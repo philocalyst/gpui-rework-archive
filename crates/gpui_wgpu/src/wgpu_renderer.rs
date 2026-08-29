@@ -872,20 +872,27 @@ impl WgpuRenderer {
         }
         let dual_source_blending = dual_source_blending && device_has_feature;
 
-        let base_shader_source = include_str!("shaders.wgsl");
-        let shader_module = device.create_shader_module(wgpu::ShaderModuleDescriptor {
-            label: Some("gpui_shaders"),
-            source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Borrowed(base_shader_source)),
-        });
+        let create_shader_module = |label, source: &wgsl_rs::Source| {
+            let source = source
+                .wgsl_source()
+                .unwrap_or_else(|error| panic!("failed to generate {label}: {error}"));
+            device.create_shader_module(wgpu::ShaderModuleDescriptor {
+                label: Some(label),
+                source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Owned(source)),
+            })
+        };
+        let shader_module =
+            create_shader_module("gpui_shaders", &crate::shaders::base::WGSL_SOURCE);
 
-        let subpixel_shader_source = include_str!("shaders_subpixel.wgsl");
         let subpixel_shader_module = if dual_source_blending {
-            let combined = format!(
-                "enable dual_source_blending;\n{base_shader_source}\n{subpixel_shader_source}"
-            );
+            let generated = crate::shaders::subpixel_sprite::WGSL_SOURCE
+                .wgsl_source()
+                .expect("failed to generate gpui subpixel shader");
             Some(device.create_shader_module(wgpu::ShaderModuleDescriptor {
                 label: Some("gpui_subpixel_shaders"),
-                source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Owned(combined)),
+                source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Owned(format!(
+                    "enable dual_source_blending;\n{generated}"
+                ))),
             }))
         } else {
             None
