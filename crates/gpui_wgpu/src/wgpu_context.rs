@@ -209,15 +209,34 @@ impl WgpuContext {
 
     #[cfg(not(target_family = "wasm"))]
     pub fn instance(display: Box<dyn wgpu::wgt::WgpuHasDisplayHandle>) -> wgpu::Instance {
-        #[cfg(not(target_os = "windows"))]
+        #[cfg(target_os = "macos")]
+        let backends = wgpu::Backends::METAL;
+        #[cfg(any(target_os = "linux", target_os = "freebsd"))]
         let backends = wgpu::Backends::VULKAN | wgpu::Backends::GL;
         #[cfg(target_os = "windows")]
         let backends = wgpu::Backends::DX12;
 
+        #[cfg(target_os = "windows")]
+        let mut backend_options = wgpu::BackendOptions::default();
+        #[cfg(not(target_os = "windows"))]
+        let backend_options = wgpu::BackendOptions::default();
+        #[cfg(target_os = "windows")]
+        {
+            // Match the former D3D renderer's DirectComposition path. wgpu-hal owns the
+            // composition device and visual, while this switch retains the diagnostic fallback.
+            let direct_composition_disabled = std::env::var("GPUI_DISABLE_DIRECT_COMPOSITION")
+                .is_ok_and(|value| value == "true" || value == "1");
+            backend_options.dx12.presentation_system = if direct_composition_disabled {
+                wgpu::Dx12SwapchainKind::DxgiFromHwnd
+            } else {
+                wgpu::Dx12SwapchainKind::DxgiFromVisual
+            };
+        }
+
         wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends,
             flags: wgpu::InstanceFlags::default(),
-            backend_options: wgpu::BackendOptions::default(),
+            backend_options,
             memory_budget_thresholds: wgpu::MemoryBudgetThresholds::default(),
             display: Some(display),
         })

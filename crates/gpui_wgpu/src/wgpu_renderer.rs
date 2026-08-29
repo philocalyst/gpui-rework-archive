@@ -833,24 +833,33 @@ impl WgpuRenderer {
             write_mask: wgpu::ColorWrites::ALL,
         };
 
+        let create_layout =
+            |label: &str, data_layout: &wgpu::BindGroupLayout| -> wgpu::PipelineLayout {
+                device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                    label: Some(label),
+                    bind_group_layouts: &[Some(&layouts.globals), Some(data_layout)],
+                    immediate_size: 0,
+                })
+            };
+        // Pipelines differ in shaders and blend state, not resource layout. Sharing these four
+        // layouts avoids redundant backend objects and gives drivers fewer compatibility keys.
+        let instance_layout = create_layout("instance_pipeline_layout", &layouts.instances);
+        let textured_layout =
+            create_layout("textured_pipeline_layout", &layouts.instances_with_texture);
+        let surface_layout = create_layout("surface_pipeline_layout", &layouts.surfaces);
+        let blur_layout = create_layout("blur_pipeline_layout", &layouts.blur);
+
         let create_pipeline = |name: &str,
                                vs_entry: &str,
                                fs_entry: &str,
-                               globals_layout: &wgpu::BindGroupLayout,
-                               data_layout: &wgpu::BindGroupLayout,
+                               pipeline_layout: &wgpu::PipelineLayout,
                                topology: wgpu::PrimitiveTopology,
                                color_targets: &[Option<wgpu::ColorTargetState>],
                                sample_count: u32,
                                module: &wgpu::ShaderModule| {
-            let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-                label: Some(&format!("{name}_layout")),
-                bind_group_layouts: &[Some(globals_layout), Some(data_layout)],
-                immediate_size: 0,
-            });
-
             device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                 label: Some(name),
-                layout: Some(&pipeline_layout),
+                layout: Some(pipeline_layout),
                 vertex: wgpu::VertexState {
                     module,
                     entry_point: Some(vs_entry),
@@ -887,8 +896,7 @@ impl WgpuRenderer {
             "quads",
             "vs_quad",
             "fs_quad",
-            &layouts.globals,
-            &layouts.instances,
+            &instance_layout,
             wgpu::PrimitiveTopology::TriangleStrip,
             &[Some(color_target.clone())],
             1,
@@ -899,8 +907,7 @@ impl WgpuRenderer {
             "shadows",
             "vs_shadow",
             "fs_shadow",
-            &layouts.globals,
-            &layouts.instances,
+            &instance_layout,
             wgpu::PrimitiveTopology::TriangleStrip,
             &[Some(color_target.clone())],
             1,
@@ -911,8 +918,7 @@ impl WgpuRenderer {
             "path_rasterization",
             "vs_path_rasterization",
             "fs_path_rasterization",
-            &layouts.globals,
-            &layouts.instances,
+            &instance_layout,
             wgpu::PrimitiveTopology::TriangleList,
             &[Some(wgpu::ColorTargetState {
                 format: surface_format,
@@ -940,8 +946,7 @@ impl WgpuRenderer {
             "paths",
             "vs_path",
             "fs_path",
-            &layouts.globals,
-            &layouts.instances_with_texture,
+            &textured_layout,
             wgpu::PrimitiveTopology::TriangleStrip,
             &[Some(wgpu::ColorTargetState {
                 format: surface_format,
@@ -956,8 +961,7 @@ impl WgpuRenderer {
             "underlines",
             "vs_underline",
             "fs_underline",
-            &layouts.globals,
-            &layouts.instances,
+            &instance_layout,
             wgpu::PrimitiveTopology::TriangleStrip,
             &[Some(color_target.clone())],
             1,
@@ -968,8 +972,7 @@ impl WgpuRenderer {
             "mono_sprites",
             "vs_mono_sprite",
             "fs_mono_sprite",
-            &layouts.globals,
-            &layouts.instances_with_texture,
+            &textured_layout,
             wgpu::PrimitiveTopology::TriangleStrip,
             &[Some(color_target.clone())],
             1,
@@ -994,8 +997,7 @@ impl WgpuRenderer {
                 "subpixel_sprites",
                 "vs_subpixel_sprite",
                 "fs_subpixel_sprite",
-                &layouts.globals,
-                &layouts.instances_with_texture,
+                &textured_layout,
                 wgpu::PrimitiveTopology::TriangleStrip,
                 &[Some(wgpu::ColorTargetState {
                     format: surface_format,
@@ -1013,8 +1015,7 @@ impl WgpuRenderer {
             "poly_sprites",
             "vs_poly_sprite",
             "fs_poly_sprite",
-            &layouts.globals,
-            &layouts.instances_with_texture,
+            &textured_layout,
             wgpu::PrimitiveTopology::TriangleStrip,
             &[Some(color_target.clone())],
             1,
@@ -1025,8 +1026,7 @@ impl WgpuRenderer {
             "surfaces",
             "vs_surface",
             "fs_surface",
-            &layouts.globals,
-            &layouts.surfaces,
+            &surface_layout,
             wgpu::PrimitiveTopology::TriangleStrip,
             &[Some(color_target)],
             1,
@@ -1045,8 +1045,7 @@ impl WgpuRenderer {
             "blur_downsample",
             "vs_blur_fullscreen",
             "fs_blur_downsample",
-            &layouts.globals,
-            &layouts.blur,
+            &blur_layout,
             wgpu::PrimitiveTopology::TriangleList,
             &[Some(no_blend_target.clone())],
             1,
@@ -1057,8 +1056,7 @@ impl WgpuRenderer {
             "blur",
             "vs_blur_fullscreen",
             "fs_blur",
-            &layouts.globals,
-            &layouts.blur,
+            &blur_layout,
             wgpu::PrimitiveTopology::TriangleList,
             &[Some(no_blend_target)],
             1,
@@ -1078,8 +1076,7 @@ impl WgpuRenderer {
             "blur_composite",
             "vs_blur_composite",
             "fs_blur_composite",
-            &layouts.globals,
-            &layouts.blur,
+            &blur_layout,
             wgpu::PrimitiveTopology::TriangleStrip,
             &[Some(premultiplied_target)],
             1,
@@ -1147,7 +1144,8 @@ impl WgpuRenderer {
             sample_count,
             dimension: wgpu::TextureDimension::D2,
             format,
-            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+            // wgpu-hal maps transient attachments to memoryless Metal textures on Apple GPUs.
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TRANSIENT,
             view_formats: &[],
         });
         let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
@@ -1311,6 +1309,25 @@ impl WgpuRenderer {
                 path_sample_count,
                 dual_source_blending,
             );
+        }
+    }
+
+    /// Controls whether Metal presents as part of the current Core Animation transaction.
+    ///
+    /// Native tab activation and live-resize callbacks need this synchronization point. The
+    /// renderer remains backend-neutral; only the platform integration reaches through wgpu-hal.
+    #[cfg(target_os = "macos")]
+    pub fn set_presents_with_transaction(&self, enabled: bool) {
+        let Some(resources) = self.resources.as_ref() else {
+            return;
+        };
+        // SAFETY: The guard is borrowed only for this property update and no native resource is
+        // destroyed or retained beyond it.
+        if let Some(surface) = unsafe { resources.surface.as_hal::<wgpu::hal::api::Metal>() } {
+            surface
+                .render_layer()
+                .lock()
+                .setPresentsWithTransaction(enabled);
         }
     }
 

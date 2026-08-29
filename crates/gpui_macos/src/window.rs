@@ -217,11 +217,6 @@ unsafe fn build_classes() {
                 handle_view_event as extern "C" fn(&Object, Sel, id),
             );
 
-            decl.add_method(
-                sel!(makeBackingLayer),
-                make_backing_layer as extern "C" fn(&Object, Sel) -> id,
-            );
-
             decl.add_protocol(Protocol::get("CALayerDelegate").unwrap());
             decl.add_method(
                 sel!(viewDidChangeBackingProperties),
@@ -784,6 +779,7 @@ impl MacWindow {
         foreground_executor: ForegroundExecutor,
         background_executor: BackgroundExecutor,
         renderer_context: renderer::Context,
+        gpu_requirements: Option<gpui_wgpu::WgpuDeviceRequirements>,
     ) -> Self {
         unsafe {
             let pool = NSAutoreleasePool::new(nil);
@@ -906,10 +902,12 @@ impl MacWindow {
                 frame_source: None,
                 renderer: renderer::new_renderer(
                     renderer_context,
-                    native_window as *mut _,
                     native_view as *mut _,
-                    bounds.size.map(|pixels| pixels.as_f32()),
+                    bounds
+                        .size
+                        .to_device_pixels(get_scale_factor(native_window)),
                     false,
+                    gpu_requirements,
                 ),
                 request_frame_callback: None,
                 event_callback: None,
@@ -1579,7 +1577,7 @@ impl PlatformWindow for MacWindow {
     }
 
     fn is_subpixel_rendering_supported(&self) -> bool {
-        false
+        self.0.lock().renderer.supports_dual_source_blending()
     }
 
     fn set_edited(&mut self, edited: bool) {
@@ -1757,7 +1755,17 @@ impl PlatformWindow for MacWindow {
 
     fn draw(&self, scene: &gpui::Scene) {
         let mut this = self.0.lock();
-        this.renderer.draw(scene);
+        if this.renderer.device_lost() {
+            // SAFETY: native_view remains valid for the lifetime of MacWindowState.
+            let window = unsafe { renderer::RawWindow::new(this.native_view.as_ptr().cast()) };
+            if let Err(error) = this.renderer.recover(&window) {
+                log::warn!("GPU recovery failed, will retry next frame: {error}");
+                return;
+            }
+        }
+        if !this.renderer.draw(scene) {
+            log::debug!("WGPU skipped the macOS frame");
+        }
     }
 
     fn sprite_atlas(&self) -> Arc<dyn PlatformAtlas> {
@@ -1765,7 +1773,7 @@ impl PlatformWindow for MacWindow {
     }
 
     fn gpu_specs(&self) -> Option<gpui::GpuSpecs> {
-        None
+        Some(self.0.lock().renderer.gpu_specs())
     }
 
     fn update_ime_position(&self, _bounds: Bounds<Pixels>) {
@@ -2618,15 +2626,6 @@ fn update_window_scale_factor(window_state: &Arc<Mutex<MacWindowState>>) {
     let scale_factor = lock.scale_factor();
     let size = lock.content_size();
     let drawable_size = size.to_device_pixels(scale_factor);
-    if let Some(layer) = lock.renderer.layer() {
-        unsafe {
-            let _: () = msg_send![
-                layer,
-                setContentsScale: scale_factor as f64
-            ];
-        }
-    }
-
     lock.renderer.update_drawable_size(drawable_size);
 
     if let Some(mut callback) = lock.resize_callback.take() {
@@ -2756,12 +2755,6 @@ extern "C" fn close_window(this: &Object, _: Sel) {
 
         let _: () = msg_send![super(this, class!(NSWindow)), close];
     }
-}
-
-extern "C" fn make_backing_layer(this: &Object, _: Sel) -> id {
-    let window_state = unsafe { get_window_state(this) };
-    let window_state = window_state.as_ref().lock();
-    window_state.renderer.layer_ptr() as id
 }
 
 extern "C" fn view_did_change_backing_properties(this: &Object, _: Sel) {

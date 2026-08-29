@@ -173,6 +173,7 @@ pub(crate) struct MacPlatformState {
     foreground_executor: ForegroundExecutor,
     text_system: Arc<dyn PlatformTextSystem>,
     renderer_context: renderer::Context,
+    gpu_requirements: Option<gpui_wgpu::WgpuDeviceRequirements>,
     headless: bool,
     activation_policy: Option<MacActivationPolicy>,
     general_pasteboard: Pasteboard,
@@ -225,6 +226,7 @@ impl MacPlatform {
             background_executor: BackgroundExecutor::new(dispatcher.clone()),
             foreground_executor: ForegroundExecutor::new(dispatcher),
             renderer_context: renderer::Context::default(),
+            gpu_requirements: None,
             activation_policy: None,
             general_pasteboard: Pasteboard::general(),
             find_pasteboard: Pasteboard::find(),
@@ -662,13 +664,20 @@ impl Platform for MacPlatform {
             return Err(PopupNotSupportedError.into());
         }
 
-        let (cursor_visible, foreground_executor, background_executor, renderer_context) = {
+        let (
+            cursor_visible,
+            foreground_executor,
+            background_executor,
+            renderer_context,
+            gpu_requirements,
+        ) = {
             let guard = self.0.lock();
             (
                 guard.cursor_visible.clone(),
                 guard.foreground_executor.clone(),
                 guard.background_executor.clone(),
                 guard.renderer_context.clone(),
+                guard.gpu_requirements.clone(),
             )
         };
 
@@ -679,7 +688,17 @@ impl Platform for MacPlatform {
             foreground_executor,
             background_executor,
             renderer_context,
+            gpu_requirements,
         )))
+    }
+
+    fn set_gpu_requirements(&self, requirements: Box<dyn std::any::Any>) {
+        match requirements.downcast::<gpui_wgpu::WgpuDeviceRequirements>() {
+            Ok(requirements) => self.0.lock().gpu_requirements = Some(*requirements),
+            Err(_) => {
+                log::warn!("set_gpu_requirements: expected gpui_wgpu::WgpuDeviceRequirements")
+            }
+        }
     }
 
     fn window_appearance(&self) -> WindowAppearance {
