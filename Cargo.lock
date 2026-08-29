@@ -2667,7 +2667,9 @@ dependencies = [
  "gpui_ce_linux",
  "gpui_ce_macos",
  "gpui_ce_web",
+ "gpui_ce_wgpu",
  "gpui_ce_windows",
+ "log",
 ]
 
 [[package]]
@@ -2759,15 +2761,21 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bytemuck",
+ "core-foundation 0.10.0",
+ "core-video",
  "cosmic-text",
  "criterion",
  "etagere",
  "gpui-ce",
  "gpui_ce_collections",
  "gpui_ce_util",
+ "image",
  "itertools 0.14.0",
  "js-sys",
  "log",
+ "metal",
+ "objc2 0.6.4",
+ "objc2-metal 0.3.2",
  "parking_lot",
  "pollster 0.4.0",
  "profiling",

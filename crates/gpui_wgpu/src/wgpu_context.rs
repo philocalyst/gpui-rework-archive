@@ -57,6 +57,58 @@ impl WgpuContext {
         Self::new_with_options(instance, surface, compositor_gpu, true, extra_requirements)
     }
 
+    /// Creates a native device without a presentation surface.
+    #[cfg(not(target_family = "wasm"))]
+    pub fn new_headless(
+        extra_requirements: Option<&WgpuDeviceRequirements>,
+    ) -> anyhow::Result<Self> {
+        #[cfg(target_os = "macos")]
+        let backends = wgpu::Backends::METAL;
+        #[cfg(target_os = "windows")]
+        let backends = wgpu::Backends::DX12;
+        #[cfg(any(target_os = "linux", target_os = "freebsd"))]
+        let backends = wgpu::Backends::VULKAN | wgpu::Backends::GL;
+
+        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
+            backends,
+            flags: wgpu::InstanceFlags::default(),
+            backend_options: wgpu::BackendOptions::default(),
+            memory_budget_thresholds: wgpu::MemoryBudgetThresholds::default(),
+            display: None,
+        });
+        let adapter = gpui::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
+            // This matches the former macOS headless device selection and avoids waking a
+            // discrete GPU solely for snapshots on dual-GPU systems.
+            power_preference: wgpu::PowerPreference::LowPower,
+            compatible_surface: None,
+            force_fallback_adapter: false,
+        }))
+        .map_err(|error| anyhow::anyhow!("failed to request headless GPU adapter: {error}"))?;
+        let (device, queue, dual_source_blending, color_texture_format) =
+            gpui::block_on(Self::create_device(&adapter, extra_requirements))?;
+
+        let device_lost = Arc::new(AtomicBool::new(false));
+        device.set_device_lost_callback({
+            let device_lost = Arc::clone(&device_lost);
+            move |reason, message| {
+                log::error!("headless wgpu device lost: reason={reason:?}, message={message}");
+                if reason != wgpu::DeviceLostReason::Destroyed {
+                    device_lost.store(true, Ordering::Relaxed);
+                }
+            }
+        });
+
+        Ok(Self {
+            instance,
+            adapter,
+            device: Arc::new(device),
+            queue: Arc::new(queue),
+            dual_source_blending,
+            color_texture_format,
+            device_lost,
+        })
+    }
+
     #[cfg(not(target_family = "wasm"))]
     fn new_with_options(
         instance: wgpu::Instance,
@@ -317,6 +369,16 @@ impl WgpuContext {
                 _ => 1,
             };
 
+            #[cfg(target_os = "macos")]
+            let type_priority: u8 = match info.device_type {
+                // Preserve the native renderer's low-power preference on dual-GPU Intel Macs.
+                wgpu::DeviceType::IntegratedGpu => 0,
+                wgpu::DeviceType::DiscreteGpu => 1,
+                wgpu::DeviceType::Other => 2,
+                wgpu::DeviceType::VirtualGpu => 3,
+                wgpu::DeviceType::Cpu => 4,
+            };
+            #[cfg(not(target_os = "macos"))]
             let type_priority: u8 = if info.device_type == wgpu::DeviceType::Cpu {
                 4
             } else {

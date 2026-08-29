@@ -1317,11 +1317,16 @@ fn fs_poly_sprite(input: PolySpriteVarying) -> @location(0) vec4<f32> {
 struct SurfaceParams {
     bounds: Bounds,
     content_mask: Bounds,
+    yuv: u32,
+    pad0: u32,
+    pad1: u32,
+    pad2: u32,
 }
 
 @group(1) @binding(0) var<uniform> surface_locals: SurfaceParams;
 @group(1) @binding(1) var t_surface: texture_2d<f32>;
-@group(1) @binding(2) var s_surface: sampler;
+@group(1) @binding(2) var t_surface_chroma: texture_2d<f32>;
+@group(1) @binding(3) var s_surface: sampler;
 
 struct SurfaceVarying {
     @builtin(position) position: vec4<f32>,
@@ -1346,6 +1351,16 @@ fn fs_surface(input: SurfaceVarying) -> @location(0) vec4<f32> {
         return vec4<f32>(0.0);
     }
 
+    if (surface_locals.yuv != 0u) {
+        let y = textureSampleLevel(t_surface, s_surface, input.texture_position, 0.0).r;
+        let cb_cr = textureSampleLevel(t_surface_chroma, s_surface, input.texture_position, 0.0).rg;
+        return vec4<f32>(
+            y + 1.4020 * cb_cr.y - 0.7010,
+            y - 0.3441 * cb_cr.x - 0.7141 * cb_cr.y + 0.5291,
+            y + 1.7720 * cb_cr.x - 0.8860,
+            1.0,
+        );
+    }
     return textureSampleLevel(t_surface, s_surface, input.texture_position, 0.0);
 }
 
