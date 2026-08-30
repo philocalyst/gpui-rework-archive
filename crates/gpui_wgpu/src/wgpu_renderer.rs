@@ -1,5 +1,14 @@
-use crate::{CompositorGpuHint, WgpuAtlas, WgpuContext, WgpuDeviceRequirements};
-use bytemuck::{Pod, Zeroable};
+use crate::{
+    CompositorGpuHint, WgpuAtlas, WgpuContext, WgpuDeviceRequirements,
+    shaders::{
+        blur::BlurUniforms,
+        common::{
+            FontRasterizationUniforms, GlobalUniforms, ShaderBool, SurfaceColorFormat,
+        },
+        interface as shader_interface,
+        surface::SurfaceUniforms,
+    },
+};
 use gpui::{
     AtlasTextureId, BackdropFilter, Background, Bounds, Corners, DevicePixels, FilterRenderTarget,
     GpuSpecs, MAX_FILTER_GROUP_DEPTH, MonochromeSprite, PaintSurface, Path, Point,
@@ -16,240 +25,14 @@ use std::num::NonZeroU64;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 
-#[repr(C)]
-#[derive(Clone, Copy, Pod, Zeroable)]
-struct GlobalUniforms {
-    viewport_size: [f32; 2],
-    premultiplied_alpha: ShaderBool,
-    _padding: u32,
-}
+mod filters;
+mod path_types;
+mod pipelines;
 
-#[repr(transparent)]
-#[derive(Clone, Copy, Default, Pod, Zeroable)]
-struct ShaderBool(u32);
-
-impl From<bool> for ShaderBool {
-    fn from(value: bool) -> Self {
-        Self(u32::from(value))
-    }
-}
-
-#[repr(C)]
-#[derive(Clone, Copy, Default, Pod, Zeroable)]
-struct ShaderBounds {
-    origin: [f32; 2],
-    size: [f32; 2],
-}
-
-impl From<Bounds<ScaledPixels>> for ShaderBounds {
-    fn from(bounds: Bounds<ScaledPixels>) -> Self {
-        Self {
-            origin: [bounds.origin.x.0, bounds.origin.y.0],
-            size: [bounds.size.width.0, bounds.size.height.0],
-        }
-    }
-}
-
-#[repr(C)]
-#[derive(Clone, Copy, Pod, Zeroable)]
-struct SurfaceUniforms {
-    bounds: ShaderBounds,
-    content_mask: ShaderBounds,
-    color_format: SurfaceColorFormat,
-    _padding: [u32; 3],
-}
-
-#[derive(Clone, Copy, Default, Pod, Zeroable)]
-#[repr(transparent)]
-struct SurfaceColorFormat(u32);
-
-impl SurfaceColorFormat {
-    const RGBA: Self = Self(0);
-    const YUV: Self = Self(1);
-}
-
-#[repr(C)]
-#[derive(Clone, Copy, Default, Pod, Zeroable)]
-struct ShaderCorners {
-    top_left: f32,
-    top_right: f32,
-    bottom_right: f32,
-    bottom_left: f32,
-}
-
-impl From<Corners<ScaledPixels>> for ShaderCorners {
-    fn from(corners: Corners<ScaledPixels>) -> Self {
-        Self {
-            top_left: corners.top_left.0,
-            top_right: corners.top_right.0,
-            bottom_right: corners.bottom_right.0,
-            bottom_left: corners.bottom_left.0,
-        }
-    }
-}
-
-#[derive(Clone, Copy, Default, Pod, Zeroable)]
-#[repr(transparent)]
-struct BlurCompositeClip(u32);
-
-impl BlurCompositeClip {
-    const NONE: Self = Self(0);
-    const ROUNDED_BOUNDS: Self = Self(1);
-}
-
-#[derive(Clone, Copy, Default, Pod, Zeroable)]
-#[repr(transparent)]
-struct DownsampleMode(u32);
-
-impl DownsampleMode {
-    const COPY: Self = Self(0);
-    const HALF_RESOLUTION: Self = Self(1);
-}
-
-/// Uniform passed to the blur pipelines. The same struct drives the downsample, separable
-/// gaussian, and composite passes; fields not relevant to a given pass are left zero.
-#[repr(C)]
-#[derive(Clone, Copy, Default, Pod, Zeroable)]
-struct BlurUniforms {
-    /// Composite target rectangle, in device pixels (composite pass only).
-    bounds: ShaderBounds,
-    /// Clip rectangle, in device pixels (composite pass only).
-    content_mask: ShaderBounds,
-    corner_radii: ShaderCorners,
-    /// Per-tap sampling step in texture-coordinate space.
-    direction: [f32; 2],
-    /// Gaussian standard deviation, in the half-resolution blur texture's pixels.
-    standard_deviation: f32,
-    /// Element opacity, multiplied into the composited result.
-    opacity: f32,
-    /// Number of samples to each side of center (gaussian passes only).
-    sample_count: u32,
-    /// Spacing between samples in pixels; values above one let bounded sample counts span large radii without
-    /// truncating the gaussian (see #6 in review).
-    sample_step: f32,
-    /// Typed clipping policy for the composite pass.
-    composite_clip: BlurCompositeClip,
-    /// Typed sampling policy for the downsample/copy pass.
-    downsample_mode: DownsampleMode,
-}
-
-impl BlurUniforms {
-    fn copy() -> Self {
-        Self {
-            downsample_mode: DownsampleMode::COPY,
-            ..Self::default()
-        }
-    }
-
-    fn downsample() -> Self {
-        Self {
-            downsample_mode: DownsampleMode::HALF_RESOLUTION,
-            ..Self::default()
-        }
-    }
-
-    fn gaussian(axis: BlurAxis, texture_size: [f32; 2], kernel: BlurKernel) -> Self {
-        let direction = match axis {
-            BlurAxis::Horizontal => [1.0 / texture_size[0], 0.0],
-            BlurAxis::Vertical => [0.0, 1.0 / texture_size[1]],
-        };
-        Self {
-            direction,
-            standard_deviation: kernel.standard_deviation,
-            sample_count: kernel.sample_count,
-            sample_step: kernel.sample_step,
-            ..Self::default()
-        }
-    }
-
-    fn composite(
-        bounds: Bounds<ScaledPixels>,
-        content_mask: Bounds<ScaledPixels>,
-        corner_radii: Corners<ScaledPixels>,
-        opacity: f32,
-        clip: FilterCompositeClip,
-    ) -> Self {
-        Self {
-            bounds: bounds.into(),
-            content_mask: content_mask.into(),
-            corner_radii: corner_radii.into(),
-            opacity,
-            composite_clip: match clip {
-                FilterCompositeClip::RoundedBounds => BlurCompositeClip::ROUNDED_BOUNDS,
-                FilterCompositeClip::ContentShape => BlurCompositeClip::NONE,
-            },
-            ..Self::default()
-        }
-    }
-}
-
-#[derive(Clone, Copy)]
-enum BlurAxis {
-    Horizontal,
-    Vertical,
-}
-
-#[repr(C)]
-#[derive(Clone, Copy, Pod, Zeroable)]
-struct FontRasterizationUniforms {
-    gamma_ratios: [f32; 4],
-    grayscale_enhanced_contrast: f32,
-    subpixel_enhanced_contrast: f32,
-    uses_blue_green_red_subpixel_order: ShaderBool,
-    _padding: u32,
-}
-
-#[derive(Clone, Debug)]
-#[repr(C)]
-struct PathSprite {
-    bounds: Bounds<ScaledPixels>,
-}
-
-#[derive(Clone, Debug)]
-#[repr(C)]
-struct PathRasterizationVertex {
-    xy_position: Point<ScaledPixels>,
-    curve_position: Point<f32>,
-    color: Background,
-    bounds: Bounds<ScaledPixels>,
-}
-
-/// Marker for scene structs whose `repr(C)` memory layout is the renderer's storage-buffer ABI.
-///
-/// # Safety
-/// Implementors must contain no uninitialized padding and must exactly match the corresponding
-/// struct in `shaders.rs`. Keeping the implementations explicit prevents an arbitrary Rust type
-/// from being uploaded by byte reinterpretation.
-unsafe trait ShaderInstance: Sized {}
-
-unsafe impl ShaderInstance for Quad {}
-unsafe impl ShaderInstance for Shadow {}
-unsafe impl ShaderInstance for Underline {}
-unsafe impl ShaderInstance for MonochromeSprite {}
-unsafe impl ShaderInstance for SubpixelSprite {}
-unsafe impl ShaderInstance for PolychromeSprite {}
-unsafe impl ShaderInstance for PathSprite {}
-unsafe impl ShaderInstance for PathRasterizationVertex {}
-
-const _: () = {
-    assert!(std::mem::size_of::<Bounds<ScaledPixels>>() == 16);
-    assert!(std::mem::size_of::<gpui::ContentMask<ScaledPixels>>() == 16);
-    assert!(std::mem::size_of::<gpui::SceneHsla>() == 16);
-    assert!(std::mem::size_of::<Background>() == 72);
-    assert!(std::mem::size_of::<gpui::AtlasTile>() == 32);
-    assert!(std::mem::size_of::<gpui::TransformationMatrix>() == 24);
-    assert!(std::mem::size_of::<GlobalUniforms>() == 16);
-    assert!(std::mem::size_of::<SurfaceUniforms>() == 48);
-    assert!(std::mem::size_of::<BlurUniforms>() == 80);
-    assert!(std::mem::size_of::<FontRasterizationUniforms>() == 32);
-    assert!(std::mem::size_of::<Quad>() == 160);
-    assert!(std::mem::size_of::<Shadow>() == 112);
-    assert!(std::mem::size_of::<Underline>() == 64);
-    assert!(std::mem::size_of::<MonochromeSprite>() == 112);
-    assert!(std::mem::size_of::<SubpixelSprite>() == 112);
-    assert!(std::mem::size_of::<PolychromeSprite>() == 96);
-    assert!(std::mem::size_of::<PathSprite>() == 16);
-    assert!(std::mem::size_of::<PathRasterizationVertex>() == 104);
+use filters::*;
+use path_types::*;
+use pipelines::{
+    WgpuBindGroupLayouts as ShaderBindGroupLayouts, WgpuPipelines as ShaderPipelines,
 };
 
 #[derive(Clone, Copy)]
@@ -268,7 +51,7 @@ struct DynamicUniformBuffer<T> {
     _value: PhantomData<T>,
 }
 
-impl<T: Pod> DynamicUniformBuffer<T> {
+impl<T: shader_interface::BufferData> DynamicUniformBuffer<T> {
     fn new(
         device: &wgpu::Device,
         label: &'static str,
@@ -332,163 +115,12 @@ impl<T: Pod> DynamicUniformBuffer<T> {
         );
         self.next_slot.set(slot + 1);
         let offset = slot * self.stride;
-        queue.write_buffer(&self.buffer, offset, bytemuck::bytes_of(value));
+        queue.write_buffer(&self.buffer, offset, shader_interface::bytes_of(value));
         UniformBufferSlot {
             offset,
             size: NonZeroU64::new(std::mem::size_of::<T>() as u64)
                 .expect("uniform types are non-empty"),
         }
-    }
-}
-
-#[derive(Clone, Copy)]
-enum FilterCompositeClip {
-    RoundedBounds,
-    ContentShape,
-}
-
-#[derive(Clone, Copy)]
-struct FilterCompositeParameters {
-    bounds: Bounds<ScaledPixels>,
-    content_mask: Bounds<ScaledPixels>,
-    corner_radii: Corners<ScaledPixels>,
-    blur_radius: f32,
-    opacity: f32,
-    clip: FilterCompositeClip,
-}
-
-#[derive(Clone, Copy)]
-struct ScissorRectangle {
-    x: u32,
-    y: u32,
-    width: u32,
-    height: u32,
-}
-
-impl ScissorRectangle {
-    fn for_blurred_bounds(
-        bounds: Bounds<ScaledPixels>,
-        dilation: f32,
-        full_width: u32,
-        full_height: u32,
-    ) -> Self {
-        let downsampled_width = (full_width / BLUR_DOWNSAMPLE_FACTOR).max(1);
-        let downsampled_height = (full_height / BLUR_DOWNSAMPLE_FACTOR).max(1);
-        let minimum_x = downsampled_coordinate(
-            bounds.origin.x.0 - dilation,
-            downsampled_width,
-            EdgeRounding::OutwardMinimum,
-        );
-        let minimum_y = downsampled_coordinate(
-            bounds.origin.y.0 - dilation,
-            downsampled_height,
-            EdgeRounding::OutwardMinimum,
-        );
-        let maximum_x = downsampled_coordinate(
-            bounds.origin.x.0 + bounds.size.width.0 + dilation,
-            downsampled_width,
-            EdgeRounding::OutwardMaximum,
-        )
-        .max(minimum_x);
-        let maximum_y = downsampled_coordinate(
-            bounds.origin.y.0 + bounds.size.height.0 + dilation,
-            downsampled_height,
-            EdgeRounding::OutwardMaximum,
-        )
-        .max(minimum_y);
-        Self {
-            x: minimum_x,
-            y: minimum_y,
-            width: maximum_x - minimum_x,
-            height: maximum_y - minimum_y,
-        }
-    }
-
-    fn is_empty(self) -> bool {
-        self.width == 0 || self.height == 0
-    }
-}
-
-#[derive(Clone, Copy)]
-enum EdgeRounding {
-    OutwardMinimum,
-    OutwardMaximum,
-}
-
-fn downsampled_coordinate(value: f32, maximum: u32, rounding: EdgeRounding) -> u32 {
-    let downsampled = value / BLUR_DOWNSAMPLE_FACTOR as f32;
-    let rounded = match rounding {
-        EdgeRounding::OutwardMinimum => downsampled.floor(),
-        EdgeRounding::OutwardMaximum => downsampled.ceil(),
-    };
-    (rounded.max(0.0) as u32).min(maximum)
-}
-
-#[derive(Clone, Copy)]
-struct BlurKernel {
-    standard_deviation: f32,
-    sample_count: u32,
-    sample_step: f32,
-}
-
-const BLUR_DOWNSAMPLE_FACTOR: u32 = 2;
-const BLUR_RADIUS_TO_STANDARD_DEVIATION: f32 = 0.5;
-const GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS: f32 = 3.0;
-const MAX_GAUSSIAN_SAMPLES_PER_SIDE: u32 = 32;
-const FILTER_UNIFORMS_PER_COMPOSITE: u64 = 4;
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-struct FrameUniformRequirements {
-    filter_count: u64,
-    surface_count: u64,
-}
-
-impl FrameUniformRequirements {
-    fn for_scene(scene: &Scene) -> Self {
-        let isolated_filter_count = if scene.filter_boundaries.is_empty() {
-            0
-        } else {
-            scene
-                .render_commands()
-                .filter(|command| {
-                    matches!(
-                        command,
-                        RenderCommand::EndFilter {
-                            target: FilterRenderTarget::Isolated(_),
-                            ..
-                        }
-                    )
-                })
-                .count() as u64
-        };
-        let composite_count = scene.backdrop_filters.len() as u64 + isolated_filter_count;
-        let requires_offscreen_rendering =
-            !scene.backdrop_filters.is_empty() || isolated_filter_count > 0;
-        Self {
-            filter_count: composite_count
-                .saturating_mul(FILTER_UNIFORMS_PER_COMPOSITE)
-                .saturating_add(u64::from(requires_offscreen_rendering)),
-            surface_count: scene.surfaces.len() as u64,
-        }
-    }
-}
-
-impl BlurKernel {
-    fn for_radius(blur_radius: f32) -> Option<Self> {
-        let standard_deviation =
-            (blur_radius * BLUR_RADIUS_TO_STANDARD_DEVIATION).max(0.0);
-        if standard_deviation <= 0.0 {
-            return None;
-        }
-
-        let ideal_sample_count =
-            (GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS * standard_deviation).ceil();
-        let sample_count = (ideal_sample_count as u32).clamp(1, MAX_GAUSSIAN_SAMPLES_PER_SIDE);
-        Some(Self {
-            standard_deviation,
-            sample_count,
-            sample_step: (ideal_sample_count / sample_count as f32).max(1.0),
-        })
     }
 }
 
@@ -563,35 +195,6 @@ fn environment_f32(name: &str, default: f32) -> f32 {
         .unwrap_or(default)
 }
 
-struct WgpuPipelines {
-    quads: wgpu::RenderPipeline,
-    shadows: wgpu::RenderPipeline,
-    path_rasterization: wgpu::RenderPipeline,
-    paths: wgpu::RenderPipeline,
-    underlines: wgpu::RenderPipeline,
-    monochrome_sprites: wgpu::RenderPipeline,
-    subpixel_sprites: Option<wgpu::RenderPipeline>,
-    polychrome_sprites: wgpu::RenderPipeline,
-    #[allow(dead_code)]
-    surfaces: wgpu::RenderPipeline,
-    /// Copies a source texture into the (smaller) target with one bilinear tap. Used both to
-    /// downsample the scene into the half-resolution blur texture and to blit the offscreen
-    /// scene into the swapchain at the end of the frame.
-    blur_downsample: wgpu::RenderPipeline,
-    /// One axis of a separable gaussian blur; direction is supplied per draw via [`BlurUniforms`].
-    blur: wgpu::RenderPipeline,
-    /// Composites a blurred texture into a rounded rectangle (with clip + opacity).
-    blur_composite: wgpu::RenderPipeline,
-}
-
-struct WgpuBindGroupLayouts {
-    globals: wgpu::BindGroupLayout,
-    instances: wgpu::BindGroupLayout,
-    instances_with_texture: wgpu::BindGroupLayout,
-    surfaces: wgpu::BindGroupLayout,
-    blur: wgpu::BindGroupLayout,
-}
-
 /// Shared GPU context reference, used to coordinate device recovery across multiple windows.
 pub type GpuContext = Rc<RefCell<Option<WgpuContext>>>;
 
@@ -600,8 +203,8 @@ struct WgpuResources {
     device: Arc<wgpu::Device>,
     queue: Arc<wgpu::Queue>,
     surface: Option<wgpu::Surface<'static>>,
-    pipelines: WgpuPipelines,
-    bind_group_layouts: WgpuBindGroupLayouts,
+    pipelines: ShaderPipelines,
+    bind_group_layouts: ShaderBindGroupLayouts,
     atlas_sampler: wgpu::Sampler,
     surface_sampler: wgpu::Sampler,
     surface_uniforms: DynamicUniformBuffer<SurfaceUniforms>,
@@ -934,8 +537,8 @@ impl WgpuRenderer {
         let dual_source_blending = context.supports_dual_source_blending();
 
         let rendering_params = RenderingParameters::new(&context.adapter, surface_format);
-        let bind_group_layouts = Self::create_bind_group_layouts(&device);
-        let pipelines = Self::create_pipelines(
+        let bind_group_layouts = ShaderBindGroupLayouts::new(&device);
+        let pipelines = ShaderPipelines::new(
             &device,
             &bind_group_layouts,
             surface_format,
@@ -1003,7 +606,7 @@ impl WgpuRenderer {
             layout: &bind_group_layouts.globals,
             entries: &[
                 wgpu::BindGroupEntry {
-                    binding: 0,
+                    binding: shader_interface::GLOBAL_UNIFORMS_BINDING,
                     resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
                         buffer: &globals_buffer,
                         offset: 0,
@@ -1011,7 +614,7 @@ impl WgpuRenderer {
                     }),
                 },
                 wgpu::BindGroupEntry {
-                    binding: 1,
+                    binding: shader_interface::FONT_RASTERIZATION_BINDING,
                     resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
                         buffer: &globals_buffer,
                         offset: gamma_offset,
@@ -1026,7 +629,7 @@ impl WgpuRenderer {
             layout: &bind_group_layouts.globals,
             entries: &[
                 wgpu::BindGroupEntry {
-                    binding: 0,
+                    binding: shader_interface::GLOBAL_UNIFORMS_BINDING,
                     resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
                         buffer: &globals_buffer,
                         offset: path_globals_offset,
@@ -1034,7 +637,7 @@ impl WgpuRenderer {
                     }),
                 },
                 wgpu::BindGroupEntry {
-                    binding: 1,
+                    binding: shader_interface::FONT_RASTERIZATION_BINDING,
                     resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
                         buffer: &globals_buffer,
                         offset: gamma_offset,
@@ -1118,492 +721,6 @@ impl WgpuRenderer {
             #[cfg(not(target_family = "wasm"))]
             device_recovery_not_before: None,
         })
-    }
-
-    fn create_bind_group_layouts(device: &wgpu::Device) -> WgpuBindGroupLayouts {
-        let globals = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: Some("globals_layout"),
-            entries: &[
-                wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
-                    ty: wgpu::BindingType::Buffer {
-                        ty: wgpu::BufferBindingType::Uniform,
-                        has_dynamic_offset: false,
-                        min_binding_size: NonZeroU64::new(
-                            std::mem::size_of::<GlobalUniforms>() as u64
-                        ),
-                    },
-                    count: None,
-                },
-                wgpu::BindGroupLayoutEntry {
-                    binding: 1,
-                    visibility: wgpu::ShaderStages::FRAGMENT,
-                    ty: wgpu::BindingType::Buffer {
-                        ty: wgpu::BufferBindingType::Uniform,
-                        has_dynamic_offset: false,
-                        min_binding_size: NonZeroU64::new(std::mem::size_of::<
-                            FontRasterizationUniforms,
-                        >() as u64),
-                    },
-                    count: None,
-                },
-            ],
-        });
-
-        let storage_buffer_entry = |binding: u32| wgpu::BindGroupLayoutEntry {
-            binding,
-            visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
-            ty: wgpu::BindingType::Buffer {
-                ty: wgpu::BufferBindingType::Storage { read_only: true },
-                has_dynamic_offset: false,
-                min_binding_size: None,
-            },
-            count: None,
-        };
-
-        let instances = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: Some("instances_layout"),
-            entries: &[storage_buffer_entry(0)],
-        });
-
-        let instances_with_texture =
-            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                label: Some("instances_with_texture_layout"),
-                entries: &[
-                    storage_buffer_entry(0),
-                    wgpu::BindGroupLayoutEntry {
-                        binding: 1,
-                        visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
-                        ty: wgpu::BindingType::Texture {
-                            sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                            view_dimension: wgpu::TextureViewDimension::D2,
-                            multisampled: false,
-                        },
-                        count: None,
-                    },
-                    wgpu::BindGroupLayoutEntry {
-                        binding: 2,
-                        visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
-                        ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                        count: None,
-                    },
-                ],
-            });
-
-        let surfaces = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: Some("surfaces_layout"),
-            entries: &[
-                wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
-                    ty: wgpu::BindingType::Buffer {
-                        ty: wgpu::BufferBindingType::Uniform,
-                        has_dynamic_offset: true,
-                        min_binding_size: NonZeroU64::new(
-                            std::mem::size_of::<SurfaceUniforms>() as u64
-                        ),
-                    },
-                    count: None,
-                },
-                wgpu::BindGroupLayoutEntry {
-                    binding: 1,
-                    visibility: wgpu::ShaderStages::FRAGMENT,
-                    ty: wgpu::BindingType::Texture {
-                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                        view_dimension: wgpu::TextureViewDimension::D2,
-                        multisampled: false,
-                    },
-                    count: None,
-                },
-                wgpu::BindGroupLayoutEntry {
-                    binding: 2,
-                    visibility: wgpu::ShaderStages::FRAGMENT,
-                    ty: wgpu::BindingType::Texture {
-                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                        view_dimension: wgpu::TextureViewDimension::D2,
-                        multisampled: false,
-                    },
-                    count: None,
-                },
-                wgpu::BindGroupLayoutEntry {
-                    binding: 3,
-                    visibility: wgpu::ShaderStages::FRAGMENT,
-                    ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                    count: None,
-                },
-            ],
-        });
-
-        let blur = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: Some("blur_layout"),
-            entries: &[
-                wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
-                    ty: wgpu::BindingType::Buffer {
-                        ty: wgpu::BufferBindingType::Uniform,
-                        has_dynamic_offset: false,
-                        min_binding_size: NonZeroU64::new(
-                            std::mem::size_of::<BlurUniforms>() as u64
-                        ),
-                    },
-                    count: None,
-                },
-                wgpu::BindGroupLayoutEntry {
-                    binding: 1,
-                    visibility: wgpu::ShaderStages::FRAGMENT,
-                    ty: wgpu::BindingType::Texture {
-                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                        view_dimension: wgpu::TextureViewDimension::D2,
-                        multisampled: false,
-                    },
-                    count: None,
-                },
-                wgpu::BindGroupLayoutEntry {
-                    binding: 2,
-                    visibility: wgpu::ShaderStages::FRAGMENT,
-                    ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                    count: None,
-                },
-            ],
-        });
-
-        WgpuBindGroupLayouts {
-            globals,
-            instances,
-            instances_with_texture,
-            surfaces,
-            blur,
-        }
-    }
-
-    fn create_pipelines(
-        device: &wgpu::Device,
-        layouts: &WgpuBindGroupLayouts,
-        surface_format: wgpu::TextureFormat,
-        alpha_mode: wgpu::CompositeAlphaMode,
-        path_sample_count: u32,
-        dual_source_blending: bool,
-    ) -> WgpuPipelines {
-        // Diagnostic guard: verify the device actually has
-        // DUAL_SOURCE_BLENDING. We have a crash report (ZED-5G1) where a
-        // feature mismatch caused a wgpu-hal abort, but we haven't
-        // identified the code path that produces the mismatch. This
-        // guard prevents the crash and logs more evidence.
-        // Remove this check once:
-        // a) We find and fix the root cause, or
-        // b) There are no reports of this warning appearing for some time.
-        let device_has_feature = device
-            .features()
-            .contains(wgpu::Features::DUAL_SOURCE_BLENDING);
-        if dual_source_blending && !device_has_feature {
-            log::error!(
-                "BUG: dual_source_blending flag is true but device does not \
-                 have DUAL_SOURCE_BLENDING enabled (device features: {:?}). \
-                 Falling back to mono text rendering. Please report this at \
-                 https://github.com/zed-industries/zed/issues",
-                device.features(),
-            );
-        }
-        let dual_source_blending = dual_source_blending && device_has_feature;
-
-        let create_shader_module = |label, source: &wgsl_rs::Source| {
-            let source = source
-                .wgsl_source()
-                .unwrap_or_else(|error| panic!("failed to generate {label}: {error}"));
-            device.create_shader_module(wgpu::ShaderModuleDescriptor {
-                label: Some(label),
-                source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Owned(source)),
-            })
-        };
-        let shader_module =
-            create_shader_module("gpui_shaders", &crate::shaders::base::WGSL_SOURCE);
-
-        let subpixel_shader_module = if dual_source_blending {
-            let generated = crate::shaders::subpixel_sprite::WGSL_SOURCE
-                .wgsl_source()
-                .expect("failed to generate gpui subpixel shader");
-            Some(device.create_shader_module(wgpu::ShaderModuleDescriptor {
-                label: Some("gpui_subpixel_shaders"),
-                source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Owned(format!(
-                    "enable dual_source_blending;\n{generated}"
-                ))),
-            }))
-        } else {
-            None
-        };
-
-        let color_target = wgpu::ColorTargetState {
-            format: surface_format,
-            blend: Some(scene_blend_state(alpha_mode)),
-            write_mask: wgpu::ColorWrites::ALL,
-        };
-
-        let create_layout =
-            |label: &str, data_layout: &wgpu::BindGroupLayout| -> wgpu::PipelineLayout {
-                device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-                    label: Some(label),
-                    bind_group_layouts: &[Some(&layouts.globals), Some(data_layout)],
-                    immediate_size: 0,
-                })
-            };
-        // Pipelines differ in shaders and blend state, not resource layout. Sharing these four
-        // layouts avoids redundant backend objects and gives drivers fewer compatibility keys.
-        let instance_layout = create_layout("instance_pipeline_layout", &layouts.instances);
-        let textured_layout =
-            create_layout("textured_pipeline_layout", &layouts.instances_with_texture);
-        let surface_layout = create_layout("surface_pipeline_layout", &layouts.surfaces);
-        let blur_layout = create_layout("blur_pipeline_layout", &layouts.blur);
-
-        let create_pipeline = |name: &str,
-                               vs_entry: &str,
-                               fs_entry: &str,
-                               pipeline_layout: &wgpu::PipelineLayout,
-                               topology: wgpu::PrimitiveTopology,
-                               color_targets: &[Option<wgpu::ColorTargetState>],
-                               sample_count: u32,
-                               module: &wgpu::ShaderModule| {
-            device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-                label: Some(name),
-                layout: Some(pipeline_layout),
-                vertex: wgpu::VertexState {
-                    module,
-                    entry_point: Some(vs_entry),
-                    buffers: &[],
-                    compilation_options: wgpu::PipelineCompilationOptions::default(),
-                },
-                fragment: Some(wgpu::FragmentState {
-                    module,
-                    entry_point: Some(fs_entry),
-                    targets: color_targets,
-                    compilation_options: wgpu::PipelineCompilationOptions::default(),
-                }),
-                primitive: wgpu::PrimitiveState {
-                    topology,
-                    strip_index_format: None,
-                    front_face: wgpu::FrontFace::Ccw,
-                    cull_mode: None,
-                    polygon_mode: wgpu::PolygonMode::Fill,
-                    unclipped_depth: false,
-                    conservative: false,
-                },
-                depth_stencil: None,
-                multisample: wgpu::MultisampleState {
-                    count: sample_count,
-                    mask: !0,
-                    alpha_to_coverage_enabled: false,
-                },
-                multiview_mask: None,
-                cache: None,
-            })
-        };
-
-        let quads = create_pipeline(
-            "quads",
-            "vs_quad",
-            "fs_quad",
-            &instance_layout,
-            wgpu::PrimitiveTopology::TriangleStrip,
-            &[Some(color_target.clone())],
-            1,
-            &shader_module,
-        );
-
-        let shadows = create_pipeline(
-            "shadows",
-            "vs_shadow",
-            "fs_shadow",
-            &instance_layout,
-            wgpu::PrimitiveTopology::TriangleStrip,
-            &[Some(color_target.clone())],
-            1,
-            &shader_module,
-        );
-
-        let path_rasterization = create_pipeline(
-            "path_rasterization",
-            "vs_path_rasterization",
-            "fs_path_rasterization",
-            &instance_layout,
-            wgpu::PrimitiveTopology::TriangleList,
-            &[Some(wgpu::ColorTargetState {
-                format: surface_format,
-                blend: Some(wgpu::BlendState::PREMULTIPLIED_ALPHA_BLENDING),
-                write_mask: wgpu::ColorWrites::ALL,
-            })],
-            path_sample_count,
-            &shader_module,
-        );
-
-        let paths_blend = wgpu::BlendState {
-            color: wgpu::BlendComponent {
-                src_factor: wgpu::BlendFactor::One,
-                dst_factor: wgpu::BlendFactor::OneMinusSrcAlpha,
-                operation: wgpu::BlendOperation::Add,
-            },
-            alpha: wgpu::BlendComponent {
-                src_factor: wgpu::BlendFactor::One,
-                dst_factor: wgpu::BlendFactor::One,
-                operation: wgpu::BlendOperation::Add,
-            },
-        };
-
-        let paths = create_pipeline(
-            "paths",
-            "vs_path",
-            "fs_path",
-            &textured_layout,
-            wgpu::PrimitiveTopology::TriangleStrip,
-            &[Some(wgpu::ColorTargetState {
-                format: surface_format,
-                blend: Some(paths_blend),
-                write_mask: wgpu::ColorWrites::ALL,
-            })],
-            1,
-            &shader_module,
-        );
-
-        let underlines = create_pipeline(
-            "underlines",
-            "vs_underline",
-            "fs_underline",
-            &instance_layout,
-            wgpu::PrimitiveTopology::TriangleStrip,
-            &[Some(color_target.clone())],
-            1,
-            &shader_module,
-        );
-
-        let monochrome_sprites = create_pipeline(
-            "monochrome_sprites",
-            "vs_mono_sprite",
-            "fs_mono_sprite",
-            &textured_layout,
-            wgpu::PrimitiveTopology::TriangleStrip,
-            &[Some(color_target.clone())],
-            1,
-            &shader_module,
-        );
-
-        let subpixel_sprites = if let Some(subpixel_module) = &subpixel_shader_module {
-            let subpixel_blend = wgpu::BlendState {
-                color: wgpu::BlendComponent {
-                    src_factor: wgpu::BlendFactor::Src1,
-                    dst_factor: wgpu::BlendFactor::OneMinusSrc1,
-                    operation: wgpu::BlendOperation::Add,
-                },
-                alpha: wgpu::BlendComponent {
-                    src_factor: wgpu::BlendFactor::One,
-                    dst_factor: wgpu::BlendFactor::OneMinusSrcAlpha,
-                    operation: wgpu::BlendOperation::Add,
-                },
-            };
-
-            Some(create_pipeline(
-                "subpixel_sprites",
-                "vs_subpixel_sprite",
-                "fs_subpixel_sprite",
-                &textured_layout,
-                wgpu::PrimitiveTopology::TriangleStrip,
-                &[Some(wgpu::ColorTargetState {
-                    format: surface_format,
-                    blend: Some(subpixel_blend),
-                    write_mask: wgpu::ColorWrites::COLOR,
-                })],
-                1,
-                subpixel_module,
-            ))
-        } else {
-            None
-        };
-
-        let polychrome_sprites = create_pipeline(
-            "polychrome_sprites",
-            "vs_poly_sprite",
-            "fs_poly_sprite",
-            &textured_layout,
-            wgpu::PrimitiveTopology::TriangleStrip,
-            &[Some(color_target.clone())],
-            1,
-            &shader_module,
-        );
-
-        let surfaces = create_pipeline(
-            "surfaces",
-            "vs_surface",
-            "fs_surface",
-            &surface_layout,
-            wgpu::PrimitiveTopology::TriangleStrip,
-            &[Some(color_target)],
-            1,
-            &shader_module,
-        );
-
-        // Blur pipelines all sample one texture into another; the downsample and gaussian passes
-        // overwrite their (intermediate) target, while the composite blends over the scene.
-        let no_blend_target = wgpu::ColorTargetState {
-            format: surface_format,
-            blend: None,
-            write_mask: wgpu::ColorWrites::ALL,
-        };
-
-        let blur_downsample = create_pipeline(
-            "blur_downsample",
-            "vs_blur_fullscreen",
-            "fs_blur_downsample",
-            &blur_layout,
-            wgpu::PrimitiveTopology::TriangleList,
-            &[Some(no_blend_target.clone())],
-            1,
-            &shader_module,
-        );
-
-        let blur = create_pipeline(
-            "blur",
-            "vs_blur_fullscreen",
-            "fs_blur",
-            &blur_layout,
-            wgpu::PrimitiveTopology::TriangleList,
-            &[Some(no_blend_target)],
-            1,
-            &shader_module,
-        );
-
-        // The blurred sample is premultiplied (blurring against the transparent, rgb=0 region
-        // around the source scales rgb with the fading alpha), so the composite outputs
-        // premultiplied and blends premultiplied — straight alpha blending would multiply rgb by
-        // alpha a second time and darken the faded edges. Independent of the window's alpha mode.
-        let premultiplied_target = wgpu::ColorTargetState {
-            format: surface_format,
-            blend: Some(premultiplied_composite_blend_state()),
-            write_mask: wgpu::ColorWrites::ALL,
-        };
-        let blur_composite = create_pipeline(
-            "blur_composite",
-            "vs_blur_composite",
-            "fs_blur_composite",
-            &blur_layout,
-            wgpu::PrimitiveTopology::TriangleStrip,
-            &[Some(premultiplied_target)],
-            1,
-            &shader_module,
-        );
-
-        WgpuPipelines {
-            quads,
-            shadows,
-            path_rasterization,
-            paths,
-            underlines,
-            monochrome_sprites,
-            subpixel_sprites,
-            polychrome_sprites,
-            surfaces,
-            blur_downsample,
-            blur,
-            blur_composite,
-        }
     }
 
     fn create_sampled_render_texture(
@@ -1798,7 +915,7 @@ impl WgpuRenderer {
             if let Some(surface) = resources.surface.as_ref() {
                 surface.configure(&resources.device, &surface_config);
             }
-            resources.pipelines = Self::create_pipelines(
+            resources.pipelines = ShaderPipelines::new(
                 &resources.device,
                 &resources.bind_group_layouts,
                 surface_config.format,
@@ -2001,28 +1118,33 @@ impl WgpuRenderer {
 
         let font_rasterization = self.rendering_params.font_rasterization;
         let font_rasterization_uniforms = FontRasterizationUniforms {
-            gamma_ratios: font_rasterization.gamma_ratios,
+            gamma_ratios: wgsl_rs::std::vec4f(
+                font_rasterization.gamma_ratios[0],
+                font_rasterization.gamma_ratios[1],
+                font_rasterization.gamma_ratios[2],
+                font_rasterization.gamma_ratios[3],
+            ),
             grayscale_enhanced_contrast: font_rasterization.grayscale_enhanced_contrast,
             subpixel_enhanced_contrast: font_rasterization.subpixel_enhanced_contrast,
             uses_blue_green_red_subpixel_order: ShaderBool::from(
                 self.subpixel_order == SubpixelOrder::BlueGreenRed,
             ),
-            _padding: 0,
+            padding: 0,
         };
 
         let globals = GlobalUniforms {
-            viewport_size: [
+            viewport_size: wgsl_rs::std::vec2f(
                 self.surface_config.width as f32,
                 self.surface_config.height as f32,
-            ],
+            ),
             premultiplied_alpha: ShaderBool::from(
                 self.surface_config.alpha_mode == wgpu::CompositeAlphaMode::PreMultiplied,
             ),
-            _padding: 0,
+            padding: 0,
         };
 
         let path_globals = GlobalUniforms {
-            premultiplied_alpha: ShaderBool::default(),
+            premultiplied_alpha: ShaderBool::Disabled,
             ..globals
         };
 
@@ -2031,17 +1153,17 @@ impl WgpuRenderer {
             resources.queue.write_buffer(
                 &resources.globals_buffer,
                 0,
-                bytemuck::bytes_of(&globals),
+                shader_interface::bytes_of(&globals),
             );
             resources.queue.write_buffer(
                 &resources.globals_buffer,
                 self.path_globals_offset,
-                bytemuck::bytes_of(&path_globals),
+                shader_interface::bytes_of(&path_globals),
             );
             resources.queue.write_buffer(
                 &resources.globals_buffer,
                 self.gamma_offset,
-                bytemuck::bytes_of(&font_rasterization_uniforms),
+                shader_interface::bytes_of(&font_rasterization_uniforms),
             );
         }
 
@@ -2392,11 +1514,13 @@ impl WgpuRenderer {
             bounds: surface.bounds.into(),
             content_mask: surface.content_mask.bounds.into(),
             color_format: if uses_yuv_color {
-                SurfaceColorFormat::YUV
+                SurfaceColorFormat::Yuv
             } else {
-                SurfaceColorFormat::RGBA
+                SurfaceColorFormat::Rgba
             },
-            _padding: [0; 3],
+            padding0: 0,
+            padding1: 0,
+            padding2: 0,
         };
         let resources = self.resources();
         let uniform_slot = resources
@@ -2409,7 +1533,7 @@ impl WgpuRenderer {
                 layout: &resources.bind_group_layouts.surfaces,
                 entries: &[
                     wgpu::BindGroupEntry {
-                        binding: 0,
+                        binding: shader_interface::DATA_BUFFER_BINDING,
                         resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
                             buffer: &resources.surface_uniforms.buffer,
                             offset: 0,
@@ -2417,24 +1541,32 @@ impl WgpuRenderer {
                         }),
                     },
                     wgpu::BindGroupEntry {
-                        binding: 1,
+                        binding: shader_interface::PRIMARY_TEXTURE_BINDING,
                         resource: wgpu::BindingResource::TextureView(color_view),
                     },
                     wgpu::BindGroupEntry {
-                        binding: 2,
+                        binding: shader_interface::SECONDARY_TEXTURE_BINDING,
                         resource: wgpu::BindingResource::TextureView(chroma_view),
                     },
                     wgpu::BindGroupEntry {
-                        binding: 3,
+                        binding: shader_interface::SURFACE_SAMPLER_BINDING,
                         resource: wgpu::BindingResource::Sampler(&resources.surface_sampler),
                     },
                 ],
             });
 
         pass.set_pipeline(&resources.pipelines.surfaces);
-        pass.set_bind_group(0, &resources.globals_bind_group, &[]);
-        pass.set_bind_group(1, &bind_group, &[uniform_slot.offset as u32]);
-        pass.draw(0..4, 0..1);
+        pass.set_bind_group(
+            shader_interface::GLOBAL_BIND_GROUP,
+            &resources.globals_bind_group,
+            &[],
+        );
+        pass.set_bind_group(
+            shader_interface::DATA_BIND_GROUP,
+            &bind_group,
+            &[uniform_slot.offset as u32],
+        );
+        pass.draw(0..resources.pipelines.surfaces.fixed_vertex_count(), 0..1);
         true
     }
 
@@ -2563,7 +1695,7 @@ impl WgpuRenderer {
                 layout: &resources.bind_group_layouts.blur,
                 entries: &[
                     wgpu::BindGroupEntry {
-                        binding: 0,
+                        binding: shader_interface::DATA_BUFFER_BINDING,
                         resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
                             buffer: &resources.filter_uniforms.buffer,
                             offset: uniform_slot.offset,
@@ -2571,11 +1703,11 @@ impl WgpuRenderer {
                         }),
                     },
                     wgpu::BindGroupEntry {
-                        binding: 1,
+                        binding: shader_interface::PRIMARY_TEXTURE_BINDING,
                         resource: wgpu::BindingResource::TextureView(source),
                     },
                     wgpu::BindGroupEntry {
-                        binding: 2,
+                        binding: shader_interface::PRIMARY_SAMPLER_BINDING,
                         resource: wgpu::BindingResource::Sampler(&resources.surface_sampler),
                     },
                 ],
@@ -2589,7 +1721,7 @@ impl WgpuRenderer {
         &self,
         encoder: &mut wgpu::CommandEncoder,
         label: &str,
-        pipeline: &wgpu::RenderPipeline,
+        pipeline: &pipelines::WgpuRenderPipeline,
         target: &wgpu::TextureView,
         source: &wgpu::TextureView,
         uniforms: BlurUniforms,
@@ -2604,10 +1736,14 @@ impl WgpuRenderer {
             wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
         );
         pass.set_pipeline(pipeline);
-        pass.set_bind_group(0, &resources.globals_bind_group, &[]);
-        pass.set_bind_group(1, &bind_group, &[]);
+        pass.set_bind_group(
+            shader_interface::GLOBAL_BIND_GROUP,
+            &resources.globals_bind_group,
+            &[],
+        );
+        pass.set_bind_group(shader_interface::DATA_BIND_GROUP, &bind_group, &[]);
         pass.set_scissor_rect(scissor.x, scissor.y, scissor.width, scissor.height);
-        pass.draw(0..3, 0..1);
+        pass.draw(0..pipeline.fixed_vertex_count(), 0..1);
     }
 
     /// Blurs `source` and composites it into `target` using the shared filter pipeline.
@@ -2706,9 +1842,16 @@ impl WgpuRenderer {
         let mut pass =
             begin_color_render_pass(encoder, "blur_composite", target, wgpu::LoadOp::Load);
         pass.set_pipeline(&resources.pipelines.blur_composite);
-        pass.set_bind_group(0, &resources.globals_bind_group, &[]);
-        pass.set_bind_group(1, &bind_group, &[]);
-        pass.draw(0..4, 0..1);
+        pass.set_bind_group(
+            shader_interface::GLOBAL_BIND_GROUP,
+            &resources.globals_bind_group,
+            &[],
+        );
+        pass.set_bind_group(shader_interface::DATA_BIND_GROUP, &bind_group, &[]);
+        pass.draw(
+            0..resources.pipelines.blur_composite.fixed_vertex_count(),
+            0..1,
+        );
     }
 
     /// Blur the scene painted so far behind `filter.bounds` and composite it back as frosted glass.
@@ -2749,9 +1892,16 @@ impl WgpuRenderer {
             wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
         );
         pass.set_pipeline(&resources.pipelines.blur_downsample);
-        pass.set_bind_group(0, &resources.globals_bind_group, &[]);
-        pass.set_bind_group(1, &bind_group, &[]);
-        pass.draw(0..3, 0..1);
+        pass.set_bind_group(
+            shader_interface::GLOBAL_BIND_GROUP,
+            &resources.globals_bind_group,
+            &[],
+        );
+        pass.set_bind_group(shader_interface::DATA_BIND_GROUP, &bind_group, &[]);
+        pass.draw(
+            0..resources.pipelines.blur_downsample.fixed_vertex_count(),
+            0..1,
+        );
     }
 
     fn draw_polychrome_sprites(
@@ -2777,7 +1927,7 @@ impl WgpuRenderer {
         &self,
         data: &[u8],
         instance_count: u32,
-        pipeline: &wgpu::RenderPipeline,
+        pipeline: &pipelines::WgpuRenderPipeline,
         instance_offset: &mut u64,
         pass: &mut wgpu::RenderPass<'_>,
     ) -> bool {
@@ -2794,14 +1944,18 @@ impl WgpuRenderer {
                 label: None,
                 layout: &resources.bind_group_layouts.instances,
                 entries: &[wgpu::BindGroupEntry {
-                    binding: 0,
+                    binding: shader_interface::DATA_BUFFER_BINDING,
                     resource: self.instance_binding(offset, size),
                 }],
             });
         pass.set_pipeline(pipeline);
-        pass.set_bind_group(0, &resources.globals_bind_group, &[]);
-        pass.set_bind_group(1, &bind_group, &[]);
-        pass.draw(0..4, 0..instance_count);
+        pass.set_bind_group(
+            shader_interface::GLOBAL_BIND_GROUP,
+            &resources.globals_bind_group,
+            &[],
+        );
+        pass.set_bind_group(shader_interface::DATA_BIND_GROUP, &bind_group, &[]);
+        pass.draw(0..pipeline.fixed_vertex_count(), 0..instance_count);
         true
     }
 
@@ -2810,7 +1964,7 @@ impl WgpuRenderer {
         data: &[u8],
         instance_count: u32,
         texture_view: &wgpu::TextureView,
-        pipeline: &wgpu::RenderPipeline,
+        pipeline: &pipelines::WgpuRenderPipeline,
         instance_offset: &mut u64,
         pass: &mut wgpu::RenderPass<'_>,
     ) -> bool {
@@ -2828,33 +1982,32 @@ impl WgpuRenderer {
                 layout: &resources.bind_group_layouts.instances_with_texture,
                 entries: &[
                     wgpu::BindGroupEntry {
-                        binding: 0,
+                        binding: shader_interface::DATA_BUFFER_BINDING,
                         resource: self.instance_binding(offset, size),
                     },
                     wgpu::BindGroupEntry {
-                        binding: 1,
+                        binding: shader_interface::PRIMARY_TEXTURE_BINDING,
                         resource: wgpu::BindingResource::TextureView(texture_view),
                     },
                     wgpu::BindGroupEntry {
-                        binding: 2,
+                        binding: shader_interface::PRIMARY_SAMPLER_BINDING,
                         resource: wgpu::BindingResource::Sampler(&resources.atlas_sampler),
                     },
                 ],
             });
         pass.set_pipeline(pipeline);
-        pass.set_bind_group(0, &resources.globals_bind_group, &[]);
-        pass.set_bind_group(1, &bind_group, &[]);
-        pass.draw(0..4, 0..instance_count);
+        pass.set_bind_group(
+            shader_interface::GLOBAL_BIND_GROUP,
+            &resources.globals_bind_group,
+            &[],
+        );
+        pass.set_bind_group(shader_interface::DATA_BIND_GROUP, &bind_group, &[]);
+        pass.draw(0..pipeline.fixed_vertex_count(), 0..instance_count);
         true
     }
 
-    fn shader_instance_bytes<T: ShaderInstance>(instances: &[T]) -> &[u8] {
-        unsafe {
-            std::slice::from_raw_parts(
-                instances.as_ptr() as *const u8,
-                std::mem::size_of_val(instances),
-            )
-        }
+    fn shader_instance_bytes<T: shader_interface::BufferData>(instances: &[T]) -> &[u8] {
+        shader_interface::slice_as_bytes(instances)
     }
 
     fn draw_paths_from_intermediate(
@@ -2931,7 +2084,7 @@ impl WgpuRenderer {
                 label: Some("path_rasterization_bind_group"),
                 layout: &resources.bind_group_layouts.instances,
                 entries: &[wgpu::BindGroupEntry {
-                    binding: 0,
+                    binding: shader_interface::DATA_BUFFER_BINDING,
                     resource: self.instance_binding(vertex_offset, vertex_size),
                 }],
             });
@@ -2963,8 +2116,12 @@ impl WgpuRenderer {
             });
 
             pass.set_pipeline(&resources.pipelines.path_rasterization);
-            pass.set_bind_group(0, &resources.path_globals_bind_group, &[]);
-            pass.set_bind_group(1, &data_bind_group, &[]);
+            pass.set_bind_group(
+                shader_interface::GLOBAL_BIND_GROUP,
+                &resources.path_globals_bind_group,
+                &[],
+            );
+            pass.set_bind_group(shader_interface::DATA_BIND_GROUP, &data_bind_group, &[]);
             pass.draw(0..vertices.len() as u32, 0..1);
         }
 
@@ -3548,42 +2705,32 @@ impl RenderingParameters {
     }
 }
 
-fn scene_blend_state(alpha_mode: wgpu::CompositeAlphaMode) -> wgpu::BlendState {
-    let source_color_factor = if alpha_mode == wgpu::CompositeAlphaMode::PreMultiplied {
-        wgpu::BlendFactor::One
-    } else {
-        wgpu::BlendFactor::SrcAlpha
-    };
-    source_over_blend_state(source_color_factor)
-}
-
-fn premultiplied_composite_blend_state() -> wgpu::BlendState {
-    source_over_blend_state(wgpu::BlendFactor::One)
-}
-
-fn source_over_blend_state(source_color_factor: wgpu::BlendFactor) -> wgpu::BlendState {
-    #[cfg(any(target_os = "macos", target_os = "windows"))]
-    let destination_alpha_factor = wgpu::BlendFactor::One;
-    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
-    let destination_alpha_factor = wgpu::BlendFactor::OneMinusSrcAlpha;
-
-    wgpu::BlendState {
-        color: wgpu::BlendComponent {
-            src_factor: source_color_factor,
-            dst_factor: wgpu::BlendFactor::OneMinusSrcAlpha,
-            operation: wgpu::BlendOperation::Add,
-        },
-        alpha: wgpu::BlendComponent {
-            src_factor: wgpu::BlendFactor::One,
-            dst_factor: destination_alpha_factor,
-            operation: wgpu::BlendOperation::Add,
-        },
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn rust_storage_types_match_shader_strides() {
+        let linkage =
+            wgsl_rs::linkage::wgpu::analyze_wgsl_module(&crate::shaders::storage_abi::WGSL_SOURCE);
+
+        for (shader_buffer, rust_size) in [
+            ("ABI_QUAD", size_of::<Quad>()),
+            ("ABI_SHADOW", size_of::<Shadow>()),
+            ("ABI_UNDERLINE", size_of::<Underline>()),
+            ("ABI_MONOCHROME_SPRITE", size_of::<MonochromeSprite>()),
+            ("ABI_SUBPIXEL_SPRITE", size_of::<SubpixelSprite>()),
+            ("ABI_POLYCHROME_SPRITE", size_of::<PolychromeSprite>()),
+            ("ABI_PATH_SPRITE", size_of::<PathSprite>()),
+            ("ABI_PATH_VERTEX", size_of::<PathRasterizationVertex>()),
+        ] {
+            assert_eq!(
+                linkage.buffer(shader_buffer).size,
+                rust_size as u64,
+                "Rust and WGSL layouts differ for {shader_buffer}",
+            );
+        }
+    }
 
     #[test]
     fn large_filter_scenes_reserve_unique_uniform_slots() {
@@ -3612,11 +2759,13 @@ mod tests {
     #[cfg(any(target_os = "macos", target_os = "windows"))]
     #[test]
     fn desktop_blending_preserves_native_alpha_accumulation() {
-        let straight = scene_blend_state(wgpu::CompositeAlphaMode::Opaque);
+        let straight =
+            pipelines::desktop_scene_blend_state(wgpu::CompositeAlphaMode::Opaque);
         assert_eq!(straight.color.src_factor, wgpu::BlendFactor::SrcAlpha);
         assert_eq!(straight.alpha.dst_factor, wgpu::BlendFactor::One);
 
-        let premultiplied = scene_blend_state(wgpu::CompositeAlphaMode::PreMultiplied);
+        let premultiplied =
+            pipelines::desktop_scene_blend_state(wgpu::CompositeAlphaMode::PreMultiplied);
         assert_eq!(premultiplied.color.src_factor, wgpu::BlendFactor::One);
         assert_eq!(premultiplied.alpha.dst_factor, wgpu::BlendFactor::One);
     }

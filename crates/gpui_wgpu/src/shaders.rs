@@ -8,6 +8,120 @@
 
 use wgsl_rs::wgsl;
 
+pub mod interface {
+    /// Shader-declared data that can be uploaded without serialization.
+    ///
+    /// # Safety
+    /// Implementors must have a stable C-compatible layout, contain no uninitialized padding,
+    /// and match the corresponding WGSL declaration exactly.
+    pub unsafe trait BufferData: Sized {}
+
+    pub fn bytes_of<T: BufferData>(value: &T) -> &[u8] {
+        unsafe {
+            std::slice::from_raw_parts(
+                std::ptr::from_ref(value).cast::<u8>(),
+                std::mem::size_of::<T>(),
+            )
+        }
+    }
+
+    pub fn slice_as_bytes<T: BufferData>(values: &[T]) -> &[u8] {
+        unsafe {
+            std::slice::from_raw_parts(values.as_ptr().cast::<u8>(), std::mem::size_of_val(values))
+        }
+    }
+
+    #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+    pub enum DataLayout {
+        Instances,
+        TexturedInstances,
+        Surface,
+        Blur,
+    }
+
+    #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+    pub enum VertexCount {
+        Rectangle,
+        FullscreenTriangle,
+        Dynamic,
+    }
+
+    impl VertexCount {
+        pub const fn fixed(self) -> Option<u32> {
+            match self {
+                Self::Rectangle => Some(RECTANGLE_VERTEX_COUNT),
+                Self::FullscreenTriangle => Some(FULLSCREEN_TRIANGLE_VERTEX_COUNT),
+                Self::Dynamic => None,
+            }
+        }
+    }
+
+    #[derive(Clone, Copy)]
+    pub struct Pipeline {
+        pub label: &'static str,
+        pub vertex_entry: &'static str,
+        pub fragment_entry: &'static str,
+        pub topology: wgpu::PrimitiveTopology,
+        pub data_layout: DataLayout,
+        pub vertex_count: VertexCount,
+    }
+
+    macro_rules! define_pipelines {
+        ($($name:ident: $label:literal, $vertex:ident, $fragment:ident, $topology:ident, $layout:ident, $vertices:ident;)*) => {
+            $(
+                pub const $name: Pipeline = Pipeline {
+                    label: $label,
+                    vertex_entry: stringify!($vertex),
+                    fragment_entry: stringify!($fragment),
+                    topology: wgpu::PrimitiveTopology::$topology,
+                    data_layout: DataLayout::$layout,
+                    vertex_count: VertexCount::$vertices,
+                };
+            )*
+
+            pub const ALL: &[Pipeline] = &[$($name),*];
+        };
+    }
+
+    define_pipelines! {
+        QUADS: "quads", vertex_quad, fragment_quad, TriangleStrip, Instances, Rectangle;
+        SHADOWS: "shadows", vertex_shadow, fragment_shadow, TriangleStrip, Instances, Rectangle;
+        PATH_RASTERIZATION: "path_rasterization", vertex_path_rasterization, fragment_path_rasterization, TriangleList, Instances, Dynamic;
+        PATHS: "paths", vertex_path, fragment_path, TriangleStrip, TexturedInstances, Rectangle;
+        UNDERLINES: "underlines", vertex_underline, fragment_underline, TriangleStrip, Instances, Rectangle;
+        MONOCHROME_SPRITES: "monochrome_sprites", vertex_monochrome_sprite, fragment_monochrome_sprite, TriangleStrip, TexturedInstances, Rectangle;
+        SUBPIXEL_SPRITES: "subpixel_sprites", vertex_subpixel_sprite, fragment_subpixel_sprite, TriangleStrip, TexturedInstances, Rectangle;
+        POLYCHROME_SPRITES: "polychrome_sprites", vertex_polychrome_sprite, fragment_polychrome_sprite, TriangleStrip, TexturedInstances, Rectangle;
+        SURFACES: "surfaces", vertex_surface, fragment_surface, TriangleStrip, Surface, Rectangle;
+        BLUR_DOWNSAMPLE: "blur_downsample", vertex_blur_fullscreen, fragment_blur_downsample, TriangleList, Blur, FullscreenTriangle;
+        BLUR: "blur", vertex_blur_fullscreen, fragment_blur, TriangleList, Blur, FullscreenTriangle;
+        BLUR_COMPOSITE: "blur_composite", vertex_blur_composite, fragment_blur_composite, TriangleStrip, Blur, Rectangle;
+    }
+
+    pub const GLOBAL_BIND_GROUP: u32 = 0;
+    pub const DATA_BIND_GROUP: u32 = 1;
+    pub const GLOBAL_UNIFORMS_BINDING: u32 = 0;
+    pub const FONT_RASTERIZATION_BINDING: u32 = 1;
+    pub const DATA_BUFFER_BINDING: u32 = 0;
+    pub const PRIMARY_TEXTURE_BINDING: u32 = 1;
+    pub const SECONDARY_TEXTURE_BINDING: u32 = 2;
+    pub const PRIMARY_SAMPLER_BINDING: u32 = 2;
+    pub const SURFACE_SAMPLER_BINDING: u32 = 3;
+    pub const RECTANGLE_VERTEX_COUNT: u32 = 4;
+    pub const FULLSCREEN_TRIANGLE_VERTEX_COUNT: u32 = 3;
+
+    unsafe impl BufferData for super::common::GlobalUniforms {}
+    unsafe impl BufferData for super::common::FontRasterizationUniforms {}
+    unsafe impl BufferData for super::surface::SurfaceUniforms {}
+    unsafe impl BufferData for super::blur::BlurUniforms {}
+    unsafe impl BufferData for gpui::Quad {}
+    unsafe impl BufferData for gpui::Shadow {}
+    unsafe impl BufferData for gpui::Underline {}
+    unsafe impl BufferData for gpui::MonochromeSprite {}
+    unsafe impl BufferData for gpui::SubpixelSprite {}
+    unsafe impl BufferData for gpui::PolychromeSprite {}
+}
+
 #[wgsl]
 pub mod common {
     use wgsl_rs::std::*;
@@ -118,6 +232,7 @@ pub mod common {
         HalfResolution = 1,
     }
 
+    #[repr(C)]
     #[derive(Clone, Copy, Wgsl)]
     pub struct GlobalUniforms {
         pub viewport_size: Vec2f,
@@ -125,6 +240,7 @@ pub mod common {
         pub padding: u32,
     }
 
+    #[repr(C)]
     #[derive(Clone, Copy, Wgsl)]
     pub struct FontRasterizationUniforms {
         pub gamma_ratios: Vec4f,
@@ -137,6 +253,7 @@ pub mod common {
     uniform!(group(0), binding(0), GLOBALS: GlobalUniforms);
     uniform!(group(0), binding(1), FONT_RASTERIZATION: FontRasterizationUniforms);
 
+    #[repr(C)]
     #[derive(Clone, Copy, Wgsl)]
     pub struct Bounds {
         pub origin: Vec2f,
@@ -157,6 +274,7 @@ pub mod common {
         }
     }
 
+    #[repr(C)]
     #[derive(Clone, Copy, Wgsl)]
     pub struct Corners {
         pub top_left: f32,
@@ -670,11 +788,12 @@ pub mod common {
         let ratio = linear_gradient_ratio(background, position, bounds);
         let ratio4 = vec4f(ratio, ratio, ratio, ratio);
         let interpolated = mix(prepared.color0, prepared.color1, ratio4);
-        let color = if background.color_space == ColorSpace::Oklab {
-            oklab_to_linear_srgb(interpolated)
+        let mut color = transparent();
+        if background.color_space == ColorSpace::Oklab {
+            color = oklab_to_linear_srgb(interpolated);
         } else {
-            srgba_to_linear(interpolated)
-        };
+            color = srgba_to_linear(interpolated);
+        }
         color + gradient_dither(position)
     }
 
@@ -721,19 +840,23 @@ pub mod common {
         bounds: Bounds,
         prepared: PreparedBackground,
     ) -> Vec4f {
+        let mut color = prepared.solid;
         #[wgsl_allow(non_literal_match_statement_patterns)]
         match background.tag {
-            BackgroundTag::Solid => prepared.solid,
+            BackgroundTag::Solid => {
+                color = prepared.solid;
+            }
             BackgroundTag::LinearGradient => {
-                linear_gradient_color(background, position, bounds, prepared)
+                color = linear_gradient_color(background, position, bounds, prepared);
             }
             BackgroundTag::PatternSlash => {
-                slash_pattern_color(background, position, bounds, prepared.solid)
+                color = slash_pattern_color(background, position, bounds, prepared.solid);
             }
             BackgroundTag::Checkerboard => {
-                checkerboard_color(background, position, bounds, prepared.solid)
+                color = checkerboard_color(background, position, bounds, prepared.solid);
             }
         }
+        color
     }
     pub fn corner_dash_velocity(first: f32, second: f32) -> f32 {
         if first == 0.0 {
@@ -1005,30 +1128,30 @@ pub mod quad {
 
     pub fn rounded_dash_position(quad: Quad, geometry: QuadGeometry) -> DashPosition {
         let radii = quad.corner_radii;
-        let layout = rounded_dash_layout(quad);
+        let dash_layout = rounded_dash_layout(quad);
         let horizontal = geometry.corner_center_to_point.x < geometry.corner_center_to_point.y;
         let on_right = geometry.center_to_point.x >= 0.0;
         let on_bottom = geometry.center_to_point.y >= 0.0;
 
         let top_position =
-            (geometry.point.x - radii.top_left) * layout.side_velocities.top;
-        let right_position = layout.right_start
-            + (geometry.point.y - radii.top_right) * layout.side_velocities.right;
-        let bottom_position = layout.bottom_left_start
-            - (geometry.point.x - radii.bottom_left) * layout.side_velocities.bottom;
-        let left_position = layout.top_left_start
-            - (geometry.point.y - radii.top_left) * layout.side_velocities.left;
+            (geometry.point.x - radii.top_left) * dash_layout.side_velocities.top;
+        let right_position = dash_layout.right_start
+            + (geometry.point.y - radii.top_right) * dash_layout.side_velocities.right;
+        let bottom_position = dash_layout.bottom_left_start
+            - (geometry.point.x - radii.bottom_left) * dash_layout.side_velocities.bottom;
+        let left_position = dash_layout.top_left_start
+            - (geometry.point.y - radii.top_left) * dash_layout.side_velocities.left;
         let horizontal_position = select(top_position, bottom_position, on_bottom);
         let vertical_position = select(left_position, right_position, on_right);
         let side_position = select(vertical_position, horizontal_position, horizontal);
         let horizontal_velocity = select(
-            layout.side_velocities.top,
-            layout.side_velocities.bottom,
+            dash_layout.side_velocities.top,
+            dash_layout.side_velocities.bottom,
             on_bottom,
         );
         let vertical_velocity = select(
-            layout.side_velocities.left,
-            layout.side_velocities.right,
+            dash_layout.side_velocities.left,
+            dash_layout.side_velocities.right,
             on_right,
         );
         let side_velocity = select(vertical_velocity, horizontal_velocity, horizontal);
@@ -1038,47 +1161,52 @@ pub mod quad {
                 geometry.corner_center_to_point.y,
                 geometry.corner_center_to_point.x,
             ) * geometry.corner_radius;
-            let top_right_position = layout.right_start
-                - corner_position * layout.corner_velocities.top_right;
-            let bottom_right_position = layout.bottom_right_start
-                + corner_position * layout.corner_velocities.bottom_right;
-            let bottom_left_position = layout.left_start
-                - corner_position * layout.corner_velocities.bottom_left;
-            let top_left_position = layout.top_left_start
-                + corner_position * layout.corner_velocities.top_left;
+            let top_right_position = dash_layout.right_start
+                - corner_position * dash_layout.corner_velocities.top_right;
+            let bottom_right_position = dash_layout.bottom_right_start
+                + corner_position * dash_layout.corner_velocities.bottom_right;
+            let bottom_left_position = dash_layout.left_start
+                - corner_position * dash_layout.corner_velocities.bottom_left;
+            let top_left_position = dash_layout.top_left_start
+                + corner_position * dash_layout.corner_velocities.top_left;
             let right_position = select(top_right_position, bottom_right_position, on_bottom);
             let left_position = select(top_left_position, bottom_left_position, on_bottom);
             let position = select(left_position, right_position, on_right);
             let right_velocity = select(
-                layout.corner_velocities.top_right,
-                layout.corner_velocities.bottom_right,
+                dash_layout.corner_velocities.top_right,
+                dash_layout.corner_velocities.bottom_right,
                 on_bottom,
             );
             let left_velocity = select(
-                layout.corner_velocities.top_left,
-                layout.corner_velocities.bottom_left,
+                dash_layout.corner_velocities.top_left,
+                dash_layout.corner_velocities.bottom_left,
                 on_bottom,
             );
             return DashPosition {
                 position,
-                perimeter: layout.perimeter,
+                perimeter: dash_layout.perimeter,
                 velocity: select(left_velocity, right_velocity, on_right),
             };
         }
 
         DashPosition {
             position: side_position,
-            perimeter: layout.perimeter,
+            perimeter: dash_layout.perimeter,
             velocity: side_velocity,
         }
     }
 
     pub fn dashed_border_alpha(quad: Quad, geometry: QuadGeometry) -> f32 {
-        let dash = if geometry.unrounded {
-            straight_dash_position(quad, geometry)
-        } else {
-            rounded_dash_position(quad, geometry)
+        let mut dash = DashPosition {
+            position: 0.0,
+            perimeter: 0.0,
+            velocity: 0.0,
         };
+        if geometry.unrounded {
+            dash = straight_dash_position(quad, geometry);
+        } else {
+            dash = rounded_dash_position(quad, geometry);
+        }
         let dash_period_per_width = DASH_LENGTH_PER_BORDER_WIDTH + DASH_GAP_PER_BORDER_WIDTH;
         let dash_length = DASH_LENGTH_PER_BORDER_WIDTH / dash_period_per_width;
         let perimeter = dash.perimeter - select(0.0, dash_length, geometry.unrounded);
@@ -1117,7 +1245,7 @@ pub mod quad {
     }
 
     #[vertex]
-    pub fn vs_quad(
+    pub fn vertex_quad(
         #[builtin(vertex_index)] vertex_id: u32,
         #[builtin(instance_index)] instance_id: u32,
     ) -> QuadVarying {
@@ -1136,7 +1264,7 @@ pub mod quad {
     }
 
     #[fragment]
-    pub fn fs_quad(input: QuadVarying) -> Vec4f {
+    pub fn fragment_quad(input: QuadVarying) -> Vec4f {
         if is_clipped(input.clip_distances) {
             return transparent();
         }
@@ -1244,15 +1372,16 @@ pub mod shadow {
     }
 
     pub fn shadow_coverage(shadow: Shadow, position: Vec2f) -> f32 {
-        let mut coverage = if shadow.blur_radius == 0.0 {
-            antialiased_coverage(rounded_rectangle_signed_distance(
+        let mut coverage = 0.0;
+        if shadow.blur_radius == 0.0 {
+            coverage = antialiased_coverage(rounded_rectangle_signed_distance(
                 position,
                 shadow.bounds,
                 shadow.corner_radii,
-            ))
+            ));
         } else {
-            blurred_shadow_coverage(shadow, position)
-        };
+            coverage = blurred_shadow_coverage(shadow, position);
+        }
 
         if is_enabled(shadow.inset) {
             coverage = (1.0 - coverage)
@@ -1280,7 +1409,7 @@ pub mod shadow {
     }
 
     #[vertex]
-    pub fn vs_shadow(
+    pub fn vertex_shadow(
         #[builtin(vertex_index)] vertex_id: u32,
         #[builtin(instance_index)] instance_id: u32,
     ) -> ShadowVarying {
@@ -1296,7 +1425,7 @@ pub mod shadow {
     }
 
     #[fragment]
-    pub fn fs_shadow(input: ShadowVarying) -> Vec4f {
+    pub fn fragment_shadow(input: ShadowVarying) -> Vec4f {
         if is_clipped(input.clip_distances) {
             return transparent();
         }
@@ -1347,7 +1476,7 @@ pub mod path_rasterization {
     }
 
     #[vertex]
-    pub fn vs_path_rasterization(
+    pub fn vertex_path_rasterization(
         #[builtin(vertex_index)] vertex_id: u32,
     ) -> PathRasterizationVarying {
         let vertex = get!(PATH_VERTICES)[vertex_id as usize];
@@ -1360,7 +1489,7 @@ pub mod path_rasterization {
     }
 
     #[fragment]
-    pub fn fs_path_rasterization(input: PathRasterizationVarying) -> Vec4f {
+    pub fn fragment_path_rasterization(input: PathRasterizationVarying) -> Vec4f {
         let coverage = quadratic_bezier_coverage(input.curve_position);
         if is_clipped(input.clip_distances) {
             return transparent();
@@ -1398,7 +1527,7 @@ pub mod path {
     }
 
     #[vertex]
-    pub fn vs_path(
+    pub fn vertex_path(
         #[builtin(vertex_index)] vertex_id: u32,
         #[builtin(instance_index)] instance_id: u32,
     ) -> PathVarying {
@@ -1411,7 +1540,7 @@ pub mod path {
     }
 
     #[fragment]
-    pub fn fs_path(input: PathVarying) -> Vec4f {
+    pub fn fragment_path(input: PathVarying) -> Vec4f {
         texture_sample(PATH_TEXTURE, PATH_SAMPLER, input.texture_coords)
     }
 }
@@ -1465,7 +1594,7 @@ pub mod underline {
     }
 
     #[vertex]
-    pub fn vs_underline(
+    pub fn vertex_underline(
         #[builtin(vertex_index)] vertex_id: u32,
         #[builtin(instance_index)] instance_id: u32,
     ) -> UnderlineVarying {
@@ -1480,7 +1609,7 @@ pub mod underline {
     }
 
     #[fragment]
-    pub fn fs_underline(input: UnderlineVarying) -> Vec4f {
+    pub fn fragment_underline(input: UnderlineVarying) -> Vec4f {
         if is_clipped(input.clip_distances) {
             return transparent();
         }
@@ -1528,7 +1657,7 @@ pub mod monochrome_sprite {
     }
 
     #[vertex]
-    pub fn vs_mono_sprite(
+    pub fn vertex_monochrome_sprite(
         #[builtin(vertex_index)] vertex_id: u32,
         #[builtin(instance_index)] instance_id: u32,
     ) -> MonochromeSpriteVarying {
@@ -1547,7 +1676,7 @@ pub mod monochrome_sprite {
     }
 
     #[fragment]
-    pub fn fs_mono_sprite(input: MonochromeSpriteVarying) -> Vec4f {
+    pub fn fragment_monochrome_sprite(input: MonochromeSpriteVarying) -> Vec4f {
         let sample = texture_sample(
             MONOCHROME_TEXTURE,
             MONOCHROME_SAMPLER,
@@ -1601,7 +1730,7 @@ pub mod polychrome_sprite {
     }
 
     #[vertex]
-    pub fn vs_poly_sprite(
+    pub fn vertex_polychrome_sprite(
         #[builtin(vertex_index)] vertex_id: u32,
         #[builtin(instance_index)] instance_id: u32,
     ) -> PolychromeSpriteVarying {
@@ -1620,7 +1749,7 @@ pub mod polychrome_sprite {
     }
 
     #[fragment]
-    pub fn fs_poly_sprite(input: PolychromeSpriteVarying) -> Vec4f {
+    pub fn fragment_polychrome_sprite(input: PolychromeSpriteVarying) -> Vec4f {
         let sample = texture_sample(
             POLYCHROME_TEXTURE,
             POLYCHROME_SAMPLER,
@@ -1652,6 +1781,7 @@ pub mod surface {
     use super::common::*;
     use wgsl_rs::std::*;
 
+    #[repr(C)]
     #[derive(Clone, Copy, Wgsl)]
     pub struct SurfaceUniforms {
         pub bounds: Bounds,
@@ -1702,7 +1832,7 @@ pub mod surface {
     }
 
     #[vertex]
-    pub fn vs_surface(#[builtin(vertex_index)] vertex_id: u32) -> SurfaceVarying {
+    pub fn vertex_surface(#[builtin(vertex_index)] vertex_id: u32) -> SurfaceVarying {
         let vertex = rectangle_vertex(vertex_id, get!(SURFACE_LOCALS).bounds);
         SurfaceVarying {
             position: vertex.clip_position,
@@ -1715,7 +1845,7 @@ pub mod surface {
     }
 
     #[fragment]
-    pub fn fs_surface(input: SurfaceVarying) -> Vec4f {
+    pub fn fragment_surface(input: SurfaceVarying) -> Vec4f {
         if is_clipped(input.clip_distances) {
             return transparent();
         }
@@ -1736,6 +1866,7 @@ pub mod blur {
     use super::common::*;
     use wgsl_rs::std::*;
 
+    #[repr(C)]
     #[derive(Clone, Copy, Wgsl)]
     pub struct BlurUniforms {
         pub bounds: Bounds,
@@ -1764,7 +1895,7 @@ pub mod blur {
     }
 
     #[vertex]
-    pub fn vs_blur_fullscreen(#[builtin(vertex_index)] vertex_id: u32) -> BlurVarying {
+    pub fn vertex_blur_fullscreen(#[builtin(vertex_index)] vertex_id: u32) -> BlurVarying {
         let vertex = fullscreen_vertex(vertex_id);
         BlurVarying {
             position: vertex.clip_position,
@@ -1774,7 +1905,7 @@ pub mod blur {
     }
 
     #[fragment]
-    pub fn fs_blur_downsample(input: BlurVarying) -> Vec4f {
+    pub fn fragment_blur_downsample(input: BlurVarying) -> Vec4f {
         if get!(BLUR_LOCALS).downsample_mode == DownsampleMode::HalfResolution {
             let destination = floor(input.position.xy());
             let source_coordinates = (destination * 2.0 + 1.0) / get!(GLOBALS).viewport_size;
@@ -1813,12 +1944,12 @@ pub mod blur {
     }
 
     #[fragment]
-    pub fn fs_blur(input: BlurVarying) -> Vec4f {
+    pub fn fragment_blur(input: BlurVarying) -> Vec4f {
         gaussian_blur(input.texture_coordinates)
     }
 
     #[vertex]
-    pub fn vs_blur_composite(#[builtin(vertex_index)] vertex_id: u32) -> BlurVarying {
+    pub fn vertex_blur_composite(#[builtin(vertex_index)] vertex_id: u32) -> BlurVarying {
         let vertex = rectangle_vertex(vertex_id, get!(BLUR_LOCALS).bounds);
         BlurVarying {
             position: vertex.clip_position,
@@ -1831,7 +1962,7 @@ pub mod blur {
     }
 
     #[fragment]
-    pub fn fs_blur_composite(input: BlurVarying) -> Vec4f {
+    pub fn fragment_blur_composite(input: BlurVarying) -> Vec4f {
         if is_clipped(input.clip_distances) {
             return transparent();
         }
@@ -1878,7 +2009,7 @@ pub mod base {
 
 /// Dual-source LCD glyph pipeline.  Its separate module keeps the shared
 /// `group(1), binding(0)` instance-buffer slot legal while retaining the
-/// existing `vs_subpixel_sprite` / `fs_subpixel_sprite` entry-point contract.
+/// existing dual-source entry-point contract.
 #[wgsl(skip_validation)]
 pub mod subpixel_sprite {
     use super::common::*;
@@ -1921,7 +2052,7 @@ pub mod subpixel_sprite {
     }
 
     #[vertex]
-    pub fn vs_subpixel_sprite(
+    pub fn vertex_subpixel_sprite(
         #[builtin(vertex_index)] vertex_id: u32,
         #[builtin(instance_index)] instance_id: u32,
     ) -> SubpixelSpriteOutput {
@@ -1940,7 +2071,7 @@ pub mod subpixel_sprite {
     }
 
     #[fragment]
-    pub fn fs_subpixel_sprite(input: SubpixelSpriteOutput) -> SubpixelSpriteFragmentOutput {
+    pub fn fragment_subpixel_sprite(input: SubpixelSpriteOutput) -> SubpixelSpriteFragmentOutput {
         let mut sample = texture_sample(SPRITE_TEXTURE, SPRITE_SAMPLER, input.tile_position).rgb();
         if is_enabled(get!(FONT_RASTERIZATION).uses_blue_green_red_subpixel_order) {
             sample = sample.bgr();
@@ -1969,11 +2100,143 @@ pub mod subpixel_sprite {
     }
 }
 
+/// Fixed-length probes let `wgsl-rs` calculate the storage-array stride for
+/// every Rust-uploaded instance type. The probe source is analyzed in tests but
+/// never sent to a GPU.
+#[cfg(test)]
+#[wgsl(skip_validation)]
+pub mod storage_abi {
+    use super::monochrome_sprite::*;
+    use super::path::*;
+    use super::path_rasterization::*;
+    use super::polychrome_sprite::*;
+    use super::quad::*;
+    use super::shadow::*;
+    use super::subpixel_sprite::*;
+    use super::underline::*;
+    use wgsl_rs::std::*;
+
+    storage!(group(7), binding(0), ABI_QUAD: [Quad; 1]);
+    storage!(group(7), binding(1), ABI_SHADOW: [Shadow; 1]);
+    storage!(group(7), binding(2), ABI_UNDERLINE: [Underline; 1]);
+    storage!(group(7), binding(3), ABI_MONOCHROME_SPRITE: [MonochromeSprite; 1]);
+    storage!(group(7), binding(4), ABI_SUBPIXEL_SPRITE: [SubpixelSprite; 1]);
+    storage!(group(7), binding(5), ABI_POLYCHROME_SPRITE: [PolychromeSprite; 1]);
+    storage!(group(7), binding(6), ABI_PATH_SPRITE: [PathSprite; 1]);
+    storage!(group(7), binding(7), ABI_PATH_VERTEX: [PathRasterizationVertex; 1]);
+}
+
+impl From<bool> for common::ShaderBool {
+    fn from(value: bool) -> Self {
+        if value {
+            Self::Enabled
+        } else {
+            Self::Disabled
+        }
+    }
+}
+
+impl From<gpui::Bounds<gpui::ScaledPixels>> for common::Bounds {
+    fn from(bounds: gpui::Bounds<gpui::ScaledPixels>) -> Self {
+        Self {
+            origin: wgsl_rs::std::vec2f(bounds.origin.x.0, bounds.origin.y.0),
+            size: wgsl_rs::std::vec2f(bounds.size.width.0, bounds.size.height.0),
+        }
+    }
+}
+
+impl From<gpui::Corners<gpui::ScaledPixels>> for common::Corners {
+    fn from(corners: gpui::Corners<gpui::ScaledPixels>) -> Self {
+        Self {
+            top_left: corners.top_left.0,
+            top_right: corners.top_right.0,
+            bottom_right: corners.bottom_right.0,
+            bottom_left: corners.bottom_left.0,
+        }
+    }
+}
+
 #[cfg(test)]
 #[test]
 fn validates_subpixel_shader() {
     let generated = subpixel_sprite::WGSL_SOURCE.wgsl_source().unwrap();
     wgsl_rs::validate_wgsl_source(&format!("enable dual_source_blending;\n{generated}")).unwrap();
+}
+
+#[cfg(test)]
+#[test]
+fn shader_interface_matches_generated_sources() {
+    let standard_source = base::WGSL_SOURCE.wgsl_source().unwrap();
+    let subpixel_source = subpixel_sprite::WGSL_SOURCE.wgsl_source().unwrap();
+    for pipeline in interface::ALL {
+        let source = if pipeline.label == interface::SUBPIXEL_SPRITES.label {
+            &subpixel_source
+        } else {
+            &standard_source
+        };
+        assert!(
+            source.contains(&format!("fn {}(", pipeline.vertex_entry)),
+            "missing vertex entry point {}",
+            pipeline.vertex_entry,
+        );
+        assert!(
+            source.contains(&format!("fn {}(", pipeline.fragment_entry)),
+            "missing fragment entry point {}",
+            pipeline.fragment_entry,
+        );
+    }
+
+    assert_eq!(common::GLOBALS.group, interface::GLOBAL_BIND_GROUP);
+    assert_eq!(
+        common::GLOBALS.binding,
+        interface::GLOBAL_UNIFORMS_BINDING
+    );
+    assert_eq!(
+        common::FONT_RASTERIZATION.group,
+        interface::GLOBAL_BIND_GROUP
+    );
+    assert_eq!(
+        common::FONT_RASTERIZATION.binding,
+        interface::FONT_RASTERIZATION_BINDING
+    );
+    assert_eq!(quad::QUADS.group(), interface::DATA_BIND_GROUP);
+    assert_eq!(quad::QUADS.binding(), interface::DATA_BUFFER_BINDING);
+}
+
+#[cfg(test)]
+#[test]
+fn shader_discriminants_match_scene_types() {
+    assert_eq!(common::ShaderBool::Disabled as u32, 0);
+    assert_eq!(common::ShaderBool::Enabled as u32, 1);
+    assert_eq!(
+        common::BackgroundTag::Solid as u32,
+        gpui::BackgroundTag::Solid as u32
+    );
+    assert_eq!(
+        common::BackgroundTag::LinearGradient as u32,
+        gpui::BackgroundTag::LinearGradient as u32
+    );
+    assert_eq!(
+        common::BackgroundTag::PatternSlash as u32,
+        gpui::BackgroundTag::PatternSlash as u32
+    );
+    assert_eq!(
+        common::BackgroundTag::Checkerboard as u32,
+        gpui::BackgroundTag::Checkerboard as u32
+    );
+    assert_eq!(common::ColorSpace::Srgb as u32, gpui::ColorSpace::Srgb as u32);
+    assert_eq!(
+        common::ColorSpace::Oklab as u32,
+        gpui::ColorSpace::Oklab as u32
+    );
+    assert_eq!(
+        common::BorderStyle::Solid as u32,
+        gpui::BorderStyle::Solid as u32
+    );
+    assert_eq!(
+        common::BorderStyle::Dashed as u32,
+        gpui::BorderStyle::Dashed as u32
+    );
 }
 
 #[cfg(test)]

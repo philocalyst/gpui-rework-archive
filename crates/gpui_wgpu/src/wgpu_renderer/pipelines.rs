@@ -1,0 +1,460 @@
+use crate::shaders::interface as shader;
+use std::num::NonZeroU64;
+
+pub(super) struct WgpuPipelines {
+    pub(super) quads: WgpuRenderPipeline,
+    pub(super) shadows: WgpuRenderPipeline,
+    pub(super) path_rasterization: WgpuRenderPipeline,
+    pub(super) paths: WgpuRenderPipeline,
+    pub(super) underlines: WgpuRenderPipeline,
+    pub(super) monochrome_sprites: WgpuRenderPipeline,
+    pub(super) subpixel_sprites: Option<WgpuRenderPipeline>,
+    pub(super) polychrome_sprites: WgpuRenderPipeline,
+    pub(super) surfaces: WgpuRenderPipeline,
+    pub(super) blur_downsample: WgpuRenderPipeline,
+    pub(super) blur: WgpuRenderPipeline,
+    pub(super) blur_composite: WgpuRenderPipeline,
+}
+
+pub(super) struct WgpuRenderPipeline {
+    raw: wgpu::RenderPipeline,
+    specification: shader::Pipeline,
+}
+
+impl WgpuRenderPipeline {
+    pub(super) fn fixed_vertex_count(&self) -> u32 {
+        self.specification.vertex_count.fixed().unwrap_or_else(|| {
+            panic!(
+                "pipeline {} uses a workload-defined vertex count",
+                self.specification.label
+            )
+        })
+    }
+}
+
+impl std::ops::Deref for WgpuRenderPipeline {
+    type Target = wgpu::RenderPipeline;
+
+    fn deref(&self) -> &Self::Target {
+        &self.raw
+    }
+}
+
+pub(super) struct WgpuBindGroupLayouts {
+    pub(super) globals: wgpu::BindGroupLayout,
+    pub(super) instances: wgpu::BindGroupLayout,
+    pub(super) instances_with_texture: wgpu::BindGroupLayout,
+    pub(super) surfaces: wgpu::BindGroupLayout,
+    pub(super) blur: wgpu::BindGroupLayout,
+}
+
+impl WgpuBindGroupLayouts {
+    pub(super) fn new(device: &wgpu::Device) -> Self {
+        let globals = linked_bind_group_layout(
+            device,
+            "globals_layout",
+            &crate::shaders::quad::WGSL_SOURCE,
+            shader::GLOBAL_BIND_GROUP,
+            None,
+        );
+        let instances = linked_bind_group_layout(
+            device,
+            "instances_layout",
+            &crate::shaders::quad::WGSL_SOURCE,
+            shader::DATA_BIND_GROUP,
+            None,
+        );
+        let instances_with_texture = linked_bind_group_layout(
+            device,
+            "instances_with_texture_layout",
+            &crate::shaders::monochrome_sprite::WGSL_SOURCE,
+            shader::DATA_BIND_GROUP,
+            None,
+        );
+        let surfaces = linked_bind_group_layout(
+            device,
+            "surfaces_layout",
+            &crate::shaders::surface::WGSL_SOURCE,
+            shader::DATA_BIND_GROUP,
+            Some(shader::DATA_BUFFER_BINDING),
+        );
+        let blur = linked_bind_group_layout(
+            device,
+            "blur_layout",
+            &crate::shaders::blur::WGSL_SOURCE,
+            shader::DATA_BIND_GROUP,
+            None,
+        );
+        Self {
+            globals,
+            instances,
+            instances_with_texture,
+            surfaces,
+            blur,
+        }
+    }
+}
+
+impl WgpuPipelines {
+    pub(super) fn new(
+        device: &wgpu::Device,
+        bind_group_layouts: &WgpuBindGroupLayouts,
+        surface_format: wgpu::TextureFormat,
+        alpha_mode: wgpu::CompositeAlphaMode,
+        path_sample_count: u32,
+        dual_source_blending: bool,
+    ) -> Self {
+        let dual_source_blending = supported_dual_source_blending(device, dual_source_blending);
+        let shader_module = create_shader_module(
+            device,
+            "gpui_shaders",
+            &crate::shaders::base::WGSL_SOURCE,
+        );
+        let subpixel_shader_module = dual_source_blending.then(|| {
+            let source = crate::shaders::subpixel_sprite::WGSL_SOURCE
+                .wgsl_source()
+                .expect("failed to generate gpui subpixel shader");
+            device.create_shader_module(wgpu::ShaderModuleDescriptor {
+                label: Some("gpui_subpixel_shaders"),
+                source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Owned(format!(
+                    "enable dual_source_blending;\n{source}"
+                ))),
+            })
+        });
+
+        let instance_layout = create_pipeline_layout(
+            device,
+            "instance_pipeline_layout",
+            bind_group_layouts,
+            &bind_group_layouts.instances,
+        );
+        let textured_layout = create_pipeline_layout(
+            device,
+            "textured_pipeline_layout",
+            bind_group_layouts,
+            &bind_group_layouts.instances_with_texture,
+        );
+        let surface_layout = create_pipeline_layout(
+            device,
+            "surface_pipeline_layout",
+            bind_group_layouts,
+            &bind_group_layouts.surfaces,
+        );
+        let blur_layout = create_pipeline_layout(
+            device,
+            "blur_pipeline_layout",
+            bind_group_layouts,
+            &bind_group_layouts.blur,
+        );
+
+        let scene_target = color_target(surface_format, Some(scene_blend_state(alpha_mode)));
+        let path_rasterization_target = color_target(
+            surface_format,
+            Some(wgpu::BlendState::PREMULTIPLIED_ALPHA_BLENDING),
+        );
+        let path_target = color_target(surface_format, Some(path_blend_state()));
+        let overwrite_target = color_target(surface_format, None);
+        let composite_target = color_target(
+            surface_format,
+            Some(premultiplied_composite_blend_state()),
+        );
+
+        let layout_for = |data_layout| match data_layout {
+            shader::DataLayout::Instances => &instance_layout,
+            shader::DataLayout::TexturedInstances => &textured_layout,
+            shader::DataLayout::Surface => &surface_layout,
+            shader::DataLayout::Blur => &blur_layout,
+        };
+        let create = |specification: shader::Pipeline,
+                      target: &wgpu::ColorTargetState,
+                      samples,
+                      module| {
+            create_render_pipeline(
+                device,
+                specification,
+                layout_for(specification.data_layout),
+                target,
+                samples,
+                module,
+            )
+        };
+
+        Self {
+            quads: create(shader::QUADS, &scene_target, 1, &shader_module),
+            shadows: create(
+                shader::SHADOWS,
+                &scene_target,
+                1,
+                &shader_module,
+            ),
+            path_rasterization: create(
+                shader::PATH_RASTERIZATION,
+                &path_rasterization_target,
+                path_sample_count,
+                &shader_module,
+            ),
+            paths: create(
+                shader::PATHS,
+                &path_target,
+                1,
+                &shader_module,
+            ),
+            underlines: create(
+                shader::UNDERLINES,
+                &scene_target,
+                1,
+                &shader_module,
+            ),
+            monochrome_sprites: create(
+                shader::MONOCHROME_SPRITES,
+                &scene_target,
+                1,
+                &shader_module,
+            ),
+            subpixel_sprites: subpixel_shader_module.as_ref().map(|module| {
+                create(
+                    shader::SUBPIXEL_SPRITES,
+                    &color_target(surface_format, Some(subpixel_blend_state())),
+                    1,
+                    module,
+                )
+            }),
+            polychrome_sprites: create(
+                shader::POLYCHROME_SPRITES,
+                &scene_target,
+                1,
+                &shader_module,
+            ),
+            surfaces: create(
+                shader::SURFACES,
+                &scene_target,
+                1,
+                &shader_module,
+            ),
+            blur_downsample: create(
+                shader::BLUR_DOWNSAMPLE,
+                &overwrite_target,
+                1,
+                &shader_module,
+            ),
+            blur: create(
+                shader::BLUR,
+                &overwrite_target,
+                1,
+                &shader_module,
+            ),
+            blur_composite: create(
+                shader::BLUR_COMPOSITE,
+                &composite_target,
+                1,
+                &shader_module,
+            ),
+        }
+    }
+}
+
+fn linked_bind_group_layout(
+    device: &wgpu::Device,
+    label: &str,
+    source: &wgsl_rs::Source,
+    group_index: u32,
+    dynamic_uniform_binding: Option<u32>,
+) -> wgpu::BindGroupLayout {
+    let linkage = wgsl_rs::linkage::wgpu::analyze_wgsl_module(source);
+    let group = linkage.bind_group(group_index).unwrap_or_else(|| {
+        panic!("shader module {} has no bind group {group_index}", source.name)
+    });
+    let mut entries = group.entries.clone();
+
+    for entry in &mut entries {
+        if group_index == shader::GLOBAL_BIND_GROUP {
+            entry.visibility = match entry.binding {
+                shader::GLOBAL_UNIFORMS_BINDING => wgpu::ShaderStages::VERTEX_FRAGMENT,
+                shader::FONT_RASTERIZATION_BINDING => wgpu::ShaderStages::FRAGMENT,
+                binding => panic!("unexpected global shader binding {binding}"),
+            };
+        }
+
+        if let wgpu::BindingType::Buffer {
+            has_dynamic_offset,
+            min_binding_size,
+            ..
+        } = &mut entry.ty
+        {
+            *has_dynamic_offset = dynamic_uniform_binding == Some(entry.binding);
+            *min_binding_size = linkage
+                .buffers
+                .iter()
+                .find(|buffer| buffer.group == group_index && buffer.binding == entry.binding)
+                .and_then(|buffer| NonZeroU64::new(buffer.size));
+        }
+    }
+
+    device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        label: Some(label),
+        entries: &entries,
+    })
+}
+
+fn create_shader_module(
+    device: &wgpu::Device,
+    label: &str,
+    source: &wgsl_rs::Source,
+) -> wgpu::ShaderModule {
+    let source = source
+        .wgsl_source()
+        .unwrap_or_else(|error| panic!("failed to generate {label}: {error}"));
+    device.create_shader_module(wgpu::ShaderModuleDescriptor {
+        label: Some(label),
+        source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Owned(source)),
+    })
+}
+
+fn create_pipeline_layout(
+    device: &wgpu::Device,
+    label: &str,
+    layouts: &WgpuBindGroupLayouts,
+    data_layout: &wgpu::BindGroupLayout,
+) -> wgpu::PipelineLayout {
+    device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+        label: Some(label),
+        bind_group_layouts: &[Some(&layouts.globals), Some(data_layout)],
+        immediate_size: 0,
+    })
+}
+
+fn create_render_pipeline(
+    device: &wgpu::Device,
+    specification: shader::Pipeline,
+    layout: &wgpu::PipelineLayout,
+    color_target: &wgpu::ColorTargetState,
+    sample_count: u32,
+    module: &wgpu::ShaderModule,
+) -> WgpuRenderPipeline {
+    let raw = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        label: Some(specification.label),
+        layout: Some(layout),
+        vertex: wgpu::VertexState {
+            module,
+            entry_point: Some(specification.vertex_entry),
+            buffers: &[],
+            compilation_options: wgpu::PipelineCompilationOptions::default(),
+        },
+        fragment: Some(wgpu::FragmentState {
+            module,
+            entry_point: Some(specification.fragment_entry),
+            targets: &[Some(color_target.clone())],
+            compilation_options: wgpu::PipelineCompilationOptions::default(),
+        }),
+        primitive: wgpu::PrimitiveState {
+            topology: specification.topology,
+            ..Default::default()
+        },
+        depth_stencil: None,
+        multisample: wgpu::MultisampleState {
+            count: sample_count,
+            ..Default::default()
+        },
+        multiview_mask: None,
+        cache: None,
+    });
+    WgpuRenderPipeline {
+        raw,
+        specification,
+    }
+}
+
+fn color_target(
+    format: wgpu::TextureFormat,
+    blend: Option<wgpu::BlendState>,
+) -> wgpu::ColorTargetState {
+    wgpu::ColorTargetState {
+        format,
+        blend,
+        write_mask: wgpu::ColorWrites::ALL,
+    }
+}
+
+fn supported_dual_source_blending(device: &wgpu::Device, requested: bool) -> bool {
+    let supported = device
+        .features()
+        .contains(wgpu::Features::DUAL_SOURCE_BLENDING);
+    if requested && !supported {
+        log::error!(
+            "dual-source blending was requested but is absent from device features {:?}; falling \
+             back to monochrome text rendering",
+            device.features(),
+        );
+    }
+    requested && supported
+}
+
+fn scene_blend_state(alpha_mode: wgpu::CompositeAlphaMode) -> wgpu::BlendState {
+    let source_color_factor = if alpha_mode == wgpu::CompositeAlphaMode::PreMultiplied {
+        wgpu::BlendFactor::One
+    } else {
+        wgpu::BlendFactor::SrcAlpha
+    };
+    source_over_blend_state(source_color_factor)
+}
+
+fn premultiplied_composite_blend_state() -> wgpu::BlendState {
+    source_over_blend_state(wgpu::BlendFactor::One)
+}
+
+fn source_over_blend_state(source_color_factor: wgpu::BlendFactor) -> wgpu::BlendState {
+    #[cfg(any(target_os = "macos", target_os = "windows"))]
+    let destination_alpha_factor = wgpu::BlendFactor::One;
+    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    let destination_alpha_factor = wgpu::BlendFactor::OneMinusSrcAlpha;
+
+    wgpu::BlendState {
+        color: wgpu::BlendComponent {
+            src_factor: source_color_factor,
+            dst_factor: wgpu::BlendFactor::OneMinusSrcAlpha,
+            operation: wgpu::BlendOperation::Add,
+        },
+        alpha: wgpu::BlendComponent {
+            src_factor: wgpu::BlendFactor::One,
+            dst_factor: destination_alpha_factor,
+            operation: wgpu::BlendOperation::Add,
+        },
+    }
+}
+
+fn path_blend_state() -> wgpu::BlendState {
+    wgpu::BlendState {
+        color: wgpu::BlendComponent {
+            src_factor: wgpu::BlendFactor::One,
+            dst_factor: wgpu::BlendFactor::OneMinusSrcAlpha,
+            operation: wgpu::BlendOperation::Add,
+        },
+        alpha: wgpu::BlendComponent {
+            src_factor: wgpu::BlendFactor::One,
+            dst_factor: wgpu::BlendFactor::One,
+            operation: wgpu::BlendOperation::Add,
+        },
+    }
+}
+
+fn subpixel_blend_state() -> wgpu::BlendState {
+    wgpu::BlendState {
+        color: wgpu::BlendComponent {
+            src_factor: wgpu::BlendFactor::Src1,
+            dst_factor: wgpu::BlendFactor::OneMinusSrc1,
+            operation: wgpu::BlendOperation::Add,
+        },
+        alpha: wgpu::BlendComponent {
+            src_factor: wgpu::BlendFactor::One,
+            dst_factor: wgpu::BlendFactor::OneMinusSrcAlpha,
+            operation: wgpu::BlendOperation::Add,
+        },
+    }
+}
+
+#[cfg(test)]
+pub(super) fn desktop_scene_blend_state(
+    alpha_mode: wgpu::CompositeAlphaMode,
+) -> wgpu::BlendState {
+    scene_blend_state(alpha_mode)
+}

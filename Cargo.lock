@@ -7034,6 +7034,7 @@ dependencies = [
  "naga",
  "paste",
  "snafu",
+ "wgpu",
  "wgsl-rs-ir",
  "wgsl-rs-macros",
 ]
