@@ -20,8 +20,18 @@ use std::sync::{Arc, Mutex};
 #[derive(Clone, Copy, Pod, Zeroable)]
 struct GlobalUniforms {
     viewport_size: [f32; 2],
-    premultiplied_alpha: u32,
+    premultiplied_alpha: ShaderBool,
     _padding: u32,
+}
+
+#[repr(transparent)]
+#[derive(Clone, Copy, Default, Pod, Zeroable)]
+struct ShaderBool(u32);
+
+impl From<bool> for ShaderBool {
+    fn from(value: bool) -> Self {
+        Self(u32::from(value))
+    }
 }
 
 #[repr(C)]
@@ -45,8 +55,55 @@ impl From<Bounds<ScaledPixels>> for ShaderBounds {
 struct SurfaceUniforms {
     bounds: ShaderBounds,
     content_mask: ShaderBounds,
-    uses_yuv_color: u32,
+    color_format: SurfaceColorFormat,
     _padding: [u32; 3],
+}
+
+#[derive(Clone, Copy, Default, Pod, Zeroable)]
+#[repr(transparent)]
+struct SurfaceColorFormat(u32);
+
+impl SurfaceColorFormat {
+    const RGBA: Self = Self(0);
+    const YUV: Self = Self(1);
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Default, Pod, Zeroable)]
+struct ShaderCorners {
+    top_left: f32,
+    top_right: f32,
+    bottom_right: f32,
+    bottom_left: f32,
+}
+
+impl From<Corners<ScaledPixels>> for ShaderCorners {
+    fn from(corners: Corners<ScaledPixels>) -> Self {
+        Self {
+            top_left: corners.top_left.0,
+            top_right: corners.top_right.0,
+            bottom_right: corners.bottom_right.0,
+            bottom_left: corners.bottom_left.0,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Default, Pod, Zeroable)]
+#[repr(transparent)]
+struct BlurCompositeClip(u32);
+
+impl BlurCompositeClip {
+    const NONE: Self = Self(0);
+    const ROUNDED_BOUNDS: Self = Self(1);
+}
+
+#[derive(Clone, Copy, Default, Pod, Zeroable)]
+#[repr(transparent)]
+struct DownsampleMode(u32);
+
+impl DownsampleMode {
+    const COPY: Self = Self(0);
+    const HALF_RESOLUTION: Self = Self(1);
 }
 
 /// Uniform passed to the blur pipelines. The same struct drives the downsample, separable
@@ -58,27 +115,26 @@ struct BlurUniforms {
     bounds: ShaderBounds,
     /// Clip rectangle, in device pixels (composite pass only).
     content_mask: ShaderBounds,
-    /// Rounded-corner radii in top-left, top-right, bottom-right, bottom-left order.
-    corner_radii: [f32; 4],
+    corner_radii: ShaderCorners,
     /// Per-tap sampling step in texture-coordinate space.
     direction: [f32; 2],
     /// Gaussian sigma, in the (half-resolution) blur texture's pixels.
-    sigma: f32,
+    standard_deviation: f32,
     /// Element opacity, multiplied into the composited result.
     opacity: f32,
     /// Number of taps to each side of center (gaussian passes only).
-    tap_count: f32,
+    sample_count: u32,
     /// Spacing between taps in pixels; >1 lets `tap_count` taps span very large radii without
     /// truncating the gaussian (see #6 in review).
-    tap_step: f32,
+    sample_step: f32,
     /// 1.0 to clip the composite to the rounded rectangle (the panel has a defined shape),
     /// 0.0 to let the blurred result fade out on its own (content `filter` — it bleeds past the
     /// element bounds like CSS, so the fade isn't sharply truncated at the box edge).
-    clip_rounded: f32,
+    composite_clip: BlurCompositeClip,
     /// 1.0 = snapped 2:1 box downsample (anchor the half-resolution grid to a fixed grid at the
     /// origin, so a stationary element blurs identically at every window size); 0.0 = 1:1 copy
     /// (the scene blit, which must not downsample). Downsample pass only.
-    downsample: f32,
+    downsample_mode: DownsampleMode,
 }
 
 #[repr(C)]
@@ -87,7 +143,7 @@ struct FontRasterizationUniforms {
     gamma_ratios: [f32; 4],
     grayscale_enhanced_contrast: f32,
     subpixel_enhanced_contrast: f32,
-    uses_blue_green_red_subpixel_order: u32,
+    uses_blue_green_red_subpixel_order: ShaderBool,
     _padding: u32,
 }
 
@@ -101,7 +157,7 @@ struct PathSprite {
 #[repr(C)]
 struct PathRasterizationVertex {
     xy_position: Point<ScaledPixels>,
-    st_position: Point<f32>,
+    curve_position: Point<f32>,
     color: Background,
     bounds: Bounds<ScaledPixels>,
 }
@@ -265,10 +321,16 @@ impl ScissorRectangle {
 
 #[derive(Clone, Copy)]
 struct BlurKernel {
-    sigma: f32,
-    tap_count: f32,
-    tap_step: f32,
+    standard_deviation: f32,
+    sample_count: u32,
+    sample_step: f32,
 }
+
+const BLUR_DOWNSAMPLE_FACTOR: u32 = 2;
+const BLUR_RADIUS_TO_STANDARD_DEVIATION: f32 = 0.5;
+const GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS: f32 = 3.0;
+const MAX_GAUSSIAN_SAMPLES_PER_SIDE: u32 = 32;
+const FILTER_UNIFORMS_PER_COMPOSITE: u64 = 4;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 struct FrameUniformRequirements {
@@ -299,7 +361,7 @@ impl FrameUniformRequirements {
             !scene.backdrop_filters.is_empty() || isolated_filter_count > 0;
         Self {
             filter_count: composite_count
-                .saturating_mul(4)
+                .saturating_mul(FILTER_UNIFORMS_PER_COMPOSITE)
                 .saturating_add(u64::from(requires_offscreen_rendering)),
             surface_count: scene.surfaces.len() as u64,
         }
@@ -308,17 +370,19 @@ impl FrameUniformRequirements {
 
 impl BlurKernel {
     fn for_radius(blur_radius: f32) -> Option<Self> {
-        let sigma = (blur_radius * 0.5).max(0.0);
-        if sigma <= 0.0 {
+        let standard_deviation =
+            (blur_radius * BLUR_RADIUS_TO_STANDARD_DEVIATION).max(0.0);
+        if standard_deviation <= 0.0 {
             return None;
         }
 
-        let ideal_tap_count = (3.0 * sigma).ceil();
-        let tap_count = ideal_tap_count.clamp(1.0, 32.0);
+        let ideal_sample_count =
+            (GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS * standard_deviation).ceil();
+        let sample_count = (ideal_sample_count as u32).clamp(1, MAX_GAUSSIAN_SAMPLES_PER_SIDE);
         Some(Self {
-            sigma,
-            tap_count,
-            tap_step: (ideal_tap_count / tap_count).max(1.0),
+            standard_deviation,
+            sample_count,
+            sample_step: (ideal_sample_count / sample_count as f32).max(1.0),
         })
     }
 }
@@ -2226,7 +2290,11 @@ impl WgpuRenderer {
         let uniforms = SurfaceUniforms {
             bounds: surface.bounds.into(),
             content_mask: surface.content_mask.bounds.into(),
-            uses_yuv_color: u32::from(uses_yuv_color),
+            color_format: if uses_yuv_color {
+                SurfaceColorFormat::Yuv
+            } else {
+                SurfaceColorFormat::Rgba
+            },
             _padding: [0; 3],
         };
         let resources = self.resources();
@@ -2777,7 +2845,7 @@ impl WgpuRenderer {
             let bounds = path.clipped_bounds();
             vertices.extend(path.vertices.iter().map(|v| PathRasterizationVertex {
                 xy_position: v.xy_position,
-                st_position: v.st_position,
+                curve_position: v.st_position,
                 color: path.color,
                 bounds,
             }));
@@ -3513,7 +3581,7 @@ mod tests {
         let mut scene = Scene::default();
         scene.insert_primitive(Underline {
             order: 0,
-            pad: 0,
+            padding: 0,
             bounds,
             content_mask: gpui::ContentMask { bounds },
             color: gpui::hsla(0.0, 1.0, 0.5, 0.5).into(),

@@ -3946,8 +3946,8 @@ impl Window {
                 color: shadow.color.opacity(opacity).into(),
                 element_bounds,
                 element_corner_radii,
-                inset: 0,
-                pad: 0,
+                inset: false.into(),
+                padding: 0,
             });
         }
     }
@@ -3991,8 +3991,8 @@ impl Window {
                 color: shadow.color.opacity(opacity).into(),
                 element_bounds,
                 element_corner_radii,
-                inset: 1,
-                pad: 0,
+                inset: true.into(),
+                padding: 0,
             });
         }
     }
@@ -4228,7 +4228,7 @@ impl Window {
 
         self.next_frame.scene.insert_primitive(Underline {
             order: 0,
-            pad: 0,
+            padding: 0,
             bounds,
             content_mask: self.snapped_content_mask(),
             color: style
@@ -4262,7 +4262,7 @@ impl Window {
 
         self.next_frame.scene.insert_primitive(Underline {
             order: 0,
-            pad: 0,
+            padding: 0,
             bounds,
             content_mask: self.snapped_content_mask(),
             thickness: self.snap_stroke(style.thickness),
@@ -4335,7 +4335,7 @@ impl Window {
             if subpixel_rendering {
                 self.next_frame.scene.insert_primitive(SubpixelSprite {
                     order: 0,
-                    pad: 0,
+                    padding: 0,
                     bounds,
                     content_mask,
                     color: color.opacity(element_opacity).into(),
@@ -4345,7 +4345,7 @@ impl Window {
             } else {
                 self.next_frame.scene.insert_primitive(MonochromeSprite {
                     order: 0,
-                    pad: 0,
+                    padding: 0,
                     bounds,
                     content_mask,
                     color: color.opacity(element_opacity).into(),
@@ -4426,7 +4426,7 @@ impl Window {
 
             self.next_frame.scene.insert_primitive(PolychromeSprite {
                 order: 0,
-                pad: 0,
+                padding: 0,
                 grayscale: false.into(),
                 bounds,
                 corner_radii: Default::default(),
@@ -4492,7 +4492,7 @@ impl Window {
 
         self.next_frame.scene.insert_primitive(MonochromeSprite {
             order: 0,
-            pad: 0,
+            padding: 0,
             bounds: final_bounds,
             content_mask,
             color: color.opacity(element_opacity).into(),
@@ -4598,7 +4598,7 @@ impl Window {
 
         self.next_frame.scene.insert_primitive(PolychromeSprite {
             order: 0,
-            pad: 0,
+            padding: 0,
             grayscale: grayscale.into(),
             bounds: visible_bounds_snapped,
             content_mask,

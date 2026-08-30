@@ -12,14 +12,116 @@ use wgsl_rs::wgsl;
 pub mod common {
     use wgsl_rs::std::*;
 
-    pub fn pi() -> f32 {
-        acos(-1.0)
+    pub const PI: f32 = 3.141592653589793;
+    pub const HALF_TURN_DEGREES: f32 = 180.0;
+    pub const FULL_TURN_DEGREES: f32 = 360.0;
+    pub const CSS_GRADIENT_OFFSET_DEGREES: f32 = 90.0;
+    pub const PIXEL_ANTIALIAS_RADIUS: f32 = 0.5;
+    pub const GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS: f32 = 3.0;
+    pub const PATTERN_COMPONENT_SCALE: f32 = 255.0;
+    pub const PATTERN_PACKING_RADIX: f32 = 65535.0;
+    pub const MIN_NORMALIZED_WEIGHT: f32 = 0.00001;
+    pub const MIN_PATH_GRADIENT: f32 = 0.001;
+    pub const UNDERLINE_WAVE_FREQUENCY: f32 = 2.0;
+    pub const UNDERLINE_WAVE_HEIGHT_RATIO: f32 = 0.8;
+    pub const GRADIENT_DITHER_SCALE: f32 = 0.6180339887;
+    pub const GRADIENT_DITHER_RGB_STRENGTH: f32 = 2.0 / PATTERN_COMPONENT_SCALE;
+    pub const GRADIENT_DITHER_ALPHA_STRENGTH: f32 = 3.0 / PATTERN_COMPONENT_SCALE;
+    pub const GRADIENT_DITHER_SEED_A: Vec2f = vec2f(12.9898, 78.233);
+    pub const GRADIENT_DITHER_SEED_B: Vec2f = vec2f(39.3460, 11.135);
+    pub const GRADIENT_DITHER_MULTIPLIER_A: f32 = 43758.5453;
+    pub const GRADIENT_DITHER_MULTIPLIER_B: f32 = 24634.6345;
+    pub const DIAGONAL_STRIPE_ANGLE: f32 = PI / 4.0;
+    pub const REC_601_LUMA_WEIGHTS: Vec3f = vec3f(0.30, 0.59, 0.11);
+    pub const LINEAR_RGB_LUMA_WEIGHTS: Vec3f = vec3f(0.2126, 0.7152, 0.0722);
+    pub const SRGB_DECODE_CUTOFF: f32 = 0.04045;
+    pub const SRGB_ENCODE_CUTOFF: f32 = 0.0031308;
+    pub const SRGB_TRANSFER_OFFSET: f32 = 0.055;
+    pub const SRGB_TRANSFER_SCALE: f32 = 1.055;
+    pub const SRGB_DECODE_EXPONENT: f32 = 2.4;
+    pub const SRGB_LINEAR_SCALE: f32 = 12.92;
+    pub const ERROR_FUNCTION_LINEAR_COEFFICIENT: f32 = 0.278393;
+    pub const ERROR_FUNCTION_QUADRATIC_COEFFICIENT: f32 = 0.230389;
+    pub const ERROR_FUNCTION_CUBIC_COEFFICIENT: f32 = 0.000972;
+    pub const ERROR_FUNCTION_QUARTIC_COEFFICIENT: f32 = 0.078108;
+    pub const DARK_TEXT_CONTRAST_SCALE: f32 = 4.0;
+    pub const DARK_TEXT_BRIGHTNESS_CUTOFF: f32 = 0.75;
+    pub const LINEAR_SRGB_TO_CONE_RESPONSE: Mat3x3f = mat3x3f(
+        vec3f(0.4122214708, 0.2119034982, 0.0883024619),
+        vec3f(0.5363325363, 0.6806995451, 0.2817188376),
+        vec3f(0.0514459929, 0.1073969566, 0.6299787005),
+    );
+    pub const CONE_RESPONSE_TO_OKLAB: Mat3x3f = mat3x3f(
+        vec3f(0.2104542553, 1.9779984951, 0.0259040371),
+        vec3f(0.7936177850, -2.4285922050, 0.7827717662),
+        vec3f(-0.0040720468, 0.4505937099, -0.8086757660),
+    );
+    pub const OKLAB_TO_CONE_RESPONSE: Mat3x3f = mat3x3f(
+        vec3f(1.0, 1.0, 1.0),
+        vec3f(0.3963377774, -0.1055613458, -0.0894841775),
+        vec3f(0.2158037573, -0.0638541728, -1.2914855480),
+    );
+    pub const CONE_RESPONSE_TO_LINEAR_SRGB: Mat3x3f = mat3x3f(
+        vec3f(4.0767416621, -1.2684380046, -0.0041960863),
+        vec3f(-3.3077115913, 2.6097574011, -0.7034186147),
+        vec3f(0.2309699292, -0.3413193965, 1.7076147010),
+    );
+
+    #[repr(u32)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Wgsl)]
+    pub enum ShaderBool {
+        Disabled = 0,
+        Enabled = 1,
+    }
+
+    #[repr(u32)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Wgsl)]
+    pub enum BackgroundTag {
+        Solid = 0,
+        LinearGradient = 1,
+        PatternSlash = 2,
+        Checkerboard = 3,
+    }
+
+    #[repr(u32)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Wgsl)]
+    pub enum ColorSpace {
+        Srgb = 0,
+        Oklab = 1,
+    }
+
+    #[repr(u32)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Wgsl)]
+    pub enum BorderStyle {
+        Solid = 0,
+        Dashed = 1,
+    }
+
+    #[repr(u32)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Wgsl)]
+    pub enum SurfaceColorFormat {
+        Rgba = 0,
+        Yuv = 1,
+    }
+
+    #[repr(u32)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Wgsl)]
+    pub enum BlurCompositeClip {
+        None = 0,
+        RoundedBounds = 1,
+    }
+
+    #[repr(u32)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Wgsl)]
+    pub enum DownsampleMode {
+        Copy = 0,
+        HalfResolution = 1,
     }
 
     #[derive(Clone, Copy, Wgsl)]
     pub struct GlobalUniforms {
         pub viewport_size: Vec2f,
-        pub premultiplied_alpha: u32,
+        pub premultiplied_alpha: ShaderBool,
         pub padding: u32,
     }
 
@@ -28,7 +130,7 @@ pub mod common {
         pub gamma_ratios: Vec4f,
         pub grayscale_enhanced_contrast: f32,
         pub subpixel_enhanced_contrast: f32,
-        pub uses_blue_green_red_subpixel_order: u32,
+        pub uses_blue_green_red_subpixel_order: ShaderBool,
         pub padding: u32,
     }
 
@@ -40,6 +142,21 @@ pub mod common {
         pub origin: Vec2f,
         pub size: Vec2f,
     }
+
+    impl Bounds {
+        pub fn position(bounds: Bounds, unit_position: Vec2f) -> Vec2f {
+            bounds.origin + unit_position * bounds.size
+        }
+
+        pub fn half_size(bounds: Bounds) -> Vec2f {
+            bounds.size / 2.0
+        }
+
+        pub fn center(bounds: Bounds) -> Vec2f {
+            bounds.origin + Bounds::half_size(bounds)
+        }
+    }
+
     #[derive(Clone, Copy, Wgsl)]
     pub struct Corners {
         pub top_left: f32,
@@ -47,12 +164,28 @@ pub mod common {
         pub bottom_right: f32,
         pub bottom_left: f32,
     }
+
+    impl Corners {
+        pub fn is_zero(corners: Corners) -> bool {
+            corners.top_left == 0.0
+                && corners.top_right == 0.0
+                && corners.bottom_right == 0.0
+                && corners.bottom_left == 0.0
+        }
+    }
+
     #[derive(Clone, Copy, Wgsl)]
     pub struct Edges {
         pub top: f32,
         pub right: f32,
         pub bottom: f32,
         pub left: f32,
+    }
+
+    impl Edges {
+        pub fn is_zero(edges: Edges) -> bool {
+            edges.top == 0.0 && edges.right == 0.0 && edges.bottom == 0.0 && edges.left == 0.0
+        }
     }
     #[derive(Clone, Copy, Wgsl)]
     pub struct Hsla {
@@ -68,8 +201,8 @@ pub mod common {
     }
     #[derive(Clone, Copy, Wgsl)]
     pub struct Background {
-        pub tag: u32,
-        pub color_space: u32,
+        pub tag: BackgroundTag,
+        pub color_space: ColorSpace,
         pub solid: Hsla,
         pub gradient_angle_or_pattern_height: f32,
         pub colors: [LinearColorStop; 2],
@@ -98,28 +231,86 @@ pub mod common {
         pub translation: Vec2f,
     }
 
+    impl TransformationMatrix {
+        pub fn transform_position(transform: TransformationMatrix, position: Vec2f) -> Vec2f {
+            transpose(transform.rotation_scale) * position + transform.translation
+        }
+    }
+
+    #[derive(Clone, Copy, Wgsl)]
+    pub struct RectangleVertex {
+        pub unit_position: Vec2f,
+        pub viewport_position: Vec2f,
+        pub clip_position: Vec4f,
+    }
+
+    #[derive(Clone, Copy, Wgsl)]
+    pub struct FullscreenVertex {
+        pub texture_coordinates: Vec2f,
+        pub clip_position: Vec4f,
+    }
+
+    pub fn is_enabled(value: ShaderBool) -> bool {
+        value == ShaderBool::Enabled
+    }
+
+    pub fn transparent() -> Vec4f {
+        vec4f(0.0, 0.0, 0.0, 0.0)
+    }
+
+    pub fn antialiased_coverage(signed_distance: f32) -> f32 {
+        saturate(PIXEL_ANTIALIAS_RADIUS - signed_distance)
+    }
+
+    pub fn premultiply(color: Vec4f, coverage: f32) -> Vec4f {
+        let alpha = color.w * coverage;
+        vec4f(color.x * alpha, color.y * alpha, color.z * alpha, alpha)
+    }
+
+    pub fn atlas_texture_coordinates(
+        unit_position: Vec2f,
+        tile: AtlasTile,
+        atlas_size: Vec2u,
+    ) -> Vec2f {
+        let tile_origin = vec2f(tile.bounds.origin.x as f32, tile.bounds.origin.y as f32);
+        let tile_size = vec2f(tile.bounds.size.x as f32, tile.bounds.size.y as f32);
+        let texture_size = vec2f(atlas_size.x as f32, atlas_size.y as f32);
+        (tile_origin + unit_position * tile_size) / texture_size
+    }
+
     pub fn color_brightness(color: Vec3f) -> f32 {
-        dot(color, vec3f(0.30, 0.59, 0.11))
+        dot(color, REC_601_LUMA_WEIGHTS)
     }
     pub fn light_on_dark_contrast(enhanced_contrast: f32, color: Vec3f) -> f32 {
-        enhanced_contrast * saturate(4.0 * (0.75 - color_brightness(color)))
+        let darkness = saturate(
+            DARK_TEXT_CONTRAST_SCALE
+                * (DARK_TEXT_BRIGHTNESS_CUTOFF - color_brightness(color)),
+        );
+        enhanced_contrast * darkness
     }
-    pub fn enhance_contrast(alpha: f32, contrast: f32) -> f32 {
+
+    pub fn enhance_contrast<T>(alpha: T, contrast: f32) -> T
+    where
+        T: Copy
+            + std::ops::Mul<f32, Output = T>
+            + std::ops::Add<f32, Output = T>
+            + std::ops::Div<T, Output = T>,
+    {
         alpha * (contrast + 1.0) / (alpha * contrast + 1.0)
     }
-    pub fn enhance_contrast3(alpha: Vec3f, contrast: f32) -> Vec3f {
-        alpha * (contrast + 1.0) / (alpha * contrast + 1.0)
-    }
-    pub fn apply_alpha_correction(alpha: f32, brightness: f32, gamma_ratios: Vec4f) -> f32 {
-        let brightness_adjustment = gamma_ratios.x * brightness + gamma_ratios.y;
+
+    pub fn apply_alpha_correction<T>(alpha: T, brightness: T, gamma_ratios: Vec4f) -> T
+    where
+        T: Copy
+            + std::ops::Mul<f32, Output = T>
+            + std::ops::Mul<T, Output = T>
+            + std::ops::Add<f32, Output = T>
+            + std::ops::Add<T, Output = T>,
+        f32: std::ops::Sub<T, Output = T>,
+    {
+        let brightness_adjustment = brightness * gamma_ratios.x + gamma_ratios.y;
         let correction =
-            brightness_adjustment * alpha + (gamma_ratios.z * brightness + gamma_ratios.w);
-        alpha + alpha * (1.0 - alpha) * correction
-    }
-    pub fn apply_alpha_correction3(alpha: Vec3f, brightness: Vec3f, gamma_ratios: Vec4f) -> Vec3f {
-        let brightness_adjustment = gamma_ratios.x * brightness + gamma_ratios.y;
-        let correction =
-            brightness_adjustment * alpha + (gamma_ratios.z * brightness + gamma_ratios.w);
+            brightness_adjustment * alpha + (brightness * gamma_ratios.z + gamma_ratios.w);
         alpha + alpha * (1.0 - alpha) * correction
     }
     pub fn apply_contrast_and_gamma_correction(
@@ -129,8 +320,8 @@ pub mod common {
         gamma_ratios: Vec4f,
     ) -> f32 {
         let enhanced_contrast = light_on_dark_contrast(enhanced_contrast_factor, color);
-        apply_alpha_correction(
-            enhance_contrast(sample, enhanced_contrast),
+        apply_alpha_correction::<f32>(
+            enhance_contrast::<f32>(sample, enhanced_contrast),
             color_brightness(color),
             gamma_ratios,
         )
@@ -141,160 +332,210 @@ pub mod common {
         enhanced_contrast_factor: f32,
         gamma_ratios: Vec4f,
     ) -> Vec3f {
-        let contrasted = enhance_contrast3(
+        let contrasted = enhance_contrast::<Vec3f>(
             sample,
             light_on_dark_contrast(enhanced_contrast_factor, color),
         );
-        apply_alpha_correction3(contrasted, color, gamma_ratios)
+        apply_alpha_correction::<Vec3f>(contrasted, color, gamma_ratios)
     }
-    pub fn unit_vertex(vertex_id: u32) -> Vec2f {
+    pub fn rectangle_corner(vertex_id: u32) -> Vec2f {
         vec2f((vertex_id & 1u32) as f32, 0.5 * (vertex_id & 2u32) as f32)
     }
-    pub fn to_device_position_impl(position: Vec2f) -> Vec4f {
-        let device_position =
+
+    pub fn viewport_to_clip_position(position: Vec2f) -> Vec4f {
+        let clip_position =
             position / get!(GLOBALS).viewport_size * vec2f(2.0, -2.0) + vec2f(-1.0, 1.0);
-        vec4f(device_position.x, device_position.y, 0.0, 1.0)
+        vec4f(clip_position.x, clip_position.y, 0.0, 1.0)
     }
-    pub fn to_device_position(unit_vertex: Vec2f, bounds: Bounds) -> Vec4f {
-        to_device_position_impl(unit_vertex * bounds.size + bounds.origin)
+
+    pub fn rectangle_vertex(vertex_id: u32, bounds: Bounds) -> RectangleVertex {
+        let unit_position = rectangle_corner(vertex_id);
+        let viewport_position = Bounds::position(bounds, unit_position);
+        RectangleVertex {
+            unit_position,
+            viewport_position,
+            clip_position: viewport_to_clip_position(viewport_position),
+        }
     }
-    pub fn to_device_position_transformed(
-        unit_vertex: Vec2f,
+
+    pub fn transformed_rectangle_vertex(
+        vertex_id: u32,
         bounds: Bounds,
         transform: TransformationMatrix,
-    ) -> Vec4f {
-        let position = unit_vertex * bounds.size + bounds.origin;
-        to_device_position_impl(
-            transpose(transform.rotation_scale) * position + transform.translation,
+    ) -> RectangleVertex {
+        let unit_position = rectangle_corner(vertex_id);
+        let viewport_position = TransformationMatrix::transform_position(
+            transform,
+            Bounds::position(bounds, unit_position),
+        );
+        RectangleVertex {
+            unit_position,
+            viewport_position,
+            clip_position: viewport_to_clip_position(viewport_position),
+        }
+    }
+
+    pub fn fullscreen_vertex(vertex_id: u32) -> FullscreenVertex {
+        let texture_coordinates = vec2f(
+            ((vertex_id << 1u32) & 2u32) as f32,
+            (vertex_id & 2u32) as f32,
+        );
+        FullscreenVertex {
+            texture_coordinates,
+            clip_position: vec4f(
+                texture_coordinates.x * 2.0 - 1.0,
+                1.0 - texture_coordinates.y * 2.0,
+                0.0,
+                1.0,
+            ),
+        }
+    }
+
+    pub fn clip_distances(position: Vec2f, clip_bounds: Bounds) -> Vec4f {
+        let distance_from_top_left = position - clip_bounds.origin;
+        let distance_from_bottom_right = clip_bounds.origin + clip_bounds.size - position;
+        vec4f(
+            distance_from_top_left.x,
+            distance_from_bottom_right.x,
+            distance_from_top_left.y,
+            distance_from_bottom_right.y,
         )
     }
-    pub fn distance_from_clip_rect_impl(position: Vec2f, clip_bounds: Bounds) -> Vec4f {
-        let tl = position - clip_bounds.origin;
-        let br = clip_bounds.origin + clip_bounds.size - position;
-        vec4f(tl.x, br.x, tl.y, br.y)
-    }
-    pub fn distance_from_clip_rect(
-        unit_vertex: Vec2f,
-        bounds: Bounds,
-        clip_bounds: Bounds,
-    ) -> Vec4f {
-        distance_from_clip_rect_impl(unit_vertex * bounds.size + bounds.origin, clip_bounds)
-    }
-    pub fn distance_from_clip_rect_transformed(
-        unit_vertex: Vec2f,
-        bounds: Bounds,
-        clip_bounds: Bounds,
-        transform: TransformationMatrix,
-    ) -> Vec4f {
-        let position = unit_vertex * bounds.size + bounds.origin;
-        distance_from_clip_rect_impl(
-            transpose(transform.rotation_scale) * position + transform.translation,
-            clip_bounds,
-        )
-    }
+
     pub fn is_clipped(distances: Vec4f) -> bool {
         distances.x < 0.0 || distances.y < 0.0 || distances.z < 0.0 || distances.w < 0.0
     }
+
+    pub fn unclipped_distances() -> Vec4f {
+        vec4f(1.0, 1.0, 1.0, 1.0)
+    }
     pub fn srgb_to_linear(srgb: Vec3f) -> Vec3f {
-        let cutoff = vec3b(srgb.x < 0.04045, srgb.y < 0.04045, srgb.z < 0.04045);
-        let higher = pow((srgb + 0.055) / 1.055, vec3f(2.4, 2.4, 2.4));
-        select(higher, srgb / 12.92, cutoff)
+        let cutoff = vec3b(
+            srgb.x < SRGB_DECODE_CUTOFF,
+            srgb.y < SRGB_DECODE_CUTOFF,
+            srgb.z < SRGB_DECODE_CUTOFF,
+        );
+        let higher = pow(
+            (srgb + SRGB_TRANSFER_OFFSET) / SRGB_TRANSFER_SCALE,
+            vec3f(
+                SRGB_DECODE_EXPONENT,
+                SRGB_DECODE_EXPONENT,
+                SRGB_DECODE_EXPONENT,
+            ),
+        );
+        select(higher, srgb / SRGB_LINEAR_SCALE, cutoff)
     }
     pub fn linear_to_srgb(linear: Vec3f) -> Vec3f {
         let cutoff = vec3b(
-            linear.x < 0.0031308,
-            linear.y < 0.0031308,
-            linear.z < 0.0031308,
+            linear.x < SRGB_ENCODE_CUTOFF,
+            linear.y < SRGB_ENCODE_CUTOFF,
+            linear.z < SRGB_ENCODE_CUTOFF,
         );
-        let higher = 1.055 * pow(linear, vec3f(1.0 / 2.4, 1.0 / 2.4, 1.0 / 2.4)) - 0.055;
-        select(higher, linear * 12.92, cutoff)
+        let inverse_exponent = 1.0 / SRGB_DECODE_EXPONENT;
+        let higher = SRGB_TRANSFER_SCALE
+            * pow(
+                linear,
+                vec3f(inverse_exponent, inverse_exponent, inverse_exponent),
+            )
+            - SRGB_TRANSFER_OFFSET;
+        select(higher, linear * SRGB_LINEAR_SCALE, cutoff)
     }
     pub fn linear_to_srgba(color: Vec4f) -> Vec4f {
-        let rgb = linear_to_srgb(color.rgb());
-        vec4f(rgb.x, rgb.y, rgb.z, color.w)
+        let red_green_blue = linear_to_srgb(color.rgb());
+        vec4f(
+            red_green_blue.x,
+            red_green_blue.y,
+            red_green_blue.z,
+            color.w,
+        )
     }
     pub fn srgba_to_linear(color: Vec4f) -> Vec4f {
-        let rgb = srgb_to_linear(color.rgb());
-        vec4f(rgb.x, rgb.y, rgb.z, color.w)
+        let red_green_blue = srgb_to_linear(color.rgb());
+        vec4f(
+            red_green_blue.x,
+            red_green_blue.y,
+            red_green_blue.z,
+            color.w,
+        )
     }
+    pub fn hue_to_unit_rgb(hue: f32) -> Vec3f {
+        let phases = fract(vec3f(hue, hue + 2.0 / 3.0, hue + 1.0 / 3.0));
+        saturate(abs(phases * 6.0 - 3.0) - 1.0)
+    }
+
     pub fn hsla_to_rgba(hsla: Hsla) -> Vec4f {
-        let h = hsla.h * 6.0;
-        let c = (1.0 - abs(2.0 * hsla.l - 1.0)) * hsla.s;
-        let x = c * (1.0 - abs(h % 2.0 - 1.0));
-        let m = hsla.l - c / 2.0;
-        let mut color = vec3f(m, m, m);
-        if h >= 0.0 && h < 1.0 {
-            color.x += c;
-            color.y += x;
-        } else if h >= 1.0 && h < 2.0 {
-            color.x += x;
-            color.y += c;
-        } else if h >= 2.0 && h < 3.0 {
-            color.y += c;
-            color.z += x;
-        } else if h >= 3.0 && h < 4.0 {
-            color.y += x;
-            color.z += c;
-        } else if h >= 4.0 && h < 5.0 {
-            color.x += x;
-            color.z += c;
-        } else {
-            color.x += c;
-            color.z += x;
-        }
-        vec4f(color.x, color.y, color.z, hsla.a)
+        let chroma = hsla.s * (1.0 - abs(2.0 * hsla.l - 1.0));
+        let red_green_blue = (hue_to_unit_rgb(hsla.h) - 0.5) * chroma + hsla.l;
+        vec4f(
+            red_green_blue.x,
+            red_green_blue.y,
+            red_green_blue.z,
+            hsla.a,
+        )
     }
     pub fn linear_srgb_to_oklab(color: Vec4f) -> Vec4f {
-        let l = 0.4122214708 * color.x + 0.5363325363 * color.y + 0.0514459929 * color.z;
-        let m = 0.2119034982 * color.x + 0.6806995451 * color.y + 0.1073969566 * color.z;
-        let s = 0.0883024619 * color.x + 0.2817188376 * color.y + 0.6299787005 * color.z;
-        let l_ = pow(l, 1.0 / 3.0);
-        let m_ = pow(m, 1.0 / 3.0);
-        let s_ = pow(s, 1.0 / 3.0);
-        vec4f(
-            0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_,
-            1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_,
-            0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_,
-            color.w,
-        )
+        let cone_response = LINEAR_SRGB_TO_CONE_RESPONSE * color.rgb();
+        let cube_root = vec3f(1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0);
+        let oklab = CONE_RESPONSE_TO_OKLAB * pow(cone_response, cube_root);
+        vec4f(oklab.x, oklab.y, oklab.z, color.w)
     }
     pub fn oklab_to_linear_srgb(color: Vec4f) -> Vec4f {
-        let l_ = color.x + 0.3963377774 * color.y + 0.2158037573 * color.z;
-        let m_ = color.x - 0.1055613458 * color.y - 0.0638541728 * color.z;
-        let s_ = color.x - 0.0894841775 * color.y - 1.2914855480 * color.z;
-        let l = l_ * l_ * l_;
-        let m = m_ * m_ * m_;
-        let s = s_ * s_ * s_;
-        vec4f(
-            4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
-            -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
-            -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s,
-            color.w,
-        )
+        let cone_root = OKLAB_TO_CONE_RESPONSE * color.rgb();
+        let cone_response = cone_root * cone_root * cone_root;
+        let linear_srgb = CONE_RESPONSE_TO_LINEAR_SRGB * cone_response;
+        vec4f(linear_srgb.x, linear_srgb.y, linear_srgb.z, color.w)
     }
     pub fn over(below: Vec4f, above: Vec4f) -> Vec4f {
         let alpha = above.w + below.w * (1.0 - above.w);
-        let rgb = (above.rgb() * above.w + below.rgb() * below.w * (1.0 - above.w)) / alpha;
-        vec4f(rgb.x, rgb.y, rgb.z, alpha)
+        if alpha == 0.0 {
+            return transparent();
+        }
+        let red_green_blue =
+            (above.rgb() * above.w + below.rgb() * below.w * (1.0 - above.w)) / alpha;
+        vec4f(
+            red_green_blue.x,
+            red_green_blue.y,
+            red_green_blue.z,
+            alpha,
+        )
     }
     pub fn gaussian(x: f32, sigma: f32) -> f32 {
-        exp(-(x * x) / (2.0 * sigma * sigma)) / (sqrt(2.0 * pi()) * sigma)
+        exp(-(x * x) / (2.0 * sigma * sigma)) / (sqrt(2.0 * PI) * sigma)
     }
-    pub fn erf(value: Vec2f) -> Vec2f {
+    pub fn approximate_error_function(value: Vec2f) -> Vec2f {
         let signs = sign(value);
         let absolute_value = abs(value);
         let polynomial = 1.0
-            + (0.278393
-                + (0.230389 + (0.000972 + 0.078108 * absolute_value) * absolute_value)
-                    * absolute_value)
-                * absolute_value;
+            + absolute_value
+                * (ERROR_FUNCTION_LINEAR_COEFFICIENT
+                    + absolute_value
+                        * (ERROR_FUNCTION_QUADRATIC_COEFFICIENT
+                            + absolute_value
+                                * (ERROR_FUNCTION_CUBIC_COEFFICIENT
+                                    + absolute_value * ERROR_FUNCTION_QUARTIC_COEFFICIENT)));
         let polynomial_squared = polynomial * polynomial;
         signs - signs / (polynomial_squared * polynomial_squared)
     }
-    pub fn blur_along_x(x: f32, y: f32, sigma: f32, corner: f32, half_size: Vec2f) -> f32 {
-        let delta = min(half_size.y - corner - abs(y), 0.0);
-        let curved = half_size.x - corner + sqrt(max(0.0, corner * corner - delta * delta));
-        let integral = 0.5 + 0.5 * erf((x + vec2f(-curved, curved)) * (sqrt(0.5) / sigma));
+    pub fn integrated_rounded_rectangle_coverage(
+        horizontal_position: f32,
+        vertical_position: f32,
+        standard_deviation: f32,
+        corner_radius: f32,
+        half_size: Vec2f,
+    ) -> f32 {
+        let distance_beyond_corner = min(
+            half_size.y - corner_radius - abs(vertical_position),
+            0.0,
+        );
+        let curved_extent = half_size.x - corner_radius
+            + sqrt(max(
+                0.0,
+                corner_radius * corner_radius
+                    - distance_beyond_corner * distance_beyond_corner,
+            ));
+        let integration_bounds = horizontal_position + vec2f(-curved_extent, curved_extent);
+        let normalized_bounds = integration_bounds * (sqrt(0.5) / standard_deviation);
+        let integral = 0.5 + 0.5 * approximate_error_function(normalized_bounds);
         integral.y - integral.x
     }
     pub fn pick_corner_radius(center_to_point: Vec2f, radii: Corners) -> f32 {
@@ -310,7 +551,10 @@ pub mod common {
             radii.bottom_right
         }
     }
-    pub fn quad_sdf_impl(corner_center_to_point: Vec2f, corner_radius: f32) -> f32 {
+    pub fn rounded_rectangle_signed_distance_from_corner(
+        corner_center_to_point: Vec2f,
+        corner_radius: f32,
+    ) -> f32 {
         if corner_radius == 0.0 {
             max(corner_center_to_point.x, corner_center_to_point.y)
         } else {
@@ -319,18 +563,26 @@ pub mod common {
                 - corner_radius
         }
     }
-    pub fn quad_sdf(point: Vec2f, bounds: Bounds, corner_radii: Corners) -> f32 {
-        let half_size = bounds.size / 2.0;
-        let center_to_point = point - (bounds.origin + half_size);
+    pub fn rounded_rectangle_signed_distance(
+        point: Vec2f,
+        bounds: Bounds,
+        corner_radii: Corners,
+    ) -> f32 {
+        let half_size = Bounds::half_size(bounds);
+        let center_to_point = point - Bounds::center(bounds);
         let corner_radius = pick_corner_radius(center_to_point, corner_radii);
-        quad_sdf_impl(
+        rounded_rectangle_signed_distance_from_corner(
             abs(center_to_point) - half_size + corner_radius,
             corner_radius,
         )
     }
     pub fn blend_color(color: Vec4f, alpha_factor: f32) -> Vec4f {
         let alpha = color.w * alpha_factor;
-        let multiplier = select(1.0, alpha, get!(GLOBALS).premultiplied_alpha != 0u32);
+        let multiplier = select(
+            1.0,
+            alpha,
+            is_enabled(get!(GLOBALS).premultiplied_alpha),
+        );
         vec4f(
             color.x * multiplier,
             color.y * multiplier,
@@ -340,118 +592,146 @@ pub mod common {
     }
 
     #[derive(Clone, Copy, Wgsl)]
-    pub struct GradientColor {
+    pub struct PreparedBackground {
         pub solid: Vec4f,
         pub color0: Vec4f,
         pub color1: Vec4f,
     }
 
-    pub fn prepare_gradient_color(
-        tag: u32,
-        color_space: u32,
-        solid: Hsla,
-        colors: [LinearColorStop; 2],
-    ) -> GradientColor {
-        let mut result = GradientColor {
-            solid: vec4f(0.0, 0.0, 0.0, 0.0),
-            color0: vec4f(0.0, 0.0, 0.0, 0.0),
-            color1: vec4f(0.0, 0.0, 0.0, 0.0),
+    pub fn prepare_background(background: Background) -> PreparedBackground {
+        let mut prepared = PreparedBackground {
+            solid: transparent(),
+            color0: transparent(),
+            color1: transparent(),
         };
-        if tag == 0u32 || tag == 2u32 || tag == 3u32 {
-            result.solid = hsla_to_rgba(solid);
-        } else if tag == 1u32 {
-            result.color0 = hsla_to_rgba(colors[0usize].color);
-            result.color1 = hsla_to_rgba(colors[1usize].color);
-            if color_space == 0u32 {
-                result.color0 = linear_to_srgba(result.color0);
-                result.color1 = linear_to_srgba(result.color1);
-            } else if color_space == 1u32 {
-                result.color0 = linear_srgb_to_oklab(result.color0);
-                result.color1 = linear_srgb_to_oklab(result.color1);
+
+        if background.tag == BackgroundTag::LinearGradient {
+            prepared.color0 = hsla_to_rgba(background.colors[0usize].color);
+            prepared.color1 = hsla_to_rgba(background.colors[1usize].color);
+            if background.color_space == ColorSpace::Srgb {
+                prepared.color0 = linear_to_srgba(prepared.color0);
+                prepared.color1 = linear_to_srgba(prepared.color1);
+            } else {
+                prepared.color0 = linear_srgb_to_oklab(prepared.color0);
+                prepared.color1 = linear_srgb_to_oklab(prepared.color1);
             }
+        } else {
+            prepared.solid = hsla_to_rgba(background.solid);
         }
-        result
+        prepared
     }
-    pub fn gradient_color(
+
+    pub fn linear_gradient_ratio(background: Background, position: Vec2f, bounds: Bounds) -> f32 {
+        let radians = (background.gradient_angle_or_pattern_height % FULL_TURN_DEGREES
+            - CSS_GRADIENT_OFFSET_DEGREES)
+            * PI
+            / HALF_TURN_DEGREES;
+        let mut direction = vec2f(cos(radians), sin(radians));
+        if bounds.size.x > bounds.size.y {
+            direction.y *= bounds.size.y / bounds.size.x;
+        } else {
+            direction.x *= bounds.size.x / bounds.size.y;
+        }
+
+        let half_size = Bounds::half_size(bounds);
+        let mut ratio = dot(position - Bounds::center(bounds), direction) / length(direction);
+        if abs(direction.x) > abs(direction.y) {
+            ratio = (ratio + half_size.x) / bounds.size.x;
+        } else {
+            ratio = (ratio + half_size.y) / bounds.size.y;
+        }
+
+        let first_stop = background.colors[0usize].percentage;
+        let last_stop = background.colors[1usize].percentage;
+        saturate((ratio - first_stop) / (last_stop - first_stop))
+    }
+
+    pub fn gradient_dither(position: Vec2f) -> Vec4f {
+        let seed = position * GRADIENT_DITHER_SCALE;
+        let noise_a = fract(sin(dot(seed, GRADIENT_DITHER_SEED_A)) * GRADIENT_DITHER_MULTIPLIER_A);
+        let noise_b = fract(sin(dot(seed, GRADIENT_DITHER_SEED_B)) * GRADIENT_DITHER_MULTIPLIER_B);
+        let triangular_noise = noise_a + noise_b - 1.0;
+        vec4f(
+            triangular_noise * GRADIENT_DITHER_RGB_STRENGTH,
+            triangular_noise * GRADIENT_DITHER_RGB_STRENGTH,
+            triangular_noise * GRADIENT_DITHER_RGB_STRENGTH,
+            triangular_noise * GRADIENT_DITHER_ALPHA_STRENGTH,
+        )
+    }
+
+    pub fn linear_gradient_color(
         background: Background,
         position: Vec2f,
         bounds: Bounds,
-        solid_color: Vec4f,
-        color0: Vec4f,
-        color1: Vec4f,
+        prepared: PreparedBackground,
     ) -> Vec4f {
-        let mut background_color = vec4f(0.0, 0.0, 0.0, 0.0);
-        match background.tag {
-            1 => {
-                let radians =
-                    (background.gradient_angle_or_pattern_height % 360.0 - 90.0) * pi() / 180.0;
-                let mut direction = vec2f(cos(radians), sin(radians));
-                if bounds.size.x > bounds.size.y {
-                    direction.y *= bounds.size.y / bounds.size.x;
-                } else {
-                    direction.x *= bounds.size.x / bounds.size.y;
-                }
-                let half_size = bounds.size / 2.0;
-                let center_to_point = position - (bounds.origin + half_size);
-                let mut t = dot(center_to_point, direction) / length(direction);
-                if abs(direction.x) > abs(direction.y) {
-                    t = (t + half_size.x) / bounds.size.x;
-                } else {
-                    t = (t + half_size.y) / bounds.size.y;
-                }
-                t = (t - background.colors[0usize].percentage)
-                    / (background.colors[1usize].percentage - background.colors[0usize].percentage);
-                t = clamp(t, 0.0, 1.0);
-                let ratio = vec4f(t, t, t, t);
-                if background.color_space == 1u32 {
-                    background_color = oklab_to_linear_srgb(mix(color0, color1, ratio));
-                } else {
-                    background_color = srgba_to_linear(mix(color0, color1, ratio));
-                }
+        let ratio = linear_gradient_ratio(background, position, bounds);
+        let ratio4 = vec4f(ratio, ratio, ratio, ratio);
+        let interpolated = mix(prepared.color0, prepared.color1, ratio4);
+        let color = if background.color_space == ColorSpace::Oklab {
+            oklab_to_linear_srgb(interpolated)
+        } else {
+            srgba_to_linear(interpolated)
+        };
+        color + gradient_dither(position)
+    }
 
-                // Preserve the retired desktop shaders' triangular-distributed gradient dither.
-                let seed = position * 0.6180339887;
-                let first_noise = fract(sin(dot(seed, vec2f(12.9898, 78.233))) * 43758.5453);
-                let second_noise = fract(sin(dot(seed, vec2f(39.3460, 11.135))) * 24634.6345);
-                let triangular_noise = first_noise + second_noise - 1.0;
-                background_color = background_color
-                    + vec4f(
-                        triangular_noise * 2.0 / 255.0,
-                        triangular_noise * 2.0 / 255.0,
-                        triangular_noise * 2.0 / 255.0,
-                        triangular_noise * 3.0 / 255.0,
-                    );
+    pub fn slash_pattern_color(
+        background: Background,
+        position: Vec2f,
+        bounds: Bounds,
+        solid: Vec4f,
+    ) -> Vec4f {
+        let encoded = background.gradient_angle_or_pattern_height;
+        let pattern_width = (encoded / PATTERN_PACKING_RADIX) / PATTERN_COMPONENT_SCALE;
+        let pattern_interval = (encoded % PATTERN_PACKING_RADIX) / PATTERN_COMPONENT_SCALE;
+        let pattern_height = pattern_width + pattern_interval;
+        let period = pattern_height * sin(DIAGONAL_STRIPE_ANGLE);
+        let rotation = mat2x2f(
+            vec2f(cos(DIAGONAL_STRIPE_ANGLE), -sin(DIAGONAL_STRIPE_ANGLE)),
+            vec2f(sin(DIAGONAL_STRIPE_ANGLE), cos(DIAGONAL_STRIPE_ANGLE)),
+        );
+        let pattern = (rotation * (position - bounds.origin)).x % period;
+        let distance = min(pattern, period - pattern)
+            - period * (pattern_width / pattern_height) / 2.0;
+        let mut color = solid;
+        color.w *= antialiased_coverage(distance);
+        color
+    }
+
+    pub fn checkerboard_color(
+        background: Background,
+        position: Vec2f,
+        bounds: Bounds,
+        solid: Vec4f,
+    ) -> Vec4f {
+        let relative = position - bounds.origin;
+        let square_size = background.gradient_angle_or_pattern_height;
+        let colored = (floor(relative.x / square_size) + floor(relative.y / square_size)) % 2.0;
+        let mut color = solid;
+        color.w *= saturate(colored);
+        color
+    }
+
+    pub fn background_color(
+        background: Background,
+        position: Vec2f,
+        bounds: Bounds,
+        prepared: PreparedBackground,
+    ) -> Vec4f {
+        #[wgsl_allow(non_literal_match_statement_patterns)]
+        match background.tag {
+            BackgroundTag::Solid => prepared.solid,
+            BackgroundTag::LinearGradient => {
+                linear_gradient_color(background, position, bounds, prepared)
             }
-            2 => {
-                let encoded = background.gradient_angle_or_pattern_height;
-                let pattern_width = (encoded / 65535.0) / 255.0;
-                let pattern_interval = (encoded % 65535.0) / 255.0;
-                let pattern_height = pattern_width + pattern_interval;
-                let stripe_angle = pi() / 4.0;
-                let period = pattern_height * sin(stripe_angle);
-                let rotation = mat2x2f(
-                    vec2f(cos(stripe_angle), -sin(stripe_angle)),
-                    vec2f(sin(stripe_angle), cos(stripe_angle)),
-                );
-                let pattern = (rotation * (position - bounds.origin)).x % period;
-                let distance = min(pattern, period - pattern)
-                    - period * (pattern_width / pattern_height) / 2.0;
-                background_color = solid_color;
-                background_color.w *= saturate(0.5 - distance);
+            BackgroundTag::PatternSlash => {
+                slash_pattern_color(background, position, bounds, prepared.solid)
             }
-            3 => {
-                let relative = position - bounds.origin;
-                let colored = (floor(relative.x / background.gradient_angle_or_pattern_height)
-                    + floor(relative.y / background.gradient_angle_or_pattern_height))
-                    % 2.0;
-                background_color = solid_color;
-                background_color.w *= saturate(colored);
-            }
-            _ => {
-                return solid_color;
+            BackgroundTag::Checkerboard => {
+                checkerboard_color(background, position, bounds, prepared.solid)
             }
         }
-        background_color
     }
     pub fn corner_dash_velocity(first: f32, second: f32) -> f32 {
         if first == 0.0 {
@@ -462,21 +742,25 @@ pub mod common {
             min(first, second)
         }
     }
-    pub fn fmod(a: f32, b: f32) -> f32 {
-        a - b * trunc(a / b)
+    pub fn signed_modulo(value: f32, modulus: f32) -> f32 {
+        value - modulus * trunc(value / modulus)
     }
-    pub fn dash_alpha(
-        t: f32,
+    pub fn dash_coverage(
+        position: f32,
         period: f32,
-        length_: f32,
+        dash_length: f32,
         dash_velocity: f32,
-        antialias_threshold: f32,
     ) -> f32 {
-        let centered = fmod(t + period / 2.0 - length_ / 2.0, period) - period / 2.0;
-        let signed_distance = abs(centered) - length_ / 2.0;
-        saturate(antialias_threshold - signed_distance / dash_velocity)
+        let half_period = period / 2.0;
+        let half_dash_length = dash_length / 2.0;
+        let centered = signed_modulo(
+            position + half_period - half_dash_length,
+            period,
+        ) - half_period;
+        let signed_distance = abs(centered) - half_dash_length;
+        antialiased_coverage(signed_distance / dash_velocity)
     }
-    pub fn quarter_ellipse_sdf(point: Vec2f, radii: Vec2f) -> f32 {
+    pub fn quarter_ellipse_signed_distance(point: Vec2f, radii: Vec2f) -> f32 {
         (length(point / radii) - 1.0) * (radii.x + radii.y) * -0.5
     }
 }
@@ -489,7 +773,7 @@ pub mod quad {
     #[derive(Clone, Copy, Wgsl)]
     pub struct Quad {
         pub order: u32,
-        pub border_style: u32,
+        pub border_style: BorderStyle,
         pub bounds: Bounds,
         pub content_mask: Bounds,
         pub background: Background,
@@ -498,6 +782,314 @@ pub mod quad {
         pub border_widths: Edges,
     }
     storage!(group(1), binding(0), QUADS: RuntimeArray<Quad>);
+
+    pub const DASH_LENGTH_PER_BORDER_WIDTH: f32 = 2.0;
+    pub const DASH_GAP_PER_BORDER_WIDTH: f32 = 1.0;
+    pub const DEFINITELY_OUTSIDE_INNER_BORDER: f32 = -1.0;
+
+    #[derive(Clone, Copy, Wgsl)]
+    pub struct QuadGeometry {
+        pub point: Vec2f,
+        pub center_to_point: Vec2f,
+        pub corner_radius: f32,
+        pub corner_center_to_point: Vec2f,
+        pub reduced_border: Vec2f,
+        pub straight_border_inner_corner_to_point: Vec2f,
+        pub near_rounded_corner: bool,
+        pub unrounded: bool,
+    }
+
+    #[derive(Clone, Copy, Wgsl)]
+    pub struct BorderDistances {
+        pub outer: f32,
+        pub inner: f32,
+    }
+
+    #[derive(Clone, Copy, Wgsl)]
+    pub struct DashPosition {
+        pub position: f32,
+        pub perimeter: f32,
+        pub velocity: f32,
+    }
+
+    #[derive(Clone, Copy, Wgsl)]
+    pub struct RoundedDashLayout {
+        pub side_velocities: Edges,
+        pub corner_velocities: Corners,
+        pub right_start: f32,
+        pub bottom_right_start: f32,
+        pub bottom_left_start: f32,
+        pub left_start: f32,
+        pub top_left_start: f32,
+        pub perimeter: f32,
+    }
+
+    pub fn quad_geometry(quad: Quad, position: Vec2f) -> QuadGeometry {
+        let half_size = Bounds::half_size(quad.bounds);
+        let point = position - quad.bounds.origin;
+        let center_to_point = point - half_size;
+        let corner_radius = pick_corner_radius(center_to_point, quad.corner_radii);
+        let corner_to_point = abs(center_to_point) - half_size;
+        let corner_center_to_point = corner_to_point + corner_radius;
+        let border = vec2f(
+            select(
+                quad.border_widths.right,
+                quad.border_widths.left,
+                center_to_point.x < 0.0,
+            ),
+            select(
+                quad.border_widths.bottom,
+                quad.border_widths.top,
+                center_to_point.y < 0.0,
+            ),
+        );
+        let reduced_border = vec2f(
+            select(
+                border.x,
+                -PIXEL_ANTIALIAS_RADIUS,
+                border.x == 0.0,
+            ),
+            select(
+                border.y,
+                -PIXEL_ANTIALIAS_RADIUS,
+                border.y == 0.0,
+            ),
+        );
+        QuadGeometry {
+            point,
+            center_to_point,
+            corner_radius,
+            corner_center_to_point,
+            reduced_border,
+            straight_border_inner_corner_to_point: corner_to_point + reduced_border,
+            near_rounded_corner: corner_center_to_point.x >= 0.0
+                && corner_center_to_point.y >= 0.0,
+            unrounded: Corners::is_zero(quad.corner_radii),
+        }
+    }
+
+    pub fn is_unaffected_background(geometry: QuadGeometry) -> bool {
+        geometry.straight_border_inner_corner_to_point.x < -PIXEL_ANTIALIAS_RADIUS
+            && geometry.straight_border_inner_corner_to_point.y < -PIXEL_ANTIALIAS_RADIUS
+            && !geometry.near_rounded_corner
+    }
+
+    pub fn inner_border_signed_distance(
+        geometry: QuadGeometry,
+        outer_signed_distance: f32,
+    ) -> f32 {
+        if geometry.corner_center_to_point.x <= 0.0
+            || geometry.corner_center_to_point.y <= 0.0
+        {
+            return -max(
+                geometry.straight_border_inner_corner_to_point.x,
+                geometry.straight_border_inner_corner_to_point.y,
+            );
+        }
+        if geometry.straight_border_inner_corner_to_point.x > 0.0
+            || geometry.straight_border_inner_corner_to_point.y > 0.0
+        {
+            return DEFINITELY_OUTSIDE_INNER_BORDER;
+        }
+        if geometry.reduced_border.x == geometry.reduced_border.y {
+            return -(outer_signed_distance + geometry.reduced_border.x);
+        }
+
+        let ellipse_radii = max(
+            vec2f(0.0, 0.0),
+            geometry.corner_radius - geometry.reduced_border,
+        );
+        quarter_ellipse_signed_distance(geometry.corner_center_to_point, ellipse_radii)
+    }
+
+    pub fn border_distances(geometry: QuadGeometry) -> BorderDistances {
+        let outer = rounded_rectangle_signed_distance_from_corner(
+            geometry.corner_center_to_point,
+            geometry.corner_radius,
+        );
+        BorderDistances {
+            outer,
+            inner: inner_border_signed_distance(geometry, outer),
+        }
+    }
+
+    pub fn dash_velocity(border_width: f32) -> f32 {
+        if border_width <= 0.0 {
+            0.0
+        } else {
+            1.0 / (DASH_LENGTH_PER_BORDER_WIDTH + DASH_GAP_PER_BORDER_WIDTH) / border_width
+        }
+    }
+
+    pub fn straight_dash_position(quad: Quad, geometry: QuadGeometry) -> DashPosition {
+        let horizontal = geometry.corner_center_to_point.x < geometry.corner_center_to_point.y;
+        let border_width = select(
+            max(quad.border_widths.right, quad.border_widths.left),
+            max(quad.border_widths.bottom, quad.border_widths.top),
+            horizontal,
+        );
+        let velocity = dash_velocity(border_width);
+        DashPosition {
+            position: select(geometry.point.y, geometry.point.x, horizontal) * velocity,
+            perimeter: select(quad.bounds.size.y, quad.bounds.size.x, horizontal) * velocity,
+            velocity,
+        }
+    }
+
+    pub fn side_dash_velocities(border_widths: Edges) -> Edges {
+        Edges {
+            top: dash_velocity(border_widths.top),
+            right: dash_velocity(border_widths.right),
+            bottom: dash_velocity(border_widths.bottom),
+            left: dash_velocity(border_widths.left),
+        }
+    }
+
+    pub fn straight_side_dash_lengths(
+        bounds: Bounds,
+        radii: Corners,
+        velocities: Edges,
+    ) -> Edges {
+        Edges {
+            top: (bounds.size.x - radii.top_left - radii.top_right) * velocities.top,
+            right: (bounds.size.y - radii.top_right - radii.bottom_right) * velocities.right,
+            bottom: (bounds.size.x - radii.bottom_right - radii.bottom_left) * velocities.bottom,
+            left: (bounds.size.y - radii.bottom_left - radii.top_left) * velocities.left,
+        }
+    }
+
+    pub fn corner_dash_velocities(side_velocities: Edges) -> Corners {
+        Corners {
+            top_left: corner_dash_velocity(side_velocities.top, side_velocities.left),
+            top_right: corner_dash_velocity(side_velocities.top, side_velocities.right),
+            bottom_right: corner_dash_velocity(side_velocities.bottom, side_velocities.right),
+            bottom_left: corner_dash_velocity(side_velocities.bottom, side_velocities.left),
+        }
+    }
+
+    pub fn corner_dash_lengths(radii: Corners, velocities: Corners) -> Corners {
+        let quarter_turn = PI / 2.0;
+        Corners {
+            top_left: radii.top_left * quarter_turn * velocities.top_left,
+            top_right: radii.top_right * quarter_turn * velocities.top_right,
+            bottom_right: radii.bottom_right * quarter_turn * velocities.bottom_right,
+            bottom_left: radii.bottom_left * quarter_turn * velocities.bottom_left,
+        }
+    }
+
+    pub fn rounded_dash_layout(quad: Quad) -> RoundedDashLayout {
+        let side_velocities = side_dash_velocities(quad.border_widths);
+        let side_lengths =
+            straight_side_dash_lengths(quad.bounds, quad.corner_radii, side_velocities);
+        let corner_velocities = corner_dash_velocities(side_velocities);
+        let corner_lengths = corner_dash_lengths(quad.corner_radii, corner_velocities);
+        let right_start = side_lengths.top + corner_lengths.top_right;
+        let bottom_right_start = right_start + side_lengths.right;
+        let bottom_left_start =
+            bottom_right_start + corner_lengths.bottom_right + side_lengths.bottom;
+        let left_start = bottom_left_start + corner_lengths.bottom_left;
+        let top_left_start = left_start + side_lengths.left;
+        RoundedDashLayout {
+            side_velocities,
+            corner_velocities,
+            right_start,
+            bottom_right_start,
+            bottom_left_start,
+            left_start,
+            top_left_start,
+            perimeter: top_left_start + corner_lengths.top_left,
+        }
+    }
+
+    pub fn rounded_dash_position(quad: Quad, geometry: QuadGeometry) -> DashPosition {
+        let radii = quad.corner_radii;
+        let layout = rounded_dash_layout(quad);
+        let horizontal = geometry.corner_center_to_point.x < geometry.corner_center_to_point.y;
+        let on_right = geometry.center_to_point.x >= 0.0;
+        let on_bottom = geometry.center_to_point.y >= 0.0;
+
+        let top_position =
+            (geometry.point.x - radii.top_left) * layout.side_velocities.top;
+        let right_position = layout.right_start
+            + (geometry.point.y - radii.top_right) * layout.side_velocities.right;
+        let bottom_position = layout.bottom_left_start
+            - (geometry.point.x - radii.bottom_left) * layout.side_velocities.bottom;
+        let left_position = layout.top_left_start
+            - (geometry.point.y - radii.top_left) * layout.side_velocities.left;
+        let horizontal_position = select(top_position, bottom_position, on_bottom);
+        let vertical_position = select(left_position, right_position, on_right);
+        let side_position = select(vertical_position, horizontal_position, horizontal);
+        let horizontal_velocity = select(
+            layout.side_velocities.top,
+            layout.side_velocities.bottom,
+            on_bottom,
+        );
+        let vertical_velocity = select(
+            layout.side_velocities.left,
+            layout.side_velocities.right,
+            on_right,
+        );
+        let side_velocity = select(vertical_velocity, horizontal_velocity, horizontal);
+
+        if geometry.near_rounded_corner {
+            let corner_position = atan2(
+                geometry.corner_center_to_point.y,
+                geometry.corner_center_to_point.x,
+            ) * geometry.corner_radius;
+            let top_right_position = layout.right_start
+                - corner_position * layout.corner_velocities.top_right;
+            let bottom_right_position = layout.bottom_right_start
+                + corner_position * layout.corner_velocities.bottom_right;
+            let bottom_left_position = layout.left_start
+                - corner_position * layout.corner_velocities.bottom_left;
+            let top_left_position = layout.top_left_start
+                + corner_position * layout.corner_velocities.top_left;
+            let right_position = select(top_right_position, bottom_right_position, on_bottom);
+            let left_position = select(top_left_position, bottom_left_position, on_bottom);
+            let position = select(left_position, right_position, on_right);
+            let right_velocity = select(
+                layout.corner_velocities.top_right,
+                layout.corner_velocities.bottom_right,
+                on_bottom,
+            );
+            let left_velocity = select(
+                layout.corner_velocities.top_left,
+                layout.corner_velocities.bottom_left,
+                on_bottom,
+            );
+            return DashPosition {
+                position,
+                perimeter: layout.perimeter,
+                velocity: select(left_velocity, right_velocity, on_right),
+            };
+        }
+
+        DashPosition {
+            position: side_position,
+            perimeter: layout.perimeter,
+            velocity: side_velocity,
+        }
+    }
+
+    pub fn dashed_border_alpha(quad: Quad, geometry: QuadGeometry) -> f32 {
+        let dash = if geometry.unrounded {
+            straight_dash_position(quad, geometry)
+        } else {
+            rounded_dash_position(quad, geometry)
+        };
+        let dash_period_per_width = DASH_LENGTH_PER_BORDER_WIDTH + DASH_GAP_PER_BORDER_WIDTH;
+        let dash_length = DASH_LENGTH_PER_BORDER_WIDTH / dash_period_per_width;
+        let perimeter = dash.perimeter - select(0.0, dash_length, geometry.unrounded);
+
+        if perimeter >= 1.0 {
+            let period = perimeter / floor(perimeter);
+            dash_coverage(dash.position, period, dash_length, dash.velocity)
+        } else if geometry.unrounded && perimeter > dash_length {
+            dash_coverage(dash.position, perimeter, dash_length, dash.velocity)
+        } else {
+            1.0
+        }
+    }
 
     #[derive(Wgsl)]
     pub struct QuadVarying {
@@ -527,19 +1119,14 @@ pub mod quad {
         #[builtin(vertex_index)] vertex_id: u32,
         #[builtin(instance_index)] instance_id: u32,
     ) -> QuadVarying {
-        let vertex = unit_vertex(vertex_id);
         let quad = get!(QUADS)[instance_id as usize];
-        let gradient = prepare_gradient_color(
-            quad.background.tag,
-            quad.background.color_space,
-            quad.background.solid,
-            quad.background.colors,
-        );
+        let vertex = rectangle_vertex(vertex_id, quad.bounds);
+        let gradient = prepare_background(quad.background);
         QuadVarying {
-            position: to_device_position(vertex, quad.bounds),
+            position: vertex.clip_position,
             border_color: hsla_to_rgba(quad.border_color),
             quad_id: instance_id,
-            clip_distances: distance_from_clip_rect(vertex, quad.bounds, quad.content_mask),
+            clip_distances: clip_distances(vertex.viewport_position, quad.content_mask),
             background_solid: gradient.solid,
             background_color0: gradient.color0,
             background_color1: gradient.color1,
@@ -549,236 +1136,44 @@ pub mod quad {
     #[fragment]
     pub fn fs_quad(input: QuadVarying) -> Vec4f {
         if is_clipped(input.clip_distances) {
-            return vec4f(0.0, 0.0, 0.0, 0.0);
+            return transparent();
         }
         let quad = get!(QUADS)[input.quad_id as usize];
-        let background_color = gradient_color(
+        let background_color = background_color(
             quad.background,
             input.position.xy(),
             quad.bounds,
-            input.background_solid,
-            input.background_color0,
-            input.background_color1,
+            PreparedBackground {
+                solid: input.background_solid,
+                color0: input.background_color0,
+                color1: input.background_color1,
+            },
         );
-        let unrounded = quad.corner_radii.top_left == 0.0
-            && quad.corner_radii.bottom_left == 0.0
-            && quad.corner_radii.top_right == 0.0
-            && quad.corner_radii.bottom_right == 0.0;
-        if quad.border_widths.top == 0.0
-            && quad.border_widths.left == 0.0
-            && quad.border_widths.right == 0.0
-            && quad.border_widths.bottom == 0.0
-            && unrounded
-        {
+        if Edges::is_zero(quad.border_widths) && Corners::is_zero(quad.corner_radii) {
             return blend_color(background_color, 1.0);
         }
 
-        let size = quad.bounds.size;
-        let half_size = size / 2.0;
-        let point = input.position.xy() - quad.bounds.origin;
-        let center_to_point = point - half_size;
-        let antialias_threshold = 0.5;
-        let corner_radius = pick_corner_radius(center_to_point, quad.corner_radii);
-        let border = vec2f(
-            select(
-                quad.border_widths.right,
-                quad.border_widths.left,
-                center_to_point.x < 0.0,
-            ),
-            select(
-                quad.border_widths.bottom,
-                quad.border_widths.top,
-                center_to_point.y < 0.0,
-            ),
-        );
-        let reduced_border = vec2f(
-            select(border.x, -antialias_threshold, border.x == 0.0),
-            select(border.y, -antialias_threshold, border.y == 0.0),
-        );
-        let corner_to_point = abs(center_to_point) - half_size;
-        let corner_center_to_point = corner_to_point + corner_radius;
-        let is_near_rounded_corner =
-            corner_center_to_point.x >= 0.0 && corner_center_to_point.y >= 0.0;
-        let straight_border_inner_corner_to_point = corner_to_point + reduced_border;
-        let is_beyond_inner_straight_border = straight_border_inner_corner_to_point.x > 0.0
-            || straight_border_inner_corner_to_point.y > 0.0;
-        let is_within_inner_straight_border = straight_border_inner_corner_to_point.x
-            < -antialias_threshold
-            && straight_border_inner_corner_to_point.y < -antialias_threshold;
-        if is_within_inner_straight_border && !is_near_rounded_corner {
+        let geometry = quad_geometry(quad, input.position.xy());
+        if is_unaffected_background(geometry) {
             return blend_color(background_color, 1.0);
         }
 
-        let outer_sdf = quad_sdf_impl(corner_center_to_point, corner_radius);
-        let mut inner_sdf = 0.0;
-        if corner_center_to_point.x <= 0.0 || corner_center_to_point.y <= 0.0 {
-            inner_sdf = -max(
-                straight_border_inner_corner_to_point.x,
-                straight_border_inner_corner_to_point.y,
-            );
-        } else if is_beyond_inner_straight_border {
-            inner_sdf = -1.0;
-        } else if reduced_border.x == reduced_border.y {
-            inner_sdf = -(outer_sdf + reduced_border.x);
-        } else {
-            inner_sdf = quarter_ellipse_sdf(
-                corner_center_to_point,
-                max(vec2f(0.0, 0.0), corner_radius - reduced_border),
-            );
-        }
-
-        let border_sdf = max(inner_sdf, outer_sdf);
+        let distances = border_distances(geometry);
         let mut color = background_color;
-        if border_sdf < antialias_threshold {
+        if max(distances.inner, distances.outer) < PIXEL_ANTIALIAS_RADIUS {
             let mut border_color = input.border_color;
-            if quad.border_style == 1u32 {
-                let mut t = 0.0;
-                let mut max_t = 0.0;
-                let dash_length_per_width = 2.0;
-                let dash_gap_per_width = 1.0;
-                let dash_period_per_width = dash_length_per_width + dash_gap_per_width;
-                let mut dash_velocity = 0.0;
-                let dash_velocity_numerator = 1.0 / dash_period_per_width;
-
-                if unrounded {
-                    let is_horizontal = corner_center_to_point.x < corner_center_to_point.y;
-                    let dashed_border = vec2f(
-                        max(quad.border_widths.bottom, quad.border_widths.top),
-                        max(quad.border_widths.right, quad.border_widths.left),
-                    );
-                    let border_width = select(dashed_border.y, dashed_border.x, is_horizontal);
-                    dash_velocity = dash_velocity_numerator / border_width;
-                    t = select(point.y, point.x, is_horizontal) * dash_velocity;
-                    max_t = select(size.y, size.x, is_horizontal) * dash_velocity;
-                } else {
-                    let top_right_radius = quad.corner_radii.top_right;
-                    let bottom_right_radius = quad.corner_radii.bottom_right;
-                    let bottom_left_radius = quad.corner_radii.bottom_left;
-                    let top_left_radius = quad.corner_radii.top_left;
-                    let top_width = quad.border_widths.top;
-                    let right_width = quad.border_widths.right;
-                    let bottom_width = quad.border_widths.bottom;
-                    let left_width = quad.border_widths.left;
-                    let top_velocity =
-                        select(dash_velocity_numerator / top_width, 0.0, top_width <= 0.0);
-                    let right_velocity = select(
-                        dash_velocity_numerator / right_width,
-                        0.0,
-                        right_width <= 0.0,
-                    );
-                    let bottom_velocity = select(
-                        dash_velocity_numerator / bottom_width,
-                        0.0,
-                        bottom_width <= 0.0,
-                    );
-                    let left_velocity =
-                        select(dash_velocity_numerator / left_width, 0.0, left_width <= 0.0);
-                    let top_length = (size.x - top_left_radius - top_right_radius) * top_velocity;
-                    let right_length =
-                        (size.y - top_right_radius - bottom_right_radius) * right_velocity;
-                    let bottom_length =
-                        (size.x - bottom_right_radius - bottom_left_radius) * bottom_velocity;
-                    let left_length =
-                        (size.y - bottom_left_radius - top_left_radius) * left_velocity;
-                    let top_right_corner_velocity =
-                        corner_dash_velocity(top_velocity, right_velocity);
-                    let bottom_right_corner_velocity =
-                        corner_dash_velocity(bottom_velocity, right_velocity);
-                    let bottom_left_corner_velocity =
-                        corner_dash_velocity(bottom_velocity, left_velocity);
-                    let top_left_corner_velocity =
-                        corner_dash_velocity(top_velocity, left_velocity);
-                    let top_right_corner_length =
-                        top_right_radius * (pi() / 2.0) * top_right_corner_velocity;
-                    let bottom_right_corner_length =
-                        bottom_right_radius * (pi() / 2.0) * bottom_right_corner_velocity;
-                    let bottom_left_corner_length =
-                        bottom_left_radius * (pi() / 2.0) * bottom_left_corner_velocity;
-                    let top_left_corner_length =
-                        top_left_radius * (pi() / 2.0) * top_left_corner_velocity;
-                    let top_right_start = top_length;
-                    let right_start = top_right_start + top_right_corner_length;
-                    let bottom_right_start = right_start + right_length;
-                    let bottom_start = bottom_right_start + bottom_right_corner_length;
-                    let bottom_left_start = bottom_start + bottom_length;
-                    let left_start = bottom_left_start + bottom_left_corner_length;
-                    let top_left_start = left_start + left_length;
-                    max_t = top_left_start + top_left_corner_length;
-
-                    if is_near_rounded_corner {
-                        let radians = atan2(corner_center_to_point.y, corner_center_to_point.x);
-                        let corner_t = radians * corner_radius;
-                        if center_to_point.x >= 0.0 {
-                            if center_to_point.y < 0.0 {
-                                dash_velocity = top_right_corner_velocity;
-                                t = right_start - corner_t * dash_velocity;
-                            } else {
-                                dash_velocity = bottom_right_corner_velocity;
-                                t = bottom_right_start + corner_t * dash_velocity;
-                            }
-                        } else if center_to_point.y >= 0.0 {
-                            dash_velocity = bottom_left_corner_velocity;
-                            t = left_start - corner_t * dash_velocity;
-                        } else {
-                            dash_velocity = top_left_corner_velocity;
-                            t = top_left_start + corner_t * dash_velocity;
-                        }
-                    } else {
-                        let is_horizontal = corner_center_to_point.x < corner_center_to_point.y;
-                        if is_horizontal {
-                            if center_to_point.y < 0.0 {
-                                dash_velocity = top_velocity;
-                                t = (point.x - top_left_radius) * dash_velocity;
-                            } else {
-                                dash_velocity = bottom_velocity;
-                                t = bottom_left_start
-                                    - (point.x - bottom_left_radius) * dash_velocity;
-                            }
-                        } else if center_to_point.x < 0.0 {
-                            dash_velocity = left_velocity;
-                            t = top_left_start - (point.y - top_left_radius) * dash_velocity;
-                        } else {
-                            dash_velocity = right_velocity;
-                            t = right_start + (point.y - top_right_radius) * dash_velocity;
-                        }
-                    }
-                }
-
-                let dash_length = dash_length_per_width / dash_period_per_width;
-                max_t -= select(0.0, dash_length, unrounded);
-                if max_t >= 1.0 {
-                    let dash_count = floor(max_t);
-                    let dash_period = max_t / dash_count;
-                    border_color.w *= dash_alpha(
-                        t,
-                        dash_period,
-                        dash_length,
-                        dash_velocity,
-                        antialias_threshold,
-                    );
-                } else if unrounded {
-                    let dash_gap = max_t - dash_length;
-                    if dash_gap > 0.0 {
-                        border_color.w *= dash_alpha(
-                            t,
-                            dash_length + dash_gap,
-                            dash_length,
-                            dash_velocity,
-                            antialias_threshold,
-                        );
-                    }
-                }
+            if quad.border_style == BorderStyle::Dashed {
+                border_color.w *= dashed_border_alpha(quad, geometry);
             }
-
             let blended_border = over(background_color, border_color);
-            let factor = saturate(antialias_threshold - inner_sdf);
+            let factor = antialiased_coverage(distances.inner);
             color = mix(
                 background_color,
                 blended_border,
                 vec4f(factor, factor, factor, factor),
             );
         }
-        blend_color(color, saturate(antialias_threshold - outer_sdf))
+        blend_color(color, antialiased_coverage(distances.outer))
     }
 }
 
@@ -797,10 +1192,76 @@ pub mod shadow {
         pub color: Hsla,
         pub element_bounds: Bounds,
         pub element_corner_radii: Corners,
-        pub inset: u32,
+        pub inset: ShaderBool,
         pub padding: u32,
     }
     storage!(group(1), binding(0), SHADOWS: RuntimeArray<Shadow>);
+
+    pub const SHADOW_INTEGRATION_SAMPLE_COUNT: i32 = 4;
+
+    pub fn shadow_geometry(shadow: Shadow) -> Bounds {
+        if is_enabled(shadow.inset) {
+            return shadow.element_bounds;
+        }
+
+        let margin = GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS * shadow.blur_radius;
+        Bounds {
+            origin: shadow.bounds.origin - vec2f(margin, margin),
+            size: shadow.bounds.size + vec2f(2.0 * margin, 2.0 * margin),
+        }
+    }
+
+    pub fn blurred_shadow_coverage(shadow: Shadow, position: Vec2f) -> f32 {
+        let half_size = Bounds::half_size(shadow.bounds);
+        let center_to_point = position - Bounds::center(shadow.bounds);
+        let corner_radius = pick_corner_radius(center_to_point, shadow.corner_radii);
+        let vertical_minimum = center_to_point.y - half_size.y;
+        let vertical_maximum = center_to_point.y + half_size.y;
+        let integration_radius = GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS * shadow.blur_radius;
+        let integration_start = clamp(-integration_radius, vertical_minimum, vertical_maximum);
+        let integration_end = clamp(integration_radius, vertical_minimum, vertical_maximum);
+        let sample_step =
+            (integration_end - integration_start) / SHADOW_INTEGRATION_SAMPLE_COUNT as f32;
+
+        let mut coverage = 0.0;
+        let mut sample_index = 0;
+        let mut sample_position = integration_start + sample_step * 0.5;
+        while sample_index < SHADOW_INTEGRATION_SAMPLE_COUNT {
+            coverage += integrated_rounded_rectangle_coverage(
+                center_to_point.x,
+                center_to_point.y - sample_position,
+                shadow.blur_radius,
+                corner_radius,
+                half_size,
+            ) * gaussian(sample_position, shadow.blur_radius)
+                * sample_step;
+            sample_position += sample_step;
+            sample_index += 1;
+        }
+        coverage
+    }
+
+    pub fn shadow_coverage(shadow: Shadow, position: Vec2f) -> f32 {
+        let mut coverage = if shadow.blur_radius == 0.0 {
+            antialiased_coverage(rounded_rectangle_signed_distance(
+                position,
+                shadow.bounds,
+                shadow.corner_radii,
+            ))
+        } else {
+            blurred_shadow_coverage(shadow, position)
+        };
+
+        if is_enabled(shadow.inset) {
+            coverage = (1.0 - coverage)
+                * antialiased_coverage(rounded_rectangle_signed_distance(
+                    position,
+                    shadow.element_bounds,
+                    shadow.element_corner_radii,
+                ));
+        }
+        coverage
+    }
 
     #[derive(Wgsl)]
     pub struct ShadowVarying {
@@ -821,67 +1282,24 @@ pub mod shadow {
         #[builtin(vertex_index)] vertex_id: u32,
         #[builtin(instance_index)] instance_id: u32,
     ) -> ShadowVarying {
-        let vertex = unit_vertex(vertex_id);
         let shadow = get!(SHADOWS)[instance_id as usize];
-        let mut geometry = shadow.bounds;
-        if shadow.inset != 0u32 {
-            geometry = shadow.element_bounds;
-        } else {
-            let margin = 3.0 * shadow.blur_radius;
-            geometry.origin = geometry.origin - vec2f(margin, margin);
-            geometry.size = geometry.size + vec2f(2.0 * margin, 2.0 * margin);
-        }
+        let geometry = shadow_geometry(shadow);
+        let vertex = rectangle_vertex(vertex_id, geometry);
         ShadowVarying {
-            position: to_device_position(vertex, geometry),
+            position: vertex.clip_position,
             color: hsla_to_rgba(shadow.color),
             shadow_id: instance_id,
-            clip_distances: distance_from_clip_rect(vertex, geometry, shadow.content_mask),
+            clip_distances: clip_distances(vertex.viewport_position, shadow.content_mask),
         }
     }
 
     #[fragment]
     pub fn fs_shadow(input: ShadowVarying) -> Vec4f {
         if is_clipped(input.clip_distances) {
-            return vec4f(0.0, 0.0, 0.0, 0.0);
+            return transparent();
         }
         let shadow = get!(SHADOWS)[input.shadow_id as usize];
-        let half_size = shadow.bounds.size / 2.0;
-        let center_to_point = input.position.xy() - (shadow.bounds.origin + half_size);
-        let corner_radius = pick_corner_radius(center_to_point, shadow.corner_radii);
-        let mut alpha = 0.0;
-        if shadow.blur_radius == 0.0 {
-            alpha =
-                saturate(0.5 - quad_sdf(input.position.xy(), shadow.bounds, shadow.corner_radii));
-        } else {
-            let low = center_to_point.y - half_size.y;
-            let high = center_to_point.y + half_size.y;
-            let start = clamp(-3.0 * shadow.blur_radius, low, high);
-            let end = clamp(3.0 * shadow.blur_radius, low, high);
-            let step = (end - start) / 4.0;
-            let mut y = start + step * 0.5;
-            for _i in 0..4 {
-                alpha += blur_along_x(
-                    center_to_point.x,
-                    center_to_point.y - y,
-                    shadow.blur_radius,
-                    corner_radius,
-                    half_size,
-                ) * gaussian(y, shadow.blur_radius)
-                    * step;
-                y += step;
-            }
-        }
-        if shadow.inset != 0u32 {
-            alpha = 1.0 - alpha;
-            alpha *= saturate(
-                0.5 - quad_sdf(
-                    input.position.xy(),
-                    shadow.element_bounds,
-                    shadow.element_corner_radii,
-                ),
-            );
-        }
-        blend_color(input.color, alpha)
+        blend_color(input.color, shadow_coverage(shadow, input.position.xy()))
     }
 }
 
@@ -893,18 +1311,32 @@ pub mod path_rasterization {
     #[derive(Clone, Copy, Wgsl)]
     pub struct PathRasterizationVertex {
         pub xy_position: Vec2f,
-        pub st_position: Vec2f,
+        pub curve_position: Vec2f,
         pub color: Background,
         pub bounds: Bounds,
     }
     storage!(group(1), binding(0), PATH_VERTICES: RuntimeArray<PathRasterizationVertex>);
+
+    pub fn quadratic_bezier_coverage(curve_position: Vec2f) -> f32 {
+        let horizontal_derivative = dpdx(curve_position);
+        let vertical_derivative = dpdy(curve_position);
+        let horizontal_gradient = vec2f(horizontal_derivative.x, vertical_derivative.x);
+        if length(horizontal_gradient) < MIN_PATH_GRADIENT {
+            return 1.0;
+        }
+
+        let implicit_gradient = 2.0 * curve_position.xx() * horizontal_gradient
+            - vec2f(horizontal_derivative.y, vertical_derivative.y);
+        let implicit_value = curve_position.x * curve_position.x - curve_position.y;
+        antialiased_coverage(implicit_value / length(implicit_gradient))
+    }
 
     #[derive(Wgsl)]
     pub struct PathRasterizationVarying {
         #[builtin(position)]
         pub position: Vec4f,
         #[location(0)]
-        pub st_position: Vec2f,
+        pub curve_position: Vec2f,
         #[location(1)]
         #[interpolate(flat)]
         pub vertex_id: u32,
@@ -918,48 +1350,27 @@ pub mod path_rasterization {
     ) -> PathRasterizationVarying {
         let vertex = get!(PATH_VERTICES)[vertex_id as usize];
         PathRasterizationVarying {
-            position: to_device_position_impl(vertex.xy_position),
-            st_position: vertex.st_position,
+            position: viewport_to_clip_position(vertex.xy_position),
+            curve_position: vertex.curve_position,
             vertex_id,
-            clip_distances: distance_from_clip_rect_impl(vertex.xy_position, vertex.bounds),
+            clip_distances: clip_distances(vertex.xy_position, vertex.bounds),
         }
     }
 
     #[fragment]
     pub fn fs_path_rasterization(input: PathRasterizationVarying) -> Vec4f {
-        let dx = dpdx(input.st_position);
-        let dy = dpdy(input.st_position);
+        let coverage = quadratic_bezier_coverage(input.curve_position);
         if is_clipped(input.clip_distances) {
-            return vec4f(0.0, 0.0, 0.0, 0.0);
+            return transparent();
         }
         let vertex = get!(PATH_VERTICES)[input.vertex_id as usize];
-        let mut alpha = 1.0;
-        if length(vec2f(dx.x, dy.x)) >= 0.001 {
-            let gradient = 2.0 * input.st_position.xx() * vec2f(dx.x, dy.x) - vec2f(dx.y, dy.y);
-            let distance = (input.st_position.x * input.st_position.x - input.st_position.y)
-                / length(gradient);
-            alpha = saturate(0.5 - distance);
-        }
-        let prepared = prepare_gradient_color(
-            vertex.color.tag,
-            vertex.color.color_space,
-            vertex.color.solid,
-            vertex.color.colors,
-        );
-        let color = gradient_color(
+        let color = background_color(
             vertex.color,
             input.position.xy(),
             vertex.bounds,
-            prepared.solid,
-            prepared.color0,
-            prepared.color1,
+            prepare_background(vertex.color),
         );
-        vec4f(
-            color.x * color.w * alpha,
-            color.y * color.w * alpha,
-            color.z * color.w * alpha,
-            color.w * alpha,
-        )
+        premultiply(color, coverage)
     }
 }
 
@@ -989,12 +1400,11 @@ pub mod path {
         #[builtin(vertex_index)] vertex_id: u32,
         #[builtin(instance_index)] instance_id: u32,
     ) -> PathVarying {
-        let vertex = unit_vertex(vertex_id);
         let sprite = get!(PATH_SPRITES)[instance_id as usize];
+        let vertex = rectangle_vertex(vertex_id, sprite.bounds);
         PathVarying {
-            position: to_device_position(vertex, sprite.bounds),
-            texture_coords: (sprite.bounds.origin + vertex * sprite.bounds.size)
-                / get!(GLOBALS).viewport_size,
+            position: vertex.clip_position,
+            texture_coords: vertex.viewport_position / get!(GLOBALS).viewport_size,
         }
     }
 
@@ -1017,9 +1427,26 @@ pub mod underline {
         pub content_mask: Bounds,
         pub color: Hsla,
         pub thickness: f32,
-        pub wavy: u32,
+        pub wavy: ShaderBool,
     }
     storage!(group(1), binding(0), UNDERLINES: RuntimeArray<Underline>);
+
+    pub fn wavy_underline_coverage(underline: Underline, position: Vec2f) -> f32 {
+        let normalized_position = (position - underline.bounds.origin) / underline.bounds.size.y
+            - vec2f(0.0, 0.5);
+        let angular_frequency = PI * UNDERLINE_WAVE_FREQUENCY * underline.thickness
+            / underline.bounds.size.y;
+        let amplitude = underline.thickness * UNDERLINE_WAVE_HEIGHT_RATIO
+            / underline.bounds.size.y;
+        let wave_height = sin(normalized_position.x * angular_frequency) * amplitude;
+        let wave_slope =
+            cos(normalized_position.x * angular_frequency) * amplitude * angular_frequency;
+        let signed_distance = (normalized_position.y - wave_height)
+            / sqrt(1.0 + wave_slope * wave_slope)
+            * underline.bounds.size.y;
+        let stroke_distance = abs(signed_distance) - underline.thickness * 0.5;
+        antialiased_coverage(stroke_distance)
+    }
 
     #[derive(Wgsl)]
     pub struct UnderlineVarying {
@@ -1040,45 +1467,29 @@ pub mod underline {
         #[builtin(vertex_index)] vertex_id: u32,
         #[builtin(instance_index)] instance_id: u32,
     ) -> UnderlineVarying {
-        let vertex = unit_vertex(vertex_id);
         let underline = get!(UNDERLINES)[instance_id as usize];
+        let vertex = rectangle_vertex(vertex_id, underline.bounds);
         UnderlineVarying {
-            position: to_device_position(vertex, underline.bounds),
+            position: vertex.clip_position,
             color: hsla_to_rgba(underline.color),
             underline_id: instance_id,
-            clip_distances: distance_from_clip_rect(
-                vertex,
-                underline.bounds,
-                underline.content_mask,
-            ),
+            clip_distances: clip_distances(vertex.viewport_position, underline.content_mask),
         }
     }
 
     #[fragment]
     pub fn fs_underline(input: UnderlineVarying) -> Vec4f {
         if is_clipped(input.clip_distances) {
-            return vec4f(0.0, 0.0, 0.0, 0.0);
+            return transparent();
         }
         let underline = get!(UNDERLINES)[input.underline_id as usize];
-        if underline.wavy == 0u32 {
+        if !is_enabled(underline.wavy) {
             return blend_color(input.color, 1.0);
         }
-        let half_thickness = underline.thickness * 0.5;
-        let st = (input.position.xy() - underline.bounds.origin) / underline.bounds.size.y
-            - vec2f(0.0, 0.5);
-        let frequency = pi() * 2.0 * underline.thickness / underline.bounds.size.y;
-        let amplitude = underline.thickness * 0.8 / underline.bounds.size.y;
-        let sine = sin(st.x * frequency) * amplitude;
-        let derivative = cos(st.x * frequency) * amplitude * frequency;
-        let distance_in_pixels =
-            (st.y - sine) / sqrt(1.0 + derivative * derivative) * underline.bounds.size.y;
-        let alpha = saturate(
-            0.5 - max(
-                -(distance_in_pixels + half_thickness),
-                distance_in_pixels - half_thickness,
-            ),
-        );
-        blend_color(input.color, alpha)
+        blend_color(
+            input.color,
+            wavy_underline_coverage(underline, input.position.xy()),
+        )
     }
 }
 
@@ -1097,9 +1508,9 @@ pub mod monochrome_sprite {
         pub tile: AtlasTile,
         pub transformation: TransformationMatrix,
     }
-    storage!(group(1), binding(0), MONO_SPRITES: RuntimeArray<MonochromeSprite>);
-    texture!(group(1), binding(1), MONO_TEXTURE: Texture2D<f32>);
-    sampler!(group(1), binding(2), MONO_SAMPLER: Sampler);
+    storage!(group(1), binding(0), MONOCHROME_SPRITES: RuntimeArray<MonochromeSprite>);
+    texture!(group(1), binding(1), MONOCHROME_TEXTURE: Texture2D<f32>);
+    sampler!(group(1), binding(2), MONOCHROME_SAMPLER: Sampler);
 
     #[derive(Wgsl)]
     pub struct MonochromeSpriteVarying {
@@ -1114,36 +1525,33 @@ pub mod monochrome_sprite {
         pub clip_distances: Vec4f,
     }
 
-    pub fn monochrome_tile_position(vertex: Vec2f, tile: AtlasTile) -> Vec2f {
-        let atlas_size = texture_dimensions(MONO_TEXTURE);
-        (vec2f(tile.bounds.origin.x as f32, tile.bounds.origin.y as f32)
-            + vertex * vec2f(tile.bounds.size.x as f32, tile.bounds.size.y as f32))
-            / vec2f(atlas_size.x as f32, atlas_size.y as f32)
-    }
-
     #[vertex]
     pub fn vs_mono_sprite(
         #[builtin(vertex_index)] vertex_id: u32,
         #[builtin(instance_index)] instance_id: u32,
     ) -> MonochromeSpriteVarying {
-        let vertex = unit_vertex(vertex_id);
-        let sprite = get!(MONO_SPRITES)[instance_id as usize];
+        let sprite = get!(MONOCHROME_SPRITES)[instance_id as usize];
+        let vertex = transformed_rectangle_vertex(vertex_id, sprite.bounds, sprite.transformation);
         MonochromeSpriteVarying {
-            position: to_device_position_transformed(vertex, sprite.bounds, sprite.transformation),
-            tile_position: monochrome_tile_position(vertex, sprite.tile),
-            color: hsla_to_rgba(sprite.color),
-            clip_distances: distance_from_clip_rect_transformed(
-                vertex,
-                sprite.bounds,
-                sprite.content_mask,
-                sprite.transformation,
+            position: vertex.clip_position,
+            tile_position: atlas_texture_coordinates(
+                vertex.unit_position,
+                sprite.tile,
+                texture_dimensions(MONOCHROME_TEXTURE),
             ),
+            color: hsla_to_rgba(sprite.color),
+            clip_distances: clip_distances(vertex.viewport_position, sprite.content_mask),
         }
     }
 
     #[fragment]
     pub fn fs_mono_sprite(input: MonochromeSpriteVarying) -> Vec4f {
-        let sample = texture_sample(MONO_TEXTURE, MONO_SAMPLER, input.tile_position).x;
+        let sample = texture_sample(
+            MONOCHROME_TEXTURE,
+            MONOCHROME_SAMPLER,
+            input.tile_position,
+        )
+        .x;
         let corrected = apply_contrast_and_gamma_correction(
             sample,
             input.color.rgb(),
@@ -1151,7 +1559,7 @@ pub mod monochrome_sprite {
             get!(FONT_RASTERIZATION).gamma_ratios,
         );
         if is_clipped(input.clip_distances) {
-            return vec4f(0.0, 0.0, 0.0, 0.0);
+            return transparent();
         }
         blend_color(input.color, corrected)
     }
@@ -1166,16 +1574,16 @@ pub mod polychrome_sprite {
     pub struct PolychromeSprite {
         pub order: u32,
         pub padding: u32,
-        pub grayscale: u32,
+        pub grayscale: ShaderBool,
         pub opacity: f32,
         pub bounds: Bounds,
         pub content_mask: Bounds,
         pub corner_radii: Corners,
         pub tile: AtlasTile,
     }
-    storage!(group(1), binding(0), POLY_SPRITES: RuntimeArray<PolychromeSprite>);
-    texture!(group(1), binding(1), POLY_TEXTURE: Texture2D<f32>);
-    sampler!(group(1), binding(2), POLY_SAMPLER: Sampler);
+    storage!(group(1), binding(0), POLYCHROME_SPRITES: RuntimeArray<PolychromeSprite>);
+    texture!(group(1), binding(1), POLYCHROME_TEXTURE: Texture2D<f32>);
+    sampler!(group(1), binding(2), POLYCHROME_SAMPLER: Sampler);
 
     #[derive(Wgsl)]
     pub struct PolychromeSpriteVarying {
@@ -1190,44 +1598,49 @@ pub mod polychrome_sprite {
         pub clip_distances: Vec4f,
     }
 
-    pub fn polychrome_tile_position(vertex: Vec2f, tile: AtlasTile) -> Vec2f {
-        let atlas_size = texture_dimensions(POLY_TEXTURE);
-        (vec2f(tile.bounds.origin.x as f32, tile.bounds.origin.y as f32)
-            + vertex * vec2f(tile.bounds.size.x as f32, tile.bounds.size.y as f32))
-            / vec2f(atlas_size.x as f32, atlas_size.y as f32)
-    }
-
     #[vertex]
     pub fn vs_poly_sprite(
         #[builtin(vertex_index)] vertex_id: u32,
         #[builtin(instance_index)] instance_id: u32,
     ) -> PolychromeSpriteVarying {
-        let vertex = unit_vertex(vertex_id);
-        let sprite = get!(POLY_SPRITES)[instance_id as usize];
+        let sprite = get!(POLYCHROME_SPRITES)[instance_id as usize];
+        let vertex = rectangle_vertex(vertex_id, sprite.bounds);
         PolychromeSpriteVarying {
-            position: to_device_position(vertex, sprite.bounds),
-            tile_position: polychrome_tile_position(vertex, sprite.tile),
+            position: vertex.clip_position,
+            tile_position: atlas_texture_coordinates(
+                vertex.unit_position,
+                sprite.tile,
+                texture_dimensions(POLYCHROME_TEXTURE),
+            ),
             sprite_id: instance_id,
-            clip_distances: distance_from_clip_rect(vertex, sprite.bounds, sprite.content_mask),
+            clip_distances: clip_distances(vertex.viewport_position, sprite.content_mask),
         }
     }
 
     #[fragment]
     pub fn fs_poly_sprite(input: PolychromeSpriteVarying) -> Vec4f {
-        let sample = texture_sample(POLY_TEXTURE, POLY_SAMPLER, input.tile_position);
+        let sample = texture_sample(
+            POLYCHROME_TEXTURE,
+            POLYCHROME_SAMPLER,
+            input.tile_position,
+        );
         if is_clipped(input.clip_distances) {
-            return vec4f(0.0, 0.0, 0.0, 0.0);
+            return transparent();
         }
-        let sprite = get!(POLY_SPRITES)[input.sprite_id as usize];
+        let sprite = get!(POLYCHROME_SPRITES)[input.sprite_id as usize];
         let mut color = sample;
-        if sprite.grayscale != 0u32 {
-            let grayscale = dot(color.rgb(), vec3f(0.2126, 0.7152, 0.0722));
+        if is_enabled(sprite.grayscale) {
+            let grayscale = dot(color.rgb(), LINEAR_RGB_LUMA_WEIGHTS);
             color = vec4f(grayscale, grayscale, grayscale, sample.w);
         }
         blend_color(
             color,
             sprite.opacity
-                * saturate(0.5 - quad_sdf(input.position.xy(), sprite.bounds, sprite.corner_radii)),
+                * antialiased_coverage(rounded_rectangle_signed_distance(
+                    input.position.xy(),
+                    sprite.bounds,
+                    sprite.corner_radii,
+                )),
         )
     }
 }
@@ -1241,15 +1654,40 @@ pub mod surface {
     pub struct SurfaceUniforms {
         pub bounds: Bounds,
         pub content_mask: Bounds,
-        pub uses_yuv_color: u32,
-        pub pad0: u32,
-        pub pad1: u32,
-        pub pad2: u32,
+        pub color_format: SurfaceColorFormat,
+        pub padding0: u32,
+        pub padding1: u32,
+        pub padding2: u32,
     }
     uniform!(group(1), binding(0), SURFACE_LOCALS: SurfaceUniforms);
     texture!(group(1), binding(1), SURFACE_TEXTURE: Texture2D<f32>);
     texture!(group(1), binding(2), SURFACE_CHROMA_TEXTURE: Texture2D<f32>);
     sampler!(group(1), binding(3), SURFACE_SAMPLER: Sampler);
+
+    pub const YCBCR_TO_LINEAR_RGB: Mat4x4f = mat4x4f(
+        vec4f(1.0000, 1.0000, 1.0000, 0.0),
+        vec4f(0.0000, -0.3441, 1.7720, 0.0),
+        vec4f(1.4020, -0.7141, 0.0000, 0.0),
+        vec4f(-0.7010, 0.5291, -0.8860, 1.0),
+    );
+
+    pub fn sample_yuv_surface(texture_position: Vec2f) -> Vec4f {
+        let luma = texture_sample_level(
+            SURFACE_TEXTURE,
+            SURFACE_SAMPLER,
+            texture_position,
+            0.0,
+        )
+        .x;
+        let chroma = texture_sample_level(
+            SURFACE_CHROMA_TEXTURE,
+            SURFACE_SAMPLER,
+            texture_position,
+            0.0,
+        )
+        .xy();
+        YCBCR_TO_LINEAR_RGB * vec4f(luma, chroma.x, chroma.y, 1.0)
+    }
 
     #[derive(Wgsl)]
     pub struct SurfaceVarying {
@@ -1263,13 +1701,12 @@ pub mod surface {
 
     #[vertex]
     pub fn vs_surface(#[builtin(vertex_index)] vertex_id: u32) -> SurfaceVarying {
-        let vertex = unit_vertex(vertex_id);
+        let vertex = rectangle_vertex(vertex_id, get!(SURFACE_LOCALS).bounds);
         SurfaceVarying {
-            position: to_device_position(vertex, get!(SURFACE_LOCALS).bounds),
-            texture_position: vertex,
-            clip_distances: distance_from_clip_rect(
-                vertex,
-                get!(SURFACE_LOCALS).bounds,
+            position: vertex.clip_position,
+            texture_position: vertex.unit_position,
+            clip_distances: clip_distances(
+                vertex.viewport_position,
                 get!(SURFACE_LOCALS).content_mask,
             ),
         }
@@ -1278,29 +1715,10 @@ pub mod surface {
     #[fragment]
     pub fn fs_surface(input: SurfaceVarying) -> Vec4f {
         if is_clipped(input.clip_distances) {
-            return vec4f(0.0, 0.0, 0.0, 0.0);
+            return transparent();
         }
-        if get!(SURFACE_LOCALS).uses_yuv_color != 0u32 {
-            let luma = texture_sample_level(
-                SURFACE_TEXTURE,
-                SURFACE_SAMPLER,
-                input.texture_position,
-                0.0,
-            )
-            .x;
-            let chroma = texture_sample_level(
-                SURFACE_CHROMA_TEXTURE,
-                SURFACE_SAMPLER,
-                input.texture_position,
-                0.0,
-            )
-            .xy();
-            return vec4f(
-                luma + 1.4020 * chroma.y - 0.7010,
-                luma - 0.3441 * chroma.x - 0.7141 * chroma.y + 0.5291,
-                luma + 1.7720 * chroma.x - 0.8860,
-                1.0,
-            );
+        if get!(SURFACE_LOCALS).color_format == SurfaceColorFormat::Yuv {
+            return sample_yuv_surface(input.texture_position);
         }
         texture_sample_level(
             SURFACE_TEXTURE,
@@ -1320,14 +1738,14 @@ pub mod blur {
     pub struct BlurUniforms {
         pub bounds: Bounds,
         pub content_mask: Bounds,
-        pub corner_radii: Vec4f,
+        pub corner_radii: Corners,
         pub direction: Vec2f,
-        pub sigma: f32,
+        pub standard_deviation: f32,
         pub opacity: f32,
-        pub tap_count: f32,
-        pub tap_step: f32,
-        pub clip_rounded: f32,
-        pub downsample: f32,
+        pub sample_count: u32,
+        pub sample_step: f32,
+        pub composite_clip: BlurCompositeClip,
+        pub downsample_mode: DownsampleMode,
     }
     uniform!(group(1), binding(0), BLUR_LOCALS: BlurUniforms);
     texture!(group(1), binding(1), BLUR_TEXTURE: Texture2D<f32>);
@@ -1345,63 +1763,66 @@ pub mod blur {
 
     #[vertex]
     pub fn vs_blur_fullscreen(#[builtin(vertex_index)] vertex_id: u32) -> BlurVarying {
-        let texture_coordinates = vec2f(
-            ((vertex_id << 1u32) & 2u32) as f32,
-            (vertex_id & 2u32) as f32,
-        );
+        let vertex = fullscreen_vertex(vertex_id);
         BlurVarying {
-            position: vec4f(
-                texture_coordinates.x * 2.0 - 1.0,
-                1.0 - texture_coordinates.y * 2.0,
-                0.0,
-                1.0,
-            ),
-            texture_coordinates,
-            clip_distances: vec4f(1.0, 1.0, 1.0, 1.0),
+            position: vertex.clip_position,
+            texture_coordinates: vertex.texture_coordinates,
+            clip_distances: unclipped_distances(),
         }
     }
 
     #[fragment]
     pub fn fs_blur_downsample(input: BlurVarying) -> Vec4f {
-        if get!(BLUR_LOCALS).downsample > 0.5 {
+        if get!(BLUR_LOCALS).downsample_mode == DownsampleMode::HalfResolution {
             let destination = floor(input.position.xy());
-            let source_uv = (destination * 2.0 + 1.0) / get!(GLOBALS).viewport_size;
-            return texture_sample_level(BLUR_TEXTURE, BLUR_SAMPLER, source_uv, 0.0);
+            let source_coordinates = (destination * 2.0 + 1.0) / get!(GLOBALS).viewport_size;
+            return texture_sample_level(
+                BLUR_TEXTURE,
+                BLUR_SAMPLER,
+                source_coordinates,
+                0.0,
+            );
         }
         texture_sample_level(BLUR_TEXTURE, BLUR_SAMPLER, input.texture_coordinates, 0.0)
     }
 
+    pub fn sample_blur_texture(texture_coordinates: Vec2f) -> Vec4f {
+        texture_sample_level(BLUR_TEXTURE, BLUR_SAMPLER, texture_coordinates, 0.0)
+    }
+
+    pub fn gaussian_blur(texture_coordinates: Vec2f) -> Vec4f {
+        let uniforms = get!(BLUR_LOCALS);
+        let center_weight = gaussian(0.0, uniforms.standard_deviation);
+        let mut weighted_color = sample_blur_texture(texture_coordinates) * center_weight;
+        let mut weight_sum = center_weight;
+        let mut sample_index = 1u32;
+
+        while sample_index <= uniforms.sample_count {
+            let distance = sample_index as f32 * uniforms.sample_step;
+            let weight = gaussian(distance, uniforms.standard_deviation);
+            let coordinate_offset = uniforms.direction * distance;
+            let symmetric_pair = sample_blur_texture(texture_coordinates - coordinate_offset)
+                + sample_blur_texture(texture_coordinates + coordinate_offset);
+            weighted_color = weighted_color + symmetric_pair * weight;
+            weight_sum += 2.0 * weight;
+            sample_index += 1u32;
+        }
+        weighted_color / max(weight_sum, MIN_NORMALIZED_WEIGHT)
+    }
+
     #[fragment]
     pub fn fs_blur(input: BlurVarying) -> Vec4f {
-        let sigma = get!(BLUR_LOCALS).sigma;
-        let taps = get!(BLUR_LOCALS).tap_count as i32;
-        let step = get!(BLUR_LOCALS).tap_step;
-        let mut color = vec4f(0.0, 0.0, 0.0, 0.0);
-        let mut weight_sum = 0.0;
-        let mut i = -taps;
-        while i <= taps {
-            let offset = i as f32 * step;
-            let weight = gaussian(offset, sigma);
-            let texture_coordinates =
-                input.texture_coordinates + get!(BLUR_LOCALS).direction * offset;
-            color = color
-                + texture_sample_level(BLUR_TEXTURE, BLUR_SAMPLER, texture_coordinates, 0.0)
-                    * weight;
-            weight_sum += weight;
-            i += 1;
-        }
-        color / max(weight_sum, 0.00001)
+        gaussian_blur(input.texture_coordinates)
     }
 
     #[vertex]
     pub fn vs_blur_composite(#[builtin(vertex_index)] vertex_id: u32) -> BlurVarying {
-        let vertex = unit_vertex(vertex_id);
+        let vertex = rectangle_vertex(vertex_id, get!(BLUR_LOCALS).bounds);
         BlurVarying {
-            position: to_device_position(vertex, get!(BLUR_LOCALS).bounds),
-            texture_coordinates: vertex,
-            clip_distances: distance_from_clip_rect(
-                vertex,
-                get!(BLUR_LOCALS).bounds,
+            position: vertex.clip_position,
+            texture_coordinates: vertex.unit_position,
+            clip_distances: clip_distances(
+                vertex.viewport_position,
                 get!(BLUR_LOCALS).content_mask,
             ),
         }
@@ -1410,27 +1831,23 @@ pub mod blur {
     #[fragment]
     pub fn fs_blur_composite(input: BlurVarying) -> Vec4f {
         if is_clipped(input.clip_distances) {
-            return vec4f(0.0, 0.0, 0.0, 0.0);
+            return transparent();
         }
-        let blur_span = 2.0 * floor(get!(GLOBALS).viewport_size * 0.5);
+        let sampled_blur_extent = 2.0 * floor(get!(GLOBALS).viewport_size * 0.5);
         let blurred = texture_sample_level(
             BLUR_TEXTURE,
             BLUR_SAMPLER,
-            input.position.xy() / blur_span,
+            input.position.xy() / sampled_blur_extent,
             0.0,
         );
-        let radii = get!(BLUR_LOCALS).corner_radii;
-        let corners = Corners {
-            top_left: radii.x,
-            top_right: radii.y,
-            bottom_right: radii.z,
-            bottom_left: radii.w,
-        };
-        let distance = quad_sdf(input.position.xy(), get!(BLUR_LOCALS).bounds, corners);
         let coverage = select(
             1.0,
-            saturate(0.5 - distance),
-            get!(BLUR_LOCALS).clip_rounded > 0.5,
+            antialiased_coverage(rounded_rectangle_signed_distance(
+                input.position.xy(),
+                get!(BLUR_LOCALS).bounds,
+                get!(BLUR_LOCALS).corner_radii,
+            )),
+            get!(BLUR_LOCALS).composite_clip == BlurCompositeClip::RoundedBounds,
         );
         let factor = coverage * get!(BLUR_LOCALS).opacity;
         vec4f(

@@ -23,17 +23,30 @@ pub type PathVertex_ScaledPixels = PathVertex<ScaledPixels>;
 #[expect(missing_docs)]
 pub type DrawOrder = u32;
 
-/// A boolean stored as a `u32` so that GPU-facing structs contain no
-/// compiler-inserted padding bytes, which would be undefined behavior to
-/// reinterpret as `&[u8]` when writing instance buffers. Guaranteed to be
-/// `0` or `1` by construction; shaders read it as a `u32`/`uint`.
+/// A boolean with the same four-byte representation in Rust and WGSL.
+///
+/// GPU-facing scene structs use this instead of Rust's one-byte [`bool`],
+/// eliminating implicit padding while making the storage-buffer ABI explicit.
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
-#[repr(transparent)]
-pub struct PaddedBool32(u32);
+#[repr(u32)]
+pub enum ShaderBool {
+    /// The flag is disabled.
+    #[default]
+    Disabled = 0,
+    /// The flag is enabled.
+    Enabled = 1,
+}
 
-impl From<bool> for PaddedBool32 {
+impl ShaderBool {
+    /// Returns this flag as a regular Rust boolean.
+    pub fn is_enabled(self) -> bool {
+        self == Self::Enabled
+    }
+}
+
+impl From<bool> for ShaderBool {
     fn from(value: bool) -> Self {
-        PaddedBool32(value as u32)
+        if value { Self::Enabled } else { Self::Disabled }
     }
 }
 
@@ -858,12 +871,12 @@ impl From<Quad> for Primitive {
 #[expect(missing_docs)]
 pub struct Underline {
     pub order: DrawOrder,
-    pub pad: u32, // align to 8 bytes
+    pub padding: u32,
     pub bounds: Bounds<ScaledPixels>,
     pub content_mask: ContentMask<ScaledPixels>,
     pub color: SceneHsla,
     pub thickness: ScaledPixels,
-    pub wavy: PaddedBool32,
+    pub wavy: ShaderBool,
 }
 
 impl From<Underline> for Primitive {
@@ -884,9 +897,9 @@ pub struct Shadow {
     pub color: SceneHsla,
     pub element_bounds: Bounds<ScaledPixels>,
     pub element_corner_radii: Corners<ScaledPixels>,
-    /// 0 = drop shadow (rendered outside the element), 1 = inset shadow (rendered inside).
-    pub inset: u32,
-    pub pad: u32, // align to 8 bytes
+    /// Whether this shadow is rendered inside the element instead of outside it.
+    pub inset: ShaderBool,
+    pub padding: u32,
 }
 
 impl From<Shadow> for Primitive {
@@ -974,7 +987,7 @@ impl From<FilterBoundary> for Primitive {
 
 /// The style of a border.
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
-#[repr(C)]
+#[repr(u32)]
 pub enum BorderStyle {
     /// A solid border.
     #[default]
@@ -1091,7 +1104,7 @@ impl Default for TransformationMatrix {
 #[expect(missing_docs)]
 pub struct MonochromeSprite {
     pub order: DrawOrder,
-    pub pad: u32,
+    pub padding: u32,
     pub bounds: Bounds<ScaledPixels>,
     pub content_mask: ContentMask<ScaledPixels>,
     pub color: SceneHsla,
@@ -1110,7 +1123,7 @@ impl From<MonochromeSprite> for Primitive {
 #[expect(missing_docs)]
 pub struct SubpixelSprite {
     pub order: DrawOrder,
-    pub pad: u32, // align to 8 bytes
+    pub padding: u32,
     pub bounds: Bounds<ScaledPixels>,
     pub content_mask: ContentMask<ScaledPixels>,
     pub color: SceneHsla,
@@ -1129,8 +1142,8 @@ impl From<SubpixelSprite> for Primitive {
 #[expect(missing_docs)]
 pub struct PolychromeSprite {
     pub order: DrawOrder,
-    pub pad: u32,
-    pub grayscale: PaddedBool32,
+    pub padding: u32,
+    pub grayscale: ShaderBool,
     pub opacity: f32,
     pub bounds: Bounds<ScaledPixels>,
     pub content_mask: ContentMask<ScaledPixels>,
