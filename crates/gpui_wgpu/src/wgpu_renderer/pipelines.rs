@@ -93,6 +93,130 @@ impl WgpuBindGroupLayouts {
             blur,
         }
     }
+
+    pub(super) fn create_globals(
+        &self,
+        device: &wgpu::Device,
+        label: &str,
+        globals: wgpu::BufferBinding,
+        font_rasterization: wgpu::BufferBinding,
+    ) -> wgpu::BindGroup {
+        device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some(label),
+            layout: &self.globals,
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: shader::GLOBAL_UNIFORMS_BINDING,
+                    resource: wgpu::BindingResource::Buffer(globals),
+                },
+                wgpu::BindGroupEntry {
+                    binding: shader::FONT_RASTERIZATION_BINDING,
+                    resource: wgpu::BindingResource::Buffer(font_rasterization),
+                },
+            ],
+        })
+    }
+
+    pub(super) fn create_instances(
+        &self,
+        device: &wgpu::Device,
+        instances: wgpu::BufferBinding,
+    ) -> wgpu::BindGroup {
+        device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("instances"),
+            layout: &self.instances,
+            entries: &[wgpu::BindGroupEntry {
+                binding: shader::DATA_BUFFER_BINDING,
+                resource: wgpu::BindingResource::Buffer(instances),
+            }],
+        })
+    }
+
+    pub(super) fn create_textured_instances(
+        &self,
+        device: &wgpu::Device,
+        instances: wgpu::BufferBinding,
+        texture: &wgpu::TextureView,
+        sampler: &wgpu::Sampler,
+    ) -> wgpu::BindGroup {
+        device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("textured_instances"),
+            layout: &self.instances_with_texture,
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: shader::DATA_BUFFER_BINDING,
+                    resource: wgpu::BindingResource::Buffer(instances),
+                },
+                wgpu::BindGroupEntry {
+                    binding: shader::PRIMARY_TEXTURE_BINDING,
+                    resource: wgpu::BindingResource::TextureView(texture),
+                },
+                wgpu::BindGroupEntry {
+                    binding: shader::PRIMARY_SAMPLER_BINDING,
+                    resource: wgpu::BindingResource::Sampler(sampler),
+                },
+            ],
+        })
+    }
+
+    pub(super) fn create_surface(
+        &self,
+        device: &wgpu::Device,
+        uniforms: wgpu::BufferBinding,
+        color: &wgpu::TextureView,
+        chroma: &wgpu::TextureView,
+        sampler: &wgpu::Sampler,
+    ) -> wgpu::BindGroup {
+        device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("surface"),
+            layout: &self.surfaces,
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: shader::DATA_BUFFER_BINDING,
+                    resource: wgpu::BindingResource::Buffer(uniforms),
+                },
+                wgpu::BindGroupEntry {
+                    binding: shader::PRIMARY_TEXTURE_BINDING,
+                    resource: wgpu::BindingResource::TextureView(color),
+                },
+                wgpu::BindGroupEntry {
+                    binding: shader::SECONDARY_TEXTURE_BINDING,
+                    resource: wgpu::BindingResource::TextureView(chroma),
+                },
+                wgpu::BindGroupEntry {
+                    binding: shader::SURFACE_SAMPLER_BINDING,
+                    resource: wgpu::BindingResource::Sampler(sampler),
+                },
+            ],
+        })
+    }
+
+    pub(super) fn create_blur(
+        &self,
+        device: &wgpu::Device,
+        uniforms: wgpu::BufferBinding,
+        texture: &wgpu::TextureView,
+        sampler: &wgpu::Sampler,
+    ) -> wgpu::BindGroup {
+        device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("blur"),
+            layout: &self.blur,
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: shader::DATA_BUFFER_BINDING,
+                    resource: wgpu::BindingResource::Buffer(uniforms),
+                },
+                wgpu::BindGroupEntry {
+                    binding: shader::PRIMARY_TEXTURE_BINDING,
+                    resource: wgpu::BindingResource::TextureView(texture),
+                },
+                wgpu::BindGroupEntry {
+                    binding: shader::PRIMARY_SAMPLER_BINDING,
+                    resource: wgpu::BindingResource::Sampler(sampler),
+                },
+            ],
+        })
+    }
 }
 
 impl WgpuPipelines {
@@ -260,11 +384,13 @@ fn linked_bind_group_layout(
     group_index: u32,
     dynamic_uniform_binding: Option<u32>,
 ) -> wgpu::BindGroupLayout {
-    let linkage = wgsl_rs::linkage::wgpu::analyze_wgsl_module(source);
+    let linkage = wgsl_rs::linkage::wgpu::analyze_wgsl_module(source)
+        .unwrap_or_else(|error| panic!("failed to analyze shader module {}: {error}", source.name));
     let group = linkage.bind_group(group_index).unwrap_or_else(|| {
         panic!("shader module {} has no bind group {group_index}", source.name)
     });
     let mut entries = group.entries.clone();
+    let uniform_sizes = naga_uniform_sizes(source);
 
     for entry in &mut entries {
         if group_index == shader::GLOBAL_BIND_GROUP {
@@ -275,18 +401,22 @@ fn linked_bind_group_layout(
             };
         }
 
-        if let wgpu::BindingType::Buffer {
-            has_dynamic_offset,
-            min_binding_size,
-            ..
-        } = &mut entry.ty
-        {
-            *has_dynamic_offset = dynamic_uniform_binding == Some(entry.binding);
-            *min_binding_size = linkage
+        if let wgpu::BindingType::Buffer { ty, .. } = entry.ty {
+            let min_binding_size = linkage
                 .buffers
                 .iter()
                 .find(|buffer| buffer.group == group_index && buffer.binding == entry.binding)
                 .and_then(|buffer| NonZeroU64::new(buffer.size));
+            entry.ty = wgpu::BindingType::Buffer {
+                ty,
+                has_dynamic_offset: dynamic_uniform_binding == Some(entry.binding),
+                min_binding_size: uniform_sizes
+                    .iter()
+                    .find_map(|&(group, binding, size)| {
+                        (group == group_index && binding == entry.binding).then_some(size)
+                    })
+                    .or(min_binding_size),
+            };
         }
     }
 
@@ -294,6 +424,35 @@ fn linked_bind_group_layout(
         label: Some(label),
         entries: &entries,
     })
+}
+
+fn naga_uniform_sizes(source: &wgsl_rs::Source) -> Vec<(u32, u32, NonZeroU64)> {
+    let generated = source
+        .wgsl_source()
+        .unwrap_or_else(|error| panic!("failed to generate shader module {}: {error}", source.name));
+    let module = naga::front::wgsl::parse_str(&generated)
+        .unwrap_or_else(|error| panic!("failed to parse shader module {}: {error}", source.name));
+    let mut layouter = naga::proc::Layouter::default();
+    layouter
+        .update(module.to_ctx())
+        .unwrap_or_else(|error| panic!("failed to lay out shader module {}: {error}", source.name));
+
+    module
+        .global_variables
+        .iter()
+        .filter_map(|(_, variable)| {
+            if variable.space != naga::AddressSpace::Uniform {
+                return None;
+            }
+            let binding = variable.binding.as_ref()?;
+            Some((
+                binding.group,
+                binding.binding,
+                NonZeroU64::new(u64::from(layouter[variable.ty].size))
+                    .expect("uniform types cannot be empty"),
+            ))
+        })
+        .collect()
 }
 
 fn create_shader_module(

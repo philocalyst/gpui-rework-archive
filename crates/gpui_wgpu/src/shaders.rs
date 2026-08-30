@@ -14,7 +14,22 @@ pub mod interface {
     /// # Safety
     /// Implementors must have a stable C-compatible layout, contain no uninitialized padding,
     /// and match the corresponding WGSL declaration exactly.
-    pub unsafe trait BufferData: Sized {}
+    pub unsafe trait BufferData: Sized {
+        const WGSL_TYPE: &'static str;
+    }
+
+    #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+    pub struct StorageAbi {
+        pub wgsl_type: &'static str,
+        pub rust_stride: usize,
+    }
+
+    pub const fn storage_abi<T: BufferData>() -> StorageAbi {
+        StorageAbi {
+            wgsl_type: T::WGSL_TYPE,
+            rust_stride: std::mem::size_of::<T>(),
+        }
+    }
 
     pub fn bytes_of<T: BufferData>(value: &T) -> &[u8] {
         unsafe {
@@ -110,16 +125,37 @@ pub mod interface {
     pub const RECTANGLE_VERTEX_COUNT: u32 = 4;
     pub const FULLSCREEN_TRIANGLE_VERTEX_COUNT: u32 = 3;
 
-    unsafe impl BufferData for super::common::GlobalUniforms {}
-    unsafe impl BufferData for super::common::FontRasterizationUniforms {}
-    unsafe impl BufferData for super::surface::SurfaceUniforms {}
-    unsafe impl BufferData for super::blur::BlurUniforms {}
-    unsafe impl BufferData for gpui::Quad {}
-    unsafe impl BufferData for gpui::Shadow {}
-    unsafe impl BufferData for gpui::Underline {}
-    unsafe impl BufferData for gpui::MonochromeSprite {}
-    unsafe impl BufferData for gpui::SubpixelSprite {}
-    unsafe impl BufferData for gpui::PolychromeSprite {}
+    macro_rules! buffer_data {
+        ($($rust:ty => $wgsl:literal),* $(,)?) => {
+            $(
+                unsafe impl BufferData for $rust {
+                    const WGSL_TYPE: &'static str = $wgsl;
+                }
+            )*
+        };
+    }
+
+    buffer_data! {
+        super::common::GlobalUniforms => "GlobalUniforms",
+        super::common::FontRasterizationUniforms => "FontRasterizationUniforms",
+        super::surface::SurfaceUniforms => "SurfaceUniforms",
+        super::blur::BlurUniforms => "BlurUniforms",
+        gpui::Quad => "Quad",
+        gpui::Shadow => "Shadow",
+        gpui::Underline => "Underline",
+        gpui::MonochromeSprite => "MonochromeSprite",
+        gpui::SubpixelSprite => "SubpixelSprite",
+        gpui::PolychromeSprite => "PolychromeSprite",
+    }
+
+    pub const SCENE_STORAGE_ABI: &[StorageAbi] = &[
+        storage_abi::<gpui::Quad>(),
+        storage_abi::<gpui::Shadow>(),
+        storage_abi::<gpui::Underline>(),
+        storage_abi::<gpui::MonochromeSprite>(),
+        storage_abi::<gpui::SubpixelSprite>(),
+        storage_abi::<gpui::PolychromeSprite>(),
+    ];
 }
 
 #[wgsl]
@@ -2098,32 +2134,6 @@ pub mod subpixel_sprite {
             ),
         }
     }
-}
-
-/// Fixed-length probes let `wgsl-rs` calculate the storage-array stride for
-/// every Rust-uploaded instance type. The probe source is analyzed in tests but
-/// never sent to a GPU.
-#[cfg(test)]
-#[wgsl(skip_validation)]
-pub mod storage_abi {
-    use super::monochrome_sprite::*;
-    use super::path::*;
-    use super::path_rasterization::*;
-    use super::polychrome_sprite::*;
-    use super::quad::*;
-    use super::shadow::*;
-    use super::subpixel_sprite::*;
-    use super::underline::*;
-    use wgsl_rs::std::*;
-
-    storage!(group(7), binding(0), ABI_QUAD: [Quad; 1]);
-    storage!(group(7), binding(1), ABI_SHADOW: [Shadow; 1]);
-    storage!(group(7), binding(2), ABI_UNDERLINE: [Underline; 1]);
-    storage!(group(7), binding(3), ABI_MONOCHROME_SPRITE: [MonochromeSprite; 1]);
-    storage!(group(7), binding(4), ABI_SUBPIXEL_SPRITE: [SubpixelSprite; 1]);
-    storage!(group(7), binding(5), ABI_POLYCHROME_SPRITE: [PolychromeSprite; 1]);
-    storage!(group(7), binding(6), ABI_PATH_SPRITE: [PathSprite; 1]);
-    storage!(group(7), binding(7), ABI_PATH_VERTEX: [PathRasterizationVertex; 1]);
 }
 
 impl From<bool> for common::ShaderBool {
