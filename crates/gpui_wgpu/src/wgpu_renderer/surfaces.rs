@@ -28,13 +28,13 @@ impl WgpuRenderer {
             padding2: 0,
         };
         let resources = self.resources();
-        let uniform_slot = resources.surface_uniforms.write(&uniforms);
+        let uniform_offset = resources.surface_uniforms.write(&uniforms);
         let bind_group = resources.bind_group_layouts.create_surface(
             &resources.device,
             wgpu::BufferBinding {
                 buffer: &resources.surface_uniforms.buffer,
                 offset: 0,
-                size: Some(uniform_slot.size),
+                size: std::num::NonZeroU64::new(std::mem::size_of::<SurfaceUniforms>() as u64),
             },
             color_view,
             chroma_view,
@@ -43,14 +43,9 @@ impl WgpuRenderer {
 
         pass.set_pipeline(&resources.pipelines.surfaces);
         pass.set_bind_group(
-            shader_interface::GLOBAL_BIND_GROUP,
-            &resources.globals_bind_group,
-            &[],
-        );
-        pass.set_bind_group(
             shader_interface::DATA_BIND_GROUP,
             &bind_group,
-            &[uniform_slot.offset as u32],
+            &[uniform_offset],
         );
         pass.draw(0..resources.pipelines.surfaces.fixed_vertex_count(), 0..1);
         Ok(())

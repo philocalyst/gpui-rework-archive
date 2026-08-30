@@ -6,7 +6,7 @@ use crate::shaders::interface as shader_interface;
 #[cfg(test)]
 use gpui::BackdropFilter;
 #[cfg(all(test, feature = "test-support", not(target_family = "wasm")))]
-use gpui::{Bounds, Point, ScaledPixels, Underline};
+use gpui::{Bounds, Point, Quad, ScaledPixels, Underline};
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -30,13 +30,21 @@ use filters::*;
 #[cfg(all(feature = "test-support", not(target_family = "wasm")))]
 pub use headless::WgpuHeadlessRenderer;
 use pipelines::WgpuPipelines as ShaderPipelines;
-use resources::{ResourceMetadata, WgpuResources};
+use resources::{GlobalBufferLayout, ResourceMetadata, WgpuResources};
 use settings::RenderingParameters;
 pub use settings::{FontRasterizationSettings, SubpixelOrder, WgpuSurfaceConfig};
 use target::RenderTarget;
 
 /// Shared GPU context reference, used to coordinate device recovery across multiple windows.
 pub type GpuContext = Rc<RefCell<Option<WgpuContext>>>;
+
+struct GpuFaultState {
+    pending_error: Arc<Mutex<Option<String>>>,
+    consecutive_failed_frames: u32,
+    device_lost: Arc<std::sync::atomic::AtomicBool>,
+    #[cfg(not(target_family = "wasm"))]
+    recovery_not_before: Option<std::time::Instant>,
+}
 
 pub struct WgpuRenderer {
     /// Shared GPU context for device recovery coordination (unused on WASM).
@@ -51,18 +59,13 @@ pub struct WgpuRenderer {
     resources: Option<WgpuResources>,
     target: RenderTarget,
     atlas: Arc<WgpuAtlas>,
-    path_globals_offset: u64,
-    gamma_offset: u64,
-    maximum_uniform_buffer_size: u64,
+    globals: GlobalBufferLayout,
     rendering_params: RenderingParameters,
     subpixel_order: SubpixelOrder,
     dual_source_blending: bool,
     adapter_info: wgpu::AdapterInfo,
-    last_error: Arc<Mutex<Option<String>>>,
-    failed_frame_count: u32,
-    device_lost: std::sync::Arc<std::sync::atomic::AtomicBool>,
-    #[cfg(not(target_family = "wasm"))]
-    device_recovery_not_before: Option<std::time::Instant>,
+    uploaded_globals: Option<frame::GlobalUniformState>,
+    faults: GpuFaultState,
 }
 
 impl WgpuRenderer {
@@ -104,9 +107,7 @@ impl WgpuRenderer {
             dual_source_blending,
         )?;
         let ResourceMetadata {
-            path_globals_offset,
-            gamma_offset,
-            maximum_uniform_buffer_size,
+            globals,
             last_error,
         } = metadata;
 
@@ -117,18 +118,19 @@ impl WgpuRenderer {
             resources: Some(resources),
             target,
             atlas,
-            path_globals_offset,
-            gamma_offset,
-            maximum_uniform_buffer_size,
+            globals,
             rendering_params,
             subpixel_order: SubpixelOrder::RedGreenBlue,
             dual_source_blending,
             adapter_info,
-            last_error,
-            failed_frame_count: 0,
-            device_lost: context.device_lost_flag(),
-            #[cfg(not(target_family = "wasm"))]
-            device_recovery_not_before: None,
+            uploaded_globals: None,
+            faults: GpuFaultState {
+                pending_error: last_error,
+                consecutive_failed_frames: 0,
+                device_lost: context.device_lost_flag(),
+                #[cfg(not(target_family = "wasm"))]
+                recovery_not_before: None,
+            },
         })
     }
 
@@ -230,7 +232,17 @@ impl WgpuRenderer {
     /// Swapchain drawing, window capture, and headless rendering all use this path so platform
     /// integrations cannot silently diverge in batching, filters, or pipeline state.
     fn render_to_view(&mut self, scene: &Scene, frame_view: &wgpu::TextureView) -> bool {
-        frame::render_to_view(self, scene, frame_view)
+        frame::render_to_view(self, scene, frame_view, None).is_some()
+    }
+
+    #[cfg(all(feature = "test-support", not(target_family = "wasm")))]
+    fn render_to_view_with_readback(
+        &mut self,
+        scene: &Scene,
+        frame_view: &wgpu::TextureView,
+        readback: frame::ReadbackCopy<'_>,
+    ) -> Option<wgpu::SubmissionIndex> {
+        frame::render_to_view(self, scene, frame_view, Some(readback))
     }
 }
 
@@ -362,6 +374,8 @@ mod tests {
             },
         };
         let mut scene = Scene::default();
+        // Force the underline to use a non-zero first-instance index in the mixed-type arena.
+        scene.insert_primitive(Quad::default());
         scene.insert_primitive(Underline {
             order: 0,
             padding: 0,
@@ -381,6 +395,40 @@ mod tests {
         );
         assert!(center[1] <= 2 && center[2] <= 2);
         assert_eq!(center[3], 255);
+        Ok(())
+    }
+
+    #[cfg(all(feature = "test-support", not(target_family = "wasm")))]
+    #[test]
+    fn cached_filter_bindings_accept_frame_local_dynamic_offsets() -> anyhow::Result<()> {
+        let context = WgpuContext::new_headless(None)?;
+        let size = Size {
+            width: DevicePixels(4),
+            height: DevicePixels(4),
+        };
+        let mut renderer = WgpuRenderer::new_headless(&context, size)?;
+        let bounds = Bounds {
+            origin: Point {
+                x: ScaledPixels(0.0),
+                y: ScaledPixels(0.0),
+            },
+            size: Size {
+                width: ScaledPixels(4.0),
+                height: ScaledPixels(4.0),
+            },
+        };
+        let mut scene = Scene::default();
+        scene.insert_primitive(BackdropFilter {
+            bounds,
+            content_mask: gpui::ContentMask { bounds },
+            filters: smallvec::smallvec![gpui::ScaledFilter::Blur(ScaledPixels(1.0))],
+            opacity: 1.0,
+            ..BackdropFilter::default()
+        });
+        scene.finish();
+
+        renderer.render_to_image(&scene)?;
+        renderer.render_to_image(&scene)?;
         Ok(())
     }
 }

@@ -269,7 +269,7 @@ pub mod common {
     }
 
     #[repr(C)]
-    #[derive(Clone, Copy, Wgsl)]
+    #[derive(Clone, Copy, PartialEq, Wgsl)]
     pub struct GlobalUniforms {
         pub viewport_size: Vec2f,
         pub premultiplied_alpha: ShaderBool,
@@ -277,7 +277,7 @@ pub mod common {
     }
 
     #[repr(C)]
-    #[derive(Clone, Copy, Wgsl)]
+    #[derive(Clone, Copy, PartialEq, Wgsl)]
     pub struct FontRasterizationUniforms {
         pub gamma_ratios: Vec4f,
         pub grayscale_enhanced_contrast: f32,

@@ -15,26 +15,32 @@ pub(super) fn render_to_view(
     renderer: &mut WgpuRenderer,
     scene: &Scene,
     frame_view: &wgpu::TextureView,
-) -> bool {
+    readback: Option<ReadbackCopy<'_>>,
+) -> Option<wgpu::SubmissionIndex> {
     let Some(targets) = PreparedTargets::prepare(renderer, scene, frame_view) else {
-        return false;
+        return None;
     };
 
-    match FrameEncoder::new(renderer, scene, targets).encode() {
-        Ok(command_buffer) => {
-            renderer.resources().queue.submit([command_buffer]);
-            true
-        }
-        Err(DrawError::ExternalSurface) => false,
+    match FrameEncoder::new(renderer, scene, targets).encode(readback) {
+        Ok(command_buffer) => Some(renderer.resources().queue.submit([command_buffer])),
+        Err(DrawError::ExternalSurface) => None,
         Err(DrawError::CapacityPlanningInvariant) => {
             log::error!("frame storage exceeded its precomputed capacity");
-            false
+            None
         }
         Err(DrawError::MissingIntermediateTarget) => {
             log::error!("frame preparation did not create a required intermediate target");
-            false
+            None
         }
     }
+}
+
+pub(super) struct ReadbackCopy<'a> {
+    pub(super) texture: &'a wgpu::Texture,
+    pub(super) buffer: &'a wgpu::Buffer,
+    pub(super) bytes_per_row: u32,
+    pub(super) width: u32,
+    pub(super) height: u32,
 }
 
 struct PreparedTargets {
@@ -54,14 +60,14 @@ impl PreparedTargets {
         if !begin_frame(renderer) {
             return None;
         }
-        let required_storage =
-            FrameStorageRequirements::for_scene(scene, renderer.resources().instances.alignment());
+        let required_storage = FrameStorageRequirements::for_scene(scene);
         let device = renderer.resources().device.clone();
-        if !renderer
-            .resources_mut()
-            .instances
-            .ensure_capacity(&device, required_storage.bytes)
-        {
+        let resources = renderer.resources_mut();
+        if !resources.instances.ensure_capacity(
+            &device,
+            &resources.bind_group_layouts,
+            required_storage.bytes,
+        ) {
             return None;
         }
         let instances = {
@@ -108,27 +114,27 @@ impl PreparedTargets {
 }
 
 fn begin_frame(renderer: &mut WgpuRenderer) -> bool {
-    let Some(error) = renderer.last_error.lock().unwrap().take() else {
-        renderer.failed_frame_count = 0;
+    let Some(error) = renderer.faults.pending_error.lock().unwrap().take() else {
+        renderer.faults.consecutive_failed_frames = 0;
         renderer.atlas.before_frame();
         return true;
     };
 
-    renderer.failed_frame_count += 1;
+    renderer.faults.consecutive_failed_frames += 1;
     log::error!(
         "GPU error during frame (failure {} of 10): {error}",
-        renderer.failed_frame_count
+        renderer.faults.consecutive_failed_frames
     );
-    if renderer.failed_frame_count > 10 {
+    if renderer.faults.consecutive_failed_frames > 10 {
         panic!("too many consecutive GPU errors; last error: {error}");
     }
-    if renderer.failed_frame_count > 5 {
+    if renderer.faults.consecutive_failed_frames > 5 {
         if let Some(resources) = renderer.resources.as_mut() {
             resources.invalidate_intermediate_textures();
         }
         renderer.atlas.clear();
         renderer.target.request_redraw();
-        renderer.failed_frame_count = 0;
+        renderer.faults.consecutive_failed_frames = 0;
         return false;
     }
 
@@ -136,7 +142,14 @@ fn begin_frame(renderer: &mut WgpuRenderer) -> bool {
     true
 }
 
-fn write_shader_globals(renderer: &WgpuRenderer) {
+#[derive(Clone, Copy, PartialEq)]
+pub(super) struct GlobalUniformState {
+    globals: GlobalUniforms,
+    path_globals: GlobalUniforms,
+    font_rasterization: FontRasterizationUniforms,
+}
+
+fn write_shader_globals(renderer: &mut WgpuRenderer) {
     let font = renderer.rendering_params.font_rasterization;
     let font_rasterization = FontRasterizationUniforms {
         gamma_ratios: wgsl_rs::std::vec4f(
@@ -166,11 +179,19 @@ fn write_shader_globals(renderer: &WgpuRenderer) {
         premultiplied_alpha: ShaderBool::Disabled,
         ..globals
     };
+    let state = GlobalUniformState {
+        globals,
+        path_globals,
+        font_rasterization,
+    };
+    if renderer.uploaded_globals == Some(state) {
+        return;
+    }
 
     let resources = renderer.resources();
     let globals_size = std::mem::size_of::<GlobalUniforms>();
     let font_size = std::mem::size_of::<FontRasterizationUniforms>();
-    let upload_size = renderer.gamma_offset + font_size as u64;
+    let upload_size = renderer.globals.font_offset + font_size as u64;
     let mut upload = resources
         .queue
         .write_buffer_with(
@@ -185,27 +206,28 @@ fn write_shader_globals(renderer: &WgpuRenderer) {
         .copy_from_slice(shader_interface::bytes_of(&globals));
     upload
         .slice(
-            renderer.path_globals_offset as usize
-                ..renderer.path_globals_offset as usize + globals_size,
+            renderer.globals.path_offset as usize
+                ..renderer.globals.path_offset as usize + globals_size,
         )
         .copy_from_slice(shader_interface::bytes_of(&path_globals));
     upload
-        .slice(renderer.gamma_offset as usize..renderer.gamma_offset as usize + font_size)
+        .slice(
+            renderer.globals.font_offset as usize
+                ..renderer.globals.font_offset as usize + font_size,
+        )
         .copy_from_slice(shader_interface::bytes_of(&font_rasterization));
+    drop(upload);
+    renderer.uploaded_globals = Some(state);
 }
 
 #[derive(Default)]
 struct FrameStorageRequirements {
     bytes: u64,
-    alignment: u64,
 }
 
 impl FrameStorageRequirements {
-    fn for_scene(scene: &Scene, alignment: u64) -> Self {
-        let mut requirements = Self {
-            alignment,
-            ..Self::default()
-        };
+    fn for_scene(scene: &Scene) -> Self {
+        let mut requirements = Self::default();
         for command in scene.render_commands() {
             let RenderCommand::Batch(batch) = command else {
                 continue;
@@ -244,8 +266,9 @@ impl FrameStorageRequirements {
         if count == 0 {
             return;
         }
-        self.bytes = self.bytes.next_multiple_of(self.alignment);
-        self.bytes += (std::mem::size_of::<T>() as u64 * count as u64).max(16);
+        let stride = std::mem::size_of::<T>() as u64;
+        self.bytes = self.bytes.next_multiple_of(stride);
+        self.bytes += stride * count as u64;
     }
 }
 
@@ -279,13 +302,34 @@ impl<'a> FrameEncoder<'a> {
         }
     }
 
-    fn encode(mut self) -> Result<wgpu::CommandBuffer, DrawError> {
+    fn encode(
+        mut self,
+        readback: Option<ReadbackCopy<'_>>,
+    ) -> Result<wgpu::CommandBuffer, DrawError> {
         let result = self.encode_commands();
         if result.is_ok() {
             if let Some(offscreen) = &self.offscreen {
                 self.renderer
                     .blit_to_frame(&mut self.encoder, offscreen, &self.presentation);
             }
+        }
+        if let Some(readback) = readback {
+            self.encoder.copy_texture_to_buffer(
+                readback.texture.as_image_copy(),
+                wgpu::TexelCopyBufferInfo {
+                    buffer: readback.buffer,
+                    layout: wgpu::TexelCopyBufferLayout {
+                        offset: 0,
+                        bytes_per_row: Some(readback.bytes_per_row),
+                        rows_per_image: Some(readback.height),
+                    },
+                },
+                wgpu::Extent3d {
+                    width: readback.width,
+                    height: readback.height,
+                    depth_or_array_layers: 1,
+                },
+            );
         }
         self.instances.finish();
         self.renderer.resources().finish_frame_uploads();
@@ -294,7 +338,8 @@ impl<'a> FrameEncoder<'a> {
     }
 
     fn encode_commands(&mut self) -> DrawResult {
-        let mut pass = begin_color_render_pass(
+        let mut pass = begin_scene_render_pass(
+            self.renderer,
             &mut self.encoder,
             "main_pass",
             self.targets.current(),
@@ -314,7 +359,8 @@ impl<'a> FrameEncoder<'a> {
                         paths,
                         &mut self.instances,
                     );
-                    pass = begin_color_render_pass(
+                    pass = begin_scene_render_pass(
+                        self.renderer,
                         &mut self.encoder,
                         "after_paths",
                         self.targets.current(),
@@ -336,7 +382,8 @@ impl<'a> FrameEncoder<'a> {
                             self.targets.current(),
                         );
                     }
-                    pass = begin_color_render_pass(
+                    pass = begin_scene_render_pass(
+                        self.renderer,
                         &mut self.encoder,
                         "after_backdrop_filter",
                         self.targets.current(),
@@ -359,7 +406,8 @@ impl<'a> FrameEncoder<'a> {
                 } => {
                     drop(pass);
                     self.targets.enter(index.as_usize());
-                    pass = begin_color_render_pass(
+                    pass = begin_scene_render_pass(
+                        self.renderer,
                         &mut self.encoder,
                         "filter_group",
                         self.targets.current(),
@@ -385,7 +433,8 @@ impl<'a> FrameEncoder<'a> {
                             clip: FilterCompositeClip::ContentShape,
                         },
                     );
-                    pass = begin_color_render_pass(
+                    pass = begin_scene_render_pass(
+                        self.renderer,
                         &mut self.encoder,
                         "after_content_filter",
                         self.targets.current(),
@@ -406,6 +455,22 @@ impl<'a> FrameEncoder<'a> {
         self.targets.assert_balanced();
         Ok(())
     }
+}
+
+fn begin_scene_render_pass<'a>(
+    renderer: &'a WgpuRenderer,
+    encoder: &'a mut wgpu::CommandEncoder,
+    label: &'a str,
+    target: &'a wgpu::TextureView,
+    load: wgpu::LoadOp<wgpu::Color>,
+) -> wgpu::RenderPass<'a> {
+    let mut pass = begin_color_render_pass(encoder, label, target, load);
+    pass.set_bind_group(
+        shader_interface::GLOBAL_BIND_GROUP,
+        &renderer.resources().globals_bind_group,
+        &[],
+    );
+    pass
 }
 
 struct TargetStack {

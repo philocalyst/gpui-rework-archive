@@ -2,8 +2,12 @@ use gpui::{
     AtlasTextureId, MonochromeSprite, Path, PolychromeSprite, Quad, ScaledPixels, Shadow,
     SubpixelSprite, Underline,
 };
+use std::ops::Range;
 
-use crate::shaders::interface as shader_interface;
+use crate::{
+    WgpuTextureInfo,
+    shaders::interface::{self as shader_interface, BufferData},
+};
 
 use super::{WgpuRenderer, buffers::InstanceUpload, frame, path_types, pipelines};
 
@@ -14,13 +18,7 @@ impl WgpuRenderer {
         instances: &mut InstanceUpload,
         pass: &mut wgpu::RenderPass<'_>,
     ) -> frame::DrawResult {
-        self.draw_instances(
-            shader_interface::slice_as_bytes(quads),
-            quads.len() as u32,
-            &self.resources().pipelines.quads,
-            instances,
-            pass,
-        )
+        self.draw_instances(quads, &self.resources().pipelines.quads, instances, pass)
     }
 
     pub(super) fn draw_shadows(
@@ -30,8 +28,7 @@ impl WgpuRenderer {
         pass: &mut wgpu::RenderPass<'_>,
     ) -> frame::DrawResult {
         self.draw_instances(
-            shader_interface::slice_as_bytes(shadows),
-            shadows.len() as u32,
+            shadows,
             &self.resources().pipelines.shadows,
             instances,
             pass,
@@ -45,8 +42,7 @@ impl WgpuRenderer {
         pass: &mut wgpu::RenderPass<'_>,
     ) -> frame::DrawResult {
         self.draw_instances(
-            shader_interface::slice_as_bytes(underlines),
-            underlines.len() as u32,
+            underlines,
             &self.resources().pipelines.underlines,
             instances,
             pass,
@@ -62,9 +58,9 @@ impl WgpuRenderer {
     ) -> frame::DrawResult {
         let texture = self.atlas.get_texture_info(texture_id);
         self.draw_instances_with_texture(
-            shader_interface::slice_as_bytes(sprites),
-            sprites.len() as u32,
-            &texture.view,
+            sprites,
+            texture_id,
+            &texture,
             &self.resources().pipelines.monochrome_sprites,
             instances,
             pass,
@@ -85,14 +81,7 @@ impl WgpuRenderer {
             .subpixel_sprites
             .as_ref()
             .unwrap_or(&resources.pipelines.monochrome_sprites);
-        self.draw_instances_with_texture(
-            shader_interface::slice_as_bytes(sprites),
-            sprites.len() as u32,
-            &texture.view,
-            pipeline,
-            instances,
-            pass,
-        )
+        self.draw_instances_with_texture(sprites, texture_id, &texture, pipeline, instances, pass)
     }
 
     pub(super) fn draw_polychrome_sprites(
@@ -104,75 +93,84 @@ impl WgpuRenderer {
     ) -> frame::DrawResult {
         let texture = self.atlas.get_texture_info(texture_id);
         self.draw_instances_with_texture(
-            shader_interface::slice_as_bytes(sprites),
-            sprites.len() as u32,
-            &texture.view,
+            sprites,
+            texture_id,
+            &texture,
             &self.resources().pipelines.polychrome_sprites,
             instances,
             pass,
         )
     }
 
-    fn draw_instances(
+    fn draw_instances<T: BufferData>(
         &self,
-        data: &[u8],
-        instance_count: u32,
+        values: &[T],
         pipeline: &pipelines::WgpuRenderPipeline,
         instances: &mut InstanceUpload,
         pass: &mut wgpu::RenderPass<'_>,
     ) -> frame::DrawResult {
-        if instance_count == 0 {
+        if values.is_empty() {
             return Ok(());
         }
-        let Some(slice) = instances.write(data) else {
+        let resources = self.resources();
+        self.draw_bound_instances(
+            values,
+            pipeline,
+            resources.instances.bind_group(),
+            instances,
+            pass,
+        )
+    }
+
+    fn draw_bound_instances<T: BufferData>(
+        &self,
+        values: &[T],
+        pipeline: &pipelines::WgpuRenderPipeline,
+        bind_group: &wgpu::BindGroup,
+        instances: &mut InstanceUpload,
+        pass: &mut wgpu::RenderPass<'_>,
+    ) -> frame::DrawResult {
+        let Some(slice) = instances.write(values) else {
             return Err(frame::DrawError::CapacityPlanningInvariant);
         };
-        let resources = self.resources();
-        let bind_group = resources
-            .bind_group_layouts
-            .create_instances(&resources.device, resources.instances.binding(slice));
-        pass.set_pipeline(pipeline);
-        pass.set_bind_group(
-            shader_interface::GLOBAL_BIND_GROUP,
-            &resources.globals_bind_group,
-            &[],
-        );
-        pass.set_bind_group(shader_interface::DATA_BIND_GROUP, &bind_group, &[]);
-        pass.draw(0..pipeline.fixed_vertex_count(), 0..instance_count);
+        self.draw_bound_range(pipeline, bind_group, slice.range(), pass);
         Ok(())
     }
 
-    fn draw_instances_with_texture(
+    fn draw_bound_range(
         &self,
-        data: &[u8],
-        instance_count: u32,
-        texture_view: &wgpu::TextureView,
+        pipeline: &pipelines::WgpuRenderPipeline,
+        bind_group: &wgpu::BindGroup,
+        instances: Range<u32>,
+        pass: &mut wgpu::RenderPass<'_>,
+    ) {
+        pass.set_pipeline(pipeline);
+        pass.set_bind_group(shader_interface::DATA_BIND_GROUP, bind_group, &[]);
+        pass.draw(0..pipeline.fixed_vertex_count(), instances);
+    }
+
+    fn draw_instances_with_texture<T: BufferData>(
+        &self,
+        values: &[T],
+        texture_id: AtlasTextureId,
+        texture: &WgpuTextureInfo,
         pipeline: &pipelines::WgpuRenderPipeline,
         instances: &mut InstanceUpload,
         pass: &mut wgpu::RenderPass<'_>,
     ) -> frame::DrawResult {
-        if instance_count == 0 {
+        if values.is_empty() {
             return Ok(());
         }
-        let Some(slice) = instances.write(data) else {
-            return Err(frame::DrawError::CapacityPlanningInvariant);
-        };
         let resources = self.resources();
-        let bind_group = resources.bind_group_layouts.create_textured_instances(
+        let bind_group = resources.instances.textured_bind_group(
             &resources.device,
-            resources.instances.binding(slice),
-            texture_view,
+            &resources.bind_group_layouts,
+            texture_id,
+            texture.generation,
+            &texture.view,
             &resources.atlas_sampler,
         );
-        pass.set_pipeline(pipeline);
-        pass.set_bind_group(
-            shader_interface::GLOBAL_BIND_GROUP,
-            &resources.globals_bind_group,
-            &[],
-        );
-        pass.set_bind_group(shader_interface::DATA_BIND_GROUP, &bind_group, &[]);
-        pass.draw(0..pipeline.fixed_vertex_count(), 0..instance_count);
-        Ok(())
+        self.draw_bound_instances(values, pipeline, &bind_group, instances, pass)
     }
 
     pub(super) fn draw_paths_from_intermediate(
@@ -181,19 +179,28 @@ impl WgpuRenderer {
         instances: &mut InstanceUpload,
         pass: &mut wgpu::RenderPass<'_>,
     ) -> frame::DrawResult {
-        let sprites = path_types::sprites(paths);
+        let sprite_count = path_types::sprite_count(paths);
+        let Some(sprite_slice) = instances.write_iter(sprite_count, path_types::sprites(paths))
+        else {
+            return Err(frame::DrawError::CapacityPlanningInvariant);
+        };
         let resources = self.resources();
         let Some(path_intermediate_view) = resources.path_intermediate_view.as_ref() else {
             return Err(frame::DrawError::MissingIntermediateTarget);
         };
-        self.draw_instances_with_texture(
-            shader_interface::slice_as_bytes(&sprites),
-            sprites.len() as u32,
+        let bind_group = resources.instances.path_bind_group(
+            &resources.device,
+            &resources.bind_group_layouts,
             path_intermediate_view,
+            &resources.atlas_sampler,
+        );
+        self.draw_bound_range(
             &resources.pipelines.paths,
-            instances,
+            &bind_group,
+            sprite_slice.range(),
             pass,
-        )
+        );
+        Ok(())
     }
 
     pub(super) fn draw_paths_to_intermediate(
@@ -202,19 +209,17 @@ impl WgpuRenderer {
         paths: &[Path<ScaledPixels>],
         instances: &mut InstanceUpload,
     ) -> frame::DrawResult {
-        let vertices = path_types::rasterization_vertices(paths);
-        if vertices.is_empty() {
+        let vertex_count = path_types::rasterization_vertex_count(paths);
+        if vertex_count == 0 {
             return Ok(());
         }
 
-        let Some(vertex_slice) = instances.write(shader_interface::slice_as_bytes(&vertices))
+        let Some(vertex_slice) =
+            instances.write_iter(vertex_count, path_types::rasterization_vertices(paths))
         else {
             return Err(frame::DrawError::CapacityPlanningInvariant);
         };
         let resources = self.resources();
-        let data_bind_group = resources
-            .bind_group_layouts
-            .create_instances(&resources.device, resources.instances.binding(vertex_slice));
         let Some(path_intermediate_view) = resources.path_intermediate_view.as_ref() else {
             return Err(frame::DrawError::MissingIntermediateTarget);
         };
@@ -244,8 +249,12 @@ impl WgpuRenderer {
             &resources.path_globals_bind_group,
             &[],
         );
-        pass.set_bind_group(shader_interface::DATA_BIND_GROUP, &data_bind_group, &[]);
-        pass.draw(0..vertices.len() as u32, 0..1);
+        pass.set_bind_group(
+            shader_interface::DATA_BIND_GROUP,
+            resources.instances.bind_group(),
+            &[],
+        );
+        pass.draw(vertex_slice.range(), 0..1);
         Ok(())
     }
 }

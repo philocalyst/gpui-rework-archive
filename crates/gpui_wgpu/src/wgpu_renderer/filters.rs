@@ -243,19 +243,10 @@ impl WgpuRenderer {
         &self,
         uniforms: BlurUniforms,
         source: &wgpu::TextureView,
-    ) -> wgpu::BindGroup {
+    ) -> (wgpu::BindGroup, u32) {
         let resources = self.resources();
-        let uniform_slot = resources.filter_uniforms.write(&uniforms);
-        resources.bind_group_layouts.create_blur(
-            &resources.device,
-            wgpu::BufferBinding {
-                buffer: &resources.filter_uniforms.buffer,
-                offset: uniform_slot.offset,
-                size: Some(uniform_slot.size),
-            },
-            source,
-            &resources.surface_sampler,
-        )
+        let uniform_offset = resources.filter_uniforms.write(&uniforms);
+        (resources.blur_bind_group(source), uniform_offset)
     }
 
     fn run_blur_pass(
@@ -268,7 +259,7 @@ impl WgpuRenderer {
         uniforms: BlurUniforms,
         scissor: ScissorRectangle,
     ) {
-        let bind_group = self.make_blur_bind_group(uniforms, source);
+        let (bind_group, uniform_offset) = self.make_blur_bind_group(uniforms, source);
         let resources = self.resources();
         let mut pass = begin_color_render_pass(
             encoder,
@@ -282,7 +273,11 @@ impl WgpuRenderer {
             &resources.globals_bind_group,
             &[],
         );
-        pass.set_bind_group(shader_interface::DATA_BIND_GROUP, &bind_group, &[]);
+        pass.set_bind_group(
+            shader_interface::DATA_BIND_GROUP,
+            &bind_group,
+            &[uniform_offset],
+        );
         pass.set_scissor_rect(scissor.x, scissor.y, scissor.width, scissor.height);
         pass.draw(0..pipeline.fixed_vertex_count(), 0..1);
     }
@@ -366,7 +361,7 @@ impl WgpuRenderer {
             parameters.opacity,
             parameters.clip,
         );
-        let bind_group = self.make_blur_bind_group(uniforms, &horizontal_target);
+        let (bind_group, uniform_offset) = self.make_blur_bind_group(uniforms, &horizontal_target);
         let resources = self.resources();
         let mut pass =
             begin_color_render_pass(encoder, "blur_composite", target, wgpu::LoadOp::Load);
@@ -376,7 +371,11 @@ impl WgpuRenderer {
             &resources.globals_bind_group,
             &[],
         );
-        pass.set_bind_group(shader_interface::DATA_BIND_GROUP, &bind_group, &[]);
+        pass.set_bind_group(
+            shader_interface::DATA_BIND_GROUP,
+            &bind_group,
+            &[uniform_offset],
+        );
         pass.draw(
             0..resources.pipelines.blur_composite.fixed_vertex_count(),
             0..1,
@@ -410,7 +409,7 @@ impl WgpuRenderer {
         source: &wgpu::TextureView,
         frame_view: &wgpu::TextureView,
     ) {
-        let bind_group = self.make_blur_bind_group(BlurUniforms::copy(), source);
+        let (bind_group, uniform_offset) = self.make_blur_bind_group(BlurUniforms::copy(), source);
         let resources = self.resources();
         let mut pass = begin_color_render_pass(
             encoder,
@@ -424,7 +423,11 @@ impl WgpuRenderer {
             &resources.globals_bind_group,
             &[],
         );
-        pass.set_bind_group(shader_interface::DATA_BIND_GROUP, &bind_group, &[]);
+        pass.set_bind_group(
+            shader_interface::DATA_BIND_GROUP,
+            &bind_group,
+            &[uniform_offset],
+        );
         pass.draw(
             0..resources.pipelines.blur_downsample.fixed_vertex_count(),
             0..1,

@@ -1,8 +1,10 @@
 use std::{
+    cell::RefCell,
     num::NonZeroU64,
     sync::{Arc, Mutex},
 };
 
+use collections::FxHashMap;
 use gpui::{MAX_FILTER_GROUP_DEPTH, Scene};
 
 use crate::{
@@ -38,6 +40,7 @@ pub(super) struct WgpuResources {
     #[cfg(target_os = "macos")]
     pub(super) core_video_texture_cache: core_video::metal_texture_cache::CVMetalTextureCache,
     pub(super) filter_uniforms: DynamicUniformBuffer<BlurUniforms>,
+    blur_bind_groups: RefCell<BlurBindGroups>,
     pub(super) globals_buffer: wgpu::Buffer,
     pub(super) globals_bind_group: wgpu::BindGroup,
     pub(super) path_globals_bind_group: wgpu::BindGroup,
@@ -56,11 +59,21 @@ pub(super) struct WgpuResources {
     pub(super) filter_group_views: Vec<wgpu::TextureView>,
 }
 
+#[derive(Default)]
+struct BlurBindGroups {
+    uniform_generation: u64,
+    groups: FxHashMap<wgpu::TextureView, wgpu::BindGroup>,
+}
+
 pub(super) struct ResourceMetadata {
-    pub(super) path_globals_offset: u64,
-    pub(super) gamma_offset: u64,
-    pub(super) maximum_uniform_buffer_size: u64,
+    pub(super) globals: GlobalBufferLayout,
     pub(super) last_error: Arc<Mutex<Option<String>>>,
+}
+
+pub(super) struct GlobalBufferLayout {
+    pub(super) path_offset: u64,
+    pub(super) font_offset: u64,
+    pub(super) maximum_uniform_buffer_size: u64,
 }
 
 impl WgpuResources {
@@ -144,13 +157,15 @@ impl WgpuResources {
         let core_video_texture_cache = create_core_video_texture_cache(&device)?;
 
         let metadata = ResourceMetadata {
-            path_globals_offset,
-            gamma_offset,
-            maximum_uniform_buffer_size: device.limits().max_buffer_size.min(u32::MAX as u64),
+            globals: GlobalBufferLayout {
+                path_offset: path_globals_offset,
+                font_offset: gamma_offset,
+                maximum_uniform_buffer_size: device.limits().max_buffer_size.min(u32::MAX as u64),
+            },
             last_error,
         };
         let resources = Self {
-            instances: InstanceBufferArena::new(&device),
+            instances: InstanceBufferArena::new(&device, &bind_group_layouts),
             device,
             queue,
             surface,
@@ -162,6 +177,7 @@ impl WgpuResources {
             #[cfg(target_os = "macos")]
             core_video_texture_cache,
             filter_uniforms,
+            blur_bind_groups: RefCell::default(),
             globals_buffer,
             globals_bind_group,
             path_globals_bind_group,
@@ -182,6 +198,8 @@ impl WgpuResources {
     }
 
     pub(super) fn invalidate_intermediate_textures(&mut self) {
+        self.instances.invalidate_texture_bindings();
+        self.blur_bind_groups.get_mut().groups.clear();
         self.path_intermediate_texture = None;
         self.path_intermediate_view = None;
         self.path_msaa_texture = None;
@@ -200,6 +218,32 @@ impl WgpuResources {
         self.filter_uniforms.finish_upload();
         self.surface_uniforms.finish_upload();
     }
+
+    pub(super) fn blur_bind_group(&self, source: &wgpu::TextureView) -> wgpu::BindGroup {
+        let mut cache = self.blur_bind_groups.borrow_mut();
+        let uniform_generation = self.filter_uniforms.generation();
+        if cache.uniform_generation != uniform_generation {
+            cache.groups.clear();
+            cache.uniform_generation = uniform_generation;
+        }
+        cache
+            .groups
+            .entry(source.clone())
+            .or_insert_with(|| {
+                self.bind_group_layouts.create_blur(
+                    &self.device,
+                    wgpu::BufferBinding {
+                        buffer: &self.filter_uniforms.buffer,
+                        offset: 0,
+                        size: NonZeroU64::new(std::mem::size_of::<BlurUniforms>() as u64),
+                    },
+                    source,
+                    &self.surface_sampler,
+                )
+            })
+            .clone()
+    }
+
 }
 
 impl WgpuRenderer {
@@ -255,7 +299,7 @@ impl WgpuRenderer {
 
     pub(super) fn ensure_uniform_capacity(&mut self, scene: &Scene) -> bool {
         let requirements = FrameUniformRequirements::for_scene(scene);
-        let maximum_buffer_size = self.maximum_uniform_buffer_size;
+        let maximum_buffer_size = self.globals.maximum_uniform_buffer_size;
         let resources = self.resources_mut();
         let filters = resources.filter_uniforms.ensure_capacity(
             &resources.device,

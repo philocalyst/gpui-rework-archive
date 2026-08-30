@@ -1,14 +1,25 @@
 use crate::shaders::interface::{self as shader_interface, BufferData};
+use collections::FxHashMap;
+use gpui::AtlasTextureId;
 use std::{
     cell::{Cell, RefCell},
     marker::PhantomData,
     num::NonZeroU64,
+    ops::Range,
 };
 
-#[derive(Clone, Copy)]
-pub(super) struct BufferSlice {
-    pub(super) offset: u64,
-    pub(super) size: NonZeroU64,
+use super::pipelines::WgpuBindGroupLayouts;
+
+pub(super) struct InstanceSlice<T> {
+    first: u32,
+    count: u32,
+    value: PhantomData<T>,
+}
+
+impl<T> InstanceSlice<T> {
+    pub(super) fn range(&self) -> Range<u32> {
+        self.first..self.first + self.count
+    }
 }
 
 /// A single mapped staging allocation containing every instance payload for one frame.
@@ -16,13 +27,40 @@ pub(super) struct InstanceUpload {
     staging: Option<wgpu::QueueWriteBufferView>,
     cursor: u64,
     size: u64,
-    alignment: u64,
 }
 
 impl InstanceUpload {
-    pub(super) fn write(&mut self, data: &[u8]) -> Option<BufferSlice> {
-        let offset = self.cursor.next_multiple_of(self.alignment);
-        let size = (data.len() as u64).max(16);
+    pub(super) fn write<T: BufferData>(&mut self, values: &[T]) -> Option<InstanceSlice<T>> {
+        let stride = std::mem::size_of::<T>() as u64;
+        let offset = self.cursor.next_multiple_of(stride);
+        let data = shader_interface::slice_as_bytes(values);
+        let size = data.len() as u64;
+        if offset + size > self.size {
+            return None;
+        }
+        let staging = self
+            .staging
+            .as_mut()
+            .expect("non-empty frame uploads have mapped staging memory");
+        staging
+            .slice(offset as usize..(offset + size) as usize)
+            .copy_from_slice(data);
+        self.cursor = offset + size;
+        Some(InstanceSlice {
+            first: u32::try_from(offset / stride).ok()?,
+            count: u32::try_from(values.len()).ok()?,
+            value: PhantomData,
+        })
+    }
+
+    pub(super) fn write_iter<T: BufferData>(
+        &mut self,
+        count: usize,
+        values: impl IntoIterator<Item = T>,
+    ) -> Option<InstanceSlice<T>> {
+        let stride = std::mem::size_of::<T>() as u64;
+        let offset = self.cursor.next_multiple_of(stride);
+        let size = stride.checked_mul(count as u64)?;
         if offset + size > self.size {
             return None;
         }
@@ -31,12 +69,21 @@ impl InstanceUpload {
             .as_mut()
             .expect("non-empty frame uploads have mapped staging memory");
         let mut destination = staging.slice(offset as usize..(offset + size) as usize);
-        destination.fill(0);
-        destination.slice(..data.len()).copy_from_slice(data);
+        let mut values = values.into_iter();
+        for index in 0..count {
+            let value = values.next()?;
+            destination
+                .slice(index * stride as usize..(index + 1) * stride as usize)
+                .copy_from_slice(shader_interface::bytes_of(&value));
+        }
+        if values.next().is_some() {
+            return None;
+        }
         self.cursor = offset + size;
-        Some(BufferSlice {
-            offset,
-            size: NonZeroU64::new(size).expect("instance slices are at least 16 bytes"),
+        Some(InstanceSlice {
+            first: u32::try_from(offset / stride).ok()?,
+            count: u32::try_from(count).ok()?,
+            value: PhantomData,
         })
     }
 
@@ -52,6 +99,7 @@ pub(super) struct DynamicUniformBuffer<T> {
     label: &'static str,
     stride: u64,
     capacity: u64,
+    generation: u64,
     next_slot: Cell<u64>,
     staging: RefCell<Option<wgpu::QueueWriteBufferView>>,
     value: PhantomData<T>,
@@ -76,6 +124,7 @@ impl<T: BufferData> DynamicUniformBuffer<T> {
             label,
             stride,
             capacity: initial_capacity,
+            generation: 0,
             next_slot: Cell::new(0),
             staging: RefCell::new(None),
             value: PhantomData,
@@ -102,6 +151,7 @@ impl<T: BufferData> DynamicUniformBuffer<T> {
 
         self.buffer = create_buffer(device, self.label, new_size, wgpu::BufferUsages::UNIFORM);
         self.capacity = new_capacity;
+        self.generation = self.generation.wrapping_add(1);
         true
     }
 
@@ -122,11 +172,15 @@ impl<T: BufferData> DynamicUniformBuffer<T> {
         true
     }
 
+    pub(super) fn generation(&self) -> u64 {
+        self.generation
+    }
+
     pub(super) fn finish_upload(&self) {
         self.staging.take();
     }
 
-    pub(super) fn write(&self, value: &T) -> BufferSlice {
+    pub(super) fn write(&self, value: &T) -> u32 {
         let slot = self.next_slot.get();
         assert!(
             slot < self.capacity,
@@ -142,49 +196,57 @@ impl<T: BufferData> DynamicUniformBuffer<T> {
             .expect("uniform uploads must begin before rendering")
             .slice(offset as usize..offset as usize + bytes.len())
             .copy_from_slice(bytes);
-        BufferSlice {
-            offset,
-            size: NonZeroU64::new(std::mem::size_of::<T>() as u64)
-                .expect("uniform types are non-empty"),
-        }
+        u32::try_from(offset).expect("dynamic uniform offsets are limited to u32")
     }
 }
 
 /// One frame's zero-copy scene data arena.
 pub(super) struct InstanceBufferArena {
     buffer: wgpu::Buffer,
+    bind_group: wgpu::BindGroup,
+    textured_bind_groups: RefCell<TexturedBindGroups>,
     capacity: u64,
     maximum_size: u64,
-    alignment: u64,
+}
+
+#[derive(Default)]
+struct TexturedBindGroups {
+    atlas_generation: Option<u64>,
+    groups: FxHashMap<AtlasTextureId, wgpu::BindGroup>,
+    path: Option<wgpu::BindGroup>,
 }
 
 impl InstanceBufferArena {
     const INITIAL_CAPACITY: u64 = 2 * 1024 * 1024;
 
-    pub(super) fn new(device: &wgpu::Device) -> Self {
+    pub(super) fn new(device: &wgpu::Device, layouts: &WgpuBindGroupLayouts) -> Self {
         let maximum_size = device
             .limits()
             .max_buffer_size
             .min(device.limits().max_storage_buffer_binding_size);
         let capacity = Self::INITIAL_CAPACITY.min(maximum_size);
+        let buffer = create_buffer(
+            device,
+            "instance_buffer",
+            capacity,
+            wgpu::BufferUsages::STORAGE,
+        );
+        let bind_group = layouts.create_instances(device, whole_buffer(&buffer));
         Self {
-            buffer: create_buffer(
-                device,
-                "instance_buffer",
-                capacity,
-                wgpu::BufferUsages::STORAGE,
-            ),
+            buffer,
+            bind_group,
+            textured_bind_groups: RefCell::default(),
             capacity,
             maximum_size,
-            alignment: device.limits().min_storage_buffer_offset_alignment as u64,
         }
     }
 
-    pub(super) fn alignment(&self) -> u64 {
-        self.alignment
-    }
-
-    pub(super) fn ensure_capacity(&mut self, device: &wgpu::Device, required: u64) -> bool {
+    pub(super) fn ensure_capacity(
+        &mut self,
+        device: &wgpu::Device,
+        layouts: &WgpuBindGroupLayouts,
+        required: u64,
+    ) -> bool {
         if required <= self.capacity {
             return true;
         }
@@ -203,6 +265,8 @@ impl InstanceBufferArena {
             self.capacity,
             wgpu::BufferUsages::STORAGE,
         );
+        self.bind_group = layouts.create_instances(device, whole_buffer(&self.buffer));
+        *self.textured_bind_groups.get_mut() = TexturedBindGroups::default();
         log::info!("increased instance buffer size to {}", self.capacity);
         true
     }
@@ -224,16 +288,72 @@ impl InstanceBufferArena {
             staging,
             cursor: 0,
             size: required,
-            alignment: self.alignment,
         })
     }
 
-    pub(super) fn binding(&self, slice: BufferSlice) -> wgpu::BufferBinding<'_> {
-        wgpu::BufferBinding {
-            buffer: &self.buffer,
-            offset: slice.offset,
-            size: Some(slice.size),
+    pub(super) fn bind_group(&self) -> &wgpu::BindGroup {
+        &self.bind_group
+    }
+
+    pub(super) fn textured_bind_group(
+        &self,
+        device: &wgpu::Device,
+        layouts: &WgpuBindGroupLayouts,
+        texture_id: AtlasTextureId,
+        atlas_generation: u64,
+        texture: &wgpu::TextureView,
+        sampler: &wgpu::Sampler,
+    ) -> wgpu::BindGroup {
+        let mut cache = self.textured_bind_groups.borrow_mut();
+        if cache.atlas_generation != Some(atlas_generation) {
+            cache.groups.clear();
+            cache.atlas_generation = Some(atlas_generation);
         }
+        cache
+            .groups
+            .entry(texture_id)
+            .or_insert_with(|| {
+                layouts.create_textured_instances(
+                    device,
+                    whole_buffer(&self.buffer),
+                    texture,
+                    sampler,
+                )
+            })
+            .clone()
+    }
+
+    pub(super) fn path_bind_group(
+        &self,
+        device: &wgpu::Device,
+        layouts: &WgpuBindGroupLayouts,
+        texture: &wgpu::TextureView,
+        sampler: &wgpu::Sampler,
+    ) -> wgpu::BindGroup {
+        let mut cache = self.textured_bind_groups.borrow_mut();
+        cache
+            .path
+            .get_or_insert_with(|| {
+                layouts.create_textured_instances(
+                    device,
+                    whole_buffer(&self.buffer),
+                    texture,
+                    sampler,
+                )
+            })
+            .clone()
+    }
+
+    pub(super) fn invalidate_texture_bindings(&self) {
+        *self.textured_bind_groups.borrow_mut() = TexturedBindGroups::default();
+    }
+}
+
+fn whole_buffer(buffer: &wgpu::Buffer) -> wgpu::BufferBinding<'_> {
+    wgpu::BufferBinding {
+        buffer,
+        offset: 0,
+        size: None,
     }
 }
 

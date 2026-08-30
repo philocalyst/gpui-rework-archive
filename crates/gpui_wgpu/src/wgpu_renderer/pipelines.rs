@@ -87,7 +87,7 @@ impl WgpuBindGroupLayouts {
             "blur_layout",
             &crate::shaders::blur::WGSL_SOURCE,
             shader::DATA_BIND_GROUP,
-            None,
+            Some(shader::DATA_BUFFER_BINDING),
         );
         Self {
             globals,
