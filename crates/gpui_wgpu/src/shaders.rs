@@ -12,24 +12,28 @@ use wgsl_rs::wgsl;
 pub mod common {
     use wgsl_rs::std::*;
 
-    #[derive(Clone, Copy, Wgsl)]
-    pub struct GlobalParams {
-        pub viewport_size: Vec2f,
-        pub premultiplied_alpha: u32,
-        pub pad: u32,
+    pub fn pi() -> f32 {
+        acos(-1.0)
     }
 
     #[derive(Clone, Copy, Wgsl)]
-    pub struct GammaParams {
+    pub struct GlobalUniforms {
+        pub viewport_size: Vec2f,
+        pub premultiplied_alpha: u32,
+        pub padding: u32,
+    }
+
+    #[derive(Clone, Copy, Wgsl)]
+    pub struct FontRasterizationUniforms {
         pub gamma_ratios: Vec4f,
         pub grayscale_enhanced_contrast: f32,
         pub subpixel_enhanced_contrast: f32,
-        pub is_bgr: u32,
-        pub pad: u32,
+        pub uses_blue_green_red_subpixel_order: u32,
+        pub padding: u32,
     }
 
-    uniform!(group(0), binding(0), GLOBALS: GlobalParams);
-    uniform!(group(0), binding(1), GAMMA_PARAMS: GammaParams);
+    uniform!(group(0), binding(0), GLOBALS: GlobalUniforms);
+    uniform!(group(0), binding(1), FONT_RASTERIZATION: FontRasterizationUniforms);
 
     #[derive(Clone, Copy, Wgsl)]
     pub struct Bounds {
@@ -69,7 +73,7 @@ pub mod common {
         pub solid: Hsla,
         pub gradient_angle_or_pattern_height: f32,
         pub colors: [LinearColorStop; 2],
-        pub pad: u32,
+        pub padding: u32,
     }
     #[derive(Clone, Copy, Wgsl)]
     pub struct AtlasTextureId {
@@ -100,21 +104,23 @@ pub mod common {
     pub fn light_on_dark_contrast(enhanced_contrast: f32, color: Vec3f) -> f32 {
         enhanced_contrast * saturate(4.0 * (0.75 - color_brightness(color)))
     }
-    pub fn enhance_contrast(alpha: f32, k: f32) -> f32 {
-        alpha * (k + 1.0) / (alpha * k + 1.0)
+    pub fn enhance_contrast(alpha: f32, contrast: f32) -> f32 {
+        alpha * (contrast + 1.0) / (alpha * contrast + 1.0)
     }
-    pub fn enhance_contrast3(alpha: Vec3f, k: f32) -> Vec3f {
-        alpha * (k + 1.0) / (alpha * k + 1.0)
+    pub fn enhance_contrast3(alpha: Vec3f, contrast: f32) -> Vec3f {
+        alpha * (contrast + 1.0) / (alpha * contrast + 1.0)
     }
-    pub fn apply_alpha_correction(a: f32, b: f32, g: Vec4f) -> f32 {
-        let brightness_adjustment = g.x * b + g.y;
-        let correction = brightness_adjustment * a + (g.z * b + g.w);
-        a + a * (1.0 - a) * correction
+    pub fn apply_alpha_correction(alpha: f32, brightness: f32, gamma_ratios: Vec4f) -> f32 {
+        let brightness_adjustment = gamma_ratios.x * brightness + gamma_ratios.y;
+        let correction =
+            brightness_adjustment * alpha + (gamma_ratios.z * brightness + gamma_ratios.w);
+        alpha + alpha * (1.0 - alpha) * correction
     }
-    pub fn apply_alpha_correction3(a: Vec3f, b: Vec3f, g: Vec4f) -> Vec3f {
-        let brightness_adjustment = g.x * b + g.y;
-        let correction = brightness_adjustment * a + (g.z * b + g.w);
-        a + a * (1.0 - a) * correction
+    pub fn apply_alpha_correction3(alpha: Vec3f, brightness: Vec3f, gamma_ratios: Vec4f) -> Vec3f {
+        let brightness_adjustment = gamma_ratios.x * brightness + gamma_ratios.y;
+        let correction =
+            brightness_adjustment * alpha + (gamma_ratios.z * brightness + gamma_ratios.w);
+        alpha + alpha * (1.0 - alpha) * correction
     }
     pub fn apply_contrast_and_gamma_correction(
         sample: f32,
@@ -272,14 +278,18 @@ pub mod common {
         vec4f(rgb.x, rgb.y, rgb.z, alpha)
     }
     pub fn gaussian(x: f32, sigma: f32) -> f32 {
-        exp(-(x * x) / (2.0 * sigma * sigma)) / (sqrt(2.0 * 3.1415926) * sigma)
+        exp(-(x * x) / (2.0 * sigma * sigma)) / (sqrt(2.0 * pi()) * sigma)
     }
-    pub fn erf(v: Vec2f) -> Vec2f {
-        let signs = sign(v);
-        let a = abs(v);
-        let r1 = 1.0 + (0.278393 + (0.230389 + (0.000972 + 0.078108 * a) * a) * a) * a;
-        let r2 = r1 * r1;
-        signs - signs / (r2 * r2)
+    pub fn erf(value: Vec2f) -> Vec2f {
+        let signs = sign(value);
+        let absolute_value = abs(value);
+        let polynomial = 1.0
+            + (0.278393
+                + (0.230389 + (0.000972 + 0.078108 * absolute_value) * absolute_value)
+                    * absolute_value)
+                * absolute_value;
+        let polynomial_squared = polynomial * polynomial;
+        signs - signs / (polynomial_squared * polynomial_squared)
     }
     pub fn blur_along_x(x: f32, y: f32, sigma: f32, corner: f32, half_size: Vec2f) -> f32 {
         let delta = min(half_size.y - corner - abs(y), 0.0);
@@ -373,9 +383,8 @@ pub mod common {
         let mut background_color = vec4f(0.0, 0.0, 0.0, 0.0);
         match background.tag {
             1 => {
-                let radians = (background.gradient_angle_or_pattern_height % 360.0 - 90.0)
-                    * 3.1415926
-                    / 180.0;
+                let radians =
+                    (background.gradient_angle_or_pattern_height % 360.0 - 90.0) * pi() / 180.0;
                 let mut direction = vec2f(cos(radians), sin(radians));
                 if bounds.size.x > bounds.size.y {
                     direction.y *= bounds.size.y / bounds.size.x;
@@ -399,13 +408,26 @@ pub mod common {
                 } else {
                     background_color = srgba_to_linear(mix(color0, color1, ratio));
                 }
+
+                // Preserve the retired desktop shaders' triangular-distributed gradient dither.
+                let seed = position * 0.6180339887;
+                let first_noise = fract(sin(dot(seed, vec2f(12.9898, 78.233))) * 43758.5453);
+                let second_noise = fract(sin(dot(seed, vec2f(39.3460, 11.135))) * 24634.6345);
+                let triangular_noise = first_noise + second_noise - 1.0;
+                background_color = background_color
+                    + vec4f(
+                        triangular_noise * 2.0 / 255.0,
+                        triangular_noise * 2.0 / 255.0,
+                        triangular_noise * 2.0 / 255.0,
+                        triangular_noise * 3.0 / 255.0,
+                    );
             }
             2 => {
                 let encoded = background.gradient_angle_or_pattern_height;
                 let pattern_width = (encoded / 65535.0) / 255.0;
                 let pattern_interval = (encoded % 65535.0) / 255.0;
                 let pattern_height = pattern_width + pattern_interval;
-                let stripe_angle = 3.1415926 / 4.0;
+                let stripe_angle = pi() / 4.0;
                 let period = pattern_height * sin(stripe_angle);
                 let rotation = mat2x2f(
                     vec2f(cos(stripe_angle), -sin(stripe_angle)),
@@ -431,13 +453,13 @@ pub mod common {
         }
         background_color
     }
-    pub fn corner_dash_velocity(dv1: f32, dv2: f32) -> f32 {
-        if dv1 == 0.0 {
-            dv2
-        } else if dv2 == 0.0 {
-            dv1
+    pub fn corner_dash_velocity(first: f32, second: f32) -> f32 {
+        if first == 0.0 {
+            second
+        } else if second == 0.0 {
+            first
         } else {
-            min(dv1, dv2)
+            min(first, second)
         }
     }
     pub fn fmod(a: f32, b: f32) -> f32 {
@@ -616,7 +638,7 @@ pub mod quad {
                 let dash_gap_per_width = 1.0;
                 let dash_period_per_width = dash_length_per_width + dash_gap_per_width;
                 let mut dash_velocity = 0.0;
-                let dv_numerator = 1.0 / dash_period_per_width;
+                let dash_velocity_numerator = 1.0 / dash_period_per_width;
 
                 if unrounded {
                     let is_horizontal = corner_center_to_point.x < corner_center_to_point.y;
@@ -625,77 +647,99 @@ pub mod quad {
                         max(quad.border_widths.right, quad.border_widths.left),
                     );
                     let border_width = select(dashed_border.y, dashed_border.x, is_horizontal);
-                    dash_velocity = dv_numerator / border_width;
+                    dash_velocity = dash_velocity_numerator / border_width;
                     t = select(point.y, point.x, is_horizontal) * dash_velocity;
                     max_t = select(size.y, size.x, is_horizontal) * dash_velocity;
                 } else {
-                    let r_tr = quad.corner_radii.top_right;
-                    let r_br = quad.corner_radii.bottom_right;
-                    let r_bl = quad.corner_radii.bottom_left;
-                    let r_tl = quad.corner_radii.top_left;
-                    let w_t = quad.border_widths.top;
-                    let w_r = quad.border_widths.right;
-                    let w_b = quad.border_widths.bottom;
-                    let w_l = quad.border_widths.left;
-                    let dv_t = select(dv_numerator / w_t, 0.0, w_t <= 0.0);
-                    let dv_r = select(dv_numerator / w_r, 0.0, w_r <= 0.0);
-                    let dv_b = select(dv_numerator / w_b, 0.0, w_b <= 0.0);
-                    let dv_l = select(dv_numerator / w_l, 0.0, w_l <= 0.0);
-                    let s_t = (size.x - r_tl - r_tr) * dv_t;
-                    let s_r = (size.y - r_tr - r_br) * dv_r;
-                    let s_b = (size.x - r_br - r_bl) * dv_b;
-                    let s_l = (size.y - r_bl - r_tl) * dv_l;
-                    let corner_velocity_tr = corner_dash_velocity(dv_t, dv_r);
-                    let corner_velocity_br = corner_dash_velocity(dv_b, dv_r);
-                    let corner_velocity_bl = corner_dash_velocity(dv_b, dv_l);
-                    let corner_velocity_tl = corner_dash_velocity(dv_t, dv_l);
-                    let c_tr = r_tr * (3.1415926 / 2.0) * corner_velocity_tr;
-                    let c_br = r_br * (3.1415926 / 2.0) * corner_velocity_br;
-                    let c_bl = r_bl * (3.1415926 / 2.0) * corner_velocity_bl;
-                    let c_tl = r_tl * (3.1415926 / 2.0) * corner_velocity_tl;
-                    let upto_tr = s_t;
-                    let upto_r = upto_tr + c_tr;
-                    let upto_br = upto_r + s_r;
-                    let upto_b = upto_br + c_br;
-                    let upto_bl = upto_b + s_b;
-                    let upto_l = upto_bl + c_bl;
-                    let upto_tl = upto_l + s_l;
-                    max_t = upto_tl + c_tl;
+                    let top_right_radius = quad.corner_radii.top_right;
+                    let bottom_right_radius = quad.corner_radii.bottom_right;
+                    let bottom_left_radius = quad.corner_radii.bottom_left;
+                    let top_left_radius = quad.corner_radii.top_left;
+                    let top_width = quad.border_widths.top;
+                    let right_width = quad.border_widths.right;
+                    let bottom_width = quad.border_widths.bottom;
+                    let left_width = quad.border_widths.left;
+                    let top_velocity =
+                        select(dash_velocity_numerator / top_width, 0.0, top_width <= 0.0);
+                    let right_velocity = select(
+                        dash_velocity_numerator / right_width,
+                        0.0,
+                        right_width <= 0.0,
+                    );
+                    let bottom_velocity = select(
+                        dash_velocity_numerator / bottom_width,
+                        0.0,
+                        bottom_width <= 0.0,
+                    );
+                    let left_velocity =
+                        select(dash_velocity_numerator / left_width, 0.0, left_width <= 0.0);
+                    let top_length = (size.x - top_left_radius - top_right_radius) * top_velocity;
+                    let right_length =
+                        (size.y - top_right_radius - bottom_right_radius) * right_velocity;
+                    let bottom_length =
+                        (size.x - bottom_right_radius - bottom_left_radius) * bottom_velocity;
+                    let left_length =
+                        (size.y - bottom_left_radius - top_left_radius) * left_velocity;
+                    let top_right_corner_velocity =
+                        corner_dash_velocity(top_velocity, right_velocity);
+                    let bottom_right_corner_velocity =
+                        corner_dash_velocity(bottom_velocity, right_velocity);
+                    let bottom_left_corner_velocity =
+                        corner_dash_velocity(bottom_velocity, left_velocity);
+                    let top_left_corner_velocity =
+                        corner_dash_velocity(top_velocity, left_velocity);
+                    let top_right_corner_length =
+                        top_right_radius * (pi() / 2.0) * top_right_corner_velocity;
+                    let bottom_right_corner_length =
+                        bottom_right_radius * (pi() / 2.0) * bottom_right_corner_velocity;
+                    let bottom_left_corner_length =
+                        bottom_left_radius * (pi() / 2.0) * bottom_left_corner_velocity;
+                    let top_left_corner_length =
+                        top_left_radius * (pi() / 2.0) * top_left_corner_velocity;
+                    let top_right_start = top_length;
+                    let right_start = top_right_start + top_right_corner_length;
+                    let bottom_right_start = right_start + right_length;
+                    let bottom_start = bottom_right_start + bottom_right_corner_length;
+                    let bottom_left_start = bottom_start + bottom_length;
+                    let left_start = bottom_left_start + bottom_left_corner_length;
+                    let top_left_start = left_start + left_length;
+                    max_t = top_left_start + top_left_corner_length;
 
                     if is_near_rounded_corner {
                         let radians = atan2(corner_center_to_point.y, corner_center_to_point.x);
                         let corner_t = radians * corner_radius;
                         if center_to_point.x >= 0.0 {
                             if center_to_point.y < 0.0 {
-                                dash_velocity = corner_velocity_tr;
-                                t = upto_r - corner_t * dash_velocity;
+                                dash_velocity = top_right_corner_velocity;
+                                t = right_start - corner_t * dash_velocity;
                             } else {
-                                dash_velocity = corner_velocity_br;
-                                t = upto_br + corner_t * dash_velocity;
+                                dash_velocity = bottom_right_corner_velocity;
+                                t = bottom_right_start + corner_t * dash_velocity;
                             }
                         } else if center_to_point.y >= 0.0 {
-                            dash_velocity = corner_velocity_bl;
-                            t = upto_l - corner_t * dash_velocity;
+                            dash_velocity = bottom_left_corner_velocity;
+                            t = left_start - corner_t * dash_velocity;
                         } else {
-                            dash_velocity = corner_velocity_tl;
-                            t = upto_tl + corner_t * dash_velocity;
+                            dash_velocity = top_left_corner_velocity;
+                            t = top_left_start + corner_t * dash_velocity;
                         }
                     } else {
                         let is_horizontal = corner_center_to_point.x < corner_center_to_point.y;
                         if is_horizontal {
                             if center_to_point.y < 0.0 {
-                                dash_velocity = dv_t;
-                                t = (point.x - r_tl) * dash_velocity;
+                                dash_velocity = top_velocity;
+                                t = (point.x - top_left_radius) * dash_velocity;
                             } else {
-                                dash_velocity = dv_b;
-                                t = upto_bl - (point.x - r_bl) * dash_velocity;
+                                dash_velocity = bottom_velocity;
+                                t = bottom_left_start
+                                    - (point.x - bottom_left_radius) * dash_velocity;
                             }
                         } else if center_to_point.x < 0.0 {
-                            dash_velocity = dv_l;
-                            t = upto_tl - (point.y - r_tl) * dash_velocity;
+                            dash_velocity = left_velocity;
+                            t = top_left_start - (point.y - top_left_radius) * dash_velocity;
                         } else {
-                            dash_velocity = dv_r;
-                            t = upto_r + (point.y - r_tr) * dash_velocity;
+                            dash_velocity = right_velocity;
+                            t = right_start + (point.y - top_right_radius) * dash_velocity;
                         }
                     }
                 }
@@ -754,7 +798,7 @@ pub mod shadow {
         pub element_bounds: Bounds,
         pub element_corner_radii: Corners,
         pub inset: u32,
-        pub pad: u32,
+        pub padding: u32,
     }
     storage!(group(1), binding(0), SHADOWS: RuntimeArray<Shadow>);
 
@@ -968,7 +1012,7 @@ pub mod underline {
     #[derive(Clone, Copy, Wgsl)]
     pub struct Underline {
         pub order: u32,
-        pub pad: u32,
+        pub padding: u32,
         pub bounds: Bounds,
         pub content_mask: Bounds,
         pub color: Hsla,
@@ -1017,12 +1061,12 @@ pub mod underline {
         }
         let underline = get!(UNDERLINES)[input.underline_id as usize];
         if underline.wavy == 0u32 {
-            return blend_color(input.color, input.color.w);
+            return blend_color(input.color, 1.0);
         }
         let half_thickness = underline.thickness * 0.5;
         let st = (input.position.xy() - underline.bounds.origin) / underline.bounds.size.y
             - vec2f(0.0, 0.5);
-        let frequency = 3.1415926 * 2.0 * underline.thickness / underline.bounds.size.y;
+        let frequency = pi() * 2.0 * underline.thickness / underline.bounds.size.y;
         let amplitude = underline.thickness * 0.8 / underline.bounds.size.y;
         let sine = sin(st.x * frequency) * amplitude;
         let derivative = cos(st.x * frequency) * amplitude * frequency;
@@ -1034,19 +1078,19 @@ pub mod underline {
                 distance_in_pixels - half_thickness,
             ),
         );
-        blend_color(input.color, alpha * input.color.w)
+        blend_color(input.color, alpha)
     }
 }
 
 #[wgsl]
-pub mod mono_sprite {
+pub mod monochrome_sprite {
     use super::common::*;
     use wgsl_rs::std::*;
 
     #[derive(Clone, Copy, Wgsl)]
     pub struct MonochromeSprite {
         pub order: u32,
-        pub pad: u32,
+        pub padding: u32,
         pub bounds: Bounds,
         pub content_mask: Bounds,
         pub color: Hsla,
@@ -1058,7 +1102,7 @@ pub mod mono_sprite {
     sampler!(group(1), binding(2), MONO_SAMPLER: Sampler);
 
     #[derive(Wgsl)]
-    pub struct MonoSpriteVarying {
+    pub struct MonochromeSpriteVarying {
         #[builtin(position)]
         pub position: Vec4f,
         #[location(0)]
@@ -1070,7 +1114,7 @@ pub mod mono_sprite {
         pub clip_distances: Vec4f,
     }
 
-    pub fn mono_tile_position(vertex: Vec2f, tile: AtlasTile) -> Vec2f {
+    pub fn monochrome_tile_position(vertex: Vec2f, tile: AtlasTile) -> Vec2f {
         let atlas_size = texture_dimensions(MONO_TEXTURE);
         (vec2f(tile.bounds.origin.x as f32, tile.bounds.origin.y as f32)
             + vertex * vec2f(tile.bounds.size.x as f32, tile.bounds.size.y as f32))
@@ -1081,12 +1125,12 @@ pub mod mono_sprite {
     pub fn vs_mono_sprite(
         #[builtin(vertex_index)] vertex_id: u32,
         #[builtin(instance_index)] instance_id: u32,
-    ) -> MonoSpriteVarying {
+    ) -> MonochromeSpriteVarying {
         let vertex = unit_vertex(vertex_id);
         let sprite = get!(MONO_SPRITES)[instance_id as usize];
-        MonoSpriteVarying {
+        MonochromeSpriteVarying {
             position: to_device_position_transformed(vertex, sprite.bounds, sprite.transformation),
-            tile_position: mono_tile_position(vertex, sprite.tile),
+            tile_position: monochrome_tile_position(vertex, sprite.tile),
             color: hsla_to_rgba(sprite.color),
             clip_distances: distance_from_clip_rect_transformed(
                 vertex,
@@ -1098,13 +1142,13 @@ pub mod mono_sprite {
     }
 
     #[fragment]
-    pub fn fs_mono_sprite(input: MonoSpriteVarying) -> Vec4f {
+    pub fn fs_mono_sprite(input: MonochromeSpriteVarying) -> Vec4f {
         let sample = texture_sample(MONO_TEXTURE, MONO_SAMPLER, input.tile_position).x;
         let corrected = apply_contrast_and_gamma_correction(
             sample,
             input.color.rgb(),
-            get!(GAMMA_PARAMS).grayscale_enhanced_contrast,
-            get!(GAMMA_PARAMS).gamma_ratios,
+            get!(FONT_RASTERIZATION).grayscale_enhanced_contrast,
+            get!(FONT_RASTERIZATION).gamma_ratios,
         );
         if is_clipped(input.clip_distances) {
             return vec4f(0.0, 0.0, 0.0, 0.0);
@@ -1114,14 +1158,14 @@ pub mod mono_sprite {
 }
 
 #[wgsl]
-pub mod poly_sprite {
+pub mod polychrome_sprite {
     use super::common::*;
     use wgsl_rs::std::*;
 
     #[derive(Clone, Copy, Wgsl)]
     pub struct PolychromeSprite {
         pub order: u32,
-        pub pad: u32,
+        pub padding: u32,
         pub grayscale: u32,
         pub opacity: f32,
         pub bounds: Bounds,
@@ -1134,7 +1178,7 @@ pub mod poly_sprite {
     sampler!(group(1), binding(2), POLY_SAMPLER: Sampler);
 
     #[derive(Wgsl)]
-    pub struct PolySpriteVarying {
+    pub struct PolychromeSpriteVarying {
         #[builtin(position)]
         pub position: Vec4f,
         #[location(0)]
@@ -1146,7 +1190,7 @@ pub mod poly_sprite {
         pub clip_distances: Vec4f,
     }
 
-    pub fn poly_tile_position(vertex: Vec2f, tile: AtlasTile) -> Vec2f {
+    pub fn polychrome_tile_position(vertex: Vec2f, tile: AtlasTile) -> Vec2f {
         let atlas_size = texture_dimensions(POLY_TEXTURE);
         (vec2f(tile.bounds.origin.x as f32, tile.bounds.origin.y as f32)
             + vertex * vec2f(tile.bounds.size.x as f32, tile.bounds.size.y as f32))
@@ -1157,19 +1201,19 @@ pub mod poly_sprite {
     pub fn vs_poly_sprite(
         #[builtin(vertex_index)] vertex_id: u32,
         #[builtin(instance_index)] instance_id: u32,
-    ) -> PolySpriteVarying {
+    ) -> PolychromeSpriteVarying {
         let vertex = unit_vertex(vertex_id);
         let sprite = get!(POLY_SPRITES)[instance_id as usize];
-        PolySpriteVarying {
+        PolychromeSpriteVarying {
             position: to_device_position(vertex, sprite.bounds),
-            tile_position: poly_tile_position(vertex, sprite.tile),
+            tile_position: polychrome_tile_position(vertex, sprite.tile),
             sprite_id: instance_id,
             clip_distances: distance_from_clip_rect(vertex, sprite.bounds, sprite.content_mask),
         }
     }
 
     #[fragment]
-    pub fn fs_poly_sprite(input: PolySpriteVarying) -> Vec4f {
+    pub fn fs_poly_sprite(input: PolychromeSpriteVarying) -> Vec4f {
         let sample = texture_sample(POLY_TEXTURE, POLY_SAMPLER, input.tile_position);
         if is_clipped(input.clip_distances) {
             return vec4f(0.0, 0.0, 0.0, 0.0);
@@ -1194,15 +1238,15 @@ pub mod surface {
     use wgsl_rs::std::*;
 
     #[derive(Clone, Copy, Wgsl)]
-    pub struct SurfaceParams {
+    pub struct SurfaceUniforms {
         pub bounds: Bounds,
         pub content_mask: Bounds,
-        pub yuv: u32,
+        pub uses_yuv_color: u32,
         pub pad0: u32,
         pub pad1: u32,
         pub pad2: u32,
     }
-    uniform!(group(1), binding(0), SURFACE_LOCALS: SurfaceParams);
+    uniform!(group(1), binding(0), SURFACE_LOCALS: SurfaceUniforms);
     texture!(group(1), binding(1), SURFACE_TEXTURE: Texture2D<f32>);
     texture!(group(1), binding(2), SURFACE_CHROMA_TEXTURE: Texture2D<f32>);
     sampler!(group(1), binding(3), SURFACE_SAMPLER: Sampler);
@@ -1236,8 +1280,8 @@ pub mod surface {
         if is_clipped(input.clip_distances) {
             return vec4f(0.0, 0.0, 0.0, 0.0);
         }
-        if get!(SURFACE_LOCALS).yuv != 0u32 {
-            let y = texture_sample_level(
+        if get!(SURFACE_LOCALS).uses_yuv_color != 0u32 {
+            let luma = texture_sample_level(
                 SURFACE_TEXTURE,
                 SURFACE_SAMPLER,
                 input.texture_position,
@@ -1252,9 +1296,9 @@ pub mod surface {
             )
             .xy();
             return vec4f(
-                y + 1.4020 * chroma.y - 0.7010,
-                y - 0.3441 * chroma.x - 0.7141 * chroma.y + 0.5291,
-                y + 1.7720 * chroma.x - 0.8860,
+                luma + 1.4020 * chroma.y - 0.7010,
+                luma - 0.3441 * chroma.x - 0.7141 * chroma.y + 0.5291,
+                luma + 1.7720 * chroma.x - 0.8860,
                 1.0,
             );
         }
@@ -1273,7 +1317,7 @@ pub mod blur {
     use wgsl_rs::std::*;
 
     #[derive(Clone, Copy, Wgsl)]
-    pub struct BlurParams {
+    pub struct BlurUniforms {
         pub bounds: Bounds,
         pub content_mask: Bounds,
         pub corner_radii: Vec4f,
@@ -1285,7 +1329,7 @@ pub mod blur {
         pub clip_rounded: f32,
         pub downsample: f32,
     }
-    uniform!(group(1), binding(0), BLUR_LOCALS: BlurParams);
+    uniform!(group(1), binding(0), BLUR_LOCALS: BlurUniforms);
     texture!(group(1), binding(1), BLUR_TEXTURE: Texture2D<f32>);
     sampler!(group(1), binding(2), BLUR_SAMPLER: Sampler);
 
@@ -1294,20 +1338,25 @@ pub mod blur {
         #[builtin(position)]
         pub position: Vec4f,
         #[location(0)]
-        pub uv: Vec2f,
+        pub texture_coordinates: Vec2f,
         #[location(3)]
         pub clip_distances: Vec4f,
     }
 
     #[vertex]
     pub fn vs_blur_fullscreen(#[builtin(vertex_index)] vertex_id: u32) -> BlurVarying {
-        let uv = vec2f(
+        let texture_coordinates = vec2f(
             ((vertex_id << 1u32) & 2u32) as f32,
             (vertex_id & 2u32) as f32,
         );
         BlurVarying {
-            position: vec4f(uv.x * 2.0 - 1.0, 1.0 - uv.y * 2.0, 0.0, 1.0),
-            uv,
+            position: vec4f(
+                texture_coordinates.x * 2.0 - 1.0,
+                1.0 - texture_coordinates.y * 2.0,
+                0.0,
+                1.0,
+            ),
+            texture_coordinates,
             clip_distances: vec4f(1.0, 1.0, 1.0, 1.0),
         }
     }
@@ -1319,7 +1368,7 @@ pub mod blur {
             let source_uv = (destination * 2.0 + 1.0) / get!(GLOBALS).viewport_size;
             return texture_sample_level(BLUR_TEXTURE, BLUR_SAMPLER, source_uv, 0.0);
         }
-        texture_sample_level(BLUR_TEXTURE, BLUR_SAMPLER, input.uv, 0.0)
+        texture_sample_level(BLUR_TEXTURE, BLUR_SAMPLER, input.texture_coordinates, 0.0)
     }
 
     #[fragment]
@@ -1333,8 +1382,11 @@ pub mod blur {
         while i <= taps {
             let offset = i as f32 * step;
             let weight = gaussian(offset, sigma);
-            let uv = input.uv + get!(BLUR_LOCALS).direction * offset;
-            color = color + texture_sample_level(BLUR_TEXTURE, BLUR_SAMPLER, uv, 0.0) * weight;
+            let texture_coordinates =
+                input.texture_coordinates + get!(BLUR_LOCALS).direction * offset;
+            color = color
+                + texture_sample_level(BLUR_TEXTURE, BLUR_SAMPLER, texture_coordinates, 0.0)
+                    * weight;
             weight_sum += weight;
             i += 1;
         }
@@ -1346,7 +1398,7 @@ pub mod blur {
         let vertex = unit_vertex(vertex_id);
         BlurVarying {
             position: to_device_position(vertex, get!(BLUR_LOCALS).bounds),
-            uv: vertex,
+            texture_coordinates: vertex,
             clip_distances: distance_from_clip_rect(
                 vertex,
                 get!(BLUR_LOCALS).bounds,
@@ -1395,10 +1447,10 @@ pub mod blur {
 #[wgsl]
 pub mod base {
     use super::blur::*;
-    use super::mono_sprite::*;
+    use super::monochrome_sprite::*;
     use super::path::*;
     use super::path_rasterization::*;
-    use super::poly_sprite::*;
+    use super::polychrome_sprite::*;
     use super::quad::*;
     use super::shadow::*;
     use super::surface::*;
@@ -1416,7 +1468,7 @@ pub mod subpixel_sprite {
     #[derive(Clone, Copy, Wgsl)]
     pub struct SubpixelSprite {
         pub order: u32,
-        pub pad: u32,
+        pub padding: u32,
         pub bounds: Bounds,
         pub content_mask: Bounds,
         pub color: Hsla,
@@ -1483,14 +1535,14 @@ pub mod subpixel_sprite {
     #[fragment]
     pub fn fs_subpixel_sprite(input: SubpixelSpriteOutput) -> SubpixelSpriteFragmentOutput {
         let mut sample = texture_sample(SPRITE_TEXTURE, SPRITE_SAMPLER, input.tile_position).rgb();
-        if get!(GAMMA_PARAMS).is_bgr != 0u32 {
+        if get!(FONT_RASTERIZATION).uses_blue_green_red_subpixel_order != 0u32 {
             sample = sample.bgr();
         }
         let alpha_corrected = apply_contrast_and_gamma_correction3(
             sample,
             input.color.rgb(),
-            get!(GAMMA_PARAMS).subpixel_enhanced_contrast,
-            get!(GAMMA_PARAMS).gamma_ratios,
+            get!(FONT_RASTERIZATION).subpixel_enhanced_contrast,
+            get!(FONT_RASTERIZATION).gamma_ratios,
         );
         if input.clip_distances.x < 0.0
             || input.clip_distances.y < 0.0
@@ -1519,4 +1571,63 @@ pub mod subpixel_sprite {
 fn validates_subpixel_shader() {
     let generated = subpixel_sprite::WGSL_SOURCE.wgsl_source().unwrap();
     wgsl_rs::validate_wgsl_source(&format!("enable dual_source_blending;\n{generated}")).unwrap();
+}
+
+#[cfg(test)]
+#[test]
+fn linear_gradients_preserve_native_dithering() {
+    use common::*;
+    use wgsl_rs::std::*;
+
+    let color = Hsla {
+        h: 0.0,
+        s: 0.0,
+        l: 0.5,
+        a: 0.5,
+    };
+    let background = Background {
+        tag: 1,
+        color_space: 0,
+        solid: color,
+        gradient_angle_or_pattern_height: 90.0,
+        colors: [
+            LinearColorStop {
+                color,
+                percentage: 0.0,
+            },
+            LinearColorStop {
+                color,
+                percentage: 1.0,
+            },
+        ],
+        padding: 0,
+    };
+    let bounds = Bounds {
+        origin: vec2f(0.0, 0.0),
+        size: vec2f(100.0, 100.0),
+    };
+    let prepared = prepare_gradient_color(
+        background.tag,
+        background.color_space,
+        background.solid,
+        background.colors,
+    );
+    let first = gradient_color(
+        background,
+        vec2f(10.0, 10.0),
+        bounds,
+        prepared.solid,
+        prepared.color0,
+        prepared.color1,
+    );
+    let second = gradient_color(
+        background,
+        vec2f(11.0, 10.0),
+        bounds,
+        prepared.solid,
+        prepared.color0,
+        prepared.color1,
+    );
+
+    assert_ne!(first.w, second.w);
 }

@@ -18,8 +18,7 @@ use smallvec::SmallVec;
 use windows::{
     Win32::{
         Foundation::*,
-        Graphics::Dwm::*,
-        Graphics::Gdi::*,
+        Graphics::{DirectWrite::*, Dwm::*, Gdi::*},
         System::{
             Com::*, Diagnostics::Debug::MessageBeep, LibraryLoader::*, Ole::*, SystemServices::*,
         },
@@ -32,7 +31,7 @@ use crate::direct_manipulation::DirectManipulationHandler;
 use crate::*;
 use gpui::*;
 
-use gpui_wgpu::{WgpuRenderer, WgpuSurfaceConfig, wgpu};
+use gpui_wgpu::{FontRasterizationSettings, SubpixelOrder, WgpuRenderer, WgpuSurfaceConfig, wgpu};
 
 pub(crate) struct WindowsWindow(pub Rc<WindowsWindowInner>);
 
@@ -133,7 +132,7 @@ impl WindowsWindowState {
         };
         let border_offset = WindowBorderOffset::default();
         let restore_from_minimized = None;
-        let renderer = WgpuRenderer::new(
+        let mut renderer = WgpuRenderer::new(
             renderer_context,
             &RawWindow { hwnd },
             WgpuSurfaceConfig {
@@ -145,6 +144,9 @@ impl WindowsWindowState {
             gpu_requirements,
         )
         .context("Creating Wgpu renderer")?;
+        if let Some(settings) = system_font_rasterization_settings().log_err() {
+            renderer.set_font_rasterization_settings(settings);
+        }
         let callbacks = Callbacks::default();
         let input_handler = None;
         let pending_surrogate = None;
@@ -599,6 +601,27 @@ impl rwh::HasDisplayHandle for RawWindow {
     fn display_handle(&self) -> std::result::Result<rwh::DisplayHandle<'_>, rwh::HandleError> {
         Ok(rwh::DisplayHandle::windows())
     }
+}
+
+fn system_font_rasterization_settings() -> Result<FontRasterizationSettings> {
+    let factory: IDWriteFactory5 = unsafe { DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED) }
+        .context("creating the shared DirectWrite factory")?;
+    let rendering_parameters: IDWriteRenderingParams1 = unsafe { factory.CreateRenderingParams() }
+        .context("reading the system DirectWrite rendering parameters")?
+        .cast()
+        .context("querying DirectWrite rendering parameters version 1")?;
+    let subpixel_order =
+        if unsafe { rendering_parameters.GetPixelGeometry() } == DWRITE_PIXEL_GEOMETRY_BGR {
+            SubpixelOrder::BlueGreenRed
+        } else {
+            SubpixelOrder::RedGreenBlue
+        };
+    Ok(FontRasterizationSettings::new(
+        unsafe { rendering_parameters.GetGamma() },
+        unsafe { rendering_parameters.GetGrayscaleEnhancedContrast() },
+        unsafe { rendering_parameters.GetEnhancedContrast() },
+        subpixel_order,
+    ))
 }
 
 impl rwh::HasWindowHandle for WindowsWindow {

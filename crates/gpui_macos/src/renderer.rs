@@ -1,5 +1,7 @@
 use gpui::{DevicePixels, Size};
-use gpui_wgpu::{GpuContext, WgpuDeviceRequirements, WgpuRenderer, WgpuSurfaceConfig};
+use gpui_wgpu::{
+    FontRasterizationSettings, GpuContext, WgpuDeviceRequirements, WgpuRenderer, WgpuSurfaceConfig,
+};
 use raw_window_handle as rwh;
 use std::{ffi::c_void, ptr::NonNull};
 
@@ -51,7 +53,7 @@ pub(crate) unsafe fn new_renderer(
 ) -> Renderer {
     // SAFETY: MacWindow owns the NSView and destroys the renderer before releasing it.
     let window = unsafe { RawWindow::new(native_view) };
-    WgpuRenderer::new(
+    let mut renderer = WgpuRenderer::new(
         context,
         &window,
         WgpuSurfaceConfig {
@@ -62,5 +64,7 @@ pub(crate) unsafe fn new_renderer(
         None,
         requirements,
     )
-    .expect("failed to create macOS WGPU renderer")
+    .expect("failed to create macOS WGPU renderer");
+    renderer.set_font_rasterization_settings(FontRasterizationSettings::uncorrected());
+    renderer
 }
