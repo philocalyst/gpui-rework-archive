@@ -478,8 +478,7 @@ impl Background {
                 BackgroundKind::PatternSlash {
                     color: self.solid.into(),
                     width: (packed / PATTERN_PACKING_RADIX).floor() / PATTERN_COMPONENT_SCALE,
-                    interval: (packed.rem_euclid(PATTERN_PACKING_RADIX))
-                        / PATTERN_COMPONENT_SCALE,
+                    interval: (packed.rem_euclid(PATTERN_PACKING_RADIX)) / PATTERN_COMPONENT_SCALE,
                 }
             }
             BackgroundTag::Checkerboard => BackgroundKind::Checkerboard {

@@ -1,3 +1,4 @@
+use crate::shaders::interface as shader_interface;
 use crate::shaders::{
     blur::BlurUniforms,
     common::{
@@ -5,7 +6,6 @@ use crate::shaders::{
         Corners as ShaderCorners, DownsampleMode,
     },
 };
-use crate::shaders::interface as shader_interface;
 use gpui::{
     BackdropFilter, Bounds, Corners, FilterRenderTarget, RenderCommand, ScaledPixels, Scene,
 };
@@ -22,11 +22,7 @@ impl BlurUniforms {
         empty_uniforms(DownsampleMode::HalfResolution)
     }
 
-    pub(super) fn gaussian(
-        axis: BlurAxis,
-        texture_size: [f32; 2],
-        kernel: BlurKernel,
-    ) -> Self {
+    pub(super) fn gaussian(axis: BlurAxis, texture_size: [f32; 2], kernel: BlurKernel) -> Self {
         let direction = match axis {
             BlurAxis::Horizontal => vec2f(1.0 / texture_size[0], 0.0),
             BlurAxis::Vertical => vec2f(0.0, 1.0 / texture_size[1]),
@@ -194,10 +190,8 @@ impl BlurKernel {
             return None;
         }
 
-        let ideal_sample_count =
-            (GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS * standard_deviation).ceil();
-        let sample_count =
-            (ideal_sample_count as u32).clamp(1, MAX_GAUSSIAN_SAMPLES_PER_SIDE);
+        let ideal_sample_count = (GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS * standard_deviation).ceil();
+        let sample_count = (ideal_sample_count as u32).clamp(1, MAX_GAUSSIAN_SAMPLES_PER_SIDE);
         Some(Self {
             standard_deviation,
             sample_count,
@@ -251,7 +245,7 @@ impl WgpuRenderer {
         source: &wgpu::TextureView,
     ) -> wgpu::BindGroup {
         let resources = self.resources();
-        let uniform_slot = resources.filter_uniforms.write(&resources.queue, &uniforms);
+        let uniform_slot = resources.filter_uniforms.write(&uniforms);
         resources.bind_group_layouts.create_blur(
             &resources.device,
             wgpu::BufferBinding {
@@ -303,8 +297,8 @@ impl WgpuRenderer {
         let Some(kernel) = BlurKernel::for_radius(parameters.blur_radius) else {
             return;
         };
-        let full_width = self.surface_config.width;
-        let full_height = self.surface_config.height;
+        let full_width = self.target.width();
+        let full_height = self.target.height();
         let blur_size = [
             (full_width / BLUR_DOWNSAMPLE_FACTOR).max(1) as f32,
             (full_height / BLUR_DOWNSAMPLE_FACTOR).max(1) as f32,

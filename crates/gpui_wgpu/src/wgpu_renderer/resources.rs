@@ -1,0 +1,361 @@
+use std::{
+    num::NonZeroU64,
+    sync::{Arc, Mutex},
+};
+
+use gpui::{MAX_FILTER_GROUP_DEPTH, Scene};
+
+use crate::{
+    WgpuContext,
+    shaders::{
+        blur::BlurUniforms,
+        common::{FontRasterizationUniforms, GlobalUniforms},
+        surface::SurfaceUniforms,
+    },
+};
+
+use super::{
+    WgpuRenderer,
+    buffers::{DynamicUniformBuffer, InstanceBufferArena},
+    filters::{BLUR_DOWNSAMPLE_FACTOR, FrameUniformRequirements},
+    pipelines::{WgpuBindGroupLayouts, WgpuPipelines},
+    settings::RenderingParameters,
+};
+
+const INITIAL_FILTER_UNIFORM_CAPACITY: u64 = 256;
+const INITIAL_SURFACE_UNIFORM_CAPACITY: u64 = 64;
+
+/// Device-owned state that is replaced atomically during GPU recovery.
+pub(super) struct WgpuResources {
+    pub(super) device: Arc<wgpu::Device>,
+    pub(super) queue: Arc<wgpu::Queue>,
+    pub(super) surface: Option<wgpu::Surface<'static>>,
+    pub(super) pipelines: WgpuPipelines,
+    pub(super) bind_group_layouts: WgpuBindGroupLayouts,
+    pub(super) atlas_sampler: wgpu::Sampler,
+    pub(super) surface_sampler: wgpu::Sampler,
+    pub(super) surface_uniforms: DynamicUniformBuffer<SurfaceUniforms>,
+    #[cfg(target_os = "macos")]
+    pub(super) core_video_texture_cache: core_video::metal_texture_cache::CVMetalTextureCache,
+    pub(super) filter_uniforms: DynamicUniformBuffer<BlurUniforms>,
+    pub(super) globals_buffer: wgpu::Buffer,
+    pub(super) globals_bind_group: wgpu::BindGroup,
+    pub(super) path_globals_bind_group: wgpu::BindGroup,
+    pub(super) instances: InstanceBufferArena,
+    pub(super) path_intermediate_texture: Option<wgpu::Texture>,
+    pub(super) path_intermediate_view: Option<wgpu::TextureView>,
+    pub(super) path_msaa_texture: Option<wgpu::Texture>,
+    pub(super) path_msaa_view: Option<wgpu::TextureView>,
+    pub(super) scene_color_texture: Option<wgpu::Texture>,
+    pub(super) scene_color_view: Option<wgpu::TextureView>,
+    pub(super) blur_ping_texture: Option<wgpu::Texture>,
+    pub(super) blur_ping_view: Option<wgpu::TextureView>,
+    pub(super) blur_pong_texture: Option<wgpu::Texture>,
+    pub(super) blur_pong_view: Option<wgpu::TextureView>,
+    pub(super) filter_group_textures: Vec<wgpu::Texture>,
+    pub(super) filter_group_views: Vec<wgpu::TextureView>,
+}
+
+pub(super) struct ResourceMetadata {
+    pub(super) path_globals_offset: u64,
+    pub(super) gamma_offset: u64,
+    pub(super) maximum_uniform_buffer_size: u64,
+    pub(super) last_error: Arc<Mutex<Option<String>>>,
+}
+
+impl WgpuResources {
+    pub(super) fn new(
+        context: &WgpuContext,
+        surface: Option<wgpu::Surface<'static>>,
+        surface_config: &wgpu::SurfaceConfiguration,
+        rendering: &RenderingParameters,
+        dual_source_blending: bool,
+    ) -> anyhow::Result<(Self, ResourceMetadata)> {
+        let device = Arc::clone(&context.device);
+        let queue = Arc::clone(&context.queue);
+        let bind_group_layouts = WgpuBindGroupLayouts::new(&device);
+        let pipelines = WgpuPipelines::new(
+            &device,
+            &bind_group_layouts,
+            surface_config.format,
+            surface_config.alpha_mode,
+            rendering.path_sample_count,
+            dual_source_blending,
+        );
+        let linear_sampler = |label| {
+            device.create_sampler(&wgpu::SamplerDescriptor {
+                label: Some(label),
+                mag_filter: wgpu::FilterMode::Linear,
+                min_filter: wgpu::FilterMode::Linear,
+                ..Default::default()
+            })
+        };
+        let atlas_sampler = linear_sampler("atlas_sampler");
+        let surface_sampler = linear_sampler("surface_sampler");
+
+        let uniform_alignment = device.limits().min_uniform_buffer_offset_alignment as u64;
+        let surface_uniforms = DynamicUniformBuffer::new(
+            &device,
+            "surface_uniforms",
+            INITIAL_SURFACE_UNIFORM_CAPACITY,
+            uniform_alignment,
+        );
+        let filter_uniforms = DynamicUniformBuffer::new(
+            &device,
+            "filter_uniforms",
+            INITIAL_FILTER_UNIFORM_CAPACITY,
+            uniform_alignment,
+        );
+        let globals_size = std::mem::size_of::<GlobalUniforms>() as u64;
+        let gamma_size = std::mem::size_of::<FontRasterizationUniforms>() as u64;
+        let path_globals_offset = globals_size.next_multiple_of(uniform_alignment);
+        let gamma_offset = (path_globals_offset + globals_size).next_multiple_of(uniform_alignment);
+        let globals_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("globals_buffer"),
+            size: gamma_offset + gamma_size,
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        });
+        let create_globals = |label, offset| {
+            bind_group_layouts.create_globals(
+                &device,
+                label,
+                wgpu::BufferBinding {
+                    buffer: &globals_buffer,
+                    offset,
+                    size: NonZeroU64::new(globals_size),
+                },
+                wgpu::BufferBinding {
+                    buffer: &globals_buffer,
+                    offset: gamma_offset,
+                    size: NonZeroU64::new(gamma_size),
+                },
+            )
+        };
+        let globals_bind_group = create_globals("globals_bind_group", 0);
+        let path_globals_bind_group =
+            create_globals("path_globals_bind_group", path_globals_offset);
+        let last_error = Arc::new(Mutex::new(None));
+        let error_slot = Arc::clone(&last_error);
+        device.on_uncaptured_error(Arc::new(move |error| {
+            *error_slot.lock().unwrap() = Some(error.to_string());
+        }));
+        #[cfg(target_os = "macos")]
+        let core_video_texture_cache = create_core_video_texture_cache(&device)?;
+
+        let metadata = ResourceMetadata {
+            path_globals_offset,
+            gamma_offset,
+            maximum_uniform_buffer_size: device.limits().max_buffer_size.min(u32::MAX as u64),
+            last_error,
+        };
+        let resources = Self {
+            instances: InstanceBufferArena::new(&device),
+            device,
+            queue,
+            surface,
+            pipelines,
+            bind_group_layouts,
+            atlas_sampler,
+            surface_sampler,
+            surface_uniforms,
+            #[cfg(target_os = "macos")]
+            core_video_texture_cache,
+            filter_uniforms,
+            globals_buffer,
+            globals_bind_group,
+            path_globals_bind_group,
+            path_intermediate_texture: None,
+            path_intermediate_view: None,
+            path_msaa_texture: None,
+            path_msaa_view: None,
+            scene_color_texture: None,
+            scene_color_view: None,
+            blur_ping_texture: None,
+            blur_ping_view: None,
+            blur_pong_texture: None,
+            blur_pong_view: None,
+            filter_group_textures: Vec::new(),
+            filter_group_views: Vec::new(),
+        };
+        Ok((resources, metadata))
+    }
+
+    pub(super) fn invalidate_intermediate_textures(&mut self) {
+        self.path_intermediate_texture = None;
+        self.path_intermediate_view = None;
+        self.path_msaa_texture = None;
+        self.path_msaa_view = None;
+        self.scene_color_texture = None;
+        self.scene_color_view = None;
+        self.blur_ping_texture = None;
+        self.blur_ping_view = None;
+        self.blur_pong_texture = None;
+        self.blur_pong_view = None;
+        self.filter_group_textures.clear();
+        self.filter_group_views.clear();
+    }
+
+    pub(super) fn finish_frame_uploads(&self) {
+        self.filter_uniforms.finish_upload();
+        self.surface_uniforms.finish_upload();
+    }
+}
+
+impl WgpuRenderer {
+    pub(super) fn ensure_intermediate_textures(&mut self) {
+        if self.resources().path_intermediate_texture.is_some() {
+            return;
+        }
+        let format = self.target.format();
+        let width = self.target.width();
+        let height = self.target.height();
+        let sample_count = self.rendering_params.path_sample_count;
+        let resources = self.resources_mut();
+        let (texture, view) = sampled_render_texture(&resources.device, format, width, height);
+        resources.path_intermediate_texture = Some(texture);
+        resources.path_intermediate_view = Some(view);
+        if let Some((texture, view)) =
+            msaa_texture(&resources.device, format, width, height, sample_count)
+        {
+            resources.path_msaa_texture = Some(texture);
+            resources.path_msaa_view = Some(view);
+        }
+    }
+
+    pub(super) fn ensure_blur_textures(&mut self) {
+        if self.resources().scene_color_texture.is_some() {
+            return;
+        }
+        let format = self.target.format();
+        let width = self.target.width();
+        let height = self.target.height();
+        let blur_width = (width / BLUR_DOWNSAMPLE_FACTOR).max(1);
+        let blur_height = (height / BLUR_DOWNSAMPLE_FACTOR).max(1);
+        let resources = self.resources_mut();
+
+        let (texture, view) = sampled_render_texture(&resources.device, format, width, height);
+        resources.scene_color_texture = Some(texture);
+        resources.scene_color_view = Some(view);
+        let (texture, view) =
+            sampled_render_texture(&resources.device, format, blur_width, blur_height);
+        resources.blur_ping_texture = Some(texture);
+        resources.blur_ping_view = Some(view);
+        let (texture, view) =
+            sampled_render_texture(&resources.device, format, blur_width, blur_height);
+        resources.blur_pong_texture = Some(texture);
+        resources.blur_pong_view = Some(view);
+
+        for _ in 0..MAX_FILTER_GROUP_DEPTH {
+            let (texture, view) = sampled_render_texture(&resources.device, format, width, height);
+            resources.filter_group_textures.push(texture);
+            resources.filter_group_views.push(view);
+        }
+    }
+
+    pub(super) fn ensure_uniform_capacity(&mut self, scene: &Scene) -> bool {
+        let requirements = FrameUniformRequirements::for_scene(scene);
+        let maximum_buffer_size = self.maximum_uniform_buffer_size;
+        let resources = self.resources_mut();
+        let filters = resources.filter_uniforms.ensure_capacity(
+            &resources.device,
+            requirements.filter_count,
+            maximum_buffer_size,
+        );
+        let surfaces = resources.surface_uniforms.ensure_capacity(
+            &resources.device,
+            requirements.surface_count,
+            maximum_buffer_size,
+        );
+        if !filters || !surfaces {
+            log::error!(
+                "scene uniform data exceeds the GPU buffer limit: {} filter uniforms and {} surface uniforms",
+                requirements.filter_count,
+                requirements.surface_count,
+            );
+        }
+        if !filters || !surfaces {
+            return false;
+        }
+        let filters = resources
+            .filter_uniforms
+            .begin_upload(&resources.queue, requirements.filter_count);
+        let surfaces = resources
+            .surface_uniforms
+            .begin_upload(&resources.queue, requirements.surface_count);
+        if !filters || !surfaces {
+            resources.finish_frame_uploads();
+            log::error!("failed to map frame uniform staging memory");
+            return false;
+        }
+        true
+    }
+}
+
+fn sampled_render_texture(
+    device: &wgpu::Device,
+    format: wgpu::TextureFormat,
+    width: u32,
+    height: u32,
+) -> (wgpu::Texture, wgpu::TextureView) {
+    let texture = device.create_texture(&wgpu::TextureDescriptor {
+        label: Some("sampled_render_texture"),
+        size: wgpu::Extent3d {
+            width: width.max(1),
+            height: height.max(1),
+            depth_or_array_layers: 1,
+        },
+        mip_level_count: 1,
+        sample_count: 1,
+        dimension: wgpu::TextureDimension::D2,
+        format,
+        usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING,
+        view_formats: &[],
+    });
+    let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+    (texture, view)
+}
+
+fn msaa_texture(
+    device: &wgpu::Device,
+    format: wgpu::TextureFormat,
+    width: u32,
+    height: u32,
+    sample_count: u32,
+) -> Option<(wgpu::Texture, wgpu::TextureView)> {
+    if sample_count <= 1 {
+        return None;
+    }
+    let texture = device.create_texture(&wgpu::TextureDescriptor {
+        label: Some("path_msaa"),
+        size: wgpu::Extent3d {
+            width: width.max(1),
+            height: height.max(1),
+            depth_or_array_layers: 1,
+        },
+        mip_level_count: 1,
+        sample_count,
+        dimension: wgpu::TextureDimension::D2,
+        format,
+        usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TRANSIENT,
+        view_formats: &[],
+    });
+    let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+    Some((texture, view))
+}
+
+#[cfg(target_os = "macos")]
+fn create_core_video_texture_cache(
+    device: &wgpu::Device,
+) -> anyhow::Result<core_video::metal_texture_cache::CVMetalTextureCache> {
+    use metal::foreign_types::ForeignTypeRef as _;
+
+    let hal_device = unsafe { device.as_hal::<wgpu::hal::api::Metal>() }
+        .ok_or_else(|| anyhow::anyhow!("macOS WGPU device did not expose the Metal HAL"))?;
+    let raw_device = objc2::rc::Retained::as_ptr(hal_device.raw_device())
+        .cast_mut()
+        .cast();
+    let metal_device = unsafe { metal::DeviceRef::from_ptr(raw_device) }.to_owned();
+    core_video::metal_texture_cache::CVMetalTextureCache::new(None, metal_device, None)
+        .map_err(|error| anyhow::anyhow!("failed to create CoreVideo Metal texture cache: {error}"))
+}

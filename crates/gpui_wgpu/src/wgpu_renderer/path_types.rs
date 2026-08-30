@@ -23,6 +23,7 @@ unsafe impl BufferData for PathRasterizationVertex {
     const WGSL_TYPE: &'static str = "PathRasterizationVertex";
 }
 
+#[cfg(test)]
 pub(super) const STORAGE_ABI: &[crate::shaders::interface::StorageAbi] = &[
     crate::shaders::interface::storage_abi::<PathSprite>(),
     crate::shaders::interface::storage_abi::<PathRasterizationVertex>(),
@@ -32,9 +33,7 @@ pub(super) fn rasterization_vertex_count(paths: &[Path<ScaledPixels>]) -> usize 
     paths.iter().map(|path| path.vertices.len()).sum()
 }
 
-pub(super) fn rasterization_vertices(
-    paths: &[Path<ScaledPixels>],
-) -> Vec<PathRasterizationVertex> {
+pub(super) fn rasterization_vertices(paths: &[Path<ScaledPixels>]) -> Vec<PathRasterizationVertex> {
     paths
         .iter()
         .flat_map(|path| {
@@ -55,7 +54,10 @@ pub(super) fn sprites(paths: &[Path<ScaledPixels>]) -> Vec<PathSprite> {
     let Some(first_path) = paths.first() else {
         return Vec::new();
     };
-    if paths.last().is_some_and(|path| path.order == first_path.order) {
+    if paths
+        .last()
+        .is_some_and(|path| path.order == first_path.order)
+    {
         return paths
             .iter()
             .map(|path| PathSprite {
