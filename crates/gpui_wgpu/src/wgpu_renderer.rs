@@ -118,23 +118,75 @@ struct BlurUniforms {
     corner_radii: ShaderCorners,
     /// Per-tap sampling step in texture-coordinate space.
     direction: [f32; 2],
-    /// Gaussian sigma, in the (half-resolution) blur texture's pixels.
+    /// Gaussian standard deviation, in the half-resolution blur texture's pixels.
     standard_deviation: f32,
     /// Element opacity, multiplied into the composited result.
     opacity: f32,
-    /// Number of taps to each side of center (gaussian passes only).
+    /// Number of samples to each side of center (gaussian passes only).
     sample_count: u32,
-    /// Spacing between taps in pixels; >1 lets `tap_count` taps span very large radii without
+    /// Spacing between samples in pixels; values above one let bounded sample counts span large radii without
     /// truncating the gaussian (see #6 in review).
     sample_step: f32,
-    /// 1.0 to clip the composite to the rounded rectangle (the panel has a defined shape),
-    /// 0.0 to let the blurred result fade out on its own (content `filter` — it bleeds past the
-    /// element bounds like CSS, so the fade isn't sharply truncated at the box edge).
+    /// Typed clipping policy for the composite pass.
     composite_clip: BlurCompositeClip,
-    /// 1.0 = snapped 2:1 box downsample (anchor the half-resolution grid to a fixed grid at the
-    /// origin, so a stationary element blurs identically at every window size); 0.0 = 1:1 copy
-    /// (the scene blit, which must not downsample). Downsample pass only.
+    /// Typed sampling policy for the downsample/copy pass.
     downsample_mode: DownsampleMode,
+}
+
+impl BlurUniforms {
+    fn copy() -> Self {
+        Self {
+            downsample_mode: DownsampleMode::COPY,
+            ..Self::default()
+        }
+    }
+
+    fn downsample() -> Self {
+        Self {
+            downsample_mode: DownsampleMode::HALF_RESOLUTION,
+            ..Self::default()
+        }
+    }
+
+    fn gaussian(axis: BlurAxis, texture_size: [f32; 2], kernel: BlurKernel) -> Self {
+        let direction = match axis {
+            BlurAxis::Horizontal => [1.0 / texture_size[0], 0.0],
+            BlurAxis::Vertical => [0.0, 1.0 / texture_size[1]],
+        };
+        Self {
+            direction,
+            standard_deviation: kernel.standard_deviation,
+            sample_count: kernel.sample_count,
+            sample_step: kernel.sample_step,
+            ..Self::default()
+        }
+    }
+
+    fn composite(
+        bounds: Bounds<ScaledPixels>,
+        content_mask: Bounds<ScaledPixels>,
+        corner_radii: Corners<ScaledPixels>,
+        opacity: f32,
+        clip: FilterCompositeClip,
+    ) -> Self {
+        Self {
+            bounds: bounds.into(),
+            content_mask: content_mask.into(),
+            corner_radii: corner_radii.into(),
+            opacity,
+            composite_clip: match clip {
+                FilterCompositeClip::RoundedBounds => BlurCompositeClip::ROUNDED_BOUNDS,
+                FilterCompositeClip::ContentShape => BlurCompositeClip::NONE,
+            },
+            ..Self::default()
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+enum BlurAxis {
+    Horizontal,
+    Vertical,
 }
 
 #[repr(C)]
@@ -314,9 +366,62 @@ struct ScissorRectangle {
 }
 
 impl ScissorRectangle {
+    fn for_blurred_bounds(
+        bounds: Bounds<ScaledPixels>,
+        dilation: f32,
+        full_width: u32,
+        full_height: u32,
+    ) -> Self {
+        let downsampled_width = (full_width / BLUR_DOWNSAMPLE_FACTOR).max(1);
+        let downsampled_height = (full_height / BLUR_DOWNSAMPLE_FACTOR).max(1);
+        let minimum_x = downsampled_coordinate(
+            bounds.origin.x.0 - dilation,
+            downsampled_width,
+            EdgeRounding::OutwardMinimum,
+        );
+        let minimum_y = downsampled_coordinate(
+            bounds.origin.y.0 - dilation,
+            downsampled_height,
+            EdgeRounding::OutwardMinimum,
+        );
+        let maximum_x = downsampled_coordinate(
+            bounds.origin.x.0 + bounds.size.width.0 + dilation,
+            downsampled_width,
+            EdgeRounding::OutwardMaximum,
+        )
+        .max(minimum_x);
+        let maximum_y = downsampled_coordinate(
+            bounds.origin.y.0 + bounds.size.height.0 + dilation,
+            downsampled_height,
+            EdgeRounding::OutwardMaximum,
+        )
+        .max(minimum_y);
+        Self {
+            x: minimum_x,
+            y: minimum_y,
+            width: maximum_x - minimum_x,
+            height: maximum_y - minimum_y,
+        }
+    }
+
     fn is_empty(self) -> bool {
         self.width == 0 || self.height == 0
     }
+}
+
+#[derive(Clone, Copy)]
+enum EdgeRounding {
+    OutwardMinimum,
+    OutwardMaximum,
+}
+
+fn downsampled_coordinate(value: f32, maximum: u32, rounding: EdgeRounding) -> u32 {
+    let downsampled = value / BLUR_DOWNSAMPLE_FACTOR as f32;
+    let rounded = match rounding {
+        EdgeRounding::OutwardMinimum => downsampled.floor(),
+        EdgeRounding::OutwardMaximum => downsampled.ceil(),
+    };
+    (rounded.max(0.0) as u32).min(maximum)
 }
 
 #[derive(Clone, Copy)]
@@ -1629,8 +1734,8 @@ impl WgpuRenderer {
         let format = self.surface_config.format;
         let width = self.surface_config.width;
         let height = self.surface_config.height;
-        let blur_width = (width / 2).max(1);
-        let blur_height = (height / 2).max(1);
+        let blur_width = (width / BLUR_DOWNSAMPLE_FACTOR).max(1);
+        let blur_height = (height / BLUR_DOWNSAMPLE_FACTOR).max(1);
         let resources = self.resources_mut();
 
         let (scene_texture, scene_view) =
@@ -1899,7 +2004,7 @@ impl WgpuRenderer {
             gamma_ratios: font_rasterization.gamma_ratios,
             grayscale_enhanced_contrast: font_rasterization.grayscale_enhanced_contrast,
             subpixel_enhanced_contrast: font_rasterization.subpixel_enhanced_contrast,
-            uses_blue_green_red_subpixel_order: u32::from(
+            uses_blue_green_red_subpixel_order: ShaderBool::from(
                 self.subpixel_order == SubpixelOrder::BlueGreenRed,
             ),
             _padding: 0,
@@ -1910,18 +2015,14 @@ impl WgpuRenderer {
                 self.surface_config.width as f32,
                 self.surface_config.height as f32,
             ],
-            premultiplied_alpha: if self.surface_config.alpha_mode
-                == wgpu::CompositeAlphaMode::PreMultiplied
-            {
-                1
-            } else {
-                0
-            },
+            premultiplied_alpha: ShaderBool::from(
+                self.surface_config.alpha_mode == wgpu::CompositeAlphaMode::PreMultiplied,
+            ),
             _padding: 0,
         };
 
         let path_globals = GlobalUniforms {
-            premultiplied_alpha: 0,
+            premultiplied_alpha: ShaderBool::default(),
             ..globals
         };
 
@@ -2291,9 +2392,9 @@ impl WgpuRenderer {
             bounds: surface.bounds.into(),
             content_mask: surface.content_mask.bounds.into(),
             color_format: if uses_yuv_color {
-                SurfaceColorFormat::Yuv
+                SurfaceColorFormat::YUV
             } else {
-                SurfaceColorFormat::Rgba
+                SurfaceColorFormat::RGBA
             },
             _padding: [0; 3],
         };
@@ -2522,40 +2623,18 @@ impl WgpuRenderer {
         };
         let full_width = self.surface_config.width;
         let full_height = self.surface_config.height;
-        let blur_width = (full_width / 2).max(1) as f32;
-        let blur_height = (full_height / 2).max(1) as f32;
+        let blur_width = (full_width / BLUR_DOWNSAMPLE_FACTOR).max(1) as f32;
+        let blur_height = (full_height / BLUR_DOWNSAMPLE_FACTOR).max(1) as f32;
 
-        // Limit the half-res passes to the element bounds dilated by the kernel radius (3·sigma,
+        // Limit the half-res passes to the element bounds dilated by the kernel radius,
         // full-res) — outside that the composite never samples, so there's no reason to blur it.
-        let dilation = 3.0 * parameters.blur_radius;
-        let half_width = (full_width / 2).max(1);
-        let half_height = (full_height / 2).max(1);
-        let left = (((parameters.bounds.origin.x.0 - dilation) * 0.5)
-            .floor()
-            .max(0.0) as u32)
-            .min(half_width);
-        let top = (((parameters.bounds.origin.y.0 - dilation) * 0.5)
-            .floor()
-            .max(0.0) as u32)
-            .min(half_height);
-        let right = ((((parameters.bounds.origin.x.0 + parameters.bounds.size.width.0 + dilation)
-            * 0.5)
-            .ceil()
-            .max(0.0) as u32)
-            .min(half_width))
-        .max(left);
-        let bottom =
-            ((((parameters.bounds.origin.y.0 + parameters.bounds.size.height.0 + dilation) * 0.5)
-                .ceil()
-                .max(0.0) as u32)
-                .min(half_height))
-            .max(top);
-        let scissor = ScissorRectangle {
-            x: left,
-            y: top,
-            width: right - left,
-            height: bottom - top,
-        };
+        let dilation = GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS * parameters.blur_radius;
+        let scissor = ScissorRectangle::for_blurred_bounds(
+            parameters.bounds,
+            dilation,
+            full_width,
+            full_height,
+        );
         if scissor.is_empty() {
             return;
         }
@@ -2579,10 +2658,7 @@ impl WgpuRenderer {
             &self.resources().pipelines.blur_downsample,
             &horizontal_target,
             source,
-            BlurUniforms {
-                downsample: 1.0,
-                ..Default::default()
-            },
+            BlurUniforms::downsample(),
             scissor,
         );
         self.run_blur_pass(
@@ -2591,13 +2667,11 @@ impl WgpuRenderer {
             &self.resources().pipelines.blur,
             &vertical_target,
             &horizontal_target,
-            BlurUniforms {
-                direction: [1.0 / blur_width, 0.0],
-                sigma: kernel.sigma,
-                tap_count: kernel.tap_count,
-                tap_step: kernel.tap_step,
-                ..Default::default()
-            },
+            BlurUniforms::gaussian(
+                BlurAxis::Horizontal,
+                [blur_width, blur_height],
+                kernel,
+            ),
             scissor,
         );
         self.run_blur_pass(
@@ -2606,13 +2680,7 @@ impl WgpuRenderer {
             &self.resources().pipelines.blur,
             &horizontal_target,
             &vertical_target,
-            BlurUniforms {
-                direction: [0.0, 1.0 / blur_height],
-                sigma: kernel.sigma,
-                tap_count: kernel.tap_count,
-                tap_step: kernel.tap_step,
-                ..Default::default()
-            },
+            BlurUniforms::gaussian(BlurAxis::Vertical, [blur_width, blur_height], kernel),
             scissor,
         );
 
@@ -2626,19 +2694,13 @@ impl WgpuRenderer {
         } else {
             parameters.bounds.dilate(ScaledPixels(dilation))
         };
-        let uniforms = BlurUniforms {
-            bounds: composite_bounds.into(),
-            content_mask: parameters.content_mask.into(),
-            corner_radii: [
-                parameters.corner_radii.top_left.0,
-                parameters.corner_radii.top_right.0,
-                parameters.corner_radii.bottom_right.0,
-                parameters.corner_radii.bottom_left.0,
-            ],
-            opacity: parameters.opacity,
-            clip_rounded: if clips_to_rounded_bounds { 1.0 } else { 0.0 },
-            ..Default::default()
-        };
+        let uniforms = BlurUniforms::composite(
+            composite_bounds,
+            parameters.content_mask,
+            parameters.corner_radii,
+            parameters.opacity,
+            parameters.clip,
+        );
         let bind_group = self.make_blur_bind_group(uniforms, &horizontal_target);
         let resources = self.resources();
         let mut pass =
@@ -2678,7 +2740,7 @@ impl WgpuRenderer {
         source: &wgpu::TextureView,
         frame_view: &wgpu::TextureView,
     ) {
-        let bind_group = self.make_blur_bind_group(BlurUniforms::default(), source);
+        let bind_group = self.make_blur_bind_group(BlurUniforms::copy(), source);
         let resources = self.resources();
         let mut pass = begin_color_render_pass(
             encoder,
@@ -3542,9 +3604,9 @@ mod tests {
     #[test]
     fn large_blur_radii_expand_tap_spacing_instead_of_truncating_the_kernel() {
         let kernel = BlurKernel::for_radius(100.0).expect("positive radii have a blur kernel");
-        assert_eq!(kernel.sigma, 50.0);
-        assert_eq!(kernel.tap_count, 32.0);
-        assert!(kernel.tap_step > 4.0);
+        assert_eq!(kernel.standard_deviation, 50.0);
+        assert_eq!(kernel.sample_count, MAX_GAUSSIAN_SAMPLES_PER_SIDE);
+        assert!(kernel.sample_step > 4.0);
     }
 
     #[cfg(any(target_os = "macos", target_os = "windows"))]

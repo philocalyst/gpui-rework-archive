@@ -499,8 +499,10 @@ pub mod common {
             alpha,
         )
     }
-    pub fn gaussian(x: f32, sigma: f32) -> f32 {
-        exp(-(x * x) / (2.0 * sigma * sigma)) / (sqrt(2.0 * PI) * sigma)
+    pub fn gaussian(position: f32, standard_deviation: f32) -> f32 {
+        let variance = standard_deviation * standard_deviation;
+        exp(-(position * position) / (2.0 * variance))
+            / (sqrt(2.0 * PI) * standard_deviation)
     }
     pub fn approximate_error_function(value: Vec2f) -> Vec2f {
         let signs = sign(value);
@@ -1918,41 +1920,29 @@ pub mod subpixel_sprite {
         pub alpha: Vec4f,
     }
 
-    pub fn to_tile_position(unit_vertex: Vec2f, tile: AtlasTile) -> Vec2f {
-        let atlas_size = texture_dimensions(SPRITE_TEXTURE);
-        (vec2f(tile.bounds.origin.x as f32, tile.bounds.origin.y as f32)
-            + unit_vertex * vec2f(tile.bounds.size.x as f32, tile.bounds.size.y as f32))
-            / vec2f(atlas_size.x as f32, atlas_size.y as f32)
-    }
-
     #[vertex]
     pub fn vs_subpixel_sprite(
         #[builtin(vertex_index)] vertex_id: u32,
         #[builtin(instance_index)] instance_id: u32,
     ) -> SubpixelSpriteOutput {
-        let unit_vertex = vec2f((vertex_id & 1u32) as f32, 0.5 * (vertex_id & 2u32) as f32);
         let sprite = get!(SUBPIXEL_SPRITES)[instance_id as usize];
+        let vertex = transformed_rectangle_vertex(vertex_id, sprite.bounds, sprite.transformation);
         SubpixelSpriteOutput {
-            position: to_device_position_transformed(
-                unit_vertex,
-                sprite.bounds,
-                sprite.transformation,
+            position: vertex.clip_position,
+            tile_position: atlas_texture_coordinates(
+                vertex.unit_position,
+                sprite.tile,
+                texture_dimensions(SPRITE_TEXTURE),
             ),
-            tile_position: to_tile_position(unit_vertex, sprite.tile),
             color: hsla_to_rgba(sprite.color),
-            clip_distances: distance_from_clip_rect_transformed(
-                unit_vertex,
-                sprite.bounds,
-                sprite.content_mask,
-                sprite.transformation,
-            ),
+            clip_distances: clip_distances(vertex.viewport_position, sprite.content_mask),
         }
     }
 
     #[fragment]
     pub fn fs_subpixel_sprite(input: SubpixelSpriteOutput) -> SubpixelSpriteFragmentOutput {
         let mut sample = texture_sample(SPRITE_TEXTURE, SPRITE_SAMPLER, input.tile_position).rgb();
-        if get!(FONT_RASTERIZATION).uses_blue_green_red_subpixel_order != 0u32 {
+        if is_enabled(get!(FONT_RASTERIZATION).uses_blue_green_red_subpixel_order) {
             sample = sample.bgr();
         }
         let alpha_corrected = apply_contrast_and_gamma_correction3(
@@ -1961,14 +1951,10 @@ pub mod subpixel_sprite {
             get!(FONT_RASTERIZATION).subpixel_enhanced_contrast,
             get!(FONT_RASTERIZATION).gamma_ratios,
         );
-        if input.clip_distances.x < 0.0
-            || input.clip_distances.y < 0.0
-            || input.clip_distances.z < 0.0
-            || input.clip_distances.w < 0.0
-        {
+        if is_clipped(input.clip_distances) {
             return SubpixelSpriteFragmentOutput {
-                foreground: vec4f(0.0, 0.0, 0.0, 0.0),
-                alpha: vec4f(0.0, 0.0, 0.0, 0.0),
+                foreground: transparent(),
+                alpha: transparent(),
             };
         }
         SubpixelSpriteFragmentOutput {
@@ -2003,8 +1989,8 @@ fn linear_gradients_preserve_native_dithering() {
         a: 0.5,
     };
     let background = Background {
-        tag: 1,
-        color_space: 0,
+        tag: BackgroundTag::LinearGradient,
+        color_space: ColorSpace::Srgb,
         solid: color,
         gradient_angle_or_pattern_height: 90.0,
         colors: [
@@ -2023,27 +2009,18 @@ fn linear_gradients_preserve_native_dithering() {
         origin: vec2f(0.0, 0.0),
         size: vec2f(100.0, 100.0),
     };
-    let prepared = prepare_gradient_color(
-        background.tag,
-        background.color_space,
-        background.solid,
-        background.colors,
-    );
-    let first = gradient_color(
+    let prepared = prepare_background(background);
+    let first = background_color(
         background,
         vec2f(10.0, 10.0),
         bounds,
-        prepared.solid,
-        prepared.color0,
-        prepared.color1,
+        prepared,
     );
-    let second = gradient_color(
+    let second = background_color(
         background,
         vec2f(11.0, 10.0),
         bounds,
-        prepared.solid,
-        prepared.color0,
-        prepared.color1,
+        prepared,
     );
 
     assert_ne!(first.w, second.w);
