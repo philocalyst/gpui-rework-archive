@@ -12,17 +12,13 @@ impl WgpuRenderer {
         surface: &PaintSurface,
         color_view: &wgpu::TextureView,
         chroma_view: &wgpu::TextureView,
-        uses_yuv_color: bool,
+        color_format: SurfaceColorFormat,
         pass: &mut wgpu::RenderPass<'_>,
     ) -> frame::DrawResult {
         let uniforms = SurfaceUniforms {
             bounds: surface.bounds.into(),
             content_mask: surface.content_mask.bounds.into(),
-            color_format: if uses_yuv_color {
-                SurfaceColorFormat::Yuv
-            } else {
-                SurfaceColorFormat::Rgba
-            },
+            color_format,
             padding0: 0,
             padding1: 0,
             padding2: 0,
@@ -62,7 +58,7 @@ impl WgpuRenderer {
                 continue;
             };
             let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
-            self.draw_surface_views(surface, &view, &view, false, pass)?;
+            self.draw_surface_views(surface, &view, &view, SurfaceColorFormat::Rgba, pass)?;
         }
         Ok(())
     }
@@ -85,6 +81,20 @@ impl WgpuRenderer {
                 != kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
             {
                 log::error!("unsupported CoreVideo surface pixel format");
+                return Err(frame::DrawError::ExternalSurface);
+            }
+            let has_io_surface = unsafe {
+                !core_video::pixel_buffer_io_surface::CVPixelBufferGetIOSurface(
+                    surface.image_buffer.as_concrete_TypeRef(),
+                )
+                .is_null()
+            };
+            if !has_io_surface {
+                log::error!(
+                    "CoreVideo surface is not IOSurface-backed; allocate it with \
+                     kCVPixelBufferIOSurfacePropertiesKey and \
+                     kCVPixelBufferMetalCompatibilityKey"
+                );
                 return Err(frame::DrawError::ExternalSurface);
             }
             let luma = resources
@@ -142,7 +152,13 @@ impl WgpuRenderer {
             };
             let luma_view = luma_texture.create_view(&wgpu::TextureViewDescriptor::default());
             let chroma_view = chroma_texture.create_view(&wgpu::TextureViewDescriptor::default());
-            self.draw_surface_views(surface, &luma_view, &chroma_view, true, pass)?;
+            self.draw_surface_views(
+                surface,
+                &luma_view,
+                &chroma_view,
+                SurfaceColorFormat::Yuv,
+                pass,
+            )?;
         }
         Ok(())
     }

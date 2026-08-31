@@ -6,9 +6,7 @@ use crate::shaders::{
         Corners as ShaderCorners, DownsampleMode,
     },
 };
-use gpui::{
-    BackdropFilter, Bounds, Corners, FilterRenderTarget, RenderCommand, ScaledPixels, Scene,
-};
+use gpui::{BackdropFilter, Bounds, Corners, ScaledPixels};
 use wgsl_rs::std::vec2f;
 
 use super::{WgpuRenderer, begin_color_render_pass, pipelines};
@@ -181,7 +179,7 @@ pub(super) const BLUR_DOWNSAMPLE_FACTOR: u32 = 2;
 const BLUR_RADIUS_TO_STANDARD_DEVIATION: f32 = 0.5;
 pub(super) const GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS: f32 = 3.0;
 pub(super) const MAX_GAUSSIAN_SAMPLES_PER_SIDE: u32 = 32;
-const FILTER_UNIFORMS_PER_COMPOSITE: u64 = 4;
+pub(super) const FILTER_UNIFORMS_PER_COMPOSITE: u64 = 4;
 
 impl BlurKernel {
     pub(super) fn for_radius(blur_radius: f32) -> Option<Self> {
@@ -200,40 +198,10 @@ impl BlurKernel {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub(super) struct FrameUniformRequirements {
     pub(super) filter_count: u64,
     pub(super) surface_count: u64,
-}
-
-impl FrameUniformRequirements {
-    pub(super) fn for_scene(scene: &Scene) -> Self {
-        let isolated_filter_count = if scene.filter_boundaries.is_empty() {
-            0
-        } else {
-            scene
-                .render_commands()
-                .filter(|command| {
-                    matches!(
-                        command,
-                        RenderCommand::EndFilter {
-                            target: FilterRenderTarget::Isolated(_),
-                            ..
-                        }
-                    )
-                })
-                .count() as u64
-        };
-        let composite_count = scene.backdrop_filters.len() as u64 + isolated_filter_count;
-        let requires_offscreen_rendering =
-            !scene.backdrop_filters.is_empty() || isolated_filter_count > 0;
-        Self {
-            filter_count: composite_count
-                .saturating_mul(FILTER_UNIFORMS_PER_COMPOSITE)
-                .saturating_add(u64::from(requires_offscreen_rendering)),
-            surface_count: scene.surfaces.len() as u64,
-        }
-    }
 }
 
 const _: () = assert!(std::mem::size_of::<BlurUniforms>() == 80);

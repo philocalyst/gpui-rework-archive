@@ -556,7 +556,7 @@ pub mod common {
     }
 
     pub fn is_clipped(distances: Vec4f) -> bool {
-        distances.x < 0.0 || distances.y < 0.0 || distances.z < 0.0 || distances.w < 0.0
+        min(min(distances.x, distances.y), min(distances.z, distances.w)) < 0.0
     }
 
     pub fn unclipped_distances() -> Vec4f {
@@ -622,7 +622,10 @@ pub mod common {
         vec4f(red_green_blue.x, red_green_blue.y, red_green_blue.z, hsla.a)
     }
     pub fn linear_srgb_to_oklab(color: Vec4f) -> Vec4f {
-        let cone_response = LINEAR_SRGB_TO_CONE_RESPONSE * color.rgb();
+        // The retired Metal shader used the 2.2 transfer curve around Oklab conversion.
+        // Preserve it exactly while validating the WGPU replacement against Metal pixels.
+        let linear_srgb = pow(color.rgb(), vec3f(2.2, 2.2, 2.2));
+        let cone_response = LINEAR_SRGB_TO_CONE_RESPONSE * linear_srgb;
         let cube_root = vec3f(1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0);
         let oklab = CONE_RESPONSE_TO_OKLAB * pow(cone_response, cube_root);
         vec4f(oklab.x, oklab.y, oklab.z, color.w)
@@ -631,7 +634,8 @@ pub mod common {
         let cone_root = OKLAB_TO_CONE_RESPONSE * color.rgb();
         let cone_response = cone_root * cone_root * cone_root;
         let linear_srgb = CONE_RESPONSE_TO_LINEAR_SRGB * cone_response;
-        vec4f(linear_srgb.x, linear_srgb.y, linear_srgb.z, color.w)
+        let srgb = pow(linear_srgb, vec3f(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));
+        vec4f(srgb.x, srgb.y, srgb.z, color.w)
     }
     pub fn over(below: Vec4f, above: Vec4f) -> Vec4f {
         let alpha = above.w + below.w * (1.0 - above.w);
@@ -679,17 +683,9 @@ pub mod common {
         integral.y - integral.x
     }
     pub fn pick_corner_radius(center_to_point: Vec2f, radii: Corners) -> f32 {
-        if center_to_point.x < 0.0 {
-            if center_to_point.y < 0.0 {
-                radii.top_left
-            } else {
-                radii.bottom_left
-            }
-        } else if center_to_point.y < 0.0 {
-            radii.top_right
-        } else {
-            radii.bottom_right
-        }
+        let left = select(radii.bottom_left, radii.top_left, center_to_point.y < 0.0);
+        let right = select(radii.bottom_right, radii.top_right, center_to_point.y < 0.0);
+        select(right, left, center_to_point.x < 0.0)
     }
     pub fn rounded_rectangle_signed_distance_from_corner(
         corner_center_to_point: Vec2f,
@@ -1424,542 +1420,11 @@ pub mod shadow {
     }
 }
 
-#[wgsl]
-pub mod path_rasterization {
-    use super::common::*;
-    use wgsl_rs::std::*;
+include!("shaders/paths.rs");
 
-    #[derive(Clone, Copy, Wgsl)]
-    pub struct PathRasterizationVertex {
-        pub xy_position: Vec2f,
-        pub curve_position: Vec2f,
-        pub color: Background,
-        pub bounds: Bounds,
-    }
-    storage!(group(1), binding(0), PATH_VERTICES: RuntimeArray<PathRasterizationVertex>);
+include!("shaders/sprites.rs");
 
-    pub fn quadratic_bezier_coverage(curve_position: Vec2f) -> f32 {
-        let horizontal_derivative = dpdx(curve_position);
-        let vertical_derivative = dpdy(curve_position);
-        let horizontal_gradient = vec2f(horizontal_derivative.x, vertical_derivative.x);
-        if length(horizontal_gradient) < MIN_PATH_GRADIENT {
-            return 1.0;
-        }
-
-        let implicit_gradient = 2.0 * curve_position.xx() * horizontal_gradient
-            - vec2f(horizontal_derivative.y, vertical_derivative.y);
-        let implicit_value = curve_position.x * curve_position.x - curve_position.y;
-        antialiased_coverage(implicit_value / length(implicit_gradient))
-    }
-
-    #[derive(Wgsl)]
-    pub struct PathRasterizationVarying {
-        #[builtin(position)]
-        pub position: Vec4f,
-        #[location(0)]
-        pub curve_position: Vec2f,
-        #[location(1)]
-        #[interpolate(flat)]
-        pub vertex_id: u32,
-        #[location(3)]
-        pub clip_distances: Vec4f,
-    }
-
-    #[vertex]
-    pub fn vertex_path_rasterization(
-        #[builtin(vertex_index)] vertex_id: u32,
-    ) -> PathRasterizationVarying {
-        let vertex = get!(PATH_VERTICES)[vertex_id as usize];
-        PathRasterizationVarying {
-            position: viewport_to_clip_position(vertex.xy_position),
-            curve_position: vertex.curve_position,
-            vertex_id,
-            clip_distances: clip_distances(vertex.xy_position, vertex.bounds),
-        }
-    }
-
-    #[fragment]
-    pub fn fragment_path_rasterization(input: PathRasterizationVarying) -> Vec4f {
-        let coverage = quadratic_bezier_coverage(input.curve_position);
-        if is_clipped(input.clip_distances) {
-            return transparent();
-        }
-        let vertex = get!(PATH_VERTICES)[input.vertex_id as usize];
-        let color = background_color(
-            vertex.color,
-            input.position.xy(),
-            vertex.bounds,
-            prepare_background(vertex.color),
-        );
-        premultiply(color, coverage)
-    }
-}
-
-#[wgsl]
-pub mod path {
-    use super::common::*;
-    use wgsl_rs::std::*;
-
-    #[derive(Clone, Copy, Wgsl)]
-    pub struct PathSprite {
-        pub bounds: Bounds,
-    }
-    storage!(group(1), binding(0), PATH_SPRITES: RuntimeArray<PathSprite>);
-    texture!(group(1), binding(1), PATH_TEXTURE: Texture2D<f32>);
-    sampler!(group(1), binding(2), PATH_SAMPLER: Sampler);
-
-    #[derive(Wgsl)]
-    pub struct PathVarying {
-        #[builtin(position)]
-        pub position: Vec4f,
-        #[location(0)]
-        pub texture_coords: Vec2f,
-    }
-
-    #[vertex]
-    pub fn vertex_path(
-        #[builtin(vertex_index)] vertex_id: u32,
-        #[builtin(instance_index)] instance_id: u32,
-    ) -> PathVarying {
-        let sprite = get!(PATH_SPRITES)[instance_id as usize];
-        let vertex = rectangle_vertex(vertex_id, sprite.bounds);
-        PathVarying {
-            position: vertex.clip_position,
-            texture_coords: vertex.viewport_position / get!(GLOBALS).viewport_size,
-        }
-    }
-
-    #[fragment]
-    pub fn fragment_path(input: PathVarying) -> Vec4f {
-        texture_sample(PATH_TEXTURE, PATH_SAMPLER, input.texture_coords)
-    }
-}
-
-#[wgsl]
-pub mod underline {
-    use super::common::*;
-    use wgsl_rs::std::*;
-
-    #[derive(Clone, Copy, Wgsl)]
-    pub struct Underline {
-        pub order: u32,
-        pub padding: u32,
-        pub bounds: Bounds,
-        pub content_mask: Bounds,
-        pub color: Hsla,
-        pub thickness: f32,
-        pub wavy: ShaderBool,
-    }
-    storage!(group(1), binding(0), UNDERLINES: RuntimeArray<Underline>);
-
-    pub fn wavy_underline_coverage(underline: Underline, position: Vec2f) -> f32 {
-        let normalized_position =
-            (position - underline.bounds.origin) / underline.bounds.size.y - vec2f(0.0, 0.5);
-        let angular_frequency =
-            PI * UNDERLINE_WAVE_FREQUENCY * underline.thickness / underline.bounds.size.y;
-        let amplitude = underline.thickness * UNDERLINE_WAVE_HEIGHT_RATIO / underline.bounds.size.y;
-        let wave_height = sin(normalized_position.x * angular_frequency) * amplitude;
-        let wave_slope =
-            cos(normalized_position.x * angular_frequency) * amplitude * angular_frequency;
-        let signed_distance = (normalized_position.y - wave_height)
-            / sqrt(1.0 + wave_slope * wave_slope)
-            * underline.bounds.size.y;
-        let stroke_distance = abs(signed_distance) - underline.thickness * 0.5;
-        antialiased_coverage(stroke_distance)
-    }
-
-    #[derive(Wgsl)]
-    pub struct UnderlineVarying {
-        #[builtin(position)]
-        pub position: Vec4f,
-        #[location(0)]
-        #[interpolate(flat)]
-        pub color: Vec4f,
-        #[location(1)]
-        #[interpolate(flat)]
-        pub underline_id: u32,
-        #[location(3)]
-        pub clip_distances: Vec4f,
-    }
-
-    #[vertex]
-    pub fn vertex_underline(
-        #[builtin(vertex_index)] vertex_id: u32,
-        #[builtin(instance_index)] instance_id: u32,
-    ) -> UnderlineVarying {
-        let underline = get!(UNDERLINES)[instance_id as usize];
-        let vertex = rectangle_vertex(vertex_id, underline.bounds);
-        UnderlineVarying {
-            position: vertex.clip_position,
-            color: hsla_to_rgba(underline.color),
-            underline_id: instance_id,
-            clip_distances: clip_distances(vertex.viewport_position, underline.content_mask),
-        }
-    }
-
-    #[fragment]
-    pub fn fragment_underline(input: UnderlineVarying) -> Vec4f {
-        if is_clipped(input.clip_distances) {
-            return transparent();
-        }
-        let underline = get!(UNDERLINES)[input.underline_id as usize];
-        if !is_enabled(underline.wavy) {
-            return blend_color(input.color, 1.0);
-        }
-        blend_color(
-            input.color,
-            wavy_underline_coverage(underline, input.position.xy()),
-        )
-    }
-}
-
-#[wgsl]
-pub mod monochrome_sprite {
-    use super::common::*;
-    use wgsl_rs::std::*;
-
-    #[derive(Clone, Copy, Wgsl)]
-    pub struct MonochromeSprite {
-        pub order: u32,
-        pub padding: u32,
-        pub bounds: Bounds,
-        pub content_mask: Bounds,
-        pub color: Hsla,
-        pub tile: AtlasTile,
-        pub transformation: TransformationMatrix,
-    }
-    storage!(group(1), binding(0), MONOCHROME_SPRITES: RuntimeArray<MonochromeSprite>);
-    texture!(group(1), binding(1), MONOCHROME_TEXTURE: Texture2D<f32>);
-    sampler!(group(1), binding(2), MONOCHROME_SAMPLER: Sampler);
-
-    #[derive(Wgsl)]
-    pub struct MonochromeSpriteVarying {
-        #[builtin(position)]
-        pub position: Vec4f,
-        #[location(0)]
-        pub tile_position: Vec2f,
-        #[location(1)]
-        #[interpolate(flat)]
-        pub color: Vec4f,
-        #[location(3)]
-        pub clip_distances: Vec4f,
-    }
-
-    #[vertex]
-    pub fn vertex_monochrome_sprite(
-        #[builtin(vertex_index)] vertex_id: u32,
-        #[builtin(instance_index)] instance_id: u32,
-    ) -> MonochromeSpriteVarying {
-        let sprite = get!(MONOCHROME_SPRITES)[instance_id as usize];
-        let vertex = transformed_rectangle_vertex(vertex_id, sprite.bounds, sprite.transformation);
-        MonochromeSpriteVarying {
-            position: vertex.clip_position,
-            tile_position: atlas_texture_coordinates(
-                vertex.unit_position,
-                sprite.tile,
-                texture_dimensions(MONOCHROME_TEXTURE),
-            ),
-            color: hsla_to_rgba(sprite.color),
-            clip_distances: clip_distances(vertex.viewport_position, sprite.content_mask),
-        }
-    }
-
-    #[fragment]
-    pub fn fragment_monochrome_sprite(input: MonochromeSpriteVarying) -> Vec4f {
-        let sample = texture_sample(MONOCHROME_TEXTURE, MONOCHROME_SAMPLER, input.tile_position).x;
-        let corrected = apply_contrast_and_gamma_correction(
-            sample,
-            input.color.rgb(),
-            get!(FONT_RASTERIZATION).grayscale_enhanced_contrast,
-            get!(FONT_RASTERIZATION).gamma_ratios,
-        );
-        if is_clipped(input.clip_distances) {
-            return transparent();
-        }
-        blend_color(input.color, corrected)
-    }
-}
-
-#[wgsl]
-pub mod polychrome_sprite {
-    use super::common::*;
-    use wgsl_rs::std::*;
-
-    #[derive(Clone, Copy, Wgsl)]
-    pub struct PolychromeSprite {
-        pub order: u32,
-        pub padding: u32,
-        pub grayscale: ShaderBool,
-        pub opacity: f32,
-        pub bounds: Bounds,
-        pub content_mask: Bounds,
-        pub corner_radii: Corners,
-        pub tile: AtlasTile,
-    }
-    storage!(group(1), binding(0), POLYCHROME_SPRITES: RuntimeArray<PolychromeSprite>);
-    texture!(group(1), binding(1), POLYCHROME_TEXTURE: Texture2D<f32>);
-    sampler!(group(1), binding(2), POLYCHROME_SAMPLER: Sampler);
-
-    #[derive(Wgsl)]
-    pub struct PolychromeSpriteVarying {
-        #[builtin(position)]
-        pub position: Vec4f,
-        #[location(0)]
-        pub tile_position: Vec2f,
-        #[location(1)]
-        #[interpolate(flat)]
-        pub sprite_id: u32,
-        #[location(3)]
-        pub clip_distances: Vec4f,
-    }
-
-    #[vertex]
-    pub fn vertex_polychrome_sprite(
-        #[builtin(vertex_index)] vertex_id: u32,
-        #[builtin(instance_index)] instance_id: u32,
-    ) -> PolychromeSpriteVarying {
-        let sprite = get!(POLYCHROME_SPRITES)[instance_id as usize];
-        let vertex = rectangle_vertex(vertex_id, sprite.bounds);
-        PolychromeSpriteVarying {
-            position: vertex.clip_position,
-            tile_position: atlas_texture_coordinates(
-                vertex.unit_position,
-                sprite.tile,
-                texture_dimensions(POLYCHROME_TEXTURE),
-            ),
-            sprite_id: instance_id,
-            clip_distances: clip_distances(vertex.viewport_position, sprite.content_mask),
-        }
-    }
-
-    #[fragment]
-    pub fn fragment_polychrome_sprite(input: PolychromeSpriteVarying) -> Vec4f {
-        let sample = texture_sample(POLYCHROME_TEXTURE, POLYCHROME_SAMPLER, input.tile_position);
-        if is_clipped(input.clip_distances) {
-            return transparent();
-        }
-        let sprite = get!(POLYCHROME_SPRITES)[input.sprite_id as usize];
-        let mut color = sample;
-        if is_enabled(sprite.grayscale) {
-            let grayscale = dot(color.rgb(), LINEAR_RGB_LUMA_WEIGHTS);
-            color = vec4f(grayscale, grayscale, grayscale, sample.w);
-        }
-        blend_color(
-            color,
-            sprite.opacity
-                * antialiased_coverage(rounded_rectangle_signed_distance(
-                    input.position.xy(),
-                    sprite.bounds,
-                    sprite.corner_radii,
-                )),
-        )
-    }
-}
-
-#[wgsl]
-pub mod surface {
-    use super::common::*;
-    use wgsl_rs::std::*;
-
-    #[repr(C)]
-    #[derive(Clone, Copy, Wgsl)]
-    pub struct SurfaceUniforms {
-        pub bounds: Bounds,
-        pub content_mask: Bounds,
-        pub color_format: SurfaceColorFormat,
-        pub padding0: u32,
-        pub padding1: u32,
-        pub padding2: u32,
-    }
-    uniform!(group(1), binding(0), SURFACE_LOCALS: SurfaceUniforms);
-    texture!(group(1), binding(1), SURFACE_TEXTURE: Texture2D<f32>);
-    texture!(group(1), binding(2), SURFACE_CHROMA_TEXTURE: Texture2D<f32>);
-    sampler!(group(1), binding(3), SURFACE_SAMPLER: Sampler);
-
-    pub const YCBCR_TO_LINEAR_RGB: Mat4x4f = mat4x4f(
-        vec4f(1.0000, 1.0000, 1.0000, 0.0),
-        vec4f(0.0000, -0.3441, 1.7720, 0.0),
-        vec4f(1.4020, -0.7141, 0.0000, 0.0),
-        vec4f(-0.7010, 0.5291, -0.8860, 1.0),
-    );
-
-    pub fn sample_yuv_surface(texture_position: Vec2f) -> Vec4f {
-        let luma = texture_sample_level(SURFACE_TEXTURE, SURFACE_SAMPLER, texture_position, 0.0).x;
-        let chroma = texture_sample_level(
-            SURFACE_CHROMA_TEXTURE,
-            SURFACE_SAMPLER,
-            texture_position,
-            0.0,
-        )
-        .xy();
-        YCBCR_TO_LINEAR_RGB * vec4f(luma, chroma.x, chroma.y, 1.0)
-    }
-
-    #[derive(Wgsl)]
-    pub struct SurfaceVarying {
-        #[builtin(position)]
-        pub position: Vec4f,
-        #[location(0)]
-        pub texture_position: Vec2f,
-        #[location(3)]
-        pub clip_distances: Vec4f,
-    }
-
-    #[vertex]
-    pub fn vertex_surface(#[builtin(vertex_index)] vertex_id: u32) -> SurfaceVarying {
-        let vertex = rectangle_vertex(vertex_id, get!(SURFACE_LOCALS).bounds);
-        SurfaceVarying {
-            position: vertex.clip_position,
-            texture_position: vertex.unit_position,
-            clip_distances: clip_distances(
-                vertex.viewport_position,
-                get!(SURFACE_LOCALS).content_mask,
-            ),
-        }
-    }
-
-    #[fragment]
-    pub fn fragment_surface(input: SurfaceVarying) -> Vec4f {
-        if is_clipped(input.clip_distances) {
-            return transparent();
-        }
-        if get!(SURFACE_LOCALS).color_format == SurfaceColorFormat::Yuv {
-            return sample_yuv_surface(input.texture_position);
-        }
-        texture_sample_level(
-            SURFACE_TEXTURE,
-            SURFACE_SAMPLER,
-            input.texture_position,
-            0.0,
-        )
-    }
-}
-
-#[wgsl]
-pub mod blur {
-    use super::common::*;
-    use wgsl_rs::std::*;
-
-    #[repr(C)]
-    #[derive(Clone, Copy, Wgsl)]
-    pub struct BlurUniforms {
-        pub bounds: Bounds,
-        pub content_mask: Bounds,
-        pub corner_radii: Corners,
-        pub direction: Vec2f,
-        pub standard_deviation: f32,
-        pub opacity: f32,
-        pub sample_count: u32,
-        pub sample_step: f32,
-        pub composite_clip: BlurCompositeClip,
-        pub downsample_mode: DownsampleMode,
-    }
-    uniform!(group(1), binding(0), BLUR_LOCALS: BlurUniforms);
-    texture!(group(1), binding(1), BLUR_TEXTURE: Texture2D<f32>);
-    sampler!(group(1), binding(2), BLUR_SAMPLER: Sampler);
-
-    #[derive(Wgsl)]
-    pub struct BlurVarying {
-        #[builtin(position)]
-        pub position: Vec4f,
-        #[location(0)]
-        pub texture_coordinates: Vec2f,
-        #[location(3)]
-        pub clip_distances: Vec4f,
-    }
-
-    #[vertex]
-    pub fn vertex_blur_fullscreen(#[builtin(vertex_index)] vertex_id: u32) -> BlurVarying {
-        let vertex = fullscreen_vertex(vertex_id);
-        BlurVarying {
-            position: vertex.clip_position,
-            texture_coordinates: vertex.texture_coordinates,
-            clip_distances: unclipped_distances(),
-        }
-    }
-
-    #[fragment]
-    pub fn fragment_blur_downsample(input: BlurVarying) -> Vec4f {
-        if get!(BLUR_LOCALS).downsample_mode == DownsampleMode::HalfResolution {
-            let destination = floor(input.position.xy());
-            let source_coordinates = (destination * 2.0 + 1.0) / get!(GLOBALS).viewport_size;
-            return texture_sample_level(BLUR_TEXTURE, BLUR_SAMPLER, source_coordinates, 0.0);
-        }
-        texture_sample_level(BLUR_TEXTURE, BLUR_SAMPLER, input.texture_coordinates, 0.0)
-    }
-
-    pub fn sample_blur_texture(texture_coordinates: Vec2f) -> Vec4f {
-        texture_sample_level(BLUR_TEXTURE, BLUR_SAMPLER, texture_coordinates, 0.0)
-    }
-
-    pub fn gaussian_blur(texture_coordinates: Vec2f) -> Vec4f {
-        let uniforms = get!(BLUR_LOCALS);
-        let center_weight = gaussian(0.0, uniforms.standard_deviation);
-        let mut weighted_color = sample_blur_texture(texture_coordinates) * center_weight;
-        let mut weight_sum = center_weight;
-        let mut sample_index = 1u32;
-
-        while sample_index <= uniforms.sample_count {
-            let distance = sample_index as f32 * uniforms.sample_step;
-            let weight = gaussian(distance, uniforms.standard_deviation);
-            let coordinate_offset = uniforms.direction * distance;
-            let symmetric_pair = sample_blur_texture(texture_coordinates - coordinate_offset)
-                + sample_blur_texture(texture_coordinates + coordinate_offset);
-            weighted_color = weighted_color + symmetric_pair * weight;
-            weight_sum += 2.0 * weight;
-            sample_index += 1u32;
-        }
-        weighted_color / max(weight_sum, MIN_NORMALIZED_WEIGHT)
-    }
-
-    #[fragment]
-    pub fn fragment_blur(input: BlurVarying) -> Vec4f {
-        gaussian_blur(input.texture_coordinates)
-    }
-
-    #[vertex]
-    pub fn vertex_blur_composite(#[builtin(vertex_index)] vertex_id: u32) -> BlurVarying {
-        let vertex = rectangle_vertex(vertex_id, get!(BLUR_LOCALS).bounds);
-        BlurVarying {
-            position: vertex.clip_position,
-            texture_coordinates: vertex.unit_position,
-            clip_distances: clip_distances(
-                vertex.viewport_position,
-                get!(BLUR_LOCALS).content_mask,
-            ),
-        }
-    }
-
-    #[fragment]
-    pub fn fragment_blur_composite(input: BlurVarying) -> Vec4f {
-        if is_clipped(input.clip_distances) {
-            return transparent();
-        }
-        let sampled_blur_extent = 2.0 * floor(get!(GLOBALS).viewport_size * 0.5);
-        let blurred = texture_sample_level(
-            BLUR_TEXTURE,
-            BLUR_SAMPLER,
-            input.position.xy() / sampled_blur_extent,
-            0.0,
-        );
-        let coverage = select(
-            1.0,
-            antialiased_coverage(rounded_rectangle_signed_distance(
-                input.position.xy(),
-                get!(BLUR_LOCALS).bounds,
-                get!(BLUR_LOCALS).corner_radii,
-            )),
-            get!(BLUR_LOCALS).composite_clip == BlurCompositeClip::RoundedBounds,
-        );
-        let factor = coverage * get!(BLUR_LOCALS).opacity;
-        vec4f(
-            blurred.x * factor,
-            blurred.y * factor,
-            blurred.z * factor,
-            blurred.w * factor,
-        )
-    }
-}
+include!("shaders/filters.rs");
 
 /// All standard pipelines share one WGPU shader module so drivers can reuse the
 /// parsed common code and compile only each entry point's reachable resources.
@@ -1974,99 +1439,6 @@ pub mod base {
     use super::shadow::*;
     use super::surface::*;
     use super::underline::*;
-}
-
-/// Dual-source LCD glyph pipeline.  Its separate module keeps the shared
-/// `group(1), binding(0)` instance-buffer slot legal while retaining the
-/// existing dual-source entry-point contract.
-#[wgsl(skip_validation)]
-pub mod subpixel_sprite {
-    use super::common::*;
-    use wgsl_rs::std::*;
-
-    #[derive(Clone, Copy, Wgsl)]
-    pub struct SubpixelSprite {
-        pub order: u32,
-        pub padding: u32,
-        pub bounds: Bounds,
-        pub content_mask: Bounds,
-        pub color: Hsla,
-        pub tile: AtlasTile,
-        pub transformation: TransformationMatrix,
-    }
-    storage!(group(1), binding(0), SUBPIXEL_SPRITES: RuntimeArray<SubpixelSprite>);
-    texture!(group(1), binding(1), SPRITE_TEXTURE: Texture2D<f32>);
-    sampler!(group(1), binding(2), SPRITE_SAMPLER: Sampler);
-
-    #[derive(Wgsl)]
-    pub struct SubpixelSpriteOutput {
-        #[builtin(position)]
-        pub position: Vec4f,
-        #[location(0)]
-        pub tile_position: Vec2f,
-        #[location(1)]
-        #[interpolate(flat)]
-        pub color: Vec4f,
-        #[location(3)]
-        pub clip_distances: Vec4f,
-    }
-    #[derive(Wgsl)]
-    pub struct SubpixelSpriteFragmentOutput {
-        #[location(0)]
-        #[blend_src(0)]
-        pub foreground: Vec4f,
-        #[location(0)]
-        #[blend_src(1)]
-        pub alpha: Vec4f,
-    }
-
-    #[vertex]
-    pub fn vertex_subpixel_sprite(
-        #[builtin(vertex_index)] vertex_id: u32,
-        #[builtin(instance_index)] instance_id: u32,
-    ) -> SubpixelSpriteOutput {
-        let sprite = get!(SUBPIXEL_SPRITES)[instance_id as usize];
-        let vertex = transformed_rectangle_vertex(vertex_id, sprite.bounds, sprite.transformation);
-        SubpixelSpriteOutput {
-            position: vertex.clip_position,
-            tile_position: atlas_texture_coordinates(
-                vertex.unit_position,
-                sprite.tile,
-                texture_dimensions(SPRITE_TEXTURE),
-            ),
-            color: hsla_to_rgba(sprite.color),
-            clip_distances: clip_distances(vertex.viewport_position, sprite.content_mask),
-        }
-    }
-
-    #[fragment]
-    pub fn fragment_subpixel_sprite(input: SubpixelSpriteOutput) -> SubpixelSpriteFragmentOutput {
-        let mut sample = texture_sample(SPRITE_TEXTURE, SPRITE_SAMPLER, input.tile_position).rgb();
-        if is_enabled(get!(FONT_RASTERIZATION).uses_blue_green_red_subpixel_order) {
-            sample = sample.bgr();
-        }
-        let alpha_corrected = apply_contrast_and_gamma_correction3(
-            sample,
-            input.color.rgb(),
-            get!(FONT_RASTERIZATION).subpixel_enhanced_contrast,
-            get!(FONT_RASTERIZATION).gamma_ratios,
-        );
-        if is_clipped(input.clip_distances) {
-            return SubpixelSpriteFragmentOutput {
-                foreground: transparent(),
-                alpha: transparent(),
-            };
-        }
-        SubpixelSpriteFragmentOutput {
-            foreground: vec4f(input.color.x, input.color.y, input.color.z, 1.0),
-            alpha: vec4f(
-                input.color.w * alpha_corrected.x,
-                input.color.w * alpha_corrected.y,
-                input.color.w * alpha_corrected.z,
-                1.0,
-            ),
-        }
-    }
 }
 
 impl From<bool> for common::ShaderBool {
@@ -2100,6 +1472,21 @@ impl From<gpui::Corners<gpui::ScaledPixels>> for common::Corners {
 fn validates_subpixel_shader() {
     let generated = subpixel_sprite::WGSL_SOURCE.wgsl_source().unwrap();
     wgsl_rs::validate_wgsl_source(&format!("enable dual_source_blending;\n{generated}")).unwrap();
+}
+
+#[cfg(test)]
+#[test]
+fn build_generated_shaders_match_rust_sources() {
+    assert_eq!(
+        base::WGSL_SOURCE.wgsl_source().unwrap(),
+        crate::shader_sources::BASE_WGSL
+    );
+    let subpixel = subpixel_sprite::WGSL_SOURCE.wgsl_source().unwrap();
+    assert_eq!(subpixel, crate::shader_sources::SUBPIXEL_WGSL);
+    assert_eq!(
+        format!("enable dual_source_blending;\n{subpixel}"),
+        crate::shader_sources::SUBPIXEL_DUAL_SOURCE_WGSL
+    );
 }
 
 #[cfg(test)]

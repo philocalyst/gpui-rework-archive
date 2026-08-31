@@ -1,6 +1,8 @@
 use super::{
     FilterCompositeClip, FilterCompositeParameters, WgpuRenderer, begin_color_render_pass,
-    buffers::InstanceUpload, path_types,
+    buffers::InstanceUpload,
+    filters::{FILTER_UNIFORMS_PER_COMPOSITE, FrameUniformRequirements},
+    path_types,
 };
 use crate::shaders::{
     common::{FontRasterizationUniforms, GlobalUniforms, ShaderBool},
@@ -60,13 +62,13 @@ impl PreparedTargets {
         if !begin_frame(renderer) {
             return None;
         }
-        let required_storage = FrameStorageRequirements::for_scene(scene);
+        let requirements = FrameRequirements::for_scene(scene);
         let device = renderer.resources().device.clone();
         let resources = renderer.resources_mut();
         if !resources.instances.ensure_capacity(
             &device,
             &resources.bind_group_layouts,
-            required_storage.bytes,
+            requirements.storage_bytes,
         ) {
             return None;
         }
@@ -74,20 +76,21 @@ impl PreparedTargets {
             let resources = renderer.resources();
             resources
                 .instances
-                .begin_upload(&resources.queue, required_storage.bytes)?
+                .begin_upload(&resources.queue, requirements.storage_bytes)?
         };
-        if !renderer.ensure_uniform_capacity(scene) {
+        if !renderer.ensure_uniform_capacity(requirements.uniforms) {
             return None;
         }
 
-        renderer.ensure_intermediate_textures();
-        let uses_offscreen_target = scene.requires_offscreen_rendering();
-        if uses_offscreen_target {
-            renderer.ensure_blur_textures();
+        if requirements.uses_path_target {
+            renderer.ensure_path_textures();
+        }
+        if requirements.uses_offscreen_target {
+            renderer.ensure_filter_textures(requirements.isolated_target_count);
         }
         write_shader_globals(renderer);
 
-        if uses_offscreen_target {
+        if requirements.uses_offscreen_target {
             let resources = renderer.resources();
             let offscreen = resources
                 .scene_color_view
@@ -98,7 +101,8 @@ impl PreparedTargets {
                 active: offscreen.clone(),
                 presentation: frame_view.clone(),
                 offscreen: Some(offscreen),
-                filter_groups: resources.filter_group_views.clone(),
+                filter_groups: resources.filter_group_views[..requirements.isolated_target_count]
+                    .to_vec(),
                 instances,
             })
         } else {
@@ -220,45 +224,74 @@ fn write_shader_globals(renderer: &mut WgpuRenderer) {
     renderer.uploaded_globals = Some(state);
 }
 
-#[derive(Default)]
-struct FrameStorageRequirements {
-    bytes: u64,
+#[derive(Clone, Copy, Default)]
+pub(super) struct FrameRequirements {
+    storage_bytes: u64,
+    pub(super) uniforms: FrameUniformRequirements,
+    isolated_target_count: usize,
+    uses_path_target: bool,
+    uses_offscreen_target: bool,
 }
 
-impl FrameStorageRequirements {
-    fn for_scene(scene: &Scene) -> Self {
+impl FrameRequirements {
+    pub(super) fn for_scene(scene: &Scene) -> Self {
         let mut requirements = Self::default();
         for command in scene.render_commands() {
-            let RenderCommand::Batch(batch) = command else {
-                continue;
-            };
-            match batch {
-                PrimitiveBatch::Quads(range) => requirements.reserve::<Quad>(range.len()),
-                PrimitiveBatch::Shadows(range) => requirements.reserve::<Shadow>(range.len()),
-                PrimitiveBatch::Paths(range) => {
-                    let paths = &scene.paths[range];
-                    let vertex_count = path_types::rasterization_vertex_count(paths);
-                    requirements.reserve::<path_types::PathRasterizationVertex>(vertex_count);
-                    if vertex_count > 0 {
-                        requirements
-                            .reserve::<path_types::PathSprite>(path_types::sprite_count(paths));
+            match command {
+                RenderCommand::BeginFilter { .. } => {}
+                RenderCommand::EndFilter {
+                    target: FilterRenderTarget::Isolated(index),
+                    ..
+                } => {
+                    requirements.uses_offscreen_target = true;
+                    requirements.isolated_target_count =
+                        requirements.isolated_target_count.max(index.as_usize() + 1);
+                    requirements.uniforms.filter_count += FILTER_UNIFORMS_PER_COMPOSITE;
+                }
+                RenderCommand::EndFilter {
+                    target: FilterRenderTarget::Inline,
+                    ..
+                } => {}
+                RenderCommand::Batch(batch) => match batch {
+                    PrimitiveBatch::Quads(range) => requirements.reserve::<Quad>(range.len()),
+                    PrimitiveBatch::Shadows(range) => requirements.reserve::<Shadow>(range.len()),
+                    PrimitiveBatch::Paths(range) => {
+                        let paths = &scene.paths[range];
+                        let vertex_count = path_types::rasterization_vertex_count(paths);
+                        requirements.reserve::<path_types::PathRasterizationVertex>(vertex_count);
+                        if vertex_count > 0 {
+                            requirements.uses_path_target = true;
+                            requirements
+                                .reserve::<path_types::PathSprite>(path_types::sprite_count(paths));
+                        }
                     }
-                }
-                PrimitiveBatch::Underlines(range) => requirements.reserve::<Underline>(range.len()),
-                PrimitiveBatch::MonochromeSprites { range, .. } => {
-                    requirements.reserve::<MonochromeSprite>(range.len())
-                }
-                PrimitiveBatch::SubpixelSprites { range, .. } => {
-                    requirements.reserve::<SubpixelSprite>(range.len())
-                }
-                PrimitiveBatch::PolychromeSprites { range, .. } => {
-                    requirements.reserve::<PolychromeSprite>(range.len())
-                }
-                PrimitiveBatch::Surfaces(_)
-                | PrimitiveBatch::BackdropFilters(_)
-                | PrimitiveBatch::FilterBoundary(_) => {}
+                    PrimitiveBatch::Underlines(range) => {
+                        requirements.reserve::<Underline>(range.len())
+                    }
+                    PrimitiveBatch::MonochromeSprites { range, .. } => {
+                        requirements.reserve::<MonochromeSprite>(range.len())
+                    }
+                    PrimitiveBatch::SubpixelSprites { range, .. } => {
+                        requirements.reserve::<SubpixelSprite>(range.len())
+                    }
+                    PrimitiveBatch::PolychromeSprites { range, .. } => {
+                        requirements.reserve::<PolychromeSprite>(range.len())
+                    }
+                    PrimitiveBatch::Surfaces(range) => {
+                        requirements.uniforms.surface_count += range.len() as u64;
+                    }
+                    PrimitiveBatch::BackdropFilters(range) => {
+                        requirements.uses_offscreen_target = true;
+                        requirements.uniforms.filter_count +=
+                            FILTER_UNIFORMS_PER_COMPOSITE * range.len() as u64;
+                    }
+                    PrimitiveBatch::FilterBoundary(_) => {
+                        unreachable!("filter boundaries must be compiled into render commands")
+                    }
+                },
             }
         }
+        requirements.uniforms.filter_count += u64::from(requirements.uses_offscreen_target);
         requirements
     }
 
@@ -267,8 +300,8 @@ impl FrameStorageRequirements {
             return;
         }
         let stride = std::mem::size_of::<T>() as u64;
-        self.bytes = self.bytes.next_multiple_of(stride);
-        self.bytes += stride * count as u64;
+        self.storage_bytes = self.storage_bytes.next_multiple_of(stride);
+        self.storage_bytes += stride * count as u64;
     }
 }
 
@@ -312,29 +345,29 @@ impl<'a> FrameEncoder<'a> {
                 self.renderer
                     .blit_to_frame(&mut self.encoder, offscreen, &self.presentation);
             }
-        }
-        if let Some(readback) = readback {
-            self.encoder.copy_texture_to_buffer(
-                readback.texture.as_image_copy(),
-                wgpu::TexelCopyBufferInfo {
-                    buffer: readback.buffer,
-                    layout: wgpu::TexelCopyBufferLayout {
-                        offset: 0,
-                        bytes_per_row: Some(readback.bytes_per_row),
-                        rows_per_image: Some(readback.height),
+            if let Some(readback) = readback {
+                self.encoder.copy_texture_to_buffer(
+                    readback.texture.as_image_copy(),
+                    wgpu::TexelCopyBufferInfo {
+                        buffer: readback.buffer,
+                        layout: wgpu::TexelCopyBufferLayout {
+                            offset: 0,
+                            bytes_per_row: Some(readback.bytes_per_row),
+                            rows_per_image: Some(readback.height),
+                        },
                     },
-                },
-                wgpu::Extent3d {
-                    width: readback.width,
-                    height: readback.height,
-                    depth_or_array_layers: 1,
-                },
-            );
+                    wgpu::Extent3d {
+                        width: readback.width,
+                        height: readback.height,
+                        depth_or_array_layers: 1,
+                    },
+                );
+            }
         }
         self.instances.finish();
         self.renderer.resources().finish_frame_uploads();
-        result?;
-        Ok(self.encoder.finish())
+        let command_buffer = self.encoder.finish();
+        result.map(|()| command_buffer)
     }
 
     fn encode_commands(&mut self) -> DrawResult {

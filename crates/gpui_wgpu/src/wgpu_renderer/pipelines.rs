@@ -1,4 +1,7 @@
-use crate::shaders::interface as shader;
+use crate::{
+    shader_sources::{BASE_WGSL, SUBPIXEL_DUAL_SOURCE_WGSL},
+    shaders::interface as shader,
+};
 use std::num::NonZeroU64;
 
 pub(super) struct WgpuPipelines {
@@ -233,17 +236,13 @@ impl WgpuPipelines {
         dual_source_blending: bool,
     ) -> Self {
         let dual_source_blending = supported_dual_source_blending(device, dual_source_blending);
-        let shader_module =
-            create_shader_module(device, "gpui_shaders", &crate::shaders::base::WGSL_SOURCE);
+        let shader_module = create_shader_module(device, "gpui_shaders", BASE_WGSL);
         let subpixel_shader_module = dual_source_blending.then(|| {
-            let source = crate::shaders::subpixel_sprite::WGSL_SOURCE
-                .wgsl_source()
-                .expect("failed to generate gpui subpixel shader");
             device.create_shader_module(wgpu::ShaderModuleDescriptor {
                 label: Some("gpui_subpixel_shaders"),
-                source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Owned(format!(
-                    "enable dual_source_blending;\n{source}"
-                ))),
+                source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Borrowed(
+                    SUBPIXEL_DUAL_SOURCE_WGSL,
+                )),
             })
         });
 
@@ -474,14 +473,11 @@ fn naga_interface(source: &wgsl_rs::Source) -> NagaInterface {
 fn create_shader_module(
     device: &wgpu::Device,
     label: &str,
-    source: &wgsl_rs::Source,
+    source: &'static str,
 ) -> wgpu::ShaderModule {
-    let source = source
-        .wgsl_source()
-        .unwrap_or_else(|error| panic!("failed to generate {label}: {error}"));
     device.create_shader_module(wgpu::ShaderModuleDescriptor {
         label: Some(label),
-        source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Owned(source)),
+        source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Borrowed(source)),
     })
 }
 

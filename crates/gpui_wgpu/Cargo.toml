@@ -42,6 +42,11 @@ wgsl-rs.workspace = true
 # Optional: only needed on platforms with multiple font sources (e.g. Linux)
 font-kit = { version = "0.14.1-zed", package = "zed-font-kit", optional = true }
 
+[build-dependencies]
+gpui.workspace = true
+wgpu.workspace = true
+wgsl-rs.workspace = true
+
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 pollster.workspace = true
 
@@ -63,4 +68,8 @@ criterion.workspace = true
 
 [[bench]]
 name = "layout_line"
+harness = false
+
+[[bench]]
+name = "renderer"
 harness = false

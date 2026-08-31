@@ -106,7 +106,7 @@ impl WgpuRenderer {
             }
             wgpu::CurrentSurfaceTexture::Validation => {
                 self.target.request_redraw();
-                *self.last_error.lock().unwrap() =
+                *self.faults.pending_error.lock().unwrap() =
                     Some("surface texture validation error".to_string());
                 return false;
             }
@@ -172,7 +172,9 @@ impl WgpuRenderer {
     }
 
     pub fn device_lost(&self) -> bool {
-        self.device_lost.load(std::sync::atomic::Ordering::SeqCst)
+        self.faults
+            .device_lost
+            .load(std::sync::atomic::Ordering::Relaxed)
     }
 
     pub fn needs_redraw(&mut self) -> bool {
@@ -191,19 +193,19 @@ impl WgpuRenderer {
             .is_none_or(WgpuContext::device_lost);
         if needs_new_context {
             let now = std::time::Instant::now();
-            match self.device_recovery_not_before {
+            match self.faults.recovery_not_before {
                 None => {
-                    self.device_recovery_not_before =
+                    self.faults.recovery_not_before =
                         Some(now + std::time::Duration::from_millis(350));
                     anyhow::bail!("waiting for the GPU driver to stabilize before recovery");
                 }
                 Some(not_before) if now < not_before => {
                     anyhow::bail!("waiting for the GPU driver to stabilize before recovery");
                 }
-                Some(_) => self.device_recovery_not_before = None,
+                Some(_) => self.faults.recovery_not_before = None,
             }
         } else {
-            self.device_recovery_not_before = None;
+            self.faults.recovery_not_before = None;
         }
 
         let window_handle = window
@@ -223,7 +225,7 @@ impl WgpuRenderer {
             ) {
                 Ok(context) => context,
                 Err(error) => {
-                    self.device_recovery_not_before =
+                    self.faults.recovery_not_before =
                         Some(std::time::Instant::now() + std::time::Duration::from_millis(350));
                     return Err(error);
                 }

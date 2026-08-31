@@ -217,7 +217,8 @@ struct TexturedBindGroups {
 }
 
 impl InstanceBufferArena {
-    const INITIAL_CAPACITY: u64 = 2 * 1024 * 1024;
+    // Large scenes grow geometrically; ordinary UI frames fit without a permanent 2 MiB floor.
+    const INITIAL_CAPACITY: u64 = 64 * 1024;
 
     pub(super) fn new(device: &wgpu::Device, layouts: &WgpuBindGroupLayouts) -> Self {
         let maximum_size = device

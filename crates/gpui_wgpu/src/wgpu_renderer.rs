@@ -325,7 +325,7 @@ mod tests {
             .resize_with(100, BackdropFilter::default);
 
         assert_eq!(
-            FrameUniformRequirements::for_scene(&scene),
+            frame::FrameRequirements::for_scene(&scene).uniforms,
             FrameUniformRequirements {
                 filter_count: 401,
                 surface_count: 0,
@@ -389,12 +389,88 @@ mod tests {
 
         let image = renderer.render_to_image(&scene)?;
         let center = image.get_pixel(1, 1).0;
-        assert!(
-            (120..=136).contains(&center[0]),
-            "half-opacity red should contribute about 128, got {center:?}"
+        assert_eq!(
+            center,
+            [128, 0, 0, 255],
+            "must match the retired Metal renderer's mixed primitive baseline"
         );
-        assert!(center[1] <= 2 && center[2] <= 2);
-        assert_eq!(center[3], 255);
+        Ok(())
+    }
+
+    #[cfg(all(feature = "test-support", not(target_family = "wasm")))]
+    #[test]
+    fn quad_backgrounds_match_legacy_metal_pixels() -> anyhow::Result<()> {
+        const LEGACY: &[u8] = &[
+            255, 0, 0, 255, 255, 0, 0, 255, 0, 0, 0, 255, 38, 110, 217, 255, 255, 0, 0, 255, 255,
+            0, 0, 255, 38, 110, 217, 255, 0, 0, 0, 255, 10, 34, 4, 255, 57, 196, 22, 255, 193, 114,
+            151, 255, 223, 154, 105, 255, 57, 196, 22, 255, 10, 34, 4, 255, 166, 61, 182, 255, 192,
+            113, 151, 255,
+        ];
+        let bounds = |x, y| Bounds {
+            origin: Point {
+                x: ScaledPixels(x),
+                y: ScaledPixels(y),
+            },
+            size: Size {
+                width: ScaledPixels(2.0),
+                height: ScaledPixels(2.0),
+            },
+        };
+        let mut scene = Scene::default();
+        for (order, (bounds, background)) in [
+            (
+                bounds(0.0, 0.0),
+                gpui::solid_background(gpui::hsla(0.0, 1.0, 0.5, 1.0)),
+            ),
+            (
+                bounds(2.0, 0.0),
+                gpui::checkerboard(gpui::hsla(0.6, 0.7, 0.5, 1.0), 1.0),
+            ),
+            (
+                bounds(0.0, 2.0),
+                gpui::pattern_slash(gpui::hsla(0.3, 0.8, 0.5, 1.0), 1.0, 1.0),
+            ),
+            (
+                bounds(2.0, 2.0),
+                gpui::linear_gradient(
+                    45.0,
+                    gpui::linear_color_stop(gpui::hsla(0.8, 0.9, 0.4, 1.0), 0.0),
+                    gpui::linear_color_stop(gpui::hsla(0.1, 0.8, 0.6, 1.0), 1.0),
+                ),
+            ),
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            scene.insert_primitive(Quad {
+                order: order as u32,
+                bounds,
+                content_mask: gpui::ContentMask { bounds },
+                background,
+                ..Default::default()
+            });
+        }
+        scene.finish();
+        let context = WgpuContext::new_headless(None)?;
+        let mut renderer = WgpuRenderer::new_headless(
+            &context,
+            Size {
+                width: DevicePixels(4),
+                height: DevicePixels(4),
+            },
+        )?;
+        let actual = renderer.render_to_image(&scene)?;
+        for (index, (actual, expected)) in actual.as_raw().iter().zip(LEGACY).enumerate() {
+            assert_eq!(
+                actual,
+                expected,
+                "legacy mismatch at pixel ({}, {}), channel {}",
+                (index / 4) % 4,
+                (index / 4) / 4,
+                index % 4
+            );
+        }
+        assert_eq!(actual.as_raw().len(), LEGACY.len());
         Ok(())
     }
 

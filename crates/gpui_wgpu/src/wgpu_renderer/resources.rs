@@ -5,7 +5,6 @@ use std::{
 };
 
 use collections::FxHashMap;
-use gpui::{MAX_FILTER_GROUP_DEPTH, Scene};
 
 use crate::{
     WgpuContext,
@@ -24,8 +23,8 @@ use super::{
     settings::RenderingParameters,
 };
 
-const INITIAL_FILTER_UNIFORM_CAPACITY: u64 = 256;
-const INITIAL_SURFACE_UNIFORM_CAPACITY: u64 = 64;
+const INITIAL_FILTER_UNIFORM_CAPACITY: u64 = 16;
+const INITIAL_SURFACE_UNIFORM_CAPACITY: u64 = 8;
 
 /// Device-owned state that is replaced atomically during GPU recovery.
 pub(super) struct WgpuResources {
@@ -243,11 +242,10 @@ impl WgpuResources {
             })
             .clone()
     }
-
 }
 
 impl WgpuRenderer {
-    pub(super) fn ensure_intermediate_textures(&mut self) {
+    pub(super) fn ensure_path_textures(&mut self) {
         if self.resources().path_intermediate_texture.is_some() {
             return;
         }
@@ -267,10 +265,7 @@ impl WgpuRenderer {
         }
     }
 
-    pub(super) fn ensure_blur_textures(&mut self) {
-        if self.resources().scene_color_texture.is_some() {
-            return;
-        }
+    pub(super) fn ensure_filter_textures(&mut self, isolated_target_count: usize) {
         let format = self.target.format();
         let width = self.target.width();
         let height = self.target.height();
@@ -278,27 +273,31 @@ impl WgpuRenderer {
         let blur_height = (height / BLUR_DOWNSAMPLE_FACTOR).max(1);
         let resources = self.resources_mut();
 
-        let (texture, view) = sampled_render_texture(&resources.device, format, width, height);
-        resources.scene_color_texture = Some(texture);
-        resources.scene_color_view = Some(view);
-        let (texture, view) =
-            sampled_render_texture(&resources.device, format, blur_width, blur_height);
-        resources.blur_ping_texture = Some(texture);
-        resources.blur_ping_view = Some(view);
-        let (texture, view) =
-            sampled_render_texture(&resources.device, format, blur_width, blur_height);
-        resources.blur_pong_texture = Some(texture);
-        resources.blur_pong_view = Some(view);
+        if resources.scene_color_texture.is_none() {
+            let (texture, view) = sampled_render_texture(&resources.device, format, width, height);
+            resources.scene_color_texture = Some(texture);
+            resources.scene_color_view = Some(view);
+            let (texture, view) =
+                sampled_render_texture(&resources.device, format, blur_width, blur_height);
+            resources.blur_ping_texture = Some(texture);
+            resources.blur_ping_view = Some(view);
+            let (texture, view) =
+                sampled_render_texture(&resources.device, format, blur_width, blur_height);
+            resources.blur_pong_texture = Some(texture);
+            resources.blur_pong_view = Some(view);
+        }
 
-        for _ in 0..MAX_FILTER_GROUP_DEPTH {
+        while resources.filter_group_views.len() < isolated_target_count {
             let (texture, view) = sampled_render_texture(&resources.device, format, width, height);
             resources.filter_group_textures.push(texture);
             resources.filter_group_views.push(view);
         }
     }
 
-    pub(super) fn ensure_uniform_capacity(&mut self, scene: &Scene) -> bool {
-        let requirements = FrameUniformRequirements::for_scene(scene);
+    pub(super) fn ensure_uniform_capacity(
+        &mut self,
+        requirements: FrameUniformRequirements,
+    ) -> bool {
         let maximum_buffer_size = self.globals.maximum_uniform_buffer_size;
         let resources = self.resources_mut();
         let filters = resources.filter_uniforms.ensure_capacity(
@@ -311,14 +310,13 @@ impl WgpuRenderer {
             requirements.surface_count,
             maximum_buffer_size,
         );
-        if !filters || !surfaces {
+        let capacity_available = filters && surfaces;
+        if !capacity_available {
             log::error!(
                 "scene uniform data exceeds the GPU buffer limit: {} filter uniforms and {} surface uniforms",
                 requirements.filter_count,
                 requirements.surface_count,
             );
-        }
-        if !filters || !surfaces {
             return false;
         }
         let filters = resources
@@ -327,7 +325,7 @@ impl WgpuRenderer {
         let surfaces = resources
             .surface_uniforms
             .begin_upload(&resources.queue, requirements.surface_count);
-        if !filters || !surfaces {
+        if !(filters && surfaces) {
             resources.finish_frame_uploads();
             log::error!("failed to map frame uniform staging memory");
             return false;
