@@ -6,6 +6,9 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use wgpu::TextureFormat;
 
+/// Environment variable that forces the HWND swapchain path on Windows.
+pub const DISABLE_DIRECT_COMPOSITION_ENV: &str = "GPUI_DISABLE_DIRECT_COMPOSITION";
+
 pub struct WgpuContext {
     pub instance: wgpu::Instance,
     pub adapter: wgpu::Adapter,
@@ -62,15 +65,8 @@ impl WgpuContext {
     pub fn new_headless(
         extra_requirements: Option<&WgpuDeviceRequirements>,
     ) -> anyhow::Result<Self> {
-        #[cfg(target_os = "macos")]
-        let backends = wgpu::Backends::METAL;
-        #[cfg(target_os = "windows")]
-        let backends = wgpu::Backends::DX12;
-        #[cfg(any(target_os = "linux", target_os = "freebsd"))]
-        let backends = wgpu::Backends::VULKAN | wgpu::Backends::GL;
-
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
-            backends,
+            backends: native_backends(),
             flags: wgpu::InstanceFlags::default(),
             backend_options: wgpu::BackendOptions::default(),
             memory_budget_thresholds: wgpu::MemoryBudgetThresholds::default(),
@@ -261,13 +257,6 @@ impl WgpuContext {
 
     #[cfg(not(target_family = "wasm"))]
     pub fn instance(display: Box<dyn wgpu::wgt::WgpuHasDisplayHandle>) -> wgpu::Instance {
-        #[cfg(target_os = "macos")]
-        let backends = wgpu::Backends::METAL;
-        #[cfg(any(target_os = "linux", target_os = "freebsd"))]
-        let backends = wgpu::Backends::VULKAN | wgpu::Backends::GL;
-        #[cfg(target_os = "windows")]
-        let backends = wgpu::Backends::DX12;
-
         #[cfg(target_os = "windows")]
         let mut backend_options = wgpu::BackendOptions::default();
         #[cfg(not(target_os = "windows"))]
@@ -276,7 +265,7 @@ impl WgpuContext {
         {
             // Match the former D3D renderer's DirectComposition path. wgpu-hal owns the
             // composition device and visual, while this switch retains the diagnostic fallback.
-            let direct_composition_disabled = std::env::var("GPUI_DISABLE_DIRECT_COMPOSITION")
+            let direct_composition_disabled = std::env::var(DISABLE_DIRECT_COMPOSITION_ENV)
                 .is_ok_and(|value| value == "true" || value == "1");
             backend_options.dx12.presentation_system = if direct_composition_disabled {
                 wgpu::Dx12SwapchainKind::DxgiFromHwnd
@@ -286,7 +275,7 @@ impl WgpuContext {
         }
 
         wgpu::Instance::new(wgpu::InstanceDescriptor {
-            backends,
+            backends: native_backends(),
             flags: wgpu::InstanceFlags::default(),
             backend_options,
             memory_budget_thresholds: wgpu::MemoryBudgetThresholds::default(),
@@ -558,6 +547,17 @@ impl WgpuContext {
     /// Returns a clone of the device_lost flag for sharing with renderers.
     pub(crate) fn device_lost_flag(&self) -> Arc<AtomicBool> {
         Arc::clone(&self.device_lost)
+    }
+}
+
+#[cfg(not(target_family = "wasm"))]
+fn native_backends() -> wgpu::Backends {
+    if cfg!(target_os = "macos") {
+        wgpu::Backends::METAL
+    } else if cfg!(target_os = "windows") {
+        wgpu::Backends::DX12 | wgpu::Backends::VULKAN | wgpu::Backends::GL
+    } else {
+        wgpu::Backends::VULKAN | wgpu::Backends::GL
     }
 }
 

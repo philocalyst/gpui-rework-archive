@@ -143,6 +143,8 @@ objc2-user-notifications = "0.3"
 mach2 = "0.5"
 metal = "0.33"
 scap = { version = "0.0.8-zed", package = "zed-scap", default-features = false }
+windows-capture = "1.5.0"
+windows-061 = { package = "windows", version = "0.61.3" }
 env_logger = "0.11"
 unicode-segmentation = "1.10"
 

@@ -1593,7 +1593,7 @@ impl LinuxClient for X11Client {
         &self,
     ) -> futures::channel::oneshot::Receiver<anyhow::Result<Vec<Rc<dyn gpui::ScreenCaptureSource>>>>
     {
-        gpui::scap_screen_capture::scap_screen_sources(&self.0.borrow().common.foreground_executor)
+        gpui::screen_capture::screen_sources(&self.0.borrow().common.foreground_executor)
     }
 
     fn set_gpu_requirements(&self, requirements: Box<dyn std::any::Any>) {

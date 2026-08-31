@@ -92,7 +92,7 @@ fn renderer_sources_remain_unified_wgpu_only() {
         relative_paths(&root, platform_shader_sources).join(", ")
     );
 
-    let rust_shader_module = root.join("crates/gpui_wgpu/src/shaders.rs");
+    let rust_shader_module = root.join("crates/gpui_wgpu/src/shaders/mod.rs");
     assert!(
         rust_shader_module.is_file(),
         "the unified renderer must keep its typed Rust shader module"

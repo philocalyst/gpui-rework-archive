@@ -1,6 +1,6 @@
-#[wgsl]
+#[wgsl_rs::wgsl]
 pub mod path_rasterization {
-    use super::common::*;
+    use super::super::common::*;
     use wgsl_rs::std::*;
 
     #[derive(Clone, Copy, Wgsl)]
@@ -69,9 +69,9 @@ pub mod path_rasterization {
     }
 }
 
-#[wgsl]
+#[wgsl_rs::wgsl]
 pub mod path {
-    use super::common::*;
+    use super::super::common::*;
     use wgsl_rs::std::*;
 
     #[derive(Clone, Copy, Wgsl)]

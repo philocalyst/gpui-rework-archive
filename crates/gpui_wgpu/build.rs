@@ -1,10 +1,10 @@
-#[path = "src/shaders.rs"]
+#[path = "src/shaders/mod.rs"]
 mod shaders;
 
 use std::{env, fs, path::PathBuf};
 
 fn main() {
-    println!("cargo:rerun-if-changed=src/shaders.rs");
+    println!("cargo:rerun-if-changed=src/shaders");
     println!("cargo:rerun-if-changed=src/shaders");
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR must be set"));

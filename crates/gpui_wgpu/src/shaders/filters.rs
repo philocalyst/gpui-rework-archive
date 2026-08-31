@@ -1,6 +1,6 @@
-#[wgsl]
+#[wgsl_rs::wgsl]
 pub mod surface {
-    use super::common::*;
+    use super::super::common::*;
     use wgsl_rs::std::*;
 
     #[repr(C)]
@@ -77,9 +77,9 @@ pub mod surface {
     }
 }
 
-#[wgsl]
+#[wgsl_rs::wgsl]
 pub mod blur {
-    use super::common::*;
+    use super::super::common::*;
     use wgsl_rs::std::*;
 
     #[repr(C)]

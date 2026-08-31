@@ -1163,12 +1163,7 @@ pub struct PaintSurface {
     pub order: DrawOrder,
     pub bounds: Bounds<ScaledPixels>,
     pub content_mask: ContentMask<ScaledPixels>,
-    #[cfg(target_os = "macos")]
-    pub image_buffer: core_video::pixel_buffer::CVPixelBuffer,
-    #[cfg(any(target_os = "linux", target_os = "freebsd"))]
-    pub texture: std::sync::Arc<dyn std::any::Any + Send + Sync>,
-    #[cfg(any(target_os = "linux", target_os = "freebsd"))]
-    pub texture_size: Size<crate::DevicePixels>,
+    pub source: crate::SurfaceSource,
 }
 
 impl From<PaintSurface> for Primitive {

@@ -1,0 +1,77 @@
+//! Cross-platform screen capture source discovery and stream adaptation.
+
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
+use crate::Size;
+use crate::{
+    DevicePixels, ForegroundExecutor, ScreenCaptureFrame, ScreenCaptureSource, ScreenCaptureStream,
+    SourceMetadata,
+};
+use anyhow::Result;
+use futures::channel::oneshot;
+use std::rc::Rc;
+
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
+#[path = "screen_capture/linux.rs"]
+mod platform;
+#[cfg(target_os = "windows")]
+#[path = "screen_capture/windows.rs"]
+mod platform;
+
+/// Populates the receiver with the screens that can be captured.
+///
+/// `start_default_target_source` should be used instead on Wayland, since source discovery
+/// cannot enumerate portal-selected targets.
+pub fn screen_sources(
+    foreground_executor: &ForegroundExecutor,
+) -> oneshot::Receiver<Result<Vec<Rc<dyn ScreenCaptureSource>>>> {
+    platform::screen_sources(foreground_executor)
+}
+
+/// Starts capture for the portal-selected default target.
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
+pub fn start_default_target_source(
+    foreground_executor: &ForegroundExecutor,
+) -> oneshot::Receiver<Result<Vec<Rc<dyn ScreenCaptureSource>>>> {
+    platform::start_default_target(foreground_executor)
+}
+
+fn to_dyn_screen_capture_sources<T: ScreenCaptureSource + 'static>(
+    sources_rx: oneshot::Receiver<Result<Vec<T>>>,
+    foreground_executor: &ForegroundExecutor,
+) -> oneshot::Receiver<Result<Vec<Rc<dyn ScreenCaptureSource>>>> {
+    let (dyn_sources_tx, dyn_sources_rx) = oneshot::channel();
+    foreground_executor
+        .spawn(async move {
+            match sources_rx.await {
+                Ok(Ok(results)) => dyn_sources_tx
+                    .send(Ok(results
+                        .into_iter()
+                        .map(|source| Rc::new(source) as Rc<dyn ScreenCaptureSource>)
+                        .collect()))
+                    .ok(),
+                Ok(Err(error)) => dyn_sources_tx.send(Err(error)).ok(),
+                Err(oneshot::Canceled) => None,
+            }
+        })
+        .detach();
+    dyn_sources_rx
+}
+
+fn to_dyn_screen_capture_stream<T: ScreenCaptureStream + 'static>(
+    stream_rx: oneshot::Receiver<Result<T>>,
+    foreground_executor: &ForegroundExecutor,
+) -> oneshot::Receiver<Result<Box<dyn ScreenCaptureStream>>> {
+    let (dyn_stream_tx, dyn_stream_rx) = oneshot::channel();
+    foreground_executor
+        .spawn(async move {
+            match stream_rx.await {
+                Ok(Ok(stream)) => dyn_stream_tx
+                    .send(Ok(Box::new(stream) as Box<dyn ScreenCaptureStream>))
+                    .ok(),
+                Ok(Err(error)) => dyn_stream_tx.send(Err(error)).ok(),
+                Err(oneshot::Canceled) => None,
+            }
+        })
+        .detach();
+    dyn_stream_rx
+}

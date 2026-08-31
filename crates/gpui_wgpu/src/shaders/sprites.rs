@@ -1,6 +1,6 @@
-#[wgsl]
+#[wgsl_rs::wgsl]
 pub mod underline {
-    use super::common::*;
+    use super::super::common::*;
     use wgsl_rs::std::*;
 
     #[derive(Clone, Copy, Wgsl)]
@@ -76,9 +76,9 @@ pub mod underline {
     }
 }
 
-#[wgsl]
+#[wgsl_rs::wgsl]
 pub mod monochrome_sprite {
-    use super::common::*;
+    use super::super::common::*;
     use wgsl_rs::std::*;
 
     #[derive(Clone, Copy, Wgsl)]
@@ -149,9 +149,9 @@ pub mod monochrome_sprite {
     }
 }
 
-#[wgsl]
+#[wgsl_rs::wgsl]
 pub mod polychrome_sprite {
-    use super::common::*;
+    use super::super::common::*;
     use wgsl_rs::std::*;
 
     #[derive(Clone, Copy, Wgsl)]
@@ -233,9 +233,9 @@ pub mod polychrome_sprite {
 
 /// Dual-source LCD glyph pipeline. Its separate module keeps the shared
 /// `group(1), binding(0)` instance-buffer slot legal.
-#[wgsl(skip_validation)]
+#[wgsl_rs::wgsl(skip_validation)]
 pub mod subpixel_sprite {
-    use super::common::*;
+    use super::super::common::*;
     use wgsl_rs::std::*;
 
     #[derive(Clone, Copy, Wgsl)]
@@ -301,13 +301,8 @@ pub mod subpixel_sprite {
                 alpha: transparent(),
             };
         }
-        let sampled = texture_sample_level(
-            SPRITE_TEXTURE,
-            SPRITE_SAMPLER,
-            input.tile_position,
-            0.0,
-        )
-        .rgb();
+        let sampled =
+            texture_sample_level(SPRITE_TEXTURE, SPRITE_SAMPLER, input.tile_position, 0.0).rgb();
         let sample = select(
             sampled,
             sampled.bgr(),

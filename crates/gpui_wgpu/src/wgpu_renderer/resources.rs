@@ -21,6 +21,7 @@ use super::{
     filters::{BLUR_DOWNSAMPLE_FACTOR, FrameUniformRequirements},
     pipelines::{WgpuBindGroupLayouts, WgpuPipelines},
     settings::RenderingParameters,
+    surfaces::SurfaceCache,
 };
 
 const INITIAL_FILTER_UNIFORM_CAPACITY: u64 = 16;
@@ -36,8 +37,7 @@ pub(super) struct WgpuResources {
     pub(super) atlas_sampler: wgpu::Sampler,
     pub(super) surface_sampler: wgpu::Sampler,
     pub(super) surface_uniforms: DynamicUniformBuffer<SurfaceUniforms>,
-    #[cfg(target_os = "macos")]
-    pub(super) core_video_texture_cache: core_video::metal_texture_cache::CVMetalTextureCache,
+    pub(super) surface_cache: RefCell<SurfaceCache>,
     pub(super) filter_uniforms: DynamicUniformBuffer<BlurUniforms>,
     blur_bind_groups: RefCell<BlurBindGroups>,
     pub(super) globals_buffer: wgpu::Buffer,
@@ -152,8 +152,7 @@ impl WgpuResources {
         device.on_uncaptured_error(Arc::new(move |error| {
             *error_slot.lock().unwrap() = Some(error.to_string());
         }));
-        #[cfg(target_os = "macos")]
-        let core_video_texture_cache = create_core_video_texture_cache(&device)?;
+        let surface_cache = SurfaceCache::new(&device)?;
 
         let metadata = ResourceMetadata {
             globals: GlobalBufferLayout {
@@ -173,8 +172,7 @@ impl WgpuResources {
             atlas_sampler,
             surface_sampler,
             surface_uniforms,
-            #[cfg(target_os = "macos")]
-            core_video_texture_cache,
+            surface_cache: RefCell::new(surface_cache),
             filter_uniforms,
             blur_bind_groups: RefCell::default(),
             globals_buffer,
@@ -384,20 +382,4 @@ fn msaa_texture(
     });
     let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
     Some((texture, view))
-}
-
-#[cfg(target_os = "macos")]
-fn create_core_video_texture_cache(
-    device: &wgpu::Device,
-) -> anyhow::Result<core_video::metal_texture_cache::CVMetalTextureCache> {
-    use metal::foreign_types::ForeignTypeRef as _;
-
-    let hal_device = unsafe { device.as_hal::<wgpu::hal::api::Metal>() }
-        .ok_or_else(|| anyhow::anyhow!("macOS WGPU device did not expose the Metal HAL"))?;
-    let raw_device = objc2::rc::Retained::as_ptr(hal_device.raw_device())
-        .cast_mut()
-        .cast();
-    let metal_device = unsafe { metal::DeviceRef::from_ptr(raw_device) }.to_owned();
-    core_video::metal_texture_cache::CVMetalTextureCache::new(None, metal_device, None)
-        .map_err(|error| anyhow::anyhow!("failed to create CoreVideo Metal texture cache: {error}"))
 }
