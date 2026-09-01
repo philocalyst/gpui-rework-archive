@@ -18,21 +18,13 @@ mod test;
 #[cfg(all(target_os = "macos", any(test, feature = "test-support")))]
 mod visual_test;
 
-#[cfg(all(
-    feature = "screen-capture",
-    any(target_os = "windows", target_os = "linux", target_os = "freebsd")
-))]
+#[cfg(all(feature = "screen-capture", target_os = "windows"))]
 pub mod screen_capture;
 #[cfg(target_os = "windows")]
 mod windows_screen_capture;
 #[cfg(target_os = "windows")]
 pub use windows_screen_capture::WindowsScreenCaptureFrame;
 
-#[cfg(all(
-    any(target_os = "linux", target_os = "freebsd"),
-    feature = "screen-capture"
-))]
-pub(crate) type PlatformScreenCaptureFrame = scap::frame::Frame;
 #[cfg(all(target_os = "windows", feature = "screen-capture"))]
 pub(crate) type PlatformScreenCaptureFrame = WindowsScreenCaptureFrame;
 #[cfg(not(feature = "screen-capture"))]

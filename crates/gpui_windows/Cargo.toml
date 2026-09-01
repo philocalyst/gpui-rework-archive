@@ -19,6 +19,8 @@ screen-capture = ["gpui/screen-capture"]
 
 [dependencies]
 gpui.workspace = true
+gpui_render.workspace = true
+wgsl-rs.workspace = true
 
 [target.'cfg(target_os = "windows")'.dependencies]
 accesskit.workspace = true

@@ -1,10 +1,25 @@
 use std::{
+    ffi::CString,
     slice,
     sync::{Arc, OnceLock},
 };
 
 use anyhow::{Context, Result};
+use gpui_render::{
+    blur::{
+        BlurAxis, BlurKernel, BlurUniforms, DOWNSAMPLE_FACTOR as BLUR_DOWNSAMPLE_FACTOR,
+        FilterCompositeClip, GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS,
+    },
+    path_types::{PathRasterizationVertex, PathSprite},
+    shaders::{
+        common::{
+            FontRasterizationUniforms, GlobalUniforms, ShaderBool, SurfaceColorFormat,
+            SurfaceUniforms,
+        },
+    },
+};
 use gpui_util::ResultExt;
+use wgsl_rs::std::{vec2f, vec4f};
 use windows::{
     Win32::{
         Foundation::HWND,
@@ -16,7 +31,7 @@ use windows::{
             Dxgi::{Common::*, *},
         },
     },
-    core::{HSTRING, Interface},
+    core::{PCSTR, HSTRING, Interface},
 };
 
 use crate::directx_renderer::shader_resources::{RawShaderBytes, ShaderModule, ShaderTarget};
@@ -153,15 +168,16 @@ impl BlurResources {
 struct DirectXRenderPipelines {
     shadow_pipeline: PipelineState<Shadow>,
     quad_pipeline: PipelineState<Quad>,
-    path_rasterization_pipeline: PipelineState<PathRasterizationSprite>,
+    path_rasterization_pipeline: PipelineState<PathRasterizationVertex>,
     path_sprite_pipeline: PipelineState<PathSprite>,
     underline_pipeline: PipelineState<Underline>,
     mono_sprites: PipelineState<MonochromeSprite>,
     subpixel_sprites: PipelineState<SubpixelSprite>,
     poly_sprites: PipelineState<PolychromeSprite>,
+    surfaces: SurfacePipeline,
     // Blur (backdrop-filter / filter). These don't use the generic PipelineState since they
     // sample a texture rather than read a structured instance buffer; their parameters live in
-    // a dedicated constant buffer at register b1.
+    // a dedicated constant buffer at register b2.
     blur_downsample_vertex: ID3D11VertexShader,
     blur_downsample_fragment: ID3D11PixelShader,
     blur_vertex: ID3D11VertexShader,
@@ -173,9 +189,27 @@ struct DirectXRenderPipelines {
     blur_blend_composite: ID3D11BlendState,
 }
 
+/// The generated `surfaces` pipeline: one draw per paint surface with per-draw uniforms instead
+/// of instance data.
+struct SurfacePipeline {
+    vertex: ID3D11VertexShader,
+    fragment: ID3D11PixelShader,
+    params_buffer: ID3D11Buffer,
+    blend: ID3D11BlendState,
+}
+
 struct DirectXGlobalElements {
-    global_params_buffer: Option<ID3D11Buffer>,
+    globals_buffer: Option<ID3D11Buffer>,
+    font_buffer: Option<ID3D11Buffer>,
     sampler: Option<ID3D11SamplerState>,
+}
+
+impl DirectXGlobalElements {
+    /// The two global constant buffers, bound consecutively at registers b0 (globals) and
+    /// b1 (font rasterization) by the generated HLSL.
+    fn cbuffers(&self) -> [Option<ID3D11Buffer>; 2] {
+        [self.globals_buffer.clone(), self.font_buffer.clone()]
+    }
 }
 
 struct Annotation<'a>(&'a ID3DUserDefinedAnnotation);
@@ -289,14 +323,30 @@ impl DirectXRenderer {
             .device_context;
         update_buffer(
             device_context,
-            self.globals.global_params_buffer.as_ref().unwrap(),
-            &[GlobalParams {
-                gamma_ratios: self.font_info.gamma_ratios,
-                viewport_size: [resources.viewport.Width, resources.viewport.Height],
+            self.globals.globals_buffer.as_ref().unwrap(),
+            &[GlobalUniforms {
+                viewport_size: vec2f(resources.viewport.Width, resources.viewport.Height),
+                // The DirectComposition swap chain expects premultiplied output, but the scene
+                // shaders handle the premultiply for path rasterization themselves; scene
+                // geometry blends with straight alpha exactly like the legacy pipeline.
+                premultiplied_alpha: ShaderBool::Disabled,
+                padding: 0,
+            }],
+        )?;
+        update_buffer(
+            device_context,
+            self.globals.font_buffer.as_ref().unwrap(),
+            &[FontRasterizationUniforms {
+                gamma_ratios: vec4f(
+                    self.font_info.gamma_ratios[0],
+                    self.font_info.gamma_ratios[1],
+                    self.font_info.gamma_ratios[2],
+                    self.font_info.gamma_ratios[3],
+                ),
                 grayscale_enhanced_contrast: self.font_info.grayscale_enhanced_contrast,
                 subpixel_enhanced_contrast: self.font_info.subpixel_enhanced_contrast,
-                is_bgr: self.font_info.is_bgr as u32,
-                _pad: [0; 3],
+                uses_blue_green_red_subpixel_order: ShaderBool::from(self.font_info.is_bgr),
+                padding: 0,
             }],
         )?;
         unsafe {
@@ -517,7 +567,7 @@ impl DirectXRenderer {
                                 &current_rtv,
                                 filter.bounds,
                                 filter.content_mask.bounds,
-                                corner_radii_array(filter.corner_radii),
+                                filter.corner_radii,
                                 filter.max_blur_radius(),
                                 filter.opacity,
                                 true,
@@ -559,7 +609,7 @@ impl DirectXRenderer {
                         &parent_rtv,
                         boundary.bounds,
                         boundary.content_mask.bounds,
-                        corner_radii_array(boundary.corner_radii),
+                        boundary.corner_radii,
                         boundary.max_blur_radius(),
                         boundary.opacity,
                         false,
@@ -721,7 +771,7 @@ impl DirectXRenderer {
                     .context("resources missing")?
                     .viewport,
             ),
-            slice::from_ref(&self.globals.global_params_buffer),
+            &self.globals.cbuffers(),
             4,
             start as u32,
             len as u32,
@@ -743,7 +793,7 @@ impl DirectXRenderer {
                     .context("resources missing")?
                     .viewport,
             ),
-            slice::from_ref(&self.globals.global_params_buffer),
+            &self.globals.cbuffers(),
             4,
             start as u32,
             len as u32,
@@ -770,13 +820,13 @@ impl DirectXRenderer {
             );
         }
 
-        // Collect all vertices and sprites for a single draw call
+        // Collect all vertices for a single draw call
         let mut vertices = Vec::new();
 
         for path in paths {
-            vertices.extend(path.vertices.iter().map(|v| PathRasterizationSprite {
+            vertices.extend(path.vertices.iter().map(|v| PathRasterizationVertex {
                 xy_position: v.xy_position,
-                st_position: v.st_position,
+                curve_position: v.st_position,
                 color: path.color,
                 bounds: path.clipped_bounds(),
             }));
@@ -791,7 +841,7 @@ impl DirectXRenderer {
         self.pipelines.path_rasterization_pipeline.draw(
             &devices.device_context,
             slice::from_ref(&resources.viewport),
-            slice::from_ref(&self.globals.global_params_buffer),
+            &self.globals.cbuffers(),
             D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
             vertices.len() as u32,
             1,
@@ -861,7 +911,7 @@ impl DirectXRenderer {
             &devices.device_context,
             slice::from_ref(&resources.path_intermediate_srv),
             slice::from_ref(&resources.viewport),
-            slice::from_ref(&self.globals.global_params_buffer),
+            &self.globals.cbuffers(),
             slice::from_ref(&self.globals.sampler),
             sprites.len() as u32,
         )
@@ -877,7 +927,7 @@ impl DirectXRenderer {
             &devices.device,
             &devices.device_context,
             slice::from_ref(&resources.viewport),
-            slice::from_ref(&self.globals.global_params_buffer),
+            &self.globals.cbuffers(),
             4,
             start as u32,
             len as u32,
@@ -901,7 +951,7 @@ impl DirectXRenderer {
             &devices.device_context,
             &texture_view,
             slice::from_ref(&resources.viewport),
-            slice::from_ref(&self.globals.global_params_buffer),
+            &self.globals.cbuffers(),
             slice::from_ref(&self.globals.sampler),
             start as u32,
             len as u32,
@@ -925,7 +975,7 @@ impl DirectXRenderer {
             &devices.device_context,
             &texture_view,
             slice::from_ref(&resources.viewport),
-            slice::from_ref(&self.globals.global_params_buffer),
+            &self.globals.cbuffers(),
             slice::from_ref(&self.globals.sampler),
             start as u32,
             len as u32,
@@ -949,7 +999,7 @@ impl DirectXRenderer {
             &devices.device_context,
             &texture_view,
             slice::from_ref(&resources.viewport),
-            slice::from_ref(&self.globals.global_params_buffer),
+            &self.globals.cbuffers(),
             slice::from_ref(&self.globals.sampler),
             start as u32,
             len as u32,
@@ -960,11 +1010,57 @@ impl DirectXRenderer {
         if surfaces.is_empty() {
             return Ok(());
         }
+        let devices = self.devices.as_ref().context("devices missing")?;
+        let resources = self.resources.as_ref().context("resources missing")?;
+        let ctx = &devices.device_context;
+        let cbuffers = self.globals.cbuffers();
+        let surface_cb = [Some(self.pipelines.surface_params_buffer.clone())];
+        let sampler = [self.globals.sampler.clone()];
+        for surface in surfaces {
+            let gpui::SurfaceSource::WindowsCapture(frame) = &surface.source else {
+                log::error!("DirectX renderer cannot import this surface source");
+                anyhow::bail!("unsupported surface source");
+            };
+            let mut texture_srv = None;
+            unsafe {
+                devices
+                    .device
+                    .CreateShaderResourceView(frame.texture(), None, Some(&mut texture_srv))?
+            };
+            // The generated surface shader always declares both planes; RGBA captures only use
+            // the first one, so the same view is bound to both slots.
+            let texture_srvs = [texture_srv.clone(), texture_srv];
+
+            let uniforms = SurfaceUniforms {
+                bounds: surface.bounds.into(),
+                content_mask: surface.content_mask.bounds.into(),
+                color_format: SurfaceColorFormat::Rgba,
+                padding0: 0,
+                padding1: 0,
+                padding2: 0,
+            };
+            update_buffer(ctx, &self.pipelines.surfaces.params_buffer, &[uniforms])?;
+
+            unsafe {
+                ctx.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+                ctx.RSSetViewports(Some(slice::from_ref(&resources.viewport)));
+                ctx.VSSetShader(&self.pipelines.surfaces.vertex, None);
+                ctx.PSSetShader(&self.pipelines.surfaces.fragment, None);
+                ctx.VSSetConstantBuffers(0, Some(&cbuffers));
+                ctx.PSSetConstantBuffers(0, Some(&cbuffers));
+                ctx.VSSetConstantBuffers(2, Some(&surface_cb));
+                ctx.PSSetConstantBuffers(2, Some(&surface_cb));
+                ctx.PSSetShaderResources(3, Some(&texture_srvs));
+                ctx.PSSetSamplers(4, Some(&sampler));
+                ctx.OMSetBlendState(&self.pipelines.surfaces.blend, None, 0xFFFFFFFF);
+                ctx.DrawInstanced(4, 1, 0, 0);
+            }
+        }
         Ok(())
     }
 
     /// Run a single blur pass: a full-screen (or composite) draw sampling `source_srv` into
-    /// `target_rtv`, with `params` in the blur constant buffer (b1).
+    /// `target_rtv`, with `params` in the blur constant buffer (register b2).
     #[allow(clippy::too_many_arguments)]
     fn dx_blur_pass(
         &self,
@@ -973,7 +1069,7 @@ impl DirectXRenderer {
         blend: &ID3D11BlendState,
         target_rtv: &Option<ID3D11RenderTargetView>,
         source_srv: &Option<ID3D11ShaderResourceView>,
-        params: BlurParams,
+        params: BlurUniforms,
         viewport: &D3D11_VIEWPORT,
         topology: D3D_PRIMITIVE_TOPOLOGY,
         vertex_count: u32,
@@ -983,10 +1079,12 @@ impl DirectXRenderer {
         let ctx = &devices.device_context;
         update_buffer(ctx, &self.pipelines.blur_params_buffer, &[params])?;
         let null_srv: [Option<ID3D11ShaderResourceView>; 1] = [None];
+        let cbuffers = self.globals.cbuffers();
         let blur_params = [Some(self.pipelines.blur_params_buffer.clone())];
         unsafe {
-            // Unbind any SRV at slot 0 so the target texture isn't simultaneously bound as input.
-            ctx.PSSetShaderResources(0, Some(&null_srv));
+            // Unbind any SRV at the blur texture slot so the target texture isn't simultaneously
+            // bound as input.
+            ctx.PSSetShaderResources(3, Some(&null_srv));
             if clear {
                 ctx.ClearRenderTargetView(
                     target_rtv.as_ref().context("blur target view missing")?,
@@ -998,16 +1096,16 @@ impl DirectXRenderer {
             ctx.IASetPrimitiveTopology(topology);
             ctx.VSSetShader(vertex, None);
             ctx.PSSetShader(fragment, None);
-            ctx.VSSetConstantBuffers(0, Some(slice::from_ref(&self.globals.global_params_buffer)));
-            ctx.PSSetConstantBuffers(0, Some(slice::from_ref(&self.globals.global_params_buffer)));
-            ctx.VSSetConstantBuffers(1, Some(&blur_params));
-            ctx.PSSetConstantBuffers(1, Some(&blur_params));
-            ctx.PSSetSamplers(0, Some(slice::from_ref(&self.globals.sampler)));
-            ctx.PSSetShaderResources(0, Some(slice::from_ref(source_srv)));
+            ctx.VSSetConstantBuffers(0, Some(&cbuffers));
+            ctx.PSSetConstantBuffers(0, Some(&cbuffers));
+            ctx.VSSetConstantBuffers(2, Some(&blur_params));
+            ctx.PSSetConstantBuffers(2, Some(&blur_params));
+            ctx.PSSetSamplers(4, Some(slice::from_ref(&self.globals.sampler)));
+            ctx.PSSetShaderResources(3, Some(slice::from_ref(source_srv)));
             ctx.OMSetBlendState(blend, None, 0xFFFFFFFF);
             ctx.DrawInstanced(vertex_count, 1, 0, 0);
             // Unbind the source so the target can be rebound as a render target next.
-            ctx.PSSetShaderResources(0, Some(&null_srv));
+            ctx.PSSetShaderResources(3, Some(&null_srv));
         }
         Ok(())
     }
@@ -1022,35 +1120,28 @@ impl DirectXRenderer {
         target_rtv: &Option<ID3D11RenderTargetView>,
         bounds: Bounds<ScaledPixels>,
         content_mask: Bounds<ScaledPixels>,
-        corner_radii: [f32; 4],
+        corner_radii: Corners<ScaledPixels>,
         blur_radius: f32,
         opacity: f32,
         // Backdrop clips to the rounded rect; content (`filter`) bleeds past its bounds.
         clip_rounded: bool,
     ) -> Result<()> {
-        // Sigma is halved because the blur runs at half resolution.
-        let sigma = (blur_radius * 0.5).max(0.0);
-        if sigma <= 0.0 {
-            return Ok(());
-        }
-        // Span ±3σ. If that needs more than 32 taps, spread the taps apart (tap_step > 1) rather
-        // than truncating the kernel — keeps very large radii from clipping. Matches wgpu.
-        let ideal_taps = (3.0 * sigma).ceil();
-        let tap_count = ideal_taps.clamp(1.0, 32.0);
-        let tap_step = (ideal_taps / tap_count).max(1.0);
-        // Content blur bleeds ~3·radius past the box, so its composite quad covers a dilated rect.
-        let composite_bounds = if clip_rounded {
-            bounds
+        let full_width = self.width;
+        let full_height = self.height;
+        let blur_size = [
+            (full_width / BLUR_DOWNSAMPLE_FACTOR).max(1) as f32,
+            (full_height / BLUR_DOWNSAMPLE_FACTOR).max(1) as f32,
+        ];
+        let clip = if clip_rounded {
+            FilterCompositeClip::RoundedBounds
         } else {
-            bounds.dilate(ScaledPixels(3.0 * blur_radius))
+            FilterCompositeClip::ContentShape
         };
-        let half_w = (self.width / 2).max(1);
-        let half_h = (self.height / 2).max(1);
         let half_vp = D3D11_VIEWPORT {
             TopLeftX: 0.0,
             TopLeftY: 0.0,
-            Width: half_w as f32,
-            Height: half_h as f32,
+            Width: (full_width / BLUR_DOWNSAMPLE_FACTOR).max(1) as f32,
+            Height: (full_height / BLUR_DOWNSAMPLE_FACTOR).max(1) as f32,
             MinDepth: 0.0,
             MaxDepth: 1.0,
         };
@@ -1064,6 +1155,9 @@ impl DirectXRenderer {
                 r.blur.pong_srv.clone(),
             )
         };
+        let Some(kernel) = BlurKernel::for_radius(blur_radius) else {
+            return Ok(());
+        };
 
         // Downsample source -> ping, then separable gaussian ping -> pong -> ping.
         self.dx_blur_pass(
@@ -1072,10 +1166,7 @@ impl DirectXRenderer {
             &self.pipelines.blur_blend_replace,
             &ping_rtv,
             source_srv,
-            BlurParams {
-                downsample: 1.0,
-                ..Default::default()
-            },
+            BlurUniforms::downsample([full_width as f32, full_height as f32], blur_size),
             &half_vp,
             D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
             3,
@@ -1087,13 +1178,7 @@ impl DirectXRenderer {
             &self.pipelines.blur_blend_replace,
             &pong_rtv,
             &ping_srv,
-            BlurParams {
-                direction: [1.0 / half_w as f32, 0.0],
-                sigma,
-                tap_count,
-                tap_step,
-                ..Default::default()
-            },
+            BlurUniforms::gaussian(BlurAxis::Horizontal, blur_size, kernel),
             &half_vp,
             D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
             3,
@@ -1105,18 +1190,19 @@ impl DirectXRenderer {
             &self.pipelines.blur_blend_replace,
             &ping_rtv,
             &pong_srv,
-            BlurParams {
-                direction: [0.0, 1.0 / half_h as f32],
-                sigma,
-                tap_count,
-                tap_step,
-                ..Default::default()
-            },
+            BlurUniforms::gaussian(BlurAxis::Vertical, blur_size, kernel),
             &half_vp,
             D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
             3,
             true,
         )?;
+
+        // Content blur bleeds ~3·radius past the box, so its composite quad covers a dilated rect.
+        let composite_bounds = if clip_rounded {
+            bounds
+        } else {
+            bounds.dilate(ScaledPixels(GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS * blur_radius))
+        };
         // Composite the blurred result into the target (preserving its contents).
         self.dx_blur_pass(
             &self.pipelines.blur_composite_vertex,
@@ -1124,14 +1210,15 @@ impl DirectXRenderer {
             &self.pipelines.blur_blend_composite,
             target_rtv,
             &ping_srv,
-            BlurParams {
-                bounds: composite_bounds,
+            BlurUniforms::composite(
+                composite_bounds,
                 content_mask,
                 corner_radii,
                 opacity,
-                clip_rounded: if clip_rounded { 1.0 } else { 0.0 },
-                ..Default::default()
-            },
+                clip,
+                blur_size,
+                [full_width as f32, full_height as f32],
+            ),
             &full_vp,
             D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
             4,
@@ -1157,7 +1244,7 @@ impl DirectXRenderer {
             &self.pipelines.blur_blend_replace,
             target_rtv,
             source_srv,
-            BlurParams::default(),
+            BlurUniforms::copy([self.width as f32, self.height as f32]),
             &full_vp,
             D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
             3,
@@ -1370,11 +1457,24 @@ impl DirectXRenderPipelines {
             device,
             RawShaderBytes::new(ShaderModule::BlurComposite, ShaderTarget::Fragment)?.as_bytes(),
         )?;
-        let blur_params_buffer = create_constant_buffer(device, std::mem::size_of::<BlurParams>())?;
+        let blur_params_buffer = create_constant_buffer(device, std::mem::size_of::<BlurUniforms>())?;
         let blur_blend_replace = create_blend_state_no_blend(device)?;
         // Premultiplied (One / InvSrcAlpha) — the composite outputs a premultiplied blurred sample;
         // straight-alpha blending would darken the faded edges.
         let blur_blend_composite = create_blend_state_for_path_sprite(device)?;
+
+        let surfaces = SurfacePipeline {
+            vertex: create_vertex_shader(
+                device,
+                RawShaderBytes::new(ShaderModule::Surface, ShaderTarget::Vertex)?.as_bytes(),
+            )?,
+            fragment: create_fragment_shader(
+                device,
+                RawShaderBytes::new(ShaderModule::Surface, ShaderTarget::Fragment)?.as_bytes(),
+            )?,
+            params_buffer: create_constant_buffer(device, std::mem::size_of::<SurfaceUniforms>())?,
+            blend: create_blend_state(device)?,
+        };
 
         Ok(Self {
             shadow_pipeline,
@@ -1385,6 +1485,7 @@ impl DirectXRenderPipelines {
             mono_sprites,
             subpixel_sprites,
             poly_sprites,
+            surfaces,
             blur_downsample_vertex,
             blur_downsample_fragment,
             blur_vertex,
@@ -1423,18 +1524,9 @@ impl DirectComposition {
 
 impl DirectXGlobalElements {
     pub fn new(device: &ID3D11Device) -> Result<Self> {
-        let global_params_buffer = unsafe {
-            let desc = D3D11_BUFFER_DESC {
-                ByteWidth: std::mem::size_of::<GlobalParams>() as u32,
-                Usage: D3D11_USAGE_DYNAMIC,
-                BindFlags: D3D11_BIND_CONSTANT_BUFFER.0 as u32,
-                CPUAccessFlags: D3D11_CPU_ACCESS_WRITE.0 as u32,
-                ..Default::default()
-            };
-            let mut buffer = None;
-            device.CreateBuffer(&desc, None, Some(&mut buffer))?;
-            buffer
-        };
+        let globals_buffer = create_constant_buffer(device, std::mem::size_of::<GlobalUniforms>())?;
+        let font_buffer =
+            create_constant_buffer(device, std::mem::size_of::<FontRasterizationUniforms>())?;
 
         let sampler = unsafe {
             let desc = D3D11_SAMPLER_DESC {
@@ -1455,61 +1547,10 @@ impl DirectXGlobalElements {
         };
 
         Ok(Self {
-            global_params_buffer,
+            globals_buffer: Some(globals_buffer),
+            font_buffer: Some(font_buffer),
             sampler,
         })
-    }
-}
-
-#[derive(Debug, Default)]
-#[repr(C)]
-struct GlobalParams {
-    gamma_ratios: [f32; 4],
-    viewport_size: [f32; 2],
-    grayscale_enhanced_contrast: f32,
-    subpixel_enhanced_contrast: f32,
-    is_bgr: u32,
-    _pad: [u32; 3],
-}
-
-/// Mirrors the `BlurParams` cbuffer (register b1) in `shaders.hlsl`. 80 bytes (a multiple of 16,
-/// as constant buffers require). Updated per blur pass via `update_buffer`.
-#[repr(C)]
-#[derive(Clone, Copy)]
-struct BlurParams {
-    bounds: Bounds<ScaledPixels>,
-    content_mask: Bounds<ScaledPixels>,
-    corner_radii: [f32; 4],
-    direction: [f32; 2],
-    sigma: f32,
-    opacity: f32,
-    tap_count: f32,
-    /// 1.0 clips the composite to the rounded rect (backdrop); 0.0 lets content blur bleed past
-    /// its bounds like CSS `filter: blur`.
-    clip_rounded: f32,
-    /// 1.0 = snapped 2:1 box downsample (anchor the half-res grid to a fixed 2px grid at the
-    /// origin, so a stationary element blurs identically at every window size); 0.0 = 1:1 copy
-    /// (the scene blit, which must not downsample). Downsample pass only.
-    downsample: f32,
-    /// Spacing between taps in pixels (gaussian passes only); >1 lets `tap_count` taps span very
-    /// large radii without truncating the gaussian, matching the wgpu backend.
-    tap_step: f32,
-}
-
-impl Default for BlurParams {
-    fn default() -> Self {
-        BlurParams {
-            bounds: Bounds::default(),
-            content_mask: Bounds::default(),
-            corner_radii: [0.0; 4],
-            direction: [0.0, 0.0],
-            sigma: 0.0,
-            opacity: 1.0,
-            tap_count: 0.0,
-            clip_rounded: 0.0,
-            downsample: 0.0,
-            tap_step: 0.0,
-        }
     }
 }
 
@@ -1623,9 +1664,9 @@ impl<T> PipelineState<T> {
             &self.blend_state,
         );
         unsafe {
-            device_context.PSSetSamplers(0, Some(sampler));
-            device_context.VSSetShaderResources(0, Some(texture));
-            device_context.PSSetShaderResources(0, Some(texture));
+            device_context.PSSetSamplers(4, Some(sampler));
+            device_context.VSSetShaderResources(3, Some(texture));
+            device_context.PSSetShaderResources(3, Some(texture));
 
             device_context.DrawInstanced(4, instance_count, 0, 0);
         }
@@ -1642,7 +1683,13 @@ impl<T> PipelineState<T> {
         first_instance: u32,
         instance_count: u32,
     ) -> Result<()> {
-        let view = create_buffer_view_range(device, &self.buffer, first_instance, instance_count)?;
+        let view = create_buffer_view_range(
+            device,
+            &self.buffer,
+            first_instance,
+            instance_count,
+            std::mem::size_of::<T>() as u32,
+        )?;
         set_pipeline_state(
             device_context,
             slice::from_ref(&view),
@@ -1670,7 +1717,13 @@ impl<T> PipelineState<T> {
         first_instance: u32,
         instance_count: u32,
     ) -> Result<()> {
-        let view = create_buffer_view_range(device, &self.buffer, first_instance, instance_count)?;
+        let view = create_buffer_view_range(
+            device,
+            &self.buffer,
+            first_instance,
+            instance_count,
+            std::mem::size_of::<T>() as u32,
+        )?;
         set_pipeline_state(
             device_context,
             slice::from_ref(&view),
@@ -1682,28 +1735,13 @@ impl<T> PipelineState<T> {
             &self.blend_state,
         );
         unsafe {
-            device_context.PSSetSamplers(0, Some(sampler));
-            device_context.VSSetShaderResources(0, Some(texture));
-            device_context.PSSetShaderResources(0, Some(texture));
+            device_context.PSSetSamplers(4, Some(sampler));
+            device_context.VSSetShaderResources(3, Some(texture));
+            device_context.PSSetShaderResources(3, Some(texture));
             device_context.DrawInstanced(4, instance_count, 0, 0);
         }
         Ok(())
     }
-}
-
-#[derive(Clone, Copy)]
-#[repr(C)]
-struct PathRasterizationSprite {
-    xy_position: Point<ScaledPixels>,
-    st_position: Point<f32>,
-    color: Background,
-    bounds: Bounds<ScaledPixels>,
-}
-
-#[derive(Clone, Copy)]
-#[repr(C)]
-struct PathSprite {
-    bounds: Bounds<ScaledPixels>,
 }
 
 impl Drop for DirectXRenderer {
@@ -1808,17 +1846,6 @@ fn create_resources(
         path_intermediate_msaa_view,
         viewport,
     ))
-}
-
-#[inline]
-/// Flatten a `Corners` into the `[tl, tr, br, bl]` order expected by the blur composite shader.
-fn corner_radii_array(corners: Corners<ScaledPixels>) -> [f32; 4] {
-    [
-        corners.top_left.0,
-        corners.top_right.0,
-        corners.bottom_right.0,
-        corners.bottom_left.0,
-    ]
 }
 
 fn create_render_target_and_its_view(
@@ -2105,12 +2132,14 @@ fn create_buffer(
     buffer_size: usize,
 ) -> Result<ID3D11Buffer> {
     let desc = D3D11_BUFFER_DESC {
+        // The generated HLSL consumes instance data through `ByteAddressBuffer`, which requires
+        // a raw-view-enabled buffer with 4-byte-aligned contents.
         ByteWidth: (element_size * buffer_size) as u32,
         Usage: D3D11_USAGE_DYNAMIC,
         BindFlags: D3D11_BIND_SHADER_RESOURCE.0 as u32,
         CPUAccessFlags: D3D11_CPU_ACCESS_WRITE.0 as u32,
-        MiscFlags: D3D11_RESOURCE_MISC_BUFFER_STRUCTURED.0 as u32,
-        StructureByteStride: element_size as u32,
+        MiscFlags: D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS.0 as u32,
+        ..Default::default()
     };
     let mut buffer = None;
     unsafe { device.CreateBuffer(&desc, None, Some(&mut buffer)) }?;
@@ -2122,8 +2151,21 @@ fn create_buffer_view(
     device: &ID3D11Device,
     buffer: &ID3D11Buffer,
 ) -> Result<Option<ID3D11ShaderResourceView>> {
+    let mut buffer_desc = D3D11_BUFFER_DESC::default();
+    unsafe { buffer.GetDesc(&mut buffer_desc) };
+    let desc = D3D11_SHADER_RESOURCE_VIEW_DESC {
+        Format: DXGI_FORMAT_R32_TYPELESS,
+        ViewDimension: D3D11_SRV_DIMENSION_BUFFEREX,
+        Anonymous: D3D11_SHADER_RESOURCE_VIEW_DESC_0 {
+            BufferEx: D3D11_BUFFEREX_SRV {
+                FirstElement: 0,
+                NumElements: buffer_desc.ByteWidth / 4,
+                Flags: D3D11_BUFFEREX_SRV_RAW,
+            },
+        },
+    };
     let mut view = None;
-    unsafe { device.CreateShaderResourceView(buffer, None, Some(&mut view)) }?;
+    unsafe { device.CreateShaderResourceView(buffer, Some(&desc), Some(&mut view)) }?;
     Ok(view)
 }
 
@@ -2133,18 +2175,17 @@ fn create_buffer_view_range(
     buffer: &ID3D11Buffer,
     first_element: u32,
     num_elements: u32,
+    element_stride: u32,
 ) -> Result<Option<ID3D11ShaderResourceView>> {
+    let words_per_element = element_stride / 4;
     let desc = D3D11_SHADER_RESOURCE_VIEW_DESC {
-        Format: DXGI_FORMAT_UNKNOWN,
-        ViewDimension: D3D11_SRV_DIMENSION_BUFFER,
+        Format: DXGI_FORMAT_R32_TYPELESS,
+        ViewDimension: D3D11_SRV_DIMENSION_BUFFEREX,
         Anonymous: D3D11_SHADER_RESOURCE_VIEW_DESC_0 {
-            Buffer: D3D11_BUFFER_SRV {
-                Anonymous1: D3D11_BUFFER_SRV_0 {
-                    FirstElement: first_element,
-                },
-                Anonymous2: D3D11_BUFFER_SRV_1 {
-                    NumElements: num_elements,
-                },
+            BufferEx: D3D11_BUFFEREX_SRV {
+                FirstElement: first_element * words_per_element,
+                NumElements: num_elements * words_per_element,
+                Flags: D3D11_BUFFEREX_SRV_RAW,
             },
         },
     };
@@ -2180,8 +2221,9 @@ fn set_pipeline_state(
     blend_state: &ID3D11BlendState,
 ) {
     unsafe {
-        device_context.VSSetShaderResources(1, Some(buffer_view));
-        device_context.PSSetShaderResources(1, Some(buffer_view));
+        // Instance data is the group-1 data binding, mapped to register t2 by the generated HLSL.
+        device_context.VSSetShaderResources(2, Some(buffer_view));
+        device_context.PSSetShaderResources(2, Some(buffer_view));
         device_context.IASetPrimitiveTopology(topology);
         device_context.RSSetViewports(Some(viewport));
         device_context.VSSetShader(vertex_shader, None);
@@ -2204,15 +2246,16 @@ fn report_live_objects(device: &ID3D11Device) -> Result<()> {
 const BUFFER_COUNT: usize = 3;
 
 pub(crate) mod shader_resources {
-    use anyhow::Result;
+    //! HLSL generated from the shared Rust shader sources in `gpui_render` at Cargo build time,
+    //! compiled to bytecode with the D3D compiler when the renderer initializes.
 
-    #[cfg(debug_assertions)]
+    use std::ffi::CString;
+
+    use anyhow::{Context as _, Result};
+    use gpui_render::artifacts::{NativeShader, NATIVE_SHADERS};
     use windows::{
-        Win32::Graphics::Direct3D::{
-            Fxc::{D3DCOMPILE_DEBUG, D3DCOMPILE_SKIP_OPTIMIZATION, D3DCompileFromFile},
-            ID3DBlob,
-        },
-        core::{HSTRING, PCSTR},
+        Win32::Graphics::Direct3D::{Fxc::D3DCompile, ID3DBlob},
+        core::PCSTR,
     };
 
     #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -2225,10 +2268,33 @@ pub(crate) mod shader_resources {
         MonochromeSprite,
         SubpixelSprite,
         PolychromeSprite,
-        EmojiRasterization,
+        Surface,
         BlurDownsample,
         Blur,
         BlurComposite,
+    }
+
+    impl ShaderModule {
+        fn shader(self) -> &'static NativeShader {
+            let label = match self {
+                Self::Quad => "quads",
+                Self::Shadow => "shadows",
+                Self::Underline => "underlines",
+                Self::PathRasterization => "path_rasterization",
+                Self::PathSprite => "paths",
+                Self::MonochromeSprite => "monochrome_sprites",
+                Self::SubpixelSprite => "subpixel_sprites",
+                Self::PolychromeSprite => "polychrome_sprites",
+                Self::Surface => "surfaces",
+                Self::BlurDownsample => "blur_downsample",
+                Self::Blur => "blur",
+                Self::BlurComposite => "blur_composite",
+            };
+            NATIVE_SHADERS
+                .iter()
+                .find(|shader| shader.label == label)
+                .unwrap_or_else(|| panic!("missing generated native shader {label}"))
+        }
     }
 
     #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -2237,181 +2303,62 @@ pub(crate) mod shader_resources {
         Fragment,
     }
 
-    pub(crate) struct RawShaderBytes<'t> {
-        inner: &'t [u8],
-
-        #[cfg(debug_assertions)]
-        _blob: ID3DBlob,
+    pub(crate) struct RawShaderBytes {
+        blob: ID3DBlob,
     }
 
-    impl<'t> RawShaderBytes<'t> {
+    impl RawShaderBytes {
         pub(crate) fn new(module: ShaderModule, target: ShaderTarget) -> Result<Self> {
-            #[cfg(not(debug_assertions))]
-            {
-                Ok(Self::from_bytes(module, target))
+            let shader = module.shader();
+            let (entry, profile): (&str, &[u8]) = match target {
+                ShaderTarget::Vertex => (shader.vertex_entry, b"vs_5_0\0"),
+                ShaderTarget::Fragment => (shader.fragment_entry, b"ps_5_0\0"),
+            };
+            let entry = CString::new(entry).context("shader entry point name")?;
+            let mut blob = None;
+            let mut errors = None;
+            unsafe {
+                D3DCompile(
+                    shader.hlsl.as_bytes(),
+                    PCSTR::from_raw(b"gpui_shaders.hlsl\0".as_ptr()),
+                    None,
+                    None,
+                    PCSTR::from_raw(entry.as_ptr() as *const u8),
+                    PCSTR::from_raw(profile.as_ptr()),
+                    0,
+                    0,
+                    Some(&mut blob),
+                    Some(&mut errors),
+                )
             }
-            #[cfg(debug_assertions)]
-            {
-                let blob = build_shader_blob(module, target)?;
-                let inner = unsafe {
-                    std::slice::from_raw_parts(
-                        blob.GetBufferPointer() as *const u8,
-                        blob.GetBufferSize(),
-                    )
-                };
-                Ok(Self { inner, _blob: blob })
-            }
+            .map_err(|error| {
+                let details = errors.as_ref().map(|errors| unsafe {
+                    std::ffi::CStr::from_ptr(errors.GetBufferPointer() as *const i8)
+                        .to_string_lossy()
+                        .into_owned()
+                });
+                anyhow::anyhow!(
+                    "compiling generated HLSL for {}: {error}\n{}",
+                    shader.label,
+                    details.unwrap_or_default()
+                )
+            })?;
+            Ok(Self {
+                blob: blob.context("the shader compiler returned no blob")?,
+            })
         }
 
-        pub(crate) fn as_bytes(&'t self) -> &'t [u8] {
-            self.inner
-        }
-
-        #[cfg(not(debug_assertions))]
-        fn from_bytes(module: ShaderModule, target: ShaderTarget) -> Self {
-            let bytes = match module {
-                ShaderModule::Quad => match target {
-                    ShaderTarget::Vertex => QUAD_VERTEX_BYTES,
-                    ShaderTarget::Fragment => QUAD_FRAGMENT_BYTES,
-                },
-                ShaderModule::Shadow => match target {
-                    ShaderTarget::Vertex => SHADOW_VERTEX_BYTES,
-                    ShaderTarget::Fragment => SHADOW_FRAGMENT_BYTES,
-                },
-                ShaderModule::Underline => match target {
-                    ShaderTarget::Vertex => UNDERLINE_VERTEX_BYTES,
-                    ShaderTarget::Fragment => UNDERLINE_FRAGMENT_BYTES,
-                },
-                ShaderModule::PathRasterization => match target {
-                    ShaderTarget::Vertex => PATH_RASTERIZATION_VERTEX_BYTES,
-                    ShaderTarget::Fragment => PATH_RASTERIZATION_FRAGMENT_BYTES,
-                },
-                ShaderModule::PathSprite => match target {
-                    ShaderTarget::Vertex => PATH_SPRITE_VERTEX_BYTES,
-                    ShaderTarget::Fragment => PATH_SPRITE_FRAGMENT_BYTES,
-                },
-                ShaderModule::MonochromeSprite => match target {
-                    ShaderTarget::Vertex => MONOCHROME_SPRITE_VERTEX_BYTES,
-                    ShaderTarget::Fragment => MONOCHROME_SPRITE_FRAGMENT_BYTES,
-                },
-                ShaderModule::SubpixelSprite => match target {
-                    ShaderTarget::Vertex => SUBPIXEL_SPRITE_VERTEX_BYTES,
-                    ShaderTarget::Fragment => SUBPIXEL_SPRITE_FRAGMENT_BYTES,
-                },
-                ShaderModule::PolychromeSprite => match target {
-                    ShaderTarget::Vertex => POLYCHROME_SPRITE_VERTEX_BYTES,
-                    ShaderTarget::Fragment => POLYCHROME_SPRITE_FRAGMENT_BYTES,
-                },
-                ShaderModule::EmojiRasterization => match target {
-                    ShaderTarget::Vertex => EMOJI_RASTERIZATION_VERTEX_BYTES,
-                    ShaderTarget::Fragment => EMOJI_RASTERIZATION_FRAGMENT_BYTES,
-                },
-                ShaderModule::BlurDownsample => match target {
-                    ShaderTarget::Vertex => BLUR_DOWNSAMPLE_VERTEX_BYTES,
-                    ShaderTarget::Fragment => BLUR_DOWNSAMPLE_FRAGMENT_BYTES,
-                },
-                ShaderModule::Blur => match target {
-                    ShaderTarget::Vertex => BLUR_VERTEX_BYTES,
-                    ShaderTarget::Fragment => BLUR_FRAGMENT_BYTES,
-                },
-                ShaderModule::BlurComposite => match target {
-                    ShaderTarget::Vertex => BLUR_COMPOSITE_VERTEX_BYTES,
-                    ShaderTarget::Fragment => BLUR_COMPOSITE_FRAGMENT_BYTES,
-                },
-            };
-            Self { inner: bytes }
-        }
-    }
-
-    #[cfg(debug_assertions)]
-    pub(super) fn build_shader_blob(entry: ShaderModule, target: ShaderTarget) -> Result<ID3DBlob> {
-        unsafe {
-            use windows::Win32::Graphics::{
-                Direct3D::ID3DInclude, Hlsl::D3D_COMPILE_STANDARD_FILE_INCLUDE,
-            };
-
-            let shader_name = if matches!(entry, ShaderModule::EmojiRasterization) {
-                "color_text_raster.hlsl"
-            } else {
-                "shaders.hlsl"
-            };
-
-            let entry = format!(
-                "{}_{}\0",
-                entry.as_str(),
-                match target {
-                    ShaderTarget::Vertex => "vertex",
-                    ShaderTarget::Fragment => "fragment",
-                }
-            );
-            let target = match target {
-                ShaderTarget::Vertex => "vs_4_1\0",
-                ShaderTarget::Fragment => "ps_4_1\0",
-            };
-
-            let mut compile_blob = None;
-            let mut error_blob = None;
-            let shader_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-                .join(&format!("src/{}", shader_name))
-                .canonicalize()?;
-
-            let entry_point = PCSTR::from_raw(entry.as_ptr());
-            let target_cstr = PCSTR::from_raw(target.as_ptr());
-
-            // really dirty trick because winapi bindings are unhappy otherwise
-            let include_handler = &std::mem::transmute::<usize, ID3DInclude>(
-                D3D_COMPILE_STANDARD_FILE_INCLUDE as usize,
-            );
-
-            let ret = D3DCompileFromFile(
-                &HSTRING::from(shader_path.to_str().unwrap()),
-                None,
-                include_handler,
-                entry_point,
-                target_cstr,
-                D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
-                0,
-                &mut compile_blob,
-                Some(&mut error_blob),
-            );
-            if ret.is_err() {
-                let Some(error_blob) = error_blob else {
-                    return Err(anyhow::anyhow!("{ret:?}"));
-                };
-
-                let error_string =
-                    std::ffi::CStr::from_ptr(error_blob.GetBufferPointer() as *const i8)
-                        .to_string_lossy();
-                log::error!("Shader compile error: {}", error_string);
-                return Err(anyhow::anyhow!("Compile error: {}", error_string));
-            }
-            Ok(compile_blob.unwrap())
-        }
-    }
-
-    #[cfg(not(debug_assertions))]
-    include!(concat!(env!("OUT_DIR"), "/shaders_bytes.rs"));
-
-    #[cfg(debug_assertions)]
-    impl ShaderModule {
-        pub fn as_str(self) -> &'static str {
-            match self {
-                ShaderModule::Quad => "quad",
-                ShaderModule::Shadow => "shadow",
-                ShaderModule::Underline => "underline",
-                ShaderModule::PathRasterization => "path_rasterization",
-                ShaderModule::PathSprite => "path_sprite",
-                ShaderModule::MonochromeSprite => "monochrome_sprite",
-                ShaderModule::SubpixelSprite => "subpixel_sprite",
-                ShaderModule::PolychromeSprite => "polychrome_sprite",
-                ShaderModule::EmojiRasterization => "emoji_rasterization",
-                ShaderModule::BlurDownsample => "blur_downsample",
-                ShaderModule::Blur => "blur",
-                ShaderModule::BlurComposite => "blur_composite",
+        pub(crate) fn as_bytes(&self) -> &[u8] {
+            unsafe {
+                std::slice::from_raw_parts(
+                    self.blob.GetBufferPointer() as *const u8,
+                    self.blob.GetBufferSize(),
+                )
             }
         }
     }
 }
+
 
 mod nvidia {
     use std::{

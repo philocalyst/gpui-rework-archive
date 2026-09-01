@@ -1,19 +1,13 @@
 //! Cross-platform screen capture source discovery and stream adaptation.
 
-#[cfg(any(target_os = "linux", target_os = "freebsd"))]
-use crate::Size;
 use crate::{
-    DevicePixels, ForegroundExecutor, ScreenCaptureFrame, ScreenCaptureSource, ScreenCaptureStream,
+    ForegroundExecutor, ScreenCaptureFrame, ScreenCaptureSource, ScreenCaptureStream,
     SourceMetadata,
 };
 use anyhow::Result;
 use futures::channel::oneshot;
 use std::rc::Rc;
 
-#[cfg(any(target_os = "linux", target_os = "freebsd"))]
-#[path = "screen_capture/linux.rs"]
-mod platform;
-#[cfg(target_os = "windows")]
 #[path = "screen_capture/windows.rs"]
 mod platform;
 
@@ -25,14 +19,6 @@ pub fn screen_sources(
     foreground_executor: &ForegroundExecutor,
 ) -> oneshot::Receiver<Result<Vec<Rc<dyn ScreenCaptureSource>>>> {
     platform::screen_sources(foreground_executor)
-}
-
-/// Starts capture for the portal-selected default target.
-#[cfg(any(target_os = "linux", target_os = "freebsd"))]
-pub fn start_default_target_source(
-    foreground_executor: &ForegroundExecutor,
-) -> oneshot::Receiver<Result<Vec<Rc<dyn ScreenCaptureSource>>>> {
-    platform::start_default_target(foreground_executor)
 }
 
 fn to_dyn_screen_capture_sources<T: ScreenCaptureSource + 'static>(

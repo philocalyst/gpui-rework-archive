@@ -28,9 +28,9 @@ test-support = [
 bench = ["test-support", "dep:criterion", "dep:hdrhistogram"]
 inspector = ["gpui_macros/inspector"]
 leak-detection = ["backtrace"]
-wayland = ["scap?/wayland"]
-x11 = ["scap?/x11"]
-screen-capture = ["scap", "dep:windows-capture"]
+wayland = []
+x11 = []
+screen-capture = ["dep:windows-capture"]
 windows-manifest = ["dep:embed-resource"]
 input-latency-histogram = ["dep:hdrhistogram"]
 profiler = []
@@ -136,7 +136,6 @@ metal.workspace = true
 pathfinder_geometry.workspace = true
 
 [target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies]
-scap = { workspace = true, optional = true }
 
 
 [target.'cfg(target_os = "windows")'.dependencies]

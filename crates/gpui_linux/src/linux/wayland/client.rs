@@ -901,16 +901,6 @@ impl LinuxClient for WaylandClient {
         None
     }
 
-    #[cfg(feature = "screen-capture")]
-    fn screen_capture_sources(
-        &self,
-    ) -> futures::channel::oneshot::Receiver<anyhow::Result<Vec<Rc<dyn gpui::ScreenCaptureSource>>>>
-    {
-        gpui::screen_capture::start_default_target_source(
-            &self.0.borrow().common.foreground_executor,
-        )
-    }
-
     fn set_gpu_requirements(&self, requirements: Box<dyn std::any::Any>) {
         if let Ok(reqs) = requirements.downcast::<gpui_wgpu::WgpuDeviceRequirements>() {
             self.0.borrow_mut().gpu_requirements = Some(*reqs);

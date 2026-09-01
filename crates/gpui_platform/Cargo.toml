@@ -20,7 +20,6 @@ screen-capture = [
   "gpui/screen-capture",
   "gpui_macos/screen-capture",
   "gpui_windows/screen-capture",
-  "gpui_linux/screen-capture",
 ]
 wayland = ["gpui_linux/wayland"]
 x11 = ["gpui_linux/x11"]

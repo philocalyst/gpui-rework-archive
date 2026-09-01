@@ -272,6 +272,7 @@ fn begin_color_render_pass<'encoder>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::wgpu_renderer::filters::FrameUniformRequirements;
 
     #[test]
     fn rust_storage_types_match_shader_strides() {
