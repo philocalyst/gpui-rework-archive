@@ -2,12 +2,14 @@ use gpui::{
     AtlasTextureId, MonochromeSprite, Path, PolychromeSprite, Quad, ScaledPixels, Shadow,
     SubpixelSprite, Underline,
 };
-use std::ops::Range;
 
 use crate::WgpuTextureInfo;
 use gpui_render::shaders::interface::{self as shader_interface, BufferData};
 
-use super::{WgpuRenderer, buffers::InstanceUpload, frame, path_types, pipelines};
+use super::{
+    buffers::{InstanceSlice, InstanceUpload},
+    frame, path_types, pipelines, WgpuRenderer,
+};
 
 impl WgpuRenderer {
     pub(super) fn draw_quads(
@@ -131,20 +133,20 @@ impl WgpuRenderer {
         let Some(slice) = instances.write(values) else {
             return Err(frame::DrawError::CapacityPlanningInvariant);
         };
-        self.draw_bound_range(pipeline, bind_group, slice.range(), pass);
+        self.draw_bound_slice(pipeline, bind_group, &slice, pass);
         Ok(())
     }
 
-    fn draw_bound_range(
+    fn draw_bound_slice<T>(
         &self,
         pipeline: &pipelines::WgpuRenderPipeline,
         bind_group: &wgpu::BindGroup,
-        instances: Range<u32>,
+        slice: &InstanceSlice<T>,
         pass: &mut wgpu::RenderPass<'_>,
     ) {
         pass.set_pipeline(pipeline);
-        pass.set_bind_group(shader_interface::DATA_BIND_GROUP, bind_group, &[]);
-        pass.draw(0..pipeline.fixed_vertex_count(), instances);
+        slice.set_data_bind_group(pass, bind_group);
+        pass.draw(0..pipeline.fixed_vertex_count(), slice.range());
     }
 
     fn draw_instances_with_texture<T: BufferData>(
@@ -192,12 +194,7 @@ impl WgpuRenderer {
             path_intermediate_view,
             &resources.atlas_sampler,
         );
-        self.draw_bound_range(
-            &resources.pipelines.paths,
-            &bind_group,
-            sprite_slice.range(),
-            pass,
-        );
+        self.draw_bound_slice(&resources.pipelines.paths, &bind_group, &sprite_slice, pass);
         Ok(())
     }
 
@@ -247,11 +244,7 @@ impl WgpuRenderer {
             &resources.path_globals_bind_group,
             &[],
         );
-        pass.set_bind_group(
-            shader_interface::DATA_BIND_GROUP,
-            resources.instances.bind_group(),
-            &[],
-        );
+        vertex_slice.set_data_bind_group(&mut pass, resources.instances.bind_group());
         pass.draw(vertex_slice.range(), 0..1);
         Ok(())
     }

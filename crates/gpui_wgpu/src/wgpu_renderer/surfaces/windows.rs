@@ -2,8 +2,8 @@ use super::*;
 use anyhow::Result;
 use collections::FxHashMap;
 use windows_061::{
-    Win32::Graphics::Direct3D11::{D3D11_TEXTURE2D_DESC, ID3D11Texture2D},
     core::Interface as _,
+    Win32::Graphics::Direct3D11::{ID3D11Texture2D, D3D11_TEXTURE2D_DESC},
 };
 
 #[path = "windows/shared.rs"]

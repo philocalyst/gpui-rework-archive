@@ -1,9 +1,9 @@
+use gpui::PaintSurface;
 use gpui_render::shaders::{
     common::SurfaceColorFormat, interface as shader_interface, surface::SurfaceUniforms,
 };
-use gpui::PaintSurface;
 
-use super::{WgpuRenderer, frame};
+use super::{frame, WgpuRenderer};
 
 #[cfg(target_os = "macos")]
 #[path = "surfaces/macos.rs"]

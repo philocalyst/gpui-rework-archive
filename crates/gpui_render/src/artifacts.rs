@@ -3,6 +3,10 @@
 pub const BASE_WGSL: &str = include_str!(concat!(env!("OUT_DIR"), "/gpui_base.wgsl"));
 pub const SUBPIXEL_DUAL_SOURCE_WGSL: &str =
     include_str!(concat!(env!("OUT_DIR"), "/gpui_subpixel_dual_source.wgsl"));
+/// Downlevel (WebGL2/GLES) dialect of the base module: scene storage arrays are transported
+/// through an `rgba32uint` data texture with build-generated typed decoders.
+pub const BASE_DOWNLEVEL_WGSL: &str =
+    include_str!(concat!(env!("OUT_DIR"), "/gpui_base_downlevel.wgsl"));
 
 #[derive(Clone, Copy)]
 pub struct GeneratedBinding {
@@ -17,6 +21,10 @@ pub enum GeneratedBindingKind {
     StorageRead(u64),
     Texture2dFloat,
     FilteringSampler,
+    /// Downlevel only: the `rgba32uint` scene-data texture.
+    DataTexture,
+    /// Downlevel only: the per-draw batch base uniform; always bound with a dynamic offset.
+    RangeUniform,
 }
 
 include!(concat!(env!("OUT_DIR"), "/shader_interface.rs"));

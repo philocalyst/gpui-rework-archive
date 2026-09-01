@@ -7,20 +7,20 @@ use std::{
 use collections::FxHashMap;
 
 use crate::WgpuContext;
+use gpui_render::blur::DOWNSAMPLE_FACTOR as BLUR_DOWNSAMPLE_FACTOR;
 use gpui_render::shaders::{
     blur::BlurUniforms,
     common::{FontRasterizationUniforms, GlobalUniforms},
     surface::SurfaceUniforms,
 };
-use gpui_render::blur::DOWNSAMPLE_FACTOR as BLUR_DOWNSAMPLE_FACTOR;
 
 use super::{
-    WgpuRenderer,
     buffers::{DynamicUniformBuffer, InstanceBufferArena},
     filters::FrameUniformRequirements,
     pipelines::{WgpuBindGroupLayouts, WgpuPipelines},
     settings::RenderingParameters,
     surfaces::SurfaceCache,
+    WgpuRenderer,
 };
 
 const INITIAL_FILTER_UNIFORM_CAPACITY: u64 = 16;
@@ -30,6 +30,7 @@ const INITIAL_SURFACE_UNIFORM_CAPACITY: u64 = 8;
 pub(super) struct WgpuResources {
     pub(super) device: Arc<wgpu::Device>,
     pub(super) queue: Arc<wgpu::Queue>,
+    pub(super) renderer_tier: crate::RendererTier,
     pub(super) surface: Option<wgpu::Surface<'static>>,
     pub(super) pipelines: WgpuPipelines,
     pub(super) bind_group_layouts: WgpuBindGroupLayouts,
@@ -84,7 +85,8 @@ impl WgpuResources {
     ) -> anyhow::Result<(Self, ResourceMetadata)> {
         let device = Arc::clone(&context.device);
         let queue = Arc::clone(&context.queue);
-        let bind_group_layouts = WgpuBindGroupLayouts::new(&device);
+        let renderer_tier = context.renderer_tier();
+        let bind_group_layouts = WgpuBindGroupLayouts::new(&device, renderer_tier);
         let pipelines = WgpuPipelines::new(
             &device,
             &bind_group_layouts,
@@ -92,6 +94,7 @@ impl WgpuResources {
             surface_config.alpha_mode,
             rendering.path_sample_count,
             dual_source_blending,
+            renderer_tier,
         );
         let linear_sampler = |label| {
             device.create_sampler(&wgpu::SamplerDescriptor {
@@ -158,7 +161,8 @@ impl WgpuResources {
             last_error,
         };
         let resources = Self {
-            instances: InstanceBufferArena::new(&device, &bind_group_layouts),
+            instances: InstanceBufferArena::new(&device, &bind_group_layouts, renderer_tier),
+            renderer_tier,
             device,
             queue,
             surface,

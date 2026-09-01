@@ -1,16 +1,17 @@
 use super::{
-    WgpuRenderer, begin_color_render_pass, buffers::InstanceUpload,
-    filters::{FILTER_UNIFORMS_PER_COMPOSITE, FrameUniformRequirements},
-    path_types,
+    begin_color_render_pass,
+    buffers::{InstanceTransport, InstanceUpload},
+    filters::{FrameUniformRequirements, FILTER_UNIFORMS_PER_COMPOSITE},
+    path_types, WgpuRenderer,
+};
+use gpui::{
+    FilterRenderTarget, MonochromeSprite, PolychromeSprite, PrimitiveBatch, Quad, RenderCommand,
+    Scene, Shadow, SubpixelSprite, Underline,
 };
 use gpui_render::blur::{FilterCompositeClip, FilterCompositeParameters};
 use gpui_render::shaders::{
     common::{FontRasterizationUniforms, GlobalUniforms, ShaderBool},
     interface as shader_interface,
-};
-use gpui::{
-    FilterRenderTarget, MonochromeSprite, PolychromeSprite, PrimitiveBatch, Quad, RenderCommand,
-    Scene, Shadow, SubpixelSprite, Underline,
 };
 
 pub(super) fn render_to_view(
@@ -62,21 +63,27 @@ impl PreparedTargets {
         if !begin_frame(renderer) {
             return None;
         }
-        let requirements = FrameRequirements::for_scene(scene);
+        let requirements = {
+            let transport = renderer.resources().instances.transport();
+            FrameRequirements::for_scene(scene, transport)
+        };
         let device = renderer.resources().device.clone();
         let resources = renderer.resources_mut();
         if !resources.instances.ensure_capacity(
             &device,
             &resources.bind_group_layouts,
             requirements.storage_bytes,
+            requirements.instance_batches,
         ) {
             return None;
         }
         let instances = {
             let resources = renderer.resources();
-            resources
-                .instances
-                .begin_upload(&resources.queue, requirements.storage_bytes)?
+            resources.instances.begin_upload(
+                &resources.queue,
+                requirements.storage_bytes,
+                requirements.instance_batches,
+            )?
         };
         if !renderer.ensure_uniform_capacity(requirements.uniforms) {
             return None;
@@ -224,18 +231,39 @@ fn write_shader_globals(renderer: &mut WgpuRenderer) {
     renderer.uploaded_globals = Some(state);
 }
 
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy)]
 pub(super) struct FrameRequirements {
     storage_bytes: u64,
+    /// Number of instance batches drawn this frame; one downlevel range-uniform slot
+    /// (bound with a dynamic offset) is required per batch.
+    instance_batches: u64,
+    transport: InstanceTransport,
     pub(super) uniforms: FrameUniformRequirements,
     isolated_target_count: usize,
     uses_path_target: bool,
     uses_offscreen_target: bool,
 }
 
+impl Default for FrameRequirements {
+    fn default() -> Self {
+        Self {
+            storage_bytes: 0,
+            instance_batches: 0,
+            transport: InstanceTransport::StorageBuffer,
+            uniforms: FrameUniformRequirements::default(),
+            isolated_target_count: 0,
+            uses_path_target: false,
+            uses_offscreen_target: false,
+        }
+    }
+}
+
 impl FrameRequirements {
-    pub(super) fn for_scene(scene: &Scene) -> Self {
-        let mut requirements = Self::default();
+    pub(super) fn for_scene(scene: &Scene, transport: InstanceTransport) -> Self {
+        let mut requirements = Self {
+            transport,
+            ..Self::default()
+        };
         for command in scene.render_commands() {
             match command {
                 RenderCommand::BeginFilter { .. } => {}
@@ -300,8 +328,11 @@ impl FrameRequirements {
             return;
         }
         let stride = std::mem::size_of::<T>() as u64;
-        self.storage_bytes = self.storage_bytes.next_multiple_of(stride);
+        self.storage_bytes = self
+            .storage_bytes
+            .next_multiple_of(self.transport.batch_alignment(stride));
         self.storage_bytes += stride * count as u64;
+        self.instance_batches += 1;
     }
 }
 
@@ -364,7 +395,7 @@ impl<'a> FrameEncoder<'a> {
                 );
             }
         }
-        self.instances.finish();
+        self.instances.finish(&mut self.encoder);
         self.renderer.resources().finish_frame_uploads();
         let command_buffer = self.encoder.finish();
         result.map(|()| command_buffer)

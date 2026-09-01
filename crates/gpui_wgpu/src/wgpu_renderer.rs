@@ -2,13 +2,13 @@ use crate::{CompositorGpuHint, WgpuAtlas, WgpuContext, WgpuDeviceRequirements};
 use gpui::{DevicePixels, GpuSpecs, Scene, Size};
 
 #[cfg(test)]
-use gpui_render::shaders::interface as shader_interface;
-#[cfg(test)]
-use gpui_render::blur::{BlurKernel, MAX_GAUSSIAN_SAMPLES_PER_SIDE};
-#[cfg(test)]
 use gpui::BackdropFilter;
 #[cfg(all(test, feature = "test-support", not(target_family = "wasm")))]
 use gpui::{Bounds, Point, Quad, ScaledPixels, Underline};
+#[cfg(test)]
+use gpui_render::blur::{BlurKernel, MAX_GAUSSIAN_SAMPLES_PER_SIDE};
+#[cfg(test)]
+use gpui_render::shaders::interface as shader_interface;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -194,6 +194,7 @@ impl WgpuRenderer {
             config.alpha_mode,
             self.rendering_params.path_sample_count,
             self.dual_source_blending,
+            resources.renderer_tier,
         );
     }
 
@@ -327,7 +328,11 @@ mod tests {
             .resize_with(100, BackdropFilter::default);
 
         assert_eq!(
-            frame::FrameRequirements::for_scene(&scene).uniforms,
+            frame::FrameRequirements::for_scene(
+                &scene,
+                super::buffers::InstanceTransport::StorageBuffer
+            )
+            .uniforms,
             FrameUniformRequirements {
                 filter_count: 401,
                 surface_count: 0,

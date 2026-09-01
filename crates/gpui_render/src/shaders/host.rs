@@ -2,7 +2,11 @@ use super::*;
 
 impl From<bool> for common::ShaderBool {
     fn from(value: bool) -> Self {
-        if value { Self::Enabled } else { Self::Disabled }
+        if value {
+            Self::Enabled
+        } else {
+            Self::Disabled
+        }
     }
 }
 
