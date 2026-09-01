@@ -19,7 +19,6 @@ screen-capture = ["gpui/screen-capture"]
 
 [dependencies]
 gpui.workspace = true
-gpui_wgpu = { workspace = true, features = ["font-kit"] }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 accesskit.workspace = true
@@ -27,6 +26,7 @@ accesskit_windows.workspace = true
 anyhow.workspace = true
 collections.workspace = true
 dunce.workspace = true
+etagere.workspace = true
 futures.workspace = true
 gpui_util.workspace = true
 image.workspace = true

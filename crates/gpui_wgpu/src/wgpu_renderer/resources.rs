@@ -6,19 +6,18 @@ use std::{
 
 use collections::FxHashMap;
 
-use crate::{
-    WgpuContext,
-    shaders::{
-        blur::BlurUniforms,
-        common::{FontRasterizationUniforms, GlobalUniforms},
-        surface::SurfaceUniforms,
-    },
+use crate::WgpuContext;
+use gpui_render::shaders::{
+    blur::BlurUniforms,
+    common::{FontRasterizationUniforms, GlobalUniforms},
+    surface::SurfaceUniforms,
 };
+use gpui_render::blur::DOWNSAMPLE_FACTOR as BLUR_DOWNSAMPLE_FACTOR;
 
 use super::{
     WgpuRenderer,
     buffers::{DynamicUniformBuffer, InstanceBufferArena},
-    filters::{BLUR_DOWNSAMPLE_FACTOR, FrameUniformRequirements},
+    filters::FrameUniformRequirements,
     pipelines::{WgpuBindGroupLayouts, WgpuPipelines},
     settings::RenderingParameters,
     surfaces::SurfaceCache,
@@ -147,11 +146,7 @@ impl WgpuResources {
         let globals_bind_group = create_globals("globals_bind_group", 0);
         let path_globals_bind_group =
             create_globals("path_globals_bind_group", path_globals_offset);
-        let last_error = Arc::new(Mutex::new(None));
-        let error_slot = Arc::clone(&last_error);
-        device.on_uncaptured_error(Arc::new(move |error| {
-            *error_slot.lock().unwrap() = Some(error.to_string());
-        }));
+        let last_error = context.uncaptured_error_slot();
         let surface_cache = SurfaceCache::new(&device)?;
 
         let metadata = ResourceMetadata {
@@ -267,8 +262,8 @@ impl WgpuRenderer {
         let format = self.target.format();
         let width = self.target.width();
         let height = self.target.height();
-        let blur_width = (width / BLUR_DOWNSAMPLE_FACTOR).max(1);
-        let blur_height = (height / BLUR_DOWNSAMPLE_FACTOR).max(1);
+        let blur_width = width.div_ceil(BLUR_DOWNSAMPLE_FACTOR).max(1);
+        let blur_height = height.div_ceil(BLUR_DOWNSAMPLE_FACTOR).max(1);
         let resources = self.resources_mut();
 
         if resources.scene_color_texture.is_none() {

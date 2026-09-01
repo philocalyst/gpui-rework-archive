@@ -1,10 +1,10 @@
 use super::{
-    FilterCompositeClip, FilterCompositeParameters, WgpuRenderer, begin_color_render_pass,
-    buffers::InstanceUpload,
+    WgpuRenderer, begin_color_render_pass, buffers::InstanceUpload,
     filters::{FILTER_UNIFORMS_PER_COMPOSITE, FrameUniformRequirements},
     path_types,
 };
-use crate::shaders::{
+use gpui_render::blur::{FilterCompositeClip, FilterCompositeParameters};
+use gpui_render::shaders::{
     common::{FontRasterizationUniforms, GlobalUniforms, ShaderBool},
     interface as shader_interface,
 };

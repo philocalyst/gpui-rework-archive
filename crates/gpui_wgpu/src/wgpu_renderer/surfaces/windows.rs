@@ -35,12 +35,15 @@ pub(super) fn draw_surfaces(
     let mut cache = resources.surface_cache.borrow_mut();
     let active_keys = surfaces
         .iter()
-        .map(|surface| capture_texture(surface).as_raw() as usize)
+        .filter_map(|surface| capture_texture(surface).map(|texture| texture.as_raw() as usize))
         .collect::<smallvec::SmallVec<[usize; 4]>>();
     cache.textures.retain(|key, _| active_keys.contains(key));
 
     for surface in surfaces {
-        let source = capture_texture(surface);
+        let Some(source) = capture_texture(surface) else {
+            log::error!("surface source cannot be imported by the Windows renderer");
+            return Err(frame::DrawError::ExternalSurface);
+        };
         let key = source.as_raw() as usize;
         let size = source_size(source);
         if cache
@@ -81,9 +84,11 @@ pub(super) fn draw_surfaces(
     Ok(())
 }
 
-fn capture_texture(surface: &PaintSurface) -> &ID3D11Texture2D {
-    let gpui::SurfaceSource::WindowsCapture(frame) = &surface.source;
-    frame.texture()
+fn capture_texture(surface: &PaintSurface) -> Option<&ID3D11Texture2D> {
+    let gpui::SurfaceSource::WindowsCapture(frame) = &surface.source else {
+        return None;
+    };
+    Some(frame.texture())
 }
 
 fn surface_error(error: anyhow::Error) -> frame::DrawError {

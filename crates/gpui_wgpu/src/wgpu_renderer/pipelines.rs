@@ -1,5 +1,9 @@
-use crate::{
-    shader_sources::{BASE_WGSL, SUBPIXEL_DUAL_SOURCE_WGSL},
+use gpui_render::{
+    artifacts::{
+        BASE_WGSL, BLUR_BINDINGS, GeneratedBinding, GeneratedBindingKind, GLOBAL_BINDINGS,
+        INSTANCE_BINDINGS, SUBPIXEL_DUAL_SOURCE_WGSL, SURFACE_BINDINGS,
+        TEXTURED_INSTANCE_BINDINGS,
+    },
     shaders::interface as shader,
 };
 use std::num::NonZeroU64;
@@ -53,43 +57,25 @@ pub(super) struct WgpuBindGroupLayouts {
 
 impl WgpuBindGroupLayouts {
     pub(super) fn new(device: &wgpu::Device) -> Self {
-        let globals = linked_bind_group_layout(
-            device,
-            "globals_layout",
-            // Globals are shared by every non-subpixel pipeline, so derive visibility from the
-            // complete linked module rather than whichever primitive happens to be created first.
-            &crate::shaders::base::WGSL_SOURCE,
-            shader::GLOBAL_BIND_GROUP,
-            None,
-        );
-        let instances = linked_bind_group_layout(
-            device,
-            "instances_layout",
-            &crate::shaders::quad::WGSL_SOURCE,
-            shader::DATA_BIND_GROUP,
-            None,
-        );
-        let instances_with_texture = linked_bind_group_layout(
+        let globals = generated_bind_group_layout(device, "globals_layout", GLOBAL_BINDINGS, None);
+        let instances =
+            generated_bind_group_layout(device, "instances_layout", INSTANCE_BINDINGS, None);
+        let instances_with_texture = generated_bind_group_layout(
             device,
             "instances_with_texture_layout",
-            // Polychrome sprites exercise the full shared contract: instance data is consumed by
-            // both stages, while the texture and sampler are consumed by the fragment stage.
-            &crate::shaders::polychrome_sprite::WGSL_SOURCE,
-            shader::DATA_BIND_GROUP,
+            TEXTURED_INSTANCE_BINDINGS,
             None,
         );
-        let surfaces = linked_bind_group_layout(
+        let surfaces = generated_bind_group_layout(
             device,
             "surfaces_layout",
-            &crate::shaders::surface::WGSL_SOURCE,
-            shader::DATA_BIND_GROUP,
+            SURFACE_BINDINGS,
             Some(shader::DATA_BUFFER_BINDING),
         );
-        let blur = linked_bind_group_layout(
+        let blur = generated_bind_group_layout(
             device,
             "blur_layout",
-            &crate::shaders::blur::WGSL_SOURCE,
-            shader::DATA_BIND_GROUP,
+            BLUR_BINDINGS,
             Some(shader::DATA_BUFFER_BINDING),
         );
         Self {
@@ -346,128 +332,45 @@ impl WgpuPipelines {
     }
 }
 
-fn linked_bind_group_layout(
+fn generated_bind_group_layout(
     device: &wgpu::Device,
     label: &str,
-    source: &wgsl_rs::Source,
-    group_index: u32,
+    bindings: &[GeneratedBinding],
     dynamic_uniform_binding: Option<u32>,
 ) -> wgpu::BindGroupLayout {
-    let linkage = wgsl_rs::linkage::wgpu::analyze_wgsl_module(source)
-        .unwrap_or_else(|error| panic!("failed to analyze shader module {}: {error}", source.name));
-    let group = linkage.bind_group(group_index).unwrap_or_else(|| {
-        panic!(
-            "shader module {} has no bind group {group_index}",
-            source.name
-        )
-    });
-    let mut entries = group.entries.clone();
-    let interface = naga_interface(source);
-
-    for entry in &mut entries {
-        entry.visibility = interface
-            .bindings
-            .iter()
-            .find_map(|binding| {
-                (binding.group == group_index && binding.binding == entry.binding)
-                    .then_some(binding.visibility)
-            })
-            .unwrap_or_else(|| {
-                panic!(
-                    "Naga found no stage using shader binding {group_index}:{} in {}",
-                    entry.binding, source.name
-                )
-            });
-
-        if let wgpu::BindingType::Buffer { ty, .. } = entry.ty {
-            let min_binding_size = linkage
-                .buffers
-                .iter()
-                .find(|buffer| buffer.group == group_index && buffer.binding == entry.binding)
-                .and_then(|buffer| NonZeroU64::new(buffer.size));
-            entry.ty = wgpu::BindingType::Buffer {
-                ty,
-                has_dynamic_offset: dynamic_uniform_binding == Some(entry.binding),
-                min_binding_size: interface
-                    .bindings
-                    .iter()
-                    .find_map(|binding| {
-                        (binding.group == group_index && binding.binding == entry.binding)
-                            .then_some(binding.uniform_size)
-                    })
-                    .flatten()
-                    .or(min_binding_size),
-            };
-        }
-    }
+    let entries = bindings
+        .iter()
+        .map(|binding| wgpu::BindGroupLayoutEntry {
+            binding: binding.binding,
+            visibility: wgpu::ShaderStages::from_bits_retain(binding.visibility),
+            ty: match binding.kind {
+                GeneratedBindingKind::Uniform(min_size) => wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: dynamic_uniform_binding == Some(binding.binding),
+                    min_binding_size: NonZeroU64::new(min_size),
+                },
+                GeneratedBindingKind::StorageRead(min_size) => wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Storage { read_only: true },
+                    has_dynamic_offset: false,
+                    min_binding_size: NonZeroU64::new(min_size),
+                },
+                GeneratedBindingKind::Texture2dFloat => wgpu::BindingType::Texture {
+                    sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                    view_dimension: wgpu::TextureViewDimension::D2,
+                    multisampled: false,
+                },
+                GeneratedBindingKind::FilteringSampler => {
+                    wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering)
+                }
+            },
+            count: None,
+        })
+        .collect::<Vec<_>>();
 
     device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
         label: Some(label),
         entries: &entries,
     })
-}
-
-struct NagaBinding {
-    group: u32,
-    binding: u32,
-    visibility: wgpu::ShaderStages,
-    uniform_size: Option<NonZeroU64>,
-}
-
-struct NagaInterface {
-    bindings: Vec<NagaBinding>,
-}
-
-fn naga_interface(source: &wgsl_rs::Source) -> NagaInterface {
-    let generated = source.wgsl_source().unwrap_or_else(|error| {
-        panic!("failed to generate shader module {}: {error}", source.name)
-    });
-    let module = naga::front::wgsl::parse_str(&generated)
-        .unwrap_or_else(|error| panic!("failed to parse shader module {}: {error}", source.name));
-    let info = naga::valid::Validator::new(
-        naga::valid::ValidationFlags::all(),
-        naga::valid::Capabilities::all(),
-    )
-    .validate(&module)
-    .unwrap_or_else(|error| panic!("failed to validate shader module {}: {error}", source.name));
-    let mut layouter = naga::proc::Layouter::default();
-    layouter
-        .update(module.to_ctx())
-        .unwrap_or_else(|error| panic!("failed to lay out shader module {}: {error}", source.name));
-
-    let bindings = module
-        .global_variables
-        .iter()
-        .filter_map(|(handle, variable)| {
-            let binding = variable.binding.as_ref()?;
-            let mut visibility = wgpu::ShaderStages::empty();
-            for (index, entry_point) in module.entry_points.iter().enumerate() {
-                if !info.get_entry_point(index)[handle].is_empty() {
-                    visibility |= match entry_point.stage {
-                        naga::ShaderStage::Vertex => wgpu::ShaderStages::VERTEX,
-                        naga::ShaderStage::Fragment => wgpu::ShaderStages::FRAGMENT,
-                        naga::ShaderStage::Compute => wgpu::ShaderStages::COMPUTE,
-                        naga::ShaderStage::Task => wgpu::ShaderStages::TASK,
-                        naga::ShaderStage::Mesh => wgpu::ShaderStages::MESH,
-                        naga::ShaderStage::RayGeneration => wgpu::ShaderStages::RAY_GENERATION,
-                        naga::ShaderStage::Miss => wgpu::ShaderStages::MISS,
-                        naga::ShaderStage::AnyHit => wgpu::ShaderStages::ANY_HIT,
-                        naga::ShaderStage::ClosestHit => wgpu::ShaderStages::CLOSEST_HIT,
-                    };
-                }
-            }
-            Some(NagaBinding {
-                group: binding.group,
-                binding: binding.binding,
-                visibility,
-                uniform_size: (variable.space == naga::AddressSpace::Uniform).then(|| {
-                    NonZeroU64::new(u64::from(layouter[variable.ty].size))
-                        .expect("uniform types cannot be empty")
-                }),
-            })
-        })
-        .collect();
-    NagaInterface { bindings }
 }
 
 fn create_shader_module(
@@ -518,7 +421,12 @@ fn create_render_pipeline(
             compilation_options: wgpu::PipelineCompilationOptions::default(),
         }),
         primitive: wgpu::PrimitiveState {
-            topology: specification.topology,
+            topology: match specification.topology {
+                shader::PrimitiveTopology::TriangleList => wgpu::PrimitiveTopology::TriangleList,
+                shader::PrimitiveTopology::TriangleStrip => {
+                    wgpu::PrimitiveTopology::TriangleStrip
+                }
+            },
             ..Default::default()
         },
         depth_stencil: None,

@@ -14,13 +14,14 @@ path = "src/gpui_macos.rs"
 
 [features]
 default = ["gpui/default"]
-test-support = ["gpui/test-support", "gpui_wgpu/test-support"]
+test-support = ["gpui/test-support"]
 font-kit = ["dep:font-kit"]
 screen-capture = ["gpui/screen-capture"]
 
 [dependencies]
 gpui.workspace = true
-gpui_wgpu = { workspace = true, features = ["font-kit"] }
+gpui_render.workspace = true
+wgsl-rs.workspace = true
 
 [target.'cfg(target_os = "macos")'.dependencies]
 accesskit.workspace = true
@@ -39,6 +40,7 @@ core-video.workspace = true
 ctor.workspace = true
 derive_more.workspace = true
 dispatch2 = "0.3.1"
+etagere.workspace = true
 font-kit = { version = "0.14.1-zed", package = "zed-font-kit", optional = true }
 foreign-types.workspace = true
 futures.workspace = true
@@ -49,6 +51,7 @@ libc.workspace = true
 log.workspace = true
 mach2.workspace = true
 media.workspace = true
+metal.workspace = true
 objc.workspace = true
 objc2.workspace = true
 objc2-app-kit.workspace = true

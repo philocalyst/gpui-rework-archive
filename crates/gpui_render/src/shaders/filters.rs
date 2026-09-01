@@ -95,6 +95,8 @@ pub mod blur {
         pub sample_step: f32,
         pub composite_clip: BlurCompositeClip,
         pub downsample_mode: DownsampleMode,
+        pub source_size: Vec2f,
+        pub target_size: Vec2f,
     }
     uniform!(group(1), binding(0), BLUR_LOCALS: BlurUniforms);
     texture!(group(1), binding(1), BLUR_TEXTURE: Texture2D<f32>);
@@ -124,7 +126,10 @@ pub mod blur {
     pub fn fragment_blur_downsample(input: BlurVarying) -> Vec4f {
         if get!(BLUR_LOCALS).downsample_mode == DownsampleMode::HalfResolution {
             let destination = floor(input.position.xy());
-            let source_coordinates = (destination * 2.0 + 1.0) / get!(GLOBALS).viewport_size;
+            let source_coordinates = min(
+                (destination + 0.5) / get!(BLUR_LOCALS).target_size,
+                (get!(BLUR_LOCALS).source_size - 0.5) / get!(BLUR_LOCALS).source_size,
+            );
             return texture_sample_level(BLUR_TEXTURE, BLUR_SAMPLER, source_coordinates, 0.0);
         }
         texture_sample_level(BLUR_TEXTURE, BLUR_SAMPLER, input.texture_coordinates, 0.0)
@@ -177,11 +182,10 @@ pub mod blur {
         if is_clipped(input.clip_distances) {
             return transparent();
         }
-        let sampled_blur_extent = 2.0 * floor(get!(GLOBALS).viewport_size * 0.5);
         let blurred = texture_sample_level(
             BLUR_TEXTURE,
             BLUR_SAMPLER,
-            input.position.xy() / sampled_blur_extent,
+            input.position.xy() / get!(BLUR_LOCALS).target_size,
             0.0,
         );
         let coverage = select(

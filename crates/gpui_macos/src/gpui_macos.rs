@@ -16,7 +16,10 @@ mod system_notifications;
 #[cfg(feature = "screen-capture")]
 mod screen_capture;
 
-mod renderer;
+mod metal_atlas;
+pub mod metal_renderer;
+
+use metal_renderer as renderer;
 
 #[cfg(feature = "font-kit")]
 mod open_type;

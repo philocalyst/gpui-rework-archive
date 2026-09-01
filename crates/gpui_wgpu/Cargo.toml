@@ -19,6 +19,7 @@ test-support = ["gpui/test-support", "dep:image"]
 
 [dependencies]
 gpui.workspace = true
+gpui_render.workspace = true
 anyhow.workspace = true
 bytemuck = "1"
 collections.workspace = true
@@ -27,7 +28,6 @@ etagere.workspace = true
 itertools.workspace = true
 image = { workspace = true, optional = true }
 log.workspace = true
-naga = { version = "29.0.4", features = ["wgsl-in"] }
 parking_lot.workspace = true
 profiling.workspace = true
 raw-window-handle.workspace = true
@@ -41,11 +41,6 @@ wgsl-rs.workspace = true
 
 # Optional: only needed on platforms with multiple font sources (e.g. Linux)
 font-kit = { version = "0.14.1-zed", package = "zed-font-kit", optional = true }
-
-[build-dependencies]
-gpui.workspace = true
-wgpu.workspace = true
-wgsl-rs.workspace = true
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 pollster.workspace = true
@@ -72,6 +67,7 @@ windows-061 = { workspace = true, features = [
 ] }
 
 [target.'cfg(target_family = "wasm")'.dependencies]
+wgpu = { workspace = true, features = ["webgl"] }
 wasm-bindgen.workspace = true
 wasm-bindgen-futures.workspace = true
 web-sys = { version = "0.3", features = ["HtmlCanvasElement"] }
@@ -79,6 +75,7 @@ js-sys.workspace = true
 
 [dev-dependencies]
 criterion.workspace = true
+naga = { version = "29.0.4", features = ["wgsl-in"] }
 
 [[bench]]
 name = "layout_line"

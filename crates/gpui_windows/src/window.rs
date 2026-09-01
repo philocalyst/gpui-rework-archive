@@ -31,8 +31,6 @@ use crate::direct_manipulation::DirectManipulationHandler;
 use crate::*;
 use gpui::*;
 
-use gpui_wgpu::{FontRasterizationSettings, SubpixelOrder, WgpuRenderer, WgpuSurfaceConfig, wgpu};
-
 pub(crate) struct WindowsWindow(pub Rc<WindowsWindowInner>);
 
 impl std::ops::Deref for WindowsWindow {
@@ -63,9 +61,14 @@ pub struct WindowsWindowState {
     pub hovered: Cell<bool>,
     pub direct_manipulation: DirectManipulationHandler,
 
-    pub renderer: RefCell<WgpuRenderer>,
-    /// Set when the next `draw_window` call must bypass the GPUI view cache, either after WGPU
-    /// recovery invalidates atlas tiles or when a forced draw is deferred by re-entrant painting.
+    pub renderer: RefCell<DirectXRenderer>,
+    /// Set when the next `draw_window` call must be treated as a forced
+    /// render. Used after a GPU device-lost recovery, where the next frame
+    /// must both re-enable drawing (via `mark_drawable`) and bypass the GPUI
+    /// view cache (which would otherwise replay stale atlas tile references
+    /// from the previous frame and panic in `DirectXAtlasState::texture`),
+    /// and when a forced render was requested while another draw was in
+    /// progress and had to be deferred.
     pub force_render_pending: Cell<bool>,
 
     pub click_state: ClickState,
@@ -78,6 +81,7 @@ pub struct WindowsWindowState {
     pub display: Cell<WindowsDisplay>,
     /// Flag to instruct the `VSyncProvider` thread to invalidate the directx devices
     /// as resizing them has failed, causing us to have lost at least the render target.
+    pub invalidate_devices: Arc<AtomicBool>,
     /// Shared with [`WindowsPlatformState::draw_coordinator`] and every other window.
     pub(crate) draw_coordinator: Rc<DrawCoordinator>,
     fullscreen: Cell<Option<StyleAndBounds>>,
@@ -106,14 +110,15 @@ pub(crate) struct WindowsWindowInner {
 impl WindowsWindowState {
     fn new(
         hwnd: HWND,
+        directx_devices: &DirectXDevices,
         window_params: &CREATESTRUCTW,
         current_cursor: Option<HCURSOR>,
         cursor_visible: Arc<AtomicBool>,
         display: WindowsDisplay,
         min_size: Option<Size<Pixels>>,
         appearance: WindowAppearance,
-        renderer_context: gpui_wgpu::GpuContext,
-        gpu_requirements: Option<gpui_wgpu::WgpuDeviceRequirements>,
+        disable_direct_composition: bool,
+        invalidate_devices: Arc<AtomicBool>,
         draw_coordinator: Rc<DrawCoordinator>,
     ) -> Result<Self> {
         let scale_factor = {
@@ -132,21 +137,8 @@ impl WindowsWindowState {
         };
         let border_offset = WindowBorderOffset::default();
         let restore_from_minimized = None;
-        let mut renderer = WgpuRenderer::new(
-            renderer_context,
-            &RawWindow { hwnd },
-            WgpuSurfaceConfig {
-                size: physical_size,
-                transparent: false,
-                preferred_present_mode: Some(wgpu::PresentMode::Mailbox),
-            },
-            None,
-            gpu_requirements,
-        )
-        .context("Creating Wgpu renderer")?;
-        if let Some(settings) = system_font_rasterization_settings().log_err() {
-            renderer.set_font_rasterization_settings(settings);
-        }
+        let renderer = DirectXRenderer::new(hwnd, directx_devices, disable_direct_composition)
+            .context("Creating DirectX renderer")?;
         let callbacks = Callbacks::default();
         let input_handler = None;
         let pending_surrogate = None;
@@ -189,6 +181,7 @@ impl WindowsWindowState {
             fullscreen: Cell::new(fullscreen),
             initial_placement: Cell::new(initial_placement),
             hwnd,
+            invalidate_devices,
             draw_coordinator,
             direct_manipulation,
             a11y: RefCell::new(None),
@@ -258,14 +251,15 @@ impl WindowsWindowInner {
     fn new(context: &mut WindowCreateContext, hwnd: HWND, cs: &CREATESTRUCTW) -> Result<Rc<Self>> {
         let state = WindowsWindowState::new(
             hwnd,
+            &context.directx_devices,
             cs,
             context.current_cursor,
             context.cursor_visible.clone(),
             context.display,
             context.min_size,
             context.appearance,
-            context.renderer_context.clone(),
-            context.gpu_requirements.clone(),
+            context.disable_direct_composition,
+            context.invalidate_devices.clone(),
             context.draw_coordinator.clone(),
         )?;
 
@@ -411,8 +405,9 @@ struct WindowCreateContext {
     main_receiver: PriorityQueueReceiver<RunnableVariant>,
     platform_window_handle: HWND,
     appearance: WindowAppearance,
-    renderer_context: gpui_wgpu::GpuContext,
-    gpu_requirements: Option<gpui_wgpu::WgpuDeviceRequirements>,
+    disable_direct_composition: bool,
+    directx_devices: DirectXDevices,
+    invalidate_devices: Arc<AtomicBool>,
     draw_coordinator: Rc<DrawCoordinator>,
     parent_hwnd: Option<HWND>,
 }
@@ -439,8 +434,8 @@ impl WindowsWindow {
             main_receiver,
             platform_window_handle,
             disable_direct_composition,
-            renderer_context,
-            gpu_requirements,
+            directx_devices,
+            invalidate_devices,
             draw_coordinator,
         } = creation_info;
         register_window_class(icon);
@@ -523,8 +518,9 @@ impl WindowsWindow {
             main_receiver,
             platform_window_handle,
             appearance,
-            renderer_context,
-            gpu_requirements,
+            disable_direct_composition,
+            directx_devices,
+            invalidate_devices,
             draw_coordinator,
             parent_hwnd,
         };
@@ -577,51 +573,6 @@ impl WindowsWindow {
 
         Ok(Self(this))
     }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct RawWindow {
-    pub hwnd: HWND,
-}
-
-unsafe impl Send for RawWindow {}
-unsafe impl Sync for RawWindow {}
-
-impl rwh::HasWindowHandle for RawWindow {
-    fn window_handle(&self) -> std::result::Result<rwh::WindowHandle<'_>, rwh::HandleError> {
-        let raw = rwh::Win32WindowHandle::new(unsafe {
-            NonZeroIsize::new_unchecked(self.hwnd.0 as isize)
-        })
-        .into();
-        Ok(unsafe { rwh::WindowHandle::borrow_raw(raw) })
-    }
-}
-
-impl rwh::HasDisplayHandle for RawWindow {
-    fn display_handle(&self) -> std::result::Result<rwh::DisplayHandle<'_>, rwh::HandleError> {
-        Ok(rwh::DisplayHandle::windows())
-    }
-}
-
-fn system_font_rasterization_settings() -> Result<FontRasterizationSettings> {
-    let factory: IDWriteFactory5 = unsafe { DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED) }
-        .context("creating the shared DirectWrite factory")?;
-    let rendering_parameters: IDWriteRenderingParams1 = unsafe { factory.CreateRenderingParams() }
-        .context("reading the system DirectWrite rendering parameters")?
-        .cast()
-        .context("querying DirectWrite rendering parameters version 1")?;
-    let subpixel_order =
-        if unsafe { rendering_parameters.GetPixelGeometry() } == DWRITE_PIXEL_GEOMETRY_BGR {
-            SubpixelOrder::BlueGreenRed
-        } else {
-            SubpixelOrder::RedGreenBlue
-        };
-    Ok(FontRasterizationSettings::new(
-        unsafe { rendering_parameters.GetGamma() },
-        unsafe { rendering_parameters.GetGrayscaleEnhancedContrast() },
-        unsafe { rendering_parameters.GetEnhancedContrast() },
-        subpixel_order,
-    ))
 }
 
 impl rwh::HasWindowHandle for WindowsWindow {
@@ -916,7 +867,7 @@ impl PlatformWindow for WindowsWindow {
     }
 
     fn is_subpixel_rendering_supported(&self) -> bool {
-        self.state.renderer.borrow().supports_dual_source_blending()
+        true
     }
 
     fn set_title(&mut self, title: &str) {
@@ -927,10 +878,6 @@ impl PlatformWindow for WindowsWindow {
 
     fn set_background_appearance(&self, background_appearance: WindowBackgroundAppearance) {
         self.state.background_appearance.set(background_appearance);
-        self.state
-            .renderer
-            .borrow_mut()
-            .update_transparency(background_appearance != WindowBackgroundAppearance::Opaque);
         let hwnd = self.0.hwnd;
 
         // using Dwm APIs for Mica and MicaAlt backdrops.
@@ -1079,27 +1026,11 @@ impl PlatformWindow for WindowsWindow {
     }
 
     fn draw(&self, scene: &Scene) {
-        let mut renderer = self.state.renderer.borrow_mut();
-        if renderer.device_lost() {
-            match renderer.recover(&RawWindow {
-                hwnd: self.platform_window_handle,
-            }) {
-                Ok(()) => {}
-                Err(err) => {
-                    log::warn!("GPU recovery failed, will retry on next frame: {err}");
-                }
-            }
-
-            self.state.force_render_pending.set(true);
-            return;
-        }
-        if !renderer.draw(scene) {
-            log::error!("failed to render scene");
-        }
-
-        if renderer.needs_redraw() {
-            self.state.force_render_pending.set(true);
-        }
+        self.state
+            .renderer
+            .borrow_mut()
+            .draw(scene, self.state.background_appearance.get())
+            .log_err();
     }
 
     fn sprite_atlas(&self) -> Arc<dyn PlatformAtlas> {
@@ -1111,7 +1042,7 @@ impl PlatformWindow for WindowsWindow {
     }
 
     fn gpu_specs(&self) -> Option<GpuSpecs> {
-        Some(self.state.renderer.borrow().gpu_specs())
+        self.state.renderer.borrow().gpu_specs().log_err()
     }
 
     fn update_ime_position(&self, bounds: Bounds<Pixels>) {

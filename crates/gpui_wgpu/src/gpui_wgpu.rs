@@ -1,6 +1,4 @@
 mod cosmic_text_system;
-mod shader_sources;
-mod shaders;
 mod wgpu_atlas;
 mod wgpu_context;
 mod wgpu_renderer;

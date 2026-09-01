@@ -10,13 +10,12 @@ fn validates_subpixel_shader() {
 fn build_generated_shaders_match_rust_sources() {
     assert_eq!(
         base::WGSL_SOURCE.wgsl_source().unwrap(),
-        crate::shader_sources::BASE_WGSL
+        crate::artifacts::BASE_WGSL
     );
     let subpixel = subpixel_sprite::WGSL_SOURCE.wgsl_source().unwrap();
-    assert_eq!(subpixel, crate::shader_sources::SUBPIXEL_WGSL);
     assert_eq!(
         format!("enable dual_source_blending;\n{subpixel}"),
-        crate::shader_sources::SUBPIXEL_DUAL_SOURCE_WGSL
+        crate::artifacts::SUBPIXEL_DUAL_SOURCE_WGSL
     );
 }
 

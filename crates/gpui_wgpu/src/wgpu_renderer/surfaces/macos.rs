@@ -43,7 +43,10 @@ pub(super) fn draw_surfaces(
 
     let mut keyed_surfaces = smallvec::SmallVec::<[(&PaintSurface, usize); 4]>::new();
     for surface in surfaces {
-        let gpui::SurfaceSource::Surface(image_buffer) = &surface.source;
+        let gpui::SurfaceSource::Surface(image_buffer) = &surface.source else {
+            log::error!("surface source cannot be imported by the macOS renderer");
+            return Err(frame::DrawError::ExternalSurface);
+        };
         if image_buffer.get_pixel_format() != kCVPixelFormatType_420YpCbCr8BiPlanarFullRange {
             log::error!("unsupported CoreVideo surface pixel format");
             return Err(frame::DrawError::ExternalSurface);
@@ -58,7 +61,9 @@ pub(super) fn draw_surfaces(
         .retain(|key, _| keyed_surfaces.iter().any(|(_, active)| active == key));
 
     for (surface, key) in keyed_surfaces {
-        let gpui::SurfaceSource::Surface(image_buffer) = &surface.source;
+        let gpui::SurfaceSource::Surface(image_buffer) = &surface.source else {
+            return Err(frame::DrawError::ExternalSurface);
+        };
         let mut imported = cache.surfaces.remove(&key).map(Ok).unwrap_or_else(|| {
             create_core_video_surface(renderer, &cache.texture_cache, image_buffer)
         })?;

@@ -25,6 +25,12 @@ pub enum SurfaceSource {
     /// A native Windows Graphics Capture texture.
     #[cfg(target_os = "windows")]
     WindowsCapture(WindowsScreenCaptureFrame),
+    /// A placeholder for platforms that cannot import native surfaces.
+    ///
+    /// Renderers report this explicitly instead of silently dropping the primitive. This variant
+    /// also keeps the public type inhabited on targets, such as WASM, with no native surface API.
+    #[doc(hidden)]
+    Unsupported(Size<DevicePixels>),
 }
 
 impl std::fmt::Debug for SurfaceSource {
@@ -39,6 +45,9 @@ impl std::fmt::Debug for SurfaceSource {
                 .finish_non_exhaustive(),
             #[cfg(target_os = "windows")]
             SurfaceSource::WindowsCapture(ref frame) => frame.fmt(_f),
+            SurfaceSource::Unsupported(size) => {
+                _f.debug_tuple("Unsupported").field(&size).finish()
+            }
         }
     }
 }
@@ -54,6 +63,7 @@ impl SurfaceSource {
             SurfaceSource::Texture { size, .. } => *size,
             #[cfg(target_os = "windows")]
             SurfaceSource::WindowsCapture(frame) => frame.size(),
+            SurfaceSource::Unsupported(size) => *size,
         }
     }
 }

@@ -1,4 +1,4 @@
-use crate::shaders::{
+use gpui_render::shaders::{
     common::SurfaceColorFormat, interface as shader_interface, surface::SurfaceUniforms,
 };
 use gpui::PaintSurface;

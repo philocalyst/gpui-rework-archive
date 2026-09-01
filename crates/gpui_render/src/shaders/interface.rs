@@ -50,6 +50,12 @@ pub enum VertexCount {
     Dynamic,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum PrimitiveTopology {
+    TriangleList,
+    TriangleStrip,
+}
+
 impl VertexCount {
     pub const fn fixed(self) -> Option<u32> {
         match self {
@@ -65,7 +71,7 @@ pub struct Pipeline {
     pub label: &'static str,
     pub vertex_entry: &'static str,
     pub fragment_entry: &'static str,
-    pub topology: wgpu::PrimitiveTopology,
+    pub topology: PrimitiveTopology,
     pub data_layout: DataLayout,
     pub vertex_count: VertexCount,
 }
@@ -77,7 +83,7 @@ macro_rules! define_pipelines {
                     label: $label,
                     vertex_entry: stringify!($vertex),
                     fragment_entry: stringify!($fragment),
-                    topology: wgpu::PrimitiveTopology::$topology,
+                    topology: PrimitiveTopology::$topology,
                     data_layout: DataLayout::$layout,
                     vertex_count: VertexCount::$vertices,
                 };

@@ -4,10 +4,8 @@ use gpui::{
 };
 use std::ops::Range;
 
-use crate::{
-    WgpuTextureInfo,
-    shaders::interface::{self as shader_interface, BufferData},
-};
+use crate::WgpuTextureInfo;
+use gpui_render::shaders::interface::{self as shader_interface, BufferData};
 
 use super::{WgpuRenderer, buffers::InstanceUpload, frame, path_types, pipelines};
 

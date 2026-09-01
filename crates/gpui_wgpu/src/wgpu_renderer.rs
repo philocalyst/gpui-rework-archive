@@ -2,7 +2,9 @@ use crate::{CompositorGpuHint, WgpuAtlas, WgpuContext, WgpuDeviceRequirements};
 use gpui::{DevicePixels, GpuSpecs, Scene, Size};
 
 #[cfg(test)]
-use crate::shaders::interface as shader_interface;
+use gpui_render::shaders::interface as shader_interface;
+#[cfg(test)]
+use gpui_render::blur::{BlurKernel, MAX_GAUSSIAN_SAMPLES_PER_SIDE};
 #[cfg(test)]
 use gpui::BackdropFilter;
 #[cfg(all(test, feature = "test-support", not(target_family = "wasm")))]
@@ -26,7 +28,6 @@ mod settings;
 mod surfaces;
 mod target;
 
-use filters::*;
 #[cfg(all(feature = "test-support", not(target_family = "wasm")))]
 pub use headless::WgpuHeadlessRenderer;
 use pipelines::WgpuPipelines as ShaderPipelines;
@@ -286,9 +287,9 @@ mod tests {
             (module, layouter)
         }
 
-        let (base, base_layout) = module_layout(&crate::shaders::base::WGSL_SOURCE);
+        let (base, base_layout) = module_layout(&gpui_render::shaders::base::WGSL_SOURCE);
         let (subpixel, subpixel_layout) =
-            module_layout(&crate::shaders::subpixel_sprite::WGSL_SOURCE);
+            module_layout(&gpui_render::shaders::subpixel_sprite::WGSL_SOURCE);
 
         for abi in shader_interface::SCENE_STORAGE_ABI
             .iter()

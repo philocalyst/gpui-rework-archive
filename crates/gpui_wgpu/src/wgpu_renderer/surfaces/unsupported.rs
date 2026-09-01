@@ -10,8 +10,13 @@ impl SurfaceCache {
 
 pub(super) fn draw_surfaces(
     _renderer: &WgpuRenderer,
-    _surfaces: &[PaintSurface],
+    surfaces: &[PaintSurface],
     _pass: &mut wgpu::RenderPass<'_>,
 ) -> frame::DrawResult {
-    Ok(())
+    if surfaces.is_empty() {
+        Ok(())
+    } else {
+        log::error!("native surface primitives are unsupported on this render target");
+        Err(frame::DrawError::ExternalSurface)
+    }
 }

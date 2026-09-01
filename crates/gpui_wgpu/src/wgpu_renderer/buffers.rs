@@ -1,4 +1,4 @@
-use crate::shaders::interface::{self as shader_interface, BufferData};
+use gpui_render::shaders::interface::{self as shader_interface, BufferData};
 use collections::FxHashMap;
 use gpui::AtlasTextureId;
 use std::{
