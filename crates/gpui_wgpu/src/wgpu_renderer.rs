@@ -515,4 +515,141 @@ mod tests {
         renderer.render_to_image(&scene)?;
         Ok(())
     }
+
+    #[cfg(all(feature = "test-support", not(target_family = "wasm")))]
+    #[test]
+    fn odd_sized_blur_preserves_edge_symmetry() -> anyhow::Result<()> {
+        let context = WgpuContext::new_headless(None)?;
+        let size = Size {
+            width: DevicePixels(5),
+            height: DevicePixels(5),
+        };
+        let mut renderer = WgpuRenderer::new_headless(&context, size)?;
+        let full_bounds = Bounds {
+            origin: Point {
+                x: ScaledPixels(0.0),
+                y: ScaledPixels(0.0),
+            },
+            size: Size {
+                width: ScaledPixels(5.0),
+                height: ScaledPixels(5.0),
+            },
+        };
+        let center_bounds = Bounds {
+            origin: Point {
+                x: ScaledPixels(2.0),
+                y: ScaledPixels(2.0),
+            },
+            size: Size {
+                width: ScaledPixels(1.0),
+                height: ScaledPixels(1.0),
+            },
+        };
+        let mut scene = Scene::default();
+        scene.insert_primitive(Quad {
+            order: 0,
+            bounds: full_bounds,
+            content_mask: gpui::ContentMask {
+                bounds: full_bounds,
+            },
+            background: gpui::solid_background(gpui::hsla(0.0, 0.0, 0.0, 1.0)),
+            ..Default::default()
+        });
+        scene.insert_primitive(Quad {
+            order: 1,
+            bounds: center_bounds,
+            content_mask: gpui::ContentMask {
+                bounds: center_bounds,
+            },
+            background: gpui::solid_background(gpui::hsla(0.0, 0.0, 1.0, 1.0)),
+            ..Default::default()
+        });
+        scene.insert_primitive(BackdropFilter {
+            order: 2,
+            bounds: full_bounds,
+            content_mask: gpui::ContentMask {
+                bounds: full_bounds,
+            },
+            filters: smallvec::smallvec![gpui::ScaledFilter::Blur(ScaledPixels(2.0))],
+            opacity: 1.0,
+            ..Default::default()
+        });
+        scene.finish();
+
+        let image = renderer.render_to_image(&scene)?;
+        for y in 0..5 {
+            for x in 0..5 {
+                let actual = image.get_pixel(x, y).0;
+                let horizontal = image.get_pixel(4 - x, y).0;
+                let vertical = image.get_pixel(x, 4 - y).0;
+                for channel in 0..4 {
+                    assert!(
+                        actual[channel].abs_diff(horizontal[channel]) <= 1,
+                        "horizontal blur asymmetry at ({x}, {y}), channel {channel}: {actual:?} vs {horizontal:?}"
+                    );
+                    assert!(
+                        actual[channel].abs_diff(vertical[channel]) <= 1,
+                        "vertical blur asymmetry at ({x}, {y}), channel {channel}: {actual:?} vs {vertical:?}"
+                    );
+                }
+            }
+        }
+        assert!(
+            image.get_pixel(1, 2).0[0] > 0,
+            "blur must spread from the center pixel"
+        );
+        Ok(())
+    }
+
+    #[cfg(all(feature = "test-support", not(target_family = "wasm")))]
+    #[test]
+    fn alternating_instance_batches_fit_the_exact_upload_arena() -> anyhow::Result<()> {
+        let context = WgpuContext::new_headless(None)?;
+        let size = Size {
+            width: DevicePixels(1),
+            height: DevicePixels(1),
+        };
+        let mut renderer = WgpuRenderer::new_headless(&context, size)?;
+        let bounds = Bounds {
+            origin: Point {
+                x: ScaledPixels(0.0),
+                y: ScaledPixels(0.0),
+            },
+            size: Size {
+                width: ScaledPixels(1.0),
+                height: ScaledPixels(1.0),
+            },
+        };
+        let mut scene = Scene::default();
+        for index in 0..512 {
+            scene.insert_primitive(Quad {
+                order: index * 2,
+                bounds,
+                content_mask: gpui::ContentMask { bounds },
+                background: gpui::solid_background(gpui::hsla(0.0, 0.0, 0.0, 1.0)),
+                ..Default::default()
+            });
+            scene.insert_primitive(Underline {
+                order: index * 2 + 1,
+                padding: 0,
+                bounds,
+                content_mask: gpui::ContentMask { bounds },
+                color: gpui::hsla(0.0, 0.0, 1.0, 1.0).into(),
+                thickness: ScaledPixels(1.0),
+                wavy: false.into(),
+            });
+        }
+        scene.finish();
+        assert_eq!(
+            scene
+                .render_commands()
+                .iter()
+                .filter(|command| matches!(command, gpui::RenderCommand::Batch(_)))
+                .count(),
+            1024
+        );
+
+        renderer.render_to_image(&scene)?;
+        Ok(())
+    }
 }

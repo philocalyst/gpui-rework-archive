@@ -380,7 +380,7 @@ fn emit_downlevel_runtime(name: &str, base_source: &str, arrays: &[StorageArray]
     runtime
 }
 
-fn find_type<'a>(module: &'a naga::Module, name: &str, context: &str) -> naga::Handle<naga::Type> {
+fn find_type(module: &naga::Module, name: &str, context: &str) -> naga::Handle<naga::Type> {
     module
         .types
         .iter()
@@ -918,7 +918,7 @@ fn write_msl(module: &naga::Module, info: &naga::valid::ModuleInfo, label: &str)
             },
             space => panic!("unsupported MSL resource space {space:?} in {label}"),
         };
-        resources.insert(binding.clone(), target);
+        resources.insert(*binding, target);
     }
     let entry_resources = naga::back::msl::EntryPointResources {
         resources,

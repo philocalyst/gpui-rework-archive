@@ -7,12 +7,16 @@ use std::{
 use anyhow::{Context, Result};
 use gpui_render::{
     blur::{
-        BlurAxis, BlurKernel, BlurUniforms, DOWNSAMPLE_FACTOR as BLUR_DOWNSAMPLE_FACTOR,
-        FilterCompositeClip, GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS,
+        BlurAxis, BlurKernel, BlurUniforms, FilterCompositeClip,
+        GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS, downsampled_dimension,
     },
     path_types::{PathRasterizationVertex, PathSprite},
-    shaders::common::{
-        FontRasterizationUniforms, GlobalUniforms, ShaderBool, SurfaceColorFormat, SurfaceUniforms,
+    shaders::{
+        common::{
+            FontRasterizationUniforms, GlobalUniforms, ShaderBool, SurfaceColorFormat,
+            SurfaceUniforms,
+        },
+        interface as shader_interface,
     },
 };
 use gpui_util::ResultExt;
@@ -40,6 +44,15 @@ pub(crate) const DISABLE_DIRECT_COMPOSITION: &str = "GPUI_DISABLE_DIRECT_COMPOSI
 const RENDER_TARGET_FORMAT: DXGI_FORMAT = DXGI_FORMAT_B8G8R8A8_UNORM;
 // This configuration is used for MSAA rendering on paths only, and it's guaranteed to be supported by DirectX 11.
 const PATH_MULTISAMPLE_COUNT: u32 = 4;
+// Group 0 occupies registers 0 and 1 in native shaders, so generated group-1 bindings start at 2.
+const GROUP_1_REGISTER_OFFSET: u32 = 2;
+const DATA_REGISTER: u32 = shader_interface::DATA_BUFFER_BINDING + GROUP_1_REGISTER_OFFSET;
+const PRIMARY_TEXTURE_REGISTER: u32 =
+    shader_interface::PRIMARY_TEXTURE_BINDING + GROUP_1_REGISTER_OFFSET;
+const PRIMARY_SAMPLER_REGISTER: u32 =
+    shader_interface::PRIMARY_SAMPLER_BINDING + GROUP_1_REGISTER_OFFSET;
+const SURFACE_SAMPLER_REGISTER: u32 =
+    shader_interface::SURFACE_SAMPLER_BINDING + GROUP_1_REGISTER_OFFSET;
 
 pub(crate) struct FontInfo {
     pub gamma_ratios: [f32; 4],
@@ -72,6 +85,8 @@ pub(crate) struct DirectXRenderer {
     /// group, or the swapchain otherwise). `draw_paths_to_intermediate` restores to this after
     /// its own pass so paths land on the correct target.
     active_render_target: Option<ID3D11RenderTargetView>,
+    path_rasterization_vertices: Vec<PathRasterizationVertex>,
+    path_sprites: Vec<PathSprite>,
 }
 
 /// Direct3D objects
@@ -131,8 +146,8 @@ struct BlurResources {
 
 impl BlurResources {
     fn new(device: &ID3D11Device, width: u32, height: u32) -> Result<Self> {
-        let half_w = width.div_ceil(2).max(1);
-        let half_h = height.div_ceil(2).max(1);
+        let half_w = downsampled_dimension(width);
+        let half_h = downsampled_dimension(height);
         let (scene_color, scene_color_rtv, scene_color_srv) =
             create_color_target(device, width, height)?;
         let (ping, ping_rtv, ping_srv) = create_color_target(device, half_w, half_h)?;
@@ -305,6 +320,8 @@ impl DirectXRenderer {
             height: 1,
             skip_draws: false,
             active_render_target: None,
+            path_rasterization_vertices: Vec::new(),
+            path_sprites: Vec::new(),
         })
     }
 
@@ -541,14 +558,14 @@ impl DirectXRenderer {
                 RenderCommand::Batch(PrimitiveBatch::Paths {
                     range,
                     rasterization_vertex_count,
-                    ..
+                    sprite_count,
                 }) => {
                     if *rasterization_vertex_count == 0 {
                         continue;
                     }
                     let paths = &scene.paths[range.clone()];
-                    self.draw_paths_to_intermediate(paths)?;
-                    self.draw_paths_from_intermediate(paths)
+                    self.draw_paths_to_intermediate(paths, *rasterization_vertex_count)?;
+                    self.draw_paths_from_intermediate(paths, *sprite_count)
                 }
                 RenderCommand::Batch(PrimitiveBatch::Underlines(range)) => {
                     self.draw_underlines(range.start, range.len())
@@ -779,7 +796,6 @@ impl DirectXRenderer {
         }
         let devices = self.devices.as_ref().context("devices missing")?;
         self.pipelines.shadow_pipeline.draw_range(
-            &devices.device,
             &devices.device_context,
             slice::from_ref(
                 &self
@@ -801,7 +817,6 @@ impl DirectXRenderer {
         }
         let devices = self.devices.as_ref().context("devices missing")?;
         self.pipelines.quad_pipeline.draw_range(
-            &devices.device,
             &devices.device_context,
             slice::from_ref(
                 &self
@@ -817,7 +832,11 @@ impl DirectXRenderer {
         )
     }
 
-    fn draw_paths_to_intermediate(&mut self, paths: &[Path<ScaledPixels>]) -> Result<()> {
+    fn draw_paths_to_intermediate(
+        &mut self,
+        paths: &[Path<ScaledPixels>],
+        rasterization_vertex_count: usize,
+    ) -> Result<()> {
         if paths.is_empty() {
             return Ok(());
         }
@@ -837,22 +856,27 @@ impl DirectXRenderer {
             );
         }
 
-        // Collect all vertices for a single draw call
-        let mut vertices = Vec::new();
-
+        self.path_rasterization_vertices.clear();
+        self.path_rasterization_vertices
+            .reserve(rasterization_vertex_count);
         for path in paths {
-            vertices.extend(path.vertices.iter().map(|v| PathRasterizationVertex {
-                xy_position: v.xy_position,
-                curve_position: v.st_position,
-                color: path.color,
-                bounds: path.clipped_bounds(),
-            }));
+            self.path_rasterization_vertices
+                .extend(path.vertices.iter().map(|vertex| PathRasterizationVertex {
+                    xy_position: vertex.xy_position,
+                    curve_position: vertex.st_position,
+                    color: path.color,
+                    bounds: path.clipped_bounds(),
+                }));
         }
+        debug_assert_eq!(
+            self.path_rasterization_vertices.len(),
+            rasterization_vertex_count
+        );
 
         self.pipelines.path_rasterization_pipeline.update_buffer(
             &devices.device,
             &devices.device_context,
-            &vertices,
+            &self.path_rasterization_vertices,
         )?;
 
         self.pipelines.path_rasterization_pipeline.draw(
@@ -860,7 +884,7 @@ impl DirectXRenderer {
             slice::from_ref(&resources.viewport),
             &self.globals.cbuffers(),
             D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
-            vertices.len() as u32,
+            rasterization_vertex_count as u32,
             1,
         )?;
 
@@ -888,7 +912,11 @@ impl DirectXRenderer {
         Ok(())
     }
 
-    fn draw_paths_from_intermediate(&mut self, paths: &[Path<ScaledPixels>]) -> Result<()> {
+    fn draw_paths_from_intermediate(
+        &mut self,
+        paths: &[Path<ScaledPixels>],
+        sprite_count: usize,
+    ) -> Result<()> {
         let Some(first_path) = paths.first() else {
             return Ok(());
         };
@@ -900,27 +928,28 @@ impl DirectXRenderer {
         // disjoint, so we can copy each path's bounds individually. If this
         // batch combines different draw orders, we perform a single copy
         // for a minimal spanning rect.
-        let sprites = if paths.last().unwrap().order == first_path.order {
-            paths
-                .iter()
-                .map(|path| PathSprite {
+        self.path_sprites.clear();
+        self.path_sprites.reserve(sprite_count);
+        if paths.last().unwrap().order == first_path.order {
+            self.path_sprites
+                .extend(paths.iter().map(|path| PathSprite {
                     bounds: path.clipped_bounds(),
-                })
-                .collect::<Vec<_>>()
+                }));
         } else {
             let mut bounds = first_path.clipped_bounds();
             for path in paths.iter().skip(1) {
                 bounds = bounds.union(&path.clipped_bounds());
             }
-            vec![PathSprite { bounds }]
-        };
+            self.path_sprites.push(PathSprite { bounds });
+        }
+        debug_assert_eq!(self.path_sprites.len(), sprite_count);
 
         let devices = self.devices.as_ref().context("devices missing")?;
         let resources = self.resources.as_ref().context("resources missing")?;
         self.pipelines.path_sprite_pipeline.update_buffer(
             &devices.device,
             &devices.device_context,
-            &sprites,
+            &self.path_sprites,
         )?;
 
         // Draw the sprites with the path texture
@@ -930,7 +959,7 @@ impl DirectXRenderer {
             slice::from_ref(&resources.viewport),
             &self.globals.cbuffers(),
             slice::from_ref(&self.globals.sampler),
-            sprites.len() as u32,
+            sprite_count as u32,
         )
     }
 
@@ -941,7 +970,6 @@ impl DirectXRenderer {
         let devices = self.devices.as_ref().context("devices missing")?;
         let resources = self.resources.as_ref().context("resources missing")?;
         self.pipelines.underline_pipeline.draw_range(
-            &devices.device,
             &devices.device_context,
             slice::from_ref(&resources.viewport),
             &self.globals.cbuffers(),
@@ -964,7 +992,6 @@ impl DirectXRenderer {
         let resources = self.resources.as_ref().context("resources missing")?;
         let texture_view = self.atlas.get_texture_view(texture_id);
         self.pipelines.mono_sprites.draw_range_with_texture(
-            &devices.device,
             &devices.device_context,
             &texture_view,
             slice::from_ref(&resources.viewport),
@@ -988,7 +1015,6 @@ impl DirectXRenderer {
         let resources = self.resources.as_ref().context("resources missing")?;
         let texture_view = self.atlas.get_texture_view(texture_id);
         self.pipelines.subpixel_sprites.draw_range_with_texture(
-            &devices.device,
             &devices.device_context,
             &texture_view,
             slice::from_ref(&resources.viewport),
@@ -1012,7 +1038,6 @@ impl DirectXRenderer {
         let resources = self.resources.as_ref().context("resources missing")?;
         let texture_view = self.atlas.get_texture_view(texture_id);
         self.pipelines.poly_sprites.draw_range_with_texture(
-            &devices.device,
             &devices.device_context,
             &texture_view,
             slice::from_ref(&resources.viewport),
@@ -1031,7 +1056,7 @@ impl DirectXRenderer {
         let resources = self.resources.as_ref().context("resources missing")?;
         let ctx = &devices.device_context;
         let cbuffers = self.globals.cbuffers();
-        let surface_cb = [Some(self.pipelines.surface_params_buffer.clone())];
+        let surface_cb = [Some(self.pipelines.surfaces.params_buffer.clone())];
         let sampler = [self.globals.sampler.clone()];
         for surface in surfaces {
             let gpui::SurfaceSource::WindowsCapture(frame) = &surface.source else {
@@ -1067,10 +1092,10 @@ impl DirectXRenderer {
                 ctx.PSSetShader(&self.pipelines.surfaces.fragment, None);
                 ctx.VSSetConstantBuffers(0, Some(&cbuffers));
                 ctx.PSSetConstantBuffers(0, Some(&cbuffers));
-                ctx.VSSetConstantBuffers(2, Some(&surface_cb));
-                ctx.PSSetConstantBuffers(2, Some(&surface_cb));
-                ctx.PSSetShaderResources(3, Some(&texture_srvs));
-                ctx.PSSetSamplers(4, Some(&sampler));
+                ctx.VSSetConstantBuffers(DATA_REGISTER, Some(&surface_cb));
+                ctx.PSSetConstantBuffers(DATA_REGISTER, Some(&surface_cb));
+                ctx.PSSetShaderResources(PRIMARY_TEXTURE_REGISTER, Some(&texture_srvs));
+                ctx.PSSetSamplers(SURFACE_SAMPLER_REGISTER, Some(&sampler));
                 ctx.OMSetBlendState(&self.pipelines.surfaces.blend, None, 0xFFFFFFFF);
                 ctx.DrawInstanced(4, 1, 0, 0);
             }
@@ -1103,7 +1128,7 @@ impl DirectXRenderer {
         unsafe {
             // Unbind any SRV at the blur texture slot so the target texture isn't simultaneously
             // bound as input.
-            ctx.PSSetShaderResources(3, Some(&null_srv));
+            ctx.PSSetShaderResources(PRIMARY_TEXTURE_REGISTER, Some(&null_srv));
             if clear {
                 ctx.ClearRenderTargetView(
                     target_rtv.as_ref().context("blur target view missing")?,
@@ -1117,14 +1142,17 @@ impl DirectXRenderer {
             ctx.PSSetShader(fragment, None);
             ctx.VSSetConstantBuffers(0, Some(&cbuffers));
             ctx.PSSetConstantBuffers(0, Some(&cbuffers));
-            ctx.VSSetConstantBuffers(2, Some(&blur_params));
-            ctx.PSSetConstantBuffers(2, Some(&blur_params));
-            ctx.PSSetSamplers(4, Some(slice::from_ref(&self.globals.sampler)));
-            ctx.PSSetShaderResources(3, Some(slice::from_ref(source_srv)));
+            ctx.VSSetConstantBuffers(DATA_REGISTER, Some(&blur_params));
+            ctx.PSSetConstantBuffers(DATA_REGISTER, Some(&blur_params));
+            ctx.PSSetSamplers(
+                PRIMARY_SAMPLER_REGISTER,
+                Some(slice::from_ref(&self.globals.sampler)),
+            );
+            ctx.PSSetShaderResources(PRIMARY_TEXTURE_REGISTER, Some(slice::from_ref(source_srv)));
             ctx.OMSetBlendState(blend, None, 0xFFFFFFFF);
             ctx.DrawInstanced(vertex_count, 1, 0, 0);
             // Unbind the source so the target can be rebound as a render target next.
-            ctx.PSSetShaderResources(3, Some(&null_srv));
+            ctx.PSSetShaderResources(PRIMARY_TEXTURE_REGISTER, Some(&null_srv));
         }
         Ok(())
     }
@@ -1148,8 +1176,8 @@ impl DirectXRenderer {
         let full_width = self.width;
         let full_height = self.height;
         let blur_size = [
-            (full_width / BLUR_DOWNSAMPLE_FACTOR).max(1) as f32,
-            (full_height / BLUR_DOWNSAMPLE_FACTOR).max(1) as f32,
+            downsampled_dimension(full_width) as f32,
+            downsampled_dimension(full_height) as f32,
         ];
         let clip = if clip_rounded {
             FilterCompositeClip::RoundedBounds
@@ -1159,8 +1187,8 @@ impl DirectXRenderer {
         let half_vp = D3D11_VIEWPORT {
             TopLeftX: 0.0,
             TopLeftY: 0.0,
-            Width: (full_width / BLUR_DOWNSAMPLE_FACTOR).max(1) as f32,
-            Height: (full_height / BLUR_DOWNSAMPLE_FACTOR).max(1) as f32,
+            Width: blur_size[0],
+            Height: blur_size[1],
             MinDepth: 0.0,
             MaxDepth: 1.0,
         };
@@ -1686,9 +1714,9 @@ impl<T> PipelineState<T> {
             &self.blend_state,
         );
         unsafe {
-            device_context.PSSetSamplers(4, Some(sampler));
-            device_context.VSSetShaderResources(3, Some(texture));
-            device_context.PSSetShaderResources(3, Some(texture));
+            device_context.PSSetSamplers(PRIMARY_SAMPLER_REGISTER, Some(sampler));
+            device_context.VSSetShaderResources(PRIMARY_TEXTURE_REGISTER, Some(texture));
+            device_context.PSSetShaderResources(PRIMARY_TEXTURE_REGISTER, Some(texture));
 
             device_context.DrawInstanced(4, instance_count, 0, 0);
         }
@@ -1697,7 +1725,6 @@ impl<T> PipelineState<T> {
 
     fn draw_range(
         &self,
-        device: &ID3D11Device,
         device_context: &ID3D11DeviceContext,
         viewport: &[D3D11_VIEWPORT],
         global_params: &[Option<ID3D11Buffer>],
@@ -1705,16 +1732,9 @@ impl<T> PipelineState<T> {
         first_instance: u32,
         instance_count: u32,
     ) -> Result<()> {
-        let view = create_buffer_view_range(
-            device,
-            &self.buffer,
-            first_instance,
-            instance_count,
-            std::mem::size_of::<T>() as u32,
-        )?;
         set_pipeline_state(
             device_context,
-            slice::from_ref(&view),
+            slice::from_ref(&self.view),
             D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
             viewport,
             &self.vertex,
@@ -1723,14 +1743,13 @@ impl<T> PipelineState<T> {
             &self.blend_state,
         );
         unsafe {
-            device_context.DrawInstanced(vertex_count, instance_count, 0, 0);
+            device_context.DrawInstanced(vertex_count, instance_count, 0, first_instance);
         }
         Ok(())
     }
 
     fn draw_range_with_texture(
         &self,
-        device: &ID3D11Device,
         device_context: &ID3D11DeviceContext,
         texture: &[Option<ID3D11ShaderResourceView>],
         viewport: &[D3D11_VIEWPORT],
@@ -1739,16 +1758,9 @@ impl<T> PipelineState<T> {
         first_instance: u32,
         instance_count: u32,
     ) -> Result<()> {
-        let view = create_buffer_view_range(
-            device,
-            &self.buffer,
-            first_instance,
-            instance_count,
-            std::mem::size_of::<T>() as u32,
-        )?;
         set_pipeline_state(
             device_context,
-            slice::from_ref(&view),
+            slice::from_ref(&self.view),
             D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
             viewport,
             &self.vertex,
@@ -1757,10 +1769,10 @@ impl<T> PipelineState<T> {
             &self.blend_state,
         );
         unsafe {
-            device_context.PSSetSamplers(4, Some(sampler));
-            device_context.VSSetShaderResources(3, Some(texture));
-            device_context.PSSetShaderResources(3, Some(texture));
-            device_context.DrawInstanced(4, instance_count, 0, 0);
+            device_context.PSSetSamplers(PRIMARY_SAMPLER_REGISTER, Some(sampler));
+            device_context.VSSetShaderResources(PRIMARY_TEXTURE_REGISTER, Some(texture));
+            device_context.PSSetShaderResources(PRIMARY_TEXTURE_REGISTER, Some(texture));
+            device_context.DrawInstanced(4, instance_count, 0, first_instance);
         }
         Ok(())
     }
@@ -2192,31 +2204,6 @@ fn create_buffer_view(
 }
 
 #[inline]
-fn create_buffer_view_range(
-    device: &ID3D11Device,
-    buffer: &ID3D11Buffer,
-    first_element: u32,
-    num_elements: u32,
-    element_stride: u32,
-) -> Result<Option<ID3D11ShaderResourceView>> {
-    let words_per_element = element_stride / 4;
-    let desc = D3D11_SHADER_RESOURCE_VIEW_DESC {
-        Format: DXGI_FORMAT_R32_TYPELESS,
-        ViewDimension: D3D11_SRV_DIMENSION_BUFFEREX,
-        Anonymous: D3D11_SHADER_RESOURCE_VIEW_DESC_0 {
-            BufferEx: D3D11_BUFFEREX_SRV {
-                FirstElement: first_element * words_per_element,
-                NumElements: num_elements * words_per_element,
-                Flags: D3D11_BUFFEREX_SRV_RAW,
-            },
-        },
-    };
-    let mut view = None;
-    unsafe { device.CreateShaderResourceView(buffer, Some(&desc), Some(&mut view)) }?;
-    Ok(view)
-}
-
-#[inline]
 fn update_buffer<T>(
     device_context: &ID3D11DeviceContext,
     buffer: &ID3D11Buffer,
@@ -2243,9 +2230,8 @@ fn set_pipeline_state(
     blend_state: &ID3D11BlendState,
 ) {
     unsafe {
-        // Instance data is the group-1 data binding, mapped to register t2 by the generated HLSL.
-        device_context.VSSetShaderResources(2, Some(buffer_view));
-        device_context.PSSetShaderResources(2, Some(buffer_view));
+        device_context.VSSetShaderResources(DATA_REGISTER, Some(buffer_view));
+        device_context.PSSetShaderResources(DATA_REGISTER, Some(buffer_view));
         device_context.IASetPrimitiveTopology(topology);
         device_context.RSSetViewports(Some(viewport));
         device_context.VSSetShader(vertex_shader, None);

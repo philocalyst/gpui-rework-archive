@@ -2,6 +2,8 @@
 mod source {
     use wgsl_rs::std::*;
 
+    // Keep this literal available to the Rust-to-WGSL translator rather than referencing `std`.
+    #[allow(clippy::approx_constant)]
     pub const PI: f32 = 3.141592653589793;
     pub const HALF_TURN_DEGREES: f32 = 180.0;
     pub const FULL_TURN_DEGREES: f32 = 360.0;

@@ -7,7 +7,7 @@ use std::{
 use collections::FxHashMap;
 
 use crate::WgpuContext;
-use gpui_render::blur::DOWNSAMPLE_FACTOR as BLUR_DOWNSAMPLE_FACTOR;
+use gpui_render::blur::downsampled_dimension;
 use gpui_render::shaders::{
     blur::BlurUniforms,
     common::{FontRasterizationUniforms, GlobalUniforms},
@@ -15,12 +15,12 @@ use gpui_render::shaders::{
 };
 
 use super::{
+    WgpuRenderer,
     buffers::{DynamicUniformBuffer, InstanceBufferArena},
     filters::FrameUniformRequirements,
     pipelines::{WgpuBindGroupLayouts, WgpuPipelines},
     settings::RenderingParameters,
     surfaces::SurfaceCache,
-    WgpuRenderer,
 };
 
 const INITIAL_FILTER_UNIFORM_CAPACITY: u64 = 16;
@@ -266,8 +266,8 @@ impl WgpuRenderer {
         let format = self.target.format();
         let width = self.target.width();
         let height = self.target.height();
-        let blur_width = width.div_ceil(BLUR_DOWNSAMPLE_FACTOR).max(1);
-        let blur_height = height.div_ceil(BLUR_DOWNSAMPLE_FACTOR).max(1);
+        let blur_width = downsampled_dimension(width);
+        let blur_height = downsampled_dimension(height);
         let resources = self.resources_mut();
 
         if resources.scene_color_texture.is_none() {

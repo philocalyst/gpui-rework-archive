@@ -50,19 +50,20 @@ fn unplanned_mixed_scene(count: usize) -> Scene {
             y: ScaledPixels(0.0),
         },
         size: Size {
-            width: ScaledPixels(1280.0),
-            height: ScaledPixels(720.0),
+            width: ScaledPixels(1.0),
+            height: ScaledPixels(1.0),
         },
     };
-    for _ in 0..count {
+    for index in 0..count {
         scene.insert_primitive(Quad {
+            order: (index * 2) as u32,
             bounds,
             content_mask: ContentMask { bounds },
             background: solid_background(gpui::rgb(0x336699)),
             ..Default::default()
         });
         scene.insert_primitive(Underline {
-            order: 0,
+            order: (index * 2 + 1) as u32,
             padding: 0,
             bounds,
             content_mask: ContentMask { bounds },
@@ -78,6 +79,8 @@ fn bench_renderer(c: &mut Criterion) {
     let mut renderer = WgpuHeadlessRenderer::new().expect("headless WGPU renderer must initialize");
     let single_quad = quad_scene(1);
     let dense_quads = quad_scene(512);
+    let mut mixed_batches = unplanned_mixed_scene(512);
+    mixed_batches.finish();
 
     let mut group = c.benchmark_group("renderer_end_to_end");
     group.bench_function("single_quad", |b| {
@@ -106,6 +109,13 @@ fn bench_renderer(c: &mut Criterion) {
             renderer
                 .render_scene_and_wait(&dense_quads, TARGET_SIZE)
                 .expect("dense quad render must succeed")
+        })
+    });
+    group.bench_function("1024_mixed_batches_wait", |b| {
+        b.iter(|| {
+            renderer
+                .render_scene_and_wait(&mixed_batches, TARGET_SIZE)
+                .expect("mixed batch render must succeed")
         })
     });
     group.finish();

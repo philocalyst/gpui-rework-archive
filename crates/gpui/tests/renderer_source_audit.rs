@@ -102,3 +102,38 @@ fn renderer_backends_share_rust_authored_shaders() {
         relative_paths(&root, standalone_shader_sources).join(", ")
     );
 }
+
+#[test]
+fn directx_registers_and_instance_views_follow_generated_shader_contracts() {
+    let path = workspace_root().join("crates/gpui_windows/src/directx_renderer.rs");
+    let source = fs::read_to_string(&path)
+        .unwrap_or_else(|error| panic!("failed to read {}: {error}", path.display()));
+
+    for binding in [
+        "shader_interface::DATA_BUFFER_BINDING",
+        "shader_interface::PRIMARY_TEXTURE_BINDING",
+        "shader_interface::PRIMARY_SAMPLER_BINDING",
+        "shader_interface::SURFACE_SAMPLER_BINDING",
+    ] {
+        assert!(
+            source.contains(binding),
+            "{} must derive native register slots from {binding}",
+            path.display()
+        );
+    }
+    assert!(
+        source.contains("self.pipelines.surfaces.params_buffer"),
+        "{} must bind the surface pipeline's generated uniform buffer",
+        path.display()
+    );
+    assert!(
+        source.contains("PSSetSamplers(SURFACE_SAMPLER_REGISTER"),
+        "{} must bind the surface sampler at its generated slot",
+        path.display()
+    );
+    assert!(
+        !source.contains("create_buffer_view_range"),
+        "{} must reuse each pipeline's whole-buffer SRV and select batches with first-instance",
+        path.display()
+    );
+}

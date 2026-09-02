@@ -14,8 +14,8 @@ use gpui::{
 use gpui_render::{
     artifacts::{NATIVE_SHADERS, NativeShader},
     blur::{
-        BlurAxis, BlurKernel, BlurUniforms, DOWNSAMPLE_FACTOR as BLUR_DOWNSAMPLE_FACTOR,
-        GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS, ScissorRectangle,
+        BlurAxis, BlurKernel, BlurUniforms, GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS, ScissorRectangle,
+        downsampled_dimension,
     },
     path_types::{self, PathRasterizationVertex},
     shaders::{
@@ -130,9 +130,17 @@ fn bind_instances<T>(
     offset: usize,
     instances: &[T],
 ) {
+    bind_instance_count(encoder, buffer, offset, instances.len() as u32);
+}
+
+fn bind_instance_count(
+    encoder: &metal::RenderCommandEncoderRef,
+    buffer: &metal::BufferRef,
+    offset: usize,
+    count: u32,
+) {
     encoder.set_vertex_buffer(DATA_SLOT, Some(buffer), offset as u64);
     encoder.set_fragment_buffer(DATA_SLOT, Some(buffer), offset as u64);
-    let count = (mem::size_of_val(instances) / mem::size_of::<T>()) as u32;
     encoder.set_vertex_bytes(SIZES_SLOT, 4, &count as *const u32 as *const _);
     encoder.set_fragment_bytes(SIZES_SLOT, 4, &count as *const u32 as *const _);
 }
@@ -251,6 +259,7 @@ pub(crate) struct MetalRenderer {
     /// nested content blurs isolate consistently with [`MAX_FILTER_GROUP_DEPTH`]; deeper nests render
     /// inline.
     group_textures: Vec<metal::Texture>,
+    intermediate_texture_size: Option<Size<DevicePixels>>,
     path_sample_count: u32,
     /// Offscreen render target reused across `render_scene` calls when
     /// rendering headlessly without reading pixels back.
@@ -476,6 +485,7 @@ impl MetalRenderer {
             blur_ping_texture: None,
             blur_pong_texture: None,
             group_textures: Vec::new(),
+            intermediate_texture_size: None,
             path_sample_count: PATH_SAMPLE_COUNT,
             #[cfg(any(test, feature = "test-support"))]
             headless_render_target: None,
@@ -517,33 +527,31 @@ impl MetalRenderer {
                 ];
             }
         }
-        self.update_path_intermediate_textures(size);
+        self.update_intermediate_texture_size(size);
     }
 
-    fn update_path_intermediate_textures(&mut self, size: Size<DevicePixels>) {
-        // We are uncertain when this happens, but sometimes size can be 0 here. Most likely before
-        // the layout pass on window creation. Zero-sized texture creation causes SIGABRT.
-        // https://github.com/zed-industries/zed/issues/36229
-        if size.width.0 <= 0 || size.height.0 <= 0 {
-            self.path_intermediate_texture = None;
-            self.path_intermediate_msaa_texture = None;
-            self.scene_color_texture = None;
-            self.blur_ping_texture = None;
-            self.blur_pong_texture = None;
-            self.group_textures.clear();
+    fn update_intermediate_texture_size(&mut self, size: Size<DevicePixels>) {
+        if self.intermediate_texture_size == Some(size) {
             return;
         }
+        self.path_intermediate_texture = None;
+        self.path_intermediate_msaa_texture = None;
+        self.scene_color_texture = None;
+        self.blur_ping_texture = None;
+        self.blur_pong_texture = None;
+        self.group_textures.clear();
+        self.intermediate_texture_size = (size.width.0 > 0 && size.height.0 > 0).then_some(size);
+    }
 
-        let texture_descriptor = metal::TextureDescriptor::new();
-        texture_descriptor.set_width(size.width.0 as u64);
-        texture_descriptor.set_height(size.height.0 as u64);
-        texture_descriptor.set_pixel_format(metal::MTLPixelFormat::BGRA8Unorm);
-        texture_descriptor.set_storage_mode(metal::MTLStorageMode::Private);
-        texture_descriptor
-            .set_usage(metal::MTLTextureUsage::RenderTarget | metal::MTLTextureUsage::ShaderRead);
-        self.path_intermediate_texture = Some(self.device.new_texture(&texture_descriptor));
+    fn prepare_intermediate_textures(&mut self, scene: &Scene, size: Size<DevicePixels>) {
+        self.update_intermediate_texture_size(size);
+        let Some(size) = self.intermediate_texture_size else {
+            return;
+        };
+        let requirements = scene.render_plan().requirements();
+        let full_w = size.width.0 as u64;
+        let full_h = size.height.0 as u64;
 
-        // Full-res scene + group targets, and half-res ping/pong blur targets.
         let make_color_texture = |width: u64, height: u64| {
             let descriptor = metal::TextureDescriptor::new();
             descriptor.set_width(width.max(1));
@@ -555,37 +563,47 @@ impl MetalRenderer {
             );
             self.device.new_texture(&descriptor)
         };
-        let full_w = size.width.0 as u64;
-        let full_h = size.height.0 as u64;
-        self.scene_color_texture = Some(make_color_texture(full_w, full_h));
-        self.group_textures = (0..MAX_FILTER_GROUP_DEPTH)
-            .map(|_| make_color_texture(full_w, full_h))
-            .collect();
-        self.blur_ping_texture = Some(make_color_texture(
-            full_w.div_ceil(u64::from(BLUR_DOWNSAMPLE_FACTOR)),
-            full_h.div_ceil(u64::from(BLUR_DOWNSAMPLE_FACTOR)),
-        ));
-        self.blur_pong_texture = Some(make_color_texture(
-            full_w.div_ceil(u64::from(BLUR_DOWNSAMPLE_FACTOR)),
-            full_h.div_ceil(u64::from(BLUR_DOWNSAMPLE_FACTOR)),
-        ));
 
-        if self.path_sample_count > 1 {
+        if requirements.uses_path_target && self.path_intermediate_texture.is_none() {
+            let texture_descriptor = metal::TextureDescriptor::new();
+            texture_descriptor.set_width(full_w);
+            texture_descriptor.set_height(full_h);
+            texture_descriptor.set_pixel_format(metal::MTLPixelFormat::BGRA8Unorm);
+            texture_descriptor.set_storage_mode(metal::MTLStorageMode::Private);
+            texture_descriptor.set_usage(
+                metal::MTLTextureUsage::RenderTarget | metal::MTLTextureUsage::ShaderRead,
+            );
+            self.path_intermediate_texture = Some(self.device.new_texture(&texture_descriptor));
+
             // https://developer.apple.com/documentation/metal/choosing-a-resource-storage-mode-for-apple-gpus
             // Rendering MSAA textures are done in a single pass, so we can use memory-less storage on Apple Silicon
-            let storage_mode = if self.is_apple_gpu {
-                metal::MTLStorageMode::Memoryless
-            } else {
-                metal::MTLStorageMode::Private
-            };
+            if self.path_sample_count > 1 {
+                let storage_mode = if self.is_apple_gpu {
+                    metal::MTLStorageMode::Memoryless
+                } else {
+                    metal::MTLStorageMode::Private
+                };
+                let msaa_descriptor = texture_descriptor;
+                msaa_descriptor.set_texture_type(metal::MTLTextureType::D2Multisample);
+                msaa_descriptor.set_storage_mode(storage_mode);
+                msaa_descriptor.set_sample_count(self.path_sample_count as _);
+                self.path_intermediate_msaa_texture =
+                    Some(self.device.new_texture(&msaa_descriptor));
+            }
+        }
 
-            let msaa_descriptor = texture_descriptor;
-            msaa_descriptor.set_texture_type(metal::MTLTextureType::D2Multisample);
-            msaa_descriptor.set_storage_mode(storage_mode);
-            msaa_descriptor.set_sample_count(self.path_sample_count as _);
-            self.path_intermediate_msaa_texture = Some(self.device.new_texture(&msaa_descriptor));
-        } else {
-            self.path_intermediate_msaa_texture = None;
+        if requirements.uses_offscreen_target {
+            self.scene_color_texture
+                .get_or_insert_with(|| make_color_texture(full_w, full_h));
+            let blur_width = u64::from(downsampled_dimension(full_w as u32));
+            let blur_height = u64::from(downsampled_dimension(full_h as u32));
+            self.blur_ping_texture
+                .get_or_insert_with(|| make_color_texture(blur_width, blur_height));
+            self.blur_pong_texture
+                .get_or_insert_with(|| make_color_texture(blur_width, blur_height));
+            while self.group_textures.len() < requirements.isolated_target_count {
+                self.group_textures.push(make_color_texture(full_w, full_h));
+            }
         }
     }
 
@@ -716,9 +734,6 @@ impl MetalRenderer {
             anyhow::bail!("Invalid size for render_scene_to_image: {:?}", size);
         }
 
-        // Update path intermediate textures for this size
-        self.update_path_intermediate_textures(size);
-
         // Create an offscreen texture as render target
         let texture_descriptor = metal::TextureDescriptor::new();
         texture_descriptor.set_width(size.width.0 as u64);
@@ -780,8 +795,6 @@ impl MetalRenderer {
         if size.width.0 <= 0 || size.height.0 <= 0 {
             anyhow::bail!("Invalid size for render_scene: {:?}", size);
         }
-
-        self.update_path_intermediate_textures(size);
 
         let needs_new_target = self.headless_render_target.as_ref().is_none_or(|texture| {
             texture.width() != size.width.0 as u64 || texture.height() != size.height.0 as u64
@@ -850,6 +863,7 @@ impl MetalRenderer {
         texture: &metal::TextureRef,
         viewport_size: Size<DevicePixels>,
     ) -> Result<metal::CommandBuffer> {
+        self.prepare_intermediate_textures(scene, viewport_size);
         let command_queue = self.command_queue.clone();
         let command_buffer = command_queue.new_command_buffer();
         let alpha = if self.opaque { 1. } else { 0. };
@@ -909,7 +923,7 @@ impl MetalRenderer {
                 RenderCommand::Batch(PrimitiveBatch::Paths {
                     range,
                     rasterization_vertex_count,
-                    ..
+                    sprite_count,
                 }) => {
                     if *rasterization_vertex_count == 0 {
                         continue;
@@ -919,6 +933,7 @@ impl MetalRenderer {
 
                     let did_draw = self.draw_paths_to_intermediate(
                         paths,
+                        *rasterization_vertex_count,
                         instance_buffer,
                         &mut instance_offset,
                         &scene_uniforms,
@@ -937,6 +952,7 @@ impl MetalRenderer {
                     if did_draw {
                         self.draw_paths_from_intermediate(
                             paths,
+                            *sprite_count,
                             instance_buffer,
                             &mut instance_offset,
                             &scene_uniforms,
@@ -1219,8 +1235,8 @@ impl MetalRenderer {
         let full_width = i32::from(viewport_size.width).max(0) as u32;
         let full_height = i32::from(viewport_size.height).max(0) as u32;
         let blur_size = [
-            full_width.div_ceil(BLUR_DOWNSAMPLE_FACTOR).max(1) as f32,
-            full_height.div_ceil(BLUR_DOWNSAMPLE_FACTOR).max(1) as f32,
+            downsampled_dimension(full_width) as f32,
+            downsampled_dimension(full_height) as f32,
         ];
         let blur_viewport_size = Size {
             width: DevicePixels(blur_size[0] as i32),
@@ -1323,6 +1339,7 @@ impl MetalRenderer {
     fn draw_paths_to_intermediate(
         &self,
         paths: &[Path<ScaledPixels>],
+        rasterization_vertex_count: usize,
         instance_buffer: &mut InstanceBuffer,
         instance_offset: &mut usize,
         scene_uniforms: &SceneUniforms,
@@ -1357,33 +1374,38 @@ impl MetalRenderer {
         bind_scene_uniforms(command_encoder, scene_uniforms);
 
         align_offset(instance_offset);
-        let vertices: Vec<PathRasterizationVertex> =
-            path_types::rasterization_vertices(paths).collect();
-        let vertices_bytes_len = mem::size_of_val(vertices.as_slice());
+        let vertices_bytes_len =
+            mem::size_of::<PathRasterizationVertex>() * rasterization_vertex_count;
         let next_offset = *instance_offset + vertices_bytes_len;
         if next_offset > instance_buffer.size {
             command_encoder.end_encoding();
             return false;
         }
         let buffer_contents =
-            unsafe { (instance_buffer.metal_buffer.contents() as *mut u8).add(*instance_offset) };
-        unsafe {
-            ptr::copy_nonoverlapping(
-                vertices.as_ptr() as *const u8,
-                buffer_contents,
-                vertices_bytes_len,
-            );
+            unsafe { (instance_buffer.metal_buffer.contents() as *mut u8).add(*instance_offset) }
+                as *mut PathRasterizationVertex;
+        let mut vertices = path_types::rasterization_vertices(paths);
+        for index in 0..rasterization_vertex_count {
+            let Some(vertex) = vertices.next() else {
+                command_encoder.end_encoding();
+                return false;
+            };
+            unsafe { buffer_contents.add(index).write(vertex) };
         }
-        bind_instances(
+        if vertices.next().is_some() {
+            command_encoder.end_encoding();
+            return false;
+        }
+        bind_instance_count(
             command_encoder,
             &instance_buffer.metal_buffer,
             *instance_offset,
-            vertices.as_slice(),
+            rasterization_vertex_count as u32,
         );
         command_encoder.draw_primitives(
             metal::MTLPrimitiveType::Triangle,
             0,
-            vertices.len() as u64,
+            rasterization_vertex_count as u64,
         );
         *instance_offset = next_offset;
 
@@ -1486,12 +1508,13 @@ impl MetalRenderer {
     fn draw_paths_from_intermediate(
         &self,
         paths: &[Path<ScaledPixels>],
+        sprite_count: usize,
         instance_buffer: &mut InstanceBuffer,
         instance_offset: &mut usize,
         scene_uniforms: &SceneUniforms,
         command_encoder: &metal::RenderCommandEncoderRef,
     ) -> bool {
-        let Some(first_path) = paths.first() else {
+        let Some(_) = paths.first() else {
             return true;
         };
 
@@ -1506,13 +1529,8 @@ impl MetalRenderer {
         // disjoint, so we can copy each path's bounds individually. If this
         // batch combines different draw orders, we perform a single copy
         // for a minimal spanning rect.
-        let sprites: Vec<path_types::PathSprite> = path_types::sprites(paths).collect();
-        debug_assert_eq!(paths.last().unwrap().order == first_path.order, {
-            sprites.len() == paths.len()
-        });
-
         align_offset(instance_offset);
-        let sprite_bytes_len = mem::size_of_val(sprites.as_slice());
+        let sprite_bytes_len = mem::size_of::<path_types::PathSprite>() * sprite_count;
         let next_offset = *instance_offset + sprite_bytes_len;
         if next_offset > instance_buffer.size {
             return false;
@@ -1524,26 +1542,30 @@ impl MetalRenderer {
         command_encoder.set_fragment_sampler_state(SAMPLER_SLOT, Some(&self.sampler));
 
         let buffer_contents =
-            unsafe { (instance_buffer.metal_buffer.contents() as *mut u8).add(*instance_offset) };
-        unsafe {
-            ptr::copy_nonoverlapping(
-                sprites.as_ptr() as *const u8,
-                buffer_contents,
-                sprite_bytes_len,
-            );
+            unsafe { (instance_buffer.metal_buffer.contents() as *mut u8).add(*instance_offset) }
+                as *mut path_types::PathSprite;
+        let mut sprites = path_types::sprites(paths);
+        for index in 0..sprite_count {
+            let Some(sprite) = sprites.next() else {
+                return false;
+            };
+            unsafe { buffer_contents.add(index).write(sprite) };
+        }
+        if sprites.next().is_some() {
+            return false;
         }
 
-        bind_instances(
+        bind_instance_count(
             command_encoder,
             &instance_buffer.metal_buffer,
             *instance_offset,
-            sprites.as_slice(),
+            sprite_count as u32,
         );
         command_encoder.draw_primitives_instanced(
             metal::MTLPrimitiveType::TriangleStrip,
             0,
             4,
-            sprites.len() as u64,
+            sprite_count as u64,
         );
         *instance_offset = next_offset;
 
@@ -1943,21 +1965,47 @@ fn build_blur_pipeline_state(
 }
 
 fn required_instance_buffer_size(scene: &Scene) -> usize {
-    let planned = scene.render_plan().requirements();
-    let payload = mem::size_of::<Shadow>() * scene.shadows.len()
-        + mem::size_of::<Quad>() * scene.quads.len()
-        + mem::size_of::<path_types::PathRasterizationVertex>()
-            * planned.path_rasterization_vertex_count
-        + mem::size_of::<path_types::PathSprite>() * planned.path_sprite_count
-        + mem::size_of::<Underline>() * scene.underlines.len()
-        + mem::size_of::<MonochromeSprite>() * scene.monochrome_sprites.len()
-        + mem::size_of::<PolychromeSprite>() * scene.polychrome_sprites.len();
-    payload.saturating_add(
-        planned
-            .instance_batch_count
-            .saturating_sub(1)
-            .saturating_mul(255),
-    )
+    let mut required = 0;
+    let mut reserve = |element_size: usize, count: usize| {
+        if count > 0 {
+            align_offset(&mut required);
+            required = required.saturating_add(element_size.saturating_mul(count));
+        }
+    };
+
+    for command in scene.render_commands() {
+        let RenderCommand::Batch(batch) = command else {
+            continue;
+        };
+        match batch {
+            PrimitiveBatch::Shadows(range) => reserve(mem::size_of::<Shadow>(), range.len()),
+            PrimitiveBatch::Quads(range) => reserve(mem::size_of::<Quad>(), range.len()),
+            PrimitiveBatch::Paths {
+                rasterization_vertex_count,
+                sprite_count,
+                ..
+            } if *rasterization_vertex_count > 0 => {
+                reserve(
+                    mem::size_of::<path_types::PathRasterizationVertex>(),
+                    *rasterization_vertex_count,
+                );
+                reserve(mem::size_of::<path_types::PathSprite>(), *sprite_count);
+            }
+            PrimitiveBatch::Underlines(range) => reserve(mem::size_of::<Underline>(), range.len()),
+            PrimitiveBatch::MonochromeSprites { range, .. } => {
+                reserve(mem::size_of::<MonochromeSprite>(), range.len())
+            }
+            PrimitiveBatch::PolychromeSprites { range, .. } => {
+                reserve(mem::size_of::<PolychromeSprite>(), range.len())
+            }
+            PrimitiveBatch::Paths { .. }
+            | PrimitiveBatch::SubpixelSprites { .. }
+            | PrimitiveBatch::Surfaces(_)
+            | PrimitiveBatch::BackdropFilters(_)
+            | PrimitiveBatch::FilterBoundary(_) => {}
+        }
+    }
+    required
 }
 
 // Align to multiples of 256 make Metal happy.
@@ -2008,6 +2056,42 @@ mod tests {
         pattern_slash, px, solid_background, white,
     };
     use std::borrow::Cow;
+
+    #[test]
+    fn intermediate_textures_follow_scene_requirements() {
+        let pool = Arc::new(Mutex::new(InstanceBufferPool::default()));
+        let mut renderer = MetalRenderer::new_headless(pool);
+        let target_size = size(DevicePixels(5), DevicePixels(5));
+        let mut empty_scene = Scene::default();
+        empty_scene.finish();
+
+        renderer.prepare_intermediate_textures(&empty_scene, target_size);
+        assert!(renderer.path_intermediate_texture.is_none());
+        assert!(renderer.scene_color_texture.is_none());
+        assert!(renderer.blur_ping_texture.is_none());
+        assert!(renderer.group_textures.is_empty());
+
+        let bounds = Bounds {
+            origin: gpui::point(ScaledPixels(0.0), ScaledPixels(0.0)),
+            size: size(ScaledPixels(5.0), ScaledPixels(5.0)),
+        };
+        let mut filtered_scene = Scene::default();
+        filtered_scene.insert_primitive(BackdropFilter {
+            bounds,
+            content_mask: ContentMask { bounds },
+            filters: smallvec::smallvec![ScaledFilter::Blur(ScaledPixels(1.0))],
+            opacity: 1.0,
+            ..Default::default()
+        });
+        filtered_scene.finish();
+
+        renderer.prepare_intermediate_textures(&filtered_scene, target_size);
+        assert!(renderer.path_intermediate_texture.is_none());
+        assert!(renderer.scene_color_texture.is_some());
+        assert!(renderer.blur_ping_texture.is_some());
+        assert!(renderer.blur_pong_texture.is_some());
+        assert!(renderer.group_textures.is_empty());
+    }
 
     #[test]
     fn generated_sprite_shader_preserves_monochrome_coverage() {

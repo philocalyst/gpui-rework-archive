@@ -9,6 +9,13 @@ use gpui::{Bounds, Corners, ScaledPixels};
 use wgsl_rs::std::vec2f;
 
 pub const DOWNSAMPLE_FACTOR: u32 = 2;
+
+/// Returns the texture dimension used by the downsampled blur passes.
+///
+/// Allocation, viewport, and shader dimensions must agree for odd-sized render targets.
+pub fn downsampled_dimension(dimension: u32) -> u32 {
+    dimension.div_ceil(DOWNSAMPLE_FACTOR).max(1)
+}
 const RADIUS_TO_STANDARD_DEVIATION: f32 = 0.5;
 pub const GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS: f32 = 3.0;
 pub const MAX_GAUSSIAN_SAMPLES_PER_SIDE: u32 = 32;
@@ -217,5 +224,19 @@ fn empty_uniforms(downsample_mode: DownsampleMode) -> BlurUniforms {
         downsample_mode,
         source_size: vec2f(1.0, 1.0),
         target_size: vec2f(1.0, 1.0),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::downsampled_dimension;
+
+    #[test]
+    fn downsampled_dimensions_cover_odd_edges() {
+        assert_eq!(downsampled_dimension(0), 1);
+        assert_eq!(downsampled_dimension(1), 1);
+        assert_eq!(downsampled_dimension(2), 1);
+        assert_eq!(downsampled_dimension(3), 2);
+        assert_eq!(downsampled_dimension(33), 17);
     }
 }

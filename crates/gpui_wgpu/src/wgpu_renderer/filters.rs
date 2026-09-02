@@ -2,13 +2,13 @@ use gpui::{BackdropFilter, ScaledPixels};
 use gpui_render::shaders::interface as shader_interface;
 use gpui_render::{
     blur::{
-        BlurAxis, BlurKernel, FilterCompositeClip, FilterCompositeParameters, ScissorRectangle,
-        DOWNSAMPLE_FACTOR as BLUR_DOWNSAMPLE_FACTOR, GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS,
+        BlurAxis, BlurKernel, FilterCompositeClip, FilterCompositeParameters,
+        GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS, ScissorRectangle, downsampled_dimension,
     },
     shaders::blur::BlurUniforms,
 };
 
-use super::{begin_color_render_pass, pipelines, WgpuRenderer};
+use super::{WgpuRenderer, begin_color_render_pass, pipelines};
 
 pub(super) const FILTER_UNIFORMS_PER_COMPOSITE: u64 = 4;
 
@@ -77,8 +77,8 @@ impl WgpuRenderer {
         let full_width = self.target.width();
         let full_height = self.target.height();
         let blur_size = [
-            (full_width / BLUR_DOWNSAMPLE_FACTOR).max(1) as f32,
-            (full_height / BLUR_DOWNSAMPLE_FACTOR).max(1) as f32,
+            downsampled_dimension(full_width) as f32,
+            downsampled_dimension(full_height) as f32,
         ];
         let dilation = GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS * parameters.blur_radius;
         let scissor = ScissorRectangle::for_blurred_bounds(

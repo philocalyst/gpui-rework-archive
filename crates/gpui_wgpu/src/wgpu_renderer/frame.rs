@@ -227,7 +227,7 @@ fn write_shader_globals(renderer: &mut WgpuRenderer) {
     renderer.uploaded_globals = Some(state);
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub(super) struct FrameRequirements {
     storage_bytes: u64,
     /// Number of instance batches drawn this frame; one downlevel range-uniform slot
@@ -239,54 +239,63 @@ pub(super) struct FrameRequirements {
     uses_offscreen_target: bool,
 }
 
-impl Default for FrameRequirements {
-    fn default() -> Self {
-        Self {
-            storage_bytes: 0,
-            instance_batches: 0,
-            uniforms: FrameUniformRequirements::default(),
-            isolated_target_count: 0,
-            uses_path_target: false,
-            uses_offscreen_target: false,
-        }
-    }
-}
-
 impl FrameRequirements {
     pub(super) fn for_scene(scene: &Scene, transport: InstanceTransport) -> Self {
         let planned = scene.render_plan().requirements();
-        let payload_bytes = payload_bytes::<Quad>(scene.quads.len())
-            + payload_bytes::<Shadow>(scene.shadows.len())
-            + payload_bytes::<path_types::PathRasterizationVertex>(
-                planned.path_rasterization_vertex_count,
-            )
-            + payload_bytes::<path_types::PathSprite>(planned.path_sprite_count)
-            + payload_bytes::<Underline>(scene.underlines.len())
-            + payload_bytes::<MonochromeSprite>(scene.monochrome_sprites.len())
-            + payload_bytes::<SubpixelSprite>(scene.subpixel_sprites.len())
-            + payload_bytes::<PolychromeSprite>(scene.polychrome_sprites.len());
-        let max_alignment = match transport {
-            InstanceTransport::StorageBuffer => [
-                std::mem::size_of::<Quad>(),
-                std::mem::size_of::<Shadow>(),
-                std::mem::size_of::<path_types::PathRasterizationVertex>(),
-                std::mem::size_of::<path_types::PathSprite>(),
-                std::mem::size_of::<Underline>(),
-                std::mem::size_of::<MonochromeSprite>(),
-                std::mem::size_of::<SubpixelSprite>(),
-                std::mem::size_of::<PolychromeSprite>(),
-            ]
-            .into_iter()
-            .max()
-            .unwrap_or(1) as u64,
-            InstanceTransport::DataTexture => 16,
+        let mut storage_bytes = 0_u64;
+        let mut instance_batches = 0_u64;
+        let mut reserve = |element_size: usize, count: usize| {
+            if count > 0 {
+                let stride = element_size as u64;
+                storage_bytes = storage_bytes.next_multiple_of(transport.batch_alignment(stride));
+                storage_bytes = storage_bytes.saturating_add(stride.saturating_mul(count as u64));
+                instance_batches += 1;
+            }
         };
-        let alignment_padding =
-            planned.instance_batch_count.saturating_sub(1) as u64 * max_alignment.saturating_sub(1);
+
+        for command in scene.render_commands() {
+            let RenderCommand::Batch(batch) = command else {
+                continue;
+            };
+            match batch {
+                PrimitiveBatch::Shadows(range) => {
+                    reserve(std::mem::size_of::<Shadow>(), range.len())
+                }
+                PrimitiveBatch::Quads(range) => reserve(std::mem::size_of::<Quad>(), range.len()),
+                PrimitiveBatch::Paths {
+                    rasterization_vertex_count,
+                    sprite_count,
+                    ..
+                } if *rasterization_vertex_count > 0 => {
+                    reserve(
+                        std::mem::size_of::<path_types::PathRasterizationVertex>(),
+                        *rasterization_vertex_count,
+                    );
+                    reserve(std::mem::size_of::<path_types::PathSprite>(), *sprite_count);
+                }
+                PrimitiveBatch::Underlines(range) => {
+                    reserve(std::mem::size_of::<Underline>(), range.len())
+                }
+                PrimitiveBatch::MonochromeSprites { range, .. } => {
+                    reserve(std::mem::size_of::<MonochromeSprite>(), range.len())
+                }
+                PrimitiveBatch::SubpixelSprites { range, .. } => {
+                    reserve(std::mem::size_of::<SubpixelSprite>(), range.len())
+                }
+                PrimitiveBatch::PolychromeSprites { range, .. } => {
+                    reserve(std::mem::size_of::<PolychromeSprite>(), range.len())
+                }
+                PrimitiveBatch::Paths { .. }
+                | PrimitiveBatch::Surfaces(_)
+                | PrimitiveBatch::BackdropFilters(_)
+                | PrimitiveBatch::FilterBoundary(_) => {}
+            }
+        }
+        debug_assert_eq!(instance_batches as usize, planned.instance_batch_count);
 
         Self {
-            storage_bytes: payload_bytes.saturating_add(alignment_padding),
-            instance_batches: planned.instance_batch_count as u64,
+            storage_bytes,
+            instance_batches,
             uniforms: FrameUniformRequirements {
                 filter_count: FILTER_UNIFORMS_PER_COMPOSITE
                     * (planned.backdrop_filter_count + planned.isolated_filter_count) as u64
@@ -296,13 +305,8 @@ impl FrameRequirements {
             isolated_target_count: planned.isolated_target_count,
             uses_path_target: planned.uses_path_target,
             uses_offscreen_target: planned.uses_offscreen_target,
-            ..Self::default()
         }
     }
-}
-
-fn payload_bytes<T>(count: usize) -> u64 {
-    (std::mem::size_of::<T>() as u64).saturating_mul(count as u64)
 }
 
 struct FrameEncoder<'a> {
