@@ -16,6 +16,9 @@ use std::{
     slice,
 };
 
+mod plan;
+pub use plan::*;
+
 #[allow(non_camel_case_types, unused)]
 #[expect(missing_docs)]
 pub type PathVertex_ScaledPixels = PathVertex<ScaledPixels>;
@@ -66,6 +69,8 @@ pub struct Scene {
     pub surfaces: Vec<PaintSurface>,
     pub backdrop_filters: Vec<BackdropFilter>,
     pub filter_boundaries: Vec<FilterBoundary>,
+    render_plan: ScenePlan,
+    is_finished: bool,
 }
 
 #[expect(missing_docs)]
@@ -84,6 +89,8 @@ impl Scene {
         self.surfaces.clear();
         self.backdrop_filters.clear();
         self.filter_boundaries.clear();
+        self.render_plan = ScenePlan::default();
+        self.is_finished = false;
     }
 
     pub fn len(&self) -> usize {
@@ -91,6 +98,7 @@ impl Scene {
     }
 
     pub fn push_layer(&mut self, bounds: Bounds<ScaledPixels>) {
+        self.is_finished = false;
         let order = self.primitive_bounds.insert(bounds);
         self.layer_stack.push(order);
         self.paint_operations
@@ -98,6 +106,7 @@ impl Scene {
     }
 
     pub fn pop_layer(&mut self) {
+        self.is_finished = false;
         self.layer_stack.pop();
         self.paint_operations.push(PaintOperation::EndLayer);
     }
@@ -107,11 +116,13 @@ impl Scene {
     /// drag images) sort above the main scene — and a deferred backdrop's order can't fall inside
     /// a content-filter (`filter`) order range left behind by the main scene.
     pub fn raise_order_floor(&mut self) {
+        self.is_finished = false;
         let floor = self.primitive_bounds.max_order() + 1;
         self.primitive_bounds.set_order_floor(floor);
     }
 
     pub fn insert_primitive(&mut self, primitive: impl Into<Primitive>) {
+        self.is_finished = false;
         let mut primitive = primitive.into();
         let clipped_bounds = primitive
             .bounds()
@@ -230,6 +241,8 @@ impl Scene {
         // the start (false = 0) ahead of the end (true = 1) so the pair stays well-formed.
         self.filter_boundaries
             .sort_by_key(|boundary| (boundary.order, !boundary.is_start));
+        self.render_plan = ScenePlan::build(self);
+        self.is_finished = true;
     }
 
     #[cfg_attr(
@@ -240,28 +253,16 @@ impl Scene {
         allow(dead_code)
     )]
     pub fn batches(&self) -> impl Iterator<Item = PrimitiveBatch> + '_ {
-        BatchIterator {
-            shadows_start: 0,
-            shadows_iter: self.shadows.iter().peekable(),
-            quads_start: 0,
-            quads_iter: self.quads.iter().peekable(),
-            paths_start: 0,
-            paths_iter: self.paths.iter().peekable(),
-            underlines_start: 0,
-            underlines_iter: self.underlines.iter().peekable(),
-            monochrome_sprites_start: 0,
-            monochrome_sprites_iter: self.monochrome_sprites.iter().peekable(),
-            subpixel_sprites_start: 0,
-            subpixel_sprites_iter: self.subpixel_sprites.iter().peekable(),
-            polychrome_sprites_start: 0,
-            polychrome_sprites_iter: self.polychrome_sprites.iter().peekable(),
-            surfaces_start: 0,
-            surfaces_iter: self.surfaces.iter().peekable(),
-            backdrop_filters_start: 0,
-            backdrop_filters_iter: self.backdrop_filters.iter().peekable(),
-            filter_boundaries_start: 0,
-            filter_boundaries_iter: self.filter_boundaries.iter().peekable(),
-        }
+        self.render_commands().iter().map(|command| match command {
+            RenderCommand::Batch(batch) => batch.clone(),
+            RenderCommand::BeginFilter { boundary_index, .. } => {
+                PrimitiveBatch::FilterBoundary(*boundary_index)
+            }
+            RenderCommand::EndFilter {
+                closing_boundary_index,
+                ..
+            } => PrimitiveBatch::FilterBoundary(*closing_boundary_index),
+        })
     }
 
     /// Returns the backend-neutral sequence of work needed to render this scene.
@@ -269,107 +270,23 @@ impl Scene {
     /// In addition to preserving primitive batch order, this pairs content-filter boundaries and
     /// assigns the bounded offscreen target used by each isolated group. GPU backends only need to
     /// manage their target handles; nesting and overflow behavior stay consistent everywhere.
-    pub fn render_commands(&self) -> impl Iterator<Item = RenderCommand<'_>> + '_ {
-        // An unmatched start must render inline. Isolating it would redirect every remaining
-        // primitive into a texture that is never composited back into the scene.
-        let mut matched_starts = SmallVec::<[bool; 4]>::new();
-        matched_starts.resize(self.filter_boundaries.len(), false);
-        if !self.filter_boundaries.is_empty() {
-            let mut pending_starts = SmallVec::<[usize; 4]>::new();
-            for batch in self.batches() {
-                if let PrimitiveBatch::FilterBoundary(index) = batch {
-                    if self.filter_boundaries[index].is_start {
-                        pending_starts.push(index);
-                    } else if let Some(start_index) = pending_starts.pop() {
-                        matched_starts[start_index] = true;
-                    }
-                }
-            }
-        }
+    pub fn render_commands(&self) -> &[RenderCommand] {
+        self.render_plan().commands()
+    }
 
-        let mut filter_stack: SmallVec<[(&FilterBoundary, FilterRenderTarget); 4]> =
-            SmallVec::new();
-        let mut isolated_depth = 0;
-
-        self.batches().map(move |batch| match batch {
-            PrimitiveBatch::FilterBoundary(ix) => {
-                let boundary = &self.filter_boundaries[ix];
-                if boundary.is_start {
-                    let target = if matched_starts[ix] && isolated_depth < MAX_FILTER_GROUP_DEPTH {
-                        FilterRenderTarget::Isolated(FilterTargetIndex(isolated_depth))
-                    } else {
-                        FilterRenderTarget::Inline
-                    };
-                    if target.is_isolated() {
-                        isolated_depth += 1;
-                    }
-                    filter_stack.push((boundary, target));
-                    RenderCommand::BeginFilter { boundary, target }
-                } else if let Some((boundary, target)) = filter_stack.pop() {
-                    if target.is_isolated() {
-                        isolated_depth -= 1;
-                    }
-                    RenderCommand::EndFilter { boundary, target }
-                } else {
-                    debug_assert!(false, "content-filter end boundary has no matching start");
-                    RenderCommand::EndFilter {
-                        boundary,
-                        target: FilterRenderTarget::Inline,
-                    }
-                }
-            }
-            batch => RenderCommand::Batch(batch),
-        })
+    /// Returns the compiled render plan for this finished scene.
+    pub fn render_plan(&self) -> &ScenePlan {
+        debug_assert!(
+            self.is_finished,
+            "Scene::finish must be called before rendering"
+        );
+        self.render_plan.assert_matches(self);
+        &self.render_plan
     }
 
     /// Whether rendering needs an offscreen scene target for backdrop or content filters.
     pub fn requires_offscreen_rendering(&self) -> bool {
-        if !self.backdrop_filters.is_empty() {
-            return true;
-        }
-        if self.filter_boundaries.is_empty() {
-            return false;
-        }
-        self.render_commands().any(|command| {
-            matches!(
-                command,
-                RenderCommand::BeginFilter {
-                    target: FilterRenderTarget::Isolated(_),
-                    ..
-                }
-            )
-        })
-    }
-}
-
-/// Number of nested content-filter groups with dedicated isolation targets.
-///
-/// Deeper groups render inline instead of allocating an unbounded number of full-size textures.
-pub const MAX_FILTER_GROUP_DEPTH: usize = 2;
-
-/// Index of an offscreen texture reserved for an isolated content-filter group.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct FilterTargetIndex(usize);
-
-impl FilterTargetIndex {
-    /// Returns the index into the renderer's content-filter target pool.
-    pub fn as_usize(self) -> usize {
-        self.0
-    }
-}
-
-/// Where the contents of a filter group are rendered.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum FilterRenderTarget {
-    /// Render directly into the current target. Used after the bounded isolation pool is exhausted.
-    Inline,
-    /// Render into a dedicated offscreen target and composite it into the parent when complete.
-    Isolated(FilterTargetIndex),
-}
-
-impl FilterRenderTarget {
-    fn is_isolated(self) -> bool {
-        matches!(self, Self::Isolated(_))
+        self.render_plan().requirements().uses_offscreen_target
     }
 }
 
@@ -496,6 +413,7 @@ struct BatchIterator<'a> {
     quads_start: usize,
     quads_iter: Peekable<slice::Iter<'a, Quad>>,
     paths_start: usize,
+    paths: &'a [Path<ScaledPixels>],
     paths_iter: Peekable<slice::Iter<'a, Path<ScaledPixels>>>,
     underlines_start: usize,
     underlines_iter: Peekable<slice::Iter<'a, Underline>>,
@@ -513,11 +431,47 @@ struct BatchIterator<'a> {
     filter_boundaries_iter: Peekable<slice::Iter<'a, FilterBoundary>>,
 }
 
+impl<'a> BatchIterator<'a> {
+    fn new(scene: &'a Scene) -> Self {
+        Self {
+            shadows_start: 0,
+            shadows_iter: scene.shadows.iter().peekable(),
+            quads_start: 0,
+            quads_iter: scene.quads.iter().peekable(),
+            paths_start: 0,
+            paths: &scene.paths,
+            paths_iter: scene.paths.iter().peekable(),
+            underlines_start: 0,
+            underlines_iter: scene.underlines.iter().peekable(),
+            monochrome_sprites_start: 0,
+            monochrome_sprites_iter: scene.monochrome_sprites.iter().peekable(),
+            subpixel_sprites_start: 0,
+            subpixel_sprites_iter: scene.subpixel_sprites.iter().peekable(),
+            polychrome_sprites_start: 0,
+            polychrome_sprites_iter: scene.polychrome_sprites.iter().peekable(),
+            surfaces_start: 0,
+            surfaces_iter: scene.surfaces.iter().peekable(),
+            backdrop_filters_start: 0,
+            backdrop_filters_iter: scene.backdrop_filters.iter().peekable(),
+            filter_boundaries_start: 0,
+            filter_boundaries_iter: scene.filter_boundaries.iter().peekable(),
+        }
+    }
+}
+
+fn precedes_limit(
+    order: DrawOrder,
+    kind: PrimitiveKind,
+    limit: Option<(DrawOrder, PrimitiveKind)>,
+) -> bool {
+    limit.is_none_or(|limit| (order, kind) < limit)
+}
+
 impl<'a> Iterator for BatchIterator<'a> {
     type Item = PrimitiveBatch;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let mut orders_and_kinds = [
+        let orders_and_kinds = [
             (
                 self.shadows_iter.peek().map(|s| s.order),
                 PrimitiveKind::Shadow,
@@ -559,15 +513,24 @@ impl<'a> Iterator for BatchIterator<'a> {
                 },
             ),
         ];
-        orders_and_kinds.sort_by_key(|(order, kind)| (order.unwrap_or(u32::MAX), *kind));
-
-        let first = orders_and_kinds[0];
-        let second = orders_and_kinds[1];
-        let (batch_kind, max_order_and_kind) = if first.0.is_some() {
-            (first.1, (second.0.unwrap_or(u32::MAX), second.1))
-        } else {
-            return None;
-        };
+        // Find the two lowest live cursors in one fixed-size scan. The previous implementation
+        // sorted all ten entries for every emitted batch, despite needing only these two values.
+        let mut first = None;
+        let mut second = None;
+        for (order, kind) in orders_and_kinds {
+            let Some(order) = order else {
+                continue;
+            };
+            let candidate = (order, kind);
+            if first.is_none_or(|current| candidate < current) {
+                second = first;
+                first = Some(candidate);
+            } else if second.is_none_or(|current| candidate < current) {
+                second = Some(candidate);
+            }
+        }
+        let (_, batch_kind) = first?;
+        let max_order_and_kind = second;
 
         match batch_kind {
             PrimitiveKind::Shadow => {
@@ -576,7 +539,7 @@ impl<'a> Iterator for BatchIterator<'a> {
                 self.shadows_iter.next();
                 while self
                     .shadows_iter
-                    .next_if(|shadow| (shadow.order, batch_kind) < max_order_and_kind)
+                    .next_if(|shadow| precedes_limit(shadow.order, batch_kind, max_order_and_kind))
                     .is_some()
                 {
                     shadows_end += 1;
@@ -590,7 +553,7 @@ impl<'a> Iterator for BatchIterator<'a> {
                 self.quads_iter.next();
                 while self
                     .quads_iter
-                    .next_if(|quad| (quad.order, batch_kind) < max_order_and_kind)
+                    .next_if(|quad| precedes_limit(quad.order, batch_kind, max_order_and_kind))
                     .is_some()
                 {
                     quads_end += 1;
@@ -604,13 +567,28 @@ impl<'a> Iterator for BatchIterator<'a> {
                 self.paths_iter.next();
                 while self
                     .paths_iter
-                    .next_if(|path| (path.order, batch_kind) < max_order_and_kind)
+                    .next_if(|path| precedes_limit(path.order, batch_kind, max_order_and_kind))
                     .is_some()
                 {
                     paths_end += 1;
                 }
                 self.paths_start = paths_end;
-                Some(PrimitiveBatch::Paths(paths_start..paths_end))
+                let range = paths_start..paths_end;
+                let paths = &self.paths[range.clone()];
+                let rasterization_vertex_count = paths.iter().map(|path| path.vertices.len()).sum();
+                let sprite_count = if paths
+                    .last()
+                    .is_some_and(|path| path.order == paths[0].order)
+                {
+                    paths.len()
+                } else {
+                    1
+                };
+                Some(PrimitiveBatch::Paths {
+                    range,
+                    rasterization_vertex_count,
+                    sprite_count,
+                })
             }
             PrimitiveKind::Underline => {
                 let underlines_start = self.underlines_start;
@@ -618,7 +596,9 @@ impl<'a> Iterator for BatchIterator<'a> {
                 self.underlines_iter.next();
                 while self
                     .underlines_iter
-                    .next_if(|underline| (underline.order, batch_kind) < max_order_and_kind)
+                    .next_if(|underline| {
+                        precedes_limit(underline.order, batch_kind, max_order_and_kind)
+                    })
                     .is_some()
                 {
                     underlines_end += 1;
@@ -634,7 +614,7 @@ impl<'a> Iterator for BatchIterator<'a> {
                 while self
                     .monochrome_sprites_iter
                     .next_if(|sprite| {
-                        (sprite.order, batch_kind) < max_order_and_kind
+                        precedes_limit(sprite.order, batch_kind, max_order_and_kind)
                             && sprite.tile.texture_id == texture_id
                     })
                     .is_some()
@@ -655,7 +635,7 @@ impl<'a> Iterator for BatchIterator<'a> {
                 while self
                     .subpixel_sprites_iter
                     .next_if(|sprite| {
-                        (sprite.order, batch_kind) < max_order_and_kind
+                        precedes_limit(sprite.order, batch_kind, max_order_and_kind)
                             && sprite.tile.texture_id == texture_id
                     })
                     .is_some()
@@ -676,7 +656,7 @@ impl<'a> Iterator for BatchIterator<'a> {
                 while self
                     .polychrome_sprites_iter
                     .next_if(|sprite| {
-                        (sprite.order, batch_kind) < max_order_and_kind
+                        precedes_limit(sprite.order, batch_kind, max_order_and_kind)
                             && sprite.tile.texture_id == texture_id
                     })
                     .is_some()
@@ -695,7 +675,9 @@ impl<'a> Iterator for BatchIterator<'a> {
                 self.surfaces_iter.next();
                 while self
                     .surfaces_iter
-                    .next_if(|surface| (surface.order, batch_kind) < max_order_and_kind)
+                    .next_if(|surface| {
+                        precedes_limit(surface.order, batch_kind, max_order_and_kind)
+                    })
                     .is_some()
                 {
                     surfaces_end += 1;
@@ -709,7 +691,7 @@ impl<'a> Iterator for BatchIterator<'a> {
                 self.backdrop_filters_iter.next();
                 while self
                     .backdrop_filters_iter
-                    .next_if(|filter| (filter.order, batch_kind) < max_order_and_kind)
+                    .next_if(|filter| precedes_limit(filter.order, batch_kind, max_order_and_kind))
                     .is_some()
                 {
                     backdrop_filters_end += 1;
@@ -727,121 +709,6 @@ impl<'a> Iterator for BatchIterator<'a> {
                 self.filter_boundaries_start = index + 1;
                 Some(PrimitiveBatch::FilterBoundary(index))
             }
-        }
-    }
-}
-
-#[derive(Debug)]
-#[cfg_attr(
-    all(
-        any(target_os = "linux", target_os = "freebsd"),
-        not(any(feature = "x11", feature = "wayland"))
-    ),
-    allow(dead_code)
-)]
-#[allow(missing_docs)]
-pub enum PrimitiveBatch {
-    Shadows(Range<usize>),
-    Quads(Range<usize>),
-    Paths(Range<usize>),
-    Underlines(Range<usize>),
-    MonochromeSprites {
-        texture_id: AtlasTextureId,
-        range: Range<usize>,
-    },
-    #[cfg_attr(target_os = "macos", allow(dead_code))]
-    SubpixelSprites {
-        texture_id: AtlasTextureId,
-        range: Range<usize>,
-    },
-    PolychromeSprites {
-        texture_id: AtlasTextureId,
-        range: Range<usize>,
-    },
-    Surfaces(Range<usize>),
-    BackdropFilters(Range<usize>),
-    /// A single content-filter group boundary; index into [`Scene::filter_boundaries`]. Read
-    /// `is_start` to tell whether this opens the group (switch render target) or closes it
-    /// (filter the offscreen target and composite it back).
-    FilterBoundary(usize),
-}
-
-/// Backend-neutral rendering work derived from a [`Scene`].
-///
-/// Filter commands are paired and carry their shared rendering target.
-#[derive(Debug)]
-pub enum RenderCommand<'a> {
-    /// A normal primitive batch.
-    Batch(PrimitiveBatch),
-    /// Begin rendering a content-filter group.
-    BeginFilter {
-        /// Parameters captured by the opening boundary.
-        boundary: &'a FilterBoundary,
-        /// Whether this group renders inline or into an isolated target.
-        target: FilterRenderTarget,
-    },
-    /// Finish and composite a content-filter group.
-    EndFilter {
-        /// Parameters from the matching opening boundary.
-        boundary: &'a FilterBoundary,
-        /// The same target selected by the matching begin command.
-        target: FilterRenderTarget,
-    },
-}
-
-impl RenderCommand<'_> {
-    /// A diagnostic label suitable for GPU debug annotations.
-    pub fn label(&self) -> String {
-        match self {
-            Self::Batch(batch) => batch.label(),
-            Self::BeginFilter { target, .. } => match target {
-                FilterRenderTarget::Isolated(index) => {
-                    format!("begin filter group ({})", index.as_usize())
-                }
-                FilterRenderTarget::Inline => "begin inline filter group".into(),
-            },
-            Self::EndFilter { target, .. } => match target {
-                FilterRenderTarget::Isolated(index) => {
-                    format!("end filter group ({})", index.as_usize())
-                }
-                FilterRenderTarget::Inline => "end inline filter group".into(),
-            },
-        }
-    }
-}
-
-impl PrimitiveBatch {
-    #[expect(missing_docs)]
-    pub fn label(&self) -> String {
-        match self {
-            Self::Shadows(range) => format!("shadows ({})", range.len()),
-            Self::Quads(range) => format!("quads ({})", range.len()),
-            Self::Paths(range) => format!("paths ({})", range.len()),
-            Self::Underlines(range) => format!("underlines ({})", range.len()),
-            Self::MonochromeSprites { texture_id, range } => {
-                format!(
-                    "monochrome sprites ({}) on atlas {}",
-                    range.len(),
-                    texture_id.index
-                )
-            }
-            Self::SubpixelSprites { texture_id, range } => {
-                format!(
-                    "subpixel sprites ({}) on atlas {}",
-                    range.len(),
-                    texture_id.index
-                )
-            }
-            Self::PolychromeSprites { texture_id, range } => {
-                format!(
-                    "polychrome sprites ({}) on atlas {}",
-                    range.len(),
-                    texture_id.index
-                )
-            }
-            Self::Surfaces(range) => format!("surfaces ({})", range.len()),
-            Self::BackdropFilters(range) => format!("backdrop filters ({})", range.len()),
-            Self::FilterBoundary(ix) => format!("filter boundary ({ix})"),
         }
     }
 }
@@ -1527,16 +1394,26 @@ mod tests {
 
         let commands: Vec<_> = scene
             .render_commands()
+            .iter()
             .map(|command| match command {
                 RenderCommand::Batch(PrimitiveBatch::Quads(_)) => "quad".to_string(),
-                RenderCommand::BeginFilter { boundary, target } => {
+                RenderCommand::BeginFilter {
+                    boundary_index,
+                    target,
+                } => {
+                    let boundary = &scene.filter_boundaries[*boundary_index];
                     assert!(boundary.is_start);
                     format!("begin:{target:?}")
                 }
                 // An end command must carry its matched *start* boundary. This lets a
                 // renderer use the opening group's bounds, filters, and opacity while
                 // composing it, rather than trusting an independently-sorted end marker.
-                RenderCommand::EndFilter { boundary, target } => {
+                RenderCommand::EndFilter {
+                    boundary_index,
+                    target,
+                    ..
+                } => {
+                    let boundary = &scene.filter_boundaries[*boundary_index];
                     assert!(boundary.is_start);
                     format!("end:{target:?}")
                 }
@@ -1574,6 +1451,7 @@ mod tests {
 
         let commands: Vec<_> = scene
             .render_commands()
+            .iter()
             .map(|command| match command {
                 RenderCommand::BeginFilter { target, .. } => {
                     format!("begin:{target:?}")
@@ -1602,7 +1480,7 @@ mod tests {
         scene.insert_primitive(quad());
         scene.finish();
 
-        let mut commands = scene.render_commands();
+        let mut commands = scene.render_commands().iter();
         assert!(matches!(
             commands.next(),
             Some(RenderCommand::BeginFilter {
@@ -1616,5 +1494,51 @@ mod tests {
         ));
         assert!(commands.next().is_none());
         assert!(!scene.requires_offscreen_rendering());
+    }
+
+    #[test]
+    fn finish_rebuilds_the_plan_after_direct_primitive_mutation() {
+        let mut scene = Scene::default();
+        scene.insert_primitive(quad());
+        scene.finish();
+        let commands = scene.render_commands().to_vec();
+
+        // Primitive storage is public for renderer integration, so callers can mutate it
+        // without going through insert_primitive's finished-state invalidation.
+        scene.quads.push(quad());
+        scene.finish();
+        assert_ne!(scene.render_commands(), commands);
+        assert_eq!(scene.render_plan().requirements().instance_batch_count, 1);
+    }
+
+    #[test]
+    fn maximum_draw_order_is_not_treated_as_an_empty_batch_cursor() {
+        let mut scene = Scene::default();
+        let mut quad = quad();
+        quad.order = DrawOrder::MAX;
+        scene.quads.push(quad);
+        scene.finish();
+
+        assert!(matches!(
+            scene.render_commands(),
+            [RenderCommand::Batch(PrimitiveBatch::Quads(range))] if range == &(0..1)
+        ));
+    }
+
+    #[test]
+    fn plan_requirements_are_collected_with_filter_pairing() {
+        let mut scene = Scene::default();
+        scene.insert_primitive(backdrop());
+        scene.insert_primitive(boundary(true));
+        scene.insert_primitive(quad());
+        scene.insert_primitive(boundary(false));
+        scene.finish();
+
+        let requirements = scene.render_plan().requirements();
+        assert_eq!(requirements.backdrop_filter_count, 1);
+        assert_eq!(requirements.isolated_filter_count, 1);
+        assert_eq!(requirements.isolated_target_count, 1);
+        assert_eq!(requirements.instance_batch_count, 1);
+        assert!(requirements.uses_offscreen_target);
     }
 }

@@ -11,14 +11,12 @@ use gpui_render::{
         FilterCompositeClip, GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS,
     },
     path_types::{PathRasterizationVertex, PathSprite},
-    shaders::{
-        common::{
-            FontRasterizationUniforms, GlobalUniforms, ShaderBool, SurfaceColorFormat,
-            SurfaceUniforms,
-        },
+    shaders::common::{
+        FontRasterizationUniforms, GlobalUniforms, ShaderBool, SurfaceColorFormat, SurfaceUniforms,
     },
 };
 use gpui_util::ResultExt;
+use smallvec::SmallVec;
 use wgsl_rs::std::{vec2f, vec4f};
 use windows::{
     Win32::{
@@ -31,7 +29,7 @@ use windows::{
             Dxgi::{Common::*, *},
         },
     },
-    core::{PCSTR, HSTRING, Interface},
+    core::{HSTRING, Interface, PCSTR},
 };
 
 use crate::directx_renderer::shader_resources::{RawShaderBytes, ShaderModule, ShaderTarget};
@@ -478,8 +476,16 @@ impl DirectXRenderer {
             (
                 r.blur.scene_color_rtv.clone(),
                 r.blur.scene_color_srv.clone(),
-                r.blur.group_rtvs.clone(),
-                r.blur.group_srvs.clone(),
+                r.blur
+                    .group_rtvs
+                    .iter()
+                    .cloned()
+                    .collect::<SmallVec<[_; MAX_FILTER_GROUP_DEPTH]>>(),
+                r.blur
+                    .group_srvs
+                    .iter()
+                    .cloned()
+                    .collect::<SmallVec<[_; MAX_FILTER_GROUP_DEPTH]>>(),
                 r.render_target_view.clone(),
             )
         };
@@ -509,10 +515,12 @@ impl DirectXRenderer {
         } else {
             None
         };
-        let mut filter_stack: Vec<(
-            Option<ID3D11RenderTargetView>,
-            Option<ID3D11ShaderResourceView>,
-        )> = Vec::new();
+        let mut filter_stack = SmallVec::<
+            [(
+                Option<ID3D11RenderTargetView>,
+                Option<ID3D11ShaderResourceView>,
+            ); MAX_FILTER_GROUP_DEPTH],
+        >::new();
 
         let annotation = self
             .devices
@@ -530,8 +538,15 @@ impl DirectXRenderer {
                 RenderCommand::Batch(PrimitiveBatch::Quads(range)) => {
                     self.draw_quads(range.start, range.len())
                 }
-                RenderCommand::Batch(PrimitiveBatch::Paths(range)) => {
-                    let paths = &scene.paths[range];
+                RenderCommand::Batch(PrimitiveBatch::Paths {
+                    range,
+                    rasterization_vertex_count,
+                    ..
+                }) => {
+                    if *rasterization_vertex_count == 0 {
+                        continue;
+                    }
+                    let paths = &scene.paths[range.clone()];
                     self.draw_paths_to_intermediate(paths)?;
                     self.draw_paths_from_intermediate(paths)
                 }
@@ -557,11 +572,11 @@ impl DirectXRenderer {
                     self.draw_polychrome_sprites(texture_id, range.start, range.len())
                 }
                 RenderCommand::Batch(PrimitiveBatch::Surfaces(range)) => {
-                    self.draw_surfaces(&scene.surfaces[range])
+                    self.draw_surfaces(&scene.surfaces[range.clone()])
                 }
                 RenderCommand::Batch(PrimitiveBatch::BackdropFilters(range)) => {
                     let result = (|| {
-                        for filter in &scene.backdrop_filters[range] {
+                        for filter in &scene.backdrop_filters[range.clone()] {
                             self.dx_blur_and_composite(
                                 &current_srv,
                                 &current_rtv,
@@ -598,9 +613,11 @@ impl DirectXRenderer {
                     Ok(())
                 }
                 RenderCommand::EndFilter {
-                    boundary,
+                    boundary_index,
                     target: FilterRenderTarget::Isolated(_),
+                    ..
                 } => {
+                    let boundary = &scene.filter_boundaries[*boundary_index];
                     let (parent_rtv, parent_srv) = filter_stack
                         .pop()
                         .expect("render plan emitted an unmatched isolated filter end");
@@ -1023,9 +1040,11 @@ impl DirectXRenderer {
             };
             let mut texture_srv = None;
             unsafe {
-                devices
-                    .device
-                    .CreateShaderResourceView(frame.texture(), None, Some(&mut texture_srv))?
+                devices.device.CreateShaderResourceView(
+                    frame.texture(),
+                    None,
+                    Some(&mut texture_srv),
+                )?
             };
             // The generated surface shader always declares both planes; RGBA captures only use
             // the first one, so the same view is bound to both slots.
@@ -1201,7 +1220,9 @@ impl DirectXRenderer {
         let composite_bounds = if clip_rounded {
             bounds
         } else {
-            bounds.dilate(ScaledPixels(GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS * blur_radius))
+            bounds.dilate(ScaledPixels(
+                GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS * blur_radius,
+            ))
         };
         // Composite the blurred result into the target (preserving its contents).
         self.dx_blur_pass(
@@ -1457,7 +1478,8 @@ impl DirectXRenderPipelines {
             device,
             RawShaderBytes::new(ShaderModule::BlurComposite, ShaderTarget::Fragment)?.as_bytes(),
         )?;
-        let blur_params_buffer = create_constant_buffer(device, std::mem::size_of::<BlurUniforms>())?;
+        let blur_params_buffer =
+            create_constant_buffer(device, std::mem::size_of::<BlurUniforms>())?;
         let blur_blend_replace = create_blend_state_no_blend(device)?;
         // Premultiplied (One / InvSrcAlpha) — the composite outputs a premultiplied blurred sample;
         // straight-alpha blending would darken the faded edges.
@@ -2252,7 +2274,7 @@ pub(crate) mod shader_resources {
     use std::ffi::CString;
 
     use anyhow::{Context as _, Result};
-    use gpui_render::artifacts::{NativeShader, NATIVE_SHADERS};
+    use gpui_render::artifacts::{NATIVE_SHADERS, NativeShader};
     use windows::{
         Win32::Graphics::Direct3D::{Fxc::D3DCompile, ID3DBlob},
         core::PCSTR,
@@ -2358,7 +2380,6 @@ pub(crate) mod shader_resources {
         }
     }
 }
-
 
 mod nvidia {
     use std::{

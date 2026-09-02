@@ -1,8 +1,8 @@
 use super::{
-    begin_color_render_pass,
+    WgpuRenderer, begin_color_render_pass,
     buffers::{InstanceTransport, InstanceUpload},
-    filters::{FrameUniformRequirements, FILTER_UNIFORMS_PER_COMPOSITE},
-    path_types, WgpuRenderer,
+    filters::{FILTER_UNIFORMS_PER_COMPOSITE, FrameUniformRequirements},
+    path_types,
 };
 use gpui::{
     FilterRenderTarget, MonochromeSprite, PolychromeSprite, PrimitiveBatch, Quad, RenderCommand,
@@ -50,7 +50,6 @@ struct PreparedTargets {
     active: wgpu::TextureView,
     presentation: wgpu::TextureView,
     offscreen: Option<wgpu::TextureView>,
-    filter_groups: Vec<wgpu::TextureView>,
     instances: InstanceUpload,
 }
 
@@ -108,8 +107,6 @@ impl PreparedTargets {
                 active: offscreen.clone(),
                 presentation: frame_view.clone(),
                 offscreen: Some(offscreen),
-                filter_groups: resources.filter_group_views[..requirements.isolated_target_count]
-                    .to_vec(),
                 instances,
             })
         } else {
@@ -117,7 +114,6 @@ impl PreparedTargets {
                 active: frame_view.clone(),
                 presentation: frame_view.clone(),
                 offscreen: None,
-                filter_groups: Vec::new(),
                 instances,
             })
         }
@@ -237,7 +233,6 @@ pub(super) struct FrameRequirements {
     /// Number of instance batches drawn this frame; one downlevel range-uniform slot
     /// (bound with a dynamic offset) is required per batch.
     instance_batches: u64,
-    transport: InstanceTransport,
     pub(super) uniforms: FrameUniformRequirements,
     isolated_target_count: usize,
     uses_path_target: bool,
@@ -249,7 +244,6 @@ impl Default for FrameRequirements {
         Self {
             storage_bytes: 0,
             instance_batches: 0,
-            transport: InstanceTransport::StorageBuffer,
             uniforms: FrameUniformRequirements::default(),
             isolated_target_count: 0,
             uses_path_target: false,
@@ -260,80 +254,55 @@ impl Default for FrameRequirements {
 
 impl FrameRequirements {
     pub(super) fn for_scene(scene: &Scene, transport: InstanceTransport) -> Self {
-        let mut requirements = Self {
-            transport,
-            ..Self::default()
+        let planned = scene.render_plan().requirements();
+        let payload_bytes = payload_bytes::<Quad>(scene.quads.len())
+            + payload_bytes::<Shadow>(scene.shadows.len())
+            + payload_bytes::<path_types::PathRasterizationVertex>(
+                planned.path_rasterization_vertex_count,
+            )
+            + payload_bytes::<path_types::PathSprite>(planned.path_sprite_count)
+            + payload_bytes::<Underline>(scene.underlines.len())
+            + payload_bytes::<MonochromeSprite>(scene.monochrome_sprites.len())
+            + payload_bytes::<SubpixelSprite>(scene.subpixel_sprites.len())
+            + payload_bytes::<PolychromeSprite>(scene.polychrome_sprites.len());
+        let max_alignment = match transport {
+            InstanceTransport::StorageBuffer => [
+                std::mem::size_of::<Quad>(),
+                std::mem::size_of::<Shadow>(),
+                std::mem::size_of::<path_types::PathRasterizationVertex>(),
+                std::mem::size_of::<path_types::PathSprite>(),
+                std::mem::size_of::<Underline>(),
+                std::mem::size_of::<MonochromeSprite>(),
+                std::mem::size_of::<SubpixelSprite>(),
+                std::mem::size_of::<PolychromeSprite>(),
+            ]
+            .into_iter()
+            .max()
+            .unwrap_or(1) as u64,
+            InstanceTransport::DataTexture => 16,
         };
-        for command in scene.render_commands() {
-            match command {
-                RenderCommand::BeginFilter { .. } => {}
-                RenderCommand::EndFilter {
-                    target: FilterRenderTarget::Isolated(index),
-                    ..
-                } => {
-                    requirements.uses_offscreen_target = true;
-                    requirements.isolated_target_count =
-                        requirements.isolated_target_count.max(index.as_usize() + 1);
-                    requirements.uniforms.filter_count += FILTER_UNIFORMS_PER_COMPOSITE;
-                }
-                RenderCommand::EndFilter {
-                    target: FilterRenderTarget::Inline,
-                    ..
-                } => {}
-                RenderCommand::Batch(batch) => match batch {
-                    PrimitiveBatch::Quads(range) => requirements.reserve::<Quad>(range.len()),
-                    PrimitiveBatch::Shadows(range) => requirements.reserve::<Shadow>(range.len()),
-                    PrimitiveBatch::Paths(range) => {
-                        let paths = &scene.paths[range];
-                        let vertex_count = path_types::rasterization_vertex_count(paths);
-                        requirements.reserve::<path_types::PathRasterizationVertex>(vertex_count);
-                        if vertex_count > 0 {
-                            requirements.uses_path_target = true;
-                            requirements
-                                .reserve::<path_types::PathSprite>(path_types::sprite_count(paths));
-                        }
-                    }
-                    PrimitiveBatch::Underlines(range) => {
-                        requirements.reserve::<Underline>(range.len())
-                    }
-                    PrimitiveBatch::MonochromeSprites { range, .. } => {
-                        requirements.reserve::<MonochromeSprite>(range.len())
-                    }
-                    PrimitiveBatch::SubpixelSprites { range, .. } => {
-                        requirements.reserve::<SubpixelSprite>(range.len())
-                    }
-                    PrimitiveBatch::PolychromeSprites { range, .. } => {
-                        requirements.reserve::<PolychromeSprite>(range.len())
-                    }
-                    PrimitiveBatch::Surfaces(range) => {
-                        requirements.uniforms.surface_count += range.len() as u64;
-                    }
-                    PrimitiveBatch::BackdropFilters(range) => {
-                        requirements.uses_offscreen_target = true;
-                        requirements.uniforms.filter_count +=
-                            FILTER_UNIFORMS_PER_COMPOSITE * range.len() as u64;
-                    }
-                    PrimitiveBatch::FilterBoundary(_) => {
-                        unreachable!("filter boundaries must be compiled into render commands")
-                    }
-                },
-            }
-        }
-        requirements.uniforms.filter_count += u64::from(requirements.uses_offscreen_target);
-        requirements
-    }
+        let alignment_padding =
+            planned.instance_batch_count.saturating_sub(1) as u64 * max_alignment.saturating_sub(1);
 
-    fn reserve<T: shader_interface::BufferData>(&mut self, count: usize) {
-        if count == 0 {
-            return;
+        Self {
+            storage_bytes: payload_bytes.saturating_add(alignment_padding),
+            instance_batches: planned.instance_batch_count as u64,
+            uniforms: FrameUniformRequirements {
+                filter_count: FILTER_UNIFORMS_PER_COMPOSITE
+                    * (planned.backdrop_filter_count + planned.isolated_filter_count) as u64
+                    + u64::from(planned.uses_offscreen_target),
+                surface_count: planned.surface_count as u64,
+            },
+            isolated_target_count: planned.isolated_target_count,
+            uses_path_target: planned.uses_path_target,
+            uses_offscreen_target: planned.uses_offscreen_target,
+            ..Self::default()
         }
-        let stride = std::mem::size_of::<T>() as u64;
-        self.storage_bytes = self
-            .storage_bytes
-            .next_multiple_of(self.transport.batch_alignment(stride));
-        self.storage_bytes += stride * count as u64;
-        self.instance_batches += 1;
     }
+}
+
+fn payload_bytes<T>(count: usize) -> u64 {
+    (std::mem::size_of::<T>() as u64).saturating_mul(count as u64)
 }
 
 struct FrameEncoder<'a> {
@@ -359,7 +328,7 @@ impl<'a> FrameEncoder<'a> {
             renderer,
             scene,
             encoder,
-            targets: TargetStack::new(targets.active, targets.filter_groups),
+            targets: TargetStack::new(targets.active),
             offscreen: targets.offscreen,
             presentation: targets.presentation,
             instances: targets.instances,
@@ -412,11 +381,15 @@ impl<'a> FrameEncoder<'a> {
 
         for command in self.scene.render_commands() {
             match command {
-                RenderCommand::Batch(PrimitiveBatch::Paths(range)) => {
-                    let paths = &self.scene.paths[range];
-                    if path_types::rasterization_vertex_count(paths) == 0 {
+                RenderCommand::Batch(PrimitiveBatch::Paths {
+                    range,
+                    rasterization_vertex_count,
+                    ..
+                }) => {
+                    if *rasterization_vertex_count == 0 {
                         continue;
                     }
+                    let paths = &self.scene.paths[range.clone()];
                     drop(pass);
                     let rasterized = self.renderer.draw_paths_to_intermediate(
                         &mut self.encoder,
@@ -439,7 +412,7 @@ impl<'a> FrameEncoder<'a> {
                 }
                 RenderCommand::Batch(PrimitiveBatch::BackdropFilters(range)) => {
                     drop(pass);
-                    for filter in &self.scene.backdrop_filters[range] {
+                    for filter in &self.scene.backdrop_filters[range.clone()] {
                         self.renderer.draw_backdrop_filter(
                             &mut self.encoder,
                             filter,
@@ -469,7 +442,9 @@ impl<'a> FrameEncoder<'a> {
                     ..
                 } => {
                     drop(pass);
-                    self.targets.enter(index.as_usize());
+                    let target =
+                        self.renderer.resources().filter_group_views[index.as_usize()].clone();
+                    self.targets.enter(target);
                     pass = begin_scene_render_pass(
                         self.renderer,
                         &mut self.encoder,
@@ -479,11 +454,13 @@ impl<'a> FrameEncoder<'a> {
                     );
                 }
                 RenderCommand::EndFilter {
-                    boundary,
+                    boundary_index,
                     target: FilterRenderTarget::Isolated(_),
+                    ..
                 } => {
                     drop(pass);
                     let (filtered, parent) = self.targets.exit();
+                    let boundary = &self.scene.filter_boundaries[*boundary_index];
                     self.renderer.blur_and_composite(
                         &mut self.encoder,
                         &filtered,
@@ -540,15 +517,13 @@ fn begin_scene_render_pass<'a>(
 struct TargetStack {
     current: wgpu::TextureView,
     parents: Vec<wgpu::TextureView>,
-    isolated: Vec<wgpu::TextureView>,
 }
 
 impl TargetStack {
-    fn new(root: wgpu::TextureView, isolated: Vec<wgpu::TextureView>) -> Self {
+    fn new(root: wgpu::TextureView) -> Self {
         Self {
             current: root,
             parents: Vec::new(),
-            isolated,
         }
     }
 
@@ -556,8 +531,7 @@ impl TargetStack {
         &self.current
     }
 
-    fn enter(&mut self, target_index: usize) {
-        let next = self.isolated[target_index].clone();
+    fn enter(&mut self, next: wgpu::TextureView) {
         self.parents
             .push(std::mem::replace(&mut self.current, next));
     }
@@ -591,40 +565,44 @@ pub(super) type DrawResult = Result<(), DrawError>;
 fn encode_inline_batch(
     renderer: &WgpuRenderer,
     scene: &Scene,
-    batch: PrimitiveBatch,
+    batch: &PrimitiveBatch,
     instances: &mut InstanceUpload,
     pass: &mut wgpu::RenderPass<'_>,
 ) -> DrawResult {
     match batch {
-        PrimitiveBatch::Quads(range) => renderer.draw_quads(&scene.quads[range], instances, pass),
+        PrimitiveBatch::Quads(range) => {
+            renderer.draw_quads(&scene.quads[range.clone()], instances, pass)
+        }
         PrimitiveBatch::Shadows(range) => {
-            renderer.draw_shadows(&scene.shadows[range], instances, pass)
+            renderer.draw_shadows(&scene.shadows[range.clone()], instances, pass)
         }
         PrimitiveBatch::Underlines(range) => {
-            renderer.draw_underlines(&scene.underlines[range], instances, pass)
+            renderer.draw_underlines(&scene.underlines[range.clone()], instances, pass)
         }
         PrimitiveBatch::MonochromeSprites { texture_id, range } => renderer
             .draw_monochrome_sprites(
-                &scene.monochrome_sprites[range],
-                texture_id,
+                &scene.monochrome_sprites[range.clone()],
+                *texture_id,
                 instances,
                 pass,
             ),
         PrimitiveBatch::SubpixelSprites { texture_id, range } => renderer.draw_subpixel_sprites(
-            &scene.subpixel_sprites[range],
-            texture_id,
+            &scene.subpixel_sprites[range.clone()],
+            *texture_id,
             instances,
             pass,
         ),
         PrimitiveBatch::PolychromeSprites { texture_id, range } => renderer
             .draw_polychrome_sprites(
-                &scene.polychrome_sprites[range],
-                texture_id,
+                &scene.polychrome_sprites[range.clone()],
+                *texture_id,
                 instances,
                 pass,
             ),
-        PrimitiveBatch::Surfaces(range) => renderer.draw_surfaces(&scene.surfaces[range], pass),
-        PrimitiveBatch::Paths(_)
+        PrimitiveBatch::Surfaces(range) => {
+            renderer.draw_surfaces(&scene.surfaces[range.clone()], pass)
+        }
+        PrimitiveBatch::Paths { .. }
         | PrimitiveBatch::BackdropFilters(_)
         | PrimitiveBatch::FilterBoundary(_) => {
             unreachable!("pass-interrupting batches are handled by FrameEncoder")

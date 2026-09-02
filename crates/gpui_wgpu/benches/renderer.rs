@@ -1,7 +1,7 @@
-use criterion::{Criterion, criterion_group, criterion_main};
+use criterion::{BatchSize, Criterion, black_box, criterion_group, criterion_main};
 use gpui::{
     Bounds, ContentMask, DevicePixels, PlatformHeadlessRenderer, Point, Quad, ScaledPixels, Scene,
-    Size, solid_background,
+    ShaderBool, Size, Underline, solid_background, white,
 };
 use gpui_ce_wgpu::WgpuHeadlessRenderer;
 
@@ -11,6 +11,12 @@ const TARGET_SIZE: Size<DevicePixels> = Size {
 };
 
 fn quad_scene(count: usize) -> Scene {
+    let mut scene = unplanned_quad_scene(count);
+    scene.finish();
+    scene
+}
+
+fn unplanned_quad_scene(count: usize) -> Scene {
     let mut scene = Scene::default();
     for index in 0..count {
         let column = index % 32;
@@ -33,7 +39,38 @@ fn quad_scene(count: usize) -> Scene {
             ..Default::default()
         });
     }
-    scene.finish();
+    scene
+}
+
+fn unplanned_mixed_scene(count: usize) -> Scene {
+    let mut scene = Scene::default();
+    let bounds = Bounds {
+        origin: Point {
+            x: ScaledPixels(0.0),
+            y: ScaledPixels(0.0),
+        },
+        size: Size {
+            width: ScaledPixels(1280.0),
+            height: ScaledPixels(720.0),
+        },
+    };
+    for _ in 0..count {
+        scene.insert_primitive(Quad {
+            bounds,
+            content_mask: ContentMask { bounds },
+            background: solid_background(gpui::rgb(0x336699)),
+            ..Default::default()
+        });
+        scene.insert_primitive(Underline {
+            order: 0,
+            padding: 0,
+            bounds,
+            content_mask: ContentMask { bounds },
+            color: white().into(),
+            thickness: ScaledPixels(1.0),
+            wavy: ShaderBool::Disabled,
+        });
+    }
     scene
 }
 
@@ -55,6 +92,42 @@ fn bench_renderer(c: &mut Criterion) {
             renderer
                 .render_scene_to_image(&dense_quads, TARGET_SIZE)
                 .expect("dense quad render must succeed")
+        })
+    });
+    group.bench_function("single_quad_wait", |b| {
+        b.iter(|| {
+            renderer
+                .render_scene_and_wait(&single_quad, TARGET_SIZE)
+                .expect("single quad render must succeed")
+        })
+    });
+    group.bench_function("512_quads_wait", |b| {
+        b.iter(|| {
+            renderer
+                .render_scene_and_wait(&dense_quads, TARGET_SIZE)
+                .expect("dense quad render must succeed")
+        })
+    });
+    group.finish();
+
+    let mut group = c.benchmark_group("scene_plan");
+    group.bench_function("compile_1024_mixed_batches", |b| {
+        b.iter_batched(
+            || unplanned_mixed_scene(512),
+            |mut scene| {
+                scene.finish();
+                black_box(*scene.render_plan().requirements())
+            },
+            BatchSize::SmallInput,
+        )
+    });
+    let mut mixed_scene = unplanned_mixed_scene(512);
+    mixed_scene.finish();
+    group.bench_function("traverse_1024_mixed_batches", |b| {
+        b.iter(|| {
+            for command in mixed_scene.render_commands() {
+                black_box(command);
+            }
         })
     });
     group.finish();

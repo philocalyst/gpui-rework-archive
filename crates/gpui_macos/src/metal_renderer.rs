@@ -12,16 +12,14 @@ use gpui::{
     ScaledPixels, Scene, Shadow, Size, SurfaceSource, Underline, size,
 };
 use gpui_render::{
-    artifacts::{NativeShader, NATIVE_SHADERS},
+    artifacts::{NATIVE_SHADERS, NativeShader},
     blur::{
         BlurAxis, BlurKernel, BlurUniforms, DOWNSAMPLE_FACTOR as BLUR_DOWNSAMPLE_FACTOR,
         GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS, ScissorRectangle,
     },
     path_types::{self, PathRasterizationVertex},
     shaders::{
-        common::{
-            FontRasterizationUniforms, GlobalUniforms, ShaderBool, SurfaceColorFormat,
-        },
+        common::{FontRasterizationUniforms, GlobalUniforms, ShaderBool, SurfaceColorFormat},
         surface::SurfaceUniforms,
     },
 };
@@ -40,6 +38,7 @@ use metal::{
 };
 use objc::{self, msg_send, sel, sel_impl};
 use parking_lot::Mutex;
+use smallvec::SmallVec;
 use wgsl_rs::std::{vec2f, vec4f};
 
 use std::{cell::Cell, ffi::c_void, mem, ptr, sync::Arc};
@@ -83,7 +82,7 @@ impl SceneUniforms {
             // Metal text is gamma-corrected grayscale rasterization; the shader-side font
             // corrections must therefore be neutral.
             font: FontRasterizationUniforms {
-                gamma_ratios: vec4f(1.0, 1.0, 1.0, 1.0),
+                gamma_ratios: vec4f(0.0, 0.0, 0.0, 0.0),
                 grayscale_enhanced_contrast: 0.0,
                 subpixel_enhanced_contrast: 0.0,
                 uses_blue_green_red_subpixel_order: ShaderBool::Disabled,
@@ -177,7 +176,15 @@ impl InstanceBufferPool {
         &mut self,
         device: &metal::Device,
         unified_memory: bool,
+        minimum_size: usize,
     ) -> InstanceBuffer {
+        if minimum_size > self.buffer_size {
+            self.reset(
+                minimum_size
+                    .checked_next_power_of_two()
+                    .unwrap_or(minimum_size),
+            );
+        }
         let buffer = self.buffers.pop().unwrap_or_else(|| {
             let options = if unified_memory {
                 MTLResourceOptions::StorageModeShared
@@ -348,7 +355,8 @@ impl MetalRenderer {
             (shader, library_for(shader.msl))
         };
 
-        let (path_rasterization_shader, path_rasterization_library) = pipeline("path_rasterization");
+        let (path_rasterization_shader, path_rasterization_library) =
+            pipeline("path_rasterization");
         let paths_rasterization_pipeline_state = build_path_rasterization_pipeline_state(
             &device,
             &path_rasterization_library,
@@ -553,8 +561,14 @@ impl MetalRenderer {
         self.group_textures = (0..MAX_FILTER_GROUP_DEPTH)
             .map(|_| make_color_texture(full_w, full_h))
             .collect();
-        self.blur_ping_texture = Some(make_color_texture(full_w / 2, full_h / 2));
-        self.blur_pong_texture = Some(make_color_texture(full_w / 2, full_h / 2));
+        self.blur_ping_texture = Some(make_color_texture(
+            full_w.div_ceil(u64::from(BLUR_DOWNSAMPLE_FACTOR)),
+            full_h.div_ceil(u64::from(BLUR_DOWNSAMPLE_FACTOR)),
+        ));
+        self.blur_pong_texture = Some(make_color_texture(
+            full_w.div_ceil(u64::from(BLUR_DOWNSAMPLE_FACTOR)),
+            full_h.div_ceil(u64::from(BLUR_DOWNSAMPLE_FACTOR)),
+        ));
 
         if self.path_sample_count > 1 {
             // https://developer.apple.com/documentation/metal/choosing-a-resource-storage-mode-for-apple-gpus
@@ -611,55 +625,24 @@ impl MetalRenderer {
             return;
         };
 
-        loop {
-            let mut instance_buffer = self
-                .instance_buffer_pool
-                .lock()
-                .acquire(&self.device, self.is_unified_memory);
-
-            let command_buffer =
-                self.draw_primitives(scene, &mut instance_buffer, drawable, viewport_size);
-
-            match command_buffer {
-                Ok(command_buffer) => {
-                    let instance_buffer_pool = self.instance_buffer_pool.clone();
-                    let instance_buffer = Cell::new(Some(instance_buffer));
-                    let block = ConcreteBlock::new(move |_| {
-                        if let Some(instance_buffer) = instance_buffer.take() {
-                            instance_buffer_pool.lock().release(instance_buffer);
-                        }
-                    });
-                    let block = block.copy();
-                    command_buffer.add_completed_handler(&block);
-
-                    if self.presents_with_transaction {
-                        command_buffer.commit();
-                        command_buffer.wait_until_scheduled();
-                        drawable.present();
-                    } else {
-                        command_buffer.present_drawable(drawable);
-                        command_buffer.commit();
-                    }
+        let mut instance_buffer = self.acquire_instance_buffer(scene);
+        let command_buffer =
+            match self.draw_primitives(scene, &mut instance_buffer, drawable, viewport_size) {
+                Ok(command_buffer) => command_buffer,
+                Err(error) => {
+                    log::error!("failed to render pre-sized scene: {error}");
                     return;
                 }
-                Err(err) => {
-                    log::error!(
-                        "failed to render: {}. retrying with larger instance buffer size",
-                        err
-                    );
-                    let mut instance_buffer_pool = self.instance_buffer_pool.lock();
-                    let buffer_size = instance_buffer_pool.buffer_size;
-                    if buffer_size >= 256 * 1024 * 1024 {
-                        log::error!("instance buffer size grew too large: {}", buffer_size);
-                        break;
-                    }
-                    instance_buffer_pool.reset(buffer_size * 2);
-                    log::info!(
-                        "increased instance buffer size to {}",
-                        instance_buffer_pool.buffer_size
-                    );
-                }
-            }
+            };
+        self.release_instance_buffer_when_complete(&command_buffer, instance_buffer);
+
+        if self.presents_with_transaction {
+            command_buffer.commit();
+            command_buffer.wait_until_scheduled();
+            drawable.present();
+        } else {
+            command_buffer.present_drawable(drawable);
+            command_buffer.commit();
         }
     }
 
@@ -684,83 +667,39 @@ impl MetalRenderer {
             .next_drawable()
             .ok_or_else(|| anyhow::anyhow!("Failed to get drawable for render_to_image"))?;
 
-        loop {
-            let mut instance_buffer = self
-                .instance_buffer_pool
-                .lock()
-                .acquire(&self.device, self.is_unified_memory);
+        let mut instance_buffer = self.acquire_instance_buffer(scene);
+        let command_buffer =
+            self.draw_primitives(scene, &mut instance_buffer, drawable, viewport_size)?;
 
-            let command_buffer =
-                self.draw_primitives(scene, &mut instance_buffer, drawable, viewport_size);
+        command_buffer.commit();
+        command_buffer.wait_until_completed();
+        self.instance_buffer_pool.lock().release(instance_buffer);
 
-            match command_buffer {
-                Ok(command_buffer) => {
-                    let instance_buffer_pool = self.instance_buffer_pool.clone();
-                    let instance_buffer = Cell::new(Some(instance_buffer));
-                    let block = ConcreteBlock::new(move |_| {
-                        if let Some(instance_buffer) = instance_buffer.take() {
-                            instance_buffer_pool.lock().release(instance_buffer);
-                        }
-                    });
-                    let block = block.copy();
-                    command_buffer.add_completed_handler(&block);
-
-                    // Commit and wait for completion without presenting
-                    command_buffer.commit();
-                    command_buffer.wait_until_completed();
-
-                    // Read pixels from the texture
-                    let texture = drawable.texture();
-                    let width = texture.width() as u32;
-                    let height = texture.height() as u32;
-                    let bytes_per_row = width as usize * 4;
-                    let buffer_size = height as usize * bytes_per_row;
-
-                    let mut pixels = vec![0u8; buffer_size];
-
-                    let region = metal::MTLRegion {
-                        origin: metal::MTLOrigin { x: 0, y: 0, z: 0 },
-                        size: metal::MTLSize {
-                            width: width as u64,
-                            height: height as u64,
-                            depth: 1,
-                        },
-                    };
-
-                    texture.get_bytes(
-                        pixels.as_mut_ptr() as *mut std::ffi::c_void,
-                        bytes_per_row as u64,
-                        region,
-                        0,
-                    );
-
-                    // Convert BGRA to RGBA (swap B and R channels)
-                    for chunk in pixels.chunks_exact_mut(4) {
-                        chunk.swap(0, 2);
-                    }
-
-                    return RgbaImage::from_raw(width, height, pixels).ok_or_else(|| {
-                        anyhow::anyhow!("Failed to create RgbaImage from pixel data")
-                    });
-                }
-                Err(err) => {
-                    log::error!(
-                        "failed to render: {}. retrying with larger instance buffer size",
-                        err
-                    );
-                    let mut instance_buffer_pool = self.instance_buffer_pool.lock();
-                    let buffer_size = instance_buffer_pool.buffer_size;
-                    if buffer_size >= 256 * 1024 * 1024 {
-                        anyhow::bail!("instance buffer size grew too large: {}", buffer_size);
-                    }
-                    instance_buffer_pool.reset(buffer_size * 2);
-                    log::info!(
-                        "increased instance buffer size to {}",
-                        instance_buffer_pool.buffer_size
-                    );
-                }
-            }
+        let texture = drawable.texture();
+        let width = texture.width() as u32;
+        let height = texture.height() as u32;
+        let bytes_per_row = width as usize * 4;
+        let buffer_size = height as usize * bytes_per_row;
+        let mut pixels = vec![0u8; buffer_size];
+        let region = metal::MTLRegion {
+            origin: metal::MTLOrigin { x: 0, y: 0, z: 0 },
+            size: metal::MTLSize {
+                width: width as u64,
+                height: height as u64,
+                depth: 1,
+            },
+        };
+        texture.get_bytes(
+            pixels.as_mut_ptr() as *mut std::ffi::c_void,
+            bytes_per_row as u64,
+            region,
+            0,
+        );
+        for chunk in pixels.chunks_exact_mut(4) {
+            chunk.swap(0, 2);
         }
+        RgbaImage::from_raw(width, height, pixels)
+            .ok_or_else(|| anyhow::anyhow!("Failed to create RgbaImage from pixel data"))
     }
 
     /// Renders a scene to an image without requiring a window or CAMetalLayer.
@@ -790,92 +729,43 @@ impl MetalRenderer {
         texture_descriptor.set_storage_mode(metal::MTLStorageMode::Managed);
         let target_texture = self.device.new_texture(&texture_descriptor);
 
-        loop {
-            let mut instance_buffer = self
-                .instance_buffer_pool
-                .lock()
-                .acquire(&self.device, self.is_unified_memory);
+        let mut instance_buffer = self.acquire_instance_buffer(scene);
+        let command_buffer =
+            self.draw_primitives_to_texture(scene, &mut instance_buffer, &target_texture, size)?;
 
-            let command_buffer =
-                self.draw_primitives_to_texture(scene, &mut instance_buffer, &target_texture, size);
-
-            match command_buffer {
-                Ok(command_buffer) => {
-                    let instance_buffer_pool = self.instance_buffer_pool.clone();
-                    let instance_buffer = Cell::new(Some(instance_buffer));
-                    let block = ConcreteBlock::new(move |_| {
-                        if let Some(instance_buffer) = instance_buffer.take() {
-                            instance_buffer_pool.lock().release(instance_buffer);
-                        }
-                    });
-                    let block = block.copy();
-                    command_buffer.add_completed_handler(&block);
-
-                    // On discrete GPUs (non-unified memory), Managed textures
-                    // require an explicit blit synchronize before the CPU can
-                    // read back the rendered data. Without this, get_bytes
-                    // returns stale zeros.
-                    if !self.is_unified_memory {
-                        let blit = command_buffer.new_blit_command_encoder();
-                        blit.synchronize_resource(&target_texture);
-                        blit.end_encoding();
-                    }
-
-                    // Commit and wait for completion
-                    command_buffer.commit();
-                    command_buffer.wait_until_completed();
-
-                    // Read pixels from the texture
-                    let width = size.width.0 as u32;
-                    let height = size.height.0 as u32;
-                    let bytes_per_row = width as usize * 4;
-                    let buffer_size = height as usize * bytes_per_row;
-
-                    let mut pixels = vec![0u8; buffer_size];
-
-                    let region = metal::MTLRegion {
-                        origin: metal::MTLOrigin { x: 0, y: 0, z: 0 },
-                        size: metal::MTLSize {
-                            width: width as u64,
-                            height: height as u64,
-                            depth: 1,
-                        },
-                    };
-
-                    target_texture.get_bytes(
-                        pixels.as_mut_ptr() as *mut std::ffi::c_void,
-                        bytes_per_row as u64,
-                        region,
-                        0,
-                    );
-
-                    // Convert BGRA to RGBA (swap B and R channels)
-                    for chunk in pixels.chunks_exact_mut(4) {
-                        chunk.swap(0, 2);
-                    }
-
-                    return RgbaImage::from_raw(width, height, pixels).ok_or_else(|| {
-                        anyhow::anyhow!("Failed to create RgbaImage from pixel data")
-                    });
-                }
-                Err(err) => {
-                    log::error!(
-                        "failed to render: {}. retrying with larger instance buffer size",
-                        err
-                    );
-                    let mut instance_buffer_pool = self.instance_buffer_pool.lock();
-                    let buffer_size = instance_buffer_pool.buffer_size;
-                    if buffer_size >= 256 * 1024 * 1024 {
-                        anyhow::bail!("instance buffer size grew too large: {}", buffer_size);
-                    }
-                    instance_buffer_pool.reset(buffer_size * 2);
-                    log::info!(
-                        "increased instance buffer size to {}",
-                        instance_buffer_pool.buffer_size
-                    );
-                }
-            }
+        if !self.is_unified_memory {
+            let blit = command_buffer.new_blit_command_encoder();
+            blit.synchronize_resource(&target_texture);
+            blit.end_encoding();
         }
+        command_buffer.commit();
+        command_buffer.wait_until_completed();
+        self.instance_buffer_pool.lock().release(instance_buffer);
+
+        let width = size.width.0 as u32;
+        let height = size.height.0 as u32;
+        let bytes_per_row = width as usize * 4;
+        let buffer_size = height as usize * bytes_per_row;
+        let mut pixels = vec![0u8; buffer_size];
+        let region = metal::MTLRegion {
+            origin: metal::MTLOrigin { x: 0, y: 0, z: 0 },
+            size: metal::MTLSize {
+                width: width as u64,
+                height: height as u64,
+                depth: 1,
+            },
+        };
+        target_texture.get_bytes(
+            pixels.as_mut_ptr() as *mut std::ffi::c_void,
+            bytes_per_row as u64,
+            region,
+            0,
+        );
+        for chunk in pixels.chunks_exact_mut(4) {
+            chunk.swap(0, 2);
+        }
+        RgbaImage::from_raw(width, height, pixels)
+            .ok_or_else(|| anyhow::anyhow!("Failed to create RgbaImage from pixel data"))
     }
 
     /// Renders a scene to a reused offscreen texture without reading pixels
@@ -912,50 +802,35 @@ impl MetalRenderer {
             .clone()
             .expect("just ensured the render target exists");
 
-        loop {
-            let mut instance_buffer = self
-                .instance_buffer_pool
-                .lock()
-                .acquire(&self.device, self.is_unified_memory);
+        let mut instance_buffer = self.acquire_instance_buffer(scene);
+        let command_buffer =
+            self.draw_primitives_to_texture(scene, &mut instance_buffer, &target_texture, size)?;
+        self.release_instance_buffer_when_complete(&command_buffer, instance_buffer);
+        command_buffer.commit();
+        Ok(())
+    }
 
-            let command_buffer =
-                self.draw_primitives_to_texture(scene, &mut instance_buffer, &target_texture, size);
+    fn acquire_instance_buffer(&self, scene: &Scene) -> InstanceBuffer {
+        self.instance_buffer_pool.lock().acquire(
+            &self.device,
+            self.is_unified_memory,
+            required_instance_buffer_size(scene),
+        )
+    }
 
-            match command_buffer {
-                Ok(command_buffer) => {
-                    let instance_buffer_pool = self.instance_buffer_pool.clone();
-                    let instance_buffer = Cell::new(Some(instance_buffer));
-                    let block = ConcreteBlock::new(move |_| {
-                        if let Some(instance_buffer) = instance_buffer.take() {
-                            instance_buffer_pool.lock().release(instance_buffer);
-                        }
-                    });
-                    let block = block.copy();
-                    command_buffer.add_completed_handler(&block);
-
-                    // Commit without waiting, mirroring presentation to a real
-                    // window where the CPU doesn't block on the GPU.
-                    command_buffer.commit();
-                    return Ok(());
-                }
-                Err(err) => {
-                    log::error!(
-                        "failed to render: {}. retrying with larger instance buffer size",
-                        err
-                    );
-                    let mut instance_buffer_pool = self.instance_buffer_pool.lock();
-                    let buffer_size = instance_buffer_pool.buffer_size;
-                    if buffer_size >= 256 * 1024 * 1024 {
-                        anyhow::bail!("instance buffer size grew too large: {}", buffer_size);
-                    }
-                    instance_buffer_pool.reset(buffer_size * 2);
-                    log::info!(
-                        "increased instance buffer size to {}",
-                        instance_buffer_pool.buffer_size
-                    );
-                }
+    fn release_instance_buffer_when_complete(
+        &self,
+        command_buffer: &metal::CommandBufferRef,
+        instance_buffer: InstanceBuffer,
+    ) {
+        let instance_buffer_pool = self.instance_buffer_pool.clone();
+        let instance_buffer = Cell::new(Some(instance_buffer));
+        let block = ConcreteBlock::new(move |_| {
+            if let Some(instance_buffer) = instance_buffer.take() {
+                instance_buffer_pool.lock().release(instance_buffer);
             }
-        }
+        });
+        command_buffer.add_completed_handler(&block.copy());
     }
 
     fn draw_primitives(
@@ -991,7 +866,11 @@ impl MetalRenderer {
         let scene_color_owned = self.scene_color_texture.clone();
         let blur_ping_owned = self.blur_ping_texture.clone();
         let blur_pong_owned = self.blur_pong_texture.clone();
-        let group_owned = self.group_textures.clone();
+        let group_owned = self
+            .group_textures
+            .iter()
+            .cloned()
+            .collect::<SmallVec<[metal::Texture; MAX_FILTER_GROUP_DEPTH]>>();
         let scene_color: &metal::TextureRef = if use_offscreen {
             scene_color_owned.as_deref().unwrap_or(texture)
         } else {
@@ -999,7 +878,7 @@ impl MetalRenderer {
         };
         // The active render target; switches to the group texture inside a content-filter group.
         let mut current_target: &metal::TextureRef = scene_color;
-        let mut filter_stack: Vec<&metal::TextureRef> = Vec::new();
+        let mut filter_stack = SmallVec::<[&metal::TextureRef; MAX_FILTER_GROUP_DEPTH]>::new();
 
         let mut command_encoder = new_command_encoder_for_texture(
             command_buffer,
@@ -1014,21 +893,28 @@ impl MetalRenderer {
         for command in scene.render_commands() {
             let ok = match command {
                 RenderCommand::Batch(PrimitiveBatch::Shadows(range)) => self.draw_shadows(
-                    &scene.shadows[range],
+                    &scene.shadows[range.clone()],
                     instance_buffer,
                     &mut instance_offset,
                     &scene_uniforms,
                     command_encoder,
                 ),
                 RenderCommand::Batch(PrimitiveBatch::Quads(range)) => self.draw_quads(
-                    &scene.quads[range],
+                    &scene.quads[range.clone()],
                     instance_buffer,
                     &mut instance_offset,
                     &scene_uniforms,
                     command_encoder,
                 ),
-                RenderCommand::Batch(PrimitiveBatch::Paths(range)) => {
-                    let paths = &scene.paths[range];
+                RenderCommand::Batch(PrimitiveBatch::Paths {
+                    range,
+                    rasterization_vertex_count,
+                    ..
+                }) => {
+                    if *rasterization_vertex_count == 0 {
+                        continue;
+                    }
+                    let paths = &scene.paths[range.clone()];
                     command_encoder.end_encoding();
 
                     let did_draw = self.draw_paths_to_intermediate(
@@ -1061,7 +947,7 @@ impl MetalRenderer {
                     }
                 }
                 RenderCommand::Batch(PrimitiveBatch::Underlines(range)) => self.draw_underlines(
-                    &scene.underlines[range],
+                    &scene.underlines[range.clone()],
                     instance_buffer,
                     &mut instance_offset,
                     &scene_uniforms,
@@ -1069,8 +955,8 @@ impl MetalRenderer {
                 ),
                 RenderCommand::Batch(PrimitiveBatch::MonochromeSprites { texture_id, range }) => {
                     self.draw_monochrome_sprites(
-                        texture_id,
-                        &scene.monochrome_sprites[range],
+                        *texture_id,
+                        &scene.monochrome_sprites[range.clone()],
                         instance_buffer,
                         &mut instance_offset,
                         &scene_uniforms,
@@ -1079,8 +965,8 @@ impl MetalRenderer {
                 }
                 RenderCommand::Batch(PrimitiveBatch::PolychromeSprites { texture_id, range }) => {
                     self.draw_polychrome_sprites(
-                        texture_id,
-                        &scene.polychrome_sprites[range],
+                        *texture_id,
+                        &scene.polychrome_sprites[range.clone()],
                         instance_buffer,
                         &mut instance_offset,
                         &scene_uniforms,
@@ -1088,7 +974,7 @@ impl MetalRenderer {
                     )
                 }
                 RenderCommand::Batch(PrimitiveBatch::Surfaces(range)) => self.draw_surfaces(
-                    &scene.surfaces[range],
+                    &scene.surfaces[range.clone()],
                     &scene_uniforms,
                     command_encoder,
                 ),
@@ -1097,7 +983,7 @@ impl MetalRenderer {
                     if let (Some(ping), Some(pong)) =
                         (blur_ping_owned.as_deref(), blur_pong_owned.as_deref())
                     {
-                        for filter in &scene.backdrop_filters[range] {
+                        for filter in &scene.backdrop_filters[range.clone()] {
                             self.metal_blur_and_composite(
                                 command_buffer,
                                 &scene_uniforms,
@@ -1145,9 +1031,11 @@ impl MetalRenderer {
                     true
                 }
                 RenderCommand::EndFilter {
-                    boundary,
+                    boundary_index,
                     target: FilterRenderTarget::Isolated(_),
+                    ..
                 } => {
+                    let boundary = &scene.filter_boundaries[*boundary_index];
                     let parent = filter_stack
                         .pop()
                         .expect("render plan emitted an unmatched isolated filter end");
@@ -1331,9 +1219,13 @@ impl MetalRenderer {
         let full_width = i32::from(viewport_size.width).max(0) as u32;
         let full_height = i32::from(viewport_size.height).max(0) as u32;
         let blur_size = [
-            (full_width / BLUR_DOWNSAMPLE_FACTOR).max(1) as f32,
-            (full_height / BLUR_DOWNSAMPLE_FACTOR).max(1) as f32,
+            full_width.div_ceil(BLUR_DOWNSAMPLE_FACTOR).max(1) as f32,
+            full_height.div_ceil(BLUR_DOWNSAMPLE_FACTOR).max(1) as f32,
         ];
+        let blur_viewport_size = Size {
+            width: DevicePixels(blur_size[0] as i32),
+            height: DevicePixels(blur_size[1] as i32),
+        };
         let dilation = GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS * blur_radius;
         let scissor =
             ScissorRectangle::for_blurred_bounds(bounds, dilation, full_width, full_height);
@@ -1352,12 +1244,9 @@ impl MetalRenderer {
             &self.blur_downsample_pipeline_state,
             ping,
             source,
-            viewport_size,
+            blur_viewport_size,
             scene_uniforms,
-            BlurUniforms::downsample(
-                [full_width as f32, full_height as f32],
-                blur_size,
-            ),
+            BlurUniforms::downsample([full_width as f32, full_height as f32], blur_size),
             scissor,
             metal::MTLPrimitiveType::Triangle,
             3,
@@ -1368,7 +1257,7 @@ impl MetalRenderer {
             &self.blur_pipeline_state,
             pong,
             ping,
-            viewport_size,
+            blur_viewport_size,
             scene_uniforms,
             BlurUniforms::gaussian(BlurAxis::Horizontal, blur_size, kernel),
             scissor,
@@ -1381,7 +1270,7 @@ impl MetalRenderer {
             &self.blur_pipeline_state,
             ping,
             pong,
-            viewport_size,
+            blur_viewport_size,
             scene_uniforms,
             BlurUniforms::gaussian(BlurAxis::Vertical, blur_size, kernel),
             scissor,
@@ -1468,7 +1357,8 @@ impl MetalRenderer {
         bind_scene_uniforms(command_encoder, scene_uniforms);
 
         align_offset(instance_offset);
-        let vertices: Vec<PathRasterizationVertex> = path_types::rasterization_vertices(paths).collect();
+        let vertices: Vec<PathRasterizationVertex> =
+            path_types::rasterization_vertices(paths).collect();
         let vertices_bytes_len = mem::size_of_val(vertices.as_slice());
         let next_offset = *instance_offset + vertices_bytes_len;
         if next_offset > instance_buffer.size {
@@ -1747,6 +1637,9 @@ impl MetalRenderer {
             *instance_offset,
             sprites,
         );
+        // Generated native shaders derive normalized tile coordinates from the atlas dimensions
+        // in the vertex stage. Bind the same texture to both stages, as WGPU and DirectX do.
+        command_encoder.set_vertex_texture(PRIMARY_TEXTURE_SLOT, Some(&texture));
         command_encoder.set_fragment_texture(PRIMARY_TEXTURE_SLOT, Some(&texture));
         command_encoder.set_fragment_sampler_state(SAMPLER_SLOT, Some(&self.sampler));
 
@@ -1799,6 +1692,7 @@ impl MetalRenderer {
             *instance_offset,
             sprites,
         );
+        command_encoder.set_vertex_texture(PRIMARY_TEXTURE_SLOT, Some(&texture));
         command_encoder.set_fragment_texture(PRIMARY_TEXTURE_SLOT, Some(&texture));
         command_encoder.set_fragment_sampler_state(SAMPLER_SLOT, Some(&self.sampler));
 
@@ -2048,6 +1942,24 @@ fn build_blur_pipeline_state(
         .expect("could not create render pipeline state")
 }
 
+fn required_instance_buffer_size(scene: &Scene) -> usize {
+    let planned = scene.render_plan().requirements();
+    let payload = mem::size_of::<Shadow>() * scene.shadows.len()
+        + mem::size_of::<Quad>() * scene.quads.len()
+        + mem::size_of::<path_types::PathRasterizationVertex>()
+            * planned.path_rasterization_vertex_count
+        + mem::size_of::<path_types::PathSprite>() * planned.path_sprite_count
+        + mem::size_of::<Underline>() * scene.underlines.len()
+        + mem::size_of::<MonochromeSprite>() * scene.monochrome_sprites.len()
+        + mem::size_of::<PolychromeSprite>() * scene.polychrome_sprites.len();
+    payload.saturating_add(
+        planned
+            .instance_batch_count
+            .saturating_sub(1)
+            .saturating_mul(255),
+    )
+}
+
 // Align to multiples of 256 make Metal happy.
 fn align_offset(offset: &mut usize) {
     *offset = (*offset).div_ceil(256) * 256;
@@ -2083,5 +1995,399 @@ impl gpui::PlatformHeadlessRenderer for MetalHeadlessRenderer {
 
     fn sprite_atlas(&self) -> Arc<dyn gpui::PlatformAtlas> {
         self.renderer.sprite_atlas().clone()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use gpui::{
+        AtlasKey, BackdropFilter, BorderStyle, ContentMask, Edges, ImageId, Path, PlatformAtlas,
+        PlatformHeadlessRenderer, RenderImageParams, RenderSvgParams, ScaledFilter,
+        TransformationMatrix, checkerboard, hsla, linear_color_stop, linear_gradient,
+        pattern_slash, px, solid_background, white,
+    };
+    use std::borrow::Cow;
+
+    #[test]
+    fn generated_sprite_shader_preserves_monochrome_coverage() {
+        let pool = Arc::new(Mutex::new(InstanceBufferPool::default()));
+        let mut renderer = MetalRenderer::new_headless(pool);
+        let tile_size = Size {
+            width: DevicePixels(8),
+            height: DevicePixels(8),
+        };
+        let key = AtlasKey::Svg(RenderSvgParams {
+            path: "generated-sprite-coverage-test".into(),
+            size: tile_size,
+        });
+        let tile = renderer
+            .sprite_atlas()
+            .get_or_insert_with(&key, &mut || {
+                Ok(Some((tile_size, Cow::Owned(vec![64; 64]))))
+            })
+            .unwrap()
+            .unwrap();
+        let bounds = Bounds {
+            origin: gpui::point(ScaledPixels(8.0), ScaledPixels(8.0)),
+            size: Size {
+                width: ScaledPixels(16.0),
+                height: ScaledPixels(16.0),
+            },
+        };
+        let mut scene = Scene::default();
+        scene.insert_primitive(MonochromeSprite {
+            order: 0,
+            padding: 0,
+            bounds,
+            content_mask: ContentMask { bounds },
+            color: white().into(),
+            tile,
+            transformation: TransformationMatrix::unit(),
+        });
+        scene.finish();
+
+        let image = renderer
+            .render_scene_to_image(
+                &scene,
+                Size {
+                    width: DevicePixels(32),
+                    height: DevicePixels(32),
+                },
+            )
+            .unwrap();
+        let center = image.get_pixel(16, 16).0;
+        assert!(
+            center[0] >= 63 && center[0] <= 65 && center[1] == center[0] && center[2] == center[0],
+            "monochrome coverage was altered before blending: {center:?}"
+        );
+    }
+
+    fn assert_legacy_fixture(name: &str, actual: image::RgbaImage) {
+        fn hash(bytes: &[u8]) -> u64 {
+            bytes.iter().fold(0xcbf29ce484222325, |hash, byte| {
+                (hash ^ u64::from(*byte)).wrapping_mul(0x100000001b3)
+            })
+        }
+        let (dimensions, expected_hash) = match name {
+            "quad_backgrounds" => ((4, 4), 0xd656_1edc_c7f9_3ad2),
+            "underline" => ((8, 8), 0x66c7_bc2e_79c5_8c35),
+            "wavy_underline" => ((8, 8), 0xeeb6_e06f_28e0_29b5),
+            "rounded_dashed_border" => ((16, 16), 0xa459_3495_866f_4b3b),
+            "drop_shadow" => ((16, 16), 0xd5bd_b420_d57c_0715),
+            "backdrop_blur" => ((16, 16), 0xdbdd_c1e9_ab60_8d29),
+            "polychrome_sprite" => ((8, 8), 0x0007_2f7c_69e3_7653),
+            "path_triangle" => ((8, 8), 0xfc7e_8636_4d5e_73a9),
+            _ => panic!("unknown legacy fixture {name}"),
+        };
+        assert_eq!(actual.dimensions(), dimensions, "{name}");
+        assert_eq!(
+            hash(actual.as_raw()),
+            expected_hash,
+            "{name} diverged from the retired Metal renderer's exact RGBA fixture"
+        );
+    }
+
+    #[test]
+    fn generated_native_shaders_match_retired_metal_fixtures() {
+        let mut renderer = MetalHeadlessRenderer::new();
+        let bounds = |x, y| Bounds {
+            origin: gpui::point(ScaledPixels(x), ScaledPixels(y)),
+            size: Size {
+                width: ScaledPixels(2.0),
+                height: ScaledPixels(2.0),
+            },
+        };
+        let mut quads = Scene::default();
+        for (bounds, background) in [
+            (bounds(0.0, 0.0), solid_background(hsla(0.0, 1.0, 0.5, 1.0))),
+            (
+                bounds(2.0, 0.0),
+                checkerboard(hsla(0.6, 0.7, 0.5, 1.0), 1.0),
+            ),
+            (
+                bounds(0.0, 2.0),
+                pattern_slash(hsla(0.3, 0.8, 0.5, 1.0), 1.0, 1.0),
+            ),
+            (
+                bounds(2.0, 2.0),
+                linear_gradient(
+                    45.0,
+                    linear_color_stop(hsla(0.8, 0.9, 0.4, 1.0), 0.0),
+                    linear_color_stop(hsla(0.1, 0.8, 0.6, 1.0), 1.0),
+                ),
+            ),
+        ] {
+            quads.insert_primitive(Quad {
+                bounds,
+                content_mask: ContentMask { bounds },
+                background,
+                ..Default::default()
+            });
+        }
+        quads.finish();
+        assert_legacy_fixture(
+            "quad_backgrounds",
+            renderer
+                .render_scene_to_image(
+                    &quads,
+                    Size {
+                        width: DevicePixels(4),
+                        height: DevicePixels(4),
+                    },
+                )
+                .unwrap(),
+        );
+
+        let underline_bounds = Bounds {
+            origin: gpui::point(ScaledPixels(1.5), ScaledPixels(3.5)),
+            size: Size {
+                width: ScaledPixels(5.0),
+                height: ScaledPixels(1.5),
+            },
+        };
+        let underline_frame = Bounds {
+            origin: gpui::point(ScaledPixels(0.0), ScaledPixels(0.0)),
+            size: Size {
+                width: ScaledPixels(8.0),
+                height: ScaledPixels(8.0),
+            },
+        };
+        let mut underline = Scene::default();
+        underline.insert_primitive(Quad {
+            bounds: underline_frame,
+            content_mask: ContentMask {
+                bounds: underline_frame,
+            },
+            background: solid_background(hsla(0.0, 0.0, 0.1, 1.0)),
+            ..Default::default()
+        });
+        underline.insert_primitive(Underline {
+            order: 0,
+            padding: 0,
+            bounds: underline_bounds,
+            content_mask: ContentMask {
+                bounds: underline_bounds,
+            },
+            color: hsla(0.6, 0.8, 0.6, 0.65).into(),
+            thickness: ScaledPixels(1.0),
+            wavy: gpui::ShaderBool::Disabled,
+        });
+        underline.finish();
+        assert_legacy_fixture(
+            "underline",
+            renderer
+                .render_scene_to_image(
+                    &underline,
+                    Size {
+                        width: DevicePixels(8),
+                        height: DevicePixels(8),
+                    },
+                )
+                .unwrap(),
+        );
+        let mut wavy = Scene::default();
+        wavy.insert_primitive(Underline {
+            order: 0,
+            padding: 0,
+            bounds: underline_bounds,
+            content_mask: ContentMask {
+                bounds: underline_bounds,
+            },
+            color: hsla(0.1, 0.9, 0.55, 1.0).into(),
+            thickness: ScaledPixels(1.0),
+            wavy: gpui::ShaderBool::Enabled,
+        });
+        wavy.finish();
+        assert_legacy_fixture(
+            "wavy_underline",
+            renderer
+                .render_scene_to_image(
+                    &wavy,
+                    Size {
+                        width: DevicePixels(8),
+                        height: DevicePixels(8),
+                    },
+                )
+                .unwrap(),
+        );
+
+        let full = Bounds {
+            origin: gpui::point(ScaledPixels(0.0), ScaledPixels(0.0)),
+            size: Size {
+                width: ScaledPixels(16.0),
+                height: ScaledPixels(16.0),
+            },
+        };
+        let box_bounds = Bounds {
+            origin: gpui::point(ScaledPixels(4.0), ScaledPixels(4.0)),
+            size: Size {
+                width: ScaledPixels(8.0),
+                height: ScaledPixels(8.0),
+            },
+        };
+        let mut border = Scene::default();
+        border.insert_primitive(Quad {
+            bounds: box_bounds,
+            content_mask: ContentMask { bounds: full },
+            background: solid_background(hsla(0.05, 0.8, 0.45, 1.0)),
+            border_style: BorderStyle::Dashed,
+            border_color: hsla(0.6, 0.9, 0.7, 1.0).into(),
+            corner_radii: Corners::all(ScaledPixels(2.0)),
+            border_widths: Edges::all(ScaledPixels(1.0)),
+            ..Default::default()
+        });
+        border.finish();
+        assert_legacy_fixture(
+            "rounded_dashed_border",
+            renderer
+                .render_scene_to_image(
+                    &border,
+                    Size {
+                        width: DevicePixels(16),
+                        height: DevicePixels(16),
+                    },
+                )
+                .unwrap(),
+        );
+
+        let mut shadow = Scene::default();
+        shadow.insert_primitive(Shadow {
+            order: 0,
+            blur_radius: ScaledPixels(2.0),
+            bounds: box_bounds,
+            content_mask: ContentMask { bounds: full },
+            corner_radii: Corners::all(ScaledPixels(2.0)),
+            color: hsla(0.7, 0.8, 0.3, 0.7).into(),
+            element_bounds: box_bounds,
+            element_corner_radii: Corners::all(ScaledPixels(2.0)),
+            inset: gpui::ShaderBool::Disabled,
+            padding: 0,
+        });
+        shadow.finish();
+        assert_legacy_fixture(
+            "drop_shadow",
+            renderer
+                .render_scene_to_image(
+                    &shadow,
+                    Size {
+                        width: DevicePixels(16),
+                        height: DevicePixels(16),
+                    },
+                )
+                .unwrap(),
+        );
+
+        let mut filter = Scene::default();
+        filter.insert_primitive(Quad {
+            bounds: full,
+            content_mask: ContentMask { bounds: full },
+            background: checkerboard(hsla(0.2, 0.7, 0.5, 1.0), 2.0),
+            ..Default::default()
+        });
+        filter.insert_primitive(BackdropFilter {
+            bounds: box_bounds,
+            content_mask: ContentMask { bounds: full },
+            corner_radii: Corners::all(ScaledPixels(2.0)),
+            filters: smallvec::smallvec![ScaledFilter::Blur(ScaledPixels(1.0))],
+            opacity: 0.8,
+            ..Default::default()
+        });
+        filter.finish();
+        assert_legacy_fixture(
+            "backdrop_blur",
+            renderer
+                .render_scene_to_image(
+                    &filter,
+                    Size {
+                        width: DevicePixels(16),
+                        height: DevicePixels(16),
+                    },
+                )
+                .unwrap(),
+        );
+
+        let key = AtlasKey::Image(RenderImageParams {
+            image_id: ImageId(0),
+            frame_index: 0,
+        });
+        let tile = renderer
+            .sprite_atlas()
+            .get_or_insert_with(&key, &mut || {
+                Ok(Some((
+                    Size {
+                        width: DevicePixels(2),
+                        height: DevicePixels(2),
+                    },
+                    Cow::Borrowed(&[
+                        0, 0, 255, 255, 0, 255, 0, 255, 255, 0, 0, 255, 255, 255, 255, 255,
+                    ]),
+                )))
+            })
+            .unwrap()
+            .unwrap();
+        let sprite_bounds = Bounds {
+            origin: gpui::point(ScaledPixels(1.0), ScaledPixels(1.0)),
+            size: Size {
+                width: ScaledPixels(6.0),
+                height: ScaledPixels(6.0),
+            },
+        };
+        let mut sprite = Scene::default();
+        sprite.insert_primitive(PolychromeSprite {
+            order: 0,
+            padding: 0,
+            grayscale: gpui::ShaderBool::Disabled,
+            opacity: 0.75,
+            bounds: sprite_bounds,
+            content_mask: ContentMask {
+                bounds: sprite_bounds,
+            },
+            corner_radii: Corners::all(ScaledPixels(1.0)),
+            tile,
+        });
+        sprite.finish();
+        assert_legacy_fixture(
+            "polychrome_sprite",
+            renderer
+                .render_scene_to_image(
+                    &sprite,
+                    Size {
+                        width: DevicePixels(8),
+                        height: DevicePixels(8),
+                    },
+                )
+                .unwrap(),
+        );
+
+        let mut path = Path::new(gpui::point(px(1.0), px(1.0)));
+        path.line_to(gpui::point(px(7.0), px(1.0)));
+        path.line_to(gpui::point(px(4.0), px(7.0)));
+        path.line_to(gpui::point(px(1.0), px(1.0)));
+        path.content_mask = ContentMask {
+            bounds: Bounds {
+                origin: gpui::point(px(0.0), px(0.0)),
+                size: Size {
+                    width: px(8.0),
+                    height: px(8.0),
+                },
+            },
+        };
+        path.color = solid_background(hsla(0.45, 0.9, 0.45, 1.0));
+        let mut path_scene = Scene::default();
+        path_scene.insert_primitive(path.scale(1.0));
+        path_scene.finish();
+        assert_legacy_fixture(
+            "path_triangle",
+            renderer
+                .render_scene_to_image(
+                    &path_scene,
+                    Size {
+                        width: DevicePixels(8),
+                        height: DevicePixels(8),
+                    },
+                )
+                .unwrap(),
+        );
     }
 }

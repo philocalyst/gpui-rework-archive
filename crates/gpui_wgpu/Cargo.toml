@@ -84,3 +84,4 @@ harness = false
 [[bench]]
 name = "renderer"
 harness = false
+required-features = ["test-support"]

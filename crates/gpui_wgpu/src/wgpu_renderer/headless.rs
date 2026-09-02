@@ -177,6 +177,28 @@ impl WgpuHeadlessRenderer {
         self.target = Some(self.renderer.create_offscreen_target());
         Ok(())
     }
+
+    /// Renders through the normal submission path and waits for that GPU work to complete.
+    pub fn render_scene_and_wait(
+        &mut self,
+        scene: &Scene,
+        size: Size<DevicePixels>,
+    ) -> anyhow::Result<()> {
+        self.ensure_target(size)?;
+        let target = self.target.as_ref().expect("target was just ensured");
+        let submission =
+            super::frame::render_to_view(&mut self.renderer, scene, &target.view, None)
+                .ok_or_else(|| anyhow::anyhow!("failed to render headless scene"))?;
+        self.renderer
+            .resources()
+            .device
+            .poll(wgpu::PollType::Wait {
+                submission_index: Some(submission),
+                timeout: None,
+            })
+            .map_err(|error| anyhow::anyhow!("failed to wait for headless render: {error}"))?;
+        Ok(())
+    }
 }
 
 impl gpui::PlatformHeadlessRenderer for WgpuHeadlessRenderer {

@@ -1,4 +1,4 @@
-//! Guards the unified renderer boundary against reintroducing native renderer sources.
+//! Guards the shared shader boundary used by the WGPU, Metal, and DirectX renderers.
 
 use std::{
     env, fs,
@@ -55,29 +55,23 @@ fn relative_paths(root: &Path, paths: impl IntoIterator<Item = PathBuf>) -> Vec<
 }
 
 #[test]
-fn renderer_sources_remain_unified_wgpu_only() {
+fn renderer_backends_share_rust_authored_shaders() {
     let root = workspace_root();
 
-    // These were the independent Metal and DirectX renderer implementations. Keeping this
-    // explicit list makes a reintroduced module immediately visible in the failure output,
-    // while the shader scan below catches renamed replacements.
-    let retired_modules = [
+    let native_renderer_modules = [
         "crates/gpui_macos/src/metal_renderer.rs",
-        "crates/gpui_macos/src/metal_atlas.rs",
         "crates/gpui_windows/src/directx_renderer.rs",
-        "crates/gpui_windows/src/directx_atlas.rs",
-        "crates/gpui_windows/src/directx_devices.rs",
     ];
-    let present_modules: Vec<_> = retired_modules
-        .iter()
-        .map(|relative| root.join(relative))
-        .filter(|path| path.exists())
-        .collect();
-    assert!(
-        present_modules.is_empty(),
-        "retired backend renderer modules returned: {}",
-        relative_paths(&root, present_modules).join(", ")
-    );
+    for relative in native_renderer_modules {
+        let path = root.join(relative);
+        let source = fs::read_to_string(&path)
+            .unwrap_or_else(|error| panic!("failed to read {}: {error}", path.display()));
+        assert!(
+            source.contains("NATIVE_SHADERS"),
+            "{} must consume generated shared shader artifacts",
+            path.display()
+        );
+    }
 
     let mut platform_shader_sources = Vec::new();
     for relative in ["crates/gpui_macos/src", "crates/gpui_windows/src"] {
@@ -88,24 +82,23 @@ fn renderer_sources_remain_unified_wgpu_only() {
     }
     assert!(
         platform_shader_sources.is_empty(),
-        "retired platform renderer shader source returned: {}",
+        "platform-local renderer shader source bypasses shared generation: {}",
         relative_paths(&root, platform_shader_sources).join(", ")
     );
 
-    let rust_shader_module = root.join("crates/gpui_wgpu/src/shaders/mod.rs");
+    let rust_shader_module = root.join("crates/gpui_render/src/shaders/mod.rs");
     assert!(
         rust_shader_module.is_file(),
-        "the unified renderer must keep its typed Rust shader module"
+        "renderers must keep their typed Rust shader module in gpui_render"
     );
 
-    // Renderer shaders are authored in Rust and generate WGSL through wgsl-rs. Standalone
-    // shader files would bypass the shared types and compile-time source validation.
-    let wgpu_source_root = root.join("crates/gpui_wgpu/src");
-    let mut wgpu_shader_sources = Vec::new();
-    collect_renderer_shader_sources(&wgpu_source_root, &mut wgpu_shader_sources);
+    let mut standalone_shader_sources = Vec::new();
+    for relative in ["crates/gpui_render/src", "crates/gpui_wgpu/src"] {
+        collect_renderer_shader_sources(&root.join(relative), &mut standalone_shader_sources);
+    }
     assert!(
-        wgpu_shader_sources.is_empty(),
-        "standalone WGPU shader sources returned: {}",
-        relative_paths(&root, wgpu_shader_sources).join(", ")
+        standalone_shader_sources.is_empty(),
+        "standalone shader sources bypass typed generation: {}",
+        relative_paths(&root, standalone_shader_sources).join(", ")
     );
 }

@@ -326,6 +326,7 @@ mod tests {
         scene
             .backdrop_filters
             .resize_with(100, BackdropFilter::default);
+        scene.finish();
 
         assert_eq!(
             frame::FrameRequirements::for_scene(

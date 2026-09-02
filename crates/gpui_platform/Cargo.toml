@@ -15,7 +15,7 @@ path = "src/gpui_platform.rs"
 [features]
 default = []
 font-kit = ["gpui_macos/font-kit"]
-test-support = ["gpui/test-support", "gpui_macos/test-support", "dep:gpui_wgpu"]
+test-support = ["gpui/test-support", "gpui_macos/test-support"]
 screen-capture = [
   "gpui/screen-capture",
   "gpui_macos/screen-capture",
@@ -30,7 +30,6 @@ log.workspace = true
 
 [target.'cfg(target_os = "macos")'.dependencies]
 gpui_macos.workspace = true
-gpui_wgpu = { workspace = true, features = ["test-support"], optional = true }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 gpui_windows.workspace = true
