@@ -5732,7 +5732,9 @@ mod tests {
     }
 
     #[gpui::test]
-    fn hover_listeners_update_when_layout_changes_under_stationary_mouse(cx: &mut TestAppContext) {
+    fn default_hover_listener_updates_when_layout_changes_under_stationary_mouse(
+        cx: &mut TestAppContext,
+    ) {
         let hover_transitions = Rc::new(RefCell::new(Vec::new()));
         let window = cx.add_window({
             let hover_transitions = hover_transitions.clone();
@@ -5772,7 +5774,114 @@ mod tests {
     }
 
     #[gpui::test]
-    fn hover_listeners_remain_hovered_during_stationary_mouse_press(cx: &mut TestAppContext) {
+    fn default_hover_listener_ends_after_key_press(cx: &mut TestAppContext) {
+        let hover_transitions = Rc::new(RefCell::new(Vec::new()));
+        let window = cx.add_window({
+            let hover_transitions = hover_transitions.clone();
+            move |_, _| HoverListenerLayoutTestView {
+                target_left: px(0.),
+                hover_transitions,
+            }
+        });
+        let any_window = AnyWindowHandle::from(window);
+
+        cx.update_window(any_window, |_, window, cx| {
+            window.draw(cx).clear(cx);
+            window.simulate_mouse_move(point(px(10.), px(10.)), cx);
+        })
+        .unwrap();
+        assert_eq!(*hover_transitions.borrow(), [true]);
+
+        key_down(cx, any_window, "a");
+        cx.update_window(any_window, |_, window, cx| window.draw(cx).clear(cx))
+            .unwrap();
+        assert_eq!(*hover_transitions.borrow(), [true, false]);
+    }
+
+    struct HoverListenerModeLayoutTestView {
+        target_left: Pixels,
+        hover_transitions: Rc<RefCell<Vec<bool>>>,
+    }
+
+    impl Render for HoverListenerModeLayoutTestView {
+        fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+            let hover_transitions = self.hover_transitions.clone();
+            div().relative().size_full().child(
+                div()
+                    .id("hover-target")
+                    .absolute()
+                    .left(self.target_left)
+                    .top_0()
+                    .size(px(20.))
+                    .hover_listener_mode(HoverListenerMode::InputModalityIndependent)
+                    .on_hover(move |is_hovered, _, _| {
+                        hover_transitions.borrow_mut().push(*is_hovered);
+                    }),
+            )
+        }
+    }
+
+    #[gpui::test]
+    fn input_modality_independent_hover_listener_updates_after_key_press(cx: &mut TestAppContext) {
+        let hover_transitions = Rc::new(RefCell::new(Vec::new()));
+        let window = cx.add_window({
+            let hover_transitions = hover_transitions.clone();
+            move |_, _| HoverListenerModeLayoutTestView {
+                target_left: px(40.),
+                hover_transitions,
+            }
+        });
+        let any_window = AnyWindowHandle::from(window);
+        let pointer_position = point(px(10.), px(10.));
+
+        cx.update_window(any_window, |_, window, cx| {
+            window.draw(cx).clear(cx);
+            window.simulate_mouse_move(pointer_position, cx);
+        })
+        .unwrap();
+        assert!(hover_transitions.borrow().is_empty());
+
+        key_down(cx, any_window, "a");
+        window
+            .update(cx, |view, _, cx| {
+                view.target_left = px(0.);
+                cx.notify();
+            })
+            .unwrap();
+        cx.update_window(any_window, |_, window, cx| window.draw(cx).clear(cx))
+            .unwrap();
+        assert_eq!(*hover_transitions.borrow(), [true]);
+
+        key_down(cx, any_window, "b");
+        cx.update_window(any_window, |_, window, cx| window.draw(cx).clear(cx))
+            .unwrap();
+        assert_eq!(*hover_transitions.borrow(), [true]);
+
+        cx.update_window(any_window, |_, window, cx| {
+            window.simulate_mouse_move(point(px(30.), px(10.)), cx);
+        })
+        .unwrap();
+        assert_eq!(*hover_transitions.borrow(), [true, false]);
+
+        cx.update_window(any_window, |_, window, cx| {
+            window.simulate_mouse_move(pointer_position, cx);
+            window.dispatch_event(
+                MouseExitEvent {
+                    position: pointer_position,
+                    ..Default::default()
+                }
+                .to_platform_input(),
+                cx,
+            );
+        })
+        .unwrap();
+        assert_eq!(*hover_transitions.borrow(), [true, false, true, false]);
+    }
+
+    #[gpui::test]
+    fn default_hover_listener_remains_hovered_during_stationary_mouse_press(
+        cx: &mut TestAppContext,
+    ) {
         let hover_transitions = Rc::new(RefCell::new(Vec::new()));
         let window = cx.add_window({
             let hover_transitions = hover_transitions.clone();
