@@ -834,8 +834,11 @@ impl PlatformInput {
 mod test {
 
     use crate::{
-        self as gpui, AppContext as _, Context, FocusHandle, InteractiveElement, IntoElement,
-        KeyBinding, Keystroke, ParentElement, Render, TestAppContext, Window, div,
+        self as gpui, AppContext as _, Bounds, ClickEvent, Context, FocusHandle,
+        InteractiveElement, IntoElement, KeyBinding, KeyboardButton, KeyboardClickEvent, Keystroke,
+        Modifiers, MouseButton, MouseClickEvent, MouseDownEvent, MouseMoveEvent, MouseUpEvent,
+        ParentElement, Pixels, Point, Render, ScrollDelta, TestAppContext, TouchClickEvent, Window,
+        div, point, px,
     };
 
     struct TestView {
@@ -901,5 +904,222 @@ mod test {
                 assert!(test_view.saw_action);
             })
             .unwrap();
+    }
+
+    fn assert_pixel_delta_eq(actual: ScrollDelta, expected: Point<Pixels>, context: &str) {
+        match actual {
+            ScrollDelta::Pixels(delta) => assert_eq!(delta, expected, "{context}"),
+            other => panic!("{context}: expected a Pixels delta, got {other:?}"),
+        }
+    }
+
+    fn assert_line_delta_eq(actual: ScrollDelta, expected: Point<f32>, context: &str) {
+        match actual {
+            ScrollDelta::Lines(delta) => assert_eq!(delta, expected, "{context}"),
+            other => panic!("{context}: expected a Lines delta, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn scroll_delta_coalesce_table() {
+        // Matching signs on an axis sum; opposite signs override with the newer
+        // value; mixing Pixels and Lines keeps the newer variant.
+        let pixel_cases = [
+            ((1., 2.), (3., 4.), (4., 6.)),
+            ((0., -2.), (0., -3.), (0., -5.)),
+            ((-1., 2.), (-3., -4.), (-4., -4.)),
+            // Zero pixels share a sign with positive pixels, so they sum.
+            ((1., 0.), (0., 0.), (1., 0.)),
+            // Per-axis: x overrides, y sums.
+            ((2., 2.), (-3., 3.), (-3., 5.)),
+        ];
+        for ((ax, ay), (bx, by), (expected_x, expected_y)) in pixel_cases {
+            let coalesced = ScrollDelta::Pixels(point(px(ax), px(ay)))
+                .coalesce(ScrollDelta::Pixels(point(px(bx), px(by))));
+            assert_pixel_delta_eq(
+                coalesced,
+                point(px(expected_x), px(expected_y)),
+                &format!("coalescing pixels ({ax}, {ay}) with ({bx}, {by})"),
+            );
+        }
+
+        let line_cases = [
+            ((1.5, 2.5), (3.0, 1.0), (4.5, 3.5)),
+            ((0.0, -2.0), (0.0, -3.0), (0.0, -5.0)),
+            ((-1.0, 2.0), (-3.0, -4.0), (-4.0, -4.0)),
+            // x sums, y overrides.
+            ((2., 2.), (3., -3.), (5., -3.)),
+            // both axes override.
+            ((2., 2.), (-3., -3.), (-3., -3.)),
+        ];
+        for ((ax, ay), (bx, by), (expected_x, expected_y)) in line_cases {
+            let coalesced =
+                ScrollDelta::Lines(point(ax, ay)).coalesce(ScrollDelta::Lines(point(bx, by)));
+            assert_line_delta_eq(
+                coalesced,
+                point(expected_x, expected_y),
+                &format!("coalescing lines ({ax}, {ay}) with ({bx}, {by})"),
+            );
+        }
+
+        let pixels = ScrollDelta::Pixels(point(px(10.), px(20.)));
+        let lines = ScrollDelta::Lines(point(1., 2.));
+        assert_line_delta_eq(
+            pixels.coalesce(lines),
+            point(1., 2.),
+            "Pixels followed by Lines keeps the Lines delta",
+        );
+        assert_pixel_delta_eq(
+            lines.coalesce(pixels),
+            point(px(10.), px(20.)),
+            "Lines followed by Pixels keeps the Pixels delta",
+        );
+        assert_line_delta_eq(
+            ScrollDelta::default().coalesce(lines),
+            point(1., 2.),
+            "a default (zero lines) delta coalesces into a real delta",
+        );
+    }
+
+    #[test]
+    fn scroll_delta_pixel_delta_maps_lines_and_pixels() {
+        // Exact pixel deltas pass through unchanged, ignoring the line height.
+        assert_eq!(
+            ScrollDelta::Pixels(point(px(10.), px(20.))).pixel_delta(px(30.)),
+            point(px(10.), px(20.))
+        );
+        // Line deltas are scaled by the line height.
+        assert_eq!(
+            ScrollDelta::Lines(point(2., 3.)).pixel_delta(px(10.)),
+            point(px(20.), px(30.))
+        );
+        assert_eq!(
+            ScrollDelta::Lines(point(-1.5, 2.5)).pixel_delta(px(4.)),
+            point(px(-6.), px(10.))
+        );
+        // Precision is a property of the variant, and the default is a zero line delta.
+        match ScrollDelta::default() {
+            ScrollDelta::Lines(_) => {}
+            other => panic!("expected default to be a Lines delta, got {other:?}"),
+        }
+        assert!(!ScrollDelta::default().precise());
+        assert!(ScrollDelta::Pixels(point(px(0.), px(0.))).precise());
+        assert!(!ScrollDelta::Lines(point(0., 0.)).precise());
+    }
+
+    fn mouse_click_event(
+        down_button: MouseButton,
+        up_button: MouseButton,
+        click_count: usize,
+        first_mouse: bool,
+    ) -> ClickEvent {
+        ClickEvent::Mouse(MouseClickEvent {
+            down: MouseDownEvent {
+                button: down_button,
+                position: point(px(5.), px(6.)),
+                modifiers: Modifiers {
+                    control: true,
+                    ..Default::default()
+                },
+                click_count,
+                first_mouse,
+            },
+            up: MouseUpEvent {
+                button: up_button,
+                position: point(px(7.), px(8.)),
+                modifiers: Modifiers {
+                    shift: true,
+                    ..Default::default()
+                },
+                click_count,
+            },
+        })
+    }
+
+    #[test]
+    fn click_event_classifier_single_double_triple_and_button_bits() {
+        // The platform supplies click_count; the classifier surfaces it verbatim
+        // for single, double, and triple clicks.
+        for count in [1, 2, 3] {
+            let click = mouse_click_event(MouseButton::Left, MouseButton::Left, count, false);
+            assert_eq!(click.click_count(), count, "click_count {count}");
+            assert!(click.standard_click(), "standard_click {count}");
+            assert!(!click.is_right_click());
+            assert!(!click.is_middle_click());
+            assert!(!click.is_secondary());
+        }
+
+        let left = mouse_click_event(MouseButton::Left, MouseButton::Left, 1, true);
+        assert!(left.standard_click());
+        assert!(!left.is_right_click());
+        assert!(!left.is_middle_click());
+        assert!(!left.is_secondary());
+        assert!(left.first_focus());
+        // Modifiers and position come from the up event.
+        assert_eq!(
+            left.modifiers(),
+            Modifiers {
+                shift: true,
+                ..Default::default()
+            }
+        );
+        assert_eq!(left.position(), point(px(7.), px(8.)));
+        assert_eq!(left.mouse_position(), Some(point(px(7.), px(8.))));
+
+        let right = mouse_click_event(MouseButton::Right, MouseButton::Right, 1, false);
+        assert!(!right.standard_click());
+        assert!(right.is_right_click());
+        assert!(right.is_secondary());
+
+        let middle = mouse_click_event(MouseButton::Middle, MouseButton::Middle, 1, false);
+        assert!(middle.is_middle_click());
+        assert!(!middle.standard_click());
+
+        let mismatched = mouse_click_event(MouseButton::Left, MouseButton::Right, 1, false);
+        assert!(!mismatched.standard_click());
+        assert!(!mismatched.is_right_click());
+        assert!(!mismatched.is_secondary());
+
+        // Keyboard clicks are always a single click, never carry modifiers, and
+        // position at the bounds' bottom-left corner.
+        let keyboard = ClickEvent::Keyboard(KeyboardClickEvent {
+            button: KeyboardButton::Space,
+            bounds: Bounds::from_corners(point(px(0.), px(0.)), point(px(100.), px(50.))),
+        });
+        assert_eq!(keyboard.click_count(), 1);
+        assert!(keyboard.is_keyboard());
+        assert_eq!(keyboard.modifiers(), Modifiers::default());
+        assert_eq!(keyboard.position(), point(px(0.), px(50.)));
+        assert_eq!(keyboard.mouse_position(), None);
+
+        // Touch taps carry tap_count as the click count, have no modifiers or
+        // mouse position, and long presses are secondary.
+        let touch = ClickEvent::Touch(TouchClickEvent {
+            position: point(px(9.), px(10.)),
+            tap_count: 2,
+            long_press: true,
+        });
+        assert_eq!(touch.click_count(), 2);
+        assert!(!touch.is_keyboard());
+        assert_eq!(touch.modifiers(), Modifiers::default());
+        assert_eq!(touch.position(), point(px(9.), px(10.)));
+        assert_eq!(touch.mouse_position(), None);
+        assert!(touch.is_secondary());
+        assert!(!touch.standard_click());
+    }
+
+    #[test]
+    fn mouse_move_dragging_flag_reflects_held_left_button() {
+        let position = point(px(1.), px(2.));
+        let move_with = |pressed_button| MouseMoveEvent {
+            position,
+            pressed_button,
+            modifiers: Modifiers::default(),
+        };
+        assert!(move_with(Some(MouseButton::Left)).dragging());
+        assert!(!move_with(Some(MouseButton::Right)).dragging());
+        assert!(!move_with(Some(MouseButton::Middle)).dragging());
+        assert!(!move_with(None).dragging());
+        assert!(!MouseMoveEvent::default().dragging());
     }
 }

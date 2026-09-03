@@ -9,17 +9,17 @@ use crate::{
     GlobalElementId, GlyphId, GpuSpecs, InputHandler, IsZero, KeyBinding, KeyContext, KeyDownEvent,
     KeyEvent, Keystroke, KeystrokeEvent, LayoutId, Lerp, LineLayoutIndex, Modifiers,
     ModifiersChangedEvent, MonochromeSprite, Motion, MouseButton, MouseEvent, MouseMoveEvent,
-    MouseUpEvent,
-    Path, Pixels, PlatformAtlas, PlatformDisplay, PlatformInput, PlatformInputHandler,
-    PlatformWindow, Point, PolychromeSprite, Priority, PromptButton, PromptLevel, Quad, Render,
-    RenderGlyphParams, RenderImage, RenderImageParams, RenderSvgParams, Replay, ResizeEdge,
-    SMOOTH_SVG_SCALE_FACTOR, SUBPIXEL_VARIANTS_X, SUBPIXEL_VARIANTS_Y, ScaledFilter, ScaledPixels,
-    Scene, Shadow, SharedString, Size, StrikethroughStyle, Style, SubpixelSprite, SubscriberSet,
-    Subscription, SystemWindowTab, SystemWindowTabController, TabStopMap, TaffyLayoutEngine, Task,
-    TextRenderingMode, TextStyle, TextStyleRefinement, ThermalState, TransformationMatrix,
-    Transition, TransitionState, Underline, UnderlineStyle, WindowAppearance,
-    WindowBackgroundAppearance, WindowBounds, WindowControls, WindowDecorations, WindowOptions,
-    WindowParams, WindowTextSystem, point, prelude::*, profiler, px, rems, size, transparent_black,
+    MouseUpEvent, Path, Pixels, PlatformAtlas, PlatformDisplay, PlatformInput,
+    PlatformInputHandler, PlatformWindow, Point, PolychromeSprite, Priority, PromptButton,
+    PromptLevel, Quad, Render, RenderGlyphParams, RenderImage, RenderImageParams, RenderSvgParams,
+    Replay, ResizeEdge, SMOOTH_SVG_SCALE_FACTOR, SUBPIXEL_VARIANTS_X, SUBPIXEL_VARIANTS_Y,
+    ScaledFilter, ScaledPixels, Scene, Shadow, SharedString, Size, StrikethroughStyle, Style,
+    SubpixelSprite, SubscriberSet, Subscription, SystemWindowTab, SystemWindowTabController,
+    TabStopMap, TaffyLayoutEngine, Task, TextRenderingMode, TextStyle, TextStyleRefinement,
+    ThermalState, TransformationMatrix, Transition, TransitionState, Underline, UnderlineStyle,
+    WindowAppearance, WindowBackgroundAppearance, WindowBounds, WindowControls, WindowDecorations,
+    WindowOptions, WindowParams, WindowTextSystem, point, prelude::*, profiler, px, rems, size,
+    transparent_black,
 };
 
 use anyhow::{Context as _, Result, anyhow};
@@ -6916,12 +6916,13 @@ mod tests {
     };
 
     use crate::{
-        AnyWindowHandle, AppContext as _, Bounds, Context, DragMoveEvent, Empty,
+        AnyWindowHandle, AppContext as _, Bounds, ClickEvent, Context, DragMoveEvent, Empty,
         ExternalDragPayload, ExternalPaths, FileDragPaths, FileDropEvent, FocusHandle,
-        InputEvent as _, InteractiveElement as _, IntoElement, MouseButton, MouseDownEvent,
-        MouseMoveEvent, ParentElement, Pixels, Point, Render, StatefulInteractiveElement as _,
-        Styled, TestAppContext, Window, WindowAppearance, WindowOptions, canvas, div, point, px,
-        size,
+        HitboxBehavior, InputEvent as _, InteractiveElement as _, IntoElement, MouseButton,
+        MouseDownEvent, MouseMoveEvent, MouseUpEvent, ParentElement, Pixels, Point, Render,
+        ScrollDelta, ScrollHandle, ScrollWheelEvent, StatefulInteractiveElement as _, Styled,
+        TestAppContext, TouchPhase, Window, WindowAppearance, WindowControlArea, WindowOptions,
+        canvas, div, point, px, size,
     };
 
     struct EmptyView;
@@ -7435,5 +7436,659 @@ mod tests {
             })
             .unwrap();
         assert_eq!(b_focus_count.get(), 1);
+    }
+
+    struct DragFlagView {
+        flags: Rc<RefCell<Vec<bool>>>,
+    }
+
+    impl Render for DragFlagView {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            let flags = self.flags.clone();
+            div()
+                .id("surface")
+                .size_full()
+                .on_mouse_move(move |event, _, _| flags.borrow_mut().push(event.dragging()))
+        }
+    }
+
+    #[test]
+    fn mouse_move_dragging_flag_reaches_listeners() {
+        let mut cx = TestAppContext::single();
+        let flags = Rc::new(RefCell::new(Vec::new()));
+        let window = cx.add_window({
+            let flags = flags.clone();
+            move |_, _| DragFlagView { flags }
+        });
+        let dispatch_move =
+            |cx: &mut TestAppContext, position: Point<Pixels>, pressed: Option<MouseButton>| {
+                cx.update_window(window.into(), |_, window, cx| {
+                    window.dispatch_event(
+                        MouseMoveEvent {
+                            position,
+                            pressed_button: pressed,
+                            modifiers: Default::default(),
+                        }
+                        .to_platform_input(),
+                        cx,
+                    );
+                })
+                .unwrap();
+            };
+
+        dispatch_move(&mut cx, point(px(10.), px(10.)), Some(MouseButton::Left));
+        dispatch_move(&mut cx, point(px(20.), px(20.)), None);
+        dispatch_move(&mut cx, point(px(30.), px(30.)), Some(MouseButton::Right));
+        dispatch_move(&mut cx, point(px(40.), px(40.)), Some(MouseButton::Left));
+
+        assert_eq!(flags.borrow().as_slice(), &[true, false, false, true]);
+    }
+
+    struct ClickCaptureView {
+        clicks: Rc<RefCell<Vec<ClickEvent>>>,
+    }
+
+    impl Render for ClickCaptureView {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            let clicks = self.clicks.clone();
+            div()
+                .id("target")
+                .size_full()
+                .on_click(move |event, _, _| clicks.borrow_mut().push(event.clone()))
+        }
+    }
+
+    #[test]
+    fn click_events_carry_platform_click_count_and_focus_flags() {
+        let mut cx = TestAppContext::single();
+        let clicks = Rc::new(RefCell::new(Vec::new()));
+        let window = cx.add_window({
+            let clicks = clicks.clone();
+            move |_, _| ClickCaptureView { clicks }
+        });
+
+        let position = point(px(40.), px(50.));
+        cx.update_window(window.into(), |_, window, cx| {
+            window.dispatch_event(
+                MouseDownEvent {
+                    position,
+                    button: MouseButton::Left,
+                    modifiers: Default::default(),
+                    click_count: 3,
+                    first_mouse: true,
+                }
+                .to_platform_input(),
+                cx,
+            );
+            window.dispatch_event(
+                MouseUpEvent {
+                    position,
+                    button: MouseButton::Left,
+                    modifiers: Default::default(),
+                    click_count: 3,
+                }
+                .to_platform_input(),
+                cx,
+            );
+        })
+        .unwrap();
+
+        let clicks = clicks.borrow();
+        assert_eq!(clicks.len(), 1, "expected exactly one click event");
+        let click = &clicks[0];
+        assert_eq!(click.click_count(), 3);
+        assert!(click.standard_click());
+        assert!(click.first_focus());
+        assert!(!click.is_keyboard());
+        assert_eq!(click.position(), position);
+        assert_eq!(click.mouse_position(), Some(position));
+    }
+
+    struct LayerHarness {
+        behavior: HitboxBehavior,
+        bg_down: Rc<Cell<usize>>,
+        bg_move: Rc<Cell<usize>>,
+        bg_scroll: Rc<Cell<usize>>,
+        fg_down: Rc<Cell<usize>>,
+    }
+
+    impl Render for LayerHarness {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            let bg_down = self.bg_down.clone();
+            let bg_move = self.bg_move.clone();
+            let bg_scroll = self.bg_scroll.clone();
+            let fg_down = self.fg_down.clone();
+
+            let overlay = div()
+                .id("overlay")
+                .absolute()
+                .left(px(0.))
+                .top(px(0.))
+                .w(px(100.))
+                .h(px(100.))
+                .on_mouse_down(MouseButton::Left, move |_, _, _| {
+                    fg_down.set(fg_down.get() + 1);
+                });
+            let overlay = match self.behavior {
+                HitboxBehavior::Normal => overlay,
+                HitboxBehavior::BlockMouse => overlay.occlude(),
+                HitboxBehavior::BlockMouseExceptScroll => overlay.block_mouse_except_scroll(),
+            };
+
+            div()
+                .relative()
+                .size_full()
+                .child(
+                    div()
+                        .id("background")
+                        .absolute()
+                        .left(px(0.))
+                        .top(px(0.))
+                        .w(px(100.))
+                        .h(px(100.))
+                        .on_mouse_down(MouseButton::Left, move |_, _, _| {
+                            bg_down.set(bg_down.get() + 1);
+                        })
+                        .on_mouse_move(move |_, _, _| bg_move.set(bg_move.get() + 1))
+                        .on_scroll_wheel(move |_, _, _| bg_scroll.set(bg_scroll.get() + 1)),
+                )
+                .child(overlay)
+        }
+    }
+
+    /// The foreground overlay's hitbox behavior drives what the background can
+    /// observe: `Normal` lets everything through, `occlude` blocks all mouse
+    /// interaction, and `block_mouse_except_scroll` blocks clicks and hovers but
+    /// still lets scroll wheel events reach the background.
+    #[test]
+    fn hit_test_matrix_occlude_block_scroll_and_normal() {
+        let cases = [
+            (HitboxBehavior::Normal, 1, 1, 1),
+            (HitboxBehavior::BlockMouse, 0, 0, 0),
+            (HitboxBehavior::BlockMouseExceptScroll, 0, 0, 1),
+        ];
+        for (behavior, expected_bg_down, expected_bg_move, expected_bg_scroll) in cases {
+            let mut cx = TestAppContext::single();
+            let bg_down = Rc::new(Cell::new(0));
+            let bg_move = Rc::new(Cell::new(0));
+            let bg_scroll = Rc::new(Cell::new(0));
+            let fg_down = Rc::new(Cell::new(0));
+            let window = cx.open_window(size(px(100.), px(100.)), {
+                let (bg_down, bg_move, bg_scroll, fg_down) = (
+                    bg_down.clone(),
+                    bg_move.clone(),
+                    bg_scroll.clone(),
+                    fg_down.clone(),
+                );
+                move |_, _| LayerHarness {
+                    behavior,
+                    bg_down,
+                    bg_move,
+                    bg_scroll,
+                    fg_down,
+                }
+            });
+
+            cx.update_window(window.into(), |_, window, cx| {
+                let position = point(px(50.), px(50.));
+                window.dispatch_event(
+                    MouseMoveEvent {
+                        position,
+                        pressed_button: None,
+                        modifiers: Default::default(),
+                    }
+                    .to_platform_input(),
+                    cx,
+                );
+                window.dispatch_event(
+                    MouseDownEvent {
+                        position,
+                        button: MouseButton::Left,
+                        modifiers: Default::default(),
+                        click_count: 1,
+                        first_mouse: false,
+                    }
+                    .to_platform_input(),
+                    cx,
+                );
+                window.dispatch_event(
+                    ScrollWheelEvent {
+                        position,
+                        delta: ScrollDelta::Pixels(point(px(0.), px(-10.))),
+                        modifiers: Default::default(),
+                        touch_phase: TouchPhase::Moved,
+                    }
+                    .to_platform_input(),
+                    cx,
+                );
+            })
+            .unwrap();
+
+            assert_eq!(
+                fg_down.get(),
+                1,
+                "overlay must stay clickable for {behavior:?}"
+            );
+            assert_eq!(
+                bg_down.get(),
+                expected_bg_down,
+                "background mouse_down for {behavior:?}"
+            );
+            assert_eq!(
+                bg_move.get(),
+                expected_bg_move,
+                "background mouse_move for {behavior:?}"
+            );
+            assert_eq!(
+                bg_scroll.get(),
+                expected_bg_scroll,
+                "background scroll for {behavior:?}"
+            );
+        }
+    }
+
+    /// `occlude` blocks a mouse down that lands on the overlay from reaching the
+    /// element below, without stopping the overlay itself from being clicked.
+    #[test]
+    fn occlude_blocks_clicks_to_elements_below() {
+        let mut cx = TestAppContext::single();
+        let bg_down = Rc::new(Cell::new(0));
+        let fg_down = Rc::new(Cell::new(0));
+        let window = cx.open_window(size(px(100.), px(100.)), {
+            let bg_down = bg_down.clone();
+            let fg_down = fg_down.clone();
+            move |_, _| LayerHarness {
+                behavior: HitboxBehavior::BlockMouse,
+                bg_down,
+                bg_move: Rc::new(Cell::new(0)),
+                bg_scroll: Rc::new(Cell::new(0)),
+                fg_down,
+            }
+        });
+
+        cx.update_window(window.into(), |_, window, cx| {
+            window.dispatch_event(
+                MouseDownEvent {
+                    position: point(px(50.), px(50.)),
+                    button: MouseButton::Left,
+                    modifiers: Default::default(),
+                    click_count: 1,
+                    first_mouse: false,
+                }
+                .to_platform_input(),
+                cx,
+            );
+        })
+        .unwrap();
+
+        assert_eq!(
+            bg_down.get(),
+            0,
+            "occluded background must not see the click"
+        );
+        assert_eq!(fg_down.get(), 1, "overlay itself must remain clickable");
+    }
+
+    /// `block_mouse_except_scroll` shields the background from clicks and hover
+    /// moves while still routing scroll wheel deltas through to it.
+    #[test]
+    fn block_mouse_except_scroll_passes_scroll_but_blocks_clicks() {
+        let mut cx = TestAppContext::single();
+        let bg_down = Rc::new(Cell::new(0));
+        let bg_move = Rc::new(Cell::new(0));
+        let bg_scroll = Rc::new(Cell::new(0));
+        let window = cx.open_window(size(px(100.), px(100.)), {
+            let bg_down = bg_down.clone();
+            let bg_move = bg_move.clone();
+            let bg_scroll = bg_scroll.clone();
+            move |_, _| LayerHarness {
+                behavior: HitboxBehavior::BlockMouseExceptScroll,
+                bg_down,
+                bg_move,
+                bg_scroll,
+                fg_down: Rc::new(Cell::new(0)),
+            }
+        });
+
+        cx.update_window(window.into(), |_, window, cx| {
+            let position = point(px(50.), px(50.));
+            window.dispatch_event(
+                MouseMoveEvent {
+                    position,
+                    pressed_button: None,
+                    modifiers: Default::default(),
+                }
+                .to_platform_input(),
+                cx,
+            );
+            window.dispatch_event(
+                MouseDownEvent {
+                    position,
+                    button: MouseButton::Left,
+                    modifiers: Default::default(),
+                    click_count: 1,
+                    first_mouse: false,
+                }
+                .to_platform_input(),
+                cx,
+            );
+            window.dispatch_event(
+                ScrollWheelEvent {
+                    position,
+                    delta: ScrollDelta::Pixels(point(px(0.), px(-10.))),
+                    modifiers: Default::default(),
+                    touch_phase: TouchPhase::Moved,
+                }
+                .to_platform_input(),
+                cx,
+            );
+        })
+        .unwrap();
+
+        assert_eq!(bg_move.get(), 0, "hover moves must be blocked");
+        assert_eq!(bg_down.get(), 0, "clicks must be blocked");
+        assert_eq!(bg_scroll.get(), 1, "scroll wheel must still pass through");
+    }
+
+    struct WindowControlView;
+
+    impl Render for WindowControlView {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            div()
+                .id("control")
+                .w(px(100.))
+                .h(px(50.))
+                .window_control_area(WindowControlArea::Drag)
+        }
+    }
+
+    #[test]
+    fn window_control_area_registers_platform_control_hitbox() {
+        let mut cx = TestAppContext::single();
+        let window = cx.add_window(|_, _| WindowControlView);
+
+        let (area, hitbox) = cx
+            .update_window(window.into(), |_, window, _| {
+                window
+                    .rendered_frame
+                    .window_control_hitboxes
+                    .first()
+                    .cloned()
+            })
+            .unwrap()
+            .expect("expected a window control hitbox");
+        assert_eq!(area, WindowControlArea::Drag);
+
+        // The platform's hit-test callback reads exactly this hitbox/area pair
+        // from `window_control_hitboxes` and the mouse hit test, so the control
+        // hitbox must track the cursor.
+        cx.update_window(window.into(), |_, window, cx| {
+            window.dispatch_event(
+                MouseMoveEvent {
+                    position: point(px(50.), px(25.)),
+                    pressed_button: None,
+                    modifiers: Default::default(),
+                }
+                .to_platform_input(),
+                cx,
+            );
+            assert!(hitbox.id.is_hovered(window));
+            assert!(hitbox.id.should_handle_scroll(window));
+        })
+        .unwrap();
+
+        cx.update_window(window.into(), |_, window, cx| {
+            window.dispatch_event(
+                MouseMoveEvent {
+                    position: point(px(200.), px(200.)),
+                    pressed_button: None,
+                    modifiers: Default::default(),
+                }
+                .to_platform_input(),
+                cx,
+            );
+            assert!(!hitbox.id.is_hovered(window));
+            assert!(!hitbox.id.should_handle_scroll(window));
+        })
+        .unwrap();
+    }
+
+    struct ScrollReceivingView {
+        events: Rc<RefCell<Vec<(ScrollDelta, Point<Pixels>)>>>,
+    }
+
+    impl Render for ScrollReceivingView {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            let events = self.events.clone();
+            div()
+                .id("scrollable")
+                .size_full()
+                .on_scroll_wheel(move |event, _, _| {
+                    events.borrow_mut().push((event.delta, event.position));
+                })
+        }
+    }
+
+    #[test]
+    fn scroll_wheel_delta_reaches_plain_div_listener() {
+        let mut cx = TestAppContext::single();
+        let events = Rc::new(RefCell::new(Vec::new()));
+        let window = cx.open_window(size(px(100.), px(100.)), {
+            let events = events.clone();
+            move |_, _| ScrollReceivingView { events }
+        });
+
+        let position = point(px(40.), px(50.));
+        cx.update_window(window.into(), |_, window, cx| {
+            window.dispatch_event(
+                ScrollWheelEvent {
+                    position,
+                    delta: ScrollDelta::Pixels(point(px(0.), px(-24.))),
+                    modifiers: Default::default(),
+                    touch_phase: TouchPhase::Moved,
+                }
+                .to_platform_input(),
+                cx,
+            );
+        })
+        .unwrap();
+
+        let recorded = events.borrow();
+        assert_eq!(recorded.len(), 1);
+        let (delta, recorded_position) = &recorded[0];
+        assert_eq!(*recorded_position, position);
+        match delta {
+            ScrollDelta::Pixels(delta) => assert_eq!(*delta, point(px(0.), px(-24.))),
+            other => panic!("expected a Pixels delta, got {other:?}"),
+        }
+    }
+
+    struct ScrollClampView {
+        handle: ScrollHandle,
+    }
+
+    impl Render for ScrollClampView {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            let handle = self.handle.clone();
+            div()
+                .id("scroll")
+                .size_full()
+                .track_scroll(&self.handle)
+                .overflow_scroll()
+                .on_scroll_wheel(move |event, _, _| {
+                    let delta = event.delta.pixel_delta(px(20.));
+                    let current = handle.offset();
+                    handle.set_offset(point(px(0.), current.y + delta.y));
+                })
+                .child(div().w(px(300.)).h(px(300.)))
+        }
+    }
+
+    /// A scroll wheel delta applied to a 100x100 viewport over 300x300 content
+    /// must clamp at the event level: past the max offset at the bottom and
+    /// above the origin at the top.
+    #[test]
+    fn scroll_offset_clamps_after_scroll_wheel_events() {
+        let mut cx = TestAppContext::single();
+        let handle = ScrollHandle::new();
+        let window = cx.open_window(size(px(100.), px(100.)), {
+            let handle = handle.clone();
+            move |_, _| ScrollClampView { handle }
+        });
+
+        cx.update_window(window.into(), |_, window, cx| {
+            window.dispatch_event(
+                ScrollWheelEvent {
+                    position: point(px(50.), px(50.)),
+                    delta: ScrollDelta::Pixels(point(px(0.), px(-500.))),
+                    modifiers: Default::default(),
+                    touch_phase: TouchPhase::Moved,
+                }
+                .to_platform_input(),
+                cx,
+            );
+        })
+        .unwrap();
+        cx.update_window(window.into(), |_, window, cx| window.draw(cx).clear(cx))
+            .unwrap();
+        assert_eq!(handle.max_offset(), point(px(200.), px(200.)));
+        assert_eq!(handle.offset(), point(px(0.), px(-200.)));
+
+        cx.update_window(window.into(), |_, window, cx| {
+            window.dispatch_event(
+                ScrollWheelEvent {
+                    position: point(px(50.), px(50.)),
+                    delta: ScrollDelta::Pixels(point(px(0.), px(500.))),
+                    modifiers: Default::default(),
+                    touch_phase: TouchPhase::Moved,
+                }
+                .to_platform_input(),
+                cx,
+            );
+        })
+        .unwrap();
+        cx.update_window(window.into(), |_, window, cx| window.draw(cx).clear(cx))
+            .unwrap();
+        assert_eq!(handle.offset(), point(px(0.), px(0.)));
+    }
+
+    struct DragDropView {
+        drag_moves: Rc<RefCell<Vec<Point<Pixels>>>>,
+        drops: Rc<RefCell<Vec<usize>>>,
+    }
+
+    impl Render for DragDropView {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            let drag_moves = self.drag_moves.clone();
+            let drops = self.drops.clone();
+            div()
+                .size_full()
+                .child(
+                    div()
+                        .id("source")
+                        .absolute()
+                        .left(px(0.))
+                        .top(px(0.))
+                        .w(px(40.))
+                        .h(px(40.))
+                        .on_drag(42usize, |_, _, _, cx| cx.new(|_| Empty))
+                        .on_drag_move(move |event: &DragMoveEvent<usize>, _, _| {
+                            drag_moves.borrow_mut().push(event.event.position);
+                        }),
+                )
+                .child(
+                    div()
+                        .id("target")
+                        .absolute()
+                        .left(px(0.))
+                        .top(px(100.))
+                        .w(px(100.))
+                        .h(px(40.))
+                        .on_drop(move |value: &usize, _, _| drops.borrow_mut().push(*value)),
+                )
+        }
+    }
+
+    /// gpui's drag surface is `on_drag`/`on_drag_move`/`on_drop` (plus
+    /// `drag_over` styling) - there is no `on_drag_enter`/`on_drag_leave` in this
+    /// API. This pins the pure in-window state path: a drag started under the
+    /// pointer stays alive headlessly and delivers moves and the final drop
+    /// without ever touching the OS drag session.
+    #[test]
+    fn internal_drag_move_and_drop_flow_headlessly() {
+        let mut cx = TestAppContext::single();
+        let drag_moves = Rc::new(RefCell::new(Vec::new()));
+        let drops = Rc::new(RefCell::new(Vec::new()));
+        let window = cx.open_window(size(px(300.), px(300.)), {
+            let drag_moves = drag_moves.clone();
+            let drops = drops.clone();
+            move |_, _| DragDropView { drag_moves, drops }
+        });
+
+        cx.update_window(window.into(), |_, window, cx| {
+            window.dispatch_event(
+                MouseDownEvent {
+                    position: point(px(20.), px(20.)),
+                    button: MouseButton::Left,
+                    modifiers: Default::default(),
+                    click_count: 1,
+                    first_mouse: false,
+                }
+                .to_platform_input(),
+                cx,
+            );
+            // Moving past the drag threshold starts the drag; the move that
+            // crosses the threshold does not itself fire `on_drag_move`.
+            window.dispatch_event(
+                MouseMoveEvent {
+                    position: point(px(30.), px(30.)),
+                    pressed_button: Some(MouseButton::Left),
+                    modifiers: Default::default(),
+                }
+                .to_platform_input(),
+                cx,
+            );
+            assert!(cx.active_drag.is_some());
+        })
+        .unwrap();
+
+        cx.update_window(window.into(), |_, window, cx| {
+            window.dispatch_event(
+                MouseMoveEvent {
+                    position: point(px(50.), px(50.)),
+                    pressed_button: Some(MouseButton::Left),
+                    modifiers: Default::default(),
+                }
+                .to_platform_input(),
+                cx,
+            );
+            window.dispatch_event(
+                MouseMoveEvent {
+                    position: point(px(50.), px(120.)),
+                    pressed_button: Some(MouseButton::Left),
+                    modifiers: Default::default(),
+                }
+                .to_platform_input(),
+                cx,
+            );
+            window.dispatch_event(
+                MouseUpEvent {
+                    position: point(px(50.), px(120.)),
+                    button: MouseButton::Left,
+                    modifiers: Default::default(),
+                    click_count: 1,
+                }
+                .to_platform_input(),
+                cx,
+            );
+            assert!(cx.active_drag.is_none());
+        })
+        .unwrap();
+
+        assert_eq!(
+            drag_moves.borrow().as_slice(),
+            &[point(px(50.), px(50.)), point(px(50.), px(120.))]
+        );
+        assert_eq!(drops.borrow().as_slice(), &[42]);
     }
 }
