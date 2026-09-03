@@ -1500,10 +1500,16 @@ impl IntoElement for InteractiveText {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{
+        AnyWindowHandle, App, AvailableSpace, Bounds, Context, ElementId, GlobalElementId,
+        InteractiveText, LayoutId, ParentElement, Pixels, Render, SharedString, Styled,
+        TestAppContext, TextOverflow, TextStyle, TruncateFrom, WhiteSpace, Window, div, point, px,
+    };
+    use std::{cell::RefCell, rc::Rc};
 
     #[test]
     fn test_into_element_for() {
-        use crate::{ParentElement as _, SharedString, div};
+        use crate::SharedString;
         use std::borrow::Cow;
 
         let _ = div().child("static str");
@@ -1529,5 +1535,573 @@ mod tests {
             make_text_unstable_id(false).id,
             make_text_unstable_id(true).id
         );
+    }
+
+    // ============================================================
+    // WRAP WIDTH / OVERFLOW (pure logic, no fonts required)
+    // ============================================================
+
+    fn available(width: AvailableSpace) -> Size<AvailableSpace> {
+        Size {
+            width,
+            height: AvailableSpace::MinContent,
+        }
+    }
+
+    fn known(width: Option<Pixels>) -> Size<Option<Pixels>> {
+        Size {
+            width,
+            height: None,
+        }
+    }
+
+    #[test]
+    fn evaluate_wrap_width_table() {
+        use AvailableSpace::*;
+
+        // (white_space, known_dimensions, available_space, expected wrap width)
+        let cases: &[(
+            WhiteSpace,
+            Size<Option<Pixels>>,
+            Size<AvailableSpace>,
+            Option<Pixels>,
+        )] = &[
+            // Nowrap never wraps, regardless of known width or available space.
+            (
+                WhiteSpace::Nowrap,
+                known(Some(px(100.))),
+                available(Definite(px(50.))),
+                None,
+            ),
+            (
+                WhiteSpace::Nowrap,
+                known(None),
+                available(Definite(px(50.))),
+                None,
+            ),
+            (WhiteSpace::Nowrap, known(None), available(MaxContent), None),
+            // Normal wraps to the known width when present, taking precedence over available space.
+            (
+                WhiteSpace::Normal,
+                known(Some(px(100.))),
+                available(Definite(px(50.))),
+                Some(px(100.)),
+            ),
+            (
+                WhiteSpace::Normal,
+                known(Some(px(80.))),
+                available(MaxContent),
+                Some(px(80.)),
+            ),
+            // Normal wraps to the concrete available space.
+            (
+                WhiteSpace::Normal,
+                known(None),
+                available(Definite(px(50.))),
+                Some(px(50.)),
+            ),
+            // Content-based available space means no wrapping.
+            (WhiteSpace::Normal, known(None), available(MaxContent), None),
+            (WhiteSpace::Normal, known(None), available(MinContent), None),
+        ];
+
+        for (ix, (white_space, known_dims, available_space, expected)) in cases.iter().enumerate() {
+            assert_eq!(
+                TextLayout::evaluate_wrap_width(white_space, *known_dims, *available_space),
+                *expected,
+                "case {ix}"
+            );
+        }
+    }
+
+    struct OverflowCase {
+        overflow: Option<TextOverflow>,
+        line_clamp: Option<usize>,
+        known_width: Option<Pixels>,
+        available_width: AvailableSpace,
+        width: Option<Pixels>,
+        affix: &'static str,
+        source: TruncateFrom,
+    }
+
+    #[test]
+    fn evaluate_overflow_table() {
+        use AvailableSpace::*;
+
+        let cases: &[OverflowCase] = &[
+            // No overflow configured: nothing is truncated.
+            OverflowCase {
+                overflow: None,
+                line_clamp: None,
+                known_width: None,
+                available_width: Definite(px(50.)),
+                width: None,
+                affix: "",
+                source: TruncateFrom::End,
+            },
+            // Known width wins over available space.
+            OverflowCase {
+                overflow: Some(TextOverflow::Truncate("…".into())),
+                line_clamp: None,
+                known_width: Some(px(100.)),
+                available_width: Definite(px(50.)),
+                width: Some(px(100.)),
+                affix: "…",
+                source: TruncateFrom::End,
+            },
+            // Falls back to the concrete available space.
+            OverflowCase {
+                overflow: Some(TextOverflow::Truncate("…".into())),
+                line_clamp: None,
+                known_width: None,
+                available_width: Definite(px(50.)),
+                width: Some(px(50.)),
+                affix: "…",
+                source: TruncateFrom::End,
+            },
+            // line_clamp multiplies the per-line available width.
+            OverflowCase {
+                overflow: Some(TextOverflow::Truncate("…".into())),
+                line_clamp: Some(3),
+                known_width: None,
+                available_width: Definite(px(50.)),
+                width: Some(px(150.)),
+                affix: "…",
+                source: TruncateFrom::End,
+            },
+            // Content-based available space never truncates.
+            OverflowCase {
+                overflow: Some(TextOverflow::Truncate("…".into())),
+                line_clamp: None,
+                known_width: None,
+                available_width: MaxContent,
+                width: None,
+                affix: "…",
+                source: TruncateFrom::End,
+            },
+            // Start / middle truncation sources are preserved.
+            OverflowCase {
+                overflow: Some(TextOverflow::TruncateStart("…".into())),
+                line_clamp: None,
+                known_width: None,
+                available_width: Definite(px(40.)),
+                width: Some(px(40.)),
+                affix: "…",
+                source: TruncateFrom::Start,
+            },
+            OverflowCase {
+                overflow: Some(TextOverflow::TruncateMiddle("…".into())),
+                line_clamp: None,
+                known_width: Some(px(90.)),
+                available_width: Definite(px(40.)),
+                width: Some(px(90.)),
+                affix: "…",
+                source: TruncateFrom::Middle,
+            },
+        ];
+
+        for (ix, case) in cases.iter().enumerate() {
+            let text_style = TextStyle {
+                text_overflow: case.overflow.clone(),
+                line_clamp: case.line_clamp,
+                ..Default::default()
+            };
+            let available_space = available(case.available_width);
+            let truncation = TextLayout::evaluate_overflow(
+                &text_style,
+                known(case.known_width),
+                available_space,
+            );
+            assert_eq!(truncation.width, case.width, "case {ix}: width");
+            assert_eq!(truncation.affix.as_ref(), case.affix, "case {ix}: affix");
+            assert_eq!(truncation.source, case.source, "case {ix}: source");
+        }
+    }
+
+    // ============================================================
+    // TEXT HIT-TESTING
+    //
+    // These tests run against the deterministic `NoopTextSystem` that the
+    // test platform uses by default. It lays out each character with an
+    // advance of `0.6 * font_size`, so glyph geometry (and therefore every
+    // pixel coordinate asserted below) is hermetic and reproducible.
+    // ============================================================
+
+    /// Wraps a `StyledText` so its `TextLayout` can be captured after a real
+    /// layout pass and probed for hit-testing from the test body.
+    struct TextLayoutProbe {
+        element: StyledText,
+        captured: Rc<RefCell<Option<TextLayout>>>,
+    }
+
+    impl IntoElement for TextLayoutProbe {
+        type Element = Self;
+
+        fn into_element(self) -> Self::Element {
+            self
+        }
+    }
+
+    impl Element for TextLayoutProbe {
+        type RequestLayoutState = ();
+        type PrepaintState = ();
+
+        fn id(&self) -> Option<ElementId> {
+            None
+        }
+
+        fn source_location(&self) -> Option<&'static std::panic::Location<'static>> {
+            None
+        }
+
+        fn request_layout(
+            &mut self,
+            _id: Option<&GlobalElementId>,
+            inspector_id: Option<&crate::InspectorElementId>,
+            window: &mut Window,
+            cx: &mut App,
+        ) -> (LayoutId, Self::RequestLayoutState) {
+            (
+                self.element
+                    .request_layout(None, inspector_id, window, cx)
+                    .0,
+                (),
+            )
+        }
+
+        fn prepaint(
+            &mut self,
+            _id: Option<&GlobalElementId>,
+            inspector_id: Option<&crate::InspectorElementId>,
+            bounds: Bounds<Pixels>,
+            _state: &mut Self::RequestLayoutState,
+            window: &mut Window,
+            cx: &mut App,
+        ) -> Self::PrepaintState {
+            self.element
+                .prepaint(None, inspector_id, bounds, &mut (), window, cx);
+            *self.captured.borrow_mut() = Some(self.element.layout().clone());
+        }
+
+        fn paint(
+            &mut self,
+            _id: Option<&GlobalElementId>,
+            inspector_id: Option<&crate::InspectorElementId>,
+            bounds: Bounds<Pixels>,
+            _state: &mut Self::RequestLayoutState,
+            _prepaint: &mut Self::PrepaintState,
+            window: &mut Window,
+            cx: &mut App,
+        ) {
+            self.element
+                .paint(None, inspector_id, bounds, &mut (), &mut (), window, cx);
+        }
+    }
+
+    struct ProbeView {
+        text: SharedString,
+        captured: Rc<RefCell<Option<TextLayout>>>,
+    }
+
+    impl Render for ProbeView {
+        fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+            div().w(px(400.)).h(px(300.)).child(TextLayoutProbe {
+                element: StyledText::new(self.text.clone()),
+                captured: self.captured.clone(),
+            })
+        }
+    }
+
+    fn layout_for_text(cx: &mut TestAppContext, text: &str) -> TextLayout {
+        let captured: Rc<RefCell<Option<TextLayout>>> = Rc::new(RefCell::new(None));
+        let window = cx.add_window({
+            let captured = captured.clone();
+            move |_, _| ProbeView {
+                text: text.into(),
+                captured,
+            }
+        });
+        let window = AnyWindowHandle::from(window);
+        cx.update_window(window, |_, window, cx| window.draw(cx).clear(cx))
+            .unwrap();
+        captured
+            .borrow()
+            .clone()
+            .expect("layout should be captured")
+    }
+
+    #[gpui::test]
+    fn index_for_position_maps_start_middle_and_end(cx: &mut TestAppContext) {
+        let layout = layout_for_text(cx, "hello world");
+        let origin = layout.bounds().origin;
+        let n = layout.len();
+        assert_eq!(n, "hello world".len());
+
+        let advance = layout.position_for_index(1).unwrap().x - origin.x;
+        assert!(advance > px(0.));
+
+        // The very start of the text maps to the first character.
+        assert_eq!(layout.index_for_position(origin), Ok(0));
+
+        // Clicking the middle of the first glyph maps to character 0.
+        let first_glyph_mid = point(origin.x + advance / 2., origin.y + px(1.));
+        assert_eq!(layout.index_for_position(first_glyph_mid), Ok(0));
+
+        // Stepping by whole advances maps to each successive character.
+        for k in 1..n {
+            let at_k = point(origin.x + advance * k as f32, origin.y + px(1.));
+            assert_eq!(layout.index_for_position(at_k), Ok(k), "glyph {k}");
+        }
+
+        // Past the end of the last glyph clamps to the final index.
+        assert_eq!(
+            layout.index_for_position(point(origin.x + advance * n as f32, origin.y + px(1.))),
+            Err(n)
+        );
+        assert_eq!(
+            layout.index_for_position(point(
+                origin.x + advance * (n as f32 + 5.),
+                origin.y + px(1.)
+            )),
+            Err(n)
+        );
+    }
+
+    #[gpui::test]
+    fn index_for_position_clamps_out_of_bounds(cx: &mut TestAppContext) {
+        let layout = layout_for_text(cx, "hello world");
+        let origin = layout.bounds().origin;
+        let line_height = layout.line_height();
+        let n = layout.len();
+
+        // Above the text clamps to the start.
+        assert_eq!(
+            layout.index_for_position(point(origin.x, origin.y - px(1.))),
+            Err(0)
+        );
+
+        // Below the last line clamps to the final index.
+        assert_eq!(
+            layout.index_for_position(point(origin.x, origin.y + line_height + px(1.))),
+            Err(n)
+        );
+
+        // Clicking directly between two glyphs (on the shared advance boundary)
+        // resolves to the glyph on the right.
+        let advance = layout.position_for_index(1).unwrap().x - origin.x;
+        assert_eq!(
+            layout.index_for_position(point(origin.x + advance, origin.y + px(1.))),
+            Ok(1)
+        );
+    }
+
+    #[gpui::test]
+    fn position_for_index_roundtrips_with_index_for_position(cx: &mut TestAppContext) {
+        let layout = layout_for_text(cx, "hello world");
+        let origin = layout.bounds().origin;
+        let line_height = layout.line_height();
+        let n = layout.len();
+
+        // For every character boundary, position_for_index -> index_for_position
+        // recovers the original index.
+        for i in 0..n {
+            let position = layout.position_for_index(i).expect("index in range");
+            assert_eq!(layout.index_for_position(position).unwrap(), i, "index {i}");
+        }
+
+        // Positions are monotonically increasing along a single line.
+        let mut previous_x = None;
+        for i in 0..=n {
+            let position = layout.position_for_index(i).unwrap();
+            assert_eq!(position.y, origin.y);
+            if let Some(previous_x) = previous_x {
+                assert!(position.x >= previous_x, "position {i} regressed");
+            }
+            previous_x = Some(position.x);
+        }
+
+        // The end of the text (position for `n`) is just past the last glyph.
+        assert_eq!(
+            layout.index_for_position(layout.position_for_index(n).unwrap()),
+            Err(n)
+        );
+
+        // Out-of-range byte indices return no position.
+        assert!(layout.position_for_index(n + 1).is_none());
+        assert!(layout.position_for_index(usize::MAX).is_none());
+
+        // Every position sits within the layout's bounds (same line height).
+        assert_eq!(layout.line_height(), line_height);
+    }
+
+    #[gpui::test]
+    fn multiline_layout_maps_indices_across_newlines(cx: &mut TestAppContext) {
+        let layout = layout_for_text(cx, "hello\nworld");
+        let origin = layout.bounds().origin;
+        let line_height = layout.line_height();
+
+        // `len` counts the full source text, including the newline byte.
+        assert_eq!(layout.len(), "hello\nworld".len());
+        assert_eq!(layout.line_layouts().len(), 2);
+
+        // The newline byte is skipped in the index space: line 2 starts at index 6.
+        assert_eq!(layout.index_for_position(origin), Ok(0));
+        assert_eq!(
+            layout.index_for_position(point(origin.x, origin.y + line_height + px(1.))),
+            Ok(6)
+        );
+
+        // position_for_index places line 2 on the second visual line.
+        let second_line = layout.position_for_index(6).unwrap();
+        assert_eq!(second_line.x, origin.x);
+        assert_eq!(second_line.y, origin.y + line_height);
+
+        // Roundtrip holds across the second line too. A small vertical nudge is
+        // applied because `position_for_index` places line 2 exactly on the shared
+        // line boundary, which `index_for_position` assigns to the line above.
+        for i in 6..layout.len() {
+            let position = layout.position_for_index(i).unwrap();
+            let nudged = point(position.x, position.y + px(0.5));
+            assert_eq!(layout.index_for_position(nudged).unwrap(), i, "index {i}");
+        }
+    }
+
+    // ============================================================
+    // INTERACTIVE TEXT (click / hover)
+    // ============================================================
+
+    struct InteractiveTextProbe {
+        text: SharedString,
+        clicks: Rc<RefCell<Vec<usize>>>,
+        hovers: Rc<RefCell<Vec<Option<usize>>>>,
+    }
+
+    impl Render for InteractiveTextProbe {
+        fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+            let clicks = self.clicks.clone();
+            let hovers = self.hovers.clone();
+            div().w(px(400.)).h(px(300.)).child(
+                InteractiveText::new("interactive-text", StyledText::new(self.text.clone()))
+                    .on_click(vec![0..5, 6..11], move |range_ix, _, _| {
+                        clicks.borrow_mut().push(range_ix);
+                    })
+                    .on_hover(move |index, _, _, _| {
+                        hovers.borrow_mut().push(index);
+                    }),
+            )
+        }
+    }
+
+    #[gpui::test]
+    fn interactive_text_click_reports_clicked_range(cx: &mut TestAppContext) {
+        let clicks: Rc<RefCell<Vec<usize>>> = Rc::new(RefCell::new(Vec::new()));
+        let window = cx.add_window({
+            let clicks = clicks.clone();
+            move |_, _| InteractiveTextProbe {
+                text: "hello world".into(),
+                clicks,
+                hovers: Rc::new(RefCell::new(Vec::new())),
+            }
+        });
+        let window = AnyWindowHandle::from(window);
+        let advance = cx
+            .update_window(window, |_, window, _| {
+                let font_size = window.text_style().font_size.to_pixels(window.rem_size());
+                px(font_size.0 * 0.6)
+            })
+            .unwrap();
+
+        let y = px(1.);
+        let click_at = |cx: &mut TestAppContext, index: usize| {
+            use crate::{InputEvent, MouseButton, MouseDownEvent, MouseUpEvent};
+            let x = advance * index as f32 + advance / 2.;
+            cx.update_window(window, |_, window, cx| window.draw(cx).clear(cx))
+                .unwrap();
+            cx.update_window(window, |_, window, cx| {
+                window.dispatch_event(
+                    MouseDownEvent {
+                        position: point(x, y),
+                        button: MouseButton::Left,
+                        modifiers: Default::default(),
+                        click_count: 1,
+                        first_mouse: false,
+                    }
+                    .to_platform_input(),
+                    cx,
+                );
+            })
+            .unwrap();
+            cx.update_window(window, |_, window, cx| window.draw(cx).clear(cx))
+                .unwrap();
+            cx.update_window(window, |_, window, cx| {
+                window.dispatch_event(
+                    MouseUpEvent {
+                        position: point(x, y),
+                        button: MouseButton::Left,
+                        modifiers: Default::default(),
+                        click_count: 1,
+                    }
+                    .to_platform_input(),
+                    cx,
+                );
+            })
+            .unwrap();
+            cx.update_window(window, |_, window, cx| window.draw(cx).clear(cx))
+                .unwrap();
+        };
+
+        // Clicking within the first clickable range reports range index 0.
+        click_at(cx, 1);
+        // Clicking within the second clickable range reports range index 1.
+        click_at(cx, 8);
+        // Clicking on the space between the ranges (index 5) reports nothing.
+        click_at(cx, 5);
+
+        assert_eq!(clicks.borrow().as_slice(), &[0, 1]);
+    }
+
+    #[gpui::test]
+    fn interactive_text_hover_reports_character_index(cx: &mut TestAppContext) {
+        let hovers: Rc<RefCell<Vec<Option<usize>>>> = Rc::new(RefCell::new(Vec::new()));
+        let window = cx.add_window({
+            let hovers = hovers.clone();
+            move |_, _| InteractiveTextProbe {
+                text: "hello world".into(),
+                clicks: Rc::new(RefCell::new(Vec::new())),
+                hovers,
+            }
+        });
+        let window = AnyWindowHandle::from(window);
+        let advance = cx
+            .update_window(window, |_, window, _| {
+                let font_size = window.text_style().font_size.to_pixels(window.rem_size());
+                px(font_size.0 * 0.6)
+            })
+            .unwrap();
+
+        // First frame: registers the hover listener.
+        cx.update_window(window, |_, window, cx| window.draw(cx).clear(cx))
+            .unwrap();
+
+        // Move over the third glyph ("l" at index 2) and then onto the space (index 5).
+        let y = px(1.);
+        cx.update_window(window, |_, window, cx| {
+            window.simulate_mouse_move(point(advance * 2.5, y), cx);
+        })
+        .unwrap();
+        cx.update_window(window, |_, window, cx| window.draw(cx).clear(cx))
+            .unwrap();
+        cx.update_window(window, |_, window, cx| {
+            window.simulate_mouse_move(point(advance * 5.5, y), cx);
+        })
+        .unwrap();
+        cx.update_window(window, |_, window, cx| window.draw(cx).clear(cx))
+            .unwrap();
+
+        // Hovering reports the character under the cursor, and transitions
+        // between characters are reported as the mouse moves.
+        let hovers = hovers.borrow();
+        assert!(hovers.contains(&Some(2)));
+        assert!(hovers.contains(&Some(5)));
     }
 }

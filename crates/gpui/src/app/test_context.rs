@@ -1198,15 +1198,290 @@ impl AnyWindowHandle {
 #[cfg(test)]
 mod tests {
     use crate::{
-        PathPromptOptions, SystemNotification, SystemNotificationAction,
-        SystemNotificationResponse, TestAppContext,
+        AnyWindowHandle, App, AppContext, Bounds, Context, DispatchPhase, Element, ElementId,
+        FocusHandle, Focusable, GlobalElementId, InputHandler, IntoElement, KeyBinding, LayoutId,
+        PathPromptOptions, Pixels, Point, Render, Style, SystemNotification,
+        SystemNotificationAction, SystemNotificationResponse, TestAppContext, UTF16Selection,
+        Window, WindowHandle,
     };
-    use std::cell::RefCell;
-    use std::path::PathBuf;
-    use std::rc::Rc;
+    use std::{
+        cell::{Cell, RefCell},
+        ops::Range,
+        path::PathBuf,
+        rc::Rc,
+    };
+
+    actions!([SimulateInputTestAction]);
+
+    /// A minimal focused view that both accepts text input (via `InputHandler`)
+    /// and handles a single bound action, mirroring a real editable element.
+    #[derive(Clone)]
+    struct TestInputView {
+        focus_handle: FocusHandle,
+        text: Rc<RefCell<String>>,
+        action_count: Rc<Cell<usize>>,
+    }
+
+    impl TestInputView {
+        fn new(cx: &mut Context<Self>) -> Self {
+            Self {
+                focus_handle: cx.focus_handle(),
+                text: Rc::default(),
+                action_count: Rc::default(),
+            }
+        }
+    }
+
+    impl Focusable for TestInputView {
+        fn focus_handle(&self, _: &App) -> FocusHandle {
+            self.focus_handle.clone()
+        }
+    }
+
+    impl InputHandler for TestInputView {
+        fn selected_text_range(
+            &mut self,
+            _: bool,
+            _: &mut Window,
+            _: &mut App,
+        ) -> Option<UTF16Selection> {
+            None
+        }
+
+        fn marked_text_range(&mut self, _: &mut Window, _: &mut App) -> Option<Range<usize>> {
+            None
+        }
+
+        fn text_for_range(
+            &mut self,
+            _: Range<usize>,
+            _: &mut Option<Range<usize>>,
+            _: &mut Window,
+            _: &mut App,
+        ) -> Option<String> {
+            None
+        }
+
+        fn replace_text_in_range(
+            &mut self,
+            _: Option<Range<usize>>,
+            text: &str,
+            _: &mut Window,
+            _: &mut App,
+        ) {
+            self.text.borrow_mut().push_str(text);
+        }
+
+        fn replace_and_mark_text_in_range(
+            &mut self,
+            _: Option<Range<usize>>,
+            new_text: &str,
+            _: Option<Range<usize>>,
+            _: &mut Window,
+            _: &mut App,
+        ) {
+            self.text.borrow_mut().push_str(new_text);
+        }
+
+        fn unmark_text(&mut self, _: &mut Window, _: &mut App) {}
+
+        fn bounds_for_range(
+            &mut self,
+            _: Range<usize>,
+            _: &mut Window,
+            _: &mut App,
+        ) -> Option<Bounds<Pixels>> {
+            None
+        }
+
+        fn character_index_for_point(
+            &mut self,
+            _: Point<Pixels>,
+            _: &mut Window,
+            _: &mut App,
+        ) -> Option<usize> {
+            None
+        }
+    }
+
+    impl Element for TestInputView {
+        type RequestLayoutState = ();
+        type PrepaintState = ();
+
+        fn id(&self) -> Option<ElementId> {
+            Some("test-input".into())
+        }
+
+        fn source_location(&self) -> Option<&'static std::panic::Location<'static>> {
+            None
+        }
+
+        fn request_layout(
+            &mut self,
+            _: Option<&GlobalElementId>,
+            _: Option<&crate::InspectorElementId>,
+            window: &mut Window,
+            cx: &mut App,
+        ) -> (LayoutId, Self::RequestLayoutState) {
+            (window.request_layout(Style::default(), [], cx), ())
+        }
+
+        fn prepaint(
+            &mut self,
+            _: Option<&GlobalElementId>,
+            _: Option<&crate::InspectorElementId>,
+            _: Bounds<Pixels>,
+            _: &mut Self::RequestLayoutState,
+            window: &mut Window,
+            cx: &mut App,
+        ) -> Self::PrepaintState {
+            window.set_focus_handle(&self.focus_handle, cx);
+        }
+
+        fn paint(
+            &mut self,
+            _: Option<&GlobalElementId>,
+            _: Option<&crate::InspectorElementId>,
+            _: Bounds<Pixels>,
+            _: &mut Self::RequestLayoutState,
+            _: &mut Self::PrepaintState,
+            window: &mut Window,
+            cx: &mut App,
+        ) {
+            window.handle_input(&self.focus_handle, self.clone(), cx);
+            let action_count = self.action_count.clone();
+            window.on_action(
+                std::any::TypeId::of::<SimulateInputTestAction>(),
+                move |_, phase, _, _| {
+                    if phase == DispatchPhase::Bubble {
+                        action_count.set(action_count.get() + 1);
+                    }
+                },
+            );
+        }
+    }
+
+    impl IntoElement for TestInputView {
+        type Element = Self;
+
+        fn into_element(self) -> Self::Element {
+            self
+        }
+    }
+
+    impl Render for TestInputView {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            self.clone()
+        }
+    }
+
+    fn simulate_input_view(
+        cx: &mut TestAppContext,
+    ) -> (
+        WindowHandle<TestInputView>,
+        Rc<RefCell<String>>,
+        Rc<Cell<usize>>,
+    ) {
+        let view = cx.add_window(|_, cx| TestInputView::new(cx));
+        let text = view.update(cx, |view, _, _| view.text.clone()).unwrap();
+        let action_count = view
+            .update(cx, |view, _, _| view.action_count.clone())
+            .unwrap();
+        (view, text, action_count)
+    }
 
     #[gpui::test]
-    async fn test_system_notifications_require_identity_and_replace_matching_tags(
+    fn test_simulate_input_inserts_text_through_input_handler(cx: &mut TestAppContext) {
+        let (view, text, _) = simulate_input_view(cx);
+        let window = AnyWindowHandle::from(view);
+        let focus_handle = view
+            .update(cx, |view, _, _| view.focus_handle.clone())
+            .unwrap();
+
+        cx.update_window(window, |_, window, cx| window.focus(&focus_handle, cx))
+            .unwrap();
+
+        cx.simulate_input(window, "abc");
+
+        // The input handler receives each character in order.
+        assert_eq!(text.borrow().as_str(), "abc");
+
+        // Input is appended across separate calls too.
+        cx.simulate_input(window, " de");
+        assert_eq!(text.borrow().as_str(), "abc de");
+    }
+
+    #[gpui::test]
+    fn test_simulate_keystrokes_dispatches_bound_action(cx: &mut TestAppContext) {
+        let (view, _, action_count) = simulate_input_view(cx);
+        let window = AnyWindowHandle::from(view);
+        let focus_handle = view
+            .update(cx, |view, _, _| view.focus_handle.clone())
+            .unwrap();
+
+        cx.update(|cx| {
+            cx.bind_keys([KeyBinding::new("ctrl-b", SimulateInputTestAction, None)]);
+        });
+
+        cx.update_window(window, |_, window, cx| window.focus(&focus_handle, cx))
+            .unwrap();
+
+        cx.simulate_keystrokes(window, "ctrl-b");
+        assert_eq!(action_count.get(), 1);
+
+        // Unbound printable keys fall through to text input rather than dispatching an action.
+        cx.simulate_keystrokes(window, "x");
+        assert_eq!(action_count.get(), 1);
+    }
+
+    #[gpui::test]
+    fn test_simulate_keystrokes_multi_keystroke_sequence(cx: &mut TestAppContext) {
+        let (view, _, action_count) = simulate_input_view(cx);
+        let window = AnyWindowHandle::from(view);
+        let focus_handle = view
+            .update(cx, |view, _, _| view.focus_handle.clone())
+            .unwrap();
+
+        cx.update(|cx| {
+            cx.bind_keys([KeyBinding::new(
+                "ctrl-b ctrl-c",
+                SimulateInputTestAction,
+                None,
+            )]);
+        });
+
+        cx.update_window(window, |_, window, cx| window.focus(&focus_handle, cx))
+            .unwrap();
+
+        // Each space-separated token is dispatched in order; the sequence completes the binding.
+        cx.simulate_keystrokes(window, "ctrl-b ctrl-c");
+        assert_eq!(action_count.get(), 1);
+    }
+
+    #[gpui::test]
+    fn test_simulate_input_ignores_action_bound_keys(cx: &mut TestAppContext) {
+        let (view, text, action_count) = simulate_input_view(cx);
+        let window = AnyWindowHandle::from(view);
+        let focus_handle = view
+            .update(cx, |view, _, _| view.focus_handle.clone())
+            .unwrap();
+
+        cx.update(|cx| {
+            cx.bind_keys([KeyBinding::new("a", SimulateInputTestAction, None)]);
+        });
+
+        cx.update_window(window, |_, window, cx| window.focus(&focus_handle, cx))
+            .unwrap();
+
+        // `simulate_input` types printable characters, but a bound keystroke wins
+        // over text input, dispatching the action instead.
+        cx.simulate_input(window, "a");
+        assert_eq!(action_count.get(), 1);
+        assert_eq!(text.borrow().as_str(), "");
+    }
+
+    #[gpui::test]
+    fn test_system_notifications_require_identity_and_replace_matching_tags(
         cx: &mut TestAppContext,
     ) {
         cx.update(|cx| {

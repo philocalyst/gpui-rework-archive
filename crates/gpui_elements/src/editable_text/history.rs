@@ -155,3 +155,184 @@ impl HistoryEntry {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Records a pure insertion of `text` at byte offset `at`, with no grouping of consecutive edits.
+    fn record_insert(
+        history: &mut EditableTextHistory,
+        at: usize,
+        text: &str,
+        selected_range: (usize, usize),
+    ) {
+        history.record(at..at, "", text.len(), selected_range);
+    }
+
+    #[test]
+    fn undo_stack_returns_entries_in_lifo_order() {
+        let mut history = EditableTextHistory::default();
+        history.set_grouping_interval(Duration::ZERO);
+
+        record_insert(&mut history, 0, "a", (0, 0));
+        record_insert(&mut history, 1, "b", (1, 1));
+        record_insert(&mut history, 2, "c", (2, 2));
+
+        assert!(history.has_next(HistoryKind::Undo));
+        assert_eq!(
+            history
+                .take(HistoryKind::Undo)
+                .unwrap()
+                .char_range(usize::MAX),
+            2..3
+        );
+        assert_eq!(
+            history
+                .take(HistoryKind::Undo)
+                .unwrap()
+                .char_range(usize::MAX),
+            1..2
+        );
+        assert_eq!(
+            history
+                .take(HistoryKind::Undo)
+                .unwrap()
+                .char_range(usize::MAX),
+            0..1
+        );
+        assert!(!history.has_next(HistoryKind::Undo));
+        assert!(history.take(HistoryKind::Undo).is_none());
+    }
+
+    #[test]
+    fn empty_history_undo_and_redo_are_noops() {
+        let mut history = EditableTextHistory::default();
+        assert!(!history.has_next(HistoryKind::Undo));
+        assert!(!history.has_next(HistoryKind::Redo));
+        assert!(history.take(HistoryKind::Undo).is_none());
+        assert!(history.take(HistoryKind::Redo).is_none());
+    }
+
+    #[test]
+    fn redo_stack_returns_entries_in_lifo_order() {
+        let mut history = EditableTextHistory::default();
+        history.push(
+            HistoryKind::Redo,
+            HistoryEntry {
+                range: 0..1,
+                old_text: "x".into(),
+                new_text_len: 1,
+                selected_range: (0, 0),
+                timestamp: Instant::now(),
+            },
+        );
+        history.push(
+            HistoryKind::Redo,
+            HistoryEntry {
+                range: 1..2,
+                old_text: "y".into(),
+                new_text_len: 1,
+                selected_range: (1, 1),
+                timestamp: Instant::now(),
+            },
+        );
+
+        assert!(history.has_next(HistoryKind::Redo));
+        assert_eq!(history.take(HistoryKind::Redo).unwrap().range, 1..2);
+        assert_eq!(history.take(HistoryKind::Redo).unwrap().range, 0..1);
+        assert!(!history.has_next(HistoryKind::Redo));
+        assert!(history.take(HistoryKind::Redo).is_none());
+    }
+
+    #[test]
+    fn new_record_clears_redo_stack() {
+        let mut history = EditableTextHistory::default();
+        history.set_grouping_interval(Duration::ZERO);
+
+        record_insert(&mut history, 0, "a", (0, 0));
+        let undone = history.take(HistoryKind::Undo).unwrap();
+        history.push(HistoryKind::Redo, undone);
+        assert!(history.has_next(HistoryKind::Redo));
+
+        record_insert(&mut history, 0, "b", (0, 0));
+        assert!(!history.has_next(HistoryKind::Redo));
+        assert!(history.take(HistoryKind::Redo).is_none());
+    }
+
+    #[test]
+    fn contiguous_edits_within_group_interval_merge_into_single_entry() {
+        let mut history = EditableTextHistory::default();
+        history.set_grouping_interval(Duration::from_secs(60));
+
+        record_insert(&mut history, 0, "a", (0, 0));
+        record_insert(&mut history, 1, "b", (1, 1));
+        record_insert(&mut history, 2, "c", (2, 2));
+
+        assert_eq!(history.undo_stack.len(), 1);
+        let entry = history.take(HistoryKind::Undo).unwrap();
+        assert_eq!(entry.char_range(usize::MAX), 0..3);
+        assert_eq!(entry.new_text_len, 3);
+        assert_eq!(entry.old_text, "");
+    }
+
+    #[test]
+    fn non_contiguous_edits_do_not_group() {
+        let mut history = EditableTextHistory::default();
+        history.set_grouping_interval(Duration::from_secs(60));
+
+        record_insert(&mut history, 0, "a", (0, 0));
+        record_insert(&mut history, 5, "b", (5, 5));
+
+        assert_eq!(history.undo_stack.len(), 2);
+    }
+
+    #[test]
+    fn char_range_clamps_to_available_length() {
+        let mut history = EditableTextHistory::default();
+        history.set_grouping_interval(Duration::ZERO);
+
+        record_insert(&mut history, 0, "hello", (0, 0));
+        let entry = history.take(HistoryKind::Undo).unwrap();
+        assert_eq!(entry.char_range(3), 0..3);
+        assert_eq!(entry.char_range(10), 0..5);
+    }
+
+    #[test]
+    fn inverted_entry_swaps_old_and_new_text() {
+        let mut history = EditableTextHistory::default();
+        history.set_grouping_interval(Duration::ZERO);
+
+        history.record(0..3, "foo", 3, (3, 3));
+        let entry = history.take(HistoryKind::Undo).unwrap();
+        assert_eq!(entry.range, 0..3);
+        assert_eq!(entry.old_text, "foo");
+        assert_eq!(entry.new_text_len, 3);
+        assert_eq!(entry.selected_range, (3, 3));
+        let timestamp = entry.timestamp;
+
+        let inverted = entry.as_inverted("bar".to_string());
+        assert_eq!(inverted.range, 0..3);
+        assert_eq!(inverted.old_text, "bar");
+        assert_eq!(inverted.new_text_len, 3);
+        assert_eq!(inverted.selected_range, (3, 3));
+        assert_eq!(inverted.timestamp, timestamp);
+    }
+
+    #[test]
+    fn history_length_is_capped() {
+        let mut history = EditableTextHistory::default();
+        history.set_grouping_interval(Duration::ZERO);
+
+        for i in 0..MAX_HISTORY_LEN + 10 {
+            record_insert(&mut history, i, "x", (i, i));
+        }
+
+        assert_eq!(history.undo_stack.len(), MAX_HISTORY_LEN);
+        let mut oldest_range_start = None;
+        while let Some(entry) = history.take(HistoryKind::Undo) {
+            oldest_range_start = Some(entry.range.start);
+        }
+        assert_eq!(oldest_range_start, Some(10));
+    }
+}
