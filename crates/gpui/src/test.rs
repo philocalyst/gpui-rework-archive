@@ -181,6 +181,9 @@ fn calculate_seeds(
             explicit_seeds
         };
 
+        // With `SEED` set and `iterations > 1`, `env_range` (`SEED..SEED+1`) and
+        // `iterations_range` (`SEED..SEED+iterations`) intentionally overlap, so the
+        // seed is emitted twice: once as the env pin and once as the first iteration.
         env_range
             .chain(iterations_range)
             .chain(explicit_seeds.iter().copied())
@@ -217,4 +220,136 @@ pub fn observe<T: 'static>(entity: &Entity<T>, cx: &mut TestAppContext) -> Obser
     let rx = Box::pin(rx);
 
     Observation { rx, _subscription }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use proptest::strategy::ValueTree;
+    use std::sync::{Arc, Mutex};
+
+    /// Serializes `SEED`/`ITERATIONS` env-var mutation between the seed tests in
+    /// this module. Only these tests mutate env vars, and every one restores the
+    /// previous values on exit (including unwinds), so the window during which other
+    /// `#[gpui::test]` cases could observe a synthetic `SEED` stays as small as
+    /// possible.
+    static ENV_LOCK: Mutex<()> = Mutex::new(());
+
+    /// Captures the previous `SEED`/`ITERATIONS` values (if any) and clears
+    /// them, restoring them on drop.
+    struct EnvResetGuard {
+        seed: Option<String>,
+        iterations: Option<String>,
+    }
+
+    impl EnvResetGuard {
+        fn take() -> Self {
+            let guard = Self {
+                seed: env::var("SEED").ok(),
+                iterations: env::var("ITERATIONS").ok(),
+            };
+            unsafe {
+                env::remove_var("SEED");
+                env::remove_var("ITERATIONS");
+            }
+            guard
+        }
+
+        fn set_seed(&self, value: &str) {
+            unsafe {
+                env::set_var("SEED", value);
+            }
+        }
+
+        fn clear_seed(&self) {
+            unsafe {
+                env::remove_var("SEED");
+            }
+        }
+    }
+
+    impl Drop for EnvResetGuard {
+        fn drop(&mut self) {
+            unsafe {
+                match &self.seed {
+                    Some(value) => env::set_var("SEED", value),
+                    None => env::remove_var("SEED"),
+                }
+                match &self.iterations {
+                    Some(value) => env::set_var("ITERATIONS", value),
+                    None => env::remove_var("ITERATIONS"),
+                }
+            }
+        }
+    }
+
+    fn record_seeds(
+        guard: &EnvResetGuard,
+        iterations: usize,
+        explicit: &[u64],
+        set_seed: Option<&str>,
+    ) -> Vec<u64> {
+        match set_seed {
+            Some(value) => guard.set_seed(value),
+            None => guard.clear_seed(),
+        }
+        let seen = Arc::new(Mutex::new(Vec::new()));
+        run_test(
+            iterations,
+            explicit,
+            0,
+            &mut {
+                let seen = Arc::clone(&seen);
+                move |_dispatcher, seed| seen.lock().unwrap().push(seed)
+            },
+            None,
+        );
+        seen.lock().unwrap().clone()
+    }
+
+    #[test]
+    fn run_test_seed_selection_default_and_explicit() {
+        let _lock = ENV_LOCK
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        let guard = EnvResetGuard::take();
+
+        assert_eq!(record_seeds(&guard, 1, &[], None), [0]);
+        assert_eq!(record_seeds(&guard, 3, &[], None), [0, 1, 2]);
+        assert_eq!(record_seeds(&guard, 3, &[10, 20], None), [0, 1, 2, 10, 20]);
+    }
+
+    #[test]
+    fn run_test_seed_env_pins_and_overrides_explicit() {
+        let _lock = ENV_LOCK
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        let guard = EnvResetGuard::take();
+
+        assert_eq!(record_seeds(&guard, 1, &[7], Some("42")), [42]);
+        assert_eq!(record_seeds(&guard, 3, &[7], Some("42")), [42, 42, 43, 44]);
+    }
+
+    #[test]
+    fn seed_env_bridges_proptest_config_and_strategy() {
+        let _lock = ENV_LOCK
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        let guard = EnvResetGuard::take();
+
+        guard.clear_seed();
+        assert_eq!(
+            apply_seed_to_proptest_config(proptest::test_runner::Config::default()).rng_seed,
+            proptest::test_runner::RngSeed::Fixed(0)
+        );
+        guard.set_seed("42");
+        assert_eq!(
+            apply_seed_to_proptest_config(proptest::test_runner::Config::default()).rng_seed,
+            proptest::test_runner::RngSeed::Fixed(42)
+        );
+        let mut runner =
+            proptest::test_runner::TestRunner::new(proptest::test_runner::Config::default());
+        let value = seed_strategy().new_tree(&mut runner).unwrap().current();
+        assert_eq!(value, 42);
+    }
 }

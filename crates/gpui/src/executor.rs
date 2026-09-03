@@ -184,12 +184,15 @@ impl BackgroundExecutor {
         self.dispatcher.as_test().unwrap().scheduler().tick()
     }
 
-    /// In tests, run tasks until the scheduler would park.
+    /// In tests, run all currently-runnable tasks until the scheduler would park.
     ///
-    /// Under the scheduler-backed test dispatcher, `tick()` will not advance the clock, so a pending
-    /// timer can keep `has_pending_tasks()` true even after all currently-runnable tasks have been
-    /// drained. To preserve the historical semantics that tests relied on (drain all work that can
-    /// make progress), we advance the clock to the next timer when no runnable tasks remain.
+    /// This drains runnable tasks and timers that have *already* expired, but it
+    /// does **not** advance the clock: a future `timer` stays pending, and
+    /// [`crate::TestDispatcher::run_until_parked`] (the same-name dispatcher
+    /// method, used by `TestAppContext::run_until_parked`) is equally
+    /// non-advancing. To fire pending timers deterministically, use
+    /// [`Self::advance_clock`] or
+    /// [`scheduler::TestScheduler::run_with_clock_advancement`] instead.
     #[cfg(any(test, feature = "test-support"))]
     pub fn run_until_parked(&self) {
         let scheduler = self.dispatcher.as_test().unwrap().scheduler();
@@ -487,6 +490,15 @@ mod test {
     use super::*;
     use crate::{App, TestDispatcher, TestPlatform};
     use std::cell::RefCell;
+    use std::sync::{
+        Arc,
+        atomic::{AtomicUsize, Ordering},
+    };
+
+    /// Default `num_cpus()` reported by a test executor with no override. Mirrors
+    /// the `4` fallback in `BackgroundExecutor::num_cpus` and the `0` = "no
+    /// override" sentinel in `TestDispatcher::set_num_cpus`.
+    const TEST_NUM_CPUS_DEFAULT: usize = 4;
 
     /// Helper to create test infrastructure.
     /// Returns (dispatcher, background_executor, app).
@@ -502,6 +514,12 @@ mod test {
 
         let app = App::new_app(platform, asset_source, http_client);
         (dispatcher, background_executor, app)
+    }
+
+    fn test_executor() -> (TestDispatcher, BackgroundExecutor) {
+        let dispatcher = TestDispatcher::new(0);
+        let executor = BackgroundExecutor::new(Arc::new(dispatcher.clone()));
+        (dispatcher, executor)
     }
 
     #[test]
@@ -528,5 +546,59 @@ mod test {
             *task_ran.borrow(),
             "Task should run normally when app is alive"
         );
+    }
+
+    #[test]
+    fn background_executor_tick_runs_one_task_run_until_parked_drains_all() {
+        let (_dispatcher, executor) = test_executor();
+        let count = Arc::new(AtomicUsize::new(0));
+        for _ in 0..3 {
+            executor
+                .spawn({
+                    let count = Arc::clone(&count);
+                    async move { count.fetch_add(1, Ordering::SeqCst) }
+                })
+                .detach();
+        }
+
+        assert!(executor.tick());
+        assert_eq!(count.load(Ordering::SeqCst), 1);
+        executor.run_until_parked();
+        assert_eq!(count.load(Ordering::SeqCst), 3);
+    }
+
+    #[test]
+    fn background_executor_advance_clock_fires_timer_and_updates_clock() {
+        let (_dispatcher, executor) = test_executor();
+        let fired = Arc::new(AtomicUsize::new(0));
+        let timer = executor.timer(Duration::from_millis(100));
+        executor
+            .spawn({
+                let fired = Arc::clone(&fired);
+                async move {
+                    timer.await;
+                    fired.fetch_add(1, Ordering::SeqCst);
+                }
+            })
+            .detach();
+
+        let start = executor.now();
+        executor.advance_clock(Duration::from_millis(99));
+        assert_eq!(fired.load(Ordering::SeqCst), 0);
+        assert_eq!(executor.now() - start, Duration::from_millis(99));
+
+        executor.advance_clock(Duration::from_millis(1));
+        assert_eq!(fired.load(Ordering::SeqCst), 1);
+        assert_eq!(executor.now() - start, Duration::from_millis(100));
+    }
+
+    #[test]
+    fn background_executor_num_cpus_override() {
+        let (_dispatcher, executor) = test_executor();
+        assert_eq!(executor.num_cpus(), TEST_NUM_CPUS_DEFAULT);
+        executor.set_num_cpus(2);
+        assert_eq!(executor.num_cpus(), 2);
+        executor.set_num_cpus(0);
+        assert_eq!(executor.num_cpus(), TEST_NUM_CPUS_DEFAULT);
     }
 }
