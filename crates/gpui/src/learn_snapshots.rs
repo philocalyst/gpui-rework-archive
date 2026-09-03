@@ -1,4 +1,5 @@
-//! Headless snapshot corpus for the `examples/learn` (and two legacy) example UIs.
+//! Headless snapshot corpus for the `examples/learn`, `examples/legacy`, and
+//! `examples/bench` example UIs.
 //!
 //! The examples are `main()` programs that open a window and render a root view.
 //! We never run those mains. Instead this harness draws a *mirrored* copy of each
@@ -25,6 +26,24 @@
 //! shapes themselves. The same applies to the `img`/`svg` children of the legacy cases:
 //! the hermetic asset source returns `None`, so images decode to nothing.
 //!
+//! Bench honesty: the `examples/bench/*` examples are benchmark loops (2000 identical
+//! paths, 10000 random quotes). The mirrors replicate each bench's *scene-building
+//! pattern* at small scale — a handful of paths, a short deterministic table — never
+//! the full benchmark loop. `bench_data_table` replaces the random quotes with fixed
+//! per-row values so the snapshot is hermetic, and mirrors the example's *full*
+//! 24-column FIELDS on a widened frame that pins every column (the real example clips
+//! at its 1280-wide window); `bench_shadow` pins the whole `overflow_y_scroll` table
+//! on a tall frame; `bench_paths` keeps the exact star geometry from the loop body but
+//! draws five copies instead of 2000.
+//!
+//! Interactive-event honesty: `on_click`/`on_action`/`on_mouse_*` handlers are inert in
+//! a static headless frame and are omitted from the mirrors; style refinements (hover,
+//! focus, active, opacity) are kept because they pin the initial-state styles. The
+//! legacy window-management mirrors (`focus_visible`, `tab_stop`) render their initial
+//! focus state — focus sits on the app container, so no button shows a focus ring — and
+//! `window_shadow` runs under `Decorations::Server`, so its client-decoration shadow
+//! branch never paints headlessly.
+//!
 //! # Honest skips (OS services; would hang or panic headlessly)
 //!
 //! The following examples are intentionally *not* mirrored, with the service that
@@ -41,9 +60,21 @@
 //! - `examples/system_notifications.rs` — gh-notifications: OS notification center.
 //! - `examples/learn/async_tasks.rs` — gh-async: timer/executor timing. The scene would race
 //!   with parked futures, so no single deterministic frame exists.
-//! - `examples/legacy/gif_viewer.rs`, `examples/legacy/image_loading.rs` — gh-assets: image
-//!   decoding from disk. The hermetic asset source returns `None`, so the mirror would only
-//!   capture an empty placeholder rectangle — skipping avoids a misleading snapshot.
+//! - `examples/legacy/gif_viewer.rs`, `examples/legacy/image_loading.rs`, and the image
+//!   + svg examples under `examples/legacy/image/` and `examples/legacy/svg/` — gh-assets:
+//!   image/SVG decoding from disk and URLs. The hermetic asset source returns `None`, so
+//!   the mirror would only capture an empty placeholder rectangle — skipping avoids a
+//!   misleading snapshot.
+//! - `examples/legacy/on_window_close_quit.rs` — gh-window-mgmt: window close/quit
+//!   lifecycle driven by OS window events.
+//! - `examples/legacy/shadow.rs` — does not exist; the shadow-elevations table lives at
+//!   `examples/bench/shadow.rs` and is mirrored there as `bench_shadow`.
+//!
+//! Seg1 covered the learn examples plus `legacy/opacity` and `legacy/gradient` (already
+//! in this file). Seg2 adds the remaining static legacy mirrors (`hello_world`,
+//! `scrollable`, `tree`, `uniform_list`, `focus_visible`, `tab_stop`, `window`,
+//! `window_shadow`) and small-scale bench mirrors (`bench_shadow`, `bench_pattern`,
+//! `bench_paths`, `bench_data_table`).
 
 use std::time::Duration;
 
@@ -52,12 +83,14 @@ use palette::{IntoColor, WithAlpha};
 use crate::colors::Colors;
 use crate::util::FluentBuilder as _;
 use crate::{
-    Animation, AnimationExt as _, AnyElement, App, AppContext, Bounds, BoxShadow, Canvas, ColorExt,
-    ColorSpace, Context, Div, DurationWithEasing, ElementId, FontStyle, FontWeight, Half, Hsla,
-    IntoElement, Lerp, Path, PathBuilder, Pixels, Point, Render, Rgba, SceneArchive, Size,
-    StyledText, TestAppContext, Transformation, Window, black, blue, bounce, canvas, deferred, div,
-    ease_in_out, fill, green, hsla, linear, linear_color_stop, linear_gradient, percentage, point,
-    prelude::*, px, red, relative, rgb, rgba, size, svg, transparent_black, white, yellow,
+    Animation, AnimationExt as _, AnyElement, App, AppContext, Background, Bounds, BoxShadow,
+    Canvas, ColorExt, ColorSpace, Context, CursorStyle, Decorations, Div, DurationWithEasing,
+    ElementId, FocusHandle, FontStyle, FontWeight, Half, Hsla, IntoElement, Lerp, Path,
+    PathBuilder, Pixels, Point, Render, Rgba, SceneArchive, Size, Stateful, StyledText,
+    TestAppContext, Transformation, Window, black, blue, bounce, canvas, deferred, div,
+    ease_in_out, fill, green, hsla, linear, linear_color_stop, linear_gradient, pattern_slash,
+    percentage, point, prelude::*, px, red, relative, rgb, rgba, size, svg, transparent_black,
+    uniform_list, white, yellow,
 };
 
 /// SVG glyph used by the animation example; won't decode with the hermetic asset source.
@@ -2387,8 +2420,1104 @@ fn example_gradient(_window: &mut Window, _cx: &mut App) -> impl IntoElement {
         )))
 }
 
-/// Renders every statically-mirrorable learn/legacy example on the harness window
-/// and snapshots its finished scene archive.
+// ============================================================================
+// example_hello_world — mirrors examples/legacy/hello_world.rs
+// Centered text block on a grey 500×500 card with a blue border and a row of
+// six 8×8 dashed color swatches (the example's `self.text` is "World").
+// ============================================================================
+
+fn example_hello_world(_window: &mut Window, _cx: &mut App) -> impl IntoElement {
+    let swatches = [
+        (red(), white()),
+        (green(), white()),
+        (blue(), white()),
+        (yellow(), white()),
+        (black(), white()),
+        (white(), black()),
+    ];
+    div()
+        .flex()
+        .flex_col()
+        .gap_3()
+        .bg(rgb(0x505050))
+        .size(px(500.0))
+        .justify_center()
+        .items_center()
+        .shadow_lg()
+        .border_1()
+        .border_color(rgb(0x0000ff))
+        .text_xl()
+        .text_color(rgb(0xffffff))
+        .child("Hello, World!") // mirrors `Hello, {}!` with `self.text == "World"`
+        .child(
+            div()
+                .flex()
+                .gap_2()
+                .children(swatches.map(|(color, border_color)| {
+                    // The example repeats `.rounded_md()` on the black swatch
+                    // (hello_world.rs:73); applying it once here is idempotent.
+                    div()
+                        .size_8()
+                        .bg(color)
+                        .border_1()
+                        .border_dashed()
+                        .rounded_md()
+                        .border_color(border_color)
+                })),
+        )
+}
+
+// ============================================================================
+// example_scrollable — mirrors examples/legacy/scrollable.rs
+// The mirror uses a wide+tall frame (2070×5100) so the whole 2000×150 horizontal
+// strip and the 5000-tall vertical column fit without clipping; the example
+// itself scrolls at 500×500 with initial offset 0.
+// ============================================================================
+
+fn example_scrollable(_window: &mut Window, _cx: &mut App) -> impl IntoElement {
+    div()
+        .size_full()
+        .id("vertical")
+        .p_4()
+        .overflow_scroll()
+        .bg(white())
+        .child("Example for test 2 way scroll in nested layout")
+        .child(
+            div()
+                .h(px(5000.))
+                .border_1()
+                .border_color(blue())
+                .bg(blue().with_alpha(0.05))
+                .p_4()
+                .child(
+                    div()
+                        .mb_5()
+                        .w_full()
+                        .id("horizontal")
+                        .overflow_scroll()
+                        .child(
+                            div()
+                                .w(px(2000.))
+                                .h(px(150.))
+                                .bg(green().with_alpha(0.1))
+                                .hover(|this| this.bg(green().with_alpha(0.2)))
+                                .border_1()
+                                .border_color(green())
+                                .p_4()
+                                .child("Scroll Horizontal"),
+                        ),
+                )
+                .child("Scroll Vertical"),
+        )
+}
+
+// ============================================================================
+// example_tree — mirrors examples/legacy/tree.rs
+// 50 nested divs (the GPUI_TREE_DEPTH default), each padded 2px and cycling
+// red/blue/green/yellow, innermost first.
+// ============================================================================
+
+fn example_tree(_window: &mut Window, _cx: &mut App) -> impl IntoElement {
+    const DEPTH: u64 = 50; // GPUI_TREE_DEPTH default
+    static COLORS: [Hsla; 4] = [red(), blue(), green(), yellow()];
+    let mut colors = COLORS.iter().cycle().copied();
+    let mut next_div = || div().p_0p5().bg(colors.next().unwrap());
+    let mut innermost = next_div();
+    for _ in 0..DEPTH {
+        innermost = next_div().child(innermost);
+    }
+    innermost
+}
+
+// ============================================================================
+// example_uniform_list — mirrors examples/legacy/uniform_list.rs
+// 50 lazily-rendered list rows; the headless first frame pins the first
+// viewport of rows at their initial offset 0.
+// ============================================================================
+
+fn example_uniform_list(_window: &mut Window, _cx: &mut App) -> impl IntoElement {
+    div().size_full().bg(rgb(0xffffff)).child(
+        uniform_list("entries", 50, |range, _window, _cx| {
+            range
+                .map(|ix| {
+                    div()
+                        .id(ix)
+                        .px_2()
+                        .cursor_pointer()
+                        .child(format!("Item {}", ix + 1))
+                })
+                .collect::<Vec<_>>()
+        })
+        .h_full(),
+    )
+}
+
+// ============================================================================
+// example_focus_visible — mirrors examples/legacy/focus_visible.rs
+// Initial focus state: focus sits on the app container (window.focus in `new()`),
+// so none of the three buttons shows its focus()/focus_visible() border — the
+// snapshot pins the base blue buttons.
+// ============================================================================
+
+fn focus_visible_base(
+    id: &'static str,
+    label: &'static str,
+    handle: &FocusHandle,
+) -> Stateful<Div> {
+    div()
+        .id(id)
+        .h_16()
+        .w_full()
+        .flex()
+        .justify_center()
+        .items_center()
+        .bg(rgb(0x2563eb))
+        .text_color(white())
+        .rounded_md()
+        .cursor_pointer()
+        .hover(|style| style.bg(rgb(0x1d4ed8)))
+        .track_focus(handle)
+        .child(label)
+}
+
+fn focus_section(label: &'static str, button: impl IntoElement) -> Div {
+    div()
+        .flex()
+        .flex_col()
+        .gap_2()
+        .child(
+            div()
+                .text_sm()
+                .font_weight(FontWeight::BOLD)
+                .text_color(rgb(0x374151))
+                .child(label),
+        )
+        .child(button)
+}
+
+fn example_focus_visible(window: &mut Window, cx: &mut App) -> impl IntoElement {
+    let root = cx.focus_handle();
+    window.focus(&root, cx); // example focuses the app container in `new()`
+    let items = [
+        (
+            cx.focus_handle().tab_index(1).tab_stop(true),
+            "Button with .focus() - always shows border when focused",
+        ),
+        (
+            cx.focus_handle().tab_index(2).tab_stop(true),
+            "Button with .focus_visible() - only shows border with keyboard",
+        ),
+        (
+            cx.focus_handle().tab_index(3).tab_stop(true),
+            "Button with both .focus() and .focus_visible()",
+        ),
+    ];
+    div()
+        .id("app")
+        .track_focus(&root)
+        .size_full()
+        .flex()
+        .flex_col()
+        .p_8()
+        .gap_6()
+        .bg(rgb(0xf3f4f6))
+        .child(
+            div()
+                .text_2xl()
+                .font_weight(FontWeight::BOLD)
+                .text_color(rgb(0x111827))
+                .child("CSS focus-visible Demo"),
+        )
+        .child(
+            div()
+                .p_4()
+                .rounded_md()
+                .bg(rgb(0xdbeafe))
+                .text_color(rgb(0x1e3a8a))
+                .child("Try clicking vs tabbing! Click shows no border, Tab shows border."),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap_4()
+                .child(focus_section(
+                    "1. Regular .focus() - always visible:",
+                    focus_visible_base("button1", items[0].1, &items[0].0)
+                        .focus(|s| s.border_4().border_color(rgb(0xfbbf24))),
+                ))
+                .child(focus_section(
+                    "2. New .focus_visible() - only keyboard:",
+                    focus_visible_base("button2", items[1].1, &items[1].0)
+                        .focus_visible(|s| s.border_4().border_color(rgb(0x10b981))),
+                ))
+                .child(focus_section(
+                    "3. Both .focus() (yellow) and .focus_visible() (green):",
+                    focus_visible_base("button3", items[2].1, &items[2].0)
+                        .focus(|s| s.border_4().border_color(rgb(0xfbbf24)))
+                        .focus_visible(|s| s.border_4().border_color(rgb(0x10b981))),
+                )),
+        )
+}
+
+// ============================================================================
+// example_tab_stop — mirrors examples/legacy/tab_stop.rs
+// Five focus rows (tab_index 1/2/3, no tab-stop, tab_index 2) plus two buttons.
+// Initial focus is on the app container, so the `tab_stop && is_focused` blue
+// border is never applied in the first frame.
+// ============================================================================
+
+fn tab_stop_style<T: Styled>(this: T) -> T {
+    this.border_3().border_color(blue())
+}
+
+fn tab_stop_button(id: &'static str, tab_index: isize, label: &'static str) -> Stateful<Div> {
+    div()
+        .id(id)
+        .h_10()
+        .flex_1()
+        .flex()
+        .justify_center()
+        .items_center()
+        .border_1()
+        .border_color(black())
+        .bg(black())
+        .text_color(white())
+        .focus(tab_stop_style)
+        .shadow_sm()
+        .tab_index(tab_index)
+        .child(label)
+}
+
+fn example_tab_stop(window: &mut Window, cx: &mut App) -> impl IntoElement {
+    let root = cx.focus_handle();
+    window.focus(&root, cx); // example focuses the app container in `new()`
+    let items = [
+        cx.focus_handle().tab_index(1).tab_stop(true),
+        cx.focus_handle().tab_index(2).tab_stop(true),
+        cx.focus_handle().tab_index(3).tab_stop(true),
+        cx.focus_handle(),
+        cx.focus_handle().tab_index(2).tab_stop(true),
+    ];
+    div()
+        .id("app")
+        .track_focus(&root)
+        .size_full()
+        .flex()
+        .flex_col()
+        .p_4()
+        .gap_3()
+        .bg(white())
+        .text_color(black())
+        .child("Press `Tab`, `Shift-Tab` to switch focus.")
+        .children(items.iter().enumerate().map(|(ix, item_handle)| {
+            div()
+                .id(("item", ix))
+                .track_focus(item_handle)
+                .h_10()
+                .w_full()
+                .flex()
+                .justify_center()
+                .items_center()
+                .border_1()
+                .border_color(black())
+                .when(
+                    item_handle.tab_stop && item_handle.is_focused(window),
+                    tab_stop_style,
+                )
+                .map(|this| match item_handle.tab_stop {
+                    true => this
+                        .hover(|this| this.bg(black().with_alpha(0.1)))
+                        .child(format!("tab_index: {}", item_handle.tab_index)),
+                    false => this.opacity(0.4).child("tab_stop: false"),
+                })
+        }))
+        .child(
+            div()
+                .flex()
+                .flex_row()
+                .gap_3()
+                .items_center()
+                .child(tab_stop_button("el1", 4, "Button 1"))
+                .child(tab_stop_button("el2", 5, "Button 2")),
+        )
+}
+
+// ============================================================================
+// example_window — mirrors examples/legacy/window.rs (window chrome)
+// The main window is a button grid; every button opens/inspects a sub-window on
+// click, which is inert headlessly, so the mirror pins the chrome button grid
+// in its initial static state.
+// ============================================================================
+
+fn window_button(label: &'static str) -> Stateful<Div> {
+    div()
+        .id(label)
+        .flex_none()
+        .px_2()
+        .bg(rgb(0xf7f7f7))
+        .active(|this| this.opacity(0.85))
+        .border_1()
+        .border_color(rgb(0xe0e0e0))
+        .rounded_sm()
+        .cursor_pointer()
+        .child(label)
+}
+
+fn example_window(_window: &mut Window, _cx: &mut App) -> impl IntoElement {
+    div()
+        .p_4()
+        .flex()
+        .flex_wrap()
+        .bg(rgb(0xffffff))
+        .size_full()
+        .justify_center()
+        .content_center()
+        .gap_2()
+        .children(
+            [
+                "Normal",
+                "Popup",
+                "Custom Titlebar",
+                "Invisible",
+                "Unmovable",
+                "Unresizable",
+                "Unminimizable",
+                "Hide Application",
+                "Resize",
+                "Prompt",
+                "Prompt (non-English)",
+            ]
+            .map(window_button),
+        )
+}
+
+// ============================================================================
+// example_window_shadow — mirrors examples/legacy/window_shadow.rs
+// The headless test platform reports `Decorations::Server`, so the client-side
+// backdrop/canvas/border/shadow branch never paints; the mirror keeps the match
+// so the snapshot honestly reflects the Server-decorated content (the 0xCCCCFF
+// page, the white shadow_lg card, and the green 200×100 shadow box).
+// ============================================================================
+
+fn example_window_shadow(window: &mut Window, _cx: &mut App) -> impl IntoElement {
+    let decorations = window.window_decorations();
+    let rounding = px(10.0);
+    let shadow_size = px(10.0);
+    let border_size = px(1.0);
+    let grey = rgb(0x808080);
+    window.set_client_inset(shadow_size);
+    div()
+        .id("window-backdrop")
+        .bg(transparent_black())
+        .map(|div| match decorations {
+            Decorations::Server => div,
+            Decorations::Client { tiling, .. } => div
+                .bg(transparent_black())
+                // The example's client-branch canvas only registers hitbox + cursor-style
+                // mouse handlers (it paints nothing), so it is stubbed to empty closures
+                // here; the branch itself never renders headlessly (Decorations::Server).
+                .child(canvas(|_, _, _| {}, |_, _, _, _| {}).size_full().absolute())
+                .when(!(tiling.top || tiling.right), |div| {
+                    div.rounded_tr(rounding)
+                })
+                .when(!(tiling.top || tiling.left), |div| div.rounded_tl(rounding))
+                .when(!tiling.top, |div| div.pt(shadow_size))
+                .when(!tiling.bottom, |div| div.pb(shadow_size))
+                .when(!tiling.left, |div| div.pl(shadow_size))
+                .when(!tiling.right, |div| div.pr(shadow_size)),
+        })
+        .size_full()
+        .child(
+            div()
+                .cursor(CursorStyle::Arrow)
+                .map(|div| match decorations {
+                    Decorations::Server => div,
+                    Decorations::Client { tiling } => div
+                        .border_color(grey)
+                        .when(!(tiling.top || tiling.right), |div| {
+                            div.rounded_tr(rounding)
+                        })
+                        .when(!(tiling.top || tiling.left), |div| div.rounded_tl(rounding))
+                        .when(!tiling.top, |div| div.border_t(border_size))
+                        .when(!tiling.bottom, |div| div.border_b(border_size))
+                        .when(!tiling.left, |div| div.border_l(border_size))
+                        .when(!tiling.right, |div| div.border_r(border_size))
+                        .when(!tiling.is_tiled(), |div| {
+                            div.shadow(vec![
+                                BoxShadow::new(px(0.), px(0.), Hsla::new(0., 0., 0., 0.4))
+                                    .blur_radius(shadow_size / 2.),
+                            ])
+                        }),
+                })
+                .bg(rgb(0xCCCCFF))
+                .size_full()
+                .flex()
+                .flex_col()
+                .justify_around()
+                .child(
+                    div().w_full().flex().flex_row().justify_around().child(
+                        div()
+                            .flex()
+                            .bg(white())
+                            .size(px(300.0))
+                            .justify_center()
+                            .items_center()
+                            .shadow_lg()
+                            .border_1()
+                            .border_color(rgb(0x0000ff))
+                            .text_xl()
+                            .text_color(white())
+                            .child(
+                                div()
+                                    .id("hello")
+                                    .w(px(200.0))
+                                    .h(px(100.0))
+                                    .bg(green())
+                                    .shadow(vec![
+                                        BoxShadow::new(px(0.), px(0.), Hsla::new(0., 0., 0., 1.))
+                                            .blur_radius(px(20.)),
+                                    ])
+                                    .map(|div| match decorations {
+                                        Decorations::Server => div,
+                                        Decorations::Client { .. } => div
+                                            .text_color(black())
+                                            .child("this is the custom titlebar"),
+                                    }),
+                            ),
+                    ),
+                ),
+        )
+}
+
+// ============================================================================
+// example_bench_shadow — mirrors examples/bench/shadow.rs
+// The full shadow-elevations table (12 rows × cells) mirrored verbatim: shape
+// drop-shadows, the elevation presets, blur/spread sweeps, directional shadows,
+// multiple shadows, insets, and the combined drop+inset. This case is larger
+// than the 30-line target because the table is inherently wide; the shared
+// `shadow_swatch`/`shadow_cell`/`shadow_row` helpers keep every row to a line.
+// A tall frame (1000×2600) pins the whole `overflow_y_scroll` table in one frame.
+// ============================================================================
+
+#[derive(Clone, Copy)]
+enum ShadowShape {
+    Circle,
+    Square,
+    Rounded4,
+    Rounded8,
+    Rounded12,
+}
+
+fn shadow_swatch(shape: ShadowShape) -> Div {
+    let base = match shape {
+        ShadowShape::Circle => div().size_16().bg(rgb(0xffffff)).rounded_full(),
+        ShadowShape::Square => div().size_16().bg(rgb(0xffffff)),
+        ShadowShape::Rounded4 => div().size_16().bg(rgb(0xffffff)).rounded(px(4.)),
+        ShadowShape::Rounded8 => div().size_16().bg(rgb(0xffffff)).rounded(px(8.)),
+        ShadowShape::Rounded12 => div().size_16().bg(rgb(0xffffff)).rounded(px(12.)),
+    };
+    base.border_1().border_color(hsla(0.0, 0.0, 0.0, 0.1))
+}
+
+fn shadow_cell(label: &'static str, swatch: Div) -> Div {
+    div()
+        .flex()
+        .flex_col()
+        .justify_center()
+        .items_center()
+        .w(relative(1. / 6.))
+        .border_r_1()
+        .border_color(hsla(0.0, 0.0, 0.0, 1.0))
+        .child(
+            div()
+                .flex()
+                .items_center()
+                .justify_center()
+                .flex_1()
+                .py_12()
+                .child(swatch),
+        )
+        .child(
+            div()
+                .w_full()
+                .border_t_1()
+                .border_color(hsla(0.0, 0.0, 0.0, 1.0))
+                .p_1()
+                .flex()
+                .items_center()
+                .child(label),
+        )
+}
+
+fn shadow_row(cells: impl IntoIterator<Item = Div>) -> Div {
+    div()
+        .border_b_1()
+        .border_color(hsla(0.0, 0.0, 0.0, 1.0))
+        .flex()
+        // The example sets `.w_full()` only on the elevation/inset/drop+inset rows
+        // (bench/shadow.rs:141,523,571); under the parent flex-col's default
+        // align-items:stretch every row already spans the full width, so applying it
+        // uniformly here does not change the layout.
+        .w_full()
+        .children(cells)
+}
+
+fn multiple_shadow() -> Vec<BoxShadow> {
+    vec![
+        BoxShadow::new(px(0.), px(-12.), hsla(0.0 / 360., 1.0, 0.5, 0.3))
+            .blur_radius(px(8.))
+            .spread_radius(px(2.)),
+        BoxShadow::new(px(12.), px(0.), hsla(60.0 / 360., 1.0, 0.5, 0.3))
+            .blur_radius(px(8.))
+            .spread_radius(px(2.)),
+        BoxShadow::new(px(0.), px(12.), hsla(120.0 / 360., 1.0, 0.5, 0.3))
+            .blur_radius(px(8.))
+            .spread_radius(px(2.)),
+        BoxShadow::new(px(-12.), px(0.), hsla(240.0 / 360., 1.0, 0.5, 0.3))
+            .blur_radius(px(8.))
+            .spread_radius(px(2.)),
+    ]
+}
+
+fn inset_shadow(x: f32, y: f32, blur: f32, spread: f32, alpha: f32) -> BoxShadow {
+    BoxShadow::new(px(x), px(y), hsla(0.0, 0.0, 0.0, alpha))
+        .blur_radius(px(blur))
+        .spread_radius(px(spread))
+        .inset()
+}
+
+fn example_bench_shadow(_window: &mut Window, _cx: &mut App) -> impl IntoElement {
+    let pink = |x: f32, y: f32, blur: f32| {
+        BoxShadow::new(px(x), px(y), hsla(0.0, 0.5, 0.5, 0.3)).blur_radius(px(blur))
+    };
+    let ink = |x: f32, y: f32, blur: f32, spread: f32| {
+        BoxShadow::new(px(x), px(y), hsla(0.0, 0.0, 0.0, 0.3))
+            .blur_radius(px(blur))
+            .spread_radius(px(spread))
+    };
+    div()
+        .id("shadow-example")
+        .overflow_y_scroll()
+        .bg(rgb(0xffffff))
+        .size_full()
+        .text_xs()
+        .child(div().flex().flex_col().w_full().children(vec![
+                shadow_row([
+                    shadow_cell(
+                        "Square",
+                        shadow_swatch(ShadowShape::Square).shadow(vec![pink(0., 8., 8.)]),
+                    ),
+                    shadow_cell(
+                        "Rounded 4",
+                        shadow_swatch(ShadowShape::Rounded4).shadow(vec![pink(0., 8., 8.)]),
+                    ),
+                    shadow_cell(
+                        "Rounded 8",
+                        shadow_swatch(ShadowShape::Rounded8).shadow(vec![pink(0., 8., 8.)]),
+                    ),
+                    shadow_cell(
+                        "Rounded 16",
+                        shadow_swatch(ShadowShape::Rounded12).shadow(vec![pink(0., 8., 8.)]),
+                    ),
+                    shadow_cell(
+                        "Circle",
+                        shadow_swatch(ShadowShape::Circle).shadow(vec![pink(0., 8., 8.)]),
+                    ),
+                ]),
+                shadow_row([
+                    shadow_cell("None", shadow_swatch(ShadowShape::Circle)),
+                    shadow_cell("2X Small", shadow_swatch(ShadowShape::Circle).shadow_2xs()),
+                    shadow_cell(
+                        "Extra Small",
+                        shadow_swatch(ShadowShape::Circle).shadow_xs(),
+                    ),
+                    shadow_cell("Small", shadow_swatch(ShadowShape::Circle).shadow_sm()),
+                    shadow_cell("Medium", shadow_swatch(ShadowShape::Circle).shadow_md()),
+                    shadow_cell("Large", shadow_swatch(ShadowShape::Circle).shadow_lg()),
+                    shadow_cell(
+                        "Extra Large",
+                        shadow_swatch(ShadowShape::Circle).shadow_xl(),
+                    ),
+                    shadow_cell("2X Large", shadow_swatch(ShadowShape::Circle).shadow_2xl()),
+                ]),
+                shadow_row([
+                    shadow_cell(
+                        "Blur 0",
+                        shadow_swatch(ShadowShape::Circle).shadow(vec![ink(0., 8., 0., 0.)]),
+                    ),
+                    shadow_cell(
+                        "Blur 2",
+                        shadow_swatch(ShadowShape::Circle).shadow(vec![ink(0., 8., 2., 0.)]),
+                    ),
+                    shadow_cell(
+                        "Blur 4",
+                        shadow_swatch(ShadowShape::Circle).shadow(vec![ink(0., 8., 4., 0.)]),
+                    ),
+                    shadow_cell(
+                        "Blur 8",
+                        shadow_swatch(ShadowShape::Circle).shadow(vec![ink(0., 8., 8., 0.)]),
+                    ),
+                    shadow_cell(
+                        "Blur 16",
+                        shadow_swatch(ShadowShape::Circle).shadow(vec![ink(0., 8., 16., 0.)]),
+                    ),
+                ]),
+                shadow_row([
+                    shadow_cell(
+                        "Spread 0",
+                        shadow_swatch(ShadowShape::Circle).shadow(vec![ink(0., 8., 8., 0.)]),
+                    ),
+                    shadow_cell(
+                        "Spread 2",
+                        shadow_swatch(ShadowShape::Circle).shadow(vec![ink(0., 8., 8., 2.)]),
+                    ),
+                    shadow_cell(
+                        "Spread 4",
+                        shadow_swatch(ShadowShape::Circle).shadow(vec![ink(0., 8., 8., 4.)]),
+                    ),
+                    shadow_cell(
+                        "Spread 8",
+                        shadow_swatch(ShadowShape::Circle).shadow(vec![ink(0., 8., 8., 8.)]),
+                    ),
+                    shadow_cell(
+                        "Spread 16",
+                        shadow_swatch(ShadowShape::Circle).shadow(vec![ink(0., 8., 8., 16.)]),
+                    ),
+                ]),
+                shadow_row([
+                    shadow_cell(
+                        "Square Spread 0",
+                        shadow_swatch(ShadowShape::Square).shadow(vec![ink(0., 8., 8., 0.)]),
+                    ),
+                    shadow_cell(
+                        "Square Spread 8",
+                        shadow_swatch(ShadowShape::Square).shadow(vec![ink(0., 8., 8., 8.)]),
+                    ),
+                    shadow_cell(
+                        "Square Spread 16",
+                        shadow_swatch(ShadowShape::Square).shadow(vec![ink(0., 8., 8., 16.)]),
+                    ),
+                ]),
+                shadow_row([
+                    shadow_cell(
+                        "Rounded Large Spread 0",
+                        shadow_swatch(ShadowShape::Rounded12).shadow(vec![ink(0., 8., 8., 0.)]),
+                    ),
+                    shadow_cell(
+                        "Rounded Large Spread 8",
+                        shadow_swatch(ShadowShape::Rounded12).shadow(vec![ink(0., 8., 8., 8.)]),
+                    ),
+                    shadow_cell(
+                        "Rounded Large Spread 16",
+                        shadow_swatch(ShadowShape::Rounded12).shadow(vec![ink(0., 8., 8., 16.)]),
+                    ),
+                ]),
+                shadow_row([
+                    shadow_cell(
+                        "Left",
+                        shadow_swatch(ShadowShape::Circle).shadow(vec![pink(-8., 0., 8.)]),
+                    ),
+                    shadow_cell(
+                        "Right",
+                        shadow_swatch(ShadowShape::Circle).shadow(vec![pink(8., 0., 8.)]),
+                    ),
+                    shadow_cell(
+                        "Top",
+                        shadow_swatch(ShadowShape::Circle).shadow(vec![pink(0., -8., 8.)]),
+                    ),
+                    shadow_cell(
+                        "Bottom",
+                        shadow_swatch(ShadowShape::Circle).shadow(vec![pink(0., 8., 8.)]),
+                    ),
+                ]),
+                shadow_row([
+                    shadow_cell(
+                        "Square Left",
+                        shadow_swatch(ShadowShape::Square).shadow(vec![pink(-8., 0., 8.)]),
+                    ),
+                    shadow_cell(
+                        "Square Right",
+                        shadow_swatch(ShadowShape::Square).shadow(vec![pink(8., 0., 8.)]),
+                    ),
+                    shadow_cell(
+                        "Square Top",
+                        shadow_swatch(ShadowShape::Square).shadow(vec![pink(0., -8., 8.)]),
+                    ),
+                    shadow_cell(
+                        "Square Bottom",
+                        shadow_swatch(ShadowShape::Square).shadow(vec![pink(0., 8., 8.)]),
+                    ),
+                ]),
+                shadow_row([
+                    shadow_cell(
+                        "Rounded Large Left",
+                        shadow_swatch(ShadowShape::Rounded12).shadow(vec![pink(-8., 0., 8.)]),
+                    ),
+                    shadow_cell(
+                        "Rounded Large Right",
+                        shadow_swatch(ShadowShape::Rounded12).shadow(vec![pink(8., 0., 8.)]),
+                    ),
+                    shadow_cell(
+                        "Rounded Large Top",
+                        shadow_swatch(ShadowShape::Rounded12).shadow(vec![pink(0., -8., 8.)]),
+                    ),
+                    shadow_cell(
+                        "Rounded Large Bottom",
+                        shadow_swatch(ShadowShape::Rounded12).shadow(vec![pink(0., 8., 8.)]),
+                    ),
+                ]),
+                shadow_row([
+                    shadow_cell(
+                        "Circle Multiple",
+                        shadow_swatch(ShadowShape::Circle).shadow(multiple_shadow()),
+                    ),
+                    shadow_cell(
+                        "Square Multiple",
+                        shadow_swatch(ShadowShape::Square).shadow(multiple_shadow()),
+                    ),
+                    shadow_cell(
+                        "Rounded Large Multiple",
+                        shadow_swatch(ShadowShape::Rounded12).shadow(multiple_shadow()),
+                    ),
+                ]),
+                shadow_row([
+                    shadow_cell(
+                        "Inset basic",
+                        shadow_swatch(ShadowShape::Circle)
+                            .shadow(vec![inset_shadow(0., 0., 12., 0., 0.5)]),
+                    ),
+                    shadow_cell(
+                        "Inset offset",
+                        shadow_swatch(ShadowShape::Circle)
+                            .shadow(vec![inset_shadow(6., 6., 8., 0., 0.5)]),
+                    ),
+                    shadow_cell(
+                        "Inset spread",
+                        shadow_swatch(ShadowShape::Circle)
+                            .shadow(vec![inset_shadow(0., 0., 4., 8., 0.5)]),
+                    ),
+                    shadow_cell(
+                        "Inset rounded",
+                        shadow_swatch(ShadowShape::Rounded12)
+                            .shadow(vec![inset_shadow(0., 4., 10., 2., 0.5)]),
+                    ),
+                    shadow_cell(
+                        "Inset sharp",
+                        shadow_swatch(ShadowShape::Square)
+                            .shadow(vec![inset_shadow(0., 0., 0., 6., 0.6)]),
+                    ),
+                ]),
+                shadow_row([shadow_cell(
+                    "Drop + Inset",
+                    shadow_swatch(ShadowShape::Rounded8).shadow(vec![
+                        BoxShadow::new(px(0.), px(8.), hsla(0.0, 0.0, 0.0, 0.25))
+                            .blur_radius(px(12.)),
+                        BoxShadow::new(px(0.), px(2.), hsla(0.0, 0.0, 0.0, 0.4))
+                            .blur_radius(px(4.))
+                            .inset(),
+                    ]),
+                )]),
+            ]))
+}
+
+// ============================================================================
+// example_bench_pattern — mirrors examples/bench/pattern.rs
+// The full (already-small) example: a label, two blue-bordered pattern-strip
+// columns, and solid/gradient control blocks.
+// ============================================================================
+
+fn pattern_strip(w: f32, h: f32, color: Hsla, width: f32, interval: f32) -> Div {
+    div()
+        .w(px(w))
+        .h(px(h))
+        .bg(pattern_slash(color, width, interval))
+}
+
+fn example_bench_pattern(_window: &mut Window, _cx: &mut App) -> impl IntoElement {
+    div()
+        .flex()
+        .flex_col()
+        .gap_3()
+        .bg(white())
+        .size(px(600.0))
+        .justify_center()
+        .items_center()
+        .shadow_lg()
+        .text_xl()
+        .text_color(black())
+        .child("Pattern Example")
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .border_1()
+                .border_color(blue())
+                .child(pattern_strip(54.0, 18.0, red(), 18.0 / 4.0, 18.0 / 4.0))
+                .child(pattern_strip(54.0, 18.0, red(), 18.0 / 4.0, 18.0 / 4.0))
+                .child(pattern_strip(54.0, 18.0, red(), 18.0 / 4.0, 18.0 / 4.0))
+                .child(pattern_strip(54.0, 18.0, red(), 18.0 / 4.0, 18.0 / 2.0)),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .border_1()
+                .border_color(blue())
+                .bg(green().with_alpha(0.16))
+                .child("Elements the same height should align")
+                .child(pattern_strip(256.0, 56.0, red(), 56.0 / 6.0, 56.0 / 6.0))
+                .child(pattern_strip(256.0, 56.0, green(), 56.0 / 6.0, 56.0 / 6.0))
+                .child(pattern_strip(256.0, 56.0, blue(), 56.0 / 6.0, 56.0 / 6.0))
+                .child(pattern_strip(256.0, 26.0, yellow(), 56.0 / 6.0, 56.0 / 6.0)),
+        )
+        .child(
+            div()
+                .border_1()
+                .border_color(blue())
+                .w(px(240.0))
+                .h(px(40.0))
+                .bg(red()),
+        )
+        .child(
+            div()
+                .border_1()
+                .border_color(blue())
+                .w(px(240.0))
+                .h(px(40.0))
+                .bg(linear_gradient(
+                    45.,
+                    linear_color_stop(red(), 0.),
+                    linear_color_stop(blue(), 1.),
+                )),
+        )
+}
+
+// ============================================================================
+// example_paths_bench — mirrors examples/bench/paths_bench.rs
+// The bench builds 2000 identical lightning-bolt paths; the mirror keeps the
+// exact star geometry from the loop body but draws five translated copies so the
+// snapshot pins the path tessellation + Oklab gradient at small scale.
+// ============================================================================
+
+fn star_path(offset_x: f32, offset_y: f32) -> Path<Pixels> {
+    let mut builder = PathBuilder::fill();
+    builder.move_to(point(px(350. + offset_x), px(100. + offset_y)));
+    builder.line_to(point(px(370. + offset_x), px(160. + offset_y)));
+    builder.line_to(point(px(430. + offset_x), px(160. + offset_y)));
+    builder.line_to(point(px(380. + offset_x), px(200. + offset_y)));
+    builder.line_to(point(px(400. + offset_x), px(260. + offset_y)));
+    builder.line_to(point(px(350. + offset_x), px(220. + offset_y)));
+    builder.line_to(point(px(300. + offset_x), px(260. + offset_y)));
+    builder.line_to(point(px(320. + offset_x), px(200. + offset_y)));
+    builder.line_to(point(px(270. + offset_x), px(160. + offset_y)));
+    builder.line_to(point(px(330. + offset_x), px(160. + offset_y)));
+    builder.line_to(point(px(350. + offset_x), px(100. + offset_y)));
+    builder.build().unwrap()
+}
+
+fn example_paths_bench(_window: &mut Window, _cx: &mut App) -> impl IntoElement {
+    // The example calls `window.request_animation_frame()` every render to keep the
+    // bench redrawing; a static mirror omits it (it only schedules a next frame, so
+    // it is inert for a single pinned frame).
+    let lines: Vec<(Path<Pixels>, Background)> =
+        [(0., 0.), (150., 0.), (0., 180.), (150., 180.), (75., 360.)]
+            .map(|(ox, oy)| {
+                (
+                    star_path(ox, oy),
+                    linear_gradient(
+                        180.,
+                        linear_color_stop(rgb(0xFACC15), 0.7),
+                        linear_color_stop(rgb(0xD56D0C), 1.),
+                    )
+                    .color_space(ColorSpace::Oklab),
+                )
+            })
+            .to_vec();
+    div().size_full().child(
+        canvas(
+            move |_, _, _| {},
+            move |_, _, window, _| {
+                for (path, color) in lines {
+                    window.paint_path(path, color);
+                }
+            },
+        )
+        .size_full(),
+    )
+}
+
+// ============================================================================
+// example_data_table — mirrors examples/bench/data_table.rs
+// The bench generates 10000 random quotes; the mirror keeps the header +
+// zebra-striped uniform_list + first-frame scrollbar structure with 20
+// deterministic rows and the example's *full* 24-column FIELDS. The visible-range
+// header is the example's first-frame "0..0" value (set by the list's processor
+// during layout).
+// ============================================================================
+
+const TABLE_FIELDS: [(&str, f32); 24] = [
+    ("id", 64.),
+    ("symbol", 64.),
+    ("name", 180.),
+    ("last_done", 80.),
+    ("prev_close", 80.),
+    ("open", 80.),
+    ("low", 80.),
+    ("high", 80.),
+    ("ttm", 50.),
+    ("market_cap", 96.),
+    ("float_cap", 96.),
+    ("turnover", 120.),
+    ("volume", 100.),
+    ("turnover_ratio", 96.),
+    ("pe", 64.),
+    ("pb", 64.),
+    ("eps", 64.),
+    ("shares", 96.),
+    ("dividend", 64.),
+    ("yield", 64.),
+    ("dividend_per_share", 64.),
+    ("dividend_date", 96.),
+    ("dividend_payment", 64.),
+    ("timestamp", 120.),
+];
+
+fn table_cell(key: &str, width: f32, ix: usize, color: Hsla) -> Div {
+    // `render_cell` colors exactly the market-data cells; the rest keep the default
+    // text color. Values are deterministic stand-ins for the bench's random quotes.
+    let (value, colored) = match key {
+        "id" => (format!("{ix}"), false),
+        "symbol" => (format!("TICK{ix:03}"), false),
+        "name" => (format!("Quote #{ix:05}"), false),
+        "last_done" => (format!("{:.3}", 100.0 + ix as f64), true),
+        "prev_close" => (format!("{:.3}", 100.0), true),
+        "open" => (format!("{:.2}", 101.0 + ix as f64), true),
+        "low" => (format!("{:.2}", 99.0 + ix as f64), true),
+        "high" => (format!("{:.2}", 103.0 + ix as f64), true),
+        "ttm" => (format!("{:.2}", ix as f64 * 0.5), false),
+        "market_cap" => (format!("{:.2} M", 2.0 + ix as f64 * 0.1), false),
+        "float_cap" => (format!("{:.2} M", 2.05 + ix as f64 * 0.1), false),
+        "turnover" => (format!("{:.2} M", 4.0 + ix as f64 * 0.2), false),
+        "volume" => (format!("{:.2} M", 1.0 + ix as f64 * 0.1), false),
+        "turnover_ratio" => {
+            let volume = 1.0 + ix as f64 * 0.1;
+            let turnover = 4.0 + ix as f64 * 0.2;
+            (format!("{:.2}%", volume / turnover * 100.0), false)
+        }
+        "pe" => (format!("{:.2}", 12.0 + ix as f64 * 0.25), false),
+        "pb" => (format!("{:.2}", 1.5 + ix as f64 * 0.05), false),
+        "eps" => (format!("{:.2}", 8.0 + ix as f64 * 0.1), false),
+        "shares" => (format!("{:.2}", 500.0 + ix as f64 * 10.0), false),
+        "dividend" => (format!("{:.2}", 0.5 + ix as f64 * 0.05), false),
+        "yield" => (format!("{:.2}%", 1.0 + ix as f64 * 0.1), false),
+        "dividend_per_share" => (format!("{:.2}", 0.25 + ix as f64 * 0.05), false),
+        "dividend_date" => (
+            format!(
+                "{}-{:02}-{:02}",
+                2020 + ix % 3,
+                (ix % 12) + 1,
+                (ix % 27) + 1
+            ),
+            false,
+        ),
+        "dividend_payment" => (format!("{:.2}", 0.3 + ix as f64 * 0.03), false),
+        "timestamp" => (format!("{}", ix * 60), true),
+        _ => ("--".to_string(), false),
+    };
+    let text = if colored {
+        div().text_color(color).child(value)
+    } else {
+        div().child(value)
+    };
+    div()
+        .whitespace_nowrap()
+        .truncate()
+        .w(px(width))
+        .px_1()
+        .child(text)
+}
+
+fn table_row(ix: usize) -> Div {
+    // `change_color()` is green when change > 0, else red; change == ix here.
+    let color = if ix > 0 { green() } else { red() };
+    div()
+        .flex()
+        .flex_row()
+        .border_b_1()
+        .border_color(rgb(0xE0E0E0))
+        .bg(if ix.is_multiple_of(2) {
+            rgb(0xFFFFFF)
+        } else {
+            rgb(0xFAFAFA)
+        })
+        .py_0p5()
+        .px_2()
+        .children(TABLE_FIELDS.map(|(key, width)| table_cell(key, width, ix, color)))
+}
+
+fn example_data_table(_window: &mut Window, _cx: &mut App) -> impl IntoElement {
+    const TOTAL_ITEMS: usize = 20; // the bench generates 10000 random quotes
+    div()
+        .bg(white())
+        .text_sm()
+        .size_full()
+        .p_4()
+        .gap_2()
+        .flex()
+        .flex_col()
+        .child(format!("Total {TOTAL_ITEMS} items, visible range: 0..0"))
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .flex_1()
+                .overflow_hidden()
+                .border_1()
+                .border_color(rgb(0xE0E0E0))
+                .rounded_sm()
+                .child(
+                    div()
+                        .flex()
+                        .flex_row()
+                        .w_full()
+                        .overflow_hidden()
+                        .border_b_1()
+                        .border_color(rgb(0xE0E0E0))
+                        .text_color(rgb(0x555555))
+                        .bg(rgb(0xF0F0F0))
+                        .py_1()
+                        .px_2()
+                        .text_xs()
+                        .children(TABLE_FIELDS.map(|(key, width)| {
+                            div()
+                                .whitespace_nowrap()
+                                .flex_shrink_0()
+                                .truncate()
+                                .px_1()
+                                .w(px(width))
+                                .child(key.replace("_", " ").to_uppercase())
+                        })),
+                )
+                .child(
+                    div()
+                        .relative()
+                        .size_full()
+                        .child(
+                            uniform_list("items", TOTAL_ITEMS, |range, _window, _cx| {
+                                range.map(table_row).collect::<Vec<_>>()
+                            })
+                            .size_full(),
+                        )
+                        // First frame: scroll metrics aren't laid out yet, so the example's
+                        // render_scrollbar returns the empty `div().id("scrollbar")` placeholder.
+                        .child(div().id("scrollbar")),
+                ),
+        )
+}
+
+/// Renders every statically-mirrorable learn/legacy/bench example on the harness
+/// window and snapshots its finished scene archive.
 #[test]
 fn learn_example_scenes_match_snapshots() {
     let mut cx = TestAppContext::single();
@@ -2448,14 +3577,74 @@ fn learn_example_scenes_match_snapshots() {
             Box::new(|window, cx| example_animation(window, cx).into_any_element()),
         ),
         (
-            "opacity", // examples/legacy/opacity.rs
+            "opacity", // examples/legacy/opacity.rs (already covered by Seg1)
             size(px(500.), px(500.)),
             Box::new(|window, cx| example_opacity(window, cx).into_any_element()),
         ),
         (
-            "gradient", // examples/legacy/gradient.rs
+            "gradient", // examples/legacy/gradient.rs (already covered by Seg1)
             size(px(800.), px(800.)),
             Box::new(|window, cx| example_gradient(window, cx).into_any_element()),
+        ),
+        (
+            "hello_world", // examples/legacy/hello_world.rs
+            size(px(500.), px(500.)),
+            Box::new(|window, cx| example_hello_world(window, cx).into_any_element()),
+        ),
+        (
+            "scrollable", // examples/legacy/scrollable.rs (wide+tall frame pins the whole mirrored tree)
+            size(px(2070.), px(5100.)),
+            Box::new(|window, cx| example_scrollable(window, cx).into_any_element()),
+        ),
+        (
+            "tree", // examples/legacy/tree.rs
+            size(px(300.), px(300.)),
+            Box::new(|window, cx| example_tree(window, cx).into_any_element()),
+        ),
+        (
+            "uniform_list", // examples/legacy/uniform_list.rs
+            size(px(300.), px(300.)),
+            Box::new(|window, cx| example_uniform_list(window, cx).into_any_element()),
+        ),
+        (
+            "focus_visible", // examples/legacy/focus_visible.rs (initial focus: no rings)
+            size(px(800.), px(600.)),
+            Box::new(|window, cx| example_focus_visible(window, cx).into_any_element()),
+        ),
+        (
+            "tab_stop", // examples/legacy/tab_stop.rs (initial focus: no rings)
+            size(px(800.), px(600.)),
+            Box::new(|window, cx| example_tab_stop(window, cx).into_any_element()),
+        ),
+        (
+            "window", // examples/legacy/window.rs (chrome: sub-windows open on click, inert headlessly)
+            size(px(800.), px(600.)),
+            Box::new(|window, cx| example_window(window, cx).into_any_element()),
+        ),
+        (
+            "window_shadow", // examples/legacy/window_shadow.rs (Decorations::Server headlessly)
+            size(px(600.), px(600.)),
+            Box::new(|window, cx| example_window_shadow(window, cx).into_any_element()),
+        ),
+        (
+            "bench_shadow", // examples/bench/shadow.rs (shadow elevations table; tall frame pins whole overflow_y_scroll table)
+            size(px(1000.), px(2600.)),
+            Box::new(|window, cx| example_bench_shadow(window, cx).into_any_element()),
+        ),
+        (
+            "bench_pattern", // examples/bench/pattern.rs
+            size(px(600.), px(600.)),
+            Box::new(|window, cx| example_bench_pattern(window, cx).into_any_element()),
+        ),
+        (
+            "bench_paths", // examples/bench/paths_bench.rs (small scale: 5 stars, not 2000)
+            size(px(1024.), px(768.)),
+            Box::new(|window, cx| example_paths_bench(window, cx).into_any_element()),
+        ),
+        (
+            "bench_data_table", // examples/bench/data_table.rs (20 deterministic rows, not 10000 random; full 24-column FIELDS on a widened frame)
+            size(px(2070.), px(1000.)),
+            Box::new(|window, cx| example_data_table(window, cx).into_any_element()),
         ),
     ];
     for (name, window_size, build) in cases {
