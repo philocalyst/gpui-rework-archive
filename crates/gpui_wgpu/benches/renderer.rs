@@ -1,4 +1,4 @@
-use criterion::{BatchSize, Criterion, black_box, criterion_group, criterion_main};
+use criterion::{Criterion, criterion_group, criterion_main};
 use gpui::{
     Bounds, ContentMask, DevicePixels, PlatformHeadlessRenderer, Point, Quad, ScaledPixels, Scene,
     ShaderBool, Size, Underline, solid_background, white,
@@ -116,28 +116,6 @@ fn bench_renderer(c: &mut Criterion) {
             renderer
                 .render_scene_and_wait(&mixed_batches, TARGET_SIZE)
                 .expect("mixed batch render must succeed")
-        })
-    });
-    group.finish();
-
-    let mut group = c.benchmark_group("scene_plan");
-    group.bench_function("compile_1024_mixed_batches", |b| {
-        b.iter_batched(
-            || unplanned_mixed_scene(512),
-            |mut scene| {
-                scene.finish();
-                black_box(*scene.render_plan().requirements())
-            },
-            BatchSize::SmallInput,
-        )
-    });
-    let mut mixed_scene = unplanned_mixed_scene(512);
-    mixed_scene.finish();
-    group.bench_function("traverse_1024_mixed_batches", |b| {
-        b.iter(|| {
-            for command in mixed_scene.render_commands() {
-                black_box(command);
-            }
         })
     });
     group.finish();
