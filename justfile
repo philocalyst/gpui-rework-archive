@@ -148,6 +148,26 @@ bench-smoke:
     cargo bench --workspace --no-run
     print "Bench binary compiled OK."
 
+# GPU-gated end-to-end renderer benches (crates/gpui_wgpu/benches/renderer.rs).
+# Opt-in via GPUI_BENCH_GPU=1; the bench self-skips otherwise so T0/bench-smoke
+# never touch the GPU. Adapter comes from WgpuContext::native_backends() with
+# PowerPreference::LowPower (Metal on macOS, DX12/Vulkan/GL on Windows,
+# Vulkan/GL on Linux). wgpu 29 has no dx11 backend, and it only honors
+# WGPU_BACKEND/WGPU_ADAPTER_NAME/WGPU_DX12_COMPILER when the crate calls
+# Backends::from_env() — the headless path does not, so pick the platform's
+# default software adapter instead:
+#   Windows: DX12 WARP (Basic Render Driver)
+#   Linux:   Vulkan=lavapipe, GL=llvmpipe (Mesa)
+#   macOS:   no software Metal; needs a real Metal device
+# Quick smoke: bench-gpu -- --measurement-time 1
+[doc('Run GPU-gated renderer benches (opt-in; requires a GPU or software adapter)')]
+[group('testing')]
+bench-gpu *flags:
+    #!/usr/bin/env nu
+    with-env {GPUI_BENCH_GPU: "1"} {
+        cargo bench -p gpui_ce_wgpu --bench renderer --features test-support {{ flags }}
+    }
+
 [doc('Archive nextest binary set for CI caching')]
 [group('testing')]
 nextest-archive:
