@@ -4395,8 +4395,8 @@ impl ScrollHandle {
 mod tests {
     use super::*;
     use crate::{
-        AnyWindowHandle, Context, InputEvent, Keystroke, MouseMoveEvent, TestAppContext, canvas,
-        util::FluentBuilder as _,
+        AnyWindowHandle, Canvas, Context, InputEvent, Keystroke, MouseMoveEvent, TestAppContext,
+        canvas, relative, util::FluentBuilder as _,
     };
     use std::{cell::Cell, rc::Weak};
 
@@ -5177,5 +5177,309 @@ mod tests {
             .unwrap();
 
         assert_eq!(focused, Some(item_b.id));
+    }
+
+    /// Deterministic, CPU-only layout harness. A view renders a declarative
+    /// `Div` tree whose leaves are styled probe elements that capture their own
+    /// resolved bounds by index. Layout happens entirely on the headless test
+    /// window; no fonts, GPU, or manual taffy calls are needed.
+    struct LayoutFixture {
+        captured: Rc<RefCell<Vec<Option<Bounds<Pixels>>>>>,
+    }
+
+    impl LayoutFixture {
+        fn probe(&self, index: usize) -> Canvas<()> {
+            let captured = self.captured.clone();
+            canvas(
+                move |bounds, _, _| {
+                    let mut captured = captured.borrow_mut();
+                    if captured.len() <= index {
+                        captured.resize(index + 1, None);
+                    }
+                    captured[index] = Some(bounds);
+                },
+                |_, _, _, _| {},
+            )
+        }
+    }
+
+    struct LayoutView<R> {
+        fixture: Rc<RefCell<LayoutFixture>>,
+        root_size: Size<Pixels>,
+        build: Box<dyn Fn(&mut LayoutFixture) -> R>,
+    }
+
+    impl<R> Render for LayoutView<R>
+    where
+        R: Styled + IntoElement + 'static,
+    {
+        fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+            let mut fixture = self.fixture.borrow_mut();
+            let root = (self.build)(&mut fixture);
+            root.w(self.root_size.width).h(self.root_size.height)
+        }
+    }
+
+    struct LayoutTree {
+        window: AnyWindowHandle,
+        captured: Rc<RefCell<Vec<Option<Bounds<Pixels>>>>>,
+    }
+
+    impl LayoutTree {
+        fn bounds(&self, index: usize) -> Bounds<Pixels> {
+            self.captured
+                .borrow()
+                .get(index)
+                .and_then(Clone::clone)
+                .expect("layout probe index out of range")
+        }
+
+        fn redraw(&self, cx: &mut TestAppContext) {
+            cx.update_window(self.window, |_, window, cx| window.draw(cx).clear(cx))
+                .unwrap();
+        }
+    }
+
+    fn layout_tree<R>(
+        cx: &mut TestAppContext,
+        root_size: Size<Pixels>,
+        build: impl Fn(&mut LayoutFixture) -> R + 'static,
+    ) -> LayoutTree
+    where
+        R: Styled + IntoElement + 'static,
+    {
+        let fixture = Rc::new(RefCell::new(LayoutFixture {
+            captured: Rc::new(RefCell::new(Vec::new())),
+        }));
+        let window: AnyWindowHandle = cx
+            .add_window({
+                let fixture = fixture.clone();
+                move |_, _| LayoutView::<R> {
+                    fixture,
+                    root_size,
+                    build: Box::new(build),
+                }
+            })
+            .into();
+        cx.update_window(window, |_, window, cx| window.draw(cx).clear(cx))
+            .unwrap();
+        LayoutTree {
+            window,
+            captured: fixture.borrow().captured.clone(),
+        }
+    }
+
+    #[test]
+    fn flex_row_distributes_grow_space_proportionally() {
+        let mut cx = TestAppContext::single();
+        let layout = layout_tree(&mut cx, size(px(200.), px(100.)), |f| {
+            div()
+                .flex()
+                .flex_row()
+                .items_start()
+                .child(f.probe(0).flex_grow(1.).h(px(20.)))
+                .child(f.probe(1).flex_grow(3.).h(px(20.)))
+        });
+        assert_eq!(layout.bounds(0).origin, point(px(0.), px(0.)));
+        assert_eq!(layout.bounds(0).size, size(px(50.), px(20.)));
+        assert_eq!(layout.bounds(1).origin, point(px(50.), px(0.)));
+        assert_eq!(layout.bounds(1).size, size(px(150.), px(20.)));
+    }
+
+    #[test]
+    fn flex_column_distributes_grow_space_proportionally() {
+        let mut cx = TestAppContext::single();
+        let layout = layout_tree(&mut cx, size(px(100.), px(300.)), |f| {
+            div()
+                .flex()
+                .flex_col()
+                .child(f.probe(0).flex_grow(1.))
+                .child(f.probe(1).flex_grow(2.))
+        });
+        assert_eq!(layout.bounds(0).origin, point(px(0.), px(0.)));
+        assert_eq!(layout.bounds(0).size, size(px(100.), px(100.)));
+        assert_eq!(layout.bounds(1).origin, point(px(0.), px(100.)));
+        assert_eq!(layout.bounds(1).size, size(px(100.), px(200.)));
+    }
+
+    #[test]
+    fn flex_shrink_reduces_items_to_fit_container() {
+        let mut cx = TestAppContext::single();
+        let layout = layout_tree(&mut cx, size(px(200.), px(100.)), |f| {
+            div()
+                .flex()
+                .flex_row()
+                .items_start()
+                .child(f.probe(0).w(px(100.)).h(px(20.)).flex_shrink(0.))
+                .child(f.probe(1).w(px(100.)).h(px(20.)))
+                .child(f.probe(2).w(px(100.)).h(px(20.)))
+        });
+        assert_eq!(layout.bounds(0).size, size(px(100.), px(20.)));
+        assert_eq!(layout.bounds(1).origin.x, px(100.));
+        assert_eq!(layout.bounds(1).size, size(px(50.), px(20.)));
+        assert_eq!(layout.bounds(2).origin.x, px(150.));
+        assert_eq!(layout.bounds(2).size, size(px(50.), px(20.)));
+    }
+
+    #[test]
+    fn min_and_max_size_clamp_flex_distribution() {
+        let mut cx = TestAppContext::single();
+        let layout = layout_tree(&mut cx, size(px(300.), px(100.)), |f| {
+            div()
+                .flex()
+                .flex_row()
+                .items_start()
+                .child(f.probe(0).flex_grow(1.).max_w(px(40.)).h(px(20.)))
+                .child(f.probe(1).flex_grow(1.).h(px(20.)))
+                .child(f.probe(2).flex_grow(1.).h(px(20.)))
+        });
+        assert_eq!(layout.bounds(0).size.width, px(40.));
+        assert_eq!(layout.bounds(1).origin.x, px(40.));
+        assert_eq!(layout.bounds(1).size.width, px(130.));
+        assert_eq!(layout.bounds(2).size.width, px(130.));
+
+        let layout = layout_tree(&mut cx, size(px(300.), px(100.)), |f| {
+            div()
+                .flex()
+                .flex_row()
+                .items_start()
+                .child(f.probe(0).flex_grow(1.).min_w(px(150.)).h(px(20.)))
+                .child(f.probe(1).flex_grow(1.).h(px(20.)))
+                .child(f.probe(2).flex_grow(1.).h(px(20.)))
+        });
+        assert_eq!(layout.bounds(0).size.width, px(150.));
+        assert_eq!(layout.bounds(1).origin.x, px(150.));
+        assert_eq!(layout.bounds(1).size.width, px(75.));
+        assert_eq!(layout.bounds(2).size.width, px(75.));
+    }
+
+    #[test]
+    fn aspect_ratio_resolves_missing_dimension() {
+        let mut cx = TestAppContext::single();
+        let layout = layout_tree(&mut cx, size(px(200.), px(100.)), |f| {
+            div().child(f.probe(0).w(px(100.)).aspect_ratio(2.))
+        });
+        assert_eq!(layout.bounds(0).size, size(px(100.), px(50.)));
+
+        let layout = layout_tree(&mut cx, size(px(200.), px(100.)), |f| {
+            div().child(f.probe(0).h(px(60.)).aspect_ratio(1.5))
+        });
+        assert_eq!(layout.bounds(0).size, size(px(90.), px(60.)));
+    }
+
+    #[test]
+    fn flex_gap_separates_children_in_both_axes() {
+        let mut cx = TestAppContext::single();
+        let layout = layout_tree(&mut cx, size(px(200.), px(100.)), |f| {
+            div()
+                .flex()
+                .flex_row()
+                .items_start()
+                .gap(px(25.))
+                .child(f.probe(0).w(px(50.)).h(px(20.)))
+                .child(f.probe(1).w(px(50.)).h(px(20.)))
+                .child(f.probe(2).w(px(50.)).h(px(20.)))
+        });
+        assert_eq!(layout.bounds(0).origin.x, px(0.));
+        assert_eq!(layout.bounds(1).origin.x, px(75.));
+        assert_eq!(layout.bounds(2).origin.x, px(150.));
+
+        let layout = layout_tree(&mut cx, size(px(100.), px(200.)), |f| {
+            div()
+                .flex()
+                .flex_col()
+                .items_start()
+                .gap(px(25.))
+                .child(f.probe(0).w(px(60.)).h(px(50.)))
+                .child(f.probe(1).w(px(60.)).h(px(50.)))
+                .child(f.probe(2).w(px(60.)).h(px(50.)))
+        });
+        assert_eq!(layout.bounds(0).origin.y, px(0.));
+        assert_eq!(layout.bounds(1).origin.y, px(75.));
+        assert_eq!(layout.bounds(2).origin.y, px(150.));
+    }
+
+    #[test]
+    fn padding_and_border_inset_children() {
+        let mut cx = TestAppContext::single();
+        let layout = layout_tree(&mut cx, size(px(100.), px(100.)), |f| {
+            div()
+                .p(px(10.))
+                .border(px(2.))
+                .child(f.probe(0).size_full())
+        });
+        assert_eq!(layout.bounds(0).origin, point(px(12.), px(12.)));
+        assert_eq!(layout.bounds(0).size, size(px(76.), px(76.)));
+    }
+
+    #[test]
+    fn percentage_sizes_resolve_against_parent() {
+        let mut cx = TestAppContext::single();
+        let layout = layout_tree(&mut cx, size(px(200.), px(100.)), |f| {
+            div().child(f.probe(0).w(relative(0.5)).h(relative(0.5)))
+        });
+        assert_eq!(layout.bounds(0).origin, point(px(0.), px(0.)));
+        assert_eq!(layout.bounds(0).size, size(px(100.), px(50.)));
+    }
+
+    #[test]
+    fn absolute_positioning_places_child_in_containing_block() {
+        let mut cx = TestAppContext::single();
+        let layout = layout_tree(&mut cx, size(px(200.), px(200.)), |f| {
+            div().relative().child(
+                f.probe(0)
+                    .absolute()
+                    .left(px(20.))
+                    .top(px(30.))
+                    .w(px(50.))
+                    .h(px(40.)),
+            )
+        });
+        assert_eq!(layout.bounds(0).origin, point(px(20.), px(30.)));
+        assert_eq!(layout.bounds(0).size, size(px(50.), px(40.)));
+    }
+
+    #[test]
+    fn scroll_container_keeps_bounds_and_child_overflow_is_unclamped() {
+        let mut cx = TestAppContext::single();
+        let handle = ScrollHandle::new();
+        let layout = layout_tree(&mut cx, size(px(100.), px(50.)), {
+            let handle = handle.clone();
+            move |f| {
+                div()
+                    .id("scroll")
+                    .track_scroll(&handle)
+                    .overflow_scroll()
+                    .child(f.probe(0).w(px(300.)).h(px(80.)))
+            }
+        });
+        assert_eq!(handle.bounds().size, size(px(100.), px(50.)));
+        assert_eq!(layout.bounds(0).origin, point(px(0.), px(0.)));
+        assert_eq!(layout.bounds(0).size, size(px(300.), px(80.)));
+    }
+
+    #[test]
+    fn scroll_offset_clamps_when_content_larger_than_viewport() {
+        let mut cx = TestAppContext::single();
+        let handle = ScrollHandle::new();
+        let layout = layout_tree(&mut cx, size(px(100.), px(100.)), {
+            let handle = handle.clone();
+            move |f| {
+                div()
+                    .id("scroll")
+                    .track_scroll(&handle)
+                    .overflow_scroll()
+                    .child(f.probe(0).w(px(300.)).h(px(300.)))
+            }
+        });
+        assert_eq!(handle.max_offset(), point(px(200.), px(200.)));
+
+        handle.set_offset(point(px(-999.), px(-999.)));
+        layout.redraw(&mut cx);
+        assert_eq!(handle.offset(), point(px(-200.), px(-200.)));
+
+        handle.set_offset(point(px(50.), px(50.)));
+        layout.redraw(&mut cx);
+        assert_eq!(handle.offset(), point(px(0.), px(0.)));
     }
 }

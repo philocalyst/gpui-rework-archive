@@ -1599,4 +1599,79 @@ mod tests {
             style.text_style().unwrap().font_weight
         );
     }
+
+    #[test]
+    fn style_refinement_merge_later_wins_and_none_preserves() {
+        let mut style = Style::default();
+        style.refine(
+            &StyleRefinement::default()
+                .w(px(100.))
+                .h(px(50.))
+                .p(px(10.))
+                .flex_grow(2.)
+                .flex_col()
+                .gap(px(5.)),
+        );
+
+        style.refine(
+            &StyleRefinement::default()
+                .w(px(200.))
+                .h(px(30.))
+                .flex_grow(4.),
+        );
+
+        assert_eq!(
+            style.size,
+            size(Length::from(px(200.)), Length::from(px(30.)))
+        );
+        assert_eq!(style.flex_grow, 4.);
+        assert_eq!(style.padding, Edges::all(px(10.).into()));
+        assert_eq!(style.gap, size(px(5.).into(), px(5.).into()));
+        assert_eq!(style.flex_direction, FlexDirection::Column);
+    }
+
+    #[test]
+    fn style_refinement_edges_merge_elementwise_preserving_unset_sides() {
+        let mut style = Style::default();
+        style.refine(
+            &StyleRefinement::default()
+                .mt(px(1.))
+                .mr(px(2.))
+                .mb(px(3.))
+                .ml(px(4.)),
+        );
+
+        style.refine(&StyleRefinement::default().mt(px(10.)).ml(px(20.)));
+
+        assert_eq!(style.margin.top, Length::from(px(10.)));
+        assert_eq!(style.margin.left, Length::from(px(20.)));
+        assert_eq!(style.margin.right, Length::from(px(2.)));
+        assert_eq!(style.margin.bottom, Length::from(px(3.)));
+    }
+
+    #[test]
+    fn style_refinement_scalar_and_text_override_preserves_unmentioned_fields() {
+        let mut style = Style::default();
+        style.refine(
+            &StyleRefinement::default()
+                .text_size(px(12.))
+                .opacity(0.5)
+                .aspect_ratio(1.5)
+                .flex_direction(FlexDirection::RowReverse),
+        );
+
+        style.refine(
+            &StyleRefinement::default()
+                .text_size(px(16.))
+                .flex_direction(FlexDirection::Column),
+        );
+
+        assert_eq!(
+            style.text_style().unwrap().font_size,
+            Some(AbsoluteLength::from(px(16.)))
+        );
+        assert_eq!(style.opacity, Some(0.5));
+        assert_eq!(style.aspect_ratio, Some(1.5));
+        assert_eq!(style.flex_direction, FlexDirection::Column);
+    }
 }
