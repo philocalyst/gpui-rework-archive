@@ -352,4 +352,16 @@ mod tests {
         let value = seed_strategy().new_tree(&mut runner).unwrap().current();
         assert_eq!(value, 42);
     }
+
+    #[gpui::property_test]
+    fn calculate_seeds_replay_is_deterministic(
+        #[strategy = 0usize..64] iterations: usize,
+        #[strategy = ::gpui::proptest::collection::vec(0u64..1000u64, 0..8)] explicit: Vec<u64>,
+    ) {
+        // The same inputs (including whatever `SEED`/`ITERATIONS` the environment pins)
+        // must reproduce the same seed vector, so a failing seed can be replayed.
+        let (first, _) = calculate_seeds(iterations as u64, &explicit);
+        let (second, _) = calculate_seeds(iterations as u64, &explicit);
+        assert_eq!(first.collect::<Vec<_>>(), second.collect::<Vec<_>>());
+    }
 }

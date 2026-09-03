@@ -1122,4 +1122,97 @@ mod test {
         assert!(!move_with(None).dragging());
         assert!(!MouseMoveEvent::default().dragging());
     }
+
+    fn assert_scroll_delta_eq(actual: ScrollDelta, expected: ScrollDelta, context: &str) {
+        match (actual, expected) {
+            (ScrollDelta::Pixels(a), ScrollDelta::Pixels(b)) => assert_eq!(a, b, "{context}"),
+            (ScrollDelta::Lines(a), ScrollDelta::Lines(b)) => assert_eq!(a, b, "{context}"),
+            (actual, expected) => panic!("{context}: variant mismatch {actual:?} vs {expected:?}"),
+        }
+    }
+
+    #[gpui::property_test]
+    fn scroll_delta_coalesce_same_sign_associativity(
+        #[strategy = (0u32..1000u32, 0u32..1000u32, 0u32..1000u32, 0u32..1000u32, 0u32..1000u32, 0u32..1000u32, 0usize..2)]
+        (ax, ay, bx, by, cx, cy, sign): (u32, u32, u32, u32, u32, u32, usize),
+    ) {
+        // All three deltas share one sign (positive, or mirrored negative), so
+        // coalesce reduces to componentwise addition and fold order cannot matter.
+        let scale = if sign == 0 { 1.0 } else { -1.0 };
+        let to_f = |v: u32| scale * v as f32;
+        let deltas = [
+            (to_f(ax), to_f(ay)),
+            (to_f(bx), to_f(by)),
+            (to_f(cx), to_f(cy)),
+        ];
+        let [a, b, c] = deltas.map(|(x, y)| ScrollDelta::Lines(point(x, y)));
+        assert_scroll_delta_eq(
+            a.coalesce(b.coalesce(c)),
+            a.coalesce(b).coalesce(c),
+            "same-sign Lines coalesce like componentwise addition, so fold order cannot matter",
+        );
+        let [a, b, c] = deltas.map(|(x, y)| ScrollDelta::Pixels(point(px(x), px(y))));
+        assert_scroll_delta_eq(
+            a.coalesce(b.coalesce(c)),
+            a.coalesce(b).coalesce(c),
+            "same-sign Pixels coalesce like componentwise addition, so fold order cannot matter",
+        );
+        // Mixed variants coalesce to the second delta wholesale (`_ => other`).
+        let pixels = ScrollDelta::Pixels(point(px(1.0), px(2.0)));
+        let lines = ScrollDelta::Lines(point(3.0, 4.0));
+        assert_scroll_delta_eq(
+            pixels.coalesce(lines),
+            lines,
+            "Pixels then Lines keeps Lines",
+        );
+        assert_scroll_delta_eq(
+            lines.coalesce(pixels),
+            pixels,
+            "Lines then Pixels keeps Pixels",
+        );
+    }
+
+    #[gpui::property_test]
+    fn scroll_delta_coalesce_contract_and_zero_identity(
+        #[strategy = (0usize..2, -1000i32..1000i32, -1000i32..1000i32, -1000i32..1000i32, -1000i32..1000i32)]
+        (variant, ax, ay, bx, by): (usize, i32, i32, i32, i32),
+    ) {
+        let signum = |v: i32| (v as f32).signum();
+        let (a, b) = match variant {
+            0 => (
+                ScrollDelta::Pixels(point(px(ax as f32), px(ay as f32))),
+                ScrollDelta::Pixels(point(px(bx as f32), px(by as f32))),
+            ),
+            _ => (
+                ScrollDelta::Lines(point(ax as f32, ay as f32)),
+                ScrollDelta::Lines(point(bx as f32, by as f32)),
+            ),
+        };
+        let expected_x = if signum(ax) == signum(bx) {
+            ax + bx
+        } else {
+            bx
+        };
+        let expected_y = if signum(ay) == signum(by) {
+            ay + by
+        } else {
+            by
+        };
+        let expected = match variant {
+            0 => ScrollDelta::Pixels(point(px(expected_x as f32), px(expected_y as f32))),
+            _ => ScrollDelta::Lines(point(expected_x as f32, expected_y as f32)),
+        };
+        // Per-axis contract: agreeing signs sum, opposing signs override with the newer delta.
+        assert_scroll_delta_eq(
+            a.coalesce(b),
+            expected,
+            "coalesce must follow the documented sign rule",
+        );
+        // The default zero delta is a left identity within and across variants.
+        assert_scroll_delta_eq(
+            ScrollDelta::default().coalesce(b),
+            b,
+            "zero delta is a left identity",
+        );
+    }
 }

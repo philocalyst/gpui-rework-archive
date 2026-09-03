@@ -1674,4 +1674,134 @@ mod tests {
         assert_eq!(style.aspect_ratio, Some(1.5));
         assert_eq!(style.flex_direction, FlexDirection::Column);
     }
+
+    fn assert_ratio_close(actual: f32, expected: f32, context: &str) {
+        let tolerance = 1e-3 * expected.abs().max(actual.abs()).max(1.0);
+        assert!(
+            (actual - expected).abs() <= tolerance,
+            "{context}: ratio {actual} not within {tolerance} of {expected}"
+        );
+    }
+
+    fn random_viewport_and_image(
+        (vw, vh, iw, ih, ox, oy): (u32, u32, u32, u32, i32, i32),
+    ) -> (Bounds<Pixels>, Size<DevicePixels>) {
+        let viewport = Bounds {
+            origin: point(px(ox as f32), px(oy as f32)),
+            size: size(px(vw as f32), px(vh as f32)),
+        };
+        let image = size(DevicePixels::from(iw as i32), DevicePixels::from(ih as i32));
+        (viewport, image)
+    }
+
+    #[gpui::property_test]
+    fn object_fit_contain_keeps_image_inside_viewport(
+        #[strategy = (1u32..2000u32, 1u32..2000u32, 1u32..2000u32, 1u32..2000u32, -500i32..500i32, -500i32..500i32)]
+        (vw, vh, iw, ih, ox, oy): (u32, u32, u32, u32, i32, i32),
+    ) {
+        let (viewport, image) = random_viewport_and_image((vw, vh, iw, ih, ox, oy));
+        let fit = ObjectFit::Contain.get_bounds(viewport, image);
+        let eps = px(1e-2);
+        assert!(
+            fit.origin.x >= viewport.origin.x - eps,
+            "contain: left edge inside viewport"
+        );
+        assert!(
+            fit.origin.y >= viewport.origin.y - eps,
+            "contain: top edge inside viewport"
+        );
+        assert!(
+            fit.origin.x + fit.size.width <= viewport.origin.x + viewport.size.width + eps,
+            "contain: right edge inside viewport"
+        );
+        assert!(
+            fit.origin.y + fit.size.height <= viewport.origin.y + viewport.size.height + eps,
+            "contain: bottom edge inside viewport"
+        );
+        assert_ratio_close(
+            fit.size.width / fit.size.height,
+            iw as f32 / ih as f32,
+            "contain preserves aspect ratio",
+        );
+    }
+
+    #[gpui::property_test]
+    fn object_fit_cover_covers_viewport_and_keeps_ratio(
+        #[strategy = (1u32..2000u32, 1u32..2000u32, 1u32..2000u32, 1u32..2000u32, -500i32..500i32, -500i32..500i32)]
+        (vw, vh, iw, ih, ox, oy): (u32, u32, u32, u32, i32, i32),
+    ) {
+        let (viewport, image) = random_viewport_and_image((vw, vh, iw, ih, ox, oy));
+        let fit = ObjectFit::Cover.get_bounds(viewport, image);
+        let eps = px(1e-2);
+        assert!(
+            fit.origin.x <= viewport.origin.x + eps,
+            "cover: left edge covers viewport"
+        );
+        assert!(
+            fit.origin.y <= viewport.origin.y + eps,
+            "cover: top edge covers viewport"
+        );
+        assert!(
+            fit.origin.x + fit.size.width >= viewport.origin.x + viewport.size.width - eps,
+            "cover: right edge covers viewport"
+        );
+        assert!(
+            fit.origin.y + fit.size.height >= viewport.origin.y + viewport.size.height - eps,
+            "cover: bottom edge covers viewport"
+        );
+        assert!(
+            fit.size.width >= viewport.size.width - eps,
+            "cover: width at least viewport"
+        );
+        assert!(
+            fit.size.height >= viewport.size.height - eps,
+            "cover: height at least viewport"
+        );
+        assert_ratio_close(
+            fit.size.width / fit.size.height,
+            iw as f32 / ih as f32,
+            "cover preserves aspect ratio",
+        );
+    }
+
+    #[gpui::property_test]
+    fn object_fit_fill_none_scaledown_follow_definitions(
+        #[strategy = 0usize..3] variant: usize,
+        #[strategy = (1u32..2000u32, 1u32..2000u32, 1u32..2000u32, 1u32..2000u32, -500i32..500i32, -500i32..500i32)]
+        (vw, vh, iw, ih, ox, oy): (u32, u32, u32, u32, i32, i32),
+    ) {
+        let (viewport, image) = random_viewport_and_image((vw, vh, iw, ih, ox, oy));
+        let fit = match variant {
+            0 => ObjectFit::Fill.get_bounds(viewport, image),
+            1 => ObjectFit::None.get_bounds(viewport, image),
+            _ => ObjectFit::ScaleDown.get_bounds(viewport, image),
+        };
+        match variant {
+            0 => assert_eq!(fit, viewport, "Fill stretches to the viewport"),
+            1 => {
+                assert_eq!(fit.origin, viewport.origin, "None keeps the origin");
+                assert_eq!(
+                    fit.size,
+                    image.map(|d| Pixels::from(u32::from(d))),
+                    "None keeps the image size"
+                );
+            }
+            _ => {
+                let eps = px(1e-2);
+                assert!(
+                    fit.size.width <= viewport.size.width + eps,
+                    "ScaleDown never exceeds width"
+                );
+                assert!(
+                    fit.size.height <= viewport.size.height + eps,
+                    "ScaleDown never exceeds height"
+                );
+                assert_ratio_close(
+                    fit.size.width / fit.size.height,
+                    iw as f32 / ih as f32,
+                    "ScaleDown preserves aspect ratio",
+                );
+            }
+        }
+    }
 }

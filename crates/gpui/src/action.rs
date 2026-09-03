@@ -645,4 +645,49 @@ mod tests {
             real.action_schemas(&mut generator).into_iter().unzip();
         assert_eq!(real_names, real.all_action_names());
     }
+
+    const ACTION_NAMES: &[&str] = &[
+        "editor::SelectAll",
+        "editor::MoveUp",
+        "editor::MoveDown",
+        "editor::MoveLeft",
+        "editor::MoveRight",
+        "pane::Deactivate",
+    ];
+
+    #[gpui::property_test]
+    fn action_name_ordering_is_deterministic_and_sortable(
+        #[strategy = ::gpui::proptest::strategy::Strategy::prop_shuffle(::gpui::proptest::prelude::Just(ACTION_NAMES.to_vec()))]
+        order: Vec<&'static str>,
+    ) {
+        let mut registry = empty_registry();
+        for &name in &order {
+            registry.insert_action(registration(
+                name,
+                TypeId::of::<FirstAction>(),
+                FirstAction::build,
+                &[],
+            ));
+        }
+        let names = registry.all_action_names();
+        // Registration order is preserved exactly, so every read is deterministic.
+        assert_eq!(names, &order[..]);
+        assert_eq!(names, registry.all_action_names(), "repeated reads agree");
+        // Sorting is a stable, idempotent permutation that yields a sorted list.
+        let mut sorted = names.to_vec();
+        sorted.sort_unstable();
+        assert!(
+            sorted.windows(2).all(|w| w[0] <= w[1]),
+            "sorted action names are ordered"
+        );
+        let mut sorted_twice = sorted.clone();
+        sorted_twice.sort_unstable();
+        assert_eq!(sorted, sorted_twice, "sorting is idempotent");
+        let mut all = names.to_vec();
+        all.sort_unstable();
+        assert_eq!(
+            all, sorted,
+            "sorting is a permutation of the registered names"
+        );
+    }
 }

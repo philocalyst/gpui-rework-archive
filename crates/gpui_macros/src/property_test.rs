@@ -94,6 +94,13 @@ impl Args {
     /// By default, proptest uses random seeds unless `$PROPTEST_SEED` is set.
     /// Rather than managing both `$SEED` and `$PROPTEST_SEED`, we intercept
     /// `config = ...` tokens and add a call to `gpui::apply_seed_to_config`.
+    ///
+    /// Note: the workspace's proptest (1.11 / proptest-macro 0.5) hard-errors
+    /// on a `proptest_path` argument, so we cannot point the generated
+    /// `::proptest::...` paths at the gpui re-export. The generated code
+    /// resolves `::proptest` against the using crate's own dependency; gpui
+    /// declares proptest as a dev-dependency, which is enough for the tests
+    /// that use this macro.
     fn render(&self) -> TokenStream {
         let user_provided_config = match &self.config {
             None => quote! { ::gpui::proptest::prelude::ProptestConfig::default() },
@@ -107,7 +114,6 @@ impl Args {
         quote! {
             #errors
             #[::gpui::proptest::property_test(
-                proptest_path = "::gpui::proptest",
                 config = #fixed_config,
                 #(#remaining_args,)*
             )]
@@ -127,7 +133,9 @@ impl Parse for Args {
             match pair.path.get_ident().map(Ident::to_string).as_deref() {
                 Some("config") => config = Some(pair.value),
                 Some("proptest_path") => errors.extend(quote_spanned! {pair.span() =>
-                    compile_error!("`gpui::property_test` overrides the `proptest_path` parameter")
+                    compile_error!("`proptest_path` is not supported: the vendored proptest (1.11) \
+                        hard-errors on it, and `gpui::property_test` resolves `::proptest` \
+                        against the using crate's own dependency")
                 }),
                 _ => remaining_args.push(pair),
             }

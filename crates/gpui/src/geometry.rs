@@ -4032,4 +4032,29 @@ mod tests {
         // Test Case 3: Bounds intersecting with themselves
         assert!(bounds1.intersects(&bounds1));
     }
+
+    #[gpui::property_test]
+    fn refineable_merge_empty_refinement_is_identity(
+        #[strategy = (-1000.0f32..1000.0f32, -1000.0f32..1000.0f32)] (x, y): (f32, f32),
+    ) {
+        let p = Point { x, y };
+        assert_eq!(p.refined(PointRefinement::default()), p);
+    }
+
+    #[gpui::property_test]
+    fn refineable_merge_is_idempotent(
+        #[strategy = (-1000.0f32..1000.0f32, -1000.0f32..1000.0f32, -1000.0f32..1000.0f32, -1000.0f32..1000.0f32)]
+        (x, y, rx, ry): (f32, f32, f32, f32),
+    ) {
+        let p = Point { x, y };
+        let r = PointRefinement {
+            x: Some(rx),
+            y: Some(ry),
+        };
+        assert_eq!(
+            p.refined(r.clone()).refined(r.clone()),
+            p.refined(r),
+            "reapplying a refinement is a no-op"
+        );
+    }
 }
