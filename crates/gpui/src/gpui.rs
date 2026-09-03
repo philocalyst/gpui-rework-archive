@@ -32,6 +32,8 @@ mod inspector;
 mod interactive;
 mod key_dispatch;
 mod keymap;
+#[cfg(test)]
+mod learn_snapshots;
 mod lerp;
 mod motion;
 mod path_builder;
