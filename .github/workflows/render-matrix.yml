@@ -1,0 +1,226 @@
+# Render matrix — nightly renderer/backend matrix (NOT a PR gate).
+#
+# When it runs:
+#   - schedule: weekly (Monday 03:00 UTC)
+#   - workflow_dispatch: manual, with backend_filter + profile inputs
+#
+# It deliberately does NOT run on push/pull_request. ci.yml owns the PR gate
+# (tests-pass) and is intentionally left untouched by this workflow; there is
+# no `run_render_matrix` orchestrate output. The only overlap with ci.yml is
+# shared tooling conventions (rust-cache, nextest, same Linux apt deps).
+#
+# Matrix philosophy: no os x backend x profile cross product. gpu-smoke is an
+# explicit include-only list (5 entries) sized to each platform's default
+# adapter, since wgpu 29 has no dx11 backend and native_backends() =
+#   macOS Metal / Win DX12|Vulkan|GL / Linux Vulkan|GL.
+#
+#   windows-latest dx12  -> DX12 WARP (Basic Render Driver), wgpu default
+#   windows-latest vulkan-> SwiftShader (software Vulkan; EXPERIMENTAL)
+#   ubuntu-latest vulkan -> Lavapipe (Mesa)
+#   ubuntu-latest gl     -> llvmpipe (Mesa)
+#   macos-latest metal   -> hardware Metal (runner-dependent; EXPERIMENTAL)
+#
+# Software-adapter recipes (verified against wgpu 29.0.4 backend names):
+#
+#   WARP (dx12, Windows): built-in software adapter; nothing to install. The
+#   headless path uses WgpuContext::native_backends() + LowPower and picks WARP
+#   on a GPU-less runner. WGPU_BACKEND / WGPU_ADAPTER_NAME are INERT here
+#   because the crate never calls Backends::from_env().
+#
+#   SwiftShader (vulkan, Windows): ship vk_swiftshader.dll + vk_swiftshader_icd.json
+#   (e.g. jakoch/install-vulkan-sdk-action with install_swiftshader: true, or a
+#   LunarG Vulkan SDK install), then point the Vulkan loader at the ICD manifest:
+#       VK_ICD_FILENAMES=C:\SwiftShader\vk_swiftshader_icd.json
+#   Unlike WGPU_BACKEND, this IS honored on the headless path: wgpu-hal's ash
+#   loader enumerates Vulkan ICDs itself, so SwiftShader becomes the only
+#   Vulkan adapter. Manual fallback: `reg add "HKLM\SOFTWARE\Khronos\Vulkan\Drivers"
+#   /v "C:\SwiftShader\vk_swiftshader_icd.json" /t REG_DWORD /d 0 /f`.
+#
+#   Lavapipe (vulkan, Linux): apt mesa-vulkan-drivers. llvmpipe (gl, Linux):
+#   apt libgl1-mesa-dri. macOS has NO software Metal — a real Metal device is
+#   required, so that entry stays experimental.
+#
+# These jobs never run the real GPU bench: GPUI_BENCH_GPU is left unset and the
+# renderer bench is only compiled with --no-run. The renderer-agnostic scene
+# corpus (scene_compliance under both GPUI_RENDERER_UNDER_TEST values) is
+# hermetic CPU-only lowering, so it is deterministic on every runner. Full GPU
+# benches stay gated behind `just bench-gpu` / GPUI_BENCH_GPU=1.
+
+name: render-matrix
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+    inputs:
+      backend_filter:
+        description: >-
+          gpu-smoke backend filter: 'all', or a JSON array of backends, e.g.
+          '["vulkan"]' or '["dx12","vulkan"]'. Snapshot always runs.
+        required: false
+        type: string
+        default: 'all'
+      profile:
+        description: nextest profile used by snapshot + gpu-smoke runs
+        required: false
+        type: choice
+        default: ci
+        options:
+          - ci
+          - gpu
+          - nightly
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  CARGO_INCREMENTAL: 0
+
+jobs:
+  # Scene-contract job: full workspace under the chosen nextest profile, then
+  # authoritative no-auto-update snapshot check + compliance under both renderer
+  # env values. This is the only full-test coverage on the weekly schedule
+  # (ci.yml does not run on schedule).
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      PROFILE: ${{ inputs.profile || 'ci' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@nextest
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libxkbcommon-dev libwayland-dev libx11-dev \
+            libxcb-shape0-dev libxcb-xfixes0-dev \
+            libxcb-randr0-dev libxcb-xinput-dev \
+            libxkbcommon-x11-dev libegl1-mesa-dev \
+            libgles2-mesa-dev libglib2.0-dev libfontconfig-dev
+      - name: Workspace tests (nextest profile)
+        run: cargo nextest run --workspace --profile "${{ env.PROFILE }}" --no-fail-fast
+      - name: Scene snapshots (no auto-update)
+        env:
+          INSTA_UPDATE: no
+        run: cargo nextest run -p gpui-ce --test scene_snapshots --profile "${{ env.PROFILE }}" --no-fail-fast
+      - name: Scene compliance (wgpu renderer)
+        env:
+          GPUI_RENDERER_UNDER_TEST: wgpu
+        run: cargo nextest run -p gpui-ce --test scene_compliance --profile "${{ env.PROFILE }}" --no-fail-fast
+      - name: Scene compliance (software renderer)
+        env:
+          GPUI_RENDERER_UNDER_TEST: software
+        run: cargo nextest run -p gpui-ce --test scene_compliance --profile "${{ env.PROFILE }}" --no-fail-fast
+      - name: Upload junit on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-render-matrix-snapshot-${{ github.run_id }}
+          path: target/junit/*.xml
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # Build + hermetic compliance + compile-only GPU bench per backend/adapter.
+  # Experimental entries (SwiftShader, hardware Metal) use continue-on-error so
+  # adapter install or device quirks never fail the whole matrix.
+  gpu-smoke:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
+    timeout-minutes: 30
+    env:
+      PROFILE: ${{ inputs.profile || 'ci' }}
+      BACKEND_OK: ${{ (inputs.backend_filter || 'all') == 'all' || contains(fromJSON(inputs.backend_filter || 'all'), matrix.backend) }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: windows-dx12-warp
+            os: windows-latest
+            backend: dx12
+            adapter: WARP (Basic Render Driver)
+            experimental: false
+          - name: windows-vulkan-swiftshader
+            os: windows-latest
+            backend: vulkan
+            adapter: SwiftShader (software Vulkan)
+            experimental: true
+          - name: ubuntu-vulkan-lavapipe
+            os: ubuntu-latest
+            backend: vulkan
+            adapter: Lavapipe (Mesa)
+            experimental: false
+          - name: ubuntu-gl-llvmpipe
+            os: ubuntu-latest
+            backend: gl
+            adapter: llvmpipe (Mesa)
+            experimental: false
+          - name: macos-metal-hw
+            os: macos-latest
+            backend: metal
+            adapter: hardware Metal (runner-dependent)
+            experimental: true
+    steps:
+      - name: Backend filter gate
+        run: 'echo "matrix entry: backend=${{ matrix.backend }}, adapter=${{ matrix.adapter }}, BACKEND_OK=${{ env.BACKEND_OK }}"'
+      - uses: actions/checkout@v4
+        if: env.BACKEND_OK == 'true'
+        with:
+          submodules: recursive
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        if: env.BACKEND_OK == 'true'
+      - uses: Swatinem/rust-cache@v2
+        if: env.BACKEND_OK == 'true'
+      - uses: taiki-e/install-action@nextest
+        if: env.BACKEND_OK == 'true'
+      - name: Install Linux system deps + software rasterizers
+        if: env.BACKEND_OK == 'true' && runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libxkbcommon-dev libwayland-dev libx11-dev \
+            libxcb-shape0-dev libxcb-xfixes0-dev \
+            libxcb-randr0-dev libxcb-xinput-dev \
+            libxkbcommon-x11-dev libegl1-mesa-dev \
+            libgles2-mesa-dev libglib2.0-dev libfontconfig-dev \
+            mesa-vulkan-drivers libgl1-mesa-dri
+      - name: Install SwiftShader (Windows Vulkan software ICD)
+        if: env.BACKEND_OK == 'true' && runner.os == 'Windows' && matrix.backend == 'vulkan'
+        uses: jakoch/install-vulkan-sdk-action@v1
+        with:
+          install_swiftshader: true
+      - name: Build workspace
+        if: env.BACKEND_OK == 'true'
+        run: cargo build --workspace --all-targets
+      - name: Scene compliance (wgpu renderer)
+        if: env.BACKEND_OK == 'true'
+        env:
+          GPUI_RENDERER_UNDER_TEST: wgpu
+        run: cargo nextest run -p gpui-ce --test scene_compliance --profile "${{ env.PROFILE }}" --no-fail-fast
+      - name: Scene compliance (software renderer)
+        if: env.BACKEND_OK == 'true'
+        env:
+          GPUI_RENDERER_UNDER_TEST: software
+        run: cargo nextest run -p gpui-ce --test scene_compliance --profile "${{ env.PROFILE }}" --no-fail-fast
+      - name: Compile GPU renderer bench (no run; GPUI_BENCH_GPU unset)
+        if: env.BACKEND_OK == 'true'
+        run: cargo bench -p gpui_ce_wgpu --bench renderer --features test-support --no-run
+      - name: Upload junit on failure
+        if: env.BACKEND_OK == 'true' && failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-render-matrix-${{ matrix.name }}-${{ github.run_id }}
+          path: target/junit/*.xml
+          if-no-files-found: ignore
+          retention-days: 14
