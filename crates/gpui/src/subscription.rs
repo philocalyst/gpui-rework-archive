@@ -202,7 +202,7 @@ impl std::fmt::Debug for Subscription {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Global, TestApp};
+    use crate::{AppContext, EventEmitter, Global, TestApp, TestAppContext};
 
     #[test]
     fn test_unsubscribe_during_callback_with_insert() {
@@ -347,5 +347,215 @@ mod tests {
 
         app.update(|cx| cx.set_global(TestGlobal));
         assert_eq!(count.get(), 0, "should not fire after drop");
+    }
+
+    struct Emitter;
+
+    struct EvtA(usize);
+
+    struct EvtB(char);
+
+    impl EventEmitter<EvtA> for Emitter {}
+
+    impl EventEmitter<EvtB> for Emitter {}
+
+    #[test]
+    fn emit_reaches_subscribers_in_registration_order() {
+        let mut cx = TestAppContext::single();
+        let emitter = cx.update(|cx| cx.new(|_| Emitter));
+        let received = Rc::new(RefCell::new(Vec::new()));
+
+        cx.update(|cx| {
+            cx.subscribe(&emitter, {
+                let received = received.clone();
+                move |_, event: &EvtA, _| received.borrow_mut().push(("first", event.0))
+            })
+            .detach();
+            cx.subscribe(&emitter, {
+                let received = received.clone();
+                move |_, event: &EvtA, _| received.borrow_mut().push(("second", event.0))
+            })
+            .detach();
+        });
+
+        cx.update(|cx| cx.emit(&emitter, EvtA(1)));
+        assert_eq!(
+            *received.borrow(),
+            vec![("first", 1), ("second", 1)],
+            "subscribers must fire in registration order"
+        );
+
+        drop(emitter);
+        cx.update(|_| {});
+    }
+
+    #[test]
+    fn distinct_event_types_route_independently() {
+        let mut cx = TestAppContext::single();
+        let emitter = cx.update(|cx| cx.new(|_| Emitter));
+        let a_count = Rc::new(Cell::new(0));
+        let b_seen = Rc::new(RefCell::new(Vec::new()));
+
+        cx.update(|cx| {
+            cx.subscribe(&emitter, {
+                let a_count = a_count.clone();
+                move |_, _: &EvtA, _| a_count.set(a_count.get() + 1)
+            })
+            .detach();
+            cx.subscribe(&emitter, {
+                let b_seen = b_seen.clone();
+                move |_, event: &EvtB, _| b_seen.borrow_mut().push(event.0)
+            })
+            .detach();
+        });
+
+        cx.update(|cx| cx.emit(&emitter, EvtB('x')));
+        assert_eq!(a_count.get(), 0, "EvtB must not reach the EvtA subscriber");
+        assert_eq!(*b_seen.borrow(), vec!['x']);
+
+        cx.update(|cx| cx.emit(&emitter, EvtA(9)));
+        assert_eq!(a_count.get(), 1);
+        assert_eq!(
+            *b_seen.borrow(),
+            vec!['x'],
+            "EvtA must not reach the EvtB subscriber"
+        );
+
+        drop(emitter);
+        cx.update(|_| {});
+    }
+
+    #[test]
+    fn subscribe_self_receives_own_emit() {
+        let cx = TestAppContext::single();
+        let emitter = cx.update(|cx| cx.new(|_| Emitter));
+        let seen = Rc::new(RefCell::new(Vec::new()));
+
+        let subscription = cx.update(|cx| {
+            emitter.update(cx, |_, cx| {
+                cx.subscribe_self({
+                    let seen = seen.clone();
+                    move |_, event: &EvtA, _| seen.borrow_mut().push(event.0)
+                })
+            })
+        });
+
+        cx.update(|cx| emitter.update(cx, |_, cx| cx.emit(EvtA(42))));
+        assert_eq!(*seen.borrow(), vec![42]);
+
+        drop(subscription);
+        drop(emitter);
+        cx.update(|_| {});
+    }
+
+    #[test]
+    fn no_delivery_after_emitter_drop_with_cleanup() {
+        let mut cx = TestAppContext::single();
+        let emitter = cx.update(|cx| cx.new(|_| Emitter));
+        let count = Rc::new(Cell::new(0));
+        let weak = emitter.downgrade();
+
+        let subscription = cx.update(|cx| {
+            cx.subscribe(&emitter, {
+                let count = count.clone();
+                move |_, _: &EvtA, _| count.set(count.get() + 1)
+            })
+        });
+
+        cx.update(|cx| cx.emit(&emitter, EvtA(1)));
+        assert_eq!(count.get(), 1);
+
+        drop(emitter);
+        cx.update(|_| {});
+        weak.assert_released();
+
+        drop(subscription);
+        cx.update(|_| {});
+    }
+
+    #[test]
+    fn dropped_subscription_stops_receiving() {
+        let mut cx = TestAppContext::single();
+        let emitter = cx.update(|cx| cx.new(|_| Emitter));
+        let count = Rc::new(Cell::new(0));
+
+        let subscription = cx.update(|cx| {
+            cx.subscribe(&emitter, {
+                let count = count.clone();
+                move |_, _: &EvtA, _| count.set(count.get() + 1)
+            })
+        });
+
+        cx.update(|cx| cx.emit(&emitter, EvtA(1)));
+        assert_eq!(count.get(), 1);
+
+        drop(subscription);
+        cx.update(|cx| cx.emit(&emitter, EvtA(2)));
+        assert_eq!(
+            count.get(),
+            1,
+            "dropped subscription must not receive events"
+        );
+
+        drop(emitter);
+        cx.update(|_| {});
+    }
+
+    #[test]
+    fn inert_subscribers_are_not_delivered() {
+        let set = SubscriberSet::<usize, fn(&mut Vec<usize>)>::new();
+        let (_active, activate) = set.insert(0, |out| out.push(1));
+        let (_inert, _) = set.insert(0, |out| out.push(2));
+        activate();
+
+        let mut out = Vec::new();
+        for callback in set.remove(&0) {
+            callback(&mut out);
+        }
+        assert_eq!(out, vec![1], "inert subscribers must be filtered out");
+    }
+
+    #[test]
+    fn joined_subscription_unsubscribes_both_when_dropped() {
+        let a_dropped = Rc::new(Cell::new(false));
+        let b_dropped = Rc::new(Cell::new(false));
+
+        let joined = Subscription::join(
+            Subscription::new({
+                let a_dropped = a_dropped.clone();
+                move || a_dropped.set(true)
+            }),
+            Subscription::new({
+                let b_dropped = b_dropped.clone();
+                move || b_dropped.set(true)
+            }),
+        );
+
+        assert!(!a_dropped.get() && !b_dropped.get());
+        drop(joined);
+        assert!(a_dropped.get() && b_dropped.get());
+    }
+
+    #[test]
+    fn detaching_joined_subscription_keeps_both_alive() {
+        let a_dropped = Rc::new(Cell::new(false));
+        let b_dropped = Rc::new(Cell::new(false));
+
+        let joined = Subscription::join(
+            Subscription::new({
+                let a_dropped = a_dropped.clone();
+                move || a_dropped.set(true)
+            }),
+            Subscription::new({
+                let b_dropped = b_dropped.clone();
+                move || b_dropped.set(true)
+            }),
+        );
+
+        joined.detach();
+        assert!(
+            !a_dropped.get() && !b_dropped.get(),
+            "detach must keep both subscriptions alive"
+        );
     }
 }

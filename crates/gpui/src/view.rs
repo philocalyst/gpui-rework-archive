@@ -505,3 +505,134 @@ impl Render for EmptyView {
         Empty
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{AppContext, TestAppContext};
+    use std::{
+        any::TypeId,
+        cell::{Cell, RefCell},
+        rc::Rc,
+    };
+
+    #[derive(PartialEq, Eq)]
+    struct Payload(usize);
+
+    impl Render for Payload {
+        fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+            Empty
+        }
+    }
+
+    struct OtherView;
+
+    impl Render for OtherView {
+        fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+            Empty
+        }
+    }
+
+    #[test]
+    fn any_view_downcasts_to_typed_entity_or_returns_self() {
+        let cx = TestAppContext::single();
+        let entity = cx.update(|cx| cx.new(|_| Payload(42)));
+        let any: AnyView = entity.clone().into();
+
+        let downcast = any.clone().downcast::<Payload>().unwrap();
+        assert_eq!(downcast.entity_id(), entity.entity_id());
+        cx.read(|cx| assert_eq!(downcast.read(cx).0, 42));
+
+        let err = any.downcast::<OtherView>().unwrap_err();
+        assert_eq!(err.entity_id(), entity.entity_id());
+        assert_eq!(err.entity_type(), TypeId::of::<Payload>());
+    }
+
+    #[test]
+    fn any_weak_view_upgrades_live_and_is_none_after_drop() {
+        let cx = TestAppContext::single();
+        let entity = cx.update(|cx| cx.new(|_| Payload(1)));
+        let weak = AnyView::from(entity.clone()).downgrade();
+
+        {
+            let live = weak.upgrade().unwrap();
+            assert_eq!(live.entity_id(), entity.entity_id());
+        }
+
+        drop(entity);
+        cx.update(|_| {});
+        assert!(weak.upgrade().is_none());
+    }
+
+    #[test]
+    fn on_release_fires_once_on_entity_drop() {
+        let cx = TestAppContext::single();
+        let released = Rc::new(Cell::new(0));
+
+        let entity = cx.update(|cx| {
+            cx.new(|cx| {
+                cx.on_release({
+                    let released = released.clone();
+                    move |_, _| released.set(released.get() + 1)
+                })
+                .detach();
+                Payload(1)
+            })
+        });
+
+        drop(entity);
+        cx.update(|_| {});
+        assert_eq!(released.get(), 1);
+        cx.update(|_| {});
+        assert_eq!(released.get(), 1, "release must fire exactly once");
+    }
+
+    #[test]
+    fn observe_release_fires_with_dropped_entity_state() {
+        let cx = TestAppContext::single();
+        let seen = Rc::new(RefCell::new(None::<usize>));
+        let observed = cx.update(|cx| cx.new(|_| Payload(7)));
+        let observer = cx.update(|cx| {
+            cx.new(|cx| {
+                cx.observe_release(&observed, {
+                    let seen = seen.clone();
+                    move |_, observed, _| *seen.borrow_mut() = Some(observed.0)
+                })
+                .detach();
+                Payload(0)
+            })
+        });
+
+        drop(observed);
+        cx.update(|_| {});
+        assert_eq!(*seen.borrow(), Some(7));
+
+        drop(observer);
+        cx.update(|_| {});
+    }
+
+    #[test]
+    fn release_listeners_fire_in_registration_order() {
+        let cx = TestAppContext::single();
+        let log = Rc::new(RefCell::new(Vec::new()));
+        let entity = cx.update(|cx| {
+            cx.new(|cx| {
+                cx.on_release({
+                    let log = log.clone();
+                    move |_, _| log.borrow_mut().push(1)
+                })
+                .detach();
+                cx.on_release({
+                    let log = log.clone();
+                    move |_, _| log.borrow_mut().push(2)
+                })
+                .detach();
+                Payload(1)
+            })
+        });
+
+        drop(entity);
+        cx.update(|_| {});
+        assert_eq!(*log.borrow(), vec![1, 2]);
+    }
+}
