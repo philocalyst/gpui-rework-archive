@@ -1,7 +1,7 @@
 use crate::{
     AbsoluteLength, App, Background, BackgroundTag, BorderStyle, Bounds, ColorExt, ContentMask,
-    Corners, CornersRefinement, CursorStyle, DefiniteLength, DevicePixels, Edges, EdgesRefinement,
-    Font, FontFallbacks, FontFeatures, FontStyle, FontWeight, GridLocation, Length, Pixels, Point,
+    Corners, CornersRefinement, CursorStyle, DefiniteLength, Edges, EdgesRefinement, Font,
+    FontFallbacks, FontFeatures, FontStyle, FontWeight, GridLocation, Length, Pixels, Point,
     PointRefinement, ScaledPixels, SharedString, Size, SizeRefinement, Styled, TextRun, Window,
     black, phi, point, px, quad, rems, size,
 };
@@ -37,12 +37,7 @@ pub enum ObjectFit {
 
 impl ObjectFit {
     /// Get the bounds of the image within the given bounds.
-    pub fn get_bounds(
-        &self,
-        bounds: Bounds<Pixels>,
-        image_size: Size<DevicePixels>,
-    ) -> Bounds<Pixels> {
-        let image_size = image_size.map(|dimension| Pixels::from(u32::from(dimension)));
+    pub fn get_bounds(&self, bounds: Bounds<Pixels>, image_size: Size<Pixels>) -> Bounds<Pixels> {
         let image_ratio = image_size.width / image_size.height;
         let bounds_ratio = bounds.size.width / bounds.size.height;
 
@@ -1685,12 +1680,12 @@ mod tests {
 
     fn random_viewport_and_image(
         (vw, vh, iw, ih, ox, oy): (u32, u32, u32, u32, i32, i32),
-    ) -> (Bounds<Pixels>, Size<DevicePixels>) {
+    ) -> (Bounds<Pixels>, Size<Pixels>) {
         let viewport = Bounds {
             origin: point(px(ox as f32), px(oy as f32)),
             size: size(px(vw as f32), px(vh as f32)),
         };
-        let image = size(DevicePixels::from(iw as i32), DevicePixels::from(ih as i32));
+        let image = size(px(iw as f32), px(ih as f32));
         (viewport, image)
     }
 
@@ -1780,11 +1775,7 @@ mod tests {
             0 => assert_eq!(fit, viewport, "Fill stretches to the viewport"),
             1 => {
                 assert_eq!(fit.origin, viewport.origin, "None keeps the origin");
-                assert_eq!(
-                    fit.size,
-                    image.map(|d| Pixels::from(u32::from(d))),
-                    "None keeps the image size"
-                );
+                assert_eq!(fit.size, image, "None keeps the image size");
             }
             _ => {
                 let eps = px(1e-2);

@@ -346,34 +346,36 @@ impl Element for Img {
                             }
 
                             let image_size = data.render_size(frame_index);
-                            style.aspect_ratio = Some(image_size.width / image_size.height);
+                            if image_size.width > Pixels::ZERO && image_size.height > Pixels::ZERO {
+                                style.aspect_ratio = Some(image_size.width / image_size.height);
 
-                            if let Length::Auto = style.size.width {
-                                style.size.width = match style.size.height {
-                                    Length::Definite(DefiniteLength::Absolute(abs_length)) => {
-                                        let height_px = abs_length.to_pixels(window.rem_size());
-                                        Length::Definite(
-                                            px(image_size.width.0 * height_px.0
-                                                / image_size.height.0)
-                                            .into(),
-                                        )
-                                    }
-                                    _ => Length::Definite(image_size.width.into()),
-                                };
-                            }
+                                if let Length::Auto = style.size.width {
+                                    style.size.width = match style.size.height {
+                                        Length::Definite(DefiniteLength::Absolute(abs_length)) => {
+                                            let height_px = abs_length.to_pixels(window.rem_size());
+                                            Length::Definite(
+                                                px(image_size.width.0 * height_px.0
+                                                    / image_size.height.0)
+                                                .into(),
+                                            )
+                                        }
+                                        _ => Length::Definite(image_size.width.into()),
+                                    };
+                                }
 
-                            if let Length::Auto = style.size.height {
-                                style.size.height = match style.size.width {
-                                    Length::Definite(DefiniteLength::Absolute(abs_length)) => {
-                                        let width_px = abs_length.to_pixels(window.rem_size());
-                                        Length::Definite(
-                                            px(image_size.height.0 * width_px.0
-                                                / image_size.width.0)
-                                            .into(),
-                                        )
-                                    }
-                                    _ => Length::Definite(image_size.height.into()),
-                                };
+                                if let Length::Auto = style.size.height {
+                                    style.size.height = match style.size.width {
+                                        Length::Definite(DefiniteLength::Absolute(abs_length)) => {
+                                            let width_px = abs_length.to_pixels(window.rem_size());
+                                            Length::Definite(
+                                                px(image_size.height.0 * width_px.0
+                                                    / image_size.width.0)
+                                                .into(),
+                                            )
+                                        }
+                                        _ => Length::Definite(image_size.height.into()),
+                                    };
+                                }
                             }
 
                             if global_id.is_some()
@@ -484,10 +486,15 @@ impl Element for Img {
                     if data.frame_count() == 0 {
                         return;
                     }
+                    // The frame index in the layout state is clamped against the
+                    // data seen during layout. The data can change between layout
+                    // and paint (e.g. a custom loader), so clamp again here to
+                    // keep the index valid for the image actually painted.
+                    let frame_index = layout_state.frame_index.min(data.frame_count() - 1);
                     let new_bounds = self
                         .style
                         .object_fit
-                        .get_bounds(bounds, data.size(layout_state.frame_index));
+                        .get_bounds(bounds, data.render_size(frame_index));
                     let corner_radii = style.corner_radii.to_pixels(window.rem_size());
                     window
                         .paint_image(
@@ -495,7 +502,7 @@ impl Element for Img {
                             new_bounds,
                             corner_radii,
                             data,
-                            layout_state.frame_index,
+                            frame_index,
                             self.style.grayscale,
                         )
                         .log_err();
@@ -796,8 +803,8 @@ impl From<image::ImageError> for ImageCacheError {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{ParentElement as _, TestAppContext, canvas, div, point, px, size};
-    use image::{Frame, ImageBuffer, Rgba};
+    use crate::{DevicePixels, ParentElement as _, TestAppContext, canvas, div, point, px, size};
+    use image::{Delay, Frame, ImageBuffer, Rgba};
 
     const TEST_IMG_ID: &str = "test-img";
 
@@ -813,15 +820,47 @@ mod tests {
         Arc::new(RenderImage::new(SmallVec::from_elem(frame, 1)))
     }
 
+    fn test_image_with_delays(frame_count: usize, delay_ms: u32) -> Arc<RenderImage> {
+        let delay = Delay::from_numer_denom_ms(delay_ms, 1);
+        let frame = Frame::from_parts(
+            ImageBuffer::from_pixel(1, 1, Rgba([0, 0, 0, 0])),
+            0,
+            0,
+            delay,
+        );
+        Arc::new(RenderImage::new(SmallVec::from_iter(
+            (0..frame_count).map(|_| frame.clone()),
+        )))
+    }
+
+    /// An SVG-like image: device pixels are rendered at 2x the logical size.
+    fn svg_like_image(logical_width: u32, logical_height: u32) -> Arc<RenderImage> {
+        let mut render_image = RenderImage::new(SmallVec::from_elem(
+            Frame::new(ImageBuffer::from_pixel(
+                logical_width * 2,
+                logical_height * 2,
+                Rgba([0, 0, 0, 0]),
+            )),
+            1,
+        ));
+        render_image.scale_factor = crate::svg_renderer::SMOOTH_SVG_SCALE_FACTOR;
+        Arc::new(render_image)
+    }
+
     /// Overwrites the cached `frame_index` of the sibling `img` during paint.
     fn seed_frame_index(frame_index: usize) -> impl IntoElement {
+        seed_img_state(move |state| state.frame_index = frame_index)
+    }
+
+    /// Mutates the cached element state of the sibling `img` during paint.
+    fn seed_img_state(mutator: impl Fn(&mut ImgState) + 'static) -> impl IntoElement {
         canvas(
             |_, _, _| (),
             move |_, _, window, _| {
                 window.with_global_id(TEST_IMG_ID.into(), |id, window| {
                     window.with_element_state::<ImgState, _>(id, |state, _| {
                         let mut state = state.expect("img state should be initialized");
-                        state.frame_index = frame_index;
+                        mutator(&mut state);
                         ((), state)
                     });
                 });
@@ -830,11 +869,81 @@ mod tests {
     }
 
     #[gpui::test]
-    fn zero_frame_image_does_not_panic_on_paint(cx: &mut TestAppContext) {
-        cx.add_empty_window()
-            .draw(point(px(0.), px(0.)), size(px(100.), px(100.)), |_, _| {
-                img(ImageSource::Render(test_image(0))).into_any_element()
-            });
+    fn zero_frame_image_stretches_like_an_auto_sized_image(cx: &mut TestAppContext) {
+        let window = cx.add_empty_window();
+
+        // The auto axis of a zero-frame image stays `Auto` instead of being
+        // inferred as px(NaN), so it participates in cross-axis stretching just
+        // like a normal image.
+        window.draw(point(px(0.), px(0.)), size(px(200.), px(100.)), |_, _| {
+            div()
+                .flex()
+                .flex_row()
+                .h(px(50.))
+                .child(
+                    img(ImageSource::Render(test_image(0)))
+                        .w(px(100.))
+                        .debug_selector(|| "zero-stretch".into()),
+                )
+                .into_any_element()
+        });
+
+        let bounds = window
+            .update(|window, _| {
+                window
+                    .rendered_frame
+                    .debug_bounds
+                    .get("zero-stretch")
+                    .copied()
+            })
+            .expect("img should be laid out");
+        assert_eq!(
+            bounds.size,
+            size(px(100.), px(50.)),
+            "zero-frame img's auto height should stretch like a normal image"
+        );
+    }
+
+    #[gpui::test]
+    fn zero_frame_image_resolves_finite_layout(cx: &mut TestAppContext) {
+        let window = cx.add_empty_window();
+
+        // A zero-frame image reports a 0x0 render size. Layout must not turn the
+        // 0/0 aspect ratio or the derived auto dimension into NaN: the auto axis
+        // falls back to the taffy default (0) so the img resolves to exact,
+        // finite bounds with no aspect ratio or dimension inference. The flex
+        // column with items_start prevents cross-axis stretching, which would
+        // otherwise fill the auto axis with the container size.
+        for (label, expected) in [
+            ("w-definite", size(px(100.), px(0.))),
+            ("h-definite", size(px(0.), px(100.))),
+        ] {
+            let image = test_image(0);
+            let element = if label == "w-definite" {
+                img(ImageSource::Render(image)).w(px(100.))
+            } else {
+                img(ImageSource::Render(image)).h(px(100.))
+            };
+            window.draw(
+                point(px(0.), px(0.)),
+                size(px(200.), px(100.)),
+                move |_, _| {
+                    div()
+                        .flex()
+                        .flex_col()
+                        .items_start()
+                        .child(element.debug_selector(move || label.into()))
+                        .into_any_element()
+                },
+            );
+            let bounds = window
+                .update(|window, _| window.rendered_frame.debug_bounds.get(label).copied())
+                .expect("img should be laid out");
+            assert_eq!(
+                bounds.size, expected,
+                "zero-frame img must resolve to its exact finite size for {label}"
+            );
+        }
     }
 
     #[gpui::test]
@@ -921,19 +1030,118 @@ mod tests {
     fn stale_frame_index_is_clamped_when_image_changes(cx: &mut TestAppContext) {
         let window = cx.add_empty_window();
 
-        // Assert that a cached frame_index from a previous multi-frame image
-        // does not cause an out-of-bounds panic when the image is replaced
-        // with one that has fewer frames.
+        // Prime the cached element state with a frame index from a previous
+        // multi-frame image.
         window.draw(point(px(0.), px(0.)), size(px(100.), px(100.)), |_, _| {
             div()
                 .child(img(ImageSource::Render(test_image(5))).id(TEST_IMG_ID))
                 .child(seed_frame_index(4))
                 .into_any_element()
         });
+
+        // Replacing it with a single-frame image must clamp the cached index
+        // during layout so the paint path uses a valid frame.
+        let (layout_state, _) =
+            window.draw(point(px(0.), px(0.)), size(px(100.), px(100.)), |_, _| {
+                img(ImageSource::Render(test_image(1)))
+                    .id(TEST_IMG_ID)
+                    .size_full()
+            });
+        assert_eq!(
+            layout_state.frame_index, 0,
+            "layout must clamp the stale frame index to the new frame count"
+        );
+        window.update(|window, _| {
+            assert_eq!(
+                window.rendered_frame.scene.polychrome_sprites.len(),
+                1,
+                "single-frame image should paint exactly one sprite"
+            );
+        });
+    }
+
+    #[gpui::test]
+    fn stale_frame_index_is_clamped_when_paint_data_has_fewer_frames(cx: &mut TestAppContext) {
+        let window = cx.add_empty_window();
+
+        // Prime a stale frame index of 4 from a previous 5-frame image.
         window.draw(point(px(0.), px(0.)), size(px(100.), px(100.)), |_, _| {
-            img(ImageSource::Render(test_image(1)))
-                .id(TEST_IMG_ID)
+            div()
+                .child(img(ImageSource::Render(test_image_with_delays(5, 60_000))).id(TEST_IMG_ID))
+                .child(seed_frame_index(4))
                 .into_any_element()
         });
+
+        // A custom loader that resolves to a 5-frame image during layout but a
+        // single-frame image during paint desynchronizes the cached frame index
+        // from the data actually painted.
+        let layout_image = test_image_with_delays(5, 60_000);
+        let paint_image = test_image(1);
+        let calls = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let source = ImageSource::Custom(Arc::new(move |_, _| {
+            let call = calls.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            Some(Ok(if call == 0 {
+                layout_image.clone()
+            } else {
+                paint_image.clone()
+            }))
+        }));
+
+        window.draw(point(px(0.), px(0.)), size(px(100.), px(100.)), |_, _| {
+            img(source).id(TEST_IMG_ID).size_full().into_any_element()
+        });
+
+        window.update(|window, _| {
+            let sprite = window
+                .rendered_frame
+                .scene
+                .polychrome_sprites
+                .last()
+                .expect("img should paint a sprite");
+            assert_eq!(
+                sprite.tile.bounds.size,
+                size(DevicePixels(1), DevicePixels(1)),
+                "paint must clamp to the painted image's frame count"
+            );
+        });
+    }
+
+    #[gpui::test]
+    fn object_fit_none_uses_logical_size_not_device_size(cx: &mut TestAppContext) {
+        let window = cx.add_empty_window();
+
+        // A 100x50 SVG is rendered at 2x (200x100 device pixels). ObjectFit::None
+        // must size the sprite by the logical render size, not the raw device
+        // pixels, so the sprite matches the layout.
+        let image = svg_like_image(100, 50);
+        window.draw(
+            point(px(0.), px(0.)),
+            size(px(100.), px(100.)),
+            move |_, _| {
+                img(ImageSource::Render(image))
+                    .size_full()
+                    .object_fit(ObjectFit::None)
+                    .into_any_element()
+            },
+        );
+
+        let (sprite_bounds, scale_factor) = window.update(|window, _| {
+            let sprite = window
+                .rendered_frame
+                .scene
+                .polychrome_sprites
+                .last()
+                .expect("none image should paint a sprite");
+            (sprite.bounds, window.scale_factor())
+        });
+        assert_eq!(
+            sprite_bounds,
+            Bounds {
+                origin: point(px(0.).scale(scale_factor), px(0.).scale(scale_factor)),
+                size: size(px(100.).scale(scale_factor), px(50.).scale(scale_factor)),
+            },
+            "ObjectFit::None should paint at the image's logical size (100x50), \
+             not the 2x device size (200x100)"
+        );
     }
 }

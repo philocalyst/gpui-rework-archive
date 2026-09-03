@@ -42,9 +42,7 @@ impl std::fmt::Debug for SurfaceSource {
                 .finish_non_exhaustive(),
             #[cfg(target_os = "windows")]
             SurfaceSource::WindowsCapture(ref frame) => frame.fmt(_f),
-            SurfaceSource::Unsupported(size) => {
-                _f.debug_tuple("Unsupported").field(&size).finish()
-            }
+            SurfaceSource::Unsupported(size) => _f.debug_tuple("Unsupported").field(&size).finish(),
         }
     }
 }
@@ -157,7 +155,11 @@ impl Element for Surface {
         _window: &mut Window,
         _: &mut App,
     ) {
-        let new_bounds = self.object_fit.get_bounds(_bounds, self.source.size());
+        let source_size = self
+            .source
+            .size()
+            .map(|dimension| Pixels::from(u32::from(dimension)));
+        let new_bounds = self.object_fit.get_bounds(_bounds, source_size);
         // TODO: Add support for corner_radii.
         _window.paint_surface(new_bounds, self.source.clone());
     }
@@ -182,7 +184,8 @@ mod tests {
     use super::*;
     use crate::{TestAppContext, point, px, size};
 
-    const IMAGE_SIZE: Size<DevicePixels> = size(DevicePixels(200), DevicePixels(100));
+    const IMAGE_SIZE: Size<Pixels> = size(px(200.), px(100.));
+    const IMAGE_SIZE_DEVICE: Size<DevicePixels> = size(DevicePixels(200), DevicePixels(100));
 
     #[gpui::test]
     fn object_fit_selects_bounds_and_paint_inserts_primitive(cx: &mut TestAppContext) {
@@ -216,7 +219,7 @@ mod tests {
         // Painting the element must emit a PaintSurface primitive whose bounds
         // reflect the selected object-fit.
         let window = cx.add_empty_window();
-        let source = SurfaceSource::Unsupported(IMAGE_SIZE);
+        let source = SurfaceSource::Unsupported(IMAGE_SIZE_DEVICE);
         window.draw(point(px(0.), px(0.)), size(px(100.), px(100.)), {
             move |_, _| surface(source).size_full().object_fit(ObjectFit::Contain)
         });
@@ -239,6 +242,9 @@ mod tests {
             ),
             "painted bounds must match the contain object-fit"
         );
-        assert_eq!(source_size, IMAGE_SIZE, "source size is carried through");
+        assert_eq!(
+            source_size, IMAGE_SIZE_DEVICE,
+            "source size is carried through"
+        );
     }
 }
