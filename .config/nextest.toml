@@ -1,0 +1,42 @@
+# nextest configuration — gpui-ce
+# Requires nextest >= 0.9.143 (installed: 0.9.143)
+#
+# Partitioning:
+#   hash:m/n is preferred for stable shard assignment across runs.
+#   slice:m/n is faster but order-dependent; use only when hash stability is
+#   not required (e.g. local dev splits).
+
+[store]
+dir = "target/nextest"
+
+# ── Test groups ───────────────────────────────────────────────────────────────
+
+[test-groups]
+serial = { max-threads = 1 }
+
+# ── Profiles ──────────────────────────────────────────────────────────────────
+
+[profile.default]
+fail-fast = true
+
+[profile.ci]
+fail-fast = false
+retries = 0
+slow-timeout = { period = "30s", terminate-after = 2 }
+junit = { path = "target/junit/junit-ci.xml", store-success-output = true, store-failure-output = true }
+final-status-level = "flaky"
+
+# gpu profile: duplicated from ci (nextest has no profile inheritance).
+[profile.gpu]
+fail-fast = false
+retries = 0
+slow-timeout = { period = "30s", terminate-after = 2 }
+junit = { path = "target/junit/junit-gpu.xml", store-success-output = true, store-failure-output = true }
+final-status-level = "flaky"
+
+[profile.nightly]
+fail-fast = false
+retries = 0
+slow-timeout = { period = "60s", terminate-after = 3 }
+junit = { path = "target/junit/junit-nightly.xml", store-success-output = true, store-failure-output = true }
+final-status-level = "flaky"

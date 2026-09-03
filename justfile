@@ -117,6 +117,47 @@ test-with +args:
     @echo "🧪 Running workspace tests with args..."
     cargo test --workspace -- {{ args }}
 
+[doc('Run nextest with CI profile (no-fail-fast, retries for gpu_ tests)')]
+[group('testing')]
+test-nextest-ci:
+    cargo nextest run --workspace --profile ci --no-fail-fast
+
+[doc('Run GPU-specific tests via nextest gpu profile')]
+[group('testing')]
+test-gpu:
+    cargo nextest run --workspace --profile gpu -E 'test(gpu_)'
+
+[doc('Run criterion bench --no-run + quick smoke')]
+[group('testing')]
+bench-smoke:
+    #!/usr/bin/env nu
+    let benches = (glob "crates/*/benches/*.rs" | length)
+    if $benches == 0 {
+        print "No bench files found under crates/*/benches/, skipping."
+        exit 0
+    }
+    cargo bench --workspace --no-run
+    print "Bench binary compiled OK."
+
+[doc('Archive nextest binary set for CI caching')]
+[group('testing')]
+nextest-archive:
+    #!/usr/bin/env nu
+    mkdir --force target/nextest target/junit
+    cargo nextest archive --workspace --archive-file target/nextest/archive.tar.zst
+
+[doc('Run nextest with hash partitioning (usage: nextest-run-archive 4 1)')]
+[group('testing')]
+nextest-run-archive n m:
+    #!/usr/bin/env nu
+    print $"Running partition hash:($m)/($n)..."
+    cargo nextest run --workspace --archive-file target/nextest/archive.tar.zst --partition 'hash:{{ m }}/{{ n }}'
+
+# Partitioning examples (uncomment one):
+#   cargo nextest run --workspace --partition 'hash:1/4'
+#   cargo nextest run --workspace --partition 'hash:2/4'
+#   cargo nextest run --workspace --partition 'slice:0/4'
+
 
 [doc('Format all Rust code in the workspace')]
 [group('quality')]
