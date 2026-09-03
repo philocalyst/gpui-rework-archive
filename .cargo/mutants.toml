@@ -1,0 +1,87 @@
+# cargo-mutants configuration — gpui-ce
+#
+# Reference: https://mutants.rs/config-file.html
+# Schema:    cargo mutants --emit-schema=config   (or cargo-mutants-config.json)
+# Install:   cargo install --locked cargo-mutants   (NOT vendored; nix devShell
+#            does not ship it, so `just mutants-smoke` self-skips when absent)
+#
+# Run modes:
+#   spot:    cargo mutants -f crates/gpui_render/src/shaders/interface.rs --shard 0/1
+#   nightly: cargo mutants --shard k/n   (hours; see "Shards" below)
+#   hermetic: nix develop --command cargo mutants --shard k/n
+
+# ── Test runner ───────────────────────────────────────────────────────────────
+# nextest matches the rest of the gate (process-per-test isolation, faster
+# fail-fast per mutant). Requires cargo-nextest, already a dev tool here.
+test_tool = "nextest"
+
+# ── Timeouts ──────────────────────────────────────────────────────────────────
+# A mutation can legitimately slow a path (one more loop iteration); wait rather
+# than spuriously kill a real catch. The floor sits above nextest's slow-timeout
+# defaults so fast baselines don't generate over-aggressive timeouts. This
+# defends against mutants that turn finite loops into infinite loops.
+timeout_multiplier = 3.0
+minimum_test_timeout = 60.0
+
+# ── Build robustness ──────────────────────────────────────────────────────────
+# CI builds with -D warnings, so a lint (not a behavior change) tripping a
+# mutant build would be miscounted as "caught". Cap lints to `allow` during
+# mutant builds: what's measured is detection, not a build abort.
+cap_lints = true
+
+# ── Files that are never mutated ──────────────────────────────────────────────
+exclude_globs = [
+    # Benches are not executed by `cargo test` / `cargo nextest run`; mutating
+    # them only burns build time and produces mutants nothing runs.
+    "**/benches/**",
+
+    # GPU-gated pixel goldens (crates/gpui_wgpu/tests/pixel_goldens.rs): the
+    # harness self-skips without a real GPU (GPUI_GOLDEN=1 opt-in), so a mutant
+    # would register as "caught" only on GPU runners and "uncaught" everywhere
+    # else — a flaky detector. Excluded; never rely on it for mutation coverage.
+    "crates/gpui_wgpu/tests/pixel_goldens.rs",
+
+    # Generated OUT_DIR shader build output: build.rs writes gpui_*.wgsl,
+    # *.hlsl, *.metal, shader_interface.rs and native_shaders.rs into
+    # target/debug/build/gpui_ce_render-*/out/. cargo-mutants already copies the
+    # tree excluding /target, so these never land in the mutation tree; the
+    # globs below are belt-and-suspenders in case an OUT_DIR path is ever
+    # materialized in-tree.
+    "**/shader_interface.rs",
+    "**/native_shaders.rs",
+]
+
+# ── Scene snapshot tests are a DETECTOR, not a fixture ────────────────────────
+# Do NOT add crates/gpui/tests/scene_snapshots.rs (or crates/gpui/tests/**) to
+# exclude_globs. The snapshot corpus is the primary catch for shader-lowering
+# and scene-archive mutants and MUST keep running under every mutation.
+# scene_compliance.rs (plan-vs-archive cross-check) is the same. The in-tree
+# OUT_DIR reader crates/gpui_render/src/artifacts.rs stays EXAMINED too:
+# shaders::tests build_generated_shaders_match_rust_sources catches any mutant
+# there, mirroring the snapshot policy.
+
+# ── Compliance policy (sudo-rs / uutils style) ───────────────────────────────
+# Hardening micro-wins only; no big refactors. This config records where the
+# mutation suite knowingly tolerates a gap, and every tolerated gap MUST:
+#   (1) carry the tracked issue id, e.g. ignored = ghXXXX,
+#   (2) name the blocker it tracks in a comment, and
+#   (3) be un-ignored (removed from this file / re-enabled) once fixed.
+# Bare `#[ignore]` with no issue id is not allowed under this policy (mirrors
+# crates/gpui/tests/scene_compliance.rs).
+#
+# Today there are NO tolerated coverage gaps: exclude_globs holds only fixtures
+# that are GPU-gated, not run by the test suite, or generated build output —
+# none of which represent a coverage decision. If a future mutant is provably
+# un-killable (equivalent-code mutant), file a tracked issue and document it
+# here with the ghXXXX id rather than silently widening exclude_globs.
+
+# ── Shards (nightly only) ─────────────────────────────────────────────────────
+# Full sweeps take hours; run them as parallel shards, one `cargo mutants` per
+# job, merging mutants.out afterwards:
+#   cargo mutants --shard 0/8   cargo mutants --shard 1/8   ...   --shard 7/8
+# Each shard independently discovers all mutants and selects its subset via
+# `--shard k/n`; there is no runtime coordination. Default `sharding = "slice"`
+# keeps each shard's builds localized for incremental reuse; switch to
+# `--sharding round-robin` if shard wall-times skew. Every shard runs its own
+# baseline: a broken baseline must abort (exit 4) rather than make every mutant
+# look caught.

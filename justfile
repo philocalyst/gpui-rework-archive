@@ -236,6 +236,23 @@ machete:
     @echo "⚙️ Checking for unused dependencies..."
     cargo machete
 
+# cargo-mutants spot check on a single high-value file (fast: seconds per
+# mutant). Full nightlies are shard-friendly: `cargo mutants --shard m/n`
+# (see .cargo/mutants.toml for the shard contract + compliance policy).
+# Hermetic run under the flake dev shell: `nix develop --command cargo mutants
+# --shard 0/8`. cargo-mutants is not vendored — the recipe self-skips when
+# absent rather than installing it.
+[doc('Spot-check mutation testing on one file (cargo-mutants; fast)')]
+[group('quality')]
+mutants-smoke *flags:
+    #!/usr/bin/env nu
+    if (which cargo-mutants | length) == 0 {
+        print "⚠️  cargo-mutants not installed (cargo install --locked cargo-mutants); skipping."
+        exit 0
+    }
+    print "🧬 Spot-checking mutants on shaders/interface.rs..."
+    cargo mutants --test-tool=nextest -f crates/gpui_render/src/shaders/interface.rs --shard 0/1 {{ flags }}
+
 [doc('Check workspace against MSRV — requires {{ msrv }} toolchain to be installed')]
 [group('quality')]
 msrv-check:
