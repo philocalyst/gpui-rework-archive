@@ -630,6 +630,7 @@ mod tests {
         cell::{Cell, RefCell},
         ops::Range,
         rc::Rc,
+        sync::Arc,
     };
 
     use crate::{
@@ -827,6 +828,184 @@ mod tests {
 
         assert_eq!(result.pending.len(), 1);
         assert!(!result.pending_has_binding);
+    }
+
+    struct UnregisteredAction;
+
+    impl crate::Action for UnregisteredAction {
+        fn boxed_clone(&self) -> Box<dyn crate::Action> {
+            Box::new(UnregisteredAction)
+        }
+
+        fn partial_eq(&self, other: &dyn crate::Action) -> bool {
+            other.as_any().is::<UnregisteredAction>()
+        }
+
+        fn name(&self) -> &'static str {
+            "unregistered::UnregisteredAction"
+        }
+
+        fn name_for_type() -> &'static str {
+            "unregistered::UnregisteredAction"
+        }
+
+        fn build(_: serde_json::Value) -> anyhow::Result<Box<dyn crate::Action>> {
+            Ok(Box::new(UnregisteredAction))
+        }
+    }
+
+    fn focus_id() -> crate::FocusId {
+        crate::FocusHandle::new(&Arc::new(crate::FocusMap::default())).id
+    }
+
+    #[test]
+    fn test_multi_keystroke_replay_prefix_delivery() {
+        let mut tree = test_dispatch_tree(vec![
+            KeyBinding::new("ctrl-b", SecondaryTestAction, None),
+            KeyBinding::new("ctrl-b h", TestAction, None),
+        ]);
+        let dispatch_path: SmallVec<[super::DispatchNodeId; 32]> = SmallVec::new();
+
+        // `ctrl-b` is both a full binding and a prefix of a longer binding, so it stays pending.
+        let first = tree.dispatch_key(
+            SmallVec::new(),
+            Keystroke::parse("ctrl-b").unwrap(),
+            &dispatch_path,
+        );
+        assert_eq!(first.pending.len(), 1);
+        assert!(first.pending_has_binding);
+
+        // A non-matching key flushes the pending prefix as a replay carrying the shorter binding.
+        let second = tree.dispatch_key(
+            first.pending,
+            Keystroke::parse("x").unwrap(),
+            &dispatch_path,
+        );
+        assert!(second.pending.is_empty());
+        assert_eq!(second.to_replay.len(), 1);
+        let replay = &second.to_replay[0];
+        assert_eq!(replay.keystroke, Keystroke::parse("ctrl-b").unwrap());
+        assert_eq!(replay.bindings.len(), 1);
+        assert!(replay.bindings[0].action.partial_eq(&SecondaryTestAction));
+    }
+
+    #[test]
+    fn test_flush_dispatch_replays_pending_prefix() {
+        let mut tree = test_dispatch_tree(vec![KeyBinding::new("ctrl-b h", TestAction, None)]);
+        let dispatch_path: SmallVec<[super::DispatchNodeId; 32]> = SmallVec::new();
+
+        let replays = tree.flush_dispatch(
+            SmallVec::from([Keystroke::parse("ctrl-b").unwrap()]),
+            &dispatch_path,
+        );
+        assert_eq!(replays.len(), 1);
+        assert_eq!(replays[0].keystroke, Keystroke::parse("ctrl-b").unwrap());
+        assert!(replays[0].bindings.is_empty());
+    }
+
+    #[test]
+    fn test_available_actions_reflect_dispatch_path() {
+        let mut tree = test_dispatch_tree(vec![]);
+        let root = tree.push_node();
+        tree.on_action(
+            std::any::TypeId::of::<TestAction>(),
+            Rc::new(|_, _, _, _| {}),
+        );
+        let child = tree.push_node();
+        tree.on_action(
+            std::any::TypeId::of::<SecondaryTestAction>(),
+            Rc::new(|_, _, _, _| {}),
+        );
+        tree.on_action(
+            std::any::TypeId::of::<UnregisteredAction>(),
+            Rc::new(|_, _, _, _| {}),
+        );
+        tree.pop_node();
+        tree.pop_node();
+
+        // Actions without a registered builder are intentionally skipped.
+        let mut action_types: Vec<_> = tree
+            .available_actions(child)
+            .into_iter()
+            .map(|action| action.as_any().type_id())
+            .collect();
+        action_types.sort();
+        assert_eq!(
+            action_types,
+            vec![
+                std::any::TypeId::of::<TestAction>(),
+                std::any::TypeId::of::<SecondaryTestAction>()
+            ]
+        );
+
+        // `is_action_available` checks listeners, not buildability.
+        assert!(tree.is_action_available(&TestAction, child));
+        assert!(tree.is_action_available(&SecondaryTestAction, child));
+        assert!(tree.is_action_available(&UnregisteredAction, child));
+
+        // Only listeners on the target's dispatch path count.
+        assert!(tree.is_action_available(&TestAction, root));
+        assert!(!tree.is_action_available(&SecondaryTestAction, root));
+    }
+
+    #[test]
+    fn test_truncate_and_clear_reset_dispatch_state() {
+        let mut tree = test_dispatch_tree(vec![]);
+        let focus_id = focus_id();
+
+        tree.push_node();
+        let _child = tree.push_node();
+        tree.set_focus_id(focus_id);
+        tree.set_view_id(crate::EntityId::from(7));
+        tree.pop_node();
+        tree.pop_node();
+
+        assert_eq!(tree.len(), 2);
+        assert!(tree.focusable_node_id(focus_id).is_some());
+
+        tree.truncate(0);
+        assert_eq!(tree.len(), 0);
+        assert!(tree.focusable_node_id(focus_id).is_none());
+        assert!(tree.focus_path(focus_id).is_empty());
+        assert!(tree.view_node_ids.is_empty());
+
+        tree.push_node();
+        tree.set_key_context(KeyContext::parse("Workspace").unwrap());
+        assert_eq!(tree.context_stack.len(), 1);
+        tree.pop_node();
+        assert!(tree.context_stack.is_empty());
+
+        tree.clear();
+        assert_eq!(tree.len(), 0);
+        assert!(tree.active_node_id().is_none());
+        assert!(tree.context_stack.is_empty());
+        assert!(tree.node_stack.is_empty());
+    }
+
+    #[test]
+    fn test_reuse_subtree_tracks_focus() {
+        let focus_id = focus_id();
+
+        let mut source = test_dispatch_tree(vec![]);
+        source.push_node();
+        source.push_node();
+        source.set_focus_id(focus_id);
+        source.set_key_context(KeyContext::parse("Editor").unwrap());
+        source.pop_node();
+        source.pop_node();
+
+        let mut dest = test_dispatch_tree(vec![]);
+        dest.push_node();
+        let reused = dest.reuse_subtree(0..source.len(), &mut source, Some(focus_id));
+        assert!(reused.contains_focus());
+        assert_eq!(reused.new_range, 1..3);
+        assert!(dest.focusable_node_id(focus_id).is_some());
+
+        // Reusing a subtree that does not contain the given focus reports it.
+        let mut dest = test_dispatch_tree(vec![]);
+        dest.push_node();
+        let reused = dest.reuse_subtree(0..source.len(), &mut source, None);
+        assert!(!reused.contains_focus());
     }
 
     #[crate::test]

@@ -926,4 +926,50 @@ mod tests {
         assert!(result[0].action.partial_eq(&ActionBeta {}));
         assert!(result[1].action.partial_eq(&ActionAlpha {}));
     }
+
+    #[test]
+    fn test_possible_next_bindings_and_all_bindings_for_input() {
+        let mut keymap = Keymap::default();
+        keymap.add_bindings([
+            KeyBinding::new("ctrl-x", ActionAlpha {}, Some("workspace")),
+            KeyBinding::new("ctrl-x 0", ActionBeta {}, Some("workspace")),
+            KeyBinding::new("ctrl-y", ActionGamma {}, Some("workspace")),
+        ]);
+        let contexts = [KeyContext::parse("workspace").unwrap()];
+        let ctrl_x = Keystroke::parse("ctrl-x").unwrap();
+
+        // `possible_next_bindings_for_input` reports bindings that are still pending.
+        let possible =
+            keymap.possible_next_bindings_for_input(std::slice::from_ref(&ctrl_x), &contexts);
+        assert_eq!(possible.len(), 1);
+        assert!(possible[0].action.partial_eq(&ActionBeta {}));
+
+        // `all_bindings_for_input` returns exact matches without a context filter.
+        let all = keymap.all_bindings_for_input(&[ctrl_x]);
+        assert_eq!(all.len(), 1);
+        assert!(all[0].action.partial_eq(&ActionAlpha {}));
+    }
+
+    #[test]
+    fn test_clear_resets_bindings_and_bumps_version() {
+        let mut keymap = Keymap::default();
+        keymap.add_bindings([KeyBinding::new("ctrl-a", ActionAlpha {}, None)]);
+        let version_after_add = keymap.version();
+
+        keymap.add_bindings([KeyBinding::new("ctrl-b", ActionBeta {}, None)]);
+        assert!(keymap.version() != version_after_add);
+
+        keymap.clear();
+        assert_eq!(keymap.bindings().count(), 0);
+        assert!(keymap.version() != version_after_add);
+        assert!(keymap.bindings_for_action(&ActionAlpha {}).next().is_none());
+        assert!(keymap.bindings_for_action(&ActionBeta {}).next().is_none());
+
+        let (result, pending) = keymap.bindings_for_input(
+            &[Keystroke::parse("ctrl-a").unwrap()],
+            &[KeyContext::parse("workspace").unwrap()],
+        );
+        assert!(result.is_empty());
+        assert!(!pending);
+    }
 }

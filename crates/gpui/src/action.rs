@@ -456,3 +456,193 @@ mod no_action {
         action.as_any().is::<Unbind>()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate as gpui;
+    use std::panic::{AssertUnwindSafe, catch_unwind};
+
+    actions!(action_test, [FirstAction, SecondAction, ThirdAction]);
+
+    fn no_schema(_: &mut schemars::SchemaGenerator) -> Option<schemars::Schema> {
+        None
+    }
+
+    fn registration(
+        name: &'static str,
+        type_id: TypeId,
+        build: ActionBuilder,
+        deprecated_aliases: &'static [&'static str],
+    ) -> MacroActionData {
+        MacroActionData {
+            name,
+            type_id,
+            build,
+            json_schema: no_schema,
+            deprecated_aliases,
+            deprecation_message: None,
+            documentation: None,
+        }
+    }
+
+    fn empty_registry() -> ActionRegistry {
+        ActionRegistry {
+            by_name: Default::default(),
+            names_by_type_id: Default::default(),
+            all_names: Vec::new(),
+            deprecated_aliases: Default::default(),
+            deprecation_messages: Default::default(),
+            documentation: Default::default(),
+        }
+    }
+
+    #[test]
+    fn test_build_action_ok() {
+        let registry = ActionRegistry::default();
+
+        let unbind = registry
+            .build_action("zed::Unbind", Some(json!("editor::NewLine")))
+            .expect("unbind action builds from its JSON parameter");
+        assert!(is_unbind(unbind.as_ref()));
+        assert_eq!(
+            unbind
+                .as_any()
+                .downcast_ref::<Unbind>()
+                .expect("downcast to Unbind")
+                .0
+                .as_ref(),
+            "editor::NewLine"
+        );
+
+        let no_action = registry
+            .build_action("zed::NoAction", None)
+            .expect("no-arg action builds from an empty object");
+        assert!(is_no_action(no_action.as_ref()));
+    }
+
+    #[test]
+    fn test_build_action_not_found() {
+        let registry = empty_registry();
+        let error = registry
+            .build_action("editor::MissingAction", None)
+            .unwrap_err();
+        assert!(matches!(
+            error,
+            ActionBuildError::NotFound { ref name } if name == "editor::MissingAction"
+        ));
+        assert_eq!(
+            error.to_string(),
+            "Didn't find an action named \"editor::MissingAction\""
+        );
+    }
+
+    #[test]
+    fn test_build_action_build_error() {
+        let registry = ActionRegistry::default();
+        let error = registry
+            .build_action("zed::Unbind", Some(json!({})))
+            .unwrap_err();
+        assert!(matches!(
+            error,
+            ActionBuildError::BuildError { ref name, .. } if name == "zed::Unbind"
+        ));
+        assert!(
+            error
+                .to_string()
+                .starts_with("Error while building action \"zed::Unbind\"")
+        );
+    }
+
+    #[test]
+    fn test_duplicate_registration_panics() {
+        let mut registry = empty_registry();
+        registry.insert_action(registration(
+            "editor::TestAction",
+            TypeId::of::<FirstAction>(),
+            FirstAction::build,
+            &[],
+        ));
+
+        let duplicate = registration(
+            "editor::TestAction",
+            TypeId::of::<SecondAction>(),
+            SecondAction::build,
+            &[],
+        );
+        assert!(catch_unwind(AssertUnwindSafe(|| registry.insert_action(duplicate))).is_err());
+
+        let alias_collision = registration(
+            "editor::OtherAction",
+            TypeId::of::<ThirdAction>(),
+            ThirdAction::build,
+            &["editor::TestAction"],
+        );
+        assert!(
+            catch_unwind(AssertUnwindSafe(|| registry.insert_action(alias_collision))).is_err()
+        );
+    }
+
+    #[test]
+    fn test_deprecated_aliases_resolve() {
+        let mut registry = empty_registry();
+        registry.insert_action(registration(
+            "editor::MoveUp",
+            TypeId::of::<FirstAction>(),
+            FirstAction::build,
+            &["editor::LegacyMoveUp", "editor::OldMoveUp"],
+        ));
+
+        let action = registry
+            .build_action("editor::LegacyMoveUp", None)
+            .expect("deprecated alias resolves to the registered action");
+        assert!(action.as_any().is::<FirstAction>());
+
+        assert_eq!(
+            registry.deprecated_aliases().get("editor::LegacyMoveUp"),
+            Some(&"editor::MoveUp")
+        );
+        assert_eq!(
+            registry.deprecated_aliases().get("editor::OldMoveUp"),
+            Some(&"editor::MoveUp")
+        );
+    }
+
+    #[test]
+    fn test_all_names_ordering_and_schema() {
+        let mut registry = empty_registry();
+        registry.insert_action(registration(
+            "editor::MoveUp",
+            TypeId::of::<FirstAction>(),
+            FirstAction::build,
+            &["editor::LegacyMoveUp"],
+        ));
+        registry.insert_action(registration(
+            "editor::MoveDown",
+            TypeId::of::<SecondAction>(),
+            SecondAction::build,
+            &[],
+        ));
+
+        // Deprecated aliases are listed immediately before their primary name.
+        assert_eq!(
+            registry.all_action_names(),
+            &["editor::LegacyMoveUp", "editor::MoveUp", "editor::MoveDown"][..]
+        );
+
+        // Schemas are generated for every registered name, in `all_names` order.
+        let mut generator = schemars::SchemaGenerator::default();
+        let (names, schemas): (Vec<_>, Vec<_>) =
+            registry.action_schemas(&mut generator).into_iter().unzip();
+        assert_eq!(names, registry.all_action_names());
+        assert!(schemas.iter().all(Option::is_none));
+
+        // The real registry exposes the built-in zed actions by name and schema.
+        let real = ActionRegistry::default();
+        assert!(real.all_action_names().contains(&"zed::Unbind"));
+        assert!(real.all_action_names().contains(&"zed::NoAction"));
+        let (real_names, _): (Vec<_>, Vec<_>) =
+            real.action_schemas(&mut generator).into_iter().unzip();
+        assert_eq!(real_names, real.all_action_names());
+    }
+}
