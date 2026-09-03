@@ -124,3 +124,42 @@ impl Styled for ContainerQuery {
         &mut self.style
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{TestAppContext, div, point, px, size};
+    use std::{cell::Cell, rc::Rc};
+
+    #[gpui::test]
+    fn width_threshold_selects_variants(cx: &mut TestAppContext) {
+        // The render callback observes the size assigned during layout, so the
+        // element can branch on a width threshold the way CSS container queries do.
+        let cases = [(200.0, "narrow"), (240.0, "wide"), (400.0, "wide")];
+        for (width, expected) in cases {
+            let window = cx.add_empty_window();
+            let selected = Rc::new(Cell::new(""));
+            let selected_for_render = selected.clone();
+            window.draw(
+                point(px(0.), px(0.)),
+                size(px(width), px(50.)),
+                move |_, _| {
+                    container_query(move |size, _, _| {
+                        selected_for_render.set(if size.width < px(240.) {
+                            "narrow"
+                        } else {
+                            "wide"
+                        });
+                        div().size_full()
+                    })
+                },
+            );
+
+            assert_eq!(
+                selected.get(),
+                expected,
+                "width {width}px should select the {expected} variant"
+            );
+        }
+    }
+}

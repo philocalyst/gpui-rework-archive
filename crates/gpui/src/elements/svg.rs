@@ -274,3 +274,51 @@ impl Asset for SvgAsset {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{DevicePixels, RenderSvgParams, SvgRenderer, size};
+
+    const INLINE_SVG: &str = r##"
+        <svg xmlns="http://www.w3.org/2000/svg" width="100" height="50">
+            <rect x="0" y="0" width="100" height="50" fill="#fff"/>
+        </svg>
+    "##;
+
+    fn renderer() -> SvgRenderer {
+        SvgRenderer::new(std::sync::Arc::new(()))
+    }
+
+    #[test]
+    fn render_alpha_mask_parses_inline_svg() {
+        let params = RenderSvgParams {
+            path: "inline".into(),
+            size: size(DevicePixels(100), DevicePixels(50)),
+        };
+        let (rendered_size, alpha_mask) = renderer()
+            .render_alpha_mask(&params, Some(INLINE_SVG.as_bytes()))
+            .expect("inline svg should parse and render")
+            .expect("non-zero render size must produce a mask");
+
+        assert_eq!(rendered_size, size(DevicePixels(100), DevicePixels(50)));
+        assert_eq!(alpha_mask.len(), 100 * 50, "one alpha byte per pixel");
+        assert!(
+            alpha_mask.iter().all(|&alpha| alpha == 255),
+            "opaque rect should produce an opaque mask"
+        );
+    }
+
+    #[test]
+    fn render_single_frame_renders_inline_svg() {
+        let image = renderer()
+            .render_single_frame(INLINE_SVG.as_bytes(), 1.0)
+            .expect("inline svg should parse and render");
+
+        assert_eq!(image.frame_count(), 1);
+        assert_eq!(
+            image.size(0),
+            size(DevicePixels(200), DevicePixels(100)),
+            "rendered at smooth scale factor 2.0"
+        );
+    }
+}

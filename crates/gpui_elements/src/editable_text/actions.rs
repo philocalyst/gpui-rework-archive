@@ -354,3 +354,53 @@ pub(super) trait EditableTextActionElement<State> {
         register_action!(self, show_character_palette);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default_bindings_map_expected_actions() {
+        assert_eq!(DEFAULT_INPUT_CONTEXT, "EditableText");
+
+        let bindings = default_bindings()
+            .as_keybindings(Some(DEFAULT_INPUT_CONTEXT))
+            .collect::<Vec<_>>();
+        let names = bindings
+            .iter()
+            .map(|binding| binding.action().name())
+            .collect::<Vec<_>>();
+        assert!(!names.is_empty(), "expected at least one default binding");
+
+        for expected in [
+            "actions::DeleteLeft",
+            "actions::DeleteRight",
+            "actions::Tab",
+            "actions::Enter",
+            "actions::NavLeft",
+            "actions::NavRight",
+            "actions::SelectAll",
+            "actions::SelectLeft",
+            "actions::SelectRight",
+            "actions::Copy",
+            "actions::Cut",
+            "actions::Paste",
+            "actions::Undo",
+            "actions::Redo",
+            "actions::Escape",
+            "actions::ShowCharacterPalette",
+        ] {
+            assert!(
+                names.contains(&expected),
+                "default bindings must map the {expected} action"
+            );
+        }
+
+        assert!(
+            bindings
+                .iter()
+                .all(|binding| !binding.keystrokes().is_empty()),
+            "every bound action must resolve to at least one keystroke"
+        );
+    }
+}

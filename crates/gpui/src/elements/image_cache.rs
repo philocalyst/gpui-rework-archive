@@ -351,3 +351,152 @@ impl ImageCacheProvider for RetainAllImageCacheProvider {
             .into()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{AnyWindowHandle, Context, ImageSource, Render, TestAppContext, Window, img};
+    use image::{Frame, ImageBuffer, Rgba};
+    use smallvec::SmallVec;
+    use std::{cell::RefCell, collections::HashMap, rc::Rc};
+
+    /// A cache that memoizes one synthetic image per resource, counting how many
+    /// times a resource actually needs a fresh load (i.e. was not already cached).
+    struct CountingImageCache {
+        source_loads: Rc<RefCell<HashMap<String, usize>>>,
+        images: HashMap<String, Arc<RenderImage>>,
+    }
+
+    impl CountingImageCache {
+        fn key(resource: &Resource) -> String {
+            match resource {
+                Resource::Embedded(path) => path.to_string(),
+                Resource::Path(path) => path.display().to_string(),
+                Resource::Uri(uri) => uri.to_string(),
+            }
+        }
+
+        fn image_for(key: &str) -> Arc<RenderImage> {
+            let (width, height) = if key.contains("wide") {
+                (20, 10)
+            } else {
+                (10, 10)
+            };
+            let frame = Frame::new(ImageBuffer::from_pixel(width, height, Rgba([0, 0, 0, 0])));
+            Arc::new(RenderImage::new(SmallVec::from_elem(frame, 1)))
+        }
+    }
+
+    impl ImageCache for CountingImageCache {
+        fn load(
+            &mut self,
+            resource: &Resource,
+            _window: &mut Window,
+            _cx: &mut App,
+        ) -> Option<Result<Arc<RenderImage>, ImageCacheError>> {
+            let key = Self::key(resource);
+            if !self.images.contains_key(&key) {
+                *self
+                    .source_loads
+                    .borrow_mut()
+                    .entry(key.clone())
+                    .or_default() += 1;
+                self.images.insert(key.clone(), Self::image_for(&key));
+            }
+            Some(Ok(self.images[&key].clone()))
+        }
+    }
+
+    struct ImageCacheTestView {
+        cache: Entity<CountingImageCache>,
+        resource: Rc<RefCell<Resource>>,
+    }
+
+    impl Render for ImageCacheTestView {
+        fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+            image_cache(self.cache.clone())
+                .child(img(ImageSource::Resource(self.resource.borrow().clone())))
+        }
+    }
+
+    fn sprite_width(window: AnyWindowHandle, cx: &mut TestAppContext) -> f32 {
+        let scale_factor = cx
+            .update_window(window, |_, window, _| window.scale_factor())
+            .unwrap();
+        cx.update_window(window, |_, window, _| {
+            window
+                .rendered_frame
+                .scene
+                .polychrome_sprites
+                .last()
+                .map(|sprite| sprite.bounds.size.width.0)
+                .unwrap_or_default()
+        })
+        .unwrap()
+            / scale_factor
+    }
+
+    #[gpui::test]
+    fn same_input_is_cached_and_changed_input_repaints(cx: &mut TestAppContext) {
+        let source_loads = Rc::new(RefCell::new(HashMap::new()));
+        let resource = Rc::new(RefCell::new(Resource::Embedded("small".into())));
+        let window = cx.add_window({
+            let source_loads = source_loads.clone();
+            let resource = resource.clone();
+            move |_, cx| ImageCacheTestView {
+                cache: cx.new(|_| CountingImageCache {
+                    source_loads,
+                    images: HashMap::new(),
+                }),
+                resource,
+            }
+        });
+        let window: AnyWindowHandle = window.into();
+
+        // Frame 1: the resource is loaded and painted.
+        cx.update_window(window, |_, window, cx| {
+            window.draw(cx).clear(cx);
+        })
+        .unwrap();
+        assert_eq!(source_loads.borrow()["small"], 1, "first draw loads once");
+        assert_eq!(sprite_width(window, cx), 10.0);
+
+        // Frame 2: unchanged input hits the cache, no repaint of the source.
+        cx.update_window(window, |_, window, cx| {
+            window.draw(cx).clear(cx);
+        })
+        .unwrap();
+        assert_eq!(
+            source_loads.borrow()["small"],
+            1,
+            "unchanged input must not reload"
+        );
+        assert_eq!(sprite_width(window, cx), 10.0);
+
+        // Frame 3: a changed input forces a fresh load and a different render.
+        *resource.borrow_mut() = Resource::Embedded("wide".into());
+        cx.update_window(window, |_, window, cx| {
+            window.draw(cx).clear(cx);
+        })
+        .unwrap();
+        assert_eq!(
+            source_loads.borrow()["wide"],
+            1,
+            "changed input loads again"
+        );
+        assert_eq!(sprite_width(window, cx), 20.0, "repaint reflects new size");
+
+        // Frame 4: returning to the original input is still served from the cache.
+        *resource.borrow_mut() = Resource::Embedded("small".into());
+        cx.update_window(window, |_, window, cx| {
+            window.draw(cx).clear(cx);
+        })
+        .unwrap();
+        assert_eq!(
+            source_loads.borrow()["small"],
+            1,
+            "re-visiting an input must reuse the cached result"
+        );
+        assert_eq!(sprite_width(window, cx), 10.0);
+    }
+}

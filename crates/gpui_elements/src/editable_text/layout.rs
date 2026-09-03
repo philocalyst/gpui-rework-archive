@@ -101,3 +101,51 @@ impl TextLineSegment {
         wrapped.position_for_index(relative_text_pos, line_height)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use gpui::{point, px};
+
+    fn segment(text_range: Range<usize>) -> TextLineSegment {
+        TextLineSegment {
+            text_range,
+            wrapped_line: None,
+            pos_y: 0,
+        }
+    }
+
+    #[test]
+    fn text_line_segment_reports_rows_hits_and_fallbacks() {
+        let plain = segment(4..10);
+        assert_eq!(
+            plain.row_count(),
+            1,
+            "an unwrapped line occupies a single row"
+        );
+        assert!(plain.contains_position(6, false));
+        assert!(
+            !plain.contains_position(10, false),
+            "the end is exclusive by default"
+        );
+        assert!(
+            plain.contains_position(10, true),
+            "the end is inclusive when asked"
+        );
+        assert!(!plain.contains_position(11, true));
+
+        let empty = segment(2..2);
+        assert!(
+            empty.contains_position(2, false),
+            "an empty segment matches its own position"
+        );
+
+        // Without a shaped wrapped line the hit-test falls back to the segment
+        // start, and no screen position can be resolved.
+        assert_eq!(
+            plain.character_index_at_point(point(px(10.), px(0.)), px(16.)),
+            4
+        );
+        assert_eq!(plain.position_for_index(6, px(16.)), None);
+    }
+}

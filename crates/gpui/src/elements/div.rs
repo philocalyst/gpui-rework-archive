@@ -4398,7 +4398,10 @@ mod tests {
         AnyWindowHandle, Canvas, Context, InputEvent, Keystroke, MouseMoveEvent, TestAppContext,
         canvas, relative, util::FluentBuilder as _,
     };
-    use std::{cell::Cell, rc::Weak};
+    use std::{
+        cell::{Cell, RefCell},
+        rc::{Rc, Weak},
+    };
 
     struct GroupHoverTestView {
         render_count: Rc<Cell<usize>>,
@@ -5481,5 +5484,106 @@ mod tests {
         handle.set_offset(point(px(50.), px(50.)));
         layout.redraw(&mut cx);
         assert_eq!(handle.offset(), point(px(0.), px(0.)));
+    }
+
+    struct AnyButtonHarness {
+        buttons: Rc<RefCell<Vec<MouseButton>>>,
+        phases: Rc<RefCell<Vec<&'static str>>>,
+    }
+
+    impl Render for AnyButtonHarness {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            let capture_buttons = self.buttons.clone();
+            let capture_phases = self.phases.clone();
+            let bubble_buttons = self.buttons.clone();
+            let bubble_phases = self.phases.clone();
+            div()
+                .id("target")
+                .size_full()
+                .capture_any_mouse_down(move |event, _, _| {
+                    capture_buttons.borrow_mut().push(event.button);
+                    capture_phases.borrow_mut().push("capture");
+                })
+                .on_any_mouse_down(move |event, _, _| {
+                    bubble_buttons.borrow_mut().push(event.button);
+                    bubble_phases.borrow_mut().push("bubble");
+                })
+        }
+    }
+
+    fn dispatch_any_mouse_down(
+        cx: &mut TestAppContext,
+        window: AnyWindowHandle,
+        button: MouseButton,
+    ) {
+        cx.update_window(window, |_, window, cx| {
+            window.dispatch_event(
+                MouseDownEvent {
+                    position: point(px(50.), px(50.)),
+                    button,
+                    modifiers: Default::default(),
+                    click_count: 1,
+                    first_mouse: false,
+                }
+                .to_platform_input(),
+                cx,
+            );
+        })
+        .unwrap();
+    }
+
+    #[gpui::test]
+    fn on_any_mouse_down_receives_events_for_every_button(cx: &mut TestAppContext) {
+        let buttons = Rc::new(RefCell::new(Vec::new()));
+        let phases = Rc::new(RefCell::new(Vec::new()));
+        let window = cx.open_window(size(px(100.), px(100.)), {
+            let buttons = buttons.clone();
+            let phases = phases.clone();
+            move |_, _| AnyButtonHarness { buttons, phases }
+        });
+        let window: AnyWindowHandle = window.into();
+
+        dispatch_any_mouse_down(cx, window, MouseButton::Left);
+        dispatch_any_mouse_down(cx, window, MouseButton::Right);
+
+        assert_eq!(
+            *buttons.borrow(),
+            vec![
+                MouseButton::Left,
+                MouseButton::Left,
+                MouseButton::Right,
+                MouseButton::Right
+            ],
+            "capture and bubble handlers must each observe every button"
+        );
+        assert_eq!(
+            *phases.borrow(),
+            vec!["capture", "bubble", "capture", "bubble"]
+        );
+    }
+
+    #[gpui::test]
+    fn capture_any_mouse_down_fires_before_bubble_handler(cx: &mut TestAppContext) {
+        let buttons = Rc::new(RefCell::new(Vec::new()));
+        let phases = Rc::new(RefCell::new(Vec::new()));
+        let window = cx.open_window(size(px(100.), px(100.)), {
+            let buttons = buttons.clone();
+            let phases = phases.clone();
+            move |_, _| AnyButtonHarness { buttons, phases }
+        });
+        let window: AnyWindowHandle = window.into();
+
+        dispatch_any_mouse_down(cx, window, MouseButton::Middle);
+
+        assert_eq!(
+            buttons.borrow().as_slice(),
+            &[MouseButton::Middle, MouseButton::Middle],
+            "capture and bubble handlers each receive the middle-button event"
+        );
+        assert_eq!(
+            *phases.borrow(),
+            vec!["capture", "bubble"],
+            "capture-phase handler must observe the event before the bubble handler"
+        );
     }
 }

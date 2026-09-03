@@ -160,3 +160,40 @@ impl Caret {
         .detach();
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use gpui::{AppContext, TestAppContext};
+
+    #[gpui::test]
+    fn caret_visibility_tracks_focus_and_blink_interval(cx: &mut TestAppContext) {
+        let caret = cx.update(|app| app.new(|_| Caret::default()));
+        assert_eq!(
+            cx.read(|app| caret.read(app).blink_interval()),
+            Duration::ZERO,
+            "a caret does not blink unless an interval is configured"
+        );
+
+        let gain = caret.update(cx, |caret, cx| caret.update_focus(true, cx));
+        assert!(gain, "a non-blinking caret is visible while focused");
+        let loss = caret.update(cx, |caret, cx| caret.update_focus(false, cx));
+        assert!(!loss, "a non-blinking caret hides when blurred");
+
+        let blinking = cx.update(|app| app.new(|_| Caret::default().with_blink_interval_500ms()));
+        assert_eq!(
+            cx.read(|app| blinking.read(app).blink_interval()),
+            BLINK_INTERVAL_500MS
+        );
+
+        blinking.update(cx, |caret, cx| {
+            caret.set_blink_interval(Duration::from_millis(200));
+            let visible = caret.update_focus(true, cx);
+            assert!(visible, "a blinking caret becomes visible on focus");
+        });
+        assert_eq!(
+            cx.read(|app| blinking.read(app).blink_interval()),
+            Duration::from_millis(200)
+        );
+    }
+}

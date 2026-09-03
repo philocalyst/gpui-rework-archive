@@ -93,3 +93,101 @@ impl<T> Styled for Canvas<T> {
         &mut self.style
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{ParentElement, Styled, TestAppContext, div, point, px, size};
+    use std::{cell::Cell, rc::Rc};
+
+    fn canvas_with_counters(
+        paint_count: Rc<Cell<usize>>,
+        prepaint_bounds: Rc<Cell<Bounds<Pixels>>>,
+    ) -> Canvas<()> {
+        canvas(
+            move |bounds, _, _| prepaint_bounds.set(bounds),
+            move |_, _, _, _| paint_count.set(paint_count.get() + 1),
+        )
+        .size_full()
+    }
+
+    #[gpui::test]
+    fn canvas_paint_callback_receives_bounds_and_fires_once_per_draw(cx: &mut TestAppContext) {
+        let window = cx.add_empty_window();
+        let paint_count = Rc::new(Cell::new(0));
+        let prepaint_bounds = Rc::new(Cell::new(Bounds::default()));
+
+        window.draw(point(px(0.), px(0.)), size(px(120.), px(60.)), {
+            let paint_count = paint_count.clone();
+            let prepaint_bounds = prepaint_bounds.clone();
+            move |_, _| canvas_with_counters(paint_count, prepaint_bounds)
+        });
+
+        assert_eq!(
+            paint_count.get(),
+            1,
+            "paint must fire during the first draw"
+        );
+        assert_eq!(prepaint_bounds.get().origin, point(px(0.), px(0.)));
+        assert_eq!(prepaint_bounds.get().size, size(px(120.), px(60.)));
+
+        // A fresh canvas element is built per frame, so a second draw re-runs
+        // both callbacks against the new frame's bounds.
+        window.draw(point(px(10.), px(20.)), size(px(50.), px(40.)), {
+            let paint_count = paint_count.clone();
+            let prepaint_bounds = prepaint_bounds.clone();
+            move |_, _| canvas_with_counters(paint_count, prepaint_bounds)
+        });
+
+        assert_eq!(paint_count.get(), 2, "paint must fire on every draw");
+        assert_eq!(prepaint_bounds.get().origin, point(px(10.), px(20.)));
+        assert_eq!(prepaint_bounds.get().size, size(px(50.), px(40.)));
+    }
+
+    #[gpui::test]
+    fn multiple_canvases_paint_independently(cx: &mut TestAppContext) {
+        let window = cx.add_empty_window();
+        let left_paints = Rc::new(Cell::new(0));
+        let right_paints = Rc::new(Cell::new(0));
+        let left_bounds = Rc::new(Cell::new(Bounds::default()));
+        let right_bounds = Rc::new(Cell::new(Bounds::default()));
+
+        window.draw(point(px(0.), px(0.)), size(px(200.), px(100.)), {
+            let left_paints = left_paints.clone();
+            let right_paints = right_paints.clone();
+            let left_bounds = left_bounds.clone();
+            let right_bounds = right_bounds.clone();
+            move |_, _| {
+                div()
+                    .flex()
+                    .size_full()
+                    .child(canvas_with_counters(left_paints, left_bounds))
+                    .child(canvas_with_counters(right_paints, right_bounds))
+            }
+        });
+
+        assert_eq!(left_paints.get(), 1);
+        assert_eq!(right_paints.get(), 1);
+        assert_eq!(left_bounds.get().size, size(px(100.), px(100.)));
+        assert_eq!(right_bounds.get().size, size(px(100.), px(100.)));
+        assert_eq!(left_bounds.get().origin, point(px(0.), px(0.)));
+        assert_eq!(right_bounds.get().origin, point(px(100.), px(0.)));
+
+        // Each canvas keeps its own callbacks; painting one side again does not
+        // re-run the other side's closure.
+        let draw_left_paints = left_paints.clone();
+        window.draw(
+            point(px(0.), px(0.)),
+            size(px(200.), px(100.)),
+            move |_, _| {
+                div()
+                    .flex()
+                    .size_full()
+                    .child(canvas_with_counters(draw_left_paints, left_bounds))
+            },
+        );
+
+        assert_eq!(left_paints.get(), 2);
+        assert_eq!(right_paints.get(), 1);
+    }
+}

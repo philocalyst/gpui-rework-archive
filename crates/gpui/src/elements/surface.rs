@@ -176,3 +176,69 @@ impl Styled for Surface {
         &mut self.style
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{TestAppContext, point, px, size};
+
+    const IMAGE_SIZE: Size<DevicePixels> = size(DevicePixels(200), DevicePixels(100));
+
+    #[gpui::test]
+    fn object_fit_selects_bounds_and_paint_inserts_primitive(cx: &mut TestAppContext) {
+        let bounds = Bounds::new(point(px(0.), px(0.)), size(px(100.), px(100.)));
+        assert_eq!(
+            ObjectFit::Fill.get_bounds(bounds, IMAGE_SIZE),
+            bounds,
+            "fill stretches to the element bounds"
+        );
+        let contain = ObjectFit::Contain.get_bounds(bounds, IMAGE_SIZE);
+        assert_eq!(contain.size, size(px(100.), px(50.)), "contain fits inside");
+        assert_eq!(contain.origin, point(px(0.), px(25.)), "contain centers");
+        let cover = ObjectFit::Cover.get_bounds(bounds, IMAGE_SIZE);
+        assert_eq!(cover.size, size(px(200.), px(100.)), "cover fills bounds");
+        assert_eq!(
+            cover.origin,
+            point(px(-50.), px(0.)),
+            "cover crops overflow"
+        );
+        assert_eq!(
+            ObjectFit::ScaleDown.get_bounds(bounds, IMAGE_SIZE),
+            contain,
+            "scale-down behaves like contain when larger"
+        );
+        assert_eq!(
+            ObjectFit::None.get_bounds(bounds, IMAGE_SIZE).size,
+            size(px(200.), px(100.)),
+            "none keeps original size"
+        );
+
+        // Painting the element must emit a PaintSurface primitive whose bounds
+        // reflect the selected object-fit.
+        let window = cx.add_empty_window();
+        let source = SurfaceSource::Unsupported(IMAGE_SIZE);
+        window.draw(point(px(0.), px(0.)), size(px(100.), px(100.)), {
+            move |_, _| surface(source).size_full().object_fit(ObjectFit::Contain)
+        });
+
+        let (primitive_bounds, source_size) = window.update(|window, _| {
+            let primitive = window
+                .rendered_frame
+                .scene
+                .surfaces
+                .last()
+                .expect("surface should paint a PaintSurface primitive");
+            (primitive.bounds, primitive.source.size())
+        });
+        let scale_factor = window.update(|window, _| window.scale_factor());
+        assert_eq!(
+            primitive_bounds,
+            Bounds::new(
+                point(px(0.).scale(scale_factor), px(25.).scale(scale_factor)),
+                size(px(100.).scale(scale_factor), px(50.).scale(scale_factor)),
+            ),
+            "painted bounds must match the contain object-fit"
+        );
+        assert_eq!(source_size, IMAGE_SIZE, "source size is carried through");
+    }
+}

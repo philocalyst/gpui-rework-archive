@@ -239,3 +239,86 @@ impl UnicodeTextStorage for StringStorage {
         self.version = self.version.wrapping_add(1);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use gpui::NavigationDirection;
+
+    #[test]
+    fn string_storage_utf_offsets_round_trip_multibyte() {
+        // "héllo😀": h(1B,1u16) é(2B,1u16) l(1B) l(1B) o(1B) 😀(4B,2u16)
+        let storage = StringStorage::from("héllo😀");
+        assert_eq!(storage.content_utf8(), "héllo😀");
+        assert_eq!(storage.len_utf16(), 7);
+
+        assert_eq!(storage.utf_offset_8to16(0), 0);
+        assert_eq!(storage.utf_offset_8to16(1), 1, "start of é");
+        assert_eq!(storage.utf_offset_8to16(3), 2, "after é");
+        assert_eq!(storage.utf_offset_8to16(6), 5, "start of 😀");
+        assert_eq!(storage.utf_offset_8to16(10), 7, "end of content");
+
+        assert_eq!(storage.utf_offset_16to8(0), 0);
+        assert_eq!(storage.utf_offset_16to8(1), 1);
+        assert_eq!(storage.utf_offset_16to8(2), 3);
+        assert_eq!(storage.utf_offset_16to8(5), 6);
+        assert_eq!(storage.utf_offset_16to8(7), 10);
+
+        assert_eq!(storage.utf_range_8to16(&(1..6)), 1..5);
+        assert_eq!(storage.utf_range_16to8(&(1..5)), 1..6);
+    }
+
+    #[test]
+    fn string_storage_navigation_and_version_bump() {
+        let mut storage = StringStorage::from("hello world");
+        assert_eq!(storage.word_range_at(4), 0..5);
+        assert_eq!(storage.word_range_at(6), 6..11);
+        assert_eq!(
+            storage.offset_from_caret(5, NavigationDirection::Back, TextBoundary::Word),
+            0,
+            "backward word from mid-string"
+        );
+        assert_eq!(
+            storage.offset_from_caret(6, NavigationDirection::Forward, TextBoundary::Word),
+            11,
+            "forward word to end"
+        );
+        assert_eq!(
+            storage.offset_from_caret(5, NavigationDirection::Back, TextBoundary::Document),
+            0
+        );
+        assert_eq!(
+            storage.offset_from_caret(5, NavigationDirection::Forward, TextBoundary::Document),
+            11
+        );
+
+        let multiline = StringStorage::from("ab\ncd");
+        assert_eq!(
+            multiline.offset_from_caret(4, NavigationDirection::Back, TextBoundary::Line),
+            3,
+            "backward line lands just after the preceding newline"
+        );
+        assert_eq!(
+            multiline.offset_from_caret(0, NavigationDirection::Forward, TextBoundary::Line),
+            2,
+            "forward line lands just before the next newline"
+        );
+
+        // A grapheme cluster (biceps + skin tone) is a single graphmeme boundary.
+        let clusters = StringStorage::from("a💪🏽b");
+        assert_eq!(
+            clusters.offset_from_caret(1, NavigationDirection::Forward, TextBoundary::Graphmeme),
+            9,
+            "forward graphmeme skips the whole cluster"
+        );
+        assert_eq!(
+            clusters.offset_from_caret(9, NavigationDirection::Back, TextBoundary::Graphmeme),
+            1
+        );
+
+        let version = storage.version();
+        storage.replace_range(6..11, "there");
+        assert_eq!(storage.content_utf8(), "hello there");
+        assert_eq!(storage.version(), version.wrapping_add(1));
+    }
+}
