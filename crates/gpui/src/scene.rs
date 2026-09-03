@@ -19,6 +19,9 @@ use std::{
 mod plan;
 pub use plan::*;
 
+pub mod snapshot;
+pub use snapshot::*;
+
 #[allow(non_camel_case_types, unused)]
 #[expect(missing_docs)]
 pub type PathVertex_ScaledPixels = PathVertex<ScaledPixels>;
@@ -28,7 +31,7 @@ pub type DrawOrder = u32;
 
 /// A boolean with the same four-byte representation in Rust and WGSL.
 /// Scene structs use it over one-byte [`bool`] to keep the storage-buffer ABI explicit.
-#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[repr(u32)]
 pub enum ShaderBool {
     /// The flag is disabled.
@@ -710,7 +713,7 @@ impl<'a> Iterator for BatchIterator<'a> {
     }
 }
 
-#[derive(Default, Debug, Copy, Clone)]
+#[derive(Default, Debug, Copy, Clone, Serialize, Deserialize, JsonSchema)]
 #[repr(C)]
 #[expect(missing_docs)]
 pub struct Quad {
@@ -730,7 +733,7 @@ impl From<Quad> for Primitive {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize, JsonSchema)]
 #[repr(C)]
 #[expect(missing_docs)]
 pub struct Underline {
@@ -749,7 +752,7 @@ impl From<Underline> for Primitive {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize, JsonSchema)]
 #[repr(C)]
 #[expect(missing_docs)]
 pub struct Shadow {
@@ -775,7 +778,7 @@ impl From<Shadow> for Primitive {
 /// A backdrop filter blurs (and may otherwise filter) the content already rendered behind
 /// `bounds`, compositing the result into a rounded rectangle — the frosted-glass effect.
 /// Emitted by [`crate::Window::paint_backdrop_filter`]; produces the CSS `backdrop-filter` effect.
-#[derive(Default, Debug, Clone)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[expect(missing_docs)]
 pub struct BackdropFilter {
     pub order: DrawOrder,
@@ -810,7 +813,7 @@ impl From<BackdropFilter> for Primitive {
 /// subtree is painted between a matched start/end pair; the renderer redirects that span into
 /// an offscreen target, filters it, and composites it back at `bounds`. Produces the CSS
 /// `filter` effect (e.g. blurring the element and its children as a single group).
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[expect(missing_docs)]
 pub struct FilterBoundary {
     pub order: DrawOrder,
@@ -861,7 +864,7 @@ pub enum BorderStyle {
 }
 
 /// A data type representing a 2 dimensional transformation that can be applied to an element.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[repr(C)]
 pub struct TransformationMatrix {
     /// 2x2 matrix containing rotation and scale,
@@ -963,7 +966,7 @@ impl Default for TransformationMatrix {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Serialize, Deserialize, JsonSchema)]
 #[repr(C)]
 #[expect(missing_docs)]
 pub struct MonochromeSprite {
@@ -982,7 +985,7 @@ impl From<MonochromeSprite> for Primitive {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Serialize, Deserialize, JsonSchema)]
 #[repr(C)]
 #[expect(missing_docs)]
 pub struct SubpixelSprite {
@@ -1001,7 +1004,7 @@ impl From<SubpixelSprite> for Primitive {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Serialize, Deserialize, JsonSchema)]
 #[repr(C)]
 #[expect(missing_docs)]
 pub struct PolychromeSprite {
@@ -1036,7 +1039,7 @@ impl From<PaintSurface> for Primitive {
     }
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
 #[expect(missing_docs)]
 pub struct PathId(pub usize);
 
@@ -1185,7 +1188,7 @@ impl From<Path<ScaledPixels>> for Primitive {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
 #[repr(C)]
 #[expect(missing_docs)]
 pub struct PathVertex<P: Clone + Debug + Default + PartialEq> {

@@ -50,7 +50,8 @@ impl std::fmt::Debug for SurfaceSource {
 }
 
 impl SurfaceSource {
-    fn size(&self) -> Size<DevicePixels> {
+    /// The size of the surface's source content, in device pixels.
+    pub fn size(&self) -> Size<DevicePixels> {
         match self {
             #[cfg(target_os = "macos")]
             SurfaceSource::Surface(buffer) => {

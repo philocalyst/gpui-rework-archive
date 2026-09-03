@@ -404,7 +404,19 @@ impl<T: Clone + Debug + Default + PartialEq + Display> Display for Point<T> {
 /// This struct is generic over the type `T`, which can be any type that implements `Clone`, `Default`, and `Debug`.
 /// It is commonly used to specify dimensions for elements in a UI, such as a window or element.
 #[derive(
-    Add, Clone, Copy, Default, Deserialize, Div, Hash, Neg, PartialEq, Refineable, Serialize, Sub,
+    Add,
+    Clone,
+    Copy,
+    Default,
+    Deserialize,
+    Div,
+    Hash,
+    JsonSchema,
+    Neg,
+    PartialEq,
+    Refineable,
+    Serialize,
+    Sub,
 )]
 #[refineable(Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[repr(C)]
@@ -746,7 +758,9 @@ impl Size<Length> {
 /// assert_eq!(bounds.origin, origin);
 /// assert_eq!(bounds.size, size);
 /// ```
-#[derive(Refineable, Copy, Clone, Default, Debug, Eq, PartialEq, Serialize, Deserialize, Hash)]
+#[derive(
+    Refineable, Copy, Clone, Default, Debug, Eq, PartialEq, Serialize, Deserialize, Hash, JsonSchema,
+)]
 #[refineable(Debug)]
 #[repr(C)]
 pub struct Bounds<T: Clone + Debug + Default + PartialEq> {
@@ -1742,7 +1756,7 @@ impl Bounds<DevicePixels> {
 /// assert_eq!(edges.bottom, 30.0);
 /// assert_eq!(edges.left, 40.0);
 /// ```
-#[derive(Refineable, Clone, Default, Debug, Eq, PartialEq)]
+#[derive(Refineable, Clone, Default, Debug, Eq, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[refineable(Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[repr(C)]
 pub struct Edges<T: Clone + Debug + Default + PartialEq> {
@@ -2250,7 +2264,7 @@ impl Anchor {
 /// Represents the corners of a box in a 2D space, such as border radius.
 ///
 /// Each field represents the size of the corner on one side of the box: `top_left`, `top_right`, `bottom_right`, and `bottom_left`.
-#[derive(Refineable, Clone, Default, Debug, Eq, PartialEq)]
+#[derive(Refineable, Clone, Default, Debug, Eq, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[refineable(Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[repr(C)]
 pub struct Corners<T: Clone + Debug + Default + PartialEq> {
@@ -2975,6 +2989,7 @@ impl From<usize> for Pixels {
     SubAssign,
     Serialize,
     Deserialize,
+    JsonSchema,
 )]
 #[repr(transparent)]
 pub struct DevicePixels(pub i32);
@@ -3068,7 +3083,21 @@ impl From<usize> for DevicePixels {
 /// a single logical pixel may correspond to multiple physical pixels. By using `ScaledPixels`,
 /// dimensions and positions can be specified in a way that scales appropriately across different
 /// display resolutions.
-#[derive(Clone, Copy, Default, Add, AddAssign, Sub, SubAssign, Div, DivAssign, PartialEq)]
+#[derive(
+    Clone,
+    Copy,
+    Default,
+    Add,
+    AddAssign,
+    Sub,
+    SubAssign,
+    Div,
+    DivAssign,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+)]
 #[repr(transparent)]
 pub struct ScaledPixels(pub f32);
 
