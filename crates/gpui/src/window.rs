@@ -1596,12 +1596,139 @@ pub(crate) enum DrawPhase {
     Focus,
 }
 
+pub(crate) const PENDING_INPUT_TIMEOUT: Duration = Duration::from_secs(1);
+
+/// Pending input for a potential multi-stroke key binding.
+pub struct PendingInputStatus<'a> {
+    keystrokes: &'a [Keystroke],
+    timeout: Option<PendingInputTimeoutStatus>,
+}
+
+impl<'a> PendingInputStatus<'a> {
+    /// Returns the keystrokes entered so far.
+    pub fn keystrokes(&self) -> &'a [Keystroke] {
+        self.keystrokes
+    }
+
+    /// Returns the timeout state for flushing this input, if it needs a timeout.
+    pub fn timeout(&self) -> Option<PendingInputTimeoutStatus> {
+        self.timeout
+    }
+}
+
+/// The timeout state for pending input.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct PendingInputTimeoutStatus {
+    duration: Duration,
+    remaining: Duration,
+    started_at: Option<Instant>,
+    paused: bool,
+}
+
+impl PendingInputTimeoutStatus {
+    /// Returns the full timeout duration.
+    pub fn duration(&self) -> Duration {
+        self.duration
+    }
+
+    /// Returns the duration remaining before pending input is flushed.
+    pub fn remaining(&self, cx: &App) -> Duration {
+        self.started_at
+            .map(|started_at| {
+                self.remaining
+                    .saturating_sub(cx.background_executor().now() - started_at)
+            })
+            .unwrap_or(self.remaining)
+    }
+
+    /// Returns whether the timeout is paused.
+    pub fn is_paused(&self) -> bool {
+        self.paused
+    }
+}
+
+#[derive(Debug)]
+struct PendingInputTimeout {
+    duration: Duration,
+    remaining: Duration,
+    state: PendingInputTimeoutState,
+}
+
+#[derive(Debug)]
+enum PendingInputTimeoutState {
+    Running { started_at: Instant, task: Task<()> },
+    Paused { pause: PendingInputTimeoutPause },
+}
+
+#[derive(Debug)]
+struct PendingInputTimeoutPause {
+    owner_id: EntityId,
+    _release_subscription: Subscription,
+}
+
+impl PendingInputTimeout {
+    fn is_paused(&self) -> bool {
+        matches!(&self.state, PendingInputTimeoutState::Paused { .. })
+    }
+
+    fn pause(&mut self, pause: PendingInputTimeoutPause, now: Instant) -> bool {
+        match std::mem::replace(&mut self.state, PendingInputTimeoutState::Paused { pause }) {
+            PendingInputTimeoutState::Running { started_at, task } => {
+                self.remaining = self.remaining.saturating_sub(now - started_at);
+                drop(task);
+                true
+            }
+            previous_state @ PendingInputTimeoutState::Paused { .. } => {
+                self.state = previous_state;
+                false
+            }
+        }
+    }
+
+    fn pause_owner_id(&self) -> Option<EntityId> {
+        match &self.state {
+            PendingInputTimeoutState::Running { .. } => None,
+            PendingInputTimeoutState::Paused { pause } => Some(pause.owner_id),
+        }
+    }
+
+    fn resume(&mut self, owner_id: EntityId, started_at: Instant, task: Task<()>) -> bool {
+        match std::mem::replace(
+            &mut self.state,
+            PendingInputTimeoutState::Running { started_at, task },
+        ) {
+            PendingInputTimeoutState::Paused { pause } if pause.owner_id == owner_id => true,
+            previous_state => {
+                self.state = previous_state;
+                false
+            }
+        }
+    }
+
+    fn reset_duration(&mut self, duration: Duration) {
+        self.duration = duration;
+        self.remaining = duration;
+    }
+
+    fn status(&self) -> PendingInputTimeoutStatus {
+        let (started_at, paused) = match &self.state {
+            PendingInputTimeoutState::Running { started_at, .. } => (Some(*started_at), false),
+            PendingInputTimeoutState::Paused { .. } => (None, true),
+        };
+        PendingInputTimeoutStatus {
+            duration: self.duration,
+            remaining: self.remaining,
+            started_at,
+            paused,
+        }
+    }
+}
+
 #[derive(Default, Debug)]
 struct PendingInput {
     keystrokes: SmallVec<[Keystroke; 1]>,
     focus: Option<FocusId>,
-    timer: Option<Task<()>>,
-    needs_timeout: bool,
+    timeout: Option<PendingInputTimeout>,
 }
 
 pub(crate) struct ElementStateBox {
@@ -6943,7 +7070,7 @@ impl Window {
         }
 
         if !match_result.pending.is_empty() {
-            currently_pending.timer.take();
+            let previous_timeout = currently_pending.timeout.take();
             currently_pending.keystrokes = match_result.pending;
             currently_pending.focus = self.focus;
 
@@ -6957,38 +7084,23 @@ impl Window {
                     accepts
                 });
 
-            currently_pending.needs_timeout |=
-                match_result.pending_has_binding || text_input_requires_timeout;
-
-            if currently_pending.needs_timeout {
-                currently_pending.timer = Some(self.spawn(cx, async move |cx| {
-                    cx.background_executor.timer(Duration::from_secs(1)).await;
-                    cx.update(move |window, cx| {
-                        let Some(currently_pending) = window
-                            .pending_input
-                            .take()
-                            .filter(|pending| pending.focus == window.focus)
-                        else {
-                            return;
-                        };
-
-                        let node_id = window.focus_node_id_in_rendered_frame(window.focus);
-                        let dispatch_path =
-                            window.rendered_frame.dispatch_tree.dispatch_path(node_id);
-
-                        let to_replay = window
-                            .rendered_frame
-                            .dispatch_tree
-                            .flush_dispatch(currently_pending.keystrokes, &dispatch_path);
-
-                        window.pending_input_changed(cx);
-                        window.replay_pending_input(to_replay, cx)
-                    })
-                    .log_err();
-                }));
+            let needs_timeout = previous_timeout.is_some()
+                || match_result.pending_has_binding
+                || text_input_requires_timeout;
+            currently_pending.timeout = if needs_timeout {
+                match previous_timeout {
+                    Some(mut timeout) if timeout.is_paused() => {
+                        timeout.reset_duration(PENDING_INPUT_TIMEOUT);
+                        Some(timeout)
+                    }
+                    previous_timeout => {
+                        drop(previous_timeout);
+                        Some(self.new_pending_input_timeout(PENDING_INPUT_TIMEOUT, cx))
+                    }
+                }
             } else {
-                currently_pending.timer = None;
-            }
+                None
+            };
             self.pending_input = Some(currently_pending);
             self.pending_input_changed(cx);
             cx.propagate_event = false;
@@ -7029,6 +7141,44 @@ impl Window {
 
         self.finish_dispatch_key_event(event, dispatch_path, match_result.context_stack, cx);
         self.pending_input_changed(cx);
+    }
+
+    fn new_pending_input_timeout(&self, duration: Duration, cx: &App) -> PendingInputTimeout {
+        let (started_at, task) = self.start_pending_input_timeout(duration, cx);
+        PendingInputTimeout {
+            duration,
+            remaining: duration,
+            state: PendingInputTimeoutState::Running { started_at, task },
+        }
+    }
+
+    fn start_pending_input_timeout(&self, remaining: Duration, cx: &App) -> (Instant, Task<()>) {
+        let started_at = cx.background_executor().now();
+        let task = self.spawn(cx, async move |cx| {
+            cx.background_executor.timer(remaining).await;
+            cx.update(move |window, cx| {
+                let Some(currently_pending) = window
+                    .pending_input
+                    .take()
+                    .filter(|pending| pending.focus == window.focus)
+                else {
+                    return;
+                };
+
+                let node_id = window.focus_node_id_in_rendered_frame(window.focus);
+                let dispatch_path = window.rendered_frame.dispatch_tree.dispatch_path(node_id);
+
+                let to_replay = window
+                    .rendered_frame
+                    .dispatch_tree
+                    .flush_dispatch(currently_pending.keystrokes, &dispatch_path);
+
+                window.pending_input_changed(cx);
+                window.replay_pending_input(to_replay, cx)
+            })
+            .log_err();
+        });
+        (started_at, task)
     }
 
     fn finish_dispatch_key_event(
@@ -7134,7 +7284,7 @@ impl Window {
     /// After the first keystroke of such a binding, GPUI waits for the next one. Use this to show
     /// that a sequence is pending.
     pub fn has_pending_keystrokes(&self) -> bool {
-        self.active_pending_input().is_some()
+        self.pending_input().is_some()
     }
 
     #[cfg(test)]
@@ -7153,8 +7303,8 @@ impl Window {
     /// Returns `None` when no binding is pending. The list is cleared when the sequence completes,
     /// times out, or focus changes.
     pub fn pending_input_keystrokes(&self) -> Option<&[Keystroke]> {
-        self.active_pending_input()
-            .map(|pending_input| pending_input.keystrokes.as_slice())
+        self.pending_input()
+            .map(|pending_input| pending_input.keystrokes())
     }
 
     fn replay_pending_input(&mut self, replays: SmallVec<[Replay; 1]>, cx: &mut App) {
