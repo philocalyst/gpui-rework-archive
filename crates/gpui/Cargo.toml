@@ -155,6 +155,11 @@ backtrace.workspace = true
 smol.workspace = true
 collections = { workspace = true, features = ["test-support"] }
 env_logger.workspace = true
+# Snapshot testing for the deterministic scene archive (`tests/scene_snapshots.rs`). The
+# `cargo-insta` review CLI is a separate install (`cargo install cargo-insta`), not a
+# dependency; run `INSTA_UPDATE=always` to write new snapshots and `cargo insta review --accept`
+# to accept pending diffs.
+insta = { version = "1.48", features = ["json", "redactions"] }
 gpui_platform = { workspace = true, features = ["font-kit", "wayland", "x11"] }
 gpui_util = { workspace = true }
 lyon = { version = "1.0", features = ["extra"] }

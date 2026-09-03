@@ -127,6 +127,15 @@ test-nextest-ci:
 test-gpu:
     cargo nextest run --workspace --profile gpu -E 'test(gpu_)'
 
+# Regenerate scene snapshots with:  INSTA_UPDATE=always cargo test -p gpui-ce --test scene_snapshots
+# Review + accept pending diffs with:  cargo insta review --accept  (requires `cargo install cargo-insta`)
+[doc('Run scene snapshot tests against committed snapshots (no auto-update)')]
+[group('testing')]
+test-snap:
+    #!/usr/bin/env nu
+    print "📸 Running scene snapshot tests (no auto-update)..."
+    with-env {INSTA_UPDATE: 'no'} { cargo test -p gpui-ce --test scene_snapshots }
+
 [doc('Run criterion bench --no-run + quick smoke')]
 [group('testing')]
 bench-smoke:

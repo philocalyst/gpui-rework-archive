@@ -1,0 +1,294 @@
+---
+source: crates/gpui/tests/scene_snapshots.rs
+expression: archive.to_canonical_json()
+---
+{
+  "version": 1,
+  "commands": [
+    {
+      "op": "quad",
+      "order": 1,
+      "border_style": "Solid",
+      "bounds": {
+        "origin": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "size": {
+          "width": 100.0,
+          "height": 100.0
+        }
+      },
+      "content_mask": {
+        "bounds": {
+          "origin": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "size": {
+            "width": 100.0,
+            "height": 100.0
+          }
+        }
+      },
+      "background": {
+        "tag": "Solid",
+        "color_space": "Srgb",
+        "solid": {
+          "h": 0.1,
+          "s": 0.6,
+          "l": 0.5,
+          "a": 1.0
+        },
+        "gradient_angle_or_pattern_height": 0.0,
+        "colors": [
+          {
+            "color": {
+              "h": 0.0,
+              "s": 0.0,
+              "l": 0.0,
+              "a": 0.0
+            },
+            "percentage": 0.0
+          },
+          {
+            "color": {
+              "h": 0.0,
+              "s": 0.0,
+              "l": 0.0,
+              "a": 0.0
+            },
+            "percentage": 0.0
+          }
+        ],
+        "padding": 0
+      },
+      "border_color": {
+        "h": 0.0,
+        "s": 0.0,
+        "l": 0.0,
+        "a": 0.0
+      },
+      "corner_radii": {
+        "top_left": 0.0,
+        "top_right": 0.0,
+        "bottom_right": 0.0,
+        "bottom_left": 0.0
+      },
+      "border_widths": {
+        "top": 0.0,
+        "right": 0.0,
+        "bottom": 0.0,
+        "left": 0.0
+      }
+    },
+    {
+      "op": "quad",
+      "order": 1,
+      "border_style": "Solid",
+      "bounds": {
+        "origin": {
+          "x": 400.0,
+          "y": 0.0
+        },
+        "size": {
+          "width": 100.0,
+          "height": 100.0
+        }
+      },
+      "content_mask": {
+        "bounds": {
+          "origin": {
+            "x": 400.0,
+            "y": 0.0
+          },
+          "size": {
+            "width": 100.0,
+            "height": 100.0
+          }
+        }
+      },
+      "background": {
+        "tag": "Solid",
+        "color_space": "Srgb",
+        "solid": {
+          "h": 0.0,
+          "s": 0.0,
+          "l": 0.0,
+          "a": 1.0
+        },
+        "gradient_angle_or_pattern_height": 0.0,
+        "colors": [
+          {
+            "color": {
+              "h": 0.0,
+              "s": 0.0,
+              "l": 0.0,
+              "a": 0.0
+            },
+            "percentage": 0.0
+          },
+          {
+            "color": {
+              "h": 0.0,
+              "s": 0.0,
+              "l": 0.0,
+              "a": 0.0
+            },
+            "percentage": 0.0
+          }
+        ],
+        "padding": 0
+      },
+      "border_color": {
+        "h": 0.0,
+        "s": 0.0,
+        "l": 0.0,
+        "a": 0.0
+      },
+      "corner_radii": {
+        "top_left": 0.0,
+        "top_right": 0.0,
+        "bottom_right": 0.0,
+        "bottom_left": 0.0
+      },
+      "border_widths": {
+        "top": 0.0,
+        "right": 0.0,
+        "bottom": 0.0,
+        "left": 0.0
+      }
+    },
+    {
+      "op": "underline",
+      "order": 1,
+      "padding": 0,
+      "bounds": {
+        "origin": {
+          "x": 200.0,
+          "y": 0.0
+        },
+        "size": {
+          "width": 100.0,
+          "height": 100.0
+        }
+      },
+      "content_mask": {
+        "bounds": {
+          "origin": {
+            "x": 200.0,
+            "y": 0.0
+          },
+          "size": {
+            "width": 100.0,
+            "height": 100.0
+          }
+        }
+      },
+      "color": {
+        "h": 0.6,
+        "s": 0.8,
+        "l": 0.5,
+        "a": 1.0
+      },
+      "thickness": 1.0,
+      "wavy": "Disabled"
+    },
+    {
+      "op": "shadow",
+      "order": 2,
+      "blur_radius": 4.0,
+      "bounds": {
+        "origin": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "size": {
+          "width": 100.0,
+          "height": 100.0
+        }
+      },
+      "corner_radii": {
+        "top_left": 0.0,
+        "top_right": 0.0,
+        "bottom_right": 0.0,
+        "bottom_left": 0.0
+      },
+      "content_mask": {
+        "bounds": {
+          "origin": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "size": {
+            "width": 100.0,
+            "height": 100.0
+          }
+        }
+      },
+      "color": {
+        "h": 0.0,
+        "s": 0.0,
+        "l": 0.0,
+        "a": 0.4
+      },
+      "element_bounds": {
+        "origin": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "size": {
+          "width": 100.0,
+          "height": 100.0
+        }
+      },
+      "element_corner_radii": {
+        "top_left": 0.0,
+        "top_right": 0.0,
+        "bottom_right": 0.0,
+        "bottom_left": 0.0
+      },
+      "inset": "Disabled",
+      "padding": 0
+    },
+    {
+      "op": "underline",
+      "order": 3,
+      "padding": 0,
+      "bounds": {
+        "origin": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "size": {
+          "width": 100.0,
+          "height": 100.0
+        }
+      },
+      "content_mask": {
+        "bounds": {
+          "origin": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "size": {
+            "width": 100.0,
+            "height": 100.0
+          }
+        }
+      },
+      "color": {
+        "h": 0.6,
+        "s": 0.8,
+        "l": 0.5,
+        "a": 1.0
+      },
+      "thickness": 1.0,
+      "wavy": "Disabled"
+    }
+  ],
+  "resources": {
+    "textures": [],
+    "tiles": []
+  }
+}

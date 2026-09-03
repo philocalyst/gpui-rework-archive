@@ -1,0 +1,12 @@
+---
+source: crates/gpui/tests/scene_snapshots.rs
+expression: archive.to_canonical_json()
+---
+{
+  "version": 1,
+  "commands": [],
+  "resources": {
+    "textures": [],
+    "tiles": []
+  }
+}

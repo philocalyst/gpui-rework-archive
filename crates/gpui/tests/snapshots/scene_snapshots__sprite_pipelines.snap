@@ -1,0 +1,268 @@
+---
+source: crates/gpui/tests/scene_snapshots.rs
+expression: archive.to_canonical_json()
+---
+{
+  "version": 1,
+  "commands": [
+    {
+      "op": "monochrome_sprite",
+      "order": 1,
+      "padding": 0,
+      "bounds": {
+        "origin": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "size": {
+          "width": 100.0,
+          "height": 100.0
+        }
+      },
+      "content_mask": {
+        "bounds": {
+          "origin": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "size": {
+            "width": 100.0,
+            "height": 100.0
+          }
+        }
+      },
+      "color": {
+        "h": 0.0,
+        "s": 0.0,
+        "l": 0.0,
+        "a": 1.0
+      },
+      "tile": {
+        "texture_id": {
+          "index": 2,
+          "kind": "Monochrome"
+        },
+        "tile_id": 3,
+        "padding": 0,
+        "bounds": {
+          "origin": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 16,
+            "height": 16
+          }
+        }
+      },
+      "transformation": {
+        "rotation_scale": [
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0
+          ]
+        ],
+        "translation": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "op": "subpixel_sprite",
+      "order": 2,
+      "padding": 0,
+      "bounds": {
+        "origin": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "size": {
+          "width": 100.0,
+          "height": 100.0
+        }
+      },
+      "content_mask": {
+        "bounds": {
+          "origin": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "size": {
+            "width": 100.0,
+            "height": 100.0
+          }
+        }
+      },
+      "color": {
+        "h": 0.0,
+        "s": 0.0,
+        "l": 0.0,
+        "a": 1.0
+      },
+      "tile": {
+        "texture_id": {
+          "index": 3,
+          "kind": "Subpixel"
+        },
+        "tile_id": 4,
+        "padding": 0,
+        "bounds": {
+          "origin": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 16,
+            "height": 16
+          }
+        }
+      },
+      "transformation": {
+        "rotation_scale": [
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0
+          ]
+        ],
+        "translation": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "op": "polychrome_sprite",
+      "order": 3,
+      "padding": 0,
+      "grayscale": "Disabled",
+      "opacity": 0.75,
+      "bounds": {
+        "origin": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "size": {
+          "width": 100.0,
+          "height": 100.0
+        }
+      },
+      "content_mask": {
+        "bounds": {
+          "origin": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "size": {
+            "width": 100.0,
+            "height": 100.0
+          }
+        }
+      },
+      "corner_radii": {
+        "top_left": 0.0,
+        "top_right": 0.0,
+        "bottom_right": 0.0,
+        "bottom_left": 0.0
+      },
+      "tile": {
+        "texture_id": {
+          "index": 4,
+          "kind": "Polychrome"
+        },
+        "tile_id": 5,
+        "padding": 0,
+        "bounds": {
+          "origin": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 16,
+            "height": 16
+          }
+        }
+      }
+    }
+  ],
+  "resources": {
+    "textures": [
+      {
+        "index": 2,
+        "kind": "Monochrome"
+      },
+      {
+        "index": 3,
+        "kind": "Subpixel"
+      },
+      {
+        "index": 4,
+        "kind": "Polychrome"
+      }
+    ],
+    "tiles": [
+      {
+        "texture_id": {
+          "index": 2,
+          "kind": "Monochrome"
+        },
+        "tile_id": 3,
+        "padding": 0,
+        "bounds": {
+          "origin": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 16,
+            "height": 16
+          }
+        }
+      },
+      {
+        "texture_id": {
+          "index": 3,
+          "kind": "Subpixel"
+        },
+        "tile_id": 4,
+        "padding": 0,
+        "bounds": {
+          "origin": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 16,
+            "height": 16
+          }
+        }
+      },
+      {
+        "texture_id": {
+          "index": 4,
+          "kind": "Polychrome"
+        },
+        "tile_id": 5,
+        "padding": 0,
+        "bounds": {
+          "origin": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 16,
+            "height": 16
+          }
+        }
+      }
+    ]
+  }
+}

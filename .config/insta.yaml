@@ -1,0 +1,8 @@
+# Insta snapshot configuration (https://insta.rs/docs/settings/).
+# Loaded by both `insta` (at test time) and `cargo-insta` (at review time).
+behavior:
+  # Never auto-write snapshots: uncommitted diffs surface as `.snap.new` files and fail the run.
+  # An explicit `INSTA_UPDATE=always` (snapshot generation) overrides this per-invocation.
+  update: "no"
+  # Show a full diff on mismatch so a drifted scene archive is reviewable from the terminal.
+  output: "diff"
