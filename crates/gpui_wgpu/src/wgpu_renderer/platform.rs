@@ -25,25 +25,24 @@ impl WgpuRenderer {
         let window_handle = window
             .window_handle()
             .map_err(|error| anyhow::anyhow!("failed to get window handle: {error}"))?;
-        let instance = gpu_context
-            .borrow()
-            .as_ref()
-            .map(|context| context.instance.clone())
-            .unwrap_or_else(|| WgpuContext::instance(Box::new(window.clone())));
-        let surface = create_surface(&instance, window_handle.as_raw())?;
 
         let mut context_slot = gpu_context.borrow_mut();
-        let context = match context_slot.as_mut() {
+        let (context, surface) = match context_slot.as_mut() {
             Some(context) => {
+                let surface = create_surface(&context.instance, window_handle.as_raw())?;
                 context.check_compatible_with_surface(&surface)?;
-                context
+                (context, surface)
             }
-            None => context_slot.insert(WgpuContext::new(
-                instance,
-                &surface,
-                compositor_gpu,
-                extra_requirements.as_ref(),
-            )?),
+            None => {
+                let (context, surface) = initialize_context_and_surface(
+                    window,
+                    window_handle.as_raw(),
+                    compositor_gpu,
+                    false,
+                    extra_requirements.as_ref(),
+                )?;
+                (context_slot.insert(context), surface)
+            }
         };
         let atlas = Arc::new(WgpuAtlas::from_context(context));
         Self::new_internal(
@@ -215,15 +214,14 @@ impl WgpuRenderer {
             log::warn!("GPU device lost, recreating context...");
             self.resources = None;
             *gpu_context.borrow_mut() = None;
-            let instance = WgpuContext::instance(Box::new(window.clone()));
-            let surface = create_surface(&instance, window_handle.as_raw())?;
-            let new_context = match WgpuContext::new_rejecting_software(
-                instance,
-                &surface,
+            let (new_context, surface) = match initialize_context_and_surface(
+                window,
+                window_handle.as_raw(),
                 self.compositor_gpu,
+                true,
                 self.extra_requirements.as_ref(),
             ) {
-                Ok(context) => context,
+                Ok(result) => result,
                 Err(error) => {
                     self.faults.recovery_not_before =
                         Some(std::time::Instant::now() + std::time::Duration::from_millis(350));
@@ -282,6 +280,50 @@ impl WgpuRenderer {
                 .setPresentsWithTransaction(enabled);
         }
     }
+}
+
+#[cfg(not(target_family = "wasm"))]
+fn initialize_context_and_surface<W>(
+    window: &W,
+    raw_window_handle: raw_window_handle::RawWindowHandle,
+    compositor_gpu: Option<CompositorGpuHint>,
+    reject_software: bool,
+    extra_requirements: Option<&WgpuDeviceRequirements>,
+) -> anyhow::Result<(WgpuContext, wgpu::Surface<'static>)>
+where
+    W: HasDisplayHandle + std::fmt::Debug + Clone + Send + Sync + 'static,
+{
+    let mut failures = Vec::new();
+    for &backend in WgpuContext::native_backend_order() {
+        let instance = WgpuContext::instance_for_backend(Some(Box::new(window.clone())), backend);
+        let surface = match create_surface(&instance, raw_window_handle) {
+            Ok(surface) => surface,
+            Err(error) => {
+                failures.push(format!("{backend:?}: {error:#}"));
+                continue;
+            }
+        };
+        let context = if reject_software {
+            WgpuContext::new_rejecting_software(
+                instance,
+                &surface,
+                compositor_gpu,
+                extra_requirements,
+            )
+        } else {
+            WgpuContext::new(instance, &surface, compositor_gpu, extra_requirements)
+        };
+
+        match context {
+            Ok(context) => return Ok((context, surface)),
+            Err(error) => failures.push(format!("{backend:?}: {error:#}")),
+        }
+    }
+
+    anyhow::bail!(
+        "failed to initialize a GPU context for the window; attempted backends in order: {}",
+        failures.join("; ")
+    )
 }
 
 #[cfg(not(target_family = "wasm"))]

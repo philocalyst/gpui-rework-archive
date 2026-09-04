@@ -3,7 +3,7 @@ use gpui_render::shaders::{
     common::SurfaceColorFormat, interface as shader_interface, surface::SurfaceUniforms,
 };
 
-use super::{frame, WgpuRenderer};
+use super::{WgpuRenderer, frame};
 
 #[cfg(target_os = "macos")]
 #[path = "surfaces/macos.rs"]
@@ -57,6 +57,10 @@ impl SurfaceBinding {
 }
 
 impl WgpuRenderer {
+    pub(super) fn retain_surface_cache(&self, surfaces: &[PaintSurface]) {
+        platform::retain_surface_cache(self, surfaces);
+    }
+
     fn create_surface_bind_group(
         &self,
         color_view: &wgpu::TextureView,

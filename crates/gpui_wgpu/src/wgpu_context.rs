@@ -2,12 +2,56 @@
 use anyhow::Context as _;
 #[cfg(not(target_family = "wasm"))]
 use gpui_util::ResultExt;
-use std::sync::{Arc, Mutex};
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Mutex};
 use wgpu::TextureFormat;
 
 /// Environment variable that forces the HWND swapchain path on Windows.
 pub const DISABLE_DIRECT_COMPOSITION_ENV: &str = "GPUI_DISABLE_DIRECT_COMPOSITION";
+
+/// A single native graphics API that can back a [`WgpuContext`].
+///
+/// Keeping this as an enum, rather than passing a [`wgpu::Backends`] bit-set through the native
+/// initialization path, makes it impossible for the renderer to accidentally initialize a
+/// fallback API alongside the preferred one. In particular, constructing WGPU's GL backend
+/// creates and retains EGL state even when a Vulkan adapter is eventually selected.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub(crate) enum NativeBackend {
+    #[cfg(target_os = "macos")]
+    Metal,
+    #[cfg(target_os = "windows")]
+    Dx12,
+    #[cfg(not(target_os = "macos"))]
+    Vulkan,
+    #[cfg(not(target_os = "macos"))]
+    Gl,
+}
+
+impl NativeBackend {
+    const fn as_wgpu(self) -> wgpu::Backends {
+        match self {
+            #[cfg(target_os = "macos")]
+            Self::Metal => wgpu::Backends::METAL,
+            #[cfg(target_os = "windows")]
+            Self::Dx12 => wgpu::Backends::DX12,
+            #[cfg(not(target_os = "macos"))]
+            Self::Vulkan => wgpu::Backends::VULKAN,
+            #[cfg(not(target_os = "macos"))]
+            Self::Gl => wgpu::Backends::GL,
+        }
+    }
+}
+
+#[cfg(target_os = "macos")]
+const NATIVE_BACKEND_ORDER: &[NativeBackend] = &[NativeBackend::Metal];
+#[cfg(target_os = "windows")]
+const NATIVE_BACKEND_ORDER: &[NativeBackend] = &[
+    NativeBackend::Dx12,
+    NativeBackend::Vulkan,
+    NativeBackend::Gl,
+];
+#[cfg(not(any(target_os = "macos", target_os = "windows")))]
+const NATIVE_BACKEND_ORDER: &[NativeBackend] = &[NativeBackend::Vulkan, NativeBackend::Gl];
 
 pub struct WgpuContext {
     pub instance: wgpu::Instance,
@@ -76,35 +120,48 @@ impl WgpuContext {
     pub fn new_headless(
         extra_requirements: Option<&WgpuDeviceRequirements>,
     ) -> anyhow::Result<Self> {
-        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
-            backends: native_backends(),
-            flags: wgpu::InstanceFlags::default(),
-            backend_options: wgpu::BackendOptions::default(),
-            memory_budget_thresholds: wgpu::MemoryBudgetThresholds::default(),
-            display: None,
-        });
-        let adapter = gpui::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
-            // LowPower avoids waking a discrete GPU just for snapshots on dual-GPU systems.
-            power_preference: wgpu::PowerPreference::LowPower,
-            compatible_surface: None,
-            force_fallback_adapter: false,
-        }))
-        .map_err(|error| anyhow::anyhow!("failed to request headless GPU adapter: {error}"))?;
-        let (device, queue, dual_source_blending, color_texture_format, renderer_tier) =
-            gpui::block_on(Self::create_device(&adapter, extra_requirements))?;
-        let (device_lost, uncaptured_error) = install_device_callbacks(&device);
+        let mut failures = Vec::new();
+        for &backend in Self::native_backend_order() {
+            let instance = Self::instance_for_backend(None, backend);
+            let result: anyhow::Result<Self> = (|| {
+                let adapter =
+                    gpui::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
+                        // LowPower avoids waking a discrete GPU just for snapshots on dual-GPU
+                        // systems.
+                        power_preference: wgpu::PowerPreference::LowPower,
+                        compatible_surface: None,
+                        force_fallback_adapter: false,
+                    }))
+                    .map_err(|error| {
+                        anyhow::anyhow!("failed to request headless GPU adapter: {error}")
+                    })?;
+                let (device, queue, dual_source_blending, color_texture_format, renderer_tier) =
+                    gpui::block_on(Self::create_device(&adapter, extra_requirements))?;
+                let (device_lost, uncaptured_error) = install_device_callbacks(&device);
 
-        Ok(Self {
-            instance,
-            adapter,
-            device: Arc::new(device),
-            queue: Arc::new(queue),
-            dual_source_blending,
-            color_texture_format,
-            renderer_tier,
-            device_lost,
-            uncaptured_error,
-        })
+                Ok(Self {
+                    instance,
+                    adapter,
+                    device: Arc::new(device),
+                    queue: Arc::new(queue),
+                    dual_source_blending,
+                    color_texture_format,
+                    renderer_tier,
+                    device_lost,
+                    uncaptured_error,
+                })
+            })();
+
+            match result {
+                Ok(context) => return Ok(context),
+                Err(error) => failures.push(format!("{backend:?}: {error:#}")),
+            }
+        }
+
+        anyhow::bail!(
+            "failed to initialize a headless GPU context; attempted backends in order: {}",
+            failures.join("; ")
+        )
     }
 
     #[cfg(not(target_family = "wasm"))]
@@ -261,7 +318,18 @@ impl WgpuContext {
     }
 
     #[cfg(not(target_family = "wasm"))]
-    pub fn instance(display: Box<dyn wgpu::wgt::WgpuHasDisplayHandle>) -> wgpu::Instance {
+    pub(crate) fn native_backend_order() -> &'static [NativeBackend] {
+        NATIVE_BACKEND_ORDER
+    }
+
+    /// Creates an instance for exactly one native backend.
+    ///
+    /// Callers that want fallback behavior must try [`Self::native_backend_order`] sequentially;
+    /// combining the flags eagerly initializes every requested backend.
+    pub(crate) fn instance_for_backend(
+        display: Option<Box<dyn wgpu::wgt::WgpuHasDisplayHandle>>,
+        backend: NativeBackend,
+    ) -> wgpu::Instance {
         #[cfg(target_os = "windows")]
         let mut backend_options = wgpu::BackendOptions::default();
         #[cfg(not(target_os = "windows"))]
@@ -280,11 +348,11 @@ impl WgpuContext {
         }
 
         wgpu::Instance::new(wgpu::InstanceDescriptor {
-            backends: native_backends(),
+            backends: backend.as_wgpu(),
             flags: wgpu::InstanceFlags::default(),
             backend_options,
             memory_budget_thresholds: wgpu::MemoryBudgetThresholds::default(),
-            display: Some(display),
+            display,
         })
     }
 
@@ -429,7 +497,13 @@ impl WgpuContext {
             log::info!("Testing adapter: {} ({:?})...", info.name, info.backend);
 
             match Self::try_adapter_with_surface(&adapter, surface, extra_requirements).await {
-                Ok((device, queue, dual_source_blending, color_atlas_texture_format, renderer_tier)) => {
+                Ok((
+                    device,
+                    queue,
+                    dual_source_blending,
+                    color_atlas_texture_format,
+                    renderer_tier,
+                )) => {
                     log::info!(
                         "Selected GPU (passed configuration test): {} ({:?})",
                         info.name,
@@ -605,17 +679,6 @@ fn install_device_callbacks(
 }
 
 #[cfg(not(target_family = "wasm"))]
-fn native_backends() -> wgpu::Backends {
-    if cfg!(target_os = "macos") {
-        wgpu::Backends::METAL
-    } else if cfg!(target_os = "windows") {
-        wgpu::Backends::DX12 | wgpu::Backends::VULKAN | wgpu::Backends::GL
-    } else {
-        wgpu::Backends::VULKAN | wgpu::Backends::GL
-    }
-}
-
-#[cfg(not(target_family = "wasm"))]
 fn parse_pci_id(id: &str) -> anyhow::Result<u32> {
     let mut id = id.trim();
 
@@ -634,7 +697,33 @@ fn parse_pci_id(id: &str) -> anyhow::Result<u32> {
 
 #[cfg(test)]
 mod tests {
-    use super::parse_pci_id;
+    use super::{NativeBackend, WgpuContext, parse_pci_id};
+
+    #[test]
+    fn native_backend_fallbacks_are_individually_initialized() {
+        let backends = WgpuContext::native_backend_order();
+        assert!(!backends.is_empty());
+        assert!(
+            backends
+                .iter()
+                .all(|backend| backend.as_wgpu().bits().count_ones() == 1),
+            "each fallback step must initialize exactly one WGPU backend"
+        );
+
+        #[cfg(target_os = "linux")]
+        assert_eq!(backends, &[NativeBackend::Vulkan, NativeBackend::Gl]);
+        #[cfg(target_os = "windows")]
+        assert_eq!(
+            backends,
+            &[
+                NativeBackend::Dx12,
+                NativeBackend::Vulkan,
+                NativeBackend::Gl,
+            ]
+        );
+        #[cfg(target_os = "macos")]
+        assert_eq!(backends, &[NativeBackend::Metal]);
+    }
 
     #[test]
     fn test_parse_device_id() {
