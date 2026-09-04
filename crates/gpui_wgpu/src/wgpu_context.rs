@@ -2,12 +2,170 @@
 use anyhow::Context as _;
 #[cfg(not(target_family = "wasm"))]
 use gpui_util::ResultExt;
-use std::sync::{Arc, Mutex};
+#[cfg(not(target_family = "wasm"))]
+use smallvec::SmallVec;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Mutex};
 use wgpu::TextureFormat;
 
 /// Environment variable that forces the HWND swapchain path on Windows.
 pub const DISABLE_DIRECT_COMPOSITION_ENV: &str = "GPUI_DISABLE_DIRECT_COMPOSITION";
+
+/// A single native graphics API that can back a [`WgpuContext`].
+///
+/// Keeping this as an enum, rather than passing a [`wgpu::Backends`] bit-set through the native
+/// initialization path, makes it impossible for the renderer to accidentally initialize a
+/// fallback API alongside the preferred one. In particular, constructing WGPU's GL backend
+/// creates and retains EGL state even when a Vulkan adapter is eventually selected.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[cfg(not(target_family = "wasm"))]
+pub(crate) enum NativeBackend {
+    #[cfg(target_vendor = "apple")]
+    Metal,
+    #[cfg(target_os = "windows")]
+    Dx12,
+    #[cfg(not(target_vendor = "apple"))]
+    Vulkan,
+    #[cfg(not(target_vendor = "apple"))]
+    Gl,
+}
+
+#[cfg(not(target_family = "wasm"))]
+impl NativeBackend {
+    #[cfg(target_vendor = "apple")]
+    const PREFERENCE: &'static [Self] = &[Self::Metal];
+    #[cfg(target_os = "windows")]
+    const PREFERENCE: &'static [Self] = &[Self::Dx12, Self::Vulkan, Self::Gl];
+    #[cfg(not(any(target_vendor = "apple", target_os = "windows")))]
+    const PREFERENCE: &'static [Self] = &[Self::Vulkan, Self::Gl];
+
+    pub(crate) fn instance(
+        self,
+        display: Option<Box<dyn wgpu::wgt::WgpuHasDisplayHandle>>,
+    ) -> wgpu::Instance {
+        #[cfg(target_os = "windows")]
+        let mut backend_options = wgpu::BackendOptions::default();
+        #[cfg(not(target_os = "windows"))]
+        let backend_options = wgpu::BackendOptions::default();
+        #[cfg(target_os = "windows")]
+        {
+            // Mirrors the former D3D DirectComposition path; the env switch keeps a
+            // diagnostic fallback.
+            let direct_composition_disabled = std::env::var(DISABLE_DIRECT_COMPOSITION_ENV)
+                .is_ok_and(|value| value == "true" || value == "1");
+            backend_options.dx12.presentation_system = if direct_composition_disabled {
+                wgpu::Dx12SwapchainKind::DxgiFromHwnd
+            } else {
+                wgpu::Dx12SwapchainKind::DxgiFromVisual
+            };
+        }
+
+        wgpu::Instance::new(wgpu::InstanceDescriptor {
+            backends: self.into(),
+            flags: wgpu::InstanceFlags::default(),
+            backend_options,
+            memory_budget_thresholds: wgpu::MemoryBudgetThresholds::default(),
+            display,
+        })
+    }
+
+    pub(crate) fn try_in_preference_order<T>(
+        operation: &'static str,
+        mut attempt: impl FnMut(Self) -> anyhow::Result<T>,
+    ) -> anyhow::Result<T> {
+        let mut failures = SmallVec::<[NativeBackendFailure; 3]>::new();
+        for &backend in Self::PREFERENCE {
+            match attempt(backend) {
+                Ok(value) => return Ok(value),
+                Err(source) => failures.push(NativeBackendFailure { backend, source }),
+            }
+        }
+        Err(NativeBackendFallbackError {
+            operation,
+            failures,
+        }
+        .into())
+    }
+}
+
+#[cfg(not(target_family = "wasm"))]
+impl From<NativeBackend> for wgpu::Backends {
+    fn from(backend: NativeBackend) -> Self {
+        match backend {
+            #[cfg(target_vendor = "apple")]
+            NativeBackend::Metal => Self::METAL,
+            #[cfg(target_os = "windows")]
+            NativeBackend::Dx12 => Self::DX12,
+            #[cfg(not(target_vendor = "apple"))]
+            NativeBackend::Vulkan => Self::VULKAN,
+            #[cfg(not(target_vendor = "apple"))]
+            NativeBackend::Gl => Self::GL,
+        }
+    }
+}
+
+#[cfg(not(target_family = "wasm"))]
+#[derive(Debug)]
+struct NativeBackendFailure {
+    backend: NativeBackend,
+    source: anyhow::Error,
+}
+
+#[cfg(not(target_family = "wasm"))]
+#[derive(Debug)]
+struct NativeBackendFallbackError {
+    operation: &'static str,
+    failures: SmallVec<[NativeBackendFailure; 3]>,
+}
+
+#[cfg(not(target_family = "wasm"))]
+impl std::fmt::Display for NativeBackendFallbackError {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            formatter,
+            "failed to initialize {}; attempted backends in order: ",
+            self.operation
+        )?;
+        for (index, failure) in self.failures.iter().enumerate() {
+            if index > 0 {
+                formatter.write_str("; ")?;
+            }
+            write!(formatter, "{:?}: {:#}", failure.backend, failure.source)?;
+        }
+        Ok(())
+    }
+}
+
+#[cfg(not(target_family = "wasm"))]
+impl std::error::Error for NativeBackendFallbackError {}
+
+#[cfg(not(target_family = "wasm"))]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum SoftwareAdapterPolicy {
+    Allow,
+    Reject,
+}
+
+#[cfg(not(target_family = "wasm"))]
+impl SoftwareAdapterPolicy {
+    fn accepts(self, device_type: wgpu::DeviceType) -> bool {
+        self == Self::Allow || device_type != wgpu::DeviceType::Cpu
+    }
+}
+
+struct CreatedDevice {
+    device: wgpu::Device,
+    queue: wgpu::Queue,
+    dual_source_blending: bool,
+    color_texture_format: TextureFormat,
+    renderer_tier: RendererTier,
+}
+
+#[cfg(not(target_family = "wasm"))]
+struct SelectedAdapter {
+    adapter: wgpu::Adapter,
+    device: CreatedDevice,
+}
 
 pub struct WgpuContext {
     pub instance: wgpu::Instance,
@@ -58,7 +216,13 @@ impl WgpuContext {
         compositor_gpu: Option<CompositorGpuHint>,
         extra_requirements: Option<&WgpuDeviceRequirements>,
     ) -> anyhow::Result<Self> {
-        Self::new_with_options(instance, surface, compositor_gpu, false, extra_requirements)
+        Self::new_with_adapter_policy(
+            instance,
+            surface,
+            compositor_gpu,
+            SoftwareAdapterPolicy::Allow,
+            extra_requirements,
+        )
     }
 
     #[cfg(not(target_family = "wasm"))]
@@ -68,7 +232,13 @@ impl WgpuContext {
         compositor_gpu: Option<CompositorGpuHint>,
         extra_requirements: Option<&WgpuDeviceRequirements>,
     ) -> anyhow::Result<Self> {
-        Self::new_with_options(instance, surface, compositor_gpu, true, extra_requirements)
+        Self::new_with_adapter_policy(
+            instance,
+            surface,
+            compositor_gpu,
+            SoftwareAdapterPolicy::Reject,
+            extra_requirements,
+        )
     }
 
     /// Creates a native device without a presentation surface.
@@ -76,43 +246,27 @@ impl WgpuContext {
     pub fn new_headless(
         extra_requirements: Option<&WgpuDeviceRequirements>,
     ) -> anyhow::Result<Self> {
-        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
-            backends: native_backends(),
-            flags: wgpu::InstanceFlags::default(),
-            backend_options: wgpu::BackendOptions::default(),
-            memory_budget_thresholds: wgpu::MemoryBudgetThresholds::default(),
-            display: None,
-        });
-        let adapter = gpui::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
-            // LowPower avoids waking a discrete GPU just for snapshots on dual-GPU systems.
-            power_preference: wgpu::PowerPreference::LowPower,
-            compatible_surface: None,
-            force_fallback_adapter: false,
-        }))
-        .map_err(|error| anyhow::anyhow!("failed to request headless GPU adapter: {error}"))?;
-        let (device, queue, dual_source_blending, color_texture_format, renderer_tier) =
-            gpui::block_on(Self::create_device(&adapter, extra_requirements))?;
-        let (device_lost, uncaptured_error) = install_device_callbacks(&device);
-
-        Ok(Self {
-            instance,
-            adapter,
-            device: Arc::new(device),
-            queue: Arc::new(queue),
-            dual_source_blending,
-            color_texture_format,
-            renderer_tier,
-            device_lost,
-            uncaptured_error,
+        NativeBackend::try_in_preference_order("a headless GPU context", |backend| {
+            let instance = backend.instance(None);
+            let adapter = gpui::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
+                // LowPower avoids waking a discrete GPU just for snapshots on dual-GPU
+                // systems.
+                power_preference: wgpu::PowerPreference::LowPower,
+                compatible_surface: None,
+                force_fallback_adapter: false,
+            }))
+            .map_err(|error| anyhow::anyhow!("failed to request headless GPU adapter: {error}"))?;
+            let device = gpui::block_on(Self::create_device(&adapter, extra_requirements))?;
+            Ok(Self::from_created_device(instance, adapter, device))
         })
     }
 
     #[cfg(not(target_family = "wasm"))]
-    fn new_with_options(
+    pub(crate) fn new_with_adapter_policy(
         instance: wgpu::Instance,
         surface: &wgpu::Surface<'_>,
         compositor_gpu: Option<CompositorGpuHint>,
-        reject_software: bool,
+        adapter_policy: SoftwareAdapterPolicy,
         extra_requirements: Option<&WgpuDeviceRequirements>,
     ) -> anyhow::Result<Self> {
         let device_id_filter = match std::env::var("ZED_DEVICE_ID") {
@@ -129,35 +283,20 @@ impl WgpuContext {
 
         // Select an adapter by actually testing surface configuration with the real device.
         // This is the only reliable way to determine compatibility on hybrid GPU systems.
-        let (adapter, device, queue, dual_source_blending, color_texture_format, renderer_tier) =
-            gpui::block_on(Self::select_adapter_and_device(
-                &instance,
-                device_id_filter,
-                surface,
-                compositor_gpu.as_ref(),
-                reject_software,
-                extra_requirements,
-            ))?;
+        let selection = gpui::block_on(Self::select_adapter_and_device(
+            &instance,
+            device_id_filter,
+            surface,
+            compositor_gpu.as_ref(),
+            adapter_policy,
+            extra_requirements,
+        ))?;
 
-        let (device_lost, uncaptured_error) = install_device_callbacks(&device);
-
-        log::info!(
-            "Selected GPU adapter: {:?} ({:?})",
-            adapter.get_info().name,
-            adapter.get_info().backend
-        );
-
-        Ok(Self {
+        Ok(Self::from_created_device(
             instance,
-            adapter,
-            device: Arc::new(device),
-            queue: Arc::new(queue),
-            dual_source_blending,
-            color_texture_format,
-            renderer_tier,
-            device_lost,
-            uncaptured_error,
-        })
+            selection.adapter,
+            selection.device,
+        ))
     }
 
     #[cfg(target_family = "wasm")]
@@ -179,33 +318,36 @@ impl WgpuContext {
             .await
             .map_err(|e| anyhow::anyhow!("Failed to request GPU adapter: {e}"))?;
 
-        log::info!(
-            "Selected GPU adapter: {:?} ({:?})",
-            adapter.get_info().name,
-            adapter.get_info().backend
-        );
+        let device = Self::create_device(&adapter, None).await?;
+        Ok(Self::from_created_device(instance, adapter, device))
+    }
 
-        let (device, queue, dual_source_blending, color_texture_format, renderer_tier) =
-            Self::create_device(&adapter, None).await?;
-        let (device_lost, uncaptured_error) = install_device_callbacks(&device);
+    fn from_created_device(
+        instance: wgpu::Instance,
+        adapter: wgpu::Adapter,
+        device: CreatedDevice,
+    ) -> Self {
+        let (device_lost, uncaptured_error) = install_device_callbacks(&device.device);
+        let info = adapter.get_info();
+        log::info!("Selected GPU adapter: {:?} ({:?})", info.name, info.backend);
 
-        Ok(Self {
+        Self {
             instance,
             adapter,
-            device: Arc::new(device),
-            queue: Arc::new(queue),
-            dual_source_blending,
-            color_texture_format,
-            renderer_tier,
+            device: Arc::new(device.device),
+            queue: Arc::new(device.queue),
+            dual_source_blending: device.dual_source_blending,
+            color_texture_format: device.color_texture_format,
+            renderer_tier: device.renderer_tier,
             device_lost,
             uncaptured_error,
-        })
+        }
     }
 
     async fn create_device(
         adapter: &wgpu::Adapter,
         extra_requirements: Option<&WgpuDeviceRequirements>,
-    ) -> anyhow::Result<(wgpu::Device, wgpu::Queue, bool, TextureFormat, RendererTier)> {
+    ) -> anyhow::Result<CreatedDevice> {
         let renderer_tier = renderer_tier(adapter);
         let dual_source_blending = adapter
             .features()
@@ -221,7 +363,7 @@ impl WgpuContext {
             );
         }
 
-        let color_atlas_texture_format = Self::select_color_texture_format(adapter)?;
+        let color_texture_format = Self::select_color_texture_format(adapter)?;
 
         let baseline = match renderer_tier {
             RendererTier::Modern => wgpu::Limits::downlevel_defaults(),
@@ -251,40 +393,12 @@ impl WgpuContext {
             .await
             .map_err(|e| anyhow::anyhow!("Failed to create wgpu device: {e}"))?;
 
-        Ok((
+        Ok(CreatedDevice {
             device,
             queue,
             dual_source_blending,
-            color_atlas_texture_format,
+            color_texture_format,
             renderer_tier,
-        ))
-    }
-
-    #[cfg(not(target_family = "wasm"))]
-    pub fn instance(display: Box<dyn wgpu::wgt::WgpuHasDisplayHandle>) -> wgpu::Instance {
-        #[cfg(target_os = "windows")]
-        let mut backend_options = wgpu::BackendOptions::default();
-        #[cfg(not(target_os = "windows"))]
-        let backend_options = wgpu::BackendOptions::default();
-        #[cfg(target_os = "windows")]
-        {
-            // Mirrors the former D3D DirectComposition path; the env switch keeps a
-            // diagnostic fallback.
-            let direct_composition_disabled = std::env::var(DISABLE_DIRECT_COMPOSITION_ENV)
-                .is_ok_and(|value| value == "true" || value == "1");
-            backend_options.dx12.presentation_system = if direct_composition_disabled {
-                wgpu::Dx12SwapchainKind::DxgiFromHwnd
-            } else {
-                wgpu::Dx12SwapchainKind::DxgiFromVisual
-            };
-        }
-
-        wgpu::Instance::new(wgpu::InstanceDescriptor {
-            backends: native_backends(),
-            flags: wgpu::InstanceFlags::default(),
-            backend_options,
-            memory_budget_thresholds: wgpu::MemoryBudgetThresholds::default(),
-            display: Some(display),
         })
     }
 
@@ -314,16 +428,9 @@ impl WgpuContext {
         device_id_filter: Option<u32>,
         surface: &wgpu::Surface<'_>,
         compositor_gpu: Option<&CompositorGpuHint>,
-        reject_software: bool,
+        adapter_policy: SoftwareAdapterPolicy,
         extra_requirements: Option<&WgpuDeviceRequirements>,
-    ) -> anyhow::Result<(
-        wgpu::Adapter,
-        wgpu::Device,
-        wgpu::Queue,
-        bool,
-        TextureFormat,
-        RendererTier,
-    )> {
+    ) -> anyhow::Result<SelectedAdapter> {
         let mut adapters: Vec<_> = instance.enumerate_adapters(wgpu::Backends::all()).await;
 
         if adapters.is_empty() {
@@ -364,7 +471,7 @@ impl WgpuContext {
                 _ => 1,
             };
 
-            #[cfg(target_os = "macos")]
+            #[cfg(target_vendor = "apple")]
             let type_priority: u8 = match info.device_type {
                 // Preserves the native renderer's low-power preference on Intel Macs.
                 wgpu::DeviceType::IntegratedGpu => 0,
@@ -373,7 +480,7 @@ impl WgpuContext {
                 wgpu::DeviceType::VirtualGpu => 3,
                 wgpu::DeviceType::Cpu => 4,
             };
-            #[cfg(not(target_os = "macos"))]
+            #[cfg(not(target_vendor = "apple"))]
             let type_priority: u8 = if info.device_type == wgpu::DeviceType::Cpu {
                 4
             } else {
@@ -417,7 +524,7 @@ impl WgpuContext {
         for adapter in adapters {
             let info = adapter.get_info();
 
-            if reject_software && info.device_type == wgpu::DeviceType::Cpu {
+            if !adapter_policy.accepts(info.device_type) {
                 log::info!(
                     "Skipping software renderer: {} ({:?})",
                     info.name,
@@ -429,20 +536,13 @@ impl WgpuContext {
             log::info!("Testing adapter: {} ({:?})...", info.name, info.backend);
 
             match Self::try_adapter_with_surface(&adapter, surface, extra_requirements).await {
-                Ok((device, queue, dual_source_blending, color_atlas_texture_format, renderer_tier)) => {
+                Ok(device) => {
                     log::info!(
-                        "Selected GPU (passed configuration test): {} ({:?})",
+                        "Adapter passed surface configuration test: {} ({:?})",
                         info.name,
                         info.backend
                     );
-                    return Ok((
-                        adapter,
-                        device,
-                        queue,
-                        dual_source_blending,
-                        color_atlas_texture_format,
-                        renderer_tier,
-                    ));
+                    return Ok(SelectedAdapter { adapter, device });
                 }
                 Err(e) => {
                     log::info!(
@@ -465,7 +565,7 @@ impl WgpuContext {
         adapter: &wgpu::Adapter,
         surface: &wgpu::Surface<'_>,
         extra_requirements: Option<&WgpuDeviceRequirements>,
-    ) -> anyhow::Result<(wgpu::Device, wgpu::Queue, bool, TextureFormat, RendererTier)> {
+    ) -> anyhow::Result<CreatedDevice> {
         let caps = surface.get_capabilities(adapter);
         if caps.formats.is_empty() {
             anyhow::bail!("no compatible surface formats");
@@ -474,9 +574,10 @@ impl WgpuContext {
             anyhow::bail!("no compatible alpha modes");
         }
 
-        let (device, queue, dual_source_blending, color_atlas_texture_format, renderer_tier) =
-            Self::create_device(adapter, extra_requirements).await?;
-        let error_scope = device.push_error_scope(wgpu::ErrorFilter::Validation);
+        let device = Self::create_device(adapter, extra_requirements).await?;
+        let error_scope = device
+            .device
+            .push_error_scope(wgpu::ErrorFilter::Validation);
 
         let test_config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
@@ -489,20 +590,14 @@ impl WgpuContext {
             view_formats: vec![],
         };
 
-        surface.configure(&device, &test_config);
+        surface.configure(&device.device, &test_config);
 
         let error = error_scope.pop().await;
         if let Some(e) = error {
             anyhow::bail!("surface configuration failed: {e}");
         }
 
-        Ok((
-            device,
-            queue,
-            dual_source_blending,
-            color_atlas_texture_format,
-            renderer_tier,
-        ))
+        Ok(device)
     }
 
     fn select_color_texture_format(adapter: &wgpu::Adapter) -> anyhow::Result<wgpu::TextureFormat> {
@@ -605,17 +700,6 @@ fn install_device_callbacks(
 }
 
 #[cfg(not(target_family = "wasm"))]
-fn native_backends() -> wgpu::Backends {
-    if cfg!(target_os = "macos") {
-        wgpu::Backends::METAL
-    } else if cfg!(target_os = "windows") {
-        wgpu::Backends::DX12 | wgpu::Backends::VULKAN | wgpu::Backends::GL
-    } else {
-        wgpu::Backends::VULKAN | wgpu::Backends::GL
-    }
-}
-
-#[cfg(not(target_family = "wasm"))]
 fn parse_pci_id(id: &str) -> anyhow::Result<u32> {
     let mut id = id.trim();
 
@@ -632,9 +716,65 @@ fn parse_pci_id(id: &str) -> anyhow::Result<u32> {
     u32::from_str_radix(id, 16).context("parsing PCI ID as hex")
 }
 
-#[cfg(test)]
+#[cfg(all(test, not(target_family = "wasm")))]
 mod tests {
-    use super::parse_pci_id;
+    use super::{NativeBackend, SoftwareAdapterPolicy, parse_pci_id};
+
+    #[test]
+    fn native_backend_fallbacks_are_individually_initialized() {
+        let backends = NativeBackend::PREFERENCE;
+        assert!(!backends.is_empty());
+        assert!(
+            backends
+                .iter()
+                .all(|backend| wgpu::Backends::from(*backend).bits().count_ones() == 1),
+            "each fallback step must initialize exactly one WGPU backend"
+        );
+
+        #[cfg(target_os = "linux")]
+        assert_eq!(backends, &[NativeBackend::Vulkan, NativeBackend::Gl]);
+        #[cfg(target_os = "windows")]
+        assert_eq!(
+            backends,
+            &[
+                NativeBackend::Dx12,
+                NativeBackend::Vulkan,
+                NativeBackend::Gl,
+            ]
+        );
+        #[cfg(target_os = "macos")]
+        assert_eq!(backends, &[NativeBackend::Metal]);
+    }
+
+    #[test]
+    fn native_backend_fallback_preserves_ordered_failures() {
+        let mut attempted = Vec::new();
+        let error = NativeBackend::try_in_preference_order::<()>("test context", |backend| {
+            attempted.push(backend);
+            anyhow::bail!("unavailable")
+        })
+        .unwrap_err();
+
+        assert_eq!(attempted, NativeBackend::PREFERENCE);
+        let message = format!("{error:#}");
+        let mut previous = 0;
+        for backend in NativeBackend::PREFERENCE {
+            let index = message[previous..]
+                .find(&format!("{backend:?}: unavailable"))
+                .expect("each backend failure should be reported in preference order");
+            previous += index;
+        }
+    }
+
+    #[test]
+    fn software_adapter_policy_is_explicit() {
+        assert!(SoftwareAdapterPolicy::Allow.accepts(wgpu::DeviceType::Cpu));
+        assert!(!SoftwareAdapterPolicy::Reject.accepts(wgpu::DeviceType::Cpu));
+        assert!(
+            SoftwareAdapterPolicy::Reject.accepts(wgpu::DeviceType::IntegratedGpu),
+            "rejecting software must not reject lower-power hardware adapters"
+        );
+    }
 
     #[test]
     fn test_parse_device_id() {

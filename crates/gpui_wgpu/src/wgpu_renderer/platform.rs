@@ -2,7 +2,10 @@ use std::{rc::Rc, sync::Arc};
 
 use gpui::Scene;
 
-use crate::{CompositorGpuHint, WgpuAtlas, WgpuContext, WgpuDeviceRequirements};
+use crate::{
+    CompositorGpuHint, NativeBackend, SoftwareAdapterPolicy, WgpuAtlas, WgpuContext,
+    WgpuDeviceRequirements,
+};
 
 use super::{GpuContext, WgpuRenderer, WgpuSurfaceConfig};
 
@@ -25,25 +28,24 @@ impl WgpuRenderer {
         let window_handle = window
             .window_handle()
             .map_err(|error| anyhow::anyhow!("failed to get window handle: {error}"))?;
-        let instance = gpu_context
-            .borrow()
-            .as_ref()
-            .map(|context| context.instance.clone())
-            .unwrap_or_else(|| WgpuContext::instance(Box::new(window.clone())));
-        let surface = create_surface(&instance, window_handle.as_raw())?;
 
         let mut context_slot = gpu_context.borrow_mut();
-        let context = match context_slot.as_mut() {
+        let (context, surface) = match context_slot.as_mut() {
             Some(context) => {
+                let surface = create_surface(&context.instance, window_handle.as_raw())?;
                 context.check_compatible_with_surface(&surface)?;
-                context
+                (context, surface)
             }
-            None => context_slot.insert(WgpuContext::new(
-                instance,
-                &surface,
-                compositor_gpu,
-                extra_requirements.as_ref(),
-            )?),
+            None => {
+                let (context, surface) = initialize_context_and_surface(
+                    window,
+                    window_handle.as_raw(),
+                    compositor_gpu,
+                    SoftwareAdapterPolicy::Allow,
+                    extra_requirements.as_ref(),
+                )?;
+                (context_slot.insert(context), surface)
+            }
         };
         let atlas = Arc::new(WgpuAtlas::from_context(context));
         Self::new_internal(
@@ -215,15 +217,14 @@ impl WgpuRenderer {
             log::warn!("GPU device lost, recreating context...");
             self.resources = None;
             *gpu_context.borrow_mut() = None;
-            let instance = WgpuContext::instance(Box::new(window.clone()));
-            let surface = create_surface(&instance, window_handle.as_raw())?;
-            let new_context = match WgpuContext::new_rejecting_software(
-                instance,
-                &surface,
+            let (new_context, surface) = match initialize_context_and_surface(
+                window,
+                window_handle.as_raw(),
                 self.compositor_gpu,
+                SoftwareAdapterPolicy::Reject,
                 self.extra_requirements.as_ref(),
             ) {
-                Ok(context) => context,
+                Ok(result) => result,
                 Err(error) => {
                     self.faults.recovery_not_before =
                         Some(std::time::Instant::now() + std::time::Duration::from_millis(350));
@@ -282,6 +283,31 @@ impl WgpuRenderer {
                 .setPresentsWithTransaction(enabled);
         }
     }
+}
+
+#[cfg(not(target_family = "wasm"))]
+fn initialize_context_and_surface<W>(
+    window: &W,
+    raw_window_handle: raw_window_handle::RawWindowHandle,
+    compositor_gpu: Option<CompositorGpuHint>,
+    adapter_policy: SoftwareAdapterPolicy,
+    extra_requirements: Option<&WgpuDeviceRequirements>,
+) -> anyhow::Result<(WgpuContext, wgpu::Surface<'static>)>
+where
+    W: HasDisplayHandle + std::fmt::Debug + Clone + Send + Sync + 'static,
+{
+    NativeBackend::try_in_preference_order("a GPU context for the window", |backend| {
+        let instance = backend.instance(Some(Box::new(window.clone())));
+        let surface = create_surface(&instance, raw_window_handle)?;
+        let context = WgpuContext::new_with_adapter_policy(
+            instance,
+            &surface,
+            compositor_gpu,
+            adapter_policy,
+            extra_requirements,
+        )?;
+        Ok((context, surface))
+    })
 }
 
 #[cfg(not(target_family = "wasm"))]

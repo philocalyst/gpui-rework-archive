@@ -137,3 +137,84 @@ fn directx_registers_and_instance_views_follow_generated_shader_contracts() {
         path.display()
     );
 }
+
+#[test]
+fn native_renderer_fallbacks_and_intermediates_are_lazy() {
+    let root = workspace_root();
+    let wgpu_context_path = root.join("crates/gpui_wgpu/src/wgpu_context.rs");
+    let wgpu_context = fs::read_to_string(&wgpu_context_path)
+        .unwrap_or_else(|error| panic!("failed to read {}: {error}", wgpu_context_path.display()));
+    assert!(
+        wgpu_context.contains("enum NativeBackend"),
+        "{} must represent one native backend as a closed type",
+        wgpu_context_path.display()
+    );
+    assert!(
+        wgpu_context.contains("impl From<NativeBackend> for wgpu::Backends")
+            && wgpu_context.contains("backends: self.into()")
+            && wgpu_context.contains("try_in_preference_order"),
+        "{} must initialize one backend per fallback attempt",
+        wgpu_context_path.display()
+    );
+    assert!(
+        !wgpu_context.contains("Backends::VULKAN | wgpu::Backends::GL"),
+        "{} must not eagerly construct the GL fallback beside Vulkan",
+        wgpu_context_path.display()
+    );
+
+    let directx_path = root.join("crates/gpui_windows/src/directx_renderer.rs");
+    let directx = fs::read_to_string(&directx_path)
+        .unwrap_or_else(|error| panic!("failed to read {}: {error}", directx_path.display()));
+    assert!(
+        directx.contains("blur: Option<BlurResources>"),
+        "{} must make large filter targets optional",
+        directx_path.display()
+    );
+    assert!(
+        directx.contains("path: Option<PathResources>"),
+        "{} must make large path targets optional",
+        directx_path.display()
+    );
+    assert!(
+        directx.contains("ensure_blur_resources(device, requirements.isolated_target_count)"),
+        "{} must allocate filter targets from the typed scene requirements",
+        directx_path.display()
+    );
+    assert!(
+        directx.contains("static CACHE: [OnceLock<CachedShader>"),
+        "{} must not recompile generated HLSL for every window or device recovery",
+        directx_path.display()
+    );
+    assert!(
+        directx.contains("surface_views: FxHashMap<usize, CachedSurfaceView>"),
+        "{} must reuse capture texture views while their surfaces remain active",
+        directx_path.display()
+    );
+}
+
+#[test]
+fn windows_default_renderer_has_no_wgpu_path() {
+    let root = workspace_root();
+    let manifest_path = root.join("crates/gpui_windows/Cargo.toml");
+    let manifest = fs::read_to_string(&manifest_path)
+        .unwrap_or_else(|error| panic!("failed to read {}: {error}", manifest_path.display()));
+    assert!(
+        !manifest.contains("gpui_wgpu") && !manifest.contains("wgpu.workspace"),
+        "{} must not pull WGPU into the native Windows renderer",
+        manifest_path.display()
+    );
+
+    let window_path = root.join("crates/gpui_windows/src/window.rs");
+    let window = fs::read_to_string(&window_path)
+        .unwrap_or_else(|error| panic!("failed to read {}: {error}", window_path.display()));
+    assert!(
+        window.contains("RefCell<DirectXRenderer>"),
+        "{} must use the native DirectX renderer",
+        window_path.display()
+    );
+    assert!(
+        !window.contains("feature = \"wgpu\"") && !window.contains("WgpuRenderer"),
+        "{} must not contain a dormant WGPU renderer path",
+        window_path.display()
+    );
+}
