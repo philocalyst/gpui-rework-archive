@@ -136,6 +136,17 @@ test-snap:
     print "📸 Running scene snapshot tests (no auto-update)..."
     with-env {INSTA_UPDATE: 'no'} { cargo test -p gpui-ce --test scene_snapshots }
 
+[doc('Check deterministic scene representations and renderer contracts')]
+[group('testing')]
+test-render:
+    #!/usr/bin/env nu
+    print "📸 Checking committed scene snapshots..."
+    with-env {INSTA_UPDATE: 'no'} { cargo test -p gpui-ce --test scene_snapshots }
+    print "🧭 Checking the scene contract as the wgpu renderer..."
+    with-env {GPUI_RENDERER_UNDER_TEST: 'wgpu'} { cargo test -p gpui-ce --test scene_compliance }
+    print "🧭 Checking the scene contract as the software renderer..."
+    with-env {GPUI_RENDERER_UNDER_TEST: 'software'} { cargo test -p gpui-ce --test scene_compliance }
+
 [doc('Run criterion bench --no-run + quick smoke')]
 [group('testing')]
 bench-smoke:
@@ -147,6 +158,21 @@ bench-smoke:
     }
     cargo bench --workspace --no-run
     print "Bench binary compiled OK."
+
+[doc('Compile the rendering benchmark corpus without collecting timings')]
+[group('testing')]
+bench-render-smoke:
+    cargo bench -p gpui_ce_wgpu --bench scene_cpu --bench layout_line --bench renderer --features test-support --no-run
+
+[doc('Measure CPU-only scene and text metrics with Criterion')]
+[group('testing')]
+perf-cpu *flags:
+    cargo bench -p gpui_ce_wgpu --bench scene_cpu --bench layout_line -- {{ flags }}
+
+[doc('Quick CPU-only scene and text performance sample for local change feedback')]
+[group('testing')]
+perf-cpu-quick:
+    cargo bench -p gpui_ce_wgpu --bench scene_cpu --bench layout_line -- --quick
 
 # GPU-gated end-to-end renderer benches (crates/gpui_wgpu/benches/renderer.rs).
 # Opt-in via GPUI_BENCH_GPU=1; the bench self-skips otherwise so T0/bench-smoke

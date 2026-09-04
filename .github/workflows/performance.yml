@@ -1,0 +1,95 @@
+# CPU performance tracking for the benchmark corpus that is safe and useful on
+# GitHub-hosted runners. A pull request receives a job summary compared with the
+# latest default-branch sample; pushes to main refresh that sample. Real GPU
+# rendering remains intentionally out of this workflow because runner adapters
+# are not stable enough to make a trustworthy timing baseline.
+name: Performance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'crates/gpui/**'
+      - 'crates/gpui_render/**'
+      - 'crates/gpui_wgpu/**'
+      - 'crates/gpui_elements/**'
+      - 'assets/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.cargo/**'
+      - '.github/workflows/performance.yml'
+  pull_request:
+    paths:
+      - 'crates/gpui/**'
+      - 'crates/gpui_render/**'
+      - 'crates/gpui_wgpu/**'
+      - 'crates/gpui_elements/**'
+      - 'assets/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.cargo/**'
+      - '.github/workflows/performance.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  CARGO_INCREMENTAL: 0
+
+jobs:
+  cpu-benchmarks:
+    name: CPU scene and text metrics
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: Swatinem/rust-cache@v2
+      - name: Restore the latest main-branch benchmark history
+        uses: actions/cache/restore@v4
+        with:
+          path: target/benchmark-history.json
+          key: gpui-ce-cpu-bench-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            gpui-ce-cpu-bench-${{ runner.os }}-
+      - name: Create an empty history for the first run
+        run: test -f target/benchmark-history.json || printf '[]' > target/benchmark-history.json
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libxkbcommon-dev libwayland-dev libx11-dev \
+            libxcb-shape0-dev libxcb-xfixes0-dev \
+            libxcb-randr0-dev libxcb-xinput-dev \
+            libxkbcommon-x11-dev libegl1-mesa-dev \
+            libgles2-mesa-dev libglib2.0-dev libfontconfig-dev
+      - name: Measure CPU-only scene and text benchmarks
+        shell: bash
+        run: |
+          set -o pipefail
+          cargo bench -p gpui_ce_wgpu --bench scene_cpu --bench layout_line -- --quick 2>&1 | tee target/perf-output.txt
+      - name: Summarize performance deltas
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: GPUI CPU scene and text metrics
+          tool: cargo
+          output-file-path: target/perf-output.txt
+          external-data-json-path: target/benchmark-history.json
+          alert-threshold: '115%'
+          fail-on-alert: false
+          summary-always: true
+      - name: Save a new main-branch benchmark history
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/cache/save@v4
+        with:
+          path: target/benchmark-history.json
+          key: gpui-ce-cpu-bench-${{ runner.os }}-${{ github.sha }}

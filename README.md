@@ -22,6 +22,22 @@ Everything in GPUI starts with an `Application`. You can create one with `gpui_p
 
 From then on, `gpui::{import}` to pull in whatever you need. Most of it will be under `gpui::prelude::*`. 
 
+### Contributor feedback
+
+Rendering changes have a quick, repeatable feedback loop:
+
+- `just test-render` checks the committed scene representations and verifies the same scene
+  contract through both renderer selections. It is deterministic and does not require a GPU.
+- `just perf-cpu-quick` samples the CPU-only scene build, planning, archive, and text-layout
+  metrics. Use `just perf-cpu` when a full Criterion measurement is warranted.
+- `just bench-gpu` is deliberately opt-in for end-to-end GPU timings, because adapter and driver
+  differences make shared hosted-runner measurements misleading.
+
+Relevant pull requests run the representation checks automatically. They also receive a CPU
+benchmark job summary compared with the latest `main` sample; updates to `main` refresh that
+baseline. Treat small timing deltas as a prompt to investigate rather than a hard gate—the
+deterministic scene snapshots and compliance checks are the merge-time correctness contract.
+
 ### High level concepts
 
 GPUI offers three different [registers](<https://en.wikipedia.org/wiki/Register_(sociolinguistics)>) depending on your needs:
@@ -94,5 +110,4 @@ As a whole, we'd like to be a framework for real applications, to allow for deep
 
 #### How does the project compare to other forks in the ecosystem?
 Other efforts (namely WGPUI) are actively maintained, but have diverged quite a bit from mainline usage. They typically serve the interests of the projects that they're used within, leading to a diverse yet fragmented ecosystem. GPUI-CE focuses on stability, and continously monitors the other forks for good ideas worth pulling in.
-
 

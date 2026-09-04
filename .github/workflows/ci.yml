@@ -26,6 +26,7 @@ jobs:
       run_tests: ${{ steps.filter.outputs.run_tests }}
       run_style: ${{ steps.filter.outputs.run_style }}
       run_docs:  ${{ steps.filter.outputs.run_docs }}
+      run_render_contract: ${{ steps.filter.outputs.run_render_contract }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -53,6 +54,7 @@ jobs:
           check_pattern "run_tests" '^(docs/|\.github/(ISSUE_TEMPLATE|workflows/)|README\.md|CHANGELOG\.md)' true
           check_pattern "run_style" '\.(rs|toml)$|rust-toolchain\.toml|\.cargo/|clippy\.toml|typos\.toml'
           check_pattern "run_docs"  '^docs/|\.rs$'
+          check_pattern "run_render_contract" '^(crates/(gpui|gpui_render|gpui_wgpu|gpui_elements)/|assets/|Cargo\.(toml|lock)$|\.cargo/|\.config/nextest\.toml|justfile|\.github/workflows/(ci|performance|render-matrix)\.yml)'
 
   # Formatting
   fmt:
@@ -256,6 +258,37 @@ jobs:
       - uses: extractions/setup-just@v2
       - run: just check-examples
 
+  # Fast, deterministic feedback for scene-representation changes. This intentionally
+  # does not time a real GPU: snapshots and plan/archive compliance are hermetic, while
+  # the renderer benchmark is compiled to keep its public corpus healthy. Timings are
+  # collected separately in performance.yml, where they can be compared to a baseline.
+  render-contract:
+    runs-on: ubuntu-latest
+    needs: [orchestrate]
+    if: needs.orchestrate.outputs.run_render_contract == 'true'
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: Swatinem/rust-cache@v2
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libxkbcommon-dev libwayland-dev libx11-dev \
+            libxcb-shape0-dev libxcb-xfixes0-dev \
+            libxcb-randr0-dev libxcb-xinput-dev \
+            libxkbcommon-x11-dev libegl1-mesa-dev \
+            libgles2-mesa-dev libglib2.0-dev libfontconfig-dev
+      - uses: hustcer/setup-nu@v3
+      - uses: extractions/setup-just@v2
+      - name: Check scene representations and renderer contracts
+        run: just test-render
+      - name: Compile rendering benchmark corpus
+        run: just bench-render-smoke
+
   # Compare against the PR base rather than crates.io. This reports only API
   # regressions introduced by the PR, including regressions that would break
   # downstream users such as our gpui-component fork.
@@ -366,6 +399,7 @@ jobs:
       - test-mac
       - test-windows
       - check-examples
+      - render-contract
       - semver
       - components
     runs-on: ubuntu-latest
@@ -389,6 +423,7 @@ jobs:
           check_result test-mac       ${{ needs.test-mac.result }}
           check_result test-windows   ${{ needs.test-windows.result }}
           check_result check-examples ${{ needs.check-examples.result }}
+          check_result render-contract ${{ needs.render-contract.result }}
           check_result semver         ${{ needs.semver.result }}
           check_result components     ${{ needs.components.result }}
           exit $EXIT_CODE
