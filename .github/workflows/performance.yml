@@ -9,25 +9,21 @@ on:
   push:
     branches: [main]
     paths:
-      - 'crates/gpui/**'
-      - 'crates/gpui_render/**'
-      - 'crates/gpui_wgpu/**'
-      - 'crates/gpui_elements/**'
+      - 'crates/**'
       - 'assets/**'
       - 'Cargo.toml'
       - 'Cargo.lock'
       - '.cargo/**'
+      - 'justfile'
       - '.github/workflows/performance.yml'
   pull_request:
     paths:
-      - 'crates/gpui/**'
-      - 'crates/gpui_render/**'
-      - 'crates/gpui_wgpu/**'
-      - 'crates/gpui_elements/**'
+      - 'crates/**'
       - 'assets/**'
       - 'Cargo.toml'
       - 'Cargo.lock'
       - '.cargo/**'
+      - 'justfile'
       - '.github/workflows/performance.yml'
   workflow_dispatch:
 

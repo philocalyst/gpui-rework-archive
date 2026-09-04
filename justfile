@@ -140,8 +140,10 @@ test-snap:
 [group('testing')]
 test-render:
     #!/usr/bin/env nu
-    print "📸 Checking committed scene snapshots..."
+    print "📸 Checking focused scene-archive snapshots..."
     with-env {INSTA_UPDATE: 'no'} { cargo test -p gpui-ce --test scene_snapshots }
+    print "📚 Checking the learn, legacy, and bench example scene corpus..."
+    with-env {INSTA_UPDATE: 'no'} { cargo test -p gpui-ce --lib learn_snapshots }
     print "🧭 Checking the scene contract as the wgpu renderer..."
     with-env {GPUI_RENDERER_UNDER_TEST: 'wgpu'} { cargo test -p gpui-ce --test scene_compliance }
     print "🧭 Checking the scene contract as the software renderer..."
@@ -173,6 +175,20 @@ perf-cpu *flags:
 [group('testing')]
 perf-cpu-quick:
     cargo bench -p gpui_ce_wgpu --bench scene_cpu --bench layout_line -- --quick
+
+[doc('Save a CPU benchmark baseline before a performance-sensitive change')]
+[group('testing')]
+perf-cpu-save baseline="before":
+    cargo bench -p gpui_ce_wgpu --bench scene_cpu --bench layout_line -- --save-baseline {{ baseline }}
+
+[doc('Compare CPU benchmarks to a saved baseline (default: "before")')]
+[group('testing')]
+perf-cpu-compare baseline="before":
+    cargo bench -p gpui_ce_wgpu --bench scene_cpu --bench layout_line -- --baseline {{ baseline }}
+
+[doc('Run deterministic render checks plus quick CPU performance feedback')]
+[group('testing')]
+render-feedback: test-render perf-cpu-quick
 
 # GPU-gated end-to-end renderer benches (crates/gpui_wgpu/benches/renderer.rs).
 # Opt-in via GPUI_BENCH_GPU=1; the bench self-skips otherwise so T0/bench-smoke
