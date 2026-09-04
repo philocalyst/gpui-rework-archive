@@ -1,9 +1,10 @@
 use std::borrow::Cow;
+use std::cell::RefCell;
 
 use gpui::prelude::*;
 use gpui::{
-    App, Bounds, Context, ElementId, SharedString, Task, Window, WindowBounds, WindowOptions, div,
-    px, rgb, size,
+    App, ApplicationHandle, Bounds, Context, ElementId, SharedString, Task, Window, WindowBounds,
+    WindowOptions, div, px, rgb, size,
 };
 
 // ---------------------------------------------------------------------------
@@ -426,6 +427,10 @@ fn requested_backend() -> gpui_platform::WebBackendPreference {
     } else {
         gpui_platform::WebBackendPreference::Auto
     }
+}
+
+thread_local! {
+    static APPLICATION: RefCell<Option<ApplicationHandle>> = RefCell::new(None);
 }
 
 fn main() {
