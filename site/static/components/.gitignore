@@ -1,0 +1,4 @@
+!gpui-demo/*.wasm
+!gpui-demo/*.js
+!gpui-demo/*.html
+

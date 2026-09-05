@@ -1,0 +1,5 @@
+public/
+.tools/
+.preview/
+
+node_modules/

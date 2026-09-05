@@ -1,0 +1,3 @@
+{% component note(title="A note in the margin") %}
+<aside role="note"><strong>{{ title | default(value="A note in the margin") }}</strong>{{ body | markdown | safe }}</aside>
+{% endcomponent note %}

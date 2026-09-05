@@ -1,0 +1,3 @@
+{% component disclosure(title, open=false) %}
+<details {% if open | default(value=false) %}open{% endif %}><summary>{{ title }}</summary>{{ body | markdown | safe }}</details>
+{% endcomponent disclosure %}

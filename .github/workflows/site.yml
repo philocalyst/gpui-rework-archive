@@ -1,0 +1,42 @@
+name: Documentation site
+on:
+  pull_request:
+    paths: ['site/**', '.github/workflows/site.yml']
+  push:
+    branches: [main]
+    paths: ['site/**', '.github/workflows/site.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Zola
+        env:
+          ZOLA_VERSION: 0.23.4
+        run: |
+          curl --fail --location --silent --show-error "https://github.com/getzola/zola/releases/download/v${ZOLA_VERSION}/zola-v${ZOLA_VERSION}-x86_64-unknown-linux-gnu.tar.gz" -o /tmp/zola.tar.gz
+          tar -xzf /tmp/zola.tar.gz -C /tmp
+          sudo install /tmp/zola /usr/local/bin/zola
+      - name: Build and audit
+        run: ./site/scripts/build.sh
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - name: Install browser test tools
+        working-directory: site
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Verify rendering and interactions
+        working-directory: site
+        run: npm test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gpui-field-guide
+          path: site/public
+          if-no-files-found: error

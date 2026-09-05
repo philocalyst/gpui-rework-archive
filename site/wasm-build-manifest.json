@@ -1,0 +1,13 @@
+{
+  "wasm/src/lib.rs": "5db12826baa58d704805bd0e02404b9770263f60407519ddd10150a701896068",
+  "wasm/Cargo.toml": "02b4c26ad6bc70df9ced023110162c9a26fc6d30531b47580a38a92083afb591",
+  "wasm/Cargo.lock": "70781034c317f26dd79d61fdac1214f7f65109315e3e92e49bac9494dfe13d73",
+  "wasm/gpui-demo/src/main.rs": "2be452a5a2ee53d3c52799a4d15012e9283fee4036006d1f12a1964ef4f87fe3",
+  "wasm/gpui-demo/Cargo.toml": "e1a1fd09fe05fb04a93d08a37657866dbd1525806db9e1b440a7843ffe89455d",
+  "wasm/gpui-demo/Cargo.lock": "a728c1c88754e54d696d9b9087e6470c1185c73df6ccf2f1a636798589a4c397",
+  "wasm/gpui-demo/index.html": "536736adb43b6af1dd5f43a7d391ebaac6cf927fc0baef031074b42e04f66a70",
+  "static/wasm/gpui_examples.wasm": "ac25ed895faa27b8ae50f99bf6fa4ea9509b8289e8c6f8c480c5337c470ed224",
+  "static/components/gpui-demo/gpui-site-demo-97c8fcb9f47e4e72.js": "4125cb21c21a9702fd21b80a4490619a299edead3678d3e7680d61cd161e6e02",
+  "static/components/gpui-demo/gpui-site-demo-97c8fcb9f47e4e72_bg.wasm": "c435571caa7a59c87047cca1119d915eeb445c2b86444e7319ed0c5569db6ba0",
+  "static/components/gpui-demo/index.html": "45772ab760df4af943deb8e4dd8682e08b9f3cb4325a1643a236571423556d05"
+}

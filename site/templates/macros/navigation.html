@@ -1,0 +1,12 @@
+{% set guide = get_section(path="guide/_index.md") %}
+{% set categories = ["GETTING STARTED", "FUNDAMENTALS", "RENDERING", "ELEMENTS", "INTERACTIVITY", "GRAPHICS", "SYSTEM", "PLATFORMS", "GUIDES", "ABOUT THE PROJECT", "PROJECT MAINTENANCE"] %}
+<nav aria-label="Field guide">
+<a href="{{ guide.permalink }}"><small>THE FIELD GUIDE</small></a>
+{% for category in categories %}
+<details {% if page.extra.category == category %}open{% endif %}>
+<summary>{{ category | lower | title }}</summary>
+<ol>{% for item in guide.pages %}{% if item.extra.category == category %}<li><a href="{{ item.permalink }}" {% if page.permalink == item.permalink %}aria-current="page"{% endif %}>{{ item.title }}</a></li>{% endif %}{% endfor %}</ol>
+</details>
+{% endfor %}
+<a href="{{ get_url(path='examples/') }}">The working collection ↗</a>
+</nav>

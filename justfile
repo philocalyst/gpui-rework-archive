@@ -574,3 +574,18 @@ alias d   := doc
 alias up  := update
 alias cl  := clean
 alias sync := sync-upstream
+
+[doc('Build and validate the Zola documentation site')]
+[group('docs')]
+site-build:
+    ./site/scripts/build.sh
+
+[doc('Preview the Zola documentation site')]
+[group('docs')]
+site-serve:
+    zola --root site serve --interface 127.0.0.1 --port 1111
+
+[doc('Rebuild interactive Rust/WASM site examples')]
+[group('docs')]
+site-wasm:
+    ./site/scripts/build-wasm.sh

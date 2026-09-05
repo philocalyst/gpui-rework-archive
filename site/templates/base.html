@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% set title = config.title %}{% set description = config.description %}
+  {% if page %}{% set title = page.title ~ " · GPUI–CE" %}{% set description = page.description | default(value=config.description) %}{% elif section %}{% set title = section.title ~ " · GPUI–CE" %}{% set description = section.description | default(value=config.description) %}{% endif %}
+  <title>{{ title }}</title>
+  <meta name="description" content="{{ description }}">
+  <meta name="theme-color" content="oklch(13% 0.018 280)">
+  <meta property="og:title" content="{{ title }}">
+  <meta property="og:description" content="{{ description }}">
+  <meta property="og:type" content="website">
+  {% if current_url %}<link rel="canonical" href="{{ current_url | safe }}">{% endif %}
+  <link rel="icon" href="{{ get_url(path='mark.svg') }}" type="image/svg+xml">
+  <link rel="preload" href="{{ get_url(path='fonts/barlow-condensed-800.ttf') }}" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="{{ get_url(path='site.css') }}">
+  <link rel="stylesheet" href="{{ get_url(path='syntax.css') }}">
+  <link rel="stylesheet" href="{{ get_url(path='components/playground.css') }}">
+  {% block head %}{% endblock head %}
+</head>
+<body>
+  {% block backdrop %}{% endblock backdrop %}
+  <a href="#main">Skip to content</a>
+  <header>
+    <a href="{{ get_url(path='/') }}" aria-label="GPUI Community Edition home"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M2 16V2h14M32 2h14v14M46 32v14H32M16 46H2V32M12 12h24v24H12zM24 8v32M8 24h32"/><circle cx="24" cy="24" r="16"/></svg><b>GPUI<sup>CE</sup></b><small>Human input.<br>Extraordinary output.</small></a>
+    <nav aria-label="Primary"><a href="{{ get_url(path='guide/') }}" {% if current_path and '/guide/' in current_path %}aria-current="{{ 'page' if current_path == '/guide/' else 'true' }}"{% endif %}>Field guide</a><a href="{{ get_url(path='examples/') }}" {% if current_path and '/examples/' in current_path %}aria-current="{{ 'page' if current_path == '/examples/' else 'true' }}"{% endif %}>Experiments</a><a href="{{ config.extra.repository }}">Source ↗</a></nav>
+  </header>
+  {% block main %}{% endblock main %}
+  <footer>
+    <a href="{{ get_url(path='/') }}"><b>GPUI<sup>CE</sup></b></a>
+    <p>Independent by design.<br>Open by default.</p>
+    <nav aria-label="Footer"><a href="{{ get_url(path='guide/community/') }}">Community</a><a href="{{ get_url(path='colophon/') }}">Colophon</a><a href="{{ config.extra.repository }}/blob/main/LICENSE.md">Apache–2.0 ↗</a></nav>
+    <small>Rust inside. Zola outside.</small>{% if current_path == '/' %}<button type="button" data-motion aria-pressed="false" hidden>Pause field</button>{% endif %}
+  </footer>
+</body>
+</html>

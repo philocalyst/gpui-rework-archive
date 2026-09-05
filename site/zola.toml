@@ -1,0 +1,18 @@
+base_url = "https://gpui-ce.github.io"
+title = "GPUI — Community Edition"
+description = "A field guide to building expressive, GPU-accelerated interfaces in Rust."
+compile_sass = false
+build_search_index = false
+minify_html = false
+
+[markdown]
+smart_punctuation = true
+bottom_footnotes = true
+
+[markdown.highlighting]
+theme = "github-light"
+style = "class"
+
+[extra]
+repository = "https://github.com/gpui-ce/gpui-ce"
+discord = "https://discord.gg/vNdskJSfWd"

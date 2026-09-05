@@ -1,0 +1,17 @@
+[package]
+name = "gpui-site-demo"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[[bin]]
+name = "gpui-site-demo"
+path = "src/main.rs"
+
+[dependencies]
+gpui = { path = "../../../crates/gpui", package = "gpui-ce", default-features = false }
+gpui_web = { path = "../../../crates/gpui_web", package = "gpui_ce_web", default-features = false }
+wasm-bindgen = "0.2"
+web-sys = { version = "0.3", features = ["console", "EventTarget", "MessageEvent", "Window"] }
+
+[workspace]

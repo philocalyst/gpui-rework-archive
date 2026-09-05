@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block head %}<script type="module" src="{{ get_url(path='scripts/field.js') }}"></script><script type="module" src="{{ get_url(path='components/playground.js') }}"></script>{% endblock head %}
+{% block backdrop %}<canvas data-field aria-hidden="true"></canvas>{% endblock backdrop %}
+{% block main %}
+{% set manual = get_section(path="guide/_index.md") %}
+<main id="main" data-page="home">
+<aside aria-label="Edition"><small>Independent interface machinery</small><small>Rust / GPU / Community</small><small>Transmission № 001</small></aside>
+<section aria-label="Introduction and live example">
+<header>
+<p>{{ section.extra.kicker }}</p>
+<h1><strong>{{ section.extra.headline }}</strong><em>{{ section.extra.headline_end }}</em></h1>
+<p>{{ section.extra.intro }}</p>
+<nav aria-label="Start building"><a href="{{ get_url(path='guide/getting-started/') }}" data-accelerate>Get started <b>↗</b></a><code>cargo add gpui-ce</code></nav>
+<small>Less distance between an idea and an interface.</small>
+</header>
+<article aria-label="Live GPUI experiment">
+<header><small>CONTROL ROOM / LIVE SPECIMEN</small><a href="{{ get_url(path='examples/') }}">Enter the lab ↗</a></header>
+{{ section.content | safe }}
+<footer><small>Not a picture. Put your hands on it.</small><a href="{{ get_url(path='guide/getting-started/counter-tutorial/') }}">Take it apart ↗</a></footer>
+</article>
+</section>
+<aside aria-label="Framework characteristics"><p><b>01</b> Think in <strong>Rust.</strong></p><p><b>02</b> Compose with <strong>elements.</strong></p><p><b>03</b> Paint on the <strong>GPU.</strong></p><p><b>∞</b> Make it <strong>yours.</strong></p></aside>
+<nav aria-label="Explore the framework"><a href="{{ get_url(path='guide/') }}"><small>THE FIELD MANUAL / {{ manual.pages | length }} CHAPTERS</small><strong>Know your machinery.</strong><p>From the first window to the last draw call.</p><b>↗</b></a><a href="{{ get_url(path='guide/why-community-edition/') }}"><small>THE COMMUNITY EDITION / OPEN SOURCE</small><strong>Built out in the open.</strong><p>A shared foundation. An independent direction.</p><b>↗</b></a></nav>
+</main>
+{% endblock main %}

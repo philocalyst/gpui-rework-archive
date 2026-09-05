@@ -1,0 +1,4 @@
+{% extends "base.html" %}
+{% block main %}
+<main id="main" data-page="collection"><aside><a href="{{ get_url(path='/') }}">Home</a><small>{{ section.extra.eyebrow }}</small></aside><header><small>{{ section.pages | length }} ENTRIES / COMMUNITY EDITION</small><h1>{{ section.title }}</h1>{{ section.content | safe }}</header><ol>{% for item in section.pages %}<li><a href="{{ item.permalink }}"><small>{{ loop.index }} / {{ item.extra.category | default(value="FIELD NOTES") }}</small><h2>{{ item.title }}</h2><p>{{ item.description }}</p><strong>Read {{ 'experiment' if section.path == '/examples/' else 'chapter' }} ↗</strong></a></li>{% endfor %}</ol><aside><p>Not sure where to begin? <a href="{{ get_url(path='guide/getting-started/') }}">Start with your first window.</a></p><p>Found a rough edge? <a href="{{ config.extra.repository }}/issues">Help improve the guide ↗</a></p></aside></main>
+{% endblock main %}

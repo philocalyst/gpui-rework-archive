@@ -1,0 +1,494 @@
+[
+  {
+    "source": "gpui-ce-docs/build/html/index.html",
+    "markdown": "site/content/guide/welcome.md",
+    "code_blocks": 1,
+    "title": "Welcome to GPUI",
+    "category": "Getting Started",
+    "code_sha256": [
+      "09bbb35453211c382200ba2f0b5c11a2a888610ff075c005e8a4bc43e0983d7b"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/getting-started.html",
+    "markdown": "site/content/guide/getting-started.md",
+    "code_blocks": 5,
+    "title": "Getting started",
+    "category": "Getting Started",
+    "code_sha256": [
+      "41abfc615229794a521f73ab0dc6ede28fed052f39ba1ad12495f8e3f5969c65",
+      "27f6771ff5b13ecb90db550cdb4fe854c5f60d38839c4b4c76f93b5f52b8e706",
+      "9d7ca53ea878b0ffb3cc975b06886ffdc2179f65f50e6b8a0ad048c40a2125bc",
+      "ed30fa43cb489a1c2883634946f4d97ac8aff2a72550228ef16971ee09cc5cb8",
+      "e3ef4e998e4fd04244ce4c72149036b140e065a717bde27845a5098149c07e36"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/getting-started/mental-model.html",
+    "markdown": "site/content/guide/getting-started/mental-model.md",
+    "code_blocks": 4,
+    "title": "Mental model: the three registers",
+    "category": "Getting Started",
+    "code_sha256": [
+      "1ef1004bb66173cc4c12555e4864c18a6315291216886ef113c5aa60a03d9521",
+      "2d6e21d752bb65f4718fdaed865322c6233dfe071c27a98d02494c77e44e44c3",
+      "e59755a2fe19625312f1e965b6f585eb8428bd726671ac52c76d0b3e0718ff71",
+      "d64ffcff3358ef7cd8e32be87639249d6363913ab1c436ebfc353b0db8e714a5"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/getting-started/first-app.html",
+    "markdown": "site/content/guide/getting-started/first-app.md",
+    "code_blocks": 6,
+    "title": "First app: window plus root view",
+    "category": "Getting Started",
+    "code_sha256": [
+      "20d80ee02e50ef453bc91f3b8589667562b3627242f0b93988f50826cb43210a",
+      "4357262e9d3a257842e847ece478b59812cd75f630d7f90cc9001f173b521884",
+      "f7e77aae2ee2745ddd471af77ce30895b332863f068fd189de460a605a3fdbc1",
+      "1f381f67a30e6902d26acc6e5c80eee248064da095a79c7d8644b0045cf3c9bf",
+      "255a0c154e218fad9772460c90f38bc52141cbe7fcbcfe2f5f0303333ea2d62a",
+      "80487d32db2f219d9b427c8303446b48a661472dd3bbbabe47fa1c998a9e9ab1"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/getting-started/counter-tutorial.html",
+    "markdown": "site/content/guide/getting-started/counter-tutorial.md",
+    "code_blocks": 6,
+    "title": "Tutorial: a counter",
+    "category": "Getting Started",
+    "code_sha256": [
+      "55813f4131c2c7de57b6deca2b59032d4c6131996f0d0677ca28b42f9678892b",
+      "3d1819baf0c57a69972701c3680bc5d7410c7289b4e014ef74e86a3b94d01155",
+      "0290780132362d08f473087f7df977e33298f609a2536b2d23c44c6a57a3b5ff",
+      "6c9ee49daf6f38db1ea6b111858cfc83ff68cb7486f67f9ed663db7d69eef073",
+      "f846965021a7d75f6c5426226451785d2eacdec8caca66d3c6eff590946595d7",
+      "294e96352c1adb38c3360b6abe8f1ab4a2ede8981afcd4cb3b129c087873e1cf"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/fundamentals/application.html",
+    "markdown": "site/content/guide/fundamentals/application.md",
+    "code_blocks": 7,
+    "title": "Application",
+    "category": "Fundamentals",
+    "code_sha256": [
+      "4adfa52388e0ebd89382ed04a5dc2cb084a78106bed5609a7b4a040368de328e",
+      "52cd0a2afc85afe4d13f46ab6592166ba4902de74351d38e6d90e66eccfc06a2",
+      "e22fcd3cf96a63ea0d4492a4642a2eff18654e5fc9eade0bb8faffff89bda724",
+      "630d71fa6f629735a7e7284963dda5f3bf2253ffa6989dbb5ea7efaba0056e2c",
+      "e35629a6048dedfe84a0e1250a321d9343457394008017b28661a9a6f4da834d",
+      "374960aef1e42ed46a0bbae06a9233834122d7d98d623c8afbcb565f9b75dd4b",
+      "6329e92cac2a7b18faf864a4bda5d87dabcf0c6cc66fb8822e8933017d32e630"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/fundamentals/windows.html",
+    "markdown": "site/content/guide/fundamentals/windows.md",
+    "code_blocks": 5,
+    "title": "Windows",
+    "category": "Fundamentals",
+    "code_sha256": [
+      "a678f3845d36be6ca094a9e237f21ca16725c80c6cf28bf2b60e426a4324bfac",
+      "4eb1163b694f7d7a721c95395f41c75dbae248cc5ac54cb4f05e0b902b7d0767",
+      "1ae710222a0cc7270aaa9332e9d08cc8f56baa76fe95d6806fba1f7625b8517f",
+      "ae0f649982e0458fec7027c127c19a6a4c17aea607e1d7e696e73f81e0e44684",
+      "8f3fca5d3a5a85369b9589743b3d7e8b3e29c6c3747ab82535fe8d388671c575"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/fundamentals/platform-loop.html",
+    "markdown": "site/content/guide/fundamentals/platform-loop.md",
+    "code_blocks": 3,
+    "title": "Platform Loop",
+    "category": "Fundamentals",
+    "code_sha256": [
+      "99069d8fa250ad7debdd3df8f96e3c584a600eda5aa0b913cedd4d75223b25af",
+      "868b7dc187d8d7dd6d5ecf1c5e7b98f10cc533d896bbd27474b6fbb3f91258dc",
+      "58bd11981f8635fc0743aafe212e2c661118978d449cf328f7c3ec9ba878a7e3"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/fundamentals/entities.html",
+    "markdown": "site/content/guide/fundamentals/entities.md",
+    "code_blocks": 3,
+    "title": "Entities and weak handles",
+    "category": "Fundamentals",
+    "code_sha256": [
+      "d3e58c7647ee9e329f8a28bf928a00a0def2a41bf043d787d074e7866c9816c7",
+      "a4e7345b06106a4e0e9abb478400f62d3149b03e0188c054c6b82464a791ce45",
+      "d613d51a38a05b81ec73ce8793147bb93308fd9df51ee8c985222d9f51a90fa7"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/fundamentals/models-contexts.html",
+    "markdown": "site/content/guide/fundamentals/models-contexts.md",
+    "code_blocks": 3,
+    "title": "Models and contexts",
+    "category": "Fundamentals",
+    "code_sha256": [
+      "352e1f82acf108869eaf0a6b1f83a8b89288896405de2a8f2c42e16baecb7a97",
+      "2da0bdbda5159f828fbec91b6eb115ff8cc9c2a392b5ba970d39b71ab3a191ac",
+      "d08ba7cafbc9fdaa5a98f1db5d3294ab31fd609cadff22de4b1279b12fde9a5d"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/fundamentals/globals-subscriptions.html",
+    "markdown": "site/content/guide/fundamentals/globals-subscriptions.md",
+    "code_blocks": 4,
+    "title": "Globals and subscriptions",
+    "category": "Fundamentals",
+    "code_sha256": [
+      "7d78737b4f9693f9d9103d9f3875597294b303fde4dba909939f2cdc18b68ccf",
+      "19c22d6b643e1e6cf79350808ba2d471af18fa4e4f6392f0555590e737ebaa98",
+      "c787f4bc7131f1ccb1490effb0869192a415050acd9afea1b9e9f50063760916",
+      "9c8d7c1b0f1958b025b3a3063f449ce6add1a0f24cf64228ab9f0d0b8a9eb138"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/rendering/elements-core.html",
+    "markdown": "site/content/guide/rendering/elements-core.md",
+    "code_blocks": 4,
+    "title": "Elements core",
+    "category": "Rendering",
+    "code_sha256": [
+      "81ea85a3e851499fb23c1c74be11080787fd27a0907447fd6f99e999285851b6",
+      "62e45067f64c09ebb3c650c2d6fb1520d67039c48c44de5866bc3f2b292bbf32",
+      "4624a500c238a552aab659c20b4f688097a869e39693900db30f05e4d6bb415e",
+      "16d3734a7dc20e3859a606dee897e03e53c92013be8e66293744ae99ef317285"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/rendering/views-render.html",
+    "markdown": "site/content/guide/rendering/views-render.md",
+    "code_blocks": 5,
+    "title": "Views and render",
+    "category": "Rendering",
+    "code_sha256": [
+      "93411ad180b9e34eea169475299aee1fb35a61f78523f85d1644aca7593dcf31",
+      "85b2a6820f4721f25457de47885e9ebedc04a1d9e1233649d55ef1931537c233",
+      "3d3f760b9f1a9af1146bb46a4020f7acde19ea46a9c4ed9f3c806695fe042f9b",
+      "fed187d20373b09395334cb8034fc151919c55a7a8efe21cc18c11792ceb194f",
+      "f054100bbffe37a33c1e6f13cbdd0e65e609baf9a70ec15e901a4d96956e8511"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/rendering/layout.html",
+    "markdown": "site/content/guide/rendering/layout.md",
+    "code_blocks": 4,
+    "title": "Layout",
+    "category": "Rendering",
+    "code_sha256": [
+      "e4b4c6dbd1bcd76ce8791fa0cac2f63dac3b4a5bb35a31b5fc29837f2baedd1c",
+      "0dde9035e2aaf7008701b0954b43227a369fd3e40c9153c5cce1d658fe1ad861",
+      "7ea52d96d61e66d8a8cdfedbcf0396ad1a9b89e801b07eaae20ecd8f4f0ed17e",
+      "adc767ece074230dbd4056f49e6422380973c93a99fd53df538abd03c81f8576"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/rendering/styling.html",
+    "markdown": "site/content/guide/rendering/styling.md",
+    "code_blocks": 4,
+    "title": "Styling",
+    "category": "Rendering",
+    "code_sha256": [
+      "6b1a5b10c7f76ff2bea0a93ec3b7e61a3c0004260555c0d90a81daaf2a152aee",
+      "02f16b936ff00d4dfece885d49943b0ee2b76f46b1abf42ded026ae6665f4f82",
+      "aef4f801d0c1a44e8a2b1f1087f867d517e8ae8fde4458285c9d7890c2775c06",
+      "cda0bf279244d04fd39ca90e125446e7af2daf59813e4f0b0060318e2f67d832"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/elements/div.html",
+    "markdown": "site/content/guide/elements/div.md",
+    "code_blocks": 2,
+    "title": "div : the universal container",
+    "category": "Elements",
+    "code_sha256": [
+      "e50e3b084cff6b06d5cffcc980dca5885bd14532011297e5574f29396d40cf3c",
+      "386e668172bfdf44c3c76f6a94bcdabebcccea631ca65e64946a328f71d734fe"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/elements/text.html",
+    "markdown": "site/content/guide/elements/text.md",
+    "code_blocks": 2,
+    "title": "Text: plain, styled, clickable",
+    "category": "Elements",
+    "code_sha256": [
+      "ddf83383a1cd0be24ed1b44a44451a4144a42c293445d3a64666c98fbff9fa19",
+      "4b170d75ec9d5c80f26dbfe43462a8913dd75ceb11cc8089dc5ecd78cfa537b0"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/elements/media.html",
+    "markdown": "site/content/guide/elements/media.md",
+    "code_blocks": 4,
+    "title": "Pictures and paint: image, SVG, canvas, surface",
+    "category": "Elements",
+    "code_sha256": [
+      "c2a5a713e8c032438e9e1649a3a428e73b808a0431e48b973cbd95874389742e",
+      "6196eebe8eefdfa42d704bec244e065834791a1928cdad32a6d0c320fffb4220",
+      "57acbd43946189c61a5987b6ceaee229ad65ce233410db0d2c9065f773c49943",
+      "6c962587c00ffad62cf30cc7c43fcfe2763b8070cff288879122431c37c6de03"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/elements/lists.html",
+    "markdown": "site/content/guide/elements/lists.md",
+    "code_blocks": 1,
+    "title": "Lists that stay fast",
+    "category": "Elements",
+    "code_sha256": [
+      "b6ddb5269d2bc42fcd8e471e70233e8d75e06ff23ef4d44e967825cd959ceab8"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/elements/advanced.html",
+    "markdown": "site/content/guide/elements/advanced.md",
+    "code_blocks": 4,
+    "title": "Popups, overlays, motion, queries",
+    "category": "Elements",
+    "code_sha256": [
+      "5659784dcfbbf98fa815206b57072f2b75519c819b3c8490e2c960de7a7f3df5",
+      "89f6274ba23b7a83fe31c046ca290da3e273a21ebe3b607721e22ef44bde13e3",
+      "0472a2c3d69a23071110722f80fbdc071ec8afcf7508bdd88d66f5888acec85f",
+      "c5aa02a7ae7a3b26bb383e34934b77fbf87829390c621bda88738237301b8d30"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/elements/text-input.html",
+    "markdown": "site/content/guide/elements/text-input.md",
+    "code_blocks": 3,
+    "title": "Fields that edit: text_input , text_area",
+    "category": "Elements",
+    "code_sha256": [
+      "6406d97a9fe60704d32dd82eed9f306877ac5f42100102e168d0fc762856ce40",
+      "cb5ba3c4a92d6ea3e4f11790958a6430ac12386b2c96865ba5a7be6ac2e27d3e",
+      "5ae17f59216c2a4fafc0dd33a64dc992be308732c127b74b24e33c083e3ae71e"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/interactivity/events.html",
+    "markdown": "site/content/guide/interactivity/events.md",
+    "code_blocks": 4,
+    "title": "Event handlers",
+    "category": "Interactivity",
+    "code_sha256": [
+      "6bb19b5671159806e722e1eab049da33a4cccd2ae050559895c0a10665829645",
+      "6397f07301098e6518ed9228e031ff631c7cdf2a3b0d170cb99e613886c73db8",
+      "6d5d8ab214e29a8bafd6d7d364b91de04625d90ee82285c90382ceb333875abc",
+      "b868f7ea3b88f01aa0c408e2c6041b39c7c58909590ff769424e1346799eccef"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/interactivity/focus.html",
+    "markdown": "site/content/guide/interactivity/focus.md",
+    "code_blocks": 3,
+    "title": "Focus and tab stops",
+    "category": "Interactivity",
+    "code_sha256": [
+      "a6dc21e9a435421a8663cdd641298d48a3415527cd92ab01441a3a454d7338f8",
+      "5cfc27163727d93c321521a62076f08baf956d9f2bdac1f2b739c414378504c7",
+      "32bb7f140a2001b44f08bef6a0257a249dab21f46f0394816499697fa73c9b48"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/interactivity/actions-keymap.html",
+    "markdown": "site/content/guide/interactivity/actions-keymap.md",
+    "code_blocks": 3,
+    "title": "Actions and keymap",
+    "category": "Interactivity",
+    "code_sha256": [
+      "34783e534b0f7ab6ecc9ad0d9002d286e4f586ec48ae1088e9be06f5b76718c3",
+      "79daeb85c3845cabcc51cebc716f97c22f96713e9ad695e909f311a1dc1e0671",
+      "15e8e0899b341bb95d495a768569401b2857d59a7b944b6dc24d4cbc5863c168"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/interactivity/gestures-drag.html",
+    "markdown": "site/content/guide/interactivity/gestures-drag.md",
+    "code_blocks": 4,
+    "title": "Click drag scroll",
+    "category": "Interactivity",
+    "code_sha256": [
+      "84b84224dc44de98202acd38b388e3e0c2f1d85aacb8a3673a261856c49d56d5",
+      "23f75a3a022900eb6b8cd70c39eda8b4a28bdf8acb93d12867ac4b72ba0243e1",
+      "8ec2ff0dfe5ccf60c41fa89e86a2bd9d2e73983dde7adfdd115e5b3bc040340f",
+      "e889fdd3b9374b02309c0d68b8b8ae89c0004dd5d01e8a6f36882766db11c997"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/graphics/text-system.html",
+    "markdown": "site/content/guide/graphics/text-system.md",
+    "code_blocks": 5,
+    "title": "Text system: fonts, shaping, layout",
+    "category": "Graphics",
+    "code_sha256": [
+      "659aabc28217b1751c0bf86e51dc26faf4af2db93d876f96bdf33a6d5eb040cb",
+      "7143f4120072eeb05367bdf5351592378c8c9570bfecac4b1e338841c38e3052",
+      "76b7c3bafcf1dc859d676e6ea95791b1df5a5a73e129e97d5f3286f113be006a",
+      "b5982d795de14230a4383ef5a6d6164d656ff9b514f2ff24378e4bec0df26f30",
+      "7534282540df70f8cfbf4210b20d4166d153fee32b7f152e6e38ccb50ba30289"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/graphics/geometry-color.html",
+    "markdown": "site/content/guide/graphics/geometry-color.md",
+    "code_blocks": 5,
+    "title": "Geometry and color",
+    "category": "Graphics",
+    "code_sha256": [
+      "7daa309cb6ec20e5f763f8ba352b8dfd32d5ee0d368aed2acc8b10d327549410",
+      "7e03025ad39f3f3b1a46aabc385bee326882263950a33cfe7a636074ba5c6556",
+      "0630f788a381741671f95e21bb7948524d72f126058aa1659765b60864a58319",
+      "15a3c4032466018d3b7f75552fab45de0cd1eda79e3fe811d646c1b8cb9a6276",
+      "a346d9019779091f20154bafb7aa5e23eccafabf5327f1dcfec8d20d75dfbddd"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/graphics/scene-rendering.html",
+    "markdown": "site/content/guide/graphics/scene-rendering.md",
+    "code_blocks": 4,
+    "title": "Scene and rendering: primitives, paths, SVG",
+    "category": "Graphics",
+    "code_sha256": [
+      "732b8fcc08c63e92cff4791257a330243b253e9fee132235020ffa13aabc07bb",
+      "2378488de7f0ecca1acba34046086307ee8e756d27ebab91e369bca04a62f627",
+      "660c03f99a14949d4c69694419576fcd92f204344365ac2fb86fb9852db86943",
+      "d118450fc06df58c93a2321f79e18ff1d9f4c2c8ddca8ec87545e8e5f53b322a"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/graphics/animation.html",
+    "markdown": "site/content/guide/graphics/animation.md",
+    "code_blocks": 4,
+    "title": "Animation: motion, springs, transitions",
+    "category": "Graphics",
+    "code_sha256": [
+      "6af50fdabc355e087a9fc44c68c0bc6b7cff664f00bc84d6b74cf695b4d00d34",
+      "305e5bc177146f0bac09c98c75231df5be32b4828603df6bf8e8a91fb3e2a4a7",
+      "364edab4ce6d8de99233eadec2abca1d562ce38abc4225254b7d4bd4ef3bc390",
+      "b2072e5e408b432634cdfe0f3b1659101ceffd6594e9e970523710daaca2565a"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/system/async-executor.html",
+    "markdown": "site/content/guide/system/async-executor.md",
+    "code_blocks": 2,
+    "title": "Async executor: tasks that respect windows",
+    "category": "System",
+    "code_sha256": [
+      "40d11624a7d1d82cfc809b2ad080d28abe624c9bd3a7e91116cd9fe5e5fd5087",
+      "8460ec8052799df6878b956f34f8f7fc170c55952e96546e456f95535ee5b0da"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/system/assets-http.html",
+    "markdown": "site/content/guide/system/assets-http.md",
+    "code_blocks": 3,
+    "title": "Assets and HTTP: load once, share widely",
+    "category": "System",
+    "code_sha256": [
+      "a6a1f39b449b2ac0317647f8fee02bbc9850076716f76e690da4c90be381c42f",
+      "5c4cbe1fa1135ea0273498958f3d013af11ffa10d29e9204330583974605a640",
+      "d8858605562052a28bb3c9286cdc976843c951b739518fe491349abdf186b2a5"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/system/utilities.html",
+    "markdown": "site/content/guide/system/utilities.md",
+    "code_blocks": 2,
+    "title": "Utilities: which tool for which job",
+    "category": "System",
+    "code_sha256": [
+      "0022cdf608134be019487f3fa0855aaaf30794fd7785fea66dd3104235e6d11c",
+      "8162484aa8190d3af5629bc32b8237796dc9371ae261e4180e190f396ce36f49"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/system/macros.html",
+    "markdown": "site/content/guide/system/macros.md",
+    "code_blocks": 2,
+    "title": "Macros: the verified list",
+    "category": "System",
+    "code_sha256": [
+      "71d9a644be682d9db7bef7e59af7eb01721b3383bf1fb7b61f0a5e286b804e6f",
+      "301455225a7e87064358da15b3b1357c487a21f21c640bceb3b4265955d62a44"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/system/testing.html",
+    "markdown": "site/content/guide/system/testing.md",
+    "code_blocks": 2,
+    "title": "Testing: drive the app like a user",
+    "category": "System",
+    "code_sha256": [
+      "f816b40f3a5277e9efa3f60aa50a4bcc227309ac92d12cf2d5652f75d8f05fa9",
+      "7f9615a5e9ec0d6018abe807abb74591e97ee9ea5a20aef357afb84f744864af"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/platforms/overview.html",
+    "markdown": "site/content/guide/platforms/overview.md",
+    "code_blocks": 2,
+    "title": "Platforms: overview",
+    "category": "Platforms",
+    "code_sha256": [
+      "a31e0c6b81410465a03d0f777a892c8d88c5334fd7b19b625bcf336258b79425",
+      "d6bd204522dceb0bc43195592f24433714fb80db5144f5db9a8c573d88f78c59"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/platforms/backends.html",
+    "markdown": "site/content/guide/platforms/backends.md",
+    "code_blocks": 4,
+    "title": "Platforms: rendering backends",
+    "category": "Platforms",
+    "code_sha256": [
+      "f6db2a8f49498d03dcbd130861a14c612f8b0747f7f3551f3241cc460dffd61f",
+      "52987c9dee60352c08a893a945ad60a8d67e1cdbede790988c172d8e63c20c4b",
+      "5ff29da75fcb32ee01d96e6247bb24141ae955e9a9cb5df228c75771740974da",
+      "5aa02b46e9173f1eb1bb7bfd6410c55542e7ae7d9daa89c1900c8f288ee7b7d3"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/guides/cookbook.html",
+    "markdown": "site/content/guide/guides/cookbook.md",
+    "code_blocks": 8,
+    "title": "Cookbook: eight recipes that run",
+    "category": "Guides",
+    "code_sha256": [
+      "5b344738e983d3ebf19c67a5d4b143d7c7f98ef1790722c748f69983c7bfe638",
+      "1004ecc45a7574a7f294a8f10ac9bf8f48fee61c80fcd47af437bdd35c3619a7",
+      "68a2509496260e519c7b13c9532fbefc3ae05143b715a2c7b1db001c3b378231",
+      "7b7e62e4c7cfed760e60275f33659fbb5e05b3b7f0bf449b15b277a14f987089",
+      "1555c1affdd77eee539d3a7622e1bda82bd24f12ca4ce9ecb53919d05b72c6cc",
+      "e83ca15bb1fbfddc3014fee9393cfa474bc74dd1332443aaefe304d364fc82cc",
+      "bd64078fa546e7bd4b5ef48ea662b857e5c93764ad4da1f7d0250db28a885a56",
+      "0bae0a153d838425bf8a2d9c7e54aa3422b7b35c6c90ec7f02b37fffba9e9e27"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/guides/performance.html",
+    "markdown": "site/content/guide/guides/performance.md",
+    "code_blocks": 3,
+    "title": "Performance: measure first, then cut",
+    "category": "Guides",
+    "code_sha256": [
+      "e339a361de846c15407fe7734055cca91fae627b71ba2792e983fe0b9c66cc0d",
+      "51deabbc335a289a9f6372a851228d736ff027b7eca7eda4fa6b2c47e7e34601",
+      "5b0f26381ab8f5cfdbca47b4fa16a201a525f9aec29db11b291ba24b6aab99d4"
+    ]
+  },
+  {
+    "source": "gpui-ce-docs/build/html/guides/migration-faq.html",
+    "markdown": "site/content/guide/guides/migration-faq.md",
+    "code_blocks": 1,
+    "title": "Migration, FAQ, and glossary",
+    "category": "Guides",
+    "code_sha256": [
+      "a7abb8b678cc191e1ea3dc11c7c54fd64555441c784d9b72d113be4d8574bea4"
+    ]
+  }
+]
