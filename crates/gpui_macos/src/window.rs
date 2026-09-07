@@ -2250,7 +2250,6 @@ impl PlatformWindow for MacWindow {
                                 }
                             }
                             "Fill" => {
-                                // There is no documented API for "Fill" action, so we'll just zoom the window
                                 if is_resizable {
                                     window.zoom_(NIL);
                                 }
