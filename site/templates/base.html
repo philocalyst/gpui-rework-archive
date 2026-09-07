@@ -3,35 +3,63 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  {% set title = config.title %}{% set description = config.description %}
-  {% if page %}{% set title = page.title ~ " · GPUI–CE" %}{% set description = page.description | default(value=config.description) %}{% elif section %}{% set title = section.title ~ " · GPUI–CE" %}{% set description = section.description | default(value=config.description) %}{% endif %}
+  {%- set title = config.title -%}{%- set description = config.description -%}
+  {%- if page %}{% set title = page.title ~ " · GPUI Community Edition" %}{% set description = page.description | default(value=config.description) %}{% elif section and section.path != "/" %}{% set title = section.title ~ " · GPUI Community Edition" %}{% set description = section.description | default(value=config.description) %}{% endif %}
   <title>{{ title }}</title>
   <meta name="description" content="{{ description }}">
-  <meta name="theme-color" content="oklch(13% 0.018 280)">
+  <meta name="theme-color" content="oklch(17% 0.06 255)">
+  <meta name="view-transition" content="same-origin">
+  <meta name="gpui-compiler" content="{{ config.extra.live_compiler | default(value='') }}">
   <meta property="og:title" content="{{ title }}">
   <meta property="og:description" content="{{ description }}">
   <meta property="og:type" content="website">
   {% if current_url %}<link rel="canonical" href="{{ current_url | safe }}">{% endif %}
   <link rel="icon" href="{{ get_url(path='mark.svg') }}" type="image/svg+xml">
-  <link rel="preload" href="{{ get_url(path='fonts/barlow-condensed-800.ttf') }}" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="{{ get_url(path='fonts/pilowlava.woff2') }}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{{ get_url(path='fonts/basteleur-bold.woff2') }}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{{ get_url(path='fonts/newsreader.woff2') }}" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{{ get_url(path='site.css') }}">
   <link rel="stylesheet" href="{{ get_url(path='syntax.css') }}">
-  <link rel="stylesheet" href="{{ get_url(path='components/playground.css') }}">
   {% block head %}{% endblock head %}
 </head>
-<body>
-  {% block backdrop %}{% endblock backdrop %}
-  <a href="#main">Skip to content</a>
-  <header>
-    <a href="{{ get_url(path='/') }}" aria-label="GPUI Community Edition home"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M2 16V2h14M32 2h14v14M46 32v14H32M16 46H2V32M12 12h24v24H12zM24 8v32M8 24h32"/><circle cx="24" cy="24" r="16"/></svg><b>GPUI<sup>CE</sup></b><small>Human input.<br>Extraordinary output.</small></a>
-    <nav aria-label="Primary"><a href="{{ get_url(path='guide/') }}" {% if current_path and '/guide/' in current_path %}aria-current="{{ 'page' if current_path == '/guide/' else 'true' }}"{% endif %}>Field guide</a><a href="{{ get_url(path='examples/') }}" {% if current_path and '/examples/' in current_path %}aria-current="{{ 'page' if current_path == '/examples/' else 'true' }}"{% endif %}>Experiments</a><a href="{{ config.extra.repository }}">Source ↗</a></nav>
+<body class="{% block bodyclass %}{% endblock bodyclass %}">
+  {% block backdrop %}<canvas class="ocean" data-field aria-hidden="true"></canvas>{% endblock backdrop %}
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="masthead">
+    <a class="wordmark" href="{{ get_url(path='/') }}" aria-label="GPUI Community Edition home">
+      <span class="wordmark__mark" aria-hidden="true">GPUI</span>
+      <span class="wordmark__edition">Community<br>Edition</span>
+    </a>
+    <nav class="buoy" aria-label="Primary">
+      <a href="{{ get_url(path='guide/') }}" {% if current_path and '/guide/' in current_path %}aria-current="{{ 'page' if current_path == '/guide/' else 'true' }}"{% endif %}>Field guide</a>
+      <a href="{{ get_url(path='examples/') }}" {% if current_path and '/examples/' in current_path %}aria-current="{{ 'page' if current_path == '/examples/' else 'true' }}"{% endif %}>Exhibits</a>
+      <a href="{{ get_url(path='colophon/') }}" {% if current_path == '/colophon/' %}aria-current="page"{% endif %}>Colophon</a>
+      <a href="{{ config.extra.repository }}" rel="external">Source<span aria-hidden="true"> ↗</span></a>
+    </nav>
+    <svg class="seal" viewBox="0 0 120 120" aria-hidden="true">
+      <defs><path id="seal-ring" d="M60 60 m-44 0 a44 44 0 1 1 88 0 a44 44 0 1 1 -88 0"/></defs>
+      <circle cx="60" cy="60" r="58" class="seal__rim"/>
+      <circle cx="60" cy="60" r="30" class="seal__core"/>
+      <text class="seal__text"><textPath href="#seal-ring" startOffset="0">GPUI · COMMUNITY EDITION · RUST · GPU · </textPath></text>
+      <path class="seal__wave" d="M38 62c6-6 10-6 16 0s10 6 16 0 10-6 16 0"/>
+    </svg>
   </header>
   {% block main %}{% endblock main %}
-  <footer>
-    <a href="{{ get_url(path='/') }}"><b>GPUI<sup>CE</sup></b></a>
-    <p>Independent by design.<br>Open by default.</p>
-    <nav aria-label="Footer"><a href="{{ get_url(path='guide/community/') }}">Community</a><a href="{{ get_url(path='colophon/') }}">Colophon</a><a href="{{ config.extra.repository }}/blob/main/LICENSE.md">Apache–2.0 ↗</a></nav>
-    <small>Rust inside. Zola outside.</small>{% if current_path == '/' %}<button type="button" data-motion aria-pressed="false" hidden>Pause field</button>{% endif %}
+  <footer class="seabed">
+    <div class="seabed__moon" aria-hidden="true"></div>
+    <div class="seabed__inner">
+      <p class="seabed__motto">Independent by design.<br><em>Open by default.</em></p>
+      <nav class="seabed__nav" aria-label="Footer">
+        <a href="{{ get_url(path='guide/getting-started/') }}">Getting started</a>
+        <a href="{{ get_url(path='guide/community/') }}">Community</a>
+        <a href="{{ config.extra.discord }}" rel="external">Discord ↗</a>
+        <a href="{{ config.extra.repository }}/blob/main/LICENSE.md" rel="external">Apache-2.0 ↗</a>
+        <a href="{{ get_url(path='colophon/') }}">Colophon</a>
+      </nav>
+      <p class="seabed__fine">Rust inside. Zola outside. Type set in Pilowlava, Basteleur, Newsreader and Monaspace.</p>
+      <button class="still" type="button" data-motion aria-pressed="false" hidden>Still the water</button>
+    </div>
   </footer>
+  <script type="module" src="{{ get_url(path='scripts/field.js') }}"></script>
 </body>
 </html>

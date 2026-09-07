@@ -1,25 +1,66 @@
 {% extends "base.html" %}
-{% block head %}<script type="module" src="{{ get_url(path='scripts/field.js') }}"></script><script type="module" src="{{ get_url(path='components/playground.js') }}"></script>{% endblock head %}
-{% block backdrop %}<canvas data-field aria-hidden="true"></canvas>{% endblock backdrop %}
+{% block bodyclass %}home{% endblock bodyclass %}
+{% block head %}<link rel="stylesheet" href="{{ get_url(path='components/playground.css') }}"><script type="module" src="{{ get_url(path='components/playground.js') }}"></script>{% endblock head %}
 {% block main %}
 {% set manual = get_section(path="guide/_index.md") %}
-<main id="main" data-page="home">
-<aside aria-label="Edition"><small>Independent interface machinery</small><small>Rust / GPU / Community</small><small>Transmission № 001</small></aside>
-<section aria-label="Introduction and live example">
-<header>
-<p>{{ section.extra.kicker }}</p>
-<h1><strong>{{ section.extra.headline }}</strong><em>{{ section.extra.headline_end }}</em></h1>
-<p>{{ section.extra.intro }}</p>
-<nav aria-label="Start building"><a href="{{ get_url(path='guide/getting-started/') }}" data-accelerate>Get started <b>↗</b></a><code>cargo add gpui-ce</code></nav>
-<small>Less distance between an idea and an interface.</small>
-</header>
-<article aria-label="Live GPUI experiment">
-<header><small>CONTROL ROOM / LIVE SPECIMEN</small><a href="{{ get_url(path='examples/') }}">Enter the lab ↗</a></header>
-{{ section.content | safe }}
-<footer><small>Not a picture. Put your hands on it.</small><a href="{{ get_url(path='guide/getting-started/counter-tutorial/') }}">Take it apart ↗</a></footer>
-</article>
-</section>
-<aside aria-label="Framework characteristics"><p><b>01</b> Think in <strong>Rust.</strong></p><p><b>02</b> Compose with <strong>elements.</strong></p><p><b>03</b> Paint on the <strong>GPU.</strong></p><p><b>∞</b> Make it <strong>yours.</strong></p></aside>
-<nav aria-label="Explore the framework"><a href="{{ get_url(path='guide/') }}"><small>THE FIELD MANUAL / {{ manual.pages | length }} CHAPTERS</small><strong>Know your machinery.</strong><p>From the first window to the last draw call.</p><b>↗</b></a><a href="{{ get_url(path='guide/why-community-edition/') }}"><small>THE COMMUNITY EDITION / OPEN SOURCE</small><strong>Built out in the open.</strong><p>A shared foundation. An independent direction.</p><b>↗</b></a></nav>
+{% set exhibits = get_section(path="examples/_index.md") %}
+<main id="main" class="pavilion">
+
+  <section class="sheet hero" aria-labelledby="hero-title">
+    <p class="kicker"><span>Pavilion № 01</span><span>A field guide to GPUI</span><span>Rust · GPU · Community</span></p>
+    <h1 id="hero-title" class="headline">
+      <span class="headline__line">{{ section.extra.headline_1 }}</span>
+      <span class="headline__line headline__line--print" data-text="{{ section.extra.headline_2 }}">{{ section.extra.headline_2 }}</span>
+      <span class="headline__line headline__line--tail">{{ section.extra.headline_3 }}</span>
+    </h1>
+    <p class="deck">{{ section.extra.intro }}</p>
+    <div class="hero__actions">
+      <a class="ticket" href="{{ get_url(path='guide/getting-started/') }}" data-accelerate><span class="ticket__stub">01</span><span class="ticket__body">Enter the pavilion<small>Your first window in ten minutes</small></span><span class="ticket__arrow" aria-hidden="true">→</span></a>
+      <code class="stub" title="Add the framework to a Cargo project"><span class="stub__prompt" aria-hidden="true">$</span>cargo add gpui-ce</code>
+    </div>
+    <ul class="hero__facts" aria-label="Facts">
+      <li><b>{{ manual.pages | length }}</b> chapters</li>
+      <li><b>{{ exhibits.pages | length }}</b> live exhibits</li>
+      <li><b>1</b> language</li>
+    </ul>
+    <svg class="undertow" viewBox="0 0 1200 160" aria-hidden="true" preserveAspectRatio="none">
+      <defs><path id="undertow-path" d="M-100 90 C 100 20, 250 160, 450 90 S 800 20, 1000 90 S 1250 160, 1400 90"/></defs>
+      <text class="undertow__text"><textPath href="#undertow-path" startOffset="0">{{ section.extra.marquee }}<animate attributeName="startOffset" from="0" to="-50%" dur="28s" repeatCount="indefinite"/></textPath></text>
+    </svg>
+  </section>
+
+  <section class="water exhibit-hall" aria-labelledby="exhibit-title">
+    <header class="hall__plate">
+      <p class="eyebrow">Live exhibit · compiled from Rust · drawn on the GPU</p>
+      <h2 id="exhibit-title" class="hall__title">Tinker with the source.<br><em>The GPU redraws.</em></h2>
+      <p class="hall__note">This is GPUI itself, running as WebAssembly. Open the source, change a colour or a number, and run the compiler. Every rebuild is real Rust.</p>
+    </header>
+    {{ section.content | safe }}
+    <footer class="hall__foot"><a class="wavelink" href="{{ get_url(path='examples/') }}">All exhibits</a><a class="wavelink" href="{{ get_url(path='guide/getting-started/counter-tutorial/') }}">Take the counter apart</a></footer>
+  </section>
+
+  <section class="sheet halls" aria-labelledby="halls-title">
+    <h2 id="halls-title" class="visually-hidden">Three halls</h2>
+    <ol class="arches">
+      <li class="arch"><a href="{{ get_url(path='guide/fundamentals/entities/') }}"><span class="arch__num">I</span><strong class="arch__title">Think in Rust.</strong><p>Entities own state. Views render it. The borrow checker keeps the two honest.</p><span class="arch__cta">Entities &amp; contexts</span></a></li>
+      <li class="arch"><a href="{{ get_url(path='guide/elements/div/') }}"><span class="arch__num">II</span><strong class="arch__title">Compose with elements.</strong><p>Flex, grid, text and paint, chained the way the web taught you. No markup, no stylesheet, no gap between the two.</p><span class="arch__cta">The element tree</span></a></li>
+      <li class="arch"><a href="{{ get_url(path='guide/graphics/scene-rendering/') }}"><span class="arch__num">III</span><strong class="arch__title">Paint on the GPU.</strong><p>Every frame is a scene of quads, paths and glyphs handed to Metal, Vulkan, DirectX or WebGPU.</p><span class="arch__cta">Scene rendering</span></a></li>
+    </ol>
+  </section>
+
+  <section class="sheet tide" aria-labelledby="tide-title">
+    <header class="tide__head">
+      <p class="eyebrow">Tide table</p>
+      <h2 id="tide-title" class="hall__title hall__title--ink">Know your machinery,<br><em>from the first window to the last draw call.</em></h2>
+    </header>
+    <ul class="tickets" aria-label="Chapters by category">
+      {% set categories = ["GETTING STARTED", "FUNDAMENTALS", "RENDERING", "ELEMENTS", "INTERACTIVITY", "GRAPHICS", "SYSTEM", "PLATFORMS", "GUIDES", "ABOUT THE PROJECT", "PROJECT MAINTENANCE"] %}
+      {% for category in categories %}{% set_global first = false %}{% set_global count = 0 %}{% for item in manual.pages %}{% if item.extra.category == category %}{% if not first %}{% set_global first = item %}{% endif %}{% set_global count = count + 1 %}{% endif %}{% endfor %}{% if first %}
+      <li class="ticket-card"><a href="{{ first.permalink }}"><span class="ticket-card__num">{{ loop.index }}</span><span class="ticket-card__cat">{{ category | lower | title }}</span><span class="ticket-card__count">{{ count }} chapter{% if count != 1 %}s{% endif %}</span><span class="ticket-card__first">{{ first.title }}</span></a></li>
+      {% endif %}{% endfor %}
+    </ul>
+    <p class="tide__more"><a class="wavelink" href="{{ manual.permalink }}">Open the whole field guide</a></p>
+  </section>
+
 </main>
 {% endblock main %}

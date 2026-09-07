@@ -1,1 +1,10 @@
-{% extends "base.html" %}{% block main %}<main id="main" data-page="collection"><header><small>404 / OUTSIDE THE DRAWING AREA</small><h1>A pixel out<br>of place.</h1><p>This page has moved, or has yet to be drawn.</p><a href="{{ get_url(path='guide/') }}">Find your way in the field guide ↗</a></header></main>{% endblock main %}
+{% extends "base.html" %}
+{% block bodyclass %}collection{% endblock bodyclass %}
+{% block main %}
+<main id="main" class="sheet collection__sheet lost">
+  <p class="eyebrow">404 · Outside the drawing area</p>
+  <h1 class="collection__title">A pixel<br><em>out of place.</em></h1>
+  <p class="deck">This page has drifted, or has yet to be drawn.</p>
+  <p><a class="ticket" href="{{ get_url(path='guide/') }}"><span class="ticket__stub">?</span><span class="ticket__body">Find your way in the field guide<small>Every chapter, charted</small></span><span class="ticket__arrow" aria-hidden="true">→</span></a></p>
+</main>
+{% endblock main %}

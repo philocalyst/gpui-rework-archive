@@ -1,6 +1,6 @@
 base_url = "https://gpui-ce.github.io"
 title = "GPUI — Community Edition"
-description = "A field guide to building expressive, GPU-accelerated interfaces in Rust."
+description = "A field guide to building expressive, GPU-accelerated interfaces in Rust. Read the chapters, then edit the exhibits and watch the GPU redraw."
 compile_sass = false
 build_search_index = false
 minify_html = false
@@ -16,3 +16,7 @@ style = "class"
 [extra]
 repository = "https://github.com/gpui-ce/gpui-ce"
 discord = "https://discord.gg/vNdskJSfWd"
+# URL of a running `site/scripts/live-compiler.mjs`. Leave empty to probe
+# http://127.0.0.1:1117 automatically on localhost only; production visitors
+# then see the exhibits read-only until they run a compiler of their own.
+live_compiler = ""

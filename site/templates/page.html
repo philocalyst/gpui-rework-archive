@@ -1,6 +1,37 @@
 {% extends "base.html" %}
-
-{% block head %}{% if page.extra.playground | default(value=false) %}<script type="module" src="{{ get_url(path='components/playground.js') }}"></script>{% endif %}{% endblock head %}
+{% block bodyclass %}reading{% endblock bodyclass %}
+{% block head %}{% if page.extra.playground | default(value=false) %}<link rel="stylesheet" href="{{ get_url(path='components/playground.css') }}"><script type="module" src="{{ get_url(path='components/playground.js') }}"></script>{% endif %}{% endblock head %}
 {% block main %}
-<main id="main" data-page="article"><aside aria-label="Breadcrumb"><a href="{{ get_url(path='/') }}">Home</a>{% if '/examples/' in current_path %}<a href="{{ get_url(path='examples/') }}">Experiments</a>{% else %}<a href="{{ get_url(path='guide/') }}">Field guide</a>{% endif %}<small>{{ page.extra.category | default(value="FIELD NOTES") }}</small></aside><section>{% include "macros/navigation.html" %}<article><header><small>{{ page.extra.category | default(value="FIELD NOTES") }} / {{ page.reading_time }} MIN READ</small><h1>{{ page.title }}</h1><p>{{ page.description }}</p></header>{% if page.toc %}<details><summary>In this chapter</summary><nav aria-label="On this page"><ol>{% for heading in page.toc %}<li><a href="{{ heading.permalink }}">{{ heading.title }}</a></li>{% endfor %}</ol></nav></details>{% endif %}{{ page.content | safe }}<footer><p>Keep exploring.</p><nav aria-label="Related reading">{% if page.lower %}<a href="{{ page.lower.permalink }}">← {{ page.lower.title }}</a>{% endif %}{% if page.higher %}<a href="{{ page.higher.permalink }}">{{ page.higher.title }} →</a>{% endif %}<a href="{{ config.extra.repository }}/issues">Suggest an improvement ↗</a></nav></footer></article></section></main>
+{% set in_examples = '/examples/' in current_path %}
+<main id="main" class="sheet reading__sheet">
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a href="{{ get_url(path='/') }}">Pavilion</a>
+    {% if in_examples %}<a href="{{ get_url(path='examples/') }}">Exhibits</a>{% else %}<a href="{{ get_url(path='guide/') }}">Field guide</a>{% endif %}
+    <span aria-current="page">{{ page.extra.category | default(value="Field notes") | lower | title }}</span>
+  </nav>
+  <div class="reading__grid">
+    {% include "macros/navigation.html" %}
+    <article class="chapter">
+      <header class="chapter__head">
+        <p class="eyebrow">{{ page.extra.category | default(value="Field notes") | lower | title }} · {{ page.reading_time }} min read</p>
+        <h1 class="chapter__title">{{ page.title }}</h1>
+        {% if page.description %}<p class="chapter__deck">{{ page.description }}</p>{% endif %}
+      </header>
+      {% if page.toc and page.toc | length > 1 %}
+      <details class="wayfinding">
+        <summary>In this chapter</summary>
+        <nav aria-label="On this page"><ol>{% for heading in page.toc %}<li><a href="{{ heading.permalink }}">{{ heading.title }}</a></li>{% endfor %}</ol></nav>
+      </details>
+      {% endif %}
+      <div class="prose">{{ page.content | safe }}</div>
+      <footer class="chapter__foot">
+        <nav class="turn" aria-label="Neighbouring chapters">
+          {% if page.lower %}<a class="turn__prev" href="{{ page.lower.permalink }}"><small>Previous</small>{{ page.lower.title }}</a>{% else %}<span></span>{% endif %}
+          {% if page.higher %}<a class="turn__next" href="{{ page.higher.permalink }}"><small>Next</small>{{ page.higher.title }}</a>{% endif %}
+        </nav>
+        <p class="chapter__improve"><a class="wavelink" href="{{ config.extra.repository }}/issues" rel="external">Found a rough edge? Suggest an improvement ↗</a></p>
+      </footer>
+    </article>
+  </div>
+</main>
 {% endblock main %}

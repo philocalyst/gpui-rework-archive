@@ -1,38 +1,38 @@
 +++
-title = "Inside the transmission."
-description = "The signal, the type, and the machinery behind the GPUI field guide."
+title = "Inside the pavilion."
+description = "The type, the sea, and the machinery behind the GPUI field guide."
 weight = 0
 [extra]
 category = "ABOUT THE PROJECT"
 playground = false
 +++
 
-This is a working field guide for GPUI Community Edition. Its visual language borrows from phosphor terminals, instrument panels, halftone printing, and optimistic exhibitions of unfamiliar machinery.
+This is a working field guide for GPUI Community Edition, dressed as an exhibition. The conceit comes from the imaginary world's fairs of [Lost World's Fairs](https://lostworldsfairs.com/): posters for places that never existed, set with conviction. Ours is a pavilion at the bottom of the sea.
 
-## A compact sort of spectacle
+## The swell as structure
 
-The compact structure takes a cue from [East River Source Control](https://ersc.io/). The layered typography and exhibition spirit are inspired by [Lost World’s Fairs](https://lostworldsfairs.com/), particularly the very different worlds of El Dorado, Atlantis, and the Moon. The drawing, layout, and typography here are an original composition.
+Every edge between paper and water is a wave. Sheets of paper are masked with a repeating swell at their top and bottom, code blocks rise out of the dark with the same profile, tickets are notched and scalloped with radial masks, and the nav links bob at different phases of a sine. The background is one WebGL draw call whose clock and swell profile come from a small Rust module; the hero sheet's edge samples that same function so paper and water move together. Page transitions are cross-document view transitions in which the new page surfaces through a rising wave mask.
 
-Doto builds the opening word from discrete pixels. Barlow Condensed supplies the dense, physical letterforms beside it. IBM Plex Mono carries labels, commands, and the working details. All fonts are self-hosted with their SIL Open Font License files.
+Other techniques on show: `mix-blend-mode: multiply` for the off-register overprint in the headline, `text-decoration-style: wavy` as the universal link underline, `::details-content` transitions in the chapter rail, `initial-letter` drop caps, `animation-timeline: view()` entrances, and `@property`-registered custom properties so the tide inside a ticket can be animated by the browser.
 
-Graphite surfaces, acid green signals, and violet annotations are specified in OKLCH. Scan texture, registration marks, and ruled bands make the page feel like one compact piece of equipment. Layouts resize through flexible bases, wrapping, `min()`, `max()`, `clamp()`, and intrinsic grids. No CSS media queries are used.
+## The type
 
-## A static publication with moving parts
+**Pilowlava**, by Anton Moglia and Jérémy Landes for Studio Triple, sets the wordmark and the headlines. It is named after pillow lava, the forms molten rock takes when it cools under water, which was too good to pass up. **Basteleur**, by Keussel, carries chapter titles and section heads with a tarot-card seriousness. **Newsreader**, by Production Type, is the reading face; its optical-size axis keeps long chapters comfortable. **Monaspace Krypton** labels the exhibits and **Monaspace Neon** sets code and the editor, both from GitHub Next. All five are self-hosted under the SIL Open Font License, subset to the Latin ranges the guide uses.
 
-[Zola](https://www.getzola.org/) publishes the Markdown, builds the navigation and table of contents, resolves internal links, and highlights code at build time. Reading and navigation work without JavaScript.
+Colour is specified in OKLCH: an abyss blue, bone paper, coral, gold, and lagoon.
 
-The examples are native custom elements. Small JavaScript modules connect browser events to compiled Rust/WebAssembly exports. The inline browser studies use semantic HTML to make their controls accessible; their captions distinguish them from the GPUI GPU renderer. Source panels show the corresponding GPUI pattern and the actual WASM implementation.
+## The exhibits
 
-The full-screen interference field is one native WebGL draw call: warped bands, halftone dots, scan texture, and a phase supplied by the same Rust/WASM module. It responds to pointer hover and keyboard focus on **Get started**. Motion pauses when the tab is hidden; reduced-motion preferences start it still. The footer has a motion control, and an etched CSS background remains when WebGL or WASM is unavailable.
+Each exhibit is a complete GPUI program compiled to WebAssembly with the framework's own web backend, drawing through WebGPU or WebGL 2. The editor is a `<textarea>` over a highlighted mirror, the arrangement David Bushell arrived at in his [text editor notes](https://dbushell.com/2026/09/01/text-editor/): the textarea keeps selection, input methods and accessibility, and the mirror carries colour and diagnostics.
 
-Syntax highlighting is the one deliberate exception to the preference for classless, span-free markup: Zola generates token spans and classes so source remains readable without a client-side highlighter. Its token colors use the same OKLCH palette as the page.
+Live editing recompiles the real thing. A small compiler daemon (`site/scripts/live-compiler.mjs`) accepts the edited program, runs `cargo build` for `wasm32-unknown-unknown` and `wasm-bindgen`, and serves the fresh bundle; the page swaps the exhibit's frame to it. An incremental build takes a few seconds. Errors come back as rustc diagnostics with line numbers, which the editor underlines in a wave.
 
-## The source material
+## The publication
 
-The earlier documentation work lives in `gpui-ce-docs`. The complete recoverable publication was in `build/html`: 38 chapters and a home page. Those chapters and their 141 code blocks were recovered into Markdown, with original navigation categories and a migration manifest. The old Typst welcome, sidebar, and disclosure patterns now have Zola equivalents.
+[Zola](https://www.getzola.org/) builds the Markdown, navigation and tables of contents, resolves internal links, and highlights code at build time with Giallo. The editor's highlighter emits the same token classes so both share one stylesheet. Reading and navigation work without JavaScript; the committed exhibit still renders, and its source is readable as a static code block.
 
-The editorial guide also adapts the repository README and release notes. The recovered technical chapters retain their source references; APIs can evolve, so check the revision used by your application.
+The earlier documentation lives in `gpui-ce-docs`. Its 38 chapters and 141 code blocks were recovered into Markdown with a migration manifest that the build verifies on every run.
 
 ## Open by default
 
-The framework’s license is [Apache–2.0](https://github.com/gpui-ce/gpui-ce/blob/main/LICENSE.md). Font licenses are distributed with the font files. There are no analytics, third-party embeds, or runtime CDN dependencies on this site.
+The framework is [Apache-2.0](https://github.com/gpui-ce/gpui-ce/blob/main/LICENSE.md). Font licences ship beside the font files. There are no analytics, third-party embeds, or runtime CDN dependencies.

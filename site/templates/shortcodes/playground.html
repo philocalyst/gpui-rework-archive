@@ -1,79 +1,41 @@
-{% component playground(example, title, number="study", label="Live study") %}
-{% if example == "counter" %}
-{% set source_path = "wasm/gpui-demo/src/main.rs" %}
-{% set source = load_data(path=source_path, format="plain", required=true) %}
-{% else %}
-{% set source_path = "static/examples/" ~ example ~ ".rs" %}
-{% set gpui_source = load_data(path=source_path, format="plain", required=true) %}
-{% set wasm_source = load_data(path="wasm/src/lib.rs", format="plain", required=true) %}
-{% set source = gpui_source ~ "\n\n// ——— COMPILED PREVIEW STATE MODULE ———\n" ~ wasm_source %}
-{% endif %}
-<gpui-playground data-example="{{ example }}" role="region" aria-label="{{ title }} interactive example">
-<header>
-<hgroup>
-<p>Example / {{ number }}</p>
-<h3>{{ title }}</h3>
-</hgroup>
-<p data-runtime>Loading Rust · WASM</p>
-</header>
-<nav aria-label="Example view">
-<button type="button" data-view="result" aria-pressed="true" disabled>Result</button>
-<button type="button" data-view="source" aria-pressed="false" disabled>Source</button>
-</nav>
-<section data-panel="result" aria-label="Interactive result">
-<figure>
-<article>
-{% if example != "counter" %}
-<header>
-<p>{{ label }}</p>
-<button type="button" data-reset disabled>Reset</button>
-</header>
-{% endif %}
-{% if example == "counter" %}
-<iframe data-gpui title="Counter rendered by GPUI in WebAssembly" src="{{ get_url(path='components/gpui-demo/index.html') }}" loading="lazy"></iframe>
-<footer data-counter-controls aria-label="Counter controls">
-<button type="button" data-delta="-1" aria-label="Decrease count" disabled>−</button>
-<output data-count aria-live="polite">0</output>
-<button type="button" data-delta="1" aria-label="Increase count" disabled>+</button>
-<button type="button" data-reset disabled>Reset</button>
-</footer>
-{% elif example == "layout" %}
-<form data-layout-controls>
-<label>Container width
-<input type="range" min="260" max="680" value="480" step="10" disabled>
-</label>
-<output data-measurement aria-live="polite">480px · compact row</output>
-</form>
-<section data-layout data-mode="1" aria-label="Responsive card arrangement">
-<article>
-<h4>Workbench</h4>
-<p>Flexible space follows the available width.</p>
-</article>
-<article>
-<h4>Inspector</h4>
-<p>The narrow state stacks both regions.</p>
-</article>
-</section>
-{% elif example == "interaction" %}
-<section data-interaction-stage aria-label="Pointer and keyboard state demonstration">
-<p>
-<button type="button" data-interaction data-state="0" disabled>Press, point, focus.</button>
-<output data-state aria-live="polite">Idle</output>
-</p>
-</section>
-{% endif %}
-</article>
-<figcaption>
-{% if example == "counter" %}
-Live GPUI rendering · Rust → WebAssembly → GPU
-{% else %}
-Rust/WASM state · Semantic HTML preview
-{% endif %}
-</figcaption>
-</figure>
-</section>
-<article data-panel="source" aria-label="GPUI Rust source">
-{{ ("```rust\n" ~ source ~ "\n```") | markdown | safe }}
-</article>
+{% component playground(example, title, number="01", label="Live exhibit") %}
+{% set source = load_data(path="wasm/gpui-demo/src/" ~ example ~ ".rs", format="plain", required=true) %}
+<gpui-playground class="exhibit" data-example="{{ example }}" role="region" aria-label="{{ title }}: live GPUI exhibit">
+  <header class="exhibit__plate">
+    <hgroup>
+      <p class="exhibit__num">Exhibit {{ number }} · {{ label }}</p>
+      <h3 class="exhibit__title">{{ title }}</h3>
+    </hgroup>
+    <p class="exhibit__runtime" data-runtime>Loading GPUI…</p>
+    <menu class="exhibit__modes" aria-label="Exhibit view">
+      <li><button type="button" data-view="result" aria-pressed="true" disabled>Result</button></li>
+      <li><button type="button" data-view="source" aria-pressed="false" disabled>Source</button></li>
+      <li><button type="button" data-view="split" aria-pressed="false" disabled>Split</button></li>
+      <li class="exhibit__expand"><button type="button" data-expand aria-pressed="false" disabled aria-label="Expand exhibit">⤢</button></li>
+    </menu>
+  </header>
+  <section class="exhibit__result" data-panel="result" aria-label="Rendered result">
+    <iframe class="exhibit__frame" data-gpui title="{{ title }}, rendered by GPUI in WebAssembly" src="{{ get_url(path='components/gpui-demo/index.html') }}#{{ example }}" loading="lazy"></iframe>
+    <footer class="exhibit__readout">
+      <output data-report aria-live="polite">Waiting for the first frame…</output>
+      <span class="exhibit__hint">Click and type inside the canvas. Everything you see is drawn by GPUI.</span>
+    </footer>
+  </section>
+  <section class="exhibit__source" data-panel="source" aria-label="Rust source" hidden>
+    <div class="editor" data-editor>
+      <textarea class="editor__input" data-source spellcheck="false" autocapitalize="off" autocorrect="off" translate="no" wrap="off" aria-label="Rust source for {{ title }}">{{ source }}</textarea>
+      <pre class="editor__view" aria-hidden="true">{{ source }}</pre>
+    </div>
+    <div class="editor__static">{{ ("```rust\n" ~ source ~ "\n```") | markdown | safe }}</div>
+    <footer class="editor__bar">
+      <button type="button" class="editor__run" data-compile disabled>Compile &amp; run <kbd>⌘↵</kbd></button>
+      <button type="button" class="editor__reset" data-reset-source disabled>Restore</button>
+      <output class="editor__status" data-status aria-live="polite">Checking for a compiler…</output>
+    </footer>
+    <details class="editor__diagnostics" data-diagnostics hidden>
+      <summary>Compiler output</summary>
+      <pre></pre>
+    </details>
+  </section>
 </gpui-playground>
 {% endcomponent playground %}

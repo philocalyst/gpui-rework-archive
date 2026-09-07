@@ -1,4 +1,27 @@
 {% extends "base.html" %}
+{% block bodyclass %}collection{% endblock bodyclass %}
 {% block main %}
-<main id="main" data-page="collection"><aside><a href="{{ get_url(path='/') }}">Home</a><small>{{ section.extra.eyebrow }}</small></aside><header><small>{{ section.pages | length }} ENTRIES / COMMUNITY EDITION</small><h1>{{ section.title }}</h1>{{ section.content | safe }}</header><ol>{% for item in section.pages %}<li><a href="{{ item.permalink }}"><small>{{ loop.index }} / {{ item.extra.category | default(value="FIELD NOTES") }}</small><h2>{{ item.title }}</h2><p>{{ item.description }}</p><strong>Read {{ 'experiment' if section.path == '/examples/' else 'chapter' }} ↗</strong></a></li>{% endfor %}</ol><aside><p>Not sure where to begin? <a href="{{ get_url(path='guide/getting-started/') }}">Start with your first window.</a></p><p>Found a rough edge? <a href="{{ config.extra.repository }}/issues">Help improve the guide ↗</a></p></aside></main>
+<main id="main" class="sheet collection__sheet">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="{{ get_url(path='/') }}">Pavilion</a><span aria-current="page">{{ section.title }}</span></nav>
+  <header class="collection__head">
+    <p class="eyebrow">{{ section.extra.eyebrow }} · {{ section.pages | length }} entries</p>
+    <h1 class="collection__title">{{ section.title }}</h1>
+    <div class="deck">{{ section.content | safe }}</div>
+  </header>
+  <ol class="catalogue">
+    {% for item in section.pages %}
+    <li class="catalogue__item"><a href="{{ item.permalink }}">
+      <span class="catalogue__num">{{ loop.index }}</span>
+      <span class="catalogue__cat">{{ item.extra.category | default(value="Field notes") | lower | title }}</span>
+      <h2 class="catalogue__title">{{ item.title }}</h2>
+      <p>{{ item.description }}</p>
+      <span class="catalogue__cta">{{ 'Open the exhibit' if section.path == '/examples/' else 'Read the chapter' }}</span>
+    </a></li>
+    {% endfor %}
+  </ol>
+  <aside class="collection__aside">
+    <p>Not sure where to begin? <a class="wavelink" href="{{ get_url(path='guide/getting-started/') }}">Start with your first window.</a></p>
+    <p>Found a rough edge? <a class="wavelink" href="{{ config.extra.repository }}/issues" rel="external">Help improve the guide ↗</a></p>
+  </aside>
+</main>
 {% endblock main %}

@@ -1,19 +1,21 @@
-/* Zola/Giallo's build-time token classes. No runtime highlighter. */
-.z-code{color:var(--ink);background:var(--wash)}
-.giallo-l{display:inline-block;min-height:1lh;width:100%}
-.giallo-ln{display:inline-block;user-select:none;margin-right:1em;min-width:3ch;text-align:right;color:var(--muted)}
-.z-hl{background:oklch(28% .06 280)}
-.z-1{color:oklch(79% .12 220)}
-.z-2{color:oklch(83% .1 220)}
-.z-3{color:oklch(82% .15 125)}
-.z-4,.z-5{color:oklch(64% .03 280)}
-.z-6{color:oklch(78% .14 305)}
-.z-7,.z-8{color:oklch(78% .15 340)}
-.z-9{color:oklch(85% .12 85)}
-.z-10,.z-11{color:var(--paper)}
-.z-bg1{background:oklch(43% .09 240)}
-.z-bg2{background:oklch(48% .16 32)}
-.z-bg3{background:oklch(25% .04 150)}
-.z-bg4{background:oklch(25% .04 65)}
-.z-bg5{background:oklch(25% .04 32)}
-.z-b{font-weight:500}.z-i{font-style:italic}.z-u{text-decoration:underline}.z-s{text-decoration:line-through}.z-us{text-decoration:underline line-through}
+/* Zola/Giallo's build-time token classes, shared with the editor's highlighter.
+   z-1 constants and numbers · z-2 strings · z-4/z-5 comments · z-6 identifiers
+   z-8 keywords and operators · z-9 macros, lifetimes and attributes. */
+.z-code { color: var(--paper); background: var(--abyss); }
+.giallo-l { display: inline-block; min-height: 1lh; width: 100%; }
+.giallo-ln { display: inline-block; user-select: none; margin-right: 1em; min-width: 3ch; text-align: right; color: oklch(55% 0.04 250); }
+.z-hl { background: oklch(28% 0.07 250); }
+.z-1 { color: oklch(84% 0.13 85); }
+.z-2 { color: oklch(80% 0.12 185); }
+.z-3 { color: oklch(78% 0.15 150); }
+.z-4, .z-5 { color: oklch(62% 0.035 245); font-style: italic; }
+.z-6 { color: oklch(93% 0.02 90); }
+.z-7, .z-8 { color: oklch(74% 0.17 32); }
+.z-9 { color: oklch(78% 0.13 300); }
+.z-10, .z-11 { color: var(--paper); }
+.z-bg1 { background: oklch(40% 0.09 240); }
+.z-bg2 { background: oklch(46% 0.16 32); }
+.z-bg3 { background: oklch(28% 0.05 150); }
+.z-bg4 { background: oklch(28% 0.05 65); }
+.z-bg5 { background: oklch(28% 0.05 32); }
+.z-b { font-weight: 700; } .z-i { font-style: italic; } .z-u { text-decoration: underline; } .z-s { text-decoration: line-through; } .z-us { text-decoration: underline line-through; }

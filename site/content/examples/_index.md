@@ -1,10 +1,10 @@
 +++
-title = "The working collection"
-description = "Small interactive experiments in state, layout, and input. Read the source. Turn the controls. See what changes."
+title = "The exhibits"
+description = "Small, editable GPUI programs. Read the source, change it, compile it, and watch the GPU redraw."
 sort_by = "weight"
 template = "section.html"
 page_template = "page.html"
 [extra]
-eyebrow = "Observe / Adjust / Repeat"
+eyebrow = "Observe · Edit · Compile"
 +++
-Good documentation has moving parts. These small, annotated experiments put the mechanism beside the result, so you can see an idea work before you put it to work.
+Good documentation has moving parts. Each exhibit is a complete GPUI program compiled to WebAssembly. Open **Source**, change a colour or a number, and run the compiler: the rebuild is real Rust, and the result is drawn by GPUI's own renderer.

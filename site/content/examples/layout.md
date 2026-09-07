@@ -1,28 +1,26 @@
 +++
-title = "Space is a material."
-description = "Move the constraint. Watch a composition reorganize itself around the room it actually has."
+title = "Layout that answers to its container."
+description = "One arrangement decision, expressed as a function of width, drives two panels through three states."
 weight = 2
 [extra]
-category = "LAYOUT / CONSTRAINTS"
+category = "LAYOUT"
 playground = true
 +++
 
-An interface is always negotiating with a rectangle. This study makes that constraint visible: adjust the container width and observe how the workbench and inspector share space.
+Responsive layout in GPUI is ordinary Rust: measure, decide, then style. The `arrangement` function below turns a width into one of three states, and `render` reads that state to choose a flex direction and a gap.
 
-{{ <playground example="layout" title="A room of its own" number="02" label="Layout constraints" /> }}
+{{ <playground example="layout" title="The workbench" number="02" label="Flex and gaps" /> }}
 
-## Read the arrangement
+## What to notice
 
-The slider supplies the available width. Rust/WASM chooses the study’s arrangement and the preview applies it. This deliberately small model exposes a layout decision; GPUI’s actual layout engine has a much richer set of constraints.
+The buttons only change `self.width`. Everything else, the column-versus-row decision, the gap, the caption in the plate, is derived inside `render`. There is no second source of truth to keep in sync.
 
-Move slowly through the range. Watch when the two regions stack and when they can sit alongside each other. The range control also works with the arrow keys.
+`when(condition, |element| …)` applies a style only when the condition holds. It is the idiom for conditional layout throughout the framework.
 
-## Constraints before coordinates
+## Try it deliberately
 
-In GPUI, start with a parent’s layout mode and the dimensions its children need. Use growth, shrink, padding, and gap to describe relationships. Fixed coordinates are useful when you need them; they should be a decision rather than the default.
+1. Switch between the three widths and watch the panels reflow.
+2. Open **Source** and move the `340.` breakpoint to `500.`, then compile. Compact now stacks.
+3. Replace `.gap(px(gap))` with `.gap_8()` to see the fixed Tailwind-style spacing helpers.
 
-The documentation site itself uses intrinsic CSS layout: wrapping flex items and automatically fitted grid columns, without viewport media queries.
-
-## Keep going
-
-The [layout reference](@/guide/rendering/layout.md) explains the framework’s layout vocabulary. The [styling chapter](@/guide/rendering/styling.md) covers the fluent methods that shape an element’s appearance.
+Read [Layout basics](@/guide/rendering/layout.md) for the full flex and grid vocabulary, and [`container_query`](@/guide/elements/advanced.md) for measuring the available space instead of choosing it.

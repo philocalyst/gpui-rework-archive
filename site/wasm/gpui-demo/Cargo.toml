@@ -12,6 +12,6 @@ path = "src/main.rs"
 gpui = { path = "../../../crates/gpui", package = "gpui-ce", default-features = false }
 gpui_web = { path = "../../../crates/gpui_web", package = "gpui_ce_web", default-features = false }
 wasm-bindgen = "0.2"
-web-sys = { version = "0.3", features = ["console", "EventTarget", "MessageEvent", "Window"] }
+web-sys = { version = "0.3", features = ["console", "EventTarget", "Location", "MessageEvent", "Window"] }
 
 [workspace]

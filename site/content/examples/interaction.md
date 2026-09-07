@@ -1,24 +1,26 @@
 +++
-title = "The difference is in the response."
-description = "A control is a conversation: idle, pointed at, focused, and pressed."
+title = "One element, four moods."
+description = "Hover, press, release, and keyboard activation move a small state machine that the visuals are derived from."
 weight = 3
 [extra]
-category = "INPUT / FEEDBACK"
+category = "INTERACTIVITY"
 playground = true
 +++
 
-A button has more than one appearance because a person has more than one way to reach it. This experiment makes those states explicit.
+Interaction in GPUI is a set of listeners on an element. This exhibit wires `on_hover`, `on_mouse_down`, `on_click`, and `on_key_down` to a single `Mood`, and derives colour and lift from that mood every frame.
 
-{{ <playground example="interaction" title="A responsive character" number="03" label="Input states" /> }}
+{{ <playground example="interaction" title="The specimen" number="03" label="Pointer and keyboard" /> }}
 
-## Give it your attention
+## What to notice
 
-Hover the control. Press it and hold. Move the pointer away. Now use Tab to focus it and hold Space. The label describes the current state, and the visual treatment follows it.
+The listeners never set a colour. They set a mood, call `cx.notify()`, and let `render` translate mood into paint. That separation is what keeps hover, press, and keyboard activation consistent with each other.
 
-Rust/WASM resolves the input flags into a state. The browser supplies native keyboard and pointer events, with semantic controls that remain part of its accessibility tree.
+`focusable()` makes the element part of the tab order, so Space and Enter can activate it without a pointer.
 
-## Focus is part of the design
+## Try it deliberately
 
-Pointer hover cannot stand in for keyboard focus. In GPUI, use a focus handle and track focus deliberately. A focus indicator tells a keyboard user where the next action will land.
+1. Hover, then press and release. The mood readout above the canvas follows along.
+2. Click the canvas once, press Tab until the specimen is focused, and press Space.
+3. Open **Source** and give `Mood::Pressed` a different `fill`, then compile.
 
-Read [Focus](@/guide/interactivity/focus.md) for the framework’s focus model and [Events](@/guide/interactivity/events.md) for dispatch and listeners. For application commands that should work from more than one control, continue to [Actions & Keymap](@/guide/interactivity/actions-keymap.md).
+Read [Events](@/guide/interactivity/events.md) and [Focus](@/guide/interactivity/focus.md) for the complete listener catalogue.

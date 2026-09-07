@@ -1,11 +1,12 @@
 +++
-title = "Make contact."
-description = "GPUI Community Edition. Independent interface machinery. Build expressive, GPU-accelerated interfaces in Rust."
+title = "Every pixel, on purpose."
+description = "GPUI Community Edition. A Rust framework for interfaces with presence: native speed, expressive elements, and your ideas all the way down to the GPU."
 [extra]
-kicker = "SOFTWARE SHOULD FEEL LIKE SOMETHING."
-headline = "Make"
-headline_end = "contact."
-intro = "A Rust framework for interfaces with presence. Native speed. Expressive elements. Your ideas, all the way down to the GPU."
+headline_1 = "Every"
+headline_2 = "pixel,"
+headline_3 = "on purpose."
+intro = "GPUI is a Rust framework for interfaces with presence. Compose elements the way the web taught you, keep state in entities the borrow checker understands, and let the GPU draw every frame."
+marquee = "RUST · ENTITIES · ELEMENTS · FLEX · TEXT · PATHS · METAL · VULKAN · DIRECTX · WEBGPU · COMMUNITY EDITION · "
 +++
 
-{{ <playground example="counter" title="State → pixels" number="01" label="Live GPUI / WASM" /> }}
+{{ <playground example="counter" title="The counter" number="01" label="State → pixels" /> }}
