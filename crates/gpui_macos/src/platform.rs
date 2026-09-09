@@ -1015,6 +1015,13 @@ impl Platform for MacPlatform {
         }
     }
 
+    fn prevent_idle_sleep(&self, reason: &str) -> Task<Result<ActivityGuard>> {
+        Task::ready(Ok(MacActivity::begin(
+            reason,
+            NSActivityOptions::UserInitiated,
+        )))
+    }
+
     fn show_system_notification(&self, notification: gpui::SystemNotification) {
         let mut state = self.0.lock();
         let executor = state.foreground_executor.clone();

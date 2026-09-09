@@ -1,4 +1,4 @@
-use crate::{App, PlatformDispatcher, PlatformScheduler};
+use crate::{ActivityGuard, App, PlatformDispatcher, PlatformScheduler};
 #[cfg(not(target_family = "wasm"))]
 use futures::channel::mpsc;
 use futures::prelude::*;

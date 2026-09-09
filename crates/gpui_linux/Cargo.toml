@@ -127,5 +127,8 @@ xim = { version = "0.4.0-zed", package = "zed-xim", features = [
 ], optional = true }
 x11-clipboard = { version = "0.9.3", optional = true }
 
+[target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dev-dependencies]
+gpui = { workspace = true, features = ["test-support"] }
+
 [package.metadata.cargo-shear]
 ignored = ["bitflags", "scap", "x11-clipboard"]
