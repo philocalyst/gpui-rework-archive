@@ -750,6 +750,10 @@ impl Platform for MacPlatform {
     }
 
     fn register_url_scheme(&self, scheme: &str) -> Task<anyhow::Result<()>> {
+        use block2::RcBlock;
+        use objc2_app_kit::NSWorkspace;
+        use objc2_foundation::{NSBundle, NSError, NSString};
+
         // API only available post Monterey
         // https://developer.apple.com/documentation/appkit/nsworkspace/3753004-setdefaultapplicationaturl
         let (done_tx, done_rx) = oneshot::channel();
@@ -794,8 +798,7 @@ impl Platform for MacPlatform {
             );
         }
 
-        self.background_executor()
-            .spawn(async { done_rx.await.map_err(|e| anyhow!(e))? })
+        self.background_executor().spawn(async { done_rx.await? })
     }
 
     fn on_open_urls(&self, callback: Box<dyn FnMut(Vec<String>)>) {
