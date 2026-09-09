@@ -1,11 +1,10 @@
 use crate::{
     AnyElement, AnyEntity, App, AppContext, Asset, AssetLogger, Bounds, Element, ElementId, Entity,
     GlobalElementId, ImageAssetLoader, ImageCacheError, InspectorElementId, IntoElement, LayoutId,
-    ParentElement, Pixels, RenderImage, Resource, Style, StyleRefinement, Styled, Task, Window,
-    hash,
+    ParentElement, Pixels, RenderImage, Resource, Style, StyleRefinement, Styled, Window, hash,
 };
 
-use futures::{FutureExt, future::Shared};
+use crate::asset_cache::CachedLoad;
 use refineable::Refineable;
 use smallvec::SmallVec;
 use std::{collections::HashMap, fmt, sync::Arc};
@@ -197,12 +196,8 @@ pub enum ImageCacheItem {
 
 impl std::fmt::Debug for ImageCacheItem {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let status = match self {
-            ImageCacheItem::Loading(_) => &"Loading...".to_string(),
-            ImageCacheItem::Loaded(render_image) => &format!("{:?}", render_image),
-        };
         f.debug_struct("ImageCacheItem")
-            .field("status", status)
+            .field("result", &self.get())
             .finish()
     }
 }
@@ -284,7 +279,7 @@ impl RetainAllImageCache {
     pub fn new(cx: &mut App) -> Entity<Self> {
         let e = cx.new(|_cx| RetainAllImageCache(HashMap::new()));
         cx.observe_release(&e, |image_cache, cx| {
-            for (_, mut item) in std::mem::replace(&mut image_cache.0, HashMap::new()) {
+            for (_, item) in std::mem::replace(&mut image_cache.0, HashMap::new()) {
                 if let Some(Ok(image)) = item.get() {
                     cx.drop_image(image, None);
                 }
@@ -306,34 +301,17 @@ impl RetainAllImageCache {
     ) -> Option<Result<Arc<RenderImage>, ImageCacheError>> {
         let hash = hash(source);
 
-        if let Some(item) = self.0.get_mut(&hash) {
-            return item.get();
-        }
-
-        let fut = AssetLogger::<ImageAssetLoader>::load(source.clone(), cx);
-        let task = cx.background_executor().spawn(fut).shared();
-        self.0.insert(hash, ImageCacheItem::Loading(task.clone()));
-
-        let entity = window.current_view();
-        window
-            .spawn(cx, {
-                async move |cx| {
-                    _ = task.await;
-                    cx.on_next_frame(move |_, cx| {
-                        cx.notify(entity);
-                    });
-                }
-            })
-            .detach();
-
-        None
+        self.0
+            .entry(hash)
+            .or_insert_with(|| ImageCacheItem::new(source, cx))
+            .use_image(window)
     }
 
     /// Removes every entry and drops the decoded images from the windows.
     ///
     /// A load still in progress is forgotten, so the next request for its source starts again.
     pub fn clear(&mut self, window: &mut Window, cx: &mut App) {
-        for (_, mut item) in std::mem::replace(&mut self.0, HashMap::new()) {
+        for (_, item) in std::mem::replace(&mut self.0, HashMap::new()) {
             if let Some(Ok(image)) = item.get() {
                 cx.drop_image(image, Some(window));
             }
@@ -344,7 +322,7 @@ impl RetainAllImageCache {
     /// loads it again.
     pub fn remove(&mut self, source: &Resource, window: &mut Window, cx: &mut App) {
         let hash = hash(source);
-        if let Some(mut item) = self.0.remove(&hash)
+        if let Some(item) = self.0.remove(&hash)
             && let Some(Ok(image)) = item.get()
         {
             cx.drop_image(image, Some(window));
