@@ -2288,6 +2288,9 @@ pub(crate) type MouseMoveListener =
 pub(crate) type MouseExitListener =
     Box<dyn Fn(&MouseExitEvent, DispatchPhase, &Hitbox, &mut Window, &mut App) + 'static>;
 
+pub(crate) type FileDropExitListener =
+    Box<dyn Fn(&FileDropEvent, DispatchPhase, &Hitbox, &mut Window, &mut App) + 'static>;
+
 pub(crate) type ScrollWheelListener =
     Box<dyn Fn(&ScrollWheelEvent, DispatchPhase, &Hitbox, &mut Window, &mut App) + 'static>;
 
@@ -3036,6 +3039,7 @@ pub struct Interactivity {
     pub(crate) mouse_pressure_listeners: Vec<MousePressureListener>,
     pub(crate) mouse_move_listeners: Vec<MouseMoveListener>,
     pub(crate) mouse_exit_listeners: Vec<MouseExitListener>,
+    pub(crate) file_drop_exit_listeners: Vec<FileDropExitListener>,
     pub(crate) scroll_wheel_listeners: Vec<ScrollWheelListener>,
     pub(crate) pinch_listeners: Vec<PinchListener>,
     pub(crate) key_down_listeners: Vec<KeyDownListener>,
@@ -3340,6 +3344,7 @@ impl Interactivity {
             || !self.mouse_down_listeners.is_empty()
             || !self.mouse_move_listeners.is_empty()
             || !self.mouse_exit_listeners.is_empty()
+            || !self.file_drop_exit_listeners.is_empty()
             || !self.click_listeners.is_empty()
             || !self.aux_click_listeners.is_empty()
             || !self.scroll_wheel_listeners.is_empty()
@@ -3742,6 +3747,13 @@ impl Interactivity {
         for listener in self.mouse_exit_listeners.drain(..) {
             let hitbox = hitbox.clone();
             window.on_mouse_event(move |event: &MouseExitEvent, phase, window, cx| {
+                listener(event, phase, &hitbox, window, cx);
+            })
+        }
+
+        for listener in self.file_drop_exit_listeners.drain(..) {
+            let hitbox = hitbox.clone();
+            window.on_mouse_event(move |event: &FileDropEvent, phase, window, cx| {
                 listener(event, phase, &hitbox, window, cx);
             })
         }
