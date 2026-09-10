@@ -750,8 +750,6 @@ impl Platform for MacPlatform {
     }
 
     fn register_url_scheme(&self, scheme: &str) -> Task<anyhow::Result<()>> {
-        use block2::RcBlock;
-        use objc2_app_kit::NSWorkspace;
         use objc2_foundation::{NSBundle, NSError, NSString};
 
         // API only available post Monterey
@@ -809,6 +807,9 @@ impl Platform for MacPlatform {
         &self,
         options: PathPromptOptions,
     ) -> oneshot::Receiver<Result<Option<Vec<PathBuf>>>> {
+        use objc2_foundation::NSString;
+
+        let marker = self.1;
         let (done_tx, done_rx) = oneshot::channel();
         self.foreground_executor()
             .spawn(async move {
@@ -846,9 +847,12 @@ impl Platform for MacPlatform {
                     if let Some(prompt) = options.prompt {
                         panel.setPrompt(Some(&ns_string(&prompt)));
                     }
+                });
 
                     panel.beginWithCompletionHandler(&block);
                 }
+
+                panel.beginWithCompletionHandler(&handler);
             })
             .detach();
         done_rx
@@ -859,9 +863,12 @@ impl Platform for MacPlatform {
         directory: &Path,
         suggested_name: Option<&str>,
     ) -> oneshot::Receiver<Result<Option<PathBuf>>> {
-        let directory = directory.to_owned();
-        let suggested_name = suggested_name.map(|s| s.to_owned());
+        use objc2_foundation::{NSString, NSURL};
+
+        let url = NSURL::from_directory_path(directory);
+        let suggested_name = suggested_name.map(NSString::from_str);
         let (done_tx, done_rx) = oneshot::channel();
+        let marker = self.1;
         self.foreground_executor()
             .spawn(async move {
                 {
@@ -899,21 +906,12 @@ impl Platform for MacPlatform {
                                     // This is conditional on OS version because I'd like to get rid of it, so that
                                     // you can manually create a file called `a.sql.s`. That said it seems better
                                     // to break that use-case than breaking `a.sql`.
-                                    if chunks.len() == 3
-                                        && chunks[1].starts_with(chunks[2])
+                                    if let &[_, second, third] = chunks.as_slice()
+                                        && second.starts_with(third)
                                         && Self::os_version() >= Version::new(15, 0, 0)
                                     {
-                                        let new_filename = OsStr::from_bytes(
-                                            &filename.as_bytes()
-                                                [..chunks[0].len() + 1 + chunks[1].len()],
-                                        )
-                                        .to_owned();
-                                        result.set_file_name(&new_filename);
+                                        path.set_extension("");
                                     }
-                                    result
-                                })
-                            }
-                        }
 
                         if let Some(done_tx) = done_tx.take() {
                             let _ = done_tx.send(Ok(result));
