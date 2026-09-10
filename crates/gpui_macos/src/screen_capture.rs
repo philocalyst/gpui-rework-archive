@@ -205,6 +205,7 @@ fn screen_id_to_human_label() -> HashMap<CGDirectDisplayID, ScreenMeta> {
             },
         );
     }
+
     map
 }
 
@@ -273,6 +274,8 @@ impl StreamDelegate {
         // SAFETY: NSObject's `init` is its designated initializer.
         unsafe { msg_send![super(this), init] }
     }
+
+    rx
 }
 
 define_class!(
