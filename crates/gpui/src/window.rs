@@ -2172,6 +2172,22 @@ impl Window {
             }
         }));
         invalidator.set_platform_waker(platform_window.frame_waker());
+        platform_window.on_visual_viewport_changed(Box::new({
+            let mut cx = cx.to_async();
+            move || {
+                handle
+                    .update(&mut cx, |_, window, _| window.refresh())
+                    .log_err();
+            }
+        }));
+        platform_window.on_insets_changed(Box::new({
+            let mut cx = cx.to_async();
+            move |_| {
+                handle
+                    .update(&mut cx, |_, window, _| window.refresh())
+                    .log_err();
+            }
+        }));
         platform_window.on_resize(Box::new({
             let mut cx = cx.to_async();
             move |_, _| {
@@ -3750,6 +3766,9 @@ impl Window {
         // This ensures that multiple test Apps have isolated arenas.
         let arena_scope = ElementArenaScope::enter(&cx.element_arena);
 
+        if self.platform_window.prepare_frame() {
+            self.refresh();
+        }
         self.invalidate_entities();
         cx.entities.clear_accessed();
         debug_assert!(self.rendered_entity_stack.is_empty());
@@ -9260,6 +9279,78 @@ mod tests {
             glyph_ids.starts_with(&[GlyphId(1), GlyphId(2)]),
             "unexpected rasterization sequence: {glyph_ids:?}"
         );
+    }
+
+    #[gpui::test]
+    fn test_fully_visible_bounds_preserve_layout_viewport(cx: &mut TestAppContext) {
+        let window = cx.add_window(|_, _| EmptyView);
+        let mut platform_window = cx.test_window(window.into());
+        platform_window.simulate_resize(size(px(400.), px(800.)));
+        window
+            .update(cx, |_, window, _| {
+                assert_eq!(
+                    window.visual_viewport_bounds(),
+                    Bounds::new(Point::default(), size(px(400.), px(800.)))
+                );
+                assert_eq!(
+                    window.fully_visible_bounds(),
+                    window.visual_viewport_bounds()
+                );
+            })
+            .unwrap();
+
+        platform_window.simulate_frame_request(RequestFrameOptions::default());
+        let wakes = platform_window.frame_wake_count();
+        let visual_bounds = Bounds::new(point(px(10.), px(40.)), size(px(380.), px(460.)));
+        platform_window.simulate_visual_viewport_change(visual_bounds);
+        assert!(platform_window.frame_wake_count() > wakes);
+        platform_window.simulate_frame_request(RequestFrameOptions::default());
+        let wakes = platform_window.frame_wake_count();
+        platform_window.simulate_insets_change(crate::WindowInsets {
+            safe_area: crate::Edges {
+                top: px(60.),
+                right: px(20.),
+                bottom: px(30.),
+                left: px(-10.),
+            },
+            ime: crate::Edges {
+                bottom: px(350.),
+                ..Default::default()
+            },
+        });
+        assert!(platform_window.frame_wake_count() > wakes);
+        window
+            .update(cx, |_, window, _| {
+                assert_eq!(window.viewport_size(), size(px(400.), px(800.)));
+                assert_eq!(window.visual_viewport_bounds(), visual_bounds);
+                assert_eq!(
+                    window.fully_visible_bounds(),
+                    Bounds::new(point(px(10.), px(60.)), size(px(370.), px(390.)))
+                );
+                window.request_virtual_keyboard();
+                window.dismiss_virtual_keyboard();
+                assert_eq!(window.viewport_size(), size(px(400.), px(800.)));
+            })
+            .unwrap();
+        assert_eq!(platform_window.virtual_keyboard_requests(), 1);
+        assert_eq!(platform_window.virtual_keyboard_dismissals(), 1);
+
+        platform_window.simulate_insets_change(crate::WindowInsets {
+            safe_area: crate::Edges {
+                top: px(900.),
+                left: px(500.),
+                ..Default::default()
+            },
+            ..Default::default()
+        });
+        window
+            .update(cx, |_, window, _| {
+                assert_eq!(
+                    window.fully_visible_bounds().size,
+                    size(Pixels::ZERO, Pixels::ZERO)
+                );
+            })
+            .unwrap();
     }
 
     struct EmptyView;

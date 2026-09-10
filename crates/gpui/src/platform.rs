@@ -1073,9 +1073,9 @@ impl WindowInsets {
 /// A change in the state of the focused text input.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum TextInputStateChange {
-    /// An editable element gained focus.
+    /// The window changed from having no active text input to having one.
     FocusGained,
-    /// The focused editable element lost focus.
+    /// The window no longer has an active text input.
     FocusLost,
     /// The selection or caret moved
     SelectionChanged,

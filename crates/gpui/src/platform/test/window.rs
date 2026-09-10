@@ -36,6 +36,12 @@ pub(crate) struct TestWindowState {
     active_status_change_callback: Option<Box<dyn FnMut(bool)>>,
     hover_status_change_callback: Option<Box<dyn FnMut(bool)>>,
     resize_callback: Option<Box<dyn FnMut(Size<Pixels>, f32)>>,
+    visual_viewport: Option<Bounds<Pixels>>,
+    visual_viewport_callback: Option<Box<dyn FnMut()>>,
+    insets: WindowInsets,
+    insets_callback: Option<Box<dyn FnMut(WindowInsets)>>,
+    virtual_keyboard_requests: usize,
+    virtual_keyboard_dismissals: usize,
     moved_callback: Option<Box<dyn FnMut()>>,
     appearance_change_callback: Option<Box<dyn FnMut()>>,
     request_frame_callback: Option<Box<dyn FnMut(RequestFrameOptions)>>,
@@ -111,6 +117,12 @@ impl TestWindow {
             active_status_change_callback: None,
             hover_status_change_callback: None,
             resize_callback: None,
+            visual_viewport: None,
+            visual_viewport_callback: None,
+            insets: WindowInsets::default(),
+            insets_callback: None,
+            virtual_keyboard_requests: 0,
+            virtual_keyboard_dismissals: 0,
             moved_callback: None,
             appearance_change_callback: None,
             request_frame_callback: None,
@@ -271,6 +283,33 @@ impl TestWindow {
 }
 
 impl PlatformWindow for TestWindow {
+    fn visual_viewport_bounds(&self) -> Bounds<Pixels> {
+        let state = self.0.lock();
+        state
+            .visual_viewport
+            .unwrap_or_else(|| Bounds::new(Point::default(), state.bounds.size))
+    }
+
+    fn on_visual_viewport_changed(&self, callback: Box<dyn FnMut()>) {
+        self.0.lock().visual_viewport_callback = Some(callback);
+    }
+
+    fn insets(&self) -> WindowInsets {
+        self.0.lock().insets.clone()
+    }
+
+    fn on_insets_changed(&self, callback: Box<dyn FnMut(WindowInsets)>) {
+        self.0.lock().insets_callback = Some(callback);
+    }
+
+    fn show_soft_keyboard(&self) {
+        self.0.lock().virtual_keyboard_requests += 1;
+    }
+
+    fn hide_soft_keyboard(&self) {
+        self.0.lock().virtual_keyboard_dismissals += 1;
+    }
+
     fn bounds(&self) -> Bounds<Pixels> {
         self.0.lock().bounds
     }
