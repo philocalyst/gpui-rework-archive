@@ -1898,6 +1898,7 @@ pub struct InteractiveTextState {
     mouse_down_index: Rc<Cell<Option<usize>>>,
     hovered_index: Rc<Cell<Option<usize>>>,
     active_tooltip: Rc<RefCell<Option<ActiveTooltip>>>,
+    long_press_tooltip_active: Rc<Cell<bool>>,
 }
 
 impl InteractiveText {
@@ -2022,6 +2023,7 @@ impl Element for InteractiveText {
                             set_tooltip_on_window(&interactive_state.active_tooltip, window);
                     } else {
                         // If there is no longer a tooltip builder, remove the active tooltip.
+                        interactive_state.long_press_tooltip_active.set(false);
                         interactive_state.active_tooltip.take();
                     }
                 }
@@ -2170,6 +2172,7 @@ impl Element for InteractiveText {
                         build_tooltip,
                         check_is_hovered,
                         check_is_hovered_during_prepaint,
+                        interactive_state.long_press_tooltip_active.clone(),
                         None,
                         window,
                     );
