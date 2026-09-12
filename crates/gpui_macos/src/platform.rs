@@ -201,8 +201,9 @@ pub(crate) struct MacPlatformState {
     reopen: Option<Box<dyn FnMut()>>,
     on_keyboard_layout_change: Option<Box<dyn FnMut()>>,
     on_thermal_state_change: Option<Box<dyn FnMut()>>,
+    on_system_sleep: Option<Box<dyn FnMut()>>,
     on_system_wake: Option<Box<dyn FnMut()>>,
-    system_wake_observer_registered: bool,
+    system_power_observers_registered: bool,
     quit: Option<Box<dyn FnMut() -> bool>>,
     menu_command: Option<Box<dyn FnMut(&dyn Action)>>,
     validate_menu_command: Option<Box<dyn FnMut(&dyn Action) -> bool>>,
@@ -252,8 +253,9 @@ impl MacPlatform {
             app_delegate: None,
             on_keyboard_layout_change: None,
             on_thermal_state_change: None,
+            on_system_sleep: None,
             on_system_wake: None,
-            system_wake_observer_registered: false,
+            system_power_observers_registered: false,
             menus: None,
             keyboard_mapper,
             cursor_visible: Arc::new(AtomicBool::new(true)),
@@ -488,6 +490,28 @@ impl MacPlatform {
             version.minorVersion as u64,
             version.patchVersion as u64,
         )
+    }
+
+    // Before the app finishes launching there is no delegate yet;
+    // `did_finish_launching` registers the observers then.
+    fn ensure_system_power_observers(&self) {
+        if self.0.lock().system_power_observers_registered {
+            return;
+        }
+
+        // The shared application must be created through `APP_CLASS`, or `run`
+        // finds a plain `NSApplication` without the `platform` ivar; only the
+        // delegate lookup goes through the typed binding.
+        // SAFETY: APP_CLASS is registered during startup and `sharedApplication`
+        // returns a live NSApplication instance.
+        let delegate = unsafe {
+            let app: id = msg_send![APP_CLASS, sharedApplication];
+            (*(app as *const objc2_app_kit::NSApplication)).delegate()
+        };
+        if let Some(delegate) = delegate {
+            register_system_power_observers(delegate.as_ref());
+            self.0.lock().system_power_observers_registered = true;
+        }
     }
 }
 
@@ -991,13 +1015,10 @@ impl Platform for MacPlatform {
         self.0.lock().on_thermal_state_change = Some(callback);
     }
 
-    fn on_system_wake(&self, callback: Box<dyn FnMut()>) {
-        let mut state = self.0.lock();
-        state.on_system_wake = Some(callback);
-        if state.system_wake_observer_registered {
-            return;
-        }
-        drop(state);
+    fn on_system_sleep(&self, callback: Box<dyn FnMut()>) {
+        self.0.lock().on_system_sleep = Some(callback);
+        self.ensure_system_power_observers();
+    }
 
         let delegate = self.0.lock().app_delegate.clone();
         if let Some(delegate) = delegate {

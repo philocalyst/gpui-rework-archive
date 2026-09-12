@@ -34,6 +34,8 @@ pub(crate) struct TestWindowState {
     hit_test_window_control_callback: Option<Box<dyn FnMut() -> Option<WindowControlArea>>>,
     input_callback: Option<Box<dyn FnMut(PlatformInput) -> DispatchEventResult>>,
     active_status_change_callback: Option<Box<dyn FnMut(bool)>>,
+    visibility: WindowVisibility,
+    visibility_callback: Option<Box<dyn FnMut(WindowVisibility)>>,
     hover_status_change_callback: Option<Box<dyn FnMut(bool)>>,
     resize_callback: Option<Box<dyn FnMut(Size<Pixels>, f32)>>,
     visual_viewport: Option<Bounds<Pixels>>,
@@ -115,6 +117,8 @@ impl TestWindow {
             hit_test_window_control_callback: None,
             input_callback: None,
             active_status_change_callback: None,
+            visibility: WindowVisibility::Visible,
+            visibility_callback: None,
             hover_status_change_callback: None,
             resize_callback: None,
             visual_viewport: None,
@@ -405,6 +409,10 @@ impl PlatformWindow for TestWindow {
         false
     }
 
+    fn visibility(&self) -> WindowVisibility {
+        self.0.lock().visibility
+    }
+
     fn is_hovered(&self) -> bool {
         false
     }
@@ -489,6 +497,10 @@ impl PlatformWindow for TestWindow {
 
     fn on_active_status_change(&self, callback: Box<dyn FnMut(bool)>) {
         self.0.lock().active_status_change_callback = Some(callback)
+    }
+
+    fn on_visibility_change(&self, callback: Box<dyn FnMut(WindowVisibility)>) {
+        self.0.lock().visibility_callback = Some(callback);
     }
 
     fn on_hover_status_change(&self, callback: Box<dyn FnMut(bool)>) {
