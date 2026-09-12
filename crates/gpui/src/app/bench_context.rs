@@ -2,8 +2,11 @@ use std::{
     cell::{OnceCell, RefCell},
     future::Future,
     rc::Rc,
-    sync::Arc,
-    time::Duration,
+    sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering},
+    },
+    time::{Duration, Instant},
 };
 
 use anyhow::{Result, anyhow};
@@ -125,6 +128,10 @@ impl BenchReport {
     /// Don't pass `0`. [`BenchReport::foreground_work`] and [`BenchReport::print`] divide by
     /// this value when they have samples to report, so they panic with `0`.
     pub fn with_frame_budget_nanos(frame_budget_nanos: u128) -> Self {
+        assert!(
+            frame_budget_nanos > 0,
+            "frame budget must be at least one nanosecond"
+        );
         Self {
             frame_snapshot: Rc::new(RefCell::new(WindowFrameSnapshot::new())),
             frame_budget_nanos,
@@ -453,6 +460,7 @@ impl<Output> Drop for MeasuredTaskOutput<Output> {
     }
 }
 
+#[cfg(test)]
 fn run_task_to_completion<Output>(
     foreground_executor: &ForegroundExecutor,
     task: Task<Output>,
@@ -599,11 +607,23 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
     ///
     /// Timers that aren't due yet are not waited for. See [`ThreadedDispatcher::run_until_idle`].
     pub fn run_until_idle(&self) {
-        self.background_executor
+        let dispatcher = self
+            .background_executor
             .dispatcher()
             .as_threaded()
-            .expect("validated in BenchAppContext::build")
-            .run_until_idle();
+            .expect("validated in BenchAppContext::build");
+        dispatcher.run_until_idle_with(|| {
+            let ran_tasks = dispatcher.run_ready_main_tasks_with(
+                || true,
+                || {
+                    self.dispatch_pending_frames(|| true);
+                },
+            );
+            if !ran_tasks {
+                self.dispatch_pending_frames(|| true);
+            }
+            ran_tasks
+        });
     }
 
     /// Runs queued work and update cycles until neither makes progress.
@@ -619,6 +639,7 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
         loop {
             self.run_until_idle();
             self.update(|_| ());
+            self.dispatch_pending_frames(|| true);
             if dispatcher.is_idle() {
                 return;
             }
@@ -634,7 +655,7 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
             .dispatcher()
             .as_threaded()
             .expect("validated in BenchAppContext::build")
-            .run_until(ready)
+            .run_until_with_frames(ready, || self.dispatch_pending_frames(|| true))
     }
 
     /// Creates a collector observing foreground journal entries recorded
@@ -654,8 +675,12 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
     /// `bench_iter` is called from inside another measurement.
     pub fn bench_iter(&mut self, mut benchmark: impl FnMut(&mut Self)) {
         let bencher = self.take_bencher("bench_iter");
+        self.dispatch_pending_frames(|| true);
         let collector = TraceScope::start(self.foreground_journal_collector());
-        let mut benchmark = || benchmark(self);
+        let mut benchmark = || {
+            benchmark(self);
+            self.dispatch_pending_frames(|| true);
+        };
         bencher.iter(&mut benchmark);
         let events = collector.finish();
         self.report.record_frame_timings(events.frame_events.iter());
@@ -728,8 +753,10 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
                 // next setup, so per-iteration state cannot accumulate
                 // across a measurement.
                 setup_context.settle();
+                let input = setup(&mut setup_context);
+                setup_context.dispatch_pending_frames(|| true);
                 MeasuredTaskInput {
-                    input: setup(&mut setup_context),
+                    input,
                     trace_scope: Some(TraceScope::start(
                         setup_context.foreground_journal_collector(),
                     )),
@@ -737,7 +764,16 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
             },
             |measured_input| {
                 let task = benchmark(&mut measured_input.input, &mut benchmark_context);
-                let output = run_task_to_completion(&foreground_executor, task);
+                benchmark_context.dispatch_pending_frames(|| true);
+                let output = Rc::new(RefCell::new(None));
+                let completion = foreground_executor.spawn({
+                    let output = output.clone();
+                    async move {
+                        *output.borrow_mut() = Some(task.await);
+                    }
+                });
+                let output = benchmark_context.run_until(|| output.borrow_mut().take());
+                drop(completion);
                 MeasuredTaskOutput {
                     trace_scope: measured_input.trace_scope.take(),
                     report: report.clone(),
@@ -770,46 +806,29 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
         V: 'static + Render,
     {
         let bencher = self.take_bencher("bench_renderer");
-        let window_id = self
-            .with_window(view.entity_id(), |window, _| {
-                window.window_handle().window_id()
-            })
-            .expect("cannot benchmark renderer for entity without a current window");
-
         let dispatcher = self.background_executor.dispatcher().clone();
+        self.dispatch_pending_frames(|| true);
         let collector = TraceScope::start(self.foreground_journal_collector());
-
         let mut benchmark = || {
-            // Work already queued at frame start delays the frame in
-            // production too, so run it inside the measured interval.
             dispatcher
                 .as_threaded()
                 .expect("validated in BenchAppContext::build")
-                .run_ready_main_tasks();
+                .run_ready_main_tasks_with(
+                    || true,
+                    || {
+                        self.dispatch_pending_frames(|| true);
+                    },
+                );
             self.with_window(view.entity_id(), |window, cx| {
                 view.update(cx, |view, cx| update(view, window, cx));
             })
             .expect("cannot benchmark renderer for entity without a current window");
-            // Submit the frame drawn by the update's effect flush, mirroring
-            // production where every drawn frame is presented. With a headless
-            // renderer this includes scene submission to the GPU.
-            self.with_window(view.entity_id(), |window, _| {
-                window.present_if_needed();
-            })
-            .expect("cannot benchmark renderer for entity without a current window");
+            self.dispatch_pending_frames(|| true);
         };
         bencher.iter(&mut benchmark);
 
         let events = collector.finish();
-        self.report
-            .record_frame_timings(events.frame_events.iter().filter(|event| match event {
-                FrameEvent::Draw(timing) => timing.window_id == window_id,
-                FrameEvent::Present(timing) => timing.window_id == window_id,
-            }));
-        // Foreground work isn't attributed to a window, so unlike frame
-        // timings above it isn't filtered by `window_id`. A benchmark app
-        // hosts one window at a time, so this cannot pick up unrelated
-        // windows' work.
+        self.report.record_frame_timings(events.frame_events.iter());
         self.report
             .record_foreground_events(events.foreground_events());
         self.replace_bencher(bencher);
@@ -836,6 +855,10 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
                 )
                 .expect("failed to open benchmark window")
                 .into();
+            // An active renderer workload must not inherit the platform
+            // callback's inactive-window animation throttle.
+            app.update_window(window, |_, window, _| window.activate_window())
+                .expect("failed to activate newly created benchmark window");
             window
         };
 
