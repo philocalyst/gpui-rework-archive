@@ -1103,6 +1103,7 @@ fn repaint_shaped_text_layout(
 
 #[derive(Clone, Default)]
 pub(crate) struct LineLayoutIndex {
+    font_generation: usize,
     lines_index: usize,
     shaped_texts_index: usize,
     inline_layouts_index: usize,
@@ -1120,6 +1121,7 @@ impl LineLayoutCache {
     }
 
     pub fn layout_index(&self) -> LineLayoutIndex {
+        let font_generation = self.clear_if_font_generation_changed();
         let frame = self.current_frame.read();
         LineLayoutIndex {
             lines_index: frame.lines.used.len(),
@@ -1143,8 +1145,14 @@ impl LineLayoutCache {
     }
 
     pub fn reuse_layouts(&self, range: Range<LineLayoutIndex>) {
-        let mut previous_frame = &mut *self.previous_frame.lock();
+        let font_generation = self.clear_if_font_generation_changed();
+        if range.start.font_generation != font_generation
+            || range.end.font_generation != font_generation
+        {
+            return;
+        }
         let mut current_frame = &mut *self.current_frame.write();
+        let mut previous_frame = &mut *self.previous_frame.lock();
 
         current_frame.lines.reuse(
             &mut previous_frame.lines,
@@ -1161,6 +1169,10 @@ impl LineLayoutCache {
     }
 
     pub fn truncate_layouts(&self, index: LineLayoutIndex) {
+        let font_generation = self.clear_if_font_generation_changed();
+        if index.font_generation != font_generation {
+            return;
+        }
         let mut current_frame = &mut *self.current_frame.write();
         current_frame.lines.used.truncate(index.lines_index);
         current_frame
@@ -1174,8 +1186,9 @@ impl LineLayoutCache {
     }
 
     pub fn finish_frame(&self) {
-        let mut prev_frame = self.previous_frame.lock();
+        let _font_generation = self.clear_if_font_generation_changed();
         let mut curr_frame = self.current_frame.write();
+        let mut prev_frame = self.previous_frame.lock();
         std::mem::swap(&mut *prev_frame, &mut *curr_frame);
         curr_frame.lines.clear();
         curr_frame.shaped_texts.clear();
@@ -1320,6 +1333,24 @@ impl LineLayoutCache {
         current_frame.inline_layouts.insert(key, layout.clone());
 
         layout
+    }
+
+    fn clear_if_font_generation_changed(&self) -> usize {
+        let font_generation = self.font_generation.load(Ordering::Acquire);
+        if self.cached_font_generation.load(Ordering::Acquire) == font_generation {
+            return font_generation;
+        }
+
+        let mut current_frame = self.current_frame.write();
+        if self.cached_font_generation.load(Ordering::Acquire) == font_generation {
+            return font_generation;
+        }
+
+        *current_frame = FrameCache::default();
+        *self.previous_frame.lock() = FrameCache::default();
+        self.cached_font_generation
+            .store(font_generation, Ordering::Release);
+        font_generation
     }
 }
 
