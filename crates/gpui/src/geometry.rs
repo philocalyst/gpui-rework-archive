@@ -2356,6 +2356,15 @@ impl Anchor {
             Self::TopCenter | Self::BottomCenter | Self::LeftCenter | Self::RightCenter
         )
     }
+
+    /// Returns whether the anchor is bottom-positioned.
+    #[inline]
+    pub fn is_bottom(&self) -> bool {
+        matches!(
+            self,
+            Self::BottomCenter | Self::BottomLeft | Self::BottomRight
+        )
+    }
 }
 
 /// The values at the four corners of a box, such as a border radius.
