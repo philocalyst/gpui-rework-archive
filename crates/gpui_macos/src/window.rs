@@ -299,14 +299,6 @@ const NSFloatingWindowLevel: NSInteger = 3;
 #[allow(non_upper_case_globals)]
 const NSPopUpWindowLevel: NSInteger = 101;
 #[allow(non_upper_case_globals)]
-const NSTrackingMouseEnteredAndExited: NSUInteger = 0x01;
-#[allow(non_upper_case_globals)]
-const NSTrackingMouseMoved: NSUInteger = 0x02;
-#[allow(non_upper_case_globals)]
-const NSTrackingActiveAlways: NSUInteger = 0x80;
-#[allow(non_upper_case_globals)]
-const NSTrackingInVisibleRect: NSUInteger = 0x200;
-#[allow(non_upper_case_globals)]
 const NSWindowAnimationBehaviorUtilityWindow: NSInteger = 4;
 #[allow(non_upper_case_globals)]
 // https://developer.apple.com/documentation/appkit/nsdragoperation
@@ -1420,13 +1412,28 @@ impl MacWindow {
             let main_window: ObjcId = msg_send![app, mainWindow];
             let mut sheet_parent = None;
 
+            // SAFETY: This is the live GPUIView (an NSView subclass) added to the
+            // content view above, and window creation runs on the main thread.
+            let tracking_view = &*native_view.cast::<Objc2NSView>();
+
             match kind {
                 WindowKind::Normal | WindowKind::Floating => {
                     if kind == WindowKind::Floating {
                         // Let the window float keep above normal windows.
                         native_window.setLevel_(NSFloatingWindowLevel);
+                        native_window.setAcceptsMouseMovedEvents_(YES);
                     } else {
                         native_window.setLevel_(NSNormalWindowLevel);
+                        native_window.setAcceptsMouseMovedEvents_(NO);
+                        add_mouse_tracking_area(
+                            tracking_view,
+                            NSTrackingAreaOptions::MouseEnteredAndExited
+                                | NSTrackingAreaOptions::MouseMoved
+                                // Track while this application is active, even if another
+                                // window in the application has focus.
+                                | NSTrackingAreaOptions::ActiveInActiveApp
+                                | NSTrackingAreaOptions::InVisibleRect,
+                        );
                     }
                     native_window.setAcceptsMouseMovedEvents_(Bool::new(true));
 
