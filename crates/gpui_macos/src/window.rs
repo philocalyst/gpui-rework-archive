@@ -1425,15 +1425,7 @@ impl MacWindow {
                     } else {
                         native_window.setLevel_(NSNormalWindowLevel);
                         native_window.setAcceptsMouseMovedEvents_(NO);
-                        add_mouse_tracking_area(
-                            tracking_view,
-                            NSTrackingAreaOptions::MouseEnteredAndExited
-                                | NSTrackingAreaOptions::MouseMoved
-                                // Track while this application is active, even if another
-                                // window in the application has focus.
-                                | NSTrackingAreaOptions::ActiveInActiveApp
-                                | NSTrackingAreaOptions::InVisibleRect,
-                        );
+                        add_mouse_tracking_area(tracking_view);
                     }
                     native_window.setAcceptsMouseMovedEvents_(Bool::new(true));
 
