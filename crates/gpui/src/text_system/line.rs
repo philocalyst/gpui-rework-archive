@@ -430,6 +430,13 @@ fn paint_visual_text(
     pass: TextPaintPass,
     window: &mut Window,
     cx: &mut App,
+    paint_underline: &mut dyn FnMut(
+        Range<usize>,
+        Point<Pixels>,
+        Pixels,
+        &UnderlineStyle,
+        &mut Window,
+    ),
 ) -> Result<()> {
     if visual_lines.is_empty() {
         return Ok(());
@@ -556,6 +563,83 @@ fn aligned_visual_origin_x(
         TextAlign::Center => (origin_x * 2.0 + align_width - line_width) / 2.0,
         TextAlign::End if direction.is_rtl() => origin_x,
         TextAlign::End | TextAlign::Right => origin_x + align_width - line_width,
+    }
+
+    struct UnderlineHandlerTestView(Rc<dyn Fn(&mut Window, &mut App)>);
+
+    impl Render for UnderlineHandlerTestView {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            let paint = self.0.clone();
+            canvas(
+                |_, _, _| {},
+                move |_, _, window, cx| {
+                    window.with_element_opacity(Some(0.5), |window| paint(window, cx));
+                },
+            )
+            .size_full()
+        }
+    }
+
+    fn test_underline_handler_at_scales(
+        cx: &mut TestAppContext,
+        paint: impl Fn(&mut Window, &mut App) + 'static,
+    ) {
+        let window = cx.add_window(move |_, _| UnderlineHandlerTestView(Rc::new(paint)));
+        for scale in [1., 1.25, 1.5, 2., 3.] {
+            cx.simulate_window_scale_factor_change(window.into(), scale);
+            cx.update_window(window.into(), |_, window, cx| window.draw(cx).clear(cx))
+                .unwrap();
+        }
+    }
+
+    fn underline_test_line(
+        text: &str,
+        decorations: &[DecorationRun],
+        zero_advance: bool,
+        window: &Window,
+    ) -> ShapedLine {
+        let mut line = window.text_system().shape_line(
+            SharedString::new(text),
+            px(16.),
+            &[TextRun {
+                len: text.len(),
+                font: font(".ZedMono"),
+                color: black(),
+                ..TextRun::default()
+            }],
+            None,
+        );
+        line.decoration_runs = SmallVec::from(decorations.to_vec());
+        let layout = &line.layout;
+        let mut runs = layout.runs.clone();
+        let advance = if zero_advance { px(0.) } else { px(8.) };
+        let mut width = px(0.);
+        for glyph in runs.iter_mut().flat_map(|run| &mut run.glyphs) {
+            glyph.position.x = width;
+            width += advance;
+        }
+        line.layout = Arc::new(LineLayout {
+            font_size: layout.font_size,
+            width,
+            ascent: layout.ascent,
+            descent: layout.descent,
+            runs,
+            len: layout.len,
+        });
+        line
+    }
+
+    fn assert_underline_primitives_eq(actual: &[Underline], expected: &[Underline]) {
+        assert_eq!(actual.len(), expected.len());
+        for (actual, expected) in actual.iter().zip(expected) {
+            assert_eq!(actual.bounds, expected.bounds);
+            assert_eq!(actual.content_mask, expected.content_mask);
+            assert_eq!(actual.color, expected.color);
+            assert_eq!(actual.thickness, expected.thickness);
+            assert_eq!(actual.wavy, expected.wavy);
+            assert_eq!(actual.order, expected.order);
+            assert_eq!(actual.pad, expected.pad);
+        }
     }
 
     #[test]
