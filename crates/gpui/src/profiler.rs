@@ -1090,16 +1090,25 @@ impl WindowProfiler {
             return;
         };
 
-        journal::record_input(journal::InputTiming {
-            kind,
-            start: started_at,
-            end: Instant::now(),
-            caused_invalidation,
-        });
+        if !journal::power_interrupted_since(started_at) {
+            journal::record_input(journal::InputTiming {
+                kind,
+                start: started_at,
+                end: Instant::now(),
+                caused_invalidation,
+            });
+        }
         journal::end_foreground_turn();
 
-        if !caused_invalidation {
+        if !caused_invalidation || !journal::frame_sample_is_valid(self.window_id, started_at) {
             return;
+        }
+        if self
+            .first_input_at
+            .is_some_and(|at| !journal::frame_sample_is_valid(self.window_id, at))
+        {
+            self.first_input_at = None;
+            self.pending_input_count = 0;
         }
 
         let arrived_during_draw = self
@@ -1132,11 +1141,13 @@ impl WindowProfiler {
             journal::end_foreground_turn();
             return;
         };
-        journal::record_action(ActionTiming {
-            name,
-            start,
-            end: Instant::now(),
-        });
+        if !journal::power_interrupted_since(start) {
+            journal::record_action(ActionTiming {
+                name,
+                start,
+                end: Instant::now(),
+            });
+        }
         journal::end_foreground_turn();
     }
 
@@ -1166,13 +1177,15 @@ impl WindowProfiler {
         let draw_end = Instant::now();
         let frame_timing = FrameTiming {
             window_id: self.window_id,
-            dirty_at,
+            dirty_at: dirty_at.filter(|at| journal::frame_sample_is_valid(self.window_id, *at)),
             invalidations,
             draw_start,
             draw_end,
         };
         let draw_duration = frame_timing.draw_duration();
-        self.record_draw_timing(frame_timing);
+        if !journal::power_interrupted_since(draw_start) {
+            self.record_draw_timing(frame_timing);
+        }
         journal::end_foreground_turn();
         draw_duration
     }
@@ -1224,21 +1237,33 @@ impl WindowProfiler {
         window_active: bool,
         next_frame_scheduled: bool,
     ) {
-        if let Some(first_input_at) = self.first_input_at.take() {
+        if let Some(first_input_at) = self.first_input_at.take()
+            && journal::frame_sample_is_valid(self.window_id, first_input_at)
+        {
             let latency_nanos = present_end.duration_since(first_input_at).as_nanos() as u64;
             self.input_latency_histogram.record(latency_nanos).ok();
+            if self.pending_input_count > 0 {
+                self.events_per_frame_histogram
+                    .record(self.pending_input_count)
+                    .ok();
+            }
         }
-        if self.pending_input_count > 0 {
-            self.events_per_frame_histogram
-                .record(self.pending_input_count)
-                .ok();
-            self.pending_input_count = 0;
-        }
+        self.pending_input_count = 0;
 
-        let frame = self.pending_frame.take();
+        let frame = self
+            .pending_frame
+            .take()
+            .filter(|frame| journal::frame_sample_is_valid(self.window_id, frame.draw_start))
+            .map(|mut frame| {
+                frame.dirty_at = frame
+                    .dirty_at
+                    .filter(|at| journal::frame_sample_is_valid(self.window_id, *at));
+                frame
+            });
         let animation_interval =
             if frame.is_some() && self.animating_at_last_present && window_active {
                 self.last_present_at
+                    .filter(|at| journal::frame_sample_is_valid(self.window_id, *at))
                     .map(|last_present_at| present_end.duration_since(last_present_at))
             } else {
                 None
