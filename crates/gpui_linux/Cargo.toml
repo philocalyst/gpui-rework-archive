@@ -11,6 +11,7 @@ workspace = true
 
 [lib]
 path = "src/gpui_linux.rs"
+doctest = false
 
 [features]
 default = ["wayland", "x11"]

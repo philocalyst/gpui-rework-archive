@@ -10,6 +10,7 @@ repository = "https://github.com/gpui-ce/gpui-ce"
 [lib]
 name = "path"
 path = "src/path.rs"
+doctest = false
 
 [features]
 test-support = []

@@ -11,6 +11,7 @@ workspace = true
 
 [lib]
 path = "src/gpui_windows.rs"
+doctest = false
 
 [features]
 default = ["gpui/default"]

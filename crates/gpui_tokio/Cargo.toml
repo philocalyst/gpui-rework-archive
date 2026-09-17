@@ -12,6 +12,7 @@ workspace = true
 [lib]
 path = "src/gpui_tokio.rs"
 doctest = false
+test = false
 
 [dependencies]
 anyhow.workspace = true

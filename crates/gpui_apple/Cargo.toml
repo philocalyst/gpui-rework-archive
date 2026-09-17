@@ -12,6 +12,7 @@ workspace = true
 [lib]
 name = "gpui_apple"
 path = "src/gpui_apple.rs"
+doctest = false
 
 [features]
 default = []

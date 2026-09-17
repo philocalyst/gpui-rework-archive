@@ -11,6 +11,9 @@ repository = "https://github.com/gpui-ce/gpui-ce"
 name = "gpui_util"
 path = "src/lib.rs"
 
+[lib]
+doctest = false
+
 [dependencies]
 log = { version = "0.4.16", features = ["kv_unstable_serde", "serde"] }
 anyhow = "1.0.86"
