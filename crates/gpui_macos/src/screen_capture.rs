@@ -60,12 +60,18 @@ impl ScreenCaptureSource for MacScreenCaptureSource {
             .map(|meta| (meta.label, meta.is_main))
             .unzip();
 
-        Ok(SourceMetadata {
+        SourceMetadata {
             id: display_id as u64,
             label,
             is_main,
             resolution: size,
-        })
+        }
+    }
+}
+
+impl ScreenCaptureSource for MacScreenCaptureSource {
+    fn metadata(&self) -> Result<SourceMetadata> {
+        Ok(self.metadata())
     }
 
     fn stream(
@@ -104,6 +110,11 @@ impl ScreenCaptureSource for MacScreenCaptureSource {
                 &configuration,
                 Some(ProtocolObject::from_ref(&*delegate)),
             );
+            let configuration = SCStreamConfiguration::new();
+            configuration.setScalesToFit(true);
+            configuration.setPixelFormat(0x42475241);
+            configuration.setWidth(metadata.resolution.width.0 as usize);
+            configuration.setHeight(metadata.resolution.height.0 as usize);
 
             if let Err(error) = stream.addStreamOutput_type_sampleHandlerQueue_error(
                 ProtocolObject::from_ref(&*output),
