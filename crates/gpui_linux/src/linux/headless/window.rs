@@ -2,16 +2,14 @@
 //!
 //! A headless window has no compositor surface and no GPU: layout, text
 //! shaping, and entity plumbing run normally, `draw` discards the scene, and
-//! the sprite atlas hands out tiles without uploading pixels (mirroring
-//! GPUI's `TestWindow`/`TestAtlas`). This lets command-line tools drive real
-//! `Window`-based code paths without a display server.
+//! the sprite atlas hands out tiles without uploading pixels (the same
+//! `HeadlessAtlas` GPUI's `TestWindow` uses). This lets command-line tools
+//! drive real `Window`-based code paths without a display server.
 
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
 
-use collections::HashMap;
-use parking_lot::Mutex;
 use uuid::Uuid;
 
 use gpui::{

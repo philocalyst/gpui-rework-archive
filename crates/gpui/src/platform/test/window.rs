@@ -6,7 +6,6 @@ use crate::{
     TextInputConfiguration, TextInputStateChange, TileId, ValidatedRasterizedGlyph,
     WindowAppearance, WindowBackgroundAppearance, WindowBounds, WindowControlArea, WindowParams,
 };
-use collections::HashMap;
 use gpui_util::ResultExt as _;
 #[cfg(any(test, feature = "test-support"))]
 use image::RgbaImage;
@@ -101,7 +100,7 @@ impl TestWindow {
     ) -> Self {
         let sprite_atlas: Arc<dyn PlatformAtlas> = match &renderer {
             Some(r) => r.sprite_atlas(),
-            None => Arc::new(TestAtlas::new()),
+            None => Arc::new(HeadlessAtlas::default()),
         };
         Self(Rc::new(Mutex::new(TestWindowState {
             bounds: params.bounds,
