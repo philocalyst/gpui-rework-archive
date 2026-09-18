@@ -92,6 +92,7 @@ impl AppContext for AsyncApp {
         app.insert_entity(reservation, build_entity)
     }
 
+    #[inline(always)]
     fn update_entity<T: 'static, R>(
         &mut self,
         handle: &Entity<T>,
@@ -109,6 +110,7 @@ impl AppContext for AsyncApp {
         panic!("Cannot as_mut with an async context. Try calling update() first")
     }
 
+    #[inline(always)]
     fn read_entity<T, R>(&self, handle: &Entity<T>, callback: impl FnOnce(&T, &App) -> R) -> R
     where
         T: 'static,
@@ -146,6 +148,7 @@ impl AppContext for AsyncApp {
         lock.update_window(window, f)
     }
 
+    #[inline(always)]
     fn with_window<R>(
         &mut self,
         entity_id: EntityId,
@@ -299,6 +302,7 @@ impl AsyncApp {
     /// `f` receives an `&mut AsyncApp`. Dropping the returned [`Task`] cancels the
     /// future, so store it, await it or call [`Task::detach`].
     #[track_caller]
+    #[inline(always)]
     pub fn spawn<AsyncFn, R>(&self, f: AsyncFn) -> Task<R>
     where
         AsyncFn: AsyncFnOnce(&mut AsyncApp) -> R + 'static,
@@ -547,6 +551,7 @@ impl AsyncWindowContext {
     /// Dropping the returned [`Task`] cancels the future. Store it, await it or call
     /// [`Task::detach`].
     #[track_caller]
+    #[inline(always)]
     pub fn spawn<AsyncFn, R>(&self, f: AsyncFn) -> Task<R>
     where
         AsyncFn: AsyncFnOnce(&mut AsyncWindowContext) -> R + 'static,
@@ -626,6 +631,7 @@ impl AppContext for AsyncWindowContext {
         }
     }
 
+    #[inline(always)]
     fn update_entity<T: 'static, R>(
         &mut self,
         handle: &Entity<T>,
@@ -641,6 +647,7 @@ impl AppContext for AsyncWindowContext {
         panic!("Cannot use as_mut() from an async context, call `update`")
     }
 
+    #[inline(always)]
     fn read_entity<T, R>(&self, handle: &Entity<T>, read: impl FnOnce(&T, &App) -> R) -> R
     where
         T: 'static,
@@ -667,6 +674,7 @@ impl AppContext for AsyncWindowContext {
         self.app.update_window(window, update)
     }
 
+    #[inline(always)]
     fn with_window<R>(
         &mut self,
         entity_id: EntityId,

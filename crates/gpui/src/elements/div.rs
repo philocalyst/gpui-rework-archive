@@ -516,6 +516,7 @@ impl Interactivity {
     /// }
     /// ```
     #[track_caller]
+    #[inline(always)]
     pub fn on_action<A: Action>(&mut self, listener: impl Fn(&A, &mut Window, &mut App) + 'static) {
         self.action_listeners.push((
             TypeId::of::<A>(),
@@ -616,10 +617,7 @@ impl Interactivity {
         &mut self,
         listener: impl Fn(&ModifiersChangedEvent, &mut Window, &mut App) + 'static,
     ) {
-        self.modifiers_changed_listeners
-            .push(Box::new(move |event, window, cx| {
-                listener(event, window, cx)
-            }));
+        self.modifiers_changed_listeners.push(Box::new(listener));
     }
 
     /// Runs `listener` when a drag of type `T` is released over this element.
@@ -706,9 +704,7 @@ impl Interactivity {
     where
         Self: Sized,
     {
-        self.click_listeners.push(Rc::new(move |event, window, cx| {
-            listener(event, window, cx)
-        }));
+        self.click_listeners.push(Rc::new(listener));
     }
 
     /// Runs `listener` for clicks with a button other than the left one.
@@ -718,10 +714,7 @@ impl Interactivity {
     where
         Self: Sized,
     {
-        self.aux_click_listeners
-            .push(Rc::new(move |event, window, cx| {
-                listener(event, window, cx)
-            }));
+        self.aux_click_listeners.push(Rc::new(listener));
     }
 
     /// Starts a drag of `value` when the left button is pressed on this element and the pointer moves.
@@ -1407,6 +1400,7 @@ pub trait InteractiveElement: Sized {
     /// }
     /// ```
     #[track_caller]
+    #[inline(always)]
     fn on_action<A: Action>(
         mut self,
         listener: impl Fn(&A, &mut Window, &mut App) + 'static,
