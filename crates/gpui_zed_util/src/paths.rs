@@ -254,6 +254,10 @@ impl SanitizedPath {
 
         #[cfg(target_os = "windows")]
         {
+            let path = match path.to_str().and_then(|s| s.strip_prefix(r"\\?\UNC\")) {
+                Some(rest) => PathBuf::from(format!(r"\\{rest}")).into(),
+                None => path,
+            };
             let simplified = dunce::simplified(path.as_ref());
             if simplified == path.as_ref() {
                 // safe because `Path` and `SanitizedPath` have the same repr and Drop impl
