@@ -274,12 +274,15 @@ impl WgpuAtlasState {
 
         let texture_list = &mut self.storage[kind];
         let index = texture_list.free_list.pop();
+        let generation = self.next_texture_generation;
+        self.next_texture_generation = self.next_texture_generation.wrapping_add(1);
 
         let atlas_texture = WgpuAtlasTexture {
             id: AtlasTextureId {
                 index: index.unwrap_or(texture_list.textures.len()) as u32,
                 kind,
             },
+            generation,
             allocator: BucketedAtlasAllocator::new(device_size_to_etagere(size)),
             format,
             texture,
@@ -397,6 +400,7 @@ impl ops::Index<AtlasTextureId> for WgpuAtlasStorage {
 
 struct WgpuAtlasTexture {
     id: AtlasTextureId,
+    generation: u64,
     allocator: BucketedAtlasAllocator,
     texture: wgpu::Texture,
     view: wgpu::TextureView,
