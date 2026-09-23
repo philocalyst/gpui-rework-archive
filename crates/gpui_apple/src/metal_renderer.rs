@@ -22,6 +22,7 @@ use gpui_render::{
 };
 #[cfg(any(test, feature = "bench-support", feature = "test-support"))]
 use image::RgbaImage;
+use objc2::runtime::AnyObject;
 
 use core_foundation::base::TCFType;
 use core_video::{
