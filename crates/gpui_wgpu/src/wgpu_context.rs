@@ -513,17 +513,7 @@ impl WgpuContext {
         adapter_policy: SoftwareAdapterPolicy,
         extra_requirements: Option<&WgpuDeviceRequirements>,
     ) -> anyhow::Result<Self> {
-        let device_id_filter = match std::env::var("ZED_DEVICE_ID") {
-            Ok(val) => parse_pci_id(&val)
-                .context("Failed to parse device ID from `ZED_DEVICE_ID` environment variable")
-                .log_err(),
-            Err(std::env::VarError::NotPresent) => None,
-            err => {
-                err.context("Failed to read value of `ZED_DEVICE_ID` environment variable")
-                    .log_err();
-                None
-            }
-        };
+        let device_id_filter = Self::device_id_filter();
 
         // Select an adapter by actually testing surface configuration with the real device.
         // This is the only reliable way to determine compatibility on hybrid GPU systems.
@@ -853,6 +843,59 @@ impl WgpuContext {
         anyhow::bail!("No GPU adapter found that can configure the display surface")
     }
 
+    /// Sort adapters into a single priority order. Tiers (from highest to lowest):
+    ///
+    /// 1. ZED_DEVICE_ID match — explicit user override
+    /// 2. Compositor GPU match — the GPU the display server is rendering on
+    /// 3. Device type (Discrete > Integrated > Other > Virtual > Cpu).
+    ///    "Other" ranks above "Virtual" because OpenGL seems to count as "Other".
+    /// 4. Backend — prefer Vulkan/Metal/Dx12 over GL/etc.
+    #[cfg(not(target_family = "wasm"))]
+    fn sort_adapters(
+        adapters: &mut [wgpu::Adapter],
+        device_id_filter: Option<u32>,
+        compositor_gpu: Option<&CompositorGpuHint>,
+    ) {
+        adapters.sort_by_key(|adapter| {
+            let info = adapter.get_info();
+            // Backends like OpenGL report device=0 for all adapters, so
+            // device-based matching is only meaningful when non-zero.
+            let device_known = info.device != 0;
+            let user_override: u8 = match device_id_filter {
+                Some(id) if device_known && info.device == id => 0,
+                _ => 1,
+            };
+            let compositor_match: u8 = match compositor_gpu {
+                Some(hint)
+                    if device_known
+                        && info.vendor == hint.vendor_id
+                        && info.device == hint.device_id =>
+                {
+                    0
+                }
+                _ => 1,
+            };
+            let type_priority: u8 = match info.device_type {
+                wgpu::DeviceType::DiscreteGpu => 0,
+                wgpu::DeviceType::IntegratedGpu => 1,
+                wgpu::DeviceType::Other => 2,
+                wgpu::DeviceType::VirtualGpu => 3,
+                wgpu::DeviceType::Cpu => 4,
+            };
+            let backend_priority: u8 = match info.backend {
+                wgpu::Backend::Vulkan | wgpu::Backend::Metal | wgpu::Backend::Dx12 => 0,
+                _ => 1,
+            };
+
+            (
+                user_override,
+                compositor_match,
+                type_priority,
+                backend_priority,
+            )
+        });
+    }
+
     /// Try to use an adapter with a surface by creating a device and testing configuration.
     /// Returns the device and queue if successful, allowing them to be reused.
     #[cfg(not(target_family = "wasm"))]
@@ -956,12 +999,12 @@ impl WgpuContext {
     /// Returns true if the GPU device was lost (driver crash, suspend/resume).
     /// When this returns true, the context should be recreated.
     pub fn device_lost(&self) -> bool {
-        self.device_lost.load(Ordering::Relaxed)
+        self.errors.device_lost()
     }
 
-    /// Returns a clone of the device_lost flag for sharing with renderers.
-    pub(crate) fn device_lost_flag(&self) -> Arc<AtomicBool> {
-        Arc::clone(&self.device_lost)
+    /// The device-wide error state, shared with renderers on this device.
+    pub fn errors(&self) -> &Arc<DeviceErrorState> {
+        &self.errors
     }
 
     pub(crate) fn uncaptured_error_slot(&self) -> Arc<Mutex<Option<String>>> {

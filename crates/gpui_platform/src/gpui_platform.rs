@@ -184,7 +184,8 @@ pub fn current_platform(headless: bool) -> Rc<dyn Platform> {
 /// only with the `bench-support` or `test-support` feature. On macOS it returns a
 /// Metal renderer.
 #[cfg(any(feature = "bench-support", feature = "test-support"))]
-pub fn current_headless_renderer() -> Option<Box<dyn gpui::PlatformHeadlessRenderer>> {
+pub fn current_headless_renderer() -> anyhow::Result<Option<Box<dyn gpui::PlatformHeadlessRenderer>>>
+{
     #[cfg(target_os = "macos")]
     {
         Some(
@@ -193,9 +194,15 @@ pub fn current_headless_renderer() -> Option<Box<dyn gpui::PlatformHeadlessRende
         )
     }
 
-    #[cfg(not(target_os = "macos"))]
+    #[cfg(target_os = "linux")]
     {
-        None
+        gpui_wgpu::WgpuHeadlessRenderer::new()
+            .map(|renderer| Some(Box::new(renderer) as Box<dyn gpui::PlatformHeadlessRenderer>))
+    }
+
+    #[cfg(not(any(target_os = "macos", target_os = "linux")))]
+    {
+        Ok(None)
     }
 }
 

@@ -2017,7 +2017,7 @@ impl PlatformWindow for X11Window {
     }
 
     fn gpu_specs(&self) -> Option<GpuSpecs> {
-        self.0.state.borrow().renderer.gpu_specs().into()
+        self.0.state.borrow().renderer.gpu_specs()
     }
 
     fn gpu_context(&self) -> Option<Box<dyn std::any::Any>> {

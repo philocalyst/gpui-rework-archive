@@ -14,7 +14,7 @@ use smallvec::{SmallVec, smallvec};
 
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 mod buffers;
 mod drawing;
@@ -72,16 +72,18 @@ pub struct WgpuRenderer {
 }
 
 impl WgpuRenderer {
-    fn resources(&self) -> &WgpuResources {
-        self.resources
-            .as_ref()
-            .expect("GPU resources not available")
+    fn core(&self) -> Option<&WgpuRendererCore> {
+        match &self.state {
+            RendererState::Ready { core, .. } | RendererState::Unconfigured { core } => Some(core),
+            RendererState::Released => None,
+        }
     }
 
-    fn resources_mut(&mut self) -> &mut WgpuResources {
-        self.resources
-            .as_mut()
-            .expect("GPU resources not available")
+    fn core_mut(&mut self) -> Option<&mut WgpuRendererCore> {
+        match &mut self.state {
+            RendererState::Ready { core, .. } | RendererState::Unconfigured { core } => Some(core),
+            RendererState::Released => None,
+        }
     }
 
     fn new_internal(
@@ -136,6 +138,7 @@ impl WgpuRenderer {
             },
         })
     }
+}
 
     pub fn update_drawable_size(&mut self, size: Size<DevicePixels>) {
         if !self.target.resize(size) {
@@ -210,7 +213,7 @@ impl WgpuRenderer {
     }
 
     pub fn supports_dual_source_blending(&self) -> bool {
-        self.dual_source_blending
+        self.core().is_some_and(|core| core.dual_source_blending)
     }
 
     pub fn gpu_context(&self) -> (Arc<wgpu::Device>, Arc<wgpu::Queue>) {
@@ -1125,7 +1128,7 @@ mod tests {
             },
         };
 
-        let bytes = unsafe { WgpuRenderer::instance_bytes(std::slice::from_ref(&quad)) };
+        let bytes = unsafe { WgpuRendererCore::instance_bytes(std::slice::from_ref(&quad)) };
         let words: &[u32] = bytemuck::cast_slice(bytes);
         assert_eq!(
             words,
