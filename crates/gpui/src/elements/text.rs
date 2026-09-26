@@ -704,6 +704,13 @@ struct TextLayoutState {
     layout: RefCell<Option<TextLayoutInner>>,
 }
 
+#[derive(Clone, Copy)]
+enum TextPaintPass {
+    All,
+    Background,
+    Foreground,
+}
+
 struct TextLayoutInner {
     len: usize,
     document: Option<ShapedText>,
@@ -1148,12 +1155,10 @@ impl TextLayout {
         let element_state = self.0.layout.borrow();
         let element_state = element_state
             .as_ref()
-            .with_context(|| format!("measurement has not been performed on {text}"))
-            .unwrap();
+            .context("measurement has not been performed")?;
         let bounds = element_state
             .bounds
-            .with_context(|| format!("prepaint has not been performed on {text}"))
-            .unwrap();
+            .context("prepaint has not been performed")?;
 
         let line_height = element_state.line_height;
         if let Some(document) = &element_state.document {
@@ -1178,6 +1183,7 @@ impl TextLayout {
                 )
                 .log_err();
         }
+        Ok(())
     }
 
     fn measured(&self) -> Ref<'_, TextLayoutInner> {
