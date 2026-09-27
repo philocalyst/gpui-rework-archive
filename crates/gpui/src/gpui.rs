@@ -123,8 +123,19 @@ pub use spring::*;
 /// [`gpui::bench`]: crate::bench
 #[macro_export]
 macro_rules! bench_group {
-    ($($tokens:tt)*) => {
-        criterion::criterion_group!($($tokens)*);
+    (name = $name:ident; config = $config:expr; targets = $($target:path),+ $(,)?) => {
+        criterion::criterion_group! {
+            name = $name;
+            config = ($config).with_measurement($crate::BenchMeasurement::from_env_or_exit());
+            targets = $($target),+
+        }
+    };
+    ($name:ident, $($target:path),+ $(,)?) => {
+        $crate::bench_group! {
+            name = $name;
+            config = criterion::Criterion::default();
+            targets = $($target),+
+        }
     };
 }
 

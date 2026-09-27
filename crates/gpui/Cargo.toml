@@ -33,7 +33,7 @@ test-support = [
   "x11",
   "proptest",
 ]
-bench-support = ["profiler", "dep:criterion"]
+bench-support = ["profiler", "dep:criterion", "dep:bench_metrics"]
 # Preserve the published feature name while consumers migrate to `bench-support`.
 bench = ["bench-support"]
 inspector = ["gpui_macros/inspector"]
@@ -61,6 +61,7 @@ backtrace = { workspace = true, optional = true }
 bitflags.workspace = true
 
 collections.workspace = true
+bench_metrics = { workspace = true, optional = true }
 criterion = { workspace = true, optional = true }
 ctor.workspace = true
 derive_more.workspace = true
@@ -149,7 +150,6 @@ objc2 = { workspace = true, optional = true }
 objc2-metal = { version = "0.3", optional = true }
 
 [target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies]
-
 
 [target.'cfg(target_os = "windows")'.dependencies]
 windows = { workspace = true, features = [
