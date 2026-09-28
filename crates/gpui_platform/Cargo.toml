@@ -43,6 +43,11 @@ name = "inspector_render"
 harness = false
 required-features = ["bench-support"]
 
+[[bench]]
+name = "randomized_element_tree"
+harness = false
+required-features = ["bench-support"]
+
 [dependencies]
 gpui = { workspace = true, default-features = false }
 
@@ -50,6 +55,7 @@ gpui = { workspace = true, default-features = false }
 gpui_fonts = { path = "../gpui_ce_fonts", version = "0.2.2", package = "gpui-ce-fonts" }
 
 [dev-dependencies]
+bench_metrics.workspace = true
 criterion.workspace = true
 
 [target.'cfg(target_os = "macos")'.dependencies]
