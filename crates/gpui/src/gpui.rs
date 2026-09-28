@@ -50,6 +50,8 @@ pub mod profiler;
 pub mod queue;
 mod resize;
 mod scene;
+#[cfg(any(test, feature = "test-support", feature = "bench-support"))]
+mod seeds;
 mod shared_uri;
 mod spring;
 mod style;
@@ -69,6 +71,8 @@ mod window;
 
 #[cfg(any(test, feature = "test-support"))]
 pub use proptest;
+#[cfg(any(test, feature = "test-support", feature = "bench-support"))]
+pub use seeds::calculate_seeds;
 
 pub mod _documentation;
 
@@ -77,6 +81,7 @@ pub mod _documentation;
 pub mod private {
     pub use anyhow;
     pub use inventory;
+    pub use rand;
     pub use schemars;
     pub use serde;
     pub use serde_json;
@@ -142,8 +147,18 @@ macro_rules! bench_group {
 /// Defines the entry point for the benchmark groups, like `criterion::criterion_main!`.
 #[macro_export]
 macro_rules! bench_main {
-    ($($tokens:tt)*) => {
-        criterion::criterion_main!($($tokens)*);
+    (allocator = none; $($groups:tt)*) => {
+        criterion::criterion_main!($($groups)*);
+    };
+    (allocator = $allocator:path; $($groups:tt)*) => {
+        #[global_allocator]
+        static GPUI_BENCH_ALLOCATOR: $crate::CountingAllocator<$allocator> =
+            $crate::CountingAllocator::new($allocator);
+
+        criterion::criterion_main!($($groups)*);
+    };
+    ($($groups:tt)*) => {
+        $crate::bench_main!(allocator = ::std::alloc::System; $($groups)*);
     };
 }
 pub use gpui_shared_string::*;

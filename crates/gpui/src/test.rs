@@ -29,7 +29,7 @@
 //!     cx_b.read_global::<Name, _>(|name, _| assert_eq!(name.0, "bob"));
 //! }
 //! ```
-use crate::{Entity, Subscription, TestAppContext, TestDispatcher};
+use crate::{Entity, Subscription, TestAppContext, TestDispatcher, calculate_seeds};
 use futures::StreamExt as _;
 use proptest::prelude::{Just, Strategy, any};
 use std::{
