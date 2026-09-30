@@ -16,15 +16,15 @@ use async_task::Runnable;
 use objc2_foundation::NSThread;
 use std::{ffi::c_void, ptr::NonNull, time::Duration};
 
-pub(crate) struct MacDispatcher;
+pub struct AppleDispatcher;
 
-impl MacDispatcher {
+impl AppleDispatcher {
     pub fn new() -> Self {
         Self
     }
 }
 
-impl PlatformDispatcher for MacDispatcher {
+impl PlatformDispatcher for AppleDispatcher {
     fn is_main_thread(&self) -> bool {
         NSThread::isMainThread_class()
     }
@@ -73,22 +73,22 @@ impl PlatformDispatcher for MacDispatcher {
     }
 
     fn prevent_app_nap(&self, reason: &str) -> ActivityGuard {
-        MacActivity::begin(
+        AppleActivity::begin(
             reason,
             NSActivityOptions::UserInitiatedAllowingIdleSystemSleep,
         )
     }
 }
 
-pub(crate) struct MacActivity {
+pub struct AppleActivity {
     activity: Retained<ProtocolObject<dyn NSObjectProtocol>>,
 }
 
 // The activity token returned by NSProcessInfo is thread-safe
-unsafe impl Send for MacActivity {}
+unsafe impl Send for AppleActivity {}
 
-impl MacActivity {
-    pub(crate) fn begin(reason: &str, options: NSActivityOptions) -> ActivityGuard {
+impl AppleActivity {
+    pub fn begin(reason: &str, options: NSActivityOptions) -> ActivityGuard {
         let activity = Self {
             activity: NSProcessInfo::processInfo()
                 .beginActivityWithOptions_reason(options, &NSString::from_str(reason)),
@@ -97,7 +97,7 @@ impl MacActivity {
     }
 }
 
-impl Drop for MacActivity {
+impl Drop for AppleActivity {
     fn drop(&mut self) {
         unsafe { NSProcessInfo::processInfo().endActivity(&self.activity) };
     }

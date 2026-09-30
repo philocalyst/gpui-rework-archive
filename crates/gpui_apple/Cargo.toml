@@ -24,7 +24,7 @@ gpui.workspace = true
 gpui_render.workspace = true
 wgsl-rs.workspace = true
 
-[target.'cfg(target_os = "macos")'.dependencies]
+[target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
 anyhow.workspace = true
 block.workspace = true
 collections.workspace = true
@@ -32,15 +32,19 @@ core-foundation.workspace = true
 core-graphics.workspace = true
 core-video.workspace = true
 derive_more.workspace = true
+dispatch2.workspace = true
 etagere.workspace = true
 foreign-types.workspace = true
+gpui_util.workspace = true
 image.workspace = true
+libc.workspace = true
 log.workspace = true
+mach2.workspace = true
 metal.workspace = true
 objc2.workspace = true
 objc2-quartz-core.workspace = true
 parking_lot.workspace = true
 smallvec.workspace = true
 
-[target.'cfg(target_os = "macos")'.dev-dependencies]
+[target.'cfg(any(target_os = "macos", target_os = "ios"))'.dev-dependencies]
 gpui = { workspace = true, features = ["test-support"] }

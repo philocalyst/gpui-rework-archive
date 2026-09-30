@@ -225,7 +225,7 @@ pub(crate) struct MacPlatformState {
 impl MacPlatform {
     pub fn new(headless: bool) -> Self {
         let marker = MainThreadMarker::new().expect("Mac platform not created on main thread");
-        let dispatcher = Arc::new(MacDispatcher::new());
+        let dispatcher = Arc::new(AppleDispatcher::new());
 
         let text_system = Arc::new(crate::MacTextSystem::new());
 
@@ -1038,7 +1038,7 @@ impl Platform for MacPlatform {
     }
 
     fn prevent_idle_sleep(&self, reason: &str) -> Task<Result<ActivityGuard>> {
-        Task::ready(Ok(MacActivity::begin(
+        Task::ready(Ok(AppleActivity::begin(
             reason,
             NSActivityOptions::UserInitiated,
         )))
