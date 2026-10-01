@@ -39,6 +39,7 @@ unicode-segmentation.workspace = true
 gpui_util.workspace = true
 wgpu.workspace = true
 wgsl-rs.workspace = true
+naga = { version = "29.0.4", features = ["wgsl-in"] }
 
 # Optional: only needed on platforms with multiple font sources (e.g. Linux)
 font-kit = { version = "0.14.1-zed", package = "zed-font-kit", optional = true }
@@ -79,11 +80,18 @@ bytemuck = { version = "1", features = ["derive"] }
 criterion.workspace = true
 env_logger.workspace = true
 gpui_platform = { workspace = true, features = ["font-kit", "wayland", "x11"] }
-naga = { version = "29.0.4", features = ["wgsl-in"] }
 
 [[example]]
 name = "custom_gpu"
 required-features = ["custom-gpu"]
+
+[[example]]
+name = "paint_gallery"
+required-features = ["test-support"]
+
+[[example]]
+name = "vercel_hero"
+required-features = ["test-support"]
 
 [[bench]]
 name = "layout_line"
@@ -91,5 +99,10 @@ harness = false
 
 [[bench]]
 name = "renderer"
+harness = false
+required-features = ["test-support"]
+
+[[bench]]
+name = "paint"
 harness = false
 required-features = ["test-support"]
