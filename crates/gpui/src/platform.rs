@@ -1104,6 +1104,7 @@ impl PlatformFrameSignal {
 
     /// Records a platform frame request, retaining the first undrained timestamp.
     #[inline]
+    #[cfg_attr(not(feature = "profiler"), expect(unused_variables))]
     pub fn record(&self, at: Instant, source: FrameRequestSource) {
         #[cfg(feature = "profiler")]
         {
@@ -1120,8 +1121,6 @@ impl PlatformFrameSignal {
                 std::sync::atomic::Ordering::Relaxed,
             );
         }
-        #[cfg(not(feature = "profiler"))]
-        let _ = (at, source);
     }
 
     /// Drains the first platform frame request time and source, leaving the accumulator empty.
