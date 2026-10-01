@@ -1,5 +1,6 @@
-use gpui::NavigationDirection;
-use std::ops::Range;
+use crate::rich_text::{ChangeError, ChangeSet, Document};
+use gpui::{NavigationDirection, SharedString};
+use std::{cell::RefCell, ops::Range};
 use unicode_segmentation::UnicodeSegmentation;
 
 /// Describes a boundary within a chunk of text.
@@ -14,15 +15,83 @@ pub enum TextBoundary {
     Document,
 }
 
-/// Implement this trait to create a storage medium that can be used as the content of EditableText elements.
-/// Default implementation is [`StringStorage`].
+/// Implement this trait to provide custom content storage for EditableText elements.
+/// The built-in keyed state constructors use the persistent [`Document`] backend; use
+/// [`StringStorage`] directly when constructing a state that needs a mutable `String` adapter.
 pub trait UnicodeTextStorage {
     /// Returns the version/generation of the content, which should be incremented ever time the
     /// content is changed so that rendering elements can reprocess the contents via the text layout engine.
     fn version(&self) -> u16;
 
+    /// Returns a monotonically increasing revision for cache keys.
+    ///
+    /// This default preserves compatibility with existing storage implementations. Backends
+    /// that can outlive `u16` wraparound should override it with their own wider generation.
+    fn revision(&self) -> u64 {
+        u64::from(self.version())
+    }
+
     /// Returns a reference to the utf8 string.
     fn content_utf8(&self) -> &str;
+
+    /// Returns the current UTF-8 byte length without requiring callers to inspect the contents.
+    fn len_bytes(&self) -> usize {
+        self.content_utf8().len()
+    }
+
+    /// Clamps a byte offset to a valid UTF-8 character boundary.
+    fn clamp_byte_offset(&self, position: usize) -> usize {
+        let text = self.content_utf8();
+        let mut position = position.min(text.len());
+        while !text.is_char_boundary(position) {
+            position -= 1;
+        }
+        position
+    }
+
+    /// Returns a shared snapshot of the current content.
+    ///
+    /// The default copies the text. Backends that already retain shared text can override this
+    /// to return a cheap clone, which lets editable elements avoid copying on every frame.
+    fn shared_string(&self) -> SharedString {
+        SharedString::from(self.content_utf8())
+    }
+
+    /// Returns a persistent document snapshot.
+    ///
+    /// The default implementation copies legacy storage into a document. Tree-backed storage
+    /// should override this to return a cheap snapshot.
+    fn document_snapshot(&self) -> Document {
+        Document::new(self.content_utf8())
+    }
+
+    /// Copies the requested byte range using this backend's native slice operation when available.
+    fn slice_bytes(&self, range: Range<usize>) -> String {
+        self.content_utf8()[range].to_owned()
+    }
+
+    /// Applies a validated batch of replacements to this backend.
+    ///
+    /// The complete source is checked before any mutation. Replacements then apply from right to
+    /// left so their original-snapshot byte ranges remain valid.
+    fn apply_changes(&mut self, changes: &ChangeSet) -> Result<(), ChangeError> {
+        if self.content_utf8() != changes.base_text() {
+            return Err(ChangeError::StaleSource);
+        }
+        for change in changes.changes().iter().rev() {
+            self.replace_range(change.range.clone(), &change.insert);
+        }
+        Ok(())
+    }
+
+    /// Restores a previously captured document snapshot.
+    ///
+    /// Custom legacy backends remain source-compatible and restore by replacing their contents.
+    /// Persistent backends should override this to share the prior tree/root in constant time.
+    fn restore_document(&mut self, document: &Document) -> Result<(), ChangeError> {
+        self.replace_range(0..self.len_bytes(), document.as_str());
+        Ok(())
+    }
 
     /// Returns the UTF-16 length of the content.
     fn len_utf16(&self) -> usize;
@@ -209,6 +278,9 @@ pub trait UnicodeTextStorage {
 pub struct StringStorage {
     value: String,
     version: u16,
+    revision: u64,
+    shared_value: RefCell<Option<(u64, SharedString)>>,
+    document_value: RefCell<Option<(u64, Document)>>,
 }
 impl<S> From<S> for StringStorage
 where
@@ -218,6 +290,9 @@ where
         Self {
             value: value.into(),
             version: u16::default(),
+            revision: 0,
+            shared_value: RefCell::default(),
+            document_value: RefCell::default(),
         }
     }
 }
@@ -226,8 +301,38 @@ impl UnicodeTextStorage for StringStorage {
         self.version
     }
 
+    fn revision(&self) -> u64 {
+        self.revision
+    }
+
     fn content_utf8(&self) -> &str {
         self.value.as_str()
+    }
+
+    fn shared_string(&self) -> SharedString {
+        if let Some((revision, text)) = self.shared_value.borrow().as_ref()
+            && *revision == self.revision
+        {
+            return text.clone();
+        }
+
+        let text = SharedString::from(self.value.as_str());
+        self.shared_value
+            .replace(Some((self.revision, text.clone())));
+        text
+    }
+
+    fn document_snapshot(&self) -> Document {
+        if let Some((revision, document)) = self.document_value.borrow().as_ref()
+            && *revision == self.revision
+        {
+            return document.clone();
+        }
+
+        let document = Document::new(self.value.clone());
+        self.document_value
+            .replace(Some((self.revision, document.clone())));
+        document
     }
 
     fn len_utf16(&self) -> usize {
@@ -237,5 +342,20 @@ impl UnicodeTextStorage for StringStorage {
     fn replace_range(&mut self, range: Range<usize>, text: &str) {
         self.value.replace_range(range, &text);
         self.version = self.version.wrapping_add(1);
+        self.revision = self.revision.wrapping_add(1);
+        self.shared_value.get_mut().take();
+        self.document_value.get_mut().take();
+    }
+
+    fn apply_changes(&mut self, changes: &ChangeSet) -> Result<(), ChangeError> {
+        let updated = changes.apply_to(self.value.as_str())?;
+        if updated != self.value {
+            self.value = updated;
+            self.version = self.version.wrapping_add(1);
+            self.revision = self.revision.wrapping_add(1);
+            self.shared_value.get_mut().take();
+            self.document_value.get_mut().take();
+        }
+        Ok(())
     }
 }

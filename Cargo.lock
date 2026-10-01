@@ -2532,8 +2532,10 @@ dependencies = [
 name = "gpui_ce_elements"
 version = "0.1.0"
 dependencies = [
+ "criterion",
  "gpui-ce",
  "gpui_ce_platform",
+ "gpui_ce_sum_tree",
  "palette",
  "smallvec",
  "unicode-segmentation",
@@ -2791,6 +2793,7 @@ dependencies = [
  "etagere",
  "gpui-ce",
  "gpui_ce_collections",
+ "gpui_ce_elements",
  "gpui_ce_platform",
  "gpui_ce_render",
  "gpui_ce_util",

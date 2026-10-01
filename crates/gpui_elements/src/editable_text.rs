@@ -13,9 +13,9 @@
 //!
 //! For all input actions, see documentation in the [`actions`] module.
 //!
-//! Editable text elements will default to using [`String`] as the storage medium (see [`StringStorage`]).
-//! Standard library strings are not ideal though for large text documents. For such uses,
-//! it is encouraged that implementers consider rolling their own [`UnicodeTextStorage`] medium.
+//! Editable text defaults to the persistent [`Document`](crate::rich_text::Document) backend.
+//! [`StringStorage`] and custom [`UnicodeTextStorage`] implementations remain supported.
+//! Persistent inline formatting shares the same editing path; see [`crate::rich_text`].
 //!
 //! Unlike other elements, editable text internally owns its [`FocusHandle`](gpui::FocusHandle).
 //! This is required due to limitations of the [`Interactivity`](gpui::Interactivity) api and
@@ -168,6 +168,9 @@ mod history;
 mod layout;
 mod state;
 mod storage;
+
+#[cfg(test)]
+mod verification_tests;
 
 pub use caret::*;
 pub use element::*;

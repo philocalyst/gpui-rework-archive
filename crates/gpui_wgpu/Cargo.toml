@@ -75,6 +75,7 @@ web-sys = { version = "0.3", features = ["HtmlCanvasElement"] }
 js-sys.workspace = true
 
 [dev-dependencies]
+gpui_ce_elements = { path = "../gpui_elements" }
 bytemuck = { version = "1", features = ["derive"] }
 criterion.workspace = true
 env_logger.workspace = true
@@ -84,6 +85,10 @@ naga = { version = "29.0.4", features = ["wgsl-in"] }
 [[example]]
 name = "custom_gpu"
 required-features = ["custom-gpu"]
+
+[[example]]
+name = "rich_text_studio"
+required-features = ["test-support"]
 
 [[bench]]
 name = "layout_line"

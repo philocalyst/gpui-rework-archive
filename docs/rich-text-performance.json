@@ -1,0 +1,2937 @@
+{
+  "schema_version": 1,
+  "environment": {
+    "hardware": "Apple M3 Pro",
+    "architecture": "arm64",
+    "os": "macOS 15.7.4 (24G517)",
+    "rustc": "rustc 1.98.1 (48a229cea 2026-09-01) (Homebrew)",
+    "cargo_profile": "bench / release optimized"
+  },
+  "criterion": {
+    "version": "0.5.1",
+    "sample_size": 20,
+    "warmup_seconds": 1,
+    "measurement_target_seconds": 3,
+    "confidence_level": 0.95
+  },
+  "scope": {
+    "model": "CPU-side document/range/style/editor transactions. Document/RangeSet cases do not use a text system. State dispatch uses a no-render headless context; setup/Entity teardown excluded.",
+    "frames": "NoopTextSystem headless render/layout/prepaint/scene work. No OS/Cosmic font shaping, rasterization, presentation or GPU. No GUI FPS inference.",
+    "cold_layout": "Setup creates populated state before opening a window whose first render has no editor attached. Attach flag changes without notify. Preflight proves total render count unchanged from empty-shell baseline and no final-paragraph bounds. Timed refresh+draw performs first full-document editor render; afterward counter is baseline+1 and final bounds exist. Setup and teardown excluded.",
+    "warm_layout": "Explicit window.refresh+draw forces one view render of an already-shaped document. Localized edit and width/foreground mutation are nested inside the same update_window closure as refresh+draw, avoiding a separate effect-flush redraw; preflight verifies count+1. Localized edit includes transaction build, dispatch/history and one draw. State/frame setup/warmup/teardown excluded.",
+    "document": "Edit cases exclude O(1) snapshot setup and Criterion batched output destruction; internal temporary destruction remains included. Legacy-as-str includes first edited snapshot flatten. Cheap clone uses iter, including returned-handle destruction.",
+    "uncertainty": "Confidence bounds describe this local run; no cross-machine or interactive frame-rate guarantee.",
+    "invalidation": "Width alternates 320/640 logical px; text_style_invalidation toggles foreground color on 128 paragraphs. Each measured mutation includes its one verified render/draw.",
+    "throughput": "Criterion Document throughput expressed as Bytes(document_size) is input-size normalization, not measured bytes actually processed by snapshot cloning or localized edits, and must not be interpreted as memory bandwidth. Query element throughput counts the explicitly defined batch operations; absolute nanosecond estimates remain the primary result."
+  },
+  "retention_observation": {
+    "source_bytes": 1048576,
+    "edited_bytes": 1048579,
+    "source_chunks": 512,
+    "edited_chunks": 513,
+    "shared_unchanged_chunk_allocations": 509,
+    "flattening": "Clones share snapshot lazy contiguous buffer; edited snapshots allocate distinct buffers on first contiguous read.",
+    "heap_measurement": false,
+    "cache": "Retains active document paragraph layouts; no historical FIFO, no viewport or byte budget.",
+    "history": "Up to 1,000 entries share text/style payloads but retain changed chunks and coordinate/index arrays."
+  },
+  "cases": [
+    {
+      "id": "rich_text/decorations/map_through/1024",
+      "operation": "one whole RangeSet map through a ChangeSet",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 32323.881357931226,
+          "upper_bound": 33841.90286163363
+        },
+        "point_estimate": 32957.659464157325,
+        "standard_error": 386.84276067239523
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 33074.93801798349,
+            "upper_bound": 36216.69330688446
+          },
+          "point_estimate": 34352.880300171746,
+          "standard_error": 824.6525434925343
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 32545.979105928083,
+            "upper_bound": 35048.00478710003
+          },
+          "point_estimate": 33533.74787414966,
+          "standard_error": 559.4712422390692
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 891.2433085688111,
+            "upper_bound": 2737.3803818250635
+          },
+          "point_estimate": 2245.0372592828317,
+          "standard_error": 491.6666865428708
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 32323.881357931226,
+            "upper_bound": 33841.90286163363
+          },
+          "point_estimate": 32957.659464157325,
+          "standard_error": 386.84276067239523
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 1254.05196479339,
+            "upper_bound": 5987.344579731031
+          },
+          "point_estimate": 3782.7733875203958,
+          "standard_error": 1538.8126325192275
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 92610.0,
+      "total_measured_time_ns": 3099440123.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/decorations",
+        "function_id": "map_through",
+        "value_str": "1024",
+        "throughput": null,
+        "full_id": "rich_text/decorations/map_through/1024",
+        "directory_name": "rich_text_decorations/map_through/1024",
+        "title": "rich_text/decorations/map_through/1024"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/decorations/map_through/16384",
+      "operation": "one whole RangeSet map through a ChangeSet",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 467306.5275467821,
+          "upper_bound": 817452.522538322
+        },
+        "point_estimate": 663211.7777076075,
+        "standard_error": 90780.41123047234
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 385295.2644280674,
+            "upper_bound": 623136.3947486099
+          },
+          "point_estimate": 499958.97815504577,
+          "standard_error": 60896.135263902645
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 302788.9166666666,
+            "upper_bound": 663672.8117559524
+          },
+          "point_estimate": 308073.07899305556,
+          "standard_error": 114724.33665141789
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 6443.867508098478,
+            "upper_bound": 468706.36164702784
+          },
+          "point_estimate": 105205.03418584523,
+          "standard_error": 139433.25572031437
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 467306.5275467821,
+            "upper_bound": 817452.522538322
+          },
+          "point_estimate": 663211.7777076075,
+          "standard_error": 90780.41123047234
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 196869.40224356973,
+            "upper_bound": 323004.522587847
+          },
+          "point_estimate": 279870.46481136093,
+          "standard_error": 32123.255544078012
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 10080.0,
+      "total_measured_time_ns": 6099759250.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/decorations",
+        "function_id": "map_through",
+        "value_str": "16384",
+        "throughput": null,
+        "full_id": "rich_text/decorations/map_through/16384",
+        "directory_name": "rich_text_decorations/map_through/16384",
+        "title": "rich_text/decorations/map_through/16384"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/decorations/sparse_queries_64/1024",
+      "operation": "one batch of 64 queries",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 4240.6117525351465,
+          "upper_bound": 5069.20236255633
+        },
+        "point_estimate": 4513.852822784973,
+        "standard_error": 225.00393274498492
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 4364.922399436183,
+            "upper_bound": 5046.397637000473
+          },
+          "point_estimate": 4642.32141323947,
+          "standard_error": 179.28301692005178
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 4264.871355158204,
+            "upper_bound": 4561.224190905366
+          },
+          "point_estimate": 4344.23274272839,
+          "standard_error": 82.44166092165176
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 79.3410993119483,
+            "upper_bound": 489.6454821323501
+          },
+          "point_estimate": 200.59367087545658,
+          "standard_error": 105.84001210829406
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 4240.6117525351465,
+            "upper_bound": 5069.20236255633
+          },
+          "point_estimate": 4513.852822784973,
+          "standard_error": 225.00393274498492
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 238.52447134153206,
+            "upper_bound": 1276.2899911466993
+          },
+          "point_estimate": 821.6302895639726,
+          "standard_error": 321.81120271605624
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 512610.0,
+      "total_measured_time_ns": 2355880415.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/decorations",
+        "function_id": "sparse_queries_64",
+        "value_str": "1024",
+        "throughput": null,
+        "full_id": "rich_text/decorations/sparse_queries_64/1024",
+        "directory_name": "rich_text_decorations/sparse_queries_64/1024",
+        "title": "rich_text/decorations/sparse_queries_64/1024"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/decorations/sparse_queries_64/16384",
+      "operation": "one batch of 64 queries",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 9002.949902183329,
+          "upper_bound": 9474.482781852485
+        },
+        "point_estimate": 9206.31957340965,
+        "standard_error": 119.1957564209521
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 9134.432257499124,
+            "upper_bound": 12271.026903756472
+          },
+          "point_estimate": 10242.497112453231,
+          "standard_error": 949.3411875972091
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 9058.235894901572,
+            "upper_bound": 9427.061197594927
+          },
+          "point_estimate": 9213.215851898092,
+          "standard_error": 99.56945887922456
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 143.90741983287802,
+            "upper_bound": 572.1792978855727
+          },
+          "point_estimate": 317.04710390141565,
+          "standard_error": 107.47324031170304
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 9002.949902183329,
+            "upper_bound": 9474.482781852485
+          },
+          "point_estimate": 9206.31957340965,
+          "standard_error": 119.1957564209521
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 264.10522465692674,
+            "upper_bound": 7157.75982053599
+          },
+          "point_estimate": 4362.663064339143,
+          "standard_error": 2443.8900798245973
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 283290.0,
+      "total_measured_time_ns": 2676847251.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/decorations",
+        "function_id": "sparse_queries_64",
+        "value_str": "16384",
+        "throughput": null,
+        "full_id": "rich_text/decorations/sparse_queries_64/16384",
+        "directory_name": "rich_text_decorations/sparse_queries_64/16384",
+        "title": "rich_text/decorations/sparse_queries_64/16384"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/documents/32_spaced_edits/1024",
+      "operation": "one batch of 32 edits",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 204562.35782648966,
+          "upper_bound": 207176.86104532907
+        },
+        "point_estimate": 205582.08416625188,
+        "standard_error": 670.3545249498549
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 206662.303417344,
+            "upper_bound": 213119.0241021062
+          },
+          "point_estimate": 209483.65677774695,
+          "standard_error": 1667.1891956923857
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 205540.95467532467,
+            "upper_bound": 209593.45920634922
+          },
+          "point_estimate": 207207.77551020408,
+          "standard_error": 1103.761963380421
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 1918.5951598017593,
+            "upper_bound": 6778.430987011702
+          },
+          "point_estimate": 3862.438210928021,
+          "standard_error": 1206.1153795610467
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 204562.35782648966,
+            "upper_bound": 207176.86104532907
+          },
+          "point_estimate": 205582.08416625188,
+          "standard_error": 670.3545249498549
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 2763.0333993558997,
+            "upper_bound": 11231.978549922653
+          },
+          "point_estimate": 7681.5172273892695,
+          "standard_error": 2342.33749033711
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 14700.0,
+      "total_measured_time_ns": 3039160501.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/documents",
+        "function_id": "32_spaced_edits",
+        "value_str": "1024",
+        "throughput": null,
+        "full_id": "rich_text/documents/32_spaced_edits/1024",
+        "directory_name": "rich_text_documents/32_spaced_edits/1024",
+        "title": "rich_text/documents/32_spaced_edits/1024"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/documents/32_spaced_edits/1048576",
+      "operation": "one batch of 32 edits",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 849858.7028587732,
+          "upper_bound": 919316.465646576
+        },
+        "point_estimate": 882487.2650174216,
+        "standard_error": 18129.84995515918
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 794077.5144718281,
+            "upper_bound": 873003.5572574122
+          },
+          "point_estimate": 833569.0452490585,
+          "standard_error": 20112.0232946277
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 770733.5311111112,
+            "upper_bound": 872261.4260249555
+          },
+          "point_estimate": 865721.6235449736,
+          "standard_error": 27357.193264706326
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 11592.086780866186,
+            "upper_bound": 195054.52373709
+          },
+          "point_estimate": 53208.0504187529,
+          "standard_error": 46208.71469822285
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 849858.7028587732,
+            "upper_bound": 919316.465646576
+          },
+          "point_estimate": 882487.2650174216,
+          "standard_error": 18129.84995515918
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 66201.72821396604,
+            "upper_bound": 111619.83968215586
+          },
+          "point_estimate": 92475.53474045463,
+          "standard_error": 11795.015485345322
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 3150.0,
+      "total_measured_time_ns": 2735339461.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/documents",
+        "function_id": "32_spaced_edits",
+        "value_str": "1048576",
+        "throughput": null,
+        "full_id": "rich_text/documents/32_spaced_edits/1048576",
+        "directory_name": "rich_text_documents/32_spaced_edits/1048576",
+        "title": "rich_text/documents/32_spaced_edits/1048576"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/documents/32_spaced_edits/65536",
+      "operation": "one batch of 32 edits",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 1253263.8895969812,
+          "upper_bound": 1672349.605453106
+        },
+        "point_estimate": 1436036.3759194736,
+        "standard_error": 114658.65833607015
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 1248028.0230837348,
+            "upper_bound": 1437290.0929470344
+          },
+          "point_estimate": 1324796.0606599287,
+          "standard_error": 49932.89459272835
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 1229333.8395061728,
+            "upper_bound": 1337395.6347489315
+          },
+          "point_estimate": 1249567.532142857,
+          "standard_error": 26454.304849771634
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 30421.082766167878,
+            "upper_bound": 151613.3949383242
+          },
+          "point_estimate": 87253.87914046396,
+          "standard_error": 34158.92151435656
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 1253263.8895969812,
+            "upper_bound": 1672349.605453106
+          },
+          "point_estimate": 1436036.3759194736,
+          "standard_error": 114658.65833607015
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 65274.12909413202,
+            "upper_bound": 359032.6277203453
+          },
+          "point_estimate": 229177.39522162758,
+          "standard_error": 91641.2402301618
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 3780.0,
+      "total_measured_time_ns": 5241996675.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/documents",
+        "function_id": "32_spaced_edits",
+        "value_str": "65536",
+        "throughput": null,
+        "full_id": "rich_text/documents/32_spaced_edits/65536",
+        "directory_name": "rich_text_documents/32_spaced_edits/65536",
+        "title": "rich_text/documents/32_spaced_edits/65536"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/documents/cheap_clone/1024",
+      "operation": "one operation described by case name",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 3.7069487965730397,
+          "upper_bound": 3.7815433796829026
+        },
+        "point_estimate": 3.742597776544631,
+        "standard_error": 0.019126606781047953
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 3.7251091431102177,
+            "upper_bound": 3.781580378700017
+          },
+          "point_estimate": 3.7524933019796007,
+          "standard_error": 0.014264965430735547
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 3.720969856391757,
+            "upper_bound": 3.783585343231029
+          },
+          "point_estimate": 3.748769387714029,
+          "standard_error": 0.016593087943105995
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 0.030810479727007713,
+            "upper_bound": 0.10481743977197046
+          },
+          "point_estimate": 0.06512811230001621,
+          "standard_error": 0.01843073374799613
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 3.7069487965730397,
+            "upper_bound": 3.7815433796829026
+          },
+          "point_estimate": 3.742597776544631,
+          "standard_error": 0.019126606781047953
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 0.043767275063230575,
+            "upper_bound": 0.0828480627172394
+          },
+          "point_estimate": 0.06584636114265649,
+          "standard_error": 0.01005765069529784
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 803447610.0,
+      "total_measured_time_ns": 3010213751.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/documents",
+        "function_id": "cheap_clone",
+        "value_str": "1024",
+        "throughput": null,
+        "full_id": "rich_text/documents/cheap_clone/1024",
+        "directory_name": "rich_text_documents/cheap_clone/1024",
+        "title": "rich_text/documents/cheap_clone/1024"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/documents/cheap_clone/1048576",
+      "operation": "one operation described by case name",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 5.606016768035955,
+          "upper_bound": 6.850839021173727
+        },
+        "point_estimate": 6.085407763003413,
+        "standard_error": 0.32735783159382875
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 5.679326942012571,
+            "upper_bound": 6.538056863030837
+          },
+          "point_estimate": 6.027099617207682,
+          "standard_error": 0.22705237310088758
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 5.554685229249639,
+            "upper_bound": 6.044590562954077
+          },
+          "point_estimate": 5.775851913133684,
+          "standard_error": 0.12144635056761924
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 0.22300935777213654,
+            "upper_bound": 0.614250844520287
+          },
+          "point_estimate": 0.5255267979820061,
+          "standard_error": 0.11277989810805929
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 5.606016768035955,
+            "upper_bound": 6.850839021173727
+          },
+          "point_estimate": 6.085407763003413,
+          "standard_error": 0.32735783159382875
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 0.2749289748769837,
+            "upper_bound": 1.6364178777631273
+          },
+          "point_estimate": 1.0423231161297148,
+          "standard_error": 0.4252365662093295
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 463378230.0,
+      "total_measured_time_ns": 2823697128.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/documents",
+        "function_id": "cheap_clone",
+        "value_str": "1048576",
+        "throughput": null,
+        "full_id": "rich_text/documents/cheap_clone/1048576",
+        "directory_name": "rich_text_documents/cheap_clone/1048576",
+        "title": "rich_text/documents/cheap_clone/1048576"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/documents/cheap_clone/65536",
+      "operation": "one operation described by case name",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 3.8017101469631362,
+          "upper_bound": 3.841772307701081
+        },
+        "point_estimate": 3.819056288127026,
+        "standard_error": 0.010328765149463123
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 3.8054743330325476,
+            "upper_bound": 3.8394522939166107
+          },
+          "point_estimate": 3.8220778439469854,
+          "standard_error": 0.008696716678172995
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 3.798895687960015,
+            "upper_bound": 3.8402634697432765
+          },
+          "point_estimate": 3.8107705316397964,
+          "standard_error": 0.012683102936021958
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 0.014808178071967106,
+            "upper_bound": 0.06163498479503212
+          },
+          "point_estimate": 0.03812105472437106,
+          "standard_error": 0.010814630494092712
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 3.8017101469631362,
+            "upper_bound": 3.841772307701081
+          },
+          "point_estimate": 3.819056288127026,
+          "standard_error": 0.010328765149463123
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 0.025360635572162046,
+            "upper_bound": 0.05030162574269095
+          },
+          "point_estimate": 0.03980823829925209,
+          "standard_error": 0.006328671510345656
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 785834700.0,
+      "total_measured_time_ns": 3002942626.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/documents",
+        "function_id": "cheap_clone",
+        "value_str": "65536",
+        "throughput": null,
+        "full_id": "rich_text/documents/cheap_clone/65536",
+        "directory_name": "rich_text_documents/cheap_clone/65536",
+        "title": "rich_text/documents/cheap_clone/65536"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/documents/edit_only/1024",
+      "operation": "one operation described by case name",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 6730.618144328439,
+          "upper_bound": 8063.796593897578
+        },
+        "point_estimate": 7331.665559781573,
+        "standard_error": 350.0909303062255
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 6633.353154749757,
+            "upper_bound": 7379.4584887279525
+          },
+          "point_estimate": 6946.162956804158,
+          "standard_error": 194.95711784378597
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 6516.483024484132,
+            "upper_bound": 6869.036962791025
+          },
+          "point_estimate": 6735.29569177745,
+          "standard_error": 103.18782794685286
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 152.86935518361292,
+            "upper_bound": 479.22248985206625
+          },
+          "point_estimate": 353.18012410276845,
+          "standard_error": 83.06572810079368
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 6730.618144328439,
+            "upper_bound": 8063.796593897578
+          },
+          "point_estimate": 7331.665559781573,
+          "standard_error": 350.0909303062255
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 201.52928109642684,
+            "upper_bound": 1339.8066027014136
+          },
+          "point_estimate": 896.4455994902934,
+          "standard_error": 320.8619449773017
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 426510.0,
+      "total_measured_time_ns": 3060540795.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/documents",
+        "function_id": "edit_only",
+        "value_str": "1024",
+        "throughput": null,
+        "full_id": "rich_text/documents/edit_only/1024",
+        "directory_name": "rich_text_documents/edit_only/1024",
+        "title": "rich_text/documents/edit_only/1024"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/documents/edit_only/1048576",
+      "operation": "one operation described by case name",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 29564.668830235805,
+          "upper_bound": 32396.346634247926
+        },
+        "point_estimate": 31044.883955483903,
+        "standard_error": 723.2934727277343
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 31160.89534670406,
+            "upper_bound": 35098.27386098505
+          },
+          "point_estimate": 33066.88362592574,
+          "standard_error": 1004.3922442703986
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 30441.64829036635,
+            "upper_bound": 34476.38832309043
+          },
+          "point_estimate": 32364.216705943963,
+          "standard_error": 1345.7028298571488
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 1991.2146877596356,
+            "upper_bound": 9071.248455019871
+          },
+          "point_estimate": 3425.4777716695094,
+          "standard_error": 1724.7678922323655
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 29564.668830235805,
+            "upper_bound": 32396.346634247926
+          },
+          "point_estimate": 31044.883955483903,
+          "standard_error": 723.2934727277343
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 3185.266222665864,
+            "upper_bound": 5461.593723253328
+          },
+          "point_estimate": 4604.807615536147,
+          "standard_error": 585.5393430266187
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 70350.0,
+      "total_measured_time_ns": 2207214673.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/documents",
+        "function_id": "edit_only",
+        "value_str": "1048576",
+        "throughput": null,
+        "full_id": "rich_text/documents/edit_only/1048576",
+        "directory_name": "rich_text_documents/edit_only/1048576",
+        "title": "rich_text/documents/edit_only/1048576"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/documents/edit_only/65536",
+      "operation": "one operation described by case name",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 15626.648944495975,
+          "upper_bound": 15790.37682716141
+        },
+        "point_estimate": 15720.912326895559,
+        "standard_error": 41.78229741068348
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 15350.041220954794,
+            "upper_bound": 15630.861966673056
+          },
+          "point_estimate": 15492.803252247108,
+          "standard_error": 71.64650089646359
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 15262.37474680514,
+            "upper_bound": 15765.269584198315
+          },
+          "point_estimate": 15517.39481649441,
+          "standard_error": 148.1431259469894
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 145.26807261819226,
+            "upper_bound": 503.308451237184
+          },
+          "point_estimate": 396.00869530896006,
+          "standard_error": 99.04628761752045
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 15626.648944495975,
+            "upper_bound": 15790.37682716141
+          },
+          "point_estimate": 15720.912326895559,
+          "standard_error": 41.78229741068348
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 247.65145619379945,
+            "upper_bound": 393.4101034906624
+          },
+          "point_estimate": 330.5503371645205,
+          "standard_error": 37.60662484010125
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 181020.0,
+      "total_measured_time_ns": 2832979210.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/documents",
+        "function_id": "edit_only",
+        "value_str": "65536",
+        "throughput": null,
+        "full_id": "rich_text/documents/edit_only/65536",
+        "directory_name": "rich_text_documents/edit_only/65536",
+        "title": "rich_text/documents/edit_only/65536"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/documents/edit_plus_legacy_as_str/1024",
+      "operation": "one operation described by case name",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 6673.152089850254,
+          "upper_bound": 6752.1170893332865
+        },
+        "point_estimate": 6721.325688608055,
+        "standard_error": 20.12965437467465
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 6616.063335058165,
+            "upper_bound": 6699.8990619625865
+          },
+          "point_estimate": 6658.941952396379,
+          "standard_error": 21.362825448727065
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 6600.932775806725,
+            "upper_bound": 6729.924137764584
+          },
+          "point_estimate": 6677.208826145978,
+          "standard_error": 36.65524004752341
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 45.43061612198166,
+            "upper_bound": 149.3648879446278
+          },
+          "point_estimate": 98.24414973199582,
+          "standard_error": 26.765655058076316
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 6673.152089850254,
+            "upper_bound": 6752.1170893332865
+          },
+          "point_estimate": 6721.325688608055,
+          "standard_error": 20.12965437467465
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 69.15709749109777,
+            "upper_bound": 120.18598578722063
+          },
+          "point_estimate": 98.17437293486165,
+          "standard_error": 13.11558682230467
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 414330.0,
+      "total_measured_time_ns": 2773867041.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/documents",
+        "function_id": "edit_plus_legacy_as_str",
+        "value_str": "1024",
+        "throughput": null,
+        "full_id": "rich_text/documents/edit_plus_legacy_as_str/1024",
+        "directory_name": "rich_text_documents/edit_plus_legacy_as_str/1024",
+        "title": "rich_text/documents/edit_plus_legacy_as_str/1024"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/documents/edit_plus_legacy_as_str/1048576",
+      "operation": "one operation described by case name",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 177511.63932238973,
+          "upper_bound": 206915.97131006105
+        },
+        "point_estimate": 189030.6387630662,
+        "standard_error": 7519.799653884183
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 193903.56557648978,
+            "upper_bound": 225659.55320274143
+          },
+          "point_estimate": 209432.47606109208,
+          "standard_error": 8108.36359420726
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 179859.30106837608,
+            "upper_bound": 224416.33489583334
+          },
+          "point_estimate": 214810.24583333335,
+          "standard_error": 13082.413304682781
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 13920.219182241704,
+            "upper_bound": 63499.183455311206
+          },
+          "point_estimate": 46944.289852405585,
+          "standard_error": 12607.419980571098
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 177511.63932238973,
+            "upper_bound": 206915.97131006105
+          },
+          "point_estimate": 189030.6387630662,
+          "standard_error": 7519.799653884183
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 26711.467498147405,
+            "upper_bound": 44751.76819186678
+          },
+          "point_estimate": 37235.371124809084,
+          "standard_error": 4640.021896720391
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 8400.0,
+      "total_measured_time_ns": 1660789987.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/documents",
+        "function_id": "edit_plus_legacy_as_str",
+        "value_str": "1048576",
+        "throughput": null,
+        "full_id": "rich_text/documents/edit_plus_legacy_as_str/1048576",
+        "directory_name": "rich_text_documents/edit_plus_legacy_as_str/1048576",
+        "title": "rich_text/documents/edit_plus_legacy_as_str/1048576"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/documents/edit_plus_legacy_as_str/65536",
+      "operation": "one operation described by case name",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 22176.697918354886,
+          "upper_bound": 26590.885115716937
+        },
+        "point_estimate": 23813.541619839816,
+        "standard_error": 1141.2274284679252
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 21647.951086091296,
+            "upper_bound": 26708.021364746226
+          },
+          "point_estimate": 23796.48741228955,
+          "standard_error": 1314.3716134709596
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 21167.22800256904,
+            "upper_bound": 22472.14068186684
+          },
+          "point_estimate": 21910.382831355848,
+          "standard_error": 353.07069692379594
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 550.267948316856,
+            "upper_bound": 2229.4669313888617
+          },
+          "point_estimate": 1265.3961256657508,
+          "standard_error": 452.50081834397406
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 22176.697918354886,
+            "upper_bound": 26590.885115716937
+          },
+          "point_estimate": 23813.541619839816,
+          "standard_error": 1141.2274284679252
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 903.7519815865953,
+            "upper_bound": 8659.354680520197
+          },
+          "point_estimate": 6057.113195064483,
+          "standard_error": 2065.2683147576986
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 108990.0,
+      "total_measured_time_ns": 2632122250.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/documents",
+        "function_id": "edit_plus_legacy_as_str",
+        "value_str": "65536",
+        "throughput": null,
+        "full_id": "rich_text/documents/edit_plus_legacy_as_str/65536",
+        "directory_name": "rich_text_documents/edit_plus_legacy_as_str/65536",
+        "title": "rich_text/documents/edit_plus_legacy_as_str/65536"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/editable_state_dispatch/map_1000_styles_1MiB_no_render",
+      "operation": "one transaction build+dispatch; no render; fixture teardown excluded",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 126139.49254891292,
+          "upper_bound": 131234.88988464203
+        },
+        "point_estimate": 129060.90134395221,
+        "standard_error": 1300.340943243659
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 126747.28054381703,
+            "upper_bound": 132496.43577435846
+          },
+          "point_estimate": 129404.46317873252,
+          "standard_error": 1481.0348224790698
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 124548.21547619048,
+            "upper_bound": 131548.74183006535
+          },
+          "point_estimate": 125808.05357142858,
+          "standard_error": 2298.4101890060397
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 1128.5970332601073,
+            "upper_bound": 9266.278787683636
+          },
+          "point_estimate": 3641.7414065000294,
+          "standard_error": 2511.490635882786
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 126139.49254891292,
+            "upper_bound": 131234.88988464203
+          },
+          "point_estimate": 129060.90134395221,
+          "standard_error": 1300.340943243659
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 3765.0836150556484,
+            "upper_bound": 8995.44315559415
+          },
+          "point_estimate": 6787.917005484651,
+          "standard_error": 1376.1870694280337
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 1470.0,
+      "total_measured_time_ns": 188767081.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/editable_state_dispatch",
+        "function_id": "map_1000_styles_1MiB_no_render",
+        "value_str": null,
+        "throughput": null,
+        "full_id": "rich_text/editable_state_dispatch/map_1000_styles_1MiB_no_render",
+        "directory_name": "rich_text_editable_state_dispatch/map_1000_styles_1MiB_no_render",
+        "title": "rich_text/editable_state_dispatch/map_1000_styles_1MiB_no_render"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/editable_state_dispatch/no_marks_1MiB_no_render",
+      "operation": "one transaction build+dispatch; no render; fixture teardown excluded",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 75165.2277215528,
+          "upper_bound": 121468.99679613659
+        },
+        "point_estimate": 93559.86319686411,
+        "standard_error": 12606.489895459386
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 79603.48853852354,
+            "upper_bound": 105588.10118805975
+          },
+          "point_estimate": 91110.84437610867,
+          "standard_error": 6712.997571037436
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 72346.70625,
+            "upper_bound": 92077.60119047618
+          },
+          "point_estimate": 81056.98943014705,
+          "standard_error": 5018.585451021145
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 4440.55680241435,
+            "upper_bound": 26739.632182476074
+          },
+          "point_estimate": 15427.327644829533,
+          "standard_error": 5331.79658801121
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 75165.2277215528,
+            "upper_bound": 121468.99679613659
+          },
+          "point_estimate": 93559.86319686411,
+          "standard_error": 12606.489895459386
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 10738.448713711918,
+            "upper_bound": 42713.54638952268
+          },
+          "point_estimate": 30660.96991176441,
+          "standard_error": 8341.457356484869
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 1680.0,
+      "total_measured_time_ns": 156661427.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/editable_state_dispatch",
+        "function_id": "no_marks_1MiB_no_render",
+        "value_str": null,
+        "throughput": null,
+        "full_id": "rich_text/editable_state_dispatch/no_marks_1MiB_no_render",
+        "directory_name": "rich_text_editable_state_dispatch/no_marks_1MiB_no_render",
+        "title": "rich_text/editable_state_dispatch/no_marks_1MiB_no_render"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/headless_frames_noop_text_system/cold_document_layout_draw_128_paragraphs",
+      "operation": "one operation described by frame case name; exact draw/render count scope recorded below",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 311650.807545532,
+          "upper_bound": 354296.39164698694
+        },
+        "point_estimate": 334857.3906794425,
+        "standard_error": 10752.32819660411
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 315422.2501039065,
+            "upper_bound": 336072.3741971824
+          },
+          "point_estimate": 324862.2222971867,
+          "standard_error": 5314.743777930392
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 311511.4983455882,
+            "upper_bound": 323135.5625
+          },
+          "point_estimate": 313773.9270833334,
+          "standard_error": 3466.2414883351767
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 3105.2294749748226,
+            "upper_bound": 23373.810060200212
+          },
+          "point_estimate": 6915.633136285429,
+          "standard_error": 5340.945950709174
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 311650.807545532,
+            "upper_bound": 354296.39164698694
+          },
+          "point_estimate": 334857.3906794425,
+          "standard_error": 10752.32819660411
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 11126.07398550086,
+            "upper_bound": 32135.984387536242
+          },
+          "point_estimate": 24342.357328255785,
+          "standard_error": 5385.631095489967
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 6720.0,
+      "total_measured_time_ns": 2210398712.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/headless_frames_noop_text_system",
+        "function_id": "cold_document_layout_draw_128_paragraphs",
+        "value_str": null,
+        "throughput": null,
+        "full_id": "rich_text/headless_frames_noop_text_system/cold_document_layout_draw_128_paragraphs",
+        "directory_name": "rich_text_headless_frames_noop_text_system/cold_document_layout_draw_128_paragraphs",
+        "title": "rich_text/headless_frames_noop_text_system/cold_document_layout_draw_128_paragraphs"
+      },
+      "provenance": {
+        "run_id": "corrected_frames",
+        "benchmark_source_sha256": "c943107cda7504937e95e68a4bb856b72f2cb8a046b2d79b3f68b528bf06a80d"
+      }
+    },
+    {
+      "id": "rich_text/headless_frames_noop_text_system/cold_document_layout_draw_4097_paragraphs",
+      "operation": "one operation described by frame case name; exact draw/render count scope recorded below",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 11779004.900990449,
+          "upper_bound": 12356000.364910211
+        },
+        "point_estimate": 12004314.033449477,
+        "standard_error": 147269.6637816647
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 12418238.280155154,
+            "upper_bound": 14490705.630002746
+          },
+          "point_estimate": 13380125.911176156,
+          "standard_error": 532095.4195659431
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 11949787.795454547,
+            "upper_bound": 13432397.42857143
+          },
+          "point_estimate": 12076178.722222224,
+          "standard_error": 486589.1369687439
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 146992.14443367012,
+            "upper_bound": 2592835.167750768
+          },
+          "point_estimate": 966832.3515972568,
+          "standard_error": 654623.4387677029
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 11779004.900990449,
+            "upper_bound": 12356000.364910211
+          },
+          "point_estimate": 12004314.033449477,
+          "standard_error": 147269.6637816647
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 1318317.6999621505,
+            "upper_bound": 3037618.6598020406
+          },
+          "point_estimate": 2436693.720681775,
+          "standard_error": 436079.11114732217
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 210.0,
+      "total_measured_time_ns": 2599766085.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/headless_frames_noop_text_system",
+        "function_id": "cold_document_layout_draw_4097_paragraphs",
+        "value_str": null,
+        "throughput": null,
+        "full_id": "rich_text/headless_frames_noop_text_system/cold_document_layout_draw_4097_paragraphs",
+        "directory_name": "rich_text_headless_frames_noop_text_system/cold_document_layout_draw_4097_paragraphs",
+        "title": "rich_text/headless_frames_noop_text_system/cold_document_layout_draw_4097_paragraphs"
+      },
+      "provenance": {
+        "run_id": "corrected_frames",
+        "benchmark_source_sha256": "c943107cda7504937e95e68a4bb856b72f2cb8a046b2d79b3f68b528bf06a80d"
+      }
+    },
+    {
+      "id": "rich_text/headless_frames_noop_text_system/localized_edit_plus_draw_128_paragraphs",
+      "operation": "one operation described by frame case name; exact draw/render count scope recorded below",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 181563.32992216418,
+          "upper_bound": 227819.56005101328
+        },
+        "point_estimate": 203373.86493902438,
+        "standard_error": 12368.828661507541
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 176963.36839697196,
+            "upper_bound": 199641.22266719208
+          },
+          "point_estimate": 186553.632876874,
+          "standard_error": 5885.212432851595
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 177157.93799019608,
+            "upper_bound": 182026.2763888889
+          },
+          "point_estimate": 179764.67395833333,
+          "standard_error": 1753.2206229010358
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 2680.3299218275124,
+            "upper_bound": 19115.074884381036
+          },
+          "point_estimate": 5815.326529882313,
+          "standard_error": 4802.17899436038
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 181563.32992216418,
+            "upper_bound": 227819.56005101328
+          },
+          "point_estimate": 203373.86493902438,
+          "standard_error": 12368.828661507541
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 7517.697270168794,
+            "upper_bound": 40352.73646795999
+          },
+          "point_estimate": 26938.321519732057,
+          "standard_error": 9252.452823092333
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 5040.0,
+      "total_measured_time_ns": 988753973.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/headless_frames_noop_text_system",
+        "function_id": "localized_edit_plus_draw_128_paragraphs",
+        "value_str": null,
+        "throughput": null,
+        "full_id": "rich_text/headless_frames_noop_text_system/localized_edit_plus_draw_128_paragraphs",
+        "directory_name": "rich_text_headless_frames_noop_text_system/localized_edit_plus_draw_128_paragraphs",
+        "title": "rich_text/headless_frames_noop_text_system/localized_edit_plus_draw_128_paragraphs"
+      },
+      "provenance": {
+        "run_id": "corrected_frames",
+        "benchmark_source_sha256": "c943107cda7504937e95e68a4bb856b72f2cb8a046b2d79b3f68b528bf06a80d"
+      }
+    },
+    {
+      "id": "rich_text/headless_frames_noop_text_system/localized_edit_plus_draw_4097_paragraphs",
+      "operation": "one operation described by frame case name; exact draw/render count scope recorded below",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 5802785.4803580735,
+          "upper_bound": 6164217.221824391
+        },
+        "point_estimate": 5959807.038675958,
+        "standard_error": 92765.62935147567
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 5799074.999111762,
+            "upper_bound": 6086634.677732819
+          },
+          "point_estimate": 5934994.170518158,
+          "standard_error": 73693.07187201463
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 5738095.583333334,
+            "upper_bound": 5939545.625
+          },
+          "point_estimate": 5849356.516666667,
+          "standard_error": 58931.35462173957
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 86035.02937257243,
+            "upper_bound": 367971.4410954366
+          },
+          "point_estimate": 186466.21038956268,
+          "standard_error": 75971.4885372388
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 5802785.4803580735,
+            "upper_bound": 6164217.221824391
+          },
+          "point_estimate": 5959807.038675958,
+          "standard_error": 92765.62935147567
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 199112.2040975717,
+            "upper_bound": 416998.3293313138
+          },
+          "point_estimate": 339031.8634632997,
+          "standard_error": 55668.41081087993
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 210.0,
+      "total_measured_time_ns": 1252398831.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/headless_frames_noop_text_system",
+        "function_id": "localized_edit_plus_draw_4097_paragraphs",
+        "value_str": null,
+        "throughput": null,
+        "full_id": "rich_text/headless_frames_noop_text_system/localized_edit_plus_draw_4097_paragraphs",
+        "directory_name": "rich_text_headless_frames_noop_text_system/localized_edit_plus_draw_4097_paragraphs",
+        "title": "rich_text/headless_frames_noop_text_system/localized_edit_plus_draw_4097_paragraphs"
+      },
+      "provenance": {
+        "run_id": "corrected_frames",
+        "benchmark_source_sha256": "c943107cda7504937e95e68a4bb856b72f2cb8a046b2d79b3f68b528bf06a80d"
+      }
+    },
+    {
+      "id": "rich_text/headless_frames_noop_text_system/text_style_invalidation_128_paragraphs",
+      "operation": "one operation described by frame case name; exact draw/render count scope recorded below",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 267380.36254722823,
+          "upper_bound": 344746.2105259797
+        },
+        "point_estimate": 296660.14266293484,
+        "standard_error": 22043.688671314892
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 266006.2877027136,
+            "upper_bound": 303384.8469661051
+          },
+          "point_estimate": 280768.8961245039,
+          "standard_error": 10026.785184741937
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 262489.1206088993,
+            "upper_bound": 277703.7226775956
+          },
+          "point_estimate": 272206.62540983607,
+          "standard_error": 4208.657288432021
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 6732.664513995895,
+            "upper_bound": 27831.978886006542
+          },
+          "point_estimate": 16146.031885522769,
+          "standard_error": 5297.218359567549
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 267380.36254722823,
+            "upper_bound": 344746.2105259797
+          },
+          "point_estimate": 296660.14266293484,
+          "standard_error": 22043.688671314892
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 11897.381883343123,
+            "upper_bound": 73786.40397625667
+          },
+          "point_estimate": 46004.278224340145,
+          "standard_error": 20315.8681747951
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 12810.0,
+      "total_measured_time_ns": 3704337834.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/headless_frames_noop_text_system",
+        "function_id": "text_style_invalidation_128_paragraphs",
+        "value_str": null,
+        "throughput": null,
+        "full_id": "rich_text/headless_frames_noop_text_system/text_style_invalidation_128_paragraphs",
+        "directory_name": "rich_text_headless_frames_noop_text_system/text_style_invalidation_128_paragraphs",
+        "title": "rich_text/headless_frames_noop_text_system/text_style_invalidation_128_paragraphs"
+      },
+      "provenance": {
+        "run_id": "corrected_frames",
+        "benchmark_source_sha256": "c943107cda7504937e95e68a4bb856b72f2cb8a046b2d79b3f68b528bf06a80d"
+      }
+    },
+    {
+      "id": "rich_text/headless_frames_noop_text_system/warm_unchanged_redraw_128_paragraphs",
+      "operation": "one operation described by frame case name; exact draw/render count scope recorded below",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 32501.941715004832,
+          "upper_bound": 33213.828685653636
+        },
+        "point_estimate": 32827.02401922829,
+        "standard_error": 182.12110205809995
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 32562.435735859708,
+            "upper_bound": 36106.61446251119
+          },
+          "point_estimate": 33882.62015884697,
+          "standard_error": 1011.2737638172349
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 32298.74610339506,
+            "upper_bound": 33392.017127684405
+          },
+          "point_estimate": 32704.74389315302,
+          "standard_error": 261.341771656033
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 388.89450015770774,
+            "upper_bound": 1428.4008204047045
+          },
+          "point_estimate": 854.825411289863,
+          "standard_error": 286.6979789521613
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 32501.941715004832,
+            "upper_bound": 33213.828685653636
+          },
+          "point_estimate": 32827.02401922829,
+          "standard_error": 182.12110205809995
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 634.2728362855705,
+            "upper_bound": 7582.460042073174
+          },
+          "point_estimate": 4650.6419286604605,
+          "standard_error": 2372.8067379830477
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 90720.0,
+      "total_measured_time_ns": 2987533211.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/headless_frames_noop_text_system",
+        "function_id": "warm_unchanged_redraw_128_paragraphs",
+        "value_str": null,
+        "throughput": null,
+        "full_id": "rich_text/headless_frames_noop_text_system/warm_unchanged_redraw_128_paragraphs",
+        "directory_name": "rich_text_headless_frames_noop_text_system/warm_unchanged_redraw_128_paragraphs",
+        "title": "rich_text/headless_frames_noop_text_system/warm_unchanged_redraw_128_paragraphs"
+      },
+      "provenance": {
+        "run_id": "corrected_frames",
+        "benchmark_source_sha256": "c943107cda7504937e95e68a4bb856b72f2cb8a046b2d79b3f68b528bf06a80d"
+      }
+    },
+    {
+      "id": "rich_text/headless_frames_noop_text_system/warm_unchanged_redraw_4097_paragraphs",
+      "operation": "one operation described by frame case name; exact draw/render count scope recorded below",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 34478.841206316836,
+          "upper_bound": 36020.41179197957
+        },
+        "point_estimate": 35086.498447969716,
+        "standard_error": 394.0529036159323
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 35157.73240066982,
+            "upper_bound": 38987.271532207706
+          },
+          "point_estimate": 36729.944822040794,
+          "standard_error": 1009.589198713191
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 34456.65047134238,
+            "upper_bound": 36771.20753205128
+          },
+          "point_estimate": 35485.075721153844,
+          "standard_error": 669.9352223270495
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 567.3017702979682,
+            "upper_bound": 2922.246780836091
+          },
+          "point_estimate": 1878.6559748803616,
+          "standard_error": 628.1438436769251
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 34478.841206316836,
+            "upper_bound": 36020.41179197957
+          },
+          "point_estimate": 35086.498447969716,
+          "standard_error": 394.0529036159323
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 1228.1544108617784,
+            "upper_bound": 7176.045447045906
+          },
+          "point_estimate": 4629.639596245827,
+          "standard_error": 1806.6695005568426
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 87360.0,
+      "total_measured_time_ns": 3101588581.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/headless_frames_noop_text_system",
+        "function_id": "warm_unchanged_redraw_4097_paragraphs",
+        "value_str": null,
+        "throughput": null,
+        "full_id": "rich_text/headless_frames_noop_text_system/warm_unchanged_redraw_4097_paragraphs",
+        "directory_name": "rich_text_headless_frames_noop_text_system/warm_unchanged_redraw_4097_paragraphs",
+        "title": "rich_text/headless_frames_noop_text_system/warm_unchanged_redraw_4097_paragraphs"
+      },
+      "provenance": {
+        "run_id": "corrected_frames",
+        "benchmark_source_sha256": "c943107cda7504937e95e68a4bb856b72f2cb8a046b2d79b3f68b528bf06a80d"
+      }
+    },
+    {
+      "id": "rich_text/headless_frames_noop_text_system/width_invalidation_128_paragraphs",
+      "operation": "one operation described by frame case name; exact draw/render count scope recorded below",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 312197.7153157424,
+          "upper_bound": 339995.4851073724
+        },
+        "point_estimate": 325586.586395312,
+        "standard_error": 7167.488687659147
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 322973.8099542406,
+            "upper_bound": 340979.2323547436
+          },
+          "point_estimate": 332050.94348098314,
+          "standard_error": 4581.044620622941
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 320931.4391233766,
+            "upper_bound": 344039.37784090906
+          },
+          "point_estimate": 334805.68956611573,
+          "standard_error": 7325.521486747586
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 9290.808767100607,
+            "upper_bound": 30617.5526829271
+          },
+          "point_estimate": 20569.963341215156,
+          "standard_error": 5575.728488561301
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 312197.7153157424,
+            "upper_bound": 339995.4851073724
+          },
+          "point_estimate": 325586.586395312,
+          "standard_error": 7167.488687659147
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 13953.93234146945,
+            "upper_bound": 26587.389612505885
+          },
+          "point_estimate": 21047.993606369157,
+          "standard_error": 3239.2846688913296
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 9240.0,
+      "total_measured_time_ns": 3038175376.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/headless_frames_noop_text_system",
+        "function_id": "width_invalidation_128_paragraphs",
+        "value_str": null,
+        "throughput": null,
+        "full_id": "rich_text/headless_frames_noop_text_system/width_invalidation_128_paragraphs",
+        "directory_name": "rich_text_headless_frames_noop_text_system/width_invalidation_128_paragraphs",
+        "title": "rich_text/headless_frames_noop_text_system/width_invalidation_128_paragraphs"
+      },
+      "provenance": {
+        "run_id": "corrected_frames",
+        "benchmark_source_sha256": "c943107cda7504937e95e68a4bb856b72f2cb8a046b2d79b3f68b528bf06a80d"
+      }
+    },
+    {
+      "id": "rich_text/line_queries/line_range_16/1024",
+      "operation": "one batch of 16 line-range queries",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 3215.1728575060324,
+          "upper_bound": 3345.965661884334
+        },
+        "point_estimate": 3290.7145661894015,
+        "standard_error": 33.57263346690852
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 3234.0886625616245,
+            "upper_bound": 3350.7763821027347
+          },
+          "point_estimate": 3292.9564914151188,
+          "standard_error": 29.764263435930236
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 3236.446163628656,
+            "upper_bound": 3359.806455196052
+          },
+          "point_estimate": 3315.2244973848274,
+          "standard_error": 38.5329836419611
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 43.56859273709075,
+            "upper_bound": 182.06781880113712
+          },
+          "point_estimate": 109.932681626108,
+          "standard_error": 36.46672848110224
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 3215.1728575060324,
+            "upper_bound": 3345.965661884334
+          },
+          "point_estimate": 3290.7145661894015,
+          "standard_error": 33.57263346690852
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 85.32761153917863,
+            "upper_bound": 176.86583319806044
+          },
+          "point_estimate": 136.56283569712153,
+          "standard_error": 23.46229323124057
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 778470.0,
+      "total_measured_time_ns": 2554921750.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/line_queries",
+        "function_id": "line_range_16",
+        "value_str": "1024",
+        "throughput": {
+          "Elements": 16
+        },
+        "full_id": "rich_text/line_queries/line_range_16/1024",
+        "directory_name": "rich_text_line_queries/line_range_16/1024",
+        "title": "rich_text/line_queries/line_range_16/1024"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/line_queries/line_range_16/1048576",
+      "operation": "one batch of 16 line-range queries",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 7243.550100460616,
+          "upper_bound": 8038.901073178285
+        },
+        "point_estimate": 7526.627733365963,
+        "standard_error": 217.12107655383988
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 7233.2588265550075,
+            "upper_bound": 7786.492052859271
+          },
+          "point_estimate": 7440.986895993333,
+          "standard_error": 156.7692210879086
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 7198.019235414344,
+            "upper_bound": 7374.187736900781
+          },
+          "point_estimate": 7297.0426049795615,
+          "standard_error": 52.65417113539608
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 86.58998349616542,
+            "upper_bound": 262.83287230563445
+          },
+          "point_estimate": 172.31231012646347,
+          "standard_error": 46.226802700621136
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 7243.550100460616,
+            "upper_bound": 8038.901073178285
+          },
+          "point_estimate": 7526.627733365963,
+          "standard_error": 217.12107655383988
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 118.70837361223802,
+            "upper_bound": 1177.2617114990637
+          },
+          "point_estimate": 721.1714880989863,
+          "standard_error": 364.3142718904865
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 376740.0,
+      "total_measured_time_ns": 2826100627.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/line_queries",
+        "function_id": "line_range_16",
+        "value_str": "1048576",
+        "throughput": {
+          "Elements": 16
+        },
+        "full_id": "rich_text/line_queries/line_range_16/1048576",
+        "directory_name": "rich_text_line_queries/line_range_16/1048576",
+        "title": "rich_text/line_queries/line_range_16/1048576"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/line_queries/line_range_16/65536",
+      "operation": "one batch of 16 line-range queries",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 6852.231713476395,
+          "upper_bound": 8646.977904430156
+        },
+        "point_estimate": 7485.049171830212,
+        "standard_error": 461.55416796966097
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 8833.557954865739,
+            "upper_bound": 12333.016237937696
+          },
+          "point_estimate": 10544.79086208923,
+          "standard_error": 895.5696375537436
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 6484.810684067688,
+            "upper_bound": 12828.88798967863
+          },
+          "point_estimate": 10373.008848335572,
+          "standard_error": 1851.17527946684
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 169.76683124260177,
+            "upper_bound": 7830.761607839219
+          },
+          "point_estimate": 5764.6424960007025,
+          "standard_error": 2069.1698786157963
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 6852.231713476395,
+            "upper_bound": 8646.977904430156
+          },
+          "point_estimate": 7485.049171830212,
+          "standard_error": 461.55416796966097
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 2980.1626495670325,
+            "upper_bound": 4831.157554336071
+          },
+          "point_estimate": 4103.0675803091535,
+          "standard_error": 473.1961249659447
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 255780.0,
+      "total_measured_time_ns": 2159496290.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/line_queries",
+        "function_id": "line_range_16",
+        "value_str": "65536",
+        "throughput": {
+          "Elements": 16
+        },
+        "full_id": "rich_text/line_queries/line_range_16/65536",
+        "directory_name": "rich_text_line_queries/line_range_16/65536",
+        "title": "rich_text/line_queries/line_range_16/65536"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/lower_1000_overlapping_styles",
+      "operation": "one lowering of 1000 overlapping styles",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 171626.6330231411,
+          "upper_bound": 189278.52142272546
+        },
+        "point_estimate": 180812.7860943934,
+        "standard_error": 4496.697978674859
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 174845.43686728497,
+            "upper_bound": 189831.3377347146
+          },
+          "point_estimate": 182350.3436323547,
+          "standard_error": 3824.3350726827643
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 175841.78842975205,
+            "upper_bound": 187903.64449760766
+          },
+          "point_estimate": 182640.04285714286,
+          "standard_error": 3315.116490209232
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 5785.22216492814,
+            "upper_bound": 24823.037730224052
+          },
+          "point_estimate": 12980.765543787767,
+          "standard_error": 4801.691911337498
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 171626.6330231411,
+            "upper_bound": 189278.52142272546
+          },
+          "point_estimate": 180812.7860943934,
+          "standard_error": 4496.697978674859
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 11117.114070729642,
+            "upper_bound": 22231.68949831283
+          },
+          "point_estimate": 17633.02734274228,
+          "standard_error": 2826.984188344618
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 11550.0,
+      "total_measured_time_ns": 2092301625.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/lower_1000_overlapping_styles",
+        "function_id": null,
+        "value_str": null,
+        "throughput": null,
+        "full_id": "rich_text/lower_1000_overlapping_styles",
+        "directory_name": "rich_text_lower_1000_overlapping_styles",
+        "title": "rich_text/lower_1000_overlapping_styles"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/utf16_queries/byte_to_utf16_64_mixed_unicode/1024",
+      "operation": "one batch of 64 queries",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 21109.7012606727,
+          "upper_bound": 28466.746980631127
+        },
+        "point_estimate": 24001.644726703402,
+        "standard_error": 1880.7159266640585
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 24614.136621888476,
+            "upper_bound": 29737.83414943596
+          },
+          "point_estimate": 27197.912829475747,
+          "standard_error": 1311.546968438966
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 25637.708113069017,
+            "upper_bound": 31159.638294524855
+          },
+          "point_estimate": 27452.72411894273,
+          "standard_error": 1304.9878200202852
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 1043.734325412742,
+            "upper_bound": 12050.755679536494
+          },
+          "point_estimate": 6860.720639270379,
+          "standard_error": 2506.4784234216995
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 21109.7012606727,
+            "upper_bound": 28466.746980631127
+          },
+          "point_estimate": 24001.644726703402,
+          "standard_error": 1880.7159266640585
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 4322.309738295898,
+            "upper_bound": 7133.759478564046
+          },
+          "point_estimate": 6016.767098943856,
+          "standard_error": 713.5915486637007
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 95340.0,
+      "total_measured_time_ns": 2444548917.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/utf16_queries",
+        "function_id": "byte_to_utf16_64_mixed_unicode",
+        "value_str": "1024",
+        "throughput": {
+          "Elements": 64
+        },
+        "full_id": "rich_text/utf16_queries/byte_to_utf16_64_mixed_unicode/1024",
+        "directory_name": "rich_text_utf16_queries/byte_to_utf16_64_mixed_unicode/1024",
+        "title": "rich_text/utf16_queries/byte_to_utf16_64_mixed_unicode/1024"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/utf16_queries/byte_to_utf16_64_mixed_unicode/1048576",
+      "operation": "one batch of 64 queries",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 34797.39740211015,
+          "upper_bound": 35594.77650139105
+        },
+        "point_estimate": 35185.56662302874,
+        "standard_error": 204.54227217306595
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 35069.25358530063,
+            "upper_bound": 35731.14537739128
+          },
+          "point_estimate": 35400.21941910506,
+          "standard_error": 169.20052960895137
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 34797.0957698371,
+            "upper_bound": 36117.71246903385
+          },
+          "point_estimate": 35399.62695086705,
+          "standard_error": 472.5768775287674
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 121.42250969402582,
+            "upper_bound": 1165.9770204778981
+          },
+          "point_estimate": 1071.5257421760386,
+          "standard_error": 304.4994559782381
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 34797.39740211015,
+            "upper_bound": 35594.77650139105
+          },
+          "point_estimate": 35185.56662302874,
+          "standard_error": 204.54227217306595
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 637.8022042181266,
+            "upper_bound": 859.4833814266361
+          },
+          "point_estimate": 778.3152074494101,
+          "standard_error": 56.42788217858029
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 72660.0,
+      "total_measured_time_ns": 2560623249.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/utf16_queries",
+        "function_id": "byte_to_utf16_64_mixed_unicode",
+        "value_str": "1048576",
+        "throughput": {
+          "Elements": 64
+        },
+        "full_id": "rich_text/utf16_queries/byte_to_utf16_64_mixed_unicode/1048576",
+        "directory_name": "rich_text_utf16_queries/byte_to_utf16_64_mixed_unicode/1048576",
+        "title": "rich_text/utf16_queries/byte_to_utf16_64_mixed_unicode/1048576"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/utf16_queries/byte_to_utf16_64_mixed_unicode/65536",
+      "operation": "one batch of 64 queries",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 83453.87096903032,
+          "upper_bound": 97159.83741417313
+        },
+        "point_estimate": 89298.4181988743,
+        "standard_error": 3486.1176578395384
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 94721.0178008324,
+            "upper_bound": 110632.60966558092
+          },
+          "point_estimate": 102608.83967829464,
+          "standard_error": 4052.264345068739
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 95251.06318681319,
+            "upper_bound": 108312.54566544566
+          },
+          "point_estimate": 103595.52065527067,
+          "standard_error": 3115.5597126684493
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 4078.373600585841,
+            "upper_bound": 29930.653505034938
+          },
+          "point_estimate": 16471.511470392725,
+          "standard_error": 7022.72082952664
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 83453.87096903032,
+            "upper_bound": 97159.83741417313
+          },
+          "point_estimate": 89298.4181988743,
+          "standard_error": 3486.1176578395384
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 12217.98257140357,
+            "upper_bound": 23393.776941475237
+          },
+          "point_estimate": 18575.402900133002,
+          "standard_error": 2867.2088370547935
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 24570.0,
+      "total_measured_time_ns": 2302951750.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/utf16_queries",
+        "function_id": "byte_to_utf16_64_mixed_unicode",
+        "value_str": "65536",
+        "throughput": {
+          "Elements": 64
+        },
+        "full_id": "rich_text/utf16_queries/byte_to_utf16_64_mixed_unicode/65536",
+        "directory_name": "rich_text_utf16_queries/byte_to_utf16_64_mixed_unicode/65536",
+        "title": "rich_text/utf16_queries/byte_to_utf16_64_mixed_unicode/65536"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/utf16_queries/utf16_to_byte_64_mixed_unicode/1024",
+      "operation": "one batch of 64 queries",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 25908.114451980884,
+          "upper_bound": 38196.5574071663
+        },
+        "point_estimate": 30491.51220280282,
+        "standard_error": 3633.7251692308923
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 25532.59394726836,
+            "upper_bound": 30533.10745378512
+          },
+          "point_estimate": 27322.879290653644,
+          "standard_error": 1488.648684967887
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 25553.01504307316,
+            "upper_bound": 25934.09744488978
+          },
+          "point_estimate": 25643.01612113115,
+          "standard_error": 114.52962464380481
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 106.54562272620159,
+            "upper_bound": 1375.3394859936639
+          },
+          "point_estimate": 431.55716294287345,
+          "standard_error": 406.64265594206404
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 25908.114451980884,
+            "upper_bound": 38196.5574071663
+          },
+          "point_estimate": 30491.51220280282,
+          "standard_error": 3633.7251692308923
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 572.994334595901,
+            "upper_bound": 11190.885156910132
+          },
+          "point_estimate": 6825.607644132141,
+          "standard_error": 3741.9885084278785
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 104790.0,
+      "total_measured_time_ns": 3035257376.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/utf16_queries",
+        "function_id": "utf16_to_byte_64_mixed_unicode",
+        "value_str": "1024",
+        "throughput": {
+          "Elements": 64
+        },
+        "full_id": "rich_text/utf16_queries/utf16_to_byte_64_mixed_unicode/1024",
+        "directory_name": "rich_text_utf16_queries/utf16_to_byte_64_mixed_unicode/1024",
+        "title": "rich_text/utf16_queries/utf16_to_byte_64_mixed_unicode/1024"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/utf16_queries/utf16_to_byte_64_mixed_unicode/1048576",
+      "operation": "one batch of 64 queries",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 54054.65350254218,
+          "upper_bound": 67381.56461887705
+        },
+        "point_estimate": 58983.763486950236,
+        "standard_error": 3419.3214887865247
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 68162.77288396914,
+            "upper_bound": 94348.62810390534
+          },
+          "point_estimate": 81147.39406644678,
+          "standard_error": 6702.072941682669
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 50766.25301105768,
+            "upper_bound": 103130.62810721772
+          },
+          "point_estimate": 83111.85934819898,
+          "standard_error": 17088.782967014213
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 4216.548018145286,
+            "upper_bound": 51985.39760319648
+          },
+          "point_estimate": 51269.765970199194,
+          "standard_error": 13856.3643153593
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 54054.65350254218,
+            "upper_bound": 67381.56461887705
+          },
+          "point_estimate": 58983.763486950236,
+          "standard_error": 3419.3214887865247
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 24948.49787421058,
+            "upper_bound": 33984.804152906065
+          },
+          "point_estimate": 30806.21112494863,
+          "standard_error": 2302.9921140052475
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 33390.0,
+      "total_measured_time_ns": 2203678000.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/utf16_queries",
+        "function_id": "utf16_to_byte_64_mixed_unicode",
+        "value_str": "1048576",
+        "throughput": {
+          "Elements": 64
+        },
+        "full_id": "rich_text/utf16_queries/utf16_to_byte_64_mixed_unicode/1048576",
+        "directory_name": "rich_text_utf16_queries/utf16_to_byte_64_mixed_unicode/1048576",
+        "title": "rich_text/utf16_queries/utf16_to_byte_64_mixed_unicode/1048576"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    },
+    {
+      "id": "rich_text/utf16_queries/utf16_to_byte_64_mixed_unicode/65536",
+      "operation": "one batch of 64 queries",
+      "timing_unit": "nanoseconds_per_operation_as_defined_above",
+      "primary_estimator": "slope",
+      "primary_estimate": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 50946.12986407373,
+          "upper_bound": 53153.60726251967
+        },
+        "point_estimate": 52069.60943640217,
+        "standard_error": 568.8869492328816
+      },
+      "estimates": {
+        "mean": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 51468.77216365247,
+            "upper_bound": 52879.42552357348
+          },
+          "point_estimate": 52151.873176515204,
+          "standard_error": 359.99208428267787
+        },
+        "median": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 51726.030756013744,
+            "upper_bound": 52418.14292408622
+          },
+          "point_estimate": 51981.13015463918,
+          "standard_error": 176.0847260959084
+        },
+        "median_abs_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 310.1639119875398,
+            "upper_bound": 2211.635394240774
+          },
+          "point_estimate": 719.1194505835946,
+          "standard_error": 462.3292810583119
+        },
+        "slope": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 50946.12986407373,
+            "upper_bound": 53153.60726251967
+          },
+          "point_estimate": 52069.60943640217,
+          "standard_error": 568.8869492328816
+        },
+        "std_dev": {
+          "confidence_interval": {
+            "confidence_level": 0.95,
+            "lower_bound": 936.3874949805214,
+            "upper_bound": 2179.000816747943
+          },
+          "point_estimate": 1656.8526631390257,
+          "standard_error": 318.2649853616839
+        }
+      },
+      "sample_count": 20,
+      "sampling_mode": "Linear",
+      "total_measured_iterations": 20370.0,
+      "total_measured_time_ns": 1060907542.0,
+      "criterion_metadata": {
+        "group_id": "rich_text/utf16_queries",
+        "function_id": "utf16_to_byte_64_mixed_unicode",
+        "value_str": "65536",
+        "throughput": {
+          "Elements": 64
+        },
+        "full_id": "rich_text/utf16_queries/utf16_to_byte_64_mixed_unicode/65536",
+        "directory_name": "rich_text_utf16_queries/utf16_to_byte_64_mixed_unicode/65536",
+        "title": "rich_text/utf16_queries/utf16_to_byte_64_mixed_unicode/65536"
+      },
+      "provenance": {
+        "run_id": "model_state",
+        "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2"
+      }
+    }
+  ],
+  "runs": [
+    {
+      "id": "model_state",
+      "command": "cargo bench -p gpui_ce_elements --bench rich_text -- --noplot",
+      "started_at_utc": "2026-09-26T19:32:13.047232+00:00",
+      "started_epoch": 1790451133.0473988,
+      "finished_at_utc": "2026-09-26T20:05:00.533479+00:00",
+      "exit_code": 0,
+      "benchmark_source_sha256": "4cdee2d0ce4d4d9f164f759a38cd8673e732f5d7641d5500fabe3496c9a59ae2",
+      "published_case_count": 28,
+      "original_executed_case_count": 36,
+      "superseded_case_count": 8,
+      "note": "Original frame results are omitted: test-support entity-update effect flushing drew dirty windows before intended cold timing and added an implicit draw to changed-frame routines."
+    },
+    {
+      "id": "corrected_frames",
+      "command": "cargo bench -p gpui_ce_elements --bench rich_text -- rich_text/headless_frames_noop_text_system --noplot",
+      "started_at_utc": "2026-09-26T21:09:36.098644+00:00",
+      "started_epoch": 1790456976.098791,
+      "finished_at_utc": "2026-09-26T21:10:17.463557+00:00",
+      "exit_code": 0,
+      "benchmark_source_sha256": "c943107cda7504937e95e68a4bb856b72f2cb8a046b2d79b3f68b528bf06a80d",
+      "published_case_count": 8
+    }
+  ],
+  "verification_status": "All 36 published cases come from verified measured routines: 28 unchanged model/state cases retained from the first successful run and 8 corrected frame cases from the second run. Per-case provenance identifies the run and whole benchmark source SHA.",
+  "unchanged_model_state_sections_sha256": "a3b4f7510f291687ad424341f54b5ee562a1d21dbf25f4c10d550d2e71d381be",
+  "frame_preflight": {
+    "command": "cargo bench -p gpui_ce_elements --bench rich_text -- --test",
+    "successful_case_count": 36,
+    "cold": "bounds absent and render count unchanged from empty-shell baseline before first editor draw; +1 and final-paragraph bounds after",
+    "changed": "edit/width/color operations each advance render counter by exactly1; source/revision/bounds checked",
+    "initial_revision": 0,
+    "localized_edit_revision": 1
+  }
+}

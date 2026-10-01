@@ -17,11 +17,17 @@ gpui.workspace = true
 unicode-segmentation.workspace = true
 palette.workspace = true
 smallvec.workspace = true
+sum_tree.workspace = true
 
 [dev-dependencies]
+criterion.workspace = true
 gpui = { path = "../gpui", package = "gpui-ce", features = ["test-support"] }
 gpui_platform = { workspace = true, features = ["font-kit", "wayland", "x11"] }
 
 [[example]]
 name = "editable_text"
 path = "examples/editable_text.rs"
+
+[[bench]]
+name = "rich_text"
+harness = false

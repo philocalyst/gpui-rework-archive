@@ -114,6 +114,10 @@ It's mostly API compatible with upstream, but that is changing!
 
   [Drawing example](crates/gpui/examples/learn/custom_drawing.rs)
 
+- Composable rich text (experimental)
+
+  [Composable rich text](docs/rich-text-guide.md) adds persistent text snapshots, atomic edits, typed annotations, and rich formatting to the existing text input and IME path, with an interactive studio example.
+
 ## Setup
 View the [setup guide](SETUP.md) for installation instructions.
 

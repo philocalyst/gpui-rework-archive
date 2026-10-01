@@ -538,11 +538,14 @@ impl WindowTextSystem {
 
     /// Shape a multi line string of text, at the given font_size, for painting to the screen.
     /// Subsets of the text can be styled independently with the `runs` parameter,
-    /// where each run dictates the length of utf8 characters in `text` that it styles.
-    /// The length (utf8 characters) of last item in `runs` is semantically ignored as it
-    /// represents the "rest" of the `text`.
+    /// where each run's `len` is the number of UTF-8 bytes in `text` that it styles.
+    /// Runs must cover the entire text, and each run boundary must fall on a character
+    /// boundary. The final run may extend past the end of `text`; excess bytes are clipped.
     ///
     /// If `wrap_width` is provided, the line breaks will be adjusted to fit within the given width.
+    /// `line_clamp` limits the total number of visual rows represented by the returned layouts,
+    /// including lines separated by newlines. It does not truncate the source text. A clamp of
+    /// zero returns no lines.
     ///
     /// If the text provided is SharedString and does not contain new-lines,
     /// it will be used as-is without additional allocations.
@@ -560,10 +563,13 @@ impl WindowTextSystem {
         let mut font_runs = self.font_runs_pool.lock().pop().unwrap_or_default();
 
         let mut lines = SmallVec::new();
-        let mut max_wrap_lines = line_clamp;
-        let mut wrapped_lines = 0;
+        let mut visual_lines = 0;
 
         let mut process_line = |line_text: SharedString, line_start, line_end| {
+            if line_clamp.is_some_and(|max_lines| visual_lines >= max_lines) {
+                return false;
+            }
+
             font_runs.clear();
 
             let mut decoration_runs = <Vec<DecorationRun>>::with_capacity(32);
@@ -619,14 +625,28 @@ impl WindowTextSystem {
                 run_start += run_len_within_line;
             }
 
-            let layout = self.line_layout_cache.layout_wrapped_line(
-                &line_text,
-                font_size,
-                &font_runs,
-                wrap_width,
-                max_wrap_lines.map(|max| max.saturating_sub(wrapped_lines)),
-            );
-            wrapped_lines += layout.wrap_boundaries.len();
+            // Keep the cached layout independent of `line_clamp`, which varies with the
+            // preceding paragraphs in this call. Clamp a per-call view of the full layout.
+            let layout = self
+                .line_layout_cache
+                .layout_wrapped_line(&line_text, font_size, &font_runs, wrap_width, None);
+            let layout = if let Some(max_lines) = line_clamp.map(|max| max - visual_lines)
+                && layout.wrap_boundaries.len() + 1 > max_lines
+            {
+                Arc::new(WrappedLineLayout {
+                    unwrapped_layout: layout.unwrapped_layout.clone(),
+                    wrap_boundaries: layout
+                        .wrap_boundaries
+                        .iter()
+                        .take(max_lines - 1)
+                        .copied()
+                        .collect(),
+                    wrap_width: layout.wrap_width,
+                })
+            } else {
+                layout
+            };
+            visual_lines += layout.wrap_boundaries.len() + 1;
 
             lines.push(WrappedLine {
                 layout,
@@ -641,6 +661,8 @@ impl WindowTextSystem {
                     runs.next();
                 }
             }
+
+            line_clamp.is_none_or(|max_lines| visual_lines < max_lines)
         };
 
         let mut split_lines = text.as_ref().split('\n');
@@ -650,28 +672,36 @@ impl WindowTextSystem {
             && let Some(second_line) = split_lines.next()
         {
             let mut line_start = 0;
-            process_line(
+            let mut should_process_next_line = process_line(
                 SharedString::new(first_line),
                 line_start,
                 line_start + first_line.len(),
             );
-            line_start += first_line.len() + '\n'.len_utf8();
-            process_line(
-                SharedString::new(second_line),
-                line_start,
-                line_start + second_line.len(),
-            );
-            for line_text in split_lines {
-                line_start += line_text.len() + '\n'.len_utf8();
-                process_line(
-                    SharedString::new(line_text),
+            if should_process_next_line {
+                line_start += first_line.len() + '\n'.len_utf8();
+                should_process_next_line = process_line(
+                    SharedString::new(second_line),
                     line_start,
-                    line_start + line_text.len(),
+                    line_start + second_line.len(),
                 );
+            }
+            if should_process_next_line {
+                line_start += second_line.len() + '\n'.len_utf8();
+                for line_text in split_lines {
+                    should_process_next_line = process_line(
+                        SharedString::new(line_text),
+                        line_start,
+                        line_start + line_text.len(),
+                    );
+                    line_start += line_text.len() + '\n'.len_utf8();
+                    if !should_process_next_line {
+                        break;
+                    }
+                }
             }
         } else {
             let end = text.as_ref().len();
-            process_line(text.into(), 0, end);
+            let _ = process_line(text.into(), 0, end);
         }
 
         self.font_runs_pool.lock().push(font_runs);
@@ -1260,5 +1290,285 @@ pub fn font_name_with_fallbacks_shared<'a>(
         ".ZedSans" | "Zed Plex Sans" => const { &SharedString::new_static("IBM Plex Sans") },
         ".ZedMono" | "Zed Plex Mono" => const { &SharedString::new_static("Lilex") },
         _ => name,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn shape_text_preserves_run_decorations_across_multiline_unicode_text() {
+        let platform_text_system: Arc<dyn PlatformTextSystem> =
+            Arc::new(crate::NoopTextSystem::new());
+        let text_system = WindowTextSystem::new(Arc::new(TextSystem::new(platform_text_system)));
+        let text = "x\nlonger\ncafé\n";
+        let red = Hsla::new(0., 1., 0.5, 1.);
+        let green = Hsla::new(120., 1., 0.25, 1.);
+        let blue = Hsla::new(240., 1., 0.5, 1.);
+        let yellow = Hsla::new(60., 1., 0.5, 1.);
+        let runs = [
+            TextRun {
+                len: "x\n".len(),
+                font: font("IBM Plex Sans"),
+                color: red,
+                background_color: Some(blue),
+                ..Default::default()
+            },
+            TextRun {
+                len: "longer\n".len(),
+                font: font("Lilex"),
+                color: green,
+                background_color: Some(yellow),
+                underline: Some(UnderlineStyle {
+                    thickness: px(1.),
+                    color: Some(green),
+                    wavy: false,
+                }),
+                ..Default::default()
+            },
+            TextRun {
+                len: "café\n".len(),
+                font: font("IBM Plex Sans"),
+                color: blue,
+                strikethrough: Some(StrikethroughStyle {
+                    thickness: px(1.),
+                    color: Some(red),
+                }),
+                ..Default::default()
+            },
+        ];
+
+        let lines = text_system
+            .shape_text(text, px(16.), &runs, None, None)
+            .unwrap();
+
+        assert_eq!(lines.len(), 4);
+        assert_eq!(
+            lines
+                .iter()
+                .map(|line| line.text.as_ref())
+                .collect::<Vec<_>>(),
+            ["x", "longer", "café", ""]
+        );
+        assert_eq!(
+            lines.iter().map(WrappedLine::len).collect::<Vec<_>>(),
+            [1, 6, 5, 0]
+        );
+
+        let first = &lines[0].decoration_runs;
+        assert_eq!(first.len(), 1);
+        assert_eq!(first[0].len, 1);
+        assert_eq!(first[0].color, red);
+        assert_eq!(first[0].background_color, Some(blue));
+        assert!(first[0].underline.is_none());
+        assert!(first[0].strikethrough.is_none());
+
+        let second = &lines[1].decoration_runs;
+        assert_eq!(second.len(), 1);
+        assert_eq!(second[0].len, 6);
+        assert_eq!(second[0].color, green);
+        assert_eq!(second[0].background_color, Some(yellow));
+        assert!(second[0].underline.is_some());
+        assert!(second[0].strikethrough.is_none());
+
+        let third = &lines[2].decoration_runs;
+        assert_eq!(third.len(), 1);
+        assert_eq!(third[0].len, 5);
+        assert_eq!(third[0].color, blue);
+        assert_eq!(third[0].background_color, None);
+        assert!(third[0].underline.is_none());
+        assert!(third[0].strikethrough.is_some());
+
+        assert!(lines[3].decoration_runs.is_empty());
+    }
+
+    #[test]
+    fn shape_text_clamps_the_total_visual_line_count() {
+        let platform_text_system: Arc<dyn PlatformTextSystem> =
+            Arc::new(crate::NoopTextSystem::new());
+        let text_system = WindowTextSystem::new(Arc::new(TextSystem::new(platform_text_system)));
+        let wrap_run = |text: &str| {
+            [TextRun {
+                len: text.len(),
+                font: font(".ZedMono"),
+                ..Default::default()
+            }]
+        };
+        let visual_line_count = |lines: &[WrappedLine]| {
+            lines
+                .iter()
+                .map(|line| line.wrap_boundaries().len() + 1)
+                .sum::<usize>()
+        };
+
+        let wrapped_text = "abcdef";
+        let unbounded_lines = text_system
+            .shape_text(
+                wrapped_text,
+                px(16.),
+                &wrap_run(wrapped_text),
+                Some(px(20.)),
+                None,
+            )
+            .unwrap();
+        let unbounded_visual_lines = visual_line_count(&unbounded_lines);
+        assert!(unbounded_visual_lines > 2);
+
+        let wrapped_lines = text_system
+            .shape_text(
+                wrapped_text,
+                px(16.),
+                &wrap_run(wrapped_text),
+                Some(px(20.)),
+                Some(2),
+            )
+            .unwrap();
+        assert_eq!(wrapped_lines.len(), 1);
+        assert_eq!(visual_line_count(&wrapped_lines), 2);
+        assert_eq!(wrapped_lines[0].wrap_boundaries().len(), 1);
+        assert_eq!(wrapped_lines[0].len(), wrapped_text.len());
+        assert!(wrapped_lines[0].width() <= px(20.));
+        assert_eq!(wrapped_lines[0].size(px(16.)).height, px(32.));
+
+        let three_wrapped_lines = text_system
+            .shape_text(
+                wrapped_text,
+                px(16.),
+                &wrap_run(wrapped_text),
+                Some(px(20.)),
+                Some(3),
+            )
+            .unwrap();
+        assert_eq!(visual_line_count(&three_wrapped_lines), 3);
+
+        let unbounded_lines_again = text_system
+            .shape_text(
+                wrapped_text,
+                px(16.),
+                &wrap_run(wrapped_text),
+                Some(px(20.)),
+                None,
+            )
+            .unwrap();
+        assert_eq!(
+            visual_line_count(&unbounded_lines_again),
+            unbounded_visual_lines
+        );
+
+        let clamp_first_text = "ghijkl";
+        let clamp_first_lines = text_system
+            .shape_text(
+                clamp_first_text,
+                px(16.),
+                &wrap_run(clamp_first_text),
+                Some(px(20.)),
+                Some(2),
+            )
+            .unwrap();
+        assert_eq!(visual_line_count(&clamp_first_lines), 2);
+        let unbounded_after_clamp = text_system
+            .shape_text(
+                clamp_first_text,
+                px(16.),
+                &wrap_run(clamp_first_text),
+                Some(px(20.)),
+                None,
+            )
+            .unwrap();
+        assert!(visual_line_count(&unbounded_after_clamp) > 2);
+
+        let explicit_text = "first\nsecond\nthird";
+        let two_hard_lines = text_system
+            .shape_text(
+                explicit_text,
+                px(16.),
+                &wrap_run(explicit_text),
+                Some(px(300.)),
+                Some(2),
+            )
+            .unwrap();
+        assert_eq!(
+            two_hard_lines
+                .iter()
+                .map(|line| line.text.as_ref())
+                .collect::<Vec<_>>(),
+            ["first", "second"]
+        );
+        assert_eq!(visual_line_count(&two_hard_lines), 2);
+
+        let mixed_text = "a\nabcdef";
+        let mixed_lines = text_system
+            .shape_text(
+                mixed_text,
+                px(16.),
+                &wrap_run(mixed_text),
+                Some(px(20.)),
+                Some(2),
+            )
+            .unwrap();
+        assert_eq!(mixed_lines.len(), 2);
+        assert_eq!(visual_line_count(&mixed_lines), 2);
+        assert_eq!(mixed_lines[1].wrap_boundaries().len(), 0);
+
+        let trailing_newline = "a\n";
+        let no_lines = text_system
+            .shape_text(
+                trailing_newline,
+                px(16.),
+                &wrap_run(trailing_newline),
+                None,
+                Some(0),
+            )
+            .unwrap();
+        assert!(no_lines.is_empty());
+
+        let one_line = text_system
+            .shape_text(
+                trailing_newline,
+                px(16.),
+                &wrap_run(trailing_newline),
+                None,
+                Some(1),
+            )
+            .unwrap();
+        assert_eq!(one_line.len(), 1);
+        assert_eq!(one_line[0].text.as_ref(), "a");
+
+        let two_lines = text_system
+            .shape_text(
+                trailing_newline,
+                px(16.),
+                &wrap_run(trailing_newline),
+                None,
+                Some(2),
+            )
+            .unwrap();
+        assert_eq!(
+            two_lines
+                .iter()
+                .map(|line| line.text.as_ref())
+                .collect::<Vec<_>>(),
+            ["a", ""]
+        );
+
+        let trailing_empty = "a\nb\n";
+        let three_lines = text_system
+            .shape_text(
+                trailing_empty,
+                px(16.),
+                &wrap_run(trailing_empty),
+                None,
+                Some(3),
+            )
+            .unwrap();
+        assert_eq!(
+            three_lines
+                .iter()
+                .map(|line| line.text.as_ref())
+                .collect::<Vec<_>>(),
+            ["a", "b", ""]
+        );
+        assert_eq!(visual_line_count(&three_lines), 3);
     }
 }

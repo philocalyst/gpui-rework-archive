@@ -1,8 +1,12 @@
 use crate::editable_text::{
     BLINK_INTERVAL_500MS, Caret, EditableTextState,
     actions::{DEFAULT_INPUT_CONTEXT, EditableTextActionElement, EditableTextActionHandler},
-    layout::{EditableTextLayoutResult, EditableTextLayoutState, TextLineSegment},
+    layout::{
+        EditableTextLayoutKey, EditableTextLayoutResult, EditableTextLayoutState,
+        ParagraphLayoutCache, ParagraphLayoutCacheBuilder, ParagraphLayoutKey, TextLineSegment,
+    },
 };
+use crate::rich_text::{Document, InlineStyle, RangeSet};
 use gpui::{
     App, Bounds, CursorStyle, DefiniteLength, DispatchPhase, Display, Element, ElementId,
     ElementInputHandler, Entity, FocusHandle, Focusable, Hitbox, HitboxBehavior, Hsla,
@@ -31,6 +35,7 @@ pub fn editable_text(id: impl Into<ElementId>) -> EditableTextElement {
         caret_blink_interval: None,
         caret_width: px(2.),
         caret_height: relative(1.).into(),
+        decorations: RangeSet::default(),
     };
     this.interactivity.element_id = Some(id.into());
 
@@ -54,6 +59,14 @@ pub fn text_area(id: impl Into<ElementId>) -> EditableTextElement {
     editable_text(id).multiline(true)
 }
 
+/// Creates an editable element intended for composing rich text.
+///
+/// It uses the same selection, input, IME, and storage path as [`text_input`] and [`text_area`].
+#[track_caller]
+pub fn rich_text(id: impl Into<ElementId>) -> EditableTextElement {
+    editable_text(id)
+}
+
 /// An input field which users can type text into.
 pub struct EditableTextElement {
     interactivity: Interactivity,
@@ -68,6 +81,8 @@ pub struct EditableTextElement {
     caret_blink_interval: Option<Duration>,
     caret_width: Pixels,
     caret_height: DefiniteLength,
+    /// Transient presentation ranges supplied by the element's owner.
+    decorations: RangeSet<InlineStyle>,
 }
 
 /// EditableText styling that goes beyond what Style/StyleRefinement supports
@@ -109,11 +124,20 @@ impl EditableTextElement {
         self
     }
 
+    /// Adds transient text styles, such as syntax colors, diagnostics, and links.
+    ///
+    /// These ranges are part of the text layout and paint cache key. They do not change persistent
+    /// formatting or participate in undo history.
+    pub fn decorations(mut self, decorations: RangeSet<InlineStyle>) -> Self {
+        self.decorations = decorations;
+        self
+    }
+
     /// Configures whether the field supports multiple lines of text.
     /// Disabling this prevents actions like `enter` and navigating up and down.
     ///
-    /// It doesnt not automatically sanitize inputs from containing newlines (e.g. on paste).
-    /// This is a limitation of the current state of implementation and requires further iteration.
+    /// In single-line mode, incoming user text has newline characters removed. Programmatic
+    /// document transactions can still insert newline characters.
     pub fn multiline(mut self, enabled: bool) -> Self {
         self.supports_multiline = enabled;
         self
@@ -222,10 +246,15 @@ impl EditableTextActionElement<EditableTextState> for EditableTextElement {
 struct PrelayoutState {
     state: Entity<EditableTextState>,
     prev_layout_state: EditableTextLayoutState,
-    storage_version: u16,
+    paragraph_cache: ParagraphLayoutCache,
+    document: Document,
+    storage_revision: u64,
+    pending_scroll_to_caret: bool,
     show_placeholder: bool,
-    text: Option<SharedString>,
+    placeholder_text: Option<SharedString>,
     placeholder_color: Hsla,
+    persistent_styles: RangeSet<InlineStyle>,
+    decorations: RangeSet<InlineStyle>,
     supports_multiline: bool,
     accepts_input: bool,
 }
@@ -281,29 +310,51 @@ impl Element for EditableTextElement {
 
         // Read new state information from the underlying entity.
         // Block-wrapped so that the state being read is dropped before continuing.
-        let (prelayout, next_scroll_offset) = {
+        let (prelayout, next_scroll_offset, pending_scroll_to_caret) = {
             let state = entity.read(cx);
-            let show_placeholder = state.as_str().is_empty();
-            let text = match show_placeholder {
-                false => Some(SharedString::from(state.as_str())),
-                true => self.placeholder.clone(),
+            let show_placeholder = state.len_bytes() == 0;
+            let placeholder_text = show_placeholder.then(|| self.placeholder.clone()).flatten();
+            let source_document = state.document_snapshot();
+            let decorations = if show_placeholder {
+                RangeSet::default()
+            } else {
+                self.decorations.clone()
+            };
+            let persistent_styles = if show_placeholder {
+                RangeSet::default()
+            } else {
+                state.inline_styles().clone()
+            };
+            let document = if let Some(placeholder) = &placeholder_text {
+                Document::from_shared_string(placeholder.clone())
+            } else {
+                source_document
             };
 
             let prelayout = PrelayoutState {
                 state: entity.clone(),
-                prev_layout_state: state.layout_data.state,
+                prev_layout_state: state.layout_data.state.clone(),
+                paragraph_cache: state.layout_data.paragraph_cache.clone(),
+                document,
                 show_placeholder,
-                storage_version: state.version(),
-                text,
+                storage_revision: state.revision(),
+                pending_scroll_to_caret: state.pending_scroll_to_caret(),
+                placeholder_text,
                 placeholder_color: self.colors.placeholder,
+                persistent_styles,
+                decorations,
                 supports_multiline: self.supports_multiline,
                 accepts_input: self.accepts_input,
             };
-            (prelayout, state.layout_data.next_scroll_offset)
+            (
+                prelayout,
+                state.layout_data.next_scroll_offset,
+                state.pending_scroll_to_caret(),
+            )
         };
 
         // Update the scroll offset of the element when the user's caret goes out of scope.
-        if let Some(scroll_offset) = next_scroll_offset {
+        if let Some(scroll_offset) = next_scroll_offset.filter(|_| !pending_scroll_to_caret) {
             self.interactivity
                 .set_scroll_offset(global_id, window, -scroll_offset);
 
@@ -386,6 +437,7 @@ impl Element for EditableTextElement {
                     // this is converted into positive for usage with bounds
                     state.layout_data.scroll_bounds =
                         Bounds::new(-scroll_offset, inner_bounds.size);
+                    state.layout_data.inner_bounds = inner_bounds;
                 });
                 InteractivityPrepaint {
                     hitbox,
@@ -395,6 +447,40 @@ impl Element for EditableTextElement {
                 }
             },
         );
+
+        // If layout was first requested before the element had viewport bounds, resolve the
+        // pending caret after prepaint has supplied those bounds and schedule one more frame.
+        let pending_scroll = {
+            let state = request_layout.state.read(cx);
+            let scroll_bounds = state.layout_data.scroll_bounds;
+            if state.pending_scroll_to_caret() && !scroll_bounds.is_empty() {
+                Some((
+                    scroll_bounds,
+                    state.layout_data.lines.clone(),
+                    state.layout_data.line_height,
+                    state.layout_data.state.size.unwrap_or(content_size),
+                    state.caret_pos(),
+                ))
+            } else {
+                None
+            }
+        };
+        if let Some((scroll_bounds, lines, line_height, content_size, caret_pos)) = pending_scroll {
+            let next_scroll_offset = scroll_offset_for_layout_caret(
+                &lines,
+                caret_pos,
+                line_height,
+                scroll_bounds,
+                content_size,
+            );
+            request_layout.state.update(cx, move |state, state_cx| {
+                state.layout_data.next_scroll_offset = next_scroll_offset;
+                state.clear_pending_scroll_to_caret();
+                if next_scroll_offset.is_some() {
+                    state_cx.notify();
+                }
+            });
+        }
 
         let state = request_layout.state.read(cx);
         let elements = PrepaintElements::build_elements(
@@ -429,6 +515,7 @@ impl Element for EditableTextElement {
 
         let accepts_input = self.accepts_input;
         let hitbox = prepaint.interactivity.hitbox.clone();
+        let line_h = request_layout.state.read(cx).layout_data.line_height;
         let perform_paint = |style: &Style, window: &mut Window, cx: &mut App| {
             if style.display == Display::None {
                 return;
@@ -439,15 +526,31 @@ impl Element for EditableTextElement {
                 Self::process_frame_events(prepaint, bounds, &request_layout.state, window, cx);
             }
 
-            // Actually draw the elements we constructed during prepaint
-            let line_h = window.line_height();
-            for PrepaintLine { line, point, align } in prepaint.elements.lines.drain(..) {
-                let _ = line.paint(point, line_h, align, Some(bounds), window, cx);
-            }
-            for quad in prepaint.elements.ime_marked.drain(..) {
-                window.paint_quad(quad);
+            // Paint inline backgrounds first so the selection and glyphs remain readable.
+            for PrepaintLine { line, point, align } in &prepaint.elements.lines {
+                let _ = line.paint_background(
+                    *point,
+                    line_h,
+                    *align,
+                    Some(prepaint.interactivity.inner_bounds),
+                    window,
+                    cx,
+                );
             }
             for quad in prepaint.elements.selection.drain(..) {
+                window.paint_quad(quad);
+            }
+            for PrepaintLine { line, point, align } in prepaint.elements.lines.drain(..) {
+                let _ = line.paint(
+                    point,
+                    line_h,
+                    align,
+                    Some(prepaint.interactivity.inner_bounds),
+                    window,
+                    cx,
+                );
+            }
+            for quad in prepaint.elements.ime_marked.drain(..) {
                 window.paint_quad(quad);
             }
             if let Some(quad) = prepaint.elements.caret.take() {
@@ -507,7 +610,7 @@ impl EditableTextElement {
         cx: &mut App,
     ) {
         let inner_bounds = prepaint.interactivity.inner_bounds;
-        let to_local_position = -(bounds.origin + prepaint.interactivity.scroll_offset);
+        let to_local_position = -(inner_bounds.origin + prepaint.interactivity.scroll_offset);
 
         let ime_handler = ElementInputHandler::new(inner_bounds, entity.clone());
         window.handle_input(&prepaint.focus_handle, ime_handler, cx);
@@ -582,23 +685,27 @@ impl PrelayoutState {
             true => self.placeholder_color,
         };
 
-        let text = self.text.unwrap_or_default();
+        let mut base_text_style = text_style.clone();
+        base_text_style.color = color;
+
+        let document = self.document;
+        let persistent_styles = self.persistent_styles;
+        let decorations = self.decorations;
+        let previous_paragraph_cache = self.paragraph_cache;
+        let previous_layout = self.prev_layout_state;
+        let state = self.state;
+        let storage_revision = self.storage_revision;
+        let pending_scroll_to_caret = self.pending_scroll_to_caret;
+        let is_placeholder = self.show_placeholder;
+        let placeholder_text = self.placeholder_text;
+        let supports_multiline = self.supports_multiline;
+        let accepts_input = self.accepts_input;
 
         window.request_measured_layout(
             Default::default(),
             // This is invoked sometime in the near future (before prepaint but not immediately),
             // so we avoid doing any pre-emptive work until the layout engine is ready.
             move |known_dimensions, available_space, window, cx| {
-                let runs = vec![gpui::TextRun {
-                    len: text.len(),
-                    font: text_style.font(),
-                    color,
-                    background_color: None,
-                    underline: None,
-                    strikethrough: None,
-                    letter_spacing: None,
-                }];
-
                 let wrap_width = TextLayout::evaluate_wrap_width(
                     &text_style.white_space,
                     known_dimensions,
@@ -608,86 +715,336 @@ impl PrelayoutState {
                 let truncation =
                     TextLayout::evaluate_overflow(&text_style, known_dimensions, available_space);
 
-                if let Some(size) = self.prev_layout_state.size
-                    && (wrap_width.is_none() || wrap_width == self.prev_layout_state.wrap_width)
+                let cache_key = EditableTextLayoutKey {
+                    storage_revision,
+                    wrap_width,
+                    truncation_width: truncation.width,
+                    truncation_affix: truncation.affix.clone(),
+                    truncation_source: truncation.source,
+                    is_placeholder,
+                    placeholder_text: placeholder_text.clone(),
+                    text_style: text_style.clone(),
+                    text_color: color,
+                    persistent_styles: persistent_styles.clone(),
+                    decorations: decorations.clone(),
+                    font_size,
+                    line_height,
+                    supports_multiline,
+                };
+
+                // Check the full layout key before lowering inline ranges or reading paragraph
+                // text. Caret, focus, and selection changes therefore leave shaped lines alone.
+                if let Some(size) = previous_layout.size
                     && truncation.width.is_none()
-                    && self.storage_version == self.prev_layout_state.last_seen_storage_version
+                    && previous_layout.cache_key.as_ref() == Some(&cache_key)
                 {
+                    if pending_scroll_to_caret {
+                        let (next_scroll_offset, has_viewport) = {
+                            let state = state.read(cx);
+                            let scroll_bounds = state.layout_data.scroll_bounds;
+                            (
+                                (!scroll_bounds.is_empty())
+                                    .then(|| {
+                                        scroll_offset_for_layout_caret(
+                                            &state.layout_data.lines,
+                                            state.caret_pos(),
+                                            state.layout_data.line_height,
+                                            scroll_bounds,
+                                            size,
+                                        )
+                                    })
+                                    .flatten(),
+                                !scroll_bounds.is_empty(),
+                            )
+                        };
+                        state.update(cx, move |state, state_cx| {
+                            state.layout_data.next_scroll_offset = next_scroll_offset;
+                            if has_viewport {
+                                state.clear_pending_scroll_to_caret();
+                            }
+                            if next_scroll_offset.is_some() {
+                                state_cx.notify();
+                            }
+                        });
+                    }
+                    state.update(cx, move |state, _cx| {
+                        state.layout_data.accepts_input = accepts_input;
+                        state.layout_data.supports_multiline = supports_multiline;
+                    });
                     return size;
                 }
 
-                let (text, runs) = TextLayout::apply_truncation(
-                    text.clone(),
-                    &text_style,
-                    font_size,
-                    line_height,
-                    wrap_width,
-                    &truncation,
-                    &runs,
-                    window,
-                    cx,
-                );
-                let text_len = text.len();
+                // Validate and combine annotation layers only when a layout input changed.
+                // Cloning and equality-checking their Arc-backed source sets above stays cheap on
+                // unchanged frames; persistent formatting remains below transient decorations.
+                let valid_decorations = if decorations.validate_document(&document).is_ok() {
+                    decorations.clone()
+                } else {
+                    RangeSet::default()
+                };
+                let mut next_paragraph_cache = ParagraphLayoutCacheBuilder::default();
 
-                let wrapped_lines = window
-                    .text_system()
-                    .shape_text(text, font_size, &runs, wrap_width, text_style.line_clamp)
-                    .unwrap_or_default();
-
-                // Build the size of the text and convert the wrapped_lines into
-                // lines that will be cached in state and painted.
                 let mut size: Size<Pixels> = Size::default();
-                let mut pos_y = 0;
-                let mut line_start = 0;
-                let mut lines = Vec::with_capacity(wrapped_lines.len());
-                for line in wrapped_lines {
-                    let line_size = line.size(line_height);
-                    size.height += line_size.height;
-                    size.width = size.width.max(line_size.width).ceil();
+                let mut pos_y = 0usize;
+                let mut lines = Vec::with_capacity(document.line_count());
 
-                    let mut line_len = line.len();
-                    if line_len < text_len {
-                        // to offset for new-line characters that are
-                        // omitted from WrappedLine range
-                        line_len += 1;
+                if truncation.width.is_some() {
+                    // The overflow helper currently accepts one contiguous string. Keep its
+                    // established behavior for explicit truncation, while the normal editor path
+                    // below stays on native document line slices and never flattens the document.
+                    let inline_styles = persistent_styles.concat(&valid_decorations);
+                    let text = SharedString::from(document.slice(0..document.len_bytes()));
+                    let runs = inline_styles
+                        .text_runs(&text, &base_text_style)
+                        .unwrap_or_else(|_| vec![base_text_style.to_run(text.len())]);
+                    let (text, runs) = TextLayout::apply_truncation(
+                        text,
+                        &text_style,
+                        font_size,
+                        line_height,
+                        wrap_width,
+                        &truncation,
+                        &runs,
+                        window,
+                        cx,
+                    );
+                    let text_len = text.len();
+                    let wrapped_lines = window
+                        .text_system()
+                        .shape_text(text, font_size, &runs, wrap_width, text_style.line_clamp)
+                        .unwrap_or_default();
+                    let mut line_start = 0usize;
+                    for line in wrapped_lines {
+                        let line_size = line.size(line_height);
+                        size.height += line_size.height;
+                        size.width = size.width.max(line_size.width).ceil();
+                        let mut line_len = line.len();
+                        if line_len < text_len {
+                            // Wrapped lines omit the LF separator from their text range.
+                            line_len += 1;
+                        }
+                        let segment = TextLineSegment {
+                            text_range: line_start..line_start + line_len,
+                            wrapped_line: Some(Arc::new(line)),
+                            pos_y,
+                        };
+                        line_start += line_len;
+                        pos_y += segment.row_count();
+                        lines.push(segment);
                     }
+                } else {
+                    let mut remaining_rows = text_style.line_clamp;
+                    for line_index in 0..document.line_count() {
+                        if remaining_rows == Some(0) {
+                            break;
+                        }
+                        let text_range = document
+                            .line_range(line_index)
+                            .expect("line index is within document line count");
+                        let local_persistent_styles = persistent_styles
+                            .clipped(text_range.clone())
+                            .unwrap_or_default();
+                        let local_decorations = valid_decorations
+                            .clipped(text_range.clone())
+                            .unwrap_or_default();
+                        let local_styles = local_persistent_styles.concat(&local_decorations);
+                        let paragraph_key = ParagraphLayoutKey {
+                            base_text_style: base_text_style.clone(),
+                            inline_styles: local_styles.clone(),
+                            font_size,
+                            wrap_width,
+                            line_clamp: remaining_rows,
+                            truncation_width: truncation.width,
+                            truncation_affix: truncation.affix.clone(),
+                            truncation_source: truncation.source,
+                            is_placeholder,
+                            placeholder_text: placeholder_text.clone(),
+                        };
+                        let fingerprint = ParagraphLayoutCache::fingerprint(
+                            &paragraph_key,
+                            &document,
+                            &text_range,
+                        );
 
-                    let segment = TextLineSegment {
-                        text_range: line_start..line_start + line_len,
-                        wrapped_line: Some(Arc::new(line)),
-                        pos_y,
-                    };
-                    line_start += line_len;
-                    pos_y += segment.row_count();
-                    lines.push(segment);
+                        let current_match = next_paragraph_cache.get(
+                            fingerprint,
+                            &paragraph_key,
+                            &document,
+                            &text_range,
+                        );
+                        let wrapped = if let Some(wrapped) = current_match {
+                            wrapped
+                        } else if let Some(wrapped) = previous_paragraph_cache.get(
+                            fingerprint,
+                            &paragraph_key,
+                            &document,
+                            &text_range,
+                        ) {
+                            next_paragraph_cache.insert(
+                                fingerprint,
+                                paragraph_key.clone(),
+                                wrapped.text.clone(),
+                                wrapped.clone(),
+                            );
+                            wrapped
+                        } else {
+                            let text = SharedString::from(document.slice(text_range.clone()));
+                            let runs = local_styles
+                                .text_runs(&text, &base_text_style)
+                                .unwrap_or_else(|_| vec![base_text_style.to_run(text.len())]);
+                            let Some(line) = window
+                                .text_system()
+                                .shape_text(
+                                    text.clone(),
+                                    font_size,
+                                    &runs,
+                                    wrap_width,
+                                    remaining_rows,
+                                )
+                                .unwrap_or_default()
+                                .into_iter()
+                                .next()
+                            else {
+                                break;
+                            };
+                            let wrapped = Arc::new(line);
+                            next_paragraph_cache.insert(
+                                fingerprint,
+                                paragraph_key.clone(),
+                                text,
+                                wrapped.clone(),
+                            );
+                            wrapped
+                        };
+
+                        let line_size = wrapped.size(line_height);
+                        size.height += line_size.height;
+                        size.width = size.width.max(line_size.width).ceil();
+                        let row_count = wrapped.wrap_boundaries().len() + 1;
+                        if let Some(remaining) = &mut remaining_rows {
+                            *remaining = remaining.saturating_sub(row_count);
+                        }
+                        let has_newline = line_index + 1 < document.line_count();
+                        let segment = TextLineSegment {
+                            text_range: text_range.start..text_range.end + usize::from(has_newline),
+                            wrapped_line: Some(wrapped),
+                            pos_y,
+                        };
+                        pos_y += segment.row_count();
+                        lines.push(segment);
+                    }
                 }
 
+                let (scroll_bounds, inner_bounds, caret_pos) = {
+                    let state = state.read(cx);
+                    (
+                        state.layout_data.scroll_bounds,
+                        state.layout_data.inner_bounds,
+                        state.caret_pos(),
+                    )
+                };
+                let has_viewport = !scroll_bounds.is_empty();
+                let next_scroll_offset = (pending_scroll_to_caret && has_viewport)
+                    .then(|| {
+                        scroll_offset_for_layout_caret(
+                            &lines,
+                            caret_pos,
+                            line_height,
+                            scroll_bounds,
+                            size,
+                        )
+                    })
+                    .flatten();
+
                 let layout_data = EditableTextLayoutResult {
-                    supports_multiline: self.supports_multiline,
-                    accepts_input: self.accepts_input,
-                    // updated during prepaint
-                    scroll_bounds: Bounds::default(),
+                    supports_multiline,
+                    accepts_input,
+                    // Keep the previous viewport geometry until the next prepaint refreshes it.
+                    scroll_bounds,
+                    inner_bounds,
                     state: EditableTextLayoutState {
-                        wrap_width,
                         size: Some(size),
-                        last_seen_storage_version: self.storage_version,
+                        cache_key: Some(cache_key),
                     },
-                    lines,
+                    lines: lines.into(),
+                    paragraph_cache: next_paragraph_cache.finish(),
                     line_height,
-                    next_scroll_offset: None,
+                    next_scroll_offset,
                 };
 
                 // Update the state for use in prepaint, paint, and action handlers.
                 // request_measured_layout caches this scope for processing later
                 // between layout and prepaint, so we cant just copy/move these values to the outer scope.
-                self.state.update(cx, move |state, _cx| {
+                let should_notify_for_scroll = next_scroll_offset.is_some();
+                state.update(cx, move |state, state_cx| {
                     state.layout_data = layout_data;
+                    if pending_scroll_to_caret && has_viewport {
+                        state.clear_pending_scroll_to_caret();
+                    }
+                    if should_notify_for_scroll {
+                        state_cx.notify();
+                    }
                 });
 
                 size
             },
         )
     }
+}
+
+fn scroll_offset_for_layout_caret(
+    lines: &[TextLineSegment],
+    caret_pos: usize,
+    line_height: Pixels,
+    scroll_bounds: Bounds<Pixels>,
+    content_size: Size<Pixels>,
+) -> Option<Point<Pixels>> {
+    if scroll_bounds.is_empty() {
+        return None;
+    }
+    let candidate = lines.get(
+        lines
+            .partition_point(|segment| segment.text_range.start <= caret_pos)
+            .saturating_sub(1),
+    );
+    let segment = candidate
+        .filter(|segment| segment.contains_position(caret_pos, false))
+        .or_else(|| candidate.filter(|segment| segment.contains_position(caret_pos, true)))?;
+    let point = point(Pixels::ZERO, segment.pos_y * line_height)
+        + segment
+            .position_for_index(caret_pos, line_height)
+            .unwrap_or_default();
+    let caret_bottom = point.y + line_height;
+    if point.x >= scroll_bounds.left()
+        && point.x <= scroll_bounds.right()
+        && point.y >= scroll_bounds.top()
+        && caret_bottom <= scroll_bounds.bottom()
+    {
+        return None;
+    }
+
+    let mut offset = scroll_bounds.origin;
+    if point.x < scroll_bounds.left() {
+        offset.x = point.x;
+    }
+    if point.y < scroll_bounds.top() {
+        offset.y = point.y;
+    }
+    if point.x > scroll_bounds.right() {
+        offset.x += point.x - scroll_bounds.right();
+    }
+    if caret_bottom > scroll_bounds.bottom() {
+        offset.y += caret_bottom - scroll_bounds.bottom();
+    }
+    offset.x = offset.x.clamp(
+        Pixels::ZERO,
+        (content_size.width - scroll_bounds.size.width).max(Pixels::ZERO),
+    );
+    offset.y = offset.y.clamp(
+        Pixels::ZERO,
+        (content_size.height - scroll_bounds.size.height).max(Pixels::ZERO),
+    );
+    (offset != scroll_bounds.origin).then_some(offset)
 }
 
 struct PrepaintLine {
@@ -743,7 +1100,7 @@ impl PrepaintElements {
 
         let mut elements = PrepaintElements::default();
 
-        let line_height = window.line_height();
+        let line_height = state.layout_data.line_height;
         let is_range_contained_by_range =
             |text_range: &Range<usize>, containing_range: &Range<usize>| {
                 if text_range.is_empty() {
@@ -755,7 +1112,15 @@ impl PrepaintElements {
                 }
             };
         let mut caret_point = None::<Point<Pixels>>;
-        for segment in &state.layout_data.lines {
+        let lines = &state.layout_data.lines;
+        let document_top = -scroll_offset.y;
+        let document_bottom = inner_bounds.size.height - scroll_offset.y;
+        let first_visible = lines.partition_point(|segment| {
+            line_height * ((segment.pos_y + segment.row_count()) as f32) < document_top
+        });
+        let after_last_visible =
+            lines.partition_point(|segment| line_height * segment.pos_y as f32 <= document_bottom);
+        for segment in &lines[first_visible..after_last_visible] {
             let line_distance_from_top = segment.pos_y * line_height;
             let line_y = line_distance_from_top + scroll_offset.y;
             let line_bottom = line_y + line_height * segment.row_count() as f32;
