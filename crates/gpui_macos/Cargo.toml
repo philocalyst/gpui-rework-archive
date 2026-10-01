@@ -69,6 +69,7 @@ palette.workspace = true
 parking_lot.workspace = true
 pathfinder_geometry.workspace = true
 raw-window-handle.workspace = true
+scheduler.workspace = true
 semver.workspace = true
 smallvec.workspace = true
 skrifa.workspace = true

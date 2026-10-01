@@ -6,8 +6,8 @@
 //! bound the stream by the number of slow polls while preserving their exact
 //! count and total duration.
 //!
-//! Presentation and the foreground going idle are explicit [`IntervalBoundary`]
-//! entries in the same stream. Independent [`ForegroundJournalCollector`]s
+//! Presentation, completed frame skips, and foreground idle are explicit
+//! [`IntervalBoundary`] entries in the same stream. Independent [`ForegroundJournalCollector`]s
 //! feed entries to [`IntervalSealer`], a pure state machine that groups all work
 //! preceding each boundary into a [`FrameSnapshot`]. The sealer does not infer
 //! boundaries from elapsed time or from incidental event kinds such as draws.
@@ -203,6 +203,8 @@ impl PresentedFrame {
 pub enum IntervalBoundary {
     /// A newly drawn frame was submitted to the platform.
     Presented(PresentedFrame),
+    /// A callback completed without drawing, excluding reentrant callbacks.
+    FrameSkipped(FrameSkipped),
     /// The foreground returned to an idle platform loop with no unexpired
     /// frame pending.
     Idle {
@@ -223,6 +225,7 @@ impl IntervalBoundary {
     pub fn end_time(&self) -> Instant {
         match self {
             Self::Presented(presented) => presented.presentation.present_end,
+            Self::FrameSkipped(skipped) => skipped.at,
             Self::Idle { ended_at } | Self::PowerTransition { ended_at } => *ended_at,
         }
     }
@@ -231,7 +234,7 @@ impl IntervalBoundary {
     pub fn dirty_at(&self) -> Option<Instant> {
         match self {
             Self::Presented(presented) => presented.frame.dirty_at,
-            Self::Idle { .. } | Self::PowerTransition { .. } => None,
+            Self::FrameSkipped(_) | Self::Idle { .. } | Self::PowerTransition { .. } => None,
         }
     }
 }
@@ -269,6 +272,15 @@ pub enum ForegroundJournalEntry {
     Boundary(IntervalBoundary),
     /// A change to pending-frame state. This is metadata, not foreground work.
     FrameState(FrameStateChange),
+    /// A callback entering the foreground; not work or an interval boundary.
+    PlatformSignal(PlatformSignal),
+    /// A nested frame request deferred while an enclosing draw was still running.
+    ReentrantFrameSkipped {
+        /// The window whose nested frame request was deferred.
+        window_id: WindowId,
+        /// When the nested frame request was deferred.
+        at: Instant,
+    },
     /// One or more logical entries were unavailable at this point in the
     /// stream. Consumers must not infer interval boundaries across this gap.
     Discontinuity {
@@ -613,6 +625,18 @@ impl ForegroundJournalWriter {
 
     fn record_frame_state(&mut self, change: FrameStateChange) {
         self.record_entry(ForegroundJournalEntry::FrameState(change));
+    }
+
+    fn record_platform_signal(&mut self, signal: PlatformSignal) {
+        self.record_entry(ForegroundJournalEntry::PlatformSignal(signal));
+    }
+
+    fn record_frame_skipped(&mut self, skipped: FrameSkipped) {
+        // Even a no-render callback can schedule or invalidate the next frame.
+        // Skipping does not establish that the window's pending demand is met.
+        self.record_entry(ForegroundJournalEntry::Boundary(
+            IntervalBoundary::FrameSkipped(skipped),
+        ));
     }
 
     fn record_frame_pending(&mut self, window_id: WindowId, dirty_at: Instant) {
@@ -993,6 +1017,26 @@ pub(crate) fn record_present(timing: PresentTiming, frame: Option<FrameTiming>) 
     with_journal(|journal| journal.record_present(timing, frame));
 }
 
+pub(crate) fn record_platform_signal(signal: PlatformSignal) {
+    with_journal(|journal| journal.record_platform_signal(signal));
+}
+
+pub(crate) fn record_reentrant_frame_skipped(window_id: WindowId, at: Instant) {
+    with_journal(|journal| {
+        journal.record_entry(ForegroundJournalEntry::ReentrantFrameSkipped { window_id, at });
+    });
+}
+
+pub(crate) fn record_frame_skipped(window_id: WindowId, at: Instant, reason: FrameSkipReason) {
+    with_journal(|journal| {
+        journal.record_frame_skipped(FrameSkipped {
+            window_id,
+            at,
+            reason,
+        })
+    });
+}
+
 pub(crate) fn record_frame_pending(window_id: WindowId, dirty_at: Instant) {
     with_journal(|journal| journal.record_frame_pending(window_id, dirty_at));
 }
@@ -1368,14 +1412,17 @@ impl IntervalSealer {
                     }
                     if self.is_empty() {
                         self.interval_start = self.interval_start.max(boundary.end_time());
-                    } else {
+                    }
+                    if !self.is_empty() || matches!(boundary, IntervalBoundary::FrameSkipped(_)) {
                         snapshots.push(self.seal(boundary));
                     }
                 }
                 // Pending-frame state gates boundaries on the writer side;
                 // the entries remain in the stream for consumers that want
                 // dirty timing, but the sealer has no use for them.
-                ForegroundJournalEntry::FrameState(_) => {}
+                ForegroundJournalEntry::FrameState(_)
+                | ForegroundJournalEntry::PlatformSignal(_)
+                | ForegroundJournalEntry::ReentrantFrameSkipped { .. } => {}
                 ForegroundJournalEntry::Discontinuity { lost } => self.note_lost(lost),
             }
         }
@@ -1434,6 +1481,145 @@ mod tests {
 
     use super::*;
     use crate::{WindowId, profiler::YieldTime};
+
+    #[test]
+    fn platform_signals_are_journaled_without_sealing_or_occupying_time() {
+        let (journal, _guard) = install_test_foreground_journal(32, 4);
+        let mut collector = journal.collector();
+        let start = Instant::now();
+        let mut sealer = IntervalSealer::new(start);
+        let window_id = WindowId::from(1);
+        for source in [
+            crate::FrameRequestSource::NativeCallback,
+            crate::FrameRequestSource::LocalSchedule,
+        ] {
+            for signal_at in [None, Some(start + Duration::from_secs(5))] {
+                record_platform_signal(PlatformSignal {
+                    window_id,
+                    signal_at,
+                    handled_at: start + Duration::from_millis(5),
+                    source,
+                });
+                let entries = collector.collect_unseen().entries;
+                let [ForegroundJournalEntry::PlatformSignal(signal)] = entries.as_slice() else {
+                    panic!("expected a raw platform signal, got {entries:?}");
+                };
+                assert_eq!(signal.window_id, window_id);
+                assert_eq!(signal.signal_at, signal_at);
+                assert_eq!(signal.handled_at, start + Duration::from_millis(5));
+                assert_eq!(signal.source, source);
+                assert!(sealer.push_entries(entries).is_empty());
+            }
+        }
+        let ended_at = start + Duration::from_millis(10);
+        // An enclosing work span may complete after the callback metadata.
+        let snapshots = sealer.push_entries([
+            input_entry(start, ended_at),
+            ForegroundJournalEntry::Boundary(IntervalBoundary::Idle { ended_at }),
+        ]);
+        let [snapshot] = snapshots.as_slice() else {
+            panic!("expected one snapshot, got {snapshots:?}");
+        };
+        assert_eq!(snapshot.interval_start, start);
+        assert_eq!(snapshot.interval_end(), ended_at);
+        assert_eq!(snapshot.occupancy(), Duration::from_millis(10));
+        assert_eq!(snapshot.events.len(), 1);
+    }
+
+    #[test]
+    fn completed_skips_seal_without_retiring_pending_demand() {
+        let start = Instant::now();
+        let at = start + Duration::from_millis(10);
+        let window_id = WindowId::from(1);
+        for reason in [
+            FrameSkipReason::NoRenderNeeded,
+            FrameSkipReason::InactiveFrameRateLimit,
+            FrameSkipReason::ThermalFrameRateLimit,
+        ] {
+            let (mut writer, mut collector) = test_journal(ForegroundRunnableCounter::new());
+            writer.begin_turn();
+            writer.record_frame_pending(window_id, start);
+            writer.record_frame_skipped(FrameSkipped {
+                window_id,
+                at,
+                reason,
+            });
+
+            let mut sealer = IntervalSealer::new(start);
+            let snapshots = sealer.push_entries(collector.collect_unseen().entries);
+            let [snapshot] = snapshots.as_slice() else {
+                panic!("expected a completed skip, got {snapshots:?}");
+            };
+            assert!(
+                matches!(snapshot.boundary, IntervalBoundary::FrameSkipped(skipped)
+                if skipped.window_id == window_id && skipped.at == at && skipped.reason == reason)
+            );
+            assert_eq!(snapshot.interval_end(), at);
+            assert_eq!(snapshot.boundary.dirty_at(), None);
+            assert_eq!(snapshot.occupancy(), Duration::ZERO);
+
+            writer.record_event(ForegroundEvent::Input(InputTiming {
+                kind: "test",
+                start: at,
+                end: at + Duration::from_millis(1),
+                caused_invalidation: false,
+            }));
+            writer.end_turn(at + Duration::from_millis(1));
+            assert!(
+                !collector
+                    .collect_unseen()
+                    .entries
+                    .iter()
+                    .any(|entry| matches!(entry, ForegroundJournalEntry::Boundary(_))),
+                "pending demand must still block idle boundaries"
+            );
+        }
+    }
+
+    #[test]
+    fn reentrant_skip_does_not_seal_the_enclosing_draw() {
+        let (journal, _guard) = install_test_foreground_journal(32, 4);
+        let mut collector = journal.collector();
+        let start = Instant::now();
+        let window_id = WindowId::from(1);
+        let mut sealer = IntervalSealer::new(start);
+        record_platform_signal(PlatformSignal {
+            window_id,
+            signal_at: None,
+            handled_at: start + Duration::from_millis(5),
+            source: crate::FrameRequestSource::LocalSchedule,
+        });
+        record_reentrant_frame_skipped(window_id, start + Duration::from_millis(6));
+        let entries = collector.collect_unseen().entries;
+        assert!(matches!(
+            entries.as_slice(),
+            [
+                ForegroundJournalEntry::PlatformSignal(_),
+                ForegroundJournalEntry::ReentrantFrameSkipped {
+                    window_id: skipped_window_id,
+                    at,
+                }
+            ]
+            if *skipped_window_id == window_id && *at == start + Duration::from_millis(6)
+        ));
+        assert!(sealer.push_entries(entries).is_empty());
+
+        let frame = FrameTiming {
+            window_id,
+            dirty_at: Some(start),
+            invalidations: 1,
+            draw_start: start,
+            draw_end: start + Duration::from_millis(20),
+        };
+        record_draw(frame);
+        record_present(presentation_timing(window_id, frame.draw_end), Some(frame));
+        let snapshots = sealer.push_entries(collector.collect_unseen().entries);
+        let [snapshot] = snapshots.as_slice() else {
+            panic!("expected the enclosing presentation, got {snapshots:?}");
+        };
+        assert!(matches!(snapshot.boundary, IntervalBoundary::Presented(_)));
+        assert_eq!(snapshot.occupancy(), Duration::from_millis(20));
+    }
 
     #[gpui::test]
     fn wake_rechecks_native_visibility(cx: &mut crate::TestAppContext) {
@@ -1640,7 +1826,9 @@ mod tests {
                 IntervalBoundary::Presented(presented) => {
                     presented.dirty_to_present_duration()
                 }
-                IntervalBoundary::Idle { .. } | IntervalBoundary::PowerTransition { .. } => None,
+                IntervalBoundary::FrameSkipped(_)
+                | IntervalBoundary::Idle { .. }
+                | IntervalBoundary::PowerTransition { .. } => None,
             },
             Some(Duration::from_millis(5))
         );
@@ -2467,6 +2655,7 @@ mod tests {
                 IntervalBoundary::Idle { .. } => 0,
                 IntervalBoundary::Presented(_) => 1,
                 IntervalBoundary::PowerTransition { .. } => 2,
+                IntervalBoundary::FrameSkipped(_) => 3,
             },
             interval_end: snapshot.interval_end().duration_since(origin).as_micros() as u64,
             events: snapshot
@@ -2566,6 +2755,7 @@ mod tests {
                                 IntervalBoundary::Idle { .. } => 0,
                                 IntervalBoundary::Presented(_) => 1,
                                 IntervalBoundary::PowerTransition { .. } => 2,
+                                IntervalBoundary::FrameSkipped(_) => 3,
                             },
                             interval_end,
                             events: std::mem::take(&mut events),
@@ -2576,7 +2766,9 @@ mod tests {
                         interval_start = interval_end;
                     }
                 }
-                ForegroundJournalEntry::FrameState(_) => {}
+                ForegroundJournalEntry::FrameState(_)
+                | ForegroundJournalEntry::PlatformSignal(_)
+                | ForegroundJournalEntry::ReentrantFrameSkipped { .. } => {}
                 ForegroundJournalEntry::Discontinuity { lost } => {
                     dropped_events += lost;
                     journal_discontinuous = true;
