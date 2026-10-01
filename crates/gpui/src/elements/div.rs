@@ -3066,7 +3066,7 @@ pub struct Interactivity {
     #[cfg(any(feature = "inspector", debug_assertions))]
     pub(crate) source_location: Option<&'static core::panic::Location<'static>>,
 
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, all(debug_assertions, feature = "test-support")))]
     pub(crate) debug_selector: Option<String>,
 }
 
@@ -3455,7 +3455,7 @@ impl Interactivity {
                         .truncate(self.hover_region_listeners.len());
                 }
 
-                #[cfg(any(feature = "test-support", test))]
+                #[cfg(any(test, all(debug_assertions, feature = "test-support")))]
                 if let Some(debug_selector) = &self.debug_selector {
                     window
                         .next_frame
