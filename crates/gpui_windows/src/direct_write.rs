@@ -96,8 +96,15 @@ impl DirectWriteTextSystem {
         Ok(Self { parley, renderer })
     }
 
+    /// Uses `directx_devices` to rasterize color glyphs, replacing any previous devices, for
+    /// example after the device was lost.
     pub(crate) fn handle_gpu_lost(&self, directx_devices: &DirectXDevices) -> Result<()> {
         self.renderer.write().handle_gpu_lost(directx_devices)
+    }
+
+    /// Releases the GPU state, when the platform switches to headless mode.
+    pub(crate) fn release_gpu(&self) {
+        self.state.write().gpu_state = None;
     }
 }
 

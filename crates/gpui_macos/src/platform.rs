@@ -222,6 +222,22 @@ pub(crate) struct MacPlatformState {
     haptics: MacHaptics,
 }
 
+/// The activation policy that stands for a windowing mode: an app is headless while it has no
+/// Dock icon or menu bar.
+fn activation_policy_for(request: &WindowingRequest) -> ActivationPolicy {
+    match request {
+        WindowingRequest::Headless => ActivationPolicy::Accessory,
+        WindowingRequest::Windowed(_) => ActivationPolicy::Regular,
+    }
+}
+
+fn native_activation_policy(policy: ActivationPolicy) -> NSApplicationActivationPolicy {
+    match policy {
+        ActivationPolicy::Regular => NSApplicationActivationPolicyRegular,
+        ActivationPolicy::Accessory => NSApplicationActivationPolicyAccessory,
+    }
+}
+
 impl MacPlatform {
     pub fn new(headless: bool) -> Self {
         let marker = MainThreadMarker::new().expect("Mac platform not created on main thread");
@@ -234,6 +250,8 @@ impl MacPlatform {
 
         let state = Mutex::new(MacPlatformState {
             headless,
+            activation_policy: ActivationPolicy::Regular,
+            application_created: false,
             text_system,
             background_executor: BackgroundExecutor::new(dispatcher.clone()),
             foreground_executor: ForegroundExecutor::new(dispatcher),
@@ -562,6 +580,7 @@ impl Platform for MacPlatform {
             app.ivars().platform.set(null_mut());
             self.0.lock().app_delegate = None;
         }
+        self.0.lock().application_created = false;
     }
 
     fn quit(&self) {
@@ -638,6 +657,48 @@ impl Platform for MacPlatform {
                 app.activate();
             }
         }
+    }
+
+    fn set_activation_policy(&self, policy: ActivationPolicy) {
+        let mut state = self.0.lock();
+        state.activation_policy = policy;
+        let should_apply = state.application_created && !state.headless;
+        drop(state);
+        if should_apply {
+            unsafe {
+                let app: id = msg_send![APP_CLASS, sharedApplication];
+                app.setActivationPolicy_(native_activation_policy(policy));
+            }
+        }
+    }
+
+    fn set_initial_windowing(&self, request: WindowingRequest) {
+        self.set_activation_policy(activation_policy_for(&request));
+    }
+
+    fn request_windowing(&self, request: WindowingRequest) -> Task<Result<()>> {
+        let state = self.0.lock();
+        if state.headless {
+            return Task::ready(Err(anyhow!(
+                "a platform created headless has no application to switch windowing modes"
+            )));
+        }
+        let policy = activation_policy_for(&request);
+        if state.activation_policy == policy {
+            return Task::ready(Err(match request {
+                WindowingRequest::Headless => anyhow!("already headless"),
+                WindowingRequest::Windowed(_) => anyhow!("already windowed"),
+            }));
+        }
+        drop(state);
+        self.set_activation_policy(policy);
+        Task::ready(Ok(()))
+    }
+
+    fn graphical_environment(&self) -> Option<GraphicalEnvironment> {
+        let state = self.0.lock();
+        (!state.headless && state.activation_policy == ActivationPolicy::Regular)
+            .then(GraphicalEnvironment::detect)
     }
 
     fn hide(&self) {
