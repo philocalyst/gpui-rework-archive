@@ -93,6 +93,10 @@ required-features = ["test-support"]
 name = "vercel_hero"
 required-features = ["test-support"]
 
+[[example]]
+name = "shader_gallery"
+required-features = ["test-support"]
+
 [[bench]]
 name = "layout_line"
 harness = false

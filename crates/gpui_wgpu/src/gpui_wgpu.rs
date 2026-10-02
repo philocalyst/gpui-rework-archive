@@ -12,3 +12,7 @@ pub use wgpu_renderer::WgpuHeadlessRenderer;
 pub use wgpu_renderer::{
     FontRasterizationSettings, GpuContext, SubpixelOrder, WgpuRenderer, WgpuSurfaceConfig,
 };
+
+#[cfg(doctest)]
+#[doc = include_str!("../tests/shader_types.md")]
+mod shader_type_checks {}

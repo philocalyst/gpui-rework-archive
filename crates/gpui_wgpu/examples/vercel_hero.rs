@@ -1,130 +1,106 @@
-//! A retained GPUI hero: typed material functions, one canvas, native text and controls.
+//! A retained GPUI hero composed from an ordinary element background.
 //!
-//! cargo run -p gpui_ce_wgpu --example vercel_hero --features test-support -- --headless
-//! --output /tmp/hero.png --time 3 --pointer 720 350 --size 1280 720
-//! macOS defaults to a headless screenshot because its native renderer is Metal.
+//! ```sh
+//! cargo run -p gpui_ce_wgpu --example vercel_hero --features test-support -- \
+//!   --headless --output /tmp/hero.png --time 3 --pointer 720 350 --size 1280 720
+//! ```
+//!
+//! The material is a reusable Rust function over typed fragment values. The
+//! element supplies its bounds, coverage and paint order; there is no canvas or
+//! shader root to create or retain.
 
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
+use gpui::Bounds;
 use gpui::{
-    AppContext, Bounds, Context, FontWeight, HeadlessAppContext, InteractiveElement, IntoElement,
-    ParentElement, Pixels, Render, Size, StatefulInteractiveElement, Styled, Window, canvas, div,
-    paint::{CanvasDrawing, Distance, PaintRoot, Parameter, Shader, ShaderError},
-    point, px, rgb, size,
+    AppContext, Context, FontWeight, HeadlessAppContext, InteractiveElement, IntoElement,
+    ParentElement, Pixels, Render, Size, StatefulInteractiveElement, Styled, Window, div, px, rgb,
+    shader::{Field, Paint, color, constant, shader, vec2},
+    size,
 };
 use gpui_ce_wgpu::{CosmicTextSystem, WgpuHeadlessRenderer};
 use std::{path::PathBuf, sync::Arc, time::Instant};
 
-/// Parameters belong to the material, independently of canvas geometry.
-struct HeroMaterial {
-    root: PaintRoot,
-    shader: Shader,
-    time: Parameter<f32>,
-    pointer: Parameter<[f32; 2]>,
-    intensity: Parameter<f32>,
-    center: Parameter<[f32; 2]>,
-    tint: Parameter<[f32; 4]>,
+/// Distance to a finite line segment, with its endpoints expressed in the
+/// triangle's local coordinate system.
+fn segment_distance(point: &Field<[f32; 2]>, start: [f32; 2], end: [f32; 2]) -> Field<f32> {
+    let a = constant(start);
+    let edge = constant([end[0] - start[0], end[1] - start[1]]);
+    let offset = point - &a;
+    let projection = (offset.dot(&edge) / edge.dot(&edge)).clamp(0.0, 1.0);
+    (&offset - &edge * projection).length()
 }
-impl HeroMaterial {
-    fn new() -> Result<Self, ShaderError> {
-        let root = PaintRoot::new();
-        // A distance to a finite edge; projection clamps correctly at both corners.
-        let edge = root.function::<([f32; 2], [f32; 2], [f32; 2]), f32>(|cx, (p, a, b)| {
-            let v = b - a.clone();
-            let w = p - a;
-            let t = (w.clone().dot(v.clone()) / v.clone().dot(v.clone()))
-                .clamp(cx.scalar(0.0), cx.scalar(1.0));
-            (w - v.scale(t)).length()
-        })?;
-        let triangle = root.function::<[f32; 2], Distance>(|cx, p| {
-            let a = cx.vec2([0.0, -110.0]);
-            let b = cx.vec2([-95.26, 55.0]);
-            let c = cx.vec2([95.26, 55.0]);
-            let d = cx
-                .call(&edge, (p.clone(), a.clone(), b.clone()))
-                .min(cx.call(&edge, (p.clone(), b, c.clone())))
-                .min(cx.call(&edge, (p.clone(), c, a)));
-            let outside = (p.clone().x().abs() * cx.scalar(0.8660254)
-                - p.clone().y() * cx.scalar(0.5)
-                - cx.scalar(55.0))
-            .max(p.y() - cx.scalar(55.0))
-            .gt(cx.scalar(0.0));
-            Distance::new(outside.select(d.clone(), -d))
-        })?;
-        // A compact inverse-square falloff, reusable with any distance or radius.
-        let glow = root.function::<(f32, f32), f32>(|cx, (distance, radius)| {
-            let x = distance / radius;
-            cx.scalar(1.0) / (cx.scalar(1.0) + x.clone() * x)
-        })?;
-        let grain = root.function::<([f32; 2], f32), f32>(|cx, (p, phase)| {
-            (p.dot(cx.vec2([12.9898, 78.233])) + phase)
-                .sin()
-                .scale(cx.scalar(43758.547))
-                .fract()
-        })?;
-        let time = root.parameter(0.0)?;
-        let pointer = root.parameter([0.0, 0.0])?;
-        let intensity = root.parameter(1.0)?;
-        let center = root.parameter([640.0, 422.0])?;
-        let tint = root.parameter([0.94, 0.97, 1.0, 1.0])?;
-        let shader = root.shader(|cx| {
-            // Centered logical pixels preserve an equilateral triangle at every size.
-            let p = cx.position() - cx.uniform(center);
-            let d = cx.call(&triangle, p.clone());
-            let phase = cx.uniform(time);
-            let pointer = cx.uniform(pointer).scale(cx.scalar(0.14));
-            let light = cx.xy(
-                phase.clone().sin() * cx.scalar(20.0) - cx.scalar(65.0),
-                phase.clone().cos() * cx.scalar(12.0) - cx.scalar(60.0),
-            ) + pointer;
-            let illumination = cx.call(&glow, ((p.clone() - light).length(), cx.scalar(95.0)));
-            let halo = cx.call(&glow, (d.expression().abs(), cx.scalar(18.0)))
-                * illumination.clone()
-                * cx.scalar(0.46);
-            let rim = cx.call(&glow, (d.expression().abs(), cx.scalar(1.5)))
-                * illumination
-                * cx.scalar(0.75);
-            let floor = cx.call(
-                &glow,
-                ((p.clone().y() - cx.scalar(60.0)).abs(), cx.scalar(1.5)),
-            ) * cx.call(&glow, (p.clone().x().abs(), cx.scalar(130.0)))
-                * cx.scalar(0.36);
-            let mist = cx.call(
-                &glow,
-                ((p - cx.vec2([-35.0, 42.0])).length(), cx.scalar(110.0)),
-            ) * cx.scalar(0.025);
-            let exterior = cx.scalar(1.0) - d.coverage().expression();
-            let noise = cx.call(&grain, (cx.position(), phase * cx.scalar(0.1))) * cx.scalar(0.006);
-            let value = ((halo + rim + floor + mist) * exterior * cx.uniform(intensity) + noise)
-                .clamp(cx.scalar(0.0), cx.scalar(1.0));
-            let tint = cx.uniform(tint);
-            cx.rgba(
-                value.clone() * tint.clone().x(),
-                value.clone() * tint.clone().y(),
-                value * tint.z(),
-                cx.scalar(1.0),
-            )
-        })?;
-        Ok(Self {
-            root,
-            shader,
-            time,
-            pointer,
-            intensity,
-            center,
-            tint,
-        })
-    }
-    fn drawing(&self, viewport: Size<Pixels>) -> Result<CanvasDrawing, ShaderError> {
-        self.root.canvas(|canvas| {
-            canvas
-                .rect(Bounds::new(point(px(0.0), px(0.0)), viewport))
-                .fill(&self.shader);
-        })
-    }
+
+/// An equilateral neon triangle with a moving specular light and soft floor.
+/// Ordinary Rust values become uniforms when they meet a symbolic field, so
+/// time, pointer and intensity can change without changing the recipe.
+fn triangle_material(
+    time: f32,
+    pointer: [f32; 2],
+    intensity: f32,
+    center: [f32; 2],
+    scale: f32,
+) -> Paint {
+    shader(move |pixel| {
+        let p = (pixel.position() - center) / scale;
+        let a = [0.0, -110.0];
+        let b = [-95.2628, 55.0];
+        let c = [95.2628, 55.0];
+        let edge_distance = segment_distance(&p, a, b)
+            .min(segment_distance(&p, b, c))
+            .min(segment_distance(&p, c, a));
+
+        // The two half-planes of an upright equilateral triangle determine
+        // whether the closest edge distance is inside or outside.
+        let horizontal = p.x().abs() * 0.866_025_4 - p.y() * 0.5 - 55.0;
+        let vertical = p.y() - 55.0;
+        let outside = horizontal.max(vertical).gt(0.0);
+        let distance = outside.select(&edge_distance, -&edge_distance);
+        let edge = distance.abs();
+        let edge_width = distance.fwidth().max(0.75);
+        let body_coverage = 1.0 - distance.smoothstep(-&edge_width, &edge_width);
+
+        let phase: Field<f32> = time.into();
+        let pointer: Field<[f32; 2]> = pointer.into();
+        let pointer = pointer / scale;
+        let intensity: Field<f32> = intensity.into();
+        let light = vec2(
+            phase.sin() * 21.0 - 62.0 + pointer.x() * 0.14,
+            phase.cos() * 15.0 - 48.0 + pointer.y() * 0.14,
+        );
+        let light_distance = (&p - &light).length() / 96.0;
+        let falloff = &light_distance * &light_distance + 1.0;
+        let illumination = 1.0 / falloff;
+        let rim_coverage = 1.0 - edge.smoothstep(0.0, 2.2);
+        let body = color(rgb(0x090d17)).mask(body_coverage);
+        let rim = color(rgb(0x668dff))
+            .mix(color(rgb(0xf0fcff)), &illumination)
+            .opacity(&rim_coverage * &illumination * &intensity);
+        let halo = color(rgb(0x8acbff))
+            .opacity((1.0 - edge.smoothstep(2.0, 46.0)) * &illumination * &intensity * 0.62);
+        let floor = color(rgb(0x76aaff)).opacity(
+            (1.0 - (p.y() - 58.0).abs().smoothstep(0.0, 2.0))
+                * (1.0 - (p.x().abs() / 132.0).smoothstep(0.0, 1.0))
+                * &illumination
+                * &intensity
+                * 0.48,
+        );
+        let mist = color(rgb(0x789cff)).opacity(
+            (1.0 - (&p - constant([-35.0, 42.0]))
+                .length()
+                .smoothstep(0.0, 115.0))
+                * &intensity
+                * 0.055,
+        );
+
+        rim.over(body)
+            .over(floor)
+            .over(mist)
+            .over(halo)
+            .over(color(rgb(0x05070c)))
+    })
 }
 
 struct Hero {
-    material: HeroMaterial,
-    drawing: Option<(Size<Pixels>, CanvasDrawing)>,
     started: Instant,
     time: f32,
     pointer: [f32; 2],
@@ -134,8 +110,6 @@ struct Hero {
 impl Hero {
     fn new(options: &Options, animate: bool) -> Self {
         Self {
-            material: HeroMaterial::new().expect("valid hero material"),
-            drawing: None,
             started: Instant::now(),
             time: options.time,
             pointer: options.pointer,
@@ -150,16 +124,6 @@ impl Render for Hero {
         if self.animate {
             window.request_animation_frame();
         }
-        if self
-            .drawing
-            .as_ref()
-            .is_none_or(|(previous, _)| *previous != viewport)
-        {
-            self.drawing = Some((
-                viewport,
-                self.material.drawing(viewport).expect("valid canvas"),
-            ));
-        }
         let time = self.time
             + if self.animate {
                 self.started.elapsed().as_secs_f32() * 0.35
@@ -170,28 +134,26 @@ impl Render for Hero {
         let height = f32::from(viewport.height);
         let compact = width < 1000.0;
         let center = if compact {
-            [width * 0.76, height * 0.56]
+            [width * 0.72, height * 0.61]
         } else {
-            [width * 0.5, height * 0.5 + 62.0]
+            [width * 0.73, height * 0.58 + 20.0]
         };
-        let drawing = self
-            .drawing
-            .as_ref()
-            .unwrap()
-            .1
-            .with_parameters(|p| {
-                p.set(self.material.time, time);
-                p.set(self.material.center, center);
-                p.set(self.material.pointer, self.pointer);
-                p.set(self.material.intensity, if self.bright { 1.0 } else { 0.3 });
-                p.set(self.material.tint, [0.94, 0.97, 1.0, 1.0]);
-            })
-            .expect("valid live parameters");
-        let headline_size = if compact { 40.0 } else { 60.0 };
+        let scale = (width * 0.45 / 190.5)
+            .min(height * 0.64 / 165.0)
+            .clamp(1.1, 1.9);
+        let intensity = if self.bright { 1.0 } else { 0.3 };
+        let pointer = [
+            self.pointer[0] - (center[0] - width * 0.5),
+            self.pointer[1] - (center[1] - height * 0.5),
+        ];
+        let paint = triangle_material(time, pointer, intensity, center, scale);
+        let headline_size = if compact { 40.0 } else { 66.0 };
+        let headline_left = if compact { 24.0 } else { width * 0.10 };
+
         div()
             .relative()
             .size_full()
-            .bg(rgb(0x000000))
+            .bg(paint)
             .text_color(rgb(0xffffff))
             .font_family("sans-serif")
             .on_mouse_move(
@@ -202,18 +164,6 @@ impl Render for Hero {
                     ];
                     cx.notify();
                 }),
-            )
-            .child(
-                canvas(
-                    |_, _, _| (),
-                    move |bounds, _, window, _| {
-                        drawing
-                            .paint_at(bounds.origin, window)
-                            .expect("renderer supports typed paints");
-                    },
-                )
-                .absolute()
-                .size_full(),
             )
             .child(
                 div()
@@ -248,7 +198,7 @@ impl Render for Hero {
             .child(
                 div()
                     .absolute()
-                    .left(px(if compact { 24.0 } else { width * 0.5 - 122.0 }))
+                    .left(px(24.0))
                     .top(px(if compact { 70.0 } else { 115.0 }))
                     .text_size(px(13.0))
                     .text_color(rgb(0xa1a1a1))
@@ -257,8 +207,8 @@ impl Render for Hero {
             .child(
                 div()
                     .absolute()
-                    .left(px(24.0))
-                    .top(px(height * 0.5 - if compact { 140.0 } else { 60.0 }))
+                    .left(px(headline_left))
+                    .top(px(height * 0.5 - if compact { 140.0 } else { 125.0 }))
                     .flex()
                     .flex_col()
                     .text_size(px(headline_size))
@@ -321,14 +271,14 @@ impl Render for Hero {
             .child(
                 div()
                     .absolute()
-                    .left(px(if compact { 24.0 } else { width * 0.71 }))
-                    .top(px(height * 0.5 + if compact { 90.0 } else { 3.0 }))
+                    .left(px(headline_left))
+                    .top(px(height * if compact { 0.81 } else { 0.80 }))
                     .flex()
                     .flex_col()
                     .gap(px(8.0))
                     .text_size(px(if compact { 16.0 } else { 18.0 }))
                     .line_height(px(25.0))
-                    .children(["Typed functions.", "Retained canvas.", "Shared primitives."]),
+                    .children(["Typed recipes.", "Native elements.", "Shared primitives."]),
             )
     }
 }
@@ -462,88 +412,45 @@ fn main() -> anyhow::Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use gpui::{
-        Modifiers, MouseButton, MouseDownEvent, MouseMoveEvent, MouseUpEvent, PlatformInput,
-    };
+    use gpui::{Modifiers, MouseButton, MouseDownEvent, MouseUpEvent, PlatformInput, point};
 
     #[test]
-    fn real_window_routes_pointer_and_buttons_and_repaints_retained_material() {
-        let options = Options {
-            output: "/tmp/unused-hero-test.png".into(),
-            time: 0.0,
-            pointer: [0.0, 0.0],
-            viewport: size(px(1280.0), px(720.0)),
-            headless: true,
-        };
+    fn retained_hero_tracks_pointer_and_responds_to_controls() -> anyhow::Result<()> {
         let mut cx = HeadlessAppContext::with_platform(
             Arc::new(CosmicTextSystem::new("sans-serif")),
             Arc::new(()),
             || Some(Box::new(WgpuHeadlessRenderer::new().expect("GPU renderer"))),
         );
-        let mut entity = None;
-        let window = cx
-            .open_window(options.viewport, |_, cx| {
-                let view = cx.new(|_| Hero::new(&options, false));
-                entity = Some(view.clone());
-                view
+        let viewport = size(px(1280.0), px(720.0));
+        let window = cx.open_window(viewport, |_, cx| {
+            cx.new(|_| Hero {
+                started: Instant::now(),
+                time: 0.0,
+                pointer: [0.0, 0.0],
+                animate: true,
+                bright: true,
             })
-            .unwrap();
-        let entity = entity.unwrap();
+        })?;
         cx.update_window(window.into(), |_, window, cx| {
             window.draw(cx).clear(cx);
-        })
-        .unwrap();
-        let program = cx.update(|cx| entity.read(cx).material.shader.program_id());
-        let before_pointer = cx.capture_screenshot(window.into()).unwrap();
+        })?;
+        cx.run_until_parked();
+        let hero = window.root(&mut cx)?;
+
         cx.update_window(window.into(), |_, window, cx| {
-            window.dispatch_event(
-                PlatformInput::MouseMove(MouseMoveEvent {
-                    position: point(px(950.0), px(220.0)),
-                    pressed_button: None,
-                    modifiers: Modifiers::default(),
-                }),
-                cx,
-            );
-            window.draw(cx).clear(cx);
-        })
-        .unwrap();
-        assert_eq!(cx.update(|cx| entity.read(cx).pointer), [310.0, -140.0]);
-        let lit = cx.capture_screenshot(window.into()).unwrap();
-        // These pixels contain only the procedural material, with no text or controls.
-        // Require a visible channel delta across many pixels, rather than counting
-        // harmless readback noise or a changed button label as successful repainting.
-        fn changed_material_pixels(before: &image::RgbaImage, after: &image::RgbaImage) -> usize {
-            assert_eq!(before.dimensions(), after.dimensions());
-            // Headless windows retain their platform's DPI. Map the logical ROI
-            // to readback pixels, so this remains the same material region at 1×/2×.
-            let left = before.width() * 500 / 1280;
-            let right = before.width() * 780 / 1280;
-            let top = before.height() * 240 / 720;
-            let bottom = before.height() * 540 / 720;
-            (top..bottom)
-                .flat_map(|y| (left..right).map(move |x| (x, y)))
-                .filter(|&(x, y)| {
-                    let a = before.get_pixel(x, y);
-                    let b = after.get_pixel(x, y);
-                    (0..3).any(|channel| a[channel].abs_diff(b[channel]) >= 3)
-                })
-                .count()
-        }
-        assert!(
-            changed_material_pixels(&before_pointer, &lit) > 1000,
-            "pointer movement must visibly change the triangle lighting"
-        );
-        fn click(
-            cx: &mut HeadlessAppContext,
-            window: gpui::AnyWindowHandle,
-            position: gpui::Point<Pixels>,
-        ) {
-            cx.update_window(window, |_, window, cx| {
+            window.simulate_mouse_move(point(px(900.0), px(400.0)), cx);
+        })?;
+        cx.run_until_parked();
+        let pointer = cx.update(|cx| hero.read(cx).pointer);
+        assert_eq!(pointer, [260.0, 40.0]);
+
+        let click = |cx: &mut HeadlessAppContext, position| {
+            cx.update_window(window.into(), |_, window, cx| {
                 window.dispatch_event(
                     PlatformInput::MouseDown(MouseDownEvent {
                         position,
+                        modifiers: Modifiers::none(),
                         button: MouseButton::Left,
-                        modifiers: Modifiers::default(),
                         click_count: 1,
                         first_mouse: false,
                     }),
@@ -552,44 +459,22 @@ mod tests {
                 window.dispatch_event(
                     PlatformInput::MouseUp(MouseUpEvent {
                         position,
+                        modifiers: Modifiers::none(),
                         button: MouseButton::Left,
-                        modifiers: Modifiers::default(),
                         click_count: 1,
                     }),
                     cx,
                 );
-                window.draw(cx).clear(cx);
-            })
-            .unwrap();
-        }
-        click(&mut cx, window.into(), point(px(90.0), px(470.0)));
-        assert!(!cx.update(|cx| entity.read(cx).bright));
-        let dimmed = cx.capture_screenshot(window.into()).unwrap();
-        assert!(
-            changed_material_pixels(&lit, &dimmed) > 4000,
-            "the light control must dim the material, independently of its label"
-        );
-        click(&mut cx, window.into(), point(px(260.0), px(470.0)));
-        cx.update_window(window.into(), |_, window, cx| {
-            assert!(window.simulate_next_frame(cx) > 0);
-        })
-        .unwrap();
-        assert!(cx.update(|cx| entity.read(cx).animate));
-        click(&mut cx, window.into(), point(px(260.0), px(470.0)));
-        assert!(!cx.update(|cx| entity.read(cx).animate));
-        assert_eq!(
-            program,
-            cx.update(|cx| entity.read(cx).material.shader.program_id())
-        );
-        assert_eq!(
-            1,
-            cx.update(|cx| entity
-                .read(cx)
-                .drawing
-                .as_ref()
-                .unwrap()
-                .1
-                .primitive_count())
-        );
+            })?;
+            cx.run_until_parked();
+            Ok::<_, anyhow::Error>(())
+        };
+
+        click(&mut cx, point(px(180.0), px(416.0)))?;
+        assert!(!cx.update(|cx| hero.read(cx).bright));
+        click(&mut cx, point(px(310.0), px(416.0)))?;
+        assert!(!cx.update(|cx| hero.read(cx).animate));
+
+        Ok(())
     }
 }

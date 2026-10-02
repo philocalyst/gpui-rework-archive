@@ -9,7 +9,7 @@ use std::path::PathBuf;
 
 use gpui::{
     Bounds, ContentMask, Corners, DevicePixels, Pixels, PlatformHeadlessRenderer, Quad, Scene,
-    ShaderQuad,
+    ShaderProgram, ShaderQuad,
     paint::{PaintRoot, Shader, Shape},
     point, px, rgb, size, solid_background,
 };
@@ -49,9 +49,10 @@ fn submit(scene: &mut Scene, bounds: Bounds<Pixels>, shader: Shader) {
         order: 0,
         bounds,
         content_mask: ContentMask { bounds },
-        shader,
+        shader: ShaderProgram::Legacy(shader),
         opacity: 1.0,
         scale_factor: 1.0,
+        geometry: None,
     });
 }
 

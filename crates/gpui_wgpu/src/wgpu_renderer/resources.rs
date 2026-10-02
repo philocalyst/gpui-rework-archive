@@ -4,6 +4,9 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+#[cfg(feature = "test-support")]
+use std::cell::Cell;
+
 use collections::FxHashMap;
 
 use crate::WgpuContext;
@@ -61,12 +64,18 @@ pub(super) struct WgpuResources {
     pub(super) path_msaa_view: Option<wgpu::TextureView>,
     pub(super) scene_color_texture: Option<wgpu::Texture>,
     pub(super) scene_color_view: Option<wgpu::TextureView>,
+    pub(super) backdrop_texture: Option<wgpu::Texture>,
+    pub(super) backdrop_view: Option<wgpu::TextureView>,
     pub(super) blur_ping_texture: Option<wgpu::Texture>,
     pub(super) blur_ping_view: Option<wgpu::TextureView>,
     pub(super) blur_pong_texture: Option<wgpu::Texture>,
     pub(super) blur_pong_view: Option<wgpu::TextureView>,
     pub(super) filter_group_textures: Vec<wgpu::Texture>,
     pub(super) filter_group_views: Vec<wgpu::TextureView>,
+    #[cfg(feature = "test-support")]
+    pub(super) backdrop_captures: Cell<u64>,
+    #[cfg(feature = "test-support")]
+    pub(super) backdrop_copied_pixels: Cell<u64>,
 }
 
 #[derive(Default)]
@@ -195,18 +204,25 @@ impl WgpuResources {
             path_msaa_view: None,
             scene_color_texture: None,
             scene_color_view: None,
+            backdrop_texture: None,
+            backdrop_view: None,
             blur_ping_texture: None,
             blur_ping_view: None,
             blur_pong_texture: None,
             blur_pong_view: None,
             filter_group_textures: Vec::new(),
             filter_group_views: Vec::new(),
+            #[cfg(feature = "test-support")]
+            backdrop_captures: Cell::new(0),
+            #[cfg(feature = "test-support")]
+            backdrop_copied_pixels: Cell::new(0),
         };
         Ok((resources, metadata))
     }
 
     pub(super) fn invalidate_intermediate_textures(&mut self) {
         self.instances.invalidate_texture_bindings();
+        self.paints.invalidate_backdrop_views();
         self.blur_bind_groups.get_mut().groups.clear();
         self.path_intermediate_texture = None;
         self.path_intermediate_view = None;
@@ -214,6 +230,8 @@ impl WgpuResources {
         self.path_msaa_view = None;
         self.scene_color_texture = None;
         self.scene_color_view = None;
+        self.backdrop_texture = None;
+        self.backdrop_view = None;
         self.blur_ping_texture = None;
         self.blur_ping_view = None;
         self.blur_pong_texture = None;
@@ -275,6 +293,7 @@ impl WgpuRenderer {
     }
 
     pub(super) fn ensure_filter_textures(&mut self, isolated_target_count: usize) {
+        self.ensure_scene_color_texture();
         let format = self.target.format();
         let width = self.target.width();
         let height = self.target.height();
@@ -282,14 +301,13 @@ impl WgpuRenderer {
         let blur_height = downsampled_dimension(height);
         let resources = self.resources_mut();
 
-        if resources.scene_color_texture.is_none() {
-            let (texture, view) = sampled_render_texture(&resources.device, format, width, height);
-            resources.scene_color_texture = Some(texture);
-            resources.scene_color_view = Some(view);
+        if resources.blur_ping_texture.is_none() {
             let (texture, view) =
                 sampled_render_texture(&resources.device, format, blur_width, blur_height);
             resources.blur_ping_texture = Some(texture);
             resources.blur_ping_view = Some(view);
+        }
+        if resources.blur_pong_texture.is_none() {
             let (texture, view) =
                 sampled_render_texture(&resources.device, format, blur_width, blur_height);
             resources.blur_pong_texture = Some(texture);
@@ -301,6 +319,49 @@ impl WgpuRenderer {
             resources.filter_group_textures.push(texture);
             resources.filter_group_views.push(view);
         }
+    }
+
+    /// Allocate only the full-size scene target used by backdrop paints. Blur ping-pong
+    /// textures are reserved for actual filters.
+    pub(super) fn ensure_scene_color_texture(&mut self) {
+        if self.resources().scene_color_texture.is_some() {
+            return;
+        }
+        let format = self.target.format();
+        let width = self.target.width();
+        let height = self.target.height();
+        let resources = self.resources_mut();
+        let (texture, view) = sampled_render_texture(&resources.device, format, width, height);
+        resources.scene_color_texture = Some(texture);
+        resources.scene_color_view = Some(view);
+    }
+
+    /// Allocate a reusable full-viewport snapshot destination for ordered backdrop captures.
+    pub(super) fn ensure_backdrop_texture(&mut self) {
+        if self.resources().backdrop_texture.is_some() {
+            return;
+        }
+        let format = self.target.format();
+        let width = self.target.width();
+        let height = self.target.height();
+        let resources = self.resources_mut();
+        let texture = resources.device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("shader_backdrop_snapshot"),
+            size: wgpu::Extent3d {
+                width: width.max(1),
+                height: height.max(1),
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format,
+            usage: wgpu::TextureUsages::COPY_DST | wgpu::TextureUsages::TEXTURE_BINDING,
+            view_formats: &[],
+        });
+        let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+        resources.backdrop_texture = Some(texture);
+        resources.backdrop_view = Some(view);
     }
 
     pub(super) fn ensure_uniform_capacity(
@@ -360,7 +421,9 @@ fn sampled_render_texture(
         sample_count: 1,
         dimension: wgpu::TextureDimension::D2,
         format,
-        usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING,
+        usage: wgpu::TextureUsages::RENDER_ATTACHMENT
+            | wgpu::TextureUsages::TEXTURE_BINDING
+            | wgpu::TextureUsages::COPY_SRC,
         view_formats: &[],
     });
     let view = texture.create_view(&wgpu::TextureViewDescriptor::default());

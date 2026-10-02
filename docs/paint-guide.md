@@ -1,4 +1,8 @@
-# Composable paint: current API
+# Legacy paint and retained canvas API
+
+For component backgrounds, borders, layered materials, and backdrop sampling,
+use the simpler [`gpui::shader` builder](shader-guide.md). This document covers
+the existing `gpui::paint` API and its separate retained canvas lifecycle.
 
 `gpui::paint` is an experimental, device-independent composition API. A `PaintRoot`
 constructs typed functions, parameters, procedural materials and retained canvas

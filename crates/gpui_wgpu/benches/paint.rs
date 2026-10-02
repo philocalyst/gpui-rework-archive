@@ -1,7 +1,9 @@
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
 use gpui::{
-    Bounds, ContentMask, DevicePixels, Point, Quad, ScaledPixels, Scene, ShaderQuad, Size,
+    Bounds, ContentMask, Corners, DevicePixels, Edges, PlatformHeadlessRenderer, Point, Quad,
+    ScaledPixels, Scene, ShaderProgram, ShaderQuad, ShaderShape, Size,
     paint::{PaintRoot, Shader},
+    shader::{Paint, backdrop, color, shader as production_shader},
     solid_background,
 };
 use gpui_ce_wgpu::WgpuHeadlessRenderer;
@@ -29,9 +31,10 @@ fn scene(count: usize, paint: Option<&Shader>, unique: bool) -> Scene {
                 order: 0,
                 bounds: b,
                 content_mask: mask,
-                shader: if unique { shader() } else { paint.clone() },
+                shader: ShaderProgram::Legacy(if unique { shader() } else { paint.clone() }),
                 opacity: 1.,
                 scale_factor: 1.,
+                geometry: None,
             });
         } else {
             scene.insert_primitive(Quad {
@@ -343,5 +346,200 @@ fn benchmark(c: &mut Criterion) {
     }
     group.finish();
 }
-criterion_group!(benches, benchmark);
+
+/// Rebuilds the same shader structure with changing instance values, matching
+/// an ordinary GPUI component render that reconstructs its paint each frame.
+fn production_recipe(phase: f32) -> Paint {
+    production_shader(|pixel| {
+        let uv = pixel.uv();
+        let band = ((uv.x() * 8.0 + phase).sin() * 0.5 + 0.5).smoothstep(0.2, 0.8);
+        let rim = (uv.y() - 0.5).abs().smoothstep(0.03, 0.4);
+        let front = color([0.8, 0.3, 0.1, 0.7]).mix(color([0.2, 0.4, 1.0, 0.8]), band);
+        let back = color([0.08, 0.1, 0.2, 1.0]);
+        front.mask(rim).over(back).mix(front.opacity(0.7), 0.25)
+    })
+}
+
+fn production_scene(count: usize, paint: &Paint, shape: ShaderShape, interleaved: bool) -> Scene {
+    let mut scene = Scene::default();
+    for i in 0..count {
+        let bounds = Bounds {
+            origin: Point {
+                x: ScaledPixels((i % 8) as f32 * 32.),
+                y: ScaledPixels((i / 8) as f32 * 32.),
+            },
+            size: Size {
+                width: ScaledPixels(32.),
+                height: ScaledPixels(32.),
+            },
+        };
+        let content_mask = ContentMask { bounds };
+        if interleaved && i > 0 {
+            scene.insert_primitive(Quad {
+                bounds: Bounds {
+                    origin: bounds.origin,
+                    size: Size {
+                        width: ScaledPixels(1.),
+                        height: ScaledPixels(1.),
+                    },
+                },
+                content_mask,
+                background: solid_background(gpui::rgb(0x223344)),
+                ..Default::default()
+            });
+        }
+        let geometry = Quad {
+            bounds,
+            content_mask,
+            background: solid_background(gpui::transparent_black()),
+            border_color: gpui::transparent_black().into(),
+            border_widths: if shape == ShaderShape::Border {
+                Edges::all(ScaledPixels(2.))
+            } else {
+                Edges::default()
+            },
+            corner_radii: Corners::all(ScaledPixels(4.)),
+            corner_smoothing: 0.6,
+            ..Default::default()
+        };
+        scene.insert_primitive(ShaderQuad {
+            order: 0,
+            bounds,
+            content_mask,
+            shader: ShaderProgram::Paint(paint.compile().expect("production paint compile")),
+            opacity: 1.,
+            scale_factor: 1.,
+            geometry: Some((shape, geometry)),
+        });
+    }
+    scene.finish();
+    scene
+}
+
+fn production_benchmark(c: &mut Criterion) {
+    let retained = production_recipe(0.1);
+    let retained_compiled = retained.compile().expect("warm production program");
+    let mut phase = 0.0f32;
+    c.bench_function("paint_production_cpu/construct_drop", |b| {
+        b.iter(|| {
+            phase += 0.001;
+            black_box(production_recipe(black_box(phase)))
+        })
+    });
+    c.bench_function("paint_production_cpu/fresh_rebuild_warm_compile", |b| {
+        b.iter(|| {
+            phase += 0.001;
+            let paint = production_recipe(black_box(phase));
+            let compiled = paint.compile().expect("warm production compile");
+            assert_eq!(compiled.program_id(), retained_compiled.program_id());
+            black_box(compiled)
+        })
+    });
+    c.bench_function("paint_production_cpu/retained_compile", |b| {
+        b.iter(|| black_box(retained.compile().expect("retained paint compile")))
+    });
+    c.bench_function("paint_production_cpu/retained_clone", |b| {
+        b.iter(|| black_box(retained.clone()))
+    });
+
+    let pure = production_recipe(0.1);
+    let border = color(gpui::rgb(0x48b8d0));
+    let glass = production_shader(|pixel| {
+        backdrop()
+            .sample(pixel.uv())
+            .mix(color(gpui::rgb(0xe0faff)), 0.2)
+    });
+    let mut renderer = WgpuHeadlessRenderer::new().expect("headless GPU required");
+    let target = Size {
+        width: DevicePixels(256),
+        height: DevicePixels(256),
+    };
+    let mut wait_group = c.benchmark_group("paint_production_gpu_submit_wait");
+    for count in [1, 64] {
+        for (name, paint, shape) in [
+            ("pure_background", &pure, ShaderShape::Background),
+            ("pure_border", &border, ShaderShape::Border),
+            ("backdrop_background", &glass, ShaderShape::Background),
+        ] {
+            let scene = production_scene(count, paint, shape, false);
+            renderer
+                .render_scene_and_wait(&scene, target)
+                .expect("warm GPU scene");
+            let pipelines = renderer.paint_diagnostics().1;
+            renderer
+                .render_scene_and_wait(&scene, target)
+                .expect("warm GPU scene");
+            assert_eq!(renderer.paint_diagnostics().1, pipelines);
+            wait_group.bench_with_input(BenchmarkId::new(name, count), &scene, |b, scene| {
+                b.iter(|| {
+                    renderer
+                        .render_scene_and_wait(black_box(scene), target)
+                        .unwrap()
+                })
+            });
+        }
+    }
+    // Every quad between glass paints forces a full snapshot refresh. At the
+    // larger viewport, these copies expose bandwidth beyond render-pass cost.
+    for (label, target, interleaved) in [
+        ("backdrop_interleaved_256", target, true),
+        (
+            "backdrop_contiguous_1024",
+            Size {
+                width: DevicePixels(1024),
+                height: DevicePixels(1024),
+            },
+            false,
+        ),
+        (
+            "backdrop_interleaved_1024",
+            Size {
+                width: DevicePixels(1024),
+                height: DevicePixels(1024),
+            },
+            true,
+        ),
+    ] {
+        let scene = production_scene(64, &glass, ShaderShape::Background, interleaved);
+        renderer
+            .render_scene_and_wait(&scene, target)
+            .expect("warm GPU scene");
+        let pipelines = renderer.paint_diagnostics().1;
+        wait_group.bench_with_input(BenchmarkId::new(label, 64), &scene, |b, scene| {
+            b.iter(|| {
+                renderer
+                    .render_scene_and_wait(black_box(scene), target)
+                    .unwrap()
+            })
+        });
+        assert_eq!(renderer.paint_diagnostics().1, pipelines);
+    }
+    wait_group.finish();
+
+    let mut readback_group = c.benchmark_group("paint_production_gpu_readback_wait");
+    for count in [1, 64] {
+        for (name, paint, shape) in [
+            ("pure_background", &pure, ShaderShape::Background),
+            ("pure_border", &border, ShaderShape::Border),
+            ("backdrop_background", &glass, ShaderShape::Background),
+        ] {
+            let scene = production_scene(count, paint, shape, false);
+            renderer
+                .render_scene_to_image(&scene, target)
+                .expect("warm readback scene");
+            readback_group.bench_with_input(BenchmarkId::new(name, count), &scene, |b, scene| {
+                b.iter(|| {
+                    black_box(
+                        renderer
+                            .render_scene_to_image(black_box(scene), target)
+                            .unwrap(),
+                    )
+                })
+            });
+        }
+    }
+    readback_group.finish();
+}
+
+criterion_group!(benches, benchmark, production_benchmark);
 criterion_main!(benches);

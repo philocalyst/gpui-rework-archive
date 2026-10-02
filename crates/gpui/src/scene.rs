@@ -158,12 +158,16 @@ impl Scene {
         // marker is inserted (see below) — otherwise a later non-overlapping sibling could reuse a
         // low order that lands inside the start..end range and be swept into the group.
         let is_filter_boundary = matches!(primitive, Primitive::FilterBoundary(_));
+        // A backdrop paint can sample anywhere in the current target, so spatial
+        // non-overlap cannot justify moving another draw across this read.
+        let is_backdrop_paint =
+            matches!(&primitive, Primitive::Shader(shader) if shader.shader.uses_backdrop());
 
         if clipped_bounds.is_empty() && !is_filter_boundary {
             return;
         }
 
-        let order = if is_filter_boundary {
+        let order = if is_filter_boundary || is_backdrop_paint {
             let order_bounds = if clipped_bounds.is_empty() {
                 *primitive.bounds()
             } else {
@@ -174,8 +178,12 @@ impl Scene {
             self.layer_stack
                 .last()
                 .copied()
+                .map(|order| order.max(self.primitive_bounds.order_floor()))
                 .unwrap_or_else(|| self.primitive_bounds.insert(clipped_bounds))
         };
+        if is_backdrop_paint {
+            self.primitive_bounds.set_order_floor(order + 1);
+        }
         match &mut primitive {
             Primitive::Shadow(shadow) => {
                 shadow.order = order;
@@ -829,11 +837,99 @@ pub struct ShaderQuad {
     /// The active content clip.
     pub content_mask: ContentMask<ScaledPixels>,
     /// Typed program and immutable parameter values.
-    pub shader: crate::paint::Shader,
+    pub shader: ShaderProgram,
     /// Inherited element opacity, applied after shader evaluation.
     pub opacity: f32,
     /// Converts scaled coordinates to logical shader coordinates.
     pub scale_factor: f32,
+    /// Canonical shape data for style paints. The renderer may rasterize a
+    /// smaller region (for example, optimized border strips), while this quad
+    /// keeps shader coordinates and coverage anchored to the full shape.
+    /// Legacy custom shaders leave this unset.
+    pub geometry: Option<(ShaderShape, Quad)>,
+}
+
+/// The program representation shared by legacy graph shaders and style paints.
+#[derive(Debug, Clone)]
+pub enum ShaderProgram {
+    /// A legacy graph shader with straight-alpha output.
+    Legacy(crate::paint::Shader),
+    /// A typed style paint with premultiplied output.
+    Paint(crate::shader::CompiledPaint),
+}
+
+/// A family-namespaced cache key for compiled shader programs.
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub enum ShaderProgramKey {
+    /// A legacy graph shader program id.
+    Legacy(u64),
+    /// A typed style paint program id.
+    Paint(u64),
+}
+
+impl ShaderProgram {
+    /// Program id within its family, shared by parameter permutations.
+    /// Use [`Self::cache_key`] when interning a mixed-family program cache.
+    pub fn program_id(&self) -> u64 {
+        match self {
+            Self::Legacy(shader) => shader.program_id(),
+            Self::Paint(paint) => paint.program_id(),
+        }
+    }
+
+    /// Cache identity, namespaced by program family.
+    pub fn cache_key(&self) -> ShaderProgramKey {
+        match self {
+            Self::Legacy(shader) => ShaderProgramKey::Legacy(shader.program_id()),
+            Self::Paint(paint) => ShaderProgramKey::Paint(paint.program_id()),
+        }
+    }
+
+    /// WGSL declarations and fragment entry point for this program.
+    pub fn wgsl(&self) -> &str {
+        match self {
+            Self::Legacy(shader) => shader.wgsl(),
+            Self::Paint(paint) => paint.wgsl(),
+        }
+    }
+
+    /// Packed parameter values in the program's uniform layout.
+    pub fn parameter_slots(&self) -> &[[f32; 4]] {
+        match self {
+            Self::Legacy(shader) => shader.parameter_slots(),
+            Self::Paint(paint) => paint.parameter_slots(),
+        }
+    }
+
+    /// Whether the fragment entry point returns premultiplied RGB.
+    pub fn is_premultiplied(&self) -> bool {
+        matches!(self, Self::Paint(_))
+    }
+
+    /// Whether the program samples the current backdrop.
+    pub fn uses_backdrop(&self) -> bool {
+        match self {
+            Self::Legacy(_) => false,
+            Self::Paint(paint) => paint.uses_backdrop(),
+        }
+    }
+
+    /// Whether the program uses fragment derivatives.
+    pub fn requires_derivatives(&self) -> bool {
+        match self {
+            Self::Legacy(shader) => shader.requires_derivatives(),
+            Self::Paint(paint) => paint.requires_derivatives(),
+        }
+    }
+}
+
+/// Canonical geometric coverage applied to a style paint.
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum ShaderShape {
+    /// Fill the rounded shape represented by `ShaderQuad::geometry`.
+    Background,
+    /// Fill only its styled border ring.
+    Border,
 }
 
 impl From<ShaderQuad> for Primitive {
@@ -1405,11 +1501,14 @@ mod tests {
             order: 0,
             bounds: full_bounds(),
             content_mask: mask(),
-            shader: crate::paint::PaintRoot::new()
-                .shader(|cx| cx.uniform(cx.parameter([1.0, 0.0, 0.0, 1.0])))
-                .unwrap(),
+            shader: ShaderProgram::Legacy(
+                crate::paint::PaintRoot::new()
+                    .shader(|cx| cx.uniform(cx.parameter([1.0, 0.0, 0.0, 1.0])))
+                    .unwrap(),
+            ),
             opacity: 1.0,
             scale_factor: 1.0,
+            geometry: None,
         }
     }
 
@@ -1782,6 +1881,49 @@ mod tests {
         assert_eq!(scene.render_plan().requirements().shader_count, 2);
         assert_eq!(scene.render_plan().requirements().instance_batch_count, 1);
         assert!(!scene.requires_offscreen_rendering());
+    }
+
+    #[test]
+    fn backdrop_paints_are_global_order_barriers_even_inside_layers() {
+        let paint = crate::shader::shader(|pixel| pixel.backdrop().sample(pixel.uv()))
+            .compile()
+            .expect("backdrop paint compiles");
+        for layered in [false, true] {
+            let mut scene = Scene::default();
+            if layered {
+                scene.push_layer(full_bounds().union(&detached_quad().bounds));
+            }
+            let mut glass = shader_quad();
+            glass.shader = ShaderProgram::Paint(paint.clone());
+            scene.insert_primitive(detached_quad());
+            scene.insert_primitive(glass.clone());
+            scene.insert_primitive(detached_quad());
+            scene.insert_primitive(glass);
+            scene.insert_primitive(detached_quad());
+            if layered {
+                scene.pop_layer();
+            }
+            scene.finish();
+
+            assert!(scene.quads[0].order < scene.shaders[0].order);
+            assert!(scene.shaders[0].order < scene.quads[1].order);
+            assert!(scene.quads[1].order < scene.shaders[1].order);
+            assert!(scene.shaders[1].order < scene.quads[2].order);
+            assert!(matches!(
+                scene.render_commands(),
+                [RenderCommand::Batch(PrimitiveBatch::Quads { range: first, .. }),
+                 RenderCommand::Batch(PrimitiveBatch::Shaders(_)),
+                 RenderCommand::Batch(PrimitiveBatch::Quads { range: middle, .. }),
+                 RenderCommand::Batch(PrimitiveBatch::Shaders(_)),
+                 RenderCommand::Batch(PrimitiveBatch::Quads { range: last, .. })]
+                    if first == &(0..1) && middle == &(1..2) && last == &(2..3)
+            ));
+
+            let mut replay = Scene::default();
+            replay.replay(0..scene.len(), &scene);
+            replay.finish();
+            assert_eq!(replay.render_commands(), scene.render_commands());
+        }
     }
 
     #[test]

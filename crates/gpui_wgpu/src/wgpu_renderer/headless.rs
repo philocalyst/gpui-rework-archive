@@ -166,9 +166,25 @@ impl WgpuHeadlessRenderer {
         self.renderer.gpu_specs()
     }
 
+    /// Selects a transparent or opaque scene, including the matching blend pipelines.
+    /// Transparent scenes clear to zero and expose composited alpha in readback images.
+    pub fn set_transparent(&mut self, transparent: bool) {
+        self.renderer.update_transparency(transparent);
+    }
+
     /// Paint cache entries, cumulative pipeline compilations, and uniform arena bytes.
     pub fn paint_diagnostics(&self) -> (usize, u64, u64) {
         self.renderer.resources().paints.diagnostics()
+    }
+
+    /// Number of logical snapshots made for backdrop-dependent paints.
+    pub fn backdrop_capture_count(&self) -> u64 {
+        self.renderer.resources().backdrop_captures.get()
+    }
+
+    /// Cumulative pixels copied into backdrop snapshots.
+    pub fn backdrop_copied_pixels(&self) -> u64 {
+        self.renderer.resources().backdrop_copied_pixels.get()
     }
 
     fn ensure_target(&mut self, size: Size<DevicePixels>) -> anyhow::Result<()> {

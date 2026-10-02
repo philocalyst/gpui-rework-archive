@@ -641,11 +641,6 @@ fn premultiplied_composite_blend_state() -> wgpu::BlendState {
 }
 
 fn source_over_blend_state(source_color_factor: wgpu::BlendFactor) -> wgpu::BlendState {
-    #[cfg(any(target_os = "macos", target_os = "windows"))]
-    let destination_alpha_factor = wgpu::BlendFactor::One;
-    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
-    let destination_alpha_factor = wgpu::BlendFactor::OneMinusSrcAlpha;
-
     wgpu::BlendState {
         color: wgpu::BlendComponent {
             src_factor: source_color_factor,
@@ -654,7 +649,7 @@ fn source_over_blend_state(source_color_factor: wgpu::BlendFactor) -> wgpu::Blen
         },
         alpha: wgpu::BlendComponent {
             src_factor: wgpu::BlendFactor::One,
-            dst_factor: destination_alpha_factor,
+            dst_factor: wgpu::BlendFactor::OneMinusSrcAlpha,
             operation: wgpu::BlendOperation::Add,
         },
     }
@@ -669,7 +664,7 @@ fn path_blend_state() -> wgpu::BlendState {
         },
         alpha: wgpu::BlendComponent {
             src_factor: wgpu::BlendFactor::One,
-            dst_factor: wgpu::BlendFactor::One,
+            dst_factor: wgpu::BlendFactor::OneMinusSrcAlpha,
             operation: wgpu::BlendOperation::Add,
         },
     }

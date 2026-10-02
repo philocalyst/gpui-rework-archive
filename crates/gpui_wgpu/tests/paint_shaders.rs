@@ -2,7 +2,7 @@
 #![cfg(feature = "test-support")]
 use gpui::{
     Bounds, ContentMask, DevicePixels, PlatformHeadlessRenderer, Point, Quad, ScaledPixels, Scene,
-    ShaderQuad, Size,
+    ShaderProgram, ShaderQuad, Size,
     paint::{PaintRoot, Shader},
     solid_background,
 };
@@ -27,9 +27,10 @@ fn shader_quad(shader: Shader, b: Bounds<ScaledPixels>) -> ShaderQuad {
         content_mask: ContentMask {
             bounds: bounds(0., 0., 256., 256.),
         },
-        shader,
+        shader: ShaderProgram::Legacy(shader),
         opacity: 1.,
         scale_factor: 1.,
+        geometry: None,
     }
 }
 fn render(renderer: &mut WgpuHeadlessRenderer, mut scene: Scene) -> image::RgbaImage {

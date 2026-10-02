@@ -2614,6 +2614,14 @@ impl Window {
         self.rendered_frame.scene.quads.clone()
     }
 
+    /// Returns the shader-backed shapes in the most recently rendered frame.
+    /// The optional geometry keeps the full logical shape even when the
+    /// renderer chooses a smaller raster region.
+    #[cfg(any(test, feature = "test-support"))]
+    pub fn painted_shader_quads(&self) -> Vec<crate::ShaderQuad> {
+        self.rendered_frame.scene.shaders.clone()
+    }
+
     /// Set the content size of the window.
     pub fn resize(&mut self, size: Size<Pixels>) {
         self.platform_window.resize(size);
@@ -4550,12 +4558,101 @@ impl Window {
             order: 0,
             bounds: bounds.scale(scale_factor),
             content_mask: self.snapped_content_mask(),
-            shader: shader.clone(),
+            shader: crate::ShaderProgram::Legacy(shader.clone()),
             opacity: self.element_opacity(),
             scale_factor,
+            geometry: None,
         };
         self.next_frame.scene.insert_primitive(primitive);
         Ok(())
+    }
+
+    /// Paints a procedural style fill using the same canonical geometry and
+    /// clipping rules as an ordinary quad. The renderer may split border
+    /// rasterization into strips, but shader coordinates and coverage remain
+    /// anchored to the complete quad.
+    pub(crate) fn paint_shader_fill(
+        &mut self,
+        quad: PaintQuad,
+        paint: &crate::shader::Paint,
+        shape: crate::ShaderShape,
+        corner_smoothing: f32,
+    ) {
+        self.invalidator.debug_assert_paint();
+        let scale_factor = self.scale_factor();
+        let coordinates = [
+            quad.bounds.origin.x.0,
+            quad.bounds.origin.y.0,
+            quad.bounds.size.width.0,
+            quad.bounds.size.height.0,
+            quad.bounds.right().0,
+            quad.bounds.bottom().0,
+        ];
+        if !scale_factor.is_finite()
+            || scale_factor <= 0.0
+            || quad.bounds.size.width.0 < 0.0
+            || quad.bounds.size.height.0 < 0.0
+            || coordinates
+                .iter()
+                .any(|value| !value.is_finite() || !(value * scale_factor).is_finite())
+        {
+            log::error!("cannot paint a style shader with invalid bounds or scale");
+            return;
+        }
+        if quad.bounds.is_empty() {
+            return;
+        }
+
+        let raster_bounds = self.snap_bounds(quad.bounds);
+        let content_mask = self.snapped_content_mask();
+        if raster_bounds.is_empty() || raster_bounds.intersect(&content_mask.bounds).is_empty() {
+            return;
+        }
+
+        if !self.supports_shader_paint() {
+            log::error!(
+                "cannot paint a style shader: the active renderer does not support shader paint"
+            );
+            return;
+        }
+
+        let shader = match paint.compile() {
+            Ok(shader) => shader,
+            Err(error) => {
+                log::error!("cannot compile style shader: {error:?}");
+                return;
+            }
+        };
+
+        let canonical = Quad {
+            order: 0,
+            border_style: quad.border_style,
+            border_dashed_length: quad.border_dashed_length,
+            border_dashed_gap: quad.border_dashed_gap,
+            bounds: raster_bounds,
+            content_mask,
+            background: transparent_black().into(),
+            border_color: transparent_black().into(),
+            corner_radii: quad.corner_radii.scale(scale_factor),
+            border_widths: self.snap_border_widths(quad.border_widths),
+            corner_smoothing: corner_smoothing.clamp(0.0, 1.0),
+            padding: 0,
+        };
+        let primitive = crate::ShaderQuad {
+            order: 0,
+            bounds: raster_bounds,
+            content_mask: canonical.content_mask,
+            shader: crate::ShaderProgram::Paint(shader),
+            opacity: self.element_opacity(),
+            scale_factor,
+            geometry: Some((shape, canonical)),
+        };
+
+        // Keep a shader border as one scene primitive. The GPU may derive
+        // optimized raster regions from the canonical border geometry, but a
+        // backdrop-reading paint must see one stable target snapshot for the
+        // whole shape and must not capture its own previously painted strips.
+        self.next_frame.scene.insert_primitive(primitive);
     }
 
     /// Paints `quad` with smoothed corners.

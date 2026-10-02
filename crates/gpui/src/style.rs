@@ -333,8 +333,8 @@ pub struct Style {
     /// The fill color of this element
     pub background: Option<Fill>,
 
-    /// The background painted into the border of this element
-    pub border_color: Option<Background>,
+    /// The fill painted into the border of this element.
+    pub border_color: Option<Fill>,
 
     /// The border style of this element
     pub border_style: BorderStyle,
@@ -799,10 +799,7 @@ impl Style {
                 let mut min = bounds.origin;
                 let mut max = bounds.bottom_right();
 
-                if self
-                    .border_color
-                    .is_some_and(|background| !background.is_transparent())
-                {
+                if self.border_color.as_ref().is_some_and(Fill::is_visible) {
                     min.x += self.border_widths.left.to_pixels(rem_size);
                     max.x -= self.border_widths.right.to_pixels(rem_size);
                     min.y += self.border_widths.top.to_pixels(rem_size);
@@ -886,20 +883,38 @@ impl Style {
         // unit. A `filter` (CSS `filter`) wraps this whole unit so the renderer blurs the element
         // and its children together as one group; without a filter it paints directly.
         let paint_box = |window: &mut Window, cx: &mut App| {
-            let background_color = self.background.as_ref().and_then(Fill::color);
-            if background_color.is_some_and(|color| !color.is_transparent()) {
-                let background_color = background_color.unwrap_or_default();
-                window.paint_quad_with_corner_smoothing(
-                    quad(
-                        bounds,
-                        corner_radii,
-                        background_color,
-                        Edges::default(),
-                        background_color.opacity(0.),
-                        self.border_style,
-                    ),
-                    corner_smoothing,
-                );
+            if let Some(background) = self.background.as_ref() {
+                match background {
+                    Fill::Color(background_color) if !background_color.is_transparent() => {
+                        window.paint_quad_with_corner_smoothing(
+                            quad(
+                                bounds,
+                                corner_radii,
+                                *background_color,
+                                Edges::default(),
+                                background_color.opacity(0.),
+                                self.border_style,
+                            ),
+                            corner_smoothing,
+                        );
+                    }
+                    Fill::Shader(paint) => {
+                        window.paint_shader_fill(
+                            quad(
+                                bounds,
+                                corner_radii,
+                                transparent_black(),
+                                Edges::default(),
+                                transparent_black(),
+                                self.border_style,
+                            ),
+                            paint,
+                            crate::ShaderShape::Background,
+                            corner_smoothing,
+                        );
+                    }
+                    Fill::Color(_) => {}
+                }
             }
 
             if let Some(ring) = self.inset_ring.inset_shadow(current_color) {
@@ -921,20 +936,41 @@ impl Style {
 
             if self.is_border_visible() {
                 let border_widths = self.border_widths.to_pixels(rem_size);
-                let border_color = self.border_color.unwrap_or_default();
-                window.paint_quad_with_corner_smoothing(
-                    quad(
-                        bounds,
-                        corner_radii,
-                        border_color.opacity(0.),
-                        border_widths,
-                        border_color,
-                        self.border_style,
-                    )
-                    .border_dashed_length(self.border_dashed_length)
-                    .border_dashed_gap(self.border_dashed_gap),
-                    corner_smoothing,
-                );
+                match self.border_color.as_ref() {
+                    Some(Fill::Color(border_color)) => {
+                        window.paint_quad_with_corner_smoothing(
+                            quad(
+                                bounds,
+                                corner_radii,
+                                border_color.opacity(0.),
+                                border_widths,
+                                *border_color,
+                                self.border_style,
+                            )
+                            .border_dashed_length(self.border_dashed_length)
+                            .border_dashed_gap(self.border_dashed_gap),
+                            corner_smoothing,
+                        );
+                    }
+                    Some(Fill::Shader(paint)) => {
+                        window.paint_shader_fill(
+                            quad(
+                                bounds,
+                                corner_radii,
+                                transparent_black(),
+                                border_widths,
+                                transparent_black(),
+                                self.border_style,
+                            )
+                            .border_dashed_length(self.border_dashed_length)
+                            .border_dashed_gap(self.border_dashed_gap),
+                            paint,
+                            crate::ShaderShape::Border,
+                            corner_smoothing,
+                        );
+                    }
+                    None => {}
+                }
             }
         };
 
@@ -959,8 +995,7 @@ impl Style {
     }
 
     fn is_border_visible(&self) -> bool {
-        self.border_color
-            .is_some_and(|background| !background.is_transparent())
+        self.border_color.as_ref().is_some_and(Fill::is_visible)
             && self.border_widths.any(|length| !length.is_zero())
     }
 }
@@ -1053,6 +1088,15 @@ pub struct StrikethroughStyle {
 pub enum Fill {
     /// A solid color fill.
     Color(Background),
+    /// A procedural paint evaluated by the renderer for every covered pixel.
+    ///
+    /// Shader paints are executable rendering state and are intentionally
+    /// excluded from style serialization and generated schemas. Style
+    /// transitions keep them at the starting paint until the transition ends;
+    /// solid colors and gradients retain their existing interpolation.
+    #[serde(skip_serializing, skip_deserializing)]
+    #[schemars(skip)]
+    Shader(crate::shader::Paint),
 }
 
 impl Fill {
@@ -1062,6 +1106,14 @@ impl Fill {
     pub fn color(&self) -> Option<Background> {
         match self {
             Fill::Color(color) => Some(*color),
+            Fill::Shader(_) => None,
+        }
+    }
+
+    fn is_visible(&self) -> bool {
+        match self {
+            Self::Color(color) => !color.is_transparent(),
+            Self::Shader(_) => true,
         }
     }
 }
@@ -1075,6 +1127,18 @@ impl Default for Fill {
 impl<T: Into<Background>> From<T> for Fill {
     fn from(color: T) -> Self {
         Self::Color(color.into())
+    }
+}
+
+impl From<crate::shader::Paint> for Fill {
+    fn from(paint: crate::shader::Paint) -> Self {
+        Self::Shader(paint)
+    }
+}
+
+impl From<&crate::shader::Paint> for Fill {
+    fn from(paint: &crate::shader::Paint) -> Self {
+        Self::Shader(paint.clone())
     }
 }
 
@@ -1539,10 +1603,61 @@ mod tests {
             linear_color_stop(blue(), 1.0),
         );
         let gradient_style = StyleRefinement::default().border_color(gradient);
-        assert_eq!(gradient_style.border_color, Some(gradient));
+        assert_eq!(gradient_style.border_color, Some(gradient.into()));
 
         let solid_style = StyleRefinement::default().border_color(red());
         assert_eq!(solid_style.border_color, Some(red().into()));
+    }
+
+    #[test]
+    fn procedural_paints_are_style_fills_and_refuse_serde_round_trips() {
+        let paint = crate::shader::color(red());
+        let style = StyleRefinement::default().bg(&paint).border_color(&paint);
+
+        assert!(matches!(style.background.as_ref(), Some(Fill::Shader(_))));
+        assert!(matches!(style.border_color.as_ref(), Some(Fill::Shader(_))));
+        assert!(Fill::Shader(paint.clone()).color().is_none());
+
+        let mut visibility = Style::default();
+        visibility.background = Some(Fill::Shader(paint.clone()));
+        visibility.border_color = Some(Fill::Shader(paint.clone()));
+        visibility.border_widths = Edges::all(px(1.0).into());
+        assert!(!visibility.has_opaque_background());
+        assert!(visibility.is_border_visible());
+
+        assert!(serde_json::to_string(&Fill::Shader(paint.clone())).is_err());
+        assert!(serde_json::to_string(&style).is_err());
+        assert!(serde_json::from_str::<Fill>(r#"{"Shader":null}"#).is_err());
+    }
+
+    #[test]
+    fn procedural_fill_transitions_switch_only_at_the_endpoint() {
+        let color = Fill::Color(red().into());
+        let paint = Fill::Shader(crate::shader::color(blue()));
+
+        assert!(matches!(
+            crate::Lerp::lerp(&color, &paint, 0.5),
+            Fill::Color(_)
+        ));
+        assert!(matches!(
+            crate::Lerp::lerp(&color, &paint, 1.0),
+            Fill::Shader(_)
+        ));
+        assert!(matches!(
+            crate::Lerp::lerp(&paint, &color, 0.5),
+            Fill::Shader(_)
+        ));
+    }
+
+    #[test]
+    fn procedural_fill_equality_tracks_structure_and_parameter_values() {
+        let red_paint = Fill::Shader(crate::shader::color(red()));
+        let equal_red_paint = Fill::Shader(crate::shader::color(red()));
+        let blue_paint = Fill::Shader(crate::shader::color(blue()));
+
+        assert_eq!(red_paint, equal_red_paint);
+        assert_eq!(red_paint, red_paint.clone());
+        assert_ne!(red_paint, blue_paint);
     }
 
     #[test]

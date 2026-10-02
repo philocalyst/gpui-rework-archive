@@ -51,6 +51,7 @@ pub(super) struct ReadbackCopy<'a> {
 
 struct PreparedTargets {
     active: wgpu::TextureView,
+    active_texture: Option<wgpu::Texture>,
     presentation: wgpu::TextureView,
     offscreen: Option<wgpu::TextureView>,
     instances: InstanceUpload,
@@ -94,8 +95,12 @@ impl PreparedTargets {
         if requirements.uses_path_target {
             renderer.ensure_path_textures();
         }
-        if requirements.uses_offscreen_target {
+        if requirements.uses_filter_targets {
             renderer.ensure_filter_textures(requirements.isolated_target_count);
+        }
+        if requirements.uses_backdrop_paint {
+            renderer.ensure_scene_color_texture();
+            renderer.ensure_backdrop_texture();
         }
         write_shader_globals(renderer);
         let viewport = [
@@ -112,6 +117,8 @@ impl PreparedTargets {
             viewport,
             config.format,
             config.alpha_mode,
+            resources.backdrop_view.as_ref(),
+            &resources.surface_sampler,
         ) {
             log::error!("paint preparation failed: {error}");
             return None;
@@ -124,8 +131,14 @@ impl PreparedTargets {
                 .as_ref()
                 .expect("blur texture preparation must create a scene target")
                 .clone();
+            let active_texture = resources
+                .scene_color_texture
+                .as_ref()
+                .expect("offscreen preparation must create a scene target texture")
+                .clone();
             Some(Self {
                 active: offscreen.clone(),
+                active_texture: Some(active_texture),
                 presentation: frame_view.clone(),
                 offscreen: Some(offscreen),
                 instances,
@@ -133,6 +146,7 @@ impl PreparedTargets {
         } else {
             Some(Self {
                 active: frame_view.clone(),
+                active_texture: None,
                 presentation: frame_view.clone(),
                 offscreen: None,
                 instances,
@@ -256,7 +270,9 @@ pub(super) struct FrameRequirements {
     pub(super) uniforms: FrameUniformRequirements,
     isolated_target_count: usize,
     uses_path_target: bool,
+    uses_filter_targets: bool,
     uses_offscreen_target: bool,
+    uses_backdrop_paint: bool,
 }
 
 impl FrameRequirements {
@@ -316,18 +332,24 @@ impl FrameRequirements {
         }
         debug_assert_eq!(instance_batches as usize, planned.instance_batch_count);
 
+        let uses_backdrop_paint = scene
+            .shaders
+            .iter()
+            .any(|shader| shader.shader.uses_backdrop());
         Self {
             storage_bytes,
             instance_batches,
             uniforms: FrameUniformRequirements {
                 filter_count: FILTER_UNIFORMS_PER_COMPOSITE
                     * (planned.backdrop_filter_count + planned.isolated_filter_count) as u64
-                    + u64::from(planned.uses_offscreen_target),
+                    + u64::from(planned.uses_offscreen_target || uses_backdrop_paint),
                 surface_count: planned.surface_count as u64,
             },
             isolated_target_count: planned.isolated_target_count,
             uses_path_target: planned.uses_path_target,
-            uses_offscreen_target: planned.uses_offscreen_target,
+            uses_filter_targets: planned.uses_offscreen_target,
+            uses_offscreen_target: planned.uses_offscreen_target || uses_backdrop_paint,
+            uses_backdrop_paint,
         }
     }
 }
@@ -337,6 +359,9 @@ struct FrameEncoder<'a> {
     scene: &'a Scene,
     encoder: wgpu::CommandEncoder,
     targets: TargetStack,
+    // Bounding rectangle modified since the full backdrop mirror was last synchronized.
+    // None means the snapshot is already coherent with the active target.
+    backdrop_dirty: Option<[u32; 4]>,
     offscreen: Option<wgpu::TextureView>,
     presentation: wgpu::TextureView,
     instances: InstanceUpload,
@@ -355,7 +380,8 @@ impl<'a> FrameEncoder<'a> {
             renderer,
             scene,
             encoder,
-            targets: TargetStack::new(targets.active),
+            targets: TargetStack::new(targets.active, targets.active_texture),
+            backdrop_dirty: Some([0, 0, renderer.target.width(), renderer.target.height()]),
             offscreen: targets.offscreen,
             presentation: targets.presentation,
             instances: targets.instances,
@@ -436,6 +462,11 @@ impl<'a> FrameEncoder<'a> {
                         &mut self.instances,
                         &mut pass,
                     )?;
+                    mark_full_dirty(
+                        &mut self.backdrop_dirty,
+                        self.renderer.target.width(),
+                        self.renderer.target.height(),
+                    );
                 }
                 RenderCommand::Batch(PrimitiveBatch::BackdropFilters(range)) => {
                     drop(pass);
@@ -446,6 +477,11 @@ impl<'a> FrameEncoder<'a> {
                             self.targets.current(),
                         );
                     }
+                    mark_full_dirty(
+                        &mut self.backdrop_dirty,
+                        self.renderer.target.width(),
+                        self.renderer.target.height(),
+                    );
                     pass = begin_scene_render_pass(
                         self.renderer,
                         &mut self.encoder,
@@ -454,16 +490,54 @@ impl<'a> FrameEncoder<'a> {
                         wgpu::LoadOp::Load,
                     );
                 }
+                RenderCommand::Batch(PrimitiveBatch::Shaders(range)) => {
+                    for index in range.clone() {
+                        if !self.renderer.resources().paints.is_visible(index) {
+                            continue;
+                        }
+                        let dirty = self
+                            .renderer
+                            .resources()
+                            .paints
+                            .scissor_bounds(index)
+                            .expect("visible paint must have a prepared scissor");
+                        if self.scene.shaders[index].shader.uses_backdrop() {
+                            drop(pass);
+                            self.capture_backdrop_snapshot()?;
+                            pass = begin_scene_render_pass(
+                                self.renderer,
+                                &mut self.encoder,
+                                "after_shader_backdrop_capture",
+                                self.targets.current(),
+                                wgpu::LoadOp::Load,
+                            );
+                        }
+                        self.renderer.resources().paints.draw(
+                            self.scene,
+                            index..index + 1,
+                            &mut pass,
+                        );
+                        union_dirty_rect(&mut self.backdrop_dirty, dirty);
+                        pass.set_bind_group(0, &self.renderer.resources().globals_bind_group, &[]);
+                    }
+                }
                 RenderCommand::Batch(PrimitiveBatch::FilterBoundary(_)) => {
                     unreachable!("filter boundaries must be compiled into render commands")
                 }
-                RenderCommand::Batch(batch) => encode_inline_batch(
-                    self.renderer,
-                    self.scene,
-                    batch,
-                    &mut self.instances,
-                    &mut pass,
-                )?,
+                RenderCommand::Batch(batch) => {
+                    encode_inline_batch(
+                        self.renderer,
+                        self.scene,
+                        batch,
+                        &mut self.instances,
+                        &mut pass,
+                    )?;
+                    mark_full_dirty(
+                        &mut self.backdrop_dirty,
+                        self.renderer.target.width(),
+                        self.renderer.target.height(),
+                    );
+                }
                 RenderCommand::BeginFilter {
                     target: FilterRenderTarget::Isolated(index),
                     ..
@@ -471,7 +545,14 @@ impl<'a> FrameEncoder<'a> {
                     drop(pass);
                     let target =
                         self.renderer.resources().filter_group_views[index.as_usize()].clone();
-                    self.targets.enter(target);
+                    let target_texture =
+                        self.renderer.resources().filter_group_textures[index.as_usize()].clone();
+                    self.targets.enter(target, target_texture);
+                    mark_full_dirty(
+                        &mut self.backdrop_dirty,
+                        self.renderer.target.width(),
+                        self.renderer.target.height(),
+                    );
                     pass = begin_scene_render_pass(
                         self.renderer,
                         &mut self.encoder,
@@ -502,6 +583,11 @@ impl<'a> FrameEncoder<'a> {
                             clip: FilterCompositeClip::ContentShape,
                         },
                     );
+                    mark_full_dirty(
+                        &mut self.backdrop_dirty,
+                        self.renderer.target.width(),
+                        self.renderer.target.height(),
+                    );
                     pass = begin_scene_render_pass(
                         self.renderer,
                         &mut self.encoder,
@@ -524,6 +610,73 @@ impl<'a> FrameEncoder<'a> {
         self.targets.assert_balanced();
         Ok(())
     }
+
+    fn capture_backdrop_snapshot(&mut self) -> DrawResult {
+        let source = self
+            .targets
+            .current_texture()
+            .ok_or(DrawError::MissingIntermediateTarget)?;
+        let destination = self
+            .renderer
+            .resources()
+            .backdrop_texture
+            .as_ref()
+            .ok_or(DrawError::MissingIntermediateTarget)?;
+        if let Some([x, y, width, height]) = self.backdrop_dirty {
+            let origin = wgpu::Origin3d { x, y, z: 0 };
+            self.encoder.copy_texture_to_texture(
+                wgpu::TexelCopyTextureInfo {
+                    texture: source,
+                    mip_level: 0,
+                    origin,
+                    aspect: wgpu::TextureAspect::All,
+                },
+                wgpu::TexelCopyTextureInfo {
+                    texture: destination,
+                    mip_level: 0,
+                    origin,
+                    aspect: wgpu::TextureAspect::All,
+                },
+                wgpu::Extent3d {
+                    width,
+                    height,
+                    depth_or_array_layers: 1,
+                },
+            );
+            self.backdrop_dirty = None;
+            #[cfg(feature = "test-support")]
+            {
+                let copied = self.renderer.resources().backdrop_copied_pixels.get();
+                self.renderer
+                    .resources()
+                    .backdrop_copied_pixels
+                    .set(copied + u64::from(width) * u64::from(height));
+            }
+        }
+        #[cfg(feature = "test-support")]
+        {
+            let count = self.renderer.resources().backdrop_captures.get();
+            self.renderer.resources().backdrop_captures.set(count + 1);
+        }
+        Ok(())
+    }
+}
+
+fn union_dirty_rect(dirty: &mut Option<[u32; 4]>, rect: [u32; 4]) {
+    *dirty = Some(match *dirty {
+        Some([left, top, width, height]) => {
+            let right = (left + width).max(rect[0] + rect[2]);
+            let bottom = (top + height).max(rect[1] + rect[3]);
+            let left = left.min(rect[0]);
+            let top = top.min(rect[1]);
+            [left, top, right - left, bottom - top]
+        }
+        None => rect,
+    });
+}
+
+fn mark_full_dirty(dirty: &mut Option<[u32; 4]>, width: u32, height: u32) {
+    *dirty = Some([0, 0, width, height]);
 }
 
 fn begin_scene_render_pass<'a>(
@@ -544,13 +697,16 @@ fn begin_scene_render_pass<'a>(
 
 struct TargetStack {
     current: wgpu::TextureView,
-    parents: smallvec::SmallVec<[wgpu::TextureView; MAX_FILTER_GROUP_DEPTH]>,
+    current_texture: Option<wgpu::Texture>,
+    parents:
+        smallvec::SmallVec<[(wgpu::TextureView, Option<wgpu::Texture>); MAX_FILTER_GROUP_DEPTH]>,
 }
 
 impl TargetStack {
-    fn new(root: wgpu::TextureView) -> Self {
+    fn new(root: wgpu::TextureView, root_texture: Option<wgpu::Texture>) -> Self {
         Self {
             current: root,
+            current_texture: root_texture,
             parents: smallvec::SmallVec::new(),
         }
     }
@@ -559,17 +715,23 @@ impl TargetStack {
         &self.current
     }
 
-    fn enter(&mut self, next: wgpu::TextureView) {
-        self.parents
-            .push(std::mem::replace(&mut self.current, next));
+    fn current_texture(&self) -> Option<&wgpu::Texture> {
+        self.current_texture.as_ref()
+    }
+
+    fn enter(&mut self, next: wgpu::TextureView, next_texture: wgpu::Texture) {
+        let parent = std::mem::replace(&mut self.current, next);
+        let parent_texture = std::mem::replace(&mut self.current_texture, Some(next_texture));
+        self.parents.push((parent, parent_texture));
     }
 
     fn exit(&mut self) -> (wgpu::TextureView, &wgpu::TextureView) {
-        let parent = self
+        let (parent, parent_texture) = self
             .parents
             .pop()
             .expect("render plan ended an isolated filter without beginning one");
         let filtered = std::mem::replace(&mut self.current, parent);
+        self.current_texture = parent_texture;
         (filtered, &self.current)
     }
 

@@ -51,6 +51,8 @@ pub mod profiler;
 #[expect(missing_docs)]
 pub mod queue;
 mod scene;
+/// Typed, composable fragment paints.
+pub mod shader;
 mod shared_uri;
 mod spring;
 mod style;
