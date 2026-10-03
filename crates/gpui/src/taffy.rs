@@ -1,6 +1,7 @@
 use crate::{
     AbsoluteLength, App, Bounds, DefiniteLength, Display, Edges, GridTemplate, InlineContent,
-    Length, Pixels, Point, Position, Size, Style, VerticalAlign, Window, WindowTextSystem, size,
+    Length, Pixels, Point, Position, ScaledPixels, Size, Style, VerticalAlign, Window,
+    WindowTextSystem, size,
     util::{
         ceil_to_device_pixel, round_half_toward_zero, round_stroke_to_device_pixel,
         round_to_device_pixel,
@@ -26,25 +27,57 @@ type FrameBoundMeasureFn =
 type RetainedMeasureFn =
     dyn FnMut(Size<Option<Pixels>>, Size<AvailableSpace>, &WindowTextSystem) -> Size<Pixels>;
 
-enum NodeContext {
+enum NodeMeasureFn {
     FrameBound(StackSafe<Box<FrameBoundMeasureFn>>),
     Retained(StackSafe<Box<RetainedMeasureFn>>),
 }
+
+#[derive(Copy, Clone)]
+enum InlineDisplay {
+    Inline,
+    InlineFlex,
+}
+
+struct NodeContext {
+    frame_epoch: u64,
+    measure: Option<NodeMeasureFn>,
+    vertical_align: VerticalAlign,
+    inline_display: Option<InlineDisplay>,
+    inline_content: Option<Arc<InlineContent>>,
+    inline_fragments: Option<Arc<[Bounds<Pixels>]>>,
+}
+
+impl NodeContext {
+    fn for_style(style: &Style, frame_epoch: u64) -> Self {
+        Self {
+            frame_epoch,
+            measure: None,
+            vertical_align: style.vertical_align,
+            inline_display: match style.display {
+                Display::Inline => Some(InlineDisplay::Inline),
+                Display::InlineFlex => Some(InlineDisplay::InlineFlex),
+                Display::Block | Display::Flex | Display::Grid | Display::None => None,
+            },
+            inline_content: None,
+            inline_fragments: None,
+        }
+    }
+}
+
+#[derive(Copy, Clone)]
+struct AbsoluteGeometry {
+    bounds: Bounds<Pixels>,
+    raw_outer_origin: Point<ScaledPixels>,
+}
+
 pub struct TaffyLayoutEngine {
     taffy: TaffyTree<NodeContext>,
-    absolute_layout_bounds: FxHashMap<LayoutId, Bounds<Pixels>>,
-    /// Unrounded absolute border-box top-left per-node coordinate in device pixels.
-    absolute_outer_origins: FxHashMap<LayoutId, Point<f32>>,
+    absolute_geometries: FxHashMap<LayoutId, AbsoluteGeometry>,
     computed_layouts: FxHashSet<LayoutId>,
-    vertical_alignments: FxHashMap<LayoutId, VerticalAlign>,
-    pub(crate) inline_content: FxHashMap<LayoutId, Arc<InlineContent>>,
-    pub(crate) inline_fragments: FxHashMap<LayoutId, Arc<[Bounds<Pixels>]>>,
-    display_and_position: FxHashMap<LayoutId, (Display, Position)>,
     layout_bounds_scratch_space: Vec<LayoutId>,
     live_layout_nodes: Vec<LayoutId>,
-    frame_layout_nodes: Vec<LayoutId>,
-    frame_layout_node_set: FxHashSet<LayoutId>,
-    frame_bound_measured_nodes: FxHashSet<LayoutId>,
+    frame_epoch: u64,
+    frame_bound_measured_nodes: Vec<LayoutId>,
 }
 
 const EXPECT_MESSAGE: &str = "we should avoid taffy layout errors by construction if possible";
@@ -55,51 +88,57 @@ impl TaffyLayoutEngine {
         taffy.disable_rounding();
         TaffyLayoutEngine {
             taffy,
-            absolute_layout_bounds: FxHashMap::default(),
-            absolute_outer_origins: FxHashMap::default(),
+            absolute_geometries: FxHashMap::default(),
             computed_layouts: FxHashSet::default(),
-            vertical_alignments: FxHashMap::default(),
-            inline_content: FxHashMap::default(),
-            inline_fragments: FxHashMap::default(),
-            display_and_position: FxHashMap::default(),
             layout_bounds_scratch_space: Vec::new(),
             live_layout_nodes: Vec::new(),
-            frame_layout_nodes: Vec::new(),
-            frame_layout_node_set: FxHashSet::default(),
-            frame_bound_measured_nodes: FxHashSet::default(),
+            frame_epoch: 0,
+            frame_bound_measured_nodes: Vec::new(),
         }
     }
 
-    /// Discard transient nodes from the previous frame while keeping nodes
-    /// claimed by retained views. Taffy's own per-node layout cache then carries
-    /// unchanged subtrees across frames.
+    /// Keep nodes claimed in this epoch and discard the rest. Taffy's per-node
+    /// layout cache then carries unchanged retained subtrees across frames.
     pub fn finish_frame(&mut self) {
-        for node in self.live_layout_nodes.drain(..) {
-            if !self.frame_layout_node_set.contains(&node) {
-                self.taffy
-                    .set_node_context(node.0, None)
-                    .expect(EXPECT_MESSAGE);
-                self.taffy.remove(node.0).expect(EXPECT_MESSAGE);
-                self.vertical_alignments.remove(&node);
-                self.display_and_position.remove(&node);
-                self.inline_content.remove(&node);
-                self.inline_fragments.remove(&node);
+        let frame_epoch = self.frame_epoch;
+        {
+            let (taffy, live_layout_nodes, stale_layout_nodes) = (
+                &mut self.taffy,
+                &mut self.live_layout_nodes,
+                &mut self.layout_bounds_scratch_space,
+            );
+            stale_layout_nodes.clear();
+            live_layout_nodes.retain(|node| {
+                let claimed = taffy
+                    .get_node_context(node.0)
+                    .is_some_and(|context| context.frame_epoch == frame_epoch);
+                if !claimed {
+                    stale_layout_nodes.push(*node);
+                }
+                claimed
+            });
+            // Parents are created after their children, so reverse order avoids repeatedly
+            // scanning each parent's child vector during removal. Prune membership is already
+            // decided above and does not depend on this ordering.
+            for node in stale_layout_nodes.drain(..).rev() {
+                // Taffy 0.13 leaves node-context entries behind on remove/clear.
+                taffy.set_node_context(node.0, None).expect(EXPECT_MESSAGE);
+                taffy.remove(node.0).expect(EXPECT_MESSAGE);
             }
         }
         self.release_frame_bound_measured_contexts();
-        std::mem::swap(&mut self.live_layout_nodes, &mut self.frame_layout_nodes);
-        self.frame_layout_nodes.clear();
-        self.frame_layout_node_set.clear();
-        self.absolute_layout_bounds.clear();
-        self.absolute_outer_origins.clear();
+        self.frame_epoch = frame_epoch
+            .checked_add(1)
+            .expect("layout frame epoch exhausted");
+        self.absolute_geometries.clear();
         self.computed_layouts.clear();
     }
 
     pub(crate) fn release_frame_bound_measured_contexts(&mut self) {
-        for node in self.frame_bound_measured_nodes.drain() {
-            self.taffy
-                .set_node_context(node.0, None)
-                .expect(EXPECT_MESSAGE);
+        for node in self.frame_bound_measured_nodes.drain(..) {
+            if let Some(context) = self.taffy.get_node_context_mut(node.0) {
+                context.measure = None;
+            }
         }
     }
 
@@ -112,18 +151,24 @@ impl TaffyLayoutEngine {
     pub(crate) fn live_measured_node_count(&self) -> usize {
         self.live_layout_nodes
             .iter()
-            .filter(|node| self.taffy.get_node_context(node.0).is_some())
+            .filter(|node| {
+                self.taffy
+                    .get_node_context(node.0)
+                    .is_some_and(|context| context.measure.is_some())
+            })
             .count()
     }
 
     pub fn retain_subtree(&mut self, root: LayoutId) {
         self.layout_bounds_scratch_space.clear();
         self.layout_bounds_scratch_space.push(root);
+        let frame_epoch = self.frame_epoch;
         while let Some(node) = self.layout_bounds_scratch_space.pop() {
-            if !self.frame_layout_node_set.insert(node) {
+            let context = self.context_mut(node);
+            if context.frame_epoch == frame_epoch {
                 continue;
             }
-            self.frame_layout_nodes.push(node);
+            context.frame_epoch = frame_epoch;
             self.layout_bounds_scratch_space.extend(
                 (0..self.taffy.child_count(node.0))
                     .map(|index| LayoutId::from(self.taffy.get_child_id(node.0, index))),
@@ -132,8 +177,31 @@ impl TaffyLayoutEngine {
     }
 
     fn claim_node(&mut self, node: LayoutId) {
-        if self.frame_layout_node_set.insert(node) {
-            self.frame_layout_nodes.push(node);
+        self.live_layout_nodes.push(node);
+    }
+
+    fn context(&self, node: LayoutId) -> &NodeContext {
+        self.taffy
+            .get_node_context(node.0)
+            .expect("every GPUI layout node owns its context")
+    }
+
+    fn context_mut(&mut self, node: LayoutId) -> &mut NodeContext {
+        self.taffy
+            .get_node_context_mut(node.0)
+            .expect("every GPUI layout node owns its context")
+    }
+
+    fn invalidate_geometry_subtree(&mut self, root: LayoutId) {
+        self.layout_bounds_scratch_space.clear();
+        self.layout_bounds_scratch_space.push(root);
+        while let Some(node) = self.layout_bounds_scratch_space.pop() {
+            self.absolute_geometries.remove(&node);
+            let child_count = self.taffy.child_count(node.0);
+            self.layout_bounds_scratch_space.extend(
+                (0..child_count)
+                    .map(|index| LayoutId::from(self.taffy.get_child_id(node.0, index))),
+            );
         }
     }
 
@@ -144,12 +212,12 @@ impl TaffyLayoutEngine {
         scale_factor: f32,
         children: &[LayoutId],
     ) -> LayoutId {
-        let vertical_align = style.vertical_align;
         let taffy_style = style.to_taffy(rem_size, scale_factor);
+        let context = NodeContext::for_style(&style, self.frame_epoch);
 
         let node_id: LayoutId = self
             .taffy
-            .new_leaf(taffy_style)
+            .new_leaf_with_context(taffy_style, context)
             .expect(EXPECT_MESSAGE)
             .into();
         self.taffy
@@ -157,9 +225,6 @@ impl TaffyLayoutEngine {
             .expect(EXPECT_MESSAGE);
 
         self.claim_node(node_id);
-        self.record_vertical_align(node_id, vertical_align);
-        self.display_and_position
-            .insert(node_id, (style.display, style.position));
         node_id
     }
 
@@ -183,7 +248,7 @@ impl TaffyLayoutEngine {
             style,
             rem_size,
             scale_factor,
-            NodeContext::FrameBound(measure),
+            NodeMeasureFn::FrameBound(measure),
         )
     }
 
@@ -206,7 +271,7 @@ impl TaffyLayoutEngine {
             style,
             rem_size,
             scale_factor,
-            NodeContext::Retained(measure),
+            NodeMeasureFn::Retained(measure),
         )
     }
 
@@ -215,11 +280,12 @@ impl TaffyLayoutEngine {
         style: Style,
         rem_size: Pixels,
         scale_factor: f32,
-        context: NodeContext,
+        measure: NodeMeasureFn,
     ) -> LayoutId {
-        let vertical_align = style.vertical_align;
         let taffy_style = style.to_taffy(rem_size, scale_factor);
-        let frame_bound = matches!(&context, NodeContext::FrameBound(_));
+        let mut context = NodeContext::for_style(&style, self.frame_epoch);
+        let frame_bound = matches!(&measure, NodeMeasureFn::FrameBound(_));
+        context.measure = Some(measure);
         let node_id: LayoutId = self
             .taffy
             .new_leaf_with_context(taffy_style, context)
@@ -227,51 +293,67 @@ impl TaffyLayoutEngine {
             .into();
         self.claim_node(node_id);
         if frame_bound {
-            self.frame_bound_measured_nodes.insert(node_id);
+            self.frame_bound_measured_nodes.push(node_id);
         }
-        self.record_vertical_align(node_id, vertical_align);
-        self.display_and_position
-            .insert(node_id, (style.display, style.position));
         node_id
     }
 
-    fn record_vertical_align(&mut self, node_id: LayoutId, vertical_align: VerticalAlign) {
-        if vertical_align != VerticalAlign::Baseline {
-            self.vertical_alignments.insert(node_id, vertical_align);
-        }
-    }
-
     pub(crate) fn vertical_align(&self, node_id: LayoutId) -> VerticalAlign {
-        self.vertical_alignments
-            .get(&node_id)
-            .copied()
-            .unwrap_or_default()
+        self.context(node_id).vertical_align
     }
 
     pub(crate) fn display_and_position(&self, node_id: LayoutId) -> (Display, Position) {
-        self.display_and_position[&node_id]
+        let style = self.taffy.style(node_id.0).expect(EXPECT_MESSAGE);
+        let display = self
+            .context(node_id)
+            .inline_display
+            .map(|display| match display {
+                InlineDisplay::Inline => Display::Inline,
+                InlineDisplay::InlineFlex => Display::InlineFlex,
+            })
+            .unwrap_or_else(|| match style.display {
+                taffy::style::Display::Block => Display::Block,
+                taffy::style::Display::FlowRoot => Display::Block,
+                taffy::style::Display::Flex => Display::Flex,
+                taffy::style::Display::Grid => Display::Grid,
+                taffy::style::Display::None => Display::None,
+            });
+        let position = match style.position {
+            taffy::style::Position::Relative => Position::Relative,
+            taffy::style::Position::Absolute => Position::Absolute,
+        };
+        (display, position)
+    }
+
+    pub(crate) fn set_inline_content(&mut self, node_id: LayoutId, content: Arc<InlineContent>) {
+        self.context_mut(node_id).inline_content = Some(content);
+    }
+
+    pub(crate) fn inline_content(&self, node_id: LayoutId) -> Option<Arc<InlineContent>> {
+        self.context(node_id).inline_content.clone()
+    }
+
+    pub(crate) fn inline_fragments(&self, node_id: LayoutId) -> Option<Arc<[Bounds<Pixels>]>> {
+        self.context(node_id).inline_fragments.clone()
+    }
+
+    pub(crate) fn set_inline_fragments(
+        &mut self,
+        node_id: LayoutId,
+        fragments: Arc<[Bounds<Pixels>]>,
+    ) {
+        self.context_mut(node_id).inline_fragments = Some(fragments);
     }
 
     /// Places a detached inline box, invalidating cached positions of its descendants.
     pub(crate) fn place_inline(&mut self, node_id: LayoutId, bounds: Bounds<Pixels>, scale: f32) {
-        let mut stack = vec![node_id];
-
-        while let Some(child) = stack.pop() {
-            self.absolute_layout_bounds.remove(&child);
-            self.absolute_outer_origins.remove(&child);
-            stack.extend(
-                self.taffy
-                    .children(child.into())
-                    .expect(EXPECT_MESSAGE)
-                    .into_iter()
-                    .map(LayoutId::from),
-            );
-        }
-
-        self.absolute_layout_bounds.insert(node_id, bounds);
-        self.absolute_outer_origins.insert(
+        self.invalidate_geometry_subtree(node_id);
+        self.absolute_geometries.insert(
             node_id,
-            bounds.origin.map(|position| f32::from(position) * scale),
+            AbsoluteGeometry {
+                bounds,
+                raw_outer_origin: bounds.origin.scale(scale),
+            },
         );
     }
 
@@ -372,19 +454,7 @@ impl TaffyLayoutEngine {
         //
 
         if !self.computed_layouts.insert(id) {
-            let stack = &mut self.layout_bounds_scratch_space;
-            stack.push(id);
-            while let Some(id) = stack.pop() {
-                self.absolute_layout_bounds.remove(&id);
-                self.absolute_outer_origins.remove(&id);
-                stack.extend(
-                    self.taffy
-                        .children(id.into())
-                        .expect(EXPECT_MESSAGE)
-                        .into_iter()
-                        .map(LayoutId::from),
-                );
-            }
+            self.invalidate_geometry_subtree(id);
         }
 
         let scale_factor = window.scale_factor();
@@ -406,7 +476,8 @@ impl TaffyLayoutEngine {
                 id.into(),
                 available_space.into(),
                 |known_dimensions, available_space, _id, node_context, _style| {
-                    let Some(node_context) = node_context else {
+                    let Some(measure) = node_context.and_then(|context| context.measure.as_mut())
+                    else {
                         return taffy::geometry::Size::default();
                     };
 
@@ -428,11 +499,11 @@ impl TaffyLayoutEngine {
                         untransform(available_space.height),
                     );
 
-                    let measured_size: Size<Pixels> = match node_context {
-                        NodeContext::FrameBound(measure) => {
+                    let measured_size: Size<Pixels> = match measure {
+                        NodeMeasureFn::FrameBound(measure) => {
                             measure(known_dimensions, available_space, window, cx)
                         }
-                        NodeContext::Retained(measure) => {
+                        NodeMeasureFn::Retained(measure) => {
                             measure(known_dimensions, available_space, window.text_system())
                         }
                     };
@@ -546,40 +617,40 @@ impl TaffyLayoutEngine {
     // snapped independently, but the raw content-box origin can carry a
     // 1dp residual into descendants.
 
-    pub fn layout_bounds(&mut self, id: LayoutId, scale_factor: f32) -> Bounds<Pixels> {
-        if let Some(layout) = self.absolute_layout_bounds.get(&id).cloned() {
-            return layout;
+    fn absolute_geometry(&mut self, id: LayoutId, scale_factor: f32) -> AbsoluteGeometry {
+        if let Some(geometry) = self.absolute_geometries.get(&id) {
+            return *geometry;
         }
-
         let layout = self.taffy.layout(id.into()).expect(EXPECT_MESSAGE);
-        let layout_location = layout.location;
-        let layout_size = layout.size;
+        let layout_location = Point::from(layout.location).map(ScaledPixels);
+        let layout_size = Size::from(layout.size).map(ScaledPixels);
         let parent = self.taffy.parent(id.0);
 
-        let absolute_outer_origin = match parent {
+        let raw_outer_origin = match parent {
             Some(parent_id) => {
-                let parent_id = LayoutId::from(parent_id);
-                self.layout_bounds(parent_id, scale_factor);
-                let parent_origin = *self
-                    .absolute_outer_origins
-                    .get(&parent_id)
-                    .expect("parent absolute outer origin should be cached");
-                parent_origin + Point::from(layout_location)
+                self.absolute_geometry(LayoutId::from(parent_id), scale_factor)
+                    .raw_outer_origin
+                    + layout_location
             }
-            None => Point::from(layout_location),
+            None => layout_location,
         };
-        self.absolute_outer_origins
-            .insert(id, absolute_outer_origin);
 
-        let absolute_far = absolute_outer_origin + Point::from(Size::from(layout_size));
+        let absolute_far = raw_outer_origin + Point::from(layout_size);
         let snapped_bounds = Bounds::from_corners(
-            absolute_outer_origin.map(round_half_toward_zero),
-            absolute_far.map(round_half_toward_zero),
+            raw_outer_origin.map(|position| round_half_toward_zero(position.0)),
+            absolute_far.map(|position| round_half_toward_zero(position.0)),
         );
 
-        let bounds = (snapped_bounds / scale_factor).map(Pixels);
-        self.absolute_layout_bounds.insert(id, bounds);
-        bounds
+        let geometry = AbsoluteGeometry {
+            bounds: (snapped_bounds / scale_factor).map(Pixels),
+            raw_outer_origin,
+        };
+        self.absolute_geometries.insert(id, geometry);
+        geometry
+    }
+
+    pub fn layout_bounds(&mut self, id: LayoutId, scale_factor: f32) -> Bounds<Pixels> {
+        self.absolute_geometry(id, scale_factor).bounds
     }
 
     /// Returns bounds whose origin and size are snapped in the coordinate space of the parent.
@@ -592,7 +663,7 @@ impl TaffyLayoutEngine {
         node_id: LayoutId,
         scale_factor: f32,
     ) -> Bounds<Pixels> {
-        if self.inline_fragments.contains_key(&node_id) {
+        if self.context(node_id).inline_fragments.is_some() {
             return self.layout_bounds(node_id, scale_factor);
         }
 
@@ -1129,6 +1200,31 @@ mod tests {
         assert_eq!(
             taffy_border.left,
             taffy::style::LengthPercentage::length(2.0)
+        );
+    }
+
+    #[test]
+    fn pruning_wide_stale_parent_preserves_reparented_child() {
+        let mut engine = TaffyLayoutEngine::new();
+        let children: Vec<_> = (0..64)
+            .map(|_| engine.request_layout(Style::default(), Pixels(16.0), 1.0, &[]))
+            .collect();
+        let old_parent = engine.request_layout(Style::default(), Pixels(16.0), 1.0, &children);
+        engine.finish_frame();
+
+        let surviving_child = children[32];
+        let new_parent =
+            engine.request_layout(Style::default(), Pixels(16.0), 1.0, &[surviving_child]);
+        engine.retain_subtree(surviving_child);
+        engine.finish_frame();
+
+        assert_eq!(engine.live_layout_node_count(), 2);
+        assert!(engine.taffy.get_node_context(old_parent.0).is_none());
+        assert_eq!(engine.taffy.parent(surviving_child.0), Some(new_parent.0));
+        assert_eq!(engine.taffy.child_count(new_parent.0), 1);
+        assert_eq!(
+            engine.taffy.get_child_id(new_parent.0, 0),
+            surviving_child.0
         );
     }
 }

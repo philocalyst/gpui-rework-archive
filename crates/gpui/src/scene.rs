@@ -107,8 +107,8 @@ impl Scene {
         self.is_finished = false;
     }
 
-    /// Converts finished-scene operation indices back to the recording-order indices before
-    /// accepting more operations or sorting the public primitive lanes again.
+    /// Materializes finished-scene operation indices into current lane positions before accepting
+    /// more operations.
     fn prepare_recording(&mut self) {
         if !self.is_finished {
             return;
@@ -321,89 +321,96 @@ impl Scene {
     }
 
     pub fn finish(&mut self) {
-        self.prepare_recording();
+        let was_finished = self.is_finished;
         self.surface_opacities.resize(self.surfaces.len(), 1.0);
         self.surface_opacities.truncate(self.surfaces.len());
 
         let mut permutations = ScenePermutations::default();
-        macro_rules! sort_lane {
-            ($lane:ident, $key:expr) => {
+        macro_rules! sort_and_apply_lane {
+            ($kind:ident, $lane:ident, $key:expr, $parallel:expr) => {{
                 sort_scene_items(
                     &self.$lane,
                     &mut self.sort_keys,
                     &mut self.sort_old_to_new,
                     $key,
-                    &mut permutations.$lane,
-                )
-            };
-        }
-        sort_lane!(shadows, |shadow| (shadow.order, 0));
-        sort_lane!(quads, |quad| (quad.order, 0));
-        sort_lane!(paths, |path| (path.order, 0));
-        sort_lane!(underlines, |underline| (underline.order, 0));
-        sort_lane!(monochrome_sprites, |sprite| {
-            (sprite.order, sprite.tile.tile_id.0)
-        });
-        sort_lane!(subpixel_sprites, |sprite| {
-            (sprite.order, sprite.tile.tile_id.0)
-        });
-        sort_lane!(polychrome_sprites, |sprite| {
-            (sprite.order, sprite.tile.tile_id.0)
-        });
-        sort_lane!(surfaces, |surface| (surface.order, 0));
-        sort_lane!(backdrop_filters, |filter| (filter.order, 0));
-        // Markers normally get distinct, monotonically-increasing orders (children overlap
-        // their group bounds and so sort strictly between the start and end). The `!is_start`
-        // tiebreak only matters for a degenerate empty group whose start and end tie: it keeps
-        // the start (false = 0) ahead of the end (true = 1) so the pair stays well-formed.
-        sort_lane!(filter_boundaries, |boundary| {
-            (boundary.order, (!boundary.is_start) as u32)
-        });
-        let stored_permutations = permutations.clone();
-
-        macro_rules! apply_lane {
-            ($lane:ident, $key:expr) => {
+                    &mut permutations[SceneLane::$kind],
+                );
                 apply_scene_sort(
                     &mut self.$lane,
                     &self.sort_old_to_new,
                     &mut self.sort_scratch,
-                    permutations.$lane,
+                    permutations[SceneLane::$kind].sort.clone(),
                     $key,
-                    |_| {},
-                )
-            };
+                    $parallel,
+                );
+            }};
         }
-        apply_lane!(shadows, |shadow| (shadow.order, 0));
-        apply_lane!(quads, |quad| (quad.order, 0));
-        apply_lane!(paths, |path| (path.order, 0));
-        apply_lane!(underlines, |underline| (underline.order, 0));
-        apply_lane!(monochrome_sprites, |sprite| {
-            (sprite.order, sprite.tile.tile_id.0)
-        });
-        apply_lane!(subpixel_sprites, |sprite| {
-            (sprite.order, sprite.tile.tile_id.0)
-        });
-        apply_lane!(polychrome_sprites, |sprite| {
-            (sprite.order, sprite.tile.tile_id.0)
-        });
-        apply_scene_sort(
-            &mut self.surfaces,
-            &self.sort_old_to_new,
-            &mut self.sort_scratch,
-            permutations.surfaces,
-            |surface| (surface.order, 0),
-            |edit| match edit {
+        sort_and_apply_lane!(Shadows, shadows, |shadow| (shadow.order, 0), |_| {});
+        sort_and_apply_lane!(Quads, quads, |quad| (quad.order, 0), |_| {});
+        sort_and_apply_lane!(Paths, paths, |path| (path.order, 0), |_| {});
+        sort_and_apply_lane!(
+            Underlines,
+            underlines,
+            |underline| (underline.order, 0),
+            |_| {}
+        );
+        sort_and_apply_lane!(
+            MonochromeSprites,
+            monochrome_sprites,
+            |sprite| { (sprite.order, sprite.tile.tile_id.0) },
+            |_| {}
+        );
+        sort_and_apply_lane!(
+            SubpixelSprites,
+            subpixel_sprites,
+            |sprite| { (sprite.order, sprite.tile.tile_id.0) },
+            |_| {}
+        );
+        sort_and_apply_lane!(
+            PolychromeSprites,
+            polychrome_sprites,
+            |sprite| { (sprite.order, sprite.tile.tile_id.0) },
+            |_| {}
+        );
+        sort_and_apply_lane!(Surfaces, surfaces, |surface| (surface.order, 0), |edit| {
+            match edit {
                 LaneEdit::Swap(from, to) => self.surface_opacities.swap(from, to),
                 LaneEdit::Reverse(range) => self.surface_opacities[range].reverse(),
-            },
-        );
-        apply_lane!(backdrop_filters, |filter| (filter.order, 0));
-        apply_lane!(filter_boundaries, |boundary| {
-            (boundary.order, (!boundary.is_start) as u32)
+            }
         });
+        sort_and_apply_lane!(
+            BackdropFilters,
+            backdrop_filters,
+            |filter| (filter.order, 0),
+            |_| {}
+        );
+        // Markers normally get distinct, monotonically-increasing orders (children overlap
+        // their group bounds and so sort strictly between the start and end). The `!is_start`
+        // tiebreak only matters for a degenerate empty group whose start and end tie: it keeps
+        // the start (false = 0) ahead of the end (true = 1) so the pair stays well-formed.
+        sort_and_apply_lane!(
+            FilterBoundaries,
+            filter_boundaries,
+            |boundary| { (boundary.order, (!boundary.is_start) as u32) },
+            |_| {}
+        );
         self.sort_keys.clear();
         self.sort_scratch.clear();
-        self.permutations = stored_permutations;
+        if was_finished {
+            if !permutations.is_identity() {
+                let composed = compose_scene_permutations(
+                    &self.permutations,
+                    &permutations,
+                    &self.sort_old_to_new,
+                    &mut self.sort_scratch,
+                );
+                std::mem::swap(&mut self.sort_old_to_new, &mut self.sort_scratch);
+                self.sort_scratch.clear();
+                self.permutations = composed;
+            }
+        } else {
+            self.permutations = permutations;
+        }
         let commands = std::mem::take(&mut self.render_plan.commands);
         self.render_plan = ScenePlan::build(self, commands);
         self.is_finished = true;
@@ -533,18 +540,54 @@ pub(crate) enum PaintOperation {
     EndLayer,
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Copy)]
+#[repr(usize)]
+enum SceneLane {
+    Shadows,
+    Quads,
+    Paths,
+    Underlines,
+    MonochromeSprites,
+    SubpixelSprites,
+    PolychromeSprites,
+    Surfaces,
+    BackdropFilters,
+    FilterBoundaries,
+}
+
+const SCENE_LANE_COUNT: usize = SceneLane::FilterBoundaries as usize + 1;
+
+#[derive(Clone)]
 struct ScenePermutations {
-    shadows: LaneSort,
-    quads: LaneSort,
-    paths: LaneSort,
-    underlines: LaneSort,
-    monochrome_sprites: LaneSort,
-    subpixel_sprites: LaneSort,
-    polychrome_sprites: LaneSort,
-    surfaces: LaneSort,
-    backdrop_filters: LaneSort,
-    filter_boundaries: LaneSort,
+    lanes: [LaneMapping; SCENE_LANE_COUNT],
+}
+
+impl Default for ScenePermutations {
+    fn default() -> Self {
+        Self {
+            lanes: std::array::from_fn(|_| LaneMapping::default()),
+        }
+    }
+}
+
+impl std::ops::Index<SceneLane> for ScenePermutations {
+    type Output = LaneMapping;
+
+    fn index(&self, lane: SceneLane) -> &Self::Output {
+        &self.lanes[lane as usize]
+    }
+}
+
+impl std::ops::IndexMut<SceneLane> for ScenePermutations {
+    fn index_mut(&mut self, lane: SceneLane) -> &mut Self::Output {
+        &mut self.lanes[lane as usize]
+    }
+}
+
+#[derive(Clone, Default)]
+struct LaneMapping {
+    source_len: usize,
+    sort: LaneSort,
 }
 
 #[derive(Clone, Default)]
@@ -570,43 +613,113 @@ struct SceneSortKey(DrawOrder, u32, usize);
 
 impl ScenePermutations {
     fn is_identity(&self) -> bool {
-        matches!(&self.shadows, LaneSort::Identity)
-            && matches!(&self.quads, LaneSort::Identity)
-            && matches!(&self.paths, LaneSort::Identity)
-            && matches!(&self.underlines, LaneSort::Identity)
-            && matches!(&self.monochrome_sprites, LaneSort::Identity)
-            && matches!(&self.subpixel_sprites, LaneSort::Identity)
-            && matches!(&self.polychrome_sprites, LaneSort::Identity)
-            && matches!(&self.surfaces, LaneSort::Identity)
-            && matches!(&self.backdrop_filters, LaneSort::Identity)
-            && matches!(&self.filter_boundaries, LaneSort::Identity)
+        self.lanes
+            .iter()
+            .all(|mapping| matches!(&mapping.sort, LaneSort::Identity))
     }
 
     fn remap(&self, operation: &mut PaintOperation, old_to_new: &[usize]) {
-        match operation {
-            PaintOperation::Shadow(index) => remap_index(index, &self.shadows, old_to_new),
-            PaintOperation::Quad(index) => remap_index(index, &self.quads, old_to_new),
-            PaintOperation::Path(index) => remap_index(index, &self.paths, old_to_new),
-            PaintOperation::Underline(index) => remap_index(index, &self.underlines, old_to_new),
-            PaintOperation::MonochromeSprite(index) => {
-                remap_index(index, &self.monochrome_sprites, old_to_new)
+        let (lane, index) = match operation {
+            PaintOperation::Shadow(index) => (SceneLane::Shadows, index),
+            PaintOperation::Quad(index) => (SceneLane::Quads, index),
+            PaintOperation::Path(index) => (SceneLane::Paths, index),
+            PaintOperation::Underline(index) => (SceneLane::Underlines, index),
+            PaintOperation::MonochromeSprite(index) => (SceneLane::MonochromeSprites, index),
+            PaintOperation::SubpixelSprite(index) => (SceneLane::SubpixelSprites, index),
+            PaintOperation::PolychromeSprite(index) => (SceneLane::PolychromeSprites, index),
+            PaintOperation::Surface(index) => (SceneLane::Surfaces, index),
+            PaintOperation::BackdropFilter(index) => (SceneLane::BackdropFilters, index),
+            PaintOperation::FilterBoundary(index) => (SceneLane::FilterBoundaries, index),
+            PaintOperation::StartLayer(_) | PaintOperation::EndLayer => return,
+        };
+        remap_index(index, &self[lane].sort, old_to_new);
+    }
+}
+
+fn compose_scene_permutations(
+    previous: &ScenePermutations,
+    current: &ScenePermutations,
+    source: &[usize],
+    output: &mut Vec<usize>,
+) -> ScenePermutations {
+    ScenePermutations {
+        lanes: std::array::from_fn(|index| {
+            compose_lane(
+                &previous.lanes[index],
+                &current.lanes[index],
+                source,
+                output,
+            )
+        }),
+    }
+}
+
+fn compose_lane(
+    previous: &LaneMapping,
+    current: &LaneMapping,
+    source: &[usize],
+    output: &mut Vec<usize>,
+) -> LaneMapping {
+    let source_len = previous.source_len;
+    let sort = match (&previous.sort, &current.sort) {
+        (LaneSort::Identity, sort) => copy_lane_sort(sort, source_len, source, output),
+        (sort, LaneSort::Identity) => copy_lane_sort(sort, source_len, source, output),
+        (LaneSort::Swap(old), LaneSort::Swap(new)) if old == new => LaneSort::Identity,
+        (LaneSort::Reverse(old), LaneSort::Reverse(new)) if old == new => LaneSort::Identity,
+        _ => {
+            let start = output.len();
+            for old_index in 0..source_len {
+                let current_index = map_index(old_index, &previous.sort, source);
+                output.push(map_index(current_index, &current.sort, source));
             }
-            PaintOperation::SubpixelSprite(index) => {
-                remap_index(index, &self.subpixel_sprites, old_to_new)
+            if output[start..]
+                .iter()
+                .enumerate()
+                .all(|(index, &mapped)| index == mapped)
+            {
+                output.truncate(start);
+                LaneSort::Identity
+            } else {
+                LaneSort::Indexed(start..output.len())
             }
-            PaintOperation::PolychromeSprite(index) => {
-                remap_index(index, &self.polychrome_sprites, old_to_new)
-            }
-            PaintOperation::Surface(index) => remap_index(index, &self.surfaces, old_to_new),
-            PaintOperation::BackdropFilter(index) => {
-                remap_index(index, &self.backdrop_filters, old_to_new)
-            }
-            PaintOperation::FilterBoundary(index) => {
-                remap_index(index, &self.filter_boundaries, old_to_new)
-            }
-            PaintOperation::StartLayer(_) | PaintOperation::EndLayer => {}
+        }
+    };
+    LaneMapping { source_len, sort }
+}
+
+fn copy_lane_sort(
+    sort: &LaneSort,
+    source_len: usize,
+    source: &[usize],
+    output: &mut Vec<usize>,
+) -> LaneSort {
+    match sort {
+        LaneSort::Identity => LaneSort::Identity,
+        LaneSort::Swap(position) => LaneSort::Swap(*position),
+        LaneSort::Reverse(len) => LaneSort::Reverse(*len),
+        LaneSort::ReverseRuns(range) | LaneSort::Indexed(range) => {
+            copy_lane_map(range, source_len, source, output)
         }
     }
+}
+
+fn copy_lane_map(
+    range: &Range<usize>,
+    source_len: usize,
+    source: &[usize],
+    output: &mut Vec<usize>,
+) -> LaneSort {
+    let start = output.len();
+    let mapping = &source[range.start..range.start + source_len];
+    if mapping
+        .iter()
+        .enumerate()
+        .all(|(index, &mapped)| index == mapped)
+    {
+        return LaneSort::Identity;
+    }
+    output.extend_from_slice(mapping);
+    LaneSort::Indexed(start..output.len())
 }
 
 #[inline]
@@ -640,8 +753,10 @@ fn sort_scene_items<T>(
     sort_keys: &mut Vec<SceneSortKey>,
     old_to_new: &mut Vec<usize>,
     key: impl Fn(&T) -> (DrawOrder, u32),
-    sort: &mut LaneSort,
+    mapping: &mut LaneMapping,
 ) {
+    mapping.source_len = items.len();
+    let sort = &mut mapping.sort;
     match classify_scene_lane(items, &key) {
         LanePattern::Identity => *sort = LaneSort::Identity,
         LanePattern::Swap(position) => *sort = LaneSort::Swap(position),
@@ -2408,6 +2523,231 @@ mod tests {
     }
 
     #[test]
+    fn repeated_finish_composes_indices_and_preserves_direct_lane_additions() {
+        fn recorded_indices(scene: &Scene) -> Vec<usize> {
+            scene
+                .paint_operations
+                .iter()
+                .map(|operation| match operation {
+                    PaintOperation::Quad(index) => *index,
+                    _ => unreachable!(),
+                })
+                .collect()
+        }
+
+        let mut scene = Scene::default();
+        for smoothing in [0.1, 0.2, 0.3, 0.4] {
+            let mut quad = quad();
+            quad.corner_smoothing = smoothing;
+            scene.insert_primitive(quad);
+        }
+        for (quad, order) in scene.quads.iter_mut().zip([4, 1, 3, 2]) {
+            quad.order = order;
+        }
+        scene.finish();
+
+        assert_eq!(recorded_indices(&scene), [0, 1, 2, 3]);
+
+        for (quad, order) in scene.quads.iter_mut().zip([4, 3, 2, 1]) {
+            quad.order = order;
+        }
+        scene.finish();
+        let mut public_only_quad = quad();
+        public_only_quad.corner_smoothing = 0.5;
+        public_only_quad.order = 5;
+        scene.quads.push(public_only_quad);
+        scene.finish();
+        for (quad, order) in scene.quads.iter_mut().zip([5, 4, 3, 2, 1]) {
+            quad.order = order;
+        }
+        scene.finish();
+        assert_eq!(recorded_indices(&scene), [0, 1, 2, 3]);
+
+        for round in 0..20 {
+            let lane_len = scene.quads.len();
+            for (index, quad) in scene.quads.iter_mut().enumerate() {
+                quad.order = ((index * 2 + round) % lane_len) as DrawOrder;
+            }
+            scene.finish();
+            assert_eq!(recorded_indices(&scene), [0, 1, 2, 3]);
+            assert!(scene.sort_old_to_new.len() <= 4);
+        }
+
+        let mut replay = Scene::default();
+        replay.replay(0..scene.paint_operations.len(), &scene);
+        replay.finish();
+        assert_eq!(
+            replay
+                .quads
+                .iter()
+                .map(|quad| quad.corner_smoothing)
+                .collect::<Vec<_>>(),
+            [0.1, 0.2, 0.3, 0.4]
+        );
+    }
+
+    #[test]
+    fn lane_permutation_composition_matches_every_pair_through_five_items() {
+        fn enumerate(items: &mut [usize], position: usize, output: &mut Vec<Vec<usize>>) {
+            if position == items.len() {
+                output.push(items.to_vec());
+                return;
+            }
+            for next in position..items.len() {
+                items.swap(position, next);
+                enumerate(items, position + 1, output);
+                items.swap(position, next);
+            }
+        }
+
+        for len in 0..=5 {
+            let mut permutations = Vec::new();
+            enumerate(&mut (0..len).collect::<Vec<_>>(), 0, &mut permutations);
+            for previous_map in &permutations {
+                for current_map in &permutations {
+                    let mut source = previous_map.clone();
+                    source.extend_from_slice(current_map);
+                    let previous = LaneMapping {
+                        source_len: len,
+                        sort: LaneSort::Indexed(0..len),
+                    };
+                    let current = LaneMapping {
+                        source_len: len,
+                        sort: LaneSort::Indexed(len..2 * len),
+                    };
+                    let mut composed_map = Vec::new();
+                    let composed = compose_lane(&previous, &current, &source, &mut composed_map);
+                    for old_index in 0..len {
+                        assert_eq!(
+                            map_index(old_index, &composed.sort, &composed_map),
+                            current_map[previous_map[old_index]],
+                            "len={len}, previous={previous_map:?}, current={current_map:?}"
+                        );
+                    }
+                }
+            }
+        }
+
+        let mut scratch = Vec::new();
+        let swap = LaneMapping {
+            source_len: 6,
+            sort: LaneSort::Swap(2),
+        };
+        assert!(matches!(
+            compose_lane(&swap, &swap, &[], &mut scratch).sort,
+            LaneSort::Identity
+        ));
+        let reverse = LaneMapping {
+            source_len: 6,
+            sort: LaneSort::Reverse(6),
+        };
+        assert!(matches!(
+            compose_lane(&reverse, &reverse, &[], &mut scratch).sort,
+            LaneSort::Identity
+        ));
+    }
+
+    #[test]
+    fn lane_composition_handles_structural_sorts_and_public_lane_growth() {
+        fn assert_composes(
+            previous: LaneMapping,
+            current: LaneMapping,
+            source: &[usize],
+            expected: &[usize],
+        ) {
+            let mut output = Vec::new();
+            let composed = compose_lane(&previous, &current, source, &mut output);
+            assert_eq!(composed.source_len, expected.len());
+            for (old_index, &new_index) in expected.iter().enumerate() {
+                assert_eq!(
+                    map_index(old_index, &composed.sort, &output),
+                    new_index,
+                    "old index {old_index}"
+                );
+            }
+        }
+
+        let len = 5;
+        let identity = || LaneMapping {
+            source_len: len,
+            sort: LaneSort::Identity,
+        };
+        let swap = |position| LaneMapping {
+            source_len: len,
+            sort: LaneSort::Swap(position),
+        };
+        let reverse = || LaneMapping {
+            source_len: len,
+            sort: LaneSort::Reverse(len),
+        };
+        let swap_map = |position| {
+            (0..len)
+                .map(|index| match index {
+                    index if index == position => index + 1,
+                    index if index == position + 1 => index - 1,
+                    index => index,
+                })
+                .collect::<Vec<_>>()
+        };
+        let reverse_map = || (0..len).map(|index| len - 1 - index).collect::<Vec<_>>();
+        let run_map = [3, 4, 2, 0, 1];
+        let indexed_map = [2, 4, 0, 3, 1];
+
+        assert_composes(identity(), swap(1), &[], &swap_map(1));
+        assert_composes(swap(3), identity(), &[], &swap_map(3));
+        assert_composes(identity(), reverse(), &[], &reverse_map());
+        assert_composes(reverse(), identity(), &[], &reverse_map());
+        assert_composes(reverse(), reverse(), &[], &[0, 1, 2, 3, 4]);
+
+        let mut source = run_map.to_vec();
+        source.extend_from_slice(&indexed_map);
+        assert_composes(
+            LaneMapping {
+                source_len: len,
+                sort: LaneSort::ReverseRuns(0..len),
+            },
+            LaneMapping {
+                source_len: len,
+                sort: LaneSort::Indexed(len..2 * len),
+            },
+            &source,
+            &run_map.map(|index| indexed_map[index]),
+        );
+        assert_composes(
+            LaneMapping {
+                source_len: len,
+                sort: LaneSort::Identity,
+            },
+            LaneMapping {
+                source_len: len,
+                sort: LaneSort::ReverseRuns(0..len),
+            },
+            &run_map,
+            &run_map,
+        );
+
+        let six_item_map = [1, 5, 2, 4, 0, 3];
+        let mut output = Vec::new();
+        let composed = compose_lane(
+            &LaneMapping {
+                source_len: 4,
+                sort: LaneSort::Identity,
+            },
+            &LaneMapping {
+                source_len: 6,
+                sort: LaneSort::Indexed(0..6),
+            },
+            &six_item_map,
+            &mut output,
+        );
+        assert_eq!(composed.source_len, 4);
+        assert_eq!(output.len(), 4);
+        for (old_index, &new_index) in six_item_map[..4].iter().enumerate() {
+            assert_eq!(map_index(old_index, &composed.sort, &output), new_index);
+        }
+    }
+
+    #[test]
     fn lane_sort_matches_stable_sort_for_all_short_key_sequences() {
         let mut saw_identity = false;
         let mut saw_swap = false;
@@ -2436,15 +2776,15 @@ mod tests {
                 expected.extend_from_slice(&items);
                 expected.sort_by_key(|(key, _)| *key);
 
-                let mut sort = LaneSort::Identity;
+                let mut mapping = LaneMapping::default();
                 sort_scene_items(
                     &items,
                     &mut sort_keys,
                     &mut old_to_new,
                     |(key, _)| (*key, 0),
-                    &mut sort,
+                    &mut mapping,
                 );
-                match &sort {
+                match &mapping.sort {
                     LaneSort::Identity => saw_identity = true,
                     LaneSort::Swap(_) => saw_swap = true,
                     LaneSort::Reverse(_) => saw_reverse = true,
@@ -2454,7 +2794,7 @@ mod tests {
 
                 for old_index in 0..len {
                     let mut new_index = old_index;
-                    remap_index(&mut new_index, &sort, &old_to_new);
+                    remap_index(&mut new_index, &mapping.sort, &old_to_new);
                     let expected_index = expected
                         .iter()
                         .position(|(_, id)| *id == old_index)
@@ -2467,7 +2807,7 @@ mod tests {
                     &mut items,
                     &old_to_new,
                     &mut sort_scratch,
-                    sort,
+                    mapping.sort.clone(),
                     |(key, _)| (*key, 0),
                     |edit| match edit {
                         LaneEdit::Swap(from, to) => parallel.swap(from, to),

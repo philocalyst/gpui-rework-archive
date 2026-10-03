@@ -5681,18 +5681,12 @@ impl Window {
             return false;
         };
 
-        layout_engine
-            .inline_content
-            .insert(node_id, Arc::new(content));
+        layout_engine.set_inline_content(node_id, Arc::new(content));
         true
     }
 
     pub(crate) fn inline_content(&self, node_id: LayoutId) -> Option<Arc<crate::InlineContent>> {
-        self.layout_engine
-            .as_ref()?
-            .inline_content
-            .get(&node_id)
-            .cloned()
+        self.layout_engine.as_ref()?.inline_content(node_id)
     }
 
     pub(crate) fn layout_display_and_position(
@@ -5707,8 +5701,7 @@ impl Window {
     pub(crate) fn inline_fragments(&self, node_id: LayoutId) -> Option<Arc<[Bounds<Pixels>]>> {
         self.layout_engine
             .as_ref()?
-            .inline_fragments
-            .get(&node_id)
+            .inline_fragments(node_id)
             .map(|fragments| {
                 let offset = self.pixel_snap_point(self.element_offset());
 
@@ -5743,7 +5736,7 @@ impl Window {
             for fragment in &mut fragments {
                 fragment.origin -= offset;
             }
-            engine.inline_fragments.insert(node_id, fragments.into());
+            engine.set_inline_fragments(node_id, fragments.into());
         }
 
         true
