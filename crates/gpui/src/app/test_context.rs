@@ -924,6 +924,10 @@ impl VisualTestContext {
         self.update(|window, cx| {
             let arena_scope = ElementArenaScope::enter(&cx.element_arena);
 
+            // This helper draws a caller-supplied root outside Window::draw. Treat
+            // that content as fresh and release frame-bound measure closures before
+            // its element arena is cleared.
+            window.refresh();
             window.invalidator.set_phase(DrawPhase::Prepaint);
             let mut element = Drawable::new(f(window, cx));
             element.layout_as_root(space.into(), window, cx);
@@ -932,6 +936,7 @@ impl VisualTestContext {
             window.invalidator.set_phase(DrawPhase::Paint);
             let (request_layout_state, prepaint_state) = element.paint(window, cx);
 
+            window.release_frame_bound_measured_contexts();
             window.invalidator.set_phase(DrawPhase::None);
             window.refresh();
 

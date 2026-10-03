@@ -1,13 +1,11 @@
 use crate::{
-    AnyElement, AnyEntity, AnyWeakEntity, App, Bounds, ContentMask, Context, Element, ElementId,
-    Entity, EntityId, GlobalElementId, InspectorElementId, IntoElement, LayoutId, PaintIndex,
-    Pixels, PrepaintStateIndex, Render, RenderOnce, Style, StyleRefinement, TextStyle, WeakEntity,
+    AnyElement, AnyEntity, AnyWeakEntity, App, Bounds, Context, Element, ElementId, Entity,
+    EntityId, GlobalElementId, InspectorElementId, IntoElement, LayoutId, PaintIndex, Pixels,
+    PrepaintStateIndex, Render, RenderOnce, Style, StyleRefinement, ViewDependencies, WeakEntity,
 };
 use crate::{Empty, Window};
 use anyhow::Result;
-use collections::FxHashSet;
 use refineable::Refineable;
-use std::mem;
 use std::{any::TypeId, fmt, ops::Range};
 
 /// A dynamically-typed view handle that can be downcast to a specific `Entity<V>`.
@@ -37,7 +35,8 @@ impl AnyView {
     /// [Context::notify] was called on the backing entity since it was rendered
     /// (or [Window::refresh] is called, which ignores caching).
     pub fn cached(self, style: StyleRefinement) -> ViewElement<AnyView> {
-        ViewElement::new(self).cached(style)
+        let entity_id = self.entity_id();
+        ViewElement::retained(self, entity_id, Some(style))
     }
 
     /// Convert this to a weak handle.
@@ -96,7 +95,8 @@ impl<V: 'static + Render> IntoElement for Entity<V> {
     type Element = ViewElement<Entity<V>>;
 
     fn into_element(self) -> Self::Element {
-        ViewElement::new(self)
+        let entity_id = self.entity_id();
+        ViewElement::retained(self, entity_id, None)
     }
 }
 
@@ -104,7 +104,8 @@ impl IntoElement for AnyView {
     type Element = ViewElement<AnyView>;
 
     fn into_element(self) -> Self::Element {
-        ViewElement::new(self)
+        let entity_id = self.entity_id();
+        ViewElement::retained(self, entity_id, None)
     }
 }
 
@@ -280,11 +281,13 @@ impl<T: Render> Entity<T> {
     /// The rendered subtree is reused until the entity is notified (or the
     /// cached bounds / text style change). Caching requires a definite size:
     /// a cached view is laid out from `style` and is *not* measured from its
-    /// contents. Use [`ViewElement::new`] (or `.child(entity)`) for the
-    /// uncached case.
+    /// contents. `.child(entity)` uses natural layout and retains its subtree
+    /// while the entity is clean; use [`ViewElement::new`] for a manual `View`
+    /// whose parent-supplied props must remain fresh.
     #[track_caller]
     pub fn cached(self, style: StyleRefinement) -> ViewElement<Entity<T>> {
-        ViewElement::new(self).cached(style)
+        let entity_id = self.entity_id();
+        ViewElement::retained(self, entity_id, Some(style))
     }
 }
 
@@ -293,38 +296,53 @@ impl<T: Render> Entity<T> {
 #[doc(hidden)]
 pub struct ViewElement<V: View> {
     view: Option<V>,
-    entity_id: Option<EntityId>,
-    cached_style: Option<StyleRefinement>,
+    mount: Option<ViewMount>,
     #[cfg(debug_assertions)]
     source: &'static core::panic::Location<'static>,
+}
+
+struct ViewMount {
+    entity_id: EntityId,
+    mount_id: Option<u32>,
+    policy: ViewPolicy,
+}
+
+#[derive(Clone)]
+enum ViewPolicy {
+    Fresh,
+    Retained {
+        fixed_style: Option<StyleRefinement>,
+    },
 }
 
 impl<V: View> ViewElement<V> {
     /// Wrap a [`View`] as an element.
     #[track_caller]
     pub fn new(view: V) -> Self {
-        let entity_id = view.entity_id();
-        ViewElement {
+        let mount = view.entity_id().map(|entity_id| ViewMount {
             entity_id,
-            cached_style: None,
+            mount_id: None,
+            policy: ViewPolicy::Fresh,
+        });
+        ViewElement {
+            mount,
             view: Some(view),
             #[cfg(debug_assertions)]
             source: core::panic::Location::caller(),
         }
     }
 
-    /// Enable caching of this view's rendered subtree, laid out at `style`.
-    /// The composer supplies the layout style because caching skips rendering
-    /// the contents to measure them.
-    ///
-    /// Crate-private on purpose: caching is only sound for entity-backed views,
-    /// where [`Context::notify`] is the contract that busts the cache. A stateless
-    /// view has no such contract, so a frozen subtree could never be invalidated.
-    /// Reach this through [`Entity::cached`] or [`AnyView::cached`], which are
-    /// entity-backed by construction.
-    pub(crate) fn cached(mut self, style: StyleRefinement) -> Self {
-        self.cached_style = Some(style);
-        self
+    fn retained(view: V, entity_id: EntityId, fixed_style: Option<StyleRefinement>) -> Self {
+        Self {
+            view: Some(view),
+            mount: Some(ViewMount {
+                entity_id,
+                mount_id: None,
+                policy: ViewPolicy::Retained { fixed_style },
+            }),
+            #[cfg(debug_assertions)]
+            source: core::panic::Location::caller(),
+        }
     }
 }
 
@@ -336,17 +354,132 @@ impl<V: View> IntoElement for ViewElement<V> {
     }
 }
 
-struct ViewElementState {
-    prepaint_range: Range<PrepaintStateIndex>,
-    paint_range: Range<PaintIndex>,
-    cache_key: ViewElementCacheKey,
-    accessed_entities: FxHashSet<EntityId>,
+#[derive(Default)]
+pub(crate) struct ViewElementState {
+    cache: Option<ViewCache>,
 }
 
-struct ViewElementCacheKey {
+struct ViewCache {
+    layout: LayoutCache,
+    output: CachedOutput,
+}
+
+struct LayoutCache {
+    root: LayoutId,
+    environment: crate::window::ViewEnvironment,
+    fixed_style: Option<StyleRefinement>,
+    dependencies: ViewDependencies,
+    frame_bound: bool,
+}
+
+enum CachedOutput {
+    NeedsPrepaint,
+    Prepared(ViewOutput<Option<Range<PaintIndex>>>),
+    Painted(ViewOutput<Range<PaintIndex>>),
+}
+
+struct ViewOutput<P> {
+    key: ViewOutputKey,
+    prepaint_range: Range<PrepaintStateIndex>,
+    a11y_roots: Vec<accesskit::NodeId>,
+    paint: P,
+}
+
+#[derive(PartialEq)]
+struct ViewOutputKey {
     bounds: Bounds<Pixels>,
-    content_mask: ContentMask<Pixels>,
-    text_style: TextStyle,
+    // Normally paint runs under the same ambient state as request_layout, so
+    // `None` avoids storing a second copy. Nested mask/opacity/input scopes are
+    // captured only when the prepaint environment differs from that baseline.
+    environment: Option<crate::window::ViewEnvironment>,
+}
+
+impl ViewElementState {
+    pub(crate) fn extend_dependencies(
+        &mut self,
+        dependencies: &ViewDependencies,
+        frame_bound: bool,
+    ) {
+        if let Some(cache) = &mut self.cache {
+            cache.layout.dependencies.extend(dependencies);
+            cache.layout.frame_bound |= frame_bound;
+        }
+    }
+
+    pub(crate) fn rebase_prepaint_range(
+        &mut self,
+        source: &Range<crate::window::PrepaintStateIndex>,
+        destination: &crate::window::PrepaintStateIndex,
+    ) {
+        let Some(cache) = &mut self.cache else { return };
+        match &mut cache.output {
+            CachedOutput::NeedsPrepaint => {}
+            CachedOutput::Prepared(output) => {
+                rebase_range(&mut output.prepaint_range, source, destination)
+            }
+            CachedOutput::Painted(output) => {
+                rebase_range(&mut output.prepaint_range, source, destination)
+            }
+        }
+    }
+
+    pub(crate) fn rebase_paint_range(
+        &mut self,
+        source: &Range<crate::window::PaintIndex>,
+        destination: &crate::window::PaintIndex,
+    ) {
+        let Some(cache) = &mut self.cache else { return };
+        match &mut cache.output {
+            CachedOutput::NeedsPrepaint => {}
+            CachedOutput::Prepared(output) => {
+                if let Some(range) = &mut output.paint {
+                    rebase_range(range, source, destination);
+                }
+            }
+            CachedOutput::Painted(output) => rebase_range(&mut output.paint, source, destination),
+        }
+    }
+}
+
+trait RebaseRangeIndex: Sized {
+    fn rebase_from(&mut self, source: &Range<Self>, destination: &Self);
+}
+
+impl RebaseRangeIndex for PrepaintStateIndex {
+    fn rebase_from(&mut self, source: &Range<Self>, destination: &Self) {
+        PrepaintStateIndex::rebase_from(self, source, destination);
+    }
+}
+
+impl RebaseRangeIndex for PaintIndex {
+    fn rebase_from(&mut self, source: &Range<Self>, destination: &Self) {
+        PaintIndex::rebase_from(self, source, destination);
+    }
+}
+
+fn rebase_range<I: RebaseRangeIndex>(range: &mut Range<I>, source: &Range<I>, destination: &I) {
+    range.start.rebase_from(source, destination);
+    range.end.rebase_from(source, destination);
+}
+
+fn cache_is_valid(cache: &ViewCache, entity_id: EntityId, window: &Window, cx: &App) -> bool {
+    !window.refreshing
+        && !window.is_inspector_picking(cx)
+        && !window.inspector_is_open()
+        && !window.dirty_views.contains(&entity_id)
+        && !cache.layout.frame_bound
+        && !cache
+            .layout
+            .dependencies
+            .entities
+            .iter()
+            .any(|entity| window.dirty_views.contains(entity))
+        && cache
+            .layout
+            .dependencies
+            .globals
+            .iter()
+            .all(|(global_type, revision)| cx.global_revision(*global_type) == *revision)
 }
 
 impl<V: View> Element for ViewElement<V> {
@@ -354,7 +487,9 @@ impl<V: View> Element for ViewElement<V> {
     type PrepaintState = Option<AnyElement>;
 
     fn id(&self) -> Option<ElementId> {
-        self.entity_id.map(ElementId::View)
+        self.mount
+            .as_ref()
+            .map(|mount| ElementId::View(mount.entity_id))
     }
 
     fn source_location(&self) -> Option<&'static core::panic::Location<'static>> {
@@ -367,29 +502,81 @@ impl<V: View> Element for ViewElement<V> {
 
     fn request_layout(
         &mut self,
-        _id: Option<&GlobalElementId>,
+        id: Option<&GlobalElementId>,
         _inspector_id: Option<&InspectorElementId>,
         window: &mut Window,
         cx: &mut App,
     ) -> (LayoutId, Self::RequestLayoutState) {
-        if let Some(entity_id) = self.entity_id {
-            // Stateful path: create a reactive boundary.
-            window.with_rendered_view(entity_id, |window| {
-                let caching_disabled = window.is_inspector_picking(cx);
-                match self.cached_style.as_ref() {
-                    Some(style) if !caching_disabled => {
-                        let mut root_style = Style::default();
-                        root_style.refine(style);
-                        let layout_id = window.request_layout(root_style, None, cx);
-                        (layout_id, None)
-                    }
-                    _ => {
-                        let mut element = render_view(self.view.take().unwrap(), window, cx);
-                        let layout_id = element.request_layout(window, cx);
-                        (layout_id, Some(element))
-                    }
+        if let Some(mount) = self.mount.as_mut() {
+            let entity_id = mount.entity_id;
+            let global_id = id.expect("entity-backed views must have an element id");
+            let mount_id = window.next_view_mount_id(global_id);
+            mount.mount_id = Some(mount_id);
+            let cache_id = Window::mounted_view_id(global_id, mount_id);
+
+            let fixed_style = match &mount.policy {
+                ViewPolicy::Fresh => {
+                    return window.with_rendered_view(entity_id, |window| {
+                        window.with_cached_view(cache_id, mount_id, |window| {
+                            let mut element = render_view(self.view.take().unwrap(), window, cx);
+                            let layout = element.request_layout(window, cx);
+                            (layout, Some(element))
+                        })
+                    });
                 }
-            })
+                ViewPolicy::Retained { fixed_style } => fixed_style.clone(),
+            };
+
+            let (layout_id, request) = window.with_rendered_view(entity_id, |window| {
+                window.with_cached_view(cache_id.clone(), mount_id, |window| {
+                    let environment = window.view_environment();
+                    window.with_element_state::<ViewElementState, _>(&cache_id, |state, window| {
+                        let mut state = state.unwrap_or_default();
+                        if let Some(cache) = state.cache.as_ref().filter(|cache| {
+                            cache_is_valid(cache, entity_id, window, cx)
+                                && cache.layout.environment == environment
+                                && cache.layout.fixed_style == fixed_style
+                        }) {
+                            let root = cache.layout.root;
+                            window.retain_layout_subtree(root);
+                            cx.extend_accessed_dependencies(&cache.layout.dependencies);
+                            window.note_view_reused();
+                            return ((root, None), state);
+                        }
+
+                        let (root, request_element, dependencies) =
+                            if let Some(style) = &fixed_style {
+                                let mut root_style = Style::default();
+                                root_style.refine(style);
+                                let root = window.request_layout(root_style, None, cx);
+                                (root, None, ViewDependencies::default())
+                            } else {
+                                let ((element, root_layout), dependencies) = cx
+                                    .detect_accessed_dependencies(|cx| {
+                                        let mut element =
+                                            render_view(self.view.take().unwrap(), window, cx);
+                                        let root_layout = element.request_layout(window, cx);
+                                        (element, root_layout)
+                                    });
+                                (root_layout, Some(element), dependencies)
+                            };
+
+                        state.cache = Some(ViewCache {
+                            layout: LayoutCache {
+                                root,
+                                environment,
+                                fixed_style,
+                                dependencies,
+                                frame_bound: false,
+                            },
+                            output: CachedOutput::NeedsPrepaint,
+                        });
+                        window.note_view_rebuilt();
+                        ((root, request_element), state)
+                    })
+                })
+            });
+            (layout_id, request)
         } else {
             // Stateless path: isolate subtree via type name (no entity identity).
             window.with_id(
@@ -412,75 +599,110 @@ impl<V: View> Element for ViewElement<V> {
         window: &mut Window,
         cx: &mut App,
     ) -> Option<AnyElement> {
-        if let Some(entity_id) = self.entity_id {
-            // Stateful path.
+        if let Some(mount) = self.mount.as_ref() {
+            let entity_id = mount.entity_id;
+            let mount_id = mount.mount_id.expect("request_layout sets the view mount");
+            let cache_id = Window::mounted_view_id(global_id.unwrap(), mount_id);
             window.set_view_id(entity_id);
-            window.with_rendered_view(entity_id, |window| {
-                if let Some(mut element) = element.take() {
-                    element.prepaint(window, cx);
-                    return Some(element);
+
+            let fixed_style = match &mount.policy {
+                ViewPolicy::Fresh => {
+                    return window.with_rendered_view(entity_id, |window| {
+                        window.with_cached_view(cache_id, mount_id, |window| {
+                            let mut element = element.take().unwrap();
+                            element.prepaint(window, cx);
+                            Some(element)
+                        })
+                    });
                 }
+                ViewPolicy::Retained { fixed_style } => fixed_style.clone(),
+            };
 
-                window.with_element_state::<ViewElementState, _>(
-                    global_id.unwrap(),
-                    |element_state, window| {
-                        let content_mask = window.content_mask();
-                        let text_style = window.text_style();
+            window.with_rendered_view(entity_id, |window| {
+                window.with_cached_view(cache_id.clone(), mount_id, |window| {
+                    let mut fresh_element = element.take();
+                    let request_reused = fresh_element.is_none();
+                    let environment = window.view_environment();
 
-                        if let Some(mut element_state) = element_state
-                            && element_state.cache_key.bounds == bounds
-                            && element_state.cache_key.content_mask == content_mask
-                            && element_state.cache_key.text_style == text_style
-                            && !window.dirty_views.contains(&entity_id)
-                            && !window.refreshing
-                        {
-                            let prepaint_start = window.prepaint_index();
-                            window.reuse_prepaint(element_state.prepaint_range.clone());
-                            cx.entities
-                                .extend_accessed(&element_state.accessed_entities);
-                            let prepaint_end = window.prepaint_index();
-                            element_state.prepaint_range = prepaint_start..prepaint_end;
-
-                            return (None, element_state);
-                        }
-
-                        let refreshing = mem::replace(&mut window.refreshing, true);
+                    window.with_element_state::<ViewElementState, _>(&cache_id, |state, window| {
+                        let mut state = state.unwrap_or_default();
+                        let cache = state.cache.as_mut().expect("retained view layout exists");
+                        let key = ViewOutputKey {
+                            bounds,
+                            environment: (environment != cache.layout.environment)
+                                .then_some(environment.clone()),
+                        };
+                        let can_replay = request_reused
+                            && cache.layout.fixed_style == fixed_style
+                            && cache_is_valid(cache, entity_id, window, cx)
+                            && matches!(&cache.output, CachedOutput::Painted(output) if output.key == key);
                         let prepaint_start = window.prepaint_index();
-                        let (mut element, accessed_entities) = cx.detect_accessed_entities(|cx| {
-                            let mut element = render_view(self.view.take().unwrap(), window, cx);
-                            element.layout_as_root(bounds.size.into(), window, cx);
-                            element.prepaint_at(bounds.origin, window, cx);
-                            element
-                        });
+                        let a11y_start = window.a11y.cache_subtree_start();
+                        let (element, paint_source, a11y_roots) = if can_replay {
+                            let CachedOutput::Painted(output) =
+                                std::mem::replace(&mut cache.output, CachedOutput::NeedsPrepaint)
+                            else {
+                                unreachable!("replay requires a completed paint")
+                            };
+                            window.a11y.reuse_prepaint(&output.a11y_roots);
+                            window.reuse_prepaint(output.prepaint_range);
+                            cx.extend_accessed_dependencies(&cache.layout.dependencies);
+                            (None, Some(output.paint), output.a11y_roots)
+                        } else {
+                            cache.output = CachedOutput::NeedsPrepaint;
+                            let (fresh_element, dependencies) = cx.detect_accessed_dependencies(|cx| {
+                                let mut fresh_element = fresh_element.take().unwrap_or_else(|| {
+                                    render_view(self.view.take().unwrap(), window, cx)
+                                });
+                                if request_reused || fixed_style.is_some() {
+                                    if request_reused && fixed_style.is_none() {
+                                        // A detached intrinsic layout can reparent retained child nodes.
+                                        // Rebuild this owner chain next frame to reconnect it safely.
+                                        window.mark_cached_views_frame_bound();
+                                    }
+                                    fresh_element.layout_as_root_at_size(
+                                        bounds.size.into(),
+                                        bounds.size,
+                                        window,
+                                        cx,
+                                    );
+                                    fresh_element.prepaint_at(bounds.origin, window, cx);
+                                } else {
+                                    fresh_element.prepaint(window, cx);
+                                }
+                                fresh_element
+                            });
+                            cache.layout.dependencies.extend(&dependencies);
+                            cx.extend_accessed_dependencies(&cache.layout.dependencies);
+                            let roots = window.a11y.cache_subtree_roots(a11y_start);
+                            (Some(fresh_element), None, roots)
+                        };
 
                         let prepaint_end = window.prepaint_index();
-                        window.refreshing = refreshing;
-
-                        (
-                            Some(element),
-                            ViewElementState {
-                                accessed_entities,
-                                prepaint_range: prepaint_start..prepaint_end,
-                                paint_range: PaintIndex::default()..PaintIndex::default(),
-                                cache_key: ViewElementCacheKey {
-                                    bounds,
-                                    content_mask,
-                                    text_style,
-                                },
-                            },
-                        )
-                    },
-                )
+                        cache.output = CachedOutput::Prepared(ViewOutput {
+                            key,
+                            prepaint_range: prepaint_start..prepaint_end,
+                            a11y_roots,
+                            paint: paint_source,
+                        });
+                        cache.layout.frame_bound =
+                            window.has_frame_bound_layout(&cache_id);
+                        (element, state)
+                    })
+                })
             })
         } else {
             // Stateless path: just prepaint the element.
             window.with_id(
                 ElementId::Name(std::any::type_name::<V>().into()),
                 |window| {
-                    element.as_mut().unwrap().prepaint(window, cx);
+                    let Some(mut element) = element.take() else {
+                        unreachable!("stateless views always render in request_layout")
+                    };
+                    element.prepaint(window, cx);
+                    Some(element)
                 },
-            );
-            Some(element.take().unwrap())
+            )
         }
     }
 
@@ -494,42 +716,66 @@ impl<V: View> Element for ViewElement<V> {
         window: &mut Window,
         cx: &mut App,
     ) {
-        if let Some(entity_id) = self.entity_id {
-            // Stateful path.
+        if let Some(mount) = self.mount.as_ref() {
+            let entity_id = mount.entity_id;
+            let mount_id = mount.mount_id.expect("request_layout sets the view mount");
+            let cache_id = Window::mounted_view_id(global_id.unwrap(), mount_id);
+
+            if matches!(&mount.policy, ViewPolicy::Fresh) {
+                window.with_rendered_view(entity_id, |window| {
+                    window.with_cached_view(cache_id, mount_id, |window| {
+                        if let Some(element) = element {
+                            element.paint(window, cx);
+                        }
+                    })
+                });
+                return;
+            }
+
             window.with_rendered_view(entity_id, |window| {
-                let caching_disabled = window.is_inspector_picking(cx);
-                if self.cached_style.is_some() && !caching_disabled {
-                    window.with_element_state::<ViewElementState, _>(
-                        global_id.unwrap(),
-                        |element_state, window| {
-                            let mut element_state = element_state.unwrap();
-
-                            let paint_start = window.paint_index();
-
-                            if let Some(element) = element {
-                                let refreshing = mem::replace(&mut window.refreshing, true);
-                                element.paint(window, cx);
-                                window.refreshing = refreshing;
-                            } else {
-                                window.reuse_paint(element_state.paint_range.clone());
-                            }
-
-                            let paint_end = window.paint_index();
-                            element_state.paint_range = paint_start..paint_end;
-
-                            ((), element_state)
-                        },
-                    )
-                } else {
-                    element.as_mut().unwrap().paint(window, cx);
-                }
+                window.with_cached_view(cache_id.clone(), mount_id, |window| {
+                    window.with_element_state::<ViewElementState, _>(&cache_id, |state, window| {
+                        let mut state = state.unwrap_or_default();
+                        let cache = state.cache.as_mut().expect("retained view layout exists");
+                        let CachedOutput::Prepared(prepared) =
+                            std::mem::replace(&mut cache.output, CachedOutput::NeedsPrepaint)
+                        else {
+                            unreachable!("prepaint must prepare output before paint")
+                        };
+                        let paint_start = window.paint_index();
+                        if let Some(element) = element {
+                            let (_, dependencies) =
+                                cx.detect_accessed_dependencies(|cx| element.paint(window, cx));
+                            cache.layout.dependencies.extend(&dependencies);
+                            cx.extend_accessed_dependencies(&cache.layout.dependencies);
+                        } else {
+                            let paint_source = prepared
+                                .paint
+                                .as_ref()
+                                .expect("replayed prepaint has a completed paint range");
+                            window.a11y.reuse_paint(&prepared.a11y_roots);
+                            window.reuse_paint(paint_source.clone());
+                            cx.extend_accessed_dependencies(&cache.layout.dependencies);
+                        }
+                        cache.layout.frame_bound |= window.has_frame_bound_layout(&cache_id);
+                        cache.output = CachedOutput::Painted(ViewOutput {
+                            key: prepared.key,
+                            prepaint_range: prepared.prepaint_range,
+                            paint: paint_start..window.paint_index(),
+                            a11y_roots: prepared.a11y_roots,
+                        });
+                        ((), state)
+                    })
+                })
             });
         } else {
             // Stateless path: just paint the element.
             window.with_id(
                 ElementId::Name(std::any::type_name::<V>().into()),
                 |window| {
-                    element.as_mut().unwrap().paint(window, cx);
+                    if let Some(element) = element {
+                        element.paint(window, cx);
+                    }
                 },
             );
         }

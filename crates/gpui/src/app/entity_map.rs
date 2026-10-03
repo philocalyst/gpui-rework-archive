@@ -1,6 +1,6 @@
 use crate::{App, AppContext, GpuiBorrow, VisualContext, Window, seal::Sealed};
 use anyhow::{Context as _, Result};
-use collections::FxHashSet;
+use collections::{FxHashMap, FxHashSet};
 use derive_more::{Deref, DerefMut};
 use parking_lot::{RwLock, RwLockUpgradableReadGuard};
 use slotmap::{KeyData, SecondaryMap, SlotMap};
@@ -26,7 +26,22 @@ use collections::HashMap;
 
 slotmap::new_key_type! {
     /// A unique identifier for a entity across the application.
-    pub struct EntityId;
+pub struct EntityId;
+}
+
+#[derive(Clone, Default)]
+pub(crate) struct ViewDependencies {
+    pub entities: FxHashSet<EntityId>,
+    pub globals: FxHashMap<TypeId, u64>,
+}
+
+impl ViewDependencies {
+    pub(crate) fn extend(&mut self, other: &Self) {
+        self.entities.extend(other.entities.iter().copied());
+        for (global_type, revision) in &other.globals {
+            self.globals.entry(*global_type).or_insert(*revision);
+        }
+    }
 }
 
 impl From<u64> for EntityId {
@@ -121,8 +136,7 @@ impl EntityMap {
     where
         T: 'static,
     {
-        let mut accessed_entities = self.accessed_entities.get_mut();
-        accessed_entities.insert(slot.entity_id);
+        self.accessed_entities.get_mut().insert(slot.entity_id);
 
         let handle = slot.0;
         self.entities.insert(handle.entity_id, Box::new(entity));
@@ -133,8 +147,7 @@ impl EntityMap {
     #[track_caller]
     pub fn lease<T>(&mut self, pointer: &Entity<T>) -> Lease<T> {
         self.assert_valid_context(pointer);
-        let mut accessed_entities = self.accessed_entities.get_mut();
-        accessed_entities.insert(pointer.entity_id);
+        self.accessed_entities.get_mut().insert(pointer.entity_id);
 
         let entity = Some(
             self.entities
@@ -155,8 +168,7 @@ impl EntityMap {
 
     pub fn read<T: 'static>(&self, entity: &Entity<T>) -> &T {
         self.assert_valid_context(entity);
-        let mut accessed_entities = self.accessed_entities.borrow_mut();
-        accessed_entities.insert(entity.entity_id);
+        self.accessed_entities.borrow_mut().insert(entity.entity_id);
 
         self.entities
             .get(entity.entity_id)

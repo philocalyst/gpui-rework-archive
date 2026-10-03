@@ -225,12 +225,12 @@ impl InlineParagraphCollector<'_> {
         let measured_document = document.clone();
         let measurement_cache = measurement.clone();
 
-        let layout_id = self.window.request_measured_layout(
+        let layout_id = self.window.request_retained_measured_layout(
             Style {
                 display: Display::Block,
                 ..Style::default()
             },
-            move |known_dimensions, available_space, window, _context| {
+            move |known_dimensions, available_space, text_system| {
                 let wrap_width = TextLayout::evaluate_wrap_width(
                     &text_style.white_space,
                     known_dimensions,
@@ -244,7 +244,7 @@ impl InlineParagraphCollector<'_> {
                     return measurement.layout.size;
                 }
 
-                let layout = window.text_system().layout_inline(InlineLayoutRequest {
+                let layout = text_system.layout_inline(InlineLayoutRequest {
                     text: &measured_document.text,
                     runs: &measured_document.runs,
                     text_styles: &measured_document.text_styles,

@@ -49,7 +49,13 @@ pub mod profiler;
 ))]
 #[expect(missing_docs)]
 pub mod queue;
+#[cfg(test)]
+mod retained_tests;
+#[cfg(test)]
+mod retention_workload;
 mod scene;
+#[cfg(test)]
+mod scene_workload;
 mod shared_uri;
 mod spring;
 mod style;

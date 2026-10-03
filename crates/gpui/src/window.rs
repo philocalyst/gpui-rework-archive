@@ -1085,6 +1085,7 @@ pub(crate) struct TooltipRequest {
 
 pub(crate) struct DeferredDraw {
     current_view: EntityId,
+    view_owners: Rc<[GlobalElementId]>,
     priority: usize,
     parent_node: DispatchNodeId,
     element_id_stack: SmallVec<[ElementId; 32]>,
@@ -1095,6 +1096,12 @@ pub(crate) struct DeferredDraw {
     absolute_offset: Point<Pixels>,
     prepaint_range: Range<PrepaintStateIndex>,
     paint_range: Range<PaintIndex>,
+    a11y_roots: Vec<accesskit::NodeId>,
+}
+
+struct CachedViewScope {
+    id: GlobalElementId,
+    owners: Option<Rc<[GlobalElementId]>>,
 }
 
 pub(crate) struct Frame {
@@ -1113,11 +1120,41 @@ pub(crate) struct Frame {
     pub(crate) cursor_styles: Vec<CursorStyleRequest>,
     #[cfg(any(test, feature = "test-support"))]
     pub(crate) debug_bounds: FxHashMap<String, Bounds<Pixels>>,
+    #[cfg(any(test, feature = "test-support"))]
+    debug_bounds_events: Vec<(String, Bounds<Pixels>)>,
     #[cfg(any(feature = "inspector", debug_assertions))]
     pub(crate) next_inspector_instance_ids: FxHashMap<Rc<crate::InspectorElementPath>, usize>,
     #[cfg(any(feature = "inspector", debug_assertions))]
     pub(crate) inspector_hitboxes: FxHashMap<HitboxId, crate::InspectorElementId>,
     pub(crate) tab_stops: TabStopMap,
+}
+
+#[cfg(test)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub(crate) struct RetainedViewStats {
+    pub(crate) rebuilt_views: usize,
+    pub(crate) reused_views: usize,
+    pub(crate) live_layout_nodes: usize,
+    pub(crate) measured_layouts: usize,
+    pub(crate) retained_element_states: usize,
+}
+
+#[derive(Clone, PartialEq)]
+pub(crate) struct ViewEnvironment {
+    pub(crate) viewport_size: Size<Pixels>,
+    pub(crate) scale_factor: f32,
+    pub(crate) rem_size: Pixels,
+    pub(crate) text_style: TextStyle,
+    pub(crate) content_mask: ContentMask<Pixels>,
+    pub(crate) opacity: f32,
+    pub(crate) image_caches: Vec<EntityId>,
+    pub(crate) mouse_position: Point<Pixels>,
+    pub(crate) focus: Option<FocusId>,
+    pub(crate) window_active: bool,
+    pub(crate) a11y_active: bool,
+    pub(crate) keyboard_input: bool,
+    pub(crate) touch_input: bool,
+    pub(crate) modifiers: Modifiers,
 }
 
 #[derive(Clone, Default)]
@@ -1130,6 +1167,46 @@ pub(crate) struct PrepaintStateIndex {
     line_layout_index: LineLayoutIndex,
 }
 
+impl PrepaintStateIndex {
+    pub(crate) fn rebase_from(&mut self, source: &Range<Self>, destination: &Self) {
+        rebase_index(
+            &mut self.hitboxes_index,
+            source.start.hitboxes_index,
+            source.end.hitboxes_index,
+            destination.hitboxes_index,
+        );
+        rebase_index(
+            &mut self.tooltips_index,
+            source.start.tooltips_index,
+            source.end.tooltips_index,
+            destination.tooltips_index,
+        );
+        rebase_index(
+            &mut self.deferred_draws_index,
+            source.start.deferred_draws_index,
+            source.end.deferred_draws_index,
+            destination.deferred_draws_index,
+        );
+        rebase_index(
+            &mut self.dispatch_tree_index,
+            source.start.dispatch_tree_index,
+            source.end.dispatch_tree_index,
+            destination.dispatch_tree_index,
+        );
+        rebase_index(
+            &mut self.accessed_element_states_index,
+            source.start.accessed_element_states_index,
+            source.end.accessed_element_states_index,
+            destination.accessed_element_states_index,
+        );
+        self.line_layout_index.rebase_from(
+            &source.start.line_layout_index,
+            &source.end.line_layout_index,
+            &destination.line_layout_index,
+        );
+    }
+}
+
 #[derive(Clone, Default)]
 pub(crate) struct PaintIndex {
     scene_index: usize,
@@ -1139,6 +1216,79 @@ pub(crate) struct PaintIndex {
     accessed_element_states_index: usize,
     tab_handle_index: usize,
     line_layout_index: LineLayoutIndex,
+    window_control_hitboxes_index: usize,
+    #[cfg(any(test, feature = "test-support"))]
+    debug_bounds_events_index: usize,
+}
+
+impl PaintIndex {
+    pub(crate) fn rebase_from(&mut self, source: &Range<Self>, destination: &Self) {
+        rebase_index(
+            &mut self.scene_index,
+            source.start.scene_index,
+            source.end.scene_index,
+            destination.scene_index,
+        );
+        rebase_index(
+            &mut self.mouse_listeners_index,
+            source.start.mouse_listeners_index,
+            source.end.mouse_listeners_index,
+            destination.mouse_listeners_index,
+        );
+        rebase_index(
+            &mut self.input_handlers_index,
+            source.start.input_handlers_index,
+            source.end.input_handlers_index,
+            destination.input_handlers_index,
+        );
+        rebase_index(
+            &mut self.cursor_styles_index,
+            source.start.cursor_styles_index,
+            source.end.cursor_styles_index,
+            destination.cursor_styles_index,
+        );
+        rebase_index(
+            &mut self.accessed_element_states_index,
+            source.start.accessed_element_states_index,
+            source.end.accessed_element_states_index,
+            destination.accessed_element_states_index,
+        );
+        rebase_index(
+            &mut self.tab_handle_index,
+            source.start.tab_handle_index,
+            source.end.tab_handle_index,
+            destination.tab_handle_index,
+        );
+        self.line_layout_index.rebase_from(
+            &source.start.line_layout_index,
+            &source.end.line_layout_index,
+            &destination.line_layout_index,
+        );
+        rebase_index(
+            &mut self.window_control_hitboxes_index,
+            source.start.window_control_hitboxes_index,
+            source.end.window_control_hitboxes_index,
+            destination.window_control_hitboxes_index,
+        );
+        #[cfg(any(test, feature = "test-support"))]
+        rebase_index(
+            &mut self.debug_bounds_events_index,
+            source.start.debug_bounds_events_index,
+            source.end.debug_bounds_events_index,
+            destination.debug_bounds_events_index,
+        );
+    }
+}
+
+fn rebase_index(
+    index: &mut usize,
+    source_start: usize,
+    source_end: usize,
+    destination_start: usize,
+) {
+    if (source_start..=source_end).contains(index) {
+        *index = destination_start + (*index - source_start);
+    }
 }
 
 impl Frame {
@@ -1160,6 +1310,8 @@ impl Frame {
 
             #[cfg(any(test, feature = "test-support"))]
             debug_bounds: FxHashMap::default(),
+            #[cfg(any(test, feature = "test-support"))]
+            debug_bounds_events: Vec::new(),
 
             #[cfg(any(feature = "inspector", debug_assertions))]
             next_inspector_instance_ids: FxHashMap::default(),
@@ -1188,6 +1340,7 @@ impl Frame {
         #[cfg(any(test, feature = "test-support"))]
         {
             self.debug_bounds.clear();
+            self.debug_bounds_events.clear();
         }
 
         #[cfg(any(feature = "inspector", debug_assertions))]
@@ -1267,6 +1420,13 @@ pub struct Window {
     pub(crate) element_id_stack: SmallVec<[ElementId; 32]>,
     pub(crate) text_style_stack: Vec<TextStyleRefinement>,
     pub(crate) rendered_entity_stack: Vec<EntityId>,
+    cached_view_stack: Vec<CachedViewScope>,
+    view_mount_counts: FxHashMap<GlobalElementId, u32>,
+    frame_bound_layout_views: FxHashSet<GlobalElementId>,
+    pending_deferred_dependencies: FxHashMap<GlobalElementId, crate::ViewDependencies>,
+    replayed_view_state_ids: FxHashSet<GlobalElementId>,
+    group_hitboxes: HashMap<SharedString, SmallVec<[HitboxId; 1]>>,
+    deferred_priority_stack: Vec<usize>,
     pub(crate) element_offset_stack: Vec<Point<Pixels>>,
     /// Bounds of the parent `Div` currently prepainting this element as one of its children.
     /// Inset transitions use these bounds to resolve `auto` from the child's rendered position.
@@ -1279,6 +1439,7 @@ pub struct Window {
     /// input session can restart the IME connection).
     last_text_input_configuration: Option<TextInputConfiguration>,
     focused_text_input_active: bool,
+    active_input_handler_slot: Option<usize>,
     pub(crate) image_cache_stack: Vec<AnyImageCache>,
     pub(crate) rendered_frame: Frame,
     pub(crate) next_frame: Frame,
@@ -1287,6 +1448,8 @@ pub struct Window {
     pub(crate) tooltip_bounds: Option<TooltipBounds>,
     pub(crate) next_frame_callbacks: Rc<RefCell<Vec<FrameCallback>>>,
     pub(crate) dirty_views: FxHashSet<EntityId>,
+    #[cfg(test)]
+    retained_view_stats: RetainedViewStats,
     focus_listeners: SubscriberSet<(), AnyWindowFocusListener>,
     pub(crate) focus_lost_listeners: SubscriberSet<(), AnyObserver>,
     focus_lost_path: SmallVec<[FocusId; 8]>,
@@ -2020,6 +2183,13 @@ impl Window {
             element_id_stack: SmallVec::default(),
             text_style_stack: Vec::new(),
             rendered_entity_stack: Vec::new(),
+            cached_view_stack: Vec::new(),
+            view_mount_counts: FxHashMap::default(),
+            frame_bound_layout_views: FxHashSet::default(),
+            pending_deferred_dependencies: FxHashMap::default(),
+            replayed_view_state_ids: FxHashSet::default(),
+            group_hitboxes: HashMap::default(),
+            deferred_priority_stack: Vec::new(),
             element_offset_stack: Vec::new(),
             style_transition_containing_bounds: None,
             content_mask_stack: Vec::new(),
@@ -2027,6 +2197,7 @@ impl Window {
             requested_autoscroll: None,
             last_text_input_configuration: None,
             focused_text_input_active: false,
+            active_input_handler_slot: None,
             rendered_frame: Frame::new(DispatchTree::new(cx.keymap.clone(), cx.actions.clone())),
             next_frame: Frame::new(DispatchTree::new(cx.keymap.clone(), cx.actions.clone())),
             next_frame_callbacks,
@@ -2034,6 +2205,8 @@ impl Window {
             next_tooltip_id: TooltipId::default(),
             tooltip_bounds: None,
             dirty_views: FxHashSet::default(),
+            #[cfg(test)]
+            retained_view_stats: RetainedViewStats::default(),
             focus_listeners: SubscriberSet::new(),
             focus_lost_listeners: SubscriberSet::new(),
             focus_lost_path: SmallVec::new(),
@@ -3155,6 +3328,17 @@ impl Window {
 
         self.invalidate_entities();
         cx.entities.clear_accessed();
+        cx.clear_accessed_global_revisions();
+        self.view_mount_counts.clear();
+        self.frame_bound_layout_views.clear();
+        self.pending_deferred_dependencies.clear();
+        self.group_hitboxes.clear();
+        self.deferred_priority_stack.clear();
+        debug_assert!(self.cached_view_stack.is_empty());
+        #[cfg(test)]
+        {
+            self.retained_view_stats = RetainedViewStats::default();
+        }
         debug_assert!(self.rendered_entity_stack.is_empty());
         self.invalidator.set_dirty(false);
         self.requested_autoscroll = None;
@@ -3163,14 +3347,12 @@ impl Window {
         // Place it back into a None slot (left by a previous .take()) so that
         // cached paint_range indices in reuse_paint find the handler at the
         // expected position.
+        let previous_handler_slot = self.active_input_handler_slot.take();
         if let Some(input_handler) = self.platform_window.take_input_handler() {
-            if let Some(slot) = self
-                .rendered_frame
-                .input_handlers
-                .iter_mut()
-                .rev()
-                .find(|h| h.is_none())
-            {
+            let slot = previous_handler_slot
+                .and_then(|index| self.rendered_frame.input_handlers.get_mut(index));
+            if let Some(slot) = slot {
+                debug_assert!(slot.is_none(), "active input handler slot was reused");
                 *slot = Some(input_handler);
             } else {
                 self.rendered_frame.input_handlers.push(Some(input_handler));
@@ -3197,17 +3379,21 @@ impl Window {
         // paint_range indices remain valid for reuse_paint on the next frame.
         // Search backwards to find the last Some entry, since reuse_paint may
         // have copied None slots from the previous frame. (Fixes #50456)
-        let focused_text_input_active = if let Some(mut input_handler) = self
+        let next_input_handler = self
             .next_frame
             .input_handlers
             .iter_mut()
+            .enumerate()
             .rev()
-            .find_map(|h| h.take())
+            .find_map(|(index, slot)| slot.take().map(|handler| (index, handler)));
+        let focused_text_input_active = if let Some((index, mut input_handler)) = next_input_handler
         {
+            self.active_input_handler_slot = Some(index);
             let accepts_text_input = input_handler.accepts_text_input(self, cx);
             self.platform_window.set_input_handler(input_handler);
             accepts_text_input
         } else {
+            self.active_input_handler_slot = None;
             false
         };
         self.apply_text_input_configuration(cx);
@@ -3221,9 +3407,24 @@ impl Window {
                 });
         }
 
-        self.layout_engine.as_mut().unwrap().clear();
+        self.layout_engine.as_mut().unwrap().finish_frame();
         self.text_system().finish_frame();
         self.next_frame.finish(&mut self.rendered_frame);
+        self.flush_pending_view_dependencies();
+        #[cfg(test)]
+        {
+            self.retained_view_stats.live_layout_nodes = self
+                .layout_engine
+                .as_ref()
+                .unwrap()
+                .live_layout_node_count();
+            self.retained_view_stats.measured_layouts = self
+                .layout_engine
+                .as_ref()
+                .unwrap()
+                .live_measured_node_count();
+            self.retained_view_stats.retained_element_states = self.next_frame.element_states.len();
+        }
 
         self.invalidator.set_phase(DrawPhase::Focus);
         let previous_focus_path = self.rendered_frame.focus_path();
@@ -3304,6 +3505,9 @@ impl Window {
             self.invalidator.clone(),
             &entities,
         );
+        let global_revisions = cx.take_accessed_global_revisions();
+        cx.record_global_dependencies(handle, self.invalidator.clone(), &global_revisions);
+        cx.restore_accessed_global_revisions(global_revisions);
         let mut entities_ref = cx.entities.accessed_entities.get_mut();
         mem::swap(&mut entities, entities_ref.deref_mut());
     }
@@ -3311,6 +3515,7 @@ impl Window {
     fn invalidate_entities(&mut self) {
         let mut views = self.invalidator.take_views();
         for entity in views.drain() {
+            self.dirty_views.insert(entity);
             self.mark_view_dirty(entity);
         }
         self.invalidator.replace_views(views);
@@ -3606,9 +3811,11 @@ impl Window {
                     element,
                     parent_node,
                     current_view,
+                    view_owners,
                     rem_size,
                     absolute_offset,
                     prepaint_range,
+                    a11y_roots,
                 ) = {
                     let deferred_draw = &mut self.next_frame.deferred_draws[deferred_draw_ix];
                     self.element_id_stack
@@ -3620,26 +3827,40 @@ impl Window {
                         deferred_draw.element.take(),
                         deferred_draw.parent_node,
                         deferred_draw.current_view,
+                        deferred_draw.view_owners.clone(),
                         deferred_draw.rem_size,
                         deferred_draw.absolute_offset,
                         deferred_draw.prepaint_range.clone(),
+                        deferred_draw.a11y_roots.clone(),
                     )
                 };
                 self.next_frame.dispatch_tree.set_active_node(parent_node);
 
                 let prepaint_start = self.prepaint_index();
+                let a11y_start = self.a11y.cache_subtree_start();
                 if let Some(mut element) = element {
-                    self.with_rendered_view(current_view, |window| {
-                        window.with_rem_size(Some(rem_size), |window| {
-                            window.with_absolute_element_offset(absolute_offset, |window| {
-                                crate::DeferredPriorityStackCache::push(priority, cx);
-                                element.prepaint(window, cx);
-                                crate::DeferredPriorityStackCache::pop(cx);
+                    let (_, dependencies) = cx.detect_accessed_dependencies(|cx| {
+                        self.with_cached_view_owners(&view_owners, |window| {
+                            window.with_rendered_view(current_view, |window| {
+                                window.with_rem_size(Some(rem_size), |window| {
+                                    window.with_absolute_element_offset(
+                                        absolute_offset,
+                                        |window| {
+                                            window.push_deferred_priority(priority);
+                                            element.prepaint(window, cx);
+                                            window.pop_deferred_priority();
+                                        },
+                                    );
+                                });
                             });
                         });
                     });
+                    self.record_deferred_view_dependencies(&view_owners, dependencies);
+                    self.next_frame.deferred_draws[deferred_draw_ix].a11y_roots =
+                        self.a11y.cache_subtree_roots(a11y_start);
                     self.next_frame.deferred_draws[deferred_draw_ix].element = Some(element);
                 } else {
+                    self.a11y.reuse_prepaint(&a11y_roots);
                     self.reuse_prepaint(prepaint_range);
                 }
                 let prepaint_end = self.prepaint_index();
@@ -3680,14 +3901,23 @@ impl Window {
             let paint_start = self.paint_index();
             let content_mask = deferred_draw.content_mask;
             if let Some(element) = deferred_draw.element.as_mut() {
-                self.with_rendered_view(deferred_draw.current_view, |window| {
-                    window.with_content_mask(content_mask, |window| {
-                        window.with_rem_size(Some(deferred_draw.rem_size), |window| {
-                            element.paint(window, cx);
-                        });
-                    })
-                })
+                let current_view = deferred_draw.current_view;
+                let rem_size = deferred_draw.rem_size;
+                let view_owners = deferred_draw.view_owners.clone();
+                let (_, dependencies) = cx.detect_accessed_dependencies(|cx| {
+                    self.with_cached_view_owners(&view_owners, |window| {
+                        window.with_rendered_view(current_view, |window| {
+                            window.with_content_mask(content_mask, |window| {
+                                window.with_rem_size(Some(rem_size), |window| {
+                                    element.paint(window, cx);
+                                });
+                            })
+                        })
+                    });
+                });
+                self.record_deferred_view_dependencies(&view_owners, dependencies);
             } else {
+                self.a11y.reuse_paint(&deferred_draw.a11y_roots);
                 self.reuse_paint(deferred_draw.paint_range.clone());
             }
             let paint_end = self.paint_index();
@@ -3716,6 +3946,7 @@ impl Window {
     }
 
     pub(crate) fn reuse_prepaint(&mut self, range: Range<PrepaintStateIndex>) {
+        let destination = self.prepaint_index();
         self.next_frame.hitboxes.extend(
             self.rendered_frame.hitboxes[range.start.hitboxes_index..range.end.hitboxes_index]
                 .iter()
@@ -3762,8 +3993,50 @@ impl Window {
                     absolute_offset: deferred_draw.absolute_offset,
                     prepaint_range: deferred_draw.prepaint_range.clone(),
                     paint_range: deferred_draw.paint_range.clone(),
+                    a11y_roots: deferred_draw.a11y_roots.clone(),
+                    view_owners: deferred_draw.view_owners.clone(),
                 }),
         );
+        self.rebase_replayed_prepaint_views(&range, &destination);
+    }
+
+    fn rebase_replayed_prepaint_views(
+        &mut self,
+        source: &Range<PrepaintStateIndex>,
+        destination: &PrepaintStateIndex,
+    ) {
+        self.rebase_replayed_view_states(
+            source.start.accessed_element_states_index..source.end.accessed_element_states_index,
+            |state| state.rebase_prepaint_range(source, destination),
+        );
+    }
+
+    fn rebase_replayed_view_states(
+        &mut self,
+        accessed_states: Range<usize>,
+        mut rebase: impl FnMut(&mut crate::view::ViewElementState),
+    ) {
+        let state_type = TypeId::of::<crate::view::ViewElementState>();
+        self.replayed_view_state_ids.clear();
+        for (id, type_id) in &self.rendered_frame.accessed_element_states[accessed_states] {
+            if *type_id == state_type {
+                self.replayed_view_state_ids.insert(id.clone());
+            }
+        }
+
+        for id in &self.replayed_view_state_ids {
+            let key = (id.clone(), state_type);
+            let Some(element_state) = self.rendered_frame.element_states.get_mut(&key) else {
+                continue;
+            };
+            let Some(Some(view_state)) = element_state
+                .inner
+                .downcast_mut::<Option<crate::view::ViewElementState>>()
+            else {
+                unreachable!("view state type id must match its stored value");
+            };
+            rebase(view_state);
+        }
     }
 
     pub(crate) fn paint_index(&self) -> PaintIndex {
@@ -3775,10 +4048,20 @@ impl Window {
             accessed_element_states_index: self.next_frame.accessed_element_states.len(),
             tab_handle_index: self.next_frame.tab_stops.paint_index(),
             line_layout_index: self.text_system.layout_index(),
+            window_control_hitboxes_index: self.next_frame.window_control_hitboxes.len(),
+            #[cfg(any(test, feature = "test-support"))]
+            debug_bounds_events_index: self.next_frame.debug_bounds_events.len(),
         }
     }
 
     pub(crate) fn reuse_paint(&mut self, range: Range<PaintIndex>) {
+        let destination = self.paint_index();
+        self.next_frame.window_control_hitboxes.extend(
+            self.rendered_frame.window_control_hitboxes[range.start.window_control_hitboxes_index
+                ..range.end.window_control_hitboxes_index]
+                .iter()
+                .cloned(),
+        );
         self.next_frame.cursor_styles.extend(
             self.rendered_frame.cursor_styles
                 [range.start.cursor_styles_index..range.end.cursor_styles_index]
@@ -3813,6 +4096,31 @@ impl Window {
         self.next_frame.scene.replay(
             range.start.scene_index..range.end.scene_index,
             &self.rendered_frame.scene,
+        );
+
+        #[cfg(any(test, feature = "test-support"))]
+        for (selector, bounds) in &self.rendered_frame.debug_bounds_events
+            [range.start.debug_bounds_events_index..range.end.debug_bounds_events_index]
+        {
+            self.next_frame
+                .debug_bounds
+                .insert(selector.clone(), *bounds);
+            self.next_frame
+                .debug_bounds_events
+                .push((selector.clone(), *bounds));
+        }
+
+        self.rebase_replayed_paint_views(&range, &destination);
+    }
+
+    fn rebase_replayed_paint_views(
+        &mut self,
+        source: &Range<PaintIndex>,
+        destination: &PaintIndex,
+    ) {
+        self.rebase_replayed_view_states(
+            source.start.accessed_element_states_index..source.end.accessed_element_states_index,
+            |state| state.rebase_paint_range(source, destination),
         );
     }
 
@@ -4311,6 +4619,7 @@ impl Window {
     ) {
         self.invalidator.debug_assert_prepaint();
         let parent_node = self.next_frame.dispatch_tree.active_node_id().unwrap();
+        let view_owners = self.cached_view_owners();
         self.next_frame.deferred_draws.push(DeferredDraw {
             current_view: self.current_view(),
             parent_node,
@@ -4323,6 +4632,8 @@ impl Window {
             absolute_offset,
             prepaint_range: PrepaintStateIndex::default()..PrepaintStateIndex::default(),
             paint_range: PaintIndex::default()..PaintIndex::default(),
+            a11y_roots: Vec::new(),
+            view_owners,
         });
     }
 
@@ -5264,6 +5575,7 @@ impl Window {
             + 'static,
     {
         self.invalidator.debug_assert_prepaint();
+        self.mark_cached_views_frame_bound();
 
         let rem_size = self.rem_size();
         let scale_factor = self.scale_factor();
@@ -5271,6 +5583,25 @@ impl Window {
             .as_mut()
             .unwrap()
             .request_measured_layout(style, rem_size, scale_factor, measure)
+    }
+
+    pub(crate) fn request_retained_measured_layout<F>(
+        &mut self,
+        style: Style,
+        measure: F,
+    ) -> LayoutId
+    where
+        F: Fn(Size<Option<Pixels>>, Size<AvailableSpace>, &WindowTextSystem) -> Size<Pixels>
+            + 'static,
+    {
+        self.invalidator.debug_assert_prepaint();
+
+        let rem_size = self.rem_size();
+        let scale_factor = self.scale_factor();
+        self.layout_engine
+            .as_mut()
+            .unwrap()
+            .request_retained_measured_layout(style, rem_size, scale_factor, measure)
     }
 
     /// Compute the layout for the given id within the given available space.
@@ -5288,6 +5619,20 @@ impl Window {
 
         let mut layout_engine = self.layout_engine.take().unwrap();
         layout_engine.compute_layout(layout_id, available_space, self, cx);
+        self.layout_engine = Some(layout_engine);
+    }
+
+    pub(crate) fn compute_layout_with_root_size(
+        &mut self,
+        layout_id: LayoutId,
+        available_space: Size<AvailableSpace>,
+        size: Size<Pixels>,
+        cx: &mut App,
+    ) {
+        self.invalidator.debug_assert_prepaint();
+
+        let mut layout_engine = self.layout_engine.take().unwrap();
+        layout_engine.compute_layout_at_size(layout_id, available_space, size, self, cx);
         self.layout_engine = Some(layout_engine);
     }
 
@@ -5492,6 +5837,238 @@ impl Window {
     pub fn current_view(&self) -> EntityId {
         self.invalidator.debug_assert_paint_or_prepaint();
         self.rendered_entity_stack.last().copied().unwrap()
+    }
+
+    pub(crate) fn next_view_mount_id(&mut self, id: &GlobalElementId) -> u32 {
+        let next = self.view_mount_counts.entry(id.clone()).or_default();
+        let mount_id = *next;
+        *next = next.wrapping_add(1);
+        mount_id
+    }
+
+    pub(crate) fn mounted_view_id(id: &GlobalElementId, mount_id: u32) -> GlobalElementId {
+        let mut path = id.0.to_vec();
+        path.push(ElementId::Integer(u64::from(mount_id)));
+        GlobalElementId(path.into())
+    }
+
+    pub(crate) fn with_cached_view<R>(
+        &mut self,
+        id: GlobalElementId,
+        mount_id: u32,
+        f: impl FnOnce(&mut Self) -> R,
+    ) -> R {
+        self.element_id_stack
+            .push(ElementId::Integer(u64::from(mount_id)));
+        self.cached_view_stack
+            .push(CachedViewScope { id, owners: None });
+        let result = f(self);
+        self.cached_view_stack.pop();
+        self.element_id_stack.pop();
+        result
+    }
+
+    fn cached_view_owners(&mut self) -> Rc<[GlobalElementId]> {
+        if let Some(owners) = self
+            .cached_view_stack
+            .last()
+            .and_then(|scope| scope.owners.as_ref())
+        {
+            return owners.clone();
+        }
+
+        if self.cached_view_stack.is_empty() {
+            return Rc::from([]);
+        }
+
+        let owners: Rc<[GlobalElementId]> = self
+            .cached_view_stack
+            .iter()
+            .map(|scope| scope.id.clone())
+            .collect::<Vec<_>>()
+            .into();
+        self.cached_view_stack.last_mut().unwrap().owners = Some(owners.clone());
+        owners
+    }
+
+    fn with_cached_view_owners<R>(
+        &mut self,
+        owners: &Rc<[GlobalElementId]>,
+        f: impl FnOnce(&mut Self) -> R,
+    ) -> R {
+        let start = self.cached_view_stack.len();
+        self.cached_view_stack.extend(
+            owners
+                .iter()
+                .cloned()
+                .map(|id| CachedViewScope { id, owners: None }),
+        );
+        if let Some(scope) = self.cached_view_stack.last_mut() {
+            scope.owners = Some(owners.clone());
+        }
+        let result = f(self);
+        self.cached_view_stack.truncate(start);
+        result
+    }
+
+    pub(crate) fn view_environment(&self) -> ViewEnvironment {
+        ViewEnvironment {
+            viewport_size: self.viewport_size,
+            scale_factor: self.scale_factor,
+            rem_size: self.rem_size(),
+            text_style: self.text_style(),
+            content_mask: self.content_mask(),
+            opacity: self.element_opacity,
+            image_caches: self
+                .image_cache_stack
+                .iter()
+                .map(AnyImageCache::entity_id)
+                .collect(),
+            mouse_position: self.mouse_position,
+            focus: self.focus,
+            window_active: self.active.get(),
+            a11y_active: self.a11y.is_active(),
+            keyboard_input: self.last_input_was_keyboard(),
+            touch_input: self.last_input_was_touch(),
+            modifiers: self.modifiers,
+        }
+    }
+
+    pub(crate) fn inspector_is_open(&self) -> bool {
+        #[cfg(any(feature = "inspector", debug_assertions))]
+        {
+            self.inspector.is_some()
+        }
+        #[cfg(not(any(feature = "inspector", debug_assertions)))]
+        {
+            false
+        }
+    }
+
+    pub(crate) fn note_view_rebuilt(&mut self) {
+        #[cfg(test)]
+        {
+            self.retained_view_stats.rebuilt_views += 1;
+        }
+    }
+
+    pub(crate) fn note_view_reused(&mut self) {
+        #[cfg(test)]
+        {
+            self.retained_view_stats.reused_views += 1;
+        }
+    }
+
+    #[cfg(any(test, feature = "test-support"))]
+    pub(crate) fn release_frame_bound_measured_contexts(&mut self) {
+        self.layout_engine
+            .as_mut()
+            .unwrap()
+            .release_frame_bound_measured_contexts();
+    }
+
+    pub(crate) fn mark_cached_views_frame_bound(&mut self) {
+        self.frame_bound_layout_views
+            .extend(self.cached_view_stack.iter().map(|scope| scope.id.clone()));
+    }
+
+    pub(crate) fn has_frame_bound_layout(&self, owner: &GlobalElementId) -> bool {
+        self.frame_bound_layout_views.contains(owner)
+    }
+
+    fn record_deferred_view_dependencies(
+        &mut self,
+        owners: &[GlobalElementId],
+        dependencies: crate::ViewDependencies,
+    ) {
+        if dependencies.entities.is_empty()
+            && dependencies.globals.is_empty()
+            && owners
+                .iter()
+                .all(|owner| !self.frame_bound_layout_views.contains(owner))
+        {
+            return;
+        }
+        for owner in owners {
+            self.pending_deferred_dependencies
+                .entry(owner.clone())
+                .or_default()
+                .extend(&dependencies);
+        }
+    }
+
+    fn flush_pending_view_dependencies(&mut self) {
+        let state_type = TypeId::of::<crate::view::ViewElementState>();
+        let pending_deferred_dependencies = &mut self.pending_deferred_dependencies;
+        let next_frame = &mut self.next_frame;
+        let frame_bound_layout_views = &self.frame_bound_layout_views;
+        for (owner, dependencies) in pending_deferred_dependencies.drain() {
+            let frame_bound = frame_bound_layout_views.contains(&owner);
+            let key = (owner, state_type);
+            let Some(element_state) = next_frame.element_states.get_mut(&key) else {
+                continue;
+            };
+            let Some(Some(view_state)) = element_state
+                .inner
+                .downcast_mut::<Option<crate::view::ViewElementState>>()
+            else {
+                unreachable!("view state type id must match its stored value");
+            };
+            view_state.extend_dependencies(&dependencies, frame_bound);
+        }
+    }
+
+    #[cfg(any(test, feature = "test-support"))]
+    pub(crate) fn record_debug_bounds(
+        &mut self,
+        selector: impl Into<String>,
+        bounds: Bounds<Pixels>,
+    ) {
+        let selector = selector.into();
+        self.next_frame
+            .debug_bounds
+            .insert(selector.clone(), bounds);
+        self.next_frame.debug_bounds_events.push((selector, bounds));
+    }
+
+    pub(crate) fn retain_layout_subtree(&mut self, root: LayoutId) {
+        if let Some(layout_engine) = self.layout_engine.as_mut() {
+            layout_engine.retain_subtree(root);
+        }
+    }
+
+    pub(crate) fn push_group_hitbox(&mut self, name: SharedString, hitbox: HitboxId) {
+        self.group_hitboxes.entry(name).or_default().push(hitbox);
+    }
+
+    pub(crate) fn pop_group_hitbox(&mut self, name: &SharedString) {
+        self.group_hitboxes.get_mut(name).unwrap().pop();
+    }
+
+    pub(crate) fn group_hitbox(&self, name: &SharedString) -> Option<HitboxId> {
+        self.group_hitboxes
+            .get(name)
+            .and_then(|hitboxes| hitboxes.last())
+            .copied()
+    }
+
+    pub(crate) fn push_deferred_priority(&mut self, priority: usize) {
+        self.deferred_priority_stack.push(priority);
+    }
+
+    pub(crate) fn pop_deferred_priority(&mut self) {
+        self.deferred_priority_stack
+            .pop()
+            .expect("deferred priority stack underflow");
+    }
+
+    pub(crate) fn deferred_priority(&self) -> Option<usize> {
+        self.deferred_priority_stack.last().copied()
+    }
+
+    #[cfg(test)]
+    pub(crate) fn retained_view_stats(&self) -> RetainedViewStats {
+        self.retained_view_stats
     }
 
     #[inline]

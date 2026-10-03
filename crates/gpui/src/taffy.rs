@@ -1,6 +1,6 @@
 use crate::{
     AbsoluteLength, App, Bounds, DefiniteLength, Display, Edges, GridTemplate, InlineContent,
-    Length, Pixels, Point, Position, Size, Style, VerticalAlign, Window, size,
+    Length, Pixels, Point, Position, Size, Style, VerticalAlign, Window, WindowTextSystem, size,
     util::{
         ceil_to_device_pixel, round_half_toward_zero, round_stroke_to_device_pixel,
         round_to_device_pixel,
@@ -21,12 +21,14 @@ type StackSafe<T> = stacksafe::StackSafe<T>;
 #[cfg(not(feature = "stacker"))]
 type StackSafe<T> = T;
 
-type MeasureFn =
+type FrameBoundMeasureFn =
     dyn FnMut(Size<Option<Pixels>>, Size<AvailableSpace>, &mut Window, &mut App) -> Size<Pixels>;
-type NodeMeasureFn = StackSafe<Box<MeasureFn>>;
+type RetainedMeasureFn =
+    dyn FnMut(Size<Option<Pixels>>, Size<AvailableSpace>, &WindowTextSystem) -> Size<Pixels>;
 
-struct NodeContext {
-    measure: NodeMeasureFn,
+enum NodeContext {
+    FrameBound(StackSafe<Box<FrameBoundMeasureFn>>),
+    Retained(StackSafe<Box<RetainedMeasureFn>>),
 }
 pub struct TaffyLayoutEngine {
     taffy: TaffyTree<NodeContext>,
@@ -39,6 +41,10 @@ pub struct TaffyLayoutEngine {
     pub(crate) inline_fragments: FxHashMap<LayoutId, Arc<[Bounds<Pixels>]>>,
     display_and_position: FxHashMap<LayoutId, (Display, Position)>,
     layout_bounds_scratch_space: Vec<LayoutId>,
+    live_layout_nodes: Vec<LayoutId>,
+    frame_layout_nodes: Vec<LayoutId>,
+    frame_layout_node_set: FxHashSet<LayoutId>,
+    frame_bound_measured_nodes: FxHashSet<LayoutId>,
 }
 
 const EXPECT_MESSAGE: &str = "we should avoid taffy layout errors by construction if possible";
@@ -57,18 +63,78 @@ impl TaffyLayoutEngine {
             inline_fragments: FxHashMap::default(),
             display_and_position: FxHashMap::default(),
             layout_bounds_scratch_space: Vec::new(),
+            live_layout_nodes: Vec::new(),
+            frame_layout_nodes: Vec::new(),
+            frame_layout_node_set: FxHashSet::default(),
+            frame_bound_measured_nodes: FxHashSet::default(),
         }
     }
 
-    pub fn clear(&mut self) {
-        self.taffy.clear();
+    /// Discard transient nodes from the previous frame while keeping nodes
+    /// claimed by retained views. Taffy's own per-node layout cache then carries
+    /// unchanged subtrees across frames.
+    pub fn finish_frame(&mut self) {
+        for node in self.live_layout_nodes.drain(..) {
+            if !self.frame_layout_node_set.contains(&node) {
+                self.taffy
+                    .set_node_context(node.0, None)
+                    .expect(EXPECT_MESSAGE);
+                self.taffy.remove(node.0).expect(EXPECT_MESSAGE);
+                self.vertical_alignments.remove(&node);
+                self.display_and_position.remove(&node);
+                self.inline_content.remove(&node);
+                self.inline_fragments.remove(&node);
+            }
+        }
+        self.release_frame_bound_measured_contexts();
+        std::mem::swap(&mut self.live_layout_nodes, &mut self.frame_layout_nodes);
+        self.frame_layout_nodes.clear();
+        self.frame_layout_node_set.clear();
         self.absolute_layout_bounds.clear();
         self.absolute_outer_origins.clear();
         self.computed_layouts.clear();
-        self.vertical_alignments.clear();
-        self.inline_content.clear();
-        self.inline_fragments.clear();
-        self.display_and_position.clear();
+    }
+
+    pub(crate) fn release_frame_bound_measured_contexts(&mut self) {
+        for node in self.frame_bound_measured_nodes.drain() {
+            self.taffy
+                .set_node_context(node.0, None)
+                .expect(EXPECT_MESSAGE);
+        }
+    }
+
+    #[cfg(test)]
+    pub(crate) fn live_layout_node_count(&self) -> usize {
+        self.live_layout_nodes.len()
+    }
+
+    #[cfg(test)]
+    pub(crate) fn live_measured_node_count(&self) -> usize {
+        self.live_layout_nodes
+            .iter()
+            .filter(|node| self.taffy.get_node_context(node.0).is_some())
+            .count()
+    }
+
+    pub fn retain_subtree(&mut self, root: LayoutId) {
+        self.layout_bounds_scratch_space.clear();
+        self.layout_bounds_scratch_space.push(root);
+        while let Some(node) = self.layout_bounds_scratch_space.pop() {
+            if !self.frame_layout_node_set.insert(node) {
+                continue;
+            }
+            self.frame_layout_nodes.push(node);
+            self.layout_bounds_scratch_space.extend(
+                (0..self.taffy.child_count(node.0))
+                    .map(|index| LayoutId::from(self.taffy.get_child_id(node.0, index))),
+            );
+        }
+    }
+
+    fn claim_node(&mut self, node: LayoutId) {
+        if self.frame_layout_node_set.insert(node) {
+            self.frame_layout_nodes.push(node);
+        }
     }
 
     pub fn request_layout(
@@ -81,19 +147,16 @@ impl TaffyLayoutEngine {
         let vertical_align = style.vertical_align;
         let taffy_style = style.to_taffy(rem_size, scale_factor);
 
-        let node_id = if children.is_empty() {
-            self.taffy
-                .new_leaf(taffy_style)
-                .expect(EXPECT_MESSAGE)
-                .into()
-        } else {
-            self.taffy
-                // This is safe because LayoutId is repr(transparent) to taffy::tree::NodeId.
-                .new_with_children(taffy_style, LayoutId::to_taffy_slice(children))
-                .expect(EXPECT_MESSAGE)
-                .into()
-        };
+        let node_id: LayoutId = self
+            .taffy
+            .new_leaf(taffy_style)
+            .expect(EXPECT_MESSAGE)
+            .into();
+        self.taffy
+            .set_children(node_id.0, LayoutId::to_taffy_slice(children))
+            .expect(EXPECT_MESSAGE);
 
+        self.claim_node(node_id);
         self.record_vertical_align(node_id, vertical_align);
         self.display_and_position
             .insert(node_id, (style.display, style.position));
@@ -113,17 +176,59 @@ impl TaffyLayoutEngine {
         ) -> Size<Pixels>
         + 'static,
     ) -> LayoutId {
-        let vertical_align = style.vertical_align;
-        let taffy_style = style.to_taffy(rem_size, scale_factor);
-        let measure = Box::new(measure) as Box<MeasureFn>;
+        let measure = Box::new(measure) as Box<FrameBoundMeasureFn>;
         #[cfg(feature = "stacker")]
         let measure = StackSafe::new(measure);
+        self.request_measured_layout_with_measure(
+            style,
+            rem_size,
+            scale_factor,
+            NodeContext::FrameBound(measure),
+        )
+    }
 
-        let node_id = self
+    pub fn request_retained_measured_layout(
+        &mut self,
+        style: Style,
+        rem_size: Pixels,
+        scale_factor: f32,
+        measure: impl FnMut(
+            Size<Option<Pixels>>,
+            Size<AvailableSpace>,
+            &WindowTextSystem,
+        ) -> Size<Pixels>
+        + 'static,
+    ) -> LayoutId {
+        let measure = Box::new(measure) as Box<RetainedMeasureFn>;
+        #[cfg(feature = "stacker")]
+        let measure = StackSafe::new(measure);
+        self.request_measured_layout_with_measure(
+            style,
+            rem_size,
+            scale_factor,
+            NodeContext::Retained(measure),
+        )
+    }
+
+    fn request_measured_layout_with_measure(
+        &mut self,
+        style: Style,
+        rem_size: Pixels,
+        scale_factor: f32,
+        context: NodeContext,
+    ) -> LayoutId {
+        let vertical_align = style.vertical_align;
+        let taffy_style = style.to_taffy(rem_size, scale_factor);
+        let frame_bound = matches!(&context, NodeContext::FrameBound(_));
+        let node_id: LayoutId = self
             .taffy
-            .new_leaf_with_context(taffy_style, NodeContext { measure })
+            .new_leaf_with_context(taffy_style, context)
             .expect(EXPECT_MESSAGE)
             .into();
+        self.claim_node(node_id);
+        if frame_bound {
+            self.frame_bound_measured_nodes.insert(node_id);
+        }
         self.record_vertical_align(node_id, vertical_align);
         self.display_and_position
             .insert(node_id, (style.display, style.position));
@@ -323,11 +428,46 @@ impl TaffyLayoutEngine {
                         untransform(available_space.height),
                     );
 
-                    let measured_size: Size<Pixels> =
-                        (node_context.measure)(known_dimensions, available_space, window, cx);
+                    let measured_size: Size<Pixels> = match node_context {
+                        NodeContext::FrameBound(measure) => {
+                            measure(known_dimensions, available_space, window, cx)
+                        }
+                        NodeContext::Retained(measure) => {
+                            measure(known_dimensions, available_space, window.text_system())
+                        }
+                    };
                     snap_measured_size_to_device_pixels(measured_size, scale_factor).into()
                 },
             )
+            .expect(EXPECT_MESSAGE);
+    }
+
+    /// Compute a detached element as though it had been assigned `size` by
+    /// its parent. Restore the natural root style afterwards so a later
+    /// parent-driven layout can still choose its intrinsic dimensions.
+    pub fn compute_layout_at_size(
+        &mut self,
+        id: LayoutId,
+        available_space: Size<AvailableSpace>,
+        size: Size<Pixels>,
+        window: &mut Window,
+        cx: &mut App,
+    ) {
+        let scale_factor = window.scale_factor();
+        let natural_style = self.taffy.style(id.0).expect(EXPECT_MESSAGE).clone();
+        let mut assigned_style = natural_style.clone();
+        assigned_style.size.width =
+            taffy::style::Dimension::length(round_to_device_pixel(size.width.0, scale_factor));
+        assigned_style.size.height =
+            taffy::style::Dimension::length(round_to_device_pixel(size.height.0, scale_factor));
+        self.taffy
+            .set_style(id.0, assigned_style)
+            .expect(EXPECT_MESSAGE);
+
+        self.compute_layout(id, available_space, window, cx);
+
+        self.taffy
+            .set_style(id.0, natural_style)
             .expect(EXPECT_MESSAGE);
     }
 

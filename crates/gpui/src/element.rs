@@ -288,6 +288,14 @@ trait ElementObject {
         window: &mut Window,
         cx: &mut App,
     ) -> Size<Pixels>;
+
+    fn layout_as_root_at_size(
+        &mut self,
+        available_space: Size<AvailableSpace>,
+        size: Size<Pixels>,
+        window: &mut Window,
+        cx: &mut App,
+    ) -> (LayoutId, Size<Pixels>);
 }
 
 /// A wrapper around an implementer of [`Element`] that allows it to be drawn in a window.
@@ -620,6 +628,7 @@ impl<E: Element> Drawable<E> {
     fn compute_layout_as_root(
         &mut self,
         available_space: Size<AvailableSpace>,
+        assigned_size: Option<Size<Pixels>>,
         window: &mut Window,
         cx: &mut App,
     ) -> (LayoutId, Size<Pixels>) {
@@ -634,7 +643,11 @@ impl<E: Element> Drawable<E> {
                 inspector_id,
                 request_layout,
             } => {
-                window.compute_layout(layout_id, available_space, cx);
+                if let Some(size) = assigned_size {
+                    window.compute_layout_with_root_size(layout_id, available_space, size, cx);
+                } else {
+                    window.compute_layout(layout_id, available_space, cx);
+                }
                 self.phase = ElementDrawPhase::LayoutComputed {
                     layout_id,
                     global_id,
@@ -651,8 +664,12 @@ impl<E: Element> Drawable<E> {
                 available_space: prev_available_space,
                 request_layout,
             } => {
-                if available_space != prev_available_space {
-                    window.compute_layout(layout_id, available_space, cx);
+                if available_space != prev_available_space || assigned_size.is_some() {
+                    if let Some(size) = assigned_size {
+                        window.compute_layout_with_root_size(layout_id, available_space, size, cx);
+                    } else {
+                        window.compute_layout(layout_id, available_space, cx);
+                    }
                 }
                 self.phase = ElementDrawPhase::LayoutComputed {
                     layout_id,
@@ -675,8 +692,18 @@ impl<E: Element> Drawable<E> {
         window: &mut Window,
         context: &mut App,
     ) -> Size<Pixels> {
-        self.compute_layout_as_root(available_space, window, context)
+        self.compute_layout_as_root(available_space, None, window, context)
             .1
+    }
+
+    pub(crate) fn layout_as_root_at_size(
+        &mut self,
+        available_space: Size<AvailableSpace>,
+        size: Size<Pixels>,
+        window: &mut Window,
+        context: &mut App,
+    ) -> (LayoutId, Size<Pixels>) {
+        self.compute_layout_as_root(available_space, Some(size), window, context)
     }
 }
 
@@ -712,6 +739,17 @@ where
         cx: &mut App,
     ) -> Size<Pixels> {
         Drawable::layout_as_root(self, available_space, window, cx)
+    }
+
+    #[inline]
+    fn layout_as_root_at_size(
+        &mut self,
+        available_space: Size<AvailableSpace>,
+        size: Size<Pixels>,
+        window: &mut Window,
+        cx: &mut App,
+    ) -> (LayoutId, Size<Pixels>) {
+        Drawable::layout_as_root_at_size(self, available_space, size, window, cx)
     }
 }
 
@@ -767,6 +805,17 @@ impl AnyElement {
         cx: &mut App,
     ) -> Size<Pixels> {
         self.0.layout_as_root(available_space, window, cx)
+    }
+
+    pub(crate) fn layout_as_root_at_size(
+        &mut self,
+        available_space: Size<AvailableSpace>,
+        size: Size<Pixels>,
+        window: &mut Window,
+        cx: &mut App,
+    ) -> (LayoutId, Size<Pixels>) {
+        self.0
+            .layout_as_root_at_size(available_space, size, window, cx)
     }
 
     /// Prepaints this element at the given absolute origin.

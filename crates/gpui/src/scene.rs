@@ -74,6 +74,10 @@ pub struct Scene {
     surface_opacities: Vec<f32>,
     pub backdrop_filters: Vec<BackdropFilter>,
     pub filter_boundaries: Vec<FilterBoundary>,
+    sort_keys: Vec<SceneSortKey>,
+    sort_old_to_new: Vec<usize>,
+    sort_scratch: Vec<usize>,
+    permutations: ScenePermutations,
     render_plan: ScenePlan,
     is_finished: bool,
 }
@@ -95,7 +99,30 @@ impl Scene {
         self.surface_opacities.clear();
         self.backdrop_filters.clear();
         self.filter_boundaries.clear();
+        self.sort_keys.clear();
+        self.sort_old_to_new.clear();
+        self.sort_scratch.clear();
+        self.permutations = ScenePermutations::default();
         self.render_plan.clear();
+        self.is_finished = false;
+    }
+
+    /// Converts finished-scene operation indices back to the recording-order indices before
+    /// accepting more operations or sorting the public primitive lanes again.
+    fn prepare_recording(&mut self) {
+        if !self.is_finished {
+            return;
+        }
+
+        if !self.permutations.is_identity() {
+            for operation in &mut self.paint_operations {
+                self.permutations.remap(operation, &self.sort_old_to_new);
+            }
+        }
+        self.permutations = ScenePermutations::default();
+        self.sort_old_to_new.clear();
+        self.sort_scratch.clear();
+        self.sort_keys.clear();
         self.is_finished = false;
     }
 
@@ -104,7 +131,7 @@ impl Scene {
     }
 
     pub fn push_layer(&mut self, bounds: Bounds<ScaledPixels>) {
-        self.is_finished = false;
+        self.prepare_recording();
         let order = self.primitive_bounds.insert(bounds);
         self.layer_stack.push(order);
         self.paint_operations
@@ -112,7 +139,7 @@ impl Scene {
     }
 
     pub fn pop_layer(&mut self) {
-        self.is_finished = false;
+        self.prepare_recording();
         self.layer_stack.pop();
         self.paint_operations.push(PaintOperation::EndLayer);
     }
@@ -122,7 +149,7 @@ impl Scene {
     /// drag images) sort above the main scene — and a deferred backdrop's order can't fall inside
     /// a content-filter (`filter`) order range left behind by the main scene.
     pub fn raise_order_floor(&mut self) {
-        self.is_finished = false;
+        self.prepare_recording();
         let floor = self.primitive_bounds.max_order() + 1;
         self.primitive_bounds.set_order_floor(floor);
     }
@@ -137,10 +164,10 @@ impl Scene {
 
     fn insert_primitive_with_surface_opacity(
         &mut self,
-        mut primitive: Primitive,
+        primitive: Primitive,
         surface_opacity: Option<f32>,
     ) {
-        self.is_finished = false;
+        self.prepare_recording();
         let clipped_bounds = primitive
             .bounds()
             .intersect(&primitive.content_mask().bounds);
@@ -174,46 +201,64 @@ impl Scene {
                 .copied()
                 .unwrap_or_else(|| self.primitive_bounds.insert(clipped_bounds))
         };
-        match &mut primitive {
-            Primitive::Shadow(shadow) => {
+        let paint_operation = match primitive {
+            Primitive::Shadow(mut shadow) => {
                 shadow.order = order;
-                self.shadows.push(*shadow);
+                let index = self.shadows.len();
+                self.shadows.push(shadow);
+                PaintOperation::Shadow(index)
             }
-            Primitive::Quad(quad) => {
+            Primitive::Quad(mut quad) => {
                 quad.order = order;
-                self.quads.push(*quad);
+                let index = self.quads.len();
+                self.quads.push(quad);
+                PaintOperation::Quad(index)
             }
-            Primitive::Path(path) => {
+            Primitive::Path(mut path) => {
                 path.order = order;
                 path.id = PathId(self.paths.len());
-                self.paths.push(path.clone());
+                let index = self.paths.len();
+                self.paths.push(path);
+                PaintOperation::Path(index)
             }
-            Primitive::Underline(underline) => {
+            Primitive::Underline(mut underline) => {
                 underline.order = order;
-                self.underlines.push(*underline);
+                let index = self.underlines.len();
+                self.underlines.push(underline);
+                PaintOperation::Underline(index)
             }
-            Primitive::MonochromeSprite(sprite) => {
+            Primitive::MonochromeSprite(mut sprite) => {
                 sprite.order = order;
-                self.monochrome_sprites.push(*sprite);
+                let index = self.monochrome_sprites.len();
+                self.monochrome_sprites.push(sprite);
+                PaintOperation::MonochromeSprite(index)
             }
-            Primitive::SubpixelSprite(sprite) => {
+            Primitive::SubpixelSprite(mut sprite) => {
                 sprite.order = order;
-                self.subpixel_sprites.push(*sprite);
+                let index = self.subpixel_sprites.len();
+                self.subpixel_sprites.push(sprite);
+                PaintOperation::SubpixelSprite(index)
             }
-            Primitive::PolychromeSprite(sprite) => {
+            Primitive::PolychromeSprite(mut sprite) => {
                 sprite.order = order;
-                self.polychrome_sprites.push(*sprite);
+                let index = self.polychrome_sprites.len();
+                self.polychrome_sprites.push(sprite);
+                PaintOperation::PolychromeSprite(index)
             }
-            Primitive::Surface(surface) => {
+            Primitive::Surface(mut surface) => {
                 surface.order = order;
-                self.surfaces.push(surface.clone());
+                let index = self.surfaces.len();
+                self.surfaces.push(surface);
                 self.surface_opacities.push(surface_opacity.unwrap_or(1.0));
+                PaintOperation::Surface(index)
             }
-            Primitive::BackdropFilter(filter) => {
+            Primitive::BackdropFilter(mut filter) => {
                 filter.order = order;
-                self.backdrop_filters.push(filter.clone());
+                let index = self.backdrop_filters.len();
+                self.backdrop_filters.push(filter);
+                PaintOperation::BackdropFilter(index)
             }
-            Primitive::FilterBoundary(boundary) => {
+            Primitive::FilterBoundary(mut boundary) => {
                 boundary.order = order;
                 if !boundary.is_start {
                     // A closed content-filter group is a draw-order barrier: everything painted
@@ -223,64 +268,142 @@ impl Scene {
                     // `raise_order_floor`.
                     self.primitive_bounds.set_order_floor(order + 1);
                 }
-                self.filter_boundaries.push(boundary.clone());
+                let index = self.filter_boundaries.len();
+                self.filter_boundaries.push(boundary);
+                PaintOperation::FilterBoundary(index)
             }
-        }
-        if let (Primitive::Surface(surface), Some(opacity)) = (&primitive, surface_opacity) {
-            self.paint_operations.push(PaintOperation::Surface {
-                surface: surface.clone(),
-                opacity,
-            });
-        } else {
-            self.paint_operations
-                .push(PaintOperation::Primitive(primitive));
-        }
+        };
+        self.paint_operations.push(paint_operation);
     }
 
     pub fn replay(&mut self, range: Range<usize>, prev_scene: &Scene) {
         for operation in &prev_scene.paint_operations[range] {
+            let mut operation = *operation;
+            prev_scene
+                .permutations
+                .remap(&mut operation, &prev_scene.sort_old_to_new);
             match operation {
-                PaintOperation::Primitive(primitive) => self.insert_primitive(primitive.clone()),
-                PaintOperation::Surface { surface, opacity } => {
-                    self.insert_surface(surface.clone(), *opacity)
-                }
-                PaintOperation::StartLayer(bounds) => self.push_layer(*bounds),
+                PaintOperation::StartLayer(bounds) => self.push_layer(bounds),
                 PaintOperation::EndLayer => self.pop_layer(),
+                PaintOperation::Shadow(index) => {
+                    self.insert_primitive(Primitive::Shadow(prev_scene.shadows[index]))
+                }
+                PaintOperation::Quad(index) => {
+                    self.insert_primitive(Primitive::Quad(prev_scene.quads[index]))
+                }
+                PaintOperation::Path(index) => {
+                    self.insert_primitive(Primitive::Path(prev_scene.paths[index].clone()))
+                }
+                PaintOperation::Underline(index) => {
+                    self.insert_primitive(Primitive::Underline(prev_scene.underlines[index]))
+                }
+                PaintOperation::MonochromeSprite(index) => self.insert_primitive(
+                    Primitive::MonochromeSprite(prev_scene.monochrome_sprites[index]),
+                ),
+                PaintOperation::SubpixelSprite(index) => self.insert_primitive(
+                    Primitive::SubpixelSprite(prev_scene.subpixel_sprites[index]),
+                ),
+                PaintOperation::PolychromeSprite(index) => self.insert_primitive(
+                    Primitive::PolychromeSprite(prev_scene.polychrome_sprites[index]),
+                ),
+                PaintOperation::Surface(index) => self.insert_surface(
+                    prev_scene.surfaces[index].clone(),
+                    prev_scene.surface_opacities[index],
+                ),
+                PaintOperation::BackdropFilter(index) => self.insert_primitive(
+                    Primitive::BackdropFilter(prev_scene.backdrop_filters[index].clone()),
+                ),
+                PaintOperation::FilterBoundary(index) => self.insert_primitive(
+                    Primitive::FilterBoundary(prev_scene.filter_boundaries[index].clone()),
+                ),
             }
         }
     }
 
     pub fn finish(&mut self) {
-        self.shadows.sort_by_key(|shadow| shadow.order);
-        self.quads.sort_by_key(|quad| quad.order);
-        self.paths.sort_by_key(|path| path.order);
-        self.underlines.sort_by_key(|underline| underline.order);
-        self.monochrome_sprites
-            .sort_by_key(|sprite| (sprite.order, sprite.tile.tile_id));
-        self.subpixel_sprites
-            .sort_by_key(|sprite| (sprite.order, sprite.tile.tile_id));
-        self.polychrome_sprites
-            .sort_by_key(|sprite| (sprite.order, sprite.tile.tile_id));
-        let surfaces = std::mem::take(&mut self.surfaces);
-        let mut surface_opacities = std::mem::take(&mut self.surface_opacities);
-        surface_opacities.resize(surfaces.len(), 1.0);
-        surface_opacities.truncate(surfaces.len());
-        let mut surfaces_with_opacity = surfaces
-            .into_iter()
-            .zip(surface_opacities)
-            .collect::<Vec<_>>();
-        surfaces_with_opacity.sort_by_key(|(surface, _)| surface.order);
-        let (surfaces, surface_opacities): (Vec<_>, Vec<_>) =
-            surfaces_with_opacity.into_iter().unzip();
-        self.surfaces = surfaces;
-        self.surface_opacities = surface_opacities;
-        self.backdrop_filters.sort_by_key(|filter| filter.order);
+        self.prepare_recording();
+        self.surface_opacities.resize(self.surfaces.len(), 1.0);
+        self.surface_opacities.truncate(self.surfaces.len());
+
+        let mut permutations = ScenePermutations::default();
+        macro_rules! sort_lane {
+            ($lane:ident, $key:expr) => {
+                sort_scene_items(
+                    &self.$lane,
+                    &mut self.sort_keys,
+                    &mut self.sort_old_to_new,
+                    $key,
+                    &mut permutations.$lane,
+                )
+            };
+        }
+        sort_lane!(shadows, |shadow| (shadow.order, 0));
+        sort_lane!(quads, |quad| (quad.order, 0));
+        sort_lane!(paths, |path| (path.order, 0));
+        sort_lane!(underlines, |underline| (underline.order, 0));
+        sort_lane!(monochrome_sprites, |sprite| {
+            (sprite.order, sprite.tile.tile_id.0)
+        });
+        sort_lane!(subpixel_sprites, |sprite| {
+            (sprite.order, sprite.tile.tile_id.0)
+        });
+        sort_lane!(polychrome_sprites, |sprite| {
+            (sprite.order, sprite.tile.tile_id.0)
+        });
+        sort_lane!(surfaces, |surface| (surface.order, 0));
+        sort_lane!(backdrop_filters, |filter| (filter.order, 0));
         // Markers normally get distinct, monotonically-increasing orders (children overlap
         // their group bounds and so sort strictly between the start and end). The `!is_start`
         // tiebreak only matters for a degenerate empty group whose start and end tie: it keeps
         // the start (false = 0) ahead of the end (true = 1) so the pair stays well-formed.
-        self.filter_boundaries
-            .sort_by_key(|boundary| (boundary.order, !boundary.is_start));
+        sort_lane!(filter_boundaries, |boundary| {
+            (boundary.order, (!boundary.is_start) as u32)
+        });
+        let stored_permutations = permutations.clone();
+
+        macro_rules! apply_lane {
+            ($lane:ident, $key:expr) => {
+                apply_scene_sort(
+                    &mut self.$lane,
+                    &self.sort_old_to_new,
+                    &mut self.sort_scratch,
+                    permutations.$lane,
+                    $key,
+                    |_| {},
+                )
+            };
+        }
+        apply_lane!(shadows, |shadow| (shadow.order, 0));
+        apply_lane!(quads, |quad| (quad.order, 0));
+        apply_lane!(paths, |path| (path.order, 0));
+        apply_lane!(underlines, |underline| (underline.order, 0));
+        apply_lane!(monochrome_sprites, |sprite| {
+            (sprite.order, sprite.tile.tile_id.0)
+        });
+        apply_lane!(subpixel_sprites, |sprite| {
+            (sprite.order, sprite.tile.tile_id.0)
+        });
+        apply_lane!(polychrome_sprites, |sprite| {
+            (sprite.order, sprite.tile.tile_id.0)
+        });
+        apply_scene_sort(
+            &mut self.surfaces,
+            &self.sort_old_to_new,
+            &mut self.sort_scratch,
+            permutations.surfaces,
+            |surface| (surface.order, 0),
+            |edit| match edit {
+                LaneEdit::Swap(from, to) => self.surface_opacities.swap(from, to),
+                LaneEdit::Reverse(range) => self.surface_opacities[range].reverse(),
+            },
+        );
+        apply_lane!(backdrop_filters, |filter| (filter.order, 0));
+        apply_lane!(filter_boundaries, |boundary| {
+            (boundary.order, (!boundary.is_start) as u32)
+        });
+        self.sort_keys.clear();
+        self.sort_scratch.clear();
+        self.permutations = stored_permutations;
         let commands = std::mem::take(&mut self.render_plan.commands);
         self.render_plan = ScenePlan::build(self, commands);
         self.is_finished = true;
@@ -394,11 +517,264 @@ pub(crate) enum PrimitiveKind {
     FilterBoundaryEnd,
 }
 
+#[derive(Clone, Copy)]
 pub(crate) enum PaintOperation {
-    Primitive(Primitive),
-    Surface { surface: PaintSurface, opacity: f32 },
+    Shadow(usize),
+    Quad(usize),
+    Path(usize),
+    Underline(usize),
+    MonochromeSprite(usize),
+    SubpixelSprite(usize),
+    PolychromeSprite(usize),
+    Surface(usize),
+    BackdropFilter(usize),
+    FilterBoundary(usize),
     StartLayer(Bounds<ScaledPixels>),
     EndLayer,
+}
+
+#[derive(Clone, Default)]
+struct ScenePermutations {
+    shadows: LaneSort,
+    quads: LaneSort,
+    paths: LaneSort,
+    underlines: LaneSort,
+    monochrome_sprites: LaneSort,
+    subpixel_sprites: LaneSort,
+    polychrome_sprites: LaneSort,
+    surfaces: LaneSort,
+    backdrop_filters: LaneSort,
+    filter_boundaries: LaneSort,
+}
+
+#[derive(Clone, Default)]
+enum LaneSort {
+    #[default]
+    Identity,
+    Swap(usize),
+    Reverse(usize),
+    ReverseRuns(Range<usize>),
+    Indexed(Range<usize>),
+}
+
+enum LanePattern {
+    Identity,
+    Swap(usize),
+    Reverse,
+    ReverseRuns,
+    Indexed,
+}
+
+#[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
+struct SceneSortKey(DrawOrder, u32, usize);
+
+impl ScenePermutations {
+    fn is_identity(&self) -> bool {
+        matches!(&self.shadows, LaneSort::Identity)
+            && matches!(&self.quads, LaneSort::Identity)
+            && matches!(&self.paths, LaneSort::Identity)
+            && matches!(&self.underlines, LaneSort::Identity)
+            && matches!(&self.monochrome_sprites, LaneSort::Identity)
+            && matches!(&self.subpixel_sprites, LaneSort::Identity)
+            && matches!(&self.polychrome_sprites, LaneSort::Identity)
+            && matches!(&self.surfaces, LaneSort::Identity)
+            && matches!(&self.backdrop_filters, LaneSort::Identity)
+            && matches!(&self.filter_boundaries, LaneSort::Identity)
+    }
+
+    fn remap(&self, operation: &mut PaintOperation, old_to_new: &[usize]) {
+        match operation {
+            PaintOperation::Shadow(index) => remap_index(index, &self.shadows, old_to_new),
+            PaintOperation::Quad(index) => remap_index(index, &self.quads, old_to_new),
+            PaintOperation::Path(index) => remap_index(index, &self.paths, old_to_new),
+            PaintOperation::Underline(index) => remap_index(index, &self.underlines, old_to_new),
+            PaintOperation::MonochromeSprite(index) => {
+                remap_index(index, &self.monochrome_sprites, old_to_new)
+            }
+            PaintOperation::SubpixelSprite(index) => {
+                remap_index(index, &self.subpixel_sprites, old_to_new)
+            }
+            PaintOperation::PolychromeSprite(index) => {
+                remap_index(index, &self.polychrome_sprites, old_to_new)
+            }
+            PaintOperation::Surface(index) => remap_index(index, &self.surfaces, old_to_new),
+            PaintOperation::BackdropFilter(index) => {
+                remap_index(index, &self.backdrop_filters, old_to_new)
+            }
+            PaintOperation::FilterBoundary(index) => {
+                remap_index(index, &self.filter_boundaries, old_to_new)
+            }
+            PaintOperation::StartLayer(_) | PaintOperation::EndLayer => {}
+        }
+    }
+}
+
+#[inline]
+fn remap_index(index: &mut usize, sort: &LaneSort, old_to_new: &[usize]) {
+    *index = map_index(*index, sort, old_to_new);
+}
+
+#[inline]
+fn map_index(index: usize, sort: &LaneSort, old_to_new: &[usize]) -> usize {
+    match sort {
+        LaneSort::Identity => {}
+        LaneSort::Swap(position) => {
+            return match index {
+                index if index == *position => index + 1,
+                index if index == *position + 1 => index - 1,
+                index => index,
+            };
+        }
+        LaneSort::Reverse(len) => return len - 1 - index,
+        LaneSort::ReverseRuns(range) | LaneSort::Indexed(range) => {
+            return old_to_new[range.start + index];
+        }
+    }
+    index
+}
+
+/// Selects a cheap lane operation for monotone keys; equal runs never take simple reverse.
+/// Remaining keys use old indices as a final key, preserving stable-sort tie behavior.
+fn sort_scene_items<T>(
+    items: &[T],
+    sort_keys: &mut Vec<SceneSortKey>,
+    old_to_new: &mut Vec<usize>,
+    key: impl Fn(&T) -> (DrawOrder, u32),
+    sort: &mut LaneSort,
+) {
+    match classify_scene_lane(items, &key) {
+        LanePattern::Identity => *sort = LaneSort::Identity,
+        LanePattern::Swap(position) => *sort = LaneSort::Swap(position),
+        LanePattern::Reverse => *sort = LaneSort::Reverse(items.len()),
+        LanePattern::ReverseRuns => {
+            let start = old_to_new.len();
+            old_to_new.resize(start + items.len(), 0);
+            let mut run_start = 0;
+            let mut run_key = key(&items[0]);
+            for end in 1..=items.len() {
+                let next_key = items.get(end).map(&key);
+                if next_key != Some(run_key) {
+                    let new_start = items.len() - end;
+                    for old_index in run_start..end {
+                        old_to_new[start + old_index] = new_start + old_index - run_start;
+                    }
+                    run_start = end;
+                    if let Some(next_key) = next_key {
+                        run_key = next_key;
+                    }
+                }
+            }
+            *sort = LaneSort::ReverseRuns(start..old_to_new.len());
+        }
+        LanePattern::Indexed => {
+            let start = old_to_new.len();
+            sort_keys.clear();
+            sort_keys.extend(items.iter().enumerate().map(|(index, item)| {
+                let (order, tie_break) = key(item);
+                SceneSortKey(order, tie_break, index)
+            }));
+            sort_keys.sort_unstable();
+            old_to_new.resize(start + items.len(), 0);
+            for (new_index, &SceneSortKey(_, _, old_index)) in sort_keys.iter().enumerate() {
+                old_to_new[start + old_index] = new_index;
+            }
+            *sort = LaneSort::Indexed(start..old_to_new.len());
+        }
+    }
+}
+
+fn classify_scene_lane<T>(items: &[T], key: &impl Fn(&T) -> (DrawOrder, u32)) -> LanePattern {
+    let mut inversions = items
+        .windows(2)
+        .enumerate()
+        .filter(|(_, pair)| key(&pair[0]) > key(&pair[1]));
+    let Some((position, _)) = inversions.next() else {
+        return LanePattern::Identity;
+    };
+    if inversions.next().is_none() {
+        let lower = key(&items[position + 1]);
+        let upper = key(&items[position]);
+        // With one inversion, its adjacent keys bound the already ordered prefix and suffix.
+        let prefix_is_ordered = position == 0 || key(&items[position - 1]) <= lower;
+        let suffix_is_ordered = position + 2 == items.len() || upper <= key(&items[position + 2]);
+        if prefix_is_ordered && suffix_is_ordered {
+            return LanePattern::Swap(position);
+        }
+    }
+
+    match items
+        .windows(2)
+        .try_fold(true, |strictly_decreasing, pair| {
+            let previous = key(&pair[0]);
+            let current = key(&pair[1]);
+            if previous < current {
+                None
+            } else {
+                Some(strictly_decreasing && previous > current)
+            }
+        }) {
+        Some(true) => LanePattern::Reverse,
+        Some(false) => LanePattern::ReverseRuns,
+        None => LanePattern::Indexed,
+    }
+}
+
+enum LaneEdit {
+    Swap(usize, usize),
+    Reverse(Range<usize>),
+}
+
+/// Applies a permutation in place and mirrors each edit to its parallel lane.
+fn apply_scene_sort<T>(
+    items: &mut [T],
+    old_to_new: &[usize],
+    scratch: &mut Vec<usize>,
+    sort: LaneSort,
+    key: impl Fn(&T) -> (DrawOrder, u32),
+    mut apply_parallel: impl FnMut(LaneEdit),
+) {
+    match sort {
+        LaneSort::Identity => {}
+        LaneSort::Swap(position) => {
+            items.swap(position, position + 1);
+            apply_parallel(LaneEdit::Swap(position, position + 1));
+        }
+        LaneSort::Reverse(len) => {
+            items[..len].reverse();
+            apply_parallel(LaneEdit::Reverse(0..len));
+        }
+        LaneSort::ReverseRuns(range) => {
+            let len = items.len();
+            items.reverse();
+            apply_parallel(LaneEdit::Reverse(0..len));
+            let mut start = 0;
+            while start < len {
+                let run_key = key(&items[start]);
+                let mut end = start + 1;
+                while end < len && key(&items[end]) == run_key {
+                    end += 1;
+                }
+                let run = start..end;
+                items[run.clone()].reverse();
+                apply_parallel(LaneEdit::Reverse(run));
+                start = end;
+            }
+            debug_assert_eq!(range.len(), len);
+        }
+        LaneSort::Indexed(range) => {
+            scratch.clear();
+            scratch.extend_from_slice(&old_to_new[range]);
+            let old_to_new = scratch.as_mut_slice();
+            for index in 0..items.len() {
+                while old_to_new[index] != index {
+                    let destination = old_to_new[index];
+                    items.swap(index, destination);
+                    apply_parallel(LaneEdit::Swap(index, destination));
+                    old_to_new.swap(index, destination);
+                }
+            }
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -1500,6 +1876,33 @@ mod tests {
         }
     }
 
+    fn tagged_surface(tag: i32) -> PaintSurface {
+        PaintSurface {
+            source: SurfaceSource::Unsupported(Size {
+                width: DevicePixels(tag),
+                height: DevicePixels(1),
+            }),
+            ..surface()
+        }
+    }
+
+    fn path_with_triangles(triangle_count: usize) -> Path<ScaledPixels> {
+        let mut path = Path::new(point(crate::px(10.0), crate::px(10.0)));
+        let triangle = (
+            point(crate::px(10.0), crate::px(10.0)),
+            point(crate::px(20.0), crate::px(10.0)),
+            point(crate::px(10.0), crate::px(20.0)),
+        );
+        let st = (point(0.0, 0.0), point(1.0, 0.0), point(0.0, 1.0));
+        for _ in 0..triangle_count {
+            path.push_triangle(triangle, st);
+        }
+        let mut path = path.scale(1.0);
+        path.bounds = full_bounds();
+        path.content_mask = mask();
+        path
+    }
+
     fn batch_kinds(scene: &mut Scene) -> Vec<&'static str> {
         scene.finish();
         scene
@@ -1550,6 +1953,228 @@ mod tests {
         replay.replay(0..scene.paint_operations.len(), &scene);
         replay.finish();
         assert_eq!(replay.surface_opacities(), &[0.25, 1.0]);
+    }
+
+    #[test]
+    fn replay_resolves_typed_indices_after_every_primitive_lane_is_sorted() {
+        let mut scene = Scene::default();
+        for smoothing in [0.1, 0.2, 0.3] {
+            let mut quad = quad();
+            quad.corner_smoothing = smoothing;
+            scene.insert_primitive(quad);
+        }
+        scene.insert_primitive(path_with_triangles(1));
+        scene.insert_primitive(path_with_triangles(2));
+        for tile_id in [8, 2, 5] {
+            let mut sprite = polychrome_sprite(0);
+            sprite.tile.tile_id = TileId(tile_id);
+            sprite.opacity = tile_id as f32 / 10.0;
+            scene.insert_primitive(sprite);
+        }
+        for (tag, opacity) in [(10, 0.1), (20, 0.2), (30, 0.3)] {
+            let surface = tagged_surface(tag);
+            scene.insert_surface(surface, opacity);
+        }
+        for opacity in [0.1, 0.2] {
+            let mut filter = backdrop();
+            filter.opacity = opacity;
+            scene.insert_primitive(filter);
+        }
+
+        // Force non-identity permutations, including stable ties and sprite tile-id sorting.
+        for (quad, order) in scene.quads.iter_mut().zip([2, 1, 2]) {
+            quad.order = order;
+        }
+        for (path, order) in scene.paths.iter_mut().zip([2, 1]) {
+            path.order = order;
+        }
+        for sprite in &mut scene.polychrome_sprites {
+            sprite.order = 7;
+        }
+        for (surface, order) in scene.surfaces.iter_mut().zip([3, 1, 2]) {
+            surface.order = order;
+        }
+        for (filter, order) in scene.backdrop_filters.iter_mut().zip([2, 1]) {
+            filter.order = order;
+        }
+        scene.finish();
+
+        assert_eq!(
+            scene
+                .quads
+                .iter()
+                .map(|quad| quad.corner_smoothing)
+                .collect::<Vec<_>>(),
+            [0.2, 0.1, 0.3]
+        );
+        assert_eq!(
+            scene
+                .paths
+                .iter()
+                .map(|path| (path.id, path.vertices.len()))
+                .collect::<Vec<_>>(),
+            [(PathId(1), 6), (PathId(0), 3)]
+        );
+        assert_eq!(
+            scene
+                .polychrome_sprites
+                .iter()
+                .map(|sprite| (sprite.tile.tile_id, sprite.opacity))
+                .collect::<Vec<_>>(),
+            [(TileId(2), 0.2), (TileId(5), 0.5), (TileId(8), 0.8)]
+        );
+        assert_eq!(scene.surface_opacities(), &[0.2, 0.3, 0.1]);
+        assert_eq!(
+            scene
+                .surfaces
+                .iter()
+                .map(|surface| match &surface.source {
+                    SurfaceSource::Unsupported(size) => size.width.0,
+                    _ => unreachable!(),
+                })
+                .collect::<Vec<_>>(),
+            [20, 30, 10]
+        );
+        assert_eq!(
+            scene
+                .backdrop_filters
+                .iter()
+                .map(|filter| filter.opacity)
+                .collect::<Vec<_>>(),
+            [0.2, 0.1]
+        );
+
+        let mut replay = Scene::default();
+        replay.replay(0..scene.paint_operations.len(), &scene);
+        replay.finish();
+        assert_eq!(
+            replay
+                .quads
+                .iter()
+                .map(|quad| quad.corner_smoothing)
+                .collect::<Vec<_>>(),
+            [0.1, 0.2, 0.3]
+        );
+        assert_eq!(
+            replay
+                .paths
+                .iter()
+                .map(|path| (path.id, path.vertices.len()))
+                .collect::<Vec<_>>(),
+            [(PathId(0), 3), (PathId(1), 6)]
+        );
+        assert_eq!(
+            replay
+                .polychrome_sprites
+                .iter()
+                .map(|sprite| (sprite.tile.tile_id, sprite.opacity))
+                .collect::<Vec<_>>(),
+            [(TileId(8), 0.8), (TileId(2), 0.2), (TileId(5), 0.5)]
+        );
+        assert_eq!(replay.surface_opacities(), &[0.1, 0.2, 0.3]);
+        assert_eq!(
+            replay
+                .surfaces
+                .iter()
+                .map(|surface| match &surface.source {
+                    SurfaceSource::Unsupported(size) => size.width.0,
+                    _ => unreachable!(),
+                })
+                .collect::<Vec<_>>(),
+            [10, 20, 30]
+        );
+        assert_eq!(
+            replay
+                .backdrop_filters
+                .iter()
+                .map(|filter| filter.opacity)
+                .collect::<Vec<_>>(),
+            [0.1, 0.2]
+        );
+    }
+
+    #[test]
+    fn replay_keeps_filter_pairs_attached_after_boundary_sorting() {
+        let mut scene = Scene::default();
+        for opacity in [0.25, 0.75] {
+            let mut start = boundary(true);
+            start.opacity = opacity;
+            scene.insert_primitive(start);
+            scene.insert_primitive(quad());
+            let mut end = boundary(false);
+            end.opacity = opacity;
+            scene.insert_primitive(end);
+        }
+        scene.filter_boundaries[0].order = 2;
+        scene.filter_boundaries[1].order = 2;
+        scene.filter_boundaries[2].order = 1;
+        scene.filter_boundaries[3].order = 1;
+        scene.finish();
+
+        assert_eq!(
+            scene
+                .filter_boundaries
+                .iter()
+                .map(|boundary| boundary.opacity)
+                .collect::<Vec<_>>(),
+            [0.75, 0.75, 0.25, 0.25]
+        );
+
+        let mut replay = Scene::default();
+        replay.replay(0..scene.paint_operations.len(), &scene);
+        replay.finish();
+        assert_eq!(
+            replay
+                .filter_boundaries
+                .iter()
+                .map(|boundary| boundary.opacity)
+                .collect::<Vec<_>>(),
+            [0.25, 0.25, 0.75, 0.75]
+        );
+        assert_eq!(
+            replay
+                .render_commands()
+                .iter()
+                .filter_map(|command| match command {
+                    RenderCommand::BeginFilter { boundary_index, .. } =>
+                        Some(replay.filter_boundaries[*boundary_index].opacity,),
+                    _ => None,
+                })
+                .collect::<Vec<_>>(),
+            [0.25, 0.75]
+        );
+    }
+
+    #[test]
+    fn finished_scenes_can_be_extended_then_replayed_repeatedly() {
+        let mut previous = Scene::default();
+        for smoothing in [0.1, 0.2] {
+            let mut quad = quad();
+            quad.corner_smoothing = smoothing;
+            previous.insert_primitive(quad);
+        }
+        previous.finish();
+
+        let mut appended = Scene::default();
+        appended.replay(0..previous.len(), &previous);
+        appended.finish();
+        let mut quad = quad();
+        quad.corner_smoothing = 0.3;
+        appended.insert_primitive(quad);
+        appended.finish();
+
+        let mut replay = Scene::default();
+        replay.replay(0..appended.len(), &appended);
+        replay.replay(0..appended.len(), &appended);
+        replay.finish();
+        assert_eq!(
+            replay
+                .quads
+                .iter()
+                .map(|quad| quad.corner_smoothing)
+                .collect::<Vec<_>>(),
+            [0.1, 0.2, 0.3, 0.1, 0.2, 0.3]
+        );
     }
 
     // Note: this validates only the *scene ordering* of nested filter boundaries (start/child/
@@ -1734,6 +2359,131 @@ mod tests {
         scene.finish();
         assert_ne!(scene.render_commands(), commands);
         assert_eq!(scene.render_plan().requirements().instance_batch_count, 1);
+    }
+
+    #[test]
+    fn lazy_indices_survive_replay_reopen_and_repeated_finish() {
+        let mut scene = Scene::default();
+        for smoothing in [0.1, 0.2, 0.3] {
+            let mut quad = quad();
+            quad.corner_smoothing = smoothing;
+            scene.insert_primitive(quad);
+        }
+        for (quad, order) in scene.quads.iter_mut().zip([3, 1, 2]) {
+            quad.order = order;
+        }
+        scene.finish();
+
+        assert_eq!(
+            scene
+                .paint_operations
+                .iter()
+                .map(|operation| match operation {
+                    PaintOperation::Quad(index) => *index,
+                    _ => unreachable!(),
+                })
+                .collect::<Vec<_>>(),
+            [0, 1, 2]
+        );
+
+        let mut appended = quad();
+        appended.corner_smoothing = 0.4;
+        scene.insert_primitive(appended);
+        // Public lane edits followed by finish remain supported after reopening.
+        scene.quads[0].order = 99;
+        scene.finish();
+        scene.finish();
+
+        let mut replay = Scene::default();
+        replay.replay(0..scene.paint_operations.len(), &scene);
+        replay.finish();
+        assert_eq!(
+            replay
+                .quads
+                .iter()
+                .map(|quad| quad.corner_smoothing)
+                .collect::<Vec<_>>(),
+            [0.1, 0.2, 0.3, 0.4]
+        );
+    }
+
+    #[test]
+    fn lane_sort_matches_stable_sort_for_all_short_key_sequences() {
+        let mut saw_identity = false;
+        let mut saw_swap = false;
+        let mut saw_reverse = false;
+        let mut saw_reverse_runs = false;
+        let mut saw_indexed = false;
+        let mut sort_keys = Vec::new();
+        let mut old_to_new = Vec::new();
+        let mut items = Vec::new();
+        let mut expected = Vec::new();
+        let mut parallel = Vec::new();
+        let mut sort_scratch = Vec::new();
+
+        for len in 0..=8 {
+            for mut encoded in 0..4_usize.pow(len as u32) {
+                items.clear();
+                parallel.clear();
+                expected.clear();
+                old_to_new.clear();
+                sort_keys.clear();
+                for index in 0..len {
+                    items.push(((encoded % 4) as u32, index));
+                    parallel.push(index);
+                    encoded /= 4;
+                }
+                expected.extend_from_slice(&items);
+                expected.sort_by_key(|(key, _)| *key);
+
+                let mut sort = LaneSort::Identity;
+                sort_scene_items(
+                    &items,
+                    &mut sort_keys,
+                    &mut old_to_new,
+                    |(key, _)| (*key, 0),
+                    &mut sort,
+                );
+                match &sort {
+                    LaneSort::Identity => saw_identity = true,
+                    LaneSort::Swap(_) => saw_swap = true,
+                    LaneSort::Reverse(_) => saw_reverse = true,
+                    LaneSort::ReverseRuns(_) => saw_reverse_runs = true,
+                    LaneSort::Indexed(_) => saw_indexed = true,
+                }
+
+                for old_index in 0..len {
+                    let mut new_index = old_index;
+                    remap_index(&mut new_index, &sort, &old_to_new);
+                    let expected_index = expected
+                        .iter()
+                        .position(|(_, id)| *id == old_index)
+                        .unwrap();
+                    assert_eq!(new_index, expected_index, "keys: {items:?}");
+                }
+
+                let permutation = old_to_new.clone();
+                apply_scene_sort(
+                    &mut items,
+                    &old_to_new,
+                    &mut sort_scratch,
+                    sort,
+                    |(key, _)| (*key, 0),
+                    |edit| match edit {
+                        LaneEdit::Swap(from, to) => parallel.swap(from, to),
+                        LaneEdit::Reverse(range) => parallel[range].reverse(),
+                    },
+                );
+                assert_eq!(old_to_new, permutation, "keys: {items:?}");
+                assert_eq!(items, expected, "keys: {items:?}");
+                assert_eq!(
+                    parallel,
+                    expected.iter().map(|(_, id)| *id).collect::<Vec<_>>()
+                );
+            }
+        }
+
+        assert!(saw_identity && saw_swap && saw_reverse && saw_reverse_runs && saw_indexed);
     }
 
     #[test]

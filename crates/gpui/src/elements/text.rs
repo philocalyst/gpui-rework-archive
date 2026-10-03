@@ -3,7 +3,8 @@ use crate::{
     GlobalElementId, HighlightStyle, Hitbox, HitboxBehavior, InspectorElementId, IntoElement,
     LayoutId, MouseDownEvent, MouseMoveEvent, MouseUpEvent, Pixels, Point, SharedString, Size,
     TextOverflow, TextRangeExt, TextRun, TextStyle, TextTransform, TooltipId, WhiteSpace, Window,
-    WrappedLine, WrappedLineLayout, px, register_tooltip_mouse_handlers, set_tooltip_on_window,
+    WindowTextSystem, WrappedLine, WrappedLineLayout, px, register_tooltip_mouse_handlers,
+    set_tooltip_on_window,
 };
 use anyhow::Context as _;
 use gpui_util::ResultExt;
@@ -860,14 +861,33 @@ impl TextLayout {
         text: SharedString,
         text_style: &TextStyle,
         font_size: Pixels,
-        line_height: Pixels,
+        _line_height: Pixels,
         wrap_width: Option<Pixels>,
         truncation: &TextLayoutTruncation,
         runs: &'runs [TextRun],
         window: &mut Window,
-        cx: &mut App,
+        _cx: &mut App,
     ) -> (SharedString, Cow<'runs, [TextRun]>) {
-        let _ = (line_height, cx);
+        Self::apply_truncation_with_text_system(
+            text,
+            text_style,
+            font_size,
+            wrap_width,
+            truncation,
+            runs,
+            window.text_system(),
+        )
+    }
+
+    fn apply_truncation_with_text_system<'runs>(
+        text: SharedString,
+        text_style: &TextStyle,
+        font_size: Pixels,
+        wrap_width: Option<Pixels>,
+        truncation: &TextLayoutTruncation,
+        runs: &'runs [TextRun],
+        text_system: &WindowTextSystem,
+    ) -> (SharedString, Cow<'runs, [TextRun]>) {
         let Some(truncate_width) = truncation.width else {
             return (text, Cow::Borrowed(runs));
         };
@@ -880,7 +900,7 @@ impl TextLayout {
             &truncation.affix,
             runs,
             truncation.source,
-            window,
+            text_system,
         )
     }
 
@@ -914,10 +934,10 @@ impl TextLayout {
             line_height,
         };
 
-        let layout_id = window.request_measured_layout(Default::default(), {
+        let layout_id = window.request_retained_measured_layout(Default::default(), {
             let element_state = self.clone();
 
-            move |known_dimensions, available_space, window, cx| {
+            move |known_dimensions, available_space, text_system| {
                 let wrap_width = Self::evaluate_wrap_width(
                     &text_style.white_space,
                     known_dimensions,
@@ -945,19 +965,16 @@ impl TextLayout {
                     return size;
                 }
 
-                let (text, runs) = Self::apply_truncation(
+                let (text, runs) = Self::apply_truncation_with_text_system(
                     text.clone(),
                     &text_style,
                     font_size,
-                    line_height,
                     wrap_width,
                     &truncation,
                     &runs,
-                    window,
-                    cx,
+                    text_system,
                 );
-                let document = window
-                    .text_system()
+                let document = text_system
                     .shape_text(
                         text,
                         font_size,
@@ -1170,10 +1187,10 @@ fn truncate_to_shaped_layout<'a>(
     affix: &str,
     runs: &'a [TextRun],
     direction: TruncateFrom,
-    window: &mut Window,
+    text_system: &WindowTextSystem,
 ) -> (SharedString, Cow<'a, [TextRun]>) {
-    let fits = |candidate: &str, candidate_runs: &[TextRun], window: &mut Window| {
-        let Ok(document) = window.text_system().shape_text(
+    let fits = |candidate: &str, candidate_runs: &[TextRun]| {
+        let Ok(document) = text_system.shape_text(
             SharedString::from(candidate.to_owned()),
             font_size,
             candidate_runs,
@@ -1190,7 +1207,7 @@ fn truncate_to_shaped_layout<'a>(
                 .all(|visual| visual.advance_width <= width + px(0.01))
     };
 
-    if fits(&text, runs, window) {
+    if fits(&text, runs) {
         return (text, Cow::Borrowed(runs));
     }
 
@@ -1208,7 +1225,7 @@ fn truncate_to_shaped_layout<'a>(
     while low < high {
         let middle = low + (high - low).div_ceil(2);
         let (candidate_text, candidate_runs) = candidate(middle);
-        if fits(&candidate_text, &candidate_runs, window) {
+        if fits(&candidate_text, &candidate_runs) {
             low = middle;
         } else {
             high = middle - 1;

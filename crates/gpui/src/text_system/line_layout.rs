@@ -937,10 +937,43 @@ struct FrameCache {
     used_wrapped_lines: Vec<Arc<CacheKey>>,
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Copy, Default)]
 pub(crate) struct LineLayoutIndex {
     lines_index: usize,
     wrapped_lines_index: usize,
+}
+
+impl LineLayoutIndex {
+    pub(crate) fn rebase_from(
+        &mut self,
+        source_start: &Self,
+        source_end: &Self,
+        destination: &Self,
+    ) {
+        rebase_index(
+            &mut self.lines_index,
+            source_start.lines_index,
+            source_end.lines_index,
+            destination.lines_index,
+        );
+        rebase_index(
+            &mut self.wrapped_lines_index,
+            source_start.wrapped_lines_index,
+            source_end.wrapped_lines_index,
+            destination.wrapped_lines_index,
+        );
+    }
+}
+
+fn rebase_index(
+    index: &mut usize,
+    source_start: usize,
+    source_end: usize,
+    destination_start: usize,
+) {
+    if (source_start..=source_end).contains(index) {
+        *index = destination_start + (*index - source_start);
+    }
 }
 
 impl LineLayoutCache {
@@ -977,23 +1010,55 @@ impl LineLayoutCache {
     }
 
     pub fn reuse_layouts(&self, range: Range<LineLayoutIndex>) {
+        // A retained measured node can reuse its shaped lines without marking them as used in
+        // this frame. In that case the recorded range is empty at the index where the lines
+        // would have appeared, and the previous frame may contain fewer (or no) used lines.
+        // Empty ranges own no entries, so their absolute index is immaterial.
+        let has_lines = range.start.lines_index != range.end.lines_index;
+        let has_wrapped_lines = range.start.wrapped_lines_index != range.end.wrapped_lines_index;
+        if !has_lines && !has_wrapped_lines {
+            return;
+        }
+
         let mut previous_frame = &mut *self.previous_frame.lock();
         let mut current_frame = &mut *self.current_frame.write();
 
-        for key in &previous_frame.used_lines[range.start.lines_index..range.end.lines_index] {
-            if let Some((key, line)) = previous_frame.lines.remove_entry(key) {
-                current_frame.lines.insert(key, line);
+        if has_lines {
+            assert!(
+                range.start.lines_index <= range.end.lines_index
+                    && range.end.lines_index <= previous_frame.used_lines.len(),
+                "invalid retained line-layout range: {:?}..{:?} of {} lines",
+                range.start.lines_index,
+                range.end.lines_index,
+                previous_frame.used_lines.len(),
+            );
+
+            for key in &previous_frame.used_lines[range.start.lines_index..range.end.lines_index] {
+                if let Some((key, line)) = previous_frame.lines.remove_entry(key) {
+                    current_frame.lines.insert(key, line);
+                }
+                current_frame.used_lines.push(key.clone());
             }
-            current_frame.used_lines.push(key.clone());
         }
 
-        for key in &previous_frame.used_wrapped_lines
-            [range.start.wrapped_lines_index..range.end.wrapped_lines_index]
-        {
-            if let Some((key, line)) = previous_frame.wrapped_lines.remove_entry(key) {
-                current_frame.wrapped_lines.insert(key, line);
+        if has_wrapped_lines {
+            assert!(
+                range.start.wrapped_lines_index <= range.end.wrapped_lines_index
+                    && range.end.wrapped_lines_index <= previous_frame.used_wrapped_lines.len(),
+                "invalid retained wrapped-line range: {:?}..{:?} of {} wrapped lines",
+                range.start.wrapped_lines_index,
+                range.end.wrapped_lines_index,
+                previous_frame.used_wrapped_lines.len(),
+            );
+
+            for key in &previous_frame.used_wrapped_lines
+                [range.start.wrapped_lines_index..range.end.wrapped_lines_index]
+            {
+                if let Some((key, line)) = previous_frame.wrapped_lines.remove_entry(key) {
+                    current_frame.wrapped_lines.insert(key, line);
+                }
+                current_frame.used_wrapped_lines.push(key.clone());
             }
-            current_frame.used_wrapped_lines.push(key.clone());
         }
     }
 
