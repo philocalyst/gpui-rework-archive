@@ -40,6 +40,7 @@ inspector = ["gpui_macros/inspector"]
 # Tracks every entity handle so tests can assert nothing leaked. Also enabled
 # by setting `GPUI_LEAK_DETECTION` when building; see `build.rs`.
 leak-detection = []
+font-kit = []
 wayland = []
 x11 = []
 screen-capture = ["dep:windows-capture"]
@@ -70,7 +71,7 @@ derive_more.workspace = true
 derive_setters.workspace = true
 etagere.workspace = true
 futures.workspace = true
-futures-concurrency.workspace = true
+futures-concurrency = { workspace = true, optional = true }
 gpui_macros.workspace = true
 gpui_shared_string.workspace = true
 http.workspace = true
@@ -85,11 +86,11 @@ palette.workspace = true
 phf.workspace = true
 postage.workspace = true
 proptest = { workspace = true, optional = true }
-chrono.workspace = true
+chrono = { workspace = true, default-features = true }
 profiling.workspace = true
-rand.workspace = true
+rand = { workspace = true, features = ["small_rng", "thread_rng"] }
 raw-window-handle.workspace = true
-regex.workspace = true
+regex = { workspace = true, default-features = true }
 refineable.workspace = true
 scheduler.workspace = true
 resvg = { version = "0.48.1", default-features = false, features = [
@@ -103,14 +104,22 @@ usvg = { version = "0.48.1", default-features = false }
 skrifa.workspace = true
 schemars.workspace = true
 seahash = "4.1"
-serde.workspace = true
+serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
 slotmap.workspace = true
 smallvec.workspace = true
 stacksafe = { workspace = true, optional = true }
 strum.workspace = true
 sum_tree.workspace = true
-taffy = "=0.13.0"
+taffy = { workspace = true, features = [
+    "std",
+    "taffy_tree",
+    "flexbox",
+    "grid",
+    "block_layout",
+    "float_layout",
+    "content_size",
+] }
 thiserror.workspace = true
 gpui_util.workspace = true
 unicode-segmentation.workspace = true
@@ -119,19 +128,20 @@ hdrhistogram = { workspace = true, optional = true }
 waker-fn = "1.2.0"
 lyon = "1.0"
 pin-project = "1.1.10"
-spin = "0.10.0"
-pollster.workspace = true
+spin.workspace = true
 url.workspace = true
-uuid.workspace = true
-web-time.workspace = true
+uuid = { workspace = true, features = ["v4"] }
+web-time = { workspace = true, optional = true }
 heapless.workspace = true
 
 [target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
-# Workspace inheritance would re-enable defaults, including blocking channel synchronization.
-async-channel = { version = "2.5.0", default-features = false }
+async-channel.workspace = true
 
 [target.'cfg(not(all(target_arch = "wasm32", target_os = "unknown")))'.dependencies]
-async-channel.workspace = true
+async-channel = { workspace = true, features = ["std"] }
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+pollster.workspace = true
 
 [target.'cfg(target_family = "wasm")'.dependencies]
 getrandom = { version = "0.3.4", features = ["wasm_js"] }
@@ -175,7 +185,7 @@ gpui_platform = { workspace = true, features = ["font-kit", "wayland", "x11", "t
 gpui_fonts = { path = "../gpui_ce_fonts", version = "0.2.2", package = "gpui-ce-fonts" }
 gpui_util = { workspace = true }
 lyon = { version = "1.0", features = ["extra"] }
-rand.workspace = true
+rand = { workspace = true, default-features = true }
 scheduler = { workspace = true, features = ["test-support"] }
 image = { workspace = true, features = ["png"] }
 
@@ -183,14 +193,11 @@ image = { workspace = true, features = ["png"] }
 proptest = { workspace = true }
 
 [target.'cfg(target_family = "wasm")'.dev-dependencies]
-wasm-bindgen = { workspace = true }
-web-sys = { version = "0.3", features = ["console"] }
+wasm-bindgen.workspace = true
+web-sys.workspace = true
 
 [build-dependencies]
 embed-resource = { version = "3.0", optional = true }
-
-[target.'cfg(target_os = "macos")'.build-dependencies]
-bindgen = "0.72"
 
 [package.metadata.cargo-shear]
 ignored = [
