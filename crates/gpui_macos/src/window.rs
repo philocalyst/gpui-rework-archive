@@ -2021,6 +2021,7 @@ impl PlatformWindow for MacWindow {
         }
         let lock = self.0.lock();
         let window = lock.native_window;
+        let view = lock.native_view.as_ptr();
         let closed = lock.closed.clone();
         let executor = lock.foreground_executor.clone();
         executor
@@ -2029,6 +2030,7 @@ impl PlatformWindow for MacWindow {
                     unsafe {
                         let _: () = msg_send![window, makeKeyAndOrderFront: NIL];
                     }
+                    window.makeKeyAndOrderFront(None);
                 }
             })
             .detach();
