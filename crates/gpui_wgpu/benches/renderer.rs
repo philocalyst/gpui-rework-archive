@@ -1,8 +1,8 @@
 use criterion::{BatchSize, Criterion, black_box, criterion_group, criterion_main};
 use gpui::{
-    Bounds, ContentMask, Corners, DevicePixels, PlatformHeadlessRenderer, Point, Quad,
-    ScaledPixels, Scene, ShaderBool, Size, TransformationMatrix, Underline, point, radians,
-    solid_background, white,
+    BorderStyle, Bounds, ContentMask, Corners, DevicePixels, Edges, PlatformHeadlessRenderer,
+    Point, Quad, ScaledPixels, Scene, ShaderBool, Size, TransformationMatrix, Underline, point,
+    radians, solid_background, white,
 };
 use gpui_ce_wgpu::WgpuHeadlessRenderer;
 
@@ -105,14 +105,35 @@ fn unplanned_mixed_scene(count: usize) -> Scene {
     scene
 }
 
-fn transformed_quad_scene(count: usize, transform: TransformationMatrix) -> Scene {
+fn transformed_quad_scene(content: Scene, transform: TransformationMatrix) -> Scene {
     let mut scene = Scene::default();
     scene.with_transform(transform, |scene| {
-        for quad in &unplanned_quad_scene(count).quads {
+        for quad in &content.quads {
             scene.insert_primitive(*quad);
         }
     });
     scene.finish();
+    scene
+}
+
+fn unplanned_rounded_border_scene(count: usize) -> Scene {
+    let mut scene = unplanned_quad_scene(count);
+    for (index, quad) in scene.quads.iter_mut().enumerate() {
+        quad.corner_radii = Corners::all(ScaledPixels(8.0));
+        quad.corner_smoothing = if index % 2 == 0 { 0.0 } else { 1.0 };
+        quad.border_widths = Edges {
+            top: ScaledPixels(1.0),
+            right: ScaledPixels(4.0),
+            bottom: ScaledPixels(2.0),
+            left: ScaledPixels(6.0),
+        };
+        quad.border_color = solid_background(white());
+        quad.border_style = if index % 3 == 0 {
+            BorderStyle::Dashed
+        } else {
+            BorderStyle::Solid
+        };
+    }
     scene
 }
 
@@ -233,11 +254,18 @@ fn bench_renderer(criterion: &mut Criterion) {
 
     let identity_512 = quad_scene(512);
     let shared_pan_zoom = transformed_quad_scene(
-        512,
+        unplanned_quad_scene(512),
         TransformationMatrix::unit()
             .translate(point(ScaledPixels(24.0), ScaledPixels(18.0)))
             .rotate(radians(0.08))
             .scale(Size::new(1.25, 1.25)),
+    );
+    let rounded_borders = transformed_quad_scene(
+        unplanned_rounded_border_scene(512),
+        TransformationMatrix {
+            rotation_scale: [[1.05, 0.12], [-0.05, 0.9]],
+            translation: [24.0, 40.0],
+        },
     );
     let nested_clip_scenes = [1, 4, 16].map(|depth| (depth, nested_rotated_clip_scene(depth, 512)));
     let mut group = criterion.benchmark_group("coordinate_spaces_render_wait");
@@ -254,6 +282,13 @@ fn bench_renderer(criterion: &mut Criterion) {
             renderer
                 .render_scene_and_wait(black_box(&shared_pan_zoom), TARGET_SIZE)
                 .expect("shared pan/zoom scene render must succeed")
+        })
+    });
+    group.bench_function("sheared_rounded_borders_512", |bencher| {
+        bencher.iter(|| {
+            renderer
+                .render_scene_and_wait(black_box(&rounded_borders), TARGET_SIZE)
+                .expect("sheared rounded-border scene render must succeed")
         })
     });
     for (depth, scene) in &nested_clip_scenes {

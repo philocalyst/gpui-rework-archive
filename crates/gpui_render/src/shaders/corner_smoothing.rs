@@ -55,18 +55,138 @@ mod source {
         corner_smoothing: f32,
         power: f32,
     ) -> f32 {
+        normalized_superellipse_sample_from_corner(
+            corner_to_point,
+            corner_radius,
+            corner_smoothing,
+            power,
+        )
+        .distance
+    }
+
+    pub fn normalized_superellipse_sample_from_corner(
+        corner_to_point: Vec2f,
+        corner_radius: f32,
+        corner_smoothing: f32,
+        power: f32,
+    ) -> PreparedCornerSample {
         let extent = max(corner_radius, 0.0) * (1.0 + clamp(corner_smoothing, 0.0, 1.0));
         let corner_center_to_point = corner_to_point + extent;
-
         if extent <= 0.0 || corner_center_to_point.x <= 0.0 || corner_center_to_point.y <= 0.0 {
-            return max(corner_to_point.x, corner_to_point.y);
+            let x_is_nearest = corner_to_point.x > corner_to_point.y;
+            return PreparedCornerSample {
+                distance: max(corner_to_point.x, corner_to_point.y),
+                gradient: select(vec2f(0.0, 1.0), vec2f(1.0, 0.0), x_is_nearest),
+                curvature: 0.0,
+                corner: FIGMA_NO_CORNER,
+                path_t: 0.0,
+                segment: FIGMA_SEGMENT_STRAIGHT,
+            };
         }
 
         let normalized = corner_center_to_point / extent;
         let powered = pow(normalized, vec2f(power, power));
-        let gradient = power * length(pow(normalized, vec2f(power - 1.0, power - 1.0)));
+        let first_derivative = power * pow(normalized, vec2f(power - 1.0, power - 1.0));
+        let denominator = max(
+            power * length(pow(normalized, vec2f(power - 1.0, power - 1.0))),
+            FIGMA_EPSILON,
+        );
+        let denominator_derivative =
+            power * (power - 1.0) * pow(normalized, vec2f(2.0 * power - 3.0, 2.0 * power - 3.0))
+                / max(
+                    length(pow(normalized, vec2f(power - 1.0, power - 1.0))),
+                    FIGMA_EPSILON,
+                );
+        let numerator = powered.x + powered.y - 1.0;
+        let distance = extent * numerator / denominator;
+        let gradient = (first_derivative * denominator - numerator * denominator_derivative)
+            / (denominator * denominator);
+        PreparedCornerSample {
+            distance,
+            gradient,
+            curvature: 0.0,
+            corner: FIGMA_NO_CORNER,
+            path_t: 0.0,
+            segment: FIGMA_SEGMENT_ARC,
+        }
+    }
 
-        extent * (powered.x + powered.y - 1.0) / max(gradient, FIGMA_EPSILON)
+    pub fn normalized_superellipse_sample(
+        point: Vec2f,
+        bounds: Bounds,
+        corner_radii: Corners,
+        corner_smoothing: f32,
+        reaches: Vec4f,
+        power: f32,
+    ) -> PreparedCornerSample {
+        // Keep the compact path's quadrant selection: when every corner is
+        // contained in half the short side, only the nearest corner can affect
+        // the contour. Besides avoiding four nearest-point evaluations, this
+        // matches the established compact distance algorithm exactly.
+        if can_use_compact_corner_selection(bounds.size, reaches) {
+            let center_to_point = point - Bounds::center(bounds);
+            let mut corner = 2u32;
+            if center_to_point.x < 0.0 {
+                if center_to_point.y < 0.0 {
+                    corner = 0u32;
+                } else {
+                    corner = 3u32;
+                }
+            } else if center_to_point.y < 0.0 {
+                corner = 1u32;
+            }
+            let corner_to_point = abs(center_to_point) - Bounds::half_size(bounds);
+            let radii = corner_values(corner_radii);
+            let mut sample = normalized_superellipse_sample_from_corner(
+                corner_to_point,
+                radii[corner],
+                corner_smoothing,
+                power,
+            );
+            sample.gradient = figma_orient_corner_normal(sample.gradient, corner);
+            sample.corner = corner;
+            return sample;
+        }
+
+        let local_point = point - bounds.origin;
+        let radii = corner_values(corner_radii);
+        let nearest_straight =
+            figma_nearest_straight_sample(local_point, bounds.size, reaches, reaches);
+        let mut nearest = PreparedCornerSample {
+            distance: nearest_straight.distance,
+            gradient: nearest_straight.normal,
+            curvature: 0.0,
+            corner: FIGMA_NO_CORNER,
+            path_t: nearest_straight.path_t,
+            segment: FIGMA_SEGMENT_STRAIGHT,
+        };
+        let mut corner = 0u32;
+        while corner < 4u32 {
+            if figma_is_corner_candidate(
+                local_point,
+                bounds.size,
+                reaches[corner],
+                reaches[corner],
+                corner,
+            ) {
+                let corner_point = figma_corner_to_point(local_point, bounds.size, corner);
+                let mut candidate = normalized_superellipse_sample_from_corner(
+                    corner_point,
+                    radii[corner],
+                    corner_smoothing,
+                    power,
+                );
+                if abs(candidate.distance) <= abs(nearest.distance) {
+                    candidate.gradient = figma_orient_corner_normal(candidate.gradient, corner);
+                    candidate.corner = corner;
+                    candidate.path_t = 0.0;
+                    candidate.segment = FIGMA_SEGMENT_ARC;
+                    nearest = candidate;
+                }
+            }
+            corner += 1u32;
+        }
+        nearest
     }
 
     pub fn can_use_compact_corner_selection(size: Vec2f, reaches: Vec4f) -> bool {
@@ -146,17 +266,7 @@ mod source {
         reaches: Vec4f,
         power: f32,
     ) -> f32 {
-        if can_use_compact_corner_selection(bounds.size, reaches) {
-            return compact_normalized_superellipse_signed_distance(
-                point,
-                bounds,
-                corner_radii,
-                corner_smoothing,
-                power,
-            );
-        }
-
-        reach_aware_normalized_superellipse_signed_distance(
+        normalized_superellipse_sample(
             point,
             bounds,
             corner_radii,
@@ -164,6 +274,7 @@ mod source {
             reaches,
             power,
         )
+        .distance
     }
 
     // This corner construction derives from Tien Pham's figma-squircle.
@@ -317,6 +428,17 @@ mod source {
     pub struct SignedDistanceSample {
         pub distance: f32,
         pub normal: Vec2f,
+        pub curvature: f32,
+        pub path_t: f32,
+        pub segment: u32,
+    }
+
+    #[derive(Clone, Copy, Wgsl)]
+    pub struct PreparedCornerSample {
+        pub distance: f32,
+        pub gradient: Vec2f,
+        pub curvature: f32,
+        pub corner: u32,
         pub path_t: f32,
         pub segment: u32,
     }
@@ -590,6 +712,59 @@ mod source {
         a.x * b.y - a.y * b.x
     }
 
+    pub fn figma_cubic_curvature(tangent: Vec2f, second_derivative: Vec2f) -> f32 {
+        abs(figma_cross_2d(tangent, second_derivative))
+            / max(
+                length(tangent) * length(tangent) * length(tangent),
+                FIGMA_EPSILON,
+            )
+    }
+
+    pub fn figma_offset_gradient(
+        distance: f32,
+        normal: Vec2f,
+        curvature: f32,
+        width_gradient: Vec2f,
+    ) -> Vec2f {
+        let normal_length = length(normal);
+        let offset_scale = 1.0 + curvature * distance;
+        if curvature <= 0.0 || offset_scale <= FIGMA_EPSILON || normal_length <= FIGMA_EPSILON {
+            return -normal;
+        }
+        let unit_normal = normal / normal_length;
+        let tangent_width_gradient =
+            width_gradient - unit_normal * dot(unit_normal, width_gradient);
+        -(normal + curvature / offset_scale * tangent_width_gradient)
+    }
+
+    #[derive(Clone, Copy, Wgsl)]
+    pub struct BorderWidthSample {
+        pub width: f32,
+        pub normal_gradient: Vec2f,
+    }
+
+    /// Effective width and its derivative with respect to the contour normal.
+    pub fn figma_border_width_sample(border: Vec2f, normal: Vec2f) -> BorderWidthSample {
+        let active_sides = vec2f(
+            select(0.0, 1.0, border.x > 0.0),
+            select(0.0, 1.0, border.y > 0.0),
+        );
+        let border_length = length(border * normal);
+        let active_length = length(active_sides * normal);
+        let mut normal_gradient = vec2f(0.0, 0.0);
+        if border_length > 0.0 {
+            normal_gradient = normal_gradient + border * border * normal / border_length;
+        }
+        if active_length > 0.0 {
+            normal_gradient =
+                normal_gradient + PIXEL_ANTIALIAS_RADIUS * active_sides * normal / active_length;
+        }
+        BorderWidthSample {
+            width: border_length - PIXEL_ANTIALIAS_RADIUS * (1.0 - active_length),
+            normal_gradient,
+        }
+    }
+
     pub fn figma_unfold_normal(normal: Vec2f, mirrored: bool) -> Vec2f {
         select(
             vec2f(normal.x, -normal.y),
@@ -612,6 +787,7 @@ mod source {
                     vec2f(1.0, 0.0),
                     corner_to_point.x > corner_to_point.y,
                 ),
+                curvature: 0.0,
                 path_t: 0.0,
                 segment: FIGMA_SEGMENT_STRAIGHT,
             };
@@ -658,6 +834,7 @@ mod source {
         let mut sample = SignedDistanceSample {
             distance: figma_signed_distance(arc_delta, arc_normal, length(arc_delta)),
             normal: figma_unfold_normal(arc_normal, false),
+            curvature: 1.0 / max(params.radius, FIGMA_EPSILON),
             path_t: arc_t,
             segment: FIGMA_SEGMENT_ARC,
         };
@@ -680,6 +857,15 @@ mod source {
                 if abs(distance) <= abs(sample.distance) {
                     sample.distance = distance;
                     sample.normal = figma_unfold_normal(normal, false);
+                    sample.curvature = figma_cubic_curvature(
+                        cubic.tangent,
+                        figma_cubic_second_derivative(
+                            params.horizontal,
+                            params.c,
+                            params.d,
+                            cubic.path_t,
+                        ),
+                    );
                     sample.path_t = cubic.path_t;
                     sample.segment = FIGMA_SEGMENT_FIRST_CUBIC;
                 }
@@ -702,6 +888,15 @@ mod source {
                 if abs(distance) <= abs(sample.distance) {
                     sample.distance = distance;
                     sample.normal = figma_unfold_normal(normal, true);
+                    sample.curvature = figma_cubic_curvature(
+                        cubic.tangent,
+                        figma_cubic_second_derivative(
+                            params.vertical,
+                            params.c,
+                            params.d,
+                            cubic.path_t,
+                        ),
+                    );
                     sample.path_t = cubic.path_t;
                     sample.segment = FIGMA_SEGMENT_SECOND_CUBIC;
                 }
@@ -755,7 +950,7 @@ mod source {
 
     pub fn figma_corner_progress(
         params: FigmaCornerParams,
-        sample: SignedDistanceSample,
+        sample: PreparedCornerSample,
         total_length: f32,
     ) -> f32 {
         if sample.segment == FIGMA_SEGMENT_FIRST_CUBIC {
@@ -919,8 +1114,54 @@ mod source {
                 sqrt(nearest_distance_squared),
             ),
             normal: nearest_normal,
+            curvature: 0.0,
             path_t: 0.0,
             segment: FIGMA_SEGMENT_STRAIGHT,
+        }
+    }
+
+    pub fn prepared_corner_sample(
+        point: Vec2f,
+        bounds: Bounds,
+        corner_radii: Corners,
+        corner_smoothing: f32,
+        prepared: PreparedCorners,
+    ) -> PreparedCornerSample {
+        if prepared.superellipse_power > 0.0 {
+            return normalized_superellipse_sample(
+                point,
+                bounds,
+                corner_radii,
+                corner_smoothing,
+                prepared.horizontal_reaches,
+                prepared.superellipse_power,
+            );
+        }
+        if prepared.smoothing_factors.x <= 0.0 {
+            return PreparedCornerSample {
+                distance: rounded_rectangle_signed_distance(point, bounds, corner_radii),
+                gradient: rounded_rectangle_gradient(point, bounds, corner_radii),
+                curvature: 0.0,
+                corner: FIGMA_NO_CORNER,
+                path_t: 0.0,
+                segment: FIGMA_SEGMENT_STRAIGHT,
+            };
+        }
+        let sample = figma_smooth_rectangle_sample(
+            point,
+            bounds,
+            corner_radii,
+            prepared.horizontal_reaches,
+            prepared.vertical_reaches,
+            prepared.smoothing_factors,
+        );
+        PreparedCornerSample {
+            distance: sample.signed_distance.distance,
+            gradient: sample.signed_distance.normal,
+            curvature: sample.signed_distance.curvature,
+            corner: sample.corner,
+            path_t: sample.signed_distance.path_t,
+            segment: sample.signed_distance.segment,
         }
     }
 
@@ -996,31 +1237,7 @@ mod source {
         corner_smoothing: f32,
         prepared: PreparedCorners,
     ) -> f32 {
-        if prepared.superellipse_power > 0.0 {
-            return normalized_superellipse_signed_distance(
-                point,
-                bounds,
-                corner_radii,
-                corner_smoothing,
-                prepared.horizontal_reaches,
-                prepared.superellipse_power,
-            );
-        }
-
-        if prepared.smoothing_factors.x <= 0.0 {
-            return rounded_rectangle_signed_distance(point, bounds, corner_radii);
-        }
-
-        figma_smooth_rectangle_sample(
-            point,
-            bounds,
-            corner_radii,
-            prepared.horizontal_reaches,
-            prepared.vertical_reaches,
-            prepared.smoothing_factors,
-        )
-        .signed_distance
-        .distance
+        prepared_corner_sample(point, bounds, corner_radii, corner_smoothing, prepared).distance
     }
 }
 
@@ -1110,6 +1327,94 @@ mod tests {
         assert_eq!(circular.horizontal_reaches.x, 20.0);
         assert!(smoothed.horizontal_reaches.x > circular.horizontal_reaches.x);
         assert!(smoothed.vertical_reaches.x > circular.vertical_reaches.x);
+    }
+
+    #[test]
+    fn contour_gradients_match_scalar_fields_in_every_quadrant() {
+        let step = 0.002;
+        let bounds = Bounds {
+            origin: vec2f(0.0, 0.0),
+            size: vec2f(120.0, 80.0),
+        };
+        let radii = Corners {
+            top_left: 20.0,
+            top_right: 20.0,
+            bottom_right: 20.0,
+            bottom_left: 20.0,
+        };
+        let prepared = prepare_corners(bounds.size, radii, 0.6, true);
+        assert!(prepared.superellipse_power > 0.0);
+        for point in [
+            vec2f(4.0, 8.0),
+            vec2f(116.0, 8.0),
+            vec2f(116.0, 72.0),
+            vec2f(4.0, 72.0),
+        ] {
+            let sample = prepared_corner_sample(point, bounds, radii, 0.6, prepared);
+            for (axis, analytic) in [
+                (vec2f(step, 0.0), sample.gradient.x),
+                (vec2f(0.0, step), sample.gradient.y),
+            ] {
+                let finite = (distance(point + axis, bounds, radii, 0.6, true)
+                    - distance(point - axis, bounds, radii, 0.6, true))
+                    / (2.0 * step);
+                assert!(
+                    (finite - analytic).abs() < 0.005,
+                    "superellipse at {point:?}: {finite} vs {analytic}"
+                );
+            }
+        }
+        for point in [vec2f(1.0, 5.0), vec2f(2.5, 2.0)] {
+            let radii = vec2f(3.0, 7.0);
+            let gradient = quarter_ellipse_gradient(point, radii);
+            for (axis, analytic) in [
+                (vec2f(step, 0.0), gradient.x),
+                (vec2f(0.0, step), gradient.y),
+            ] {
+                let finite = (quarter_ellipse_signed_distance(point + axis, radii)
+                    - quarter_ellipse_signed_distance(point - axis, radii))
+                    / (2.0 * step);
+                assert!(
+                    (finite - analytic).abs() < 0.001,
+                    "ellipse at {point:?}: {finite} vs {analytic}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn variable_border_width_gradient_preserves_normal_signs() {
+        let step = 0.001;
+        for border in [vec2f(3.0, 1.0), vec2f(3.0, 0.0), vec2f(0.0, 2.0)] {
+            for normal in [
+                vec2f(0.6, 0.8),
+                vec2f(-0.6, 0.8),
+                vec2f(-0.6, -0.8),
+                vec2f(0.6, -0.8),
+            ] {
+                let sample = figma_border_width_sample(border, normal);
+                for (axis, analytic) in [
+                    (vec2f(step, 0.0), sample.normal_gradient.x),
+                    (vec2f(0.0, step), sample.normal_gradient.y),
+                ] {
+                    let finite = (figma_border_width_sample(border, normal + axis).width
+                        - figma_border_width_sample(border, normal - axis).width)
+                        / (2.0 * step);
+                    assert!(
+                        (finite - analytic).abs() < 0.001,
+                        "border {border:?}, normal {normal:?}: {finite} vs {analytic}"
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn figma_offset_gradient_falls_back_at_corner_circle_center() {
+        let normal = vec2f(0.0, -1.0);
+        let gradient = figma_offset_gradient(-0.5, normal, 2.0, vec2f(3.0, 0.0));
+        assert!((gradient.x - 0.0).abs() < 0.000001);
+        assert!((gradient.y - 1.0).abs() < 0.000001);
     }
 
     #[test]

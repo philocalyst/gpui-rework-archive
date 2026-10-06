@@ -15,20 +15,34 @@ pub mod underline {
     }
     storage!(group(1), binding(0), UNDERLINES: RuntimeArray<Underline>);
 
-    pub fn wavy_underline_coverage(underline: Underline, position: Vec2f) -> f32 {
-        let normalized_position =
-            (position - underline.bounds.origin) / underline.bounds.size.y - vec2f(0.0, 0.5);
-        let angular_frequency =
-            PI * UNDERLINE_WAVE_FREQUENCY * underline.thickness / underline.bounds.size.y;
-        let amplitude = underline.thickness * UNDERLINE_WAVE_HEIGHT_RATIO / underline.bounds.size.y;
+    #[derive(Clone, Copy, Wgsl)]
+    pub struct WaveSample {
+        pub distance: f32,
+        pub gradient: Vec2f,
+    }
+
+    /// Differentiate the wave's slope-corrected scalar distance, including its denominator.
+    pub fn wavy_underline_sample(bounds: Bounds, thickness: f32, position: Vec2f) -> WaveSample {
+        let normalized_position = (position - bounds.origin) / bounds.size.y - vec2f(0.0, 0.5);
+        let angular_frequency = PI * UNDERLINE_WAVE_FREQUENCY * thickness / bounds.size.y;
+        let amplitude = thickness * UNDERLINE_WAVE_HEIGHT_RATIO / bounds.size.y;
         let wave_height = sin(normalized_position.x * angular_frequency) * amplitude;
         let wave_slope =
             cos(normalized_position.x * angular_frequency) * amplitude * angular_frequency;
-        let signed_distance = (normalized_position.y - wave_height)
-            / sqrt(1.0 + wave_slope * wave_slope)
-            * underline.bounds.size.y;
-        let stroke_distance = abs(signed_distance) - underline.thickness * 0.5;
-        antialiased_coverage(stroke_distance)
+        let wave_second_derivative = -wave_height * angular_frequency * angular_frequency;
+        let numerator = normalized_position.y - wave_height;
+        let denominator = sqrt(1.0 + wave_slope * wave_slope);
+        let signed_distance = numerator / denominator * bounds.size.y;
+        WaveSample {
+            distance: abs(signed_distance) - thickness * 0.5,
+            gradient: sign(signed_distance)
+                * vec2f(
+                    -wave_slope / denominator
+                        - numerator * wave_slope * wave_second_derivative
+                            / (denominator * denominator * denominator),
+                    1.0 / denominator,
+                ),
+        }
     }
 
     #[derive(Wgsl)]
@@ -81,15 +95,52 @@ pub mod underline {
                 ),
             );
         }
+        let wave = wavy_underline_sample(underline.bounds, underline.thickness, local);
         blend_color(
             input.color,
-            wavy_underline_coverage(underline, local)
-                * ContentMask::alpha_at_local_position(
-                    underline.content_mask,
-                    input.position.xy(),
-                    local,
-                ),
+            distance_coverage_from_gradient(
+                wave.distance,
+                wave.gradient,
+                local_pixel_basis(underline.content_mask),
+            ) * ContentMask::alpha_at_local_position(
+                underline.content_mask,
+                input.position.xy(),
+                local,
+            ),
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::super::common::Bounds;
+    use super::underline::wavy_underline_sample;
+    use wgsl_rs::std::vec2f;
+
+    #[test]
+    fn wavy_underline_gradient_matches_its_slope_corrected_distance() {
+        let bounds = Bounds {
+            origin: vec2f(3.0, 4.0),
+            size: vec2f(80.0, 6.0),
+        };
+        let step = 0.001;
+        for thickness in [0.5, 1.0, 2.0] {
+            for point in [vec2f(5.3, 4.7), vec2f(8.1, 8.4), vec2f(13.7, 7.9)] {
+                let sample = wavy_underline_sample(bounds, thickness, point);
+                for (axis, analytic) in [
+                    (vec2f(step, 0.0), sample.gradient.x),
+                    (vec2f(0.0, step), sample.gradient.y),
+                ] {
+                    let finite = (wavy_underline_sample(bounds, thickness, point + axis).distance
+                        - wavy_underline_sample(bounds, thickness, point - axis).distance)
+                        / (2.0 * step);
+                    assert!(
+                        (finite - analytic).abs() < 0.002,
+                        "thickness {thickness}, point {point:?}: {finite} vs {analytic}"
+                    );
+                }
+            }
+        }
     }
 }
 
@@ -293,15 +344,17 @@ pub mod polychrome_sprite {
             input.position.xy(),
             input.clip_distances,
         );
+        let distance = rounded_rectangle_signed_distance(local, sprite.bounds, sprite.corner_radii);
+        let coverage = distance_coverage_from_gradient(
+            distance,
+            rounded_rectangle_gradient(local, sprite.bounds, sprite.corner_radii),
+            local_pixel_basis(sprite.content_mask),
+        );
         let color = polychrome_color(sprite, input.tile_position);
         blend_color(
             color,
             sprite.opacity
-                * antialiased_coverage(rounded_rectangle_signed_distance(
-                    local,
-                    sprite.bounds,
-                    sprite.corner_radii,
-                ))
+                * coverage
                 * ContentMask::alpha_at_local_position(
                     sprite.content_mask,
                     input.position.xy(),
@@ -372,22 +425,28 @@ pub mod polychrome_sprite {
             input.position.xy(),
             input.clip_distances,
         );
+        let contour = prepared_corner_sample(
+            local,
+            sprite.bounds,
+            sprite.corner_radii,
+            sprite.corner_smoothing,
+            PreparedCorners {
+                horizontal_reaches: input.horizontal_corner_reaches,
+                vertical_reaches: input.vertical_corner_reaches,
+                smoothing_factors: input.smoothing_factors,
+                superellipse_power: input.superellipse_power,
+            },
+        );
+        let coverage = distance_coverage_from_gradient(
+            contour.distance,
+            contour.gradient,
+            local_pixel_basis(sprite.content_mask),
+        );
         let color = polychrome_color(sprite, input.tile_position);
         blend_color(
             color,
             sprite.opacity
-                * antialiased_coverage(prepared_corner_signed_distance(
-                    local,
-                    sprite.bounds,
-                    sprite.corner_radii,
-                    sprite.corner_smoothing,
-                    PreparedCorners {
-                        horizontal_reaches: input.horizontal_corner_reaches,
-                        vertical_reaches: input.vertical_corner_reaches,
-                        smoothing_factors: input.smoothing_factors,
-                        superellipse_power: input.superellipse_power,
-                    },
-                ))
+                * coverage
                 * ContentMask::alpha_at_local_position(
                     sprite.content_mask,
                     input.position.xy(),

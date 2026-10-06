@@ -72,25 +72,33 @@ pub mod shadow {
         coverage
     }
 
-    pub fn shadow_coverage(shadow: Shadow, position: Vec2f) -> f32 {
+    pub fn shadow_coverage(shadow: Shadow, position: Vec2f, pixel_basis: LocalPixelBasis) -> f32 {
         let mut coverage = 0.0;
         if shadow.blur_radius == 0.0 {
-            coverage = antialiased_coverage(rounded_rectangle_signed_distance(
-                position,
-                shadow.bounds,
-                shadow.corner_radii,
-            ));
+            coverage = distance_coverage_from_gradient(
+                rounded_rectangle_signed_distance(position, shadow.bounds, shadow.corner_radii),
+                rounded_rectangle_gradient(position, shadow.bounds, shadow.corner_radii),
+                pixel_basis,
+            );
         } else {
             coverage = blurred_shadow_coverage(shadow, position);
         }
 
         if is_enabled(shadow.inset) {
             coverage = (1.0 - coverage)
-                * antialiased_coverage(rounded_rectangle_signed_distance(
-                    position,
-                    shadow.element_bounds,
-                    shadow.element_corner_radii,
-                ));
+                * distance_coverage_from_gradient(
+                    rounded_rectangle_signed_distance(
+                        position,
+                        shadow.element_bounds,
+                        shadow.element_corner_radii,
+                    ),
+                    rounded_rectangle_gradient(
+                        position,
+                        shadow.element_bounds,
+                        shadow.element_corner_radii,
+                    ),
+                    pixel_basis,
+                );
         }
         coverage
     }
@@ -100,17 +108,20 @@ pub mod shadow {
         position: Vec2f,
         prepared: PreparedCorners,
         prepared_element: PreparedCorners,
+        pixel_basis: LocalPixelBasis,
     ) -> f32 {
         let mut coverage = 0.0;
 
         if shadow.blur_radius == 0.0 {
-            coverage = antialiased_coverage(prepared_corner_signed_distance(
+            let contour = prepared_corner_sample(
                 position,
                 shadow.bounds,
                 shadow.corner_radii,
                 shadow.corner_smoothing,
                 prepared,
-            ));
+            );
+            coverage =
+                distance_coverage_from_gradient(contour.distance, contour.gradient, pixel_basis);
         } else if !Corners::is_zero(shadow.corner_radii) {
             let blur_limit = GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS * shadow.blur_radius;
             let half_size = Bounds::half_size(shadow.bounds);
@@ -149,14 +160,15 @@ pub mod shadow {
         }
 
         if is_enabled(shadow.inset) {
+            let contour = prepared_corner_sample(
+                position,
+                shadow.element_bounds,
+                shadow.element_corner_radii,
+                shadow.corner_smoothing,
+                prepared_element,
+            );
             coverage = (1.0 - coverage)
-                * antialiased_coverage(prepared_corner_signed_distance(
-                    position,
-                    shadow.element_bounds,
-                    shadow.element_corner_radii,
-                    shadow.corner_smoothing,
-                    prepared_element,
-                ));
+                * distance_coverage_from_gradient(contour.distance, contour.gradient, pixel_basis);
         }
 
         coverage
@@ -233,6 +245,7 @@ pub mod shadow {
             input.position.xy(),
             input.clip_distances,
         );
+        let pixel_basis = local_pixel_basis(shadow.content_mask);
         let color = paint_color(
             shadow_paint(shadow),
             local,
@@ -240,7 +253,7 @@ pub mod shadow {
         );
         blend_color(
             color,
-            shadow_coverage(shadow, local)
+            shadow_coverage(shadow, local, pixel_basis)
                 * ContentMask::alpha_at_local_position(
                     shadow.content_mask,
                     input.position.xy(),
@@ -330,22 +343,21 @@ pub mod shadow {
             input.position.xy(),
             input.clip_distances,
         );
-        let coverage = smoothed_shadow_coverage(
-            shadow,
-            local,
-            PreparedCorners {
-                horizontal_reaches: input.horizontal_corner_reaches,
-                vertical_reaches: input.vertical_corner_reaches,
-                smoothing_factors: input.smoothing_factors,
-                superellipse_power: 0.0,
-            },
-            PreparedCorners {
-                horizontal_reaches: input.element_horizontal_corner_reaches,
-                vertical_reaches: input.element_vertical_corner_reaches,
-                smoothing_factors: input.smoothing_factors,
-                superellipse_power: 0.0,
-            },
-        );
+        let prepared = PreparedCorners {
+            horizontal_reaches: input.horizontal_corner_reaches,
+            vertical_reaches: input.vertical_corner_reaches,
+            smoothing_factors: input.smoothing_factors,
+            superellipse_power: 0.0,
+        };
+        let prepared_element = PreparedCorners {
+            horizontal_reaches: input.element_horizontal_corner_reaches,
+            vertical_reaches: input.element_vertical_corner_reaches,
+            smoothing_factors: input.smoothing_factors,
+            superellipse_power: 0.0,
+        };
+        let pixel_basis = local_pixel_basis(shadow.content_mask);
+        let coverage =
+            smoothed_shadow_coverage(shadow, local, prepared, prepared_element, pixel_basis);
         let color = paint_color(
             shadow_paint(shadow),
             local,

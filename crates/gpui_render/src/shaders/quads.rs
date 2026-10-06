@@ -36,16 +36,11 @@ pub mod quad {
     }
 
     #[derive(Clone, Copy, Wgsl)]
-    pub struct BorderDistances {
-        pub outer: f32,
-        pub inner: f32,
-    }
-
-    #[derive(Clone, Copy, Wgsl)]
     pub struct DashPosition {
         pub position: f32,
         pub perimeter: f32,
         pub velocity: f32,
+        pub tangent: Vec2f,
     }
 
     #[derive(Clone, Copy, Wgsl)]
@@ -124,15 +119,29 @@ pub mod quad {
         quarter_ellipse_signed_distance(geometry.corner_center_to_point, ellipse_radii)
     }
 
-    pub fn border_distances(geometry: QuadGeometry) -> BorderDistances {
-        let outer = rounded_rectangle_signed_distance_from_corner(
-            geometry.corner_center_to_point,
-            geometry.corner_radius,
-        );
-        BorderDistances {
-            outer,
-            inner: inner_border_signed_distance(geometry, outer),
+    pub fn inner_border_gradient(geometry: QuadGeometry, outer_gradient: Vec2f) -> Vec2f {
+        if geometry.corner_center_to_point.x <= 0.0 || geometry.corner_center_to_point.y <= 0.0 {
+            if geometry.straight_border_inner_corner_to_point.x
+                > geometry.straight_border_inner_corner_to_point.y
+            {
+                return vec2f(-sign(geometry.center_to_point.x), 0.0);
+            }
+            return vec2f(0.0, -sign(geometry.center_to_point.y));
         }
+        if geometry.straight_border_inner_corner_to_point.x > 0.0
+            || geometry.straight_border_inner_corner_to_point.y > 0.0
+        {
+            return vec2f(0.0, 0.0);
+        }
+        if geometry.reduced_border.x == geometry.reduced_border.y {
+            return -outer_gradient;
+        }
+        let radii = max(
+            vec2f(0.0, 0.0),
+            geometry.corner_radius - geometry.reduced_border,
+        );
+        sign(geometry.center_to_point)
+            * quarter_ellipse_gradient(geometry.corner_center_to_point, radii)
     }
 
     pub fn dash_period_per_border_width(quad: Quad) -> f32 {
@@ -160,6 +169,7 @@ pub mod quad {
             position: select(geometry.point.y, geometry.point.x, horizontal) * velocity,
             perimeter: select(quad.bounds.size.y, quad.bounds.size.x, horizontal) * velocity,
             velocity,
+            tangent: select(vec2f(0.0, 1.0), vec2f(1.0, 0.0), horizontal),
         }
     }
 
@@ -307,11 +317,12 @@ pub mod quad {
     pub fn smoothed_dashed_border_alpha(
         quad: Quad,
         geometry: QuadGeometry,
-        rectangle_sample: FigmaRectangleSample,
+        contour: PreparedCornerSample,
         prepared: PreparedCorners,
         corner_lengths: Vec4f,
         border: Vec2f,
         straight_border_inner_corner_to_point: Vec2f,
+        pixel_basis: LocalPixelBasis,
     ) -> f32 {
         let dash_period_per_width = dash_period_per_border_width(quad);
 
@@ -323,10 +334,8 @@ pub mod quad {
         let mut dash_position = 0.0;
         let mut dash_velocity = 0.0;
 
-        if rectangle_sample.corner != FIGMA_NO_CORNER
-            && rectangle_sample.signed_distance.segment != FIGMA_SEGMENT_STRAIGHT
-        {
-            let corner = rectangle_sample.corner;
+        if contour.corner != FIGMA_NO_CORNER && contour.segment != FIGMA_SEGMENT_STRAIGHT {
+            let corner = contour.corner;
             let mut radius = quad.corner_radii.top_left;
             let mut horizontal_reach = prepared.horizontal_reaches.x;
             let mut vertical_reach = prepared.vertical_reaches.x;
@@ -360,8 +369,7 @@ pub mod quad {
                 vertical_reach,
                 prepared.smoothing_factors,
             );
-            let progress =
-                figma_corner_progress(params, rectangle_sample.signed_distance, corner_length);
+            let progress = figma_corner_progress(params, contour, corner_length);
 
             match corner {
                 0u32 => {
@@ -418,7 +426,20 @@ pub mod quad {
 
         if dash_layout.perimeter >= 1.0 {
             let period = dash_layout.perimeter / floor(dash_layout.perimeter);
-            dash_coverage(dash_position, period, dash_length, dash_velocity)
+            let normal = contour.gradient;
+            let offset_scale = 1.0 + contour.curvature * contour.distance;
+            let mut tangent = vec2f(-normal.y, normal.x);
+            if offset_scale > FIGMA_EPSILON {
+                tangent = tangent / offset_scale;
+            }
+            dash_coverage(
+                dash_position,
+                period,
+                dash_length,
+                dash_velocity,
+                tangent,
+                pixel_basis,
+            )
         } else {
             1.0
         }
@@ -452,6 +473,7 @@ pub mod quad {
             on_right,
         );
         let side_velocity = select(vertical_velocity, horizontal_velocity, horizontal);
+        let side_tangent = select(vec2f(0.0, 1.0), vec2f(1.0, 0.0), horizontal);
 
         if geometry.near_rounded_corner {
             let corner_position = atan2(
@@ -479,10 +501,16 @@ pub mod quad {
                 dash_layout.corner_velocities.bottom_left,
                 on_bottom,
             );
+            let radial = geometry.corner_center_to_point;
+            let tangent = sign(geometry.center_to_point)
+                * vec2f(-radial.y, radial.x)
+                * geometry.corner_radius
+                / max(dot(radial, radial), FIGMA_EPSILON);
             return DashPosition {
                 position,
                 perimeter: dash_layout.perimeter,
                 velocity: select(left_velocity, right_velocity, on_right),
+                tangent,
             };
         }
 
@@ -490,10 +518,15 @@ pub mod quad {
             position: side_position,
             perimeter: dash_layout.perimeter,
             velocity: side_velocity,
+            tangent: side_tangent,
         }
     }
 
-    pub fn dashed_border_alpha(quad: Quad, geometry: QuadGeometry) -> f32 {
+    pub fn dashed_border_alpha(
+        quad: Quad,
+        geometry: QuadGeometry,
+        pixel_basis: LocalPixelBasis,
+    ) -> f32 {
         let dash_period_per_width = dash_period_per_border_width(quad);
 
         if dash_period_per_width <= 0.0 {
@@ -504,6 +537,7 @@ pub mod quad {
             position: 0.0,
             perimeter: 0.0,
             velocity: 0.0,
+            tangent: vec2f(1.0, 0.0),
         };
 
         if geometry.unrounded {
@@ -517,9 +551,23 @@ pub mod quad {
 
         if perimeter >= 1.0 {
             let period = perimeter / floor(perimeter);
-            dash_coverage(dash.position, period, dash_length, dash.velocity)
+            dash_coverage(
+                dash.position,
+                period,
+                dash_length,
+                dash.velocity,
+                dash.tangent,
+                pixel_basis,
+            )
         } else if geometry.unrounded && perimeter > dash_length {
-            dash_coverage(dash.position, perimeter, dash_length, dash.velocity)
+            dash_coverage(
+                dash.position,
+                perimeter,
+                dash_length,
+                dash.velocity,
+                dash.tangent,
+                pixel_basis,
+            )
         } else {
             1.0
         }
@@ -615,35 +663,58 @@ pub mod quad {
             local_position,
             PreparedPaint::new(input.fill_solid, input.fill_color0, input.fill_color1),
         );
-        if Edges::is_zero(quad.border_widths) && Corners::is_zero(quad.corner_radii) {
+        let no_border = Edges::is_zero(quad.border_widths);
+        if quad.content_mask.space == 0u32 && no_border && Corners::is_zero(quad.corner_radii) {
             return blend_color(fill_color, fade);
         }
-
         let geometry = quad_geometry(quad, local_position);
-        if is_unaffected_background(geometry) {
+        if quad.content_mask.space == 0u32 && is_unaffected_background(geometry) {
             return blend_color(fill_color, fade);
         }
-
-        let distances = border_distances(geometry);
-        let mut color = fill_color;
-        if max(distances.inner, distances.outer) < PIXEL_ANTIALIAS_RADIUS {
-            let mut border_color = paint_color(
-                Paint::new(quad.border_color, quad.bounds),
-                local_position,
-                PreparedPaint::new(input.border_solid, input.border_color0, input.border_color1),
-            );
-            if quad.border_style == BorderStyle::Dashed {
-                border_color.w *= dashed_border_alpha(quad, geometry);
-            }
-            let blended_border = over(fill_color, border_color);
-            let factor = antialiased_coverage(distances.inner);
-            color = mix(
-                fill_color,
-                blended_border,
-                vec4f(factor, factor, factor, factor),
-            );
+        let pixel_basis = local_pixel_basis(quad.content_mask);
+        let outer_distance = rounded_rectangle_signed_distance_from_corner(
+            geometry.corner_center_to_point,
+            geometry.corner_radius,
+        );
+        let outer_gradient = rounded_rectangle_normal_from_corner(
+            geometry.corner_center_to_point,
+            geometry.center_to_point,
+        );
+        let outer_coverage =
+            distance_coverage_from_gradient(outer_distance, outer_gradient, pixel_basis);
+        if no_border {
+            return blend_color(fill_color, outer_coverage * fade);
         }
-        blend_color(color, antialiased_coverage(distances.outer) * fade)
+        let inner_coverage = distance_coverage_from_gradient(
+            inner_border_signed_distance(geometry, outer_distance),
+            inner_border_gradient(geometry, outer_gradient),
+            pixel_basis,
+        );
+        if outer_coverage <= 0.0 {
+            return transparent();
+        }
+        if inner_coverage <= 0.0 {
+            return blend_color(fill_color, outer_coverage * fade);
+        }
+        let mut border_color = paint_color(
+            Paint::new(quad.border_color, quad.bounds),
+            local_position,
+            PreparedPaint::new(input.border_solid, input.border_color0, input.border_color1),
+        );
+        if quad.border_style == BorderStyle::Dashed {
+            border_color.w *= dashed_border_alpha(quad, geometry, pixel_basis);
+        }
+        let color = mix(
+            fill_color,
+            over(fill_color, border_color),
+            vec4f(
+                inner_coverage,
+                inner_coverage,
+                inner_coverage,
+                inner_coverage,
+            ),
+        );
+        blend_color(color, outer_coverage * fade)
     }
 
     #[derive(Wgsl)]
@@ -733,6 +804,22 @@ pub mod quad {
             input.position.xy(),
             input.clip_distances,
         );
+        let prepared = PreparedCorners {
+            horizontal_reaches: input.horizontal_corner_reaches,
+            vertical_reaches: input.vertical_corner_reaches,
+            smoothing_factors: input.smoothing_factors,
+            superellipse_power: input.superellipse_power,
+        };
+        let contour = prepared_corner_sample(
+            local_position,
+            quad.bounds,
+            quad.corner_radii,
+            quad.corner_smoothing,
+            prepared,
+        );
+        let pixel_basis = local_pixel_basis(quad.content_mask);
+        let outer_coverage =
+            distance_coverage_from_gradient(contour.distance, contour.gradient, pixel_basis);
         let fade = ContentMask::alpha_at_local_position(
             quad.content_mask,
             input.position.xy(),
@@ -743,34 +830,10 @@ pub mod quad {
             local_position,
             PreparedPaint::new(input.fill_solid, input.fill_color0, input.fill_color1),
         );
-        let prepared = PreparedCorners {
-            horizontal_reaches: input.horizontal_corner_reaches,
-            vertical_reaches: input.vertical_corner_reaches,
-            smoothing_factors: input.smoothing_factors,
-            superellipse_power: input.superellipse_power,
-        };
-
         if Edges::is_zero(quad.border_widths) {
-            let distance = prepared_corner_signed_distance(
-                local_position,
-                quad.bounds,
-                quad.corner_radii,
-                quad.corner_smoothing,
-                prepared,
-            );
-
-            return blend_color(fill_color, antialiased_coverage(distance) * fade);
+            return blend_color(fill_color, outer_coverage * fade);
         }
-
         let geometry = quad_geometry(quad, local_position);
-        let rectangle_sample = figma_smooth_rectangle_sample(
-            local_position,
-            quad.bounds,
-            quad.corner_radii,
-            prepared.horizontal_reaches,
-            prepared.vertical_reaches,
-            prepared.smoothing_factors,
-        );
         let mut border = vec2f(
             select(
                 quad.border_widths.right,
@@ -783,8 +846,7 @@ pub mod quad {
                 geometry.center_to_point.y < 0.0,
             ),
         );
-
-        match rectangle_sample.corner {
+        match contour.corner {
             0u32 => {
                 border = vec2f(quad.border_widths.left, quad.border_widths.top);
             }
@@ -799,72 +861,77 @@ pub mod quad {
             }
             _ => {}
         }
-
         let reduced_border = vec2f(
             select(border.x, -PIXEL_ANTIALIAS_RADIUS, border.x == 0.0),
             select(border.y, -PIXEL_ANTIALIAS_RADIUS, border.y == 0.0),
         );
-        let half_size = Bounds::half_size(quad.bounds);
-        let corner_to_point = abs(geometry.center_to_point) - half_size;
-        let straight_border_inner_corner_to_point = corner_to_point + reduced_border;
-        let near_curve = rectangle_sample.signed_distance.segment != FIGMA_SEGMENT_STRAIGHT;
-
-        if straight_border_inner_corner_to_point.x < -PIXEL_ANTIALIAS_RADIUS
+        let straight_border_inner_corner_to_point =
+            abs(geometry.center_to_point) - Bounds::half_size(quad.bounds) + reduced_border;
+        let near_curve = contour.segment != FIGMA_SEGMENT_STRAIGHT;
+        if pixel_basis.is_identity
+            && straight_border_inner_corner_to_point.x < -PIXEL_ANTIALIAS_RADIUS
             && straight_border_inner_corner_to_point.y < -PIXEL_ANTIALIAS_RADIUS
             && !near_curve
         {
             return blend_color(fill_color, fade);
         }
-
-        let outer = rectangle_sample.signed_distance.distance;
-        let mut inner = 0.0;
-
+        let mut inner_distance = 0.0;
+        let mut inner_gradient = vec2f(0.0, 0.0);
         if near_curve {
-            let normal = abs(rectangle_sample.signed_distance.normal);
-            let active_sides = vec2f(
-                select(0.0, 1.0, border.x > 0.0),
-                select(0.0, 1.0, border.y > 0.0),
+            let width = figma_border_width_sample(border, contour.gradient);
+            inner_distance = -(contour.distance + width.width);
+            inner_gradient = figma_offset_gradient(
+                contour.distance,
+                contour.gradient,
+                contour.curvature,
+                width.normal_gradient,
             );
-            let effective_width = length(border * normal)
-                - PIXEL_ANTIALIAS_RADIUS * (1.0 - length(active_sides * normal));
-            inner = -(outer + effective_width);
         } else {
-            inner = -max(
+            inner_distance = -max(
                 straight_border_inner_corner_to_point.x,
                 straight_border_inner_corner_to_point.y,
             );
-        }
-
-        let mut color = fill_color;
-
-        if max(inner, outer) < PIXEL_ANTIALIAS_RADIUS {
-            let mut border_color = paint_color(
-                Paint::new(quad.border_color, quad.bounds),
-                local_position,
-                PreparedPaint::new(input.border_solid, input.border_color0, input.border_color1),
-            );
-            if quad.border_style == BorderStyle::Dashed {
-                border_color.w *= smoothed_dashed_border_alpha(
-                    quad,
-                    geometry,
-                    rectangle_sample,
-                    prepared,
-                    input.corner_lengths,
-                    border,
-                    straight_border_inner_corner_to_point,
-                );
-            }
-
-            let blended_border = over(fill_color, border_color);
-            let factor = antialiased_coverage(inner);
-
-            color = mix(
-                fill_color,
-                blended_border,
-                vec4f(factor, factor, factor, factor),
+            inner_gradient = select(
+                vec2f(0.0, -sign(geometry.center_to_point.y)),
+                vec2f(-sign(geometry.center_to_point.x), 0.0),
+                straight_border_inner_corner_to_point.x > straight_border_inner_corner_to_point.y,
             );
         }
-
-        blend_color(color, antialiased_coverage(outer) * fade)
+        let inner_coverage =
+            distance_coverage_from_gradient(inner_distance, inner_gradient, pixel_basis);
+        if outer_coverage <= 0.0 {
+            return transparent();
+        }
+        if inner_coverage <= 0.0 {
+            return blend_color(fill_color, outer_coverage * fade);
+        }
+        let mut border_color = paint_color(
+            Paint::new(quad.border_color, quad.bounds),
+            local_position,
+            PreparedPaint::new(input.border_solid, input.border_color0, input.border_color1),
+        );
+        if quad.border_style == BorderStyle::Dashed {
+            border_color.w *= smoothed_dashed_border_alpha(
+                quad,
+                geometry,
+                contour,
+                prepared,
+                input.corner_lengths,
+                border,
+                straight_border_inner_corner_to_point,
+                pixel_basis,
+            );
+        }
+        let color = mix(
+            fill_color,
+            over(fill_color, border_color),
+            vec4f(
+                inner_coverage,
+                inner_coverage,
+                inner_coverage,
+                inner_coverage,
+            ),
+        );
+        blend_color(color, outer_coverage * fade)
     }
 }

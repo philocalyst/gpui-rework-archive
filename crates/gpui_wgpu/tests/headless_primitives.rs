@@ -762,7 +762,8 @@ fn clip_distances_reconstruct_local_coordinates_under_large_sheared_reflection()
             mask_at(local_origin + 5.0, local_y + 4.0, 14.0, 8.0),
             |scene| {
                 scene.insert_primitive(Quad {
-                    bounds: bounds(local_origin, local_y, 24.0, 16.0),
+                    // Keep the shape edge outside the mask, isolating exact clip coverage.
+                    bounds: bounds(local_origin - 40.0, local_y - 40.0, 104.0, 96.0),
                     content_mask: mask_at(local_origin, local_y, 24.0, 16.0),
                     background: solid_background(gpui::white()),
                     ..Default::default()
@@ -896,5 +897,86 @@ fn content_filters_preserve_inherited_fades_without_multiplying_them_again() {
                 "ancestor={ancestor_fade}, ({x},{y}): expected one fade {expected}, got {actual}"
             );
         }
+    }
+}
+
+#[test]
+fn rounded_quad_edges_stay_one_device_pixel_under_affine_zoom() {
+    let mut renderer = WgpuHeadlessRenderer::new().expect("headless renderer");
+    let transforms = [
+        gpui::TransformationMatrix {
+            rotation_scale: [[1.0, 0.0], [0.0, 1.0]],
+            translation: [60.0, 30.0],
+        },
+        gpui::TransformationMatrix {
+            rotation_scale: [[4.0, 0.0], [0.0, 4.0]],
+            translation: [100.0, 2.0],
+        },
+        gpui::TransformationMatrix {
+            rotation_scale: [[2.0, 0.5], [1.0, 0.5]],
+            translation: [94.0, 44.25],
+        },
+        gpui::TransformationMatrix {
+            rotation_scale: [[4.0, 3.8], [0.3, 0.2]],
+            translation: [54.4, 47.6],
+        },
+        gpui::TransformationMatrix {
+            rotation_scale: [[3.0, 1.4], [-0.3, 0.9]],
+            translation: [56.0, 45.0],
+        },
+    ];
+
+    for transform in transforms {
+        let mut scene = Scene::default();
+        scene.insert_primitive(Quad {
+            bounds: bounds(0.0, 0.0, 310.0, 100.0),
+            content_mask: full_mask(),
+            background: solid_background(gpui::black()),
+            ..Default::default()
+        });
+        scene.with_transform(transform, |scene| {
+            scene.insert_primitive(Quad {
+                bounds: bounds(0.0, 0.0, 24.0, 24.0),
+                content_mask: full_mask(),
+                background: solid_background(gpui::white()),
+                corner_radii: gpui::Corners::all(ScaledPixels(6.0)),
+                ..Default::default()
+            });
+        });
+        scene.finish();
+        let image = renderer.render_scene_to_image(&scene, TARGET).unwrap();
+        let inverse = transform.inverse().unwrap();
+        let distance_gradient = (inverse.rotation_scale[0][0] * inverse.rotation_scale[0][0]
+            + inverse.rotation_scale[0][1] * inverse.rotation_scale[0][1])
+            .sqrt();
+        let mut compared = 0;
+        for y in 0..100 {
+            for x in 0..310 {
+                let local = inverse.apply(gpui::point(
+                    gpui::Pixels::from(x as f32 + 0.5),
+                    gpui::Pixels::from(y as f32 + 0.5),
+                ));
+                let local_x = f32::from(local.x);
+                let local_y = f32::from(local.y);
+                // Away from rounded corners, the left edge's local SDF is exactly -x.
+                if (8.0..16.0).contains(&local_y) && (0.01..1.0).contains(&local_x) {
+                    let expected = (0.5 + local_x / distance_gradient).clamp(0.0, 1.0);
+                    let pixel = image.get_pixel(x, y).0;
+                    let actual = pixel[0] as f32 / 255.0;
+
+                    assert!(
+                        (actual - expected).abs() <= 0.025,
+                        "matrix {:?}: pixel ({x},{y}) maps to local ({local_x:.3},{local_y:.3}), got {actual:.3}, expected {expected:.3}",
+                        transform.rotation_scale,
+                    );
+                    compared += 1;
+                }
+            }
+        }
+        assert!(
+            compared > 0,
+            "matrix {:?} has edge sample pixels",
+            transform.rotation_scale
+        );
     }
 }

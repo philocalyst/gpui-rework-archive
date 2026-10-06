@@ -92,6 +92,14 @@ clip-space `w = 1`, so they carry the same information as an extra local-positio
 varying. This removes repeated inverse applications without expanding vertex
 interfaces. The identity path still uses the original fragment position.
 
+Antialiasing uses the cached inverse as a local device-pixel basis. Each contour
+sample returns its distance and gradient together, so corners, variable-width
+borders and dash edges reuse their geometry work. The gradient maps through that
+basis to keep coverage at a device pixel's scale under zoom and shear, without
+adding shader varyings or shape-distance fragment derivatives. Identity mappings
+retain their existing coverage. The [antialiasing experiment](element-antialiasing-experiment.md)
+describes the quotient and curvature derivatives and their finite-difference checks.
+
 The same shader sources and scene ABI serve WGPU, native Metal and DirectX.
 WGPU's downlevel transport encodes the coordinate table alongside primitive data.
 Path rasterization, surface passes and filter encoder restarts preserve the table.

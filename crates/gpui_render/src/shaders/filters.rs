@@ -253,15 +253,16 @@ pub mod blur {
             input.position.xy(),
             input.clip_distances,
         );
-        let coverage = select(
-            1.0,
-            antialiased_coverage(rounded_rectangle_signed_distance(
-                local,
-                locals.shape_bounds,
-                locals.corner_radii,
-            )),
-            locals.composite_clip == BlurCompositeClip::RoundedBounds,
-        );
+        let mut coverage = 1.0;
+        if locals.composite_clip == BlurCompositeClip::RoundedBounds {
+            let distance =
+                rounded_rectangle_signed_distance(local, locals.shape_bounds, locals.corner_radii);
+            coverage = distance_coverage_from_gradient(
+                distance,
+                rounded_rectangle_gradient(local, locals.shape_bounds, locals.corner_radii),
+                local_pixel_basis(locals.space_mask),
+            );
+        }
         blur_composite_color(input.position.xy(), local, coverage)
     }
 
@@ -320,9 +321,9 @@ pub mod blur {
             input.position.xy(),
             input.clip_distances,
         );
-        let coverage = select(
-            1.0,
-            antialiased_coverage(prepared_corner_signed_distance(
+        let mut coverage = 1.0;
+        if locals.composite_clip == BlurCompositeClip::RoundedBounds {
+            let contour = prepared_corner_sample(
                 local,
                 locals.shape_bounds,
                 locals.corner_radii,
@@ -333,9 +334,13 @@ pub mod blur {
                     smoothing_factors: input.smoothing_factors,
                     superellipse_power: input.superellipse_power,
                 },
-            )),
-            locals.composite_clip == BlurCompositeClip::RoundedBounds,
-        );
+            );
+            coverage = distance_coverage_from_gradient(
+                contour.distance,
+                contour.gradient,
+                local_pixel_basis(locals.space_mask),
+            );
+        }
         blur_composite_color(input.position.xy(), local, coverage)
     }
 }

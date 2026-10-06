@@ -442,6 +442,72 @@ mod source {
         saturate(PIXEL_ANTIALIAS_RADIUS - signed_distance)
     }
 
+    #[derive(Clone, Copy, Wgsl)]
+    pub struct LocalPixelBasis {
+        pub x: Vec2f,
+        pub y: Vec2f,
+        pub is_identity: bool,
+    }
+
+    /// The inverse affine map gives the exact local displacement for a device-pixel step.
+    pub fn local_pixel_basis(content_mask: ContentMask) -> LocalPixelBasis {
+        if content_mask.space == 0u32 {
+            return LocalPixelBasis {
+                x: vec2f(1.0, 0.0),
+                y: vec2f(0.0, 1.0),
+                is_identity: true,
+            };
+        }
+        let space = get!(RENDER_SPACES)[content_mask.space as usize];
+        let inverse = space.inverse.rotation_scale;
+        let is_identity = space.transform.rotation_scale[0usize].x == 1.0
+            && space.transform.rotation_scale[0usize].y == 0.0
+            && space.transform.rotation_scale[1usize].x == 0.0
+            && space.transform.rotation_scale[1usize].y == 1.0;
+        LocalPixelBasis {
+            x: vec2f(inverse[0usize].x, inverse[1usize].x),
+            y: vec2f(inverse[0usize].y, inverse[1usize].y),
+            is_identity,
+        }
+    }
+
+    pub fn distance_coverage_from_gradient(
+        distance: f32,
+        local_gradient: Vec2f,
+        pixel_basis: LocalPixelBasis,
+    ) -> f32 {
+        if pixel_basis.is_identity {
+            return antialiased_coverage(distance);
+        }
+        let screen_gradient = vec2f(
+            dot(local_gradient, pixel_basis.x),
+            dot(local_gradient, pixel_basis.y),
+        );
+        saturate(PIXEL_ANTIALIAS_RADIUS - distance / max(length(screen_gradient), 0.000001))
+    }
+
+    pub fn rounded_rectangle_gradient(point: Vec2f, bounds: Bounds, radii: Corners) -> Vec2f {
+        let center_to_point = point - Bounds::center(bounds);
+        let corner_radius = pick_corner_radius(center_to_point, radii);
+        let corner_center_to_point =
+            abs(center_to_point) - Bounds::half_size(bounds) + corner_radius;
+        rounded_rectangle_normal_from_corner(corner_center_to_point, center_to_point)
+    }
+
+    pub fn rounded_rectangle_normal_from_corner(
+        corner_center_to_point: Vec2f,
+        center_to_point: Vec2f,
+    ) -> Vec2f {
+        let outside = max(vec2f(0.0, 0.0), corner_center_to_point);
+        if outside.x > 0.0 && outside.y > 0.0 {
+            return sign(center_to_point) * normalize(outside);
+        }
+        if corner_center_to_point.x > corner_center_to_point.y {
+            return vec2f(sign(center_to_point.x), 0.0);
+        }
+        vec2f(0.0, sign(center_to_point.y))
+    }
+
     pub fn premultiply(color: Vec4f, coverage: f32) -> Vec4f {
         let alpha = color.w * coverage;
         vec4f(color.x * alpha, color.y * alpha, color.z * alpha, alpha)
@@ -959,16 +1025,31 @@ mod source {
     pub fn signed_modulo(value: f32, modulus: f32) -> f32 {
         value - modulus * trunc(value / modulus)
     }
-    pub fn dash_coverage(position: f32, period: f32, dash_length: f32, dash_velocity: f32) -> f32 {
+    pub fn dash_coverage(
+        position: f32,
+        period: f32,
+        dash_length: f32,
+        dash_velocity: f32,
+        tangent: Vec2f,
+        pixel_basis: LocalPixelBasis,
+    ) -> f32 {
         let half_period = period / 2.0;
         let half_dash_length = dash_length / 2.0;
         let centered =
             signed_modulo(position + half_period - half_dash_length, period) - half_period;
         let signed_distance = abs(centered) - half_dash_length;
-        antialiased_coverage(signed_distance / dash_velocity)
+        distance_coverage_from_gradient(signed_distance / dash_velocity, tangent, pixel_basis)
     }
     pub fn quarter_ellipse_signed_distance(point: Vec2f, radii: Vec2f) -> f32 {
         (length(point / radii) - 1.0) * (radii.x + radii.y) * -0.5
+    }
+
+    pub fn quarter_ellipse_gradient(point: Vec2f, radii: Vec2f) -> Vec2f {
+        let radial_length = length(point / radii);
+        if radial_length == 0.0 {
+            return vec2f(0.0, 0.0);
+        }
+        -0.5 * (radii.x + radii.y) * point / (radii * radii * radial_length)
     }
 }
 
