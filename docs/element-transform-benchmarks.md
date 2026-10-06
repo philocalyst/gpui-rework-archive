@@ -92,7 +92,7 @@ application frame-rate improvement.
 
 ## GPU submission target
 
-`gpui_wgpu`'s `renderer` benchmark includes `coordinate_spaces_render_wait`: 512 identity quads, a shared pan/zoom transform on 512 quads, and nested rotated clip chains at depths 1, 4 and 16. Each timed iteration uses `render_scene_and_wait`, which waits for GPU completion without a readback. Criterion reports each case separately; the harness does not interleave variants in one paired timer.
+`gpui_wgpu`'s `renderer` benchmark includes `coordinate_spaces_render_wait`: 512 identity quads, a shared pan/zoom transform on 512 quads, sheared circular/Figma rounded quads with unequal borders and every third border dashed, and nested rotated clip chains at depths 1, 4 and 16. Each timed iteration uses `render_scene_and_wait`, which waits for GPU completion without a readback. Criterion reports each case separately; the harness does not interleave variants in one paired timer.
 
 Run the renderer benchmark with `cargo bench -p gpui_ce_wgpu --bench renderer --features test-support -- coordinate_spaces_render_wait --noplot`.
 
@@ -109,3 +109,73 @@ Recorded on macOS 15.7.4 with the Apple M3 Pro 14-core GPU (system-reported Meta
 These intervals overlap and the point estimates are non-monotonic with clip depth. That result does not establish a clip-depth cost curve: this end-to-end test includes fixed command submission and GPU completion wait, and Criterion reported 3–5 outliers for four of the cases. The adapter driver string was not emitted by this benchmark. The measured binary used geometry equivalent to `cd388bf8b1dd15e63772a2e3b7dc2cdb0fa5cdd0`, built before the later atlas guards, clip-distance reconstruction and antialiasing refinements; it is not an exact build or performance claim for the final source.
 
 The source retains the workload and methodology. Raw CPU and GPU output logs are also available in the benchmark host's `/tmp/gpui-transform-bench/` directory, but the tables above are the durable results record.
+
+## Final GPU run
+
+Luna ran the three bounded final workloads on
+`f1eb725c7c2589d4f3a06e377602f7351dff08f3`, with only documentation edits
+uncommitted. The optimized binary ran on the same Apple M3 Pro host described
+above, with 30 Criterion samples per case. The table gives Criterion's slope
+estimate and 95% bootstrap confidence interval, verified against its estimate
+JSON; these values are not sample medians.
+
+| Final GPU submission and wait workload | Slope estimate (95% interval) |
+| --- | ---: |
+| Identity, 512 quads | 1.946 ms (1.826–2.128) |
+| Shared pan/zoom, 512 quads | 2.060 ms (1.973–2.160) |
+| Sheared rounded borders, 512 quads | 5.481 ms (4.770–6.208) |
+
+The rounded-border workload alternates circular/Figma corners, uses unequal
+widths of 1/4/2/6 pixels, and makes every third border dashed. The identity case
+had three outliers; the complex-border interval is broad. The post-run load
+averages were 35.17/52.68/50.77, recorded after measurement rather than throughout
+the timed interval. Our own builds were idle during measurement.
+
+[The raw run](experiments/affine-aa-gpu-final-run.txt) records command, host,
+toolchain and output, and [the estimate objects](experiments/affine-aa-gpu-final-estimates.json)
+preserve slope/mean/median statistics in nanoseconds. Criterion printed comparison
+statistics against a locally stored baseline whose source provenance was not
+established; those comparisons are not treated as before/after evidence. This
+run records representative final costs under contention and supports no stable
+GPU performance-win claim.
+
+## Final integrated validation
+
+The shader and renderer source at `f1eb725c7c2589d4f3a06e377602f7351dff08f3`
+passed 34 shared-render tests, 14 native Metal tests, 32 WGPU tests and 10 headless
+pixel tests. This includes the five-matrix affine edge ramp, exact nested clip
+and replay tests, atlas sampling, affine blur and the inherited-filter-fade
+regression. The generated-source, ABI and compact-varying checks passed on the
+integrated shader source, rather than an earlier prototype.
+
+```sh
+cargo test --offline -p gpui_ce_render -p gpui_ce_apple -p gpui_ce_wgpu \
+  --features gpui_ce_apple/test-support,gpui_ce_wgpu/test-support \
+  -- --skip quad_border_backgrounds_use_the_fill_coordinate_space
+cargo clippy --offline -p gpui-ce -p gpui_ce_render -p gpui_ce_wgpu \
+  --lib --no-default-features --no-deps
+cargo check --offline -p gpui-ce --target wasm32-unknown-unknown --no-default-features
+cargo check --offline -p gpui-ce --example element_transforms
+```
+
+The scoped Clippy, WASM and example commands above succeeded. This is not a
+full-workspace Clippy result: dependency linting encounters a preexisting
+redundant-clone diagnostic in `gpui_macros`. The core retained-tree/input/platform
+suite passed 410 tests after the cache comparison change at `d6095a95a5`;
+subsequent commits changed the DirectX renderer and shared shaders, with no
+changes to that core implementation.
+
+The excluded WGPU gradient test was also run separately on the final source:
+
+```sh
+cargo test --offline -p gpui_ce_wgpu --lib --features test-support \
+  quad_border_backgrounds_use_the_fill_coordinate_space
+```
+
+It reproduces the archived `b5aceefaf9` baseline's exact mismatch at `(10, 10)`:
+border `[228, 159, 103, 255]`, fill `[225, 158, 102, 255]`. Its channel tolerance
+remains two; the assertion has not been weakened. Native Windows compilation
+and rendering were not available on this host. The DirectX optional-resource
+argument was checked against the local Windows SDK Rust signature, and the
+shared generated HLSL and layout checks passed; these do not substitute for a
+native Windows build.

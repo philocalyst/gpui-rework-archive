@@ -1,0 +1,261 @@
+source_commit=f1eb725c7c2589d4f3a06e377602f7351dff08f3
+working_tree_status= M docs/element-transform-benchmarks.md
+?? docs/experiments/affine-aa-gpu-final-run.txt
+
+--- host ---
+Darwin mileswirht 24.6.0 Darwin Kernel Version 24.6.0: Mon Jan 19 21:59:23 PST 2026; root:xnu-11417.140.69.708.3~1/RELEASE_ARM64_T6030 arm64 Darwin
+ProductName:		macOS
+ProductVersion:		15.7.4
+BuildVersion:		24G517
+cpu=Apple M3 Pro
+
+--- graphics ---
+Graphics/Displays:
+
+    Apple M3 Pro:
+
+      Chipset Model: Apple M3 Pro
+      Type: GPU
+      Bus: Built-In
+      Total Number of Cores: 14
+      Vendor: Apple (0x106b)
+      Metal Support: Metal 3
+      Displays:
+        Color LCD:
+          Display Type: Built-in Liquid Retina XDR Display
+          Resolution: 3024 x 1964 Retina
+          Main Display: Yes
+          Mirror: Off
+          Online: Yes
+          Automatically Adjust Brightness: Yes
+          Connection Type: Internal
+        DELL U2723QE:
+          Resolution: 3840 x 2160 (2160p/4K UHD 1 - Ultra High Definition)
+          UI Looks like: 1920 x 1080 @ 60.00Hz
+          Mirror: Off
+          Online: Yes
+          Rotation: Supported
+
+
+--- command ---
+cargo bench --offline -p gpui_ce_wgpu --bench renderer --features test-support -- 'coordinate_spaces_render_wait/(identity_512|shared_pan_zoom_512|sheared_rounded_borders_512)'
+
+--- output ---
+warning: unused workspace dependency `cbindgen`
+   --> Cargo.toml:114:1
+    |
+114 | cbindgen = { version = "0.28.0", default-features = false }
+    | ^^^^^^^^
+    |
+    = note: `cargo::unused_workspace_dependencies` is set to `warn` by default
+help: consider removing the workspace dependency `cbindgen`
+warning: unused workspace dependency `gpui_tokio`
+   --> Cargo.toml:255:1
+    |
+255 | gpui_tokio = { path = "./crates/gpui_tokio/", version = "0.1.0", package = "gpui_ce_tokio" }
+    | ^^^^^^^^^^
+    |
+help: consider removing the workspace dependency `gpui_tokio`
+warning: unused workspace dependency `gpui_web`
+   --> Cargo.toml:248:1
+    |
+248 | gpui_web = { path = "./crates/gpui_web/", version = "0.1.0", package = "gpui_ce_web" }
+    | ^^^^^^^^
+    |
+help: consider removing the workspace dependency `gpui_web`
+warning: unused workspace dependency `util`
+   --> Cargo.toml:180:1
+    |
+180 | util = { path = "crates/gpui_zed_util", version = "0.2.2", package = "gpui_ce_zed_util" }
+    | ^^^^
+    |
+help: consider removing the workspace dependency `util`
+warning: unused field `authors` in `workspace.package`
+  --> Cargo.toml:33:1
+   |
+33 | authors = ["Nathan Sobo <nathan@zed.dev>"]
+   | ^^^^^^^
+   |
+   = note: `cargo::unused_workspace_package_fields` is set to `warn` by default
+help: consider removing the field `workspace.package.authors`
+warning: unused field `homepage` in `workspace.package`
+  --> Cargo.toml:37:1
+   |
+37 | homepage = "https://gpui-ce.github.io/"
+   | ^^^^^^^^
+   |
+help: consider removing the field `workspace.package.homepage`
+warning: unused field `readme` in `workspace.package`
+  --> Cargo.toml:38:1
+   |
+38 | readme = "README.md"
+   | ^^^^^^
+   |
+help: consider removing the field `workspace.package.readme`
+warning: workspace (manifest) generated 7 warnings
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> crates/gpui_refineable/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+15 ~ derive_refineable = { package = "gpui_ce_derive_refineable", version = "0.2.2", path = "../gpui_derive_refineable" }
+16 + [lints]
+17 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+15 ~ derive_refineable = { package = "gpui_ce_derive_refineable", version = "0.2.2", path = "../gpui_derive_refineable" }
+16 + [lints]
+   |
+warning: `gpui_ce_refineable` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> crates/gpui_scheduler/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+42 ~ ], optional = true }
+43 + [lints]
+44 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+42 ~ ], optional = true }
+43 + [lints]
+   |
+warning: `gpui_ce_scheduler` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> crates/gpui_sum_tree/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+29 ~ ignored = ["tracing"]
+30 + [lints]
+31 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+29 ~ ignored = ["tracing"]
+30 + [lints]
+   |
+warning: `gpui_ce_sum_tree` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> crates/gpui_zed_util/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+74 ~ ] }
+75 + [lints]
+76 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+74 ~ ] }
+75 + [lints]
+   |
+warning: `gpui_ce_zed_util` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> crates/gpui_media/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+25 ~ bindgen = "0.72"
+26 + [lints]
+27 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+25 ~ bindgen = "0.72"
+26 + [lints]
+   |
+warning: `gpui_ce_media` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> crates/gpui_ce_util/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+19 ~ which = "6.0.0"
+20 + [lints]
+21 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+19 ~ which = "6.0.0"
+20 + [lints]
+   |
+warning: `gpui_ce_util` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> crates/gpui_collections/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+21 ~ gpui_util = { package = "gpui_ce_util", version = "0.2.6", path = "../gpui_ce_util" }
+22 + [lints]
+23 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+21 ~ gpui_util = { package = "gpui_ce_util", version = "0.2.6", path = "../gpui_ce_util" }
+22 + [lints]
+   |
+warning: `gpui_ce_collections` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> crates/gpui_derive_refineable/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+18 ~ syn = { version = "2.0.117", features = ["full", "extra-traits", "visit-mut"] }
+19 + [lints]
+20 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+18 ~ syn = { version = "2.0.117", features = ["full", "extra-traits", "visit-mut"] }
+19 + [lints]
+   |
+warning: `gpui_ce_derive_refineable` (manifest) generated 1 warning
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Finished `bench` profile [optimized] target(s) in 2.41s
+warning: the following packages contain code that will be rejected by a future version of Rust: block v0.1.6
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 2`
+     Running benches/renderer.rs (target/release/build/gpui_ce_wgpu/58ad6b10e8a67e5d/out/renderer-58ad6b10e8a67e5d)
+Gnuplot not found, using plotters backend
+Benchmarking coordinate_spaces_render_wait/identity_512
+Benchmarking coordinate_spaces_render_wait/identity_512: Warming up for 3.0000 s
+Benchmarking coordinate_spaces_render_wait/identity_512: Collecting 30 samples in estimated 5.2009 s (2790 iterations)
+Benchmarking coordinate_spaces_render_wait/identity_512: Analyzing
+coordinate_spaces_render_wait/identity_512
+                        time:   [1.8264 ms 1.9462 ms 2.1281 ms]
+                        change: [+10.272% +19.227% +28.669%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+Found 3 outliers among 30 measurements (10.00%)
+  1 (3.33%) high mild
+  2 (6.67%) high severe
+Benchmarking coordinate_spaces_render_wait/shared_pan_zoom_512
+Benchmarking coordinate_spaces_render_wait/shared_pan_zoom_512: Warming up for 3.0000 s
+Benchmarking coordinate_spaces_render_wait/shared_pan_zoom_512: Collecting 30 samples in estimated 5.0366 s (2325 iterations)
+Benchmarking coordinate_spaces_render_wait/shared_pan_zoom_512: Analyzing
+coordinate_spaces_render_wait/shared_pan_zoom_512
+                        time:   [1.9726 ms 2.0598 ms 2.1600 ms]
+                        change: [-9.0220% +3.0068% +15.835%] (p = 0.65 > 0.05)
+                        No change in performance detected.
+Benchmarking coordinate_spaces_render_wait/sheared_rounded_borders_512
+Benchmarking coordinate_spaces_render_wait/sheared_rounded_borders_512: Warming up for 3.0000 s
+Benchmarking coordinate_spaces_render_wait/sheared_rounded_borders_512: Collecting 30 samples in estimated 5.7499 s (930 iterations)
+Benchmarking coordinate_spaces_render_wait/sheared_rounded_borders_512: Analyzing
+coordinate_spaces_render_wait/sheared_rounded_borders_512
+                        time:   [4.7701 ms 5.4812 ms 6.2084 ms]
+
+
+--- interpretation and limits ---
+Only the three requested `coordinate_spaces_render_wait` cases ran, with Criterion's group-configured 30 samples per case. These are end-to-end `render_scene_and_wait` timings. The reported intervals were identity 1.8264–2.1281 ms (slope estimate 1.9462 ms), shared pan/zoom 1.9726–2.1600 ms (slope estimate 2.0598 ms), and sheared rounded borders 4.7701–6.2084 ms (slope estimate 5.4812 ms). Identity had 3/30 outliers. Criterion printed change estimates for the first two cases based on any locally stored baseline; its provenance/source revision was not established here, so those comparisons are not interpreted as regressions or wins. The broad sheared interval and shared desktop/GPU environment limit precision. These measurements establish representative final-run costs only; they do not support a GPU performance-win claim or a before/after conclusion.
+
+--- estimator verification and post-run metadata ---
+Criterion's new/estimates.json files confirm that the printed time estimates above are regression slopes, with 95% bootstrap confidence intervals, not sample medians. The sample median point estimates are identity 1.867844 ms, shared pan/zoom 2.003596 ms, and sheared rounded borders 4.380829 ms. Full estimate objects are preserved in affine-aa-gpu-final-estimates.json.
+Metadata captured after measurements, at 2026-10-06 21:26:06 UTC (load is post-run, not a timed-interval load trace):
+rustc 1.101.0-nightly (5c543b0b8 2026-09-29)
+commit-hash: 5c543b0b8c73c7b72bc8284ced4fb22ead15734d
+host: aarch64-apple-darwin
+LLVM version: 23.1.1
+uptime: 22:07; load averages: 35.17 52.68 50.77
