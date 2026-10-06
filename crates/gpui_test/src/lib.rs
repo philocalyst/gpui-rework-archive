@@ -17,7 +17,8 @@ pub use gallery::{BuiltInScenario, built_in_scenarios};
 pub use report::{
     CheckpointManifest, EnvironmentManifest, NativeCheckpointManifest, ReportChange,
     ReportChangeKind, ReportManifest, ReportOptions, ReportStatus, ScenarioManifest,
-    compare_reports, compare_reports_selected, diff_images, read_manifest, write_report,
+    collect_reports, compare_reports, compare_reports_selected, diff_images, read_manifest,
+    read_report, write_report,
 };
 pub use runner::{
     Harness, ImageDifference, NativeCheckpoint, NativeReplayInfo, NativeReplayMetrics,

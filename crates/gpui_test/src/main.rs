@@ -30,10 +30,55 @@ fn run_cli() -> Result<()> {
         "run" => run_command(&rest, Mode::Run),
         "bench" => run_command(&rest, Mode::Benchmark),
         "check" => run_command(&rest, Mode::Check),
+        "collect" => collect_command(&rest),
         "platform" => run_platform_command(&rest),
         "help" | "--help" | "-h" => usage(),
         other => bail!("unknown command {other:?}; use `gpui-test help`"),
     }
+}
+
+fn collect_command(args: &[String]) -> Result<()> {
+    let parsed = parse_args(args)?;
+    ensure!(
+        !parsed.names.is_empty(),
+        "`collect` requires one or more report directories"
+    );
+    ensure!(
+        parsed.gpu || parsed.samples.is_none(),
+        "`collect --samples` requires --gpu; CPU timings come from the source reports"
+    );
+    if parsed.gpu {
+        #[cfg(not(feature = "gpu"))]
+        bail!(
+            "native GPU replay is unavailable in this build; rebuild with `--features gpui_ce_test/gpu`"
+        );
+        #[cfg(feature = "gpu")]
+        ensure!(
+            parsed.samples.unwrap_or(20) > 0,
+            "--samples must be positive"
+        );
+    }
+    #[allow(unused_mut)] // Native replay exists only in GPU-enabled builds.
+    let mut suite = gpui_test::collect_reports(&parsed.names)?;
+    if parsed.gpu {
+        #[cfg(feature = "gpu")]
+        gpui_test::native::replay_native(&mut suite, parsed.samples.unwrap_or(20))?;
+    }
+    let manifest = write_report(
+        &suite,
+        &parsed.output,
+        ReportOptions {
+            baseline_dir: parsed.baseline,
+            selected_ids: Vec::new(),
+        },
+    )?;
+    println!(
+        "collected {} scenarios; {} comparison change(s); report: {}",
+        suite.scenarios.len(),
+        manifest.changes.len(),
+        parsed.output.display()
+    );
+    Ok(())
 }
 
 fn run_platform_command(args: &[String]) -> Result<()> {
@@ -232,7 +277,7 @@ fn select_scenarios(names: &[String]) -> Result<Vec<gpui_test::BuiltInScenario>>
 
 fn usage() -> Result<()> {
     println!(
-        "gpui-test list\ngpui-test run [SCENARIO ...] [--output DIR] [--baseline DIR] [--samples N] [--gpu]\ngpui-test bench [SCENARIO ...] [--output DIR] [--baseline DIR] [--samples N] [--gpu]\ngpui-test check [SCENARIO ...] --baseline DIR [--output DIR] [--samples N] [--gpu]\ngpui-test platform [--output DIR]\n\nOmitting scenario IDs runs the full built-in suite. `check` compares scene JSON, decoded pixels, and checkpoint metadata. `bench` defaults to 20 repeated frames; `run` and `check` default to one. `--gpu` replays captured scenes through optional native WGPU support; build with `--features gpui_ce_test/gpu`. `platform` runs an opt-in native window lifecycle probe; build with `--features gpui_ce_test/platform`."
+        "gpui-test list\ngpui-test run [SCENARIO ...] [--output DIR] [--baseline DIR] [--samples N] [--gpu]\ngpui-test bench [SCENARIO ...] [--output DIR] [--baseline DIR] [--samples N] [--gpu]\ngpui-test check [SCENARIO ...] --baseline DIR [--output DIR] [--samples N] [--gpu]\ngpui-test collect REPORT_DIR... [--output DIR] [--baseline DIR] [--samples N] [--gpu]\ngpui-test platform [--output DIR]\n\nOmitting scenario IDs runs the full built-in suite. `check` compares scene JSON, decoded pixels, and checkpoint metadata. `collect` combines existing CPU captures without rerendering them; identical duplicate scenarios keep the first copy. `bench` defaults to 20 repeated frames; `run` and `check` default to one. `collect --gpu` defaults to 20 native replay samples. `--gpu` replays captured scenes through optional native WGPU support; build with `--features gpui_ce_test/gpu`. `platform` runs an opt-in native window lifecycle probe; build with `--features gpui_ce_test/platform`."
     );
     Ok(())
 }

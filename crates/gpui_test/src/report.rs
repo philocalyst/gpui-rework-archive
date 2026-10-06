@@ -1,6 +1,6 @@
 use crate::{
-    ImageDifference, NativeReplayInfo, NativeReplayMetrics, RenderedSuite, ScenarioMetrics,
-    Viewport, validate_id,
+    ImageDifference, NativeReplayInfo, NativeReplayMetrics, RenderedCheckpoint, RenderedScenario,
+    RenderedSuite, ScenarioMetrics, Viewport, validate_id,
 };
 use anyhow::{Context, Result, ensure};
 use plotters::prelude::*;
@@ -62,10 +62,26 @@ pub struct ScenarioManifest {
     pub title: String,
     /// Logical viewport and device scale.
     pub viewport: Viewport,
+    /// Font fixture pack used by this scenario. Optional for older schema-version-1 reports.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub font_pack: Option<String>,
     /// Baseline comparison outcome for this scenario.
     pub status: ReportStatus,
     /// Checkpoint captures in timeline order.
     pub checkpoints: Vec<CheckpointManifest>,
+}
+
+impl ScenarioManifest {
+    fn metadata<'a>(
+        &'a self,
+        environment: &'a EnvironmentManifest,
+    ) -> (&'a str, &'a Viewport, &'a str) {
+        (
+            &self.title,
+            &self.viewport,
+            self.font_pack.as_deref().unwrap_or(&environment.font_pack),
+        )
+    }
 }
 
 /// One checkpoint entry in a scenario manifest.
@@ -203,12 +219,18 @@ pub fn write_report(
                 .iter()
                 .find(|previous| previous.id == scenario.id)
         });
-        let scenario_metadata_changed = previous_scenario.map(|previous| {
-            previous.title != scenario.title
-                || previous.viewport.width != scenario.viewport.width
-                || previous.viewport.height != scenario.viewport.height
-                || previous.viewport.scale_factor != scenario.viewport.scale_factor
-        });
+        let scenario_metadata_changed =
+            baseline_manifest
+                .as_ref()
+                .zip(previous_scenario)
+                .map(|(manifest, previous)| {
+                    previous.metadata(&manifest.environment)
+                        != (
+                            scenario.title.as_str(),
+                            &scenario.viewport,
+                            scenario.font_pack.as_str(),
+                        )
+                });
         let dir = output_dir.join(&scenario.id);
         fs::create_dir_all(&dir)
             .with_context(|| format!("creating scenario directory {}", dir.display()))?;
@@ -225,7 +247,9 @@ pub fn write_report(
             let scene_file = format!("{}.scene.json", checkpoint.id);
             let png_file = format!("{}.png", checkpoint.id);
             let scene_path = dir.join(&scene_file);
-            let scene_bytes = serde_json::to_vec_pretty(&checkpoint.capture)?;
+            // Full captures are machine-readable artifacts; compact JSON keeps atlas bytes and
+            // large path workloads small enough to host. Reviewed snapshots retain the outline.
+            let scene_bytes = serde_json::to_vec(&checkpoint.capture)?;
             fs::write(&scene_path, &scene_bytes)
                 .with_context(|| format!("writing {}", scene_path.display()))?;
             let png_path = dir.join(&png_file);
@@ -347,6 +371,7 @@ pub fn write_report(
             id: scenario.id.clone(),
             title: scenario.title.clone(),
             viewport: scenario.viewport.clone(),
+            font_pack: Some(scenario.font_pack.clone()),
             status,
             checkpoints,
         });
@@ -472,6 +497,162 @@ pub fn read_manifest(report_dir: impl AsRef<Path>) -> Result<ReportManifest> {
     Ok(manifest)
 }
 
+/// Loads a report's portable captures and PNGs into an in-memory suite.
+///
+/// Paths are constrained to the canonical report layout before opening any artifacts, and every
+/// serialized scene is validated before it is returned for replay or collection.
+pub fn read_report(report_dir: impl AsRef<Path>) -> Result<RenderedSuite> {
+    let report_dir = report_dir.as_ref();
+    let root = report_dir
+        .canonicalize()
+        .with_context(|| format!("opening report directory {}", report_dir.display()))?;
+    let manifest = read_manifest(&root)?;
+    ensure!(
+        manifest.backend == "cpu",
+        "unsupported report backend {:?}",
+        manifest.backend
+    );
+    let mut scenarios = Vec::with_capacity(manifest.scenarios.len());
+    for scenario in manifest.scenarios {
+        let device_size = scenario.viewport.device_size()?;
+        let mut checkpoints = Vec::with_capacity(scenario.checkpoints.len());
+        for checkpoint in scenario.checkpoints {
+            let scene_path = artifact_path(&root, &checkpoint.scene_json)?;
+            let capture: gpui::SceneCapture = serde_json::from_slice(
+                &fs::read(&scene_path)
+                    .with_context(|| format!("reading scene capture {}", scene_path.display()))?,
+            )
+            .with_context(|| format!("parsing scene capture {}", scene_path.display()))?;
+            capture.validate().with_context(|| {
+                format!("validating scene capture {}/{}", scenario.id, checkpoint.id)
+            })?;
+
+            let image = read_image(&artifact_path(&root, &checkpoint.png)?)?;
+            ensure!(
+                image.dimensions() == (device_size.width.0 as u32, device_size.height.0 as u32),
+                "image dimensions do not match viewport for {}/{}",
+                scenario.id,
+                checkpoint.id
+            );
+            let native = checkpoint
+                .native
+                .map(|native| -> Result<_> {
+                    let native_image = read_image(&artifact_path(&root, &native.png)?)?;
+                    let diff = read_image(&artifact_path(&root, &native.diff_png)?)?;
+                    ensure!(
+                        native_image.dimensions() == image.dimensions()
+                            && diff.dimensions() == image.dimensions(),
+                        "native images have unexpected dimensions for {}/{}",
+                        scenario.id,
+                        checkpoint.id
+                    );
+                    Ok(crate::NativeCheckpoint {
+                        image: native_image,
+                        diff,
+                        metrics: native.metrics,
+                        difference: native.difference,
+                    })
+                })
+                .transpose()?;
+            checkpoints.push(RenderedCheckpoint {
+                id: checkpoint.id,
+                name: checkpoint.name,
+                time_ns: checkpoint.time_ns,
+                capture,
+                image,
+                metrics: checkpoint.metrics,
+                native,
+            });
+        }
+        scenarios.push(RenderedScenario {
+            id: scenario.id,
+            title: scenario.title,
+            viewport: scenario.viewport,
+            font_pack: scenario
+                .font_pack
+                .unwrap_or_else(|| manifest.environment.font_pack.clone()),
+            checkpoints,
+        });
+    }
+    Ok(RenderedSuite {
+        scenarios,
+        native_replay: manifest.native_replay,
+        platform_checks: manifest.platform_checks,
+    })
+}
+
+/// Loads multiple reports in input order, retaining the first copy of identical scenario IDs.
+///
+/// Duplicate captures must agree on all scenario/checkpoint metadata, scene and bitmap content,
+/// and canonical RGBA pixels. Timing metrics are intentionally ignored. Non-null native adapter
+/// and platform results must agree wherever they are both present.
+pub fn collect_reports(report_dirs: &[impl AsRef<Path>]) -> Result<RenderedSuite> {
+    ensure!(
+        !report_dirs.is_empty(),
+        "at least one report directory is required"
+    );
+    let mut suite = RenderedSuite::new(Vec::new());
+    let mut scenario_indices = BTreeMap::<String, usize>::new();
+    for report_dir in report_dirs {
+        let incoming = read_report(report_dir)?;
+        merge_optional_report_value(
+            &mut suite.native_replay,
+            incoming.native_replay,
+            "native WGPU adapter metadata",
+        )?;
+        merge_optional_report_value(
+            &mut suite.platform_checks,
+            incoming.platform_checks,
+            "platform lifecycle report",
+        )?;
+        for scenario in incoming.scenarios {
+            if let Some(index) = scenario_indices.get(&scenario.id) {
+                let existing = &suite.scenarios[*index];
+                ensure!(
+                    existing.font_pack == scenario.font_pack
+                        && existing.snapshots()? == scenario.snapshots()?,
+                    "conflicting duplicate scenario ID {:?}",
+                    scenario.id
+                );
+            } else {
+                scenario_indices.insert(scenario.id.clone(), suite.scenarios.len());
+                suite.scenarios.push(scenario);
+            }
+        }
+    }
+    Ok(suite)
+}
+
+fn merge_optional_report_value<T: Serialize>(
+    current: &mut Option<T>,
+    incoming: Option<T>,
+    label: &str,
+) -> Result<()> {
+    if let Some(incoming) = incoming {
+        if let Some(current) = current {
+            ensure!(
+                serde_json::to_value(&*current)? == serde_json::to_value(&incoming)?,
+                "incompatible {label} across collected reports"
+            );
+        } else {
+            *current = Some(incoming);
+        }
+    }
+    Ok(())
+}
+
+fn artifact_path(root: &Path, relative: &str) -> Result<PathBuf> {
+    let path = root
+        .join(relative)
+        .canonicalize()
+        .with_context(|| format!("opening report artifact {relative}"))?;
+    ensure!(
+        path.starts_with(root),
+        "report artifact escapes report directory: {relative}"
+    );
+    Ok(path)
+}
+
 /// Compares two report directories. Any scenario/checkpoint addition, removal, metadata,
 /// serialized-scene, or decoded pixel change is returned as a human-readable entry.
 pub fn compare_reports(
@@ -548,16 +729,14 @@ fn compare_manifests(
         let Some(old_scenario) = old_scenarios.get(id) else {
             continue;
         };
-        if old_scenario.title != new_scenario.title
-            || old_scenario.viewport.width != new_scenario.viewport.width
-            || old_scenario.viewport.height != new_scenario.viewport.height
-            || old_scenario.viewport.scale_factor != new_scenario.viewport.scale_factor
+        if old_scenario.metadata(&baseline.environment)
+            != new_scenario.metadata(&current.environment)
         {
             changes.push(change(
                 ReportChangeKind::ScenarioMetadataChanged,
                 id,
                 None,
-                "scenario title or viewport changed",
+                "scenario title, viewport, or font pack changed",
             ));
         }
         let old_checkpoints: BTreeMap<_, _> = old_scenario
@@ -704,7 +883,7 @@ fn save_png(path: &Path, image: &image::RgbaImage) -> Result<()> {
 fn read_image(path: &Path) -> Result<image::RgbaImage> {
     image::open(path)
         .map(|image| image.to_rgba8())
-        .with_context(|| format!("reading baseline image {}", path.display()))
+        .with_context(|| format!("reading report image {}", path.display()))
 }
 
 fn read_json_value(path: &Path) -> Result<serde_json::Value> {

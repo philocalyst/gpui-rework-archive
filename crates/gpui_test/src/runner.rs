@@ -54,7 +54,7 @@ pub struct RenderedScenario {
 }
 
 /// Viewport metadata in physical-independent logical pixels.
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct Viewport {
     /// Logical width.
     pub width: f32,
