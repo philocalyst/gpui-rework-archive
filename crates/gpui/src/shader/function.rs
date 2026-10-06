@@ -107,8 +107,7 @@ enum Language {
 
 impl Library {
     /// Parse WGSL. The [prelude](super::prelude) (`Fragment`, `Color`, ...) is
-    /// in scope. Sources may declare functions, structs, and constants, but no
-    /// resource bindings or entry points.
+    /// in scope. Resource bindings and pipeline overrides are rejected.
     pub fn wgsl(source: &str) -> Result<Self, ShaderError> {
         Self::load(Language::Wgsl, source)
     }
