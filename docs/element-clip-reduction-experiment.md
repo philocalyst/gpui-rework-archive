@@ -26,6 +26,13 @@ The convex-polygon experiment supports keeping the more complex representation o
 The dominance proof was checked against both the original and prefix-pruned chains at 512,000 randomized points; hard membership and alpha agreed. A singular/non-finite mapping stays collapsed. Zero-area rectangles deliberately take the original-chain fallback in the polygon prototype because a closed line/point clip is not represented by the polygon fast path. For the production `f32` path, treat numerical uncertainty as a reason to retain an ancestor: require an inward margin when comparing transformed corners to the fade inset, rather than expanding the inset by a tolerance. The exact margin should be tied to the composed matrix and coordinate magnitudes, with edge-adjacent differential tests before adoption.
 
 The production implementation adopts the prefix rule in `CoordinateSpace::clipped`.
+Consecutive masks in the same coordinates merge only when both have zero fades.
+Active ramps remain separate, including coincident masks: at `x=10`, two
+left fades of length 20 contribute `0.5 * 0.5 = 0.25`, not the `0.5` produced
+by merging their visible boundaries. A faded identity clip also retains its
+original rectangle when cropped by the window viewport, so cropping cannot
+move its fade anchor. Regression tests cover the retained clip table at device
+scales one and two, plus rendered nested ramps crossing the viewport edge.
 Its inward margin uses both affine evaluations' absolute operation magnitudes,
 with a factor of `32 * f32::EPSILON`; it retains ancestors when the mapping's
 infinity-norm condition estimate exceeds 4,096. Empty child rectangles also retain

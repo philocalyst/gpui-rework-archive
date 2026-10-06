@@ -731,6 +731,43 @@ fn content_mask_fades_quad_edges() {
 }
 
 #[test]
+fn nested_fades_multiply_without_moving_offscreen_anchors() {
+    let mut renderer = WgpuHeadlessRenderer::new().expect("headless renderer");
+    let mut scene = Scene::default();
+    let faded = |left| ContentMask {
+        bounds: bounds(left, 0., 100., 60.),
+        fade_out: Edges {
+            left: ScaledPixels(20.),
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+    scene.with_clip(faded(-10.), |scene| {
+        scene.with_clip(faded(0.), |scene| {
+            scene.insert_primitive(Quad {
+                bounds: bounds(0., 0., 100., 60.),
+                content_mask: full_mask(),
+                background: solid_background(gpui::white()),
+                ..Default::default()
+            });
+        });
+    });
+    scene.finish();
+    let image = renderer.render_scene_to_image(&scene, TARGET).unwrap();
+    for x in [0, 4, 9, 14, 19, 30] {
+        let center = x as f32 + 0.5;
+        let alpha = ((center + 10.) / 20.).clamp(0., 1.) * (center / 20.).clamp(0., 1.);
+        let expected = (alpha * 255.).round() as u8;
+        let actual = image.get_pixel(x, 30).0[0];
+        assert!(
+            actual.abs_diff(expected) <= 2,
+            "x={x}: expected {expected}, got {actual}"
+        );
+    }
+    assert_eq!(image.get_pixel(91, 30).0, [0, 0, 0, 255]);
+}
+
+#[test]
 fn clip_distances_reconstruct_local_coordinates_under_large_sheared_reflection() {
     let mut renderer = WgpuHeadlessRenderer::new().expect("headless renderer");
     let mask_at = |x, y, width, height| ContentMask {

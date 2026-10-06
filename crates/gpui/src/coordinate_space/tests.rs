@@ -45,6 +45,154 @@ fn affine_operations_keep_their_order_and_inverse() {
 }
 
 #[test]
+fn same_space_fades_keep_their_original_ramps() {
+    let mask = |left, width, fade| ContentMask {
+        bounds: Bounds::new(point(px(left), px(0.)), size(px(width), px(100.))),
+        fade_out: Edges {
+            left: px(fade),
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+    for (outer, inner, x, expected) in [
+        (mask(0., 100., 20.), mask(10., 80., 30.), 15., 0.125),
+        (mask(0., 100., 20.), mask(0., 100., 20.), 10., 0.25),
+        (mask(0., 100., 20.), mask(10., 80., 0.), 15., 0.75),
+    ] {
+        let space = CoordinateSpace::default().clipped(outer).clipped(inner);
+        assert!(
+            space.contains_window_point(point(px(x), px(50.))),
+            "visual fading does not disable geometric input"
+        );
+        for scale in [1., 2.] {
+            let mut scene = crate::Scene::default();
+            scene.enter_coordinate_space(&space, scale);
+            let clips: Vec<_> = scene
+                .render_spaces()
+                .iter()
+                .filter(|record| record.kind == crate::SpaceKind::Clip)
+                .collect();
+            assert_eq!(clips.len(), 2, "neither partial ramp may be merged away");
+            let alpha: f32 = clips
+                .iter()
+                .map(|record| {
+                    if record.fade.left.0 > 0. {
+                        ((x * scale - record.clip.origin.x.0) / record.fade.left.0).clamp(0., 1.)
+                    } else {
+                        1.
+                    }
+                })
+                .product();
+            assert!((alpha - expected).abs() < 0.00001);
+        }
+    }
+}
+
+#[test]
+fn viewport_cropping_preserves_fade_anchors_and_hard_clip_fast_path() {
+    let viewport = Bounds::new(point(px(0.), px(0.)), size(px(50.), px(100.)));
+    let bounds = Bounds::new(point(px(-10.), px(0.)), size(px(100.), px(100.)));
+    let faded = CoordinateSpace::default().clipped(ContentMask {
+        bounds,
+        fade_out: Edges {
+            left: px(20.),
+            ..Default::default()
+        },
+        ..Default::default()
+    });
+    assert!(!faded.is_identity_scope());
+    assert_eq!(faded.content_mask(viewport).bounds, viewport);
+    assert_eq!(faded.content_mask(viewport).fade_out, Edges::default());
+    let mut scene = crate::Scene::default();
+    scene.enter_coordinate_space(&faded, 1.);
+    let clip = scene
+        .render_spaces()
+        .iter()
+        .find(|record| record.kind == crate::SpaceKind::Clip)
+        .unwrap();
+    assert_eq!(clip.clip.origin.x.0, -10.);
+    assert_eq!((5. - clip.clip.origin.x.0) / clip.fade.left.0, 0.75);
+
+    let hard = CoordinateSpace::default().clipped(bounds).clipped(viewport);
+    assert!(hard.is_identity_scope());
+    assert_eq!(hard.content_mask(viewport), ContentMask::from(viewport));
+    assert!(hard.clips.as_ref().unwrap().parent.is_none());
+}
+
+#[gpui::test]
+fn deferred_overlay_can_escape_clipping_without_leaving_the_camera(cx: &mut TestAppContext) {
+    let observed = Rc::new(RefCell::new(Vec::new()));
+    let observations = observed.clone();
+    let camera = ElementTransform::default()
+        .scale(2.)
+        .translate(point(px(10.), px(20.)))
+        .resolve(Bounds::default());
+    let probe = point(px(12.), px(0.));
+    let (_, context) = add_tree_window(cx, move |_, _| {
+        let observations = observations.clone();
+        canvas(
+            move |_, window, cx| {
+                let original = window.coordinate_space().clone();
+                window.with_element_transform(camera, |window| {
+                    window.with_clip(
+                        Bounds::new(point(px(0.), px(0.)), size(px(10.), px(10.))),
+                        |window| {
+                            for escape in [false, true] {
+                                let observations = observations.clone();
+                                let mut deferred = canvas(
+                                    |_, _, _| (),
+                                    move |_, _, window, _| {
+                                        let space = window.coordinate_space();
+                                        observations.borrow_mut().push((
+                                            escape,
+                                            space.to_window(probe),
+                                            space.contains_window_point(camera.apply(probe)),
+                                        ));
+                                    },
+                                )
+                                .size(px(20.))
+                                .into_any_element();
+                                deferred.layout_as_root(
+                                    crate::AvailableSpace::min_size(),
+                                    window,
+                                    cx,
+                                );
+                                let space = if escape {
+                                    window.coordinate_space().without_clips()
+                                } else {
+                                    window.coordinate_space().clone()
+                                };
+                                window.with_coordinate_space(space, |window| {
+                                    window.defer_draw(deferred, Point::default(), 0, None)
+                                });
+                            }
+                        },
+                    );
+                });
+                assert_eq!(
+                    *window.coordinate_space(),
+                    original,
+                    "all nested scopes restore their parent"
+                );
+            },
+            |_, _, _, _| {},
+        )
+        .size_full()
+        .into_any_element()
+    });
+    // Inspect the explicit frame below, after the initial window draw.
+    observed.borrow_mut().clear();
+    context.update(|window, cx| window.draw(cx).clear(cx));
+    assert_eq!(
+        *observed.borrow(),
+        [
+            (false, camera.apply(probe), false),
+            (true, camera.apply(probe), true)
+        ]
+    );
+}
+
+#[test]
 fn origin_rotation_and_nested_composition_share_one_local_mapping() {
     let bounds = Bounds::new(point(px(0.), px(0.)), size(px(40.), px(20.)));
     let child = ElementTransform::default()

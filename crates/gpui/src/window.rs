@@ -1,10 +1,10 @@
 use crate::{
     Action, AnyDrag, AnyElement, AnyImageCache, AnyTooltip, AnyView, App, AppContext, Arena, Asset,
     AsyncWindowContext, AtlasTile, AvailableSpace, BackdropFilter, Background, BorderStyle, Bounds,
-    BoxShadow, Capslock, ColorExt, Context, Corners, CursorHideMode, CursorStyle, Decorations,
-    DevicePixels, DispatchActionListener, DispatchNodeId, DispatchTree, DisplayId, Edges, Effect,
-    Entity, EntityId, EventEmitter, FileDropEvent, Filter, FilterBoundary, FontId, Global,
-    GlobalElementId, GlyphId, GlyphRenderMode, GpuSpecs, InputHandler, IntoElement, IsZero,
+    BoxShadow, Capslock, ColorExt, ContentMask, Context, Corners, CursorHideMode, CursorStyle,
+    Decorations, DevicePixels, DispatchActionListener, DispatchNodeId, DispatchTree, DisplayId,
+    Edges, Effect, Entity, EntityId, EventEmitter, FileDropEvent, Filter, FilterBoundary, FontId,
+    Global, GlobalElementId, GlyphId, GlyphRenderMode, GpuSpecs, InputHandler, IntoElement, IsZero,
     KeyBinding, KeyContext, KeyDownEvent, KeyEvent, Keystroke, KeystrokeEvent, LayoutId, Lerp,
     LineLayoutIndex, Modifiers, ModifiersChangedEvent, MonochromeSprite, Motion, MouseButton,
     MouseEvent, MouseMoveEvent, MouseUpEvent, Path, Pixels, PlatformAtlas, PlatformDisplay,
@@ -2123,122 +2123,6 @@ pub struct DispatchEventResult {
     pub default_prevented: bool,
 }
 
-/// Indicates which region of the window is visible. Content falling outside of this mask will not be
-/// rendered. Currently, only rectangular content masks are supported, but we give the mask its own type
-/// to leave room to support more complex shapes in the future. Edge fades are evaluated in
-/// the coordinate space in which the mask was established. Ancestor masks are
-/// retained by [`CoordinateSpace`](crate::CoordinateSpace), including rotations.
-#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
-#[repr(C)]
-pub struct ContentMask<P: Clone + Debug + Default + PartialEq> {
-    /// The bounds
-    pub bounds: Bounds<P>,
-    /// Edge fade distances. A zero distance leaves that edge fully opaque.
-    pub fade_out: Edges<P>,
-    /// Frame-local renderer space. Assigned by the scene; callers should leave it zero.
-    #[doc(hidden)]
-    pub space: u32,
-    /// Explicit storage-buffer alignment.
-    #[doc(hidden)]
-    pub padding: u32,
-}
-
-impl ContentMask<Pixels> {
-    /// Scale the content mask's pixel units by the given scaling factor.
-    pub fn scale(&self, factor: f32) -> ContentMask<ScaledPixels> {
-        ContentMask {
-            bounds: self.bounds.scale(factor),
-            fade_out: self.fade_out.scale(factor),
-            space: self.space,
-            padding: 0,
-        }
-    }
-
-    /// Intersect the content mask with the given content mask.
-    ///
-    /// For each edge, the mask that actually clips at that edge contributes its
-    /// fade; when both masks clip at the same coordinate, the stronger fade wins.
-    pub fn intersect(&self, other: &Self) -> Self {
-        fn edge_fade(
-            a: Pixels,
-            b: Pixels,
-            a_fade: Pixels,
-            b_fade: Pixels,
-            a_clips_closer: impl Fn(Pixels, Pixels) -> bool,
-        ) -> Pixels {
-            if a_clips_closer(a, b) {
-                a_fade
-            } else if a_clips_closer(b, a) {
-                b_fade
-            } else {
-                a_fade.max(b_fade)
-            }
-        }
-
-        ContentMask {
-            bounds: self.bounds.intersect(&other.bounds),
-            fade_out: Edges {
-                top: edge_fade(
-                    self.bounds.top(),
-                    other.bounds.top(),
-                    self.fade_out.top,
-                    other.fade_out.top,
-                    |a, b| a > b,
-                ),
-                right: edge_fade(
-                    self.bounds.right(),
-                    other.bounds.right(),
-                    self.fade_out.right,
-                    other.fade_out.right,
-                    |a, b| a < b,
-                ),
-                bottom: edge_fade(
-                    self.bounds.bottom(),
-                    other.bounds.bottom(),
-                    self.fade_out.bottom,
-                    other.fade_out.bottom,
-                    |a, b| a < b,
-                ),
-                left: edge_fade(
-                    self.bounds.left(),
-                    other.bounds.left(),
-                    self.fade_out.left,
-                    other.fade_out.left,
-                    |a, b| a > b,
-                ),
-            },
-            space: 0,
-            padding: 0,
-        }
-    }
-}
-
-#[cfg(test)]
-mod content_mask_tests {
-    use super::*;
-
-    fn mask(left: f32, width: f32, fade_left: f32) -> ContentMask<Pixels> {
-        ContentMask {
-            bounds: Bounds::new(point(px(left), px(0.)), size(px(width), px(10.))),
-            fade_out: Edges {
-                left: px(fade_left),
-                ..Default::default()
-            },
-            ..Default::default()
-        }
-    }
-
-    #[test]
-    fn intersect_keeps_only_the_fade_at_the_visible_edge() {
-        let outer = mask(0., 100., 20.);
-        let inner = mask(30., 40., 0.);
-        assert_eq!(outer.intersect(&inner).fade_out.left, px(0.));
-
-        let child = mask(0., 40., 0.);
-        assert_eq!(outer.intersect(&child).fade_out.left, px(20.));
-    }
-}
-
 impl Window {
     fn mark_view_dirty(&mut self, view_id: EntityId) {
         // Mark ancestor views as dirty. If already in the `dirty_views` set, then all its ancestors
@@ -4018,8 +3902,21 @@ impl Window {
         result
     }
 
-    /// Invoke the given function with the given content mask after intersecting it
-    /// with the current mask. This method should only be called during element drawing.
+    /// Draws inside a local rectangular clip, retaining exact ancestor clips and fades.
+    /// Bounds create a hard clip; a content mask can also specify edge fades.
+    /// Nested fade coverage multiplies. The previous scope is restored afterward.
+    #[inline]
+    pub fn with_clip<R>(
+        &mut self,
+        mask: impl Into<ContentMask<Pixels>>,
+        f: impl FnOnce(&mut Self) -> R,
+    ) -> R {
+        self.invalidator.debug_assert_paint_or_prepaint();
+        self.with_coordinate_space(self.coordinate_space.clipped(mask), f)
+    }
+
+    /// Applies an optional local clip during element drawing.
+    /// Equivalent to [`Self::with_clip`] when the mask is present.
     // This function is called in a highly recursive manner in editor
     // prepainting, make sure its inlined to reduce the stack burden
     #[inline]
@@ -4030,8 +3927,7 @@ impl Window {
     ) -> R {
         self.invalidator.debug_assert_paint_or_prepaint();
         if let Some(mask) = mask {
-            let space = self.coordinate_space.clipped(mask);
-            self.with_coordinate_space(space, f)
+            self.with_clip(mask, f)
         } else {
             f(self)
         }
@@ -4202,7 +4098,9 @@ impl Window {
         self.element_opacity
     }
 
-    /// Obtain the current content mask. This method should only be called during element drawing.
+    /// Returns the current local draw/culling mask during element drawing.
+    /// For transformed or faded clip chains, its bounds are conservative; exact
+    /// clipping remains in [`Self::coordinate_space`], including each ancestor's fades.
     pub fn content_mask(&self) -> ContentMask<Pixels> {
         self.invalidator.debug_assert_paint_or_prepaint();
         let viewport = Bounds::new(Point::default(), self.viewport_size);
@@ -4440,6 +4338,8 @@ impl Window {
     ///
     /// When `content_mask` is provided, the deferred element will be clipped to that region during
     /// both prepaint and paint. When `None`, no additional clipping is applied.
+    /// The captured coordinate space still retains ancestor clips. To escape
+    /// overflow while keeping the camera, defer within `coordinate_space().without_clips()`.
     ///
     /// This method should only be called as part of the prepaint phase of element drawing.
     pub fn defer_draw(

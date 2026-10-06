@@ -19,6 +19,8 @@ use std::{
 
 mod plan;
 pub use plan::*;
+mod space;
+pub use space::{RenderSpace, SpaceKind};
 mod abi;
 #[doc(hidden)]
 pub use abi::{SCENE_BUFFER_LAYOUTS, SceneBufferLayout};
@@ -288,45 +290,44 @@ impl Scene {
         if transform == TransformationMatrix::unit() {
             return paint(self);
         }
-        if self.render_spaces.is_empty() {
-            self.intern_space(crate::RenderSpace::default());
-        }
-        let previous = self.active_space;
-        let current = self.render_spaces[previous as usize];
+        let current = self.active_render_space();
         let transform = current.transform.compose(transform);
-        let inverse = transform.inverse();
-        self.active_space = self.intern_space(crate::RenderSpace::mapping(
+        let id = self.intern_space(crate::RenderSpace::mapping(
             transform,
-            inverse,
-            current.clip_scope(previous),
+            transform.inverse(),
+            current.clip_scope(self.active_space),
         ));
-        let result = paint(self);
-        self.active_space = previous;
-        result
+        self.with_space(id, paint)
     }
 
-    /// Clips primitives to a rectangle in the active local space, retaining ancestor clips.
+    /// Clips primitives in local device-pixel coordinates, retaining ancestor fade ramps.
+    /// Pass bounds for a hard clip, or a content mask to include edge fades.
     pub fn with_clip<R>(
         &mut self,
-        mask: ContentMask<ScaledPixels>,
+        mask: impl Into<ContentMask<ScaledPixels>>,
         paint: impl FnOnce(&mut Self) -> R,
     ) -> R {
-        if self.render_spaces.is_empty() {
-            self.intern_space(crate::RenderSpace::default());
-        }
-        let previous = self.active_space;
-        let current = self.render_spaces[previous as usize];
-        self.active_space = if current.is_collapsed() {
-            self.intern_space(crate::RenderSpace::collapsed(previous))
-        } else {
-            self.intern_space(crate::RenderSpace::clipping(
-                current.transform,
-                Some(current.inverse),
-                mask.bounds,
-                mask.fade_out,
-                current.clip_scope(previous),
-            ))
-        };
+        let mask = mask.into();
+        let current = self.active_render_space();
+        let id = self.intern_space(crate::RenderSpace::clipping(
+            current.transform,
+            (!current.is_collapsed()).then_some(current.inverse),
+            mask.bounds,
+            mask.fade_out,
+            current.clip_scope(self.active_space),
+        ));
+        self.with_space(id, paint)
+    }
+
+    fn active_render_space(&self) -> crate::RenderSpace {
+        self.render_spaces
+            .get(self.active_space as usize)
+            .copied()
+            .unwrap_or_default()
+    }
+
+    fn with_space<R>(&mut self, id: u32, paint: impl FnOnce(&mut Self) -> R) -> R {
+        let previous = std::mem::replace(&mut self.active_space, id);
         let result = paint(self);
         self.active_space = previous;
         result
@@ -352,9 +353,6 @@ impl Scene {
     }
 
     fn set_coordinate_space(&mut self, space: &crate::CoordinateSpace, scale: f32) {
-        if self.render_spaces.is_empty() {
-            self.intern_space(crate::RenderSpace::default());
-        }
         if space.is_identity_scope() {
             self.active_space = 0;
             return;
@@ -366,6 +364,11 @@ impl Scene {
     }
 
     fn intern_space(&mut self, space: crate::RenderSpace) -> u32 {
+        if self.render_spaces.is_empty() {
+            let identity = crate::RenderSpace::default();
+            self.render_spaces.push(identity);
+            self.space_ids.insert(identity.key(), 0);
+        }
         let key = space.key();
         if let Some(id) = self.space_ids.get(&key) {
             return *id;
@@ -423,9 +426,6 @@ impl Scene {
 
     pub fn replay(&mut self, range: Range<usize>, prev_scene: &Scene) {
         let active_space = self.active_space;
-        if self.render_spaces.is_empty() {
-            self.intern_space(crate::RenderSpace::default());
-        }
         let mut imported = collections::FxHashMap::default();
         for operation in &prev_scene.paint_operations[range] {
             match operation {

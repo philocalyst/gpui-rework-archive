@@ -1,7 +1,138 @@
 //! Coordinate spaces shared by painting, clipping, input and platform geometry.
 
-use crate::{Bounds, ContentMask, Pixels, Point, Radians, Size, TransformationMatrix, point};
-use std::sync::Arc;
+use crate::{
+    Bounds, Edges, Pixels, Point, Radians, ScaledPixels, Size, TransformationMatrix, point,
+};
+use std::{fmt::Debug, sync::Arc};
+
+/// Indicates which region of the window is visible. Content falling outside of this mask will not be
+/// rendered. Currently, only rectangular content masks are supported, but we give the mask its own type
+/// to leave room to support more complex shapes in the future. Edge fades are evaluated in
+/// the coordinate space in which the mask was established. Ancestor masks are
+/// retained by [`CoordinateSpace`](crate::CoordinateSpace), including rotations.
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
+#[repr(C)]
+pub struct ContentMask<P: Clone + Debug + Default + PartialEq> {
+    /// The bounds
+    pub bounds: Bounds<P>,
+    /// Edge fade distances. A zero distance leaves that edge fully opaque.
+    pub fade_out: Edges<P>,
+    /// Frame-local renderer space. Assigned by the scene; callers should leave it zero.
+    #[doc(hidden)]
+    pub space: u32,
+    /// Explicit storage-buffer alignment.
+    #[doc(hidden)]
+    pub padding: u32,
+}
+
+impl<P: Clone + Debug + Default + PartialEq> From<Bounds<P>> for ContentMask<P> {
+    fn from(bounds: Bounds<P>) -> Self {
+        Self {
+            bounds,
+            ..Default::default()
+        }
+    }
+}
+
+impl ContentMask<Pixels> {
+    /// Scale the content mask's pixel units by the given scaling factor.
+    pub fn scale(&self, factor: f32) -> ContentMask<ScaledPixels> {
+        ContentMask {
+            bounds: self.bounds.scale(factor),
+            fade_out: self.fade_out.scale(factor),
+            space: self.space,
+            padding: 0,
+        }
+    }
+
+    /// Intersect the content mask with the given content mask.
+    ///
+    /// For each edge, the mask that actually clips at that edge contributes its
+    /// fade; when both masks clip at the same coordinate, the stronger fade wins.
+    /// This combines visible boundaries, not the alpha of nested fade ramps.
+    /// Use [`crate::Window::with_clip`] or [`CoordinateSpace::clipped`](crate::CoordinateSpace::clipped)
+    /// to compose independent clipping scopes.
+    pub fn intersect(&self, other: &Self) -> Self {
+        fn edge_fade(
+            a: Pixels,
+            b: Pixels,
+            a_fade: Pixels,
+            b_fade: Pixels,
+            a_clips_closer: impl Fn(Pixels, Pixels) -> bool,
+        ) -> Pixels {
+            if a_clips_closer(a, b) {
+                a_fade
+            } else if a_clips_closer(b, a) {
+                b_fade
+            } else {
+                a_fade.max(b_fade)
+            }
+        }
+
+        ContentMask {
+            bounds: self.bounds.intersect(&other.bounds),
+            fade_out: Edges {
+                top: edge_fade(
+                    self.bounds.top(),
+                    other.bounds.top(),
+                    self.fade_out.top,
+                    other.fade_out.top,
+                    |a, b| a > b,
+                ),
+                right: edge_fade(
+                    self.bounds.right(),
+                    other.bounds.right(),
+                    self.fade_out.right,
+                    other.fade_out.right,
+                    |a, b| a < b,
+                ),
+                bottom: edge_fade(
+                    self.bounds.bottom(),
+                    other.bounds.bottom(),
+                    self.fade_out.bottom,
+                    other.fade_out.bottom,
+                    |a, b| a < b,
+                ),
+                left: edge_fade(
+                    self.bounds.left(),
+                    other.bounds.left(),
+                    self.fade_out.left,
+                    other.fade_out.left,
+                    |a, b| a > b,
+                ),
+            },
+            space: 0,
+            padding: 0,
+        }
+    }
+}
+
+#[cfg(test)]
+mod content_mask_tests {
+    use super::*;
+    use crate::{px, size};
+
+    fn mask(left: f32, width: f32, fade_left: f32) -> ContentMask<Pixels> {
+        ContentMask {
+            bounds: Bounds::new(point(px(left), px(0.)), size(px(width), px(10.))),
+            fade_out: Edges {
+                left: px(fade_left),
+                ..Default::default()
+            },
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn intersect_keeps_only_the_fade_at_the_visible_edge() {
+        let outer = mask(0., 100., 20.);
+        let inner = mask(30., 40., 0.);
+        assert_eq!(outer.intersect(&inner).fade_out.left, px(0.));
+
+        let child = mask(0., 40., 0.);
+        assert_eq!(outer.intersect(&child).fade_out.left, px(20.));
+    }
+}
 
 const RASTER_BUCKETS_PER_UNIT: f32 = 8.0;
 const MAX_RASTER_SCALE: f32 = 8.0;
@@ -99,12 +230,20 @@ impl ElementTransform {
 ///
 /// A space owns its exact ancestor clips. Clones are cheap and can outlive the
 /// traversal, so listeners, hitboxes and deferred draws retain the same geometry.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct CoordinateSpace {
     pub(crate) transform: TransformationMatrix,
     inverse: Option<TransformationMatrix>,
     raster_scale: f32,
     pub(crate) clips: Option<Arc<ClipRegion>>,
+}
+
+impl PartialEq for CoordinateSpace {
+    fn eq(&self, other: &Self) -> bool {
+        // Equality describes geometry; inverse and density are derived from it.
+        // Recognize retained scopes before walking separately rebuilt clip chains.
+        self.same_scope(other) || self.transform == other.transform && self.clips == other.clips
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -251,6 +390,14 @@ impl CoordinateSpace {
         self.inverse.map(|inverse| inverse.apply_vector(vector))
     }
 
+    /// Retains this mapping while removing its clips, useful for camera-relative overlays.
+    pub fn without_clips(&self) -> Self {
+        Self {
+            clips: None,
+            ..self.clone()
+        }
+    }
+
     /// Returns the axis-aligned window bounds enclosing a local rectangle.
     /// This is conservative geometry for culling and platform APIs, not a hit test.
     pub fn bounds_to_window(&self, bounds: Bounds<Pixels>) -> Bounds<Pixels> {
@@ -289,12 +436,14 @@ impl CoordinateSpace {
             }
     }
 
-    // Ordinary drawing retains the original single-mask shader path. Consecutive
-    // clips in one space are already intersected by `clipped`.
+    // Hard clips in one space fit the ordinary single-mask path. Fades retain
+    // their original bounds even when the viewport crops away their hard edge.
     pub(crate) fn is_identity_scope(&self) -> bool {
         self.transform == TransformationMatrix::unit()
             && self.clips.as_ref().is_none_or(|clip| {
-                clip.transform == TransformationMatrix::unit() && clip.parent.is_none()
+                clip.transform == TransformationMatrix::unit()
+                    && clip.parent.is_none()
+                    && clip.mask.fade_out == Default::default()
             })
     }
 
@@ -317,7 +466,8 @@ impl CoordinateSpace {
         }
     }
 
-    pub(crate) fn transformed(&self, transform: TransformationMatrix) -> Self {
+    /// Composes a child mapping while retaining the clips in their original coordinates.
+    pub fn transformed(&self, transform: TransformationMatrix) -> Self {
         let transform = self.transform.compose(transform);
         Self {
             clips: self.clips.clone(),
@@ -325,10 +475,15 @@ impl CoordinateSpace {
         }
     }
 
-    pub(crate) fn clipped(&self, mut mask: ContentMask<Pixels>) -> Self {
+    /// Adds a local rectangular clip. Nested edge fades multiply independently.
+    /// Pass bounds for a hard clip, or a content mask to include edge fades.
+    pub fn clipped(&self, mask: impl Into<ContentMask<Pixels>>) -> Self {
+        let mut mask = mask.into();
         let mut parent = self.clips.clone();
         if let Some(clip) = &self.clips
             && clip.transform == self.transform
+            && clip.mask.fade_out == Default::default()
+            && mask.fade_out == Default::default()
         {
             mask = mask.intersect(&clip.mask);
             if mask == clip.mask {
@@ -457,140 +612,6 @@ impl TransformationMatrix {
                 .sqrt())
             * 0.5)
             .sqrt()
-    }
-}
-
-/// The role of a frame-local coordinate-space record.
-#[doc(hidden)]
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-#[repr(u32)]
-pub enum SpaceKind {
-    /// An affine mapping with no additional clip.
-    #[default]
-    Mapping = 0,
-    /// A clipping scope, evaluated in its own coordinates.
-    Clip = 1,
-    /// A collapsed or non-finite mapping with no visible region.
-    Collapsed = 2,
-}
-
-/// An interned coordinate-space record in the scene's GPU table.
-#[doc(hidden)]
-#[derive(Clone, Copy, Debug, PartialEq)]
-#[repr(C)]
-pub struct RenderSpace {
-    pub transform: TransformationMatrix,
-    pub inverse: TransformationMatrix,
-    pub clip: Bounds<crate::ScaledPixels>,
-    pub fade: crate::Edges<crate::ScaledPixels>,
-    pub parent: u32,
-    pub kind: SpaceKind,
-}
-
-impl Default for RenderSpace {
-    fn default() -> Self {
-        Self {
-            transform: TransformationMatrix::unit(),
-            inverse: TransformationMatrix::unit(),
-            clip: Bounds::default(),
-            fade: crate::Edges::default(),
-            parent: 0,
-            kind: SpaceKind::Mapping,
-        }
-    }
-}
-
-impl RenderSpace {
-    /// Skip mappings in the coverage chain: their complete affine composition is
-    /// already stored on the active record. Collapsed scopes must remain barriers.
-    pub(crate) fn clip_scope(self, id: u32) -> u32 {
-        match self.kind {
-            SpaceKind::Mapping => self.parent,
-            SpaceKind::Clip | SpaceKind::Collapsed => id,
-        }
-    }
-
-    pub(crate) fn mapping(
-        transform: TransformationMatrix,
-        inverse: Option<TransformationMatrix>,
-        parent: u32,
-    ) -> Self {
-        let Some(inverse) = inverse else {
-            return Self::collapsed(parent);
-        };
-        Self {
-            transform,
-            inverse,
-            parent,
-            ..Default::default()
-        }
-    }
-
-    pub(crate) fn clipping(
-        transform: TransformationMatrix,
-        inverse: Option<TransformationMatrix>,
-        clip: Bounds<crate::ScaledPixels>,
-        fade: crate::Edges<crate::ScaledPixels>,
-        parent: u32,
-    ) -> Self {
-        let Some(inverse) = inverse else {
-            return Self::collapsed(parent);
-        };
-        Self {
-            transform,
-            inverse,
-            clip,
-            fade,
-            parent,
-            kind: SpaceKind::Clip,
-        }
-    }
-
-    pub(crate) fn collapsed(parent: u32) -> Self {
-        Self {
-            transform: TransformationMatrix {
-                rotation_scale: [[0.0; 2]; 2],
-                translation: [0.0; 2],
-            },
-            inverse: TransformationMatrix::unit(),
-            parent,
-            kind: SpaceKind::Collapsed,
-            ..Default::default()
-        }
-    }
-
-    pub(crate) fn is_collapsed(&self) -> bool {
-        self.kind == SpaceKind::Collapsed
-    }
-
-    pub(crate) fn key(&self) -> [u32; 22] {
-        let mut key = [0; 22];
-        for (i, value) in self
-            .transform
-            .rotation_scale
-            .iter()
-            .flatten()
-            .chain(self.transform.translation.iter())
-            .chain(self.inverse.rotation_scale.iter().flatten())
-            .chain(self.inverse.translation.iter())
-            .copied()
-            .chain([
-                self.clip.origin.x.0,
-                self.clip.origin.y.0,
-                self.clip.size.width.0,
-                self.clip.size.height.0,
-                self.fade.top.0,
-                self.fade.right.0,
-                self.fade.bottom.0,
-                self.fade.left.0,
-            ])
-            .enumerate()
-        {
-            key[i] = value.to_bits();
-        }
-        key[20] = self.parent;
-        key[21] = self.kind as u32;
-        key
     }
 }
 

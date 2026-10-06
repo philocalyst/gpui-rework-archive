@@ -14,6 +14,7 @@ pub fn deferred(child: impl IntoElement) -> Deferred {
 
 /// An element which delays the painting of its child until after all of
 /// its ancestors, while keeping its layout as part of the current element tree.
+/// The child retains the coordinate space and ancestor clips captured during prepaint.
 ///
 /// Per [`Window::prepaint_deferred_draws`], deferred elements causing additional deferred elements
 /// should be constrained to limited circumstances and will stop processing after some depth
@@ -99,10 +100,10 @@ impl Deferred {
         self
     }
 
-    /// When a content mask is provided, the deferred element will be clipped to that region during
-    /// both prepaint and paint.
-    pub fn content_mask(mut self, mask: ContentMask<Pixels>) -> Self {
-        self.content_mask = Some(mask);
+    /// Adds a local clip during prepaint and paint, retaining captured ancestor clips.
+    /// Pass bounds for a hard clip, or a content mask to include edge fades.
+    pub fn content_mask(mut self, mask: impl Into<ContentMask<Pixels>>) -> Self {
+        self.content_mask = Some(mask.into());
         self
     }
 }

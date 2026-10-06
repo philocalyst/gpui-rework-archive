@@ -52,6 +52,20 @@ it with `with_coordinate_space` also retains its ancestor clips. Re-entering
 camera's clips. The common element lifecycle applies styled transforms, including
 to transparent wrappers and custom styled canvases.
 
+Clip custom content directly with `window.with_clip(bounds, |window| ...)`.
+Pass a `ContentMask` when the clip also needs edge fades. The optional
+`with_content_mask` API delegates to this same scope. A retained space can be
+extended with `.transformed(matrix).clipped(bounds)`; use `.without_clips()` for
+an overlay that follows the camera while escaping overflow. Deferred drawing
+retains the captured space, so a `None` mask still inherits that space's clips.
+
+Nested clip fades multiply, including clips in the same coordinates. A single
+rectangle cannot encode the product of two ramps. `ContentMask::intersect`
+combines visible boundaries and their edge ramps; use clip scopes for exact
+nested coverage. `window.content_mask()` provides conservative local draw bounds;
+the retained coordinate space owns exact clipping. Geometric hit testing checks
+the hard clip region independently of visual fade alpha.
+
 ## One geometry model
 
 [Issue #273](https://github.com/gpui-ce/gpui-ce/issues/273) asks for composable
@@ -65,9 +79,9 @@ shares its mapping through the element lifecycle and renderer.
 
 `CoordinateSpace` contains a forward matrix, a precomputed inverse, cached raster
 density and a persistent chain of clipping scopes. Hitboxes, listeners, deferred draws and input handlers
-retain this value. Consecutive clips in the same space merge; clips across different
-spaces keep their original rectangles and fade distances. A new clip removes a
-prefix of ancestors only when its four corners prove that its entire support lies
+retain this value. Consecutive hard clips in the same space merge; faded clips
+retain their original rectangles and fade distances even in identical coordinates.
+A new clip removes a prefix of ancestors only when its four corners prove that its entire support lies
 inside each ancestor's full-coverage fade inset. Numerical uncertainty retains the
 ancestor. Cached views include
 the space in their key, so changing an ancestor camera invalidates geometry that
@@ -99,6 +113,9 @@ basis to keep coverage at a device pixel's scale under zoom and shear, without
 adding shader varyings or shape-distance fragment derivatives. Identity mappings
 retain their existing coverage. The [antialiasing experiment](element-antialiasing-experiment.md)
 describes the quotient and curvature derivatives and their finite-difference checks.
+One `ContourSample` carries the selected contour's geometry and typed segment
+state; Figma, circular and superellipse paths share that evaluator without
+distance-only duplicates or conversion wrappers.
 
 The same shader sources and scene ABI serve WGPU, native Metal and DirectX.
 WGPU's downlevel transport encodes the coordinate table alongside primitive data.
