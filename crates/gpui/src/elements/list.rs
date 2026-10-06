@@ -33,7 +33,9 @@ pub fn list(
     }
 }
 
-/// A list element
+/// A virtualized list of items whose heights may differ.
+///
+/// Keep row sizes unchanged in `nth` and `every` selectors to preserve accurate scrolling.
 pub struct List {
     state: ListState,
     render_item: Box<RenderItemFn>,
@@ -1279,6 +1281,8 @@ impl StateInner {
                 _ => {}
             }
 
+            // Failed autoscroll attempts drop these visible and focused drawables.
+            // The retry rebuilds them after selector progress rewinds.
             let mut layout_response = self.layout_items(
                 Some(bounds.size.width),
                 bounds.size.height,
