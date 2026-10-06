@@ -570,22 +570,20 @@ impl DirectXRenderer {
         })?;
 
         self.upload_scene_buffers(scene)?;
-        if let Some(view) = self.globals.render_spaces_view.as_ref() {
-            let ctx = &self
-                .devices
-                .as_ref()
-                .context("devices missing")?
-                .device_context;
-            unsafe {
-                ctx.VSSetShaderResources(
-                    shader_interface::RENDER_SPACES_BINDING,
-                    Some(slice::from_ref(view)),
-                );
-                ctx.PSSetShaderResources(
-                    shader_interface::RENDER_SPACES_BINDING,
-                    Some(slice::from_ref(view)),
-                );
-            }
+        let ctx = &self
+            .devices
+            .as_ref()
+            .context("devices missing")?
+            .device_context;
+        unsafe {
+            ctx.VSSetShaderResources(
+                shader_interface::RENDER_SPACES_BINDING,
+                Some(slice::from_ref(&self.globals.render_spaces_view)),
+            );
+            ctx.PSSetShaderResources(
+                shader_interface::RENDER_SPACES_BINDING,
+                Some(slice::from_ref(&self.globals.render_spaces_view)),
+            );
         }
 
         // Only route through the offscreen scene texture when the scene contains blur filters;
