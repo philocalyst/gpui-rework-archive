@@ -1231,7 +1231,7 @@ impl Fill {
         }
     }
 
-    /// Whether this fill paints anything.
+    /// Whether this fill may produce visible pixels.
     pub fn is_visible(&self) -> bool {
         match self {
             Fill::Color(color) => !color.is_transparent(),
