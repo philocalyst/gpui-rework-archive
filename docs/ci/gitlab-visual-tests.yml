@@ -40,17 +40,17 @@ gpui-visual-tests:
           echo "WARNING: could not create the base worktree; visual comparisons will be skipped."
         elif [ ! -x "$baseline_checkout/scripts/gpui-test" ]; then
           echo "WARNING: base revision predates the visual-test harness; comparisons will be skipped."
-        elif ! GIT_SHA="$base_sha" "$baseline_checkout/scripts/gpui-test" run --output "$CI_PROJECT_DIR/visual-baseline"; then
+        elif ! GIT_SHA="$base_sha" "$baseline_checkout/scripts/gpui-test" bench --output "$CI_PROJECT_DIR/visual-baseline"; then
           echo "WARNING: base capture failed; current captures will still be generated."
         fi
       fi
     - |
       set -eu
       if [ -f visual-baseline/manifest.json ]; then
-        GIT_SHA="$CI_COMMIT_SHA" scripts/gpui-test run --output visual-report --baseline visual-baseline
+        GIT_SHA="$CI_COMMIT_SHA" scripts/gpui-test bench --output visual-report --baseline visual-baseline
       else
         echo "WARNING: no baseline capture is available; generating current captures without diffs."
-        GIT_SHA="$CI_COMMIT_SHA" scripts/gpui-test run --output visual-report
+        GIT_SHA="$CI_COMMIT_SHA" scripts/gpui-test bench --output visual-report
       fi
   artifacts:
     when: always

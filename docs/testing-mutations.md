@@ -1,6 +1,26 @@
 # Pseudo-mutation campaign
 
-## Luna campaign on the integrated source
+## Final Luna campaign after simplification
+
+The final campaign ran against archived revision `a00a48972e`. All 14 distinct baseline commands passed before the mutations: **18 killed, 0 survived, 0 invalid, 0 timed out**. The [complete run](testing-mutations-run.md) records commands, times, and assertion failures. It extends the 15 rendering, capture, animation, and report mutations below with three checks of the final cleanup:
+
+| Added mutant | Observed failure |
+|---|---|
+| Drop entity observation events | The stream returns `None` instead of the first notification |
+| Ignore the selected scenario filter | An unrelated new scenario appears in a partial comparison |
+| Compare widened values instead of persisted JSON | Unchanged fractional geometry incorrectly adds two scene changes |
+
+Trials ran in a disposable source archive and restored each file in `finally`. This campaign reused the normal Cargo target cache; a concurrently generated report exposed that Cargo had replaced its executable with an underline mutant. The runner now defaults to its own persistent `target/pseudo-mutation` cache, isolating mutant executables from normal builds. Reports were regenerated from an unmutated build afterward. No working source was mutated, committed, or pushed by the runner.
+
+Run the committed checks again with:
+
+```sh
+python3 scripts/testing/pseudo_mutation.py --timeout-seconds 300
+```
+
+The generated report records the tested source revision. Compilation failures, zero-test selections, and timeouts are inconclusive and never count as killed mutations.
+
+## Earlier integrated campaign
 
 The campaign used a disposable `git archive HEAD` checkout at source revision `1977b94c2f` (2026-10-06 19:11 UTC). Mutation configuration included the local test-runner additions for the new clipped-sprite, font gamma, and RGB/BGR laws. Trials ran sequentially; the runner restored each mutated file in `finally`, and never changed the user's working checkout. It made no commits or pushes.
 

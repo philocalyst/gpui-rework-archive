@@ -68,3 +68,24 @@ CPU reports mark GPU memory as unavailable. Captured bitmap storage is not VRAM 
 The capture boundary also suits live-update and interpreter work: a running view can export a versioned value, and a separate renderer or report viewer can consume it without sharing Rust object layouts, native handles, or atlas lifetimes. The harness adds no hot-patching runtime dependency. `cargo miri test -p gpui_ce_render --features cpu --test capture_validation` checks this value boundary without entering native font/platform calls or graphics drivers. All seven capture checks passed under Miri on the pinned nightly. The separate live-update branch was not available in this checkout, so this work establishes the shared artifact boundary without assuming its implementation.
 
 Property tests check compositing laws, clipping locality, canonical atlas history, and timeline ordering using generated inputs. Analytic state tests cover Parley underline pixels, dispatcher time, easing, repeat boundaries, and removed checkpoints. The isolated Luna mutation campaign exercises deliberate regressions against those assertions; see [the mutation evidence](testing-mutations.md). Run `python3 scripts/testing/pseudo_mutation.py --help` for its source-revision and output controls. Compile failures, zero-test selections, timeouts, and surviving mutations remain distinct from detected regressions.
+
+## Verification of the implementation
+
+Local checks used the pinned nightly on macOS. These are focused checks of the new boundary and shared examples, rather than a claim that every existing workspace test ran.
+
+| Check | Local result |
+|---|---|
+| Renderer and harness, all targets | 69 tests passed, including the 23 reviewed scene/pixel checkpoints |
+| Native component and styling lessons | Both tests passed with real click, redraw, Tab, and Shift-Tab events |
+| Entity observation stream | Successive notifications and safe stream disposal passed |
+| Miri capture validation | All seven checks passed without entering native font or GPU calls |
+| Luna source mutations | All 18 detected after 14 baseline commands passed; no survivors, invalid trials, or timeouts |
+| Native examples | All 40 targets compiled |
+| Web example | `hello_world` compiled for `wasm32-unknown-unknown` with the shared font pack |
+| Forge adapters and launchers | 22 checks completed; the Windows-only launcher check was skipped locally |
+| Code quality and packaging | Renderer/harness Clippy passed with `--no-deps`; the test crate's package file list includes its fonts |
+| Saved reports | Full and selected CLI comparisons passed from outside the repository; intentional scene, pixel, and metadata changes failed with before/current/red images |
+| Repeated frame benchmark | All 23 checkpoints used 20 samples and matched the single-frame scene and pixel baseline |
+| Website artifacts | The generated and trusted viewers rendered locally; all 23 checkpoint labels appeared in the sanitized Plotters graph |
+
+Linux and Windows contract jobs are configured in CI but were not executed from this checkout. Forge publication was tested with mocked APIs; no report was posted or deployed. Native GPU presentation and driver memory remain separate backend measurements, as described above.

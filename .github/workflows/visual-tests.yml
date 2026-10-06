@@ -69,7 +69,7 @@ jobs:
             exit 0
           fi
 
-          if ! GIT_SHA="$BASE_SHA" "$baseline_checkout/scripts/gpui-test" run --output "$GITHUB_WORKSPACE/visual-baseline"; then
+          if ! GIT_SHA="$BASE_SHA" "$baseline_checkout/scripts/gpui-test" bench --output "$GITHUB_WORKSPACE/visual-baseline"; then
             echo "::warning::Could not capture the base revision; current captures will still be reported."
           fi
 
@@ -78,7 +78,7 @@ jobs:
           GIT_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          args=(run --output visual-report)
+          args=(bench --output visual-report)
           if [[ -f visual-baseline/manifest.json ]]; then
             args+=(--baseline visual-baseline)
           else

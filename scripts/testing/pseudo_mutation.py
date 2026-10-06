@@ -2,8 +2,8 @@
 """Run focused pseudo-source mutants in an isolated archive of HEAD.
 
 The runner never edits the caller's checkout. Each trial restores its exact source file bytes
-before running the next trial; a fresh temporary archive is discarded at exit. Cargo commands
-share the caller's target directory and execute serially to avoid corrupting Cargo's build cache.
+before running the next trial; a fresh temporary archive is discarded at exit. Trials reuse
+their own Cargo cache under target/pseudo-mutation, keeping mutant executables out of normal builds.
 """
 from __future__ import annotations
 
@@ -374,8 +374,10 @@ def markdown_report(results: Sequence[dict[str, object]], baselines: dict[str, d
     lines = [
         "# Pseudo-mutation campaign",
         "",
-        f"Source revision: `{commit}`  ",
-        f"Run date: {date}  ",
+        f"Source revision: `{commit}`",
+        "",
+        f"Run date: {date}",
+        "",
         "Mutations ran one at a time in a disposable `git archive HEAD` checkout. Source files were restored after each trial, and the caller's working tree was not modified.",
         "",
         "| Mutant | Focused check | Result | Time |",
@@ -415,7 +417,7 @@ def markdown_report(results: Sequence[dict[str, object]], baselines: dict[str, d
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", type=pathlib.Path, default=pathlib.Path(__file__).resolve().parents[2], help="main checkout containing the committed HEAD")
-    parser.add_argument("--target-dir", type=pathlib.Path, help="Cargo target cache (defaults to <repo>/target)")
+    parser.add_argument("--target-dir", type=pathlib.Path, help="isolated Cargo cache (defaults to <repo>/target/pseudo-mutation)")
     parser.add_argument("--timeout-seconds", type=int, default=300)
     parser.add_argument("--only", action="append", help="run only this mutant (repeat the option to select several)")
     parser.add_argument("--report", type=pathlib.Path, default=pathlib.Path("docs/testing-mutations-run.md"), help="standalone Markdown result report written in the main checkout")
@@ -423,7 +425,7 @@ def main() -> int:
     args = parser.parse_args()
 
     repo = git_root(args.repo.resolve())
-    target_dir = (args.target_dir or repo / "target").resolve()
+    target_dir = (args.target_dir or repo / "target" / "pseudo-mutation").resolve()
     if args.list:
         for mutant in MUTANTS:
             print(f"{mutant.name}: {mutant.command_name}\n  {' '.join(mutant.command)}")

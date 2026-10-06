@@ -26,7 +26,7 @@ The launcher resolves the repository from its own location and passes any remain
 
 ## CI and report hosting
 
-GitHub Actions runs GPU-free renderer contracts and state regressions on Linux, macOS, and Windows, then captures snapshots on Ubuntu and always uploads the reports. A missing baseline (for example, when the base predates this harness) is reported as a warning; it does not turn a successful capture into a failure. Visual pixel changes remain advisory.
+GitHub Actions runs GPU-free renderer contracts and state regressions on Linux, macOS, and Windows, then captures snapshots on Ubuntu and always uploads the reports. Both forge templates use `bench` for saved reports: twenty repeated frames at each fixed checkpoint supply timing percentiles without advancing animation time. A missing baseline (for example, when the base predates this harness) is reported as a warning; it does not turn a successful capture into a failure. Visual pixel changes remain advisory.
 
 The standard-library report-adapter checks can be run locally with `python3 -m unittest discover -s scripts/testing -p 'test_*.py'`.
 
