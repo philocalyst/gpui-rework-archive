@@ -224,6 +224,10 @@ name = "custom_drawing"
 path = "examples/learn/custom_drawing.rs"
 
 [[example]]
+name = "element_transforms"
+path = "examples/learn/element_transforms.rs"
+
+[[example]]
 name = "animation"
 path = "examples/learn/animation.rs"
 
@@ -346,3 +350,8 @@ path = "examples/legacy/window_positioning.rs"
 [[example]]
 name = "window_shadow"
 path = "examples/legacy/window_shadow.rs"
+
+[[bench]]
+name = "element_transforms"
+harness = false
+required-features = ["bench-support"]

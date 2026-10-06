@@ -1,7 +1,8 @@
 use criterion::{BatchSize, Criterion, black_box, criterion_group, criterion_main};
 use gpui::{
     Bounds, ContentMask, Corners, DevicePixels, PlatformHeadlessRenderer, Point, Quad,
-    ScaledPixels, Scene, ShaderBool, Size, Underline, solid_background, white,
+    ScaledPixels, Scene, ShaderBool, Size, TransformationMatrix, Underline, point, radians,
+    solid_background, white,
 };
 use gpui_ce_wgpu::WgpuHeadlessRenderer;
 
@@ -104,6 +105,55 @@ fn unplanned_mixed_scene(count: usize) -> Scene {
     scene
 }
 
+fn transformed_quad_scene(count: usize, transform: TransformationMatrix) -> Scene {
+    let mut scene = Scene::default();
+    scene.with_transform(transform, |scene| {
+        for quad in &unplanned_quad_scene(count).quads {
+            scene.insert_primitive(*quad);
+        }
+    });
+    scene.finish();
+    scene
+}
+
+fn nested_rotated_clip_scene(depth: usize, count: usize) -> Scene {
+    fn descend(scene: &mut Scene, level: usize, depth: usize, count: usize) {
+        if level == depth {
+            let content = unplanned_quad_scene(count);
+            for quad in &content.quads {
+                scene.insert_primitive(*quad);
+            }
+            return;
+        }
+
+        let transform = TransformationMatrix::unit()
+            .rotate(radians(0.035 + level as f32 * 0.002))
+            .translate(point(ScaledPixels(2.0), ScaledPixels(1.5)))
+            .scale(Size::new(1.002, 0.998));
+        let clip = ContentMask {
+            bounds: Bounds {
+                origin: Point {
+                    x: ScaledPixels(-4096.0),
+                    y: ScaledPixels(-4096.0),
+                },
+                size: Size {
+                    width: ScaledPixels(8192.0),
+                    height: ScaledPixels(8192.0),
+                },
+            },
+            ..Default::default()
+        };
+        scene.with_transform(transform, |scene| {
+            scene.with_clip(clip, |scene| descend(scene, level + 1, depth, count));
+        });
+    }
+
+    let mut scene = Scene::default();
+    descend(&mut scene, 0, depth, count);
+    scene.finish();
+    scene
+}
+
 fn bench_renderer(criterion: &mut Criterion) {
     let mut renderer = WgpuHeadlessRenderer::new().expect("headless WGPU renderer must initialize");
     let single_quad = quad_scene(1);
@@ -179,6 +229,45 @@ fn bench_renderer(criterion: &mut Criterion) {
                 .expect("mixed batch render must succeed")
         })
     });
+    group.finish();
+
+    let identity_512 = quad_scene(512);
+    let shared_pan_zoom = transformed_quad_scene(
+        512,
+        TransformationMatrix::unit()
+            .translate(point(ScaledPixels(24.0), ScaledPixels(18.0)))
+            .rotate(radians(0.08))
+            .scale(Size::new(1.25, 1.25)),
+    );
+    let nested_clip_scenes = [1, 4, 16].map(|depth| (depth, nested_rotated_clip_scene(depth, 512)));
+    let mut group = criterion.benchmark_group("coordinate_spaces_render_wait");
+    group.sample_size(30);
+    group.bench_function("identity_512", |bencher| {
+        bencher.iter(|| {
+            renderer
+                .render_scene_and_wait(black_box(&identity_512), TARGET_SIZE)
+                .expect("identity scene render must succeed")
+        })
+    });
+    group.bench_function("shared_pan_zoom_512", |bencher| {
+        bencher.iter(|| {
+            renderer
+                .render_scene_and_wait(black_box(&shared_pan_zoom), TARGET_SIZE)
+                .expect("shared pan/zoom scene render must succeed")
+        })
+    });
+    for (depth, scene) in &nested_clip_scenes {
+        group.bench_function(
+            format!("nested_rotated_clips_depth_{depth}_512"),
+            |bencher| {
+                bencher.iter(|| {
+                    renderer
+                        .render_scene_and_wait(black_box(scene), TARGET_SIZE)
+                        .expect("nested clip scene render must succeed")
+                })
+            },
+        );
+    }
     group.finish();
 
     let mut group = criterion.benchmark_group("scene_plan");
