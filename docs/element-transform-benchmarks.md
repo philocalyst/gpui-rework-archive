@@ -110,16 +110,16 @@ These intervals overlap and the point estimates are non-monotonic with clip dept
 
 The source retains the workload and methodology. Raw CPU and GPU output logs are also available in the benchmark host's `/tmp/gpui-transform-bench/` directory, but the tables above are the durable results record.
 
-## Final GPU run
+## GPU run before contour simplification
 
-Luna ran the three bounded final workloads on
+Luna ran three bounded workloads on
 `f1eb725c7c2589d4f3a06e377602f7351dff08f3`, with only documentation edits
 uncommitted. The optimized binary ran on the same Apple M3 Pro host described
 above, with 30 Criterion samples per case. The table gives Criterion's slope
 estimate and 95% bootstrap confidence interval, verified against its estimate
 JSON; these values are not sample medians.
 
-| Final GPU submission and wait workload | Slope estimate (95% interval) |
+| GPU submission and wait workload | Slope estimate (95% interval) |
 | --- | ---: |
 | Identity, 512 quads | 1.946 ms (1.826–2.128) |
 | Shared pan/zoom, 512 quads | 2.060 ms (1.973–2.160) |
@@ -136,10 +136,10 @@ toolchain and output, and [the estimate objects](experiments/affine-aa-gpu-final
 preserve slope/mean/median statistics in nanoseconds. Criterion printed comparison
 statistics against a locally stored baseline whose source provenance was not
 established; those comparisons are not treated as before/after evidence. This
-run records representative final costs under contention and supports no stable
-GPU performance-win claim.
+run records representative costs at that revision under contention and supports
+no stable GPU performance-win claim.
 
-## Final integrated validation
+## Validation before contour simplification
 
 The shader and renderer source at `f1eb725c7c2589d4f3a06e377602f7351dff08f3`
 passed 34 shared-render tests, 14 native Metal tests, 32 WGPU tests and 10 headless
@@ -179,3 +179,51 @@ and rendering were not available on this host. The DirectX optional-resource
 argument was checked against the local Windows SDK Rust signature, and the
 shared generated HLSL and layout checks passed; these do not substitute for a
 native Windows build.
+
+## Simplified implementation validation
+
+The implementation at `7cb1d273813e8e2075f1d352e273d78200ba03c9` passed
+413 core tests, 35 shared-shader tests, 14 Metal tests, 32 WGPU tests and 11
+headless pixel tests. The new checks exercise coincident and offset fade products
+at device scales one and two, original fade anchors outside the viewport,
+deferred overlays that escape clips while retaining the camera, and straight
+contour ties with overlapping or collapsed reaches. The shader and renderer
+command above was rerun after the contour and clipping changes; the core command is:
+
+```sh
+cargo test --offline -p gpui-ce --lib --no-default-features --features test-support
+cargo fmt -p gpui-ce -p gpui_ce_render -p gpui_ce_wgpu --check
+```
+
+Scoped Clippy, WASM and the camera example were rerun successfully after the
+final clipping API changes. The public transform doctest also passed. The
+separately run WGPU gradient case still reproduces the exact baseline mismatch
+recorded above, with its original tolerance. The native Windows validation
+limitation remains.
+
+## GPU run after contour simplification
+
+Luna measured `7cb1d273813e8e2075f1d352e273d78200ba03c9` on the same
+Apple M3 Pro host, with 30 samples per case and only benchmark-document edits
+uncommitted. The optimized build took five minutes; our own builds were idle
+during measurement. The workload and submission/wait methodology are unchanged.
+
+| Workload, 512 quads | Median (95% interval) | Slope (95% interval) |
+| --- | ---: | ---: |
+| Identity | 2.297 ms (1.922–2.591) | 2.445 ms (2.231–2.726) |
+| Shared pan/zoom | 1.877 ms (1.795–1.964) | 1.984 ms (1.801–2.268) |
+| Sheared rounded borders | 3.046 ms (3.004–3.077) | 3.211 ms (3.062–3.424) |
+
+[The raw run](experiments/affine-contour-gpu-run.txt) preserves the command,
+host metadata and output. [Complete estimates](experiments/affine-contour-gpu-estimates.json)
+record the source revision and slope/mean/median statistics in nanoseconds.
+The CLI's displayed time estimates are slopes, not medians. Its printed mean
+changes reproduce the archived `f1eb725c7c` means: identity +27.6%, pan/zoom
++5.0%, sheared borders −36.6%. Criterion reports the identity increase and
+sheared decrease as significant, and pan/zoom as inconclusive (`p=0.42`).
+
+These are single, sequential runs without interleaved variants or controlled
+host contention; they do not establish a general implementation speedup or
+isolate the cost of the contour reduction. The cases had 3, 5 and 2 outliers
+respectively. Post-run load averages were 45.23/53.44/51.86, recorded at
+22:10:20 UTC after measurement, not throughout the timed interval.
