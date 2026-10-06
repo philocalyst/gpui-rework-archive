@@ -961,7 +961,7 @@ pub enum BorderStyle {
 }
 
 /// A data type representing a 2 dimensional transformation that can be applied to an element.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[repr(C)]
 pub struct TransformationMatrix {
     /// 2x2 matrix containing rotation and scale,
