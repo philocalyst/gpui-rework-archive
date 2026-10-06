@@ -2,7 +2,7 @@
 
 use gpui::{
     rgb,
-    shader::{Input, Paint, Vec3, color, noise, paint, rgba, shape, vec2, vec3, vec3f},
+    shader::{Input, Paint, Vec3, color, paint, rgba, shape, vec2, vec3, vec3f},
     white,
 };
 

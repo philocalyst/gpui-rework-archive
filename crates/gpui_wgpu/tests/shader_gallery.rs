@@ -2,6 +2,8 @@
 //! drawing. Set `GPUI_SHADER_GALLERY_PNG` to a path to save the frame.
 #![cfg(feature = "test-support")]
 
+mod support;
+
 #[path = "../examples/shader_gallery/gallery/mod.rs"]
 #[allow(dead_code)]
 mod gallery;
@@ -9,19 +11,15 @@ mod gallery;
 use std::sync::Arc;
 
 use gpui::{AppContext, HeadlessAppContext, PrimitiveBatch, RenderCommand, px};
-use gpui_ce_wgpu::{CosmicTextSystem, WgpuHeadlessRenderer};
+use gpui_ce_wgpu::WgpuHeadlessRenderer;
 
 #[test]
 fn the_gallery_renders() {
-    let mut cx = HeadlessAppContext::with_platform(
-        Arc::new(CosmicTextSystem::new("sans-serif")),
-        Arc::new(()),
-        || {
-            Some(Box::new(
-                WgpuHeadlessRenderer::new().expect("a GPU adapter"),
-            ))
-        },
-    );
+    let mut cx = HeadlessAppContext::with_platform(support::text_system(), Arc::new(()), || {
+        Some(Box::new(
+            WgpuHeadlessRenderer::new().expect("a GPU adapter"),
+        ))
+    });
     let window = cx
         .open_window(gpui::size(px(912.0), px(824.0)), |_, cx| {
             cx.new(|_| gallery::Gallery::frozen(1.5))
