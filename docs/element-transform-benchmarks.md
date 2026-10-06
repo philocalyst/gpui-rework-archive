@@ -77,6 +77,19 @@ visit-count reduction is the relevant structural result for the shader.
 passed the strengthened clip-order assertions and reproduced those visit counts;
 its timing spread is recorded separately.
 
+## Retained clip comparisons
+
+The [clip equality experiment](arc-clip-equality-experiment.md) found that this
+toolchain's `Arc<PartialEq>` comparison walks the pointee even for the same
+allocation; its pointer shortcut requires `Eq`, which float geometry does not
+implement. The production view cache now tries the existing immutable-scope
+identity check before structural equality. A standalone proxy counted 1, 16, 64
+and 256 clip comparisons on retained clones, reduced to a constant-time pointer
+check. Separately rebuilt equal chains still receive structural comparison.
+The recorded timings have wide tails under heavy host load; the counted
+traversal and source change establish the complexity reduction, not an
+application frame-rate improvement.
+
 ## GPU submission target
 
 `gpui_wgpu`'s `renderer` benchmark includes `coordinate_spaces_render_wait`: 512 identity quads, a shared pan/zoom transform on 512 quads, and nested rotated clip chains at depths 1, 4 and 16. Each timed iteration uses `render_scene_and_wait`, which waits for GPU completion without a readback. Criterion reports each case separately; the harness does not interleave variants in one paired timer.

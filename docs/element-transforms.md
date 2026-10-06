@@ -72,6 +72,9 @@ inside each ancestor's full-coverage fade inset. Numerical uncertainty retains t
 ancestor. Cached views include
 the space in their key, so changing an ancestor camera invalidates geometry that
 was retained in the old space.
+Retained-view comparisons first recognize an identical immutable scope, avoiding
+a walk of its clip chain. Separately rebuilt equivalent scopes still compare
+structurally.
 
 Painting interns those scopes into a frame-local GPU table. Primitives carry a
 small space ID through their content mask instead of duplicating a matrix on each

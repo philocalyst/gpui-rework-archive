@@ -358,7 +358,6 @@ struct ViewDirectionState {
     contribution: Option<ResolvedDirection>,
 }
 
-#[derive(PartialEq)]
 struct ViewElementCacheKey {
     coordinate_space: crate::CoordinateSpace,
     bounds: Bounds<Pixels>,
@@ -366,6 +365,21 @@ struct ViewElementCacheKey {
     text_style: TextStyle,
     direction: ResolvedDirection,
     unicode_bidi: UnicodeBidi,
+}
+
+impl PartialEq for ViewElementCacheKey {
+    fn eq(&self, other: &Self) -> bool {
+        // Retained scopes share immutable clips. Arc's structural equality has
+        // no pointer shortcut for float geometry, so use the scope identity
+        // before comparing separately rebuilt, equivalent chains.
+        (self.coordinate_space.same_scope(&other.coordinate_space)
+            || self.coordinate_space == other.coordinate_space)
+            && self.bounds == other.bounds
+            && self.content_mask == other.content_mask
+            && self.text_style == other.text_style
+            && self.direction == other.direction
+            && self.unicode_bidi == other.unicode_bidi
+    }
 }
 
 impl<V: View> Element for ViewElement<V> {
