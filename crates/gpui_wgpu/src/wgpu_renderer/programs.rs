@@ -2,8 +2,8 @@
 //! paint, and custom pipelines.
 //!
 //! Each program links into one shader module (see [`gpui_render::link`]);
-//! its pipelines are created on first use and evicted once unused. User data
-//! travels in the frame's instance buffer: shader paints bind it a second time
+//! its pipelines are cached on first use, retaining recently used programs.
+//! User data travels in the frame's instance buffer: shader paints bind it a second time
 //! as `array<vec4<f32>>` in group 2, and custom pipelines read it as their
 //! group-1 data.
 
@@ -23,7 +23,7 @@ use super::{
     pipelines::{self, WgpuBindGroupLayouts, WgpuRenderPipeline},
 };
 
-/// Programs of each kind kept beyond the current frame's working set.
+/// Cache budget; programs used in the current frame are always retained.
 const RETAINED_PROGRAMS: usize = 64;
 
 /// Pipelines by program, remembering the frame each was last used in.

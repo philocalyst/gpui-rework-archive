@@ -1,12 +1,14 @@
 //! Compare WGPU shader pixels with ordinary quads and CPU paint evaluation.
 #![cfg(feature = "test-support")]
 
+mod support;
+
 use gpui::{
     AnyElement, App, AppContext, Context, HeadlessAppContext, IntoElement, ParentElement,
     PrimitiveBatch, Render, RenderCommand, Styled, Window, canvas, div, hsla, px, rgb,
     shader::{Fragment, Paint, Pipeline, Shader, color, paint, rgba, vec2, vec2f},
 };
-use gpui_ce_wgpu::{CosmicTextSystem, WgpuHeadlessRenderer};
+use gpui_ce_wgpu::WgpuHeadlessRenderer;
 use image::RgbaImage;
 use std::sync::Arc;
 
@@ -29,15 +31,11 @@ fn render_with(
     build: impl Fn() -> AnyElement + 'static,
     inspect: impl FnOnce(&mut Window, &mut App),
 ) -> RgbaImage {
-    let mut cx = HeadlessAppContext::with_platform(
-        Arc::new(CosmicTextSystem::new("sans-serif")),
-        Arc::new(()),
-        || {
-            Some(Box::new(
-                WgpuHeadlessRenderer::new().expect("a GPU adapter"),
-            ))
-        },
-    );
+    let mut cx = HeadlessAppContext::with_platform(support::text_system(), Arc::new(()), || {
+        Some(Box::new(
+            WgpuHeadlessRenderer::new().expect("a GPU adapter"),
+        ))
+    });
     let root = move || {
         div()
             .size_full()
