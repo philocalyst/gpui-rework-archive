@@ -90,6 +90,38 @@ fn collapsed_and_rotated_spaces_have_sound_inverse_and_scale_queries() {
     assert!((round_trip.y.0 - point.y.0).abs() < 0.001);
 }
 
+#[test]
+fn bitmap_density_uses_the_composed_intrinsic_mapping() {
+    let anisotropic_parent = TransformationMatrix::unit().scale(size(4., 0.25));
+    let anisotropic_child = TransformationMatrix::unit().scale(size(0.25, 4.));
+    let parent = CoordinateSpace::new(anisotropic_parent);
+
+    // The two anisotropic scales cancel. Multiplying their independent maximum
+    // stretches would incorrectly select the maximum density bucket.
+    assert_eq!(parent.raster_scale_for(anisotropic_child), 1.);
+    assert_eq!(
+        parent.raster_scale_for(TransformationMatrix {
+            translation: [3., -2.],
+            ..TransformationMatrix::unit()
+        }),
+        parent.raster_scale()
+    );
+
+    let rotated_parent = TransformationMatrix::unit()
+        .scale(size(1.5, 0.75))
+        .rotate(Radians(0.37));
+    let sheared_child = TransformationMatrix {
+        rotation_scale: [[1., 0.6], [0.2, 1.]],
+        translation: [80., -40.],
+    };
+    let composed = rotated_parent.compose(sheared_child);
+    let expected = (composed.max_scale().max(1.) * 8.).ceil().clamp(8., 64.) / 8.;
+    assert_eq!(
+        CoordinateSpace::new(rotated_parent).raster_scale_for(sheared_child),
+        expected
+    );
+}
+
 struct CachedTarget {
     renders: Rc<Cell<usize>>,
     clicks: Rc<Cell<usize>>,

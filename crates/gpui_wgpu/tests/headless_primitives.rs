@@ -819,3 +819,82 @@ fn clip_distances_reconstruct_local_coordinates_under_large_sheared_reflection()
         "the affine clip excludes points inside its AABB"
     );
 }
+#[test]
+fn content_filters_preserve_inherited_fades_without_multiplying_them_again() {
+    let mut renderer = WgpuHeadlessRenderer::new().expect("headless renderer");
+    let faded_mask = ContentMask {
+        bounds: bounds(0., 0., 100., 60.),
+        fade_out: Edges {
+            left: ScaledPixels(20.),
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+    let camera = gpui::TransformationMatrix::unit()
+        .translate(gpui::point(ScaledPixels(40.), ScaledPixels(10.)))
+        .rotate(gpui::Radians(0.2))
+        .scale(Size::new(2., 1.));
+    for (transform, ancestor_fade) in [(gpui::TransformationMatrix::unit(), false), (camera, true)]
+    {
+        let mut scene = Scene::default();
+        scene.insert_primitive(Quad {
+            bounds: full_mask().bounds,
+            content_mask: full_mask(),
+            background: solid_background(gpui::black()),
+            ..Default::default()
+        });
+        let paint_group = |scene: &mut Scene| {
+            let content_mask = if ancestor_fade {
+                full_mask()
+            } else {
+                faded_mask
+            };
+            let boundary = gpui::FilterBoundary {
+                geometry: None,
+                order: 0,
+                bounds: faded_mask.bounds,
+                content_mask,
+                corner_radii: Corners::default(),
+                corner_smoothing: 0.,
+                filters: smallvec![ScaledFilter::Blur(ScaledPixels(0.25))],
+                opacity: 1.,
+                is_start: true,
+            };
+            scene.insert_primitive(boundary.clone());
+            scene.insert_primitive(Quad {
+                bounds: faded_mask.bounds,
+                content_mask,
+                background: solid_background(gpui::white()),
+                ..Default::default()
+            });
+            scene.insert_primitive(gpui::FilterBoundary {
+                is_start: false,
+                ..boundary
+            });
+        };
+        scene.with_transform(transform, |scene| {
+            if ancestor_fade {
+                scene.with_clip(faded_mask, paint_group);
+            } else {
+                paint_group(scene);
+            }
+        });
+        scene.finish();
+        let image = renderer.render_scene_to_image(&scene, TARGET).unwrap();
+        for local_x in [5., 10., 15., 35.] {
+            let window_point = transform.apply(gpui::point(gpui::px(local_x), gpui::px(25.)));
+            let x = f32::from(window_point.x).floor() as u32;
+            let y = f32::from(window_point.y).floor() as u32;
+            let local = transform.inverse().unwrap().apply(gpui::point(
+                gpui::px(x as f32 + 0.5),
+                gpui::px(y as f32 + 0.5),
+            ));
+            let expected = ((f32::from(local.x) / 20.).clamp(0., 1.) * 255.).round() as u8;
+            let actual = image.get_pixel(x, y).0[0];
+            assert!(
+                actual.abs_diff(expected) <= 6,
+                "ancestor={ancestor_fade}, ({x},{y}): expected one fade {expected}, got {actual}"
+            );
+        }
+    }
+}

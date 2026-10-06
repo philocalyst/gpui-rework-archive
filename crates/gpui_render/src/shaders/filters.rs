@@ -156,10 +156,11 @@ pub mod blur {
         );
         let factor = coverage
             * get!(BLUR_LOCALS).opacity
-            * ContentMask::alpha_at_local_position(
+            * ContentMask::coverage_at_local_position(
                 get!(BLUR_LOCALS).space_mask,
                 position,
                 local_position,
+                get!(BLUR_LOCALS).composite_clip == BlurCompositeClip::RoundedBounds,
             );
         vec4f(
             blurred.x * factor,

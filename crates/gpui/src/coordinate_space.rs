@@ -6,6 +6,16 @@ use std::sync::Arc;
 const RASTER_BUCKETS_PER_UNIT: f32 = 8.0;
 const MAX_RASTER_SCALE: f32 = 8.0;
 
+fn quantized_raster_scale(transform: TransformationMatrix) -> f32 {
+    (transform.max_scale().max(1.0) * RASTER_BUCKETS_PER_UNIT)
+        .ceil()
+        .clamp(
+            RASTER_BUCKETS_PER_UNIT,
+            MAX_RASTER_SCALE * RASTER_BUCKETS_PER_UNIT,
+        )
+        / RASTER_BUCKETS_PER_UNIT
+}
+
 /// An affine transform applied after layout to an element and its descendants.
 ///
 /// Operations apply in the order written. Translation uses logical pixels; the
@@ -191,13 +201,7 @@ impl CoordinateSpace {
             inverse: transform.inverse(),
             // Raster density is a property of the space, not of each glyph.
             // Upward eighth-step buckets limit churn; the cap bounds allocations.
-            raster_scale: (transform.max_scale().max(1.0) * RASTER_BUCKETS_PER_UNIT)
-                .ceil()
-                .clamp(
-                    RASTER_BUCKETS_PER_UNIT,
-                    MAX_RASTER_SCALE * RASTER_BUCKETS_PER_UNIT,
-                )
-                / RASTER_BUCKETS_PER_UNIT,
+            raster_scale: quantized_raster_scale(transform),
             clips: None,
         }
     }
@@ -208,6 +212,23 @@ impl CoordinateSpace {
     /// and eight. Use this for custom bitmap content while retaining layout size.
     pub fn raster_scale(&self) -> f32 {
         self.raster_scale
+    }
+
+    /// Recommended bitmap density for content with an additional local transform.
+    ///
+    /// `local_transform` maps the bitmap's logical coordinates into this space's
+    /// logical coordinates. Its linear part is composed with this space before
+    /// measuring stretch, so translations do not affect density and nested
+    /// rotations, shears, and inverse scales are handled together. The result is
+    /// relative to the window's device scale; retain the bitmap's logical bounds
+    /// when drawing it. Passing a translation-only transform returns the cached
+    /// density for this coordinate space.
+    pub fn raster_scale_for(&self, local_transform: TransformationMatrix) -> f32 {
+        if local_transform.rotation_scale == TransformationMatrix::unit().rotation_scale {
+            return self.raster_scale;
+        }
+
+        quantized_raster_scale(self.transform.compose(local_transform))
     }
 
     /// Maps a point in layout coordinates into the window.

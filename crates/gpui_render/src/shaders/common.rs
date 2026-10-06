@@ -176,7 +176,23 @@ mod source {
             position: Vec2f,
             local: Vec2f,
         ) -> f32 {
-            let mut alpha = Self::bounds_alpha(content_mask.bounds, content_mask.fade_out, local);
+            Self::coverage_at_local_position(content_mask, position, local, true)
+        }
+
+        /// Isolated content already carries inherited fades; its composite
+        /// rechecks exact hard clips without multiplying those ramps again.
+        pub fn coverage_at_local_position(
+            content_mask: ContentMask,
+            position: Vec2f,
+            local: Vec2f,
+            include_fades: bool,
+        ) -> f32 {
+            let mut alpha = Self::bounds_coverage(
+                content_mask.bounds,
+                content_mask.fade_out,
+                local,
+                include_fades,
+            );
             // Space zero is the legacy identity path: preserve ordinary mask coverage
             // without touching the scene table for the overwhelming majority of frames.
             if content_mask.space == 0u32 {
@@ -189,10 +205,11 @@ mod source {
                     return 0.0;
                 }
                 if space.kind == SpaceKind::Clip {
-                    alpha *= Self::bounds_alpha(
+                    alpha *= Self::bounds_coverage(
                         space.clip,
                         space.fade,
                         TransformationMatrix::transform_position(space.inverse, position),
+                        include_fades,
                     );
                 }
                 space_id = space.parent;
@@ -200,7 +217,12 @@ mod source {
             alpha
         }
 
-        pub fn bounds_alpha(bounds: Bounds, fade: Edges, position: Vec2f) -> f32 {
+        pub fn bounds_coverage(
+            bounds: Bounds,
+            fade: Edges,
+            position: Vec2f,
+            include_fades: bool,
+        ) -> f32 {
             let far = bounds.origin + bounds.size;
             if position.x < bounds.origin.x
                 || position.y < bounds.origin.y
@@ -208,6 +230,9 @@ mod source {
                 || position.y > far.y
             {
                 return 0.0;
+            }
+            if !include_fades {
+                return 1.0;
             }
             let mut alpha = 1.0;
             if fade.left > 0.0 {

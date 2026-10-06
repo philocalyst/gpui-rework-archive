@@ -5136,8 +5136,18 @@ impl Window {
         self.invalidator.debug_assert_paint();
 
         let element_opacity = self.element_opacity();
-        let bounds = self.snap_bounds(bounds);
-        let raster_multiplier = self.coordinate_space.raster_scale();
+        let device_scale = self.scale_factor();
+        let render_transform = self
+            .coordinate_space
+            .transform
+            .scaled(device_scale)
+            .compose(transformation);
+        let bounds = if render_transform == TransformationMatrix::unit() {
+            self.snap_bounds(bounds)
+        } else {
+            bounds.scale(device_scale)
+        };
+        let raster_multiplier = self.coordinate_space.raster_scale_for(transformation);
         let raster_scale = SMOOTH_SVG_SCALE_FACTOR * raster_multiplier;
 
         let params = RenderSvgParams {
@@ -5168,7 +5178,7 @@ impl Window {
             origin: bounds.center() - Point::new(size.width, size.height) / 2.0,
             size,
         };
-        let final_bounds = if self.coordinate_space.transform == TransformationMatrix::unit() {
+        let final_bounds = if render_transform == TransformationMatrix::unit() {
             svg_bounds
                 .map_origin(|value| ScaledPixels(round_half_toward_zero(value.0)))
                 .map_size(|size| size.ceil())
@@ -5350,7 +5360,7 @@ impl Window {
                 frame_index,
             };
 
-            self.sprite_atlas.remove(&params.clone().into());
+            self.sprite_atlas.remove(&params.into());
         }
 
         Ok(())
@@ -8656,6 +8666,43 @@ mod tests {
                 "SVG render space should preserve the 2.01x element transform: {:?}",
                 space.transform
             );
+        });
+    }
+
+    struct IntrinsicallyScaledSvgView;
+
+    impl Render for IntrinsicallyScaledSvgView {
+        fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+            div().size_full().child(
+                svg()
+                    .data(INLINE_SVG)
+                    .w(px(20.))
+                    .h(px(10.))
+                    .with_transformation(crate::Transformation::scale(size(4., 4.)))
+                    .text_color(white()),
+            )
+        }
+    }
+
+    #[test]
+    fn intrinsic_svg_transform_selects_composed_raster_density() {
+        let mut app = TestApp::new();
+        let mut test_window = app.open_window(|_, _| IntrinsicallyScaledSvgView);
+        test_window.draw();
+
+        test_window.update(|_, window, _| {
+            let scene = &window.rendered_frame.scene;
+            assert_eq!(scene.monochrome_sprites.len(), 1);
+            let sprite = scene.monochrome_sprites[0];
+            assert_eq!(
+                sprite.tile.bounds.size,
+                size(DevicePixels(320), DevicePixels(160))
+            );
+            assert_eq!(
+                sprite.bounds.size,
+                size(ScaledPixels(40.), ScaledPixels(20.))
+            );
+            assert_eq!(sprite.transformation.max_scale(), 4.);
         });
     }
 
