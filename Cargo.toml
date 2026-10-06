@@ -1,6 +1,7 @@
 [workspace]
 members = [
   "./crates/gpui/",
+  "./crates/gpui_test/",
   "./crates/gpui_render/",
   "./crates/gpui_web/",
   "./crates/gpui_wgpu/",
@@ -96,7 +97,7 @@ schemars = { version = "1.0", features = ["indexmap2"] }
 serde = { version = "1.0.221", features = ["derive", "rc"] }
 serde_json = { version = "1.0.144", features = ["preserve_order", "raw_value"] }
 slotmap = "1.0.6"
-smallvec = { version = "1.6", features = ["union", "const_new"] }
+smallvec = { version = "1.6", features = ["union", "const_new", "serde"] }
 async-channel = "2.5.0"
 stacksafe = "1.0"
 strum = { version = "0.27.2", features = ["derive"] }

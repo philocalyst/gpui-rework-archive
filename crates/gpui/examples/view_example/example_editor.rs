@@ -390,6 +390,7 @@ impl Element for EditorText {
                 background_color: None,
                 underline: None,
                 strikethrough: None,
+                letter_spacing: None,
             };
             vec![
                 window
@@ -408,6 +409,7 @@ impl Element for EditorText {
                         background_color: None,
                         underline: None,
                         strikethrough: None,
+                        letter_spacing: None,
                     };
                     window.text_system().shape_line(text, font_size, &[run])
                 })
@@ -417,7 +419,25 @@ impl Element for EditorText {
         let cursor = if is_focused && cursor_visible && !is_placeholder {
             let (cursor_line, offset_in_line) = cursor_line_and_offset(&content, cursor_offset);
             let cursor_line = cursor_line.min(lines.len().saturating_sub(1));
-            let cursor_x = lines[cursor_line].x_for_index(offset_in_line);
+            let line_text = lines[cursor_line].text.clone();
+            let run = TextRun {
+                len: line_text.len(),
+                font: style.font(),
+                color: text_color,
+                background_color: None,
+                underline: None,
+                strikethrough: None,
+                letter_spacing: None,
+            };
+            let cursor_x = window
+                .text_system()
+                .shape_text(line_text, font_size, &[run], None, None)
+                .ok()
+                .and_then(|layout| {
+                    layout.visual_position_for_byte_index(offset_in_line, line_height)
+                })
+                .unwrap_or_default()
+                .x;
             Some(fill(
                 Bounds::new(
                     point(

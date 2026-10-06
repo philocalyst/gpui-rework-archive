@@ -211,12 +211,38 @@ pub mod polychrome_sprite {
     pub fn polychrome_color(sprite: PolychromeSprite, tile_position: Vec2f) -> Vec4f {
         let sample =
             texture_sample_level(POLYCHROME_TEXTURE, POLYCHROME_SAMPLER, tile_position, 0.0);
+        polychrome_color_from_sample(sample, sprite.grayscale)
+    }
+
+    pub fn polychrome_color_from_sample(sample: Vec4f, grayscale_enabled: ShaderBool) -> Vec4f {
         let grayscale = dot(sample.rgb(), LINEAR_RGB_LUMA_WEIGHTS);
         select(
             sample,
             vec4f(grayscale, grayscale, grayscale, sample.w),
-            is_enabled(sprite.grayscale),
+            is_enabled(grayscale_enabled),
         )
+    }
+
+    pub fn polychrome_sprite_coverage(sprite: PolychromeSprite, position: Vec2f) -> f32 {
+        antialiased_coverage(rounded_rectangle_signed_distance(
+            position,
+            sprite.bounds,
+            sprite.corner_radii,
+        ))
+    }
+
+    pub fn smoothed_polychrome_sprite_coverage(
+        sprite: PolychromeSprite,
+        position: Vec2f,
+        prepared: PreparedCorners,
+    ) -> f32 {
+        antialiased_coverage(prepared_corner_signed_distance(
+            position,
+            sprite.bounds,
+            sprite.corner_radii,
+            sprite.corner_smoothing,
+            prepared,
+        ))
     }
 
     #[derive(Wgsl)]
@@ -257,11 +283,7 @@ pub mod polychrome_sprite {
         blend_color(
             color,
             sprite.opacity
-                * antialiased_coverage(rounded_rectangle_signed_distance(
-                    input.position.xy(),
-                    sprite.bounds,
-                    sprite.corner_radii,
-                ))
+                * polychrome_sprite_coverage(sprite, input.position.xy())
                 * ContentMask::alpha(sprite.content_mask, input.position.xy()),
         )
     }
@@ -327,18 +349,16 @@ pub mod polychrome_sprite {
         blend_color(
             color,
             sprite.opacity
-                * antialiased_coverage(prepared_corner_signed_distance(
+                * smoothed_polychrome_sprite_coverage(
+                    sprite,
                     input.position.xy(),
-                    sprite.bounds,
-                    sprite.corner_radii,
-                    sprite.corner_smoothing,
                     PreparedCorners {
                         horizontal_reaches: input.horizontal_corner_reaches,
                         vertical_reaches: input.vertical_corner_reaches,
                         smoothing_factors: input.smoothing_factors,
                         superellipse_power: input.superellipse_power,
                     },
-                ))
+                )
                 * ContentMask::alpha(sprite.content_mask, input.position.xy()),
         )
     }

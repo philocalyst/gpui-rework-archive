@@ -890,7 +890,6 @@ pub struct BackdropFilter {
     /// Inline capacity is 4: a `SmallVec<[ScaledFilter; 4]>` is the same size as capacity 1 here
     /// (the heap repr already occupies that space), so chains up to 4 filters avoid allocating
     /// at no extra struct size.
-    #[serde(with = "smallvec_scaled_filters_serde")]
     pub filters: SmallVec<[ScaledFilter; 4]>,
     /// Element opacity captured at paint time, multiplied into the composited result.
     pub opacity: f32,
@@ -924,7 +923,6 @@ pub struct FilterBoundary {
     /// The filter chain applied to the isolated group, in scene (device-pixel) space. Identity
     /// filters are dropped at paint time, so a `FilterBoundary` is only emitted when non-empty.
     /// Inline capacity 4 (same struct size as 1 here — see [`BackdropFilter::filters`]).
-    #[serde(with = "smallvec_scaled_filters_serde")]
     pub filters: SmallVec<[ScaledFilter; 4]>,
     pub opacity: f32,
     /// `true` for the start marker (opens the group), `false` for the end marker (closes it).
@@ -946,29 +944,6 @@ fn max_blur_radius(filters: &[ScaledFilter]) -> f32 {
     filters.iter().fold(0.0, |radius, filter| match filter {
         ScaledFilter::Blur(filter_radius) => radius.max(filter_radius.0),
     })
-}
-
-mod smallvec_scaled_filters_serde {
-    use super::ScaledFilter;
-    use serde::{Deserialize, Deserializer, Serialize, Serializer};
-    use smallvec::SmallVec;
-
-    pub fn serialize<S>(
-        value: &SmallVec<[ScaledFilter; 4]>,
-        serializer: S,
-    ) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        value.as_slice().serialize(serializer)
-    }
-
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<SmallVec<[ScaledFilter; 4]>, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        Vec::<ScaledFilter>::deserialize(deserializer).map(|filters| filters.into_iter().collect())
-    }
 }
 
 impl From<FilterBoundary> for Primitive {

@@ -1,0 +1,33 @@
+[package]
+name = "gpui_ce_test"
+version = "0.1.0"
+description = "GPU-free visual scenario testing for GPUI"
+edition.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[lib]
+name = "gpui_test"
+path = "src/lib.rs"
+
+[[bin]]
+name = "gpui-test"
+path = "src/main.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow.workspace = true
+gpui = { path = "../gpui", version = "0.2.2", package = "gpui-ce", default-features = false, features = ["test-support"] }
+gpui_ce_parley = { path = "../gpui_ce_parley", version = "0.1.0", default-features = false }
+gpui_ce_render = { path = "../gpui_render", version = "0.1.0", features = ["cpu"] }
+image.workspace = true
+plotters = { version = "0.3.7", default-features = false, features = ["line_series", "svg_backend"] }
+serde.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+insta = { version = "1.43.1", features = ["json"] }
+proptest.workspace = true
+sha2 = "0.10.9"

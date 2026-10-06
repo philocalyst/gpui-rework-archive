@@ -590,8 +590,18 @@ mod source {
     }
 
     pub fn blend_color(color: Vec4f, alpha_factor: f32) -> Vec4f {
+        blend_color_with_premultiplication(color, alpha_factor, get!(GLOBALS).premultiplied_alpha)
+    }
+
+    /// Applies shader color coverage with an explicit target-alpha convention. The explicit
+    /// variant lets the CPU renderer execute the same fragment equations without binding globals.
+    pub fn blend_color_with_premultiplication(
+        color: Vec4f,
+        alpha_factor: f32,
+        premultiplied_alpha: ShaderBool,
+    ) -> Vec4f {
         let alpha = color.w * alpha_factor;
-        let multiplier = select(1.0, alpha, is_enabled(get!(GLOBALS).premultiplied_alpha));
+        let multiplier = select(1.0, alpha, is_enabled(premultiplied_alpha));
         vec4f(
             color.x * multiplier,
             color.y * multiplier,

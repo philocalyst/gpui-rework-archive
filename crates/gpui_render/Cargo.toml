@@ -12,9 +12,15 @@ workspace = true
 [lib]
 path = "src/gpui_render.rs"
 
+[features]
+default = []
+cpu = ["gpui/test-support", "dep:anyhow", "dep:image"]
+
 [dependencies]
 gpui = { path = "../gpui", version = "0.2.2", package = "gpui-ce", default-features = false }
 wgsl-rs.workspace = true
+anyhow = { workspace = true, optional = true }
+image = { workspace = true, optional = true }
 
 [target.'cfg(windows)'.build-dependencies]
 windows.workspace = true
@@ -35,3 +41,6 @@ wgsl-rs.workspace = true
 
 [dev-dependencies]
 naga = { version = "29.0.4", features = ["wgsl-in"] }
+proptest.workspace = true
+serde_json.workspace = true
+smallvec.workspace = true

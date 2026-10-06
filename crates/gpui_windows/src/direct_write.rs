@@ -961,13 +961,13 @@ mod tests {
     use gpui_parley::FontSynthesis;
 
     const IBM_PLEX: &[u8] =
-        include_bytes!("../../../assets/fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf");
+        include_bytes!("../../gpui_test/assets/fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf");
     const IBM_PLEX_ITALIC: &[u8] =
-        include_bytes!("../../../assets/fonts/ibm-plex-sans/IBMPlexSans-Italic.ttf");
+        include_bytes!("../../gpui_test/assets/fonts/ibm-plex-sans/IBMPlexSans-Italic.ttf");
     const SOURCE_SERIF: &[u8] =
-        include_bytes!("../../../assets/fonts/source-serif-4/SourceSerif4[opsz,wght].ttf");
+        include_bytes!("../../gpui_test/assets/fonts/source-serif-4/SourceSerif4[opsz,wght].ttf");
     const NOTO_SANS: &[u8] =
-        include_bytes!("../../../assets/fonts/noto-sans/NotoSans[wdth,wght].subset.ttf");
+        include_bytes!("../../gpui_test/assets/fonts/noto-sans/NotoSans[wdth,wght].subset.ttf");
 
     #[test]
     fn fixed_fonts_cover_native_modes_instances_and_empty_glyphs() -> Result<()> {
@@ -1375,7 +1375,7 @@ mod tests {
 
         let bitmap_system = DirectWriteTextSystem::new_headless()?;
         bitmap_system.add_fonts(vec![Cow::Borrowed(include_bytes!(
-            "../../../assets/fonts/noto-color-emoji/NotoColorEmoji.subset.ttf"
+            "../../gpui_test/assets/fonts/noto-color-emoji/NotoColorEmoji.subset.ttf"
         ))])?;
         let font_id = bitmap_system.font_id(&font("Noto Color Emoji"))?;
         let glyph_id = bitmap_system.glyph_for_char(font_id, '😀').unwrap();

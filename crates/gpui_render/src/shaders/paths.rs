@@ -15,6 +15,21 @@ pub mod path_rasterization {
     pub fn quadratic_bezier_coverage(curve_position: Vec2f) -> f32 {
         let horizontal_derivative = dpdx(curve_position);
         let vertical_derivative = dpdy(curve_position);
+        quadratic_bezier_coverage_with_derivatives(
+            curve_position,
+            horizontal_derivative,
+            vertical_derivative,
+        )
+    }
+
+    /// Derivative-explicit form shared with the CPU rasterizer. The equation is the same
+    /// implicit quadratic coverage used by the fragment shader; the caller supplies the
+    /// triangle-interpolated derivatives that GPU fragment stages provide through dpdx/dpdy.
+    pub fn quadratic_bezier_coverage_with_derivatives(
+        curve_position: Vec2f,
+        horizontal_derivative: Vec2f,
+        vertical_derivative: Vec2f,
+    ) -> f32 {
         let horizontal_gradient = vec2f(horizontal_derivative.x, vertical_derivative.x);
         if length(horizontal_gradient) < MIN_PATH_GRADIENT {
             return 1.0;

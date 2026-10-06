@@ -8,7 +8,10 @@
 //! use example_prelude::init_example;
 //! ```
 
-use gpui::{App, KeyBinding, Menu, MenuItem, SharedString, actions};
+use gpui::{
+    App, Bounds, KeyBinding, Menu, MenuItem, SharedString, WindowBounds, WindowOptions, actions,
+    px, size,
+};
 
 actions!(example, [Quit, CloseWindow]);
 
@@ -39,4 +42,12 @@ pub fn init_example(cx: &mut App, name: impl Into<SharedString>) {
         }
     })
     .detach();
+}
+
+/// Build the standard centered, windowed options used by most visual examples.
+/// Callers that demonstrate native window controls can start from this value and refine it.
+#[allow(dead_code)]
+pub fn centered_window(width: f32, height: f32, cx: &App) -> WindowOptions {
+    let bounds = Bounds::centered(None, size(px(width), px(height)), cx);
+    WindowOptions::new().window_bounds(Some(WindowBounds::Windowed(bounds)))
 }

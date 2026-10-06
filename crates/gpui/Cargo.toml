@@ -154,6 +154,7 @@ windows-061 = { workspace = true, features = ["Win32_Graphics_Direct3D11"] }
 accesskit_consumer.workspace = true
 backtrace.workspace = true
 smol.workspace = true
+gpui_test = { package = "gpui_ce_test", path = "../gpui_test", version = "0.1.0" }
 collections = { workspace = true, features = ["test-support"] }
 env_logger.workspace = true
 gpui_ce_elements = { path = "../gpui_elements" }
@@ -236,10 +237,6 @@ name = "transitions"
 path = "examples/learn/transitions.rs"
 
 [[example]]
-name = "style_transitions"
-path = "examples/learn/style_transitions.rs"
-
-[[example]]
 name = "motion_showcase"
 path = "examples/learn/motion_showcase.rs"
 
@@ -258,6 +255,22 @@ path = "examples/learn/corner_smoothing.rs"
 [[example]]
 name = "keyring"
 path = "examples/learn/keyring.rs"
+
+[[example]]
+name = "border_and_shadow_backgrounds"
+path = "examples/learn/border_and_shadow_backgrounds.rs"
+
+[[example]]
+name = "direction"
+path = "examples/learn/direction.rs"
+
+# ==========================================================================
+# View composition examples
+# ==========================================================================
+
+[[example]]
+name = "view_example"
+path = "examples/view_example/view_example_main.rs"
 
 # ============================================================================
 # Bench Examples - Performance benchmarks
@@ -280,69 +293,81 @@ name = "shadow"
 path = "examples/bench/shadow.rs"
 
 # ============================================================================
-# Legacy Examples - Original examples (to be updated)
+# Gallery Examples - focused demonstrations by topic
 # ============================================================================
 
 [[example]]
-name = "focus_visible"
-path = "examples/legacy/focus_visible.rs"
+name = "input_states"
+path = "examples/gallery/interaction/input_states.rs"
 
 [[example]]
 name = "gif_viewer"
-path = "examples/legacy/gif_viewer.rs"
+path = "examples/gallery/rendering/gif_viewer.rs"
 
 [[example]]
-name = "gradient"
-path = "examples/legacy/gradient.rs"
+name = "render_effects"
+path = "examples/gallery/rendering/render_effects.rs"
 
 [[example]]
 name = "hello_world"
-path = "examples/legacy/hello_world.rs"
+path = "examples/gallery/basics/hello_world.rs"
 
 [[example]]
 name = "image_loading"
-path = "examples/legacy/image_loading.rs"
+path = "examples/gallery/rendering/image_loading.rs"
 
 [[example]]
 name = "inline_layout"
-path = "examples/legacy/inline_layout.rs"
+path = "examples/gallery/interaction/inline_layout.rs"
 
 [[example]]
 name = "layer_shell"
-path = "examples/legacy/layer_shell.rs"
+path = "examples/gallery/platform/layer_shell.rs"
 
 [[example]]
 name = "on_window_close_quit"
-path = "examples/legacy/on_window_close_quit.rs"
-
-[[example]]
-name = "opacity"
-path = "examples/legacy/opacity.rs"
-
-[[example]]
-name = "scrollable"
-path = "examples/legacy/scrollable.rs"
+path = "examples/gallery/interaction/on_window_close_quit.rs"
 
 [[example]]
 name = "svg"
-path = "examples/legacy/svg/svg.rs"
-
-[[example]]
-name = "tab_stop"
-path = "examples/legacy/tab_stop.rs"
-
-[[example]]
-name = "tree"
-path = "examples/legacy/tree.rs"
+path = "examples/gallery/rendering/svg/svg.rs"
 
 [[example]]
 name = "window"
-path = "examples/legacy/window.rs"
+path = "examples/gallery/platform/window.rs"
 
 [[example]]
 name = "window_positioning"
-path = "examples/legacy/window_positioning.rs"
+path = "examples/gallery/platform/window_positioning.rs"
 
 [[example]]
 name = "window_shadow"
-path = "examples/legacy/window_shadow.rs"
+path = "examples/gallery/platform/window_shadow.rs"
+
+# ==========================================================================
+# Text examples - text-system inspection and transforms
+# ==========================================================================
+
+[[example]]
+name = "text_system"
+path = "examples/text/text_system.rs"
+
+[[example]]
+name = "text_transform_preview"
+path = "examples/text/text_transform_preview.rs"
+
+# ==========================================================================
+# Platform examples - native integration and window lifecycle
+# ==========================================================================
+
+[[example]]
+name = "system_notifications"
+path = "examples/platform/system_notifications.rs"
+
+[[example]]
+name = "window_movable"
+path = "examples/platform/window_movable.rs"
+
+[[example]]
+name = "window_visibility"
+path = "examples/platform/window_visibility.rs"

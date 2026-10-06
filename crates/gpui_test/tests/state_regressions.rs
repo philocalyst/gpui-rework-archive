@@ -1,0 +1,304 @@
+use anyhow::Result;
+use gpui::{App, AppContext as _, px, size};
+use gpui_test::{
+    Harness, RenderedCheckpoint, RenderedScenario, RenderedSuite, ReportChangeKind, ReportOptions,
+    Scenario, ScenarioMetrics, Viewport, compare_reports, gallery::AnimationScenario, write_report,
+};
+use std::time::Duration;
+
+fn animation_scenario(id: &str, times_ms: &[u64]) -> Result<Scenario<AnimationScenario>> {
+    let mut scenario = Scenario::new(
+        id,
+        "Repeated animation clock regression",
+        size(px(320.0), px(220.0)),
+        |cx: &mut App| cx.new(|_| AnimationScenario),
+    )?;
+    for (index, milliseconds) in times_ms.iter().copied().enumerate() {
+        scenario = scenario.checkpoint(
+            format!("frame-{index}"),
+            format!("{milliseconds} ms"),
+            Duration::from_millis(milliseconds),
+        )?;
+    }
+    Ok(scenario)
+}
+
+fn pixel_bytes(checkpoint: &RenderedCheckpoint) -> Vec<u8> {
+    checkpoint.image.as_raw().to_vec()
+}
+
+fn marker_min_x(checkpoint: &RenderedCheckpoint) -> u32 {
+    checkpoint
+        .image
+        .enumerate_pixels()
+        .filter(|(_, _, pixel)| pixel.0 == [0x61, 0xc6, 0xed, 0xff])
+        .map(|(x, _, _)| x)
+        .min()
+        .expect("animation marker pixels are present")
+}
+
+#[test]
+fn fixed_animation_times_are_idempotent_and_cross_repeat_boundaries() -> Result<()> {
+    let scenario = animation_scenario("animation-fixed-times", &[0, 250, 250, 500, 1000, 1250])?;
+    let rendered = Harness::new().timing_samples(1)?.run(&scenario)?;
+    assert_eq!(rendered.checkpoints.len(), 6);
+
+    let pixels = rendered
+        .checkpoints
+        .iter()
+        .map(pixel_bytes)
+        .collect::<Vec<_>>();
+    assert_eq!(
+        pixels[1], pixels[2],
+        "repeated 250 ms capture must be identical"
+    );
+    let x0 = marker_min_x(&rendered.checkpoints[0]);
+    let x250 = marker_min_x(&rendered.checkpoints[1]);
+    let x500 = marker_min_x(&rendered.checkpoints[3]);
+    let x1000 = marker_min_x(&rendered.checkpoints[4]);
+    let x1250 = marker_min_x(&rendered.checkpoints[5]);
+    assert!(
+        (10..=25).contains(&(x250 as i32 - x0 as i32)),
+        "ease-in-out at 250 ms should move about 16 px; got {} px",
+        x250 as i32 - x0 as i32
+    );
+    assert!(
+        (55..=70).contains(&(x500 as i32 - x0 as i32)),
+        "eased 500 ms position is unexpected: {} px",
+        x500 as i32 - x0 as i32
+    );
+    assert!(
+        (160..=178).contains(&(x1000 as i32 - x0 as i32)),
+        "eased 1000 ms position is unexpected: {} px",
+        x1000 as i32 - x0 as i32
+    );
+    assert!(
+        (0..=3).contains(&(x1250 as i32 - x0 as i32)),
+        "repeat phase at 1250 ms should be near its start: {} px",
+        x1250 as i32 - x0 as i32
+    );
+    for (before, after) in [(0, 1), (2, 3), (3, 4), (4, 5)] {
+        assert_ne!(
+            pixels[before],
+            pixels[after],
+            "animation should visibly advance between {} ms and {} ms",
+            rendered.checkpoints[before].time_ns / 1_000_000,
+            rendered.checkpoints[after].time_ns / 1_000_000,
+        );
+    }
+    Ok(())
+}
+
+#[test]
+fn animation_at_an_absolute_time_is_independent_of_clock_chunking() -> Result<()> {
+    let direct = animation_scenario("animation-direct", &[0, 250])?;
+    let chunked = animation_scenario("animation-chunked", &[0, 125, 250])?;
+    let direct = Harness::new().timing_samples(1)?.run(&direct)?;
+    let chunked = Harness::new().timing_samples(1)?.run(&chunked)?;
+
+    assert_eq!(
+        pixel_bytes(direct.checkpoints.last().unwrap()),
+        pixel_bytes(chunked.checkpoints.last().unwrap()),
+        "the same 250 ms animation state must render identically after different checkpoint intervals"
+    );
+    Ok(())
+}
+
+proptest::proptest! {
+    #![proptest_config(proptest::test_runner::Config {
+        cases: 48,
+        .. proptest::test_runner::Config::default()
+    })]
+
+    #[test]
+    fn nondecreasing_absolute_checkpoint_times_are_accepted(mut times in proptest::collection::vec(0u16..=5000, 0..12)) {
+        times.sort_unstable();
+        let mut scenario = Scenario::new(
+            "timeline-order-property",
+            "Checkpoint timeline ordering",
+            size(px(1.0), px(1.0)),
+            |cx: &mut App| cx.new(|_| AnimationScenario),
+        ).unwrap();
+        for (index, milliseconds) in times.into_iter().enumerate() {
+            scenario = scenario.checkpoint(
+                format!("tick-{index}"),
+                "generated time",
+                Duration::from_millis(u64::from(milliseconds)),
+            ).unwrap();
+        }
+        proptest::prop_assert_eq!(scenario.id(), "timeline-order-property");
+    }
+}
+
+#[test]
+fn report_comparison_reports_removed_checkpoints() -> Result<()> {
+    use gpui::Scene;
+
+    fn empty_checkpoint(id: &str, time_ns: u64) -> Result<RenderedCheckpoint> {
+        let mut scene = Scene::default();
+        scene.finish();
+        let capture = gpui::SceneCapture::capture(&scene, |_| {
+            anyhow::bail!("empty scene has no atlas tiles")
+        })?;
+        Ok(RenderedCheckpoint {
+            id: id.to_owned(),
+            name: format!("{id} checkpoint"),
+            time_ns,
+            capture,
+            image: image::RgbaImage::from_pixel(1, 1, image::Rgba([0, 0, 0, 0])),
+            metrics: ScenarioMetrics {
+                frame_count: 1,
+                scene_build_p50_ns: 1,
+                scene_build_p95_ns: 1,
+                scene_build_p99_ns: 1,
+                cpu_render_p50_ns: 1,
+                cpu_render_p95_ns: 1,
+                cpu_render_p99_ns: 1,
+                primitive_count: 0,
+                batch_count: 0,
+                bitmap_storage_bytes: 0,
+            },
+        })
+    }
+
+    fn suite(checkpoints: Vec<RenderedCheckpoint>) -> RenderedSuite {
+        RenderedSuite {
+            scenarios: vec![RenderedScenario {
+                id: "animation".into(),
+                title: "Animation".into(),
+                viewport: Viewport {
+                    width: 1,
+                    height: 1,
+                    scale_factor: 1.0,
+                },
+                checkpoints,
+            }],
+        }
+    }
+
+    let old = suite(vec![
+        empty_checkpoint("t000", 0)?,
+        empty_checkpoint("t250", 250_000_000)?,
+        empty_checkpoint("t500", 500_000_000)?,
+    ]);
+    let current = suite(vec![
+        empty_checkpoint("t000", 0)?,
+        empty_checkpoint("t500", 500_000_000)?,
+    ]);
+    let root = std::env::temp_dir().join(format!("gpui-compare-checkpoint-{}", std::process::id()));
+    let baseline_dir = root.join("baseline");
+    let current_dir = root.join("current");
+    let _ = std::fs::remove_dir_all(&root);
+    write_report(&old, &baseline_dir, ReportOptions::default())?;
+    write_report(&current, &current_dir, ReportOptions::default())?;
+
+    let changes = compare_reports(&baseline_dir, &current_dir)?;
+    assert!(
+        changes.iter().any(|change| {
+            change.kind == ReportChangeKind::CheckpointRemoved
+                && change.scenario_id == "animation"
+                && change.checkpoint_id.as_deref() == Some("t250")
+        }),
+        "actual changes: {changes:?}"
+    );
+    std::fs::remove_dir_all(root)?;
+    Ok(())
+}
+
+#[derive(Default)]
+struct MultilineUnderlineScenario;
+
+impl gpui::Render for MultilineUnderlineScenario {
+    fn render(
+        &mut self,
+        _window: &mut gpui::Window,
+        _cx: &mut gpui::Context<Self>,
+    ) -> impl gpui::IntoElement {
+        use gpui::{HighlightStyle, StyledText, UnderlineStyle, div, hsla, prelude::*, px, rgb};
+        let underline = |color| HighlightStyle {
+            underline: Some(UnderlineStyle {
+                thickness: px(2.0),
+                color: Some(color),
+                wavy: true,
+            }),
+            ..Default::default()
+        };
+        div()
+            .size_full()
+            .p_2()
+            .bg(rgb(0xffffff))
+            .text_color(rgb(0x111111))
+            .child(div().w(px(90.0)).text_lg().child(
+                StyledText::new("first second third").with_highlights([
+                    (0..5, underline(hsla(0.0, 0.9, 0.45, 1.0))),
+                    (6..12, underline(hsla(0.58, 0.9, 0.45, 1.0))),
+                    (13..18, underline(hsla(0.88, 0.9, 0.45, 1.0))),
+                ]),
+            ))
+    }
+}
+
+#[test]
+fn wrapped_parley_text_keeps_colored_wavy_underlines_on_multiple_lines() -> Result<()> {
+    let scenario = Scenario::new(
+        "multiline-underlines",
+        "Multiline colored underlines",
+        size(px(120.0), px(160.0)),
+        |cx: &mut App| cx.new(|_| MultilineUnderlineScenario),
+    )?
+    .checkpoint("default", "Wrapped text", Duration::ZERO)?;
+    let rendered = Harness::new().timing_samples(1)?.run(&scenario)?;
+    let checkpoint = &rendered.checkpoints[0];
+    let scene = checkpoint.capture.clone().into_scene()?;
+
+    let has_colored_underline_pixel = checkpoint.image.enumerate_pixels().any(|(x, y, pixel)| {
+        let rgb = [pixel[0], pixel[1], pixel[2]];
+        let colorful = rgb.iter().max().unwrap() - rgb.iter().min().unwrap() > 40;
+        scene.underlines.iter().any(|underline| {
+            let bounds = underline.bounds;
+            x as f32 + 0.5 >= bounds.origin.x.0
+                && x as f32 + 0.5 < bounds.origin.x.0 + bounds.size.width.0
+                && y as f32 + 0.5 >= bounds.origin.y.0 - 1.0
+                && y as f32 + 0.5 <= bounds.origin.y.0 + bounds.size.height.0 + 1.0
+        }) && colorful
+    });
+    assert!(
+        has_colored_underline_pixel,
+        "the CPU raster must include colored underline pixels"
+    );
+
+    assert!(
+        scene.underlines.len() >= 3,
+        "captured underline segments: {}",
+        scene.underlines.len()
+    );
+    assert!(
+        scene
+            .underlines
+            .iter()
+            .any(|underline| underline.wavy == gpui::ShaderBool::Enabled)
+    );
+    let mut y_positions = scene
+        .underlines
+        .iter()
+        .map(|underline| underline.bounds.origin.y.0.to_bits())
+        .collect::<Vec<_>>();
+    y_positions.sort_unstable();
+    y_positions.dedup();
+    assert!(
+        y_positions.len() >= 2,
+        "underlines should occupy wrapped text lines; y positions: {y_positions:?}"
+    );
+    let mut colors = scene
+        .underlines
+        .iter()
+        .map(|underline| serde_json::to_string(&underline.color).unwrap())
+        .collect::<Vec<_>>();
+    colors.sort();
+    colors.dedup();
+    assert!(
+        colors.len() >= 2,
+        "styled runs should retain separate underline colors"
+    );
+    Ok(())
+}
