@@ -4953,7 +4953,7 @@ impl Window {
         self.invalidator.debug_assert_paint();
 
         let element_opacity = self.element_opacity();
-        let scale_factor = self.scale_factor() * self.text_raster_multiplier();
+        let scale_factor = self.scale_factor() * self.coordinate_space.raster_scale();
         let glyph_origin = origin.scale(scale_factor);
 
         let (integer_origin, subpixel_variant) = quantize_glyph_origin(glyph_origin);
@@ -5039,16 +5039,6 @@ impl Window {
         Ok(())
     }
 
-    fn text_raster_multiplier(&self) -> f32 {
-        // Rasterize at the greatest stretch, then retain the original layout size.
-        // Eighth-step buckets bound atlas churn during continuous camera zoom;
-        // the cap limits allocations for extreme transforms.
-        (self.coordinate_space.transform.max_scale().max(1.0) * 8.0)
-            .ceil()
-            .clamp(8.0, 64.0)
-            / 8.0
-    }
-
     fn should_use_subpixel_rendering(&self, font_id: FontId, font_size: Pixels) -> bool {
         let transform = self.coordinate_space.transform;
         let translation = transform
@@ -5110,7 +5100,7 @@ impl Window {
     ) -> Result<()> {
         self.invalidator.debug_assert_paint();
 
-        let scale_factor = self.scale_factor() * self.text_raster_multiplier();
+        let scale_factor = self.scale_factor() * self.coordinate_space.raster_scale();
         let glyph_origin = origin.scale(scale_factor);
         let (integer_origin, subpixel_variant) = quantize_color_glyph_origin(glyph_origin);
         let raster_style = self.text_system().prepare_raster_style(
@@ -5147,7 +5137,7 @@ impl Window {
 
         let element_opacity = self.element_opacity();
         let bounds = self.snap_bounds(bounds);
-        let raster_multiplier = self.text_raster_multiplier();
+        let raster_multiplier = self.coordinate_space.raster_scale();
         let raster_scale = SMOOTH_SVG_SCALE_FACTOR * raster_multiplier;
 
         let params = RenderSvgParams {
@@ -8211,13 +8201,14 @@ pub fn outline(
 mod tests {
     use super::*;
     use crate::{
-        DragMoveEvent, Empty, ExternalDragPayload, ExternalPaths, FileDragPaths, FocusHandle, Font,
-        FontMetrics, ImageSource, InlineLayout, InlineLayoutRequest, InputEvent,
-        InteractiveElement, LineLayout, LongPressEvent, MouseDownEvent, ParentElement,
-        PlatformTextSystem, PreparedRasterStyle, RasterColorEffect, RasterStyleRequest,
-        RasterizedGlyph, RequestFrameOptions, ShaderBool, StatefulInteractiveElement, Styled,
-        TestApp, TestAppContext, TestTextSystem, TextLayoutRequest, TouchDragEvent, TouchId,
-        TouchPhase, canvas, div, hsla, img, linear_color_stop, linear_gradient,
+        DragMoveEvent, ElementTransform, Empty, ExternalDragPayload, ExternalPaths, FileDragPaths,
+        FocusHandle, Font, FontMetrics, GlyphRenderMode, ImageSource, InlineLayout,
+        InlineLayoutRequest, InputEvent, InteractiveElement, LineLayout, LongPressEvent,
+        MouseDownEvent, ParentElement, PlatformTextSystem, PreparedRasterStyle, RasterColorEffect,
+        RasterStyleRequest, RasterizedGlyph, RequestFrameOptions, ScaledPixels, ShaderBool,
+        StatefulInteractiveElement, Styled, TestApp, TestAppContext, TestTextSystem,
+        TextLayoutRequest, TouchDragEvent, TouchId, TouchPhase, canvas, div, hsla, img,
+        linear_color_stop, linear_gradient, svg,
     };
     use image::{Frame as ImageFrame, ImageBuffer, Rgba};
     use proptest::prelude::*;
@@ -8379,7 +8370,7 @@ mod tests {
             }
 
             let (format, pixels) = match params.glyph_id.0 {
-                1 => (RasterizedGlyphFormat::AlphaMask, vec![0, 255]),
+                1 | 6 | 7 => (RasterizedGlyphFormat::AlphaMask, vec![0, 255]),
                 2 => (
                     RasterizedGlyphFormat::BgraSubpixelMask,
                     vec![1, 2, 3, 0, 4, 5, 6, 0],
@@ -8471,6 +8462,201 @@ mod tests {
                 .size_full(),
             )
         }
+    }
+
+    fn painted_glyph(glyph_id: GlyphId) -> impl IntoElement {
+        canvas(
+            |_, _, _| (),
+            move |_, _, window, _| {
+                window
+                    .paint_glyph(point(px(4.), px(8.)), FontId(7), glyph_id, px(16.), white())
+                    .unwrap();
+            },
+        )
+        .size_full()
+    }
+
+    struct TransformedRasterView;
+
+    impl Render for TransformedRasterView {
+        fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+            div().size_full().children([
+                div()
+                    .id("bucket-first")
+                    .absolute()
+                    .left(px(0.))
+                    .top(px(0.))
+                    .size(px(80.))
+                    .transform(ElementTransform::default().scale(2.01))
+                    .child(painted_glyph(GlyphId(1))),
+                div()
+                    .id("bucket-second")
+                    .absolute()
+                    .left(px(2.))
+                    .top(px(0.))
+                    .size(px(80.))
+                    .transform(ElementTransform::default().scale(2.04))
+                    .child(painted_glyph(GlyphId(1))),
+                div()
+                    .id("rotated-raster")
+                    .absolute()
+                    .left(px(0.))
+                    .top(px(200.))
+                    .size(px(80.))
+                    .transform(
+                        ElementTransform::default()
+                            .rotate(crate::Radians(std::f32::consts::FRAC_PI_4)),
+                    )
+                    .child(painted_glyph(GlyphId(6))),
+                div()
+                    .id("fractional-raster")
+                    .absolute()
+                    .left(px(200.))
+                    .top(px(200.))
+                    .size(px(80.))
+                    .transform(ElementTransform::default().translate(point(px(0.25), px(0.))))
+                    .child(painted_glyph(GlyphId(7))),
+                div()
+                    .id("color-raster")
+                    .absolute()
+                    .left(px(2.))
+                    .top(px(0.))
+                    .size(px(80.))
+                    .transform(ElementTransform::default().scale(2.01))
+                    .child(
+                        canvas(
+                            |_, _, _| (),
+                            |_, _, window, _| {
+                                window
+                                    .paint_emoji(
+                                        point(px(4.), px(8.)),
+                                        FontId(7),
+                                        GlyphId(3),
+                                        px(16.),
+                                    )
+                                    .unwrap();
+                            },
+                        )
+                        .size_full(),
+                    ),
+            ])
+        }
+    }
+
+    #[test]
+    fn transformed_glyphs_use_bounded_density_buckets_and_keep_local_geometry() {
+        let text_system = Arc::new(RasterFormatTextSystem::default());
+        let mut app = TestApp::with_text_system(text_system.clone());
+        let mut test_window = app.open_window(|_, _| TransformedRasterView);
+        test_window.draw();
+
+        let rasterized = text_system.rasterized.lock().unwrap().clone();
+        let glyph = |id| {
+            rasterized
+                .iter()
+                .find(|params| params.glyph_id == GlyphId(id))
+                .unwrap_or_else(|| panic!("glyph {id} was not rasterized: {rasterized:?}"))
+        };
+        assert_eq!(
+            rasterized
+                .iter()
+                .filter(|params| params.glyph_id == GlyphId(1))
+                .count(),
+            1,
+            "nearby zoom levels in one density bucket share the atlas tile"
+        );
+        assert_eq!(glyph(1).scale_factor, 4.25);
+        assert_eq!(glyph(3).scale_factor, 4.25);
+        assert_eq!(glyph(6).scale_factor, 2.0);
+        assert_eq!(glyph(7).scale_factor, 2.0);
+        assert_eq!(glyph(1).raster_style.mode, GlyphRenderMode::Grayscale);
+        assert_eq!(glyph(3).raster_style.mode, GlyphRenderMode::Color);
+        assert_eq!(glyph(6).raster_style.mode, GlyphRenderMode::Grayscale);
+        assert_eq!(glyph(7).raster_style.mode, GlyphRenderMode::Grayscale);
+
+        test_window.update(|_, window, _| {
+            let scene = &window.rendered_frame.scene;
+            assert_eq!(
+                scene.monochrome_sprites.len(),
+                4,
+                "monochrome sprite bounds: {:?}",
+                scene
+                    .monochrome_sprites
+                    .iter()
+                    .map(|sprite| (sprite.bounds, sprite.tile))
+                    .collect::<Vec<_>>()
+            );
+            assert_eq!(scene.polychrome_sprites.len(), 1);
+            let first = scene.monochrome_sprites[0];
+            let second = scene.monochrome_sprites[1];
+            assert_eq!(first.tile, second.tile);
+            assert_eq!(first.bounds, second.bounds);
+
+            // The -1/-2 raster bearing and 2x1 bitmap are expressed back in
+            // window-local device pixels after rendering at 2.125x density.
+            let raster_multiplier = 2.125;
+            let expected_origin = point(
+                ScaledPixels((4. * 2. * raster_multiplier - 1.) / raster_multiplier),
+                ScaledPixels((8. * 2. * raster_multiplier - 2.) / raster_multiplier),
+            );
+            let expected_size = size(
+                ScaledPixels(2. / raster_multiplier),
+                ScaledPixels(1. / raster_multiplier),
+            );
+            assert!((first.bounds.origin.x.0 - expected_origin.x.0).abs() < 0.001);
+            assert!((first.bounds.origin.y.0 - expected_origin.y.0).abs() < 0.001);
+            assert!((first.bounds.size.width.0 - expected_size.width.0).abs() < 0.001);
+            assert!((first.bounds.size.height.0 - expected_size.height.0).abs() < 0.001);
+        });
+    }
+
+    const INLINE_SVG: &[u8] = br#"<svg xmlns="http://www.w3.org/2000/svg" width="20" height="10" viewBox="0 0 20 10"><rect width="20" height="10" fill="white"/></svg>"#;
+
+    struct TransformedSvgView;
+
+    impl Render for TransformedSvgView {
+        fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+            div().size_full().child(
+                div()
+                    .size(px(100.))
+                    .transform(ElementTransform::default().scale(2.01))
+                    .child(
+                        svg()
+                            .data(INLINE_SVG)
+                            .w(px(20.))
+                            .h(px(10.))
+                            .text_color(white()),
+                    ),
+            )
+        }
+    }
+
+    #[test]
+    fn transformed_inline_svg_rasterizes_dense_but_keeps_its_logical_size() {
+        let mut app = TestApp::new();
+        let mut test_window = app.open_window(|_, _| TransformedSvgView);
+        test_window.draw();
+
+        test_window.update(|_, window, _| {
+            let scene = &window.rendered_frame.scene;
+            assert_eq!(scene.monochrome_sprites.len(), 1);
+            let sprite = scene.monochrome_sprites[0];
+            assert_eq!(
+                sprite.tile.bounds.size,
+                size(DevicePixels(170), DevicePixels(85))
+            );
+            assert_eq!(
+                sprite.bounds.size,
+                size(ScaledPixels(40.), ScaledPixels(20.))
+            );
+
+            let space = &scene.render_spaces()[sprite.content_mask.space as usize];
+            assert!(
+                (space.transform.max_scale() - 2.01).abs() < 0.001,
+                "SVG render space should preserve the 2.01x element transform: {:?}",
+                space.transform
+            );
+        });
     }
 
     #[test]

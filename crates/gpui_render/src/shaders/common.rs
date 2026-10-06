@@ -68,6 +68,14 @@ mod source {
 
     #[repr(u32)]
     #[derive(Clone, Copy, Debug, PartialEq, Eq, Wgsl)]
+    pub enum SpaceKind {
+        Mapping = 0,
+        Clip = 1,
+        Collapsed = 2,
+    }
+
+    #[repr(u32)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Wgsl)]
     pub enum BackgroundTag {
         Solid = 0,
         LinearGradient = 1,
@@ -155,7 +163,7 @@ mod source {
         pub clip: Bounds,
         pub fade: Edges,
         pub parent: u32,
-        pub has_clip: u32,
+        pub kind: SpaceKind,
     }
 
     storage!(group(0), binding(2), RENDER_SPACES: RuntimeArray<RenderSpace>);
@@ -177,10 +185,10 @@ mod source {
             let mut space_id = content_mask.space;
             while space_id != 0u32 {
                 let space = get!(RENDER_SPACES)[space_id as usize];
-                if space.has_clip == 2u32 {
+                if space.kind == SpaceKind::Collapsed {
                     return 0.0;
                 }
-                if space.has_clip == 1u32 {
+                if space.kind == SpaceKind::Clip {
                     alpha *= Self::bounds_alpha(
                         space.clip,
                         space.fade,
@@ -413,8 +421,8 @@ mod source {
     }
 
     pub fn transformation_is_identity(transform: TransformationMatrix) -> bool {
-        let x_axis = transform.rotation_scale[0];
-        let y_axis = transform.rotation_scale[1];
+        let x_axis: Vec2f = transform.rotation_scale[0usize];
+        let y_axis: Vec2f = transform.rotation_scale[1usize];
         x_axis.x == 1.0
             && x_axis.y == 0.0
             && y_axis.x == 0.0
@@ -434,8 +442,7 @@ mod source {
         content_mask: ContentMask,
         sprite_transform: TransformationMatrix,
     ) -> bool {
-        !transformation_is_identity(sprite_transform)
-            || should_clamp_atlas_for_space(content_mask)
+        !transformation_is_identity(sprite_transform) || should_clamp_atlas_for_space(content_mask)
     }
 
     /// Keep bilinear filtering inside a tile when transforms move texel centers off the pixel grid.

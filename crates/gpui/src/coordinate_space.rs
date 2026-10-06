@@ -3,6 +3,9 @@
 use crate::{Bounds, ContentMask, Pixels, Point, Radians, Size, TransformationMatrix, point};
 use std::sync::Arc;
 
+const RASTER_BUCKETS_PER_UNIT: f32 = 8.0;
+const MAX_RASTER_SCALE: f32 = 8.0;
+
 /// An affine transform applied after layout to an element and its descendants.
 ///
 /// Operations apply in the order written. Translation uses logical pixels; the
@@ -90,6 +93,7 @@ impl ElementTransform {
 pub struct CoordinateSpace {
     pub(crate) transform: TransformationMatrix,
     inverse: Option<TransformationMatrix>,
+    raster_scale: f32,
     pub(crate) clips: Option<Arc<ClipRegion>>,
 }
 
@@ -106,6 +110,66 @@ impl ClipRegion {
     pub(crate) fn render_inverse(&self, scale: f32) -> Option<TransformationMatrix> {
         self.inverse.map(|inverse| inverse.scaled(scale))
     }
+
+    // A rectangle is convex: its four corners certify full coverage of its
+    // entire support. Fades matter even when their hard edge is redundant.
+    fn fully_covers(&self, bounds: Bounds<Pixels>, transform: TransformationMatrix) -> bool {
+        let Some(inverse) = self.inverse else {
+            return false;
+        };
+        let norm = |matrix: TransformationMatrix| {
+            matrix
+                .rotation_scale
+                .iter()
+                .map(|row| row[0].abs() + row[1].abs())
+                .fold(0.0f32, f32::max)
+        };
+        if bounds.is_empty() || norm(self.transform) * norm(inverse) > 4096.0 {
+            return false;
+        }
+        let near = [self.mask.bounds.left().0, self.mask.bounds.top().0];
+        let far = [self.mask.bounds.right().0, self.mask.bounds.bottom().0];
+        let near_fade = [self.mask.fade_out.left.0, self.mask.fade_out.top.0];
+        let far_fade = [self.mask.fade_out.right.0, self.mask.fade_out.bottom.0];
+        [
+            bounds.origin,
+            bounds.top_right(),
+            bounds.bottom_left(),
+            bounds.bottom_right(),
+        ]
+        .into_iter()
+        .all(|corner| {
+            let position = inverse.apply(transform.apply(corner));
+            let source = [corner.x.0 as f64, corner.y.0 as f64];
+            // Bound cancellation error in both affine evaluations. Uncertain
+            // edges retain the ancestor; the coverage inset only shrinks.
+            let magnitude = transform
+                .rotation_scale
+                .map(|row| (row[0] as f64 * source[0]).abs() + (row[1] as f64 * source[1]).abs());
+            let magnitude = [
+                magnitude[0] + (transform.translation[0] as f64).abs(),
+                magnitude[1] + (transform.translation[1] as f64).abs(),
+            ];
+            [position.x.0, position.y.0]
+                .into_iter()
+                .enumerate()
+                .all(|(axis, value)| {
+                    let row = inverse.rotation_scale[axis];
+                    let magnitude = (row[0] as f64).abs() * magnitude[0]
+                        + (row[1] as f64).abs() * magnitude[1]
+                        + (inverse.translation[axis] as f64).abs();
+                    let margin = 32.0
+                        * f32::EPSILON as f64
+                        * magnitude
+                            .max((near[axis] as f64).abs())
+                            .max((far[axis] as f64).abs())
+                            .max(1.0);
+                    let lower = near[axis] as f64 + near_fade[axis].max(0.0) as f64 + margin;
+                    let upper = far[axis] as f64 - far_fade[axis].max(0.0) as f64 - margin;
+                    value.is_finite() && value as f64 >= lower && value as f64 <= upper
+                })
+        })
+    }
 }
 
 impl Default for CoordinateSpace {
@@ -113,6 +177,7 @@ impl Default for CoordinateSpace {
         Self {
             transform: TransformationMatrix::unit(),
             inverse: Some(TransformationMatrix::unit()),
+            raster_scale: 1.0,
             clips: None,
         }
     }
@@ -124,13 +189,35 @@ impl CoordinateSpace {
         Self {
             transform,
             inverse: transform.inverse(),
+            // Raster density is a property of the space, not of each glyph.
+            // Upward eighth-step buckets limit churn; the cap bounds allocations.
+            raster_scale: (transform.max_scale().max(1.0) * RASTER_BUCKETS_PER_UNIT)
+                .ceil()
+                .clamp(
+                    RASTER_BUCKETS_PER_UNIT,
+                    MAX_RASTER_SCALE * RASTER_BUCKETS_PER_UNIT,
+                )
+                / RASTER_BUCKETS_PER_UNIT,
             clips: None,
         }
+    }
+
+    /// Recommended bitmap density relative to the window's device scale.
+    ///
+    /// The greatest affine stretch rounds upward to eighth steps, between one
+    /// and eight. Use this for custom bitmap content while retaining layout size.
+    pub fn raster_scale(&self) -> f32 {
+        self.raster_scale
     }
 
     /// Maps a point in layout coordinates into the window.
     pub fn to_window(&self, position: Point<Pixels>) -> Point<Pixels> {
         self.transform.apply(position)
+    }
+
+    /// Maps a displacement, excluding translation, into window coordinates.
+    pub fn vector_to_window(&self, vector: Point<Pixels>) -> Point<Pixels> {
+        self.transform.apply_vector(vector)
     }
 
     /// Maps a window point into layout coordinates. A collapsed space has no inverse.
@@ -212,9 +299,8 @@ impl CoordinateSpace {
     pub(crate) fn transformed(&self, transform: TransformationMatrix) -> Self {
         let transform = self.transform.compose(transform);
         Self {
-            transform,
-            inverse: transform.inverse(),
             clips: self.clips.clone(),
+            ..Self::new(transform)
         }
     }
 
@@ -224,6 +310,17 @@ impl CoordinateSpace {
             && clip.transform == self.transform
         {
             mask = mask.intersect(&clip.mask);
+            if mask == clip.mask {
+                return self.clone();
+            }
+            parent = clip.parent.clone();
+        }
+        // Clip multiplication has an identity: an ancestor covering the whole
+        // child contributes alpha one. Pop only a proven redundant prefix; this
+        // avoids rebuilding an arbitrary chain or compiling a polygon.
+        while let Some(clip) = &parent
+            && clip.fully_covers(mask.bounds, self.transform)
+        {
             parent = clip.parent.clone();
         }
         let local_window_bounds = self.transform.apply_bounds(mask.bounds);
@@ -233,6 +330,7 @@ impl CoordinateSpace {
         Self {
             transform: self.transform,
             inverse: self.inverse,
+            raster_scale: self.raster_scale,
             clips: Some(Arc::new(ClipRegion {
                 mask,
                 transform: self.transform,
@@ -344,6 +442,20 @@ impl TransformationMatrix {
 /// A frame-local coordinate space shared by scene primitives on the GPU.
 /// The parent links clipping scopes; bounds and fades stay in their own local units.
 #[doc(hidden)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[repr(u32)]
+pub enum SpaceKind {
+    /// An affine mapping with no additional clip.
+    #[default]
+    Mapping = 0,
+    /// A clipping scope, evaluated in its own coordinates.
+    Clip = 1,
+    /// A collapsed or non-finite mapping with no visible region.
+    Collapsed = 2,
+}
+
+/// An interned coordinate-space record in the scene's GPU table.
+#[doc(hidden)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[repr(C)]
 pub struct RenderSpace {
@@ -352,8 +464,7 @@ pub struct RenderSpace {
     pub clip: Bounds<crate::ScaledPixels>,
     pub fade: crate::Edges<crate::ScaledPixels>,
     pub parent: u32,
-    /// 0: mapping only, 1: clip, 2: collapsed/non-finite mapping.
-    pub has_clip: u32,
+    pub kind: SpaceKind,
 }
 
 impl Default for RenderSpace {
@@ -364,7 +475,7 @@ impl Default for RenderSpace {
             clip: Bounds::default(),
             fade: crate::Edges::default(),
             parent: 0,
-            has_clip: 0,
+            kind: SpaceKind::Mapping,
         }
     }
 }
@@ -402,7 +513,7 @@ impl RenderSpace {
             clip,
             fade,
             parent,
-            has_clip: 1,
+            kind: SpaceKind::Clip,
         }
     }
 
@@ -414,13 +525,13 @@ impl RenderSpace {
             },
             inverse: TransformationMatrix::unit(),
             parent,
-            has_clip: 2,
+            kind: SpaceKind::Collapsed,
             ..Default::default()
         }
     }
 
     pub(crate) fn is_collapsed(&self) -> bool {
-        self.has_clip == 2
+        self.kind == SpaceKind::Collapsed
     }
 
     pub(crate) fn key(&self) -> [u32; 22] {
@@ -449,7 +560,7 @@ impl RenderSpace {
             key[i] = value.to_bits();
         }
         key[20] = self.parent;
-        key[21] = self.has_clip;
+        key[21] = self.kind as u32;
         key
     }
 }

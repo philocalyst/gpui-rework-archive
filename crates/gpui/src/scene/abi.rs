@@ -49,7 +49,7 @@ pub const SCENE_BUFFER_LAYOUTS: &[SceneBufferLayout] = &[
         clip,
         fade,
         parent,
-        has_clip
+        kind
     ),
     layout!(Edges<ScaledPixels>, "Edges", top, right, bottom, left),
     layout!(SceneHsla, "Hsla", h, s, l, a),

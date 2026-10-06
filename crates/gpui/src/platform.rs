@@ -2110,13 +2110,21 @@ impl PlatformInputHandler {
         &mut self,
         read: impl FnOnce(&mut dyn InputHandler, &mut Window, &mut App) -> R,
     ) -> Option<R> {
+        let mut cx = self.cx.clone();
+        cx.update(|window, cx| self.with_handler_on_window(window, cx, read))
+            .ok()
+    }
+
+    /// Runs a handler callback with the element's retained space installed on its window.
+    fn with_handler_on_window<R>(
+        &mut self,
+        window: &mut Window,
+        cx: &mut App,
+        read: impl FnOnce(&mut dyn InputHandler, &mut Window, &mut App) -> R,
+    ) -> R {
         let space = self.coordinate_space.clone();
         let handler = self.handler.as_mut();
-        self.cx
-            .update(|window, cx| {
-                window.with_coordinate_space(space, |window| read(handler, window, cx))
-            })
-            .ok()
+        window.with_coordinate_space(space, |window| read(handler, window, cx))
     }
 
     pub fn selected_text_range(&mut self, ignore_disabled_input: bool) -> Option<UTF16Selection> {
@@ -2191,8 +2199,8 @@ impl PlatformInputHandler {
     }
 
     pub fn dispatch_input(&mut self, input: &str, window: &mut Window, cx: &mut App) {
-        window.with_coordinate_space(self.coordinate_space.clone(), |window| {
-            self.handler.replace_text_in_range(None, input, window, cx);
+        self.with_handler_on_window(window, cx, |handler, window, cx| {
+            handler.replace_text_in_range(None, input, window, cx);
         });
     }
 
@@ -2232,15 +2240,14 @@ impl PlatformInputHandler {
     }
 
     pub fn selected_bounds(&mut self, window: &mut Window, cx: &mut App) -> Option<Bounds<Pixels>> {
-        window
-            .with_coordinate_space(self.coordinate_space.clone(), |window| {
-                let marked_range = self.handler.marked_text_range(window, cx);
-                let selection = self.handler.selected_text_range(true, window, cx)?;
-                Self::compute_ime_candidate_bounds(marked_range, &selection, |range| {
-                    self.handler.bounds_for_range(range, window, cx)
-                })
+        self.with_handler_on_window(window, cx, |handler, window, cx| {
+            let marked_range = handler.marked_text_range(window, cx);
+            let selection = handler.selected_text_range(true, window, cx)?;
+            Self::compute_ime_candidate_bounds(marked_range, &selection, |range| {
+                handler.bounds_for_range(range, window, cx)
             })
-            .map(|bounds| self.coordinate_space.bounds_to_window(bounds))
+        })
+        .map(|bounds| self.coordinate_space.bounds_to_window(bounds))
     }
 
     pub fn ime_candidate_bounds(&mut self) -> Option<Bounds<Pixels>> {
@@ -2284,8 +2291,8 @@ impl PlatformInputHandler {
 
     #[allow(dead_code)]
     pub fn accepts_text_input(&mut self, window: &mut Window, cx: &mut App) -> bool {
-        window.with_coordinate_space(self.coordinate_space.clone(), |window| {
-            self.handler.accepts_text_input(window, cx)
+        self.with_handler_on_window(window, cx, |handler, window, cx| {
+            handler.accepts_text_input(window, cx)
         })
     }
 
@@ -2314,8 +2321,8 @@ impl PlatformInputHandler {
         window: &mut Window,
         cx: &mut App,
     ) -> TextInputConfiguration {
-        window.with_coordinate_space(self.coordinate_space.clone(), |window| {
-            self.handler.text_input_configuration(window, cx)
+        self.with_handler_on_window(window, cx, |handler, window, cx| {
+            handler.text_input_configuration(window, cx)
         })
     }
 

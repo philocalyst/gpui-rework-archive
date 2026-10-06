@@ -171,6 +171,9 @@ fn shader_buffer_layouts_match_host_layouts() {
 
 #[test]
 fn shader_discriminants_match_scene_types() {
+    assert_eq!(common::SpaceKind::Mapping as u32, gpui::SpaceKind::Mapping as u32);
+    assert_eq!(common::SpaceKind::Clip as u32, gpui::SpaceKind::Clip as u32);
+    assert_eq!(common::SpaceKind::Collapsed as u32, gpui::SpaceKind::Collapsed as u32);
     assert_eq!(common::ShaderBool::Disabled as u32, 0);
     assert_eq!(common::ShaderBool::Enabled as u32, 1);
     assert_eq!(

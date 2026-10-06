@@ -3533,7 +3533,10 @@ impl Interactivity {
                         if cx.has_active_drag() || mouse_down.button != MouseButton::Left {
                             return;
                         }
-                        if (event.position - mouse_down.position).magnitude() <= DRAG_THRESHOLD {
+                        let movement = window
+                            .coordinate_space()
+                            .vector_to_window(event.position - mouse_down.position);
+                        if movement.magnitude() <= DRAG_THRESHOLD {
                             return;
                         }
                         if let Some(listener) = drag_listener.take() {

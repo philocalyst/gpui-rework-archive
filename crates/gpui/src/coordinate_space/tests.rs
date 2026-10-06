@@ -1,9 +1,10 @@
 use crate::prelude::*;
 use crate::{
-    AnyElement, AnyWindowHandle, App, Bounds, Context, CoordinateSpace, DispatchPhase,
-    ElementTransform, Entity, InputEvent, InputHandler, MouseButton, MouseDownEvent, MouseUpEvent,
-    Pixels, Point, Radians, Render, ScrollDelta, ScrollWheelEvent, StyleRefinement, TestAppContext,
-    UTF16Selection, VisualTestContext, Window, canvas, div, point, px, size,
+    AnyElement, AnyWindowHandle, App, Bounds, ContentMask, Context, CoordinateSpace, DispatchPhase,
+    Edges, ElementTransform, Empty, Entity, InputEvent, InputHandler, MouseButton, MouseDownEvent,
+    MouseUpEvent, Pixels, Point, Radians, Render, ScrollDelta, ScrollWheelEvent, StyleRefinement,
+    TestAppContext, TransformationMatrix, UTF16Selection, VisualTestContext, Window, canvas, div,
+    point, px, size,
 };
 use std::{
     cell::{Cell, RefCell},
@@ -28,6 +29,65 @@ fn add_tree_window(
     cx.add_window_view(move |_, _| TestTree {
         build: Box::new(build),
     })
+}
+
+#[test]
+fn affine_operations_keep_their_order_and_inverse() {
+    let transform = ElementTransform::default()
+        .scale(2.)
+        .translate(point(px(10.), px(20.)));
+    let bounds = Bounds::new(point(px(0.), px(0.)), size(px(100.), px(100.)));
+    let space = CoordinateSpace::new(transform.resolve(bounds));
+
+    let mapped = space.to_window(point(px(3.), px(4.)));
+    assert_eq!(mapped, point(px(16.), px(28.)));
+    assert_eq!(space.from_window(mapped), Some(point(px(3.), px(4.))));
+}
+
+#[test]
+fn origin_rotation_and_nested_composition_share_one_local_mapping() {
+    let bounds = Bounds::new(point(px(0.), px(0.)), size(px(40.), px(20.)));
+    let child = ElementTransform::default()
+        .origin(point(0.5, 0.5))
+        .rotate(Radians(std::f32::consts::FRAC_PI_2))
+        .resolve(bounds);
+    let parent = ElementTransform::default()
+        .scale(2.)
+        .translate(point(px(10.), px(20.)))
+        .resolve(Bounds::new(point(px(0.), px(0.)), size(px(100.), px(100.))));
+
+    let pivot = point(px(20.), px(10.));
+    assert_eq!(child.apply(pivot), pivot);
+
+    let nested = CoordinateSpace::new(parent.compose(child));
+    assert_eq!(
+        nested.to_window(point(px(20.), px(0.))),
+        point(px(70.), px(40.))
+    );
+    let local = nested.from_window(point(px(70.), px(40.))).unwrap();
+    assert!((local.x.0 - 20.).abs() < 0.001);
+    assert!(local.y.0.abs() < 0.001);
+}
+
+#[test]
+fn collapsed_and_rotated_spaces_have_sound_inverse_and_scale_queries() {
+    let zero_scale = CoordinateSpace::new(
+        ElementTransform::default()
+            .scale(0.)
+            .resolve(Bounds::new(point(px(0.), px(0.)), size(px(10.), px(10.)))),
+    );
+    assert_eq!(zero_scale.from_window(point(px(0.), px(0.))), None);
+
+    let rotation_and_scale = ElementTransform::default()
+        .scale_axes(size(3., 2.))
+        .rotate(Radians(std::f32::consts::FRAC_PI_4))
+        .resolve(Bounds::new(point(px(0.), px(0.)), size(px(10.), px(10.))));
+    let space = CoordinateSpace::new(rotation_and_scale);
+    assert!((space.transform.max_scale() - 3.).abs() < 0.001);
+    let point = point(px(2.), px(7.));
+    let round_trip = space.from_window(space.to_window(point)).unwrap();
+    assert!((round_trip.x.0 - point.x.0).abs() < 0.001);
+    assert!((round_trip.y.0 - point.y.0).abs() < 0.001);
 }
 
 struct CachedTarget {
@@ -372,6 +432,76 @@ fn collapsed_transform_cannot_receive_pointer_input(cx: &mut TestAppContext) {
 }
 
 #[gpui::test]
+fn drag_threshold_is_measured_in_window_pixels_but_grab_offset_stays_local(
+    cx: &mut TestAppContext,
+) {
+    for scale in [0.5, 4.] {
+        let starts = Rc::new(Cell::new(0));
+        let offsets = Rc::new(RefCell::new(Vec::new()));
+        let starts_for_view = starts.clone();
+        let offsets_for_view = offsets.clone();
+        let (_, context) = add_tree_window(cx, move |_, _| {
+            let starts = starts_for_view.clone();
+            let offsets = offsets_for_view.clone();
+            div()
+                .size_full()
+                .child(
+                    div()
+                        .id("scaled-draggable")
+                        .size(px(100.))
+                        .transform(
+                            ElementTransform::default()
+                                .scale(scale)
+                                .translate(point(px(20.), px(20.))),
+                        )
+                        .on_drag("payload", move |_, cursor_offset, _, cx| {
+                            starts.set(starts.get() + 1);
+                            offsets.borrow_mut().push(cursor_offset);
+                            cx.new(|_| Empty)
+                        }),
+                )
+                .into_any_element()
+        });
+
+        // A local center point maps to this window location at any zoom.
+        let start = point(px(20. + 50. * scale), px(20. + 50. * scale));
+        context.simulate_mouse_move(start, None, Default::default());
+        context.simulate_mouse_down(start, MouseButton::Left, Default::default());
+        context.simulate_mouse_move(
+            point(start.x + px(1.), start.y),
+            Some(MouseButton::Left),
+            Default::default(),
+        );
+        assert_eq!(
+            starts.get(),
+            0,
+            "a 1px window movement at {scale}x is below threshold"
+        );
+
+        context.simulate_mouse_move(
+            point(start.x + px(3.), start.y),
+            Some(MouseButton::Left),
+            Default::default(),
+        );
+        assert_eq!(
+            starts.get(),
+            1,
+            "a 3px window movement at {scale}x starts a drag"
+        );
+        assert_eq!(
+            *offsets.borrow(),
+            [point(px(50. + 3. / scale), px(50.))],
+            "the drag constructor receives the threshold-crossing point in element-local units"
+        );
+        context.simulate_mouse_up(
+            point(start.x + px(3.), start.y),
+            MouseButton::Left,
+            Default::default(),
+        );
+    }
+}
+
+#[gpui::test]
 fn captured_drag_preserves_local_coordinates_beyond_the_transformed_clip(cx: &mut TestAppContext) {
     let moves = Rc::new(RefCell::new(Vec::new()));
     let recorded_moves = moves.clone();
@@ -580,6 +710,147 @@ fn input_handler_range_bounds_follow_the_element_coordinate_space(cx: &mut TestA
         ime_bounds,
         Bounds::new(point(px(34.), px(26.)), size(px(16.), px(10.)))
     );
+}
+
+#[test]
+fn rotated_child_inside_fade_safe_region_prunes_redundant_parent_clip() {
+    let ancestor_mask = ContentMask {
+        bounds: Bounds::new(point(px(0.), px(0.)), size(px(100.), px(100.))),
+        fade_out: Edges {
+            top: px(10.),
+            right: px(10.),
+            bottom: px(10.),
+            left: px(10.),
+        },
+        ..Default::default()
+    };
+    let ancestor = CoordinateSpace::default().clipped(ancestor_mask);
+    let child_transform = TransformationMatrix {
+        rotation_scale: [[0.8, -0.6], [0.6, 0.8]],
+        translation: [35., 30.],
+    };
+    let child_mask = ContentMask {
+        bounds: Bounds::new(point(px(0.), px(0.)), size(px(10.), px(10.))),
+        ..Default::default()
+    };
+    let child = ancestor.transformed(child_transform).clipped(child_mask);
+
+    let child_clip = child.clips.as_deref().unwrap();
+    assert!(
+        child_clip.parent.is_none(),
+        "the child support lies inside the ancestor's fully opaque interior"
+    );
+
+    let inverse = child_transform.inverse().unwrap();
+    for x in (-5..=105).step_by(5) {
+        for y in (-5..=105).step_by(5) {
+            let point = point(px(x as f32), px(y as f32));
+            let reference = ancestor.contains_window_point(point)
+                && child_mask.bounds.contains(&inverse.apply(point));
+            assert_eq!(
+                child.contains_window_point(point),
+                reference,
+                "input membership changed at {point:?}"
+            );
+        }
+    }
+}
+
+#[test]
+fn active_ancestor_fade_and_uncertain_clip_edges_are_retained() {
+    let child_mask = ContentMask {
+        bounds: Bounds::new(point(px(0.), px(0.)), size(px(10.), px(10.))),
+        ..Default::default()
+    };
+    let faded_ancestor = CoordinateSpace::default().clipped(ContentMask {
+        bounds: Bounds::new(point(px(0.), px(0.)), size(px(100.), px(100.))),
+        fade_out: Edges {
+            left: px(20.),
+            ..Default::default()
+        },
+        ..Default::default()
+    });
+    let shifted = TransformationMatrix {
+        translation: [1., 0.],
+        ..TransformationMatrix::unit()
+    };
+    let inside_fade = faded_ancestor.transformed(shifted).clipped(child_mask);
+    assert!(
+        inside_fade.clips.as_deref().unwrap().parent.is_some(),
+        "a parent fade still attenuates content inside its hard bounds"
+    );
+
+    let plain_ancestor = CoordinateSpace::default().clipped(ContentMask {
+        bounds: Bounds::new(point(px(0.), px(0.)), size(px(100.), px(100.))),
+        ..Default::default()
+    });
+    let near_edge = TransformationMatrix {
+        translation: [0.0001, 0.],
+        ..TransformationMatrix::unit()
+    };
+    let boundary_adjacent = plain_ancestor.transformed(near_edge).clipped(child_mask);
+    assert!(
+        boundary_adjacent.clips.as_deref().unwrap().parent.is_some(),
+        "coverage uncertainty near the ancestor edge must keep the original clip"
+    );
+    for x in [-1., 0., 0.0001, 5., 10., 99.999, 100.] {
+        let point = point(px(x), px(5.));
+        assert_eq!(
+            boundary_adjacent.contains_window_point(point),
+            plain_ancestor.contains_window_point(point)
+                && child_mask
+                    .bounds
+                    .contains(&near_edge.inverse().unwrap().apply(point)),
+            "boundary-adjacent input membership changed at {point:?}"
+        );
+    }
+}
+
+#[test]
+fn deeply_nested_redundant_clips_collapse_without_changing_input_membership() {
+    let root_mask = ContentMask {
+        bounds: Bounds::new(point(px(0.), px(0.)), size(px(1000.), px(1000.))),
+        ..Default::default()
+    };
+    let mut space = CoordinateSpace::default().clipped(root_mask);
+    let mut reference_clips = vec![(TransformationMatrix::unit(), root_mask.bounds)];
+
+    for depth in 1..=20 {
+        let translation = TransformationMatrix {
+            translation: [1., 1.],
+            ..TransformationMatrix::unit()
+        };
+        space = space.transformed(translation);
+        let extent = px(100. - depth as f32 * 2.);
+        let mask = ContentMask {
+            bounds: Bounds::new(point(px(0.), px(0.)), size(extent, extent)),
+            ..Default::default()
+        };
+        reference_clips.push((space.transform.inverse().unwrap(), mask.bounds));
+        space = space.clipped(mask);
+    }
+
+    let mut depth = 0;
+    let mut clip = space.clips.as_deref();
+    while let Some(region) = clip {
+        depth += 1;
+        clip = region.parent.as_deref();
+    }
+    assert_eq!(depth, 1, "only the most restrictive nested clip remains");
+
+    for x in (-5..=105).step_by(5) {
+        for y in (-5..=105).step_by(5) {
+            let point = point(px(x as f32), px(y as f32));
+            let reference = reference_clips
+                .iter()
+                .all(|(inverse, bounds)| bounds.contains(&inverse.apply(point)));
+            assert_eq!(
+                space.contains_window_point(point),
+                reference,
+                "deep clip input membership changed at {point:?}"
+            );
+        }
+    }
 }
 
 #[gpui::test]
