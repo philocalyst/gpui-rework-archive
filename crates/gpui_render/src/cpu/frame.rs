@@ -29,6 +29,13 @@ impl Frame {
             pixels: vec![[0.; 4]; width as usize * height as usize],
         }
     }
+    pub(super) fn resize_and_clear(&mut self, width: u32, height: u32) {
+        self.width = width;
+        self.height = height;
+        self.pixels
+            .resize(width as usize * height as usize, [0.; 4]);
+        self.pixels.fill([0.; 4]);
+    }
     pub(super) fn to_image(&self) -> RgbaImage {
         let mut image = RgbaImage::new(self.width, self.height);
         for (index, px) in self.pixels.iter().enumerate() {

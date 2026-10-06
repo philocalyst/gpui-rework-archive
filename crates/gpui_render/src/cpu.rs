@@ -17,6 +17,7 @@ use std::sync::Arc;
 pub struct CpuRenderer {
     atlas: Arc<CpuAtlas>,
     font: crate::font::FontRasterizationSettings,
+    frame: Option<Frame>,
 }
 
 mod atlas;
@@ -47,15 +48,15 @@ impl CpuRenderer {
         Self {
             atlas,
             font: Default::default(),
+            frame: None,
         }
     }
 
     /// Creates an atlas from SceneCapture's canonical bitmap vector.
     pub fn from_captured_bitmaps(bitmaps: &[CapturedBitmap]) -> Result<Self> {
-        Ok(Self {
-            atlas: Arc::new(CpuAtlas::from_captured_bitmaps(bitmaps)?),
-            font: Default::default(),
-        })
+        Ok(Self::from_atlas(Arc::new(CpuAtlas::from_captured_bitmaps(
+            bitmaps,
+        )?)))
     }
 
     /// Uses explicit platform text settings instead of neutral portable coverage.
@@ -66,6 +67,16 @@ impl CpuRenderer {
         self.font = settings;
         self
     }
+
+    /// Copies the most recently rendered frame into straight RGBA pixels.
+    /// Benchmark callers can keep this conversion outside their replay timings.
+    pub fn readback(&self) -> Result<RgbaImage> {
+        Ok(self
+            .frame
+            .as_ref()
+            .context("CPU renderer has no completed frame")?
+            .to_image())
+    }
 }
 
 impl PlatformHeadlessRendererTrait for CpuRenderer {
@@ -74,11 +85,18 @@ impl PlatformHeadlessRendererTrait for CpuRenderer {
         scene: &Scene,
         size: Size<DevicePixels>,
     ) -> Result<RgbaImage> {
-        render_scene(scene, size, &self.atlas, self.font.uniforms())
+        self.render_scene(scene, size)?;
+        self.readback()
     }
 
     fn render_scene(&mut self, scene: &Scene, size: Size<DevicePixels>) -> Result<()> {
-        let _ = render_scene(scene, size, &self.atlas, self.font.uniforms())?;
+        self.frame = Some(replay_frame(
+            scene,
+            size,
+            &self.atlas,
+            self.font.uniforms(),
+            self.frame.take(),
+        )?);
         Ok(())
     }
 
@@ -87,19 +105,26 @@ impl PlatformHeadlessRendererTrait for CpuRenderer {
     }
 }
 
-fn render_scene(
+fn replay_frame(
     scene: &Scene,
     size: Size<DevicePixels>,
     atlas: &CpuAtlas,
     font: crate::shaders::common::FontRasterizationUniforms,
-) -> Result<RgbaImage> {
+    retained: Option<Frame>,
+) -> Result<Frame> {
     ensure!(
         size.width.0 >= 0 && size.height.0 >= 0,
         "CPU renderer requires non-negative dimensions"
     );
     let width = size.width.0 as u32;
     let height = size.height.0 as u32;
-    let mut target = Frame::new(width, height);
+    let mut target = match retained {
+        Some(mut frame) => {
+            frame.resize_and_clear(width, height);
+            frame
+        }
+        None => Frame::new(width, height),
+    };
     let mut stack = Vec::<Option<FilterFrame>>::new();
     for command in scene.render_commands() {
         match command {
@@ -222,7 +247,7 @@ fn render_scene(
         }
     }
     ensure!(stack.is_empty(), "unclosed CPU filter group");
-    Ok(target.to_image())
+    Ok(target)
 }
 
 /// Replays a compiled scene into an RGBA image with the supplied CPU atlas.
@@ -231,12 +256,14 @@ pub fn render_scene_to_image(
     size: Size<DevicePixels>,
     atlas: &CpuAtlas,
 ) -> Result<RgbaImage> {
-    render_scene(
+    Ok(replay_frame(
         scene,
         size,
         atlas,
         crate::font::FontRasterizationSettings::default().uniforms(),
-    )
+        None,
+    )?
+    .to_image())
 }
 
 struct FilterFrame {

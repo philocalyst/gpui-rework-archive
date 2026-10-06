@@ -509,12 +509,15 @@ mod source {
         vec4f(srgb.x, srgb.y, srgb.z, color.w)
     }
     pub fn over(below: Vec4f, above: Vec4f) -> Vec4f {
-        let alpha = above.w + below.w * (1.0 - above.w);
+        // Dither can move alpha outside its range; match fixed-function blend factors.
+        let above_alpha = saturate(above.w);
+        let below_alpha = saturate(below.w);
+        let alpha = above_alpha + below_alpha * (1.0 - above_alpha);
         if alpha == 0.0 {
             return transparent();
         }
         let red_green_blue =
-            (above.rgb() * above.w + below.rgb() * below.w * (1.0 - above.w)) / alpha;
+            (above.rgb() * above_alpha + below.rgb() * below_alpha * (1.0 - above_alpha)) / alpha;
         vec4f(red_green_blue.x, red_green_blue.y, red_green_blue.z, alpha)
     }
     pub fn gaussian(position: f32, standard_deviation: f32) -> f32 {
