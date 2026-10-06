@@ -14,7 +14,11 @@ pub trait InputEvent: Sealed + 'static {
 /// A key event from the platform.
 pub trait KeyEvent: InputEvent {}
 
-/// A mouse event from the platform.
+/// A pointer event whose coordinates follow the receiving element's space.
+///
+/// Element listeners receive positions in layout coordinates. Raw
+/// [`PlatformInput`] events use window coordinates; [`Window::window_mouse_position`]
+/// provides that position inside a transformed listener.
 pub trait MouseEvent: InputEvent + Clone {
     /// Returns this event in the listener's layout coordinates. Pixel deltas
     /// map as vectors; gesture magnitudes and other dimensionless values are unchanged.
@@ -153,7 +157,7 @@ pub struct MouseDownEvent {
     /// Which mouse button was pressed.
     pub button: MouseButton,
 
-    /// The position of the mouse on the window.
+    /// The pointer position in the receiving listener's coordinate space.
     pub position: Point<Pixels>,
 
     /// The modifiers that were held down when the mouse was pressed.
@@ -196,7 +200,7 @@ pub struct MouseUpEvent {
     /// Which mouse button was released.
     pub button: MouseButton,
 
-    /// The position of the mouse on the window.
+    /// The pointer position in the receiving listener's coordinate space.
     pub position: Point<Pixels>,
 
     /// The modifiers that were held down when the mouse was released.
@@ -261,7 +265,7 @@ pub struct MousePressureEvent {
     pub pressure: f32,
     /// The pressure stage of the event.
     pub stage: PressureStage,
-    /// The position of the mouse on the window.
+    /// The pointer position in the receiving listener's coordinate space.
     pub position: Point<Pixels>,
     /// The modifiers that were held down when the mouse pressure changed.
     pub modifiers: Modifiers,
@@ -295,7 +299,7 @@ pub struct KeyboardClickEvent {
 /// screen.
 #[derive(Clone, Debug, Default)]
 pub struct TouchClickEvent {
-    /// The position of the tap in window coordinates.
+    /// The tap position in the receiving listener's layout coordinates.
     pub position: Point<Pixels>,
     /// The number of consecutive taps at this location (double tap = 2),
     /// analogous to the mouse `click_count`.
@@ -514,7 +518,7 @@ pub enum NavigationDirection {
 /// A mouse move event from the platform.
 #[derive(Clone, Debug, Default)]
 pub struct MouseMoveEvent {
-    /// The position of the mouse on the window.
+    /// The pointer position in the receiving listener's coordinate space.
     pub position: Point<Pixels>,
 
     /// The mouse button that was pressed, if any.
@@ -548,7 +552,7 @@ impl MouseMoveEvent {
 /// A mouse wheel event from the platform.
 #[derive(Clone, Debug, Default)]
 pub struct ScrollWheelEvent {
-    /// The position of the mouse on the window.
+    /// The pointer position in the receiving listener's coordinate space.
     pub position: Point<Pixels>,
 
     /// The change in scroll wheel position for this event.
@@ -609,7 +613,7 @@ impl Default for ScrollDelta {
 ///
 #[derive(Clone, Debug, Default)]
 pub struct PinchEvent {
-    /// The position of the pinch center on the window.
+    /// The pinch center in the receiving listener's coordinate space.
     pub position: Point<Pixels>,
 
     /// The zoom delta for this event.
@@ -710,7 +714,7 @@ impl ScrollDelta {
 /// A mouse exit event from the platform, generated when the mouse leaves the window.
 #[derive(Clone, Debug, Default)]
 pub struct MouseExitEvent {
-    /// The position of the mouse relative to the window.
+    /// The pointer position in the receiving listener's coordinate space.
     pub position: Point<Pixels>,
     /// The mouse button that was pressed, if any.
     pub pressed_button: Option<MouseButton>,
@@ -789,19 +793,19 @@ impl Render for ExternalPaths {
 pub enum FileDropEvent {
     /// The files have entered the window.
     Entered {
-        /// The position of the mouse relative to the window.
+        /// The pointer position in the receiving listener's coordinate space.
         position: Point<Pixels>,
         /// The paths of the files that are being dragged.
         paths: ExternalPaths,
     },
     /// The files are being dragged over the window
     Pending {
-        /// The position of the mouse relative to the window.
+        /// The pointer position in the receiving listener's coordinate space.
         position: Point<Pixels>,
     },
     /// The files have been dropped onto the window.
     Submit {
-        /// The position of the mouse relative to the window.
+        /// The pointer position in the receiving listener's coordinate space.
         position: Point<Pixels>,
     },
     /// The user has stopped dragging the files over the window.

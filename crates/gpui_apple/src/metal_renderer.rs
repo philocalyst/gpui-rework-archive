@@ -3,9 +3,9 @@ use anyhow::Result;
 use block::ConcreteBlock;
 use core_graphics::geometry::CGSize;
 use gpui::{
-    AtlasTextureId, DevicePixels, FilterRenderTarget, MAX_FILTER_GROUP_DEPTH,
-    MonochromeSprite, PaintSurface, Path, PolychromeSprite, PrimitiveBatch, Quad, RenderCommand,
-    ScaledPixels, Scene, Shadow, Size, SurfaceSource, Underline, size,
+    AtlasTextureId, DevicePixels, FilterRenderTarget, MAX_FILTER_GROUP_DEPTH, MonochromeSprite,
+    PaintSurface, Path, PolychromeSprite, PrimitiveBatch, Quad, RenderCommand, ScaledPixels, Scene,
+    Shadow, Size, SurfaceSource, Underline, size,
 };
 use gpui_render::{
     artifacts::{NATIVE_SHADERS, NativeShader},
@@ -2194,8 +2194,8 @@ impl gpui::PlatformHeadlessRenderer for MetalHeadlessRenderer {
 mod tests {
     use super::*;
     use gpui::{
-        AtlasKey, BackdropFilter, BorderStyle, Bounds, ContentMask, Corners, Edges, ImageId, Path, PlatformAtlas,
-        PlatformHeadlessRenderer, RenderImageParams, RenderSvgParams, ScaledFilter,
+        AtlasKey, BackdropFilter, BorderStyle, Bounds, ContentMask, Corners, Edges, ImageId, Path,
+        PlatformAtlas, PlatformHeadlessRenderer, RenderImageParams, RenderSvgParams, ScaledFilter,
         TransformationMatrix, checkerboard, hsla, linear_color_stop, linear_gradient,
         pattern_slash, px, solid_background, white,
     };

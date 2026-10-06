@@ -20,7 +20,7 @@ CARGO_TARGET_DIR=/path/to/shared/target cargo rustc \
 
 ## Recorded CPU run
 
-Recorded on an Apple M3 Pro (`aarch64-apple-darwin`) with `rustc 1.101.0-nightly (5c543b0b8 2026-09-29)`, the bench profile, default features disabled, 30 timed samples after warmup, fixed seed `0x2732026`. The current production snapshot was committed as `cd388bf8b1dd15e63772a2e3b7dc2cdb0fa5cdd0` (based on `dd3768f3e218c29aeb5d2ff307a32044955b34ae`); the baseline source snapshot was `b5aceefaf96af3946ff26a603e5f4110d4bdf4ca`. Values below are median and p10–p90 nanoseconds per reported operation.
+Recorded on an Apple M3 Pro (`aarch64-apple-darwin`) with `rustc 1.101.0-nightly (5c543b0b8 2026-09-29)`, the bench profile, default features disabled, 30 timed samples after warmup, fixed seed `0x2732026`. The measured CPU scene implementation corresponds to the geometry committed in `cd388bf8b1dd15e63772a2e3b7dc2cdb0fa5cdd0`; the baseline source snapshot was `b5aceefaf96af3946ff26a603e5f4110d4bdf4ca`. These scene workloads do not compile or time the complete final shader implementation. Values below are median and p10–p90 nanoseconds per reported operation.
 
 | CPU workload | Current median (p10–p90) | Baseline median (p10–p90) |
 | --- | ---: | ---: |
@@ -33,7 +33,49 @@ The post-culling scene-only measurements are close to the baseline medians, with
 
 The matrix microbench isolates affine point mapping, not the whole pointer-dispatch path. For a 10,000-node scan across 64 deterministic events, computing each candidate inverse inside the scan measured 8.54 ns/candidate (8.11–8.96); reusing the precomputed inverse measured 1.97 ns/candidate (1.86–2.52). A 100-node/256-event case measured 7.35 (7.32–13.44) and 1.66 (1.62–2.61), respectively. Exact 16-clip containment on rotated chains measured 60.77 ns/event (60.02–96.56) when inverting each clip for each point and 20.38 (20.33–36.96) with cached inverses; a mixed inside/early-miss/late-miss trace measured 46.12 (46.05–73.54) and 15.66 (15.61–28.77). The AABB timing is only a geometric baseline; it does not preserve rotated clip semantics.
 
+The current `element_transforms` target also pairs the actual `CoordinateSpace::raster_scale()` getter against recomputing the camera’s maximum stretch and eighth-step bucket per operation. Each iteration black-boxes the matrix or the `CoordinateSpace` reference before the operation, preventing constant folding or a hoisted getter load. At production HEAD `34bc8a29e8e52ec28f1f26ae3665aae3239702b8` with the benchmark changes uncommitted, variant A (recompute) versus B (cached getter) measured:
+
+| Shared camera operations | Recompute median (p10–p90) | Cached getter median (p10–p90) |
+| --- | ---: | ---: |
+| 512 | 2.28 ns (2.20–2.36) | 0.73 ns (0.65–0.73) |
+| 10,000 | 2.23 ns (2.22–2.25) | 0.72 ns (0.70–0.74) |
+| 100,000 | 2.23 ns (2.21–2.82) | 0.73 ns (0.70–0.74) |
+
+This scalar-operation benchmark validates that the cached getter returns the same bucket, but does not measure glyph shaping or rendering. The corrected run had a host load of 22.72 / 20.09 / 23.41. Raw methodology and values are in [raster-density-production-run-2.txt](experiments/raster-density-production-run-2.txt). Run 1 is preserved as a superseded experiment: its cached scalar lacked an opaque input reference and could be hoisted, so it is not a valid getter comparison. The deep convex-clip and prefix-pruning experiments are standalone geometry microbenchmarks documented in [element-clip-reduction-experiment.md](element-clip-reduction-experiment.md), not calls into the private production clip builder.
+
 For four deterministic 100,000-frame zoom traces and device scales 1, 1.5 and 2, the current `ceil(max(zoom, 1) * 8) / 8` scale policy produced 25 distinct effective scale values. The maximum upward raster oversampling was 12.5% (p95 5.7–6.2%). These are scale-error and bucket-transition measurements, not rendered image-quality results.
+
+## Mapping-only parent traversal
+
+The production scene stores the complete composed matrix on each active space.
+Parent links skip mapping-only records, so coverage traversal depends on clip
+depth rather than transform depth. Run the isolated CPU proxy with:
+
+```sh
+cargo bench -p gpui-ce --bench element_transforms --features bench-support --no-default-features -- --parent-walk-only
+```
+
+The [source](experiments/element-mapping-chain.rs) builds real production `Scene`
+records and reconstructs the former parent links on a copy of those records. It
+checks visit counts, retained clip IDs/order and clip metadata before timing 30
+alternating paired samples of 10,000 probes. It does not execute GPU shaders,
+evaluate clip alpha or build an older commit. The table retains the same number
+of records; only the parent walk changes.
+
+| Transform depth / clips | Records visited, former → current | CPU proxy median, former → current |
+| --- | ---: | ---: |
+| 8 / 0 | 8 → 1 | 5.85 → 1.12 ns |
+| 64 / 0 | 64 → 1 | 158.41 → 1.19 ns |
+| 256 / 0 | 256 → 1 | 249.31 → 1.14 ns |
+| 64 / 8 | 72 → 9 | 176.41 → 8.81 ns |
+| 256 / 32 | 288 → 33 | 209.30 → 53.40 ns |
+
+[The raw run](experiments/element-mapping-chain-run.txt) records wide timing tails
+under host contention. These timings describe a CPU traversal proxy; the exact
+visit-count reduction is the relevant structural result for the shader.
+[A repeat through the durable harness](experiments/element-mapping-chain-run-2.txt)
+passed the strengthened clip-order assertions and reproduced those visit counts;
+its timing spread is recorded separately.
 
 ## GPU submission target
 
@@ -51,6 +93,6 @@ Recorded on macOS 15.7.4 with the Apple M3 Pro 14-core GPU (system-reported Meta
 | Rotated nested clips, depth 4, 512 quads | 2.693 ms (2.260–3.188) |
 | Rotated nested clips, depth 16, 512 quads | 1.915 ms (1.837–2.008) |
 
-These intervals overlap and the point estimates are non-monotonic with clip depth. That result does not establish a clip-depth cost curve: this end-to-end test includes fixed command submission and GPU completion wait, and Criterion reported 3–5 outliers for four of the cases. The adapter driver string was not emitted by this benchmark. The captured run is the working tree at `cd388bf8b1dd15e63772a2e3b7dc2cdb0fa5cdd0` plus the benchmark file changes.
+These intervals overlap and the point estimates are non-monotonic with clip depth. That result does not establish a clip-depth cost curve: this end-to-end test includes fixed command submission and GPU completion wait, and Criterion reported 3–5 outliers for four of the cases. The adapter driver string was not emitted by this benchmark. The measured binary used geometry equivalent to `cd388bf8b1dd15e63772a2e3b7dc2cdb0fa5cdd0`, built before the later atlas guards, clip-distance reconstruction and antialiasing refinements; it is not an exact build or performance claim for the final source.
 
 The source retains the workload and methodology. Raw CPU and GPU output logs are also available in the benchmark host's `/tmp/gpui-transform-bench/` directory, but the tables above are the durable results record.

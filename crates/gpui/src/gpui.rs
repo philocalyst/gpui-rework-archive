@@ -15,9 +15,9 @@ mod asset_cache;
 mod assets;
 mod bounds_tree;
 mod color;
-mod coordinate_space;
 /// The default colors used by GPUI.
 pub mod colors;
+mod coordinate_space;
 #[cfg(feature = "profiler")]
 mod debug_overlay;
 mod element;

@@ -4,6 +4,10 @@
 #![allow(unexpected_cfgs)]
 
 #[cfg(not(gpui_scene_only))]
+#[path = "../../../docs/experiments/element-mapping-chain.rs"]
+mod mapping_chain;
+
+#[cfg(not(gpui_scene_only))]
 mod full {
     use gpui::{
         Bounds, ContentMask, CoordinateSpace, Quad, ScaledPixels, Scene, Size,
@@ -498,6 +502,43 @@ mod full {
             );
         }
     }
+    fn raster_density(glyphs: usize) {
+        // Exercise the actual CoordinateSpace cache and public getter against
+        // recalculating the same bucket from its shared camera transform.
+        let camera = TransformationMatrix {
+            rotation_scale: [[1.37, 0.34], [-0.21, 1.37]],
+            translation: [1280.0, 720.0],
+        };
+        let space = CoordinateSpace::new(camera);
+        let expected = (camera.max_scale().max(1.0) * 8.0).ceil().clamp(8.0, 64.0) / 8.0;
+        let cached_scale = space.raster_scale();
+        assert_eq!(cached_scale, expected);
+
+        let recompute = || {
+            let mut sum = 0.0f32;
+            for _ in 0..glyphs {
+                let matrix = black_box(camera);
+                let scale = (matrix.max_scale().max(1.0) * 8.0).ceil().clamp(8.0, 64.0) / 8.0;
+                sum += scale;
+            }
+            black_box(sum.to_bits())
+        };
+        let cached = || {
+            let mut sum = 0.0f32;
+            for _ in 0..glyphs {
+                sum += black_box(black_box(&space).raster_scale());
+            }
+            black_box(sum.to_bits())
+        };
+        assert_eq!(recompute(), cached());
+        measure_pair(
+            &format!("shared-camera raster density glyphs={glyphs}"),
+            glyphs,
+            recompute,
+            cached,
+            30,
+        );
+    }
     fn identity(ops: usize) {
         let pts = (0..ops)
             .map(|i| point(px(200.25 + (i % 17) as f32), px(300.5 - (i % 13) as f32)))
@@ -551,6 +592,19 @@ mod full {
             scenebench(10_000, 10);
             return;
         }
+        if args.iter().any(|arg| arg == "--raster-density-only") {
+            println!(
+                "Raster-density-only mode; A recomputes from opaque matrix, B reads from opaque CoordinateSpace reference."
+            );
+            for glyphs in [512, 10_000, 100_000] {
+                raster_density(glyphs);
+            }
+            return;
+        }
+        if args.iter().any(|arg| arg == "--parent-walk-only") {
+            super::mapping_chain::run();
+            return;
+        }
         println!(
             "Release mode, fixed seed=0x2732026; compiler/CPU/revision should accompany saved output; correctness assertions precede timed comparisons."
         );
@@ -563,6 +617,10 @@ mod full {
         }
         scenebench(100, 100);
         scenebench(10_000, 10);
+        for glyphs in [512, 10_000, 100_000] {
+            raster_density(glyphs);
+        }
+        super::mapping_chain::run();
         raster(100_000);
         identity(50_000);
     }

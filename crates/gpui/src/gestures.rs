@@ -386,9 +386,9 @@ impl GestureKinds {
 pub struct TouchDragEvent {
     /// The phase of the touch drag.
     pub phase: TouchPhase,
-    /// The position where the touch started.
+    /// Where the touch started, in the receiving listener's coordinate space.
     pub start_position: Point<Pixels>,
-    /// The touch's current position.
+    /// The current position in the receiving listener's coordinate space.
     pub position: Point<Pixels>,
 }
 
@@ -413,9 +413,9 @@ impl MouseEvent for TouchDragEvent {
 pub struct LongPressEvent {
     /// The phase of the long press.
     pub phase: TouchPhase,
-    /// The position where the touch started.
+    /// Where the touch started, in the receiving listener's coordinate space.
     pub start_position: Point<Pixels>,
-    /// The touch's current position.
+    /// The current position in the receiving listener's coordinate space.
     pub position: Point<Pixels>,
 }
 

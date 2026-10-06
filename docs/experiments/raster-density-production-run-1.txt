@@ -1,0 +1,35 @@
+Superseded CoordinateSpace raster-density microbenchmark
+=======================================================
+
+Command:
+  cargo bench -p gpui-ce --bench element_transforms --features bench-support --no-default-features
+
+Host:
+  Apple M3 Pro, arm64-apple-darwin, macOS 15.7.4
+  rustc 1.101.0-nightly (5c543b0b8 2026-09-29)
+  bench profile, 30 paired samples after warmup
+  HEAD b8fe0f89b865b1294aaba2d659e1db4b384cad40 plus active working-tree changes
+  load average after run: 59.66 / 38.02 / 30.67
+
+The benchmark validates CoordinateSpace::new(camera).raster_scale() against the
+same max_scale/eighth-step formula, then alternates paired variants. A recomputes
+the formula per operation; B reads the real cached public getter per operation.
+
+shared-camera raster density glyphs=512 variant=A
+  median=9.20 ns/op p10=9.11 p90=9.36
+shared-camera raster density glyphs=512 variant=B
+  median=1.14 ns/op p10=1.14 p90=1.22
+shared-camera raster density glyphs=10000 variant=A
+  median=2.24 ns/op p10=2.21 p90=9.15
+shared-camera raster density glyphs=10000 variant=B
+  median=0.77 ns/op p10=0.74 p90=1.15
+shared-camera raster density glyphs=100000 variant=A
+  median=5.20 ns/op p10=2.22 p90=9.11
+shared-camera raster density glyphs=100000 variant=B
+  median=0.95 ns/op p10=0.75 p90=1.80
+
+This run is not a valid getter comparison: the cached side black-boxed the
+result rather than the CoordinateSpace reference, allowing its load to be
+hoisted. Corrected run 2 makes both inputs opaque before each operation.
+The high host load also widened timing tails. This output is retained as
+experiment history, not performance evidence for the final implementation.

@@ -1,0 +1,231 @@
+clip-compile prototype: f64 reference geometry; epsilon-tested polygon clipping; fixed seed; correctness before timing
+shared-camera raster density recomputed glyphs=512   median=2.28 ns/op p10=2.20 p90=2.36
+shared-camera cached density reads glyphs=512        median=0.65 ns/op p10=0.65 p90=0.73
+shared-camera raster density recomputed glyphs=10000 median=2.23 ns/op p10=2.23 p90=2.24
+shared-camera cached density reads glyphs=10000      median=0.74 ns/op p10=0.72 p90=0.75
+shared-camera raster density recomputed glyphs=100000 median=2.24 ns/op p10=2.24 p90=3.60
+shared-camera cached density reads glyphs=100000     median=0.75 ns/op p10=0.71 p90=1.24
+dominance differential fuzz: 400 affine/fade chains, 512000 points, original and pruned alpha agree
+case=identical        depth= 1 vertices=  4 retained_clips= 1 prefix_clips= 1 chain_bytes~=168 pruned_bytes~=168 polygon_bytes=64 hit_count=2824
+identical d=1 exact chain mixed hits=2824 visits=8192 median=1.73 ns/op p10=1.73 p90=14.53
+identical d=1 pruned chain clips=1                   median=1.61 ns/op p10=1.60 p90=1.73
+identical d=1 prefix chain clips=1                   median=1.62 ns/op p10=1.61 p90=1.74
+identical d=1 compiled polygon mixed vertices=4      median=2.61 ns/op p10=2.59 p90=3.48
+identical d=1 unpruned plane scan visits=22429       median=2.17 ns/op p10=2.00 p90=5.22
+identical d=1 compile build                          median=42.00 ns/op p10=0.00 p90=42.00
+identical d=1 dominance prune build                  median=42.00 ns/op p10=41.00 p90=84.00
+identical d=1 prefix prune build                     median=42.00 ns/op p10=41.00 p90=84.00
+case=identical        depth= 4 vertices=  4 retained_clips= 1 prefix_clips= 1 chain_bytes~=672 pruned_bytes~=168 polygon_bytes=64 hit_count=2824
+identical d=4 exact chain mixed hits=2824 visits=16664 median=3.30 ns/op p10=3.23 p90=3.62
+identical d=4 pruned chain clips=1                   median=1.67 ns/op p10=1.62 p90=14.28
+identical d=4 prefix chain clips=1                   median=1.62 ns/op p10=1.61 p90=2.52
+identical d=4 compiled polygon mixed vertices=4      median=2.58 ns/op p10=2.58 p90=11.30
+identical d=4 unpruned plane scan visits=56317       median=4.39 ns/op p10=4.36 p90=7.78
+identical d=4 compile build                          median=834.00 ns/op p10=792.00 p90=1875.00
+identical d=4 dominance prune build                  median=83.00 ns/op p10=83.00 p90=125.00
+identical d=4 prefix prune build                     median=83.00 ns/op p10=83.00 p90=125.00
+case=identical        depth=16 vertices=  4 retained_clips= 1 prefix_clips= 1 chain_bytes~=2688 pruned_bytes~=168 polygon_bytes=64 hit_count=2824
+identical d=16 exact chain mixed hits=2824 visits=50552 median=7.83 ns/op p10=7.81 p90=9.22
+identical d=16 pruned chain clips=1                  median=2.38 ns/op p10=1.61 p90=11.59
+identical d=16 prefix chain clips=1                  median=1.59 ns/op p10=1.59 p90=1.65
+identical d=16 compiled polygon mixed vertices=4     median=2.62 ns/op p10=2.60 p90=7.57
+identical d=16 unpruned plane scan visits=191869     median=18.92 ns/op p10=18.80 p90=27.36
+identical d=16 compile build                         median=3917.00 ns/op p10=3834.00 p90=4000.00
+identical d=16 dominance prune build                 median=250.00 ns/op p10=208.00 p90=250.00
+identical d=16 prefix prune build                    median=209.00 ns/op p10=208.00 p90=250.00
+case=identical        depth=64 vertices=  4 retained_clips= 1 prefix_clips= 1 chain_bytes~=10752 pruned_bytes~=168 polygon_bytes=64 hit_count=2824
+identical d=64 exact chain mixed hits=2824 visits=186104 median=30.48 ns/op p10=30.46 p90=30.70
+identical d=64 pruned chain clips=1                  median=1.60 ns/op p10=1.59 p90=1.68
+identical d=64 prefix chain clips=1                  median=1.67 ns/op p10=1.66 p90=1.84
+identical d=64 compiled polygon mixed vertices=4     median=2.61 ns/op p10=2.60 p90=3.56
+identical d=64 unpruned plane scan visits=734077     median=54.68 ns/op p10=54.59 p90=112.76
+identical d=64 compile build                         median=16042.00 ns/op p10=15833.00 p90=35458.00
+identical d=64 dominance prune build                 median=792.00 ns/op p10=791.00 p90=875.00
+identical d=64 prefix prune build                    median=750.00 ns/op p10=750.00 p90=833.00
+case=contained        depth= 1 vertices=  4 retained_clips= 1 prefix_clips= 1 chain_bytes~=168 pruned_bytes~=168 polygon_bytes=64 hit_count=4989
+contained d=1 exact chain mixed hits=4989 visits=8192 median=1.73 ns/op p10=1.72 p90=1.99
+contained d=1 pruned chain clips=1                   median=1.51 ns/op p10=1.50 p90=1.76
+contained d=1 prefix chain clips=1                   median=1.51 ns/op p10=1.48 p90=3.46
+contained d=1 compiled polygon mixed vertices=4      median=2.79 ns/op p10=2.78 p90=3.20
+contained d=1 unpruned plane scan visits=26970       median=2.18 ns/op p10=2.16 p90=2.71
+contained d=1 compile build                          median=42.00 ns/op p10=0.00 p90=42.00
+contained d=1 dominance prune build                  median=42.00 ns/op p10=41.00 p90=83.00
+contained d=1 prefix prune build                     median=42.00 ns/op p10=41.00 p90=84.00
+case=contained        depth= 4 vertices=  5 retained_clips= 2 prefix_clips= 2 chain_bytes~=672 pruned_bytes~=336 polygon_bytes=80 hit_count=4866
+contained d=4 exact chain mixed hits=4866 visits=23047 median=3.92 ns/op p10=3.91 p90=4.31
+contained d=4 pruned chain clips=2                   median=2.16 ns/op p10=2.13 p90=2.53
+contained d=4 prefix chain clips=2                   median=2.17 ns/op p10=2.08 p90=11.54
+contained d=4 compiled polygon mixed vertices=5      median=3.27 ns/op p10=3.26 p90=3.92
+contained d=4 unpruned plane scan visits=86243       median=7.38 ns/op p10=7.30 p90=13.60
+contained d=4 compile build                          median=1208.00 ns/op p10=1166.00 p90=2542.00
+contained d=4 dominance prune build                  median=83.00 ns/op p10=83.00 p90=84.00
+contained d=4 prefix prune build                     median=208.00 ns/op p10=83.00 p90=250.00
+case=contained        depth=16 vertices= 29 retained_clips=14 prefix_clips=14 chain_bytes~=2688 pruned_bytes~=2352 polygon_bytes=464 hit_count=4349
+contained d=16 exact chain mixed hits=4349 visits=78977 median=14.48 ns/op p10=13.25 p90=37.63
+contained d=16 pruned chain clips=14                 median=12.85 ns/op p10=12.82 p90=14.12
+contained d=16 prefix chain clips=14                 median=10.58 ns/op p10=10.56 p90=13.04
+contained d=16 compiled polygon mixed vertices=29    median=15.44 ns/op p10=15.32 p90=16.55
+contained d=16 unpruned plane scan visits=309463     median=33.93 ns/op p10=24.76 p90=57.28
+contained d=16 compile build                         median=12416.00 ns/op p10=12083.00 p90=14375.00
+contained d=16 dominance prune build                 median=625.00 ns/op p10=583.00 p90=625.00
+contained d=16 prefix prune build                    median=291.00 ns/op p10=250.00 p90=292.00
+case=contained        depth=64 vertices= 49 retained_clips=62 prefix_clips=62 chain_bytes~=10752 pruned_bytes~=10416 polygon_bytes=784 hit_count=83
+contained d=64 exact chain mixed hits=83 visits=182575 median=34.51 ns/op p10=33.42 p90=38.45
+contained d=64 pruned chain clips=62                 median=35.93 ns/op p10=34.54 p90=77.90
+contained d=64 prefix chain clips=62                 median=34.14 ns/op p10=31.91 p90=52.28
+contained d=64 compiled polygon mixed vertices=49    median=21.20 ns/op p10=21.03 p90=47.99
+contained d=64 unpruned plane scan visits=719812     median=60.80 ns/op p10=54.05 p90=121.97
+contained d=64 compile build                         median=109625.00 ns/op p10=98208.00 p90=354375.00
+contained d=64 dominance prune build                 median=8333.00 ns/op p10=8042.00 p90=30916.00
+contained d=64 prefix prune build                    median=834.00 ns/op p10=791.00 p90=958.00
+case=adversarial      depth= 1 vertices=  4 retained_clips= 1 prefix_clips= 1 chain_bytes~=168 pruned_bytes~=168 polygon_bytes=64 hit_count=2632
+adversarial d=1 exact chain mixed hits=2632 visits=8192 median=1.64 ns/op p10=1.64 p90=1.70
+adversarial d=1 pruned chain clips=1                 median=1.59 ns/op p10=1.57 p90=138.18
+adversarial d=1 prefix chain clips=1                 median=7.28 ns/op p10=1.72 p90=20.18
+adversarial d=1 compiled polygon mixed vertices=4    median=13.05 ns/op p10=4.44 p90=13.82
+adversarial d=1 unpruned plane scan visits=22041     median=2.04 ns/op p10=2.01 p90=3.01
+adversarial d=1 compile build                        median=42.00 ns/op p10=0.00 p90=42.00
+adversarial d=1 dominance prune build                median=42.00 ns/op p10=41.00 p90=84.00
+adversarial d=1 prefix prune build                   median=42.00 ns/op p10=41.00 p90=83.00
+case=adversarial      depth= 4 vertices=  7 retained_clips= 4 prefix_clips= 4 chain_bytes~=672 pruned_bytes~=672 polygon_bytes=112 hit_count=2395
+adversarial d=4 exact chain mixed hits=2395 visits=15673 median=11.70 ns/op p10=3.83 p90=18.34
+adversarial d=4 pruned chain clips=4                 median=2.48 ns/op p10=2.44 p90=4.58
+adversarial d=4 prefix chain clips=4                 median=2.53 ns/op p10=2.35 p90=18.11
+adversarial d=4 compiled polygon mixed vertices=7    median=15.49 ns/op p10=14.72 p90=27.40
+adversarial d=4 unpruned plane scan visits=51478     median=18.41 ns/op p10=4.25 p90=25.41
+adversarial d=4 compile build                        median=3042.00 ns/op p10=1375.00 p90=3250.00
+adversarial d=4 dominance prune build                median=250.00 ns/op p10=208.00 p90=250.00
+adversarial d=4 prefix prune build                   median=208.00 ns/op p10=166.00 p90=209.00
+case=adversarial      depth=16 vertices=  5 retained_clips=11 prefix_clips=15 chain_bytes~=2688 pruned_bytes~=1848 polygon_bytes=80 hit_count=2146
+adversarial d=16 exact chain mixed hits=2146 visits=42618 median=8.63 ns/op p10=6.71 p90=21.21
+adversarial d=16 pruned chain clips=11               median=16.50 ns/op p10=16.36 p90=18.73
+adversarial d=16 prefix chain clips=15               median=6.72 ns/op p10=6.36 p90=17.16
+adversarial d=16 compiled polygon mixed vertices=5   median=2.58 ns/op p10=2.55 p90=15.04
+adversarial d=16 unpruned plane scan visits=158755   median=32.38 ns/op p10=16.75 p90=160.34
+adversarial d=16 compile build                       median=10375.00 ns/op p10=9417.00 p90=33667.00
+adversarial d=16 dominance prune build               median=2458.00 ns/op p10=2375.00 p90=2542.00
+adversarial d=16 prefix prune build                  median=667.00 ns/op p10=666.00 p90=750.00
+case=adversarial      depth=64 vertices=  7 retained_clips=11 prefix_clips=63 chain_bytes~=10752 pruned_bytes~=1848 polygon_bytes=112 hit_count=1
+adversarial d=64 exact chain mixed hits=1 visits=82640 median=14.76 ns/op p10=14.16 p90=120.09
+adversarial d=64 pruned chain clips=11               median=4.73 ns/op p10=1.60 p90=8.71
+adversarial d=64 prefix chain clips=63               median=15.20 ns/op p10=13.95 p90=61.05
+adversarial d=64 compiled polygon mixed vertices=7   median=2.49 ns/op p10=2.48 p90=5.71
+adversarial d=64 unpruned plane scan visits=312498   median=57.79 ns/op p10=29.10 p90=88.82
+adversarial d=64 compile build                       median=61958.00 ns/op p10=43625.00 p90=116750.00
+adversarial d=64 dominance prune build               median=14250.00 ns/op p10=3958.00 p90=15917.00
+adversarial d=64 prefix prune build                  median=750.00 ns/op p10=708.00 p90=2083.00
+case=shear_reflect    depth= 1 vertices=  4 retained_clips= 1 prefix_clips= 1 chain_bytes~=168 pruned_bytes~=168 polygon_bytes=64 hit_count=3259
+shear_reflect d=1 exact chain mixed hits=3259 visits=8192 median=1.70 ns/op p10=1.66 p90=1.78
+shear_reflect d=1 pruned chain clips=1               median=1.62 ns/op p10=1.62 p90=8.67
+shear_reflect d=1 prefix chain clips=1               median=1.63 ns/op p10=1.62 p90=1.89
+shear_reflect d=1 compiled polygon mixed vertices=4  median=2.64 ns/op p10=2.63 p90=4.90
+shear_reflect d=1 unpruned plane scan visits=23688   median=3.74 ns/op p10=2.04 p90=17.44
+shear_reflect d=1 compile build                      median=83.00 ns/op p10=83.00 p90=125.00
+shear_reflect d=1 dominance prune build              median=125.00 ns/op p10=125.00 p90=125.00
+shear_reflect d=1 prefix prune build                 median=125.00 ns/op p10=125.00 p90=125.00
+case=shear_reflect    depth= 4 vertices= 10 retained_clips= 4 prefix_clips= 4 chain_bytes~=672 pruned_bytes~=672 polygon_bytes=160 hit_count=2893
+shear_reflect d=4 exact chain mixed hits=2893 visits=17483 median=3.44 ns/op p10=3.35 p90=12.84
+shear_reflect d=4 pruned chain clips=4               median=2.67 ns/op p10=2.66 p90=12.26
+shear_reflect d=4 prefix chain clips=4               median=12.62 ns/op p10=2.79 p90=21.23
+shear_reflect d=4 compiled polygon mixed vertices=10 median=4.77 ns/op p10=4.60 p90=14.53
+shear_reflect d=4 unpruned plane scan visits=60097   median=19.61 ns/op p10=4.74 p90=34.83
+shear_reflect d=4 compile build                      median=2000.00 ns/op p10=1917.00 p90=4333.00
+shear_reflect d=4 dominance prune build              median=250.00 ns/op p10=83.00 p90=250.00
+shear_reflect d=4 prefix prune build                 median=208.00 ns/op p10=166.00 p90=209.00
+case=shear_reflect    depth=16 vertices=  7 retained_clips=16 prefix_clips=16 chain_bytes~=2688 pruned_bytes~=2688 polygon_bytes=112 hit_count=212
+shear_reflect d=16 exact chain mixed hits=212 visits=47024 median=9.59 ns/op p10=7.39 p90=26.13
+shear_reflect d=16 pruned chain clips=16             median=17.11 ns/op p10=9.50 p90=28.20
+shear_reflect d=16 prefix chain clips=16             median=26.27 ns/op p10=6.98 p90=39.97
+shear_reflect d=16 compiled polygon mixed vertices=7 median=2.12 ns/op p10=2.07 p90=10.32
+shear_reflect d=16 unpruned plane scan visits=171054 median=19.48 ns/op p10=17.43 p90=57.60
+shear_reflect d=16 compile build                     median=21500.00 ns/op p10=10167.00 p90=23167.00
+shear_reflect d=16 dominance prune build             median=792.00 ns/op p10=750.00 p90=2584.00
+shear_reflect d=16 prefix prune build                median=625.00 ns/op p10=625.00 p90=708.00
+case=shear_reflect    depth=64 vertices=  9 retained_clips=64 prefix_clips=64 chain_bytes~=10752 pruned_bytes~=10752 polygon_bytes=144 hit_count=68
+shear_reflect d=64 exact chain mixed hits=68 visits=53128 median=27.82 ns/op p10=10.80 p90=72.37
+shear_reflect d=64 pruned chain clips=64             median=27.67 ns/op p10=11.10 p90=29.42
+shear_reflect d=64 prefix chain clips=64             median=11.90 ns/op p10=7.83 p90=203.67
+shear_reflect d=64 compiled polygon mixed vertices=9 median=2.02 ns/op p10=1.63 p90=14.97
+shear_reflect d=64 unpruned plane scan visits=195166 median=42.46 ns/op p10=26.05 p90=85.62
+shear_reflect d=64 compile build                     median=55583.00 ns/op p10=40500.00 p90=120750.00
+shear_reflect d=64 dominance prune build             median=13750.00 ns/op p10=13333.00 p90=40208.00
+shear_reflect d=64 prefix prune build                median=792.00 ns/op p10=750.00 p90=916.00
+case=nested_fade_safe depth= 1 vertices=  4 retained_clips= 1 prefix_clips= 1 chain_bytes~=168 pruned_bytes~=168 polygon_bytes=64 hit_count=2518
+nested_fade_safe d=1 exact chain mixed hits=2518 visits=8192 median=2.15 ns/op p10=1.70 p90=8.49
+nested_fade_safe d=1 pruned chain clips=1            median=2.15 ns/op p10=1.65 p90=7.52
+nested_fade_safe d=1 prefix chain clips=1            median=1.65 ns/op p10=1.63 p90=3.86
+nested_fade_safe d=1 compiled polygon mixed vertices=4 median=13.64 ns/op p10=13.57 p90=32.78
+nested_fade_safe d=1 unpruned plane scan visits=21650 median=1.98 ns/op p10=1.97 p90=4.52
+nested_fade_safe d=1 compile build                   median=83.00 ns/op p10=42.00 p90=84.00
+nested_fade_safe d=1 dominance prune build           median=42.00 ns/op p10=41.00 p90=83.00
+nested_fade_safe d=1 prefix prune build              median=42.00 ns/op p10=41.00 p90=83.00
+case=nested_fade_safe depth= 4 vertices=  4 retained_clips= 1 prefix_clips= 1 chain_bytes~=672 pruned_bytes~=168 polygon_bytes=64 hit_count=2102
+nested_fade_safe d=4 exact chain mixed hits=2102 visits=15143 median=3.12 ns/op p10=3.11 p90=6.77
+nested_fade_safe d=4 pruned chain clips=1            median=7.72 ns/op p10=1.82 p90=15.23
+nested_fade_safe d=4 prefix chain clips=1            median=7.65 ns/op p10=4.03 p90=15.42
+nested_fade_safe d=4 compiled polygon mixed vertices=4 median=4.00 ns/op p10=2.36 p90=11.82
+nested_fade_safe d=4 unpruned plane scan visits=48786 median=19.02 ns/op p10=5.84 p90=24.40
+nested_fade_safe d=4 compile build                   median=2083.00 ns/op p10=958.00 p90=2250.00
+nested_fade_safe d=4 dominance prune build           median=250.00 ns/op p10=208.00 p90=250.00
+nested_fade_safe d=4 prefix prune build              median=250.00 ns/op p10=208.00 p90=250.00
+case=nested_fade_safe depth=16 vertices=  4 retained_clips= 1 prefix_clips= 1 chain_bytes~=2688 pruned_bytes~=168 polygon_bytes=64 hit_count=2048
+nested_fade_safe d=16 exact chain mixed hits=2048 visits=39829 median=10.77 ns/op p10=6.50 p90=34.09
+nested_fade_safe d=16 pruned chain clips=1           median=5.54 ns/op p10=1.59 p90=23.12
+nested_fade_safe d=16 prefix chain clips=1           median=6.62 ns/op p10=3.11 p90=12.72
+nested_fade_safe d=16 compiled polygon mixed vertices=4 median=10.08 ns/op p10=2.27 p90=13.27
+nested_fade_safe d=16 unpruned plane scan visits=147451 median=31.62 ns/op p10=15.54 p90=47.85
+nested_fade_safe d=16 compile build                  median=4459.00 ns/op p10=4292.00 p90=9750.00
+nested_fade_safe d=16 dominance prune build          median=250.00 ns/op p10=208.00 p90=250.00
+nested_fade_safe d=16 prefix prune build             median=209.00 ns/op p10=208.00 p90=250.00
+case=nested_fade_safe depth=64 vertices=  0 retained_clips= 1 prefix_clips= 1 chain_bytes~=10752 pruned_bytes~=168 polygon_bytes=0 hit_count=0
+nested_fade_safe d=64 exact chain mixed hits=0 visits=105365 median=44.54 ns/op p10=19.10 p90=86.27
+nested_fade_safe d=64 pruned chain clips=1           median=0.84 ns/op p10=0.84 p90=3.76
+nested_fade_safe d=64 prefix chain clips=1           median=0.57 ns/op p10=0.56 p90=1.34
+nested_fade_safe d=64 compiled polygon mixed vertices=0 median=0.28 ns/op p10=0.28 p90=1.46
+nested_fade_safe d=64 unpruned plane scan visits=401403 median=66.11 ns/op p10=37.42 p90=184.20
+nested_fade_safe d=64 compile build                  median=12542.00 ns/op p10=12041.00 p90=27791.00
+nested_fade_safe d=64 dominance prune build          median=667.00 ns/op p10=625.00 p90=750.00
+nested_fade_safe d=64 prefix prune build             median=1917.00 ns/op p10=1875.00 p90=1959.00
+case=fade_active      depth= 1 vertices=  4 retained_clips= 1 prefix_clips= 1 chain_bytes~=168 pruned_bytes~=168 polygon_bytes=64 hit_count=2953
+fade_active d=1 exact chain mixed hits=2953 visits=8192 median=1.89 ns/op p10=1.69 p90=9.89
+fade_active d=1 pruned chain clips=1                 median=1.61 ns/op p10=1.60 p90=13.96
+fade_active d=1 prefix chain clips=1                 median=1.78 ns/op p10=1.62 p90=10.12
+fade_active d=1 compiled polygon mixed vertices=4    median=12.52 ns/op p10=2.78 p90=36.02
+fade_active d=1 unpruned plane scan visits=22928     median=7.74 ns/op p10=2.45 p90=19.48
+fade_active d=1 compile build                        median=83.00 ns/op p10=41.00 p90=84.00
+fade_active d=1 dominance prune build                median=42.00 ns/op p10=41.00 p90=83.00
+fade_active d=1 prefix prune build                   median=83.00 ns/op p10=41.00 p90=125.00
+case=fade_active      depth= 4 vertices=  8 retained_clips= 4 prefix_clips= 4 chain_bytes~=672 pruned_bytes~=672 polygon_bytes=128 hit_count=2945
+fade_active d=4 exact chain mixed hits=2945 visits=17046 median=4.06 ns/op p10=3.30 p90=15.19
+fade_active d=4 pruned chain clips=4                 median=11.39 ns/op p10=3.37 p90=12.71
+fade_active d=4 prefix chain clips=4                 median=2.73 ns/op p10=2.53 p90=12.50
+fade_active d=4 compiled polygon mixed vertices=8    median=4.47 ns/op p10=4.08 p90=11.42
+fade_active d=4 unpruned plane scan visits=58332     median=13.60 ns/op p10=5.71 p90=43.25
+fade_active d=4 compile build                        median=3167.00 ns/op p10=1834.00 p90=4125.00
+fade_active d=4 dominance prune build                median=250.00 ns/op p10=208.00 p90=250.00
+fade_active d=4 prefix prune build                   median=208.00 ns/op p10=166.00 p90=209.00
+case=fade_active      depth=16 vertices= 42 retained_clips=16 prefix_clips=16 chain_bytes~=2688 pruned_bytes~=2688 polygon_bytes=672 hit_count=2853
+fade_active d=16 exact chain mixed hits=2853 visits=51979 median=15.70 ns/op p10=9.22 p90=30.54
+fade_active d=16 pruned chain clips=16               median=13.19 ns/op p10=10.93 p90=45.12
+fade_active d=16 prefix chain clips=16               median=12.47 ns/op p10=8.59 p90=28.89
+fade_active d=16 compiled polygon mixed vertices=42  median=41.61 ns/op p10=23.00 p90=51.08
+fade_active d=16 unpruned plane scan visits=197926   median=23.02 ns/op p10=19.04 p90=57.48
+fade_active d=16 compile build                       median=20334.00 ns/op p10=16083.00 p90=52250.00
+fade_active d=16 dominance prune build               median=708.00 ns/op p10=667.00 p90=709.00
+fade_active d=16 prefix prune build                  median=625.00 ns/op p10=625.00 p90=667.00
+case=fade_active      depth=64 vertices= 75 retained_clips=64 prefix_clips=64 chain_bytes~=10752 pruned_bytes~=10752 polygon_bytes=1200 hit_count=2506
+fade_active d=64 exact chain mixed hits=2506 visits=178767 median=75.15 ns/op p10=33.97 p90=95.07
+fade_active d=64 pruned chain clips=64               median=71.23 ns/op p10=33.20 p90=106.96
+fade_active d=64 prefix chain clips=64               median=70.13 ns/op p10=34.60 p90=104.60
+fade_active d=64 compiled polygon mixed vertices=75  median=74.65 ns/op p10=34.63 p90=115.92
+fade_active d=64 unpruned plane scan visits=704561   median=101.54 ns/op p10=56.89 p90=129.97
+fade_active d=64 compile build                       median=155333.00 ns/op p10=108750.00 p90=327334.00
+fade_active d=64 dominance prune build               median=8792.00 ns/op p10=8542.00 p90=13458.00
+fade_active d=64 prefix prune build                  median=833.00 ns/op p10=708.00 p90=2041.00
+fade case depth=1 hard_edges=4 retained_fade_terms=1 max_exact_alpha_error=0.000e0 hard_boundary_only_alpha_mismatches=22256/100000
+fade case depth=4 hard_edges=13 retained_fade_terms=4 max_exact_alpha_error=0.000e0 hard_boundary_only_alpha_mismatches=17554/100000
+fade case depth=16 hard_edges=19 retained_fade_terms=16 max_exact_alpha_error=0.000e0 hard_boundary_only_alpha_mismatches=12936/100000
+invalid transform M { a: [[0.0, 0.0], [0.0, 1.0]], t: P { x: 0.0, y: 0.0 } }: vertices=0
+invalid transform M { a: [[NaN, 0.0], [0.0, 1.0]], t: P { x: 0.0, y: 0.0 } }: vertices=0
+invalid transform M { a: [[inf, 0.0], [0.0, 1.0]], t: P { x: 0.0, y: 0.0 } }: vertices=0
+zero-width rectangle reference boundary matches polygon compiler (vertices=0)

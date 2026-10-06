@@ -63,10 +63,13 @@ and accessibility. The closed proposals [#309](https://github.com/gpui-ce/gpui-c
 regression cases. This implementation keeps geometry in layout coordinates and
 shares its mapping through the element lifecycle and renderer.
 
-`CoordinateSpace` contains a forward matrix, a precomputed inverse and a persistent
-chain of clipping scopes. Hitboxes, listeners, deferred draws and input handlers
+`CoordinateSpace` contains a forward matrix, a precomputed inverse, cached raster
+density and a persistent chain of clipping scopes. Hitboxes, listeners, deferred draws and input handlers
 retain this value. Consecutive clips in the same space merge; clips across different
-spaces keep their original rectangles and fade distances. Cached views include
+spaces keep their original rectangles and fade distances. A new clip removes a
+prefix of ancestors only when its four corners prove that its entire support lies
+inside each ancestor's full-coverage fade inset. Numerical uncertainty retains the
+ancestor. Cached views include
 the space in their key, so changing an ancestor camera invalidates geometry that
 was retained in the old space.
 
@@ -76,13 +79,23 @@ primitive. The GPU maps vertices forward, evaluates shapes and gradients locally
 and checks each ancestor clip through its inverse. CPU bounding boxes schedule and
 cull draws; they do not replace rotated shapes or clips. Scene replay imports and
 remaps space IDs, preserving cached content even when a new frame interns spaces
-in a different order. Identity drawing retains the ordinary single-mask path.
+in a different order. Parent links skip mapping-only scopes: composed transforms
+are stored once, while the coverage walk visits only clips and collapsed scopes.
+Identity drawing retains the ordinary single-mask path.
+
+Fragments recover layout coordinates from their existing interpolated clip
+distances. Those distances are affine in the local point, and every vertex has
+clip-space `w = 1`, so they carry the same information as an extra local-position
+varying. This removes repeated inverse applications without expanding vertex
+interfaces. The identity path still uses the original fragment position.
 
 The same shader sources and scene ABI serve WGPU, native Metal and DirectX.
 WGPU's downlevel transport encodes the coordinate table alongside primitive data.
 Path rasterization, surface passes and filter encoder restarts preserve the table.
 Blur uses the affine mapping's two local axes, so nonuniform scaling and rotation
 produce an oriented blur rather than an isotropic blur at the largest scale.
+Isolated content retains the fades already painted into its children. Compositing
+rechecks the exact hard clips, avoiding a second multiplication of those fades.
 
 IME discovers visual lines in layout coordinates before mapping the selected
 caret rectangle to the window; rotation cannot turn positions on one line into
@@ -96,6 +109,12 @@ the device scale to limit atlas churn and extreme allocations. Text beyond that
 cap remains valid but can lose sharpness. LCD subpixel text is used only with an
 identity linear mapping and integral device translation; other mappings use
 grayscale coverage.
+`raster_scale_for` also accounts for an intrinsic bitmap transform, composing
+matrices before measuring stretch. Opposing anisotropic scales can cancel; multiplying
+their independent maximum stretches would oversample. SVGs use this same policy
+for their preexisting intrinsic transformation API.
+Transformed sprite sampling clamps to the atlas tile's texel centers, preventing
+bilinear filtering from pulling colors or coverage from an adjacent tile.
 
 ## Validation and measurements
 
@@ -108,6 +127,10 @@ downlevel layouts. Native Metal has a separate rendered clip/fade regression.
 See [the benchmark notes](element-transform-benchmarks.md) for reproducible CPU
 and GPU workloads, measured results and their limits. Geometry microbenchmarks
 isolate their operation; they are not full application frame-rate claims.
+The [clip reduction experiment](element-clip-reduction-experiment.md) compares
+convex-polygon compilation, whole-chain filtering and the adopted prefix rule.
+Polygon compilation enlarged the representation and did not preserve independent
+fade ramps; the smaller rule keeps the existing clip representation and shader ABI.
 
 The WGPU border-background comparison for a 90° gradient has a known baseline
 failure: the archived pre-transform source produces `[228, 159, 103, 255]` for
