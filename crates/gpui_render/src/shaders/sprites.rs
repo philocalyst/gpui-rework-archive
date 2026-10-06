@@ -56,10 +56,7 @@ pub mod underline {
             position: vertex.clip_position,
             color: hsla_to_rgba(underline.color),
             underline_id: instance_id,
-            clip_distances: clip_distances(
-                local_position(underline.content_mask, vertex.viewport_position),
-                underline.content_mask.bounds,
-            ),
+            clip_distances: clip_distances(vertex.local_position, underline.content_mask.bounds),
         }
     }
 
@@ -69,18 +66,29 @@ pub mod underline {
             return transparent();
         }
         let underline = get!(UNDERLINES)[input.underline_id as usize];
+        let local = local_position_from_clip_distances(
+            underline.content_mask,
+            input.position.xy(),
+            input.clip_distances,
+        );
         if !is_enabled(underline.wavy) {
             return blend_color(
                 input.color,
-                ContentMask::alpha(underline.content_mask, input.position.xy()),
+                ContentMask::alpha_at_local_position(
+                    underline.content_mask,
+                    input.position.xy(),
+                    local,
+                ),
             );
         }
         blend_color(
             input.color,
-            wavy_underline_coverage(
-                underline,
-                local_position(underline.content_mask, input.position.xy()),
-            ) * ContentMask::alpha(underline.content_mask, input.position.xy()),
+            wavy_underline_coverage(underline, local)
+                * ContentMask::alpha_at_local_position(
+                    underline.content_mask,
+                    input.position.xy(),
+                    local,
+                ),
         )
     }
 }
@@ -141,10 +149,7 @@ pub mod monochrome_sprite {
             ),
             color: hsla_to_rgba(sprite.color),
             sprite_id: instance_id,
-            clip_distances: clip_distances(
-                local_position(sprite.content_mask, vertex.viewport_position),
-                sprite.content_mask.bounds,
-            ),
+            clip_distances: clip_distances(vertex.local_position, sprite.content_mask.bounds),
         }
     }
 
@@ -154,19 +159,19 @@ pub mod monochrome_sprite {
             return transparent();
         }
         let sprite = get!(MONOCHROME_SPRITES)[input.sprite_id as usize];
+        let local = local_position_from_clip_distances(
+            sprite.content_mask,
+            input.position.xy(),
+            input.clip_distances,
+        );
         let tile_position = clamp_atlas_texture_coordinates(
             input.tile_position,
             sprite.tile,
             texture_dimensions(MONOCHROME_TEXTURE),
             should_clamp_atlas_for_sprite(sprite.content_mask, sprite.transformation),
         );
-        let sample = texture_sample_level(
-            MONOCHROME_TEXTURE,
-            MONOCHROME_SAMPLER,
-            tile_position,
-            0.0,
-        )
-        .x;
+        let sample =
+            texture_sample_level(MONOCHROME_TEXTURE, MONOCHROME_SAMPLER, tile_position, 0.0).x;
         let corrected = apply_contrast_and_gamma_correction(
             sample,
             input.color.rgb(),
@@ -175,7 +180,12 @@ pub mod monochrome_sprite {
         );
         blend_color(
             input.color,
-            corrected * ContentMask::alpha(sprite.content_mask, input.position.xy()),
+            corrected
+                * ContentMask::alpha_at_local_position(
+                    sprite.content_mask,
+                    input.position.xy(),
+                    local,
+                ),
         )
     }
 }
@@ -223,10 +233,7 @@ pub mod polychrome_sprite {
                 texture_dimensions(POLYCHROME_TEXTURE),
             ),
             sprite_id: instance_id,
-            clip_distances: clip_distances(
-                local_position(sprite.content_mask, vertex.viewport_position),
-                sprite.content_mask.bounds,
-            ),
+            clip_distances: clip_distances(vertex.local_position, sprite.content_mask.bounds),
         }
     }
 
@@ -237,12 +244,8 @@ pub mod polychrome_sprite {
             texture_dimensions(POLYCHROME_TEXTURE),
             should_clamp_atlas_for_space(sprite.content_mask),
         );
-        let sample = texture_sample_level(
-            POLYCHROME_TEXTURE,
-            POLYCHROME_SAMPLER,
-            tile_position,
-            0.0,
-        );
+        let sample =
+            texture_sample_level(POLYCHROME_TEXTURE, POLYCHROME_SAMPLER, tile_position, 0.0);
         let grayscale = dot(sample.rgb(), LINEAR_RGB_LUMA_WEIGHTS);
         select(
             sample,
@@ -285,16 +288,25 @@ pub mod polychrome_sprite {
             return transparent();
         }
         let sprite = get!(POLYCHROME_SPRITES)[input.sprite_id as usize];
+        let local = local_position_from_clip_distances(
+            sprite.content_mask,
+            input.position.xy(),
+            input.clip_distances,
+        );
         let color = polychrome_color(sprite, input.tile_position);
         blend_color(
             color,
             sprite.opacity
                 * antialiased_coverage(rounded_rectangle_signed_distance(
-                    local_position(sprite.content_mask, input.position.xy()),
+                    local,
                     sprite.bounds,
                     sprite.corner_radii,
                 ))
-                * ContentMask::alpha(sprite.content_mask, input.position.xy()),
+                * ContentMask::alpha_at_local_position(
+                    sprite.content_mask,
+                    input.position.xy(),
+                    local,
+                ),
         )
     }
 
@@ -355,12 +367,17 @@ pub mod polychrome_sprite {
             return transparent();
         }
         let sprite = get!(POLYCHROME_SPRITES)[input.sprite_id as usize];
+        let local = local_position_from_clip_distances(
+            sprite.content_mask,
+            input.position.xy(),
+            input.clip_distances,
+        );
         let color = polychrome_color(sprite, input.tile_position);
         blend_color(
             color,
             sprite.opacity
                 * antialiased_coverage(prepared_corner_signed_distance(
-                    local_position(sprite.content_mask, input.position.xy()),
+                    local,
                     sprite.bounds,
                     sprite.corner_radii,
                     sprite.corner_smoothing,
@@ -371,7 +388,11 @@ pub mod polychrome_sprite {
                         superellipse_power: input.superellipse_power,
                     },
                 ))
-                * ContentMask::alpha(sprite.content_mask, input.position.xy()),
+                * ContentMask::alpha_at_local_position(
+                    sprite.content_mask,
+                    input.position.xy(),
+                    local,
+                ),
         )
     }
 }
@@ -442,10 +463,7 @@ pub mod subpixel_sprite {
             ),
             color: hsla_to_rgba(sprite.color),
             sprite_id: instance_id,
-            clip_distances: clip_distances(
-                local_position(sprite.content_mask, vertex.viewport_position),
-                sprite.content_mask.bounds,
-            ),
+            clip_distances: clip_distances(vertex.local_position, sprite.content_mask.bounds),
         }
     }
 
@@ -458,6 +476,11 @@ pub mod subpixel_sprite {
             };
         }
         let sprite = get!(SUBPIXEL_SPRITES)[input.sprite_id as usize];
+        let local = local_position_from_clip_distances(
+            sprite.content_mask,
+            input.position.xy(),
+            input.clip_distances,
+        );
         let tile_position = clamp_atlas_texture_coordinates(
             input.tile_position,
             sprite.tile,
@@ -477,7 +500,8 @@ pub mod subpixel_sprite {
             get!(FONT_RASTERIZATION).subpixel_enhanced_contrast,
             get!(FONT_RASTERIZATION).gamma_ratios,
         );
-        let mask_alpha = ContentMask::alpha(sprite.content_mask, input.position.xy());
+        let mask_alpha =
+            ContentMask::alpha_at_local_position(sprite.content_mask, input.position.xy(), local);
         SubpixelSpriteFragmentOutput {
             foreground: vec4f(input.color.x, input.color.y, input.color.z, 1.0),
             alpha: vec4f(

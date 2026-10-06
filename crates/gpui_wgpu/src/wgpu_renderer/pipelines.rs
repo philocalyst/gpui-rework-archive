@@ -763,7 +763,13 @@ mod tests {
             size: NonZeroU64::new(256),
         };
 
-        let _globals = layouts.create_globals(device, "test_globals", binding(), binding(), SpaceBindingSource::Buffer(binding()));
+        let _globals = layouts.create_globals(
+            device,
+            "test_globals",
+            binding(),
+            binding(),
+            SpaceBindingSource::Buffer(binding()),
+        );
         let _instances = layouts.create_instances(device, InstanceBindingSource::Buffer(binding()));
         let _textured = layouts.create_textured_instances(
             device,

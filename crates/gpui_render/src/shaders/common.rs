@@ -171,12 +171,12 @@ mod source {
     impl ContentMask {
         /// The mask's coverage at the given window-space position: 1 inside,
         /// 0 outside, and a linear ramp to 0 across each edge's fade distance.
-        pub fn alpha(content_mask: ContentMask, position: Vec2f) -> f32 {
-            let mut alpha = Self::bounds_alpha(
-                content_mask.bounds,
-                content_mask.fade_out,
-                local_position(content_mask, position),
-            );
+        pub fn alpha_at_local_position(
+            content_mask: ContentMask,
+            position: Vec2f,
+            local: Vec2f,
+        ) -> f32 {
+            let mut alpha = Self::bounds_alpha(content_mask.bounds, content_mask.fade_out, local);
             // Space zero is the legacy identity path: preserve ordinary mask coverage
             // without touching the scene table for the overwhelming majority of frames.
             if content_mask.space == 0u32 {
@@ -252,10 +252,11 @@ mod source {
         content_mask: ContentMask,
     ) -> RectangleVertex {
         let unit_position = rectangle_corner(vertex_id);
-        let viewport_position =
-            space_position(content_mask, Bounds::position(bounds, unit_position));
+        let local_position = Bounds::position(bounds, unit_position);
+        let viewport_position = space_position(content_mask, local_position);
         RectangleVertex {
             unit_position,
+            local_position,
             viewport_position,
             clip_position: viewport_to_clip_position(viewport_position),
         }
@@ -275,13 +276,24 @@ mod source {
         let viewport_position = space_position(content_mask, local);
         RectangleVertex {
             unit_position,
+            local_position: local,
             viewport_position,
             clip_position: viewport_to_clip_position(viewport_position),
         }
     }
 
-    pub fn content_clip_distances(position: Vec2f, content_mask: ContentMask) -> Vec4f {
-        clip_distances(local_position(content_mask, position), content_mask.bounds)
+    pub fn local_position_from_clip_distances(
+        content_mask: ContentMask,
+        position: Vec2f,
+        distances: Vec4f,
+    ) -> Vec2f {
+        if content_mask.space == 0u32 {
+            return position;
+        }
+        // These distances are affine in the local point. With clip-space w = 1,
+        // interpolation preserves them exactly, so x/z recover the layout point
+        // without another varying or a per-fragment inverse matrix application.
+        content_mask.bounds.origin + vec2f(distances.x, distances.z)
     }
 
     impl Bounds {
@@ -382,6 +394,7 @@ mod source {
     #[derive(Clone, Copy, Wgsl)]
     pub struct RectangleVertex {
         pub unit_position: Vec2f,
+        pub local_position: Vec2f,
         pub viewport_position: Vec2f,
         pub clip_position: Vec4f,
     }
@@ -537,9 +550,11 @@ mod source {
 
     pub fn rectangle_vertex(vertex_id: u32, bounds: Bounds) -> RectangleVertex {
         let unit_position = rectangle_corner(vertex_id);
-        let viewport_position = Bounds::position(bounds, unit_position);
+        let local_position = Bounds::position(bounds, unit_position);
+        let viewport_position = local_position;
         RectangleVertex {
             unit_position,
+            local_position,
             viewport_position,
             clip_position: viewport_to_clip_position(viewport_position),
         }
@@ -551,12 +566,11 @@ mod source {
         transform: TransformationMatrix,
     ) -> RectangleVertex {
         let unit_position = rectangle_corner(vertex_id);
-        let viewport_position = TransformationMatrix::transform_position(
-            transform,
-            Bounds::position(bounds, unit_position),
-        );
+        let local_position = Bounds::position(bounds, unit_position);
+        let viewport_position = TransformationMatrix::transform_position(transform, local_position);
         RectangleVertex {
             unit_position,
+            local_position,
             viewport_position,
             clip_position: viewport_to_clip_position(viewport_position),
         }

@@ -68,10 +68,154 @@ fn full_mask() -> ContentMask<ScaledPixels> {
     }
 }
 
+#[test]
+fn nested_spaces_clip_exactly_and_survive_replay_id_remapping() {
+    let mut renderer = WgpuHeadlessRenderer::new().expect("headless renderer");
+    let camera = gpui::TransformationMatrix::unit()
+        .translate(gpui::point(ScaledPixels(50.0), ScaledPixels(30.0)))
+        .rotate(gpui::Radians(std::f32::consts::FRAC_PI_4));
+    let mut scene = Scene::default();
+    scene.with_transform(camera, |scene| {
+        scene.with_clip(mask(30.0, 20.0), |scene| {
+            // The child has its own scale and clip. Its larger shape must still
+            // respect the parent's rotated rectangle in the parent's coordinates.
+            scene.with_transform(
+                gpui::TransformationMatrix::unit().scale(Size::new(2.0, 1.0)),
+                |scene| {
+                    scene.with_clip(mask(30.0, 60.0), |scene| {
+                        scene.insert_primitive(Quad {
+                            bounds: bounds(0.0, 0.0, 60.0, 60.0),
+                            content_mask: full_mask(),
+                            background: solid_background(gpui::white()),
+                            ..Default::default()
+                        });
+                    });
+                },
+            );
+        });
+    });
+    scene.finish();
+    let original = renderer.render_scene_to_image(&scene, TARGET).unwrap();
+    assert_eq!(original.get_pixel(53, 44).0, [255, 255, 255, 255]);
+    // Inside the rotated clip's AABB, outside the actual clip.
+    assert_eq!(original.get_pixel(65, 31).0, [0, 0, 0, 255]);
+    // Inside the child, beyond the parent clip's right edge.
+    assert_eq!(original.get_pixel(78, 66).0, [0, 0, 0, 255]);
+
+    let mut replayed = Scene::default();
+    replayed.with_transform(
+        gpui::TransformationMatrix::unit().rotate(gpui::Radians(0.2)),
+        |_| {},
+    );
+    replayed.replay(0..1, &scene);
+    replayed.finish();
+    assert_eq!(
+        renderer.render_scene_to_image(&replayed, TARGET).unwrap(),
+        original
+    );
+}
+
+#[test]
+fn transformed_path_and_backdrop_use_local_shape_and_screen_scheduling() {
+    let mut renderer = WgpuHeadlessRenderer::new().expect("headless renderer");
+    let mut scene = Scene::default();
+    scene.with_transform(
+        gpui::TransformationMatrix::unit()
+            .translate(gpui::point(ScaledPixels(50.0), ScaledPixels(30.0)))
+            .rotate(gpui::Radians(std::f32::consts::FRAC_PI_4)),
+        |scene| {
+            scene.with_clip(mask(30.0, 20.0), |scene| {
+                let mut builder = gpui::PathBuilder::fill();
+                builder.move_to(gpui::point(gpui::px(0.0), gpui::px(0.0)));
+                builder.line_to(gpui::point(gpui::px(60.0), gpui::px(0.0)));
+                builder.line_to(gpui::point(gpui::px(60.0), gpui::px(60.0)));
+                builder.line_to(gpui::point(gpui::px(0.0), gpui::px(60.0)));
+                builder.close();
+                let mut path = builder.build().unwrap().scale(1.0);
+                path.content_mask = full_mask();
+                path.color = solid_background(gpui::white());
+                scene.insert_primitive(path);
+                scene.insert_primitive(BackdropFilter {
+                    bounds: bounds(0.0, 0.0, 30.0, 20.0),
+                    content_mask: full_mask(),
+                    filters: smallvec![ScaledFilter::Blur(ScaledPixels(2.0))],
+                    opacity: 1.0,
+                    ..Default::default()
+                });
+            });
+        },
+    );
+    scene.finish();
+    let image = renderer.render_scene_to_image(&scene, TARGET).unwrap();
+    assert!(image.get_pixel(53, 44).0[0] > 240);
+    assert_eq!(image.get_pixel(65, 31).0, [0, 0, 0, 255]);
+}
+
 fn mask(width: f32, height: f32) -> ContentMask<ScaledPixels> {
     ContentMask {
         bounds: bounds(0.0, 0.0, width, height),
         ..Default::default()
+    }
+}
+
+#[test]
+fn content_blur_follows_nonuniform_and_rotated_local_axes() {
+    let mut renderer = WgpuHeadlessRenderer::new().expect("headless renderer");
+    for angle in [0.0, std::f32::consts::FRAC_PI_4] {
+        let mut scene = Scene::default();
+        scene.with_transform(
+            gpui::TransformationMatrix::unit()
+                .translate(gpui::point(ScaledPixels(110.0), ScaledPixels(50.0)))
+                .rotate(gpui::Radians(angle))
+                .scale(Size::new(2.0, 0.5)),
+            |scene| {
+                let boundary = gpui::FilterBoundary {
+                    geometry: None,
+                    order: 0,
+                    bounds: bounds(-20.0, -20.0, 40.0, 40.0),
+                    content_mask: ContentMask {
+                        bounds: bounds(-200.0, -200.0, 400.0, 400.0),
+                        ..Default::default()
+                    },
+                    corner_radii: Default::default(),
+                    corner_smoothing: 0.0,
+                    filters: smallvec![ScaledFilter::Blur(ScaledPixels(8.0))],
+                    opacity: 1.0,
+                    is_start: true,
+                };
+                scene.insert_primitive(boundary.clone());
+                scene.insert_primitive(Quad {
+                    bounds: bounds(-1.0, -1.0, 2.0, 2.0),
+                    content_mask: boundary.content_mask,
+                    background: solid_background(gpui::white()),
+                    ..Default::default()
+                });
+                scene.insert_primitive(gpui::FilterBoundary {
+                    is_start: false,
+                    ..boundary
+                });
+            },
+        );
+        scene.finish();
+        let image = renderer.render_scene_to_image(&scene, TARGET).unwrap();
+        // Project the rendered impulse onto the transformed local axes. A blur
+        // using only the largest scale would instead produce a circular halo.
+        let (sin, cos) = angle.sin_cos();
+        let mut mass = 0.0;
+        let mut moments = [0.0; 2];
+        for (x, y, pixel) in image.enumerate_pixels() {
+            let weight = pixel.0[0] as f32;
+            let dx = x as f32 + 0.5 - 110.0;
+            let dy = y as f32 + 0.5 - 50.0;
+            mass += weight;
+            moments[0] += weight * (cos * dx + sin * dy).powi(2);
+            moments[1] += weight * (-sin * dx + cos * dy).powi(2);
+        }
+        assert!(mass > 100.0, "the impulse must survive compositing");
+        assert!(
+            moments[0] > moments[1] * 4.0,
+            "blur must follow both local scales at angle {angle}: {moments:?}"
+        );
     }
 }
 
@@ -443,6 +587,7 @@ fn smoothed_primitives_share_one_contour() {
         corner_smoothing: 1.0,
         filters: smallvec![ScaledFilter::Blur(ScaledPixels(5.0))],
         opacity: 1.0,
+        geometry: None,
     });
 
     scene.finish();
@@ -555,6 +700,8 @@ fn content_mask_fades_quad_edges() {
                 bottom: ScaledPixels(0.0),
                 left: ScaledPixels(20.0),
             },
+            space: 0,
+            padding: 0,
         },
         background: solid_background(red),
         ..Default::default()
@@ -581,4 +728,94 @@ fn content_mask_fades_quad_edges() {
     close(60, 2, 64);
     // The unfaded right edge still clips hard at the mask boundary.
     assert_eq!(pixel(101, 50)[0], 0);
+}
+
+#[test]
+fn clip_distances_reconstruct_local_coordinates_under_large_sheared_reflection() {
+    let mut renderer = WgpuHeadlessRenderer::new().expect("headless renderer");
+    let mask_at = |x, y, width, height| ContentMask {
+        bounds: bounds(x, y, width, height),
+        ..Default::default()
+    };
+    let local_origin = 10_000.0;
+    let local_y = 20_000.0;
+    let center_x = local_origin + 12.0;
+    let center_y = local_y + 8.0;
+    // High shear with negative determinant: the mapping is intentionally far from
+    // orthogonal, so an accidental axis-aligned or forward-only interpretation is visible.
+    let transform = gpui::TransformationMatrix {
+        rotation_scale: [[4.0, 3.8], [0.3, 0.2]],
+        translation: [
+            150.0 - (4.0 * center_x + 3.8 * center_y),
+            50.0 - (0.3 * center_x + 0.2 * center_y),
+        ],
+    };
+    let mut scene = Scene::default();
+    scene.insert_primitive(Quad {
+        bounds: bounds(0.0, 0.0, 310.0, 100.0),
+        content_mask: full_mask(),
+        background: solid_background(gpui::black()),
+        ..Default::default()
+    });
+    scene.with_transform(transform, |scene| {
+        scene.with_clip(
+            mask_at(local_origin + 5.0, local_y + 4.0, 14.0, 8.0),
+            |scene| {
+                scene.insert_primitive(Quad {
+                    bounds: bounds(local_origin, local_y, 24.0, 16.0),
+                    content_mask: mask_at(local_origin, local_y, 24.0, 16.0),
+                    background: solid_background(gpui::white()),
+                    ..Default::default()
+                });
+            },
+        );
+    });
+    scene.finish();
+    let image = renderer.render_scene_to_image(&scene, TARGET).unwrap();
+    let inverse = transform.inverse().unwrap();
+    let in_mask = |x: u32, y: u32, margin: f32| {
+        let local = inverse.apply(gpui::point(
+            gpui::Pixels::from(x as f32 + 0.5),
+            gpui::Pixels::from(y as f32 + 0.5),
+        ));
+        f32::from(local.x) >= local_origin + 5.0 + margin
+            && f32::from(local.x) <= local_origin + 19.0 - margin
+            && f32::from(local.y) >= local_y + 4.0 + margin
+            && f32::from(local.y) <= local_y + 12.0 - margin
+    };
+    let visual_bounds = transform.apply_bounds(
+        mask_at(local_origin + 5.0, local_y + 4.0, 14.0, 8.0)
+            .bounds
+            .map(|p| gpui::px(p.0)),
+    );
+    let mut interior_count = 0;
+    let mut phantom_count = 0;
+    for y in 0..100 {
+        for x in 0..310 {
+            let window_point = gpui::point(gpui::px(x as f32 + 0.5), gpui::px(y as f32 + 0.5));
+            if in_mask(x, y, 1.0) {
+                assert_eq!(
+                    image.get_pixel(x, y).0,
+                    [255, 255, 255, 255],
+                    "inside at {x},{y}"
+                );
+                interior_count += 1;
+            } else if visual_bounds.contains(&window_point) && !in_mask(x, y, -1.0) {
+                assert_eq!(
+                    image.get_pixel(x, y).0,
+                    [0, 0, 0, 255],
+                    "outside at {x},{y}"
+                );
+                phantom_count += 1;
+            }
+        }
+    }
+    assert!(
+        interior_count > 0,
+        "the affine clip has interior pixel centers"
+    );
+    assert!(
+        phantom_count > 0,
+        "the affine clip excludes points inside its AABB"
+    );
 }

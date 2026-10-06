@@ -439,8 +439,7 @@ impl TransformationMatrix {
     }
 }
 
-/// A frame-local coordinate space shared by scene primitives on the GPU.
-/// The parent links clipping scopes; bounds and fades stay in their own local units.
+/// The role of a frame-local coordinate-space record.
 #[doc(hidden)]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 #[repr(u32)]
@@ -481,6 +480,15 @@ impl Default for RenderSpace {
 }
 
 impl RenderSpace {
+    /// Skip mappings in the coverage chain: their complete affine composition is
+    /// already stored on the active record. Collapsed scopes must remain barriers.
+    pub(crate) fn clip_scope(self, id: u32) -> u32 {
+        match self.kind {
+            SpaceKind::Mapping => self.parent,
+            SpaceKind::Clip | SpaceKind::Collapsed => id,
+        }
+    }
+
     pub(crate) fn mapping(
         transform: TransformationMatrix,
         inverse: Option<TransformationMatrix>,

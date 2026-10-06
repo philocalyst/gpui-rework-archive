@@ -181,10 +181,7 @@ pub mod shadow {
             position: vertex.clip_position,
             paint: prepare_paint(shadow_paint(shadow)),
             shadow_id: instance_id,
-            clip_distances: clip_distances(
-                local_position(shadow.content_mask, vertex.viewport_position),
-                shadow.content_mask.bounds,
-            ),
+            clip_distances: clip_distances(vertex.local_position, shadow.content_mask.bounds),
         }
     }
 
@@ -231,17 +228,24 @@ pub mod shadow {
             return transparent();
         }
         let shadow = get!(SHADOWS)[input.shadow_id as usize];
+        let local = local_position_from_clip_distances(
+            shadow.content_mask,
+            input.position.xy(),
+            input.clip_distances,
+        );
         let color = paint_color(
             shadow_paint(shadow),
-            local_position(shadow.content_mask, input.position.xy()),
+            local,
             PreparedPaint::new(input.paint_solid, input.paint_color0, input.paint_color1),
         );
         blend_color(
             color,
-            shadow_coverage(
-                shadow,
-                local_position(shadow.content_mask, input.position.xy()),
-            ) * ContentMask::alpha(shadow.content_mask, input.position.xy()),
+            shadow_coverage(shadow, local)
+                * ContentMask::alpha_at_local_position(
+                    shadow.content_mask,
+                    input.position.xy(),
+                    local,
+                ),
         )
     }
 
@@ -321,9 +325,14 @@ pub mod shadow {
             return transparent();
         }
         let shadow = get!(SHADOWS)[input.shadow_id as usize];
+        let local = local_position_from_clip_distances(
+            shadow.content_mask,
+            input.position.xy(),
+            input.clip_distances,
+        );
         let coverage = smoothed_shadow_coverage(
             shadow,
-            local_position(shadow.content_mask, input.position.xy()),
+            local,
             PreparedCorners {
                 horizontal_reaches: input.horizontal_corner_reaches,
                 vertical_reaches: input.vertical_corner_reaches,
@@ -339,12 +348,17 @@ pub mod shadow {
         );
         let color = paint_color(
             shadow_paint(shadow),
-            local_position(shadow.content_mask, input.position.xy()),
+            local,
             PreparedPaint::new(input.paint_solid, input.paint_color0, input.paint_color1),
         );
         blend_color(
             color,
-            coverage * ContentMask::alpha(shadow.content_mask, input.position.xy()),
+            coverage
+                * ContentMask::alpha_at_local_position(
+                    shadow.content_mask,
+                    input.position.xy(),
+                    local,
+                ),
         )
     }
 }

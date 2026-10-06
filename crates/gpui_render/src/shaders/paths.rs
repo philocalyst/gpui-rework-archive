@@ -64,14 +64,20 @@ pub mod path_rasterization {
         }
         let vertex = get!(PATH_VERTICES)[input.vertex_id as usize];
         let paint = Paint::new(vertex.color, vertex.bounds);
-        let color = paint_color(
-            paint,
-            local_position(vertex.content_mask, input.position.xy()),
-            prepare_paint(paint),
+        let local = local_position_from_clip_distances(
+            vertex.content_mask,
+            input.position.xy(),
+            input.clip_distances,
         );
+        let color = paint_color(paint, local, prepare_paint(paint));
         premultiply(
             color,
-            coverage * ContentMask::alpha(vertex.content_mask, input.position.xy()),
+            coverage
+                * ContentMask::alpha_at_local_position(
+                    vertex.content_mask,
+                    input.position.xy(),
+                    local,
+                ),
         )
     }
 }

@@ -155,8 +155,8 @@ impl Scene {
         primitive.content_mask_mut().space = self.active_space;
         // Most frames contain no transformed geometry. Keep their culling path
         // local and avoid even loading the shared coordinate table.
-        let active_space = (self.active_space != 0)
-            .then(|| &self.render_spaces[self.active_space as usize]);
+        let active_space =
+            (self.active_space != 0).then(|| &self.render_spaces[self.active_space as usize]);
         let collapsed = active_space.is_some_and(crate::RenderSpace::is_collapsed);
         let transform =
             active_space.map_or_else(TransformationMatrix::unit, |space| space.transform);
@@ -167,7 +167,9 @@ impl Scene {
             let mask_bounds = if self.active_space == 0 {
                 primitive.content_mask().bounds
             } else {
-                transform.apply_bounds(primitive.content_mask().bounds.map(|v| Pixels(v.0))).scale(1.0)
+                transform
+                    .apply_bounds(primitive.content_mask().bounds.map(|v| Pixels(v.0)))
+                    .scale(1.0)
             };
             let clipped_bounds = visual_bounds.intersect(&mask_bounds);
             (visual_bounds, mask_bounds, clipped_bounds)
@@ -290,12 +292,14 @@ impl Scene {
             self.intern_space(crate::RenderSpace::default());
         }
         let previous = self.active_space;
-        let transform = self.render_spaces[previous as usize]
-            .transform
-            .compose(transform);
+        let current = self.render_spaces[previous as usize];
+        let transform = current.transform.compose(transform);
         let inverse = transform.inverse();
-        self.active_space =
-            self.intern_space(crate::RenderSpace::mapping(transform, inverse, previous));
+        self.active_space = self.intern_space(crate::RenderSpace::mapping(
+            transform,
+            inverse,
+            current.clip_scope(previous),
+        ));
         let result = paint(self);
         self.active_space = previous;
         result
@@ -320,7 +324,7 @@ impl Scene {
                 Some(current.inverse),
                 mask.bounds,
                 mask.fade_out,
-                previous,
+                current.clip_scope(previous),
             ))
         };
         let result = paint(self);
@@ -638,7 +642,9 @@ impl Primitive {
             Self::SubpixelSprite(sprite) => parent.compose(sprite.transformation),
             _ => parent,
         };
-        if transform == TransformationMatrix::unit() { return *self.bounds(); }
+        if transform == TransformationMatrix::unit() {
+            return *self.bounds();
+        }
         transform
             .apply_bounds(self.bounds().map(|v| Pixels(v.0)))
             .scale(1.0)
@@ -2104,6 +2110,31 @@ mod tests {
             [RenderCommand::Batch(PrimitiveBatch::Quads { range, smoothed: false })]
                 if range == &(0..1)
         ));
+    }
+
+    #[test]
+    fn nested_mapping_scopes_keep_a_constant_depth_coverage_chain() {
+        fn paint_nested(scene: &mut Scene, depth: usize) {
+            if depth == 0 {
+                scene.insert_primitive(quad());
+                return;
+            }
+            scene.with_transform(
+                TransformationMatrix::unit()
+                    .translate(crate::point(ScaledPixels(0.25), ScaledPixels(0.5))),
+                |scene| paint_nested(scene, depth - 1),
+            );
+        }
+
+        let mut scene = Scene::default();
+        scene.with_clip(quad().content_mask, |scene| paint_nested(scene, 64));
+        let active = scene.quads[0].content_mask.space;
+        let mapping = scene.render_spaces[active as usize];
+        let clip = scene.render_spaces[mapping.parent as usize];
+        assert_eq!(mapping.kind, crate::SpaceKind::Mapping);
+        assert_eq!(clip.kind, crate::SpaceKind::Clip);
+        assert_eq!(clip.parent, 0);
+        assert_eq!(mapping.transform.translation, [16.0, 32.0]);
     }
 
     #[test]

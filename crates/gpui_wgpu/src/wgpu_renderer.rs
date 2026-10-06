@@ -869,4 +869,124 @@ mod tests {
         renderer.render_to_image(&scene)?;
         Ok(())
     }
+
+    #[cfg(all(feature = "test-support", not(target_family = "wasm")))]
+    #[test]
+    fn transformed_sprite_sampling_stays_inside_its_atlas_tile() -> anyhow::Result<()> {
+        use gpui::{
+            AtlasKey, ContentMask, MonochromeSprite, PlatformAtlas, RenderSvgParams,
+            TransformationMatrix,
+        };
+        use std::borrow::Cow;
+
+        let context = WgpuContext::new_headless(None)?;
+        let size = Size {
+            width: DevicePixels(16),
+            height: DevicePixels(16),
+        };
+        let mut renderer = WgpuRenderer::new_headless(&context, size)?;
+        let atlas = renderer.sprite_atlas();
+        let tile_size = Size {
+            width: DevicePixels(4),
+            height: DevicePixels(4),
+        };
+        let insert_tile = |path: &str, coverage: u8| -> anyhow::Result<_> {
+            let key = AtlasKey::Svg(RenderSvgParams {
+                path: path.into(),
+                size: tile_size,
+            });
+            atlas
+                .get_or_insert_with(&key, &mut || {
+                    Ok(Some((tile_size, Cow::Owned(vec![coverage; 16]))))
+                })
+                .map(|tile| tile.expect("test callback provides pixels"))
+        };
+        let white_tile = insert_tile("white-atlas-neighbor-test", 255)?;
+        let dark_tile = insert_tile("dark-atlas-neighbor-test", 0)?;
+        let white_right = white_tile.bounds.origin.x.0 + white_tile.bounds.size.width.0;
+        let white_bottom = white_tile.bounds.origin.y.0 + white_tile.bounds.size.height.0;
+        let dark_right = dark_tile.bounds.origin.x.0 + dark_tile.bounds.size.width.0;
+        let dark_bottom = dark_tile.bounds.origin.y.0 + dark_tile.bounds.size.height.0;
+        let edge_pixel = if white_right == dark_tile.bounds.origin.x.0
+            && white_tile.bounds.origin.y == dark_tile.bounds.origin.y
+        {
+            (9, 6)
+        } else if dark_right == white_tile.bounds.origin.x.0
+            && white_tile.bounds.origin.y == dark_tile.bounds.origin.y
+        {
+            (3, 6)
+        } else if white_bottom == dark_tile.bounds.origin.y.0
+            && white_tile.bounds.origin.x == dark_tile.bounds.origin.x
+        {
+            (6, 9)
+        } else if dark_bottom == white_tile.bounds.origin.y.0
+            && white_tile.bounds.origin.x == dark_tile.bounds.origin.x
+        {
+            (6, 3)
+        } else {
+            panic!("test atlas tiles must share an edge")
+        };
+
+        let sprite_bounds = Bounds {
+            origin: Point {
+                x: ScaledPixels(0.0),
+                y: ScaledPixels(0.0),
+            },
+            size: Size {
+                width: ScaledPixels(4.0),
+                height: ScaledPixels(4.0),
+            },
+        };
+        let mask_bounds = Bounds {
+            origin: Point {
+                x: ScaledPixels(0.0),
+                y: ScaledPixels(0.0),
+            },
+            size: Size {
+                width: ScaledPixels(16.0),
+                height: ScaledPixels(16.0),
+            },
+        };
+        let zoom = TransformationMatrix {
+            rotation_scale: [[2.0, 0.0], [0.0, 2.0]],
+            translation: [2.25, 2.25],
+        };
+        let mut render = |element_transform: bool| -> anyhow::Result<image::RgbaImage> {
+            let mut scene = Scene::default();
+            let sprite = MonochromeSprite {
+                order: 0,
+                padding: 0,
+                bounds: sprite_bounds,
+                content_mask: ContentMask {
+                    bounds: mask_bounds,
+                    ..Default::default()
+                },
+                color: gpui::hsla(0.0, 0.0, 1.0, 1.0).into(),
+                tile: white_tile,
+                transformation: if element_transform {
+                    TransformationMatrix::unit()
+                } else {
+                    zoom
+                },
+            };
+            if element_transform {
+                scene.with_transform(zoom, |scene| scene.insert_primitive(sprite));
+            } else {
+                scene.insert_primitive(sprite);
+            }
+            scene.finish();
+            renderer.render_to_image(&scene)
+        };
+
+        for element_transform in [false, true] {
+            let image = render(element_transform)?;
+            let edge_pixel = image.get_pixel(edge_pixel.0, edge_pixel.1).0;
+            assert_eq!(
+                edge_pixel,
+                [255, 255, 255, 255],
+                "a transformed sprite edge must clamp to its own tile; element space: {element_transform}"
+            );
+        }
+        Ok(())
+    }
 }

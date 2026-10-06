@@ -64,7 +64,7 @@ pub mod surface {
             position: vertex.clip_position,
             texture_position: vertex.unit_position,
             clip_distances: clip_distances(
-                local_position(get!(SURFACE_LOCALS).content_mask, vertex.viewport_position),
+                vertex.local_position,
                 get!(SURFACE_LOCALS).content_mask.bounds,
             ),
         }
@@ -76,7 +76,13 @@ pub mod surface {
             return transparent();
         }
         let locals = get!(SURFACE_LOCALS);
-        let fade = ContentMask::alpha(locals.content_mask, input.position.xy());
+        let local = local_position_from_clip_distances(
+            locals.content_mask,
+            input.position.xy(),
+            input.clip_distances,
+        );
+        let fade =
+            ContentMask::alpha_at_local_position(locals.content_mask, input.position.xy(), local);
         if locals.color_format == SurfaceColorFormat::Yuv {
             return sample_yuv_surface(input.texture_position) * locals.opacity * fade;
         }
@@ -141,7 +147,7 @@ pub mod blur {
         }
     }
 
-    pub fn blur_composite_color(position: Vec2f, coverage: f32) -> Vec4f {
+    pub fn blur_composite_color(position: Vec2f, local_position: Vec2f, coverage: f32) -> Vec4f {
         let blurred = texture_sample_level(
             BLUR_TEXTURE,
             BLUR_SAMPLER,
@@ -150,7 +156,11 @@ pub mod blur {
         );
         let factor = coverage
             * get!(BLUR_LOCALS).opacity
-            * ContentMask::alpha(get!(BLUR_LOCALS).space_mask, position);
+            * ContentMask::alpha_at_local_position(
+                get!(BLUR_LOCALS).space_mask,
+                position,
+                local_position,
+            );
         vec4f(
             blurred.x * factor,
             blurred.y * factor,
@@ -236,16 +246,22 @@ pub mod blur {
         if is_clipped(input.clip_distances) {
             return transparent();
         }
+        let locals = get!(BLUR_LOCALS);
+        let local = local_position_from_clip_distances(
+            locals.space_mask,
+            input.position.xy(),
+            input.clip_distances,
+        );
         let coverage = select(
             1.0,
             antialiased_coverage(rounded_rectangle_signed_distance(
-                local_position(get!(BLUR_LOCALS).space_mask, input.position.xy()),
-                get!(BLUR_LOCALS).shape_bounds,
-                get!(BLUR_LOCALS).corner_radii,
+                local,
+                locals.shape_bounds,
+                locals.corner_radii,
             )),
-            get!(BLUR_LOCALS).composite_clip == BlurCompositeClip::RoundedBounds,
+            locals.composite_clip == BlurCompositeClip::RoundedBounds,
         );
-        blur_composite_color(input.position.xy(), coverage)
+        blur_composite_color(input.position.xy(), local, coverage)
     }
 
     #[derive(Wgsl)]
@@ -297,13 +313,19 @@ pub mod blur {
         if is_clipped(input.clip_distances) {
             return transparent();
         }
+        let locals = get!(BLUR_LOCALS);
+        let local = local_position_from_clip_distances(
+            locals.space_mask,
+            input.position.xy(),
+            input.clip_distances,
+        );
         let coverage = select(
             1.0,
             antialiased_coverage(prepared_corner_signed_distance(
-                local_position(get!(BLUR_LOCALS).space_mask, input.position.xy()),
-                get!(BLUR_LOCALS).shape_bounds,
-                get!(BLUR_LOCALS).corner_radii,
-                get!(BLUR_LOCALS).corner_smoothing,
+                local,
+                locals.shape_bounds,
+                locals.corner_radii,
+                locals.corner_smoothing,
                 PreparedCorners {
                     horizontal_reaches: input.horizontal_corner_reaches,
                     vertical_reaches: input.vertical_corner_reaches,
@@ -311,8 +333,8 @@ pub mod blur {
                     superellipse_power: input.superellipse_power,
                 },
             )),
-            get!(BLUR_LOCALS).composite_clip == BlurCompositeClip::RoundedBounds,
+            locals.composite_clip == BlurCompositeClip::RoundedBounds,
         );
-        blur_composite_color(input.position.xy(), coverage)
+        blur_composite_color(input.position.xy(), local, coverage)
     }
 }
