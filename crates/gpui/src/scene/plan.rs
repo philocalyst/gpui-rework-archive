@@ -1,4 +1,5 @@
 use super::{AtlasTextureId, BatchIterator, FilterBoundary, Scene};
+use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 use std::ops::Range;
 
@@ -6,7 +7,7 @@ use std::ops::Range;
 pub const MAX_FILTER_GROUP_DEPTH: usize = 2;
 
 /// Index of an offscreen texture reserved for an isolated content-filter group.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct FilterTargetIndex(usize);
 
 impl FilterTargetIndex {
@@ -17,7 +18,7 @@ impl FilterTargetIndex {
 }
 
 /// Where the contents of a filter group are rendered.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum FilterRenderTarget {
     /// Render directly into the current target once isolation targets are exhausted.
     Inline,
@@ -138,6 +139,226 @@ impl ScenePlan {
         }
     }
 
+    /// Restores a serialized command stream after validating every referenced array range and
+    /// filter boundary. Unlike `build`, this preserves the original command order and grouping.
+    pub(super) fn from_captured_commands(
+        scene: &Scene,
+        commands: Vec<RenderCommand>,
+    ) -> anyhow::Result<Self> {
+        use anyhow::{bail, ensure};
+
+        let lengths = SceneLengths::for_scene(scene);
+        let mut requirements = ScenePlanRequirements::default();
+        let mut filter_stack = Vec::<(usize, FilterRenderTarget)>::new();
+        let mut isolated_depth = 0;
+        for (command_index, command) in commands.iter().enumerate() {
+            match command {
+                RenderCommand::Batch(batch) => {
+                    let range = match batch {
+                        PrimitiveBatch::Shadows { range, .. } => {
+                            ensure!(
+                                range.start <= range.end && range.end <= lengths.shadows,
+                                "command {command_index}: shadow range out of bounds"
+                            );
+                            Some(range)
+                        }
+                        PrimitiveBatch::Quads { range, .. } => {
+                            ensure!(
+                                range.start <= range.end && range.end <= lengths.quads,
+                                "command {command_index}: quad range out of bounds"
+                            );
+                            Some(range)
+                        }
+                        PrimitiveBatch::Paths {
+                            range,
+                            rasterization_vertex_count,
+                            sprite_count,
+                        } => {
+                            ensure!(
+                                range.start <= range.end && range.end <= lengths.paths,
+                                "command {command_index}: path range out of bounds"
+                            );
+                            let paths = &scene.paths[range.clone()];
+                            let expected_vertex_count =
+                                paths.iter().map(|path| path.vertices.len()).sum::<usize>();
+                            let expected_sprite_count = match (paths.first(), paths.last()) {
+                                (Some(first), Some(last)) if first.order == last.order => {
+                                    paths.len()
+                                }
+                                (Some(_), Some(_)) => 1,
+                                _ => 0,
+                            };
+                            ensure!(
+                                *rasterization_vertex_count == expected_vertex_count,
+                                "command {command_index}: path vertex count does not match its range"
+                            );
+                            ensure!(
+                                *sprite_count == expected_sprite_count,
+                                "command {command_index}: path sprite count does not match its range"
+                            );
+                            Some(range)
+                        }
+                        PrimitiveBatch::Underlines(range) => {
+                            ensure!(
+                                range.start <= range.end && range.end <= lengths.underlines,
+                                "command {command_index}: underline range out of bounds"
+                            );
+                            Some(range)
+                        }
+                        PrimitiveBatch::MonochromeSprites { range, .. } => {
+                            ensure!(
+                                range.start <= range.end && range.end <= lengths.monochrome_sprites,
+                                "command {command_index}: monochrome sprite range out of bounds"
+                            );
+                            Some(range)
+                        }
+                        PrimitiveBatch::SubpixelSprites { range, .. } => {
+                            ensure!(
+                                range.start <= range.end && range.end <= lengths.subpixel_sprites,
+                                "command {command_index}: subpixel sprite range out of bounds"
+                            );
+                            Some(range)
+                        }
+                        PrimitiveBatch::PolychromeSprites { range, .. } => {
+                            ensure!(
+                                range.start <= range.end && range.end <= lengths.polychrome_sprites,
+                                "command {command_index}: polychrome sprite range out of bounds"
+                            );
+                            Some(range)
+                        }
+                        PrimitiveBatch::Surfaces(range) => {
+                            ensure!(
+                                range.start <= range.end && range.end <= lengths.surfaces,
+                                "command {command_index}: surface range out of bounds"
+                            );
+                            Some(range)
+                        }
+                        PrimitiveBatch::BackdropFilters(range) => {
+                            ensure!(
+                                range.start <= range.end && range.end <= lengths.backdrop_filters,
+                                "command {command_index}: backdrop filter range out of bounds"
+                            );
+                            Some(range)
+                        }
+                        PrimitiveBatch::FilterBoundary(index) => {
+                            ensure!(
+                                *index < lengths.filter_boundaries,
+                                "command {command_index}: filter boundary index out of bounds"
+                            );
+                            bail!(
+                                "command {command_index}: raw filter-boundary batch is not a compiled render command"
+                            );
+                        }
+                    };
+                    if let Some(range) = range {
+                        ensure!(
+                            !range.is_empty(),
+                            "command {command_index}: empty primitive range"
+                        );
+                    }
+                    match batch {
+                        PrimitiveBatch::MonochromeSprites { texture_id, range } => {
+                            ensure!(
+                                range
+                                    .clone()
+                                    .all(|index| scene.monochrome_sprites[index].tile.texture_id
+                                        == *texture_id),
+                                "command {command_index}: monochrome sprite texture does not match its range"
+                            );
+                        }
+                        PrimitiveBatch::SubpixelSprites { texture_id, range } => {
+                            ensure!(
+                                range
+                                    .clone()
+                                    .all(|index| scene.subpixel_sprites[index].tile.texture_id
+                                        == *texture_id),
+                                "command {command_index}: subpixel sprite texture does not match its range"
+                            );
+                        }
+                        PrimitiveBatch::PolychromeSprites {
+                            texture_id, range, ..
+                        } => {
+                            ensure!(
+                                range
+                                    .clone()
+                                    .all(|index| scene.polychrome_sprites[index].tile.texture_id
+                                        == *texture_id),
+                                "command {command_index}: polychrome sprite texture does not match its range"
+                            );
+                        }
+                        _ => {}
+                    }
+                    requirements.include_batch(batch);
+                }
+                RenderCommand::BeginFilter {
+                    boundary_index,
+                    target,
+                } => {
+                    ensure!(
+                        *boundary_index < lengths.filter_boundaries,
+                        "command {command_index}: opening boundary index out of bounds"
+                    );
+                    ensure!(
+                        scene.filter_boundaries[*boundary_index].is_start,
+                        "command {command_index}: begin command references an end boundary"
+                    );
+                    if let FilterRenderTarget::Isolated(target_index) = target {
+                        ensure!(
+                            target_index.0 == isolated_depth
+                                && isolated_depth < MAX_FILTER_GROUP_DEPTH,
+                            "command {command_index}: invalid isolated filter target"
+                        );
+                        isolated_depth += 1;
+                        requirements.uses_offscreen_target = true;
+                        requirements.isolated_target_count =
+                            requirements.isolated_target_count.max(isolated_depth);
+                    }
+                    filter_stack.push((*boundary_index, *target));
+                }
+                RenderCommand::EndFilter {
+                    boundary_index,
+                    closing_boundary_index,
+                    target,
+                } => {
+                    ensure!(
+                        *boundary_index < lengths.filter_boundaries
+                            && *closing_boundary_index < lengths.filter_boundaries,
+                        "command {command_index}: closing boundary index out of bounds"
+                    );
+                    ensure!(
+                        !scene.filter_boundaries[*closing_boundary_index].is_start,
+                        "command {command_index}: end command references an opening boundary"
+                    );
+                    let Some((start, start_target)) = filter_stack.pop() else {
+                        bail!("command {command_index}: end filter has no matching begin")
+                    };
+                    ensure!(
+                        start == *boundary_index && start_target == *target,
+                        "command {command_index}: end filter does not match its begin"
+                    );
+                    ensure!(
+                        *closing_boundary_index > *boundary_index,
+                        "command {command_index}: closing filter boundary precedes its begin"
+                    );
+                    if target.is_isolated() {
+                        isolated_depth -= 1;
+                        requirements.isolated_filter_count += 1;
+                    }
+                }
+            }
+        }
+        ensure!(
+            filter_stack.is_empty(),
+            "captured commands leave filter groups open"
+        );
+        requirements.command_count = commands.len();
+        Ok(Self {
+            commands,
+            requirements,
+            scene_lengths: lengths,
+        })
+    }
+
     /// Returns the ordered rendering commands.
     pub fn commands(&self) -> &[RenderCommand] {
         &self.commands
@@ -226,7 +447,7 @@ impl SceneLengths {
 }
 
 /// A contiguous range of one primitive type drawn by a single pipeline invocation.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub enum PrimitiveBatch {
     Shadows {
@@ -262,7 +483,7 @@ pub enum PrimitiveBatch {
 }
 
 /// Backend-neutral rendering work derived from a [`Scene`].
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum RenderCommand {
     /// A normal primitive batch.
     Batch(PrimitiveBatch),

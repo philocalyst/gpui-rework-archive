@@ -585,7 +585,7 @@ impl Filter {
 /// stays in device space like every other primitive, and so the renderers `match` on it
 /// exhaustively — adding a filter variant breaks each backend's match, forcing a deliberate
 /// implement-or-decline decision per backend instead of silently rendering nothing.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum ScaledFilter {
     /// A gaussian blur with the given radius, in scaled (device) pixels.
     Blur(ScaledPixels),

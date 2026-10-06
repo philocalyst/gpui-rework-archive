@@ -165,6 +165,35 @@ impl HeadlessAppContext {
         app.update_window(window, f)
     }
 
+    /// Draws a frame without presenting it or advancing the simulated clock.
+    ///
+    /// Advance the clock and apply input before calling this to capture a specific
+    /// animation or interaction state. The element arena is released after paint.
+    pub fn draw_window(&mut self, window: AnyWindowHandle) -> Result<()> {
+        self.update_window(window, |_, window, cx| window.draw(cx).clear(cx))
+    }
+
+    /// Reads the finished scene of the last drawn frame.
+    ///
+    /// The callback keeps scene borrows inside the window update. It can inspect
+    /// the command plan, measure resources, or capture a portable display list.
+    pub fn read_scene<R>(
+        &mut self,
+        window: AnyWindowHandle,
+        read: impl FnOnce(&crate::Scene) -> R,
+    ) -> Result<R> {
+        self.update_window(window, |_, window, _| read(&window.rendered_frame.scene))
+    }
+
+    /// Captures a portable scene with the bitmaps supplied by its renderer's atlas.
+    pub fn capture_scene(
+        &mut self,
+        window: AnyWindowHandle,
+        resolve_tile: impl FnMut(crate::AtlasTile) -> Result<crate::CapturedBitmap>,
+    ) -> Result<crate::SceneCapture> {
+        self.read_scene(window, |scene| crate::SceneCapture::capture(scene, resolve_tile))?
+    }
+
     /// Returns the most recently rendered bounds for an element's debug selector.
     pub fn debug_bounds(
         &mut self,

@@ -5,8 +5,9 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    AtlasTextureId, AtlasTile, Background, Bounds, ContentMask, Corners, Edges, Pixels, Point,
-    Radians, ScaledFilter, ScaledPixels, Size, bounds_tree::BoundsTree, point,
+    AtlasTextureId, AtlasTextureKind, AtlasTile, Background, Bounds, ContentMask, Corners,
+    DevicePixels, Edges, Pixels, Point, Radians, ScaledFilter, ScaledPixels, Size, TileId,
+    bounds_tree::BoundsTree, point,
 };
 use smallvec::SmallVec;
 use std::{
@@ -18,6 +19,8 @@ use std::{
 
 mod plan;
 pub use plan::*;
+mod capture;
+pub use capture::*;
 mod abi;
 #[doc(hidden)]
 pub use abi::{SCENE_BUFFER_LAYOUTS, SceneBufferLayout};
@@ -34,7 +37,7 @@ pub(crate) const DEFAULT_BORDER_DASHED_GAP: f32 = 1.0;
 
 /// A boolean with the same four-byte representation in Rust and WGSL.
 /// Scene structs use it over one-byte [`bool`] to keep the storage-buffer ABI explicit.
-#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[repr(u32)]
 pub enum ShaderBool {
     /// The flag is disabled.
@@ -785,7 +788,7 @@ impl<'a> Iterator for BatchIterator<'a> {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 #[repr(C)]
 #[expect(missing_docs)]
 pub struct Quad {
@@ -828,7 +831,7 @@ impl From<Quad> for Primitive {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 #[repr(C)]
 #[expect(missing_docs)]
 pub struct Underline {
@@ -847,7 +850,7 @@ impl From<Underline> for Primitive {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 #[repr(C)]
 #[expect(missing_docs)]
 pub struct Shadow {
@@ -873,7 +876,7 @@ impl From<Shadow> for Primitive {
 /// A backdrop filter blurs (and may otherwise filter) the content already rendered behind
 /// `bounds`, compositing the result into a rounded rectangle — the frosted-glass effect.
 /// Emitted by [`crate::Window::paint_backdrop_filter`]; produces the CSS `backdrop-filter` effect.
-#[derive(Default, Debug, Clone)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[expect(missing_docs)]
 pub struct BackdropFilter {
     pub order: DrawOrder,
@@ -887,6 +890,7 @@ pub struct BackdropFilter {
     /// Inline capacity is 4: a `SmallVec<[ScaledFilter; 4]>` is the same size as capacity 1 here
     /// (the heap repr already occupies that space), so chains up to 4 filters avoid allocating
     /// at no extra struct size.
+    #[serde(with = "smallvec_scaled_filters_serde")]
     pub filters: SmallVec<[ScaledFilter; 4]>,
     /// Element opacity captured at paint time, multiplied into the composited result.
     pub opacity: f32,
@@ -909,7 +913,7 @@ impl From<BackdropFilter> for Primitive {
 /// subtree is painted between a matched start/end pair; the renderer redirects that span into
 /// an offscreen target, filters it, and composites it back at `bounds`. Produces the CSS
 /// `filter` effect (e.g. blurring the element and its children as a single group).
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[expect(missing_docs)]
 pub struct FilterBoundary {
     pub order: DrawOrder,
@@ -920,6 +924,7 @@ pub struct FilterBoundary {
     /// The filter chain applied to the isolated group, in scene (device-pixel) space. Identity
     /// filters are dropped at paint time, so a `FilterBoundary` is only emitted when non-empty.
     /// Inline capacity 4 (same struct size as 1 here — see [`BackdropFilter::filters`]).
+    #[serde(with = "smallvec_scaled_filters_serde")]
     pub filters: SmallVec<[ScaledFilter; 4]>,
     pub opacity: f32,
     /// `true` for the start marker (opens the group), `false` for the end marker (closes it).
@@ -943,6 +948,29 @@ fn max_blur_radius(filters: &[ScaledFilter]) -> f32 {
     })
 }
 
+mod smallvec_scaled_filters_serde {
+    use super::ScaledFilter;
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+    use smallvec::SmallVec;
+
+    pub fn serialize<S>(
+        value: &SmallVec<[ScaledFilter; 4]>,
+        serializer: S,
+    ) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        value.as_slice().serialize(serializer)
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<SmallVec<[ScaledFilter; 4]>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Vec::<ScaledFilter>::deserialize(deserializer).map(|filters| filters.into_iter().collect())
+    }
+}
+
 impl From<FilterBoundary> for Primitive {
     fn from(boundary: FilterBoundary) -> Self {
         Primitive::FilterBoundary(boundary)
@@ -961,7 +989,7 @@ pub enum BorderStyle {
 }
 
 /// A data type representing a 2 dimensional transformation that can be applied to an element.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[repr(C)]
 pub struct TransformationMatrix {
     /// 2x2 matrix containing rotation and scale,
@@ -1063,7 +1091,7 @@ impl Default for TransformationMatrix {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
 #[repr(C)]
 #[expect(missing_docs)]
 pub struct MonochromeSprite {
@@ -1082,7 +1110,7 @@ impl From<MonochromeSprite> for Primitive {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
 #[repr(C)]
 #[expect(missing_docs)]
 pub struct SubpixelSprite {
@@ -1101,7 +1129,7 @@ impl From<SubpixelSprite> for Primitive {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
 #[repr(C)]
 #[expect(missing_docs)]
 pub struct PolychromeSprite {
@@ -1136,12 +1164,12 @@ impl From<PaintSurface> for Primitive {
     }
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[expect(missing_docs)]
 pub struct PathId(pub usize);
 
 /// A line made up of a series of vertices and control points.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[expect(missing_docs)]
 pub struct Path<P: Clone + Debug + Default + PartialEq> {
     pub id: PathId,
@@ -1285,7 +1313,7 @@ impl From<Path<ScaledPixels>> for Primitive {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[repr(C)]
 #[expect(missing_docs)]
 pub struct PathVertex<P: Clone + Debug + Default + PartialEq> {
