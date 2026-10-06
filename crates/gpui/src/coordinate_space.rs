@@ -98,7 +98,14 @@ pub(crate) struct ClipRegion {
     pub mask: ContentMask<Pixels>,
     pub transform: TransformationMatrix,
     inverse: Option<TransformationMatrix>,
+    window_bounds: Bounds<Pixels>,
     pub parent: Option<Arc<ClipRegion>>,
+}
+
+impl ClipRegion {
+    pub(crate) fn render_inverse(&self, scale: f32) -> Option<TransformationMatrix> {
+        self.inverse.map(|inverse| inverse.scaled(scale))
+    }
 }
 
 impl Default for CoordinateSpace {
@@ -112,6 +119,15 @@ impl Default for CoordinateSpace {
 }
 
 impl CoordinateSpace {
+    /// Creates a coordinate space from an affine mapping in logical pixels.
+    pub fn new(transform: TransformationMatrix) -> Self {
+        Self {
+            transform,
+            inverse: transform.inverse(),
+            clips: None,
+        }
+    }
+
     /// Maps a point in layout coordinates into the window.
     pub fn to_window(&self, position: Point<Pixels>) -> Point<Pixels> {
         self.transform.apply(position)
@@ -130,7 +146,15 @@ impl CoordinateSpace {
     /// Returns the axis-aligned window bounds enclosing a local rectangle.
     /// This is conservative geometry for culling and platform APIs, not a hit test.
     pub fn bounds_to_window(&self, bounds: Bounds<Pixels>) -> Bounds<Pixels> {
+        if self.inverse.is_none() {
+            return Bounds::default();
+        }
         self.transform.apply_bounds(bounds)
+    }
+
+    /// Conservatively maps a window rectangle into layout coordinates.
+    pub fn bounds_from_window(&self, bounds: Bounds<Pixels>) -> Option<Bounds<Pixels>> {
+        self.inverse.map(|inverse| inverse.apply_bounds(bounds))
     }
 
     /// Tests all ancestor clips in the coordinates where they were established.
@@ -146,6 +170,43 @@ impl CoordinateSpace {
             clip = region.parent.as_deref();
         }
         self.inverse.is_some()
+    }
+
+    pub(crate) fn same_scope(&self, other: &Self) -> bool {
+        self.transform == other.transform
+            && match (&self.clips, &other.clips) {
+                (None, None) => true,
+                (Some(a), Some(b)) => Arc::ptr_eq(a, b),
+                _ => false,
+            }
+    }
+
+    // Ordinary drawing retains the original single-mask shader path. Consecutive
+    // clips in one space are already intersected by `clipped`.
+    pub(crate) fn is_identity_scope(&self) -> bool {
+        self.transform == TransformationMatrix::unit()
+            && self.clips.as_ref().is_none_or(|clip| {
+                clip.transform == TransformationMatrix::unit() && clip.parent.is_none()
+            })
+    }
+
+    pub(crate) fn content_mask(&self, viewport: Bounds<Pixels>) -> ContentMask<Pixels> {
+        if self.is_identity_scope() {
+            let viewport = ContentMask {
+                bounds: viewport,
+                ..Default::default()
+            };
+            return self
+                .clips
+                .as_ref()
+                .map_or(viewport, |clip| clip.mask.intersect(&viewport));
+        }
+        ContentMask {
+            bounds: self
+                .bounds_from_window(self.window_clip_bounds(viewport))
+                .unwrap_or_default(),
+            ..Default::default()
+        }
     }
 
     pub(crate) fn transformed(&self, transform: TransformationMatrix) -> Self {
@@ -165,6 +226,10 @@ impl CoordinateSpace {
             mask = mask.intersect(&clip.mask);
             parent = clip.parent.clone();
         }
+        let local_window_bounds = self.transform.apply_bounds(mask.bounds);
+        let window_bounds = self.clips.as_ref().map_or(local_window_bounds, |clip| {
+            clip.window_bounds.intersect(&local_window_bounds)
+        });
         Self {
             transform: self.transform,
             inverse: self.inverse,
@@ -172,19 +237,26 @@ impl CoordinateSpace {
                 mask,
                 transform: self.transform,
                 inverse: self.inverse,
+                window_bounds,
                 parent,
             })),
         }
     }
 
     pub(crate) fn window_clip_bounds(&self, viewport: Bounds<Pixels>) -> Bounds<Pixels> {
-        let mut bounds = viewport;
-        let mut clip = self.clips.as_deref();
-        while let Some(region) = clip {
-            bounds = bounds.intersect(&region.transform.apply_bounds(region.mask.bounds));
-            clip = region.parent.as_deref();
-        }
-        bounds
+        self.clips
+            .as_ref()
+            .map_or(viewport, |clip| viewport.intersect(&clip.window_bounds))
+    }
+
+    pub(crate) fn render_transform(
+        &self,
+        scale: f32,
+    ) -> (TransformationMatrix, Option<TransformationMatrix>) {
+        (
+            self.transform.scaled(scale),
+            self.inverse.map(|inverse| inverse.scaled(scale)),
+        )
     }
 }
 
@@ -226,6 +298,9 @@ impl TransformationMatrix {
 
     /// Conservatively encloses all four transformed corners of a rectangle.
     pub fn apply_bounds(self, bounds: Bounds<Pixels>) -> Bounds<Pixels> {
+        if self == Self::unit() {
+            return bounds;
+        }
         let corners = [
             bounds.origin,
             bounds.top_right(),
@@ -295,6 +370,59 @@ impl Default for RenderSpace {
 }
 
 impl RenderSpace {
+    pub(crate) fn mapping(
+        transform: TransformationMatrix,
+        inverse: Option<TransformationMatrix>,
+        parent: u32,
+    ) -> Self {
+        let Some(inverse) = inverse else {
+            return Self::collapsed(parent);
+        };
+        Self {
+            transform,
+            inverse,
+            parent,
+            ..Default::default()
+        }
+    }
+
+    pub(crate) fn clipping(
+        transform: TransformationMatrix,
+        inverse: Option<TransformationMatrix>,
+        clip: Bounds<crate::ScaledPixels>,
+        fade: crate::Edges<crate::ScaledPixels>,
+        parent: u32,
+    ) -> Self {
+        let Some(inverse) = inverse else {
+            return Self::collapsed(parent);
+        };
+        Self {
+            transform,
+            inverse,
+            clip,
+            fade,
+            parent,
+            has_clip: 1,
+        }
+    }
+
+    pub(crate) fn collapsed(parent: u32) -> Self {
+        Self {
+            transform: TransformationMatrix {
+                rotation_scale: [[0.0; 2]; 2],
+                translation: [0.0; 2],
+            },
+            inverse: TransformationMatrix::unit(),
+            parent,
+            has_clip: 2,
+            ..Default::default()
+        }
+    }
+
+    pub(crate) fn is_collapsed(&self) -> bool {
+        self.has_clip == 2
+    }
+
     pub(crate) fn key(&self) -> [u32; 22] {
         let mut key = [0; 22];
         for (i, value) in self
@@ -325,3 +453,6 @@ impl RenderSpace {
         key
     }
 }
+
+#[cfg(test)]
+mod tests;

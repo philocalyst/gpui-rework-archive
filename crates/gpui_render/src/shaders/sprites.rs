@@ -51,12 +51,15 @@ pub mod underline {
         #[builtin(instance_index)] instance_id: u32,
     ) -> UnderlineVarying {
         let underline = get!(UNDERLINES)[instance_id as usize];
-        let vertex = rectangle_vertex(vertex_id, underline.bounds);
+        let vertex = space_rectangle_vertex(vertex_id, underline.bounds, underline.content_mask);
         UnderlineVarying {
             position: vertex.clip_position,
             color: hsla_to_rgba(underline.color),
             underline_id: instance_id,
-            clip_distances: clip_distances(vertex.viewport_position, underline.content_mask.bounds),
+            clip_distances: clip_distances(
+                local_position(underline.content_mask, vertex.viewport_position),
+                underline.content_mask.bounds,
+            ),
         }
     }
 
@@ -74,8 +77,10 @@ pub mod underline {
         }
         blend_color(
             input.color,
-            wavy_underline_coverage(underline, input.position.xy())
-                * ContentMask::alpha(underline.content_mask, input.position.xy()),
+            wavy_underline_coverage(
+                underline,
+                local_position(underline.content_mask, input.position.xy()),
+            ) * ContentMask::alpha(underline.content_mask, input.position.xy()),
         )
     }
 }
@@ -121,7 +126,12 @@ pub mod monochrome_sprite {
         #[builtin(instance_index)] instance_id: u32,
     ) -> MonochromeSpriteVarying {
         let sprite = get!(MONOCHROME_SPRITES)[instance_id as usize];
-        let vertex = transformed_rectangle_vertex(vertex_id, sprite.bounds, sprite.transformation);
+        let vertex = space_transformed_rectangle_vertex(
+            vertex_id,
+            sprite.bounds,
+            sprite.transformation,
+            sprite.content_mask,
+        );
         MonochromeSpriteVarying {
             position: vertex.clip_position,
             tile_position: atlas_texture_coordinates(
@@ -131,7 +141,10 @@ pub mod monochrome_sprite {
             ),
             color: hsla_to_rgba(sprite.color),
             sprite_id: instance_id,
-            clip_distances: clip_distances(vertex.viewport_position, sprite.content_mask.bounds),
+            clip_distances: clip_distances(
+                local_position(sprite.content_mask, vertex.viewport_position),
+                sprite.content_mask.bounds,
+            ),
         }
     }
 
@@ -141,10 +154,16 @@ pub mod monochrome_sprite {
             return transparent();
         }
         let sprite = get!(MONOCHROME_SPRITES)[input.sprite_id as usize];
+        let tile_position = clamp_atlas_texture_coordinates(
+            input.tile_position,
+            sprite.tile,
+            texture_dimensions(MONOCHROME_TEXTURE),
+            should_clamp_atlas_for_sprite(sprite.content_mask, sprite.transformation),
+        );
         let sample = texture_sample_level(
             MONOCHROME_TEXTURE,
             MONOCHROME_SAMPLER,
-            input.tile_position,
+            tile_position,
             0.0,
         )
         .x;
@@ -195,7 +214,7 @@ pub mod polychrome_sprite {
         instance_id: u32,
         sprite: PolychromeSprite,
     ) -> PolychromeVertexData {
-        let vertex = rectangle_vertex(vertex_id, sprite.bounds);
+        let vertex = space_rectangle_vertex(vertex_id, sprite.bounds, sprite.content_mask);
         PolychromeVertexData {
             position: vertex.clip_position,
             tile_position: atlas_texture_coordinates(
@@ -204,13 +223,26 @@ pub mod polychrome_sprite {
                 texture_dimensions(POLYCHROME_TEXTURE),
             ),
             sprite_id: instance_id,
-            clip_distances: clip_distances(vertex.viewport_position, sprite.content_mask.bounds),
+            clip_distances: clip_distances(
+                local_position(sprite.content_mask, vertex.viewport_position),
+                sprite.content_mask.bounds,
+            ),
         }
     }
 
     pub fn polychrome_color(sprite: PolychromeSprite, tile_position: Vec2f) -> Vec4f {
-        let sample =
-            texture_sample_level(POLYCHROME_TEXTURE, POLYCHROME_SAMPLER, tile_position, 0.0);
+        let tile_position = clamp_atlas_texture_coordinates(
+            tile_position,
+            sprite.tile,
+            texture_dimensions(POLYCHROME_TEXTURE),
+            should_clamp_atlas_for_space(sprite.content_mask),
+        );
+        let sample = texture_sample_level(
+            POLYCHROME_TEXTURE,
+            POLYCHROME_SAMPLER,
+            tile_position,
+            0.0,
+        );
         let grayscale = dot(sample.rgb(), LINEAR_RGB_LUMA_WEIGHTS);
         select(
             sample,
@@ -258,7 +290,7 @@ pub mod polychrome_sprite {
             color,
             sprite.opacity
                 * antialiased_coverage(rounded_rectangle_signed_distance(
-                    input.position.xy(),
+                    local_position(sprite.content_mask, input.position.xy()),
                     sprite.bounds,
                     sprite.corner_radii,
                 ))
@@ -328,7 +360,7 @@ pub mod polychrome_sprite {
             color,
             sprite.opacity
                 * antialiased_coverage(prepared_corner_signed_distance(
-                    input.position.xy(),
+                    local_position(sprite.content_mask, input.position.xy()),
                     sprite.bounds,
                     sprite.corner_radii,
                     sprite.corner_smoothing,
@@ -395,7 +427,12 @@ pub mod subpixel_sprite {
         #[builtin(instance_index)] instance_id: u32,
     ) -> SubpixelSpriteOutput {
         let sprite = get!(SUBPIXEL_SPRITES)[instance_id as usize];
-        let vertex = transformed_rectangle_vertex(vertex_id, sprite.bounds, sprite.transformation);
+        let vertex = space_transformed_rectangle_vertex(
+            vertex_id,
+            sprite.bounds,
+            sprite.transformation,
+            sprite.content_mask,
+        );
         SubpixelSpriteOutput {
             position: vertex.clip_position,
             tile_position: atlas_texture_coordinates(
@@ -405,7 +442,10 @@ pub mod subpixel_sprite {
             ),
             color: hsla_to_rgba(sprite.color),
             sprite_id: instance_id,
-            clip_distances: clip_distances(vertex.viewport_position, sprite.content_mask.bounds),
+            clip_distances: clip_distances(
+                local_position(sprite.content_mask, vertex.viewport_position),
+                sprite.content_mask.bounds,
+            ),
         }
     }
 
@@ -418,8 +458,14 @@ pub mod subpixel_sprite {
             };
         }
         let sprite = get!(SUBPIXEL_SPRITES)[input.sprite_id as usize];
+        let tile_position = clamp_atlas_texture_coordinates(
+            input.tile_position,
+            sprite.tile,
+            texture_dimensions(SPRITE_TEXTURE),
+            should_clamp_atlas_for_sprite(sprite.content_mask, sprite.transformation),
+        );
         let sampled =
-            texture_sample_level(SPRITE_TEXTURE, SPRITE_SAMPLER, input.tile_position, 0.0).rgb();
+            texture_sample_level(SPRITE_TEXTURE, SPRITE_SAMPLER, tile_position, 0.0).rgb();
         let sample = select(
             sampled,
             sampled.bgr(),

@@ -19,6 +19,7 @@ pub struct PathRasterizationVertex {
     pub curve_position: gpui::Point<f32>,
     pub color: Background,
     pub bounds: Bounds<ScaledPixels>,
+    pub content_mask: gpui::ContentMask<ScaledPixels>,
 }
 
 unsafe impl BufferData for PathSprite {
@@ -41,7 +42,7 @@ pub fn rasterization_vertices(
     paths: &[Path<ScaledPixels>],
 ) -> impl Iterator<Item = PathRasterizationVertex> + '_ {
     paths.iter().flat_map(|path| {
-        let bounds = path.clipped_bounds();
+        let bounds = path.bounds;
         path.vertices
             .iter()
             .map(move |vertex| PathRasterizationVertex {
@@ -49,6 +50,7 @@ pub fn rasterization_vertices(
                 curve_position: vertex.st_position,
                 color: path.color,
                 bounds,
+                content_mask: path.content_mask,
             })
     })
 }
@@ -103,5 +105,5 @@ pub fn sprite_count(paths: &[Path<ScaledPixels>]) -> usize {
 
 const _: () = {
     assert!(std::mem::size_of::<PathSprite>() == 16);
-    assert!(std::mem::size_of::<PathRasterizationVertex>() == 104);
+    assert!(std::mem::size_of::<PathRasterizationVertex>() == 144);
 };

@@ -281,7 +281,7 @@ impl Interactivity {
             .push(Box::new(move |event, phase, hitbox, window, cx| {
                 if phase == DispatchPhase::Capture
                     && !window.has_active_prompt()
-                    && !hitbox.contains(&window.mouse_position())
+                    && !hitbox.contains(&window.window_mouse_position())
                 {
                     (listener)(event, window, cx)
                 }
@@ -3741,7 +3741,7 @@ impl Interactivity {
                     move |window: &Window| {
                         !window.last_input_was_keyboard()
                             && pending_mouse_down.borrow().is_none()
-                            && source_hitbox.contains(&window.mouse_position())
+                            && source_hitbox.contains(&window.window_mouse_position())
                     }
                 });
                 let check_is_hovered = Rc::new({
@@ -4463,7 +4463,7 @@ fn handle_tooltip_mouse_move(
                                 ActiveTooltip::Visible {
                                     tooltip: AnyTooltip {
                                         view,
-                                        mouse_position: window.mouse_position(),
+                                        mouse_position: window.window_mouse_position(),
                                         check_visible_and_update: Rc::new(
                                             move |tooltip_bounds, window, cx| {
                                                 let Some(active_tooltip) =
@@ -4522,7 +4522,7 @@ fn handle_tooltip_check_visible_and_update(
     }
 
     let is_hovered = check_is_hovered(window)
-        || (tooltip_is_hoverable && tooltip_bounds.contains(&window.mouse_position()));
+        || (tooltip_is_hoverable && tooltip_bounds.contains(&window.window_mouse_position()));
     let action = match active_tooltip.borrow().as_ref() {
         Some(ActiveTooltip::Visible { tooltip, .. }) => {
             if is_hovered {

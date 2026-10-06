@@ -3,15 +3,15 @@ use anyhow::Result;
 use block::ConcreteBlock;
 use core_graphics::geometry::CGSize;
 use gpui::{
-    AtlasTextureId, Bounds, Corners, DevicePixels, FilterRenderTarget, MAX_FILTER_GROUP_DEPTH,
+    AtlasTextureId, DevicePixels, FilterRenderTarget, MAX_FILTER_GROUP_DEPTH,
     MonochromeSprite, PaintSurface, Path, PolychromeSprite, PrimitiveBatch, Quad, RenderCommand,
     ScaledPixels, Scene, Shadow, Size, SurfaceSource, Underline, size,
 };
 use gpui_render::{
     artifacts::{NATIVE_SHADERS, NativeShader},
     blur::{
-        BlurAxis, BlurKernel, BlurUniforms, GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS, ScissorRectangle,
-        downsampled_dimension,
+        BlurAxis, BlurKernel, BlurUniforms, FilterCompositeClip, FilterCompositeParameters,
+        ScissorRectangle, downsampled_dimension,
     },
     path_types::{self, PathRasterizationVertex},
     shaders::{
@@ -43,12 +43,12 @@ use std::{cell::Cell, mem, ptr, sync::Arc};
 // https://developer.apple.com/documentation/metal/mtldevice/1433355-supportstexturesamplecount
 const PATH_SAMPLE_COUNT: u32 = 4;
 
-// Buffer slots declared by the generated MSL. Group 0 globals land at 0/1, the group 1 data
-// binding at 2, Naga's runtime-array sizes buffer at 3.
+// Buffer slots declared by the generated MSL. The shared RenderSpace table occupies 2,
+// the group-1 data binding starts at 3, and Naga's runtime-array sizes buffer follows it.
 const GLOBALS_SLOT: u64 = 0;
 const FONT_SLOT: u64 = 1;
-const DATA_SLOT: u64 = 2;
-const SIZES_SLOT: u64 = 3;
+const DATA_SLOT: u64 = 3;
+const SIZES_SLOT: u64 = 4;
 const PRIMARY_TEXTURE_SLOT: u64 = 0;
 const SECONDARY_TEXTURE_SLOT: u64 = 1;
 const SAMPLER_SLOT: u64 = 0;
@@ -60,10 +60,24 @@ pub type Renderer = MetalRenderer;
 struct SceneUniforms {
     globals: GlobalUniforms,
     font: FontRasterizationUniforms,
+    render_spaces: metal::Buffer,
+    render_space_bytes: u32,
 }
 
 impl SceneUniforms {
-    fn new(viewport_size: Size<DevicePixels>) -> Self {
+    fn new(
+        viewport_size: Size<DevicePixels>,
+        render_spaces: &[gpui::RenderSpace],
+        buffer: &metal::Buffer,
+    ) -> Self {
+        let bytes = gpui_render::shaders::interface::slice_as_bytes(render_spaces);
+        let render_space_bytes =
+            u32::try_from(bytes.len()).expect("render-space table exceeds 4 GiB");
+        if !bytes.is_empty() {
+            unsafe {
+                ptr::copy_nonoverlapping(bytes.as_ptr(), buffer.contents() as *mut u8, bytes.len())
+            };
+        }
         Self {
             globals: GlobalUniforms {
                 viewport_size: vec2f(
@@ -83,6 +97,8 @@ impl SceneUniforms {
                 uses_blue_green_red_subpixel_order: ShaderBool::Disabled,
                 padding: 0,
             },
+            render_spaces: buffer.clone(),
+            render_space_bytes,
         }
     }
 }
@@ -95,6 +111,19 @@ fn native_shader(label: &str) -> &'static NativeShader {
 }
 
 fn bind_scene_uniforms(encoder: &metal::RenderCommandEncoderRef, uniforms: &SceneUniforms) {
+    let sizes = [uniforms.render_space_bytes, 0];
+    encoder.set_vertex_buffer(2, Some(&uniforms.render_spaces), 0);
+    encoder.set_fragment_buffer(2, Some(&uniforms.render_spaces), 0);
+    encoder.set_vertex_bytes(
+        SIZES_SLOT,
+        mem::size_of_val(&sizes) as u64,
+        sizes.as_ptr() as *const _,
+    );
+    encoder.set_fragment_bytes(
+        SIZES_SLOT,
+        mem::size_of_val(&sizes) as u64,
+        sizes.as_ptr() as *const _,
+    );
     encoder.set_vertex_bytes(
         GLOBALS_SLOT,
         mem::size_of::<GlobalUniforms>() as u64,
@@ -123,8 +152,15 @@ fn bind_instances<T>(
     buffer: &metal::BufferRef,
     offset: usize,
     instances: &[T],
+    render_space_bytes: u32,
 ) {
-    bind_instance_bytes(encoder, buffer, offset, mem::size_of_val(instances));
+    bind_instance_bytes(
+        encoder,
+        buffer,
+        offset,
+        mem::size_of_val(instances),
+        render_space_bytes,
+    );
 }
 
 fn bind_instance_bytes(
@@ -132,12 +168,22 @@ fn bind_instance_bytes(
     buffer: &metal::BufferRef,
     offset: usize,
     byte_len: usize,
+    render_space_bytes: u32,
 ) {
     let byte_len = u32::try_from(byte_len).expect("Metal instance binding exceeds 4 GiB");
+    let sizes = [render_space_bytes, byte_len];
     encoder.set_vertex_buffer(DATA_SLOT, Some(buffer), offset as u64);
     encoder.set_fragment_buffer(DATA_SLOT, Some(buffer), offset as u64);
-    encoder.set_vertex_bytes(SIZES_SLOT, 4, &byte_len as *const u32 as *const _);
-    encoder.set_fragment_bytes(SIZES_SLOT, 4, &byte_len as *const u32 as *const _);
+    encoder.set_vertex_bytes(
+        SIZES_SLOT,
+        mem::size_of_val(&sizes) as u64,
+        sizes.as_ptr() as *const _,
+    );
+    encoder.set_fragment_bytes(
+        SIZES_SLOT,
+        mem::size_of_val(&sizes) as u64,
+        sizes.as_ptr() as *const _,
+    );
 }
 
 /// Creates the CAMetalLayer that backs a window's view. The renderer drawing
@@ -896,8 +942,14 @@ impl MetalRenderer {
         let command_queue = self.command_queue.clone();
         let command_buffer = command_queue.new_command_buffer();
         let alpha = if self.opaque { 1. } else { 0. };
-        let mut instance_offset = 0;
-        let scene_uniforms = SceneUniforms::new(viewport_size);
+        let render_space_bytes =
+            gpui_render::shaders::interface::slice_as_bytes(scene.render_spaces()).len();
+        let mut instance_offset = render_space_bytes;
+        let scene_uniforms = SceneUniforms::new(
+            viewport_size,
+            scene.render_spaces(),
+            &instance_buffer.metal_buffer,
+        );
 
         // Render the scene into an offscreen color texture (so filters can sample it), then
         // blit it to `texture`. Owned clones keep the textures borrowable without borrowing
@@ -1044,13 +1096,18 @@ impl MetalRenderer {
                                 ping,
                                 pong,
                                 viewport_size,
-                                filter.bounds,
-                                filter.content_mask.bounds,
-                                filter.corner_radii,
-                                filter.corner_smoothing,
-                                filter.max_blur_radius(),
-                                filter.opacity,
-                                true,
+                                FilterCompositeParameters {
+                                    bounds: filter.visual_bounds(),
+                                    shape_bounds: filter.bounds,
+                                    space_mask: filter.content_mask,
+                                    content_mask: filter.visual_clip_bounds(),
+                                    corner_radii: filter.corner_radii,
+                                    corner_smoothing: filter.corner_smoothing,
+                                    blur_radius: filter.max_blur_radius(),
+                                    blur_axes: filter.blur_axes(),
+                                    opacity: filter.opacity,
+                                    clip: FilterCompositeClip::RoundedBounds,
+                                },
                             );
                         }
                     }
@@ -1104,13 +1161,18 @@ impl MetalRenderer {
                             ping,
                             pong,
                             viewport_size,
-                            boundary.bounds,
-                            boundary.content_mask.bounds,
-                            boundary.corner_radii,
-                            boundary.corner_smoothing,
-                            boundary.max_blur_radius(),
-                            boundary.opacity,
-                            false,
+                            FilterCompositeParameters {
+                                bounds: boundary.visual_bounds(),
+                                shape_bounds: boundary.bounds,
+                                space_mask: boundary.content_mask,
+                                content_mask: boundary.visual_clip_bounds(),
+                                corner_radii: boundary.corner_radii,
+                                corner_smoothing: boundary.corner_smoothing,
+                                blur_radius: boundary.max_blur_radius(),
+                                blur_axes: boundary.blur_axes(),
+                                opacity: boundary.opacity,
+                                clip: FilterCompositeClip::ContentShape,
+                            },
                         );
                     }
                     current_target = parent;
@@ -1249,7 +1311,6 @@ impl MetalRenderer {
     /// result into `target`, clipped to `bounds`/`corner_radii`/`content_mask` and modulated by
     /// `opacity`. Shared by the backdrop and content-filter paths, mirroring the wgpu
     /// backend's pass structure via the shared `gpui_render::blur` contracts.
-    #[allow(clippy::too_many_arguments)]
     fn metal_blur_and_composite(
         &self,
         command_buffer: &metal::CommandBufferRef,
@@ -1259,16 +1320,9 @@ impl MetalRenderer {
         ping: &metal::TextureRef,
         pong: &metal::TextureRef,
         viewport_size: Size<DevicePixels>,
-        bounds: Bounds<ScaledPixels>,
-        content_mask: Bounds<ScaledPixels>,
-        corner_radii: Corners<ScaledPixels>,
-        corner_smoothing: f32,
-        blur_radius: f32,
-        opacity: f32,
-        // Backdrop clips to the rounded rect; content (`filter`) bleeds past its bounds.
-        clip_rounded: bool,
+        parameters: FilterCompositeParameters,
     ) {
-        let Some(kernel) = BlurKernel::for_radius(blur_radius) else {
+        let Some(kernel) = BlurKernel::for_radius(parameters.blur_radius) else {
             return;
         };
         let full_width = i32::from(viewport_size.width).max(0) as u32;
@@ -1281,18 +1335,15 @@ impl MetalRenderer {
             width: DevicePixels(blur_size[0] as i32),
             height: DevicePixels(blur_size[1] as i32),
         };
-        let dilation = GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS * blur_radius;
-        let scissor =
-            ScissorRectangle::for_blurred_bounds(bounds, dilation, full_width, full_height);
+        let scissor = ScissorRectangle::for_blurred_bounds(
+            parameters.bounds,
+            parameters.scissor_dilation(),
+            full_width,
+            full_height,
+        );
         if scissor.is_empty() {
             return;
         }
-        let clip = if clip_rounded {
-            gpui_render::blur::FilterCompositeClip::RoundedBounds
-        } else {
-            gpui_render::blur::FilterCompositeClip::ContentShape
-        };
-
         // Downsample source -> ping, then separable gaussian ping -> pong -> ping.
         self.run_metal_blur_pass(
             command_buffer,
@@ -1314,7 +1365,12 @@ impl MetalRenderer {
             ping,
             blur_viewport_size,
             scene_uniforms,
-            BlurUniforms::gaussian(BlurAxis::Horizontal, blur_size, kernel),
+            BlurUniforms::gaussian_along(
+                BlurAxis::Horizontal,
+                blur_size,
+                kernel,
+                parameters.blur_axes,
+            ),
             scissor,
             metal::MTLPrimitiveType::Triangle,
             3,
@@ -1327,7 +1383,12 @@ impl MetalRenderer {
             pong,
             blur_viewport_size,
             scene_uniforms,
-            BlurUniforms::gaussian(BlurAxis::Vertical, blur_size, kernel),
+            BlurUniforms::gaussian_along(
+                BlurAxis::Vertical,
+                blur_size,
+                kernel,
+                parameters.blur_axes,
+            ),
             scissor,
             metal::MTLPrimitiveType::Triangle,
             3,
@@ -1335,21 +1396,18 @@ impl MetalRenderer {
         );
 
         // Composite the blurred result into the target (preserving its contents).
-        let composite_bounds = if clip_rounded {
-            bounds
-        } else {
-            bounds.dilate(ScaledPixels(dilation))
-        };
+        let composite_bounds = parameters.composite_bounds();
         let composite_uniforms = BlurUniforms::composite(
             composite_bounds,
-            content_mask,
-            corner_radii,
-            corner_smoothing,
-            opacity,
-            clip,
+            parameters.content_mask,
+            parameters.corner_radii,
+            parameters.corner_smoothing,
+            parameters.opacity,
+            parameters.clip,
             blur_size,
             [full_width as f32, full_height as f32],
-        );
+        )
+        .in_space(parameters.shape_bounds, parameters.space_mask);
         let encoder = new_command_encoder_for_texture(
             command_buffer,
             target,
@@ -1446,6 +1504,7 @@ impl MetalRenderer {
             &instance_buffer.metal_buffer,
             *instance_offset,
             vertices_bytes_len,
+            scene_uniforms.render_space_bytes,
         );
         command_encoder.draw_primitives(
             metal::MTLPrimitiveType::Triangle,
@@ -1500,6 +1559,7 @@ impl MetalRenderer {
             &instance_buffer.metal_buffer,
             *instance_offset,
             shadows,
+            scene_uniforms.render_space_bytes,
         );
 
         command_encoder.draw_primitives_instanced(
@@ -1550,6 +1610,7 @@ impl MetalRenderer {
             &instance_buffer.metal_buffer,
             *instance_offset,
             quads,
+            scene_uniforms.render_space_bytes,
         );
 
         command_encoder.draw_primitives_instanced(
@@ -1617,6 +1678,7 @@ impl MetalRenderer {
             &instance_buffer.metal_buffer,
             *instance_offset,
             sprite_bytes_len,
+            scene_uniforms.render_space_bytes,
         );
         command_encoder.draw_primitives_instanced(
             metal::MTLPrimitiveType::TriangleStrip,
@@ -1665,6 +1727,7 @@ impl MetalRenderer {
             &instance_buffer.metal_buffer,
             *instance_offset,
             underlines,
+            scene_uniforms.render_space_bytes,
         );
 
         command_encoder.draw_primitives_instanced(
@@ -1715,6 +1778,7 @@ impl MetalRenderer {
             &instance_buffer.metal_buffer,
             *instance_offset,
             sprites,
+            scene_uniforms.render_space_bytes,
         );
         // Generated native shaders derive tile coordinates from the atlas size in the
         // vertex stage; bind the same texture to both stages, as WGPU and DirectX do.
@@ -1776,6 +1840,7 @@ impl MetalRenderer {
             &instance_buffer.metal_buffer,
             *instance_offset,
             sprites,
+            scene_uniforms.render_space_bytes,
         );
         command_encoder.set_vertex_texture(PRIMARY_TEXTURE_SLOT, Some(&texture));
         command_encoder.set_fragment_texture(PRIMARY_TEXTURE_SLOT, Some(&texture));
@@ -2048,6 +2113,10 @@ fn required_instance_buffer_size(scene: &Scene) -> usize {
         }
     };
 
+    reserve(
+        mem::size_of::<gpui::RenderSpace>(),
+        scene.render_spaces().len(),
+    );
     for command in scene.render_commands() {
         let RenderCommand::Batch(batch) = command else {
             continue;
@@ -2125,7 +2194,7 @@ impl gpui::PlatformHeadlessRenderer for MetalHeadlessRenderer {
 mod tests {
     use super::*;
     use gpui::{
-        AtlasKey, BackdropFilter, BorderStyle, ContentMask, Edges, ImageId, Path, PlatformAtlas,
+        AtlasKey, BackdropFilter, BorderStyle, Bounds, ContentMask, Corners, Edges, ImageId, Path, PlatformAtlas,
         PlatformHeadlessRenderer, RenderImageParams, RenderSvgParams, ScaledFilter,
         TransformationMatrix, checkerboard, hsla, linear_color_stop, linear_gradient,
         pattern_slash, px, solid_background, white,
@@ -2905,6 +2974,145 @@ mod tests {
                 g > 20 && g < 200 && texel.0[0] < 11
             }),
             "triangle edges are antialiased",
+        );
+    }
+
+    #[test]
+    fn render_space_table_preserves_rotated_ancestor_clips_across_encoders() {
+        let mut renderer = MetalHeadlessRenderer::new();
+        let bounds = |x: f32, y: f32, width: f32, height: f32| Bounds {
+            origin: gpui::point(ScaledPixels(x), ScaledPixels(y)),
+            size: size(ScaledPixels(width), ScaledPixels(height)),
+        };
+        let parent_bounds = bounds(0.0, 0.0, 10.0, 10.0);
+        let parent_transform = TransformationMatrix::unit()
+            .translate(gpui::point(ScaledPixels(12.0), ScaledPixels(8.0)))
+            .rotate(gpui::Radians(std::f32::consts::FRAC_PI_4));
+        // Reflection and nonuniform scale exercise both the inverse and nested-space chain.
+        let child_transform = TransformationMatrix::unit()
+            .translate(gpui::point(ScaledPixels(12.0), ScaledPixels(0.0)))
+            .scale(size(-1.0, 0.5));
+
+        let mut scene = Scene::default();
+        scene.with_transform(parent_transform, |scene| {
+            scene.with_clip(
+                ContentMask {
+                    bounds: parent_bounds,
+                    fade_out: Edges {
+                        left: ScaledPixels(2.0),
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                },
+                |scene| {
+                    // Overscan reaches beyond the clip diamond into its AABB-only corners.
+                    let overscan = bounds(-5.0, -5.0, 20.0, 20.0);
+                    scene.insert_primitive(Quad {
+                        bounds: overscan,
+                        content_mask: ContentMask {
+                            bounds: overscan,
+                            ..Default::default()
+                        },
+                        background: solid_background(white()),
+                        ..Default::default()
+                    });
+
+                    // Path rasterization ends and restarts the main encoder. This also checks
+                    // that the active render-space table is rebound through both passes.
+                    let mut path = Path::new(gpui::point(px(1.0), px(1.0)));
+                    path.line_to(gpui::point(px(5.0), px(1.0)));
+                    path.line_to(gpui::point(px(3.0), px(5.0)));
+                    path.line_to(gpui::point(px(1.0), px(1.0)));
+                    path.content_mask = ContentMask {
+                        bounds: Bounds {
+                            origin: gpui::point(px(0.0), px(0.0)),
+                            size: size(px(6.0), px(6.0)),
+                        },
+                        ..Default::default()
+                    };
+                    path.color = solid_background(hsla(0.62, 1.0, 0.5, 1.0));
+                    scene.insert_primitive(path.scale(1.0));
+
+                    scene.with_transform(child_transform, |scene| {
+                        let child_bounds = bounds(0.0, 0.0, 4.0, 4.0);
+                        scene.with_clip(
+                            ContentMask {
+                                bounds: child_bounds,
+                                ..Default::default()
+                            },
+                            |scene| {
+                                scene.insert_primitive(Quad {
+                                    bounds: child_bounds,
+                                    content_mask: ContentMask {
+                                        bounds: child_bounds,
+                                        ..Default::default()
+                                    },
+                                    background: solid_background(hsla(0.0, 1.0, 0.5, 1.0)),
+                                    ..Default::default()
+                                });
+                            },
+                        );
+                    });
+                },
+            );
+        });
+        scene.finish();
+
+        let Some(image) = render_for_contracts(
+            &mut renderer,
+            &scene,
+            Size {
+                width: DevicePixels(32),
+                height: DevicePixels(28),
+            },
+        ) else {
+            return;
+        };
+
+        // This pixel is inside the rotated clip's AABB, but outside the true diamond.
+        assert_pixel_close(&image, 6, 10, [0, 0, 0, 255], 1, "outside rotated clip");
+        assert_pixel_close(
+            &image,
+            12,
+            15,
+            [255, 255, 255, 255],
+            3,
+            "inside rotated clip",
+        );
+
+        // The rotated left edge fades instead of turning into a hard or AABB clip.
+        let faded_edge = pixel(&image, 9, 12);
+        assert!(
+            (10..245).contains(&faded_edge[0])
+                && faded_edge[0] == faded_edge[1]
+                && faded_edge[1] == faded_edge[2],
+            "rotated clip fade remains partial neutral coverage: {faded_edge:?}",
+        );
+
+        // Child-local (3, 2) lands inside the ancestor; (1, 2) lands beyond its
+        // right edge despite remaining inside both the child geometry and child clip.
+        assert_pixel_close(
+            &image,
+            17,
+            15,
+            [255, 0, 0, 255],
+            8,
+            "reflected child interior",
+        );
+        assert_pixel_close(
+            &image,
+            19,
+            16,
+            [0, 0, 0, 255],
+            1,
+            "outside inherited ancestor clip",
+        );
+
+        // The transformed path centroid lands near this texel after the encoder restart.
+        let path_interior = pixel(&image, 12, 11);
+        assert!(
+            path_interior[2] > path_interior[0] + 40 && path_interior[2] > path_interior[1] + 20,
+            "transformed path remains blue after the encoder restart: {path_interior:?}",
         );
     }
 }

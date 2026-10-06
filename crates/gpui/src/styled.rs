@@ -33,6 +33,24 @@ pub trait Styled: Sized {
         self
     }
 
+    /// Applies an affine transform to this element and its subtree after layout.
+    ///
+    /// Layout and scroll extents remain unchanged. Clips, hitboxes, pointer
+    /// positions, text input geometry and accessibility follow the transform.
+    /// Pointer handlers receive coordinates in their own layout space.
+    ///
+    /// ```
+    /// use gpui::{ElementTransform, div, point, px, prelude::*};
+    /// let camera = ElementTransform::default()
+    ///     .scale(1.5)
+    ///     .translate(point(px(40.), px(20.)));
+    /// let graph = div().overflow_hidden().child(div().transform(camera));
+    /// ```
+    fn transform(mut self, transform: crate::ElementTransform) -> Self {
+        self.style().transform = Some(transform);
+        self
+    }
+
     gpui_macros::style_helpers!();
     gpui_macros::visibility_style_methods!();
     gpui_macros::margin_style_methods!();

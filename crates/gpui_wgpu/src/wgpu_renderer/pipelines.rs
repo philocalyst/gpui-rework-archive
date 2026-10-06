@@ -22,6 +22,12 @@ pub(super) enum InstanceBindingSource<'a> {
     },
 }
 
+/// The global coordinate table shares the instance arena but has a fixed zero base.
+pub(super) enum SpaceBindingSource<'a> {
+    Buffer(wgpu::BufferBinding<'a>),
+    DataTexture(&'a wgpu::TextureView),
+}
+
 fn instance_binding_entries(source: InstanceBindingSource<'_>) -> Vec<wgpu::BindGroupEntry<'_>> {
     match source {
         InstanceBindingSource::Buffer(instances) => {
@@ -145,7 +151,11 @@ impl WgpuBindGroupLayouts {
                 Some(DOWNLEVEL_RANGE_BINDING),
             ),
         };
-        let globals = generated_bind_group_layout(device, "globals_layout", GLOBAL_BINDINGS, None);
+        let global_table = match tier {
+            RendererTier::Modern => GLOBAL_BINDINGS,
+            RendererTier::WebGl2 => gpui_render::artifacts::DOWNLEVEL_GLOBAL_BINDINGS,
+        };
+        let globals = generated_bind_group_layout(device, "globals_layout", global_table, None);
         let instances = generated_bind_group_layout(
             device,
             "instances_layout",
@@ -199,7 +209,12 @@ impl WgpuBindGroupLayouts {
         label: &str,
         globals: wgpu::BufferBinding,
         font_rasterization: wgpu::BufferBinding,
+        spaces: SpaceBindingSource<'_>,
     ) -> wgpu::BindGroup {
+        let spaces = match spaces {
+            SpaceBindingSource::Buffer(buffer) => wgpu::BindingResource::Buffer(buffer),
+            SpaceBindingSource::DataTexture(texture) => wgpu::BindingResource::TextureView(texture),
+        };
         device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some(label),
             layout: &self.globals,
@@ -211,6 +226,10 @@ impl WgpuBindGroupLayouts {
                 wgpu::BindGroupEntry {
                     binding: shader::FONT_RASTERIZATION_BINDING,
                     resource: wgpu::BindingResource::Buffer(font_rasterization),
+                },
+                wgpu::BindGroupEntry {
+                    binding: shader::RENDER_SPACES_BINDING,
+                    resource: spaces,
                 },
             ],
         })
@@ -744,7 +763,7 @@ mod tests {
             size: NonZeroU64::new(256),
         };
 
-        let _globals = layouts.create_globals(device, "test_globals", binding(), binding());
+        let _globals = layouts.create_globals(device, "test_globals", binding(), binding(), SpaceBindingSource::Buffer(binding()));
         let _instances = layouts.create_instances(device, InstanceBindingSource::Buffer(binding()));
         let _textured = layouts.create_textured_instances(
             device,

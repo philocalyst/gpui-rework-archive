@@ -12,7 +12,7 @@ use std::{
 
 use crate::{RendererTier, WgpuTextureIdentity};
 
-use super::pipelines::{InstanceBindingSource, WgpuBindGroupLayouts};
+use super::pipelines::{InstanceBindingSource, SpaceBindingSource, WgpuBindGroupLayouts};
 
 /// Size of one `rgba32uint` data-texture texel, the downlevel transport's unit.
 const TEXEL_BYTES: u64 = 16;
@@ -91,6 +91,25 @@ pub(super) struct InstanceUpload {
 }
 
 impl InstanceUpload {
+    /// Writes the frame's indexed coordinate table at arena byte zero. Instance
+    /// uploads begin after this reserved prefix, so the modern storage buffer and
+    /// downlevel data texture can expose the same bytes through group 0 binding 2.
+    pub(super) fn write_spaces(&mut self, spaces: &[gpui::RenderSpace]) -> Option<()> {
+        let bytes = shader_interface::slice_as_bytes(spaces);
+        let end = u64::try_from(bytes.len()).ok()?;
+        if end > self.size {
+            return None;
+        }
+        if end > 0 {
+            self.staging
+                .as_mut()?
+                .slice(0..end as usize)
+                .copy_from_slice(bytes);
+        }
+        self.cursor = end;
+        Some(())
+    }
+
     pub(super) fn write<T: BufferData>(&mut self, values: &[T]) -> Option<InstanceSlice<T>> {
         if values.is_empty() {
             return Some(self.empty_batch());
@@ -366,6 +385,7 @@ pub(super) struct InstanceBufferArena {
     textured_bind_groups: RefCell<TexturedBindGroups>,
     capacity: u64,
     maximum_size: u64,
+    generation: u64,
 }
 
 /// Backing store for the arena's payload bytes.
@@ -501,6 +521,18 @@ impl InstanceBufferArena {
             textured_bind_groups: RefCell::default(),
             capacity,
             maximum_size,
+            generation: 0,
+        }
+    }
+
+    pub(super) fn generation(&self) -> u64 {
+        self.generation
+    }
+
+    pub(super) fn space_binding_source(&self) -> SpaceBindingSource<'_> {
+        match &self.storage {
+            InstanceStorage::Buffer(buffer) => SpaceBindingSource::Buffer(whole_buffer(buffer)),
+            InstanceStorage::DataTexture { view, .. } => SpaceBindingSource::DataTexture(view),
         }
     }
 
@@ -573,6 +605,7 @@ impl InstanceBufferArena {
             }
         }
         self.bind_group = instance_bind_group(device, layouts, &self.storage);
+        self.generation = self.generation.wrapping_add(1);
         *self.textured_bind_groups.get_mut() = TexturedBindGroups::default();
         log::info!("increased instance buffer size to {}", self.capacity);
         true

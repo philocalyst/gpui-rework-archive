@@ -166,6 +166,8 @@ mod tests {
             bounds: bounds(16.0),
             content_mask: gpui::ContentMask {
                 bounds: bounds(32.0),
+                space: 0,
+                padding: 0,
             },
             background: gpui::solid_background(gpui::red()),
             ..Default::default()

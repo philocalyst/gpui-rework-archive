@@ -143,14 +143,64 @@ mod source {
     pub struct ContentMask {
         pub bounds: Bounds,
         pub fade_out: Edges,
+        pub space: u32,
+        pub padding: u32,
     }
+
+    #[repr(C)]
+    #[derive(Clone, Copy, Wgsl)]
+    pub struct RenderSpace {
+        pub transform: TransformationMatrix,
+        pub inverse: TransformationMatrix,
+        pub clip: Bounds,
+        pub fade: Edges,
+        pub parent: u32,
+        pub has_clip: u32,
+    }
+
+    storage!(group(0), binding(2), RENDER_SPACES: RuntimeArray<RenderSpace>);
 
     impl ContentMask {
         /// The mask's coverage at the given window-space position: 1 inside,
         /// 0 outside, and a linear ramp to 0 across each edge's fade distance.
         pub fn alpha(content_mask: ContentMask, position: Vec2f) -> f32 {
-            let bounds = content_mask.bounds;
-            let fade = content_mask.fade_out;
+            let mut alpha = Self::bounds_alpha(
+                content_mask.bounds,
+                content_mask.fade_out,
+                local_position(content_mask, position),
+            );
+            // Space zero is the legacy identity path: preserve ordinary mask coverage
+            // without touching the scene table for the overwhelming majority of frames.
+            if content_mask.space == 0u32 {
+                return alpha;
+            }
+            let mut space_id = content_mask.space;
+            while space_id != 0u32 {
+                let space = get!(RENDER_SPACES)[space_id as usize];
+                if space.has_clip == 2u32 {
+                    return 0.0;
+                }
+                if space.has_clip == 1u32 {
+                    alpha *= Self::bounds_alpha(
+                        space.clip,
+                        space.fade,
+                        TransformationMatrix::transform_position(space.inverse, position),
+                    );
+                }
+                space_id = space.parent;
+            }
+            alpha
+        }
+
+        pub fn bounds_alpha(bounds: Bounds, fade: Edges, position: Vec2f) -> f32 {
+            let far = bounds.origin + bounds.size;
+            if position.x < bounds.origin.x
+                || position.y < bounds.origin.y
+                || position.x > far.x
+                || position.y > far.y
+            {
+                return 0.0;
+            }
             let mut alpha = 1.0;
             if fade.left > 0.0 {
                 alpha *= saturate((position.x - bounds.origin.x) / fade.left);
@@ -166,6 +216,64 @@ mod source {
             }
             alpha
         }
+    }
+
+    pub fn space_position(content_mask: ContentMask, position: Vec2f) -> Vec2f {
+        if content_mask.space == 0u32 {
+            return position;
+        }
+        TransformationMatrix::transform_position(
+            get!(RENDER_SPACES)[content_mask.space as usize].transform,
+            position,
+        )
+    }
+
+    pub fn local_position(content_mask: ContentMask, position: Vec2f) -> Vec2f {
+        if content_mask.space == 0u32 {
+            return position;
+        }
+        TransformationMatrix::transform_position(
+            get!(RENDER_SPACES)[content_mask.space as usize].inverse,
+            position,
+        )
+    }
+
+    pub fn space_rectangle_vertex(
+        vertex_id: u32,
+        bounds: Bounds,
+        content_mask: ContentMask,
+    ) -> RectangleVertex {
+        let unit_position = rectangle_corner(vertex_id);
+        let viewport_position =
+            space_position(content_mask, Bounds::position(bounds, unit_position));
+        RectangleVertex {
+            unit_position,
+            viewport_position,
+            clip_position: viewport_to_clip_position(viewport_position),
+        }
+    }
+
+    pub fn space_transformed_rectangle_vertex(
+        vertex_id: u32,
+        bounds: Bounds,
+        transform: TransformationMatrix,
+        content_mask: ContentMask,
+    ) -> RectangleVertex {
+        let unit_position = rectangle_corner(vertex_id);
+        let local = TransformationMatrix::transform_position(
+            transform,
+            Bounds::position(bounds, unit_position),
+        );
+        let viewport_position = space_position(content_mask, local);
+        RectangleVertex {
+            unit_position,
+            viewport_position,
+            clip_position: viewport_to_clip_position(viewport_position),
+        }
+    }
+
+    pub fn content_clip_distances(position: Vec2f, content_mask: ContentMask) -> Vec4f {
+        clip_distances(local_position(content_mask, position), content_mask.bounds)
     }
 
     impl Bounds {
@@ -302,6 +410,53 @@ mod source {
         let tile_size = vec2f(tile.bounds.size.x as f32, tile.bounds.size.y as f32);
         let texture_size = vec2f(atlas_size.x as f32, atlas_size.y as f32);
         (tile_origin + unit_position * tile_size) / texture_size
+    }
+
+    pub fn transformation_is_identity(transform: TransformationMatrix) -> bool {
+        let x_axis = transform.rotation_scale[0];
+        let y_axis = transform.rotation_scale[1];
+        x_axis.x == 1.0
+            && x_axis.y == 0.0
+            && y_axis.x == 0.0
+            && y_axis.y == 1.0
+            && transform.translation.x == 0.0
+            && transform.translation.y == 0.0
+    }
+
+    pub fn should_clamp_atlas_for_space(content_mask: ContentMask) -> bool {
+        if content_mask.space == 0u32 {
+            return false;
+        }
+        !transformation_is_identity(get!(RENDER_SPACES)[content_mask.space as usize].transform)
+    }
+
+    pub fn should_clamp_atlas_for_sprite(
+        content_mask: ContentMask,
+        sprite_transform: TransformationMatrix,
+    ) -> bool {
+        !transformation_is_identity(sprite_transform)
+            || should_clamp_atlas_for_space(content_mask)
+    }
+
+    /// Keep bilinear filtering inside a tile when transforms move texel centers off the pixel grid.
+    pub fn clamp_atlas_texture_coordinates(
+        coordinates: Vec2f,
+        tile: AtlasTile,
+        atlas_size: Vec2u,
+        clamp_to_tile: bool,
+    ) -> Vec2f {
+        if !clamp_to_tile {
+            return coordinates;
+        }
+        let texture_size = vec2f(atlas_size.x as f32, atlas_size.y as f32);
+        let tile_origin = vec2f(tile.bounds.origin.x as f32, tile.bounds.origin.y as f32);
+        let tile_size = vec2f(tile.bounds.size.x as f32, tile.bounds.size.y as f32);
+        let half_texel = vec2f(0.5, 0.5) / texture_size;
+        clamp(
+            coordinates,
+            (tile_origin / texture_size) + half_texel,
+            ((tile_origin + tile_size) / texture_size) - half_texel,
+        )
     }
 
     pub fn color_brightness(color: Vec3f) -> f32 {

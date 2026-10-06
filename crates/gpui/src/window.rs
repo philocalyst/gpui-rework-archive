@@ -942,12 +942,21 @@ pub struct Hitbox {
     pub fragments: Option<Arc<[Bounds<Pixels>]>>,
     /// Additional user-provided tags to extend behavior of the hitbox.
     pub tags: Vec<SharedString>,
+    /// Coordinate space retained from prepaint, including exact ancestor clips.
+    pub coordinate_space: crate::CoordinateSpace,
 }
 
 impl Hitbox {
-    /// Tests the actual regions, including the content mask, without occlusion checks.
+    /// Tests a window-coordinate point against the exact regions and clips, without occlusion.
+    /// Use [`Window::window_mouse_position`] inside transformed listeners.
     pub fn contains(&self, point: &Point<Pixels>) -> bool {
-        self.content_mask.bounds.contains(point)
+        let Some(local) = self.coordinate_space.from_window(*point) else {
+            return false;
+        };
+        let inside_clip = self.coordinate_space.contains_window_point(*point);
+        let point = &local;
+        inside_clip
+            && self.content_mask.bounds.contains(point)
             && self.fragments.as_ref().map_or_else(
                 || self.bounds.contains(point),
                 |fragments| fragments.iter().any(|bounds| bounds.contains(point)),
@@ -1068,7 +1077,9 @@ impl TooltipId {
             .as_ref()
             .is_some_and(|tooltip_bounds| {
                 tooltip_bounds.id == *self
-                    && tooltip_bounds.bounds.contains(&window.mouse_position())
+                    && tooltip_bounds
+                        .bounds
+                        .contains(&window.window_mouse_position())
             })
     }
 }
@@ -1091,6 +1102,7 @@ pub(crate) struct DeferredDraw {
     element_id_stack: SmallVec<[ElementId; 32]>,
     text_style_stack: Vec<TextStyleRefinement>,
     content_mask: Option<ContentMask<Pixels>>,
+    coordinate_space: crate::CoordinateSpace,
     rem_size: Pixels,
     element: Option<AnyElement>,
     absolute_offset: Point<Pixels>,
@@ -1276,7 +1288,8 @@ pub struct Window {
     /// Inset transitions use these bounds to resolve `auto` from the child's rendered position.
     style_transition_containing_bounds: Option<Bounds<Pixels>>,
     pub(crate) element_opacity: f32,
-    pub(crate) content_mask_stack: Vec<ContentMask<Pixels>>,
+    coordinate_space: crate::CoordinateSpace,
+    transformed_layout: Option<LayoutId>,
     pub(crate) requested_autoscroll: Option<Bounds<Pixels>>,
     /// The [`TextInputConfiguration`] most recently forwarded to the platform
     /// window, so that only actual changes are forwarded (reconfiguring a live
@@ -2029,7 +2042,8 @@ impl Window {
             rendered_entity_stack: Vec::new(),
             element_offset_stack: Vec::new(),
             style_transition_containing_bounds: None,
-            content_mask_stack: Vec::new(),
+            coordinate_space: crate::CoordinateSpace::default(),
+            transformed_layout: None,
             element_opacity: 1.0,
             requested_autoscroll: None,
             last_text_input_configuration: None,
@@ -2112,7 +2126,8 @@ pub struct DispatchEventResult {
 /// Indicates which region of the window is visible. Content falling outside of this mask will not be
 /// rendered. Currently, only rectangular content masks are supported, but we give the mask its own type
 /// to leave room to support more complex shapes in the future. Edge fades are evaluated in
-/// window space against these axis-aligned bounds and are not transform-aware.
+/// the coordinate space in which the mask was established. Ancestor masks are
+/// retained by [`CoordinateSpace`](crate::CoordinateSpace), including rotations.
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
 #[repr(C)]
 pub struct ContentMask<P: Clone + Debug + Default + PartialEq> {
@@ -2120,6 +2135,12 @@ pub struct ContentMask<P: Clone + Debug + Default + PartialEq> {
     pub bounds: Bounds<P>,
     /// Edge fade distances. A zero distance leaves that edge fully opaque.
     pub fade_out: Edges<P>,
+    /// Frame-local renderer space. Assigned by the scene; callers should leave it zero.
+    #[doc(hidden)]
+    pub space: u32,
+    /// Explicit storage-buffer alignment.
+    #[doc(hidden)]
+    pub padding: u32,
 }
 
 impl ContentMask<Pixels> {
@@ -2128,6 +2149,8 @@ impl ContentMask<Pixels> {
         ContentMask {
             bounds: self.bounds.scale(factor),
             fade_out: self.fade_out.scale(factor),
+            space: self.space,
+            padding: 0,
         }
     }
 
@@ -2184,6 +2207,8 @@ impl ContentMask<Pixels> {
                     |a, b| a > b,
                 ),
             },
+            space: 0,
+            padding: 0,
         }
     }
 }
@@ -2199,6 +2224,7 @@ mod content_mask_tests {
                 left: px(fade_left),
                 ..Default::default()
             },
+            ..Default::default()
         }
     }
 
@@ -3033,6 +3059,9 @@ impl Window {
     #[inline]
     fn snap_bounds(&self, bounds: Bounds<Pixels>) -> Bounds<ScaledPixels> {
         let scale_factor = self.scale_factor();
+        if self.coordinate_space.transform != TransformationMatrix::unit() {
+            return bounds.scale(scale_factor);
+        }
         let left = round_to_device_pixel(bounds.left().0, scale_factor);
         let top = round_to_device_pixel(bounds.top().0, scale_factor);
         let right = round_to_device_pixel(bounds.right().0, scale_factor).max(left);
@@ -3058,6 +3087,9 @@ impl Window {
     #[inline]
     fn cover_bounds(&self, bounds: Bounds<Pixels>) -> Bounds<ScaledPixels> {
         let scale_factor = self.scale_factor();
+        if self.coordinate_space.transform != TransformationMatrix::unit() {
+            return bounds.scale(scale_factor);
+        }
         let left = floor_to_device_pixel(bounds.left().0, scale_factor);
         let top = floor_to_device_pixel(bounds.top().0, scale_factor);
         let right = ceil_to_device_pixel(bounds.right().0, scale_factor).max(left);
@@ -3074,6 +3106,8 @@ impl Window {
         ContentMask {
             bounds: self.cover_bounds(mask.bounds),
             fade_out: mask.fade_out.scale(self.scale_factor()),
+            space: 0,
+            padding: 0,
         }
     }
 
@@ -3105,8 +3139,16 @@ impl Window {
             .is_action_available(action, node_id)
     }
 
-    /// The position of the mouse relative to the window.
+    /// The pointer in the current element or listener’s layout coordinates.
+    /// Use [`Self::window_mouse_position`] for an absolute window position.
     pub fn mouse_position(&self) -> Point<Pixels> {
+        self.coordinate_space
+            .from_window(self.mouse_position)
+            .unwrap_or_default()
+    }
+
+    /// The pointer position in window coordinates, independent of the current listener.
+    pub fn window_mouse_position(&self) -> Point<Pixels> {
         self.mouse_position
     }
 
@@ -3635,6 +3677,8 @@ impl Window {
                     rem_size,
                     absolute_offset,
                     prepaint_range,
+                    coordinate_space,
+                    content_mask,
                 ) = {
                     let deferred_draw = &mut self.next_frame.deferred_draws[deferred_draw_ix];
                     self.element_id_stack
@@ -3649,6 +3693,8 @@ impl Window {
                         deferred_draw.rem_size,
                         deferred_draw.absolute_offset,
                         deferred_draw.prepaint_range.clone(),
+                        deferred_draw.coordinate_space.clone(),
+                        deferred_draw.content_mask,
                     )
                 };
                 self.next_frame.dispatch_tree.set_active_node(parent_node);
@@ -3659,7 +3705,11 @@ impl Window {
                         window.with_rem_size(Some(rem_size), |window| {
                             window.with_absolute_element_offset(absolute_offset, |window| {
                                 crate::DeferredPriorityStackCache::push(priority, cx);
-                                element.prepaint(window, cx);
+                                window.with_coordinate_space(coordinate_space, |window| {
+                                    window.with_content_mask(content_mask, |window| {
+                                        element.prepaint(window, cx)
+                                    });
+                                });
                                 crate::DeferredPriorityStackCache::pop(cx);
                             });
                         });
@@ -3707,10 +3757,12 @@ impl Window {
             let content_mask = deferred_draw.content_mask;
             if let Some(element) = deferred_draw.element.as_mut() {
                 self.with_rendered_view(deferred_draw.current_view, |window| {
-                    window.with_content_mask(content_mask, |window| {
-                        window.with_rem_size(Some(deferred_draw.rem_size), |window| {
-                            element.paint(window, cx);
-                        });
+                    window.with_coordinate_space(deferred_draw.coordinate_space.clone(), |window| {
+                        window.with_content_mask(content_mask, |window| {
+                            window.with_rem_size(Some(deferred_draw.rem_size), |window| {
+                                element.paint(window, cx);
+                            });
+                        })
                     })
                 })
             } else {
@@ -3782,6 +3834,7 @@ impl Window {
                     element_id_stack: deferred_draw.element_id_stack.clone(),
                     text_style_stack: deferred_draw.text_style_stack.clone(),
                     content_mask: deferred_draw.content_mask,
+                    coordinate_space: deferred_draw.coordinate_space.clone(),
                     rem_size: deferred_draw.rem_size,
                     priority: deferred_draw.priority,
                     element: None,
@@ -3893,6 +3946,78 @@ impl Window {
         id
     }
 
+    // Transparent wrappers share a layout ID with the element they delegate to.
+    // Enter its space at the outermost wrapper so a11y and input share the mapping,
+    // and leave it active through every wrapper without composing it twice.
+    pub(crate) fn with_layout_transform<R>(
+        &mut self,
+        layout_id: LayoutId,
+        f: impl FnOnce(&mut Self) -> R,
+    ) -> R {
+        let transform = self
+            .layout_engine
+            .as_ref()
+            .and_then(|engine| engine.element_transform(layout_id));
+        if self.transformed_layout == Some(layout_id) || transform.is_none() {
+            return f(self);
+        }
+        let transform = transform.unwrap().resolve(self.layout_bounds(layout_id));
+        let previous = self.transformed_layout.replace(layout_id);
+        let result = self.with_element_transform(transform, f);
+        self.transformed_layout = previous;
+        result
+    }
+
+    /// The coordinate space active for painting or for the current event listener.
+    pub fn coordinate_space(&self) -> &crate::CoordinateSpace {
+        &self.coordinate_space
+    }
+
+    /// Runs drawing in an affine space, composed with the current parent space.
+    /// Coordinates passed to painting, clips and event listeners remain layout coordinates.
+    pub fn with_element_transform<R>(
+        &mut self,
+        transform: TransformationMatrix,
+        f: impl FnOnce(&mut Self) -> R,
+    ) -> R {
+        if transform == TransformationMatrix::unit() {
+            return f(self);
+        }
+        let space = self.coordinate_space.transformed(transform);
+        self.with_coordinate_space(space, f)
+    }
+
+    /// Re-enters an absolute coordinate space, including its retained clips.
+    ///
+    /// Capture [`Self::coordinate_space`] during prepaint to reuse the same
+    /// geometry during custom painting. The previous space is restored afterward.
+    /// [`CoordinateSpace::default`](crate::CoordinateSpace) establishes window
+    /// coordinates, which is useful for overlays outside a camera's clips.
+    pub fn with_coordinate_space<R>(
+        &mut self,
+        space: crate::CoordinateSpace,
+        f: impl FnOnce(&mut Self) -> R,
+    ) -> R {
+        if self.coordinate_space.same_scope(&space) {
+            return f(self);
+        }
+        let painting = self.invalidator.inner.borrow().draw_phase == DrawPhase::Paint;
+        let previous = mem::replace(&mut self.coordinate_space, space);
+        let previous_scene_space = painting.then(|| {
+            self.next_frame
+                .scene
+                .enter_coordinate_space(&self.coordinate_space, self.scale_factor)
+        });
+        let result = f(self);
+        self.coordinate_space = previous;
+        if let Some(previous_scene_space) = previous_scene_space {
+            self.next_frame
+                .scene
+                .restore_coordinate_space(previous_scene_space);
+        }
+        result
+    }
+
     /// Invoke the given function with the given content mask after intersecting it
     /// with the current mask. This method should only be called during element drawing.
     // This function is called in a highly recursive manner in editor
@@ -3905,11 +4030,8 @@ impl Window {
     ) -> R {
         self.invalidator.debug_assert_paint_or_prepaint();
         if let Some(mask) = mask {
-            let mask = mask.intersect(&self.content_mask());
-            self.content_mask_stack.push(mask);
-            let result = f(self);
-            self.content_mask_stack.pop();
-            result
+            let space = self.coordinate_space.clipped(mask);
+            self.with_coordinate_space(space, f)
         } else {
             f(self)
         }
@@ -4083,16 +4205,8 @@ impl Window {
     /// Obtain the current content mask. This method should only be called during element drawing.
     pub fn content_mask(&self) -> ContentMask<Pixels> {
         self.invalidator.debug_assert_paint_or_prepaint();
-        self.content_mask_stack
-            .last()
-            .cloned()
-            .unwrap_or_else(|| ContentMask {
-                bounds: Bounds {
-                    origin: Point::default(),
-                    size: self.viewport_size,
-                },
-                ..Default::default()
-            })
+        let viewport = Bounds::new(Point::default(), self.viewport_size);
+        self.coordinate_space.content_mask(viewport)
     }
 
     /// Provide elements in the called function with a new namespace in which their identifiers must be unique.
@@ -4343,6 +4457,7 @@ impl Window {
             element_id_stack: self.element_id_stack.clone(),
             text_style_stack: self.text_style_stack.clone(),
             content_mask,
+            coordinate_space: self.coordinate_space.clone(),
             rem_size: self.rem_size(),
             priority,
             element: Some(element),
@@ -4363,9 +4478,9 @@ impl Window {
         let content_mask = self.content_mask();
         let clipped_bounds = bounds.intersect(&content_mask.bounds);
         if !clipped_bounds.is_empty() {
-            self.next_frame
-                .scene
-                .push_layer(self.cover_bounds(clipped_bounds));
+            self.next_frame.scene.push_layer(
+                self.cover_bounds(self.coordinate_space.bounds_to_window(clipped_bounds)),
+            );
         }
 
         let result = f(self);
@@ -4525,6 +4640,7 @@ impl Window {
         }
 
         self.next_frame.scene.insert_primitive(BackdropFilter {
+            geometry: None,
             order: 0,
             bounds: self.snap_bounds(bounds),
             content_mask: self.snapped_content_mask(),
@@ -4583,6 +4699,7 @@ impl Window {
         // non-filtered elements). Re-applying it at composite time would double it (e.g.
         // `.blur(r).opacity(0.5)` would render at 0.25 instead of 0.5).
         let boundary = FilterBoundary {
+            geometry: None,
             order: 0,
             bounds: self.snap_bounds(bounds),
             content_mask: self.snapped_content_mask(),
@@ -4596,6 +4713,7 @@ impl Window {
         self.next_frame.scene.insert_primitive(boundary.clone());
         let result = f(self);
         self.next_frame.scene.insert_primitive(FilterBoundary {
+            geometry: None,
             is_start: false,
             ..boundary
         });
@@ -4835,7 +4953,7 @@ impl Window {
         self.invalidator.debug_assert_paint();
 
         let element_opacity = self.element_opacity();
-        let scale_factor = self.scale_factor();
+        let scale_factor = self.scale_factor() * self.text_raster_multiplier();
         let glyph_origin = origin.scale(scale_factor);
 
         let (integer_origin, subpixel_variant) = quantize_glyph_origin(glyph_origin);
@@ -4876,8 +4994,9 @@ impl Window {
 
         debug_assert_eq!(entry.bounds.size, tile.bounds.size.map(Into::into));
         let bounds = Bounds {
-            origin: integer_origin + entry.bounds.origin.map(Into::into),
-            size: tile.bounds.size.map(Into::into),
+            origin: (integer_origin + entry.bounds.origin.map(Into::into))
+                / (params.scale_factor / self.scale_factor()),
+            size: tile.bounds.size.map(Into::into) / (params.scale_factor / self.scale_factor()),
         };
         let content_mask = self.snapped_content_mask();
 
@@ -4920,7 +5039,26 @@ impl Window {
         Ok(())
     }
 
+    fn text_raster_multiplier(&self) -> f32 {
+        // Rasterize at the greatest stretch, then retain the original layout size.
+        // Eighth-step buckets bound atlas churn during continuous camera zoom;
+        // the cap limits allocations for extreme transforms.
+        (self.coordinate_space.transform.max_scale().max(1.0) * 8.0)
+            .ceil()
+            .clamp(8.0, 64.0)
+            / 8.0
+    }
+
     fn should_use_subpixel_rendering(&self, font_id: FontId, font_size: Pixels) -> bool {
+        let transform = self.coordinate_space.transform;
+        let translation = transform
+            .translation
+            .map(|value| value * self.scale_factor());
+        if transform.rotation_scale != TransformationMatrix::unit().rotation_scale
+            || translation.iter().any(|value| value.fract() != 0.0)
+        {
+            return false;
+        }
         if self
             .platform_window
             .background_appearance()
@@ -4972,7 +5110,7 @@ impl Window {
     ) -> Result<()> {
         self.invalidator.debug_assert_paint();
 
-        let scale_factor = self.scale_factor();
+        let scale_factor = self.scale_factor() * self.text_raster_multiplier();
         let glyph_origin = origin.scale(scale_factor);
         let (integer_origin, subpixel_variant) = quantize_color_glyph_origin(glyph_origin);
         let raster_style = self.text_system().prepare_raster_style(
@@ -5009,12 +5147,14 @@ impl Window {
 
         let element_opacity = self.element_opacity();
         let bounds = self.snap_bounds(bounds);
+        let raster_multiplier = self.text_raster_multiplier();
+        let raster_scale = SMOOTH_SVG_SCALE_FACTOR * raster_multiplier;
 
         let params = RenderSvgParams {
             path,
-            size: bounds.size.map(|pixels| {
-                DevicePixels::from((pixels.0 * SMOOTH_SVG_SCALE_FACTOR).ceil() as i32)
-            }),
+            size: bounds
+                .size
+                .map(|pixels| DevicePixels::from((pixels.0 * raster_scale).ceil() as i32)),
         };
 
         let Some(tile) =
@@ -5030,20 +5170,21 @@ impl Window {
             return Ok(());
         };
         let content_mask = self.snapped_content_mask();
+        let size = tile
+            .bounds
+            .size
+            .map(|value| ScaledPixels(value.0 as f32 / raster_scale));
         let svg_bounds = Bounds {
-            origin: bounds.center()
-                - Point::new(
-                    ScaledPixels(tile.bounds.size.width.0 as f32 / SMOOTH_SVG_SCALE_FACTOR / 2.),
-                    ScaledPixels(tile.bounds.size.height.0 as f32 / SMOOTH_SVG_SCALE_FACTOR / 2.),
-                ),
-            size: tile
-                .bounds
-                .size
-                .map(|value| ScaledPixels(value.0 as f32 / SMOOTH_SVG_SCALE_FACTOR)),
+            origin: bounds.center() - Point::new(size.width, size.height) / 2.0,
+            size,
         };
-        let final_bounds = svg_bounds
-            .map_origin(|value| ScaledPixels(round_half_toward_zero(value.0)))
-            .map_size(|size| size.ceil());
+        let final_bounds = if self.coordinate_space.transform == TransformationMatrix::unit() {
+            svg_bounds
+                .map_origin(|value| ScaledPixels(round_half_toward_zero(value.0)))
+                .map_size(|size| size.ceil())
+        } else {
+            svg_bounds
+        };
 
         self.next_frame.scene.insert_primitive(MonochromeSprite {
             order: 0,
@@ -5549,6 +5690,7 @@ impl Window {
             behavior,
             fragments: self.current_inline_fragments.clone(),
             tags: Vec::default(),
+            coordinate_space: self.coordinate_space.clone(),
         };
 
         self.next_frame.hitboxes.push_mut(hitbox)
@@ -5644,9 +5786,10 @@ impl Window {
 
         if focus_handle.is_focused(self) {
             let cx = self.to_async(cx);
-            self.next_frame
-                .input_handlers
-                .push(Some(PlatformInputHandler::new(cx, Box::new(input_handler))));
+            self.next_frame.input_handlers.push(Some(
+                PlatformInputHandler::new(cx, Box::new(input_handler))
+                    .in_coordinate_space(self.coordinate_space.clone()),
+            ));
         }
     }
 
@@ -5681,10 +5824,15 @@ impl Window {
     ) {
         self.invalidator.debug_assert_paint();
 
+        let space = self.coordinate_space.clone();
         self.next_frame.mouse_listeners.push(Some(Box::new(
             move |event: &dyn Any, phase: DispatchPhase, window: &mut Window, cx: &mut App| {
-                if let Some(event) = event.downcast_ref() {
-                    listener(event, phase, window, cx)
+                if let Some(event) = event.downcast_ref::<Event>() {
+                    if let Some(event) = event.in_coordinate_space(&space) {
+                        window.with_coordinate_space(space.clone(), |window| {
+                            listener(&event, phase, window, cx)
+                        });
+                    }
                 }
             },
         )));
@@ -5704,10 +5852,13 @@ impl Window {
     ) {
         self.invalidator.debug_assert_paint();
 
+        let space = self.coordinate_space.clone();
         self.next_frame.dispatch_tree.on_key_event(Rc::new(
             move |event: &dyn Any, phase, window: &mut Window, cx: &mut App| {
                 if let Some(event) = event.downcast_ref::<Event>() {
-                    listener(event, phase, window, cx)
+                    window.with_coordinate_space(space.clone(), |window| {
+                        listener(event, phase, window, cx)
+                    })
                 }
             },
         ));
@@ -5725,9 +5876,10 @@ impl Window {
     ) {
         self.invalidator.debug_assert_paint();
 
+        let space = self.coordinate_space.clone();
         self.next_frame.dispatch_tree.on_modifiers_changed(Rc::new(
             move |event: &ModifiersChangedEvent, window: &mut Window, cx: &mut App| {
-                listener(event, window, cx)
+                window.with_coordinate_space(space.clone(), |window| listener(event, window, cx))
             },
         ));
     }
@@ -6179,7 +6331,7 @@ impl Window {
     }
 
     fn dispatch_mouse_event(&mut self, event: &dyn Any, cx: &mut App) {
-        let hit_test = self.rendered_frame.hit_test(self.mouse_position());
+        let hit_test = self.rendered_frame.hit_test(self.window_mouse_position());
         if hit_test != self.mouse_hit_test {
             self.mouse_hit_test = hit_test;
             self.reset_cursor_style(cx);
@@ -7016,9 +7168,15 @@ impl Window {
     ) {
         self.invalidator.debug_assert_paint();
 
-        self.next_frame
-            .dispatch_tree
-            .on_action(action_type, Rc::new(listener));
+        let space = self.coordinate_space.clone();
+        self.next_frame.dispatch_tree.on_action(
+            action_type,
+            Rc::new(move |event, phase, window, cx| {
+                window.with_coordinate_space(space.clone(), |window| {
+                    listener(event, phase, window, cx)
+                });
+            }),
+        );
     }
 
     /// Register a capturing action listener on this node for the next frame if the condition is true.
@@ -7038,9 +7196,7 @@ impl Window {
         self.invalidator.debug_assert_paint();
 
         if condition {
-            self.next_frame
-                .dispatch_tree
-                .on_action(action_type, Rc::new(listener));
+            self.on_action(action_type, listener);
         }
     }
 
@@ -7203,13 +7359,20 @@ impl Window {
         &mut self,
         node_id: accesskit::NodeId,
         action: accesskit::Action,
-        listener: impl FnMut(Option<&accesskit::ActionData>, &mut Window, &mut App) + 'static,
+        mut listener: impl FnMut(Option<&accesskit::ActionData>, &mut Window, &mut App) + 'static,
     ) {
+        let space = self.coordinate_space.clone();
         self.a11y
             .action_listeners
             .entry(node_id)
             .or_default()
-            .push((action, Box::new(listener)));
+            .push((
+                action,
+                Box::new(move |data, window, cx| {
+                    window
+                        .with_coordinate_space(space.clone(), |window| listener(data, window, cx));
+                }),
+            ));
     }
 
     /// Perform an accessibility action on a node as assistive technology
@@ -7413,7 +7576,11 @@ impl Window {
                     .iter()
                     .find(|hitbox| hitbox.id == hitbox_id)
             {
-                self.paint_quad(crate::fill(hitbox.bounds, crate::rgba(0x61afef4d)));
+                let bounds = hitbox.bounds;
+                let space = hitbox.coordinate_space.clone();
+                self.with_coordinate_space(space, |window| {
+                    window.paint_quad(crate::fill(bounds, crate::rgba(0x61afef4d)));
+                });
             }
         }
     }
@@ -8062,6 +8229,7 @@ mod tests {
         let bounds = Bounds::new(Point::default(), size(px(100.), px(80.)));
         let background = Hitbox {
             id: HitboxId(1),
+            coordinate_space: Default::default(),
             bounds,
             content_mask: ContentMask {
                 bounds,
@@ -8073,6 +8241,7 @@ mod tests {
         };
         let mut inline = Hitbox {
             id: HitboxId(2),
+            coordinate_space: Default::default(),
             bounds,
             content_mask: ContentMask {
                 bounds: Bounds::new(Point::default(), size(px(80.), px(80.))),

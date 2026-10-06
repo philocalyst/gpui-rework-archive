@@ -2079,6 +2079,7 @@ impl From<TileId> for etagere::AllocId {
 
 #[expect(missing_docs)]
 pub struct PlatformInputHandler {
+    coordinate_space: crate::CoordinateSpace,
     cx: AsyncWindowContext,
     handler: Box<dyn InputHandler>,
 }
@@ -2093,24 +2094,41 @@ pub struct PlatformInputHandler {
 )]
 impl PlatformInputHandler {
     pub fn new(cx: AsyncWindowContext, handler: Box<dyn InputHandler>) -> Self {
-        Self { cx, handler }
+        Self {
+            cx,
+            handler,
+            coordinate_space: crate::CoordinateSpace::default(),
+        }
+    }
+
+    pub(crate) fn in_coordinate_space(mut self, space: crate::CoordinateSpace) -> Self {
+        self.coordinate_space = space;
+        self
+    }
+
+    fn with_handler<R>(
+        &mut self,
+        read: impl FnOnce(&mut dyn InputHandler, &mut Window, &mut App) -> R,
+    ) -> Option<R> {
+        let space = self.coordinate_space.clone();
+        let handler = self.handler.as_mut();
+        self.cx
+            .update(|window, cx| {
+                window.with_coordinate_space(space, |window| read(handler, window, cx))
+            })
+            .ok()
     }
 
     pub fn selected_text_range(&mut self, ignore_disabled_input: bool) -> Option<UTF16Selection> {
-        self.cx
-            .update(|window, cx| {
-                self.handler
-                    .selected_text_range(ignore_disabled_input, window, cx)
-            })
-            .ok()
-            .flatten()
+        self.with_handler(|handler, window, cx| {
+            handler.selected_text_range(ignore_disabled_input, window, cx)
+        })
+        .flatten()
     }
 
     #[cfg_attr(target_os = "windows", allow(dead_code))]
     pub fn marked_text_range(&mut self) -> Option<Range<usize>> {
-        self.cx
-            .update(|window, cx| self.handler.marked_text_range(window, cx))
-            .ok()
+        self.with_handler(|handler, window, cx| handler.marked_text_range(window, cx))
             .flatten()
     }
 
@@ -2123,22 +2141,16 @@ impl PlatformInputHandler {
         range_utf16: Range<usize>,
         adjusted: &mut Option<Range<usize>>,
     ) -> Option<String> {
-        self.cx
-            .update(|window, cx| {
-                self.handler
-                    .text_for_range(range_utf16, adjusted, window, cx)
-            })
-            .ok()
-            .flatten()
+        self.with_handler(|handler, window, cx| {
+            handler.text_for_range(range_utf16, adjusted, window, cx)
+        })
+        .flatten()
     }
 
     pub fn replace_text_in_range(&mut self, replacement_range: Option<Range<usize>>, text: &str) {
-        self.cx
-            .update(|window, cx| {
-                self.handler
-                    .replace_text_in_range(replacement_range, text, window, cx);
-            })
-            .ok();
+        self.with_handler(|handler, window, cx| {
+            handler.replace_text_in_range(replacement_range, text, window, cx);
+        });
     }
 
     pub fn replace_and_mark_text_in_range(
@@ -2147,37 +2159,30 @@ impl PlatformInputHandler {
         new_text: &str,
         new_selected_range: Option<Range<usize>>,
     ) {
-        self.cx
-            .update(|window, cx| {
-                self.handler.replace_and_mark_text_in_range(
-                    range_utf16,
-                    new_text,
-                    new_selected_range,
-                    window,
-                    cx,
-                )
-            })
-            .ok();
+        self.with_handler(|handler, window, cx| {
+            handler.replace_and_mark_text_in_range(
+                range_utf16,
+                new_text,
+                new_selected_range,
+                window,
+                cx,
+            )
+        });
     }
 
     #[cfg_attr(target_os = "windows", allow(dead_code))]
     pub fn unmark_text(&mut self) {
-        self.cx
-            .update(|window, cx| self.handler.unmark_text(window, cx))
-            .ok();
+        self.with_handler(|handler, window, cx| handler.unmark_text(window, cx));
     }
 
     pub fn paste(&mut self, item: ClipboardItem) {
-        self.cx
-            .update(|window, cx| self.handler.paste(item, window, cx))
-            .ok();
+        self.with_handler(|handler, window, cx| handler.paste(item, window, cx));
     }
 
     pub fn bounds_for_range(&mut self, range_utf16: Range<usize>) -> Option<Bounds<Pixels>> {
-        self.cx
-            .update(|window, cx| self.handler.bounds_for_range(range_utf16, window, cx))
-            .ok()
+        self.with_handler(|handler, window, cx| handler.bounds_for_range(range_utf16, window, cx))
             .flatten()
+            .map(|bounds| self.coordinate_space.bounds_to_window(bounds))
     }
 
     #[allow(dead_code)]
@@ -2186,7 +2191,9 @@ impl PlatformInputHandler {
     }
 
     pub fn dispatch_input(&mut self, input: &str, window: &mut Window, cx: &mut App) {
-        self.handler.replace_text_in_range(None, input, window, cx);
+        window.with_coordinate_space(self.coordinate_space.clone(), |window| {
+            self.handler.replace_text_in_range(None, input, window, cx);
+        });
     }
 
     pub fn compute_ime_candidate_bounds(
@@ -2225,64 +2232,66 @@ impl PlatformInputHandler {
     }
 
     pub fn selected_bounds(&mut self, window: &mut Window, cx: &mut App) -> Option<Bounds<Pixels>> {
-        let marked_range = self.handler.marked_text_range(window, cx);
-        let selection = self.handler.selected_text_range(true, window, cx)?;
-        Self::compute_ime_candidate_bounds(marked_range, &selection, |range| {
-            self.handler.bounds_for_range(range, window, cx)
-        })
+        window
+            .with_coordinate_space(self.coordinate_space.clone(), |window| {
+                let marked_range = self.handler.marked_text_range(window, cx);
+                let selection = self.handler.selected_text_range(true, window, cx)?;
+                Self::compute_ime_candidate_bounds(marked_range, &selection, |range| {
+                    self.handler.bounds_for_range(range, window, cx)
+                })
+            })
+            .map(|bounds| self.coordinate_space.bounds_to_window(bounds))
     }
 
     pub fn ime_candidate_bounds(&mut self) -> Option<Bounds<Pixels>> {
-        let marked_range = self.marked_text_range();
-        let selection = self.selected_text_range(true)?;
-        Self::compute_ime_candidate_bounds(marked_range, &selection, |range| {
-            self.bounds_for_range(range)
-        })
+        // Discover visual lines in the text's layout coordinates. A rotation
+        // changes window-space Y even within a single line.
+        self.cx
+            .clone()
+            .update(|window, cx| self.selected_bounds(window, cx))
+            .ok()
+            .flatten()
     }
 
     #[allow(unused)]
     pub fn character_index_for_point(&mut self, point: Point<Pixels>) -> Option<usize> {
-        self.cx
-            .update(|window, cx| self.handler.character_index_for_point(point, window, cx))
-            .ok()
-            .flatten()
+        let point = self.coordinate_space.from_window(point)?;
+        self.with_handler(|handler, window, cx| {
+            handler.character_index_for_point(point, window, cx)
+        })
+        .flatten()
     }
 
     /// See [`InputHandler::set_selected_text_range`].
     pub fn set_selected_text_range(&mut self, range_utf16: Range<usize>) {
-        self.cx
-            .update(|window, cx| {
-                self.handler
-                    .set_selected_text_range(range_utf16, window, cx)
-            })
-            .ok();
+        self.with_handler(|handler, window, cx| {
+            handler.set_selected_text_range(range_utf16, window, cx)
+        });
     }
 
     /// See [`InputHandler::element_bounds`].
     pub fn element_bounds(&mut self) -> Option<Bounds<Pixels>> {
-        self.cx
-            .update(|window, cx| self.handler.element_bounds(window, cx))
-            .ok()
+        self.with_handler(|handler, window, cx| handler.element_bounds(window, cx))
             .flatten()
+            .map(|bounds| self.coordinate_space.bounds_to_window(bounds))
     }
 
     /// See [`InputHandler::text_length_utf16`].
     pub fn text_length_utf16(&mut self) -> Option<usize> {
-        self.cx
-            .update(|window, cx| self.handler.text_length_utf16(window, cx))
-            .ok()
+        self.with_handler(|handler, window, cx| handler.text_length_utf16(window, cx))
             .flatten()
     }
 
     #[allow(dead_code)]
     pub fn accepts_text_input(&mut self, window: &mut Window, cx: &mut App) -> bool {
-        self.handler.accepts_text_input(window, cx)
+        window.with_coordinate_space(self.coordinate_space.clone(), |window| {
+            self.handler.accepts_text_input(window, cx)
+        })
     }
 
     #[allow(dead_code)]
     pub fn query_accepts_text_input(&mut self) -> bool {
-        self.cx
-            .update(|window, cx| self.handler.accepts_text_input(window, cx))
+        self.with_handler(|handler, window, cx| handler.accepts_text_input(window, cx))
             .unwrap_or(true)
     }
 
@@ -2292,13 +2301,11 @@ impl PlatformInputHandler {
     /// returns `false` regardless of the handler's preference, because the next printable key may
     /// complete a binding whose prefix already bypassed the IME.
     pub fn query_prefers_ime_for_printable_keys(&mut self) -> bool {
-        self.cx
-            .update(|window, cx| {
-                // The next printable key may complete a chord whose prefix bypassed the IME.
-                !window.has_pending_keystrokes()
-                    && self.handler.prefers_ime_for_printable_keys(window, cx)
-            })
-            .unwrap_or(false)
+        self.with_handler(|handler, window, cx| {
+            // The next printable key may complete a chord whose prefix bypassed the IME.
+            !window.has_pending_keystrokes() && handler.prefers_ime_for_printable_keys(window, cx)
+        })
+        .unwrap_or(false)
     }
 
     /// See [`InputHandler::text_input_configuration`].
@@ -2307,14 +2314,14 @@ impl PlatformInputHandler {
         window: &mut Window,
         cx: &mut App,
     ) -> TextInputConfiguration {
-        self.handler.text_input_configuration(window, cx)
+        window.with_coordinate_space(self.coordinate_space.clone(), |window| {
+            self.handler.text_input_configuration(window, cx)
+        })
     }
 
     /// See [`InputHandler::text_input_editable_range`].
     pub fn text_input_editable_range(&mut self) -> Option<Range<usize>> {
-        self.cx
-            .update(|window, cx| self.handler.text_input_editable_range(window, cx))
-            .ok()
+        self.with_handler(|handler, window, cx| handler.text_input_editable_range(window, cx))
             .flatten()
     }
 }
@@ -2408,7 +2415,8 @@ pub trait InputHandler: 'static {
         }
     }
 
-    /// Get the bounds of the given document range in screen coordinates
+    /// Get the bounds of the given document range in the element's layout coordinates.
+    /// GPUI maps these into window coordinates for the platform input system.
     /// Corresponds to [firstRect(forCharacterRange:actualRange:)](https://developer.apple.com/documentation/appkit/nstextinputclient/1438240-firstrect)
     ///
     /// This is used for positioning the IME candidate window

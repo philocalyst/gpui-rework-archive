@@ -327,6 +327,7 @@ impl A11y {
 pub struct A11ySubtreeBuilder<'a> {
     parent_id: NodeId,
     nodes: &'a mut A11yNodeBuilder,
+    transform: crate::TransformationMatrix,
     /// Provenance of the real element whose `a11y_synthetic_children` is
     /// running.
     #[cfg(debug_assertions)]
@@ -338,9 +339,15 @@ impl<'a> A11ySubtreeBuilder<'a> {
         Self {
             parent_id,
             nodes,
+            transform: crate::TransformationMatrix::unit(),
             #[cfg(debug_assertions)]
             creator: debug::NodeCreator::default(),
         }
+    }
+
+    pub(crate) fn with_transform(mut self, transform: crate::TransformationMatrix) -> Self {
+        self.transform = transform;
+        self
     }
 
     #[cfg(debug_assertions)]
@@ -366,7 +373,8 @@ impl<'a> A11ySubtreeBuilder<'a> {
     ///
     /// Returns `false` if a node with this id is already present in the tree,
     /// in which case the node is discarded.
-    pub fn push_child(&mut self, id: NodeId, node: accesskit::Node) -> bool {
+    pub fn push_child(&mut self, id: NodeId, mut node: accesskit::Node) -> bool {
+        transform_node_bounds(&mut node, self.transform);
         let pushed = self.nodes.push_leaf(id, node);
         #[cfg(debug_assertions)]
         if pushed {
@@ -388,6 +396,28 @@ impl<'a> A11ySubtreeBuilder<'a> {
         self.nodes
             .current_node_mut()
             .expect("A11ySubtreeBuilder exists only while its element's node is on the stack")
+    }
+}
+
+pub(crate) fn transform_node_bounds(
+    node: &mut accesskit::Node,
+    transform: crate::TransformationMatrix,
+) {
+    if transform == crate::TransformationMatrix::unit() {
+        return;
+    }
+    if let Some(rect) = node.bounds() {
+        let bounds = crate::Bounds::from_corners(
+            crate::point(crate::px(rect.x0 as f32), crate::px(rect.y0 as f32)),
+            crate::point(crate::px(rect.x1 as f32), crate::px(rect.y1 as f32)),
+        );
+        let visual = crate::CoordinateSpace::new(transform).bounds_to_window(bounds);
+        node.set_bounds(accesskit::Rect {
+            x0: visual.left().0 as f64,
+            y0: visual.top().0 as f64,
+            x1: visual.right().0 as f64,
+            y1: visual.bottom().0 as f64,
+        });
     }
 }
 

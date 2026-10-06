@@ -9,8 +9,8 @@ use gpui_render::{
     InstanceRange,
     artifacts::{Dx11DrawConstants, Dx11DrawConstantsBinding},
     blur::{
-        BlurAxis, BlurKernel, BlurUniforms, FilterCompositeClip,
-        GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS, downsampled_dimension,
+        BlurAxis, BlurKernel, BlurUniforms, FilterCompositeClip, FilterCompositeParameters,
+        downsampled_dimension,
     },
     path_types::{PathRasterizationVertex, PathSprite},
     shaders::{
@@ -47,8 +47,8 @@ const RENDER_TARGET_FORMAT: DXGI_FORMAT = DXGI_FORMAT_B8G8R8A8_UNORM;
 // This configuration is used for MSAA rendering on paths only, and it's guaranteed to be supported by DirectX 11.
 const PATH_MULTISAMPLE_COUNT: u32 = 4;
 const MAX_INSTANCE_BUFFER_SIZE: usize = 256 * 1024 * 1024;
-// Group 0 occupies registers 0 and 1 in native shaders, so generated group-1 bindings start at 2.
-const GROUP_1_REGISTER_OFFSET: u32 = 2;
+// Group-0 binding 2 is the shared RenderSpace table, so group-1 native resources start at 3.
+const GROUP_1_REGISTER_OFFSET: u32 = shader_interface::NATIVE_GROUP_1_BINDING_OFFSET;
 const DATA_REGISTER: u32 = shader_interface::DATA_BUFFER_BINDING + GROUP_1_REGISTER_OFFSET;
 const PRIMARY_TEXTURE_REGISTER: u32 =
     shader_interface::PRIMARY_TEXTURE_BINDING + GROUP_1_REGISTER_OFFSET;
@@ -267,10 +267,30 @@ struct DirectXGlobalElements {
     font_buffer: Option<ID3D11Buffer>,
     /// Per-draw [`Dx11DrawConstants`]; rewritten before every instanced draw.
     draw_constants_buffer: ID3D11Buffer,
+    render_spaces_buffer: ID3D11Buffer,
+    render_spaces_view: Option<ID3D11ShaderResourceView>,
+    render_spaces_capacity: usize,
     sampler: Option<ID3D11SamplerState>,
 }
 
 impl DirectXGlobalElements {
+    fn upload_render_spaces(
+        &mut self,
+        device: &ID3D11Device,
+        context: &ID3D11DeviceContext,
+        spaces: &[gpui::RenderSpace],
+    ) -> Result<()> {
+        let bytes = shader_interface::slice_as_bytes(spaces);
+        let words = bytes.len().div_ceil(4).max(1);
+        if words > self.render_spaces_capacity / 4 {
+            let capacity = words.checked_next_power_of_two().unwrap_or(words);
+            self.render_spaces_buffer = create_buffer(device, 4, capacity)?;
+            self.render_spaces_view = create_buffer_view(device, &self.render_spaces_buffer)?;
+            self.render_spaces_capacity = capacity * 4;
+        }
+        update_buffer(context, &self.render_spaces_buffer, bytes)
+    }
+
     /// Global constant buffers at registers b0 (globals) and b1 (font rasterization).
     fn cbuffers(&self) -> [Option<ID3D11Buffer>; 2] {
         [self.globals_buffer.clone(), self.font_buffer.clone()]
@@ -550,6 +570,23 @@ impl DirectXRenderer {
         })?;
 
         self.upload_scene_buffers(scene)?;
+        if let Some(view) = self.globals.render_spaces_view.as_ref() {
+            let ctx = &self
+                .devices
+                .as_ref()
+                .context("devices missing")?
+                .device_context;
+            unsafe {
+                ctx.VSSetShaderResources(
+                    shader_interface::RENDER_SPACES_BINDING,
+                    Some(slice::from_ref(view)),
+                );
+                ctx.PSSetShaderResources(
+                    shader_interface::RENDER_SPACES_BINDING,
+                    Some(slice::from_ref(view)),
+                );
+            }
+        }
 
         // Only route through the offscreen scene texture when the scene contains blur filters;
         // otherwise render straight to the swapchain exactly as before.
@@ -687,13 +724,18 @@ impl DirectXRenderer {
                             self.dx_blur_and_composite(
                                 &current_srv,
                                 &current_rtv,
-                                filter.bounds,
-                                filter.content_mask.bounds,
-                                filter.corner_radii,
-                                filter.corner_smoothing,
-                                filter.max_blur_radius(),
-                                filter.opacity,
-                                true,
+                                FilterCompositeParameters {
+                                    bounds: filter.visual_bounds(),
+                                    shape_bounds: filter.bounds,
+                                    space_mask: filter.content_mask,
+                                    content_mask: filter.visual_clip_bounds(),
+                                    corner_radii: filter.corner_radii,
+                                    corner_smoothing: filter.corner_smoothing,
+                                    blur_radius: filter.max_blur_radius(),
+                                    blur_axes: filter.blur_axes(),
+                                    opacity: filter.opacity,
+                                    clip: FilterCompositeClip::RoundedBounds,
+                                },
                             )?;
                         }
                         Ok::<(), anyhow::Error>(())
@@ -732,13 +774,18 @@ impl DirectXRenderer {
                     let result = self.dx_blur_and_composite(
                         &current_srv,
                         &parent_rtv,
-                        boundary.bounds,
-                        boundary.content_mask.bounds,
-                        boundary.corner_radii,
-                        boundary.corner_smoothing,
-                        boundary.max_blur_radius(),
-                        boundary.opacity,
-                        false,
+                        FilterCompositeParameters {
+                            bounds: boundary.visual_bounds(),
+                            shape_bounds: boundary.bounds,
+                            space_mask: boundary.content_mask,
+                            content_mask: boundary.visual_clip_bounds(),
+                            corner_radii: boundary.corner_radii,
+                            corner_smoothing: boundary.corner_smoothing,
+                            blur_radius: boundary.max_blur_radius(),
+                            blur_axes: boundary.blur_axes(),
+                            opacity: boundary.opacity,
+                            clip: FilterCompositeClip::ContentShape,
+                        },
                     );
                     current_rtv = parent_rtv;
                     current_srv = parent_srv;
@@ -906,6 +953,11 @@ impl DirectXRenderer {
 
     fn upload_scene_buffers(&mut self, scene: &Scene) -> Result<()> {
         let devices = self.devices.as_ref().context("devices missing")?;
+        self.globals.upload_render_spaces(
+            &devices.device,
+            &devices.device_context,
+            scene.render_spaces(),
+        )?;
 
         if !scene.shadows.is_empty() {
             self.pipelines.shadow_pipeline.update_buffer(
@@ -1299,19 +1351,11 @@ impl DirectXRenderer {
     /// Blur `source_srv` (full-resolution) using the half-res ping/pong textures and composite the
     /// result into `target_rtv`, clipped to `bounds`/`corner_radii`/`content_mask` and modulated
     /// by `opacity`. Shared by the backdrop and content-filter paths.
-    #[allow(clippy::too_many_arguments)]
     fn dx_blur_and_composite(
         &self,
         source_srv: &Option<ID3D11ShaderResourceView>,
         target_rtv: &Option<ID3D11RenderTargetView>,
-        bounds: Bounds<ScaledPixels>,
-        content_mask: Bounds<ScaledPixels>,
-        corner_radii: Corners<ScaledPixels>,
-        corner_smoothing: f32,
-        blur_radius: f32,
-        opacity: f32,
-        // Backdrop clips to the rounded rect; content (`filter`) bleeds past its bounds.
-        clip_rounded: bool,
+        parameters: FilterCompositeParameters,
     ) -> Result<()> {
         let full_width = self.width;
         let full_height = self.height;
@@ -1319,11 +1363,6 @@ impl DirectXRenderer {
             downsampled_dimension(full_width) as f32,
             downsampled_dimension(full_height) as f32,
         ];
-        let clip = if clip_rounded {
-            FilterCompositeClip::RoundedBounds
-        } else {
-            FilterCompositeClip::ContentShape
-        };
         let half_vp = D3D11_VIEWPORT {
             TopLeftX: 0.0,
             TopLeftY: 0.0,
@@ -1346,7 +1385,7 @@ impl DirectXRenderer {
                 blur.pong_srv.clone(),
             )
         };
-        let Some(kernel) = BlurKernel::for_radius(blur_radius) else {
+        let Some(kernel) = BlurKernel::for_radius(parameters.blur_radius) else {
             return Ok(());
         };
 
@@ -1369,7 +1408,12 @@ impl DirectXRenderer {
             &self.pipelines.blur_blend_replace,
             &pong_rtv,
             &ping_srv,
-            BlurUniforms::gaussian(BlurAxis::Horizontal, blur_size, kernel),
+            BlurUniforms::gaussian_along(
+                BlurAxis::Horizontal,
+                blur_size,
+                kernel,
+                parameters.blur_axes,
+            ),
             &half_vp,
             D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
             3,
@@ -1381,7 +1425,12 @@ impl DirectXRenderer {
             &self.pipelines.blur_blend_replace,
             &ping_rtv,
             &pong_srv,
-            BlurUniforms::gaussian(BlurAxis::Vertical, blur_size, kernel),
+            BlurUniforms::gaussian_along(
+                BlurAxis::Vertical,
+                blur_size,
+                kernel,
+                parameters.blur_axes,
+            ),
             &half_vp,
             D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
             3,
@@ -1389,23 +1438,18 @@ impl DirectXRenderer {
         )?;
 
         // Content blur bleeds ~3·radius past the box; composite over a dilated rect.
-        let composite_bounds = if clip_rounded {
-            bounds
-        } else {
-            bounds.dilate(ScaledPixels(
-                GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS * blur_radius,
-            ))
-        };
+        let composite_bounds = parameters.composite_bounds();
         let composite_uniforms = BlurUniforms::composite(
             composite_bounds,
-            content_mask,
-            corner_radii,
-            corner_smoothing,
-            opacity,
-            clip,
+            parameters.content_mask,
+            parameters.corner_radii,
+            parameters.corner_smoothing,
+            parameters.opacity,
+            parameters.clip,
             blur_size,
             [full_width as f32, full_height as f32],
-        );
+        )
+        .in_space(parameters.shape_bounds, parameters.space_mask);
         let (composite_vertex, composite_fragment) = if composite_uniforms.corner_smoothing > 0.0 {
             (
                 &self.pipelines.smoothed_blur_composite_vertex,
@@ -1757,6 +1801,8 @@ impl DirectXGlobalElements {
             create_constant_buffer(device, std::mem::size_of::<FontRasterizationUniforms>())?;
         let draw_constants_buffer =
             create_constant_buffer(device, std::mem::size_of::<Dx11DrawConstants>())?;
+        let render_spaces_buffer = create_buffer(device, 4, 1)?;
+        let render_spaces_view = create_buffer_view(device, &render_spaces_buffer)?;
 
         let sampler = unsafe {
             let desc = D3D11_SAMPLER_DESC {
@@ -1780,6 +1826,9 @@ impl DirectXGlobalElements {
             globals_buffer: Some(globals_buffer),
             font_buffer: Some(font_buffer),
             draw_constants_buffer,
+            render_spaces_buffer,
+            render_spaces_view,
+            render_spaces_capacity: 4,
             sampler,
         })
     }

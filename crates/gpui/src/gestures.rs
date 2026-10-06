@@ -399,7 +399,14 @@ impl InputEvent for TouchDragEvent {
     }
 }
 impl GestureEvent for TouchDragEvent {}
-impl MouseEvent for TouchDragEvent {}
+impl MouseEvent for TouchDragEvent {
+    fn in_coordinate_space(&self, space: &crate::CoordinateSpace) -> Option<Self> {
+        let mut event = self.clone();
+        event.position = space.from_window(event.position)?;
+        event.start_position = space.from_window(event.start_position)?;
+        Some(event)
+    }
+}
 
 /// A phased long-press gesture recognized from a touch.
 #[derive(Clone, Debug)]
@@ -429,7 +436,14 @@ impl InputEvent for LongPressEvent {
     }
 }
 impl GestureEvent for LongPressEvent {}
-impl MouseEvent for LongPressEvent {}
+impl MouseEvent for LongPressEvent {
+    fn in_coordinate_space(&self, space: &crate::CoordinateSpace) -> Option<Self> {
+        let mut event = self.clone();
+        event.position = space.from_window(event.position)?;
+        event.start_position = space.from_window(event.start_position)?;
+        Some(event)
+    }
+}
 
 /// Platform gesture recognition services.
 ///

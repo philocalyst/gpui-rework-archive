@@ -70,6 +70,7 @@ impl PreparedTargets {
             FrameRequirements::for_scene(scene, transport)
         };
         let device = renderer.resources().device.clone();
+        let globals = renderer.globals;
         let resources = renderer.resources_mut();
         if !resources.instances.ensure_capacity(
             &device,
@@ -79,6 +80,7 @@ impl PreparedTargets {
         ) {
             return None;
         }
+        resources.refresh_space_bind_groups(&globals);
         let instances = {
             let resources = renderer.resources();
             resources.instances.begin_upload(
@@ -244,7 +246,10 @@ pub(super) struct FrameRequirements {
 impl FrameRequirements {
     pub(super) fn for_scene(scene: &Scene, transport: InstanceTransport) -> Self {
         let planned = scene.render_plan().requirements();
-        let mut storage_bytes = 0_u64;
+        // Global RenderSpace records live at byte zero in the shared arena; typed
+        // primitive batches follow them and keep their existing per-batch offsets.
+        let mut storage_bytes = (std::mem::size_of::<gpui::RenderSpace>() as u64)
+            .saturating_mul(scene.render_spaces().len() as u64);
         let mut instance_batches = 0_u64;
         let mut reserve = |element_size: usize, count: usize| {
             if count > 0 {
@@ -347,6 +352,13 @@ impl<'a> FrameEncoder<'a> {
         mut self,
         readback: Option<ReadbackCopy<'_>>,
     ) -> Result<wgpu::CommandBuffer, DrawError> {
+        if self
+            .instances
+            .write_spaces(self.scene.render_spaces())
+            .is_none()
+        {
+            return Err(DrawError::CapacityPlanningInvariant);
+        }
         let result = self.encode_commands();
         if result.is_ok() {
             if let Some(offscreen) = &self.offscreen {
@@ -474,11 +486,14 @@ impl<'a> FrameEncoder<'a> {
                         &filtered,
                         parent,
                         FilterCompositeParameters {
-                            bounds: boundary.bounds,
-                            content_mask: boundary.content_mask.bounds,
+                            bounds: boundary.visual_bounds(),
+                            shape_bounds: boundary.bounds,
+                            space_mask: boundary.content_mask,
+                            content_mask: boundary.visual_clip_bounds(),
                             corner_radii: boundary.corner_radii,
                             corner_smoothing: boundary.corner_smoothing,
                             blur_radius: boundary.max_blur_radius(),
+                            blur_axes: boundary.blur_axes(),
                             opacity: boundary.opacity,
                             clip: FilterCompositeClip::ContentShape,
                         },

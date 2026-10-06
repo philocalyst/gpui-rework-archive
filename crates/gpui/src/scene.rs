@@ -14,6 +14,7 @@ use std::{
     iter::Peekable,
     ops::{Add, Range, Sub},
     slice,
+    sync::Arc,
 };
 
 mod plan;
@@ -60,6 +61,11 @@ impl From<bool> for ShaderBool {
 #[derive(Default)]
 #[expect(missing_docs)]
 pub struct Scene {
+    render_spaces: Vec<crate::RenderSpace>,
+    space_ids: collections::FxHashMap<[u32; 22], u32>,
+    clip_space_ids: collections::FxHashMap<(usize, u32), u32>,
+    retained_clips: Vec<Arc<crate::coordinate_space::ClipRegion>>,
+    active_space: u32,
     pub(crate) paint_operations: Vec<PaintOperation>,
     primitive_bounds: BoundsTree<ScaledPixels>,
     layer_stack: Vec<DrawOrder>,
@@ -82,6 +88,11 @@ pub struct Scene {
 impl Scene {
     pub fn clear(&mut self) {
         self.paint_operations.clear();
+        self.render_spaces.clear();
+        self.space_ids.clear();
+        self.clip_space_ids.clear();
+        self.retained_clips.clear();
+        self.active_space = 0;
         self.primitive_bounds.clear();
         self.layer_stack.clear();
         self.paths.clear();
@@ -141,9 +152,26 @@ impl Scene {
         surface_opacity: Option<f32>,
     ) {
         self.is_finished = false;
-        let clipped_bounds = primitive
-            .bounds()
-            .intersect(&primitive.content_mask().bounds);
+        primitive.content_mask_mut().space = self.active_space;
+        // Most frames contain no transformed geometry. Keep their culling path
+        // local and avoid even loading the shared coordinate table.
+        let active_space = (self.active_space != 0)
+            .then(|| &self.render_spaces[self.active_space as usize]);
+        let collapsed = active_space.is_some_and(crate::RenderSpace::is_collapsed);
+        let transform =
+            active_space.map_or_else(TransformationMatrix::unit, |space| space.transform);
+        let (visual_bounds, mask_bounds, clipped_bounds) = if collapsed {
+            (Bounds::default(), Bounds::default(), Bounds::default())
+        } else {
+            let visual_bounds = primitive.visual_bounds(transform);
+            let mask_bounds = if self.active_space == 0 {
+                primitive.content_mask().bounds
+            } else {
+                transform.apply_bounds(primitive.content_mask().bounds.map(|v| Pixels(v.0))).scale(1.0)
+            };
+            let clipped_bounds = visual_bounds.intersect(&mask_bounds);
+            (visual_bounds, mask_bounds, clipped_bounds)
+        };
 
         // Content-filter boundaries must always be inserted as matched pairs — dropping one
         // (e.g. for an empty clipped region) would orphan its partner and corrupt the renderer's
@@ -163,7 +191,7 @@ impl Scene {
 
         let order = if is_filter_boundary {
             let order_bounds = if clipped_bounds.is_empty() {
-                *primitive.bounds()
+                visual_bounds
             } else {
                 clipped_bounds
             };
@@ -186,6 +214,7 @@ impl Scene {
             Primitive::Path(path) => {
                 path.order = order;
                 path.id = PathId(self.paths.len());
+                path.visual_bounds = Some(clipped_bounds);
                 self.paths.push(path.clone());
             }
             Primitive::Underline(underline) => {
@@ -211,10 +240,20 @@ impl Scene {
             }
             Primitive::BackdropFilter(filter) => {
                 filter.order = order;
+                filter.geometry = Some(PrimitiveGeometry::new(
+                    visual_bounds,
+                    mask_bounds,
+                    transform,
+                ));
                 self.backdrop_filters.push(filter.clone());
             }
             Primitive::FilterBoundary(boundary) => {
                 boundary.order = order;
+                boundary.geometry = Some(PrimitiveGeometry::new(
+                    visual_bounds,
+                    mask_bounds,
+                    transform,
+                ));
                 if !boundary.is_start {
                     // A closed content-filter group is a draw-order barrier: everything painted
                     // afterwards must sort above the group's end marker so it can't fall back
@@ -237,20 +276,180 @@ impl Scene {
         }
     }
 
+    /// Paints primitives in a composed affine space. Translation uses device pixels.
+    /// Local primitive geometry is preserved for the GPU; ordering uses visual bounds.
+    pub fn with_transform<R>(
+        &mut self,
+        transform: TransformationMatrix,
+        paint: impl FnOnce(&mut Self) -> R,
+    ) -> R {
+        if transform == TransformationMatrix::unit() {
+            return paint(self);
+        }
+        if self.render_spaces.is_empty() {
+            self.intern_space(crate::RenderSpace::default());
+        }
+        let previous = self.active_space;
+        let transform = self.render_spaces[previous as usize]
+            .transform
+            .compose(transform);
+        let inverse = transform.inverse();
+        self.active_space =
+            self.intern_space(crate::RenderSpace::mapping(transform, inverse, previous));
+        let result = paint(self);
+        self.active_space = previous;
+        result
+    }
+
+    /// Clips primitives to a rectangle in the active local space, retaining ancestor clips.
+    pub fn with_clip<R>(
+        &mut self,
+        mask: ContentMask<ScaledPixels>,
+        paint: impl FnOnce(&mut Self) -> R,
+    ) -> R {
+        if self.render_spaces.is_empty() {
+            self.intern_space(crate::RenderSpace::default());
+        }
+        let previous = self.active_space;
+        let current = self.render_spaces[previous as usize];
+        self.active_space = if current.is_collapsed() {
+            self.intern_space(crate::RenderSpace::collapsed(previous))
+        } else {
+            self.intern_space(crate::RenderSpace::clipping(
+                current.transform,
+                Some(current.inverse),
+                mask.bounds,
+                mask.fade_out,
+                previous,
+            ))
+        };
+        let result = paint(self);
+        self.active_space = previous;
+        result
+    }
+
+    /// Coordinate spaces referenced by the frame. Entry zero is the identity space.
+    pub fn render_spaces(&self) -> &[crate::RenderSpace] {
+        &self.render_spaces
+    }
+
+    pub(crate) fn enter_coordinate_space(
+        &mut self,
+        space: &crate::CoordinateSpace,
+        scale: f32,
+    ) -> u32 {
+        let previous = self.active_space;
+        self.set_coordinate_space(space, scale);
+        previous
+    }
+
+    pub(crate) fn restore_coordinate_space(&mut self, previous: u32) {
+        self.active_space = previous;
+    }
+
+    fn set_coordinate_space(&mut self, space: &crate::CoordinateSpace, scale: f32) {
+        if self.render_spaces.is_empty() {
+            self.intern_space(crate::RenderSpace::default());
+        }
+        if space.is_identity_scope() {
+            self.active_space = 0;
+            return;
+        }
+        let parent = self.intern_clip(space.clips.as_ref(), scale);
+        let (transform, inverse) = space.render_transform(scale);
+        self.active_space =
+            self.intern_space(crate::RenderSpace::mapping(transform, inverse, parent));
+    }
+
+    fn intern_space(&mut self, space: crate::RenderSpace) -> u32 {
+        let key = space.key();
+        if let Some(id) = self.space_ids.get(&key) {
+            return *id;
+        }
+        let id = u32::try_from(self.render_spaces.len()).expect("scene spaces fit u32");
+        self.render_spaces.push(space);
+        self.space_ids.insert(key, id);
+        id
+    }
+
+    fn intern_clip(
+        &mut self,
+        clip: Option<&Arc<crate::coordinate_space::ClipRegion>>,
+        scale: f32,
+    ) -> u32 {
+        let Some(clip) = clip else {
+            return 0;
+        };
+        let key = (Arc::as_ptr(clip) as usize, scale.to_bits());
+        if let Some(id) = self.clip_space_ids.get(&key) {
+            return *id;
+        }
+        let parent = self.intern_clip(clip.parent.as_ref(), scale);
+        let transform = clip.transform.scaled(scale);
+        let id = self.intern_space(crate::RenderSpace::clipping(
+            transform,
+            clip.render_inverse(scale),
+            clip.mask.bounds.scale(scale),
+            clip.mask.fade_out.scale(scale),
+            parent,
+        ));
+        self.clip_space_ids.insert(key, id);
+        self.retained_clips.push(clip.clone());
+        id
+    }
+
+    fn import_space(
+        &mut self,
+        id: u32,
+        previous: &Scene,
+        imported: &mut collections::FxHashMap<u32, u32>,
+    ) -> u32 {
+        if id == 0 {
+            return 0;
+        }
+        if let Some(imported) = imported.get(&id) {
+            return *imported;
+        }
+        let mut space = previous.render_spaces[id as usize];
+        space.parent = self.import_space(space.parent, previous, imported);
+        let new_id = self.intern_space(space);
+        imported.insert(id, new_id);
+        new_id
+    }
+
     pub fn replay(&mut self, range: Range<usize>, prev_scene: &Scene) {
+        let active_space = self.active_space;
+        if self.render_spaces.is_empty() {
+            self.intern_space(crate::RenderSpace::default());
+        }
+        let mut imported = collections::FxHashMap::default();
         for operation in &prev_scene.paint_operations[range] {
             match operation {
-                PaintOperation::Primitive(primitive) => self.insert_primitive(primitive.clone()),
+                PaintOperation::Primitive(primitive) => {
+                    self.active_space = self.import_space(
+                        primitive.content_mask().space,
+                        prev_scene,
+                        &mut imported,
+                    );
+                    self.insert_primitive(primitive.clone());
+                }
                 PaintOperation::Surface { surface, opacity } => {
+                    self.active_space =
+                        self.import_space(surface.content_mask.space, prev_scene, &mut imported);
                     self.insert_surface(surface.clone(), *opacity)
                 }
                 PaintOperation::StartLayer(bounds) => self.push_layer(*bounds),
                 PaintOperation::EndLayer => self.pop_layer(),
             }
         }
+        self.active_space = active_space;
     }
 
     pub fn finish(&mut self) {
+        self.active_space = 0;
+        if self.render_spaces.is_empty() {
+            self.intern_space(crate::RenderSpace::default());
+        }
         self.shadows.sort_by_key(|shadow| shadow.order);
         self.quads.sort_by_key(|quad| quad.order);
         self.paths.sort_by_key(|path| path.order);
@@ -430,6 +629,33 @@ impl Primitive {
             Primitive::Surface(surface) => &surface.bounds,
             Primitive::BackdropFilter(filter) => &filter.bounds,
             Primitive::FilterBoundary(boundary) => &boundary.bounds,
+        }
+    }
+
+    pub(crate) fn visual_bounds(&self, parent: TransformationMatrix) -> Bounds<ScaledPixels> {
+        let transform = match self {
+            Self::MonochromeSprite(sprite) => parent.compose(sprite.transformation),
+            Self::SubpixelSprite(sprite) => parent.compose(sprite.transformation),
+            _ => parent,
+        };
+        if transform == TransformationMatrix::unit() { return *self.bounds(); }
+        transform
+            .apply_bounds(self.bounds().map(|v| Pixels(v.0)))
+            .scale(1.0)
+    }
+
+    pub(crate) fn content_mask_mut(&mut self) -> &mut ContentMask<ScaledPixels> {
+        match self {
+            Self::Shadow(v) => &mut v.content_mask,
+            Self::Quad(v) => &mut v.content_mask,
+            Self::Path(v) => &mut v.content_mask,
+            Self::Underline(v) => &mut v.content_mask,
+            Self::MonochromeSprite(v) => &mut v.content_mask,
+            Self::SubpixelSprite(v) => &mut v.content_mask,
+            Self::PolychromeSprite(v) => &mut v.content_mask,
+            Self::Surface(v) => &mut v.content_mask,
+            Self::BackdropFilter(v) => &mut v.content_mask,
+            Self::FilterBoundary(v) => &mut v.content_mask,
         }
     }
 
@@ -847,6 +1073,74 @@ impl From<Underline> for Primitive {
     }
 }
 
+/// Conservative device-space geometry used to schedule framebuffer effects.
+/// The effect's own shape and mask remain in their original coordinate space.
+#[doc(hidden)]
+#[derive(Debug, Clone, Copy)]
+pub struct PrimitiveGeometry {
+    pub bounds: Bounds<ScaledPixels>,
+    pub clip_bounds: Bounds<ScaledPixels>,
+    pub scale: f32,
+    pub blur_axes: BlurAxes,
+}
+
+impl PrimitiveGeometry {
+    fn new(
+        bounds: Bounds<ScaledPixels>,
+        clip_bounds: Bounds<ScaledPixels>,
+        transform: TransformationMatrix,
+    ) -> Self {
+        let scale = transform.max_scale();
+        Self {
+            bounds,
+            clip_bounds,
+            scale,
+            blur_axes: BlurAxes::for_transform(transform, scale),
+        }
+    }
+}
+
+/// Local filter axes expressed in normalized device-space vectors.
+#[doc(hidden)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct BlurAxes {
+    /// Device-space direction of the local x axis, normalized by the maximum scale.
+    pub x: [f32; 2],
+    /// Device-space direction of the local y axis, normalized by the maximum scale.
+    pub y: [f32; 2],
+}
+
+impl BlurAxes {
+    /// Identity axes used for untransformed geometry and degenerate mappings.
+    pub const IDENTITY: Self = Self {
+        x: [1.0, 0.0],
+        y: [0.0, 1.0],
+    };
+
+    fn for_transform(transform: TransformationMatrix, scale: f32) -> Self {
+        if !scale.is_finite() || scale <= f32::EPSILON {
+            return Self::IDENTITY;
+        }
+        let [[a, b], [c, d]] = transform.rotation_scale;
+        let axes = Self {
+            x: [a / scale, c / scale],
+            y: [b / scale, d / scale],
+        };
+        if axes.x.into_iter().chain(axes.y).all(f32::is_finite) {
+            axes
+        } else {
+            Self::IDENTITY
+        }
+    }
+
+    /// Maximum axis-aligned support of the two separable kernel directions.
+    pub fn support_scale(self) -> f32 {
+        let x = self.x[0].abs() + self.y[0].abs();
+        let y = self.x[1].abs() + self.y[1].abs();
+        x.max(y)
+    }
+}
+
 #[derive(Debug, Copy, Clone)]
 #[repr(C)]
 #[expect(missing_docs)]
@@ -876,6 +1170,8 @@ impl From<Shadow> for Primitive {
 #[derive(Default, Debug, Clone)]
 #[expect(missing_docs)]
 pub struct BackdropFilter {
+    #[doc(hidden)]
+    pub geometry: Option<PrimitiveGeometry>,
     pub order: DrawOrder,
     pub bounds: Bounds<ScaledPixels>,
     pub content_mask: ContentMask<ScaledPixels>,
@@ -893,9 +1189,26 @@ pub struct BackdropFilter {
 }
 
 impl BackdropFilter {
+    /// Conservative bounds of the transformed effect in device pixels.
+    pub fn visual_bounds(&self) -> Bounds<ScaledPixels> {
+        self.geometry
+            .map_or(self.bounds, |geometry| geometry.bounds)
+    }
+    /// Conservative clip bounds in device pixels.
+    pub fn visual_clip_bounds(&self) -> Bounds<ScaledPixels> {
+        self.geometry
+            .map_or(self.content_mask.bounds, |geometry| geometry.clip_bounds)
+    }
+
     /// Largest gaussian blur radius in this filter chain, in device pixels.
     pub fn max_blur_radius(&self) -> f32 {
-        max_blur_radius(&self.filters)
+        max_blur_radius(&self.filters) * self.geometry.map_or(1.0, |geometry| geometry.scale)
+    }
+
+    /// Normalized device-space directions for the filter's local gaussian axes.
+    pub fn blur_axes(&self) -> BlurAxes {
+        self.geometry
+            .map_or(BlurAxes::IDENTITY, |geometry| geometry.blur_axes)
     }
 }
 
@@ -912,6 +1225,8 @@ impl From<BackdropFilter> for Primitive {
 #[derive(Debug, Clone)]
 #[expect(missing_docs)]
 pub struct FilterBoundary {
+    #[doc(hidden)]
+    pub geometry: Option<PrimitiveGeometry>,
     pub order: DrawOrder,
     pub bounds: Bounds<ScaledPixels>,
     pub content_mask: ContentMask<ScaledPixels>,
@@ -927,9 +1242,26 @@ pub struct FilterBoundary {
 }
 
 impl FilterBoundary {
+    /// Conservative bounds of the transformed effect in device pixels.
+    pub fn visual_bounds(&self) -> Bounds<ScaledPixels> {
+        self.geometry
+            .map_or(self.bounds, |geometry| geometry.bounds)
+    }
+    /// Conservative clip bounds in device pixels.
+    pub fn visual_clip_bounds(&self) -> Bounds<ScaledPixels> {
+        self.geometry
+            .map_or(self.content_mask.bounds, |geometry| geometry.clip_bounds)
+    }
+
     /// Largest gaussian blur radius in this filter chain, in device pixels.
     pub fn max_blur_radius(&self) -> f32 {
-        max_blur_radius(&self.filters)
+        max_blur_radius(&self.filters) * self.geometry.map_or(1.0, |geometry| geometry.scale)
+    }
+
+    /// Normalized device-space directions for the filter's local gaussian axes.
+    pub fn blur_axes(&self) -> BlurAxes {
+        self.geometry
+            .map_or(BlurAxes::IDENTITY, |geometry| geometry.blur_axes)
     }
 }
 
@@ -1153,6 +1485,7 @@ pub struct Path<P: Clone + Debug + Default + PartialEq> {
     start: Point<P>,
     current: Point<P>,
     contour_count: usize,
+    visual_bounds: Option<Bounds<P>>,
 }
 
 impl Path<Pixels> {
@@ -1171,6 +1504,7 @@ impl Path<Pixels> {
             content_mask: Default::default(),
             color: Default::default(),
             contour_count: 0,
+            visual_bounds: None,
         }
     }
 
@@ -1189,6 +1523,7 @@ impl Path<Pixels> {
             start: self.start.map(|start| start.scale(factor)),
             current: self.current.scale(factor),
             contour_count: self.contour_count,
+            visual_bounds: self.visual_bounds.map(|bounds| bounds.scale(factor)),
             color: self.color,
         }
     }
@@ -1275,7 +1610,9 @@ where
     #[allow(unused)]
     #[expect(missing_docs)]
     pub fn clipped_bounds(&self) -> Bounds<T> {
-        self.bounds.intersect(&self.content_mask.bounds)
+        self.visual_bounds
+            .clone()
+            .unwrap_or_else(|| self.bounds.intersect(&self.content_mask.bounds))
     }
 }
 
@@ -1469,6 +1806,7 @@ mod tests {
 
     fn boundary(is_start: bool) -> FilterBoundary {
         FilterBoundary {
+            geometry: None,
             order: 0,
             bounds: full_bounds(),
             content_mask: mask(),

@@ -84,6 +84,8 @@ struct NativeShaderModule {
 struct StorageArray {
     name: String,
     element_type: String,
+    group: u32,
+    binding: u32,
 }
 
 fn main() {
@@ -141,6 +143,12 @@ fn main() {
             source: &base.source,
             group: shaders::interface::GLOBAL_BIND_GROUP,
             dialect: ReflectionDialect::Modern,
+        },
+        BindingLayout {
+            constant: "DOWNLEVEL_GLOBAL_BINDINGS",
+            source: &downlevel.source,
+            group: shaders::interface::GLOBAL_BIND_GROUP,
+            dialect: ReflectionDialect::Downlevel,
         },
         BindingLayout {
             constant: "INSTANCE_BINDINGS",
@@ -267,8 +275,8 @@ fn downlevel_dialect(name: &str, source: &str) -> String {
         let trimmed = line.trim();
         if let Some(array) = parse_storage_array_decl(trimmed) {
             transformed.push_str(&format!(
-                "@group(1) @binding(0) var {}_DATA: texture_2d<u32>;\n",
-                array.name
+                "@group({}) @binding({}) var {}_DATA: texture_2d<u32>;\n",
+                array.group, array.binding, array.name,
             ));
             arrays.push(array);
         } else {
@@ -293,7 +301,9 @@ fn downlevel_dialect(name: &str, source: &str) -> String {
 }
 
 fn parse_storage_array_decl(line: &str) -> Option<StorageArray> {
-    let rest = line.strip_prefix("@group(1) @binding(0) var<storage, read> ")?;
+    let rest = line.strip_prefix("@group(")?;
+    let (group, rest) = rest.split_once(") @binding(")?;
+    let (binding, rest) = rest.split_once(") var<storage, read> ")?;
     let (name, rest) = rest.split_once(": array<")?;
     let type_name = rest
         .strip_suffix(';')?
@@ -307,6 +317,8 @@ fn parse_storage_array_decl(line: &str) -> Option<StorageArray> {
     Some(StorageArray {
         name: name.trim().to_string(),
         element_type: type_name,
+        group: group.parse().ok()?,
+        binding: binding.parse().ok()?,
     })
 }
 
@@ -348,17 +360,19 @@ fn emit_downlevel_runtime(name: &str, base_source: &str, arrays: &[StorageArray]
         "const DATA_TEXTURE_WIDTH: u32 = {DATA_TEXTURE_WIDTH}u;"
     )
     .unwrap();
-    writeln!(
-        runtime,
-        "struct DataRange {{
+    if arrays.iter().any(|array| array.group == 1) {
+        writeln!(
+            runtime,
+            "struct DataRange {{
     base_texel: u32,
     element_count: u32,
     padding0: u32,
     padding1: u32,
 }}
 @group(1) @binding({DOWNLEVEL_RANGE_BINDING}) var<uniform> DATA_RANGE: DataRange;"
-    )
-    .unwrap();
+        )
+        .unwrap();
+    }
     writeln!(
         runtime,
         "fn dl_scene_word(t: texture_2d<u32>, base: u32, w: u32) -> u32 {{
@@ -383,15 +397,27 @@ fn emit_downlevel_runtime(name: &str, base_source: &str, arrays: &[StorageArray]
         let handle = find_type(&module, &array.element_type, name);
         emit_type_decoder(&module, &layouter, handle, &mut runtime, &mut emitted);
         let words = words_per_element(&layouter, handle);
-        writeln!(
-            runtime,
-            "fn dl_load_{array_name}(i: u32) -> {type_name} {{
+        if array.group == 0 {
+            writeln!(
+                runtime,
+                "fn dl_load_{array_name}(i: u32) -> {type_name} {{
+    return dl_load_{type_name}_impl({array_name}_DATA, i * {words}u);
+}}",
+                array_name = array.name,
+                type_name = array.element_type,
+            )
+            .unwrap();
+        } else {
+            writeln!(
+                runtime,
+                "fn dl_load_{array_name}(i: u32) -> {type_name} {{
     return dl_load_{type_name}_impl({array_name}_DATA, DATA_RANGE.base_texel * 4u + i * {words}u);
 }}",
-            array_name = array.name,
-            type_name = array.element_type,
-        )
-        .unwrap();
+                array_name = array.name,
+                type_name = array.element_type,
+            )
+            .unwrap();
+        }
     }
     runtime
 }
@@ -1231,7 +1257,12 @@ fn write_hlsl(
                 binding.clone(),
                 naga_old::back::hlsl::BindTarget {
                     space: 0,
-                    register: binding.binding + if binding.group == 0 { 0 } else { 2 },
+                    register: binding.binding
+                        + if binding.group == 0 {
+                            0
+                        } else {
+                            shaders::interface::NATIVE_GROUP_1_BINDING_OFFSET
+                        },
                     ..Default::default()
                 },
             );
@@ -1307,7 +1338,14 @@ fn write_msl(module: &naga::Module, info: &naga::valid::ModuleInfo, label: &str)
         let target = match variable.space {
             naga::AddressSpace::Uniform | naga::AddressSpace::Storage { .. } => {
                 naga::back::msl::BindTarget {
-                    buffer: Some((binding.binding + if binding.group == 0 { 0 } else { 2 }) as u8),
+                    buffer: Some(
+                        (binding.binding
+                            + if binding.group == 0 {
+                                0
+                            } else {
+                                shaders::interface::NATIVE_GROUP_1_BINDING_OFFSET
+                            }) as u8,
+                    ),
                     ..Default::default()
                 }
             }
@@ -1328,7 +1366,7 @@ fn write_msl(module: &naga::Module, info: &naga::valid::ModuleInfo, label: &str)
     }
     let entry_resources = naga::back::msl::EntryPointResources {
         resources,
-        sizes_buffer: Some(3),
+        sizes_buffer: Some((shaders::interface::NATIVE_GROUP_1_BINDING_OFFSET + 1) as u8),
         ..Default::default()
     };
     let per_entry_point_map = module

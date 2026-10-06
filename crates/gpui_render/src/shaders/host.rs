@@ -31,6 +31,8 @@ impl From<gpui::ContentMask<gpui::ScaledPixels>> for common::ContentMask {
         Self {
             bounds: mask.bounds.into(),
             fade_out: mask.fade_out.into(),
+            space: mask.space,
+            padding: 0,
         }
     }
 }

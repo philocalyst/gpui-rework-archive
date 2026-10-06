@@ -392,6 +392,9 @@ pub struct Style {
     /// The mouse cursor style shown when the mouse pointer is over an element.
     pub mouse_cursor: Option<CursorStyle>,
 
+    /// Affine transform of this element and its descendants, applied after layout.
+    pub transform: Option<crate::ElementTransform>,
+
     /// The opacity of this element
     pub opacity: Option<f32>,
 
@@ -947,7 +950,12 @@ impl Style {
                     fade_out.bottom = Pixels::ZERO;
                 }
 
-                Some(ContentMask { bounds, fade_out })
+                Some(ContentMask {
+                    bounds,
+                    fade_out,
+                    space: 0,
+                    padding: 0,
+                })
             }
         }
     }
@@ -1127,6 +1135,7 @@ impl Style {
 impl Default for Style {
     fn default() -> Self {
         Style {
+            transform: None,
             display: Display::Block,
             visibility: Visibility::Visible,
             direction: LayoutDirection::Inherit,

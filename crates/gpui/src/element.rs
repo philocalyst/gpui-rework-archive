@@ -315,6 +315,7 @@ enum ElementDrawPhase<RequestLayoutState, PrepaintState> {
         request_layout: RequestLayoutState,
     },
     Prepaint {
+        coordinate_space: crate::CoordinateSpace,
         node_id: DispatchNodeId,
         global_id: Option<GlobalElementId>,
         inspector_id: Option<InspectorElementId>,
@@ -401,6 +402,15 @@ impl<E: Element> Drawable<E> {
     }
 
     pub(crate) fn prepaint(&mut self, window: &mut Window, cx: &mut App) {
+        let layout_id = match &self.phase {
+            ElementDrawPhase::RequestLayout { layout_id, .. }
+            | ElementDrawPhase::LayoutComputed { layout_id, .. } => *layout_id,
+            _ => panic!("must call request_layout before prepaint"),
+        };
+        window.with_layout_transform(layout_id, |window| self.prepaint_in_space(window, cx));
+    }
+
+    fn prepaint_in_space(&mut self, window: &mut Window, cx: &mut App) {
         match mem::take(&mut self.phase) {
             ElementDrawPhase::RequestLayout {
                 layout_id,
@@ -421,6 +431,7 @@ impl<E: Element> Drawable<E> {
                 }
 
                 let bounds = window.layout_bounds(layout_id);
+                let visual_bounds = window.coordinate_space().bounds_to_window(bounds);
                 let mut pushed_a11y_node = false;
                 if window.a11y.is_active() {
                     if let Some(global_id) = global_id.as_ref() {
@@ -438,10 +449,14 @@ impl<E: Element> Drawable<E> {
                                 y1: ((bounds.origin.y.0 + bounds.size.height.0) * scale) as f64,
                             });
                             self.element.write_a11y_info(&mut node);
+                            crate::window::a11y::transform_node_bounds(
+                                &mut node,
+                                window.coordinate_space().transform.scaled(scale),
+                            );
                             if hidden {
                                 node.set_hidden();
                             }
-                            window.a11y.node_bounds.insert(node_id, bounds);
+                            window.a11y.node_bounds.insert(node_id, visual_bounds);
                             pushed_a11y_node = window.a11y.nodes.push(node_id, node);
                             #[cfg(debug_assertions)]
                             if pushed_a11y_node {
@@ -523,10 +538,15 @@ impl<E: Element> Drawable<E> {
                             element_id: global_id.0.last().map(|id| format!("{id:?}")),
                             source_location: self.element.source_location(),
                         };
+                        let transform = window
+                            .coordinate_space()
+                            .transform
+                            .scaled(window.scale_factor());
                         let mut builder = A11ySubtreeBuilder::new(
                             global_id.accesskit_node_id(),
                             &mut window.a11y.nodes,
-                        );
+                        )
+                        .with_transform(transform);
                         #[cfg(debug_assertions)]
                         {
                             builder = builder.with_creator(creator);
@@ -542,6 +562,7 @@ impl<E: Element> Drawable<E> {
                 }
 
                 self.phase = ElementDrawPhase::Prepaint {
+                    coordinate_space: window.coordinate_space().clone(),
                     node_id,
                     global_id,
                     inspector_id,
@@ -556,6 +577,20 @@ impl<E: Element> Drawable<E> {
     }
 
     pub(crate) fn paint(
+        &mut self,
+        window: &mut Window,
+        cx: &mut App,
+    ) -> (E::RequestLayoutState, E::PrepaintState) {
+        let space = match &self.phase {
+            ElementDrawPhase::Prepaint {
+                coordinate_space, ..
+            } => coordinate_space.clone(),
+            _ => panic!("must call prepaint before paint"),
+        };
+        window.with_coordinate_space(space, |window| self.paint_in_space(window, cx))
+    }
+
+    fn paint_in_space(
         &mut self,
         window: &mut Window,
         cx: &mut App,

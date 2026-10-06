@@ -360,6 +360,7 @@ struct ViewDirectionState {
 
 #[derive(PartialEq)]
 struct ViewElementCacheKey {
+    coordinate_space: crate::CoordinateSpace,
     bounds: Bounds<Pixels>,
     content_mask: ContentMask<Pixels>,
     text_style: TextStyle,
@@ -485,6 +486,7 @@ impl<V: View> Element for ViewElement<V> {
                     global_id.unwrap(),
                     |element_state, window| {
                         let cache_key = ViewElementCacheKey {
+                            coordinate_space: window.coordinate_space().clone(),
                             bounds,
                             content_mask: window.content_mask(),
                             text_style: window.text_style(),

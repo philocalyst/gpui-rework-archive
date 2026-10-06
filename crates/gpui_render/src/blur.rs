@@ -5,7 +5,7 @@ pub use crate::shaders::{
         Corners as ShaderCorners, DownsampleMode,
     },
 };
-use gpui::{Bounds, Corners, ScaledPixels};
+use gpui::{BlurAxes, Bounds, Corners, ScaledPixels};
 use wgsl_rs::std::vec2f;
 
 pub const DOWNSAMPLE_FACTOR: u32 = 2;
@@ -32,13 +32,33 @@ pub enum FilterCompositeClip {
 
 #[derive(Clone, Copy)]
 pub struct FilterCompositeParameters {
+    pub shape_bounds: Bounds<ScaledPixels>,
+    pub space_mask: gpui::ContentMask<ScaledPixels>,
     pub bounds: Bounds<ScaledPixels>,
     pub content_mask: Bounds<ScaledPixels>,
     pub corner_radii: Corners<ScaledPixels>,
     pub corner_smoothing: f32,
     pub blur_radius: f32,
+    pub blur_axes: BlurAxes,
     pub opacity: f32,
     pub clip: FilterCompositeClip,
+}
+
+impl FilterCompositeParameters {
+    /// Device-space support radius of both separable passes, rounded to an AABB.
+    pub fn scissor_dilation(self) -> f32 {
+        GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS * self.blur_radius * self.blur_axes.support_scale()
+    }
+
+    /// Bounds that can contain every pixel produced by the composite.
+    pub fn composite_bounds(self) -> Bounds<ScaledPixels> {
+        match self.clip {
+            FilterCompositeClip::RoundedBounds => self.bounds,
+            FilterCompositeClip::ContentShape => {
+                self.bounds.dilate(ScaledPixels(self.scissor_dilation()))
+            }
+        }
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -66,6 +86,16 @@ impl BlurKernel {
 }
 
 impl BlurUniforms {
+    pub fn in_space(
+        mut self,
+        shape_bounds: Bounds<ScaledPixels>,
+        mask: gpui::ContentMask<ScaledPixels>,
+    ) -> Self {
+        self.shape_bounds = shape_bounds.into();
+        self.space_mask = mask.into();
+        self
+    }
+
     pub fn copy(size: [f32; 2]) -> Self {
         with_texture_sizes(empty_uniforms(DownsampleMode::Copy), size, size)
     }
@@ -79,10 +109,20 @@ impl BlurUniforms {
     }
 
     pub fn gaussian(axis: BlurAxis, texture_size: [f32; 2], kernel: BlurKernel) -> Self {
-        let direction = match axis {
-            BlurAxis::Horizontal => vec2f(1.0 / texture_size[0], 0.0),
-            BlurAxis::Vertical => vec2f(0.0, 1.0 / texture_size[1]),
+        Self::gaussian_along(axis, texture_size, kernel, BlurAxes::IDENTITY)
+    }
+
+    pub fn gaussian_along(
+        axis: BlurAxis,
+        texture_size: [f32; 2],
+        kernel: BlurKernel,
+        axes: BlurAxes,
+    ) -> Self {
+        let axis = match axis {
+            BlurAxis::Horizontal => axes.x,
+            BlurAxis::Vertical => axes.y,
         };
+        let direction = vec2f(axis[0] / texture_size[0], axis[1] / texture_size[1]);
         Self {
             direction,
             standard_deviation: kernel.standard_deviation,
@@ -108,6 +148,12 @@ impl BlurUniforms {
     ) -> Self {
         Self {
             bounds: bounds.into(),
+            shape_bounds: bounds.into(),
+            space_mask: gpui::ContentMask {
+                bounds: content_mask,
+                ..Default::default()
+            }
+            .into(),
             content_mask: content_mask.into(),
             corner_radii: corner_radii.into(),
             corner_smoothing,
@@ -209,6 +255,8 @@ fn empty_uniforms(downsample_mode: DownsampleMode) -> BlurUniforms {
     };
     BlurUniforms {
         bounds,
+        shape_bounds: bounds,
+        space_mask: gpui::ContentMask::<ScaledPixels>::default().into(),
         content_mask: bounds,
         corner_radii: ShaderCorners {
             top_left: 0.0,

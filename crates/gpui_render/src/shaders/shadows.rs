@@ -175,12 +175,16 @@ pub mod shadow {
         instance_id: u32,
         shadow: Shadow,
     ) -> ShadowVertexData {
-        let vertex = rectangle_vertex(vertex_id, shadow_geometry(shadow));
+        let vertex =
+            space_rectangle_vertex(vertex_id, shadow_geometry(shadow), shadow.content_mask);
         ShadowVertexData {
             position: vertex.clip_position,
             paint: prepare_paint(shadow_paint(shadow)),
             shadow_id: instance_id,
-            clip_distances: clip_distances(vertex.viewport_position, shadow.content_mask.bounds),
+            clip_distances: clip_distances(
+                local_position(shadow.content_mask, vertex.viewport_position),
+                shadow.content_mask.bounds,
+            ),
         }
     }
 
@@ -229,13 +233,15 @@ pub mod shadow {
         let shadow = get!(SHADOWS)[input.shadow_id as usize];
         let color = paint_color(
             shadow_paint(shadow),
-            input.position.xy(),
+            local_position(shadow.content_mask, input.position.xy()),
             PreparedPaint::new(input.paint_solid, input.paint_color0, input.paint_color1),
         );
         blend_color(
             color,
-            shadow_coverage(shadow, input.position.xy())
-                * ContentMask::alpha(shadow.content_mask, input.position.xy()),
+            shadow_coverage(
+                shadow,
+                local_position(shadow.content_mask, input.position.xy()),
+            ) * ContentMask::alpha(shadow.content_mask, input.position.xy()),
         )
     }
 
@@ -317,7 +323,7 @@ pub mod shadow {
         let shadow = get!(SHADOWS)[input.shadow_id as usize];
         let coverage = smoothed_shadow_coverage(
             shadow,
-            input.position.xy(),
+            local_position(shadow.content_mask, input.position.xy()),
             PreparedCorners {
                 horizontal_reaches: input.horizontal_corner_reaches,
                 vertical_reaches: input.vertical_corner_reaches,
@@ -333,7 +339,7 @@ pub mod shadow {
         );
         let color = paint_color(
             shadow_paint(shadow),
-            input.position.xy(),
+            local_position(shadow.content_mask, input.position.xy()),
             PreparedPaint::new(input.paint_solid, input.paint_color0, input.paint_color1),
         );
         blend_color(

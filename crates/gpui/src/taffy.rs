@@ -64,6 +64,7 @@ pub struct TaffyLayoutEngine {
     absolute_outer_origins: FxHashMap<LayoutId, Point<f32>>,
     computed_available_spaces: FxHashMap<LayoutId, Size<AvailableSpace>>,
     vertical_alignments: FxHashMap<LayoutId, VerticalAlign>,
+    element_transforms: FxHashMap<LayoutId, crate::ElementTransform>,
     pub(crate) inline_content: FxHashMap<LayoutId, Arc<InlineContent>>,
     pub(crate) inline_fragments: FxHashMap<LayoutId, Arc<[Bounds<Pixels>]>>,
     display_and_position: FxHashMap<LayoutId, (Display, Position)>,
@@ -83,6 +84,7 @@ impl TaffyLayoutEngine {
             absolute_outer_origins: FxHashMap::default(),
             computed_available_spaces: FxHashMap::default(),
             vertical_alignments: FxHashMap::default(),
+            element_transforms: FxHashMap::default(),
             inline_content: FxHashMap::default(),
             inline_fragments: FxHashMap::default(),
             display_and_position: FxHashMap::default(),
@@ -97,6 +99,7 @@ impl TaffyLayoutEngine {
         self.absolute_outer_origins.clear();
         self.computed_available_spaces.clear();
         self.vertical_alignments.clear();
+        self.element_transforms.clear();
         self.inline_content.clear();
         self.inline_fragments.clear();
         self.display_and_position.clear();
@@ -164,7 +167,14 @@ impl TaffyLayoutEngine {
         node_id
     }
 
+    pub(crate) fn element_transform(&self, id: LayoutId) -> Option<crate::ElementTransform> {
+        self.element_transforms.get(&id).copied()
+    }
+
     fn record_style(&mut self, node_id: LayoutId, style: &Style) {
+        if let Some(transform) = style.transform {
+            self.element_transforms.insert(node_id, transform);
+        }
         if style.vertical_align != VerticalAlign::Baseline {
             self.vertical_alignments
                 .insert(node_id, style.vertical_align);

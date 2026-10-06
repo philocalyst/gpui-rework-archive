@@ -54,6 +54,7 @@ pub(super) struct WgpuResources {
     pub(super) globals_bind_group: wgpu::BindGroup,
     pub(super) path_globals_bind_group: wgpu::BindGroup,
     pub(super) instances: InstanceBufferArena,
+    global_space_generation: u64,
     pub(super) path_intermediate_texture: Option<wgpu::Texture>,
     pub(super) path_intermediate_view: Option<wgpu::TextureView>,
     pub(super) path_msaa_texture: Option<wgpu::Texture>,
@@ -79,6 +80,7 @@ pub(super) struct ResourceMetadata {
     pub(super) last_error: Arc<Mutex<Option<String>>>,
 }
 
+#[derive(Clone, Copy)]
 pub(super) struct GlobalBufferLayout {
     pub(super) path_offset: u64,
     pub(super) font_offset: u64,
@@ -130,6 +132,7 @@ impl WgpuResources {
             INITIAL_FILTER_UNIFORM_CAPACITY,
             uniform_alignment,
         );
+        let instances = InstanceBufferArena::new(&device, &bind_group_layouts, renderer_tier);
         let globals_size = std::mem::size_of::<GlobalUniforms>() as u64;
         let gamma_size = std::mem::size_of::<FontRasterizationUniforms>() as u64;
         let path_globals_offset = globals_size.next_multiple_of(uniform_alignment);
@@ -154,8 +157,10 @@ impl WgpuResources {
                     offset: gamma_offset,
                     size: NonZeroU64::new(gamma_size),
                 },
+                instances.space_binding_source(),
             )
         };
+        let global_space_generation = instances.generation();
         let globals_bind_group = create_globals("globals_bind_group", 0);
         let path_globals_bind_group =
             create_globals("path_globals_bind_group", path_globals_offset);
@@ -171,7 +176,8 @@ impl WgpuResources {
             last_error,
         };
         let resources = Self {
-            instances: InstanceBufferArena::new(&device, &bind_group_layouts, renderer_tier),
+            instances,
+            global_space_generation,
             renderer_tier,
             device,
             queue,
@@ -201,6 +207,37 @@ impl WgpuResources {
             filter_group_views: Vec::new(),
         };
         Ok((resources, metadata))
+    }
+
+    /// Rebinds group 0 after the shared scene arena grows. The table and all instance
+    /// payloads continue to share one allocation for both shader transports.
+    pub(super) fn refresh_space_bind_groups(&mut self, layout: &GlobalBufferLayout) {
+        let generation = self.instances.generation();
+        if generation == self.global_space_generation {
+            return;
+        }
+        let globals_size = std::mem::size_of::<GlobalUniforms>() as u64;
+        let font_size = std::mem::size_of::<FontRasterizationUniforms>() as u64;
+        let create = |label, offset| {
+            self.bind_group_layouts.create_globals(
+                &self.device,
+                label,
+                wgpu::BufferBinding {
+                    buffer: &self.globals_buffer,
+                    offset,
+                    size: NonZeroU64::new(globals_size),
+                },
+                wgpu::BufferBinding {
+                    buffer: &self.globals_buffer,
+                    offset: layout.font_offset,
+                    size: NonZeroU64::new(font_size),
+                },
+                self.instances.space_binding_source(),
+            )
+        };
+        self.globals_bind_group = create("globals_bind_group", 0);
+        self.path_globals_bind_group = create("path_globals_bind_group", layout.path_offset);
+        self.global_space_generation = generation;
     }
 
     pub(super) fn invalidate_intermediate_textures(&mut self) {

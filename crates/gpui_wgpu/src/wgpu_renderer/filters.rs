@@ -1,9 +1,9 @@
-use gpui::{BackdropFilter, ScaledPixels};
+use gpui::BackdropFilter;
 use gpui_render::shaders::interface as shader_interface;
 use gpui_render::{
     blur::{
-        BlurAxis, BlurKernel, FilterCompositeClip, FilterCompositeParameters,
-        GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS, ScissorRectangle, downsampled_dimension,
+        BlurAxis, BlurKernel, FilterCompositeClip, FilterCompositeParameters, ScissorRectangle,
+        downsampled_dimension,
     },
     shaders::blur::BlurUniforms,
 };
@@ -18,7 +18,7 @@ pub(super) struct FrameUniformRequirements {
     pub(super) surface_count: u64,
 }
 
-const _: () = assert!(std::mem::size_of::<BlurUniforms>() == 112);
+const _: () = assert!(std::mem::size_of::<BlurUniforms>() == 168);
 
 impl WgpuRenderer {
     fn make_blur_bind_group(
@@ -80,7 +80,7 @@ impl WgpuRenderer {
             downsampled_dimension(full_width) as f32,
             downsampled_dimension(full_height) as f32,
         ];
-        let dilation = GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS * parameters.blur_radius;
+        let dilation = parameters.scissor_dilation();
         let scissor = ScissorRectangle::for_blurred_bounds(
             parameters.bounds,
             dilation,
@@ -117,7 +117,12 @@ impl WgpuRenderer {
             &self.resources().pipelines.blur,
             &vertical_target,
             &horizontal_target,
-            BlurUniforms::gaussian(BlurAxis::Horizontal, blur_size, kernel),
+            BlurUniforms::gaussian_along(
+                BlurAxis::Horizontal,
+                blur_size,
+                kernel,
+                parameters.blur_axes,
+            ),
             scissor,
         );
         self.run_blur_pass(
@@ -126,16 +131,16 @@ impl WgpuRenderer {
             &self.resources().pipelines.blur,
             &horizontal_target,
             &vertical_target,
-            BlurUniforms::gaussian(BlurAxis::Vertical, blur_size, kernel),
+            BlurUniforms::gaussian_along(
+                BlurAxis::Vertical,
+                blur_size,
+                kernel,
+                parameters.blur_axes,
+            ),
             scissor,
         );
 
-        let clips_to_bounds = matches!(parameters.clip, FilterCompositeClip::RoundedBounds);
-        let composite_bounds = if clips_to_bounds {
-            parameters.bounds
-        } else {
-            parameters.bounds.dilate(ScaledPixels(dilation))
-        };
+        let composite_bounds = parameters.composite_bounds();
         let uniforms = BlurUniforms::composite(
             composite_bounds,
             parameters.content_mask,
@@ -145,7 +150,8 @@ impl WgpuRenderer {
             parameters.clip,
             blur_size,
             [full_width as f32, full_height as f32],
-        );
+        )
+        .in_space(parameters.shape_bounds, parameters.space_mask);
         let (bind_group, uniform_offset) = self.make_blur_bind_group(uniforms, &horizontal_target);
         let resources = self.resources();
         let pipeline = if uniforms.corner_smoothing > 0.0 {
@@ -180,11 +186,14 @@ impl WgpuRenderer {
             scene_color_view,
             scene_color_view,
             FilterCompositeParameters {
-                bounds: filter.bounds,
-                content_mask: filter.content_mask.bounds,
+                bounds: filter.visual_bounds(),
+                shape_bounds: filter.bounds,
+                space_mask: filter.content_mask,
+                content_mask: filter.visual_clip_bounds(),
                 corner_radii: filter.corner_radii,
                 corner_smoothing: filter.corner_smoothing,
                 blur_radius: filter.max_blur_radius(),
+                blur_axes: filter.blur_axes(),
                 opacity: filter.opacity,
                 clip: FilterCompositeClip::RoundedBounds,
             },

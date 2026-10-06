@@ -7,7 +7,6 @@ pub mod surface {
     #[derive(Clone, Copy, Wgsl)]
     pub struct SurfaceUniforms {
         pub bounds: Bounds,
-        pub content_mask: ContentMask,
         pub color_format: SurfaceColorFormat,
         pub opacity: f32,
         pub padding0: u32,
@@ -16,6 +15,9 @@ pub mod surface {
         pub padding3: u32,
         pub padding4: u32,
         pub padding5: u32,
+        // Keep the enlarged nested mask last: uniform address-space rules require
+        // later members to begin on a 16-byte boundary after a nested struct.
+        pub content_mask: ContentMask,
     }
     uniform!(group(1), binding(0), SURFACE_LOCALS: SurfaceUniforms);
     texture!(group(1), binding(1), SURFACE_TEXTURE: Texture2D<f32>);
@@ -53,12 +55,16 @@ pub mod surface {
 
     #[vertex]
     pub fn vertex_surface(#[builtin(vertex_index)] vertex_id: u32) -> SurfaceVarying {
-        let vertex = rectangle_vertex(vertex_id, get!(SURFACE_LOCALS).bounds);
+        let vertex = space_rectangle_vertex(
+            vertex_id,
+            get!(SURFACE_LOCALS).bounds,
+            get!(SURFACE_LOCALS).content_mask,
+        );
         SurfaceVarying {
             position: vertex.clip_position,
             texture_position: vertex.unit_position,
             clip_distances: clip_distances(
-                vertex.viewport_position,
+                local_position(get!(SURFACE_LOCALS).content_mask, vertex.viewport_position),
                 get!(SURFACE_LOCALS).content_mask.bounds,
             ),
         }
@@ -109,6 +115,8 @@ pub mod blur {
         pub padding0: u32,
         pub padding1: u32,
         pub padding2: u32,
+        pub shape_bounds: Bounds,
+        pub space_mask: ContentMask,
     }
     uniform!(group(1), binding(0), BLUR_LOCALS: BlurUniforms);
     texture!(group(1), binding(1), BLUR_TEXTURE: Texture2D<f32>);
@@ -127,8 +135,8 @@ pub mod blur {
             position: vertex.clip_position,
             texture_coordinates: vertex.unit_position,
             clip_distances: clip_distances(
-                vertex.viewport_position,
-                get!(BLUR_LOCALS).content_mask,
+                local_position(get!(BLUR_LOCALS).space_mask, vertex.viewport_position),
+                get!(BLUR_LOCALS).space_mask.bounds,
             ),
         }
     }
@@ -140,7 +148,9 @@ pub mod blur {
             position / get!(BLUR_LOCALS).target_size,
             0.0,
         );
-        let factor = coverage * get!(BLUR_LOCALS).opacity;
+        let factor = coverage
+            * get!(BLUR_LOCALS).opacity
+            * ContentMask::alpha(get!(BLUR_LOCALS).space_mask, position);
         vec4f(
             blurred.x * factor,
             blurred.y * factor,
@@ -229,8 +239,8 @@ pub mod blur {
         let coverage = select(
             1.0,
             antialiased_coverage(rounded_rectangle_signed_distance(
-                input.position.xy(),
-                get!(BLUR_LOCALS).bounds,
+                local_position(get!(BLUR_LOCALS).space_mask, input.position.xy()),
+                get!(BLUR_LOCALS).shape_bounds,
                 get!(BLUR_LOCALS).corner_radii,
             )),
             get!(BLUR_LOCALS).composite_clip == BlurCompositeClip::RoundedBounds,
@@ -266,7 +276,7 @@ pub mod blur {
     ) -> SmoothedBlurVarying {
         let vertex = prepare_blur_composite_vertex(vertex_id);
         let prepared = prepare_corners(
-            get!(BLUR_LOCALS).bounds.size,
+            get!(BLUR_LOCALS).shape_bounds.size,
             get!(BLUR_LOCALS).corner_radii,
             get!(BLUR_LOCALS).corner_smoothing,
             true,
@@ -290,8 +300,8 @@ pub mod blur {
         let coverage = select(
             1.0,
             antialiased_coverage(prepared_corner_signed_distance(
-                input.position.xy(),
-                get!(BLUR_LOCALS).bounds,
+                local_position(get!(BLUR_LOCALS).space_mask, input.position.xy()),
+                get!(BLUR_LOCALS).shape_bounds,
                 get!(BLUR_LOCALS).corner_radii,
                 get!(BLUR_LOCALS).corner_smoothing,
                 PreparedCorners {

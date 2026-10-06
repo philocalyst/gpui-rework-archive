@@ -126,8 +126,12 @@ pub const EMOJI_RASTERIZATION: Pipeline = Pipeline {
 pub const GLOBAL_BIND_GROUP: u32 = 0;
 pub const DATA_BIND_GROUP: u32 = 1;
 pub const GLOBAL_UNIFORMS_BINDING: u32 = 0;
+pub const RENDER_SPACES_BINDING: u32 = 2;
 pub const FONT_RASTERIZATION_BINDING: u32 = 1;
 pub const DATA_BUFFER_BINDING: u32 = 0;
+/// Native Metal/HLSL register offset for group 1. Group 0 binding 2 is the
+/// per-frame RenderSpace storage table, so native group-1 resources begin at 3.
+pub const NATIVE_GROUP_1_BINDING_OFFSET: u32 = 3;
 pub const PRIMARY_TEXTURE_BINDING: u32 = 1;
 pub const SECONDARY_TEXTURE_BINDING: u32 = 2;
 pub const PRIMARY_SAMPLER_BINDING: u32 = 2;
@@ -159,6 +163,7 @@ buffer_data! {
     gpui::MonochromeSprite => "MonochromeSprite",
     gpui::SubpixelSprite => "SubpixelSprite",
     gpui::PolychromeSprite => "PolychromeSprite",
+    gpui::RenderSpace => "RenderSpace",
 }
 
 pub const SCENE_STORAGE_ABI: &[StorageAbi] = &[
@@ -168,6 +173,7 @@ pub const SCENE_STORAGE_ABI: &[StorageAbi] = &[
     storage_abi::<gpui::MonochromeSprite>(),
     storage_abi::<gpui::SubpixelSprite>(),
     storage_abi::<gpui::PolychromeSprite>(),
+    storage_abi::<gpui::RenderSpace>(),
 ];
 
 macro_rules! render_layout {
@@ -202,7 +208,6 @@ pub const RENDER_BUFFER_LAYOUTS: &[gpui::SceneBufferLayout] = &[
         super::surface::SurfaceUniforms,
         "SurfaceUniforms",
         bounds,
-        content_mask,
         color_format,
         opacity,
         padding0,
@@ -210,7 +215,8 @@ pub const RENDER_BUFFER_LAYOUTS: &[gpui::SceneBufferLayout] = &[
         padding2,
         padding3,
         padding4,
-        padding5
+        padding5,
+        content_mask
     ),
     render_layout!(
         super::blur::BlurUniforms,
@@ -230,7 +236,9 @@ pub const RENDER_BUFFER_LAYOUTS: &[gpui::SceneBufferLayout] = &[
         corner_smoothing,
         padding0,
         padding1,
-        padding2
+        padding2,
+        shape_bounds,
+        space_mask
     ),
     render_layout!(crate::path_types::PathSprite, "PathSprite", bounds),
     render_layout!(
@@ -239,6 +247,7 @@ pub const RENDER_BUFFER_LAYOUTS: &[gpui::SceneBufferLayout] = &[
         xy_position,
         curve_position,
         color,
-        bounds
+        bounds,
+        content_mask
     ),
 ];
