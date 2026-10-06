@@ -972,6 +972,10 @@ impl PlatformWindow for WindowsWindow {
             .detach();
     }
 
+    fn is_visible(&self) -> Option<bool> {
+        Some(unsafe { IsWindowVisible(self.0.hwnd).as_bool() })
+    }
+
     fn minimize(&self) {
         unsafe { ShowWindowAsync(self.0.hwnd, SW_MINIMIZE).ok().log_err() };
     }

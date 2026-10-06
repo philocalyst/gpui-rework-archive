@@ -25,12 +25,16 @@ pub(crate) const NOTO_SANS: FontFixture = FontFixture {
 
 pub(crate) const NOTO_ARABIC: FontFixture = FontFixture {
     family: "Noto Sans Arabic",
-    data: include_bytes!("../../gpui_test/assets/fonts/noto-sans-arabic/NotoSansArabic-Regular.ttf"),
+    data: include_bytes!(
+        "../../gpui_test/assets/fonts/noto-sans-arabic/NotoSansArabic-Regular.ttf"
+    ),
 };
 
 pub(crate) const NOTO_HEBREW: FontFixture = FontFixture {
     family: "Noto Sans Hebrew",
-    data: include_bytes!("../../gpui_test/assets/fonts/noto-sans-hebrew/NotoSansHebrew-Regular.ttf"),
+    data: include_bytes!(
+        "../../gpui_test/assets/fonts/noto-sans-hebrew/NotoSansHebrew-Regular.ttf"
+    ),
 };
 
 pub(crate) const NOTO_COLOR_EMOJI: FontFixture = FontFixture {

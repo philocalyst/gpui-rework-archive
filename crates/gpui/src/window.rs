@@ -6760,6 +6760,11 @@ impl Window {
         self.platform_window.set_visible(visible);
     }
 
+    /// Returns the platform's current visibility when it can be queried.
+    pub fn is_visible(&self) -> Option<bool> {
+        self.platform_window.is_visible()
+    }
+
     /// Toggle full screen status on the current window at the platform level.
     pub fn toggle_fullscreen(&self) {
         self.platform_window.toggle_fullscreen();

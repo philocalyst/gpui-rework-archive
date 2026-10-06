@@ -3,7 +3,11 @@ use gpui_test::{Harness, RenderedSuite, ReportOptions, write_report};
 use std::{env, path::PathBuf};
 
 fn main() {
-    if let Err(error) = run_cli() {
+    exit_on_error(run_cli());
+}
+
+fn exit_on_error(result: Result<()>) {
+    if let Err(error) = result {
         eprintln!("gpui-test: {error:#}");
         std::process::exit(1);
     }
@@ -26,9 +30,55 @@ fn run_cli() -> Result<()> {
         "run" => run_command(&rest, Mode::Run),
         "bench" => run_command(&rest, Mode::Benchmark),
         "check" => run_command(&rest, Mode::Check),
+        "platform" => run_platform_command(&rest),
         "help" | "--help" | "-h" => usage(),
         other => bail!("unknown command {other:?}; use `gpui-test help`"),
     }
+}
+
+fn run_platform_command(args: &[String]) -> Result<()> {
+    let parsed = parse_args(args)?;
+    ensure!(
+        parsed.names.is_empty(),
+        "`platform` does not accept scenario IDs"
+    );
+    ensure!(
+        parsed.baseline.is_none(),
+        "`platform` does not accept --baseline"
+    );
+    ensure!(
+        parsed.samples.is_none(),
+        "`platform` does not accept --samples"
+    );
+    ensure!(!parsed.gpu, "`platform` does not accept --gpu");
+    #[cfg(not(feature = "platform"))]
+    bail!(
+        "native platform probes are unavailable in this build; rebuild with `--features gpui_ce_test/platform`"
+    );
+    #[cfg(feature = "platform")]
+    {
+        gpui_ce_platform::testing::run_window_checks(move |checks| {
+            exit_on_error(write_platform_report(checks, &parsed.output));
+        });
+        Ok(())
+    }
+}
+
+#[cfg(feature = "platform")]
+fn write_platform_report(checks: gpui::WindowCheckReport, output: &std::path::Path) -> Result<()> {
+    let status = checks.status;
+    let suite = RenderedSuite::new(Vec::new()).with_platform_checks(checks);
+    write_report(&suite, output, ReportOptions::default())?;
+    ensure!(
+        status == gpui::WindowCheckStatus::Passed,
+        "native platform checks failed; report: {}",
+        output.display()
+    );
+    println!(
+        "verified native platform checks; report: {}",
+        output.display()
+    );
+    Ok(())
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -40,6 +90,12 @@ enum Mode {
 
 fn run_command(args: &[String], mode: Mode) -> Result<()> {
     let parsed = parse_args(args)?;
+    if parsed.gpu {
+        #[cfg(not(feature = "gpu"))]
+        bail!(
+            "native GPU replay is unavailable in this build; rebuild with `--features gpui_ce_test/gpu`"
+        );
+    }
     if mode == Mode::Check {
         let baseline = parsed
             .baseline
@@ -65,9 +121,12 @@ fn run_command(args: &[String], mode: Mode) -> Result<()> {
     for scenario in selected {
         captures.push(scenario.run(&harness)?);
     }
-    let suite = RenderedSuite {
-        scenarios: captures,
-    };
+    #[allow(unused_mut)] // The native replay pass exists only in GPU-enabled builds.
+    let mut suite = RenderedSuite::new(captures);
+    if parsed.gpu {
+        #[cfg(feature = "gpu")]
+        gpui_test::native::replay_native(&mut suite, harness.timing_sample_count())?;
+    }
     let manifest = write_report(
         &suite,
         &parsed.output,
@@ -104,6 +163,7 @@ struct Args {
     output: PathBuf,
     baseline: Option<PathBuf>,
     samples: Option<usize>,
+    gpu: bool,
 }
 
 fn parse_args(args: &[String]) -> Result<Args> {
@@ -111,6 +171,7 @@ fn parse_args(args: &[String]) -> Result<Args> {
     let mut output = PathBuf::from("target/gpui-test");
     let mut baseline = None;
     let mut samples = None;
+    let mut gpu = false;
     let mut index = 0;
     while index < args.len() {
         match args[index].as_str() {
@@ -133,6 +194,7 @@ fn parse_args(args: &[String]) -> Result<Args> {
                         .context("--samples must be an integer")?,
                 );
             }
+            "--gpu" => gpu = true,
             name if name.starts_with('-') => bail!("unknown option {name:?}"),
             name => names.push(name.to_owned()),
         }
@@ -143,6 +205,7 @@ fn parse_args(args: &[String]) -> Result<Args> {
         output,
         baseline,
         samples,
+        gpu,
     })
 }
 
@@ -169,7 +232,7 @@ fn select_scenarios(names: &[String]) -> Result<Vec<gpui_test::BuiltInScenario>>
 
 fn usage() -> Result<()> {
     println!(
-        "gpui-test list\ngpui-test run [SCENARIO ...] [--output DIR] [--baseline DIR] [--samples N]\ngpui-test bench [SCENARIO ...] [--output DIR] [--baseline DIR] [--samples N]\ngpui-test check [SCENARIO ...] --baseline DIR [--output DIR] [--samples N]\n\nOmitting scenario IDs runs the full built-in suite. `check` compares scene JSON, decoded pixels, and checkpoint metadata. `bench` defaults to 20 repeated frames; `run` and `check` default to one."
+        "gpui-test list\ngpui-test run [SCENARIO ...] [--output DIR] [--baseline DIR] [--samples N] [--gpu]\ngpui-test bench [SCENARIO ...] [--output DIR] [--baseline DIR] [--samples N] [--gpu]\ngpui-test check [SCENARIO ...] --baseline DIR [--output DIR] [--samples N] [--gpu]\ngpui-test platform [--output DIR]\n\nOmitting scenario IDs runs the full built-in suite. `check` compares scene JSON, decoded pixels, and checkpoint metadata. `bench` defaults to 20 repeated frames; `run` and `check` default to one. `--gpu` replays captured scenes through optional native WGPU support; build with `--features gpui_ce_test/gpu`. `platform` runs an opt-in native window lifecycle probe; build with `--features gpui_ce_test/platform`."
     );
     Ok(())
 }

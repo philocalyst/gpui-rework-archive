@@ -1,6 +1,8 @@
 #![allow(clippy::disallowed_methods, reason = "build scripts are exempt")]
 
 fn main() {
+    // Otherwise Cargo reruns this script for every example edit and rebuilds GPUI itself.
+    println!("cargo::rerun-if-changed=build.rs");
     println!("cargo::rustc-check-cfg=cfg(gles)");
 
     let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();

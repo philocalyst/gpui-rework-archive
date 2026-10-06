@@ -6,7 +6,7 @@ use gpui::{
 };
 use gpui_ce_render::cpu::{CpuAtlas, CpuRenderer};
 use std::{
-    sync::Arc,
+    sync::{Arc, OnceLock},
     time::{Duration, Instant},
 };
 
@@ -15,6 +15,27 @@ use std::{
 pub struct RenderedSuite {
     /// Captured scenarios, in caller-provided order.
     pub scenarios: Vec<RenderedScenario>,
+    /// Native replay metadata, present only when an optional WGPU pass was requested.
+    pub native_replay: Option<NativeReplayInfo>,
+    /// Optional OS-backed lifecycle diagnostics.
+    pub platform_checks: Option<gpui::WindowCheckReport>,
+}
+
+impl RenderedSuite {
+    /// Creates a portable CPU-rendered suite without optional backend results.
+    pub fn new(scenarios: Vec<RenderedScenario>) -> Self {
+        Self {
+            scenarios,
+            native_replay: None,
+            platform_checks: None,
+        }
+    }
+
+    /// Adds a platform probe result to the report.
+    pub fn with_platform_checks(mut self, checks: gpui::WindowCheckReport) -> Self {
+        self.platform_checks = Some(checks);
+        self
+    }
 }
 
 /// Captures from one scenario and its viewport.
@@ -43,6 +64,33 @@ pub struct Viewport {
     pub scale_factor: f32,
 }
 
+impl Viewport {
+    /// Converts logical viewport dimensions to checked physical device pixels.
+    pub fn device_size(&self) -> Result<Size<DevicePixels>> {
+        ensure!(
+            self.width.is_finite()
+                && self.height.is_finite()
+                && self.width > 0.0
+                && self.height > 0.0
+                && self.scale_factor.is_finite()
+                && self.scale_factor > 0.0,
+            "viewport dimensions and scale factor must be finite and positive"
+        );
+        let dimension = |logical: f32| -> Result<DevicePixels> {
+            let physical = (logical * self.scale_factor).ceil();
+            ensure!(
+                physical.is_finite() && physical as f64 <= i32::MAX as f64,
+                "physical viewport exceeds scene coordinate limits"
+            );
+            Ok(DevicePixels(physical as i32))
+        };
+        Ok(Size {
+            width: dimension(self.width)?,
+            height: dimension(self.height)?,
+        })
+    }
+}
+
 /// One portable display list, image, and timing sample set.
 #[derive(Clone, Debug)]
 pub struct RenderedCheckpoint {
@@ -58,12 +106,77 @@ pub struct RenderedCheckpoint {
     pub image: image::RgbaImage,
     /// Measurements collected from repeated identical frame work.
     pub metrics: ScenarioMetrics,
+    /// Optional native GPU replay output; CPU image and capture remain canonical.
+    pub native: Option<NativeCheckpoint>,
+}
+
+/// Optional results from replaying one capture on a native WGPU device.
+#[derive(Clone, Debug)]
+pub struct NativeCheckpoint {
+    /// Readback image produced by the native renderer.
+    pub image: image::RgbaImage,
+    /// Red-highlighted pixel difference against the canonical CPU output.
+    pub diff: image::RgbaImage,
+    /// Native execution and allocation measurements.
+    pub metrics: NativeReplayMetrics,
+    /// Difference statistics against the CPU output.
+    pub difference: ImageDifference,
+}
+
+/// Native adapter details stored once per report suite.
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+pub struct NativeReplayInfo {
+    /// Name advertised by the selected hardware or software adapter.
+    pub adapter: String,
+    /// Driver name and version advertised by WGPU.
+    pub driver: String,
+    /// Graphics API used for replay, such as Metal or Vulkan.
+    pub backend: String,
+    /// Adapter class, including integrated, discrete, and software devices.
+    pub device_type: String,
+    /// Why hardware GPU timestamps are unavailable, if the adapter does not support them.
+    pub timestamp_reason: Option<String>,
+}
+
+/// Native replay measurements and their explicit memory scope.
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+pub struct NativeReplayMetrics {
+    /// Repeated frames measured after one warm-up frame.
+    pub samples: usize,
+    /// CPU elapsed time from frame preparation through encoding, queue submission, and completion
+    /// wait. Excludes target creation, timestamp mapping, and pixel readback.
+    pub encode_submit_completion: TimingPercentiles,
+    /// GPU command execution timestamps, absent when unsupported by the adapter.
+    pub gpu: Option<TimingPercentiles>,
+    /// Renderer-owned GPU resource bytes, not total driver/device VRAM.
+    pub tracked_owned_bytes: u64,
+    /// Backend-reported allocation; interpret this with `device_allocation_scope`.
+    pub device_allocated_bytes: Option<u64>,
+    /// Exact resource subset included in `tracked_owned_bytes`.
+    pub allocation_scope: String,
+    /// Source and scope of backend-reported device allocation telemetry, when available.
+    pub device_allocation_scope: Option<String>,
+    /// Why allocation telemetry is unavailable; absent when a measurement exists.
+    pub allocation_reason: Option<String>,
+}
+
+/// Pixel difference statistics between native replay and canonical CPU output.
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+pub struct ImageDifference {
+    /// Pixels where at least one RGBA channel differs.
+    pub changed_pixels: u64,
+    /// Pixels in the union of both image bounds.
+    pub total_pixels: u64,
+    /// Largest absolute difference in an 8-bit channel.
+    pub max_channel_error: u8,
+    /// Mean absolute difference across all RGBA channels, in the range 0–255.
+    pub mean_channel_error: f64,
 }
 
 /// Explicit CPU-side performance and storage measurements.
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct ScenarioMetrics {
-    /// Number of repeated frames used for timing.
+    /// Number of repeated frames measured after one warm-up frame.
     pub frame_count: usize,
     /// Scene build percentiles, in nanoseconds.
     pub scene_build_p50_ns: u64,
@@ -71,11 +184,11 @@ pub struct ScenarioMetrics {
     pub scene_build_p95_ns: u64,
     /// Scene build percentiles, in nanoseconds.
     pub scene_build_p99_ns: u64,
-    /// CPU replay percentiles, in nanoseconds.
+    /// CPU replay p50, in nanoseconds; reuses the target and excludes RGBA readback.
     pub cpu_render_p50_ns: u64,
-    /// CPU replay percentiles, in nanoseconds.
+    /// CPU replay p95, in nanoseconds; reuses the target and excludes RGBA readback.
     pub cpu_render_p95_ns: u64,
-    /// CPU replay percentiles, in nanoseconds.
+    /// CPU replay p99, in nanoseconds; reuses the target and excludes RGBA readback.
     pub cpu_render_p99_ns: u64,
     /// Number of scene primitives across all primitive arrays.
     pub primitive_count: usize,
@@ -85,12 +198,21 @@ pub struct ScenarioMetrics {
     pub bitmap_storage_bytes: usize,
 }
 
+/// Nearest-rank timing percentiles in nanoseconds.
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+pub struct TimingPercentiles {
+    pub p50_ns: u64,
+    pub p95_ns: u64,
+    pub p99_ns: u64,
+}
+
 /// Configures a deterministic headless GPUI run.
 pub struct Harness {
     timing_samples: usize,
     text_system: Option<Arc<dyn PlatformTextSystem>>,
     font_pack: String,
     asset_source: Arc<dyn AssetSource>,
+    bundled_text_system: OnceLock<std::result::Result<Arc<dyn PlatformTextSystem>, String>>,
 }
 
 impl Default for Harness {
@@ -107,6 +229,7 @@ impl Harness {
             text_system: None,
             font_pack: "bundled-v1".into(),
             asset_source: Arc::new(()),
+            bundled_text_system: OnceLock::new(),
         }
     }
 
@@ -124,6 +247,11 @@ impl Harness {
         ensure!(count > 0, "timing sample count must be positive");
         self.timing_samples = count;
         Ok(self)
+    }
+
+    /// Repeated frames measured at each checkpoint, excluding its warm-up frame.
+    pub fn timing_sample_count(&self) -> usize {
+        self.timing_samples
     }
 
     /// Supplies a caller-owned text system instead of the bundled-font default.
@@ -163,22 +291,21 @@ impl Harness {
             height: scenario.size.height.as_f32(),
             scale_factor: scenario.scale_factor,
         };
-        let dimension = |logical: f32| -> Result<DevicePixels> {
-            let physical = (logical * viewport.scale_factor).ceil();
-            ensure!(
-                physical.is_finite() && physical as f64 <= i32::MAX as f64,
-                "scenario {} physical viewport exceeds scene coordinate limits",
-                scenario.id
-            );
-            Ok(DevicePixels(physical as i32))
-        };
-        let device_size = Size {
-            width: dimension(viewport.width)?,
-            height: dimension(viewport.height)?,
-        };
-        let system: Arc<dyn PlatformTextSystem> = match &self.text_system {
-            Some(system) => system.clone(),
-            None => Arc::new(bundled_text_system()?),
+        let device_size = viewport
+            .device_size()
+            .with_context(|| format!("invalid physical viewport for scenario {}", scenario.id))?;
+        let system: Arc<dyn PlatformTextSystem> = if let Some(system) = &self.text_system {
+            system.clone()
+        } else {
+            self.bundled_text_system
+                .get_or_init(|| {
+                    bundled_text_system()
+                        .map(|system| Arc::new(system) as Arc<dyn PlatformTextSystem>)
+                        .map_err(|error| format!("{error:#}"))
+                })
+                .as_ref()
+                .map(Arc::clone)
+                .map_err(|error| anyhow::anyhow!(error.clone()))?
         };
         let atlas = Arc::new(CpuAtlas::new());
         let factory_atlas = atlas.clone();
@@ -205,6 +332,8 @@ impl Harness {
             }
             cx.run_until_parked();
 
+            // Resolve first-paint work before measuring repeated draws at this fixed time.
+            cx.draw_window(any_window)?;
             let mut scene_samples = Vec::with_capacity(self.timing_samples);
             for _ in 0..self.timing_samples {
                 let start = Instant::now();
@@ -224,17 +353,14 @@ impl Harness {
             })?;
             let scene = capture.to_scene()?;
             let mut cpu = CpuRenderer::from_captured_bitmaps(capture.bitmaps())?;
+            // Allocate and warm the retained target before collecting steady-state samples.
+            cpu.render_scene(&scene, device_size)?;
             let mut cpu_samples = Vec::with_capacity(self.timing_samples);
-            let mut image = None;
             for _ in 0..self.timing_samples {
                 let start = Instant::now();
-                let frame = cpu
-                    .render_scene_to_image(&scene, device_size)
+                cpu.render_scene(&scene, device_size)
                     .context("CPU rendering scenario frame")?;
                 cpu_samples.push(elapsed_ns(start));
-                if image.is_none() {
-                    image = Some(frame);
-                }
             }
             let commands = capture.commands();
             let batch_count = commands
@@ -246,26 +372,27 @@ impl Harness {
                 .iter()
                 .map(|bitmap| bitmap.bytes.len())
                 .sum();
-            let build = Percentiles::new(scene_samples);
-            let replay = Percentiles::new(cpu_samples);
+            let build = TimingPercentiles::from_samples(scene_samples);
+            let replay = TimingPercentiles::from_samples(cpu_samples);
             output.push(RenderedCheckpoint {
                 id: checkpoint.id.clone(),
                 name: checkpoint.name.clone(),
                 time_ns: checkpoint.at.as_nanos().min(u64::MAX as u128) as u64,
                 capture,
-                image: image.context("CPU renderer produced no frame")?,
+                image: cpu.readback()?,
                 metrics: ScenarioMetrics {
                     frame_count: self.timing_samples,
-                    scene_build_p50_ns: build.p50,
-                    scene_build_p95_ns: build.p95,
-                    scene_build_p99_ns: build.p99,
-                    cpu_render_p50_ns: replay.p50,
-                    cpu_render_p95_ns: replay.p95,
-                    cpu_render_p99_ns: replay.p99,
+                    scene_build_p50_ns: build.p50_ns,
+                    scene_build_p95_ns: build.p95_ns,
+                    scene_build_p99_ns: build.p99_ns,
+                    cpu_render_p50_ns: replay.p50_ns,
+                    cpu_render_p95_ns: replay.p95_ns,
+                    cpu_render_p99_ns: replay.p99_ns,
                     primitive_count,
                     batch_count,
                     bitmap_storage_bytes,
                 },
+                native: None,
             });
         }
         Ok(RenderedScenario {
@@ -302,14 +429,9 @@ fn elapsed_ns(start: Instant) -> u64 {
     start.elapsed().as_nanos().min(u64::MAX as u128) as u64
 }
 
-struct Percentiles {
-    p50: u64,
-    p95: u64,
-    p99: u64,
-}
-
-impl Percentiles {
-    fn new(mut samples: Vec<u64>) -> Self {
+impl TimingPercentiles {
+    pub(crate) fn from_samples(samples: impl IntoIterator<Item = u64>) -> Self {
+        let mut samples: Vec<_> = samples.into_iter().collect();
         assert!(
             !samples.is_empty(),
             "timing measurements require at least one sample"
@@ -319,25 +441,29 @@ impl Percentiles {
         let rank =
             |percent: u128| samples[((samples.len() as u128 * percent).div_ceil(100) - 1) as usize];
         Self {
-            p50: rank(50),
-            p95: rank(95),
-            p99: rank(99),
+            p50_ns: rank(50),
+            p95_ns: rank(95),
+            p99_ns: rank(99),
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::Percentiles;
+    use super::TimingPercentiles;
 
     #[test]
     fn tail_percentiles_use_nearest_rank_without_discarding_the_slowest_frame() {
-        let distribution = Percentiles::new((1..=20).rev().collect());
+        let distribution = TimingPercentiles::from_samples((1..=20).rev());
         assert_eq!(
-            (distribution.p50, distribution.p95, distribution.p99),
+            (
+                distribution.p50_ns,
+                distribution.p95_ns,
+                distribution.p99_ns
+            ),
             (10, 19, 20)
         );
-        let single = Percentiles::new(vec![42]);
-        assert_eq!((single.p50, single.p95, single.p99), (42, 42, 42));
+        let single = TimingPercentiles::from_samples([42]);
+        assert_eq!((single.p50_ns, single.p95_ns, single.p99_ns), (42, 42, 42));
     }
 }

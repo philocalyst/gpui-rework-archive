@@ -71,6 +71,12 @@ criterion.workspace = true
 env_logger.workspace = true
 gpui_platform = { workspace = true, features = ["wayland", "x11"] }
 naga = { version = "29.0.4", features = ["wgsl-in"] }
+gpui_render = { workspace = true, features = ["cpu"] }
+
+[[test]]
+name = "capture_parity"
+path = "tests/capture_parity.rs"
+required-features = ["test-support"]
 
 [target.'cfg(target_os = "linux")'.dev-dependencies]
 wayland-backend = { version = "0.3.15", features = [

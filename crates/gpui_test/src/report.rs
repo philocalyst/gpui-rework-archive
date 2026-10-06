@@ -1,4 +1,7 @@
-use crate::{RenderedSuite, ScenarioMetrics, Viewport, validate_id};
+use crate::{
+    ImageDifference, NativeReplayInfo, NativeReplayMetrics, RenderedSuite, ScenarioMetrics,
+    Viewport, validate_id,
+};
 use anyhow::{Context, Result, ensure};
 use plotters::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -26,6 +29,12 @@ pub struct ReportManifest {
     pub backend: String,
     /// Renderer and font pack details.
     pub environment: EnvironmentManifest,
+    /// Native replay adapter metadata; absent from CPU-only reports.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub native_replay: Option<NativeReplayInfo>,
+    /// Optional OS-backed window lifecycle diagnostics.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub platform_checks: Option<gpui::WindowCheckReport>,
     /// Scenarios and checkpoint artifacts in stable order.
     pub scenarios: Vec<ScenarioManifest>,
     /// Complete comparison results for the selected baseline, including removed items.
@@ -53,8 +62,6 @@ pub struct ScenarioManifest {
     pub title: String,
     /// Logical viewport and device scale.
     pub viewport: Viewport,
-    /// GPU memory measurement. Null for the CPU-only backend.
-    pub gpu_memory_bytes: Option<u64>,
     /// Baseline comparison outcome for this scenario.
     pub status: ReportStatus,
     /// Checkpoint captures in timeline order.
@@ -88,6 +95,22 @@ pub struct CheckpointManifest {
     pub metadata_changed: Option<bool>,
     /// CPU-side timing, primitive, batch, and bitmap metrics.
     pub metrics: ScenarioMetrics,
+    /// Native replay artifacts and CPU-vs-native pixel statistics, when requested.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub native: Option<NativeCheckpointManifest>,
+}
+
+/// Native replay artifacts for one checkpoint.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct NativeCheckpointManifest {
+    /// Relative path to the native-rendered image.
+    pub png: String,
+    /// Relative path to the CPU-vs-native red difference image.
+    pub diff_png: String,
+    /// Native timings and explicitly scoped memory measurements.
+    pub metrics: NativeReplayMetrics,
+    /// Difference against the canonical CPU rendering.
+    pub difference: ImageDifference,
 }
 
 /// Summary status for a report artifact.
@@ -207,6 +230,20 @@ pub fn write_report(
                 .with_context(|| format!("writing {}", scene_path.display()))?;
             let png_path = dir.join(&png_file);
             save_png(&png_path, &checkpoint.image)?;
+            let native = if let Some(native) = &checkpoint.native {
+                let native_file = format!("{}.native.png", checkpoint.id);
+                let diff_file = format!("{}.native.diff.png", checkpoint.id);
+                save_png(&dir.join(&native_file), &native.image)?;
+                save_png(&dir.join(&diff_file), &native.diff)?;
+                Some(NativeCheckpointManifest {
+                    png: format!("{}/{}", scenario.id, native_file),
+                    diff_png: format!("{}/{}", scenario.id, diff_file),
+                    metrics: native.metrics.clone(),
+                    difference: native.difference.clone(),
+                })
+            } else {
+                None
+            };
             let previous_checkpoint = previous_scenario.and_then(|previous| {
                 previous
                     .checkpoints
@@ -271,6 +308,7 @@ pub fn write_report(
                 scene_changed,
                 metadata_changed,
                 metrics: checkpoint.metrics.clone(),
+                native,
             });
         }
         let checkpoint_set_changed = previous_scenario.is_some_and(|previous| {
@@ -309,7 +347,6 @@ pub fn write_report(
             id: scenario.id.clone(),
             title: scenario.title.clone(),
             viewport: scenario.viewport.clone(),
-            gpu_memory_bytes: None,
             status,
             checkpoints,
         });
@@ -329,6 +366,8 @@ pub fn write_report(
                 .join(", "),
             git_sha: option_env!("GIT_SHA").map(str::to_owned),
         },
+        native_replay: suite.native_replay.clone(),
+        platform_checks: suite.platform_checks.clone(),
         scenarios,
         changes: Vec::new(),
     };
@@ -414,6 +453,20 @@ pub fn read_manifest(report_dir: impl AsRef<Path>) -> Result<ReportManifest> {
                 scenario.id,
                 checkpoint.id
             );
+            if let Some(native) = &checkpoint.native {
+                ensure!(
+                    manifest.native_replay.is_some(),
+                    "native checkpoint artifact exists without suite native replay metadata"
+                );
+                ensure!(
+                    native.png == format!("{}/{}.native.png", scenario.id, checkpoint.id)
+                        && native.diff_png
+                            == format!("{}/{}.native.diff.png", scenario.id, checkpoint.id),
+                    "noncanonical native image paths for {}/{}",
+                    scenario.id,
+                    checkpoint.id
+                );
+            }
         }
     }
     Ok(manifest)
@@ -660,51 +713,144 @@ fn read_json_value(path: &Path) -> Result<serde_json::Value> {
 }
 
 fn write_markdown(manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
-    let mut md = String::from(
-        "# GPUI visual scenario report\n\nBackend: CPU. VRAM is unavailable for this backend; bitmap bytes measure captured atlas storage. Timings exclude font setup, capture serialization, and PNG encoding.\n\n| Scenario / checkpoint | Time (ms) | Samples | Build p50/p95/p99 (ms) | Replay p50/p95/p99 (ms) | Primitives | Batches | Bitmap bytes | VRAM | Status |\n|---|---:|---:|---:|---:|---:|---:|---:|---|---|\n",
-    );
-    for scenario in &manifest.scenarios {
-        for checkpoint in &scenario.checkpoints {
-            let m = &checkpoint.metrics;
-            let title = format!("{} / {}", scenario.title, checkpoint.name)
-                .replace('|', "\\|")
-                .replace(['\n', '\r'], " ");
-            md.push_str(&format!(
-                "| [{}]({}) | {:.3} | {} | {} | {} | {} | {} | {} | n/a | {} |\n",
-                title,
-                checkpoint.png,
-                checkpoint.time_ns as f64 / 1_000_000.0,
-                m.frame_count,
-                timing_triplet(
-                    m.scene_build_p50_ns,
-                    m.scene_build_p95_ns,
-                    m.scene_build_p99_ns
-                ),
-                timing_triplet(
-                    m.cpu_render_p50_ns,
-                    m.cpu_render_p95_ns,
-                    m.cpu_render_p99_ns
-                ),
-                m.primitive_count,
-                m.batch_count,
-                m.bitmap_storage_bytes,
-                status_name(checkpoint.status),
-            ));
+    let mut md = String::from("# GPUI scenario report\n\n");
+    if !manifest.scenarios.is_empty() {
+        md.push_str("Timings follow one warm-up frame. CPU replay reuses its target and excludes font setup, RGBA readback, capture serialization, and PNG encoding. Bitmap bytes measure captured atlas storage.\n\n| Scenario / checkpoint | Time (ms) | Samples | Build p50/p95/p99 (ms) | CPU p50/p95/p99 (ms) | Primitives | Batches | Bitmap bytes | Status |\n|---|---:|---:|---:|---:|---:|---:|---:|---|\n");
+        for scenario in &manifest.scenarios {
+            for checkpoint in &scenario.checkpoints {
+                let m = &checkpoint.metrics;
+                let title = format!("{} / {}", scenario.title, checkpoint.name)
+                    .replace('|', "\\|")
+                    .replace(['\n', '\r'], " ");
+                md.push_str(&format!(
+                    "| [{title}]({}) | {:.3} | {} | {} | {} | {} | {} | {} | {} |\n",
+                    checkpoint.png,
+                    checkpoint.time_ns as f64 / 1_000_000.0,
+                    m.frame_count,
+                    timing_triplet(
+                        m.scene_build_p50_ns,
+                        m.scene_build_p95_ns,
+                        m.scene_build_p99_ns
+                    ),
+                    timing_triplet(
+                        m.cpu_render_p50_ns,
+                        m.cpu_render_p95_ns,
+                        m.cpu_render_p99_ns
+                    ),
+                    m.primitive_count,
+                    m.batch_count,
+                    m.bitmap_storage_bytes,
+                    status_name(checkpoint.status),
+                ));
+            }
+        }
+        md.push_str("\n![Frame timings](metrics.svg)\n\n## Baseline changes\n\n");
+        if !manifest.changes.is_empty() {
+            for change in &manifest.changes {
+                md.push_str(&format!("- {change}\n"));
+            }
+        } else if manifest
+            .scenarios
+            .iter()
+            .all(|scenario| scenario.status == ReportStatus::BaselineUnavailable)
+        {
+            md.push_str("No baseline was supplied.\n");
+        } else {
+            md.push_str("No scenario or checkpoint changes.\n");
         }
     }
-    md.push_str("\n![Frame timings](metrics.svg)\n\n## Baseline changes\n\n");
-    if !manifest.changes.is_empty() {
-        for change in &manifest.changes {
-            md.push_str(&format!("- {}\n", change));
+    if let Some(adapter) = &manifest.native_replay {
+        md.push_str(&format!(
+            "\n## Native replay\n\nAdapter: {} ({}; {}; {}).\n\n",
+            adapter.adapter, adapter.backend, adapter.device_type, adapter.driver
+        ));
+        md.push_str("Encode/submit/completion latency covers CPU frame preparation through queue completion. Target creation, timestamp mapping, and pixel readback are excluded. GPU latency is the device timestamp interval.\n\n");
+        if let Some(reason) = &adapter.timestamp_reason {
+            md.push_str(&format!("GPU timestamps unavailable: {reason}\n\n"));
         }
-    } else if manifest
-        .scenarios
-        .iter()
-        .all(|scenario| scenario.status == ReportStatus::BaselineUnavailable)
-    {
-        md.push_str("No baseline was supplied.\n");
-    } else {
-        md.push_str("No scenario or checkpoint changes.\n");
+        if let Some(native) = manifest
+            .scenarios
+            .iter()
+            .flat_map(|scenario| &scenario.checkpoints)
+            .find_map(|checkpoint| checkpoint.native.as_ref())
+        {
+            let m = &native.metrics;
+            md.push_str(&format!(
+                "Tracked allocation scope: {}.\n\nDevice allocation: {}.\n\n",
+                m.allocation_scope,
+                m.device_allocation_scope
+                    .as_deref()
+                    .or(m.allocation_reason.as_deref())
+                    .unwrap_or("unavailable")
+            ));
+        }
+        md.push_str("| Scenario / checkpoint | Samples | Encode/submit/completion p50/p95/p99 (ms) | GPU p50/p95/p99 (ms) | Tracked bytes | Device allocated bytes | CPU vs native pixels | Max / mean channel error |\n|---|---:|---:|---:|---:|---:|---:|---:|\n");
+        for scenario in &manifest.scenarios {
+            for checkpoint in &scenario.checkpoints {
+                let Some(native) = &checkpoint.native else {
+                    continue;
+                };
+                let m = &native.metrics;
+                let d = &native.difference;
+                let gpu = m
+                    .gpu
+                    .as_ref()
+                    .map(|p| timing_triplet(p.p50_ns, p.p95_ns, p.p99_ns))
+                    .unwrap_or_else(|| "n/a".into());
+                let device = m
+                    .device_allocated_bytes
+                    .map_or_else(|| "n/a".into(), |bytes| bytes.to_string());
+                md.push_str(&format!(
+                    "| [{} / {}]({}) | {} | {} | {} | {} | {} | [{}/{}]({}) | {} / {:.3} |\n",
+                    scenario.id,
+                    checkpoint.id,
+                    native.png,
+                    m.samples,
+                    timing_triplet(
+                        m.encode_submit_completion.p50_ns,
+                        m.encode_submit_completion.p95_ns,
+                        m.encode_submit_completion.p99_ns
+                    ),
+                    gpu,
+                    m.tracked_owned_bytes,
+                    device,
+                    d.changed_pixels,
+                    d.total_pixels,
+                    native.diff_png,
+                    d.max_channel_error,
+                    d.mean_channel_error,
+                ));
+            }
+        }
+    }
+    if let Some(checks) = &manifest.platform_checks {
+        md.push_str(&format!("\n## Native platform checks\n\nPlatform: {} · Status: {}\n\n| Capability | Available |\n|---|---|\n", checks.platform, checks.status));
+        for (name, available) in &checks.capabilities {
+            md.push_str(&format!("| {name} | {available} |\n"));
+        }
+        md.push_str("\n| Lifecycle event | Polls | Elapsed (ms) |\n|---|---:|---:|\n");
+        for event in &checks.events {
+            md.push_str(&format!(
+                "| {} | {} | {} |\n",
+                event.name, event.polls, event.elapsed_ms
+            ));
+        }
+        if manifest.scenarios.is_empty() {
+            md.push_str("\n![Lifecycle latency](metrics.svg)\n");
+        }
+        if let Some(frame) = &checks.frame {
+            md.push_str(&format!("\nCaptured frame: {}×{}, {} paints, {} quads, {} monochrome sprites, {} subpixel sprites, {} polychrome sprites, {} painted pixels.\n",
+                frame.capture_width, frame.capture_height, frame.render_count, frame.quads, frame.monochrome_sprites, frame.subpixel_sprites, frame.polychrome_sprites, frame.painted_pixels));
+        }
+        if let Some(resize) = &checks.resize {
+            md.push_str(&format!(
+                "Resize callback: {} events at {}×{} logical pixels.\n",
+                resize.callback_count, resize.width, resize.height
+            ));
+        }
+        for error in &checks.errors {
+            md.push_str(&format!("\n- Platform error: {error}\n"));
+        }
     }
     fs::write(output_dir.join("report.md"), md)?;
     Ok(())
@@ -720,38 +866,91 @@ fn timing_triplet(p50: u64, p95: u64, p99: u64) -> String {
 }
 
 fn write_svg(manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
-    let values: Vec<_> = manifest
+    let platform_only = manifest.scenarios.is_empty() && manifest.platform_checks.is_some();
+    let mut values: Vec<_> = manifest
         .scenarios
         .iter()
         .flat_map(|scenario| {
             scenario.checkpoints.iter().map(move |checkpoint| {
                 (
                     format!("{} / {}", scenario.id, checkpoint.id),
-                    checkpoint.metrics.scene_build_p50_ns,
-                    checkpoint.metrics.cpu_render_p50_ns,
+                    [
+                        Some(checkpoint.metrics.scene_build_p50_ns),
+                        Some(checkpoint.metrics.cpu_render_p50_ns),
+                        checkpoint
+                            .native
+                            .as_ref()
+                            .map(|native| native.metrics.encode_submit_completion.p50_ns),
+                        checkpoint
+                            .native
+                            .as_ref()
+                            .and_then(|native| native.metrics.gpu.as_ref())
+                            .map(|gpu| gpu.p50_ns),
+                    ],
                 )
             })
         })
         .collect();
+    let frame_bars = [
+        ("Scene build", BLUE.mix(0.75)),
+        ("CPU replay", RED.mix(0.7)),
+        ("Native encode/submit/completion", GREEN.mix(0.75)),
+        ("GPU execution", MAGENTA.mix(0.75)),
+    ];
+    let platform_bars = [("Lifecycle latency", BLUE.mix(0.75))];
+    let bars = if platform_only {
+        if let Some(checks) = &manifest.platform_checks {
+            values = checks
+                .events
+                .iter()
+                .map(|event| {
+                    let ns = u64::try_from(event.elapsed_ms.saturating_mul(1_000_000))
+                        .unwrap_or(u64::MAX);
+                    (event.name.clone(), [Some(ns), None, None, None])
+                })
+                .collect();
+        }
+        &platform_bars[..]
+    } else {
+        let count = values
+            .iter()
+            .flat_map(|(_, timings)| timings.iter().enumerate())
+            .filter_map(|(index, value)| value.map(|_| index + 1))
+            .max()
+            .unwrap_or(2);
+        &frame_bars[..count]
+    };
+    let bars_per_row = bars.len();
     let path = output_dir.join("metrics.svg");
-    let height = 140 + values.len().max(1) as u32 * 36;
+    let height = 140 + values.len().max(1) as u32 * 54;
     let root = SVGBackend::new(&path, (1100, height)).into_drawing_area();
     root.fill(&WHITE).map_err(plot_err)?;
     let max = values
         .iter()
-        .map(|value| value.1.max(value.2))
+        .flat_map(|(_, timings)| timings.iter().flatten().copied())
         .max()
         .unwrap_or(1)
         .max(1);
-    let rows = values.len().max(1) * 2;
+    let rows = values.len().max(1) * bars_per_row;
     let mut chart = ChartBuilder::on(&root)
-        .caption("Median frame work by checkpoint", ("sans-serif", 24))
+        .caption(
+            if platform_only {
+                "Native lifecycle latency"
+            } else {
+                "Median frame work by checkpoint"
+            },
+            ("sans-serif", 24),
+        )
         .margin(18)
         .x_label_area_size(48)
         .y_label_area_size(300)
         .build_cartesian_2d(
             0u64..max.saturating_add(max / 10 + 1),
-            (0usize..rows).with_key_points((0..values.len()).map(|index| index * 2 + 1).collect()),
+            (0usize..rows).with_key_points(
+                (0..values.len())
+                    .map(|index| index * bars_per_row + bars_per_row / 2)
+                    .collect(),
+            ),
         )
         .map_err(plot_err)?;
     chart
@@ -759,7 +958,7 @@ fn write_svg(manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
         .y_labels(values.len())
         .y_label_formatter(&|index| {
             values
-                .get(*index / 2)
+                .get(*index / bars_per_row)
                 .map(|value| value.0.clone())
                 .unwrap_or_default()
         })
@@ -768,29 +967,26 @@ fn write_svg(manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
         .disable_mesh()
         .draw()
         .map_err(plot_err)?;
-    for (index, (_, build, replay)) in values.iter().enumerate() {
-        let row = index * 2;
-        let build_bar = chart
-            .draw_series(std::iter::once(Rectangle::new(
-                [(0, row), (*build, row + 1)],
-                BLUE.mix(0.75).filled(),
-            )))
-            .map_err(plot_err)?;
-        if index == 0 {
-            build_bar.label("Scene build").legend(|(x, y)| {
-                Rectangle::new([(x, y - 4), (x + 16, y + 4)], BLUE.mix(0.75).filled())
-            });
-        }
-        let replay_bar = chart
-            .draw_series(std::iter::once(Rectangle::new(
-                [(0, row + 1), (*replay, row + 2)],
-                RED.mix(0.7).filled(),
-            )))
-            .map_err(plot_err)?;
-        if index == 0 {
-            replay_bar.label("CPU replay").legend(|(x, y)| {
-                Rectangle::new([(x, y - 4), (x + 16, y + 4)], RED.mix(0.7).filled())
-            });
+    let mut legend_added = [false; 4];
+    for (index, (_, timings)) in values.iter().enumerate() {
+        for (bar_index, ((label, color), value)) in bars.iter().zip(timings).enumerate() {
+            let Some(value) = value else {
+                continue;
+            };
+            let row = index * bars_per_row + bar_index;
+            let series = chart
+                .draw_series(std::iter::once(Rectangle::new(
+                    [(0, row), (*value, row + 1)],
+                    color.filled(),
+                )))
+                .map_err(plot_err)?;
+            if !legend_added[bar_index] {
+                legend_added[bar_index] = true;
+                let color = *color;
+                series.label(*label).legend(move |(x, y)| {
+                    Rectangle::new([(x, y - 4), (x + 16, y + 4)], color.filled())
+                });
+            }
         }
     }
     chart
@@ -827,9 +1023,49 @@ fn write_html(manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
 <body>
   <h1>GPUI scenario report</h1>
   <p><a href="manifest.json">JSON manifest</a> · <a href="report.md">Markdown metrics</a></p>
-  <img src="metrics.svg" alt="Scene build and CPU replay timings">
+  <img src="metrics.svg" alt="Measured timings">
 "#,
     );
+    if let Some(native) = &manifest.native_replay {
+        html.push_str(&format!(
+            "<section><h2>Native replay</h2><p>Adapter: {} · Backend: {} · Device type: {} · Driver: {}</p>",
+            escape_html(&native.adapter),
+            escape_html(&native.backend),
+            escape_html(&native.device_type),
+            escape_html(&native.driver)
+        ));
+        html.push_str("<p>Encode/submit/completion latency covers CPU frame preparation through queue completion; it excludes target creation, timestamp mapping, and pixel readback. GPU latency is the device timestamp interval.</p>");
+        if let Some(reason) = &native.timestamp_reason {
+            html.push_str(&format!(
+                "<p>GPU timestamps unavailable: {}</p>",
+                escape_html(reason)
+            ));
+        }
+        if let Some(metrics) = manifest
+            .scenarios
+            .iter()
+            .flat_map(|scenario| scenario.checkpoints.iter())
+            .find_map(|checkpoint| checkpoint.native.as_ref())
+            .map(|checkpoint| &checkpoint.metrics)
+        {
+            html.push_str(&format!(
+                "<p>Tracked owned memory: {}.</p>",
+                escape_html(&metrics.allocation_scope)
+            ));
+            if let Some(source) = &metrics.device_allocation_scope {
+                html.push_str(&format!(
+                    "<p>Device allocation source: {}.</p>",
+                    escape_html(source)
+                ));
+            } else if let Some(reason) = &metrics.allocation_reason {
+                html.push_str(&format!(
+                    "<p>Device allocation unavailable: {}.</p>",
+                    escape_html(reason)
+                ));
+            }
+        }
+        html.push_str("</section>");
+    }
     html.push_str("<nav aria-label=\"Scenarios\">");
     for scenario in &manifest.scenarios {
         html.push_str(&format!(
@@ -846,6 +1082,40 @@ fn write_html(manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
         }
         html.push_str("</ul></section>");
     }
+    if let Some(checks) = &manifest.platform_checks {
+        html.push_str(&format!("<section><h2>Native platform checks</h2><p>{} · {}</p><table><thead><tr><th>Capability</th><th>Available</th></tr></thead><tbody>",
+            escape_html(&checks.platform), checks.status));
+        for (name, available) in &checks.capabilities {
+            html.push_str(&format!(
+                "<tr><td>{}</td><td>{available}</td></tr>",
+                escape_html(name)
+            ));
+        }
+        html.push_str("</tbody></table><table><thead><tr><th>Lifecycle event</th><th>Polls</th><th>Elapsed (ms)</th></tr></thead><tbody>");
+        for event in &checks.events {
+            html.push_str(&format!(
+                "<tr><td>{}</td><td>{}</td><td>{}</td></tr>",
+                escape_html(&event.name),
+                event.polls,
+                event.elapsed_ms
+            ));
+        }
+        html.push_str("</tbody></table>");
+        if let Some(frame) = &checks.frame {
+            html.push_str(&format!("<p>Captured frame: {}×{}, {} paints, {} quads, {} monochrome sprites, {} subpixel sprites, {} polychrome sprites, {} painted pixels.</p>",
+                frame.capture_width, frame.capture_height, frame.render_count, frame.quads, frame.monochrome_sprites, frame.subpixel_sprites, frame.polychrome_sprites, frame.painted_pixels));
+        }
+        if let Some(resize) = &checks.resize {
+            html.push_str(&format!(
+                "<p>Resize callback: {} events at {}×{} logical pixels.</p>",
+                resize.callback_count, resize.width, resize.height
+            ));
+        }
+        for error in &checks.errors {
+            html.push_str(&format!("<p>Platform error: {}</p>", escape_html(error)));
+        }
+        html.push_str("</section>");
+    }
     for scenario in &manifest.scenarios {
         html.push_str(&format!(
             "<section id=\"{}\"><h2>{}</h2>",
@@ -861,11 +1131,27 @@ fn write_html(manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
                 checkpoint.scene_json
             ));
             html.push_str("<div class=\"images\">");
-            let images = [
+            let mut images = vec![
                 ("Before", checkpoint.before_png.as_deref()),
                 ("Current", Some(checkpoint.png.as_str())),
                 ("Changes in red", checkpoint.diff_png.as_deref()),
             ];
+            if let Some(native) = &checkpoint.native {
+                images.push(("Native WGPU", Some(native.png.as_str())));
+                images.push(("CPU vs native", Some(native.diff_png.as_str())));
+                html.push_str(&format!(
+                    "<p>Native encode/submit/completion p50: {:.3} ms · GPU p50: {} · pixel error: {}/{} (max {}, mean {:.3}) · tracked bytes: {} · device allocation: {} ({})</p>",
+                    native.metrics.encode_submit_completion.p50_ns as f64 / 1_000_000.0,
+                    native.metrics.gpu.as_ref().map_or_else(|| "unavailable".to_owned(), |gpu| format!("{:.3} ms", gpu.p50_ns as f64 / 1_000_000.0)),
+                    native.difference.changed_pixels,
+                    native.difference.total_pixels,
+                    native.difference.max_channel_error,
+                    native.difference.mean_channel_error,
+                    native.metrics.tracked_owned_bytes,
+                    native.metrics.device_allocated_bytes.map_or_else(|| "unavailable".to_owned(), |bytes| bytes.to_string()),
+                    escape_html(native.metrics.device_allocation_scope.as_deref().or(native.metrics.allocation_reason.as_deref()).unwrap_or("scope unavailable"))
+                ));
+            }
             for (label, path) in images {
                 if let Some(path) = path {
                     html.push_str(&format!("<figure><figcaption>{label}</figcaption><a href=\"{path}\"><img loading=\"lazy\" src=\"{path}\" alt=\"{label}\"></a></figure>"));

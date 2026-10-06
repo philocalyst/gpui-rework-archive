@@ -357,6 +357,10 @@ impl PlatformWindow for TestWindow {
         self.0.lock().visible = visible;
     }
 
+    fn is_visible(&self) -> Option<bool> {
+        Some(TestWindow::is_visible(self))
+    }
+
     fn set_edited(&mut self, edited: bool) {
         self.0.lock().edited = edited;
     }

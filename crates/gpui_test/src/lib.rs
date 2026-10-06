@@ -5,6 +5,8 @@
 //! [`write_report`] only when you want to persist the returned capture bundle.
 
 mod fonts;
+#[cfg(feature = "gpu")]
+pub mod native;
 mod report;
 mod runner;
 mod snapshot;
@@ -13,18 +15,20 @@ pub mod gallery;
 pub use fonts::{bundled_fonts, bundled_text_system};
 pub use gallery::{BuiltInScenario, built_in_scenarios};
 pub use report::{
-    CheckpointManifest, EnvironmentManifest, ReportChange, ReportChangeKind, ReportManifest,
-    ReportOptions, ReportStatus, ScenarioManifest, compare_reports, compare_reports_selected,
-    diff_images, read_manifest, write_report,
+    CheckpointManifest, EnvironmentManifest, NativeCheckpointManifest, ReportChange,
+    ReportChangeKind, ReportManifest, ReportOptions, ReportStatus, ScenarioManifest,
+    compare_reports, compare_reports_selected, diff_images, read_manifest, write_report,
 };
 pub use runner::{
-    Harness, RenderedCheckpoint, RenderedScenario, RenderedSuite, ScenarioMetrics, Viewport,
+    Harness, ImageDifference, NativeCheckpoint, NativeReplayInfo, NativeReplayMetrics,
+    RenderedCheckpoint, RenderedScenario, RenderedSuite, ScenarioMetrics, TimingPercentiles,
+    Viewport,
 };
 
 use anyhow::{Result, ensure};
 use gpui::{
     AnyWindowHandle, App, DispatchEventResult, Entity, HeadlessAppContext, Pixels, PlatformInput,
-    Render, Size, Window, WindowHandle,
+    Render, Size, Window, WindowBounds, WindowHandle, WindowOptions,
 };
 use std::time::Duration;
 
@@ -146,6 +150,23 @@ impl<V: Render + 'static> Scenario<V> {
     /// Human-readable scenario title.
     pub fn title(&self) -> &str {
         &self.title
+    }
+
+    /// Logical viewport size used by the headless capture and as the native window's default.
+    pub fn size(&self) -> Size<Pixels> {
+        self.size
+    }
+
+    /// Opens the scenario's original typed view in a native GPUI window.
+    ///
+    /// Caller-provided bounds are preserved. When no bounds are supplied, the scenario viewport
+    /// is centered on the current display so ordinary examples can mount the same view used by
+    /// headless captures.
+    pub fn open_window(&self, cx: &mut App, mut options: WindowOptions) -> Result<WindowHandle<V>> {
+        if options.window_bounds.is_none() {
+            options.window_bounds = Some(WindowBounds::centered(self.size, cx));
+        }
+        Ok(cx.open_window(options, |window, app| (self.build)(window, app))?)
     }
 }
 

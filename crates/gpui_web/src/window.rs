@@ -756,6 +756,15 @@ impl PlatformWindow for WebWindow {
             .unwrap_or_else(|error| log::error!("Failed to update canvas visibility: {error:?}"));
     }
 
+    fn is_visible(&self) -> Option<bool> {
+        self.inner
+            .canvas
+            .style()
+            .get_property_value("display")
+            .ok()
+            .map(|display| display != "none")
+    }
+
     fn minimize(&self) {
         log::warn!("WebWindow::minimize is not supported in the browser");
     }

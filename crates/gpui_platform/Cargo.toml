@@ -53,6 +53,9 @@ gpui_macos = { workspace = true, features = ["test-support"] }
 gpui = { workspace = true, features = ["test-support"] }
 gpui_wgpu = { workspace = true, features = ["test-support"] }
 
+[dev-dependencies]
+serde_json.workspace = true
+
 [target.'cfg(target_os = "windows")'.dependencies]
 gpui_windows.workspace = true
 gpui = { workspace = true, features = ["windows-manifest"] }
@@ -68,3 +71,9 @@ console_error_panic_hook.workspace = true
 name = "parley_render"
 path = "tests/parley_render.rs"
 harness = false
+
+[[test]]
+name = "native_window"
+path = "tests/native_window.rs"
+harness = false
+required-features = ["test-support"]

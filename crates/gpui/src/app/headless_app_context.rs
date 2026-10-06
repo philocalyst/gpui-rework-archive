@@ -184,12 +184,20 @@ impl HeadlessAppContext {
 
     /// Changes the device density and invalidates layout and glyph rasterization.
     pub fn set_scale_factor(&mut self, window: AnyWindowHandle, scale_factor: f32) -> Result<()> {
-        anyhow::ensure!(scale_factor.is_finite() && scale_factor > 0.0, "scale factor must be positive and finite");
+        anyhow::ensure!(
+            scale_factor.is_finite() && scale_factor > 0.0,
+            "scale factor must be positive and finite"
+        );
         // Deliver the platform callback after releasing the app borrow: it updates the
         // same window and must be able to borrow the app again.
-        let mut test_window = self.update_window(window, |_, window, _| {
-            window.platform_window.as_test().map(|window| window.clone())
-        })?.ok_or_else(|| anyhow::anyhow!("headless window has no test platform"))?;
+        let mut test_window = self
+            .update_window(window, |_, window, _| {
+                window
+                    .platform_window
+                    .as_test()
+                    .map(|window| window.clone())
+            })?
+            .ok_or_else(|| anyhow::anyhow!("headless window has no test platform"))?;
         test_window.simulate_scale_factor(scale_factor);
         Ok(())
     }
@@ -212,7 +220,9 @@ impl HeadlessAppContext {
         window: AnyWindowHandle,
         resolve_tile: impl FnMut(crate::AtlasTile) -> Result<crate::CapturedBitmap>,
     ) -> Result<crate::SceneCapture> {
-        self.read_scene(window, |scene| crate::SceneCapture::capture(scene, resolve_tile))?
+        self.read_scene(window, |scene| {
+            crate::SceneCapture::capture(scene, resolve_tile)
+        })?
     }
 
     /// Returns the most recently rendered bounds for an element's debug selector.

@@ -65,47 +65,72 @@ impl BuiltInScenario {
     }
 }
 
-/// Returns the deterministic regression gallery. The same view types are used by
-/// runnable examples in `gpui/examples`.
-pub fn built_in_scenarios() -> Result<Vec<BuiltInScenario>> {
-    let text = Scenario::new(
-        "text-mixed-script",
-        "Wrapping, underline, and mixed scripts",
-        size(px(460.), px(340.)),
-        |_, cx: &mut App| cx.new(|_| TextScenario),
-    )?
-    .checkpoint("default", "Default width", Duration::ZERO)?;
-    let narrow = Scenario::new(
-        "text-narrow-wrap",
-        "Narrow text wrapping",
-        size(px(320.), px(420.)),
-        |_, cx: &mut App| cx.new(|_| TextScenario),
-    )?
-    .checkpoint("narrow", "Narrow viewport", Duration::ZERO)?;
-    let hidpi = Scenario::new(
-        "text-hidpi-2x",
-        "Text at 2x device scale",
-        size(px(340.), px(280.)),
-        |_, cx: &mut App| cx.new(|_| TextScenario),
-    )?
-    .scale_factor(2.0)?
-    .checkpoint("hidpi", "2x device scale", Duration::ZERO)?;
-    let fractional_dpi = Scenario::new(
-        "text-fractional-dpi",
-        "Text at fractional device scale",
-        size(px(340.), px(280.)),
-        |_, cx: &mut App| cx.new(|_| TextScenario),
-    )?
-    .scale_factor(1.5)?
-    .checkpoint("fractional", "1.5x device scale", Duration::ZERO)?;
-    let effects = Scenario::new(
+/// Shared wrapping and mixed-script scenarios used by the lesson and regression gallery.
+pub fn text_scenarios() -> Result<Vec<Scenario<TextScenario>>> {
+    [
+        (
+            "text-mixed-script",
+            "Wrapping, underline, and mixed scripts",
+            460.,
+            340.,
+            1.,
+            "default",
+            "Default width",
+        ),
+        (
+            "text-narrow-wrap",
+            "Narrow text wrapping",
+            320.,
+            420.,
+            1.,
+            "narrow",
+            "Narrow viewport",
+        ),
+        (
+            "text-hidpi-2x",
+            "Text at 2x device scale",
+            340.,
+            280.,
+            2.,
+            "hidpi",
+            "2x device scale",
+        ),
+        (
+            "text-fractional-dpi",
+            "Text at fractional device scale",
+            340.,
+            280.,
+            1.5,
+            "fractional",
+            "1.5x device scale",
+        ),
+    ]
+    .into_iter()
+    .map(|(id, title, width, height, scale, checkpoint, label)| {
+        let scenario = Scenario::new(id, title, size(px(width), px(height)), |_, cx: &mut App| {
+            cx.new(|_| TextScenario)
+        })?
+        .scale_factor(scale)?
+        .checkpoint(checkpoint, label, Duration::ZERO)?;
+        Ok(scenario)
+    })
+    .collect()
+}
+
+/// Canonical layered painting scenario used by the rendering example.
+pub fn effects_scenario() -> Result<Scenario<EffectsScenario>> {
+    Ok(Scenario::new(
         "effects",
         "Clipping, opacity, gradients, paths, and nested filters",
         size(px(480.), px(420.)),
         |_, cx: &mut App| cx.new(|_| EffectsScenario),
     )?
-    .checkpoint("effects", "Layered effects", Duration::ZERO)?;
-    let animation = Scenario::new(
+    .checkpoint("effects", "Layered effects", Duration::ZERO)?)
+}
+
+/// Fixed-clock animation is captured using the same GPUI animation wrapper as its runnable view.
+pub fn animation_scenario() -> Result<Scenario<AnimationScenario>> {
+    Ok(Scenario::new(
         "animation-clock",
         "Animation at fixed dispatcher times",
         size(px(320.), px(220.)),
@@ -115,15 +140,23 @@ pub fn built_in_scenarios() -> Result<Vec<BuiltInScenario>> {
     .checkpoint("t300", "300 ms", Duration::from_millis(300))?
     .checkpoint("t600", "600 ms", Duration::from_millis(600))?
     .checkpoint("t900", "900 ms", Duration::from_millis(900))?
-    .checkpoint("t1200", "1200 ms", Duration::from_millis(1200))?;
-    let layout = Scenario::new(
+    .checkpoint("t1200", "1200 ms", Duration::from_millis(1200))?)
+}
+
+/// Canonical flexible-row example and its capture checkpoint.
+pub fn layout_scenario() -> Result<Scenario<LayoutScenario>> {
+    Ok(Scenario::new(
         "layout",
         "Flexible layout",
         size(px(620.), px(300.)),
         |_, cx: &mut App| cx.new(|_| LayoutScenario),
     )?
-    .checkpoint("default", "Default layout", Duration::ZERO)?;
-    let interaction = Scenario::new(
+    .checkpoint("default", "Default layout", Duration::ZERO)?)
+}
+
+/// Selection, disclosure, focus, and scroll states after real input dispatch.
+pub fn interaction_scenario() -> Result<Scenario<InteractionScenario>> {
+    Ok(Scenario::new(
         "interaction-states",
         "Selection, disclosure, focus, and scroll input",
         size(px(420.), px(420.)),
@@ -184,22 +217,34 @@ pub fn built_in_scenarios() -> Result<Vec<BuiltInScenario>> {
             );
             Ok(())
         },
-    )?;
-    let media = Scenario::new(
+    )?)
+}
+
+/// Self-contained SVG and raster clipping/transformation example.
+pub fn media_scenario() -> Result<Scenario<MediaScenario>> {
+    Ok(Scenario::new(
         "media",
         "SVG and raster image clipping and transforms",
         size(px(360.), px(300.)),
         |_, cx: &mut App| cx.new(|_| MediaScenario),
     )?
-    .checkpoint("default", "Inline SVG and raster", Duration::ZERO)?;
-    let stress = Scenario::new(
+    .checkpoint("default", "Inline SVG and raster", Duration::ZERO)?)
+}
+
+/// Large virtual list and deliberate overlap used for paint stress captures.
+pub fn stress_scenario() -> Result<Scenario<StressScenario>> {
+    Ok(Scenario::new(
         "layered-stress",
         "Virtualized rows and overlapping paint layers",
         size(px(620.), px(480.)),
         |_, cx: &mut App| cx.new(|_| StressScenario),
     )?
-    .checkpoint("default", "Virtual rows", Duration::ZERO)?;
-    let async_tasks = Scenario::new(
+    .checkpoint("default", "Virtual rows", Duration::ZERO)?)
+}
+
+/// Foreground cancellation and completion states driven by real button input.
+pub fn tasks_scenario() -> Result<Scenario<AsyncTaskScenario>> {
+    Ok(Scenario::new(
         "async-tasks",
         "Foreground task cancellation and completion",
         size(px(360.), px(220.)),
@@ -272,18 +317,24 @@ pub fn built_in_scenarios() -> Result<Vec<BuiltInScenario>> {
             );
             Ok(())
         },
-    )?;
-    Ok(vec![
-        text.into(),
-        narrow.into(),
-        hidpi.into(),
-        fractional_dpi.into(),
-        effects.into(),
-        animation.into(),
-        layout.into(),
-        interaction.into(),
-        media.into(),
-        stress.into(),
-        async_tasks.into(),
-    ])
+    )?)
+}
+
+/// Returns the deterministic regression gallery. The same typed views and checkpoints are used
+/// by native examples through the builders above.
+pub fn built_in_scenarios() -> Result<Vec<BuiltInScenario>> {
+    let mut scenarios = text_scenarios()?
+        .into_iter()
+        .map(BuiltInScenario::from)
+        .collect::<Vec<_>>();
+    scenarios.extend([
+        effects_scenario()?.into(),
+        animation_scenario()?.into(),
+        layout_scenario()?.into(),
+        interaction_scenario()?.into(),
+        media_scenario()?.into(),
+        stress_scenario()?.into(),
+        tasks_scenario()?.into(),
+    ]);
+    Ok(scenarios)
 }

@@ -487,6 +487,14 @@ impl WgpuContext {
     pub fn new_headless(
         extra_requirements: Option<&WgpuDeviceRequirements>,
     ) -> anyhow::Result<Self> {
+        Self::new_headless_internal(extra_requirements, false).map(|(context, _)| context)
+    }
+
+    #[cfg(not(target_family = "wasm"))]
+    fn new_headless_internal(
+        extra_requirements: Option<&WgpuDeviceRequirements>,
+        request_optional_timestamps: bool,
+    ) -> anyhow::Result<(Self, bool)> {
         NativeBackend::try_in_preference_order("a headless GPU context", |backend| {
             let instance = backend.instance(None);
             let adapter =
@@ -500,9 +508,31 @@ impl WgpuContext {
                 .map_err(|error| {
                     anyhow::anyhow!("failed to request headless GPU adapter: {error}")
                 })?;
-            let device = gpui::block_on(Self::create_device(&adapter, extra_requirements))?;
-            Self::from_created_device(instance.raw, adapter, device)
+            let timestamp_feature =
+                wgpu::Features::TIMESTAMP_QUERY | wgpu::Features::TIMESTAMP_QUERY_INSIDE_ENCODERS;
+            let timestamps_requested =
+                request_optional_timestamps && adapter.features().contains(timestamp_feature);
+            let mut requirements = extra_requirements.cloned();
+            if timestamps_requested {
+                requirements
+                    .get_or_insert_with(WgpuDeviceRequirements::default)
+                    .features |= timestamp_feature;
+            }
+            let device = gpui::block_on(Self::create_device(&adapter, requirements.as_ref()))?;
+            let timestamps_enabled =
+                timestamps_requested && device.device.features().contains(timestamp_feature);
+            Ok((
+                Self::from_created_device(instance.raw, adapter, device)?,
+                timestamps_enabled,
+            ))
         })
+    }
+
+    /// Creates a headless context and enables encoder timestamps only when advertised by the
+    /// selected adapter. Returns whether the feature was actually enabled on the device.
+    #[cfg(not(target_family = "wasm"))]
+    pub(crate) fn new_headless_with_optional_timestamps() -> anyhow::Result<(Self, bool)> {
+        Self::new_headless_internal(None, true)
     }
 
     #[cfg(not(target_family = "wasm"))]

@@ -172,23 +172,22 @@ fn report_comparison_reports_removed_checkpoints() -> Result<()> {
                 batch_count: 1,
                 bitmap_storage_bytes: 0,
             },
+            native: None,
         })
     }
 
     fn suite(checkpoints: Vec<RenderedCheckpoint>) -> RenderedSuite {
-        RenderedSuite {
-            scenarios: vec![RenderedScenario {
-                id: "animation".into(),
-                title: "Animation".into(),
-                viewport: Viewport {
-                    width: 1.0,
-                    height: 1.0,
-                    scale_factor: 1.0,
-                },
-                font_pack: "test-fixture".into(),
-                checkpoints,
-            }],
-        }
+        RenderedSuite::new(vec![RenderedScenario {
+            id: "animation".into(),
+            title: "Animation".into(),
+            viewport: Viewport {
+                width: 1.0,
+                height: 1.0,
+                scale_factor: 1.0,
+            },
+            font_pack: "test-fixture".into(),
+            checkpoints,
+        }])
     }
 
     let mut old = suite(vec![
@@ -350,6 +349,152 @@ fn wrapped_parley_text_keeps_colored_wavy_underlines_on_multiple_lines() -> Resu
     assert!(
         colors.len() >= 2,
         "styled runs should retain separate underline colors"
+    );
+    Ok(())
+}
+
+#[derive(Default)]
+struct DecorationBaselineScenario;
+
+impl gpui::Render for DecorationBaselineScenario {
+    fn render(
+        &mut self,
+        _window: &mut gpui::Window,
+        _cx: &mut gpui::Context<Self>,
+    ) -> impl gpui::IntoElement {
+        use gpui::{
+            StrikethroughStyle, TextAlign, UnderlineStyle, canvas, div, fill, point, prelude::*,
+        };
+
+        let pieces = [
+            (
+                "IBM Plex Sans has a baseline marker and enough words to wrap across visual lines. ",
+                "IBM Plex Sans",
+            ),
+            (
+                "Source Serif 4 also wraps its own words across multiple visual lines. ",
+                "Source Serif 4",
+            ),
+            (
+                "Lilex wraps too, so all three bundled families are painted.",
+                "Lilex",
+            ),
+        ];
+        let text = pieces
+            .iter()
+            .map(|(piece, _)| *piece)
+            .collect::<Vec<_>>()
+            .concat();
+        let runs = pieces
+            .iter()
+            .map(|(piece, family)| gpui::TextRun {
+                len: piece.len(),
+                font: gpui::font(*family),
+                color: gpui::hsla(0.0, 0.0, 0.07, 1.0),
+                underline: Some(UnderlineStyle {
+                    thickness: px(2.0),
+                    color: Some(gpui::hsla(0.0, 0.8, 0.5, 1.0)),
+                    wavy: false,
+                }),
+                strikethrough: Some(StrikethroughStyle {
+                    thickness: px(2.0),
+                    color: Some(gpui::hsla(0.66, 0.8, 0.5, 1.0)),
+                }),
+                ..Default::default()
+            })
+            .collect::<Vec<_>>();
+        let line_height = px(30.0);
+
+        div().size_full().bg(gpui::rgb(0xffffff)).child(canvas(
+            move |_bounds, window, _cx| {
+                window
+                    .text_system()
+                    .shape_text(text, px(16.0), &runs, Some(px(180.0)), None)
+                    .expect("fixed bundled decoration text should shape")
+            },
+            move |bounds, shaped, window, cx| {
+                let origin = point(bounds.origin.x + px(8.0), bounds.origin.y + px(8.0));
+                let baseline_offset =
+                    (line_height - shaped.ascent() - shaped.descent()) / 2.0 + shaped.ascent();
+                for line_index in 0..shaped.line_count() {
+                    let baseline = origin.y + line_height * line_index as f32 + baseline_offset;
+                    // This guide is outside the text column and is computed from font metrics,
+                    // independently of the decoration offsets being tested.
+                    window.paint_quad(fill(
+                        gpui::Bounds::new(
+                            point(bounds.origin.x + px(220.0), baseline - px(0.5)),
+                            gpui::size(px(8.0), px(1.0)),
+                        ),
+                        gpui::hsla(0.33, 1.0, 0.4, 1.0),
+                    ));
+                }
+                shaped
+                    .paint(origin, line_height, TextAlign::Left, None, window, cx)
+                    .expect("shaped decorated text should paint");
+            },
+        ))
+    }
+}
+
+#[test]
+fn rendered_decoration_pixels_straddle_independent_font_baseline_guides() -> Result<()> {
+    let scenario = Scenario::new(
+        "decoration-baseline-signs",
+        "Decoration sides of font baseline",
+        size(px(240.0), px(280.0)),
+        |_, cx: &mut App| cx.new(|_| DecorationBaselineScenario),
+    )?
+    .checkpoint("default", "Wrapped decorated text", Duration::ZERO)?;
+    let rendered = Harness::new().timing_samples(1)?.run(&scenario)?;
+    let checkpoint = &rendered.checkpoints[0];
+
+    let baseline_rows = checkpoint
+        .image
+        .enumerate_pixels()
+        .filter(|(x, _, pixel)| {
+            (220..238).contains(x) && pixel[1] > 100 && pixel[0] < 80 && pixel[2] < 80
+        })
+        .map(|(_, y, _)| y)
+        .collect::<std::collections::BTreeSet<_>>();
+    assert!(
+        baseline_rows.len() >= 3,
+        "baseline guides found at {baseline_rows:?}"
+    );
+    let baselines = baseline_rows.into_iter().collect::<Vec<_>>();
+
+    let mut underline_pixels = 0;
+    let mut strike_pixels = 0;
+    for (x, y, pixel) in checkpoint.image.enumerate_pixels() {
+        if x >= 210 {
+            continue;
+        }
+        let nearest_baseline = *baselines
+            .iter()
+            .min_by_key(|baseline| y.abs_diff(**baseline))
+            .expect("baseline guides are present");
+        let baseline = nearest_baseline as i32;
+        if pixel[0] > 120 && pixel[0] > pixel[1].saturating_mul(2) && pixel[2] < 120 {
+            underline_pixels += 1;
+            assert!(
+                y as i32 > baseline,
+                "underline pixel ({x}, {y}) must be below its baseline guide at {nearest_baseline}"
+            );
+        }
+        if pixel[2] > 120 && pixel[2] > pixel[0].saturating_mul(2) && pixel[1] < 120 {
+            strike_pixels += 1;
+            assert!(
+                (y as i32) < baseline,
+                "strikethrough pixel ({x}, {y}) must be above its baseline guide at {nearest_baseline}"
+            );
+        }
+    }
+    assert!(
+        underline_pixels > 10,
+        "rendered underline pixels: {underline_pixels}"
+    );
+    assert!(
+        strike_pixels > 10,
+        "rendered strikethrough pixels: {strike_pixels}"
     );
     Ok(())
 }

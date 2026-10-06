@@ -20,6 +20,16 @@ pub(super) fn render_to_view(
     frame_view: &wgpu::TextureView,
     readback: Option<ReadbackCopy<'_>>,
 ) -> Option<wgpu::SubmissionIndex> {
+    render_to_view_measured(renderer, scene, frame_view, readback, None)
+}
+
+pub(super) fn render_to_view_measured(
+    renderer: &mut WgpuRenderer,
+    scene: &Scene,
+    frame_view: &wgpu::TextureView,
+    readback: Option<ReadbackCopy<'_>>,
+    timestamps: Option<TimestampCapture<'_>>,
+) -> Option<wgpu::SubmissionIndex> {
     let Some(targets) = PreparedTargets::prepare(renderer, scene, frame_view) else {
         return None;
     };
@@ -27,7 +37,7 @@ pub(super) fn render_to_view(
     // texture that reappears after an intervening primitive and recreate its platform view.
     renderer.retain_surface_cache(&scene.surfaces);
 
-    match FrameEncoder::new(renderer, scene, targets).encode(readback) {
+    match FrameEncoder::new(renderer, scene, targets).encode(readback, timestamps) {
         Ok(command_buffer) => Some(renderer.resources().queue.submit([command_buffer])),
         Err(DrawError::ExternalSurface) => None,
         Err(DrawError::CapacityPlanningInvariant) => {
@@ -39,6 +49,12 @@ pub(super) fn render_to_view(
             None
         }
     }
+}
+
+pub(super) struct TimestampCapture<'a> {
+    pub(super) query_set: &'a wgpu::QuerySet,
+    pub(super) resolve_buffer: &'a wgpu::Buffer,
+    pub(super) readback_buffer: &'a wgpu::Buffer,
 }
 
 pub(super) struct ReadbackCopy<'a> {
@@ -333,12 +349,32 @@ impl<'a> FrameEncoder<'a> {
     fn encode(
         mut self,
         readback: Option<ReadbackCopy<'_>>,
+        timestamps: Option<TimestampCapture<'_>>,
     ) -> Result<wgpu::CommandBuffer, DrawError> {
+        if let Some(timestamps) = &timestamps {
+            self.encoder.write_timestamp(timestamps.query_set, 0);
+        }
         let result = self.encode_commands();
         if result.is_ok() {
             if let Some(offscreen) = &self.offscreen {
                 self.renderer
                     .blit_to_frame(&mut self.encoder, offscreen, &self.presentation);
+            }
+            if let Some(timestamps) = &timestamps {
+                self.encoder.write_timestamp(timestamps.query_set, 1);
+                self.encoder.resolve_query_set(
+                    timestamps.query_set,
+                    0..2,
+                    timestamps.resolve_buffer,
+                    0,
+                );
+                self.encoder.copy_buffer_to_buffer(
+                    timestamps.resolve_buffer,
+                    0,
+                    timestamps.readback_buffer,
+                    0,
+                    16,
+                );
             }
             if let Some(readback) = readback {
                 self.encoder.copy_texture_to_buffer(

@@ -29,7 +29,7 @@ mod surfaces;
 mod target;
 
 #[cfg(all(feature = "test-support", not(target_family = "wasm")))]
-pub use headless::WgpuHeadlessRenderer;
+pub use headless::{GpuFrameMeasurement, GpuOwnedMemoryUsage, GpuReplayInfo, WgpuHeadlessRenderer};
 use pipelines::WgpuPipelines as ShaderPipelines;
 use resources::{GlobalBufferLayout, ResourceMetadata, WgpuResources};
 use settings::RenderingParameters;
@@ -435,17 +435,21 @@ mod tests {
         assert!(kernel.sample_step > 4.0);
     }
 
-    #[cfg(any(target_os = "macos", target_os = "windows"))]
     #[test]
-    fn desktop_blending_preserves_native_alpha_accumulation() {
-        let straight = pipelines::desktop_scene_blend_state(wgpu::CompositeAlphaMode::Opaque);
+    fn scene_blending_uses_source_over_for_both_color_encodings() {
+        let straight = pipelines::scene_blend_state(wgpu::CompositeAlphaMode::Opaque);
         assert_eq!(straight.color.src_factor, wgpu::BlendFactor::SrcAlpha);
-        assert_eq!(straight.alpha.dst_factor, wgpu::BlendFactor::One);
+        assert_eq!(
+            straight.alpha.dst_factor,
+            wgpu::BlendFactor::OneMinusSrcAlpha
+        );
 
-        let premultiplied =
-            pipelines::desktop_scene_blend_state(wgpu::CompositeAlphaMode::PreMultiplied);
+        let premultiplied = pipelines::scene_blend_state(wgpu::CompositeAlphaMode::PreMultiplied);
         assert_eq!(premultiplied.color.src_factor, wgpu::BlendFactor::One);
-        assert_eq!(premultiplied.alpha.dst_factor, wgpu::BlendFactor::One);
+        assert_eq!(
+            premultiplied.alpha.dst_factor,
+            wgpu::BlendFactor::OneMinusSrcAlpha
+        );
     }
 
     #[cfg(all(feature = "test-support", not(target_family = "wasm")))]

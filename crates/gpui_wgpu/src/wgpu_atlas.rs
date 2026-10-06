@@ -34,6 +34,11 @@ struct PendingUpload {
     data: Vec<u8>,
 }
 
+struct CapturedAtlas {
+    bitmaps: Vec<gpui::CapturedBitmap>,
+    tiles: Vec<AtlasTile>,
+}
+
 struct WgpuAtlasState {
     device: Arc<wgpu::Device>,
     queue: Arc<wgpu::Queue>,
@@ -44,6 +49,7 @@ struct WgpuAtlasState {
     glyph_cache: GlyphAtlasCache,
     pending_uploads: Vec<PendingUpload>,
     next_texture_identity: u64,
+    captured: Option<CapturedAtlas>,
 }
 
 pub struct WgpuTextureInfo {
@@ -69,6 +75,7 @@ impl WgpuAtlas {
             glyph_cache: Default::default(),
             pending_uploads: Vec::new(),
             next_texture_identity: 0,
+            captured: None,
         }))
     }
 
@@ -98,10 +105,7 @@ impl WgpuAtlas {
     /// Use this for incremental recovery when the device is still valid.
     pub fn clear(&self) {
         let mut lock = self.0.lock();
-        lock.storage = WgpuAtlasStorage::default();
-        lock.tiles_by_key.clear();
-        lock.glyph_cache.clear();
-        lock.pending_uploads.clear();
+        lock.clear();
     }
 
     /// Handles device lost by clearing all textures and cached tiles.
@@ -111,10 +115,69 @@ impl WgpuAtlas {
         lock.device = context.device.clone();
         lock.queue = context.queue.clone();
         lock.color_texture_format = context.color_texture_format();
-        lock.storage = WgpuAtlasStorage::default();
-        lock.tiles_by_key.clear();
-        lock.glyph_cache.clear();
-        lock.pending_uploads.clear();
+        lock.clear();
+    }
+
+    /// Bytes in live atlas backing textures, using the exact WGPU extent and
+    /// format. This intentionally excludes driver bookkeeping and allocation
+    /// padding, which WGPU does not expose.
+    pub fn backing_texture_bytes(&self) -> u64 {
+        let state = self.0.lock();
+        [
+            AtlasTextureKind::Monochrome,
+            AtlasTextureKind::Subpixel,
+            AtlasTextureKind::Polychrome,
+        ]
+        .into_iter()
+        .flat_map(|kind| state.storage[kind].textures.iter())
+        .filter_map(Option::as_ref)
+        .map(|texture| {
+            let extent = texture.texture.size();
+            u64::from(extent.width)
+                .saturating_mul(u64::from(extent.height))
+                .saturating_mul(u64::from(extent.depth_or_array_layers))
+                .saturating_mul(u64::from(texture.bytes_per_pixel()))
+        })
+        .sum()
+    }
+
+    /// Replaces atlas contents with portable capture bitmaps and returns the corresponding
+    /// platform tiles in capture order. This path intentionally does not fabricate cache keys.
+    pub fn replace_with_captured_bitmaps(
+        &self,
+        bitmaps: &[gpui::CapturedBitmap],
+    ) -> Result<Vec<AtlasTile>> {
+        let mut state = self.0.lock();
+        if let Some(captured) = &state.captured
+            && captured.bitmaps == bitmaps
+        {
+            return Ok(captured.tiles.clone());
+        }
+        state.clear();
+        let mut tiles = Vec::with_capacity(bitmaps.len());
+        for (index, bitmap) in bitmaps.iter().enumerate() {
+            bitmap.validate()?;
+            anyhow::ensure!(
+                bitmap.width <= state.max_texture_size && bitmap.height <= state.max_texture_size,
+                "captured bitmap {index} exceeds GPU texture limit {}",
+                state.max_texture_size
+            );
+            let size = Size {
+                width: DevicePixels(bitmap.width as i32),
+                height: DevicePixels(bitmap.height as i32),
+            };
+            let tile = state
+                .allocate(size, bitmap.kind)
+                .with_context(|| format!("failed to allocate captured bitmap {index}"))?;
+            state.upload_texture(tile.texture_id, tile.bounds, &bitmap.bytes);
+            tiles.push(tile);
+        }
+        state.flush_uploads();
+        state.captured = Some(CapturedAtlas {
+            bitmaps: bitmaps.to_vec(),
+            tiles: tiles.clone(),
+        });
+        Ok(tiles)
     }
 }
 
@@ -190,6 +253,14 @@ impl PlatformAtlas for WgpuAtlas {
 }
 
 impl WgpuAtlasState {
+    fn clear(&mut self) {
+        self.storage = WgpuAtlasStorage::default();
+        self.tiles_by_key.clear();
+        self.glyph_cache.clear();
+        self.pending_uploads.clear();
+        self.captured = None;
+    }
+
     fn insert_tile(
         &mut self,
         key: AtlasKey,
@@ -490,6 +561,43 @@ mod tests {
                 .map_err(|error| anyhow::anyhow!("failed to request device: {error}"))?;
             Ok((Arc::new(device), Arc::new(queue)))
         })
+    }
+
+    #[test]
+    fn captured_atlas_reuses_identical_uploads_and_invalidates_after_clear() -> anyhow::Result<()> {
+        let (device, queue) = test_device_and_queue()?;
+        let atlas = WgpuAtlas::new(device, queue, wgpu::TextureFormat::Bgra8Unorm);
+        let mut bitmaps = vec![gpui::CapturedBitmap {
+            kind: AtlasTextureKind::Monochrome,
+            width: 2,
+            height: 2,
+            bytes: vec![128; 4],
+        }];
+        let first = atlas.replace_with_captured_bitmaps(&bitmaps)?;
+        let first_identity = atlas.get_texture_info(first[0].texture_id).identity;
+        let again = atlas.replace_with_captured_bitmaps(&bitmaps)?;
+        assert_eq!(first, again);
+        assert_eq!(
+            first_identity,
+            atlas.get_texture_info(again[0].texture_id).identity
+        );
+
+        bitmaps[0].bytes.fill(255);
+        let changed = atlas.replace_with_captured_bitmaps(&bitmaps)?;
+        let changed_identity = atlas.get_texture_info(changed[0].texture_id).identity;
+        assert_ne!(
+            first_identity, changed_identity,
+            "changed bytes must upload fresh textures"
+        );
+        atlas.clear();
+        assert_eq!(atlas.backing_texture_bytes(), 0);
+        let restored = atlas.replace_with_captured_bitmaps(&bitmaps)?;
+        assert_ne!(
+            changed_identity,
+            atlas.get_texture_info(restored[0].texture_id).identity,
+            "clearing an atlas must invalidate the identical-capture cache"
+        );
+        Ok(())
     }
 
     #[test]
