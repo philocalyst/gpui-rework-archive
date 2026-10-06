@@ -342,16 +342,16 @@ impl Harness {
             }
 
             let capture = cx.capture_scene(any_window, |tile| atlas.resolve(tile))?;
-            let primitive_count = cx.read_scene(any_window, |scene| {
-                scene.shadows.len()
-                    + scene.quads.len()
-                    + scene.paths.len()
-                    + scene.underlines.len()
-                    + scene.monochrome_sprites.len()
-                    + scene.subpixel_sprites.len()
-                    + scene.polychrome_sprites.len()
-            })?;
             let scene = capture.to_scene()?;
+            let primitive_count = scene.shadows.len()
+                + scene.quads.len()
+                + scene.paths.len()
+                + scene.underlines.len()
+                + scene.monochrome_sprites.len()
+                + scene.subpixel_sprites.len()
+                + scene.polychrome_sprites.len()
+                + scene.backdrop_filters.len()
+                + scene.filter_boundaries.len();
             let mut cpu = CpuRenderer::from_captured_bitmaps(capture.bitmaps())?;
             // Allocate and warm the retained target before collecting steady-state samples.
             cpu.render_scene(&scene, device_size)?;

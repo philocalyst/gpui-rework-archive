@@ -105,6 +105,28 @@ fn animation_at_an_absolute_time_is_independent_of_clock_chunking() -> Result<()
     Ok(())
 }
 
+#[test]
+fn effects_metrics_count_all_captured_primitive_arrays() -> Result<()> {
+    let scenario = gpui_test::gallery::effects_scenario()?;
+    let rendered = Harness::new().run(&scenario)?;
+    let checkpoint = &rendered.checkpoints[0];
+    let scene = checkpoint.capture.to_scene()?;
+    let primitive_count = scene.shadows.len()
+        + scene.quads.len()
+        + scene.paths.len()
+        + scene.underlines.len()
+        + scene.monochrome_sprites.len()
+        + scene.subpixel_sprites.len()
+        + scene.polychrome_sprites.len()
+        + scene.backdrop_filters.len()
+        + scene.filter_boundaries.len();
+
+    assert!(!scene.backdrop_filters.is_empty());
+    assert!(!scene.filter_boundaries.is_empty());
+    assert_eq!(checkpoint.metrics.primitive_count, primitive_count);
+    Ok(())
+}
+
 proptest::proptest! {
     #![proptest_config(proptest::test_runner::Config {
         cases: 48,
