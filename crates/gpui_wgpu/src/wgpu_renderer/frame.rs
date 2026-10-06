@@ -161,20 +161,7 @@ pub(super) struct GlobalUniformState {
 
 fn write_shader_globals(renderer: &mut WgpuRenderer) {
     let font = renderer.rendering_params.font_rasterization;
-    let font_rasterization = FontRasterizationUniforms {
-        gamma_ratios: wgsl_rs::std::vec4f(
-            font.gamma_ratios[0],
-            font.gamma_ratios[1],
-            font.gamma_ratios[2],
-            font.gamma_ratios[3],
-        ),
-        grayscale_enhanced_contrast: font.grayscale_enhanced_contrast,
-        subpixel_enhanced_contrast: font.subpixel_enhanced_contrast,
-        uses_blue_green_red_subpixel_order: ShaderBool::from(
-            renderer.subpixel_order == super::SubpixelOrder::BlueGreenRed,
-        ),
-        padding: 0,
-    };
+    let font_rasterization = font.with_subpixel_order(renderer.subpixel_order).uniforms();
     let globals = GlobalUniforms {
         viewport_size: wgsl_rs::std::vec2f(
             renderer.target.width() as f32,

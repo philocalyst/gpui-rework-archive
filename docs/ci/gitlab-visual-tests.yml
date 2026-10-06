@@ -1,8 +1,7 @@
 # Include this file from .gitlab-ci.yml with:
 #   include:
 #     - local: docs/ci/gitlab-visual-tests.yml
-# GitLab CI exposes the report at the job artifact URL for the configured
-# retention period. No repository or Pages credentials are needed.
+# The CPU renderer needs no GPU, display server, Wayland, X11, or fontconfig.
 gpui-visual-tests:
   stage: test
   image: rust:latest
@@ -10,27 +9,68 @@ gpui-visual-tests:
     CARGO_TERM_COLOR: always
     CARGO_INCREMENTAL: "0"
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends python3 libxkbcommon-dev libxkbcommon-x11-dev libwayland-dev libx11-dev libxcb-shape0-dev libxcb-xfixes0-dev libfontconfig-dev
+    - apt-get update && apt-get install -y --no-install-recommends python3
   script:
     - python3 -m unittest discover -s scripts/testing -p 'test_*.py'
-    - cargo test --package gpui_ce_test --lib
-    - scripts/gpui-test run --output visual-report
+    - cargo test --locked --package gpui_ce_render --features cpu
+    - cargo test --locked --package gpui_ce_test --lib --test state_regressions
+    - |
+      if ! cargo test --locked --package gpui_ce_test --test gallery_snapshots; then
+        echo "WARNING: reviewed scene or pixel snapshots changed; inspect captures before updating baselines."
+      fi
+    - |
+      set -eu
+      base_sha="${GPUI_VISUAL_BASE_SHA:-${CI_MERGE_REQUEST_DIFF_BASE_SHA:-}}"
+      if [ -z "$base_sha" ] && [ "${CI_PIPELINE_SOURCE:-}" = "push" ]; then
+        base_sha="${CI_COMMIT_BEFORE_SHA:-}"
+      fi
+      if [ "$base_sha" = "0000000000000000000000000000000000000000" ]; then
+        base_sha=""
+      fi
+
+      if [ -z "$base_sha" ]; then
+        echo "WARNING: no base commit was provided; visual comparisons will be skipped."
+      elif ! git cat-file -e "$base_sha^{commit}" 2>/dev/null; then
+        echo "WARNING: base commit $base_sha is unavailable in this checkout; visual comparisons will be skipped."
+      else
+        baseline_checkout="$(mktemp -d)"
+        rmdir "$baseline_checkout"
+        trap 'git worktree remove --force "$baseline_checkout" >/dev/null 2>&1 || true' EXIT
+        if ! git worktree add --detach "$baseline_checkout" "$base_sha"; then
+          echo "WARNING: could not create the base worktree; visual comparisons will be skipped."
+        elif [ ! -x "$baseline_checkout/scripts/gpui-test" ]; then
+          echo "WARNING: base revision predates the visual-test harness; comparisons will be skipped."
+        elif ! GIT_SHA="$base_sha" "$baseline_checkout/scripts/gpui-test" run --output "$CI_PROJECT_DIR/visual-baseline"; then
+          echo "WARNING: base capture failed; current captures will still be generated."
+        fi
+      fi
+    - |
+      set -eu
+      if [ -f visual-baseline/manifest.json ]; then
+        GIT_SHA="$CI_COMMIT_SHA" scripts/gpui-test run --output visual-report --baseline visual-baseline
+      else
+        echo "WARNING: no baseline capture is available; generating current captures without diffs."
+        GIT_SHA="$CI_COMMIT_SHA" scripts/gpui-test run --output visual-report
+      fi
   artifacts:
     when: always
     expire_in: 30 days
     paths:
       - visual-report/
+      - visual-baseline/
+      - crates/gpui_test/tests/snapshots/*.snap.new
     # Merge-request source controls its generated HTML/SVG. Keep those out of
-    # GitLab's authenticated artifact browser; it can still expose PNG/JSON.
+    # GitLab's authenticated artifact browser; PNG/JSON remain downloadable.
     exclude:
       - visual-report/*.html
       - visual-report/*.svg
       - visual-report/**/*.html
       - visual-report/**/*.svg
+      - visual-baseline/*.html
+      - visual-baseline/*.svg
+      - visual-baseline/**/*.html
+      - visual-baseline/**/*.svg
     expose_as: "GPUI visual report"
 
-# To publish reports with GitLab Pages, use the Pages job/artifact syntax
-# supported by your GitLab version and copy visual-report/ into the public/
-# directory. Treat the generated PNG/JSON files as data; serve index.html only
-# from trusted branch pipelines, because merge-request captures come from
-# developer-controlled source code.
+# Optional GitLab Pages setup: copy visual-report/ to public/ from a trusted
+# branch pipeline. Do not publish merge-request-generated HTML or SVG.

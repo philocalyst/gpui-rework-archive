@@ -157,7 +157,7 @@ impl WgpuRenderer {
     /// Updates platform-specific text rasterization parameters.
     pub fn set_font_rasterization_settings(&mut self, settings: FontRasterizationSettings) {
         self.rendering_params.font_rasterization = settings;
-        self.subpixel_order = settings.subpixel_order;
+        self.subpixel_order = settings.subpixel_order();
     }
 
     /// Compatibility wrapper for callers that still report the layout as a boolean.

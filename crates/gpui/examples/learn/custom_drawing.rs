@@ -10,8 +10,8 @@
 use gpui::colors::Colors;
 use gpui::{
     App, Bounds, ColorExt, Context, Hsla, MouseButton, MouseDownEvent, MouseMoveEvent,
-    MouseUpEvent, Path, PathBuilder, Pixels, Point, Render, Rgba, Window, WindowBounds,
-    WindowOptions, canvas, div, fill, point, prelude::*, px, rgb, size,
+    MouseUpEvent, Path, PathBuilder, Pixels, Point, Render, Rgba, Window, canvas, div, fill, point,
+    prelude::*, px, rgb, size,
 };
 use palette::IntoColor;
 
@@ -466,12 +466,9 @@ fn section(
 
 fn main() {
     gpui_platform::application().run(|cx: &mut App| {
-        let bounds = Bounds::centered(None, size(px(550.), px(800.)), cx);
-        cx.open_window(
-            WindowOptions::new().window_bounds(Some(WindowBounds::Windowed(bounds))),
-            |_, cx| cx.new(|cx| CustomDrawingExample::new(cx)),
-        )
-        .expect("Failed to open window");
+        let options = example_prelude::centered_window(550., 800., cx);
+        cx.open_window(options, |_, cx| cx.new(|cx| CustomDrawingExample::new(cx)))
+            .expect("Failed to open window");
 
         example_prelude::init_example(cx, "Custom Drawing");
     });

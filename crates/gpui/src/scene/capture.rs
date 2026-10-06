@@ -164,7 +164,10 @@ impl SceneCapture {
     ) -> Result<()> {
         let mut sources = HashMap::<AtlasTile, usize>::new();
         let mut resources = Vec::new();
-        let tiles = self.monochrome_sprites.iter().map(|sprite| sprite.tile)
+        let tiles = self
+            .monochrome_sprites
+            .iter()
+            .map(|sprite| sprite.tile)
             .chain(self.subpixel_sprites.iter().map(|sprite| sprite.tile))
             .chain(self.polychrome_sprites.iter().map(|sprite| sprite.tile));
         for tile in tiles {
@@ -174,11 +177,15 @@ impl SceneCapture {
             let bitmap = resolve_tile(tile)
                 .with_context(|| format!("resolving atlas tile {:?}", tile.tile_id))?;
             bitmap.validate()?;
-            ensure!(bitmap.kind == tile.texture_id.kind,
-                "resolved bitmap kind does not match atlas tile kind");
-            ensure!(bitmap.width as i32 == tile.bounds.size.width.0
-                && bitmap.height as i32 == tile.bounds.size.height.0,
-                "resolved bitmap dimensions do not match atlas tile bounds");
+            ensure!(
+                bitmap.kind == tile.texture_id.kind,
+                "resolved bitmap kind does not match atlas tile kind"
+            );
+            ensure!(
+                bitmap.width as i32 == tile.bounds.size.width.0
+                    && bitmap.height as i32 == tile.bounds.size.height.0,
+                "resolved bitmap dimensions do not match atlas tile bounds"
+            );
             let index = resources.len();
             sources.insert(tile, index);
             resources.push((index, bitmap));
@@ -207,25 +214,41 @@ impl SceneCapture {
                 },
                 tile_id: TileId(0),
                 padding: 0,
-                bounds: Bounds::new(point(DevicePixels(0), DevicePixels(0)),
-                    crate::size(DevicePixels(bitmap.width as i32), DevicePixels(bitmap.height as i32))),
+                bounds: Bounds::new(
+                    point(DevicePixels(0), DevicePixels(0)),
+                    crate::size(
+                        DevicePixels(bitmap.width as i32),
+                        DevicePixels(bitmap.height as i32),
+                    ),
+                ),
             });
         }
-        let tiles = self.monochrome_sprites.iter_mut().map(|sprite| &mut sprite.tile)
-            .chain(self.subpixel_sprites.iter_mut().map(|sprite| &mut sprite.tile))
-            .chain(self.polychrome_sprites.iter_mut().map(|sprite| &mut sprite.tile));
+        let tiles = self
+            .monochrome_sprites
+            .iter_mut()
+            .map(|sprite| &mut sprite.tile)
+            .chain(
+                self.subpixel_sprites
+                    .iter_mut()
+                    .map(|sprite| &mut sprite.tile),
+            )
+            .chain(
+                self.polychrome_sprites
+                    .iter_mut()
+                    .map(|sprite| &mut sprite.tile),
+            );
         for tile in tiles {
             *tile = normalized[sources[tile]].expect("every source tile was normalized");
         }
 
         // GPUI assigns distinct draw orders to intersecting primitives. Sort only
         // within an order, where atlas-dependent ordering cannot affect compositing.
-        self.monochrome_sprites.sort_by(|a, b|
-            sprite_order(a.order, a.tile, a.bounds, b.order, b.tile, b.bounds));
-        self.subpixel_sprites.sort_by(|a, b|
-            sprite_order(a.order, a.tile, a.bounds, b.order, b.tile, b.bounds));
-        self.polychrome_sprites.sort_by(|a, b|
-            sprite_order(a.order, a.tile, a.bounds, b.order, b.tile, b.bounds));
+        self.monochrome_sprites
+            .sort_by(|a, b| sprite_order(a.order, a.tile, a.bounds, b.order, b.tile, b.bounds));
+        self.subpixel_sprites
+            .sort_by(|a, b| sprite_order(a.order, a.tile, a.bounds, b.order, b.tile, b.bounds));
+        self.polychrome_sprites
+            .sort_by(|a, b| sprite_order(a.order, a.tile, a.bounds, b.order, b.tile, b.bounds));
         self.commands = ScenePlan::build(&self.clone_primitives(), Vec::new()).commands;
         Ok(())
     }
@@ -344,20 +367,30 @@ impl SceneCapture {
 }
 
 fn sprite_order(
-    order_a: DrawOrder, tile_a: AtlasTile, bounds_a: Bounds<ScaledPixels>,
-    order_b: DrawOrder, tile_b: AtlasTile, bounds_b: Bounds<ScaledPixels>,
+    order_a: DrawOrder,
+    tile_a: AtlasTile,
+    bounds_a: Bounds<ScaledPixels>,
+    order_b: DrawOrder,
+    tile_b: AtlasTile,
+    bounds_b: Bounds<ScaledPixels>,
 ) -> std::cmp::Ordering {
-    (order_a, tile_a.texture_id.index).cmp(&(order_b, tile_b.texture_id.index))
+    (order_a, tile_a.texture_id.index)
+        .cmp(&(order_b, tile_b.texture_id.index))
         .then_with(|| bounds_a.origin.y.0.total_cmp(&bounds_b.origin.y.0))
         .then_with(|| bounds_a.origin.x.0.total_cmp(&bounds_b.origin.x.0))
 }
 
 fn validate_filters(filters: &[ScaledFilter], opacity: f32) -> Result<()> {
-    ensure!((0.0..=1.0).contains(&opacity), "filter opacity must be between zero and one");
+    ensure!(
+        (0.0..=1.0).contains(&opacity),
+        "filter opacity must be between zero and one"
+    );
     for filter in filters {
         match filter {
-            ScaledFilter::Blur(radius) => ensure!(radius.0 >= 0.0 && radius.0.is_finite(),
-                "blur radius must be finite and non-negative"),
+            ScaledFilter::Blur(radius) => ensure!(
+                radius.0 >= 0.0 && radius.0.is_finite(),
+                "blur radius must be finite and non-negative"
+            ),
         }
     }
     Ok(())
@@ -519,7 +552,7 @@ mod tests {
                 .err()
                 .unwrap()
                 .to_string()
-                .contains("invalid shadow range")
+                .contains("does not match compiled scene")
         );
 
         let mut invalid_scene = Scene::default();

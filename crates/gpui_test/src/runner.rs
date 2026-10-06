@@ -28,6 +28,8 @@ pub struct RenderedScenario {
     pub title: String,
     /// Viewport associated with this scenario.
     pub viewport: Viewport,
+    /// Font pack used to shape this scenario. Caller-supplied systems default to `custom`.
+    pub font_pack: String,
     /// Per-checkpoint captures in timeline order.
     pub checkpoints: Vec<RenderedCheckpoint>,
 }
@@ -36,9 +38,9 @@ pub struct RenderedScenario {
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct Viewport {
     /// Logical width.
-    pub width: u32,
+    pub width: f32,
     /// Logical height.
-    pub height: u32,
+    pub height: f32,
     /// Device scale factor used to build and capture the window.
     pub scale_factor: f32,
 }
@@ -89,6 +91,7 @@ pub struct ScenarioMetrics {
 pub struct Harness {
     timing_samples: usize,
     text_system: Option<Arc<dyn PlatformTextSystem>>,
+    font_pack: String,
     asset_source: Arc<dyn AssetSource>,
 }
 
@@ -104,6 +107,7 @@ impl Harness {
         Self {
             timing_samples: 1,
             text_system: None,
+            font_pack: "bundled-v1".into(),
             asset_source: Arc::new(()),
         }
     }
@@ -112,8 +116,7 @@ impl Harness {
     pub fn benchmark() -> Self {
         Self {
             timing_samples: 20,
-            text_system: None,
-            asset_source: Arc::new(()),
+            ..Self::new()
         }
     }
 
@@ -128,6 +131,18 @@ impl Harness {
     /// Supplies a caller-owned text system instead of the bundled-font default.
     pub fn with_text_system(mut self, system: Arc<dyn PlatformTextSystem>) -> Self {
         self.text_system = Some(system);
+        self.font_pack = "custom".into();
+        self
+    }
+
+    /// Identifies a caller-owned font pack in exported reports.
+    pub fn with_named_text_system(
+        mut self,
+        name: impl Into<String>,
+        system: Arc<dyn PlatformTextSystem>,
+    ) -> Self {
+        self.text_system = Some(system);
+        self.font_pack = name.into();
         self
     }
 
@@ -145,6 +160,24 @@ impl Harness {
             "scenario {} has no checkpoints",
             scenario.id
         );
+        let viewport = Viewport {
+            width: scenario.size.width.as_f32(),
+            height: scenario.size.height.as_f32(),
+            scale_factor: scenario.scale_factor,
+        };
+        let dimension = |logical: f32| -> Result<DevicePixels> {
+            let physical = (logical * viewport.scale_factor).ceil();
+            ensure!(
+                physical.is_finite() && physical as f64 <= i32::MAX as f64,
+                "scenario {} physical viewport exceeds scene coordinate limits",
+                scenario.id
+            );
+            Ok(DevicePixels(physical as i32))
+        };
+        let device_size = Size {
+            width: dimension(viewport.width)?,
+            height: dimension(viewport.height)?,
+        };
         let system: Arc<dyn PlatformTextSystem> = match &self.text_system {
             Some(system) => system.clone(),
             None => Arc::new(bundled_text_system()?),
@@ -163,7 +196,6 @@ impl Harness {
         cx.set_scale_factor(window.into(), scenario.scale_factor)?;
         cx.run_until_parked();
         let any_window = window.into();
-        let scale_factor = cx.update_window(any_window, |_, window, _| window.scale_factor())?;
         let mut previous_at = Duration::ZERO;
         let mut output = Vec::with_capacity(scenario.checkpoints.len());
 
@@ -192,12 +224,8 @@ impl Harness {
                     + scene.subpixel_sprites.len()
                     + scene.polychrome_sprites.len()
             })?;
-            let scene = capture.clone().into_scene()?;
+            let scene = capture.to_scene()?;
             let mut cpu = CpuRenderer::from_captured_bitmaps(capture.bitmaps())?;
-            let device_size = Size {
-                width: DevicePixels((scenario.size.width.as_f32() * scale_factor).ceil() as i32),
-                height: DevicePixels((scenario.size.height.as_f32() * scale_factor).ceil() as i32),
-            };
             let mut cpu_samples = Vec::with_capacity(self.timing_samples);
             let mut image = None;
             for _ in 0..self.timing_samples {
@@ -245,11 +273,8 @@ impl Harness {
         Ok(RenderedScenario {
             id: scenario.id.clone(),
             title: scenario.title.clone(),
-            viewport: Viewport {
-                width: scenario.size.width.as_f32() as u32,
-                height: scenario.size.height.as_f32() as u32,
-                scale_factor,
-            },
+            viewport,
+            font_pack: self.font_pack.clone(),
             checkpoints: output,
         })
     }

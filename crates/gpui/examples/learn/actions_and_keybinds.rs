@@ -4,10 +4,7 @@
 #![cfg_attr(target_family = "wasm", no_main)]
 
 use gpui::colors::Colors;
-use gpui::{
-    App, Bounds, Context, FocusHandle, KeyBinding, Window, WindowBounds, WindowOptions, actions,
-    div, prelude::*, px, size,
-};
+use gpui::{App, Context, FocusHandle, KeyBinding, Window, actions, div, prelude::*, px};
 
 #[path = "../shared/prelude.rs"]
 mod example_prelude;
@@ -81,11 +78,10 @@ fn run_example() {
 
         register_keybinds(cx);
 
-        let bounds = Bounds::centered(None, size(px(480.0), px(240.0)), cx);
-        cx.open_window(
-            WindowOptions::new().window_bounds(Some(WindowBounds::Windowed(bounds))),
-            |window, cx| cx.new(|cx| ActionsExample::new(window, cx)),
-        )
+        let options = example_prelude::centered_window(480., 240., cx);
+        cx.open_window(options, |window, cx| {
+            cx.new(|cx| ActionsExample::new(window, cx))
+        })
         .expect("Failed to open window");
 
         example_prelude::init_example(cx, "Actions and keybinds");

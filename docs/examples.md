@@ -1,6 +1,6 @@
 # GPUI examples
 
-Examples are grouped by the idea they teach: `learn` is the short learning path, `gallery` keeps focused reference demos, `text` covers text-system inspection, `platform` demonstrates native integration, and `bench` contains stress and performance views. Cargo target names stay familiar, so launch examples with `scripts/gpui-example <name>` or `cargo run -p gpui-ce --example <name>`.
+Examples are grouped by the idea they teach: `learn` is the short learning path, `gallery` keeps focused reference demos, `text` covers text-system inspection, `platform` demonstrates native integration, and `bench` contains stress and performance views. Cargo targets use short topic names, so launch examples with `scripts/gpui-example <name>` or `cargo run -p gpui-ce --example <name>`.
 
 The deterministic gallery lives in `gpui_ce_test::gallery`. Its `LayoutScenario`, `TextScenario`, `EffectsScenario`, `AnimationScenario`, `InteractionScenario`, `MediaScenario`, and `StressScenario` views are also used by the matching `layout`, `text`, `blur`/`render_effects`, `animation`, `input_states`, `svg`, and `uniform_list` examples. Run captures from the repository root with `scripts/gpui-test list` and `scripts/gpui-test run`. The registry covers default, narrow, 2x, and fractional-DPI text; layered effects; five animation clock checkpoints (0, 300, 600, 900, and 1200 ms); flexible layout; input-dispatched selection, disclosure, focus, and scrolling; embedded SVG/raster media; and a virtualized overlap-heavy list.
 
@@ -8,12 +8,12 @@ The table marks shared cases as automated. Other targets remain manual-only in t
 
 | Group | Example | What it demonstrates | Coverage and states to exercise | Requirements |
 | --- | --- | --- | --- | --- |
-| Learn | `interactive_elements` | Click, hover, pointer and drag/drop interactions. | Manual: click counts, hover enter/leave, drag start and drop acceptance. | Pointer input. |
+| Learn | `interactive_elements` | Click count, callback-driven hover, raw mouse position/events, and drag data/drop feedback. | Manual: single/double/triple-click counts, hover enter/leave, pressed colors and coordinates, drag preview and accepted drop. | Pointer input. |
 | Learn | `actions_and_keybinds` | Registering actions and binding shortcuts. | Manual: Space increments; Backspace resets; focus and shortcut dispatch. | Keyboard input. |
 | Learn | `uniform_list` | Virtualized rendering of 2,000 stable rows with overlapping cell decoration. | Automated: deterministic initial list viewport; useful future cases are top, middle, and end offsets plus row identity. | Scroll input. |
-| Learn | `creating_components` | Element-scoped state, `RenderOnce`, and entity-backed `Render`. | Manual: state persistence across redraws and independent component instances. | Pointer input. |
+| Learn | `creating_components` | One reusable counter card backed by element-local `use_state`, parent props in `RenderOnce`, or an entity-backed `Render`. | Manual: click each counter independently and verify its value survives redraws; compare ownership and lifetime. | Pointer input. |
 | Learn | `layout` | Flexible sidebar/content layout and wrapping tiles. | Automated: fixed viewport; useful future cases are narrow and wide layouts. | None. |
-| Learn | `styling` | Conditional styles, theme colors, and interactive states. | Manual: hover, active, focus-visible, and group-hover states in both themes. | Pointer and keyboard input. |
+| Learn | `styling` | Pointer/focus states, conditional choice and badge styles, parent-to-child group hover, and appearance colors. | Manual: hover and press buttons, Tab through focus rings, inspect the selected/disabled branches, and compare both themes. | Pointer and keyboard input. |
 | Learn | `async_tasks` | Foreground/background tasks, progress, cancellation, and detaching. | Manual: progress updates, cancellation, completion and UI responsiveness. | Waits for the example's task timers. |
 | Learn | `custom_drawing` | Canvas painting, paths, and pointer-driven drawing. | Manual: path geometry, pointer movement, and resize behavior. | Pointer input. |
 | Learn | `animation` | A repeated easing animation using GPUI's animation wrapper. | Automated: 0/300/600/900/1200 ms clock checkpoints. | None. |

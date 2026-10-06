@@ -10,6 +10,9 @@ GPUI-CE is a fork of Zed's [GPUI](https://gpui.rs) UI Framework.
 
 It's mostly API compatible with upstream, but that is changing!
 
+GPU-free visual testing uses the same views as the [example gallery](docs/examples.md).
+See [running tests and hosting reports](docs/testing.md) and [testing your own views](docs/testing-design.md).
+
 ## Overview:
 
 - Web-inspired Styling & Layout

@@ -5,14 +5,9 @@
 #[path = "../shared/prelude.rs"]
 mod example_prelude;
 
-use gpui::{
-    App, Bounds, Context, Window, WindowBounds, WindowOptions, actions, div, prelude::*, px, rgb,
-    rgba, size,
-};
+use gpui::{App, Context, Window, div, prelude::*, px, rgb, rgba};
 use palette::WithAlpha;
 use slider::Slider;
-
-actions!(app, [Quit]);
 
 const INITIAL_SIZE: f32 = 200.;
 const MIN_SIZE: f32 = 20.;
@@ -152,18 +147,15 @@ impl Render for CornerSmoothingExample {
 
 fn main() {
     gpui_platform::application().run(|cx: &mut App| {
-        let bounds = Bounds::centered(None, size(px(500.), px(650.)), cx);
-        cx.open_window(
-            WindowOptions::new().window_bounds(Some(WindowBounds::Windowed(bounds))),
-            |_, cx| {
-                cx.new(|_| CornerSmoothingExample {
-                    corner_smoothing: 1.,
-                    corner_radius: 40.,
-                    width: INITIAL_SIZE,
-                    height: INITIAL_SIZE,
-                })
-            },
-        )
+        let options = example_prelude::centered_window(500., 650., cx);
+        cx.open_window(options, |_, cx| {
+            cx.new(|_| CornerSmoothingExample {
+                corner_smoothing: 1.,
+                corner_radius: 40.,
+                width: INITIAL_SIZE,
+                height: INITIAL_SIZE,
+            })
+        })
         .expect("Failed to open window");
 
         example_prelude::init_example(cx, "Corner Smoothing");

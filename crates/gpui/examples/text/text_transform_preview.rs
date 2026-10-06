@@ -1,6 +1,9 @@
+#[path = "../shared/prelude.rs"]
+mod example_prelude;
+
 use gpui::{
-    App, Bounds, Context, FontWeight, Render, TextTransform, Window, WindowBounds, WindowOptions,
-    div, prelude::*, px, rgb, size,
+    App, AppContext as _, Context, FontWeight, Render, TextTransform, Window, div, prelude::*, px,
+    rgb,
 };
 
 struct TextTransformPreview;
@@ -68,14 +71,11 @@ impl Render for TextTransformPreview {
 
 fn main() {
     gpui_platform::application().run(|cx: &mut App| {
-        cx.activate(true);
-        let bounds = Bounds::centered(None, size(px(720.), px(480.)), cx);
-        if let Err(error) = cx.open_window(
-            WindowOptions::new().window_bounds(Some(WindowBounds::Windowed(bounds))),
-            |_, cx| cx.new(|_| TextTransformPreview),
-        ) {
+        let options = example_prelude::centered_window(720., 480., cx);
+        if let Err(error) = cx.open_window(options, |_, cx| cx.new(|_| TextTransformPreview)) {
             eprintln!("failed to open preview window: {error}");
             return;
         }
+        example_prelude::init_example(cx, "Text Transform Preview");
     });
 }

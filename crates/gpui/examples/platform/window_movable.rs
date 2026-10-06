@@ -34,7 +34,7 @@ impl Render for ExampleWindow {
                 div()
                     .text_sm()
                     .text_color(rgb(0xb0b0b0))
-                    .child("Try to drag the titlebar, and check the Window menu."),
+                    .child("Drag each titlebar to compare native and app-owned drag regions."),
             )
     }
 }

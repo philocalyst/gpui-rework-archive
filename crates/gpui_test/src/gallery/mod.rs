@@ -3,10 +3,12 @@
 mod interaction;
 mod media;
 mod stress;
+mod tasks;
 mod views;
 pub use interaction::InteractionScenario;
 pub use media::{MediaAssets, MediaScenario};
 pub use stress::StressScenario;
+pub use tasks::{AsyncTaskScenario, TaskState};
 pub use views::{AnimationScenario, EffectsScenario, LayoutScenario, TextScenario};
 
 use crate::Scenario;
@@ -197,6 +199,80 @@ pub fn built_in_scenarios() -> Result<Vec<BuiltInScenario>> {
         |cx: &mut App| cx.new(|_| StressScenario),
     )?
     .checkpoint("default", "Virtual rows", Duration::ZERO)?;
+    let async_tasks = Scenario::new(
+        "async-tasks",
+        "Foreground task cancellation and completion",
+        size(px(360.), px(220.)),
+        |cx: &mut App| cx.new(|_| AsyncTaskScenario::new()),
+    )?
+    .checkpoint("ready", "No task has started", Duration::ZERO)?
+    .checkpoint_with(
+        "started",
+        "Start background work",
+        Duration::ZERO,
+        |cx, view, window| {
+            crate::dispatch_click_on(cx, window.into(), "async-task-action")?;
+            anyhow::ensure!(
+                view.read_with(cx, |view, _| view.state()) == TaskState::Running,
+                "task did not start"
+            );
+            Ok(())
+        },
+    )?
+    .checkpoint_with(
+        "running",
+        "Task is awaiting its result",
+        Duration::from_millis(100),
+        |cx, view, _| {
+            anyhow::ensure!(
+                view.read_with(cx, |view, _| view.state()) == TaskState::Running,
+                "task left running state before background work completed"
+            );
+            Ok(())
+        },
+    )?
+    .checkpoint_with(
+        "cancelled",
+        "Cancel the pending task",
+        Duration::from_millis(200),
+        |cx, view, window| {
+            crate::dispatch_click_on(cx, window.into(), "async-task-action")?;
+            anyhow::ensure!(
+                view.read_with(cx, |view, _| view.state()) == TaskState::Cancelled,
+                "task was not cancelled"
+            );
+            Ok(())
+        },
+    )?
+    .checkpoint_with(
+        "restarted",
+        "Start a fresh task",
+        Duration::from_millis(300),
+        |cx, view, window| {
+            anyhow::ensure!(
+                view.read_with(cx, |view, _| view.state()) == TaskState::Cancelled,
+                "cancelled work applied a late result"
+            );
+            crate::dispatch_click_on(cx, window.into(), "async-task-action")?;
+            anyhow::ensure!(
+                view.read_with(cx, |view, _| view.state()) == TaskState::Running,
+                "task did not restart"
+            );
+            Ok(())
+        },
+    )?
+    .checkpoint_with(
+        "completed",
+        "Apply the background result",
+        Duration::from_millis(600),
+        |cx, view, _| {
+            anyhow::ensure!(
+                view.read_with(cx, |view, _| view.state()) == TaskState::Completed(42),
+                "background result was not applied"
+            );
+            Ok(())
+        },
+    )?;
     Ok(vec![
         text.into(),
         narrow.into(),
@@ -208,5 +284,6 @@ pub fn built_in_scenarios() -> Result<Vec<BuiltInScenario>> {
         interaction.into(),
         media.into(),
         stress.into(),
+        async_tasks.into(),
     ])
 }

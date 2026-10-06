@@ -1,37 +1,53 @@
 #![cfg_attr(target_family = "wasm", no_main)]
 
+#[path = "../../shared/prelude.rs"]
+mod example_prelude;
 #[path = "../../example_support/fonts.rs"]
 mod example_support;
 
-use std::{path::Path, sync::Arc, time::Duration};
+use std::{
+    path::{Path, PathBuf},
+    sync::Arc,
+    time::Duration,
+};
 
 use gpui::{
-    Animation, AnimationExt, App, Asset, AssetLogger, AssetSource, Bounds, Context, Hsla,
+    Animation, AnimationExt, App, AppContext as _, Asset, AssetLogger, AssetSource, Context, Hsla,
     ImageAssetLoader, ImageCacheError, ImgResourceLoader, LOADING_DELAY, Length, RenderImage,
-    Resource, SharedString, Window, WindowBounds, WindowOptions, black, div, img, prelude::*,
-    pulsating_between, px, red, size,
+    Resource, SharedString, Window, black, div, img, prelude::*, pulsating_between, px, red,
 };
 use gpui_platform::application;
 use palette::WithAlpha;
 
-struct Assets {}
+struct Assets {
+    base: PathBuf,
+}
 
 impl AssetSource for Assets {
     fn load(&self, path: &str) -> anyhow::Result<Option<std::borrow::Cow<'static, [u8]>>> {
-        std::fs::read(path)
+        std::fs::read(resolve_path(&self.base, path))
             .map(Into::into)
             .map_err(Into::into)
             .map(Some)
     }
 
     fn list(&self, path: &str) -> anyhow::Result<Vec<SharedString>> {
-        Ok(std::fs::read_dir(path)?
+        Ok(std::fs::read_dir(resolve_path(&self.base, path))?
             .filter_map(|entry| {
                 Some(SharedString::from(
-                    entry.ok()?.path().to_string_lossy().into_owned(),
+                    entry.ok()?.file_name().to_string_lossy().into_owned(),
                 ))
             })
             .collect::<Vec<_>>())
+    }
+}
+
+fn resolve_path(base: &Path, path: &str) -> PathBuf {
+    let path = Path::new(path);
+    if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        base.join(path)
     }
 }
 
@@ -108,6 +124,20 @@ impl ImageLoadingExample {
     }
 }
 
+fn parameterized_image(id: &'static str, timeout: Duration, fail: bool) -> impl IntoElement {
+    let source = LoadImageParameters { timeout, fail };
+    img(move |window: &mut Window, cx: &mut App| {
+        window.use_asset::<LoadImageWithParameters>(&source, cx)
+    })
+    .id(id)
+    .border_1()
+    .size_12()
+    .with_fallback(|| ImageLoadingExample::fallback_element().into_any_element())
+    .border_color(red())
+    .with_loading(|| ImageLoadingExample::loading_element().into_any_element())
+    .on_click(move |_, _, cx| cx.remove_asset::<LoadImageWithParameters>(&source))
+}
+
 impl Render for ImageLoadingExample {
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
         div().flex().flex_col().size_full().justify_around().child(
@@ -118,73 +148,22 @@ impl Render for ImageLoadingExample {
                     .size(Length::Definite(px(300.0).into()))
                     .justify_center()
                     .items_center()
-                    .child({
-                        let image_source = LoadImageParameters {
-                            timeout: LOADING_DELAY.saturating_sub(Duration::from_millis(25)),
-                            fail: false,
-                        };
-
-                        // Load within the 'loading delay', should not show loading fallback
-                        img(move |window: &mut Window, cx: &mut App| {
-                            window.use_asset::<LoadImageWithParameters>(&image_source, cx)
-                        })
-                        .id("image-1")
-                        .border_1()
-                        .size_12()
-                        .with_fallback(|| Self::fallback_element().into_any_element())
-                        .border_color(red())
-                        .with_loading(|| Self::loading_element().into_any_element())
-                        .on_click(move |_, _, cx| {
-                            cx.remove_asset::<LoadImageWithParameters>(&image_source);
-                        })
-                    })
-                    .child({
-                        // Load after a long delay
-                        let image_source = LoadImageParameters {
-                            timeout: Duration::from_secs(5),
-                            fail: false,
-                        };
-
-                        img(move |window: &mut Window, cx: &mut App| {
-                            window.use_asset::<LoadImageWithParameters>(&image_source, cx)
-                        })
-                        .id("image-2")
-                        .with_fallback(|| Self::fallback_element().into_any_element())
-                        .with_loading(|| Self::loading_element().into_any_element())
-                        .size_12()
-                        .border_1()
-                        .border_color(red())
-                        .on_click(move |_, _, cx| {
-                            cx.remove_asset::<LoadImageWithParameters>(&image_source);
-                        })
-                    })
-                    .child({
-                        // Fail to load image after a long delay
-                        let image_source = LoadImageParameters {
-                            timeout: Duration::from_secs(5),
-                            fail: true,
-                        };
-
-                        // Fail to load after a long delay
-                        img(move |window: &mut Window, cx: &mut App| {
-                            window.use_asset::<LoadImageWithParameters>(&image_source, cx)
-                        })
-                        .id("image-3")
-                        .with_fallback(|| Self::fallback_element().into_any_element())
-                        .with_loading(|| Self::loading_element().into_any_element())
-                        .size_12()
-                        .border_1()
-                        .border_color(red())
-                        .on_click(move |_, _, cx| {
-                            cx.remove_asset::<LoadImageWithParameters>(&image_source);
-                        })
-                    })
+                    // This one resolves before the loading delay; the next two exercise waiting and failure.
+                    .child(parameterized_image(
+                        "image-1",
+                        LOADING_DELAY.saturating_sub(Duration::from_millis(25)),
+                        false,
+                    ))
+                    .child(parameterized_image(
+                        "image-2",
+                        Duration::from_secs(5),
+                        false,
+                    ))
+                    .child(parameterized_image("image-3", Duration::from_secs(5), true))
                     .child({
                         // Ensure that the normal image loader doesn't spam logs
-                        let image_source = Path::new(
-                            "this/file/really/shouldn't/exist/or/won't/be/an/image/I/hope",
-                        )
-                        .to_path_buf();
+                        let image_source = Path::new(env!("CARGO_MANIFEST_DIR"))
+                            .join("examples/gallery/rendering/image/__intentionally_missing.png");
                         img(image_source.clone())
                             .id("image-4")
                             .border_1()
@@ -202,19 +181,19 @@ impl Render for ImageLoadingExample {
 }
 
 fn run_example() {
-    application().with_assets(Assets {}).run(|cx: &mut App| {
-        if !example_support::load_fonts(cx) {
-            return;
-        }
-        let options = WindowOptions::new().window_bounds(Some(WindowBounds::Windowed(
-            Bounds::centered(None, size(px(300.), px(300.)), cx),
-        )));
-        cx.open_window(options, |_, cx| {
-            cx.activate(false);
-            cx.new(|_| ImageLoadingExample {})
+    application()
+        .with_assets(Assets {
+            base: PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("examples/gallery/rendering"),
         })
-        .unwrap();
-    });
+        .run(|cx: &mut App| {
+            if !example_support::load_fonts(cx) {
+                return;
+            }
+            let options = example_prelude::centered_window(500., 320., cx);
+            cx.open_window(options, |_, cx| cx.new(|_| ImageLoadingExample {}))
+                .expect("open image loading example");
+            example_prelude::init_example(cx, "Image Loading");
+        });
 }
 
 #[cfg(not(target_family = "wasm"))]

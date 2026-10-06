@@ -14,6 +14,8 @@ use std::{
 pub struct ReportOptions {
     /// Existing baseline directory. Files follow `<scenario>/<checkpoint>.png`.
     pub baseline_dir: Option<PathBuf>,
+    /// Compare only these scenario IDs. Empty compares the complete suite.
+    pub selected_ids: Vec<String>,
 }
 
 /// The versioned, portable suite manifest consumed by report sites and automation.
@@ -322,27 +324,46 @@ pub fn write_report(
             checkpoints,
         });
     }
-    let manifest = ReportManifest {
+    let mut manifest = ReportManifest {
         schema_version: 1,
         backend: "cpu".into(),
         environment: EnvironmentManifest {
             renderer: "gpui-ce-cpu".into(),
-            font_pack: "bundled".into(),
+            font_pack: suite
+                .scenarios
+                .iter()
+                .map(|scenario| scenario.font_pack.as_str())
+                .collect::<BTreeSet<_>>()
+                .into_iter()
+                .collect::<Vec<_>>()
+                .join(", "),
             git_sha: option_env!("GIT_SHA").map(str::to_owned),
         },
         scenarios,
         changes: Vec::new(),
     };
-    let manifest_path = output_dir.join("manifest.json");
-    fs::write(&manifest_path, serde_json::to_vec_pretty(&manifest)?)?;
-    let mut manifest = manifest;
-    if let Some(baseline_dir) = &options.baseline_dir {
-        manifest.changes = compare_reports(baseline_dir, output_dir)?;
+    if let Some(baseline) = &baseline_manifest {
+        // Comparisons were measured while writing each checkpoint. Reuse those facts
+        // instead of writing, decoding, and comparing the entire report a second time.
+        manifest.changes =
+            compare_manifests(baseline, &manifest, &options.selected_ids, |_, current| {
+                Ok((
+                    current
+                        .pixels_changed
+                        .context("matched checkpoint has pixel comparison")?,
+                    current
+                        .scene_changed
+                        .context("matched checkpoint has scene comparison")?,
+                ))
+            })?;
     }
-    fs::write(&manifest_path, serde_json::to_vec_pretty(&manifest)?)?;
-    write_markdown(suite, &manifest, output_dir)?;
-    write_svg(suite, output_dir)?;
-    write_html(suite, &manifest, output_dir)?;
+    fs::write(
+        output_dir.join("manifest.json"),
+        serde_json::to_vec_pretty(&manifest)?,
+    )?;
+    write_markdown(&manifest, output_dir)?;
+    write_svg(&manifest, output_dir)?;
+    write_html(&manifest, output_dir)?;
     Ok(manifest)
 }
 
@@ -366,8 +387,11 @@ pub fn read_manifest(report_dir: impl AsRef<Path>) -> Result<ReportManifest> {
             scenario.id
         );
         ensure!(
-            scenario.viewport.width > 0 && scenario.viewport.height > 0,
-            "scenario viewport dimensions must be positive"
+            scenario.viewport.width.is_finite()
+                && scenario.viewport.height.is_finite()
+                && scenario.viewport.width > 0.0
+                && scenario.viewport.height > 0.0,
+            "scenario viewport dimensions must be finite and positive"
         );
         ensure!(
             scenario.viewport.scale_factor.is_finite() && scenario.viewport.scale_factor > 0.0,
@@ -435,6 +459,26 @@ pub fn compare_reports_selected(
     }
     let baseline = read_manifest(baseline_dir)?;
     let current = read_manifest(current_dir)?;
+    compare_manifests(&baseline, &current, selected_ids, |old, new| {
+        Ok((
+            read_image(&baseline_dir.join(&old.png))? != read_image(&current_dir.join(&new.png))?,
+            read_json_value(&baseline_dir.join(&old.scene_json))?
+                != read_json_value(&current_dir.join(&new.scene_json))?,
+        ))
+    })
+}
+
+// Entity additions, removals, and metadata use the same comparison for in-memory
+// captures and saved reports. The caller supplies the two content comparisons.
+fn compare_manifests(
+    baseline: &ReportManifest,
+    current: &ReportManifest,
+    selected_ids: &[String],
+    mut content_changed: impl FnMut(&CheckpointManifest, &CheckpointManifest) -> Result<(bool, bool)>,
+) -> Result<Vec<ReportChange>> {
+    for id in selected_ids {
+        validate_id(id)?;
+    }
     let old_scenarios: BTreeMap<_, _> = baseline
         .scenarios
         .iter()
@@ -525,9 +569,8 @@ pub fn compare_reports_selected(
                     "checkpoint name or simulated time changed",
                 ));
             }
-            let old_png = baseline_dir.join(&old_checkpoints[checkpoint_id].png);
-            let new_png = current_dir.join(&new_cp.png);
-            if read_image(&old_png)? != read_image(&new_png)? {
+            let (pixels_changed, scene_changed) = content_changed(old_cp, new_cp)?;
+            if pixels_changed {
                 changes.push(change(
                     ReportChangeKind::PixelsChanged,
                     id,
@@ -535,9 +578,7 @@ pub fn compare_reports_selected(
                     "rendered PNG changed",
                 ));
             }
-            let old_scene = baseline_dir.join(&old_checkpoints[checkpoint_id].scene_json);
-            let new_scene = current_dir.join(&new_cp.scene_json);
-            if read_json_value(&old_scene)? != read_json_value(&new_scene)? {
+            if scene_changed {
                 changes.push(change(
                     ReportChangeKind::SceneChanged,
                     id,
@@ -648,36 +689,47 @@ fn read_json_value(path: &Path) -> Result<serde_json::Value> {
         .with_context(|| format!("parsing scene capture {}", path.display()))
 }
 
-fn write_markdown(
-    suite: &RenderedSuite,
-    manifest: &ReportManifest,
-    output_dir: &Path,
-) -> Result<()> {
+fn write_markdown(manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
     let mut md = String::from(
-        "# GPUI visual scenario report\n\nBackend: CPU\n\n| Scenario | Checkpoint | Time (ns) | Scene build p50/p95/p99 (ns) | CPU render p50/p95/p99 (ns) | Primitives | Batches | Bitmap bytes |\n|---|---|---:|---:|---:|---:|---:|---:|\n",
+        "# GPUI visual scenario report\n\nBackend: CPU. VRAM is unavailable for this backend; bitmap bytes measure captured atlas storage. Timings exclude font setup, capture serialization, and PNG encoding.\n\n| Scenario / checkpoint | Time (ms) | Samples | Build p50/p95/p99 (ms) | Replay p50/p95/p99 (ms) | Primitives | Batches | Bitmap bytes | VRAM | Status |\n|---|---:|---:|---:|---:|---:|---:|---:|---|---|\n",
     );
-    for scenario in &suite.scenarios {
+    for scenario in &manifest.scenarios {
         for checkpoint in &scenario.checkpoints {
             let m = &checkpoint.metrics;
+            let title = format!("{} / {}", scenario.title, checkpoint.name)
+                .replace('|', "\\|")
+                .replace(['\n', '\r'], " ");
             md.push_str(&format!(
-                "| {} | {} | {} | {} / {} / {} | {} / {} / {} | {} | {} | {} |\n",
-                scenario.title,
-                checkpoint.name,
-                checkpoint.time_ns,
-                m.scene_build_p50_ns,
-                m.scene_build_p95_ns,
-                m.scene_build_p99_ns,
-                m.cpu_render_p50_ns,
-                m.cpu_render_p95_ns,
-                m.cpu_render_p99_ns,
+                "| [{}]({}) | {:.3} | {} | {} | {} | {} | {} | {} | n/a | {} |\n",
+                title,
+                checkpoint.png,
+                checkpoint.time_ns as f64 / 1_000_000.0,
+                m.frame_count,
+                timing_triplet(
+                    m.scene_build_p50_ns,
+                    m.scene_build_p95_ns,
+                    m.scene_build_p99_ns
+                ),
+                timing_triplet(
+                    m.cpu_render_p50_ns,
+                    m.cpu_render_p95_ns,
+                    m.cpu_render_p99_ns
+                ),
                 m.primitive_count,
                 m.batch_count,
-                m.bitmap_storage_bytes
+                m.bitmap_storage_bytes,
+                status_name(checkpoint.status),
             ));
         }
     }
-    md.push_str("\n## Baseline changes\n\n");
-    if manifest.changes.is_empty() {
+    md.push_str("\n![Frame timings](metrics.svg)\n\n## Baseline changes\n\n");
+    if manifest
+        .scenarios
+        .iter()
+        .all(|scenario| scenario.status == ReportStatus::BaselineUnavailable)
+    {
+        md.push_str("No baseline was supplied.\n");
+    } else if manifest.changes.is_empty() {
         md.push_str("No scenario or checkpoint changes.\n");
     } else {
         for change in &manifest.changes {
@@ -688,72 +740,99 @@ fn write_markdown(
     Ok(())
 }
 
-fn write_svg(suite: &RenderedSuite, output_dir: &Path) -> Result<()> {
-    let path = output_dir.join("metrics.svg");
-    let root = SVGBackend::new(&path, (960, 520)).into_drawing_area();
-    root.fill(&WHITE).map_err(plot_err)?;
-    let values: Vec<_> = suite
+fn timing_triplet(p50: u64, p95: u64, p99: u64) -> String {
+    format!(
+        "{:.3} / {:.3} / {:.3}",
+        p50 as f64 / 1_000_000.0,
+        p95 as f64 / 1_000_000.0,
+        p99 as f64 / 1_000_000.0
+    )
+}
+
+fn write_svg(manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
+    let values: Vec<_> = manifest
         .scenarios
         .iter()
         .flat_map(|scenario| {
-            scenario.checkpoints.iter().map(move |c| {
+            scenario.checkpoints.iter().map(move |checkpoint| {
                 (
-                    format!("{} / {}", scenario.id, c.id),
-                    c.metrics.scene_build_p50_ns,
-                    c.metrics.cpu_render_p50_ns,
+                    format!("{} / {}", scenario.id, checkpoint.id),
+                    checkpoint.metrics.scene_build_p50_ns,
+                    checkpoint.metrics.cpu_render_p50_ns,
                 )
             })
         })
         .collect();
+    let path = output_dir.join("metrics.svg");
+    let height = 140 + values.len().max(1) as u32 * 36;
+    let root = SVGBackend::new(&path, (1100, height)).into_drawing_area();
+    root.fill(&WHITE).map_err(plot_err)?;
     let max = values
         .iter()
-        .map(|v| v.1.max(v.2))
+        .map(|value| value.1.max(value.2))
         .max()
         .unwrap_or(1)
         .max(1);
     let rows = values.len().max(1) * 2;
     let mut chart = ChartBuilder::on(&root)
-        .caption("Scenario frame timings (nanoseconds)", ("sans-serif", 24))
+        .caption("Median frame work by checkpoint", ("sans-serif", 24))
         .margin(18)
         .x_label_area_size(48)
-        .y_label_area_size(120)
+        .y_label_area_size(300)
         .build_cartesian_2d(0u64..max.saturating_add(max / 10 + 1), 0usize..rows)
         .map_err(plot_err)?;
     chart
         .configure_mesh()
         .y_labels(values.len())
-        .y_label_formatter(&|idx| {
+        .y_label_formatter(&|index| {
             values
-                .get(*idx / 2)
+                .get(*index / 2)
                 .map(|value| value.0.clone())
                 .unwrap_or_default()
         })
-        .x_desc("nanoseconds")
+        .x_desc("milliseconds")
+        .x_label_formatter(&|ns| format!("{:.1}", *ns as f64 / 1_000_000.0))
         .disable_mesh()
         .draw()
         .map_err(plot_err)?;
-    for (index, (_, scene, cpu)) in values.iter().enumerate() {
+    for (index, (_, build, replay)) in values.iter().enumerate() {
         let row = index * 2;
-        chart
+        let build_bar = chart
             .draw_series(std::iter::once(Rectangle::new(
-                [(0, row), (*scene, row + 1)],
+                [(0, row), (*build, row + 1)],
                 BLUE.mix(0.75).filled(),
             )))
             .map_err(plot_err)?;
-        chart
+        if index == 0 {
+            build_bar.label("Scene build").legend(|(x, y)| {
+                Rectangle::new([(x, y - 4), (x + 16, y + 4)], BLUE.mix(0.75).filled())
+            });
+        }
+        let replay_bar = chart
             .draw_series(std::iter::once(Rectangle::new(
-                [(0, row + 1), (*cpu, row + 2)],
+                [(0, row + 1), (*replay, row + 2)],
                 RED.mix(0.7).filled(),
             )))
             .map_err(plot_err)?;
+        if index == 0 {
+            replay_bar.label("CPU replay").legend(|(x, y)| {
+                Rectangle::new([(x, y - 4), (x + 16, y + 4)], RED.mix(0.7).filled())
+            });
+        }
     }
+    chart
+        .configure_series_labels()
+        .background_style(WHITE.mix(0.9))
+        .border_style(BLACK)
+        .draw()
+        .map_err(plot_err)?;
     root.present().map_err(plot_err)?;
     Ok(())
 }
 
-fn write_html(suite: &RenderedSuite, manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
+fn write_html(manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
     let mut html = String::from(
-        "<!doctype html><meta charset=\"utf-8\"><title>GPUI scenario report</title><style>body{font:15px system-ui;margin:2rem;background:#111;color:#eee}section{margin:2rem 0}img{max-width:100%;border:1px solid #555}figure{display:inline-block;vertical-align:top;width:min(48%,700px);margin:0 1% 1rem 0}figcaption{margin:.5rem 0}</style><h1>GPUI scenario report</h1><p><a href=\"manifest.json\">Versioned JSON manifest</a> · <a href=\"report.md\">Markdown metrics</a> · <a href=\"metrics.svg\">Timing plot</a></p>",
+        "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>GPUI scenario report</title><style>body{font:15px system-ui;margin:2rem;background:#111;color:#eee}a{color:#8cc8ff}section{margin:2rem 0}img{max-width:100%;border:1px solid #555}figure{display:inline-block;vertical-align:top;width:min(30%,700px);margin:0 1% 1rem 0}figcaption{margin:.5rem 0}@media(max-width:700px){figure{width:100%}}</style></head><body><h1>GPUI scenario report</h1><p><a href=\"manifest.json\">JSON manifest</a> · <a href=\"report.md\">Markdown metrics</a></p><img src=\"metrics.svg\" alt=\"Scene build and CPU replay timings\">",
     );
     if !manifest.changes.is_empty() {
         html.push_str("<section><h2>Baseline changes</h2><ul>");
@@ -762,34 +841,34 @@ fn write_html(suite: &RenderedSuite, manifest: &ReportManifest, output_dir: &Pat
         }
         html.push_str("</ul></section>");
     }
-    for scenario in &suite.scenarios {
+    for scenario in &manifest.scenarios {
         html.push_str(&format!(
-            "<section><h2>{}</h2>",
+            "<section id=\"{}\"><h2>{}</h2>",
+            scenario.id,
             escape_html(&scenario.title)
         ));
         for checkpoint in &scenario.checkpoints {
-            let report_checkpoint = manifest
-                .scenarios
-                .iter()
-                .find(|entry| entry.id == scenario.id)
-                .and_then(|entry| {
-                    entry
-                        .checkpoints
-                        .iter()
-                        .find(|entry| entry.id == checkpoint.id)
-                })
-                .context("report manifest is missing a checkpoint")?;
-            html.push_str(&format!("<figure><figcaption>{} <small>{}</small></figcaption><a href=\"{}/{}.png\"><img loading=\"lazy\" src=\"{}/{}.png\"></a>", escape_html(&checkpoint.name), status_name(report_checkpoint.status), scenario.id, checkpoint.id, scenario.id, checkpoint.id));
-            if let Some(before) = &report_checkpoint.before_png {
-                html.push_str(&format!("<a href=\"{before}\"><img loading=\"lazy\" src=\"{before}\" alt=\"Baseline image\"></a>"));
+            html.push_str(&format!(
+                "<h3>{} · {:.1} ms · {}</h3><p><a href=\"{}\">Captured scene JSON</a></p>",
+                escape_html(&checkpoint.name),
+                checkpoint.time_ns as f64 / 1_000_000.0,
+                status_name(checkpoint.status),
+                checkpoint.scene_json
+            ));
+            let images = [
+                ("Before", checkpoint.before_png.as_deref()),
+                ("Current", Some(checkpoint.png.as_str())),
+                ("Changes in red", checkpoint.diff_png.as_deref()),
+            ];
+            for (label, path) in images {
+                if let Some(path) = path {
+                    html.push_str(&format!("<figure><figcaption>{label}</figcaption><a href=\"{path}\"><img loading=\"lazy\" src=\"{path}\" alt=\"{label}\"></a></figure>"));
+                }
             }
-            if let Some(diff) = &report_checkpoint.diff_png {
-                html.push_str(&format!("<a href=\"{diff}\"><img loading=\"lazy\" src=\"{diff}\" alt=\"Red pixel difference\"></a>"));
-            }
-            html.push_str("</figure>");
         }
         html.push_str("</section>");
     }
+    html.push_str("</body></html>");
     fs::write(output_dir.join("index.html"), html)?;
     Ok(())
 }

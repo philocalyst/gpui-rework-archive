@@ -55,6 +55,7 @@ fn run_command(args: &[String], benchmark: bool) -> Result<()> {
         &parsed.output,
         ReportOptions {
             baseline_dir: parsed.baseline.clone(),
+            selected_ids: parsed.names.clone(),
         },
     )?;
     println!(
@@ -98,6 +99,7 @@ fn check_command(args: &[String]) -> Result<()> {
         &current,
         ReportOptions {
             baseline_dir: Some(baseline.clone()),
+            selected_ids: parsed.names.clone(),
         },
     )?;
     let changes = gpui_test::compare_reports_selected(baseline, &current, &parsed.names)?;

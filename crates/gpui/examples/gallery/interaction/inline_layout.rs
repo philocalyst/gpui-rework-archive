@@ -1,6 +1,8 @@
+#[path = "../../shared/prelude.rs"]
+mod example_prelude;
+
 use gpui::{
-    App, Bounds, Context, FontWeight, Render, Window, WindowBounds, WindowOptions, div, prelude::*,
-    px, relative, rgb, size,
+    App, AppContext as _, Context, FontWeight, Render, Window, div, prelude::*, px, relative, rgb,
 };
 
 struct InlineLayoutExample;
@@ -76,15 +78,9 @@ impl Render for InlineLayoutExample {
 
 fn main() {
     gpui_platform::application().run(|cx: &mut App| {
-        let bounds = Bounds::centered(None, size(px(720.), px(440.)), cx);
-        cx.open_window(
-            WindowOptions {
-                window_bounds: Some(WindowBounds::Windowed(bounds)),
-                ..Default::default()
-            },
-            |_, cx| cx.new(|_| InlineLayoutExample),
-        )
-        .unwrap();
-        cx.activate(true);
+        let options = example_prelude::centered_window(720., 440., cx);
+        cx.open_window(options, |_, cx| cx.new(|_| InlineLayoutExample))
+            .expect("open inline layout window");
+        example_prelude::init_example(cx, "Inline Layout");
     });
 }

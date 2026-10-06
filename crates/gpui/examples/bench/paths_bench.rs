@@ -1,12 +1,16 @@
 #![cfg_attr(target_family = "wasm", no_main)]
 
+#[path = "../shared/prelude.rs"]
+mod example_prelude;
 #[path = "../example_support/fonts.rs"]
 mod example_support;
 
+use std::sync::Arc;
+
 use gpui::{
-    Background, Bounds, ColorSpace, Context, Path, PathBuilder, Pixels, Render, TitlebarOptions,
-    Window, WindowBounds, WindowOptions, canvas, div, linear_color_stop, linear_gradient, point,
-    prelude::*, px, rgb, size,
+    App, AppContext as _, Background, ColorSpace, Context, Path, PathBuilder, Pixels, Render,
+    TitlebarOptions, Window, canvas, div, linear_color_stop, linear_gradient, point, prelude::*,
+    px, rgb,
 };
 use gpui_platform::application;
 
@@ -14,17 +18,14 @@ const DEFAULT_WINDOW_WIDTH: Pixels = px(1024.0);
 const DEFAULT_WINDOW_HEIGHT: Pixels = px(768.0);
 
 struct PaintingViewer {
-    default_lines: Vec<(Path<Pixels>, Background)>,
-    _painting: bool,
+    paths: Arc<Vec<(Path<Pixels>, Background)>>,
 }
 
 impl PaintingViewer {
     fn new(_window: &mut Window, _cx: &mut Context<Self>) -> Self {
-        let mut lines = vec![];
-
-        // draw a lightening bolt ⚡
-        for _ in 0..2000 {
-            // draw a ⭐
+        // Repeating one path shape isolates the cost of issuing many path draws.
+        let mut paths = Vec::with_capacity(2_000);
+        for _ in 0..2_000 {
             let mut builder = PathBuilder::fill();
             builder.move_to(point(px(350.), px(100.)));
             builder.line_to(point(px(370.), px(160.)));
@@ -38,7 +39,7 @@ impl PaintingViewer {
             builder.line_to(point(px(330.), px(160.)));
             builder.line_to(point(px(350.), px(100.)));
             let path = builder.build().unwrap();
-            lines.push((
+            paths.push((
                 path,
                 linear_gradient(
                     180.,
@@ -50,22 +51,22 @@ impl PaintingViewer {
         }
 
         Self {
-            default_lines: lines,
-            _painting: false,
+            paths: Arc::new(paths),
         }
     }
 }
 
 impl Render for PaintingViewer {
     fn render(&mut self, window: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        // Keep the frame stream active so the same workload can be profiled continuously.
         window.request_animation_frame();
-        let lines = self.default_lines.clone();
+        let paths = Arc::clone(&self.paths);
         div().size_full().child(
             canvas(
                 move |_, _, _| {},
                 move |_, _, window, _| {
-                    for (path, color) in lines {
-                        window.paint_path(path, color);
+                    for (path, color) in paths.iter() {
+                        window.paint_path(path.clone(), color.clone());
                     }
                 },
             )
@@ -75,26 +76,25 @@ impl Render for PaintingViewer {
 }
 
 fn run_example() {
-    application().run(|cx| {
+    application().run(|cx: &mut App| {
         if !example_support::load_fonts(cx) {
             return;
         }
-        cx.open_window(
-            WindowOptions::new()
-                .titlebar(Some(TitlebarOptions {
-                    title: Some("Vulkan".into()),
-                    ..Default::default()
-                }))
-                .focus(true)
-                .window_bounds(Some(WindowBounds::Windowed(Bounds::centered(
-                    None,
-                    size(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT),
-                    cx,
-                )))),
-            |window, cx| cx.new(|cx| PaintingViewer::new(window, cx)),
+        let options = example_prelude::centered_window(
+            DEFAULT_WINDOW_WIDTH.as_f32(),
+            DEFAULT_WINDOW_HEIGHT.as_f32(),
+            cx,
         )
-        .unwrap();
-        cx.activate(true);
+        .titlebar(Some(TitlebarOptions {
+            title: Some("Path Rendering Stress".into()),
+            ..Default::default()
+        }))
+        .focus(true);
+        cx.open_window(options, |window, cx| {
+            cx.new(|cx| PaintingViewer::new(window, cx))
+        })
+        .expect("open path rendering stress");
+        example_prelude::init_example(cx, "Path Rendering Stress");
     });
 }
 

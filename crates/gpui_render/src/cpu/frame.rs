@@ -1,6 +1,8 @@
 use super::CpuAtlas;
 use anyhow::Result;
-use gpui::{AtlasTextureKind, AtlasTile, Bounds, CapturedBitmap, ContentMask, ScaledPixels, ShaderBool};
+use gpui::{
+    AtlasTextureKind, AtlasTile, Bounds, CapturedBitmap, ContentMask, ScaledPixels, ShaderBool,
+};
 use image::{Rgba, RgbaImage};
 
 #[derive(Clone, Copy)]
@@ -92,7 +94,9 @@ impl Frame {
         for y in y0..y1 {
             for x in x0..x1 {
                 let p = wgsl_rs::std::vec2f(x as f32 + 0.5, y as f32 + 0.5);
-                if crate::shaders::host::is_clipped(quad.content_mask, p) {
+                if !contains_fragment(quad.bounds, p)
+                    || crate::shaders::host::is_clipped(quad.content_mask, p)
+                {
                     continue;
                 }
                 let color = shader.sample(p);
@@ -118,7 +122,9 @@ impl Frame {
         for y in y0..y1 {
             for x in x0..x1 {
                 let p = wgsl_rs::std::vec2f(x as f32 + 0.5, y as f32 + 0.5);
-                if crate::shaders::host::is_clipped(shadow.content_mask, p) {
+                if !contains_fragment(bounds, p)
+                    || crate::shaders::host::is_clipped(shadow.content_mask, p)
+                {
                     continue;
                 }
                 self.over_at(x, y, shader.sample(p));
@@ -131,7 +137,9 @@ impl Frame {
         for y in y0..y1 {
             for x in x0..x1 {
                 let p = wgsl_rs::std::vec2f(x as f32 + 0.5, y as f32 + 0.5);
-                if crate::shaders::host::is_clipped(item.content_mask, p) {
+                if !contains_fragment(item.bounds, p)
+                    || crate::shaders::host::is_clipped(item.content_mask, p)
+                {
                     continue;
                 }
                 let coverage = if item.wavy == ShaderBool::Enabled {
@@ -163,6 +171,7 @@ impl Frame {
         transform: Option<gpui::TransformationMatrix>,
         kind: SpriteKind,
         atlas: &CpuAtlas,
+        font: crate::shaders::common::FontRasterizationUniforms,
     ) -> Result<()> {
         let bitmap = atlas.resolve(tile)?;
         let m = transform;
@@ -198,6 +207,7 @@ impl Frame {
                         let alpha = crate::shaders::host::monochrome_correction(
                             sample[0],
                             [color[0], color[1], color[2]],
+                            font,
                         ) * color[3]
                             * fade;
                         self.over_at(
@@ -232,6 +242,7 @@ impl Frame {
                         let corrected = crate::shaders::host::subpixel_correction(
                             [sample[0], sample[1], sample[2]],
                             [color[0], color[1], color[2]],
+                            font,
                         );
                         let alphas = [
                             corrected[0] * color[3] * fade,
@@ -264,6 +275,12 @@ impl Frame {
             let (x0, y0, x1, y1) = self.pixel_range(sprite.bounds);
             for y in y0..y1 {
                 for x in x0..x1 {
+                    if !contains_fragment(
+                        sprite.bounds,
+                        wgsl_rs::std::vec2f(x as f32 + 0.5, y as f32 + 0.5),
+                    ) {
+                        continue;
+                    }
                     let pixel = rasterized.pixels[y as usize * self.width as usize + x as usize];
                     self.over_at(x, y, pixel);
                 }
@@ -305,6 +322,12 @@ impl Frame {
             for y in ty0..ty1 {
                 for x in tx0..tx1 {
                     let p = [x as f32 + 0.5, y as f32 + 0.5];
+                    if crate::shaders::common::is_clipped(crate::shaders::common::clip_distances(
+                        wgsl_rs::std::vec2f(p[0], p[1]),
+                        bounds.into(),
+                    )) {
+                        continue;
+                    }
                     let Some((weights, derivatives)) = barycentric(p, points) else {
                         continue;
                     };
@@ -343,7 +366,9 @@ impl Frame {
         for y in y0..y1 {
             for x in x0..x1 {
                 let p = wgsl_rs::std::vec2f(x as f32 + 0.5, y as f32 + 0.5);
-                if crate::shaders::host::is_clipped(filter.content_mask, p) {
+                if !contains_fragment(filter.bounds, p)
+                    || crate::shaders::host::is_clipped(filter.content_mask, p)
+                {
                     continue;
                 }
                 let shape = crate::shaders::host::rounded_rect_coverage(
@@ -370,18 +395,21 @@ impl Frame {
         }
         Ok(())
     }
-    pub(super) fn apply_filters(&mut self, filters: &[gpui::ScaledFilter], bounds: Bounds<ScaledPixels>) {
-        for filter in filters {
-            match filter {
-                gpui::ScaledFilter::Blur(radius) => self.gaussian_blur(radius.0, bounds),
-            }
-        }
-    }
-    pub(super) fn composite_filtered(
+    pub(super) fn apply_filters(
         &mut self,
-        child: Frame,
-        boundary: &gpui::FilterBoundary,
+        filters: &[gpui::ScaledFilter],
+        bounds: Bounds<ScaledPixels>,
     ) {
+        // The production filter pass coalesces blur declarations into one maximum radius.
+        let radius = filters
+            .iter()
+            .map(|filter| match filter {
+                gpui::ScaledFilter::Blur(radius) => radius.0,
+            })
+            .fold(0.0, f32::max);
+        self.gaussian_blur(radius, bounds);
+    }
+    pub(super) fn composite_filtered(&mut self, child: Frame, boundary: &gpui::FilterBoundary) {
         let dilation = gpui::ScaledPixels(
             boundary.max_blur_radius() * crate::blur::GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS,
         );
@@ -390,7 +418,9 @@ impl Frame {
         for y in y0..y1 {
             for x in x0..x1 {
                 let p = wgsl_rs::std::vec2f(x as f32 + 0.5, y as f32 + 0.5);
-                if crate::shaders::host::is_clipped(boundary.content_mask, p) {
+                if !contains_fragment(composite_bounds, p)
+                    || crate::shaders::host::is_clipped(boundary.content_mask, p)
+                {
                     continue;
                 }
                 let mask = crate::shaders::host::content_alpha(boundary.content_mask, p);
@@ -456,6 +486,15 @@ impl Frame {
         }
         self.pixels = output.pixels;
     }
+}
+
+// Rectangle rasterization and fragment clipping are separate: geometry uses half-open
+// edges, while shader clip distances allow a zero distance at the content-mask edge.
+fn contains_fragment(bounds: Bounds<ScaledPixels>, point: wgsl_rs::std::Vec2f) -> bool {
+    point.x >= bounds.origin.x.0
+        && point.y >= bounds.origin.y.0
+        && point.x < bounds.origin.x.0 + bounds.size.width.0
+        && point.y < bounds.origin.y.0 + bounds.size.height.0
 }
 
 fn blur_pass(

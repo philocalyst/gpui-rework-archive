@@ -34,9 +34,7 @@ impl Render for ExampleWindow {
             .border_color(rgb(0x0000ff))
             .text_xl()
             .text_color(rgb(0xffffff))
-            .child(
-                "Closing this window with cmd-w or the traffic lights should quit the application!",
-            )
+            .child("Close both windows: the application exits only after the last one closes.")
     }
 }
 

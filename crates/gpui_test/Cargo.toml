@@ -26,8 +26,8 @@ image.workspace = true
 plotters = { version = "0.3.7", default-features = false, features = ["line_series", "svg_backend"] }
 serde.workspace = true
 serde_json.workspace = true
+sha2 = "0.10.9"
 
 [dev-dependencies]
 insta = { version = "1.43.1", features = ["json"] }
 proptest.workspace = true
-sha2 = "0.10.9"

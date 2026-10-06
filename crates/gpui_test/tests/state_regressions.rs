@@ -167,16 +167,17 @@ fn report_comparison_reports_removed_checkpoints() -> Result<()> {
                 id: "animation".into(),
                 title: "Animation".into(),
                 viewport: Viewport {
-                    width: 1,
-                    height: 1,
+                    width: 1.0,
+                    height: 1.0,
                     scale_factor: 1.0,
                 },
+                font_pack: "test-fixture".into(),
                 checkpoints,
             }],
         }
     }
 
-    let old = suite(vec![
+    let mut old = suite(vec![
         empty_checkpoint("t000", 0)?,
         empty_checkpoint("t250", 250_000_000)?,
         empty_checkpoint("t500", 500_000_000)?,
@@ -188,9 +189,28 @@ fn report_comparison_reports_removed_checkpoints() -> Result<()> {
     let root = std::env::temp_dir().join(format!("gpui-compare-checkpoint-{}", std::process::id()));
     let baseline_dir = root.join("baseline");
     let current_dir = root.join("current");
+    let mut unrelated = old.scenarios[0].clone();
+    unrelated.id = "unrelated".into();
+    old.scenarios.push(unrelated);
     let _ = std::fs::remove_dir_all(&root);
-    write_report(&old, &baseline_dir, ReportOptions::default())?;
-    write_report(&current, &current_dir, ReportOptions::default())?;
+    let baseline = write_report(&old, &baseline_dir, ReportOptions::default())?;
+    assert_eq!(baseline.environment.font_pack, "test-fixture");
+    let selected = write_report(
+        &current,
+        &current_dir,
+        ReportOptions {
+            baseline_dir: Some(baseline_dir.clone()),
+            selected_ids: vec!["animation".into()],
+        },
+    )?;
+    assert!(
+        selected
+            .changes
+            .iter()
+            .all(|change| change.scenario_id == "animation"),
+        "unselected baseline cases must not appear as removed: {:?}",
+        selected.changes
+    );
 
     let changes = compare_reports(&baseline_dir, &current_dir)?;
     assert!(

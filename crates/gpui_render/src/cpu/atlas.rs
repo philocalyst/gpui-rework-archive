@@ -1,9 +1,8 @@
 use super::channels;
 use anyhow::{Context, Result, ensure};
 use gpui::{
-    AtlasKey, AtlasTextureId, AtlasTextureKind, AtlasTile, Bounds, CapturedBitmap,
-    DevicePixels, GlyphAtlasEntry, PlatformAtlas, RenderGlyphParams, Size,
-    TileId, ValidatedRasterizedGlyph,
+    AtlasKey, AtlasTextureId, AtlasTextureKind, AtlasTile, Bounds, CapturedBitmap, DevicePixels,
+    GlyphAtlasEntry, PlatformAtlas, RenderGlyphParams, Size, TileId, ValidatedRasterizedGlyph,
 };
 use std::{borrow::Cow, collections::HashMap, sync::Mutex};
 

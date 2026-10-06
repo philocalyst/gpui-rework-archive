@@ -164,12 +164,23 @@ def make_comment(repository: str, pr: str, run_id: str, head_sha: str, manifest:
                 "| " + markdown_text(scenario.get("title", sid)) + " | " + markdown_text(checkpoint.get("name", cid))
                 + f" | {_metric_pair(checkpoint, 'scene_build')} | {_metric_pair(checkpoint, 'cpu_render')} | {frames if frames is not None else 'n/a'} | {primitives if primitives is not None else 'n/a'} | {bitmap_bytes if bitmap_bytes is not None else 'n/a'} | {gpu_memory if gpu_memory is not None else 'n/a'} |"
             )
-            if page_url:
-                for field, label in (("before_png", "Before"), ("png", "Current"), ("diff_png", "Difference")):
-                    asset = checkpoint.get(field)
-                    if asset:
-                        asset_url = page_url.rsplit("/index.html", 1)[0] + "/" + quote(asset, safe="/")
-                        lines.append(f"\n**{label}:** ![{label} image]({asset_url})")
+    if page_url:
+        image_checkpoints = [
+            (scenario, checkpoint)
+            for scenario in manifest["scenarios"]
+            for checkpoint in scenario["checkpoints"]
+            if not baseline_available or checkpoint.get("status") in {"changed", "new"}
+        ]
+        for scenario, checkpoint in image_checkpoints[:6]:
+            lines.extend(["", "**" + markdown_text(scenario.get("title", scenario["id"]))
+                + " / " + markdown_text(checkpoint.get("name", checkpoint["id"])) + "**", ""])
+            for field, label in (("before_png", "Before"), ("png", "Current"), ("diff_png", "Changes in red")):
+                asset = checkpoint.get(field)
+                if asset:
+                    asset_url = page_url.rsplit("/index.html", 1)[0] + "/" + quote(asset, safe="/")
+                    lines.append(f"**{label}:** ![{label} image]({asset_url})")
+        if len(image_checkpoints) > 6:
+            lines.extend(["", f"{len(image_checkpoints) - 6} more checkpoint images are in the [hosted report]({page_url})."])
     return "\n".join(lines)
 
 

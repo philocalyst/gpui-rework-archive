@@ -117,6 +117,21 @@ fn rejects_overlapping_gapped_and_missing_primitive_ranges() {
 }
 
 #[test]
+fn rejects_pipeline_flags_and_batch_order_that_disagree_with_primitives() {
+    let mut wrong_pipeline = capture_json(&quad_scene(1));
+    wrong_pipeline["commands"][0]["Batch"]["Quads"]["smoothed"] = json!(true);
+    let error = validate_json(wrong_pipeline).expect_err("pipeline flag must match the quad");
+    assert!(error.to_string().contains("command 0"));
+
+    let mut wrong_order = capture_json(&filter_scene());
+    wrong_order["commands"].as_array_mut().unwrap().reverse();
+    assert!(
+        validate_json(wrong_order).is_err(),
+        "end cannot precede begin"
+    );
+}
+
+#[test]
 fn rejects_path_vertex_tail_even_when_command_counts_match() {
     let mut capture = capture_json(&path_scene());
     let vertex = capture["paths"][0]["vertices"][0].clone();

@@ -16,6 +16,7 @@ use std::sync::Arc;
 #[derive(Default)]
 pub struct CpuRenderer {
     atlas: Arc<CpuAtlas>,
+    font: crate::font::FontRasterizationSettings,
 }
 
 mod atlas;
@@ -43,14 +44,27 @@ impl CpuRenderer {
 
     /// Creates a renderer backed by an existing atlas handle.
     pub fn from_atlas(atlas: Arc<CpuAtlas>) -> Self {
-        Self { atlas }
+        Self {
+            atlas,
+            font: Default::default(),
+        }
     }
 
     /// Creates an atlas from SceneCapture's canonical bitmap vector.
     pub fn from_captured_bitmaps(bitmaps: &[CapturedBitmap]) -> Result<Self> {
         Ok(Self {
             atlas: Arc::new(CpuAtlas::from_captured_bitmaps(bitmaps)?),
+            font: Default::default(),
         })
+    }
+
+    /// Uses explicit platform text settings instead of neutral portable coverage.
+    pub fn with_font_rasterization(
+        mut self,
+        settings: crate::font::FontRasterizationSettings,
+    ) -> Self {
+        self.font = settings;
+        self
     }
 }
 
@@ -60,11 +74,11 @@ impl PlatformHeadlessRendererTrait for CpuRenderer {
         scene: &Scene,
         size: Size<DevicePixels>,
     ) -> Result<RgbaImage> {
-        render_scene(scene, size, &self.atlas)
+        render_scene(scene, size, &self.atlas, self.font.uniforms())
     }
 
     fn render_scene(&mut self, scene: &Scene, size: Size<DevicePixels>) -> Result<()> {
-        let _ = render_scene(scene, size, &self.atlas)?;
+        let _ = render_scene(scene, size, &self.atlas, self.font.uniforms())?;
         Ok(())
     }
 
@@ -73,7 +87,12 @@ impl PlatformHeadlessRendererTrait for CpuRenderer {
     }
 }
 
-fn render_scene(scene: &Scene, size: Size<DevicePixels>, atlas: &CpuAtlas) -> Result<RgbaImage> {
+fn render_scene(
+    scene: &Scene,
+    size: Size<DevicePixels>,
+    atlas: &CpuAtlas,
+    font: crate::shaders::common::FontRasterizationUniforms,
+) -> Result<RgbaImage> {
     ensure!(
         size.width.0 >= 0 && size.height.0 >= 0,
         "CPU renderer requires non-negative dimensions"
@@ -110,6 +129,7 @@ fn render_scene(scene: &Scene, size: Size<DevicePixels>, atlas: &CpuAtlas) -> Re
                             Some(item.transformation),
                             SpriteKind::Mono,
                             atlas,
+                            font,
                         )?;
                     }
                 }
@@ -123,6 +143,7 @@ fn render_scene(scene: &Scene, size: Size<DevicePixels>, atlas: &CpuAtlas) -> Re
                             Some(item.transformation),
                             SpriteKind::Subpixel,
                             atlas,
+                            font,
                         )?;
                     }
                 }
@@ -144,6 +165,7 @@ fn render_scene(scene: &Scene, size: Size<DevicePixels>, atlas: &CpuAtlas) -> Re
                                 smoothed: *smoothed,
                             },
                             atlas,
+                            font,
                         )?;
                     }
                 }
@@ -194,10 +216,7 @@ fn render_scene(scene: &Scene, size: Size<DevicePixels>, atlas: &CpuAtlas) -> Re
                 target = frame.parent;
                 let mut child = child;
                 child.apply_filters(&frame.boundary.filters, frame.boundary.bounds);
-                target.composite_filtered(
-                    child,
-                    &frame.boundary,
-                );
+                target.composite_filtered(child, &frame.boundary);
             }
         }
     }
@@ -211,7 +230,12 @@ pub fn render_scene_to_image(
     size: Size<DevicePixels>,
     atlas: &CpuAtlas,
 ) -> Result<RgbaImage> {
-    render_scene(scene, size, atlas)
+    render_scene(
+        scene,
+        size,
+        atlas,
+        crate::font::FontRasterizationSettings::default().uniforms(),
+    )
 }
 
 struct FilterFrame {
@@ -252,7 +276,8 @@ mod tests {
     #[test]
     fn shader_quad_pixel_uses_production_coverage_and_premultiplies() {
         let quad = scene_quad(bounds(0., 0., 2., 2.), Hsla::new(0., 1., 0.5, 0.5));
-        let color = crate::shaders::host::QuadShader::new(&quad, false).sample(wgsl_rs::std::vec2f(1., 1.));
+        let color =
+            crate::shaders::host::QuadShader::new(&quad, false).sample(wgsl_rs::std::vec2f(1., 1.));
         assert!((color[0] - 0.5).abs() < 0.002);
         assert!(color[1] < 0.002 && color[2] < 0.002);
         assert!((color[3] - 0.5).abs() < 0.002);
@@ -277,7 +302,7 @@ mod tests {
         };
         scene.insert_primitive(quad);
         scene.finish();
-        let image = render_scene(
+        let image = render_scene_to_image(
             &scene,
             Size {
                 width: DevicePixels(4),
@@ -346,7 +371,7 @@ mod tests {
             })
             .count();
         assert_eq!((isolated, inline), (2, 1));
-        let image = render_scene(
+        let image = render_scene_to_image(
             &scene,
             Size {
                 width: DevicePixels(5),

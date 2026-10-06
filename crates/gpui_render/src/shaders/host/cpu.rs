@@ -23,11 +23,7 @@ pub(crate) fn is_clipped(
     mask: gpui::ContentMask<gpui::ScaledPixels>,
     point: wgsl_rs::std::Vec2f,
 ) -> bool {
-    let bounds: common::Bounds = mask.bounds.into();
-    point.x < bounds.origin.x
-        || point.x >= bounds.origin.x + bounds.size.x
-        || point.y < bounds.origin.y
-        || point.y >= bounds.origin.y + bounds.size.y
+    common::is_clipped(common::clip_distances(point, mask.bounds.into()))
 }
 
 fn shader_hsla(color: gpui::Hsla) -> common::Hsla {
@@ -106,12 +102,21 @@ pub(crate) struct PaintShader {
 }
 
 impl PaintShader {
-    pub(crate) fn new(background: gpui::Background, bounds: gpui::Bounds<gpui::ScaledPixels>) -> Self {
-        Self::from_paint(common::Paint::new(shader_background(background), bounds.into()))
+    pub(crate) fn new(
+        background: gpui::Background,
+        bounds: gpui::Bounds<gpui::ScaledPixels>,
+    ) -> Self {
+        Self::from_paint(common::Paint::new(
+            shader_background(background),
+            bounds.into(),
+        ))
     }
 
     fn from_paint(paint: common::Paint) -> Self {
-        Self { paint, prepared: common::prepare_paint(paint) }
+        Self {
+            paint,
+            prepared: common::prepare_paint(paint),
+        }
     }
 
     pub(crate) fn sample(&self, point: wgsl_rs::std::Vec2f) -> [f32; 4] {
@@ -124,7 +129,10 @@ pub(crate) struct QuadShader {
     quad: super::super::quad::Quad,
     fill: common::PreparedPaint,
     border: common::PreparedPaint,
-    corners: Option<(super::super::corner_smoothing::PreparedCorners, wgsl_rs::std::Vec4f)>,
+    corners: Option<(
+        super::super::corner_smoothing::PreparedCorners,
+        wgsl_rs::std::Vec4f,
+    )>,
 }
 
 impl QuadShader {
@@ -146,24 +154,46 @@ impl QuadShader {
             corner_smoothing: quad.corner_smoothing,
             padding: 0,
         };
-        let prepare = |background| common::prepare_paint(common::Paint::new(background, quad.bounds));
+        let prepare =
+            |background| common::prepare_paint(common::Paint::new(background, quad.bounds));
         let corners = smoothed.then(|| {
             let prepared = super::super::corner_smoothing::prepare_corners(
-                quad.bounds.size, quad.corner_radii, quad.corner_smoothing,
-                quad.border_style == common::BorderStyle::Solid && common::Edges::is_zero(quad.border_widths),
+                quad.bounds.size,
+                quad.corner_radii,
+                quad.corner_smoothing,
+                quad.border_style == common::BorderStyle::Solid
+                    && common::Edges::is_zero(quad.border_widths),
             );
-            (prepared, super::super::quad::smoothed_corner_lengths(quad, prepared))
+            (
+                prepared,
+                super::super::quad::smoothed_corner_lengths(quad, prepared),
+            )
         });
-        Self { quad, fill: prepare(quad.background), border: prepare(quad.border_color), corners }
+        Self {
+            quad,
+            fill: prepare(quad.background),
+            border: prepare(quad.border_color),
+            corners,
+        }
     }
 
     pub(crate) fn sample(&self, point: wgsl_rs::std::Vec2f) -> [f32; 4] {
         let color = match self.corners {
             Some((prepared, lengths)) => super::super::quad::shade_smoothed_quad(
-                self.quad, point, self.fill, self.border, prepared, lengths, common::ShaderBool::Enabled,
+                self.quad,
+                point,
+                self.fill,
+                self.border,
+                prepared,
+                lengths,
+                common::ShaderBool::Enabled,
             ),
             None => super::super::quad::shade_quad(
-                self.quad, point, self.fill, self.border, common::ShaderBool::Enabled,
+                self.quad,
+                point,
+                self.fill,
+                self.border,
+                common::ShaderBool::Enabled,
             ),
         };
         [color.x, color.y, color.z, color.w]
@@ -189,7 +219,10 @@ pub(crate) fn wavy_underline_coverage(
 pub(crate) struct ShadowShader {
     shadow: super::super::shadow::Shadow,
     paint: PaintShader,
-    corners: Option<(super::super::corner_smoothing::PreparedCorners, super::super::corner_smoothing::PreparedCorners)>,
+    corners: Option<(
+        super::super::corner_smoothing::PreparedCorners,
+        super::super::corner_smoothing::PreparedCorners,
+    )>,
 }
 
 impl ShadowShader {
@@ -206,11 +239,27 @@ impl ShadowShader {
             inset: (shadow.inset == gpui::ShaderBool::Enabled).into(),
             corner_smoothing: shadow.corner_smoothing,
         };
-        let corners = smoothed.then(|| (
-            super::super::corner_smoothing::prepare_corners(shadow.bounds.size, shadow.corner_radii, shadow.corner_smoothing, true),
-            super::super::corner_smoothing::prepare_corners(shadow.element_bounds.size, shadow.element_corner_radii, shadow.corner_smoothing, true),
-        ));
-        Self { shadow, paint: PaintShader::from_paint(super::super::shadow::shadow_paint(shadow)), corners }
+        let corners = smoothed.then(|| {
+            (
+                super::super::corner_smoothing::prepare_corners(
+                    shadow.bounds.size,
+                    shadow.corner_radii,
+                    shadow.corner_smoothing,
+                    true,
+                ),
+                super::super::corner_smoothing::prepare_corners(
+                    shadow.element_bounds.size,
+                    shadow.element_corner_radii,
+                    shadow.corner_smoothing,
+                    true,
+                ),
+            )
+        });
+        Self {
+            shadow,
+            paint: PaintShader::from_paint(super::super::shadow::shadow_paint(shadow)),
+            corners,
+        }
     }
 
     pub(crate) fn bounds(&self) -> common::Bounds {
@@ -219,7 +268,9 @@ impl ShadowShader {
 
     pub(crate) fn sample(&self, point: wgsl_rs::std::Vec2f) -> [f32; 4] {
         let coverage = match self.corners {
-            Some((outer, element)) => super::super::shadow::smoothed_shadow_coverage(self.shadow, point, outer, element),
+            Some((outer, element)) => {
+                super::super::shadow::smoothed_shadow_coverage(self.shadow, point, outer, element)
+            }
             None => super::super::shadow::shadow_coverage(self.shadow, point),
         } * common::ContentMask::alpha(self.shadow.content_mask, point);
         let color = self.paint.sample(point);
@@ -243,10 +294,13 @@ pub(crate) fn rounded_rect_coverage(
     }
     let bounds: common::Bounds = bounds.into();
     let radii: common::Corners = radii.into();
-    let prepared = super::super::corner_smoothing::prepare_corners(bounds.size, radii, smoothing, true);
-    common::antialiased_coverage(super::super::corner_smoothing::prepared_corner_signed_distance(
-        point, bounds, radii, smoothing, prepared,
-    ))
+    let prepared =
+        super::super::corner_smoothing::prepare_corners(bounds.size, radii, smoothing, true);
+    common::antialiased_coverage(
+        super::super::corner_smoothing::prepared_corner_signed_distance(
+            point, bounds, radii, smoothing, prepared,
+        ),
+    )
 }
 
 pub(crate) fn sprite_corner_coverage(
@@ -289,7 +343,9 @@ pub(crate) fn sprite_corner_coverage(
             smoothing,
             true,
         );
-        super::super::polychrome_sprite::smoothed_polychrome_sprite_coverage(sprite, point, prepared)
+        super::super::polychrome_sprite::smoothed_polychrome_sprite_coverage(
+            sprite, point, prepared,
+        )
     } else {
         super::super::polychrome_sprite::polychrome_sprite_coverage(sprite, point)
     }
@@ -310,23 +366,36 @@ pub(crate) fn polychrome_color(sample: [f32; 4], grayscale: bool) -> [f32; 3] {
     [color.x, color.y, color.z]
 }
 
-pub(crate) fn monochrome_correction(sample: f32, color: [f32; 3]) -> f32 {
+pub(crate) fn monochrome_correction(
+    sample: f32,
+    color: [f32; 3],
+    font: common::FontRasterizationUniforms,
+) -> f32 {
     use wgsl_rs::std::*;
     common::apply_contrast_and_gamma_correction(
         sample,
         vec3f(color[0], color[1], color[2]),
-        0.0,
-        vec4f(0.0, 0.0, 0.0, 0.0),
+        font.grayscale_enhanced_contrast,
+        font.gamma_ratios,
     )
 }
 
-pub(crate) fn subpixel_correction(sample: [f32; 3], color: [f32; 3]) -> [f32; 3] {
+pub(crate) fn subpixel_correction(
+    sample: [f32; 3],
+    color: [f32; 3],
+    font: common::FontRasterizationUniforms,
+) -> [f32; 3] {
     use wgsl_rs::std::*;
+    let sample = if font.uses_blue_green_red_subpixel_order == common::ShaderBool::Enabled {
+        [sample[2], sample[1], sample[0]]
+    } else {
+        sample
+    };
     let result = common::apply_contrast_and_gamma_correction3(
         vec3f(sample[0], sample[1], sample[2]),
         vec3f(color[0], color[1], color[2]),
-        0.0,
-        vec4f(0.0, 0.0, 0.0, 0.0),
+        font.subpixel_enhanced_contrast,
+        font.gamma_ratios,
     );
     [result.x, result.y, result.z]
 }

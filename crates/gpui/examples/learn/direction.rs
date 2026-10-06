@@ -1,7 +1,7 @@
-use gpui::{
-    App, Bounds, Context, LayoutDirection, Window, WindowBounds, WindowOptions, div, prelude::*,
-    px, rgb, size,
-};
+#[path = "../shared/prelude.rs"]
+mod example_prelude;
+
+use gpui::{App, AppContext as _, Context, LayoutDirection, Window, div, prelude::*, px, rgb};
 use gpui_ce_elements::editable_text::{
     actions::{DEFAULT_INPUT_CONTEXT, default_bindings},
     text_input,
@@ -132,20 +132,13 @@ fn main() {
     gpui_platform::application().run(|cx: &mut App| {
         cx.bind_keys(default_bindings().as_keybindings(Some(DEFAULT_INPUT_CONTEXT)));
 
-        let bounds = Bounds::centered(None, size(px(760.0), px(620.0)), cx);
-        cx.open_window(
-            WindowOptions {
-                window_bounds: Some(WindowBounds::Windowed(bounds)),
-                ..Default::default()
-            },
-            |_, cx| {
-                cx.new(|_| DirectionExample {
-                    direction: LayoutDirection::Auto,
-                })
-            },
-        )
-        .unwrap();
-
-        cx.activate(true);
+        let options = example_prelude::centered_window(760., 620., cx);
+        cx.open_window(options, |_, cx| {
+            cx.new(|_| DirectionExample {
+                direction: LayoutDirection::Auto,
+            })
+        })
+        .expect("open layout direction example");
+        example_prelude::init_example(cx, "Layout Direction");
     });
 }

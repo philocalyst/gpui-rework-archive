@@ -1,11 +1,4 @@
-//! Interactive Elements Example
-//!
-//! This example demonstrates interactive patterns in GPUI:
-//!
-//! 1. Click events - single click, double click, click count
-//! 2. Hover states - hover styling and on_hover callbacks
-//! 3. Mouse events - mouse down, mouse up, mouse move
-//! 4. Drag and drop - draggable elements and drop targets
+//! Click counts, hover callbacks, raw pointer events, and drag/drop.
 
 #[path = "../shared/prelude.rs"]
 mod example_prelude;
@@ -13,20 +6,34 @@ mod example_prelude;
 use example_prelude::init_example;
 use gpui::colors::Colors;
 use gpui::{
-    App, Bounds, ClickEvent, ColorExt, Context, Entity, Half, Hsla, IntoElement, MouseButton,
-    MouseMoveEvent, Pixels, Point, Render, Window, WindowBounds, WindowOptions, div, prelude::*,
-    px, rgb, size,
+    App, ClickEvent, ColorExt, Context, Entity, Half, Hsla, IntoElement, MouseButton,
+    MouseMoveEvent, Pixels, Point, Render, Window, div, prelude::*, px, rgb, size,
 };
 use palette::IntoColor;
 
-// ============================================================================
-// Click Events Demo
-// ============================================================================
-//
-// Demonstrates different click interactions:
-// - Single click
-// - Double click (click_count == 2)
-// - Click count tracking
+fn demo_panel(
+    colors: &Colors,
+    title: &'static str,
+    hint: &'static str,
+    content: impl IntoElement,
+) -> impl IntoElement {
+    div()
+        .flex()
+        .flex_col()
+        .gap_3()
+        .p_4()
+        .rounded_lg()
+        .bg(colors.container)
+        .child(
+            div()
+                .text_sm()
+                .font_weight(gpui::FontWeight::SEMIBOLD)
+                .text_color(colors.text)
+                .child(title),
+        )
+        .child(div().text_xs().text_color(colors.disabled).child(hint))
+        .child(content)
+}
 
 struct ClickDemo {
     click_count: usize,
@@ -46,80 +53,57 @@ impl Render for ClickDemo {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let colors = Colors::for_appearance(window);
 
-        div()
-            .flex()
-            .flex_col()
-            .gap_3()
-            .p_4()
-            .rounded_lg()
-            .bg(colors.container)
-            .child(
-                div()
-                    .text_sm()
-                    .font_weight(gpui::FontWeight::SEMIBOLD)
-                    .text_color(colors.text)
-                    .child("Click Events"),
-            )
-            .child(
-                div()
-                    .text_xs()
-                    .text_color(colors.disabled)
-                    .child("Single click, double click, or triple click the button"),
-            )
-            .child(
-                div()
-                    .id("click-target")
-                    .px_4()
-                    .py_2()
-                    .rounded_md()
-                    .bg(colors.selected)
-                    .text_color(colors.selected_text)
-                    .text_sm()
-                    .cursor_pointer()
-                    .hover(|style| style.bg(colors.selected))
-                    .active(|style| style.bg(colors.selected))
-                    .child("Click Me!")
-                    // on_click receives a ClickEvent with click_count() method
-                    .on_click(cx.listener(|this, event: &ClickEvent, _window, cx| {
-                        this.click_count += 1;
-                        this.last_click_type = match event.click_count() {
-                            1 => "Single Click".to_string(),
-                            2 => "Double Click".to_string(),
-                            3 => "Triple Click".to_string(),
-                            n => format!("{n}x Click"),
-                        };
-                        cx.notify();
-                    })),
-            )
-            .child(
-                div()
-                    .flex()
-                    .flex_col()
-                    .gap_1()
-                    .mt_2()
-                    .child(
-                        div()
-                            .text_xs()
-                            .text_color(colors.disabled)
-                            .child(format!("Total clicks: {}", self.click_count)),
-                    )
-                    .child(
-                        div()
-                            .text_xs()
-                            .text_color(colors.disabled)
-                            .child(format!("Last: {}", self.last_click_type)),
-                    ),
-            )
+        demo_panel(
+            &colors,
+            "Click Events",
+            "Single, double, or triple click the button",
+            div()
+                .child(
+                    div()
+                        .id("click-target")
+                        .px_4()
+                        .py_2()
+                        .rounded_md()
+                        .bg(colors.selected)
+                        .text_color(colors.selected_text)
+                        .text_sm()
+                        .cursor_pointer()
+                        .hover(|style| style.opacity(0.85))
+                        .active(|style| style.opacity(0.7))
+                        .child("Click Me!")
+                        .on_click(cx.listener(|this, event: &ClickEvent, _window, cx| {
+                            this.click_count += 1;
+                            this.last_click_type = match event.click_count() {
+                                1 => "Single Click".to_string(),
+                                2 => "Double Click".to_string(),
+                                3 => "Triple Click".to_string(),
+                                n => format!("{n}x Click"),
+                            };
+                            cx.notify();
+                        })),
+                )
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap_1()
+                        .mt_2()
+                        .child(
+                            div()
+                                .text_xs()
+                                .text_color(colors.disabled)
+                                .child(format!("Total clicks: {}", self.click_count)),
+                        )
+                        .child(
+                            div()
+                                .text_xs()
+                                .text_color(colors.disabled)
+                                .child(format!("Last: {}", self.last_click_type)),
+                        ),
+                ),
+        )
     }
 }
-
-// ============================================================================
-// Hover Demo
-// ============================================================================
-//
-// Demonstrates hover interactions:
-// - hover() style modifier for CSS-like hover states
-// - on_hover() callback for programmatic hover detection
 
 struct HoverDemo {
     is_hovered: bool,
@@ -140,82 +124,59 @@ impl Render for HoverDemo {
         let colors = Colors::for_appearance(window);
         let is_hovered = self.is_hovered;
 
-        div()
-            .flex()
-            .flex_col()
-            .gap_3()
-            .p_4()
-            .rounded_lg()
-            .bg(colors.container)
-            .child(
-                div()
-                    .text_sm()
-                    .font_weight(gpui::FontWeight::SEMIBOLD)
-                    .text_color(colors.text)
-                    .child("Hover Events"),
-            )
-            .child(
-                div()
-                    .text_xs()
-                    .text_color(colors.disabled)
-                    .child("Move your mouse in and out of the target"),
-            )
-            .child(
-                div()
-                    .id("hover-target")
-                    .px_4()
-                    .py_3()
-                    .rounded_md()
-                    .border_2()
-                    .border_color(if is_hovered {
-                        colors.selected
-                    } else {
-                        colors.border
-                    })
-                    .bg(if is_hovered {
-                        colors.selected
-                    } else {
-                        colors.selected
-                    })
-                    .text_color(if is_hovered {
-                        colors.selected_text
-                    } else {
-                        colors.text
-                    })
-                    .text_sm()
-                    .cursor_pointer()
-                    .child(if is_hovered {
-                        "Mouse Inside!"
-                    } else {
-                        "Hover Over Me"
-                    })
-                    // on_hover callback receives a bool: true when mouse enters, false when it leaves
-                    .on_hover(cx.listener(|this, &hovered, _window, cx| {
-                        this.is_hovered = hovered;
-                        if hovered {
-                            this.hover_count += 1;
-                        }
-                        cx.notify();
-                    })),
-            )
-            .child(
-                div()
-                    .text_xs()
-                    .text_color(colors.disabled)
-                    .mt_2()
-                    .child(format!("Times hovered: {}", self.hover_count)),
-            )
+        demo_panel(
+            &colors,
+            "Hover Events",
+            "Move in and out to compare style and callback state",
+            div()
+                .child(
+                    div()
+                        .id("hover-target")
+                        .px_4()
+                        .py_3()
+                        .rounded_md()
+                        .border_2()
+                        .border_color(if is_hovered {
+                            colors.selected
+                        } else {
+                            colors.border
+                        })
+                        .bg(if is_hovered {
+                            colors.selected
+                        } else {
+                            colors.background
+                        })
+                        .text_color(if is_hovered {
+                            colors.selected_text
+                        } else {
+                            colors.text
+                        })
+                        .text_sm()
+                        .cursor_pointer()
+                        .child(if is_hovered {
+                            "Mouse Inside!"
+                        } else {
+                            "Hover Over Me"
+                        })
+                        // Unlike hover styling, this callback stores state and increments on entry.
+                        .on_hover(cx.listener(|this, &hovered, _window, cx| {
+                            this.is_hovered = hovered;
+                            if hovered {
+                                this.hover_count += 1;
+                            }
+                            cx.notify();
+                        })),
+                )
+                .child(
+                    div()
+                        .text_xs()
+                        .text_color(colors.disabled)
+                        .mt_2()
+                        .child(format!("Times hovered: {}", self.hover_count)),
+                ),
+        )
     }
 }
-
-// ============================================================================
-// Mouse Events Demo
-// ============================================================================
-//
-// Demonstrates low-level mouse events:
-// - on_mouse_down - fires when mouse button is pressed
-// - on_mouse_up - fires when mouse button is released
-// - on_mouse_move - fires when mouse moves over element
 
 struct MouseEventsDemo {
     mouse_position: Option<Point<Pixels>>,
@@ -249,93 +210,75 @@ impl Render for MouseEventsDemo {
             .map(|p| format!("({:.0}, {:.0})", f32::from(p.x), f32::from(p.y)))
             .unwrap_or_else(|| "—".to_string());
 
-        div()
-            .flex()
-            .flex_col()
-            .gap_3()
-            .p_4()
-            .rounded_lg()
-            .bg(colors.container)
-            .child(
-                div()
-                    .text_sm()
-                    .font_weight(gpui::FontWeight::SEMIBOLD)
-                    .text_color(colors.text)
-                    .child("Mouse Events"),
-            )
-            .child(
-                div()
-                    .text_xs()
-                    .text_color(colors.disabled)
-                    .child("Move and click within the target area"),
-            )
-            .child(
-                div()
-                    .id("mouse-events-target")
-                    .h_20()
-                    .rounded_md()
-                    .border_2()
-                    .border_color(if is_pressed {
-                        colors.selected
-                    } else {
-                        colors.border
-                    })
-                    .bg(if is_pressed {
-                        colors.selected
-                    } else {
-                        colors.selected
-                    })
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .text_sm()
-                    .text_color(colors.text)
-                    .child(format!("Position: {}", position_text))
-                    .on_mouse_down(
-                        MouseButton::Left,
-                        cx.listener(|this, _event, _window, cx| {
-                            this.is_pressed = true;
-                            this.log_event("Mouse Down");
+        demo_panel(
+            &colors,
+            "Mouse Events",
+            "Move and press inside the target to inspect raw mouse events",
+            div()
+                .child(
+                    div()
+                        .id("mouse-events-target")
+                        .h_20()
+                        .rounded_md()
+                        .border_2()
+                        .border_color(if is_pressed {
+                            colors.selected
+                        } else {
+                            colors.border
+                        })
+                        .bg(if is_pressed {
+                            colors.selected
+                        } else {
+                            colors.background
+                        })
+                        .flex()
+                        .items_center()
+                        .justify_center()
+                        .text_sm()
+                        .text_color(if is_pressed {
+                            colors.selected_text
+                        } else {
+                            colors.text
+                        })
+                        .child(format!("Position: {}", position_text))
+                        .on_mouse_down(
+                            MouseButton::Left,
+                            cx.listener(|this, _event, _window, cx| {
+                                this.is_pressed = true;
+                                this.log_event("Mouse Down");
+                                cx.notify();
+                            }),
+                        )
+                        .on_mouse_up(
+                            MouseButton::Left,
+                            cx.listener(|this, _event, _window, cx| {
+                                this.is_pressed = false;
+                                this.log_event("Mouse Up");
+                                cx.notify();
+                            }),
+                        )
+                        .on_mouse_move(cx.listener(|this, event: &MouseMoveEvent, _window, cx| {
+                            this.mouse_position = Some(event.position);
                             cx.notify();
-                        }),
-                    )
-                    .on_mouse_up(
-                        MouseButton::Left,
-                        cx.listener(|this, _event, _window, cx| {
-                            this.is_pressed = false;
-                            this.log_event("Mouse Up");
-                            cx.notify();
-                        }),
-                    )
-                    .on_mouse_move(cx.listener(|this, event: &MouseMoveEvent, _window, cx| {
-                        this.mouse_position = Some(event.position);
-                        cx.notify();
-                    })),
-            )
-            .child(
-                div()
-                    .flex()
-                    .flex_col()
-                    .gap_0p5()
-                    .mt_2()
-                    .text_xs()
-                    .text_color(colors.disabled)
-                    .children(
-                        self.event_log
-                            .iter()
-                            .map(|e| div().child(format!("• {}", e))),
-                    ),
-            )
+                        })),
+                )
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap_0p5()
+                        .mt_2()
+                        .text_xs()
+                        .text_color(colors.disabled)
+                        .children(
+                            self.event_log
+                                .iter()
+                                .map(|e| div().child(format!("• {}", e))),
+                        ),
+                ),
+        )
     }
 }
-
-// ============================================================================
-// Drag and Drop Demo
-// ============================================================================
-//
-// Demonstrates drag and drop:
-// - on_drag - makes an element draggable, provides drag data
-// - on_drop - makes an element a drop target, receives drag data
 
 #[derive(Clone, Copy)]
 struct DragData {
@@ -359,12 +302,10 @@ impl DragData {
     }
 }
 
-// Render trait for DragData allows it to be rendered as drag feedback
 impl Render for DragData {
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
         let size = gpui::size(px(80.), px(40.));
 
-        // Position the drag preview at the cursor
         div()
             .pl(self.position.x - size.width.half())
             .pt(self.position.y - size.height.half())
@@ -400,90 +341,70 @@ impl Render for DragDropDemo {
         let colors = Colors::for_appearance(window);
         let item_colors = [rgb(0xd32f2f), rgb(0x388e3c), rgb(0xf9a825)];
 
-        div()
-            .flex()
-            .flex_col()
-            .gap_3()
-            .p_4()
-            .rounded_lg()
-            .bg(colors.container)
-            .child(
-                div()
-                    .text_sm()
-                    .font_weight(gpui::FontWeight::SEMIBOLD)
-                    .text_color(colors.text)
-                    .child("Drag and Drop"),
-            )
-            .child(
-                div()
-                    .text_xs()
-                    .text_color(colors.disabled)
-                    .child("Drag items to the drop zone below"),
-            )
-            .child(
-                div()
-                    .flex()
-                    .gap_2()
-                    .children(item_colors.into_iter().enumerate().map(|(index, color)| {
-                        let drag_data = DragData::new(index, color.into_color());
+        demo_panel(
+            &colors,
+            "Drag and Drop",
+            "Drag a colored item into the drop zone",
+            div()
+                .child(
+                    div()
+                        .flex()
+                        .gap_2()
+                        .children(item_colors.into_iter().enumerate().map(|(index, color)| {
+                            let drag_data = DragData::new(index, color.into_color());
 
-                        div()
-                            .id(("drag-item", index))
-                            .px_3()
-                            .py_2()
-                            .rounded_md()
-                            .border_2()
-                            .border_color(color)
-                            .text_color(color)
-                            .text_xs()
-                            .cursor_grab()
-                            .hover(move |style| {
-                                let c: Hsla = color.into_color();
-                                style.bg(c.opacity(0.1))
-                            })
-                            .child(format!("Item {}", index + 1))
-                            // on_drag takes: drag data, and a closure that creates the drag preview
-                            .on_drag(drag_data, |data: &DragData, position, _, cx| {
-                                cx.new(|_| data.with_position(position))
-                            })
-                    })),
-            )
-            .child(
-                div()
-                    .id("drop-target")
-                    .mt_2()
-                    .h_16()
-                    .rounded_md()
-                    .border_2()
-                    .border_dashed()
-                    .border_color(
-                        self.dropped_item
-                            .map(|d| d.color)
-                            .unwrap_or_else(|| colors.border.into_color()),
-                    )
-                    .when_some(self.dropped_item, |el, data| el.bg(data.color.opacity(0.2)))
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .text_xs()
-                    .text_color(colors.disabled)
-                    // on_drop receives the drag data when an item is dropped
-                    .on_drop(cx.listener(|this, data: &DragData, _window, cx| {
-                        this.dropped_item = Some(*data);
-                        cx.notify();
-                    }))
-                    .child(
-                        self.dropped_item
-                            .map(|d| format!("Dropped: Item {}", d.index + 1))
-                            .unwrap_or_else(|| "Drop Zone".to_string()),
-                    ),
-            )
+                            div()
+                                .id(("drag-item", index))
+                                .px_3()
+                                .py_2()
+                                .rounded_md()
+                                .border_2()
+                                .border_color(color)
+                                .text_color(color)
+                                .text_xs()
+                                .cursor_grab()
+                                .hover(move |style| {
+                                    let c: Hsla = color.into_color();
+                                    style.bg(c.opacity(0.1))
+                                })
+                                .child(format!("Item {}", index + 1))
+                                .on_drag(drag_data, |data: &DragData, position, _, cx| {
+                                    cx.new(|_| data.with_position(position))
+                                })
+                        })),
+                )
+                .child(
+                    div()
+                        .id("drop-target")
+                        .mt_2()
+                        .h_16()
+                        .rounded_md()
+                        .border_2()
+                        .border_dashed()
+                        .border_color(
+                            self.dropped_item
+                                .map(|d| d.color)
+                                .unwrap_or_else(|| colors.border.into_color()),
+                        )
+                        .when_some(self.dropped_item, |el, data| el.bg(data.color.opacity(0.2)))
+                        .flex()
+                        .items_center()
+                        .justify_center()
+                        .text_xs()
+                        .text_color(colors.disabled)
+                        .on_drop(cx.listener(|this, data: &DragData, _window, cx| {
+                            this.dropped_item = Some(*data);
+                            cx.notify();
+                        }))
+                        .child(
+                            self.dropped_item
+                                .map(|d| format!("Dropped: Item {}", d.index + 1))
+                                .unwrap_or_else(|| "Drop Zone".to_string()),
+                        ),
+                ),
+        )
     }
 }
-
-// ============================================================================
-// Main Application
-// ============================================================================
 
 struct InteractiveElementsExample {
     click_demo: Entity<ClickDemo>,
@@ -554,11 +475,10 @@ impl Render for InteractiveElementsExample {
 
 fn main() {
     gpui_platform::application().run(|cx: &mut App| {
-        let bounds = Bounds::centered(None, size(px(700.), px(650.)), cx);
-        cx.open_window(
-            WindowOptions::new().window_bounds(Some(WindowBounds::Windowed(bounds))),
-            |_, cx| cx.new(|cx| InteractiveElementsExample::new(cx)),
-        )
+        let options = example_prelude::centered_window(700., 650., cx);
+        cx.open_window(options, |_, cx| {
+            cx.new(|cx| InteractiveElementsExample::new(cx))
+        })
         .expect("Failed to open window");
 
         init_example(cx, "Interactive Elements");

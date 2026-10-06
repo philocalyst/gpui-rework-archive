@@ -12,6 +12,7 @@ import dataclasses
 import datetime as dt
 import os
 import pathlib
+import signal
 import subprocess
 import sys
 import tarfile
@@ -33,10 +34,12 @@ class Mutant:
 
 CPU = "crates/gpui_render/src/cpu.rs"
 CPU_FRAME = "crates/gpui_render/src/cpu/frame.rs"
+PATH_TYPES = "crates/gpui_render/src/path_types.rs"
 RUNNER = "crates/gpui_test/src/runner.rs"
 GALLERY = "crates/gpui_test/src/gallery/views.rs"
 CAPTURE = "crates/gpui/src/scene/capture.rs"
 REPORT = "crates/gpui_test/src/report.rs"
+FONT = "crates/gpui_render/src/font.rs"
 
 MUTANTS: tuple[Mutant, ...] = (
     Mutant(
@@ -67,6 +70,24 @@ MUTANTS: tuple[Mutant, ...] = (
         ("cargo", "test", "--offline", "-p", "gpui_ce_render", "--features", "cpu", "--test", "cpu_properties", "monochrome_glyph_samples_at_transformed_destination_coordinates"),
     ),
     Mutant(
+        "ignore-font-gamma",
+        "Force neutral coverage correction even when a platform requests gamma correction.",
+        FONT,
+        "gamma_ratios: get_gamma_correction_ratios(gamma),",
+        "gamma_ratios: get_gamma_correction_ratios(1.0),",
+        "analytic half-glyph gamma correction",
+        ("cargo", "test", "--offline", "-p", "gpui_ce_render", "--features", "cpu", "--test", "cpu_properties", "font_gamma_correction_preserves_neutral_and_corrects_half_coverage"),
+    ),
+    Mutant(
+        "ignore-subpixel-order",
+        "Ignore the configured panel order when packing font rasterization uniforms.",
+        FONT,
+        "self.subpixel_order == SubpixelOrder::BlueGreenRed,",
+        "false,",
+        "RGB and BGR channel mapping",
+        ("cargo", "test", "--offline", "-p", "gpui_ce_render", "--features", "cpu", "--test", "cpu_properties", "subpixel_order_reverses_red_and_blue_coverage_channels"),
+    ),
+    Mutant(
         "drop-filter-opacity",
         "Ignore the content-filter group's opacity during compositing.",
         CPU_FRAME,
@@ -94,13 +115,22 @@ MUTANTS: tuple[Mutant, ...] = (
         ("cargo", "test", "--offline", "-p", "gpui_ce_render", "--features", "cpu", "--test", "cpu_properties", "adjacent_path_triangles_assign_shared_edge_pixels_once"),
     ),
     Mutant(
-        "ignore-path-content-clip",
-        "Rasterize a path using its full bounds instead of its clipped bounds.",
+        "ignore-path-raster-clip",
+        "Use the un-clipped path bounds when preparing the path paint gradient.",
         CPU_FRAME,
         "let bounds = path.clipped_bounds();",
         "let bounds = path.bounds;",
-        "path source-over alpha and clipped pixel bounds",
-        ("cargo", "test", "--offline", "-p", "gpui_ce_render", "--features", "cpu", "--test", "cpu_properties", "path_coverage_composites_with_quad_alpha_and_respects_its_clip"),
+        "clipped path gradient uses clipped paint bounds",
+        ("cargo", "test", "--offline", "-p", "gpui_ce_render", "--features", "cpu", "--test", "cpu_properties", "clipped_path_gradient_uses_the_clipped_paint_bounds"),
+    ),
+    Mutant(
+        "ignore-path-content-clip",
+        "Build the path composite sprite using raw path bounds rather than clipped bounds.",
+        PATH_TYPES,
+        "bounds: path.clipped_bounds(),",
+        "bounds: path.bounds,",
+        "path composite sprite bounds match the content clip",
+        ("cargo", "test", "--offline", "-p", "gpui_ce_render", "--features", "cpu", "--test", "cpu_properties", "path_composite_sprite_bounds_match_the_content_clip"),
     ),
     Mutant(
         "freeze-animation-clock",
@@ -200,40 +230,93 @@ def classify(returncode: int, output: str) -> str:
     return "invalid"
 
 
+def concise_test_output(output: str) -> str:
+    lines = output.splitlines()
+    run_markers = [
+        index
+        for index, line in enumerate(lines)
+        if line.startswith("Running ") or line.startswith("running ")
+    ]
+    if run_markers:
+        lines = lines[run_markers[-1] :]
+        concise: list[str] = []
+        skip_warning = False
+        for line in lines:
+            if line.startswith("warning:"):
+                skip_warning = True
+                continue
+            if skip_warning:
+                if not line.strip():
+                    skip_warning = False
+                continue
+            concise.append(line)
+        return "\n".join(concise)[-5000:]
+
+    error_markers = [
+        index
+        for index, line in enumerate(lines)
+        if "error:" in line.lower() or "error[" in line.lower()
+    ]
+    if error_markers:
+        start = max(0, error_markers[0] - 4)
+        return "\n".join(lines[start:])[-5000:]
+    return "\n".join(lines[-80:])[-5000:]
+
+
+def display_command(command: tuple[str, ...]) -> str:
+    if command[:2] == ("cargo", "test"):
+        command = (*command[:2], "--quiet", *command[2:])
+    return " ".join(command)
+
+
 def run_command(root: pathlib.Path, target_dir: pathlib.Path, command: tuple[str, ...], timeout: int) -> dict[str, object]:
     env = os.environ.copy()
     env["CARGO_TARGET_DIR"] = str(target_dir)
     env["CARGO_INCREMENTAL"] = "0"
     started = time.monotonic()
+    quiet_command = (*command[:2], "--quiet", *command[2:]) if command[:2] == ("cargo", "test") else command
+    process = subprocess.Popen(
+        quiet_command,
+        cwd=root,
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        start_new_session=(os.name == "posix"),
+    )
     try:
-        process = subprocess.run(
-            command,
-            cwd=root,
-            env=env,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-            check=False,
-        )
-        output = process.stdout + process.stderr
-        return {
-            "status": classify(process.returncode, output),
-            "elapsed_seconds": round(time.monotonic() - started, 2),
-            "exit_code": process.returncode,
-            "output": output[-5000:],
-        }
-    except subprocess.TimeoutExpired as error:
-        def text_output(value: str | bytes | None) -> str:
-            if isinstance(value, bytes):
-                return value.decode("utf-8", errors="replace")
-            return value or ""
-        output = text_output(error.stdout) + text_output(error.stderr)
+        stdout, stderr = process.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        if os.name == "posix":
+            try:
+                os.killpg(process.pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass
+            try:
+                stdout, stderr = process.communicate(timeout=2)
+            except subprocess.TimeoutExpired:
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                stdout, stderr = process.communicate()
+        else:
+            process.kill()
+            stdout, stderr = process.communicate()
+        output = concise_test_output(stdout + stderr)
         return {
             "status": "timeout",
             "elapsed_seconds": round(time.monotonic() - started, 2),
             "exit_code": None,
-            "output": str(output)[-5000:],
+            "output": output,
         }
+    output = stdout + stderr
+    return {
+        "status": classify(process.returncode, output),
+        "elapsed_seconds": round(time.monotonic() - started, 2),
+        "exit_code": process.returncode,
+        "output": concise_test_output(output),
+    }
 
 
 def run_mutant(root: pathlib.Path, target_dir: pathlib.Path, mutant: Mutant, timeout: int) -> dict[str, object]:
@@ -244,7 +327,7 @@ def run_mutant(root: pathlib.Path, target_dir: pathlib.Path, mutant: Mutant, tim
             "name": mutant.name,
             "description": mutant.description,
             "command_name": mutant.command_name,
-            "command": " ".join(mutant.command),
+            "command": display_command(mutant.command),
             **result,
         }
     finally:
@@ -331,7 +414,7 @@ def main() -> int:
                 baseline["status"] = "passed" if baseline["status"] == "survived" else baseline["status"]
                 baselines[key] = {
                     "command_name": mutant.command_name,
-                    "command": key,
+                    "command": display_command(mutant.command),
                     **baseline,
                 }
         for mutant in mutants:
@@ -342,7 +425,7 @@ def main() -> int:
                     "name": mutant.name,
                     "description": mutant.description,
                     "command_name": mutant.command_name,
-                    "command": " ".join(mutant.command),
+                    "command": display_command(mutant.command),
                     "status": "invalid",
                     "elapsed_seconds": 0,
                     "exit_code": None,
@@ -356,7 +439,7 @@ def main() -> int:
                         "name": mutant.name,
                         "description": mutant.description,
                         "command_name": mutant.command_name,
-                        "command": " ".join(mutant.command),
+                        "command": display_command(mutant.command),
                         "status": "invalid",
                         "elapsed_seconds": 0,
                         "exit_code": None,

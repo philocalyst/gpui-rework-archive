@@ -34,12 +34,20 @@ fn filled_triangle(
     color: Hsla,
     clip: Bounds<ScaledPixels>,
 ) -> gpui::Path<ScaledPixels> {
+    filled_triangle_with_background(points, solid_background(color), clip)
+}
+
+fn filled_triangle_with_background(
+    points: [(f32, f32); 3],
+    background: gpui::Background,
+    clip: Bounds<ScaledPixels>,
+) -> gpui::Path<ScaledPixels> {
     use gpui::{Path, px};
 
     let mut path = Path::new(point(px(points[0].0), px(points[0].1)));
     path.line_to(point(px(points[1].0), px(points[1].1)));
     path.line_to(point(px(points[2].0), px(points[2].1)));
-    path.color = solid_background(color);
+    path.color = background;
     let mut path = path.scale(1.0);
     path.content_mask = ContentMask {
         bounds: clip,
@@ -185,6 +193,57 @@ fn path_coverage_composites_with_quad_alpha_and_respects_its_clip() {
         [0, 0, 255, 128],
         "path coverage outside its content clip must leave the lower quad unchanged"
     );
+}
+
+#[test]
+fn clipped_path_gradient_uses_the_clipped_paint_bounds() {
+    use gpui::{ColorSpace, linear_color_stop, linear_gradient};
+
+    let black: Hsla = Hsla::new(0.0, 0.0, 0.0, 1.0);
+    let white: Hsla = Hsla::new(0.0, 0.0, 1.0, 1.0);
+    let gradient = linear_gradient(
+        90.0,
+        linear_color_stop(black, 0.0),
+        linear_color_stop(white, 1.0),
+    )
+    .color_space(ColorSpace::Srgb);
+    let mut scene = Scene::default();
+    scene.insert_primitive(gpui::Primitive::Path(filled_triangle_with_background(
+        [(0.0, 0.0), (5.0, 0.0), (0.0, 5.0)],
+        gradient,
+        rect(0.0, 0.0, 3.0, 5.0),
+    )));
+
+    let image = render(&mut scene, 5, 5);
+    let pixel = image.get_pixel(1, 1).0;
+    for channel in &pixel[..3] {
+        assert!(
+            (i16::from(*channel) - 55).abs() <= 3,
+            "clipped 0-to-1 sRGB gradient at its midpoint should be near linear-light 55, got {pixel:?}"
+        );
+    }
+    assert!(
+        pixel[3] >= 250,
+        "interior path coverage stays opaque: {pixel:?}"
+    );
+}
+
+#[test]
+fn path_composite_sprite_bounds_match_the_content_clip() {
+    let clip = rect(0.25, 0.5, 2.0, 3.0);
+    let path = filled_triangle(
+        [(0.0, 0.0), (5.0, 0.0), (0.0, 5.0)],
+        Hsla::new(0.0, 1.0, 0.5, 1.0),
+        clip,
+    );
+    let sprite = gpui_ce_render::path_types::sprites(std::slice::from_ref(&path))
+        .next()
+        .expect("one path yields one composite sprite");
+
+    assert_eq!(sprite.bounds.origin.x.0, clip.origin.x.0);
+    assert_eq!(sprite.bounds.origin.y.0, clip.origin.y.0);
+    assert_eq!(sprite.bounds.size.width.0, clip.size.width.0);
+    assert_eq!(sprite.bounds.size.height.0, clip.size.height.0);
 }
 
 #[test]
@@ -364,6 +423,233 @@ fn quad_content_mask_clips_inside_its_primitive_bounds() {
             );
         }
     }
+}
+
+#[test]
+fn fractional_geometry_uses_the_content_mask_fade_at_pixel_centers() {
+    use gpui::Edges;
+
+    let bounds = rect(0.2, 0.0, 1.0, 1.0);
+    let red: Hsla = Hsla::new(0.0, 1.0, 0.5, 1.0);
+    let mut scene = Scene::default();
+    scene.insert_primitive(Quad {
+        bounds,
+        content_mask: ContentMask {
+            // This mask is deliberately broader than the primitive. At the first pixel
+            // center (x = 0.5), the one-pixel fade has exactly half coverage.
+            bounds: rect(0.25, 0.0, 3.0, 1.0),
+            fade_out: Edges {
+                left: ScaledPixels(0.5),
+                ..Default::default()
+            },
+        },
+        background: solid_background(red),
+        ..Default::default()
+    });
+
+    let image = render(&mut scene, 4, 1);
+    assert_eq!(image.get_pixel(0, 0).0, [255, 0, 0, 128]);
+    assert_eq!(image.get_pixel(1, 0).0, [0, 0, 0, 0]);
+    assert_eq!(image.get_pixel(3, 0).0, [0, 0, 0, 0]);
+}
+
+#[test]
+fn font_gamma_correction_preserves_neutral_and_corrects_half_coverage() {
+    use gpui::{
+        AtlasTextureId, AtlasTextureKind, AtlasTile, CapturedBitmap, MonochromeSprite, TileId,
+    };
+    use gpui_ce_render::{
+        cpu::CpuRenderer,
+        font::{FontRasterizationSettings, SubpixelOrder},
+    };
+
+    let tile = AtlasTile {
+        texture_id: AtlasTextureId {
+            index: 0,
+            kind: AtlasTextureKind::Monochrome,
+        },
+        tile_id: TileId(0),
+        padding: 0,
+        bounds: Bounds {
+            origin: point(DevicePixels(0), DevicePixels(0)),
+            size: Size {
+                width: DevicePixels(1),
+                height: DevicePixels(1),
+            },
+        },
+    };
+    let bitmap = CapturedBitmap {
+        kind: AtlasTextureKind::Monochrome,
+        width: 1,
+        height: 1,
+        bytes: vec![128],
+    };
+    let mut scene = Scene::default();
+    scene.insert_primitive(MonochromeSprite {
+        order: 0,
+        padding: 0,
+        bounds: rect(0.0, 0.0, 1.0, 1.0),
+        content_mask: ContentMask {
+            bounds: rect(0.0, 0.0, 1.0, 1.0),
+            ..Default::default()
+        },
+        color: Hsla::new(0.0, 0.0, 1.0, 1.0).into(),
+        tile,
+        transformation: Default::default(),
+    });
+    scene.finish();
+    let size = Size {
+        width: DevicePixels(1),
+        height: DevicePixels(1),
+    };
+    let bitmaps = [bitmap];
+    let neutral = FontRasterizationSettings::new(1.0, 0.0, 0.0, SubpixelOrder::RedGreenBlue);
+    let mut renderer = CpuRenderer::from_captured_bitmaps(&bitmaps)
+        .unwrap()
+        .with_font_rasterization(neutral);
+    assert_eq!(
+        renderer
+            .render_scene_to_image(&scene, size)
+            .unwrap()
+            .get_pixel(0, 0)
+            .0,
+        [255, 255, 255, 128],
+        "neutral settings retain the captured 128/255 glyph coverage"
+    );
+
+    let corrected = FontRasterizationSettings::new(2.2, 0.0, 0.0, SubpixelOrder::RedGreenBlue);
+    let mut renderer = CpuRenderer::from_captured_bitmaps(&bitmaps)
+        .unwrap()
+        .with_font_rasterization(corrected);
+    let actual = renderer
+        .render_scene_to_image(&scene, size)
+        .unwrap()
+        .get_pixel(0, 0)
+        .0[3];
+    assert!(
+        (i16::from(actual) - 196).abs() <= 1,
+        "gamma 2.2 should map half coverage to about 0.769 alpha (196/255), got {actual}"
+    );
+}
+
+#[test]
+fn subpixel_order_reverses_red_and_blue_coverage_channels() {
+    use gpui::{
+        AtlasTextureId, AtlasTextureKind, AtlasTile, CapturedBitmap, SubpixelSprite, TileId,
+    };
+    use gpui_ce_render::{
+        cpu::CpuRenderer,
+        font::{FontRasterizationSettings, SubpixelOrder},
+    };
+
+    let tile = AtlasTile {
+        texture_id: AtlasTextureId {
+            index: 0,
+            kind: AtlasTextureKind::Subpixel,
+        },
+        tile_id: TileId(0),
+        padding: 0,
+        bounds: Bounds {
+            origin: point(DevicePixels(0), DevicePixels(0)),
+            size: Size {
+                width: DevicePixels(1),
+                height: DevicePixels(1),
+            },
+        },
+    };
+    let bitmap = CapturedBitmap {
+        kind: AtlasTextureKind::Subpixel,
+        width: 1,
+        height: 1,
+        // Captured subpixel tiles retain the native BGRA mask lane order, so this byte
+        // sequence represents full red coverage and no blue coverage.
+        bytes: vec![0, 0, 255, 255],
+    };
+    let mut scene = Scene::default();
+    scene.insert_primitive(SubpixelSprite {
+        order: 0,
+        padding: 0,
+        bounds: rect(0.0, 0.0, 1.0, 1.0),
+        content_mask: ContentMask {
+            bounds: rect(0.0, 0.0, 1.0, 1.0),
+            ..Default::default()
+        },
+        color: Hsla::new(0.0, 0.0, 1.0, 1.0).into(),
+        tile,
+        transformation: Default::default(),
+    });
+    scene.finish();
+    let bitmaps = [bitmap];
+    let size = Size {
+        width: DevicePixels(1),
+        height: DevicePixels(1),
+    };
+    let render = |order| {
+        let settings = FontRasterizationSettings::new(1.0, 0.0, 0.0, order);
+        let mut renderer = CpuRenderer::from_captured_bitmaps(&bitmaps)
+            .unwrap()
+            .with_font_rasterization(settings);
+        renderer
+            .render_scene_to_image(&scene, size)
+            .unwrap()
+            .get_pixel(0, 0)
+            .0
+    };
+
+    assert_eq!(
+        render(SubpixelOrder::RedGreenBlue),
+        [255, 0, 0, 255],
+        "RGB panel order maps the first coverage lane to red"
+    );
+    assert_eq!(
+        render(SubpixelOrder::BlueGreenRed),
+        [0, 0, 255, 255],
+        "BGR panel order reverses red and blue coverage lanes"
+    );
+}
+
+#[test]
+fn inline_blur_chain_uses_the_largest_declared_radius_once() {
+    use gpui::{FilterBoundary, Primitive, ScaledFilter};
+
+    fn render_with(filters: Vec<ScaledFilter>) -> image::RgbaImage {
+        let bounds = rect(0.0, 0.0, 24.0, 24.0);
+        let boundary = |is_start| {
+            Primitive::FilterBoundary(FilterBoundary {
+                order: 0,
+                bounds,
+                content_mask: ContentMask {
+                    bounds,
+                    ..Default::default()
+                },
+                corner_radii: Default::default(),
+                corner_smoothing: 0.0,
+                filters: filters.clone().into(),
+                opacity: 1.0,
+                is_start,
+            })
+        };
+
+        let mut scene = Scene::default();
+        scene.insert_primitive(boundary(true));
+        scene.insert_primitive(solid(
+            rect(11.0, 11.0, 2.0, 2.0),
+            Hsla::new(0.0, 1.0, 0.5, 1.0),
+        ));
+        scene.insert_primitive(boundary(false));
+        render(&mut scene, 24, 24)
+    }
+
+    let chain = render_with(vec![
+        ScaledFilter::Blur(ScaledPixels(2.0)),
+        ScaledFilter::Blur(ScaledPixels(4.0)),
+    ]);
+    let largest_only = render_with(vec![ScaledFilter::Blur(ScaledPixels(4.0))]);
+    assert_eq!(
+        chain.as_raw(),
+        largest_only.as_raw(),
+        "the inline chain's shared blur pass uses its maximum radius, not repeated blur passes"
+    );
 }
 
 #[test]

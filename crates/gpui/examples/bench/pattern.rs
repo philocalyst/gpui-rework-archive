@@ -1,16 +1,31 @@
 #![cfg_attr(target_family = "wasm", no_main)]
 
+#[path = "../shared/prelude.rs"]
+mod example_prelude;
 #[path = "../example_support/fonts.rs"]
 mod example_support;
 
 use gpui::{
-    App, AppContext, Bounds, Context, Window, WindowBounds, WindowOptions, div, linear_color_stop,
-    linear_gradient, pattern_slash, prelude::*, px, rgb, size,
+    App, AppContext, Context, Window, div, linear_color_stop, linear_gradient, pattern_slash,
+    prelude::*, px, rgb,
 };
 use gpui_platform::application;
 use palette::WithAlpha;
 
 struct PatternExample;
+
+fn pattern_bar(
+    color: gpui::Hsla,
+    width: f32,
+    height: f32,
+    slash_width: f32,
+    slash_height: f32,
+) -> impl IntoElement {
+    div()
+        .w(px(width))
+        .h(px(height))
+        .bg(pattern_slash(color, slash_width, slash_height))
+}
 
 impl Render for PatternExample {
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
@@ -32,26 +47,10 @@ impl Render for PatternExample {
                     .flex_col()
                     .border_1()
                     .border_color(gpui::blue())
-                    .child(div().w(px(54.0)).h(px(18.0)).bg(pattern_slash(
-                        gpui::red(),
-                        18.0 / 4.0,
-                        18.0 / 4.0,
-                    )))
-                    .child(div().w(px(54.0)).h(px(18.0)).bg(pattern_slash(
-                        gpui::red(),
-                        18.0 / 4.0,
-                        18.0 / 4.0,
-                    )))
-                    .child(div().w(px(54.0)).h(px(18.0)).bg(pattern_slash(
-                        gpui::red(),
-                        18.0 / 4.0,
-                        18.0 / 4.0,
-                    )))
-                    .child(div().w(px(54.0)).h(px(18.0)).bg(pattern_slash(
-                        gpui::red(),
-                        18.0 / 4.0,
-                        18.0 / 2.0,
-                    ))),
+                    .children(
+                        (0..3).map(|_| pattern_bar(gpui::red(), 54., 18., 18. / 4., 18. / 4.)),
+                    )
+                    .child(pattern_bar(gpui::red(), 54., 18., 18. / 4., 18. / 2.)),
             )
             .child(
                 div()
@@ -61,26 +60,12 @@ impl Render for PatternExample {
                     .border_color(gpui::blue())
                     .bg(gpui::green().with_alpha(0.16))
                     .child("Elements the same height should align")
-                    .child(div().w(px(256.0)).h(px(56.0)).bg(pattern_slash(
-                        gpui::red(),
-                        56.0 / 6.0,
-                        56.0 / 6.0,
-                    )))
-                    .child(div().w(px(256.0)).h(px(56.0)).bg(pattern_slash(
-                        gpui::green(),
-                        56.0 / 6.0,
-                        56.0 / 6.0,
-                    )))
-                    .child(div().w(px(256.0)).h(px(56.0)).bg(pattern_slash(
-                        gpui::blue(),
-                        56.0 / 6.0,
-                        56.0 / 6.0,
-                    )))
-                    .child(div().w(px(256.0)).h(px(26.0)).bg(pattern_slash(
-                        gpui::yellow(),
-                        56.0 / 6.0,
-                        56.0 / 6.0,
-                    ))),
+                    .children(
+                        [gpui::red(), gpui::green(), gpui::blue()]
+                            .into_iter()
+                            .map(|color| pattern_bar(color, 256., 56., 56. / 6., 56. / 6.)),
+                    )
+                    .child(pattern_bar(gpui::yellow(), 256., 26., 56. / 6., 56. / 6.)),
             )
             .child(
                 div()
@@ -110,14 +95,10 @@ fn run_example() {
         if !example_support::load_fonts(cx) {
             return;
         }
-        let bounds = Bounds::centered(None, size(px(600.0), px(600.0)), cx);
-        cx.open_window(
-            WindowOptions::new().window_bounds(Some(WindowBounds::Windowed(bounds))),
-            |_window, cx| cx.new(|_cx| PatternExample),
-        )
-        .unwrap();
-
-        cx.activate(true);
+        let options = example_prelude::centered_window(600., 600., cx);
+        cx.open_window(options, |_window, cx| cx.new(|_cx| PatternExample))
+            .expect("open pattern example");
+        example_prelude::init_example(cx, "Pattern Fills");
     });
 }
 

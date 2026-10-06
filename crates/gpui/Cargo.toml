@@ -154,7 +154,7 @@ windows-061 = { workspace = true, features = ["Win32_Graphics_Direct3D11"] }
 accesskit_consumer.workspace = true
 backtrace.workspace = true
 smol.workspace = true
-gpui_test = { package = "gpui_ce_test", path = "../gpui_test", version = "0.1.0" }
+gpui_test.workspace = true
 collections = { workspace = true, features = ["test-support"] }
 env_logger.workspace = true
 gpui_ce_elements = { path = "../gpui_elements" }

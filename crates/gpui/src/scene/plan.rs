@@ -139,201 +139,50 @@ impl ScenePlan {
         }
     }
 
-    /// Restores a serialized command stream after validating every referenced array range and
-    /// filter boundary. Unlike `build`, this preserves the original command order and grouping.
+    /// Restores a command stream only when it matches the scene's canonical compilation.
+    ///
+    /// Reusing the compiler keeps range, texture, smoothing, ordering, and resource-count
+    /// validation in one place. Serialized ranges are never used to index primitive arrays.
     pub(super) fn from_captured_commands(
         scene: &Scene,
         commands: Vec<RenderCommand>,
     ) -> anyhow::Result<Self> {
-        use anyhow::{bail, ensure};
+        use anyhow::ensure;
 
-        let lengths = SceneLengths::for_scene(scene);
-        let mut covered = SceneLengths::default();
-        let mut requirements = ScenePlanRequirements::default();
-        let mut filter_stack = Vec::<(usize, FilterRenderTarget)>::new();
-        let mut boundary_pair_stack = Vec::<usize>::new();
-        let mut expected_closing_boundaries = vec![None; lengths.filter_boundaries];
+        for (index, path) in scene.paths.iter().enumerate() {
+            ensure!(
+                path.vertices.len() % 3 == 0,
+                "path {index}: vertices must form complete triangles"
+            );
+        }
+        // The live compiler tolerates an unmatched opening boundary by drawing inline.
+        // Portable captures require complete groups, checked before invoking the compiler.
+        let mut openings = Vec::new();
         for (index, boundary) in scene.filter_boundaries.iter().enumerate() {
             if boundary.is_start {
-                boundary_pair_stack.push(index);
-            } else if let Some(start_index) = boundary_pair_stack.pop() {
-                expected_closing_boundaries[start_index] = Some(index);
-            }
-        }
-        let mut seen_boundaries = vec![false; lengths.filter_boundaries];
-        let mut isolated_depth = 0;
-        for (command_index, command) in commands.iter().enumerate() {
-            match command {
-                RenderCommand::Batch(batch) => {
-                    let (range, count, next, kind) = match batch {
-                        PrimitiveBatch::Shadows { range, .. } => (range, lengths.shadows, &mut covered.shadows, "shadow"),
-                        PrimitiveBatch::Quads { range, .. } => (range, lengths.quads, &mut covered.quads, "quad"),
-                        PrimitiveBatch::Paths { range, .. } => (range, lengths.paths, &mut covered.paths, "path"),
-                        PrimitiveBatch::Underlines(range) => (range, lengths.underlines, &mut covered.underlines, "underline"),
-                        PrimitiveBatch::MonochromeSprites { range, .. } =>
-                            (range, lengths.monochrome_sprites, &mut covered.monochrome_sprites, "monochrome sprite"),
-                        PrimitiveBatch::SubpixelSprites { range, .. } =>
-                            (range, lengths.subpixel_sprites, &mut covered.subpixel_sprites, "subpixel sprite"),
-                        PrimitiveBatch::PolychromeSprites { range, .. } =>
-                            (range, lengths.polychrome_sprites, &mut covered.polychrome_sprites, "polychrome sprite"),
-                        PrimitiveBatch::Surfaces(range) => (range, lengths.surfaces, &mut covered.surfaces, "surface"),
-                        PrimitiveBatch::BackdropFilters(range) =>
-                            (range, lengths.backdrop_filters, &mut covered.backdrop_filters, "backdrop filter"),
-                        PrimitiveBatch::FilterBoundary(_) => bail!(
-                            "command {command_index}: raw filter boundary is not a compiled command"
-                        ),
-                    };
-                    ensure!(
-                        range.start == *next && range.start < range.end && range.end <= count,
-                        "command {command_index}: invalid {kind} range {range:?} for {count} primitives"
-                    );
-                    *next = range.end;
-                    match batch {
-                        PrimitiveBatch::Paths { range, rasterization_vertex_count, sprite_count } => {
-                            let paths = &scene.paths[range.clone()];
-                            ensure!(paths.iter().all(|path| path.vertices.len() % 3 == 0),
-                                "command {command_index}: path vertices must form complete triangles");
-                            let expected_vertices = paths.iter().map(|path| path.vertices.len()).sum::<usize>();
-                            let expected_sprites = if paths.first().unwrap().order == paths.last().unwrap().order {
-                                paths.len()
-                            } else { 1 };
-                            ensure!(
-                                *rasterization_vertex_count == expected_vertices && *sprite_count == expected_sprites,
-                                "command {command_index}: path resource counts do not match its range"
-                            );
-                        }
-                        PrimitiveBatch::MonochromeSprites { texture_id, range } => {
-                            ensure!(
-                                range
-                                    .clone()
-                                    .all(|index| scene.monochrome_sprites[index].tile.texture_id
-                                        == *texture_id),
-                                "command {command_index}: monochrome sprite texture does not match its range"
-                            );
-                        }
-                        PrimitiveBatch::SubpixelSprites { texture_id, range } => {
-                            ensure!(
-                                range
-                                    .clone()
-                                    .all(|index| scene.subpixel_sprites[index].tile.texture_id
-                                        == *texture_id),
-                                "command {command_index}: subpixel sprite texture does not match its range"
-                            );
-                        }
-                        PrimitiveBatch::PolychromeSprites {
-                            texture_id, range, ..
-                        } => {
-                            ensure!(
-                                range
-                                    .clone()
-                                    .all(|index| scene.polychrome_sprites[index].tile.texture_id
-                                        == *texture_id),
-                                "command {command_index}: polychrome sprite texture does not match its range"
-                            );
-                        }
-                        _ => {}
-                    }
-                    requirements.include_batch(batch);
-                }
-                RenderCommand::BeginFilter {
-                    boundary_index,
-                    target,
-                } => {
-                    ensure!(
-                        *boundary_index < lengths.filter_boundaries,
-                        "command {command_index}: opening boundary index out of bounds"
-                    );
-                    ensure!(
-                        scene.filter_boundaries[*boundary_index].is_start,
-                        "command {command_index}: begin command references an end boundary"
-                    );
-                    ensure!(
-                        expected_closing_boundaries[*boundary_index].is_some(),
-                        "command {command_index}: opening boundary has no matching close"
-                    );
-                    ensure!(
-                        !seen_boundaries[*boundary_index],
-                        "command {command_index}: opening boundary appears more than once"
-                    );
-                    seen_boundaries[*boundary_index] = true;
-                    let expected_target = if isolated_depth < MAX_FILTER_GROUP_DEPTH {
-                        FilterRenderTarget::Isolated(FilterTargetIndex(isolated_depth))
-                    } else {
-                        FilterRenderTarget::Inline
-                    };
-                    ensure!(*target == expected_target,
-                        "command {command_index}: filter target does not match isolation depth");
-                    if let FilterRenderTarget::Isolated(target_index) = target {
-                        ensure!(
-                            target_index.0 == isolated_depth
-                                && isolated_depth < MAX_FILTER_GROUP_DEPTH,
-                            "command {command_index}: invalid isolated filter target"
-                        );
-                        isolated_depth += 1;
-                        requirements.uses_offscreen_target = true;
-                        requirements.isolated_target_count =
-                            requirements.isolated_target_count.max(isolated_depth);
-                    }
-                    filter_stack.push((*boundary_index, *target));
-                }
-                RenderCommand::EndFilter {
-                    boundary_index,
-                    closing_boundary_index,
-                    target,
-                } => {
-                    ensure!(
-                        *boundary_index < lengths.filter_boundaries
-                            && *closing_boundary_index < lengths.filter_boundaries,
-                        "command {command_index}: closing boundary index out of bounds"
-                    );
-                    ensure!(
-                        !scene.filter_boundaries[*closing_boundary_index].is_start,
-                        "command {command_index}: end command references an opening boundary"
-                    );
-                    let Some((start, start_target)) = filter_stack.pop() else {
-                        bail!("command {command_index}: end filter has no matching begin")
-                    };
-                    ensure!(
-                        start == *boundary_index && start_target == *target,
-                        "command {command_index}: end filter does not match its begin"
-                    );
-                    ensure!(
-                        *closing_boundary_index > *boundary_index,
-                        "command {command_index}: closing filter boundary precedes its begin"
-                    );
-                    ensure!(
-                        expected_closing_boundaries[*boundary_index]
-                            == Some(*closing_boundary_index),
-                        "command {command_index}: closing boundary is not paired with its begin"
-                    );
-                    ensure!(
-                        !seen_boundaries[*closing_boundary_index],
-                        "command {command_index}: closing boundary appears more than once"
-                    );
-                    seen_boundaries[*closing_boundary_index] = true;
-                    if target.is_isolated() {
-                        isolated_depth -= 1;
-                        requirements.isolated_filter_count += 1;
-                    }
-                }
+                openings.push(index);
+            } else {
+                ensure!(
+                    openings.pop().is_some(),
+                    "filter boundary {index}: end has no matching begin"
+                );
             }
         }
         ensure!(
-            filter_stack.is_empty(),
-            "captured commands leave filter groups open"
+            openings.is_empty(),
+            "captured scene leaves filter groups open"
         );
-        ensure!(
-            seen_boundaries.into_iter().all(|seen| seen),
-            "captured commands do not reference every filter boundary"
-        );
-        covered.filter_boundaries = lengths.filter_boundaries;
-        ensure!(covered == lengths, "captured commands do not cover every primitive");
-        requirements.command_count = commands.len();
-        Ok(Self {
-            commands,
-            requirements,
-            scene_lengths: lengths,
-        })
+
+        let expected = Self::build(scene, Vec::new());
+        for index in 0..expected.commands.len().max(commands.len()) {
+            let actual = commands.get(index);
+            let required = expected.commands.get(index);
+            ensure!(
+                actual == required,
+                "command {index} does not match compiled scene: got {actual:?}, expected {required:?}"
+            );
+        }
+        Ok(expected)
     }
 
     /// Returns the ordered rendering commands.

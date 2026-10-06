@@ -1,11 +1,13 @@
 #![cfg_attr(target_family = "wasm", no_main)]
 
+#[path = "../shared/prelude.rs"]
+mod example_prelude;
 #[path = "../example_support/fonts.rs"]
 mod example_support;
 
 use gpui::{
-    App, Background, Bounds, BoxShadow, Context, Div, FontWeight, Render, Window, WindowBounds,
-    WindowOptions, div, hsla, linear_color_stop, linear_gradient, prelude::*, px, rgb, size,
+    App, AppContext as _, Background, BoxShadow, Context, Div, FontWeight, Render, Window, div,
+    hsla, linear_color_stop, linear_gradient, prelude::*, px, rgb,
 };
 use gpui_platform::application;
 
@@ -165,15 +167,10 @@ fn run_example() {
             return;
         }
 
-        let bounds = Bounds::centered(None, size(px(1000.), px(760.)), cx);
-        cx.open_window(
-            WindowOptions::new()
-                .window_bounds(Some(WindowBounds::Windowed(bounds)))
-                .focus(true),
-            |_, cx| cx.new(|_| BackgroundShowcase),
-        )
-        .unwrap();
-        cx.activate(true);
+        let options = example_prelude::centered_window(1000., 760., cx).focus(true);
+        cx.open_window(options, |_, cx| cx.new(|_| BackgroundShowcase))
+            .expect("open background showcase");
+        example_prelude::init_example(cx, "Backgrounds and Shadows");
     });
 }
 

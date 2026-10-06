@@ -2,13 +2,14 @@
 
 //! Demonstrates posting, replacing, dismissing, and responding to system notifications.
 
+#[path = "../shared/prelude.rs"]
+mod example_prelude;
 #[path = "../example_support/fonts.rs"]
 mod example_support;
 
 use gpui::{
-    App, Bounds, Context, Div, SharedString, Stateful, SystemNotification,
-    SystemNotificationAction, SystemNotificationResponse, Window, WindowBounds, WindowOptions, div,
-    prelude::*, px, rgb, size,
+    App, AppContext as _, Context, Div, SharedString, Stateful, SystemNotification,
+    SystemNotificationAction, SystemNotificationResponse, Window, div, prelude::*, px, rgb,
 };
 use gpui_platform::application;
 
@@ -125,18 +126,15 @@ fn run_example() {
             }
         });
 
-        let bounds = Bounds::centered(None, size(px(560.), px(360.)), cx);
-        cx.open_window(
-            WindowOptions::new()
-                .window_bounds(Some(WindowBounds::Windowed(bounds)))
-                .titlebar(Some(gpui::TitlebarOptions {
-                    title: Some("System Notifications Example".into()),
-                    ..Default::default()
-                })),
-            move |_, _| view,
-        )
-        .expect("failed to open system notifications example window");
-        cx.activate(true);
+        let options = example_prelude::centered_window(560., 360., cx).titlebar(Some(
+            gpui::TitlebarOptions {
+                title: Some("System Notifications Example".into()),
+                ..Default::default()
+            },
+        ));
+        cx.open_window(options, move |_, _| view)
+            .expect("open system notifications example window");
+        example_prelude::init_example(cx, "System Notifications");
     });
 }
 

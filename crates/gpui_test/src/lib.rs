@@ -6,6 +6,7 @@
 
 mod report;
 mod runner;
+mod snapshot;
 
 pub mod gallery;
 pub use gallery::{BuiltInScenario, built_in_scenarios};

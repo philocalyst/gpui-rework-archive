@@ -1,16 +1,25 @@
 #![cfg_attr(target_family = "wasm", no_main)]
 
+#[path = "../../shared/prelude.rs"]
+mod example_prelude;
 #[path = "../../example_support/fonts.rs"]
 mod example_support;
 
-use gpui::{
-    App, Bounds, Context, SharedString, Window, WindowBounds, WindowOptions, div, prelude::*, px,
-    rgb, size,
-};
+use gpui::{App, AppContext as _, Context, Hsla, SharedString, Window, div, prelude::*, px, rgb};
 use gpui_platform::application;
 
 struct HelloWorld {
     text: SharedString,
+}
+
+fn swatch(color: Hsla, outline: Hsla) -> impl IntoElement {
+    div()
+        .size_8()
+        .bg(color)
+        .border_1()
+        .border_dashed()
+        .rounded_md()
+        .border_color(outline)
 }
 
 impl Render for HelloWorld {
@@ -29,66 +38,14 @@ impl Render for HelloWorld {
             .text_xl()
             .text_color(rgb(0xffffff))
             .child(format!("Hello, {}!", self.text))
-            .child(
-                div()
-                    .flex()
-                    .gap_2()
-                    .child(
-                        div()
-                            .size_8()
-                            .bg(gpui::red())
-                            .border_1()
-                            .border_dashed()
-                            .rounded_md()
-                            .border_color(gpui::white()),
-                    )
-                    .child(
-                        div()
-                            .size_8()
-                            .bg(gpui::green())
-                            .border_1()
-                            .border_dashed()
-                            .rounded_md()
-                            .border_color(gpui::white()),
-                    )
-                    .child(
-                        div()
-                            .size_8()
-                            .bg(gpui::blue())
-                            .border_1()
-                            .border_dashed()
-                            .rounded_md()
-                            .border_color(gpui::white()),
-                    )
-                    .child(
-                        div()
-                            .size_8()
-                            .bg(gpui::yellow())
-                            .border_1()
-                            .border_dashed()
-                            .rounded_md()
-                            .border_color(gpui::white()),
-                    )
-                    .child(
-                        div()
-                            .size_8()
-                            .bg(gpui::black())
-                            .border_1()
-                            .border_dashed()
-                            .rounded_md()
-                            .rounded_md()
-                            .border_color(gpui::white()),
-                    )
-                    .child(
-                        div()
-                            .size_8()
-                            .bg(gpui::white())
-                            .border_1()
-                            .border_dashed()
-                            .rounded_md()
-                            .border_color(gpui::black()),
-                    ),
-            )
+            .child(div().flex().gap_2().children([
+                swatch(gpui::red(), gpui::white()),
+                swatch(gpui::green(), gpui::white()),
+                swatch(gpui::blue(), gpui::white()),
+                swatch(gpui::yellow(), gpui::white()),
+                swatch(gpui::black(), gpui::white()),
+                swatch(gpui::white(), gpui::black()),
+            ]))
     }
 }
 
@@ -97,17 +54,14 @@ fn run_example() {
         if !example_support::load_fonts(cx) {
             return;
         }
-        let bounds = Bounds::centered(None, size(px(500.), px(500.0)), cx);
-        cx.open_window(
-            WindowOptions::new().window_bounds(Some(WindowBounds::Windowed(bounds))),
-            |_, cx| {
-                cx.new(|_| HelloWorld {
-                    text: "World".into(),
-                })
-            },
-        )
-        .unwrap();
-        cx.activate(true);
+        let options = example_prelude::centered_window(500., 500., cx);
+        cx.open_window(options, |_, cx| {
+            cx.new(|_| HelloWorld {
+                text: "World".into(),
+            })
+        })
+        .expect("open hello world window");
+        example_prelude::init_example(cx, "Hello World");
     });
 }
 
