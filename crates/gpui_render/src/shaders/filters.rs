@@ -323,7 +323,7 @@ pub mod blur {
         );
         let mut coverage = 1.0;
         if locals.composite_clip == BlurCompositeClip::RoundedBounds {
-            let contour = prepared_corner_sample(
+            let contour = contour_sample(
                 local,
                 locals.shape_bounds,
                 locals.corner_radii,

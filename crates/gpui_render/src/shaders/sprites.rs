@@ -425,7 +425,7 @@ pub mod polychrome_sprite {
             input.position.xy(),
             input.clip_distances,
         );
-        let contour = prepared_corner_sample(
+        let contour = contour_sample(
             local,
             sprite.bounds,
             sprite.corner_radii,

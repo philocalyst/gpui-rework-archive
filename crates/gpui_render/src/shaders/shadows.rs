@@ -113,7 +113,7 @@ pub mod shadow {
         let mut coverage = 0.0;
 
         if shadow.blur_radius == 0.0 {
-            let contour = prepared_corner_sample(
+            let contour = contour_sample(
                 position,
                 shadow.bounds,
                 shadow.corner_radii,
@@ -145,13 +145,14 @@ pub mod shadow {
                 if !corner_candidate && edge_depth >= blur_limit {
                     coverage = 1.0;
                 } else {
-                    let distance = prepared_corner_signed_distance(
+                    let distance = contour_sample(
                         position,
                         shadow.bounds,
                         shadow.corner_radii,
                         shadow.corner_smoothing,
                         prepared,
-                    );
+                    )
+                    .distance;
                     coverage = gaussian_signed_distance_coverage(distance, shadow.blur_radius);
                 }
             }
@@ -160,7 +161,7 @@ pub mod shadow {
         }
 
         if is_enabled(shadow.inset) {
-            let contour = prepared_corner_sample(
+            let contour = contour_sample(
                 position,
                 shadow.element_bounds,
                 shadow.element_corner_radii,

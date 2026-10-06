@@ -24,11 +24,28 @@ scale. This is a local gradient approximation, not exact integration of a curved
 shape over a pixel; finite precision and nonsmooth contour joins remain limits.
 
 `LocalPixelBasis` is shared by all scalar coverage calculations in a fragment.
-`PreparedCornerSample` returns distance, its gradient, selected corner/segment,
-path progress and curvature from one corner solve. Distance-only entry points
-delegate to the sample. Circular corners retain their existing fast selection;
+`ContourSample` returns distance, its gradient, selected corner/segment,
+path progress and curvature from one corner solve. Distance-only callers read
+the sample's distance. Circular corners retain their existing fast selection;
 normalized superellipses keep the compact quadrant path when adjacent reaches
 permit it. Figma corners reuse the nearest arc or cubic for border and dash work.
+
+The subsequent simplification merged three sample types and their adapter paths
+into this one type. `ContourSegment` distinguishes straight, Figma cubic/arc and
+implicit superellipse states. Constructors centralize metadata defaults; obsolete
+scalar-only and duplicate reach-aware evaluators were removed. Compact-path
+parity is checked against an independent scalar reference in the test module,
+rather than retaining a duplicate production evaluator.
+
+The straight-edge scan also became a four-lane projection and first-minimum
+selection, replacing four repeated candidate blocks. Luna's
+[f32 differential experiment](experiments/contour-segment-reduction/report.md)
+found no mismatch across 250,000 deterministic cases and eight adversarial
+fixtures. It preserves contour-order ties and clamps overlapping reaches to
+their original segment start; it makes no GPU contraction or speedup claim.
+Together these changes remove 169 production lines across the five affected
+shader files relative to `f1eb725c7c`; the whole-file reduction is 99 lines
+after adding independent scalar-reference and tie tests.
 
 The gradient must differentiate the actual scalar approximation, including its
 magnitude. Normalizing it would be wrong for the existing quarter-ellipse and

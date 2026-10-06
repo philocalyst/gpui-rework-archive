@@ -1,0 +1,9 @@
+fixture=top_left_corner_tie match=true old=0/0 new=0/0
+fixture=bottom_right_corner_tie match=true old=1/0 new=1/0
+fixture=symmetric_equal_top_bottom match=true old=0/-30 new=0/-30
+fixture=collapsed_top_and_right match=true old=1/-33.83784866333008 new=1/-33.83784866333008
+fixture=overlapping_reaches match=true old=0/-58.30952072143555 new=0/-58.30952072143555
+fixture=zero_size match=true old=0/0 new=0/0
+fixture=negative_extents match=true old=3/5 new=3/5
+fixture=overflowed_squared_distances match=true old=0/Infinity new=0/Infinity
+random_cases=250000 seed=0x6d2b79f5 exact_mismatches=0

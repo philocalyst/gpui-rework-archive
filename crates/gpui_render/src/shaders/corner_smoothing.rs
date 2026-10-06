@@ -5,10 +5,15 @@ mod source {
     use wgsl_rs::std::*;
 
     pub const SUPERELLIPSE_DIAGONAL_INSET: f32 = 0.2928932188134524;
-    pub const FIGMA_SEGMENT_STRAIGHT: u32 = 0u32;
-    pub const FIGMA_SEGMENT_FIRST_CUBIC: u32 = 1u32;
-    pub const FIGMA_SEGMENT_ARC: u32 = 2u32;
-    pub const FIGMA_SEGMENT_SECOND_CUBIC: u32 = 3u32;
+    #[repr(u32)]
+    #[derive(Clone, Copy, PartialEq, Eq, Wgsl)]
+    pub enum ContourSegment {
+        Straight = 0,
+        FirstCubic = 1,
+        Arc = 2,
+        SecondCubic = 3,
+        Superellipse = 4,
+    }
     pub const FIGMA_NO_CORNER: u32 = 4u32;
     pub const FIGMA_EPSILON: f32 = 0.000001;
 
@@ -49,39 +54,20 @@ mod source {
             && reaches.w + reaches.x <= size.y
     }
 
-    pub fn normalized_superellipse_signed_distance_from_corner(
-        corner_to_point: Vec2f,
-        corner_radius: f32,
-        corner_smoothing: f32,
-        power: f32,
-    ) -> f32 {
-        normalized_superellipse_sample_from_corner(
-            corner_to_point,
-            corner_radius,
-            corner_smoothing,
-            power,
-        )
-        .distance
-    }
-
     pub fn normalized_superellipse_sample_from_corner(
         corner_to_point: Vec2f,
         corner_radius: f32,
         corner_smoothing: f32,
         power: f32,
-    ) -> PreparedCornerSample {
+    ) -> ContourSample {
         let extent = max(corner_radius, 0.0) * (1.0 + clamp(corner_smoothing, 0.0, 1.0));
         let corner_center_to_point = corner_to_point + extent;
         if extent <= 0.0 || corner_center_to_point.x <= 0.0 || corner_center_to_point.y <= 0.0 {
             let x_is_nearest = corner_to_point.x > corner_to_point.y;
-            return PreparedCornerSample {
-                distance: max(corner_to_point.x, corner_to_point.y),
-                gradient: select(vec2f(0.0, 1.0), vec2f(1.0, 0.0), x_is_nearest),
-                curvature: 0.0,
-                corner: FIGMA_NO_CORNER,
-                path_t: 0.0,
-                segment: FIGMA_SEGMENT_STRAIGHT,
-            };
+            return ContourSample::straight(
+                max(corner_to_point.x, corner_to_point.y),
+                select(vec2f(0.0, 1.0), vec2f(1.0, 0.0), x_is_nearest),
+            );
         }
 
         let normalized = corner_center_to_point / extent;
@@ -101,14 +87,7 @@ mod source {
         let distance = extent * numerator / denominator;
         let gradient = (first_derivative * denominator - numerator * denominator_derivative)
             / (denominator * denominator);
-        PreparedCornerSample {
-            distance,
-            gradient,
-            curvature: 0.0,
-            corner: FIGMA_NO_CORNER,
-            path_t: 0.0,
-            segment: FIGMA_SEGMENT_ARC,
-        }
+        ContourSample::curved(distance, gradient, 0.0, 0.0, ContourSegment::Superellipse)
     }
 
     pub fn normalized_superellipse_sample(
@@ -118,7 +97,7 @@ mod source {
         corner_smoothing: f32,
         reaches: Vec4f,
         power: f32,
-    ) -> PreparedCornerSample {
+    ) -> ContourSample {
         // Keep the compact path's quadrant selection: when every corner is
         // contained in half the short side, only the nearest corner can affect
         // the contour. Besides avoiding four nearest-point evaluations, this
@@ -150,16 +129,7 @@ mod source {
 
         let local_point = point - bounds.origin;
         let radii = corner_values(corner_radii);
-        let nearest_straight =
-            figma_nearest_straight_sample(local_point, bounds.size, reaches, reaches);
-        let mut nearest = PreparedCornerSample {
-            distance: nearest_straight.distance,
-            gradient: nearest_straight.normal,
-            curvature: 0.0,
-            corner: FIGMA_NO_CORNER,
-            path_t: nearest_straight.path_t,
-            segment: FIGMA_SEGMENT_STRAIGHT,
-        };
+        let mut nearest = figma_nearest_straight_sample(local_point, bounds.size, reaches, reaches);
         let mut corner = 0u32;
         while corner < 4u32 {
             if figma_is_corner_candidate(
@@ -180,7 +150,7 @@ mod source {
                     candidate.gradient = figma_orient_corner_normal(candidate.gradient, corner);
                     candidate.corner = corner;
                     candidate.path_t = 0.0;
-                    candidate.segment = FIGMA_SEGMENT_ARC;
+                    candidate.segment = ContourSegment::Superellipse;
                     nearest = candidate;
                 }
             }
@@ -196,85 +166,6 @@ mod source {
             && reaches.y <= half_short_side
             && reaches.z <= half_short_side
             && reaches.w <= half_short_side
-    }
-
-    pub fn compact_normalized_superellipse_signed_distance(
-        point: Vec2f,
-        bounds: Bounds,
-        corner_radii: Corners,
-        corner_smoothing: f32,
-        power: f32,
-    ) -> f32 {
-        let half_size = Bounds::half_size(bounds);
-        let center_to_point = point - Bounds::center(bounds);
-        let corner_radius = pick_corner_radius(center_to_point, corner_radii);
-        let corner_to_point = abs(center_to_point) - half_size;
-
-        normalized_superellipse_signed_distance_from_corner(
-            corner_to_point,
-            corner_radius,
-            corner_smoothing,
-            power,
-        )
-    }
-
-    pub fn reach_aware_normalized_superellipse_signed_distance(
-        point: Vec2f,
-        bounds: Bounds,
-        corner_radii: Corners,
-        corner_smoothing: f32,
-        reaches: Vec4f,
-        power: f32,
-    ) -> f32 {
-        let local_point = point - bounds.origin;
-        let radii = corner_values(corner_radii);
-        let mut distance =
-            figma_nearest_straight_sample(local_point, bounds.size, reaches, reaches).distance;
-        let mut corner = 0u32;
-
-        while corner < 4u32 {
-            if figma_is_corner_candidate(
-                local_point,
-                bounds.size,
-                reaches[corner],
-                reaches[corner],
-                corner,
-            ) {
-                let candidate = normalized_superellipse_signed_distance_from_corner(
-                    figma_corner_to_point(local_point, bounds.size, corner),
-                    radii[corner],
-                    corner_smoothing,
-                    power,
-                );
-
-                if abs(candidate) <= abs(distance) {
-                    distance = candidate;
-                }
-            }
-
-            corner += 1u32;
-        }
-
-        distance
-    }
-
-    pub fn normalized_superellipse_signed_distance(
-        point: Vec2f,
-        bounds: Bounds,
-        corner_radii: Corners,
-        corner_smoothing: f32,
-        reaches: Vec4f,
-        power: f32,
-    ) -> f32 {
-        normalized_superellipse_sample(
-            point,
-            bounds,
-            corner_radii,
-            corner_smoothing,
-            reaches,
-            power,
-        )
-        .distance
     }
 
     // This corner construction derives from Tien Pham's figma-squircle.
@@ -425,28 +316,44 @@ mod source {
     }
 
     #[derive(Clone, Copy, Wgsl)]
-    pub struct SignedDistanceSample {
-        pub distance: f32,
-        pub normal: Vec2f,
-        pub curvature: f32,
-        pub path_t: f32,
-        pub segment: u32,
-    }
-
-    #[derive(Clone, Copy, Wgsl)]
-    pub struct PreparedCornerSample {
+    /// Local signed distance and its unnormalized scalar gradient.
+    pub struct ContourSample {
         pub distance: f32,
         pub gradient: Vec2f,
         pub curvature: f32,
         pub corner: u32,
         pub path_t: f32,
-        pub segment: u32,
+        pub segment: ContourSegment,
     }
 
-    #[derive(Clone, Copy, Wgsl)]
-    pub struct FigmaRectangleSample {
-        pub signed_distance: SignedDistanceSample,
-        pub corner: u32,
+    impl ContourSample {
+        pub fn straight(distance: f32, gradient: Vec2f) -> ContourSample {
+            ContourSample {
+                distance,
+                gradient,
+                curvature: 0.0,
+                corner: FIGMA_NO_CORNER,
+                path_t: 0.0,
+                segment: ContourSegment::Straight,
+            }
+        }
+
+        pub fn curved(
+            distance: f32,
+            gradient: Vec2f,
+            curvature: f32,
+            path_t: f32,
+            segment: ContourSegment,
+        ) -> ContourSample {
+            ContourSample {
+                distance,
+                gradient,
+                curvature,
+                corner: FIGMA_NO_CORNER,
+                path_t,
+                segment,
+            }
+        }
     }
 
     #[derive(Clone, Copy, Wgsl)]
@@ -773,24 +680,18 @@ mod source {
         )
     }
 
-    pub fn figma_corner_signed_distance(
-        corner_to_point: Vec2f,
-        params: FigmaCornerParams,
-    ) -> SignedDistanceSample {
+    pub fn figma_corner_sample(corner_to_point: Vec2f, params: FigmaCornerParams) -> ContourSample {
         let z = corner_to_point + vec2f(params.horizontal.p, params.vertical.p);
 
         if params.radius <= FIGMA_EPSILON || z.x <= 0.0 || z.y <= 0.0 {
-            return SignedDistanceSample {
-                distance: max(corner_to_point.x, corner_to_point.y),
-                normal: select(
+            return ContourSample::straight(
+                max(corner_to_point.x, corner_to_point.y),
+                select(
                     vec2f(0.0, 1.0),
                     vec2f(1.0, 0.0),
                     corner_to_point.x > corner_to_point.y,
                 ),
-                curvature: 0.0,
-                path_t: 0.0,
-                segment: FIGMA_SEGMENT_STRAIGHT,
-            };
+            );
         }
 
         let horizontal_point = vec2f(z.x, params.vertical.p - z.y);
@@ -831,13 +732,13 @@ mod source {
             params.arc_sweep > FIGMA_EPSILON,
         );
 
-        let mut sample = SignedDistanceSample {
-            distance: figma_signed_distance(arc_delta, arc_normal, length(arc_delta)),
-            normal: figma_unfold_normal(arc_normal, false),
-            curvature: 1.0 / max(params.radius, FIGMA_EPSILON),
-            path_t: arc_t,
-            segment: FIGMA_SEGMENT_ARC,
-        };
+        let mut sample = ContourSample::curved(
+            figma_signed_distance(arc_delta, arc_normal, length(arc_delta)),
+            figma_unfold_normal(arc_normal, false),
+            1.0 / max(params.radius, FIGMA_EPSILON),
+            arc_t,
+            ContourSegment::Arc,
+        );
 
         if params.smoothing > FIGMA_EPSILON {
             let horizontal_bounds_delta = max(
@@ -856,7 +757,7 @@ mod source {
 
                 if abs(distance) <= abs(sample.distance) {
                     sample.distance = distance;
-                    sample.normal = figma_unfold_normal(normal, false);
+                    sample.gradient = figma_unfold_normal(normal, false);
                     sample.curvature = figma_cubic_curvature(
                         cubic.tangent,
                         figma_cubic_second_derivative(
@@ -867,7 +768,7 @@ mod source {
                         ),
                     );
                     sample.path_t = cubic.path_t;
-                    sample.segment = FIGMA_SEGMENT_FIRST_CUBIC;
+                    sample.segment = ContourSegment::FirstCubic;
                 }
             }
 
@@ -887,7 +788,7 @@ mod source {
                     figma_signed_distance(vertical_point - cubic.point, normal, cubic.distance);
                 if abs(distance) <= abs(sample.distance) {
                     sample.distance = distance;
-                    sample.normal = figma_unfold_normal(normal, true);
+                    sample.gradient = figma_unfold_normal(normal, true);
                     sample.curvature = figma_cubic_curvature(
                         cubic.tangent,
                         figma_cubic_second_derivative(
@@ -898,7 +799,7 @@ mod source {
                         ),
                     );
                     sample.path_t = cubic.path_t;
-                    sample.segment = FIGMA_SEGMENT_SECOND_CUBIC;
+                    sample.segment = ContourSegment::SecondCubic;
                 }
             }
         }
@@ -950,19 +851,19 @@ mod source {
 
     pub fn figma_corner_progress(
         params: FigmaCornerParams,
-        sample: PreparedCornerSample,
+        sample: ContourSample,
         total_length: f32,
     ) -> f32 {
-        if sample.segment == FIGMA_SEGMENT_FIRST_CUBIC {
+        if sample.segment == ContourSegment::FirstCubic {
             return figma_cubic_length(params, params.horizontal, sample.path_t);
         }
 
-        if sample.segment == FIGMA_SEGMENT_ARC {
+        if sample.segment == ContourSegment::Arc {
             return figma_cubic_length(params, params.horizontal, 1.0)
                 + params.radius * params.arc_sweep * sample.path_t;
         }
 
-        if sample.segment == FIGMA_SEGMENT_SECOND_CUBIC {
+        if sample.segment == ContourSegment::SecondCubic {
             return total_length - figma_cubic_length(params, params.vertical, sample.path_t);
         }
 
@@ -1044,89 +945,65 @@ mod source {
         size: Vec2f,
         horizontal_extents: Vec4f,
         vertical_extents: Vec4f,
-    ) -> SignedDistanceSample {
-        let mut nearest_delta = point
-            - vec2f(
-                clamp(
-                    point.x,
-                    horizontal_extents.x,
-                    max(horizontal_extents.x, size.x - horizontal_extents.y),
-                ),
-                0.0,
-            );
-        let mut nearest_normal = vec2f(0.0, -1.0);
-        let mut nearest_distance_squared = dot(nearest_delta, nearest_delta);
-        let mut candidate_delta = point
-            - vec2f(
-                size.x,
-                clamp(
-                    point.y,
-                    vertical_extents.y,
-                    max(vertical_extents.y, size.y - vertical_extents.z),
-                ),
-            );
-
-        let mut candidate_distance_squared = dot(candidate_delta, candidate_delta);
-        if candidate_distance_squared < nearest_distance_squared {
-            nearest_delta = candidate_delta;
-            nearest_normal = vec2f(1.0, 0.0);
-            nearest_distance_squared = candidate_distance_squared;
+    ) -> ContourSample {
+        // Lanes follow contour order: top, right, bottom, left. Clamping a
+        // reversed interval to its start preserves collapsed/overlapping reaches.
+        let starts = vec4f(
+            horizontal_extents.x,
+            vertical_extents.y,
+            horizontal_extents.w,
+            vertical_extents.x,
+        );
+        let ends = vec4f(
+            horizontal_extents.y,
+            vertical_extents.z,
+            horizontal_extents.z,
+            vertical_extents.w,
+        );
+        let along = clamp(
+            vec4f(point.x, point.y, point.x, point.y),
+            starts,
+            max(starts, vec4f(size.x, size.y, size.x, size.y) - ends),
+        );
+        let dx = vec4f(
+            point.x - along.x,
+            point.x - size.x,
+            point.x - along.z,
+            point.x,
+        );
+        let dy = vec4f(
+            point.y,
+            point.y - along.y,
+            point.y - size.y,
+            point.y - along.w,
+        );
+        let distances = dx * dx + dy * dy;
+        let nearest = min(min(distances.x, distances.y), min(distances.z, distances.w));
+        // First minimum wins, matching the contour's strict-< tie rule.
+        let mut edge = 3u32;
+        if distances.x == nearest {
+            edge = 0u32;
+        } else if distances.y == nearest {
+            edge = 1u32;
+        } else if distances.z == nearest {
+            edge = 2u32;
         }
-
-        candidate_delta = point
-            - vec2f(
-                clamp(
-                    point.x,
-                    horizontal_extents.w,
-                    max(horizontal_extents.w, size.x - horizontal_extents.z),
-                ),
-                size.y,
-            );
-
-        candidate_distance_squared = dot(candidate_delta, candidate_delta);
-        if candidate_distance_squared < nearest_distance_squared {
-            nearest_delta = candidate_delta;
-            nearest_normal = vec2f(0.0, 1.0);
-            nearest_distance_squared = candidate_distance_squared;
-        }
-
-        candidate_delta = point
-            - vec2f(
-                0.0,
-                clamp(
-                    point.y,
-                    vertical_extents.x,
-                    max(vertical_extents.x, size.y - vertical_extents.w),
-                ),
-            );
-
-        candidate_distance_squared = dot(candidate_delta, candidate_delta);
-        if candidate_distance_squared < nearest_distance_squared {
-            nearest_delta = candidate_delta;
-            nearest_normal = vec2f(-1.0, 0.0);
-            nearest_distance_squared = candidate_distance_squared;
-        }
-
-        SignedDistanceSample {
-            distance: figma_signed_distance(
-                nearest_delta,
-                nearest_normal,
-                sqrt(nearest_distance_squared),
-            ),
-            normal: nearest_normal,
-            curvature: 0.0,
-            path_t: 0.0,
-            segment: FIGMA_SEGMENT_STRAIGHT,
-        }
+        let normals_x = vec4f(0.0, 1.0, 0.0, -1.0);
+        let normals_y = vec4f(-1.0, 0.0, 1.0, 0.0);
+        let normal = vec2f(normals_x[edge], normals_y[edge]);
+        ContourSample::straight(
+            figma_signed_distance(vec2f(dx[edge], dy[edge]), normal, sqrt(nearest)),
+            normal,
+        )
     }
 
-    pub fn prepared_corner_sample(
+    pub fn contour_sample(
         point: Vec2f,
         bounds: Bounds,
         corner_radii: Corners,
         corner_smoothing: f32,
         prepared: PreparedCorners,
-    ) -> PreparedCornerSample {
+    ) -> ContourSample {
         if prepared.superellipse_power > 0.0 {
             return normalized_superellipse_sample(
                 point,
@@ -1138,60 +1015,27 @@ mod source {
             );
         }
         if prepared.smoothing_factors.x <= 0.0 {
-            return PreparedCornerSample {
-                distance: rounded_rectangle_signed_distance(point, bounds, corner_radii),
-                gradient: rounded_rectangle_gradient(point, bounds, corner_radii),
-                curvature: 0.0,
-                corner: FIGMA_NO_CORNER,
-                path_t: 0.0,
-                segment: FIGMA_SEGMENT_STRAIGHT,
-            };
+            return ContourSample::straight(
+                rounded_rectangle_signed_distance(point, bounds, corner_radii),
+                rounded_rectangle_gradient(point, bounds, corner_radii),
+            );
         }
-        let sample = figma_smooth_rectangle_sample(
-            point,
-            bounds,
-            corner_radii,
-            prepared.horizontal_reaches,
-            prepared.vertical_reaches,
-            prepared.smoothing_factors,
-        );
-        PreparedCornerSample {
-            distance: sample.signed_distance.distance,
-            gradient: sample.signed_distance.normal,
-            curvature: sample.signed_distance.curvature,
-            corner: sample.corner,
-            path_t: sample.signed_distance.path_t,
-            segment: sample.signed_distance.segment,
-        }
-    }
 
-    pub fn figma_smooth_rectangle_sample(
-        point: Vec2f,
-        bounds: Bounds,
-        corner_radii: Corners,
-        horizontal_reaches: Vec4f,
-        vertical_reaches: Vec4f,
-        smoothing_factors: Vec4f,
-    ) -> FigmaRectangleSample {
         let local_point = point - bounds.origin;
         let radii = corner_values(corner_radii);
-        let mut result = FigmaRectangleSample {
-            signed_distance: figma_nearest_straight_sample(
-                local_point,
-                bounds.size,
-                horizontal_reaches,
-                vertical_reaches,
-            ),
-            corner: FIGMA_NO_CORNER,
-        };
-
+        let mut nearest = figma_nearest_straight_sample(
+            local_point,
+            bounds.size,
+            prepared.horizontal_reaches,
+            prepared.vertical_reaches,
+        );
         if !figma_has_corner_candidate(
             local_point,
             bounds.size,
-            horizontal_reaches,
-            vertical_reaches,
+            prepared.horizontal_reaches,
+            prepared.vertical_reaches,
         ) {
-            return result;
+            return nearest;
         }
 
         let mut corner = 0u32;
@@ -1199,45 +1043,31 @@ mod source {
             if figma_is_corner_candidate(
                 local_point,
                 bounds.size,
-                horizontal_reaches[corner],
-                vertical_reaches[corner],
+                prepared.horizontal_reaches[corner],
+                prepared.vertical_reaches[corner],
                 corner,
             ) {
                 let params = figma_corner_params(
                     radii[corner],
-                    horizontal_reaches[corner],
-                    vertical_reaches[corner],
-                    smoothing_factors,
+                    prepared.horizontal_reaches[corner],
+                    prepared.vertical_reaches[corner],
+                    prepared.smoothing_factors,
                 );
-
                 if params.radius > FIGMA_EPSILON {
-                    let mut candidate = figma_corner_signed_distance(
+                    let mut candidate = figma_corner_sample(
                         figma_corner_to_point(local_point, bounds.size, corner),
                         params,
                     );
-                    candidate.normal = figma_orient_corner_normal(candidate.normal, corner);
-
-                    if abs(candidate.distance) <= abs(result.signed_distance.distance) {
-                        result.signed_distance = candidate;
-                        result.corner = corner;
+                    candidate.gradient = figma_orient_corner_normal(candidate.gradient, corner);
+                    if abs(candidate.distance) <= abs(nearest.distance) {
+                        candidate.corner = corner;
+                        nearest = candidate;
                     }
                 }
             }
-
             corner += 1u32;
         }
-
-        result
-    }
-
-    pub fn prepared_corner_signed_distance(
-        point: Vec2f,
-        bounds: Bounds,
-        corner_radii: Corners,
-        corner_smoothing: f32,
-        prepared: PreparedCorners,
-    ) -> f32 {
-        prepared_corner_sample(point, bounds, corner_radii, corner_smoothing, prepared).distance
+        nearest
     }
 }
 
@@ -1247,7 +1077,7 @@ pub use source::*;
 mod tests {
     use super::super::common::*;
     use super::*;
-    use wgsl_rs::std::vec2f;
+    use wgsl_rs::std::{abs, vec2f, vec4f};
 
     fn distance(
         point: wgsl_rs::std::Vec2f,
@@ -1257,7 +1087,75 @@ mod tests {
         allow_superellipse: bool,
     ) -> f32 {
         let prepared = prepare_corners(bounds.size, radii, smoothing, allow_superellipse);
-        prepared_corner_signed_distance(point, bounds, radii, smoothing, prepared)
+        contour_sample(point, bounds, radii, smoothing, prepared).distance
+    }
+
+    fn superellipse_reference(
+        point: wgsl_rs::std::Vec2f,
+        radius: f32,
+        smoothing: f32,
+        power: f32,
+    ) -> f32 {
+        let extent = radius.max(0.0) * (1.0 + smoothing.clamp(0.0, 1.0));
+        let x = point.x + extent;
+        let y = point.y + extent;
+        if extent <= 0.0 || x <= 0.0 || y <= 0.0 {
+            return point.x.max(point.y);
+        }
+        let u = x / extent;
+        let v = y / extent;
+        let up = u.powf(power);
+        let vp = v.powf(power);
+        let du = u.powf(power - 1.0);
+        let dv = v.powf(power - 1.0);
+        let gradient = power * (du * du + dv * dv).sqrt();
+        extent * (up + vp - 1.0) / gradient.max(FIGMA_EPSILON)
+    }
+
+    fn compact_superellipse_reference(
+        point: wgsl_rs::std::Vec2f,
+        bounds: Bounds,
+        radii: Corners,
+        smoothing: f32,
+        power: f32,
+    ) -> f32 {
+        let center = point - Bounds::center(bounds);
+        let corner_point = abs(center) - Bounds::half_size(bounds);
+        superellipse_reference(
+            corner_point,
+            pick_corner_radius(center, radii),
+            smoothing,
+            power,
+        )
+    }
+
+    #[test]
+    fn straight_contour_keeps_first_edge_at_ties_and_collapsed_reaches() {
+        let zero = vec4f(0., 0., 0., 0.);
+        for (point, size, reaches, gradient, distance) in [
+            (vec2f(0., 0.), vec2f(100., 60.), zero, vec2f(0., -1.), 0.),
+            (vec2f(100., 60.), vec2f(100., 60.), zero, vec2f(1., 0.), 0.),
+            (
+                vec2f(50., 30.),
+                vec2f(100., 60.),
+                zero,
+                vec2f(0., -1.),
+                -30.,
+            ),
+            (vec2f(0., 0.), vec2f(0., 0.), zero, vec2f(0., -1.), 0.),
+            (
+                vec2f(50., 50.),
+                vec2f(100., 100.),
+                vec4f(80., 80., 80., 80.),
+                vec2f(0., -1.),
+                -3400_f32.sqrt(),
+            ),
+        ] {
+            let sample = figma_nearest_straight_sample(point, size, reaches, reaches);
+            assert_eq!(sample.gradient, gradient);
+            assert_eq!(sample.distance, distance);
+            assert!(sample.segment == ContourSegment::Straight);
+        }
     }
 
     #[test]
@@ -1350,7 +1248,7 @@ mod tests {
             vec2f(116.0, 72.0),
             vec2f(4.0, 72.0),
         ] {
-            let sample = prepared_corner_sample(point, bounds, radii, 0.6, prepared);
+            let sample = contour_sample(point, bounds, radii, 0.6, prepared);
             for (axis, analytic) in [
                 (vec2f(step, 0.0), sample.gradient.x),
                 (vec2f(0.0, step), sample.gradient.y),
@@ -1483,16 +1381,18 @@ mod tests {
         for y in 0..=8 {
             for x in 0..=12 {
                 let point = vec2f(x as f32 * 10.0, y as f32 * 10.0);
-                let expected = compact_normalized_superellipse_signed_distance(
+                let expected = compact_superellipse_reference(
                     point,
                     bounds,
                     radii,
                     smoothing,
                     prepared.superellipse_power,
                 );
-                let actual =
-                    prepared_corner_signed_distance(point, bounds, radii, smoothing, prepared);
-                assert_eq!(actual, expected, "compact distance at {point:?}");
+                let actual = contour_sample(point, bounds, radii, smoothing, prepared).distance;
+                assert!(
+                    (actual - expected).abs() < 0.00001,
+                    "compact distance at {point:?}: {actual} vs {expected}"
+                );
             }
         }
     }
@@ -1519,18 +1419,18 @@ mod tests {
         ));
 
         let shoulder = vec2f(65.0, 0.0);
-        let expected = normalized_superellipse_signed_distance_from_corner(
+        let expected = superellipse_reference(
             -shoulder,
             radii.top_left,
             smoothing,
             prepared.superellipse_power,
         );
-        let actual = prepared_corner_signed_distance(shoulder, bounds, radii, smoothing, prepared);
+        let actual = contour_sample(shoulder, bounds, radii, smoothing, prepared).distance;
         assert!((actual - expected).abs() < 0.0001);
         assert!(actual > 0.0);
 
         let deep_interior =
-            prepared_corner_signed_distance(vec2f(65.0, 65.0), bounds, radii, smoothing, prepared);
+            contour_sample(vec2f(65.0, 65.0), bounds, radii, smoothing, prepared).distance;
         assert!((deep_interior + 15.0).abs() < 0.0001);
     }
 }

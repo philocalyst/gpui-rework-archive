@@ -317,7 +317,7 @@ pub mod quad {
     pub fn smoothed_dashed_border_alpha(
         quad: Quad,
         geometry: QuadGeometry,
-        contour: PreparedCornerSample,
+        contour: ContourSample,
         prepared: PreparedCorners,
         corner_lengths: Vec4f,
         border: Vec2f,
@@ -334,7 +334,7 @@ pub mod quad {
         let mut dash_position = 0.0;
         let mut dash_velocity = 0.0;
 
-        if contour.corner != FIGMA_NO_CORNER && contour.segment != FIGMA_SEGMENT_STRAIGHT {
+        if contour.corner != FIGMA_NO_CORNER && contour.segment != ContourSegment::Straight {
             let corner = contour.corner;
             let mut radius = quad.corner_radii.top_left;
             let mut horizontal_reach = prepared.horizontal_reaches.x;
@@ -810,7 +810,7 @@ pub mod quad {
             smoothing_factors: input.smoothing_factors,
             superellipse_power: input.superellipse_power,
         };
-        let contour = prepared_corner_sample(
+        let contour = contour_sample(
             local_position,
             quad.bounds,
             quad.corner_radii,
@@ -867,7 +867,7 @@ pub mod quad {
         );
         let straight_border_inner_corner_to_point =
             abs(geometry.center_to_point) - Bounds::half_size(quad.bounds) + reduced_border;
-        let near_curve = contour.segment != FIGMA_SEGMENT_STRAIGHT;
+        let near_curve = contour.segment != ContourSegment::Straight;
         if pixel_basis.is_identity
             && straight_border_inner_corner_to_point.x < -PIXEL_ANTIALIAS_RADIUS
             && straight_border_inner_corner_to_point.y < -PIXEL_ANTIALIAS_RADIUS
