@@ -603,20 +603,27 @@ fn transformed_range(
     )
 }
 fn transform_position(transform: gpui::TransformationMatrix, p: [f32; 2]) -> [f32; 2] {
-    let m = transform.rotation_scale;
-    let t = transform.translation;
-    [
-        m[0][0] * p[0] + m[1][0] * p[1] + t[0],
-        m[0][1] * p[0] + m[1][1] * p[1] + t[1],
-    ]
+    use crate::shaders::common::TransformationMatrix;
+    use wgsl_rs::std::{mat2x2f, vec2f};
+
+    // The shader transposes GPUI's row-major bytes when applying the matrix.
+    let rows = transform.rotation_scale;
+    let position = TransformationMatrix::transform_position(
+        TransformationMatrix {
+            rotation_scale: mat2x2f(vec2f(rows[0][0], rows[0][1]), vec2f(rows[1][0], rows[1][1])),
+            translation: vec2f(transform.translation[0], transform.translation[1]),
+        },
+        vec2f(p[0], p[1]),
+    );
+    [position.x, position.y]
 }
 fn inverse_transform(transform: gpui::TransformationMatrix, p: [f32; 2]) -> [f32; 2] {
     let m = transform.rotation_scale;
     let tx = p[0] - transform.translation[0];
     let ty = p[1] - transform.translation[1];
     let a = m[0][0];
-    let b = m[1][0];
-    let c = m[0][1];
+    let b = m[0][1];
+    let c = m[1][0];
     let d = m[1][1];
     let det = a * d - b * c;
     if det.abs() < 1e-8 {
@@ -693,5 +700,41 @@ fn bitmap_pixel(bitmap: &CapturedBitmap, x: i32, y: i32) -> [f32; 4] {
             bitmap.bytes[index] as f32 / 255.,
             bitmap.bytes[index + 3] as f32 / 255.,
         ]
+    }
+}
+
+#[cfg(test)]
+mod transform_tests {
+    use super::{inverse_transform, transform_position};
+    use gpui::{TransformationMatrix, point, px};
+
+    #[test]
+    fn transformed_position_matches_the_scene_matrix_law() {
+        // Deterministic generated affine transforms exercise rotation, shear, scale,
+        // translation, and non-symmetric matrices without a property-test dependency.
+        for index in 0..128 {
+            let seed = index as f32 * 0.173;
+            let transform = TransformationMatrix {
+                rotation_scale: [
+                    [seed.sin() * 2.0, (seed + 0.7).cos()],
+                    [(seed + 1.1).sin(), (seed + 0.3).cos() * 1.5],
+                ],
+                translation: [seed * 0.25 - 3.0, 2.0 - seed * 0.125],
+            };
+            let determinant = transform.rotation_scale[0][0] * transform.rotation_scale[1][1]
+                - transform.rotation_scale[0][1] * transform.rotation_scale[1][0];
+            if determinant.abs() < 0.05 {
+                continue;
+            }
+            let position = [seed * 1.7 - 4.0, (seed + 2.0).cos() * 5.0];
+            let expected = transform.apply(point(px(position[0]), px(position[1])));
+            let actual = transform_position(transform, position);
+            assert!((actual[0] - f32::from(expected.x)).abs() < 1e-5);
+            assert!((actual[1] - f32::from(expected.y)).abs() < 1e-5);
+
+            let round_trip = inverse_transform(transform, actual);
+            assert!((round_trip[0] - position[0]).abs() < 1e-4);
+            assert!((round_trip[1] - position[1]).abs() < 1e-4);
+        }
     }
 }

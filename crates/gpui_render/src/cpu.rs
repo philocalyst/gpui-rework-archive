@@ -345,6 +345,86 @@ mod tests {
     }
 
     #[test]
+    fn rotated_non_square_sprite_keeps_tile_orientation_and_screen_space_mask() {
+        let atlas = CpuAtlas::new();
+        let tile = gpui::AtlasTile {
+            texture_id: gpui::AtlasTextureId {
+                kind: AtlasTextureKind::Monochrome,
+                index: 0,
+            },
+            tile_id: gpui::TileId(0),
+            padding: 0,
+            bounds: Bounds {
+                origin: Point {
+                    x: DevicePixels(0),
+                    y: DevicePixels(0),
+                },
+                size: Size {
+                    width: DevicePixels(3),
+                    height: DevicePixels(2),
+                },
+            },
+        };
+        atlas
+            .insert_captured(
+                tile.texture_id,
+                CapturedBitmap {
+                    kind: AtlasTextureKind::Monochrome,
+                    width: 3,
+                    height: 2,
+                    bytes: vec![255, 0, 255, 0, 255, 0],
+                },
+            )
+            .unwrap();
+
+        let sprite_bounds = bounds(0., 0., 3., 2.);
+        let mut scene = Scene::default();
+        scene.insert_primitive(gpui::MonochromeSprite {
+            order: gpui::DrawOrder::default(),
+            padding: 0,
+            bounds: sprite_bounds,
+            // The rotated rectangle occupies x=3..5, so this mask retains its left column.
+            content_mask: ContentMask {
+                bounds: bounds(3., 1., 1., 3.),
+                ..Default::default()
+            },
+            color: Hsla::new(0., 0., 1., 1.).into(),
+            tile,
+            transformation: gpui::TransformationMatrix {
+                rotation_scale: [[0., -1.], [1., 0.]],
+                translation: [5., 1.],
+            },
+        });
+        scene.finish();
+
+        let image = render_scene_to_image(
+            &scene,
+            Size {
+                width: DevicePixels(7),
+                height: DevicePixels(5),
+            },
+            &atlas,
+        )
+        .unwrap();
+
+        // Clockwise rotation maps the source's bottom row to the left target column.
+        eprintln!(
+            "rotated sprite alphas: {:?}",
+            (1..4)
+                .map(|y| (3..5)
+                    .map(|x| image.get_pixel(x, y).0[3])
+                    .collect::<Vec<_>>())
+                .collect::<Vec<_>>()
+        );
+        for (row, alpha) in [0, 255, 0].into_iter().enumerate() {
+            assert_eq!(image.get_pixel(3, row as u32 + 1).0[3], alpha);
+            assert_eq!(image.get_pixel(4, row as u32 + 1).0[3], 0);
+        }
+        assert_eq!(image.get_pixel(2, 2).0[3], 0);
+        assert_eq!(image.get_pixel(5, 2).0[3], 0);
+    }
+
+    #[test]
     fn nested_isolated_filters_composite_once_and_inline_fallback_keeps_parent_target() {
         let area = bounds(0., 0., 5., 5.);
         let boundary = |order: u32, is_start: bool| gpui::FilterBoundary {
