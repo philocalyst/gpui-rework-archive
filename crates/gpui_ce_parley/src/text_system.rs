@@ -2164,8 +2164,9 @@ impl ParleyTextSystem {
                     glyphs,
                     x_range: start..start + px(glyph_run.advance()),
                     style: PaintStyle::from(&source_runs[source_run]),
-                    underline_offset: Some(px(run_metrics.underline_offset)),
-                    strikethrough_offset: Some(px(run_metrics.strikethrough_offset)),
+                    // Font metrics use y-up; GPUI paints offsets from the baseline in y-down.
+                    underline_offset: Some(px(-run_metrics.underline_offset)),
+                    strikethrough_offset: Some(px(-run_metrics.strikethrough_offset)),
                 });
             }
 
@@ -3967,6 +3968,100 @@ mod tests {
                 .paint_fragments
                 .iter()
                 .any(|fragment| fragment.style.strikethrough.is_some())
+        );
+    }
+
+    #[test]
+    fn decoration_offsets_use_gpui_y_down_coordinates_for_bundled_fonts() {
+        let system = test_system();
+        let decorated_run = |text, family| TextRun {
+            underline: Some(UnderlineStyle {
+                thickness: px(1.0),
+                color: None,
+                wavy: false,
+            }),
+            strikethrough: Some(StrikethroughStyle {
+                thickness: px(1.0),
+                color: None,
+            }),
+            ..text_run(text, family)
+        };
+
+        for family in [IBM_PLEX.family, SOURCE_SERIF.family, LILEX.family] {
+            let text = "decoration";
+            let layout = layout_line(&system, text, px(16.0), &[decorated_run(text, family)]);
+            let fragment = layout
+                .paint_fragments
+                .iter()
+                .find(|fragment| {
+                    fragment.style.underline.is_some() && fragment.style.strikethrough.is_some()
+                })
+                .unwrap_or_else(|| panic!("{family}: decorated paint fragment missing"));
+            let underline = fragment.underline_offset.unwrap();
+            let strike = fragment.strikethrough_offset.unwrap();
+
+            assert!(
+                underline > px(0.0) && underline <= layout.descent,
+                "{family}: underline offset {underline:?} should be positive and within descent {:?}",
+                layout.descent
+            );
+            assert!(
+                strike < px(0.0) && strike >= -layout.ascent,
+                "{family}: strikethrough offset {strike:?} should be negative and within ascent {:?}",
+                layout.ascent
+            );
+            assert_ne!(underline, strike, "{family}: decorations share one offset");
+        }
+
+        let pieces = [
+            (
+                "IBM Plex decoration wraps across words before the next family. ",
+                IBM_PLEX.family,
+            ),
+            (
+                "Source Serif decoration also wraps across words. ",
+                SOURCE_SERIF.family,
+            ),
+            (
+                "Lilex decoration wraps across words at the end.",
+                LILEX.family,
+            ),
+        ];
+        let text = pieces.iter().map(|(text, _)| *text).collect::<String>();
+        let runs = pieces
+            .iter()
+            .map(|(piece, family)| decorated_run(piece, family))
+            .collect::<Vec<_>>();
+        let wrapped = layout_wrapped(&system, &text, px(16.0), &runs, px(145.0), None);
+        assert!(
+            wrapped.visual_lines.len() >= 3,
+            "text should wrap across lines"
+        );
+
+        let mut decorated_fragments = 0;
+        for line in &wrapped.visual_lines {
+            for fragment in &wrapped.paint_fragments[line.paint_fragment_range.clone()] {
+                if fragment.style.underline.is_none() && fragment.style.strikethrough.is_none() {
+                    continue;
+                }
+                decorated_fragments += 1;
+                if fragment.style.underline.is_some() {
+                    assert!(
+                        fragment.underline_offset.unwrap() > px(0.0),
+                        "wrapped underline must paint below its line baseline"
+                    );
+                }
+                if fragment.style.strikethrough.is_some() {
+                    assert!(
+                        fragment.strikethrough_offset.unwrap() < px(0.0),
+                        "wrapped strikethrough must paint above its line baseline"
+                    );
+                }
+            }
+        }
+        assert!(
+            decorated_fragments >= 6,
+            "each family should occur on wrapped lines"
         );
     }
 
