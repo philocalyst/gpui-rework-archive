@@ -1,0 +1,99 @@
+name: Visual tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: visual-tests-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  contracts:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: Swatinem/rust-cache@v2
+      - name: Check GPU-free rendering contracts and state transitions
+        run: |
+          python3 -m unittest discover -s scripts/testing -p 'test_*.py'
+          cargo test --locked --package gpui_ce_render --features cpu
+          cargo test --locked --package gpui_ce_test --lib --test state_regressions
+
+  visual-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Compare reviewed scene and pixel snapshots
+        continue-on-error: true
+        run: |
+          if ! cargo test --locked --package gpui_ce_test --test gallery_snapshots; then
+            echo "::warning::Reviewed visual snapshots changed. Inspect the captures before accepting new baselines."
+          fi
+
+      - name: Capture baseline from the PR base revision
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          if ! git cat-file -e "$BASE_SHA^{commit}"; then
+            echo "::warning::Base commit is unavailable; visual comparisons will be skipped."
+            exit 0
+          fi
+
+          baseline_checkout="$RUNNER_TEMP/gpui-visual-baseline"
+          git worktree add --detach "$baseline_checkout" "$BASE_SHA"
+          if [[ ! -x "$baseline_checkout/scripts/gpui-test" ]]; then
+            echo "::warning::The base revision predates the visual-test harness; visual comparisons will be skipped."
+            exit 0
+          fi
+
+          if ! GIT_SHA="$BASE_SHA" "$baseline_checkout/scripts/gpui-test" run --output "$GITHUB_WORKSPACE/visual-baseline"; then
+            echo "::warning::Could not capture the base revision; current captures will still be reported."
+          fi
+
+      - name: Capture current revision and compare
+        env:
+          GIT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          args=(run --output visual-report)
+          if [[ -f visual-baseline/manifest.json ]]; then
+            args+=(--baseline visual-baseline)
+          else
+            echo "::warning::No baseline capture is available; this run reports captures without diffs."
+          fi
+          scripts/gpui-test "${args[@]}"
+
+      - name: Upload visual report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: visual-report
+          path: |
+            visual-report/
+            visual-baseline/
+            crates/gpui_test/tests/snapshots/*.snap.new
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$(cd -- "$script_dir/.." && pwd)"
+
+cargo_config_args=()
+if [[ -f "$repo_root/.cargo/config.toml" ]]; then
+    cargo_config_args+=(--config "$repo_root/.cargo/config.toml")
+fi
+
+exec cargo "${cargo_config_args[@]}" run --manifest-path "$repo_root/Cargo.toml" --package gpui_ce_test --bin gpui-test -- "$@"

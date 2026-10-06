@@ -1,0 +1,36 @@
+# Include this file from .gitlab-ci.yml with:
+#   include:
+#     - local: docs/ci/gitlab-visual-tests.yml
+# GitLab CI exposes the report at the job artifact URL for the configured
+# retention period. No repository or Pages credentials are needed.
+gpui-visual-tests:
+  stage: test
+  image: rust:latest
+  variables:
+    CARGO_TERM_COLOR: always
+    CARGO_INCREMENTAL: "0"
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends python3 libxkbcommon-dev libxkbcommon-x11-dev libwayland-dev libx11-dev libxcb-shape0-dev libxcb-xfixes0-dev libfontconfig-dev
+  script:
+    - python3 -m unittest discover -s scripts/testing -p 'test_*.py'
+    - cargo test --package gpui_ce_test --lib
+    - scripts/gpui-test run --output visual-report
+  artifacts:
+    when: always
+    expire_in: 30 days
+    paths:
+      - visual-report/
+    # Merge-request source controls its generated HTML/SVG. Keep those out of
+    # GitLab's authenticated artifact browser; it can still expose PNG/JSON.
+    exclude:
+      - visual-report/*.html
+      - visual-report/*.svg
+      - visual-report/**/*.html
+      - visual-report/**/*.svg
+    expose_as: "GPUI visual report"
+
+# To publish reports with GitLab Pages, use the Pages job/artifact syntax
+# supported by your GitLab version and copy visual-report/ into the public/
+# directory. Treat the generated PNG/JSON files as data; serve index.html only
+# from trusted branch pipelines, because merge-request captures come from
+# developer-controlled source code.
