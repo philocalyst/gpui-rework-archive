@@ -211,10 +211,45 @@ pub fn observe<T: 'static>(entity: &Entity<T>, cx: &mut TestAppContext) -> Obser
     let (tx, rx) = async_channel::unbounded();
     let _subscription = cx.update(|cx| {
         cx.observe(entity, move |_, _| {
-            let _ = gpui::block_on(tx.send(()));
+            // This channel is unbounded, so notification never needs an executor.
+            let _ = tx.try_send(());
         })
     });
     let rx = Box::pin(rx);
 
     Observation { rx, _subscription }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::observe;
+    use crate::{AppContext as _, TestAppContext};
+    use futures::StreamExt as _;
+
+    #[gpui::test]
+    async fn observation_stream_receives_each_notify_and_unsubscribes_on_drop(
+        cx: &mut TestAppContext,
+    ) {
+        let counter = cx.update(|cx| cx.new(|_| 0usize));
+        let mut observation = observe(&counter, cx);
+
+        for expected in 1..=2 {
+            counter.update(cx, |value, cx| {
+                *value = expected;
+                cx.notify();
+            });
+
+            assert_eq!(observation.next().await, Some(()));
+            assert_eq!(counter.read_with(cx, |value, _| *value), expected);
+        }
+
+        drop(observation);
+
+        // A post-drop notification is safe even though the receiver has been discarded.
+        counter.update(cx, |value, cx| {
+            *value = 3;
+            cx.notify();
+        });
+        assert_eq!(counter.read_with(cx, |value, _| *value), 3);
+    }
 }

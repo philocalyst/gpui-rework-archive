@@ -40,6 +40,7 @@ GALLERY = "crates/gpui_test/src/gallery/views.rs"
 CAPTURE = "crates/gpui/src/scene/capture.rs"
 REPORT = "crates/gpui_test/src/report.rs"
 FONT = "crates/gpui_render/src/font.rs"
+GPUI_TEST = "crates/gpui/src/test.rs"
 
 MUTANTS: tuple[Mutant, ...] = (
     Mutant(
@@ -181,6 +182,42 @@ MUTANTS: tuple[Mutant, ...] = (
         "                let _ = checkpoint_id;",
         "report comparison detects removed checkpoints",
         ("cargo", "test", "--offline", "-p", "gpui_ce_test", "--test", "state_regressions", "report_comparison_reports_removed_checkpoints"),
+    ),
+    Mutant(
+        "drop-observation-events",
+        "Do not enqueue observer notifications in the test observation stream.",
+        GPUI_TEST,
+        "let _ = tx.try_send(());",
+        "let _ = ();",
+        "entity observation receives successive notify events",
+        ("cargo", "test", "--offline", "--locked", "-p", "gpui-ce", "--lib", "observation_stream_receives_each_notify_and_unsubscribes_on_drop"),
+    ),
+    Mutant(
+        "ignore-selected-report-scenarios",
+        "Compare every current scenario even when the report call selects a subset.",
+        REPORT,
+        '''    let new_scenarios: BTreeMap<_, _> = current
+        .scenarios
+        .iter()
+        .filter(|scenario| selected_ids.is_empty() || selected_ids.contains(&scenario.id))
+        .map(|scenario| (scenario.id.as_str(), scenario))
+        .collect();''',
+        '''    let new_scenarios: BTreeMap<_, _> = current
+        .scenarios
+        .iter()
+        .map(|scenario| (scenario.id.as_str(), scenario))
+        .collect();''',
+        "selected report comparison excludes unrelated scenario changes",
+        ("cargo", "test", "--offline", "--locked", "-p", "gpui_ce_test", "--test", "state_regressions", "report_comparison_reports_removed_checkpoints"),
+    ),
+    Mutant(
+        "compare-scene-values-without-persisting-json",
+        "Compare a freshly serialized capture instead of the serialized manifest scene bytes.",
+        REPORT,
+        "serde_json::from_slice::<serde_json::Value>(&scene_bytes)?",
+        "serde_json::to_value(&checkpoint.capture)?",
+        "fractional capture compares equal after persisted JSON round trip",
+        ("cargo", "test", "--offline", "--locked", "-p", "gpui_ce_test", "--test", "state_regressions", "report_comparison_reports_removed_checkpoints"),
     ),
 )
 
@@ -381,7 +418,7 @@ def main() -> int:
     parser.add_argument("--target-dir", type=pathlib.Path, help="Cargo target cache (defaults to <repo>/target)")
     parser.add_argument("--timeout-seconds", type=int, default=300)
     parser.add_argument("--only", action="append", help="run only this mutant (repeat the option to select several)")
-    parser.add_argument("--report", type=pathlib.Path, default=pathlib.Path("docs/testing-mutations.md"), help="Markdown result report written in the main checkout")
+    parser.add_argument("--report", type=pathlib.Path, default=pathlib.Path("docs/testing-mutations-run.md"), help="standalone Markdown result report written in the main checkout")
     parser.add_argument("--list", action="store_true", help="list mutants and focused tests without running them")
     args = parser.parse_args()
 

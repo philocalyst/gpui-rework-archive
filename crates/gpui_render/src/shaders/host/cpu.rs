@@ -1,14 +1,7 @@
 use super::super::common;
 
 pub(crate) fn hsla(color: gpui::Hsla) -> [f32; 4] {
-    use wgsl_rs::std::*;
-    let shader_color = common::Hsla {
-        h: color.hue.into_degrees().rem_euclid(360.0) / 360.0,
-        s: color.saturation,
-        l: color.lightness,
-        a: color.alpha,
-    };
-    let result = common::hsla_to_rgba(shader_color);
+    let result = common::hsla_to_rgba(shader_hsla(color));
     [result.x, result.y, result.z, result.w]
 }
 
@@ -279,75 +272,46 @@ impl ShadowShader {
     }
 }
 
-pub(crate) fn rounded_rect_coverage(
-    bounds: gpui::Bounds<gpui::ScaledPixels>,
-    radii: gpui::Corners<gpui::ScaledPixels>,
-    point: wgsl_rs::std::Vec2f,
+/// Rounded coverage prepared once for image sprites and backdrop filters.
+#[derive(Clone, Copy)]
+pub(crate) struct RoundedRectShader {
+    bounds: common::Bounds,
+    radii: common::Corners,
     smoothing: f32,
-) -> f32 {
-    if smoothing <= 0. {
-        return common::antialiased_coverage(common::rounded_rectangle_signed_distance(
-            point,
-            bounds.into(),
-            radii.into(),
-        ));
-    }
-    let bounds: common::Bounds = bounds.into();
-    let radii: common::Corners = radii.into();
-    let prepared =
-        super::super::corner_smoothing::prepare_corners(bounds.size, radii, smoothing, true);
-    common::antialiased_coverage(
-        super::super::corner_smoothing::prepared_corner_signed_distance(
-            point, bounds, radii, smoothing, prepared,
-        ),
-    )
+    corners: Option<super::super::corner_smoothing::PreparedCorners>,
 }
 
-pub(crate) fn sprite_corner_coverage(
-    bounds: gpui::Bounds<gpui::ScaledPixels>,
-    radii: gpui::Corners<gpui::ScaledPixels>,
-    smoothing: f32,
-    point: wgsl_rs::std::Vec2f,
-    smoothed: bool,
-) -> f32 {
-    let sprite = super::super::polychrome_sprite::PolychromeSprite {
-        order: 0,
-        grayscale: common::ShaderBool::Disabled,
-        opacity: 1.0,
-        corner_smoothing: smoothing,
-        bounds: bounds.into(),
-        content_mask: common::ContentMask {
-            bounds: bounds.into(),
-            fade_out: common::Edges {
-                top: 0.,
-                right: 0.,
-                bottom: 0.,
-                left: 0.,
-            },
-        },
-        corner_radii: radii.into(),
-        tile: common::AtlasTile {
-            texture_id: common::AtlasTextureId { index: 0, kind: 1 },
-            tile_id: 0,
-            padding: 0,
-            bounds: common::AtlasBounds {
-                origin: wgsl_rs::std::vec2i(0, 0),
-                size: wgsl_rs::std::vec2i(0, 0),
-            },
-        },
-    };
-    if smoothed {
-        let prepared = super::super::corner_smoothing::prepare_corners(
-            sprite.bounds.size,
-            sprite.corner_radii,
+impl RoundedRectShader {
+    pub(crate) fn new(
+        bounds: gpui::Bounds<gpui::ScaledPixels>,
+        radii: gpui::Corners<gpui::ScaledPixels>,
+        smoothing: f32,
+        smoothed: bool,
+    ) -> Self {
+        let bounds: common::Bounds = bounds.into();
+        let radii: common::Corners = radii.into();
+        Self {
+            bounds,
+            radii,
             smoothing,
-            true,
-        );
-        super::super::polychrome_sprite::smoothed_polychrome_sprite_coverage(
-            sprite, point, prepared,
-        )
-    } else {
-        super::super::polychrome_sprite::polychrome_sprite_coverage(sprite, point)
+            corners: smoothed.then(|| {
+                super::super::corner_smoothing::prepare_corners(bounds.size, radii, smoothing, true)
+            }),
+        }
+    }
+
+    pub(crate) fn sample(&self, point: wgsl_rs::std::Vec2f) -> f32 {
+        let distance = match self.corners {
+            Some(corners) => super::super::corner_smoothing::prepared_corner_signed_distance(
+                point,
+                self.bounds,
+                self.radii,
+                self.smoothing,
+                corners,
+            ),
+            None => common::rounded_rectangle_signed_distance(point, self.bounds, self.radii),
+        };
+        common::antialiased_coverage(distance)
     }
 }
 

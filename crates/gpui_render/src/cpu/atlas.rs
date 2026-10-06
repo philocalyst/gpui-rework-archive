@@ -4,7 +4,11 @@ use gpui::{
     AtlasKey, AtlasTextureId, AtlasTextureKind, AtlasTile, Bounds, CapturedBitmap, DevicePixels,
     GlyphAtlasEntry, PlatformAtlas, RenderGlyphParams, Size, TileId, ValidatedRasterizedGlyph,
 };
-use std::{borrow::Cow, collections::HashMap, sync::Mutex};
+use std::{
+    borrow::Cow,
+    collections::HashMap,
+    sync::{Arc, Mutex},
+};
 
 /// An in-memory atlas. Each uploaded tile occupies its own texture, making allocation stable
 /// and keeping the host renderer independent of windowing systems and graphics APIs.
@@ -15,7 +19,7 @@ pub struct CpuAtlas {
 
 #[derive(Default)]
 struct CpuAtlasData {
-    bitmaps: HashMap<AtlasTextureId, CapturedBitmap>,
+    bitmaps: HashMap<AtlasTextureId, Arc<CapturedBitmap>>,
     ids_by_key: HashMap<AtlasKey, AtlasTile>,
     ids_by_glyph: HashMap<RenderGlyphParams, GlyphAtlasEntry>,
     next_by_kind: [u32; 3],
@@ -41,7 +45,7 @@ impl CpuAtlas {
                     kind: bitmap.kind,
                     index: index as u32,
                 },
-                bitmap.clone(),
+                Arc::new(bitmap.clone()),
             );
             let next = &mut data.next_by_kind[kind_slot(bitmap.kind)];
             *next = (*next).max(index as u32 + 1);
@@ -64,13 +68,19 @@ impl CpuAtlas {
         let mut data = self.data.lock().unwrap();
         data.next_by_kind[kind_slot(texture_id.kind)] =
             data.next_by_kind[kind_slot(texture_id.kind)].max(texture_id.index + 1);
-        data.bitmaps.insert(texture_id, bitmap);
+        data.bitmaps.insert(texture_id, Arc::new(bitmap));
         Ok(())
     }
 
-    /// Resolves a tile to its retained bitmap. SceneCapture canonical tiles use one bitmap per
+    /// Copies a tile's pixels into a portable value. SceneCapture canonical tiles use one bitmap per
     /// texture and tile id zero; ordinary atlas uploads use the same single-tile allocation.
     pub fn resolve(&self, tile: AtlasTile) -> Result<CapturedBitmap> {
+        Ok((*self.resolve_shared(tile)?).clone())
+    }
+
+    // Replay keeps immutable pixels alive after releasing the atlas lock. Only capture
+    // needs an owned byte vector; repeated glyphs must not copy it on every frame.
+    pub(super) fn resolve_shared(&self, tile: AtlasTile) -> Result<Arc<CapturedBitmap>> {
         ensure!(
             tile.tile_id == TileId(0),
             "CPU atlas does not recognize tile id {}",
@@ -95,10 +105,7 @@ impl CpuAtlas {
     fn upload(&self, key: &AtlasKey, size: Size<DevicePixels>, bytes: &[u8]) -> Result<AtlasTile> {
         let kind = key.texture_kind();
         ensure!(
-            size.width.0 > 0
-                && size.height.0 > 0
-                && size.width.0 <= i32::MAX
-                && size.height.0 <= i32::MAX,
+            size.width.0 > 0 && size.height.0 > 0,
             "CPU atlas upload requires positive dimensions"
         );
         let expected = (size.width.0 as usize)
@@ -128,12 +135,12 @@ impl CpuAtlas {
         };
         data.bitmaps.insert(
             tile.texture_id,
-            CapturedBitmap {
+            Arc::new(CapturedBitmap {
                 kind,
                 width: size.width.0 as u32,
                 height: size.height.0 as u32,
                 bytes: bytes.to_vec(),
-            },
+            }),
         );
         data.ids_by_key.insert(key.clone(), tile);
         Ok(tile)

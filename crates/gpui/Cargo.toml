@@ -153,7 +153,6 @@ windows-061 = { workspace = true, features = ["Win32_Graphics_Direct3D11"] }
 [dev-dependencies]
 accesskit_consumer.workspace = true
 backtrace.workspace = true
-smol.workspace = true
 gpui_test.workspace = true
 collections = { workspace = true, features = ["test-support"] }
 env_logger.workspace = true
@@ -166,6 +165,7 @@ scheduler = { workspace = true, features = ["test-support"] }
 
 [target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
 proptest = { workspace = true }
+smol.workspace = true
 
 [target.'cfg(target_family = "wasm")'.dev-dependencies]
 wasm-bindgen = { workspace = true }

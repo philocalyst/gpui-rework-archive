@@ -20,6 +20,11 @@ actions!(example, [Quit, CloseWindow]);
 /// - Sets up an app menu with the example name and a Quit action (cmd-q)
 /// - Configures the app to quit when all windows are closed
 pub fn init_example(cx: &mut App, name: impl Into<SharedString>) {
+    #[cfg(not(target_family = "wasm"))]
+    cx.text_system()
+        .add_fonts(gpui_test::bundled_fonts())
+        .expect("register bundled example fonts");
+
     // Bring the example window to the front
     cx.activate(true);
 

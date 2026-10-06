@@ -4,11 +4,13 @@
 //! [`Harness`] runs those checkpoints without opening a native window. Call
 //! [`write_report`] only when you want to persist the returned capture bundle.
 
+mod fonts;
 mod report;
 mod runner;
 mod snapshot;
 
 pub mod gallery;
+pub use fonts::{bundled_fonts, bundled_text_system};
 pub use gallery::{BuiltInScenario, built_in_scenarios};
 pub use report::{
     CheckpointManifest, EnvironmentManifest, ReportChange, ReportChangeKind, ReportManifest,
@@ -17,13 +19,12 @@ pub use report::{
 };
 pub use runner::{
     Harness, RenderedCheckpoint, RenderedScenario, RenderedSuite, ScenarioMetrics, Viewport,
-    bundled_text_system,
 };
 
 use anyhow::{Result, ensure};
 use gpui::{
     AnyWindowHandle, App, DispatchEventResult, Entity, HeadlessAppContext, Pixels, PlatformInput,
-    Render, Size, WindowHandle,
+    Render, Size, Window, WindowHandle,
 };
 use std::time::Duration;
 
@@ -36,7 +37,7 @@ pub struct Scenario<V: Render + 'static> {
     title: String,
     size: Size<Pixels>,
     scale_factor: f32,
-    build: Box<dyn Fn(&mut App) -> Entity<V>>,
+    build: Box<dyn Fn(&mut Window, &mut App) -> Entity<V>>,
     checkpoints: Vec<Checkpoint<V>>,
 }
 
@@ -49,13 +50,14 @@ pub struct Checkpoint<V: Render + 'static> {
 }
 
 impl<V: Render + 'static> Scenario<V> {
-    /// Creates a scenario. IDs must contain only lowercase ASCII letters, digits,
+    /// Creates a scenario using the same view factory as [`App::open_window`].
+    /// IDs must contain only lowercase ASCII letters, digits,
     /// hyphens, or underscores so output paths are stable and safe.
     pub fn new(
         id: impl Into<String>,
         title: impl Into<String>,
         size: Size<Pixels>,
-        build: impl Fn(&mut App) -> Entity<V> + 'static,
+        build: impl Fn(&mut Window, &mut App) -> Entity<V> + 'static,
     ) -> Result<Self> {
         let id = id.into();
         validate_id(&id)?;

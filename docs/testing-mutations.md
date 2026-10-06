@@ -1,12 +1,42 @@
 # Pseudo-mutation campaign
 
-The Luna test pass ran source mutations sequentially in a disposable `git archive HEAD` checkout. Every source file was restored after its trial; the user's working checkout was never mutated by the runner. The runner made no commits or pushes.
+## Luna campaign on the integrated source
 
-## Initial campaign
+The campaign used a disposable `git archive HEAD` checkout at source revision `1977b94c2f` (2026-10-06 19:11 UTC). Mutation configuration included the local test-runner additions for the new clipped-sprite, font gamma, and RGB/BGR laws. Trials ran sequentially; the runner restored each mutated file in `finally`, and never changed the user's working checkout. It made no commits or pushes.
 
-Source revision: `0103d685c6` (2026-10-06). Each focused command passed once on unmodified source before its mutant ran. The campaign used analytic pixel expectations and state/report assertions, not hand-authored raster hash constants.
+The command ran against each exact unmutated focused test first. All 12 distinct baselines passed. Then each compiling source mutation caused its named focused test to fail by assertion: **15 killed, 0 survived, 0 invalid, 0 timed out**. A build or test-selection failure would be classified `invalid`, never as a killed mutant.
 
-| Mutant | Focused check | Result | Time |
+| Mutant | Focused Rust test | Result | Mutant time |
+|---|---|---:|---:|
+| `skip-underlines` | `wrapped_parley_text_keeps_colored_wavy_underlines_on_multiple_lines` | **killed** | 9.04 s |
+| `source-over-alpha` | `overlapping_translucent_quads_obey_source_over_for_generated_alpha_pairs` | **killed** | 5.75 s |
+| `ignore-glyph-transform` | `monochrome_glyph_samples_at_transformed_destination_coordinates` | **killed** | 5.75 s |
+| `ignore-font-gamma` | `font_gamma_correction_preserves_neutral_and_corrects_half_coverage` | **killed** | 5.55 s |
+| `ignore-subpixel-order` | `subpixel_order_reverses_red_and_blue_coverage_channels` | **killed** | 5.83 s |
+| `drop-filter-opacity` | `nested_isolated_filters_composite_once_and_inline_fallback_keeps_parent_target` | **killed** | 5.64 s |
+| `inline-boundary-not-stacked` | `nested_isolated_filters_composite_once_and_inline_fallback_keeps_parent_target` | **killed** | 5.06 s |
+| `path-half-open-edges` | `adjacent_path_triangles_assign_shared_edge_pixels_once` | **killed** | 4.80 s |
+| `ignore-path-raster-clip` | `clipped_path_gradient_uses_the_clipped_paint_bounds` | **killed** | 4.69 s |
+| `ignore-path-content-clip` | `path_composite_sprite_bounds_match_the_content_clip` | **killed** | 13.38 s |
+| `freeze-animation-clock` | `fixed_animation_times_are_idempotent_and_cross_repeat_boundaries` | **killed** | 20.02 s |
+| `disable-animation-repeat` | `fixed_animation_times_are_idempotent_and_cross_repeat_boundaries` | **killed** | 7.63 s |
+| `linearize-animation-easing` | `fixed_animation_times_are_idempotent_and_cross_repeat_boundaries` | **killed** | 7.02 s |
+| `accept-unsupported-capture-version` | `rejects_version_mutation_and_non_finite_filter_encoding` | **killed** | 29.39 s |
+| `ignore-removed-checkpoints` | `report_comparison_reports_removed_checkpoints` | **killed** | 70.86 s |
+
+The two clip mutants check different stages. `ignore-path-raster-clip` widens CPU raster paint bounds; the clipped sRGB gradient has a known pixel derived from the clipped paint width, so this catches a change even when the subsequent sprite composite clips. `ignore-path-content-clip` widens the composite sprite bounds and is tested directly against the path sprite plan bounds, independent of raster coverage. The new bounds law closes the original campaign's observation gap.
+
+The runner invocation was:
+
+```text
+python3 scripts/testing/pseudo_mutation.py --repo <workspace> --timeout-seconds 300 --report docs/testing-mutations-followup.md
+```
+
+## Historical initial campaign
+
+An earlier Luna pass used the runner at source revision `0103d685c6` (2026-10-06 18:43 UTC). It ran the source mutations in a disposable archive and passed all nine distinct focused baselines first.
+
+| Initial mutant | Focused check | Result | Time |
 |---|---|---:|---:|
 | `skip-underlines` | colored multiline Parley underline pixels | **killed** | 8.63 s |
 | `source-over-alpha` | generated source-over alpha property | **killed** | 4.74 s |
@@ -14,40 +44,11 @@ Source revision: `0103d685c6` (2026-10-06). Each focused command passed once on 
 | `drop-filter-opacity` | nested filter opacity and inline depth | **killed** | 6.86 s |
 | `inline-boundary-not-stacked` | nested inline filter boundary stack law | **killed** | 5.20 s |
 | `path-half-open-edges` | shared-edge path coverage | **killed** | 5.86 s |
-| `ignore-path-content-clip` | path composite clip and alpha | **survived** | 8.06 s |
+| `ignore-path-content-clip` | path clip pixel bounds | **survived** | 8.06 s |
 | `freeze-animation-clock` | fixed-time animation and repeat phase | **killed** | 11.35 s |
 | `disable-animation-repeat` | repeat phase at 1250 ms | **killed** | 8.41 s |
-| `linearize-animation-easing` | eased marker position at 250 ms | **killed** | 5.21 s |
+| `linearize-animation-easing` | eased marker at 250 ms | **killed** | 5.21 s |
 | `accept-unsupported-capture-version` | capture-version validation | **killed** | 27.19 s |
 | `ignore-removed-checkpoints` | report checkpoint removal detection | **killed** | 37.20 s |
 
-Initial result: **11 killed, 1 survived, 0 invalid, 0 timed out**. The surviving mutation widened the CPU path raster pass from `path.clipped_bounds()` to `path.bounds`. The solid path still produced no observable change because the later sprite composite remained clipped. This showed the first test did not observe the changed *raster bounds*; it did not establish that path clipping was fully protected.
-
-## Initial baseline commands
-
-These nine distinct focused checks passed on the unmodified archived source:
-
-| Focused check | Baseline |
-|---|---:|
-| multiline colored underline pixels | passed |
-| generated source-over alpha | passed |
-| transformed monochrome glyph | passed |
-| nested isolated filter rendering | passed |
-| shared path edge coverage | passed |
-| clipped path compositing | passed |
-| fixed animation times and repeat boundaries | passed |
-| capture version and finite-filter validation | passed |
-| removed checkpoint report comparison | passed |
-
-## Clip follow-up
-
-Two distinct clip stages are covered in follow-up checks:
-
-- A clipped horizontal sRGB gradient asserts a known interior pixel derived from the clipped paint width. Widening the raster paint bounds changes that expected pixel even though the later sprite composite still clips.
-- A direct plan-law test inspects `path_types::sprites` and asserts all four composite bounds equal the content clip. A separate mutation widens these bounds, so this check does not rely on the CPU raster pass producing pixels outside the clip.
-
-The follow-up mutations, plus font gamma/order, fractional coverage, and maximum-radius blur checks, will be reported here after running against the integrated source revision. Until then, these additions are unverified mutation evidence.
-
-## Result meanings and limits
-
-`killed` means the focused test ran and failed by assertion. `survived` means it completed successfully despite the source change. `invalid` means compilation, setup, or test selection prevented behavioral evidence. `timeout` is inconclusive. Compile failures do not count as killed mutants.
+Initial result: **11 killed, 1 survived, 0 invalid, 0 timed out**. That survivor changed CPU path raster bounds from `path.clipped_bounds()` to `path.bounds`. The solid path remained visually unchanged because the composite stage still clipped it. This is why the later campaign added both the clipped-gradient paint-bounds law and a separate direct composite-sprite-bounds law. The two campaign results are preserved here rather than silently replacing the original survivor.

@@ -23,18 +23,36 @@ fn run_cli() -> Result<()> {
             }
             Ok(())
         }
-        "run" => run_command(&rest, false),
-        "bench" => run_command(&rest, true),
-        "check" => check_command(&rest),
+        "run" => run_command(&rest, Mode::Run),
+        "bench" => run_command(&rest, Mode::Benchmark),
+        "check" => run_command(&rest, Mode::Check),
         "help" | "--help" | "-h" => usage(),
         other => bail!("unknown command {other:?}; use `gpui-test help`"),
     }
 }
 
-fn run_command(args: &[String], benchmark: bool) -> Result<()> {
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Mode {
+    Run,
+    Benchmark,
+    Check,
+}
+
+fn run_command(args: &[String], mode: Mode) -> Result<()> {
     let parsed = parse_args(args)?;
+    if mode == Mode::Check {
+        let baseline = parsed
+            .baseline
+            .as_ref()
+            .context("`check` requires --baseline <report-dir>")?;
+        ensure!(
+            baseline.is_dir(),
+            "baseline report directory does not exist: {}",
+            baseline.display()
+        );
+    }
     let selected = select_scenarios(&parsed.names)?;
-    let harness = if benchmark {
+    let harness = if mode == Mode::Benchmark {
         Harness::benchmark()
     } else {
         Harness::new()
@@ -50,76 +68,35 @@ fn run_command(args: &[String], benchmark: bool) -> Result<()> {
     let suite = RenderedSuite {
         scenarios: captures,
     };
-    write_report(
+    let manifest = write_report(
         &suite,
         &parsed.output,
         ReportOptions {
-            baseline_dir: parsed.baseline.clone(),
-            selected_ids: parsed.names.clone(),
+            baseline_dir: parsed.baseline,
+            selected_ids: parsed.names,
         },
     )?;
+    if mode == Mode::Check && !manifest.changes.is_empty() {
+        for change in &manifest.changes {
+            println!("changed: {change}");
+        }
+        bail!(
+            "{} visual regression change(s) found; current captures: {}",
+            manifest.changes.len(),
+            parsed.output.display()
+        );
+    }
     println!(
-        "wrote {} scenarios to {}",
+        "{} {} scenarios; report: {}",
+        if mode == Mode::Check {
+            "verified"
+        } else {
+            "captured"
+        },
         suite.scenarios.len(),
         parsed.output.display()
     );
     Ok(())
-}
-
-fn check_command(args: &[String]) -> Result<()> {
-    let parsed = parse_args(args)?;
-    let baseline = parsed
-        .baseline
-        .as_ref()
-        .context("`check` requires --baseline <report-dir>")?;
-    ensure!(
-        baseline.is_dir(),
-        "baseline report directory does not exist: {}",
-        baseline.display()
-    );
-    ensure!(
-        baseline != &parsed.output,
-        "--output must differ from --baseline"
-    );
-    let selected = select_scenarios(&parsed.names)?;
-    let harness = match parsed.samples {
-        Some(samples) => Harness::new().timing_samples(samples)?,
-        None => Harness::new(),
-    };
-    let mut captures = Vec::with_capacity(selected.len());
-    for scenario in selected {
-        captures.push(scenario.run(&harness)?);
-    }
-    let suite = RenderedSuite {
-        scenarios: captures,
-    };
-    let current = parsed.output;
-    write_report(
-        &suite,
-        &current,
-        ReportOptions {
-            baseline_dir: Some(baseline.clone()),
-            selected_ids: parsed.names.clone(),
-        },
-    )?;
-    let changes = gpui_test::compare_reports_selected(baseline, &current, &parsed.names)?;
-    if changes.is_empty() {
-        println!(
-            "{} scenarios match baseline {}; report: {}",
-            suite.scenarios.len(),
-            baseline.display(),
-            current.display()
-        );
-        return Ok(());
-    }
-    for change in &changes {
-        println!("changed: {change}");
-    }
-    bail!(
-        "{} visual regression change(s) found; current captures: {}",
-        changes.len(),
-        current.display()
-    )
 }
 
 struct Args {
@@ -192,7 +169,7 @@ fn select_scenarios(names: &[String]) -> Result<Vec<gpui_test::BuiltInScenario>>
 
 fn usage() -> Result<()> {
     println!(
-        "gpui-test list\ngpui-test run [SCENARIO ...] [--output DIR] [--baseline DIR] [--samples N]\ngpui-test bench [SCENARIO ...] [--output DIR] [--samples N]\ngpui-test check [SCENARIO ...] --baseline DIR [--output DIR] [--samples N]\n\nOmitting scenario IDs runs the full built-in suite. `check` compares scene JSON, exact PNG bytes, and checkpoint metadata. `bench` defaults to 20 repeated frames; `run` and `check` default to one."
+        "gpui-test list\ngpui-test run [SCENARIO ...] [--output DIR] [--baseline DIR] [--samples N]\ngpui-test bench [SCENARIO ...] [--output DIR] [--baseline DIR] [--samples N]\ngpui-test check [SCENARIO ...] --baseline DIR [--output DIR] [--samples N]\n\nOmitting scenario IDs runs the full built-in suite. `check` compares scene JSON, decoded pixels, and checkpoint metadata. `bench` defaults to 20 repeated frames; `run` and `check` default to one."
     );
     Ok(())
 }

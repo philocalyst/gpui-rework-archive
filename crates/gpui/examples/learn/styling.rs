@@ -5,14 +5,14 @@ mod example_prelude;
 
 use gpui::colors::Colors;
 use gpui::{
-    App, Context, FocusHandle, Hsla, KeyBinding, Render, Rgba, Window, actions, div, prelude::*,
-    px, rgb,
+    App, ColorExt, Context, FocusHandle, Hsla, KeyBinding, Render, Rgba, Window, actions, div,
+    prelude::*, px, rgb,
 };
 use palette::{IntoColor, WithAlpha};
 
 actions!(styling_example, [Tab, TabPrev]);
 
-fn section(colors: &Colors, title: &'static str, content: impl IntoElement) -> impl IntoElement {
+fn section(colors: &Colors, title: &'static str, content: impl IntoElement) -> gpui::Div {
     let surface: Hsla = colors.container.into_color();
     let border: Hsla = colors.border.into_color();
     div()
@@ -34,15 +34,11 @@ fn section(colors: &Colors, title: &'static str, content: impl IntoElement) -> i
         .child(content)
 }
 
-fn note(colors: &Colors, text: &'static str) -> impl IntoElement {
+fn note(colors: &Colors, text: &'static str) -> gpui::Div {
     div().text_xs().text_color(colors.disabled).child(text)
 }
 
-fn button(
-    id: impl Into<gpui::ElementId>,
-    label: &'static str,
-    colors: &Colors,
-) -> impl IntoElement {
+fn button(id: &'static str, label: &'static str, colors: &Colors) -> gpui::Stateful<gpui::Div> {
     div()
         .id(id)
         .px_4()
@@ -57,7 +53,11 @@ fn button(
         .child(label)
 }
 
-fn focus_button(id: &'static str, handle: &FocusHandle, colors: &Colors) -> impl IntoElement {
+fn focus_button(
+    id: &'static str,
+    handle: &FocusHandle,
+    colors: &Colors,
+) -> gpui::Stateful<gpui::Div> {
     let ring: Rgba = rgb(0x60a5fa);
     let accent = colors.selected;
     let surface_hover = colors.selected;
@@ -79,12 +79,7 @@ fn focus_button(id: &'static str, handle: &FocusHandle, colors: &Colors) -> impl
         .child("Tab stop")
 }
 
-fn choice(
-    label: &'static str,
-    selected: bool,
-    disabled: bool,
-    colors: &Colors,
-) -> impl IntoElement {
+fn choice(label: &'static str, selected: bool, disabled: bool, colors: &Colors) -> gpui::Div {
     let mut item = div()
         .px_3()
         .py_2()
@@ -116,7 +111,7 @@ fn choice(
     item
 }
 
-fn group_card(title: &'static str, colors: &Colors) -> impl IntoElement {
+fn group_card(title: &'static str, colors: &Colors) -> gpui::Div {
     let border = colors.border;
     let accent = colors.selected;
     let text = colors.text;
@@ -167,6 +162,13 @@ impl StylingExample {
         }
     }
 
+    #[cfg(test)]
+    fn focused_tab_stop(&self, window: &Window) -> Option<usize> {
+        self.tab_stops
+            .iter()
+            .position(|handle| handle.is_focused(window))
+    }
+
     fn tab(&mut self, _: &Tab, window: &mut Window, cx: &mut Context<Self>) {
         window.focus_next(cx);
     }
@@ -190,6 +192,7 @@ impl Render for StylingExample {
         ];
 
         div()
+            .id("styling")
             .track_focus(&self.root_focus)
             .on_action(cx.listener(Self::tab))
             .on_action(cx.listener(Self::tab_prev))
@@ -329,10 +332,7 @@ impl Render for StylingExample {
 
 fn main() {
     gpui_platform::application().run(|cx: &mut App| {
-        cx.bind_keys([
-            KeyBinding::new("tab", Tab, None),
-            KeyBinding::new("shift-tab", TabPrev, None),
-        ]);
+        bind_keys(cx);
         let options = example_prelude::centered_window(560., 760., cx);
         cx.open_window(options, |window, cx| {
             cx.new(|cx| StylingExample::new(window, cx))
@@ -340,4 +340,80 @@ fn main() {
         .expect("open styling example");
         example_prelude::init_example(cx, "Styling");
     });
+}
+
+fn bind_keys(cx: &mut App) {
+    cx.bind_keys([
+        KeyBinding::new("tab", Tab, None),
+        KeyBinding::new("shift-tab", TabPrev, None),
+    ]);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use gpui::{KeyDownEvent, Keystroke, PlatformInput, px, size};
+    use gpui_test::{Harness, Scenario, dispatch_input};
+    use std::time::Duration;
+
+    fn press_and_expect_focus(
+        cx: &mut gpui::HeadlessAppContext,
+        view: &gpui::Entity<StylingExample>,
+        window: gpui::WindowHandle<StylingExample>,
+        key: &str,
+        expected: usize,
+    ) -> anyhow::Result<()> {
+        dispatch_input(
+            cx,
+            window.into(),
+            PlatformInput::KeyDown(KeyDownEvent {
+                keystroke: Keystroke::parse(key)?,
+                is_held: false,
+                prefer_character_input: false,
+            }),
+        )?;
+        let focused = cx.update_window(window.into(), |_, window, app| {
+            view.read(app).focused_tab_stop(window)
+        })?;
+        anyhow::ensure!(
+            focused == Some(expected),
+            "{key} focused {focused:?}, expected stop {expected}"
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn tab_and_shift_tab_move_real_focus_between_styled_controls() -> anyhow::Result<()> {
+        let scenario = Scenario::new(
+            "styling-focus-test",
+            "Keyboard focus styling",
+            size(px(560.), px(760.)),
+            |window, cx: &mut App| {
+                bind_keys(cx);
+                cx.new(|cx| StylingExample::new(window, cx))
+            },
+        )?
+        .checkpoint("initial", "Root focus", Duration::ZERO)?
+        .checkpoint_with(
+            "first-stop",
+            "Tab to first control",
+            Duration::from_millis(1),
+            |cx, view, window| press_and_expect_focus(cx, view, window, "tab", 0),
+        )?
+        .checkpoint_with(
+            "second-stop",
+            "Tab to second control",
+            Duration::from_millis(2),
+            |cx, view, window| press_and_expect_focus(cx, view, window, "tab", 1),
+        )?
+        .checkpoint_with(
+            "shift-tab",
+            "Reverse to first control",
+            Duration::from_millis(3),
+            |cx, view, window| press_and_expect_focus(cx, view, window, "shift-tab", 0),
+        )?;
+
+        Harness::new().run(&scenario)?;
+        Ok(())
+    }
 }

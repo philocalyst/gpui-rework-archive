@@ -86,7 +86,9 @@ palette = { version = "0.7.6", features = ["serializing"] }
 parking_lot = "0.12.1"
 phf = { version = "0.13.1", features = ["macros"] }
 postage = { version = "0.5", features = ["futures-traits"] }
-proptest = { version = "1.10", features = ["attr-macro"] }
+# Property generation also compiles into web examples through test-support. Subprocess
+# forking/timeouts require native OS APIs; mutation trials provide their own isolation.
+proptest = { version = "1.10", default-features = false, features = ["attr-macro", "std", "bit-set"] }
 chrono = { version = "0.4", features = ["serde"] }
 profiling = "1"
 rand = "0.9.4"

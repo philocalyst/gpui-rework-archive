@@ -7,7 +7,7 @@ use example_prelude::init_example;
 use gpui::colors::Colors;
 use gpui::{
     App, ClickEvent, ColorExt, Context, Entity, Half, Hsla, IntoElement, MouseButton,
-    MouseMoveEvent, Pixels, Point, Render, Window, div, prelude::*, px, rgb, size,
+    MouseMoveEvent, Pixels, Point, Render, Window, div, prelude::*, px, rgb,
 };
 use palette::IntoColor;
 
@@ -16,7 +16,7 @@ fn demo_panel(
     title: &'static str,
     hint: &'static str,
     content: impl IntoElement,
-) -> impl IntoElement {
+) -> gpui::Div {
     div()
         .flex()
         .flex_col()

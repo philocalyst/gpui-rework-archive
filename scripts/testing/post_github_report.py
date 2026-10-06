@@ -10,10 +10,21 @@ from pathlib import Path
 import re
 import sys
 from urllib.error import HTTPError
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote
 from urllib.request import Request, urlopen
 
-from report_support import find_baseline, format_ms, load_report, markdown_text, metric, pages_index, pull_index, report_assets, trusted_index
+from report_support import (
+    comparison_summary,
+    load_report,
+    markdown_metrics_table,
+    markdown_text,
+    pages_index,
+    pull_index,
+    report_assets,
+    trusted_index,
+    validate_records,
+    validate_site_base as validate_pages_url,
+)
 
 MARKER = "<!-- gpui-visual-test-report -->"
 OWNER_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
@@ -44,13 +55,6 @@ def api(method: str, endpoint: str, token: str, payload: object | None = None):
         raise RuntimeError(f"GitHub API {method} {endpoint} returned {error.code}: {detail}") from error
 
 
-def validate_pages_url(value: str) -> str:
-    parsed = urlsplit(value)
-    if parsed.scheme not in {"http", "https"} or not parsed.netloc or parsed.username or parsed.password or parsed.query or parsed.fragment:
-        raise ValueError("GPUI_VISUAL_PAGES_URL must be an HTTP(S) base URL without credentials, query, or fragment")
-    return value.rstrip("/")
-
-
 def _blob(repository: str, content: bytes, token: str) -> str:
     response = api("POST", f"repos/{repository}/git/blobs", token, {
         "content": base64.b64encode(content).decode(), "encoding": "base64",
@@ -73,15 +77,7 @@ def _read_registry(repository: str, tree_sha: str, token: str) -> list[dict]:
     records = json.loads(data)
     if not isinstance(records, list):
         raise ValueError("Pages run registry must be a list")
-    seen = set()
-    for record in records:
-        if not isinstance(record, dict) or not SHA_RE.fullmatch(str(record.get("sha", ""))) or not str(record.get("pr", "")).isdigit():
-            raise ValueError("Pages run registry contains an invalid entry")
-        key = (record["sha"], str(record["pr"]))
-        if key in seen:
-            raise ValueError("Pages run registry contains duplicate commit/PR entries")
-        seen.add(key)
-    return [{"sha": record["sha"], "pr": str(record["pr"])} for record in records]
+    return validate_records(records)
 
 
 def publish_pages(repository: str, branch: str, head_sha: str, pull_request: str, page_url: str, assets: dict[str, bytes], manifest: dict, token: str) -> str:
@@ -115,12 +111,7 @@ def publish_pages(repository: str, branch: str, head_sha: str, pull_request: str
     return page_url + "/runs/" + head_sha + "/index.html"
 
 
-def _metric_pair(checkpoint: dict, prefix: str) -> str:
-    p50, p95 = metric(checkpoint, prefix + "_p50_ns"), metric(checkpoint, prefix + "_p95_ns")
-    return "n/a" if p50 is None and p95 is None else f"{format_ms(p50)} / {format_ms(p95)}"
-
-
-def make_comment(repository: str, pr: str, run_id: str, head_sha: str, manifest: dict, page_url: str | None, changes: list[tuple[str, str]], baseline_available: bool) -> str:
+def make_comment(repository: str, pr: str, run_id: str, head_sha: str, manifest: dict, page_url: str | None, changes: list[dict], baseline_available: bool) -> str:
     run_url = f"{github_server_url()}/{repository}/actions/runs/{quote(run_id)}"
     lines = [MARKER, f"## GPUI visual report · {head_sha[:12]}", "", f"[Open workflow run]({run_url})"]
     if page_url:
@@ -133,37 +124,15 @@ def make_comment(repository: str, pr: str, run_id: str, head_sha: str, manifest:
     if baseline_available:
         lines.append("**Visual comparison:**")
         if changes:
-            pixel_keys = {detail.split()[-1] for kind, detail in changes if kind == "pixels_changed"}
-            for kind, detail in changes:
-                label = {
-                    "scenario_added": "Added",
-                    "scenario_removed": "Removed",
-                    "checkpoint_added": "Added",
-                    "checkpoint_removed": "Removed",
-                    "scenario_metadata_changed": "Viewport or scenario metadata changed",
-                    "checkpoint_metadata_changed": "Checkpoint timeline changed",
-                    "pixels_changed": "Pixels changed",
-                    "scene_changed": "Scene and pixels changed" if detail.split()[-1] in pixel_keys else "Scene-only change",
-                }.get(kind, "Changed")
-                lines.append(f"- **{label}:** {markdown_text(detail)}")
+            for change in changes:
+                lines.append(
+                    f"- **{change['label']}:** {markdown_text(change['subject'])} — {markdown_text(change['detail'])}"
+                )
         else:
             lines.append("- No checkpoint, scene, timeline, or pixel changes detected.")
     else:
         lines.append("No baseline capture was available; current images are shown without comparison diffs.")
-    lines.extend(["", "| Scenario | Checkpoint | Scene build p50 / p95 | CPU render p50 / p95 | Frames | Primitives | Bitmap bytes | GPU memory |", "|---|---|---:|---:|---:|---:|---:|---:|"])
-    for scenario in manifest["scenarios"]:
-        sid = scenario["id"]
-        for checkpoint in scenario["checkpoints"]:
-            cid = checkpoint["id"]
-            frames, primitives = metric(checkpoint, "frame_count"), metric(checkpoint, "primitive_count")
-            bitmap_bytes = metric(checkpoint, "bitmap_storage_bytes")
-            gpu_memory = scenario.get("gpu_memory_bytes")
-            if not isinstance(gpu_memory, int) or isinstance(gpu_memory, bool) or gpu_memory < 0:
-                gpu_memory = None
-            lines.append(
-                "| " + markdown_text(scenario.get("title", sid)) + " | " + markdown_text(checkpoint.get("name", cid))
-                + f" | {_metric_pair(checkpoint, 'scene_build')} | {_metric_pair(checkpoint, 'cpu_render')} | {frames if frames is not None else 'n/a'} | {primitives if primitives is not None else 'n/a'} | {bitmap_bytes if bitmap_bytes is not None else 'n/a'} | {gpu_memory if gpu_memory is not None else 'n/a'} |"
-            )
+    lines.extend(["", markdown_metrics_table(manifest)])
     if page_url:
         image_checkpoints = [
             (scenario, checkpoint)
@@ -202,11 +171,7 @@ def main() -> int:
 
     report_path = Path(sys.argv[1])
     manifest, root = load_report(report_path)
-    try:
-        changes, baseline_available = find_baseline(report_path, manifest, root)
-    except (OSError, ValueError, json.JSONDecodeError) as error:
-        print(f"::warning::Could not read the baseline report; current captures will still be posted: {error}")
-        changes, baseline_available = [], False
+    changes, baseline_available = comparison_summary(manifest)
     assets = report_assets(manifest, root)
     page_url = None
     branch = os.environ.get("PAGES_BRANCH", "").strip()

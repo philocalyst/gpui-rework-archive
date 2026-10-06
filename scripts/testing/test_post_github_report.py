@@ -13,11 +13,12 @@ import report_support as support
 PNG = b"\x89PNG\r\n\x1a\nfixture"
 
 
-def fixture_manifest(*, title="Gallery", metrics=None, status="unchanged", pixel=False, scene=False):
+def fixture_manifest(*, title="Gallery", metrics=None, status="unchanged", pixel=False, scene=False, changes=None):
     return {
         "schema_version": 1,
         "backend": "cpu",
         "environment": {"renderer": "gpui-ce-cpu", "font_pack": "bundled", "git_sha": None},
+        "changes": list(changes or []),
         "scenarios": [{
             "id": "gallery", "title": title, "viewport": {"width": 320, "height": 200, "scale_factor": 1.0},
             "status": status,
@@ -79,6 +80,17 @@ class ReportSupportTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "boolean"):
                 support.load_report(root)
 
+            manifest["scenarios"][0]["checkpoints"][0]["scene_changed"] = False
+            manifest["changes"] = [{"kind": "mystery", "scenario_id": "gallery", "checkpoint_id": None, "detail": "bad"}]
+            (root / "manifest.json").write_text(json.dumps(manifest))
+            with self.assertRaisesRegex(ValueError, "unknown kind"):
+                support.load_report(root)
+
+            del manifest["changes"]
+            (root / "manifest.json").write_text(json.dumps(manifest))
+            with self.assertRaisesRegex(ValueError, "changes must be a list"):
+                support.load_report(root)
+
     def test_asset_symlinks_are_rejected(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary) / "report"
@@ -119,34 +131,66 @@ class ReportSupportTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "symbolic links"):
                 support.report_assets(manifest, report_root)
 
-    def test_scene_only_change_is_separate_and_unchanged_is_quiet(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            old_manifest = fixture_manifest()
-            old = write_report(root / "old", old_manifest)
-            unchanged = write_report(root / "same", fixture_manifest())
-            self.assertEqual(support.compare_manifests(old_manifest, unchanged, old_manifest, old), [])
-            changed_manifest = fixture_manifest(status="changed", scene=True)
-            changed = write_report(root / "changed", changed_manifest, scene=b'{"scene":2}')
-            changes = support.compare_manifests(changed_manifest, changed, old_manifest, old)
-            self.assertIn(("scene_changed", "Scene changed gallery/initial"), changes)
-            self.assertFalse(any(kind == "pixels_changed" for kind, _ in changes))
+    def test_typed_scene_only_change_and_unchanged_status_are_authoritative(self):
+        unchanged = fixture_manifest(status="unchanged")
+        changes, baseline_available = support.comparison_summary(unchanged)
+        self.assertEqual(changes, [])
+        self.assertTrue(baseline_available)
+
+        scene_only = fixture_manifest(
+            status="changed",
+            scene=True,
+            changes=[{
+                "kind": "scene_changed", "scenario_id": "gallery", "checkpoint_id": "initial",
+                "detail": "serialized scene differs",
+            }],
+        )
+        changes, baseline_available = support.comparison_summary(scene_only)
+        self.assertTrue(baseline_available)
+        self.assertEqual(changes[0]["label"], "Scene-only change")
+        self.assertEqual(changes[0]["subject"], "gallery/initial")
+
+        pixels_and_scene = fixture_manifest(
+            status="changed",
+            changes=[
+                {"kind": "pixels_changed", "scenario_id": "gallery", "checkpoint_id": "initial", "detail": "decoded pixels differ"},
+                {"kind": "scene_changed", "scenario_id": "gallery", "checkpoint_id": "initial", "detail": "serialized scene differs"},
+            ],
+        )
+        changes, _ = support.comparison_summary(pixels_and_scene)
+        self.assertEqual([change["label"] for change in changes], ["Pixels changed", "Scene and pixels changed"])
 
     def test_added_removed_and_metadata_changes_are_distinct(self):
-        old = fixture_manifest()
-        current = fixture_manifest(status="changed")
-        old["scenarios"][0]["checkpoints"].append({"id": "removed", "name": "Gone", "time_ns": 0, "scene_json": "gallery/removed.scene.json", "png": "gallery/removed.png"})
-        current["scenarios"][0]["checkpoints"][0]["name"] = "Changed label"
-        current["scenarios"][0]["checkpoints"].append({"id": "added", "name": "New", "time_ns": 0, "scene_json": "gallery/added.scene.json", "png": "gallery/added.png"})
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            old_root = write_report(root / "old", old)
-            current_root = write_report(root / "current", current)
-            changes = support.compare_manifests(current, current_root, old, old_root)
-        kinds = [kind for kind, _ in changes]
-        self.assertIn("checkpoint_removed", kinds)
-        self.assertIn("checkpoint_added", kinds)
-        self.assertIn("checkpoint_metadata_changed", kinds)
+        manifest = fixture_manifest(status="changed", changes=[
+            {"kind": "scenario_removed", "scenario_id": "old_scene", "checkpoint_id": None, "detail": "removed from suite"},
+            {"kind": "scenario_added", "scenario_id": "new_scene", "checkpoint_id": None, "detail": "added to suite"},
+            {"kind": "checkpoint_removed", "scenario_id": "gallery", "checkpoint_id": "removed", "detail": "checkpoint removed"},
+            {"kind": "checkpoint_added", "scenario_id": "gallery", "checkpoint_id": "added", "detail": "checkpoint added"},
+            {"kind": "checkpoint_metadata_changed", "scenario_id": "gallery", "checkpoint_id": "initial", "detail": "timeline changed"},
+        ])
+        changes, baseline_available = support.comparison_summary(manifest)
+        self.assertTrue(baseline_available)
+        self.assertEqual(
+            [(change["kind"], change["subject"]) for change in changes],
+            [
+                ("scenario_removed", "old_scene"),
+                ("scenario_added", "new_scene"),
+                ("checkpoint_removed", "gallery/removed"),
+                ("checkpoint_added", "gallery/added"),
+                ("checkpoint_metadata_changed", "gallery/initial"),
+            ],
+        )
+
+    def test_baseline_unavailable_status_and_rust_pixel_policy(self):
+        unavailable = fixture_manifest(status="baseline_unavailable")
+        changes, baseline_available = support.comparison_summary(unavailable)
+        self.assertEqual(changes, [])
+        self.assertFalse(baseline_available)
+
+        unchanged = fixture_manifest(status="unchanged")
+        # The PNG and scene bytes may differ in encoding or serialization details;
+        # the typed Rust comparison is the sole source of change policy.
+        self.assertEqual(support.comparison_summary(unchanged), ([], True))
 
     def test_missing_or_malformed_metrics_render_as_na(self):
         self.assertIsNone(support.metric({"metrics": {}}, "cpu_render_p50_ns"))
@@ -155,7 +199,12 @@ class ReportSupportTests(unittest.TestCase):
         self.assertEqual(support.format_ms(None), "n/a")
 
     def test_trusted_viewer_escapes_content_and_shows_semantic_comparison(self):
-        manifest = fixture_manifest(title="</h2><script>alert(1)</script>", status="changed", scene=True)
+        manifest = fixture_manifest(
+            title="</h2><script>alert(1)</script>",
+            status="changed",
+            scene=True,
+            metrics={"scene_build_p50_ns": 1_500_000, "bitmap_storage_bytes": 4096},
+        )
         viewer = support.trusted_index(manifest).decode()
         self.assertIn("&lt;/h2&gt;&lt;script&gt;", viewer)
         self.assertNotIn("<script>", viewer)
@@ -164,8 +213,16 @@ class ReportSupportTests(unittest.TestCase):
         self.assertIn("<figcaption>Difference</figcaption>", viewer)
         self.assertIn("Scene JSON", viewer)
         self.assertIn('src="metrics.svg"', viewer)
+        self.assertIn("<tr><th>Bitmap bytes</th><td>4096</td></tr>", viewer)
+        self.assertIn("<tr><th>Scene build p50</th><td>1.50 ms</td></tr>", viewer)
         self.assertIn("n/a", viewer)
         self.assertNotIn("<script", viewer)
+        table = support.markdown_metrics_table(manifest)
+        self.assertIn("| Scene build p50 |", table)
+        self.assertIn("| Bitmap bytes |", table)
+        self.assertIn("| GPU memory |", table)
+        self.assertIn("4096", table)
+        self.assertIn("1.50 ms", table)
 
     def test_svg_filter_removes_scripts_and_links(self):
         source = b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 8"><script>alert(1)</script><a href="https://bad"><text>bad</text></a><text>chart</text><path d="M0 0"/></svg>'
@@ -221,7 +278,7 @@ class ForgeAdapterTests(unittest.TestCase):
 
     def test_pages_registry_accepts_newline_wrapped_base64_from_github(self):
         sha = "a" * 40
-        registry = json.dumps([{"sha": sha, "pr": "17"}]).encode()
+        registry = json.dumps([{"sha": sha, "pr": 17}]).encode()
         wrapped = base64.b64encode(registry).decode()
         wrapped = "\n".join(wrapped[index:index + 12] for index in range(0, len(wrapped), 12))
 
@@ -234,6 +291,16 @@ class ForgeAdapterTests(unittest.TestCase):
 
         with patch.object(github_report, "api", side_effect=fake_api):
             self.assertEqual(github_report._read_registry("owner/repo", "tree", "token"), [{"sha": sha, "pr": "17"}])
+
+        bad_registry = base64.b64encode(json.dumps([{"sha": sha, "pr": True}]).encode()).decode()
+
+        def bad_api(method, endpoint, token, payload=None):
+            if endpoint.endswith("git/trees/tree"):
+                return {"tree": [{"path": "runs.json", "type": "blob", "sha": "registry"}]}
+            return {"encoding": "base64", "content": bad_registry}
+
+        with patch.object(github_report, "api", side_effect=bad_api), self.assertRaisesRegex(ValueError, "invalid entry"):
+            github_report._read_registry("owner/repo", "tree", "token")
 
     def test_gitlab_api_uses_private_token_with_mock_http(self):
         seen = {}
@@ -302,9 +369,13 @@ class ForgeAdapterTests(unittest.TestCase):
     def test_github_comment_reports_scene_only_and_missing_metrics(self):
         manifest = fixture_manifest(title="<img>", metrics=None)
         manifest["scenarios"][0]["checkpoints"][0]["metrics"] = {"bitmap_storage_bytes": 4096}
-        changes = [("scene_changed", "Scene changed gallery/initial")]
+        changes = [{
+            "kind": "scene_changed", "label": "Scene-only change", "scenario_id": "gallery",
+            "checkpoint_id": "initial", "subject": "gallery/initial", "detail": "serialized scene differs",
+        }]
         comment = github_report.make_comment("owner/repo", "7", "42", "d" * 40, manifest, "https://pages.example/runs/sha/index.html", changes, True)
         self.assertIn("Scene-only change", comment)
+        self.assertIn("gallery/initial", comment)
         self.assertIn("&lt;img&gt;", comment)
         self.assertIn("![Timing graph](https://pages.example/runs/sha/metrics.svg)", comment)
         self.assertIn("Bitmap bytes", comment)

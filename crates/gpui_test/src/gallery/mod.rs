@@ -72,21 +72,21 @@ pub fn built_in_scenarios() -> Result<Vec<BuiltInScenario>> {
         "text-mixed-script",
         "Wrapping, underline, and mixed scripts",
         size(px(460.), px(340.)),
-        |cx: &mut App| cx.new(|_| TextScenario),
+        |_, cx: &mut App| cx.new(|_| TextScenario),
     )?
     .checkpoint("default", "Default width", Duration::ZERO)?;
     let narrow = Scenario::new(
         "text-narrow-wrap",
         "Narrow text wrapping",
         size(px(320.), px(420.)),
-        |cx: &mut App| cx.new(|_| TextScenario),
+        |_, cx: &mut App| cx.new(|_| TextScenario),
     )?
     .checkpoint("narrow", "Narrow viewport", Duration::ZERO)?;
     let hidpi = Scenario::new(
         "text-hidpi-2x",
         "Text at 2x device scale",
         size(px(340.), px(280.)),
-        |cx: &mut App| cx.new(|_| TextScenario),
+        |_, cx: &mut App| cx.new(|_| TextScenario),
     )?
     .scale_factor(2.0)?
     .checkpoint("hidpi", "2x device scale", Duration::ZERO)?;
@@ -94,7 +94,7 @@ pub fn built_in_scenarios() -> Result<Vec<BuiltInScenario>> {
         "text-fractional-dpi",
         "Text at fractional device scale",
         size(px(340.), px(280.)),
-        |cx: &mut App| cx.new(|_| TextScenario),
+        |_, cx: &mut App| cx.new(|_| TextScenario),
     )?
     .scale_factor(1.5)?
     .checkpoint("fractional", "1.5x device scale", Duration::ZERO)?;
@@ -102,14 +102,14 @@ pub fn built_in_scenarios() -> Result<Vec<BuiltInScenario>> {
         "effects",
         "Clipping, opacity, gradients, paths, and nested filters",
         size(px(480.), px(420.)),
-        |cx: &mut App| cx.new(|_| EffectsScenario),
+        |_, cx: &mut App| cx.new(|_| EffectsScenario),
     )?
     .checkpoint("effects", "Layered effects", Duration::ZERO)?;
     let animation = Scenario::new(
         "animation-clock",
         "Animation at fixed dispatcher times",
         size(px(320.), px(220.)),
-        |cx: &mut App| cx.new(|_| AnimationScenario),
+        |_, cx: &mut App| cx.new(|_| AnimationScenario),
     )?
     .checkpoint("t000", "0 ms", Duration::ZERO)?
     .checkpoint("t300", "300 ms", Duration::from_millis(300))?
@@ -120,14 +120,14 @@ pub fn built_in_scenarios() -> Result<Vec<BuiltInScenario>> {
         "layout",
         "Flexible layout",
         size(px(620.), px(300.)),
-        |cx: &mut App| cx.new(|_| LayoutScenario),
+        |_, cx: &mut App| cx.new(|_| LayoutScenario),
     )?
     .checkpoint("default", "Default layout", Duration::ZERO)?;
     let interaction = Scenario::new(
         "interaction-states",
         "Selection, disclosure, focus, and scroll input",
         size(px(420.), px(420.)),
-        |cx: &mut App| cx.new(InteractionScenario::new),
+        |_, cx: &mut App| cx.new(InteractionScenario::new),
     )?
     .checkpoint_with(
         "initial",
@@ -189,21 +189,21 @@ pub fn built_in_scenarios() -> Result<Vec<BuiltInScenario>> {
         "media",
         "SVG and raster image clipping and transforms",
         size(px(360.), px(300.)),
-        |cx: &mut App| cx.new(|_| MediaScenario),
+        |_, cx: &mut App| cx.new(|_| MediaScenario),
     )?
     .checkpoint("default", "Inline SVG and raster", Duration::ZERO)?;
     let stress = Scenario::new(
         "layered-stress",
         "Virtualized rows and overlapping paint layers",
         size(px(620.), px(480.)),
-        |cx: &mut App| cx.new(|_| StressScenario),
+        |_, cx: &mut App| cx.new(|_| StressScenario),
     )?
     .checkpoint("default", "Virtual rows", Duration::ZERO)?;
     let async_tasks = Scenario::new(
         "async-tasks",
         "Foreground task cancellation and completion",
         size(px(360.), px(220.)),
-        |cx: &mut App| cx.new(|_| AsyncTaskScenario::new()),
+        |_, cx: &mut App| cx.new(|_| AsyncTaskScenario::new()),
     )?
     .checkpoint("ready", "No task has started", Duration::ZERO)?
     .checkpoint_with(

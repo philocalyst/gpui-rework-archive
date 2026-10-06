@@ -12,6 +12,7 @@ use gpui::{
 #[derive(IntoElement)]
 struct CounterCard {
     label: &'static str,
+    id: &'static str,
     count: i32,
     colors: Colors,
     increment: Box<dyn Fn(&mut Window, &mut App) + 'static>,
@@ -21,6 +22,7 @@ struct CounterCard {
 impl CounterCard {
     fn new(
         label: &'static str,
+        id: &'static str,
         count: i32,
         colors: Colors,
         increment: impl Fn(&mut Window, &mut App) + 'static,
@@ -28,6 +30,7 @@ impl CounterCard {
     ) -> Self {
         Self {
             label,
+            id,
             count,
             colors,
             increment: Box::new(increment),
@@ -39,7 +42,9 @@ impl CounterCard {
 impl RenderOnce for CounterCard {
     fn render(self, _window: &mut Window, _cx: &mut App) -> impl IntoElement {
         let colors = self.colors;
+        let id = self.id;
         div()
+            .id(id)
             .flex()
             .flex_col()
             .gap_2()
@@ -64,13 +69,15 @@ impl RenderOnce for CounterCard {
                     .flex()
                     .gap_2()
                     .child(counter_button(
-                        (self.label, "decrement"),
+                        id,
+                        "decrement",
                         "−",
                         rgb(0xd32f2f),
                         self.decrement,
                     ))
                     .child(counter_button(
-                        (self.label, "increment"),
+                        id,
+                        "increment",
                         "+",
                         rgb(0x388e3c),
                         self.increment,
@@ -80,21 +87,22 @@ impl RenderOnce for CounterCard {
 }
 
 fn counter_button(
-    id: impl Into<gpui::ElementId>,
+    owner: &'static str,
+    id: &'static str,
     label: &'static str,
     color: gpui::Rgba,
     action: impl Fn(&mut Window, &mut App) + 'static,
-) -> impl IntoElement {
-    let hover = color;
+) -> gpui::Stateful<gpui::Div> {
     div()
         .id(id)
+        .debug_selector(|| format!("{owner}-{id}"))
         .px_3()
         .py_1()
         .rounded_md()
         .bg(color)
         .text_color(gpui::white())
         .cursor_pointer()
-        .hover(move |style| style.opacity(0.8).bg(hover))
+        .hover(|style| style.opacity(0.8))
         .on_click(move |_, window, cx| action(window, cx))
         .child(label)
 }
@@ -103,13 +111,14 @@ struct ElementCounter {
     count: i32,
 }
 
-fn element_counter(colors: &Colors, window: &mut Window, cx: &mut App) -> impl IntoElement {
+fn element_counter(colors: &Colors, window: &mut Window, cx: &mut App) -> CounterCard {
     // The element identity keeps this state alive between renders at this call site.
     let state = window.use_state(cx, |_window, _cx| ElementCounter { count: 0 });
     let count = state.read(cx).count;
     let decrement = state.clone();
     CounterCard::new(
         "use_state: element-local",
+        "element",
         count,
         colors.clone(),
         move |_, cx| {
@@ -138,6 +147,7 @@ impl Render for EntityCounter {
         let decrement = entity.clone();
         CounterCard::new(
             "Render: entity-owned",
+            "entity",
             self.count,
             colors,
             move |_, cx| {
@@ -163,6 +173,8 @@ impl Render for EntityCounter {
 struct CreatingComponents {
     entity_counter: Entity<EntityCounter>,
     prop_count: i32,
+    #[cfg(test)]
+    rendered_element_count: i32,
 }
 
 impl Render for CreatingComponents {
@@ -170,7 +182,13 @@ impl Render for CreatingComponents {
         let colors = Colors::for_appearance(window);
         let parent = cx.entity().downgrade();
         let decrement = parent.clone();
+        let element_card = element_counter(&colors, window, cx);
+        #[cfg(test)]
+        {
+            self.rendered_element_count = element_card.count;
+        }
         div()
+            .id("component-state")
             .size_full()
             .flex()
             .flex_col()
@@ -196,9 +214,10 @@ impl Render for CreatingComponents {
                     .flex()
                     .flex_wrap()
                     .gap_3()
-                    .child(element_counter(&colors, window, cx))
+                    .child(element_card)
                     .child(CounterCard::new(
                         "RenderOnce: parent-owned props",
+                        "props",
                         self.prop_count,
                         colors.clone(),
                         move |_, cx| {
@@ -223,16 +242,98 @@ impl Render for CreatingComponents {
     }
 }
 
+impl CreatingComponents {
+    fn new(cx: &mut Context<Self>) -> Self {
+        Self {
+            entity_counter: cx.new(|_| EntityCounter { count: 0 }),
+            prop_count: 0,
+            #[cfg(test)]
+            rendered_element_count: 0,
+        }
+    }
+}
+
 fn main() {
     gpui_platform::application().run(|cx: &mut App| {
         let options = example_prelude::centered_window(760., 360., cx);
-        cx.open_window(options, |_, cx| {
-            cx.new(|cx| CreatingComponents {
-                entity_counter: cx.new(|_| EntityCounter { count: 0 }),
-                prop_count: 0,
-            })
-        })
-        .expect("open component example");
+        cx.open_window(options, |_, cx| cx.new(CreatingComponents::new))
+            .expect("open component example");
         init_example(cx, "Creating Components");
     });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use gpui::{px, size};
+    use gpui_test::{Harness, Scenario, dispatch_click_on};
+    use std::time::Duration;
+
+    fn assert_counts(
+        cx: &mut gpui::HeadlessAppContext,
+        view: &Entity<CreatingComponents>,
+        window: gpui::WindowHandle<CreatingComponents>,
+        expected: [i32; 3],
+    ) -> anyhow::Result<()> {
+        // Observe the local count presented by a fresh render, along with both owned states.
+        cx.draw_window(window.into())?;
+        let actual = view.read_with(cx, |this, app| {
+            [
+                this.rendered_element_count,
+                this.prop_count,
+                this.entity_counter.read(app).count,
+            ]
+        });
+        anyhow::ensure!(
+            actual == expected,
+            "[element, props, entity] expected {expected:?}, rendered {actual:?}"
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn all_counter_models_handle_clicks_and_keep_state_through_redraws() -> anyhow::Result<()> {
+        let scenario = Scenario::new(
+            "component-state-test",
+            "Component state interactions",
+            size(px(760.), px(360.)),
+            |_, cx: &mut App| cx.new(CreatingComponents::new),
+        )?
+        .checkpoint("initial", "Initial values", Duration::ZERO)?
+        .checkpoint_with(
+            "incremented",
+            "Increment each state owner",
+            Duration::from_millis(1),
+            |cx, view, window| {
+                dispatch_click_on(cx, window.into(), "element-increment")?;
+                dispatch_click_on(cx, window.into(), "props-increment")?;
+                dispatch_click_on(cx, window.into(), "entity-increment")?;
+                assert_counts(cx, view, window, [1, 1, 1])
+            },
+        )?
+        .checkpoint_with(
+            "redrawn",
+            "Parent redraw preserves independent state",
+            Duration::from_millis(2),
+            |cx, view, window| {
+                dispatch_click_on(cx, window.into(), "props-increment")?;
+                assert_counts(cx, view, window, [1, 2, 1])
+            },
+        )?
+        .checkpoint_with(
+            "reset",
+            "Decrement each value back to zero",
+            Duration::from_millis(3),
+            |cx, view, window| {
+                dispatch_click_on(cx, window.into(), "element-decrement")?;
+                dispatch_click_on(cx, window.into(), "props-decrement")?;
+                dispatch_click_on(cx, window.into(), "props-decrement")?;
+                dispatch_click_on(cx, window.into(), "entity-decrement")?;
+                assert_counts(cx, view, window, [0, 0, 0])
+            },
+        )?;
+
+        Harness::new().run(&scenario)?;
+        Ok(())
+    }
 }

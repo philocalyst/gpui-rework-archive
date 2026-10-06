@@ -19,6 +19,10 @@ env:
   RUST_BACKTRACE: 1
   CARGO_INCREMENTAL: 0
 
+# gpui_ce_test has its own Visual tests workflow: behavioral contracts fail there,
+# while reviewed scene/pixel changes are advisory. Keep broad workspace tests
+# from turning those reviewed snapshots into a second blocking check.
+
 jobs:
   # Change detection
   orchestrate:
@@ -182,7 +186,7 @@ jobs:
       - uses: hustcer/setup-nu@v3
       - uses: extractions/setup-just@v2
       - run: just build
-      - run: just test
+      - run: just test --exclude gpui_ce_test
       - run: just test-doc
 
   # macOS build + test
@@ -197,7 +201,7 @@ jobs:
       - uses: hustcer/setup-nu@v3
       - uses: extractions/setup-just@v2
       - run: just build
-      - run: just test
+      - run: just test --exclude gpui_ce_test
       - run: just test-doc
       - name: Test Parley rendering invariants
         run: GPUI_RUN_RENDERING_TESTS=1 cargo test -p gpui_ce_platform --test parley_render
@@ -214,7 +218,7 @@ jobs:
       - uses: hustcer/setup-nu@v3
       - uses: extractions/setup-just@v2
       - run: just build
-      - run: just test
+      - run: just test --exclude gpui_ce_test
       - run: just test-doc
       - name: Test Parley rendering invariants
         run: $env:GPUI_RUN_RENDERING_TESTS=1; cargo test -p gpui_ce_platform --test parley_render
@@ -237,3 +241,5 @@ jobs:
       - uses: hustcer/setup-nu@v3
       - uses: extractions/setup-just@v2
       - run: just check-examples
+      - name: Test lesson interactions without opening windows
+        run: cargo test --locked --package gpui-ce --example creating_components --example styling

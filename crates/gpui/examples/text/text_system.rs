@@ -3,34 +3,12 @@
 #[path = "../shared/prelude.rs"]
 mod example_prelude;
 
-use std::borrow::Cow;
-
 use example_prelude::init_example;
 use gpui::{
     App, Bounds, Context, Div, FontFallbacks, FontFeatures, FontStyle, FontWeight, FontWidth,
     HighlightStyle, Render, StrikethroughStyle, StyledText, TextTransform, UnderlineStyle, Window,
     WindowBounds, WindowOptions, div, font, hsla, prelude::*, px, relative, rgb, size,
 };
-
-const IBM_PLEX_REGULAR: &[u8] =
-    include_bytes!("../../../gpui_test/assets/fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf");
-const IBM_PLEX_ITALIC: &[u8] =
-    include_bytes!("../../../gpui_test/assets/fonts/ibm-plex-sans/IBMPlexSans-Italic.ttf");
-const IBM_PLEX_SEMIBOLD: &[u8] =
-    include_bytes!("../../../gpui_test/assets/fonts/ibm-plex-sans/IBMPlexSans-SemiBold.ttf");
-const IBM_PLEX_SEMIBOLD_ITALIC: &[u8] =
-    include_bytes!("../../../gpui_test/assets/fonts/ibm-plex-sans/IBMPlexSans-SemiBoldItalic.ttf");
-const LILEX_REGULAR: &[u8] =
-    include_bytes!("../../../gpui_test/assets/fonts/lilex/Lilex-Regular.ttf");
-const LILEX_BOLD: &[u8] = include_bytes!("../../../gpui_test/assets/fonts/lilex/Lilex-Bold.ttf");
-const NOTO_SANS: &[u8] =
-    include_bytes!("../../../gpui_test/assets/fonts/noto-sans/NotoSans[wdth,wght].subset.ttf");
-const NOTO_SANS_ARABIC: &[u8] =
-    include_bytes!("../../../gpui_test/assets/fonts/noto-sans-arabic/NotoSansArabic-Regular.ttf");
-const NOTO_SANS_HEBREW: &[u8] =
-    include_bytes!("../../../gpui_test/assets/fonts/noto-sans-hebrew/NotoSansHebrew-Regular.ttf");
-const NOTO_COLOR_EMOJI: &[u8] =
-    include_bytes!("../../../gpui_test/assets/fonts/noto-color-emoji/NotoColorEmoji.subset.ttf");
 
 const BACKGROUND: u32 = 0x0d1117;
 const SURFACE: u32 = 0x161b22;
@@ -41,23 +19,6 @@ const MUTED: u32 = 0x8b949e;
 const ACCENT: u32 = 0x58a6ff;
 
 struct TextSystemExample;
-
-fn register_fonts(cx: &App) {
-    cx.text_system()
-        .add_fonts(vec![
-            Cow::Borrowed(IBM_PLEX_REGULAR),
-            Cow::Borrowed(IBM_PLEX_ITALIC),
-            Cow::Borrowed(IBM_PLEX_SEMIBOLD),
-            Cow::Borrowed(IBM_PLEX_SEMIBOLD_ITALIC),
-            Cow::Borrowed(LILEX_REGULAR),
-            Cow::Borrowed(LILEX_BOLD),
-            Cow::Borrowed(NOTO_SANS),
-            Cow::Borrowed(NOTO_SANS_ARABIC),
-            Cow::Borrowed(NOTO_SANS_HEBREW),
-            Cow::Borrowed(NOTO_COLOR_EMOJI),
-        ])
-        .expect("failed to register the text system example fonts");
-}
 
 fn section(
     title: &'static str,
@@ -501,8 +462,6 @@ impl Render for TextSystemExample {
 
 fn main() {
     gpui_platform::application().run(|cx: &mut App| {
-        register_fonts(cx);
-
         let bounds = Bounds::centered(None, size(px(1000.), px(900.)), cx);
         cx.open_window(
             WindowOptions {

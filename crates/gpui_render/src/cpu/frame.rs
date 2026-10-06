@@ -12,9 +12,7 @@ pub(super) enum SpriteKind {
     Poly {
         grayscale: bool,
         opacity: f32,
-        corner_radii: gpui::Corners<ScaledPixels>,
-        corner_smoothing: f32,
-        smoothed: bool,
+        shape: crate::shaders::host::RoundedRectShader,
     },
 }
 #[derive(Clone)]
@@ -88,7 +86,7 @@ impl Frame {
             y1.min(self.height as i32),
         )
     }
-    pub(super) fn draw_quad(&mut self, quad: &gpui::Quad, smoothed: bool) -> Result<()> {
+    pub(super) fn draw_quad(&mut self, quad: &gpui::Quad, smoothed: bool) {
         let shader = crate::shaders::host::QuadShader::new(quad, smoothed);
         let (x0, y0, x1, y1) = self.pixel_range(quad.bounds);
         for y in y0..y1 {
@@ -103,9 +101,8 @@ impl Frame {
                 self.over_at(x, y, color);
             }
         }
-        Ok(())
     }
-    pub(super) fn draw_shadow(&mut self, shadow: &gpui::Shadow, smoothed: bool) -> Result<()> {
+    pub(super) fn draw_shadow(&mut self, shadow: &gpui::Shadow, smoothed: bool) {
         let shader = crate::shaders::host::ShadowShader::new(shadow, smoothed);
         let shader_bounds = shader.bounds();
         let bounds = Bounds {
@@ -130,7 +127,6 @@ impl Frame {
                 self.over_at(x, y, shader.sample(p));
             }
         }
-        Ok(())
     }
     pub(super) fn draw_underline(&mut self, item: &gpui::Underline) {
         let (x0, y0, x1, y1) = self.pixel_range(item.bounds);
@@ -173,7 +169,7 @@ impl Frame {
         atlas: &CpuAtlas,
         font: crate::shaders::common::FontRasterizationUniforms,
     ) -> Result<()> {
-        let bitmap = atlas.resolve(tile)?;
+        let bitmap = atlas.resolve_shared(tile)?;
         let m = transform;
         let (x0, y0, x1, y1) = if let Some(m) = m {
             transformed_range(self, bounds, m)
@@ -219,18 +215,10 @@ impl Frame {
                     SpriteKind::Poly {
                         grayscale,
                         opacity,
-                        corner_radii,
-                        corner_smoothing,
-                        smoothed,
+                        shape,
                     } => {
                         let rgb = crate::shaders::host::polychrome_color(sample, grayscale);
-                        let coverage = crate::shaders::host::sprite_corner_coverage(
-                            bounds,
-                            corner_radii,
-                            corner_smoothing,
-                            point,
-                            smoothed,
-                        );
+                        let coverage = shape.sample(point);
                         let alpha = sample[3] * opacity * coverage * fade;
                         self.over_at(
                             x,
@@ -264,12 +252,12 @@ impl Frame {
         }
         Ok(())
     }
-    pub(super) fn draw_paths(&mut self, paths: &[gpui::Path<ScaledPixels>]) -> Result<()> {
+    pub(super) fn draw_paths(&mut self, paths: &[gpui::Path<ScaledPixels>]) {
         // Paths rasterize into a cleared target using additive alpha, then their
         // clipped sprites composite into the scene using ordinary source-over.
         let mut rasterized = Frame::new(self.width, self.height);
         for path in paths {
-            rasterized.draw_path(path)?;
+            rasterized.draw_path(path);
         }
         for sprite in crate::path_types::sprites(paths) {
             let (x0, y0, x1, y1) = self.pixel_range(sprite.bounds);
@@ -286,10 +274,9 @@ impl Frame {
                 }
             }
         }
-        Ok(())
     }
 
-    fn draw_path(&mut self, path: &gpui::Path<ScaledPixels>) -> Result<()> {
+    fn draw_path(&mut self, path: &gpui::Path<ScaledPixels>) {
         let bounds = path.clipped_bounds();
         let paint = crate::shaders::host::PaintShader::new(path.color, bounds);
         let (x0, y0, x1, y1) = self.pixel_range(bounds);
@@ -357,11 +344,16 @@ impl Frame {
                 }
             }
         }
-        Ok(())
     }
-    pub(super) fn backdrop_filter(&mut self, filter: &gpui::BackdropFilter) -> Result<()> {
+    pub(super) fn backdrop_filter(&mut self, filter: &gpui::BackdropFilter) {
         let mut filtered = self.clone();
         filtered.apply_filters(&filter.filters, filter.bounds);
+        let shape = crate::shaders::host::RoundedRectShader::new(
+            filter.bounds,
+            filter.corner_radii,
+            filter.corner_smoothing,
+            filter.corner_smoothing > 0.,
+        );
         let (x0, y0, x1, y1) = self.pixel_range(filter.bounds);
         for y in y0..y1 {
             for x in x0..x1 {
@@ -371,14 +363,8 @@ impl Frame {
                 {
                     continue;
                 }
-                let shape = crate::shaders::host::rounded_rect_coverage(
-                    filter.bounds,
-                    filter.corner_radii,
-                    p,
-                    filter.corner_smoothing,
-                );
                 let mask = crate::shaders::host::content_alpha(filter.content_mask, p);
-                let factor = shape * mask * filter.opacity;
+                let factor = shape.sample(p) * mask * filter.opacity;
                 let index = y as usize * self.width as usize + x as usize;
                 let blur = filtered.pixels[index];
                 self.over_at(
@@ -393,7 +379,6 @@ impl Frame {
                 );
             }
         }
-        Ok(())
     }
     pub(super) fn apply_filters(
         &mut self,

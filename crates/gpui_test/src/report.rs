@@ -5,7 +5,6 @@ use serde::{Deserialize, Serialize};
 use std::{
     collections::{BTreeMap, BTreeSet, HashSet},
     fs,
-    io::Cursor,
     path::{Path, PathBuf},
 };
 
@@ -121,7 +120,7 @@ pub enum ReportChangeKind {
     CheckpointRemoved,
     /// Checkpoint label or simulated time changed.
     CheckpointMetadataChanged,
-    /// Rendered PNG bytes changed.
+    /// Decoded image dimensions or RGBA pixels changed.
     PixelsChanged,
     /// Serialized scene capture changed.
     SceneChanged,
@@ -203,7 +202,8 @@ pub fn write_report(
             let scene_file = format!("{}.scene.json", checkpoint.id);
             let png_file = format!("{}.png", checkpoint.id);
             let scene_path = dir.join(&scene_file);
-            fs::write(&scene_path, serde_json::to_vec_pretty(&checkpoint.capture)?)
+            let scene_bytes = serde_json::to_vec_pretty(&checkpoint.capture)?;
+            fs::write(&scene_path, &scene_bytes)
                 .with_context(|| format!("writing {}", scene_path.display()))?;
             let png_path = dir.join(&png_file);
             save_png(&png_path, &checkpoint.image)?;
@@ -213,25 +213,19 @@ pub fn write_report(
                     .iter()
                     .find(|item| item.id == checkpoint.id)
             });
-            let baseline_image_path = previous_checkpoint
-                .map(|previous| options.baseline_dir.as_ref().unwrap().join(&previous.png));
-            let (pixels_changed, scene_changed) = if let Some(previous) = previous_checkpoint {
-                let old_image_path = options.baseline_dir.as_ref().unwrap().join(&previous.png);
-                let old_image = read_image(&old_image_path)?;
-                let old_scene_path = options
-                    .baseline_dir
-                    .as_ref()
-                    .unwrap()
-                    .join(&previous.scene_json);
-                let old_scene = read_json_value(&old_scene_path)?;
-                let current_scene = read_json_value(&scene_path)?;
-                (
-                    Some(old_image != checkpoint.image),
-                    Some(old_scene != current_scene),
-                )
-            } else {
-                (None, None)
-            };
+            let previous_assets = previous_checkpoint.zip(options.baseline_dir.as_deref());
+            let before = previous_assets
+                .map(|(previous, root)| read_image(&root.join(&previous.png)))
+                .transpose()?;
+            let pixels_changed = before.as_ref().map(|image| image != &checkpoint.image);
+            let scene_changed = previous_assets
+                .map(|(previous, root)| -> Result<bool> {
+                    // Compare the persisted values: to_value widens f32 numbers
+                    // differently from the JSON serializer used by capture files.
+                    Ok(read_json_value(&root.join(&previous.scene_json))?
+                        != serde_json::from_slice::<serde_json::Value>(&scene_bytes)?)
+                })
+                .transpose()?;
             let metadata_changed = previous_checkpoint.map(|previous| {
                 previous.name != checkpoint.name
                     || previous.time_ns != checkpoint.time_ns
@@ -250,16 +244,12 @@ pub fn write_report(
                 (true, Some(_)) => ReportStatus::Unchanged,
             };
             let (before_png, diff_png) = if pixels_changed == Some(true)
-                && let Some(baseline_path) = baseline_image_path
+                && let Some(before) = &before
             {
                 let before_file = format!("{}.before.png", checkpoint.id);
                 let diff_file = format!("{}.diff.png", checkpoint.id);
-                fs::copy(&baseline_path, dir.join(&before_file))
-                    .with_context(|| format!("copying baseline {}", baseline_path.display()))?;
-                let before = image::open(&baseline_path)
-                    .with_context(|| format!("opening baseline {}", baseline_path.display()))?
-                    .to_rgba8();
-                let diff = diff_images(&before, &checkpoint.image);
+                save_png(&dir.join(&before_file), before)?;
+                let diff = diff_images(before, &checkpoint.image);
                 save_png(&dir.join(&diff_file), &diff)?;
                 (
                     Some(format!("{}/{}", scenario.id, before_file)),
@@ -367,7 +357,8 @@ pub fn write_report(
     Ok(manifest)
 }
 
-/// Reads and validates a suite manifest from an output directory.
+/// Reads a suite manifest and validates its schema, viewport, identifiers, and artifact paths.
+/// Images and scene values are loaded only when a comparison needs them.
 pub fn read_manifest(report_dir: impl AsRef<Path>) -> Result<ReportManifest> {
     let path = report_dir.as_ref().join("manifest.json");
     let manifest: ReportManifest = serde_json::from_slice(
@@ -423,22 +414,13 @@ pub fn read_manifest(report_dir: impl AsRef<Path>) -> Result<ReportManifest> {
                 scenario.id,
                 checkpoint.id
             );
-            let report_root = report_dir.as_ref();
-            read_image(&report_root.join(&checkpoint.png))?;
-            read_json_value(&report_root.join(&checkpoint.scene_json))?;
-            if let Some(path) = &checkpoint.before_png {
-                read_image(&report_root.join(path))?;
-            }
-            if let Some(path) = &checkpoint.diff_png {
-                read_image(&report_root.join(path))?;
-            }
         }
     }
     Ok(manifest)
 }
 
 /// Compares two report directories. Any scenario/checkpoint addition, removal, metadata,
-/// serialized-scene, or exact PNG change is returned as a human-readable entry.
+/// serialized-scene, or decoded pixel change is returned as a human-readable entry.
 pub fn compare_reports(
     baseline_dir: impl AsRef<Path>,
     current_dir: impl AsRef<Path>,
@@ -454,9 +436,6 @@ pub fn compare_reports_selected(
 ) -> Result<Vec<ReportChange>> {
     let baseline_dir = baseline_dir.as_ref();
     let current_dir = current_dir.as_ref();
-    for id in selected_ids {
-        validate_id(id)?;
-    }
     let baseline = read_manifest(baseline_dir)?;
     let current = read_manifest(current_dir)?;
     compare_manifests(&baseline, &current, selected_ids, |old, new| {
@@ -488,6 +467,7 @@ fn compare_manifests(
     let new_scenarios: BTreeMap<_, _> = current
         .scenarios
         .iter()
+        .filter(|scenario| selected_ids.is_empty() || selected_ids.contains(&scenario.id))
         .map(|scenario| (scenario.id.as_str(), scenario))
         .collect();
     let mut changes = Vec::<ReportChange>::new();
@@ -638,30 +618,21 @@ impl std::fmt::Display for ReportChangeKind {
     }
 }
 
-/// Builds a red overlay image: unchanged pixels are dark and changed pixels are red.
+/// Highlights changed pixels and resized regions in red over a dimmed current frame.
 pub fn diff_images(before: &image::RgbaImage, current: &image::RgbaImage) -> image::RgbaImage {
     let width = before.width().max(current.width());
     let height = before.height().max(current.height());
     let mut diff = image::RgbaImage::new(width, height);
     for y in 0..height {
         for x in 0..width {
-            let a = before
-                .get_pixel_checked(x, y)
-                .copied()
-                .unwrap_or(image::Rgba([0, 0, 0, 0]));
-            let b = current
-                .get_pixel_checked(x, y)
-                .copied()
-                .unwrap_or(image::Rgba([0, 0, 0, 0]));
-            let delta = (0..4)
-                .map(|channel| a[channel].abs_diff(b[channel]))
-                .max()
-                .unwrap_or(0);
+            let a = before.get_pixel_checked(x, y);
+            let b = current.get_pixel_checked(x, y);
             diff.put_pixel(
                 x,
                 y,
-                if delta == 0 {
-                    image::Rgba([24, 24, 24, 255])
+                if a == b {
+                    let pixel = b.copied().unwrap_or(image::Rgba([0; 4]));
+                    image::Rgba([pixel[0] / 3, pixel[1] / 3, pixel[2] / 3, 255])
                 } else {
                     image::Rgba([255, 32, 32, 255])
                 },
@@ -672,10 +643,9 @@ pub fn diff_images(before: &image::RgbaImage, current: &image::RgbaImage) -> ima
 }
 
 fn save_png(path: &Path, image: &image::RgbaImage) -> Result<()> {
-    let mut bytes = Cursor::new(Vec::new());
-    image::DynamicImage::ImageRgba8(image.clone()).write_to(&mut bytes, image::ImageFormat::Png)?;
-    fs::write(path, bytes.into_inner()).with_context(|| format!("writing {}", path.display()))?;
-    Ok(())
+    image
+        .save_with_format(path, image::ImageFormat::Png)
+        .with_context(|| format!("writing {}", path.display()))
 }
 
 fn read_image(path: &Path) -> Result<image::RgbaImage> {
@@ -723,18 +693,18 @@ fn write_markdown(manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
         }
     }
     md.push_str("\n![Frame timings](metrics.svg)\n\n## Baseline changes\n\n");
-    if manifest
+    if !manifest.changes.is_empty() {
+        for change in &manifest.changes {
+            md.push_str(&format!("- {}\n", change));
+        }
+    } else if manifest
         .scenarios
         .iter()
         .all(|scenario| scenario.status == ReportStatus::BaselineUnavailable)
     {
         md.push_str("No baseline was supplied.\n");
-    } else if manifest.changes.is_empty() {
-        md.push_str("No scenario or checkpoint changes.\n");
     } else {
-        for change in &manifest.changes {
-            md.push_str(&format!("- {}\n", change));
-        }
+        md.push_str("No scenario or checkpoint changes.\n");
     }
     fs::write(output_dir.join("report.md"), md)?;
     Ok(())
@@ -779,7 +749,10 @@ fn write_svg(manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
         .margin(18)
         .x_label_area_size(48)
         .y_label_area_size(300)
-        .build_cartesian_2d(0u64..max.saturating_add(max / 10 + 1), 0usize..rows)
+        .build_cartesian_2d(
+            0u64..max.saturating_add(max / 10 + 1),
+            (0usize..rows).with_key_points((0..values.len()).map(|index| index * 2 + 1).collect()),
+        )
         .map_err(plot_err)?;
     chart
         .configure_mesh()
@@ -832,8 +805,40 @@ fn write_svg(manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
 
 fn write_html(manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
     let mut html = String::from(
-        "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>GPUI scenario report</title><style>body{font:15px system-ui;margin:2rem;background:#111;color:#eee}a{color:#8cc8ff}section{margin:2rem 0}img{max-width:100%;border:1px solid #555}figure{display:inline-block;vertical-align:top;width:min(30%,700px);margin:0 1% 1rem 0}figcaption{margin:.5rem 0}@media(max-width:700px){figure{width:100%}}</style></head><body><h1>GPUI scenario report</h1><p><a href=\"manifest.json\">JSON manifest</a> · <a href=\"report.md\">Markdown metrics</a></p><img src=\"metrics.svg\" alt=\"Scene build and CPU replay timings\">",
+        r#"<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>GPUI scenario report</title>
+  <style>
+    body { font: 15px system-ui; line-height: 1.5; max-width: 1200px;
+           margin: 2rem; background: #111; color: #eee; }
+    nav a { display: inline-block; margin: 0 1rem .5rem 0; }
+    a { color: #8cc8ff; }
+    section { margin: 2rem 0; }
+    img { max-width: 100%; height: auto; border: 1px solid #555; }
+    .images { display: grid; gap: 1rem;
+              grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
+    figure { margin: 0 0 1rem; }
+    figcaption { margin: .5rem 0; }
+  </style>
+</head>
+<body>
+  <h1>GPUI scenario report</h1>
+  <p><a href="manifest.json">JSON manifest</a> · <a href="report.md">Markdown metrics</a></p>
+  <img src="metrics.svg" alt="Scene build and CPU replay timings">
+"#,
     );
+    html.push_str("<nav aria-label=\"Scenarios\">");
+    for scenario in &manifest.scenarios {
+        html.push_str(&format!(
+            "<a href=\"#{}\">{}</a>",
+            scenario.id,
+            escape_html(&scenario.title)
+        ));
+    }
+    html.push_str("</nav>");
     if !manifest.changes.is_empty() {
         html.push_str("<section><h2>Baseline changes</h2><ul>");
         for change in &manifest.changes {
@@ -855,6 +860,7 @@ fn write_html(manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
                 status_name(checkpoint.status),
                 checkpoint.scene_json
             ));
+            html.push_str("<div class=\"images\">");
             let images = [
                 ("Before", checkpoint.before_png.as_deref()),
                 ("Current", Some(checkpoint.png.as_str())),
@@ -865,6 +871,7 @@ fn write_html(manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
                     html.push_str(&format!("<figure><figcaption>{label}</figcaption><a href=\"{path}\"><img loading=\"lazy\" src=\"{path}\" alt=\"{label}\"></a></figure>"));
                 }
             }
+            html.push_str("</div>");
         }
         html.push_str("</section>");
     }
@@ -891,4 +898,31 @@ fn escape_html(s: &str) -> String {
 }
 fn plot_err<E: std::fmt::Debug>(error: E) -> anyhow::Error {
     anyhow::anyhow!("plot error: {error:?}")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::diff_images;
+    use image::{Rgba, RgbaImage};
+
+    #[test]
+    fn pixel_diff_keeps_context_and_marks_transparent_resize_regions() {
+        let before = RgbaImage::from_pixel(2, 1, Rgba([90, 120, 150, 255]));
+        let mut current = RgbaImage::new(3, 1);
+        current.put_pixel(0, 0, before[(0, 0)]);
+        current.put_pixel(1, 0, Rgba([91, 120, 150, 255]));
+        let diff = diff_images(&before, &current);
+        assert_eq!(diff[(0, 0)], Rgba([30, 40, 50, 255]), "unchanged context");
+        assert_eq!(diff[(1, 0)], Rgba([255, 32, 32, 255]), "one-channel change");
+        assert_eq!(
+            diff[(2, 0)],
+            Rgba([255, 32, 32, 255]),
+            "new transparent area"
+        );
+        assert_eq!(
+            diff_images(&current, &before)[(2, 0)],
+            diff[(2, 0)],
+            "removed transparent area"
+        );
+    }
 }

@@ -22,6 +22,18 @@ SVG_ATTRS = {
     "font-family", "font-size", "font-weight", "text-anchor", "dominant-baseline", "id", "clip-path",
 }
 STATUSES = {"baseline_unavailable", "new", "unchanged", "changed"}
+CHANGE_LABELS = {
+    "scenario_added": "Scenario added",
+    "scenario_removed": "Scenario removed",
+    "scenario_metadata_changed": "Scenario metadata changed",
+    "checkpoint_added": "Checkpoint added",
+    "checkpoint_removed": "Checkpoint removed",
+    "checkpoint_metadata_changed": "Checkpoint timeline changed",
+    "pixels_changed": "Pixels changed",
+}
+CHECKPOINT_CHANGE_KINDS = {
+    "checkpoint_added", "checkpoint_removed", "checkpoint_metadata_changed", "pixels_changed", "scene_changed",
+}
 
 
 def validate_relative(raw: object, suffixes: tuple[str, ...]) -> str:
@@ -59,12 +71,65 @@ def _safe_path(root: Path, relative: str) -> Path:
 
 def _validate_status_fields(value: dict, label: str) -> None:
     status = value.get("status")
-    if status is not None and (not isinstance(status, str) or status not in STATUSES):
+    if not isinstance(status, str) or status not in STATUSES:
         raise ValueError(f"{label} has an invalid comparison status")
     for field in ("pixels_changed", "scene_changed", "metadata_changed"):
         flag = value.get(field)
         if flag is not None and not isinstance(flag, bool):
             raise ValueError(f"{label} field {field} must be boolean")
+
+
+def comparison_summary(manifest: dict) -> tuple[list[dict], bool]:
+    """Validate and format the comparison already recorded by the Rust harness."""
+    raw_changes = manifest.get("changes")
+    if not isinstance(raw_changes, list):
+        raise ValueError("manifest changes must be a list")
+    statuses = []
+    for scenario in manifest.get("scenarios", []):
+        statuses.append(scenario["status"])
+        statuses.extend(checkpoint["status"] for checkpoint in scenario["checkpoints"])
+
+    normalized = []
+    pixels_changed = {
+        (change.get("scenario_id"), change.get("checkpoint_id"))
+        for change in raw_changes
+        if isinstance(change, dict)
+        and change.get("kind") == "pixels_changed"
+        and isinstance(change.get("scenario_id"), str)
+        and isinstance(change.get("checkpoint_id"), str)
+    }
+    for change in raw_changes:
+        if not isinstance(change, dict):
+            raise ValueError("manifest change must be an object")
+        kind, scenario_id = change.get("kind"), change.get("scenario_id")
+        checkpoint_id, detail = change.get("checkpoint_id"), change.get("detail")
+        if not isinstance(kind, str) or (kind not in CHANGE_LABELS and kind != "scene_changed"):
+            raise ValueError(f"manifest change has an unknown kind: {kind!r}")
+        if not isinstance(scenario_id, str) or not ID_RE.fullmatch(scenario_id):
+            raise ValueError("manifest change has an invalid scenario_id")
+        if not isinstance(detail, str):
+            raise ValueError("manifest change detail must be text")
+        if kind in CHECKPOINT_CHANGE_KINDS:
+            if not isinstance(checkpoint_id, str) or not ID_RE.fullmatch(checkpoint_id):
+                raise ValueError("checkpoint change has an invalid checkpoint_id")
+            subject = f"{scenario_id}/{checkpoint_id}"
+        else:
+            if checkpoint_id is not None:
+                raise ValueError("scenario change cannot include a checkpoint_id")
+            subject = scenario_id
+        label = CHANGE_LABELS.get(kind)
+        if kind == "scene_changed":
+            label = "Scene and pixels changed" if (scenario_id, checkpoint_id) in pixels_changed else "Scene-only change"
+        normalized.append({
+            "kind": kind,
+            "label": label,
+            "scenario_id": scenario_id,
+            "checkpoint_id": checkpoint_id,
+            "subject": subject,
+            "detail": detail,
+        })
+    baseline_available = bool(raw_changes) or any(status != "baseline_unavailable" for status in statuses)
+    return normalized, baseline_available
 
 
 def load_report(root: Path) -> tuple[dict, Path]:
@@ -134,16 +199,8 @@ def load_report(root: Path) -> tuple[dict, Path]:
                         raise ValueError(f"report asset is referenced more than once: {relative}")
                     referenced_paths.add(relative)
                     checkpoint[field] = relative
+    comparison_summary(manifest)
     return manifest, report_root
-
-
-def find_baseline(report_path: Path, current: dict, current_root: Path) -> tuple[list[tuple[str, str]], bool]:
-    candidates = [report_path / "visual-baseline", report_path.parent / "visual-baseline"]
-    baseline_dir = next((path for path in candidates if (path / "manifest.json").is_file()), None)
-    if baseline_dir is None:
-        return [], False
-    baseline, baseline_root = load_report(baseline_dir)
-    return compare_manifests(current, current_root, baseline, baseline_root), True
 
 
 def read_asset(root: Path, relative: str) -> bytes:
@@ -263,100 +320,167 @@ def markdown_text(value: object) -> str:
     return f"<code>{text}</code>"
 
 
-def _entity_map(manifest: dict, kind: str) -> dict[str, dict]:
-    result = {}
-    if kind == "scenario":
-        for scenario in manifest["scenarios"]:
-            result[scenario["id"]] = scenario
-    else:
-        for scenario in manifest["scenarios"]:
-            for checkpoint in scenario["checkpoints"]:
-                result[f"{scenario['id']}/{checkpoint['id']}"] = checkpoint
-    return result
+METRIC_COLUMNS = (
+    ("Scene build p50", "scene_build_p50_ns", "time"),
+    ("Scene build p95", "scene_build_p95_ns", "time"),
+    ("Scene build p99", "scene_build_p99_ns", "time"),
+    ("CPU render p50", "cpu_render_p50_ns", "time"),
+    ("CPU render p95", "cpu_render_p95_ns", "time"),
+    ("CPU render p99", "cpu_render_p99_ns", "time"),
+    ("Frames", "frame_count", "count"),
+    ("Primitives", "primitive_count", "count"),
+    ("Batches", "batch_count", "count"),
+    ("Bitmap bytes", "bitmap_storage_bytes", "count"),
+)
+METRIC_HEADERS = (*(column[0] for column in METRIC_COLUMNS), "GPU memory")
+MARKDOWN_METRIC_HEADERS = ("Scenario", "Checkpoint", *METRIC_HEADERS)
 
 
-def compare_manifests(current: dict, current_root: Path, baseline: dict, baseline_root: Path) -> list[tuple[str, str]]:
-    changes: list[tuple[str, str]] = []
-    old_scenarios = _entity_map(baseline, "scenario")
-    new_scenarios = _entity_map(current, "scenario")
-    for sid in sorted(old_scenarios.keys() - new_scenarios.keys()):
-        changes.append(("scenario_removed", f"Removed scenario {sid}"))
-    for sid in sorted(new_scenarios.keys() - old_scenarios.keys()):
-        changes.append(("scenario_added", f"Added scenario {sid}"))
-    for sid in sorted(old_scenarios.keys() & new_scenarios.keys()):
-        old, new = old_scenarios[sid], new_scenarios[sid]
-        if (old.get("title"), old.get("viewport")) != (new.get("title"), new.get("viewport")) or new.get("metadata_changed") is True:
-            changes.append(("scenario_metadata_changed", f"Scenario viewport or title changed {sid}"))
+def _count_text(value: object) -> str:
+    if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+        return "n/a"
+    return str(value)
 
-    old_checkpoints = _entity_map(baseline, "checkpoint")
-    new_checkpoints = _entity_map(current, "checkpoint")
-    shared_scenarios = old_scenarios.keys() & new_scenarios.keys()
-    for key in sorted(old_checkpoints.keys() - new_checkpoints.keys()):
-        if key.split("/", 1)[0] in shared_scenarios:
-            changes.append(("checkpoint_removed", f"Removed checkpoint {key}"))
-    for key in sorted(new_checkpoints.keys() - old_checkpoints.keys()):
-        if key.split("/", 1)[0] in shared_scenarios:
-            changes.append(("checkpoint_added", f"Added checkpoint {key}"))
-    for key in sorted(old_checkpoints.keys() & new_checkpoints.keys()):
-        old, new = old_checkpoints[key], new_checkpoints[key]
-        if old.get("name") != new.get("name") or old.get("time_ns") != new.get("time_ns") or new.get("metadata_changed") is True:
-            changes.append(("checkpoint_metadata_changed", f"Checkpoint timeline changed {key}"))
-        pixel_flag = new.get("pixels_changed")
-        scene_flag = new.get("scene_changed")
-        metadata_flag = new.get("metadata_changed")
-        old_png, new_png = old.get("png"), new.get("png")
-        if old_png and new_png:
-            pixels_changed = read_asset(baseline_root, validate_relative(old_png, (".png",))) != read_asset(current_root, validate_relative(new_png, (".png",)))
-        else:
-            pixels_changed = None
-        old_scene, new_scene = old.get("scene_json"), new.get("scene_json")
-        if old_scene and new_scene:
-            scene_changed = read_asset(baseline_root, validate_relative(old_scene, (".json",))) != read_asset(current_root, validate_relative(new_scene, (".json",)))
-        else:
-            scene_changed = None
-        if pixels_changed or pixel_flag is True:
-            changes.append(("pixels_changed", f"Pixels changed {key}"))
-        if scene_changed or scene_flag is True:
-            changes.append(("scene_changed", f"Scene changed {key}"))
-    return changes
+
+def checkpoint_metric_values(checkpoint: dict, gpu_memory_bytes: object = None) -> list[str]:
+    values = []
+    for _label, key, kind in METRIC_COLUMNS:
+        value = metric(checkpoint, key)
+        values.append(format_ms(value) if kind == "time" else _count_text(value))
+    values.append(_count_text(gpu_memory_bytes))
+    return values
+
+
+def markdown_metrics_table(manifest: dict) -> str:
+    """Render one consistent timing and memory table for either forge adapter."""
+    headers = "| " + " | ".join(MARKDOWN_METRIC_HEADERS) + " |"
+    divider = "|---|---|" + "---:|" * (len(MARKDOWN_METRIC_HEADERS) - 2)
+    rows = [headers, divider]
+    for scenario in manifest["scenarios"]:
+        scenario_title = markdown_text(scenario.get("title", scenario["id"]))
+        for checkpoint in scenario["checkpoints"]:
+            checkpoint_name = markdown_text(checkpoint.get("name", checkpoint["id"]))
+            metrics = checkpoint_metric_values(checkpoint, scenario.get("gpu_memory_bytes"))
+            rows.append("| " + " | ".join([scenario_title, checkpoint_name, *metrics]) + " |")
+    return "\n".join(rows)
 
 
 def trusted_index(manifest: dict) -> bytes:
-    title = html.escape("GPUI visual scenario report", quote=True)
+    title = "GPUI visual scenario report"
+    environment = manifest.get("environment") or {}
     parts = [
-        "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width\">",
-        f"<title>{title}</title><style>body{{font:16px system-ui;margin:2rem;max-width:1200px;color:#20242b}}img{{max-width:100%;height:auto;border:1px solid #bbb}}figure{{margin:1rem 0}}.images{{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem}}table{{border-collapse:collapse}}th,td{{border:1px solid #aaa;padding:.4rem;text-align:left}}.status{{font-weight:600}}</style></head><body>",
-        f"<header><h1>{title}</h1><p>Backend: {html.escape(str(manifest.get('backend', 'unknown')))} · Renderer: {html.escape(str(manifest.get('environment', {}).get('renderer', 'n/a')))} · Font pack: {html.escape(str(manifest.get('environment', {}).get('font_pack', 'n/a')))}</p>",
-        '<p><a href="manifest.json">Manifest JSON</a> · <a href="metrics.svg">Timing graph</a></p></header><main>',
-        '<figure id="timing-graph"><figcaption>Timing graph</figcaption><a href="metrics.svg"><img src="metrics.svg" alt="Scenario frame timing graph"></a></figure>',
+        "<!doctype html>",
+        '<html lang="en">',
+        "<head>",
+        '  <meta charset="utf-8">',
+        '  <meta name="viewport" content="width=device-width">',
+        f"  <title>{html.escape(title)}</title>",
+        "  <style>",
+        "    body { font: 16px system-ui; margin: 2rem; max-width: 1200px; color: #20242b; }",
+        "    img { max-width: 100%; height: auto; border: 1px solid #bbb; }",
+        "    figure { margin: 1rem 0; }",
+        "    .images { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 1rem; }",
+        "    table { border-collapse: collapse; }",
+        "    th, td { border: 1px solid #aaa; padding: .4rem; text-align: left; }",
+        "    .status { font-weight: 600; }",
+        "  </style>",
+        "</head>",
+        "<body>",
+        "<header>",
+        f"  <h1>{html.escape(title)}</h1>",
+        "  <p>"
+        f"Backend: {html.escape(str(manifest.get('backend', 'unknown')))} · "
+        f"Renderer: {html.escape(str(environment.get('renderer', 'n/a')))} · "
+        f"Font pack: {html.escape(str(environment.get('font_pack', 'n/a')))}"
+        "</p>",
+        '  <p><a href="manifest.json">Manifest JSON</a> · '
+        '<a href="metrics.svg">Timing graph</a></p>',
+        "</header>",
+        "<main>",
+        '  <figure id="timing-graph">',
+        "    <figcaption>Timing graph</figcaption>",
+        '    <a href="metrics.svg"><img src="metrics.svg" alt="Scenario frame timing graph"></a>',
+        "  </figure>",
     ]
+    navigation = " ".join(
+        f'<a href="#{html.escape(scenario["id"], quote=True)}">'
+        f"{html.escape(str(scenario.get('title', scenario['id'])))}</a>"
+        for scenario in manifest["scenarios"]
+    )
+    parts.append(f'<nav aria-label="Scenarios">{navigation}</nav>')
+
     for scenario in manifest["scenarios"]:
-        sid = scenario["id"]
-        parts.append(f"<section><h2>{html.escape(str(scenario.get('title', sid)))}</h2><p>Scenario: <code>{html.escape(sid)}</code> · {scenario.get('viewport', {}).get('width', 'n/a')} × {scenario.get('viewport', {}).get('height', 'n/a')} @ {scenario.get('viewport', {}).get('scale_factor', 'n/a')}x <span class=\"status\">{html.escape(str(scenario.get('status', 'baseline unavailable')))}</span></p>")
+        scenario_id = scenario["id"]
+        escaped_id = html.escape(scenario_id)
+        scenario_title = html.escape(str(scenario.get("title", scenario_id)))
+        viewport = scenario.get("viewport", {})
+        viewport_text = (
+            f"{html.escape(str(viewport.get('width', 'n/a')))} × "
+            f"{html.escape(str(viewport.get('height', 'n/a')))} @ "
+            f"{html.escape(str(viewport.get('scale_factor', 'n/a')))}x"
+        )
+        status = html.escape(str(scenario.get("status", "baseline_unavailable")))
+        parts.extend([
+            f'<section id="{html.escape(scenario_id, quote=True)}">',
+            f"  <h2>{scenario_title}</h2>",
+            f'  <p>Scenario: <code>{escaped_id}</code> · {viewport_text} '
+            f'<span class="status">{status}</span></p>',
+        ])
+
         for checkpoint in scenario["checkpoints"]:
-            cid = checkpoint["id"]
-            name = html.escape(str(checkpoint.get("name", cid)))
-            parts.append(f"<article><h3>{name}</h3><p><code>{html.escape(sid)}/{html.escape(cid)}</code> · {checkpoint.get('time_ns', 'n/a')} ns · <span class=\"status\">{html.escape(str(checkpoint.get('status', 'baseline unavailable')))}</span> · <a href=\"{quote(checkpoint['scene_json'], safe='/')}\">Scene JSON</a></p>")
-            parts.append('<div class="images">')
-            figures = [("Current", checkpoint.get("png")), ("Before", checkpoint.get("before_png")), ("Difference", checkpoint.get("diff_png"))]
+            checkpoint_id = checkpoint["id"]
+            checkpoint_name = html.escape(str(checkpoint.get("name", checkpoint_id)))
+            checkpoint_status = html.escape(str(checkpoint.get("status", "baseline_unavailable")))
+            timestamp = html.escape(str(checkpoint.get("time_ns", "n/a")))
+            scene_path = validate_relative(checkpoint["scene_json"], (".json",))
+            scene_url = html.escape(quote(scene_path, safe="/"), quote=True)
+            escaped_checkpoint_id = html.escape(checkpoint_id)
+            parts.extend([
+                "  <article>",
+                f"    <h3>{checkpoint_name}</h3>",
+                f'    <p><code>{escaped_id}/{escaped_checkpoint_id}</code> · {timestamp} ns · '
+                f'<span class="status">{checkpoint_status}</span> · '
+                f'<a href="{scene_url}">Scene JSON</a></p>',
+                '    <div class="images">',
+            ])
+            figures = (
+                ("Current", checkpoint.get("png")),
+                ("Before", checkpoint.get("before_png")),
+                ("Difference", checkpoint.get("diff_png")),
+            )
             for label, asset in figures:
                 if not asset:
                     continue
-                url = quote(asset, safe="/")
-                alt = html.escape(label + " " + str(scenario.get("title", sid)) + " / " + str(checkpoint.get("name", cid)), quote=True)
-                parts.append(f"<figure><figcaption>{label}</figcaption><a href=\"{url}\"><img loading=\"lazy\" src=\"{url}\" alt=\"{alt}\"></a></figure>")
-            parts.append("</div>")
-            metrics = checkpoint.get("metrics")
-            values = [metric(checkpoint, key) for key in ("scene_build_p50_ns", "scene_build_p95_ns", "scene_build_p99_ns", "cpu_render_p50_ns", "cpu_render_p95_ns", "cpu_render_p99_ns", "frame_count", "primitive_count", "batch_count", "bitmap_storage_bytes")]
-            labels = ("Scene build p50", "p95", "p99", "CPU render p50", "p95", "p99", "Frames", "Primitives", "Batches", "Bitmap bytes")
-            parts.append("<table><caption>Checkpoint metrics</caption><tbody>")
-            for label, value in zip(labels, values):
-                display = "n/a" if value is None else (f"{value / 1_000_000:.2f} ms" if "p" in label or label.startswith("Scene build") or label.startswith("CPU render") else str(value))
-                parts.append(f"<tr><th>{html.escape(label)}</th><td>{display}</td></tr>")
-            parts.append("</tbody></table></article>")
+                asset_path = validate_relative(asset, (".png",))
+                asset_url = html.escape(quote(asset_path, safe="/"), quote=True)
+                alt = html.escape(
+                    f"{label} {scenario.get('title', scenario_id)} / "
+                    f"{checkpoint.get('name', checkpoint_id)}",
+                    quote=True,
+                )
+                parts.extend([
+                    "      <figure>",
+                    f"        <figcaption>{label}</figcaption>",
+                    f'        <a href="{asset_url}"><img loading="lazy" src="{asset_url}" alt="{alt}"></a>',
+                    "      </figure>",
+                ])
+
+            parts.extend([
+                "    </div>",
+                "    <table>",
+                "      <caption>Checkpoint metrics</caption>",
+                "      <tbody>",
+            ])
+            values = checkpoint_metric_values(checkpoint, scenario.get("gpu_memory_bytes"))
+            for label, value in zip(METRIC_HEADERS, values):
+                parts.append(
+                    f"        <tr><th>{html.escape(label)}</th><td>{html.escape(value)}</td></tr>"
+                )
+            parts.extend(["      </tbody>", "    </table>", "  </article>"])
         parts.append("</section>")
-    parts.append("</main></body></html>")
-    return "".join(parts).encode()
+
+    parts.extend(["</main>", "</body>", "</html>"])
+    return "\n".join(parts).encode()
 
 
 def pages_index(reports: list[dict], page_url: str) -> bytes:
@@ -385,7 +509,11 @@ def validate_records(reports: list[dict]) -> list[dict]:
     safe_records = []
     seen = set()
     for record in reports:
+        if not isinstance(record, dict):
+            raise ValueError("invalid entry in report index")
         sha, pr = record.get("sha"), record.get("pr")
+        if isinstance(pr, int) and not isinstance(pr, bool):
+            pr = str(pr)
         if not isinstance(sha, str) or not SHA_RE.fullmatch(sha) or not isinstance(pr, str) or not pr.isdigit():
             raise ValueError("invalid entry in report index")
         if (sha, pr) in seen:

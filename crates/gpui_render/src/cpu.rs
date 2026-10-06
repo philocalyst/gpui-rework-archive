@@ -106,12 +106,12 @@ fn render_scene(
             gpui::RenderCommand::Batch(batch) => match batch {
                 gpui::PrimitiveBatch::Shadows { range, smoothed } => {
                     for item in &scene.shadows[range.clone()] {
-                        target.draw_shadow(item, *smoothed)?;
+                        target.draw_shadow(item, *smoothed);
                     }
                 }
                 gpui::PrimitiveBatch::Quads { range, smoothed } => {
                     for item in &scene.quads[range.clone()] {
-                        target.draw_quad(item, *smoothed)?;
+                        target.draw_quad(item, *smoothed);
                     }
                 }
                 gpui::PrimitiveBatch::Underlines(range) => {
@@ -160,9 +160,12 @@ fn render_scene(
                             SpriteKind::Poly {
                                 grayscale: item.grayscale == ShaderBool::Enabled,
                                 opacity: item.opacity,
-                                corner_radii: item.corner_radii,
-                                corner_smoothing: item.corner_smoothing,
-                                smoothed: *smoothed,
+                                shape: crate::shaders::host::RoundedRectShader::new(
+                                    item.bounds,
+                                    item.corner_radii,
+                                    item.corner_smoothing,
+                                    *smoothed,
+                                ),
                             },
                             atlas,
                             font,
@@ -170,7 +173,7 @@ fn render_scene(
                     }
                 }
                 gpui::PrimitiveBatch::Paths { range, .. } => {
-                    target.draw_paths(&scene.paths[range.clone()])?;
+                    target.draw_paths(&scene.paths[range.clone()]);
                 }
                 gpui::PrimitiveBatch::Surfaces(range) => {
                     if !range.is_empty() {
@@ -179,7 +182,7 @@ fn render_scene(
                 }
                 gpui::PrimitiveBatch::BackdropFilters(range) => {
                     for item in &scene.backdrop_filters[range.clone()] {
-                        target.backdrop_filter(item)?;
+                        target.backdrop_filter(item);
                     }
                 }
                 gpui::PrimitiveBatch::FilterBoundary(_) => {
@@ -212,9 +215,7 @@ fn render_scene(
                     frame.boundary.is_start && frame.render_target == *render_target,
                     "mismatched CPU filter command stream"
                 );
-                let child = target;
-                target = frame.parent;
-                let mut child = child;
+                let mut child = std::mem::replace(&mut target, frame.parent);
                 child.apply_filters(&frame.boundary.filters, frame.boundary.bounds);
                 target.composite_filtered(child, &frame.boundary);
             }

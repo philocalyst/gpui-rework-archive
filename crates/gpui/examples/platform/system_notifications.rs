@@ -9,7 +9,7 @@ mod example_support;
 
 use gpui::{
     App, AppContext as _, Context, Div, SharedString, Stateful, SystemNotification,
-    SystemNotificationAction, SystemNotificationResponse, Window, div, prelude::*, px, rgb,
+    SystemNotificationAction, SystemNotificationResponse, Window, div, prelude::*, rgb,
 };
 use gpui_platform::application;
 

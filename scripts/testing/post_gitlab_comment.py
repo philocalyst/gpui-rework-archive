@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import html
 import json
 import os
 from pathlib import Path
@@ -52,40 +51,19 @@ def main() -> int:
         return 0
 
     manifest, report_root = report.load_report(Path("visual-report"))
-    try:
-        changes, baseline_available = report.find_baseline(Path("visual-report"), manifest, report_root)
-    except (OSError, ValueError, json.JSONDecodeError) as error:
-        print(f"Could not read the baseline report; current captures will still be posted: {error}")
-        changes, baseline_available = [], False
+    changes, baseline_available = report.comparison_summary(manifest)
     body = [MARKER, f"## GPUI visual report · {head_sha[:12]}", "", f"[Open job report artifact]({artifact_url})", ""]
     if baseline_available:
         body.append("**Visual comparison:**")
-        pixel_keys = {detail.rsplit(" ", 1)[-1] for kind, detail in changes if kind == "pixels_changed"}
-        for kind, detail in changes:
-            label = {
-                "scenario_added": "Scenario added",
-                "scenario_removed": "Scenario removed",
-                "checkpoint_added": "Checkpoint added",
-                "checkpoint_removed": "Checkpoint removed",
-                "scenario_metadata_changed": "Viewport or scenario metadata changed",
-                "checkpoint_metadata_changed": "Checkpoint timeline changed",
-                "pixels_changed": "Pixels changed",
-                "scene_changed": "Scene and pixels changed" if detail.rsplit(" ", 1)[-1] in pixel_keys else "Scene-only change",
-            }.get(kind, "Changed")
-            body.append(f"- **{label}:** {report.markdown_text(detail)}")
+        for change in changes:
+            body.append(
+                f"- **{change['label']}:** {report.markdown_text(change['subject'])} — {report.markdown_text(change['detail'])}"
+            )
         if not changes:
             body.append("- No checkpoint, timeline, or pixel changes detected.")
     else:
         body.append("No baseline capture was available; current captures are shown without comparison diffs.")
-    body.extend(["", "| Scenario | Checkpoint | Scene build p50 | CPU render p50 | Frames | Primitives |", "|---|---|---:|---:|---:|---:|"])
-    for scenario in manifest["scenarios"]:
-        for checkpoint in scenario["checkpoints"]:
-            title = html.escape(str(scenario.get("title", scenario["id"])), quote=False).replace("|", "&#124;")
-            name = html.escape(str(checkpoint.get("name", checkpoint["id"])), quote=False).replace("|", "&#124;")
-            build = report.metric(checkpoint, "scene_build_p50_ns")
-            render = report.metric(checkpoint, "cpu_render_p50_ns")
-            frames, primitives = report.metric(checkpoint, "frame_count"), report.metric(checkpoint, "primitive_count")
-            body.append(f"| {title} | {name} | {report.format_ms(build)} | {report.format_ms(render)} | {frames if frames is not None else 'n/a'} | {primitives if primitives is not None else 'n/a'} |")
+    body.extend(["", report.markdown_metrics_table(manifest)])
     text = "\n".join(body)
 
     if api("GET", endpoint, token).get("sha", "").lower() != head_sha:

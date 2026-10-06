@@ -27,20 +27,22 @@ jobs:
         id: run
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_ENTERPRISE_TOKEN: ${{ github.token }}
           RUN_ID: ${{ github.event.workflow_run.id }}
           REPOSITORY: ${{ github.repository }}
           GITHUB_API_URL: ${{ github.api_url }}
           GITHUB_SERVER_URL: ${{ github.server_url }}
         run: |
           set -euo pipefail
-          run_json="$(gh api "repos/$REPOSITORY/actions/runs/$RUN_ID")"
+          server_host="${GITHUB_SERVER_URL#*://}"
+          run_json="$(gh api --hostname "$server_host" "repos/$REPOSITORY/actions/runs/$RUN_ID")"
           pr_number="$(jq -r '.pull_requests[0].number // empty' <<<"$run_json")"
           head_sha="$(jq -r '.head_sha' <<<"$run_json")"
           if [[ -z "$pr_number" ]]; then
             echo "No associated pull request; no PR report is posted."
             exit 0
           fi
-          current_sha="$(gh api "repos/$REPOSITORY/pulls/$pr_number" --jq '.head.sha')"
+          current_sha="$(gh api --hostname "$server_host" "repos/$REPOSITORY/pulls/$pr_number" --jq '.head.sha')"
           if [[ "$current_sha" != "$head_sha" ]]; then
             echo "The pull request has moved since this run; its report is stale."
             exit 0

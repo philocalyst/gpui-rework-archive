@@ -4,7 +4,7 @@
 #![cfg_attr(target_family = "wasm", no_main)]
 
 use gpui::colors::Colors;
-use gpui::{App, Context, FocusHandle, KeyBinding, Window, actions, div, prelude::*, px};
+use gpui::{App, Context, FocusHandle, KeyBinding, Window, actions, div, prelude::*};
 
 #[path = "../shared/prelude.rs"]
 mod example_prelude;

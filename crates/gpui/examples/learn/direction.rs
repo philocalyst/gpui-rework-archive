@@ -1,7 +1,7 @@
 #[path = "../shared/prelude.rs"]
 mod example_prelude;
 
-use gpui::{App, AppContext as _, Context, LayoutDirection, Window, div, prelude::*, px, rgb};
+use gpui::{App, AppContext as _, Context, LayoutDirection, Window, div, prelude::*, rgb};
 use gpui_ce_elements::editable_text::{
     actions::{DEFAULT_INPUT_CONTEXT, default_bindings},
     text_input,

@@ -3,7 +3,7 @@
 #[path = "../shared/prelude.rs"]
 mod example_prelude;
 
-use gpui::App;
+use gpui::{App, AppContext as _};
 use gpui_test::gallery::AsyncTaskScenario;
 
 fn main() {

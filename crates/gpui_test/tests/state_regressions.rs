@@ -2,7 +2,8 @@ use anyhow::Result;
 use gpui::{App, AppContext as _, px, size};
 use gpui_test::{
     Harness, RenderedCheckpoint, RenderedScenario, RenderedSuite, ReportChangeKind, ReportOptions,
-    Scenario, ScenarioMetrics, Viewport, compare_reports, gallery::AnimationScenario, write_report,
+    Scenario, ScenarioMetrics, Viewport, compare_reports, compare_reports_selected,
+    gallery::AnimationScenario, write_report,
 };
 use std::time::Duration;
 
@@ -11,7 +12,7 @@ fn animation_scenario(id: &str, times_ms: &[u64]) -> Result<Scenario<AnimationSc
         id,
         "Repeated animation clock regression",
         size(px(320.0), px(220.0)),
-        |cx: &mut App| cx.new(|_| AnimationScenario),
+        |_, cx: &mut App| cx.new(|_| AnimationScenario),
     )?;
     for (index, milliseconds) in times_ms.iter().copied().enumerate() {
         scenario = scenario.checkpoint(
@@ -117,7 +118,7 @@ proptest::proptest! {
             "timeline-order-property",
             "Checkpoint timeline ordering",
             size(px(1.0), px(1.0)),
-            |cx: &mut App| cx.new(|_| AnimationScenario),
+            |_, cx: &mut App| cx.new(|_| AnimationScenario),
         ).unwrap();
         for (index, milliseconds) in times.into_iter().enumerate() {
             scenario = scenario.checkpoint(
@@ -134,8 +135,21 @@ proptest::proptest! {
 fn report_comparison_reports_removed_checkpoints() -> Result<()> {
     use gpui::Scene;
 
-    fn empty_checkpoint(id: &str, time_ns: u64) -> Result<RenderedCheckpoint> {
+    fn fixture_checkpoint(id: &str, time_ns: u64) -> Result<RenderedCheckpoint> {
         let mut scene = Scene::default();
+        // Fractional geometry catches f32 widening during saved-JSON comparisons.
+        let bounds = gpui::Bounds::new(
+            gpui::point(gpui::ScaledPixels(0.1), gpui::ScaledPixels(0.3)),
+            size(gpui::ScaledPixels(0.8), gpui::ScaledPixels(0.6)),
+        );
+        scene.insert_primitive(gpui::Quad {
+            bounds,
+            content_mask: gpui::ContentMask {
+                bounds,
+                ..Default::default()
+            },
+            ..Default::default()
+        });
         scene.finish();
         let capture = gpui::SceneCapture::capture(&scene, |_| {
             anyhow::bail!("empty scene has no atlas tiles")
@@ -154,8 +168,8 @@ fn report_comparison_reports_removed_checkpoints() -> Result<()> {
                 cpu_render_p50_ns: 1,
                 cpu_render_p95_ns: 1,
                 cpu_render_p99_ns: 1,
-                primitive_count: 0,
-                batch_count: 0,
+                primitive_count: 1,
+                batch_count: 1,
                 bitmap_storage_bytes: 0,
             },
         })
@@ -178,13 +192,13 @@ fn report_comparison_reports_removed_checkpoints() -> Result<()> {
     }
 
     let mut old = suite(vec![
-        empty_checkpoint("t000", 0)?,
-        empty_checkpoint("t250", 250_000_000)?,
-        empty_checkpoint("t500", 500_000_000)?,
+        fixture_checkpoint("t000", 0)?,
+        fixture_checkpoint("t250", 250_000_000)?,
+        fixture_checkpoint("t500", 500_000_000)?,
     ]);
-    let current = suite(vec![
-        empty_checkpoint("t000", 0)?,
-        empty_checkpoint("t500", 500_000_000)?,
+    let mut current = suite(vec![
+        fixture_checkpoint("t000", 0)?,
+        fixture_checkpoint("t500", 500_000_000)?,
     ]);
     let root = std::env::temp_dir().join(format!("gpui-compare-checkpoint-{}", std::process::id()));
     let baseline_dir = root.join("baseline");
@@ -192,6 +206,9 @@ fn report_comparison_reports_removed_checkpoints() -> Result<()> {
     let mut unrelated = old.scenarios[0].clone();
     unrelated.id = "unrelated".into();
     old.scenarios.push(unrelated);
+    let mut added = current.scenarios[0].clone();
+    added.id = "unrelated-new".into();
+    current.scenarios.push(added);
     let _ = std::fs::remove_dir_all(&root);
     let baseline = write_report(&old, &baseline_dir, ReportOptions::default())?;
     assert_eq!(baseline.environment.font_pack, "test-fixture");
@@ -208,8 +225,22 @@ fn report_comparison_reports_removed_checkpoints() -> Result<()> {
             .changes
             .iter()
             .all(|change| change.scenario_id == "animation"),
-        "unselected baseline cases must not appear as removed: {:?}",
+        "unselected additions and removals must be excluded: {:?}",
         selected.changes
+    );
+    let selected_changes =
+        compare_reports_selected(&baseline_dir, &current_dir, &["animation".into()])?;
+    assert_eq!(
+        selected.changes.len(),
+        1,
+        "unchanged fractional geometry must not produce spurious scene differences"
+    );
+    assert_eq!(selected_changes.len(), 1);
+    assert!(
+        selected_changes
+            .iter()
+            .all(|change| change.scenario_id == "animation"),
+        "saved report comparisons must honor the same selection: {selected_changes:?}"
     );
 
     let changes = compare_reports(&baseline_dir, &current_dir)?;
@@ -264,7 +295,7 @@ fn wrapped_parley_text_keeps_colored_wavy_underlines_on_multiple_lines() -> Resu
         "multiline-underlines",
         "Multiline colored underlines",
         size(px(120.0), px(160.0)),
-        |cx: &mut App| cx.new(|_| MultilineUnderlineScenario),
+        |_, cx: &mut App| cx.new(|_| MultilineUnderlineScenario),
     )?
     .checkpoint("default", "Wrapped text", Duration::ZERO)?;
     let rendered = Harness::new().timing_samples(1)?.run(&scenario)?;
