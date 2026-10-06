@@ -2,6 +2,8 @@
 //! `GPUI_HERO_PNG` to a path prefix to save the frames.
 #![cfg(feature = "test-support")]
 
+mod support;
+
 #[path = "../examples/vercel_hero/hero/mod.rs"]
 #[allow(dead_code)]
 mod hero;
@@ -12,7 +14,7 @@ use gpui::{
     AppContext, Context, HeadlessAppContext, IntoElement, Render, Styled, Window, div, px,
     shader::{Input, vec2f},
 };
-use gpui_ce_wgpu::{CosmicTextSystem, WgpuHeadlessRenderer};
+use gpui_ce_wgpu::WgpuHeadlessRenderer;
 use image::RgbaImage;
 
 const WIDTH: f32 = 1280.0;
@@ -27,15 +29,11 @@ impl Render for Prism {
 }
 
 fn render_at(x: f32, y: f32) -> RgbaImage {
-    let mut cx = HeadlessAppContext::with_platform(
-        Arc::new(CosmicTextSystem::new("sans-serif")),
-        Arc::new(()),
-        || {
-            Some(Box::new(
-                WgpuHeadlessRenderer::new().expect("a GPU adapter"),
-            ))
-        },
-    );
+    let mut cx = HeadlessAppContext::with_platform(support::text_system(), Arc::new(()), || {
+        Some(Box::new(
+            WgpuHeadlessRenderer::new().expect("a GPU adapter"),
+        ))
+    });
     let window = cx
         .open_window(gpui::size(px(WIDTH), px(HEIGHT)), |_, cx| {
             cx.new(|_| {
