@@ -1,0 +1,468 @@
+use super::*;
+use crate::{hsla, rgb};
+
+fn fragment(uv: [f32; 2], size: [f32; 2]) -> Fragment {
+    Fragment {
+        uv: vec2f(uv[0], uv[1]),
+        position: vec2f(uv[0] * size[0], uv[1] * size[1]),
+        size: vec2f(size[0], size[1]),
+        origin: vec2f(0.0, 0.0),
+        scale: 1.0,
+    }
+}
+
+fn waves(phase: f32) -> Paint {
+    paint(|px| {
+        let wave = (px.uv().x() * 12.0 + phase).sin() * 0.5 + 0.5;
+        color(rgb(0x315bff)).mix(color(rgb(0xf48bcb)), wave)
+    })
+}
+
+#[test]
+fn rebuilding_with_new_numbers_reuses_the_program() {
+    let a = waves(0.0).compile().unwrap();
+    let b = waves(1.5).compile().unwrap();
+    assert_eq!(a.program.id(), b.program.id());
+    assert_ne!(a.params, b.params);
+    assert_ne!(a, b);
+    assert_eq!(a, waves(0.0).compile().unwrap());
+}
+
+#[test]
+fn uniform_subtrees_fold_on_the_cpu() {
+    let folded = color(rgb(0xff0000))
+        .mix(color(rgb(0x0000ff)), 0.25)
+        .opacity(0.5);
+    let solid = color(rgb(0x00ff00));
+    let folded_compiled = folded.compile().unwrap();
+    // Folding leaves only the parameter read, so both share one program.
+    assert_eq!(
+        folded_compiled.program.id(),
+        solid.compile().unwrap().program.id()
+    );
+    assert_eq!(folded_compiled.program.parameter_slots(), 1);
+    let [r, g, b, a] = folded_compiled.params[0];
+    assert!((a - 0.5).abs() < 1e-6, "alpha {a}");
+    assert!((r - 0.375).abs() < 1e-6 && g.abs() < 1e-6 && (b - 0.125).abs() < 1e-6);
+}
+
+#[test]
+fn shared_uniforms_share_a_slot_and_independent_ones_do_not() {
+    let shared = Scalar::uniform(2.0);
+    let one = paint(|px| rgba(px.uv().x() * &shared + &shared, 0.0, 0.0, 1.0));
+    let two = paint(|px| rgba(px.uv().x() * 2.0 + 2.0, 0.0, 0.0, 1.0));
+    let one = one.compile().unwrap();
+    let two = two.compile().unwrap();
+    assert_ne!(one.program.id(), two.program.id());
+    assert_eq!(one.params[0][..1], [2.0]);
+    assert_eq!(two.params[0][..2], [2.0, 2.0]);
+}
+
+#[test]
+fn constants_are_embedded_and_uniforms_are_not() {
+    let embedded = paint(|px| rgba(px.uv().x() * constant(3.0), 0.0, 0.0, 1.0));
+    let uniform = paint(|px| rgba(px.uv().x() * 3.0, 0.0, 0.0, 1.0));
+    let embedded = embedded.compile().unwrap();
+    assert!(embedded.program.source().contains("3.0"));
+    assert!(uniform.compile().unwrap().params[0][0] == 3.0);
+}
+
+#[test]
+fn map_uv_evaluates_its_paint_at_mapped_coordinates() {
+    let ramp = paint(|px| rgba(px.uv().x(), px.position().y() / 100.0, 0.0, 1.0));
+    let mirrored = ramp.map_uv(|uv| vec2(1.0 - uv.x(), uv.y() * 0.5));
+    let compiled = mirrored.compile().unwrap();
+    assert!(compiled.program.source().contains("fn paint_program_1("));
+
+    let at = fragment([0.25, 0.5], [100.0, 100.0]);
+    let rgba = mirrored.evaluate(at).unwrap();
+    assert!((rgba.x - 0.75).abs() < 1e-6);
+    assert!((rgba.y - 0.25).abs() < 1e-6);
+    // The original paint is unchanged.
+    assert!((ramp.evaluate(at).unwrap().x - 0.25).abs() < 1e-6);
+}
+
+#[test]
+fn shared_mapped_paints_lower_once_per_context() {
+    let mut layer = paint(|px| rgba(px.uv().x(), px.uv().y(), 0.0, 1.0));
+    for _ in 0..40 {
+        // Each level uses the previous one twice, under two mappings.
+        layer = layer
+            .map_uv(|uv| uv * 0.5)
+            .mix(layer.map_uv(|uv| uv * 0.5 + 0.5), 0.5);
+    }
+    let compiled = layer.compile().unwrap();
+    assert!(compiled.program.source().len() < 64 * 1024);
+}
+
+#[test]
+fn channels_and_select_compose() {
+    let base = paint(|px| rgba(px.uv().x(), 0.5, 0.25, 0.5));
+    let picked = paint(|px| {
+        let left = px.uv().x().lt(0.5);
+        rgba(
+            left.select(base.red(), base.blue()),
+            base.green(),
+            0.0,
+            base.alpha(),
+        )
+    });
+    let rgba = picked
+        .evaluate(fragment([0.75, 0.0], [10.0, 10.0]))
+        .unwrap();
+    assert!((rgba.x - 0.25 * 0.5).abs() < 1e-6);
+    picked.compile().unwrap();
+}
+
+#[test]
+fn non_finite_values_are_rejected() {
+    let paint = paint(|px| rgba(px.uv().x() * f32::NAN, 0.0, 0.0, 1.0));
+    assert_eq!(paint.compile().unwrap_err(), ShaderError::NonFinite);
+}
+
+#[test]
+fn excessive_depth_is_rejected_without_overflowing() {
+    let mut value = Pixel.uv().x();
+    for _ in 0..100_000 {
+        value = value + 1.0;
+    }
+    let paint = rgba(value, 0.0, 0.0, 1.0);
+    assert_eq!(paint.compile().unwrap_err(), ShaderError::TooDeep);
+}
+
+#[test]
+fn foreign_wgsl_is_namespaced_and_typed() {
+    let a = Function::<fn(Vec2f) -> f32>::wgsl(
+        "fn over(p: vec2<f32>) -> f32 { return p.x * 2.0; }",
+        "over",
+    )
+    .unwrap();
+    let b = Function::<fn(Vec2f) -> f32>::wgsl(
+        "fn over(p: vec2<f32>) -> f32 { return Color_over(vec4f(p, 0.0, 1.0), vec4f(0.0)).y; }",
+        "over",
+    )
+    .unwrap();
+    let paint = paint(|px| rgba(a.call(px.uv()), b.call(px.uv()), 0.0, 1.0));
+    let compiled = paint.compile().unwrap();
+    let source = compiled.program.source();
+    let prefixes: collections::FxHashSet<_> = source
+        .match_indices("_over(")
+        .map(|(at, _)| &source[source[..at].rfind([' ', '(']).unwrap() + 1..at])
+        .filter(|prefix| !prefix.ends_with("_Color"))
+        .collect();
+    assert_eq!(prefixes.len(), 2, "both sources keep their own `over`");
+
+    let wrong = Function::<fn(f32) -> f32>::wgsl("fn f(p: vec2<f32>) -> f32 { return p.x; }", "f");
+    assert!(matches!(wrong, Err(ShaderError::Source(_))));
+    assert!(Library::wgsl("@group(0) @binding(0) var<uniform> x: f32;").is_err());
+}
+
+#[test]
+fn glsl_functions_compose() {
+    let ripple = Function::<fn(Vec2f, f32) -> f32>::glsl(
+        "float ripple(vec2 uv, float t) { return sin(length(uv) * 20.0 - t) * 0.5 + 0.5; }",
+        "ripple",
+    )
+    .unwrap();
+    let paint = paint(|px| color(hsla(0.6, 0.8, 0.5, 1.0)).mask(ripple.call((px.uv(), 2.0))));
+    paint.compile().unwrap();
+}
+
+#[allow(missing_docs)]
+#[wgsl_rs::wgsl]
+pub mod effects {
+    use crate::shader::prelude::*;
+    use wgsl_rs::std::*;
+
+    pub fn stripes(fragment: Fragment, count: f32) -> Vec4f {
+        let band = step(0.5, fract(fragment.uv.x * count));
+        vec4f(band, band, band, 1.0)
+    }
+
+    pub fn double(x: f32) -> f32 {
+        x * 2.0
+    }
+}
+
+#[test]
+fn wgsl_modules_bring_their_cpu_twins() {
+    let double = crate::wgsl_fn!(effects::double).unwrap();
+    // Uniform arguments fold through the Rust implementation.
+    let folded = rgba(double.call(0.25), 0.0, 0.0, 1.0).compile().unwrap();
+    assert_eq!(folded.params[0][0], 0.5);
+    assert!(!folded.program.source().contains("double"));
+
+    let stripes = Shader::module(&effects::WGSL_SOURCE).err();
+    assert!(stripes.is_some(), "the module has no `paint` entry point");
+    let stripes = Library::module(&effects::WGSL_SOURCE)
+        .unwrap()
+        .shader("stripes")
+        .unwrap();
+    let paint = stripes.with(4.0).over(color(rgb(0x101318)));
+    paint.compile().unwrap();
+    // The same function runs on the CPU.
+    let band = effects::stripes(fragment([0.4, 0.0], [1.0, 1.0]), 4.0);
+    assert_eq!(band.x, 1.0);
+    assert!(stripes.with(Pixel.uv()).compile().is_err());
+}
+
+#[test]
+fn raw_shader_files_take_typed_parameters() {
+    let shader = Shader::wgsl(
+        "fn paint(fragment: Fragment, center: vec2<f32>, radius: f32) -> vec4<f32> {
+            let d = Shape_circle(fragment.position - center, radius);
+            return vec4<f32>(1.0, 0.5, 0.0, Shape_coverage(d, fwidth(d)));
+        }",
+    )
+    .unwrap();
+    let compiled = shader.with(([32.0, 32.0], 16.0)).compile().unwrap();
+    assert_eq!(compiled.params[0], [32.0, 32.0, 16.0, 0.0]);
+    assert!(shader.with(1.0).compile().is_err());
+}
+
+#[test]
+fn scalars_widen_across_vectors() {
+    let widened = paint(|px| {
+        let uv = (px.uv() * 2.0 - 0.5).clamp(0.0, 1.0);
+        let eased = uv.smoothstep(0.0, 1.0);
+        rgba(uv.x(), uv.y(), eased.x().max(0.25), 1.0)
+    });
+    let rgba = widened
+        .evaluate(fragment([0.6, 0.1], [10.0, 10.0]))
+        .unwrap();
+    let eased = 0.7 * 0.7 * (3.0 - 2.0 * 0.7);
+    assert!((rgba.x - 0.7).abs() < 1e-6 && rgba.y == 0.0);
+    assert!((rgba.z - eased).abs() < 1e-6, "blue {}", rgba.z);
+    widened.compile().unwrap();
+}
+
+#[test]
+fn shapes_clip_paints_and_fall_back_with_hard_edges() {
+    let dot = paint(|px| {
+        let ring = shape::circle(px.centered(), 30.0).abs() - 4.0;
+        let blob = shape::smooth_union(ring, shape::circle(px.centered(), 8.0), 6.0);
+        color(rgb(0xff8800)).clip(blob)
+    });
+    let at = |uv| dot.evaluate(fragment(uv, [100.0, 100.0])).unwrap().w;
+    // Derivatives are zero on the CPU, so coverage is all or nothing.
+    assert_eq!(at([0.5, 0.5]), 1.0, "the core");
+    assert_eq!(at([0.5, 0.2]), 1.0, "on the ring");
+    assert_eq!(at([0.5, 0.35]), 0.0, "between ring and core");
+    assert_eq!(at([0.0, 0.0]), 0.0, "outside");
+    assert!(dot.compile().unwrap().program.source().contains("fwidth"));
+}
+
+#[test]
+fn triangles_point_up_with_their_corners_at_the_radius() {
+    let distance = |x: f32, y: f32| prelude::Shape::triangle(vec2f(x, y), 100.0);
+    assert!(distance(0.0, -100.0).abs() < 1e-3, "apex");
+    assert!(
+        (distance(0.0, 0.0) + 50.0).abs() < 1e-3,
+        "center, an inradius in"
+    );
+    assert!((distance(0.0, 60.0) - 10.0).abs() < 1e-3, "below the base");
+    assert!(distance(0.0, -110.0) > 9.9, "above the apex");
+}
+
+#[test]
+fn raymarched_spheres_hit_where_expected() {
+    let scene = |p: &Vec3| p.length() - 1.0;
+    let lit = paint(|px| {
+        let origin = Vec3::constant(vec3f(0.0, 0.0, -3.0));
+        let ray = (px.uv() - 0.5).extend(1.0).normalize();
+        let t = shape::raymarch(&origin, &ray, 10.0, 64, scene);
+        let normal = shape::normal(&(&origin + &ray * &t), scene);
+        rgba(t * 0.1, -normal.z(), 0.0, 1.0)
+    });
+    let center = lit.evaluate(fragment([0.5, 0.5], [1.0, 1.0])).unwrap();
+    assert!((center.x - 0.2).abs() < 1e-3, "two units to the surface");
+    assert!((center.y - 1.0).abs() < 1e-3, "facing the camera");
+    lit.compile().unwrap();
+}
+
+#[test]
+fn uniform_derivatives_fold_to_zero() {
+    let flat = rgba(Scalar::uniform(3.0).fwidth(), 0.0, 0.0, 1.0);
+    let compiled = flat.compile().unwrap();
+    assert_eq!(compiled.program.parameter_slots(), 1);
+    assert_eq!(compiled.params[0][0], 0.0);
+}
+
+#[test]
+fn noise_matches_its_rust_twin() {
+    let point = vec2f(3.25, -1.5);
+    let grain = paint(|px| rgba(noise::value(px.position()), noise::hash(px.uv()), 0.0, 1.0));
+    let rgba = grain
+        .evaluate(fragment([0.0325, -0.015], [100.0, 100.0]))
+        .unwrap();
+    assert_eq!(rgba.x, prelude::Noise::value(point));
+    grain.compile().unwrap();
+}
+
+#[test]
+fn paints_are_operands() {
+    let left = color(rgb(0xff0000));
+    let right = paint(|px| rgba(0.0, px.uv().y(), 1.0, 1.0));
+    let split = paint(|px| left.select(px.uv().x().lt(0.5), &right));
+    let tint = Function::<fn(Vec4f) -> Vec4f>::wgsl(
+        "fn tint(color: vec4<f32>) -> vec4<f32> { return color.bgra; }",
+        "tint",
+    )
+    .unwrap();
+    let swapped = Paint::premultiplied(tint.call(&split));
+    let at = |paint: &Paint, uv| paint.evaluate(fragment(uv, [10.0, 10.0]));
+    assert_eq!(at(&split, [0.25, 0.5]).unwrap(), vec4f(1.0, 0.0, 0.0, 1.0));
+    assert_eq!(at(&split, [0.75, 0.5]).unwrap(), vec4f(0.0, 0.5, 1.0, 1.0));
+    // Foreign WGSL without a Rust twin only runs on the GPU.
+    assert!(at(&swapped, [0.25, 0.5]).is_none());
+    swapped.compile().unwrap();
+}
+
+#[test]
+fn rotation_turns_clockwise_on_screen() {
+    let turned = paint(|_| {
+        let v = Vec2::uniform(vec2f(1.0, 0.0)).rotate(std::f32::consts::FRAC_PI_2);
+        rgba(v.x(), v.y(), 0.0, 1.0)
+    });
+    let rgba = turned.evaluate(fragment([0.0, 0.0], [1.0, 1.0])).unwrap();
+    assert!(rgba.x.abs() < 1e-6 && (rgba.y - 1.0).abs() < 1e-6);
+    // Entirely uniform, so it folds to one parameter.
+    assert_eq!(turned.compile().unwrap().program.parameter_slots(), 1);
+}
+
+/// A unit sphere seen from z = -3, lit from the upper left.
+fn sphere() -> Paint {
+    paint(|px| {
+        let scene = |p: &Vec3| p.length() - 1.0;
+        let uv = (px.uv() - 0.5) * 2.0;
+        let origin = Vec3::uniform(vec3f(0.0, 0.0, -3.0));
+        let ray = uv.extend(1.5).normalize();
+        let distance = iterate_until(
+            64,
+            0.0,
+            |t| scene(&(&origin + &ray * t)).lt(0.001),
+            |t, _| {
+                let d = scene(&(&origin + &ray * &t));
+                t + d
+            },
+        );
+        let hit = &origin + &ray * &distance;
+        let shade = hit
+            .normalize()
+            .dot(vec3(-0.5, -0.5, -0.7).normalize())
+            .max(0.0);
+        let inside = distance.lt(10.0);
+        color(rgb(0xffffff))
+            .mask(shade)
+            .select(inside, color(rgb(0x000000)))
+    })
+}
+
+#[test]
+fn loops_run_per_fragment_and_on_the_cpu() {
+    let sphere = sphere();
+    let compiled = sphere.compile().unwrap();
+    let source = compiled.program.source();
+    assert_eq!(source.matches("for (var").count(), 1, "{source}");
+    assert!(source.contains("break;"));
+
+    let at = |uv| sphere.evaluate(fragment(uv, [100.0, 100.0])).unwrap();
+    assert!(at([0.4, 0.4]).x > 0.5, "lit side");
+    assert_eq!(at([0.02, 0.02]).x, 0.0, "background");
+
+    // Uniform loops fold to their result.
+    let sum = iterate(4, 0.0, |total, index| total + index);
+    let folded = rgba(sum, 0.0, 0.0, 1.0).compile().unwrap();
+    assert_eq!(folded.params[0][0], 6.0);
+    assert!(!folded.program.source().contains("for"));
+}
+
+#[test]
+fn loop_invariants_are_hoisted_and_loops_nest() {
+    let rings = paint(|px| {
+        let spin = (px.uv().x() * 7.0).sin();
+        let total = iterate(3, 0.0, |outer, i| {
+            let inner = iterate(4, 0.0, |acc, j| acc + &spin * (&i + j));
+            outer + inner
+        });
+        rgba(total * 0.01, 0.0, 0.0, 1.0)
+    });
+    let source = rings.compile().unwrap().program.source().to_owned();
+    assert_eq!(source.matches("for (var").count(), 2);
+    // `spin` depends on neither loop, so it is computed before both.
+    let sin = source.find("sin(").unwrap();
+    assert!(sin < source.find("for (var").unwrap(), "{source}");
+
+    let at = rings.evaluate(fragment([0.25, 0.0], [1.0, 1.0])).unwrap();
+    let spin = (0.25f32 * 7.0).sin();
+    let expected: f32 = (0..3)
+        .flat_map(|i| (0..4).map(move |j| spin * (i + j) as f32))
+        .sum();
+    assert!((at.x - expected * 0.01).abs() < 1e-5);
+
+    let leaked = std::cell::RefCell::new(None);
+    let _ = iterate(2, 0.0, |state, _| {
+        leaked.replace(Some(state.clone()));
+        state
+    });
+    let leaked = leaked.into_inner().unwrap();
+    assert!(rgba(leaked, 0.0, 0.0, 1.0).compile().is_err());
+}
+
+#[test]
+fn backdrop_paints_are_flagged() {
+    let glass = paint(|px| {
+        let bend = (px.uv().y() * 18.0).sin() * 0.01;
+        px.backdrop(px.uv() + vec2(bend, 0.0))
+            .mix(color(rgb(0xffffff)), 0.08)
+    });
+    let compiled = glass.compile().unwrap();
+    assert!(compiled.program.uses_backdrop());
+    assert!(glass.evaluate(fragment([0.5, 0.5], [1.0, 1.0])).is_none());
+    assert!(!waves(0.0).compile().unwrap().program.uses_backdrop());
+}
+
+#[test]
+fn print_generated_program() {
+    let glass = paint(|px| {
+        let bend = (px.uv().y() * 18.0).sin() * 0.01;
+        px.backdrop(px.uv() + vec2(bend, 0.0))
+            .mix(color(rgb(0xffffff)), 0.08)
+            .over(waves(1.0).map_uv(|uv| uv.yx()))
+    });
+    eprintln!("{}", glass.compile().unwrap().program.source());
+}
+
+const SPARK: &str = "
+struct Varyings { position: vec2<f32>, local: vec2<f32> }
+
+fn vertex(index: u32, center: vec2<f32>, radius: f32, tint: vec4<f32>) -> Varyings {
+    let corner = vec2<f32>(f32(index & 1u), f32(index >> 1u)) * 2.0 - 1.0;
+    return Varyings(center + corner * radius, corner);
+}
+
+fn fragment(in: Varyings, center: vec2<f32>, radius: f32, tint: vec4<f32>) -> vec4<f32> {
+    let distance = length(in.local) - 1.0;
+    return vec4<f32>(tint.rgb, tint.a * Shape_coverage(distance, fwidth(distance)));
+}
+";
+
+#[test]
+fn pipelines_generate_their_plumbing_and_pack_instances() {
+    let pipeline = Pipeline::wgsl(SPARK).unwrap();
+    assert!(pipeline.source().contains("@vertex"));
+    assert_eq!(pipeline.instance_slots(), 2);
+    let (packed, count) = pipeline
+        .pack([
+            ([10.0, 20.0], 4.0, [1.0, 0.5, 0.0, 1.0]),
+            ([30.0, 40.0], 8.0, [0.0, 0.5, 1.0, 0.5]),
+        ])
+        .unwrap();
+    assert_eq!(count, 2);
+    assert_eq!(packed[0], [10.0, 20.0, 4.0, 0.0]);
+    assert_eq!(packed[3], [0.0, 0.5, 1.0, 0.5]);
+    assert!(pipeline.pack([(1.0,)]).is_err());
+
+    let missing = Pipeline::wgsl("fn vertex(index: u32) -> vec2<f32> { return vec2<f32>(0.0); }");
+    assert!(missing.is_err());
+}
