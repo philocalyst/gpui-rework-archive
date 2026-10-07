@@ -44,7 +44,7 @@ pub(super) fn render_with_links(report: &ImpactReport, concise: bool, prefix: &s
             report.run.exercised_downstreams, report.run.execution.minimum_exercised
         );
     }
-    if !report.gate.log.is_empty() {
+    if !report.gate.log.trim().is_empty() {
         output.push_str("<details>\n<summary>API comparison evidence</summary>\n\n");
         fenced(
             &mut output,

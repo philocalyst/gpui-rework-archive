@@ -65,7 +65,7 @@ pub(super) fn render(report: &ImpactReport) -> String {
             );
         }
     }
-    if !report.gate.log.is_empty() {
+    if !report.gate.log.trim().is_empty() {
         let _ = write!(
             output,
             "<details><summary>API comparison evidence</summary><pre>{}</pre></details>",
