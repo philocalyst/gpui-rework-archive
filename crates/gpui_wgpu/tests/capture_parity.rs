@@ -131,7 +131,7 @@ fn capture(scene: &Scene, mono: u8, poly_bgra: [u8; 4]) -> Result<SceneCapture> 
 
 fn cpu_image(capture: &SceneCapture) -> Result<image::RgbaImage> {
     let mut cpu = CpuRenderer::from_captured_bitmaps(capture.bitmaps())?;
-    Ok(cpu.render_scene_to_image(&capture.to_scene()?, SIZE)?)
+    cpu.render_scene_to_image(&capture.to_scene()?, SIZE)
 }
 
 fn near_pixel(
@@ -287,14 +287,14 @@ fn rotated_sprite_capture(content_mask: Bounds<ScaledPixels>) -> Result<SceneCap
         "rotated sprite fixture must survive transformed screen-space culling"
     );
     scene.finish();
-    Ok(SceneCapture::capture(&scene, |_| {
+    SceneCapture::capture(&scene, |_| {
         Ok(CapturedBitmap {
             kind: AtlasTextureKind::Monochrome,
             width: 3,
             height: 2,
             bytes: vec![255, 0, 255, 0, 255, 0],
         })
-    })?)
+    })
 }
 
 #[test]
