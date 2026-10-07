@@ -4,8 +4,8 @@ use anyhow::{Result, bail};
 use gpui::{
     AtlasTextureId, AtlasTextureKind, AtlasTile, Bounds, CapturedBitmap, ContentMask, DevicePixels,
     FilterBoundary, MonochromeSprite, PathBuilder, PlatformHeadlessRenderer, PolychromeSprite,
-    Quad, ScaledFilter, ScaledPixels, Scene, SceneCapture, ShaderBool, Size, TileId, point, px,
-    size, solid_background,
+    Quad, ScaledFilter, ScaledPixels, Scene, SceneCapture, ShaderBool, Shadow, Size, TileId, point,
+    px, size, solid_background,
 };
 use gpui_ce_wgpu::{WgpuContext, WgpuHeadlessRenderer};
 use gpui_render::cpu::CpuRenderer;
@@ -75,6 +75,40 @@ fn probe_scene() -> Scene {
         corner_radii: Default::default(),
         tile: tile(AtlasTextureKind::Polychrome, 91, 20),
     });
+    scene.finish();
+    scene
+}
+
+fn over_capacity_scene() -> Scene {
+    let full = bounds(0.0, 0.0, 16.0, 14.0);
+    let mut scene = Scene::default();
+    for index in 0..2048 {
+        let x = (index % 64) as f32 * 0.25;
+        let y = (index / 64) as f32 * 0.25;
+        let primitive_bounds = bounds(x, y, 0.2, 0.2);
+        scene.raise_order_floor();
+        if index % 2 == 0 {
+            scene.insert_primitive(Quad {
+                bounds: primitive_bounds,
+                content_mask: mask(full),
+                background: solid_background(gpui::hsla(0.0, 0.0, 1.0, 1.0)),
+                ..Default::default()
+            });
+        } else {
+            scene.insert_primitive(Shadow {
+                order: Default::default(),
+                blur_radius: ScaledPixels(0.0),
+                bounds: primitive_bounds,
+                corner_radii: Default::default(),
+                content_mask: mask(full),
+                color: solid_background(gpui::hsla(0.0, 0.0, 0.0, 0.5)),
+                element_bounds: primitive_bounds,
+                element_corner_radii: Default::default(),
+                inset: ShaderBool::Disabled,
+                corner_smoothing: 0.0,
+            });
+        }
+    }
     scene.finish();
     scene
 }
@@ -334,6 +368,45 @@ fn render_pass_timestamps_are_ordered_and_within_wall_time() -> Result<()> {
             );
         }
     }
+    Ok(())
+}
+
+#[test]
+fn timestamp_query_capacity_overflow_disables_only_optional_telemetry() -> Result<()> {
+    if std::env::var("GPUI_REQUIRE_GPU").as_deref() != Ok("1") {
+        eprintln!("skipping native capacity check; set GPUI_REQUIRE_GPU=1 to require a GPU");
+        return Ok(());
+    }
+
+    let scene = over_capacity_scene();
+    assert!(
+        scene.render_commands().len() >= 2048,
+        "alternating primitive batches produced only {} commands",
+        scene.render_commands().len()
+    );
+    let mut renderer = WgpuHeadlessRenderer::new_with_measurements()?;
+    assert_timestamp_capability(&renderer)?;
+
+    let measurement = renderer.render_scene_measured(&scene, SIZE)?;
+    assert!(measurement.encode_submit_completion > std::time::Duration::ZERO);
+    assert_eq!(measurement.gpu_execution, None);
+    assert_eq!(measurement.gpu_timestamp_resolution, None);
+    let replay = renderer
+        .replay_info()
+        .expect("adapter metadata is retained");
+    assert!(!replay.gpu_timestamps_available);
+    let reason = replay
+        .gpu_timestamps_unavailable_reason
+        .as_deref()
+        .expect("capacity fallback reports a reason");
+    assert!(
+        reason.contains("scene exceeds available query capacity"),
+        "{reason}"
+    );
+    assert!(reason.contains("4096"), "{reason}");
+
+    let image = renderer.render_scene_to_image(&scene, SIZE)?;
+    assert!(image.pixels().any(|pixel| pixel[3] > 0));
     Ok(())
 }
 

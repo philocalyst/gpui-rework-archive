@@ -158,16 +158,15 @@ pub struct GpuReplayInfo {
     pub device_type: String,
     /// Whether render-pass timestamp queries remain enabled and have returned valid data.
     pub gpu_timestamps_available: bool,
-    /// Why timestamps are unavailable or were disabled after invalid query data.
+    /// Why timestamps are unavailable or were disabled after invalid data or capacity limits.
     pub gpu_timestamps_unavailable_reason: Option<String>,
 }
 
 impl GpuReplayInfo {
     fn disable_timestamps(&mut self, error: impl std::fmt::Display) {
         self.gpu_timestamps_available = false;
-        self.gpu_timestamps_unavailable_reason = Some(format!(
-            "GPU timestamp telemetry disabled after invalid query data: {error}"
-        ));
+        self.gpu_timestamps_unavailable_reason =
+            Some(format!("GPU timestamp telemetry disabled: {error}"));
     }
 }
 
@@ -377,11 +376,14 @@ impl WgpuHeadlessRenderer {
     ) -> anyhow::Result<GpuFrameMeasurement> {
         self.ensure_target(size)?;
         if let Some(resources) = &mut self.timestamp_resources {
-            resources.ensure_capacity(
-                &self.renderer.resources().device,
-                super::frame::timestamp_query_capacity(scene)?,
-            )?;
-            resources.reset();
+            match super::frame::timestamp_query_capacity(scene).and_then(|capacity| {
+                resources.ensure_capacity(&self.renderer.resources().device, capacity)
+            }) {
+                Ok(()) => resources.reset(),
+                Err(error) => self.disable_timestamp_measurement(format!(
+                    "scene exceeds available query capacity: {error:#}"
+                )),
+            }
         }
         let target = self.target.as_ref().expect("target was just ensured");
         let started = Instant::now();
@@ -422,7 +424,7 @@ impl WgpuHeadlessRenderer {
         let gpu_execution = match timestamp_result {
             Ok(duration) => duration.flatten(),
             Err(error) => {
-                self.disable_timestamp_measurement(format!("{error:#}"));
+                self.disable_timestamp_measurement(format!("invalid query data: {error:#}"));
                 None
             }
         };
@@ -769,13 +771,13 @@ mod tests {
             gpu_timestamps_available: true,
             gpu_timestamps_unavailable_reason: None,
         };
-        info.disable_timestamps("GPU timestamp pass 0: end precedes start");
+        info.disable_timestamps("invalid query data: GPU timestamp pass 0: end precedes start");
 
         assert!(!info.gpu_timestamps_available);
         assert_eq!(
             info.gpu_timestamps_unavailable_reason.as_deref(),
             Some(
-                "GPU timestamp telemetry disabled after invalid query data: GPU timestamp pass 0: end precedes start"
+                "GPU timestamp telemetry disabled: invalid query data: GPU timestamp pass 0: end precedes start"
             )
         );
     }
