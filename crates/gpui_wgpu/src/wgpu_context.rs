@@ -508,8 +508,7 @@ impl WgpuContext {
                 .map_err(|error| {
                     anyhow::anyhow!("failed to request headless GPU adapter: {error}")
                 })?;
-            let timestamp_feature =
-                wgpu::Features::TIMESTAMP_QUERY | wgpu::Features::TIMESTAMP_QUERY_INSIDE_ENCODERS;
+            let timestamp_feature = wgpu::Features::TIMESTAMP_QUERY;
             let timestamps_requested =
                 request_optional_timestamps && adapter.features().contains(timestamp_feature);
             let mut requirements = extra_requirements.cloned();
@@ -528,7 +527,7 @@ impl WgpuContext {
         })
     }
 
-    /// Creates a headless context and enables encoder timestamps only when advertised by the
+    /// Creates a headless context and enables render-pass timestamps only when advertised by the
     /// selected adapter. Returns whether the feature was actually enabled on the device.
     #[cfg(not(target_family = "wasm"))]
     pub(crate) fn new_headless_with_optional_timestamps() -> anyhow::Result<(Self, bool)> {

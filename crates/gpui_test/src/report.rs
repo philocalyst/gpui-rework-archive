@@ -389,7 +389,7 @@ pub fn write_report(
                 .into_iter()
                 .collect::<Vec<_>>()
                 .join(", "),
-            git_sha: option_env!("GIT_SHA").map(str::to_owned),
+            git_sha: std::env::var("GIT_SHA").ok(),
         },
         native_replay: suite.native_replay.clone(),
         platform_checks: suite.platform_checks.clone(),

@@ -21,18 +21,6 @@ pub fn replay_native(suite: &mut RenderedSuite, samples: usize) -> Result<()> {
 
     let mut renderer = WgpuHeadlessRenderer::new_with_measurements()
         .context("initializing the optional headless WGPU renderer")?;
-    let adapter = renderer
-        .replay_info()
-        .context("WGPU renderer did not provide adapter metadata")?;
-    let timestamps_available = adapter.gpu_timestamps_available;
-    suite.native_replay = Some(NativeReplayInfo {
-        adapter: adapter.adapter_name.clone(),
-        driver: adapter.driver.clone(),
-        backend: adapter.backend.clone(),
-        device_type: adapter.device_type.clone(),
-        timestamp_reason: adapter.gpu_timestamps_unavailable_reason.clone(),
-    });
-
     for scenario in &mut suite.scenarios {
         let size = scenario.viewport.device_size()?;
         for checkpoint in &mut scenario.checkpoints {
@@ -55,11 +43,14 @@ pub fn replay_native(suite: &mut RenderedSuite, samples: usize) -> Result<()> {
                         .as_nanos()
                         .min(u64::MAX as u128) as u64,
                 );
-                ensure!(
-                    timestamps_available == measured.gpu_execution.is_some(),
-                    "native renderer timestamp metadata disagrees with measured sample"
-                );
                 if let Some(gpu) = measured.gpu_execution {
+                    let currently_available = renderer
+                        .replay_info()
+                        .is_some_and(|info| info.gpu_timestamps_available);
+                    ensure!(
+                        currently_available,
+                        "native renderer returned GPU timing while adapter timestamps are unavailable"
+                    );
                     gpu_samples.push(gpu.as_nanos().min(u64::MAX as u128) as u64);
                 }
             }
@@ -82,6 +73,8 @@ pub fn replay_native(suite: &mut RenderedSuite, samples: usize) -> Result<()> {
                     encode_submit_completion: TimingPercentiles::from_samples(
                         encode_submit_samples,
                     ),
+                    // A None value means timestamps are unsupported, or this frame had no
+                    // GPU work to measure (for example, a clear-only scene).
                     gpu: (!gpu_samples.is_empty())
                         .then(|| TimingPercentiles::from_samples(gpu_samples)),
                     tracked_owned_bytes: memory.measured_owned_bytes,
@@ -93,6 +86,30 @@ pub fn replay_native(suite: &mut RenderedSuite, samples: usize) -> Result<()> {
             });
         }
     }
+
+    let final_adapter = renderer
+        .replay_info()
+        .context("WGPU renderer did not provide final adapter metadata")?;
+    if !final_adapter.gpu_timestamps_available {
+        // A malformed timestamp read disables the capability on the renderer. Discard
+        // earlier timings too, so the report never mixes valid and degraded samples.
+        for checkpoint in suite
+            .scenarios
+            .iter_mut()
+            .flat_map(|scenario| &mut scenario.checkpoints)
+        {
+            if let Some(native) = &mut checkpoint.native {
+                native.metrics.gpu = None;
+            }
+        }
+    }
+    suite.native_replay = Some(NativeReplayInfo {
+        adapter: final_adapter.adapter_name.clone(),
+        driver: final_adapter.driver.clone(),
+        backend: final_adapter.backend.clone(),
+        device_type: final_adapter.device_type.clone(),
+        timestamp_reason: final_adapter.gpu_timestamps_unavailable_reason.clone(),
+    });
     Ok(())
 }
 

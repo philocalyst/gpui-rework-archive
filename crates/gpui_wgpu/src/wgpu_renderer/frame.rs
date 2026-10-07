@@ -13,6 +13,7 @@ use gpui_render::shaders::{
     common::{FontRasterizationUniforms, GlobalUniforms, ShaderBool},
     interface as shader_interface,
 };
+use std::cell::Cell;
 
 pub(super) fn render_to_view(
     renderer: &mut WgpuRenderer,
@@ -51,10 +52,40 @@ pub(super) fn render_to_view_measured(
     }
 }
 
+#[derive(Clone, Copy)]
 pub(super) struct TimestampCapture<'a> {
     pub(super) query_set: &'a wgpu::QuerySet,
     pub(super) resolve_buffer: &'a wgpu::Buffer,
     pub(super) readback_buffer: &'a wgpu::Buffer,
+    pub(super) next_query: &'a Cell<u32>,
+    pub(super) query_capacity: u32,
+}
+
+impl<'a> TimestampCapture<'a> {
+    pub(super) fn pass_writes(self) -> wgpu::RenderPassTimestampWrites<'a> {
+        let start = self.next_query.get();
+        let end = start
+            .checked_add(1)
+            .expect("GPU timestamp query index overflowed");
+        let next = end
+            .checked_add(1)
+            .expect("GPU timestamp query count overflowed");
+        assert!(
+            next <= self.query_capacity,
+            "GPU timestamp query capacity estimate was too small: need {next}, capacity {}",
+            self.query_capacity
+        );
+        self.next_query.set(next);
+        wgpu::RenderPassTimestampWrites {
+            query_set: self.query_set,
+            beginning_of_pass_write_index: Some(start),
+            end_of_pass_write_index: Some(end),
+        }
+    }
+
+    pub(super) fn query_count(self) -> u32 {
+        self.next_query.get()
+    }
 }
 
 pub(super) struct ReadbackCopy<'a> {
@@ -244,6 +275,40 @@ pub(super) struct FrameRequirements {
     uses_offscreen_target: bool,
 }
 
+pub(super) fn timestamp_query_capacity(scene: &Scene) -> anyhow::Result<u32> {
+    let requirements = scene.render_plan().requirements();
+    let commands = u64::try_from(requirements.command_count)
+        .map_err(|_| anyhow::anyhow!("scene command count exceeds GPU timestamp limits"))?;
+    let backdrop_filters = u64::try_from(requirements.backdrop_filter_count)
+        .map_err(|_| anyhow::anyhow!("scene filter count exceeds GPU timestamp limits"))?;
+    let isolated_filters = u64::try_from(requirements.isolated_filter_count)
+        .map_err(|_| anyhow::anyhow!("scene filter count exceeds GPU timestamp limits"))?;
+    let filters = backdrop_filters
+        .checked_add(isolated_filters)
+        .ok_or_else(|| anyhow::anyhow!("scene filter count exceeds GPU timestamp limits"))?;
+    let offscreen_blit = u64::from(requirements.uses_offscreen_target);
+    // Each command may break one paint pass, every path batch adds one raster pass, and each
+    // filter composite can use downsample, horizontal, vertical, and composite passes.
+    let pass_count = commands
+        .checked_mul(2)
+        .and_then(|count| count.checked_add(1))
+        .and_then(|count| count.checked_add(filters.checked_mul(4)?))
+        .and_then(|count| count.checked_add(offscreen_blit))
+        .ok_or_else(|| anyhow::anyhow!("scene GPU timestamp capacity overflowed"))?;
+    let query_count = pass_count
+        .checked_mul(2)
+        .ok_or_else(|| anyhow::anyhow!("scene GPU timestamp capacity overflowed"))?;
+    let query_count = u32::try_from(query_count).map_err(|_| {
+        anyhow::anyhow!("scene requires too many GPU timestamp queries: {query_count}")
+    })?;
+    anyhow::ensure!(
+        query_count <= wgpu::QUERY_SET_MAX_QUERIES,
+        "scene needs {query_count} GPU timestamp queries, exceeding WGPU's limit of {}",
+        wgpu::QUERY_SET_MAX_QUERIES
+    );
+    Ok(query_count)
+}
+
 impl FrameRequirements {
     pub(super) fn for_scene(scene: &Scene, transport: InstanceTransport) -> Self {
         let planned = scene.render_plan().requirements();
@@ -351,20 +416,21 @@ impl<'a> FrameEncoder<'a> {
         readback: Option<ReadbackCopy<'_>>,
         timestamps: Option<TimestampCapture<'_>>,
     ) -> Result<wgpu::CommandBuffer, DrawError> {
-        if let Some(timestamps) = &timestamps {
-            self.encoder.write_timestamp(timestamps.query_set, 0);
-        }
-        let result = self.encode_commands();
+        let result = self.encode_commands(timestamps);
         if result.is_ok() {
             if let Some(offscreen) = &self.offscreen {
-                self.renderer
-                    .blit_to_frame(&mut self.encoder, offscreen, &self.presentation);
+                self.renderer.blit_to_frame(
+                    &mut self.encoder,
+                    offscreen,
+                    &self.presentation,
+                    timestamps,
+                );
             }
-            if let Some(timestamps) = &timestamps {
-                self.encoder.write_timestamp(timestamps.query_set, 1);
+            if let Some(timestamps) = timestamps.filter(|timestamps| timestamps.query_count() > 0) {
+                let query_count = timestamps.query_count();
                 self.encoder.resolve_query_set(
                     timestamps.query_set,
-                    0..2,
+                    0..query_count,
                     timestamps.resolve_buffer,
                     0,
                 );
@@ -373,7 +439,7 @@ impl<'a> FrameEncoder<'a> {
                     0,
                     timestamps.readback_buffer,
                     0,
-                    16,
+                    u64::from(query_count) * 8,
                 );
             }
             if let Some(readback) = readback {
@@ -401,20 +467,30 @@ impl<'a> FrameEncoder<'a> {
         result.map(|()| command_buffer)
     }
 
-    fn encode_commands(&mut self) -> DrawResult {
+    fn encode_commands(&mut self, timestamps: Option<TimestampCapture<'_>>) -> DrawResult {
+        let paint_pass_draws = timestamps.map(|_| scene_paint_pass_draws(self.scene));
+        let paint_pass_timestamps = |start: usize, draws_paths: bool| {
+            timestamps
+                .filter(|_| {
+                    draws_paths || paint_pass_draws.as_ref().is_some_and(|draws| draws[start])
+                })
+                .map(TimestampCapture::pass_writes)
+        };
         let mut pass = begin_scene_render_pass(
             self.renderer,
             &mut self.encoder,
             "main_pass",
             self.targets.current(),
             wgpu::LoadOp::Clear(self.renderer.target.clear_color()),
+            paint_pass_timestamps(0, false),
         );
 
-        for command in self.scene.render_commands() {
+        for (command_index, command) in self.scene.render_commands().iter().enumerate() {
             match command {
                 RenderCommand::Batch(PrimitiveBatch::Paths {
                     range,
                     rasterization_vertex_count,
+                    sprite_count,
                     ..
                 }) => {
                     if *rasterization_vertex_count == 0 {
@@ -426,6 +502,7 @@ impl<'a> FrameEncoder<'a> {
                         &mut self.encoder,
                         paths,
                         &mut self.instances,
+                        timestamps,
                     );
                     pass = begin_scene_render_pass(
                         self.renderer,
@@ -433,6 +510,7 @@ impl<'a> FrameEncoder<'a> {
                         "after_paths",
                         self.targets.current(),
                         wgpu::LoadOp::Load,
+                        paint_pass_timestamps(command_index + 1, *sprite_count > 0),
                     );
                     rasterized?;
                     self.renderer.draw_paths_from_intermediate(
@@ -448,6 +526,7 @@ impl<'a> FrameEncoder<'a> {
                             &mut self.encoder,
                             filter,
                             self.targets.current(),
+                            timestamps,
                         );
                     }
                     pass = begin_scene_render_pass(
@@ -456,6 +535,7 @@ impl<'a> FrameEncoder<'a> {
                         "after_backdrop_filter",
                         self.targets.current(),
                         wgpu::LoadOp::Load,
+                        paint_pass_timestamps(command_index + 1, false),
                     );
                 }
                 RenderCommand::Batch(PrimitiveBatch::FilterBoundary(_)) => {
@@ -482,6 +562,7 @@ impl<'a> FrameEncoder<'a> {
                         "filter_group",
                         self.targets.current(),
                         wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
+                        paint_pass_timestamps(command_index + 1, false),
                     );
                 }
                 RenderCommand::EndFilter {
@@ -505,6 +586,7 @@ impl<'a> FrameEncoder<'a> {
                             opacity: boundary.opacity,
                             clip: FilterCompositeClip::ContentShape,
                         },
+                        timestamps,
                     );
                     pass = begin_scene_render_pass(
                         self.renderer,
@@ -512,6 +594,7 @@ impl<'a> FrameEncoder<'a> {
                         "after_content_filter",
                         self.targets.current(),
                         wgpu::LoadOp::Load,
+                        paint_pass_timestamps(command_index + 1, false),
                     );
                 }
                 RenderCommand::BeginFilter {
@@ -536,14 +619,66 @@ fn begin_scene_render_pass<'a>(
     label: &'a str,
     target: &'a wgpu::TextureView,
     load: wgpu::LoadOp<wgpu::Color>,
+    timestamp_writes: Option<wgpu::RenderPassTimestampWrites<'a>>,
 ) -> wgpu::RenderPass<'a> {
-    let mut pass = begin_color_render_pass(encoder, label, target, load);
+    let mut pass = begin_color_render_pass(encoder, label, target, load, timestamp_writes);
     pass.set_bind_group(
         shader_interface::GLOBAL_BIND_GROUP,
         &renderer.resources().globals_bind_group,
         &[],
     );
     pass
+}
+
+fn scene_paint_pass_draws(scene: &Scene) -> Vec<bool> {
+    let commands = scene.render_commands();
+    let mut draws_by_start = vec![false; commands.len() + 1];
+    let mut segment_start = 0;
+    let mut segment_has_draw = false;
+
+    for (index, command) in commands.iter().enumerate() {
+        if paint_pass_breaks_at(command) {
+            draws_by_start[segment_start] = segment_has_draw;
+            segment_start = index + 1;
+            segment_has_draw = false;
+        } else if command_has_inline_draw(command) {
+            segment_has_draw = true;
+        }
+    }
+    draws_by_start[segment_start] = segment_has_draw;
+    draws_by_start
+}
+
+fn paint_pass_breaks_at(command: &RenderCommand) -> bool {
+    match command {
+        RenderCommand::Batch(PrimitiveBatch::Paths {
+            rasterization_vertex_count,
+            ..
+        }) => *rasterization_vertex_count > 0,
+        RenderCommand::Batch(PrimitiveBatch::BackdropFilters(_)) => true,
+        RenderCommand::BeginFilter {
+            target: FilterRenderTarget::Isolated(_),
+            ..
+        }
+        | RenderCommand::EndFilter {
+            target: FilterRenderTarget::Isolated(_),
+            ..
+        } => true,
+        _ => false,
+    }
+}
+
+fn command_has_inline_draw(command: &RenderCommand) -> bool {
+    match command {
+        RenderCommand::Batch(PrimitiveBatch::Shadows { range, .. })
+        | RenderCommand::Batch(PrimitiveBatch::Quads { range, .. })
+        | RenderCommand::Batch(PrimitiveBatch::Underlines(range))
+        | RenderCommand::Batch(PrimitiveBatch::MonochromeSprites { range, .. })
+        | RenderCommand::Batch(PrimitiveBatch::SubpixelSprites { range, .. })
+        | RenderCommand::Batch(PrimitiveBatch::PolychromeSprites { range, .. })
+        | RenderCommand::Batch(PrimitiveBatch::Surfaces(range)) => !range.is_empty(),
+        _ => false,
+    }
 }
 
 struct TargetStack {

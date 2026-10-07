@@ -215,6 +215,7 @@ impl WgpuRenderer {
         encoder: &mut wgpu::CommandEncoder,
         paths: &[Path<ScaledPixels>],
         instances: &mut InstanceUpload,
+        timestamps: Option<frame::TimestampCapture<'_>>,
     ) -> frame::DrawResult {
         let vertex_count = path_types::rasterization_vertex_count(paths);
         if vertex_count == 0 {
@@ -254,6 +255,7 @@ impl WgpuRenderer {
                 depth_slice: None,
             })],
             depth_stencil_attachment: None,
+            timestamp_writes: timestamps.map(frame::TimestampCapture::pass_writes),
             ..Default::default()
         });
         pass.set_pipeline(&resources.pipelines.path_rasterization);

@@ -272,11 +272,12 @@ impl WgpuRenderer {
     }
 }
 
-fn begin_color_render_pass<'encoder>(
+pub(super) fn begin_color_render_pass<'encoder>(
     encoder: &'encoder mut wgpu::CommandEncoder,
     label: &'encoder str,
     target: &'encoder wgpu::TextureView,
     load: wgpu::LoadOp<wgpu::Color>,
+    timestamp_writes: Option<wgpu::RenderPassTimestampWrites<'encoder>>,
 ) -> wgpu::RenderPass<'encoder> {
     encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
         label: Some(label),
@@ -290,6 +291,7 @@ fn begin_color_render_pass<'encoder>(
             depth_slice: None,
         })],
         depth_stencil_attachment: None,
+        timestamp_writes,
         ..Default::default()
     })
 }

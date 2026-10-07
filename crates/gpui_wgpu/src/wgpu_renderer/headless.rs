@@ -1,3 +1,4 @@
+use std::cell::Cell;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
@@ -144,7 +145,7 @@ impl OffscreenTarget {
     }
 }
 
-/// Adapter facts and whether this device exposes command-encoder GPU timestamps.
+/// Adapter facts and whether render-pass GPU timestamps remain usable.
 #[derive(Clone, Debug)]
 pub struct GpuReplayInfo {
     /// Selected adapter name.
@@ -155,10 +156,19 @@ pub struct GpuReplayInfo {
     pub backend: String,
     /// WGPU adapter class, such as discrete, integrated, or CPU.
     pub device_type: String,
-    /// Whether encoder timestamp queries were enabled on the created device.
+    /// Whether render-pass timestamp queries remain enabled and have returned valid data.
     pub gpu_timestamps_available: bool,
-    /// Adapter capability reason when timestamps are unavailable.
+    /// Why timestamps are unavailable or were disabled after invalid query data.
     pub gpu_timestamps_unavailable_reason: Option<String>,
+}
+
+impl GpuReplayInfo {
+    fn disable_timestamps(&mut self, error: impl std::fmt::Display) {
+        self.gpu_timestamps_available = false;
+        self.gpu_timestamps_unavailable_reason = Some(format!(
+            "GPU timestamp telemetry disabled after invalid query data: {error}"
+        ));
+    }
 }
 
 /// Measurements for one completed headless scene submission.
@@ -167,9 +177,13 @@ pub struct GpuFrameMeasurement {
     /// CPU wall time from scene preparation through command encoding, queue submission, and
     /// completion wait. Excludes target setup, timestamp mapping, and pixel readback mapping.
     pub encode_submit_completion: Duration,
-    /// Device timestamp interval around encoded scene rendering and final compositing.
-    /// Excludes readback mapping and includes no CPU wait time.
+    /// Device timestamp envelope from the earliest start to the latest end across actual scene
+    /// render passes (including path rasterization, filters, and offscreen compositing). It spans
+    /// gaps or overlap between passes and excludes readback mapping and CPU wait time. It is `None`
+    /// when timestamps are unsupported or disabled, or the scene submits no drawable pass.
     pub gpu_execution: Option<Duration>,
+    /// Resolution of the adapter's timestamp counter, rounded up to whole nanoseconds.
+    pub gpu_timestamp_resolution: Option<Duration>,
 }
 
 /// Exact sizes of selected renderer-owned resources, not driver VRAM usage.
@@ -236,6 +250,7 @@ impl WgpuHeadlessRenderer {
             TimestampResources::new(
                 &renderer.resources().device,
                 context.queue.get_timestamp_period(),
+                2,
             )
         });
         Ok(Self {
@@ -300,6 +315,13 @@ impl WgpuHeadlessRenderer {
         self.measurement_info.as_ref()
     }
 
+    fn disable_timestamp_measurement(&mut self, error: impl std::fmt::Display) {
+        self.timestamp_resources = None;
+        if let Some(info) = &mut self.measurement_info {
+            info.disable_timestamps(error);
+        }
+    }
+
     /// Replaces the renderer atlas with the exact captured tile bitmaps and maps canonical
     /// capture texture indices onto freshly allocated GPU atlas tiles.
     pub fn load_capture(&mut self, capture: &gpui::SceneCapture) -> anyhow::Result<Scene> {
@@ -354,6 +376,13 @@ impl WgpuHeadlessRenderer {
         size: Size<DevicePixels>,
     ) -> anyhow::Result<GpuFrameMeasurement> {
         self.ensure_target(size)?;
+        if let Some(resources) = &mut self.timestamp_resources {
+            resources.ensure_capacity(
+                &self.renderer.resources().device,
+                super::frame::timestamp_query_capacity(scene)?,
+            )?;
+            resources.reset();
+        }
         let target = self.target.as_ref().expect("target was just ensured");
         let started = Instant::now();
         let submission = super::frame::render_to_view_measured(
@@ -376,14 +405,35 @@ impl WgpuHeadlessRenderer {
                 anyhow::anyhow!("failed to wait for measured headless render: {error}")
             })?;
         let encode_submit_completion = started.elapsed();
-        let gpu_execution = self
+        let timestamp_result = self
             .timestamp_resources
             .as_ref()
-            .map(|resources| resources.read_duration(&device))
-            .transpose()?;
+            .map(|resources| {
+                let duration = resources.read_duration(&device)?;
+                if let Some(gpu) = duration {
+                    anyhow::ensure!(
+                        gpu <= encode_submit_completion.saturating_add(resources.resolution()),
+                        "GPU timestamp interval {gpu:?} exceeds encode/submit/completion {encode_submit_completion:?}"
+                    );
+                }
+                Ok::<_, anyhow::Error>(duration)
+            })
+            .transpose();
+        let gpu_execution = match timestamp_result {
+            Ok(duration) => duration.flatten(),
+            Err(error) => {
+                self.disable_timestamp_measurement(format!("{error:#}"));
+                None
+            }
+        };
+        let gpu_timestamp_resolution = self
+            .timestamp_resources
+            .as_ref()
+            .map(TimestampResources::resolution);
         Ok(GpuFrameMeasurement {
             encode_submit_completion,
             gpu_execution,
+            gpu_timestamp_resolution,
         })
     }
 }
@@ -457,7 +507,7 @@ fn replay_info(renderer: &WgpuRenderer, timestamps: bool) -> GpuReplayInfo {
         device_type: format!("{:?}", adapter.device_type),
         gpu_timestamps_available: timestamps,
         gpu_timestamps_unavailable_reason: (!timestamps)
-            .then(|| "selected adapter does not expose TIMESTAMP_QUERY_INSIDE_ENCODERS".into()),
+            .then(|| "selected adapter does not expose TIMESTAMP_QUERY".into()),
     }
 }
 
@@ -509,24 +559,28 @@ struct TimestampResources {
     query_set: wgpu::QuerySet,
     resolve_buffer: wgpu::Buffer,
     readback_buffer: wgpu::Buffer,
+    query_capacity: u32,
+    next_query: Cell<u32>,
 }
 
 impl TimestampResources {
-    fn new(device: &wgpu::Device, period_ns: f32) -> Self {
+    fn new(device: &wgpu::Device, period_ns: f32, query_capacity: u32) -> Self {
+        assert!(query_capacity > 0 && query_capacity <= wgpu::QUERY_SET_MAX_QUERIES);
+        let buffer_size = u64::from(query_capacity) * 8;
         let query_set = device.create_query_set(&wgpu::QuerySetDescriptor {
             label: Some("gpui_frame_timestamps"),
             ty: wgpu::QueryType::Timestamp,
-            count: 2,
+            count: query_capacity,
         });
         let resolve_buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("gpui_timestamp_resolve"),
-            size: 16,
+            size: buffer_size,
             usage: wgpu::BufferUsages::QUERY_RESOLVE | wgpu::BufferUsages::COPY_SRC,
             mapped_at_creation: false,
         });
         let readback_buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("gpui_timestamp_readback"),
-            size: 16,
+            size: buffer_size,
             usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
             mapped_at_creation: false,
         });
@@ -535,7 +589,31 @@ impl TimestampResources {
             query_set,
             resolve_buffer,
             readback_buffer,
+            query_capacity,
+            next_query: Cell::new(0),
         }
+    }
+
+    fn ensure_capacity(&mut self, device: &wgpu::Device, required: u32) -> anyhow::Result<()> {
+        if required <= self.query_capacity {
+            return Ok(());
+        }
+        anyhow::ensure!(
+            required <= wgpu::QUERY_SET_MAX_QUERIES,
+            "scene needs {required} GPU timestamp queries, exceeding WGPU's limit of {}",
+            wgpu::QUERY_SET_MAX_QUERIES
+        );
+        let buffer_size = u64::from(required) * 8;
+        anyhow::ensure!(
+            buffer_size <= device.limits().max_buffer_size,
+            "scene needs {required} GPU timestamp queries, exceeding the device buffer limit"
+        );
+        *self = Self::new(device, self.period_ns, required);
+        Ok(())
+    }
+
+    fn reset(&self) {
+        self.next_query.set(0);
     }
 
     fn capture(&self) -> super::frame::TimestampCapture<'_> {
@@ -543,13 +621,25 @@ impl TimestampResources {
             query_set: &self.query_set,
             resolve_buffer: &self.resolve_buffer,
             readback_buffer: &self.readback_buffer,
+            next_query: &self.next_query,
+            query_capacity: self.query_capacity,
         }
     }
 
-    fn read_duration(&self, device: &wgpu::Device) -> anyhow::Result<Duration> {
+    fn resolution(&self) -> Duration {
+        Duration::from_nanos(self.period_ns.ceil() as u64)
+    }
+
+    fn read_duration(&self, device: &wgpu::Device) -> anyhow::Result<Option<Duration>> {
+        let query_count = self.next_query.get();
+        anyhow::ensure!(query_count % 2 == 0, "incomplete GPU timestamp pass pair");
+        if query_count == 0 {
+            return Ok(None);
+        }
+        let byte_count = u64::from(query_count) * 8;
         let (sender, receiver) = std::sync::mpsc::sync_channel(1);
         self.readback_buffer
-            .slice(..)
+            .slice(..byte_count)
             .map_async(wgpu::MapMode::Read, move |result| {
                 let _ = sender.send(result);
             });
@@ -562,20 +652,53 @@ impl TimestampResources {
         receiver
             .recv()
             .map_err(|error| anyhow::anyhow!("timestamp readback callback dropped: {error}"))??;
-        let mapped = self.readback_buffer.slice(..).get_mapped_range();
-        let start = u64::from_ne_bytes(mapped[0..8].try_into().expect("timestamp is u64"));
-        let end = u64::from_ne_bytes(mapped[8..16].try_into().expect("timestamp is u64"));
+        let mapped = self.readback_buffer.slice(..byte_count).get_mapped_range();
+        let samples = mapped.chunks_exact(16).map(|pair| {
+            let start = u64::from_ne_bytes(pair[0..8].try_into().expect("timestamp is u64"));
+            let end = u64::from_ne_bytes(pair[8..16].try_into().expect("timestamp is u64"));
+            (start, end)
+        });
+        let duration = timestamp_envelope(samples, self.period_ns);
         drop(mapped);
         self.readback_buffer.unmap();
-        anyhow::ensure!(
-            self.period_ns.is_finite() && self.period_ns > 0.0,
-            "invalid GPU timestamp period"
-        );
-        let elapsed_ns = end.wrapping_sub(start) as f64 * f64::from(self.period_ns);
-        Ok(Duration::from_nanos(
-            elapsed_ns.round().min(u64::MAX as f64) as u64,
-        ))
+        duration
     }
+}
+
+fn timestamp_envelope(
+    samples: impl IntoIterator<Item = (u64, u64)>,
+    period_ns: f32,
+) -> anyhow::Result<Option<Duration>> {
+    // Passes may overlap, so use their execution envelope rather than submission order.
+    let mut envelope: Option<(u64, u64)> = None;
+    for (index, (start, end)) in samples.into_iter().enumerate() {
+        timestamp_duration(start, end, period_ns)
+            .map_err(|error| anyhow::anyhow!("GPU timestamp pass {index}: {error:#}"))?;
+        envelope = Some(match envelope {
+            Some((first_start, last_end)) => (first_start.min(start), last_end.max(end)),
+            None => (start, end),
+        });
+    }
+    let Some((first_start, last_end)) = envelope else {
+        return Ok(None);
+    };
+    timestamp_duration(first_start, last_end, period_ns).map(Some)
+}
+
+fn timestamp_duration(start: u64, end: u64, period_ns: f32) -> anyhow::Result<Duration> {
+    anyhow::ensure!(
+        period_ns.is_finite() && period_ns > 0.0,
+        "invalid GPU timestamp period"
+    );
+    let ticks = end
+        .checked_sub(start)
+        .ok_or_else(|| anyhow::anyhow!("GPU timestamp end ({end}) precedes start ({start})"))?;
+    let elapsed_ns = ticks as f64 * f64::from(period_ns);
+    anyhow::ensure!(
+        elapsed_ns.is_finite() && elapsed_ns >= 0.0 && elapsed_ns.round() < u64::MAX as f64,
+        "GPU timestamp interval cannot be represented as a duration: {ticks} ticks at {period_ns} ns/tick"
+    );
+    Ok(Duration::from_nanos(elapsed_ns.round() as u64))
 }
 
 impl gpui::PlatformHeadlessRenderer for WgpuHeadlessRenderer {
@@ -610,7 +733,52 @@ impl gpui::PlatformHeadlessRenderer for WgpuHeadlessRenderer {
 
 #[cfg(test)]
 mod tests {
-    use super::normalize_readback_rgba;
+    use super::{GpuReplayInfo, normalize_readback_rgba, timestamp_duration, timestamp_envelope};
+    use std::time::Duration;
+
+    #[test]
+    fn timestamp_duration_requires_a_valid_order_and_finite_range() {
+        assert_eq!(
+            timestamp_duration(100, 120, 2.5).unwrap(),
+            Duration::from_nanos(50)
+        );
+        assert!(timestamp_duration(120, 100, 1.0).is_err());
+        assert!(timestamp_duration(0, 1, 0.0).is_err());
+        assert!(timestamp_duration(0, 1, f32::NAN).is_err());
+        assert!(timestamp_duration(0, u64::MAX, f32::MAX).is_err());
+    }
+
+    #[test]
+    fn timestamp_envelope_contains_overlapping_passes_and_rejects_bad_pairs() {
+        assert_eq!(
+            timestamp_envelope([(100, 120), (110, 140), (90, 130)], 1.0).unwrap(),
+            Some(Duration::from_nanos(50))
+        );
+        assert_eq!(timestamp_envelope([], 1.0).unwrap(), None);
+        assert!(timestamp_envelope([(100, 120), (140, 130)], 1.0).is_err());
+        assert!(timestamp_envelope([(100, 120)], f32::NAN).is_err());
+    }
+
+    #[test]
+    fn invalid_timestamp_data_disables_the_reported_capability_with_a_reason() {
+        let mut info = GpuReplayInfo {
+            adapter_name: "test adapter".into(),
+            driver: "test driver".into(),
+            backend: "test backend".into(),
+            device_type: "CPU".into(),
+            gpu_timestamps_available: true,
+            gpu_timestamps_unavailable_reason: None,
+        };
+        info.disable_timestamps("GPU timestamp pass 0: end precedes start");
+
+        assert!(!info.gpu_timestamps_available);
+        assert_eq!(
+            info.gpu_timestamps_unavailable_reason.as_deref(),
+            Some(
+                "GPU timestamp telemetry disabled after invalid query data: GPU timestamp pass 0: end precedes start"
+            )
+        );
+    }
 
     #[test]
     fn readback_conversion_swizzles_then_unpremultiplies_and_clears_zero_alpha_rgb() {
