@@ -31,6 +31,7 @@ pub fn editable_text(id: impl Into<ElementId>) -> EditableTextElement {
         caret_blink_interval: None,
         caret_width: px(2.),
         caret_height: relative(1.).into(),
+        highlights: TextHighlights::default(),
     };
     this.interactivity.element_id = Some(id.into());
 
@@ -68,6 +69,23 @@ pub struct EditableTextElement {
     caret_blink_interval: Option<Duration>,
     caret_width: Pixels,
     caret_height: DefiniteLength,
+    highlights: TextHighlights,
+}
+
+/// Immutable syntax spans. Construct once per text edit and share across frames.
+#[derive(Clone, Default)]
+pub struct TextHighlights {
+    ranges: Arc<[(Range<usize>, Hsla)]>,
+    hash: u64,
+}
+impl TextHighlights {
+    pub fn new(ranges: Vec<(Range<usize>, Hsla)>) -> Self {
+        let hash = highlights_hash(&ranges);
+        Self {
+            ranges: ranges.into(),
+            hash,
+        }
+    }
 }
 
 /// EditableText styling that goes beyond what Style/StyleRefinement supports
@@ -100,6 +118,18 @@ impl Default for EditableTextColors {
 }
 
 impl EditableTextElement {
+    /// Color UTF-8 byte ranges without changing selection, IME, or navigation.
+    /// Ranges must be ordered, non-overlapping, and on character boundaries.
+    /// Invalid ranges are ignored. Useful for code editors and inline validation.
+    pub fn highlights(mut self, highlights: Vec<(Range<usize>, Hsla)>) -> Self {
+        self.highlights = TextHighlights::new(highlights);
+        self
+    }
+    /// Reuse immutable spans without hashing or copying them during caret/scroll frames.
+    pub fn shared_highlights(mut self, highlights: TextHighlights) -> Self {
+        self.highlights = highlights;
+        self
+    }
     /// Assigns the underlying state of this element, which should persist across multiple frames.
     /// The user should either create the entity once or utilize `Window::use_keyed_state`
     /// to create an entity intrinsicly linked to the element.
@@ -222,12 +252,19 @@ impl EditableTextActionElement<EditableTextState> for EditableTextElement {
 struct PrelayoutState {
     state: Entity<EditableTextState>,
     prev_layout_state: EditableTextLayoutState,
+    prev_text_style: Option<gpui::TextStyle>,
+    prev_source: SharedString,
+    prev_font_size: Pixels,
+    prev_line_height: Pixels,
+    prev_flags: (bool, bool),
     storage_version: u16,
     show_placeholder: bool,
     text: Option<SharedString>,
     placeholder_color: Hsla,
     supports_multiline: bool,
     accepts_input: bool,
+    highlights: TextHighlights,
+    highlights_hash: u64,
 }
 
 #[doc(hidden)]
@@ -340,19 +377,37 @@ impl Element for EditableTextElement {
             let state = entity.read(cx);
             let show_placeholder = state.as_str().is_empty();
             let text = match show_placeholder {
-                false => Some(SharedString::from(state.as_str())),
+                false => Some(state.shared_text()),
                 true => self.placeholder.clone(),
             };
 
             let prelayout = PrelayoutState {
                 state: entity.clone(),
                 prev_layout_state: state.layout_data.state,
+                prev_text_style: state.layout_data.text_style.clone(),
+                prev_source: state.layout_data.source.clone(),
+                prev_font_size: state.layout_data.font_size,
+                prev_line_height: state.layout_data.line_height,
+                prev_flags: (
+                    state.layout_data.supports_multiline,
+                    state.layout_data.accepts_input,
+                ),
                 show_placeholder,
                 storage_version: state.version(),
                 text,
                 placeholder_color: self.colors.placeholder,
                 supports_multiline: self.supports_multiline,
                 accepts_input: self.accepts_input,
+                highlights_hash: if show_placeholder {
+                    0
+                } else {
+                    self.highlights.hash
+                },
+                highlights: if show_placeholder {
+                    TextHighlights::default()
+                } else {
+                    self.highlights.clone()
+                },
             };
             (prelayout, state.layout_data.next_scroll_offset)
         };
@@ -654,7 +709,7 @@ impl EditableTextElement {
 impl PrelayoutState {
     fn perform_text_layout(self, window: &mut Window) -> LayoutId {
         // NOTE: Loosely mirrors TextLayout::layout
-        let text_style = window.text_style();
+        let mut text_style = window.text_style();
         let font_size = text_style.font_size.to_pixels(window.rem_size());
         let line_height = window.pixel_snap(
             text_style
@@ -667,6 +722,7 @@ impl PrelayoutState {
             true => self.placeholder_color,
         };
 
+        text_style.color = color;
         let text = self.text.unwrap_or_default();
 
         window.request_measured_layout(
@@ -674,16 +730,6 @@ impl PrelayoutState {
             // This is invoked sometime in the near future (before prepaint but not immediately),
             // so we avoid doing any pre-emptive work until the layout engine is ready.
             move |known_dimensions, available_space, window, cx| {
-                let runs = vec![gpui::TextRun {
-                    len: text.len(),
-                    font: text_style.font(),
-                    color,
-                    background_color: None,
-                    underline: None,
-                    strikethrough: None,
-                    letter_spacing: None,
-                }];
-
                 let wrap_width = TextLayout::evaluate_wrap_width(
                     &text_style.white_space,
                     known_dimensions,
@@ -694,13 +740,32 @@ impl PrelayoutState {
                     TextLayout::evaluate_overflow(&text_style, known_dimensions, available_space);
 
                 if let Some(size) = self.prev_layout_state.size
-                    && (wrap_width.is_none() || wrap_width == self.prev_layout_state.wrap_width)
+                    && self.highlights_hash == self.prev_layout_state.highlights_hash
+                    && wrap_width == self.prev_layout_state.wrap_width
+                    && self.prev_text_style.as_ref() == Some(&text_style)
+                    && self.prev_source.as_ptr() == text.as_ptr()
+                    && self.prev_source.len() == text.len()
+                    && font_size == self.prev_font_size
+                    && line_height == self.prev_line_height
+                    && (self.supports_multiline, self.accepts_input) == self.prev_flags
                     && truncation.width.is_none()
                     && self.storage_version == self.prev_layout_state.last_seen_storage_version
                 {
                     return size;
                 }
 
+                let base_run = gpui::TextRun {
+                    len: 0,
+                    font: text_style.font(),
+                    color,
+                    background_color: None,
+                    underline: None,
+                    strikethrough: None,
+                    letter_spacing: None,
+                };
+                let runs = highlighted_runs(&text, &self.highlights.ranges, base_run);
+
+                let source = text.clone();
                 let (text, runs) = TextLayout::apply_truncation(
                     text.clone(),
                     &text_style,
@@ -730,8 +795,12 @@ impl PrelayoutState {
                         wrap_width,
                         size: Some(size),
                         last_seen_storage_version: self.storage_version,
+                        highlights_hash: self.highlights_hash,
                     },
                     document,
+                    text_style: Some(text_style.clone()),
+                    source,
+                    font_size,
                     line_height,
                     next_scroll_offset: None,
                 };
@@ -747,6 +816,60 @@ impl PrelayoutState {
             },
         )
     }
+}
+
+fn highlighted_runs(
+    text: &str,
+    highlights: &[(Range<usize>, Hsla)],
+    base: gpui::TextRun,
+) -> Vec<gpui::TextRun> {
+    let mut runs = Vec::new();
+    let mut offset = 0;
+    for (range, color) in highlights {
+        if range.start < offset
+            || range.start >= range.end
+            || range.end > text.len()
+            || !text.is_char_boundary(range.start)
+            || !text.is_char_boundary(range.end)
+        {
+            continue;
+        }
+        if offset < range.start {
+            runs.push(gpui::TextRun {
+                len: range.start - offset,
+                ..base.clone()
+            });
+        }
+        runs.push(gpui::TextRun {
+            len: range.end - range.start,
+            color: *color,
+            ..base.clone()
+        });
+        offset = range.end;
+    }
+    if offset < text.len() || runs.is_empty() {
+        runs.push(gpui::TextRun {
+            len: text.len() - offset,
+            ..base
+        });
+    }
+    runs
+}
+
+fn highlights_hash(highlights: &[(Range<usize>, Hsla)]) -> u64 {
+    if highlights.is_empty() {
+        return 0;
+    }
+    use std::hash::{Hash, Hasher};
+    let mut hash = std::collections::hash_map::DefaultHasher::new();
+    for (range, color) in highlights {
+        range.hash(&mut hash);
+        color.color.hue.into_inner().to_bits().hash(&mut hash);
+        color.color.saturation.to_bits().hash(&mut hash);
+        color.color.lightness.to_bits().hash(&mut hash);
+        color.alpha.to_bits().hash(&mut hash);
+    }
+    hash.finish()
 }
 
 #[derive(Default)]

@@ -24,7 +24,10 @@ members = [
   "./crates/gpui_ce_util/",
   "./crates/gpui_path/",
   "./tooling/perf/",
+  "./crates/gpui_codepen/",
+  "./crates/gpui_codepen/guest/",
 ]
+exclude = ["vendor/miri"]
 default-members = ["./crates/gpui/"]
 resolver = "3"
 
@@ -319,6 +322,16 @@ features = [
 
 [workspace.lints.rust]
 unexpected_cfgs = { level = "allow" }
+
+# The browser guide is interactive software even during development. Keep
+# native dev builds debuggable without shipping unoptimized GPUI to the browser.
+[profile.codepen-web]
+inherits = "release"
+opt-level = 3
+debug = 0
+strip = "debuginfo"
+lto = "thin"
+codegen-units = 16
 
 [workspace.lints.clippy]
 dbg_macro = "deny"

@@ -1165,3 +1165,43 @@ fn mixed_font_sizes_colors_and_underlines_paint_in_their_wrapped_rows() {
         "glyph painting must use each shaped run's font size"
     );
 }
+
+struct FlexProse;
+impl Render for FlexProse {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        div().size_full().items_start().child(
+            div().flex().flex_col().w(px(180.)).text_size(px(16.)).line_height(px(24.))
+                .debug_selector(|| "prose-card".into())
+                .child(div().w_full().min_w_0().debug_selector(|| "prose-text".into())
+                    .child("Your edits are saved locally. Experiment freely and build something useful."))
+        )
+    }
+}
+#[test]
+fn flex_prose_uses_min_content_width_and_wraps_inside_card() {
+    let mut context = headless();
+    let window = context
+        .open_window(size(px(300.), px(240.)), |_, cx| cx.new(|_| FlexProse))
+        .unwrap();
+    context.run_until_parked();
+    let card = context
+        .debug_bounds(window.into(), "prose-card")
+        .unwrap()
+        .unwrap();
+    let text = context
+        .debug_bounds(window.into(), "prose-text")
+        .unwrap()
+        .unwrap();
+    assert!(
+        text.size.height >= px(72.),
+        "prose must wrap over several lines: {text:?}"
+    );
+    assert!(
+        text.size.height <= px(144.),
+        "intrinsic min-content must not poison final layout: {text:?}"
+    );
+    assert!(
+        text.right() <= card.right() + px(1.),
+        "prose overflowed its card"
+    );
+}

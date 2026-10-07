@@ -10,6 +10,8 @@ pub(super) struct EditableTextLayoutState {
     pub size: Option<Size<Pixels>>,
     /// The last seen version of `storage` (for tracking when lines need to be reprocessed during layout)
     pub last_seen_storage_version: u16,
+    /// Includes byte ranges and colors, so caret blinking can reuse layout.
+    pub highlights_hash: u64,
 }
 
 /// Internal state/result after the element has recomputed layout.
@@ -25,6 +27,9 @@ pub(super) struct EditableTextLayoutResult {
     /// The document layout produced by the painter's `prepaint`.
     /// Cached so IME `bounds_for_range` / `character_index_for_point` can evaluate without re-shaping.
     pub document: Option<Arc<WrappedLine>>,
+    pub text_style: Option<gpui::TextStyle>,
+    pub source: gpui::SharedString,
+    pub font_size: Pixels,
     pub line_height: Pixels,
     /// The next position the scroll view should move to.
     /// Set by the state in response to user actions.

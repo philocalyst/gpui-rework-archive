@@ -3,6 +3,8 @@ ignore-files = true
 ignore-hidden = false
 extend-exclude = [
   ".git/",
+  # Preserve upstream Miri sources and diagnostic fixtures verbatim.
+  "vendor/miri/",
 
   # Windows likes its abbreviations.
   "crates/gpui/src/platform/windows/directx_renderer.rs",

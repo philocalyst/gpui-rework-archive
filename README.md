@@ -117,6 +117,10 @@ It's mostly API compatible with upstream, but that is changing!
 ## Setup
 View the [setup guide](SETUP.md) for installation instructions.
 
+Try [GPUI / The living guide](crates/gpui_codepen/README.md): a native Rust
+codepen with five lessons, a live GPUI preview, a persistent vendored Miri interpreter,
+and a browser build of the guide.
+
 ## FAQ
 - Q: What is our AI Policy?
   A: We follow the [Rust Foundation's internal AI usage policy](https://rustfoundation.org/policy/internal-ai-usage-policy/). GPUI-CE is a framework "Made by Humans". We value community participation and take time to understand contributors' intentions and offer guidance.

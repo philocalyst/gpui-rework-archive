@@ -45,6 +45,8 @@ struct SelectionDragVisualCaret {
 pub struct EditableTextState {
     /// Backing text storage, usually `StringStorage`; custom storage can support long documents.
     storage: Box<dyn UnicodeTextStorage>,
+    shared_text: gpui::SharedString,
+    max_bytes: Option<usize>,
 
     /// This input's affinity-aware selection and horizontal coordinate retained during vertical
     /// navigation. The caret is the cursor, and the anchor is the other selection endpoint.
@@ -84,6 +86,10 @@ impl EventEmitter<CaretNotify> for EditableTextState {}
 /// This is not suitable for input sanitation (which should occur before the mutation).
 pub struct TextChanged;
 impl EventEmitter<TextChanged> for EditableTextState {}
+/// Emitted when an edit exceeds an explicitly configured UTF-8 byte limit.
+/// The entire edit is rejected and the existing text/selection remain intact.
+pub struct TextLimitExceeded(pub usize);
+impl EventEmitter<TextLimitExceeded> for EditableTextState {}
 
 impl Focusable for EditableTextState {
     fn focus_handle(&self, _: &App) -> FocusHandle {
@@ -149,8 +155,11 @@ impl EditableTextState {
     pub fn new(storage: impl UnicodeTextStorage + 'static, cx: &mut Context<Self>) -> Self {
         let accessibility_text_metrics = AccessibilityTextMetrics::new(storage.content_utf8());
 
+        let shared_text = gpui::SharedString::from(storage.content_utf8());
         Self {
             storage: Box::new(storage),
+            shared_text,
+            max_bytes: None,
 
             selection_movement: CaretSelectionMovement::default(),
             marked_range: None,
@@ -176,12 +185,28 @@ impl EditableTextState {
         self.storage.content_utf8()
     }
 
+    /// Cheap snapshot, refreshed only when content changes (also on undo/IME).
+    pub fn shared_text(&self) -> gpui::SharedString {
+        self.shared_text.clone()
+    }
+
+    /// Reject oversized user edits atomically, including paste and IME.
+    pub fn with_max_bytes(mut self, limit: usize) -> Self {
+        self.max_bytes = Some(limit);
+        self
+    }
     pub fn version(&self) -> u16 {
         self.storage.version()
     }
 
     /// Replaces the contents of the stored text with the provided string slice.
     pub fn emplace(&mut self, content: &str, cx: &mut Context<Self>) {
+        if let Some(limit) = self.max_bytes
+            && content.len() > limit
+        {
+            cx.emit(TextLimitExceeded(limit));
+            return;
+        }
         let len = self.storage.content_utf8().len();
         self.replace_text(0..len, content);
         self.emit_text_changed(cx);
@@ -295,6 +320,7 @@ impl AccessibilityTextMetrics {
 impl EditableTextState {
     fn replace_storage_range(&mut self, range: Range<usize>, text: &str) {
         self.storage.replace_range(range, text);
+        self.shared_text = gpui::SharedString::from(self.storage.content_utf8());
         self.accessibility_text_metrics
             .refresh(self.storage.content_utf8());
     }
@@ -302,9 +328,9 @@ impl EditableTextState {
     /// Validates/sanitizes incoming text according to the rules of the field.
     fn validate_incoming_text<'text>(
         &self,
-        _range: &Range<usize>,
+        range: &Range<usize>,
         text_to_insert: &'text str,
-    ) -> Cow<'text, str> {
+    ) -> Result<Cow<'text, str>, TextLimitExceeded> {
         // TODO: Apply text sanitization, ideally using externally-sourced implementations.
         // example optional/opt-in sanitations include:
         // - single-line fields should prune /n & /r
@@ -319,19 +345,13 @@ impl EditableTextState {
             text_to_insert = Cow::Owned(text_to_insert.replace("\n", "").replace("\r", ""));
         }
 
-        /* A sample implementation of max-length sampled from gpuikit
-        // Decide the effective new text up front (honouring `max_length`).
-        // This avoids the "apply, then truncate" path which would leave the caret past the end.
-        let max_length = None::<usize>;
-        if let Some(cap) = max_length {
-            let existing_len = self.as_str().len() - (range.end - range.start);
-            let room = cap.saturating_sub(existing_len);
-            text_to_insert = &text_to_insert[..text_to_insert.len().min(room)];
+        if let Some(limit) = self.max_bytes {
+            let retained = self.as_str().len().saturating_sub(range.len());
+            if retained.saturating_add(text_to_insert.len()) > limit {
+                return Err(TextLimitExceeded(limit));
+            }
         }
-        */
-
-        // for now, this function is no-op
-        text_to_insert
+        Ok(text_to_insert)
     }
 
     /// Internal method to record historical changes and perform text replacement in storage.
@@ -1008,7 +1028,13 @@ impl EntityInputHandler for EditableTextState {
         cx: &mut Context<Self>,
     ) {
         let range_utf8 = self.ime_resolve_range(range_utf16);
-        let text_to_insert = self.validate_incoming_text(&range_utf8, text_to_insert);
+        let text_to_insert = match self.validate_incoming_text(&range_utf8, text_to_insert) {
+            Ok(text) => text,
+            Err(error) => {
+                cx.emit(error);
+                return;
+            }
+        };
         self.replace_text(range_utf8, text_to_insert.as_ref());
         cx.emit(CaretNotify::PauseBlinking);
         self.emit_text_changed(cx);
@@ -1024,7 +1050,13 @@ impl EntityInputHandler for EditableTextState {
         cx: &mut Context<Self>,
     ) {
         let range = self.ime_resolve_range(range_utf16);
-        let text_to_insert = self.validate_incoming_text(&range, text_to_insert);
+        let text_to_insert = match self.validate_incoming_text(&range, text_to_insert) {
+            Ok(text) => text,
+            Err(error) => {
+                cx.emit(error);
+                return;
+            }
+        };
         self.replace_text(range.clone(), text_to_insert.as_ref());
         self.ime_mark_text_in_range(&range, text_to_insert.len());
         self.ime_mark_selected_range(&range, &new_selected_range_utf16, text_to_insert.as_ref());
@@ -1301,7 +1333,13 @@ impl<'app> EditableTextActionHandler<Context<'app, Self>> for EditableTextState 
         };
 
         let range = self.ime_resolve_range(None);
-        let text_to_insert = self.validate_incoming_text(&range, &text);
+        let text_to_insert = match self.validate_incoming_text(&range, &text) {
+            Ok(text) => text,
+            Err(error) => {
+                cx.emit(error);
+                return;
+            }
+        };
         self.replace_text(range, text_to_insert.as_ref());
         self.emit_text_changed(cx);
         cx.notify();
@@ -1441,6 +1479,41 @@ mod tests {
         let mut state = EditableTextState::new(StringStorage::from(content), cx);
         state.layout_data.state.last_seen_storage_version = state.version().wrapping_sub(1);
         state
+    }
+
+    #[gpui::test]
+    fn bounded_edits_preserve_selection_and_shared_snapshots(cx: &mut TestAppContext) {
+        // A heap-backed snapshot must be shared even when an edit is rejected.
+        // Short SharedStrings store bytes inline, so cloning them changes pointers.
+        let content = "A😀abcdefghijklmnopqrstuvwxy";
+        let view = create_test_input(cx, content, content.len());
+        view.update(cx, |view, window, cx| {
+            view.input.update(cx, |input, cx| {
+                input.max_bytes = Some(content.len() + 3);
+                let original = input.shared_text();
+                let selection = input.caret_selection();
+                input.replace_text_in_range(None, "日本語", window, cx);
+                input.emplace("this replacement is definitely oversized", cx);
+                input.replace_and_mark_text_in_range(None, "日本語", None, window, cx);
+                cx.write_to_clipboard(ClipboardItem::new_string(
+                    "this paste is definitely oversized".into(),
+                ));
+                EditableTextActionHandler::paste(input, &Paste, window, cx);
+                assert_eq!(input.as_str(), content);
+                assert_eq!(input.caret_selection(), selection);
+                assert_eq!(input.shared_text().as_ptr(), original.as_ptr());
+                input.replace_text_in_range(None, "日", window, cx);
+                assert_eq!(input.as_str(), format!("{content}日"));
+                assert_eq!(
+                    original.as_ref(),
+                    content,
+                    "snapshots must stay immutable across edits"
+                );
+                input.undo(&Undo, window, cx);
+                assert_eq!(input.as_str(), content);
+            });
+        })
+        .unwrap();
     }
 
     #[test]

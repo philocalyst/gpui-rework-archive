@@ -820,8 +820,11 @@ impl TextLayout {
             WhiteSpace::Normal => known_dimensions.width.or(match available_space.width {
                 // Otherwise if the available space is a concrete value, then that is the width to wrap to.
                 Definite(x) => Some(x),
-                // If the wrapping is content-based, then there is no wrapping of text.
-                MaxContent | MinContent => None,
+                // Flexbox asks for the smallest width at legal line breaks.
+                // Reporting max-content here makes the automatic minimum size
+                // prevent ordinary prose from ever shrinking and wrapping.
+                MinContent => Some(Pixels::ZERO),
+                MaxContent => None,
             }),
         }
     }
@@ -938,7 +941,7 @@ impl TextLayout {
                 //    sizing with whatever width some earlier measure pass happened to use)
                 if let Some(text_layout) = element_state.0.layout.borrow().as_ref()
                     && let Some(size) = text_layout.size
-                    && (wrap_width.is_none() || wrap_width == text_layout.wrap_width)
+                    && wrap_width == text_layout.wrap_width
                     && truncate_width.is_none()
                     && text_layout.truncate_width.is_none()
                 {

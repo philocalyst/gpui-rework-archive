@@ -50,3 +50,5 @@ xcuserdata/
 .build
 
 /build
+crates/gpui_codepen/web/dist/
+.trunk/

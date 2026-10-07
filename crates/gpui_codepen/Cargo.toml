@@ -1,0 +1,45 @@
+[package]
+name = "gpui_ce_codepen"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+publish = false
+description = "A native GPUI guide with live, executable Rust components"
+
+[dependencies]
+gpui.workspace = true
+gpui_platform.workspace = true
+gpui_ce_elements = { path = "../gpui_elements" }
+gpui_codepen_guest = { path = "guest" }
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+futures.workspace = true
+web-time.workspace = true
+uuid = { workspace = true, features = ["js"] }
+rustc_lexer = { package = "ra-ap-rustc_lexer", version = "0.175" }
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+tempfile.workspace = true
+libc.workspace = true
+tiny_http = "0.12"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows.workspace = true
+
+[target.'cfg(target_family = "wasm")'.dependencies]
+wasm-bindgen.workspace = true
+wasm-bindgen-futures.workspace = true
+js-sys.workspace = true
+web-sys = { version = "0.3", features = ["Window", "Request", "RequestInit", "Response", "Headers", "Storage", "AbortController", "AbortSignal", "Navigator", "Blob", "BlobPropertyBag"] }
+
+[[bin]]
+name = "gpui-guide"
+path = "src/main.rs"
+
+[[bin]]
+name = "gpui-codepen-server"
+path = "src/server.rs"
+
+[lints]
+workspace = true
