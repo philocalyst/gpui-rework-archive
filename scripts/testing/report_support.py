@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import html
+import gzip
+import io
 import json
 import math
 from pathlib import Path, PurePosixPath
 import re
+import zlib
 from xml.parsers import expat
 from urllib.parse import quote, urlsplit
 from urllib.error import HTTPError
@@ -364,7 +367,7 @@ def load_report(root: Path) -> tuple[dict, Path]:
                 if field in ("png", "scene_json") and value is None:
                     raise ValueError(f"checkpoint {sid}/{cid} is missing {field}")
                 if value is not None:
-                    suffix = (".png",) if field.endswith("png") else (".json",)
+                    suffix = (".png",) if field.endswith("png") else (".json", ".json.gz")
                     relative = validate_relative(value, suffix)
                     if relative in referenced_paths:
                         raise ValueError(f"report asset is referenced more than once: {relative}")
@@ -380,6 +383,8 @@ def load_report(root: Path) -> tuple[dict, Path]:
 
 def validate_report_head(manifest: dict, expected_head: str) -> None:
     """Require embedded capture provenance to match the forge-verified head."""
+    if not isinstance(expected_head, str) or not re.fullmatch(r"[0-9a-fA-F]{40}", expected_head):
+        raise ValueError("expected publication head must be a full commit SHA")
     recorded = (manifest.get("environment") or {}).get("git_sha")
     if recorded is None:
         return
@@ -400,7 +405,16 @@ def read_asset(root: Path, relative: str) -> bytes:
         raise ValueError(f"report asset is too large: {relative}")
     if relative.endswith(".png") and not data.startswith(b"\x89PNG\r\n\x1a\n"):
         raise ValueError(f"report image is not a PNG: {relative}")
-    if relative.endswith(".json"):
+    if relative.endswith(".json.gz"):
+        try:
+            with gzip.GzipFile(fileobj=io.BytesIO(data)) as compressed:
+                expanded = compressed.read(MAX_FILE_BYTES + 1)
+        except (OSError, EOFError, zlib.error) as error:
+            raise ValueError(f"scene JSON gzip is invalid: {relative}") from error
+        if len(expanded) > MAX_FILE_BYTES:
+            raise ValueError(f"expanded scene JSON exceeds the 12 MiB limit: {relative}")
+        json.loads(expanded)
+    elif relative.endswith(".json"):
         json.loads(data)
     return data
 
@@ -743,15 +757,16 @@ def trusted_index(manifest: dict) -> bytes:
             checkpoint_name = html.escape(str(checkpoint.get("name", checkpoint_id)))
             checkpoint_status = html.escape(str(checkpoint.get("status", "baseline_unavailable")))
             timestamp = html.escape(str(checkpoint.get("time_ns", "n/a")))
-            scene_path = validate_relative(checkpoint["scene_json"], (".json",))
+            scene_path = validate_relative(checkpoint["scene_json"], (".json", ".json.gz"))
             scene_url = html.escape(quote(scene_path, safe="/"), quote=True)
+            scene_label = "Scene JSON (gzip)" if scene_path.endswith(".json.gz") else "Scene JSON"
             escaped_checkpoint_id = html.escape(checkpoint_id)
             parts.extend([
                 "  <article>",
                 f"    <h3>{checkpoint_name}</h3>",
                 f'    <p><code>{escaped_id}/{escaped_checkpoint_id}</code> · {timestamp} ns · '
                 f'<span class="status">{checkpoint_status}</span> · '
-                f'<a href="{scene_url}">Scene JSON</a></p>',
+                f'<a href="{scene_url}">{scene_label}</a></p>',
                 '    <div class="images">',
             ])
             figures = (

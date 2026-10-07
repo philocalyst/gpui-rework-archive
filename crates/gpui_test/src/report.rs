@@ -3,13 +3,18 @@ use crate::{
     RenderedSuite, ScenarioMetrics, Viewport, validate_id,
 };
 use anyhow::{Context, Result, ensure};
+use flate2::{Compression, GzBuilder, read::MultiGzDecoder};
 use plotters::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::{BTreeMap, BTreeSet, HashSet},
     fs,
+    io::{Read, Write},
     path::{Path, PathBuf},
 };
+
+const MAX_COMPRESSED_SCENE_BYTES: u64 = 12 * 1024 * 1024;
+const MAX_DECOMPRESSED_SCENE_BYTES: usize = 12 * 1024 * 1024;
 
 /// Optional output settings for a capture report.
 #[derive(Clone, Debug, Default)]
@@ -244,13 +249,14 @@ pub fn write_report(
                 scenario.id,
                 checkpoint.id
             );
-            let scene_file = format!("{}.scene.json", checkpoint.id);
+            let scene_file = format!("{}.scene.json.gz", checkpoint.id);
             let png_file = format!("{}.png", checkpoint.id);
             let scene_path = dir.join(&scene_file);
-            // Full captures are machine-readable artifacts; compact JSON keeps atlas bytes and
-            // large path workloads small enough to host. Reviewed snapshots retain the outline.
+            // Compress artifact bytes after serialization; comparison and snapshots still use
+            // the original scene values, independent of their storage encoding.
             let scene_bytes = serde_json::to_vec(&checkpoint.capture)?;
-            fs::write(&scene_path, &scene_bytes)
+            let compressed_scene = gzip_scene_json(&scene_bytes)?;
+            fs::write(&scene_path, &compressed_scene)
                 .with_context(|| format!("writing {}", scene_path.display()))?;
             let png_path = dir.join(&png_file);
             save_png(&png_path, &checkpoint.image)?;
@@ -462,7 +468,9 @@ pub fn read_manifest(report_dir: impl AsRef<Path>) -> Result<ReportManifest> {
                 checkpoint.id
             );
             ensure!(
-                checkpoint.scene_json == format!("{}/{}.scene.json", scenario.id, checkpoint.id)
+                (checkpoint.scene_json == format!("{}/{}.scene.json", scenario.id, checkpoint.id)
+                    || checkpoint.scene_json
+                        == format!("{}/{}.scene.json.gz", scenario.id, checkpoint.id))
                     && checkpoint.png == format!("{}/{}.png", scenario.id, checkpoint.id),
                 "noncanonical artifact paths for {}/{}",
                 scenario.id,
@@ -518,11 +526,9 @@ pub fn read_report(report_dir: impl AsRef<Path>) -> Result<RenderedSuite> {
         let mut checkpoints = Vec::with_capacity(scenario.checkpoints.len());
         for checkpoint in scenario.checkpoints {
             let scene_path = artifact_path(&root, &checkpoint.scene_json)?;
-            let capture: gpui::SceneCapture = serde_json::from_slice(
-                &fs::read(&scene_path)
-                    .with_context(|| format!("reading scene capture {}", scene_path.display()))?,
-            )
-            .with_context(|| format!("parsing scene capture {}", scene_path.display()))?;
+            let capture: gpui::SceneCapture =
+                serde_json::from_slice(&read_scene_json(&scene_path)?)
+                    .with_context(|| format!("parsing scene capture {}", scene_path.display()))?;
             capture.validate().with_context(|| {
                 format!("validating scene capture {}/{}", scenario.id, checkpoint.id)
             })?;
@@ -887,8 +893,53 @@ fn read_image(path: &Path) -> Result<image::RgbaImage> {
 }
 
 fn read_json_value(path: &Path) -> Result<serde_json::Value> {
-    serde_json::from_slice(&fs::read(path).with_context(|| format!("reading {}", path.display()))?)
+    serde_json::from_slice(&read_scene_json(path)?)
         .with_context(|| format!("parsing scene capture {}", path.display()))
+}
+
+fn gzip_scene_json(bytes: &[u8]) -> Result<Vec<u8>> {
+    let mut encoder = GzBuilder::new()
+        .mtime(0)
+        .write(Vec::new(), Compression::fast());
+    encoder
+        .write_all(bytes)
+        .context("compressing scene capture")?;
+    encoder
+        .finish()
+        .context("finishing compressed scene capture")
+}
+
+fn read_scene_json(path: &Path) -> Result<Vec<u8>> {
+    let compressed = path.extension().is_some_and(|extension| extension == "gz");
+    if compressed {
+        ensure!(
+            path.metadata()?.len() <= MAX_COMPRESSED_SCENE_BYTES,
+            "compressed scene capture exceeds 12 MiB: {}",
+            path.display()
+        );
+    }
+    let bytes = fs::read(path).with_context(|| format!("reading {}", path.display()))?;
+    if compressed {
+        ensure!(
+            bytes.len() as u64 <= MAX_COMPRESSED_SCENE_BYTES,
+            "compressed scene capture exceeds 12 MiB: {}",
+            path.display()
+        );
+        let decoder = MultiGzDecoder::new(bytes.as_slice());
+        let mut bounded = decoder.take((MAX_DECOMPRESSED_SCENE_BYTES + 1) as u64);
+        let mut decoded = Vec::new();
+        bounded
+            .read_to_end(&mut decoded)
+            .with_context(|| format!("decompressing scene capture {}", path.display()))?;
+        ensure!(
+            decoded.len() <= MAX_DECOMPRESSED_SCENE_BYTES,
+            "decompressed scene capture exceeds 12 MiB: {}",
+            path.display()
+        );
+        Ok(decoded)
+    } else {
+        Ok(bytes)
+    }
 }
 
 fn write_markdown(manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
@@ -1303,11 +1354,16 @@ fn write_html(manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
         ));
         for checkpoint in &scenario.checkpoints {
             html.push_str(&format!(
-                "<h3>{} · {:.1} ms · {}</h3><p><a href=\"{}\">Captured scene JSON</a></p>",
+                "<h3>{} · {:.1} ms · {}</h3><p><a href=\"{}\">{}</a></p>",
                 escape_html(&checkpoint.name),
                 checkpoint.time_ns as f64 / 1_000_000.0,
                 status_name(checkpoint.status),
-                checkpoint.scene_json
+                checkpoint.scene_json,
+                if checkpoint.scene_json.ends_with(".gz") {
+                    "Captured scene JSON (gzip)"
+                } else {
+                    "Captured scene JSON"
+                }
             ));
             html.push_str("<div class=\"images\">");
             let mut images = vec![

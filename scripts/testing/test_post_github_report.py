@@ -1,5 +1,6 @@
 import base64
 import copy
+import gzip
 import json
 import tempfile
 import unittest
@@ -112,6 +113,8 @@ class ReportSupportTests(unittest.TestCase):
     def test_recorded_report_head_is_optional_but_must_match_when_present(self):
         manifest = fixture_manifest()
         support.validate_report_head(manifest, "a" * 40)
+        with self.assertRaisesRegex(ValueError, "expected publication head"):
+            support.validate_report_head(manifest, "bad")
         manifest["environment"]["git_sha"] = "A" * 40
         support.validate_report_head(manifest, "a" * 40)
         manifest["environment"]["git_sha"] = "not-a-full-sha"
@@ -150,6 +153,49 @@ class ReportSupportTests(unittest.TestCase):
             (root / "manifest.json").write_text(json.dumps(manifest))
             with self.assertRaisesRegex(ValueError, "changes must be a list"):
                 support.load_report(root)
+
+    def test_scene_json_raw_and_gzip_assets_are_both_validated_and_linked(self):
+        scene = b'{"scene":"compressed"}'
+        with tempfile.TemporaryDirectory() as temporary:
+            raw_root = Path(temporary) / "raw"
+            raw_manifest = fixture_manifest()
+            write_report(raw_root, raw_manifest, scene=scene)
+            raw, raw_report_root = support.load_report(raw_root)
+            self.assertEqual(support.report_assets(raw, raw_report_root)["gallery/initial.scene.json"], scene)
+            self.assertIn("gallery/initial.scene.json", support.trusted_index(raw).decode())
+
+            gzip_root = Path(temporary) / "gzip"
+            gzip_manifest = fixture_manifest()
+            gzip_manifest["scenarios"][0]["checkpoints"][0]["scene_json"] = "gallery/initial.scene.json.gz"
+            write_report(gzip_root, gzip_manifest, scene=scene)
+            (gzip_root / "gallery/initial.scene.json").unlink()
+            compressed = gzip.compress(scene, mtime=0)
+            (gzip_root / "gallery/initial.scene.json.gz").write_bytes(compressed)
+            normalized, gzip_report_root = support.load_report(gzip_root)
+            assets = support.report_assets(normalized, gzip_report_root)
+            self.assertEqual(assets["gallery/initial.scene.json.gz"], compressed)
+            viewer = support.trusted_index(normalized).decode()
+            self.assertIn("gallery/initial.scene.json.gz", viewer)
+            self.assertIn("Scene JSON (gzip)", viewer)
+
+    def test_scene_json_gzip_rejects_invalid_truncated_and_expanded_overlimit(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "report"
+            manifest = fixture_manifest()
+            manifest["scenarios"][0]["checkpoints"][0]["scene_json"] = "gallery/initial.scene.json.gz"
+            write_report(root, manifest)
+            (root / "gallery/initial.scene.json").unlink()
+            compressed_path = root / "gallery/initial.scene.json.gz"
+            for payload in (b"not gzip", gzip.compress(b'{"scene":1}')[:-2]):
+                compressed_path.write_bytes(payload)
+                normalized, report_root = support.load_report(root)
+                with self.assertRaisesRegex(ValueError, "gzip is invalid"):
+                    support.report_assets(normalized, report_root)
+
+            compressed_path.write_bytes(gzip.compress(b" " * (support.MAX_FILE_BYTES + 1), mtime=0))
+            normalized, report_root = support.load_report(root)
+            with self.assertRaisesRegex(ValueError, "expanded scene JSON exceeds"):
+                support.report_assets(normalized, report_root)
 
     def test_asset_symlinks_are_rejected(self):
         with tempfile.TemporaryDirectory() as temporary:

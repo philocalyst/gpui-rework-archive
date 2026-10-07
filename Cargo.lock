@@ -2803,6 +2803,7 @@ name = "gpui_ce_test"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "flate2",
  "gpui-ce",
  "gpui_ce_parley",
  "gpui_ce_platform",

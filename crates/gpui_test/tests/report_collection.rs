@@ -1,12 +1,15 @@
 use anyhow::Result;
+use flate2::{Compression, GzBuilder, read::MultiGzDecoder};
 use gpui::{Scene, SceneCapture, WindowCheckReport, WindowCheckStatus};
 use gpui_test::{
     ImageDifference, NativeCheckpoint, NativeReplayInfo, NativeReplayMetrics, RenderedCheckpoint,
     RenderedScenario, RenderedSuite, ReportChangeKind, ReportOptions, ReportStatus,
-    ScenarioMetrics, TimingPercentiles, Viewport, collect_reports, read_report, write_report,
+    ScenarioMetrics, TimingPercentiles, Viewport, collect_reports, compare_reports, read_report,
+    write_report,
 };
 use std::{
     fs,
+    io::{Read, Write},
     path::PathBuf,
     sync::atomic::{AtomicUsize, Ordering},
 };
@@ -83,6 +86,30 @@ fn write(suite: &RenderedSuite, path: &PathBuf) {
     write_report(suite, path, ReportOptions::default()).unwrap();
 }
 
+fn gzip(bytes: &[u8]) -> Vec<u8> {
+    let mut encoder = GzBuilder::new()
+        .mtime(0)
+        .write(Vec::new(), Compression::fast());
+    encoder.write_all(bytes).unwrap();
+    encoder.finish().unwrap()
+}
+
+fn rewrite_scene_as_legacy(report: &PathBuf) -> Result<()> {
+    let manifest_path = report.join("manifest.json");
+    let mut manifest: serde_json::Value = serde_json::from_slice(&fs::read(&manifest_path)?)?;
+    let checkpoint = &mut manifest["scenarios"][0]["checkpoints"][0];
+    let compressed_path = checkpoint["scene_json"].as_str().unwrap().to_owned();
+    let compressed_scene = fs::read(report.join(&compressed_path))?;
+    let mut scene_json = Vec::new();
+    MultiGzDecoder::new(compressed_scene.as_slice()).read_to_end(&mut scene_json)?;
+    let legacy_path = compressed_path.trim_end_matches(".gz").to_owned();
+    fs::write(report.join(&legacy_path), scene_json)?;
+    fs::remove_file(report.join(&compressed_path))?;
+    checkpoint["scene_json"] = legacy_path.into();
+    fs::write(&manifest_path, serde_json::to_vec_pretty(&manifest)?)?;
+    Ok(())
+}
+
 #[test]
 fn read_report_round_trips_font_native_and_platform_metadata() -> Result<()> {
     let dirs = TestDirs::new();
@@ -143,6 +170,74 @@ fn read_report_round_trips_font_native_and_platform_metadata() -> Result<()> {
         serde_json::to_value(loaded.platform_checks)?,
         serde_json::to_value(suite.platform_checks)?
     );
+    Ok(())
+}
+
+#[test]
+fn gzip_scene_artifacts_are_deterministic_and_compare_equal_to_legacy_json() -> Result<()> {
+    let dirs = TestDirs::new();
+    let suite = sample_suite([40, 80, 120, 255]);
+    let compressed_path = dirs.path("compressed");
+    let duplicate_path = dirs.path("compressed-duplicate");
+    let legacy_path = dirs.path("legacy");
+    write(&suite, &compressed_path);
+    write(&suite, &duplicate_path);
+    write(&suite, &legacy_path);
+
+    let compressed_bytes = fs::read(compressed_path.join("sample/frame.scene.json.gz"))?;
+    assert_eq!(
+        compressed_bytes,
+        fs::read(duplicate_path.join("sample/frame.scene.json.gz"))?,
+        "gzip output should be byte-for-byte stable"
+    );
+    rewrite_scene_as_legacy(&legacy_path)?;
+
+    let compressed = read_report(&compressed_path)?;
+    let legacy = read_report(&legacy_path)?;
+    assert_eq!(
+        compressed.scenarios[0].snapshots()?,
+        legacy.scenarios[0].snapshots()?
+    );
+    assert!(compare_reports(&legacy_path, &compressed_path)?.is_empty());
+    Ok(())
+}
+
+#[test]
+fn gzip_scene_reader_handles_member_boundaries_and_rejects_truncation_or_trailing_data()
+-> Result<()> {
+    let dirs = TestDirs::new();
+    let valid = dirs.path("valid");
+    write(&sample_suite([1, 2, 3, 255]), &valid);
+    let scene_path = valid.join("sample/frame.scene.json.gz");
+    let compressed = fs::read(&scene_path)?;
+    let mut decoder = MultiGzDecoder::new(compressed.as_slice());
+    let mut json = Vec::new();
+    decoder.read_to_end(&mut json)?;
+
+    let split = json.len() / 2;
+    let mut two_members = gzip(&json[..split]);
+    two_members.extend(gzip(&json[split..]));
+    fs::write(&scene_path, two_members)?;
+    assert_eq!(read_report(&valid)?.scenarios.len(), 1);
+
+    let mut trailing_member = fs::read(&scene_path)?;
+    trailing_member.extend(gzip(b"{}"));
+    fs::write(&scene_path, trailing_member)?;
+    let error = read_report(&valid).unwrap_err();
+    assert!(format!("{error:#}").contains("parsing scene capture"));
+
+    fs::write(&scene_path, &compressed[..compressed.len() - 8])?;
+    let error = read_report(&valid).unwrap_err();
+    assert!(format!("{error:#}").contains("decompressing scene capture"));
+
+    fs::write(&scene_path, b"not a gzip stream")?;
+    let error = read_report(&valid).unwrap_err();
+    assert!(format!("{error:#}").contains("decompressing scene capture"));
+
+    let oversized = vec![0; 12 * 1024 * 1024 + 1];
+    fs::write(&scene_path, gzip(&oversized))?;
+    let error = read_report(&valid).unwrap_err();
+    assert!(format!("{error:#}").contains("decompressed scene capture exceeds 12 MiB"));
     Ok(())
 }
 
@@ -262,11 +357,14 @@ fn read_report_validates_capture_before_returning_it_for_replay() {
     let dirs = TestDirs::new();
     let path = dirs.path("report");
     write(&sample_suite([1, 2, 3, 255]), &path);
-    let scene_path = path.join("sample/frame.scene.json");
-    let mut capture: serde_json::Value =
-        serde_json::from_slice(&fs::read(&scene_path).unwrap()).unwrap();
+    let scene_path = path.join("sample/frame.scene.json.gz");
+    let compressed = fs::read(&scene_path).unwrap();
+    let mut decoder = MultiGzDecoder::new(compressed.as_slice());
+    let mut scene_json = Vec::new();
+    decoder.read_to_end(&mut scene_json).unwrap();
+    let mut capture: serde_json::Value = serde_json::from_slice(&scene_json).unwrap();
     capture["version"] = 999.into();
-    fs::write(&scene_path, serde_json::to_vec(&capture).unwrap()).unwrap();
+    fs::write(&scene_path, gzip(&serde_json::to_vec(&capture).unwrap())).unwrap();
 
     let error = read_report(&path).unwrap_err();
     assert!(format!("{error:#}").contains("validating scene capture sample/frame"));
