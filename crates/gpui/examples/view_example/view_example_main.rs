@@ -9,7 +9,7 @@ mod example_editor;
 mod example_input;
 mod example_text_area;
 
-#[cfg(test)]
+#[cfg(all(test, feature = "test-support"))]
 mod example_tests;
 
 use example_editor::Editor;

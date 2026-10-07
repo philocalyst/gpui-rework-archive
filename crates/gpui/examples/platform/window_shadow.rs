@@ -1,7 +1,7 @@
 #![cfg_attr(target_family = "wasm", no_main)]
 
-#[path = "../example_support/fonts.rs"]
-mod example_support;
+#[path = "../shared/prelude.rs"]
+mod example_prelude;
 
 use gpui::{
     App, Bounds, Context, CursorStyle, Decorations, HitboxBehavior, MouseButton, Pixels, Point,
@@ -199,9 +199,7 @@ fn resize_edge(pos: Point<Pixels>, shadow_size: Pixels, size: Size<Pixels>) -> O
 
 fn run_example() {
     application().run(|cx: &mut App| {
-        if !example_support::load_fonts(cx) {
-            return;
-        }
+        example_prelude::init_example(cx, "Window Shadow");
         let bounds = Bounds::centered(None, size(px(600.0), px(600.0)), cx);
         cx.open_window(
             WindowOptions::new()

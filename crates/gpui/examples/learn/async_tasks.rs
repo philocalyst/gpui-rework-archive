@@ -1,6 +1,6 @@
 //! A cancellable foreground task awaiting background work.
 
-use gpui::{Context, Render, Task, Window, div, prelude::*, rgb};
+use gpui::{Context, Render, Task, Window, div, prelude::*, px, rgb};
 use std::time::Duration;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

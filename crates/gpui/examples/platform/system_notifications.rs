@@ -4,8 +4,6 @@
 
 #[path = "../shared/prelude.rs"]
 mod example_prelude;
-#[path = "../example_support/fonts.rs"]
-mod example_support;
 
 use gpui::{
     App, AppContext as _, Context, Div, SharedString, Stateful, SystemNotification,
@@ -101,9 +99,6 @@ fn button(id: &'static str, label: &'static str) -> Stateful<Div> {
 
 fn run_example() {
     application().run(|cx: &mut App| {
-        if !example_support::load_fonts(cx) {
-            return;
-        }
         cx.set_app_identity("dev.zed.gpui.system-notifications", "GPUI Notifications");
 
         let view = cx.new(|_| SystemNotificationExample {
@@ -126,7 +121,7 @@ fn run_example() {
             }
         });
 
-        let options = example_prelude::centered_window(example_prelude::px_size(560., 360.), cx)
+        let options = example_prelude::centered_window(gpui::size(gpui::px(560.), gpui::px(360.)), cx)
             .titlebar(Some(gpui::TitlebarOptions {
                 title: Some("System Notifications Example".into()),
                 ..Default::default()
