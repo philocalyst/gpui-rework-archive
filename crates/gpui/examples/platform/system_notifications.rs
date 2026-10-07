@@ -121,11 +121,12 @@ fn run_example() {
             }
         });
 
-        let options = example_prelude::centered_window(gpui::size(gpui::px(560.), gpui::px(360.)), cx)
-            .titlebar(Some(gpui::TitlebarOptions {
-                title: Some("System Notifications Example".into()),
-                ..Default::default()
-            }));
+        let options =
+            example_prelude::centered_window(gpui::size(gpui::px(560.), gpui::px(360.)), cx)
+                .titlebar(Some(gpui::TitlebarOptions {
+                    title: Some("System Notifications Example".into()),
+                    ..Default::default()
+                }));
         cx.open_window(options, move |_, _| view)
             .expect("open system notifications example window");
         example_prelude::init_example(cx, "System Notifications");
