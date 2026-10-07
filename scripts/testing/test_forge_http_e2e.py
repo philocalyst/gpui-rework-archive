@@ -15,7 +15,7 @@ from unittest.mock import patch
 
 import post_github_report as github
 import post_gitlab_comment as gitlab
-from test_post_github_report import PNG, add_native_replay, add_platform_checks, fixture_manifest, write_report
+from forge_fixtures import PNG, add_native_replay, add_platform_checks, fixture_manifest, write_report
 import report_support as report
 
 
@@ -280,7 +280,7 @@ class ForgeHttpEndToEndTests(unittest.TestCase):
             run_root = base + "/pages/runs/" + "a" * 40 + "/"
             for name, expected in {
                 "report.md": report.markdown_report(manifest),
-                **report._trusted_viewer_sources(),
+                **report.common._trusted_viewer_sources(),
             }.items():
                 with self.subTest(asset=name):
                     self.assertEqual(urllib.request.urlopen(run_root + name, timeout=5).read(), expected)

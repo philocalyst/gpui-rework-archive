@@ -302,7 +302,7 @@ path = "examples/gallery/interaction/inline_layout.rs"
 
 [[example]]
 name = "layer_shell"
-path = "examples/gallery/platform/layer_shell.rs"
+path = "examples/platform/layer_shell.rs"
 
 [[example]]
 name = "svg"
@@ -310,11 +310,11 @@ path = "examples/gallery/rendering/svg/svg.rs"
 
 [[example]]
 name = "windows"
-path = "examples/gallery/platform/windows.rs"
+path = "examples/platform/windows.rs"
 
 [[example]]
 name = "window_shadow"
-path = "examples/gallery/platform/window_shadow.rs"
+path = "examples/platform/window_shadow.rs"
 
 # ==========================================================================
 # Text examples - text-system inspection and transforms

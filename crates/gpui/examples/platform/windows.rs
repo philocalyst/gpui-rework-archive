@@ -1,6 +1,6 @@
 //! Native window options, placement, visibility, and prompting in one small control room.
 
-#[path = "../../shared/prelude.rs"]
+#[path = "../shared/prelude.rs"]
 mod example_prelude;
 
 use std::time::Duration;
