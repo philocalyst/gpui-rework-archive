@@ -106,6 +106,14 @@ impl Render for InteractionLesson {
                             cx.notify();
                         }),
                     )
+                    // A release outside the panel must also clear the pressed state.
+                    .on_mouse_up_out(
+                        MouseButton::Left,
+                        cx.listener(|this, _, _, cx| {
+                            this.mouse_pressed = false;
+                            cx.notify();
+                        }),
+                    )
                     .on_mouse_move(cx.listener(|this, event: &MouseMoveEvent, _, cx| {
                         this.mouse_position = Some(event.position);
                         cx.notify();

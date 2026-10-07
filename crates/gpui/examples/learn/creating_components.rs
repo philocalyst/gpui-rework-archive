@@ -67,7 +67,7 @@ impl RenderOnce for CounterCard {
 }
 
 fn element_counter(window: &mut Window, cx: &mut App) -> CounterCard {
-    // GPUI associates use_state with this position in the element tree. Stable identity matters.
+    // use_state is keyed by this call site. For repeated rows, use_keyed_state with a row ID.
     let state = window.use_state(cx, |_, _| 0i32);
     let count = *state.read(cx);
     CounterCard::new(

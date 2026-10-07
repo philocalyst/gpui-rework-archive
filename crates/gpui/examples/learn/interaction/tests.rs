@@ -1,4 +1,4 @@
-//! Pointer state, selection, keyboard traversal, and a real drag/drop sequence.
+//! Pointer state and a real drag/drop sequence, including release outside the source.
 use super::*;
 use gpui::TestAppContext;
 
@@ -22,6 +22,17 @@ fn pointer_events_update_the_view(cx: &mut TestAppContext) {
     cx.read_entity(&view, |view, _| assert!(view.mouse_pressed));
     cx.simulate_mouse_up(
         bounds.center(),
+        gpui::MouseButton::Left,
+        gpui::Modifiers::default(),
+    );
+    cx.read_entity(&view, |view, _| assert!(!view.mouse_pressed));
+    cx.simulate_mouse_down(
+        bounds.center(),
+        gpui::MouseButton::Left,
+        gpui::Modifiers::default(),
+    );
+    cx.simulate_mouse_up(
+        gpui::point(px(0.), px(0.)),
         gpui::MouseButton::Left,
         gpui::Modifiers::default(),
     );
