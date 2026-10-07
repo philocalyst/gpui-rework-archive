@@ -2,58 +2,94 @@
 
 #[path = "../../shared/prelude.rs"]
 mod example_prelude;
-#[path = "../../example_support/fonts.rs"]
-mod example_support;
+#[path = "../../shared/media_assets.rs"]
+mod media_assets;
 
-use gpui::{App, AppContext as _, Context, Render, Window, div, img, prelude::*};
-use gpui_platform::application;
-use std::path::PathBuf;
+use gpui::{
+    App, Asset, Context, ImageAssetLoader, Render, RenderImage, Window, img, prelude::*, px, size,
+};
+use std::{sync::Arc, time::Duration};
 
 struct GifViewer {
-    gif_path: PathBuf,
-}
-
-impl GifViewer {
-    fn new(gif_path: PathBuf) -> Self {
-        Self { gif_path }
-    }
+    image: Arc<RenderImage>,
 }
 
 impl Render for GifViewer {
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
-        div().size_full().child(
-            img(self.gif_path.clone())
-                .size_full()
-                .object_fit(gpui::ObjectFit::Contain)
-                .id("gif"),
-        )
+        img(self.image.clone())
+            // Img keeps its frame index and last simulated tick in element state under this ID.
+            .id("gif-viewer-image")
+            .size_full()
+            .object_fit(gpui::ObjectFit::Contain)
     }
 }
 
-fn run_example() {
-    application().run(|cx: &mut App| {
-        if !example_support::load_fonts(cx) {
-            return;
-        }
-        let gif_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("examples/gallery/rendering/image/black-cat-typing.gif");
-
-        let options = example_prelude::centered_window(640., 480., cx).focus(true);
-        cx.open_window(options, |_, cx| cx.new(|_| GifViewer::new(gif_path)))
-            .expect("open animated GIF viewer");
-        example_prelude::init_example(cx, "GIF Viewer");
-    });
+fn gif_scenario() -> anyhow::Result<gpui_test::Scenario<GifViewer>> {
+    Ok(gpui_test::Scenario::new(
+        "gif-viewer",
+        "Animated GIF",
+        size(px(640.), px(480.)),
+        |_, cx: &mut App| {
+            // Decode the embedded bytes once so the simulated image clock starts on first paint.
+            let resource = gpui::Resource::Embedded("images/typing-cat.gif".into());
+            let image = futures::executor::block_on(ImageAssetLoader::load(resource, cx))
+                .expect("decode embedded GIF");
+            cx.new(|_| GifViewer { image })
+        },
+    )?
+    .checkpoint("start", "First animation frame", Duration::ZERO)?
+    .checkpoint(
+        "middle",
+        "Animation advances at simulated time",
+        Duration::from_millis(500),
+    )?
+    .checkpoint(
+        "loop",
+        "Animation returns after a full cycle",
+        Duration::from_secs(1),
+    )?)
 }
 
 #[cfg(not(target_family = "wasm"))]
 fn main() {
-    env_logger::init();
-    run_example();
+    example_prelude::run_example_with_assets(
+        gif_scenario().expect("valid GIF scenario"),
+        Arc::new(media_assets::MediaAssets),
+    )
+    .expect("run GIF viewer");
 }
 
 #[cfg(target_family = "wasm")]
 #[wasm_bindgen::prelude::wasm_bindgen(start)]
 pub fn start() {
     gpui_platform::web_init();
-    run_example();
+    example_prelude::run_example_with_assets(
+        gif_scenario().expect("valid GIF scenario"),
+        Arc::new(media_assets::MediaAssets),
+    )
+    .expect("run GIF viewer");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use gpui_test::Harness;
+
+    #[test]
+    fn simulated_clock_advances_and_loops_the_embedded_gif() -> anyhow::Result<()> {
+        let rendered = Harness::new()
+            .with_asset_source(Arc::new(media_assets::MediaAssets))
+            .run(&gif_scenario()?)?;
+        let frames = &rendered.checkpoints;
+        anyhow::ensure!(frames.len() == 3, "unexpected GIF checkpoints");
+        anyhow::ensure!(
+            frames[0].image != frames[1].image,
+            "the midpoint should render a different GIF frame"
+        );
+        anyhow::ensure!(
+            frames[0].image == frames[2].image,
+            "the full cycle should return to the initial GIF frame"
+        );
+        Ok(())
+    }
 }

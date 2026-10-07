@@ -34,7 +34,7 @@ See [running tests and hosting reports](docs/testing.md) and [testing your own v
       .child("Hello, GPUI")
   ```
 
-  [Layout example](crates/gpui/examples/learn/layout.rs) ​ · ​ [Styling example](crates/gpui/examples/learn/styling.rs)
+  [Layout example](crates/gpui/examples/learn/layout.rs) ​ · ​ [Interaction and styles](crates/gpui/examples/learn/interaction.rs)
 
 - State and events
 
@@ -50,7 +50,7 @@ See [running tests and hosting reports](docs/testing.md) and [testing your own v
       }))
   ```
 
-  [Interaction example](crates/gpui/examples/learn/interactive_elements.rs)
+  [Interaction example](crates/gpui/examples/learn/interaction.rs)
 
 - Actions and keybinds
 

@@ -3,15 +3,9 @@
 #[path = "../shared/prelude.rs"]
 mod example_prelude;
 
-use gpui::{App, AppContext as _};
-use gpui_test::gallery::AsyncTaskScenario;
+use gpui_test::gallery::tasks_scenario;
 
 fn main() {
-    gpui_platform::application().run(|cx: &mut App| {
-        let options = example_prelude::centered_window(360., 220., cx);
-        cx.open_window(options, |_, cx| cx.new(|_| AsyncTaskScenario::new()))
-            .expect("Failed to open window");
-
-        example_prelude::init_example(cx, "Async Tasks");
-    });
+    let scenario = tasks_scenario().expect("valid async task scenario");
+    example_prelude::run_example(scenario).expect("run async task example");
 }

@@ -1,52 +1,65 @@
 # GPUI examples
 
-Examples are grouped by the idea they teach: `learn` is the short learning path, `gallery` keeps focused reference demos, `text` covers text-system inspection, `platform` demonstrates native integration, and `bench` contains stress and performance views. Cargo targets use short topic names, so launch examples with `scripts/gpui-example <name>` or `cargo run -p gpui-ce --example <name>`.
+The 31 examples are organized by the GPUI idea they teach. Start with `learn` for the component and input model, use `gallery` for reusable rendering cases, and use `platform` for operating-system integration. The remaining `text`, `bench`, and `view_example` targets cover text internals, paint workloads, and a composed editor. Run a native window with `scripts/gpui-example <name>` or `cargo run -p gpui-ce --example <name>`.
 
-The deterministic gallery lives in `gpui_test::gallery`. Its views are also used by the matching `layout`, `text`, `blur`/`render_effects`, `animation`, `input_states`, `svg`, `uniform_list`, and `async_tasks` examples. Run captures from the repository root with `scripts/gpui-test list` and `scripts/gpui-test run`. The registry covers default, narrow, 2x, and fractional-DPI text; layered effects; five animation clock checkpoints (0, 300, 600, 900, and 1200 ms); flexible layout; input-dispatched selection, disclosure, focus, and scrolling; embedded SVG/raster media; a virtualized overlap-heavy list; and six checkpoints covering task cancellation and restart.
+Most visual lessons also accept `--capture [--output DIR] [--samples N] [--baseline DIR]`. Capture mode uses the same typed scenario view and named state changes as the native window, then writes a CPU-rendered report without opening an OS window. The default output is `target/gpui-examples/<scenario-id>`. `--baseline` adds pixel and scene comparisons to that report. This path is useful on headless builders; it does not replace the native-only checks called out below. Capture mode is available for `actions_and_keybinds`, `animation`, `async_tasks`, `corner_smoothing`, `creating_components`, `custom_drawing`, `data_table`, `direction`, `gif_viewer`, `hello_world`, `image_loading`, `inline_layout`, `interaction`, `input_states`, `layout`, `pattern`, `paths_bench`, `render_effects`, `shadows`, `svg`, `text`, `text_system`, `uniform_list`, and `view_example`.
 
-The table marks shared cases as automated. Other targets remain manual-only in the current registry; those rows name the states that merit later deterministic cases. Platform notes are part of each example's purpose: a CPU-rendered capture does not replace checks against an operating system service, input device, display server, or window manager.
+The deterministic suite lives in `gpui_ce_test::gallery`. Its typed scenario builders are also used by the matching examples, so a checkpoint's view, viewport, input, and simulated time have one definition. Run `scripts/gpui-test list` and `scripts/gpui-test run` for the shared registry: default/narrow/2x/fractional text, effects, five animation times, flexible layout, dispatched focus/selection/disclosure/scroll input, embedded media, virtualized overlap, and task cancellation/restart. The standalone examples add interaction checkpoints for actions, counters, table sorting/selection, and focus.
 
-| Group | Example | What it demonstrates | Coverage and states to exercise | Requirements |
-| --- | --- | --- | --- | --- |
-| Learn | `interactive_elements` | Click count, callback-driven hover, raw mouse position/events, and drag data/drop feedback. | Manual: single/double/triple-click counts, hover enter/leave, pressed colors and coordinates, drag preview and accepted drop. | Pointer input. |
-| Learn | `actions_and_keybinds` | Registering actions and binding shortcuts. | Manual: Space increments; Backspace resets; focus and shortcut dispatch. | Keyboard input. |
-| Learn | `uniform_list` | Virtualized rendering of 2,000 stable rows with overlapping cell decoration. | Automated: deterministic initial list viewport; useful future cases are top, middle, and end offsets plus row identity. | Scroll input. |
-| Learn | `creating_components` | One reusable counter card backed by element-local `use_state`, parent props in `RenderOnce`, or an entity-backed `Render`. | Automated: real increment/decrement clicks, independent values, and state persistence across parent redraws. | Pointer input in the native demo. |
-| Learn | `layout` | Flexible sidebar/content layout and wrapping tiles. | Automated: fixed viewport; useful future cases are narrow and wide layouts. | None. |
-| Learn | `styling` | Pointer/focus states, conditional choice and badge styles, parent-to-child group hover, and appearance colors. | Automated: Tab and Shift+Tab move actual focus between styled controls. Manual: pointer states, group hover, conditional branches, and both themes. | Pointer and keyboard input in the native demo. |
-| Learn | `async_tasks` | A cancellable foreground task awaiting a background result. | Automated: ready, started, running, cancelled past the old deadline, restarted, and completed with result 42. | Native demo uses a 250 ms timer; tests use simulated time. |
-| Learn | `custom_drawing` | Canvas painting, paths, and pointer-driven drawing. | Manual: path geometry, pointer movement, and resize behavior. | Pointer input. |
-| Learn | `animation` | A repeated easing animation using GPUI's animation wrapper. | Automated: 0/300/600/900/1200 ms clock checkpoints. | None. |
-| Learn | `text` | Wrapping, inline highlights, colored wavy underline, and mixed scripts. | Automated: default and narrow viewports; useful future cases are line breaks and fallback glyph changes. | Bundled example fonts. |
-| Learn | `transitions` | Keyed bounce reset and declarative style transitions in one view. | Manual: initial position, restarted bounce, hover growth, and active color. | Pointer input. |
-| Learn | `motion_showcase` | Labeled motion controls and timeline previews. | Manual: preset selection, playback and scrub positions. | Pointer input. |
-| Learn | `haptic_feedback` | Haptic capability checks and slider feedback. | Manual: supported patterns and slider increments. | Haptic-capable Mac trackpad; calls are no-ops elsewhere. |
-| Learn | `blur` | Clip boundaries, nested filters, opacity, gradients, paths, and paint order. | Automated: fixed layered-effects view; useful future cases are filter nesting depth and overlap order. | None. |
-| Learn | `corner_smoothing` | Interactive rounded-corner smoothing and radius controls. | Manual: radius, smoothing, width, and height extremes. | Pointer input. |
-| Learn | `keyring` | Store, read, and delete credentials through the platform API. | Manual: each operation, missing credentials, and a custom Linux/FreeBSD label. | OS keyring service; stored credentials are written by the demo. |
-| Learn | `border_and_shadow_backgrounds` | Gradient backgrounds with border, drop-shadow, and inset-shadow combinations. | Manual: compare gradient directions, alpha, and combined shadows. | None. |
-| Learn | `direction` | Layout direction and direction-aware spacing. | Manual: left-to-right and right-to-left arrangements. | None. |
-| Gallery | `hello_world` | A minimal window and first rendered component. | Manual: startup, appearance, and closing the final window. | None. |
-| Gallery | `inline_layout` | Inline composition and element sizing. | Manual: wrapping and alignment at narrow window sizes. | None. |
-| Gallery | `input_states` | Focus-visible tab stops, item selection, tree disclosure, and tracked scrolling. | Automated: real pointer clicks select and collapse; scroll-wheel input moves labeled rows and reports actual scroll offset. | Keyboard, pointer, and scroll input. |
-| Gallery | `on_window_close_quit` | Quit behavior after the last window closes. | Manual: close one of several windows, then close the final window. | Window close interaction. |
-| Gallery | `render_effects` | Clipping, nested filters, opacity, gradients, paths, and layer order. | Automated: fixed layered-effects scene. | None. |
-| Gallery | `image_loading` | Asset-backed image loading and image parameters. | Manual: local asset success, parameterized failure, and sizing. | Uses files under `examples/gallery/rendering/image`; paths are manifest-relative. |
-| Gallery | `gif_viewer` | Animated GIF decoding and frame display. | Manual: frame progression, loop boundary, and resize. | Bundled GIF asset; image decoder. |
-| Gallery | `svg` | Inline monochrome SVG and procedural raster in rounded clipped frames. | Automated: shared media view with SVG transformation and raster clipping. | Self-contained; no external files. |
-| Gallery | `window` | Window options and multiple-window composition. | Manual: open, focus, resize, and close each window. | Native window manager. |
-| Gallery | `window_positioning` | Initial window placement and position updates. | Manual: centered/offset placement and monitor-boundary behavior. | Native display geometry. |
-| Gallery | `window_shadow` | Custom window-shadow appearance. | Manual: shadow edges, corners, and resize. | Native window compositor. |
-| Gallery | `layer_shell` | Linux layer-shell window integration. | Manual: layer, anchor, and exclusive-zone behavior. | Linux Wayland compositor with layer-shell support. |
-| Platform | `system_notifications` | Send, replace, dismiss, and respond to notifications. | Manual: delivery, replacement, dismissal, and response action. | Native notification service. |
-| Platform | `window_movable` | Move a window from a custom drag region. | Manual: drag initiation, release, and screen edges. | Native window manager and pointer input. |
-| Platform | `window_visibility` | Hide and show a native window; supports a `--smoke` cycle. | Manual: visible/hidden transitions and focus restoration. | Native window manager. |
-| Text | `text_system` | Font fallback, shaping, inline highlights, and text metrics. | Manual: mixed scripts, font features, line wrapping, and fallback selection. | Bundled IBM Plex, Lilex, and Noto sample fonts. |
-| Text | `text_transform_preview` | Preview text-transform variants. | Manual: each transform and mixed-case inputs. | None. |
-| Bench | `data_table` | A larger sortable and scrollable data table. | Manual: sorting, row selection, and scrolling; timing is workload-dependent. | Pointer and scroll input. |
-| Bench | `paths_bench` | Large vector-path paint workload. | Manual: compare frame time at each path-density setting. | GPU/window renderer; results depend on hardware. |
-| Bench | `pattern` | Repeated pattern fills and alignment. | Manual: pattern spacing, scale, and color. | None. |
-| Bench | `shadow` | A large set of shadow configurations. | Manual: compare blur/spread/offset combinations and rendering cost. | GPU/window renderer; results depend on hardware. |
-| View composition | `view_example` | A reusable editor composed into single-line input and text-area views. | Manual: typing, cursor movement, selection, newlines, and shared text state. | Keyboard input; clipboard behavior depends on the platform. |
+## Learn
 
-`image_loading` and `gif_viewer` use bundled resources through paths rooted at `CARGO_MANIFEST_DIR`; they do not depend on the shell's current directory. The shared media case embeds its SVG and generates its raster pixels in Rust. Text fixtures are embedded at compile time from `gpui_test/assets/fonts`.
+| Example | Purpose | States to exercise | Requirements |
+| --- | --- | --- | --- |
+| `actions_and_keybinds` | Binds typed actions to Space and Backspace. | Capture checks increment and reset; manual: focus loss and platform shortcut behavior. | Keyboard input. |
+| `animation` | Compares `Animation`, sampled `Motion`, keyed transitions, and style transitions. | Capture dispatches Play/restart and hover; asserts Motion at 0%, 50%, and 100%, and checks keyed bounce progress. Manual: press and replay the bounce. | Pointer input for manual controls. |
+| `async_tasks` | Runs, cancels, restarts, and completes foreground work from a background result. | Shared deterministic task checkpoints cover late-result suppression and result 42. | The native view uses a real timer. |
+| `corner_smoothing` | Exposes rounded-corner smoothing and radius controls. | Capture changes smoothing by pointer input and verifies radius clamping at minimum width; manual: explore minimum/maximum radius and height. | Pointer input. |
+| `creating_components` | Compares element-local state, parent-owned props, and entity-owned state in three counter cards. | Headless test clicks each ownership model, redraws the parent, and resets independently. | Pointer input in the native view. |
+| `custom_drawing` | Paints canvas primitives and vector paths, with pointer-driven drawing. | Capture draws a real stroke, then clears it; manual: pointer movement, path geometry, and resize. | Pointer input for drawing. |
+| `direction` | Shows direction-aware layout and spacing. | Capture shows both directions; manual: inspect mirrored order and spacing. | None. |
+| `haptic_feedback` | Queries haptic support and triggers feedback patterns. | Manual: supported pattern and slider increments. | Haptic-capable Mac trackpad; unsupported platforms return no-op results. |
+| `interaction` | One short lesson for click data, hover state, conditional/group styles, mouse events, focus, and drag/drop. | Capture dispatches click, hover, mouse down/up, forward/reverse Tab, and a real drag/drop; it checks the preview, payload, and cleanup. Manual: pointer coordinates and hover feel. | Pointer and keyboard input for native exploration. |
+| `keyring` | Reads and writes credentials through GPUI's platform API. | Manual: set, read, delete, and missing-entry behavior. | OS keyring service; the example writes a demo credential. |
+| `layout` | Uses flexible rows and wrapping content. | Shared fixed viewport; manual: resize to narrow and wide widths. | None. |
+| `text` | Adds uppercase/tracking and capitalization examples to the shared wrapping, underline, and mixed-script view. | Capture uses this native lesson view; shared suite separately checks narrow wrapping and scale factors. | Bundled sample fonts. |
+| `uniform_list` | Renders 2,000 virtual rows with overlapping decoration. | Shared viewport; manual: scroll to top, middle, and end and check stable row identity. | Scroll input. |
+
+## Gallery
+
+| Example | Purpose | States to exercise | Requirements |
+| --- | --- | --- | --- |
+| `hello_world` | Small first window with text and color swatches. | Manual: startup, appearance, and closing the final window. | None. |
+| `image_loading` | Uses a delayed embedded asset loader to show ready, visible loading placeholder, failure, and retry states. | Capture asserts pending, ready plus delayed placeholder, fallback, and eviction/retry-pending cache states. | Embedded app-icon image and decoder. |
+| `inline_layout` | Places atomic GPUI elements in flowing text. | Capture covers natural wrapping; manual: inspect line breaks at narrower widths. | None. |
+| `input_states` | Demonstrates tab stops, focus-visible styling, selection, tree disclosure, and a scroll handle. | Shared suite dispatches real click and scroll input, checks focus, tree state, and offset. | None for capture; keyboard/pointer/scroll for native exploration. |
+| `render_effects` | Reuses the shared clipping, opacity, gradient, path, and nested-filter view. | Shared fixed-view effects capture; inspect overlap and filter boundaries. | None. |
+| `svg` | Embeds monochrome SVG and procedural raster data, then clips and transforms both. | Shared media view is self-contained and deterministic. | None. |
+| `gif_viewer` | Decodes an embedded GIF once and lets the image element advance on dispatcher time. | Capture compares the rendered start, midpoint, and full-cycle frames: midpoint differs while the loop frame matches the start. Manual: resize and inspect the loop. | Bundled GIF decoder. |
+
+## Text and composition
+
+| Example | Purpose | States to exercise | Requirements |
+| --- | --- | --- | --- |
+| `text_system` | Inspects shaping, fallback, font features, highlights, and line metrics. | Capture records all seven compact reference sections; manual: mixed scripts, wrapping, fallback selection, and feature changes. | Embedded IBM Plex, Lilex, and Noto sample fonts. |
+| `view_example` | Composes a reusable editor into single-line input and text-area views. | Capture records the shared editor composition; headless tests exercise typing, cursor movement, Unicode boundary clamping, and sibling isolation. | Keyboard input; clipboard behavior depends on the platform. |
+
+## Paint and data workloads
+
+| Example | Purpose | States to exercise | Requirements |
+| --- | --- | --- | --- |
+| `data_table` | A deterministic 10,000-row virtual table with four sortable columns and a separate company field. | Capture sorts both directions, preserves row selection across a sort, and scrolls to deep virtual rows. | Pointer and scroll input. |
+| `paths_bench` | Paints a cached 16×16 grid of concave fills, curves, strokes, and gradients. | Capture covers 256 bounded paths; compare repeated runs on the same renderer for timing. | CPU capture is portable; native frame timing depends on hardware. |
+| `pattern` | Compares pattern spacing and alignment with flat and gradient fills. | Capture covers aligned and mismatched pattern steps. | None. |
+| `shadows` | One compact gallery for offset, blur, spread, inset, stacked, and gradient-backed shadows. | Capture covers the full representative matrix. | None. |
+
+## Native platform integration
+
+| Example | Purpose | Manual checks | Requirements |
+| --- | --- | --- | --- |
+| `windows` | Opens and repositions windows with varied bounds, kinds, visibility, and focus. | Manual: compare placement across displays and native kind/titlebar behavior. The platform probe covers visibility, activation/focus, redraw, viewport resize, scene readback, and closing multiple windows. | Native window manager and display geometry. |
+| `window_shadow` | Demonstrates custom shadow around a client-decorated window. | Shadow edges, corner clipping, resize hit-testing. | Native compositor and window manager. |
+| `window_movable` | Compares native titlebar dragging with app-owned drag regions. | Drag initiation, release, and screen edges. | Native window manager and pointer input. |
+| `layer_shell` | Configures a Linux layer-shell window. | Layer, anchor, and exclusive-zone behavior. | Wayland compositor with layer-shell support. |
+| `system_notifications` | Sends, replaces, dismisses, and responds to notifications. | Delivery and action behavior. | Native notification service. |
+
+The lesson-level counter, focus, table, layout, text, media, effects, animation, task, and interaction scenarios use deterministic views rather than screenshots copied from separate fixtures. Image and GIF bytes are embedded at compile time, so capture and launch work from any current directory. `scripts/gpui-test platform` automates native visibility, activation and focus, redraw, exact viewport resize, scene readback, and closing two windows. Placement across real displays, compositor behavior, custom window shadows, titlebar movement, layer shell, keyrings, haptics, notifications, and other OS services still need platform-specific manual checks.

@@ -2,11 +2,11 @@
 
 #[path = "../../shared/prelude.rs"]
 mod example_prelude;
-#[path = "../../example_support/fonts.rs"]
-mod example_support;
 
-use gpui::{App, AppContext as _, Context, Hsla, SharedString, Window, div, prelude::*, px, rgb};
-use gpui_platform::application;
+use gpui::{
+    App, AppContext as _, Context, Hsla, SharedString, Window, div, prelude::*, px, rgb, size,
+};
+use std::time::Duration;
 
 struct HelloWorld {
     text: SharedString,
@@ -49,31 +49,30 @@ impl Render for HelloWorld {
     }
 }
 
-fn run_example() {
-    application().run(|cx: &mut App| {
-        if !example_support::load_fonts(cx) {
-            return;
-        }
-        let options = example_prelude::centered_window(500., 500., cx);
-        cx.open_window(options, |_, cx| {
+fn hello_scenario() -> anyhow::Result<gpui_test::Scenario<HelloWorld>> {
+    Ok(gpui_test::Scenario::new(
+        "hello-world",
+        "Hello World",
+        size(px(500.), px(500.)),
+        |_, cx: &mut App| {
             cx.new(|_| HelloWorld {
                 text: "World".into(),
             })
-        })
-        .expect("open hello world window");
-        example_prelude::init_example(cx, "Hello World");
-    });
+        },
+    )?
+    .checkpoint("default", "First window", Duration::ZERO)?)
 }
 
 #[cfg(not(target_family = "wasm"))]
 fn main() {
-    env_logger::init();
-    run_example();
+    example_prelude::run_example(hello_scenario().expect("valid hello scenario"))
+        .expect("run hello world example");
 }
 
 #[cfg(target_family = "wasm")]
 #[wasm_bindgen::prelude::wasm_bindgen(start)]
 pub fn start() {
     gpui_platform::web_init();
-    run_example();
+    example_prelude::run_example(hello_scenario().expect("valid hello scenario"))
+        .expect("run hello world example");
 }

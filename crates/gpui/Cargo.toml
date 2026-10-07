@@ -193,8 +193,8 @@ ignored-paths = ["src/_ownership_and_data_flow.rs"]
 # ============================================================================
 
 [[example]]
-name = "interactive_elements"
-path = "examples/learn/interactive_elements.rs"
+name = "interaction"
+path = "examples/learn/interaction.rs"
 
 [[example]]
 name = "actions_and_keybinds"
@@ -213,10 +213,6 @@ name = "layout"
 path = "examples/learn/layout.rs"
 
 [[example]]
-name = "styling"
-path = "examples/learn/styling.rs"
-
-[[example]]
 name = "async_tasks"
 path = "examples/learn/async_tasks.rs"
 
@@ -233,20 +229,8 @@ name = "text"
 path = "examples/learn/text.rs"
 
 [[example]]
-name = "transitions"
-path = "examples/learn/transitions.rs"
-
-[[example]]
-name = "motion_showcase"
-path = "examples/learn/motion_showcase.rs"
-
-[[example]]
 name = "haptic_feedback"
 path = "examples/learn/haptic_feedback.rs"
-
-[[example]]
-name = "blur"
-path = "examples/learn/blur.rs"
 
 [[example]]
 name = "corner_smoothing"
@@ -255,10 +239,6 @@ path = "examples/learn/corner_smoothing.rs"
 [[example]]
 name = "keyring"
 path = "examples/learn/keyring.rs"
-
-[[example]]
-name = "border_and_shadow_backgrounds"
-path = "examples/learn/border_and_shadow_backgrounds.rs"
 
 [[example]]
 name = "direction"
@@ -289,8 +269,8 @@ name = "pattern"
 path = "examples/bench/pattern.rs"
 
 [[example]]
-name = "shadow"
-path = "examples/bench/shadow.rs"
+name = "shadows"
+path = "examples/bench/shadows.rs"
 
 # ============================================================================
 # Gallery Examples - focused demonstrations by topic
@@ -325,20 +305,12 @@ name = "layer_shell"
 path = "examples/gallery/platform/layer_shell.rs"
 
 [[example]]
-name = "on_window_close_quit"
-path = "examples/gallery/interaction/on_window_close_quit.rs"
-
-[[example]]
 name = "svg"
 path = "examples/gallery/rendering/svg/svg.rs"
 
 [[example]]
-name = "window"
-path = "examples/gallery/platform/window.rs"
-
-[[example]]
-name = "window_positioning"
-path = "examples/gallery/platform/window_positioning.rs"
+name = "windows"
+path = "examples/gallery/platform/windows.rs"
 
 [[example]]
 name = "window_shadow"
@@ -352,10 +324,6 @@ path = "examples/gallery/platform/window_shadow.rs"
 name = "text_system"
 path = "examples/text/text_system.rs"
 
-[[example]]
-name = "text_transform_preview"
-path = "examples/text/text_transform_preview.rs"
-
 # ==========================================================================
 # Platform examples - native integration and window lifecycle
 # ==========================================================================
@@ -367,7 +335,3 @@ path = "examples/platform/system_notifications.rs"
 [[example]]
 name = "window_movable"
 path = "examples/platform/window_movable.rs"
-
-[[example]]
-name = "window_visibility"
-path = "examples/platform/window_visibility.rs"

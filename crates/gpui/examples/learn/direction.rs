@@ -1,11 +1,14 @@
 #[path = "../shared/prelude.rs"]
 mod example_prelude;
 
-use gpui::{App, AppContext as _, Context, LayoutDirection, Window, div, prelude::*, rgb};
+use gpui::{
+    App, AppContext as _, Context, LayoutDirection, Window, div, prelude::*, px, rgb, size,
+};
 use gpui_ce_elements::editable_text::{
     actions::{DEFAULT_INPUT_CONTEXT, default_bindings},
     text_input,
 };
+use std::time::Duration;
 
 struct DirectionExample {
     direction: LayoutDirection,
@@ -23,6 +26,7 @@ impl DirectionExample {
 
         div()
             .id(id)
+            .debug_selector(|| id.into())
             .px_3()
             .py_1()
             .rounded_md()
@@ -129,16 +133,47 @@ impl Render for DirectionExample {
 }
 
 fn main() {
-    gpui_platform::application().run(|cx: &mut App| {
-        cx.bind_keys(default_bindings().as_keybindings(Some(DEFAULT_INPUT_CONTEXT)));
-
-        let options = example_prelude::centered_window(760., 620., cx);
-        cx.open_window(options, |_, cx| {
+    let scenario = gpui_test::Scenario::new(
+        "direction",
+        "Layout direction",
+        size(px(760.), px(620.)),
+        |_, cx: &mut App| {
+            cx.bind_keys(default_bindings().as_keybindings(Some(DEFAULT_INPUT_CONTEXT)));
             cx.new(|_| DirectionExample {
                 direction: LayoutDirection::Auto,
             })
-        })
-        .expect("open layout direction example");
-        example_prelude::init_example(cx, "Layout Direction");
-    });
+        },
+    )
+    .expect("valid direction scenario")
+    .checkpoint("auto", "Automatic text direction", Duration::ZERO)
+    .expect("valid direction checkpoint")
+    .checkpoint_with(
+        "rtl",
+        "Select right-to-left direction",
+        Duration::from_millis(100),
+        |cx, view, window| {
+            gpui_test::dispatch_click_on(cx, window.into(), "rtl")?;
+            anyhow::ensure!(
+                view.read_with(cx, |view, _| view.direction == LayoutDirection::RightToLeft),
+                "RTL control did not change direction"
+            );
+            Ok(())
+        },
+    )
+    .expect("valid RTL checkpoint")
+    .checkpoint_with(
+        "ltr",
+        "Select left-to-right direction",
+        Duration::from_millis(200),
+        |cx, view, window| {
+            gpui_test::dispatch_click_on(cx, window.into(), "ltr")?;
+            anyhow::ensure!(
+                view.read_with(cx, |view, _| view.direction == LayoutDirection::LeftToRight),
+                "LTR control did not change direction"
+            );
+            Ok(())
+        },
+    )
+    .expect("valid LTR checkpoint");
+    example_prelude::run_example(scenario).expect("run direction example");
 }

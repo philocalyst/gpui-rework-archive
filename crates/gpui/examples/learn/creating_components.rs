@@ -3,11 +3,11 @@
 #[path = "../shared/prelude.rs"]
 mod example_prelude;
 
-use example_prelude::init_example;
 use gpui::colors::Colors;
 use gpui::{
-    App, Context, Entity, IntoElement, Render, RenderOnce, Window, div, prelude::*, px, rgb,
+    App, Context, Entity, IntoElement, Render, RenderOnce, Window, div, prelude::*, px, rgb, size,
 };
+use std::time::Duration;
 
 #[derive(IntoElement)]
 struct CounterCard {
@@ -254,12 +254,16 @@ impl CreatingComponents {
 }
 
 fn main() {
-    gpui_platform::application().run(|cx: &mut App| {
-        let options = example_prelude::centered_window(760., 360., cx);
-        cx.open_window(options, |_, cx| cx.new(CreatingComponents::new))
-            .expect("open component example");
-        init_example(cx, "Creating Components");
-    });
+    let scenario = gpui_test::Scenario::new(
+        "creating-components",
+        "Creating components",
+        size(px(760.), px(360.)),
+        |_, cx: &mut App| cx.new(CreatingComponents::new),
+    )
+    .expect("valid components scenario")
+    .checkpoint("default", "Three counter ownership models", Duration::ZERO)
+    .expect("valid components checkpoint");
+    example_prelude::run_example(scenario).expect("run creating components example");
 }
 
 #[cfg(test)]
@@ -267,7 +271,6 @@ mod tests {
     use super::*;
     use gpui::{px, size};
     use gpui_test::{Harness, Scenario, dispatch_click_on};
-    use std::time::Duration;
 
     fn assert_counts(
         cx: &mut gpui::HeadlessAppContext,

@@ -2,15 +2,13 @@
 
 #[path = "../shared/prelude.rs"]
 mod example_prelude;
-#[path = "../example_support/fonts.rs"]
-mod example_support;
 
 use gpui::{
     App, AppContext, Context, Window, div, linear_color_stop, linear_gradient, pattern_slash,
     prelude::*, px, rgb,
 };
-use gpui_platform::application;
 use palette::WithAlpha;
+use std::time::Duration;
 
 struct PatternExample;
 
@@ -90,27 +88,26 @@ impl Render for PatternExample {
     }
 }
 
-fn run_example() {
-    application().run(|cx: &mut App| {
-        if !example_support::load_fonts(cx) {
-            return;
-        }
-        let options = example_prelude::centered_window(600., 600., cx);
-        cx.open_window(options, |_window, cx| cx.new(|_cx| PatternExample))
-            .expect("open pattern example");
-        example_prelude::init_example(cx, "Pattern Fills");
-    });
+fn pattern_scenario() -> anyhow::Result<gpui_test::Scenario<PatternExample>> {
+    Ok(gpui_test::Scenario::new(
+        "pattern-fills",
+        "Pattern fills",
+        gpui::size(gpui::px(600.), gpui::px(600.)),
+        |_, cx: &mut App| cx.new(|_| PatternExample),
+    )?
+    .checkpoint("default", "Pattern and gradient fills", Duration::ZERO)?)
 }
 
 #[cfg(not(target_family = "wasm"))]
 fn main() {
-    env_logger::init();
-    run_example();
+    example_prelude::run_example(pattern_scenario().expect("valid pattern scenario"))
+        .expect("run pattern example");
 }
 
 #[cfg(target_family = "wasm")]
 #[wasm_bindgen::prelude::wasm_bindgen(start)]
 pub fn start() {
     gpui_platform::web_init();
-    run_example();
+    example_prelude::run_example(pattern_scenario().expect("valid pattern scenario"))
+        .expect("run pattern example");
 }

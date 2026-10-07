@@ -3,7 +3,9 @@ mod example_prelude;
 
 use gpui::{
     App, AppContext as _, Context, FontWeight, Render, Window, div, prelude::*, px, relative, rgb,
+    size,
 };
+use std::time::Duration;
 
 struct InlineLayoutExample;
 
@@ -77,10 +79,18 @@ impl Render for InlineLayoutExample {
 }
 
 fn main() {
-    gpui_platform::application().run(|cx: &mut App| {
-        let options = example_prelude::centered_window(720., 440., cx);
-        cx.open_window(options, |_, cx| cx.new(|_| InlineLayoutExample))
-            .expect("open inline layout window");
-        example_prelude::init_example(cx, "Inline Layout");
-    });
+    let scenario = gpui_test::Scenario::new(
+        "inline-layout",
+        "Inline layout",
+        size(px(720.), px(440.)),
+        |_, cx: &mut App| cx.new(|_| InlineLayoutExample),
+    )
+    .expect("valid inline layout scenario")
+    .checkpoint(
+        "default",
+        "Inline elements wrap in text flow",
+        Duration::ZERO,
+    )
+    .expect("valid inline layout checkpoint");
+    example_prelude::run_example(scenario).expect("run inline layout example");
 }

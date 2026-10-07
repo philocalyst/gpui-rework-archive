@@ -3,12 +3,12 @@
 #[path = "../shared/prelude.rs"]
 mod example_prelude;
 
-use example_prelude::init_example;
 use gpui::{
-    App, Bounds, Context, Div, FontFallbacks, FontFeatures, FontStyle, FontWeight, FontWidth,
+    App, Context, Div, FontFallbacks, FontFeatures, FontStyle, FontWeight, FontWidth,
     HighlightStyle, Render, StrikethroughStyle, StyledText, TextTransform, UnderlineStyle, Window,
-    WindowBounds, WindowOptions, div, font, hsla, prelude::*, px, relative, rgb, size,
+    div, font, hsla, prelude::*, px, relative, rgb, size,
 };
+use std::time::Duration;
 
 const BACKGROUND: u32 = 0x0d1117;
 const SURFACE: u32 = 0x161b22;
@@ -263,7 +263,7 @@ fn multilingual_text() -> impl IntoElement {
 
 fn paragraph_layout() -> impl IntoElement {
     const PARAGRAPH: &str = "A paragraph can wrap at word boundaries while keeping styled text, punctuation, and spacing together. Resize the window and this sample will follow the available width.";
-    const PATH: &str = "/workspace/projects/gpui/examples/text_system/really_long_filename.rs";
+    const PATH: &str = "src/text_system/really_long_filename.rs";
 
     div()
         .flex()
@@ -376,102 +376,103 @@ fn inline_layout() -> impl IntoElement {
         .child(" moves naturally as the window becomes narrower.")
 }
 
+fn text_sections() -> impl IntoElement {
+    div()
+        .w_full()
+        .min_w_0()
+        .max_w(px(960.))
+        .flex()
+        .flex_col()
+        .gap_5()
+        .p_8()
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap_2()
+                .child(
+                    div()
+                        .text_3xl()
+                        .font_weight(FontWeight::BOLD)
+                        .child("GPUI text system"),
+                )
+                .child(div().text_color(rgb(MUTED)).child(
+                    "Font selection, rich text, multilingual text, wrapping, truncation, and inline layout.",
+                ))
+                .child(
+                    div()
+                        .text_sm()
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .text_color(rgb(ACCENT))
+                        .child("Sample fonts are embedded with this example."),
+                ),
+        )
+        .child(section(
+            "Font families and faces",
+            "Compare family, weight, and style.",
+            font_faces(),
+        ))
+        .child(section(
+            "Variable font width",
+            "Change Noto Sans width while keeping text and size fixed.",
+            variable_font_widths(),
+        ))
+        .child(section(
+            "Styled runs",
+            "Independent paint and font styles within one text value.",
+            styled_runs(),
+        ))
+        .child(section(
+            "OpenType features and spacing",
+            "Compare ligatures, case, and letter spacing.",
+            open_type_and_spacing(),
+        ))
+        .child(section(
+            "Scripts and fallback fonts",
+            "Combining marks, RTL scripts, and emoji in one view.",
+            multilingual_text(),
+        ))
+        .child(section(
+            "Paragraph layout",
+            "Wrap, space, clamp, and truncate within a container.",
+            paragraph_layout(),
+        ))
+        .child(section(
+            "Inline layout",
+            "Styled spans and boxes share paragraph flow.",
+            inline_layout(),
+        ))
+}
+
 impl Render for TextSystemExample {
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
         div()
             .id("text-system-content")
             .size_full()
             .flex()
-            .flex_col()
-            .items_center()
+            .justify_center()
             .overflow_y_scroll()
             .bg(rgb(BACKGROUND))
             .text_color(rgb(TEXT))
-            .child(
-                div()
-                    .w_full()
-                    .min_w_0()
-                    .max_w(px(960.))
-                    .flex()
-                    .flex_col()
-                    .flex_shrink_0()
-                    .gap_5()
-                    .p_8()
-                        .child(
-                            div()
-                                .flex()
-                                .flex_col()
-                                .gap_2()
-                                .child(
-                                    div()
-                                        .text_3xl()
-                                        .font_weight(FontWeight::BOLD)
-                                        .child("GPUI text system"),
-                                )
-                                .child(
-                                    div()
-                                        .text_color(rgb(MUTED))
-                                        .child("Font selection, rich text, multilingual text, wrapping, truncation, and inline layout. Resize the window to see the examples reflow."),
-                                )
-                                .child(
-                                    div()
-                                        .text_sm()
-                                        .font_weight(FontWeight::SEMIBOLD)
-                                        .text_color(rgb(ACCENT))
-                                        .child("The sample fonts are bundled with this example."),
-                                ),
-                        )
-                        .child(section(
-                            "Font families and faces",
-                            "Select a family, weight, and style through inherited element styles.",
-                            font_faces(),
-                        ))
-                        .child(section(
-                            "Variable font width",
-                            "Noto Sans at different widths, with the same text, weight, and font size.",
-                            variable_font_widths(),
-                        ))
-                        .child(section(
-                            "Styled runs",
-                            "A single text value can contain independent paint and font styles.",
-                            styled_runs(),
-                        ))
-                        .child(section(
-                            "OpenType features and spacing",
-                            "Control font features, case transformation, and letter spacing.",
-                            open_type_and_spacing(),
-                        ))
-                        .child(section(
-                            "Scripts and fallback fonts",
-                            "Mix combining marks, right-to-left scripts, and emoji in the same view.",
-                            multilingual_text(),
-                        ))
-                        .child(section(
-                            "Paragraph layout",
-                            "Wrap, align, space, clamp, and truncate text within its container.",
-                            paragraph_layout(),
-                        ))
-                        .child(section(
-                            "Inline layout",
-                            "Place styled spans and element boxes inside a wrapping paragraph.",
-                            inline_layout(),
-                        )),
-            )
+            .child(text_sections())
     }
 }
 
-fn main() {
-    gpui_platform::application().run(|cx: &mut App| {
-        let bounds = Bounds::centered(None, size(px(1000.), px(900.)), cx);
-        cx.open_window(
-            WindowOptions {
-                window_bounds: Some(WindowBounds::Windowed(bounds)),
-                ..Default::default()
-            },
-            |_, cx| cx.new(|_| TextSystemExample),
-        )
-        .expect("failed to open the text system example window");
+fn text_system_scenario() -> anyhow::Result<gpui_test::Scenario<TextSystemExample>> {
+    Ok(gpui_test::Scenario::new(
+        "text-system",
+        "Text system",
+        size(px(1000.), px(900.)),
+        |_, cx: &mut App| cx.new(|_| TextSystemExample),
+    )?
+    .checkpoint(
+        "default",
+        "Font, fallback, and layout gallery",
+        Duration::ZERO,
+    )?)
+}
 
-        init_example(cx, "Text system");
-    });
+fn main() {
+    example_prelude::run_example(text_system_scenario().expect("valid text system scenario"))
+        .expect("run text system example");
 }

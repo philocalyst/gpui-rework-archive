@@ -1,210 +1,219 @@
-#![cfg_attr(target_family = "wasm", no_main)]
+//! One image, three cache states: ready quickly, delayed, and failed with a fallback.
 
 #[path = "../../shared/prelude.rs"]
 mod example_prelude;
-#[path = "../../example_support/fonts.rs"]
-mod example_support;
+#[path = "../../shared/media_assets.rs"]
+mod media_assets;
 
-use std::{
-    path::{Path, PathBuf},
-    sync::Arc,
-    time::Duration,
-};
+use std::{sync::Arc, time::Duration};
 
 use gpui::{
-    Animation, AnimationExt, App, AppContext as _, Asset, AssetLogger, AssetSource, Context, Hsla,
-    ImageAssetLoader, ImageCacheError, ImgResourceLoader, LOADING_DELAY, Length, RenderImage,
-    Resource, SharedString, Window, black, div, img, prelude::*, pulsating_between, px, red,
+    Animation, AnimationExt, App, AppContext as _, Asset, AssetLogger, Context, Hsla,
+    ImageAssetLoader, ImageCacheError, RenderImage, Resource, Window, black, div, img, prelude::*,
+    pulsating_between, px, red, rgb,
 };
-use gpui_platform::application;
 use palette::WithAlpha;
 
-struct Assets {
-    base: PathBuf,
-}
-
-impl AssetSource for Assets {
-    fn load(&self, path: &str) -> anyhow::Result<Option<std::borrow::Cow<'static, [u8]>>> {
-        std::fs::read(resolve_path(&self.base, path))
-            .map(Into::into)
-            .map_err(Into::into)
-            .map(Some)
-    }
-
-    fn list(&self, path: &str) -> anyhow::Result<Vec<SharedString>> {
-        Ok(std::fs::read_dir(resolve_path(&self.base, path))?
-            .filter_map(|entry| {
-                Some(SharedString::from(
-                    entry.ok()?.file_name().to_string_lossy().into_owned(),
-                ))
-            })
-            .collect::<Vec<_>>())
-    }
-}
-
-fn resolve_path(base: &Path, path: &str) -> PathBuf {
-    let path = Path::new(path);
-    if path.is_absolute() {
-        path.to_path_buf()
-    } else {
-        base.join(path)
-    }
-}
-
-const IMAGE: &str = concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/examples/gallery/rendering/image/app-icon.png"
-);
-
-#[derive(Copy, Clone, Hash)]
-struct LoadImageParameters {
-    timeout: Duration,
+#[derive(Clone, Copy, Hash)]
+struct LoadParameters {
+    delay: Duration,
     fail: bool,
 }
 
-struct LoadImageWithParameters {}
+struct ParameterizedImage;
 
-impl Asset for LoadImageWithParameters {
-    type Source = LoadImageParameters;
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum LoadState {
+    Pending,
+    Ready,
+    Failed,
+}
 
+impl Asset for ParameterizedImage {
+    type Source = LoadParameters;
     type Output = Result<Arc<RenderImage>, ImageCacheError>;
 
     fn load(
         parameters: Self::Source,
         cx: &mut App,
-    ) -> impl std::future::Future<Output = Self::Output> + Send + 'static {
-        let timer = cx.background_executor().timer(parameters.timeout);
-        let data = AssetLogger::<ImageAssetLoader>::load(
-            Resource::Path(Path::new(IMAGE).to_path_buf().into()),
+    ) -> impl Future<Output = Self::Output> + Send + 'static {
+        let timer = cx.background_executor().timer(parameters.delay);
+        let image = AssetLogger::<ImageAssetLoader>::load(
+            Resource::Embedded("images/app-icon.png".into()),
             cx,
         );
         async move {
             timer.await;
             if parameters.fail {
-                log::error!("Intentionally failed to load image");
-                Err(anyhow::anyhow!("Failed to load image").into())
+                Err(anyhow::anyhow!("The failure state is deliberate").into())
             } else {
-                data.await
+                image.await
             }
         }
     }
 }
 
-struct ImageLoadingExample {}
+struct ImageLoading {
+    states: [LoadState; 3],
+}
 
-impl ImageLoadingExample {
-    fn loading_element() -> impl IntoElement {
-        div().size_full().flex_none().p_0p5().rounded_xs().child(
-            div().size_full().with_animation(
-                "loading-bg",
-                Animation::new(Duration::from_secs(3))
+impl ImageLoading {
+    fn new() -> Self {
+        Self {
+            states: [LoadState::Pending; 3],
+        }
+    }
+}
+
+impl ImageLoading {
+    fn loading() -> gpui::AnyElement {
+        div()
+            .size_full()
+            .rounded_md()
+            .bg(rgb(0x94a3b8))
+            .with_animation(
+                "loading",
+                Animation::new(Duration::from_secs(2))
                     .repeat()
-                    .with_easing(pulsating_between(0.04, 0.24)),
-                move |this, delta| this.bg(black().with_alpha(delta)),
-            ),
-        )
+                    .with_easing(pulsating_between(0.15, 0.65)),
+                |element, opacity| element.opacity(opacity),
+            )
+            .into_any_element()
     }
 
-    fn fallback_element() -> impl IntoElement {
-        let fallback_color: Hsla = black().with_alpha(0.5);
+    fn fallback() -> gpui::AnyElement {
+        let muted: Hsla = black().with_alpha(0.55);
+        div()
+            .size_full()
+            .flex()
+            .items_center()
+            .justify_center()
+            .rounded_md()
+            .border_1()
+            .border_color(muted)
+            .text_color(muted)
+            .child("Load failed")
+            .into_any_element()
+    }
 
-        div().size_full().flex_none().p_0p5().child(
-            div()
-                .size_full()
-                .flex()
-                .items_center()
-                .justify_center()
-                .rounded_xs()
-                .text_sm()
-                .text_color(fallback_color)
-                .border_1()
-                .border_color(fallback_color)
-                .child("?"),
-        )
+    fn preview(id: &'static str, delay: Duration, fail: bool) -> impl IntoElement + use<> {
+        let source = LoadParameters { delay, fail };
+        img(move |window: &mut Window, cx: &mut App| {
+            window.use_asset::<ParameterizedImage>(&source, cx)
+        })
+        .id(id)
+        .debug_selector(move || id.into())
+        .size(px(112.))
+        .border_1()
+        .border_color(red())
+        .with_loading(Self::loading)
+        .with_fallback(Self::fallback)
+        .on_click(move |_, _, cx| cx.remove_asset::<ParameterizedImage>(&source))
     }
 }
 
-fn parameterized_image(id: &'static str, timeout: Duration, fail: bool) -> impl IntoElement {
-    let source = LoadImageParameters { timeout, fail };
-    img(move |window: &mut Window, cx: &mut App| {
-        window.use_asset::<LoadImageWithParameters>(&source, cx)
-    })
-    .id(id)
-    .border_1()
-    .size_12()
-    .with_fallback(|| ImageLoadingExample::fallback_element().into_any_element())
-    .border_color(red())
-    .with_loading(|| ImageLoadingExample::loading_element().into_any_element())
-    .on_click(move |_, _, cx| cx.remove_asset::<LoadImageWithParameters>(&source))
-}
-
-impl Render for ImageLoadingExample {
-    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
-        div().flex().flex_col().size_full().justify_around().child(
-            div().flex().flex_row().w_full().justify_around().child(
+impl Render for ImageLoading {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let samples = [
+            ("Ready", Duration::from_millis(80), false),
+            ("Waiting", Duration::from_secs(3), false),
+            ("Fallback", Duration::from_secs(3), true),
+        ];
+        self.states = samples.map(|(_, delay, fail)| {
+            match window.use_asset::<ParameterizedImage>(&LoadParameters { delay, fail }, cx) {
+                None => LoadState::Pending,
+                Some(Ok(_)) => LoadState::Ready,
+                Some(Err(_)) => LoadState::Failed,
+            }
+        });
+        div()
+            .size_full()
+            .flex()
+            .flex_col()
+            .gap_4()
+            .p_5()
+            .child(
+                div()
+                    .text_xl()
+                    .font_weight(gpui::FontWeight::BOLD)
+                    .child("Image loading"),
+            )
+            .child("Click a sample to evict its cache entry and load it again.")
+            .child(
                 div()
                     .flex()
-                    .bg(gpui::white())
-                    .size(Length::Definite(px(300.0).into()))
-                    .justify_center()
-                    .items_center()
-                    // This one resolves before the loading delay; the next two exercise waiting and failure.
-                    .child(parameterized_image(
-                        "image-1",
-                        LOADING_DELAY.saturating_sub(Duration::from_millis(25)),
-                        false,
-                    ))
-                    .child(parameterized_image(
-                        "image-2",
-                        Duration::from_secs(5),
-                        false,
-                    ))
-                    .child(parameterized_image("image-3", Duration::from_secs(5), true))
-                    .child({
-                        // Ensure that the normal image loader doesn't spam logs
-                        let image_source = Path::new(env!("CARGO_MANIFEST_DIR"))
-                            .join("examples/gallery/rendering/image/__intentionally_missing.png");
-                        img(image_source.clone())
-                            .id("image-4")
-                            .border_1()
-                            .size_12()
-                            .with_fallback(|| Self::fallback_element().into_any_element())
-                            .border_color(red())
-                            .with_loading(|| Self::loading_element().into_any_element())
-                            .on_click(move |_, _, cx| {
-                                cx.remove_asset::<ImgResourceLoader>(&image_source.clone().into());
-                            })
-                    }),
-            ),
-        )
+                    .flex_wrap()
+                    .gap_4()
+                    .children(samples.into_iter().map(|(label, delay, fail)| {
+                        div()
+                            .flex()
+                            .flex_col()
+                            .gap_2()
+                            .p_3()
+                            .rounded_lg()
+                            .bg(rgb(0xf1f3f6))
+                            .child(ImageLoading::preview(label, delay, fail))
+                            .child(label)
+                    })),
+            )
     }
 }
 
-fn run_example() {
-    application()
-        .with_assets(Assets {
-            base: PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("examples/gallery/rendering"),
-        })
-        .run(|cx: &mut App| {
-            if !example_support::load_fonts(cx) {
-                return;
-            }
-            let options = example_prelude::centered_window(500., 320., cx);
-            cx.open_window(options, |_, cx| cx.new(|_| ImageLoadingExample {}))
-                .expect("open image loading example");
-            example_prelude::init_example(cx, "Image Loading");
-        });
+fn image_loading_scenario() -> anyhow::Result<gpui_test::Scenario<ImageLoading>> {
+    Ok(gpui_test::Scenario::new(
+        "image-loading",
+        "Image loading states",
+        gpui::size(px(520.), px(320.)),
+        |_, cx: &mut App| cx.new(|_| ImageLoading::new()),
+    )?
+    .checkpoint("loading", "Loading begins", Duration::ZERO)?
+    .checkpoint_with(
+        "ready",
+        "Fast image is ready while the delayed sample still shows its placeholder",
+        Duration::from_millis(250),
+        |cx, view, window| {
+            cx.draw_window(window.into())?;
+            let states = view.read_with(cx, |view, _| view.states);
+            anyhow::ensure!(
+                states == [LoadState::Ready, LoadState::Pending, LoadState::Pending],
+                "unexpected image cache states: {states:?}"
+            );
+            Ok(())
+        },
+    )?
+    .checkpoint_with(
+        "fallback",
+        "Delayed failure reaches the fallback after other assets load",
+        Duration::from_secs(3),
+        |cx, view, window| {
+            cx.draw_window(window.into())?;
+            let states = view.read_with(cx, |view, _| view.states);
+            anyhow::ensure!(
+                states == [LoadState::Ready, LoadState::Ready, LoadState::Failed],
+                "unexpected image cache states: {states:?}"
+            );
+            Ok(())
+        },
+    )?
+    .checkpoint_with(
+        "retry-pending",
+        "Click evicts the failed image and returns the cache entry to pending",
+        Duration::from_millis(3_100),
+        |cx, view, window| {
+            gpui_test::dispatch_click_on(cx, window.into(), "Fallback")?;
+            cx.draw_window(window.into())?;
+            let states = view.read_with(cx, |view, _| view.states);
+            anyhow::ensure!(
+                states == [LoadState::Ready, LoadState::Ready, LoadState::Pending],
+                "retry did not return to pending: {states:?}"
+            );
+            Ok(())
+        },
+    )?)
 }
 
-#[cfg(not(target_family = "wasm"))]
 fn main() {
-    env_logger::init();
-    run_example();
-}
-
-#[cfg(target_family = "wasm")]
-#[wasm_bindgen::prelude::wasm_bindgen(start)]
-pub fn start() {
-    gpui_platform::web_init();
-    run_example();
+    let scenario = image_loading_scenario().expect("valid image loading scenario");
+    example_prelude::run_example_with_assets(scenario, Arc::new(media_assets::MediaAssets))
+        .expect("run image loading example");
 }
