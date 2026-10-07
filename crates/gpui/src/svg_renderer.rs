@@ -1,3 +1,9 @@
+//! Parse and rasterize SVG documents using registered and system fonts.
+//!
+//! Parsing resolves font references and converts text to paths. Keep the resulting
+//! [`ParsedSvg`] when drawing the same document at several sizes; rasterization is then the only
+//! repeated work. Output images use GPUI's BGRA storage convention.
+
 use crate::{
     AssetRegistry, DevicePixels, IsZero, RenderImage, Result, SharedString, Size,
     swap_rgba_pa_to_bgra,
@@ -81,15 +87,17 @@ fn select_emoji_font(
 /// When rendering SVGs, we render them at twice the size to get a higher-quality result.
 pub const SMOOTH_SVG_SCALE_FACTOR: f32 = 2.;
 
+/// Parameters used when the renderer loads and rasterizes an SVG asset.
 #[derive(Clone, PartialEq, Hash, Eq)]
-#[expect(missing_docs)]
 pub struct RenderSvgParams {
+    /// Asset path used when the SVG bytes are supplied by the registry.
     pub path: SharedString,
+    /// Target size in device pixels.
     pub size: Size<DevicePixels>,
 }
 
 #[derive(Clone)]
-/// A struct holding everything necessary to render SVGs.
+/// SVG parser and rasterizer configured with an [`AssetRegistry`].
 pub struct SvgRenderer {
     asset_registry: Arc<AssetRegistry>,
     usvg_options: Arc<usvg::Options<'static>>,
@@ -187,13 +195,18 @@ impl SvgRenderer {
         }
     }
 
-    /// Parses SVG data into a [`ParsedSvg`] that can be rasterized at any scale.
+    /// Parses SVG bytes into a reusable [`ParsedSvg`].
+    ///
+    /// Parsing can fail for malformed XML, unsupported SVG features, or unresolved resources.
     #[tracing::instrument(skip_all)]
     pub fn parse_svg(&self, bytes: &[u8]) -> Result<ParsedSvg, usvg::Error> {
         usvg::Tree::from_data(bytes, &self.usvg_options).map(ParsedSvg)
     }
 
-    /// Rasterizes a previously parsed SVG into an image buffer.
+    /// Rasterizes a parsed SVG into a BGRA [`RenderImage`].
+    ///
+    /// `SvgSize::ScaleFactor` applies [`SMOOTH_SVG_SCALE_FACTOR`] internally and records the
+    /// correction on the image so logical display size remains unchanged.
     #[tracing::instrument(skip_all)]
     pub fn render_parsed(
         &self,

@@ -1,3 +1,8 @@
+//! Font catalog construction and family resolution for the Parley backend.
+//!
+//! System font discovery is explicit. [`SystemFonts::Skip`] starts empty, while registered font
+//! blobs are validated before being added to the live catalog.
+
 use anyhow::{Result, bail};
 use fontique::{
     Attributes, Blob, Collection, CollectionOptions, FontStyle, FontWeight, FontWidth, QueryFamily,

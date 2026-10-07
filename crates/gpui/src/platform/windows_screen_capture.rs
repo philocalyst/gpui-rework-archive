@@ -2,7 +2,10 @@ use crate::{DevicePixels, Size};
 use std::sync::Arc;
 use windows_061::Win32::Graphics::Direct3D11::ID3D11Texture2D;
 
-/// A Windows Graphics Capture frame backed by its native D3D11 texture.
+/// A Windows Graphics Capture frame backed by a native D3D11 texture.
+///
+/// The texture is borrowed from the capture frame and remains valid for the lifetime of this
+/// value. `display_time` is the native capture timestamp, not a GPUI presentation deadline.
 #[derive(Clone)]
 pub struct WindowsScreenCaptureFrame {
     texture: Arc<ID3D11Texture2D>,

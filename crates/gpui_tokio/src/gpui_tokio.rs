@@ -1,3 +1,9 @@
+//! Tokio adapters for GPUI's executor traits.
+//!
+//! This crate bridges Tokio futures into GPUI's application scheduling model. It
+//! does not create a Tokio runtime; the embedding application owns runtime setup
+//! and shutdown.
+
 use std::future::Future;
 
 use gpui::{App, AppContext, Global, ReadGlobal, Task};
@@ -47,6 +53,7 @@ impl Drop for GlobalTokio {
     }
 }
 
+/// Namespace for Tokio-to-GPUI task adapters.
 pub struct Tokio {}
 
 impl Tokio {
@@ -94,6 +101,9 @@ impl Tokio {
         })
     }
 
+    /// Returns the configured Tokio runtime handle.
+    ///
+    /// Panics if [`init`] or [`init_from_handle`] has not been called for `cx`.
     pub fn handle(cx: &App) -> tokio::runtime::Handle {
         GlobalTokio::global(cx).handle.clone()
     }

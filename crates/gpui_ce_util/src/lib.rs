@@ -1,3 +1,10 @@
+//! Small platform-neutral helpers shared by GPUI crates.
+//!
+//! The command helpers preserve the platform's process configuration, while the future and
+//! logging extensions add context without changing the underlying result. Functions that log an
+//! error intentionally return no error only where their name says so; use the `ResultExt` methods
+//! when the failure has already been reported and execution can continue.
+
 // FluentBuilder
 // pub use gpui_util::{FutureExt, Timeout, arc_cow::ArcCow};
 
@@ -18,6 +25,7 @@ pub mod arc_cow;
 const CREATE_NO_WINDOW: u32 = 0x0800_0000_u32;
 
 #[cfg(target_os = "windows")]
+/// Create a command without opening a console window on Windows.
 pub fn new_std_command(program: impl AsRef<OsStr>) -> std::process::Command {
     use std::os::windows::process::CommandExt;
 
@@ -27,11 +35,13 @@ pub fn new_std_command(program: impl AsRef<OsStr>) -> std::process::Command {
 }
 
 #[cfg(not(target_os = "windows"))]
+/// Create a standard-library command for `program`.
 pub fn new_std_command(program: impl AsRef<OsStr>) -> std::process::Command {
     std::process::Command::new(program)
 }
 
 #[cfg(target_os = "windows")]
+/// Locate the preferred installed PowerShell executable, if one is available.
 pub fn get_powershell() -> Option<String> {
     use std::path::PathBuf;
 
@@ -137,6 +147,7 @@ pub fn get_powershell() -> Option<String> {
 }
 
 #[cfg(target_os = "windows")]
+/// Return PowerShell when available, falling back to the system `cmd.exe`.
 pub fn get_windows_system_shell() -> String {
     static CMD: std::sync::LazyLock<String> = std::sync::LazyLock::new(|| {
         log::warn!("Powershell not found, falling back to `cmd`");
@@ -149,12 +160,14 @@ pub fn get_windows_system_shell() -> String {
     get_powershell().unwrap_or_else(|| (*CMD).clone())
 }
 
+/// Return the current value, then increment it by one.
 pub fn post_inc<T: From<u8> + AddAssign<T> + Copy>(value: &mut T) -> T {
     let prev = *value;
     *value += T::from(1);
     prev
 }
 
+/// Run `f`, printing its elapsed time when `ZED_MEASUREMENTS` is `1` or `true`.
 pub fn measure<R>(label: &str, f: impl FnOnce() -> R) -> R {
     static ZED_MEASUREMENTS: OnceLock<bool> = OnceLock::new();
     let zed_measurements = ZED_MEASUREMENTS.get_or_init(|| {
@@ -175,6 +188,7 @@ pub fn measure<R>(label: &str, f: impl FnOnce() -> R) -> R {
 }
 
 #[macro_export]
+/// Panic in debug builds and log an error with a captured backtrace in release builds.
 macro_rules! debug_panic {
     ( $($fmt_arg:tt)* ) => {
         if cfg!(debug_assertions) {
@@ -187,6 +201,7 @@ macro_rules! debug_panic {
 }
 
 #[track_caller]
+/// Return `Some` unchanged, or panic in debug builds when the value is `None`.
 pub fn some_or_debug_panic<T>(option: Option<T>) -> Option<T> {
     #[cfg(debug_assertions)]
     if option.is_none() {
@@ -211,9 +226,11 @@ macro_rules! maybe {
         (async move || $block)()
     };
 }
+/// Extension methods for reporting a `Result` error and continuing with an `Option`.
 pub trait ResultExt<E> {
     type Ok;
 
+    /// Log an error at error level and convert `Err` to `None`.
     fn log_err(self) -> Option<Self::Ok>;
     /// Like [`ResultExt::log_err`], but uses `{:?}` formatting so `anyhow::Error` values emit their
     /// full backtrace. Reach for this only when a backtrace is genuinely wanted — most call sites
@@ -223,8 +240,11 @@ pub trait ResultExt<E> {
         E: std::fmt::Debug;
     /// Assert that this result should never be an error in development or tests.
     fn debug_assert_ok(self, reason: &str) -> Self;
+    /// Log an error at warning level and convert `Err` to `None`.
     fn warn_on_err(self) -> Option<Self::Ok>;
+    /// Log an error at `level` and convert `Err` to `None`.
     fn log_with_level(self, level: log::Level) -> Option<Self::Ok>;
+    /// Convert the error into `anyhow::Error` without logging it.
     fn anyhow(self) -> anyhow::Result<Self::Ok>
     where
         E: Into<anyhow::Error>;
@@ -325,6 +345,7 @@ where
 }
 
 #[track_caller]
+/// Log `error` at error level, including the source location of the caller.
 pub fn log_err<E: std::fmt::Display>(error: &E) {
     log_error_with_caller(*Location::caller(), error, log::Level::Error);
 }
@@ -339,18 +360,23 @@ impl<E: std::fmt::Debug> std::fmt::Display for DebugAsDisplay<'_, E> {
     }
 }
 
+/// Future adapters for `Future<Output = Result<T, E>>`.
 pub trait TryFutureExt {
+    /// Log an error at error level when the future resolves and return `Option<T>`.
     fn log_err(self) -> LogErrorFuture<Self>
     where
         Self: Sized;
 
+    /// Log an error at error level using an explicit source location.
     fn log_tracked_err(self, location: core::panic::Location<'static>) -> LogErrorFuture<Self>
     where
         Self: Sized;
 
+    /// Log an error at warning level when the future resolves and return `Option<T>`.
     fn warn_on_err(self) -> LogErrorFuture<Self>
     where
         Self: Sized;
+    /// Panic if the future resolves to `Err`; otherwise return its value.
     fn unwrap(self) -> UnwrapFuture<Self>
     where
         Self: Sized;
@@ -435,6 +461,7 @@ where
 }
 
 #[must_use]
+/// Future returned by [`TryFutureExt`] logging adapters.
 pub struct LogErrorFuture<F>(F, log::Level, core::panic::Location<'static>);
 
 impl<F, T, E> Future for LogErrorFuture<F>
@@ -462,6 +489,7 @@ where
 }
 
 #[must_use]
+/// Future returned by [`TryFutureExtBacktrace`] logging adapters.
 pub struct LogErrorWithBacktraceFuture<F>(F, log::Level, core::panic::Location<'static>);
 
 impl<F, T, E> Future for LogErrorWithBacktraceFuture<F>
@@ -488,6 +516,7 @@ where
     }
 }
 
+/// Future returned by [`TryFutureExt::unwrap`].
 pub struct UnwrapFuture<F>(F);
 
 impl<F, T, E> Future for UnwrapFuture<F>
@@ -506,6 +535,7 @@ where
     }
 }
 
+/// Run a closure when this guard is dropped, unless [`Deferred::abort`] is called.
 pub struct Deferred<F: FnOnce()>(Option<F>);
 
 impl<F: FnOnce()> Deferred<F> {
@@ -530,6 +560,7 @@ pub fn defer<F: FnOnce()>(f: F) -> Deferred<F> {
 }
 
 #[derive(Default, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
+/// Build [`TypeIdHasher`] values for hash maps keyed by `TypeId`.
 pub struct TypeIdHashBuilder;
 
 impl std::hash::BuildHasher for TypeIdHashBuilder {
@@ -541,6 +572,7 @@ impl std::hash::BuildHasher for TypeIdHashBuilder {
 }
 
 #[derive(Default, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
+/// A compact hasher for Rust's 64-bit `TypeId` representation.
 pub struct TypeIdHasher {
     value: u64,
 }
@@ -583,6 +615,7 @@ fn type_id_hasher() {
     verify_hashing_with(TypeId::of::<Vec<u8>>());
 }
 
+/// Keep the smallest `limit` items under `compare`, sorted according to that comparator.
 pub fn truncate_to_bottom_n_sorted_by<T, F>(items: &mut Vec<T>, limit: usize, compare: &F)
 where
     F: Fn(&T, &T) -> std::cmp::Ordering,

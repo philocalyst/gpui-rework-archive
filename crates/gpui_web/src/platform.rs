@@ -1,3 +1,8 @@
+//! Browser implementation of GPUI's [`gpui::Platform`] capability boundary.
+//!
+//! [`WebPlatform`] owns one document canvas and one top-level web window. It initializes the GPU
+//! backend lazily and reports unsupported native operations through explicit defaults.
+
 use crate::dispatcher::WebDispatcher;
 use crate::display::WebDisplay;
 use crate::events::EventListenerHandle;
@@ -92,8 +97,11 @@ pub(crate) enum WebWindowLifecycle {
 
 #[derive(Debug)]
 pub enum WebWindowError {
+    /// A top-level GPUI window is already open.
     AlreadyOpen,
+    /// A closed top-level window cannot be opened again in this browser runtime.
     ReopeningUnsupported,
+    /// The requested GPUI window kind has no separate browser window representation.
     UnsupportedWindowKind(&'static str),
     /// Graphics initialization has not completed yet; retrying after it
     /// finishes (e.g. from the `Platform::run` callback) can succeed.
@@ -141,10 +149,16 @@ struct WebPlatformCallbacks {
 }
 
 impl WebPlatform {
+    /// Creates a browser platform, allowing worker threads when the build and
+    /// browser support them.
     pub fn new(allow_multi_threading: bool) -> Self {
         Self::new_with_backend(allow_multi_threading, WebBackendPreference::Auto)
     }
 
+    /// Creates a browser platform with an explicit graphics backend preference.
+    ///
+    /// Browser graphics initialization is lazy; opening the first window may
+    /// return [`WebWindowError::GraphicsInitializationPending`].
     pub fn new_with_backend(
         allow_multi_threading: bool,
         backend_preference: WebBackendPreference,

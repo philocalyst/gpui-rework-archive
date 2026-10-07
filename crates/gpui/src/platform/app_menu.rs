@@ -1,6 +1,12 @@
+//! Native application-menu descriptions.
+//!
+//! Menu values are declarative: GPUI translates them into the platform menu bar or submenu and
+//! dispatches action items through the application action system. An [`OsMenu`] or [`OsAction`]
+//! asks the operating system for behavior associated with a well-known menu role.
+
 use crate::{Action, App, Platform, SharedString};
 
-/// A menu of the application, either a main menu or a submenu
+/// A menu of the application, either a main menu or a submenu.
 pub struct Menu {
     /// The name of the menu
     pub name: SharedString,

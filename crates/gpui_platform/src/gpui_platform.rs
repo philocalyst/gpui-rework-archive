@@ -1,5 +1,8 @@
-//! Convenience crate that re-exports GPUI's platform traits and the
-//! `current_platform` constructor so consumers don't need `#[cfg]` gating.
+//! Platform selection and constructors for GPUI applications.
+//!
+//! The helpers in this crate keep application code independent of the selected
+//! native, web, or headless backend. They return GPUI's ordinary
+//! [`gpui::Application`] value.
 
 pub use gpui::Platform;
 
@@ -10,6 +13,7 @@ pub fn background_executor() -> gpui::BackgroundExecutor {
     current_platform(true).background_executor()
 }
 
+/// Creates an application using the platform backend selected by the build.
 pub fn application() -> gpui::Application {
     #[cfg(target_family = "wasm")]
     {
@@ -20,6 +24,7 @@ pub fn application() -> gpui::Application {
     gpui::Application::with_platform(current_platform(false))
 }
 
+/// Creates an application backed by the native platform in headless mode.
 pub fn headless() -> gpui::Application {
     gpui::Application::with_platform(current_platform(true))
 }
@@ -28,6 +33,7 @@ pub fn headless() -> gpui::Application {
 pub use gpui_web::WebBackendPreference;
 
 #[cfg(target_family = "wasm")]
+/// Creates a web application with an explicit WebGPU/WebGL preference.
 pub fn application_with_web_backend(backend_preference: WebBackendPreference) -> gpui::Application {
     let platform = Rc::new(gpui_web::WebPlatform::new_with_backend(
         true,
@@ -39,6 +45,7 @@ pub fn application_with_web_backend(backend_preference: WebBackendPreference) ->
 
 /// Unlike `application`, this function returns a single-threaded web application.
 #[cfg(target_family = "wasm")]
+/// Creates the single-threaded web application variant.
 pub fn single_threaded_web() -> gpui::Application {
     let platform = Rc::new(gpui_web::WebPlatform::new(false));
     let http_client = std::sync::Arc::new(platform.fetch_http_client());
@@ -48,6 +55,7 @@ pub fn single_threaded_web() -> gpui::Application {
 /// Initializes panic hooks and logging for the web platform.
 /// Call this before running the application in a wasm_bindgen entrypoint.
 #[cfg(target_family = "wasm")]
+/// Installs browser-side hooks required before starting a web application.
 pub fn web_init() {
     console_error_panic_hook::set_once();
     gpui_web::init_logging();
@@ -82,6 +90,7 @@ pub fn current_platform(headless: bool) -> Rc<dyn Platform> {
 
 /// Returns a new [`HeadlessRenderer`] for the current platform, if available.
 #[cfg(any(feature = "bench-support", feature = "test-support"))]
+/// Returns the active platform's optional off-screen renderer.
 pub fn current_headless_renderer() -> Option<Box<dyn gpui::PlatformHeadlessRenderer>> {
     #[cfg(target_os = "macos")]
     {

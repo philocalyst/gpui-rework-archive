@@ -1,0 +1,23 @@
+[package]
+name = "gpui-documentation-examples"
+version = "0.1.0"
+edition = "2024"
+publish = false
+default-run = "gpui-documentation-examples"
+
+[workspace]
+
+[dependencies]
+gpui = { package = "gpui-ce", path = "../../crates/gpui", default-features = false }
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+gpui_platform = { package = "gpui_ce_platform", path = "../../crates/gpui_platform", features = ["wayland", "x11"] }
+
+[target.'cfg(target_family = "wasm")'.dependencies]
+gpui_web = { package = "gpui_ce_web", path = "../../crates/gpui_web", default-features = false }
+wasm-bindgen = "0.2"
+web-sys = { version = "0.3", features = ["Window", "Location", "console"] }
+
+[profile.release]
+opt-level = "s"
+lto = "thin"

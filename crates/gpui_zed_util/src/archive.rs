@@ -17,6 +17,7 @@ fn archive_path_is_normal(filename: &str) -> bool {
 }
 
 #[cfg(windows)]
+/// Extract a ZIP stream while rejecting absolute and parent-traversing entries.
 pub async fn extract_zip<R: AsyncRead + Unpin>(destination: &Path, reader: R) -> Result<()> {
     let mut reader = read::stream::ZipFileReader::new(BufReader::new(reader));
 
@@ -66,6 +67,7 @@ pub async fn extract_zip<R: AsyncRead + Unpin>(destination: &Path, reader: R) ->
 }
 
 #[cfg(unix)]
+/// Buffer a ZIP stream and extract it with Unix permission metadata preserved.
 pub async fn extract_zip<R: AsyncRead + Unpin>(destination: &Path, reader: R) -> Result<()> {
     // Unix needs file permissions copied when extracting.
     // This is only possible to do when a reader impls `AsyncSeek` and `seek::ZipFileReader` is used.
@@ -83,6 +85,7 @@ pub async fn extract_zip<R: AsyncRead + Unpin>(destination: &Path, reader: R) ->
 }
 
 #[cfg(unix)]
+/// Extract a seekable ZIP stream while preserving safe entry permissions.
 pub async fn extract_seekable_zip<R: AsyncRead + AsyncSeek + Unpin>(
     destination: &Path,
     reader: R,

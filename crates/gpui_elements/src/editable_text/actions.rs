@@ -1,4 +1,7 @@
-//! Module containing user-input actions that are bound by EditableText elements
+//! User-input actions bound by editable text elements.
+//!
+//! [`DEFAULT_INPUT_CONTEXT`] names the default key context. Applications can extend or replace
+//! these bindings through GPUI's keymap system.
 use gpui::{InteractiveElement, WeakEntity, Window};
 use std::{cell::RefCell, rc::Rc};
 

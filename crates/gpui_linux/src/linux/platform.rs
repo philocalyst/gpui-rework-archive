@@ -120,6 +120,10 @@ pub(crate) struct LinuxCommon {
 }
 
 impl LinuxCommon {
+    /// Creates shared Linux platform state and the channels used to wake its event loop.
+    ///
+    /// The returned receiver must be serviced by the owning UI thread; the wake channel is used
+    /// by background work to request another event-loop turn.
     pub fn new(
         signal: LoopSignal,
     ) -> (
@@ -1142,10 +1146,10 @@ pub(super) fn keystroke_from_xkb(
     }
 }
 
-/**
- * Returns which symbol the dead key represents
- * <https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values#dead_keycodes_for_linux>
- */
+/// Returns the character represented by a Linux XKB dead-key symbol, when known.
+///
+/// This maps the keysym to the accent character used by GPUI's IME/keybinding bridge. It returns
+/// `None` for non-dead keys and symbols not covered by the table.
 #[cfg(any(feature = "wayland", feature = "x11"))]
 pub fn keystroke_underlying_dead_key(keysym: Keysym) -> Option<String> {
     match keysym {

@@ -147,6 +147,9 @@ where
 /// A handle to a subscription created by GPUI. When dropped, the subscription
 /// is cancelled and the callback will no longer be invoked.
 #[must_use]
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Subscription-85109192.md")]
+// docs:examples:end
 pub struct Subscription {
     unsubscribe: Option<Box<dyn FnOnce() + 'static>>,
 }
@@ -160,15 +163,20 @@ impl Subscription {
         }
     }
 
-    /// Detaches the subscription from this handle. The callback will
-    /// continue to be invoked until the entities it has been
-    /// subscribed to are dropped
+    /// Forgets the cancellation callback and leaves the subscription active.
+    ///
+    /// Use this only when the subscription is intentionally application-lived. A
+    /// detached subscription cannot be cancelled through this handle; it ends when
+    /// the publisher removes it (usually when the observed entity is released).
     pub fn detach(mut self) {
         self.unsubscribe.take();
     }
 
-    /// Joins two subscriptions into a single subscription. Detach will
-    /// detach both interior subscriptions.
+    /// Combines two subscriptions into one cancellation handle.
+    ///
+    /// Dropping the returned handle cancels both inputs. Calling [`Self::detach`]
+    /// on it deliberately detaches both inputs as well. The inputs are consumed,
+    /// so there is only one owner responsible for their cancellation.
     pub fn join(mut subscription_a: Self, mut subscription_b: Self) -> Self {
         let a_unsubscribe = subscription_a.unsubscribe.take();
         let b_unsubscribe = subscription_b.unsubscribe.take();

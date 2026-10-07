@@ -12,7 +12,7 @@ use crate::{
 };
 use gpui_util::ResultExt;
 
-/// An SVG element.
+/// An interactive SVG element loaded from a resource, external path, or raw bytes.
 pub struct Svg {
     interactivity: Interactivity,
     transformation: Option<Transformation>,
@@ -22,7 +22,8 @@ pub struct Svg {
     data_path: Option<SharedString>,
 }
 
-/// Create a new SVG element.
+/// Construct an SVG element. Set exactly one of [`Svg::path`], [`Svg::external_path`], or
+/// [`Svg::data`] before rendering; the selected source is decoded during paint.
 #[track_caller]
 pub fn svg() -> Svg {
     Svg {
@@ -36,20 +37,19 @@ pub fn svg() -> Svg {
 }
 
 impl Svg {
-    /// Set the path to the SVG file for this element.
+    /// Load an SVG from a resource path resolved by GPUI's asset system.
     pub fn path(mut self, path: impl Into<SharedString>) -> Self {
         self.path = Some(path.into());
         self
     }
 
-    /// Set the path to the SVG file for this element.
+    /// Load an SVG from a path supplied to the external resource loader.
     pub fn external_path(mut self, path: impl Into<SharedString>) -> Self {
         self.external_path = Some(path.into());
         self
     }
 
-    /// Set the raw SVG data for this element.
-    /// The SVG will be rendered directly from the provided bytes.
+    /// Use raw SVG bytes. The bytes are retained and identified by a deterministic cache key.
     pub fn data(mut self, data: &[u8]) -> Self {
         // Generate a unique deterministic path based on the data hash for caching
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
@@ -61,8 +61,7 @@ impl Svg {
         self
     }
 
-    /// Transform the SVG element with the given transformation.
-    /// Note that this won't effect the hitbox or layout of the element, only the rendering.
+    /// Transform only the rendered SVG; layout bounds and the hitbox are unchanged.
     pub fn with_transformation(mut self, transformation: Transformation) -> Self {
         self.transformation = Some(transformation);
         self

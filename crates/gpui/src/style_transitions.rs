@@ -1,3 +1,13 @@
+//! Internal state for style-property transitions.
+//!
+//! Style transitions interpolate authored values in their resolved layout
+//! space. Absolute lengths resolve against the rem size, relative lengths
+//! resolve against the containing bounds, and `auto` values are captured from
+//! the current layout before being animated. Each property owns an independent
+//! [`Animated`] value, so changing one style does not reset unrelated
+//! properties. Reduced-motion mode bypasses interpolation while retaining the
+//! authored endpoint.
+
 use scheduler::Instant;
 
 use crate::{

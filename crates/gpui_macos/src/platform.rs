@@ -187,6 +187,10 @@ impl GPUIApplicationDelegate {
     }
 }
 
+/// AppKit platform implementation bound to the main thread.
+///
+/// All window, menu, pasteboard, and haptic operations must be initiated on that thread. A
+/// headless instance keeps scheduling and text services but does not present native windows.
 pub struct MacPlatform(Mutex<MacPlatformState>, MainThreadMarker);
 
 pub(crate) struct MacPlatformState {
@@ -222,6 +226,10 @@ pub(crate) struct MacPlatformState {
 }
 
 impl MacPlatform {
+    /// Initializes AppKit services and returns a main-thread-bound platform.
+    ///
+    /// Panics when called without an AppKit main-thread marker; callers should construct the
+    /// platform during application startup on the main thread. `headless` disables presentation.
     pub fn new(headless: bool) -> Self {
         let marker = MainThreadMarker::new().expect("Mac platform not created on main thread");
         let dispatcher = Arc::new(MacDispatcher::new());

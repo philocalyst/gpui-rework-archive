@@ -2,28 +2,27 @@ use collections::HashMap;
 
 use crate::{KeybindingKeystroke, Keystroke};
 
-/// A trait for platform-specific keyboard layouts
+/// Provides the identity and display name of a platform keyboard layout.
 pub trait PlatformKeyboardLayout {
-    /// Get the keyboard layout ID, which should be unique to the layout
+    /// Returns an identifier unique to this layout.
     fn id(&self) -> &str;
-    /// Get the keyboard layout display name
+    /// Returns the localized display name of this layout.
     fn name(&self) -> &str;
 }
 
-/// A trait for platform-specific keyboard mappings
+/// Maps platform keyboard events into GPUI's logical key representation.
 pub trait PlatformKeyboardMapper {
-    /// Map a key equivalent to its platform-specific representation
+    /// Maps a key equivalent to its platform-specific representation.
     fn map_key_equivalent(
         &self,
         keystroke: Keystroke,
         use_key_equivalents: bool,
     ) -> KeybindingKeystroke;
-    /// Get the key equivalents for the current keyboard layout,
-    /// only used on macOS
+    /// Returns layout-specific key equivalents, when the platform exposes them.
     fn get_key_equivalents(&self) -> Option<&HashMap<char, char>>;
 }
 
-/// A dummy implementation of the platform keyboard mapper
+/// Mapper that leaves keystrokes unchanged.
 pub struct DummyKeyboardMapper;
 
 impl PlatformKeyboardMapper for DummyKeyboardMapper {

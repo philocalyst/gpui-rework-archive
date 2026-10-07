@@ -1,3 +1,8 @@
+//! Patch-based undo and redo history for one editable field.
+//!
+//! History stores UTF-8 byte ranges and the selection before each edit. New edits clear redo
+//! entries; adjacent edits may be grouped by elapsed time and are capped at [`MAX_HISTORY_LEN`].
+
 use gpui::CaretSelection;
 use std::{
     ops::Range,
@@ -11,6 +16,10 @@ pub const MAX_HISTORY_LEN: usize = 1000;
 pub const DEFAULT_GROUP_INTERVAL: Duration = Duration::from_millis(300);
 
 // TODO: Should history get attached directly to storage? currently its per text field and operate both on storage and selection
+/// Undo and redo stacks for one editable text field.
+///
+/// Consecutive contiguous edits within the grouping interval may be coalesced;
+/// recording a new edit clears the redo stack.
 pub struct EditableTextHistory {
     /// The maximum duration between changes to `content` that can be grouped together as a single entry in the history log.
     grouping_interval: Duration,
@@ -52,10 +61,12 @@ pub enum HistoryKind {
 }
 
 impl EditableTextHistory {
+    /// Sets the maximum elapsed time used when grouping adjacent edits.
     pub fn set_grouping_interval(&mut self, interval: Duration) {
         self.grouping_interval = interval;
     }
 
+    /// Records an edit and invalidates redo entries.
     pub fn record(
         &mut self,
         range: Range<usize>,
@@ -112,14 +123,17 @@ impl EditableTextHistory {
         }
     }
 
+    /// Returns whether the selected undo or redo stack contains an entry.
     pub fn has_next(&self, kind: HistoryKind) -> bool {
         !self.stack(kind).is_empty()
     }
 
+    /// Pushes an entry onto the selected stack.
     pub fn push(&mut self, kind: HistoryKind, entry: HistoryEntry) {
         self.stack_mut(kind).push(entry);
     }
 
+    /// Removes and returns the most recent entry from the selected stack.
     pub fn take(&mut self, kind: HistoryKind) -> Option<HistoryEntry> {
         self.stack_mut(kind).pop()
     }
@@ -140,12 +154,14 @@ impl HistoryEntry {
         true
     }
 
+    /// Returns the replacement range clipped to a buffer of `max_len` bytes.
     pub fn char_range(&self, max_len: usize) -> Range<usize> {
         let undo_start = self.range.start;
         let undo_end = (self.range.start + self.new_text_len).min(max_len);
         undo_start..undo_end
     }
 
+    /// Converts this edit into the inverse operation using the current text.
     pub fn as_inverted(self, prev_text_at_range: String) -> Self {
         HistoryEntry {
             range: self.range.start..self.range.start + self.old_text.len(),

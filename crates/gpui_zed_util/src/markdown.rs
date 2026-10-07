@@ -1,3 +1,5 @@
+//! Small Markdown URL and inline-formatting helpers.
+
 use std::fmt::{Display, Formatter};
 
 /// Generates a URL-friendly slug from heading text (e.g. "Hello World" → "hello-world").
@@ -57,6 +59,7 @@ pub fn split_local_url_fragment(url: &str) -> (&str, Option<&str>) {
     }
 }
 
+/// Parse a `#L<line>` or `#L<line>-L<column>` source fragment.
 pub fn source_position_from_fragment(fragment: &str) -> Option<(u32, u32)> {
     let fragment = fragment.strip_prefix('L').unwrap_or(fragment);
     let fragment = fragment
@@ -76,6 +79,7 @@ pub fn source_position_from_fragment(fragment: &str) -> Option<(u32, u32)> {
 
 /// Indicates that the wrapped `String` is markdown text.
 #[derive(Debug, Clone)]
+/// A string that is intentionally rendered as Markdown by the caller.
 pub struct MarkdownString(pub String);
 
 impl Display for MarkdownString {
@@ -115,7 +119,9 @@ pub struct MarkdownInlineCode<'a>(pub &'a str);
 
 /// Implements `Display` to format markdown code blocks, wrapped in 3 or more backticks as needed.
 pub struct MarkdownCodeBlock<'a> {
+    /// Language tag placed after the opening fence.
     pub tag: &'a str,
+    /// Code block contents.
     pub text: &'a str,
 }
 

@@ -1,3 +1,5 @@
+//! Keyboard layout adapter for browser-produced keystrokes.
+
 use gpui::PlatformKeyboardLayout;
 
 pub struct WebKeyboardLayout;

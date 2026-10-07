@@ -10,12 +10,18 @@ use crate::{Action, AsKeystroke, Keystroke, Unbind, is_no_action, is_unbind};
 use collections::{HashSet, TypeIdHashMap};
 use smallvec::SmallVec;
 
-/// An opaque identifier of which version of the keymap is currently active.
-/// The keymap's version is changed whenever bindings are added or removed.
+/// Opaque revision of a [`Keymap`].
+///
+/// The revision changes whenever bindings are added or the keymap is cleared. It is useful for
+/// invalidating cached dispatch results; it has no ordering or persistence guarantees.
 #[derive(Copy, Clone, Eq, PartialEq, Default)]
 pub struct KeymapVersion(usize);
 
-/// A collection of key bindings for the user's application.
+/// Ordered key bindings for an application.
+///
+/// Later bindings have higher precedence at the same context depth. Context-aware lookup also
+/// considers the dispatch path, so a binding on a focused child wins over an otherwise identical
+/// binding on its parent.
 #[derive(Default)]
 pub struct Keymap {
     bindings: Vec<KeyBinding>,
@@ -49,7 +55,7 @@ fn binding_is_unbound(disabled_binding: &KeyBinding, binding: &KeyBinding) -> bo
 }
 
 impl Keymap {
-    /// Create a new keymap with the given bindings.
+    /// Creates a keymap and adds `bindings` in iterator order.
     pub fn new(bindings: Vec<KeyBinding>) -> Self {
         let mut this = Self::default();
         this.add_bindings(bindings);
@@ -61,7 +67,10 @@ impl Keymap {
         self.version
     }
 
-    /// Add more bindings to the keymap.
+    /// Appends bindings and advances [`Self::version`].
+    ///
+    /// The iterator is consumed before this method returns. Existing bindings remain in place,
+    /// so appended bindings win ties at the same context depth.
     pub fn add_bindings<T: IntoIterator<Item = KeyBinding>>(&mut self, bindings: T) {
         for binding in bindings {
             let action_id = binding.action().as_any().type_id();
@@ -79,7 +88,7 @@ impl Keymap {
         self.version.0 += 1;
     }
 
-    /// Reset this keymap to its initial state.
+    /// Removes every binding and advances [`Self::version`].
     pub fn clear(&mut self) {
         self.bindings.clear();
         self.binding_indices_by_action_id.clear();
@@ -135,7 +144,7 @@ impl Keymap {
         })
     }
 
-    /// Returns all bindings that might match the input without checking context. The bindings
+    /// Returns all bindings that might match `input` without checking context. The bindings
     /// returned in precedence order (reverse of the order they were added to the keymap).
     pub fn all_bindings_for_input(&self, input: &[Keystroke]) -> Vec<KeyBinding> {
         self.bindings()
@@ -149,9 +158,10 @@ impl Keymap {
             .collect()
     }
 
-    /// Returns a list of bindings that match the given input, and a boolean indicating whether or
-    /// not more bindings might match if the input was longer. Bindings are returned in precedence
-    /// order (higher precedence first, reverse of the order they were added to the keymap).
+    /// Returns matching bindings and whether a longer input may still match another binding.
+    ///
+    /// The returned boolean is `true` when at least one binding is a prefix of a longer sequence.
+    /// Returns are in precedence order, with the highest-precedence binding first.
     ///
     /// Precedence is defined by the depth in the tree (matches on the Editor take precedence over
     /// matches on the Pane, then the Workspace, etc.). Bindings with no context are treated as the

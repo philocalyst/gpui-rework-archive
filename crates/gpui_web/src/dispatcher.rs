@@ -1,3 +1,8 @@
+//! Browser event-loop implementation of GPUI dispatch and timer contracts.
+//!
+//! Main-thread work is cooperative with browser rendering. Background work is available only
+//! when the WebAssembly build has shared memory and the multithreaded feature enabled.
+
 use gpui::{
     PlatformDispatcher, Priority, PriorityQueueReceiver, PriorityQueueSender, RunnableVariant,
 };
@@ -150,6 +155,7 @@ impl MainThreadMailbox {
     }
 }
 
+/// Dispatches GPUI foreground work and optional WebAssembly worker work.
 pub struct WebDispatcher {
     main_thread_id: std::thread::ThreadId,
     background_sender: PriorityQueueSender<RunnableVariant>,
@@ -160,6 +166,11 @@ pub struct WebDispatcher {
 }
 
 impl WebDispatcher {
+    /// Creates a dispatcher for `browser_window`.
+    ///
+    /// `allow_threads` is only a preference: workers are enabled when the
+    /// multithreaded build feature and the browser's shared-memory and
+    /// `Atomics.waitAsync` support are both available.
     pub fn new(browser_window: web_sys::Window, allow_threads: bool) -> Self {
         #[cfg(feature = "multithreaded")]
         let (background_sender, background_receiver) = PriorityQueueReceiver::new();

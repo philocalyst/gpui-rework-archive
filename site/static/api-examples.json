@@ -1,0 +1,923 @@
+{
+  "gpui::Animation": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.Animation.html",
+    "examples": [
+      {
+        "example": "animation",
+        "step": "state",
+        "step_title": "Give a replay a stable identity",
+        "title": "Replay an animation",
+        "url": "/examples/animation/#state"
+      }
+    ],
+    "path": "gpui/struct.Animation.html"
+  },
+  "gpui::AnimationExt": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.AnimationExt.html",
+    "examples": [
+      {
+        "example": "animation",
+        "step": "state",
+        "step_title": "Give a replay a stable identity",
+        "title": "Replay an animation",
+        "url": "/examples/animation/#state"
+      }
+    ],
+    "path": "gpui/trait.AnimationExt.html"
+  },
+  "gpui::AnimationExt::with_animation": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.AnimationExt.html#method.with_animation",
+    "examples": [
+      {
+        "example": "animation",
+        "step": "animate",
+        "step_title": "Animate style from the retained clock",
+        "title": "Replay an animation",
+        "url": "/examples/animation/#animate"
+      }
+    ],
+    "path": "gpui/trait.AnimationExt.html#method.with_animation"
+  },
+  "gpui::App::bind_keys": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.App.html#method.bind_keys",
+    "examples": [
+      {
+        "example": "actions",
+        "step": "bindings",
+        "step_title": "Translate a key into an operation",
+        "title": "Route a keyboard action",
+        "url": "/examples/actions/#bindings"
+      }
+    ],
+    "path": "gpui/struct.App.html#method.bind_keys"
+  },
+  "gpui::App::open_window": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.App.html#method.open_window",
+    "examples": [
+      {
+        "example": "first-window",
+        "step": "window",
+        "step_title": "Give the view a window",
+        "title": "Open a window",
+        "url": "/examples/first-window/#window"
+      }
+    ],
+    "path": "gpui/struct.App.html#method.open_window"
+  },
+  "gpui::App::reduce_motion": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.App.html#method.reduce_motion",
+    "examples": [
+      {
+        "example": "animation",
+        "step": "animate",
+        "step_title": "Animate style from the retained clock",
+        "title": "Replay an animation",
+        "url": "/examples/animation/#animate"
+      }
+    ],
+    "path": "gpui/struct.App.html#method.reduce_motion"
+  },
+  "gpui::AppContext": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.AppContext.html",
+    "examples": [
+      {
+        "example": "first-window",
+        "step": "window",
+        "step_title": "Give the view a window",
+        "title": "Open a window",
+        "url": "/examples/first-window/#window"
+      },
+      {
+        "example": "layout",
+        "step": "run",
+        "step_title": "Open the same view on every platform",
+        "title": "Constrain a layout",
+        "url": "/examples/layout/#run"
+      },
+      {
+        "example": "lists",
+        "step": "run",
+        "step_title": "Keep state with the view",
+        "title": "Render a large list",
+        "url": "/examples/lists/#run"
+      },
+      {
+        "example": "text",
+        "step": "run",
+        "step_title": "Run the same view everywhere",
+        "title": "Shape and wrap text",
+        "url": "/examples/text/#run"
+      }
+    ],
+    "path": "gpui/trait.AppContext.html"
+  },
+  "gpui::AppContext::new": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.AppContext.html#tymethod.new",
+    "examples": [
+      {
+        "example": "animation",
+        "step": "clock",
+        "step_title": "Start the view",
+        "title": "Replay an animation",
+        "url": "/examples/animation/#clock"
+      },
+      {
+        "example": "async-task",
+        "step": "launch",
+        "step_title": "Give the task a real window",
+        "title": "Finish a task after a delay",
+        "url": "/examples/async-task/#launch"
+      },
+      {
+        "example": "drawing",
+        "step": "launch",
+        "step_title": "Put the view in a window",
+        "title": "Paint a custom region",
+        "url": "/examples/drawing/#launch"
+      },
+      {
+        "example": "subscriptions",
+        "step": "lifetime",
+        "step_title": "Build both entities under the app",
+        "title": "Observe shared state",
+        "url": "/examples/subscriptions/#lifetime"
+      }
+    ],
+    "path": "gpui/trait.AppContext.html#tymethod.new"
+  },
+  "gpui::Application": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.Application.html",
+    "examples": [
+      {
+        "example": "subscriptions",
+        "step": "lifetime",
+        "step_title": "Build both entities under the app",
+        "title": "Observe shared state",
+        "url": "/examples/subscriptions/#lifetime"
+      }
+    ],
+    "path": "gpui/struct.Application.html"
+  },
+  "gpui::Application::run": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.Application.html#method.run",
+    "examples": [
+      {
+        "example": "animation",
+        "step": "clock",
+        "step_title": "Start the view",
+        "title": "Replay an animation",
+        "url": "/examples/animation/#clock"
+      },
+      {
+        "example": "drawing",
+        "step": "launch",
+        "step_title": "Put the view in a window",
+        "title": "Paint a custom region",
+        "url": "/examples/drawing/#launch"
+      },
+      {
+        "example": "first-window",
+        "step": "window",
+        "step_title": "Give the view a window",
+        "title": "Open a window",
+        "url": "/examples/first-window/#window"
+      }
+    ],
+    "path": "gpui/struct.Application.html#method.run"
+  },
+  "gpui::BackgroundExecutor::timer": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.BackgroundExecutor.html#method.timer",
+    "examples": [
+      {
+        "example": "async-task",
+        "step": "completion",
+        "step_title": "Await background work, then update safely",
+        "title": "Finish a task after a delay",
+        "url": "/examples/async-task/#completion"
+      }
+    ],
+    "path": "gpui/struct.BackgroundExecutor.html#method.timer"
+  },
+  "gpui::Bounds": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.Bounds.html",
+    "examples": [
+      {
+        "example": "drawing",
+        "step": "bounds",
+        "step_title": "Make geometry follow layout",
+        "title": "Paint a custom region",
+        "url": "/examples/drawing/#bounds"
+      },
+      {
+        "example": "drawing",
+        "step": "paint",
+        "step_title": "Paint in the canvas bounds",
+        "title": "Paint a custom region",
+        "url": "/examples/drawing/#paint"
+      }
+    ],
+    "path": "gpui/struct.Bounds.html"
+  },
+  "gpui::Context": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html",
+    "examples": [
+      {
+        "example": "async-task",
+        "step": "state",
+        "step_title": "Keep task ownership with the view",
+        "title": "Finish a task after a delay",
+        "url": "/examples/async-task/#state"
+      },
+      {
+        "example": "counter",
+        "step": "state",
+        "step_title": "Put the value on the view",
+        "title": "Make state visible",
+        "url": "/examples/counter/#state"
+      },
+      {
+        "example": "layout",
+        "step": "run",
+        "step_title": "Open the same view on every platform",
+        "title": "Constrain a layout",
+        "url": "/examples/layout/#run"
+      },
+      {
+        "example": "lists",
+        "step": "run",
+        "step_title": "Keep state with the view",
+        "title": "Render a large list",
+        "url": "/examples/lists/#run"
+      }
+    ],
+    "path": "gpui/struct.Context.html"
+  },
+  "gpui::Context::listener": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html#method.listener",
+    "examples": [
+      {
+        "example": "actions",
+        "step": "dispatch",
+        "step_title": "Handle the action on the focused element",
+        "title": "Route a keyboard action",
+        "url": "/examples/actions/#dispatch"
+      },
+      {
+        "example": "async-task",
+        "step": "lifetime",
+        "step_title": "Make start, stop, and restart visible",
+        "title": "Finish a task after a delay",
+        "url": "/examples/async-task/#lifetime"
+      },
+      {
+        "example": "counter",
+        "step": "render",
+        "step_title": "Build the next frame from that value",
+        "title": "Make state visible",
+        "url": "/examples/counter/#render"
+      },
+      {
+        "example": "subscriptions",
+        "step": "observe-state",
+        "step_title": "Read the model and update it from a click",
+        "title": "Observe shared state",
+        "url": "/examples/subscriptions/#observe-state"
+      }
+    ],
+    "path": "gpui/struct.Context.html#method.listener"
+  },
+  "gpui::Context::notify": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html#method.notify",
+    "examples": [
+      {
+        "example": "actions",
+        "step": "dispatch",
+        "step_title": "Handle the action on the focused element",
+        "title": "Route a keyboard action",
+        "url": "/examples/actions/#dispatch"
+      },
+      {
+        "example": "counter",
+        "step": "update",
+        "step_title": "Change the state and request a redraw",
+        "title": "Make state visible",
+        "url": "/examples/counter/#update"
+      },
+      {
+        "example": "subscriptions",
+        "step": "state",
+        "step_title": "Put changing data in its own entity",
+        "title": "Observe shared state",
+        "url": "/examples/subscriptions/#state"
+      }
+    ],
+    "path": "gpui/struct.Context.html#method.notify"
+  },
+  "gpui::Context::observe": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html#method.observe",
+    "examples": [
+      {
+        "example": "subscriptions",
+        "step": "observe",
+        "step_title": "Keep the view subscribed to the model",
+        "title": "Observe shared state",
+        "url": "/examples/subscriptions/#observe"
+      }
+    ],
+    "path": "gpui/struct.Context.html#method.observe"
+  },
+  "gpui::Context::spawn": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html#method.spawn",
+    "examples": [
+      {
+        "example": "async-task",
+        "step": "completion",
+        "step_title": "Await background work, then update safely",
+        "title": "Finish a task after a delay",
+        "url": "/examples/async-task/#completion"
+      }
+    ],
+    "path": "gpui/struct.Context.html#method.spawn"
+  },
+  "gpui::Div": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.Div.html",
+    "examples": [
+      {
+        "example": "layout",
+        "step": "frame",
+        "step_title": "Start with a flow and a stable anchor",
+        "title": "Constrain a layout",
+        "url": "/examples/layout/#frame"
+      }
+    ],
+    "path": "gpui/struct.Div.html"
+  },
+  "gpui::Entity": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.Entity.html",
+    "examples": [
+      {
+        "example": "counter",
+        "step": "state",
+        "step_title": "Put the value on the view",
+        "title": "Make state visible",
+        "url": "/examples/counter/#state"
+      },
+      {
+        "example": "subscriptions",
+        "step": "state",
+        "step_title": "Put changing data in its own entity",
+        "title": "Observe shared state",
+        "url": "/examples/subscriptions/#state"
+      }
+    ],
+    "path": "gpui/struct.Entity.html"
+  },
+  "gpui::Entity::read": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.Entity.html#method.read",
+    "examples": [
+      {
+        "example": "subscriptions",
+        "step": "observe-state",
+        "step_title": "Read the model and update it from a click",
+        "title": "Observe shared state",
+        "url": "/examples/subscriptions/#observe-state"
+      }
+    ],
+    "path": "gpui/struct.Entity.html#method.read"
+  },
+  "gpui::Entity::update": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.Entity.html#method.update",
+    "examples": [
+      {
+        "example": "subscriptions",
+        "step": "observe-state",
+        "step_title": "Read the model and update it from a click",
+        "title": "Observe shared state",
+        "url": "/examples/subscriptions/#observe-state"
+      }
+    ],
+    "path": "gpui/struct.Entity.html#method.update"
+  },
+  "gpui::FocusHandle": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.FocusHandle.html",
+    "examples": [
+      {
+        "example": "actions",
+        "step": "focus",
+        "step_title": "Give keyboard input somewhere to go",
+        "title": "Route a keyboard action",
+        "url": "/examples/actions/#focus"
+      }
+    ],
+    "path": "gpui/struct.FocusHandle.html"
+  },
+  "gpui::InteractiveElement": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.InteractiveElement.html",
+    "examples": [
+      {
+        "example": "async-task",
+        "step": "lifetime",
+        "step_title": "Make start, stop, and restart visible",
+        "title": "Finish a task after a delay",
+        "url": "/examples/async-task/#lifetime"
+      },
+      {
+        "example": "counter",
+        "step": "render",
+        "step_title": "Build the next frame from that value",
+        "title": "Make state visible",
+        "url": "/examples/counter/#render"
+      }
+    ],
+    "path": "gpui/trait.InteractiveElement.html"
+  },
+  "gpui::KeyBinding": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.KeyBinding.html",
+    "examples": [
+      {
+        "example": "actions",
+        "step": "bindings",
+        "step_title": "Translate a key into an operation",
+        "title": "Route a keyboard action",
+        "url": "/examples/actions/#bindings"
+      }
+    ],
+    "path": "gpui/struct.KeyBinding.html"
+  },
+  "gpui::Motion": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.Motion.html",
+    "examples": [
+      {
+        "example": "animation",
+        "step": "state",
+        "step_title": "Give a replay a stable identity",
+        "title": "Replay an animation",
+        "url": "/examples/animation/#state"
+      }
+    ],
+    "path": "gpui/struct.Motion.html"
+  },
+  "gpui::Pixels": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.Pixels.html",
+    "examples": [
+      {
+        "example": "drawing",
+        "step": "paint",
+        "step_title": "Paint in the canvas bounds",
+        "title": "Paint a custom region",
+        "url": "/examples/drawing/#paint"
+      },
+      {
+        "example": "text",
+        "step": "wrap",
+        "step_title": "Style and wrap a paragraph",
+        "title": "Shape and wrap text",
+        "url": "/examples/text/#wrap"
+      }
+    ],
+    "path": "gpui/struct.Pixels.html"
+  },
+  "gpui::Render": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.Render.html",
+    "examples": [
+      {
+        "example": "async-task",
+        "step": "launch",
+        "step_title": "Give the task a real window",
+        "title": "Finish a task after a delay",
+        "url": "/examples/async-task/#launch"
+      },
+      {
+        "example": "counter",
+        "step": "render",
+        "step_title": "Build the next frame from that value",
+        "title": "Make state visible",
+        "url": "/examples/counter/#render"
+      },
+      {
+        "example": "drawing",
+        "step": "bounds",
+        "step_title": "Make geometry follow layout",
+        "title": "Paint a custom region",
+        "url": "/examples/drawing/#bounds"
+      },
+      {
+        "example": "first-window",
+        "step": "render",
+        "step_title": "Describe the view",
+        "title": "Open a window",
+        "url": "/examples/first-window/#render"
+      },
+      {
+        "example": "layout",
+        "step": "run",
+        "step_title": "Open the same view on every platform",
+        "title": "Constrain a layout",
+        "url": "/examples/layout/#run"
+      },
+      {
+        "example": "lists",
+        "step": "run",
+        "step_title": "Keep state with the view",
+        "title": "Render a large list",
+        "url": "/examples/lists/#run"
+      },
+      {
+        "example": "text",
+        "step": "run",
+        "step_title": "Run the same view everywhere",
+        "title": "Shape and wrap text",
+        "url": "/examples/text/#run"
+      },
+      {
+        "example": "text",
+        "step": "shaping",
+        "step_title": "Shape text from Unicode source",
+        "title": "Shape and wrap text",
+        "url": "/examples/text/#shaping"
+      }
+    ],
+    "path": "gpui/trait.Render.html"
+  },
+  "gpui::StatefulInteractiveElement": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.StatefulInteractiveElement.html",
+    "examples": [
+      {
+        "example": "actions",
+        "step": "dispatch",
+        "step_title": "Handle the action on the focused element",
+        "title": "Route a keyboard action",
+        "url": "/examples/actions/#dispatch"
+      }
+    ],
+    "path": "gpui/trait.StatefulInteractiveElement.html"
+  },
+  "gpui::Styled": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.Styled.html",
+    "examples": [
+      {
+        "example": "first-window",
+        "step": "render",
+        "step_title": "Describe the view",
+        "title": "Open a window",
+        "url": "/examples/first-window/#render"
+      },
+      {
+        "example": "layout",
+        "step": "frame",
+        "step_title": "Start with a flow and a stable anchor",
+        "title": "Constrain a layout",
+        "url": "/examples/layout/#frame"
+      },
+      {
+        "example": "lists",
+        "step": "viewport",
+        "step_title": "Give a virtual list a real viewport",
+        "title": "Render a large list",
+        "url": "/examples/lists/#viewport"
+      }
+    ],
+    "path": "gpui/trait.Styled.html"
+  },
+  "gpui::Styled::flex_1": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.Styled.html#method.flex_1",
+    "examples": [
+      {
+        "example": "layout",
+        "step": "constraints",
+        "step_title": "Make a narrow pane behave",
+        "title": "Constrain a layout",
+        "url": "/examples/layout/#constraints"
+      }
+    ],
+    "path": "gpui/trait.Styled.html#method.flex_1"
+  },
+  "gpui::Styled::flex_shrink": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.Styled.html#method.flex_shrink",
+    "examples": [
+      {
+        "example": "layout",
+        "step": "constraints",
+        "step_title": "Make a narrow pane behave",
+        "title": "Constrain a layout",
+        "url": "/examples/layout/#constraints"
+      }
+    ],
+    "path": "gpui/trait.Styled.html#method.flex_shrink"
+  },
+  "gpui::Styled::line_height": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.Styled.html#method.line_height",
+    "examples": [
+      {
+        "example": "text",
+        "step": "wrap",
+        "step_title": "Style and wrap a paragraph",
+        "title": "Shape and wrap text",
+        "url": "/examples/text/#wrap"
+      }
+    ],
+    "path": "gpui/trait.Styled.html#method.line_height"
+  },
+  "gpui::Styled::min_w": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.Styled.html#method.min_w",
+    "examples": [
+      {
+        "example": "layout",
+        "step": "constraints",
+        "step_title": "Make a narrow pane behave",
+        "title": "Constrain a layout",
+        "url": "/examples/layout/#constraints"
+      }
+    ],
+    "path": "gpui/trait.Styled.html#method.min_w"
+  },
+  "gpui::Styled::opacity": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.Styled.html#method.opacity",
+    "examples": [
+      {
+        "example": "animation",
+        "step": "animate",
+        "step_title": "Animate style from the retained clock",
+        "title": "Replay an animation",
+        "url": "/examples/animation/#animate"
+      }
+    ],
+    "path": "gpui/trait.Styled.html#method.opacity"
+  },
+  "gpui::Styled::text_size": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.Styled.html#method.text_size",
+    "examples": [
+      {
+        "example": "text",
+        "step": "wrap",
+        "step_title": "Style and wrap a paragraph",
+        "title": "Shape and wrap text",
+        "url": "/examples/text/#wrap"
+      }
+    ],
+    "path": "gpui/trait.Styled.html#method.text_size"
+  },
+  "gpui::Styled::w": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.Styled.html#method.w",
+    "examples": [
+      {
+        "example": "animation",
+        "step": "animate",
+        "step_title": "Animate style from the retained clock",
+        "title": "Replay an animation",
+        "url": "/examples/animation/#animate"
+      },
+      {
+        "example": "text",
+        "step": "wrap",
+        "step_title": "Style and wrap a paragraph",
+        "title": "Shape and wrap text",
+        "url": "/examples/text/#wrap"
+      }
+    ],
+    "path": "gpui/trait.Styled.html#method.w"
+  },
+  "gpui::Subscription": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.Subscription.html",
+    "examples": [
+      {
+        "example": "subscriptions",
+        "step": "observe",
+        "step_title": "Keep the view subscribed to the model",
+        "title": "Observe shared state",
+        "url": "/examples/subscriptions/#observe"
+      }
+    ],
+    "path": "gpui/struct.Subscription.html"
+  },
+  "gpui::Task": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.Task.html",
+    "examples": [
+      {
+        "example": "async-task",
+        "step": "state",
+        "step_title": "Keep task ownership with the view",
+        "title": "Finish a task after a delay",
+        "url": "/examples/async-task/#state"
+      }
+    ],
+    "path": "gpui/struct.Task.html"
+  },
+  "gpui::Text": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.Text.html",
+    "examples": [
+      {
+        "example": "text",
+        "step": "shaping",
+        "step_title": "Shape text from Unicode source",
+        "title": "Shape and wrap text",
+        "url": "/examples/text/#shaping"
+      }
+    ],
+    "path": "gpui/struct.Text.html"
+  },
+  "gpui::UniformList": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.UniformList.html",
+    "examples": [
+      {
+        "example": "lists",
+        "step": "viewport",
+        "step_title": "Give a virtual list a real viewport",
+        "title": "Render a large list",
+        "url": "/examples/lists/#viewport"
+      }
+    ],
+    "path": "gpui/struct.UniformList.html"
+  },
+  "gpui::UniformList::track_scroll": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.UniformList.html#method.track_scroll",
+    "examples": [
+      {
+        "example": "lists",
+        "step": "rows",
+        "step_title": "Render only the requested indices",
+        "title": "Render a large list",
+        "url": "/examples/lists/#rows"
+      }
+    ],
+    "path": "gpui/struct.UniformList.html#method.track_scroll"
+  },
+  "gpui::UniformListScrollHandle::new": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.UniformListScrollHandle.html#method.new",
+    "examples": [
+      {
+        "example": "lists",
+        "step": "rows",
+        "step_title": "Render only the requested indices",
+        "title": "Render a large list",
+        "url": "/examples/lists/#rows"
+      }
+    ],
+    "path": "gpui/struct.UniformListScrollHandle.html#method.new"
+  },
+  "gpui::WeakEntity::update": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.WeakEntity.html#method.update",
+    "examples": [
+      {
+        "example": "async-task",
+        "step": "completion",
+        "step_title": "Await background work, then update safely",
+        "title": "Finish a task after a delay",
+        "url": "/examples/async-task/#completion"
+      }
+    ],
+    "path": "gpui/struct.WeakEntity.html#method.update"
+  },
+  "gpui::Window::focus": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.focus",
+    "examples": [
+      {
+        "example": "actions",
+        "step": "focus",
+        "step_title": "Give keyboard input somewhere to go",
+        "title": "Route a keyboard action",
+        "url": "/examples/actions/#focus"
+      }
+    ],
+    "path": "gpui/struct.Window.html#method.focus"
+  },
+  "gpui::Window::paint_quad": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.paint_quad",
+    "examples": [
+      {
+        "example": "drawing",
+        "step": "bounds",
+        "step_title": "Make geometry follow layout",
+        "title": "Paint a custom region",
+        "url": "/examples/drawing/#bounds"
+      },
+      {
+        "example": "drawing",
+        "step": "paint",
+        "step_title": "Paint in the canvas bounds",
+        "title": "Paint a custom region",
+        "url": "/examples/drawing/#paint"
+      }
+    ],
+    "path": "gpui/struct.Window.html#method.paint_quad"
+  },
+  "gpui::actions": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/macro.actions.html",
+    "examples": [
+      {
+        "example": "actions",
+        "step": "bindings",
+        "step_title": "Translate a key into an operation",
+        "title": "Route a keyboard action",
+        "url": "/examples/actions/#bindings"
+      }
+    ],
+    "path": "gpui/macro.actions.html"
+  },
+  "gpui::canvas": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/fn.canvas.html",
+    "examples": [
+      {
+        "example": "drawing",
+        "step": "bounds",
+        "step_title": "Make geometry follow layout",
+        "title": "Paint a custom region",
+        "url": "/examples/drawing/#bounds"
+      },
+      {
+        "example": "drawing",
+        "step": "paint",
+        "step_title": "Paint in the canvas bounds",
+        "title": "Paint a custom region",
+        "url": "/examples/drawing/#paint"
+      }
+    ],
+    "path": "gpui/fn.canvas.html"
+  },
+  "gpui::div": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/fn.div.html",
+    "examples": [
+      {
+        "example": "first-window",
+        "step": "render",
+        "step_title": "Describe the view",
+        "title": "Open a window",
+        "url": "/examples/first-window/#render"
+      },
+      {
+        "example": "layout",
+        "step": "frame",
+        "step_title": "Start with a flow and a stable anchor",
+        "title": "Constrain a layout",
+        "url": "/examples/layout/#frame"
+      },
+      {
+        "example": "text",
+        "step": "shaping",
+        "step_title": "Shape text from Unicode source",
+        "title": "Shape and wrap text",
+        "url": "/examples/text/#shaping"
+      }
+    ],
+    "path": "gpui/fn.div.html"
+  },
+  "gpui::ease_in_out": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/fn.ease_in_out.html",
+    "examples": [
+      {
+        "example": "animation",
+        "step": "state",
+        "step_title": "Give a replay a stable identity",
+        "title": "Replay an animation",
+        "url": "/examples/animation/#state"
+      }
+    ],
+    "path": "gpui/fn.ease_in_out.html"
+  },
+  "gpui::fill": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/fn.fill.html",
+    "examples": [
+      {
+        "example": "drawing",
+        "step": "paint",
+        "step_title": "Paint in the canvas bounds",
+        "title": "Paint a custom region",
+        "url": "/examples/drawing/#paint"
+      }
+    ],
+    "path": "gpui/fn.fill.html"
+  },
+  "gpui::text": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/macro.text.html",
+    "examples": [
+      {
+        "example": "text",
+        "step": "shaping",
+        "step_title": "Shape text from Unicode source",
+        "title": "Shape and wrap text",
+        "url": "/examples/text/#shaping"
+      }
+    ],
+    "path": "gpui/macro.text.html"
+  },
+  "gpui::uniform_list": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/fn.uniform_list.html",
+    "examples": [
+      {
+        "example": "lists",
+        "step": "rows",
+        "step_title": "Render only the requested indices",
+        "title": "Render a large list",
+        "url": "/examples/lists/#rows"
+      },
+      {
+        "example": "lists",
+        "step": "viewport",
+        "step_title": "Give a virtual list a real viewport",
+        "title": "Render a large list",
+        "url": "/examples/lists/#viewport"
+      }
+    ],
+    "path": "gpui/fn.uniform_list.html"
+  }
+}

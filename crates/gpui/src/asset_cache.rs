@@ -1,3 +1,9 @@
+//! Traits and keys for asynchronous application asset loading.
+//!
+//! An [`Asset`] describes how a source key becomes a cloneable output. GPUI owns the cache and
+//! schedules the future through the application; implementations should keep source keys cheap to
+//! clone and avoid borrowing from the [`App`] passed to [`Asset::load`].
+
 use crate::{App, SharedString, SharedUri};
 use futures::{Future, TryFutureExt};
 
@@ -7,14 +13,14 @@ use std::marker::PhantomData;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
-/// An enum representing
+/// Where an asset can be obtained.
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Resource {
-    /// This resource is at a given URI
+    /// A URI resolved by the application's resource loader.
     Uri(SharedUri),
-    /// This resource is at a given path in the file system
+    /// A filesystem path. The path is not read until the associated asset loads.
     Path(Arc<Path>),
-    /// This resource is embedded in the application binary
+    /// A logical key for bytes embedded in the application.
     Embedded(SharedString),
 }
 
@@ -36,22 +42,22 @@ impl From<Arc<Path>> for Resource {
     }
 }
 
-/// A trait for asynchronous asset loading.
+/// Describes an asynchronously loaded, cloneable asset type.
 pub trait Asset: 'static {
-    /// The source of the asset.
+    /// The key used to identify one load request.
     type Source: Clone + Hash + Send;
 
-    /// The loaded asset
+    /// The value delivered when loading finishes.
     type Output: Clone + Send;
 
-    /// Load the asset asynchronously
+    /// Start loading `source` using application services.
     fn load(
         source: Self::Source,
         cx: &mut App,
     ) -> impl Future<Output = Self::Output> + Send + 'static;
 }
 
-/// An asset Loader which logs the [`Err`] variant of a [`Result`] during loading
+/// An [`Asset`] adapter that logs failed `Result` loads before returning them unchanged.
 pub enum AssetLogger<T> {
     #[doc(hidden)]
     _Phantom(PhantomData<T>, &'static dyn crate::seal::Sealed),
@@ -76,7 +82,9 @@ where
     }
 }
 
-/// Use a quick, non-cryptographically secure hash function to get an identifier from data
+/// Hash `data` with GPUI's fast, non-cryptographic hasher.
+///
+/// Use this for in-process cache keys and IDs, never for security decisions or persistent formats.
 pub fn hash<T: Hash>(data: &T) -> u64 {
     collections::FxBuildHasher.hash_one(data)
 }

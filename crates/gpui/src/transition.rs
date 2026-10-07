@@ -1,3 +1,11 @@
+//! App and window backed transitions for values implementing [`Lerp`].
+//!
+//! A transition stores its target in an [`Entity`] and samples it during
+//! rendering. [`Transition::evaluate`] caches one sample for the current
+//! render, requests another frame while motion is active, and returns a
+//! reference to the cached value. Updating a target is continuous by default;
+//! use [`Transition::continuous`] to choose restart semantics.
+
 use std::{
     cell::{Ref, RefCell},
     time::Instant,

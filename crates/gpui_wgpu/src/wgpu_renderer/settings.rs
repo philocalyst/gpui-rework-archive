@@ -1,7 +1,13 @@
+//! Surface configuration shared by native, web, and headless WGPU targets.
+
 use gpui::{DevicePixels, Size, get_gamma_correction_ratios};
 
+/// Drawable dimensions and presentation policy for a WGPU target.
 pub struct WgpuSurfaceConfig {
+    /// Drawable size in physical device pixels; zero dimensions are normalized
+    /// by the target implementation.
     pub size: Size<DevicePixels>,
+    /// Whether the target preserves transparent pixels when composited.
     pub transparent: bool,
     /// Preferred presentation mode, falling back to FIFO when unsupported.
     pub preferred_present_mode: Option<wgpu::PresentMode>,

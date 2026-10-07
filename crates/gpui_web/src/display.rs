@@ -1,6 +1,11 @@
+//! Display metrics derived from the browser window and visual viewport.
+//!
+//! CSS pixels are converted to GPUI logical pixels using the current device-pixel ratio.
+
 use anyhow::Result;
 use gpui::{Bounds, DisplayId, Pixels, PlatformDisplay, Point, Size, px};
 
+/// The browser's single logical display.
 #[derive(Debug)]
 pub struct WebDisplay {
     id: DisplayId,
@@ -16,6 +21,7 @@ unsafe impl Send for WebDisplay {}
 unsafe impl Sync for WebDisplay {}
 
 impl WebDisplay {
+    /// Wraps the browser window as GPUI's single logical display.
     pub fn new(browser_window: web_sys::Window) -> Self {
         WebDisplay {
             id: DisplayId::new(1),

@@ -1,3 +1,7 @@
+//! Font storage, variation selection, and glyph rasterization for Parley.
+//!
+//! Glyph buffers use GPUI's declared formats and are validated before the renderer receives them.
+
 use anyhow::{Context as _, Result, bail, ensure};
 use fontique::{Blob, Synthesis};
 use gpui::{

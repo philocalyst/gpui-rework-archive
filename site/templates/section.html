@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block main %}
+<main id="main" class="reader">
+  <header class="page-head"><p class="eyebrow">GPUI documentation</p><h1>{{ section.title }}</h1><p class="deck">{{ section.description }}</p></header>
+  <div class="prose">{{ section.content | safe }}</div>
+  <ol class="chapters">{% for item in section.pages %}<li><a href="{{ item.permalink }}"><h2>{{ item.title }}</h2><p>{{ item.description }}</p></a></li>{% endfor %}</ol>
+</main>
+{% endblock main %}

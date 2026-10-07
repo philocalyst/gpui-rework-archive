@@ -39,6 +39,7 @@ pub fn add_new_subschema(
 /// struct. Skips structs that have `additionalProperties` set (such as if #[serde(flatten)] is used
 /// on a map).
 #[derive(Clone)]
+/// Marker used by schema generation to reject unknown object fields by default.
 pub struct DefaultDenyUnknownFields;
 
 impl schemars::transform::Transform for DefaultDenyUnknownFields {
@@ -59,6 +60,7 @@ impl schemars::transform::Transform for DefaultDenyUnknownFields {
 ///
 /// Note that this is non-recursive and only applied to the root schema.
 #[derive(Clone)]
+/// Marker used by schema generation to permit trailing commas in examples.
 pub struct AllowTrailingCommas;
 
 impl schemars::transform::Transform for AllowTrailingCommas {

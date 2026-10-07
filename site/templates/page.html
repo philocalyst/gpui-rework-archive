@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block main %}
+<main id="main" class="reader">
+  <article>
+    <header class="page-head">
+      <p class="eyebrow">{% if page.extra.example_slug %}Walkthrough{% else %}{{ page.extra.kind | default(value='Guide') }}{% endif %}</p>
+      <h1>{{ page.title }}</h1>
+      {% if page.description %}<p class="deck">{{ page.description }}</p>{% endif %}
+    </header>
+    {% if page.toc %}<details class="contents"><summary>On this page</summary><nav aria-label="On this page"><ol>{% for heading in page.toc %}<li><a href="{{ heading.permalink }}">{{ heading.title }}</a></li>{% endfor %}</ol></nav></details>{% endif %}
+    <div class="prose">{{ page.content | safe }}</div>
+    {% if page.extra.example_slug %}
+    <section class="source-box" aria-label="Complete example">
+      <h2>Run it in an editor</h2>
+      <p><a href="{{ get_url(path='examples/' ~ page.extra.example_slug ~ '.rs') }}" download>Download main.rs</a> · <a href="{{ get_url(path='examples/' ~ page.extra.example_slug ~ '.zip') }}" download>Download the Cargo project</a></p>
+      <pre><code>{{ page.extra.example_run }}</code></pre>
+      <details><summary>Complete Rust source</summary><pre><code data-copy>{{ load_data(path='static/examples/' ~ page.extra.example_slug ~ '.rs', format='plain') }}</code></pre></details>
+    </section>
+    {% endif %}
+    <nav class="next" aria-label="Reading order">{% if page.lower %}<a href="{{ page.lower.permalink }}"><small>Previous</small>{{ page.lower.title }}</a>{% endif %}{% if page.higher %}<a href="{{ page.higher.permalink }}"><small>Next</small>{{ page.higher.title }}</a>{% endif %}</nav>
+  </article>
+</main>
+{% endblock main %}

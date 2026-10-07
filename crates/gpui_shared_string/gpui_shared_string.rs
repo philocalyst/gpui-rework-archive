@@ -1,3 +1,10 @@
+//! Cheaply cloned, immutable strings for GPUI's public APIs.
+//!
+//! [`SharedString`] accepts the common string forms through `From` and keeps an
+//! owned value suitable for entities, elements, and asynchronous work. Cloning it
+//! shares the compact representation when possible; use [`SharedString::as_str`]
+//! when a borrowed view is enough.
+
 use std::{
     borrow::{Borrow, Cow},
     iter,
@@ -8,9 +15,11 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use smol_str::SmolStr;
 
-/// A shared string is an immutable string that can be cheaply cloned in GPUI
-/// tasks. Essentially an abstraction over an `Arc<str>` and `&'static str`,
-/// currently backed by a [`SmolStr`].
+/// An immutable string that can be cheaply cloned in GPUI tasks.
+///
+/// It accepts the common owned and borrowed string forms through `From` and is
+/// currently backed by [`SmolStr`]. Clones preserve the compact representation;
+/// `as_str` provides a borrowed view without allocating.
 #[derive(Eq, PartialEq, PartialOrd, Ord, Hash, Clone)]
 pub struct SharedString(SmolStr);
 

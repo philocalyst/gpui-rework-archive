@@ -1,3 +1,10 @@
+//! A bounded-policy-free, multi-producer priority queue used by platform dispatchers.
+//!
+//! High, medium, and low items share one receiver state. Selection is weighted and therefore
+//! favors higher priorities without promising strict FIFO order between priority levels. The
+//! sender and receiver are intentionally hidden from ordinary application code; platform code
+//! obtains them from [`PriorityQueueReceiver::new`].
+
 use std::{
     collections::VecDeque,
     fmt,
@@ -132,6 +139,7 @@ impl<T> PriorityQueueState<T> {
     }
 }
 
+/// The sending half of a [`PriorityQueueReceiver`].
 #[doc(hidden)]
 pub struct PriorityQueueSender<T> {
     state: Arc<PriorityQueueState<T>>,
@@ -142,11 +150,15 @@ impl<T> PriorityQueueSender<T> {
         Self { state }
     }
 
+    /// Enqueue `item`, returning it unchanged if every receiver has been dropped.
     pub fn send(&self, priority: Priority, item: T) -> Result<(), SendError<T>> {
         self.state.send(priority, item)?;
         Ok(())
     }
 
+    /// Enqueue without sleeping while another thread holds the queue lock.
+    ///
+    /// Use only on a short, latency-sensitive path; it may consume a CPU while contended.
     pub fn spin_send(&self, priority: Priority, item: T) -> Result<(), SendError<T>> {
         self.state.spin_send(priority, item)?;
         Ok(())
@@ -161,6 +173,7 @@ impl<T> Drop for PriorityQueueSender<T> {
     }
 }
 
+/// The receiving half of a [`PriorityQueueSender`].
 #[doc(hidden)]
 pub struct PriorityQueueReceiver<T> {
     state: Arc<PriorityQueueState<T>>,
@@ -181,6 +194,7 @@ impl<T> Clone for PriorityQueueReceiver<T> {
     }
 }
 
+/// Returned by a send after all receivers have been dropped; contains the unsent item.
 #[doc(hidden)]
 pub struct SendError<T>(pub T);
 
@@ -191,11 +205,13 @@ impl<T: fmt::Debug> fmt::Debug for SendError<T> {
 }
 
 #[derive(Debug)]
+/// Returned when a receive operation observes that all senders have been dropped.
 #[doc(hidden)]
 pub struct RecvError;
 
 #[allow(dead_code)]
 impl<T> PriorityQueueReceiver<T> {
+    /// Create a sender and receiver sharing an empty priority queue.
     pub fn new() -> (PriorityQueueSender<T>, Self) {
         let state = PriorityQueueState {
             queues: parking_lot::Mutex::new(PriorityQueues {
@@ -245,6 +261,7 @@ impl<T> PriorityQueueReceiver<T> {
         self.pop_inner(false)
     }
 
+    /// Try to pop without sleeping while another thread holds the queue lock.
     pub fn spin_try_pop(&mut self) -> Result<Option<T>, RecvError> {
         use Priority as P;
 
@@ -295,8 +312,7 @@ impl<T> PriorityQueueReceiver<T> {
         self.pop_inner(true).map(|e| e.unwrap())
     }
 
-    /// Returns an iterator over the elements of the queue
-    /// this iterator will end when all elements have been consumed and will not wait for new ones.
+    /// Consume the receiver into an iterator that never waits for future sends.
     pub fn try_iter(self) -> TryIter<T> {
         TryIter {
             receiver: self,
@@ -304,8 +320,7 @@ impl<T> PriorityQueueReceiver<T> {
         }
     }
 
-    /// Returns an iterator over the elements of the queue
-    /// this iterator will wait for new elements if the queue is empty.
+    /// Consume the receiver into an iterator that waits while senders remain alive.
     pub fn iter(self) -> Iter<T> {
         Iter(self)
     }

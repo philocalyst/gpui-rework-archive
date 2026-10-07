@@ -1,5 +1,8 @@
+//! Compact duration formatting for status text.
+
 use std::time::Duration;
 
+/// Format whole seconds as `Xs`, `Ym Zs`, or `Hh Mm Ss`, dropping subsecond precision.
 pub fn duration_alt_display(duration: Duration) -> String {
     let hours = duration.as_secs() / 3600;
     let minutes = (duration.as_secs() % 3600) / 60;

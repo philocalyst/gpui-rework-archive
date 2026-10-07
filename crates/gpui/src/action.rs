@@ -21,6 +21,9 @@ use std::{
 ///
 /// The namespace argument `editor` can also be omitted, though it is required for Zed actions.
 #[macro_export]
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-actions.md")]
+// docs:examples:end
 macro_rules! actions {
     ($namespace:path, [ $( $(#[$attr:meta])* $name:ident),* $(,)? ]) => {
         $(
@@ -39,8 +42,9 @@ macro_rules! actions {
     };
 }
 
-/// Actions are used to implement keyboard-driven UI. When you declare an action, you can bind keys
-/// to the action in the keymap and listeners for that action in the element tree.
+/// An action is a named, type-safe command that can be bound to keys and handled in the element
+/// tree. The same action can therefore be invoked by a key binding, a menu, or code without
+/// coupling those callers to a view implementation.
 ///
 /// To declare a list of simple actions, you can use the actions! macro, which defines a simple unit
 /// struct action for each listed action name in the given namespace.
@@ -50,7 +54,7 @@ macro_rules! actions {
 /// actions!(editor, [MoveUp, MoveDown, MoveLeft, MoveRight, Newline]);
 /// ```
 ///
-/// Registering the actions with the same name will result in a panic during  `App` creation.
+/// Registering two actions with the same name causes a panic while [`App`](crate::App) is created.
 ///
 /// # Derive Macro
 ///
@@ -115,22 +119,24 @@ macro_rules! actions {
 /// register_action!(Paste);
 /// ```
 pub trait Action: Any + Send {
-    /// Clone the action into a new box
+    /// Clone the action into an owned trait object.
     fn boxed_clone(&self) -> Box<dyn Action>;
 
-    /// Do a partial equality check on this action and the other
+    /// Compare the payload of this action with another action of the same type.
     fn partial_eq(&self, action: &dyn Action) -> bool;
 
-    /// Get the name of this action, for displaying in UI
+    /// Return the registered name used in keymaps and user-facing command lists.
     fn name(&self) -> &'static str;
 
-    /// Get the name of this action type (static)
+    /// Return the registered name for the concrete action type.
     fn name_for_type() -> &'static str
     where
         Self: Sized;
 
-    /// Build this action from a JSON value. This is used to construct actions from the keymap.
-    /// A value of `{}` will be passed for actions that don't have any parameters.
+    /// Build this action from its JSON payload.
+    ///
+    /// Unit actions receive `{}`. Return an error when the payload is malformed; callers surface
+    /// that error as [`ActionBuildError::BuildError`].
     fn build(value: serde_json::Value) -> Result<Box<dyn Action>>
     where
         Self: Sized;
@@ -187,8 +193,7 @@ impl dyn Action {
     }
 }
 
-/// Error type for `Keystroke::parse`. This is used instead of `anyhow::Error` so that Zed can use
-/// markdown to display it.
+/// Error returned when the action registry cannot construct a named action from JSON.
 #[derive(Debug)]
 pub enum ActionBuildError {
     /// Indicates that an action with this name has not been registered.

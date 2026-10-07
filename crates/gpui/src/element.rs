@@ -1,35 +1,31 @@
-//! Elements are the workhorses of GPUI. They are responsible for laying out and painting all of
-//! the contents of a window. Elements form a tree and are laid out according to the web layout
-//! standards as implemented by [taffy](https://github.com/DioxusLabs/taffy). Most of the time,
-//! you won't need to interact with this module or these APIs directly. Elements provide their
-//! own APIs and GPUI, or other element implementation, uses the APIs in this module to convert
-//! that element tree into the pixels you see on the screen.
+//! Elements are GPUI's low-level rendering contract. An element tree is built for a frame, laid
+//! out with [Taffy](https://github.com/DioxusLabs/taffy), prepared for hit testing and focus, and
+//! painted into the window. Most applications use [`RenderOnce`], [`Render`], and the elements in
+//! [`crate::elements`] rather than implementing this module's traits directly.
 //!
 //! # Element Basics
 //!
-//! Elements are constructed by calling [`Render::render()`] on the root view of the window,
-//! which recursively constructs the element tree from the current state of the application,.
-//! These elements are then laid out by Taffy, and painted to the screen according to their own
-//! implementation of [`Element::paint()`]. Before the start of the next frame, the entire element
-//! tree and any callbacks they have registered with GPUI are dropped and the process repeats.
+//! A frame runs in three ordered phases. [`Element::request_layout`] creates layout nodes and
+//! returns the element's layout state. [`Element::prepaint`] receives the resolved bounds and
+//! records hitboxes, focus information, and other frame-local state. [`Element::paint`] consumes
+//! those two states to draw. The tree and frame-local callbacks are rebuilt for the next frame;
+//! persistent state must live in a view, an entity, or an element state handle.
 //!
 //! But some state is too simple and voluminous to store in every view that needs it, e.g.
 //! whether a hover has been started or not. For this, GPUI provides the [`Element::PrepaintState`], associated type.
 //!
 //! # Implementing your own elements
 //!
-//! Elements are intended to be the low level, imperative API to GPUI. They are responsible for upholding,
-//! or breaking, GPUI's features as they deem necessary. As an example, most GPUI elements are expected
-//! to stay in the bounds that their parent element gives them. But with [`Window::with_content_mask`],
-//! you can ignore this restriction and paint anywhere inside of the window's bounds. This is useful for overlays
-//! and popups and anything else that shows up 'on top' of other elements.
-//! With great power, comes great responsibility.
+//! Implement an element when a component needs a custom layout algorithm or direct paint access.
+//! The implementation owns the invariants of its subtree: ordinary children stay within their
+//! assigned bounds, while overlays may deliberately escape them through
+//! [`Window::with_content_mask`]. Keep any state needed between frames outside the element value.
 //!
-//! However, most of the time, you won't need to implement your own elements. GPUI provides a number of
-//! elements that should cover most common use cases out of the box and it's recommended that you use those
-//! to construct `components`, using the [`RenderOnce`] trait and the `#[derive(IntoElement)]` macro. Only implement
-//! elements when you need to take manual control of the layout and painting process, such as when using
-//! your own custom layout algorithm or rendering a code editor.
+//! For reusable components, prefer [`RenderOnce`] with `#[derive(IntoElement)]`; use [`Render`] when
+//! the component is backed by an entity and must be invalidated independently. The
+//! [layout constraints example](https://gpui-ce.github.io/examples/layout/#constraints) and
+//! [drawing example](https://gpui-ce.github.io/examples/drawing/#paint) show the public path from
+//! a component to an element tree and custom painting.
 
 use crate::{
     A11ySubtreeBuilder, App, ArenaBox, AvailableSpace, Bounds, Context, DispatchNodeId, ElementId,
@@ -44,32 +40,29 @@ use std::{
     sync::Arc,
 };
 
-/// Implemented by types that participate in laying out and painting the contents of a window.
-/// Elements form a tree and are laid out according to web-based layout rules, as implemented by Taffy.
-/// You can create custom elements by implementing this trait, see the module-level documentation
-/// for more details.
+/// Participate in layout, prepaint, and paint for one position in a window's element tree.
+///
+/// GPUI calls these methods in order for each frame and passes the state returned by
+/// [`request_layout`](Self::request_layout) into the later phases. Return a stable [`ElementId`]
+/// when the element owns state that should follow it across frames; omit it for an ephemeral
+/// element. Layout IDs and `bounds` are frame-local and must not be retained.
 pub trait Element: 'static + IntoElement {
-    /// The type of state returned from [`Element::request_layout`]. A mutable reference to this state is subsequently
-    /// provided to [`Element::prepaint`] and [`Element::paint`].
+    /// Frame-local state produced while requesting layout and reused by prepaint and paint.
     type RequestLayoutState: 'static;
 
-    /// The type of state returned from [`Element::prepaint`]. A mutable reference to this state is subsequently
-    /// provided to [`Element::paint`].
+    /// Frame-local state produced after layout and reused by paint.
     type PrepaintState: 'static;
 
-    /// If this element has a unique identifier, return it here. This is used to track elements across frames, and
-    /// will cause a GlobalElementId to be passed to the request_layout, prepaint, and paint methods.
+    /// Return this element's identity, if it owns state that should persist across frames.
     ///
     /// The global id can in turn be used to access state that's connected to an element with the same id across
     /// frames. This id must be unique among children of the first containing element with an id.
     fn id(&self) -> Option<ElementId>;
 
-    /// Source location where this element was constructed, used to disambiguate elements in the
-    /// inspector and navigate to their source code.
+    /// Return the source location used by the inspector to identify this element.
     fn source_location(&self) -> Option<&'static panic::Location<'static>>;
 
-    /// Before an element can be painted, we need to know where it's going to be and how big it is.
-    /// Use this method to request a layout from Taffy and initialize the element's state.
+    /// Request a Taffy layout node and initialize [`Self::RequestLayoutState`].
     fn request_layout(
         &mut self,
         id: Option<&GlobalElementId>,
@@ -78,8 +71,7 @@ pub trait Element: 'static + IntoElement {
         cx: &mut App,
     ) -> (LayoutId, Self::RequestLayoutState);
 
-    /// After laying out an element, we need to commit its bounds to the current frame for hitbox
-    /// purposes. The state argument is the same state that was returned from [`Element::request_layout()`].
+    /// Receive resolved bounds and record frame-local hitboxes, focus, or child state.
     fn prepaint(
         &mut self,
         id: Option<&GlobalElementId>,
@@ -90,8 +82,7 @@ pub trait Element: 'static + IntoElement {
         cx: &mut App,
     ) -> Self::PrepaintState;
 
-    /// Once layout has been completed, this method will be called to paint the element to the screen.
-    /// The state argument is the same state that was returned from [`Element::request_layout()`].
+    /// Paint using the resolved bounds and both phase states.
     fn paint(
         &mut self,
         id: Option<&GlobalElementId>,
@@ -154,16 +145,15 @@ pub trait Element: 'static + IntoElement {
     }
 }
 
-/// Implemented by any type that can be converted into an element.
+/// Convert a value into a concrete or type-erased [`Element`].
 pub trait IntoElement: Sized {
-    /// The specific type of element into which the implementing type is converted.
-    /// Useful for converting other types into elements automatically, like Strings
+    /// The concrete element type produced by [`Self::into_element`].
     type Element: Element;
 
-    /// Convert self into a type that implements [`Element`].
+    /// Convert this value into its concrete element.
     fn into_element(self) -> Self::Element;
 
-    /// Convert self into a dynamically-typed [`AnyElement`].
+    /// Convert this value into an [`AnyElement`] for heterogeneous child lists.
     fn into_any_element(self) -> AnyElement {
         self.into_element().into_any()
     }
@@ -171,10 +161,15 @@ pub trait IntoElement: Sized {
 
 impl<T: IntoElement> FluentBuilder for T {}
 
-/// An object that can be drawn to the screen. This is the trait that distinguishes "views" from
-/// other entities. Views are `Entity`'s which `impl Render` and drawn to the screen.
+/// Render a stateful entity into an element tree.
+///
+/// The entity remains the view's identity, so notifying its context invalidates this subtree. Use
+/// [`RenderOnce`] for an owned component that is rebuilt from its inputs.
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Render-9fb18c52.md")]
+// docs:examples:end
 pub trait Render: 'static + Sized {
-    /// Render this view into an element tree.
+    /// Build the current element tree for this entity.
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement;
 }
 
@@ -184,15 +179,14 @@ impl Render for Empty {
     }
 }
 
-/// You can derive [`IntoElement`] on any type that implements this trait.
-/// It is used to construct reusable `components` out of plain data. Think of
-/// components as a recipe for a certain pattern of elements. RenderOnce allows
-/// you to invoke this pattern, without breaking the fluent builder pattern of
-/// the element APIs.
+/// Render an owned, stateless component once into an element tree.
+///
+/// Implement this trait (or derive [`IntoElement`]) for a reusable recipe made from plain data.
+/// Because rendering consumes `self`, fluent builder methods can assemble the component directly.
+/// Put persistent state in an [`Entity`](crate::Entity) and implement [`Render`] when it must be
+/// independently invalidated.
 pub trait RenderOnce: 'static {
-    /// Render this component into an element tree. Note that this method
-    /// takes ownership of self, as compared to [`Render::render()`] method
-    /// which takes a mutable reference.
+    /// Consume the component and build its element tree.
     fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement;
 }
 

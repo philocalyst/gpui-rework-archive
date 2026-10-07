@@ -1,3 +1,13 @@
+//! Optional timing and frame instrumentation for GPUI applications.
+//!
+//! The profiler records task polls, action handlers, input dispatch, drawing,
+//! and platform presentation as separate intervals. Durations are measured
+//! with the scheduler clock and are meaningful for comparison within one
+//! process; they are not a wall-clock trace suitable for comparing machines.
+//! Histograms aggregate all observed frames, while event collectors only see
+//! events recorded while tracing is enabled. The profiler feature gates the
+//! expensive event stream; disabled builds return empty snapshots.
+
 #[cfg(feature = "profiler")]
 use hdrhistogram::Histogram;
 use itertools::Itertools;

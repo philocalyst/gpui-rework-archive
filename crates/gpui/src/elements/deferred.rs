@@ -3,7 +3,7 @@ use crate::{
     IntoElement, LayoutId, Pixels, Window,
 };
 
-/// Builds a `Deferred` element, which delays the layout and paint of its child.
+/// Build an element whose child keeps its layout but paints in the deferred-draw pass.
 pub fn deferred(child: impl IntoElement) -> Deferred {
     Deferred {
         child: Some(child.into_any_element()),
@@ -12,12 +12,10 @@ pub fn deferred(child: impl IntoElement) -> Deferred {
     }
 }
 
-/// An element which delays the painting of its child until after all of
-/// its ancestors, while keeping its layout as part of the current element tree.
+/// Paint a child after its ancestors while keeping the child's layout in the current tree.
 ///
-/// Per [`Window::prepaint_deferred_draws`], deferred elements causing additional deferred elements
-/// should be constrained to limited circumstances and will stop processing after some depth
-/// (otherwise the renderer would be subject to an infinite loop when processing deferred draws).
+/// Deferred draws are processed by the window's deferred-draw pass. A deferred child that queues
+/// more deferred work is depth-limited, so recursive deferral is unsuitable for an unbounded loop.
 pub struct Deferred {
     child: Option<AnyElement>,
     priority: DeferredPriority,

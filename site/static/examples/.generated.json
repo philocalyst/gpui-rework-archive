@@ -1,0 +1,26 @@
+{
+  "sources": [
+    "actions",
+    "animation",
+    "async-task",
+    "counter",
+    "drawing",
+    "first-window",
+    "layout",
+    "lists",
+    "subscriptions",
+    "text"
+  ],
+  "archives": [
+    "actions",
+    "animation",
+    "async-task",
+    "counter",
+    "drawing",
+    "first-window",
+    "layout",
+    "lists",
+    "subscriptions",
+    "text"
+  ]
+}

@@ -22,6 +22,7 @@ fn etagere_point_to_device(point: etagere::Point) -> Point<DevicePixels> {
     }
 }
 
+/// GPU-backed atlas that owns uploaded glyph and image textures.
 pub struct WgpuAtlas(Mutex<WgpuAtlasState>);
 
 /// Identity of a backing atlas texture, distinct from its reusable slot ID.
@@ -46,13 +47,16 @@ struct WgpuAtlasState {
     next_texture_identity: u64,
 }
 
+/// View and identity of the atlas texture containing a tile.
 pub struct WgpuTextureInfo {
+    /// Texture view used for sampling the atlas slot.
     pub view: wgpu::TextureView,
     /// Distinguishes backing textures even when their AtlasTextureId slot is reused.
     pub identity: WgpuTextureIdentity,
 }
 
 impl WgpuAtlas {
+    /// Creates an empty atlas for a device and its upload queue.
     pub fn new(
         device: Arc<wgpu::Device>,
         queue: Arc<wgpu::Queue>,
@@ -72,6 +76,7 @@ impl WgpuAtlas {
         }))
     }
 
+    /// Creates an atlas using the device, queue, and color format in `context`.
     pub fn from_context(context: &WgpuContext) -> Self {
         Self::new(
             context.device.clone(),
@@ -80,11 +85,17 @@ impl WgpuAtlas {
         )
     }
 
+    /// Flushes uploads queued since the previous frame.
     pub fn before_frame(&self) {
         let mut lock = self.0.lock();
         lock.flush_uploads();
     }
 
+    /// Returns the texture view for an atlas slot.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `id` does not identify an allocated slot in this atlas.
     pub fn get_texture_info(&self, id: AtlasTextureId) -> WgpuTextureInfo {
         let lock = self.0.lock();
         let texture = &lock.storage[id];

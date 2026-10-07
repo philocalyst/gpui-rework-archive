@@ -1,0 +1,13 @@
+{% component playground(example, title="Run this example") %}
+<section class="playground" data-playground="{{ example }}" aria-label="{{ title }}">
+  <header><h2>Try it</h2><p>GPUI rendering the Rust program below.</p></header>
+  <iframe title="{{ title }} — GPUI WebAssembly preview" src="{{ get_url(path='preview/index.html') }}#{{ example }}" loading="lazy" data-preview></iframe>
+  <p class="preview-status" data-preview-status role="status">The preview needs JavaScript and WebGL. The walkthrough and source work without them.</p>
+  <details class="editor-panel"><summary>Edit and run the Rust source</summary>
+    <label for="editor-{{ example }}">Complete program</label>
+    <textarea id="editor-{{ example }}" data-editor spellcheck="false" autocapitalize="off" wrap="off">{{ load_data(path='static/examples/' ~ example ~ '.rs', format='plain') }}</textarea>
+    <div class="editor-controls"><button type="button" data-run disabled>Compile and run</button><button type="button" data-restore>Restore source</button><a href="{{ get_url(path='guides/live-editing/') }}">Start the local compiler</a></div>
+    <pre class="diagnostics" data-diagnostics role="status">Checking for a local compiler…</pre>
+  </details>
+</section>
+{% endcomponent playground %}

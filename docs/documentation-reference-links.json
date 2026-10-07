@@ -1,0 +1,1406 @@
+{
+  "source": "/tmp/gpui-docs-review.html",
+  "extracted_at": "2026-10-07T00:00:00Z",
+  "parser": "perl href extraction; unique absolute http(s) URLs",
+  "status_note": "Inventory records extraction, not a claim that every target was read.",
+  "links": [
+    {
+      "url": "https://actix.rs/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://actix.rs/docs/conn_lifecycle",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://actix.rs/docs/extractors",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://actix.rs/docs/handlers",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://actix.rs/docs/http_server_init",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://algoluca.gumroad.com/l/zero2prod",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://api.rocket.rs/v0.5/rocket/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://api.rocket.rs/v0.5/rocket/fn.build",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://bevyengine.org/community/people/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://bevyengine.org/learn/quick-start/introduction",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://bevyengine.org/news/bevy-at-rust-week/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://bevyengine.org/news/bevy-foundation-501c3/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://bevyengine.org/news/bevys-fourth-birthday/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://blessed.rs/crates",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://blog.rust-lang.org/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://blog.rust-lang.org/2025/02/13/2024-State-Of-Rust-Survey-results/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://blog.rust-lang.org/2025/03/03/Rust-participates-in-GSoC-2025/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://blog.rust-lang.org/2025/03/26/adopting-the-fls/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://blog.rust-lang.org/2025/04/04/c-abi-changes-for-wasm32-unknown-unknown/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://blog.rust-lang.org/2025/04/04/vision-doc-survey/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://blog.rust-lang.org/2025/04/08/Project-Goals-2025-March-Update/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://blog.rust-lang.org/2025/04/11/crates-io-security-session-cookies/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://book.iced.rs/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://book.iced.rs/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/npm/katex@0.16.37/dist/katex.min.css",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/npm/svelte-hamburgers@3/dist/css/base.css",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/npm/svelte-hamburgers@3/dist/css/types/squeeze.css",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://crates.io/crates/actix-web",
+      "status": "inaccessible (403; fetch attempted 2026-10-07 UTC)",
+      "http_status": "403"
+    },
+    {
+      "url": "https://crates.io/crates/axum",
+      "status": "inaccessible (403; fetch attempted 2026-10-07 UTC)",
+      "http_status": "403"
+    },
+    {
+      "url": "https://crates.io/crates/bevy",
+      "status": "inaccessible (403; fetch attempted 2026-10-07 UTC)",
+      "http_status": "403"
+    },
+    {
+      "url": "https://crates.io/crates/chrono",
+      "status": "inaccessible (403; fetch attempted 2026-10-07 UTC)",
+      "http_status": "403"
+    },
+    {
+      "url": "https://crates.io/crates/clap",
+      "status": "inaccessible (403; fetch attempted 2026-10-07 UTC)",
+      "http_status": "403"
+    },
+    {
+      "url": "https://crates.io/crates/eframe",
+      "status": "inaccessible (403; fetch attempted 2026-10-07 UTC)",
+      "http_status": "403"
+    },
+    {
+      "url": "https://crates.io/crates/egui",
+      "status": "inaccessible (403; fetch attempted 2026-10-07 UTC)",
+      "http_status": "403"
+    },
+    {
+      "url": "https://crates.io/crates/embassy",
+      "status": "inaccessible (403; fetch attempted 2026-10-07 UTC)",
+      "http_status": "403"
+    },
+    {
+      "url": "https://crates.io/crates/fyrox",
+      "status": "inaccessible (403; fetch attempted 2026-10-07 UTC)",
+      "http_status": "403"
+    },
+    {
+      "url": "https://crates.io/crates/iced",
+      "status": "inaccessible (403; fetch attempted 2026-10-07 UTC)",
+      "http_status": "403"
+    },
+    {
+      "url": "https://crates.io/crates/jiff",
+      "status": "inaccessible (403; fetch attempted 2026-10-07 UTC)",
+      "http_status": "403"
+    },
+    {
+      "url": "https://crates.io/crates/macroquad",
+      "status": "inaccessible (403; fetch attempted 2026-10-07 UTC)",
+      "http_status": "403"
+    },
+    {
+      "url": "https://crates.io/crates/rand",
+      "status": "inaccessible (403; fetch attempted 2026-10-07 UTC)",
+      "http_status": "403"
+    },
+    {
+      "url": "https://crates.io/crates/ratatui",
+      "status": "inaccessible (403; fetch attempted 2026-10-07 UTC)",
+      "http_status": "403"
+    },
+    {
+      "url": "https://crates.io/crates/rocket",
+      "status": "inaccessible (403; fetch attempted 2026-10-07 UTC)",
+      "http_status": "403"
+    },
+    {
+      "url": "https://crates.io/crates/smol",
+      "status": "inaccessible (403; fetch attempted 2026-10-07 UTC)",
+      "http_status": "403"
+    },
+    {
+      "url": "https://crates.io/crates/snafu",
+      "status": "inaccessible (403; fetch attempted 2026-10-07 UTC)",
+      "http_status": "403"
+    },
+    {
+      "url": "https://crates.io/crates/thiserror",
+      "status": "inaccessible (403; fetch attempted 2026-10-07 UTC)",
+      "http_status": "403"
+    },
+    {
+      "url": "https://crates.io/crates/time",
+      "status": "inaccessible (403; fetch attempted 2026-10-07 UTC)",
+      "http_status": "403"
+    },
+    {
+      "url": "https://crates.io/crates/tokio",
+      "status": "inaccessible (403; fetch attempted 2026-10-07 UTC)",
+      "http_status": "403"
+    },
+    {
+      "url": "https://crates.io/crates/wgpu",
+      "status": "inaccessible (403; fetch attempted 2026-10-07 UTC)",
+      "http_status": "403"
+    },
+    {
+      "url": "https://diataxis.fr",
+      "status": "surveyed (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://discord.com/invite/rust-lang-community",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://doc.rust-lang.org/nightly/unstable-book/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://doc.rust-lang.org/nomicon/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://doc.rust-lang.org/nomicon/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://doc.rust-lang.org/reference/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://doc.rust-lang.org/rust-by-example/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://doc.rust-lang.org/std/fs/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://doc.rust-lang.org/std/fs/struct.File.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://doc.rust-lang.org/std/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://doc.rust-lang.org/std/iter/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://doc.rust-lang.org/std/option/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://doc.rust-lang.org/std/pin/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://doc.rust-lang.org/std/thread/fn.spawn.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://doc.rust-lang.org/std/thread/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://doc.rust-lang.org/std/vec/struct.Vec.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.embassy.dev/embassy-executor/git/cortex-m/attr.main.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.embassy.dev/embassy-executor/git/cortex-m/attr.task.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.embassy.dev/embassy-executor/git/cortex-m/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.embassy.dev/embassy-time/git/default/fn.block_for.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.embassy.dev/embassy-time/git/default/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.embassy.dev/embassy-time/git/default/struct.Duration.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.embassy.dev/embassy-time/git/default/struct.Instant.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/actix-web/latest/actix_web/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://docs.rs/actix-web/latest/actix_web/struct.App.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/actix-web/latest/actix_web/web/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/anyhow/1.0.98/anyhow/struct.Error.html",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://docs.rs/axum/latest/axum/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://docs.rs/axum/latest/axum/fn.serve.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/axum/latest/axum/struct.Router.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/bevy/latest/bevy/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://docs.rs/bevy/latest/bevy/app/struct.App.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/bevy/latest/bevy/ecs/component/trait.Component.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/bevy/latest/bevy/ecs/entity/struct.Entity.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/chrono/0.4.40/chrono/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/chrono/latest/chrono/struct.DateTime.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/clap/latest/clap/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://docs.rs/clap/latest/clap/_cookbook/escaped_positional_derive/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/clap/latest/clap/_cookbook/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/clap/latest/clap/_derive/_tutorial/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/clap/latest/clap/_derive/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/clap/latest/clap/_faq/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/clap/latest/clap/_tutorial/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/clap/latest/clap/macro.command.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/clap/latest/clap/trait.Parser.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/clap_derive/4.5.32/clap_derive/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/clap_derive/4.5.32/clap_derive/derive.Parser.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/egui/latest/egui/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://docs.rs/egui/latest/egui/struct.Ui.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/egui/latest/egui/viewport/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/fastrand/latest/fastrand/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://docs.rs/fyrox/0.36.2/fyrox/plugin/trait.Plugin.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/fyrox/0.36.2/fyrox/scene/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/fyrox/0.36.2/fyrox/scene/struct.Scene.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/iced/latest/iced/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/iced/latest/iced/fn.application.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/iced/latest/iced/type.Element.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/iced_core/0.13.2/iced_core/struct.Element.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/jiff/latest/jiff/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://docs.rs/jiff/latest/jiff/_documentation/comparison/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/jiff/latest/jiff/_documentation/design/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/jiff/latest/jiff/_documentation/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/jiff/latest/jiff/struct.Zoned.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/macroquad/latest/macroquad/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/macroquad/latest/macroquad/attr.main.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/macroquad/latest/macroquad/shapes/fn.draw_circle.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/macroquad/latest/macroquad/shapes/fn.draw_line.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/pico-args/0.5.0/pico_args/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://docs.rs/pico-args/0.5.0/pico_args/enum.Error.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/pico-args/0.5.0/pico_args/struct.Arguments.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/rand/latest/rand/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://docs.rs/rand/latest/rand/distr/index.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/rand/latest/rand/trait.Rng.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/ratatui/latest/ratatui/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/ratatui/latest/ratatui/struct.Terminal.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/ratatui/latest/ratatui/widgets/index.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/ratatui/latest/ratatui/widgets/trait.Widget.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/smol/2.0.2/smol/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://docs.rs/smol/2.0.2/smol/fn.block_on.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/smol/2.0.2/smol/struct.Executor.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/snafu/latest/snafu/derive.Snafu.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/snafu/latest/snafu/guide/comparison/index.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/snafu/latest/snafu/guide/compatibility/index.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/snafu/latest/snafu/guide/examples/index.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/snafu/latest/snafu/guide/feature_flags/index.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/snafu/latest/snafu/guide/generics/index.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/snafu/latest/snafu/guide/index.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/snafu/latest/snafu/guide/opaque/index.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/snafu/latest/snafu/guide/philosophy/index.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/snafu/latest/snafu/guide/structs/index.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/snafu/latest/snafu/guide/troubleshooting/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://docs.rs/snafu/latest/snafu/guide/troubleshooting/missing_field_source/index.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/snafu/latest/snafu/guide/upgrading/index.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/snafu/latest/snafu/guide/what_code_is_generated/index.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/snafu/latest/snafu/index.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/snafu/latest/snafu/macro.whatever.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/snafu/latest/snafu/struct.Whatever.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/thiserror/2.0.12/thiserror/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://docs.rs/time/0.3.41/time/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/time/0.3.41/time/serde/macro.format_description.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/time/latest/time/struct.OffsetDateTime.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/tokio/latest/tokio/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/tokio/latest/tokio/attr.main.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/tokio/latest/tokio/task/fn.spawn.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://docs.rs/wgpu/latest/wgpu/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://docs.rs/wgpu/latest/wgpu/struct.Instance.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://embassy.dev/blog/hello-world/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://embassy.dev/book/index.html",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://en.wikipedia.org/wiki/Proleptic_Gregorian_calendar",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://fonts.googleapis.com",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2?family=Exo:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Inconsolata:wght@200;300;400;500;600;700;800;900&family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://fonts.gstatic.com",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://fyrox-book.github.io/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://fyrox-book.github.io/beginning/data_management.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://fyrox-book.github.io/introduction/philosophy_and_goals.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/BurntSushi",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/BurntSushi/jiff/blob/HEAD/CHANGELOG.md",
+      "status": "surveyed (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://github.com/BurntSushi/jiff/blob/HEAD/COMPARE.md",
+      "status": "surveyed (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://github.com/BurntSushi/jiff/blob/HEAD/DESIGN.md",
+      "status": "surveyed (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://github.com/BurntSushi/jiff/blob/HEAD/PLATFORM.md",
+      "status": "surveyed (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://github.com/BurntSushi/jiff/issues/63",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/LukeMathWalker/zero-to-production/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/actix/examples",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/akiles/embassy",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/bevyengine/bevy/discussions?discussions_q=label%3AFAQ+sort%3Atop",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/clap-rs/clap/blob/v4.5.37/CHANGELOG.md",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/clap-rs/clap/discussions",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/clap-rs/clap/tree/master/clap_complete",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/dessalines/lemmy",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/emilk/egui/issues/3556",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/emilk/egui/tree/master/examples",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/harudagondi/rust-roadmap",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/meilisearch/MeiliSearch",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/ozkriff/awesome-quads",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/pop-os/libcosmic",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/rust-cli/team/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/rust-lang/rustlings/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/rust-random/rand/releases/tag/0.9.0",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/rwf2/Rocket/blob/master/examples/chat",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/rwf2/Rocket/blob/master/examples/pastebin",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/rwf2/Rocket/blob/master/examples/todo",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/rwf2/Rocket/tree/master/examples",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/shepmaster/snafu/blob/main/tests/basic.rs",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/shepmaster/snafu/blob/master/CONTRIBUTING.md",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/shepmaster/snafu/issues",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/shepmaster/snafu/tree/main/compatibility-tests",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/shepmaster/snafu/tree/main/tests",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://github.com/tokio-rs/axum/tree/main/examples",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://harudagondi.space/cdn-cgi/content?id=0nwxYYZW4udR3pdshS0JCsrzg22UHnvFGeRwFWQiR.M-1791393238.4783914-1.2.1.1-BlpCR6mES6ObpxZCytvUaeC7ALoG.k33FUtypcqMirEGvj6PUN5cMKmgAf85P41g",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://helix-editor.com/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://iced.rs/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://keepachangelog.com/en/1.0.0/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://keepachangelog.com/en/1.1.0/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://liberapay.com/harudagondi/donate",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://macroquad.rs/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://macroquad.rs/articles/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://macroquad.rs/twiq/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://obsidian.md/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://play.rust-lang.org/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://projects.eclipse.org/projects/tools.corrosion",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://ratatui.rs/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://ratatui.rs/concepts/application-patterns/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://ratatui.rs/concepts/rendering/under-the-hood/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://ratatui.rs/developer-guide/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://ratatui.rs/examples/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://ratatui.rs/faq/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://ratatui.rs/highlights/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://ratatui.rs/recipes/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://ratatui.rs/recipes/layout/collapse-borders/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://ratatui.rs/recipes/widgets/custom/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://ratatui.rs/showcase/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://ratatui.rs/templates/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://ratatui.rs/tutorials/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://ratatui.rs/tutorials/counter-app/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://ratatui.rs/tutorials/hello-ratatui/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://ratatui.rs/tutorials/json-editor/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://rocket.rs/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://rocket.rs/guide/v0.5/configuration/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://rocket.rs/guide/v0.5/deploying/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://rocket.rs/guide/v0.5/fairings/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://rocket.rs/guide/v0.5/requests/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://rocket.rs/guide/v0.5/responses/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://rocket.rs/guide/v0.5/state/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://rocket.rs/guide/v0.5/testing/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://rust-analyzer.github.io/book/index.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://rust-lang.github.io/mdBook/format/summary.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://rust-random.github.io/book/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://rust-unofficial.github.io/too-many-lists/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://scp-wiki.wikidot.com/admonition",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://tech.lgbt/@harudagondi",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://tech.lgbt/@harudagondi/114482723565003930",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://this-week-in-rust.org/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://time-rs.github.io/book/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://time-rs.github.io/book/api/formatting.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://time-rs.github.io/book/third-party/serde.html",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://tokio.rs/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://tokio.rs/blog/2020-04-preemption",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://tokio.rs/blog/2021-04-welcome-alice",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://tokio.rs/blog/2021-05-14-inventing-the-service-trait",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://tokio.rs/blog/2021-09-console-dev-diary-1",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://tokio.rs/blog/2025-01-01-announcing-axum-0-8-0",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://tokio.rs/tokio/topics",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://tokio.rs/tokio/topics/tracing",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://tokio.rs/tokio/topics/tracing-next-steps",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://tokio.rs/tokio/tutorial",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://uk.sagepub.com/en-gb/eur/qualitative-inquiry-and-research-design/book266033",
+      "status": "inaccessible (301ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "301ERR"
+    },
+    {
+      "url": "https://unsplash.com/@rocinante_11",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://webmention.io/harudagondi.space/webmention",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://webring.antaresph.dev",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://webring.antaresph.dev/next",
+      "status": "inaccessible (301ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "301ERR"
+    },
+    {
+      "url": "https://webring.antaresph.dev/previous",
+      "status": "inaccessible (502; fetch attempted 2026-10-07 UTC)",
+      "http_status": "502"
+    },
+    {
+      "url": "https://webring.antaresph.dev/random",
+      "status": "inaccessible (502; fetch attempted 2026-10-07 UTC)",
+      "http_status": "502"
+    },
+    {
+      "url": "https://wgpu.rs/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://wheretofind.me/@harudagondi",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://www.egui.rs/",
+      "status": "fetched (200; not individually read)",
+      "http_status": "200"
+    },
+    {
+      "url": "https://www.harudagondi.space/blog/rust-documentation-ecosystem-review/",
+      "status": "inaccessible (301ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "301ERR"
+    },
+    {
+      "url": "https://www.harudagondi.space/rss.xml",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://www.ralfj.de/blog/2018/07/24/pointers-and-bytes.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://www.ralfj.de/blog/2020/12/14/provenance.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://www.ralfj.de/blog/2022/04/11/provenance-exposed.html",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://www.rust-lang.org/",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://www.rust-lang.org/community",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://www.rust-lang.org/governance",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://www.rust-lang.org/learn",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://www.rust-lang.org/tools",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=uh9i3be2wIE",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://youtu.be/-5wpm-gesOY?si=Wx5qXO1gqWyKmRZY",
+      "status": "inaccessible (000ERR; fetch attempted 2026-10-07 UTC)",
+      "http_status": "000ERR"
+    },
+    {
+      "url": "https://jiff.github.io/jiff/design/",
+      "status": "inaccessible",
+      "reason": "browser tool could not access"
+    },
+    {
+      "url": "https://docs.rs/chrono/latest/chrono/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://docs.rs/time/latest/time/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://rocket.rs/guide/v0.5/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://docs.rs/snafu/latest/snafu/guide/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://docs.rs/thiserror/latest/thiserror/",
+      "status": "read (primary page; 2026-10-07 UTC)"
+    },
+    {
+      "url": "https://panagram.dev",
+      "status": "inaccessible",
+      "reason": "DNS resolution failed"
+    },
+    {
+      "url": "https://gpui-ce.github.io",
+      "status": "fetched",
+      "reason": "current replacement site homepage; HTTP 200, not in article inventory"
+    }
+  ],
+  "status_legend": {
+    "read": "full representative primary page read",
+    "surveyed": "primary page opened and key structure inspected",
+      "fetched": "HTTP content fetched but not read in full; status stored in http_status",
+    "inaccessible": "access failed",
+      "extracted": "URL came from article; retained only when no fetch result was available"
+  },
+  "direct_survey_date": "2026-10-07 UTC"
+}

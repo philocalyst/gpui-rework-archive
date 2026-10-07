@@ -1,8 +1,10 @@
-//! A scrollable list of elements with uniform height, optimized for large lists.
-//! Rather than use the full taffy layout system, uniform_list simply measures
-//! the first element and then lays out all remaining elements in a line based on that
-//! measurement. This is much faster than the full layout system, but only works for
-//! elements with uniform height.
+//! A scrollable list optimized for items with one shared height.
+//!
+//! `uniform_list` measures one item, then places the requested range by multiplying that height;
+//! it does not run full Taffy layout for every item. Every rendered item must therefore have the
+//! same block-axis size for the current frame. If heights differ, use [`crate::list`] instead.
+//! Rendering is lazy: the callback receives the visible range plus overdraw. See the
+//! [visible-range walkthrough](https://gpui-ce.github.io/examples/lists/#visible-range).
 
 use crate::{
     AnyElement, App, AvailableSpace, Bounds, Element, ElementId, Entity, GlobalElementId, Hitbox,
@@ -15,10 +17,15 @@ use std::{cell::RefCell, cmp, ops::Range, rc::Rc};
 
 use super::ListHorizontalSizingBehavior;
 
-/// uniform_list provides lazy rendering for a set of items that are of uniform height.
-/// When rendered into a container with overflow-y: hidden and a fixed (or max) height,
-/// uniform_list will only render the visible subset of items.
+/// Construct a lazily rendered list of `item_count` uniform-height items.
+///
+/// The callback receives a half-open item range and must return elements in that order. Each
+/// element must resolve to the same height as the item selected for measurement. Keep `id` stable
+/// across frames so scroll state and descendants retain their identity.
 #[track_caller]
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-uniform-list.md")]
+// docs:examples:end
 pub fn uniform_list<R>(
     id: impl Into<ElementId>,
     item_count: usize,
@@ -55,6 +62,9 @@ where
 }
 
 /// A list element for efficiently laying out and displaying a list of uniform-height elements.
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-UniformList-205679c7.md")]
+// docs:examples:end
 pub struct UniformList {
     item_count: usize,
     item_to_measure_index: usize,
@@ -133,6 +143,9 @@ pub struct ItemSize {
 
 impl UniformListScrollHandle {
     /// Create a new scroll handle to bind to a uniform list.
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-UniformListScrollHandle-new-c1900937.md")]
+// docs:examples:end
     pub fn new() -> Self {
         Self(Rc::new(RefCell::new(UniformListScrollState {
             base_handle: ScrollHandle::new(),
@@ -684,6 +697,9 @@ impl UniformList {
     }
 
     /// Track and render scroll state of this list with reference to the given scroll handle.
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-UniformList-track-scroll-47552143.md")]
+// docs:examples:end
     pub fn track_scroll(mut self, handle: &UniformListScrollHandle) -> Self {
         self.interactivity.tracked_scroll_handle = Some(handle.0.borrow().base_handle.clone());
         self.scroll_handle = Some(handle.clone());

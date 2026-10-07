@@ -17,6 +17,7 @@ fn parse_env_map_from_noisy_output(output: &str) -> Result<collections::HashMap<
     anyhow::bail!("Failed to find JSON in shell output: {output}")
 }
 
+/// Print the current process environment in shell-assignment form.
 pub fn print_env() {
     let env_vars: HashMap<String, String> = std::env::vars().collect();
     let json = serde_json::to_string_pretty(&env_vars).unwrap_or_else(|err| {

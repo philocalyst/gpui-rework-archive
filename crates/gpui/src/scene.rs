@@ -1,3 +1,17 @@
+//! Renderer-neutral scene recording and compilation.
+//!
+//! A [`Scene`] is a retained list of paint primitives in scene space. Bounds
+//! and transforms use [`ScaledPixels`], so callers normally record in logical
+//! pixels and let the window scale them before insertion. Primitive insertion
+//! order is converted into draw order; [`Scene::finish`] sorts and compiles
+//! that recording into a [`ScenePlan`] shared by renderers. Finish is a frame
+//! boundary: mutate the scene again before drawing and finish it again.
+//!
+//! [`SceneCapture::capture`] provides a portable snapshot for tests and
+//! tooling. Native paint surfaces remain backend-owned and therefore cannot be
+//! serialized; captures containing one return an error. See the drawing example at
+//! <https://gpui-ce.github.io/examples/drawing/#paint>.
+
 // todo("windows"): remove
 #![cfg_attr(windows, allow(dead_code))]
 
@@ -58,28 +72,45 @@ impl From<bool> for ShaderBool {
 }
 
 #[derive(Default)]
-#[expect(missing_docs)]
+/// A recorded frame's renderable primitives and compiled draw plan.
+///
+/// The public primitive arrays are grouped by type for renderer efficiency;
+/// their final ordering is described by [`Scene::render_commands`]. Use
+/// [`Scene::insert_primitive`] to record content instead of editing these
+/// arrays directly.
 pub struct Scene {
     pub(crate) paint_operations: Vec<PaintOperation>,
     primitive_bounds: BoundsTree<ScaledPixels>,
     layer_stack: Vec<DrawOrder>,
+    /// Recorded shadows, grouped for renderer batching.
     pub shadows: Vec<Shadow>,
+    /// Recorded rounded rectangles and borders.
     pub quads: Vec<Quad>,
+    /// Recorded paths in scene space.
     pub paths: Vec<Path<ScaledPixels>>,
+    /// Recorded text underlines.
     pub underlines: Vec<Underline>,
+    /// Recorded grayscale sprite instances.
     pub monochrome_sprites: Vec<MonochromeSprite>,
+    /// Recorded subpixel sprite instances.
     pub subpixel_sprites: Vec<SubpixelSprite>,
+    /// Recorded full-color sprite instances.
     pub polychrome_sprites: Vec<PolychromeSprite>,
+    /// Backend-owned paint surfaces recorded for this frame.
     pub surfaces: Vec<PaintSurface>,
     surface_opacities: Vec<f32>,
+    /// Filters applied to already-painted backdrop content.
     pub backdrop_filters: Vec<BackdropFilter>,
+    /// Matched start/end markers for isolated content-filter groups.
     pub filter_boundaries: Vec<FilterBoundary>,
     render_plan: ScenePlan,
     is_finished: bool,
 }
 
-#[expect(missing_docs)]
 impl Scene {
+    /// Removes all primitives, layers, filters, and the compiled plan.
+    ///
+    /// The scene becomes unfinished and can be recorded as the next frame.
     pub fn clear(&mut self) {
         self.paint_operations.clear();
         self.primitive_bounds.clear();
@@ -99,10 +130,12 @@ impl Scene {
         self.is_finished = false;
     }
 
+    /// Returns the number of recorded paint operations, including layer markers.
     pub fn len(&self) -> usize {
         self.paint_operations.len()
     }
 
+    /// Starts a clipping/draw-order layer with the supplied scene-space bounds.
     pub fn push_layer(&mut self, bounds: Bounds<ScaledPixels>) {
         self.is_finished = false;
         let order = self.primitive_bounds.insert(bounds);
@@ -111,6 +144,10 @@ impl Scene {
             .push(PaintOperation::StartLayer(bounds));
     }
 
+    /// Ends the most recently pushed layer.
+    ///
+    /// Calling this without a matching layer is tolerated by the recorder, but
+    /// leaves an unmatched marker that should be avoided by callers.
     pub fn pop_layer(&mut self) {
         self.is_finished = false;
         self.layer_stack.pop();
@@ -127,6 +164,10 @@ impl Scene {
         self.primitive_bounds.set_order_floor(floor);
     }
 
+    /// Records a primitive for the current frame.
+    ///
+    /// Empty clipped primitives are discarded. Recording after [`Scene::finish`]
+    /// invalidates its compiled plan; finish again before rendering.
     pub fn insert_primitive(&mut self, primitive: impl Into<Primitive>) {
         self.insert_primitive_with_surface_opacity(primitive.into(), None);
     }
@@ -237,6 +278,11 @@ impl Scene {
         }
     }
 
+    /// Replays paint operations from `prev_scene` into this scene.
+    ///
+    /// `range` indexes the previous scene's operation stream, so it must be a
+    /// valid range for `prev_scene.len()`. Replayed operations are reinserted
+    /// and therefore receive draw ordering in this scene.
     pub fn replay(&mut self, range: Range<usize>, prev_scene: &Scene) {
         for operation in &prev_scene.paint_operations[range] {
             match operation {
@@ -250,6 +296,11 @@ impl Scene {
         }
     }
 
+    /// Sorts primitives and compiles the renderer-neutral command stream.
+    ///
+    /// Call this after recording and before [`Self::render_plan`], capture, or
+    /// rendering. Calling it again is safe; recording afterward invalidates the
+    /// plan and requires another finish.
     pub fn finish(&mut self) {
         self.shadows.sort_by_key(|shadow| shadow.order);
         self.quads.sort_by_key(|quad| quad.order);
@@ -293,6 +344,10 @@ impl Scene {
         ),
         allow(dead_code)
     )]
+    /// Iterates the finished plan as primitive batches and filter boundaries.
+    ///
+    /// The iterator borrows the compiled command stream and yields nothing
+    /// useful until [`Self::finish`] has been called.
     pub fn batches(&self) -> impl Iterator<Item = PrimitiveBatch> + '_ {
         self.render_commands().iter().map(|command| match command {
             RenderCommand::Batch(batch) => batch.clone(),
@@ -401,23 +456,33 @@ pub(crate) enum PaintOperation {
     EndLayer,
 }
 
+/// A renderer primitive recorded in a [`Scene`].
 #[derive(Clone)]
-#[expect(missing_docs)]
 pub enum Primitive {
+    /// A blurred or colored shadow.
     Shadow(Shadow),
+    /// A filled and/or bordered rectangle.
     Quad(Quad),
+    /// A triangulated path.
     Path(Path<ScaledPixels>),
+    /// A text underline.
     Underline(Underline),
+    /// A tinted monochrome atlas sprite.
     MonochromeSprite(MonochromeSprite),
+    /// A subpixel atlas sprite.
     SubpixelSprite(SubpixelSprite),
+    /// A full-color atlas sprite.
     PolychromeSprite(PolychromeSprite),
+    /// A backend-owned surface.
     Surface(PaintSurface),
+    /// A filter applied to already-painted backdrop content.
     BackdropFilter(BackdropFilter),
+    /// A start/end marker for an isolated content-filter group.
     FilterBoundary(FilterBoundary),
 }
 
-#[expect(missing_docs)]
 impl Primitive {
+    /// Returns the primitive's geometry bounds in scene space.
     pub fn bounds(&self) -> &Bounds<ScaledPixels> {
         match self {
             Primitive::Shadow(shadow) => &shadow.bounds,
@@ -433,6 +498,7 @@ impl Primitive {
         }
     }
 
+    /// Returns the clip mask applied while painting this primitive.
     pub fn content_mask(&self) -> &ContentMask<ScaledPixels> {
         match self {
             Primitive::Shadow(shadow) => &shadow.content_mask,
@@ -785,21 +851,33 @@ impl<'a> Iterator for BatchIterator<'a> {
     }
 }
 
+/// A filled rectangle with optional border and rounded corners.
 #[derive(Debug, Copy, Clone)]
 #[repr(C)]
-#[expect(missing_docs)]
 pub struct Quad {
+    /// Draw-order key used when primitives are sorted.
     pub order: DrawOrder,
+    /// Solid or dashed border style.
     pub border_style: BorderStyle,
+    /// Length of each dashed segment in scene pixels.
     pub border_dashed_length: f32,
+    /// Gap between dashed segments in scene pixels.
     pub border_dashed_gap: f32,
+    /// Outer rectangle in scene space.
     pub bounds: Bounds<ScaledPixels>,
+    /// Clip mask applied to the quad.
     pub content_mask: ContentMask<ScaledPixels>,
+    /// Quad fill.
     pub background: Background,
+    /// Border paint.
     pub border_color: Background,
+    /// Corner radii in top-left, top-right, bottom-right, bottom-left order.
     pub corner_radii: Corners<ScaledPixels>,
+    /// Border widths in top, right, bottom, left order.
     pub border_widths: Edges<ScaledPixels>,
+    /// Corner smoothing factor consumed by the renderer.
     pub corner_smoothing: f32,
+    /// Backend padding retained for the storage-buffer ABI.
     pub padding: u32,
 }
 
@@ -828,16 +906,23 @@ impl From<Quad> for Primitive {
     }
 }
 
+/// A text underline represented as a scene primitive.
 #[derive(Debug, Copy, Clone)]
 #[repr(C)]
-#[expect(missing_docs)]
 pub struct Underline {
+    /// Draw-order key used when primitives are sorted.
     pub order: DrawOrder,
+    /// Backend padding retained for the storage-buffer ABI.
     pub padding: u32,
+    /// Underline rectangle in scene space.
     pub bounds: Bounds<ScaledPixels>,
+    /// Clip mask applied to the underline.
     pub content_mask: ContentMask<ScaledPixels>,
+    /// Underline color.
     pub color: SceneHsla,
+    /// Stroke thickness in scene pixels.
     pub thickness: ScaledPixels,
+    /// Whether the underline uses a wavy stroke.
     pub wavy: ShaderBool,
 }
 
@@ -847,20 +932,29 @@ impl From<Underline> for Primitive {
     }
 }
 
+/// A blurred or colored shadow around an element.
 #[derive(Debug, Copy, Clone)]
 #[repr(C)]
-#[expect(missing_docs)]
 pub struct Shadow {
+    /// Draw-order key used when primitives are sorted.
     pub order: DrawOrder,
+    /// Blur radius in scene pixels.
     pub blur_radius: ScaledPixels,
+    /// Shadow paint bounds in scene space.
     pub bounds: Bounds<ScaledPixels>,
+    /// Shadow corner radii.
     pub corner_radii: Corners<ScaledPixels>,
+    /// Clip mask applied to the shadow.
     pub content_mask: ContentMask<ScaledPixels>,
+    /// Shadow color or gradient.
     pub color: Background,
+    /// Bounds of the element casting the shadow.
     pub element_bounds: Bounds<ScaledPixels>,
+    /// Corner radii of the element casting the shadow.
     pub element_corner_radii: Corners<ScaledPixels>,
     /// Whether this shadow is rendered inside the element instead of outside it.
     pub inset: ShaderBool,
+    /// Corner smoothing factor consumed by the renderer.
     pub corner_smoothing: f32,
 }
 
@@ -874,12 +968,16 @@ impl From<Shadow> for Primitive {
 /// `bounds`, compositing the result into a rounded rectangle — the frosted-glass effect.
 /// Emitted by [`crate::Window::paint_backdrop_filter`]; produces the CSS `backdrop-filter` effect.
 #[derive(Default, Debug, Clone)]
-#[expect(missing_docs)]
 pub struct BackdropFilter {
+    /// Draw-order key used when primitives are sorted.
     pub order: DrawOrder,
+    /// Region whose already-painted backdrop is filtered.
     pub bounds: Bounds<ScaledPixels>,
+    /// Clip mask applied to the filtered backdrop.
     pub content_mask: ContentMask<ScaledPixels>,
+    /// Rounded corners of the filter region.
     pub corner_radii: Corners<ScaledPixels>,
+    /// Corner smoothing factor consumed by the renderer.
     pub corner_smoothing: f32,
     /// The filter chain applied to the backdrop, in scene (device-pixel) space. Identity filters
     /// are dropped at paint time, so a `BackdropFilter` is only emitted when this is non-empty.
@@ -910,17 +1008,22 @@ impl From<BackdropFilter> for Primitive {
 /// an offscreen target, filters it, and composites it back at `bounds`. Produces the CSS
 /// `filter` effect (e.g. blurring the element and its children as a single group).
 #[derive(Debug, Clone)]
-#[expect(missing_docs)]
 pub struct FilterBoundary {
+    /// Draw-order key used when primitives are sorted.
     pub order: DrawOrder,
+    /// Bounds of the isolated filter group.
     pub bounds: Bounds<ScaledPixels>,
+    /// Clip mask applied to the group.
     pub content_mask: ContentMask<ScaledPixels>,
+    /// Rounded corners of the group.
     pub corner_radii: Corners<ScaledPixels>,
+    /// Corner smoothing factor consumed by the renderer.
     pub corner_smoothing: f32,
     /// The filter chain applied to the isolated group, in scene (device-pixel) space. Identity
     /// filters are dropped at paint time, so a `FilterBoundary` is only emitted when non-empty.
     /// Inline capacity 4 (same struct size as 1 here — see [`BackdropFilter::filters`]).
     pub filters: SmallVec<[ScaledFilter; 4]>,
+    /// Element opacity multiplied into the composited group.
     pub opacity: f32,
     /// `true` for the start marker (opens the group), `false` for the end marker (closes it).
     pub is_start: bool,
@@ -964,10 +1067,9 @@ pub enum BorderStyle {
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[repr(C)]
 pub struct TransformationMatrix {
-    /// 2x2 matrix containing rotation and scale,
-    /// stored row-major
+    /// 2×2 rotation/scale matrix, stored row-major.
     pub rotation_scale: [[f32; 2]; 2],
-    /// translation vector
+    /// Translation vector in scene pixels.
     pub translation: [f32; 2],
 }
 
@@ -1063,16 +1165,23 @@ impl Default for TransformationMatrix {
     }
 }
 
+/// A sprite whose atlas samples are tinted with one color.
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
-#[expect(missing_docs)]
 pub struct MonochromeSprite {
+    /// Draw-order key used when sprites are sorted.
     pub order: DrawOrder,
+    /// Backend padding retained for the storage-buffer ABI.
     pub padding: u32,
+    /// Sprite rectangle in scene space.
     pub bounds: Bounds<ScaledPixels>,
+    /// Clip mask applied to the sprite.
     pub content_mask: ContentMask<ScaledPixels>,
+    /// Tint color.
     pub color: SceneHsla,
+    /// Atlas tile containing the sprite image.
     pub tile: AtlasTile,
+    /// Affine transform applied to the sprite.
     pub transformation: TransformationMatrix,
 }
 
@@ -1082,16 +1191,23 @@ impl From<MonochromeSprite> for Primitive {
     }
 }
 
+/// A sprite rendered with subpixel coverage information.
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
-#[expect(missing_docs)]
 pub struct SubpixelSprite {
+    /// Draw-order key used when sprites are sorted.
     pub order: DrawOrder,
+    /// Backend padding retained for the storage-buffer ABI.
     pub padding: u32,
+    /// Sprite rectangle in scene space.
     pub bounds: Bounds<ScaledPixels>,
+    /// Clip mask applied to the sprite.
     pub content_mask: ContentMask<ScaledPixels>,
+    /// Tint color.
     pub color: SceneHsla,
+    /// Atlas tile containing the sprite image.
     pub tile: AtlasTile,
+    /// Affine transform applied to the sprite.
     pub transformation: TransformationMatrix,
 }
 
@@ -1101,17 +1217,25 @@ impl From<SubpixelSprite> for Primitive {
     }
 }
 
+/// A sprite carrying per-pixel color information.
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
-#[expect(missing_docs)]
 pub struct PolychromeSprite {
+    /// Draw-order key used when sprites are sorted.
     pub order: DrawOrder,
+    /// Whether the sprite is rendered as grayscale.
     pub grayscale: ShaderBool,
+    /// Opacity multiplied into the sprite.
     pub opacity: f32,
+    /// Corner smoothing factor consumed by the renderer.
     pub corner_smoothing: f32,
+    /// Sprite rectangle in scene space.
     pub bounds: Bounds<ScaledPixels>,
+    /// Clip mask applied to the sprite.
     pub content_mask: ContentMask<ScaledPixels>,
+    /// Rounded corners applied to the sprite.
     pub corner_radii: Corners<ScaledPixels>,
+    /// Atlas tile containing the sprite image.
     pub tile: AtlasTile,
 }
 
@@ -1121,12 +1245,16 @@ impl From<PolychromeSprite> for Primitive {
     }
 }
 
+/// A backend-owned surface embedded in a scene.
 #[derive(Clone, Debug)]
-#[allow(missing_docs)]
 pub struct PaintSurface {
+    /// Draw-order key used when surfaces are sorted.
     pub order: DrawOrder,
+    /// Surface rectangle in scene space.
     pub bounds: Bounds<ScaledPixels>,
+    /// Clip mask applied to the surface.
     pub content_mask: ContentMask<ScaledPixels>,
+    /// Backend-owned source surface.
     pub source: crate::SurfaceSource,
 }
 
@@ -1136,19 +1264,27 @@ impl From<PaintSurface> for Primitive {
     }
 }
 
+/// Renderer-local identifier assigned to a path.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-#[expect(missing_docs)]
-pub struct PathId(pub usize);
+pub struct PathId(
+    /// Renderer-local identifier for a path.
+    pub usize,
+);
 
-/// A line made up of a series of vertices and control points.
+/// A triangulated path made up of vertices and control points.
 #[derive(Clone, Debug)]
-#[expect(missing_docs)]
 pub struct Path<P: Clone + Debug + Default + PartialEq> {
+    /// Renderer-local path identifier.
     pub id: PathId,
+    /// Draw-order key used when paths are sorted.
     pub order: DrawOrder,
+    /// Geometry bounds in the path's coordinate space.
     pub bounds: Bounds<P>,
+    /// Clip mask applied to the path.
     pub content_mask: ContentMask<P>,
+    /// Triangle vertices consumed by the path shader.
     pub vertices: Vec<PathVertex<P>>,
+    /// Path paint.
     pub color: Background,
     start: Point<P>,
     current: Point<P>,
@@ -1156,7 +1292,7 @@ pub struct Path<P: Clone + Debug + Default + PartialEq> {
 }
 
 impl Path<Pixels> {
-    /// Create a new path with the given starting point.
+    /// Creates a logical-pixel path with `start` as its current point.
     pub fn new(start: Point<Pixels>) -> Self {
         Self {
             id: PathId(0),
@@ -1174,7 +1310,8 @@ impl Path<Pixels> {
         }
     }
 
-    /// Scale this path by the given factor.
+    /// Converts this logical-pixel path to scene space by multiplying all
+    /// positions and masks by `factor`.
     pub fn scale(&self, factor: f32) -> Path<ScaledPixels> {
         Path {
             id: self.id,
@@ -1193,7 +1330,7 @@ impl Path<Pixels> {
         }
     }
 
-    /// Move the start, current point to the given point.
+    /// Starts a new contour at `to` and makes it the current point.
     pub fn move_to(&mut self, to: Point<Pixels>) {
         self.contour_count += 1;
         self.start = to;
@@ -1229,7 +1366,11 @@ impl Path<Pixels> {
         self.current = to;
     }
 
-    /// Push a triangle to the Path.
+    /// Appends one triangle in logical-pixel coordinates.
+    ///
+    /// `st` carries the path-space coordinates consumed by the path shader;
+    /// callers constructing custom triangles must provide values appropriate
+    /// for their shader use.
     pub fn push_triangle(
         &mut self,
         xy: (Point<Pixels>, Point<Pixels>, Point<Pixels>),
@@ -1273,7 +1414,7 @@ where
     T: Clone + Debug + Default + PartialEq + PartialOrd + Add<T, Output = T> + Sub<Output = T>,
 {
     #[allow(unused)]
-    #[expect(missing_docs)]
+    /// Returns the intersection of geometry bounds and the content mask.
     pub fn clipped_bounds(&self) -> Bounds<T> {
         self.bounds.intersect(&self.content_mask.bounds)
     }
@@ -1287,15 +1428,18 @@ impl From<Path<ScaledPixels>> for Primitive {
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-#[expect(missing_docs)]
+/// One vertex in a path triangle list.
 pub struct PathVertex<P: Clone + Debug + Default + PartialEq> {
+    /// Position in the path coordinate space.
     pub xy_position: Point<P>,
+    /// Shader-specific path coordinate.
     pub st_position: Point<f32>,
+    /// Clip mask carried with this vertex.
     pub content_mask: ContentMask<P>,
 }
 
-#[expect(missing_docs)]
 impl PathVertex<Pixels> {
+    /// Converts this vertex from logical pixels to scene-space pixels.
     pub fn scale(&self, factor: f32) -> PathVertex<ScaledPixels> {
         PathVertex {
             xy_position: self.xy_position.scale(factor),

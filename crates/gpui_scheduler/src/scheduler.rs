@@ -1,3 +1,9 @@
+//! A priority-aware scheduler used by GPUI's background work.
+//!
+//! The scheduler separates runnable work from the clock that releases timers.
+//! [`Scheduler`] implementations may be real or deterministic; the latter is
+//! useful for tests that advance time without sleeping.
+
 mod clock;
 mod executor;
 mod test_scheduler;
@@ -27,6 +33,7 @@ use std::{
 /// priorities to prevent starvation.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 #[repr(u8)]
+/// Ordering applied when multiple runnable tasks are ready at the same instant.
 pub enum Priority {
     /// Realtime priority
     ///
@@ -56,10 +63,12 @@ impl Priority {
 }
 
 #[derive(Clone, Copy, Debug)]
+/// The instant at which a runnable item entered the scheduler.
 pub struct SpawnTime(pub Instant);
 
 /// Metadata attached to runnables for debugging and profiling.
 #[derive(Clone, Debug)]
+/// Scheduling metadata attached to a runnable task.
 pub struct RunnableMeta {
     /// The source location where the task was spawned.
     pub location: &'static Location<'static>,
@@ -69,6 +78,7 @@ pub struct RunnableMeta {
 
 impl RunnableMeta {
     #[track_caller]
+    /// Creates metadata whose location is the caller of this function.
     pub fn new_with_callers_location() -> Self {
         Self {
             location: core::panic::Location::caller(),
@@ -77,6 +87,7 @@ impl RunnableMeta {
     }
 }
 
+/// Source of runnable work and timers for an executor.
 pub trait Scheduler: Send + Sync {
     /// Block until the given future completes or timeout occurs.
     ///
@@ -214,17 +225,21 @@ fn spawn_dedicated_os_thread(session_id: SessionId, thread_body: impl FnOnce() +
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+/// Identifier for a scheduler session.
 pub struct SessionId(u16);
 
 impl SessionId {
+    /// Creates a session identifier from its scheduler-local numeric value.
     pub fn new(id: u16) -> Self {
         SessionId(id)
     }
 }
 
+/// A future that resolves when a scheduler timer fires.
 pub struct Timer(oneshot::Receiver<()>);
 
 impl Timer {
+    /// Wraps a receiver that resolves when the timer fires.
     pub fn new(rx: oneshot::Receiver<()>) -> Self {
         Timer(rx)
     }

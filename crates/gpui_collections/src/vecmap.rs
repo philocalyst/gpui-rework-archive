@@ -21,6 +21,7 @@ pub struct VecMap<K, V> {
 }
 
 impl<K, V> VecMap<K, V> {
+    /// Creates an empty insertion-ordered map.
     pub fn new() -> Self {
         Self {
             keys: Vec::new(),
@@ -28,6 +29,7 @@ impl<K, V> VecMap<K, V> {
         }
     }
 
+    /// Iterates key/value pairs in insertion order.
     pub fn iter(&self) -> Iter<'_, K, V> {
         Iter {
             iter: self.keys.iter().zip(self.values.iter()),
@@ -36,6 +38,7 @@ impl<K, V> VecMap<K, V> {
 }
 
 impl<K: Eq, V> VecMap<K, V> {
+    /// Looks up `key`, returning an occupied or vacant entry handle.
     pub fn entry(&mut self, key: K) -> Entry<'_, K, V> {
         match self.keys.iter().position(|k| k == &key) {
             Some(index) => Entry::Occupied(OccupiedEntry {
@@ -61,6 +64,7 @@ impl<K: Eq, V> VecMap<K, V> {
     }
 }
 
+/// Iterator over a [`VecMap`] in insertion order.
 pub struct Iter<'a, K, V> {
     iter: std::iter::Zip<std::slice::Iter<'a, K>, std::slice::Iter<'a, V>>,
 }
@@ -73,12 +77,14 @@ impl<'a, K, V> Iterator for Iter<'a, K, V> {
     }
 }
 
+/// Entry handle returned by [`VecMap::entry`].
 pub enum Entry<'a, K, V> {
     Occupied(OccupiedEntry<'a, K, V>),
     Vacant(VacantEntry<'a, K, V>),
 }
 
 impl<'a, K, V> Entry<'a, K, V> {
+    /// Returns the entry's key, whether occupied or vacant.
     pub fn key(&self) -> &K {
         match self {
             Entry::Occupied(entry) => entry.key,
@@ -86,6 +92,7 @@ impl<'a, K, V> Entry<'a, K, V> {
         }
     }
 
+    /// Returns the existing value or inserts one computed from the key.
     pub fn or_insert_with_key<F>(self, default: F) -> &'a mut V
     where
         F: FnOnce(&K) -> V,
@@ -103,6 +110,7 @@ impl<'a, K, V> Entry<'a, K, V> {
         }
     }
 
+    /// Returns the existing value or inserts one computed without the key.
     pub fn or_insert_with<F>(self, default: F) -> &'a mut V
     where
         F: FnOnce() -> V,
@@ -110,10 +118,12 @@ impl<'a, K, V> Entry<'a, K, V> {
         self.or_insert_with_key(|_| default())
     }
 
+    /// Returns the existing value or inserts `value`.
     pub fn or_insert(self, value: V) -> &'a mut V {
         self.or_insert_with_key(|_| value)
     }
 
+    /// Returns the existing value or inserts `V::default()`.
     pub fn or_insert_default(self) -> &'a mut V
     where
         V: Default,
@@ -122,22 +132,26 @@ impl<'a, K, V> Entry<'a, K, V> {
     }
 }
 
+/// An occupied entry's borrowed key and mutable value.
 pub struct OccupiedEntry<'a, K, V> {
     key: &'a K,
     value: &'a mut V,
 }
 
+/// A vacant entry holding the key to insert when a value is requested.
 pub struct VacantEntry<'a, K, V> {
     map: &'a mut VecMap<K, V>,
     key: K,
 }
 
+/// Entry handle returned by [`VecMap::entry_ref`].
 pub enum EntryRef<'key, 'map, K, V> {
     Occupied(OccupiedEntry<'map, K, V>),
     Vacant(VacantEntryRef<'key, 'map, K, V>),
 }
 
 impl<'key, 'map, K, V> EntryRef<'key, 'map, K, V> {
+    /// Returns the entry's borrowed key.
     pub fn key(&self) -> &K {
         match self {
             EntryRef::Occupied(entry) => entry.key,
@@ -150,6 +164,7 @@ impl<'key, 'map, K, V> EntryRef<'key, 'map, K, V>
 where
     K: Clone,
 {
+    /// Returns the existing value or inserts one computed from the borrowed key.
     pub fn or_insert_with_key<F>(self, default: F) -> &'map mut V
     where
         F: FnOnce(&K) -> V,
@@ -167,6 +182,7 @@ where
         }
     }
 
+    /// Returns the existing value or inserts one computed without the key.
     pub fn or_insert_with<F>(self, default: F) -> &'map mut V
     where
         F: FnOnce() -> V,
@@ -174,10 +190,12 @@ where
         self.or_insert_with_key(|_| default())
     }
 
+    /// Returns the existing value or inserts `value`.
     pub fn or_insert(self, value: V) -> &'map mut V {
         self.or_insert_with_key(|_| value)
     }
 
+    /// Returns the existing value or inserts `V::default()`.
     pub fn or_insert_default(self) -> &'map mut V
     where
         V: Default,
@@ -186,6 +204,7 @@ where
     }
 }
 
+/// A vacant entry that retains a borrowed key until insertion.
 pub struct VacantEntryRef<'key, 'map, K, V> {
     map: &'map mut VecMap<K, V>,
     key: &'key K,

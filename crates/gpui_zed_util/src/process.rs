@@ -31,6 +31,7 @@ impl std::ops::DerefMut for Child {
 
 impl Child {
     #[cfg(not(windows))]
+    /// Spawn a child process and retain its process-group handle where supported.
     pub fn spawn(
         mut command: std::process::Command,
         stdin: Stdio,
@@ -54,6 +55,7 @@ impl Child {
     }
 
     #[cfg(windows)]
+    /// Spawn a child process using the platform process-group implementation.
     pub fn spawn(
         command: std::process::Command,
         stdin: Stdio,
@@ -112,6 +114,7 @@ impl Child {
     }
 
     #[cfg(not(windows))]
+    /// Terminate the child process and its associated group when supported.
     pub fn kill(&mut self) -> Result<()> {
         let pid = self.process.id();
         unsafe {
@@ -121,6 +124,7 @@ impl Child {
     }
 
     #[cfg(windows)]
+    /// Terminate the child process.
     pub fn kill(&mut self) -> Result<()> {
         if let Some(job) = &self.job {
             job.terminate()

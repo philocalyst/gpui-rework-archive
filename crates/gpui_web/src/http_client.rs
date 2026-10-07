@@ -1,3 +1,8 @@
+//! Browser [`fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch) adapter.
+//!
+//! Browser CORS, origin, redirect, and permission policies apply; this client does not provide a
+//! native networking fallback.
+
 use anyhow::anyhow;
 use gpui::http_client::{HttpClient, HttpResponse};
 use std::future::Future;
@@ -12,6 +17,10 @@ extern "C" {
     fn global_fetch(input: &web_sys::Request) -> Result<js_sys::Promise, JsValue>;
 }
 
+/// GPUI HTTP client backed by the browser's global `fetch` function.
+///
+/// The future resolves with response bytes after the browser response body has been read; HTTP
+/// status codes are returned in [`gpui::HttpResponse`] rather than treated as transport errors.
 pub struct FetchHttpClient;
 
 impl Default for FetchHttpClient {
@@ -22,6 +31,12 @@ impl Default for FetchHttpClient {
 
 #[cfg(feature = "multithreaded")]
 impl FetchHttpClient {
+    /// Constructs the client in multithreaded WebAssembly builds.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure the client is only used with the browser runtime
+    /// and its main-thread Fetch integration.
     pub unsafe fn new() -> Self {
         Self
     }
@@ -29,6 +44,7 @@ impl FetchHttpClient {
 
 #[cfg(not(feature = "multithreaded"))]
 impl FetchHttpClient {
+    /// Constructs the client in single-threaded WebAssembly builds.
     pub fn new() -> Self {
         Self
     }

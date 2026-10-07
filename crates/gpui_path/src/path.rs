@@ -1,10 +1,16 @@
 //! Relative path types for deltadb.
 //!
-//! Provides [`RelPath`] and [`RelPathBuf`] — path types that are guaranteed to be
+//! Provides [`RelPath`] and [`rel_path::RelPathBuf`] — path types that are guaranteed to be
 //! relative, normalized, and valid unicode. Internally stored in POSIX (`/`-delimited)
 //! format regardless of host platform.
 //!
 //! Adapted from Zed's `util::rel_path` module.
+//!
+//! Path utilities shared by GPUI tooling and applications.
+//!
+//! [`PathStyle`] makes path parsing and display explicit when code crosses
+//! platform boundaries. The extension traits preserve `std::path` ergonomics while
+//! adding normalization and relative-path operations.
 
 use std::{
     borrow::Cow,
@@ -13,10 +19,16 @@ use std::{
 
 use crate::rel_path::RelPath;
 
+/// Borrowed and owned absolute path types.
 pub mod abs_path;
+/// Borrowed and owned normalized relative path types.
 pub mod rel_path;
 
+/// Extension methods for converting standard paths into GPUI relative paths.
 pub trait PathExt {
+    /// Parses this path using the host's [`PathStyle`] and returns normalized relative storage.
+    ///
+    /// Fails for absolute or non-UTF-8 paths.
     fn to_rel_path_buf(&self) -> anyhow::Result<rel_path::RelPathBuf>;
 }
 
@@ -26,24 +38,30 @@ impl<T: AsRef<Path> + ?Sized> PathExt for T {
     }
 }
 
+/// Selects the separator and root syntax used to parse or display a path.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum PathStyle {
+    /// POSIX separators and absolute-path rules.
     Unix,
+    /// Windows separators, drive prefixes, and UNC absolute-path rules.
     Windows,
 }
 
 impl PathStyle {
+    /// Returns the style native to the target platform.
     #[cfg(target_os = "windows")]
     pub const fn local() -> Self {
         PathStyle::Windows
     }
 
+    /// Returns the style native to the target platform.
     #[cfg(not(target_os = "windows"))]
     pub const fn local() -> Self {
         PathStyle::Unix
     }
 
     #[inline]
+    /// Returns the separator used when displaying paths in this style.
     pub fn primary_separator(&self) -> &'static str {
         match self {
             PathStyle::Unix => "/",
@@ -51,6 +69,7 @@ impl PathStyle {
         }
     }
 
+    /// Returns all separators accepted by this style's parser.
     pub fn separators(&self) -> &'static [&'static str] {
         match self {
             PathStyle::Unix => &["/"],
@@ -58,6 +77,7 @@ impl PathStyle {
         }
     }
 
+    /// Returns accepted separators as characters for splitting.
     pub fn separators_ch(&self) -> &'static [char] {
         match self {
             PathStyle::Unix => &['/'],
@@ -65,6 +85,7 @@ impl PathStyle {
         }
     }
 
+    /// Returns whether `path_like` is absolute according to this style.
     pub fn is_absolute(&self, path_like: &str) -> bool {
         path_like.starts_with('/')
             || *self == PathStyle::Windows
@@ -78,14 +99,19 @@ impl PathStyle {
                             .is_some_and(|path| path.starts_with('/') || path.starts_with('\\')))
     }
 
+    /// Returns whether this style uses Windows path rules.
     pub fn is_windows(&self) -> bool {
         *self == PathStyle::Windows
     }
 
+    /// Returns whether this style uses POSIX path rules.
     pub fn is_posix(&self) -> bool {
         *self == PathStyle::Unix
     }
 
+    /// Joins two UTF-8 paths without normalizing them.
+    ///
+    /// Returns `None` when either path cannot be represented as UTF-8 or `right` is absolute.
     pub fn join(self, left: impl AsRef<Path>, right: impl AsRef<Path>) -> Option<String> {
         let right = right.as_ref().to_str()?;
         if is_absolute(right, self) {
@@ -106,6 +132,7 @@ impl PathStyle {
         }
     }
 
+    /// Joins and normalizes two UTF-8 paths, rejecting an absolute right-hand path.
     pub fn join_path(
         self,
         left: impl AsRef<Path>,
@@ -125,6 +152,9 @@ impl PathStyle {
         Ok(PathBuf::from(self.normalize(&joined)))
     }
 
+    /// Joins two UTF-8 paths while preserving `.` and `..` components.
+    ///
+    /// Absolute right-hand paths and non-UTF-8 inputs return an error.
     pub fn join_path_preserving_components(
         self,
         left: impl AsRef<Path>,
@@ -144,6 +174,9 @@ impl PathStyle {
         Ok(PathBuf::from(&joined))
     }
 
+    /// Normalizes separators and `.`/`..` components according to this style.
+    ///
+    /// Root prefixes are preserved; relative leading `..` components are retained.
     pub fn normalize(self, path_like: &str) -> String {
         match self {
             PathStyle::Windows => {
@@ -246,6 +279,7 @@ impl PathStyle {
         }
     }
 
+    /// Splits a path into its parent portion and final component.
     pub fn split(self, path_like: &str) -> (Option<&str>, &str) {
         let Some(pos) = path_like.rfind(self.primary_separator()) else {
             return (None, path_like);
@@ -257,6 +291,7 @@ impl PathStyle {
         )
     }
 
+    /// Returns the UTF-8 file name, if `path` has one.
     pub fn file_name(self, path: &Path) -> Option<&str> {
         if self == PathStyle::local() {
             return path.file_name().and_then(|n| n.to_str());
@@ -283,6 +318,7 @@ impl PathStyle {
         }
     }
 
+    /// Returns the parent path according to this style.
     pub fn parent(self, path: &Path) -> Option<&Path> {
         if self == PathStyle::local() {
             return path.parent();
@@ -428,6 +464,7 @@ impl PathStyle {
         Some(Path::new(path.get(..parent_end)?))
     }
 
+    /// Strips `prefix` from `path` when both paths use compatible components.
     pub fn strip_prefix<'a>(
         &self,
         child: &'a Path,

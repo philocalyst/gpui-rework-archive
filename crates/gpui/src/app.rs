@@ -1,3 +1,13 @@
+//! Application state, entities, windows, and the contexts used to access them.
+//!
+//! [`Application`] owns the platform run loop. Once it is running, [`App`] is
+//! the single gateway to entities, globals, windows, executors, and system
+//! services. Entity handles are cheap to clone, but their values are accessed
+//! only through an app or an [`AppContext`]. See the
+//! [counter walkthrough](https://gpui-ce.github.io/examples/counter/#state) for
+//! the smallest complete example, and the [update walkthrough](https://gpui-ce.github.io/examples/counter/#update)
+//! for the access rules in practice.
+
 use crate::{
     Action, ActionBuildError, ActionRegistry, Any, AnyView, AnyWindowHandle, AppContext, Arena,
     ArenaBox, Asset, AssetRegistry, BackgroundExecutor, Bounds, ClipboardItem, ClipboardReadError,
@@ -146,6 +156,9 @@ impl Drop for AppRefMut<'_> {
 
 /// A reference to a GPUI application, typically constructed in the `main` function of your app.
 /// You won't interact with this type much outside of initial configuration and startup.
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Application-eb7618d3.md")]
+// docs:examples:end
 pub struct Application(Rc<AppCell>);
 
 /// A strong handle to an [`Application`] started with [`Application::run_embedded`].
@@ -158,9 +171,12 @@ pub struct ApplicationHandle {
 }
 
 impl ApplicationHandle {
-    /// Invoke `f` with the app context. Must not be called re-entrantly from code that
-    /// is already inside an update; the app state is a `RefCell` and will panic on a
-    /// double borrow.
+    /// Invoke `f` with exclusive access to the app.
+    ///
+    /// This method is the re-entry point for an embedder's event loop. It must
+    /// not be called while another app update is active: the nested borrow
+    /// panics. Keep the closure short and use [`AsyncApp::spawn`] for work that
+    /// waits.
     pub fn update<R>(&self, f: impl FnOnce(&mut App) -> R) -> R {
         let cx = &mut *self.app.borrow_mut();
         f(cx)
@@ -176,7 +192,10 @@ impl ApplicationHandle {
 /// Represents an application before it is fully launched. Once your app is
 /// configured, you'll start the app with `App::run`.
 impl Application {
-    /// Builds an app with a caller-provided platform implementation.
+    /// Builds an application around a caller-provided platform implementation.
+    ///
+    /// Configure assets, HTTP, and quit behavior on the returned builder before
+    /// calling [`Self::run`] or [`Self::run_embedded`].
     pub fn with_platform(platform: Rc<dyn Platform>) -> Self {
         Self(App::new_app(
             platform,
@@ -264,8 +283,14 @@ impl Application {
         self
     }
 
-    /// Start the application. The provided callback will be called once the
-    /// app is fully launched.
+    /// Starts the platform run loop and invokes `on_finish_launching` once.
+    ///
+    /// On native platforms this call normally blocks until the app quits. On
+    /// Wasm the browser owns the loop, so startup is scheduled and this method
+    /// returns; the application is retained for the page lifetime.
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Application-run-d0b8e587.md")]
+// docs:examples:end
     pub fn run<F>(self, on_finish_launching: F)
     where
         F: 'static + FnOnce(&mut App),
@@ -313,8 +338,10 @@ impl Application {
         ApplicationHandle { app: self.0 }
     }
 
-    /// Register a handler to be invoked when the platform instructs the application
-    /// to open one or more URLs.
+    /// Registers a handler for URLs delivered by the platform.
+    ///
+    /// The callback is retained by the platform for the application's lifetime;
+    /// register it before [`Self::run`].
     pub fn on_open_urls<F>(&self, mut callback: F) -> &Self
     where
         F: 'static + FnMut(Vec<String>),
@@ -445,7 +472,12 @@ impl SystemWindowTabController {
         &self.tab_groups
     }
 
-    /// Get the next tab group window handle.
+    /// Returns a window from the next tab group.
+    ///
+    /// Groups are visited in the map's current key order, which is not a
+    /// user-facing ordering guarantee. Within the selected group, the most
+    /// recently active tab is preferred. Returns `None` when `id` is not in a
+    /// group or no group is registered.
     pub fn get_next_tab_group_window(cx: &mut App, id: WindowId) -> Option<&AnyWindowHandle> {
         let controller = cx.global::<SystemWindowTabController>();
         let current_group = controller
@@ -470,7 +502,12 @@ impl SystemWindowTabController {
             })
     }
 
-    /// Get the previous tab group window handle.
+    /// Returns a window from the previous tab group.
+    ///
+    /// Groups are visited in the map's current key order, which is not a
+    /// user-facing ordering guarantee. Within the selected group, the most
+    /// recently active tab is preferred. Returns `None` when `id` is not in a
+    /// group or no group is registered.
     pub fn get_prev_tab_group_window(cx: &mut App, id: WindowId) -> Option<&AnyWindowHandle> {
         let controller = cx.global::<SystemWindowTabController>();
         let current_group = controller
@@ -1113,6 +1150,9 @@ impl App {
 
     /// Returns whether non-essential animations (e.g. loading spinners) should
     /// be rendered in a static state instead of animating.
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-App-reduce-motion-bcfa3417.md")]
+// docs:examples:end
     pub fn reduce_motion(&self) -> bool {
         self.reduce_motion
     }
@@ -1333,6 +1373,9 @@ impl App {
     /// Opens a new window with the given option and the root view returned by the given function.
     /// The function is invoked with a `Window`, which can be used to interact with window-specific
     /// functionality.
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-App-open-window-f8ec0f6b.md")]
+// docs:examples:end
     pub fn open_window<V: 'static + Render>(
         &mut self,
         options: crate::WindowOptions,
@@ -1545,7 +1588,7 @@ impl App {
     ///
     /// Used to share the current search string between apps.
     ///
-    /// https://developer.apple.com/documentation/appkit/nspasteboard/name-swift.struct/find
+    /// <https://developer.apple.com/documentation/appkit/nspasteboard/name-swift.struct/find>
     #[cfg(target_os = "macos")]
     pub fn read_from_find_pasteboard(&self) -> Option<ClipboardItem> {
         self.platform.read_from_find_pasteboard()
@@ -1555,7 +1598,7 @@ impl App {
     ///
     /// Used to share the current search string between apps.
     ///
-    /// https://developer.apple.com/documentation/appkit/nspasteboard/name-swift.struct/find
+    /// <https://developer.apple.com/documentation/appkit/nspasteboard/name-swift.struct/find>
     #[cfg(target_os = "macos")]
     pub fn write_to_find_pasteboard(&self, item: ClipboardItem) {
         self.platform.write_to_find_pasteboard(item)
@@ -2015,8 +2058,11 @@ impl App {
         .context("window not found")
     }
 
-    /// Creates an `AsyncApp`, which can be cloned and has a static lifetime
-    /// so it can be held across `await` points.
+    /// Creates an [`AsyncApp`] that can be cloned and held across `await` points.
+    ///
+    /// The handle is weak: it does not keep this app alive. Operations that need
+    /// the app fail or panic according to the individual `AsyncApp` method once
+    /// shutdown has released the app.
     pub fn to_async(&self) -> AsyncApp {
         AsyncApp {
             app: self.this.clone(),
@@ -2324,6 +2370,9 @@ impl App {
     }
 
     /// Register key bindings.
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-App-bind-keys-b1c931c1.md")]
+// docs:examples:end
     pub fn bind_keys(&mut self, bindings: impl IntoIterator<Item = KeyBinding>) {
         self.keymap.borrow_mut().add_bindings(bindings);
         self.pending_effects.push_back(Effect::RefreshWindows);

@@ -13,16 +13,22 @@ pub use scheduler::{
     DedicatedExecutor, FallibleTask, LocalExecutor as SchedulerLocalExecutor, Priority, Task,
 };
 
-/// A pointer to the executor that is currently running,
-/// for spawning background tasks.
+/// A cloneable handle for work that may run away from the foreground thread.
+///
+/// Futures passed to [`Self::spawn`] must be `Send`; use [`ForegroundExecutor`]
+/// for UI state and other `!Send` work. Dropping the returned [`Task`] cancels
+/// that task once its current poll returns.
 #[derive(Clone)]
 pub struct BackgroundExecutor {
     inner: scheduler::BackgroundExecutor,
     dispatcher: Arc<dyn PlatformDispatcher>,
 }
 
-/// A pointer to the executor that is currently running,
-/// for spawning tasks on the main thread.
+/// A cloneable handle for work that must run on GPUI's foreground thread.
+///
+/// Foreground tasks are polled in order by the local scheduler and may access
+/// `!Send` values. They still need to yield while doing long work so input and
+/// rendering can make progress.
 #[derive(Clone)]
 pub struct ForegroundExecutor {
     inner: scheduler::LocalExecutor,
@@ -36,7 +42,11 @@ pub struct ForegroundExecutor {
 ///
 /// This trait is automatically implemented for all `Task<Result<T, E>>` types.
 pub trait TaskExt<T, E> {
-    /// Run the task to completion in the background and log any errors that occur.
+    /// Detach the task and log its error if it resolves to `Err`.
+    ///
+    /// The task is still polled by the foreground executor. This method only
+    /// makes ownership explicit and records the call site; it does not block the
+    /// caller or turn an error into a panic.
     fn detach_and_log_err(self, cx: &App);
     /// Like [`Self::detach_and_log_err`], but uses `{:?}` formatting on failure so `anyhow::Error`
     /// values emit their full backtrace. Prefer `detach_and_log_err` unless a backtrace is wanted.
@@ -66,7 +76,7 @@ where
 }
 
 impl BackgroundExecutor {
-    /// Creates a new BackgroundExecutor from the given PlatformDispatcher.
+    /// Creates a background executor backed by `dispatcher`.
     pub fn new(dispatcher: Arc<dyn PlatformDispatcher>) -> Self {
         #[cfg(any(test, feature = "test-support"))]
         let scheduler: Arc<dyn Scheduler> = if let Some(test_dispatcher) = dispatcher.as_test() {
@@ -112,7 +122,9 @@ impl BackgroundExecutor {
         self.inner.spawn_dedicated(f)
     }
 
-    /// Enqueues the given future to be run to completion on a background thread.
+    /// Enqueues `future` for background polling and returns its cancellation handle.
+    ///
+    /// The future may run concurrently with the application and must be `Send`.
     #[track_caller]
     pub fn spawn<R>(&self, future: impl Future<Output = R> + Send + 'static) -> Task<R>
     where
@@ -182,10 +194,10 @@ impl BackgroundExecutor {
         }
     }
 
-    /// Get the current time.
+    /// Returns the scheduler's current time.
     ///
-    /// Calling this instead of `std::time::Instant::now` allows the use
-    /// of fake timers in tests.
+    /// Use this instead of `std::time::Instant::now` when code must behave
+    /// deterministically with the test scheduler's controllable clock.
     pub fn now(&self) -> Instant {
         self.inner.scheduler().clock().now()
     }
@@ -194,6 +206,9 @@ impl BackgroundExecutor {
     /// Depending on other concurrent tasks the elapsed duration may be longer
     /// than requested.
     #[track_caller]
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-BackgroundExecutor-timer-31971174.md")]
+// docs:examples:end
     pub fn timer(&self, duration: Duration) -> Task<()> {
         if duration.is_zero() {
             return Task::ready(());
@@ -354,7 +369,10 @@ impl ForegroundExecutor {
         }
     }
 
-    /// Enqueues the given Task to run on the main thread.
+    /// Enqueues `future` for polling on the foreground thread.
+    ///
+    /// Dropping the returned task cancels it. The future is local to this
+    /// executor and therefore does not need to be `Send`.
     #[track_caller]
     pub fn spawn<R>(&self, future: impl Future<Output = R> + 'static) -> Task<R>
     where
@@ -439,8 +457,12 @@ impl ForegroundExecutor {
         output.take().expect("block_test future did not complete")
     }
 
-    /// Block the current thread until the given future resolves.
-    /// Consider using `block_with_timeout` instead.
+    /// Block the current thread until `future` resolves.
+    ///
+    /// This is a synchronous escape hatch for integration code. Calling it from
+    /// a foreground callback can prevent the very work needed to resolve the
+    /// future; prefer [`Self::spawn`] in application code. Use
+    /// [`Self::block_with_timeout`] when the future depends on external input.
     #[cfg(not(target_family = "wasm"))]
     pub fn block_on<R>(&self, future: impl Future<Output = R>) -> R {
         self.inner.block_on(future)

@@ -1,3 +1,11 @@
+//! Public procedural macros used by GPUI.
+//!
+//! Derives implement GPUI's small behavioral traits by convention: `IntoElement` expects a
+//! `RenderOnce` component, `Styled`/`ParentElement`/`InteractiveElement` delegate to fields marked
+//! with their corresponding attributes, and `AppContext`/`VisualContext` locate the required
+//! context fields. A malformed input is a compile-time error; generated implementations do not
+//! add runtime allocation or state beyond the delegated field.
+
 mod bench;
 mod derive_action;
 mod derive_app_context;
@@ -292,7 +300,8 @@ pub fn bench(args: TokenStream, function: TokenStream) -> TokenStream {
 /// ```
 ///
 /// For more information on writing custom `Strategy` and `Arbitrary`
-/// implementations, see [the proptest book][book], and the [`Strategy`] trait.
+/// implementations, see [the proptest book](https://proptest-rs.github.io/proptest/intro.html),
+/// and the [`Strategy`](https://docs.rs/proptest/latest/proptest/strategy/trait.Strategy.html) trait.
 ///
 /// ## Scheduler
 ///
@@ -303,8 +312,6 @@ pub fn bench(args: TokenStream, function: TokenStream) -> TokenStream {
 /// use custom `Strategy`s.
 ///
 /// [`#[proptest::property_test]`]: https://docs.rs/proptest/latest/proptest/attr.property_test.html
-/// [book]: https://proptest-rs.github.io/proptest/intro.html
-/// [`Strategy`]: https://docs.rs/proptest/latest/proptest/strategy/trait.Strategy.html
 #[proc_macro_attribute]
 pub fn property_test(args: TokenStream, function: TokenStream) -> TokenStream {
     property_test::test(args.into(), function.into()).into()

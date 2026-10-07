@@ -1,0 +1,9 @@
+/public/
+/node_modules/
+/test-results/
+/playwright-report/
+/examples/target/
+/static/preview/pkg/
+/static/preview/build.json
+/.live/
+

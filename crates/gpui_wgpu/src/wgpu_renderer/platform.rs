@@ -105,6 +105,7 @@ impl WgpuRenderer {
 
     #[cfg(target_family = "wasm")]
     #[allow(clippy::arc_with_non_send_sync)]
+    /// Creates a renderer from an already-created browser surface.
     pub fn new_from_surface(
         context: &WgpuContext,
         surface: wgpu::Surface<'static>,
@@ -122,6 +123,10 @@ impl WgpuRenderer {
     }
 
     /// Acquires, renders, and presents one native or canvas surface frame.
+    ///
+    /// Returns `true` only when a frame was rendered and presented. Surface loss,
+    /// timeout, validation failure, or an unconfigured target request a redraw and
+    /// return `false`; a pending device error is retained for the recovery path.
     pub fn draw(&mut self, scene: &Scene) -> bool {
         if !self.target.is_configured() {
             return false;
@@ -191,6 +196,11 @@ impl WgpuRenderer {
     }
 
     #[cfg(not(target_family = "wasm"))]
+    /// Replaces the native surface while retaining the renderer and device.
+    ///
+    /// Surface capabilities are queried again because moving a window can change
+    /// the supported present modes. Returns an error when the adapter cannot
+    /// present to the new window.
     pub fn replace_surface<W: HasWindowHandle>(
         &mut self,
         window: &W,
@@ -243,21 +253,29 @@ impl WgpuRenderer {
         Ok(())
     }
 
+    /// Releases renderer resources while leaving the value usable for inspection.
     pub fn destroy(&mut self) {
         self.resources.take();
     }
 
+    /// Reports whether WGPU marked the shared device as lost.
     pub fn device_lost(&self) -> bool {
         self.faults
             .device_lost
             .load(std::sync::atomic::Ordering::Relaxed)
     }
 
+    /// Consumes and returns the pending redraw request, if any.
     pub fn needs_redraw(&mut self) -> bool {
         self.target.take_redraw_request()
     }
 
     #[cfg(not(target_family = "wasm"))]
+    /// Recreates the native surface and, when necessary, its lost device.
+    ///
+    /// Recovery can temporarily return an error while the driver stabilization
+    /// delay is in effect; callers should retry when the platform schedules a
+    /// redraw.
     pub fn recover<W>(&mut self, window: &W) -> anyhow::Result<()>
     where
         W: HasWindowHandle + HasDisplayHandle + std::fmt::Debug + Send + Sync + Clone + 'static,

@@ -1,3 +1,15 @@
+//! Time based and spring based motion primitives.
+//!
+//! Motion is sampled, rather than ticked: give [`Motion::sample`] an elapsed
+//! duration or [`Motion::sample_at`] two clock values and it returns the
+//! current phase, direction, progress, and activity. Durations include the
+//! configured delay and every pass; an easing function receives normalized
+//! `0..=1` local pass time and may return a finite overshoot. Spring motion has
+//! the same sampling interface, but its duration is derived from settling
+//! criteria. The [`crate::animated::Animated`] and
+//! [`crate::transition::Transition`] types use these results to retarget UI
+//! values without losing their current presentation.
+
 use std::{
     num::NonZeroU32,
     ops::{Deref, DerefMut, Sub},
@@ -8,17 +20,21 @@ use std::{
 use crate::spring::DEFAULT_SPRING_EPSILON;
 use crate::{SpringAnimation, SpringConfig, SpringState, SpringTarget};
 
-/// Creates a duration from a number of whole seconds.
+/// Creates a [`Duration`] from a number of whole seconds.
 pub const fn secs(seconds: u64) -> Duration {
     Duration::from_secs(seconds)
 }
 
-/// Creates a duration from a number of whole milliseconds.
+/// Creates a [`Duration`] from a number of whole milliseconds.
 pub const fn millis(milliseconds: u64) -> Duration {
     Duration::from_millis(milliseconds)
 }
 
 /// Animation progress is normalized before easing and may overshoot afterward.
+///
+/// Construct one with [`Progress::clamped`] when accepting external input.
+/// Easing output is validated separately and must be finite, but is allowed to
+/// fall outside the normalized interval.
 #[derive(Clone, Copy, Debug, Default, PartialEq, PartialOrd)]
 pub struct Progress(f32);
 
@@ -79,6 +95,9 @@ impl MotionDurationExt for Duration {
 pub use MotionDurationExt as DurationWithEasing;
 
 /// Maps linear progress to eased progress.
+///
+/// The function is called with normalized progress. [`Easing::sample`] does
+/// not clamp the return value, so curves such as springs can overshoot.
 #[derive(Clone)]
 pub struct Easing(Rc<dyn Fn(f32) -> f32>);
 
@@ -101,6 +120,9 @@ impl Default for Easing {
 }
 
 /// The duration and easing curve for one directional motion pass.
+///
+/// A zero duration is not a meaningful pass and is rejected by motion
+/// sampling's internal assertions; use a positive duration for public motion.
 ///
 /// Local pass time advances from zero to one. The easing function maps that
 /// local time to presentation progress and may be non-monotonic or overshoot.
@@ -358,6 +380,9 @@ pub struct SpringDescription {
 
 /// A motion with methods determined by its description type.
 #[derive(Clone, Debug)]
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Motion-941f1a62.md")]
+// docs:examples:end
 pub struct Motion<Description = DurationDescription> {
     description: Description,
 }

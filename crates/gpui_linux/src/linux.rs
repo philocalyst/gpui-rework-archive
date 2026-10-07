@@ -24,7 +24,11 @@ pub(crate) use x11::*;
 
 use std::rc::Rc;
 
-/// Returns the default platform implementation for the current OS.
+/// Creates the Linux/FreeBSD platform implementation selected by the compositor.
+///
+/// `headless` bypasses Wayland/X11 and is intended for tests or offscreen use. In graphical mode,
+/// the enabled backend is selected from the compositor environment; X11 initialization failures
+/// are reported by the platform constructor before normal event processing begins.
 pub fn current_platform(headless: bool) -> Rc<dyn gpui::Platform> {
     #[cfg(feature = "x11")]
     use anyhow::Context as _;

@@ -1,3 +1,6 @@
+//! Human-readable decimal and binary file-size formatting.
+
+/// Format `size` using SI (`KB`, `MB`) or IEC (`KiB`, `MiB`) units.
 pub fn format_file_size(size: u64, use_decimal: bool) -> String {
     if use_decimal {
         if size < 1000 {

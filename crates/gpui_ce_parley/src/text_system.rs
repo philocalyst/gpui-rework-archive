@@ -1,3 +1,9 @@
+//! Parley-backed implementation of GPUI's text shaping and layout interfaces.
+//!
+//! Layout cache keys include font generation, UTF-8 source, style runs, inline boxes, and line
+//! metrics. Re-registering fonts invalidates prior resolutions; returned ranges remain UTF-8
+//! boundaries even when shaping clusters contain multiple scalars.
+
 use crate::{
     ColorGlyphKind, FontStore, GlyphRasterizer, SwashGlyphRasterizer, SystemFonts,
     catalog::{family_names, new_font_context, register_font_blobs, resolve_face},
@@ -1371,7 +1377,11 @@ impl ParleyState {
     }
 }
 
-/// Shapes with Parley and paints exact font instances with an injected glyph rasterizer.
+/// Shapes text with Parley and paints exact font instances with an injected glyph rasterizer.
+///
+/// Font registration increments the generation used by paragraph caches. Layout and selection
+/// APIs use UTF-8 byte ranges; clusters and visual lines may map several scalars to one caret step
+/// or reorder them for bidirectional text.
 pub struct ParleyTextSystem {
     font_instances: RwLock<FontStore>,
     font_generation: AtomicU64,

@@ -15,6 +15,7 @@ use std::process::{ExitStatus, Output};
 use std::ptr;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+/// Standard stream configuration for a spawned process.
 pub enum Stdio {
     /// A new pipe should be arranged to connect the parent and child processes.
     #[default]
@@ -26,14 +27,17 @@ pub enum Stdio {
 }
 
 impl Stdio {
+    /// Capture the stream through a pipe.
     pub fn piped() -> Self {
         Self::Piped
     }
 
+    /// Inherit the parent's stream.
     pub fn inherit() -> Self {
         Self::Inherit
     }
 
+    /// Connect the stream to the platform null device.
     pub fn null() -> Self {
         Self::Null
     }
@@ -62,6 +66,7 @@ unsafe extern "C" {
 }
 
 #[derive(Debug)]
+/// Configurable macOS process command.
 pub struct Command {
     program: OsString,
     args: Vec<OsString>,
@@ -75,6 +80,7 @@ pub struct Command {
 }
 
 impl Command {
+    /// Create a command for `program`.
     pub fn new(program: impl AsRef<OsStr>) -> Self {
         Self {
             program: program.as_ref().to_owned(),
@@ -89,11 +95,13 @@ impl Command {
         }
     }
 
+    /// Append one argument.
     pub fn arg(&mut self, arg: impl AsRef<OsStr>) -> &mut Self {
         self.args.push(arg.as_ref().to_owned());
         self
     }
 
+    /// Append an iterator of arguments.
     pub fn args<I, S>(&mut self, args: I) -> &mut Self
     where
         I: IntoIterator<Item = S>,
@@ -104,16 +112,19 @@ impl Command {
         self
     }
 
+    /// Iterate over configured arguments.
     pub fn get_args(&self) -> impl Iterator<Item = &OsStr> {
         self.args.iter().map(|s| s.as_os_str())
     }
 
+    /// Set one environment variable for the child.
     pub fn env(&mut self, key: impl AsRef<OsStr>, val: impl AsRef<OsStr>) -> &mut Self {
         self.envs
             .insert(key.as_ref().to_owned(), Some(val.as_ref().to_owned()));
         self
     }
 
+    /// Set several environment variables for the child.
     pub fn envs<I, K, V>(&mut self, vars: I) -> &mut Self
     where
         I: IntoIterator<Item = (K, V)>,
@@ -127,6 +138,7 @@ impl Command {
         self
     }
 
+    /// Remove an inherited environment variable.
     pub fn env_remove(&mut self, key: impl AsRef<OsStr>) -> &mut Self {
         let key = key.as_ref().to_owned();
         if self.env_clear {
@@ -137,37 +149,44 @@ impl Command {
         self
     }
 
+    /// Start the child with an empty environment.
     pub fn env_clear(&mut self) -> &mut Self {
         self.env_clear = true;
         self.envs.clear();
         self
     }
 
+    /// Set the child's working directory.
     pub fn current_dir(&mut self, dir: impl AsRef<Path>) -> &mut Self {
         self.current_dir = Some(dir.as_ref().to_owned());
         self
     }
 
+    /// Configure standard input.
     pub fn stdin(&mut self, cfg: Stdio) -> &mut Self {
         self.stdin_cfg = Some(cfg);
         self
     }
 
+    /// Configure standard output.
     pub fn stdout(&mut self, cfg: Stdio) -> &mut Self {
         self.stdout_cfg = Some(cfg);
         self
     }
 
+    /// Configure standard error.
     pub fn stderr(&mut self, cfg: Stdio) -> &mut Self {
         self.stderr_cfg = Some(cfg);
         self
     }
 
+    /// Choose whether dropping the child handle terminates the process.
     pub fn kill_on_drop(&mut self, kill_on_drop: bool) -> &mut Self {
         self.kill_on_drop = kill_on_drop;
         self
     }
 
+    /// Spawn the configured process.
     pub fn spawn(&mut self) -> io::Result<Child> {
         let current_dir = self
             .current_dir
@@ -208,6 +227,7 @@ impl Command {
         })
     }
 
+    /// Spawn, wait for completion, and collect stdout and stderr.
     pub async fn output(&mut self) -> io::Result<Output> {
         self.stdin_cfg.get_or_insert(Stdio::null());
         self.stdout_cfg.get_or_insert(Stdio::piped());
@@ -217,21 +237,27 @@ impl Command {
         child.output().await
     }
 
+    /// Spawn and wait for the child's exit status.
     pub async fn status(&mut self) -> io::Result<ExitStatus> {
         let mut child = self.spawn()?;
         child.status().await
     }
 
+    /// Borrow the configured executable name.
     pub fn get_program(&self) -> &OsStr {
         self.program.as_os_str()
     }
 }
 
 #[derive(Debug)]
+    /// Handle to a spawned child process.
 pub struct Child {
     pid: libc::pid_t,
+    /// Child standard input, when configured as a pipe.
     pub stdin: Option<Unblock<std::fs::File>>,
+    /// Child standard output, when configured as a pipe.
     pub stdout: Option<Unblock<std::fs::File>>,
+    /// Child standard error, when configured as a pipe.
     pub stderr: Option<Unblock<std::fs::File>>,
     kill_on_drop: bool,
     status: Option<ExitStatus>,
@@ -246,10 +272,12 @@ impl Drop for Child {
 }
 
 impl Child {
+    /// Return the operating-system process identifier.
     pub fn id(&self) -> u32 {
         self.pid as u32
     }
 
+    /// Terminate the process.
     pub fn kill(&mut self) -> io::Result<()> {
         let result = unsafe { libc::kill(self.pid, libc::SIGKILL) };
         if result == -1 {
@@ -259,6 +287,7 @@ impl Child {
         }
     }
 
+    /// Poll the child status without blocking.
     pub fn try_status(&mut self) -> io::Result<Option<ExitStatus>> {
         if let Some(status) = self.status {
             return Ok(Some(status));
@@ -278,6 +307,7 @@ impl Child {
         }
     }
 
+    /// Return a future that waits for the child to exit.
     pub fn status(
         &mut self,
     ) -> impl std::future::Future<Output = io::Result<ExitStatus>> + Send + 'static {

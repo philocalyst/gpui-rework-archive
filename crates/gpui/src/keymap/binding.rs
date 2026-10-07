@@ -7,6 +7,9 @@ use crate::{
 use smallvec::SmallVec;
 
 /// A keybinding and its associated metadata, from the keymap.
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-KeyBinding-12b9082b.md")]
+// docs:examples:end
 pub struct KeyBinding {
     pub(crate) action: Box<dyn Action>,
     pub(crate) keystrokes: SmallVec<[KeybindingKeystroke; 2]>,

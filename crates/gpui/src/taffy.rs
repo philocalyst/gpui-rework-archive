@@ -1,3 +1,12 @@
+//! GPUI's Taffy-backed layout engine.
+//!
+//! This is the implementation behind [`Window::request_layout`](crate::Window::request_layout)
+//! and [`Window::request_measured_layout`](crate::Window::request_measured_layout). Applications
+//! normally interact with layout through [`Styled`](crate::Styled) methods and element callbacks.
+//! [`AvailableSpace`] distinguishes a definite constraint from an intrinsic min/max-content
+//! query; a measured element must return a size that satisfies the space passed to its measure
+//! closure. Layout IDs are frame-local handles and must not be retained as application state.
+
 use crate::{
     AbsoluteLength, App, Bounds, DefiniteLength, Display, Edges, GridTemplate, InlineContent,
     LayoutDirection, Length, Pixels, Point, Position, ResolvedDirection, SharedString, Size, Style,

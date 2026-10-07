@@ -16,7 +16,15 @@ use std::{
 
 use super::{App, AsyncWindowContext, Entity, KeystrokeEvent};
 
-/// The app context, with specialized behavior for the given entity.
+/// The app context for one entity update.
+///
+/// A `Context<T>` dereferences to [`App`] and adds operations scoped to the
+/// `Entity<T>` being constructed or updated. Store subscriptions returned from
+/// this context when they should be cancellable; call [`Subscription::detach`]
+/// only for intentionally longer-lived observers.
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-Context-0b5c5181.md")]
+// docs:examples:end
 pub struct Context<'a, T> {
     app: &'a mut App,
     entity_state: WeakEntity<T>,
@@ -58,8 +66,13 @@ impl<'a, T: 'static> Context<'a, T> {
         self.entity_state.clone()
     }
 
-    /// Arranges for the given function to be called whenever [`Context::notify`] is
-    /// called with the given entity.
+    /// Calls `on_notify` whenever `entity` is notified.
+    ///
+    /// The subscription is active immediately. Dropping it stops future calls;
+    /// the observer is also removed automatically when `T` is released.
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-Context-observe-803e9c7a.md")]
+// docs:examples:end
     pub fn observe<W>(
         &mut self,
         entity: &Entity<W>,
@@ -80,7 +93,7 @@ impl<'a, T: 'static> Context<'a, T> {
         })
     }
 
-    /// Observe changes to ourselves
+    /// Observes notifications sent by this entity.
     pub fn observe_self(
         &mut self,
         mut on_event: impl FnMut(&mut T, &mut Context<T>) + 'static,
@@ -94,7 +107,10 @@ impl<'a, T: 'static> Context<'a, T> {
         })
     }
 
-    /// Subscribe to an event type from another entity
+    /// Subscribes to typed events emitted by another entity.
+    ///
+    /// The emitter must implement [`EventEmitter<Evt>`]. The callback runs on
+    /// the foreground executor and may mutate the observing entity.
     pub fn subscribe<T2, Evt>(
         &mut self,
         entity: &Entity<T2>,
@@ -131,7 +147,10 @@ impl<'a, T: 'static> Context<'a, T> {
         })
     }
 
-    /// Register a callback to be invoked when GPUI releases this entity.
+    /// Registers a callback for the moment GPUI releases this entity.
+    ///
+    /// Release means that the last strong handle is gone and the app is cleaning
+    /// up the value; it is not the same as dropping this subscription.
     pub fn on_release(&self, on_release: impl FnOnce(&mut T, &mut App) + 'static) -> Subscription
     where
         T: 'static,
@@ -203,8 +222,10 @@ impl<'a, T: 'static> Context<'a, T> {
         })
     }
 
-    /// Arrange for the given function to be invoked whenever the application is quit.
-    /// The future returned from this callback will be polled for up to [crate::SHUTDOWN_TIMEOUT] until the app fully quits.
+    /// Runs a callback as the application begins quitting.
+    ///
+    /// The returned future is polled for at most [`crate::SHUTDOWN_TIMEOUT`].
+    /// Work that needs more time should be persisted before requesting quit.
     pub fn on_app_quit<Fut>(
         &self,
         mut on_quit: impl FnMut(&mut T, &mut Context<T>) -> Fut + 'static,
@@ -226,6 +247,9 @@ impl<'a, T: 'static> Context<'a, T> {
     }
 
     /// Tell GPUI that this entity has changed and observers of it should be notified.
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-Context-notify-d32eb388.md")]
+// docs:examples:end
     pub fn notify(&mut self) {
         self.app.notify(self.entity_state.entity_id);
     }
@@ -234,6 +258,9 @@ impl<'a, T: 'static> Context<'a, T> {
     /// The function is provided a weak handle to the entity owned by this context and a context that can be held across await points.
     /// The returned task must be held or detached.
     #[track_caller]
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-Context-spawn-b83a55ae.md")]
+// docs:examples:end
     pub fn spawn<AsyncFn, R>(&self, f: AsyncFn) -> Task<R>
     where
         T: 'static,
@@ -249,6 +276,9 @@ impl<'a, T: 'static> Context<'a, T> {
     /// Many GPUI callbacks take the form of `Fn(&E, &mut Window, &mut App)`,
     /// but it's often useful to be able to access view state in these
     /// callbacks. This method provides a convenient way to do so.
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-Context-listener-350baf86.md")]
+// docs:examples:end
     pub fn listener<E: ?Sized>(
         &self,
         f: impl Fn(&mut T, &E, &mut Window, &mut Context<T>) + 'static,

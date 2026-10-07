@@ -17,8 +17,11 @@ pub(crate) struct TabStopMap {
 
 #[derive(Debug, Clone)]
 pub enum TabStopOperation {
+    /// Insert a focus handle at the current tab-group path.
     Insert(FocusHandle),
+    /// Begin a nested group with the given tab index.
     Group(TabIndex),
+    /// End the most recently opened tab group.
     GroupEnd,
 }
 
@@ -75,6 +78,10 @@ impl Default for TabStopMap {
 }
 
 impl TabStopMap {
+    /// Records a focus handle in the current group and updates tab order.
+    ///
+    /// Handles whose `tab_stop` flag is false remain in the structural order but are skipped by
+    /// [`Self::next`] and [`Self::prev`].
     pub fn insert(&mut self, focus_handle: &FocusHandle) {
         self.insertion_history
             .push(TabStopOperation::Insert(focus_handle.clone()));
@@ -89,17 +96,22 @@ impl TabStopMap {
         self.order.insert_or_replace(order, ());
     }
 
+    /// Opens a nested tab-order group. Lower tab indices sort before higher indices.
     pub fn begin_group(&mut self, tab_index: isize) {
         self.insertion_history
             .push(TabStopOperation::Group(tab_index));
         self.current_path.0.push(tab_index);
     }
 
+    /// Closes the current tab-order group.
+    ///
+    /// Call this once for each [`Self::begin_group`] call while replaying a paint pass.
     pub fn end_group(&mut self) {
         self.insertion_history.push(TabStopOperation::GroupEnd);
         self.current_path.0.pop();
     }
 
+    /// Removes all recorded handles and groups.
     pub fn clear(&mut self) {
         *self = Self::default();
         self.current_path.0.clear();
@@ -108,6 +120,9 @@ impl TabStopMap {
         self.order = SumTree::new(());
     }
 
+    /// Returns the next enabled tab stop after `focused_id`, wrapping to the first stop.
+    ///
+    /// When `focused_id` is absent or unknown, traversal starts at the first stop.
     pub fn next(&self, focused_id: Option<&FocusId>) -> Option<FocusHandle> {
         let Some(focused_id) = focused_id else {
             let first = self.order.first()?;
@@ -145,6 +160,9 @@ impl TabStopMap {
         cursor.item()
     }
 
+    /// Returns the previous enabled tab stop before `focused_id`, wrapping to the last stop.
+    ///
+    /// When `focused_id` is absent or unknown, traversal starts at the last stop.
     pub fn prev(&self, focused_id: Option<&FocusId>) -> Option<FocusHandle> {
         let Some(focused_id) = focused_id else {
             let last = self.order.last()?;
@@ -182,6 +200,7 @@ impl TabStopMap {
         cursor.item()
     }
 
+    /// Replays structural operations, preserving their insertion and group order.
     pub fn replay(&mut self, nodes: &[TabStopOperation]) {
         for node in nodes {
             match node {
@@ -192,6 +211,7 @@ impl TabStopMap {
         }
     }
 
+    /// Returns the number of operations recorded during the current paint pass.
     pub fn paint_index(&self) -> usize {
         self.insertion_history.len()
     }

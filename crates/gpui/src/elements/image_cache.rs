@@ -10,8 +10,10 @@ use refineable::Refineable;
 use smallvec::SmallVec;
 use std::{collections::HashMap, fmt, sync::Arc};
 
-/// An image cache element, all its child img elements will use the cache specified by this element.
-/// Note that this could as simple as passing an `Entity<T: ImageCache>`
+/// Build a subtree whose [`crate::img`] elements share one image-cache provider.
+///
+/// The provider may be an `Entity<T>` where `T: ImageCache`; loading can remain pending across
+/// frames, while completed results are reused by descendants.
 pub fn image_cache(image_cache_provider: impl ImageCacheProvider) -> ImageCacheElement {
     ImageCacheElement {
         image_cache_provider: Box::new(image_cache_provider),
@@ -20,7 +22,7 @@ pub fn image_cache(image_cache_provider: impl ImageCacheProvider) -> ImageCacheE
     }
 }
 
-/// A dynamically typed image cache, which can be used to store any image cache
+/// A type-erased image-cache handle for generic element code.
 #[derive(Clone)]
 pub struct AnyImageCache {
     image_cache: AnyEntity,
@@ -42,8 +44,10 @@ impl<I: ImageCache> From<Entity<I>> for AnyImageCache {
 }
 
 impl AnyImageCache {
-    /// Load an image given a resource
-    /// returns the result of loading the image if it has finished loading, or None if it is still loading
+    /// Poll the cache for `resource`.
+    ///
+    /// Returns `None` while loading is in progress, or the cached image/result once loading has
+    /// completed. A returned error is the provider's terminal result for that request.
     pub fn load(
         &self,
         resource: &Resource,

@@ -6,6 +6,10 @@ use smallvec::SmallVec;
 use std::{any::Any, fmt::Debug, ops::Deref, path::PathBuf};
 
 /// An event from a platform input source.
+///
+/// Event values are converted into [`PlatformInput`] before GPUI dispatches them. Application
+/// code normally receives the concrete event through an element listener rather than calling this
+/// trait directly.
 pub trait InputEvent: Sealed + 'static {
     /// Convert this event into the platform input enum.
     fn to_platform_input(self) -> PlatformInput;
@@ -20,16 +24,16 @@ pub trait MouseEvent: InputEvent {}
 /// A gesture event from the platform.
 pub trait GestureEvent: InputEvent {}
 
-/// The key down event equivalent for the platform.
+/// A key press, including repeated key-down notifications.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct KeyDownEvent {
     /// The keystroke that was generated.
     pub keystroke: Keystroke,
 
-    /// Whether the key is currently held down.
+    /// Whether the platform reports this as an auto-repeat while the key remains held.
     pub is_held: bool,
 
-    /// Whether to prefer character input over keybindings for this keystroke.
+    /// Whether text insertion should take priority over keymap dispatch.
     /// In some cases, like AltGr on Windows, modifiers are significant for character input.
     pub prefer_character_input: bool,
 }
@@ -42,7 +46,7 @@ impl InputEvent for KeyDownEvent {
 }
 impl KeyEvent for KeyDownEvent {}
 
-/// The key up event equivalent for the platform.
+/// A key release event.
 #[derive(Clone, Debug)]
 pub struct KeyUpEvent {
     /// The keystroke that was released.
@@ -57,12 +61,12 @@ impl InputEvent for KeyUpEvent {
 }
 impl KeyEvent for KeyUpEvent {}
 
-/// The modifiers changed event equivalent for the platform.
+/// A change to modifier or Caps Lock state without a key press or release.
 #[derive(Clone, Debug, Default)]
 pub struct ModifiersChangedEvent {
-    /// The new state of the modifier keys
+    /// The new modifier state.
     pub modifiers: Modifiers,
-    /// The new state of the capslock key
+    /// The new Caps Lock state.
     pub capslock: Capslock,
 }
 
@@ -82,8 +86,11 @@ impl Deref for ModifiersChangedEvent {
     }
 }
 
-/// The phase of a touch motion event.
-/// Based on the winit enum of the same name.
+/// The phase of a touch contact.
+///
+/// A contact begins with [`TouchPhase::Started`], may produce any number of [`TouchPhase::Moved`]
+/// events, and ends with [`TouchPhase::Ended`] or [`TouchPhase::Cancelled`]. Cancellation means the platform took ownership; gesture recognizers
+/// must release any provisional state without treating the contact as a completed action.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum TouchPhase {
     /// The touch started.
@@ -143,7 +150,7 @@ impl InputEvent for TouchEvent {
     }
 }
 
-/// A mouse down event from the platform
+/// A mouse-button press from the platform.
 #[derive(Clone, Debug, Default)]
 pub struct MouseDownEvent {
     /// Which mouse button was pressed.
@@ -171,7 +178,7 @@ impl InputEvent for MouseDownEvent {
 impl MouseEvent for MouseDownEvent {}
 
 impl MouseDownEvent {
-    /// Returns true if this mouse up event should focus the element.
+    /// Returns `true` when this press conventionally focuses the target (currently left button).
     pub fn is_focusing(&self) -> bool {
         match self.button {
             MouseButton::Left => true,
@@ -180,7 +187,7 @@ impl MouseDownEvent {
     }
 }
 
-/// A mouse up event from the platform
+/// A mouse-button release from the platform.
 #[derive(Clone, Debug, Default)]
 pub struct MouseUpEvent {
     /// Which mouse button was released.
@@ -206,7 +213,7 @@ impl InputEvent for MouseUpEvent {
 impl MouseEvent for MouseUpEvent {}
 
 impl MouseUpEvent {
-    /// Returns true if this mouse up event should focus the element.
+    /// Returns `true` when this release conventionally focuses the target (currently left button).
     pub fn is_focusing(&self) -> bool {
         match self.button {
             MouseButton::Left => true,
@@ -215,7 +222,7 @@ impl MouseUpEvent {
     }
 }
 
-/// A click event, generated when a mouse button is pressed and released.
+/// A click assembled from a matching mouse press and release.
 #[derive(Clone, Debug, Default)]
 pub struct MouseClickEvent {
     /// The mouse event when the button was pressed.
@@ -237,8 +244,9 @@ pub enum PressureStage {
     Force,
 }
 
-/// A mouse pressure event from the platform. Generated when a force-sensitive trackpad is pressed hard.
-/// Currently only implemented for macOS trackpads.
+/// A pressure change from a force-sensitive pointing device.
+///
+/// Support is platform-dependent; currently GPUI produces this event for macOS trackpads.
 #[derive(Debug, Clone, Default)]
 pub struct MousePressureEvent {
     /// Pressure of the current stage as a float between 0 and 1

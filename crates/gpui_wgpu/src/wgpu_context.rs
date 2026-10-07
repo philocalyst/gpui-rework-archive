@@ -181,10 +181,15 @@ struct SelectedAdapter {
     device: CreatedDevice,
 }
 
+/// Device-level WGPU state shared by one or more render targets.
 pub struct WgpuContext {
+    /// Instance used to create the adapter and device.
     pub instance: wgpu::Instance,
+    /// Selected physical adapter.
     pub adapter: wgpu::Adapter,
+    /// Device used for resource creation and command encoding.
     pub device: Arc<wgpu::Device>,
+    /// Queue used to submit encoded GPU work.
     pub queue: Arc<wgpu::Queue>,
     backend: WgpuBackend,
     dual_source_blending: bool,
@@ -203,14 +208,19 @@ pub enum RendererTier {
     WebGl2,
 }
 
+/// Backend family selected for the WGPU device.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum WgpuBackend {
+    /// Browser WebGPU selected the adapter.
     BrowserWebGpu,
+    /// OpenGL or WebGL selected the adapter.
     Gl,
+    /// A native backend selected the adapter.
     Native(wgpu::Backend),
 }
 
 #[cfg(target_family = "wasm")]
+/// Preferred browser transport when creating a WGPU context.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum WebBackendPreference {
     #[default]
@@ -220,8 +230,11 @@ pub enum WebBackendPreference {
 }
 
 #[cfg(target_family = "wasm")]
+/// Graphics context and surface prepared from the selected web backend.
 pub struct PreparedWebGraphics {
+    /// Device-level context used by the renderer.
     pub context: WgpuContext,
+    /// Canvas surface associated with the context.
     pub surface: wgpu::Surface<'static>,
 }
 
@@ -244,7 +257,9 @@ impl raw_window_handle::HasDisplayHandle for WebDisplaySource {
 
 #[derive(Clone, Copy)]
 pub struct CompositorGpuHint {
+    /// Adapter vendor identifier used as a selection hint.
     pub vendor_id: u32,
+    /// Adapter device identifier used as a selection hint.
     pub device_id: u32,
 }
 
@@ -933,22 +948,27 @@ impl WgpuContext {
             rgba_features.allowed_usages,
         ))
     }
+    /// Returns the backend selected for this context.
     pub fn backend(&self) -> WgpuBackend {
         self.backend
     }
 
+    /// Returns whether this context uses the WebGL2 data-texture transport.
     pub fn uses_webgl_instance_data(&self) -> bool {
         matches!(self.backend, WgpuBackend::Gl) && cfg!(target_family = "wasm")
     }
 
+    /// Returns whether dual-source blending is available for subpixel text.
     pub fn supports_dual_source_blending(&self) -> bool {
         self.dual_source_blending
     }
 
+    /// Returns the atlas color texture format selected for this device.
     pub fn color_texture_format(&self) -> wgpu::TextureFormat {
         self.color_texture_format
     }
 
+    /// Returns the scene-data transport tier selected for this device.
     pub fn renderer_tier(&self) -> RendererTier {
         self.renderer_tier
     }

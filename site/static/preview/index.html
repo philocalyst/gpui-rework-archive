@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GPUI preview</title>
+    <style>html,body{height:100%;margin:0}body{background:#f7f6f2;color:#292824;font:15px system-ui,sans-serif}#status{padding:1rem}</style>
+  </head>
+  <body>
+    <div id="status">Preparing the WebAssembly preview…</div>
+    <script type="module">
+      const status = document.querySelector("#status");
+      try {
+        const build = await fetch("./build.json", { cache: "no-store" });
+        if (!build.ok) throw new Error("preview bundle metadata is missing");
+        const metadata = await build.json();
+        const entry = metadata.entry || "gpui_documentation_examples.js";
+        const module = await import(`./pkg/${entry}`);
+        const wasm = `./pkg/${entry.replace(/\.js$/, "_bg.wasm")}`;
+        await module.default({ module_or_path: wasm });
+      } catch (error) {
+        status.textContent = `Preview unavailable: ${error.message}`;
+        window.parent.postMessage({ type: "gpui-preview-error", message: String(error) }, "*");
+      }
+    </script>
+  </body>
+</html>

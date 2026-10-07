@@ -44,7 +44,11 @@ fn movements_oppose(left: Point<Pixels>, right: Point<Pixels>) -> bool {
     f32::from(left.x) * f32::from(right.x) + f32::from(left.y) * f32::from(right.y) < 0.
 }
 
-/// Tracks the dominant axis across the events in a scroll gesture.
+/// Tracks and filters the dominant axis of a scroll gesture.
+///
+/// The first non-zero delta chooses an axis. Small contradictory movement remains locked to that
+/// axis; a sufficiently large perpendicular movement unlocks the gesture so the next event can
+/// choose again. [`TouchPhase::Ended`] and [`TouchPhase::Cancelled`] reset the tracker.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct OngoingScroll {
     last_event: Option<Instant>,
@@ -107,13 +111,13 @@ impl OngoingScroll {
     }
 }
 
-/// Feel constants consumed by gesture recognizers. Provided on a best-effort
-/// basis, depending on each platform's support, defaulting to GPUI's own
-/// (iOS flavored) values
+/// Tunable thresholds and physics used by touch gesture recognizers.
+///
+/// Platform values are best-effort. [`Default`] uses GPUI's iOS-like scroll feel and thresholds;
+/// callers embedding a recognizer can replace individual fields for a product's input model.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct GestureTuning {
-    /// Distance a touch may travel before it stops being a potential tap and
-    /// becomes a pan/drag.
+    /// Distance a touch may travel before it stops being a potential tap and becomes a pan/drag.
     pub touch_slop: Pixels,
     /// Maximum interval between taps for them to accumulate a tap count.
     pub multi_tap_interval: Duration,
@@ -173,14 +177,14 @@ pub enum ScrollPhysics {
 }
 
 impl ScrollPhysics {
-    /// iOS scroll feel: `UIScrollView`'s normal deceleration rate.
+    /// Returns iOS's normal `UIScrollView` deceleration rate.
     pub fn ios() -> Self {
         Self::Exponential {
             decay_per_ms: 0.998,
         }
     }
 
-    /// Android scroll feel: `OverScroller` with stock friction, at Android's
+    /// Returns Android's stock `OverScroller` friction model at Android's
     /// nominal density of 160 density-independent pixels per inch — the
     /// right pairing when fling distances are in logical pixels. Platforms
     /// that fling in physical pixels, or know the display's true density in

@@ -1,3 +1,7 @@
+//! Focus-aware caret visibility and blink scheduling for editable text.
+//!
+//! Blinking is opt-in: a zero interval keeps the caret visible without scheduling timers.
+
 #[cfg(test)]
 use gpui::{AppContext, TestAppContext};
 
