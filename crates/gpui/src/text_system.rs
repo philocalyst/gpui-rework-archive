@@ -166,6 +166,12 @@ impl TextSystem {
         }
     }
 
+    /// Shares this application's configured shaping and rasterization backend,
+    /// including fonts registered by the host application.
+    pub fn platform_backend(&self) -> Arc<dyn PlatformTextSystem> {
+        self.platform_text_system.clone()
+    }
+
     /// Return the font family names currently visible to the backend.
     pub fn all_font_names(&self) -> Vec<String> {
         self.platform_text_system.all_font_names()
@@ -342,8 +348,13 @@ impl TextSystem {
         ValidatedRasterizedGlyph::new(glyph)
     }
 
+    pub(crate) fn prewarm_glyphs(&self, requests: &mut dyn Iterator<Item = GlyphRasterRequest>) {
+        self.platform_text_system.prewarm_glyphs(requests);
+    }
+
     /// Normalizes a requested scene color and render mode into the settings which affect the
     /// cached glyph raster.
+    #[cfg(test)]
     pub(crate) fn prepare_raster_style(
         &self,
         font_id: FontId,
@@ -351,14 +362,20 @@ impl TextSystem {
         scene_color: Hsla,
         requested_mode: GlyphRenderMode,
     ) -> PreparedRasterStyle {
-        self.platform_text_system
-            .prepare_raster_style(RasterStyleRequest {
-                font_id,
-                glyph_id,
-                scene_color: crate::hsla_to_rgba(scene_color),
-                requested_mode,
-                foreground_dependency: ForegroundDependency::Full,
-            })
+        self.prepare_raster_style_request(RasterStyleRequest {
+            font_id,
+            glyph_id,
+            scene_color: crate::hsla_to_rgba(scene_color),
+            requested_mode,
+            foreground_dependency: ForegroundDependency::Full,
+        })
+    }
+
+    pub(crate) fn prepare_raster_style_request(
+        &self,
+        request: RasterStyleRequest,
+    ) -> PreparedRasterStyle {
+        self.platform_text_system.prepare_raster_style(request)
     }
 
     /// Returns the text rendering mode recommended by the platform for the given font and size.
@@ -848,6 +865,34 @@ pub struct RenderGlyphParams {
     pub scale_factor: f32,
     /// Normalized cache-relevant rendering policy.
     pub raster_style: PreparedRasterStyle,
+}
+
+/// A glyph request before the platform selects its cache-relevant raster style.
+/// Platform bridges can prepare several glyphs together using the same requests
+/// that ordinary window painting will subsequently consume.
+#[derive(Clone, Copy, Debug, serde::Serialize, serde::Deserialize)]
+pub struct GlyphRasterRequest {
+    /// Font, glyph, foreground, and requested render mode.
+    pub style: RasterStyleRequest,
+    /// Logical font size.
+    pub font_size: Pixels,
+    /// Quantized placement within a device pixel.
+    pub subpixel_variant: Point<u8>,
+    /// Device pixels per logical pixel.
+    pub scale_factor: f32,
+}
+impl GlyphRasterRequest {
+    /// Resolves this request to the ordinary glyph atlas cache key.
+    pub fn with_style(self, raster_style: PreparedRasterStyle) -> RenderGlyphParams {
+        RenderGlyphParams {
+            font_id: self.style.font_id,
+            glyph_id: self.style.glyph_id,
+            font_size: self.font_size,
+            subpixel_variant: self.subpixel_variant,
+            scale_factor: self.scale_factor,
+            raster_style,
+        }
+    }
 }
 
 /// The kind of glyph image requested from a rasterizer.

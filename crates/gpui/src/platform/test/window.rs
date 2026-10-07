@@ -48,6 +48,7 @@ pub(crate) struct TestWindowState {
     text_input_state_changes: Vec<TextInputStateChange>,
     visible: bool,
     is_fullscreen: bool,
+    background_appearance: WindowBackgroundAppearance,
     appearance: WindowAppearance,
     external_drag_files: Vec<(PathBuf, bool)>,
     start_external_drag_result: bool,
@@ -97,6 +98,7 @@ impl TestWindow {
             title: Default::default(),
             edited: false,
             document_path: None,
+            background_appearance: WindowBackgroundAppearance::Opaque,
             should_close_handler: None,
             hit_test_window_control_callback: None,
             input_callback: None,
@@ -338,11 +340,15 @@ impl PlatformWindow for TestWindow {
     }
 
     fn background_appearance(&self) -> WindowBackgroundAppearance {
-        WindowBackgroundAppearance::Opaque
+        self.0.lock().background_appearance
     }
 
     fn is_subpixel_rendering_supported(&self) -> bool {
-        false
+        self.0
+            .lock()
+            .platform
+            .upgrade()
+            .is_some_and(|platform| platform.window_subpixel_rendering.get())
     }
 
     fn set_title(&mut self, title: &str) {
@@ -351,7 +357,9 @@ impl PlatformWindow for TestWindow {
 
     fn set_app_id(&mut self, _app_id: &str) {}
 
-    fn set_background_appearance(&self, _background: WindowBackgroundAppearance) {}
+    fn set_background_appearance(&self, background: WindowBackgroundAppearance) {
+        self.0.lock().background_appearance = background;
+    }
 
     fn set_visible(&self, visible: bool) {
         self.0.lock().visible = visible;

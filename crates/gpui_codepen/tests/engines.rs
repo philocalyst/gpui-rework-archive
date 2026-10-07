@@ -317,3 +317,77 @@ fn profile_real_gpui_frames() {
     assert!(reply.frame.is_some(), "{}", reply.diagnostics);
     println!("Text lesson: {} ms", reply.elapsed_ms);
 }
+
+#[test]
+#[ignore = "requires setup.py and full vendored Miri"]
+fn interpreted_scene_matches_native_gpui_platform_text() {
+    use gpui::{prelude::*, *};
+    struct View;
+    impl Render for View {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            div()
+                .size_full()
+                .p_4()
+                .bg(rgb(0xffffff))
+                .text_color(rgb(0x24362c))
+                .child("Platform text Aé😀")
+        }
+    }
+    struct CaptureOnly(Arc<SceneAtlas>);
+    impl PlatformHeadlessRenderer for CaptureOnly {
+        fn render_scene_to_image(
+            &mut self,
+            _: &Scene,
+            _: Size<DevicePixels>,
+        ) -> anyhow::Result<image::RgbaImage> {
+            anyhow::bail!("capture only")
+        }
+        fn render_scene(&mut self, _: &Scene, _: Size<DevicePixels>) -> anyhow::Result<()> {
+            Ok(())
+        }
+        fn sprite_atlas(&self) -> Arc<dyn PlatformAtlas> {
+            self.0.clone()
+        }
+    }
+    let atlas = Arc::new(SceneAtlas::new());
+    let captured = atlas.clone();
+    let mut native = HeadlessAppContext::with_platform(
+        gpui_platform::text_system().unwrap(),
+        Arc::new(()),
+        move || Some(Box::new(CaptureOnly(captured.clone()))),
+    );
+    let viewport = size(px(400.), px(250.));
+    let window = native
+        .open_window_with_scale_factor(viewport, 2., |_, cx| cx.new(|_| View))
+        .unwrap();
+    let expected = native
+        .capture_scene(window.into(), |tile| atlas.resolve(tile))
+        .unwrap();
+    let source = r#"use gpui::{*, prelude::*};
+struct View;
+impl Render for View {
+ fn render(&mut self,_:&mut Window,_:&mut Context<Self>)->impl IntoElement {
+  div().size_full().p_4().bg(rgb(0xffffff)).text_color(rgb(0x24362c)).child("Platform text Aé😀")
+ }
+}
+fn component(_:&mut Window,cx:&mut App)->Entity<View>{cx.new(|_|View)}"#;
+    let mut runtime = Runtime::native().unwrap();
+    let reply = execute(
+        &mut runtime,
+        1,
+        source,
+        PreviewContext {
+            viewport,
+            scale_factor: 2.,
+            ..Default::default()
+        },
+    );
+    let actual = reply.frame.expect(&reply.diagnostics).scene;
+    let atlas = SceneAtlas::from_captured_bitmaps(actual.bitmaps()).unwrap();
+    let actual =
+        SceneCapture::capture(&actual.to_scene().unwrap(), |tile| atlas.resolve(tile)).unwrap();
+    assert_eq!(
+        actual, expected,
+        "interpreted GPUI must preserve native layout, styles, placements, and glyph pixels"
+    );
+}

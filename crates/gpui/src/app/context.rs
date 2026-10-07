@@ -930,7 +930,16 @@ impl<'a, T: 'static> Context<'a, T> {
         subscription
     }
 
-    /// Register a callback to be invoked when the given Action type is dispatched to the window.
+    /// Registers an entity callback at the current action-dispatch node.
+    ///
+    /// Call this during an element's paint phase. The listener belongs to the
+    /// frame being built and must be registered again when that element is
+    /// redrawn. `action_type` selects the action; `phase` distinguishes capture
+    /// from bubbling. Prefer [`InteractiveElement::on_action`](crate::InteractiveElement::on_action)
+    /// for ordinary view handlers.
+    ///
+    /// The callback holds this entity weakly and skips delivery after release.
+    /// See [`Window::on_action`] for the underlying dispatch registration.
     pub fn on_action(
         &mut self,
         action_type: TypeId,
@@ -947,7 +956,12 @@ impl<'a, T: 'static> Context<'a, T> {
         });
     }
 
-    /// Move focus to the current view, assuming it implements [`Focusable`].
+    /// Focuses this entity after the current update has released its borrow.
+    ///
+    /// Deferral allows GPUI to read the entity's [`Focusable::focus_handle`]
+    /// without recursively borrowing it. The queued callback retains a strong
+    /// handle until it runs. Attach the focus handle to the view's rendered
+    /// element with [`track_focus`](crate::InteractiveElement::track_focus).
     pub fn focus_self(&mut self, window: &mut Window)
     where
         T: Focusable,

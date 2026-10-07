@@ -68,10 +68,32 @@ pub fn run<V: Render + 'static>(build: impl FnOnce(&mut Window, &mut App) -> Ent
                 wire::decode_value(&buffer[..len]).expect("invalid GPUI input");
             input.validate().expect("invalid GPUI viewport");
             let fresh = window.is_none();
-            let handle = *window.get_or_insert_with(|| {
-                app.open_window_with_scale_factor(input.viewport, input.scale_factor, build.take().unwrap())
-                    .expect("GPUI window")
+            app.set_subpixel_rendering_supported(input.subpixel_rendering);
+            app.update(|cx| {
+                if cx.text_rendering_mode() != input.text_rendering_mode {
+                    cx.set_text_rendering_mode(input.text_rendering_mode);
+                }
             });
+            let handle = *window.get_or_insert_with(|| {
+                app.open_window_with_scale_factor(
+                    input.viewport,
+                    input.scale_factor,
+                    build.take().unwrap(),
+                )
+                .expect("GPUI window")
+            });
+            app.update_window(handle.into(), |_, window, cx| {
+                let background = if input.transparent_window {
+                    WindowBackgroundAppearance::Transparent
+                } else {
+                    WindowBackgroundAppearance::Opaque
+                };
+                if window.background_appearance() != background {
+                    window.set_background_appearance(background);
+                    cx.refresh_windows();
+                }
+            })
+            .expect("GPUI text coverage policy");
             if previous != Some((input.viewport, input.scale_factor)) {
                 let (size, scale) = previous.unwrap_or((input.viewport, input.scale_factor));
                 if scale != input.scale_factor {
@@ -86,8 +108,7 @@ pub fn run<V: Render + 'static>(build: impl FnOnce(&mut Window, &mut App) -> Ent
             }
             profile(3);
             if fresh {
-                app.draw_window(handle.into())
-                    .expect("GPUI initial frame");
+                app.draw_window(handle.into()).expect("GPUI initial frame");
             }
             if !fresh && input.elapsed_ms > 0 {
                 app.advance_clock(Duration::from_millis(input.elapsed_ms.min(60_000)));
@@ -125,9 +146,14 @@ pub fn run<V: Render + 'static>(build: impl FnOnce(&mut Window, &mut App) -> Ent
             app.run_until_parked();
             app.draw_window_if_dirty(handle.into()).expect("GPUI draw");
             profile(5);
+            let mut live_tiles = collections::HashSet::default();
             let scene = app
-                .capture_live_scene(handle.into(), |tile| atlas.resolve(tile))
+                .capture_live_scene(handle.into(), |tile| {
+                    live_tiles.insert(tile.texture_id);
+                    atlas.resolve(tile)
+                })
                 .expect("GPUI scene capture");
+            atlas.retain_frame_tiles(&live_tiles);
             profile(6);
             let bytes = wire::encode(&Frame {
                 version: PROTOCOL_VERSION,

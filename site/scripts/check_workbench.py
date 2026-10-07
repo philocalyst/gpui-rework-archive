@@ -34,7 +34,7 @@ def evaluate(base, session, generation, source, *, restart=False):
     diagnostics = data[32:32 + diagnostics_len].decode()
     frame = data[32 + diagnostics_len:]
     if frame:
-        assert struct.unpack('<I', frame[:4])[0] == 7, 'unexpected GPUI frame format'
+        assert struct.unpack('<I', frame[:4])[0] == 8, 'unexpected GPUI frame format'
     return diagnostics, frame, elapsed
 
 

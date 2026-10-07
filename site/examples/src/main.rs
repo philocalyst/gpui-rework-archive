@@ -26,6 +26,8 @@ mod text_hit_testing;
 #[cfg(target_family = "wasm")]
 mod components;
 #[cfg(target_family = "wasm")]
+mod host;
+#[cfg(target_family = "wasm")]
 mod workbench;
 
 fn main() {
@@ -35,6 +37,11 @@ fn main() {
         .unwrap_or_default();
     #[cfg(not(target_family = "wasm"))]
     let example = std::env::args().nth(1).unwrap_or_default();
+    #[cfg(target_family = "wasm")]
+    if let Some(slug) = example.trim_start_matches('#').strip_prefix("host/") {
+        host::run(slug);
+        return;
+    }
     #[cfg(target_family = "wasm")]
     if let Some(slug) = example.trim_start_matches('#').strip_prefix("edit/") {
         workbench::run(slug);

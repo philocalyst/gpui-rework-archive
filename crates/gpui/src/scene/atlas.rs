@@ -3,7 +3,7 @@ use crate::{
     GlyphAtlasEntry, PlatformAtlas, RenderGlyphParams, Size, TileId, ValidatedRasterizedGlyph,
 };
 use anyhow::{Context, Result, ensure};
-use collections::HashMap;
+use collections::{HashMap, HashSet};
 use std::{
     borrow::Cow,
     sync::{Arc, Mutex},
@@ -26,6 +26,7 @@ struct SceneAtlasData {
     ids_by_key: HashMap<AtlasKey, AtlasTile>,
     ids_by_glyph: HashMap<RenderGlyphParams, GlyphAtlasEntry>,
     next_by_kind: [u32; 3],
+    bytes: usize,
 }
 
 impl SceneAtlas {
@@ -53,6 +54,7 @@ impl SceneAtlas {
                 },
                 Arc::new(bitmap.clone()),
             );
+            data.bytes += bitmap.bytes.len();
             let next = &mut data.next_by_kind[kind_slot(bitmap.kind)];
             *next = (*next).max(index as u32 + 1);
         }
@@ -78,7 +80,10 @@ impl SceneAtlas {
         let mut data = self.data.lock().unwrap();
         data.next_by_kind[kind_slot(texture_id.kind)] =
             data.next_by_kind[kind_slot(texture_id.kind)].max(texture_id.index + 1);
-        data.bitmaps.insert(texture_id, Arc::new(bitmap));
+        data.bytes += bitmap.bytes.len();
+        if let Some(previous) = data.bitmaps.insert(texture_id, Arc::new(bitmap)) {
+            data.bytes -= previous.bytes.len();
+        }
         Ok(())
     }
 
@@ -117,6 +122,32 @@ impl SceneAtlas {
             "CPU atlas texture slot is empty"
         );
         Ok(bitmap.clone())
+    }
+
+    /// Bounds cached resources after a frame has been captured. Tiles referenced
+    /// by that frame stay valid for GPUI's next-frame paint reuse. Captured frames
+    /// and shared bitmap leases own their pixels independently of this cache.
+    /// A single live scene can exceed the cache budget; its resources are never
+    /// discarded merely to meet a limit.
+    pub fn retain_frame_tiles(&self, live: &HashSet<AtlasTextureId>) {
+        const MAX_BYTES: usize = 8 * 1024 * 1024;
+        const MAX_ENTRIES: usize = 4096;
+        let mut data = self.data.lock().unwrap();
+        if data.bytes <= MAX_BYTES
+            && data.ids_by_key.len() <= MAX_ENTRIES
+            && data.ids_by_glyph.len() <= MAX_ENTRIES
+        {
+            return;
+        }
+        data.bitmaps.retain(|id, _| live.contains(id));
+        data.ids_by_key
+            .retain(|_, tile| live.contains(&tile.texture_id));
+        data.ids_by_glyph.retain(|_, entry| {
+            entry
+                .tile
+                .is_some_and(|tile| live.contains(&tile.texture_id))
+        });
+        data.bytes = data.bitmaps.values().map(|bitmap| bitmap.bytes.len()).sum();
     }
 
     fn upload(&self, key: &AtlasKey, size: Size<DevicePixels>, bytes: &[u8]) -> Result<AtlasTile> {
@@ -159,6 +190,7 @@ impl SceneAtlas {
                 bytes: bytes.to_vec(),
             }),
         );
+        data.bytes += bytes.len();
         data.ids_by_key.insert(key.clone(), tile);
         Ok(tile)
     }
@@ -222,7 +254,9 @@ impl PlatformAtlas for SceneAtlas {
     fn remove(&self, key: &AtlasKey) {
         let mut data = self.data.lock().unwrap();
         if let Some(tile) = data.ids_by_key.remove(key) {
-            data.bitmaps.remove(&tile.texture_id);
+            if let Some(bitmap) = data.bitmaps.remove(&tile.texture_id) {
+                data.bytes -= bitmap.bytes.len();
+            }
         }
         if let AtlasKey::Glyph { params, .. } = key {
             data.ids_by_glyph.remove(params);
@@ -243,5 +277,78 @@ fn channels(kind: AtlasTextureKind) -> usize {
         1
     } else {
         4
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{
+        FontId, GlyphId, GlyphRenderMode, PreparedRasterStyle, RasterizedGlyph,
+        RasterizedGlyphFormat, point, px, size,
+    };
+
+    #[test]
+    fn changing_glyph_variants_keep_live_tiles_and_bound_cached_pixels() {
+        let atlas = SceneAtlas::new();
+        let mut previous_lease: Option<(Arc<CapturedBitmap>, Vec<u8>)> = None;
+        for variant in 0..1000 {
+            let params = RenderGlyphParams {
+                font_id: FontId(0),
+                glyph_id: GlyphId(variant),
+                font_size: px(variant as f32 + 10.),
+                subpixel_variant: point(0, 0),
+                scale_factor: 1.,
+                raster_style: PreparedRasterStyle::independent(GlyphRenderMode::Grayscale),
+            };
+            let pixels = vec![(variant % 255) as u8; 128 * 128];
+            let entry = atlas
+                .get_or_insert_glyph_with(&params, &mut || {
+                    ValidatedRasterizedGlyph::new(RasterizedGlyph {
+                        bounds: Bounds::new(
+                            point(DevicePixels(0), DevicePixels(0)),
+                            size(DevicePixels(128), DevicePixels(128)),
+                        ),
+                        size: size(DevicePixels(128), DevicePixels(128)),
+                        format: RasterizedGlyphFormat::AlphaMask,
+                        pixels: pixels.clone(),
+                    })
+                })
+                .unwrap();
+            let tile = entry.tile.unwrap();
+            let current = atlas.resolve_shared(tile).unwrap();
+            atlas.retain_frame_tiles(&HashSet::from_iter([tile.texture_id]));
+            assert_eq!(atlas.resolve(tile).unwrap().bytes, pixels);
+            assert!(atlas.data.lock().unwrap().bytes <= 8 * 1024 * 1024);
+            if let Some((lease, expected)) = previous_lease.take() {
+                assert_eq!(lease.bytes, expected);
+            }
+            previous_lease = Some((current, pixels));
+        }
+        assert!(atlas.data.lock().unwrap().ids_by_glyph.len() <= 512);
+    }
+
+    #[test]
+    fn empty_glyph_variants_do_not_accumulate_without_bitmaps() {
+        let atlas = SceneAtlas::new();
+        for variant in 0..9000 {
+            let params = RenderGlyphParams {
+                font_id: FontId(0),
+                glyph_id: GlyphId(variant),
+                font_size: px(12.),
+                subpixel_variant: point(0, 0),
+                scale_factor: 1.,
+                raster_style: PreparedRasterStyle::independent(GlyphRenderMode::Grayscale),
+            };
+            atlas
+                .get_or_insert_glyph_with(&params, &mut || {
+                    ValidatedRasterizedGlyph::new(RasterizedGlyph::empty(
+                        RasterizedGlyphFormat::AlphaMask,
+                    ))
+                })
+                .unwrap();
+            atlas.retain_frame_tiles(&HashSet::default());
+            assert!(atlas.data.lock().unwrap().ids_by_glyph.len() <= 4096);
+        }
     }
 }

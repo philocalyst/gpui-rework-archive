@@ -8,6 +8,28 @@ pub use gpui::Platform;
 
 use std::rc::Rc;
 
+/// Creates the current platform's text backend independently of a UI event loop.
+/// This lets interpreter and rendering services use the same fonts, shaping,
+/// rasterizer, and fallback policy as ordinary platform windows.
+pub fn text_system() -> gpui::Result<std::sync::Arc<dyn gpui::PlatformTextSystem>> {
+    #[cfg(target_os = "macos")]
+    {
+        Ok(gpui_macos::text_system())
+    }
+    #[cfg(target_os = "windows")]
+    {
+        gpui_windows::text_system()
+    }
+    #[cfg(any(target_os = "linux", target_os = "freebsd"))]
+    {
+        Ok(gpui_linux::current_platform(true).text_system())
+    }
+    #[cfg(target_family = "wasm")]
+    {
+        Ok(current_platform(true).text_system())
+    }
+}
+
 /// Returns a background executor for the current platform.
 ///
 /// This constructs the selected backend in headless mode to obtain its executor. Reuse the

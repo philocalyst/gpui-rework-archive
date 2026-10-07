@@ -56,12 +56,12 @@ use crate::util::FluentBuilder;
 use crate::{
     Action, AnyWindowHandle, App, AsyncWindowContext, BackgroundExecutor, Bounds,
     DEFAULT_WINDOW_SIZE, DevicePixels, DispatchEventResult, Edges, ExternalDragPayload, Font,
-    FontId, FontMetrics, ForegroundExecutor, GlyphAtlasEntry, GlyphId, GpuSpecs, ImageSource,
-    InlineLayout, InlineLayoutRequest, Keymap, LineLayout, Pixels, PlatformGestures, PlatformInput,
-    Point, PreparedRasterStyle, Priority, RasterStyleRequest, RasterizedGlyph,
-    RasterizedGlyphFormat, RenderGlyphParams, RenderImage, RenderImageParams, RenderSvgParams,
-    Scene, SharedString, Size, SvgRenderer, SystemWindowTab, Task, TextLayoutRequest,
-    ValidatedRasterizedGlyph, Window, WindowControlArea, hash, point, px,
+    FontId, FontMetrics, ForegroundExecutor, GlyphAtlasEntry, GlyphId, GlyphRasterRequest,
+    GpuSpecs, ImageSource, InlineLayout, InlineLayoutRequest, Keymap, LineLayout, Pixels,
+    PlatformGestures, PlatformInput, Point, PreparedRasterStyle, Priority, RasterStyleRequest,
+    RasterizedGlyph, RasterizedGlyphFormat, RenderGlyphParams, RenderImage, RenderImageParams,
+    RenderSvgParams, Scene, SharedString, Size, SvgRenderer, SystemWindowTab, Task,
+    TextLayoutRequest, ValidatedRasterizedGlyph, Window, WindowControlArea, hash, point, px,
 };
 #[cfg(any(target_os = "linux", target_os = "freebsd"))]
 use anyhow::bail;
@@ -1431,6 +1431,10 @@ pub trait PlatformTextSystem: Send + Sync {
     fn glyph_for_char(&self, font_id: FontId, ch: char) -> Option<GlyphId>;
     /// Rasterize a glyph, including its atlas placement and pixels.
     fn rasterize_glyph(&self, params: &RenderGlyphParams) -> Result<RasterizedGlyph>;
+    /// Optionally prepares a lazy batch for subsequent ordinary glyph painting.
+    /// The default does not consume the iterator or allocate. A platform bridge
+    /// can batch expensive transport while keeping rasterization semantics intact.
+    fn prewarm_glyphs(&self, _requests: &mut dyn Iterator<Item = GlyphRasterRequest>) {}
     /// Normalizes the render settings that affect cached glyph pixels.
     fn prepare_raster_style(&self, request: RasterStyleRequest) -> PreparedRasterStyle {
         PreparedRasterStyle::independent(request.requested_mode)
@@ -2596,7 +2600,9 @@ impl PlatformInputHandler {
 
     /// Reads the focused handler's text assistance preferences outside an app borrow.
     pub fn query_text_input_configuration(&mut self) -> TextInputConfiguration {
-        self.cx.update(|window, cx| self.handler.text_input_configuration(window, cx)).unwrap_or_default()
+        self.cx
+            .update(|window, cx| self.handler.text_input_configuration(window, cx))
+            .unwrap_or_default()
     }
 
     /// See [`InputHandler::text_input_editable_range`].

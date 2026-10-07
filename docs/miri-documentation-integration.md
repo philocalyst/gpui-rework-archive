@@ -16,7 +16,9 @@ The builder runs once per source revision. Ordinary GPUI entities, listeners,
 closures, custom elements, tasks, and state persist across event frames. A source
 change or `restart: true` starts a new interpreted app. It does not compile edited
 components into browser WASM. Native text shaping and rasterization delegate
-through the existing GPUI platform traits to compiled Parley.
+through GPUI's platform traits to the host's configured backend. Fonts registered
+in a native host app are shared with its interpreter service; standalone services
+create a native backend through `gpui_platform::text_system`.
 
 ## Local HTTP contract
 
@@ -61,7 +63,7 @@ origins, for example `http://127.0.0.1:1111,http://localhost:1111`.
 Use `gpui_ce_codepen::transport::decode` rather than duplicating the wire codec.
 The envelope is `GPUIREP3`, u64 generation, u64 elapsed_ms, u32 diagnostics length,
 u32 frame length, UTF-8 diagnostics, then the frame (all numbers little endian).
-Frame version is 7; SceneCapture version is 2. The frame includes the actual GPUI
+Frame version is 8; SceneCapture version is 2. The frame includes the actual GPUI
 scene, viewport, DPR, cursor, text input context, and next requested frame delay.
 
 The frame uses fixed-width little-endian bincode, including existing GPUI shader

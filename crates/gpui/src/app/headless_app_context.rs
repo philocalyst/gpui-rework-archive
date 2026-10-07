@@ -121,13 +121,24 @@ impl HeadlessAppContext {
         }
     }
 
+    /// Mirrors the containing platform's support for subpixel text coverage.
+    pub fn set_subpixel_rendering_supported(&mut self, supported: bool) {
+        if self.platform.window_subpixel_rendering.replace(supported) != supported {
+            self.update(|cx| cx.refresh_windows());
+        }
+    }
+
     /// Opens a window for headless rendering.
     pub fn open_window<V: Render + 'static>(
         &mut self,
         size: Size<Pixels>,
         build_root: impl FnOnce(&mut Window, &mut App) -> Entity<V>,
     ) -> Result<WindowHandle<V>> {
-        self.open_window_with_scale_factor(size, self.platform.window_scale_factor.get(), build_root)
+        self.open_window_with_scale_factor(
+            size,
+            self.platform.window_scale_factor.get(),
+            build_root,
+        )
     }
 
     /// Opens a window with its platform density installed before the root builder
@@ -139,7 +150,10 @@ impl HeadlessAppContext {
         build_root: impl FnOnce(&mut Window, &mut App) -> Entity<V>,
     ) -> Result<WindowHandle<V>> {
         use crate::{point, px};
-        anyhow::ensure!(scale_factor.is_finite() && scale_factor > 0., "invalid density");
+        anyhow::ensure!(
+            scale_factor.is_finite() && scale_factor > 0.,
+            "invalid density"
+        );
         let previous_scale = self.platform.window_scale_factor.replace(scale_factor);
 
         let bounds = Bounds {
@@ -605,26 +619,47 @@ mod frame_driver_tests {
         let mut app = HeadlessAppContext::new(Arc::new(crate::TestTextSystem));
         app.set_automatic_drawing(false);
         let render_count = renders.clone();
-        let window = app.open_window_with_scale_factor(size(px(200.), px(150.)), 1.25, move |window, cx| {
-            assert_eq!(window.scale_factor(), 1.25, "density is visible during construction");
-            let entity = cx.new(|_| Counter { renders: render_count, count: 0 });
-            let callback_entity = entity.clone();
-            window.on_next_frame(move |window, cx| {
-                assert!(!window.rendered_frame.scene.quads.is_empty(), "initial paint precedes the first display callback");
-                callback_entity.update(cx, |this, cx| { this.count += 1; cx.notify(); });
-            });
-            entity
-        }).unwrap();
+        let window = app
+            .open_window_with_scale_factor(size(px(200.), px(150.)), 1.25, move |window, cx| {
+                assert_eq!(
+                    window.scale_factor(),
+                    1.25,
+                    "density is visible during construction"
+                );
+                let entity = cx.new(|_| Counter {
+                    renders: render_count,
+                    count: 0,
+                });
+                let callback_entity = entity.clone();
+                window.on_next_frame(move |window, cx| {
+                    assert!(
+                        !window.rendered_frame.scene.quads.is_empty(),
+                        "initial paint precedes the first display callback"
+                    );
+                    callback_entity.update(cx, |this, cx| {
+                        this.count += 1;
+                        cx.notify();
+                    });
+                });
+                entity
+            })
+            .unwrap();
         assert!(app.draw_window_if_dirty(window.into()).unwrap());
         assert_eq!(renders.get(), 1);
-        assert!(!app.draw_window_if_dirty(window.into()).unwrap(), "idle frame should reuse its scene");
+        assert!(
+            !app.draw_window_if_dirty(window.into()).unwrap(),
+            "idle frame should reuse its scene"
+        );
         assert_eq!(app.deliver_next_frame(window.into()).unwrap(), 1);
         app.run_until_parked();
         assert!(app.draw_window_if_dirty(window.into()).unwrap());
         assert_eq!(renders.get(), 2);
         app.set_scale_factor(window.into(), 2.).unwrap();
         assert!(app.draw_window_if_dirty(window.into()).unwrap());
-        app.update_window(window.into(), |_, window, _| assert_eq!(window.scale_factor(), 2.)).unwrap();
+        app.update_window(window.into(), |_, window, _| {
+            assert_eq!(window.scale_factor(), 2.)
+        })
+        .unwrap();
     }
     #[test]
     fn external_frame_driver_batches_updates_without_losing_real_event_effects() {

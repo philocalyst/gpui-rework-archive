@@ -23,7 +23,10 @@ impl InputState {
     }
 }
 pub type InputHandler = Rc<dyn Fn(gpui_codepen_guest::InputMessage, &mut Window, &mut App)>;
-pub type ResizeHandler = Rc<dyn Fn(Size<Pixels>, f32, &mut Window, &mut App)>;
+pub type ResizeHandler =
+    Rc<dyn Fn(Size<Pixels>, f32, bool, TextRenderingMode, bool, &mut Window, &mut App)>;
+pub(crate) type ErrorHandler =
+    Rc<dyn Fn(Arc<gpui_codepen_guest::Frame>, String, &mut Window, &mut App)>;
 
 pub(crate) fn scene_view(
     scene: Option<Arc<ImportedScene>>,
@@ -33,6 +36,7 @@ pub(crate) fn scene_view(
     frame: Option<Arc<gpui_codepen_guest::Frame>>,
     input: InputHandler,
     resize: ResizeHandler,
+    error: ErrorHandler,
 ) -> impl IntoElement {
     let InputState {
         pressed,
@@ -49,15 +53,36 @@ pub(crate) fn scene_view(
                 move |bounds, window, cx| {
                     let hitbox = window.insert_hitbox(bounds, HitboxBehavior::Normal);
                     let density = window.scale_factor();
+                    let subpixel = window.is_subpixel_rendering_supported();
+                    let text_mode = cx.text_rendering_mode();
+                    let transparent = window.background_appearance().is_transparent();
                     window.defer(cx, move |window, cx| {
-                        resize(bounds.size, density, window, cx)
+                        resize(
+                            bounds.size,
+                            density,
+                            subpixel,
+                            text_mode,
+                            transparent,
+                            window,
+                            cx,
+                        )
                     });
                     hitbox
                 },
                 move |bounds, hitbox, window, cx| {
                     if let Some(scene) = scene {
                         if let Err(e) = window.paint_scene(&scene, bounds, scale) {
-                            log::error!("could not compose GPUI scene: {e}");
+                            if let Some(frame) = frame.clone() {
+                                let error = error.clone();
+                                window.defer(cx, move |window, cx| {
+                                    error(
+                                        frame,
+                                        format!("Could not paint GPUI scene: {e:#}"),
+                                        window,
+                                        cx,
+                                    )
+                                });
+                            }
                         }
                     }
                     if let Some(frame) = frame {

@@ -43,6 +43,7 @@ pub(crate) struct TestPlatform {
         RefCell<Option<oneshot::Sender<(Option<PathBuf>, Vec<std::ffi::OsString>)>>>,
     headless_renderer_factory: Option<Box<dyn Fn() -> Option<Box<dyn PlatformHeadlessRenderer>>>>,
     pub(crate) window_scale_factor: Cell<f32>,
+    pub(crate) window_subpixel_rendering: Cell<bool>,
     weak: Weak<Self>,
 }
 
@@ -159,6 +160,7 @@ impl TestPlatform {
             text_system,
             headless_renderer_factory,
             window_scale_factor: Cell::new(2.0),
+            window_subpixel_rendering: Cell::new(false),
         })
     }
 

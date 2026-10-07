@@ -69,7 +69,7 @@ impl Host {
                 return;
             };
             let Some(json) = json.as_string() else { return };
-            if json.len() > 70000 {
+            if json.len() > 400000 {
                 return;
             }
             let Ok(command) = serde_json::from_str::<Command>(&json) else {

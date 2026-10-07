@@ -3024,6 +3024,11 @@ impl Window {
             .set_background_appearance(background_appearance);
     }
 
+    /// Returns the platform background appearance used to choose text coverage.
+    pub fn background_appearance(&self) -> WindowBackgroundAppearance {
+        self.platform_window.background_appearance()
+    }
+
     /// Mark the window as dirty at the platform level.
     pub fn set_window_edited(&mut self, edited: bool) {
         self.platform_window.set_edited(edited);
@@ -3062,6 +3067,11 @@ impl Window {
     /// be rendered as two pixels on screen.
     pub fn scale_factor(&self) -> f32 {
         self.scale_factor
+    }
+
+    /// Whether this platform can compose subpixel glyph coverage in the window.
+    pub fn is_subpixel_rendering_supported(&self) -> bool {
+        self.platform_window.is_subpixel_rendering_supported()
     }
 
     /// Overrides the display scale factor for tests.
@@ -4897,9 +4907,12 @@ impl Window {
         source_scale_factor: f32,
     ) -> Result<()> {
         self.invalidator.debug_assert_paint();
-        let snapped=self.snap_bounds(destination);
-        let ancestor=self.snapped_content_mask();
-        let clip=ancestor.intersect(&ContentMask { bounds: snapped, fade_out: Edges::default() });
+        let snapped = self.snap_bounds(destination);
+        let ancestor = self.snapped_content_mask();
+        let clip = ancestor.intersect(&ContentMask {
+            bounds: snapped,
+            fade_out: Edges::default(),
+        });
         self.next_frame.scene.append_imported(
             scene,
             snapped.origin,
@@ -5088,28 +5101,54 @@ impl Window {
         self.invalidator.debug_assert_paint();
 
         let element_opacity = self.element_opacity();
+        let (integer_origin, request) =
+            self.glyph_raster_request(origin, font_id, glyph_id, font_size, color, false);
+        let raster_style = self
+            .text_system()
+            .prepare_raster_style_request(request.style);
+        let params = request.with_style(raster_style);
+
+        self.paint_glyph_from_atlas(integer_origin, params, color, element_opacity)
+    }
+
+    pub(crate) fn glyph_raster_request(
+        &self,
+        origin: Point<Pixels>,
+        font_id: FontId,
+        glyph_id: GlyphId,
+        font_size: Pixels,
+        color: Hsla,
+        is_emoji: bool,
+    ) -> (Point<ScaledPixels>, crate::GlyphRasterRequest) {
         let scale_factor = self.scale_factor();
         let glyph_origin = origin.scale(scale_factor);
-
-        let (integer_origin, subpixel_variant) = quantize_glyph_origin(glyph_origin);
-        let requested_mode = if self.should_use_subpixel_rendering(font_id, font_size) {
+        let (integer_origin, subpixel_variant) = if is_emoji {
+            quantize_color_glyph_origin(glyph_origin)
+        } else {
+            quantize_glyph_origin(glyph_origin)
+        };
+        let requested_mode = if is_emoji {
+            GlyphRenderMode::Color
+        } else if self.should_use_subpixel_rendering(font_id, font_size) {
             GlyphRenderMode::Subpixel
         } else {
             GlyphRenderMode::Grayscale
         };
-        let raster_style =
-            self.text_system()
-                .prepare_raster_style(font_id, glyph_id, color, requested_mode);
-        let params = RenderGlyphParams {
-            font_id,
-            glyph_id,
-            font_size,
-            subpixel_variant,
-            scale_factor,
-            raster_style,
-        };
-
-        self.paint_glyph_from_atlas(integer_origin, params, color, element_opacity)
+        (
+            integer_origin,
+            crate::GlyphRasterRequest {
+                style: crate::RasterStyleRequest {
+                    font_id,
+                    glyph_id,
+                    scene_color: crate::hsla_to_rgba(color),
+                    requested_mode,
+                    foreground_dependency: crate::ForegroundDependency::Full,
+                },
+                font_size,
+                subpixel_variant,
+                scale_factor,
+            },
+        )
     }
 
     fn paint_glyph_from_atlas(
@@ -5225,23 +5264,12 @@ impl Window {
     ) -> Result<()> {
         self.invalidator.debug_assert_paint();
 
-        let scale_factor = self.scale_factor();
-        let glyph_origin = origin.scale(scale_factor);
-        let (integer_origin, subpixel_variant) = quantize_color_glyph_origin(glyph_origin);
-        let raster_style = self.text_system().prepare_raster_style(
-            font_id,
-            glyph_id,
-            color,
-            GlyphRenderMode::Color,
-        );
-        let params = RenderGlyphParams {
-            font_id,
-            glyph_id,
-            font_size,
-            subpixel_variant,
-            scale_factor,
-            raster_style,
-        };
+        let (integer_origin, request) =
+            self.glyph_raster_request(origin, font_id, glyph_id, font_size, color, true);
+        let raster_style = self
+            .text_system()
+            .prepare_raster_style_request(request.style);
+        let params = request.with_style(raster_style);
 
         self.paint_glyph_from_atlas(integer_origin, params, color, self.element_opacity())
     }
@@ -5968,11 +5996,13 @@ impl Window {
         mut listener: impl FnMut(&TouchEvent, DispatchPhase, &mut Window, &mut App) + 'static,
     ) {
         self.invalidator.debug_assert_paint();
-        self.next_frame.mouse_listeners.push(Some(Box::new(move |event, phase, window, cx| {
-            if let Some(event) = event.downcast_ref::<TouchEvent>() {
-                listener(event, phase, window, cx);
-            }
-        })));
+        self.next_frame
+            .mouse_listeners
+            .push(Some(Box::new(move |event, phase, window, cx| {
+                if let Some(event) = event.downcast_ref::<TouchEvent>() {
+                    listener(event, phase, window, cx);
+                }
+            })));
     }
 
     /// Observes native file drops before their conversion to mouse drag events for the next frame.
@@ -5983,9 +6013,13 @@ impl Window {
         mut listener: impl FnMut(&crate::FileDropEvent, DispatchPhase, &mut Window, &mut App) + 'static,
     ) {
         self.invalidator.debug_assert_paint();
-        self.next_frame.mouse_listeners.push(Some(Box::new(move |event,phase,window,cx| {
-            if let Some(event)=event.downcast_ref::<crate::FileDropEvent>() {listener(event,phase,window,cx);}
-        })));
+        self.next_frame
+            .mouse_listeners
+            .push(Some(Box::new(move |event, phase, window, cx| {
+                if let Some(event) = event.downcast_ref::<crate::FileDropEvent>() {
+                    listener(event, phase, window, cx);
+                }
+            })));
     }
 
     /// Registers a key listener on this node for the next rendered frame. The type of event
@@ -6168,13 +6202,20 @@ impl Window {
         // Handlers may set this to true by calling `prevent_default`.
         self.default_prevented = false;
 
-        if let PlatformInput::FileDrop(drop)=&event {
+        if let PlatformInput::FileDrop(drop) = &event {
             match drop {
-                FileDropEvent::Entered {position,..}|FileDropEvent::Pending {position}|FileDropEvent::Submit {position}=>self.mouse_position=*position,
-                FileDropEvent::Exited|FileDropEvent::Ended=>{},
+                FileDropEvent::Entered { position, .. }
+                | FileDropEvent::Pending { position }
+                | FileDropEvent::Submit { position } => self.mouse_position = *position,
+                FileDropEvent::Exited | FileDropEvent::Ended => {}
             }
-            self.dispatch_mouse_event(drop,cx);
-            if !cx.propagate_event {return DispatchEventResult {propagate:false,default_prevented:self.default_prevented};}
+            self.dispatch_mouse_event(drop, cx);
+            if !cx.propagate_event {
+                return DispatchEventResult {
+                    propagate: false,
+                    default_prevented: self.default_prevented,
+                };
+            }
         }
         let event = match event {
             // Track the mouse position with our own state, since accessing the platform
@@ -7334,14 +7375,16 @@ impl Window {
         }))
     }
 
-    /// Register an action listener on this node for the next frame. The type of action
-    /// is determined by the first parameter of the given listener. When the next frame is rendered
-    /// the listener will be cleared.
+    /// Registers a listener for `action_type` at the current dispatch node.
     ///
-    /// This is a fairly low-level method, so prefer using action handlers on elements unless you have
-    /// a specific need to register a listener yourself.
+    /// Call this during paint, while building the node's frame. The resulting
+    /// listener receives both dispatch phases and remains attached to that
+    /// frame; redraws must register it again. Use [`DispatchPhase`] to choose
+    /// when to handle the action.
     ///
-    /// This method should only be called as part of the paint phase of element drawing.
+    /// Prefer [`InteractiveElement::on_action`](crate::InteractiveElement::on_action)
+    /// for a typed handler on a view's element. This method accepts erased
+    /// actions for custom elements that manage their own dispatch nodes.
     pub fn on_action(
         &mut self,
         action_type: TypeId,
@@ -7354,14 +7397,11 @@ impl Window {
             .on_action(action_type, Rc::new(listener));
     }
 
-    /// Register a capturing action listener on this node for the next frame if the condition is true.
-    /// The type of action is determined by the first parameter of the given listener. When the next
-    /// frame is rendered the listener will be cleared.
+    /// Registers [`on_action`](Self::on_action)'s listener when `condition` is true.
     ///
-    /// This is a fairly low-level method, so prefer using action handlers on elements unless you have
-    /// a specific need to register a listener yourself.
-    ///
-    /// This method should only be called as part of the paint phase of element drawing.
+    /// This has the same paint-phase requirement and frame lifetime as
+    /// `on_action`. It does not select a dispatch phase: the listener receives
+    /// the phase as an argument.
     pub fn on_action_when(
         &mut self,
         condition: bool,
@@ -7377,8 +7417,12 @@ impl Window {
         }
     }
 
-    /// Read information about the GPU backing this window.
-    /// Currently returns None on Mac and Windows.
+    /// Returns adapter and driver details when this renderer can report them.
+    ///
+    /// The macOS Metal backend and simulated test windows return `None`.
+    /// WGPU backends and Windows DirectX report details, though an unavailable
+    /// device or backend error can still produce `None`. The strings are
+    /// backend-specific; see [`GpuSpecs`].
     pub fn gpu_specs(&self) -> Option<GpuSpecs> {
         self.platform_window.gpu_specs()
     }

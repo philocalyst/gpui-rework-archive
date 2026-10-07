@@ -256,6 +256,7 @@ try {
   const url = new URL('../preview/index.html?workbench', location.href);
   url.hash = `host/${slug}`;
   preview.src = url;
+  if (window.parent !== window) window.parent.postMessage({ type: 'gpui-workbench-shell-ready' }, location.origin);
   startupTimer = setTimeout(() => {
     if (ready) return;
     $('#runtime-label').textContent = 'Preview unavailable';

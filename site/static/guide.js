@@ -1,5 +1,3 @@
-const local = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
-
 for (const block of document.querySelectorAll('pre:has(code)')) {
   const code = block.querySelector('code');
   const button = document.createElement('button');
@@ -103,8 +101,7 @@ if (input) {
   if (query) { input.value = query; search(); }
 }
 
-// The editor is the Miri branch's GPUI Codepen, embedded in the same preview
-// bundle. Edited Rust never goes through a browser-WASM compilation endpoint.
+// The DOM editor hosts the existing GPUI preview controller and renderer.
 for (const playground of document.querySelectorAll('[data-playground]')) {
   const frame = playground.querySelector('[data-preview]');
   const status = playground.querySelector('[data-preview-status]');
@@ -116,29 +113,22 @@ for (const playground of document.querySelectorAll('[data-playground]')) {
   window.addEventListener('message', event => {
     if (event.source !== frame.contentWindow || event.origin !== new URL(frame.src).origin) return;
     if (event.data === 'gpui-preview-ready') {
-      status.textContent = editing ? 'Edit Rust in the workbench. Changes run under Miri.' : 'Ready. Click inside the preview to use it.';
+      status.textContent = 'Ready. Click inside the preview to use it.';
+    }
+    if (event.data?.type === 'gpui-workbench-shell-ready') {
+      status.textContent = 'Rust editor open. Your edits are saved in this browser.';
     }
     if (typeof event.data === 'object' && event.data?.type === 'gpui-preview-error') {
       status.textContent = `Preview unavailable: ${event.data.message}. The source and walkthrough remain available.`;
     }
   });
-  edit.addEventListener('click', async () => {
-    edit.disabled = true;
-    try {
-      const response = local && await fetch('/api/workbench', { signal: AbortSignal.timeout(3000), cache: 'no-store' });
-      if (!response?.ok || (await response.json()).backend !== 'miri') {
-        status.textContent = 'To edit Rust, start python3 site/scripts/dev.py and open this walkthrough on its localhost URL.';
-        return;
-      }
-      editing = true;
-      frame.src = open.href;
-      frame.title = `${playground.getAttribute('aria-label')} — Miri Rust editor and preview`;
-      playground.classList.add('editing');
-      edit.hidden = true; restore.hidden = false; open.hidden = false;
-      status.textContent = 'Opening the Miri workbench…';
-    } catch {
-      status.textContent = 'The Miri service is unavailable. Start python3 site/scripts/dev.py, then try again.';
-    } finally { edit.disabled = false; }
+  edit.addEventListener('click', () => {
+    editing = true;
+    frame.src = open.href;
+    frame.title = `${playground.getAttribute('aria-label')} — Rust editor and GPUI result`;
+    playground.classList.add('editing');
+    edit.hidden = true; restore.hidden = false; open.hidden = false;
+    status.textContent = 'Opening the Rust editor…';
   });
   restore.addEventListener('click', () => {
     editing = false;

@@ -2535,6 +2535,9 @@ dependencies = [
  "gpui_ce_platform",
  "gpui_ce_web",
  "io-surface",
+ "js-sys",
+ "serde",
+ "serde_json",
  "wasm-bindgen",
  "web-sys",
 ]
@@ -2574,6 +2577,7 @@ dependencies = [
  "gpui_ce_elements",
  "gpui_ce_platform",
  "gpui_codepen_guest",
+ "image",
  "js-sys",
  "libc",
  "log",

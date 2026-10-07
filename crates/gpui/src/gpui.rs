@@ -249,13 +249,21 @@ pub trait AppContext {
 // docs:examples:end
     fn new<T: 'static>(&mut self, build_entity: impl FnOnce(&mut Context<T>) -> T) -> Entity<T>;
 
-    /// Reserve a slot for a entity to be inserted later.
-    /// The returned [Reservation] allows you to obtain the [EntityId] for the future entity.
+    /// Allocates an identity for an entity before constructing its value.
+    ///
+    /// Use the reservation's [`entity_id`](Reservation::entity_id) when another
+    /// object needs that identity during setup. Pass the reservation to
+    /// [`insert_entity`](Self::insert_entity) to finish construction. Dropping
+    /// it instead releases the unused slot; no entity value is created.
     fn reserve_entity<T: 'static>(&mut self) -> Reservation<T>;
 
-    /// Insert a new entity in the app context based on a [Reservation] previously obtained from [`reserve_entity`].
+    /// Constructs an entity in a previously reserved slot.
     ///
-    /// [`reserve_entity`]: Self::reserve_entity
+    /// The returned handle has the reservation's identity. Like [`new`](Self::new),
+    /// the constructor receives a context for a value that cannot yet be read
+    /// through a handle. The reservation must come from this application.
+    ///
+    /// Unlike `new`, this operation does not invoke [`App::observe_new`] hooks.
     fn insert_entity<T: 'static>(
         &mut self,
         reservation: Reservation<T>,
@@ -382,18 +390,23 @@ pub trait AppContext {
 
     /// Clones handles to globally-stored entities of type `T`.
     ///
-    /// Each yielded handle is strong and keeps its entity alive after the
-    /// iterator or app context is dropped. Use [`WeakEntity`] for non-owning
-    /// references in long-lived records.
+    /// Each yielded handle is strong: dropping the iterator or removing the
+    /// entity from global storage does not release it while that handle remains.
+    /// Handles do not keep the application itself alive. Use [`WeakEntity`] for
+    /// non-owning references in long-lived records.
     fn global_entities<T: 'static>(&self) -> impl Iterator<Item = Entity<T>>;
 }
 
-/// Returned by [Context::reserve_entity] to later be passed to [Context::insert_entity].
-/// Allows you to obtain the [EntityId] for a entity before it is created.
+/// An allocated entity identity awaiting its value.
+///
+/// Obtain one with [`AppContext::reserve_entity`], then consume it with
+/// [`AppContext::insert_entity`]. This lets setup code refer to the eventual
+/// [`EntityId`] without constructing a partial value. Dropping the reservation
+/// releases its slot.
 pub struct Reservation<T>(pub(crate) Slot<T>);
 
 impl<T: 'static> Reservation<T> {
-    /// Returns the [EntityId] that will be associated with the entity once it is inserted.
+    /// Returns the identity the inserted entity will retain.
     pub fn entity_id(&self) -> EntityId {
         self.0.entity_id()
     }
@@ -467,7 +480,11 @@ pub trait VisualContext: AppContext {
         build_entity: impl FnOnce(&mut Window, &mut Context<T>) -> T,
     ) -> Self::Result<Entity<T>>;
 
-    /// Replace the root view of a window with a new view.
+    /// Constructs a view and installs it as this context's window root.
+    ///
+    /// The window retains the returned entity and schedules a redraw. Existing
+    /// handles to the previous root remain valid; replacing the root does not
+    /// release an entity that another owner still retains.
     fn replace_root_view<V>(
         &mut self,
         build_view: impl FnOnce(&mut Window, &mut Context<V>) -> V,
@@ -475,7 +492,12 @@ pub trait VisualContext: AppContext {
     where
         V: 'static + Render;
 
-    /// Focus a entity in the window, if it implements the [`Focusable`] trait.
+    /// Focuses the entity's [`FocusHandle`](crate::FocusHandle) in this window.
+    ///
+    /// Attach that handle to its rendered element with
+    /// [`track_focus`](crate::InteractiveElement::track_focus) so keyboard input
+    /// can reach the view. Reading the handle requires an entity read; do not
+    /// call this while the same entity is being updated.
     fn focus<V>(&mut self, entity: &Entity<V>) -> Self::Result<()>
     where
         V: Focusable;
@@ -544,15 +566,19 @@ where
     }
 }
 
-/// Information about the GPU GPUI is running on.
+/// Adapter and driver details reported by a window's renderer.
+///
+/// Obtain these with [`Window::gpu_specs`]. Availability and field contents
+/// depend on the backend; use them for diagnostics rather than as stable
+/// identifiers or a substitute for checking renderer capabilities.
 #[derive(Default, Debug, serde::Serialize, serde::Deserialize, Clone)]
 pub struct GpuSpecs {
-    /// Whether the GPU is really a fake (like `llvmpipe`) running on the CPU.
+    /// Whether rendering uses a software adapter, such as `llvmpipe`.
     pub is_software_emulated: bool,
-    /// The name of the device, as reported by Vulkan.
+    /// The backend-reported adapter name.
     pub device_name: String,
-    /// The name of the driver, as reported by Vulkan.
+    /// The backend-reported driver or vendor name; may be empty.
     pub driver_name: String,
-    /// Further information about the driver, as reported by Vulkan.
+    /// Driver version or other backend details; may be empty or unavailable.
     pub driver_info: String,
 }

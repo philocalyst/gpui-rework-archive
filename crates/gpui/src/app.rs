@@ -235,7 +235,11 @@ impl Application {
         self
     }
 
-    /// Assigns the source of assets for the application.
+    /// Installs the application's asset sources, including those used by SVGs.
+    ///
+    /// Register embedded fonts, icons, or other bundled files before startup.
+    /// This replaces the existing registry; see [`AssetRegistry`] for combining
+    /// multiple sources.
     pub fn with_assets(self, assets: impl Into<AssetRegistry>) -> Self {
         let mut context_lock = self.0.borrow_mut();
         let asset_registry = Arc::new(assets.into());
@@ -245,13 +249,19 @@ impl Application {
         self
     }
 
-    /// Configures arguments to pass when restarting the application.
+    /// Sets the arguments used by [`App::restart`].
+    ///
+    /// These replace the builder's restart argument list. They do not change
+    /// the current process's arguments.
     pub fn with_restart_arguments(self, arguments: Vec<OsString>) -> Self {
         self.0.borrow_mut().restart_arguments = arguments;
         self
     }
 
-    /// Sets the HTTP client for the application.
+    /// Installs the HTTP client used by app services and remote asset loading.
+    ///
+    /// The default [`NullHttpClient`] rejects requests. Supply a concrete
+    /// [`HttpClient`] before startup when the app needs network access.
     pub fn with_http_client(self, http_client: Arc<dyn HttpClient>) -> Self {
         let mut context_lock = self.0.borrow_mut();
         context_lock.http_client = http_client;
@@ -467,7 +477,18 @@ impl SystemWindowTab {
     }
 }
 
-/// A controller for managing window tabs.
+/// App-global records for system window tabs and their groups.
+///
+/// GPUI installs this global when it constructs the app. [`init`](Self::init)
+/// replaces it with empty records; static mutation methods panic if the global
+/// has been removed.
+/// Group and title changes update GPUI's records; they do not themselves ask
+/// the operating system to regroup or rename windows. Selection methods use
+/// the recorded handles to activate a window.
+///
+/// Prefer the corresponding [`Window`] operations when handling a user's
+/// request to change native tabs. This controller supports the bookkeeping
+/// shared by those operations.
 #[derive(Default)]
 pub struct SystemWindowTabController {
     visible: Option<bool>,
@@ -477,7 +498,7 @@ pub struct SystemWindowTabController {
 impl Global for SystemWindowTabController {}
 
 impl SystemWindowTabController {
-    /// Create a new instance of the window tab controller.
+    /// Creates empty tab records with no visibility preference.
     pub fn new() -> Self {
         Self {
             visible: None,
@@ -485,12 +506,14 @@ impl SystemWindowTabController {
         }
     }
 
-    /// Initialize the global window tab controller.
+    /// Installs a fresh controller, replacing any existing records.
     pub fn init(cx: &mut App) {
         cx.set_global(SystemWindowTabController::new());
     }
 
-    /// Get all tab groups.
+    /// Returns the recorded groups, keyed by an internal group identifier.
+    ///
+    /// Map order does not define the visual order of native windows.
     pub fn tab_groups(&self) -> &FxHashMap<usize, Vec<SystemWindowTab>> {
         &self.tab_groups
     }
@@ -500,7 +523,8 @@ impl SystemWindowTabController {
     /// Groups are visited in the map's current key order, which is not a
     /// user-facing ordering guarantee. Within the selected group, the most
     /// recently active tab is preferred. Returns `None` when `id` is not in a
-    /// group or no group is registered.
+    /// group or no group is registered. Selection wraps around; with one group,
+    /// it returns a tab in that same group.
     pub fn get_next_tab_group_window(cx: &mut App, id: WindowId) -> Option<&AnyWindowHandle> {
         let controller = cx.global::<SystemWindowTabController>();
         let current_group = controller
@@ -530,7 +554,8 @@ impl SystemWindowTabController {
     /// Groups are visited in the map's current key order, which is not a
     /// user-facing ordering guarantee. Within the selected group, the most
     /// recently active tab is preferred. Returns `None` when `id` is not in a
-    /// group or no group is registered.
+    /// group or no group is registered. Selection wraps around; with one group,
+    /// it returns a tab in that same group.
     pub fn get_prev_tab_group_window(cx: &mut App, id: WindowId) -> Option<&AnyWindowHandle> {
         let controller = cx.global::<SystemWindowTabController>();
         let current_group = controller
@@ -559,14 +584,19 @@ impl SystemWindowTabController {
             })
     }
 
-    /// Get all tabs in the same window.
+    /// Returns the group containing `id`, in recorded tab order.
+    ///
+    /// Returns `None` when no group contains that window.
     pub fn tabs(&self, id: WindowId) -> Option<&Vec<SystemWindowTab>> {
         self.tab_groups
             .values()
             .find(|tabs| tabs.iter().any(|tab| tab.id == id))
     }
 
-    /// Initialize the visibility of the system window tab controller.
+    /// Sets the initial tab-bar preference if none has been recorded.
+    ///
+    /// A later call leaves the existing value unchanged. Use
+    /// [`set_visible`](Self::set_visible) to replace it.
     pub fn init_visible(cx: &mut App, visible: bool) {
         let mut controller = cx.global_mut::<SystemWindowTabController>();
         if controller.visible.is_none() {
@@ -574,18 +604,21 @@ impl SystemWindowTabController {
         }
     }
 
-    /// Get the visibility of the system window tab controller.
+    /// Returns the recorded tab-bar preference, or `false` before initialization.
     pub fn is_visible(&self) -> bool {
         self.visible.unwrap_or(false)
     }
 
-    /// Set the visibility of the system window tab controller.
+    /// Replaces the recorded tab-bar preference.
     pub fn set_visible(cx: &mut App, visible: bool) {
         let mut controller = cx.global_mut::<SystemWindowTabController>();
         controller.visible = Some(visible);
     }
 
-    /// Update the last active of a window.
+    /// Records the current time as `id`'s most recent activation.
+    ///
+    /// Unregistered windows are ignored. Group navigation uses this timestamp
+    /// to choose the most recently active tab within a group.
     pub fn update_last_active(cx: &mut App, id: WindowId) {
         let mut controller = cx.global_mut::<SystemWindowTabController>();
         for windows in controller.tab_groups.values_mut() {
@@ -597,7 +630,9 @@ impl SystemWindowTabController {
         }
     }
 
-    /// Update the position of a tab within its group.
+    /// Moves `id` to zero-based position `ix` in its recorded group.
+    ///
+    /// An absent window or out-of-range position leaves the records unchanged.
     pub fn update_tab_position(cx: &mut App, id: WindowId, ix: usize) {
         let mut controller = cx.global_mut::<SystemWindowTabController>();
         for (_, windows) in controller.tab_groups.iter_mut() {
@@ -611,7 +646,9 @@ impl SystemWindowTabController {
         }
     }
 
-    /// Update the title of a tab.
+    /// Changes `id`'s recorded title when it differs from `title`.
+    ///
+    /// An absent window or unchanged title leaves the global untouched.
     pub fn update_tab_title(cx: &mut App, id: WindowId, title: SharedString) {
         let controller = cx.global::<SystemWindowTabController>();
         let tab = controller
@@ -635,7 +672,11 @@ impl SystemWindowTabController {
         }
     }
 
-    /// Insert a tab into a tab group.
+    /// Records the group reported after adding window `id` to native tabs.
+    ///
+    /// `tabs` must contain `id` and the group's other members. If those other
+    /// members match an existing group, this appends the new tab there;
+    /// otherwise it records `tabs` as a new group. Missing `id` is ignored.
     pub fn add_tab(cx: &mut App, id: WindowId, tabs: Vec<SystemWindowTab>) {
         let mut controller = cx.global_mut::<SystemWindowTabController>();
         let Some(tab) = tabs.iter().find(|tab| tab.id == id).cloned() else {
@@ -668,7 +709,9 @@ impl SystemWindowTabController {
         }
     }
 
-    /// Remove a tab from a tab group.
+    /// Removes `id` from the records and returns its tab, if present.
+    ///
+    /// Groups left empty are removed too. This does not close the native window.
     pub fn remove_tab(cx: &mut App, id: WindowId) -> Option<SystemWindowTab> {
         let mut controller = cx.global_mut::<SystemWindowTabController>();
         let mut removed_tab = None;
@@ -683,7 +726,10 @@ impl SystemWindowTabController {
         removed_tab
     }
 
-    /// Move a tab to a new tab group.
+    /// Moves a recorded tab into a new, one-member group.
+    ///
+    /// Does nothing for an unregistered window. The native detach operation
+    /// must be performed separately.
     pub fn move_tab_to_new_window(cx: &mut App, id: WindowId) {
         let mut removed_tab = Self::remove_tab(cx, id);
         let mut controller = cx.global_mut::<SystemWindowTabController>();
@@ -694,7 +740,10 @@ impl SystemWindowTabController {
         }
     }
 
-    /// Merge all tab groups into a single group.
+    /// Combines all records into one group, starting with `id`'s group.
+    ///
+    /// The remaining groups have no guaranteed order. If `id` is unregistered,
+    /// the records are unchanged. This does not merge native windows itself.
     pub fn merge_all_windows(cx: &mut App, id: WindowId) {
         let mut controller = cx.global_mut::<SystemWindowTabController>();
         let Some(initial_tabs) = controller.tabs(id) else {
@@ -712,7 +761,9 @@ impl SystemWindowTabController {
         controller.tab_groups.insert(0, all_tabs);
     }
 
-    /// Selects the next tab in the tab group in the trailing direction.
+    /// Activates the next recorded tab, wrapping at the group's end.
+    ///
+    /// An absent `id` or unavailable target window is silently ignored.
     pub fn select_next_tab(cx: &mut App, id: WindowId) {
         let mut controller = cx.global_mut::<SystemWindowTabController>();
         let Some(tabs) = controller.tabs(id) else {
@@ -727,7 +778,9 @@ impl SystemWindowTabController {
         });
     }
 
-    /// Selects the previous tab in the tab group in the leading direction.
+    /// Activates the previous recorded tab, wrapping at the group's beginning.
+    ///
+    /// An absent `id` or unavailable target window is silently ignored.
     pub fn select_previous_tab(cx: &mut App, id: WindowId) {
         let mut controller = cx.global_mut::<SystemWindowTabController>();
         let Some(tabs) = controller.tabs(id) else {
@@ -1121,11 +1174,15 @@ impl App {
         self.entities.assert_no_new_leaks(snapshot)
     }
 
-    /// Quit the application gracefully.
+    /// Closes app windows and runs registered shutdown handlers.
     ///
     /// Native applications give handlers registered with [`Context::on_app_quit`]
     /// [`SHUTDOWN_TIMEOUT`] to complete. WebAssembly runs them asynchronously as best-effort cleanup
     /// because its event-loop thread cannot block.
+    ///
+    /// The platform calls this during shutdown. Use [`quit`](Self::quit) to
+    /// request that the platform end its run loop; this method performs cleanup
+    /// without requesting a platform quit itself. Quit handlers run at most once.
     pub fn shutdown(&mut self) {
         let mut futures = Vec::new();
 
@@ -1190,7 +1247,11 @@ impl App {
         subscription
     }
 
-    /// Gracefully quit the application via the platform's standard routine.
+    /// Requests a quit through the platform's normal shutdown routine.
+    ///
+    /// The platform then invokes [`shutdown`](Self::shutdown) to close windows
+    /// and run quit handlers. The browser backend cannot close the user's tab
+    /// and ignores this request.
     pub fn quit(&self) {
         self.platform.quit();
     }
@@ -1715,7 +1776,11 @@ impl App {
         self.platform.read_from_clipboard_async()
     }
 
-    /// Sets the text rendering mode for the application.
+    /// Changes the text-rasterization preference read by windows during paint.
+    ///
+    /// This does not schedule a redraw. Call [`refresh_windows`](Self::refresh_windows)
+    /// when changing the mode should repaint existing content immediately.
+    /// Backend capabilities can constrain the effective mode; see [`TextRenderingMode`].
     pub fn set_text_rendering_mode(&mut self, mode: TextRenderingMode) {
         self.text_rendering_mode.set(mode);
     }
@@ -1915,9 +1980,8 @@ impl App {
 
     /// Opens a platform save picker for a new file path.
     ///
-    /// The provided directory will be used to set the initial location.
-    /// When a path is selected, it is relayed asynchronously via the returned oneshot channel.
-    /// If cancelled, a `None` will be relayed instead.
+    /// `directory` and `suggested_name` supply the picker's initial location
+    /// and filename where supported.
     /// The receiver yields `Ok(Some(path))` for a selection, `Ok(None)` for
     /// cancellation (and on Linux builds without a picker backend), or `Err`
     /// when the picker cannot open. The web backend reports unsupported with
@@ -1978,12 +2042,18 @@ impl App {
         self.restart_path = Some(path);
     }
 
-    /// Returns the HTTP client for the application.
+    /// Clones the HTTP client used by this app.
+    ///
+    /// The returned client can be moved into background work. Replacing the
+    /// app's client later does not change an already-cloned handle.
     pub fn http_client(&self) -> Arc<dyn HttpClient> {
         self.http_client.clone()
     }
 
-    /// Sets the HTTP client for the application.
+    /// Replaces the client for future app requests and resource loads.
+    ///
+    /// Existing requests and cloned clients keep using the previous instance.
+    /// Use [`Application::with_http_client`] for configuration before startup.
     pub fn set_http_client(&mut self, new_client: Arc<dyn HttpClient>) {
         self.http_client = new_client;
     }
@@ -2292,7 +2362,10 @@ impl App {
         }
     }
 
-    /// Obtains a reference to the executor, which can be used to spawn futures.
+    /// Returns the executor for `Send` work that does not borrow app state.
+    ///
+    /// Await its tasks from [`spawn`](Self::spawn) before applying results to
+    /// entities or windows on the foreground thread.
     pub fn background_executor(&self) -> &BackgroundExecutor {
         &self.background_executor
     }
@@ -2373,12 +2446,19 @@ impl App {
         });
     }
 
-    /// Accessor for the application's asset source, which is provided when constructing the `App`.
+    /// Returns the byte registry installed with [`Application::with_assets`].
+    ///
+    /// Registry paths are exact, app-defined keys. For asynchronous typed
+    /// resource loading and deduplication, use [`fetch_asset`](Self::fetch_asset).
     pub fn assets(&self) -> &Arc<AssetRegistry> {
         &self.asset_registry
     }
 
-    /// Accessor for the text system.
+    /// Returns the shared font, shaping, and glyph service for this app.
+    ///
+    /// Register bundled fonts here before first use. See [`TextSystem`] for
+    /// shaping and measurement, and [`Window::text_system`] for frame-local
+    /// text layout caching.
     pub fn text_system(&self) -> &Arc<TextSystem> {
         &self.text_system
     }
@@ -2388,7 +2468,11 @@ impl App {
         self.globals_by_type.contains_key(&TypeId::of::<G>())
     }
 
-    /// Access the global of the given type. Panics if a global for that type has not been assigned.
+    /// Borrows the app's value of type `G`.
+    ///
+    /// Panics if no value is installed, including while that global is leased
+    /// by an update callback. Use [`try_global`](Self::try_global) for optional
+    /// lookup or [`default_global`](Self::default_global) to initialize a value.
     #[track_caller]
     pub fn global<G: Global>(&self) -> &G {
         self.globals_by_type
@@ -2523,6 +2607,10 @@ impl App {
     /// window when construction happened inside a window; otherwise the window
     /// argument is `None`. Retain the subscription while new entities should
     /// be observed.
+    ///
+    /// Registration is immediate; delivery follows construction during effect
+    /// processing. Entities constructed with [`AppContext::insert_entity`]
+    /// from a reservation do not invoke this hook.
     pub fn observe_new<T: 'static>(
         &self,
         on_new: impl 'static + Fn(&mut T, Option<&mut Window>, &mut Context<T>),
@@ -2583,9 +2671,16 @@ impl App {
         })
     }
 
-    /// Register a callback to be invoked when a keystroke is received by the application
-    /// in any window. Note that this fires after all other action and event mechanisms have resolved
-    /// and that this API will not be invoked if the event's propagation is stopped.
+    /// Observes resolved keystrokes from any app window.
+    ///
+    /// The callback runs after key-binding resolution and dispatch. A consumed
+    /// action is still reported in [`KeystrokeEvent::action`]; raw key events
+    /// stopped by an element handler are not reported. Pending multi-key
+    /// sequences are reported when resolved or replayed, rather than at every
+    /// prefix. Keep the returned subscription while observation is needed.
+    ///
+    /// Use [`intercept_keystrokes`](Self::intercept_keystrokes) to prevent an
+    /// input from reaching action dispatch.
     pub fn observe_keystrokes(
         &mut self,
         mut f: impl FnMut(&KeystrokeEvent, &mut Window, &mut App) + 'static,
@@ -2608,10 +2703,13 @@ impl App {
         )
     }
 
-    /// Register a callback to be invoked when a keystroke is received by the application
-    /// in any window. Note that this fires _before_ all other action and event mechanisms have resolved
-    /// unlike [`App::observe_keystrokes`] which fires after. This means that `cx.stop_propagation` calls
-    /// within interceptors will prevent action dispatch
+    /// Intercepts keystrokes before key-binding resolution in any app window.
+    ///
+    /// Call [`stop_propagation`](Self::stop_propagation) in the callback to
+    /// prevent action dispatch. This runs before an action has been selected,
+    /// so the event's `action` is `None`. Keep the returned subscription while
+    /// interception is needed; prefer an element handler for behavior limited
+    /// to one focused view.
     pub fn intercept_keystrokes(
         &mut self,
         mut f: impl FnMut(&KeystrokeEvent, &mut Window, &mut App) + 'static,
@@ -2634,7 +2732,12 @@ impl App {
         )
     }
 
-    /// Register key bindings.
+    /// Adds key bindings and schedules windows to refresh their dispatch trees.
+    ///
+    /// Later bindings take precedence at the same context depth. Each binding
+    /// selects an action; register a handler separately with an element's
+    /// [`on_action`](crate::InteractiveElement::on_action) or [`Self::on_action`].
+    /// See [`KeyBinding`] for sequences and context predicates.
 // docs:examples:begin
 #[doc = include_str!("docs/examples/gpui-App-bind-keys-b1c931c1.md")]
 // docs:examples:end
@@ -2649,14 +2752,26 @@ impl App {
         self.pending_effects.push_back(Effect::RefreshWindows);
     }
 
-    /// Get all key bindings in the app.
+    /// Returns shared access to this app's keymap.
+    ///
+    /// Prefer [`bind_keys`](Self::bind_keys) and
+    /// [`clear_key_bindings`](Self::clear_key_bindings) for mutation: those
+    /// methods also refresh windows. A direct `RefCell` borrow obeys ordinary
+    /// runtime borrow checks and does not schedule a refresh itself.
     pub fn key_bindings(&self) -> Rc<RefCell<Keymap>> {
         self.keymap.clone()
     }
 
-    /// Register a global handler for actions invoked via the keyboard. These handlers are run at
-    /// the end of the bubble phase for actions, and so will only be invoked if there are no other
-    /// handlers or if they called `cx.propagate()`.
+    /// Adds an app-wide handler for action `A`, retained for the app's lifetime.
+    ///
+    /// Window dispatch reaches these handlers after bubbling through the
+    /// focused element path, if no element consumes the action. Newer global
+    /// handlers run first. Call [`propagate`](Self::propagate) to let a window
+    /// dispatch continue to an older global handler.
+    ///
+    /// These handlers also receive programmatic and menu dispatch, and
+    /// [`dispatch_action`](Self::dispatch_action) can invoke them when no window
+    /// is active. Prefer an element handler for view-specific behavior.
     pub fn on_action<A: Action>(
         &mut self,
         listener: impl Fn(&A, &mut Self) + 'static,
@@ -2673,18 +2788,28 @@ impl App {
         self
     }
 
-    /// Event handlers propagate events by default. Call this method to stop dispatching to
-    /// event handlers with a lower z-index (mouse) or higher in the tree (keyboard). This is
-    /// the opposite of [`Self::propagate`]. It's also possible to cancel a call to [`Self::propagate`] by
-    /// calling this method before effects are flushed.
+    /// Stops further delivery of the input or action currently being dispatched.
+    ///
+    /// Mouse and raw key handlers propagate by default. Stopping a bubbling
+    /// event prevents delivery to remaining mouse listeners or keyboard
+    /// ancestors; stopping during capture also prevents the bubble phase.
+    /// Action handlers already consume by default during bubbling.
+    ///
+    /// Dispatch checks this flag after the callback returns. Calling
+    /// [`propagate`](Self::propagate) later in the same callback reverses it.
     pub fn stop_propagation(&mut self) {
         self.propagate_event = false;
     }
 
-    /// Action handlers stop propagation by default during the bubble phase of action dispatch
-    /// dispatching to action handlers higher in the element tree. This is the opposite of
-    /// [`Self::stop_propagation`]. It's also possible to cancel a call to [`Self::stop_propagation`] by calling
-    /// this method before effects are flushed.
+    /// Allows the current dispatch to continue after this callback.
+    ///
+    /// A bubbling action handler consumes an action by default. Call this when
+    /// it cannot handle the action, or when an ancestor should handle it too.
+    /// For example, an editor at its first line can propagate a movement action
+    /// so a parent chooses the next focus target.
+    ///
+    /// This reverses [`stop_propagation`](Self::stop_propagation) within the
+    /// current callback; it does not replay dispatch that has already stopped.
     pub fn propagate(&mut self) {
         self.propagate_event = true;
     }
@@ -2704,9 +2829,12 @@ impl App {
         self.actions.all_action_names()
     }
 
-    /// Returns key bindings that invoke the given action on the currently focused element, without
-    /// checking context. Bindings are returned in the order they were added. For display, the last
-    /// binding should take precedence.
+    /// Returns complete key-sequence matches for `input`, ignoring focus and context.
+    ///
+    /// Results are in reverse insertion order, with newer bindings first.
+    /// Prefixes awaiting another key are excluded. These are possible matches,
+    /// not a prediction of the focused element's dispatch: context predicates
+    /// and propagation can change which action actually runs.
     pub fn all_bindings_for_input(&self, input: &[Keystroke]) -> Vec<KeyBinding> {
         RefCell::borrow(&self.keymap).all_bindings_for_input(input)
     }
@@ -2746,8 +2874,14 @@ impl App {
         self.actions.documentation()
     }
 
-    /// Register a callback to be invoked when the application is about to quit.
-    /// It is not possible to cancel the quit event at this point.
+    /// Registers cleanup to run during [`shutdown`](Self::shutdown).
+    ///
+    /// The callback cannot veto shutdown. It runs once with synchronous app
+    /// access and returns an owned future; native platforms wait up to
+    /// [`SHUTDOWN_TIMEOUT`] for all such futures together. Browser cleanup is
+    /// scheduled without blocking and may be interrupted by page teardown.
+    /// Keep the returned subscription until shutdown or detach it for app-wide
+    /// cleanup. See [`Context::on_app_quit`] for entity-scoped cleanup.
     pub fn on_app_quit<Fut>(
         &self,
         mut on_quit: impl FnMut(&mut App) -> Fut + 'static,
@@ -2781,8 +2915,11 @@ impl App {
         subscription
     }
 
-    /// Register a callback to be invoked when a window is closed
-    /// The window is no longer accessible at the point this callback is invoked.
+    /// Receives the identity of a window removed during a window update.
+    ///
+    /// The window is already inaccessible when the callback runs. Keep the
+    /// returned subscription to receive later closures. Bulk window cleanup
+    /// during [`shutdown`](Self::shutdown) does not invoke this hook.
     pub fn on_window_closed(
         &self,
         mut on_closed: impl FnMut(&mut App, WindowId) + 'static,
@@ -2802,8 +2939,11 @@ impl App {
         }
     }
 
-    /// Checks if the given action is bound in the current context, as defined by the app's current focus,
-    /// the bindings in the element tree, and any global action listeners.
+    /// Returns whether the focused path or an app-wide listener can handle this action type.
+    ///
+    /// This checks handler registration, not whether a key binding exists or
+    /// whether a handler will accept the action's particular payload. If the
+    /// active window cannot be accessed, only app-wide listeners are checked.
     pub fn is_action_available(&mut self, action: &dyn Action) -> bool {
         let mut action_available = false;
         if let Some(window) = self.active_window()
@@ -2934,14 +3074,20 @@ impl App {
         self.active_drag.as_ref().and_then(|drag| drag.cursor_style)
     }
 
-    /// Sets the current drag payload. Its recommended the window be refreshed when this is called.
+    /// Installs the app's current internal drag.
+    ///
+    /// Call [`Window::refresh`] to draw its view immediately. This method does
+    /// not schedule a redraw and debug builds assert that no drag is active.
     pub fn start_drag(&mut self, drag: AnyDrag) {
         debug_assert!(self.active_drag.is_none());
         self.active_drag = Some(drag);
     }
 
-    /// Takes the current drag payload. Its recommended the window be refreshed when this is called.
-    /// If there is a platform drag interop active, it is canceled.
+    /// Removes the current internal drag and returns its payload.
+    ///
+    /// Returns `None` if no internal drag is active. This does not refresh the
+    /// window; [`stop_active_drag`](Self::stop_active_drag) does. Native drag
+    /// sessions are managed separately by the platform's drag-end callback.
     pub fn stop_drag(&mut self, window: &Window) -> Option<Arc<dyn Any>> {
         let drag = self.active_drag.take();
         if drag.is_some()
@@ -3064,7 +3210,11 @@ impl App {
         self.prompt_builder = Some(PromptBuilder::Default);
     }
 
-    /// Remove an asset from GPUI's cache
+    /// Removes this typed source's task from the app's resource cache.
+    ///
+    /// The next [`fetch_asset`](Self::fetch_asset) starts a new load. Existing
+    /// clones of the shared task or its output remain valid; removing the cache
+    /// entry does not discard copies already owned by callers.
     pub fn remove_asset<A: Asset>(&mut self, source: &A::Source) {
         let asset_id = (TypeId::of::<A>(), hash(source));
         self.loading_assets.remove(&asset_id);
@@ -3078,10 +3228,17 @@ impl App {
         self.loading_assets.contains_key(&asset_id)
     }
 
-    /// Asynchronously load an asset, if the asset hasn't finished loading this will return None.
+    /// Returns a shared load task and whether this call created it.
     ///
-    /// Note that the multiple calls to this method will only result in one `Asset::load` call at a
-    /// time, and the results of this call will be cached
+    /// The cache key combines the asset type with a hash of `source`. Repeated
+    /// requests reuse the same task and completed output until
+    /// [`remove_asset`](Self::remove_asset) evicts the entry. `true` means this
+    /// call invoked [`Asset::load`] and spawned its future on the background
+    /// executor; `false` means it reused a cached task.
+    ///
+    /// Await the shared task outside a render callback, then notify the owning
+    /// view so it can display the result. The cache retains a task clone, so
+    /// dropping a caller's clone alone does not cancel loading.
     pub fn fetch_asset<A: Asset>(&mut self, source: &A::Source) -> (Shared<Task<A::Output>>, bool) {
         let asset_id = (TypeId::of::<A>(), hash(source));
         let mut is_first = false;
@@ -3101,8 +3258,12 @@ impl App {
         (task, is_first)
     }
 
-    /// Obtain a new [`FocusHandle`], which allows you to track and manipulate the keyboard focus
-    /// for elements rendered within this window.
+    /// Creates an unfocused handle for an element's keyboard-focus identity.
+    ///
+    /// Store it with the view and attach it during render with
+    /// [`track_focus`](crate::InteractiveElement::track_focus). Creating the
+    /// handle does not select a window or move focus; call [`FocusHandle::focus`]
+    /// with the window that should receive keyboard input.
     #[track_caller]
     pub fn focus_handle(&self) -> FocusHandle {
         FocusHandle::new(&self.focus_handles)
