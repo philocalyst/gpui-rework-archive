@@ -19,9 +19,14 @@ use std::{
 };
 use unicode_segmentation::UnicodeSegmentation;
 
-/// An [`Element`] that renders text.
+/// An [`Element`] that shapes, lays out, and paints text.
 ///
-/// In general, [`Text`] objects should be created via the [`text`] macro:
+/// Text layout is measured under the width and height constraints supplied by the parent. Keep a
+/// stable ID when changing the string if assistive technology should observe an update to the same
+/// node; use a new ID when the replacement is semantically a different node. Methods on
+/// [`TextLayout`] use UTF-8 byte indices, not grapheme or character counts.
+///
+/// In general, [`Text`] objects should be created via the [`crate::text!`] macro:
 /// ```rust
 /// # use gpui::*;
 /// # fn render() -> impl IntoElement {
@@ -41,7 +46,7 @@ use unicode_segmentation::UnicodeSegmentation;
 /// if the ID changes, then the screen reader will be notified that a node has
 /// been removed, and a new node has been added.
 ///
-/// When using the [`text`] macro, each invocation of the macro will get a
+/// When using the [`crate::text!`] macro, each invocation of the macro will get a
 /// unique ID, derived from its position in the source code (filename, line, and
 /// column). For example:
 /// ```rust
@@ -57,33 +62,36 @@ use unicode_segmentation::UnicodeSegmentation;
 /// // equal, because the same `text!` invocation produced them
 /// assert_eq!(x.id(), y.id());
 /// ```
-/// When the contents of an invocation of [`text`] do not change, this
+/// When the contents of an invocation of [`crate::text!`] do not change, this
 /// distinction is less relevant (with the caveat that you still need to take
 /// care to ensure that duplicate IDs do not appear).
 ///
-/// However, when a [`text`] invocation's argument *does* change, you should
+/// However, when a [`crate::text!`] invocation's argument *does* change, you should
 /// consider whether this change should be reported as a node "updating its
 /// contents", or an old node being destroyed and a new node being created.
 #[derive(Debug, Clone)]
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-Text-897555e2.md")]
+// docs:examples:end
 pub struct Text {
     id: Option<ElementId>,
     text: SharedString,
 }
 
 impl Text {
-    /// Create a new [`Text`] element with a specific ID.
+    /// Create accessible text with a specific stable ID.
     ///
-    /// If you want a unique ID to be assigned automatically, use the [`text`]
+    /// If you want a unique ID to be assigned automatically, use the [`crate::text!`]
     /// macro. The docs for [`Text`] have more detail about choosing IDs.
     #[inline]
     pub const fn new(id: ElementId, text: SharedString) -> Self {
         Self { id: Some(id), text }
     }
 
-    /// Create a new [`Text`] element that is inaccessible to screen readers.
+    /// Create text without an accessibility node of its own.
     ///
     /// In order for text to be accessible to screen readers, it must have an ID
-    /// provided. If you want text to be accessible, either use [`text`] to have
+    /// provided. If you want text to be accessible, either use [`crate::text!`] to have
     /// an ID automatically assigned, or use [`Text::new`] to manually assign an
     /// ID.
     ///
@@ -94,7 +102,7 @@ impl Text {
         Self { id: None, text }
     }
 
-    /// The ID of this [`Text`] element.
+    /// Return this element's accessibility and frame identity, if it has one.
     #[inline]
     pub const fn id(&self) -> Option<&ElementId> {
         self.id.as_ref()
@@ -106,7 +114,7 @@ impl Text {
         self
     }
 
-    /// The text that this [`Text`] element will display.
+    /// Return the displayed UTF-8 text.
     #[inline]
     pub const fn text(&self) -> &SharedString {
         &self.text
@@ -126,7 +134,7 @@ impl DerefMut for Text {
     }
 }
 
-/// Trivial hash function for the location information produced by the [`text`]
+/// Trivial hash function for the location information produced by the [`crate::text!`]
 /// macro. Not covered by semver guarantees. Performance is not particularly
 /// significant because it's only used on small strings in const contexts.
 #[doc(hidden)]
@@ -158,6 +166,9 @@ pub const fn __hash_text_macro_location_unstable_do_not_use(s: &'static str) -> 
 /// based on the source location. See the docs for [`Text`] for a more in-depth
 /// explanation of the significance of the ID of a [`Text`] element.
 #[macro_export]
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-text.md")]
+// docs:examples:end
 macro_rules! text {
     (id = $id:expr, $text:expr) => {{ $crate::Text::new($id.into(), $text.into()) }};
     ($text:expr) => {{

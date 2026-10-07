@@ -1,3 +1,10 @@
+//! Proc-macro implementation for the `Refineable` derive.
+//!
+//! The derive accepts structs with named fields and creates a companion `*Refinement` struct.
+//! Unsupported input shapes panic during macro expansion with a compiler diagnostic. Field
+//! attributes control nested refinement and optional serialization behavior; the generated code
+//! keeps unset fields distinct from values equal to their type's default.
+
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
@@ -7,6 +14,7 @@ use syn::{
 };
 
 #[proc_macro_derive(Refineable, attributes(refineable))]
+/// Generate a partial refinement type and `Refineable` implementation for a named-field struct.
 pub fn derive_refineable(input: TokenStream) -> TokenStream {
     let DeriveInput {
         ident,
@@ -487,7 +495,11 @@ pub fn derive_refineable(input: TokenStream) -> TokenStream {
         impl #impl_generics #refinement_ident #ty_generics
             #where_clause
         {
-            /// Returns `true` if all fields are `Some`
+            /// Return `true` when at least one refinement field is set.
+            ///
+            /// This is a presence check, not a semantic check: a field containing its type's
+            /// default value still counts as present. Use the `IsEmpty` trait for the latter
+            /// question.
             pub fn is_some(&self) -> bool {
                 #(
                     if self.#field_names.is_some() {

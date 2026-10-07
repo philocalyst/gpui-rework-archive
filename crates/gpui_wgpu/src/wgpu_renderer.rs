@@ -47,6 +47,11 @@ struct GpuFaultState {
     recovery_not_before: Option<std::time::Instant>,
 }
 
+/// Encodes GPUI scenes into a configured WGPU surface or off-screen target.
+///
+/// A renderer keeps the atlas, pipelines, and intermediate textures associated
+/// with one device. Call `unconfigure_surface` when a native window is temporarily
+/// unavailable, and the platform recovery method after a lost device.
 pub struct WgpuRenderer {
     /// Shared GPU context for device recovery coordination (unused on WASM).
     #[allow(dead_code)]
@@ -135,6 +140,8 @@ impl WgpuRenderer {
         })
     }
 
+    /// Applies a new drawable size and reconfigures the surface when it changes.
+    /// A zero dimension is normalized by the render target implementation.
     pub fn update_drawable_size(&mut self, size: Size<DevicePixels>) {
         if !self.target.resize(size) {
             return;
@@ -169,6 +176,7 @@ impl WgpuRenderer {
         });
     }
 
+    /// Changes the surface alpha mode and rebuilds pipelines when required.
     pub fn update_transparency(&mut self, transparent: bool) {
         if !self.target.set_transparent(transparent) {
             return;
@@ -203,19 +211,23 @@ impl WgpuRenderer {
         self.target.viewport_size()
     }
 
+    /// Returns the atlas shared by this renderer's sprite and glyph uploads.
     pub fn sprite_atlas(&self) -> &Arc<WgpuAtlas> {
         &self.atlas
     }
 
+    /// Reports whether the selected device supports dual-source blending.
     pub fn supports_dual_source_blending(&self) -> bool {
         self.dual_source_blending
     }
 
+    /// Clones the device and queue used by this renderer.
     pub fn gpu_context(&self) -> (Arc<wgpu::Device>, Arc<wgpu::Queue>) {
         let resources = self.resources();
         (resources.device.clone(), resources.queue.clone())
     }
 
+    /// Returns a typed handle for sharing this renderer's device with GPUI surfaces.
     pub fn gpu_context_info(&self) -> Option<WgpuContextHandle> {
         if let Some(context) = self.context.as_ref().and_then(|context| {
             context
@@ -241,6 +253,7 @@ impl WgpuRenderer {
         })
     }
 
+    /// Describes the adapter selected for this renderer.
     pub fn gpu_specs(&self) -> GpuSpecs {
         GpuSpecs {
             is_software_emulated: self.adapter_info.device_type == wgpu::DeviceType::Cpu,
@@ -250,6 +263,7 @@ impl WgpuRenderer {
         }
     }
 
+    /// Returns the adapter's maximum 2D texture dimension.
     pub fn max_texture_size(&self) -> u32 {
         self.target.maximum_dimension()
     }

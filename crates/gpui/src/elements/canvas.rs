@@ -5,8 +5,15 @@ use crate::{
     Style, StyleRefinement, Styled, Window,
 };
 
-/// Construct a canvas element with the given paint callback.
-/// Useful for adding short term custom drawing to a view.
+/// Construct a one-shot element with explicit prepaint and paint callbacks.
+///
+/// `prepaint` runs after layout and can compute frame-local data from the assigned bounds. Its
+/// return value is passed to `paint`, which runs in the paint phase. Both callbacks are consumed
+/// once per element value; construct a new canvas when the view renders again. See the
+/// [drawing walkthrough](https://gpui-ce.github.io/examples/drawing/#paint).
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-canvas.md")]
+// docs:examples:end
 pub fn canvas<T>(
     prepaint: impl 'static + FnOnce(Bounds<Pixels>, &mut Window, &mut App) -> T,
     paint: impl 'static + FnOnce(Bounds<Pixels>, T, &mut Window, &mut App),
@@ -18,8 +25,7 @@ pub fn canvas<T>(
     }
 }
 
-/// A canvas element, meant for accessing the low level paint API without defining a whole
-/// custom element
+/// A lightweight custom-paint element created by [`canvas`].
 pub struct Canvas<T> {
     prepaint: Option<Box<dyn FnOnce(Bounds<Pixels>, &mut Window, &mut App) -> T>>,
     paint: Option<Box<dyn FnOnce(Bounds<Pixels>, T, &mut Window, &mut App)>>,

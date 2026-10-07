@@ -75,22 +75,22 @@ fn advance_animation(
     (frame_index, remaining)
 }
 
-/// A type alias to the resource loader that the `img()` element uses.
+/// The asset loader used by [`img`] for [`ImageSource::Resource`] values.
 ///
-/// Note: that this is only for Resources, like URLs or file paths.
-/// Custom loaders, or external images will not use this asset loader
+/// Custom loaders and already decoded [`ImageSource::Render`] or [`ImageSource::Image`] values do
+/// not use this loader.
 pub type ImgResourceLoader = AssetLogger<ImageAssetLoader>;
 
-/// A source of image content.
+/// The input source for an [`Img`] element.
 #[derive(Clone)]
 pub enum ImageSource {
-    /// The image content will be loaded from some resource location
+    /// Load image data from a GPUI resource such as an embedded path or URI.
     Resource(Resource),
-    /// Cached image data
+    /// Use already decoded renderer image data.
     Render(Arc<RenderImage>),
-    /// Cached image data
+    /// Use already decoded CPU image data.
     Image(Arc<Image>),
-    /// A custom loading function to use
+    /// Poll a caller-owned loader. Return `None` while loading, or the result when complete.
     Custom(Arc<dyn Fn(&mut Window, &mut App) -> Option<Result<Arc<RenderImage>, ImageCacheError>>>),
 }
 
@@ -240,7 +240,7 @@ pub struct Img {
     image_cache: Option<AnyImageCache>,
 }
 
-/// Create a new image element.
+/// Construct an image element from a resource, decoded image, or custom loader.
 #[track_caller]
 pub fn img(source: impl Into<ImageSource>) -> Img {
     Img {

@@ -47,7 +47,7 @@ pub mod profiler;
     feature = "test-support",
     feature = "bench-support"
 ))]
-#[expect(missing_docs)]
+/// Bounded queues used by dispatchers and platform bridges.
 pub mod queue;
 mod scene;
 mod shared_uri;
@@ -74,6 +74,22 @@ pub use proptest;
 pub mod _accessibility;
 #[cfg(doc)]
 pub mod _ownership_and_data_flow;
+
+/// Explanations of the framework's rendering, input, scheduling, and platform contracts.
+///
+/// Complete programs and browser previews live in the
+/// [walkthroughs](https://gpui-ce.github.io/examples/).
+#[cfg(doc)]
+pub mod _documentation {
+    #[doc = include_str!("../docs/rendering.md")]
+    pub mod rendering {}
+    #[doc = include_str!("../docs/input.md")]
+    pub mod input {}
+    #[doc = include_str!("../docs/scheduling.md")]
+    pub mod scheduling {}
+    #[doc = include_str!("../docs/platforms.md")]
+    pub mod platforms {}
+}
 
 /// Do not touch, here be dragons for use by gpui_macros and such.
 #[doc(hidden)]
@@ -181,12 +197,18 @@ pub use pollster::block_on;
 
 /// The context trait, allows the different contexts in GPUI to be used
 /// interchangeably for certain operations.
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-AppContext-55871093.md")]
+// docs:examples:end
 pub trait AppContext {
     /// Create a new entity in the app context.
     #[expect(
         clippy::wrong_self_convention,
         reason = "`App::new` is an ubiquitous function for creating entities"
     )]
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-AppContext-new-d959d7f1.md")]
+// docs:examples:end
     fn new<T: 'static>(&mut self, build_entity: impl FnOnce(&mut Context<T>) -> T) -> Entity<T>;
 
     /// Reserve a slot for a entity to be inserted later.
@@ -266,7 +288,8 @@ pub trait AppContext {
         G: Global;
 
     /// Stores an entity in the app such that it wont be dropped if no other entities are referencing it.
-    /// Entities stored this way are dropped when the app is dropped, unless otherwise removed by [`remove_global_entity`].
+    /// Entities stored this way are dropped with the app unless removed with
+    /// [`Self::remove_global_entity`].
     fn insert_global_entity<T: 'static>(&mut self, entity: Entity<T>);
 
     /// Removes the entity from global storage. If no other entities are holding reference to it,

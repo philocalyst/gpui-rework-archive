@@ -1,12 +1,10 @@
-//! Div is the central, reusable element that most GPUI trees will be built from.
-//! It functions as a container for other elements, and provides a number of
-//! useful features for laying out and styling its children as well as binding
-//! mouse events and action handlers. It is meant to be similar to the HTML `<div>`
-//! element, but for GPUI.
+//! `Div` is GPUI's general-purpose container: it lays out children, applies style, creates
+//! hitboxes, and registers interaction and accessibility behavior. It resembles an HTML `<div>`
+//! but follows GPUI's frame lifecycle and typed event callbacks.
 //!
 //! # Build your own div
 //!
-//! GPUI does not directly provide APIs for stateful, multi step events like `click`
+//! GPUI does not directly provide APIs for stateful, multi-step events like `click`
 //! and `drag`. We want GPUI users to be able to build their own abstractions for
 //! their own needs. However, as a UI framework, we're also obliged to provide some
 //! building blocks to make the process of building your own elements easier.
@@ -14,6 +12,23 @@
 //! as several associated traits. Together, these provide the full suite of Dom-like events
 //! and Tailwind-like styling that you can use to build your own custom elements. Div is
 //! constructed by combining these two systems into an all-in-one element.
+//!
+//! Event methods follow one dispatch model:
+//!
+//! - `capture_*` runs from the window target toward the hit element; ordinary `on_*` methods run
+//!   during bubbling back toward the root.
+//! - Methods that mention a button or typed payload filter before invoking the callback. The
+//!   `*_all` methods receive the phase and hitbox and intentionally skip those filters.
+//! - `on_mouse_down_out` and `on_mouse_up_out` run during capture when the pointer is outside the
+//!   element. `on_mouse_move_all` and drag-move listeners can run outside the hitbox as well.
+//! - Action listeners are selected by action type. Drop listeners are selected by dragged-value
+//!   type; use [`DropListener`] when acceptance, hover styling, and drop handling must share that
+//!   type check.
+//!
+//! Callbacks are retained by the frame's element value, so bind them while constructing the
+//! element. State that must survive a rebuild belongs in an entity or a handle captured by the
+//! callback. The fluent [`InteractiveElement`] methods and imperative [`Interactivity`] methods
+//! implement the same behavior.
 
 #[cfg(test)]
 use crate::{
@@ -288,7 +303,7 @@ impl Interactivity {
             }));
     }
 
-    /// Bind the given callback to the mouse down event - for all mouse up events,
+    /// Bind the given callback to the mouse down event - for all mouse down events,
     /// regardless of dispatch phase, mouse button, or whether the mouse is
     /// inside or outside the bounds of the element.
     /// The imperative API equivalent to [`InteractiveElement::on_mouse_down_all`].
@@ -652,7 +667,7 @@ impl Interactivity {
     }
 
     /// Apply the given style when something is dragged over this element.
-    /// Will not trigger if the element doesnt have a drop listener for the value being dragged.
+    /// This will not trigger unless the element has a drop listener for the dragged value's type.
     /// Use this when the style of the element is not affected by the type of the dragged item.
     /// Otherwise use [`DropListener::on_drag_over`] or [`InteractiveElement::drag_over`].
     ///
@@ -878,6 +893,9 @@ impl Interactivity {
 
 /// A trait for elements that want to use the standard GPUI event handlers that don't
 /// require any state.
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-InteractiveElement-25ee04de.md")]
+// docs:examples:end
 pub trait InteractiveElement: Sized {
     /// Retrieve the interactivity state associated with this element
     fn interactivity(&mut self) -> &mut Interactivity;
@@ -1331,8 +1349,10 @@ pub trait InteractiveElement: Sized {
         self
     }
 
-    /// DEPRECATED: use [`on_drag_over`].
-    /// Apply the given style when the given data type is dragged over this element
+    /// Deprecated compatibility alias for [`Self::on_drag_over`].
+    ///
+    /// Apply a style when a value of type `S` is dragged over this element. New code should use
+    /// [`Self::on_drag_over`].
     fn drag_over<S: 'static>(
         mut self,
         f: impl 'static + Fn(StyleRefinement, &S, &mut Window, &mut App) -> StyleRefinement,
@@ -1489,6 +1509,9 @@ pub trait InteractiveElement: Sized {
 
 /// A trait for elements that want to use the standard GPUI interactivity features
 /// that require state.
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-StatefulInteractiveElement-7da77baa.md")]
+// docs:examples:end
 pub trait StatefulInteractiveElement: InteractiveElement {
     /// Set the accessible role for this element.
     ///
@@ -2037,7 +2060,7 @@ impl<T: Sized + 'static> DropListener<T> {
         self
     }
 
-    /// If a value of type [`T`] is dragged over the owning element,
+    /// If a value of type `T` is dragged over the owning element,
     /// [`Interactivity::can_drop`] is none or returns true, and [`can_drop`](Self::can_drop) is None or returns true,
     /// then this is called to provide style changes to apply to the owning element.
     pub fn on_drag_over(
@@ -2050,7 +2073,7 @@ impl<T: Sized + 'static> DropListener<T> {
         self
     }
 
-    /// If a value of type [`T`] is dropped on the owning element,
+    /// If a value of type `T` is dropped on the owning element,
     /// [`Interactivity::can_drop`] is none or returns true, and [`can_drop`](Self::can_drop) is None or returns true,
     /// then this is called to process the dropped value.
     pub fn on_drop(
@@ -2127,6 +2150,9 @@ pub(crate) type ActionListener =
 
 /// Construct a new [`Div`] element
 #[track_caller]
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-div.md")]
+// docs:examples:end
 pub fn div() -> Div {
     Div {
         interactivity: Interactivity::new(),
@@ -2138,6 +2164,9 @@ pub fn div() -> Div {
 }
 
 /// A [`Div`] element, the all-in-one element for building complex UIs in GPUI
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-Div-d35976e7.md")]
+// docs:examples:end
 pub struct Div {
     interactivity: Interactivity,
     children: SmallVec<[StackSafe<AnyElement>; 2]>,
@@ -4733,7 +4762,8 @@ where
 }
 
 /// Represents an element that can be scrolled *to* in its parent element.
-/// Contrary to [ScrollHandle::scroll_to_active_item], an anchored element does not have to be an immediate child of the parent.
+/// Unlike the direct item methods on [`ScrollHandle`], an anchored element does not have to be an
+/// immediate child of the parent.
 #[derive(Clone)]
 pub struct ScrollAnchor {
     handle: ScrollHandle,
@@ -4861,7 +4891,7 @@ impl ScrollHandle {
         self.0.borrow().child_bounds.get(ix).cloned()
     }
 
-    /// Update [ScrollHandleState]'s active item for scrolling to in prepaint
+    /// Update the handle's active item for scrolling during prepaint.
     pub fn scroll_to_item(&self, ix: usize) {
         let mut state = self.0.borrow_mut();
         state.active_item = Some(ScrollActiveItem {
@@ -4870,7 +4900,7 @@ impl ScrollHandle {
         });
     }
 
-    /// Update [ScrollHandleState]'s active item for scrolling to in prepaint
+    /// Update the handle's active item for scrolling during prepaint, placing the child at the top.
     /// This scrolls the minimal amount to ensure that the child is the first visible element
     pub fn scroll_to_top_of_item(&self, ix: usize) {
         let mut state = self.0.borrow_mut();

@@ -111,6 +111,9 @@ impl RelPath {
     }
 
     #[track_caller]
+    /// Parses a Unix-style relative path for tests, panicking if it is invalid.
+    ///
+    /// Production code should use [`Self::new`] to handle invalid input explicitly.
     pub fn new_test<'a>(path: &'a str) -> Cow<'a, Self> {
         Self::new(Path::new(path), PathStyle::Unix).unwrap()
     }
@@ -133,14 +136,17 @@ impl RelPath {
         unsafe { &*(s as *const str as *const Self) }
     }
 
+    /// Returns whether this path has no components.
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 
+    /// Iterates normalized components from first to last.
     pub fn components(&self) -> RelPathComponents<'_> {
         RelPathComponents(&self.0)
     }
 
+    /// Iterates this path's ancestors, starting with the full path and ending at empty.
     pub fn ancestors(&self) -> RelPathAncestors<'_> {
         RelPathAncestors {
             full: &self.0,
@@ -150,24 +156,29 @@ impl RelPath {
         }
     }
 
+    /// Returns the final component, or `None` for the empty path.
     pub fn file_name(&self) -> Option<&str> {
         self.components().next_back()
     }
 
+    /// Returns the final component without its extension.
     pub fn file_stem(&self) -> Option<&str> {
         Some(self.as_std_path().file_stem()?.to_str().unwrap())
     }
 
+    /// Returns the final component's extension without a leading dot.
     pub fn extension(&self) -> Option<&str> {
         Some(self.as_std_path().extension()?.to_str().unwrap())
     }
 
+    /// Returns the path without its final component, or `None` when empty.
     pub fn parent(&self) -> Option<&Self> {
         let mut components = self.components();
         components.next_back()?;
         Some(components.rest())
     }
 
+    /// Returns whether `other` is a component-aligned prefix of this path.
     pub fn starts_with(&self, other: &Self) -> bool {
         self.strip_prefix(other).is_ok()
     }
@@ -184,6 +195,7 @@ impl RelPath {
         self.starts_with(ancestor)
     }
 
+    /// Returns whether `other` is a component-aligned suffix of this path.
     pub fn ends_with(&self, other: &Self) -> bool {
         if other.is_empty() {
             return true;
@@ -196,6 +208,7 @@ impl RelPath {
         false
     }
 
+    /// Removes a component-aligned prefix, returning an error when it does not match.
     pub fn strip_prefix<'a>(&'a self, other: &Self) -> Result<&'a Self, StripPrefixError> {
         if other.is_empty() {
             return Ok(self);
@@ -210,6 +223,7 @@ impl RelPath {
         Err(StripPrefixError)
     }
 
+    /// Returns the number of components.
     pub fn len(&self) -> usize {
         if self.0.is_empty() {
             0
@@ -218,6 +232,7 @@ impl RelPath {
         }
     }
 
+    /// Returns the final `count` components, or `None` when `count` exceeds the path length.
     pub fn last_n_components(&self, count: usize) -> Option<&Self> {
         let len = self.len();
         if len >= count {
@@ -231,6 +246,7 @@ impl RelPath {
         }
     }
 
+    /// Joins two normalized relative paths without introducing `.` or `..` components.
     pub fn join(&self, other: &Self) -> RelPathBuf {
         if self.0.is_empty() {
             other.to_rel_path_buf()
@@ -241,10 +257,12 @@ impl RelPath {
         }
     }
 
+    /// Copies this borrowed path into an owned buffer.
     pub fn to_rel_path_buf(&self) -> RelPathBuf {
         RelPathBuf(self.0.to_string())
     }
 
+    /// Copies this path into an atomically reference-counted allocation.
     pub fn to_arc(&self) -> Arc<Self> {
         Arc::from(self)
     }
@@ -285,6 +303,7 @@ impl RelPath {
 }
 
 #[derive(Debug)]
+/// Error returned when a relative path does not begin with the requested prefix.
 pub struct StripPrefixError;
 
 impl ToOwned for RelPath {
@@ -332,10 +351,12 @@ impl Default for RelPathBuf {
 }
 
 impl RelPathBuf {
+    /// Creates an empty owned relative path.
     pub fn new() -> Self {
         Self(String::new())
     }
 
+    /// Removes the final component, returning whether one was removed.
     pub fn pop(&mut self) -> bool {
         if let Some(ix) = self.0.rfind('/') {
             self.0.truncate(ix);
@@ -348,6 +369,7 @@ impl RelPathBuf {
         }
     }
 
+    /// Appends the components of `path`.
     pub fn push(&mut self, path: &RelPath) {
         if path.is_empty() {
             return;
@@ -358,6 +380,7 @@ impl RelPathBuf {
         self.0.push_str(&path.0);
     }
 
+    /// Appends one validated component.
     pub fn push_component(&mut self, component: &str) -> Result<()> {
         anyhow::ensure!(
             !component.is_empty()
@@ -374,10 +397,12 @@ impl RelPathBuf {
         Ok(())
     }
 
+    /// Borrows the owned path as a [`RelPath`].
     pub fn as_rel_path(&self) -> &RelPath {
         RelPath::from_str(self.0.as_str())
     }
 
+    /// Replaces the extension, returning whether the path had a file name.
     pub fn set_extension(&mut self, extension: &str) -> bool {
         if let Some(filename) = self.file_name() {
             let mut filename = PathBuf::from(filename);
@@ -514,8 +539,10 @@ impl fmt::Display for RelPathBuf {
 }
 
 #[derive(Default)]
+/// Iterator over the slash-delimited components of a [`RelPath`].
 pub struct RelPathComponents<'a>(&'a str);
 
+/// Iterator over a relative path and each of its parents.
 pub struct RelPathAncestors<'a> {
     full: &'a str,
     front: usize,
@@ -526,6 +553,7 @@ pub struct RelPathAncestors<'a> {
 const SEPARATOR: char = '/';
 
 impl<'a> RelPathComponents<'a> {
+    /// Returns the unconsumed ancestor suffix.
     pub fn rest(&self) -> &'a RelPath {
         RelPath::from_str(self.0)
     }

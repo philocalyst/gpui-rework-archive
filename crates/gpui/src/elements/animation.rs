@@ -10,8 +10,11 @@ use crate::{
 pub use easing::*;
 use smallvec::SmallVec;
 
-/// An animation that can be applied to an element.
+/// Motion and scheduling policy used by [`AnimationExt::with_animation`].
 #[derive(Clone)]
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-Animation-de31f72e.md")]
+// docs:examples:end
 pub struct Animation {
     /// The timing, repetition, and easing applied to this animation.
     pub motion: Motion,
@@ -61,15 +64,21 @@ impl Animation {
     }
 }
 
-/// An extension trait for adding the animation wrapper to both Elements and Components
+/// Extension methods for animating an element or component.
 ///
-/// Animations rendered through this trait automatically respect
+/// Animations rendered through this trait respect
 /// [`App::reduce_motion`](crate::App::reduce_motion): when it is set,
 /// the element is rendered in a static state (the end state for oneshot
 /// animations, the start state for repeating ones) and no animation frames are
 /// scheduled.
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-AnimationExt-70b5b5c8.md")]
+// docs:examples:end
 pub trait AnimationExt {
     /// Render this component or element with an animation
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-AnimationExt-with-animation-68cbf08d.md")]
+// docs:examples:end
     fn with_animation(
         self,
         id: impl Into<ElementId>,
@@ -491,6 +500,9 @@ mod easing {
     }
 
     /// The quadratic ease-in-out function, which starts and ends slowly but speeds up in the middle
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-ease-in-out.md")]
+// docs:examples:end
     pub fn ease_in_out(delta: f32) -> f32 {
         if delta < 0.5 {
             2.0 * delta * delta

@@ -1,3 +1,9 @@
+//! Ordered, deduplicated collections of paths.
+//!
+//! `PathList` stores paths in canonical lexical order and retains a separate permutation for the
+//! caller's input order. Equality and hashing ignore that presentation order; use `ordered_paths`
+//! when the original sequence matters.
+
 use std::{
     hash::{Hash, Hasher},
     path::{Path, PathBuf},
@@ -15,6 +21,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// The paths can be retrieved in the original order using `ordered_paths()`.
 #[derive(Default, Debug, Clone)]
+/// A set of paths with a stable display order and an explicit ordering index.
 pub struct PathList {
     /// The paths, in lexicographic order.
     paths: Arc<[PathBuf]>,
@@ -39,12 +46,16 @@ impl Hash for PathList {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+/// Serializable representation of a [`PathList`].
 pub struct SerializedPathList {
+    /// Paths serialized in lexical order.
     pub paths: String,
+    /// Serialized permutation describing display order.
     pub order: String,
 }
 
 impl PathList {
+    /// Build a path list, retaining the input paths and their original order.
     pub fn new<P: AsRef<Path>>(paths: &[P]) -> Self {
         let mut indexed_paths: Vec<(usize, PathBuf)> = paths
             .iter()
@@ -61,11 +72,13 @@ impl PathList {
         Self { order, paths }
     }
 
+    /// Return whether the list contains no paths.
     pub fn is_empty(&self) -> bool {
         self.paths.is_empty()
     }
 
     /// Returns a new `PathList` with the given path removed.
+    /// Return a copy with every occurrence of `path_to_remove` omitted.
     pub fn without_path(&self, path_to_remove: &Path) -> PathList {
         let paths: Vec<PathBuf> = self
             .ordered_paths()
@@ -76,21 +89,25 @@ impl PathList {
     }
 
     /// Get the paths in lexicographic order.
+    /// Borrow the stored paths in storage order.
     pub fn paths(&self) -> &[PathBuf] {
         self.paths.as_ref()
     }
 
     /// Get the paths in the lexicographic order.
+    /// Clone the stored paths into an atomically shareable slice.
     pub fn paths_owned(&self) -> Arc<[PathBuf]> {
         self.paths.clone()
     }
 
     /// Get the order in which the paths were provided.
+    /// Borrow the indexes that define the display order.
     pub fn order(&self) -> &[usize] {
         self.order.as_ref()
     }
 
     /// Get the paths in the original order.
+    /// Iterate over paths in display order.
     pub fn ordered_paths(&self) -> impl Iterator<Item = &PathBuf> {
         self.order
             .iter()
@@ -99,10 +116,12 @@ impl PathList {
             .map(|(_, path)| path)
     }
 
+    /// Return whether display order is already lexical path order.
     pub fn is_lexicographically_ordered(&self) -> bool {
         self.order.iter().enumerate().all(|(i, &j)| i == j)
     }
 
+    /// Decode a serialized list, repairing invalid indexes by using storage order.
     pub fn deserialize(serialized: &SerializedPathList) -> Self {
         let mut paths: Vec<PathBuf> = if serialized.paths.is_empty() {
             Vec::new()
@@ -127,6 +146,7 @@ impl PathList {
         }
     }
 
+    /// Encode this list without changing its path or display order.
     pub fn serialize(&self) -> SerializedPathList {
         use std::fmt::Write as _;
 

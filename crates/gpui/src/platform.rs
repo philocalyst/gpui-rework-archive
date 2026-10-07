@@ -1,3 +1,10 @@
+//! Platform contracts shared by GPUI's native backends and test doubles.
+//!
+//! The traits in this module describe capabilities rather than a particular window toolkit:
+//! executors, displays, windows, text shaping, clipboard, image decoding, and optional capture.
+//! Implementations own native handles and must preserve the threading rules stated by each trait;
+//! application code normally reaches them through [`crate::App`] and [`crate::Window`].
+
 mod app_menu;
 mod keyboard;
 mod keystroke;
@@ -109,8 +116,11 @@ pub use threaded_dispatcher::ThreadedDispatcher;
 pub use visual_test::VisualTestPlatform;
 
 // TODO(jk): return an enum instead of a string
-/// Return which compositor we're guessing we'll use.
-/// Does not attempt to connect to the given compositor.
+/// Guess the compositor selected by the environment without opening a connection.
+///
+/// `ZED_HEADLESS` wins over display variables. On Linux and FreeBSD, a non-empty
+/// `WAYLAND_DISPLAY` selects Wayland before `DISPLAY` selects X11; otherwise the result is
+/// `"Headless"`. The returned string is descriptive and should not be used as a capability test.
 #[cfg(any(target_os = "linux", target_os = "freebsd"))]
 #[inline]
 pub fn guess_compositor() -> &'static str {
@@ -154,30 +164,47 @@ pub enum MacActivationPolicy {
 
 #[expect(missing_docs)]
 pub trait Platform: 'static {
+    /// Executor for work that may run away from the UI thread.
     fn background_executor(&self) -> BackgroundExecutor;
+    /// Executor for work serialized with the platform event loop.
     fn foreground_executor(&self) -> ForegroundExecutor;
+    /// Shared backend text system used by new windows.
     fn text_system(&self) -> Arc<dyn PlatformTextSystem>;
 
+    /// Apply the macOS activation policy; a no-op elsewhere.
     fn set_mac_activation_policy(&self, _policy: MacActivationPolicy) {}
+    /// Enter the native event loop and invoke `on_finish_launching` after launch.
     fn run(&self, on_finish_launching: Box<dyn 'static + FnOnce()>);
+    /// Ask the operating system to terminate the application.
     fn quit(&self);
+    /// Relaunch the application, optionally with a replacement executable and arguments.
     fn restart(&self, binary_path: Option<PathBuf>, arguments: Vec<OsString>);
+    /// Request application activation, optionally ignoring the currently active application.
     fn activate(&self, ignoring_other_apps: bool);
+    /// Hide this application.
     fn hide(&self);
+    /// Hide every other application where the platform supports it.
     fn hide_other_apps(&self);
+    /// Undo a previous [`Self::hide_other_apps`] request.
     fn unhide_other_apps(&self);
 
+    /// Enumerate displays currently visible to the backend.
     fn displays(&self) -> Vec<Rc<dyn PlatformDisplay>>;
+    /// Return the platform-designated primary display, if one exists.
     fn primary_display(&self) -> Option<Rc<dyn PlatformDisplay>>;
+    /// Return the active application window, if the platform exposes one.
     fn active_window(&self) -> Option<AnyWindowHandle>;
+    /// Return windows in platform stacking order when supported.
     fn window_stack(&self) -> Option<Vec<AnyWindowHandle>> {
         None
     }
 
+    /// Report whether native screen capture can be requested.
     fn is_screen_capture_supported(&self) -> bool {
         false
     }
 
+    /// Discover capturable sources asynchronously, or return an unavailable error.
     fn screen_capture_sources(
         &self,
     ) -> oneshot::Receiver<anyhow::Result<Vec<Rc<dyn ScreenCaptureSource>>>> {
@@ -190,6 +217,7 @@ pub trait Platform: 'static {
         sources_rx
     }
 
+    /// Create the native peer for a GPUI window.
     fn open_window(
         &self,
         handle: AnyWindowHandle,
@@ -214,8 +242,11 @@ pub trait Platform: 'static {
         None
     }
 
+    /// Ask the operating system to open `url` using its default handler.
     fn open_url(&self, url: &str);
+    /// Register a callback for URLs delivered to an already-running application.
     fn on_open_urls(&self, callback: Box<dyn FnMut(Vec<String>)>);
+    /// Register a URL scheme for this application.
     fn register_url_scheme(&self, url: &str) -> Task<Result<()>>;
 
     fn prompt_for_paths(
@@ -657,7 +688,7 @@ pub const MAX_BUTTONS_PER_SIDE: usize = 3;
 /// Describes which [`WindowButton`]s appear on each side of the titlebar.
 ///
 /// On Linux, this is read from the desktop environment's configuration
-/// (e.g. GNOME's `gtk-decoration-layout` gsetting) via [`WindowButtonLayout::parse`].
+/// (e.g. GNOME's `gtk-decoration-layout` setting) via the Linux/FreeBSD parser.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WindowButtonLayout {
     /// Buttons on the left side of the titlebar.
@@ -879,18 +910,31 @@ pub enum TextInputStateChange {
 
 #[expect(missing_docs)]
 pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
+    /// Return the outer window bounds in logical pixels.
     fn bounds(&self) -> Bounds<Pixels>;
+    /// Report whether the native window is maximized.
     fn is_maximized(&self) -> bool;
+    /// Return the native window bounds, including platform-specific state.
     fn window_bounds(&self) -> WindowBounds;
+    /// Return the drawable content size in logical pixels.
     fn content_size(&self) -> Size<Pixels>;
+    /// Request a content resize; native constraints may adjust the result asynchronously.
     fn resize(&mut self, size: Size<Pixels>);
+    /// Return logical pixels per device pixel.
     fn scale_factor(&self) -> f32;
+    /// Return the effective light/dark appearance for this window.
     fn appearance(&self) -> WindowAppearance;
+    /// Return the display currently containing this window.
     fn display(&self) -> Option<Rc<dyn PlatformDisplay>>;
+    /// Return the current pointer position in window coordinates.
     fn mouse_position(&self) -> Point<Pixels>;
+    /// Return current modifier key state.
     fn modifiers(&self) -> Modifiers;
+    /// Return current Caps Lock state.
     fn capslock(&self) -> Capslock;
+    /// Install the focused input handler, replacing any previous handler.
     fn set_input_handler(&mut self, input_handler: PlatformInputHandler);
+    /// Remove and return the focused input handler, if present.
     fn take_input_handler(&mut self) -> Option<PlatformInputHandler>;
     /// Apply the focused text region's [`TextInputConfiguration`] to the
     /// platform's text input session (e.g. attributes of the hidden editable
@@ -909,10 +953,15 @@ pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
     fn activate(&self, token: Option<&str>) -> bool;
     /// Requests that the operating system draw attention to this window.
     fn request_attention(&self) {}
+    /// Report whether this window is the active native window.
     fn is_active(&self) -> bool;
+    /// Report whether the pointer is currently over this window.
     fn is_hovered(&self) -> bool;
+    /// Return the window background mode used by the compositor.
     fn background_appearance(&self) -> WindowBackgroundAppearance;
+    /// Set the native title text.
     fn set_title(&mut self, title: &str);
+    /// Set the native/compositor background mode.
     fn set_background_appearance(&self, background_appearance: WindowBackgroundAppearance);
     /// Show or hide the window without explicitly requesting focus.
     ///
@@ -923,9 +972,13 @@ pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
     fn is_visible(&self) -> Option<bool> {
         None
     }
+    /// Minimize the native window.
     fn minimize(&self);
+    /// Request native zoom/maximize behavior.
     fn zoom(&self);
+    /// Toggle native fullscreen mode.
     fn toggle_fullscreen(&self);
+    /// Report native fullscreen state.
     fn is_fullscreen(&self) -> bool;
     fn frame_waker(&self) -> Option<Rc<dyn Fn()>> {
         None
@@ -941,9 +994,13 @@ pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
     fn on_close(&self, callback: Box<dyn FnOnce()>);
     fn on_appearance_changed(&self, callback: Box<dyn FnMut()>);
     fn on_button_layout_changed(&self, _callback: Box<dyn FnMut()>) {}
+    /// Submit a scene to the native renderer.
     fn draw(&self, scene: &Scene);
+    /// Ask the backend to schedule its next presentation frame.
     fn schedule_frame(&self) {}
+    /// Return the glyph/image atlas used by this window's renderer.
     fn sprite_atlas(&self) -> Arc<dyn PlatformAtlas>;
+    /// Report whether the backend can use subpixel glyph rendering.
     fn is_subpixel_rendering_supported(&self) -> bool;
 
     // macOS specific methods

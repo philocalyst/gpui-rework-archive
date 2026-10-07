@@ -27,6 +27,11 @@ impl<T: Item + fmt::Debug, D: fmt::Debug> fmt::Debug for StackEntry<'_, T, D> {
 }
 
 #[derive(Clone)]
+/// A position-aware cursor over a [`SumTree`].
+///
+/// Seek before calling inspection methods such as [`Self::item`]. Movement updates the cursor's
+/// position by applying each item's summary, so callers can navigate large trees without walking
+/// every preceding item.
 pub struct Cursor<'a, 'b, T: Item, D> {
     tree: &'a SumTree<T>,
     stack: ArrayVec<StackEntry<'a, T, D>, 16, u8>,
@@ -51,6 +56,7 @@ where
     }
 }
 
+/// In-order iterator over every item in a [`SumTree`].
 pub struct Iter<'a, T: Item> {
     tree: &'a SumTree<T>,
     stack: ArrayVec<StackEntry<'a, T, ()>, 16, u8>,
@@ -61,6 +67,7 @@ where
     T: Item,
     D: Dimension<'a, T::Summary>,
 {
+    /// Creates a cursor at the start of `tree`.
     pub fn new(tree: &'a SumTree<T>, cx: <T::Summary as Summary>::Context<'b>) -> Self {
         Self {
             tree,
@@ -72,6 +79,7 @@ where
         }
     }
 
+    /// Returns the cursor to the start position and clears any seek state.
     pub fn reset(&mut self) {
         self.did_seek = false;
         self.at_end = self.tree.is_empty();
@@ -79,11 +87,13 @@ where
         self.position = D::zero(self.cx);
     }
 
+    /// Returns the cursor's current position before the current item.
     pub fn start(&self) -> &D {
         &self.position
     }
 
     #[track_caller]
+    /// Returns the position immediately after the current item, or `start()` at end.
     pub fn end(&self) -> D {
         if let Some(item_summary) = self.item_summary() {
             let mut end = self.start().clone();
@@ -115,6 +125,7 @@ where
     }
 
     #[track_caller]
+    /// Returns the current item's summary, or `None` at the end of the tree.
     pub fn item_summary(&self) -> Option<&'a T::Summary> {
         self.assert_did_seek();
         if let Some(entry) = self.stack.last() {
@@ -136,6 +147,7 @@ where
     }
 
     #[track_caller]
+    /// Peeks at the item after the current item without moving the cursor.
     pub fn next_item(&self) -> Option<&'a T> {
         self.assert_did_seek();
         if let Some(entry) = self.stack.last() {
@@ -174,6 +186,7 @@ where
     }
 
     #[track_caller]
+    /// Peeks at the item before the current item without moving the cursor.
     pub fn prev_item(&self) -> Option<&'a T> {
         self.assert_did_seek();
         if let Some(entry) = self.stack.last() {
@@ -392,6 +405,7 @@ where
         );
     }
 
+    /// Returns whether this cursor has been positioned by a seek or movement.
     pub fn did_seek(&self) -> bool {
         self.did_seek
     }
@@ -676,6 +690,7 @@ where
     }
 }
 
+/// A cursor that visits only items accepted by a filtering predicate.
 pub struct FilterCursor<'a, 'b, F, T: Item, D> {
     cursor: Cursor<'a, 'b, T, D>,
     filter_node: F,
@@ -687,6 +702,7 @@ where
     T: Item,
     D: Dimension<'a, T::Summary>,
 {
+    /// Creates a filtered cursor over `tree`.
     pub fn new(
         tree: &'a SumTree<T>,
         cx: <T::Summary as Summary>::Context<'b>,
@@ -699,26 +715,32 @@ where
         }
     }
 
+    /// Returns the position before the current matching item.
     pub fn start(&self) -> &D {
         self.cursor.start()
     }
 
+    /// Returns the position after the current matching item.
     pub fn end(&self) -> D {
         self.cursor.end()
     }
 
+    /// Returns the current matching item, if any.
     pub fn item(&self) -> Option<&'a T> {
         self.cursor.item()
     }
 
+    /// Returns the current matching item's summary, if any.
     pub fn item_summary(&self) -> Option<&'a T::Summary> {
         self.cursor.item_summary()
     }
 
+    /// Advances to the next matching item.
     pub fn next(&mut self) {
         self.cursor.search_forward(&mut self.filter_node);
     }
 
+    /// Moves to the previous matching item.
     pub fn prev(&mut self) {
         self.cursor.search_backward(&mut self.filter_node);
     }

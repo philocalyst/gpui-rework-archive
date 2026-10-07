@@ -1,3 +1,10 @@
+//! Layered style values and the derive macro that resolves them.
+//!
+//! Refinable values distinguish an unset field from a field set to its type's
+//! default. This lets GPUI merge inherited and local style layers without losing
+//! the caller's intent.
+
+/// Derive [`Refineable`] for a struct with named fields.
 pub use derive_refineable::Refineable;
 
 /// A trait for types that can be refined with partial updates.
@@ -63,6 +70,7 @@ pub trait Refineable: Clone {
     fn subtract(&self, refinement: &Self::Refinement) -> Self::Refinement;
 }
 
+/// A refinement value that contains no changes.
 pub trait IsEmpty {
     /// Returns `true` if applying this refinement would have no effect.
     fn is_empty(&self) -> bool;
@@ -90,6 +98,7 @@ impl<S: Refineable + Default> Default for Cascade<S> {
 /// Slots are used to identify specific positions in the cascade where
 /// refinements can be set or updated.
 #[derive(Copy, Clone)]
+/// A stable handle returned by [`Cascade::reserve`] for one precedence layer.
 pub struct CascadeSlot(usize);
 
 impl<S: Refineable + Default> Cascade<S> {

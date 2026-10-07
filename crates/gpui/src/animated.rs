@@ -1,8 +1,23 @@
+//! Stateful interpolation for values that change while a UI is running.
+//!
+//! [`Animated`] stores a logical target and a presentation anchor. Calling
+//! [`Animated::set`] retargets from the value currently on screen, so an edit
+//! during a transition does not jump back to the previous origin. Sampling is
+//! explicit: the caller supplies a clock value, and a sample is active only
+//! while the configured [`crate::Motion`] has not settled. See
+//! [`crate::transition::Transition`] for the `Window`/`App` convenience API.
+
 use std::{ops::Sub, time::Duration};
 
 use crate::{AnyMotion, Lerp, Progress};
 
 /// A sampled animated value and its activity state.
+///
+/// `progress` is the eased presentation coordinate, not necessarily a value
+/// in `0..=1`: spring and custom easing curves may overshoot. `value` is still
+/// the value to paint for this sample. When `is_active` is `false`, subsequent
+/// samples at later times return the same settled value until the animation is
+/// retargeted.
 #[derive(Clone)]
 pub struct AnimatedSample<T> {
     /// The interpolated value at the sampled time.
@@ -17,6 +32,10 @@ pub struct AnimatedSample<T> {
 }
 
 /// A logical value together with the state required to animate its changes.
+///
+/// The type parameter `Time` is the clock used by the caller. It only needs to
+/// support subtraction into [`Duration`], which makes deterministic tests easy
+/// with a numeric or duration clock. The default is [`std::time::Instant`].
 #[derive(Clone)]
 pub struct Animated<T, Time = std::time::Instant> {
     value: T,

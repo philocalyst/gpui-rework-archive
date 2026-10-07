@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GPUI example preview</title>
+  </head>
+  <body>
+    <main id="preview" aria-live="polite">Loading the GPUI example…</main>
+    <script type="module">
+      const status = document.querySelector("#preview");
+      const params = new URLSearchParams(location.search);
+      const example = params.get("example") || location.hash.slice(1) || "first-window";
+      status.textContent = `Starting ${example}…`;
+      window.addEventListener("message", (event) => {
+        if (event.source === window.parent && event.data === "gpui-preview-ready") {
+          status.textContent = "Example ready.";
+          window.parent.postMessage({ type: "gpui-preview-ready", example }, "*");
+        }
+      });
+      try {
+        const response = await fetch("/preview/pkg/gpui_documentation_examples.js");
+        if (!response.ok) throw new Error(`preview bundle unavailable (${response.status})`);
+        const module = await import("/preview/pkg/gpui_documentation_examples.js");
+        await module.default();
+      } catch (error) {
+        status.textContent = `Could not start the preview: ${error.message}`;
+        window.parent.postMessage({ type: "gpui-preview-error", message: String(error) }, "*");
+      }
+    </script>
+  </body>
+</html>

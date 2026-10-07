@@ -1,4 +1,10 @@
 #![cfg(target_family = "wasm")]
+//! Browser support for GPUI applications.
+//!
+//! `gpui_ce_web` adapts browser event, window, display, keyboard, fetch, and
+//! dispatch APIs to GPUI's platform traits. Applications normally use the
+//! constructors re-exported by `gpui_ce_platform`; these types are useful when
+//! embedding GPUI into an existing browser runtime.
 
 //! GPUI's browser platform uses one document-owned canvas and supports one top-level window.
 //! Browser WebGPU is preferred by default, with an automatic WebGL2 fallback. Applications can

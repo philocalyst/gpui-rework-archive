@@ -1,13 +1,16 @@
 use crate::{App, BorrowAppContext};
 
-/// A marker trait for types that can be stored in GPUI's global state.
+/// A marker trait for one application-wide value stored in GPUI's global state.
 ///
 /// This trait exists to provide type-safe access to globals by ensuring only
 /// types that implement [`Global`] can be used with the accessor methods. For
 /// example, trying to access a global with a type that does not implement
 /// [`Global`] will result in a compile-time error.
 ///
-/// Implement this on types you want to store in the context as a global.
+/// Implement this on types you want to store in the context as a global. The
+/// [`'static`](https://doc.rust-lang.org/std/keyword.static.html) bound means the
+/// value cannot borrow a short-lived context; it can still contain interior
+/// mutability when that is appropriate for the global's ownership model.
 ///
 /// ## Restricting Access to Globals
 ///
@@ -30,7 +33,8 @@ pub trait Global: 'static {
 pub trait ReadGlobal {
     /// Returns the global instance of the implementing type.
     ///
-    /// Panics if a global for that type has not been assigned.
+    /// Panics if a global for that type has not been assigned. Use
+    /// [`App::try_global`] when absence is expected.
     fn global(cx: &App) -> &Self;
 }
 
@@ -50,7 +54,7 @@ pub trait UpdateGlobal {
         C: BorrowAppContext,
         F: FnOnce(&mut Self, &mut C) -> R;
 
-    /// Set the global instance of the implementing type.
+    /// Set the global instance of the implementing type, replacing any previous value.
     fn set_global<C>(cx: &mut C, global: Self)
     where
         C: BorrowAppContext;

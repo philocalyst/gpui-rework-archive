@@ -1,4 +1,10 @@
-//! Lerp trait defines behaviour for interpolating between two values of the same type.
+//! Linear interpolation implementations used by GPUI motion.
+//!
+//! [`Lerp::lerp`] accepts any `delta`: values below zero extrapolate before
+//! `self`, and values above one extrapolate beyond `to`. This is intentional;
+//! spring and custom easing curves can overshoot. Types implement interpolation
+//! component by component, while colors interpolate in the color space chosen
+//! by their implementation.
 use crate::{
     AbsoluteLength, Background, Bounds, Corners, DefiniteLength, DevicePixels, Edges, Fill, Length,
     Percentage, Pixels, Point, Radians, Relative, Rems, RingColor, Size, colors::Colors,

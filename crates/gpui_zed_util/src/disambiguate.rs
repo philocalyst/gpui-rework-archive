@@ -1,3 +1,5 @@
+//! Helpers for choosing the smallest disambiguating display detail.
+
 use std::collections::HashMap;
 use std::hash::Hash;
 

@@ -1,7 +1,13 @@
+//! The small HTTP boundary used by GPUI services.
+//!
+//! GPUI asks for a complete response through [`crate::http_client::HttpClient`], leaving transport, policy, and
+//! redirect handling to the application. The built-in clients make absence and denial explicit;
+//! neither performs network I/O.
+
 use futures::future::BoxFuture;
 use http::StatusCode;
 
-/// A simple HTTP response.
+/// A complete response returned by [`crate::http_client::HttpClient::get`].
 pub struct HttpResponse {
     /// The HTTP status code.
     pub status: StatusCode,
@@ -9,7 +15,10 @@ pub struct HttpResponse {
     pub body: Vec<u8>,
 }
 
-/// A trait for making HTTP requests.
+/// Performs GET requests for services that need remote bytes.
+///
+/// Implementations choose their timeout, TLS, proxy, and cache policy. `follow_redirects` is a
+/// request from the caller; implementations should report transport failures as `anyhow::Error`.
 pub trait HttpClient: 'static + Send + Sync {
     /// Perform a GET request and return the full response.
     fn get(
@@ -19,7 +28,7 @@ pub trait HttpClient: 'static + Send + Sync {
     ) -> BoxFuture<'static, anyhow::Result<HttpResponse>>;
 }
 
-/// An HTTP client that always returns an error.
+/// A client used when no HTTP service is configured.
 pub struct NullHttpClient;
 
 impl HttpClient for NullHttpClient {
@@ -32,7 +41,7 @@ impl HttpClient for NullHttpClient {
     }
 }
 
-/// An HTTP client that blocks all requests.
+/// A client that rejects every request with `PermissionDenied`.
 pub struct BlockedHttpClient;
 
 impl BlockedHttpClient {

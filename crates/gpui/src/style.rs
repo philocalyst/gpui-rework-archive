@@ -1,3 +1,16 @@
+//! Resolved style and style refinements used by GPUI's layout and paint pipeline.
+//!
+//! [`StyleRefinement`](crate::StyleRefinement) is the builder-facing, partial style: methods from
+//! [`Styled`](crate::Styled) add fields to it and later refinements override earlier fields.
+//! [`Style`] is the resolved value used for a frame. Lengths are expressed in logical [`Pixels`]
+//! unless a type explicitly says otherwise; `rem`s are resolved from the window's root text size,
+//! and device pixels are used only at the renderer boundary. Layout properties affect Taffy;
+//! paint properties are applied after bounds are known.
+//!
+//! For a property-by-property tour, start with the [layout constraints example](https://gpui-ce.github.io/examples/layout/#constraints),
+//! then use the [drawing example](https://gpui-ce.github.io/examples/drawing/#paint) to see how
+//! resolved bounds reach paint.
+
 use crate::{
     AbsoluteLength, App, Background, BorderStyle, Bounds, ColorExt, ContentMask, Corners,
     CornersRefinement, CursorStyle, DefiniteLength, DevicePixels, Edges, EdgesRefinement, Font,

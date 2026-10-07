@@ -53,7 +53,9 @@ const PRIMARY_TEXTURE_SLOT: u64 = 0;
 const SECONDARY_TEXTURE_SLOT: u64 = 1;
 const SAMPLER_SLOT: u64 = 0;
 
+/// Shared, mutex-protected pool of reusable Metal instance buffers.
 pub type Context = Arc<Mutex<InstanceBufferPool>>;
+/// Renderer type used by the macOS Metal backend.
 pub type Renderer = MetalRenderer;
 
 /// Per-frame global uniforms bound by every pipeline.
@@ -142,6 +144,10 @@ fn bind_instance_bytes(
 
 /// Creates the CAMetalLayer that backs a window's view. The renderer drawing
 /// into it sets its device and pixel format.
+/// Creates a resizable `CAMetalLayer` configured for a GPUI window.
+///
+/// `transparent` controls the layer's opaque flag; callers must still ensure the containing
+/// AppKit view and window use compatible transparency settings.
 pub fn new_window_layer(transparent: bool) -> metal::MetalLayer {
     let layer = metal::MetalLayer::new();
     // Support direct-to-display rendering if the window is not transparent
@@ -159,6 +165,10 @@ pub fn new_window_layer(transparent: bool) -> metal::MetalLayer {
     layer
 }
 
+/// Creates a Metal renderer for a window or headless target.
+///
+/// The bounds argument is retained for backend compatibility; drawable dimensions are applied
+/// later through [`MetalRenderer::update_drawable_size`].
 pub fn new_renderer(
     context: self::Context,
     _bounds: gpui::Size<f32>,
@@ -167,6 +177,7 @@ pub fn new_renderer(
     Ok(MetalRenderer::new(context, transparent))
 }
 
+/// Reusable per-frame Metal buffers used for instance data.
 pub struct InstanceBufferPool {
     buffer_size: usize,
     buffers: Vec<metal::Buffer>,
@@ -230,6 +241,10 @@ impl InstanceBufferPool {
     }
 }
 
+/// Metal renderer owning pipeline state, intermediate textures, and the optional window layer.
+///
+/// All methods must be called on the renderer's owning thread. A headless renderer has no layer;
+/// call its offscreen rendering entry points instead of [`Self::draw`].
 pub struct MetalRenderer {
     device: metal::Device,
     layer: Option<metal::MetalLayer>,
@@ -529,10 +544,14 @@ impl MetalRenderer {
         }
     }
 
+    /// Returns the retained window layer, or `None` for a headless renderer.
     pub fn layer(&self) -> Option<&metal::MetalLayerRef> {
         self.layer.as_ref().map(|l| l.as_ref())
     }
 
+    /// Returns the underlying layer pointer, or null for a headless renderer.
+    ///
+    /// The pointer is borrowed and becomes invalid when the renderer drops its layer.
     pub fn layer_ptr(&self) -> *mut CAMetalLayer {
         self.layer
             .as_ref()
@@ -540,10 +559,12 @@ impl MetalRenderer {
             .unwrap_or(ptr::null_mut())
     }
 
+    /// Returns the atlas used by this renderer for image and glyph sprites.
     pub fn sprite_atlas(&self) -> &Arc<MetalAtlas> {
         &self.sprite_atlas
     }
 
+    /// Sets whether presenting is synchronized with the surrounding Core Animation transaction.
     pub fn set_presents_with_transaction(&mut self, presents_with_transaction: bool) {
         self.presents_with_transaction = presents_with_transaction;
         if let Some(layer) = &self.layer {
@@ -551,6 +572,9 @@ impl MetalRenderer {
         }
     }
 
+    /// Updates drawable and intermediate render-target sizes in device pixels.
+    ///
+    /// A zero dimension releases intermediate targets until a non-zero size is supplied.
     pub fn update_drawable_size(&mut self, size: Size<DevicePixels>) {
         if let Some(layer) = &self.layer {
             layer.set_drawable_size(CGSize::new(size.width.0 as f64, size.height.0 as f64));
@@ -636,6 +660,7 @@ impl MetalRenderer {
         }
     }
 
+    /// Updates the layer opacity policy for subsequent frames.
     pub fn update_transparency(&mut self, transparent: bool) {
         self.opaque = !transparent;
         if let Some(layer) = &self.layer {
@@ -643,6 +668,10 @@ impl MetalRenderer {
         }
     }
 
+    /// Releases backend resources that require explicit teardown.
+    ///
+    /// Metal resources are reference-counted, so this is currently a no-op and is safe to call
+    /// more than once.
     pub fn destroy(&self) {
         // nothing to do
     }

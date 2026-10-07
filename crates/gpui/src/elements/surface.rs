@@ -8,7 +8,7 @@ use crate::{
 use core_video::pixel_buffer::CVPixelBuffer;
 use refineable::Refineable;
 
-/// A source of a surface's content.
+/// A platform surface or GPU texture that can be composited as an element.
 #[derive(Clone)]
 pub enum SurfaceSource {
     /// A macOS image buffer from CoreVideo
@@ -105,14 +105,14 @@ impl From<crate::ScreenCaptureFrame> for SurfaceSource {
     }
 }
 
-/// A surface element.
+/// An element that composites a native or GPU surface into its layout bounds.
 pub struct Surface {
     source: SurfaceSource,
     object_fit: ObjectFit,
     style: StyleRefinement,
 }
 
-/// Create a new surface element.
+/// Construct a surface element. The default [`ObjectFit`] is [`ObjectFit::Contain`].
 pub fn surface(source: impl Into<SurfaceSource>) -> Surface {
     Surface {
         source: source.into(),

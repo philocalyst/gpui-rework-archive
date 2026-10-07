@@ -1,28 +1,36 @@
+//! Theme colors shared by GPUI components.
+//!
+//! [`crate::colors::Colors`] is a deliberately small semantic palette. Values are sRGB
+//! [`crate::Rgba`] colors, and the light/dark constructors are defaults rather
+//! than an exhaustive theme system. Install [`crate::colors::GlobalColors`] in
+//! application state when views should read the same palette through
+//! [`crate::colors::DefaultColors`].
+
 use crate::{App, Global, Window, WindowAppearance, rgb};
 use palette::rgb::Rgba;
 use std::ops::Deref;
 use std::sync::Arc;
 
-/// The default set of colors for gpui.
+/// The default semantic color set for GPUI components.
 ///
 /// These are used for styling base components, examples and more.
 #[derive(Clone, Debug)]
 pub struct Colors {
-    /// Text color
+    /// Primary text color.
     pub text: Rgba,
-    /// Selected text color
+    /// Text drawn over a selected background.
     pub selected_text: Rgba,
-    /// Background color
+    /// Window or page background.
     pub background: Rgba,
-    /// Disabled color
+    /// Disabled controls and labels.
     pub disabled: Rgba,
-    /// Selected color
+    /// Selection and active-control background.
     pub selected: Rgba,
-    /// Border color
+    /// Borders around controls and containers.
     pub border: Rgba,
-    /// Separator color
+    /// Separators between adjacent items.
     pub separator: Rgba,
-    /// Container color
+    /// Raised or nested container background.
     pub container: Rgba,
 }
 
@@ -69,15 +77,18 @@ impl Colors {
         }
     }
 
-    /// Get [Colors] from the global state
+    /// Returns the application-wide palette.
     pub fn get_global(cx: &App) -> &Arc<Colors> {
         &cx.global::<GlobalColors>().0
     }
 }
 
-/// Get [Colors] from the global state
+/// Application-wide palette stored behind an [`Arc`].
 #[derive(Clone, Debug)]
-pub struct GlobalColors(pub Arc<Colors>);
+pub struct GlobalColors(
+    /// Shared semantic palette.
+    pub Arc<Colors>,
+);
 
 impl Deref for GlobalColors {
     type Target = Arc<Colors>;

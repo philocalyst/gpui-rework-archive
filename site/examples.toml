@@ -1,0 +1,482 @@
+[[examples]]
+slug = "first-window"
+title = "Open a window"
+summary = "Create a view, return an element, and let the platform open a window."
+source = "site/examples/src/bin/first-window.rs"
+support = "site/examples/src/support.rs"
+downloadable_manifest = "site/examples/download-Cargo.toml"
+run = "cargo run --manifest-path site/examples/Cargo.toml --bin first-window"
+preview = "first-window"
+weight = 10
+
+[[examples]]
+slug = "counter"
+title = "Make state visible"
+summary = "Give a view a count, change it on a click, and request the next frame."
+source = "site/examples/src/bin/counter.rs"
+support = "site/examples/src/support.rs"
+downloadable_manifest = "site/examples/download-Cargo.toml"
+run = "cargo run --manifest-path site/examples/Cargo.toml --bin counter"
+preview = "counter"
+weight = 20
+
+[[examples]]
+slug = "layout"
+title = "Constrain a layout"
+summary = "Keep a sidebar fixed while a flexible pane gives text room to shrink."
+source = "site/examples/src/bin/layout.rs"
+support = "site/examples/src/support.rs"
+downloadable_manifest = "site/examples/download-Cargo.toml"
+run = "cargo run --manifest-path site/examples/Cargo.toml --bin layout"
+preview = "layout"
+weight = 30
+
+[[examples]]
+slug = "actions"
+title = "Route a keyboard action"
+summary = "Connect a focus handle, a key context, a shortcut, and its handler."
+source = "site/examples/src/bin/actions.rs"
+support = "site/examples/src/support.rs"
+downloadable_manifest = "site/examples/download-Cargo.toml"
+run = "cargo run --manifest-path site/examples/Cargo.toml --bin actions"
+preview = "actions"
+weight = 40
+
+[[examples]]
+slug = "lists"
+title = "Render a large list"
+summary = "Scroll through 10,000 rows while constructing only the requested range."
+source = "site/examples/src/bin/lists.rs"
+support = "site/examples/src/support.rs"
+downloadable_manifest = "site/examples/download-Cargo.toml"
+run = "cargo run --manifest-path site/examples/Cargo.toml --bin lists"
+preview = "lists"
+weight = 50
+
+[[examples]]
+slug = "drawing"
+title = "Paint a custom region"
+summary = "Use layout-provided bounds to record your own drawing commands."
+source = "site/examples/src/bin/drawing.rs"
+support = "site/examples/src/support.rs"
+downloadable_manifest = "site/examples/download-Cargo.toml"
+run = "cargo run --manifest-path site/examples/Cargo.toml --bin drawing"
+preview = "drawing"
+weight = 60
+
+[[examples]]
+slug = "animation"
+title = "Replay an animation"
+summary = "Keep animation identity stable, then change its key to restart it."
+source = "site/examples/src/bin/animation.rs"
+support = "site/examples/src/support.rs"
+downloadable_manifest = "site/examples/download-Cargo.toml"
+run = "cargo run --manifest-path site/examples/Cargo.toml --bin animation"
+preview = "animation"
+weight = 70
+
+[[examples]]
+slug = "async-task"
+title = "Finish a task after a delay"
+summary = "Keep a task alive and return its result through a weak view handle."
+source = "site/examples/src/bin/async-task.rs"
+support = "site/examples/src/support.rs"
+downloadable_manifest = "site/examples/download-Cargo.toml"
+run = "cargo run --manifest-path site/examples/Cargo.toml --bin async-task"
+preview = "async-task"
+weight = 80
+
+[[examples]]
+slug = "subscriptions"
+title = "Observe shared state"
+summary = "Keep one model, observe its changes, and retain the subscription."
+source = "site/examples/src/bin/subscriptions.rs"
+support = "site/examples/src/support.rs"
+downloadable_manifest = "site/examples/download-Cargo.toml"
+run = "cargo run --manifest-path site/examples/Cargo.toml --bin subscriptions"
+preview = "subscriptions"
+weight = 90
+
+[[examples]]
+slug = "text"
+title = "Shape and wrap text"
+summary = "Lay out Unicode text, distinguish byte offsets from glyphs, and constrain a paragraph."
+source = "site/examples/src/bin/text.rs"
+support = "site/examples/src/support.rs"
+downloadable_manifest = "site/examples/download-Cargo.toml"
+run = "cargo run --manifest-path site/examples/Cargo.toml --bin text"
+preview = "text"
+weight = 100
+
+[api."gpui::Animation"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Animation.html"
+source = "crates/gpui/src/elements/animation.rs"
+declaration = "pub struct Animation {"
+
+[api."gpui::AnimationExt"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/trait.AnimationExt.html"
+source = "crates/gpui/src/elements/animation.rs"
+declaration = "pub trait AnimationExt "
+
+[api."gpui::AnimationExt::with_animation"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/trait.AnimationExt.html#method.with_animation"
+source = "crates/gpui/src/elements/animation.rs"
+declaration = "fn with_animation("
+
+[api."gpui::App::bind_keys"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.App.html#method.bind_keys"
+source = "crates/gpui/src/app.rs"
+declaration = "pub fn bind_keys(&mut self, bindings: impl IntoIterator<Item = KeyBinding>) {"
+
+[api."gpui::App::open_window"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.App.html#method.open_window"
+source = "crates/gpui/src/app.rs"
+declaration = "pub fn open_window<V: 'static + Render>("
+
+[api."gpui::App::reduce_motion"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.App.html#method.reduce_motion"
+source = "crates/gpui/src/app.rs"
+declaration = "pub fn reduce_motion(&self) -> bool {"
+
+[api."gpui::AppContext"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/trait.AppContext.html"
+source = "crates/gpui/src/gpui.rs"
+declaration = "pub trait AppContext "
+
+[api."gpui::AppContext::new"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/trait.AppContext.html#tymethod.new"
+source = "crates/gpui/src/gpui.rs"
+declaration = "fn new<T: 'static>(&mut self, build_entity:"
+
+
+[api."gpui::Application"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Application.html"
+source = "crates/gpui/src/app.rs"
+declaration = "pub struct Application(Rc<AppCell>)"
+
+[api."gpui::Application::run"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Application.html#method.run"
+source = "crates/gpui/src/app.rs"
+declaration = "pub fn run<F>(self, on_finish_launching: F)"
+
+
+[api."gpui::BackgroundExecutor::timer"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.BackgroundExecutor.html#method.timer"
+source = "crates/gpui/src/executor.rs"
+declaration = "pub fn timer(&self, duration: Duration) -> Task<()> {"
+
+[api."gpui::Bounds"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Bounds.html"
+source = "crates/gpui/src/geometry.rs"
+declaration = "pub struct Bounds"
+
+[api."gpui::Context"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Context.html"
+source = "crates/gpui/src/app/context.rs"
+declaration = "pub struct Context"
+
+[api."gpui::Context::listener"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Context.html#method.listener"
+source = "crates/gpui/src/app/context.rs"
+declaration = "pub fn listener<E: ?Sized>("
+
+[api."gpui::Context::notify"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Context.html#method.notify"
+source = "crates/gpui/src/app/context.rs"
+declaration = "pub fn notify(&mut self) {"
+
+[api."gpui::Context::observe"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Context.html#method.observe"
+source = "crates/gpui/src/app/context.rs"
+declaration = "pub fn observe<W>("
+
+
+[api."gpui::Context::spawn"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Context.html#method.spawn"
+source = "crates/gpui/src/app/context.rs"
+declaration = "pub fn spawn<AsyncFn, R>"
+
+
+[api."gpui::Div"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Div.html"
+source = "crates/gpui/src/elements/div.rs"
+declaration = "pub struct Div {"
+
+[api."gpui::Entity"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Entity.html"
+source = "crates/gpui/src/app/entity_map.rs"
+declaration = "pub struct Entity<T>"
+
+[api."gpui::Entity::read"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Entity.html#method.read"
+source = "crates/gpui/src/app/entity_map.rs"
+declaration = "pub fn read<'a>(&self, cx: &'a App) -> &'a T"
+
+
+[api."gpui::Entity::update"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Entity.html#method.update"
+source = "crates/gpui/src/app/entity_map.rs"
+declaration = "pub fn update<R, C: AppContext>("
+
+
+[api."gpui::FocusHandle"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.FocusHandle.html"
+source = "crates/gpui/src/window.rs"
+declaration = "pub struct FocusHandle"
+
+[api."gpui::InteractiveElement"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/trait.InteractiveElement.html"
+source = "crates/gpui/src/elements/div.rs"
+declaration = "pub trait InteractiveElement: Sized"
+
+[api."gpui::KeyBinding"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.KeyBinding.html"
+source = "crates/gpui/src/keymap/binding.rs"
+declaration = "pub struct KeyBinding {"
+
+[api."gpui::Motion"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Motion.html"
+source = "crates/gpui/src/motion.rs"
+declaration = "pub struct Motion<Description = DurationDescription>"
+
+[api."gpui::Pixels"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Pixels.html"
+source = "crates/gpui/src/geometry.rs"
+declaration = "pub struct Pixels"
+
+[api."gpui::Render"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/trait.Render.html"
+source = "crates/gpui/src/element.rs"
+declaration = "pub trait Render: 'static + Sized"
+
+[api."gpui::StatefulInteractiveElement"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/trait.StatefulInteractiveElement.html"
+source = "crates/gpui/src/elements/div.rs"
+declaration = "pub trait StatefulInteractiveElement: InteractiveElement"
+
+[api."gpui::Styled"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/trait.Styled.html"
+source = "crates/gpui/src/styled.rs"
+declaration = "pub trait Styled: Sized"
+
+[api."gpui::Styled::flex_1"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/trait.Styled.html#method.flex_1"
+source = "crates/gpui/src/styled.rs"
+declaration = "pub trait Styled"
+
+[api."gpui::Styled::flex_shrink"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/trait.Styled.html#method.flex_shrink"
+source = "crates/gpui/src/styled.rs"
+declaration = "pub trait Styled"
+
+[api."gpui::Styled::line_height"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/trait.Styled.html#method.line_height"
+source = "crates/gpui/src/styled.rs"
+declaration = "pub trait Styled"
+
+[api."gpui::Styled::min_w"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/trait.Styled.html#method.min_w"
+source = "crates/gpui/src/styled.rs"
+declaration = "pub trait Styled"
+
+[api."gpui::Styled::opacity"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/trait.Styled.html#method.opacity"
+source = "crates/gpui/src/styled.rs"
+declaration = "pub trait Styled"
+
+[api."gpui::Styled::text_size"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/trait.Styled.html#method.text_size"
+source = "crates/gpui/src/styled.rs"
+declaration = "pub trait Styled"
+
+[api."gpui::Styled::w"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/trait.Styled.html#method.w"
+source = "crates/gpui/src/styled.rs"
+declaration = "pub trait Styled"
+
+[api."gpui::Subscription"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Subscription.html"
+source = "crates/gpui/src/subscription.rs"
+declaration = "pub struct Subscription"
+
+[api."gpui::Task"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Task.html"
+source = "crates/gpui_scheduler/src/executor.rs"
+declaration = "pub struct Task<T>(TaskState<T>);"
+
+[api."gpui::Text"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Text.html"
+source = "crates/gpui/src/elements/text.rs"
+declaration = "pub struct Text {"
+
+[api."gpui::UniformList"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.UniformList.html"
+source = "crates/gpui/src/elements/uniform_list.rs"
+declaration = "pub struct UniformList {"
+
+[api."gpui::UniformList::track_scroll"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.UniformList.html#method.track_scroll"
+source = "crates/gpui/src/elements/uniform_list.rs"
+declaration = "pub fn track_scroll(mut self, handle: &UniformListScrollHandle) -> Self {"
+
+[api."gpui::UniformListScrollHandle::new"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.UniformListScrollHandle.html#method.new"
+source = "crates/gpui/src/elements/uniform_list.rs"
+declaration = "pub fn new() -> Self {"
+
+[api."gpui::WeakEntity::update"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.WeakEntity.html#method.update"
+source = "crates/gpui/src/app/entity_map.rs"
+declaration = "pub fn update<C, R>("
+
+
+[api."gpui::Window::focus"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Window.html#method.focus"
+source = "crates/gpui/src/window.rs"
+declaration = "pub fn focus(&mut self, handle: &FocusHandle, cx: &mut App)"
+
+
+[api."gpui::Window::paint_quad"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Window.html#method.paint_quad"
+source = "crates/gpui/src/window.rs"
+declaration = "pub fn paint_quad(&mut self, quad: PaintQuad)"
+
+
+[api."gpui::actions"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/macro.actions.html"
+source = "crates/gpui/src/action.rs"
+declaration = "macro_rules! actions {"
+
+[api."gpui::canvas"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/fn.canvas.html"
+source = "crates/gpui/src/elements/canvas.rs"
+declaration = "pub fn canvas"
+
+[api."gpui::div"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/fn.div.html"
+source = "crates/gpui/src/elements/div.rs"
+declaration = "pub fn div"
+
+[api."gpui::ease_in_out"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/fn.ease_in_out.html"
+source = "crates/gpui/src/elements/animation.rs"
+declaration = "pub fn ease_in_out"
+
+[api."gpui::fill"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/fn.fill.html"
+source = "crates/gpui/src/window.rs"
+declaration = "pub fn fill"
+
+[api."gpui::text"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/macro.text.html"
+source = "crates/gpui/src/elements/text.rs"
+declaration = "macro_rules! text {"
+
+[api."gpui::uniform_list"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/fn.uniform_list.html"
+source = "crates/gpui/src/elements/uniform_list.rs"
+declaration = "pub fn uniform_list"

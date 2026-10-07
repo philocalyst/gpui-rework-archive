@@ -1,3 +1,15 @@
+//! Fluent style methods for GPUI elements.
+//!
+//! [`Styled`] stores a [`StyleRefinement`](crate::StyleRefinement) on an element and returns the
+//! element from each setter, so calls can be chained while the element is built. The generated
+//! helpers cover visibility, margin, padding, position/inset, overflow, cursor, borders, rings,
+//! shadows, sizing, flex/grid placement, and common text styles. A setter writes its field and
+//! therefore the last setter for that field wins; `.refine_style(...)` merges a partial refinement.
+//! Filter convenience methods append, while `filter` and `backdrop_filter` replace their chains.
+//! Text color, font, and text background are inherited by descendants during style resolution.
+//! Style is resolved during layout; event-state refinements such as hover and focus are applied by
+//! [`crate::InteractiveElement`] during the frame lifecycle.
+
 use crate::{
     self as gpui, AbsoluteLength, AlignContent, AlignItems, AlignSelf, BorderStyle, CursorStyle,
     DefiniteLength, Display, Edges, Fill, Filter, FlexDirection, FlexWrap, Font, FontFeatures,
@@ -22,11 +34,35 @@ const ELLIPSIS: SharedString = SharedString::new_static("…");
     all(any(feature = "inspector", debug_assertions), not(rust_analyzer)),
     gpui_macros::derive_inspector_reflection
 )]
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Styled-1a58201f.md")]
+// docs:examples:end
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Styled-flex-1-f5667f4a.md")]
+// docs:examples:end
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Styled-flex-shrink-20b4a49b.md")]
+// docs:examples:end
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Styled-line-height-656716f3.md")]
+// docs:examples:end
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Styled-min-w-71eeddc8.md")]
+// docs:examples:end
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Styled-opacity-4ad8a9d4.md")]
+// docs:examples:end
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Styled-text-size-c72aa80f.md")]
+// docs:examples:end
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Styled-w-2ede14d6.md")]
+// docs:examples:end
 pub trait Styled: Sized {
-    /// Returns a reference to the style memory of this element.
+    /// Return the partial style storage mutated by all fluent setters.
     fn style(&mut self) -> &mut StyleRefinement;
 
-    /// Applies the given refinement to this element's style.
+    /// Merge `refinement` into this element's style, replacing fields supplied by the refinement.
     fn refine_style(mut self, refinement: &StyleRefinement) -> Self {
         self.style().refine(refinement);
 
@@ -826,7 +862,7 @@ pub trait Styled: Sized {
     }
 
     /// Sets the text decoration to underline.
-    /// [Docs](https://tailwindcss.com/docs/text-decoration-line#underling-text)
+    /// [Docs](https://tailwindcss.com/docs/text-decoration-line#underlining-text)
     fn underline(mut self) -> Self {
         let style = self.text_style();
         style.underline = Some(UnderlineStyle {

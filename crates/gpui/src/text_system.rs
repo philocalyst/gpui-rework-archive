@@ -1,3 +1,11 @@
+//! Font resolution, Unicode shaping, line breaking, and glyph rasterization.
+//!
+//! GPUI keeps platform font access behind [`PlatformTextSystem`], then exposes stable font IDs,
+//! shaped layouts, caret geometry, and paint fragments to the renderer. Text offsets are UTF-8
+//! byte offsets at API boundaries; a cluster may span several scalar values (for example a
+//! combining sequence or emoji ZWJ sequence). See [`WindowTextSystem`] for frame-scoped layout
+//! reuse and [`TextLayoutOptions`] for direction and wrapping policy.
+
 #[cfg(test)]
 use crate::{
     AtlasKey, AtlasTextureKind, PlatformAtlas, TestAtlas, TestTextSystem, hsla, point, size,
@@ -63,7 +71,10 @@ pub const SUBPIXEL_VARIANTS_X: u8 = 4;
 /// Number of subpixel glyph variants along the Y axis.
 pub const SUBPIXEL_VARIANTS_Y: u8 = 1;
 
-/// The GPUI text rendering sub system.
+/// Shared font database and glyph metrics for a platform text backend.
+///
+/// Font registration invalidates cached resolutions and metrics. The type is safe to share across
+/// windows; layout caches belong to [`WindowTextSystem`].
 pub struct TextSystem {
     platform_text_system: Arc<dyn PlatformTextSystem>,
     font_ids_by_font: RwLock<FxHashMap<Font, Result<FontId>>>,
@@ -71,7 +82,7 @@ pub struct TextSystem {
 }
 
 impl TextSystem {
-    /// Create a new TextSystem with the given platform text system.
+    /// Create a text system backed by `platform_text_system`.
     pub fn new(platform_text_system: Arc<dyn PlatformTextSystem>) -> Self {
         TextSystem {
             platform_text_system,
@@ -80,12 +91,12 @@ impl TextSystem {
         }
     }
 
-    /// Get a list of all available font names from the operating system.
+    /// Return the font family names currently visible to the backend.
     pub fn all_font_names(&self) -> Vec<String> {
         self.platform_text_system.all_font_names()
     }
 
-    /// Adds font data to the text system.
+    /// Register font bytes and invalidate cached resolutions.
     ///
     /// Font family names come from each font's embedded name table.
     pub fn add_fonts(&self, fonts: Vec<Cow<'static, [u8]>>) -> Result<()> {
@@ -150,14 +161,15 @@ impl TextSystem {
         self.platform_text_system.prewarm_fonts(&font_ids);
     }
 
-    /// Get the bounding box for the given font and font size.
-    /// A font's bounding box is the smallest rectangle that could enclose all glyphs
-    /// in the font. superimposed over one another.
+    /// Return the font-wide glyph bounds at `font_size`.
+    ///
+    /// This is the smallest rectangle that encloses every glyph in the face, not the bounds of a
+    /// particular string.
     pub fn bounding_box(&self, font_id: FontId, font_size: Pixels) -> Bounds<Pixels> {
         self.read_metrics(font_id, |metrics| metrics.bounding_box(font_size))
     }
 
-    /// Get the typographic bounds for the given character, in the given font and size.
+    /// Return the scaled typographic bounds of one character.
     pub fn typographic_bounds(
         &self,
         font_id: FontId,
@@ -276,7 +288,10 @@ impl TextSystem {
     }
 }
 
-/// The GPUI text layout subsystem.
+/// Window-scoped text shaping and layout cache.
+///
+/// The cache is invalidated or reused with the window frame lifecycle. Keep one value per window
+/// rather than constructing one for every label so shaping and glyph metrics can be shared.
 #[derive(Deref)]
 pub struct WindowTextSystem {
     line_layout_cache: LineLayoutCache,
@@ -305,11 +320,10 @@ impl WindowTextSystem {
         self.line_layout_cache.truncate_layouts(index)
     }
 
-    /// Shape the given line, at the given font_size, for painting to the screen.
+    /// Shape one logical line for painting.
     /// Subsets of the line can be styled independently with the `runs` parameter.
     ///
-    /// Note that this method can only shape a single line of text. It will panic
-    /// if the text contains newlines. If you need to shape multiple lines of text,
+    /// In debug builds this asserts that `text` contains no newline. If you need multiple lines,
     /// use [`Self::shape_text`] instead.
     pub fn shape_line(
         &self,
@@ -327,7 +341,7 @@ impl WindowTextSystem {
         ShapedLine { layout, text }
     }
 
-    /// Shape a multi line string of text, at the given font_size, for painting to the screen.
+    /// Shape a UTF-8 document for painting, including hard breaks and optional wrapping.
     /// Subsets of the text can be styled independently with the `runs` parameter,
     /// where each run gives the number of UTF-8 bytes that it styles. Runs must cover the
     /// complete string and end on UTF-8 character boundaries.
@@ -356,8 +370,7 @@ impl WindowTextSystem {
         )
     }
 
-    /// Shapes a complete text document with explicit direction and alignment options.
-    #[doc(hidden)]
+    /// Shape a complete document with explicit direction, bidi, wrapping, and alignment options.
     pub fn shape_text_with_options<S: AsRef<str> + Into<SharedString>>(
         &self,
         text: S,
@@ -378,7 +391,7 @@ impl WindowTextSystem {
         self.line_layout_cache.layout_inline(request)
     }
 
-    /// Layout the given line of text, at the given font_size.
+    /// Layout one logical line without creating a directly paintable wrapper.
     /// Subsets of the line can be styled independently with the `runs` parameter.
     /// Generally, you should prefer to use [`Self::shape_line`] instead, which
     /// can be painted directly.
@@ -698,13 +711,18 @@ pub struct GlyphId(pub u32);
 /// font, size, subpixel positioning, and scale factor. It's used to look up
 /// cached pixels, placement metadata, and sprite atlas entries.
 #[derive(Clone, Debug, PartialEq)]
-#[expect(missing_docs)]
 pub struct RenderGlyphParams {
+    /// Font face containing the glyph.
     pub font_id: FontId,
+    /// Backend glyph identifier.
     pub glyph_id: GlyphId,
+    /// Requested logical font size.
     pub font_size: Pixels,
+    /// Fractional positioning variant used by the rasterizer.
     pub subpixel_variant: Point<u8>,
+    /// Device scale used to rasterize the glyph.
     pub scale_factor: f32,
+    /// Normalized cache-relevant rendering policy.
     pub raster_style: PreparedRasterStyle,
 }
 

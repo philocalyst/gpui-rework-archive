@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% set title = config.title %}{% set description = config.description %}
+  {% if page %}{% set title = page.title ~ " · GPUI" %}{% set description = page.description | default(value=config.description) %}{% elif section %}{% set title = section.title ~ " · GPUI" %}{% set description = section.description | default(value=config.description) %}{% endif %}
+  <title>{{ title }}</title>
+  <meta name="description" content="{{ description }}">
+  {% if current_url %}<link rel="canonical" href="{{ current_url }}">{% endif %}
+  <meta property="og:title" content="{{ title }}">
+  <meta property="og:description" content="{{ description }}">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#f7f6f2">
+  <link rel="icon" href="{{ get_url(path='mark.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ get_url(path='style.css') }}">
+  <script type="module" src="{{ get_url(path='guide.js') }}"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="masthead">
+    <a class="wordmark" href="{{ get_url(path='/') }}">GPUI <span>Community Edition</span></a>
+    <nav aria-label="Primary">
+      <a href="{{ get_url(path='examples/') }}">Learn</a>
+      <a href="{{ get_url(path='guides/') }}">Solve</a>
+      <a href="{{ get_url(path='reference/') }}">Reference</a>
+      <a href="{{ get_url(path='about/') }}">Contribute</a>
+    </nav>
+    <a class="version" href="{{ config.extra.api }}">API {{ config.extra.version }} ↗</a>
+  </header>
+  <div class="layout">
+    <aside class="sidebar">
+      <form class="search" role="search" action="{{ get_url(path='search/') }}">
+        <label for="search-input">Find a topic or API</label>
+        <input id="search-input" type="search" name="q" placeholder="Entity, focus, list…" autocomplete="off" data-search data-api="{{ config.extra.api }}" data-index="{{ get_url(path='search_index.en.json') }}">
+        <ul class="search-results" data-search-results hidden></ul>
+      </form>
+      <nav aria-label="Documentation">
+      {% for group in ['examples', 'guides', 'reference', 'about'] %}
+        {% set chapter = get_section(path=group ~ '/_index.md') %}
+        <details class="nav-group" {% if current_path and '/' ~ group ~ '/' in current_path %}open{% endif %}>
+          <summary><a href="{{ chapter.permalink }}">{{ chapter.title }}</a></summary>
+          <ol>{% for item in chapter.pages %}<li><a href="{{ item.permalink }}" {% if page and page.permalink == item.permalink %}aria-current="page"{% endif %}>{{ item.title }}</a></li>{% endfor %}</ol>
+        </details>
+      {% endfor %}
+      </nav>
+      <p class="sidebar-note">Examples in Zola.<br>Contracts in <a href="{{ config.extra.api }}">rustdoc</a>.<br>The same Rust behind both.</p>
+    </aside>
+    {% block main %}{% endblock main %}
+  </div>
+  <footer class="footer"><p><a href="{{ config.extra.repository }}">Source</a> · <a href="{{ get_url(path='about/writing/') }}">How these docs are written</a> · <a href="{{ config.extra.repository }}/blob/main/LICENSE.md">Apache-2.0</a></p><p>Built from this checkout. See <a href="{{ get_url(path='reference/versions/') }}">version and platform notes</a>.</p></footer>
+</body>
+</html>

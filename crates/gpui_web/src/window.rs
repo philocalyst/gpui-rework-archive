@@ -1,3 +1,8 @@
+//! Native-window trait implementation backed by a browser canvas.
+//!
+//! [`WebWindow`] translates canvas size, pointer, keyboard, focus, IME, and visual-viewport
+//! changes into GPUI callbacks. Its hidden IME mirror uses UTF-16 at the browser boundary.
+
 use crate::display::WebDisplay;
 use crate::events::{
     ClickState, EventListenerHandle, TouchIds, WebEventListeners, is_mac_platform,
@@ -89,6 +94,7 @@ pub(crate) struct WebWindowInner {
     raf_function: RefCell<Option<js_sys::Function>>,
 }
 
+/// A GPUI window rendered into the browser's document-owned canvas.
 pub struct WebWindow {
     inner: Rc<WebWindowInner>,
     display: Rc<dyn PlatformDisplay>,

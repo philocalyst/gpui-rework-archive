@@ -1,4 +1,8 @@
 #![cfg(target_os = "windows")]
+//! Windows platform implementation for GPUI.
+//!
+//! This crate owns the Win32 window, input, clipboard, text, DirectX, and optional
+//! WGPU integration needed by the Windows backend.
 
 mod clipboard;
 mod destination_list;

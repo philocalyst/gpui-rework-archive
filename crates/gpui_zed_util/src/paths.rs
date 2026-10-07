@@ -1,3 +1,10 @@
+//! Path normalization, matching, display, and platform conversion helpers.
+//!
+//! Paths are compared lexically unless a function explicitly says it consults the filesystem.
+//! [`SanitizedPath`] is a transparent wrapper used to keep path values from being interpreted as
+//! formatting directives; its checked constructors panic only when the caller violates the
+//! documented invariant. `PathStyle` controls remote protocol separators and root syntax.
+
 use globset::{GlobBuilder, GlobSet, GlobSetBuilder};
 use itertools::Itertools;
 use regex::Regex;
@@ -52,6 +59,7 @@ pub trait PathExt {
     /// Returns a file's extension or, if the file is hidden, its name without the leading dot
     fn extension_or_hidden_file_name(&self) -> Option<&str>;
 
+    /// Construct a path value from bytes using the platform's path encoding.
     fn try_from_bytes<'a>(bytes: &'a [u8]) -> anyhow::Result<Self>
     where
         Self: From<&'a Path>,
@@ -193,6 +201,7 @@ impl<T: AsRef<Path>> PathExt for T {
     }
 }
 
+/// Return whether `base` ends at a path-component boundary with `suffix`.
 pub fn path_ends_with(base: &Path, suffix: &Path) -> bool {
     strip_path_suffix(base, suffix).is_some()
 }
@@ -210,6 +219,7 @@ pub fn component_matches_ignore_ascii_case(component: &OsStr, name: &str) -> boo
         .is_some_and(|s| s.eq_ignore_ascii_case(name))
 }
 
+/// Remove `suffix` from `base` when it matches a complete path suffix.
 pub fn strip_path_suffix<'a>(base: &'a Path, suffix: &Path) -> Option<&'a Path> {
     if let Some(remainder) = base
         .as_os_str()
@@ -234,6 +244,7 @@ pub fn strip_path_suffix<'a>(base: &'a Path, suffix: &Path) -> Option<&'a Path> 
 pub struct SanitizedPath(Path);
 
 impl SanitizedPath {
+    /// Construct a sanitized view, removing Windows' verbatim path prefix when needed.
     pub fn new<T: AsRef<Path> + ?Sized>(path: &T) -> &Self {
         #[cfg(not(target_os = "windows"))]
         return Self::unchecked_new(path.as_ref());
@@ -242,11 +253,15 @@ impl SanitizedPath {
         return Self::unchecked_new(dunce::simplified(path.as_ref()));
     }
 
+    /// Reinterpret a path as sanitized without applying platform normalization.
+    ///
+    /// Call this only when the path already satisfies the wrapper's invariant.
     pub fn unchecked_new<T: AsRef<Path> + ?Sized>(path: &T) -> &Self {
         // safe because `Path` and `SanitizedPath` have the same repr and Drop impl
         unsafe { mem::transmute::<&Path, &Self>(path.as_ref()) }
     }
 
+    /// Convert an owned path into an owned sanitized path.
     pub fn from_arc(path: Arc<Path>) -> Arc<Self> {
         // safe because `Path` and `SanitizedPath` have the same repr and Drop impl
         #[cfg(not(target_os = "windows"))]
@@ -264,52 +279,64 @@ impl SanitizedPath {
         }
     }
 
+    /// Allocate a sanitized path from any path-like value.
     pub fn new_arc<T: AsRef<Path> + ?Sized>(path: &T) -> Arc<Self> {
         Self::new(path).into()
     }
 
+    /// Remove the transparent wrapper from an owned path.
     pub fn cast_arc(path: Arc<Self>) -> Arc<Path> {
         // safe because `Path` and `SanitizedPath` have the same repr and Drop impl
         unsafe { mem::transmute::<Arc<Self>, Arc<Path>>(path) }
     }
 
+    /// Borrow an `Arc<Path>` view of an `Arc<SanitizedPath>`.
     pub fn cast_arc_ref(path: &Arc<Self>) -> &Arc<Path> {
         // safe because `Path` and `SanitizedPath` have the same repr and Drop impl
         unsafe { mem::transmute::<&Arc<Self>, &Arc<Path>>(path) }
     }
 
+    /// Test whether this path begins with `prefix`.
     pub fn starts_with(&self, prefix: &Self) -> bool {
         self.0.starts_with(&prefix.0)
     }
 
+    /// Borrow the wrapped standard-library path.
     pub fn as_path(&self) -> &Path {
         &self.0
     }
 
+    /// Return the final component, if present.
     pub fn file_name(&self) -> Option<&std::ffi::OsStr> {
         self.0.file_name()
     }
 
+    /// Return the final extension, if present.
     pub fn extension(&self) -> Option<&std::ffi::OsStr> {
         self.0.extension()
     }
 
+    /// Append `path` lexically and return the resulting owned path.
     pub fn join<P: AsRef<Path>>(&self, path: P) -> PathBuf {
         self.0.join(path)
     }
 
+    /// Return the lexical parent as another sanitized view.
     pub fn parent(&self) -> Option<&Self> {
         self.0.parent().map(Self::unchecked_new)
     }
 
+    /// Strip `base`, returning the relative remainder or the standard prefix error.
     pub fn strip_prefix(&self, base: &Self) -> Result<&Path, StripPrefixError> {
         self.0.strip_prefix(base.as_path())
     }
 
+    /// Return the path as UTF-8 when all components are valid UTF-8.
     pub fn to_str(&self) -> Option<&str> {
         self.0.to_str()
     }
 
+    /// Clone the wrapped path into a `PathBuf`.
     pub fn to_path_buf(&self) -> PathBuf {
         self.0.to_path_buf()
     }
@@ -348,24 +375,29 @@ impl AsRef<Path> for SanitizedPath {
 }
 
 #[derive(Debug, Clone)]
+/// An owned path encoded for a remote platform's separator and root rules.
 pub struct RemotePathBuf {
     style: PathStyle,
     string: String,
 }
 
 impl RemotePathBuf {
+    /// Construct a remote path with its wire-format style.
     pub fn new(string: String, style: PathStyle) -> Self {
         Self { style, string }
     }
 
+    /// Construct a remote path by copying a string slice.
     pub fn from_str(path: &str, style: PathStyle) -> Self {
         Self::new(path.to_string(), style)
     }
 
+    /// Return the path syntax used by the remote peer.
     pub fn path_style(&self) -> PathStyle {
         self.style
     }
 
+    /// Return the path in the string representation expected by the protocol.
     pub fn to_proto(&self) -> String {
         self.string.clone()
     }
@@ -377,6 +409,7 @@ impl Display for RemotePathBuf {
     }
 }
 
+/// Return whether a string is absolute under the supplied remote path syntax.
 pub fn is_absolute(path_like: &str, path_style: PathStyle) -> bool {
     path_like.starts_with('/')
         || path_style == PathStyle::Windows
@@ -392,6 +425,7 @@ pub fn is_absolute(path_like: &str, path_style: PathStyle) -> bool {
 
 #[derive(Debug, PartialEq)]
 #[non_exhaustive]
+/// Error returned when lexical normalization would escape the path root.
 pub struct NormalizeError;
 
 impl Error for NormalizeError {}
@@ -416,7 +450,7 @@ impl std::fmt::Display for NormalizeError {
 ///
 /// </div>
 ///
-/// [`path::absolute`](absolute) is an alternative that preserves `..`.
+/// The `path::absolute` helper from the path utility crate is an alternative that preserves `..`.
 /// Or [`Path::canonicalize`] can be used to resolve any `..` by querying the filesystem.
 pub fn normalize_lexically(path: &Path) -> Result<PathBuf, NormalizeError> {
     use std::path::Component;
@@ -518,9 +552,12 @@ const ROW_COL_CAPTURE_REGEX: &str = r"(?xs)
 /// Matching values example: `te`, `test.rs:22`, `te:22:5`, `test.c(22)`, `test.c(22,5)`etc.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Hash)]
 pub struct PathWithPosition {
+    /// Source path.
     pub path: PathBuf,
+    /// One-based source row, when present.
     pub row: Option<u32>,
     // Absent if row is absent.
+    /// One-based source column, when present.
     pub column: Option<u32>,
 }
 
@@ -727,6 +764,7 @@ impl PathWithPosition {
     }
 }
 
+/// A compiled collection of glob patterns for relative paths.
 #[derive(Clone)]
 pub struct PathMatcher {
     sources: Vec<(String, RelPathBuf, /*trailing separator*/ bool)>,
@@ -752,6 +790,7 @@ impl PartialEq for PathMatcher {
 impl Eq for PathMatcher {}
 
 impl PathMatcher {
+    /// Compile glob patterns using the separators of `path_style`.
     pub fn new(
         globs: impl IntoIterator<Item = impl AsRef<str>>,
         path_style: PathStyle,
@@ -789,10 +828,12 @@ impl PathMatcher {
         })
     }
 
+    /// Iterate over the original glob strings.
     pub fn sources(&self) -> impl Iterator<Item = &str> + Clone {
         self.sources.iter().map(|(source, ..)| source.as_str())
     }
 
+    /// Test a path against the compiled relative-path patterns.
     pub fn is_match<P: AsRef<RelPath>>(&self, other: P) -> bool {
         let other = other.as_ref();
         if self
@@ -812,6 +853,7 @@ impl PathMatcher {
             .is_match(other_path.into_owned() + self.path_style.primary_separator())
     }
 
+    /// Test a standard-library path against the compiled patterns.
     pub fn is_match_std_path<P: AsRef<Path>>(&self, other: P) -> bool {
         let other = other.as_ref();
         if self.sources.iter().any(|(_, source, _)| {
@@ -1070,6 +1112,7 @@ fn compare_strings_no_tiebreak(a: &str, b: &str, order: SortOrder) -> Ordering {
     }
 }
 
+/// Compare relative paths using the crate's natural file-aware ordering.
 pub fn compare_rel_paths(
     (path_a, a_is_file): (&RelPath, bool),
     (path_b, b_is_file): (&RelPath, bool),
@@ -1082,6 +1125,7 @@ pub fn compare_rel_paths(
     )
 }
 
+/// Compare relative paths under an explicit sort mode and direction.
 pub fn compare_rel_paths_by(
     (path_a, a_is_file): (&RelPath, bool),
     (path_b, b_is_file): (&RelPath, bool),
@@ -1188,6 +1232,7 @@ pub fn compare_rel_paths_by(
     }
 }
 
+/// Compare standard-library paths using the same natural ordering as relative paths.
 pub fn compare_paths(
     (path_a, a_is_file): (&Path, bool),
     (path_b, b_is_file): (&Path, bool),
@@ -1247,17 +1292,21 @@ pub fn compare_paths(
     }
 }
 
+/// A Windows path represented in WSL's `/mnt/<drive>` form.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct WslPath {
+    /// WSL distribution name.
     pub distro: String,
 
     // the reason this is an OsString and not any of the path types is that it needs to
     // represent a unix path (with '/' separators) on windows. `from_path` does this by
     // manually constructing it from the path components of a given windows path.
+    /// Unix-style path inside the distribution.
     pub path: std::ffi::OsString,
 }
 
 impl WslPath {
+    /// Convert a Windows path to a WSL path when its drive prefix is representable.
     pub fn from_path<P: AsRef<Path>>(path: P) -> Option<WslPath> {
         if cfg!(not(target_os = "windows")) {
             return None;
@@ -1322,6 +1371,7 @@ impl std::fmt::Display for ToFilePathError {
 
 impl std::error::Error for ToFilePathError {}
 
+/// URL helpers for converting file URLs to local paths.
 pub trait UrlExt {
     /// A version of `url::Url::to_file_path` that does platform handling based on the provided `PathStyle` instead of the host platform.
     ///

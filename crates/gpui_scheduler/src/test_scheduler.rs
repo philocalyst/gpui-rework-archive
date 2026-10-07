@@ -31,6 +31,7 @@ use std::{
 
 const PENDING_TRACES_VAR_NAME: &str = "PENDING_TRACES";
 
+/// Deterministic scheduler for tests, with controllable time and randomized task interleavings.
 pub struct TestScheduler {
     clock: Arc<TestClock>,
     rng: Arc<Mutex<StdRng>>,
@@ -158,6 +159,7 @@ impl TestScheduler {
         completed
     }
 
+    /// Creates a scheduler using `config` and binds it to the current thread.
     pub fn new(config: TestSchedulerConfig) -> Self {
         Self {
             rng: Arc::new(Mutex::new(StdRng::seed_from_u64(config.seed))),
@@ -183,6 +185,7 @@ impl TestScheduler {
         }
     }
 
+    /// Ends the test and panics if the scheduler observed forbidden nondeterminism.
     pub fn end_test(&self) {
         let mut state = self.state.lock();
         if let Some((message, backtrace)) = &state.non_determinism_error {
@@ -196,36 +199,44 @@ impl TestScheduler {
         state.finished = true;
     }
 
+    /// Returns the deterministic clock shared by this scheduler.
     pub fn clock(&self) -> Arc<TestClock> {
         self.clock.clone()
     }
 
+    /// Returns the seeded random source used for scheduling decisions.
     pub fn rng(&self) -> SharedRng {
         SharedRng(self.rng.clone())
     }
 
+    /// Sets the randomized poll bound used when a timeout is supplied.
     pub fn set_timeout_ticks(&self, timeout_ticks: RangeInclusive<usize>) {
         self.state.lock().timeout_ticks = timeout_ticks;
     }
 
+    /// Allows the test loop to yield to real time while waiting for work.
     pub fn allow_parking(&self) {
         let mut state = self.state.lock();
         state.allow_parking = true;
         state.parking_allowed_once = true;
     }
 
+    /// Forces deterministic timer advancement instead of parking the thread.
     pub fn forbid_parking(&self) {
         self.state.lock().allow_parking = false;
     }
 
+    /// Returns whether real-time parking is currently allowed.
     pub fn parking_allowed(&self) -> bool {
         self.state.lock().allow_parking
     }
 
+    /// Returns whether the scheduler is running on its owning test thread.
     pub fn is_main_thread(&self) -> bool {
         self.state.lock().is_main_thread
     }
 
+    /// Allocates a fresh session identifier for a local executor.
     pub fn allocate_session_id(&self) -> SessionId {
         let mut state = self.state.lock();
         state.next_session_id.0 += 1;
@@ -247,6 +258,7 @@ impl TestScheduler {
         BackgroundExecutor::new(self.clone())
     }
 
+    /// Returns a seeded yield point with a randomized tick count.
     pub fn yield_random(&self) -> Yield {
         let rng = &mut *self.rng.lock();
         if rng.random_bool(0.1) {
@@ -256,12 +268,18 @@ impl TestScheduler {
         }
     }
 
+    /// Runs queued work until no runnable task or expired timer remains.
+    ///
+    /// This does not advance the clock to future timers; use
+    /// [`Self::run_with_clock_advancement`] when timers should make progress.
     pub fn run(&self) {
         while self.step() {
             // Continue until no work remains
         }
     }
 
+    /// Runs queued work, advancing the test clock to the next timer whenever
+    /// the scheduler would otherwise become idle.
     pub fn run_with_clock_advancement(&self) {
         while self.step() || self.advance_clock_to_next_timer() {
             // Continue until no work remains
@@ -438,6 +456,8 @@ impl TestScheduler {
         }
     }
 
+    /// Advances the clock to the earliest pending timer, returning whether one
+    /// was present and made runnable.
     pub fn advance_clock_to_next_timer(&self) -> bool {
         if let Some(timer) = self.state.lock().timers.first() {
             self.clock.advance(timer.expiration - self.clock.now());
@@ -447,6 +467,7 @@ impl TestScheduler {
         }
     }
 
+    /// Advances the controllable clock without polling tasks.
     pub fn advance_clock(&self, duration: Duration) {
         let debug = std::env::var("DEBUG_SCHEDULER").is_ok();
         let start = self.clock.now();
@@ -748,6 +769,8 @@ pub struct TestSchedulerConfig {
 }
 
 impl TestSchedulerConfig {
+    /// Creates deterministic scheduler configuration using `seed` for yields
+    /// and randomized task ordering.
     pub fn with_seed(seed: u64) -> Self {
         Self {
             seed,
@@ -895,6 +918,7 @@ impl TracingWaker {
     }
 }
 
+/// A deterministic yield point that asks the test scheduler to defer work.
 pub struct Yield(usize);
 
 /// A wrapper around `Arc<Mutex<StdRng>>` that provides convenient methods

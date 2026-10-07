@@ -1,3 +1,8 @@
+//! Small combinators shared by GPUI's asynchronous and geometry code.
+//!
+//! The public extensions are deliberately policy-light: [`FluentBuilder`] preserves ownership,
+//! while [`FutureExt::with_timeout`] races a future against a GPUI background timer.
+
 use crate::{BackgroundExecutor, Task};
 use std::{
     future::Future,
@@ -62,8 +67,10 @@ pub trait FluentBuilder {
 
 /// Extensions for Future types that provide additional combinators and utilities.
 pub trait FutureExt {
-    /// Requires a Future to complete before the specified duration has elapsed.
-    /// Similar to tokio::timeout.
+    /// Resolve the future if it completes before `timeout`, otherwise return [`Timeout`].
+    ///
+    /// The timer is scheduled on `executor`; dropping the returned future drops both the timer and
+    /// the underlying future. This method does not cancel work already spawned elsewhere.
     fn with_timeout(self, timeout: Duration, executor: &BackgroundExecutor) -> WithTimeout<Self>
     where
         Self: Sized;
@@ -82,6 +89,7 @@ impl<T: Future> FutureExt for T {
 }
 
 #[pin_project::pin_project]
+/// A future returned by [`FutureExt::with_timeout`].
 pub struct WithTimeout<T> {
     #[pin]
     future: T,
@@ -91,7 +99,7 @@ pub struct WithTimeout<T> {
 
 #[derive(Debug, thiserror::Error)]
 #[error("Timed out before future resolved")]
-/// Error returned by with_timeout when the timeout duration elapsed before the future resolved
+/// The timeout elapsed before the wrapped future resolved.
 pub struct Timeout;
 
 impl<T: Future> Future for WithTimeout<T> {

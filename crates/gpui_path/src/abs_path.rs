@@ -11,13 +11,17 @@ use anyhow::Context;
 
 use crate::{PathStyle, rel_path::RelPath};
 
-// An absolute path on the user's local filesystem.
-// Requires paths to be valid utf-8
+/// An absolute path on the user's local filesystem.
+///
+/// Values are guaranteed to be absolute and valid UTF-8. Construct one with [`Self::new`].
 #[derive(PartialEq, Eq, Hash, Debug, PartialOrd, Ord)]
 #[repr(transparent)]
 pub struct AbsPath(Path);
 
 impl AbsPath {
+    /// Validates an absolute, UTF-8 path without allocating.
+    ///
+    /// Returns an error when `path` is relative or contains non-UTF-8 data.
     pub fn new(path: &Path) -> anyhow::Result<&Self> {
         if !path.is_absolute() {
             return Err(anyhow::anyhow!("Path is not absolute: {:?}", path));
@@ -33,31 +37,38 @@ impl AbsPath {
         unsafe { &*(path as *const Path as *const Self) }
     }
 
+    /// Copies this path into an owned absolute path buffer.
     pub fn to_abs_path_buf(&self) -> AbsPathBuf {
         AbsPathBuf(self.0.to_owned())
     }
 
+    /// Appends a single UTF-8 path component or relative fragment.
     pub fn join(&self, name: impl AsRef<str>) -> AbsPathBuf {
         AbsPathBuf(self.0.join(name.as_ref()))
     }
 
+    /// Appends a validated relative path without changing its components.
     pub fn join_rel_path(&self, relative_path: &RelPath) -> AbsPathBuf {
         AbsPathBuf(self.0.join(relative_path.as_std_path()))
     }
 
+    /// Returns the parent directory, if this path has one.
     pub fn parent(&self) -> Option<&AbsPath> {
         let parent = self.0.parent()?;
         Some(AbsPath::new_unchecked(parent))
     }
 
+    /// Returns whether this path begins with `other`'s components.
     pub fn starts_with(&self, other: &AbsPath) -> bool {
         self.0.starts_with(&other.0)
     }
 
+    /// Returns whether this path ends with `other`'s components.
     pub fn ends_with(&self, other: &RelPath) -> bool {
         self.0.ends_with(other.as_std_path())
     }
 
+    /// Returns whether this path is a strict descendant of `ancestor`.
     pub fn is_descendant_of(&self, ancestor: &Self) -> bool {
         if self == ancestor {
             return false;
@@ -65,28 +76,36 @@ impl AbsPath {
         self.starts_with(ancestor)
     }
 
+    /// Returns the UTF-8 file name, if present.
     pub fn file_name(&self) -> Option<&str> {
         self.0.file_name()?.to_str()
     }
 
+    /// Formats this path using the host's display conventions.
     pub fn display(&self) -> impl fmt::Display + '_ {
         self.0.display()
     }
 
+    /// Borrows the underlying standard-library path.
     pub fn as_std_path(&self) -> &Path {
         &self.0
     }
 
+    /// Returns the path as UTF-8 text.
     pub fn as_str(&self) -> &str {
         self.0
             .to_str()
             .expect("valid UTF-8 enforced in constructor")
     }
 
+    /// Iterates this path and each parent toward the filesystem root.
     pub fn ancestors(&self) -> impl Iterator<Item = &AbsPath> {
         self.0.ancestors().map(AbsPath::new_unchecked)
     }
 
+    /// Removes an absolute prefix and parses the remainder as a relative path.
+    ///
+    /// Returns `None` when the prefix does not match or the remainder cannot be normalized.
     pub fn strip_prefix<'a>(&'a self, prefix: &AbsPath) -> Option<Cow<'a, RelPath>> {
         let prefix = self.0.strip_prefix(&prefix.0).ok()?;
         RelPath::new(prefix, PathStyle::local()).ok()
@@ -131,15 +150,18 @@ impl From<&AbsPath> for Rc<AbsPath> {
 
 // An absolute path on the user's local filesystem.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+/// An owned, validated absolute path.
 pub struct AbsPathBuf(PathBuf);
 
 impl AbsPathBuf {
+    /// Creates an owned absolute path, rejecting relative or non-UTF-8 input.
     pub fn new(path: impl Into<PathBuf>) -> anyhow::Result<Self> {
         let path = path.into();
         AbsPath::new(&path)?;
         Ok(Self(path))
     }
 
+    /// Returns the current user's home directory.
     pub fn home_dir() -> anyhow::Result<Self> {
         let home = std::env::home_dir().context("no home dir available")?;
         Self::new(home)
@@ -161,6 +183,7 @@ impl AbsPathBuf {
         Self::new(canonical).map_err(io::Error::other)
     }
 
+    /// Appends one path component.
     pub fn push(&mut self, name: &str) {
         self.0.push(name);
     }

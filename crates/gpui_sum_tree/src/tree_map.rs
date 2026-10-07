@@ -9,12 +9,14 @@ where
     K: Clone + Ord,
     V: Clone;
 
+/// A key/value entry stored in [`TreeMap`].
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MapEntry<K, V> {
     key: K,
     value: V,
 }
 
+/// Seekable key wrapper used by the tree's ordered dimensions.
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct MapKey<K>(Option<K>);
 
@@ -24,6 +26,7 @@ impl<K> Default for MapKey<K> {
     }
 }
 
+/// Borrowed form of [`MapKey`] used for lookup without cloning a key.
 #[derive(Clone, Debug)]
 pub struct MapKeyRef<'a, K>(Option<&'a K>);
 
@@ -33,12 +36,14 @@ impl<K> Default for MapKeyRef<'_, K> {
     }
 }
 
+/// An ordered set backed by [`TreeMap`].
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TreeSet<K>(TreeMap<K, ()>)
 where
     K: Clone + Ord;
 
 impl<K: Clone + Ord, V: Clone> TreeMap<K, V> {
+    /// Builds a map from entries already sorted by key.
     pub fn from_ordered_entries(entries: impl IntoIterator<Item = (K, V)>) -> Self {
         let tree = SumTree::from_iter(
             entries
@@ -49,14 +54,17 @@ impl<K: Clone + Ord, V: Clone> TreeMap<K, V> {
         Self(tree)
     }
 
+    /// Returns whether the map contains no entries.
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 
+    /// Returns whether `key` is present.
     pub fn contains_key(&self, key: &K) -> bool {
         self.get(key).is_some()
     }
 
+    /// Returns the value for `key`, if present.
     pub fn get(&self, key: &K) -> Option<&V> {
         let (.., item) = self
             .0
@@ -72,16 +80,19 @@ impl<K: Clone + Ord, V: Clone> TreeMap<K, V> {
         }
     }
 
+    /// Inserts `value`, replacing any value with the same key.
     pub fn insert(&mut self, key: K, value: V) {
         self.0.insert_or_replace(MapEntry { key, value }, ());
     }
 
+    /// Inserts `value`, returning the replaced value when the key existed.
     pub fn insert_or_replace(&mut self, key: K, value: V) -> Option<V> {
         self.0
             .insert_or_replace(MapEntry { key, value }, ())
             .map(|it| it.value)
     }
 
+    /// Inserts all entries, replacing values for duplicate keys.
     pub fn extend(&mut self, iter: impl IntoIterator<Item = (K, V)>) {
         let edits: Vec<_> = iter
             .into_iter()
@@ -90,10 +101,12 @@ impl<K: Clone + Ord, V: Clone> TreeMap<K, V> {
         self.0.edit(edits, ());
     }
 
+    /// Removes every entry from the map.
     pub fn clear(&mut self) {
         self.0 = SumTree::default();
     }
 
+    /// Removes `key` and returns its value, if present.
     pub fn remove(&mut self, key: &K) -> Option<V> {
         let mut removed = None;
         let mut cursor = self.0.cursor::<MapKeyRef<'_, K>>(());
@@ -109,6 +122,7 @@ impl<K: Clone + Ord, V: Clone> TreeMap<K, V> {
         removed
     }
 
+    /// Removes entries in the half-open range `[start, end)`.
     pub fn remove_range(&mut self, start: &impl MapSeekTarget<K>, end: &impl MapSeekTarget<K>) {
         let start = MapSeekTargetAdaptor(start);
         let end = MapSeekTargetAdaptor(end);
@@ -121,6 +135,7 @@ impl<K: Clone + Ord, V: Clone> TreeMap<K, V> {
     }
 
     /// Returns the key-value pair with the greatest key less than or equal to the given key.
+    /// Returns the entry with the greatest key less than or equal to `key`.
     pub fn closest(&self, key: &K) -> Option<(&K, &V)> {
         let mut cursor = self.0.cursor::<MapKeyRef<'_, K>>(());
         let key = MapKeyRef(Some(key));
@@ -129,6 +144,7 @@ impl<K: Clone + Ord, V: Clone> TreeMap<K, V> {
         cursor.item().map(|item| (&item.key, &item.value))
     }
 
+    /// Iterates entries from the first key greater than or equal to `from`.
     pub fn iter_from<'a>(&'a self, from: &K) -> impl Iterator<Item = (&'a K, &'a V)> + 'a {
         let mut cursor = self.0.cursor::<MapKeyRef<'_, K>>(());
         let from_key = MapKeyRef(Some(from));
@@ -137,6 +153,7 @@ impl<K: Clone + Ord, V: Clone> TreeMap<K, V> {
         cursor.map(|map_entry| (&map_entry.key, &map_entry.value))
     }
 
+    /// Updates a value in place and returns the closure's result, if present.
     pub fn update<F, T>(&mut self, key: &K, f: F) -> Option<T>
     where
         F: FnOnce(&mut V) -> T,
@@ -157,6 +174,7 @@ impl<K: Clone + Ord, V: Clone> TreeMap<K, V> {
         result
     }
 
+    /// Retains only entries for which `predicate` returns `true`.
     pub fn retain<F: FnMut(&K, &V) -> bool>(&mut self, mut predicate: F) {
         let mut new_map = SumTree::<MapEntry<K, V>>::default();
 
@@ -173,22 +191,27 @@ impl<K: Clone + Ord, V: Clone> TreeMap<K, V> {
         self.0 = new_map;
     }
 
+    /// Iterates key/value pairs in ascending key order.
     pub fn iter(&self) -> impl Iterator<Item = (&K, &V)> + '_ {
         self.0.iter().map(|entry| (&entry.key, &entry.value))
     }
 
+    /// Iterates values in ascending key order.
     pub fn values(&self) -> impl Iterator<Item = &V> + '_ {
         self.0.iter().map(|entry| &entry.value)
     }
 
+    /// Returns the lowest-key entry.
     pub fn first(&self) -> Option<(&K, &V)> {
         self.0.first().map(|entry| (&entry.key, &entry.value))
     }
 
+    /// Returns the highest-key entry.
     pub fn last(&self) -> Option<(&K, &V)> {
         self.0.last().map(|entry| (&entry.key, &entry.value))
     }
 
+    /// Inserts a cloned copy of every entry in `other`.
     pub fn insert_tree(&mut self, other: TreeMap<K, V>) {
         let edits = other
             .iter()
@@ -229,6 +252,7 @@ impl<'a, K: Clone + Ord, T: MapSeekTarget<K>> SeekTarget<'a, MapKey<K>, MapKeyRe
     }
 }
 
+/// A key-like value that can be compared while seeking a [`TreeMap`].
 pub trait MapSeekTarget<K> {
     fn cmp_cursor(&self, cursor_location: &K) -> Ordering;
 }
@@ -321,36 +345,44 @@ impl<K> TreeSet<K>
 where
     K: Clone + Ord,
 {
+    /// Builds a set from keys already sorted in ascending order.
     pub fn from_ordered_entries(entries: impl IntoIterator<Item = K>) -> Self {
         Self(TreeMap::from_ordered_entries(
             entries.into_iter().map(|key| (key, ())),
         ))
     }
 
+    /// Returns whether the set has no keys.
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 
+    /// Inserts `key` if it is absent.
     pub fn insert(&mut self, key: K) {
         self.0.insert(key, ());
     }
 
+    /// Removes `key`, returning whether it was present.
     pub fn remove(&mut self, key: &K) -> bool {
         self.0.remove(key).is_some()
     }
 
+    /// Inserts all keys from `iter`.
     pub fn extend(&mut self, iter: impl IntoIterator<Item = K>) {
         self.0.extend(iter.into_iter().map(|key| (key, ())));
     }
 
+    /// Returns whether `key` is present.
     pub fn contains(&self, key: &K) -> bool {
         self.0.get(key).is_some()
     }
 
+    /// Iterates keys in ascending order.
     pub fn iter(&self) -> impl Iterator<Item = &K> + '_ {
         self.0.iter().map(|(k, _)| k)
     }
 
+    /// Iterates keys from the first key greater than or equal to `key`.
     pub fn iter_from<'a>(&'a self, key: &K) -> impl Iterator<Item = &'a K> + 'a {
         self.0.iter_from(key).map(move |(k, _)| k)
     }

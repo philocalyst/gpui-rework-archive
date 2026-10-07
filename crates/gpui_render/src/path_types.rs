@@ -9,15 +9,20 @@ use gpui::{Background, Bounds, Path, ScaledPixels};
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub struct PathSprite {
+    /// Bounds used to place the path sprite in the atlas or scene.
     pub bounds: Bounds<ScaledPixels>,
 }
 
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub struct PathRasterizationVertex {
+    /// Position of the vertex in scene coordinates.
     pub xy_position: gpui::Point<ScaledPixels>,
+    /// Quadratic-curve coordinates consumed by the path shader.
     pub curve_position: gpui::Point<f32>,
+    /// Fill paint for the path.
     pub color: Background,
+    /// Clipped path bounds used for coverage evaluation.
     pub bounds: Bounds<ScaledPixels>,
 }
 
@@ -28,15 +33,18 @@ unsafe impl BufferData for PathRasterizationVertex {
     const WGSL_TYPE: &'static str = "PathRasterizationVertex";
 }
 
+/// Storage layouts for the path records, in upload order.
 pub const STORAGE_ABI: &[StorageAbi] = &[
     storage_abi::<PathSprite>(),
     storage_abi::<PathRasterizationVertex>(),
 ];
 
+/// Counts the vertices emitted by [`rasterization_vertices`].
 pub fn rasterization_vertex_count(paths: &[Path<ScaledPixels>]) -> usize {
     paths.iter().map(|path| path.vertices.len()).sum()
 }
 
+/// Flattens paths into the vertex records expected by the path rasterization shader.
 pub fn rasterization_vertices(
     paths: &[Path<ScaledPixels>],
 ) -> impl Iterator<Item = PathRasterizationVertex> + '_ {
@@ -53,6 +61,7 @@ pub fn rasterization_vertices(
     })
 }
 
+/// Produces one sprite per path, or one combined sprite when path order changes.
 pub fn sprites(paths: &[Path<ScaledPixels>]) -> PathSprites<'_> {
     let combined = paths.first().and_then(|first| {
         (paths.last().is_some_and(|path| path.order != first.order)).then(|| {
@@ -70,6 +79,7 @@ pub fn sprites(paths: &[Path<ScaledPixels>]) -> PathSprites<'_> {
     }
 }
 
+/// Iterator over the sprite bounds emitted for a path batch.
 pub struct PathSprites<'a> {
     paths: Option<std::slice::Iter<'a, Path<ScaledPixels>>>,
     combined: Option<Bounds<ScaledPixels>>,
@@ -88,6 +98,7 @@ impl Iterator for PathSprites<'_> {
     }
 }
 
+/// Returns the number of sprites produced by [`sprites`].
 pub fn sprite_count(paths: &[Path<ScaledPixels>]) -> usize {
     if paths.is_empty() {
         0

@@ -1,3 +1,8 @@
+//! Convert a [`Shell`] configuration and task arguments into a shell command line.
+//!
+//! The builder preserves shell-specific quoting and can choose interactive or non-interactive
+//! execution. `build` returns the executable plus argument vector; it does not spawn a process.
+
 use std::borrow::Cow;
 
 use crate::shell::get_system_shell;
@@ -33,6 +38,7 @@ impl ShellBuilder {
             redirect_stdin: false,
         }
     }
+    /// Omit the interactive shell flag from the generated command.
     pub fn non_interactive(mut self) -> Self {
         self.interactive = false;
         self
@@ -68,6 +74,7 @@ impl ShellBuilder {
         }
     }
 
+    /// Redirect the child shell's standard input from `/dev/null` where supported.
     pub fn redirect_stdin_to_dev_null(mut self) -> Self {
         self.redirect_stdin = true;
         self
@@ -235,6 +242,7 @@ impl ShellBuilder {
         child
     }
 
+    /// Return the shell classification selected during construction.
     pub fn kind(&self) -> ShellKind {
         self.kind
     }

@@ -1,6 +1,12 @@
 //! A developer overlay that paints frame-time statistics directly into the
 //! scene, bypassing layout, text, and view invalidation entirely (to avoid
 //! infinitely triggering new frames).
+//!
+//! The overlay is diagnostic output: its percentiles describe the retained
+//! sample window, and its glyphs use a fixed bitmap font. It is painted in
+//! logical pixels after the scene has been recorded, so it does not measure or
+//! participate in layout. See <https://gpui-ce.github.io/guides/testing/> for
+//! test and frame-capture guidance.
 
 use crate::{
     BorderStyle, Bounds, ContentMask, Corners, Edges, Hsla, Pixels, Quad, ScaledPixels, Scene,
@@ -29,6 +35,9 @@ impl DebugFrameOverlayMode {
 }
 
 /// The number of most recent draw durations retained for percentile statistics.
+///
+/// This is a rolling window, so displayed percentiles describe recent frames,
+/// not the lifetime of the process.
 const MAX_SAMPLES: usize = 1000;
 
 const GLYPH_WIDTH: usize = 5;

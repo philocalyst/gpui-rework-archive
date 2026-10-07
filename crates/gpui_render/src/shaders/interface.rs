@@ -3,15 +3,20 @@
 /// # Safety
 /// Implementors need a stable C-compatible layout, no padding, matching the WGSL declaration.
 pub unsafe trait BufferData: Sized {
+    /// Name of the matching WGSL structure.
     const WGSL_TYPE: &'static str;
 }
 
+/// Rust stride and WGSL name for one uploaded storage record.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct StorageAbi {
+    /// Matching WGSL type name.
     pub wgsl_type: &'static str,
+    /// Rust byte stride uploaded for each record.
     pub rust_stride: usize,
 }
 
+/// Describes the storage layout expected by one shader pipeline.
 pub const fn storage_abi<T: BufferData>() -> StorageAbi {
     StorageAbi {
         wgsl_type: T::WGSL_TYPE,
@@ -34,6 +39,7 @@ pub fn slice_as_bytes<T: BufferData>(values: &[T]) -> &[u8] {
     }
 }
 
+/// Views of scene data consumed by a pipeline.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum DataLayout {
     Instances,
@@ -45,6 +51,7 @@ pub enum DataLayout {
     Blur,
 }
 
+/// Vertex-count policy for one draw call.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum VertexCount {
     Rectangle,
@@ -52,6 +59,7 @@ pub enum VertexCount {
     Dynamic,
 }
 
+/// Primitive topology submitted to WGPU.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PrimitiveTopology {
     TriangleList,
@@ -59,6 +67,7 @@ pub enum PrimitiveTopology {
 }
 
 impl VertexCount {
+    /// Returns the fixed count, or `None` for dynamically sized draws.
     pub const fn fixed(self) -> Option<u32> {
         match self {
             Self::Rectangle => Some(RECTANGLE_VERTEX_COUNT),
@@ -68,13 +77,20 @@ impl VertexCount {
     }
 }
 
+/// Generated pipeline entry points and their instance transport contract.
 #[derive(Clone, Copy)]
 pub struct Pipeline {
+    /// Stable pipeline label.
     pub label: &'static str,
+    /// Vertex entry-point name.
     pub vertex_entry: &'static str,
+    /// Fragment entry-point name.
     pub fragment_entry: &'static str,
+    /// Primitive topology used by the pipeline.
     pub topology: PrimitiveTopology,
+    /// Host data transport selected for the pipeline.
     pub data_layout: DataLayout,
+    /// Fixed or dynamic vertex count.
     pub vertex_count: VertexCount,
 }
 

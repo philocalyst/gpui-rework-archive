@@ -60,15 +60,23 @@ impl LocalExecutor {
         }
     }
 
+    /// Returns the session that owns this executor's tasks.
     pub fn session_id(&self) -> SessionId {
         self.session_id
     }
 
+    /// Returns the scheduler providing this executor's clock and dispatch services.
+    /// Returns the scheduler backing this executor.
+    /// Returns the scheduler backing this executor.
     pub fn scheduler(&self) -> &Arc<dyn Scheduler> {
         &self.scheduler
     }
 
     #[track_caller]
+    /// Spawns a non-`Send` future on this executor's session.
+    ///
+    /// The future is first scheduled before this method returns. Dropping the returned task
+    /// cancels it if it has not completed.
     pub fn spawn<F>(&self, future: F) -> Task<F::Output>
     where
         F: Future + 'static,
@@ -116,6 +124,10 @@ impl LocalExecutor {
     }
 
     #[cfg(not(target_family = "wasm"))]
+    /// Runs a future to completion on this executor's session, blocking the calling thread.
+    ///
+    /// The future is polled by the scheduler, so this must not be called from a context that would
+    /// deadlock waiting for the same session to make progress.
     pub fn block_on<Fut: Future>(&self, future: Fut) -> Fut::Output {
         use std::cell::Cell;
 
@@ -162,10 +174,12 @@ impl LocalExecutor {
     }
 
     #[track_caller]
+    /// Creates a timer driven by this scheduler's clock.
     pub fn timer(&self, duration: Duration) -> Timer {
         self.scheduler.timer(duration)
     }
 
+    /// Returns the scheduler clock's current instant.
     pub fn now(&self) -> Instant {
         self.scheduler.clock().now()
     }
@@ -213,11 +227,13 @@ pub struct BackgroundExecutor {
 }
 
 impl BackgroundExecutor {
+    /// Creates a background executor backed by `scheduler`.
     pub fn new(scheduler: Arc<dyn Scheduler>) -> Self {
         Self { scheduler }
     }
 
     #[track_caller]
+    /// Spawns a `Send` future on the scheduler's background queue.
     pub fn spawn<F>(&self, future: F) -> Task<F::Output>
     where
         F: Future + Send + 'static,
@@ -227,6 +243,7 @@ impl BackgroundExecutor {
     }
 
     #[track_caller]
+    /// Spawns a `Send` future with an explicit scheduling priority.
     pub fn spawn_with_priority<F>(&self, priority: Priority, future: F) -> Task<F::Output>
     where
         F: Future + Send + 'static,
@@ -253,6 +270,10 @@ impl BackgroundExecutor {
 
     /// Spawns a future on a dedicated realtime thread for audio processing.
     #[track_caller]
+    /// Spawns a future on a dedicated realtime thread.
+    ///
+    /// The thread is intended for low-latency work such as audio. Keep the future bounded and
+    /// avoid blocking operations that can starve the realtime loop.
     pub fn spawn_realtime<F>(&self, future: F) -> Task<F::Output>
     where
         F: Future + Send + 'static,
@@ -283,10 +304,12 @@ impl BackgroundExecutor {
     }
 
     #[track_caller]
+    /// Creates a scheduler-backed timer.
     pub fn timer(&self, duration: Duration) -> Timer {
         self.scheduler.timer(duration)
     }
 
+    /// Returns the scheduler clock's current instant.
     pub fn now(&self) -> Instant {
         self.scheduler.clock().now()
     }
@@ -382,6 +405,13 @@ impl DedicatedExecutor {
 /// If you drop a task it will be cancelled immediately. Calling [`Task::detach`] allows
 /// the task to continue running, but with no way to return a value.
 #[must_use]
+/// A cancellable handle to a scheduled future.
+///
+/// Awaiting observes its output. Dropping cancels the future, while
+/// [`Task::detach`] transfers it to the scheduler until completion.
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Task-6abc8b50.md")]
+// docs:examples:end
 pub struct Task<T>(TaskState<T>);
 
 enum TaskState<T> {
@@ -542,6 +572,7 @@ impl<T> Task<T> {
         Task(TaskState::Spawned(task))
     }
 
+    /// Returns whether the task has already completed.
     pub fn is_ready(&self) -> bool {
         match &self.0 {
             TaskState::Ready(_) => true,

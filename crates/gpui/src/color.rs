@@ -1,3 +1,12 @@
+//! Color values and backgrounds used by GPUI painting APIs.
+//!
+//! Hex helpers interpret bytes in conventional big-endian order (`0xRRGGBB`
+//! and `0xRRGGBBAA`). [`Hsla`] stores hue, saturation, lightness, and alpha as
+//! normalized values; [`hsla`] clamps all four inputs to `0..=1` (hue is a
+//! turn, not degrees). Background gradients use an angle in degrees and stop
+//! positions as normalized percentages. For examples, see
+//! <https://gpui-ce.github.io/examples/drawing/#paint>.
+
 use palette::{IntoColor, OklabHue, Oklcha, RgbHue};
 use schemars::{JsonSchema, json_schema};
 use serde::{Deserialize, Serialize};
@@ -6,7 +15,7 @@ use std::fmt::{self, Display, Formatter};
 // Re-exported for api maintenance
 pub use palette::{Hsla, rgb::Rgba};
 
-/// Convert an RGB hex color code number to a color type
+/// Converts `0xRRGGBB` into opaque sRGB [`Rgba`].
 pub fn rgb(hex: u32) -> Rgba {
     let [_, r, g, b] = hex.to_be_bytes().map(|b| (b as f32) / 255.0);
     Rgba {
@@ -15,7 +24,7 @@ pub fn rgb(hex: u32) -> Rgba {
     }
 }
 
-/// Convert an RGBA hex color code number to [`Rgba`]
+/// Converts `0xRRGGBBAA` into sRGB [`Rgba`].
 pub fn rgba(hex: u32) -> Rgba {
     let [r, g, b, a] = hex.to_be_bytes().map(|b| (b as f32) / 255.0);
     Rgba::new(r, g, b, a)
@@ -34,7 +43,11 @@ pub fn hsla_to_rgba(color: Hsla) -> Rgba {
     color.into_color()
 }
 
-/// Swap from RGBA with premultiplied alpha to BGRA
+/// Swaps a premultiplied RGBA byte buffer to BGRA in place.
+///
+/// `color` must contain at least four bytes in `[r, g, b, a]` order. The
+/// function swaps the red and blue channels and unpremultiplies RGB when
+/// alpha is nonzero; it panics if the slice is shorter than four bytes.
 pub fn swap_rgba_pa_to_bgra(color: &mut [u8]) {
     color.swap(0, 2);
     if color[3] > 0 {
@@ -45,7 +58,10 @@ pub fn swap_rgba_pa_to_bgra(color: &mut [u8]) {
     }
 }
 
-/// Construct an [`Hsla`] object from plain values
+/// Constructs [`Hsla`] from normalized hue, saturation, lightness, and alpha.
+///
+/// Hue is expressed in turns (`1.0` is a full circle), not degrees. Every
+/// input is clamped to `0.0..=1.0`.
 pub const fn hsla(h: f32, s: f32, l: f32, a: f32) -> Hsla {
     Hsla {
         color: palette::Hsl::new_const(
@@ -59,7 +75,7 @@ pub const fn hsla(h: f32, s: f32, l: f32, a: f32) -> Hsla {
     }
 }
 
-/// Constructs a ['Oklcha'](palette::Oklcha) object from plain values.
+/// Constructs a [`palette::Oklcha`] value from its components.
 pub fn oklcha<T>(lightness: T, chroma: T, hue: impl Into<OklabHue<T>>, alpha: T) -> Oklcha<T> {
     Oklcha::new(lightness, chroma, hue, alpha)
 }
@@ -163,15 +179,17 @@ pub fn rgba_schemar(_generator: &mut schemars::SchemaGenerator) -> schemars::Sch
     })
 }
 
-/// Wrapper methods to make alpha operations more convenient
+/// Alpha and source-over helpers for GPUI color values.
 pub trait ColorExt {
-    /// Performs a SrcAlpha x (1 - SrcAlpha) blend
+    /// Blends `self` over `other` using source alpha.
     fn blend(&self, other: &Self) -> Self
     where
         Self: Sized;
 
-    /// Fade out the color by a given factor. This factor should be between 0.0 and 1.0.
-    /// Where 0.0 will leave the color unchanged, and 1.0 will completely fade out the color.
+    /// Fades the color by multiplying alpha by `1.0 - factor`.
+    ///
+    /// `factor` is clamped to `0.0..=1.0`; `0.0` leaves alpha unchanged and
+    /// `1.0` makes it transparent.
     fn fade_out(&mut self, factor: f32);
 
     /// Multiplies the alpha value of the color by a given factor and returns a new color.
@@ -280,7 +298,7 @@ impl Display for ColorSpace {
     }
 }
 
-/// A background color, which can be either a solid color or a linear gradient.
+/// A paintable background: solid, gradient, or procedural pattern.
 #[derive(Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[repr(C)]
 pub struct Background {
@@ -330,7 +348,7 @@ impl Default for Background {
     }
 }
 
-/// Creates a hash pattern background
+/// Creates diagonal stripes with the given logical-pixel width and gap.
 pub fn pattern_slash(color: impl IntoColor<Hsla>, width: f32, interval: f32) -> Background {
     const PATTERN_COMPONENT_SCALE: f32 = u8::MAX as f32;
     const PATTERN_PACKING_RADIX: u32 = u16::MAX as u32;
@@ -347,7 +365,7 @@ pub fn pattern_slash(color: impl IntoColor<Hsla>, width: f32, interval: f32) -> 
     }
 }
 
-/// Creates a checkerboard pattern background
+/// Creates alternating colored and transparent squares of `size` logical pixels.
 pub fn checkerboard(color: impl IntoColor<Hsla>, size: f32) -> Background {
     Background {
         tag: BackgroundTag::Checkerboard,
@@ -365,7 +383,7 @@ pub fn solid_background(color: impl IntoColor<Hsla>) -> Background {
     }
 }
 
-/// Creates a LinearGradient background color.
+/// Creates a two-stop linear gradient.
 ///
 /// The gradient line's angle of direction. A value of `0.` is equivalent to top; increasing values rotate clockwise from there.
 ///
@@ -398,9 +416,10 @@ pub struct LinearColorStop {
     pub percentage: f32,
 }
 
-/// Creates a new linear color stop.
+/// Creates a linear color stop at normalized position `percentage`.
 ///
-/// The percentage of the gradient, in the range 0.0 to 1.0.
+/// Values are expected in `0.0..=1.0`; the renderer preserves the supplied
+/// value, so callers should clamp or validate untrusted input.
 pub fn linear_color_stop(color: impl IntoColor<Hsla>, percentage: f32) -> LinearColorStop {
     LinearColorStop {
         color: color.into_color().into(),

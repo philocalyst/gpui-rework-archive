@@ -1,99 +1,70 @@
-# Welcome to GPUI!
+# GPUI Community Edition
 
-GPUI is a hybrid immediate and retained mode, GPU accelerated, UI framework
-for Rust, designed to support a wide variety of applications.
+GPUI is a Rust UI framework. A view holds application state and implements
+[`Render`]. Its render method returns elements; GPUI lays out those elements,
+dispatches input through them, and paints the result into a window.
 
-## Getting Started
+This crate contains the framework's state, element, input, and rendering
+contracts. `gpui_ce_platform` selects a native platform;
+`gpui_ce_web` supplies the browser platform. The package is named `gpui-ce`,
+but its Rust library is imported as `gpui`.
 
-GPUI is still in active development as we work on the Zed code editor, and is still pre-1.0. There will often be breaking changes between versions. You'll also need to use the latest version of stable Rust. Add `gpui`, and optionally `gpui_platform`, to your `Cargo.toml`:
+Start with the [first window walkthrough](https://gpui-ce.github.io/examples/first-window/).
+It includes the complete program, a browser preview, and an editor download.
+For a particular operation, use the [task guides](https://gpui-ce.github.io/guides/).
 
-```toml
-gpui = { version = "*" }
-gpui_platform = { version = "*", features = ["wayland", "x11"] }
-```
+## A view with state
 
-Everything in a standalone GPUI app starts with an `Application`. You can create one with `gpui_platform::application()`, which picks the windowing and text backends for the host OS, and kick off your application by passing a callback to `Application::run()`. Inside this callback, you can create a new window with `App::open_window()` and register your first root view.
+This view stores a count, displays it, and changes it on a click.
+[`Context::listener`] gives the callback access to the view. [`Context::notify`]
+requests a redraw after the value changes.
 
-```rust,no_run
-use gpui::*;
+```no_run
+use gpui::{Context, IntoElement, Render, Window, div, prelude::*};
 
-fn main() {
-    gpui_platform::application().run(|cx: &mut App| {
-        // ..
-    });
+struct Counter { count: u32 }
+
+impl Render for Counter {
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        div().id("counter").p_4()
+            .child(format!("Count: {}", self.count))
+            .on_click(cx.listener(|this, _event, _window, cx| {
+                this.count = this.count.saturating_add(1);
+                cx.notify();
+            }))
+    }
 }
 ```
 
-### `gpui_platform`
+The [counter walkthrough](https://gpui-ce.github.io/examples/counter/) supplies
+the window and explains each step. The ID keeps the element's interaction
+state attached to the same identity across frames.
 
-GPUI uses Parley for shaping, wrapping, hit testing, and font fallback on every platform. The features on `gpui_platform` select windowing and rendering integrations. If you build for a single platform, you can trim them:
+## Choose an entry point
 
-- **macOS.** Rendering uses the shared renderer over Metal, and text uses the shared Parley backend. No text feature is required.
+| You need to… | Start here |
+| --- | --- |
+| Store or share state | [`Entity`], [`Context`], and [`_ownership_and_data_flow`] |
+| Return an element tree | [`Render`], [`RenderOnce`], [`div`], and [`Styled`] |
+| Understand a frame | [`_documentation::rendering`] and [`Element`] |
+| Handle keys and clicks | [`_documentation::input`], [`InteractiveElement`], and [`FocusHandle`] |
+| Run work without blocking input | [`_documentation::scheduling`], [`Task`], and [`BackgroundExecutor`] |
+| Draw a custom region | [`canvas`], [`Window::paint_quad`], and [`PathBuilder`] |
+| Display a large collection | [`uniform_list`] for equal-height rows, [`list`] for measured rows |
+| Expose accessible controls | [`_accessibility`] |
 
-    ```toml
-    gpui_platform = { version = "*" }
-    ```
+## Before choosing GPUI
 
-- **Linux / FreeBSD.** Enable at least one windowing backend for desktop windows: `wayland`, `x11`, or both. No separate text feature is needed.
+GPUI uses a GPU-backed drawing model, rather than a native widget for every
+control. Layout and styling resemble the web, but elements are Rust values,
+not DOM nodes. The browser backend runs GPUI itself through WebAssembly and
+currently supports one window per document.
 
-    ```toml
-    gpui_platform = { version = "*", features = ["wayland", "x11"] }
-    ```
+The current checkout and a published release can differ. See the
+[version guide](https://gpui-ce.github.io/reference/versions/) before combining
+code from a walkthrough with a crates.io dependency. Platform requirements,
+feature flags, and the renderer split are documented in
+[`_documentation::platforms`].
 
-- **Windows.** No features are required. Windowing uses Win32, rendering uses DirectX, and text uses the shared Parley backend.
-
-### Additional Topics
-
-- [Ownership and data flow](_ownership_and_data_flow)
-- [Accessibility](_accessibility)
-- [Direction and bidirectional text](direction.md)
-
-### Dependencies
-
-GPUI has various system dependencies that it needs in order to work.
-
-#### macOS
-
-On macOS, GPUI uses Metal for rendering. In order to use Metal, you need to do the following:
-
-- Install [Xcode](https://apps.apple.com/us/app/xcode/id497799835?mt=12) from the macOS App Store, or from the [Apple Developer](https://developer.apple.com/download/all/) website. Note this requires a developer account.
-
-> Ensure you launch Xcode after installing, and install the macOS components, which is the default option.
-
-- Install [Xcode command line tools](https://developer.apple.com/xcode/resources/)
-
-  ```sh
-  xcode-select --install
-  ```
-
-- Ensure that the Xcode command line tools are using your newly installed copy of Xcode:
-
-  ```sh
-  sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
-  ```
-
-## The Big Picture
-
-GPUI offers three different [registers](<https://en.wikipedia.org/wiki/Register_(sociolinguistics)>) depending on your needs:
-
-- State management and communication with `Entity`'s. Whenever you need to store application state that communicates between different parts of your application, you'll want to use GPUI's entities. Entities are owned by GPUI and are only accessible through an owned smart pointer similar to an `Rc`. See the `app::context` module for more information.
-
-- High level, declarative UI with views. All UI in GPUI starts with a view. A view is simply an `Entity` that can be rendered, by implementing the `Render` trait. At the start of each frame, GPUI will call this render method on the root view of a given window. Views build a tree of `elements`, lay them out and style them with a tailwind-style API, and then give them to GPUI to turn into pixels. See the `div` element for an all purpose swiss-army knife of rendering.
-
-- Low level, imperative UI with Elements. Elements are the building blocks of UI in GPUI, and they provide a nice wrapper around an imperative API that provides as much flexibility and control as you need. Elements have total control over how they and their child elements are rendered and can be used for making efficient views into large lists, implement custom layouting for a code editor, and anything else you can think of. See the `element` module for more information.
-
-Each of these registers has one or more corresponding contexts that can be accessed from all GPUI services. This context is your main interface to GPUI, and is used extensively throughout the framework.
-
-## Other Resources
-
-In addition to the systems above, GPUI provides a range of smaller services that are useful for building complex applications:
-
-- Actions are user-defined structs that are used for converting keystrokes into logical operations in your UI. Use this for implementing keyboard shortcuts, such as cmd-q. See the `action` module for more information.
-
-- Platform services, such as `quit the app` or `open a URL` are available as methods on the `app::App`.
-
-- An async executor that is integrated with the platform's event loop. See the `executor` module for more information.,
-
-- The `[gpui::test]` macro provides a convenient way to write tests for your GPUI applications. Tests also have their own kind of context, a `TestAppContext` which provides ways of simulating common platform input. See `app::test_context` and `test` modules for more details.
-
-Currently, the best way to learn about these APIs is to read the Zed source code or drop a question in the [Zed Discord](https://zed.dev/community-links). We're working on improving the documentation, creating more examples, and will be publishing more guides to GPUI on our [blog](https://zed.dev/blog).
+Public APIs document their behavior here. Complete applications live in the
+walkthroughs so a short reference example does not have to conceal its setup.

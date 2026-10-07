@@ -1,8 +1,16 @@
+//! Cheaply cloneable URI text used as an asset and resource key.
+//!
+//! `SharedUri` preserves the caller's spelling. It does not parse, canonicalize, validate, or
+//! resolve a URI; use the target service to apply those policies.
+
 use derive_more::{Deref, DerefMut};
 
 use crate::SharedString;
 
-/// A [`SharedString`] containing a URI.
+/// A shared string that is intended to contain a URI.
+///
+/// The wrapper documents intent at API boundaries while retaining [`SharedString`] comparison,
+/// hashing, and dereferencing behavior.
 #[derive(Deref, DerefMut, Default, PartialEq, Eq, Hash, Clone)]
 pub struct SharedUri(SharedString);
 

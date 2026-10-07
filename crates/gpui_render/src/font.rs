@@ -13,6 +13,10 @@ pub enum SubpixelOrder {
 }
 
 /// Validated text coverage settings, independent of a renderer or display server.
+///
+/// Gamma is clamped to `1.0..=2.2`; contrast values are clamped to finite
+/// non-negative values. [`Self::uniforms`] converts these settings to the
+/// shared shader ABI used by CPU and GPU renderers.
 #[derive(Clone, Copy, Debug)]
 pub struct FontRasterizationSettings {
     gamma_ratios: [f32; 4],

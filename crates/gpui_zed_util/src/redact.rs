@@ -1,3 +1,5 @@
+//! Redaction of secret-like environment assignments in command diagnostics.
+
 use std::sync::LazyLock;
 
 static REDACT_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| {

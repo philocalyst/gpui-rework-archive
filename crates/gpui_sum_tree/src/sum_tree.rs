@@ -1,3 +1,10 @@
+//! Append-friendly trees with summaries and cursor-based navigation.
+//!
+//! A [`SumTree`] stores items in balanced nodes and caches a summary for each
+//! subtree. Cursors can seek by a caller-defined dimension while edits preserve
+//! summary values. The structure is intended for text buffers and other sequences
+//! where both local edits and aggregate queries matter.
+
 mod cursor;
 #[cfg(any(test, feature = "test-support"))]
 pub mod property_test;
@@ -54,6 +61,7 @@ pub trait Summary: Clone {
     fn add_summary<'a>(&mut self, summary: &Self, cx: Self::Context<'a>);
 }
 
+/// A summary that can be combined without access to an application context.
 pub trait ContextLessSummary: Clone {
     fn zero() -> Self;
     fn add_summary(&mut self, summary: &Self);
@@ -72,6 +80,7 @@ impl<T: ContextLessSummary> Summary for T {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+/// Marker summary for trees that do not need aggregate data.
 pub struct NoSummary;
 
 /// Catch-all implementation for when you need something that implements [`Summary`] without a specific type.
@@ -186,6 +195,7 @@ where
 /// - [Bias::Right] would attach the cursor to the first character of the folded region,
 ///   and the buffer offset would be the offset of the first character of the folded region
 #[derive(Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Hash, Default)]
+/// Direction used to resolve a position between two adjacent items.
 pub enum Bias {
     /// Attach to the character on the left
     #[default]
@@ -223,6 +233,7 @@ where
 }
 
 impl<T: Item> SumTree<T> {
+    /// Creates an empty tree with a zero summary built from `cx`.
     pub fn new(cx: <T::Summary as Summary>::Context<'_>) -> Self {
         SumTree(Arc::new(Node::Leaf {
             summary: <T::Summary as Summary>::zero(cx),
@@ -240,12 +251,14 @@ impl<T: Item> SumTree<T> {
         }))
     }
 
+    /// Creates a tree containing one item.
     pub fn from_item(item: T, cx: <T::Summary as Summary>::Context<'_>) -> Self {
         let mut tree = Self::new(cx);
         tree.push(item, cx);
         tree
     }
 
+    /// Builds a balanced tree by summarizing the items from `iter`.
     pub fn from_iter<I: IntoIterator<Item = T>>(
         iter: I,
         cx: <T::Summary as Summary>::Context<'_>,
@@ -389,6 +402,7 @@ impl<T: Item> SumTree<T> {
         items
     }
 
+    /// Iterates every item in tree order.
     pub fn iter(&self) -> Iter<'_, T> {
         Iter::new(self)
     }
@@ -594,6 +608,7 @@ impl<T: Item> SumTree<T> {
         }
     }
 
+    /// Creates a position-aware cursor using dimension `D`.
     pub fn cursor<'a, 'b, D>(
         &'a self,
         cx: <T::Summary as Summary>::Context<'b>,
@@ -623,10 +638,12 @@ impl<T: Item> SumTree<T> {
         self.leftmost_leaf().0.items().first()
     }
 
+    /// Returns the final item, if the tree is non-empty.
     pub fn last(&self) -> Option<&T> {
         self.rightmost_leaf().0.items().last()
     }
 
+    /// Returns the summary of the final item, if the tree is non-empty.
     pub fn last_summary(&self) -> Option<&T::Summary> {
         self.rightmost_leaf().0.child_summaries().last()
     }

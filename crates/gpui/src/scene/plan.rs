@@ -1,3 +1,10 @@
+//! Renderer-independent compilation of a recorded [`Scene`].
+//!
+//! A plan is the stable hand-off between scene recording and backend drawing:
+//! primitive arrays stay owned by the scene, while commands describe sorting,
+//! batching, path targets, and filter isolation. Resource counts are estimates
+//! for the compiled plan, not GPU allocation guarantees.
+
 use super::{AtlasTextureId, BatchIterator, FilterBoundary, Scene};
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
@@ -34,17 +41,26 @@ impl FilterRenderTarget {
 
 /// Resource totals computed while a scene's render plan is compiled.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
-#[expect(missing_docs)]
 pub struct ScenePlanRequirements {
+    /// Number of commands in the compiled stream.
     pub command_count: usize,
+    /// Number of non-empty instance batches.
     pub instance_batch_count: usize,
+    /// Number of vertices sent through path rasterization.
     pub path_rasterization_vertex_count: usize,
+    /// Number of path sprites emitted by path rasterization.
     pub path_sprite_count: usize,
+    /// Number of native paint surfaces in the scene.
     pub surface_count: usize,
+    /// Number of isolated backdrop-filter groups.
     pub backdrop_filter_count: usize,
+    /// Number of isolated content-filter groups.
     pub isolated_filter_count: usize,
+    /// Maximum number of simultaneously isolated filter targets.
     pub isolated_target_count: usize,
+    /// Whether path rasterization requires its dedicated target.
     pub uses_path_target: bool,
+    /// Whether any offscreen target is required.
     pub uses_offscreen_target: bool,
 }
 

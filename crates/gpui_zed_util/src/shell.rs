@@ -1,3 +1,10 @@
+//! Shell selection and quoting rules for terminal commands.
+//!
+//! [`ShellKind`] determines syntax from the executable name and target platform. The quoting
+//! methods return an owned string when escaping is required and may decline (`None`) when a caller
+//! must use a different strategy. `Shell` describes configuration; [`ShellBuilder`](crate::shell_builder::ShellBuilder)
+//! turns it into executable arguments.
+
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::{borrow::Cow, fmt, path::Path};
@@ -25,6 +32,7 @@ pub enum Shell {
 }
 
 impl Shell {
+    /// Return the executable selected by this configuration.
     pub fn program(&self) -> String {
         match self {
             Shell::Program(program) => program.clone(),
@@ -33,6 +41,7 @@ impl Shell {
         }
     }
 
+    /// Return the executable and configured arguments as owned values.
     pub fn program_and_args(&self) -> (String, &[String]) {
         match self {
             Shell::Program(program) => (program.clone(), &[]),
@@ -41,6 +50,7 @@ impl Shell {
         }
     }
 
+    /// Classify the shell using its executable name and target platform.
     pub fn shell_kind(&self, is_windows: bool) -> ShellKind {
         match self {
             Shell::Program(program) => ShellKind::new(program, is_windows),
@@ -51,24 +61,35 @@ impl Shell {
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Shell syntax family used to construct commands and quote arguments.
 pub enum ShellKind {
     #[default]
+    /// POSIX-compatible shell syntax.
     Posix,
+    /// C shell syntax.
     Csh,
+    /// Tcsh syntax.
     Tcsh,
+    /// Rc shell syntax.
     Rc,
+    /// Fish syntax.
     Fish,
     /// Pre-installed "legacy" powershell for windows
     PowerShell,
     /// PowerShell 7.x
     Pwsh,
+    /// Nushell syntax.
     Nushell,
+    /// Windows command interpreter syntax.
     Cmd,
+    /// Xonsh syntax.
     Xonsh,
+    /// Elvish syntax.
     Elvish,
 }
 
-pub fn get_system_shell() -> String {
+    /// Return the configured shell executable for the current platform.
+    pub fn get_system_shell() -> String {
     if cfg!(windows) {
         get_windows_system_shell()
     } else {
@@ -76,7 +97,8 @@ pub fn get_system_shell() -> String {
     }
 }
 
-pub fn get_default_system_shell() -> String {
+    /// Return the platform's default shell without user preference overrides.
+    pub fn get_default_system_shell() -> String {
     if cfg!(windows) {
         get_windows_system_shell()
     } else {
@@ -85,7 +107,8 @@ pub fn get_default_system_shell() -> String {
 }
 
 /// Get the default system shell, preferring bash on Windows.
-pub fn get_default_system_shell_preferring_bash() -> String {
+    /// Return the default shell, preferring Bash when it is installed.
+    pub fn get_default_system_shell_preferring_bash() -> String {
     #[cfg(windows)]
     {
         get_windows_bash().unwrap_or_else(|| get_windows_system_shell())
@@ -98,7 +121,8 @@ pub fn get_default_system_shell_preferring_bash() -> String {
 }
 
 #[cfg(windows)]
-pub fn get_windows_bash() -> Option<String> {
+    /// Locate a Bash executable installed on Windows.
+    pub fn get_windows_bash() -> Option<String> {
     fn find_bash_in_installation(install_root: &Path) -> Option<PathBuf> {
         if !install_root.join("git-bash.exe").is_file() {
             return None;
@@ -139,7 +163,8 @@ pub fn get_windows_bash() -> Option<String> {
     (*BASH).clone()
 }
 
-pub fn get_windows_system_shell() -> String {
+    /// Return PowerShell or the Windows command interpreter.
+    pub fn get_windows_system_shell() -> String {
     #[cfg(windows)]
     return gpui_util::get_windows_system_shell();
 
@@ -166,6 +191,8 @@ impl fmt::Display for ShellKind {
 }
 
 impl ShellKind {
+    /// Construct a shell kind from an executable path and target platform.
+    /// Select the host's default shell kind.
     pub fn system() -> Self {
         Self::new(get_system_shell(), cfg!(windows))
     }
@@ -193,6 +220,7 @@ impl ShellKind {
     ///   brush-parser can safely parse its command chaining syntax before including
     ///   it. Omitting a variant will cause `tool_permissions::from_input` to deny
     ///   terminal commands that have `always_allow` patterns configured.
+    /// Return whether this shell supports POSIX `&&` and `;` chaining syntax.
     pub fn supports_posix_chaining(&self) -> bool {
         matches!(
             self,
@@ -210,6 +238,7 @@ impl ShellKind {
         )
     }
 
+    /// Classify `program`; `is_windows` selects Windows-specific fallbacks.
     pub fn new(program: impl AsRef<Path>, is_windows: bool) -> Self {
         let program = program.as_ref();
         let program = program
@@ -236,6 +265,8 @@ impl ShellKind {
         }
     }
 
+    /// Convert `input` into the variable syntax accepted by this shell.
+    /// Convert an input string into a shell variable assignment.
     pub fn to_shell_variable(self, input: &str) -> String {
         match self {
             Self::PowerShell | Self::Pwsh => Self::to_powershell_variable(input),
@@ -364,6 +395,7 @@ impl ShellKind {
         }
     }
 
+    /// Build argv for running `combined_command`, optionally in interactive mode.
     pub fn args_for_shell(&self, interactive: bool, combined_command: String) -> Vec<String> {
         match self {
             ShellKind::PowerShell | ShellKind::Pwsh => vec!["-C".to_owned(), combined_command],
@@ -387,6 +419,7 @@ impl ShellKind {
         }
     }
 
+    /// Return the command-prefix character used by this shell, if any.
     pub const fn command_prefix(&self) -> Option<char> {
         match self {
             ShellKind::PowerShell | ShellKind::Pwsh => Some('&'),
@@ -402,6 +435,7 @@ impl ShellKind {
         }
     }
 
+    /// Add the shell's command prefix when the command does not already have it.
     pub fn prepend_command_prefix<'a>(&self, command: &'a str) -> Cow<'a, str> {
         match self.command_prefix() {
             Some(prefix) if !command.starts_with(prefix) => {
@@ -411,6 +445,7 @@ impl ShellKind {
         }
     }
 
+    /// Return the separator for sequential commands.
     pub const fn sequential_commands_separator(&self) -> char {
         match self {
             ShellKind::Cmd => '&',
@@ -427,6 +462,7 @@ impl ShellKind {
         }
     }
 
+    /// Return the separator that runs the next command only after success.
     pub const fn sequential_and_commands_separator(&self) -> &'static str {
         match self {
             ShellKind::Cmd
@@ -441,6 +477,7 @@ impl ShellKind {
         }
     }
 
+    /// Quote `arg` for this shell, returning `None` when it cannot be represented safely.
     pub fn try_quote<'a>(&self, arg: &'a str) -> Option<Cow<'a, str>> {
         match self {
             ShellKind::PowerShell => Some(Self::quote_powershell(arg)),
@@ -570,6 +607,7 @@ impl ShellKind {
         result
     }
 
+    /// Quote a value using PowerShell's single-quoted string rules.
     pub fn quote_powershell(arg: &str) -> Cow<'_, str> {
         let ps_will_quote = Self::need_quotes_powershell(arg);
         let crt_quoted = Self::quote_windows(arg, !ps_will_quote);
@@ -581,6 +619,7 @@ impl ShellKind {
         Cow::Owned(Self::escape_powershell_quotes(&crt_quoted))
     }
 
+    /// Quote a value for the `pwsh` command-line parser.
     pub fn quote_pwsh(arg: &str) -> Cow<'_, str> {
         if arg.is_empty() {
             return Cow::Borrowed("''");
@@ -593,6 +632,7 @@ impl ShellKind {
         Cow::Owned(Self::escape_powershell_quotes(arg))
     }
 
+    /// Quote a value using Windows `cmd.exe` escaping rules.
     pub fn quote_cmd(arg: &str) -> Cow<'_, str> {
         let crt_quoted = Self::quote_windows(arg, true);
 
@@ -622,6 +662,7 @@ impl ShellKind {
     ///
     /// In other words, this will consider quoting arg without its command prefix to not break the command.
     /// You should use this over `try_quote` when you want to quote a shell command.
+    /// Quote `arg`, preserving a recognized shell command prefix.
     pub fn try_quote_prefix_aware<'a>(&self, arg: &'a str) -> Option<Cow<'a, str>> {
         if let Some(char) = self.command_prefix()
             && let Some(arg) = arg.strip_prefix(char)
@@ -657,10 +698,12 @@ impl ShellKind {
         })
     }
 
+    /// Split shell input into arguments according to this shell's quoting rules.
     pub fn split(&self, input: &str) -> Option<Vec<String>> {
         shlex::split(input)
     }
 
+    /// Return the shell keyword used to enable an environment.
     pub const fn activate_keyword(&self) -> &'static str {
         match self {
             ShellKind::Cmd => "",
@@ -676,6 +719,7 @@ impl ShellKind {
         }
     }
 
+    /// Return the command used to clear the terminal screen.
     pub const fn clear_screen_command(&self) -> &'static str {
         match self {
             ShellKind::Cmd => "cls",
@@ -695,6 +739,7 @@ impl ShellKind {
     #[cfg(windows)]
     /// We do not want to escape arguments if we are using CMD as our shell.
     /// If we do we end up with too many quotes/escaped quotes for CMD to handle.
+    /// Return whether terminal arguments need escaping for a TTY invocation.
     pub const fn tty_escape_args(&self) -> bool {
         match self {
             ShellKind::Cmd => false,

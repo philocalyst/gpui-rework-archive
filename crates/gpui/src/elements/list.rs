@@ -1,11 +1,12 @@
-//! A list element that can be used to render a large number of differently sized elements
-//! efficiently. Clients of this API need to ensure that elements outside of the scrolled
-//! area do not change their height for this element to function correctly. If your elements
-//! do change height, notify the list element via [`ListState::splice`] or [`ListState::reset`].
-//! In order to minimize re-renders, this element's state is stored intrusively
-//! on your own views, so that your code can coordinate directly with the list element's cached state.
+//! A virtualized scroll container for large collections whose items may have different heights.
 //!
-//! If all of your elements are the same height, see [`crate::UniformList`] for a simpler API
+//! The renderer receives an item index and is called only for the visible range plus configured
+//! overdraw. [`ListState`] owns measured heights and must be kept by the owning view. When item
+//! heights or the count change, update it with [`ListState::remeasure`],
+//! [`ListState::remeasure_items`], [`ListState::splice`], or [`ListState::reset`].
+//!
+//! If every item has the same height, [`crate::UniformList`] avoids per-item measurement. See the
+//! [visible-range walkthrough](https://gpui-ce.github.io/examples/lists/#visible-range).
 
 use crate::{
     AnyElement, App, AppContext, AvailableSpace, Bounds, ContentMask, DispatchPhase, Edges,
@@ -20,7 +21,11 @@ use sum_tree::{Bias, Dimensions, SumTree};
 
 type RenderItemFn = dyn FnMut(usize, &mut Window, &mut App) -> AnyElement + 'static;
 
-/// Construct a new list element
+/// Construct a virtualized list whose renderer receives the visible item range.
+///
+/// Keep `state` in the owning view and pass it back on every render. The callback's output order
+/// must match the requested indices so measured bounds and interaction remain associated with the
+/// correct item.
 pub fn list(
     state: ListState,
     render_item: impl FnMut(usize, &mut Window, &mut App) -> AnyElement + 'static,
@@ -596,7 +601,7 @@ impl ListState {
 
     /// Scroll the list to the very end (past the last item).
     ///
-    /// Unlike [`scroll_to_reveal_item`], this uses the total item count as the
+    /// Unlike [`Self::scroll_to_reveal_item`], this uses the total item count as the
     /// anchor, so the list's layout pass will walk backwards from the end and
     /// always show the bottom of the last item — even when that item is still
     /// growing (e.g. during streaming).

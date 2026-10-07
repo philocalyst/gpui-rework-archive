@@ -1,6 +1,13 @@
-//! The GPUI geometry module is a collection of types and traits that
-//! can be used to describe common units, concepts, and the relationships
-//! between them.
+//! Geometry, coordinate spaces, and CSS-like lengths used throughout GPUI.
+//!
+//! Points and bounds use a top-left origin: `x` increases to the right and
+//! `y` increases downward. [`Pixels`] are logical pixels; convert to
+//! [`DevicePixels`] only at the renderer boundary, using the window scale
+//! factor. [`ScaledPixels`] are the scene-space form, already multiplied by
+//! that factor. Lengths may be absolute (`px` or [`Rems`]), relative, or
+//! [`Length::Auto`]. Methods that combine rectangles preserve this convention:
+//! edges are ordered top, right, bottom, left, and corners are named by those
+//! same sides.
 
 use anyhow::{Context as _, anyhow};
 use core::fmt::Debug;
@@ -21,7 +28,7 @@ use taffy::prelude::{TaffyGridLine, TaffyGridSpan};
 
 use crate::{App, DisplayId};
 
-/// Axis in a 2D cartesian space.
+/// An axis in GPUI's top-left-origin 2D coordinate space.
 #[derive(Copy, Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub enum Axis {
     /// The y axis, or up and down
@@ -52,7 +59,7 @@ pub trait Along {
     fn apply_along(&self, axis: Axis, f: impl FnOnce(Self::Unit) -> Self::Unit) -> Self;
 }
 
-/// Describes a location in a 2D cartesian space.
+/// A location in a 2D coordinate space.
 ///
 /// It holds two public fields, `x` and `y`, which represent the coordinates in the space.
 /// The type `T` for the coordinates can be any type that implements `Default`, `Clone`, and `Debug`.
@@ -751,6 +758,9 @@ impl Size<Length> {
 #[derive(Refineable, Copy, Clone, Default, Debug, Eq, PartialEq, Serialize, Deserialize, Hash)]
 #[refineable(Debug)]
 #[repr(C)]
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Bounds-ab348ddb.md")]
+// docs:examples:end
 pub struct Bounds<T: Clone + Debug + Default + PartialEq> {
     /// The origin point of this area.
     pub origin: Point<T>,
@@ -1069,7 +1079,10 @@ where
         }
     }
 
-    /// Extends the bounds different amounts in each direction.
+    /// Extends the bounds by independent top, right, bottom, and left amounts.
+    ///
+    /// Positive values grow outward. Negative values are accepted when `T`
+    /// supports them and shrink the corresponding sides.
     #[must_use]
     pub fn extend(&self, amount: Edges<T>) -> Bounds<T> {
         Bounds {
@@ -1606,11 +1619,6 @@ where
     }
 }
 
-/// Checks if the bounds represent an empty area.
-///
-/// # Returns
-///
-/// Returns `true` if either the width or the height of the bounds is less than or equal to zero, indicating an empty area.
 impl<T: PartialOrd + Clone + Debug + Default + PartialEq> Bounds<T> {
     /// Checks if the bounds represent an empty area.
     ///
@@ -2619,7 +2627,7 @@ impl From<Pixels> for Corners<Pixels> {
     }
 }
 
-/// Represents an angle in Radians
+/// An angle measured in radians.
 #[derive(
     Clone,
     Copy,
@@ -2637,14 +2645,21 @@ impl From<Pixels> for Corners<Pixels> {
     Debug,
 )]
 #[repr(transparent)]
-pub struct Radians(pub f32);
+pub struct Radians(
+    /// Raw angle in radians; values are not normalized.
+    pub f32,
+);
 
-/// Create a `Radian` from a raw value
+/// Wraps a raw radian value without normalization.
 pub fn radians(value: f32) -> Radians {
     Radians(value)
 }
 
-/// A type representing a percentage value.
+/// A normalized fraction used where an API describes a percentage.
+///
+/// Values are represented as `0.0..=1.0`; [`percentage`] debug-asserts that
+/// its input is in that range. Converting to [`Radians`] treats `1.0` as one
+/// full turn.
 #[derive(
     Clone,
     Copy,
@@ -2662,9 +2677,12 @@ pub fn radians(value: f32) -> Radians {
     Debug,
 )]
 #[repr(transparent)]
-pub struct Percentage(pub f32);
+pub struct Percentage(
+    /// Fraction of a full turn or normalized percentage.
+    pub f32,
+);
 
-/// Generate a `Radian` from a percentage of a full circle.
+/// Creates a normalized percentage, debug-asserting `value` is `0.0..=1.0`.
 pub fn percentage(value: f32) -> Percentage {
     debug_assert!(
         (0.0..=1.0).contains(&value),
@@ -2679,7 +2697,7 @@ impl From<Percentage> for Radians {
     }
 }
 
-/// Represents a length in pixels, the base unit of measurement in the UI framework.
+/// A logical pixel length, the base unit of GPUI layout.
 ///
 /// `Pixels` is a value type that represents an absolute length in pixels, which is used
 /// for specifying sizes, positions, and distances in the UI. It is the fundamental unit
@@ -2718,6 +2736,9 @@ impl From<Percentage> for Radians {
     JsonSchema,
 )]
 #[repr(transparent)]
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Pixels-72028e09.md")]
+// docs:examples:end
 pub struct Pixels(pub(crate) f32);
 
 impl Div for Pixels {
@@ -3023,7 +3044,10 @@ impl From<usize> for Pixels {
     Deserialize,
 )]
 #[repr(transparent)]
-pub struct DevicePixels(pub i32);
+pub struct DevicePixels(
+    /// Physical display-pixel count.
+    pub i32,
+);
 
 impl DevicePixels {
     /// Converts the `DevicePixels` value to the number of bytes needed to represent it in memory.
@@ -3129,7 +3153,10 @@ impl From<usize> for DevicePixels {
     Deserialize,
 )]
 #[repr(transparent)]
-pub struct ScaledPixels(pub f32);
+pub struct ScaledPixels(
+    /// Scene-space coordinate after applying the display scale factor.
+    pub f32,
+);
 
 impl ScaledPixels {
     /// Returns the raw `f32` value of this `ScaledPixels`.
@@ -3292,7 +3319,10 @@ impl MulAssign<f32> for ScaledPixels {
 ///
 /// [set_rem_size]: crate::Window::set_rem_size
 #[derive(Clone, Copy, Default, Add, Sub, Mul, Div, Neg, PartialEq)]
-pub struct Rems(pub f32);
+pub struct Rems(
+    /// Number of root-font-size units.
+    pub f32,
+);
 
 impl Rems {
     /// A length of zero.

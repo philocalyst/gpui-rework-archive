@@ -1,3 +1,9 @@
+//! Asset registration and decoded image buffers used by GPUI.
+//!
+//! [`AssetRegistry`] maps stable paths to embedded bytes, owned bytes, or loaders that defer I/O
+//! until the path is requested. [`RenderImage`] is the decoded, possibly animated image handed to
+//! the renderer. Paths are application-defined; this module does not normalize or access them.
+
 use crate::{DevicePixels, Pixels, Result, SharedString, Size, size};
 use gpui_util::ResultExt;
 use smallvec::SmallVec;
@@ -27,7 +33,7 @@ pub trait AssetSource: 'static + Send + Sync {
     /// List the assets at the given path.
     fn list(&self, path: &str) -> Result<Vec<SharedString>>;
 
-    /// Iterates over all paths (via [`list`]) and loads each asset in turn (via [`load`]),
+    /// Iterates over all paths (via [`Self::list`]) and loads each asset in turn (via [`Self::load`]),
     /// yielding an iterator over all assets that were loaded successfully.
     /// Output can be provided directly to [`AssetRegistry::extend`].
     fn iter_preloaded(&self) -> Box<dyn Iterator<Item = (SharedString, AssetEntry)> + '_> {
@@ -39,8 +45,8 @@ pub trait AssetSource: 'static + Send + Sync {
         Box::new(iter)
     }
 
-    /// Iterates over all paths (via [`list`]) and constructs an [`AssetEntry::OnDemand`],
-    /// which will call [`load`] on this `Arc<AssetSource>` when the path is requested, yielding the resulting iterator.
+    /// Iterates over all paths (via [`Self::list`]) and constructs an [`AssetEntry::OnDemand`],
+    /// which calls [`Self::load`] on this shared source when a path is requested.
     /// Output can be provided directly to [`AssetRegistry::extend`].
     fn iter_ondemand(self: Arc<Self>) -> Box<dyn Iterator<Item = (SharedString, AssetEntry)>> {
         use gpui_util::ResultExt;
@@ -70,13 +76,17 @@ impl AssetSource for () {
 
 /// Alias for a Cow byte vec, representing an asset that has been loaded.
 pub type AssetData = Cow<'static, [u8]>;
-/// A thread-safe callback to load an asset, possibly from disk.
+/// A thread-safe callback that loads an asset on demand.
+///
+/// Returning `None` means that the asset is unavailable. The callback may perform I/O, so a
+/// caller should avoid invoking [`AssetRegistry::load`] on a latency-sensitive UI path when using
+/// an on-demand entry.
 pub type FnAssetLoader = Arc<dyn Fn() -> Option<AssetData> + 'static + Send + Sync>;
-/// The entry stored in the [`AssetRegistry`].
+/// The storage policy for one [`AssetRegistry`] entry.
 pub enum AssetEntry {
-    /// The asset is pre-loaded. It may be stored staticlly/embedded, or has already been loaded from disk.
+    /// The bytes are already available, either borrowed from the binary or owned by the registry.
     PreLoaded(AssetData),
-    /// The entry should be loaded on demand.
+    /// Invoke the loader when the path is requested.
     OnDemand(FnAssetLoader),
 }
 impl From<AssetData> for AssetEntry {
@@ -155,7 +165,8 @@ impl AssetRegistry {
 
     /// Returns the asset data for a given path/key. If the asset is static/embedded or pre-loaded,
     /// this will return [`Cow::Borrowed(&'this [u8])`] (the data may be 'static lifetime aka embedded/bundled or simply owned by the registry).
-    /// If the asset mapped to the path is load-on-demand, the loader is queried and its result returned as [`Cow::Owned(Vec<u8>)`].
+    /// If the asset is load-on-demand, the loader is queried and its returned bytes are passed
+    /// through as an owned or borrowed [`Cow`] value.
     pub fn load<'this>(&'this self, path: impl AsRef<str>) -> Option<Cow<'this, [u8]>> {
         match self.entries.get(path.as_ref())? {
             AssetEntry::PreLoaded(Cow::Borrowed(data)) => Some(Cow::Borrowed(data)),
@@ -205,18 +216,24 @@ impl AssetRegistry {
     }
 }
 
-/// A unique identifier for the image cache
+/// A process-local identifier for a decoded image.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct ImageId(pub usize);
 
+/// Identifies one frame of one [`RenderImage`] in a sprite-atlas request.
 #[derive(PartialEq, Eq, Hash, Clone)]
-#[expect(missing_docs)]
 pub struct RenderImageParams {
+    /// The image to draw.
     pub image_id: ImageId,
+    /// The zero-based animation frame to draw.
     pub frame_index: usize,
 }
 
-/// A cached and processed image, in BGRA format
+/// A decoded image, stored in the renderer's BGRA byte order.
+///
+/// A value can contain multiple frames. Out-of-range frame queries return an empty/default value;
+/// callers that need to distinguish a missing frame can compare `frame_index` with
+/// [`Self::frame_count`].
 pub struct RenderImage {
     /// The ID associated with this image
     pub id: ImageId,
@@ -269,7 +286,9 @@ impl RenderImage {
             .map(|v| (v.0 as f32 / self.scale_factor).into())
     }
 
-    /// Get the delay of this frame from the previous
+    /// Return the duration for which a frame should be displayed.
+    ///
+    /// Missing frames use a 100 ms fallback, matching the image decoder's conservative default.
     pub fn delay(&self, frame_index: usize) -> Delay {
         self.data
             .get(frame_index)

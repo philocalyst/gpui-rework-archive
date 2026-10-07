@@ -162,6 +162,7 @@ pub struct WgpuHeadlessRenderer {
 }
 
 impl WgpuHeadlessRenderer {
+    /// Creates a surface-free renderer without GPU timestamp queries.
     pub fn new() -> anyhow::Result<Self> {
         let context = WgpuContext::new_headless(None)?;
         let renderer = WgpuRenderer::new_headless(

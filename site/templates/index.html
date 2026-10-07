@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block main %}
+<main id="main" class="reader home">
+  <header class="page-head"><p class="eyebrow">Rust state. GPU drawing. Native windows.</p><h1>Build the interface.<br>Understand the machinery.</h1><p class="deck">GPUI is a Rust UI framework. A view owns state, returns elements, and lets GPUI lay out and paint them. Start with a window; follow each part into its API contract.</p></header>
+  <p class="start"><a class="primary" href="{{ get_url(path='examples/first-window/') }}">Open your first window →</a><a href="{{ get_url(path='guides/setup/') }}">Set up your platform</a></p>
+  <section class="home-paths" aria-label="Choose a starting point">
+    <a href="{{ get_url(path='examples/') }}"><small>Learn by doing</small><h2>Follow the code.</h2><p>Ten short programs, explained step by step. Run the real renderer in your browser and take the source with you.</p></a>
+    <a href="{{ get_url(path='guides/') }}"><small>Finish a task</small><h2>Find the missing piece.</h2><p>Handle focus, keep async work alive, load assets, and test what a user sees.</p></a>
+    <a href="{{ get_url(path='reference/') }}"><small>Understand a contract</small><h2>Read the API.</h2><p>Ownership, rendering, input, and scheduling. Versioned rustdoc, with links back to the code that uses it.</p></a>
+  </section>
+  <section class="home-model"><h2>One loop, three jobs.</h2><ol><li><strong>Update state.</strong> An event mutates the view through its context.</li><li><strong>Request a redraw.</strong> <code>cx.notify()</code> tells GPUI that the view changed.</li><li><strong>Build elements.</strong> <code>Render::render</code> describes the next frame.</li></ol><p>The <a href="{{ get_url(path='examples/counter/') }}">counter walkthrough</a> makes the loop visible. The <a href="{{ get_url(path='reference/ownership/') }}">ownership explanation</a> shows why contexts are involved.</p></section>
+  <div class="prose">{{ section.content | safe }}</div>
+</main>
+{% endblock main %}

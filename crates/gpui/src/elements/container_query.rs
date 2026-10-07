@@ -1,6 +1,9 @@
-//! A container query element, in the spirit of CSS container queries.
-//! The element's own size is determined solely by its style and the space
-//! offered by its parent.
+//! An element whose contents are chosen from its resolved size.
+//!
+//! The callback runs after the container's own layout has been resolved. Its returned subtree is
+//! laid out inside those bounds and cannot influence the container's size, so size the container
+//! explicitly with [`Styled`](crate::Styled) methods when the parent does not provide a definite
+//! size.
 
 use refineable::Refineable as _;
 

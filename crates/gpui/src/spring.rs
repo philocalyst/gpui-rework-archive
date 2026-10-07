@@ -1,3 +1,12 @@
+//! Analytic damped springs and value projection for animation.
+//!
+//! [`SpringConfig`] uses the usual physical parameters: stiffness and mass
+//! must be positive and damping must be non-negative. Time arguments are
+//! seconds (`f32`); [`SpringConfig::step`] preserves velocity and is therefore
+//! suitable for retargeting each frame. A spring is settled when both position
+//! and velocity are within the requested epsilon. [`SpringAnimation`] adapts
+//! the scalar spring coordinate to richer values through [`SpringTarget`].
+
 use std::{ops::RangeInclusive, time::Duration};
 
 use crate::{Hsla, Motion, Pixels, Rems, Rgba, SpringDescription};
@@ -253,6 +262,10 @@ impl SpringConfig {
 }
 
 /// The instantaneous position and velocity of a spring.
+///
+/// `position` and `velocity` share the same arbitrary scalar coordinate. The
+/// target need not be normalized; callers choose the coordinate system and
+/// project it through [`SpringTarget`].
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct SpringState {
     /// The current value in the animated unit.

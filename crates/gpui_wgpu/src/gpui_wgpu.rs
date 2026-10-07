@@ -1,3 +1,9 @@
+//! WGPU context, surface, atlas, and renderer integration for GPUI.
+//!
+//! A [`WgpuContext`] owns device-level state while [`WgpuRenderTarget`] owns a
+//! drawable texture. The renderer exposes recovery and device-loss state so a
+//! platform can recreate a surface without rebuilding the application scene.
+
 mod wgpu_atlas;
 mod wgpu_context;
 mod wgpu_renderer;

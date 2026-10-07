@@ -1,4 +1,7 @@
-//! Portable results from optional native window checks.
+//! Serializable results from optional native window lifecycle probes.
+//!
+//! These reports are test-support data, not a runtime health API. A failed probe keeps its
+//! partial events and errors so callers can persist evidence from an interrupted native run.
 
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;

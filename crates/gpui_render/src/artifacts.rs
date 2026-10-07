@@ -1,8 +1,15 @@
-//! WGSL linked at Cargo build time from the Rust-authored shader modules.
+//! Shader artifacts linked at Cargo build time from Rust-authored modules.
+//!
+//! The strings and metadata in this module are generated outputs. They are
+//! validated against the host-side ABI and the supported dialects by the build
+//! script; consumers should select the artifact matching their backend rather
+//! than modify the generated source.
 
 use std::marker::PhantomData;
 
+/// WebGPU WGSL for the standard GPUI pipelines.
 pub const BASE_WGSL: &str = include_str!(concat!(env!("OUT_DIR"), "/gpui_base.wgsl"));
+/// WebGPU WGSL for the dual-source subpixel text pipeline.
 pub const SUBPIXEL_DUAL_SOURCE_WGSL: &str =
     include_str!(concat!(env!("OUT_DIR"), "/gpui_subpixel_dual_source.wgsl"));
 /// Downlevel (WebGL2/GLES) dialect: scene arrays travel via an `rgba32uint` data texture.
@@ -11,16 +18,23 @@ pub const BASE_DOWNLEVEL_WGSL: &str =
 
 #[derive(Clone, Copy)]
 pub struct GeneratedBinding {
+    /// Binding number in the generated bind group.
     pub binding: u32,
+    /// Shader-stage visibility bitmask.
     pub visibility: u32,
+    /// Resource kind and byte width, when applicable.
     pub kind: GeneratedBindingKind,
 }
 
 #[derive(Clone, Copy)]
 pub enum GeneratedBindingKind {
+    /// Uniform buffer with the given byte size.
     Uniform(u64),
+    /// Read-only storage buffer with the given byte size.
     StorageRead(u64),
+    /// Two-dimensional floating-point texture.
     Texture2dFloat,
+    /// Filtering sampler.
     FilteringSampler,
     /// Downlevel only: the `rgba32uint` scene-data texture.
     DataTexture,
@@ -66,6 +80,7 @@ pub struct Dx11DrawConstants {
     pub first_instance: i32,
     /// Unused by graphics pipelines; Naga reserves it for compute dispatch sizes.
     pub other: u32,
+    /// Padding to the 16-byte D3D11 constant-buffer granule.
     pub padding: u32,
 }
 
@@ -102,6 +117,7 @@ pub enum Dx11Shader {
 /// These artifacts describe the requested GLSL profile; driver compilation
 /// and program linking still belong to a future raw-GL consumer.
 pub struct GlslShaderStage {
+    /// Generated source text for this shader stage.
     pub source: &'static str,
 }
 
@@ -113,12 +129,15 @@ pub enum Gles300 {}
 
 /// A pair of GLSL stages generated from validated WGSL for one profile.
 pub struct GlslShader<Profile> {
+    /// Generated vertex stage.
     pub vertex: GlslShaderStage,
+    /// Generated fragment stage.
     pub fragment: GlslShaderStage,
     _profile: PhantomData<fn() -> Profile>,
 }
 
 impl<Profile> GlslShader<Profile> {
+    /// Combines generated vertex and fragment stages with a profile marker.
     pub const fn new(vertex: GlslShaderStage, fragment: GlslShaderStage) -> Self {
         Self {
             vertex,
@@ -128,18 +147,24 @@ impl<Profile> GlslShader<Profile> {
     }
 }
 
+/// All generated dialects for one renderer pipeline.
 pub struct NativeShader {
+    /// Stable pipeline label used in diagnostics.
     pub label: &'static str,
     /// The shared pipeline description this shader was generated for: topology, vertex
     /// count and data layout are the same on every backend.
     pub pipeline: &'static crate::shaders::interface::Pipeline,
+    /// Vertex entry-point name in the generated source.
     pub vertex_entry: &'static str,
+    /// Fragment entry-point name in the generated source.
     pub fragment_entry: &'static str,
+    /// D3D11 bytecode or an explicit unavailable marker.
     pub dx11: Dx11Shader,
     /// GLSL 3.30 core, using the data-texture downlevel transport.
     pub glsl_330: GlslShader<Glsl330>,
     /// GLSL ES 3.00, using the same downlevel transport.
     pub gles_300: GlslShader<Gles300>,
+    /// Metal shading-language source.
     pub msl: &'static str,
 }
 

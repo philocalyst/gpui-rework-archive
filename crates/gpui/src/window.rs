@@ -101,17 +101,19 @@ fn quantize_color_glyph_origin(origin: Point<ScaledPixels>) -> (Point<ScaledPixe
     )
 }
 
-/// Default window size used when no explicit size is provided.
+/// Default content size used when no explicit window size is provided.
 pub const DEFAULT_WINDOW_SIZE: Size<Pixels> = size(px(1536.), px(1095.));
 
-/// A 6:5 aspect ratio minimum window size to be used for functional,
-/// additional-to-main-Zed windows, like the settings and rules library windows.
+/// Default minimum size for auxiliary windows such as settings and rules-library windows.
 pub const DEFAULT_ADDITIONAL_WINDOW_SIZE: Size<Pixels> = Size {
     width: Pixels(900.),
     height: Pixels(750.),
 };
 
-/// Represents the two different phases when dispatching events.
+/// Phase in which an input listener runs.
+///
+/// Mouse events capture from the root toward the hit target and bubble back out. Keyboard events
+/// capture from the root toward the focused element and bubble from that element back to the root.
 #[derive(Default, Copy, Clone, Debug, Eq, PartialEq)]
 pub enum DispatchPhase {
     /// After the capture phase comes the bubble phase, in which mouse event listeners are
@@ -549,6 +551,9 @@ impl FocusId {
 }
 
 /// A handle which can be used to track and manipulate the focused element in a window.
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-FocusHandle-4a40e532.md")]
+// docs:examples:end
 pub struct FocusHandle {
     pub(crate) id: FocusId,
     handles: Arc<FocusMap>,
@@ -594,7 +599,10 @@ impl FocusHandle {
         })
     }
 
-    /// Sets the tab index of the element associated with this handle.
+    /// Sets the element's position in tab traversal and returns the handle.
+    ///
+    /// Lower indices sort first within a tab group. The value is stored in the shared focus map,
+    /// so clones of this handle observe the same index.
     pub fn tab_index(mut self, index: isize) -> Self {
         self.tab_index = index;
         if let Some(focus) = self.handles.write().get_mut(self.id) {
@@ -603,7 +611,7 @@ impl FocusHandle {
         self
     }
 
-    /// Sets whether the element associated with this handle is a tab stop.
+    /// Sets whether tab traversal may stop on this element and returns the handle.
     ///
     /// When `false`, the element will not be included in the tab order.
     pub fn tab_stop(mut self, tab_stop: bool) -> Self {
@@ -614,7 +622,7 @@ impl FocusHandle {
         self
     }
 
-    /// Converts this focus handle into a weak variant, which does not prevent it from being released.
+    /// Converts this handle into a weak reference that does not keep the focus entry alive.
     pub fn downgrade(&self) -> WeakFocusHandle {
         WeakFocusHandle {
             id: self.id,
@@ -622,7 +630,9 @@ impl FocusHandle {
         }
     }
 
-    /// Moves the focus to the element associated with this handle.
+    /// Requests focus for the element associated with this handle.
+    ///
+    /// The change is applied to `window`; focus listeners run during normal event processing.
     pub fn focus(&self, window: &mut Window, cx: &mut App) {
         window.focus(self, cx)
     }
@@ -649,7 +659,9 @@ impl FocusHandle {
         self.id.contains(other.id, window)
     }
 
-    /// Dispatch an action on the element that rendered this focus handle
+    /// Dispatches `action` to the element that rendered this handle in the last frame.
+    ///
+    /// If the handle was not rendered in that frame, the action is ignored.
     pub fn dispatch_action(&self, action: &dyn Action, window: &mut Window, cx: &mut App) {
         if let Some(node_id) = window
             .rendered_frame
@@ -721,8 +733,7 @@ impl PartialEq<WeakFocusHandle> for FocusHandle {
     }
 }
 
-/// Focusable allows users of your view to easily
-/// focus it (using window.focus_view(cx, view))
+/// Gives a view a stable focus handle that callers can focus or use for traversal.
 pub trait Focusable: 'static {
     /// Returns the focus handle associated with this view.
     fn focus_handle(&self, cx: &App) -> FocusHandle;
@@ -734,13 +745,12 @@ impl<V: Focusable> Focusable for Entity<V> {
     }
 }
 
-/// ManagedView is a view (like a Modal, Popover, Menu, etc.)
-/// where the lifecycle of the view is handled by another view.
+/// A view whose lifecycle is managed by another view, such as a modal, popover, or menu.
 pub trait ManagedView: Focusable + EventEmitter<DismissEvent> + Render {}
 
 impl<M: Focusable + EventEmitter<DismissEvent> + Render> ManagedView for M {}
 
-/// Emitted by implementers of [`ManagedView`] to indicate the view should be dismissed, such as when a view is presented as a modal.
+/// Emitted by a [`ManagedView`] when its owner should dismiss it.
 pub struct DismissEvent;
 
 type FrameCallback = Box<dyn FnOnce(&mut Window, &mut App)>;
@@ -996,7 +1006,7 @@ pub enum HitboxBehavior {
     /// All hitboxes behind this hitbox will be ignored and so will have `hitbox.is_hovered() ==
     /// false` and `hitbox.should_handle_scroll() == false`. Typically for elements this causes
     /// skipping of all mouse events, hover styles, and tooltips. This flag is set by
-    /// [`InteractiveElement::occlude`].
+    /// the interactive `occlude` behavior.
     ///
     /// For mouse handlers that check those hitboxes, this behaves the same as registering a
     /// bubble-phase handler for every mouse event type:
@@ -1020,7 +1030,7 @@ pub enum HitboxBehavior {
     /// `hitbox.should_handle_scroll() == true`. Typically for elements this causes all mouse
     /// interaction except scroll events to be ignored - see the documentation of
     /// [`Hitbox::is_hovered`] for details. This flag is set by
-    /// [`InteractiveElement::block_mouse_except_scroll`].
+    /// the interactive `block_mouse_except_scroll` behavior.
     ///
     /// For mouse handlers that check those hitboxes, this behaves the same as registering a
     /// bubble-phase handler for every mouse event type **except** `ScrollWheelEvent`:
@@ -1244,7 +1254,10 @@ enum InputModality {
     Touch,
 }
 
-/// Holds the state for a specific window.
+/// Holds rendering, focus, input, and platform state for one native window.
+///
+/// A `Window` is borrowed from a callback or render pass. Store a [`WindowHandle`] when work must
+/// outlive that borrow.
 pub struct Window {
     pub(crate) handle: AnyWindowHandle,
     pub(crate) invalidator: WindowInvalidator,
@@ -2104,27 +2117,32 @@ impl Window {
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
-#[expect(missing_docs)]
+/// Reports whether input propagation and the platform default were allowed after dispatch.
 pub struct DispatchEventResult {
+    /// Whether propagation continued after dispatch.
+    ///
+    /// `false` means a listener stopped propagation. It does not imply that the platform default
+    /// action was prevented; inspect [`Self::default_prevented`] separately.
     pub propagate: bool,
+    /// Whether a listener prevented the platform default action.
     pub default_prevented: bool,
 }
 
-/// Indicates which region of the window is visible. Content falling outside of this mask will not be
-/// rendered. Currently, only rectangular content masks are supported, but we give the mask its own type
-/// to leave room to support more complex shapes in the future. Edge fades are evaluated in
-/// window space against these axis-aligned bounds and are not transform-aware.
+/// Rectangular region that clips window content, with optional fades at each edge.
+///
+/// Content outside `bounds` is omitted. Fades are evaluated in window space against these
+/// axis-aligned bounds and do not follow transforms. Complex masks are not supported.
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[repr(C)]
 pub struct ContentMask<P: Clone + Debug + Default + PartialEq> {
-    /// The bounds
+    /// Visible rectangle in the mask's coordinate unit.
     pub bounds: Bounds<P>,
-    /// Edge fade distances. A zero distance leaves that edge fully opaque.
+    /// Fade distance at each edge. A zero distance leaves that edge fully opaque.
     pub fade_out: Edges<P>,
 }
 
 impl ContentMask<Pixels> {
-    /// Scale the content mask's pixel units by the given scaling factor.
+    /// Converts pixel units to scaled pixels by `factor`.
     pub fn scale(&self, factor: f32) -> ContentMask<ScaledPixels> {
         ContentMask {
             bounds: self.bounds.scale(factor),
@@ -2132,7 +2150,7 @@ impl ContentMask<Pixels> {
         }
     }
 
-    /// Intersect the content mask with the given content mask.
+    /// Returns the intersection of two masks, combining edge fades at the resulting edges.
     ///
     /// For each edge, the mask that actually clips at that edge contributes its
     /// fade; when both masks clip at the same coordinate, the stronger fade wins.
@@ -2229,7 +2247,9 @@ impl Window {
         }
     }
 
-    /// Registers a callback to be invoked when the window appearance changes.
+    /// Registers a callback invoked after the window appearance changes.
+    ///
+    /// The callback remains active until the returned [`Subscription`] is dropped.
     pub fn observe_window_appearance(
         &self,
         mut callback: impl FnMut(&mut Window, &mut App) + 'static,
@@ -2261,7 +2281,7 @@ impl Window {
         subscription
     }
 
-    /// Replaces the root entity of the window with a new one.
+    /// Builds and installs a new root view, then schedules a redraw.
     pub fn replace_root<E>(
         &mut self,
         cx: &mut App,
@@ -2291,7 +2311,7 @@ impl Window {
         self.handle
     }
 
-    /// Mark the window as dirty, scheduling it to be redrawn on the next frame.
+    /// Marks the window dirty and schedules a redraw at the next frame boundary.
     pub fn refresh(&mut self) {
         if self.invalidator.not_drawing() {
             self.refreshing = true;
@@ -2321,7 +2341,13 @@ impl Window {
         })
     }
 
-    /// Move focus to the element associated with the given [`FocusHandle`].
+    /// Moves focus to the element associated with `handle`.
+    ///
+    /// Focusing the already-focused handle is a no-op. Pending key sequences are cleared when
+    /// focus changes.
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Window-focus-ca2fdb4a.md")]
+// docs:examples:end
     pub fn focus(&mut self, handle: &FocusHandle, cx: &mut App) {
         if !self.focus_enabled || self.focus == Some(handle.id) {
             return;
@@ -2355,7 +2381,9 @@ impl Window {
         self.focus_enabled = false;
     }
 
-    /// Move focus to next tab stop.
+    /// Moves focus to the next enabled tab stop, wrapping at the end of the rendered order.
+    ///
+    /// This is a no-op while focus is disabled or when the current frame contains no tab stops.
     pub fn focus_next(&mut self, cx: &mut App) {
         if !self.focus_enabled {
             return;
@@ -2366,7 +2394,9 @@ impl Window {
         }
     }
 
-    /// Move focus to previous tab stop.
+    /// Moves focus to the previous enabled tab stop, wrapping at the beginning of the rendered order.
+    ///
+    /// This is a no-op while focus is disabled or when the current frame contains no tab stops.
     pub fn focus_prev(&mut self, cx: &mut App) {
         if !self.focus_enabled {
             return;
@@ -2412,7 +2442,9 @@ impl Window {
         self.platform_window.is_maximized()
     }
 
-    /// request a certain window decoration (Wayland)
+    /// Requests a native decoration mode from the window manager.
+    ///
+    /// This is meaningful for Wayland integrations; other platforms may ignore the request.
     pub fn request_decorations(&self, decorations: WindowDecorations) {
         self.platform_window.request_decorations(decorations);
     }
@@ -2452,18 +2484,20 @@ impl Window {
         self.platform_window.set_input_region(region);
     }
 
-    /// Return the `WindowBounds` to indicate that how a window should be opened
-    /// after it has been closed
+    /// Returns the platform bounds to use when restoring or reopening this window.
     pub fn window_bounds(&self) -> WindowBounds {
         self.platform_window.window_bounds()
     }
 
-    /// Return the `WindowBounds` excluding insets (Wayland and X11)
+    /// Returns the window bounds excluding client-decoration insets where supported.
     pub fn inner_window_bounds(&self) -> WindowBounds {
         self.platform_window.inner_window_bounds()
     }
 
-    /// Dispatch the given action on the currently focused element.
+    /// Dispatches `action` to the currently focused element after the current update completes.
+    ///
+    /// Deferring the dispatch lets the current event handler finish before action listeners run.
+    /// If no rendered focus target remains, the action is ignored.
     pub fn dispatch_action(&mut self, action: Box<dyn Action>, cx: &mut App) {
         let focus_id = self.focused(cx).map(|handle| handle.id);
 
@@ -2527,8 +2561,10 @@ impl Window {
             });
     }
 
-    /// Schedules the given function to be run at the end of the current effect cycle, allowing entities
-    /// that are currently on the stack to be returned to the app.
+    /// Schedules `f` after the current effect cycle.
+    ///
+    /// The closure receives a fresh mutable window borrow. If the native window has been removed
+    /// before the callback runs, `f` is skipped.
     pub fn defer(&self, cx: &mut App, f: impl FnOnce(&mut Window, &mut App) + 'static) {
         let handle = self.handle;
         cx.defer(move |cx| {
@@ -2536,9 +2572,10 @@ impl Window {
         });
     }
 
-    /// Subscribe to events emitted by a entity.
-    /// The entity to which you're subscribing must implement the [`EventEmitter`] trait.
-    /// The callback will be invoked a handle to the emitting entity, the event, and a window context for the current window.
+    /// Observes changes to an entity and returns a subscription tied to its lifetime.
+    ///
+    /// The callback receives a fresh handle to the entity and runs with the current window. It is
+    /// removed automatically when the entity is released or the returned subscription is dropped.
     pub fn observe<T: 'static>(
         &mut self,
         observed: &Entity<T>,
@@ -2565,9 +2602,10 @@ impl Window {
         )
     }
 
-    /// Subscribe to events emitted by a entity.
-    /// The entity to which you're subscribing must implement the [`EventEmitter`] trait.
-    /// The callback will be invoked a handle to the emitting entity, the event, and a window context for the current window.
+    /// Subscribes to events emitted by an [`EventEmitter`] entity.
+    ///
+    /// The callback runs with the emitted event and a fresh entity handle. Dropping the returned
+    /// subscription stops delivery; a released entity also removes the subscription.
     pub fn subscribe<Emitter, Evt>(
         &mut self,
         entity: &Entity<Emitter>,
@@ -2602,7 +2640,7 @@ impl Window {
         )
     }
 
-    /// Register a callback to be invoked when the given `Entity` is released.
+    /// Registers a one-shot callback for release of `entity`.
     pub fn observe_release<T>(
         &self,
         entity: &Entity<T>,
@@ -2625,13 +2663,18 @@ impl Window {
         subscription
     }
 
-    /// Creates an [`AsyncWindowContext`], which has a static lifetime and can be held across
-    /// await points in async code.
+    /// Creates an [`AsyncWindowContext`] that can be held across `await` points.
+    ///
+    /// Operations performed through it reacquire the window by handle, so they remain valid only
+    /// while the native window still exists.
     pub fn to_async(&self, cx: &App) -> AsyncWindowContext {
         AsyncWindowContext::new_context(cx.to_async(), self.handle)
     }
 
-    /// Schedule the given closure to be run directly after the current frame is rendered.
+    /// Schedules `callback` immediately after the next frame is rendered.
+    ///
+    /// The callback is retained until that frame and receives a fresh mutable window borrow. This
+    /// schedules a frame even when the window is otherwise clean.
     pub fn on_next_frame(&self, callback: impl FnOnce(&mut Window, &mut App) + 'static) {
         RefCell::borrow_mut(&self.next_frame_callbacks).push(Box::new(callback));
         self.platform_window.schedule_frame();
@@ -2761,7 +2804,10 @@ impl Window {
         self.rendered_frame.scene.quads.clone()
     }
 
-    /// Set the content size of the window.
+    /// Requests a new native content size in logical pixels.
+    ///
+    /// The platform may clamp or defer the resize; use [`Self::bounds_changed`] or
+    /// [`Self::viewport_size`] to observe the applied size.
     pub fn resize(&mut self, size: Size<Pixels>) {
         self.platform_window.resize(size);
     }
@@ -2822,7 +2868,7 @@ impl Window {
         }
     }
 
-    /// Toggle zoom on the window.
+    /// Toggles the platform's zoom/maximize state.
     pub fn zoom_window(&self) {
         self.platform_window.zoom();
     }
@@ -2979,7 +3025,7 @@ impl Window {
         result
     }
 
-    /// Executes the provided function with the specified rem size.
+    /// Executes `f` with a temporary root-font (`rem`) size override.
     ///
     /// This method must only be called as part of element drawing.
     // This function is called in a highly recursive manner in editor
@@ -3166,7 +3212,7 @@ impl Window {
     }
 
     /// Produces a new frame and assigns it to `rendered_frame`. To actually show
-    /// the contents of the new [`Scene`], use [`Self::present`].
+    /// the contents of the new [`Scene`], call `present_if_needed`.
     #[profiling::function]
     pub fn draw(&mut self, cx: &mut App) -> ArenaClearNeeded {
         // Drain every draw in profiler builds so a previous frame's
@@ -3894,8 +3940,10 @@ impl Window {
         id
     }
 
-    /// Invoke the given function with the given content mask after intersecting it
-    /// with the current mask. This method should only be called during element drawing.
+    /// Executes `f` with `mask` intersected into the current content mask.
+    ///
+    /// The temporary mask is popped even when `f` returns early through its normal return value;
+    /// this helper must be called during prepaint or paint.
     // This function is called in a highly recursive manner in editor
     // prepainting, make sure its inlined to reduce the stack burden
     #[inline]
@@ -4010,9 +4058,9 @@ impl Window {
         result
     }
 
-    /// When you call this method during [`Element::prepaint`], containing elements will attempt to
+    /// When you call this method during the element prepaint phase, containing elements will attempt to
     /// scroll to cause the specified bounds to become visible. When they decide to autoscroll, they will call
-    /// [`Element::prepaint`] again with a new set of bounds. See [`crate::List`] for an example of an element
+    /// prepaint again with a new set of bounds. See [`crate::List`] for an example of an element
     /// that supports this method being called on the elements it contains. This method should only be
     /// called during the prepaint phase of element drawing.
     pub fn request_autoscroll(&mut self, bounds: Bounds<Pixels>) {
@@ -4653,6 +4701,9 @@ impl Window {
     /// Note that the `quad.corner_radii` are allowed to exceed the bounds, creating sharp corners
     /// where the circular arcs meet. This will not display well when combined with dashed borders.
     /// Use `Corners::clamp_radii_for_quad_size` if the radii should fit within the bounds.
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Window-paint-quad-572d1922.md")]
+// docs:examples:end
     pub fn paint_quad(&mut self, quad: PaintQuad) {
         self.paint_quad_with_corner_smoothing(quad, 0.0);
     }
@@ -5243,7 +5294,7 @@ impl Window {
 
     /// Add a node to the layout tree for the current frame. Takes the `Style` of the element for which
     /// layout is being requested, along with the layout ids of any children. This method is called during
-    /// calls to the [`Element::request_layout`] trait method and enables any element to participate in layout.
+    /// calls to the element layout-request method and enables any element to participate in layout.
     ///
     /// This method should only be called as part of the request_layout or prepaint phase of element drawing.
     #[must_use]
@@ -5627,10 +5678,10 @@ impl Window {
         }
     }
 
-    /// Sets an input handler, such as [`ElementInputHandler`][element_input_handler], which interfaces with the
-    /// platform to receive textual input with proper integration with concerns such
-    /// as IME interactions. This handler will be active for the upcoming frame until the following frame is
-    /// rendered.
+    /// Installs an input handler for the focused element for the next rendered frame.
+    ///
+    /// The handler bridges platform text input, selection, and IME composition. It is retained only
+    /// until the next frame replaces the input-handler list, so call this from every paint pass.
     ///
     /// This method should only be called as part of the paint phase of element drawing.
     ///
@@ -5671,7 +5722,7 @@ impl Window {
         }
     }
 
-    /// Register a mouse event listener on the window for the next frame. The type of event
+    /// Registers a mouse listener for the next rendered frame. The type of event
     /// is determined by the first parameter of the given listener. When the next frame is rendered
     /// the listener will be cleared.
     ///
@@ -5691,7 +5742,7 @@ impl Window {
         )));
     }
 
-    /// Register a key event listener on this node for the next frame. The type of event
+    /// Registers a key listener on this node for the next rendered frame. The type of event
     /// is determined by the first parameter of the given listener. When the next frame is rendered
     /// the listener will be cleared.
     ///
@@ -5793,8 +5844,11 @@ impl Window {
         }
     }
 
-    /// Dispatch a given keystroke as though the user had typed it.
-    /// You can create a keystroke with Keystroke::parse("").
+    /// Dispatches a keystroke as if the user had typed it.
+    ///
+    /// Key bindings run first. If propagation remains enabled and the keystroke contains committed
+    /// text, the focused text-input handler receives that text. Returns `true` when either path
+    /// handled the input. Use [`Keystroke::parse`](crate::Keystroke::parse) to construct one.
     pub fn dispatch_keystroke(&mut self, keystroke: Keystroke, cx: &mut App) -> bool {
         let keystroke = keystroke.with_simulated_ime();
         let result = self.dispatch_event(
@@ -5835,7 +5889,11 @@ impl Window {
             .unwrap_or_else(|| action.name().to_string())
     }
 
-    /// Dispatch a mouse, keyboard, or touch event on the window.
+    /// Dispatches a mouse, keyboard, or touch event through the rendered dispatch tree.
+    ///
+    /// Capture listeners run from the root toward the target, then bubble listeners run back out
+    /// from the target. A listener can stop propagation or prevent the platform default; the
+    /// returned flags report those two decisions independently.
     #[profiling::function]
     pub fn dispatch_event(&mut self, event: PlatformInput, cx: &mut App) -> DispatchEventResult {
         #[cfg(feature = "profiler")]
@@ -7753,7 +7811,7 @@ impl HasDisplayHandle for Window {
     }
 }
 
-/// An identifier for an [`Element`].
+/// An identifier for a rendered element.
 ///
 /// Can be constructed with a string, a number, or both, as well
 /// as other internal representations.
@@ -8015,6 +8073,9 @@ pub fn quad(
 }
 
 /// Creates a filled quad with the given bounds and background color.
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-fill.md")]
+// docs:examples:end
 pub fn fill(bounds: impl Into<Bounds<Pixels>>, background: impl Into<Background>) -> PaintQuad {
     PaintQuad {
         bounds: bounds.into(),

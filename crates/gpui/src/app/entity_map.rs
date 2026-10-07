@@ -242,7 +242,11 @@ impl<T> Drop for Lease<T> {
 #[derive(Deref, DerefMut)]
 pub(crate) struct Slot<T>(Entity<T>);
 
-/// A dynamically typed reference to a entity, which can be downcast into a `Entity<T>`.
+/// A strong, dynamically typed entity handle.
+///
+/// `AnyEntity` retains the entity just like [`Entity<T>`]. Use [`Self::downcast`]
+/// when the concrete type is known; a failed downcast returns the original
+/// handle so it is not lost.
 pub struct AnyEntity {
     pub(crate) entity_id: EntityId,
     pub(crate) entity_type: TypeId,
@@ -285,7 +289,7 @@ impl AnyEntity {
         self.entity_type
     }
 
-    /// Converts this entity handle into a weak variant, which does not prevent it from being released.
+    /// Converts this handle into a weak variant that does not keep the entity alive.
     pub fn downgrade(&self) -> AnyWeakEntity {
         AnyWeakEntity {
             entity_id: self.entity_id,
@@ -294,8 +298,10 @@ impl AnyEntity {
         }
     }
 
-    /// Converts this entity handle into a strongly-typed entity handle of the given type.
-    /// If this entity handle is not of the specified type, returns itself as an error variant.
+    /// Converts this handle into [`Entity<T>`] when its runtime type is `T`.
+    ///
+    /// If the type does not match, returns `Err(self)`, preserving the strong
+    /// handle for another consumer.
     pub fn downcast<T: 'static>(self) -> Result<Entity<T>, AnyEntity> {
         if TypeId::of::<T>() == self.entity_type {
             Ok(Entity {
@@ -408,9 +414,16 @@ impl std::fmt::Debug for AnyEntity {
     }
 }
 
-/// A strong, well-typed reference to a struct which is managed
-/// by GPUI
+/// A strong, well-typed handle to state owned by [`App`].
+///
+/// Cloning an entity clones the handle, not the value. Read or mutate the value
+/// only through an [`AppContext`] operation such as [`Entity::read_with`] or
+/// [`Entity::update`]. This keeps one serialized access path and lets GPUI notify
+/// observers and release the value at the right time.
 #[derive(Deref, DerefMut)]
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-Entity-39236474.md")]
+// docs:examples:end
 pub struct Entity<T> {
     #[deref]
     #[deref_mut]
@@ -438,13 +451,13 @@ impl<T: 'static> Entity<T> {
         }
     }
 
-    /// Get the entity ID associated with this entity
+    /// Returns the stable identifier for this entity within its application.
     #[inline]
     pub fn entity_id(&self) -> EntityId {
         self.any_entity.entity_id
     }
 
-    /// Downgrade this entity pointer to a non-retaining weak pointer
+    /// Downgrades this handle without changing the entity's lifetime.
     #[inline]
     pub fn downgrade(&self) -> WeakEntity<T> {
         WeakEntity {
@@ -459,8 +472,15 @@ impl<T: 'static> Entity<T> {
         self.any_entity
     }
 
-    /// Grab a reference to this entity from the context.
+    /// Borrows the value from an [`App`].
+    ///
+    /// The returned reference is tied to `cx`; do not retain it after the app
+    /// borrow ends. Calling this while the entity is already being updated
+    /// panics because GPUI cannot create two simultaneous leases.
     #[inline]
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-Entity-read-197b17d7.md")]
+// docs:examples:end
     pub fn read<'a>(&self, cx: &'a App) -> &'a T {
         cx.entities.read(self)
     }
@@ -471,8 +491,14 @@ impl<T: 'static> Entity<T> {
         cx.read_entity(self, f)
     }
 
-    /// Updates the entity referenced by this handle with the given function.
+    /// Runs `update` with exclusive access to the entity and its [`Context`].
+    ///
+    /// The callback may call [`Context::notify`] to invalidate observers. It must
+    /// not recursively update the same entity; such a double lease panics.
     #[inline]
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-Entity-update-527f5c5d.md")]
+// docs:examples:end
     pub fn update<R, C: AppContext>(
         &self,
         cx: &mut C,
@@ -481,13 +507,17 @@ impl<T: 'static> Entity<T> {
         cx.update_entity(self, update)
     }
 
-    /// Updates the entity referenced by this handle with the given function.
+    /// Borrows the entity mutably for the lifetime of `cx`.
+    ///
+    /// This form is useful for several field changes in one scope. It still
+    /// holds the entity lease, so do not access the same entity again until the
+    /// returned borrow is dropped.
     #[inline]
     pub fn as_mut<'a, C: AppContext>(&self, cx: &'a mut C) -> GpuiBorrow<'a, T> {
         cx.as_mut(self)
     }
 
-    /// Updates the entity referenced by this handle with the given function.
+    /// Replaces the entity's value and notifies its observers.
     pub fn write<C: AppContext>(&self, cx: &mut C, value: T) {
         self.update(cx, |entity, cx| {
             *entity = value;
@@ -763,7 +793,10 @@ impl<T> Clone for WeakEntity<T> {
 }
 
 impl<T: 'static> WeakEntity<T> {
-    /// Upgrade this weak entity reference into a strong entity reference
+    /// Attempts to retain the entity and return a strong handle.
+    ///
+    /// Returns `None` once the last strong handle has been released; this is the
+    /// normal branch for asynchronous callbacks racing entity teardown.
     pub fn upgrade(&self) -> Option<Entity<T>> {
         Some(Entity {
             any_entity: self.any_entity.upgrade()?,
@@ -771,9 +804,14 @@ impl<T: 'static> WeakEntity<T> {
         })
     }
 
-    /// Updates the entity referenced by this handle with the given function if
-    /// the referenced entity still exists. Returns an error if the entity has
-    /// been released.
+    /// Updates the entity if it is still alive, otherwise returns an error.
+    ///
+    /// This is the preferred operation for callbacks that outlive their entity:
+    /// the callback is skipped rather than panicking when the handle cannot be
+    /// upgraded.
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-WeakEntity-update-80df6484.md")]
+// docs:examples:end
     pub fn update<C, R>(
         &self,
         cx: &mut C,
@@ -937,8 +975,8 @@ pub(crate) struct LeakDetector {
 
 /// A snapshot of the set of alive entities at a point in time.
 ///
-/// Created by [`LeakDetector::snapshot`]. Can later be passed to
-/// [`LeakDetector::assert_no_new_leaks`] to verify that no new entity
+/// Created by `LeakDetector::snapshot`. Can later be passed to
+/// `LeakDetector::assert_no_new_leaks` to verify that no new entity
 /// handles remain between the snapshot and the current state.
 #[cfg(any(test, feature = "leak-detection"))]
 pub struct LeakDetectorSnapshot {

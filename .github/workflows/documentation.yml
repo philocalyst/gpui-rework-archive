@@ -1,0 +1,49 @@
+name: Documentation
+
+on:
+  pull_request:
+    paths: ['site/**', 'scripts/docs/**', 'crates/**', 'docs/**', 'Cargo.*', '.github/workflows/documentation.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  documentation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            .
+            site/examples
+      - name: Install native libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxkbcommon-dev libxkbcommon-x11-dev libwayland-dev libx11-dev libxcb-shape0-dev libxcb-xfixes0-dev libfontconfig-dev
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: zola@0.23.4,trunk
+      - name: Check generated files and tooling
+        run: |
+          python3 scripts/docs/generate.py --check
+          python3 scripts/docs/sync_links.py --check
+          python3 -m unittest discover -s scripts/docs -p 'test_*.py'
+          python3 -m unittest discover -s site/tests -p 'test_*.py'
+      - name: Check complete native programs
+        run: cargo check --locked --manifest-path site/examples/Cargo.toml --bins
+      - name: Check downloadable Cargo projects
+        run: python3 site/scripts/check_downloads.py
+      - name: Run API examples
+        run: cargo test --locked -p gpui-ce --doc
+      - name: Build site, WebAssembly previews, and checkout API
+        run: python3 site/scripts/build.py --with-api
+      - uses: actions/upload-artifact@v4
+        with:
+          name: documentation
+          path: site/public
+          if-no-files-found: error

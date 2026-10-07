@@ -7,7 +7,14 @@ use std::ops::Range;
 /// Converts a UTF-8 byte offset into a UTF-16 code-unit offset.
 ///
 /// Offsets past the end of `text` clamp to its UTF-16 length. An offset inside a UTF-8
-/// character snaps to the end of that character.
+/// character snaps to the end of that character. The returned offset is suitable for the
+/// platform text-input APIs, which use UTF-16 ranges.
+///
+/// ```
+/// # use gpui::utf8_to_utf16_offset;
+/// assert_eq!(utf8_to_utf16_offset("a🦀", 1), 1);
+/// assert_eq!(utf8_to_utf16_offset("a🦀", 2), 3);
+/// ```
 pub fn utf8_to_utf16_offset(text: &str, utf8_offset: usize) -> usize {
     text.char_indices()
         .take_while(|(offset, _)| *offset < utf8_offset)
@@ -18,7 +25,14 @@ pub fn utf8_to_utf16_offset(text: &str, utf8_offset: usize) -> usize {
 /// Converts a UTF-16 code-unit offset into a UTF-8 byte offset.
 ///
 /// Offsets past the end of `text` clamp to its UTF-8 length. An offset inside a surrogate pair
-/// snaps to the end of the corresponding character.
+/// snaps to the end of the corresponding character. This is the inverse coordinate conversion
+/// for text-input ranges; it does not validate that the input offset is on a grapheme boundary.
+///
+/// ```
+/// # use gpui::utf16_to_utf8_offset;
+/// assert_eq!(utf16_to_utf8_offset("a🦀", 3), 5);
+/// assert_eq!(utf16_to_utf8_offset("a🦀", usize::MAX), 5);
+/// ```
 pub fn utf16_to_utf8_offset(text: &str, utf16_offset: usize) -> usize {
     let mut consumed_utf16 = 0;
     for (utf8_offset, character) in text.char_indices() {
@@ -30,12 +44,16 @@ pub fn utf16_to_utf8_offset(text: &str, utf16_offset: usize) -> usize {
     text.len()
 }
 
-/// Implement this trait to allow views to handle textual input when implementing an editor, field, etc.
+/// Implement this trait to let a view handle platform text input, such as an editor or text field.
 ///
 /// Once your view implements this trait, you can use it to construct an [`ElementInputHandler<V>`].
 /// This input handler can then be assigned during paint by calling [`Window::handle_input`].
 ///
-/// See [`InputHandler`] for details on how to implement each method.
+/// Every range passed to this trait is in UTF-16 code units, matching [`InputHandler`] and the
+/// platform IME contract. Implementations may receive callbacks while the view is being painted;
+/// use the supplied [`Window`] and [`Context`] rather than retaining either value.
+///
+/// See [`InputHandler`] for the callback contract for each method.
 pub trait EntityInputHandler: 'static + Sized {
     /// See [`InputHandler::text_for_range`] for details
     fn text_for_range(

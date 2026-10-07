@@ -1,3 +1,10 @@
+//! Shared CPU-side contracts for downsampled Gaussian blur passes.
+//!
+//! Blur dimensions are texture dimensions in physical pixels. The downsample
+//! pass uses [`DOWNSAMPLE_FACTOR`], while scene bounds and radii remain
+//! [`gpui::ScaledPixels`]. The constructors here only prepare uniform data;
+//! they do not allocate textures or submit work.
+
 pub use crate::shaders::{
     blur::BlurUniforms,
     common::{
@@ -8,47 +15,72 @@ pub use crate::shaders::{
 use gpui::{Bounds, Corners, ScaledPixels};
 use wgsl_rs::std::vec2f;
 
+/// The source-to-intermediate texture dimension ratio used by blur passes.
 pub const DOWNSAMPLE_FACTOR: u32 = 2;
 
-/// Texture dimension for the downsampled blur passes; allocations must agree.
+/// Texture dimension for a downsampled blur pass; allocations must agree.
 pub fn downsampled_dimension(dimension: u32) -> u32 {
     dimension.div_ceil(DOWNSAMPLE_FACTOR).max(1)
 }
 const RADIUS_TO_STANDARD_DEVIATION: f32 = 0.5;
+/// Number of standard deviations retained by the Gaussian kernel.
 pub const GAUSSIAN_CUTOFF_STANDARD_DEVIATIONS: f32 = 3.0;
+/// Upper bound on samples taken on one side of a Gaussian blur.
 pub const MAX_GAUSSIAN_SAMPLES_PER_SIDE: u32 = 32;
 
+/// Direction in which a blur kernel samples neighboring texels.
 #[derive(Clone, Copy)]
 pub enum BlurAxis {
+    /// Samples vary along the x axis.
     Horizontal,
+    /// Samples vary along the y axis.
     Vertical,
 }
 
+/// Shape used to clip a filtered composite.
 #[derive(Clone, Copy)]
 pub enum FilterCompositeClip {
+    /// Clip to the rounded bounds supplied to the composite operation.
     RoundedBounds,
+    /// Clip to the content mask supplied by the caller.
     ContentShape,
 }
 
+/// Inputs shared by a blur composite pass.
 #[derive(Clone, Copy)]
 pub struct FilterCompositeParameters {
+    /// Scene-space bounds of the composited result.
     pub bounds: Bounds<ScaledPixels>,
+    /// Scene-space content mask bounds.
     pub content_mask: Bounds<ScaledPixels>,
+    /// Scene-space corner radii.
     pub corner_radii: Corners<ScaledPixels>,
+    /// Corner smoothing factor used by the coverage shader.
     pub corner_smoothing: f32,
+    /// Blur radius in scene pixels.
     pub blur_radius: f32,
+    /// Opacity multiplied into the composited result.
     pub opacity: f32,
+    /// Shape used to clip the composite.
     pub clip: FilterCompositeClip,
 }
 
+/// Bounded Gaussian-kernel parameters derived from a blur radius.
 #[derive(Clone, Copy)]
 pub struct BlurKernel {
+    /// Standard deviation in scene pixels.
     pub standard_deviation: f32,
+    /// Samples taken on one side of the kernel.
     pub sample_count: u32,
+    /// Distance between samples in standard-deviation units.
     pub sample_step: f32,
 }
 
 impl BlurKernel {
+    /// Converts a logical blur radius into a bounded Gaussian kernel.
+    ///
+    /// Returns `None` for zero, negative, or non-finite radii. Large radii are
+    /// represented by the maximum sample count and a larger sample step.
     pub fn for_radius(blur_radius: f32) -> Option<Self> {
         let standard_deviation = (blur_radius * RADIUS_TO_STANDARD_DEVIATION).max(0.0);
         if standard_deviation <= 0.0 {
@@ -125,15 +157,24 @@ impl BlurUniforms {
     }
 }
 
+/// A physical-pixel scissor rectangle for an intermediate blur texture.
 #[derive(Clone, Copy)]
 pub struct ScissorRectangle {
+    /// Left coordinate in downsampled texture pixels.
     pub x: u32,
+    /// Top coordinate in downsampled texture pixels.
     pub y: u32,
+    /// Width in downsampled texture pixels.
     pub width: u32,
+    /// Height in downsampled texture pixels.
     pub height: u32,
 }
 
 impl ScissorRectangle {
+    /// Computes an outward-rounded scissor around blurred scene bounds.
+    ///
+    /// `full_width` and `full_height` are full-resolution texture dimensions;
+    /// `dilation` is a scene-pixel radius added on every side.
     pub fn for_blurred_bounds(
         bounds: Bounds<ScaledPixels>,
         dilation: f32,
@@ -172,6 +213,7 @@ impl ScissorRectangle {
         }
     }
 
+    /// Returns whether either dimension is zero.
     pub fn is_empty(self) -> bool {
         self.width == 0 || self.height == 0
     }

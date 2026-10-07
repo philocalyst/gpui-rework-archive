@@ -1,3 +1,14 @@
+//! Views connect application state to an element tree. A [`RenderOnce`] component is rebuilt when
+//! its parent renders; a [`Render`] component is stored in an [`Entity`](crate::Entity), has a
+//! stable identity, and can be invalidated with [`Context::notify`](crate::Context::notify).
+//! Rendering then follows the element lifecycle described by [`crate::Element`].
+//!
+//! Use [`RenderOnce`] for stateless composition and [`Render`] for stateful components. When a
+//! view is placed in a list or repeated sibling position, give each stateful view a distinct
+//! entity identity. Reusing one entity ID for siblings makes their descendant element state share
+//! the same identity space. See the [counter walkthrough](https://gpui-ce.github.io/examples/counter/#render)
+//! for the smallest complete stateful example.
+
 use crate::{
     AnyElement, AnyEntity, AnyWeakEntity, App, Bounds, ContentMask, Context, Element, ElementId,
     Entity, EntityId, GlobalElementId, InspectorElementId, IntoElement, LayoutId, PaintIndex,

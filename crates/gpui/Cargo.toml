@@ -13,6 +13,10 @@ keywords = ["desktop", "gui", "immediate"]
 categories = ["gui"]
 rust-version = "1.95"                                                  # required for Vec::push_mut
 
+[package.metadata.docs.rs]
+features = ["test-support"]
+rustdoc-args = ["-D", "rustdoc::broken_intra_doc_links", "-D", "rustdoc::bare_urls"]
+
 [lints]
 workspace = true
 
@@ -46,7 +50,7 @@ hot-patching = ["dep:dioxus-devtools", "dep:subsecond"]
 [lib]
 name = "gpui"
 path = "src/gpui.rs"
-doctest = false
+doctest = true
 
 [dependencies]
 accesskit.workspace = true

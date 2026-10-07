@@ -127,7 +127,10 @@ impl TestApp {
         f(&app)
     }
 
-    /// Create a new entity in the app.
+    /// Creates a new entity in this test application.
+    ///
+    /// This test-only spelling forwards to [`AppContext::new`]. Production code
+    /// normally receives an [`App`] or [`Context`] and calls `cx.new` directly.
     pub fn new_entity<T: 'static>(
         &mut self,
         build: impl FnOnce(&mut Context<T>) -> T,
@@ -135,7 +138,7 @@ impl TestApp {
         self.update(|cx| cx.new(build))
     }
 
-    /// Update an entity.
+    /// Updates an entity and runs the test app's pending effects.
     pub fn update_entity<T: 'static, R>(
         &mut self,
         entity: &Entity<T>,

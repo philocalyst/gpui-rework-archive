@@ -531,6 +531,30 @@ doc-open:
     @echo "📚 Opening documentation in browser..."
     cargo doc --workspace --no-deps --open
 
+[doc('Regenerate walkthrough pages, downloads, and docs.rs example links')]
+[group('docs')]
+docs-generate:
+    python3 {{ project_root }}/scripts/docs/generate.py
+    python3 {{ project_root }}/scripts/docs/sync_links.py
+
+[doc('Build and check the Zola site with browser programs and checkout API')]
+[group('docs')]
+site-build *flags:
+    python3 {{ project_root }}/site/scripts/build.py --with-api {{ flags }}
+
+[doc('Serve Zola with the local Rust compiler and source watcher')]
+[group('docs')]
+site-serve:
+    python3 {{ project_root }}/site/scripts/dev.py
+
+[doc('Check generated documentation and run parser/compiler contract tests')]
+[group('docs')]
+docs-check:
+    python3 {{ project_root }}/scripts/docs/generate.py --check
+    python3 {{ project_root }}/scripts/docs/sync_links.py --check
+    python3 -m unittest discover -s {{ project_root }}/scripts/docs -p 'test_*.py'
+    python3 -m unittest discover -s {{ project_root }}/site/tests -p 'test_*.py'
+
 
 [doc('Run a specific example by name')]
 [group('development')]

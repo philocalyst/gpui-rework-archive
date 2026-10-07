@@ -1,3 +1,9 @@
+//! An [`Arc`] backed copy-on-write reference that can borrow for a caller-chosen lifetime.
+//!
+//! `ArcCow` avoids copying when a borrowed value is sufficient and gives owned values shared,
+//! clone-cheap storage. Conversions from `String`, `Vec`, and `Cow` allocate an owned `Arc`; a
+//! borrowed conversion never outlives its source.
+
 use std::{
     borrow::Cow,
     cmp::Ordering,
@@ -6,6 +12,7 @@ use std::{
     sync::Arc,
 };
 
+/// Either a borrowed value or an atomically reference-counted owned value.
 pub enum ArcCow<'a, T: ?Sized> {
     Borrowed(&'a T),
     Owned(Arc<T>),

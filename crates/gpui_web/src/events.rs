@@ -1,3 +1,8 @@
+//! DOM event translation and listener lifetime management for web windows.
+//!
+//! [`WebEventListeners`] owns the JavaScript closures it installs; dropping it unregisters every
+//! listener before releasing those closures.
+
 use std::{collections::HashMap, rc::Rc};
 
 use gpui::{
@@ -12,6 +17,10 @@ use wasm_bindgen::prelude::*;
 use crate::ime_mirror::ImeMirror;
 use crate::window::WebWindowInner;
 
+/// Owns the DOM listeners installed for one web window.
+///
+/// Dropping this value removes every listener, which also releases the captured
+/// JavaScript closures.
 pub struct WebEventListeners {
     _handles: Vec<EventListenerHandle>,
 }

@@ -6,13 +6,12 @@ use crate::{
     Window, point, px,
 };
 
-/// The state that the anchored element element uses to track its children.
+/// Frame-local layout IDs retained while an [`Anchored`] subtree is prepared.
 pub struct AnchoredState {
     child_layout_ids: SmallVec<[LayoutId; 4]>,
 }
 
-/// An anchored element that can be used to display UI that
-/// will avoid overflowing the window bounds.
+/// An absolutely positioned subtree that fits itself to the window when it would overflow.
 pub struct Anchored {
     children: SmallVec<[AnyElement; 2]>,
     anchor: Anchor,
@@ -22,8 +21,10 @@ pub struct Anchored {
     offset: Option<Point<Pixels>>,
 }
 
-/// anchored gives you an element that will avoid overflowing the window bounds.
-/// Its children should have no margin to avoid measurement issues.
+/// Construct an anchored overlay.
+///
+/// Its children should have no margin: margins participate in layout before the overlay is fitted
+/// and can make the apparent anchor differ from the visible content.
 pub fn anchored() -> Anchored {
     Anchored {
         children: SmallVec::new(),
@@ -42,23 +43,19 @@ impl Anchored {
         self
     }
 
-    /// Sets the position in window coordinates
-    /// (otherwise the location the anchored element is rendered is used)
+    /// Set an explicit anchor point, interpreted according to [`Self::position_mode`].
     pub fn position(mut self, anchor: Point<Pixels>) -> Self {
         self.anchor_position = Some(anchor);
         self
     }
 
-    /// Offset the final position by this amount.
-    /// Useful when you want to anchor to an element but offset from it, such as in PopoverMenu.
+    /// Offset the fitted position by a logical-pixel amount.
     pub fn offset(mut self, offset: Point<Pixels>) -> Self {
         self.offset = Some(offset);
         self
     }
 
-    /// Sets the position mode for this anchored element. Local will have this
-    /// interpret its [`Anchored::position`] as relative to the parent element.
-    /// While Window will have it interpret the position as relative to the window.
+    /// Choose whether [`Self::position`] is relative to the parent or the window.
     pub fn position_mode(mut self, mode: AnchoredPositionMode) -> Self {
         self.position_mode = mode;
         self

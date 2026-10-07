@@ -12,8 +12,16 @@ use std::{future::Future, rc::Weak};
 
 use super::{Context, WeakEntity};
 
-/// An async-friendly version of [App] with a static lifetime so it can be held across `await` points in async code.
-/// You're provided with an instance when calling [App::spawn], and you can also create one with [App::to_async].
+/// An app handle that can be held across `await` points.
+///
+/// `AsyncApp` does not keep the application alive. It is usually created by
+/// [`App::to_async`] or supplied to [`App::spawn`], and each operation briefly
+/// borrows the live app. If the app has already shut down, operations that need
+/// it panic through the handle's internal upgrade; window operations instead
+/// return an error or `None` where their API permits it.
+///
+/// For a complete task lifecycle example, see the
+/// [async task walkthrough](https://gpui-ce.github.io/examples/async-task/#completion).
 ///
 /// Internally, this holds a weak reference to an `App`. Methods will panic if the app has been dropped,
 /// but this should not happen in practice when using foreground tasks spawned via `cx.spawn()`,
@@ -178,7 +186,9 @@ impl AppContext for AsyncApp {
 }
 
 impl AsyncApp {
-    /// Schedules all windows in the application to be redrawn.
+    /// Schedules all windows to be redrawn.
+    ///
+    /// Panics if the application has already been released.
     pub fn refresh(&self) {
         let app = self.app();
         let mut lock = app.borrow_mut();
@@ -197,7 +207,11 @@ impl AsyncApp {
         &self.foreground_executor
     }
 
-    /// Invoke the given function in the context of the app, then flush any effects produced during its invocation.
+    /// Runs `f` with exclusive app access, then flushes effects produced by it.
+    ///
+    /// Panics if the app has been released or if `f` attempts a re-entrant app
+    /// borrow. Do not hold an app reference across an `.await`; use this method
+    /// again after the await.
     pub fn update<R>(&self, f: impl FnOnce(&mut App) -> R) -> R {
         let app = self.app();
         let mut lock = app.borrow_mut();
@@ -220,7 +234,10 @@ impl AsyncApp {
         lock.subscribe(entity, on_event)
     }
 
-    /// Open a window with the given options based on the root view returned by the given function.
+    /// Opens a window using the root entity returned by `build_root_view`.
+    ///
+    /// Returns an error while the app is quitting or when the platform rejects
+    /// the window request.
     pub fn open_window<V>(
         &self,
         options: crate::WindowOptions,
@@ -237,7 +254,12 @@ impl AsyncApp {
         lock.open_window(options, build_root_view)
     }
 
-    /// Schedule a future to be polled in the foreground.
+    /// Schedules a future on the foreground executor.
+    ///
+    /// The future receives a clone of this handle and may call
+    /// [`AsyncApp::update`] after awaits. Dropping the returned task cancels it;
+    /// if a task outlives the app, its next operation that needs the app can
+    /// panic because the weak handle can no longer be upgraded.
     #[track_caller]
     pub fn spawn<AsyncFn, R>(&self, f: AsyncFn) -> Task<R>
     where
@@ -265,9 +287,10 @@ impl AsyncApp {
         read(app.global(), &app)
     }
 
-    /// Reads the global state of the specified type, passing it to the given callback.
+    /// Reads a global if one is installed and the app is still running.
     ///
-    /// Similar to [`AsyncApp::read_global`], but returns an error instead of panicking
+    /// Returns `None` when the global is absent or the app is quitting, avoiding
+    /// the panic behavior of [`AsyncApp::read_global`].
     pub fn try_read_global<G: Global, R>(&self, read: impl FnOnce(&G, &App) -> R) -> Option<R> {
         let app = self.app();
         let app = app.borrow_mut();
@@ -299,7 +322,9 @@ impl AsyncApp {
         app.update(|cx| cx.update_global(update))
     }
 
-    /// Run something using this entity and cx, when the returned struct is dropped
+    /// Defers an entity update until the returned guard is dropped.
+    ///
+    /// If the entity has been released by then, the update is silently skipped.
     pub fn on_drop<T: 'static, Callback: FnOnce(&mut T, &mut Context<T>) + 'static>(
         &self,
         entity: &WeakEntity<T>,

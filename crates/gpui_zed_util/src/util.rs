@@ -1,19 +1,30 @@
+//! Utility modules used by GPUI platform integrations.
+//!
+//! The crate groups path, shell, process, filesystem, markdown, JSON-schema, and test helpers.
+//! Platform modules are compiled only where their operating-system APIs exist. Functions that
+//! touch the filesystem or spawn commands report failures through `anyhow::Result`; pure formatters
+//! and path predicates are deterministic and side-effect free.
+
 #[cfg(test)]
 extern crate self as util;
 
 #[cfg(not(target_family = "wasm"))]
+/// ZIP extraction helpers with traversal checks.
 pub mod archive;
 #[cfg(not(target_family = "wasm"))]
 pub mod command;
 #[cfg(not(target_family = "wasm"))]
+/// Asynchronous filesystem search and move helpers.
 pub mod fs;
 #[cfg(not(target_family = "wasm"))]
+/// Platform process-group lifecycle helpers.
 pub mod process;
 #[cfg(not(target_family = "wasm"))]
 pub mod shell;
 #[cfg(not(target_family = "wasm"))]
 pub mod shell_builder;
 #[cfg(not(target_family = "wasm"))]
+/// Utilities for inspecting the current shell environment.
 pub mod shell_env;
 
 pub mod disambiguate;
@@ -21,6 +32,7 @@ pub mod markdown;
 pub mod path_list;
 pub mod paths;
 pub mod redact;
+/// Schema customization helpers.
 pub mod schemars;
 pub mod serde;
 pub mod size;
@@ -53,11 +65,13 @@ pub use self::shell::{
 };
 
 #[inline]
+/// Return whether a byte can begin a UTF-8 code point.
 pub const fn is_utf8_char_boundary(u8: u8) -> bool {
     // This is bit magic equivalent to: b < 128 || b >= 192
     (u8 as i8) >= -0x40
 }
 
+/// Truncate to at most `max_chars` Unicode scalar values at a valid UTF-8 boundary.
 pub fn truncate(s: &str, max_chars: usize) -> &str {
     match s.char_indices().nth(max_chars) {
         None => s,
@@ -71,6 +85,7 @@ pub fn truncate(s: &str, max_chars: usize) -> &str {
 ///
 /// Returns `None` if no `ID` field is present. When `VERSION_ID` is absent
 /// (e.g. on rolling releases), only the `ID` is returned.
+/// Read `PRETTY_NAME` from Linux `/etc/os-release`-formatted content.
 pub fn parse_os_release(content: &str) -> Option<String> {
     let mut id = None;
     let mut version_id = None;
@@ -90,6 +105,7 @@ pub fn parse_os_release(content: &str) -> Option<String> {
 
 /// Removes characters from the end of the string if its length is greater than `max_chars` and
 /// appends "..." to the string. Returns string unchanged if its length is smaller than max_chars.
+/// Truncate to `max_chars` characters and append an ellipsis when text was removed.
 pub fn truncate_and_trailoff(s: &str, max_chars: usize) -> String {
     debug_assert!(max_chars >= 5);
 
@@ -107,6 +123,7 @@ pub fn truncate_and_trailoff(s: &str, max_chars: usize) -> String {
 
 /// Removes characters from the front of the string if its length is greater than `max_chars` and
 /// prepends the string with "...". Returns string unchanged if its length is smaller than max_chars.
+/// Keep the final `max_chars` characters, prefixing an ellipsis when text was removed.
 pub fn truncate_and_remove_front(s: &str, max_chars: usize) -> String {
     debug_assert!(max_chars >= 5);
 
@@ -129,6 +146,7 @@ pub fn truncate_and_remove_front(s: &str, max_chars: usize) -> String {
 /// Takes only `max_lines` from the string and, if there were more than `max_lines-1`, appends a
 /// a newline and "..." to the string, so that `max_lines` are returned.
 /// Returns string unchanged if its length is smaller than max_lines.
+/// Keep at most `max_lines` lines and append an ellipsis when later lines were removed.
 pub fn truncate_lines_and_trailoff(s: &str, max_lines: usize) -> String {
     let mut lines = s.lines().take(max_lines).collect::<Vec<_>>();
     if lines.len() > max_lines - 1 {
@@ -141,6 +159,7 @@ pub fn truncate_lines_and_trailoff(s: &str, max_lines: usize) -> String {
 
 /// Truncates the string at a character boundary, such that the result is less than `max_bytes` in
 /// length.
+/// Truncate to at most `max_bytes` without splitting a UTF-8 code point.
 pub fn truncate_to_byte_limit(s: &str, max_bytes: usize) -> &str {
     if s.len() < max_bytes {
         return s;
@@ -157,6 +176,7 @@ pub fn truncate_to_byte_limit(s: &str, max_bytes: usize) -> &str {
 
 /// Takes a prefix of complete lines which fit within the byte limit. If the first line is longer
 /// than the limit, truncates at a character boundary.
+/// Keep complete lines within `max_bytes`, stopping before the first line that would overflow.
 pub fn truncate_lines_to_byte_limit(s: &str, max_bytes: usize) -> &str {
     if s.len() < max_bytes {
         return s;
@@ -200,6 +220,7 @@ fn test_truncate_lines_to_byte_limit() {
 /// Extend a sorted vector with a sorted sequence of items, maintaining the vector's sort order and
 /// enforcing a maximum length. This also de-duplicates items. Sort the items according to the given callback. Before calling this,
 /// both `vec` and `new_items` should already be sorted according to the `cmp` comparator.
+/// Merge items into a sorted vector, retaining at most `limit` items under `cmp`.
 pub fn extend_sorted<T, I, F>(vec: &mut Vec<T>, new_items: I, limit: usize, mut cmp: F)
 where
     I: IntoIterator<Item = T>,
@@ -226,6 +247,7 @@ where
 /// and terminates the program with an error message unless explicitly allowed via the
 /// `ZED_ALLOW_ROOT` environment variable.
 #[cfg(unix)]
+/// Refuse to run the process as root on platforms where the check is available.
 pub fn prevent_root_execution() {
     let is_root = nix::unistd::geteuid().is_root();
     let allow_root = std::env::var("ZED_ALLOW_ROOT").is_ok_and(|val| val == "true");
@@ -299,6 +321,7 @@ fn load_shell_from_passwd() -> Result<()> {
 
 /// Returns a shell escaped path for the current zed executable
 #[cfg(not(target_family = "wasm"))]
+/// Return the Zed executable path quoted for `shell_kind`.
 pub fn get_shell_safe_zed_path(shell_kind: shell::ShellKind) -> anyhow::Result<String> {
     use anyhow::Context as _;
     use paths::PathExt;
@@ -323,6 +346,7 @@ pub fn get_shell_safe_zed_path(shell_kind: shell::ShellKind) -> anyhow::Result<S
 
 /// Returns a path for the zed cli executable, this function
 /// should be called from the zed executable, not zed-cli.
+/// Locate the command-line executable associated with the current Zed installation.
 pub fn get_zed_cli_path() -> Result<PathBuf> {
     use anyhow::Context as _;
     let zed_path =
@@ -416,6 +440,7 @@ pub fn set_pre_exec_to_start_new_session(
     command
 }
 
+/// Recursively merge JSON objects while accepting scalar/object shape changes.
 pub fn merge_json_lenient_value_into(
     source: serde_json_lenient::Value,
     target: &mut serde_json_lenient::Value,
@@ -444,6 +469,7 @@ pub fn merge_json_lenient_value_into(
 /// Merges `source` into `target`: objects are merged recursively, key by key;
 /// any other colliding value in `target` — including arrays — is replaced by
 /// `source`'s value wholesale.
+/// Recursively merge object keys from `source` into `target`.
 pub fn merge_json_value_into(source: serde_json::Value, target: &mut serde_json::Value) {
     use serde_json::Value;
 
@@ -461,6 +487,7 @@ pub fn merge_json_value_into(source: serde_json::Value, target: &mut serde_json:
     }
 }
 
+/// Recursively merge JSON values, unioning arrays instead of replacing them.
 pub fn union_json_value_into(source: serde_json::Value, target: &mut serde_json::Value) {
     use serde_json::Value;
 
@@ -485,6 +512,7 @@ pub fn union_json_value_into(source: serde_json::Value, target: &mut serde_json:
     }
 }
 
+/// Merge JSON values while leaving existing target values for null source entries.
 pub fn merge_non_null_json_value_into(source: serde_json::Value, target: &mut serde_json::Value) {
     use serde_json::Value;
     if let Value::Object(source_object) = source {
@@ -506,6 +534,7 @@ pub fn merge_non_null_json_value_into(source: serde_json::Value, target: &mut se
     }
 }
 
+/// Expand a range on a circular sequence, wrapping around its ends as needed.
 pub fn expanded_and_wrapped_usize_range(
     range: Range<usize>,
     additional_before: usize,
@@ -858,10 +887,15 @@ macro_rules! fs_embed {
     };
 }
 
+/// Common operations for exclusive and inclusive ordered ranges.
 pub trait RangeExt<T> {
+    /// Return a range with endpoints in ascending order.
     fn sorted(&self) -> Self;
+    /// Convert an exclusive range to an inclusive range.
     fn to_inclusive(&self) -> RangeInclusive<T>;
+    /// Return whether this range and `other` overlap.
     fn overlaps(&self, other: &Range<T>) -> bool;
+    /// Return whether this range fully contains `other`, including endpoints.
     fn contains_inclusive(&self, other: &Range<T>) -> bool;
 }
 
@@ -910,6 +944,7 @@ impl<T: Ord + Clone> RangeExt<T> for RangeInclusive<T> {
 pub struct NumericPrefixWithSuffix<'a>(Option<u64>, &'a str);
 
 impl<'a> NumericPrefixWithSuffix<'a> {
+    /// Split an initial decimal number from the remainder of a string.
     pub fn from_numeric_prefixed_str(str: &'a str) -> Self {
         let i = str.chars().take_while(|c| c.is_ascii_digit()).count();
         let (prefix, remainder) = str.split_at(i);
@@ -952,6 +987,7 @@ fn emoji_regex() -> &'static Regex {
 
 /// Returns true if the given string consists of emojis only.
 /// E.g. "👨‍👩‍👧‍👧👋" will return true, but "👋!" will return false.
+/// Return whether every non-whitespace grapheme in `s` is an emoji.
 pub fn word_consists_of_emojis(s: &str) -> bool {
     let mut prev_end = 0;
     for capture in emoji_regex().find_iter(s) {
@@ -988,18 +1024,24 @@ pub fn split_str_with_ranges<'s>(
     result
 }
 
+/// Construct `D::default`; useful as a serde default-function path.
 pub fn default<D: Default>() -> D {
     Default::default()
 }
 
 #[derive(Debug)]
+/// Result variants used by APIs that may return a response or a connection failure.
 pub enum ConnectionResult<O> {
+    /// The request timed out before a response arrived.
     Timeout,
+    /// The connection was reset.
     ConnectionReset,
+    /// The underlying operation returned a response or error.
     Result(anyhow::Result<O>),
 }
 
 impl<O> ConnectionResult<O> {
+    /// Convert the result to `Ok` or preserve the connection failure as an error.
     pub fn into_response(self) -> anyhow::Result<O> {
         match self {
             ConnectionResult::Timeout => anyhow::bail!("Request timed out"),

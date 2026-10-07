@@ -1,0 +1,12 @@
+[package]
+name = "gpui-walkthrough-{slug}"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+# Extract this project under <checkout>/target/{slug}/.
+[dependencies]
+gpui = { package = "gpui-ce", path = "../../crates/gpui", default-features = false }
+gpui_platform = { package = "gpui_ce_platform", path = "../../crates/gpui_platform", features = ["wayland", "x11"] }

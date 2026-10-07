@@ -1,0 +1,26 @@
+base_url = "https://gpui-ce.github.io"
+title = "GPUI Community Edition"
+description = "Build a Rust interface, understand its parts, and follow the code into the API reference."
+compile_sass = false
+build_search_index = true
+minify_html = false
+
+[search]
+index_format = "fuse_json"
+include_title = true
+include_description = true
+include_content = true
+
+[markdown]
+smart_punctuation = true
+bottom_footnotes = true
+
+[markdown.highlighting]
+theme = "github-light"
+style = "inline"
+
+[extra]
+repository = "https://github.com/gpui-ce/gpui-ce"
+api = "https://docs.rs/gpui-ce/0.2.2/gpui/"
+version = "0.2.2"
+

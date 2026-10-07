@@ -1,140 +1,109 @@
-//! In GPUI, every model or view in the application is actually owned by a single top-level object called the `App`. When a new entity or view is created (referred to collectively as _entities_), the application is given ownership of their state to enable their participation in a variety of app services and interaction with other entities.
+//! # Ownership and data flow
 //!
-//! To illustrate, consider the trivial app below. We start the app by calling `run` with a callback, which is passed a reference to the `App` that owns all the state for the application. This `App` is our gateway to all application-level services, such as opening windows, presenting dialogs, etc. It also has an `insert_entity` method, which is called below to create an entity and give ownership of it to the application.
+//! GPUI keeps entity values in the application's entity map. An [`crate::Entity<T>`]
+//! is a typed, reference-counted handle into that map; cloning the handle does
+//! not clone `T`, and dropping one handle does not immediately drop `T`. The
+//! value is released after the last strong handle disappears and the app flushes
+//! its effects.
 //!
-//! ```no_run
-//! # use gpui::{App, AppContext, Application, Entity};
-//! # struct Counter {
-//! #     count: usize,
-//! # }
-//! gpui_platform::application().run(|cx: &mut App| {
-//!     let _counter: Entity<Counter> = cx.new(|_cx| Counter { count: 0 });
-//!     // ...
-//! });
-//! ```
+//! The app is the access boundary. A handle alone cannot read or mutate its
+//! value. Use [`crate::Entity::read_with`] for a short read and [`crate::Entity::update`] for
+//! an exclusive mutation. The callback receives a [`crate::Context<T>`], which is the
+//! same app access plus entity services such as notifications and subscriptions.
 //!
-//! The call to `new_entity` returns an _entity handle_, which carries a type parameter based on the type of object it references. By itself, this `Entity<Counter>` handle doesn't provide access to the entity's state. It's merely an inert identifier plus a compile-time type tag, and it maintains a reference counted pointer to the underlying `Counter` object that is owned by the app.
-//!
-//! Much like an `Rc` from the Rust standard library, this reference count is incremented when the handle is cloned and decremented when it is dropped to enable shared ownership over the underlying model, but unlike an `Rc` it only provides access to the model's state when a reference to an `App` is available. The handle doesn't truly _own_ the state, but it can be used to access the state from its true owner, the `App`. Stripping away some of the setup code for brevity:
+//! ## Create, update, notify
 //!
 //! ```no_run
-//! # use gpui::{App, AppContext, Application, Context, Entity};
-//! # struct Counter {
-//! #     count: usize,
-//! # }
-//! gpui_platform::application().run(|cx: &mut App| {
-//!     let counter: Entity<Counter> = cx.new(|_cx| Counter { count: 0 });
-//!     // Call `update` to access the model's state.
-//!     counter.update(cx, |counter: &mut Counter, _cx: &mut Context<Counter>| {
-//!         counter.count += 1;
-//!     });
-//! });
-//! ```
-//!
-//! To update the counter, we call `update` on the handle, passing the context reference and a callback. The callback is yielded a mutable reference to the counter, which can be used to manipulate state.
-//!
-//! The callback is also provided a second `Context<Counter>` reference. This reference is similar to the `App` reference provided to the `run` callback. A `Context` is actually a wrapper around the `App`, including some additional data to indicate which particular entity it is tied to; in this case the counter.
-//!
-//! In addition to the application-level services provided by `App`, a `Context` provides access to entity-level services. For example, it can be used it to inform observers of this entity that its state has changed. Let's add that to our example, by calling `cx.notify()`.
-//!
-//! ```no_run
-//! # use gpui::{App, AppContext, Application, Entity};
-//! # struct Counter {
-//! #     count: usize,
-//! # }
+//! # use gpui::{App, AppContext, Context, Entity};
+//! # struct Counter { count: usize }
+//! # fn start() {
 //! gpui_platform::application().run(|cx: &mut App| {
 //!     let counter: Entity<Counter> = cx.new(|_cx| Counter { count: 0 });
 //!     counter.update(cx, |counter, cx| {
 //!         counter.count += 1;
-//!         cx.notify(); // Notify observers
-//!     });
-//! });
-//! ```
-//!
-//! Next, these notifications need to be observed and reacted to. Before updating the counter, we'll construct a second counter that observes it. Whenever the first counter changes, twice its count is assigned to the second counter. Note how `observe` is called on the `Context` belonging to our second counter to arrange for it to be notified whenever the first counter notifies. The call to `observe` returns a `Subscription`, which is `detach`ed to preserve this behavior for as long as both counters exist. We could also store this subscription and drop it at a time of our choosing to cancel this behavior.
-//!
-//! The `observe` callback is passed a mutable reference to the observer and a _handle_ to the observed counter, whose state we access with the `read` method.
-//!
-//! ```no_run
-//!  # use gpui::{App, AppContext, Application, Entity, prelude::*};
-//!  # struct Counter {
-//!  #     count: usize,
-//!  # }
-//!  gpui_platform::application().run(|cx: &mut App| {
-//!      let first_counter: Entity<Counter> = cx.new(|_cx| Counter { count: 0 });
-//!
-//!      let second_counter = cx.new(|cx: &mut Context<Counter>| {
-//!          // Note we can set up the callback before the Counter is even created!
-//!          cx.observe(
-//!              &first_counter,
-//!              |second: &mut Counter, first: Entity<Counter>, cx| {
-//!                  second.count = first.read(cx).count * 2;
-//!              },
-//!          )
-//!          .detach();
-//!
-//!          Counter { count: 0 }
-//!      });
-//!
-//!      first_counter.update(cx, |counter, cx| {
-//!          counter.count += 1;
-//!          cx.notify();
-//!      });
-//!
-//!      assert_eq!(second_counter.read(cx).count, 2);
-//!  });
-//! ```
-//!
-//! After updating the first counter, it can be noted that the observing counter's state is maintained according to our subscription.
-//!
-//! In addition to `observe` and `notify`, which indicate that an entity's state has changed, GPUI also offers `subscribe` and `emit`, which enables entities to emit typed events. To opt into this system, the emitting object must implement the `EventEmitter` trait.
-//!
-//! Let's introduce a new event type called `CounterChangeEvent`, then indicate that `Counter` can emit this type of event:
-//!
-//! ```no_run
-//! use gpui::EventEmitter;
-//! # struct Counter {
-//! #     count: usize,
-//! # }
-//! struct CounterChangeEvent {
-//!     increment: usize,
-//! }
-//!
-//! impl EventEmitter<CounterChangeEvent> for Counter {}
-//! ```
-//!
-//! Next, the example should be updated, replacing the observation with a subscription. Whenever the counter is incremented, a `Change` event is emitted to indicate the magnitude of the increase.
-//!
-//! ```no_run
-//! # use gpui::{App, AppContext, Application, Context, Entity, EventEmitter};
-//! # struct Counter {
-//! #     count: usize,
-//! # }
-//! # struct CounterChangeEvent {
-//! #     increment: usize,
-//! # }
-//! # impl EventEmitter<CounterChangeEvent> for Counter {}
-//! gpui_platform::application().run(|cx: &mut App| {
-//!     let first_counter: Entity<Counter> = cx.new(|_cx| Counter { count: 0 });
-//!
-//!     let second_counter = cx.new(|cx: &mut Context<Counter>| {
-//!         // Note we can set up the callback before the Counter is even created!
-//!         cx.subscribe(&first_counter, |second: &mut Counter, _first: Entity<Counter>, event, _cx| {
-//!             second.count += event.increment * 2;
-//!         })
-//!         .detach();
-//!
-//!         Counter {
-//!             count: first_counter.read(cx).count * 2,
-//!         }
-//!     });
-//!
-//!     first_counter.update(cx, |first, cx| {
-//!         first.count += 2;
-//!         cx.emit(CounterChangeEvent { increment: 2 });
 //!         cx.notify();
 //!     });
+//! });
+//! # }
+//! ```
 //!
-//!     assert_eq!(second_counter.read(cx).count, 4);
+//! `notify` is an explicit invalidation signal. It does not diff fields and it
+//! does not clone the value; observers run during GPUI's normal effect cycle.
+//!
+//! ## Read without retaining a borrow
+//!
+//! ```no_run
+//! # use gpui::{App, AppContext, Entity};
+//! # struct Counter { count: usize }
+//! # fn start() {
+//! gpui_platform::application().run(|cx: &mut App| {
+//!     let counter = cx.new(|_| Counter { count: 3 });
+//!     let count = counter.read_with(cx, |counter, _app| counter.count);
+//!     assert_eq!(count, 3);
+//! });
+//! # }
+//! ```
+//!
+//! `read_with` keeps the borrow inside its callback. Calling `read` directly is
+//! useful when a larger expression needs a reference, but the reference is tied
+//! to the current app borrow and must not escape it. GPUI rejects a second lease
+//! of the same entity while an update is in progress.
+//!
+//! ## Weak handles and asynchronous work
+//!
+//! Long-lived callbacks should capture [`crate::WeakEntity<T>`] rather than a strong
+//! entity handle. Upgrading is a race-safe test of liveness:
+//!
+//! ```no_run
+//! # use gpui::{AppContext, Entity, WeakEntity};
+//! # struct Counter { count: usize }
+//! # fn later(_: WeakEntity<Counter>) {}
+//! gpui_platform::application().run(|cx| {
+//!     let counter: Entity<Counter> = cx.new(|_| Counter { count: 0 });
+//!     let weak = counter.downgrade();
+//!     later(weak.clone());
+//!     drop(counter);
+//!     assert!(weak.upgrade().is_none());
 //! });
 //! ```
+//!
+//! This prevents an async task or subscription from keeping a model alive
+//! accidentally. [`crate::AsyncApp::spawn`] can use a weak entity after an await;
+//! the update returns an error when the entity has gone away.
+//!
+//! ## Notifications and typed events
+//!
+//! Notifications describe state invalidation. Typed events describe an action
+//! or occurrence and require [`crate::EventEmitter<E>`] on the emitting type:
+//!
+//! ```no_run
+//! # use gpui::{App, AppContext, Context, Entity, EventEmitter};
+//! # struct Counter { count: usize }
+//! struct Incremented { amount: usize }
+//! impl EventEmitter<Incremented> for Counter {}
+//! gpui_platform::application().run(|cx: &mut App| {
+//!     let counter: Entity<Counter> = cx.new(|_| Counter { count: 0 });
+//!     let listener = cx.new(|cx: &mut Context<Counter>| {
+//!         cx.subscribe(&counter, |listener, _, event: &Incremented, _| {
+//!             listener.count += event.amount;
+//!         }).detach();
+//!         Counter { count: 0 }
+//!     });
+//!     counter.update(cx, |counter, cx| {
+//!         counter.count += 1;
+//!         cx.emit(Incremented { amount: 1 });
+//!     });
+//!     assert_eq!(listener.read(cx).count, 1);
+//! });
+//! ```
+//!
+//! A [`crate::Subscription`] cancels its callback when dropped. Store it when the
+//! relationship has a bounded owner; call [`crate::Subscription::detach`] only when
+//! the callback should remain registered until its publisher or weak target is
+//! released. See the [subscription walkthrough](https://gpui-ce.github.io/examples/subscriptions/#lifetime).
+//!
+//! ## The ownership rule in one sentence
+//!
+//! Handles identify and retain entities, the app owns their storage, contexts
+//! authorize access, `notify` drives invalidation, and weak handles make
+//! teardown explicit.

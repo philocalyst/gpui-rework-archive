@@ -1,3 +1,9 @@
+//! Storage contracts for editable text and UTF-8/UTF-16 boundary conversion.
+//!
+//! Implementations own the document string and must increment [`UnicodeTextStorage::version`]
+//! whenever content changes. GPUI uses UTF-8 byte offsets internally; browser and IME boundaries
+//! are converted to UTF-16 code units at the edge.
+
 pub use gpui::TextBoundary;
 use gpui::{NavigationDirection, utf8_to_utf16_offset, utf16_to_utf8_offset};
 use std::ops::Range;

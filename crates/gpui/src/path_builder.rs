@@ -1,3 +1,12 @@
+//! Ergonomic path construction and lyon tessellation for GPUI scenes.
+//!
+//! Coordinates are logical [`Pixels`](crate::Pixels). Builder transforms are
+//! applied when commands are tessellated; they do not mutate earlier commands.
+//! A builder must contain enough geometry for lyon to tessellate before
+//! [`PathBuilder::build`] can return a path. Build errors come from lyon's
+//! tessellator and should be handled by callers that accept user supplied
+//! geometry.
+
 use anyhow::Error;
 use etagere::euclid::{Point2D, Vector2D};
 use lyon::geom::Angle;
@@ -13,11 +22,11 @@ pub use lyon::tessellation::{FillOptions, FillRule, StrokeOptions};
 
 use crate::{Path, Pixels, Point, point, px};
 
-/// Style of the PathBuilder
+/// Tessellation style used by a [`PathBuilder`].
 pub enum PathStyle {
-    /// Stroke style
+    /// Stroke the path with these options.
     Stroke(StrokeOptions),
-    /// Fill style
+    /// Fill the path with these options.
     Fill(FillOptions),
 }
 
@@ -25,7 +34,7 @@ pub enum PathStyle {
 pub struct PathBuilder {
     raw: lyon::path::builder::WithSvg<lyon::path::BuilderImpl>,
     transform: Option<lyon::math::Transform>,
-    /// PathStyle of the PathBuilder
+    /// The tessellation style used when [`PathBuilder::build`] is called.
     pub style: PathStyle,
     dash_array: Option<Vec<Pixels>>,
 }

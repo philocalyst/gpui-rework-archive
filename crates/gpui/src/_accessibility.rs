@@ -10,7 +10,7 @@
 //! This guide is focused on **programmatic accessibility**. This allows
 //! assistive technology, such as screen readers or Braille displays, to inspect
 //! and interact with your app. Docs for contributors working on accessibility
-//! support can be found in the `a11y` module's doc comment.
+//! support is documented in this module.
 //!
 //! GPUI integrates with [AccessKit] to provide programmatic accessibility
 //! features (referred to as simply "accessibility" for the rest of this guide).
@@ -106,12 +106,13 @@
 //!
 //! Special care must be taken when dealing with text.
 //!
-//! GPUI provides the [`text!`] macro, which wraps strings in the [`Text`] type,
+//! GPUI provides the `text!` macro, which wraps strings in the [`Text`] type,
 //! but automatically derives an ID. Usually, this is what you want. However,
 //! the way it generates its ID is subtle and perhaps surprising.
 //!
-//! The ID of an invocation of the [`text!`] macro is derived from the
-//! **location in the source code of that invocation**. For example:
+//! The ID of an invocation of the `text!` macro is derived from the
+//! **location in the source code of that invocation**. To choose an explicit ID, use the macro's
+//! `text!(id = value, contents)` form or [`Text::with_id`]. For example:
 //!
 //! ```rust
 //! # use gpui::*;
@@ -146,7 +147,7 @@
 //!     .children(todo_divs);  // ERROR: multiple nodes with the same global ID
 //! ```
 //!
-//! Here, when we map the iterator, since we have only written [`text!`] once,
+//! Here, when we map the iterator, since we have only written `text!` once,
 //! there is only one ID. And since they have the same ancestors and the same
 //! ID, they will have the same global ID. In release builds, this will mean
 //! some nodes get silently dropped!
@@ -164,7 +165,7 @@
 //!     .role(Role::Document)
 //!     .children(todo_divs);
 //! ```
-//! Another possible solution is to wrap the [`text!`] in another node that
+//! Another possible solution is to wrap the `text!` in another node that
 //! *does* have a unique global ID. For example:
 //! ```rust
 //! # use gpui::*;
@@ -224,7 +225,7 @@
 //! [`AccessibleAction`].
 //!
 //! To respond to an accessible action, use
-//! [`div().on_a11y_action()`][InteractiveElement::on_a11y_action]:
+//! [`div().on_a11y_action()`][crate::StatefulInteractiveElement::on_a11y_action]:
 //! ```rust,ignore
 //! div()
 //!     .id("my-slider")

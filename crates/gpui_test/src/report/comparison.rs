@@ -1,6 +1,10 @@
 //! Compare manifests without replaying scenes.
 use super::*;
 
+/// Compares every scenario and checkpoint in two saved report directories.
+///
+/// The directories must contain readable manifests and referenced image and scene
+/// artifacts. Missing or malformed artifacts return an error.
 pub fn compare_reports(
     baseline_dir: impl AsRef<Path>,
     current_dir: impl AsRef<Path>,
