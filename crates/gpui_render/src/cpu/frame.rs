@@ -93,9 +93,16 @@ impl Frame {
             y1.min(self.height as i32),
         )
     }
+    fn masked_pixel_range(
+        &self,
+        bounds: Bounds<ScaledPixels>,
+        mask: ContentMask<ScaledPixels>,
+    ) -> (i32, i32, i32, i32) {
+        intersect_pixel_ranges(self.pixel_range(bounds), self.pixel_range(mask.bounds))
+    }
     pub(super) fn draw_quad(&mut self, quad: &gpui::Quad, smoothed: bool) {
         let shader = crate::shaders::host::QuadShader::new(quad, smoothed);
-        let (x0, y0, x1, y1) = self.pixel_range(quad.bounds);
+        let (x0, y0, x1, y1) = self.masked_pixel_range(quad.bounds, quad.content_mask);
         for y in y0..y1 {
             for x in x0..x1 {
                 let p = wgsl_rs::std::vec2f(x as f32 + 0.5, y as f32 + 0.5);
@@ -122,7 +129,7 @@ impl Frame {
                 gpui::ScaledPixels(shader_bounds.size.y),
             ),
         };
-        let (x0, y0, x1, y1) = self.pixel_range(bounds);
+        let (x0, y0, x1, y1) = self.masked_pixel_range(bounds, shadow.content_mask);
         for y in y0..y1 {
             for x in x0..x1 {
                 let p = wgsl_rs::std::vec2f(x as f32 + 0.5, y as f32 + 0.5);
@@ -136,7 +143,8 @@ impl Frame {
         }
     }
     pub(super) fn draw_underline(&mut self, item: &gpui::Underline) {
-        let (x0, y0, x1, y1) = self.pixel_range(item.bounds);
+        let (x0, y0, x1, y1) = self.masked_pixel_range(item.bounds, item.content_mask);
+        let color = crate::shaders::host::hsla(item.color.into());
         for y in y0..y1 {
             for x in x0..x1 {
                 let p = wgsl_rs::std::vec2f(x as f32 + 0.5, y as f32 + 0.5);
@@ -151,7 +159,6 @@ impl Frame {
                     1.
                 };
                 let mask = crate::shaders::host::content_alpha(item.content_mask, p);
-                let color = crate::shaders::host::hsla(item.color.into());
                 self.over_at(
                     x,
                     y,
@@ -178,11 +185,12 @@ impl Frame {
     ) -> Result<()> {
         let bitmap = atlas.resolve_shared(tile)?;
         let m = transform;
-        let (x0, y0, x1, y1) = if let Some(m) = m {
+        let range = if let Some(m) = m {
             transformed_range(self, bounds, m)
         } else {
             self.pixel_range(bounds)
         };
+        let (x0, y0, x1, y1) = intersect_pixel_ranges(range, self.pixel_range(mask.bounds));
         let color = crate::shaders::host::hsla(color);
         for y in y0..y1 {
             for x in x0..x1 {
@@ -478,6 +486,13 @@ impl Frame {
         }
         self.pixels = output.pixels;
     }
+}
+
+fn intersect_pixel_ranges(
+    (x0, y0, x1, y1): (i32, i32, i32, i32),
+    (mx0, my0, mx1, my1): (i32, i32, i32, i32),
+) -> (i32, i32, i32, i32) {
+    (x0.max(mx0), y0.max(my0), x1.min(mx1), y1.min(my1))
 }
 
 // Rectangle rasterization and fragment clipping are separate: geometry uses half-open

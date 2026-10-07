@@ -536,6 +536,63 @@ fn quad_content_mask_clips_inside_its_primitive_bounds() {
 }
 
 #[test]
+fn cropping_large_offscreen_quads_preserves_fractional_mask_edge_coverage() {
+    use gpui::Edges;
+
+    let mask_bounds = rect(-0.25, -0.25, 4.75, 3.0);
+    let mask = ContentMask {
+        bounds: mask_bounds,
+        fade_out: Edges {
+            left: ScaledPixels(1.5),
+            right: ScaledPixels(1.0),
+            top: ScaledPixels(1.0),
+            bottom: ScaledPixels(0.75),
+        },
+    };
+    let mut quad = solid(
+        rect(-100.25, -80.75, 240.5, 120.25),
+        Hsla::new(0.0, 1.0, 0.5, 1.0),
+    );
+    quad.content_mask = mask;
+    let mut scene = Scene::default();
+    scene.insert_primitive(quad);
+
+    let image = render(&mut scene, 6, 5);
+    let left = mask_bounds.origin.x.0;
+    let top = mask_bounds.origin.y.0;
+    let right = left + mask_bounds.size.width.0;
+    let bottom = top + mask_bounds.size.height.0;
+    for y in 0..5 {
+        for x in 0..6 {
+            let center_x = x as f32 + 0.5;
+            let center_y = y as f32 + 0.5;
+            let inside =
+                center_x >= left && center_x <= right && center_y >= top && center_y <= bottom;
+            let fade = |distance: f32, width: f32| (distance / width).clamp(0.0, 1.0);
+            let alpha = if inside {
+                fade(center_x - left, 1.5)
+                    * fade(right - center_x, 1.0)
+                    * fade(center_y - top, 1.0)
+                    * fade(bottom - center_y, 0.75)
+            } else {
+                0.0
+            };
+            let alpha_byte = (alpha * 255.0 + 0.5) as u8;
+            let expected = if alpha == 0.0 {
+                [0, 0, 0, 0]
+            } else {
+                [255, 0, 0, alpha_byte]
+            };
+            assert_eq!(
+                image.get_pixel(x, y).0,
+                expected,
+                "mask coverage mismatch at ({x}, {y})"
+            );
+        }
+    }
+}
+
+#[test]
 fn fractional_geometry_uses_the_content_mask_fade_at_pixel_centers() {
     use gpui::Edges;
 
