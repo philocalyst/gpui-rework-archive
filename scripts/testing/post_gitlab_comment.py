@@ -41,15 +41,38 @@ def main() -> int:
     body = [MARKER, f"## GPUI visual report · {head_sha[:12]}", "", f"[Open job report artifact]({artifact_url})", ""]
     if baseline_available:
         body.append("**Visual comparison:**")
-        for change in changes:
-            body.append(
-                f"- **{change['label']}:** {report.markdown_text(change['subject'])} — {report.markdown_text(change['detail'])}"
-            )
+        if changes:
+            body.append(report.markdown_change_summary(changes))
         if not changes:
             body.append("- No checkpoint, timeline, or pixel changes detected.")
     else:
         body.append("No baseline capture was available; current captures are shown without comparison diffs.")
-    body.extend(["", report.markdown_metrics_table(manifest)])
+    body.extend(["", report.markdown_metrics_table(manifest, limit=20)])
+    previews = report.preview_checkpoints(manifest, baseline_available)
+    for scenario, checkpoint in previews[:4]:
+        body.extend(["", f"**{report.markdown_text(scenario.get('title', scenario['id']))} / {report.markdown_text(checkpoint.get('name', checkpoint['id']))}**"])
+        stats = report.checkpoint_preview_text(checkpoint)
+        if stats:
+            body.append(stats)
+        assets = []
+        for field, label in (("before_png", "Before"), ("png", "Current"),
+                             ("diff_png", "CPU changes in red"), ("heatmap_png", "CPU magnitude heatmap")):
+            if checkpoint.get(field):
+                assets.append((label, checkpoint[field]))
+        motion = checkpoint.get("motion")
+        if motion and motion["difference"]["changed_pixels"] > 0:
+            if motion.get("diff_png"):
+                assets.append(("Transition mask · previous → current", motion["diff_png"]))
+            if motion.get("heatmap_png"):
+                assets.append(("Transition heatmap · previous → current", motion["heatmap_png"]))
+        if assets:
+            hosted = [(label, path, report.hosted_report_asset_url(artifact_url, path)) for label, path in assets]
+            if all(url for _label, _path, url in hosted):
+                body.extend(f"**{label}:** ![{label}]({url})" for label, _path, url in hosted)
+            else:
+                body.append("Available in [report artifacts]({}): {}".format(
+                    artifact_url, "; ".join(f"{label}: `{path}`" for label, path in assets),
+                ))
     text = "\n".join(body)
 
     if api("GET", endpoint, token).get("sha", "").lower() != head_sha:

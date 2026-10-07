@@ -63,7 +63,7 @@ pub struct ImageComparison {
 }
 
 /// Pixel-motion differences between two pairs of RGBA frames.
-#[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct MotionDifference {
     /// Pixels in the comparison canvas spanning all four image dimensions.
     pub total_pixels: u64,
@@ -200,6 +200,16 @@ pub fn compare_transitions(
     previous_current: &image::RgbaImage,
     current: &image::RgbaImage,
 ) -> MotionDifference {
+    // Matching frame pairs imply matching transitions, including extent. A byte comparison
+    // avoids walking every channel again for the common unchanged-baseline case.
+    if previous_before == previous_current && before == current {
+        let (width, height) =
+            transition_dimensions([previous_before, before, previous_current, current]);
+        return MotionDifference {
+            total_pixels: u64::from(width) * u64::from(height),
+            ..Default::default()
+        };
+    }
     compare_transitions_with(
         previous_before,
         before,
@@ -221,16 +231,8 @@ pub fn compare_transition_images(
     current: &image::RgbaImage,
     mode: DiffMode,
 ) -> TransitionComparison {
-    let width = previous_before
-        .width()
-        .max(before.width())
-        .max(previous_current.width())
-        .max(current.width());
-    let height = previous_before
-        .height()
-        .max(before.height())
-        .max(previous_current.height())
-        .max(current.height());
+    let (width, height) =
+        transition_dimensions([previous_before, before, previous_current, current]);
     let mut image = image::RgbaImage::new(width, height);
     let difference = compare_transitions_with(
         previous_before,
@@ -269,16 +271,8 @@ fn compare_transitions_with(
     current: &image::RgbaImage,
     mut visit_pixel: impl FnMut(u32, u32, bool, f64),
 ) -> MotionDifference {
-    let width = previous_before
-        .width()
-        .max(before.width())
-        .max(previous_current.width())
-        .max(current.width());
-    let height = previous_before
-        .height()
-        .max(before.height())
-        .max(previous_current.height())
-        .max(current.height());
+    let (width, height) =
+        transition_dimensions([previous_before, before, previous_current, current]);
     let mut changed_pixels = 0;
     let mut max_channel_error = 0.0f64;
     let mut channel_error_sum = 0.0f64;
@@ -349,6 +343,12 @@ fn compare_transitions_with(
             height: max_y - min_y + 1,
         }),
     }
+}
+
+fn transition_dimensions(frames: [&image::RgbaImage; 4]) -> (u32, u32) {
+    frames.into_iter().fold((0, 0), |(width, height), frame| {
+        (width.max(frame.width()), height.max(frame.height()))
+    })
 }
 
 fn premultiplied_channel(pixel: [u8; 4], channel: usize) -> i32 {

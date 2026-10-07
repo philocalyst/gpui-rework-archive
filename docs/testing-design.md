@@ -125,18 +125,21 @@ Local checks used the pinned nightly on macOS, including actual Metal replay and
 | CPU rendering | 66 unit, capture-validation, and property checks passed |
 | Scene construction and image playback | 16 scene checks and eight image checks passed, including transformed culling/order and variable-delay animation |
 | Parley | 61 checks passed; decoration probes independently verify text metrics and underline pixels |
-| Harness and comparison | 15 library checks, 20 collection/encoding checks, seven state regressions, and all 23 reviewed scene/pixel checkpoints passed |
+| Harness and comparison | 17 library checks, 20 collection/encoding checks, seven state regressions, and all 23 reviewed scene/pixel checkpoints passed |
 | Example lessons | Eight checks passed with real pointer, drag/drop, keyboard, animation restart, editor, and GIF frame behavior |
 | Example builds and captures | All 31 targets compiled; all 24 scenario-backed examples captured at 20 samples per checkpoint |
 | Web example | `hello_world` compiled for `wasm32-unknown-unknown` with the shared font pack |
 | Miri | Seven capture-validation checks passed with isolation enabled; 64 source-over cases and 24 retained-frame cases passed with filesystem isolation disabled for proptest setup |
 | Native renderer | 39 WGPU unit checks, four analytic parity/capacity checks, two native replay checks, and 200 repeated mixed-script frames passed |
 | Native OS integration | Actual macOS visibility, activation, focus, redraw, exact resize, and two-window close checks passed: six supported capabilities, 13 events, no errors |
-| Saved aggregate | 29 scenarios and 78 checkpoints, with 20 CPU and native samples each; 326 hosted assets total 22,548,076 bytes after compression, with timings and pixels preserved |
-| Luna mutations | 25 dc88 mutations and seven distinct cf2 runtime mutations were detected; [revision-specific evidence](testing-mutations.md) preserves invalid attempts and corrected retries separately |
-| Forge adapters and launchers | 55 Python checks completed: 54 passed, one Windows-only launcher check skipped locally |
+| Saved aggregate | 29 scenarios and 78 checkpoints, with 20 CPU and native samples each; every primary scene, PNG, native PNG, timing sample, and typed baseline change survived report regeneration unchanged |
+| Report collection | Optimized collection used 182.95 MiB peak RSS for one report and 199.63 MiB for a duplicate pair; [workload and raw measurements](testing-performance.md) preserve the comparison's limits |
+| Luna mutations | 25 dc88 mutations, seven distinct cf2 runtime mutations, six 862 diff/report mutations, and one 3bba transition-mask mutation were detected; [revision-specific evidence](testing-mutations.md) preserves invalid attempts and corrected retries separately |
+| Forge adapters and launchers | 58 Python checks completed: 57 passed, one Windows-only launcher check skipped locally |
+| Browser viewer | Resize alignment, wipe clipping, exact/magnitude/transition masks, pixel focusing, scrub/play/replay, changed-frame navigation, two independent embedded instances, and mount/unmount verified in the actual browser |
+| Local HTTP publication | All 387 main-report assets (28,709,118 bytes) and 392 injected-motion-probe assets were retrieved byte-for-byte; identical main-report assets required 325 distinct blobs |
 | Code quality | Scoped renderer, harness, and WGPU Clippy checks passed with `--no-deps`; the test crate's package file list includes its fonts |
 
-Saved reports retain full captures and timing provenance. Native replay measures queue-completed wall time and tracked/device allocation scopes; invalid Metal counters are explicitly unavailable, with their driver error preserved. The report protocol and production HTTP adapters are exercised against a stateful local forge, including hosted asset retrieval, generated viewers, report history, comment updates, and stale-head guards. No external forge write or deployment was performed.
+Saved reports retain full captures and timing provenance. Native replay measures queue-completed wall time and tracked/device allocation scopes; invalid Metal counters are explicitly unavailable, with their driver error preserved. The report protocol and production HTTP adapters are exercised against a stateful local forge, including hosted asset retrieval, JavaScript/CSS/gzip MIME types, generated viewers, report history, bounded comments, identical-blob reuse, and stale-head guards. A deliberately altered baseline also produced a transition-only failure whose red and magnitude images were hosted and linked in the comment. No external forge write or deployment was performed.
 
 Linux and Windows jobs are configured in CI; their operating-system execution was not performed on this macOS checkout. Native frame work excludes monitor presentation and vsync latency.

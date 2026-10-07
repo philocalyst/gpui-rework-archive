@@ -88,21 +88,24 @@ def add_platform_checks(manifest):
 
 def write_report(root: Path, manifest: dict, *, png=PNG, scene=b'{"scene":1}') -> Path:
     root.mkdir(parents=True, exist_ok=True)
-    (root / "gallery").mkdir(exist_ok=True)
-    (root / "gallery/initial.png").write_bytes(png)
-    (root / "gallery/initial.scene.json").write_bytes(scene)
-    if manifest["scenarios"][0]["checkpoints"][0].get("before_png"):
-        (root / "gallery/initial.before.png").write_bytes(PNG)
-        (root / "gallery/initial.diff.png").write_bytes(PNG)
-    native = manifest["scenarios"][0]["checkpoints"][0].get("native")
-    if native:
-        (root / native["png"]).write_bytes(PNG)
-        (root / native["diff_png"]).write_bytes(PNG)
-        if native.get("heatmap_png"):
-            (root / native["heatmap_png"]).write_bytes(PNG)
-    checkpoint = manifest["scenarios"][0]["checkpoints"][0]
-    if checkpoint.get("heatmap_png"):
-        (root / checkpoint["heatmap_png"]).write_bytes(PNG)
+    for scenario in manifest["scenarios"]:
+        for checkpoint in scenario["checkpoints"]:
+            for field in ("png", "before_png", "diff_png", "heatmap_png"):
+                if checkpoint.get(field):
+                    path = root / checkpoint[field]
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_bytes(png)
+            path = root / checkpoint["scene_json"]
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(scene)
+            for data, fields in ((checkpoint.get("native"), ("png", "diff_png", "heatmap_png")),
+                                 (checkpoint.get("motion"), ("diff_png", "heatmap_png"))):
+                if data:
+                    for field in fields:
+                        if data.get(field):
+                            path = root / data[field]
+                            path.parent.mkdir(parents=True, exist_ok=True)
+                            path.write_bytes(png)
     (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
     return root
 
@@ -191,7 +194,7 @@ class ReportSupportTests(unittest.TestCase):
             gzip_manifest = fixture_manifest()
             gzip_manifest["scenarios"][0]["checkpoints"][0]["scene_json"] = "gallery/initial.scene.json.gz"
             write_report(gzip_root, gzip_manifest, scene=scene)
-            (gzip_root / "gallery/initial.scene.json").unlink()
+            (gzip_root / "gallery/initial.scene.json").unlink(missing_ok=True)
             compressed = gzip.compress(scene, mtime=0)
             (gzip_root / "gallery/initial.scene.json.gz").write_bytes(compressed)
             normalized, gzip_report_root = support.load_report(gzip_root)
@@ -207,7 +210,7 @@ class ReportSupportTests(unittest.TestCase):
             manifest = fixture_manifest()
             manifest["scenarios"][0]["checkpoints"][0]["scene_json"] = "gallery/initial.scene.json.gz"
             write_report(root, manifest)
-            (root / "gallery/initial.scene.json").unlink()
+            (root / "gallery/initial.scene.json").unlink(missing_ok=True)
             compressed_path = root / "gallery/initial.scene.json.gz"
             for payload in (b"not gzip", gzip.compress(b'{"scene":1}')[:-2]):
                 compressed_path.write_bytes(payload)
@@ -413,6 +416,8 @@ class ReportSupportTests(unittest.TestCase):
                 motion={
                     "previous_checkpoint_id": "initial", "before_duration_ns": 40,
                     "current_duration_ns": 20,
+                    "diff_png": "gallery/next.motion.diff.png",
+                    "heatmap_png": "gallery/next.motion.heatmap.png",
                     "difference": {
                         "total_pixels": 64000, "changed_pixels": 100,
                         "max_channel_error": 510, "mean_channel_error": 17.25,
@@ -433,6 +438,15 @@ class ReportSupportTests(unittest.TestCase):
         loaded = load(manifest)
         motion = loaded["scenarios"][0]["checkpoints"][1]["motion"]
         self.assertEqual(motion["difference"]["max_channel_error"], 510)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "report"
+            write_report(root, manifest)
+            loaded, report_root = support.load_report(root)
+            assets = support.report_assets(loaded, report_root)
+            self.assertIn("gallery/next.motion.diff.png", assets)
+            self.assertIn("gallery/next.motion.heatmap.png", assets)
+            self.assertIn(b"[Transition red](gallery/next.motion.diff.png)", assets["report.md"])
+            self.assertIn(b"Transition error: 100/64000", assets["report.md"])
         viewer = support.trusted_index(loaded).decode()
         self.assertIn("Transition error · previous frame", viewer)
         self.assertIn("pixels_changed === false ? 0", viewer)
@@ -444,6 +458,8 @@ class ReportSupportTests(unittest.TestCase):
             (lambda m: m["scenarios"][0]["checkpoints"][1]["motion"]["difference"].update(max_channel_error=510.1), "between 0 and 510"),
             (lambda m: m["scenarios"][0]["checkpoints"][1]["motion"]["difference"].update(mean_channel_error=float("nan")), "between 0 and 510"),
             (lambda m: m["scenarios"][0]["checkpoints"][1]["motion"]["difference"].update(bounds={"x": 1, "y": 1, "width": 320, "height": 201}), "bounds area exceeds total_pixels"),
+            (lambda m: m["scenarios"][0]["checkpoints"][1]["motion"].update(diff_png="gallery/wrong.png"), "motion diff_png must be"),
+            (lambda m: m["scenarios"][0]["checkpoints"][1]["motion"]["difference"].update(changed_pixels=0), "requires changed pixels"),
         ]
         for mutate, message in malformed:
             with self.subTest(message=message):
@@ -466,6 +482,26 @@ class ReportSupportTests(unittest.TestCase):
         candidate["scenarios"][0]["checkpoints"][1]["status"] = "new"
         with self.assertRaisesRegex(ValueError, "matched baseline/current"):
             load(candidate)
+
+    def test_motion_only_frames_lead_shared_forge_previews(self):
+        manifest = add_native_replay(fixture_manifest(status="unchanged"))
+        scenario = manifest["scenarios"][0]
+        first = scenario["checkpoints"][0]
+        motion = copy.deepcopy(first)
+        motion.update(id="motion", name="Motion only", status="unchanged", pixels_changed=False)
+        motion.pop("native")
+        motion["motion"] = {
+            "previous_checkpoint_id": "initial", "before_duration_ns": 1, "current_duration_ns": 1,
+            "diff_png": "gallery/motion.motion.diff.png", "heatmap_png": "gallery/motion.motion.heatmap.png",
+            "difference": {"total_pixels": 64000, "changed_pixels": 12, "max_channel_error": 9,
+                           "mean_channel_error": 1.5, "bounds": None},
+        }
+        changed = copy.deepcopy(first)
+        changed.update(id="changed", name="Changed", status="changed")
+        scenario["checkpoints"] = [first, motion, changed]
+        previews = support.preview_checkpoints(manifest, True)
+        self.assertEqual([checkpoint["id"] for _scenario, checkpoint in previews], ["motion", "changed", "initial"])
+        self.assertIn("Transition error: 12/64000", support.checkpoint_preview_text(motion))
 
     def test_native_replay_validation_rejects_paths_and_pixel_error_out_of_range(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -733,16 +769,24 @@ class ForgeAdapterTests(unittest.TestCase):
 
         manifest = fixture_manifest()
         with patch.object(github_report, "api", side_effect=fake_api):
-            result = github_report.publish_pages("owner/repo", "visual-results", current_sha, "7", "https://pages.example/site", {"gallery/initial.png": PNG}, manifest, "token")
+            result = github_report.publish_pages("owner/repo", "visual-results", current_sha, "7", "https://pages.example/site", {
+                "gallery/initial.png": PNG,
+                "gallery/copy.png": PNG,
+            }, manifest, "token")
         tree_payload = next(payload for method, endpoint, payload in calls if endpoint.endswith("git/trees") and method == "POST")
         entries = {item["path"]: item["sha"] for item in tree_payload["tree"]}
         self.assertIn(f"runs/{current_sha}/gallery/initial.png", entries)
+        self.assertEqual(entries[f"runs/{current_sha}/gallery/initial.png"], entries[f"runs/{current_sha}/gallery/copy.png"])
         self.assertIn("index.html", entries)
         self.assertIn("pulls/7/index.html", entries)
         self.assertIn("runs.json", entries)
         patch_payload = next(payload for method, endpoint, payload in calls if method == "PATCH")
         self.assertFalse(patch_payload["force"])
         self.assertEqual(result, f"https://pages.example/site/runs/{current_sha}/index.html")
+        png_blob_posts = [payload for method, endpoint, payload in calls
+                          if method == "POST" and endpoint.endswith("git/blobs")
+                          and payload.get("content") == base64.b64encode(PNG).decode()]
+        self.assertEqual(len(png_blob_posts), 1, "identical asset bytes should be uploaded only once")
         registry = None
         for method, endpoint, payload in calls:
             if method != "POST" or not endpoint.endswith("git/blobs") or not isinstance(payload, dict):
@@ -774,6 +818,79 @@ class ForgeAdapterTests(unittest.TestCase):
         self.assertIn("| n/a |", comment)
         self.assertIn("n/a", comment)
         self.assertNotIn("0.00 ms", comment)
+
+    def test_forge_comment_metrics_table_caps_rows_and_keeps_changes_and_slowest(self):
+        manifest = fixture_manifest(status="unchanged")
+        checkpoints = []
+        for index in range(60):
+            checkpoint = copy.deepcopy(manifest["scenarios"][0]["checkpoints"][0])
+            checkpoint.update(id=f"frame-{index:02d}", name=f"Frame {index:02d}",
+                              scene_json=f"gallery/frame-{index:02d}.scene.json", png=f"gallery/frame-{index:02d}.png",
+                              metrics={"frame_count": 1, "cpu_render_p95_ns": index * 1_000_000})
+            checkpoints.append(checkpoint)
+        checkpoints[58]["motion"] = {"difference": {"changed_pixels": 10}}
+        checkpoints[59]["status"] = "changed"
+        checkpoints[0]["status"] = "new"
+        manifest["scenarios"][0]["checkpoints"] = checkpoints
+        markdown = support.markdown_metrics_table(manifest, limit=20)
+        self.assertIn("Showing 20 of 60 CPU checkpoints", markdown)
+        self.assertIn("Frame 59", markdown)
+        self.assertIn("Frame 58", markdown)
+        self.assertIn("Frame 57", markdown)
+        self.assertNotIn("Frame 00", markdown)
+        changes = [{
+            "label": "Pixels changed", "subject": f"gallery/frame-{index:02d}",
+            "detail": ("long generated detail " + str(index) + " ") * 100,
+        } for index in range(300)]
+        comment = github_report.make_comment("owner/repo", "7", "42", "d" * 40, manifest, None, changes, True)
+        self.assertLess(len(comment.encode()), 65_000)
+        self.assertIn("300 baseline changes", comment)
+        self.assertIn("275 more change details omitted", comment)
+        self.assertIn("gallery/frame-00", comment)
+        self.assertNotIn("gallery/frame-25", comment)
+
+    def test_gitlab_comment_previews_motion_only_transition_assets(self):
+        sha = "a" * 40
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = fixture_manifest(status="unchanged")
+            checkpoints = manifest["scenarios"][0]["checkpoints"]
+            checkpoints[0].update(time_ns=10, before_time_ns=100)
+            next_frame = copy.deepcopy(checkpoints[0])
+            next_frame.update(id="next", name="Motion only", time_ns=20, before_time_ns=120,
+                              scene_json="gallery/next.scene.json", png="gallery/next.png", pixels_changed=False)
+            next_frame["motion"] = {
+                "previous_checkpoint_id": "initial", "before_duration_ns": 20, "current_duration_ns": 10,
+                "diff_png": "gallery/next.motion.diff.png", "heatmap_png": "gallery/next.motion.heatmap.png",
+                "difference": {"total_pixels": 64000, "changed_pixels": 90, "max_channel_error": 30,
+                               "mean_channel_error": 4.5, "bounds": None},
+            }
+            checkpoints.append(next_frame)
+            write_report(root / "visual-report", manifest)
+            env = {
+                "GITLAB_API_TOKEN": "token", "CI_API_V4_URL": "https://gitlab.example/api/v4",
+                "CI_PROJECT_ID": "group/project", "CI_MERGE_REQUEST_IID": "9", "CI_COMMIT_SHA": sha,
+                "GPUI_GITLAB_BOT_USERNAME": "gpui-bot", "GPUI_VISUAL_REPORT_URL": "https://gitlab.example/job/report/index.html",
+            }
+            updated = {}
+            def fake_api(method, endpoint, _token, payload=None):
+                if "/notes?" in endpoint:
+                    return [{"id": 8, "author": {"username": "gpui-bot"}, "body": gitlab_report.MARKER}]
+                if method == "PUT":
+                    updated["body"] = payload["body"]
+                    return {}
+                return {"sha": sha}
+            old_cwd = Path.cwd()
+            try:
+                os.chdir(root)
+                with patch.dict("os.environ", env, clear=True), patch.object(gitlab_report, "api", side_effect=fake_api):
+                    self.assertEqual(gitlab_report.main(), 0)
+            finally:
+                os.chdir(old_cwd)
+        self.assertIn("Transition error: 90/64000", updated["body"])
+        self.assertIn("![Transition mask", updated["body"])
+        self.assertIn("https://gitlab.example/job/report/gallery/next.motion.diff.png", updated["body"])
+        self.assertIn("https://gitlab.example/job/report/gallery/next.motion.heatmap.png", updated["body"])
 
     def test_comment_preview_prioritizes_changed_cpu_images_over_earlier_native_diagnostics(self):
         manifest = add_native_replay(fixture_manifest())
@@ -808,6 +925,8 @@ class ForgeAdapterTests(unittest.TestCase):
         motion_only["motion"] = {
             "previous_checkpoint_id": "checkpoint-5", "before_duration_ns": 2_000_000,
             "current_duration_ns": 1_000_000,
+            "diff_png": "gallery/checkpoint-6.motion.diff.png",
+            "heatmap_png": "gallery/checkpoint-6.motion.heatmap.png",
             "difference": {"total_pixels": 64000, "changed_pixels": 32,
                            "max_channel_error": 80, "mean_channel_error": 2.5, "bounds": None},
         }
@@ -823,6 +942,8 @@ class ForgeAdapterTests(unittest.TestCase):
         self.assertIn("gallery/checkpoint-6.png", comment)
         self.assertIn("Transition error: 32/64000", comment)
         self.assertIn("gallery/checkpoint-6.heatmap.png", comment)
+        self.assertIn("Transition changes in red", comment)
+        self.assertIn("Transition magnitude heatmap", comment)
         self.assertIn("gallery/checkpoint-7.native.png", comment)
         self.assertLess(
             comment.index("gallery/checkpoint-7.before.png"),

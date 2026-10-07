@@ -372,10 +372,11 @@ function renderComparison(doc, scenario, checkpoint, baseURL) {
   zoom.addEventListener("click", () => setZoom(!actualPixels));
   focus.addEventListener("click", () => {
     if (!bounds) return;
-    const motionSelected = mode === "motion" || mode === "motion-heatmap";
-    const selectedBounds = motionSelected ? checkpoint.motion?.difference?.bounds || bounds : bounds;
-    if (diffImg && !motionSelected) setMode("diff");
-    else if (motionImg) setMode("motion");
+    if (!["diff", "heatmap", "motion", "motion-heatmap"].includes(mode)) {
+      if (diffImg) setMode("diff");
+      else if (motionImg) setMode("motion");
+    }
+    const selectedBounds = mode.startsWith("motion") ? checkpoint.motion?.difference?.bounds || bounds : bounds;
     setZoom(true);
     stageScroll.scrollTo({ left: Math.max(0, selectedBounds.x - 24), top: Math.max(0, selectedBounds.y - 24) });
   });

@@ -455,6 +455,15 @@ MUTANTS: tuple[Mutant, ...] = (
         "failed report writes preserve the prior published report",
         ("cargo", "test", "--offline", "--locked", "-p", "gpui_ce_test", "--test", "report_collection", "failed_report_write_preserves_existing_report_and_refuses_unrelated_directories"),
     ),
+    Mutant(
+        "drop-transition-exact-mask",
+        "Render the checkerboard context instead of a red mask for motion-difference pixels.",
+        IMAGE_DIFF,
+        "DiffMode::Exact if changed => image::Rgba([255, 32, 32, 255]),",
+        "DiffMode::Exact if changed => context,",
+        "transition visualization marks motion, transparent extent, and catch-up differences",
+        ("cargo", "test", "--offline", "--locked", "-p", "gpui_ce_test", "--lib", "transition_visualization_marks_motion_and_transparent_extent"),
+    ),
 )
 
 

@@ -13,9 +13,11 @@ from urllib.parse import quote
 
 from report_support import (
     comparison_summary,
-    format_ms,
+    checkpoint_preview_text,
+    preview_checkpoints,
     load_report,
     markdown_metrics_table,
+    markdown_change_summary,
     markdown_text,
     pages_index,
     pull_index,
@@ -86,9 +88,17 @@ def publish_pages(repository: str, branch: str, head_sha: str, pull_request: str
     records.append({"sha": head_sha, "pr": str(pull_request)})
 
     entries = []
+    blob_shas: dict[bytes, str] = {}
+
+    def add_blob(path: str, content: bytes) -> None:
+        blob_sha = blob_shas.get(content)
+        if blob_sha is None:
+            blob_sha = _blob(repository, content, token)
+            blob_shas[content] = blob_sha
+        entries.append({"path": path, "mode": "100644", "type": "blob", "sha": blob_sha})
+
     for relative, content in assets.items():
-        blob_sha = _blob(repository, content, token)
-        entries.append({"path": f"runs/{head_sha}/{relative}", "mode": "100644", "type": "blob", "sha": blob_sha})
+        add_blob(f"runs/{head_sha}/{relative}", content)
     generated = {
         f"runs/{head_sha}/index.html": trusted_index(manifest),
         "runs.json": (json.dumps(records, indent=2) + "\n").encode(),
@@ -96,58 +106,13 @@ def publish_pages(repository: str, branch: str, head_sha: str, pull_request: str
         f"pulls/{pull_request}/index.html": pull_index(records, str(pull_request), page_url),
     }
     for path, content in generated.items():
-        entries.append({"path": path, "mode": "100644", "type": "blob", "sha": _blob(repository, content, token)})
+        add_blob(path, content)
     tree = api("POST", f"repos/{repository}/git/trees", token, {"base_tree": tree_sha, "tree": entries})
     commit = api("POST", f"repos/{repository}/git/commits", token, {
         "message": f"Publish GPUI visual report for {head_sha}", "tree": tree["sha"], "parents": [branch_commit],
     })
     api("PATCH", f"repos/{repository}/git/refs/{ref}", token, {"sha": commit["sha"], "force": False})
     return page_url + "/runs/" + head_sha + "/index.html"
-
-
-def preview_checkpoints(manifest: dict, baseline_available: bool) -> list[tuple[dict, dict]]:
-    checkpoints = [
-        (scenario, checkpoint)
-        for scenario in manifest["scenarios"]
-        for checkpoint in scenario["checkpoints"]
-    ]
-    if not baseline_available:
-        return checkpoints
-
-    # Give CPU contract changes first claim on the short comment preview. Native
-    # images are diagnostic and must not crowd out a later changed CPU capture.
-    cpu_changes = [
-        item for item in checkpoints
-        if item[1].get("status") in {"changed", "new"}
-        or item[1].get("motion", {}).get("difference", {}).get("changed_pixels", 0) > 0
-    ]
-    native_diagnostics = [item for item in checkpoints if item[1].get("native")]
-    cpu_change_keys = {(scenario["id"], checkpoint["id"]) for scenario, checkpoint in cpu_changes}
-    return cpu_changes + [
-        item for item in native_diagnostics
-        if (item[0]["id"], item[1]["id"]) not in cpu_change_keys
-    ]
-
-
-def _preview_stats(checkpoint: dict) -> str:
-    lines = []
-    difference = checkpoint.get("difference")
-    if difference:
-        changed, total = difference.get("changed_pixels"), difference.get("total_pixels")
-        percentage = f"{100 * changed / total:.3f}%" if isinstance(changed, int) and isinstance(total, int) and total else "n/a"
-        visible = difference.get("visible") or {}
-        visible_changed = visible.get("changed_pixels")
-        visible_text = "n/a" if not isinstance(visible_changed, int) or not total else f"{visible_changed}/{total} ({100 * visible_changed / total:.3f}%)"
-        lines.append(f"CPU pixel error: {changed}/{total} ({percentage}); visible {visible_text}; mean/peak {difference.get('mean_channel_error', 'n/a')}/{difference.get('max_channel_error', 'n/a')}.")
-    motion = checkpoint.get("motion")
-    if motion:
-        difference = motion["difference"]
-        changed, total = difference["changed_pixels"], difference["total_pixels"]
-        percentage = f"{100 * changed / total:.3f}%" if total else "n/a"
-        before = format_ms(motion.get("before_duration_ns"))
-        current = format_ms(motion.get("current_duration_ns"))
-        lines.append(f"Transition error: {changed}/{total} ({percentage}); signed premultiplied mean/peak {difference['mean_channel_error']}/{difference['max_channel_error']}; baseline/current elapsed {before}/{current}.")
-    return "\n".join(lines)
 
 
 def make_comment(repository: str, pr: str, run_id: str, head_sha: str, manifest: dict, page_url: str | None, changes: list[dict], baseline_available: bool) -> str:
@@ -163,21 +128,18 @@ def make_comment(repository: str, pr: str, run_id: str, head_sha: str, manifest:
     if baseline_available:
         lines.append("**Visual comparison:**")
         if changes:
-            for change in changes:
-                lines.append(
-                    f"- **{change['label']}:** {markdown_text(change['subject'])} — {markdown_text(change['detail'])}"
-                )
+            lines.append(markdown_change_summary(changes))
         else:
             lines.append("- No checkpoint, scene, timeline, or pixel changes detected.")
     else:
         lines.append("No baseline capture was available; current images are shown without comparison diffs.")
-    lines.extend(["", markdown_metrics_table(manifest)])
+    lines.extend(["", markdown_metrics_table(manifest, limit=20)])
     if page_url:
         image_checkpoints = preview_checkpoints(manifest, baseline_available)
         for scenario, checkpoint in image_checkpoints[:6]:
             lines.extend(["", "**" + markdown_text(scenario.get("title", scenario["id"]))
                 + " / " + markdown_text(checkpoint.get("name", checkpoint["id"])) + "**", ""])
-            stats = _preview_stats(checkpoint)
+            stats = checkpoint_preview_text(checkpoint)
             if stats:
                 lines.append(stats)
             for field, label in (("before_png", "Before"), ("png", "Current"), ("diff_png", "Changes in red"), ("heatmap_png", "Magnitude heatmap")):
@@ -190,6 +152,14 @@ def make_comment(repository: str, pr: str, run_id: str, head_sha: str, manifest:
                 lines.append("")
                 for field, label in (("png", "Native GPU replay (diagnostic)"), ("diff_png", "Native minus CPU (diagnostic difference)"), ("heatmap_png", "Native visible magnitude heatmap")):
                     asset = native.get(field)
+                    if asset:
+                        asset_url = page_url.rsplit("/index.html", 1)[0] + "/" + quote(asset, safe="/")
+                        lines.append(f"**{label}:** ![{label} image]({asset_url})")
+            motion = checkpoint.get("motion")
+            if motion and motion["difference"]["changed_pixels"] > 0:
+                for field, label in (("diff_png", "Transition changes in red (previous → current)"),
+                                     ("heatmap_png", "Transition magnitude heatmap (previous → current)")):
+                    asset = motion.get(field)
                     if asset:
                         asset_url = page_url.rsplit("/index.html", 1)[0] + "/" + quote(asset, safe="/")
                         lines.append(f"**{label}:** ![{label} image]({asset_url})")

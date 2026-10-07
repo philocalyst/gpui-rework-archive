@@ -7,6 +7,7 @@ import gzip
 import io
 import json
 import math
+from collections import Counter
 from pathlib import Path, PurePosixPath
 import re
 import zlib
@@ -174,7 +175,7 @@ def _validate_image_difference(value: object, label: str) -> None:
         raise ValueError(f"{label} size_changed must be a boolean")
 
 
-def _validate_motion(value: object, previous: dict | None, checkpoint: dict, label: str) -> None:
+def _validate_motion(value: object, previous: dict | None, checkpoint: dict, label: str, scenario_id: str, referenced_paths: set[str]) -> None:
     if not isinstance(value, dict):
         raise ValueError(f"{label} motion must be an object")
     if not {"previous_checkpoint_id", "before_duration_ns", "current_duration_ns", "difference"}.issubset(value):
@@ -210,6 +211,20 @@ def _validate_motion(value: object, previous: dict | None, checkpoint: dict, lab
     total = _nonnegative_int(difference.get("total_pixels"), f"{label} motion total_pixels")
     if changed > total:
         raise ValueError(f"{label} motion changed_pixels exceeds total_pixels")
+    for field, suffix in (("diff_png", ".motion.diff.png"), ("heatmap_png", ".motion.heatmap.png")):
+        path = value.get(field)
+        if path is None:
+            continue
+        if changed == 0:
+            raise ValueError(f"{label} motion {field} requires changed pixels")
+        relative = validate_relative(path, (".png",))
+        expected_path = f"{scenario_id}/{checkpoint['id']}{suffix}"
+        if relative != expected_path:
+            raise ValueError(f"{label} motion {field} must be {expected_path!r}")
+        if relative in referenced_paths:
+            raise ValueError(f"report asset is referenced more than once: {relative}")
+        referenced_paths.add(relative)
+        value[field] = relative
     for field in ("max_channel_error", "mean_channel_error"):
         error = difference.get(field)
         if isinstance(error, bool) or not isinstance(error, (int, float)) or not math.isfinite(error) or not 0 <= error <= 510:
@@ -396,6 +411,21 @@ def comparison_summary(manifest: dict) -> tuple[list[dict], bool]:
     return normalized, baseline_available
 
 
+def markdown_change_summary(changes: list[dict], limit: int = 25) -> str:
+    """Bound comment change details while retaining category counts and full subjects."""
+    counts = Counter(item["label"] for item in changes)
+    categories = ", ".join(f"{markdown_text(label)}: {count}" for label, count in sorted(counts.items()))
+    lines = [f"{len(changes)} baseline changes" + (f" ({categories})" if categories else ":")]
+    for change in changes[:limit]:
+        detail = change["detail"]
+        if len(detail) > 240:
+            detail = detail[:237] + "..."
+        lines.append(f"- **{change['label']}:** {markdown_text(change['subject'])} — {markdown_text(detail)}")
+    if len(changes) > limit:
+        lines.append(f"{len(changes) - limit} more change details omitted; the linked report/workflow artifact has the complete list.")
+    return "\n".join(lines)
+
+
 def load_report(root: Path) -> tuple[dict, Path]:
     if root.is_symlink():
         raise ValueError("report directory must not be a symbolic link")
@@ -476,7 +506,7 @@ def load_report(root: Path) -> tuple[dict, Path]:
                 _validate_motion(
                     checkpoint["motion"],
                     checkpoints[checkpoint_index - 1] if checkpoint_index > 0 else None,
-                    checkpoint, f"checkpoint {sid}/{cid}",
+                    checkpoint, f"checkpoint {sid}/{cid}", sid, referenced_paths,
                 )
             if checkpoint.get("heatmap_png") is not None and checkpoint.get("difference") is None:
                 raise ValueError(f"checkpoint {sid}/{cid} heatmap_png requires difference statistics")
@@ -540,6 +570,23 @@ def markdown_report(manifest: dict) -> bytes:
         lines.append("No typed checkpoint, timeline, scene, or pixel changes were recorded.")
     else:
         lines.append("No baseline capture was available; current captures are shown without comparison diffs.")
+    comparisons = []
+    for scenario in manifest["scenarios"]:
+        for checkpoint in scenario["checkpoints"]:
+            if not checkpoint.get("difference") and not _has_motion_error(checkpoint):
+                continue
+            motion = checkpoint.get("motion") or {}
+            paths = [
+                ("Exact red", checkpoint.get("diff_png")),
+                ("Magnitude heatmap", checkpoint.get("heatmap_png")),
+                ("Transition red", motion.get("diff_png")),
+                ("Transition heatmap", motion.get("heatmap_png")),
+            ]
+            title = markdown_text(f"{scenario['id']} / {checkpoint['id']}")
+            assets = " · ".join(f"[{label}]({quote(path, safe='/')})" for label, path in paths if path)
+            comparisons.extend(["", f"### {title}", checkpoint_preview_text(checkpoint), assets])
+    if comparisons:
+        lines.extend(["", "## Image and transition differences", *comparisons])
     lines.extend(["", "## Metrics", markdown_metrics_table(manifest)])
     return ("\n".join(lines).rstrip() + "\n").encode("utf-8")
 
@@ -552,6 +599,9 @@ def report_assets(manifest: dict, root: Path) -> dict[str, bytes]:
             native = checkpoint.get("native")
             if native:
                 paths.update(native[key] for key in ("png", "diff_png", "heatmap_png") if native.get(key))
+            motion = checkpoint.get("motion")
+            if motion:
+                paths.update(motion[key] for key in ("diff_png", "heatmap_png") if motion.get(key))
     assets: dict[str, bytes] = {}
     total = 0
     generated = {"report.md": markdown_report(manifest), **_trusted_viewer_sources()}
@@ -684,8 +734,8 @@ def _timing_triplet(metrics: dict, prefix: str) -> str:
     return "/".join(format_ms(metrics.get(f"{prefix}_{percentile}_ns")) for percentile in ("p50", "p95", "p99"))
 
 
-def markdown_metrics_table(manifest: dict) -> str:
-    """Render one consistent timing and memory table for either forge adapter."""
+def markdown_metrics_table(manifest: dict, *, limit: int | None = None) -> str:
+    """Render compact timing tables; callers may cap rows for comment size limits."""
     output = []
     cpu_headers = (
         "Scenario / checkpoint", "Samples", "Scene build p50/p95/p99", "CPU render p50/p95/p99",
@@ -693,8 +743,9 @@ def markdown_metrics_table(manifest: dict) -> str:
     )
     captures = [(scenario, checkpoint) for scenario in manifest["scenarios"] for checkpoint in scenario["checkpoints"]]
     if captures:
+        shown, omitted = _limit_metric_rows(captures, limit)
         rows = ["| " + " | ".join(cpu_headers) + " |", "|---|---|---:|---:|---:|---:|---:|---|"]
-        for scenario, checkpoint in captures:
+        for scenario, checkpoint in shown:
             values = [
                 markdown_text(f"{scenario.get('title', scenario['id'])} / {checkpoint.get('name', checkpoint['id'])}"),
                 _count_text(metric(checkpoint, "frame_count")),
@@ -703,10 +754,13 @@ def markdown_metrics_table(manifest: dict) -> str:
                 _count_text(metric(checkpoint, "primitive_count")),
                 _count_text(metric(checkpoint, "batch_count")),
                 _count_text(metric(checkpoint, "bitmap_storage_bytes")),
-                markdown_text(checkpoint.get("status", "n/a")),
+                markdown_text("motion changed" if checkpoint.get("status") == "unchanged" and _has_motion_error(checkpoint)
+                              else checkpoint.get("status", "n/a")),
             ]
             rows.append("| " + " | ".join(values) + " |")
         output.append("\n".join(rows))
+        if omitted:
+            output.append(f"*Showing {len(shown)} of {len(captures)} CPU checkpoints; full metrics are in the linked report artifact.*")
     replay = manifest.get("native_replay")
     if replay is not None:
         reason = replay.get("timestamp_reason")
@@ -729,37 +783,62 @@ def markdown_metrics_table(manifest: dict) -> str:
             for checkpoint in scenario["checkpoints"]
             if checkpoint.get("native")
         ]
+        shown, omitted = _limit_metric_rows(checkpoints, limit)
         tracked_scopes = sorted({checkpoint["native"]["metrics"]["allocation_scope"] for _scenario, checkpoint in checkpoints}) or ["not reported"]
         device_scopes = sorted({checkpoint["native"]["metrics"]["device_allocation_scope"] for _scenario, checkpoint in checkpoints if checkpoint["native"]["metrics"].get("device_allocation_scope")})
         allocation_reasons = sorted({checkpoint["native"]["metrics"]["allocation_reason"] for _scenario, checkpoint in checkpoints if checkpoint["native"]["metrics"].get("allocation_reason")})
         provenance = "**Allocation provenance:** tracked-owned bytes: " + ", ".join(markdown_text(value) for value in tracked_scopes)
         provenance += "; device-allocation scopes: " + (", ".join(markdown_text(value) for value in device_scopes) or "not exposed")
         provenance += "; unavailable reason: " + (", ".join(markdown_text(value) for value in allocation_reasons) or "not reported") + "."
-        for scenario in manifest["scenarios"]:
-            for checkpoint in scenario["checkpoints"]:
-                native = checkpoint.get("native")
-                if not native:
-                    continue
-                metrics = native["metrics"]
-                gpu = metrics.get("gpu") or {}
-                completion = metrics["encode_submit_completion"]
-                difference = native["difference"]
-                values = [
-                    markdown_text(f"{scenario.get('title', scenario['id'])} / {checkpoint.get('name', checkpoint['id'])}"),
-                    _count_text(metrics.get("samples")),
-                    "/".join(format_ms(gpu.get(key)) for key in ("p50_ns", "p95_ns", "p99_ns")),
-                    "/".join(format_ms(completion.get(key)) for key in ("p50_ns", "p95_ns", "p99_ns")),
-                    _count_text(metrics.get("tracked_owned_bytes")),
-                    _count_text(metrics.get("device_allocated_bytes")),
-                    f"{_count_text(difference.get('changed_pixels'))}/{_count_text(difference.get('total_pixels'))}",
-                    f"{_count_text(difference.get('max_channel_error'))}/{_float_text(difference.get('mean_channel_error'))}",
-                ]
-                native_rows.append("| " + " | ".join(values) + " |")
+        for scenario, checkpoint in shown:
+            native = checkpoint["native"]
+            metrics = native["metrics"]
+            gpu = metrics.get("gpu") or {}
+            completion = metrics["encode_submit_completion"]
+            difference = native["difference"]
+            values = [
+                markdown_text(f"{scenario.get('title', scenario['id'])} / {checkpoint.get('name', checkpoint['id'])}"),
+                _count_text(metrics.get("samples")),
+                "/".join(format_ms(gpu.get(key)) for key in ("p50_ns", "p95_ns", "p99_ns")),
+                "/".join(format_ms(completion.get(key)) for key in ("p50_ns", "p95_ns", "p99_ns")),
+                _count_text(metrics.get("tracked_owned_bytes")),
+                _count_text(metrics.get("device_allocated_bytes")),
+                f"{_count_text(difference.get('changed_pixels'))}/{_count_text(difference.get('total_pixels'))}",
+                f"{_count_text(difference.get('max_channel_error'))}/{_float_text(difference.get('mean_channel_error'))}",
+            ]
+            native_rows.append("| " + " | ".join(values) + " |")
+        if omitted:
+            provenance += f"; showing {len(shown)} of {len(checkpoints)} native checkpoints; full metrics are in the linked report artifact."
         output.extend([intro, provenance, "\n".join(native_rows)])
     platform_summary = markdown_platform_checks(manifest.get("platform_checks"))
     if platform_summary:
         output.append(platform_summary)
     return "\n\n".join(output)
+
+
+def _limit_metric_rows(rows: list[tuple[dict, dict]], limit: int | None) -> tuple[list[tuple[dict, dict]], int]:
+    if limit is None or len(rows) <= limit:
+        return rows, 0
+    if limit <= 0:
+        raise ValueError("metrics table row limit must be positive")
+    def priority(item: tuple[dict, dict]) -> tuple:
+        scenario, checkpoint = item
+        changed = checkpoint.get("status") == "changed" or checkpoint.get("pixels_changed") is True or _has_motion_error(checkpoint)
+        return (not changed, -(metric(checkpoint, "cpu_render_p95_ns") or 0),
+                -(metric(checkpoint, "scene_build_p95_ns") or 0), scenario["id"], checkpoint["id"])
+    chosen = sorted(rows, key=priority)[:limit]
+    return chosen, len(rows) - len(chosen)
+
+
+def hosted_report_asset_url(report_url: str, relative: str) -> str | None:
+    """Resolve an asset only when the configured URL is a safe static report index."""
+    parsed = urlsplit(report_url)
+    if (parsed.scheme not in {"http", "https"} or not parsed.netloc or parsed.username or parsed.password
+            or parsed.query or parsed.fragment or not parsed.path.endswith("/index.html")):
+        return None
+    safe = validate_relative(relative, (".png",))
+    base_path = parsed.path.rsplit("/", 1)[0] + "/"
+    return f"{parsed.scheme}://{parsed.netloc}{base_path}{quote(safe, safe='/')}"
 
 
 def _float_text(value: object) -> str:
@@ -787,6 +866,49 @@ def markdown_platform_checks(checks: dict | None) -> str:
         "| Check | Name | Result |", "|---|---|---|",
     ]
     lines.extend("| " + " | ".join(markdown_text(value) for value in row) + " |" for row in _platform_rows(checks))
+    return "\n".join(lines)
+
+
+def _has_motion_error(checkpoint: dict) -> bool:
+    return checkpoint.get("motion", {}).get("difference", {}).get("changed_pixels", 0) > 0
+
+
+def preview_checkpoints(manifest: dict, baseline_available: bool) -> list[tuple[dict, dict]]:
+    checkpoints = [(scenario, checkpoint) for scenario in manifest["scenarios"] for checkpoint in scenario["checkpoints"]]
+    if not baseline_available:
+        return checkpoints
+    def priority(item: tuple[dict, dict]) -> int:
+        checkpoint = item[1]
+        if _has_motion_error(checkpoint):
+            return 0 if checkpoint.get("pixels_changed") is False else 1
+        if checkpoint.get("status") in {"changed", "new"} or checkpoint.get("pixels_changed") is True:
+            return 1
+        return 2 if checkpoint.get("native") else 3
+    return sorted((item for item in checkpoints if priority(item) < 3), key=priority)
+
+
+def checkpoint_preview_text(checkpoint: dict) -> str:
+    lines = []
+    def concise(value: object) -> str:
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+            return "n/a"
+        return f"{value:.4g}"
+
+    difference = checkpoint.get("difference")
+    if difference:
+        changed, total = difference.get("changed_pixels"), difference.get("total_pixels")
+        percentage = f"{concise(100 * changed / total)}%" if isinstance(changed, int) and isinstance(total, int) and total else "n/a"
+        visible = difference.get("visible") or {}
+        visible_changed = visible.get("changed_pixels")
+        visible_text = "n/a" if not isinstance(visible_changed, int) or not total else f"{visible_changed}/{total} ({concise(100 * visible_changed / total)}%)"
+        lines.append(f"CPU pixel error: {changed}/{total} ({percentage}); visible {visible_text}; mean/peak {concise(difference.get('mean_channel_error'))}/{concise(difference.get('max_channel_error'))}.")
+    motion = checkpoint.get("motion")
+    if motion and motion["difference"]["changed_pixels"] > 0:
+        difference = motion["difference"]
+        changed, total = difference["changed_pixels"], difference["total_pixels"]
+        percentage = f"{concise(100 * changed / total)}%" if total else "n/a"
+        before, current = format_ms(motion.get("before_duration_ns")), format_ms(motion.get("current_duration_ns"))
+        lines.append(f"Transition error: {changed}/{total} ({percentage}); signed premultiplied mean/peak {concise(difference['mean_channel_error'])}/{concise(difference['max_channel_error'])}; baseline/current elapsed {before}/{current}.")
     return "\n".join(lines)
 
 

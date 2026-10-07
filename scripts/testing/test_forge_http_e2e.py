@@ -74,6 +74,7 @@ def local_forge():
                     "text/javascript" if path.endswith(".js") else
                     "text/css" if path.endswith(".css") else
                     "text/markdown" if path.endswith(".md") else
+                    "application/gzip" if path.endswith(".gz") else
                     "image/png" if path.endswith(".png") else
                     "image/svg+xml" if path.endswith(".svg") else "application/json"
                 )
