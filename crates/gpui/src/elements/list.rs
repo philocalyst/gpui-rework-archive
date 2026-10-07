@@ -36,6 +36,7 @@ pub fn list(
 /// A virtualized list of items whose heights may differ.
 ///
 /// Keep row sizes unchanged in `nth` and `every` selectors to preserve accurate scrolling.
+#[derive(gpui_macros::Reflect)]
 pub struct List {
     state: ListState,
     render_item: Box<RenderItemFn>,

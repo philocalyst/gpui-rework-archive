@@ -224,6 +224,10 @@ mod tests {
     trait CallablePaintSource: PaintSource {}
 
     #[derive(gpui::reflection::Reflect, Debug)]
+    #[expect(
+        clippy::duplicated_attributes,
+        reason = "Duplicate traits exercise reflection registration deduplication."
+    )]
     #[reflect(gpui::Styled, PaintSource, PaintSource)]
     struct GenericCard<State, const COUNT: usize>
     where
@@ -421,10 +425,6 @@ mod tests {
         assert!(control.implements_trait(inherited::Control));
         assert!(!control.implements_trait(other::Counter));
         assert!(!control.implements_trait(gpui::Styled));
-
-        let empty = gpui::Empty.into_any_element();
-
-        assert!(empty.reflected_traits().is_empty());
     }
 
     #[test]

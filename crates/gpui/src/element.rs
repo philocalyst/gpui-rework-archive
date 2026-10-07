@@ -753,6 +753,7 @@ where
 }
 
 /// A dynamically typed element that can be used to store any element type.
+#[derive(gpui_macros::Reflect)]
 pub struct AnyElement {
     element: Option<ArenaBox<dyn ElementObject>>,
     reflection: &'static crate::reflection::ElementReflection,
@@ -1090,6 +1091,7 @@ impl IntoElement for AnyElement {
 }
 
 /// The empty element, which renders nothing.
+#[derive(gpui_macros::Reflect)]
 pub struct Empty;
 
 impl IntoElement for Empty {

@@ -58,6 +58,7 @@ where
 ///
 /// Keep row sizes unchanged in `nth` and `every` selectors to preserve correct spacing
 /// and scrolling.
+#[derive(gpui_macros::Reflect)]
 pub struct UniformList {
     item_count: usize,
     item_to_measure_index: usize,
