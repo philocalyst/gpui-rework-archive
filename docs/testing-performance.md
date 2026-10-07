@@ -13,6 +13,15 @@ The workload contains 29 scenarios, 78 checkpoints, and 28,886,264 bytes across 
 | `combined-v2` | 3.22 s | 1.27 s | 0.30 s | 191,840,256 B (182.95 MiB) | `/tmp/gpui-report-final-v2-single.time.log` | `/tmp/gpui-report-final-v2-single` |
 | `combined-v2` + `gpui-report-fast-single` | 2.93 s | 1.29 s | 0.33 s | 209,321,984 B (199.63 MiB) | `/tmp/gpui-report-final-v2-duplicate.time.log` | `/tmp/gpui-report-final-v2-duplicate` |
 
+The final runner at `fdec165b0e` also skips channel analysis when both frame pairs are byte-identical. A follow-up used the regenerated `combined-v3` report, with the same 29 scenarios and 78 checkpoints. Its duplicate input was the single run's output. All primary PNGs, compressed scenes, source provenance, and CPU/native timing samples were preserved again.
+
+| Inputs | Wall | User | System | Peak RSS | Raw log |
+|---|---:|---:|---:|---:|---|
+| `combined-v3` | 3.14 s | 0.92 s | 0.24 s | 197,885,952 B (188.72 MiB) | `/tmp/gpui-report-fdec-single.time.log` |
+| `combined-v3` + `gpui-report-fdec-single` | 3.45 s | 0.96 s | 0.26 s | 209,338,368 B (199.64 MiB) | `/tmp/gpui-report-fdec-duplicate.time.log` |
+
+These are individual runs, not a statistical performance budget. Wall time varies with scheduling and filesystem state; CPU time and peak memory are reported separately. The final outputs are `/tmp/gpui-report-fdec-single` and `/tmp/gpui-report-fdec-duplicate`.
+
 ## Earlier profile reference
 
 An earlier session profile recorded approximately 2.06 s wall / 0.94 s user and 433 MB peak RSS for one combined report, and 5.82 s wall / 3.63 s user and 960 MB peak RSS for the same report supplied twice. The workload was described as 29 scenarios and 78 checkpoints, with an approximately 22.5 MB report bundle. Its raw timing logs, exact byte counts, executable source revision, and scene encoding cannot be verified from retained files, so these figures are a contextual reference rather than a reproducible before measurement.
