@@ -1,4 +1,5 @@
 import base64
+import copy
 import json
 import tempfile
 import unittest
@@ -34,6 +35,49 @@ def fixture_manifest(*, title="Gallery", metrics=None, status="unchanged", pixel
     }
 
 
+def add_native_replay(manifest):
+    manifest["native_replay"] = {
+        "adapter": "adapter <trusted>", "driver": "driver &amp; info", "backend": "Vulkan", "device_type": "Discrete GPU",
+        "timestamp_reason": None,
+    }
+    manifest["scenarios"][0]["checkpoints"][0]["native"] = {
+        "png": "gallery/initial.native.png",
+        "diff_png": "gallery/initial.native.diff.png",
+        "metrics": {
+            "samples": 4,
+            "encode_submit_completion": {"p50_ns": 1_000_000, "p95_ns": 1_200_000, "p99_ns": 1_300_000},
+            "gpu": {"p50_ns": 800_000, "p95_ns": 900_000, "p99_ns": 1_000_000},
+            "tracked_owned_bytes": 8192, "device_allocated_bytes": None,
+            "allocation_scope": "per checkpoint", "device_allocation_scope": None,
+            "allocation_reason": "allocator unavailable",
+        },
+        "difference": {
+            "changed_pixels": 12, "total_pixels": 64000,
+            "max_channel_error": 8, "mean_channel_error": 0.125,
+        },
+    }
+    return manifest
+
+
+def add_platform_checks(manifest):
+    manifest["platform_checks"] = {
+        "schema_version": 1,
+        "platform": "Linux <runner>", "status": "passed",
+        "capabilities": {
+            "native_visibility": True, "focus_handle": True, "native_render_capture": True,
+            "resize_callback": True, "two_window_close": False,
+        },
+        "events": [{"name": "window <visible>", "polls": 3, "elapsed_ms": 12}],
+        "frame": {
+            "render_count": 2, "quads": 3, "monochrome_sprites": 1, "subpixel_sprites": 1,
+            "polychrome_sprites": 1, "capture_width": 320, "capture_height": 200, "painted_pixels": 12000,
+        },
+        "resize": {"callback_count": 1, "width": 640.0, "height": 480.0},
+        "errors": [],
+    }
+    return manifest
+
+
 def write_report(root: Path, manifest: dict, *, png=PNG, scene=b'{"scene":1}') -> Path:
     root.mkdir(parents=True, exist_ok=True)
     (root / "gallery").mkdir(exist_ok=True)
@@ -42,6 +86,10 @@ def write_report(root: Path, manifest: dict, *, png=PNG, scene=b'{"scene":1}') -
     if manifest["scenarios"][0]["checkpoints"][0].get("before_png"):
         (root / "gallery/initial.before.png").write_bytes(PNG)
         (root / "gallery/initial.diff.png").write_bytes(PNG)
+    native = manifest["scenarios"][0]["checkpoints"][0].get("native")
+    if native:
+        (root / native["png"]).write_bytes(PNG)
+        (root / native["diff_png"]).write_bytes(PNG)
     (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
     return root
 
@@ -61,6 +109,18 @@ class Response:
 
 
 class ReportSupportTests(unittest.TestCase):
+    def test_recorded_report_head_is_optional_but_must_match_when_present(self):
+        manifest = fixture_manifest()
+        support.validate_report_head(manifest, "a" * 40)
+        manifest["environment"]["git_sha"] = "A" * 40
+        support.validate_report_head(manifest, "a" * 40)
+        manifest["environment"]["git_sha"] = "not-a-full-sha"
+        with self.assertRaisesRegex(ValueError, "full commit SHA"):
+            support.validate_report_head(manifest, "a" * 40)
+        manifest["environment"]["git_sha"] = "b" * 40
+        with self.assertRaisesRegex(ValueError, "does not match"):
+            support.validate_report_head(manifest, "a" * 40)
+
     def test_paths_reject_traversal_and_platform_separators(self):
         for path in ("../secret.png", "/tmp/image.png", "scenario\\image.png", "gallery/a b.png", "scene.html"):
             with self.subTest(path=path), self.assertRaises(ValueError):
@@ -192,6 +252,139 @@ class ReportSupportTests(unittest.TestCase):
         # the typed Rust comparison is the sole source of change policy.
         self.assertEqual(support.comparison_summary(unchanged), ([], True))
 
+    def test_native_replay_assets_are_optional_diagnostic_data(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = add_native_replay(fixture_manifest(status="unchanged"))
+            write_report(root, manifest)
+            loaded, report_root = support.load_report(root)
+            assets = support.report_assets(loaded, report_root)
+            self.assertIn("gallery/initial.native.png", assets)
+            self.assertIn("gallery/initial.native.diff.png", assets)
+            self.assertEqual(support.comparison_summary(loaded), ([], True))
+
+            viewer = support.trusted_index(loaded).decode()
+            self.assertIn("adapter &lt;trusted&gt;", viewer)
+            self.assertIn("Native GPU replay", viewer)
+            self.assertIn("Native minus CPU", viewer)
+            self.assertIn("0.80 ms", viewer)  # GPU timings are nanoseconds, converted to milliseconds.
+            self.assertIn("8192", viewer)
+            self.assertIn("allocator unavailable", viewer)
+            self.assertIn("CPU captures determine correctness", viewer)
+
+            table = support.markdown_metrics_table(loaded)
+            self.assertIn("Native replay diagnostics", table)
+            self.assertIn("GPU timestamps: available", table)
+            self.assertIn("0.80 ms/0.90 ms/1.00 ms", table)
+            self.assertIn("1.00 ms/1.20 ms/1.30 ms", table)
+            self.assertIn("n/a", table)  # Device allocation is unavailable, not zero.
+            self.assertIn("native minus CPU", table)
+            second = copy.deepcopy(loaded["scenarios"][0]["checkpoints"][0])
+            second.update(id="second", name="Second")
+            second["native"]["png"] = "gallery/second.native.png"
+            second["native"]["diff_png"] = "gallery/second.native.diff.png"
+            loaded["scenarios"][0]["checkpoints"].append(second)
+            table = support.markdown_metrics_table(loaded)
+            native_header = next(line for line in table.splitlines() if "GPU p50/p95/p99" in line)
+            self.assertEqual(len(native_header.strip("|").split("|")), 8)
+            self.assertEqual(table.count("per checkpoint"), 1)
+            self.assertEqual(table.count("allocator unavailable"), 1)
+            self.assertIn("12/64000", table)
+            self.assertIn("8/0.125", table)
+
+    def test_native_replay_validation_rejects_paths_and_pixel_error_out_of_range(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = add_native_replay(fixture_manifest())
+            checkpoint = manifest["scenarios"][0]["checkpoints"][0]
+            checkpoint["native"]["png"] = "https://example.invalid/native.png"
+            (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "report path"):
+                support.load_report(root)
+
+            checkpoint["native"]["png"] = "gallery/initial.native.png"
+            checkpoint["native"]["difference"]["total_pixels"] = 64001
+            (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "total_pixels"):
+                support.load_report(root)
+
+            checkpoint["native"]["difference"]["total_pixels"] = 64000
+            checkpoint["native"]["difference"]["mean_channel_error"] = float("nan")
+            (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "finite"):
+                support.load_report(root)
+
+    def test_native_timestamp_reason_matches_optional_gpu_timings(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = add_native_replay(fixture_manifest())
+            manifest["native_replay"]["timestamp_reason"] = "adapter does not expose timestamp queries"
+            manifest["scenarios"][0]["checkpoints"][0]["native"]["metrics"]["gpu"] = None
+            write_report(root, manifest)
+            loaded, _root = support.load_report(root)
+            self.assertIn("unavailable:", support.markdown_metrics_table(loaded))
+
+            manifest["scenarios"][0]["checkpoints"][0]["native"]["metrics"]["gpu"] = {
+                "p50_ns": 800_000, "p95_ns": 900_000, "p99_ns": 1_000_000,
+            }
+            (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "conflicts"):
+                support.load_report(root)
+
+    def test_supported_adapter_may_have_a_clear_only_checkpoint_without_gpu_timings(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = add_native_replay(fixture_manifest())
+            checkpoint = manifest["scenarios"][0]["checkpoints"][0]
+            checkpoint["native"]["metrics"]["gpu"] = None
+            write_report(root, manifest)
+            loaded, _report_root = support.load_report(root)
+            table = support.markdown_metrics_table(loaded)
+            self.assertIn("GPU timestamps: available", table)
+            self.assertIn("n/a/n/a/n/a", table)
+
+    def test_native_timing_requires_samples_and_monotonic_percentiles(self):
+        manifest = add_native_replay(fixture_manifest())
+        metrics = manifest["scenarios"][0]["checkpoints"][0]["native"]["metrics"]
+        metrics["samples"] = 0
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "samples must be greater"):
+                support.load_report(root)
+
+            metrics["samples"] = 1
+            metrics["encode_submit_completion"]["p50_ns"] = 2_000_000
+            (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "must be monotonic"):
+                support.load_report(root)
+
+    def test_platform_checks_are_validated_and_rendered_as_escaped_summary(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = add_platform_checks(fixture_manifest())
+            write_report(root, manifest)
+            loaded, _report_root = support.load_report(root)
+            viewer = support.trusted_index(loaded).decode()
+            self.assertIn("Linux &lt;runner&gt;", viewer)
+            self.assertIn("window &lt;visible&gt;", viewer)
+            self.assertIn("<td>Frame</td>", viewer)
+            summary = support.markdown_metrics_table(loaded)
+            self.assertIn("Platform integration checks", summary)
+            self.assertIn("native visibility", summary)
+            self.assertIn("painted pixels", summary)
+
+            manifest["platform_checks"]["capabilities"]["focus_handle"] = "yes"
+            (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "capability values"):
+                support.load_report(root)
+
+            manifest = add_platform_checks(fixture_manifest())
+            manifest["platform_checks"]["frame"]["painted_pixels"] = 64001
+            (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "painted_pixels"):
+                support.load_report(root)
+
     def test_missing_or_malformed_metrics_render_as_na(self):
         self.assertIsNone(support.metric({"metrics": {}}, "cpu_render_p50_ns"))
         self.assertIsNone(support.metric({"metrics": "invalid"}, "frame_count"))
@@ -218,11 +411,22 @@ class ReportSupportTests(unittest.TestCase):
         self.assertIn("n/a", viewer)
         self.assertNotIn("<script", viewer)
         table = support.markdown_metrics_table(manifest)
-        self.assertIn("| Scene build p50 |", table)
+        self.assertIn("Scene build p50/p95/p99", table)
         self.assertIn("| Bitmap bytes |", table)
-        self.assertIn("| GPU memory |", table)
+        self.assertNotIn("GPU memory", table)
         self.assertIn("4096", table)
         self.assertIn("1.50 ms", table)
+        cpu_header = next(line for line in table.splitlines() if line.startswith("| Scenario / checkpoint |"))
+        self.assertEqual(len(cpu_header.strip("|").split("|")), 8)
+        self.assertIn("changed", table)
+
+    def test_platform_only_report_omits_empty_cpu_table(self):
+        manifest = add_platform_checks(fixture_manifest())
+        manifest["scenarios"] = []
+        manifest["changes"] = []
+        table = support.markdown_metrics_table(manifest)
+        self.assertNotIn("Scenario / checkpoint", table)
+        self.assertIn("Platform integration checks", table)
 
     def test_svg_filter_removes_scripts_and_links(self):
         source = b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 8"><script>alert(1)</script><a href="https://bad"><text>bad</text></a><text>chart</text><path d="M0 0"/></svg>'
@@ -268,7 +472,7 @@ class ForgeAdapterTests(unittest.TestCase):
             seen["timeout"] = timeout
             return Response(b'{"ok":true}')
 
-        with patch.dict("os.environ", {"GITHUB_API_URL": "https://github.enterprise/api/v3", "GITHUB_SERVER_URL": "https://github.enterprise"}), patch.object(github_report, "urlopen", side_effect=fake_urlopen):
+        with patch.dict("os.environ", {"GITHUB_API_URL": "https://github.enterprise/api/v3", "GITHUB_SERVER_URL": "https://github.enterprise"}), patch.object(support, "urlopen", side_effect=fake_urlopen):
             result = github_report.api("POST", "repos/owner/repo/issues/8/comments", "secret", {"body": "report"})
             server_url = github_report.github_server_url()
         self.assertEqual(result, {"ok": True})
@@ -309,7 +513,7 @@ class ForgeAdapterTests(unittest.TestCase):
             seen["request"] = request
             return Response(b'[]')
 
-        with patch.object(gitlab_report, "urlopen", side_effect=fake_urlopen):
+        with patch.object(support, "urlopen", side_effect=fake_urlopen):
             gitlab_report.api("GET", "https://gitlab.example/api/v4/projects/3/merge_requests/9", "secret")
         self.assertEqual(seen["request"].get_header("Private-token"), "secret")
 
@@ -380,10 +584,54 @@ class ForgeAdapterTests(unittest.TestCase):
         self.assertIn("![Timing graph](https://pages.example/runs/sha/metrics.svg)", comment)
         self.assertIn("Bitmap bytes", comment)
         self.assertIn("4096", comment)
-        self.assertIn("GPU memory", comment)
+        self.assertNotIn("GPU memory", comment)
         self.assertIn("| n/a |", comment)
         self.assertIn("n/a", comment)
         self.assertNotIn("0.00 ms", comment)
+
+    def test_comment_preview_prioritizes_changed_cpu_images_over_earlier_native_diagnostics(self):
+        manifest = add_native_replay(fixture_manifest())
+        template = manifest["scenarios"][0]["checkpoints"][0]
+        checkpoints = []
+        for index in range(8):
+            checkpoint = copy.deepcopy(template)
+            checkpoint.update({
+                "id": f"checkpoint-{index}",
+                "name": f"Checkpoint {index}",
+                "png": f"gallery/checkpoint-{index}.png",
+                "scene_json": f"gallery/checkpoint-{index}.scene.json",
+                "before_png": None,
+                "diff_png": None,
+                "status": "unchanged",
+            })
+            checkpoint["native"].update({
+                "png": f"gallery/checkpoint-{index}.native.png",
+                "diff_png": f"gallery/checkpoint-{index}.native.diff.png",
+            })
+            checkpoints.append(checkpoint)
+
+        changed = checkpoints[-1]
+        changed.update({
+            "status": "changed",
+            "before_png": "gallery/checkpoint-7.before.png",
+            "diff_png": "gallery/checkpoint-7.diff.png",
+        })
+        manifest["scenarios"][0]["checkpoints"] = checkpoints
+        comment = github_report.make_comment(
+            "owner/repo", "7", "42", "d" * 40, manifest,
+            "https://pages.example/runs/sha/index.html", [], True,
+        )
+
+        self.assertIn("gallery/checkpoint-7.before.png", comment)
+        self.assertIn("gallery/checkpoint-7.png", comment)
+        self.assertIn("gallery/checkpoint-7.diff.png", comment)
+        self.assertIn("gallery/checkpoint-7.native.png", comment)
+        self.assertLess(
+            comment.index("gallery/checkpoint-7.before.png"),
+            comment.index("gallery/checkpoint-0.native.png"),
+        )
+        self.assertEqual(comment.count("![Current image]"), 6)
+        self.assertIn("2 more checkpoint images are in the [hosted report]", comment)
 
     def test_pages_url_rejects_credentials_and_script_schemes(self):
         for value in ("javascript:alert(1)", "https://user:password@pages.example/site", "https://pages.example/site?query=1"):
@@ -406,6 +654,61 @@ class ForgeAdapterTests(unittest.TestCase):
             self.assertEqual(gitlab_report.main(), 0)
         self.assertIn("projects/group%2Fsubgroup%2Frepo/merge_requests/9", gitlab_api.call_args.args[1])
         gitlab_api.assert_called_once()
+
+    def test_github_rejects_mismatched_report_provenance_before_any_writes(self):
+        current_sha = "a" * 40
+        calls = []
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "report"
+            manifest = fixture_manifest()
+            manifest["environment"]["git_sha"] = "b" * 40
+            write_report(root, manifest)
+            env = {
+                "GH_TOKEN": "token", "REPOSITORY": "owner/repo", "PR_NUMBER": "7",
+                "HEAD_SHA": current_sha, "RUN_ID": "42", "PAGES_BRANCH": "visual-results",
+                "PAGES_URL": "https://pages.example/site",
+            }
+
+            def fake_api(method, endpoint, token, payload=None):
+                calls.append((method, endpoint))
+                return {"head": {"sha": current_sha}}
+
+            with patch.dict("os.environ", env, clear=True), patch.object(github_report.sys, "argv", ["publisher", str(root)]), patch.object(github_report, "api", side_effect=fake_api):
+                with self.assertRaisesRegex(ValueError, "does not match"):
+                    github_report.main()
+
+        self.assertEqual(calls, [("GET", "repos/owner/repo/pulls/7")])
+
+    def test_gitlab_rejects_mismatched_report_provenance_before_any_writes(self):
+        current_sha = "a" * 40
+        calls = []
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            report_root = root / "visual-report"
+            manifest = fixture_manifest()
+            manifest["environment"]["git_sha"] = "b" * 40
+            write_report(report_root, manifest)
+            env = {
+                "GITLAB_API_TOKEN": "token", "CI_API_V4_URL": "https://gitlab.example/api/v4",
+                "CI_PROJECT_ID": "group/project", "CI_MERGE_REQUEST_IID": "9", "CI_COMMIT_SHA": current_sha,
+                "GPUI_GITLAB_BOT_USERNAME": "gpui-bot", "GPUI_VISUAL_REPORT_URL": "https://gitlab.example/artifacts",
+            }
+
+            def fake_api(method, endpoint, token, payload=None):
+                calls.append((method, endpoint))
+                return {"sha": current_sha}
+
+            old_cwd = Path.cwd()
+            try:
+                import os
+                os.chdir(root)
+                with patch.dict("os.environ", env, clear=True), patch.object(gitlab_report, "api", side_effect=fake_api):
+                    with self.assertRaisesRegex(ValueError, "does not match"):
+                        gitlab_report.main()
+            finally:
+                os.chdir(old_cwd)
+
+        self.assertEqual(calls, [("GET", "https://gitlab.example/api/v4/projects/group%2Fproject/merge_requests/9")])
 
 
 if __name__ == "__main__":

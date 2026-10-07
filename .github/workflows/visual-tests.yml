@@ -25,24 +25,155 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - uses: Swatinem/rust-cache@v2
+      - name: Install Linux native build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libxkbcommon-dev libwayland-dev libx11-dev \
+            libxcb-shape0-dev libxcb-xfixes0-dev \
+            libxcb-randr0-dev libxcb-xinput-dev \
+            libxkbcommon-x11-dev libegl1-mesa-dev \
+            libgles2-mesa-dev libglib2.0-dev libfontconfig-dev
       - name: Check GPU-free rendering contracts and state transitions
         run: |
-          python3 -m unittest discover -s scripts/testing -p 'test_*.py'
+          python -m unittest discover -s scripts/testing -p 'test_*.py'
           cargo test --locked --package gpui_ce_render --features cpu
-          cargo test --locked --package gpui_ce_test --lib --test state_regressions
+          cargo test --locked -p gpui_ce_parley --lib
+          cargo test --locked --package gpui_ce_test --lib --bin gpui-test --test state_regressions --test report_collection
+          cargo test --locked -p gpui-ce --features test-support --lib elements::img::tests
+          cargo test --locked -p gpui-ce --features test-support --lib scene::tests
+
+  miri-capture-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: nightly-2026-09-30
+          components: miri
+      - uses: Swatinem/rust-cache@v2
+      - name: Validate the serialized scene boundary under Miri
+        run: |
+          cargo miri setup
+          cargo miri test --locked -p gpui_ce_render --features cpu --test capture_validation
+
+  native-gpu-lavapipe:
+    runs-on: ubuntu-latest
+    env:
+      CARGO_INCREMENTAL: 0
+      GPUI_REQUIRE_GPU: "1"
+      WGPU_BACKEND: vulkan
+      VK_ICD_FILENAMES: /usr/share/vulkan/icd.d/lvp_icd.x86_64.json
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: Swatinem/rust-cache@v2
+      - name: Install Mesa software Vulkan
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libxkbcommon-dev libwayland-dev libx11-dev \
+            libxcb-shape0-dev libxcb-xfixes0-dev \
+            libxcb-randr0-dev libxcb-xinput-dev \
+            libxkbcommon-x11-dev libegl1-mesa-dev \
+            libgles2-mesa-dev libglib2.0-dev libfontconfig-dev libvulkan-dev \
+            mesa-vulkan-drivers vulkan-tools
+          test -f "$VK_ICD_FILENAMES"
+          vulkaninfo --summary
+      - name: Require analytic capture parity and native gallery replay
+        run: |
+          cargo test --release --locked --package gpui_ce_wgpu --features test-support --lib --test capture_parity
+          cargo test --release --locked --package gpui_ce_test --features gpu --test native_replay
+  native-platform-linux:
+    runs-on: ubuntu-latest
+    env:
+      CARGO_INCREMENTAL: 0
+      WGPU_BACKEND: vulkan
+      VK_ICD_FILENAMES: /usr/share/vulkan/icd.d/lvp_icd.x86_64.json
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: Swatinem/rust-cache@v2
+      - name: Install X11 and software rendering dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libxkbcommon-dev libwayland-dev libx11-dev \
+            libxcb-shape0-dev libxcb-xfixes0-dev \
+            libxcb-randr0-dev libxcb-xinput-dev \
+            libxkbcommon-x11-dev libegl1-mesa-dev \
+            libgles2-mesa-dev libglib2.0-dev libfontconfig-dev libvulkan-dev \
+            xvfb openbox mesa-vulkan-drivers
+          test -f "$VK_ICD_FILENAMES"
+      - name: Run native X11 lifecycle checks under Xvfb
+        run: |
+          xvfb-run -a -s '-screen 0 1280x800x24' bash -c 'openbox >/dev/null 2>&1 & scripts/gpui-test platform --output native-platform-report'
+      - name: Upload Linux platform report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: native-platform-linux
+          path: native-platform-report/
+          if-no-files-found: warn
+          retention-days: 30
+
+  native-platform-desktop:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: Swatinem/rust-cache@v2
+      - name: Run native macOS lifecycle checks
+        if: runner.os == 'macOS'
+        run: scripts/gpui-test platform --output native-platform-report
+      - name: Run native Windows lifecycle checks
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: scripts/gpui-test.ps1 platform --output native-platform-report
+      - name: Upload desktop platform report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: native-platform-${{ matrix.os }}
+          path: native-platform-report/
+          if-no-files-found: warn
+          retention-days: 30
 
   visual-tests:
     runs-on: ubuntu-latest
+    env:
+      WGPU_BACKEND: vulkan
+      VK_ICD_FILENAMES: /usr/share/vulkan/icd.d/lvp_icd.x86_64.json
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - uses: Swatinem/rust-cache@v2
+
+      - name: Install software Vulkan and native build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libxkbcommon-dev libwayland-dev libx11-dev \
+            libxcb-shape0-dev libxcb-xfixes0-dev \
+            libxcb-randr0-dev libxcb-xinput-dev \
+            libxkbcommon-x11-dev libegl1-mesa-dev \
+            libgles2-mesa-dev libglib2.0-dev libfontconfig-dev libvulkan-dev \
+            mesa-vulkan-drivers vulkan-tools
 
       - name: Compare reviewed scene and pixel snapshots
         continue-on-error: true
@@ -69,22 +200,51 @@ jobs:
             exit 0
           fi
 
-          if ! GIT_SHA="$BASE_SHA" "$baseline_checkout/scripts/gpui-test" bench --output "$GITHUB_WORKSPACE/visual-baseline"; then
+          inputs="$GITHUB_WORKSPACE/visual-baseline-inputs"
+          rm -rf "$inputs" "$GITHUB_WORKSPACE/visual-baseline"
+          mkdir -p "$inputs"
+          if ! GIT_SHA="$BASE_SHA" "$baseline_checkout/scripts/gpui-test" bench --output "$inputs/core"; then
             echo "::warning::Could not capture the base revision; current captures will still be reported."
+            exit 0
           fi
 
-      - name: Capture current revision and compare
+          if [[ -f "$baseline_checkout/scripts/testing/capture_examples.py" ]]; then
+            if GIT_SHA="$BASE_SHA" python3 "$baseline_checkout/scripts/testing/capture_examples.py" --samples 20 --output "$inputs/examples"; then
+              reports=("$inputs/core" "$inputs"/examples/*)
+              if ! GIT_SHA="$BASE_SHA" "$baseline_checkout/scripts/gpui-test" collect "${reports[@]}" --output "$GITHUB_WORKSPACE/visual-baseline"; then
+                echo "::warning::The base collector could not combine example reports; using its built-in suite as the baseline."
+                rm -rf "$GITHUB_WORKSPACE/visual-baseline"
+                cp -a "$inputs/core" "$GITHUB_WORKSPACE/visual-baseline"
+              fi
+            else
+              echo "::warning::Base example captures failed; using the built-in suite baseline. New examples will have no baseline."
+              cp -a "$inputs/core" "$GITHUB_WORKSPACE/visual-baseline"
+            fi
+          else
+            echo "::warning::The base revision has no example capture batch; new examples will have no baseline."
+            cp -a "$inputs/core" "$GITHUB_WORKSPACE/visual-baseline"
+          fi
+
+      - name: Capture current built-in and example reports
         env:
-          GIT_SHA: ${{ github.sha }}
+          GIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
-          args=(bench --output visual-report)
+          rm -rf visual-captures visual-report
+          args=(collect --output visual-report)
           if [[ -f visual-baseline/manifest.json ]]; then
             args+=(--baseline visual-baseline)
           else
-            echo "::warning::No baseline capture is available; this run reports captures without diffs."
+            echo "::warning::No combined baseline capture is available; this run reports captures without diffs."
           fi
-          scripts/gpui-test "${args[@]}"
+          scripts/gpui-test bench --output visual-captures/core
+          python3 scripts/testing/capture_examples.py --samples 20 --output visual-captures/examples
+          reports=(visual-captures/core visual-captures/examples/*)
+          if ! scripts/gpui-test "${args[@]}" "${reports[@]}" --gpu; then
+            echo "::warning::Software-native replay was unavailable or failed; regenerating the primary report with CPU captures only."
+            rm -rf visual-report
+            scripts/gpui-test "${args[@]}" "${reports[@]}"
+          fi
 
       - name: Upload visual report
         if: always()

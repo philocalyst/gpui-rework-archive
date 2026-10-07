@@ -9,9 +9,7 @@ import os
 from pathlib import Path
 import re
 import sys
-from urllib.error import HTTPError
 from urllib.parse import quote
-from urllib.request import Request, urlopen
 
 from report_support import (
     comparison_summary,
@@ -24,6 +22,8 @@ from report_support import (
     trusted_index,
     validate_records,
     validate_site_base as validate_pages_url,
+    validate_report_head,
+    json_request,
 )
 
 MARKER = "<!-- gpui-visual-test-report -->"
@@ -40,19 +40,12 @@ def github_server_url() -> str:
 
 
 def api(method: str, endpoint: str, token: str, payload: object | None = None):
-    body = None if payload is None else json.dumps(payload).encode()
     url = github_api_url() + "/" + endpoint.lstrip("/")
-    request = Request(url, data=body, method=method, headers={
-        "Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}",
-        "X-GitHub-Api-Version": "2022-11-28", "Content-Type": "application/json", "User-Agent": "gpui-visual-report",
-    })
-    try:
-        with urlopen(request, timeout=30) as response:
-            data = response.read()
-            return json.loads(data) if data else None
-    except HTTPError as error:
-        detail = error.read().decode("utf-8", "replace")[:1000]
-        raise RuntimeError(f"GitHub API {method} {endpoint} returned {error.code}: {detail}") from error
+    return json_request(method, url, {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {token}",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }, payload, api_name=f"GitHub API {endpoint}")
 
 
 def _blob(repository: str, content: bytes, token: str) -> str:
@@ -111,6 +104,29 @@ def publish_pages(repository: str, branch: str, head_sha: str, pull_request: str
     return page_url + "/runs/" + head_sha + "/index.html"
 
 
+def preview_checkpoints(manifest: dict, baseline_available: bool) -> list[tuple[dict, dict]]:
+    checkpoints = [
+        (scenario, checkpoint)
+        for scenario in manifest["scenarios"]
+        for checkpoint in scenario["checkpoints"]
+    ]
+    if not baseline_available:
+        return checkpoints
+
+    # Give CPU contract changes first claim on the short comment preview. Native
+    # images are diagnostic and must not crowd out a later changed CPU capture.
+    cpu_changes = [
+        item for item in checkpoints
+        if item[1].get("status") in {"changed", "new"}
+    ]
+    native_diagnostics = [item for item in checkpoints if item[1].get("native")]
+    cpu_change_keys = {(scenario["id"], checkpoint["id"]) for scenario, checkpoint in cpu_changes}
+    return cpu_changes + [
+        item for item in native_diagnostics
+        if (item[0]["id"], item[1]["id"]) not in cpu_change_keys
+    ]
+
+
 def make_comment(repository: str, pr: str, run_id: str, head_sha: str, manifest: dict, page_url: str | None, changes: list[dict], baseline_available: bool) -> str:
     run_url = f"{github_server_url()}/{repository}/actions/runs/{quote(run_id)}"
     lines = [MARKER, f"## GPUI visual report · {head_sha[:12]}", "", f"[Open workflow run]({run_url})"]
@@ -134,12 +150,7 @@ def make_comment(repository: str, pr: str, run_id: str, head_sha: str, manifest:
         lines.append("No baseline capture was available; current images are shown without comparison diffs.")
     lines.extend(["", markdown_metrics_table(manifest)])
     if page_url:
-        image_checkpoints = [
-            (scenario, checkpoint)
-            for scenario in manifest["scenarios"]
-            for checkpoint in scenario["checkpoints"]
-            if not baseline_available or checkpoint.get("status") in {"changed", "new"}
-        ]
+        image_checkpoints = preview_checkpoints(manifest, baseline_available)
         for scenario, checkpoint in image_checkpoints[:6]:
             lines.extend(["", "**" + markdown_text(scenario.get("title", scenario["id"]))
                 + " / " + markdown_text(checkpoint.get("name", checkpoint["id"])) + "**", ""])
@@ -148,6 +159,14 @@ def make_comment(repository: str, pr: str, run_id: str, head_sha: str, manifest:
                 if asset:
                     asset_url = page_url.rsplit("/index.html", 1)[0] + "/" + quote(asset, safe="/")
                     lines.append(f"**{label}:** ![{label} image]({asset_url})")
+            native = checkpoint.get("native")
+            if native:
+                lines.append("")
+                for field, label in (("png", "Native GPU replay (diagnostic)"), ("diff_png", "Native minus CPU (diagnostic difference)")):
+                    asset = native.get(field)
+                    if asset:
+                        asset_url = page_url.rsplit("/index.html", 1)[0] + "/" + quote(asset, safe="/")
+                        lines.append(f"**{label}:** ![{label} image]({asset_url})")
         if len(image_checkpoints) > 6:
             lines.extend(["", f"{len(image_checkpoints) - 6} more checkpoint images are in the [hosted report]({page_url})."])
     return "\n".join(lines)
@@ -171,6 +190,7 @@ def main() -> int:
 
     report_path = Path(sys.argv[1])
     manifest, root = load_report(report_path)
+    validate_report_head(manifest, current["head"]["sha"])
     changes, baseline_available = comparison_summary(manifest)
     assets = report_assets(manifest, root)
     page_url = None

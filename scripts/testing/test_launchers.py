@@ -33,11 +33,16 @@ class LauncherTests(unittest.TestCase):
             env["CARGO_CAPTURE"] = str(capture)
 
             calls = (
-                (REPO_ROOT / "scripts/gpui-test", ["list"], "gpui_ce_test", "--bin", ["--", "list"]),
-                (REPO_ROOT / "scripts/gpui-test", ["run", "text-mixed-script", "--output", "relative-report", "--baseline", "relative-baseline"], "gpui_ce_test", "--bin", ["--", "run", "text-mixed-script", "--output", "relative-report", "--baseline", "relative-baseline"]),
-                (REPO_ROOT / "scripts/gpui-example", ["hello_world", "--", "--scale", "2"], "gpui-ce", "--example", ["--example", "hello_world", "--", "--scale", "2"]),
+                (REPO_ROOT / "scripts/gpui-test", ["list"], "gpui_ce_test", "--bin", ["--", "list"], None, False),
+                (REPO_ROOT / "scripts/gpui-test", ["run", "text-mixed-script", "--output", "relative-report", "--baseline", "relative-baseline"], "gpui_ce_test", "--bin", ["--", "run", "text-mixed-script", "--output", "relative-report", "--baseline", "relative-baseline"], None, False),
+                (REPO_ROOT / "scripts/gpui-test", ["bench", "--output", "relative-report"], "gpui_ce_test", "--bin", ["--", "bench", "--output", "relative-report"], None, True),
+                (REPO_ROOT / "scripts/gpui-test", ["collect", "core-report", "example-report", "--output", "relative-report"], "gpui_ce_test", "--bin", ["--", "collect", "core-report", "example-report", "--output", "relative-report"], None, True),
+                (REPO_ROOT / "scripts/gpui-test", ["collect", "core-report", "--output", "relative-report", "--gpu"], "gpui_ce_test", "--bin", ["--", "collect", "core-report", "--output", "relative-report", "--gpu"], "gpui_ce_test/gpu", True),
+                (REPO_ROOT / "scripts/gpui-test", ["run", "--gpu", "--output", "relative-report"], "gpui_ce_test", "--bin", ["--", "run", "--gpu", "--output", "relative-report"], "gpui_ce_test/gpu", False),
+                (REPO_ROOT / "scripts/gpui-test", ["platform", "--output", "relative-report"], "gpui_ce_test", "--bin", ["--", "platform", "--output", "relative-report"], "gpui_ce_test/platform", False),
+                (REPO_ROOT / "scripts/gpui-example", ["hello_world", "--", "--scale", "2"], "gpui-ce", "--example", ["--example", "hello_world", "--", "--scale", "2"], None, False),
             )
-            for launcher, args, package, selector, expected_tail in calls:
+            for launcher, args, package, selector, expected_tail, feature, release in calls:
                 with self.subTest(launcher=launcher.name):
                     subprocess.run([str(launcher), *args], cwd=caller, env=env, check=True)
                     result = json.loads(capture.read_text(encoding="utf-8"))
@@ -45,6 +50,12 @@ class LauncherTests(unittest.TestCase):
                     self.assertEqual(Path(result["cwd"]), caller.resolve())
                     self.assertEqual(argv[:2], ["--config", str(REPO_ROOT / ".cargo/config.toml")])
                     self.assertIn("run", argv)
+                    self.assertEqual("--release" in argv, release)
+                    if feature:
+                        self.assertIn("--features", argv)
+                        self.assertEqual(argv[argv.index("--features") + 1], feature)
+                    else:
+                        self.assertNotIn("--features", argv)
                     self.assertEqual(argv[argv.index("--manifest-path") + 1], str(REPO_ROOT / "Cargo.toml"))
                     self.assertEqual(argv[argv.index("--package") + 1], package)
                     self.assertIn(selector, argv)
@@ -73,11 +84,16 @@ class LauncherTests(unittest.TestCase):
             env["CARGO_CAPTURE"] = str(capture)
 
             calls = (
-                (REPO_ROOT / "scripts/gpui-test.ps1", ["list"], "-- list"),
-                (REPO_ROOT / "scripts/gpui-test.ps1", ["run", "text-mixed-script", "--output", "relative-report", "--baseline", "relative-baseline"], "-- run text-mixed-script --output relative-report --baseline relative-baseline"),
-                (REPO_ROOT / "scripts/gpui-example.ps1", ["hello_world", "--", "--scale", "2"], "--example hello_world -- --scale 2"),
+                (REPO_ROOT / "scripts/gpui-test.ps1", ["list"], "-- list", None, False),
+                (REPO_ROOT / "scripts/gpui-test.ps1", ["run", "text-mixed-script", "--output", "relative-report", "--baseline", "relative-baseline"], "-- run text-mixed-script --output relative-report --baseline relative-baseline", None, False),
+                (REPO_ROOT / "scripts/gpui-test.ps1", ["bench", "--output", "relative-report"], "-- bench --output relative-report", None, True),
+                (REPO_ROOT / "scripts/gpui-test.ps1", ["collect", "core-report", "example-report", "--output", "relative-report"], "-- collect core-report example-report --output relative-report", None, True),
+                (REPO_ROOT / "scripts/gpui-test.ps1", ["collect", "core-report", "--output", "relative-report", "--gpu"], "-- collect core-report --output relative-report --gpu", "gpui_ce_test/gpu", True),
+                (REPO_ROOT / "scripts/gpui-test.ps1", ["run", "--gpu", "--output", "relative-report"], "-- run --gpu --output relative-report", "gpui_ce_test/gpu", False),
+                (REPO_ROOT / "scripts/gpui-test.ps1", ["platform", "--output", "relative-report"], "-- platform --output relative-report", "gpui_ce_test/platform", False),
+                (REPO_ROOT / "scripts/gpui-example.ps1", ["hello_world", "--", "--scale", "2"], "--example hello_world -- --scale 2", None, False),
             )
-            for launcher, args, expected_tail in calls:
+            for launcher, args, expected_tail, feature, release in calls:
                 with self.subTest(launcher=launcher.name, args=args):
                     subprocess.run([powershell, "-NoProfile", "-File", str(launcher), *args], cwd=caller, env=env, check=True)
                     lines = capture.read_text(encoding="utf-8-sig").splitlines()
@@ -86,6 +102,11 @@ class LauncherTests(unittest.TestCase):
                     self.assertIn(str(REPO_ROOT / ".cargo/config.toml"), cargo_args)
                     self.assertIn(str(REPO_ROOT / "Cargo.toml"), cargo_args)
                     self.assertTrue(cargo_args.endswith(expected_tail), cargo_args)
+                    self.assertEqual("--release" in cargo_args, release)
+                    if feature:
+                        self.assertIn(f"--features {feature}", cargo_args)
+                    else:
+                        self.assertNotIn("--features", cargo_args)
 
 
 if __name__ == "__main__":

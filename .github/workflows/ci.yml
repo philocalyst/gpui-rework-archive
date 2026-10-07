@@ -242,4 +242,4 @@ jobs:
       - uses: extractions/setup-just@v2
       - run: just check-examples
       - name: Test lesson interactions without opening windows
-        run: cargo test --locked --package gpui-ce --example creating_components --example styling
+        run: cargo test --locked --package gpui-ce --example creating_components --example interaction --example animation --example gif_viewer --example view_example

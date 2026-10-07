@@ -3,13 +3,10 @@
 
 from __future__ import annotations
 
-import json
 import os
 from pathlib import Path
 import re
-from urllib.error import HTTPError
 from urllib.parse import quote
-from urllib.request import Request, urlopen
 
 import report_support as report
 
@@ -18,19 +15,7 @@ SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 
 
 def api(method: str, url: str, token: str, payload: object | None = None):
-    body = None if payload is None else json.dumps(payload).encode()
-    request = Request(url, data=body, method=method, headers={
-        "PRIVATE-TOKEN": token,
-        "Content-Type": "application/json",
-        "User-Agent": "gpui-visual-report",
-    })
-    try:
-        with urlopen(request, timeout=30) as response:
-            data = response.read()
-            return json.loads(data) if data else None
-    except HTTPError as error:
-        detail = error.read().decode("utf-8", "replace")[:1000]
-        raise RuntimeError(f"GitLab API {method} returned {error.code}: {detail}") from error
+    return report.json_request(method, url, {"PRIVATE-TOKEN": token}, payload, api_name="GitLab API")
 
 
 def main() -> int:
@@ -51,6 +36,7 @@ def main() -> int:
         return 0
 
     manifest, report_root = report.load_report(Path("visual-report"))
+    report.validate_report_head(manifest, mr["sha"])
     changes, baseline_available = report.comparison_summary(manifest)
     body = [MARKER, f"## GPUI visual report · {head_sha[:12]}", "", f"[Open job report artifact]({artifact_url})", ""]
     if baseline_available:

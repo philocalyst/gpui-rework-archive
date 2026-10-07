@@ -4,10 +4,13 @@ from __future__ import annotations
 
 import html
 import json
+import math
 from pathlib import Path, PurePosixPath
 import re
 from xml.parsers import expat
 from urllib.parse import quote, urlsplit
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
 
 MAX_FILE_BYTES = 12 * 1024 * 1024
 MAX_REPORT_BYTES = 48 * 1024 * 1024
@@ -54,6 +57,21 @@ def validate_site_base(value: str) -> str:
     return value.rstrip("/")
 
 
+def json_request(method: str, url: str, headers: dict[str, str], payload: object | None = None, *, api_name: str = "API"):
+    """Send one JSON API request while leaving forge-specific auth and URLs to callers."""
+    body = None if payload is None else json.dumps(payload).encode()
+    request_headers = {"Content-Type": "application/json", "User-Agent": "gpui-visual-report", **headers}
+    request = Request(url, data=body, method=method, headers=request_headers)
+    try:
+        with urlopen(request, timeout=30) as response:
+            data = response.read()
+            return json.loads(data) if data else None
+    except HTTPError as error:
+        detail = error.read().decode("utf-8", "replace")[:1000]
+        error.close()
+        raise RuntimeError(f"{api_name} {method} returned {error.code}: {detail}") from error
+
+
 def _safe_path(root: Path, relative: str) -> Path:
     if root.is_symlink():
         raise ValueError("report directory must not be a symbolic link")
@@ -77,6 +95,157 @@ def _validate_status_fields(value: dict, label: str) -> None:
         flag = value.get(field)
         if flag is not None and not isinstance(flag, bool):
             raise ValueError(f"{label} field {field} must be boolean")
+
+
+def _nonnegative_int(value: object, label: str, *, maximum: int | None = None) -> int:
+    if not isinstance(value, int) or isinstance(value, bool) or value < 0 or (maximum is not None and value > maximum):
+        raise ValueError(f"{label} must be a non-negative integer" + (f" no greater than {maximum}" if maximum is not None else ""))
+    return value
+
+
+def _validate_uint_fields(
+    value: dict,
+    label: str,
+    fields: tuple[str, ...],
+    *,
+    maximum: int | None = None,
+    optional: bool = False,
+) -> None:
+    for field in fields:
+        raw = value.get(field)
+        if optional and raw is None:
+            continue
+        _nonnegative_int(raw, f"{label} {field}", maximum=maximum)
+
+
+def _validate_native_replay(manifest: dict) -> None:
+    replay = manifest.get("native_replay")
+    if replay is None:
+        return
+    if not isinstance(replay, dict):
+        raise ValueError("manifest native_replay must be an object")
+    for field in ("adapter", "driver", "backend", "device_type"):
+        if not isinstance(replay.get(field), str):
+            raise ValueError(f"native_replay {field} must be text")
+    if replay.get("timestamp_reason") is not None and not isinstance(replay["timestamp_reason"], str):
+        raise ValueError("native_replay timestamp_reason must be text or null")
+
+
+def _validate_native_checkpoint(native: object, scenario: dict, checkpoint: dict, replay: dict, referenced_paths: set[str]) -> None:
+    sid, cid = scenario["id"], checkpoint["id"]
+    label = f"native replay {sid}/{cid}"
+    if not isinstance(native, dict):
+        raise ValueError(f"{label} must be an object")
+    for field, expected in (("png", f"{sid}/{cid}.native.png"), ("diff_png", f"{sid}/{cid}.native.diff.png")):
+        relative = validate_relative(native.get(field), (".png",))
+        if relative != expected:
+            raise ValueError(f"{label} {field} must be {expected!r}")
+        if relative in referenced_paths:
+            raise ValueError(f"report asset is referenced more than once: {relative}")
+        referenced_paths.add(relative)
+        native[field] = relative
+
+    metrics = native.get("metrics")
+    if not isinstance(metrics, dict):
+        raise ValueError(f"{label} metrics must be an object")
+    samples = _nonnegative_int(metrics.get("samples"), f"{label} samples")
+    if samples == 0:
+        raise ValueError(f"{label} samples must be greater than zero")
+    _nonnegative_int(metrics.get("tracked_owned_bytes"), f"{label} tracked_owned_bytes")
+    for field in ("encode_submit_completion", "gpu"):
+        percentiles = metrics.get(field)
+        if field == "gpu" and percentiles is None:
+            continue
+        if not isinstance(percentiles, dict):
+            raise ValueError(f"{label} {field} timing must be an object" + (" or null" if field == "gpu" else ""))
+        _validate_uint_fields(percentiles, f"{label} {field}", ("p50_ns", "p95_ns", "p99_ns"))
+        if not percentiles["p50_ns"] <= percentiles["p95_ns"] <= percentiles["p99_ns"]:
+            raise ValueError(f"{label} {field} percentiles must be monotonic")
+    if metrics.get("gpu") is not None and replay.get("timestamp_reason") is not None:
+        raise ValueError(f"{label} GPU timing conflicts with native_replay timestamp_reason")
+    _validate_uint_fields(metrics, label, ("device_allocated_bytes",), optional=True)
+    if not isinstance(metrics.get("allocation_scope"), str):
+        raise ValueError(f"{label} allocation_scope must be text")
+    for field in ("allocation_reason", "device_allocation_scope"):
+        value = metrics.get(field)
+        if value is not None and not isinstance(value, str):
+            raise ValueError(f"{label} {field} must be text or null")
+
+    difference = native.get("difference")
+    if not isinstance(difference, dict):
+        raise ValueError(f"{label} difference must be an object")
+    changed = _nonnegative_int(difference.get("changed_pixels"), f"{label} changed_pixels")
+    viewport = scenario.get("viewport") or {}
+    width, height, scale = viewport.get("width"), viewport.get("height"), viewport.get("scale_factor", 1)
+    if (
+        isinstance(width, bool) or not isinstance(width, (int, float)) or not math.isfinite(width) or width <= 0
+        or isinstance(height, bool) or not isinstance(height, (int, float)) or not math.isfinite(height) or height <= 0
+        or isinstance(scale, bool) or not isinstance(scale, (int, float)) or not math.isfinite(scale) or scale <= 0
+    ):
+        raise ValueError(f"{label} requires a viewport to validate pixel counts")
+    max_pixels = math.ceil(width * scale) * math.ceil(height * scale)
+    total = _nonnegative_int(difference.get("total_pixels"), f"{label} total_pixels", maximum=max_pixels)
+    if changed > total:
+        raise ValueError(f"{label} changed_pixels exceeds total_pixels")
+    _validate_uint_fields(difference, label, ("max_channel_error",), maximum=255)
+    mean_error = difference.get("mean_channel_error")
+    if isinstance(mean_error, bool) or not isinstance(mean_error, (int, float)) or not math.isfinite(mean_error) or not 0 <= mean_error <= 255:
+        raise ValueError(f"{label} mean_channel_error must be finite and between 0 and 255")
+
+
+PLATFORM_CAPABILITIES = (
+    "native_visibility", "focus_handle", "native_render_capture", "resize_callback", "two_window_close",
+)
+
+
+def _validate_platform_checks(value: object) -> None:
+    if value is None:
+        return
+    version = value.get("schema_version") if isinstance(value, dict) else None
+    if not isinstance(version, int) or isinstance(version, bool) or version != 1:
+        raise ValueError("platform_checks has an unsupported schema")
+    if not isinstance(value.get("platform"), str) or value.get("status") not in {"passed", "failed"}:
+        raise ValueError("platform_checks platform or status is malformed")
+
+    capabilities = value.get("capabilities")
+    if not isinstance(capabilities, dict) or not set(PLATFORM_CAPABILITIES).issubset(capabilities):
+        raise ValueError("platform_checks capabilities are malformed")
+    if any(not isinstance(enabled, bool) for enabled in capabilities.values()):
+        raise ValueError("platform_checks capability values must be boolean")
+
+    events = value.get("events")
+    if not isinstance(events, list):
+        raise ValueError("platform_checks events must be a list")
+    for event in events:
+        if not isinstance(event, dict) or not isinstance(event.get("name"), str):
+            raise ValueError("platform_checks event is malformed")
+        _validate_uint_fields(event, "platform_checks event", ("polls", "elapsed_ms"))
+
+    frame = value.get("frame")
+    if frame is not None:
+        if not isinstance(frame, dict):
+            raise ValueError("platform_checks frame is malformed")
+        frame_fields = (
+            "render_count", "quads", "monochrome_sprites", "subpixel_sprites", "polychrome_sprites",
+            "capture_width", "capture_height", "painted_pixels",
+        )
+        _validate_uint_fields(frame, "platform_checks frame", frame_fields)
+        if frame["capture_width"] == 0 or frame["capture_height"] == 0 or frame["painted_pixels"] > frame["capture_width"] * frame["capture_height"]:
+            raise ValueError("platform_checks frame capture dimensions or painted_pixels are invalid")
+
+    resize = value.get("resize")
+    if resize is not None:
+        if not isinstance(resize, dict):
+            raise ValueError("platform_checks resize is malformed")
+        _validate_uint_fields(resize, "platform_checks resize", ("callback_count",))
+        for dimension in ("width", "height"):
+            size = resize.get(dimension)
+            if isinstance(size, bool) or not isinstance(size, (int, float)) or not math.isfinite(size) or size <= 0:
+                raise ValueError(f"platform_checks resize {dimension} must be a positive finite number")
+
+    errors = value.get("errors")
+    if not isinstance(errors, list) or any(not isinstance(error, str) for error in errors):
+        raise ValueError("platform_checks errors must be a list of strings")
 
 
 def comparison_summary(manifest: dict) -> tuple[list[dict], bool]:
@@ -155,6 +324,8 @@ def load_report(root: Path) -> tuple[dict, Path]:
     environment = manifest.get("environment")
     if environment is not None and (not isinstance(environment, dict) or any(not isinstance(environment.get(key), str) for key in ("renderer", "font_pack"))):
         raise ValueError("manifest environment is malformed")
+    _validate_native_replay(manifest)
+    _validate_platform_checks(manifest.get("platform_checks"))
     scenarios = manifest.get("scenarios")
     if not isinstance(scenarios, list):
         raise ValueError("manifest scenarios must be a list")
@@ -199,8 +370,23 @@ def load_report(root: Path) -> tuple[dict, Path]:
                         raise ValueError(f"report asset is referenced more than once: {relative}")
                     referenced_paths.add(relative)
                     checkpoint[field] = relative
+            if checkpoint.get("native") is not None:
+                if manifest.get("native_replay") is None:
+                    raise ValueError(f"checkpoint {sid}/{cid} has native data without native_replay metadata")
+                _validate_native_checkpoint(checkpoint["native"], scenario, checkpoint, manifest["native_replay"], referenced_paths)
     comparison_summary(manifest)
     return manifest, report_root
+
+
+def validate_report_head(manifest: dict, expected_head: str) -> None:
+    """Require embedded capture provenance to match the forge-verified head."""
+    recorded = (manifest.get("environment") or {}).get("git_sha")
+    if recorded is None:
+        return
+    if not isinstance(recorded, str) or not re.fullmatch(r"[0-9a-fA-F]{40}", recorded):
+        raise ValueError("manifest environment.git_sha must be a full commit SHA")
+    if recorded.lower() != expected_head.lower():
+        raise ValueError("manifest environment.git_sha does not match the expected publication head")
 
 
 def read_asset(root: Path, relative: str) -> bytes:
@@ -224,6 +410,9 @@ def report_assets(manifest: dict, root: Path) -> dict[str, bytes]:
     for scenario in manifest["scenarios"]:
         for checkpoint in scenario["checkpoints"]:
             paths.update(checkpoint[key] for key in ("png", "scene_json", "before_png", "diff_png") if checkpoint.get(key))
+            native = checkpoint.get("native")
+            if native:
+                paths.update(native[key] for key in ("png", "diff_png"))
     assets: dict[str, bytes] = {}
     total = 0
     for relative in sorted(paths):
@@ -332,8 +521,7 @@ METRIC_COLUMNS = (
     ("Batches", "batch_count", "count"),
     ("Bitmap bytes", "bitmap_storage_bytes", "count"),
 )
-METRIC_HEADERS = (*(column[0] for column in METRIC_COLUMNS), "GPU memory")
-MARKDOWN_METRIC_HEADERS = ("Scenario", "Checkpoint", *METRIC_HEADERS)
+METRIC_HEADERS = tuple(column[0] for column in METRIC_COLUMNS)
 
 
 def _count_text(value: object) -> str:
@@ -342,27 +530,135 @@ def _count_text(value: object) -> str:
     return str(value)
 
 
-def checkpoint_metric_values(checkpoint: dict, gpu_memory_bytes: object = None) -> list[str]:
+def checkpoint_metric_values(checkpoint: dict) -> list[str]:
     values = []
     for _label, key, kind in METRIC_COLUMNS:
         value = metric(checkpoint, key)
         values.append(format_ms(value) if kind == "time" else _count_text(value))
-    values.append(_count_text(gpu_memory_bytes))
     return values
+
+
+def _timing_triplet(metrics: dict, prefix: str) -> str:
+    metrics = metrics if isinstance(metrics, dict) else {}
+    return "/".join(format_ms(metrics.get(f"{prefix}_{percentile}_ns")) for percentile in ("p50", "p95", "p99"))
 
 
 def markdown_metrics_table(manifest: dict) -> str:
     """Render one consistent timing and memory table for either forge adapter."""
-    headers = "| " + " | ".join(MARKDOWN_METRIC_HEADERS) + " |"
-    divider = "|---|---|" + "---:|" * (len(MARKDOWN_METRIC_HEADERS) - 2)
-    rows = [headers, divider]
-    for scenario in manifest["scenarios"]:
-        scenario_title = markdown_text(scenario.get("title", scenario["id"]))
-        for checkpoint in scenario["checkpoints"]:
-            checkpoint_name = markdown_text(checkpoint.get("name", checkpoint["id"]))
-            metrics = checkpoint_metric_values(checkpoint, scenario.get("gpu_memory_bytes"))
-            rows.append("| " + " | ".join([scenario_title, checkpoint_name, *metrics]) + " |")
-    return "\n".join(rows)
+    output = []
+    cpu_headers = (
+        "Scenario / checkpoint", "Samples", "Scene build p50/p95/p99", "CPU render p50/p95/p99",
+        "Primitives", "Batches", "Bitmap bytes", "Status",
+    )
+    captures = [(scenario, checkpoint) for scenario in manifest["scenarios"] for checkpoint in scenario["checkpoints"]]
+    if captures:
+        rows = ["| " + " | ".join(cpu_headers) + " |", "|---|---|---:|---:|---:|---:|---:|---|"]
+        for scenario, checkpoint in captures:
+            values = [
+                markdown_text(f"{scenario.get('title', scenario['id'])} / {checkpoint.get('name', checkpoint['id'])}"),
+                _count_text(metric(checkpoint, "frame_count")),
+                _timing_triplet(checkpoint.get("metrics", {}), "scene_build"),
+                _timing_triplet(checkpoint.get("metrics", {}), "cpu_render"),
+                _count_text(metric(checkpoint, "primitive_count")),
+                _count_text(metric(checkpoint, "batch_count")),
+                _count_text(metric(checkpoint, "bitmap_storage_bytes")),
+                markdown_text(checkpoint.get("status", "n/a")),
+            ]
+            rows.append("| " + " | ".join(values) + " |")
+        output.append("\n".join(rows))
+    replay = manifest.get("native_replay")
+    if replay is not None:
+        reason = replay.get("timestamp_reason")
+        timestamp_status = "available" if reason is None else f"unavailable: {markdown_text(reason)}"
+        intro = (
+            "**Native replay diagnostics (native minus CPU differences are diagnostic only; CPU captures determine correctness).** "
+            f"Adapter: {markdown_text(replay['adapter'])}; driver: {markdown_text(replay['driver'].strip() or 'n/a')}; "
+            f"backend: {markdown_text(replay['backend'])}; "
+            f"device: {markdown_text(replay['device_type'])}; GPU timestamps: {timestamp_status}"
+        )
+        native_headers = (
+            "Scenario / checkpoint", "Samples", "GPU p50/p95/p99",
+            "Encode/submit/completion p50/p95/p99", "Tracked owned bytes", "Device allocated bytes",
+            "Changed / total pixels", "Max / mean channel error",
+        )
+        native_rows = ["| " + " | ".join(native_headers) + " |", "|---|---|" + "---:|" * (len(native_headers) - 2)]
+        checkpoints = [
+            (scenario, checkpoint)
+            for scenario in manifest["scenarios"]
+            for checkpoint in scenario["checkpoints"]
+            if checkpoint.get("native")
+        ]
+        tracked_scopes = sorted({checkpoint["native"]["metrics"]["allocation_scope"] for _scenario, checkpoint in checkpoints}) or ["not reported"]
+        device_scopes = sorted({checkpoint["native"]["metrics"]["device_allocation_scope"] for _scenario, checkpoint in checkpoints if checkpoint["native"]["metrics"].get("device_allocation_scope")})
+        allocation_reasons = sorted({checkpoint["native"]["metrics"]["allocation_reason"] for _scenario, checkpoint in checkpoints if checkpoint["native"]["metrics"].get("allocation_reason")})
+        provenance = "**Allocation provenance:** tracked-owned bytes: " + ", ".join(markdown_text(value) for value in tracked_scopes)
+        provenance += "; device-allocation scopes: " + (", ".join(markdown_text(value) for value in device_scopes) or "not exposed")
+        provenance += "; unavailable reason: " + (", ".join(markdown_text(value) for value in allocation_reasons) or "not reported") + "."
+        for scenario in manifest["scenarios"]:
+            for checkpoint in scenario["checkpoints"]:
+                native = checkpoint.get("native")
+                if not native:
+                    continue
+                metrics = native["metrics"]
+                gpu = metrics.get("gpu") or {}
+                completion = metrics["encode_submit_completion"]
+                difference = native["difference"]
+                values = [
+                    markdown_text(f"{scenario.get('title', scenario['id'])} / {checkpoint.get('name', checkpoint['id'])}"),
+                    _count_text(metrics.get("samples")),
+                    "/".join(format_ms(gpu.get(key)) for key in ("p50_ns", "p95_ns", "p99_ns")),
+                    "/".join(format_ms(completion.get(key)) for key in ("p50_ns", "p95_ns", "p99_ns")),
+                    _count_text(metrics.get("tracked_owned_bytes")),
+                    _count_text(metrics.get("device_allocated_bytes")),
+                    f"{_count_text(difference.get('changed_pixels'))}/{_count_text(difference.get('total_pixels'))}",
+                    f"{_count_text(difference.get('max_channel_error'))}/{_float_text(difference.get('mean_channel_error'))}",
+                ]
+                native_rows.append("| " + " | ".join(values) + " |")
+        output.extend([intro, provenance, "\n".join(native_rows)])
+    platform_summary = markdown_platform_checks(manifest.get("platform_checks"))
+    if platform_summary:
+        output.append(platform_summary)
+    return "\n\n".join(output)
+
+
+def _float_text(value: object) -> str:
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+        return "n/a"
+    return f"{value:.3f}"
+
+
+def _platform_rows(checks: dict) -> list[tuple[str, str, str]]:
+    rows = [("Capability", name.replace("_", " "), "available" if enabled else "unavailable")
+            for name, enabled in sorted(checks["capabilities"].items())]
+    rows.extend(("Event", event["name"], f"{event['polls']} polls · {event['elapsed_ms']} ms") for event in checks["events"])
+    for title, data in (("Frame", checks["frame"]), ("Resize", checks["resize"])):
+        if data:
+            rows.extend((title, name.replace("_", " "), str(value)) for name, value in data.items())
+    rows.extend(("Error", "Platform check", error) for error in checks["errors"])
+    return rows
+
+
+def markdown_platform_checks(checks: dict | None) -> str:
+    if not checks:
+        return ""
+    lines = [
+        f"**Platform integration checks: {markdown_text(checks['status'])} · {markdown_text(checks['platform'])}.**",
+        "| Check | Name | Result |", "|---|---|---|",
+    ]
+    lines.extend("| " + " | ".join(markdown_text(value) for value in row) + " |" for row in _platform_rows(checks))
+    return "\n".join(lines)
+
+
+def _platform_checks_html(checks: dict) -> list[str]:
+    parts = [
+        '<section id="platform-checks">',
+        f"  <h2>Platform integration checks · {html.escape(checks['status'])}</h2>",
+        f"  <p>Platform: {html.escape(checks['platform'])}. These checks exercise OS-backed window behavior.</p>",
+        "  <table><caption>Check summary</caption><thead><tr><th>Check</th><th>Name</th><th>Result</th></tr></thead><tbody>",
+    ]
+    parts.extend("    <tr>" + "".join(f"<td>{html.escape(value)}</td>" for value in row) + "</tr>" for row in _platform_rows(checks))
+    parts.extend(["  </tbody></table>", "</section>"])
+    return parts
 
 
 def trusted_index(manifest: dict) -> bytes:
@@ -402,6 +698,21 @@ def trusted_index(manifest: dict) -> bytes:
         '    <a href="metrics.svg"><img src="metrics.svg" alt="Scenario frame timing graph"></a>',
         "  </figure>",
     ]
+    replay = manifest.get("native_replay")
+    if replay is not None:
+        reason = replay.get("timestamp_reason")
+        timestamp_status = "available" if reason is None else "unavailable"
+        native_description = (
+            "  <aside><h2>Native replay diagnostics</h2><p>These captures are diagnostic; CPU captures determine correctness. "
+            f"Adapter: {html.escape(replay['adapter'])} · Driver: {html.escape(replay['driver'].strip() or 'n/a')} · "
+            f"Backend: {html.escape(replay['backend'])} · "
+            f"Device: {html.escape(replay['device_type'])} · GPU timestamps: {timestamp_status}"
+        )
+        if reason:
+            native_description += f" ({html.escape(reason)})"
+        parts.append(native_description + "</p></aside>")
+    if manifest.get("platform_checks"):
+        parts.extend(_platform_checks_html(manifest["platform_checks"]))
     navigation = " ".join(
         f'<a href="#{html.escape(scenario["id"], quote=True)}">'
         f"{html.escape(str(scenario.get('title', scenario['id'])))}</a>"
@@ -465,18 +776,71 @@ def trusted_index(manifest: dict) -> bytes:
                     "      </figure>",
                 ])
 
+            native = checkpoint.get("native")
+            if native:
+                native_figures = (
+                    ("Native GPU replay", native.get("png")),
+                    ("Native minus CPU · diagnostic difference", native.get("diff_png")),
+                )
+                for label, asset in native_figures:
+                    if not asset:
+                        continue
+                    asset_path = validate_relative(asset, (".png",))
+                    expected = f"{scenario_id}/{checkpoint_id}.native.png" if label == "Native GPU replay" else f"{scenario_id}/{checkpoint_id}.native.diff.png"
+                    if asset_path != expected:
+                        raise ValueError(f"native replay asset must be {expected!r}")
+                    asset_url = html.escape(quote(asset_path, safe="/"), quote=True)
+                    alt = html.escape(f"{label} {scenario.get('title', scenario_id)} / {checkpoint.get('name', checkpoint_id)}", quote=True)
+                    parts.extend([
+                        "      <figure>",
+                        f"        <figcaption>{label}</figcaption>",
+                        f'        <a href="{asset_url}"><img loading="lazy" src="{asset_url}" alt="{alt}"></a>',
+                        "      </figure>",
+                    ])
+
             parts.extend([
                 "    </div>",
                 "    <table>",
                 "      <caption>Checkpoint metrics</caption>",
                 "      <tbody>",
             ])
-            values = checkpoint_metric_values(checkpoint, scenario.get("gpu_memory_bytes"))
+            values = checkpoint_metric_values(checkpoint)
             for label, value in zip(METRIC_HEADERS, values):
                 parts.append(
                     f"        <tr><th>{html.escape(label)}</th><td>{html.escape(value)}</td></tr>"
                 )
-            parts.extend(["      </tbody>", "    </table>", "  </article>"])
+            parts.extend(["      </tbody>", "    </table>"])
+            if native:
+                native_metrics = native["metrics"]
+                gpu = native_metrics.get("gpu") or {}
+                completion = native_metrics["encode_submit_completion"]
+                difference = native["difference"]
+                native_values = [
+                    ("GPU timestamp p50", format_ms(gpu.get("p50_ns"))),
+                    ("GPU timestamp p95", format_ms(gpu.get("p95_ns"))),
+                    ("GPU timestamp p99", format_ms(gpu.get("p99_ns"))),
+                    ("Encode/submit/completion p50", format_ms(completion.get("p50_ns"))),
+                    ("Encode/submit/completion p95", format_ms(completion.get("p95_ns"))),
+                    ("Encode/submit/completion p99", format_ms(completion.get("p99_ns"))),
+                    ("Tracked owned bytes", _count_text(native_metrics.get("tracked_owned_bytes"))),
+                    ("Device allocated bytes", _count_text(native_metrics.get("device_allocated_bytes"))),
+                    ("Tracked allocation scope", native_metrics.get("allocation_scope") or "n/a"),
+                    ("Device allocation scope", native_metrics.get("device_allocation_scope") or "n/a"),
+                    ("Allocation reason", native_metrics.get("allocation_reason") or "n/a"),
+                    ("Changed pixels (native vs CPU)", _count_text(difference.get("changed_pixels"))),
+                    ("Total pixels", _count_text(difference.get("total_pixels"))),
+                    ("Max channel error", _count_text(difference.get("max_channel_error"))),
+                    ("Mean channel error", _float_text(difference.get("mean_channel_error"))),
+                ]
+                parts.extend([
+                    "    <table>",
+                    "      <caption>Native replay diagnostics · does not change CPU comparison status</caption>",
+                    "      <tbody>",
+                ])
+                for label, value in native_values:
+                    parts.append(f"        <tr><th>{html.escape(label)}</th><td>{html.escape(str(value))}</td></tr>")
+                parts.append("      </tbody></table>")
+            parts.append("  </article>")
         parts.append("</section>")
 
     parts.extend(["</main>", "</body>", "</html>"])
