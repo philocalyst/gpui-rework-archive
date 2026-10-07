@@ -52,7 +52,7 @@ impl CapturedBitmap {
 ///
 /// Native paint surfaces contain backend-owned handles and cannot be represented here; capture
 /// returns an error if the source scene contains any surfaces.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct SceneCapture {
     version: u32,
     shadows: Vec<Shadow>,
@@ -459,6 +459,75 @@ mod tests {
         assert_eq!(restored.quads.len(), 1);
         assert_eq!(restored.quads[0].bounds, scene.quads[0].bounds);
         assert_eq!(restored.render_commands(), scene.render_commands());
+    }
+
+    #[test]
+    fn capture_equality_covers_roundtrip_geometry_commands_and_bitmap_bytes() {
+        let bounds = test_bounds(1.0);
+        let mut scene = Scene::default();
+        scene.insert_primitive(Quad {
+            bounds,
+            content_mask: ContentMask {
+                bounds,
+                ..Default::default()
+            },
+            ..Default::default()
+        });
+        scene.insert_primitive(MonochromeSprite {
+            order: 0,
+            padding: 0,
+            bounds,
+            content_mask: ContentMask {
+                bounds,
+                ..Default::default()
+            },
+            color: SceneHsla::default(),
+            tile: AtlasTile {
+                texture_id: AtlasTextureId {
+                    index: 17,
+                    kind: AtlasTextureKind::Monochrome,
+                },
+                tile_id: TileId(23),
+                padding: 0,
+                bounds: Bounds {
+                    origin: point(DevicePixels(0), DevicePixels(0)),
+                    size: Size {
+                        width: DevicePixels(2),
+                        height: DevicePixels(2),
+                    },
+                },
+            },
+            transformation: TransformationMatrix::unit(),
+        });
+        scene.finish();
+
+        let capture = SceneCapture::capture(&scene, |tile| {
+            Ok(CapturedBitmap {
+                kind: tile.texture_id.kind,
+                width: 2,
+                height: 2,
+                bytes: vec![255; 4],
+            })
+        })
+        .expect("capture scene");
+        let json = serde_json::to_string(&capture).expect("serialize capture");
+        let decoded: SceneCapture = serde_json::from_str(&json).expect("deserialize capture");
+        assert_eq!(capture, decoded);
+
+        let mut changed_geometry = capture.clone();
+        changed_geometry.quads[0].bounds.origin.x.0 += 1.0;
+        assert_ne!(capture, changed_geometry);
+
+        let mut changed_commands = capture.clone();
+        match &mut changed_commands.commands[0] {
+            RenderCommand::Batch(PrimitiveBatch::Quads { smoothed, .. }) => *smoothed = !*smoothed,
+            command => panic!("expected first command to be a quad batch, got {command:?}"),
+        }
+        assert_ne!(capture, changed_commands);
+
+        let mut changed_bitmap = capture.clone();
+        changed_bitmap.bitmaps[0].bytes[0] ^= 1;
+        assert_ne!(capture, changed_bitmap);
     }
 
     #[test]
