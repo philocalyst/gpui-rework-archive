@@ -42,6 +42,7 @@ use parking_lot::RwLock;
 use raw_window_handle::{HandleError, HasDisplayHandle, HasWindowHandle};
 use refineable::Refineable;
 use scheduler::Instant;
+use serde::{Deserialize, Serialize};
 use slotmap::SlotMap;
 use smallvec::SmallVec;
 use std::{
@@ -2113,7 +2114,7 @@ pub struct DispatchEventResult {
 /// rendered. Currently, only rectangular content masks are supported, but we give the mask its own type
 /// to leave room to support more complex shapes in the future. Edge fades are evaluated in
 /// window space against these axis-aligned bounds and are not transform-aware.
-#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[repr(C)]
 pub struct ContentMask<P: Clone + Debug + Default + PartialEq> {
     /// The bounds
@@ -6757,6 +6758,11 @@ impl Window {
     /// The window manager may still focus a window when it is shown.
     pub fn set_visible(&self, visible: bool) {
         self.platform_window.set_visible(visible);
+    }
+
+    /// Returns the platform's current visibility when it can be queried.
+    pub fn is_visible(&self) -> Option<bool> {
+        self.platform_window.is_visible()
     }
 
     /// Toggle full screen status on the current window at the platform level.

@@ -1601,10 +1601,10 @@ mod tests {
         backend
             .add_fonts(vec![
                 Cow::Borrowed(include_bytes!(
-                    "../../../../assets/fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf"
+                    "../../../gpui_test/assets/fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf"
                 )),
                 Cow::Borrowed(include_bytes!(
-                    "../../../../assets/fonts/noto-color-emoji/NotoColorEmoji.subset.ttf"
+                    "../../../gpui_test/assets/fonts/noto-color-emoji/NotoColorEmoji.subset.ttf"
                 )),
             ])
             .unwrap();

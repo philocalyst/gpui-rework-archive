@@ -1,432 +1,342 @@
-//! Creating Components Example
-//!
-//! This example demonstrates three different approaches to creating interactive
-//! stateful components in GPUI:
-//!
-//! 1. `use_state` - Hook-like state scoped to an element's lifetime
-//! 2. `RenderOnce` - Stateless component that receives state from parent
-//! 3. `Render` - Entity-backed view with persistent internal state
+//! Three ways to give a component state: element-local, parent-owned props, and an entity.
 
 #[path = "../shared/prelude.rs"]
 mod example_prelude;
 
-use example_prelude::init_example;
 use gpui::colors::Colors;
 use gpui::{
-    App, Bounds, Context, Entity, IntoElement, Render, RenderOnce, Window, WindowBounds,
-    WindowOptions, div, prelude::*, px, rgb, size,
+    App, Context, Entity, IntoElement, Render, RenderOnce, Window, div, prelude::*, px, rgb, size,
 };
-
-// ============================================================================
-// Approach 1: use_state
-// ============================================================================
-//
-// `use_state` creates element-scoped state that persists across renders.
-// It's similar to React's useState hook. The state is automatically tied
-// to the element's identity via caller location or a provided key.
-//
-// Pros:
-// - Simple, hook-like API
-// - State is scoped to element lifetime
-// - No boilerplate for simple state
-//
-// Cons:
-// - Less explicit than Entity-backed state
-// - State is tied to call site location
-
-struct UseStateCounter {
-    count: i32,
-}
-
-fn use_state_counter(colors: &Colors, window: &mut Window, cx: &mut App) -> impl IntoElement {
-    let state: Entity<UseStateCounter> =
-        window.use_state(cx, |_window, _cx| UseStateCounter { count: 0 });
-
-    let count = state.read(cx).count;
-
-    let error = rgb(0xd32f2f);
-    let error_hover = rgb(0xe04545);
-    let success = rgb(0x388e3c);
-    let success_hover = rgb(0x43a047);
-
-    div()
-        .id("use-state-counter")
-        .flex()
-        .flex_col()
-        .gap_2()
-        .p_4()
-        .rounded_lg()
-        .bg(colors.container)
-        .child(
-            div()
-                .text_sm()
-                .text_color(colors.disabled)
-                .child("use_state Counter"),
-        )
-        .child(
-            div()
-                .text_2xl()
-                .text_color(colors.text)
-                .child(format!("{}", count)),
-        )
-        .child(
-            div()
-                .flex()
-                .gap_2()
-                .child(
-                    div()
-                        .id("use-state-decrement")
-                        .px_3()
-                        .py_1()
-                        .rounded_md()
-                        .bg(error)
-                        .text_color(colors.selected_text)
-                        .cursor_pointer()
-                        .hover(move |style| style.bg(error_hover))
-                        .child("−")
-                        .on_click({
-                            let state = state.clone();
-                            move |_, _, cx| {
-                                state.update(cx, |state, cx| {
-                                    state.count -= 1;
-                                    cx.notify();
-                                });
-                            }
-                        }),
-                )
-                .child(
-                    div()
-                        .id("use-state-increment")
-                        .px_3()
-                        .py_1()
-                        .rounded_md()
-                        .bg(success)
-                        .text_color(colors.selected_text)
-                        .cursor_pointer()
-                        .hover(move |style| style.bg(success_hover))
-                        .child("+")
-                        .on_click(move |_, _, cx| {
-                            state.update(cx, |state, cx| {
-                                state.count += 1;
-                                cx.notify();
-                            });
-                        }),
-                ),
-        )
-}
-
-// ============================================================================
-// Approach 2: RenderOnce
-// ============================================================================
-//
-// `RenderOnce` components are stateless and consumed when rendered.
-// They receive all data as props and delegate state management to the parent.
-// This is the recommended approach for presentational components.
-//
-// Pros:
-// - Clear data flow (props down, events up)
-// - Lightweight (no Entity allocation)
-// - Easy to test
-// - Highly composable
-//
-// Cons:
-// - Cannot maintain internal state
-// - Parent must manage all state
+use std::time::Duration;
 
 #[derive(IntoElement)]
-struct RenderOnceCounter {
-    colors: Colors,
+struct CounterCard {
+    label: &'static str,
+    id: &'static str,
     count: i32,
-    on_increment: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
-    on_decrement: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
+    colors: Colors,
+    increment: Box<dyn Fn(&mut Window, &mut App) + 'static>,
+    decrement: Box<dyn Fn(&mut Window, &mut App) + 'static>,
 }
 
-impl RenderOnceCounter {
-    fn new(colors: Colors, count: i32) -> Self {
+impl CounterCard {
+    fn new(
+        label: &'static str,
+        id: &'static str,
+        count: i32,
+        colors: Colors,
+        increment: impl Fn(&mut Window, &mut App) + 'static,
+        decrement: impl Fn(&mut Window, &mut App) + 'static,
+    ) -> Self {
         Self {
-            colors,
+            label,
+            id,
             count,
-            on_increment: None,
-            on_decrement: None,
+            colors,
+            increment: Box::new(increment),
+            decrement: Box::new(decrement),
         }
     }
-
-    fn on_increment(mut self, callback: impl Fn(&mut Window, &mut App) + 'static) -> Self {
-        self.on_increment = Some(Box::new(callback));
-        self
-    }
-
-    fn on_decrement(mut self, callback: impl Fn(&mut Window, &mut App) + 'static) -> Self {
-        self.on_decrement = Some(Box::new(callback));
-        self
-    }
 }
 
-impl RenderOnce for RenderOnceCounter {
+impl RenderOnce for CounterCard {
     fn render(self, _window: &mut Window, _cx: &mut App) -> impl IntoElement {
         let colors = self.colors;
-        let error = rgb(0xd32f2f);
-        let error_hover = rgb(0xe04545);
-        let success = rgb(0x388e3c);
-        let success_hover = rgb(0x43a047);
-
+        let id = self.id;
         div()
-            .id("render-once-counter")
+            .id(id)
             .flex()
             .flex_col()
             .gap_2()
             .p_4()
+            .min_w(px(160.))
             .rounded_lg()
             .bg(colors.container)
             .child(
                 div()
                     .text_sm()
                     .text_color(colors.disabled)
-                    .child("RenderOnce Counter"),
+                    .child(self.label),
             )
             .child(
                 div()
                     .text_2xl()
                     .text_color(colors.text)
-                    .child(format!("{}", self.count)),
+                    .child(self.count.to_string()),
             )
             .child(
                 div()
                     .flex()
                     .gap_2()
-                    .child(
-                        div()
-                            .id("render-once-decrement")
-                            .px_3()
-                            .py_1()
-                            .rounded_md()
-                            .bg(error)
-                            .text_color(colors.selected_text)
-                            .cursor_pointer()
-                            .hover(move |style| style.bg(error_hover))
-                            .child("−")
-                            .when_some(self.on_decrement, |element, callback| {
-                                element.on_click(move |_, window, cx| callback(window, cx))
-                            }),
-                    )
-                    .child(
-                        div()
-                            .id("render-once-increment")
-                            .px_3()
-                            .py_1()
-                            .rounded_md()
-                            .bg(success)
-                            .text_color(colors.selected_text)
-                            .cursor_pointer()
-                            .hover(move |style| style.bg(success_hover))
-                            .child("+")
-                            .when_some(self.on_increment, |element, callback| {
-                                element.on_click(move |_, window, cx| callback(window, cx))
-                            }),
-                    ),
+                    .child(counter_button(
+                        id,
+                        "decrement",
+                        "−",
+                        rgb(0xd32f2f),
+                        self.decrement,
+                    ))
+                    .child(counter_button(
+                        id,
+                        "increment",
+                        "+",
+                        rgb(0x388e3c),
+                        self.increment,
+                    )),
             )
     }
 }
 
-// ============================================================================
-// Approach 3: Render (Entity-backed)
-// ============================================================================
-//
-// `Render` components are backed by an `Entity<T>` and maintain their own
-// internal state. This is the recommended approach for complex components
-// that need to manage their own state, subscribe to events, or spawn tasks.
-//
-// Pros:
-// - Full control over internal state
-// - Can subscribe to events and observe other entities
-// - Can spawn async tasks
-// - Has identity (can be passed around as Entity<T>)
-//
-// Cons:
-// - More boilerplate
-// - Higher memory overhead
-// - More complex lifecycle
+fn counter_button(
+    owner: &'static str,
+    id: &'static str,
+    label: &'static str,
+    color: gpui::Rgba,
+    action: impl Fn(&mut Window, &mut App) + 'static,
+) -> gpui::Stateful<gpui::Div> {
+    div()
+        .id(id)
+        .debug_selector(|| format!("{owner}-{id}"))
+        .px_3()
+        .py_1()
+        .rounded_md()
+        .bg(color)
+        .text_color(gpui::white())
+        .cursor_pointer()
+        .hover(|style| style.opacity(0.8))
+        .on_click(move |_, window, cx| action(window, cx))
+        .child(label)
+}
 
-struct RenderCounter {
+struct ElementCounter {
     count: i32,
 }
 
-impl RenderCounter {
-    fn new() -> Self {
-        Self { count: 0 }
-    }
-
-    fn increment(&mut self, _window: &mut Window, cx: &mut Context<Self>) {
-        self.count += 1;
-        cx.notify();
-    }
-
-    fn decrement(&mut self, _window: &mut Window, cx: &mut Context<Self>) {
-        self.count -= 1;
-        cx.notify();
-    }
+fn element_counter(colors: &Colors, window: &mut Window, cx: &mut App) -> CounterCard {
+    // The element identity keeps this state alive between renders at this call site.
+    let state = window.use_state(cx, |_window, _cx| ElementCounter { count: 0 });
+    let count = state.read(cx).count;
+    let decrement = state.clone();
+    CounterCard::new(
+        "use_state: element-local",
+        "element",
+        count,
+        colors.clone(),
+        move |_, cx| {
+            state.update(cx, |state, cx| {
+                state.count += 1;
+                cx.notify();
+            });
+        },
+        move |_, cx| {
+            decrement.update(cx, |state, cx| {
+                state.count -= 1;
+                cx.notify();
+            });
+        },
+    )
 }
 
-impl Render for RenderCounter {
+struct EntityCounter {
+    count: i32,
+}
+
+impl Render for EntityCounter {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let colors = Colors::for_appearance(window);
-        let error = rgb(0xd32f2f);
-        let error_hover = rgb(0xe04545);
-        let success = rgb(0x388e3c);
-        let success_hover = rgb(0x43a047);
-
-        div()
-            .id("render-counter")
-            .flex()
-            .flex_col()
-            .gap_2()
-            .p_4()
-            .rounded_lg()
-            .bg(colors.container)
-            .child(
-                div()
-                    .text_sm()
-                    .text_color(colors.disabled)
-                    .child("Render Counter"),
-            )
-            .child(
-                div()
-                    .text_2xl()
-                    .text_color(colors.text)
-                    .child(format!("{}", self.count)),
-            )
-            .child(
-                div()
-                    .flex()
-                    .gap_2()
-                    .child(
-                        div()
-                            .id("render-decrement")
-                            .px_3()
-                            .py_1()
-                            .rounded_md()
-                            .bg(error)
-                            .text_color(colors.selected_text)
-                            .cursor_pointer()
-                            .hover(move |style| style.bg(error_hover))
-                            .child("−")
-                            .on_click(cx.listener(|this, _, window, cx| {
-                                this.decrement(window, cx);
-                            })),
-                    )
-                    .child(
-                        div()
-                            .id("render-increment")
-                            .px_3()
-                            .py_1()
-                            .rounded_md()
-                            .bg(success)
-                            .text_color(colors.selected_text)
-                            .cursor_pointer()
-                            .hover(move |style| style.bg(success_hover))
-                            .child("+")
-                            .on_click(cx.listener(|this, _, window, cx| {
-                                this.increment(window, cx);
-                            })),
-                    ),
-            )
+        let entity = cx.entity().downgrade();
+        let decrement = entity.clone();
+        CounterCard::new(
+            "Render: entity-owned",
+            "entity",
+            self.count,
+            colors,
+            move |_, cx| {
+                entity
+                    .update(cx, |this, cx| {
+                        this.count += 1;
+                        cx.notify();
+                    })
+                    .ok();
+            },
+            move |_, cx| {
+                decrement
+                    .update(cx, |this, cx| {
+                        this.count -= 1;
+                        cx.notify();
+                    })
+                    .ok();
+            },
+        )
     }
 }
 
-// ============================================================================
-// Main Application
-// ============================================================================
-
-struct CreatingComponentsExample {
-    render_counter: Entity<RenderCounter>,
-    render_once_count: i32,
+struct CreatingComponents {
+    entity_counter: Entity<EntityCounter>,
+    prop_count: i32,
+    #[cfg(test)]
+    rendered_element_count: i32,
 }
 
-impl CreatingComponentsExample {
-    fn new(cx: &mut Context<Self>) -> Self {
-        Self {
-            render_counter: cx.new(|_| RenderCounter::new()),
-            render_once_count: 0,
+impl Render for CreatingComponents {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let colors = Colors::for_appearance(window);
+        let parent = cx.entity().downgrade();
+        let decrement = parent.clone();
+        let element_card = element_counter(&colors, window, cx);
+        #[cfg(test)]
+        {
+            self.rendered_element_count = element_card.count;
         }
-    }
-}
-
-impl Render for CreatingComponentsExample {
-    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let colors = Colors::for_appearance(window);
-        let render_once_count = self.render_once_count;
-        let handle = cx.entity().downgrade();
-
         div()
-            .id("main")
+            .id("component-state")
             .size_full()
             .flex()
             .flex_col()
-            .gap_6()
-            .p_8()
+            .gap_4()
+            .p_6()
             .bg(colors.background)
             .overflow_scroll()
             .child(
                 div()
-                    .flex()
-                    .flex_col()
-                    .gap_2()
-                    .child(
-                        div()
-                            .text_2xl()
-                            .font_weight(gpui::FontWeight::BOLD)
-                            .text_color(colors.text)
-                            .child("Creating Components"),
-                    )
-                    .child(
-                        div()
-                            .text_sm()
-                            .text_color(colors.disabled)
-                            .child("Three approaches to stateful components in GPUI"),
-                    ),
+                    .text_xl()
+                    .font_weight(gpui::FontWeight::BOLD)
+                    .text_color(colors.text)
+                    .child("Component state"),
+            )
+            .child(
+                div()
+                    .text_sm()
+                    .text_color(colors.disabled)
+                    .child("Same counter UI, three ownership models. Click + or − to compare."),
             )
             .child(
                 div()
                     .flex()
-                    .flex_row()
-                    .gap_4()
-                    .child(use_state_counter(&colors, window, cx))
-                    .child(
-                        RenderOnceCounter::new(colors.clone(), render_once_count)
-                            .on_increment({
-                                let handle = handle.clone();
-                                move |_window, cx| {
-                                    handle
-                                        .update(cx, |this, cx| {
-                                            this.render_once_count += 1;
-                                            cx.notify();
-                                        })
-                                        .ok();
-                                }
-                            })
-                            .on_decrement(move |_window, cx| {
-                                handle
-                                    .update(cx, |this, cx| {
-                                        this.render_once_count -= 1;
-                                        cx.notify();
-                                    })
-                                    .ok();
-                            }),
-                    )
-                    .child(self.render_counter.clone()),
+                    .flex_wrap()
+                    .gap_3()
+                    .child(element_card)
+                    .child(CounterCard::new(
+                        "RenderOnce: parent-owned props",
+                        "props",
+                        self.prop_count,
+                        colors.clone(),
+                        move |_, cx| {
+                            parent
+                                .update(cx, |this, cx| {
+                                    this.prop_count += 1;
+                                    cx.notify();
+                                })
+                                .ok();
+                        },
+                        move |_, cx| {
+                            decrement
+                                .update(cx, |this, cx| {
+                                    this.prop_count -= 1;
+                                    cx.notify();
+                                })
+                                .ok();
+                        },
+                    ))
+                    .child(self.entity_counter.clone()),
             )
     }
 }
 
-fn main() {
-    gpui_platform::application().run(|cx: &mut App| {
-        let bounds = Bounds::centered(None, size(px(700.), px(400.)), cx);
-        cx.open_window(
-            WindowOptions::new().window_bounds(Some(WindowBounds::Windowed(bounds))),
-            |_, cx| cx.new(|cx| CreatingComponentsExample::new(cx)),
-        )
-        .expect("Failed to open window");
+impl CreatingComponents {
+    fn new(cx: &mut Context<Self>) -> Self {
+        Self {
+            entity_counter: cx.new(|_| EntityCounter { count: 0 }),
+            prop_count: 0,
+            #[cfg(test)]
+            rendered_element_count: 0,
+        }
+    }
+}
 
-        init_example(cx, "Creating Components");
-    });
+fn main() {
+    let scenario = gpui_test::Scenario::new(
+        "creating-components",
+        "Creating components",
+        size(px(760.), px(360.)),
+        |_, cx: &mut App| cx.new(CreatingComponents::new),
+    )
+    .expect("valid components scenario")
+    .checkpoint("default", "Three counter ownership models", Duration::ZERO)
+    .expect("valid components checkpoint");
+    example_prelude::run_example(scenario).expect("run creating components example");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use gpui::{px, size};
+    use gpui_test::{Harness, Scenario, dispatch_click_on};
+
+    fn assert_counts(
+        cx: &mut gpui::HeadlessAppContext,
+        view: &Entity<CreatingComponents>,
+        window: gpui::WindowHandle<CreatingComponents>,
+        expected: [i32; 3],
+    ) -> anyhow::Result<()> {
+        // Observe the local count presented by a fresh render, along with both owned states.
+        cx.draw_window(window.into())?;
+        let actual = view.read_with(cx, |this, app| {
+            [
+                this.rendered_element_count,
+                this.prop_count,
+                this.entity_counter.read(app).count,
+            ]
+        });
+        anyhow::ensure!(
+            actual == expected,
+            "[element, props, entity] expected {expected:?}, rendered {actual:?}"
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn all_counter_models_handle_clicks_and_keep_state_through_redraws() -> anyhow::Result<()> {
+        let scenario = Scenario::new(
+            "component-state-test",
+            "Component state interactions",
+            size(px(760.), px(360.)),
+            |_, cx: &mut App| cx.new(CreatingComponents::new),
+        )?
+        .checkpoint("initial", "Initial values", Duration::ZERO)?
+        .checkpoint_with(
+            "incremented",
+            "Increment each state owner",
+            Duration::from_millis(1),
+            |cx, view, window| {
+                dispatch_click_on(cx, window.into(), "element-increment")?;
+                dispatch_click_on(cx, window.into(), "props-increment")?;
+                dispatch_click_on(cx, window.into(), "entity-increment")?;
+                assert_counts(cx, view, window, [1, 1, 1])
+            },
+        )?
+        .checkpoint_with(
+            "redrawn",
+            "Parent redraw preserves independent state",
+            Duration::from_millis(2),
+            |cx, view, window| {
+                dispatch_click_on(cx, window.into(), "props-increment")?;
+                assert_counts(cx, view, window, [1, 2, 1])
+            },
+        )?
+        .checkpoint_with(
+            "reset",
+            "Decrement each value back to zero",
+            Duration::from_millis(3),
+            |cx, view, window| {
+                dispatch_click_on(cx, window.into(), "element-decrement")?;
+                dispatch_click_on(cx, window.into(), "props-decrement")?;
+                dispatch_click_on(cx, window.into(), "props-decrement")?;
+                dispatch_click_on(cx, window.into(), "entity-decrement")?;
+                assert_counts(cx, view, window, [0, 0, 0])
+            },
+        )?;
+
+        Harness::new().run(&scenario)?;
+        Ok(())
+    }
 }

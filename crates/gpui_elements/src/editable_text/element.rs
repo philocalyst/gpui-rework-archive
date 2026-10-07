@@ -1008,13 +1008,13 @@ mod tests {
             system
                 .add_fonts(vec![
                     Cow::Borrowed(include_bytes!(
-                        "../../../../assets/fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf"
+                        "../../../gpui_test/assets/fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf"
                     )),
                     Cow::Borrowed(include_bytes!(
-                        "../../../../assets/fonts/noto-sans-hebrew/NotoSansHebrew-Regular.ttf"
+                        "../../../gpui_test/assets/fonts/noto-sans-hebrew/NotoSansHebrew-Regular.ttf"
                     )),
                     Cow::Borrowed(include_bytes!(
-                        "../../../../assets/fonts/noto-sans-arabic/NotoSansArabic-Regular.ttf"
+                        "../../../gpui_test/assets/fonts/noto-sans-arabic/NotoSansArabic-Regular.ttf"
                     )),
                 ])
                 .unwrap();

@@ -8,7 +8,7 @@ use gpui_render::{
     shaders::blur::BlurUniforms,
 };
 
-use super::{WgpuRenderer, begin_color_render_pass, pipelines};
+use super::{WgpuRenderer, begin_color_render_pass, frame::TimestampCapture, pipelines};
 
 pub(super) const FILTER_UNIFORMS_PER_COMPOSITE: u64 = 4;
 
@@ -40,14 +40,17 @@ impl WgpuRenderer {
         source: &wgpu::TextureView,
         uniforms: BlurUniforms,
         scissor: ScissorRectangle,
+        timestamps: Option<TimestampCapture<'_>>,
     ) {
         let (bind_group, uniform_offset) = self.make_blur_bind_group(uniforms, source);
         let resources = self.resources();
+        let timestamp_writes = timestamps.map(TimestampCapture::pass_writes);
         let mut pass = begin_color_render_pass(
             encoder,
             label,
             target,
             wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
+            timestamp_writes,
         );
         pass.set_pipeline(pipeline);
         pass.set_bind_group(
@@ -70,6 +73,7 @@ impl WgpuRenderer {
         source: &wgpu::TextureView,
         target: &wgpu::TextureView,
         parameters: FilterCompositeParameters,
+        timestamps: Option<TimestampCapture<'_>>,
     ) {
         let Some(kernel) = BlurKernel::for_radius(parameters.blur_radius) else {
             return;
@@ -110,6 +114,7 @@ impl WgpuRenderer {
             source,
             BlurUniforms::downsample([full_width as f32, full_height as f32], blur_size),
             scissor,
+            timestamps,
         );
         self.run_blur_pass(
             encoder,
@@ -119,6 +124,7 @@ impl WgpuRenderer {
             &horizontal_target,
             BlurUniforms::gaussian(BlurAxis::Horizontal, blur_size, kernel),
             scissor,
+            timestamps,
         );
         self.run_blur_pass(
             encoder,
@@ -128,6 +134,7 @@ impl WgpuRenderer {
             &vertical_target,
             BlurUniforms::gaussian(BlurAxis::Vertical, blur_size, kernel),
             scissor,
+            timestamps,
         );
 
         let clips_to_bounds = matches!(parameters.clip, FilterCompositeClip::RoundedBounds);
@@ -153,8 +160,13 @@ impl WgpuRenderer {
         } else {
             &resources.pipelines.blur_composite
         };
-        let mut pass =
-            begin_color_render_pass(encoder, "blur_composite", target, wgpu::LoadOp::Load);
+        let mut pass = begin_color_render_pass(
+            encoder,
+            "blur_composite",
+            target,
+            wgpu::LoadOp::Load,
+            timestamps.map(TimestampCapture::pass_writes),
+        );
         pass.set_pipeline(pipeline);
         pass.set_bind_group(
             shader_interface::GLOBAL_BIND_GROUP,
@@ -174,6 +186,7 @@ impl WgpuRenderer {
         encoder: &mut wgpu::CommandEncoder,
         filter: &BackdropFilter,
         scene_color_view: &wgpu::TextureView,
+        timestamps: Option<TimestampCapture<'_>>,
     ) {
         self.blur_and_composite(
             encoder,
@@ -188,6 +201,7 @@ impl WgpuRenderer {
                 opacity: filter.opacity,
                 clip: FilterCompositeClip::RoundedBounds,
             },
+            timestamps,
         );
     }
 
@@ -196,6 +210,7 @@ impl WgpuRenderer {
         encoder: &mut wgpu::CommandEncoder,
         source: &wgpu::TextureView,
         frame_view: &wgpu::TextureView,
+        timestamps: Option<TimestampCapture<'_>>,
     ) {
         let size = [self.target.width() as f32, self.target.height() as f32];
         let (bind_group, uniform_offset) =
@@ -206,6 +221,7 @@ impl WgpuRenderer {
             "scene_blit",
             frame_view,
             wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
+            timestamps.map(TimestampCapture::pass_writes),
         );
         pass.set_pipeline(&resources.pipelines.blur_downsample);
         pass.set_bind_group(

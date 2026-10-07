@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$(cd -- "$script_dir/.." && pwd)"
+
+cargo_config_args=()
+if [[ -f "$repo_root/.cargo/config.toml" ]]; then
+    cargo_config_args+=(--config "$repo_root/.cargo/config.toml")
+fi
+
+cargo_mode_args=()
+if [[ "${1:-}" == "bench" || "${1:-}" == "collect" ]]; then
+    cargo_mode_args+=(--release)
+fi
+if [[ "${1:-}" == "platform" ]]; then
+    cargo_mode_args+=(--features gpui_ce_test/platform)
+else
+    for arg in "$@"; do
+        if [[ "$arg" == "--gpu" ]]; then
+            cargo_mode_args+=(--features gpui_ce_test/gpu)
+            break
+        fi
+    done
+fi
+
+exec cargo "${cargo_config_args[@]}" run "${cargo_mode_args[@]}" --manifest-path "$repo_root/Cargo.toml" --package gpui_ce_test --bin gpui-test -- "$@"

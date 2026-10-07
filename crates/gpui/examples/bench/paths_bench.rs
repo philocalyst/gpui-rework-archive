@@ -1,71 +1,130 @@
 #![cfg_attr(target_family = "wasm", no_main)]
 
-#[path = "../example_support/fonts.rs"]
-mod example_support;
+#[path = "../shared/prelude.rs"]
+mod example_prelude;
+
+use std::sync::Arc;
 
 use gpui::{
-    Background, Bounds, ColorSpace, Context, Path, PathBuilder, Pixels, Render, TitlebarOptions,
-    Window, WindowBounds, WindowOptions, canvas, div, linear_color_stop, linear_gradient, point,
-    prelude::*, px, rgb, size,
+    App, Background, ColorSpace, Context, Path, PathBuilder, Pixels, Render, Window, canvas, div,
+    linear_color_stop, linear_gradient, point, prelude::*, px, rgb, size,
 };
-use gpui_platform::application;
+use std::time::Duration;
 
-const DEFAULT_WINDOW_WIDTH: Pixels = px(1024.0);
-const DEFAULT_WINDOW_HEIGHT: Pixels = px(768.0);
+const COLUMNS: usize = 16;
+const ROWS: usize = 16;
+const CELL_WIDTH: f32 = 58.;
+const CELL_HEIGHT: f32 = 43.;
 
 struct PaintingViewer {
-    default_lines: Vec<(Path<Pixels>, Background)>,
-    _painting: bool,
+    paths: Arc<Vec<(Path<Pixels>, Background)>>,
 }
 
 impl PaintingViewer {
-    fn new(_window: &mut Window, _cx: &mut Context<Self>) -> Self {
-        let mut lines = vec![];
+    fn new(_cx: &mut Context<Self>) -> Self {
+        let fills = [
+            linear_gradient(
+                135.,
+                linear_color_stop(rgb(0xfacc15), 0.1),
+                linear_color_stop(rgb(0xea580c), 1.),
+            )
+            .color_space(ColorSpace::Oklab),
+            linear_gradient(
+                40.,
+                linear_color_stop(rgb(0x38bdf8), 0.),
+                linear_color_stop(rgb(0x4f46e5), 1.),
+            )
+            .color_space(ColorSpace::Oklab),
+            linear_gradient(
+                110.,
+                linear_color_stop(rgb(0x4ade80), 0.),
+                linear_color_stop(rgb(0x047857), 1.),
+            )
+            .color_space(ColorSpace::Oklab),
+        ];
 
-        // draw a lightening bolt ⚡
-        for _ in 0..2000 {
-            // draw a ⭐
-            let mut builder = PathBuilder::fill();
-            builder.move_to(point(px(350.), px(100.)));
-            builder.line_to(point(px(370.), px(160.)));
-            builder.line_to(point(px(430.), px(160.)));
-            builder.line_to(point(px(380.), px(200.)));
-            builder.line_to(point(px(400.), px(260.)));
-            builder.line_to(point(px(350.), px(220.)));
-            builder.line_to(point(px(300.), px(260.)));
-            builder.line_to(point(px(320.), px(200.)));
-            builder.line_to(point(px(270.), px(160.)));
-            builder.line_to(point(px(330.), px(160.)));
-            builder.line_to(point(px(350.), px(100.)));
-            let path = builder.build().unwrap();
-            lines.push((
-                path,
-                linear_gradient(
-                    180.,
-                    linear_color_stop(rgb(0xFACC15), 0.7),
-                    linear_color_stop(rgb(0xD56D0C), 1.),
-                )
-                .color_space(ColorSpace::Oklab),
-            ));
+        // Tessellate once; each frame measures painting 256 bounded, varied paths rather than
+        // allocating thousands of identical stars during render.
+        let mut paths = Vec::with_capacity(COLUMNS * ROWS);
+        for row in 0..ROWS {
+            for column in 0..COLUMNS {
+                let x = 38. + column as f32 * CELL_WIDTH;
+                let y = 22. + row as f32 * CELL_HEIGHT;
+                let variant = (row * 3 + column) % 3;
+                let path = match variant {
+                    0 => concave_path(x, y),
+                    1 => curved_path(x, y),
+                    _ => open_stroke(x, y),
+                };
+                let fill = fills[variant].clone();
+                paths.push((path.build().expect("valid benchmark path"), fill));
+            }
         }
 
         Self {
-            default_lines: lines,
-            _painting: false,
+            paths: Arc::new(paths),
         }
     }
 }
 
+fn concave_path(x: f32, y: f32) -> PathBuilder {
+    let mut path = PathBuilder::fill();
+    path.move_to(point(px(x + 28.), px(y + 2.)));
+    path.line_to(point(px(x + 35.), px(y + 15.)));
+    path.line_to(point(px(x + 55.), px(y + 17.)));
+    path.line_to(point(px(x + 40.), px(y + 28.)));
+    path.line_to(point(px(x + 45.), px(y + 40.)));
+    path.line_to(point(px(x + 28.), px(y + 33.)));
+    path.line_to(point(px(x + 12.), px(y + 40.)));
+    path.line_to(point(px(x + 17.), px(y + 27.)));
+    path.line_to(point(px(x + 2.), px(y + 17.)));
+    path.line_to(point(px(x + 21.), px(y + 15.)));
+    path.close();
+    path
+}
+
+fn curved_path(x: f32, y: f32) -> PathBuilder {
+    let mut path = PathBuilder::fill();
+    path.move_to(point(px(x + 4.), px(y + 20.)));
+    path.cubic_bezier_to(
+        point(px(x + 28.), px(y + 1.)),
+        point(px(x + 10.), px(y + 1.)),
+        point(px(x + 13.), px(y + 2.)),
+    );
+    path.cubic_bezier_to(
+        point(px(x + 54.), px(y + 20.)),
+        point(px(x + 49.), px(y + 2.)),
+        point(px(x + 54.), px(y + 9.)),
+    );
+    path.cubic_bezier_to(
+        point(px(x + 4.), px(y + 20.)),
+        point(px(x + 54.), px(y + 34.)),
+        point(px(x + 10.), px(y + 39.)),
+    );
+    path.close();
+    path
+}
+
+fn open_stroke(x: f32, y: f32) -> PathBuilder {
+    let mut path = PathBuilder::stroke(px(2.5));
+    path.move_to(point(px(x + 4.), px(y + 32.)));
+    path.cubic_bezier_to(
+        point(px(x + 54.), px(y + 10.)),
+        point(px(x + 13.), px(y + 2.)),
+        point(px(x + 46.), px(y + 42.)),
+    );
+    path
+}
+
 impl Render for PaintingViewer {
-    fn render(&mut self, window: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
-        window.request_animation_frame();
-        let lines = self.default_lines.clone();
+    fn render(&mut self, _window: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        let paths = Arc::clone(&self.paths);
         div().size_full().child(
             canvas(
-                move |_, _, _| {},
+                |_, _, _| {},
                 move |_, _, window, _| {
-                    for (path, color) in lines {
-                        window.paint_path(path, color);
+                    for (path, color) in paths.iter() {
+                        window.paint_path(path.clone(), color.clone());
                     }
                 },
             )
@@ -74,39 +133,30 @@ impl Render for PaintingViewer {
     }
 }
 
-fn run_example() {
-    application().run(|cx| {
-        if !example_support::load_fonts(cx) {
-            return;
-        }
-        cx.open_window(
-            WindowOptions::new()
-                .titlebar(Some(TitlebarOptions {
-                    title: Some("Vulkan".into()),
-                    ..Default::default()
-                }))
-                .focus(true)
-                .window_bounds(Some(WindowBounds::Windowed(Bounds::centered(
-                    None,
-                    size(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT),
-                    cx,
-                )))),
-            |window, cx| cx.new(|cx| PaintingViewer::new(window, cx)),
-        )
-        .unwrap();
-        cx.activate(true);
-    });
+fn path_scenario() -> anyhow::Result<gpui_test::Scenario<PaintingViewer>> {
+    gpui_test::Scenario::new(
+        "path-rendering-stress",
+        "Path rendering stress",
+        size(px(1024.), px(768.)),
+        |_, cx: &mut App| cx.new(PaintingViewer::new),
+    )?
+    .checkpoint(
+        "default",
+        "256 concave, curved, and stroked paths",
+        Duration::ZERO,
+    )
 }
 
 #[cfg(not(target_family = "wasm"))]
 fn main() {
-    env_logger::init();
-    run_example();
+    example_prelude::run_example(path_scenario().expect("valid path scenario"))
+        .expect("run path rendering stress");
 }
 
 #[cfg(target_family = "wasm")]
 #[wasm_bindgen::prelude::wasm_bindgen(start)]
 pub fn start() {
     gpui_platform::web_init();
-    run_example();
+    example_prelude::run_example(path_scenario().expect("valid path scenario"))
+        .expect("run path rendering stress");
 }

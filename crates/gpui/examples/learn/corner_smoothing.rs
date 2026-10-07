@@ -5,14 +5,10 @@
 #[path = "../shared/prelude.rs"]
 mod example_prelude;
 
-use gpui::{
-    App, Bounds, Context, Window, WindowBounds, WindowOptions, actions, div, prelude::*, px, rgb,
-    rgba, size,
-};
+use gpui::{App, Context, Window, div, prelude::*, px, rgb, rgba, size};
 use palette::WithAlpha;
 use slider::Slider;
-
-actions!(app, [Quit]);
+use std::time::Duration;
 
 const INITIAL_SIZE: f32 = 200.;
 const MIN_SIZE: f32 = 20.;
@@ -150,24 +146,89 @@ impl Render for CornerSmoothingExample {
     }
 }
 
-fn main() {
-    gpui_platform::application().run(|cx: &mut App| {
-        let bounds = Bounds::centered(None, size(px(500.), px(650.)), cx);
-        cx.open_window(
-            WindowOptions::new().window_bounds(Some(WindowBounds::Windowed(bounds))),
-            |_, cx| {
-                cx.new(|_| CornerSmoothingExample {
-                    corner_smoothing: 1.,
-                    corner_radius: 40.,
-                    width: INITIAL_SIZE,
-                    height: INITIAL_SIZE,
-                })
-            },
-        )
-        .expect("Failed to open window");
+fn smoothing_scenario() -> anyhow::Result<gpui_test::Scenario<CornerSmoothingExample>> {
+    gpui_test::Scenario::new(
+        "corner-smoothing",
+        "Corner smoothing",
+        size(px(500.), px(650.)),
+        |_, cx: &mut App| {
+            cx.new(|_| CornerSmoothingExample {
+                corner_smoothing: 1.,
+                corner_radius: 40.,
+                width: INITIAL_SIZE,
+                height: INITIAL_SIZE,
+            })
+        },
+    )?
+    .checkpoint("default", "Rounded rectangle", Duration::ZERO)?
+    .checkpoint_with(
+        "smoothing-midpoint",
+        "Mouse input changes corner smoothing",
+        Duration::from_millis(100),
+        |cx, view, window| {
+            gpui_test::dispatch_click_on(cx, window.into(), "corner-smoothing-slider")?;
+            let smoothing = view.read_with(cx, |view, _| view.corner_smoothing);
+            anyhow::ensure!(
+                (smoothing - 0.5).abs() < 0.01,
+                "slider center set smoothing to {smoothing}"
+            );
+            Ok(())
+        },
+    )?
+    .checkpoint_with(
+        "minimum-size-clamps-radius",
+        "Reducing width clamps the corner radius",
+        Duration::from_millis(200),
+        |cx, view, window| {
+            set_slider(cx, window.into(), "width-slider", 0.)?;
+            let (width, radius) = view.read_with(cx, |view, _| (view.width, view.corner_radius));
+            anyhow::ensure!(width == MIN_SIZE, "minimum width was {width}");
+            anyhow::ensure!(radius <= MIN_SIZE / 2., "radius was not clamped: {radius}");
+            Ok(())
+        },
+    )
+}
 
-        example_prelude::init_example(cx, "Corner Smoothing");
-    });
+fn main() {
+    example_prelude::run_example(smoothing_scenario().expect("valid smoothing scenario"))
+        .expect("run corner smoothing example");
+}
+
+fn set_slider(
+    cx: &mut gpui::HeadlessAppContext,
+    window: gpui::AnyWindowHandle,
+    selector: &str,
+    fraction: f32,
+) -> anyhow::Result<()> {
+    let bounds = cx
+        .debug_bounds(window, selector)?
+        .ok_or_else(|| anyhow::anyhow!("slider {selector:?} is missing"))?;
+    let position = gpui::point(
+        bounds.left() + bounds.size.width * fraction,
+        bounds.center().y,
+    );
+    gpui_test::dispatch_input(
+        cx,
+        window,
+        gpui::PlatformInput::MouseDown(gpui::MouseDownEvent {
+            button: gpui::MouseButton::Left,
+            position,
+            modifiers: gpui::Modifiers::default(),
+            click_count: 1,
+            first_mouse: false,
+        }),
+    )?;
+    gpui_test::dispatch_input(
+        cx,
+        window,
+        gpui::PlatformInput::MouseUp(gpui::MouseUpEvent {
+            button: gpui::MouseButton::Left,
+            position,
+            modifiers: gpui::Modifiers::default(),
+            click_count: 1,
+        }),
+    )?;
+    Ok(())
 }
 
 mod slider {
@@ -256,6 +317,7 @@ mod slider {
 
             let track = div()
                 .id(id)
+                .debug_selector(move || id.into())
                 .relative()
                 .w_full()
                 .h(px(24.))

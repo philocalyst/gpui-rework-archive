@@ -766,13 +766,14 @@ mod renderer {
         use gpui::FontWidth;
 
         const IBM_PLEX: &[u8] =
-            include_bytes!("../../../assets/fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf");
+            include_bytes!("../../gpui_test/assets/fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf");
         const IBM_PLEX_ITALIC: &[u8] =
-            include_bytes!("../../../assets/fonts/ibm-plex-sans/IBMPlexSans-Italic.ttf");
-        const SOURCE_SERIF: &[u8] =
-            include_bytes!("../../../assets/fonts/source-serif-4/SourceSerif4[opsz,wght].ttf");
+            include_bytes!("../../gpui_test/assets/fonts/ibm-plex-sans/IBMPlexSans-Italic.ttf");
+        const SOURCE_SERIF: &[u8] = include_bytes!(
+            "../../gpui_test/assets/fonts/source-serif-4/SourceSerif4[opsz,wght].ttf"
+        );
         const NOTO_SANS: &[u8] =
-            include_bytes!("../../../assets/fonts/noto-sans/NotoSans[wdth,wght].subset.ttf");
+            include_bytes!("../../gpui_test/assets/fonts/noto-sans/NotoSans[wdth,wght].subset.ttf");
 
         #[test]
         fn collection_faces_are_selected_and_compacted_by_physical_index() {

@@ -1658,6 +1658,16 @@ impl PlatformWindow for X11Window {
         xcb_flush(&self.0.xcb);
     }
 
+    fn is_visible(&self) -> Option<bool> {
+        self.0
+            .xcb
+            .get_window_attributes(self.0.x_window)
+            .ok()?
+            .reply()
+            .ok()
+            .map(|attributes| attributes.map_state != xproto::MapState::UNMAPPED)
+    }
+
     fn is_subpixel_rendering_supported(&self) -> bool {
         self.0
             .state

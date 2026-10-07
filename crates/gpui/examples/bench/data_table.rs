@@ -1,493 +1,364 @@
-#![cfg_attr(target_family = "wasm", no_main)]
+//! A deterministic 10,000-row table with sortable headers, selection, and virtualized rows.
 
-#[path = "../example_support/fonts.rs"]
-mod example_support;
-
-use std::{ops::Range, rc::Rc, time::Duration};
+#[path = "../shared/prelude.rs"]
+mod example_prelude;
 
 use gpui::{
-    App, Bounds, Context, MouseDownEvent, MouseMoveEvent, MouseUpEvent, Pixels, Point, Render,
-    SharedString, UniformListScrollHandle, Window, WindowBounds, WindowOptions, canvas, div, point,
-    prelude::*, px, rgb, size, uniform_list,
+    App, Context, Render, ScrollStrategy, UniformListScrollHandle, Window, div, prelude::*, px,
+    rgb, size, uniform_list,
 };
-use gpui_platform::application;
+use std::ops::Range;
+use std::time::Duration;
 
-const TOTAL_ITEMS: usize = 10000;
-const SCROLLBAR_THUMB_WIDTH: Pixels = px(8.);
-const SCROLLBAR_THUMB_HEIGHT: Pixels = px(100.);
+const ROW_HEIGHT: f32 = 32.;
 
-pub struct Quote {
-    name: SharedString,
-    symbol: SharedString,
-    last_done: f64,
-    prev_close: f64,
-    open: f64,
-    high: f64,
-    low: f64,
-    timestamp: Duration,
-    volume: i64,
-    turnover: f64,
-    ttm: f64,
-    market_cap: f64,
-    float_cap: f64,
-    shares: f64,
-    pb: f64,
-    pe: f64,
-    eps: f64,
-    dividend: f64,
-    dividend_yield: f64,
-    dividend_per_share: f64,
-    dividend_date: SharedString,
-    dividend_payment: f64,
+struct Quote {
+    symbol: String,
+    name: &'static str,
+    price: f64,
+    change: f64,
+    volume: u32,
 }
 
 impl Quote {
-    pub fn random() -> Self {
-        use rand::Rng;
-        let mut rng = rand::rng();
-        // simulate a base price in a realistic range
-        let prev_close = rng.random_range(100.0..200.0);
-        let change = rng.random_range(-5.0..5.0);
-        let last_done = prev_close + change;
-        let open = prev_close + rng.random_range(-3.0..3.0);
-        let high = (prev_close + rng.random_range::<f64, _>(0.0..10.0)).max(open);
-        let low = (prev_close - rng.random_range::<f64, _>(0.0..10.0)).min(open);
-        let timestamp = Duration::from_secs(rng.random_range(0..86400));
-        let volume = rng.random_range(1_000_000..100_000_000);
-        let turnover = last_done * volume as f64;
-        let symbol = {
-            let mut ticker = String::new();
-            if rng.random_bool(0.5) {
-                ticker.push_str(&format!(
-                    "{:03}.{}",
-                    rng.random_range(100..1000),
-                    rng.random_range(0..10)
-                ));
-            } else {
-                ticker.push_str(&format!(
-                    "{}{}",
-                    rng.random_range('A'..='Z'),
-                    rng.random_range('A'..='Z')
-                ));
-            }
-            ticker.push_str(&format!(".{}", rng.random_range('A'..='Z')));
-            ticker
-        };
-        let name = format!(
-            "{} {} - #{}",
-            symbol,
-            rng.random_range(1..100),
-            rng.random_range(10000..100000)
-        );
-        let ttm = rng.random_range(0.0..10.0);
-        let market_cap = rng.random_range(1_000_000.0..10_000_000.0);
-        let float_cap = market_cap + rng.random_range(1_000.0..10_000.0);
-        let shares = rng.random_range(100.0..1000.0);
-        let pb = market_cap / shares;
-        let pe = market_cap / shares;
-        let eps = market_cap / shares;
-        let dividend = rng.random_range(0.0..10.0);
-        let dividend_yield = rng.random_range(0.0..10.0);
-        let dividend_per_share = rng.random_range(0.0..10.0);
-        let dividend_date = SharedString::new(format!(
-            "{}-{}-{}",
-            rng.random_range(2000..2023),
-            rng.random_range(1..12),
-            rng.random_range(1..28)
-        ));
-        let dividend_payment = rng.random_range(0.0..10.0);
-
+    fn sample(index: usize) -> Self {
+        let change = ((index * 37 % 900) as f64 - 450.) / 100.;
         Self {
-            name: name.into(),
-            symbol: symbol.into(),
-            last_done,
-            prev_close,
-            open,
-            high,
-            low,
-            timestamp,
-            volume,
-            turnover,
-            pb,
-            pe,
-            eps,
-            ttm,
-            market_cap,
-            float_cap,
-            shares,
-            dividend,
-            dividend_yield,
-            dividend_per_share,
-            dividend_date,
-            dividend_payment,
+            symbol: format!(
+                "{:04}.{}",
+                index % 10_000,
+                char::from(b'A' + (index % 26) as u8)
+            ),
+            name: ["Northstar", "Harbor", "Cedar", "Pioneer", "Meridian"][index % 5],
+            price: 18. + (index * 73 % 14_000) as f64 / 100.,
+            change,
+            volume: 100_000 + (index * 91_337 % 90_000_000) as u32,
         }
     }
-
-    fn change(&self) -> f64 {
-        (self.last_done - self.prev_close) / self.prev_close * 100.0
-    }
-
-    fn change_color(&self) -> gpui::Hsla {
-        if self.change() > 0.0 {
-            gpui::green()
-        } else {
-            gpui::red()
-        }
-    }
-
-    fn turnover_ratio(&self) -> f64 {
-        self.volume as f64 / self.turnover * 100.0
-    }
 }
 
-#[derive(IntoElement)]
-struct TableRow {
-    ix: usize,
-    quote: Rc<Quote>,
-}
-impl TableRow {
-    fn new(ix: usize, quote: Rc<Quote>) -> Self {
-        Self { ix, quote }
-    }
-
-    fn render_cell(&self, key: &str, width: Pixels, color: gpui::Hsla) -> impl IntoElement {
-        div()
-            .whitespace_nowrap()
-            .truncate()
-            .w(width)
-            .px_1()
-            .child(match key {
-                "id" => div().child(format!("{}", self.ix)),
-                "symbol" => div().child(self.quote.symbol.clone()),
-                "name" => div().child(self.quote.name.clone()),
-                "last_done" => div()
-                    .text_color(color)
-                    .child(format!("{:.3}", self.quote.last_done)),
-                "prev_close" => div()
-                    .text_color(color)
-                    .child(format!("{:.3}", self.quote.prev_close)),
-                "change" => div()
-                    .text_color(color)
-                    .child(format!("{:.2}%", self.quote.change())),
-                "timestamp" => div()
-                    .text_color(color)
-                    .child(format!("{:?}", self.quote.timestamp.as_secs())),
-                "open" => div()
-                    .text_color(color)
-                    .child(format!("{:.2}", self.quote.open)),
-                "low" => div()
-                    .text_color(color)
-                    .child(format!("{:.2}", self.quote.low)),
-                "high" => div()
-                    .text_color(color)
-                    .child(format!("{:.2}", self.quote.high)),
-                "ttm" => div()
-                    .text_color(color)
-                    .child(format!("{:.2}", self.quote.ttm)),
-                "eps" => div()
-                    .text_color(color)
-                    .child(format!("{:.2}", self.quote.eps)),
-                "market_cap" => {
-                    div().child(format!("{:.2} M", self.quote.market_cap / 1_000_000.0))
-                }
-                "float_cap" => div().child(format!("{:.2} M", self.quote.float_cap / 1_000_000.0)),
-                "turnover" => div().child(format!("{:.2} M", self.quote.turnover / 1_000_000.0)),
-                "volume" => div().child(format!("{:.2} M", self.quote.volume as f64 / 1_000_000.0)),
-                "turnover_ratio" => div().child(format!("{:.2}%", self.quote.turnover_ratio())),
-                "pe" => div().child(format!("{:.2}", self.quote.pe)),
-                "pb" => div().child(format!("{:.2}", self.quote.pb)),
-                "shares" => div().child(format!("{:.2}", self.quote.shares)),
-                "dividend" => div().child(format!("{:.2}", self.quote.dividend)),
-                "yield" => div().child(format!("{:.2}%", self.quote.dividend_yield)),
-                "dividend_per_share" => {
-                    div().child(format!("{:.2}", self.quote.dividend_per_share))
-                }
-                "dividend_date" => div().child(format!("{}", self.quote.dividend_date)),
-                "dividend_payment" => div().child(format!("{:.2}", self.quote.dividend_payment)),
-                _ => div().child("--"),
-            })
-    }
-}
-
-const FIELDS: [(&str, f32); 24] = [
-    ("id", 64.),
-    ("symbol", 64.),
-    ("name", 180.),
-    ("last_done", 80.),
-    ("prev_close", 80.),
-    ("open", 80.),
-    ("low", 80.),
-    ("high", 80.),
-    ("ttm", 50.),
-    ("market_cap", 96.),
-    ("float_cap", 96.),
-    ("turnover", 120.),
-    ("volume", 100.),
-    ("turnover_ratio", 96.),
-    ("pe", 64.),
-    ("pb", 64.),
-    ("eps", 64.),
-    ("shares", 96.),
-    ("dividend", 64.),
-    ("yield", 64.),
-    ("dividend_per_share", 64.),
-    ("dividend_date", 96.),
-    ("dividend_payment", 64.),
-    ("timestamp", 120.),
-];
-
-impl RenderOnce for TableRow {
-    fn render(self, _window: &mut Window, _cx: &mut App) -> impl IntoElement {
-        let color = self.quote.change_color();
-        div()
-            .flex()
-            .flex_row()
-            .border_b_1()
-            .border_color(rgb(0xE0E0E0))
-            .bg(if self.ix.is_multiple_of(2) {
-                rgb(0xFFFFFF)
-            } else {
-                rgb(0xFAFAFA)
-            })
-            .py_0p5()
-            .px_2()
-            .children(FIELDS.map(|(key, width)| self.render_cell(key, px(width), color)))
-    }
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum SortBy {
+    Symbol,
+    Price,
+    Change,
+    Volume,
 }
 
 struct DataTable {
-    /// Use `Rc` to share the same quote data across multiple items, avoid cloning.
-    quotes: Vec<Rc<Quote>>,
-    visible_range: Range<usize>,
-    scroll_handle: UniformListScrollHandle,
-    /// The position in thumb bounds when dragging start mouse down.
-    drag_position: Option<Point<Pixels>>,
+    rows: Vec<Quote>,
+    order: Vec<usize>,
+    sort_by: SortBy,
+    descending: bool,
+    selected: Option<usize>,
+    scroll: UniformListScrollHandle,
 }
 
 impl DataTable {
     fn new() -> Self {
+        let rows: Vec<_> = (0..10_000).map(Quote::sample).collect();
         Self {
-            quotes: Vec::new(),
-            visible_range: 0..0,
-            scroll_handle: UniformListScrollHandle::new(),
-            drag_position: None,
+            order: (0..rows.len()).collect(),
+            rows,
+            sort_by: SortBy::Symbol,
+            descending: false,
+            selected: None,
+            scroll: UniformListScrollHandle::new(),
         }
     }
 
-    fn generate(&mut self) {
-        self.quotes = (0..TOTAL_ITEMS).map(|_| Rc::new(Quote::random())).collect();
-    }
-
-    fn table_bounds(&self) -> Bounds<Pixels> {
-        self.scroll_handle.0.borrow().base_handle.bounds()
-    }
-
-    fn scroll_top(&self) -> Pixels {
-        self.scroll_handle.0.borrow().base_handle.offset().y
-    }
-
-    fn scroll_height(&self) -> Pixels {
-        self.scroll_handle
-            .0
-            .borrow()
-            .last_item_size
-            .unwrap_or_default()
-            .contents
-            .height
-    }
-
-    fn render_scrollbar(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let scroll_height = self.scroll_height();
-        let table_bounds = self.table_bounds();
-        let table_height = table_bounds.size.height;
-        if table_height == px(0.) {
-            return div().id("scrollbar");
+    fn sort(&mut self, field: SortBy, cx: &mut Context<Self>) {
+        if field == self.sort_by {
+            self.descending = !self.descending;
+        } else {
+            self.sort_by = field;
+            self.descending = false;
         }
+        let rows = &self.rows;
+        let descending = self.descending;
+        self.order.sort_by(|left, right| {
+            let a = &rows[*left];
+            let b = &rows[*right];
+            let ordering = match field {
+                SortBy::Symbol => a.symbol.cmp(&b.symbol),
+                SortBy::Price => a.price.total_cmp(&b.price),
+                SortBy::Change => a.change.total_cmp(&b.change),
+                SortBy::Volume => a.volume.cmp(&b.volume),
+            };
+            if descending {
+                ordering.reverse()
+            } else {
+                ordering
+            }
+        });
+        cx.notify();
+    }
 
-        let percentage = -self.scroll_top() / scroll_height;
-        let offset_top = (table_height * percentage).clamp(
-            px(4.),
-            (table_height - SCROLLBAR_THUMB_HEIGHT - px(4.)).max(px(4.)),
-        );
-        let entity = cx.entity();
-        let scroll_handle = self.scroll_handle.0.borrow().base_handle.clone();
+    fn scroll_offset_y(&self) -> f32 {
+        f32::from(self.scroll.0.borrow().base_handle.offset().y)
+    }
 
+    fn prices_sorted(&self, descending: bool) -> bool {
+        self.order.windows(2).all(|pair| {
+            let left = self.rows[pair[0]].price;
+            let right = self.rows[pair[1]].price;
+            if descending {
+                left >= right
+            } else {
+                left <= right
+            }
+        })
+    }
+
+    fn header(
+        &self,
+        id: &'static str,
+        label: &'static str,
+        field: SortBy,
+        cx: &mut Context<Self>,
+    ) -> gpui::Stateful<gpui::Div> {
+        let active = field == self.sort_by;
+        let direction = if self.descending { " ↓" } else { " ↑" };
         div()
-            .id("scrollbar")
-            .absolute()
-            .top(offset_top)
-            .right_1()
-            .h(SCROLLBAR_THUMB_HEIGHT)
-            .w(SCROLLBAR_THUMB_WIDTH)
-            .bg(rgb(0xC0C0C0))
-            .hover(|this| this.bg(rgb(0xA0A0A0)))
-            .rounded_lg()
-            .child(
-                canvas(
-                    |_, _, _| (),
-                    move |thumb_bounds, _, window, _| {
-                        window.on_mouse_event({
-                            let entity = entity.clone();
-                            move |ev: &MouseDownEvent, _, _, cx| {
-                                if !thumb_bounds.contains(&ev.position) {
-                                    return;
-                                }
-
-                                entity.update(cx, |this, _| {
-                                    this.drag_position = Some(
-                                        ev.position - thumb_bounds.origin - table_bounds.origin,
-                                    );
-                                })
-                            }
-                        });
-                        window.on_mouse_event({
-                            let entity = entity.clone();
-                            move |_: &MouseUpEvent, _, _, cx| {
-                                entity.update(cx, |this, _| {
-                                    this.drag_position = None;
-                                })
-                            }
-                        });
-
-                        window.on_mouse_event(move |ev: &MouseMoveEvent, _, _, cx| {
-                            if !ev.dragging() {
-                                return;
-                            }
-
-                            let Some(drag_pos) = entity.read(cx).drag_position else {
-                                return;
-                            };
-
-                            let inside_offset = drag_pos.y;
-                            let percentage = ((ev.position.y - table_bounds.origin.y
-                                + inside_offset)
-                                / (table_bounds.size.height))
-                                .clamp(0., 1.);
-
-                            let offset_y = ((scroll_height - table_bounds.size.height)
-                                * percentage)
-                                .clamp(px(0.), scroll_height - SCROLLBAR_THUMB_HEIGHT);
-                            scroll_handle.set_offset(point(px(0.), -offset_y));
-                            cx.notify(entity.entity_id());
-                        })
-                    },
-                )
-                .size_full(),
-            )
+            .id(id)
+            .debug_selector(|| id.into())
+            .flex_1()
+            .px_3()
+            .py_2()
+            .text_xs()
+            .font_weight(gpui::FontWeight::SEMIBOLD)
+            .text_color(if active { rgb(0x1d4ed8) } else { rgb(0x5b6472) })
+            .cursor_pointer()
+            .child(if active {
+                format!("{label}{direction}")
+            } else {
+                label.to_string()
+            })
+            .on_click(cx.listener(move |this, _, _, cx| this.sort(field, cx)))
     }
 }
 
 impl Render for DataTable {
-    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let header = div()
+            .flex()
+            .bg(rgb(0xe9edf3))
+            .child(self.header("sort-symbol", "Symbol", SortBy::Symbol, cx))
+            .child(div().flex_1().px_3().py_2().text_xs().child("Company"))
+            .child(self.header("sort-price", "Price", SortBy::Price, cx))
+            .child(self.header("sort-change", "Change", SortBy::Change, cx))
+            .child(self.header("sort-volume", "Volume", SortBy::Volume, cx));
         div()
-            .bg(gpui::white())
-            .text_sm()
             .size_full()
-            .p_4()
-            .gap_2()
             .flex()
             .flex_col()
-            .child(format!(
-                "Total {} items, visible range: {:?}",
-                self.quotes.len(),
-                self.visible_range
-            ))
+            .gap_2()
+            .p_4()
+            .bg(rgb(0xf7f8fa))
+            .child(div().text_sm().child(format!(
+                "{} rows · selected {:?}",
+                self.rows.len(),
+                self.selected
+            )))
+            .child(header)
             .child(
-                div()
-                    .flex()
-                    .flex_col()
-                    .flex_1()
-                    .overflow_hidden()
-                    .border_1()
-                    .border_color(rgb(0xE0E0E0))
-                    .rounded_sm()
-                    .child(
-                        div()
-                            .flex()
-                            .flex_row()
-                            .w_full()
-                            .overflow_hidden()
-                            .border_b_1()
-                            .border_color(rgb(0xE0E0E0))
-                            .text_color(rgb(0x555555))
-                            .bg(rgb(0xF0F0F0))
-                            .py_1()
-                            .px_2()
-                            .text_xs()
-                            .children(FIELDS.map(|(key, width)| {
+                uniform_list(
+                    "quotes",
+                    self.order.len(),
+                    cx.processor(|this, range: Range<usize>, _, cx| {
+                        range
+                            .map(|position| {
+                                let index = this.order[position];
+                                let quote = &this.rows[index];
+                                let selected = this.selected == Some(index);
+                                let symbol = quote.symbol.clone();
+                                let company = quote.name;
+                                let price = quote.price;
+                                let change = quote.change;
+                                let volume = quote.volume;
+                                let change_color = if change >= 0. {
+                                    rgb(0x16834c)
+                                } else {
+                                    rgb(0xc34242)
+                                };
                                 div()
-                                    .whitespace_nowrap()
-                                    .flex_shrink_0()
-                                    .truncate()
-                                    .px_1()
-                                    .w(px(width))
-                                    .child(key.replace("_", " ").to_uppercase())
-                            })),
-                    )
-                    .child(
-                        div()
-                            .relative()
-                            .size_full()
-                            .child(
-                                uniform_list(
-                                    "items",
-                                    self.quotes.len(),
-                                    cx.processor(move |this, range: Range<usize>, _, _| {
-                                        this.visible_range = range.clone();
-                                        let mut items = Vec::with_capacity(range.end - range.start);
-                                        for i in range {
-                                            if let Some(quote) = this.quotes.get(i) {
-                                                items.push(TableRow::new(i, quote.clone()));
-                                            }
-                                        }
-                                        items
-                                    }),
-                                )
-                                .size_full()
-                                .track_scroll(&self.scroll_handle),
-                            )
-                            .child(self.render_scrollbar(window, cx)),
-                    ),
+                                    .id(("quote", index))
+                                    .debug_selector(move || {
+                                        format!("quote-row-position-{position}")
+                                    })
+                                    .flex()
+                                    .items_center()
+                                    .h(px(ROW_HEIGHT))
+                                    .border_b_1()
+                                    .border_color(rgb(0xe5e7eb))
+                                    .bg(if selected {
+                                        rgb(0xdbeafe)
+                                    } else if position % 2 == 0 {
+                                        rgb(0xffffff)
+                                    } else {
+                                        rgb(0xf8fafc)
+                                    })
+                                    .child(div().flex_1().px_3().child(symbol))
+                                    .child(div().flex_1().px_3().child(company))
+                                    .child(div().flex_1().px_3().child(format!("${price:.2}")))
+                                    .child(
+                                        div()
+                                            .flex_1()
+                                            .px_3()
+                                            .text_color(change_color)
+                                            .child(format!("{change:+.2}%")),
+                                    )
+                                    .child(
+                                        div()
+                                            .flex_1()
+                                            .px_3()
+                                            .text_color(rgb(0x5b6472))
+                                            .child(format!("{volume} shares")),
+                                    )
+                                    .cursor_pointer()
+                                    .on_click(cx.listener(move |this, _, _, cx| {
+                                        this.selected = Some(index);
+                                        cx.notify();
+                                    }))
+                            })
+                            .collect()
+                    }),
+                )
+                .debug_selector(|| "quotes-viewport".into())
+                .flex_1()
+                .min_h_0()
+                .track_scroll(&self.scroll),
             )
     }
 }
 
-fn run_example() {
-    application().run(|cx: &mut App| {
-        if !example_support::load_fonts(cx) {
-            return;
-        }
-        cx.open_window(
-            WindowOptions::new()
-                .focus(true)
-                .window_bounds(Some(WindowBounds::Windowed(Bounds::centered(
-                    None,
-                    size(px(1280.0), px(1000.0)),
-                    cx,
-                )))),
-            |_, cx| {
-                cx.new(|_| {
-                    let mut table = DataTable::new();
-                    table.generate();
-                    table
-                })
-            },
-        )
-        .unwrap();
-
-        cx.activate(true);
-    });
+fn scenario() -> anyhow::Result<gpui_test::Scenario<DataTable>> {
+    gpui_test::Scenario::new(
+        "data-table",
+        "Data table",
+        size(px(920.), px(600.)),
+        |_, cx: &mut App| cx.new(|_| DataTable::new()),
+    )?
+    .checkpoint("default", "Symbol-sorted virtual rows", Duration::ZERO)?
+    .checkpoint_with(
+        "price-sort",
+        "Sort by ascending price",
+        Duration::from_millis(100),
+        |cx, table, window| {
+            gpui_test::dispatch_click_on(cx, window.into(), "sort-price")?;
+            anyhow::ensure!(
+                table.read_with(cx, |table, _| {
+                    table.sort_by == SortBy::Price
+                        && !table.descending
+                        && table.prices_sorted(false)
+                }),
+                "first price click did not sort rows ascending"
+            );
+            Ok(())
+        },
+    )?
+    .checkpoint_with(
+        "price-sort-descending",
+        "Clicking the active sort reverses it",
+        Duration::from_millis(200),
+        |cx, table, window| {
+            gpui_test::dispatch_click_on(cx, window.into(), "sort-price")?;
+            anyhow::ensure!(
+                table.read_with(cx, |table, _| table.descending && table.prices_sorted(true)),
+                "second price click did not sort rows descending"
+            );
+            Ok(())
+        },
+    )?
+    .checkpoint_with(
+        "selected-row",
+        "Select the first visible quote",
+        Duration::from_millis(300),
+        |cx, table, window| {
+            gpui_test::dispatch_click_on(cx, window.into(), "quote-row-position-0")?;
+            anyhow::ensure!(
+                table.read_with(cx, |table, _| table.selected
+                    == table.order.first().copied()),
+                "row click did not select the first visible quote"
+            );
+            Ok(())
+        },
+    )?
+    .checkpoint_with(
+        "sort-keeps-selection",
+        "Sorting keeps selection attached to the same row identity",
+        Duration::from_millis(400),
+        |cx, table, window| {
+            let selected = table.read_with(cx, |table, _| table.selected);
+            gpui_test::dispatch_click_on(cx, window.into(), "sort-symbol")?;
+            anyhow::ensure!(
+                table.read_with(cx, |table, _| table.selected) == selected,
+                "sort changed the selected row identity"
+            );
+            Ok(())
+        },
+    )?
+    .checkpoint_with(
+        "wheel-scroll",
+        "Wheel input moves the real virtual-list viewport",
+        Duration::from_millis(500),
+        |cx, table, window| {
+            let bounds = cx
+                .debug_bounds(window.into(), "quotes-viewport")?
+                .ok_or_else(|| anyhow::anyhow!("virtual-list viewport is missing"))?;
+            let before = table.read_with(cx, |table, _| table.scroll_offset_y());
+            gpui_test::dispatch_input(
+                cx,
+                window.into(),
+                gpui::PlatformInput::ScrollWheel(gpui::ScrollWheelEvent {
+                    position: bounds.center(),
+                    delta: gpui::ScrollDelta::Pixels(gpui::point(px(0.), px(-280.))),
+                    modifiers: gpui::Modifiers::default(),
+                    touch_phase: gpui::TouchPhase::Moved,
+                }),
+            )?;
+            cx.draw_window(window.into())?;
+            let (after, scrollable) = table.read_with(cx, |table, _| {
+                (table.scroll_offset_y(), table.scroll.is_scrollable())
+            });
+            anyhow::ensure!(
+                after < before,
+                "wheel did not move the viewport: before={before}, after={after}, \
+                 scrollable={scrollable}, bounds={bounds:?}"
+            );
+            Ok(())
+        },
+    )?
+    .checkpoint_with(
+        "scroll-far",
+        "Scroll handle renders a deep virtual row",
+        Duration::from_millis(600),
+        |cx, table, window| {
+            table.update(cx, |table, _| {
+                table.scroll.scroll_to_item(500, ScrollStrategy::Top);
+            });
+            let requested_row =
+                table.read_with(cx, |table, _| table.scroll.logical_scroll_top_index());
+            anyhow::ensure!(
+                requested_row == 500,
+                "scroll handle requested row {requested_row}"
+            );
+            cx.draw_window(window.into())?;
+            let (offset, scrollable) = table.read_with(cx, |table, _| {
+                (table.scroll_offset_y(), table.scroll.is_scrollable())
+            });
+            anyhow::ensure!(offset < 0., "wheel input left offset at {offset}");
+            anyhow::ensure!(
+                cx.debug_bounds(window.into(), "quote-row-position-500")?
+                    .is_some(),
+                "deep scroll did not mount row 500; offset={offset}, scrollable={scrollable}"
+            );
+            Ok(())
+        },
+    )
 }
 
-#[cfg(not(target_family = "wasm"))]
 fn main() {
-    env_logger::init();
-    run_example();
-}
-
-#[cfg(target_family = "wasm")]
-#[wasm_bindgen::prelude::wasm_bindgen(start)]
-pub fn start() {
-    gpui_platform::web_init();
-    run_example();
+    example_prelude::run_example(scenario().expect("valid table scenario"))
+        .expect("run data table example");
 }

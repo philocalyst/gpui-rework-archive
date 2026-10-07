@@ -627,7 +627,7 @@ fn supported_dual_source_blending(device: &wgpu::Device, requested: bool) -> boo
     requested && supported
 }
 
-fn scene_blend_state(alpha_mode: wgpu::CompositeAlphaMode) -> wgpu::BlendState {
+pub(super) fn scene_blend_state(alpha_mode: wgpu::CompositeAlphaMode) -> wgpu::BlendState {
     let source_color_factor = if alpha_mode == wgpu::CompositeAlphaMode::PreMultiplied {
         wgpu::BlendFactor::One
     } else {
@@ -641,11 +641,6 @@ fn premultiplied_composite_blend_state() -> wgpu::BlendState {
 }
 
 fn source_over_blend_state(source_color_factor: wgpu::BlendFactor) -> wgpu::BlendState {
-    #[cfg(any(target_os = "macos", target_os = "windows"))]
-    let destination_alpha_factor = wgpu::BlendFactor::One;
-    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
-    let destination_alpha_factor = wgpu::BlendFactor::OneMinusSrcAlpha;
-
     wgpu::BlendState {
         color: wgpu::BlendComponent {
             src_factor: source_color_factor,
@@ -654,7 +649,7 @@ fn source_over_blend_state(source_color_factor: wgpu::BlendFactor) -> wgpu::Blen
         },
         alpha: wgpu::BlendComponent {
             src_factor: wgpu::BlendFactor::One,
-            dst_factor: destination_alpha_factor,
+            dst_factor: wgpu::BlendFactor::OneMinusSrcAlpha,
             operation: wgpu::BlendOperation::Add,
         },
     }
@@ -688,11 +683,6 @@ fn subpixel_blend_state() -> wgpu::BlendState {
             operation: wgpu::BlendOperation::Add,
         },
     }
-}
-
-#[cfg(all(test, any(target_os = "macos", target_os = "windows")))]
-pub(super) fn desktop_scene_blend_state(alpha_mode: wgpu::CompositeAlphaMode) -> wgpu::BlendState {
-    scene_blend_state(alpha_mode)
 }
 
 #[cfg(all(test, not(target_family = "wasm")))]

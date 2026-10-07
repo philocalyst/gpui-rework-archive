@@ -1,0 +1,81 @@
+# Runs only after the unprivileged capture workflow. This workflow checks out
+# trusted default-branch code and never executes code from the tested revision.
+name: Publish visual report
+
+on:
+  workflow_run:
+    workflows: [Visual tests]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: write
+  issues: write
+  pull-requests: read
+
+jobs:
+  report:
+    if: github.event.workflow_run.conclusion != 'cancelled'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Resolve authoritative PR and head revision
+        id: run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_ENTERPRISE_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          REPOSITORY: ${{ github.repository }}
+          GITHUB_API_URL: ${{ github.api_url }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+        run: |
+          set -euo pipefail
+          server_host="${GITHUB_SERVER_URL#*://}"
+          run_json="$(gh api --hostname "$server_host" "repos/$REPOSITORY/actions/runs/$RUN_ID")"
+          pr_number="$(jq -r '.pull_requests[0].number // empty' <<<"$run_json")"
+          head_sha="$(jq -r '.head_sha' <<<"$run_json")"
+          if [[ -z "$pr_number" ]]; then
+            echo "No associated pull request; no PR report is posted."
+            exit 0
+          fi
+          current_sha="$(gh api --hostname "$server_host" "repos/$REPOSITORY/pulls/$pr_number" --jq '.head.sha')"
+          if [[ "$current_sha" != "$head_sha" ]]; then
+            echo "The pull request has moved since this run; its report is stale."
+            exit 0
+          fi
+          echo "number=$pr_number" >> "$GITHUB_OUTPUT"
+          echo "sha=$head_sha" >> "$GITHUB_OUTPUT"
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Download report artifact
+        id: download
+        if: steps.run.outputs.number != ''
+        continue-on-error: true
+        uses: actions/download-artifact@v6
+        with:
+          name: visual-report
+          path: visual-report
+          run-id: ${{ steps.run.outputs.run_id }}
+          github-token: ${{ github.token }}
+
+      - name: Publish hosted report and update PR comment
+        if: steps.run.outputs.number != '' && steps.download.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          GITHUB_API_URL: ${{ github.api_url }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+          PR_NUMBER: ${{ steps.run.outputs.number }}
+          HEAD_SHA: ${{ steps.run.outputs.sha }}
+          RUN_ID: ${{ steps.run.outputs.run_id }}
+          PAGES_BRANCH: ${{ vars.GPUI_VISUAL_PAGES_BRANCH }}
+          PAGES_URL: ${{ vars.GPUI_VISUAL_PAGES_URL }}
+        run: python3 scripts/testing/post_github_report.py visual-report
+
+      - name: Report when no capture artifact exists
+        if: steps.run.outputs.number != '' && steps.download.outcome != 'success'
+        run: echo "::warning::No visual report artifact was uploaded by the capture workflow."

@@ -2,6 +2,11 @@ mod app_menu;
 mod keyboard;
 mod keystroke;
 
+#[cfg(any(test, feature = "test-support"))]
+mod diagnostics;
+#[cfg(any(test, feature = "test-support"))]
+pub use diagnostics::*;
+
 #[cfg(all(target_os = "linux", feature = "wayland"))]
 #[expect(missing_docs)]
 pub mod layer_shell;
@@ -914,6 +919,10 @@ pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
     /// The default implementation does nothing for platforms that do not support
     /// changing window visibility at runtime.
     fn set_visible(&self, _visible: bool) {}
+    /// Returns native visibility when the platform can report it.
+    fn is_visible(&self) -> Option<bool> {
+        None
+    }
     fn minimize(&self);
     fn zoom(&self);
     fn toggle_fullscreen(&self);
@@ -1994,7 +2003,7 @@ impl<T> AtlasTextureList<T> {
     }
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[repr(C)]
 #[expect(missing_docs)]
 pub struct AtlasTile {
@@ -2008,7 +2017,7 @@ pub struct AtlasTile {
     pub bounds: Bounds<DevicePixels>,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[repr(C)]
 #[expect(missing_docs)]
 pub struct AtlasTextureId {
@@ -2019,7 +2028,7 @@ pub struct AtlasTextureId {
     pub kind: AtlasTextureKind,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[repr(C)]
 #[cfg_attr(
     all(
@@ -2060,7 +2069,7 @@ impl AtlasTextureKind {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[repr(C)]
 #[expect(missing_docs)]
 pub struct TileId(pub u32);
@@ -3834,7 +3843,8 @@ mod image_tests {
     fn test_image_to_image_data_applies_exif_orientation() {
         let image = Image::from_bytes(
             ImageFormat::Jpeg,
-            include_bytes!("../examples/legacy/image/exif-orientation-rotate-180.jpg").to_vec(),
+            include_bytes!("../examples/gallery/rendering/image/exif-orientation-rotate-180.jpg")
+                .to_vec(),
         );
 
         let render_image = image

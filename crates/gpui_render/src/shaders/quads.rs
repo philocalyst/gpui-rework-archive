@@ -600,19 +600,38 @@ pub mod quad {
             return transparent();
         }
         let quad = get!(QUADS)[input.quad_id as usize];
-        let fade = ContentMask::alpha(quad.content_mask, input.position.xy());
-        let fill_color = paint_color(
-            Paint::new(quad.background, quad.bounds),
+        shade_quad(
+            quad,
             input.position.xy(),
             PreparedPaint::new(input.fill_solid, input.fill_color0, input.fill_color1),
+            PreparedPaint::new(input.border_solid, input.border_color0, input.border_color1),
+            get!(GLOBALS).premultiplied_alpha,
+        )
+    }
+
+    /// Shared quad fragment equations, callable from both the GPU entry point and the CPU
+    /// renderer. Keep coverage, border, and compositing decisions here so the backends cannot
+    /// drift independently.
+    pub fn shade_quad(
+        quad: Quad,
+        position: Vec2f,
+        fill_paint: PreparedPaint,
+        border_paint: PreparedPaint,
+        premultiplied_alpha: ShaderBool,
+    ) -> Vec4f {
+        let fade = ContentMask::alpha(quad.content_mask, position);
+        let fill_color = paint_color(
+            Paint::new(quad.background, quad.bounds),
+            position,
+            fill_paint,
         );
         if Edges::is_zero(quad.border_widths) && Corners::is_zero(quad.corner_radii) {
-            return blend_color(fill_color, fade);
+            return blend_color_with_premultiplication(fill_color, fade, premultiplied_alpha);
         }
 
-        let geometry = quad_geometry(quad, input.position.xy());
+        let geometry = quad_geometry(quad, position);
         if is_unaffected_background(geometry) {
-            return blend_color(fill_color, fade);
+            return blend_color_with_premultiplication(fill_color, fade, premultiplied_alpha);
         }
 
         let distances = border_distances(geometry);
@@ -620,8 +639,8 @@ pub mod quad {
         if max(distances.inner, distances.outer) < PIXEL_ANTIALIAS_RADIUS {
             let mut border_color = paint_color(
                 Paint::new(quad.border_color, quad.bounds),
-                input.position.xy(),
-                PreparedPaint::new(input.border_solid, input.border_color0, input.border_color1),
+                position,
+                border_paint,
             );
             if quad.border_style == BorderStyle::Dashed {
                 border_color.w *= dashed_border_alpha(quad, geometry);
@@ -634,7 +653,11 @@ pub mod quad {
                 vec4f(factor, factor, factor, factor),
             );
         }
-        blend_color(color, antialiased_coverage(distances.outer) * fade)
+        blend_color_with_premultiplication(
+            color,
+            antialiased_coverage(distances.outer) * fade,
+            premultiplied_alpha,
+        )
     }
 
     #[derive(Wgsl)]
@@ -719,12 +742,6 @@ pub mod quad {
             return transparent();
         }
         let quad = get!(QUADS)[input.quad_id as usize];
-        let fade = ContentMask::alpha(quad.content_mask, input.position.xy());
-        let fill_color = paint_color(
-            Paint::new(quad.background, quad.bounds),
-            input.position.xy(),
-            PreparedPaint::new(input.fill_solid, input.fill_color0, input.fill_color1),
-        );
         let prepared = PreparedCorners {
             horizontal_reaches: input.horizontal_corner_reaches,
             vertical_reaches: input.vertical_corner_reaches,
@@ -732,21 +749,50 @@ pub mod quad {
             superellipse_power: input.superellipse_power,
         };
 
+        shade_smoothed_quad(
+            quad,
+            input.position.xy(),
+            PreparedPaint::new(input.fill_solid, input.fill_color0, input.fill_color1),
+            PreparedPaint::new(input.border_solid, input.border_color0, input.border_color1),
+            prepared,
+            input.corner_lengths,
+            get!(GLOBALS).premultiplied_alpha,
+        )
+    }
+
+    /// Shared smoothed-quad fragment equations used by GPU and CPU renderers.
+    pub fn shade_smoothed_quad(
+        quad: Quad,
+        position: Vec2f,
+        fill_paint: PreparedPaint,
+        border_paint: PreparedPaint,
+        prepared: PreparedCorners,
+        corner_lengths: Vec4f,
+        premultiplied_alpha: ShaderBool,
+    ) -> Vec4f {
+        let fade = ContentMask::alpha(quad.content_mask, position);
+        let fill_color = paint_color(
+            Paint::new(quad.background, quad.bounds),
+            position,
+            fill_paint,
+        );
         if Edges::is_zero(quad.border_widths) {
             let distance = prepared_corner_signed_distance(
-                input.position.xy(),
+                position,
                 quad.bounds,
                 quad.corner_radii,
                 quad.corner_smoothing,
                 prepared,
             );
-
-            return blend_color(fill_color, antialiased_coverage(distance) * fade);
+            return blend_color_with_premultiplication(
+                fill_color,
+                antialiased_coverage(distance) * fade,
+                premultiplied_alpha,
+            );
         }
-
-        let geometry = quad_geometry(quad, input.position.xy());
+        let geometry = quad_geometry(quad, position);
         let rectangle_sample = figma_smooth_rectangle_sample(
-            input.position.xy(),
+            position,
             quad.bounds,
             quad.corner_radii,
             prepared.horizontal_reaches,
@@ -795,7 +841,7 @@ pub mod quad {
             && straight_border_inner_corner_to_point.y < -PIXEL_ANTIALIAS_RADIUS
             && !near_curve
         {
-            return blend_color(fill_color, fade);
+            return blend_color_with_premultiplication(fill_color, fade, premultiplied_alpha);
         }
 
         let outer = rectangle_sample.signed_distance.distance;
@@ -822,8 +868,8 @@ pub mod quad {
         if max(inner, outer) < PIXEL_ANTIALIAS_RADIUS {
             let mut border_color = paint_color(
                 Paint::new(quad.border_color, quad.bounds),
-                input.position.xy(),
-                PreparedPaint::new(input.border_solid, input.border_color0, input.border_color1),
+                position,
+                border_paint,
             );
             if quad.border_style == BorderStyle::Dashed {
                 border_color.w *= smoothed_dashed_border_alpha(
@@ -831,7 +877,7 @@ pub mod quad {
                     geometry,
                     rectangle_sample,
                     prepared,
-                    input.corner_lengths,
+                    corner_lengths,
                     border,
                     straight_border_inner_corner_to_point,
                 );
@@ -847,6 +893,10 @@ pub mod quad {
             );
         }
 
-        blend_color(color, antialiased_coverage(outer) * fade)
+        blend_color_with_premultiplication(
+            color,
+            antialiased_coverage(outer) * fade,
+            premultiplied_alpha,
+        )
     }
 }

@@ -165,6 +165,66 @@ impl HeadlessAppContext {
         app.update_window(window, f)
     }
 
+    /// Draws a frame without presenting it or advancing the simulated clock.
+    ///
+    /// Advance the clock and apply input before calling this to capture a specific
+    /// animation or interaction state. The element arena is released after paint.
+    pub fn draw_window(&mut self, window: AnyWindowHandle) -> Result<()> {
+        self.update_window(window, |_, window, cx| window.draw(cx).clear(cx))
+    }
+
+    /// Delivers keyboard or pointer input through the regular GPUI event dispatch path.
+    pub fn dispatch_input(
+        &mut self,
+        window: AnyWindowHandle,
+        input: crate::PlatformInput,
+    ) -> Result<crate::DispatchEventResult> {
+        self.update_window(window, |_, window, cx| window.dispatch_event(input, cx))
+    }
+
+    /// Changes the device density and invalidates layout and glyph rasterization.
+    pub fn set_scale_factor(&mut self, window: AnyWindowHandle, scale_factor: f32) -> Result<()> {
+        anyhow::ensure!(
+            scale_factor.is_finite() && scale_factor > 0.0,
+            "scale factor must be positive and finite"
+        );
+        // Deliver the platform callback after releasing the app borrow: it updates the
+        // same window and must be able to borrow the app again.
+        let mut test_window = self
+            .update_window(window, |_, window, _| {
+                window
+                    .platform_window
+                    .as_test()
+                    .map(|window| window.clone())
+            })?
+            .ok_or_else(|| anyhow::anyhow!("headless window has no test platform"))?;
+        test_window.simulate_scale_factor(scale_factor);
+        Ok(())
+    }
+
+    /// Reads the finished scene of the last drawn frame.
+    ///
+    /// The callback keeps scene borrows inside the window update. It can inspect
+    /// the command plan, measure resources, or capture a portable display list.
+    pub fn read_scene<R>(
+        &mut self,
+        window: AnyWindowHandle,
+        read: impl FnOnce(&crate::Scene) -> R,
+    ) -> Result<R> {
+        self.update_window(window, |_, window, _| read(&window.rendered_frame.scene))
+    }
+
+    /// Captures a portable scene with the bitmaps supplied by its renderer's atlas.
+    pub fn capture_scene(
+        &mut self,
+        window: AnyWindowHandle,
+        resolve_tile: impl FnMut(crate::AtlasTile) -> Result<crate::CapturedBitmap>,
+    ) -> Result<crate::SceneCapture> {
+        self.read_scene(window, |scene| {
+            crate::SceneCapture::capture(scene, resolve_tile)
+        })?
+    }
+
     /// Returns the most recently rendered bounds for an element's debug selector.
     pub fn debug_bounds(
         &mut self,
