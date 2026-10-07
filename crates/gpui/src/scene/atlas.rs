@@ -3,9 +3,9 @@ use crate::{
     GlyphAtlasEntry, PlatformAtlas, RenderGlyphParams, Size, TileId, ValidatedRasterizedGlyph,
 };
 use anyhow::{Context, Result, ensure};
+use collections::HashMap;
 use std::{
     borrow::Cow,
-    collections::HashMap,
     sync::{Arc, Mutex},
 };
 

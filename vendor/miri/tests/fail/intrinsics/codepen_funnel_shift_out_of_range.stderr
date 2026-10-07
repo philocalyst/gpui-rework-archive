@@ -1,0 +1,13 @@
+error: Undefined Behavior: unchecked_funnel_shl shift 64 exceeds integer width 64
+ --> tests/fail/intrinsics/codepen_funnel_shift_out_of_range.rs:LL:CC
+  |
+LL |         let _ = std::intrinsics::unchecked_funnel_shl(1u64, 2u64, 64);
+  |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Undefined Behavior occurred here
+  |
+  = help: this indicates a bug in the program: it performed an invalid operation, and caused Undefined Behavior
+  = help: see https://doc.rust-lang.org/nightly/reference/behavior-considered-undefined.html for further information
+
+note: some details are omitted, run with `MIRIFLAGS=-Zmiri-backtrace=full` for a verbose backtrace
+
+error: aborting due to 1 previous error
+

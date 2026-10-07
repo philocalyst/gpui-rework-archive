@@ -7,7 +7,7 @@
 use super::*;
 use anyhow::{Context, Result, ensure};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use collections::HashMap;
 
 /// Current serialized scene-capture format version.
 pub const SCENE_CAPTURE_VERSION: u32 = 2;
@@ -191,7 +191,7 @@ impl SceneCapture {
         resolve_tile: &mut impl FnMut(AtlasTile) -> Result<CapturedBitmap>,
         canonical: bool,
     ) -> Result<()> {
-        let mut sources = HashMap::<AtlasTile, usize>::new();
+        let mut sources = HashMap::<AtlasTile, usize>::default();
         let mut resources = Vec::new();
         let tiles = self
             .monochrome_sprites

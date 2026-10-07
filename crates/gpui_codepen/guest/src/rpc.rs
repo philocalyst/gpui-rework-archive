@@ -204,9 +204,9 @@ impl LineData {
 #[derive(Default)]
 pub struct RemoteTextSystem {
     generation: std::sync::atomic::AtomicU64,
-    modes: std::sync::Mutex<std::collections::HashMap<(usize, u32), TextRenderingMode>>,
+    modes: std::sync::Mutex<collections::HashMap<(usize, u32), TextRenderingMode>>,
     styles: std::sync::Mutex<
-        std::collections::HashMap<
+        collections::HashMap<
             (usize, u32, GlyphRenderMode, ForegroundDependency, [u32; 4]),
             PreparedRasterStyle,
         >,
@@ -447,7 +447,7 @@ impl PlatformTextLayout for RemoteLayout {
 #[cfg(feature = "host-services")]
 pub struct TextService {
     text: gpui_ce_parley::ParleyTextSystem,
-    layouts: std::collections::HashMap<u64, Arc<dyn PlatformTextLayout>>,
+    layouts: collections::HashMap<u64, Arc<dyn PlatformTextLayout>>,
     next: u64,
     dynamic_fonts: bool,
 }

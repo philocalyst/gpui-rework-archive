@@ -94,6 +94,51 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
         }
 
         match intrinsic_name {
+            // These nightly intrinsics have correct Rust fallback bodies, but
+            // interpreting their shifts and precondition helpers on every hash
+            // round is expensive. Evaluate the specified integer operation here,
+            // with the same width and unchecked preconditions as the fallback.
+            "rotate_left" | "rotate_right" => {
+                let [value, shift] = check_intrinsic_arg_count(args)?;
+                let size = value.layout.size;
+                let bits = size.bits() as u32;
+                let value = this.read_scalar(value)?.to_bits(size)?;
+                let shift = this.read_scalar(shift)?.to_u32()? % bits;
+                let result = if shift == 0 { value } else if intrinsic_name == "rotate_left" {
+                    (value << shift) | (value >> (bits - shift))
+                } else {
+                    (value >> shift) | (value << (bits - shift))
+                };
+                let mask = u128::MAX >> (128 - bits);
+                this.write_scalar(Scalar::from_uint(result & mask, size), dest)?;
+            }
+            "unchecked_funnel_shl" | "unchecked_funnel_shr" => {
+                let [a, b, shift] = check_intrinsic_arg_count(args)?;
+                let size = a.layout.size;
+                let bits = size.bits() as u32;
+                let a = this.read_scalar(a)?.to_bits(size)?;
+                let b = this.read_scalar(b)?.to_bits(size)?;
+                let shift = this.read_scalar(shift)?.to_u32()?;
+                if shift >= bits {
+                    throw_ub_format!("{intrinsic_name} shift {shift} exceeds integer width {bits}");
+                }
+                let left = intrinsic_name == "unchecked_funnel_shl";
+                let result = if shift == 0 { if left { a } else { b } }
+                    else if left { (a << shift) | (b >> (bits - shift)) }
+                    else { (a << (bits - shift)) | (b >> shift) };
+                let mask = u128::MAX >> (128 - bits);
+                this.write_scalar(Scalar::from_uint(result & mask, size), dest)?;
+            }
+            "disjoint_bitor" => {
+                let [a, b] = check_intrinsic_arg_count(args)?;
+                let size = a.layout.size;
+                let a = this.read_scalar(a)?.to_bits(size)?;
+                let b = this.read_scalar(b)?.to_bits(size)?;
+                if a & b != 0 {
+                    throw_ub_format!("disjoint_bitor operands have overlapping set bits");
+                }
+                this.write_scalar(Scalar::from_uint(a | b, size), dest)?;
+            }
             // Basic control flow
             "abort" => {
                 throw_machine_stop!(TerminationInfo::Abort(

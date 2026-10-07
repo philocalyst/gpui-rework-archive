@@ -146,7 +146,7 @@ fn browser_companion_cancels_edits_and_separates_sessions() {
     assert_eq!(post(port, &large, "http://127.0.0.1:8080").0, 200);
 }
 
-const COUNTER: &str = r#"use gpui::{PlatformInput, MouseDownEvent, MouseUpEvent, ScaledPixels, point, px, size};
+const COUNTER: &str = r#"use gpui::{*, prelude::*};
 struct Counter { count: u32 }
 impl Render for Counter {
  fn render(&mut self,_:&mut Window,cx:&mut Context<Self>)->impl IntoElement {

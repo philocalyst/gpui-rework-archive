@@ -10,6 +10,7 @@ interpreter = ["gpui/headless", "dep:image"]
 host-services = ["dep:gpui_ce_parley"]
 
 [dependencies]
+collections = { package = "gpui_ce_collections", path = "../../gpui_collections" }
 gpui = { package = "gpui-ce", path = "../../gpui", default-features = false }
 gpui_ce_parley = { path = "../../gpui_ce_parley", default-features = false, optional = true }
 image = { version = "0.25", default-features = false, optional = true }

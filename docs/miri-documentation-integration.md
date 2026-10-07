@@ -52,7 +52,9 @@ cancel server execution. Compilation/runtime errors arrive as diagnostics in a
 successful reply envelope; retain the last good frame. Superseded queued requests
 receive 409. The companion listens on loopback; currently allowed browser origins
 are localhost/127.0.0.1 port 8080. A documentation deployment using another port
-needs an explicit configurable local origin before integration.
+sets `GPUI_CODEPEN_ALLOWED_ORIGINS` to a comma-separated list of local HTTP
+origins, for example `http://127.0.0.1:1111,http://localhost:1111`.
+`GPUI_CODEPEN_ORIGINS` remains a compatible alias.
 
 ## Binary and renderer contract
 
@@ -102,6 +104,9 @@ text frame latency remains seconds and is being optimized; this is not a finishe
 performance claim. Backend-owned native surface handles and uncaptured arbitrary
 IME bounds/hit-test queries still need integration.
 
-The isolated prerequisite patch has not yet been produced. Do not merge the
-internal testing branch or the earlier fake-SDK checkpoint. The CLI hotpatching
-project's current location has not been verified in this worktree.
+The isolated prerequisite snapshot is commit
+`58c30b2452963fcec0c32296af37c793cb847806` on
+`codex/miri-documentation-prerequisites`, based on `codex/example-cleanup`.
+It excludes the internal testing merge, CPU renderer, and testing examples.
+Follow-up patches use that snapshot as their base. Do not merge the internal
+testing branch or the earlier fake-SDK checkpoint.

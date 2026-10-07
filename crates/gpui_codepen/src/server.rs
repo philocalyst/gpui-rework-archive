@@ -127,7 +127,10 @@ mod native {
             anyhow::bail!("application/json required");
         }
         if let Some(origin) = header("Origin") {
-            if !allowed_origin(origin, &std::env::var("GPUI_CODEPEN_ORIGINS").unwrap_or_default()) {
+            let configured = std::env::var("GPUI_CODEPEN_ALLOWED_ORIGINS")
+                .or_else(|_| std::env::var("GPUI_CODEPEN_ORIGINS"))
+                .unwrap_or_default();
+            if !allowed_origin(origin, &configured) {
                 anyhow::bail!("local guide origin required");
             }
         }
