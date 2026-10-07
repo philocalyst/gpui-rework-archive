@@ -1505,6 +1505,14 @@ impl PlatformWindow for X11Window {
         self.0.state.borrow_mut().input_handler.take()
     }
 
+    fn show_character_palette(&self) {
+        let Some(client) = self.0.state.borrow().client.get_client() else {
+            return;
+        };
+        let executor = client.0.borrow().common.background_executor.clone();
+        crate::linux::character_palette::show_character_palette(executor, None);
+    }
+
     fn prompt(
         &self,
         _level: PromptLevel,
@@ -1648,6 +1656,16 @@ impl PlatformWindow for X11Window {
         )
         .log_err();
         xcb_flush(&self.0.xcb);
+    }
+
+    fn is_visible(&self) -> Option<bool> {
+        self.0
+            .xcb
+            .get_window_attributes(self.0.x_window)
+            .ok()?
+            .reply()
+            .ok()
+            .map(|attributes| attributes.map_state != xproto::MapState::UNMAPPED)
     }
 
     fn is_subpixel_rendering_supported(&self) -> bool {

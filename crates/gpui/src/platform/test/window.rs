@@ -1,10 +1,10 @@
 use crate::{
     AnyWindowHandle, AtlasKey, AtlasTextureId, AtlasTile, Bounds, DevicePixels,
-    DispatchEventResult, GpuSpecs, Pixels, PlatformAtlas, PlatformDisplay,
-    PlatformHeadlessRenderer, PlatformInput, PlatformInputHandler, PlatformWindow, Point,
-    PromptButton, RequestFrameOptions, Scene, Size, TestPlatform, TextInputConfiguration,
-    TextInputStateChange, TileId, WindowAppearance, WindowBackgroundAppearance, WindowBounds,
-    WindowControlArea, WindowParams,
+    DispatchEventResult, GlyphAtlasCache, GlyphAtlasEntry, GpuSpecs, Pixels, PlatformAtlas,
+    PlatformDisplay, PlatformHeadlessRenderer, PlatformInput, PlatformInputHandler, PlatformWindow,
+    Point, PromptButton, RenderGlyphParams, RequestFrameOptions, Scene, Size, TestPlatform,
+    TextInputConfiguration, TextInputStateChange, TileId, ValidatedRasterizedGlyph,
+    WindowAppearance, WindowBackgroundAppearance, WindowBounds, WindowControlArea, WindowParams,
 };
 use collections::HashMap;
 use gpui_util::ResultExt as _;
@@ -21,6 +21,7 @@ use std::{
 
 pub(crate) struct TestWindowState {
     pub(crate) bounds: Bounds<Pixels>,
+    scale_factor: f32,
     pub(crate) handle: AnyWindowHandle,
     display: Rc<dyn PlatformDisplay>,
     pub(crate) title: Option<String>,
@@ -87,6 +88,7 @@ impl TestWindow {
         };
         Self(Rc::new(Mutex::new(TestWindowState {
             bounds: params.bounds,
+            scale_factor: 2.0,
             display,
             platform,
             handle,
@@ -165,6 +167,16 @@ impl TestWindow {
         drop(lock);
         callback(size, scale_factor);
         self.0.lock().resize_callback = Some(callback);
+    }
+
+    /// Changes device density through the same resize callback used by a platform window.
+    pub(crate) fn simulate_scale_factor(&mut self, scale_factor: f32) {
+        let size = {
+            let mut state = self.0.lock();
+            state.scale_factor = scale_factor;
+            state.bounds.size
+        };
+        self.simulate_resize(size);
     }
 
     pub(crate) fn simulate_active_status_change(&self, active: bool) {
@@ -248,7 +260,7 @@ impl PlatformWindow for TestWindow {
     }
 
     fn scale_factor(&self) -> f32 {
-        2.0
+        self.0.lock().scale_factor
     }
 
     fn appearance(&self) -> WindowAppearance {
@@ -343,6 +355,10 @@ impl PlatformWindow for TestWindow {
 
     fn set_visible(&self, visible: bool) {
         self.0.lock().visible = visible;
+    }
+
+    fn is_visible(&self) -> Option<bool> {
+        Some(TestWindow::is_visible(self))
     }
 
     fn set_edited(&mut self, edited: bool) {
@@ -498,16 +514,50 @@ impl PlatformWindow for TestWindow {
 pub(crate) struct TestAtlasState {
     next_id: u32,
     tiles: HashMap<AtlasKey, AtlasTile>,
+    glyph_cache: GlyphAtlasCache,
 }
 
 pub(crate) struct TestAtlas(Mutex<TestAtlasState>);
+
+impl TestAtlasState {
+    fn insert_tile(&mut self, key: AtlasKey, size: Size<DevicePixels>) -> AtlasTile {
+        self.next_id += 1;
+        let texture_id = self.next_id;
+        self.next_id += 1;
+        let tile_id = self.next_id;
+        let tile = AtlasTile {
+            texture_id: AtlasTextureId {
+                index: texture_id,
+                kind: key.texture_kind(),
+            },
+            tile_id: TileId(tile_id),
+            padding: 0,
+            bounds: Bounds {
+                origin: Point::default(),
+                size,
+            },
+        };
+
+        self.tiles.insert(key, tile);
+
+        tile
+    }
+}
 
 impl TestAtlas {
     pub fn new() -> Self {
         TestAtlas(Mutex::new(TestAtlasState {
             next_id: 0,
             tiles: HashMap::default(),
+            glyph_cache: GlyphAtlasCache::default(),
         }))
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn clear(&self) {
+        let mut state = self.0.lock();
+        state.tiles.clear();
+        state.glyph_cache.clear();
     }
 }
 
@@ -530,36 +580,47 @@ impl PlatformAtlas for TestAtlas {
         };
 
         let mut state = self.0.lock();
-        state.next_id += 1;
-        let texture_id = state.next_id;
-        state.next_id += 1;
-        let tile_id = state.next_id;
 
-        state.tiles.insert(
-            key.clone(),
-            crate::AtlasTile {
-                texture_id: AtlasTextureId {
-                    index: texture_id,
-                    kind: key.texture_kind(),
-                },
-                tile_id: TileId(tile_id),
-                padding: 0,
-                bounds: crate::Bounds {
-                    origin: Point::default(),
-                    size,
-                },
-            },
-        );
+        Ok(Some(state.insert_tile(key.clone(), size)))
+    }
 
-        Ok(Some(state.tiles[key]))
+    fn get_or_insert_glyph_with(
+        &self,
+        params: &RenderGlyphParams,
+        build: &mut dyn FnMut() -> anyhow::Result<ValidatedRasterizedGlyph>,
+    ) -> anyhow::Result<GlyphAtlasEntry> {
+        if let Some(entry) = self.0.lock().glyph_cache.get(params) {
+            return Ok(entry);
+        }
+
+        let glyph = build()?;
+
+        let mut state = self.0.lock();
+        let tile = if glyph.size == Size::default() {
+            None
+        } else {
+            let key = (params.clone(), glyph.format).into();
+
+            Some(state.insert_tile(key, glyph.size))
+        };
+
+        Ok(state.glyph_cache.insert(params, &glyph, tile))
     }
 
     fn remove(&self, key: &AtlasKey) {
         let mut state = self.0.lock();
+        state.glyph_cache.remove(key);
         state.tiles.remove(key);
     }
 
     fn contains(&self, key: &AtlasKey) -> bool {
-        self.0.lock().tiles.contains_key(key)
+        let state = self.0.lock();
+        match key {
+            AtlasKey::Glyph { params, format } => state
+                .glyph_cache
+                .get(params)
+                .is_some_and(|entry| entry.format == *format),
+            _ => state.tiles.contains_key(key),
+        }
     }
 }

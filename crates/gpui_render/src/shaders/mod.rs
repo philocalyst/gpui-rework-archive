@@ -25,7 +25,7 @@ pub use quads::quad;
 pub use shadows::shadow;
 pub use sprites::{monochrome_sprite, polychrome_sprite, subpixel_sprite, underline};
 
-mod host;
+pub(crate) mod host;
 
 #[cfg(test)]
 mod tests;

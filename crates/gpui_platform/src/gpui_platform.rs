@@ -20,6 +20,9 @@ pub fn application() -> gpui::Application {
     gpui::Application::with_platform(current_platform(false))
 }
 
+#[cfg(all(feature = "test-support", not(target_family = "wasm")))]
+pub mod testing;
+
 pub fn headless() -> gpui::Application {
     gpui::Application::with_platform(current_platform(true))
 }

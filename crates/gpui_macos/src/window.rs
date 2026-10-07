@@ -1984,6 +1984,12 @@ impl PlatformWindow for MacWindow {
             .detach();
     }
 
+    fn is_visible(&self) -> Option<bool> {
+        let window = self.0.lock().native_window;
+        let visible: Bool = unsafe { msg_send![window, isVisible] };
+        Some(visible.as_bool())
+    }
+
     fn minimize(&self) {
         let window = self.0.lock().native_window;
         unsafe {

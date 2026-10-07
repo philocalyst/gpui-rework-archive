@@ -29,7 +29,7 @@ mod surfaces;
 mod target;
 
 #[cfg(all(feature = "test-support", not(target_family = "wasm")))]
-pub use headless::WgpuHeadlessRenderer;
+pub use headless::{GpuFrameMeasurement, GpuOwnedMemoryUsage, GpuReplayInfo, WgpuHeadlessRenderer};
 use pipelines::WgpuPipelines as ShaderPipelines;
 use resources::{GlobalBufferLayout, ResourceMetadata, WgpuResources};
 use settings::RenderingParameters;
@@ -157,7 +157,7 @@ impl WgpuRenderer {
     /// Updates platform-specific text rasterization parameters.
     pub fn set_font_rasterization_settings(&mut self, settings: FontRasterizationSettings) {
         self.rendering_params.font_rasterization = settings;
-        self.subpixel_order = settings.subpixel_order;
+        self.subpixel_order = settings.subpixel_order();
     }
 
     /// Compatibility wrapper for callers that still report the layout as a boolean.
@@ -272,11 +272,12 @@ impl WgpuRenderer {
     }
 }
 
-fn begin_color_render_pass<'encoder>(
+pub(super) fn begin_color_render_pass<'encoder>(
     encoder: &'encoder mut wgpu::CommandEncoder,
     label: &'encoder str,
     target: &'encoder wgpu::TextureView,
     load: wgpu::LoadOp<wgpu::Color>,
+    timestamp_writes: Option<wgpu::RenderPassTimestampWrites<'encoder>>,
 ) -> wgpu::RenderPass<'encoder> {
     encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
         label: Some(label),
@@ -290,6 +291,7 @@ fn begin_color_render_pass<'encoder>(
             depth_slice: None,
         })],
         depth_stencil_attachment: None,
+        timestamp_writes,
         ..Default::default()
     })
 }
@@ -298,6 +300,10 @@ fn begin_color_render_pass<'encoder>(
 mod tests {
     use super::*;
     use crate::wgpu_renderer::filters::FrameUniformRequirements;
+
+    // Native shader backends can differ slightly when quantizing transcendental math to UNORM8.
+    #[cfg(all(feature = "test-support", not(target_family = "wasm")))]
+    const MAX_CROSS_BACKEND_CHANNEL_DELTA: u8 = 2;
 
     #[cfg(all(feature = "test-support", not(target_family = "wasm")))]
     fn dashed_border_scene(dash_length: f32, dash_gap: f32) -> Scene {
@@ -431,17 +437,21 @@ mod tests {
         assert!(kernel.sample_step > 4.0);
     }
 
-    #[cfg(any(target_os = "macos", target_os = "windows"))]
     #[test]
-    fn desktop_blending_preserves_native_alpha_accumulation() {
-        let straight = pipelines::desktop_scene_blend_state(wgpu::CompositeAlphaMode::Opaque);
+    fn scene_blending_uses_source_over_for_both_color_encodings() {
+        let straight = pipelines::scene_blend_state(wgpu::CompositeAlphaMode::Opaque);
         assert_eq!(straight.color.src_factor, wgpu::BlendFactor::SrcAlpha);
-        assert_eq!(straight.alpha.dst_factor, wgpu::BlendFactor::One);
+        assert_eq!(
+            straight.alpha.dst_factor,
+            wgpu::BlendFactor::OneMinusSrcAlpha
+        );
 
-        let premultiplied =
-            pipelines::desktop_scene_blend_state(wgpu::CompositeAlphaMode::PreMultiplied);
+        let premultiplied = pipelines::scene_blend_state(wgpu::CompositeAlphaMode::PreMultiplied);
         assert_eq!(premultiplied.color.src_factor, wgpu::BlendFactor::One);
-        assert_eq!(premultiplied.alpha.dst_factor, wgpu::BlendFactor::One);
+        assert_eq!(
+            premultiplied.alpha.dst_factor,
+            wgpu::BlendFactor::OneMinusSrcAlpha
+        );
     }
 
     #[cfg(all(feature = "test-support", not(target_family = "wasm")))]
@@ -581,13 +591,14 @@ mod tests {
         )?;
         let actual = renderer.render_to_image(&scene)?;
         for (index, (actual, expected)) in actual.as_raw().iter().zip(LEGACY).enumerate() {
-            assert_eq!(
-                actual,
-                expected,
-                "legacy mismatch at pixel ({}, {}), channel {}",
+            assert!(
+                actual.abs_diff(*expected) <= MAX_CROSS_BACKEND_CHANNEL_DELTA,
+                "legacy mismatch at pixel ({}, {}), channel {}: got {}, expected {}",
                 (index / 4) % 4,
                 (index / 4) / 4,
-                index % 4
+                index % 4,
+                actual,
+                expected,
             );
         }
         assert_eq!(actual.as_raw().len(), LEGACY.len());
@@ -668,7 +679,7 @@ mod tests {
                     border_pixel.iter().zip(fill_pixel.iter()).enumerate()
                 {
                     assert!(
-                        border.abs_diff(*fill) <= 1,
+                        border.abs_diff(*fill) <= MAX_CROSS_BACKEND_CHANNEL_DELTA,
                         "border background must sample like a fill at ({x}, {y}), channel {channel}, for {background:?}: got {border_pixel:?}, expected {fill_pixel:?}"
                     );
                 }

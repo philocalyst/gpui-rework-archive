@@ -5,14 +5,13 @@
 
 use gpui::colors::Colors;
 use gpui::{
-    App, Bounds, Context, FocusHandle, KeyBinding, Window, WindowBounds, WindowOptions, actions,
+    App, Context, FocusHandle, KeyBinding, KeyDownEvent, Keystroke, PlatformInput, Window, actions,
     div, prelude::*, px, size,
 };
+use std::time::Duration;
 
 #[path = "../shared/prelude.rs"]
 mod example_prelude;
-#[path = "../example_support/fonts.rs"]
-mod example_support;
 
 actions!(keybinds_example, [Increment, Reset]);
 
@@ -73,34 +72,65 @@ impl Render for ActionsExample {
     }
 }
 
-fn run_example() {
-    gpui_platform::application().run(|cx| {
-        if !example_support::load_fonts(cx) {
-            return;
-        }
-
-        register_keybinds(cx);
-
-        let bounds = Bounds::centered(None, size(px(480.0), px(240.0)), cx);
-        cx.open_window(
-            WindowOptions::new().window_bounds(Some(WindowBounds::Windowed(bounds))),
-            |window, cx| cx.new(|cx| ActionsExample::new(window, cx)),
-        )
-        .expect("Failed to open window");
-
-        example_prelude::init_example(cx, "Actions and keybinds");
-    });
+fn actions_scenario() -> anyhow::Result<gpui_test::Scenario<ActionsExample>> {
+    gpui_test::Scenario::new(
+        "actions-and-keybinds",
+        "Actions and keybinds",
+        size(px(480.), px(240.)),
+        |window, cx: &mut App| {
+            register_keybinds(cx);
+            cx.new(|cx| ActionsExample::new(window, cx))
+        },
+    )?
+    .checkpoint("initial", "Focused counter", Duration::ZERO)?
+    .checkpoint_with(
+        "incremented",
+        "Space dispatches the increment action",
+        Duration::from_millis(100),
+        |cx, view, window| {
+            gpui_test::dispatch_input(
+                cx,
+                window.into(),
+                PlatformInput::KeyDown(KeyDownEvent {
+                    keystroke: Keystroke::parse("space")?,
+                    is_held: false,
+                    prefer_character_input: false,
+                }),
+            )?;
+            anyhow::ensure!(view.read_with(cx, |view, _| view.count) == 1);
+            Ok(())
+        },
+    )?
+    .checkpoint_with(
+        "reset",
+        "Backspace dispatches reset",
+        Duration::from_millis(200),
+        |cx, view, window| {
+            gpui_test::dispatch_input(
+                cx,
+                window.into(),
+                PlatformInput::KeyDown(KeyDownEvent {
+                    keystroke: Keystroke::parse("backspace")?,
+                    is_held: false,
+                    prefer_character_input: false,
+                }),
+            )?;
+            anyhow::ensure!(view.read_with(cx, |view, _| view.count) == 0);
+            Ok(())
+        },
+    )
 }
 
 #[cfg(not(target_family = "wasm"))]
 fn main() {
-    env_logger::init();
-    run_example();
+    example_prelude::run_example(actions_scenario().expect("valid action scenario"))
+        .expect("run actions example");
 }
 
 #[cfg(target_family = "wasm")]
 #[wasm_bindgen::prelude::wasm_bindgen(start)]
 pub fn start() {
     gpui_platform::web_init();
-    run_example();
+    example_prelude::run_example(actions_scenario().expect("valid action scenario"))
+        .expect("run actions example");
 }
