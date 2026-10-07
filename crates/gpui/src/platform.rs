@@ -9,6 +9,11 @@ mod app_menu;
 mod keyboard;
 mod keystroke;
 
+#[cfg(any(test, feature = "headless"))]
+mod diagnostics;
+#[cfg(any(test, feature = "headless"))]
+pub use diagnostics::*;
+
 #[cfg(all(target_os = "linux", feature = "wayland"))]
 #[expect(missing_docs)]
 pub mod layer_shell;
@@ -16,13 +21,13 @@ pub mod layer_shell;
 /// Types for configuring parent-anchored popup windows such as menus, dropdowns and tooltips.
 pub mod popup;
 
-#[cfg(any(test, feature = "test-support", feature = "bench-support"))]
+#[cfg(any(test, feature = "headless", feature = "bench-support"))]
 mod threaded_dispatcher;
 
-#[cfg(any(test, feature = "test-support", feature = "bench-support"))]
+#[cfg(any(test, feature = "headless", feature = "bench-support"))]
 mod test;
 
-#[cfg(all(target_os = "macos", any(test, feature = "test-support")))]
+#[cfg(all(target_os = "macos", any(test, feature = "headless")))]
 mod visual_test;
 
 #[cfg(all(feature = "screen-capture", target_os = "windows"))]
@@ -64,7 +69,7 @@ use anyhow::{Context as _, Result};
 use async_task::Runnable;
 use collections::FxHashMap;
 use futures::channel::oneshot;
-#[cfg(any(test, feature = "test-support", feature = "bench-support"))]
+#[cfg(any(test, feature = "headless", feature = "bench-support"))]
 use image::RgbaImage;
 use image::codecs::gif::GifDecoder;
 use image::{AnimationDecoder as _, DynamicImage, Frame};
@@ -95,19 +100,19 @@ pub use app_menu::*;
 pub use keyboard::*;
 pub use keystroke::*;
 
-#[cfg(any(test, feature = "test-support", feature = "bench-support"))]
+#[cfg(any(test, feature = "headless", feature = "bench-support"))]
 pub(crate) use test::*;
 
-#[cfg(any(test, feature = "test-support"))]
+#[cfg(any(test, feature = "headless"))]
 pub use test::{TestDispatcher, TestScreenCaptureSource, TestScreenCaptureStream};
 
-#[cfg(any(test, feature = "test-support"))]
+#[cfg(any(test, feature = "headless"))]
 pub use tests::TestTextSystem;
 
-#[cfg(any(test, feature = "test-support", feature = "bench-support"))]
+#[cfg(any(test, feature = "headless", feature = "bench-support"))]
 pub use threaded_dispatcher::ThreadedDispatcher;
 
-#[cfg(all(target_os = "macos", any(test, feature = "test-support")))]
+#[cfg(all(target_os = "macos", any(test, feature = "headless")))]
 pub use visual_test::VisualTestPlatform;
 
 // TODO(jk): return an enum instead of a string
@@ -963,6 +968,10 @@ pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
     /// The default implementation does nothing for platforms that do not support
     /// changing window visibility at runtime.
     fn set_visible(&self, _visible: bool) {}
+    /// Returns native visibility when the platform can report it.
+    fn is_visible(&self) -> Option<bool> {
+        None
+    }
     /// Minimize the native window.
     fn minimize(&self);
     /// Request native zoom/maximize behavior.
@@ -1150,7 +1159,7 @@ pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
     /// Inform the adapter of updated window bounds.
     fn a11y_update_window_bounds(&self) {}
 
-    #[cfg(any(test, feature = "test-support", feature = "bench-support"))]
+    #[cfg(any(test, feature = "headless", feature = "bench-support"))]
     fn as_test(&mut self) -> Option<&mut TestWindow> {
         None
     }
@@ -1158,14 +1167,14 @@ pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
     /// Renders the given scene to a texture and returns the pixel data as an RGBA image.
     /// This does not present the frame to screen - useful for visual testing where we want
     /// to capture what would be rendered without displaying it or requiring the window to be visible.
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, feature = "headless"))]
     fn render_to_image(&self, _scene: &Scene) -> Result<RgbaImage> {
         anyhow::bail!("render_to_image not implemented for this platform")
     }
 }
 
 /// A renderer for headless windows that can produce real rendered output.
-#[cfg(any(test, feature = "test-support", feature = "bench-support"))]
+#[cfg(any(test, feature = "headless", feature = "bench-support"))]
 pub trait PlatformHeadlessRenderer {
     /// Render a scene and return the result as an RGBA image.
     fn render_scene_to_image(
@@ -1231,14 +1240,14 @@ pub trait PlatformDispatcher: Send + Sync {
         gpui_util::defer(Box::new(|| {}))
     }
 
-    #[cfg(any(test, feature = "test-support", feature = "bench-support"))]
+    #[cfg(any(test, feature = "headless", feature = "bench-support"))]
     fn as_test(&self) -> Option<&TestDispatcher> {
         None
     }
 
     // This cfg must match the `threaded_dispatcher` module's, which implements
     // this method whenever it compiles.
-    #[cfg(any(test, feature = "test-support", feature = "bench-support"))]
+    #[cfg(any(test, feature = "headless", feature = "bench-support"))]
     fn as_threaded(&self) -> Option<&ThreadedDispatcher> {
         None
     }
@@ -1285,7 +1294,7 @@ pub trait PlatformTextSystem: Send + Sync {
     }
 }
 
-#[cfg(any(test, feature = "test-support"))]
+#[cfg(any(test, feature = "headless"))]
 mod tests {
     use crate::{
         Bounds, CaretAffinity, CaretMovement, CaretPosition, Font, FontId, FontMetrics, GlyphId,
@@ -1900,6 +1909,11 @@ pub fn get_gamma_correction_ratios(gamma: f32) -> [f32; 4] {
 #[derive(PartialEq, Eq, Hash, Clone)]
 #[expect(missing_docs)]
 pub enum AtlasKey {
+    /// A portable scene resource imported into this window's atlas.
+    Captured {
+        resource: uuid::Uuid,
+        kind: AtlasTextureKind,
+    },
     Glyph {
         params: RenderGlyphParams,
         format: RasterizedGlyphFormat,
@@ -1919,6 +1933,7 @@ impl AtlasKey {
     /// Returns the texture kind for this atlas key.
     pub fn texture_kind(&self) -> AtlasTextureKind {
         match self {
+            AtlasKey::Captured { kind, .. } => *kind,
             AtlasKey::Glyph { format, .. } => match format {
                 RasterizedGlyphFormat::AlphaMask => AtlasTextureKind::Monochrome,
                 RasterizedGlyphFormat::BgraSubpixelMask => AtlasTextureKind::Subpixel,
@@ -2009,7 +2024,7 @@ pub trait PlatformAtlas {
     ) -> Result<GlyphAtlasEntry>;
     fn remove(&self, key: &AtlasKey);
 
-    #[cfg(any(test, feature = "test-support", feature = "bench-support"))]
+    #[cfg(any(test, feature = "headless", feature = "bench-support"))]
     fn contains(&self, _key: &AtlasKey) -> bool {
         false
     }
@@ -2051,7 +2066,7 @@ impl<T> AtlasTextureList<T> {
     }
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[repr(C)]
 #[expect(missing_docs)]
 pub struct AtlasTile {
@@ -2065,7 +2080,7 @@ pub struct AtlasTile {
     pub bounds: Bounds<DevicePixels>,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[repr(C)]
 #[expect(missing_docs)]
 pub struct AtlasTextureId {
@@ -2076,7 +2091,7 @@ pub struct AtlasTextureId {
     pub kind: AtlasTextureKind,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[repr(C)]
 #[cfg_attr(
     all(
@@ -2117,7 +2132,7 @@ impl AtlasTextureKind {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[repr(C)]
 #[expect(missing_docs)]
 pub struct TileId(pub u32);
@@ -2367,6 +2382,11 @@ impl PlatformInputHandler {
         self.handler.text_input_configuration(window, cx)
     }
 
+    /// Reads the focused handler's text assistance preferences outside an app borrow.
+    pub fn query_text_input_configuration(&mut self) -> TextInputConfiguration {
+        self.cx.update(|window, cx| self.handler.text_input_configuration(window, cx)).unwrap_or_default()
+    }
+
     /// See [`InputHandler::text_input_editable_range`].
     pub fn text_input_editable_range(&mut self) -> Option<Range<usize>> {
         self.cx
@@ -2378,7 +2398,7 @@ impl PlatformInputHandler {
 
 /// A struct representing a selection in a text buffer, in UTF16 characters.
 /// This is different from a range because the head may be before the tail.
-#[derive(Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct UTF16Selection {
     /// The range of text in the document this selection corresponds to
     /// in UTF16 characters.
@@ -2585,7 +2605,7 @@ pub trait InputHandler: 'static {
 ///
 /// The default disables all text assistance and requests no particular action
 /// key presentation.
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct TextInputConfiguration {
     /// Whether the platform may automatically correct entered text.
     pub autocorrect: bool,
@@ -2598,7 +2618,7 @@ pub struct TextInputConfiguration {
 }
 
 /// Automatic capitalization applied by software keyboards.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Autocapitalize {
     /// No automatic capitalization.
     #[default]
@@ -2620,7 +2640,7 @@ pub enum Autocapitalize {
 /// (<https://html.spec.whatwg.org/multipage/interaction.html#input-modalities:-the-enterkeyhint-attribute>),
 /// which also maps onto Android's `IME_ACTION_*` constants and iOS's
 /// `UIReturnKeyType`; [`TextInputAction::Unspecified`] means "emit no hint".
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TextInputAction {
     /// Let the platform choose its default presentation.
     #[default]
@@ -3233,7 +3253,7 @@ mod platform_window_background_tests {
 }
 
 /// The text rendering mode to use for drawing glyphs.
-#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum TextRenderingMode {
     /// Use the platform's default text rendering mode.
     #[default]
@@ -3756,7 +3776,7 @@ impl Image {
 
     /// Check whether this image is present in GPUI's asset cache (loading or
     /// loaded), without fetching it.
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, feature = "headless"))]
     pub fn is_asset_cached(self: &Arc<Self>, cx: &App) -> bool {
         ImageSource::Image(self.clone()).is_asset_cached(cx)
     }
@@ -3891,7 +3911,8 @@ mod image_tests {
     fn test_image_to_image_data_applies_exif_orientation() {
         let image = Image::from_bytes(
             ImageFormat::Jpeg,
-            include_bytes!("../examples/assets/images/exif-orientation-rotate-180.jpg").to_vec(),
+            include_bytes!("../examples/gallery/rendering/image/exif-orientation-rotate-180.jpg")
+                .to_vec(),
         );
 
         let render_image = image

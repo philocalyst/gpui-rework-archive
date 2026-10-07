@@ -1752,7 +1752,7 @@ impl Bounds<DevicePixels> {
 /// assert_eq!(edges.bottom, 30.0);
 /// assert_eq!(edges.left, 40.0);
 /// ```
-#[derive(Refineable, Clone, Default, Debug, Eq, PartialEq)]
+#[derive(Refineable, Clone, Default, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[refineable(Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[repr(C)]
 pub struct Edges<T: Clone + Debug + Default + PartialEq> {
@@ -2304,7 +2304,7 @@ impl Anchor {
 /// Represents the corners of a box in a 2D space, such as border radius.
 ///
 /// Each field represents the size of the corner on one side of the box: `top_left`, `top_right`, `bottom_right`, and `bottom_left`.
-#[derive(Refineable, Clone, Default, Debug, Eq, PartialEq)]
+#[derive(Refineable, Clone, Default, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[refineable(Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[repr(C)]
 pub struct Corners<T: Clone + Debug + Default + PartialEq> {
@@ -3138,7 +3138,20 @@ impl From<usize> for DevicePixels {
 /// a single logical pixel may correspond to multiple physical pixels. By using `ScaledPixels`,
 /// dimensions and positions can be specified in a way that scales appropriately across different
 /// display resolutions.
-#[derive(Clone, Copy, Default, Add, AddAssign, Sub, SubAssign, Div, DivAssign, PartialEq)]
+#[derive(
+    Clone,
+    Copy,
+    Default,
+    Add,
+    AddAssign,
+    Sub,
+    SubAssign,
+    Div,
+    DivAssign,
+    PartialEq,
+    Serialize,
+    Deserialize,
+)]
 #[repr(transparent)]
 pub struct ScaledPixels(
     /// Scene-space coordinate after applying the display scale factor.

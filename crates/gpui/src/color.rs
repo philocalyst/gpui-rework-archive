@@ -8,6 +8,7 @@
 //! <https://gpui-ce.github.io/examples/drawing/#paint>.
 
 use palette::{IntoColor, OklabHue, Oklcha, RgbHue};
+pub(crate) mod serde_colors;
 use schemars::{JsonSchema, json_schema};
 use serde::{Deserialize, Serialize};
 use std::fmt::{self, Display, Formatter};

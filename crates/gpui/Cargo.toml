@@ -26,9 +26,10 @@ default = ["font-kit", "wayland", "x11", "windows-manifest"]
 # texture surfaces.
 custom-gpu = []
 wgpu-surfaces = []
+headless = ["collections/test-support", "proptest"]
 test-support = [
+  "headless",
   "leak-detection",
-  "collections/test-support",
   "wayland",
   "x11",
   "proptest",
@@ -101,8 +102,9 @@ schemars.workspace = true
 seahash = "4.1"
 serde.workspace = true
 serde_json.workspace = true
+serde_bytes = "0.11"
 slotmap.workspace = true
-smallvec.workspace = true
+smallvec = { workspace = true, features = ["serde"] }
 async-channel.workspace = true
 stacksafe = { workspace = true, optional = true }
 strum.workspace = true
@@ -155,6 +157,7 @@ windows-061 = { workspace = true, features = ["Win32_Graphics_Direct3D11"] }
 
 
 [dev-dependencies]
+bincode = "1.3.3"
 accesskit_consumer.workspace = true
 backtrace.workspace = true
 collections = { workspace = true, features = ["test-support"] }

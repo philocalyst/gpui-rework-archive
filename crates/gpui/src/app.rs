@@ -58,13 +58,13 @@ mod async_context;
 mod bench_context;
 mod context;
 mod entity_map;
-#[cfg(any(test, feature = "test-support"))]
+#[cfg(any(test, feature = "headless"))]
 mod headless_app_context;
-#[cfg(any(test, feature = "test-support"))]
+#[cfg(any(test, feature = "headless"))]
 mod test_app;
-#[cfg(any(test, feature = "test-support"))]
+#[cfg(any(test, feature = "headless"))]
 mod test_context;
-#[cfg(all(target_os = "macos", any(test, feature = "test-support")))]
+#[cfg(all(target_os = "macos", any(test, feature = "headless")))]
 mod visual_test_context;
 
 pub use async_context::*;
@@ -72,13 +72,13 @@ pub use async_context::*;
 pub use bench_context::{BenchAppContext, BenchReport, BenchWindowContext, bench_platform};
 pub use context::*;
 pub use entity_map::*;
-#[cfg(any(test, feature = "test-support"))]
+#[cfg(any(test, feature = "headless"))]
 pub use headless_app_context::*;
-#[cfg(any(test, feature = "test-support"))]
+#[cfg(any(test, feature = "headless"))]
 pub use test_app::*;
-#[cfg(any(test, feature = "test-support"))]
+#[cfg(any(test, feature = "headless"))]
 pub use test_context::*;
-#[cfg(all(target_os = "macos", any(test, feature = "test-support")))]
+#[cfg(all(target_os = "macos", any(test, feature = "headless")))]
 pub use visual_test_context::*;
 
 #[cfg(any(feature = "inspector", debug_assertions))]
@@ -726,26 +726,36 @@ impl SystemWindowTabController {
 }
 
 pub(crate) enum GpuiMode {
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, feature = "headless"))]
     Test {
         skip_drawing: bool,
+        draw_on_flush: bool,
     },
     Production,
 }
 
 impl GpuiMode {
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, feature = "headless"))]
     pub fn test() -> Self {
         GpuiMode::Test {
             skip_drawing: false,
+            draw_on_flush: true,
         }
     }
 
+    #[cfg(any(test, feature = "headless", feature = "bench-support"))]
     #[inline]
+    fn draw_on_flush(&self) -> bool {
+        match self {
+            #[cfg(any(test, feature = "headless"))]
+            GpuiMode::Test { draw_on_flush, .. } => *draw_on_flush,
+            GpuiMode::Production => true,
+        }
+    }
     pub(crate) fn skip_drawing(&self) -> bool {
         match self {
-            #[cfg(any(test, feature = "test-support"))]
-            GpuiMode::Test { skip_drawing } => *skip_drawing,
+            #[cfg(any(test, feature = "headless"))]
+            GpuiMode::Test { skip_drawing, .. } => *skip_drawing,
             GpuiMode::Production => false,
         }
     }
@@ -853,7 +863,7 @@ pub struct App {
     pub(crate) inspector_renderer: Option<crate::InspectorRenderer>,
     #[cfg(any(feature = "inspector", debug_assertions))]
     pub(crate) inspector_element_registry: InspectorElementRegistry,
-    #[cfg(any(test, feature = "test-support", debug_assertions))]
+    #[cfg(any(test, feature = "headless", debug_assertions))]
     pub(crate) name: Option<&'static str>,
     pub(crate) text_rendering_mode: Rc<Cell<TextRenderingMode>>,
 
@@ -972,7 +982,7 @@ impl App {
                 accessibility_force_disabled: false,
                 accessibility_forced: false,
 
-                #[cfg(any(test, feature = "test-support", debug_assertions))]
+                #[cfg(any(test, feature = "headless", debug_assertions))]
                 name: None,
                 element_arena: RefCell::new(Arena::new(1024 * 1024)),
                 event_arena: Arena::new(1024 * 1024),
@@ -1403,6 +1413,15 @@ impl App {
         options: crate::WindowOptions,
         build_root_view: impl FnOnce(&mut Window, &mut App) -> Entity<V>,
     ) -> anyhow::Result<WindowHandle<V>> {
+        self.open_window_inner(options, build_root_view, true)
+    }
+
+    pub(crate) fn open_window_inner<V: 'static + Render>(
+        &mut self,
+        options: crate::WindowOptions,
+        build_root_view: impl FnOnce(&mut Window, &mut App) -> Entity<V>,
+        draw_initial: bool,
+    ) -> anyhow::Result<WindowHandle<V>> {
         self.update(|cx| {
             let id = cx.windows.insert(None);
             let handle = WindowHandle::new(id);
@@ -1418,8 +1437,9 @@ impl App {
                     // this didn't cause any issues on non windows platforms as it seems we always won the race to on_request_frame
                     // on windows we quite frequently lose the race and return a window that has never rendered, which leads to a crash
                     // where DispatchTree::root_node_id asserts on empty nodes
-                    let clear = window.draw(cx);
-                    clear.clear(cx);
+                    if draw_initial {
+                        window.draw(cx).clear(cx);
+                    }
 
                     cx.window_handles.insert(id, window.handle);
                     cx.windows.get_mut(id).unwrap().replace(Box::new(window));
@@ -1859,18 +1879,20 @@ impl App {
                     }
                 }
             } else {
-                #[cfg(any(test, feature = "test-support", feature = "bench-support"))]
-                for window in self
-                    .windows
-                    .values()
-                    .filter_map(|window| {
-                        let window = window.as_deref()?;
-                        window.invalidator.is_dirty().then_some(window.handle)
-                    })
-                    .collect::<Vec<_>>()
-                {
-                    self.update_window(window, |_, window, cx| window.draw(cx).clear(cx))
-                        .unwrap();
+                #[cfg(any(test, feature = "headless", feature = "bench-support"))]
+                if self.mode.draw_on_flush() {
+                    for window in self
+                        .windows
+                        .values()
+                        .filter_map(|window| {
+                            let window = window.as_deref()?;
+                            window.invalidator.is_dirty().then_some(window.handle)
+                        })
+                        .collect::<Vec<_>>()
+                    {
+                        self.update_window(window, |_, window, cx| window.draw(cx).clear(cx))
+                            .unwrap();
+                    }
                 }
 
                 if self.pending_effects.is_empty() {
@@ -2219,7 +2241,7 @@ impl App {
     }
 
     /// Clear all stored globals. Does not notify global observers.
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, feature = "headless"))]
     pub fn clear_globals(&mut self) {
         self.globals_by_type.drain();
     }
@@ -2829,7 +2851,7 @@ impl App {
 
     /// Check whether an asset is present in GPUI's cache (loading or loaded),
     /// without fetching it.
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, feature = "headless"))]
     pub fn has_asset<A: Asset>(&self, source: &A::Source) -> bool {
         let asset_id = (TypeId::of::<A>(), hash(source));
         self.loading_assets.contains_key(&asset_id)
@@ -2866,7 +2888,7 @@ impl App {
     }
 
     /// Returns the name for this [`App`].
-    #[cfg(any(test, feature = "test-support", debug_assertions))]
+    #[cfg(any(test, feature = "headless", debug_assertions))]
     pub fn get_name(&self) -> Option<&'static str> {
         self.name
     }

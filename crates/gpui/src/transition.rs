@@ -252,7 +252,7 @@ impl<T: Lerp + Clone + PartialEq + 'static> Transition<T> {
 /// The animated value stored by the legacy transition hooks.
 pub type TransitionState<T> = Animated<T, Instant>;
 
-#[cfg(all(test, feature = "test-support"))]
+#[cfg(all(test, feature = "headless"))]
 mod tests {
     use std::cell::RefCell;
     use std::rc::Rc;

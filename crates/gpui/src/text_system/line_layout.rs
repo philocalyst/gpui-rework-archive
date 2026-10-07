@@ -39,7 +39,9 @@ pub struct LineLayout {
 }
 
 /// Font metrics used to construct the vertical extents of an inline line.
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(
+    Clone, Copy, Debug, Default, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize,
+)]
 pub struct InlineTextMetrics {
     /// Distance above the text baseline.
     pub ascent: Pixels,
@@ -50,7 +52,7 @@ pub struct InlineTextMetrics {
 }
 
 /// A row in an inline layout.
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct InlineVisualLine {
     /// The row origin relative to the inline layout.
     pub origin: Point<Pixels>,
@@ -61,7 +63,7 @@ pub struct InlineVisualLine {
 }
 
 /// The position assigned to an element embedded in text.
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct PositionedInlineBox {
     /// The caller-provided box identifier.
     pub id: u64,
@@ -72,7 +74,7 @@ pub struct PositionedInlineBox {
 }
 
 /// The native geometry occupied by a text range on one visual line.
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct InlineRangeGeometry {
     /// Bounds relative to the complete text layout.
     pub bounds: Bounds<Pixels>,
@@ -323,7 +325,7 @@ pub trait PlatformTextLayout: Send + Sync + std::fmt::Debug {
 }
 
 /// A direction in visual, rather than logical, text order.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum VisualDirection {
     /// Move toward the visual left.
     Left,
@@ -332,7 +334,7 @@ pub enum VisualDirection {
 }
 
 /// The direction of a semantic text movement.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum TextDirection {
     /// Move toward the visual left.
     Left,
@@ -349,7 +351,7 @@ pub enum TextDirection {
 }
 
 /// The boundary at which a semantic text movement stops.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum TextBoundary {
     /// One backend-defined caret step. [`PlatformTextLayout::normalized_caret`] and
     /// [`PlatformTextLayout::adjacent_visual_caret`] govern visual stops, while
@@ -373,7 +375,7 @@ pub enum TextBoundary {
 ///
 /// `direction` chooses where to move, and `boundary` chooses the unit. Consecutive vertical
 /// movements reuse the returned preferred horizontal coordinate.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct TextMovement {
     /// The direction in which to move.
     pub direction: TextDirection,
@@ -392,7 +394,7 @@ impl TextDirection {
 }
 
 /// A semantic selection derived from a point.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum TextSelectionKind {
     /// Select a word.
     Word,
@@ -404,7 +406,7 @@ pub enum TextSelectionKind {
 
 /// A horizontal row produced by shaping and line breaking. Soft wrapping can split one logical
 /// line across several rows; bidirectional ordering does not change logical UTF-8 byte ranges.
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct VisualLine {
     /// The logical UTF-8 byte range assigned to this row.
     pub text_range: Range<usize>,
@@ -422,11 +424,13 @@ pub struct VisualLine {
 }
 
 /// GPUI paint properties carried through Parley's brush.
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct PaintStyle {
     /// Glyph foreground color.
+    #[serde(with = "crate::color::serde_colors::hsla")]
     pub color: Hsla,
     /// Optional background color.
+    #[serde(with = "crate::color::serde_colors::optional_hsla")]
     pub background_color: Option<Hsla>,
     /// Optional underline style.
     pub underline: Option<UnderlineStyle>,
@@ -435,7 +439,7 @@ pub struct PaintStyle {
 }
 
 /// A positioned, style-specific glyph run painted on one visual line.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct PaintFragment {
     /// Index of the input text run that supplies paint properties.
     pub source_run: usize,
@@ -456,7 +460,7 @@ pub struct PaintFragment {
 }
 
 /// A single glyph, ready to paint.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct ShapedGlyph {
     /// The ID for this glyph, as determined by the text system.
     pub id: GlyphId,
@@ -473,7 +477,9 @@ pub struct ShapedGlyph {
 /// At a soft wrap, downstream places the caret at the next row's start, and upstream places it at
 /// the previous row's end. At a bidirectional boundary, affinities can place the same byte index at
 /// different horizontal positions. They refer to logical order, not visual left and right.
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(
+    Clone, Copy, Debug, Default, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize,
+)]
 pub enum CaretAffinity {
     /// The caret attaches to the logically following cluster.
     #[default]
@@ -524,7 +530,9 @@ impl From<&str> for CaretAffinity {
 }
 
 /// A byte position together with the information needed to place it visually.
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(
+    Clone, Copy, Debug, Default, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize,
+)]
 pub struct CaretPosition {
     /// The logical UTF-8 byte index.
     pub index: usize,
@@ -627,7 +635,7 @@ impl CaretSelection {
 }
 
 /// The result of calculating movement through a laid-out document.
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct CaretMovement<T = CaretPosition> {
     /// The value at the requested destination.
     pub result: T,

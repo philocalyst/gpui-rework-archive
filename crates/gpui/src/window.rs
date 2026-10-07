@@ -42,6 +42,7 @@ use parking_lot::RwLock;
 use raw_window_handle::{HandleError, HasDisplayHandle, HasWindowHandle};
 use refineable::Refineable;
 use scheduler::Instant;
+use serde::{Deserialize, Serialize};
 use slotmap::SlotMap;
 use smallvec::SmallVec;
 use std::{
@@ -886,7 +887,7 @@ pub enum WindowControlArea {
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct HitboxId(u64);
 
-#[cfg(feature = "test-support")]
+#[cfg(feature = "headless")]
 impl HitboxId {
     /// A placeholder HitboxId exclusively for integration testing API's that
     /// need a hitbox but where the value of the hitbox does not matter. The
@@ -1131,7 +1132,7 @@ pub(crate) struct Frame {
     pub(crate) input_handlers: Vec<Option<PlatformInputHandler>>,
     pub(crate) tooltip_requests: Vec<Option<TooltipRequest>>,
     pub(crate) cursor_styles: Vec<CursorStyleRequest>,
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, feature = "headless"))]
     pub(crate) debug_bounds: FxHashMap<String, Bounds<Pixels>>,
     #[cfg(any(feature = "inspector", debug_assertions))]
     pub(crate) next_inspector_instance_ids: FxHashMap<Rc<crate::InspectorElementPath>, usize>,
@@ -1178,7 +1179,7 @@ impl Frame {
             tooltip_requests: Vec::new(),
             cursor_styles: Vec::new(),
 
-            #[cfg(any(test, feature = "test-support"))]
+            #[cfg(any(test, feature = "headless"))]
             debug_bounds: FxHashMap::default(),
 
             #[cfg(any(feature = "inspector", debug_assertions))]
@@ -1205,7 +1206,7 @@ impl Frame {
         self.tab_stops.clear();
         self.focus = None;
 
-        #[cfg(any(test, feature = "test-support"))]
+        #[cfg(any(test, feature = "headless"))]
         {
             self.debug_bounds.clear();
         }
@@ -2152,7 +2153,7 @@ pub struct DispatchEventResult {
 ///
 /// Content outside `bounds` is omitted. Fades are evaluated in window space against these
 /// axis-aligned bounds and do not follow transforms. Complex masks are not supported.
-#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[repr(C)]
 // docs:examples:begin
 #[doc = include_str!("docs/examples/gpui-ContentMask-596c376b.md")]
@@ -2226,6 +2227,21 @@ impl ContentMask<Pixels> {
                     |a, b| a > b,
                 ),
             },
+        }
+    }
+}
+
+impl ContentMask<ScaledPixels> {
+    /// Intersects two masks in device coordinates with the normal edge fade rules.
+    pub fn intersect(&self, other: &Self) -> Self {
+        let logical = |mask: &Self| ContentMask {
+            bounds: mask.bounds.map(|v| Pixels(v.0)),
+            fade_out: mask.fade_out.map(|v| Pixels(v.0)),
+        };
+        let merged = logical(self).intersect(&logical(other));
+        Self {
+            bounds: merged.bounds.map(|v| ScaledPixels(v.0)),
+            fade_out: merged.fade_out.map(|v| ScaledPixels(v.0)),
         }
     }
 }
@@ -2745,7 +2761,7 @@ impl Window {
     ///
     /// Tests have no platform frame loop, so this simulates the delivery of the
     /// next frame.
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, feature = "headless"))]
     pub fn simulate_next_frame(&mut self, cx: &mut App) -> usize {
         let callbacks = self.next_frame_callbacks.take();
         let count = callbacks.len();
@@ -2818,14 +2834,14 @@ impl Window {
     /// Renders the current frame's scene to a texture and returns the pixel data as an RGBA image.
     /// This does not present the frame to screen - useful for visual testing where we want
     /// to capture what would be rendered without displaying it or requiring the window to be visible.
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, feature = "headless"))]
     pub fn render_to_image(&self) -> anyhow::Result<image::RgbaImage> {
         self.platform_window
             .render_to_image(&self.rendered_frame.scene)
     }
 
     /// Returns the current frame's quad and glyph sprite counts.
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, feature = "headless"))]
     pub fn rendered_primitive_counts(&self) -> (usize, usize, usize, usize) {
         let scene = &self.rendered_frame.scene;
         (
@@ -2840,7 +2856,7 @@ impl Window {
     /// painted output without rasterizing the frame. Quad bounds are in scaled pixels and are
     /// not clipped; each quad carries the content mask it will be clipped to when drawn. Quads
     /// whose bounds don't intersect their content mask are culled at paint time and won't appear.
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, feature = "headless"))]
     pub fn painted_quads(&self) -> Vec<Quad> {
         self.rendered_frame.scene.quads.clone()
     }
@@ -3018,7 +3034,7 @@ impl Window {
     }
 
     /// Overrides the display scale factor for tests.
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, feature = "headless"))]
     pub fn set_scale_factor(&mut self, scale_factor: f32) {
         self.scale_factor = scale_factor;
         self.refresh();
@@ -4770,6 +4786,39 @@ impl Window {
         self.paint_quad_with_corner_smoothing(quad, 0.0);
     }
 
+    /// Imports a portable GPUI scene into this window's atlas. Keep the returned
+    /// value alive while displaying it; unused atlas resources are released on drop.
+    pub fn import_scene_capture(
+        &mut self,
+        capture: &crate::SceneCapture,
+        resources: &mut crate::SceneResources,
+    ) -> Result<crate::ImportedScene> {
+        resources.import(capture, self.sprite_atlas.clone())
+    }
+
+    /// Paints an imported GPUI scene through this window's normal renderer.
+    /// `source_scale_factor` is the density used when the source window drew it.
+    /// Layout coordinates are translated to `destination.origin`, retaining their logical size.
+    /// Call this during an element's paint phase, just like `paint_quad`.
+    pub fn paint_scene(
+        &mut self,
+        scene: &crate::ImportedScene,
+        destination: Bounds<Pixels>,
+        source_scale_factor: f32,
+    ) -> Result<()> {
+        self.invalidator.debug_assert_paint();
+        let snapped=self.snap_bounds(destination);
+        let ancestor=self.snapped_content_mask();
+        let clip=ancestor.intersect(&ContentMask { bounds: snapped, fade_out: Edges::default() });
+        self.next_frame.scene.append_imported(
+            scene,
+            snapped.origin,
+            self.scale_factor() / source_scale_factor,
+            clip,
+            self.element_opacity(),
+        )
+    }
+
     /// Paints `quad` with smoothed corners.
     pub fn paint_quad_with_corner_smoothing(&mut self, quad: PaintQuad, corner_smoothing: f32) {
         self.invalidator.debug_assert_paint();
@@ -5340,7 +5389,7 @@ impl Window {
     }
 
     /// Returns whether every frame of an image is present in the sprite atlas.
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, feature = "headless"))]
     pub fn has_image_atlas_entry(&self, data: &RenderImage) -> bool {
         data.frame_count() > 0
             && (0..data.frame_count()).all(|frame_index| {
@@ -5807,6 +5856,33 @@ impl Window {
         )));
     }
 
+    /// Observes raw touch input before gesture recognition for the next painted frame.
+    /// Stopping propagation transfers gesture recognition to the listener, which is
+    /// useful when embedding another GPUI window's input surface.
+    pub fn on_touch_event(
+        &mut self,
+        mut listener: impl FnMut(&TouchEvent, DispatchPhase, &mut Window, &mut App) + 'static,
+    ) {
+        self.invalidator.debug_assert_paint();
+        self.next_frame.mouse_listeners.push(Some(Box::new(move |event, phase, window, cx| {
+            if let Some(event) = event.downcast_ref::<TouchEvent>() {
+                listener(event, phase, window, cx);
+            }
+        })));
+    }
+
+    /// Observes native file drops before their conversion to mouse drag events.
+    /// Stopping propagation lets an embedded GPUI window own the drop.
+    pub fn on_file_drop_event(
+        &mut self,
+        mut listener: impl FnMut(&crate::FileDropEvent, DispatchPhase, &mut Window, &mut App) + 'static,
+    ) {
+        self.invalidator.debug_assert_paint();
+        self.next_frame.mouse_listeners.push(Some(Box::new(move |event,phase,window,cx| {
+            if let Some(event)=event.downcast_ref::<crate::FileDropEvent>() {listener(event,phase,window,cx);}
+        })));
+    }
+
     /// Registers a key listener on this node for the next rendered frame. The type of event
     /// is determined by the first parameter of the given listener. When the next frame is rendered
     /// the listener will be cleared.
@@ -5983,6 +6059,14 @@ impl Window {
         // Handlers may set this to true by calling `prevent_default`.
         self.default_prevented = false;
 
+        if let PlatformInput::FileDrop(drop)=&event {
+            match drop {
+                FileDropEvent::Entered {position,..}|FileDropEvent::Pending {position}|FileDropEvent::Submit {position}=>self.mouse_position=*position,
+                FileDropEvent::Exited|FileDropEvent::Ended=>{},
+            }
+            self.dispatch_mouse_event(drop,cx);
+            if !cx.propagate_event {return DispatchEventResult {propagate:false,default_prevented:self.default_prevented};}
+        }
         let event = match event {
             // Track the mouse position with our own state, since accessing the platform
             // API for the mouse position can only occur on the main thread.
@@ -6099,7 +6183,11 @@ impl Window {
         } else if let Some(any_key_event) = event.keyboard_event() {
             self.dispatch_key_event(any_key_event, cx);
         } else if let Some(touch_event) = event.touch_event() {
-            self.dispatch_touch_event(touch_event, cx);
+            self.mouse_position = touch_event.position;
+            self.dispatch_mouse_event(touch_event, cx);
+            if cx.propagate_event {
+                self.dispatch_touch_event(touch_event, cx);
+            }
         }
         if let PlatformInput::LongPress(long_press) = &event {
             match long_press.phase {
@@ -6883,6 +6971,11 @@ impl Window {
         self.platform_window.set_visible(visible);
     }
 
+    /// Returns the platform's current visibility when it can be queried.
+    pub fn is_visible(&self) -> Option<bool> {
+        self.platform_window.is_visible()
+    }
+
     /// Toggle full screen status on the current window at the platform level.
     pub fn toggle_fullscreen(&self) {
         self.platform_window.toggle_fullscreen();
@@ -7613,7 +7706,7 @@ impl Window {
 
     /// For testing: set the current modifier keys state.
     /// This does not generate any events.
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, feature = "headless"))]
     pub fn set_modifiers(&mut self, modifiers: Modifiers) {
         self.modifiers = modifiers;
     }
@@ -7621,7 +7714,7 @@ impl Window {
     /// For testing: simulate a mouse move event to the given position.
     /// This dispatches the event through the normal event handling path,
     /// which will trigger hover states and tooltips.
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, feature = "headless"))]
     pub fn simulate_mouse_move(&mut self, position: Point<Pixels>, cx: &mut App) {
         let event = PlatformInput::MouseMove(MouseMoveEvent {
             position,
@@ -7686,7 +7779,7 @@ impl<V: 'static + Render> WindowHandle<V> {
     /// Get the root view out of this window.
     ///
     /// This will fail if the window is closed or if the root view's type does not match `V`.
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, feature = "headless"))]
     pub fn root<C>(&self, cx: &mut C) -> Result<Entity<V>>
     where
         C: AppContext,

@@ -61,7 +61,7 @@ impl TextRangeExt for str {
 }
 
 /// An opaque identifier for a specific font.
-#[derive(Hash, PartialEq, Eq, Clone, Copy, Debug)]
+#[derive(Hash, PartialEq, Eq, Clone, Copy, Debug, serde::Serialize, serde::Deserialize)]
 #[repr(C)]
 pub struct FontId(pub usize);
 
@@ -508,15 +508,17 @@ impl Display for FontStyle {
 }
 
 /// A styled run of text, for use in [`crate::TextLayout`].
-#[derive(Clone, Debug, PartialEq, Default)]
+#[derive(Clone, Debug, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 pub struct TextRun {
     /// A number of utf8 bytes
     pub len: usize,
     /// The font to use for this run.
     pub font: Font,
     /// The color
+    #[serde(with = "crate::color::serde_colors::hsla")]
     pub color: Hsla,
     /// The background color (if any)
+    #[serde(with = "crate::color::serde_colors::optional_hsla")]
     pub background_color: Option<Hsla>,
     /// The underline style (if any)
     pub underline: Option<UnderlineStyle>,
@@ -528,7 +530,9 @@ pub struct TextRun {
 
 /// The paragraph base-direction policy supplied to a text backend.
 #[doc(hidden)]
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(
+    Clone, Copy, Debug, Default, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize,
+)]
 pub enum ParagraphDirection {
     /// Determine paragraph direction from its source text.
     #[default]
@@ -550,7 +554,7 @@ impl From<ResolvedDirection> for ParagraphDirection {
 
 /// A directional scope within an inline text document.
 #[doc(hidden)]
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct InlineBidiScope {
     /// UTF-8 source range covered by this scope.
     pub range: Range<usize>,
@@ -562,7 +566,9 @@ pub struct InlineBidiScope {
 
 /// Direction, wrapping, and alignment options for a complete text document.
 #[doc(hidden)]
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(
+    Clone, Copy, Debug, Default, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize,
+)]
 pub struct TextLayoutOptions {
     /// Optional soft-wrap width.
     pub wrap_width: Option<Pixels>,
@@ -592,7 +598,7 @@ pub struct TextLayoutRequest<'a> {
 }
 
 /// An atomic element inserted at a UTF-8 boundary in an inline document.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct InlineBoxRequest {
     /// Identifier returned with the positioned box.
     pub id: u64,
@@ -605,7 +611,7 @@ pub struct InlineBoxRequest {
 }
 
 /// Resolved font size and line height for part of an inline document.
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct InlineTextStyle {
     /// UTF-8 range receiving these resolved metrics.
     pub range: Range<usize>,
@@ -701,7 +707,7 @@ impl From<&TextRun> for PaintStyle {
 }
 
 /// An identifier for a specific glyph, as returned by [`WindowTextSystem::layout_line`].
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize)]
 #[repr(C)]
 pub struct GlyphId(pub u32);
 
@@ -710,7 +716,7 @@ pub struct GlyphId(pub u32);
 /// This struct identifies a specific glyph rendering configuration including
 /// font, size, subpixel positioning, and scale factor. It's used to look up
 /// cached pixels, placement metadata, and sprite atlas entries.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct RenderGlyphParams {
     /// Font face containing the glyph.
     pub font_id: FontId,
@@ -727,7 +733,7 @@ pub struct RenderGlyphParams {
 }
 
 /// The kind of glyph image requested from a rasterizer.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum GlyphRenderMode {
     /// A color-independent, one-channel coverage mask.
     Grayscale,
@@ -773,13 +779,14 @@ impl RasterColorExt for crate::Rgba {
 }
 
 /// A scene request before a platform rasterizer normalizes its cache-relevant settings.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, serde::Serialize, serde::Deserialize)]
 pub struct RasterStyleRequest {
     /// The canonical font instance containing the glyph.
     pub font_id: FontId,
     /// The glyph whose artwork will be rasterized.
     pub glyph_id: GlyphId,
     /// The exact application color. Rasterizers may only retain a normalized derivative of it.
+    #[serde(with = "crate::color::serde_colors::rgba")]
     pub scene_color: crate::Rgba,
     /// The requested kind of glyph image.
     pub requested_mode: GlyphRenderMode,
@@ -800,7 +807,7 @@ impl RasterStyleRequest {
 }
 
 /// Describes which foreground channels can change rasterized color artwork.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum ForegroundDependency {
     /// The artwork or its fallback may use the complete foreground color.
     Full,
@@ -809,7 +816,7 @@ pub enum ForegroundDependency {
 }
 
 /// The cache-relevant raster settings chosen by a platform rasterizer.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct PreparedRasterStyle {
     /// The normalized render mode.
     pub mode: GlyphRenderMode,
@@ -840,14 +847,14 @@ impl PreparedRasterStyle {
 }
 
 /// The part of the requested color, if any, which changes rasterized pixels.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum RasterColorEffect {
     /// Coverage and color pixels do not depend on the scene color.
     Independent,
     /// CoreGraphics' five-level font-smoothing dilation.
     Dilation(u8),
     /// A quantized color consumed by a native preblending or `currentColor` path.
-    Preblend(Rgba8),
+    Preblend(#[serde(with = "crate::color::serde_colors::rgba8")] Rgba8),
 }
 
 impl Hash for RasterColorEffect {
@@ -863,7 +870,7 @@ impl Hash for RasterColorEffect {
 }
 
 /// The byte layout supplied by a glyph rasterizer.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum RasterizedGlyphFormat {
     /// One byte of coverage per pixel.
     AlphaMask,
@@ -874,7 +881,7 @@ pub enum RasterizedGlyphFormat {
 }
 
 /// A glyph raster produced by a platform rasterizer.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct RasterizedGlyph {
     /// Placement relative to the glyph's baseline origin.
     pub bounds: Bounds<DevicePixels>,
@@ -883,6 +890,7 @@ pub struct RasterizedGlyph {
     /// Byte layout of `pixels`.
     pub format: RasterizedGlyphFormat,
     /// Pixel bytes. Color pixels use straight alpha.
+    #[serde(with = "serde_bytes")]
     pub pixels: Vec<u8>,
 }
 
@@ -988,7 +996,7 @@ impl Hash for RenderGlyphParams {
 }
 
 /// The configuration details for identifying a specific font.
-#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub struct Font {
     /// The font family name.
     ///
@@ -1045,7 +1053,7 @@ impl Font {
 
 /// A struct for storing font metrics.
 /// It is used to define the measurements of a typeface.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, serde::Serialize, serde::Deserialize)]
 pub struct FontMetrics {
     /// The number of font units that make up the "em square",
     /// a scalable grid for determining the size of a typeface.

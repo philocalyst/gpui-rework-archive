@@ -18,7 +18,7 @@ pub trait AsKeystroke {
 /// `key` identifies the key used for matching bindings; `key_char` is the optional character
 /// produced by the platform's keyboard layout or IME. They can differ for AltGr, dead keys, and
 /// non-US layouts.
-#[derive(Clone, Debug, Eq, PartialEq, Default, Deserialize, Hash)]
+#[derive(Clone, Debug, Eq, PartialEq, Default, Serialize, Deserialize, Hash)]
 pub struct Keystroke {
     /// Modifier state captured with this keystroke.
     pub modifiers: Modifiers,

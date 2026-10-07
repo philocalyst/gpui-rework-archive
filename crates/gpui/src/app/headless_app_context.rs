@@ -45,6 +45,7 @@ pub struct HeadlessAppContext {
     /// The foreground executor for running tasks on the main thread.
     pub foreground_executor: ForegroundExecutor,
     dispatcher: TestDispatcher,
+    platform: Rc<TestPlatform>,
     text_system: Arc<TextSystem>,
 }
 
@@ -91,7 +92,7 @@ impl HeadlessAppContext {
         let text_system = Arc::new(TextSystem::new(platform_text_system));
         let http_client = crate::http_client::FakeHttpClient::with_404_response();
         let app = App::new_app(
-            platform,
+            platform.clone(),
             AssetRegistry::from(asset_source).into(),
             http_client,
         );
@@ -102,7 +103,18 @@ impl HeadlessAppContext {
             background_executor,
             foreground_executor,
             dispatcher,
+            platform,
             text_system,
+        }
+    }
+
+    /// Controls whether each state update immediately draws dirty windows.
+    /// Tests default to eager drawing. External frame drivers can batch effects
+    /// and input, then call `draw_window` once at their frame boundary, as a
+    /// desktop platform does between display refreshes.
+    pub fn set_automatic_drawing(&mut self, enabled: bool) {
+        if let GpuiMode::Test { draw_on_flush, .. } = &mut self.app.borrow_mut().mode {
+            *draw_on_flush = enabled;
         }
     }
 
@@ -112,7 +124,20 @@ impl HeadlessAppContext {
         size: Size<Pixels>,
         build_root: impl FnOnce(&mut Window, &mut App) -> Entity<V>,
     ) -> Result<WindowHandle<V>> {
+        self.open_window_with_scale_factor(size, self.platform.window_scale_factor.get(), build_root)
+    }
+
+    /// Opens a window with its platform density installed before the root builder
+    /// runs, so construction observes the same metrics as subsequent rendering.
+    pub fn open_window_with_scale_factor<V: Render + 'static>(
+        &mut self,
+        size: Size<Pixels>,
+        scale_factor: f32,
+        build_root: impl FnOnce(&mut Window, &mut App) -> Entity<V>,
+    ) -> Result<WindowHandle<V>> {
         use crate::{point, px};
+        anyhow::ensure!(scale_factor.is_finite() && scale_factor > 0., "invalid density");
+        let previous_scale = self.platform.window_scale_factor.replace(scale_factor);
 
         let bounds = Bounds {
             origin: point(px(0.0), px(0.0)),
@@ -120,13 +145,17 @@ impl HeadlessAppContext {
         };
 
         let mut cx = self.app.borrow_mut();
-        cx.open_window(
+        let draw_initial = cx.mode.draw_on_flush();
+        let result = cx.open_window_inner(
             WindowOptions::new()
                 .window_bounds(Some(WindowBounds::Windowed(bounds)))
                 .focus(false)
                 .show(false),
             build_root,
-        )
+            draw_initial,
+        );
+        self.platform.window_scale_factor.set(previous_scale);
+        result
     }
 
     /// Runs all pending tasks until parked.
@@ -163,6 +192,154 @@ impl HeadlessAppContext {
     ) -> Result<R> {
         let mut app = self.app.borrow_mut();
         app.update_window(window, f)
+    }
+
+    /// Draws a frame without presenting it or advancing the simulated clock.
+    ///
+    /// Advance the clock and apply input before calling this to capture a specific
+    /// animation or interaction state. The element arena is released after paint.
+    pub fn draw_window(&mut self, window: AnyWindowHandle) -> Result<()> {
+        self.update_window(window, |_, window, cx| window.draw(cx).clear(cx))
+    }
+
+    /// Paints only when GPUI has invalidated the window, as a platform frame
+    /// callback does. Returns whether a new scene was produced.
+    pub fn draw_window_if_dirty(&mut self, window: AnyWindowHandle) -> Result<bool> {
+        self.update_window(window, |_, window, cx| {
+            let dirty = window.invalidator.is_dirty();
+            if dirty {
+                window.draw(cx).clear(cx);
+            }
+            dirty
+        })
+    }
+
+    /// Delivers keyboard or pointer input through the regular GPUI event dispatch path.
+    pub fn dispatch_input(
+        &mut self,
+        window: AnyWindowHandle,
+        input: crate::PlatformInput,
+    ) -> Result<crate::DispatchEventResult> {
+        self.update_window(window, |_, window, cx| window.dispatch_event(input, cx))
+    }
+
+    /// Delivers callbacks waiting for the next frame, without advancing time.
+    pub fn deliver_next_frame(&mut self, window: AnyWindowHandle) -> Result<usize> {
+        self.update_window(window, |_, window, cx| window.simulate_next_frame(cx))
+    }
+
+    /// Reports the next frame or timer deadline so an external driver can sleep
+    /// while an idle component has no work. This does not execute callbacks.
+    pub fn next_frame_delay(&mut self, window: AnyWindowHandle) -> Result<Option<Duration>> {
+        let animation = self.update_window(window, |_, window, _| {
+            window.invalidator.is_dirty() || !window.next_frame_callbacks.borrow().is_empty()
+        })?;
+        let timer = self.dispatcher.scheduler().next_timer_delay();
+        Ok(match (animation, timer) {
+            (true, Some(timer)) => Some(timer.min(Duration::from_millis(16))),
+            (true, None) => Some(Duration::from_millis(16)),
+            (false, timer) => timer,
+        })
+    }
+
+    /// Calls the current platform text handler without retaining an app borrow.
+    /// Its methods update the app themselves, matching native platform dispatch.
+    pub fn with_platform_input_handler<R>(
+        &mut self,
+        window: AnyWindowHandle,
+        operation: impl FnOnce(&mut crate::PlatformInputHandler) -> R,
+    ) -> Result<Option<R>> {
+        let handler = self.update_window(window, |_, window, _| {
+            window.platform_window.take_input_handler()
+        })?;
+        let Some(mut handler) = handler else {
+            return Ok(None);
+        };
+        let result = operation(&mut handler);
+        self.update_window(window, |_, window, _| {
+            window.platform_window.set_input_handler(handler)
+        })?;
+        Ok(Some(result))
+    }
+
+    /// Reads the cursor selected by the rendered frame at the current pointer.
+    pub fn cursor_style(&mut self, window: AnyWindowHandle) -> Result<crate::CursorStyle> {
+        self.update_window(window, |_, window, _| {
+            window
+                .rendered_frame
+                .cursor_style(window)
+                .unwrap_or_default()
+        })
+    }
+
+    /// Changes the device density and invalidates layout and glyph rasterization.
+    pub fn set_scale_factor(&mut self, window: AnyWindowHandle, scale_factor: f32) -> Result<()> {
+        anyhow::ensure!(
+            scale_factor.is_finite() && scale_factor > 0.0,
+            "scale factor must be positive and finite"
+        );
+        // Deliver the platform callback after releasing the app borrow: it updates the
+        // same window and must be able to borrow the app again.
+        let mut test_window = self
+            .update_window(window, |_, window, _| {
+                window
+                    .platform_window
+                    .as_test()
+                    .map(|window| window.clone())
+            })?
+            .ok_or_else(|| anyhow::anyhow!("headless window has no test platform"))?;
+        test_window.simulate_scale_factor(scale_factor);
+        Ok(())
+    }
+
+    /// Changes the logical viewport through the regular platform resize callback.
+    pub fn set_viewport_size(&mut self, window: AnyWindowHandle, size: Size<Pixels>) -> Result<()> {
+        anyhow::ensure!(
+            size.width > Pixels::ZERO && size.height > Pixels::ZERO,
+            "viewport must have positive dimensions"
+        );
+        let mut platform = self
+            .update_window(window, |_, window, _| {
+                window.platform_window.as_test().cloned()
+            })?
+            .ok_or_else(|| anyhow::anyhow!("headless window has no test platform"))?;
+        platform.simulate_resize(size);
+        Ok(())
+    }
+
+    /// Reads the finished scene of the last drawn frame.
+    ///
+    /// The callback keeps scene borrows inside the window update. It can inspect
+    /// the command plan, measure resources, or capture a portable display list.
+    pub fn read_scene<R>(
+        &mut self,
+        window: AnyWindowHandle,
+        read: impl FnOnce(&crate::Scene) -> R,
+    ) -> Result<R> {
+        self.update_window(window, |_, window, _| read(&window.rendered_frame.scene))
+    }
+
+    /// Captures a portable scene with the bitmaps supplied by its renderer's atlas.
+    pub fn capture_scene(
+        &mut self,
+        window: AnyWindowHandle,
+        resolve_tile: impl FnMut(crate::AtlasTile) -> Result<crate::CapturedBitmap>,
+    ) -> Result<crate::SceneCapture> {
+        self.read_scene(window, |scene| {
+            crate::SceneCapture::capture(scene, resolve_tile)
+        })?
+    }
+
+    /// Captures a live frame without content-sorting atlas bitmaps for snapshot
+    /// identity; drawing and command compilation use the same GPUI scene path.
+    pub fn capture_live_scene(
+        &mut self,
+        window: AnyWindowHandle,
+        resolve_tile: impl FnMut(crate::AtlasTile) -> Result<crate::CapturedBitmap>,
+    ) -> Result<crate::SceneCapture> {
+        self.read_scene(window, |scene| {
+            crate::SceneCapture::capture_live(scene, resolve_tile)
+        })?
     }
 
     /// Returns the most recently rendered bounds for an element's debug selector.
@@ -383,5 +560,122 @@ impl AppContext for HeadlessAppContext {
         let iter = app.global_entities();
         // Cloning the iterator here so that lock can be released when function is going out of scope
         iter.collect::<Vec<_>>().into_iter()
+    }
+}
+
+#[cfg(test)]
+mod frame_driver_tests {
+    use super::*;
+    use crate::prelude::*;
+    use crate::{
+        Context, MouseDownEvent, MouseUpEvent, PlatformInput, Styled, div, point, px, rgb, size,
+    };
+    use std::cell::Cell;
+    struct Counter {
+        renders: Rc<Cell<usize>>,
+        count: u32,
+    }
+    impl Render for Counter {
+        fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+            self.renders.set(self.renders.get() + 1);
+            div()
+                .id("counter")
+                .w(px(100.))
+                .h(px(60.))
+                .bg(rgb(0x110000 + self.count))
+                .on_click(cx.listener(|this, _, _, cx| {
+                    this.count += 1;
+                    cx.notify();
+                }))
+        }
+    }
+    #[test]
+    fn construction_density_and_first_frame_callbacks_match_platform_order() {
+        let renders = Rc::new(Cell::new(0));
+        let mut app = HeadlessAppContext::new(Arc::new(crate::TestTextSystem));
+        app.set_automatic_drawing(false);
+        let render_count = renders.clone();
+        let window = app.open_window_with_scale_factor(size(px(200.), px(150.)), 1.25, move |window, cx| {
+            assert_eq!(window.scale_factor(), 1.25, "density is visible during construction");
+            let entity = cx.new(|_| Counter { renders: render_count, count: 0 });
+            let callback_entity = entity.clone();
+            window.on_next_frame(move |window, cx| {
+                assert!(!window.rendered_frame.scene.quads.is_empty(), "initial paint precedes the first display callback");
+                callback_entity.update(cx, |this, cx| { this.count += 1; cx.notify(); });
+            });
+            entity
+        }).unwrap();
+        assert!(app.draw_window_if_dirty(window.into()).unwrap());
+        assert_eq!(renders.get(), 1);
+        assert!(!app.draw_window_if_dirty(window.into()).unwrap(), "idle frame should reuse its scene");
+        assert_eq!(app.deliver_next_frame(window.into()).unwrap(), 1);
+        app.run_until_parked();
+        assert!(app.draw_window_if_dirty(window.into()).unwrap());
+        assert_eq!(renders.get(), 2);
+        app.set_scale_factor(window.into(), 2.).unwrap();
+        assert!(app.draw_window_if_dirty(window.into()).unwrap());
+        app.update_window(window.into(), |_, window, _| assert_eq!(window.scale_factor(), 2.)).unwrap();
+    }
+    #[test]
+    fn external_frame_driver_batches_updates_without_losing_real_event_effects() {
+        let renders = Rc::new(Cell::new(0));
+        let mut app = HeadlessAppContext::new(Arc::new(crate::TestTextSystem));
+        app.set_automatic_drawing(false);
+        let render_count = renders.clone();
+        let window = app
+            .open_window(size(px(200.), px(150.)), move |_, cx| {
+                cx.new(|_| Counter {
+                    renders: render_count,
+                    count: 0,
+                })
+            })
+            .unwrap();
+        assert_eq!(renders.get(), 0, "external driver owns the initial paint");
+        app.draw_window(window.into()).unwrap();
+        assert_eq!(renders.get(), 1);
+        app.dispatch_input(
+            window.into(),
+            PlatformInput::MouseDown(MouseDownEvent {
+                position: point(px(20.), px(20.)),
+                ..Default::default()
+            }),
+        )
+        .unwrap();
+        app.dispatch_input(
+            window.into(),
+            PlatformInput::MouseUp(MouseUpEvent {
+                position: point(px(20.), px(20.)),
+                ..Default::default()
+            }),
+        )
+        .unwrap();
+        assert_eq!(
+            renders.get(),
+            1,
+            "input effects should not each produce a frame"
+        );
+        app.read_window(&window, |entity, cx| assert_eq!(entity.read(cx).count, 1))
+            .unwrap();
+        app.draw_window(window.into()).unwrap();
+        assert_eq!(renders.get(), 2);
+        assert_eq!(
+            app.solid_quad_bounds(window.into(), crate::rgb_to_hsla(rgb(0x110001)))
+                .unwrap()
+                .len(),
+            1
+        );
+        app.set_automatic_drawing(true);
+        app.update_window(window.into(), |root, _, cx| {
+            let counter = root.downcast::<Counter>().unwrap();
+            counter.update(cx, |this, cx| {
+                this.count += 1;
+                cx.notify();
+            });
+        })
+        .unwrap();
+        assert!(
+            renders.get() > 2,
+            "existing eager headless drawing remains available"
+        );
     }
 }

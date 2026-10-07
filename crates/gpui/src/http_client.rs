@@ -74,12 +74,12 @@ impl HttpClient for BlockedHttpClient {
 }
 
 /// A fake HTTP client for testing.
-#[cfg(any(test, feature = "test-support"))]
+#[cfg(any(test, feature = "headless"))]
 pub struct FakeHttpClient {
     status: StatusCode,
 }
 
-#[cfg(any(test, feature = "test-support"))]
+#[cfg(any(test, feature = "headless"))]
 impl FakeHttpClient {
     /// Create a fake client that returns 404 responses.
     pub fn with_404_response() -> std::sync::Arc<dyn HttpClient> {
@@ -96,7 +96,7 @@ impl FakeHttpClient {
     }
 }
 
-#[cfg(any(test, feature = "test-support"))]
+#[cfg(any(test, feature = "headless"))]
 impl HttpClient for FakeHttpClient {
     fn get(
         &self,

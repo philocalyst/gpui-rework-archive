@@ -184,7 +184,10 @@ impl TestAppContext {
 
     /// Skip all drawing operations for the duration of this test.
     pub fn skip_drawing(&mut self) {
-        self.app.borrow_mut().mode = GpuiMode::Test { skip_drawing: true };
+        self.app.borrow_mut().mode = GpuiMode::Test {
+            skip_drawing: true,
+            draw_on_flush: true,
+        };
     }
 
     /// Create a single TestAppContext, for non-multi-client tests
@@ -636,7 +639,7 @@ impl TestAppContext {
     }
 
     /// Set a name for this App.
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, feature = "headless"))]
     pub fn set_name(&mut self, name: &'static str) {
         self.update(|cx| cx.name = Some(name))
     }

@@ -386,7 +386,7 @@ impl GestureKinds {
 
 /// A direct touch drag claimed by an element before touch input becomes a tap,
 /// long press, or scrolling gesture.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct TouchDragEvent {
     /// The phase of the touch drag.
     pub phase: TouchPhase,
@@ -406,7 +406,7 @@ impl GestureEvent for TouchDragEvent {}
 impl MouseEvent for TouchDragEvent {}
 
 /// A phased long-press gesture recognized from a touch.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct LongPressEvent {
     /// The phase of the long press.
     pub phase: TouchPhase,

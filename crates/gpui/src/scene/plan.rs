@@ -5,7 +5,8 @@
 //! batching, path targets, and filter isolation. Resource counts are estimates
 //! for the compiled plan, not GPU allocation guarantees.
 
-use super::{AtlasTextureId, BatchIterator, FilterBoundary, Scene};
+use super::{AtlasTextureId, BatchIterator, FilterBoundary, Scene, ScenePrimitives};
+use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 use std::ops::Range;
 
@@ -13,7 +14,7 @@ use std::ops::Range;
 pub const MAX_FILTER_GROUP_DEPTH: usize = 2;
 
 /// Index of an offscreen texture reserved for an isolated content-filter group.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct FilterTargetIndex(usize);
 
 impl FilterTargetIndex {
@@ -24,7 +25,7 @@ impl FilterTargetIndex {
 }
 
 /// Where the contents of a filter group are rendered.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum FilterRenderTarget {
     /// Render directly into the current target once isolation targets are exhausted.
     Inline,
@@ -79,7 +80,11 @@ impl ScenePlan {
         self.scene_lengths = SceneLengths::default();
     }
 
-    pub(super) fn build(scene: &Scene, mut commands: Vec<RenderCommand>) -> Self {
+    pub(super) fn build(scene: &Scene, commands: Vec<RenderCommand>) -> Self {
+        Self::build_primitives(scene.into(), commands)
+    }
+
+    pub(super) fn build_primitives(scene: ScenePrimitives<'_>, mut commands: Vec<RenderCommand>) -> Self {
         commands.clear();
         commands.reserve(scene.len());
         let mut matched_starts =
@@ -150,8 +155,54 @@ impl ScenePlan {
         Self {
             commands,
             requirements,
-            scene_lengths: SceneLengths::for_scene(scene),
+            scene_lengths: SceneLengths::for_primitives(scene),
         }
+    }
+
+    /// Restores a command stream only when it matches the scene's canonical compilation.
+    ///
+    /// Reusing the compiler keeps range, texture, smoothing, ordering, and resource-count
+    /// validation in one place. Serialized ranges are never used to index primitive arrays.
+    pub(super) fn from_captured_commands(
+        scene: &Scene,
+        commands: Vec<RenderCommand>,
+    ) -> anyhow::Result<Self> {
+        use anyhow::ensure;
+
+        for (index, path) in scene.paths.iter().enumerate() {
+            ensure!(
+                path.vertices.len() % 3 == 0,
+                "path {index}: vertices must form complete triangles"
+            );
+        }
+        // The live compiler tolerates an unmatched opening boundary by drawing inline.
+        // Portable captures require complete groups, checked before invoking the compiler.
+        let mut openings = Vec::new();
+        for (index, boundary) in scene.filter_boundaries.iter().enumerate() {
+            if boundary.is_start {
+                openings.push(index);
+            } else {
+                ensure!(
+                    openings.pop().is_some(),
+                    "filter boundary {index}: end has no matching begin"
+                );
+            }
+        }
+        ensure!(
+            openings.is_empty(),
+            "captured scene leaves filter groups open"
+        );
+
+        let expected = Self::build(scene, Vec::new());
+        for index in 0..expected.commands.len().max(commands.len()) {
+            let actual = commands.get(index);
+            let required = expected.commands.get(index);
+            ensure!(
+                actual == required,
+                "command {index} does not match compiled scene: got {actual:?}, expected {required:?}"
+            );
+        }
+        Ok(expected)
     }
 
     /// Returns the ordered rendering commands.
@@ -226,6 +277,9 @@ struct SceneLengths {
 
 impl SceneLengths {
     fn for_scene(scene: &Scene) -> Self {
+        Self::for_primitives(scene.into())
+    }
+    fn for_primitives(scene: ScenePrimitives<'_>) -> Self {
         Self {
             shadows: scene.shadows.len(),
             quads: scene.quads.len(),
@@ -242,7 +296,7 @@ impl SceneLengths {
 }
 
 /// A contiguous range of one primitive type drawn by a single pipeline invocation.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub enum PrimitiveBatch {
     Shadows {
@@ -278,7 +332,7 @@ pub enum PrimitiveBatch {
 }
 
 /// Backend-neutral rendering work derived from a [`Scene`].
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum RenderCommand {
     /// A normal primitive batch.
     Batch(PrimitiveBatch),
