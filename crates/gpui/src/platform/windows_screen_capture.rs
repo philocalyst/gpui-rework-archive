@@ -4,8 +4,9 @@ use windows_061::Win32::Graphics::Direct3D11::ID3D11Texture2D;
 
 /// A Windows Graphics Capture frame backed by a native D3D11 texture.
 ///
-/// The texture is borrowed from the capture frame and remains valid for the lifetime of this
-/// value. `display_time` is the native capture timestamp, not a GPUI presentation deadline.
+/// This value retains a COM reference to the frame texture, so clones keep the texture alive
+/// independently of the capture callback that produced it. `size` is in device pixels.
+/// `display_time` is the native capture timestamp, not a GPUI presentation deadline.
 #[derive(Clone)]
 pub struct WindowsScreenCaptureFrame {
     texture: Arc<ID3D11Texture2D>,
@@ -27,7 +28,7 @@ impl WindowsScreenCaptureFrame {
         }
     }
 
-    /// Returns the native texture containing this frame.
+    /// Borrows the native texture containing this frame.
     pub fn texture(&self) -> &ID3D11Texture2D {
         &self.texture
     }

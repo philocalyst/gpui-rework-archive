@@ -54,6 +54,16 @@ state attached to the same identity across frames.
 | Test state and input | `TestApp` and `TestAppContext` (enable `test-support`) |
 | Expose accessible controls | [`_accessibility`] |
 
+`Application` configures the platform and starts its run loop. The `App`
+passed to launch and event callbacks is the live synchronous context. An
+`Entity<T>` is a strong handle to one stored value; pass it an app context to
+read or update that value. `Context<T>` is supplied while constructing or
+updating one entity and adds entity-specific operations such as `notify`,
+`emit`, and callback registration. Use `AsyncApp` or `AsyncWindowContext` in a
+foreground task that crosses an `.await`; their methods reacquire app access
+for each callback. See [`_ownership_and_data_flow`] for ownership and effect
+timing behind these choices.
+
 ## Before choosing GPUI
 
 GPUI uses a GPU-backed drawing model, rather than a native widget for every

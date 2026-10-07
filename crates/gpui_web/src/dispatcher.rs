@@ -1,7 +1,15 @@
 //! Browser event-loop implementation of GPUI dispatch and timer contracts.
 //!
-//! Main-thread work is cooperative with browser rendering. Background work is available only
-//! when the WebAssembly build has shared memory and the multithreaded feature enabled.
+//! The browser main thread remains responsible for DOM access and frame work. Foreground tasks are
+//! queued there and browser timers provide delayed work. Background workers are enabled only when
+//! all three conditions hold: the build enables `multithreaded`, the caller allows threads, and
+//! the browser provides shared WebAssembly memory plus `Atomics.waitAsync`. Treat the constructor's
+//! `allow_threads` flag as permission for that capability check, not a guarantee that workers run.
+//!
+//! Without workers, ordinary dispatch is scheduled on the main thread. Delays use browser
+//! `setTimeout`; realtime callbacks use a microtask; idle callbacks use `requestIdleCallback` when
+//! present and fall back to ordinary low-priority tasks otherwise. In the fallback, there is no
+//! browser idle deadline, so [`PlatformDispatcher::idle_time_remaining`] returns `None`.
 
 use gpui::{
     PlatformDispatcher, Priority, PriorityQueueReceiver, PriorityQueueSender, RunnableVariant,
@@ -156,6 +164,10 @@ impl MainThreadMailbox {
 }
 
 /// Dispatches GPUI foreground work and optional WebAssembly worker work.
+///
+/// Applications normally receive this through [`WebPlatform`] rather than constructing it. Direct
+/// construction is useful for embedding GPUI's executors in a browser runtime; all browser-window
+/// interaction must stay on the main thread.
 pub struct WebDispatcher {
     main_thread_id: std::thread::ThreadId,
     background_sender: PriorityQueueSender<RunnableVariant>,
@@ -166,7 +178,7 @@ pub struct WebDispatcher {
 }
 
 impl WebDispatcher {
-    /// Creates a dispatcher for `browser_window`.
+    /// Creates a dispatcher associated with `browser_window`.
     ///
     /// `allow_threads` is only a preference: workers are enabled when the
     /// multithreaded build feature and the browser's shared-memory and
@@ -243,10 +255,14 @@ impl WebDispatcher {
 }
 
 impl PlatformDispatcher for WebDispatcher {
+    /// Reports whether the current JavaScript/WASM thread is the browser thread captured at
+    /// construction.
     fn is_main_thread(&self) -> bool {
         self.on_main_thread()
     }
 
+    /// Sends work to workers when the capability check succeeded; otherwise schedules it on the
+    /// browser thread. Browser-thread-only work must use `dispatch_on_main_thread`.
     fn dispatch(&self, runnable: RunnableVariant, priority: Priority) {
         if !self.supports_threads {
             self.dispatch_on_main_thread(runnable, priority);
@@ -264,6 +280,7 @@ impl PlatformDispatcher for WebDispatcher {
         }
     }
 
+    /// Queues work for the browser thread; browser callbacks cannot be run from a worker.
     fn dispatch_on_main_thread(&self, runnable: RunnableVariant, priority: Priority) {
         if self.on_main_thread() {
             schedule_runnable(&browser_window(), runnable, priority);
@@ -273,6 +290,7 @@ impl PlatformDispatcher for WebDispatcher {
         }
     }
 
+    /// Schedules work after the requested duration using a browser timeout.
     fn dispatch_after(&self, duration: Duration, runnable: RunnableVariant) {
         let millis = duration.as_millis().min(i32::MAX as u128) as i32;
         if self.on_main_thread() {
@@ -291,6 +309,8 @@ impl PlatformDispatcher for WebDispatcher {
         }
     }
 
+    /// Schedules the callback as a browser microtask, or posts it to the main-thread mailbox when
+    /// called from a worker.
     fn spawn_realtime(&self, function: Box<dyn FnOnce() + Send>) {
         if self.on_main_thread() {
             let callback = Closure::once_into_js(move || {
@@ -303,6 +323,8 @@ impl PlatformDispatcher for WebDispatcher {
         }
     }
 
+    /// Schedules work for a browser idle period, falling back to an ordinary low-priority task on
+    /// browsers without `requestIdleCallback`.
     fn dispatch_on_main_thread_when_idle(
         &self,
         runnable: RunnableVariant,
@@ -316,6 +338,8 @@ impl PlatformDispatcher for WebDispatcher {
         }
     }
 
+    /// Returns the current idle deadline's remaining time only while running inside a browser idle
+    /// callback; returns `None` elsewhere and on the fallback path.
     fn idle_time_remaining(&self) -> Option<Duration> {
         if !self.on_main_thread() {
             return None;
@@ -328,6 +352,7 @@ impl PlatformDispatcher for WebDispatcher {
         })
     }
 
+    /// Returns monotonic browser time through `web_time::Instant`.
     fn now(&self) -> Instant {
         Instant::now()
     }

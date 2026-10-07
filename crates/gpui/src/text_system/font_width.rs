@@ -10,7 +10,9 @@ use std::{
 /// Font width as a percentage, with 100 representing normal width.
 ///
 /// Selects static width variants or a variable font's `wdth` axis. Requests outside
-/// a variable font's axis range are clamped to that range by the text backend.
+/// a variable font's axis range are clamped to that range by the text backend. Creating this
+/// newtype directly does not validate the value; generated JSON Schema requires it to be
+/// positive.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Serialize, Deserialize, Add, Sub, FromStr)]
 #[serde(transparent)]
 pub struct FontWidth(pub f32);

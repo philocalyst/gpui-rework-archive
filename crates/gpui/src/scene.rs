@@ -43,10 +43,10 @@ mod abi;
 pub use abi::{SCENE_BUFFER_LAYOUTS, SceneBufferLayout};
 
 #[allow(non_camel_case_types, unused)]
-#[expect(missing_docs)]
+/// A path vertex in scaled scene coordinates, named to match the shader ABI.
 pub type PathVertex_ScaledPixels = PathVertex<ScaledPixels>;
 
-#[expect(missing_docs)]
+/// Painter's-order index assigned while recording scene primitives.
 pub type DrawOrder = u32;
 
 pub(crate) const DEFAULT_BORDER_DASHED_LENGTH: f32 = 2.0;
@@ -78,12 +78,20 @@ impl From<bool> for ShaderBool {
 }
 
 #[derive(Default)]
-/// A recorded frame's renderable primitives and compiled draw plan.
+/// A recorded frame's renderer-neutral primitives and compiled draw plan.
 ///
-/// The public primitive arrays are grouped by type for renderer efficiency;
-/// their final ordering is described by [`Scene::render_commands`]. Use
-/// [`Scene::insert_primitive`] to record content instead of editing these
-/// arrays directly.
+/// Record primitives with [`Scene::insert_primitive`], then call
+/// [`Scene::finish`] before reading batches, capturing, or rendering the scene.
+/// The public primitive arrays are grouped by type for efficient uploads; their
+/// painter's order is represented by [`Scene::render_commands`]. Keep the arrays
+/// and their per-primitive fields unchanged after finishing, because they are
+/// paired with ranges in the compiled plan.
+///
+/// Scene bounds, masks, and path geometry use [`ScaledPixels`]. Window painting
+/// APIs accept logical [`Pixels`] and apply the window scale while recording.
+/// A scene contains drawing commands and atlas references, not the window's
+/// layout cache, entities, event handlers, or focus state. See
+/// [`SceneCapture`] for a portable snapshot of supported scene content.
 pub struct Scene {
     pub(crate) paint_operations: Vec<PaintOperation>,
     primitive_bounds: BoundsTree<ScaledPixels>,
@@ -150,9 +158,10 @@ impl ScenePrimitives<'_> {
 }
 
 impl Scene {
-    /// Removes all primitives, layers, filters, and the compiled plan.
+    /// Removes all primitives, layers, filters, paint operations, and the compiled plan.
     ///
     /// The scene becomes unfinished and can be recorded as the next frame.
+    /// Internal vector capacity is retained for reuse.
     pub fn clear(&mut self) {
         self.paint_operations.clear();
         self.primitive_bounds.clear();
@@ -177,7 +186,12 @@ impl Scene {
         self.paint_operations.len()
     }
 
-    /// Starts a clipping/draw-order layer with the supplied scene-space bounds.
+    /// Starts a draw-order layer with the supplied scene-space bounds.
+    ///
+    /// Primitives recorded inside the layer share its order key, so the layer
+    /// participates in overlap ordering as one region. The bounds do not clip
+    /// pixels themselves; use a [`ContentMask`] for geometric clipping. A layer
+    /// opened here must be closed with [`Scene::pop_layer`].
     pub fn push_layer(&mut self, bounds: Bounds<ScaledPixels>) {
         self.is_finished = false;
         let order = self.primitive_bounds.insert(bounds);
@@ -186,7 +200,7 @@ impl Scene {
             .push(PaintOperation::StartLayer(bounds));
     }
 
-    /// Ends the most recently pushed layer.
+    /// Ends the most recently pushed draw-order layer.
     ///
     /// Calling this without a matching layer is tolerated by the recorder, but
     /// leaves an unmatched marker that should be avoided by callers.
@@ -206,10 +220,15 @@ impl Scene {
         self.primitive_bounds.set_order_floor(floor);
     }
 
-    /// Records a primitive for the current frame.
+    /// Records a scene-space primitive for the current frame.
     ///
-    /// Empty clipped primitives are discarded. Recording after [`Scene::finish`]
-    /// invalidates its compiled plan; finish again before rendering.
+    /// Primitive geometry and masks must use [`ScaledPixels`]. Ordinary
+    /// primitives whose paint bounds become empty after intersection with the
+    /// content mask are discarded; filter boundary markers are retained so
+    /// their start/end pair remains balanced.
+    /// Recording after [`Scene::finish`] invalidates its compiled plan; finish
+    /// again before rendering. Prefer a `Window` paint method when starting from
+    /// logical-pixel UI geometry.
     pub fn insert_primitive(&mut self, primitive: impl Into<Primitive>) {
         self.insert_primitive_with_surface_opacity(primitive.into(), None);
     }
@@ -323,7 +342,9 @@ impl Scene {
     ///
     /// `range` indexes the previous scene's operation stream, so it must be a
     /// valid range for `prev_scene.len()`. Replayed operations are reinserted
-    /// and therefore receive draw ordering in this scene.
+    /// and therefore receive draw ordering from this scene's current bounds
+    /// tree and layer stack. This copies recorded drawing operations; it does
+    /// not restore a window's layout cache or event state.
     pub fn replay(&mut self, range: Range<usize>, prev_scene: &Scene) {
         for operation in &prev_scene.paint_operations[range] {
             match operation {
@@ -340,8 +361,10 @@ impl Scene {
     /// Sorts primitives and compiles the renderer-neutral command stream.
     ///
     /// Call this after recording and before [`Self::render_plan`], capture, or
-    /// rendering. Calling it again is safe; recording afterward invalidates the
-    /// plan and requires another finish.
+    /// rendering. Primitive vectors are sorted by draw order, then adjacent
+    /// compatible work is coalesced into batches without moving work across an
+    /// intervening draw. Calling it again is safe. Any subsequent recording
+    /// invalidates the plan and requires another `finish`.
     pub fn finish(&mut self) {
         self.shadows.sort_by_key(|shadow| shadow.order);
         self.quads.sort_by_key(|quad| quad.order);
@@ -421,20 +444,26 @@ impl Scene {
         &self.render_plan
     }
 
-    /// Returns the opacity associated with each surface in [`Self::surfaces`].
+    /// Returns opacities parallel to the sorted surface slice in [`Self::surfaces`].
     ///
     /// Entries created through [`Self::insert_primitive`] default to fully opaque.
+    /// Call after [`Self::finish`] when reading both slices for rendering.
     pub fn surface_opacities(&self) -> &[f32] {
         &self.surface_opacities
     }
 
-    /// Whether rendering needs an offscreen scene target for backdrop or content filters.
+    /// Whether rendering needs an offscreen target for backdrop or isolated content filters.
+    ///
+    /// Path rasterization uses a separate target reported by
+    /// [`ScenePlanRequirements::uses_path_target`]; this method does not include it.
     pub fn requires_offscreen_rendering(&self) -> bool {
         self.render_plan().requirements().uses_offscreen_target
     }
 }
 
-/// Internal representation of [`palette::Hsla`] which is layout sensitive, as its provided to the renderer.
+/// Internal representation of [`palette::Hsla`] with a renderer-sensitive layout.
+///
+/// Hue, saturation, lightness, and alpha are each normalized to `0.0..=1.0`.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[repr(C)]
 pub struct SceneHsla {
@@ -934,6 +963,10 @@ impl<'a> Iterator for BatchIterator<'a> {
 }
 
 /// A filled rectangle with optional border and rounded corners.
+///
+/// Geometry, border lengths, and corner radii are in scene pixels. The order
+/// field is assigned by [`Scene::insert_primitive`]; callers should normally
+/// leave it at its default when recording.
 #[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 #[repr(C)]
 pub struct Quad {
@@ -989,6 +1022,9 @@ impl From<Quad> for Primitive {
 }
 
 /// A text underline represented as a scene primitive.
+///
+/// Bounds and thickness are in scene pixels. The order field is assigned by
+/// [`Scene::insert_primitive`].
 #[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 #[repr(C)]
 pub struct Underline {
@@ -1015,6 +1051,9 @@ impl From<Underline> for Primitive {
 }
 
 /// A blurred or colored shadow around an element.
+///
+/// Bounds, corner radii, and blur radius are in scene pixels. The order field
+/// is assigned by [`Scene::insert_primitive`].
 #[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 #[repr(C)]
 pub struct Shadow {
@@ -1248,6 +1287,10 @@ impl Default for TransformationMatrix {
 }
 
 /// A sprite whose atlas samples are tinted with one color.
+///
+/// `tile` identifies pixels owned by a renderer atlas; it does not own or copy
+/// those pixels. Bounds and the transform translation use scene pixels. The
+/// atlas entry must remain available until the scene is rendered or captured.
 #[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[repr(C)]
 pub struct MonochromeSprite {
@@ -1274,6 +1317,10 @@ impl From<MonochromeSprite> for Primitive {
 }
 
 /// A sprite rendered with subpixel coverage information.
+///
+/// `tile` identifies pixels owned by a renderer atlas; it does not own or copy
+/// those pixels. Bounds and the transform translation use scene pixels. The
+/// atlas entry must remain available until the scene is rendered or captured.
 #[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[repr(C)]
 pub struct SubpixelSprite {
@@ -1300,6 +1347,10 @@ impl From<SubpixelSprite> for Primitive {
 }
 
 /// A sprite carrying per-pixel color information.
+///
+/// `tile` identifies pixels owned by a renderer atlas; it does not own or copy
+/// those pixels. Bounds and corner radii use scene pixels. The atlas entry must
+/// remain available until the scene is rendered or captured.
 #[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[repr(C)]
 pub struct PolychromeSprite {
@@ -1328,6 +1379,9 @@ impl From<PolychromeSprite> for Primitive {
 }
 
 /// A backend-owned surface embedded in a scene.
+///
+/// The source handle is meaningful only to a compatible renderer and is not
+/// included in [`SceneCapture`]. Bounds and clipping use scene pixels.
 #[derive(Clone, Debug)]
 pub struct PaintSurface {
     /// Draw-order key used when surfaces are sorted.
@@ -1346,14 +1400,22 @@ impl From<PaintSurface> for Primitive {
     }
 }
 
-/// Renderer-local identifier assigned to a path.
+/// Renderer-local identifier assigned to a path when it is inserted into a scene.
+///
+/// The numeric value is an index into that scene's path list, not a stable
+/// identity across frames or scenes.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct PathId(
     /// Renderer-local identifier for a path.
     pub usize,
 );
 
-/// A triangulated path made up of vertices and control points.
+/// A low-level, triangulated path made up of vertices and path-shader coordinates.
+///
+/// Use [`crate::PathBuilder`] to tessellate ordinary filled or stroked vector
+/// paths. `Path` is useful when supplying custom triangles directly. Its
+/// coordinate parameter is [`Pixels`] before painting and [`ScaledPixels`] in
+/// a recorded [`Scene`].
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Path<P: Clone + Debug + Default + PartialEq> {
     /// Renderer-local path identifier.
@@ -1419,7 +1481,11 @@ impl Path<Pixels> {
         self.current = to;
     }
 
-    /// Draw a straight line from the current point to the given point.
+    /// Adds a straight segment from the current point to `to`.
+    ///
+    /// The low-level path representation emits triangle vertices for segments;
+    /// this is not a general-purpose polygon fill operation. Use
+    /// [`crate::PathBuilder`] for normal vector paths.
     pub fn line_to(&mut self, to: Point<Pixels>) {
         self.contour_count += 1;
         if self.contour_count > 1 {
@@ -1431,7 +1497,11 @@ impl Path<Pixels> {
         self.current = to;
     }
 
-    /// Draw a curve from the current point to the given point, using the given control point.
+    /// Adds a quadratic curve segment from the current point to `to` using `ctrl`.
+    ///
+    /// The control point is encoded in the path shader's `st_position` values.
+    /// Use [`crate::PathBuilder`] when lyon's general fill or stroke tessellation
+    /// is needed.
     pub fn curve_to(&mut self, to: Point<Pixels>, ctrl: Point<Pixels>) {
         self.contour_count += 1;
         if self.contour_count > 1 {
@@ -1448,11 +1518,12 @@ impl Path<Pixels> {
         self.current = to;
     }
 
-    /// Appends one triangle in logical-pixel coordinates.
+    /// Appends one triangle in logical-pixel coordinates and expands `bounds`.
     ///
     /// `st` carries the path-space coordinates consumed by the path shader;
     /// callers constructing custom triangles must provide values appropriate
-    /// for their shader use.
+    /// for the shader's fill or quadratic-curve coverage calculation. The
+    /// method appends three vertices and does not apply a content mask.
     pub fn push_triangle(
         &mut self,
         xy: (Point<Pixels>, Point<Pixels>, Point<Pixels>),
@@ -1496,7 +1567,7 @@ where
     T: Clone + Debug + Default + PartialEq + PartialOrd + Add<T, Output = T> + Sub<Output = T>,
 {
     #[allow(unused)]
-    /// Returns the intersection of geometry bounds and the content mask.
+    /// Returns the intersection of geometry bounds and the content mask bounds.
     pub fn clipped_bounds(&self) -> Bounds<T> {
         self.bounds.intersect(&self.content_mask.bounds)
     }
@@ -1511,6 +1582,10 @@ impl From<Path<ScaledPixels>> for Primitive {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[repr(C)]
 /// One vertex in a path triangle list.
+///
+/// `xy_position` and the mask use the path's coordinate type. `st_position` is
+/// shader input: it carries fill or quadratic-curve coordinates and is not a
+/// second position in pixels.
 pub struct PathVertex<P: Clone + Debug + Default + PartialEq> {
     /// Position in the path coordinate space.
     pub xy_position: Point<P>,

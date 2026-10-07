@@ -1,10 +1,85 @@
-//! Font resolution, Unicode shaping, line breaking, and glyph rasterization.
+//! Font selection, text layout, interaction geometry, and glyph pixels.
 //!
-//! GPUI keeps platform font access behind [`PlatformTextSystem`], then exposes stable font IDs,
-//! shaped layouts, caret geometry, and paint fragments to the renderer. Text offsets are UTF-8
-//! byte offsets at API boundaries; a cluster may span several scalar values (for example a
-//! combining sequence or emoji ZWJ sequence). See [`WindowTextSystem`] for frame-scoped layout
-//! reuse and [`TextLayoutOptions`] for direction and wrapping policy.
+//! These are separate stages with different outputs. [`crate::TextSystem`] owns the shared platform
+//! font database, resolves [`crate::Font`] requests to [`crate::FontId`]s, and caches font metrics. A
+//! [`crate::WindowTextSystem`] shapes text and asks the platform backend to break it into visual rows.
+//! The resulting [`crate::LineLayout`] retains the backend's interaction model and paint fragments.
+//! During painting, glyph IDs and positions are sent to the rasterizer, whose pixels are uploaded
+//! to the glyph atlas. A layout therefore describes advances and caret geometry; it is not a
+//! bitmap, and rasterizing glyphs does not decide line breaks.
+//!
+//! # Choosing a layout entry point
+//!
+//! Use [`crate::WindowTextSystem::shape_line`] for one already-broken row, and
+//! [`crate::WindowTextSystem::shape_text`] for a document with hard breaks or wrapping. The latter
+//! delegates paragraph direction, bidi resolution, line breaking, alignment, and line clamping
+//! to one backend layout request. Use [`crate::WindowTextSystem::layout_inline`] when atomic UI boxes
+//! such as icons participate in the same wrapping and baseline calculation as text. The
+//! lower-level [`crate::WindowTextSystem::layout_line`] returns geometry without the paintable
+//! [`crate::ShapedLine`] wrapper.
+//!
+//! # Text positions
+//!
+//! Every text range and caret index in this module is a UTF-8 byte offset into the exact source
+//! string passed to layout. It is not a Unicode scalar index, UTF-16 code-unit index, grapheme
+//! count, or glyph index. Use [`crate::TextRangeExt::contains_range`] before slicing an external range;
+//! an in-bounds offset can still split a UTF-8 code point. Shape run lengths are UTF-8 byte
+//! lengths and must cover the complete string. A backend caret cluster can include multiple
+//! scalars, such as a combining sequence or emoji ZWJ sequence; normalize a caret through
+//! [`crate::PlatformTextLayout::normalized_caret`] before assuming a position is a valid editing stop.
+//! Glyph IDs are backend font glyph identifiers and cannot be used as text offsets.
+//!
+//! Unicode has several useful units, and they answer different questions:
+//!
+//! * UTF-8 byte offsets address Rust string slices and are GPUI's public layout coordinates.
+//! * UTF-16 code units are common in platform text-input protocols. Convert at that boundary;
+//!   never pass a UTF-16 index directly to a GPUI range.
+//! * A grapheme cluster approximates a user-perceived character. It is often a sensible editing
+//!   unit, but native shaping can define caret clusters differently.
+//! * A glyph is a selected drawing shape. Ligatures can combine characters, and one character
+//!   can produce multiple glyphs, so glyph counts do not map one-to-one to any text index.
+//!
+//! # Visual order and carets
+//!
+//! Logical source ranges remain in UTF-8 order even when a paragraph contains right-to-left text.
+//! [`crate::VisualLine`] records the visual row's logical range and resolved base direction;
+//! [`crate::CaretPosition`] adds [`crate::CaretAffinity`] because the same byte boundary may occupy two visual
+//! positions at a bidi boundary or soft wrap. Affinity describes the logical neighbor attached to
+//! the caret, not a left/right movement direction. Use [`crate::TextMovement`] and the platform layout
+//! for visual navigation instead of incrementing byte offsets.
+//!
+//! # Fonts and units
+//!
+//! Build a request with [`crate::font`], then choose [`crate::FontWeight`], [`crate::FontWidth`], and [`crate::FontStyle`]
+//! as needed. [`crate::FontFeatures`] supplies OpenType feature tags, and [`crate::FontFallbacks`] supplies
+//! ordered family names for missing characters. The backend may resolve aliases or select a
+//! fallback for an individual character, so one [`crate::TextRun`] is not guaranteed to become one
+//! [`crate::PaintFragment`] or one font face. [`crate::FontMetrics`] are reported in the face's font units;
+//! pixel helpers scale by `font_size / units_per_em`. Advances are shaped-run geometry, while
+//! [`crate::TextSystem::typographic_bounds`] and [`crate::TextSystem::bounding_box`] describe glyph or face
+//! bounds and should not be substituted for the width of a shaped string.
+//!
+//! # Cache lifetime
+//!
+//! Share one [`crate::TextSystem`] across windows. Keep each window's [`crate::WindowTextSystem`] alive so its
+//! current-frame and previous-frame layout caches can reuse matching requests. The cache key
+//! includes text, shaping properties, and layout options; paint-only changes can reuse shaped
+//! geometry and refresh paint fragments. Font registration invalidates font resolution, and a
+//! platform font-generation change clears layout caches. Do not construct a new window text
+//! system for each label: doing so discards the reuse boundary.
+//!
+//! # Example
+//!
+//! ```ignore
+//! let text = SharedString::from("Hello, 世界");
+//! let run = TextRun { len: text.len(), ..Default::default() };
+//! let shaped = window_text_system.shape_line(text, px(16.0), &[run]);
+//! shaped.paint(origin, px(20.0), TextAlign::Left, None, window, cx)?;
+//! ```
+//!
+//! The snippet shows the single-line path. For user-provided content that may contain line
+//! breaks, use [`crate::WindowTextSystem::shape_text`] and retain the returned [`crate::ShapedText`] for both
+//! painting and hit testing. The GPUI text example demonstrates varied styles and rendering.
 
 #[cfg(test)]
 use crate::{
@@ -73,8 +148,8 @@ pub const SUBPIXEL_VARIANTS_Y: u8 = 1;
 
 /// Shared font database and glyph metrics for a platform text backend.
 ///
-/// Font registration invalidates cached resolutions and metrics. The type is safe to share across
-/// windows; layout caches belong to [`WindowTextSystem`].
+/// Font registration invalidates cached font resolutions. Metrics are cached by resolved
+/// [`FontId`], while each window's layout cache belongs to [`WindowTextSystem`].
 pub struct TextSystem {
     platform_text_system: Arc<dyn PlatformTextSystem>,
     font_ids_by_font: RwLock<FxHashMap<Font, Result<FontId>>>,
@@ -108,7 +183,7 @@ impl TextSystem {
         result
     }
 
-    /// Get the FontId for the configure font family and style.
+    /// Resolve a font request and cache either its ID or its resolution error.
     fn font_id(&self, font: &Font) -> Result<FontId> {
         fn clone_font_id_result(font_id: &Result<FontId>) -> Result<FontId> {
             match font_id {
@@ -161,7 +236,7 @@ impl TextSystem {
         self.platform_text_system.prewarm_fonts(&font_ids);
     }
 
-    /// Return the font-wide glyph bounds at `font_size`.
+    /// Return the font-wide glyph bounds scaled to `font_size`.
     ///
     /// This is the smallest rectangle that encloses every glyph in the face, not the bounds of a
     /// particular string.
@@ -169,7 +244,7 @@ impl TextSystem {
         self.read_metrics(font_id, |metrics| metrics.bounding_box(font_size))
     }
 
-    /// Return the scaled typographic bounds of one character.
+    /// Return the scaled typographic bounds of the glyph selected for `character`.
     pub fn typographic_bounds(
         &self,
         font_id: FontId,
@@ -188,7 +263,12 @@ impl TextSystem {
         }))
     }
 
-    /// Get the advance width for the given character, in the given font and size.
+    /// Return the backend advance for the glyph selected for `ch`, scaled to `font_size`.
+    ///
+    /// The result is a [`Size`] because backends can report horizontal and vertical advances.
+    /// This performs a character-to-glyph lookup; it does not shape a string and therefore does
+    /// not account for ligatures, contextual substitutions, or kerning between characters. Use
+    /// [`WindowTextSystem::shape_line`] to measure text as it will be laid out.
     pub fn advance(&self, font_id: FontId, font_size: Pixels, ch: char) -> Result<Size<Pixels>> {
         let glyph_id = self
             .platform_text_system
@@ -200,14 +280,15 @@ impl TextSystem {
         Ok(result * font_size)
     }
 
-    /// Get the number of font size units per 'em square',
-    /// Per MDN: "an abstract square whose height is the intended distance between
-    /// lines of type in the same type size"
+    /// Return the number of design units in the face's em square.
+    ///
+    /// Scale a font-unit metric with `font_size / units_per_em`; the em square is a coordinate
+    /// system, not a promise that visible glyphs fill the requested font size.
     pub fn units_per_em(&self, font_id: FontId) -> u32 {
         self.read_metrics(font_id, |metrics| metrics.units_per_em)
     }
 
-    /// Get the recommended distance from the baseline for the given font
+    /// Return the face's recommended distance above the baseline at `font_size`.
     pub fn ascent(&self, font_id: FontId, font_size: Pixels) -> Pixels {
         self.read_metrics(font_id, |metrics| metrics.ascent(font_size))
     }
@@ -223,7 +304,11 @@ impl TextSystem {
         self.read_metrics(font_id, |metrics| metrics.x_height(font_size))
     }
 
-    /// Get the recommended baseline offset for the given font and line height.
+    /// Return the baseline position within a line of `line_height`.
+    ///
+    /// The method centers the font ascent-plus-descent box in the line, then adds the ascent.
+    /// It does not clamp negative leading when the requested line height is smaller than those
+    /// metrics.
     pub fn baseline_offset(
         &self,
         font_id: FontId,
@@ -290,8 +375,10 @@ impl TextSystem {
 
 /// Window-scoped text shaping and layout cache.
 ///
-/// The cache is invalidated or reused with the window frame lifecycle. Keep one value per window
-/// rather than constructing one for every label so shaping and glyph metrics can be shared.
+/// The cache moves matching layouts between the current frame and the previous frame as the
+/// window finishes rendering. Keep one value per window so repeated labels can reuse layout;
+/// constructing one for each label starts with an empty cache. Font metrics and font resolution
+/// are shared through the [`TextSystem`] dereferenced by this type.
 #[derive(Deref)]
 pub struct WindowTextSystem {
     line_layout_cache: LineLayoutCache,
@@ -321,10 +408,14 @@ impl WindowTextSystem {
     }
 
     /// Shape one logical line for painting.
-    /// Subsets of the line can be styled independently with the `runs` parameter.
     ///
-    /// In debug builds this asserts that `text` contains no newline. If you need multiple lines,
-    /// use [`Self::shape_text`] instead.
+    /// `runs` partitions the string by UTF-8 byte length and should cover it completely; every
+    /// run boundary must also be a UTF-8 character boundary. Each run supplies font and paint
+    /// attributes. Fallback can split a styled run into multiple resolved glyph fragments.
+    ///
+    /// In debug builds this asserts that `text` contains no LF (`\n`). Other hard-break
+    /// characters are not checked here. If the input may contain any line breaks, use
+    /// [`Self::shape_text`] instead.
     pub fn shape_line(
         &self,
         text: SharedString,
@@ -346,7 +437,9 @@ impl WindowTextSystem {
     /// where each run gives the number of UTF-8 bytes that it styles. Runs must cover the
     /// complete string and end on UTF-8 character boundaries.
     ///
-    /// If `wrap_width` is provided, the line breaks will be adjusted to fit within the given width.
+    /// If `wrap_width` is provided, the backend may insert soft breaks to fit that width. Hard
+    /// breaks in the source remain part of the same document layout. `line_clamp` limits visual
+    /// rows after line breaking; `None` leaves the backend's complete result available.
     ///
     /// The backend receives the complete string. Hard breaks, trailing empty lines, bidi
     /// paragraphs, wrapping, and `line_clamp` therefore share one layout model.
@@ -371,6 +464,11 @@ impl WindowTextSystem {
     }
 
     /// Shape a complete document with explicit direction, bidi, wrapping, and alignment options.
+    ///
+    /// Run lengths must cover the complete UTF-8 source, with every boundary on a character
+    /// boundary. Use [`TextLayoutOptions::wrap_width`] to control line breaking and
+    /// [`TextLayoutOptions::alignment_width`] to align the resulting rows within a separate box
+    /// width.
     pub fn shape_text_with_options<S: AsRef<str> + Into<SharedString>>(
         &self,
         text: S,
@@ -387,14 +485,21 @@ impl WindowTextSystem {
     }
 
     /// Layout text and atomic element boxes in one inline formatting context.
+    ///
+    /// Text styles, box insertion points, and bidi scopes use UTF-8 byte positions into
+    /// `request.text`. The returned layout owns its geometry and can be retained after the
+    /// request's borrowed slices go out of scope. Use this when a box must wrap with text; lay
+    /// out an independent icon separately when it should not affect text flow.
     pub fn layout_inline(&self, request: InlineLayoutRequest<'_>) -> Arc<InlineLayout> {
         self.line_layout_cache.layout_inline(request)
     }
 
     /// Layout one logical line without creating a directly paintable wrapper.
-    /// Subsets of the line can be styled independently with the `runs` parameter.
-    /// Generally, you should prefer to use [`Self::shape_line`] instead, which
-    /// can be painted directly.
+    ///
+    /// `runs` use UTF-8 byte lengths and should cover the full string at character boundaries.
+    /// This returns geometry for measurement and interaction; prefer [`Self::shape_line`] when
+    /// the result will be painted through its convenience wrapper. Text may be retained in the
+    /// cache, so the returned layout does not borrow from `text`.
     pub fn layout_line(&self, text: &str, font_size: Pixels, runs: &[TextRun]) -> Arc<LineLayout> {
         self.line_layout_cache
             .layout_line(&SharedString::new(text), font_size, runs)
@@ -405,8 +510,10 @@ impl WindowTextSystem {
     }
 }
 
-/// The degree of blackness or stroke thickness of a font. This value ranges from 100.0 to 900.0,
-/// with 400.0 as normal.
+/// Requested font weight, conventionally from 100 (thin) to 900 (black), with 400 normal.
+///
+/// The newtype and `From<f32>` conversion do not validate or clamp values; the range describes
+/// the standard weight scale used by the named constants and schema.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Serialize, Deserialize, Add, Sub, FromStr)]
 #[serde(transparent)]
 pub struct FontWeight(pub f32);
@@ -492,7 +599,7 @@ impl schemars::JsonSchema for FontWeight {
 /// Allows italic or oblique faces to be selected.
 #[derive(Clone, Copy, Eq, PartialEq, Debug, Hash, Default, Serialize, Deserialize, JsonSchema)]
 pub enum FontStyle {
-    /// A face that is neither italic not obliqued.
+    /// A face that is neither italic nor oblique.
     #[default]
     Normal,
     /// A form that is generally cursive in nature.
@@ -507,24 +614,28 @@ impl Display for FontStyle {
     }
 }
 
-/// A styled run of text, for use in [`crate::TextLayout`].
+/// Shaping and paint properties for a byte range passed to [`WindowTextSystem::shape_text`].
 #[derive(Clone, Debug, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 pub struct TextRun {
-    /// A number of utf8 bytes
+    /// Number of UTF-8 bytes styled by this run.
+    ///
+    /// Runs are consumed in order and should cover the full input string. Boundaries must be
+    /// UTF-8 character boundaries. This is not a count of graphemes, Unicode scalar values, or
+    /// shaped glyphs.
     pub len: usize,
     /// The font to use for this run.
     pub font: Font,
-    /// The color
+    /// Foreground color used when painting the run's glyphs.
     #[serde(with = "crate::color::serde_colors::hsla")]
     pub color: Hsla,
-    /// The background color (if any)
+    /// Optional background rectangle painted behind this run.
     #[serde(with = "crate::color::serde_colors::optional_hsla")]
     pub background_color: Option<Hsla>,
-    /// The underline style (if any)
+    /// Optional underline painted as a foreground decoration.
     pub underline: Option<UnderlineStyle>,
-    /// The strikethrough style (if any)
+    /// Optional strikethrough painted as a foreground decoration.
     pub strikethrough: Option<StrikethroughStyle>,
-    /// Letter spacing applied between glyphs, in pixels.
+    /// Additional spacing applied between glyphs, in logical pixels.
     pub letter_spacing: Option<Pixels>,
 }
 
@@ -570,21 +681,25 @@ pub struct InlineBidiScope {
     Clone, Copy, Debug, Default, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize,
 )]
 pub struct TextLayoutOptions {
-    /// Optional soft-wrap width.
+    /// Optional maximum width, in logical pixels, that triggers soft wrapping.
     pub wrap_width: Option<Pixels>,
     /// Optional maximum number of visual rows.
     pub line_clamp: Option<usize>,
-    /// Width used for horizontal alignment, independently of wrapping.
+    /// Width, in logical pixels, used for horizontal alignment independently of wrapping. Set
+    /// this when a line should align within a wider box than the width at which it wrapped.
     pub alignment_width: Option<Pixels>,
-    /// Horizontal text alignment.
+    /// Horizontal alignment, including direction-aware `Start` and `End` values.
     pub text_align: TextAlign,
-    /// Paragraph base-direction policy.
+    /// Paragraph base direction, either detected from the text or explicitly set.
     pub direction: ParagraphDirection,
-    /// Bidirectional behavior applied to the complete document.
+    /// Bidirectional behavior applied to the complete document, distinct from the base direction.
     pub unicode_bidi: UnicodeBidi,
 }
 
 /// Complete input for one backend-owned text document layout.
+///
+/// `runs` must cover all UTF-8 bytes of `text` using character-boundary lengths. The borrowed
+/// values are consumed synchronously by the backend layout request.
 #[derive(Clone, Copy, Debug)]
 pub struct TextLayoutRequest<'a> {
     /// UTF-8 source text.
@@ -597,12 +712,12 @@ pub struct TextLayoutRequest<'a> {
     pub options: TextLayoutOptions,
 }
 
-/// An atomic element inserted at a UTF-8 boundary in an inline document.
+/// An atomic element inserted at a UTF-8 character boundary in an inline document.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct InlineBoxRequest {
     /// Identifier returned with the positioned box.
     pub id: u64,
-    /// UTF-8 byte index at which to insert the box.
+    /// UTF-8 byte index at which to insert the box. This is not a character or glyph count.
     pub index: usize,
     /// Measured size of the element.
     pub size: Size<Pixels>,
@@ -628,7 +743,7 @@ pub struct InlineLayoutRequest<'a> {
     pub text: &'a str,
     /// Complete shaping and paint styles covering `text`.
     pub runs: &'a [TextRun],
-    /// Resolved font sizes and line heights within the document.
+    /// Resolved font sizes and line heights for UTF-8 ranges within the document.
     pub text_styles: &'a [InlineTextStyle],
     /// Atomic boxes inserted into the text.
     pub boxes: &'a [InlineBoxRequest],
@@ -711,11 +826,13 @@ impl From<&TextRun> for PaintStyle {
 #[repr(C)]
 pub struct GlyphId(pub u32);
 
-/// Parameters for rendering a glyph, used as cache keys for glyph atlas entries.
+/// Parameters for rendering a glyph and identifying its atlas entry.
 ///
-/// This struct identifies a specific glyph rendering configuration including
-/// font, size, subpixel positioning, and scale factor. It's used to look up
-/// cached pixels, placement metadata, and sprite atlas entries.
+/// Font and glyph IDs come from the active platform text backend. `font_size` is in logical
+/// pixels, `subpixel_variant` selects one of the rasterizer's fractional-position samples, and
+/// `scale_factor` converts to device pixels. The complete value, including `raster_style`, is
+/// hashed for atlas lookup. The subpixel grid is described by [`SUBPIXEL_VARIANTS_X`] and
+/// [`SUBPIXEL_VARIANTS_Y`].
 #[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct RenderGlyphParams {
     /// Font face containing the glyph.
@@ -724,9 +841,10 @@ pub struct RenderGlyphParams {
     pub glyph_id: GlyphId,
     /// Requested logical font size.
     pub font_size: Pixels,
-    /// Fractional positioning variant used by the rasterizer.
+    /// Fractional positioning sample; X is in `0..SUBPIXEL_VARIANTS_X` and Y in
+    /// `0..SUBPIXEL_VARIANTS_Y`.
     pub subpixel_variant: Point<u8>,
-    /// Device scale used to rasterize the glyph.
+    /// Device scale used to rasterize the glyph. This is part of the cache identity.
     pub scale_factor: f32,
     /// Normalized cache-relevant rendering policy.
     pub raster_style: PreparedRasterStyle,
@@ -759,7 +877,7 @@ pub type Rgba8 = palette::Srgba<u8>;
 
 /// Converts a scene color to the bytes used by a raster cache key.
 pub trait RasterColorExt {
-    /// Clamps and rounds each channel to the nearest byte.
+    /// Clamps each channel to `[0, 1]`, then rounds it to the nearest 8-bit value.
     fn quantize_raster_color(self) -> Rgba8;
 }
 
@@ -796,6 +914,9 @@ pub struct RasterStyleRequest {
 
 impl RasterStyleRequest {
     /// Quantizes the foreground after removing channels unused by the artwork.
+    ///
+    /// `AlphaOnly` returns zero RGB channels and the quantized alpha. `Full` retains all four
+    /// quantized channels.
     pub fn normalized_color(self) -> Rgba8 {
         let color = self.scene_color.quantize_raster_color();
         if self.foreground_dependency == ForegroundDependency::AlphaOnly {
@@ -827,7 +948,7 @@ pub struct PreparedRasterStyle {
 }
 
 impl PreparedRasterStyle {
-    /// Creates a color-independent raster style.
+    /// Creates a style whose raster pixels do not depend on the foreground color.
     pub const fn independent(mode: GlyphRenderMode) -> Self {
         Self {
             mode,
@@ -837,6 +958,8 @@ impl PreparedRasterStyle {
     }
 
     /// Creates a native preblended style from the request's relevant color channels.
+    ///
+    /// Foreground channels excluded by `foreground_dependency` are removed before quantization.
     pub fn preblend(request: RasterStyleRequest) -> Self {
         Self {
             mode: request.requested_mode,
@@ -905,7 +1028,12 @@ impl RasterizedGlyph {
         }
     }
 
-    /// Checks the buffer dimensions and byte count promised by `format`.
+    /// Checks the placement size and byte count promised by `format`.
+    ///
+    /// Bounds size must equal buffer size; dimensions must be nonnegative. A zero-sized raster
+    /// must have both dimensions zero and no bytes. Nonempty masks require one byte per pixel,
+    /// while both BGRA formats require four. Returns an error on any mismatch or byte-count
+    /// overflow.
     pub fn validate(&self) -> Result<()> {
         anyhow::ensure!(
             self.bounds.size == self.size,
@@ -964,6 +1092,8 @@ pub struct ValidatedRasterizedGlyph(RasterizedGlyph);
 
 impl ValidatedRasterizedGlyph {
     /// Validates a glyph raster before it can be used by an atlas builder.
+    ///
+    /// Returns an error when [`RasterizedGlyph::validate`] rejects its dimensions or buffer.
     pub fn new(glyph: RasterizedGlyph) -> Result<Self> {
         glyph.validate()?;
 
@@ -972,6 +1102,9 @@ impl ValidatedRasterizedGlyph {
 }
 
 /// A cached glyph's GPU tile and the placement metadata for its uploaded pixels.
+///
+/// `tile: None` represents a successfully cached empty glyph, such as a space; it does not mean
+/// rasterization failed.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct GlyphAtlasEntry {
     /// The GPU tile, or `None` for a successfully empty glyph.
@@ -995,7 +1128,13 @@ impl Hash for RenderGlyphParams {
     }
 }
 
-/// The configuration details for identifying a specific font.
+/// A font request used both for font resolution and shaping-cache identity.
+///
+/// `family` names the preferred family, and weight, width, and style choose a face or variable
+/// font instance. `features` passes OpenType feature tags to shaping. `fallbacks` supplies an
+/// ordered family list for characters the preferred face cannot draw; backend and system
+/// fallbacks may still participate. Font identity in this request does not guarantee that every
+/// glyph in a run comes from the same resolved face.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub struct Font {
     /// The font family name.
@@ -1006,7 +1145,10 @@ pub struct Font {
     /// The font features to use.
     pub features: FontFeatures,
 
-    /// The fallbacks fonts to use.
+    /// Ordered fallback family names consulted when this family lacks a character.
+    ///
+    /// `None` leaves fallback choice to the backend and platform. A configured list does not
+    /// guarantee that a listed family is installed or contains the glyph.
     pub fallbacks: Option<FontFallbacks>,
 
     /// The font weight.
@@ -1025,7 +1167,10 @@ impl Default for Font {
     }
 }
 
-/// Get a [`Font`] for a given name.
+/// Build a default [`Font`] request for a family name.
+///
+/// The request uses normal weight, width, and style, no explicit OpenType features, and no
+/// caller-provided fallback list. The system UI request is available with [`Font::default`].
 pub fn font(family: impl Into<SharedString>) -> Font {
     Font {
         family: family.into(),
@@ -1038,21 +1183,25 @@ pub fn font(family: impl Into<SharedString>) -> Font {
 }
 
 impl Font {
-    /// Set this Font to be bold
+    /// Set the requested weight to [`FontWeight::BOLD`].
     pub fn bold(mut self) -> Self {
         self.weight = FontWeight::BOLD;
         self
     }
 
-    /// Set this Font to be italic
+    /// Set the requested style to [`FontStyle::Italic`].
     pub fn italic(mut self) -> Self {
         self.style = FontStyle::Italic;
         self
     }
 }
 
-/// A struct for storing font metrics.
-/// It is used to define the measurements of a typeface.
+/// Measurements supplied by one resolved font face.
+///
+/// Values are in the face's design units. Convert with the helpers, which scale by
+/// `font_size / units_per_em`; GPUI layout geometry is in logical [`Pixels`]. A font-wide
+/// bounding box encloses possible glyph extents and is not a string's advance width. Use the
+/// shaped layout's width when measuring text that will be painted.
 #[derive(Clone, Copy, Debug, serde::Serialize, serde::Deserialize)]
 pub struct FontMetrics {
     /// The number of font units that make up the "em square",

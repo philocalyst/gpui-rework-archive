@@ -182,6 +182,10 @@ struct SelectedAdapter {
 }
 
 /// Device-level WGPU state shared by one or more render targets.
+///
+/// The device and queue are created together and must be used as a pair. A
+/// renderer observes device loss through this context and recreates its
+/// device-bound resources during recovery.
 pub struct WgpuContext {
     /// Instance used to create the adapter and device.
     pub instance: wgpu::Instance,
@@ -223,9 +227,12 @@ pub enum WgpuBackend {
 /// Preferred browser transport when creating a WGPU context.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum WebBackendPreference {
+    /// Let the browser backend choose WebGPU or WebGL.
     #[default]
     Auto,
+    /// Require browser WebGPU.
     WebGpu,
+    /// Require WebGL2.
     WebGl,
 }
 
@@ -255,6 +262,7 @@ impl raw_window_handle::HasDisplayHandle for WebDisplaySource {
     }
 }
 
+/// Adapter identifiers used as a preference when the compositor reports its GPU.
 #[derive(Clone, Copy)]
 pub struct CompositorGpuHint {
     /// Adapter vendor identifier used as a selection hint.
@@ -366,6 +374,11 @@ impl WgpuContextHandle {
 }
 
 /// A reusable offscreen render target suitable for [`gpui::Window::paint_surface`].
+///
+/// Create and resize it with a handle for the same device. Dimensions are
+/// clamped to at least one device pixel. A `Surface` made by [`Self::surface`]
+/// refers to the texture current at the time it is created; make a new surface
+/// after resizing if it should use the replacement texture.
 pub struct WgpuRenderTarget {
     texture: Arc<wgpu::Texture>,
     view: wgpu::TextureView,
@@ -380,6 +393,9 @@ impl WgpuRenderTarget {
     }
 
     /// Creates a render target with an explicit texture format.
+    ///
+    /// The format must support render-attachment and texture-binding usage on
+    /// the handle's device.
     pub fn with_format(
         context: &WgpuContextHandle,
         size: gpui::Size<gpui::DevicePixels>,
@@ -397,6 +413,8 @@ impl WgpuRenderTarget {
     }
 
     /// Resizes the target, preserving its texture format.
+    ///
+    /// Use a handle for the same device that created the existing texture.
     pub fn resize(&mut self, context: &WgpuContextHandle, size: gpui::Size<gpui::DevicePixels>) {
         let size = normalize_target_size(size);
         if self.size == size {
@@ -408,12 +426,17 @@ impl WgpuRenderTarget {
         self.size = size;
     }
 
-    /// Returns the target texture for use as a GPUI surface.
+    /// Returns a shared reference to the current target texture.
+    ///
+    /// A cloned texture keeps the old allocation alive if this target is later
+    /// resized.
     pub fn texture(&self) -> Arc<wgpu::Texture> {
         Arc::clone(&self.texture)
     }
 
-    /// Creates a GPUI element that composites this target at its layout bounds.
+    /// Creates a GPUI surface that composites the current target at layout bounds.
+    ///
+    /// Call this again after [`Self::resize`] to capture the replacement texture.
     #[cfg(any(
         target_os = "linux",
         target_os = "freebsd",
@@ -711,6 +734,9 @@ impl WgpuContext {
         })
     }
 
+    /// Checks whether this context's adapter can present to `surface`.
+    ///
+    /// Returns an error when the adapter reports no supported surface formats.
     pub fn check_compatible_with_surface(&self, surface: &wgpu::Surface<'_>) -> anyhow::Result<()> {
         let caps = surface.get_capabilities(&self.adapter);
         if caps.formats.is_empty() {

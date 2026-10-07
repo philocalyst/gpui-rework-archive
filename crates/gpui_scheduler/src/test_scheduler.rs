@@ -40,12 +40,19 @@ pub struct TestScheduler {
 }
 
 impl TestScheduler {
-    /// Run a test once with default configuration (seed 0)
+    /// Runs an async test once with default configuration (seed 0).
+    ///
+    /// The supplied future is driven to completion, then currently runnable
+    /// spawned tasks are drained before the result is returned.
     pub fn once<R>(f: impl AsyncFnOnce(Arc<TestScheduler>) -> R) -> R {
         Self::with_seed(0, f)
     }
 
-    /// Run a test multiple times with sequential seeds (0, 1, 2, ...)
+    /// Runs an async test multiple times with sequential scheduler seeds.
+    ///
+    /// `SEED` selects the first seed and `ITERATIONS` overrides
+    /// `default_iterations`. A failure prints the seed needed to replay that
+    /// schedule. Each run uses a fresh scheduler and deterministic clock.
     pub fn many<R>(
         default_iterations: usize,
         mut f: impl AsyncFnMut(Arc<TestScheduler>) -> R,
@@ -300,7 +307,10 @@ impl TestScheduler {
         self.step_filtered(true)
     }
 
-    /// Check if there are any pending tasks or timers that could run.
+    /// Checks whether any runnable task or timer is queued.
+    ///
+    /// Future timers count as pending even though [`Self::run`] will leave them
+    /// asleep until the clock advances.
     pub fn has_pending_tasks(&self) -> bool {
         let state = self.state.lock();
         !state.runnables.is_empty() || !state.timers.is_empty()
@@ -441,7 +451,7 @@ impl TestScheduler {
         false
     }
 
-    /// Drops all runnable tasks from the scheduler.
+    /// Drops all queued runnables and timers without polling their futures.
     ///
     /// This is used by the leak detector to ensure that all tasks have been dropped as tasks may keep entities alive otherwise.
     /// Why do we even have tasks left when tests finish you may ask. The reason for that is simple, the scheduler itself is the executor and it retains the scheduled runnables.
@@ -463,8 +473,10 @@ impl TestScheduler {
         }
     }
 
-    /// Advances the clock to the earliest pending timer, returning whether one
-    /// was present and made runnable.
+    /// Advances the clock to the earliest pending timer without polling tasks.
+    ///
+    /// Returns `true` if a timer was pending. Call [`Self::run`] afterward to
+    /// wake and poll the task that is waiting on that timer.
     pub fn advance_clock_to_next_timer(&self) -> bool {
         if let Some(timer) = self.state.lock().timers.first() {
             self.clock.advance(timer.expiration - self.clock.now());
@@ -474,7 +486,12 @@ impl TestScheduler {
         }
     }
 
-    /// Advances the controllable clock without polling tasks.
+    /// Advances the controllable clock and runs work due by the new time.
+    ///
+    /// Runnable tasks are drained before each timer deadline within the
+    /// requested interval. The clock then advances to the requested
+    /// destination. This deterministic helper does not model wall-clock
+    /// scheduling latency.
     pub fn advance_clock(&self, duration: Duration) {
         let debug = std::env::var("DEBUG_SCHEDULER").is_ok();
         let start = self.clock.now();
@@ -768,10 +785,16 @@ fn schedule_local_dispatch(
 
 #[derive(Clone, Debug)]
 pub struct TestSchedulerConfig {
+    /// Seed for randomized scheduling and generated yield points.
     pub seed: u64,
+    /// Whether runnable tasks are inserted at randomized queue positions.
     pub randomize_order: bool,
+    /// Whether blocking waits may yield to real time and external I/O.
     pub allow_parking: bool,
+    /// Capture backtraces for wakers that remain pending when parking fails.
     pub capture_pending_traces: bool,
+    /// Random inclusive range for the number of scheduler ticks before a
+    /// blocking timeout is declared.
     pub timeout_ticks: RangeInclusive<usize>,
 }
 

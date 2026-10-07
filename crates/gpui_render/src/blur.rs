@@ -19,6 +19,9 @@ use wgsl_rs::std::vec2f;
 pub const DOWNSAMPLE_FACTOR: u32 = 2;
 
 /// Texture dimension for a downsampled blur pass; allocations must agree.
+///
+/// Rounds odd dimensions up and returns at least one pixel, including for a
+/// zero-sized input.
 pub fn downsampled_dimension(dimension: u32) -> u32 {
     dimension.div_ceil(DOWNSAMPLE_FACTOR).max(1)
 }
@@ -77,10 +80,13 @@ pub struct BlurKernel {
 }
 
 impl BlurKernel {
-    /// Converts a logical blur radius into a bounded Gaussian kernel.
+    /// Converts a scene-pixel blur radius into a bounded Gaussian kernel.
     ///
-    /// Returns `None` for zero, negative, or non-finite radii. Large radii are
-    /// represented by the maximum sample count and a larger sample step.
+    /// Returns `None` when the radius is zero, negative, or NaN. Callers should
+    /// provide a finite positive radius; positive infinity is not rejected and
+    /// does not produce a useful kernel. Large finite radii are represented by
+    /// the maximum sample count and a larger sample step. The kernel's standard
+    /// deviation is half the supplied radius.
     pub fn for_radius(blur_radius: f32) -> Option<Self> {
         let standard_deviation = (blur_radius * RADIUS_TO_STANDARD_DEVIATION).max(0.0);
         if standard_deviation <= 0.0 {
@@ -98,10 +104,18 @@ impl BlurKernel {
 }
 
 impl BlurUniforms {
+    /// Builds uniforms for copying a texture without filtering it.
+    ///
+    /// `size` is the source and target texture size in physical pixels.
     pub fn copy(size: [f32; 2]) -> Self {
         with_texture_sizes(empty_uniforms(DownsampleMode::Copy), size, size)
     }
 
+    /// Builds uniforms for reducing a source texture to a half-resolution target.
+    ///
+    /// Both sizes are `[width, height]` in physical pixels. Allocate the target
+    /// using [`downsampled_dimension`] for each source dimension. `target_size`
+    /// must match the dimensions used to allocate that texture.
     pub fn downsample(source_size: [f32; 2], target_size: [f32; 2]) -> Self {
         with_texture_sizes(
             empty_uniforms(DownsampleMode::HalfResolution),
@@ -110,6 +124,11 @@ impl BlurUniforms {
         )
     }
 
+    /// Builds uniforms for one horizontal or vertical Gaussian pass.
+    ///
+    /// `texture_size` is the sampled texture size in physical pixels. A separable
+    /// blur normally uses one pass per [`BlurAxis`] value, ping-ponging between
+    /// intermediate textures.
     pub fn gaussian(axis: BlurAxis, texture_size: [f32; 2], kernel: BlurKernel) -> Self {
         let direction = match axis {
             BlurAxis::Horizontal => vec2f(1.0 / texture_size[0], 0.0),
@@ -128,6 +147,12 @@ impl BlurUniforms {
         }
     }
 
+    /// Builds uniforms for compositing a filtered texture into scene bounds.
+    ///
+    /// Geometry and corner values use scene pixels; source and target sizes use
+    /// physical texture pixels. `clip` selects whether the shader clips to the
+    /// rounded bounds or uses the supplied content-mask bounds. `source_size`
+    /// and `target_size` must match the textures used by the pass.
     pub fn composite(
         bounds: Bounds<ScaledPixels>,
         content_mask: Bounds<ScaledPixels>,
@@ -173,8 +198,9 @@ pub struct ScissorRectangle {
 impl ScissorRectangle {
     /// Computes an outward-rounded scissor around blurred scene bounds.
     ///
-    /// `full_width` and `full_height` are full-resolution texture dimensions;
-    /// `dilation` is a scene-pixel radius added on every side.
+    /// `full_width` and `full_height` are full-resolution texture dimensions in
+    /// physical pixels. `dilation` is a scene-pixel radius added on every side.
+    /// The returned rectangle is clamped to the downsampled texture extent.
     pub fn for_blurred_bounds(
         bounds: Bounds<ScaledPixels>,
         dilation: f32,

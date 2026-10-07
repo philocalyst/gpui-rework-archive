@@ -3,13 +3,13 @@
     clippy::disallowed_methods,
     reason = "integration tests control a real compiler companion"
 )]
+use gpui::{MouseDownEvent, MouseUpEvent, PlatformInput, point, px};
 use gpui_ce_codepen::{
     guest::PreviewContext,
     lessons::LESSONS,
     session::{Backend, Reply, Request},
 };
 use serde_json::json;
-use gpui::{PlatformInput, MouseDownEvent, MouseUpEvent, point, px};
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
@@ -86,7 +86,10 @@ fn browser_companion_cancels_edits_and_separates_sessions() {
     let spin = request(
         &a,
         1,
-        &COUNTER.replace("cx.new(|_|Counter{count:0})", "{loop {std::hint::black_box(1);} }"),
+        &COUNTER.replace(
+            "cx.new(|_|Counter{count:0})",
+            "{loop {std::hint::black_box(1);} }",
+        ),
         Backend::Miri,
     );
     let previous = std::thread::spawn(move || post(port, &spin, "http://127.0.0.1:8080"));
@@ -113,16 +116,33 @@ fn browser_companion_cancels_edits_and_separates_sessions() {
     assert_eq!(post(port, &valid, "http://127.0.0.1:8080").0, 409);
     let mut click = request(&b, 2, COUNTER, Backend::Miri);
     click.input.events = vec![
-        PlatformInput::MouseDown(MouseDownEvent { position: point(px(20.),px(20.)), ..Default::default() }),
-        PlatformInput::MouseUp(MouseUpEvent { position: point(px(20.),px(20.)), ..Default::default() }),
-    ].into_iter().map(Into::into).collect();
+        PlatformInput::MouseDown(MouseDownEvent {
+            position: point(px(20.), px(20.)),
+            ..Default::default()
+        }),
+        PlatformInput::MouseUp(MouseUpEvent {
+            position: point(px(20.), px(20.)),
+            ..Default::default()
+        }),
+    ]
+    .into_iter()
+    .map(Into::into)
+    .collect();
     let (_, body) = post(port, &click, "http://127.0.0.1:8080");
     let reply: Reply = serde_json::from_str(&body).unwrap();
-    assert_ne!(before, reply.frame.expect("actual GPUI callback paints a new scene"));
+    assert_ne!(
+        before,
+        reply
+            .frame
+            .expect("actual GPUI callback paints a new scene")
+    );
     let spin = request(
         &a,
         3,
-        &COUNTER.replace("cx.new(|_|Counter{count:0})", "{loop {std::hint::black_box(1);} }"),
+        &COUNTER.replace(
+            "cx.new(|_|Counter{count:0})",
+            "{loop {std::hint::black_box(1);} }",
+        ),
         Backend::Miri,
     );
     let cancelled = std::thread::spawn(move || post(port, &spin, "http://127.0.0.1:8080"));
@@ -146,7 +166,7 @@ fn browser_companion_cancels_edits_and_separates_sessions() {
     assert_eq!(post(port, &large, "http://127.0.0.1:8080").0, 200);
 }
 
-const COUNTER: &str = r#"use gpui::{PlatformInput, MouseDownEvent, MouseUpEvent, ScaledPixels, point, px, size};
+const COUNTER: &str = r#"use gpui::{*, prelude::*};
 struct Counter { count: u32 }
 impl Render for Counter {
  fn render(&mut self,_:&mut Window,cx:&mut Context<Self>)->impl IntoElement {

@@ -18,9 +18,23 @@ Published docs.rs is a separate release artifact: source-level Markdown includes
 supply its example backlinks, since a static site cannot rewrite docs.rs's HTML.
 The HTML postprocessor decorates local or self-hosted rustdoc copies.
 
-The separate full-API Miri workbench remains owned by its development branch.
-Only a verified integration with the required runtime changes should be imported;
-merging its internal testing baseline is unnecessary for this documentation.
+The Miri prerequisite snapshot `58c30b2452963fcec0c32296af37c793cb847806`
+is based directly on that clean example branch. It adds the real-GPUI headless
+execution and portable scene facilities required by the workbench, the existing
+Codepen editor/transport, and vendored Miri. It excludes the internal `gpui_test`
+crate, CPU renderer changes, testing example merge, and testing branch history.
+Conflicts were resolved by keeping the rewritten API prose and the runtime's
+required serialization and scene changes.
+
+Every walkthrough defines one component constructor. The generated workbench
+source removes its native entry and platform launcher; Miri executes the same
+constructor against the real `gpui` crate. The browser mounts the existing
+Codepen component and imports its GPUI scene through the ordinary renderer.
+The local documentation server proxies render and explicit cancellation on the
+same origin. It has no source-to-WASM edit endpoint.
+
+Native editing uses `gpui-ce/cli` at the reference commit recorded in the research
+notes. Its `gpui watch --example` path selects the same ordinary Cargo example.
 
 Verification evidence will be recorded in `documentation-verification.md` after
 the final build and browser pass. A source digest and Git revision are written

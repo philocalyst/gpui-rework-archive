@@ -61,8 +61,9 @@ pub trait Along {
 
 /// A location in a 2D coordinate space.
 ///
-/// It holds two public fields, `x` and `y`, which represent the coordinates in the space.
-/// The type `T` for the coordinates can be any type that implements `Default`, `Clone`, and `Debug`.
+/// `x` and `y` use the same unit and coordinate space. The coordinate type must
+/// implement `Clone`, `Debug`, `Default`, and `PartialEq`; GPUI's common choice
+/// for UI geometry is [`Pixels`].
 ///
 /// # Examples
 ///
@@ -407,10 +408,11 @@ impl<T: Clone + Debug + Default + PartialEq + Display> Display for Point<T> {
     }
 }
 
-/// A structure representing a two-dimensional size with width and height in a given unit.
+/// A two-dimensional width and height in one shared unit.
 ///
-/// This struct is generic over the type `T`, which can be any type that implements `Clone`, `Default`, and `Debug`.
-/// It is commonly used to specify dimensions for elements in a UI, such as a window or element.
+/// The unit type must implement `Clone`, `Debug`, `Default`, and `PartialEq`.
+/// GPUI uses `Size<Pixels>` for logical UI dimensions and other `Size<U>` forms
+/// when a coordinate-space conversion is explicit.
 #[derive(
     Add, Clone, Copy, Default, Deserialize, Div, Hash, Neg, PartialEq, Refineable, Serialize, Sub,
 )]
@@ -2697,15 +2699,13 @@ impl From<Percentage> for Radians {
     }
 }
 
-/// A logical pixel length, the base unit of GPUI layout.
+/// A logical-pixel length, the base unit of GPUI layout and painting.
 ///
-/// `Pixels` is a value type that represents an absolute length in pixels, which is used
-/// for specifying sizes, positions, and distances in the UI. It is the fundamental unit
-/// of measurement for all visual elements and layout calculations.
-///
-/// The inner value is an `f32`, allowing for sub-pixel precision which can be useful for
-/// anti-aliasing and animations. However, when applied to actual pixel grids, the value
-/// is typically rounded to the nearest integer.
+/// A `Pixels` value is independent of display density and may contain a
+/// fractional value. Convert it with the window's scale factor when an API
+/// requires device or scene coordinates. Whether a result is snapped to a
+/// physical pixel depends on the operation and renderer; rounding is not part
+/// of this type's representation.
 ///
 /// # Examples
 ///
@@ -3019,13 +3019,11 @@ impl From<usize> for Pixels {
     }
 }
 
-/// Represents physical pixels on the display.
+/// An integer count of physical display pixels.
 ///
-/// `DevicePixels` is a unit of measurement that refers to the actual pixels on a device's screen.
-/// This type is used when precise pixel manipulation is required, such as rendering graphics or
-/// interfacing with hardware that operates on the pixel level. Unlike logical pixels that may be
-/// affected by the device's scale factor, `DevicePixels` always correspond to real pixels on the
-/// display.
+/// Unlike [`Pixels`], this unit is already in device space and is not scaled by
+/// display density. Use it at backend and pixel-buffer boundaries; ordinary UI
+/// layout and paint APIs use logical pixels instead.
 #[derive(
     Add,
     AddAssign,
@@ -3131,13 +3129,11 @@ impl From<usize> for DevicePixels {
     }
 }
 
-/// Represents scaled pixels that take into account the device's scale factor.
+/// A floating-point scene-space value after applying the display scale factor.
 ///
-/// `ScaledPixels` are used to ensure that UI elements appear at the correct size on devices
-/// with different pixel densities. When a device has a higher scale factor (such as Retina displays),
-/// a single logical pixel may correspond to multiple physical pixels. By using `ScaledPixels`,
-/// dimensions and positions can be specified in a way that scales appropriately across different
-/// display resolutions.
+/// Convert logical [`Pixels`] to `ScaledPixels` when producing scene geometry.
+/// Unlike [`DevicePixels`], this unit preserves fractional values; a renderer
+/// may rasterize those coordinates across physical pixels.
 #[derive(
     Clone,
     Copy,
@@ -3308,16 +3304,14 @@ impl MulAssign<f32> for ScaledPixels {
     }
 }
 
-/// Represents a length in rems, a unit based on the font-size of the window, which can be assigned with [`Window::set_rem_size`][set_rem_size].
+/// A length measured in root-font-size units.
 ///
-/// Rems are used for defining lengths that are scalable and consistent across different UI elements.
-/// The value of `1rem` is typically equal to the font-size of the root element (often the `<html>` element in browsers),
-/// making it a flexible unit that adapts to the user's text size preferences. In this framework, `rems` serve a similar
-/// purpose, allowing for scalable and accessible design that can adjust to different display settings or user preferences.
+/// GPUI resolves one rem using the window's configured rem size, set with
+/// [`crate::Window::set_rem_size`]. For example, when that size is 16 logical pixels,
+/// `rems(2.)` resolves to 32 logical pixels. This is a typographic scale chosen
+/// by the application or platform; it is not automatically tied to display
+/// density.
 ///
-/// For example, if the root element's font-size is `16px`, then `1rem` equals `16px`. A length of `2rems` would then be `32px`.
-///
-/// [set_rem_size]: crate::Window::set_rem_size
 #[derive(Clone, Copy, Default, Add, Sub, Mul, Div, Neg, PartialEq)]
 pub struct Rems(
     /// Number of root-font-size units.

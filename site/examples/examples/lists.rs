@@ -2,9 +2,11 @@
 mod support;
 
 // ## Reserve a scrolling viewport {#viewport}
-// The list contains 10,000 rows but constructs only the range needed near the
-// viewport. [`uniform_list`] can compute that range because each row has the
-// same height. The parent reserves 320 logical pixels; the list fills it.
+// The data set has 10,000 indices, but the callback constructs only the range
+// needed near the visible viewport (plus the list's overdraw). [`uniform_list`]
+// can map scroll offsets to indices because every row has the same measured
+// height. The parent reserves 320 logical pixels; the list fills that finite
+// scrolling viewport.
 //
 // An unbounded height gives scrolling no useful viewport. Keep the scrolling
 // region constrained even when its parent can grow.
@@ -19,18 +21,21 @@ struct Rows {
 }
 
 // ## Build the requested range {#rows}
-// The [`uniform_list`] callback receives a half-open range of indices.
-// Return one row per index, in that order. Building these rows inside the
-// callback avoids first constructing a vector of all 10,000 elements.
+// The [`uniform_list`] callback receives a half-open index range: the start is
+// included and the end is excluded. Return one row for each index, in order.
+// Constructing rows in this callback avoids building 10,000 element values
+// before the list knows which ones it needs.
 //
-// [`UniformList::track_scroll`] attaches the view's handle to this list.
-// The list's stable ID retains its interaction state. Give interactive rows
-// their own logical IDs when that state should follow reordered data.
+// [`UniformList::track_scroll`] connects the view-owned scroll handle to this
+// list. The list ID identifies the scrolling element; row IDs identify any
+// per-row interaction state. Use stable logical keys for rows when data can be
+// reordered, since an index names a position rather than an item.
 //
 // > [!WARNING]
-// > Every row must have the same height. Wrapping text or expanding a row can
-// > violate that rule and produce incorrect scroll positions. Use a measured,
-// > variable-height list for those layouts.
+// > Every row must have the same block-axis height. Wrapping text or expanding
+// > one row breaks the estimate used to map offsets to indices, so visible
+// > rows and scrollbar positions can be wrong. Use `list` for individually
+// > measured, variable-height rows.
 
 impl Render for Rows {
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
@@ -79,9 +84,10 @@ impl Render for Rows {
 // pass it back on every render. A toolbar can keep a clone to call
 // `scroll_to_item`; both clones control the same list position.
 //
-// Scroll halfway down, resize, and continue scrolling. The visible range
-// changes while the handle and 10,000-item extent remain. Read the
-// [list guide](@/guides/lists.md) when row heights need to vary.
+// Scroll halfway down, resize the viewport, then continue scrolling. The
+// requested range should change while the same handle keeps the scroll
+// position. For insertion, deletion, or variable-height rows, follow the
+// mutation and remeasurement guidance in the [list guide](@/guides/lists.md).
 
 fn component(_window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<Rows> {
     cx.new(|_cx| Rows {

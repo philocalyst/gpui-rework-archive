@@ -5,38 +5,52 @@ description = "Choose an entity, a global, or a local field according to who own
 weight = 30
 +++
 
-A local view field is enough when only that view owns the value. Use an entity
-when several views need one model, or when the model needs GPUI observation and
-release behavior. Cloning `Entity<T>` clones the handle, not `T`.
+Start with the owner. Keep a value in a view field when only that view uses it.
+Create an `Entity<T>` when multiple views share one model, when another entity
+must observe it, or when the value needs its own release lifecycle. Cloning an
+entity clones a strong handle to the same `T`; it does not duplicate the model.
+Use a global only for one app-wide value of a type, such as a service or
+configuration object.
 
 ## Read and update through a context
 
-Read a model through its entity handle and an app context. Update it inside the
-entity's update closure. Keep the borrow within that operation; another update
-cannot lease the same entity mutably at the same time.
+Read with `Entity::read` and update with `Entity::update`, each through an app
+context. An update gives one closure an exclusive lease to the entity. Keep
+that lease within the closure; trying to read or update the same entity again
+while it is leased panics. In a view listener, use the `&mut View` supplied by
+`Context::listener` rather than looking up the current view through another
+handle.
 
-After changing visible state, call `cx.notify()` in that entity's context. A
-consumer that derives its own state from the model can observe it, update that
-state, and notify itself. The [subscription walkthrough](@/examples/subscriptions.md)
-shows both notifications. Views that read an entity during rendering are also
-tracked for invalidation.
+After changing observable state, call `cx.notify()` in that entity's context.
+GPUI does not detect field assignments. A view that reads an entity while
+rendering is tracked so notification can invalidate its window. Use
+`Context::observe` when a subscriber needs to perform work, such as updating a
+derived field; it must then notify itself if its own rendered state changed.
+The [counter](@/examples/counter.md) shows one entity, while the
+[subscription walkthrough](@/examples/subscriptions.md) shows two owners and
+both notification steps. Notifications can coalesce, so use a typed event when
+each operation needs its own payload or distinct delivery.
 
 ## Retain the relationship
 
-Observation returns a `Subscription`. Store it on the consumer to make that
-relationship last as long as the view. Dropping a temporary subscription cancels
-it immediately. Detach only when a deliberate longer lifetime is appropriate.
+`Context::observe` returns a `Subscription`. Store it on the consumer when the
+observation should live as long as that consumer. Dropping a temporary
+subscription cancels the relationship immediately. Detach only when an
+independent owner and cleanup condition are deliberate; a detached observer can
+otherwise outlive the UI that motivated it.
 
-A global represents one value of a type for the application. Use it for
-application-wide services or configuration, rather than to avoid deciding which
-model owns a value. Missing required globals can panic; choose the optional
-lookup when absence is an ordinary state.
+`App::set_global` installs one value per global type for the application. Use
+it for app-wide services or configuration, not to avoid deciding which view
+owns a model. `App::global` panics when the value is absent; use `try_global`
+when absence is a normal state and the caller can proceed without it.
 
 ## Let a view disappear
 
-Use a weak entity handle in work that should not retain a view. Upgrading or
-updating it can fail after release. That is an expected lifecycle outcome,
-including after async work completes.
+Use `Entity::downgrade` for callbacks or work that should not keep a view alive.
+After an `await`, update through that weak handle and handle failure: the view
+may have closed while the operation was pending. If another owner must keep the
+model alive, retain a strong `Entity` there instead. The
+[async guide](@/guides/async.md) applies this rule to task completion.
 
 Read the [ownership explanation](https://docs.rs/gpui-ce/0.2.2/gpui/_ownership_and_data_flow/index.html)
 for the entity map, leases, notifications, and event subscriptions. It is the

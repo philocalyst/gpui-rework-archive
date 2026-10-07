@@ -1,3 +1,13 @@
+//! Time-based and spring-driven transitions for elements and components.
+//!
+//! The extension methods wrap an element with an ID-backed [`AnimationElement`] or
+//! [`SpringAnimationElement`]. Keep that ID stable while the animated value changes so GPUI can
+//! carry elapsed time, or spring position and velocity, between frames. Animators transform a
+//! newly constructed element each render; put durable application state on a view/entity, not in
+//! the animator closure. See the [animation walkthrough](https://gpui-ce.github.io/examples/animation/)
+//! for a complete example and the [rendering guide](crate::_documentation::rendering) for the
+//! element lifecycle.
+
 use scheduler::Instant;
 use std::{cell::Cell, rc::Rc, time::Duration};
 
@@ -37,13 +47,20 @@ impl Animation {
         }
     }
 
-    /// Set the animation to loop when it finishes.
+    /// Repeat this motion indefinitely, beginning each pass when the previous one finishes.
+    ///
+    /// The phase is local to this element's retained animation state. Use
+    /// [`repeat_synced`](Self::repeat_synced) when multiple elements should share a clock phase.
     pub fn repeat(mut self) -> Self {
         self.motion = self.motion.repeat_forever();
         self
     }
 
-    /// Set the animation to loop when it finishes, phase-locked to a clock shared by the whole [`App`].
+    /// Repeat indefinitely using a phase locked to the app's shared animation epoch.
+    ///
+    /// Elements with the same motion and app epoch stay synchronized even when they are mounted
+    /// at different times. The `Animation` value still needs to be attached to an element with a
+    /// stable ID so its scheduling state can be retained.
     pub fn repeat_synced(mut self) -> Self {
         self.motion = self.motion.repeat_forever();
         self.synced = true;
@@ -93,7 +110,11 @@ pub trait AnimationExt {
         }
     }
 
-    /// Render this component or element with a chain of animations
+    /// Render this component or element with a sequence of motions.
+    ///
+    /// The animator receives the active animation's zero-based index and progress value. The
+    /// next motion starts after the current motion completes. Supply at least one animation; an
+    /// empty sequence has no active motion to sample.
     fn with_animations(
         self,
         id: impl Into<ElementId>,
@@ -118,6 +139,8 @@ pub trait AnimationExt {
     /// The element ID preserves position and velocity across target changes.
     /// A newly mounted spring starts at its target unless configured with
     /// [`SpringAnimation::from`].
+    /// The animator runs once while constructing the frame's element. Mutate the target when the
+    /// owning view changes, then notify that view so the spring can take another step.
     fn with_spring<T>(
         self,
         id: impl Into<ElementId>,
@@ -152,7 +175,12 @@ pub trait AnimationExt {
 
 impl<E: IntoElement + 'static> AnimationExt for E {}
 
-/// A GPUI element that applies an animation to another element
+/// An element wrapper that applies time-based motions to a child element.
+///
+/// Construct it with [`AnimationExt::with_animation`] or
+/// [`AnimationExt::with_animations`]. The wrapper's ID scopes the current motion and progress
+/// across frames. Use [`map_element`](Self::map_element) to configure the child after creating the
+/// wrapper.
 pub struct AnimationElement<E> {
     id: ElementId,
     element: Option<E>,
@@ -160,7 +188,10 @@ pub struct AnimationElement<E> {
     animator: Box<dyn Fn(E, usize, f32) -> E + 'static>,
 }
 
-/// A GPUI element driven by a stateful spring.
+/// An element wrapper whose child is rebuilt from a retained spring value.
+///
+/// Construct it with [`AnimationExt::with_spring`]. Its stable ID retains spring position and
+/// velocity; changing the target lets the spring continue from its current state.
 pub struct SpringAnimationElement<E> {
     id: ElementId,
     element: Option<E>,
@@ -514,7 +545,10 @@ mod easing {
         move |delta| 1.0 - (1.0 - delta).powi(5)
     }
 
-    /// Apply the given easing function, first in the forward direction and then in the reverse direction
+    /// Apply the given easing function over a forward-then-reverse progress ramp.
+    ///
+    /// The input rises from zero to one over the first half, then falls from one to zero over the
+    /// second half. The easing function receives a normalized value on both halves.
     pub fn bounce(easing: impl Fn(f32) -> f32) -> impl Fn(f32) -> f32 {
         move |delta| {
             if delta < 0.5 {
@@ -525,7 +559,10 @@ mod easing {
         }
     }
 
-    /// A custom easing function for pulsating alpha that slows down as it approaches 0.1
+    /// Return an easing function that oscillates between `min` and `max` once per motion pass.
+    ///
+    /// This is useful for alpha or another property that should pulse rather than move in only
+    /// one direction. The range is not clamped or reordered; choose finite values with `min <= max`.
     pub fn pulsating_between(min: f32, max: f32) -> impl Fn(f32) -> f32 {
         let range = max - min;
 

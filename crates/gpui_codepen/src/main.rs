@@ -224,16 +224,12 @@ fn run() {
         use std::borrow::Cow;
         let fonts = vec![
             Cow::Borrowed(
-                include_bytes!("../assets/fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf")
-                    .as_slice(),
+                include_bytes!("../assets/fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf").as_slice(),
             ),
             Cow::Borrowed(
-                include_bytes!("../assets/fonts/ibm-plex-sans/IBMPlexSans-SemiBold.ttf")
-                    .as_slice(),
+                include_bytes!("../assets/fonts/ibm-plex-sans/IBMPlexSans-SemiBold.ttf").as_slice(),
             ),
-            Cow::Borrowed(
-                include_bytes!("../assets/fonts/lilex/Lilex-Regular.ttf").as_slice(),
-            ),
+            Cow::Borrowed(include_bytes!("../assets/fonts/lilex/Lilex-Regular.ttf").as_slice()),
         ];
         cx.text_system().add_fonts(fonts).expect("guide fonts");
         cx.bind_keys(default_bindings().as_keybindings(Some(DEFAULT_INPUT_CONTEXT)));

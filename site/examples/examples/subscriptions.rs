@@ -2,8 +2,9 @@
 mod support;
 
 // ## Share a model {#state}
-// `Model` owns the count. A view keeps an [`Entity`] handle to that model;
-// another view could keep a clone and read the same value.
+// `Model` owns the count independently of the view that displays it. A view
+// keeps an [`Entity`] handle; another view can clone that handle and read the
+// same model without copying the count.
 //
 // The model's `increment` method changes its field and calls [`Context::notify`].
 // That signal means “read my current state”, without describing each mutation.
@@ -24,18 +25,21 @@ impl Model {
 }
 
 // ## Observe a change {#observe}
-// This view displays the model's count and the number of notifications it has
-// received. [`Context::observe`] updates that second value when the model
-// notifies. The callback then notifies the view because its own state changed.
+// This view displays the model's count and counts observer callbacks.
+// [`Context::observe`] subscribes this view to model notifications. The
+// callback changes the view's own count, then notifies the view so that its
+// rendered label is refreshed. The model signal and view invalidation are two
+// separate steps because they belong to two entities.
 //
 // Retain the returned [`Subscription`]. A temporary subscription is dropped
 // before the next click and cancels the callback. The observer captures its
 // target view weakly, so retaining the subscription does not retain the view.
 //
 // > [!NOTE]
-// > Pending notifications can be coalesced. The notification count measures
-// > callback deliveries, not assignments to the model. Use typed events when
-// > each operation needs a separate payload.
+// > GPUI may coalesce pending notifications. Therefore this number counts
+// > observer callback deliveries, not model assignments or clicks. Use a typed
+// > event when each operation must carry its own payload or remain individually
+// > observable.
 
 struct CounterView {
     model: Entity<Model>,
@@ -58,9 +62,9 @@ impl CounterView {
 }
 
 // ## Read the model; display the observation {#observe-state}
-// [`Entity::read`] borrows the model for this render. GPUI tracks that read
-// when deciding which windows a model notification invalidates. An explicit
-// observer is useful here for the view's additional notification count.
+// [`Entity::read`] borrows the model for this render. GPUI records the read so
+// a model notification can invalidate windows that displayed it. The explicit
+// observer serves a different purpose: it updates this view's callback count.
 //
 // The click handler uses [`Context::listener`] to access the view and
 // [`Entity::update`] to access its model. Those are different entities. The
@@ -99,9 +103,10 @@ impl Render for CounterView {
 }
 
 // ## Give the relationship an owner {#lifetime}
-// [`AppContext::new`] creates the model, then the view. Its constructor stores
-// the model handle and subscription. The window keeps the view alive; when
-// the view is released, its fields release both handles.
+// [`AppContext::new`] creates the model, then creates a view that owns a clone
+// of its handle and the returned [`Subscription`]. The window keeps the root
+// view alive. Releasing that view drops the subscription and stops observation;
+// the model can then be released when its remaining strong handles are gone.
 //
 // Click once and both numbers increase. Try discarding the subscription in
 // the constructor: the model still changes, but the notification count stays

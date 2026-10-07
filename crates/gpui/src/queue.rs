@@ -1,8 +1,9 @@
-//! A bounded-policy-free, multi-producer priority queue used by platform dispatchers.
+//! A multi-producer priority queue used by platform dispatchers.
 //!
 //! High, medium, and low items share one receiver state. Selection is weighted and therefore
-//! favors higher priorities without promising strict FIFO order between priority levels. The
-//! sender and receiver are intentionally hidden from ordinary application code; platform code
+//! favors higher priorities without promising strict FIFO order between priority levels. FIFO is
+//! preserved within each individual priority queue. The sender and receiver
+//! are intentionally hidden from ordinary application code; platform code
 //! constructs a receiver and obtains its senders through this module.
 
 use std::{
@@ -247,7 +248,7 @@ impl<T> PriorityQueueReceiver<T> {
         queues.high_priority.len() + queues.medium_priority.len() + queues.low_priority.len()
     }
 
-    /// Tries to pop one element from the priority queue without blocking.
+    /// Tries to pop one element from the priority queue without waiting for an item.
     ///
     /// This will early return if there are no elements in the queue.
     ///
@@ -256,12 +257,18 @@ impl<T> PriorityQueueReceiver<T> {
     ///
     /// # Errors
     ///
-    /// If the sender was dropped
+    /// Returns [`RecvError`] only when the queue is empty and every sender has
+    /// been dropped. Items already queued are returned before disconnection is
+    /// reported.
     pub fn try_pop(&mut self) -> Result<Option<T>, RecvError> {
         self.pop_inner(false)
     }
 
-    /// Try to pop without sleeping while another thread holds the queue lock.
+    /// Tries to pop without sleeping while another thread holds the queue lock.
+    ///
+    /// This can consume CPU while contending for the queue lock. It returns
+    /// `Ok(None)` when the queue is empty but still connected, and returns an
+    /// error after all senders are dropped and queued items have been drained.
     pub fn spin_try_pop(&mut self) -> Result<Option<T>, RecvError> {
         use Priority as P;
 
@@ -302,17 +309,23 @@ impl<T> PriorityQueueReceiver<T> {
 
     /// Pops an element from the priority queue blocking if necessary.
     ///
-    /// This method is best suited if you only intend to pop one element, for better performance
-    /// on large queues see [`Self::iter``]
+    /// This method is best suited if you only intend to pop one element; for
+    /// large queues, [`Self::iter`] avoids reacquiring the queue lock for each
+    /// item.
     ///
     /// # Errors
     ///
-    /// If the sender was dropped
+    /// Returns [`RecvError`] only after all senders are dropped and the queue
+    /// has been drained.
     pub fn pop(&mut self) -> Result<T, RecvError> {
         self.pop_inner(true).map(|e| e.unwrap())
     }
 
-    /// Consume the receiver into an iterator that never waits for future sends.
+    /// Consumes the receiver into an iterator that never waits for future sends.
+    ///
+    /// It yields currently queued items and then ends when the queue is empty
+    /// or disconnected. The iterator owns the receiver, so it cannot be used
+    /// again afterward.
     pub fn try_iter(self) -> TryIter<T> {
         TryIter {
             receiver: self,
@@ -320,7 +333,9 @@ impl<T> PriorityQueueReceiver<T> {
         }
     }
 
-    /// Consume the receiver into an iterator that waits while senders remain alive.
+    /// Consumes the receiver into an iterator that waits while senders remain
+    /// alive, yields queued items, and ends after all senders are dropped and
+    /// the queue is drained. The iterator owns the receiver.
     pub fn iter(self) -> Iter<T> {
         Iter(self)
     }

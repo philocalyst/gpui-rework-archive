@@ -1,0 +1,17 @@
+{
+  "name": "gpui-documentation-editor",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:editor": "node editor/build.mjs"
+  },
+  "dependencies": {
+    "@codemirror/autocomplete": "6.20.3",
+    "@codemirror/lang-rust": "6.0.2",
+    "@codemirror/lint": "6.9.7",
+    "codemirror": "6.0.2"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}

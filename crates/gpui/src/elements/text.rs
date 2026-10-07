@@ -1,3 +1,11 @@
+//! Text elements, shaping results, and text-range interaction.
+//!
+//! Use the [`text!`](crate::text!) macro for a simple accessible text node, a [`SharedString`] as
+//! an inherited-style text child, and [`StyledText`] when the text needs explicit runs, highlights,
+//! or shared layout geometry. Text layout is measured during layout and receives window-space
+//! bounds during prepaint. Position/index queries are valid only after those phases, and their
+//! indices are UTF-8 byte offsets. See the [rendering guide](crate::_documentation::rendering).
+
 use crate::{
     ActiveTooltip, AnyView, App, AppContext, Bounds, DispatchPhase, Element, ElementId,
     GlobalElementId, HighlightStyle, Hitbox, HitboxBehavior, InspectorElementId, IntoElement,
@@ -438,8 +446,11 @@ impl StyledText {
         &self.layout
     }
 
-    /// Set the styling attributes for the given text, as well as
-    /// as any ranges of text that have had their style customized.
+    /// Set the default style and apply highlights to selected UTF-8 byte ranges.
+    ///
+    /// The ranges are interpreted in the original string. Supply them in ascending order,
+    /// without overlap, and with endpoints on UTF-8 boundaries. Unhighlighted bytes use
+    /// `default_style`.
     pub fn with_default_highlights(
         mut self,
         default_style: &TextStyle,
@@ -453,8 +464,11 @@ impl StyledText {
         self.with_runs(runs)
     }
 
-    /// Set the styling attributes for the given text, as well as
-    /// as any ranges of text that have had their style customized.
+    /// Apply highlights to selected UTF-8 byte ranges using the inherited text style elsewhere.
+    ///
+    /// The ranges are interpreted in the original string. Supply them in ascending order,
+    /// without overlap, and with endpoints on UTF-8 boundaries. The inherited style is read when
+    /// layout is requested, so this method does not capture the current style by itself.
     pub fn with_highlights(
         mut self,
         highlights: impl IntoIterator<Item = (Range<usize>, HighlightStyle)>,
@@ -824,7 +838,11 @@ pub enum TruncateFrom {
     Middle,
 }
 
-/// Metadata about how text should be truncated. Generated during text layout via `TextLayout::evaluate_overflow`.
+/// Metadata describing truncation for one text layout measurement.
+///
+/// Produced by [`TextLayout::evaluate_overflow`]. A missing `width` means no truncation is
+/// applied. When text exceeds that width (or line clamp), GPUI removes content from `source` and
+/// inserts `affix` at the cut. The width is a layout constraint, not a separate clipping region.
 pub struct TextLayoutTruncation {
     /// The width that the text can occupy before it is truncated.
     pub width: Option<Pixels>,
@@ -1777,7 +1795,12 @@ mod truncation_tests {
     }
 }
 
-/// A text element that can be interacted with.
+/// A text element that reports pointer interactions as UTF-8 byte indices.
+///
+/// Click ranges are half-open byte ranges and activate only when both the press and release
+/// resolve inside the same configured range. Hover and tooltip indices identify the text cluster
+/// under the pointer. Use [`TextLayout`] directly when you need geometry but not this element's
+/// built-in range-based mouse behavior.
 pub struct InteractiveText {
     element_id: ElementId,
     text: StyledText,
@@ -1804,7 +1827,10 @@ pub struct InteractiveTextState {
 
 /// InteractiveTest is a wrapper around StyledText that adds mouse interactions.
 impl InteractiveText {
-    /// Creates a new InteractiveText from the given text.
+    /// Creates interactive text with a stable element ID.
+    ///
+    /// The ID scopes the retained pointer and tooltip state. Keep it stable while updating the
+    /// text, and make it unique among siblings that share an identity path.
     pub fn new(id: impl Into<ElementId>, text: StyledText) -> Self {
         Self {
             element_id: id.into(),
@@ -1817,8 +1843,11 @@ impl InteractiveText {
         }
     }
 
-    /// on_click is called when the user clicks on one of the given ranges, passing the index of
-    /// the clicked range.
+    /// Register half-open UTF-8 byte ranges that invoke a callback on click.
+    ///
+    /// The callback receives the range's index in this vector. It runs only if both the mouse-down
+    /// and mouse-up positions map into that same range; dragging into or out of a range does not
+    /// activate it. Ranges should be sorted, non-overlapping, and aligned to UTF-8 boundaries.
     pub fn on_click(
         mut self,
         ranges: Vec<Range<usize>>,
@@ -1836,8 +1865,11 @@ impl InteractiveText {
         self
     }
 
-    /// on_hover is called when the mouse moves over a character within the text, passing the
-    /// index of the hovered character, or None if the mouse leaves the text.
+    /// Notify when the pointer moves to another text cluster.
+    ///
+    /// The optional index is a UTF-8 byte offset for the cluster under the pointer. The callback
+    /// receives `None` when the pointer is outside the text; no callback runs if the resolved
+    /// cluster has not changed.
     pub fn on_hover(
         mut self,
         listener: impl Fn(Option<usize>, MouseMoveEvent, &mut Window, &mut App) + 'static,
@@ -1846,7 +1878,10 @@ impl InteractiveText {
         self
     }
 
-    /// tooltip lets you specify a tooltip for a given character index in the string.
+    /// Build a tooltip for the text cluster under the pointer.
+    ///
+    /// The callback receives a UTF-8 byte offset and may return `None` when that cluster has no
+    /// tooltip. Tooltips are suppressed while a text click is in progress.
     pub fn tooltip(
         mut self,
         builder: impl Fn(usize, &mut Window, &mut App) -> Option<AnyView> + 'static,

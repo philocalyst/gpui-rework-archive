@@ -1,31 +1,57 @@
 //! Storage contracts for editable text and UTF-8/UTF-16 boundary conversion.
 //!
-//! Implementations own the document string and must increment [`UnicodeTextStorage::version`]
-//! whenever content changes. GPUI uses UTF-8 byte offsets internally; browser and IME boundaries
-//! are converted to UTF-16 code units at the edge.
+//! Implementations own the document text and must change [`UnicodeTextStorage::version`] whenever
+//! its contents change. The storage API uses UTF-8 byte offsets and Rust `str` slicing, so every
+//! range passed to [`UnicodeTextStorage::replace_range`] must be ordered, in bounds, and on UTF-8
+//! character boundaries. These offsets count bytes, not Unicode scalar values or user-perceived
+//! grapheme clusters. The default navigation helpers move by grapheme cluster for `Cluster`, use
+//! `unicode_word_indices` for `Word`, and use newline delimiters for line movement.
+//!
+//! The web input bridge speaks UTF-16 because browser selection and composition APIs use code
+//! units. Use the conversion methods at that boundary; keep document mutations and selection state
+//! in UTF-8. For a long document, a custom piece table or rope can implement this trait, but it
+//! must still provide a valid `&str` view and an accurate UTF-16 length.
 
 pub use gpui::TextBoundary;
 use gpui::{NavigationDirection, utf8_to_utf16_offset, utf16_to_utf8_offset};
 use std::ops::Range;
 use unicode_segmentation::UnicodeSegmentation;
 
-/// Implement this trait to create a storage medium that can be used as the content of EditableText elements.
-/// Default implementation is [`StringStorage`].
+/// Text storage used by [`super::EditableTextState`].
+///
+/// Implement this trait to replace the default [`StringStorage`] with a document representation
+/// suited to the application's size and mutation pattern. GPUI currently requests a contiguous
+/// `&str` for layout and snapshots the current contents as a [`gpui::SharedString`], so this trait
+/// does not by itself make the rendering pipeline zero-copy. `replace_range` receives UTF-8 byte
+/// indices and must reject neither valid in-range edits nor break UTF-8 boundaries. Increase
+/// `version` whenever content changes so the element knows to rebuild its text layout.
 pub trait UnicodeTextStorage {
-    /// Returns the version/generation of the content, which should be incremented ever time the
-    /// content is changed so that rendering elements can reprocess the contents via the text layout engine.
+    /// Returns the current content generation.
+    ///
+    /// Advance this value after every content mutation, including edits made outside
+    /// [`EditableTextState`](super::EditableTextState). It is a `u16`, so wrapping is allowed; do
+    /// not use it as a globally unique revision id.
     fn version(&self) -> u16;
 
-    /// Returns a reference to the utf8 string.
+    /// Returns the current contents as valid UTF-8.
     fn content_utf8(&self) -> &str;
 
-    /// Returns the UTF-16 length of the content.
+    /// Returns the number of UTF-16 code units in the current contents.
+    ///
+    /// This is not the UTF-8 byte length or the number of Rust `char`s. For example, `"a😀"` has
+    /// 5 UTF-8 bytes, 2 Rust `char`s, and 3 UTF-16 code units.
     fn len_utf16(&self) -> usize;
 
-    /// Replace contents within the provided range with the given str slice.
+    /// Replaces a UTF-8 byte range with `text`.
+    ///
+    /// The range supplied by editable text is valid, ordered, within the current string, and on
+    /// UTF-8 character boundaries. Implementations must update [`version`](Self::version).
     fn replace_range(&mut self, range: Range<usize>, text: &str);
 
-    /// Returns the utf16 position equivalent of the provided utf8 character position.
+    /// Converts a UTF-8 byte offset to a UTF-16 code-unit offset.
+    ///
+    /// Offsets at or beyond the text length map to the end. Interior offsets should be on a
+    /// character boundary.
     fn utf_offset_8to16(&self, pos_uft8: usize) -> usize {
         // Fast path: if offset is 0, return 0
         if pos_uft8 == 0 {
@@ -40,7 +66,10 @@ pub trait UnicodeTextStorage {
         utf8_to_utf16_offset(self.content_utf8(), pos_uft8)
     }
 
-    /// Returns the utf8 position equivalent of the provided utf16 character position.
+    /// Converts a UTF-16 code-unit offset to a UTF-8 byte offset.
+    ///
+    /// Offsets past the UTF-16 length map to the end. An offset inside a surrogate pair is
+    /// resolved by GPUI's conversion helper to a valid UTF-8 boundary.
     fn utf_offset_16to8(&self, pos_utf16: usize) -> usize {
         // Fast path: if offset is 0, return 0
         if pos_utf16 == 0 {
@@ -60,7 +89,7 @@ pub trait UnicodeTextStorage {
         self.utf_offset_16to8(range_utf16.start)..self.utf_offset_16to8(range_utf16.end)
     }
 
-    /// Builds a utf8 character range based on a caret position within the storage,
+    /// Builds a UTF-8 byte range based on a caret offset within the storage,
     /// the direction to traverse, and the boundary to stop at.
     /// The start of the range will be the earlier position (destination if Back, caret if Forward),
     /// and the end will be the later position (caret if Back, destination if Forward).
@@ -77,7 +106,12 @@ pub trait UnicodeTextStorage {
         }
     }
 
-    /// Finds the next location from the caret based on the direction to traverse and the boundary to stop at.
+    /// Finds the next UTF-8 byte offset from the caret according to a navigation boundary.
+    ///
+    /// `Cluster` uses Unicode grapheme clusters. `Word` uses Unicode word segments and skips the
+    /// separator preceding/following the next word as implemented by `unicode-segmentation`.
+    /// `VisualLine` and `HardLine` share newline-based fallback behavior here; when a current text
+    /// layout is available, `EditableTextState` uses shaped visual-line geometry instead.
     fn offset_from_caret(
         &self,
         caret: usize,
@@ -147,7 +181,10 @@ pub trait UnicodeTextStorage {
         }
     }
 
-    /// Returns the start and end of the word the position resides within.
+    /// Returns the UTF-8 byte range of the Unicode word containing `position`.
+    ///
+    /// A position outside a word (including whitespace and punctuation) returns an empty range at
+    /// the clamped offset.
     fn word_range_at(&self, position: usize) -> Range<usize> {
         let offset = position.min(self.content_utf8().len());
 
@@ -162,9 +199,12 @@ pub trait UnicodeTextStorage {
     }
 }
 
-/// [`UnicodeTextStorage`] implementation for [`String`].
-/// This is not the most performant, especially for large text documents.
-/// Its a decent default for editable text fields though.
+/// Simple [`UnicodeTextStorage`] implementation backed by [`String`].
+///
+/// Each edit uses `String::replace_range`; text length and snapshots are based on the complete
+/// string. It is a practical default for short fields and small text areas. Larger documents can
+/// use another storage implementation, while accounting for the current layout API's need for a
+/// contiguous `&str` view.
 #[derive(Clone, Default)]
 pub struct StringStorage {
     value: String,

@@ -92,6 +92,7 @@ def main() -> int:
             build_env["NO_COLOR"] = "true"
         build_env.setdefault("CARGO_BUILD_JOBS", "4")
         build_env.setdefault("CARGO_PROFILE_RELEASE_LTO", "off")
+        build_env.setdefault("CARGO_PROFILE_RELEASE_INCREMENTAL", "true")
         result = subprocess.run(command, cwd=EXAMPLES, env=build_env, check=False)
         if result.returncode:
             return result.returncode

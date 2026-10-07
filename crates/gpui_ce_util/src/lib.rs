@@ -25,7 +25,7 @@ pub mod arc_cow;
 const CREATE_NO_WINDOW: u32 = 0x0800_0000_u32;
 
 #[cfg(target_os = "windows")]
-/// Create a command without opening a console window on Windows.
+/// Creates a command without opening a console window on Windows.
 pub fn new_std_command(program: impl AsRef<OsStr>) -> std::process::Command {
     use std::os::windows::process::CommandExt;
 
@@ -147,7 +147,11 @@ pub fn get_powershell() -> Option<String> {
 }
 
 #[cfg(target_os = "windows")]
-/// Return PowerShell when available, falling back to the system `cmd.exe`.
+/// Returns the preferred PowerShell executable, or the system `cmd.exe` if none is found.
+///
+/// The result is cached on first use. PowerShell discovery checks installed
+/// stable and preview builds, package-manager locations, `PATH`, and finally
+/// Windows PowerShell under `SystemRoot`.
 pub fn get_windows_system_shell() -> String {
     static CMD: std::sync::LazyLock<String> = std::sync::LazyLock::new(|| {
         log::warn!("Powershell not found, falling back to `cmd`");
@@ -167,7 +171,11 @@ pub fn post_inc<T: From<u8> + AddAssign<T> + Copy>(value: &mut T) -> T {
     prev
 }
 
-/// Run `f`, printing its elapsed time when `ZED_MEASUREMENTS` is `1` or `true`.
+/// Runs `f`, printing its elapsed time when `ZED_MEASUREMENTS` is `1` or `true`.
+///
+/// The environment variable is read once per process on the first call; later
+/// changes do not change measurement behavior. When enabled, the result is
+/// printed to standard error as `label: duration`.
 pub fn measure<R>(label: &str, f: impl FnOnce() -> R) -> R {
     static ZED_MEASUREMENTS: OnceLock<bool> = OnceLock::new();
     let zed_measurements = ZED_MEASUREMENTS.get_or_init(|| {
@@ -188,7 +196,10 @@ pub fn measure<R>(label: &str, f: impl FnOnce() -> R) -> R {
 }
 
 #[macro_export]
-/// Panic in debug builds and log an error with a captured backtrace in release builds.
+/// Panics in debug builds and logs the formatted message with a captured backtrace in release builds.
+///
+/// In release builds this macro returns after logging; it does not abort the
+/// current operation.
 macro_rules! debug_panic {
     ( $($fmt_arg:tt)* ) => {
         if cfg!(debug_assertions) {
@@ -201,7 +212,10 @@ macro_rules! debug_panic {
 }
 
 #[track_caller]
-/// Return `Some` unchanged, or panic in debug builds when the value is `None`.
+/// Returns `Some` unchanged, or panics in debug builds when the value is `None`.
+///
+/// In release builds, `None` is returned unchanged. The panic location points
+/// to the caller.
 pub fn some_or_debug_panic<T>(option: Option<T>) -> Option<T> {
     #[cfg(debug_assertions)]
     if option.is_none() {
@@ -210,10 +224,12 @@ pub fn some_or_debug_panic<T>(option: Option<T>) -> Option<T> {
     option
 }
 
-/// Expands to an immediately-invoked function expression. Good for using the ? operator
-/// in functions which do not return an Option or Result.
+/// Wraps a block in an immediately invoked closure, so `?` returns from that
+/// block instead of from the surrounding function.
 ///
-/// Accepts a normal block, an async block, or an async move block.
+/// The normal form returns the closure's value. The `async` and `async move`
+/// forms return a future. The surrounding function still needs to handle the
+/// resulting `Option` or `Result` explicitly.
 #[macro_export]
 macro_rules! maybe {
     ($block:block) => {
@@ -227,6 +243,10 @@ macro_rules! maybe {
     };
 }
 /// Extension methods for reporting a `Result` error and continuing with an `Option`.
+///
+/// The logging methods preserve successful values and turn failures into
+/// `None` after emitting a log record at the selected level. Use [`Self::anyhow`]
+/// when the error must be returned to the caller instead of logged and dropped.
 pub trait ResultExt<E> {
     type Ok;
 
@@ -238,7 +258,10 @@ pub trait ResultExt<E> {
     fn log_err_with_backtrace(self) -> Option<Self::Ok>
     where
         E: std::fmt::Debug;
-    /// Assert that this result should never be an error in development or tests.
+    /// Reports an unexpected error as a debug panic, then returns the original result.
+    ///
+    /// In debug builds this panics on `Err`; in release builds it logs through
+    /// [`debug_panic!`] and returns the same `Err`.
     fn debug_assert_ok(self, reason: &str) -> Self;
     /// Log an error at warning level and convert `Err` to `None`.
     fn warn_on_err(self) -> Option<Self::Ok>;
@@ -345,7 +368,7 @@ where
 }
 
 #[track_caller]
-/// Log `error` at error level, including the source location of the caller.
+/// Logs `error` at error level, including the caller's source location.
 pub fn log_err<E: std::fmt::Display>(error: &E) {
     log_error_with_caller(*Location::caller(), error, log::Level::Error);
 }
@@ -367,16 +390,19 @@ pub trait TryFutureExt {
     where
         Self: Sized;
 
-    /// Log an error at error level using an explicit source location.
+    /// Logs an error at error level using an explicit source location.
+    ///
+    /// Use this when the future is created in one helper and the useful
+    /// diagnostic location belongs to its caller.
     fn log_tracked_err(self, location: core::panic::Location<'static>) -> LogErrorFuture<Self>
     where
         Self: Sized;
 
-    /// Log an error at warning level when the future resolves and return `Option<T>`.
+    /// Logs an error at warning level when the future resolves and returns `Option<T>`.
     fn warn_on_err(self) -> LogErrorFuture<Self>
     where
         Self: Sized;
-    /// Panic if the future resolves to `Err`; otherwise return its value.
+    /// Panics when the future resolves to `Err`; otherwise returns its value.
     fn unwrap(self) -> UnwrapFuture<Self>
     where
         Self: Sized;
@@ -535,7 +561,7 @@ where
     }
 }
 
-/// Run a closure when this guard is dropped, unless [`Deferred::abort`] is called.
+/// Runs a closure when this guard is dropped, unless [`Deferred::abort`] is called.
 pub struct Deferred<F: FnOnce()>(Option<F>);
 
 impl<F: FnOnce()> Deferred<F> {
@@ -553,7 +579,7 @@ impl<F: FnOnce()> Drop for Deferred<F> {
     }
 }
 
-/// Run the given function when the returned value is dropped (unless it's cancelled).
+/// Defers `f` until the returned guard is dropped; [`Deferred::abort`] cancels it.
 #[must_use]
 pub fn defer<F: FnOnce()>(f: F) -> Deferred<F> {
     Deferred(Some(f))
@@ -573,6 +599,10 @@ impl std::hash::BuildHasher for TypeIdHashBuilder {
 
 #[derive(Default, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 /// A compact hasher for Rust's 64-bit `TypeId` representation.
+///
+/// This is specialized for `TypeId` keys, not a general-purpose hasher. It
+/// reads the first eight bytes supplied by `Hash`; other input lengths trigger
+/// [`debug_panic!`] in debug builds and log an error in release builds.
 pub struct TypeIdHasher {
     value: u64,
 }
@@ -615,7 +645,10 @@ fn type_id_hasher() {
     verify_hashing_with(TypeId::of::<Vec<u8>>());
 }
 
-/// Keep the smallest `limit` items under `compare`, sorted according to that comparator.
+/// Keeps the smallest `limit` items under `compare` and sorts the retained prefix.
+///
+/// The comparator defines both “smallest” and the output order. If `limit` is
+/// zero the vector is cleared; if all items fit, the whole vector is sorted.
 pub fn truncate_to_bottom_n_sorted_by<T, F>(items: &mut Vec<T>, limit: usize, compare: &F)
 where
     F: Fn(&T, &T) -> std::cmp::Ordering,

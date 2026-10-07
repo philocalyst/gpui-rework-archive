@@ -2,7 +2,9 @@ use collections::HashMap;
 use std::{cmp::Ordering, ops::Range};
 
 /// Construct a string and a list of offsets within that string using a single
-/// string containing embedded position markers.
+/// string containing embedded position markers. Marker characters are removed;
+/// each returned offset is a byte index into the unmarked UTF-8 string. Repeated
+/// markers produce multiple offsets in encounter order.
 pub fn marked_text_offsets_by(
     marked_text: &str,
     markers: Vec<char>,
@@ -27,7 +29,11 @@ pub fn marked_text_offsets_by(
 /// range markers. By using multiple different range markers, you can construct
 /// ranges that overlap each other.
 ///
-/// The returned ranges will be grouped by their range marking characters.
+/// Marker characters are removed, and returned byte ranges are grouped by the
+/// corresponding [`TextRangeMarker`]. Each range marker's start and end counts
+/// must match, and an end before its start panics. `ReverseRange` returns a
+/// descending range (`end..start`); ranges can overlap when different marker
+/// pairs are used.
 pub fn marked_text_ranges_by(
     marked_text: &str,
     markers: Vec<TextRangeMarker>,
@@ -108,7 +114,9 @@ pub fn marked_text_ranges_by(
 ///
 /// Any • characters in the input string will be replaced with spaces. This makes
 /// it easier to test cases with trailing spaces, which tend to get trimmed from the
-/// source code.
+/// source code. Returned offsets are byte indices into the resulting UTF-8 text.
+/// Unbalanced markers, a duplicate direction marker, or a direction marker in
+/// the middle of a range panics at the call site.
 #[track_caller]
 pub fn marked_text_ranges(
     marked_text: &str,
@@ -178,6 +186,9 @@ pub fn marked_text_ranges(
 }
 
 #[track_caller]
+/// Parse position and range markers without replacing `•` padding characters.
+/// Returns byte offsets; a non-empty range is represented with equal start and
+/// end values. Malformed marker order panics at the call site.
 pub fn marked_text_offsets(marked_text: &str) -> (String, Vec<usize>) {
     let (text, ranges) = marked_text_ranges(marked_text, false);
     (
@@ -192,6 +203,11 @@ pub fn marked_text_offsets(marked_text: &str) -> (String, Vec<usize>) {
     )
 }
 
+/// Insert marker characters around byte-indexed ranges to produce test input.
+/// `indicate_cursors` adds a `ˇ` direction marker inside non-empty ranges and
+/// uses it alone for empty ranges. Indices must be valid UTF-8 boundaries in
+/// `unmarked_text`; out-of-bounds or overlapping ranges can panic or produce
+/// ambiguous marker text.
 pub fn generate_marked_text(
     unmarked_text: &str,
     ranges: &[Range<usize>],
@@ -229,6 +245,8 @@ pub fn generate_marked_text(
 }
 
 #[derive(Clone, Eq, PartialEq, Hash)]
+/// Describes a point marker, forward range pair, or reverse-direction range pair
+/// for [`marked_text_ranges_by`].
 pub enum TextRangeMarker {
     Empty(char),
     Range(char, char),

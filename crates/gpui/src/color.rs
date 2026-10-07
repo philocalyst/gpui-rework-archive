@@ -4,7 +4,9 @@
 //! and `0xRRGGBBAA`). [`Hsla`] stores hue, saturation, lightness, and alpha as
 //! normalized values; [`hsla`] clamps all four inputs to `0..=1` (hue is a
 //! turn, not degrees). Background gradients use an angle in degrees and stop
-//! positions as normalized percentages. For examples, see
+//! positions as normalized fractions. `linear_gradient` defaults to Oklab
+//! interpolation between stops; solid-color interpolation and `ColorSpace`
+//! are separate choices. For examples, see
 //! <https://gpui-ce.github.io/examples/drawing/#paint>.
 
 use palette::{IntoColor, OklabHue, Oklcha, RgbHue};
@@ -77,6 +79,10 @@ pub const fn hsla(h: f32, s: f32, l: f32, a: f32) -> Hsla {
 }
 
 /// Constructs a [`palette::Oklcha`] value from its components.
+///
+/// Lightness and chroma use Oklab coordinates; `hue` accepts a Palette Oklab
+/// hue value, and `alpha` is stored as supplied. This helper does not clamp or
+/// validate the components.
 pub fn oklcha<T>(lightness: T, chroma: T, hue: impl Into<OklabHue<T>>, alpha: T) -> Oklcha<T> {
     Oklcha::new(lightness, chroma, hue, alpha)
 }
@@ -384,11 +390,13 @@ pub fn solid_background(color: impl IntoColor<Hsla>) -> Background {
     }
 }
 
-/// Creates a two-stop linear gradient.
+/// Creates a two-stop linear gradient, with stops blended in Oklab by default.
 ///
-/// The gradient line's angle of direction. A value of `0.` is equivalent to top; increasing values rotate clockwise from there.
-///
-/// The `angle` is in degrees value in the range 0.0 to 360.0.
+/// `angle` is measured in degrees: `0.0` points up and larger values rotate
+/// clockwise. The value is stored as supplied; use `0.0..=360.0` for one
+/// clockwise turn. Stop positions are normalized fractions in `0.0..=1.0`;
+/// [`linear_color_stop`] preserves the supplied value, so validate untrusted
+/// positions before constructing a gradient.
 ///
 /// <https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/linear-gradient>
 pub fn linear_gradient(
@@ -413,7 +421,7 @@ pub fn linear_gradient(
 pub struct LinearColorStop {
     /// The color of the color stop.
     pub color: crate::SceneHsla,
-    /// The percentage of the gradient, in the range 0.0 to 1.0.
+    /// The normalized position in the gradient, conventionally `0.0..=1.0`.
     pub percentage: f32,
 }
 
@@ -507,7 +515,7 @@ impl Background {
         }
     }
 
-    /// Use specified color space for color interpolation.
+    /// Selects the color space used to interpolate this background's gradient stops.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/color-interpolation-method>
     pub fn color_space(mut self, color_space: ColorSpace) -> Self {

@@ -95,9 +95,14 @@ mod native {
     fn allowed_origin(origin: &str, extra: &str) -> bool {
         ["http://127.0.0.1:8080", "http://localhost:8080"].contains(&origin)
             || extra.split(',').map(str::trim).any(|candidate| {
-                candidate == origin && ["http://127.0.0.1:", "http://localhost:"]
-                    .iter().any(|prefix| candidate.strip_prefix(prefix)
-                        .is_some_and(|port| port.parse::<u16>().is_ok_and(|port| port > 0)))
+                candidate == origin
+                    && ["http://127.0.0.1:", "http://localhost:"]
+                        .iter()
+                        .any(|prefix| {
+                            candidate
+                                .strip_prefix(prefix)
+                                .is_some_and(|port| port.parse::<u16>().is_ok_and(|port| port > 0))
+                        })
             })
     }
     fn decode(request: &mut tiny_http::Request, port: u16) -> anyhow::Result<Operation> {
@@ -127,7 +132,10 @@ mod native {
             anyhow::bail!("application/json required");
         }
         if let Some(origin) = header("Origin") {
-            if !allowed_origin(origin, &std::env::var("GPUI_CODEPEN_ORIGINS").unwrap_or_default()) {
+            let configured = std::env::var("GPUI_CODEPEN_ALLOWED_ORIGINS")
+                .or_else(|_| std::env::var("GPUI_CODEPEN_ORIGINS"))
+                .unwrap_or_default();
+            if !allowed_origin(origin, &configured) {
                 anyhow::bail!("local guide origin required");
             }
         }
@@ -218,8 +226,14 @@ mod native {
             assert!(super::allowed_origin("http://localhost:1111", extra));
             assert!(super::allowed_origin("http://localhost:8080", ""));
             assert!(!super::allowed_origin("http://localhost:1111", ""));
-            assert!(!super::allowed_origin("https://example.com:1111", "https://example.com:1111"));
-            assert!(!super::allowed_origin("http://localhost:1111/path", "http://localhost:1111/path"));
+            assert!(!super::allowed_origin(
+                "https://example.com:1111",
+                "https://example.com:1111"
+            ));
+            assert!(!super::allowed_origin(
+                "http://localhost:1111/path",
+                "http://localhost:1111/path"
+            ));
         }
     }
 }

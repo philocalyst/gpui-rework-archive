@@ -1,7 +1,8 @@
 /// Shader-declared data that can be uploaded without serialization.
 ///
 /// # Safety
-/// Implementors need a stable C-compatible layout, no padding, matching the WGSL declaration.
+/// Implementors need a stable C-compatible layout, no implicit padding, fully initialized bytes,
+/// and fields matching the WGSL declaration at the same offsets.
 pub unsafe trait BufferData: Sized {
     /// Name of the matching WGSL structure.
     const WGSL_TYPE: &'static str;
@@ -16,7 +17,7 @@ pub struct StorageAbi {
     pub rust_stride: usize,
 }
 
-/// Describes the storage layout expected by one shader pipeline.
+/// Returns the WGSL name and Rust stride needed to upload `T` as a record.
 pub const fn storage_abi<T: BufferData>() -> StorageAbi {
     StorageAbi {
         wgsl_type: T::WGSL_TYPE,
@@ -24,6 +25,10 @@ pub const fn storage_abi<T: BufferData>() -> StorageAbi {
     }
 }
 
+/// Views one ABI-compatible value as bytes without allocating or copying it.
+///
+/// The returned slice borrows `value` and is safe to upload only because
+/// [`BufferData`] requires initialized bytes with the matching shader layout.
 pub fn bytes_of<T: BufferData>(value: &T) -> &[u8] {
     unsafe {
         std::slice::from_raw_parts(
@@ -33,6 +38,10 @@ pub fn bytes_of<T: BufferData>(value: &T) -> &[u8] {
     }
 }
 
+/// Views a contiguous slice of ABI-compatible values as bytes without copying.
+///
+/// The output length is `values.len() * size_of::<T>()`, and it borrows the
+/// input slice.
 pub fn slice_as_bytes<T: BufferData>(values: &[T]) -> &[u8] {
     unsafe {
         std::slice::from_raw_parts(values.as_ptr().cast::<u8>(), std::mem::size_of_val(values))
@@ -42,27 +51,39 @@ pub fn slice_as_bytes<T: BufferData>(values: &[T]) -> &[u8] {
 /// Views of scene data consumed by a pipeline.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum DataLayout {
+    /// Primitive records uploaded from an instance buffer.
     Instances,
+    /// Instance records that also sample a primary texture.
     TexturedInstances,
+    /// Monochrome glyph or image records with atlas-specific sampling.
     MonochromeSprites,
+    /// Subpixel-coverage glyph records with atlas-specific sampling.
     SubpixelSprites,
+    /// Data assembled by the backend rather than uploaded from a scene array.
     NativeOnly,
+    /// A backend-owned surface and its per-surface uniforms.
     Surface,
+    /// Fullscreen blur-pass uniforms and source textures.
     Blur,
 }
 
 /// Vertex-count policy for one draw call.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum VertexCount {
+    /// A four-vertex rectangle or rectangle strip.
     Rectangle,
+    /// A three-vertex fullscreen triangle.
     FullscreenTriangle,
+    /// A count supplied by the draw's data, as in path rasterization.
     Dynamic,
 }
 
 /// Primitive topology submitted to WGPU.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PrimitiveTopology {
+    /// Independent groups of three vertices.
     TriangleList,
+    /// Connected groups of three vertices with alternating winding.
     TriangleStrip,
 }
 
@@ -97,6 +118,7 @@ pub struct Pipeline {
 macro_rules! define_pipelines {
         ($($name:ident: $label:literal, $vertex:ident, $fragment:ident, $topology:ident, $layout:ident, $vertices:ident;)*) => {
             $(
+                #[doc = "Pipeline entry points and upload contract for this shader pair."]
                 pub const $name: Pipeline = Pipeline {
                     label: $label,
                     vertex_entry: stringify!($vertex),
@@ -107,6 +129,7 @@ macro_rules! define_pipelines {
                 };
             )*
 
+            /// Every generated GPUI pipeline in this module.
             pub const ALL: &[Pipeline] = &[$($name),*];
         };
     }
@@ -130,6 +153,7 @@ define_pipelines! {
     SMOOTHED_BLUR_COMPOSITE: "smoothed_blur_composite", vertex_smoothed_blur_composite, fragment_smoothed_blur_composite, TriangleStrip, Blur, Rectangle;
 }
 
+/// Pipeline metadata for rasterizing an emoji into a native atlas texture.
 pub const EMOJI_RASTERIZATION: Pipeline = Pipeline {
     label: "emoji_rasterization",
     vertex_entry: "vertex_emoji_rasterization",
@@ -139,16 +163,27 @@ pub const EMOJI_RASTERIZATION: Pipeline = Pipeline {
     vertex_count: VertexCount::Rectangle,
 };
 
+/// Bind-group index for frame-global uniforms.
 pub const GLOBAL_BIND_GROUP: u32 = 0;
+/// Bind-group index for per-pipeline data and textures.
 pub const DATA_BIND_GROUP: u32 = 1;
+/// Binding index of [`GlobalUniforms`](super::common::GlobalUniforms).
 pub const GLOBAL_UNIFORMS_BINDING: u32 = 0;
+/// Binding index of font-rasterization uniforms.
 pub const FONT_RASTERIZATION_BINDING: u32 = 1;
+/// Binding index of the primary scene-data buffer.
 pub const DATA_BUFFER_BINDING: u32 = 0;
+/// Binding index of the primary sampled texture.
 pub const PRIMARY_TEXTURE_BINDING: u32 = 1;
+/// Binding index of the secondary sampled texture.
 pub const SECONDARY_TEXTURE_BINDING: u32 = 2;
+/// Binding index of the primary texture sampler.
 pub const PRIMARY_SAMPLER_BINDING: u32 = 2;
+/// Binding index of the sampler used for backend-owned surfaces.
 pub const SURFACE_SAMPLER_BINDING: u32 = 3;
+/// Number of vertices in a rectangle draw.
 pub const RECTANGLE_VERTEX_COUNT: u32 = 4;
+/// Number of vertices in a fullscreen triangle draw.
 pub const FULLSCREEN_TRIANGLE_VERTEX_COUNT: u32 = 3;
 /// D3D11 constant-buffer register of the per-draw instance base for instanced pipelines.
 /// Group-0 cbuffers occupy b0 and b1, and the group-1 uniform lands on b2.
@@ -177,6 +212,7 @@ buffer_data! {
     gpui::PolychromeSprite => "PolychromeSprite",
 }
 
+/// Storage-buffer layouts for scene records uploaded by the render pipelines.
 pub const SCENE_STORAGE_ABI: &[StorageAbi] = &[
     storage_abi::<gpui::Quad>(),
     storage_abi::<gpui::Shadow>(),

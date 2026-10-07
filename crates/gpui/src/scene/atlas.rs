@@ -3,14 +3,18 @@ use crate::{
     GlyphAtlasEntry, PlatformAtlas, RenderGlyphParams, Size, TileId, ValidatedRasterizedGlyph,
 };
 use anyhow::{Context, Result, ensure};
+use collections::HashMap;
 use std::{
     borrow::Cow,
-    collections::HashMap,
     sync::{Arc, Mutex},
 };
 
-/// An in-memory atlas. Each uploaded tile occupies its own texture, making allocation stable
-/// and keeping the host renderer independent of windowing systems and graphics APIs.
+/// An in-memory atlas for captured scene pixels and renderer-independent tests.
+///
+/// Each uploaded tile occupies its own texture, making allocation stable and
+/// keeping the host renderer independent of windowing systems and graphics
+/// APIs. Tile coordinates are in physical [`DevicePixels`]; this atlas accepts
+/// only tile ID zero when resolving a bitmap.
 #[derive(Default)]
 pub struct SceneAtlas {
     data: Mutex<SceneAtlasData>,
@@ -30,8 +34,11 @@ impl SceneAtlas {
         Self::default()
     }
 
-    /// Builds an atlas from canonical SceneCapture resources. Bitmap vector indices are the
-    /// canonical texture indices produced by SceneCapture.
+    /// Builds an atlas from a capture's canonical bitmap list.
+    ///
+    /// Each bitmap's vector index becomes its texture index, as used by
+    /// [`SceneCapture::bitmaps`](crate::SceneCapture::bitmaps). Returns an error if any bitmap has invalid
+    /// dimensions or packed pixel data.
     pub fn from_captured_bitmaps(bitmaps: &[CapturedBitmap]) -> Result<Self> {
         let atlas = Self::new();
         let mut data = atlas.data.lock().unwrap();
@@ -53,7 +60,11 @@ impl SceneAtlas {
         Ok(atlas)
     }
 
-    /// Inserts or replaces a canonical captured bitmap at the supplied texture index.
+    /// Inserts or replaces a captured bitmap at the supplied texture index.
+    ///
+    /// The texture kind must match the bitmap kind, and the bitmap must contain
+    /// tightly packed data with valid dimensions. Replacing a slot changes the
+    /// pixels resolved for every tile that references that texture ID.
     pub fn insert_captured(
         &self,
         texture_id: AtlasTextureId,
@@ -71,14 +82,21 @@ impl SceneAtlas {
         Ok(())
     }
 
-    /// Copies a tile's pixels into a portable value. SceneCapture canonical tiles use one bitmap per
-    /// texture and tile id zero; ordinary atlas uploads use the same single-tile allocation.
+    /// Copies one tile's pixels into an owned portable value.
+    ///
+    /// This CPU atlas stores one bitmap per texture, so `tile_id` must be zero.
+    /// Returns an error for an unknown texture ID, a mismatched texture kind,
+    /// or an empty slot.
     pub fn resolve(&self, tile: AtlasTile) -> Result<CapturedBitmap> {
         Ok((*self.resolve_shared(tile)?).clone())
     }
 
-    /// Keeps immutable pixels alive after releasing the atlas lock. Replaying a
-    /// scene can share the bitmap without copying it on every frame.
+    /// Shares immutable pixels after releasing the atlas lock.
+    ///
+    /// The returned `Arc` remains valid if the atlas is later changed or
+    /// dropped. Replaying a scene can therefore reuse the same pixels without
+    /// copying them on every frame. Returns the same lookup errors as
+    /// [`Self::resolve`].
     pub fn resolve_shared(&self, tile: AtlasTile) -> Result<Arc<CapturedBitmap>> {
         ensure!(
             tile.tile_id == TileId(0),

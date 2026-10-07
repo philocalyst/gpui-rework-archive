@@ -82,6 +82,13 @@
         "url": "/examples/async-task/#launch"
       },
       {
+        "example": "counter",
+        "step": "state",
+        "step_title": "Own the count",
+        "title": "Make state visible",
+        "url": "/examples/counter/#state"
+      },
+      {
         "example": "drawing",
         "step": "launch",
         "step_title": "Compare clipping with resizing",
@@ -356,6 +363,19 @@
     ],
     "path": "gpui/struct.FocusHandle.html"
   },
+  "gpui::InteractiveElement": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.InteractiveElement.html",
+    "examples": [
+      {
+        "example": "actions",
+        "step": "focus",
+        "step_title": "Keep a keyboard target",
+        "title": "Route a keyboard action",
+        "url": "/examples/actions/#focus"
+      }
+    ],
+    "path": "gpui/trait.InteractiveElement.html"
+  },
   "gpui::IntoElement": {
     "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.IntoElement.html",
     "examples": [
@@ -592,6 +612,13 @@
     "examples": [
       {
         "example": "subscriptions",
+        "step": "lifetime",
+        "step_title": "Give the relationship an owner",
+        "title": "Observe shared state",
+        "url": "/examples/subscriptions/#lifetime"
+      },
+      {
+        "example": "subscriptions",
         "step": "observe",
         "step_title": "Observe a change",
         "title": "Observe shared state",
@@ -798,6 +825,13 @@
         "step_title": "Compose it with ordinary elements",
         "title": "Implement an element",
         "url": "/examples/custom-element/#compose"
+      },
+      {
+        "example": "custom-element",
+        "step": "phases",
+        "step_title": "Choose the three phase states",
+        "title": "Implement an element",
+        "url": "/examples/custom-element/#phases"
       },
       {
         "example": "drawing",

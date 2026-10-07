@@ -1,6 +1,10 @@
-//! Font storage, variation selection, and glyph rasterization for Parley.
+//! Font storage, exact font instances, and glyph rasterization for Parley.
 //!
-//! Glyph buffers use GPUI's declared formats and are validated before the renderer receives them.
+//! Fontique supplies the selected source face; this module stores the face index, variable-font
+//! coordinates, and any synthetic styling so a rasterizer receives the same instance that Parley
+//! shaped. Rasterizers return GPUI glyph buffers whose dimensions and format must match the
+//! declared pixel data. Color glyph formats are negotiated before rasterization through
+//! [`GlyphRasterizer::supports_color_glyph`].
 
 use anyhow::{Context as _, Result, bail, ensure};
 use fontique::{Blob, Synthesis};
@@ -29,7 +33,10 @@ use swash::{
 
 const CANONICAL_FONT_ID_BIT: usize = 1 << (usize::BITS - 1);
 
-/// One design-space variation coordinate for an exact font instance.
+/// One design-space variation coordinate for an exact variable-font instance.
+///
+/// The tag is an OpenType four-byte axis name, such as `wght` for weight or `opsz` for optical
+/// size. Values use that axis's design-space range; they are not normalized 0–1 coordinates.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct FontVariation {
     /// OpenType variation-axis tag.
@@ -40,6 +47,9 @@ pub struct FontVariation {
 
 impl FontVariation {
     /// Creates a design-space variation coordinate from an OpenType axis tag.
+    ///
+    /// This constructor stores the tag and value without checking that a particular face exposes
+    /// the axis or accepts the value; font-instance resolution performs those checks.
     pub const fn new(tag: [u8; 4], value: f32) -> Self {
         Self {
             tag: Tag::new(&tag),
@@ -53,7 +63,7 @@ impl FontVariation {
 pub struct FontSynthesis {
     /// Whether the rasterizer should synthesize a heavier outline.
     pub embolden: bool,
-    /// Synthetic clockwise skew in degrees.
+    /// Synthetic clockwise skew in degrees, when Fontique requested an oblique instance.
     pub skew_degrees: Option<f32>,
 }
 
@@ -66,12 +76,20 @@ impl From<Synthesis> for FontSynthesis {
     }
 }
 
-/// The immutable face and instance selected by Parley for a glyph.
+/// The immutable font face and instance selected during shaping for a glyph.
+///
+/// Borrowed font bytes remain owned by the font catalog. `font_id` identifies the canonical face,
+/// variation coordinates, and synthesis combination; `source_id` is the Fontique identity for the
+/// registered blob, not a content hash. A rasterizer should use these fields rather than resolving
+/// a new font by family name, or its glyph pixels and advances may disagree.
 #[derive(Clone, Copy)]
 pub struct RasterFace<'a> {
     /// Canonical identity of the full face, variation, and synthesis combination.
     pub font_id: FontId,
-    /// Stable identity shared by every face and instance backed by the same source bytes.
+    /// Fontique blob identity shared by faces/instances that reuse this registered blob.
+    ///
+    /// This is a storage identity, not a hash of the font contents; separately registered copies
+    /// of identical bytes may have different IDs.
     pub source_id: u64,
     /// Owning handle for the original font or collection bytes.
     pub source: &'a Blob<u8>,
@@ -93,7 +111,10 @@ impl RasterFace<'_> {
         self.source.as_ref()
     }
 
-    /// Returns whether every supplied variation coordinate uses its axis default.
+    /// Returns whether each supplied variation coordinate equals its axis default.
+    ///
+    /// Returns an error if the selected font face or its variation axes cannot be read. An empty
+    /// variation list returns `true`.
     pub fn has_default_variations(&self) -> Result<bool> {
         let font = FontRef::from_index(self.data(), self.face_index)
             .context("cannot inspect variation axes in the selected face")?;
@@ -111,7 +132,12 @@ impl RasterFace<'_> {
             && ![b"COLR", b"sbix", b"SVG "].into_iter().any(has_table))
     }
 
-    /// Returns the preferred color artwork format supported by the rasterizer.
+    /// Returns the first color artwork format advertised by this face and accepted by `supports`.
+    ///
+    /// The classifier checks the requested glyph, so a face's color tables alone do not imply that
+    /// every glyph has color artwork. Returns `None` for monochrome glyphs or when no available
+    /// format is accepted. Candidates are considered in this order: COLRv1, COLRv0, sbix, CBDT,
+    /// then SVG. Returns an error when the face or its color tables cannot be parsed.
     pub fn supported_color_glyph_kind(
         &self,
         glyph_id: GlyphId,
@@ -127,7 +153,7 @@ impl RasterFace<'_> {
     }
 }
 
-/// The native artwork format for a color glyph.
+/// A color glyph artwork format embedded in a font.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ColorGlyphKind {
     /// OpenType COLRv0 layers.
@@ -142,24 +168,45 @@ pub enum ColorGlyphKind {
     Svg,
 }
 
-/// A platform glyph rasterizer used after Parley has selected and shaped an exact face.
+/// Rasterizes glyph pixels after Parley has selected and shaped an exact font instance.
+///
+/// Implement this to integrate a platform font API or a custom rasterizer. `prepare_style` is
+/// cached by requested raster style, so it should be a deterministic policy function. `rasterize`
+/// receives the face and variation instance used for shaping and must return a
+/// [`RasterizedGlyph`](gpui::RasterizedGlyph) whose pixel buffer satisfies its declared format and
+/// bounds. The system serializes mutable rasterization through a mutex; `Send` is required, while
+/// calls do not run concurrently on one rasterizer instance. Advertise only color formats that
+/// `rasterize` can preserve.
 pub trait GlyphRasterizer: Send {
-    /// Returns whether this rasterizer can preserve the glyph's native color artwork.
+    /// Returns whether this rasterizer can preserve the given native color artwork format.
+    ///
+    /// The default accepts all formats. Override this when the backend cannot render a specific
+    /// font table format; the text system will then avoid treating that format as native color.
     fn supports_color_glyph(&self, _kind: ColorGlyphKind) -> bool {
         true
     }
 
-    /// Reduces a scene request to the settings which alter cached raster pixels.
+    /// Chooses raster settings and foreground dependency for a scene request.
+    ///
+    /// The resulting style participates in glyph cache identity. Return independent styling when
+    /// pixel output does not depend on the current foreground; use the requested style's preblend
+    /// or other GPUI policy when it does.
     fn prepare_style(&self, request: RasterStyleRequest) -> PreparedRasterStyle;
 
     /// Rasterizes one glyph from the exact face selected during shaping.
+    ///
+    /// Return an empty glyph for a valid glyph with no drawable artwork. Return an error when the
+    /// face data, glyph, or raster operation is invalid. Pixel layout and channel ordering must
+    /// match the returned format expected by GPUI's renderer.
     fn rasterize(
         &mut self,
         face: RasterFace<'_>,
         params: &RenderGlyphParams,
     ) -> Result<RasterizedGlyph>;
 
-    /// Returns the platform's default mode for ordinary text.
+    /// Returns the default rendering mode for ordinary monochrome text.
+    ///
+    /// Color-glyph requests still follow their requested color mode.
     fn recommended_mode(&self) -> TextRenderingMode {
         TextRenderingMode::Subpixel
     }
@@ -578,7 +625,11 @@ fn canonical_index(id: FontId) -> Option<usize> {
     (id.0 & CANONICAL_FONT_ID_BIT != 0).then_some(id.0 & !CANONICAL_FONT_ID_BIT)
 }
 
-/// Swash raster state used by Linux, web, and explicit fallback construction.
+/// Portable Swash rasterizer used by the Linux and web text systems.
+///
+/// It handles outline glyphs and CBDT, sbix, and COLRv0 color artwork. COLRv1 and embedded SVG
+/// color glyphs are not advertised by this implementation. For a native rasterizer that handles
+/// platform font formats, see [`BitmapFallbackGlyphRasterizer`].
 #[derive(Default)]
 pub struct SwashGlyphRasterizer {
     scale_context: ScaleContext,
@@ -691,7 +742,11 @@ impl GlyphRasterizer for SwashGlyphRasterizer {
     }
 }
 
-/// Uses Swash for CBDT-only faces and a platform rasterizer for every other face.
+/// Adds portable CBDT-only color glyph support to a platform rasterizer.
+///
+/// Faces that have only CBDT/CBLC bitmap color tables are sent to Swash; other faces continue to
+/// use `native`. This avoids routing an entire font to the portable renderer when its native face
+/// supports outlines or other artwork formats.
 pub struct BitmapFallbackGlyphRasterizer<Native> {
     native: Native,
     portable: SwashGlyphRasterizer,
@@ -699,7 +754,7 @@ pub struct BitmapFallbackGlyphRasterizer<Native> {
 }
 
 impl<Native> BitmapFallbackGlyphRasterizer<Native> {
-    /// Adds portable CBDT support to a platform glyph rasterizer.
+    /// Wraps `native` and routes CBDT-only faces to Swash.
     pub fn new(native: Native) -> Self {
         Self {
             native,

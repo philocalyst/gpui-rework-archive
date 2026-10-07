@@ -293,11 +293,21 @@ pub trait AppContext {
     where
         T: 'static;
 
-    /// Tell GPUI that an entity has changed and observers of it should be notified.
+    /// Marks an entity changed and invalidates rendering that depends on it.
+    ///
+    /// Observers run during effect processing after the current update closure
+    /// returns; repeated pending notifications can be coalesced. GPUI does not
+    /// infer changes from field mutation. Use this for state changes consumers
+    /// should reread, and use [`emit`](Self::emit) when they need an event payload.
     fn notify(&mut self, entity_id: EntityId);
 
-    /// Emit an event of the specified type, which can be handled by other entities that have subscribed via `subscribe` methods on their respective contexts.
-    /// A globally-callable equivalent to `Context::emit` without requiring an entity update.
+    /// Queues a typed event from `entity` for its subscribers.
+    ///
+    /// The entity type must implement [`EventEmitter<EventType>`]. Delivery
+    /// occurs during effect processing, after the current update closure
+    /// returns. Unlike [`notify`](Self::notify), this carries a payload and
+    /// does not itself invalidate rendering. This app-level form lets code
+    /// emit without updating the publisher.
     fn emit<EntityType, EventType>(&mut self, entity: &Entity<EntityType>, event: EventType)
     where
         EntityType: EventEmitter<EventType>,
@@ -348,21 +358,33 @@ pub trait AppContext {
     where
         R: Send + 'static;
 
-    /// Read a global from this app context
+    /// Calls `callback` with the assigned global and this app.
+    ///
+    /// Panics if no global of type `G` is assigned. Use the callback form to
+    /// keep the borrow scoped while reading other app state.
     fn read_global<G, R>(&self, callback: impl FnOnce(&G, &App) -> R) -> R
     where
         G: Global;
 
-    /// Stores an entity in the app such that it wont be dropped if no other entities are referencing it.
-    /// Entities stored this way are dropped with the app unless removed with
-    /// [`Self::remove_global_entity`].
+    /// Adds a strong entity handle to app-owned global storage.
+    ///
+    /// This keeps the entity alive even when no other handles remain. The app
+    /// releases this owner at shutdown; call [`Self::remove_global_entity`]
+    /// when the app should stop retaining it sooner.
     fn insert_global_entity<T: 'static>(&mut self, entity: Entity<T>);
 
-    /// Removes the entity from global storage. If no other entities are holding reference to it,
-    /// it will be dropped in the very near future.
+    /// Removes the matching entity handle from app-owned global storage.
+    ///
+    /// If this was the last strong handle, weak upgrades fail immediately and
+    /// GPUI drops the stored value during effect processing. Other strong
+    /// handles continue to keep it alive.
     fn remove_global_entity<T: 'static>(&mut self, entity: &Entity<T>);
 
-    /// Returns an iterator of all globally-stored entities which match the provided type.
+    /// Clones handles to globally-stored entities of type `T`.
+    ///
+    /// Each yielded handle is strong and keeps its entity alive after the
+    /// iterator or app context is dropped. Use [`WeakEntity`] for non-owning
+    /// references in long-lived records.
     fn global_entities<T: 'static>(&self) -> impl Iterator<Item = Entity<T>>;
 }
 
@@ -459,20 +481,36 @@ pub trait VisualContext: AppContext {
         V: Focusable;
 }
 
-/// A trait for tying together the types of a GPUI entity and the events it can
-/// emit.
+/// Declares which typed events an entity may emit.
+///
+/// Implement `EventEmitter<Event>` for the entity type that publishes
+/// `Event`. Consumers can then register with [`Context::subscribe`] or
+/// [`App::subscribe`]. Events carry a payload and are delivered during effect
+/// processing; they are separate from [`Context::notify`], which tells
+/// consumers to reread the entity's current state.
 pub trait EventEmitter<E: Any>: 'static {}
 
-/// A helper trait for auto-implementing certain methods on contexts that
-/// can be used interchangeably.
+/// Global mutation methods available to values that can borrow an [`App`].
+///
+/// This is blanket-implemented for `BorrowMut<App>`, so `App` and wrappers that
+/// mutably borrow an `App` can use the same [`update_global`](Self::update_global)
+/// and [`set_global`](Self::set_global) calls. `update_global` leases the value
+/// while its callback runs, then restores it and schedules observers of that
+/// global type. Use [`App::global_mut`] when a direct mutable reference is more
+/// convenient; both paths notify global observers when mutable access is taken.
 pub trait BorrowAppContext {
-    /// Set a global value on the context.
+    /// Replaces the context's global of type `T` and schedules its observers.
     fn set_global<T: Global>(&mut self, global: T);
-    /// Updates the global state of the given type.
+    /// Updates an already-installed global and schedules its observers.
+    ///
+    /// Panics if that type has no global. The callback receives the global and
+    /// the context together, avoiding a second borrow of the app.
     fn update_global<G, R>(&mut self, f: impl FnOnce(&mut G, &mut Self) -> R) -> R
     where
         G: Global;
-    /// Updates the global state of the given type, creating a default if it didn't exist before.
+    /// Inserts `G::default()` if needed, then updates the global.
+    ///
+    /// The callback and observer behavior match [`update_global`](Self::update_global).
     fn update_default_global<G, R>(&mut self, f: impl FnOnce(&mut G, &mut Self) -> R) -> R
     where
         G: Global + Default;

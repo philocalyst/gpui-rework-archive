@@ -5,13 +5,18 @@ use schemars::{JsonSchema, json_schema};
 
 /// OpenType feature tags and numeric values applied during shaping.
 ///
-/// Tags must be four ASCII alphanumeric characters. Boolean serialization maps to `0` or `1`;
-/// malformed tags are ignored and logged while deserializing.
+/// Tags must be four ASCII alphanumeric characters. Human-readable deserialization accepts
+/// booleans (`false`/`true`) and stores them as `0`/`1`; serialization emits numeric values.
+/// Malformed tags and non-integer values are ignored and logged while deserializing. Integer
+/// values are read as unsigned 64-bit numbers and cast to `u32`, so values above `u32::MAX` are
+/// truncated by that cast.
 #[derive(Default, Clone, Eq, PartialEq, Hash)]
 pub struct FontFeatures(pub Arc<Vec<(String, u32)>>);
 
 impl FontFeatures {
     /// Disable contextual alternates (`calt`), which also disables common ligature substitution.
+    ///
+    /// Other feature tags remain at the font backend's defaults.
     pub fn disable_ligatures() -> Self {
         Self(Arc::new(vec![("calt".into(), 0)]))
     }
@@ -21,9 +26,10 @@ impl FontFeatures {
         self.0.as_slice()
     }
 
-    /// Report whether `calt` is explicitly enabled.
+    /// Report whether the configured `calt` value is exactly `1`.
     ///
-    /// Returns `None` if the feature is not present.
+    /// Returns `None` if the feature is not present. Other numeric values, including values
+    /// greater than one, return `Some(false)`.
     pub fn is_calt_enabled(&self) -> Option<bool> {
         self.0
             .iter()

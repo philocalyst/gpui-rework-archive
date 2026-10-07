@@ -6,6 +6,11 @@
 //! explicit: the caller supplies a clock value, and a sample is active only
 //! while the configured [`crate::Motion`] has not settled. See
 //! [`crate::transition::Transition`] for the `Window`/`App` convenience API.
+//! Keep the same `Animated` value in the state that owns a view when it must
+//! continue across renders; constructing a fresh value each render discards
+//! its anchor and start time. Motion is evaluated from explicit time, so a
+//! caller can replay a run by keeping its original start value, clock origin,
+//! and easing function.
 
 use std::{ops::Sub, time::Duration};
 
@@ -97,7 +102,8 @@ where
     ///
     /// Reverse-first playback flips motion progress into anchor-to-target
     /// progress. A custom easing curve that starts away from zero can still
-    /// cause an initial jump.
+    /// cause an initial jump. If `value` equals the current target, this is a
+    /// no-op: it returns `false` and does not replace the active motion.
     pub fn set(&mut self, value: T, motion: impl Into<AnyMotion>, now: Time) -> bool {
         self.retarget(value, motion, now, true)
     }

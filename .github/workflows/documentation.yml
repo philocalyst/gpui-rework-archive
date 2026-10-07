@@ -13,6 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: site/package-lock.json
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           targets: wasm32-unknown-unknown

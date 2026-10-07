@@ -3,8 +3,13 @@
 //! A transition stores its target in an [`Entity`] and samples it during
 //! rendering. [`Transition::evaluate`] caches one sample for the current
 //! render, requests another frame while motion is active, and returns a
-//! reference to the cached value. Updating a target is continuous by default;
-//! use [`Transition::continuous`] to choose restart semantics.
+//! reference to the cached value. Updating a target is continuous by default:
+//! the next run starts from the value currently presented. Use
+//! [`Transition::continuous`] to choose restart semantics. The hook that owns
+//! this state must keep a stable key across renders; see
+//! [`Window::use_keyed_transition`](crate::Window::use_keyed_transition).
+//! This value-transition API does not consult reduced-motion preferences;
+//! style-property transitions have their own reduced-motion handling.
 
 use std::{
     cell::{Ref, RefCell},
@@ -36,9 +41,12 @@ impl<T> TransitionCache<T> {
 
 /// An animated transition between values of type `T`.
 ///
-/// `Transition` manages the interpolation of a value from a start state to a goal
-/// state using the supplied motion. It supports customizable easing functions and
-/// can operate in continuous or non-continuous mode.
+/// `Transition` owns an entity-backed animated value and samples it during
+/// rendering. It supports customizable easing functions and can continue from
+/// the current presentation or restart from its initial value when the goal
+/// changes. Keep the owning transition state stable across renders with
+/// [`Window::use_keyed_transition`](crate::Window::use_keyed_transition).
+/// This API does not apply reduced-motion preferences automatically.
 ///
 /// # Type Parameters
 ///
@@ -47,11 +55,10 @@ impl<T> TransitionCache<T> {
 ///
 /// # Continuous vs Non-Continuous Mode
 ///
-/// By default, transitions operate in continuous mode. When the goal is updated:
-/// - **Continuous mode** (`continuous = true`): The transition smoothly continues
-///   from the current interpolated value to the new goal.
-/// - **Non-continuous mode** (`continuous = false`): The transition restarts from
-///   the initial value to the new goal.
+/// By default, a changed goal starts from the currently presented value. With
+/// `.continuous(false)`, each changed goal starts from the value used to
+/// initialize the transition instead. The new run uses the motion passed to
+/// `update`; a goal that compares equal does not start a run.
 ///
 /// # Example
 ///
@@ -104,10 +111,11 @@ impl<T: Lerp + Clone + PartialEq + 'static> Transition<T> {
         self
     }
 
-    /// Sets whether the transition should be continuous.
+    /// Chooses whether a changed goal starts from the current presentation.
     ///
-    /// On goal updates, transitions continue from the current value by default.
-    /// If `continuous` is set to false, the transition will restart from its initial value.
+    /// When `continuous` is `true` (the default), the next run starts from the
+    /// value currently presented. When `false`, it starts from the value that
+    /// initialized the animated state. This only affects changed goals.
     pub fn continuous(mut self, continuous: bool) -> Self {
         self.continuous = continuous;
         self

@@ -9,11 +9,20 @@ pub use gpui::Platform;
 use std::rc::Rc;
 
 /// Returns a background executor for the current platform.
+///
+/// This constructs the selected backend in headless mode to obtain its executor. Reuse the
+/// returned executor instead of calling this repeatedly. On macOS, call this on the AppKit main
+/// thread. On WebAssembly, it still requires a browser window context.
 pub fn background_executor() -> gpui::BackgroundExecutor {
     current_platform(true).background_executor()
 }
 
 /// Creates an application using the platform backend selected by the build.
+///
+/// On native targets this selects the OS backend and can fail during backend initialization
+/// (macOS requires the main thread; Linux/FreeBSD compositor connection setup can panic). On
+/// WebAssembly this uses the browser backend with automatic WebGPU/WebGL selection. Call
+/// `web_init()` before starting a web application.
 pub fn application() -> gpui::Application {
     #[cfg(target_family = "wasm")]
     {
@@ -24,7 +33,12 @@ pub fn application() -> gpui::Application {
     gpui::Application::with_platform(current_platform(false))
 }
 
-/// Creates an application backed by the native platform in headless mode.
+/// Creates an application using the selected platform's headless construction path.
+///
+/// Headless behavior is backend-specific: it does not promise off-screen rendering or that all
+/// system services are available. On WebAssembly, the platform remains browser-backed. See the
+/// [platform guide](https://docs.rs/gpui-ce/0.2.2/gpui/_documentation/platforms/index.html)
+/// for the current contracts.
 pub fn headless() -> gpui::Application {
     gpui::Application::with_platform(current_platform(true))
 }
@@ -34,6 +48,10 @@ pub use gpui_web::WebBackendPreference;
 
 #[cfg(target_family = "wasm")]
 /// Creates a web application with an explicit WebGPU/WebGL preference.
+///
+/// The browser graphics context is initialized lazily. Opening the first window can report that
+/// initialization is pending or unavailable. Call `web_init()` before `run` from a browser start
+/// function.
 pub fn application_with_web_backend(backend_preference: WebBackendPreference) -> gpui::Application {
     let platform = Rc::new(gpui_web::WebPlatform::new_with_backend(
         true,
@@ -43,9 +61,11 @@ pub fn application_with_web_backend(backend_preference: WebBackendPreference) ->
     gpui::Application::with_platform(platform).with_http_client(http_client)
 }
 
-/// Unlike `application`, this function returns a single-threaded web application.
+/// Creates a single-threaded web application.
+///
+/// Unlike [`application`], this disables the browser backend's worker-thread option. It still
+/// requires a browser window and graphics backend.
 #[cfg(target_family = "wasm")]
-/// Creates the single-threaded web application variant.
 pub fn single_threaded_web() -> gpui::Application {
     let platform = Rc::new(gpui_web::WebPlatform::new(false));
     let http_client = std::sync::Arc::new(platform.fetch_http_client());
@@ -53,15 +73,20 @@ pub fn single_threaded_web() -> gpui::Application {
 }
 
 /// Initializes panic hooks and logging for the web platform.
-/// Call this before running the application in a wasm_bindgen entrypoint.
+///
+/// Call this before creating or running the application from a `wasm_bindgen` start function.
 #[cfg(target_family = "wasm")]
-/// Installs browser-side hooks required before starting a web application.
 pub fn web_init() {
     console_error_panic_hook::set_once();
     gpui_web::init_logging();
 }
 
-/// Returns the default [`Platform`] for the current OS.
+/// Returns the default [`Platform`] for the current target.
+///
+/// On Linux/FreeBSD, `headless` forces the synthetic headless client. Otherwise the constructor
+/// chooses Wayland or X11 from the enabled features and display environment variables. The
+/// constructor does not return an error value; failed native initialization can panic. On macOS,
+/// construct it on the AppKit main thread. The web target always returns a browser platform.
 pub fn current_platform(headless: bool) -> Rc<dyn Platform> {
     #[cfg(target_os = "macos")]
     {
@@ -88,9 +113,12 @@ pub fn current_platform(headless: bool) -> Rc<dyn Platform> {
     }
 }
 
-/// Returns a new [`HeadlessRenderer`] for the current platform, if available.
+/// Returns an off-screen renderer for tests or benches, when this target provides one.
+///
+/// The `test-support` or `bench-support` feature must be enabled. In this facade's current
+/// configuration, only macOS returns a renderer; `None` means no renderer is available. This is
+/// independent of [`headless`], which selects platform construction behavior.
 #[cfg(any(feature = "bench-support", feature = "test-support"))]
-/// Returns the active platform's optional off-screen renderer.
 pub fn current_headless_renderer() -> Option<Box<dyn gpui::PlatformHeadlessRenderer>> {
     #[cfg(target_os = "macos")]
     {

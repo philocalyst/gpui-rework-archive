@@ -2,12 +2,14 @@
 mod support;
 
 // ## Use the rectangle layout assigned {#paint}
-// A [`canvas`] has prepaint and paint callbacks, both with layout-resolved
-// [`Bounds`]. This example needs no prepaint state. Its paint callback uses
-// [`fill`] to create three quads and [`Window::paint_quad`] to record them.
+// [`canvas`] separates prepaint from paint and supplies layout-resolved
+// [`Bounds`] to both callbacks. This example needs no prepared state. The paint
+// callback makes three quads with [`fill`] and records them with
+// [`Window::paint_quad`]. The renderer later consumes these scene commands.
 //
-// Coordinates are logical [`Pixels`]. Adding an offset to `bounds.origin`
-// anchors each rectangle to the canvas, so moving the canvas moves its paint.
+// Coordinates are logical [`Pixels`], independent of display scale. Adding an
+// offset to `bounds.origin` places each rectangle relative to the canvas, so
+// layout movement also moves the drawing.
 
 use gpui::{
     AppContext, Bounds, ContentMask, Context, IntoElement, Render, Window, canvas, fill, point,
@@ -17,17 +19,18 @@ use gpui::{
 struct PaintDemo;
 
 // ## Clip the overflow {#bounds}
-// The first rectangle is inset by ten pixels. The second follows the right
-// edge until doing so would put it over the first. In a narrow canvas, that
-// spacing pushes the second rectangle past the layout bounds.
+// The first rectangle is inset by ten pixels. The second is positioned near
+// the right edge, but cannot move left of the first. On a narrow canvas the
+// spacing can put it partly outside the canvas bounds.
 // [`Window::with_content_mask`] crops it to the canvas rectangle.
 //
 // > [!NOTE]
 // > Layout bounds do not clip paint. A [`ContentMask`] intersects the current
 // > mask for its closure, then the helper restores the previous mask.
 //
-// Paint order is draw order: background, red, then blue. A new frame records
-// those quads from its current bounds.
+// Paint order is draw order: background, red, then blue. Resize the viewport
+// to see the next frame recompute bounds and record the same order; the mask
+// clips the overflow instead of changing either rectangle's geometry.
 
 impl Render for PaintDemo {
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {

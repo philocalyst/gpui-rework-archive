@@ -249,12 +249,15 @@ pub fn style_transitions(input: TokenStream) -> TokenStream {
 
     let builders = specs.iter().map(|spec| {
         let name = format_ident!("{}", spec.name);
+        let docs = style_transition_docs(spec.name)
+            .replace("[`Styled::", "[`crate::Styled::")
+            .replace("[`StyleTransitions::", "[`crate::StyleTransitions::");
         let config_names = spec
             .fields
             .iter()
             .map(|field| style_transition_config_name(&style_transition_key(&field.path)));
         quote! {
-            #[doc = concat!("Transitions changes made by [`Styled::", stringify!(#name), "`].")]
+            #[doc = #docs]
             pub fn #name(mut self, motion: impl Into<crate::AnyMotion>) -> Self {
                 let motion = motion.into();
                 #(self.#config_names = Some(motion.clone());)*
@@ -266,14 +269,25 @@ pub fn style_transitions(input: TokenStream) -> TokenStream {
     let applications = canonical_fields.iter().map(generate_transition_application);
 
     quote! {
-        /// Selects style properties to transition and configures their motion.
+        /// Configures motion for selected style properties when their authored values change.
+        ///
+        /// Add this to a [`Div`](crate::Div) with `transitions`. Each builder selects a property
+        /// group, and accepts a [`Motion`](crate::Motion), a spring configuration, or a duration
+        /// converted with [`MotionDurationExt`](crate::MotionDurationExt). Configure separate
+        /// groups independently; when builders overlap, the later builder replaces the motion
+        /// only for the overlapping properties. GPUI retains transition state per element, so the
+        /// element must keep a stable identity across renders for motion to continue. See
+        /// [`Styled`](crate::Styled) for the style
+        /// helpers that author the values being transitioned. Reduced-motion preference presents
+        /// the authored endpoint without interpolation. Optional properties temporarily use their
+        /// value type's default while a transition is active, then return to the authored option.
         #[derive(Default)]
         pub struct StyleTransitions {
             #(#config_fields,)*
         }
 
         impl StyleTransitions {
-            /// Creates an empty set of style transitions.
+            /// Creates an empty configuration. No properties animate until a builder selects them.
             pub fn new() -> Self {
                 Self::default()
             }
@@ -299,6 +313,78 @@ pub fn style_transitions(input: TokenStream) -> TokenStream {
 
     }
     .into()
+}
+
+fn style_transition_docs(name: &str) -> &'static str {
+    match name {
+        "m" => "Transitions changes made by [`Styled::m`] and its side/axis variants. The selected motion applies to all four margins; narrower builders can override individual sides.",
+        "mt" => "Transitions changes made by [`Styled::mt`]. Selects only the top margin.",
+        "mb" => "Transitions changes made by [`Styled::mb`]. Selects only the bottom margin.",
+        "my" => "Transitions changes made by [`Styled::my`]. Selects the top and bottom margins.",
+        "mx" => "Transitions changes made by [`Styled::mx`]. Selects the left and right margins.",
+        "ml" => "Transitions changes made by [`Styled::ml`]. Selects only the left margin.",
+        "mr" => "Transitions changes made by [`Styled::mr`]. Selects only the right margin.",
+        "p" => "Transitions changes made by [`Styled::p`] and its side/axis variants. The selected motion applies to all four padding edges.",
+        "pt" => "Transitions changes made by [`Styled::pt`]. Selects only the top padding.",
+        "pb" => "Transitions changes made by [`Styled::pb`]. Selects only the bottom padding.",
+        "px" => "Transitions changes made by [`Styled::px`]. Selects left and right padding.",
+        "py" => "Transitions changes made by [`Styled::py`]. Selects top and bottom padding.",
+        "pl" => "Transitions changes made by [`Styled::pl`]. Selects only the left padding.",
+        "pr" => "Transitions changes made by [`Styled::pr`]. Selects only the right padding.",
+        "inset" => "Transitions top, right, bottom, and left offsets set by [`Styled::inset`]. Use side builders to choose different motions per edge. Relative offsets are resolved against the containing block; auto offsets use the current laid-out position as their starting or ending value.",
+        "top" => "Transitions the top offset set by [`Styled::top`]. Relative lengths resolve against the containing block; auto uses the current laid-out position when available.",
+        "right" => "Transitions the right offset set by [`Styled::right`]. Relative lengths resolve against the containing block; auto uses the current laid-out position when available.",
+        "bottom" => "Transitions the bottom offset set by [`Styled::bottom`]. Relative lengths resolve against the containing block; auto uses the current laid-out position when available.",
+        "left" => "Transitions the left offset set by [`Styled::left`]. Relative lengths resolve against the containing block; auto uses the current laid-out position when available.",
+        "w" => "Transitions the width set by [`Styled::w`]. Auto width is sampled from layout bounds; relative values resolve against the containing width.",
+        "h" => "Transitions the height set by [`Styled::h`]. Auto height is sampled from layout bounds; relative values resolve against the containing height.",
+        "size" => "Transitions width and height set by [`Styled::size`]. Auto dimensions are sampled from layout bounds; relative values resolve against the matching containing dimension.",
+        "min_size" => "Transitions the minimum width and height set by [`Styled::min_size`].",
+        "min_w" => "Transitions the minimum width set by [`Styled::min_w`].",
+        "min_h" => "Transitions the minimum height set by [`Styled::min_h`].",
+        "max_size" => "Transitions the maximum width and height set by [`Styled::max_size`].",
+        "max_w" => "Transitions the maximum width set by [`Styled::max_w`].",
+        "max_h" => "Transitions the maximum height set by [`Styled::max_h`].",
+        "gap" => "Transitions horizontal and vertical child gaps set by [`Styled::gap`].",
+        "gap_x" => "Transitions the horizontal child gap set by [`Styled::gap_x`].",
+        "gap_y" => "Transitions the vertical child gap set by [`Styled::gap_y`].",
+        "rounded" => "Transitions all corner radii set by [`Styled::rounded`]. Lengths resolve using the current root font size, then each radius is limited to half the smaller element dimension while the transition runs.",
+        "rounded_t" => "Transitions the top-left and top-right radii set by [`Styled::rounded_t`]. Radii are limited to half the smaller element dimension while the transition runs.",
+        "rounded_b" => "Transitions the bottom-left and bottom-right radii set by [`Styled::rounded_b`]. Radii are limited to half the smaller element dimension while the transition runs.",
+        "rounded_r" => "Transitions the right-side radii set by [`Styled::rounded_r`]. Radii are limited to half the smaller element dimension while the transition runs.",
+        "rounded_l" => "Transitions the left-side radii set by [`Styled::rounded_l`]. Radii are limited to half the smaller element dimension while the transition runs.",
+        "rounded_tl" => "Transitions the top-left radius set by [`Styled::rounded_tl`]. The radius is limited to half the smaller element dimension while the transition runs.",
+        "rounded_tr" => "Transitions the top-right radius set by [`Styled::rounded_tr`]. The radius is limited to half the smaller element dimension while the transition runs.",
+        "rounded_bl" => "Transitions the bottom-left radius set by [`Styled::rounded_bl`]. The radius is limited to half the smaller element dimension while the transition runs.",
+        "rounded_br" => "Transitions the bottom-right radius set by [`Styled::rounded_br`]. The radius is limited to half the smaller element dimension while the transition runs.",
+        "border" => "Transitions all four border widths set by [`Styled::border`]. Numbered presets use logical pixels; custom absolute lengths preserve their unit.",
+        "border_t" => "Transitions the top border width set by [`Styled::border_t`]. Numbered presets use logical pixels; custom absolute lengths preserve their unit.",
+        "border_b" => "Transitions the bottom border width set by [`Styled::border_b`]. Numbered presets use logical pixels; custom absolute lengths preserve their unit.",
+        "border_r" => "Transitions the right border width set by [`Styled::border_r`]. Numbered presets use logical pixels; custom absolute lengths preserve their unit.",
+        "border_l" => "Transitions the left border width set by [`Styled::border_l`]. Numbered presets use logical pixels; custom absolute lengths preserve their unit.",
+        "border_x" => "Transitions left and right border widths set by [`Styled::border_x`]. Numbered presets use logical pixels; custom absolute lengths preserve their unit.",
+        "border_y" => "Transitions top and bottom border widths set by [`Styled::border_y`]. Numbered presets use logical pixels; custom absolute lengths preserve their unit.",
+        "scrollbar_width" => "Transitions the scrollbar width. This is layout space reserved for scroll overflow, in logical pixels.",
+        "aspect_ratio" => "Transitions the optional aspect ratio set by [`Styled::aspect_ratio`].",
+        "flex_basis" => "Transitions the preferred main-axis size set by [`Styled::flex_basis`]; flex growth and shrinkage can still change the final size.",
+        "flex_grow" => "Transitions the flex growth factor set by [`Styled::flex_grow`]. This is a unitless share of positive free space, not a size.",
+        "flex_shrink" => "Transitions the flex shrink factor set by [`Styled::flex_shrink`]. This is a unitless weight used when the line has negative free space.",
+        "bg" => "Transitions the background set by [`Styled::bg`]. Solid backgrounds interpolate as colors; gradients and other backgrounds do not have a color interpolation path and switch at the endpoint.",
+        "border_color" => "Transitions the border background set by [`Styled::border_color`]. Solid colors interpolate; gradients and other backgrounds switch at the endpoint.",
+        "ring" => "Transitions the outer ring width and color. Use [`StyleTransitions::ring_color`] to select a separate color motion; builder order controls the motion for the overlapping color field.",
+        "ring_color" => "Transitions the outer ring color set by [`Styled::ring_color`]. Solid colors interpolate; gradients and other backgrounds switch at the endpoint.",
+        "inset_ring" => "Transitions the inset ring width and color. Use [`StyleTransitions::inset_ring_color`] to select a separate color motion.",
+        "inset_ring_color" => "Transitions the inset ring color set by [`Styled::inset_ring_color`]. Solid colors interpolate; gradients and other backgrounds switch at the endpoint.",
+        "text_color" => "Transitions the optional text color set by [`Styled::text_color`]. Colors interpolate through sRGB; see [`Lerp`](crate::Lerp).",
+        "text_bg" => "Transitions the optional text background color set by [`Styled::text_bg`].",
+        "text_size" => "Transitions the optional font size set by [`Styled::text_size`].",
+        "line_height" => "Transitions the optional line height set by [`Styled::line_height`].",
+        "letter_spacing" => "Transitions the optional letter spacing set by [`Styled::letter_spacing`].",
+        "line_clamp" => "Transitions the optional line clamp count set by [`Styled::line_clamp`]. The interpolated numeric value is converted back to an integer at each sample.",
+        "opacity" => "Transitions the optional opacity set by [`Styled::opacity`].",
+        "rounded_smoothing" => "Transitions the corner-smoothing factor set by [`Styled::rounded_smoothing`], from 0 (circular corners) toward 1 (maximum smoothing).",
+        _ => "Transitions the corresponding style property when its authored value changes.",
+    }
 }
 
 fn generate_transition_application(field: &CanonicalStyleTransitionField) -> TokenStream2 {
@@ -531,14 +617,15 @@ pub fn visibility_style_methods(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as StyleableMacroInput);
     let visibility = input.method_visibility;
     let output = quote! {
-        /// Sets the visibility of the element to `visible`.
+        /// Paints the element normally and keeps it in layout.
         /// [Docs](https://tailwindcss.com/docs/visibility)
         #visibility fn visible(mut self) -> Self {
             self.style().visibility = Some(gpui::Visibility::Visible);
             self
         }
 
-        /// Sets the visibility of the element to `hidden`.
+        /// Hides the element's drawing while preserving its layout space and child layout.
+        /// Use [`crate::Display::None`] when the element should be omitted from layout entirely.
         /// [Docs](https://tailwindcss.com/docs/visibility)
         #visibility fn invisible(mut self) -> Self {
             self.style().visibility = Some(gpui::Visibility::Hidden);
@@ -586,14 +673,16 @@ pub fn position_style_methods(input: TokenStream) -> TokenStream {
         visibility.clone(),
     );
     let output = quote! {
-        /// Sets the position of the element to `relative`.
+        /// Keeps the element in normal layout and applies inset offsets after layout.
+        /// Offsets do not move neighboring elements. Relative is GPUI's default position mode.
         /// [Docs](https://tailwindcss.com/docs/position)
         #visibility fn relative(mut self) -> Self {
             self.style().position = Some(gpui::Position::Relative);
             self
         }
 
-        /// Sets the position of the element to `absolute`.
+        /// Removes the element from normal flex layout and positions it from its nearest positioned
+        /// ancestor, or the origin when it has none. Use [`crate::Display::None`] to omit it from layout.
         /// [Docs](https://tailwindcss.com/docs/position)
         #visibility fn absolute(mut self) -> Self {
             self.style().position = Some(gpui::Position::Absolute);
@@ -610,7 +699,8 @@ pub fn overflow_style_methods(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as StyleableMacroInput);
     let visibility = input.method_visibility;
     let output = quote! {
-        /// Sets the behavior of content that overflows the container to be hidden.
+        /// Clips overflowing content on both axes. Unlike `invisible`, clipping does not hide the
+        /// element itself; unlike [`crate::Display::None`], it does not remove layout space.
         /// [Docs](https://tailwindcss.com/docs/overflow#hiding-content-that-overflows)
         #visibility fn overflow_hidden(mut self) -> Self {
             self.style().overflow.x = Some(gpui::Overflow::Hidden);
@@ -618,14 +708,14 @@ pub fn overflow_style_methods(input: TokenStream) -> TokenStream {
             self
         }
 
-        /// Sets the behavior of content that overflows the container on the X axis to be hidden.
+        /// Clips horizontal overflow while leaving the vertical overflow setting unchanged.
         /// [Docs](https://tailwindcss.com/docs/overflow#hiding-content-that-overflows)
         #visibility fn overflow_x_hidden(mut self) -> Self {
             self.style().overflow.x = Some(gpui::Overflow::Hidden);
             self
         }
 
-        /// Sets the behavior of content that overflows the container on the Y axis to be hidden.
+        /// Clips vertical overflow while leaving the horizontal overflow setting unchanged.
         /// [Docs](https://tailwindcss.com/docs/overflow#hiding-content-that-overflows)
         #visibility fn overflow_y_hidden(mut self) -> Self {
             self.style().overflow.y = Some(gpui::Overflow::Hidden);
@@ -640,97 +730,97 @@ pub fn cursor_style_methods(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as StyleableMacroInput);
     let visibility = input.method_visibility;
     let output = quote! {
-        /// Set the cursor style when hovering over this element
+        /// Sets the pointer cursor used while the pointer hovers over this element.
         #visibility fn cursor(mut self, cursor: CursorStyle) -> Self {
             self.style().mouse_cursor = Some(cursor);
             self
         }
 
-        /// Sets the cursor style when hovering an element to `default`.
+        /// Uses the platform's default arrow cursor while hovering this element.
         /// [Docs](https://tailwindcss.com/docs/cursor)
         #visibility fn cursor_default(mut self) -> Self {
             self.style().mouse_cursor = Some(gpui::CursorStyle::Arrow);
             self
         }
 
-        /// Sets the cursor style when hovering an element to `pointer`.
+        /// Uses a pointing-hand cursor while hovering this element.
         /// [Docs](https://tailwindcss.com/docs/cursor)
         #visibility fn cursor_pointer(mut self) -> Self {
             self.style().mouse_cursor = Some(gpui::CursorStyle::PointingHand);
             self
         }
 
-        /// Sets cursor style when hovering over an element to `text`.
+        /// Uses a text insertion cursor while hovering this element.
         /// [Docs](https://tailwindcss.com/docs/cursor)
         #visibility fn cursor_text(mut self) -> Self {
             self.style().mouse_cursor = Some(gpui::CursorStyle::IBeam);
             self
         }
 
-        /// Sets cursor style when hovering over an element to `move`.
+        /// Uses GPUI's closed-hand cursor while hovering this element (the platform's grabbing cursor).
         /// [Docs](https://tailwindcss.com/docs/cursor)
         #visibility fn cursor_move(mut self) -> Self {
             self.style().mouse_cursor = Some(gpui::CursorStyle::ClosedHand);
             self
         }
 
-        /// Sets cursor style when hovering over an element to `not-allowed`.
+        /// Uses the platform's operation-not-allowed cursor while hovering this element.
         /// [Docs](https://tailwindcss.com/docs/cursor)
         #visibility fn cursor_not_allowed(mut self) -> Self {
             self.style().mouse_cursor = Some(gpui::CursorStyle::OperationNotAllowed);
             self
         }
 
-        /// Sets cursor style when hovering over an element to `context-menu`.
+        /// Uses the platform's contextual-menu cursor while hovering this element.
         /// [Docs](https://tailwindcss.com/docs/cursor)
         #visibility fn cursor_context_menu(mut self) -> Self {
             self.style().mouse_cursor = Some(gpui::CursorStyle::ContextualMenu);
             self
         }
 
-        /// Sets cursor style when hovering over an element to `crosshair`.
+        /// Uses a crosshair cursor while hovering this element.
         /// [Docs](https://tailwindcss.com/docs/cursor)
         #visibility fn cursor_crosshair(mut self) -> Self {
             self.style().mouse_cursor = Some(gpui::CursorStyle::Crosshair);
             self
         }
 
-        /// Sets cursor style when hovering over an element to `vertical-text`.
+        /// Uses the vertical-layout text cursor while hovering this element.
         /// [Docs](https://tailwindcss.com/docs/cursor)
         #visibility fn cursor_vertical_text(mut self) -> Self {
             self.style().mouse_cursor = Some(gpui::CursorStyle::IBeamCursorForVerticalLayout);
             self
         }
 
-        /// Sets cursor style when hovering over an element to `alias`.
+        /// Uses GPUI's drag-link cursor while hovering this element.
         /// [Docs](https://tailwindcss.com/docs/cursor)
         #visibility fn cursor_alias(mut self) -> Self {
             self.style().mouse_cursor = Some(gpui::CursorStyle::DragLink);
             self
         }
 
-        /// Sets cursor style when hovering over an element to `copy`.
+        /// Uses GPUI's drag-copy cursor while hovering this element.
         /// [Docs](https://tailwindcss.com/docs/cursor)
         #visibility fn cursor_copy(mut self) -> Self {
             self.style().mouse_cursor = Some(gpui::CursorStyle::DragCopy);
             self
         }
 
-        /// Sets cursor style when hovering over an element to `no-drop`.
+        /// Uses the same operation-not-allowed cursor as [`cursor_not_allowed`](Styled::cursor_not_allowed).
         /// [Docs](https://tailwindcss.com/docs/cursor)
         #visibility fn cursor_no_drop(mut self) -> Self {
             self.style().mouse_cursor = Some(gpui::CursorStyle::OperationNotAllowed);
             self
         }
 
-        /// Sets cursor style when hovering over an element to `grab`.
+        /// Uses an open-hand cursor while hovering this element (the platform's grab cursor).
         /// [Docs](https://tailwindcss.com/docs/cursor)
         #visibility fn cursor_grab(mut self) -> Self {
             self.style().mouse_cursor = Some(gpui::CursorStyle::OpenHand);
             self
         }
 
-        /// Sets cursor style when hovering over an element to `grabbing`.
+        /// Uses a closed-hand cursor while hovering this element (the platform's grabbing cursor).
         /// [Docs](https://tailwindcss.com/docs/cursor)
         #visibility fn cursor_grabbing(mut self) -> Self {
             self.style().mouse_cursor = Some(gpui::CursorStyle::ClosedHand);
@@ -845,7 +935,8 @@ pub fn border_style_methods(input: TokenStream) -> TokenStream {
     }
 
     let output = quote! {
-        /// Sets the background painted into the border of the element.
+        /// Sets the background painted in the border. This accepts a solid color or gradient;
+        /// width and border style are configured separately.
         #visibility fn border_color<C>(mut self, border_color: C) -> Self
         where
             C: Into<gpui::Background>,
@@ -872,10 +963,11 @@ pub fn box_shadow_style_methods(input: TokenStream) -> TokenStream {
             ["ring", "inset_ring"].map(move |prefix| {
                 let visibility = visibility.clone();
                 let width = suffix.width_tokens.clone();
+                let width_doc = suffix.doc_string_suffix;
                 let method = format_ident!("{}_{}", prefix, suffix.suffix);
                 let field = format_ident!("{}", prefix);
                 quote! {
-                    #[doc = concat!("Sets the ", #prefix, " width to ", stringify!(#width), ".")]
+                    #[doc = concat!("Sets the ", #prefix, " width to ", #width_doc, " logical pixels. This changes the width only; ring color remains unchanged.")]
                     /// [Docs](https://tailwindcss.com/docs/box-shadow)
                     #visibility fn #method(mut self) -> Self {
                         use gpui::px;
@@ -887,28 +979,29 @@ pub fn box_shadow_style_methods(input: TokenStream) -> TokenStream {
         });
 
     let output = quote! {
-        /// Sets the box shadow of the element.
+        /// Replaces the element's box-shadow list with `shadows`. Use multiple [`BoxShadow`](gpui::BoxShadow) values for layered shadows; use [`shadow_none`](Styled::shadow_none) to clear them.
         /// [Docs](https://tailwindcss.com/docs/box-shadow)
         #visibility fn shadow(mut self, shadows: std::vec::Vec<gpui::BoxShadow>) -> Self {
             self.style().box_shadow = Some(shadows);
             self
         }
 
-        /// Clears the box shadow of the element.
+        /// Replaces the box-shadow list with an empty list, clearing all shadows.
         /// [Docs](https://tailwindcss.com/docs/box-shadow)
         #visibility fn shadow_none(mut self) -> Self {
             self.style().box_shadow = Some(Default::default());
             self
         }
 
-        /// Sets the outer ring width.
+        /// Sets the outer ring width in logical pixels. The ring is painted outside the border;
+        /// this leaves its color unchanged.
         /// [Docs](https://tailwindcss.com/docs/box-shadow#using-a-custom-value)
         #visibility fn ring(mut self, width: impl Into<gpui::Pixels>) -> Self {
             self.style().ring.width = Some(width.into());
             self
         }
 
-        /// Sets the outer ring color or gradient.
+        /// Sets the outer ring color or gradient, leaving its width unchanged.
         /// [Docs](https://tailwindcss.com/docs/box-shadow#setting-the-ring-color)
         #visibility fn ring_color<C>(mut self, color: C) -> Self
         where
@@ -919,14 +1012,15 @@ pub fn box_shadow_style_methods(input: TokenStream) -> TokenStream {
             self
         }
 
-        /// Sets the inset ring width.
+        /// Sets the inset ring width in logical pixels. The ring is painted inside the border;
+        /// this leaves its color unchanged.
         /// [Docs](https://tailwindcss.com/docs/box-shadow#using-a-custom-value)
         #visibility fn inset_ring(mut self, width: impl Into<gpui::Pixels>) -> Self {
             self.style().inset_ring.width = Some(width.into());
             self
         }
 
-        /// Sets the inset ring color or gradient.
+        /// Sets the inset ring color or gradient, leaving its width unchanged.
         /// [Docs](https://tailwindcss.com/docs/box-shadow#setting-the-inset-ring-color)
         #visibility fn inset_ring_color<C>(mut self, color: C) -> Self
         where
@@ -939,7 +1033,7 @@ pub fn box_shadow_style_methods(input: TokenStream) -> TokenStream {
 
         #(#ring_width_methods)*
 
-        /// Sets the box shadow of the element.
+        /// Replaces all existing shadows with a small, low-opacity preset shadow.
         /// [Docs](https://tailwindcss.com/docs/box-shadow)
         #visibility fn shadow_2xs(mut self) -> Self {
             use gpui::{BoxShadow, hsla, px};
@@ -951,7 +1045,7 @@ pub fn box_shadow_style_methods(input: TokenStream) -> TokenStream {
             self
         }
 
-        /// Sets the box shadow of the element.
+        /// Replaces all existing shadows with a compact preset shadow.
         /// [Docs](https://tailwindcss.com/docs/box-shadow)
         #visibility fn shadow_xs(mut self) -> Self {
             use gpui::{BoxShadow, hsla, px};
@@ -963,7 +1057,7 @@ pub fn box_shadow_style_methods(input: TokenStream) -> TokenStream {
             self
         }
 
-        /// Sets the box shadow of the element.
+        /// Replaces all existing shadows with a two-layer small preset shadow.
         /// [Docs](https://tailwindcss.com/docs/box-shadow)
         #visibility fn shadow_sm(mut self) -> Self {
             use gpui::{BoxShadow, hsla, px};
@@ -976,7 +1070,7 @@ pub fn box_shadow_style_methods(input: TokenStream) -> TokenStream {
             self
         }
 
-        /// Sets the box shadow of the element.
+        /// Replaces all existing shadows with a two-layer medium preset shadow.
         /// [Docs](https://tailwindcss.com/docs/box-shadow)
         #visibility fn shadow_md(mut self) -> Self {
             use gpui::{BoxShadow, hsla, px};
@@ -989,7 +1083,7 @@ pub fn box_shadow_style_methods(input: TokenStream) -> TokenStream {
             self
         }
 
-        /// Sets the box shadow of the element.
+        /// Replaces all existing shadows with a two-layer large preset shadow.
         /// [Docs](https://tailwindcss.com/docs/box-shadow)
         #visibility fn shadow_lg(mut self) -> Self {
             use gpui::{BoxShadow, hsla, px};
@@ -1002,7 +1096,7 @@ pub fn box_shadow_style_methods(input: TokenStream) -> TokenStream {
             self
         }
 
-        /// Sets the box shadow of the element.
+        /// Replaces all existing shadows with a two-layer extra-large preset shadow.
         /// [Docs](https://tailwindcss.com/docs/box-shadow)
         #visibility fn shadow_xl(mut self) -> Self {
             use gpui::{BoxShadow, hsla, px};
@@ -1015,7 +1109,7 @@ pub fn box_shadow_style_methods(input: TokenStream) -> TokenStream {
             self
         }
 
-        /// Sets the box shadow of the element.
+        /// Replaces all existing shadows with a large, diffuse preset shadow.
         /// [Docs](https://tailwindcss.com/docs/box-shadow)
         #visibility fn shadow_2xl(mut self) -> Self {
             use gpui::{BoxShadow, hsla, px};
@@ -1104,7 +1198,7 @@ fn generate_box_style_methods(
                     &box_style_suffix.length_tokens,
                     false,
                     &format!(
-                        "{prefix}\n\n{suffix}",
+                        "{prefix}\n\n{suffix}\n\nNonzero numbered presets use rems (pixel equivalents assume a 16px root font size); `_0` is zero and `_px` is one logical pixel. Fraction and `_full` suffixes are relative lengths resolved by layout against the parent or containing block. `auto` is available only for properties whose custom setter accepts `Length`.",
                         prefix = box_style_prefix.doc_string_prefix,
                         suffix = box_style_suffix.doc_string_suffix,
                     ),
@@ -1120,7 +1214,7 @@ fn generate_box_style_methods(
                     &box_style_suffix.length_tokens,
                     true,
                     &format!(
-                        "{prefix}\n\n{suffix}",
+                        "{prefix}\n\n{suffix}\n\nNonzero numbered presets use rems (pixel equivalents assume a 16px root font size); `_0` is zero and `_px` is one logical pixel. Fraction and `_full` suffixes are relative lengths resolved by layout against the parent or containing block. `auto` is available only for properties whose custom setter accepts `Length`.",
                         prefix = box_style_prefix.doc_string_prefix,
                         suffix = box_style_suffix.doc_string_suffix,
                     ),
@@ -1143,7 +1237,10 @@ fn generate_methods() -> Vec<TokenStream2> {
             corner_style_prefix.prefix,
             quote! { AbsoluteLength },
             &corner_style_prefix.fields,
-            corner_style_prefix.doc_string_prefix,
+            &format!(
+                "{} Presets use the current root rem size; custom values accept `AbsoluteLength` in pixels or rems, not percentages. Rendering limits radii to fit the element's bounds.",
+                corner_style_prefix.doc_string_prefix
+            ),
         ));
 
         for corner_style_suffix in corner_suffixes() {
@@ -1154,10 +1251,10 @@ fn generate_methods() -> Vec<TokenStream2> {
                 &corner_style_prefix.fields,
                 &corner_style_suffix.radius_tokens,
                 false,
-                &format!(
-                    "{prefix}\n\n{suffix}",
-                    prefix = corner_style_prefix.doc_string_prefix,
-                    suffix = corner_style_suffix.doc_string_suffix,
+                    &format!(
+                        "{prefix}\n\n{suffix}\n\nCorner presets use the current root rem size except `none` (zero) and `full` (a 9999 logical-pixel radius). Rendering limits radii to fit the element's bounds.",
+                        prefix = corner_style_prefix.doc_string_prefix,
+                        suffix = corner_style_suffix.doc_string_suffix,
                 ),
             ));
         }
@@ -1174,7 +1271,10 @@ fn generate_corner_smoothing_methods(visibility: Visibility) -> Vec<TokenStream2
         .map(|suffix| {
             let method_name = format_ident!("rounded_smoothing_{}", suffix.suffix);
             let amount_tokens = suffix.amount_tokens;
-            let doc_string = suffix.doc_string;
+            let doc_string = format!(
+                "{} Values range from 0 (circular corners) to 1 (maximum smoothing); this adjusts the shape of drawn corners, not their radius.",
+                suffix.doc_string
+            );
 
             quote! {
                 #[doc = #doc_string]
@@ -1216,6 +1316,12 @@ fn generate_predefined_setter(
             }
         })
         .collect::<Vec<_>>();
+
+    let doc_string = if negate {
+        format!("{doc_string}\n\nSets the negative of the listed value.")
+    } else {
+        doc_string.to_owned()
+    };
 
     let method = quote! {
         #[doc = #doc_string]
@@ -1274,43 +1380,43 @@ fn margin_box_style_prefixes() -> Vec<BoxStylePrefix> {
                 quote! { margin.left },
                 quote! { margin.right },
             ],
-            doc_string_prefix: "Sets the margin of the element. [Docs](https://tailwindcss.com/docs/margin)",
+            doc_string_prefix: "Sets the margin of the element. Presets use rems (pixel examples assume a 16px root size); `_px` is one logical pixel, and percentage fractions resolve against the relevant layout dimension. Custom values accept `Length`, including `auto`. [Docs](https://tailwindcss.com/docs/margin)",
         },
         BoxStylePrefix {
             prefix: "mt",
             auto_allowed: true,
             fields: vec![quote! { margin.top }],
-            doc_string_prefix: "Sets the top margin of the element. [Docs](https://tailwindcss.com/docs/margin#add-margin-to-a-single-side)",
+            doc_string_prefix: "Sets the top margin. Presets use rems (pixel examples assume a 16px root size); `_px` is one logical pixel, and percentage fractions resolve against the relevant layout dimension. Custom values accept `Length`, including `auto`. [Docs](https://tailwindcss.com/docs/margin#add-margin-to-a-single-side)",
         },
         BoxStylePrefix {
             prefix: "mb",
             auto_allowed: true,
             fields: vec![quote! { margin.bottom }],
-            doc_string_prefix: "Sets the bottom margin of the element. [Docs](https://tailwindcss.com/docs/margin#add-margin-to-a-single-side)",
+            doc_string_prefix: "Sets the bottom margin. Presets use rems (pixel examples assume a 16px root size); `_px` is one logical pixel, and percentage fractions resolve against the relevant layout dimension. Custom values accept `Length`, including `auto`. [Docs](https://tailwindcss.com/docs/margin#add-margin-to-a-single-side)",
         },
         BoxStylePrefix {
             prefix: "my",
             auto_allowed: true,
             fields: vec![quote! { margin.top }, quote! { margin.bottom }],
-            doc_string_prefix: "Sets the vertical margin of the element. [Docs](https://tailwindcss.com/docs/margin#add-vertical-margin)",
+            doc_string_prefix: "Sets top and bottom margins. Presets use rems (pixel examples assume a 16px root size); `_px` is one logical pixel, and percentage fractions resolve against the relevant layout dimension. Custom values accept `Length`, including `auto`. [Docs](https://tailwindcss.com/docs/margin#add-vertical-margin)",
         },
         BoxStylePrefix {
             prefix: "mx",
             auto_allowed: true,
             fields: vec![quote! { margin.left }, quote! { margin.right }],
-            doc_string_prefix: "Sets the horizontal margin of the element. [Docs](https://tailwindcss.com/docs/margin#add-horizontal-margin)",
+            doc_string_prefix: "Sets left and right margins. Presets use rems (pixel examples assume a 16px root size); `_px` is one logical pixel, and percentage fractions resolve against the relevant layout dimension. Custom values accept `Length`, including `auto`. [Docs](https://tailwindcss.com/docs/margin#add-horizontal-margin)",
         },
         BoxStylePrefix {
             prefix: "ml",
             auto_allowed: true,
             fields: vec![quote! { margin.left }],
-            doc_string_prefix: "Sets the left margin of the element. [Docs](https://tailwindcss.com/docs/margin#add-margin-to-a-single-side)",
+            doc_string_prefix: "Sets the left margin. Presets use rems (pixel examples assume a 16px root size); `_px` is one logical pixel, and percentage fractions resolve against the relevant layout dimension. Custom values accept `Length`, including `auto`. [Docs](https://tailwindcss.com/docs/margin#add-margin-to-a-single-side)",
         },
         BoxStylePrefix {
             prefix: "mr",
             auto_allowed: true,
             fields: vec![quote! { margin.right }],
-            doc_string_prefix: "Sets the right margin of the element. [Docs](https://tailwindcss.com/docs/margin#add-margin-to-a-single-side)",
+            doc_string_prefix: "Sets the right margin. Presets use rems (pixel examples assume a 16px root size); `_px` is one logical pixel, and percentage fractions resolve against the relevant layout dimension. Custom values accept `Length`, including `auto`. [Docs](https://tailwindcss.com/docs/margin#add-margin-to-a-single-side)",
         },
     ]
 }
@@ -1378,31 +1484,31 @@ fn position_box_style_prefixes() -> Vec<BoxStylePrefix> {
                 quote! { inset.bottom },
                 quote! { inset.left },
             ],
-            doc_string_prefix: "Sets the top, right, bottom, and left values of a positioned element. [Docs](https://tailwindcss.com/docs/top-right-bottom-left)",
+            doc_string_prefix: "Sets all four offsets of a positioned element. Offsets require `relative()` or `absolute()`; relative lengths resolve against the containing block, and `auto` leaves that edge to layout. [Docs](https://tailwindcss.com/docs/top-right-bottom-left)",
         },
         BoxStylePrefix {
             prefix: "top",
             auto_allowed: true,
             fields: vec![quote! { inset.top }],
-            doc_string_prefix: "Sets the top value of a positioned element. [Docs](https://tailwindcss.com/docs/top-right-bottom-left)",
+            doc_string_prefix: "Sets the top offset of a positioned element. Offsets require `relative()` or `absolute()`; relative lengths resolve against the containing block, and `auto` leaves that edge to layout. [Docs](https://tailwindcss.com/docs/top-right-bottom-left)",
         },
         BoxStylePrefix {
             prefix: "bottom",
             auto_allowed: true,
             fields: vec![quote! { inset.bottom }],
-            doc_string_prefix: "Sets the bottom value of a positioned element. [Docs](https://tailwindcss.com/docs/top-right-bottom-left)",
+            doc_string_prefix: "Sets the bottom offset of a positioned element. Offsets require `relative()` or `absolute()`; relative lengths resolve against the containing block, and `auto` leaves that edge to layout. [Docs](https://tailwindcss.com/docs/top-right-bottom-left)",
         },
         BoxStylePrefix {
             prefix: "left",
             auto_allowed: true,
             fields: vec![quote! { inset.left }],
-            doc_string_prefix: "Sets the left value of a positioned element. [Docs](https://tailwindcss.com/docs/top-right-bottom-left)",
+            doc_string_prefix: "Sets the left offset of a positioned element. Offsets require `relative()` or `absolute()`; relative lengths resolve against the containing block, and `auto` leaves that edge to layout. [Docs](https://tailwindcss.com/docs/top-right-bottom-left)",
         },
         BoxStylePrefix {
             prefix: "right",
             auto_allowed: true,
             fields: vec![quote! { inset.right }],
-            doc_string_prefix: "Sets the right value of a positioned element. [Docs](https://tailwindcss.com/docs/top-right-bottom-left)",
+            doc_string_prefix: "Sets the right offset of a positioned element. Offsets require `relative()` or `absolute()`; relative lengths resolve against the containing block, and `auto` leaves that edge to layout. [Docs](https://tailwindcss.com/docs/top-right-bottom-left)",
         },
     ]
 }
@@ -1413,31 +1519,31 @@ fn box_prefixes() -> Vec<BoxStylePrefix> {
             prefix: "w",
             auto_allowed: true,
             fields: vec![quote! { size.width }],
-            doc_string_prefix: "Sets the width of the element. [Docs](https://tailwindcss.com/docs/width)",
+            doc_string_prefix: "Sets preferred width. Flex layout may shrink it to satisfy available space unless constrained by minimum width. `auto` uses intrinsic/layout sizing. [Docs](https://tailwindcss.com/docs/width)",
         },
         BoxStylePrefix {
             prefix: "h",
             auto_allowed: true,
             fields: vec![quote! { size.height }],
-            doc_string_prefix: "Sets the height of the element. [Docs](https://tailwindcss.com/docs/height)",
+            doc_string_prefix: "Sets preferred height. Flex layout may shrink it to satisfy available space unless constrained by minimum height. `auto` uses intrinsic/layout sizing. [Docs](https://tailwindcss.com/docs/height)",
         },
         BoxStylePrefix {
             prefix: "size",
             auto_allowed: true,
             fields: vec![quote! {size.width}, quote! {size.height}],
-            doc_string_prefix: "Sets the width and height of the element.",
+            doc_string_prefix: "Sets preferred width and height. Flex layout may shrink either dimension to satisfy available space unless constrained by minimum size. `auto` uses intrinsic/layout sizing.",
         },
         BoxStylePrefix {
             prefix: "min_size",
             auto_allowed: true,
             fields: vec![quote! {min_size.width}, quote! {min_size.height}],
-            doc_string_prefix: "Sets the minimum width and height of the element.",
+            doc_string_prefix: "Sets the lower bounds on width and height. These constraints can prevent flex shrinkage from reducing the element below the chosen size.",
         },
         BoxStylePrefix {
             prefix: "min_w",
             auto_allowed: true,
             fields: vec![quote! { min_size.width }],
-            doc_string_prefix: "Sets the minimum width of the element. [Docs](https://tailwindcss.com/docs/min-width)",
+            doc_string_prefix: "Sets the lower bound on width. This constraint can prevent flex shrinkage from reducing the element below the chosen size. [Docs](https://tailwindcss.com/docs/min-width)",
         },
         // TODO: These don't use the same size ramp as the others
         // see https://tailwindcss.com/docs/max-width
@@ -1445,13 +1551,13 @@ fn box_prefixes() -> Vec<BoxStylePrefix> {
             prefix: "min_h",
             auto_allowed: true,
             fields: vec![quote! { min_size.height }],
-            doc_string_prefix: "Sets the minimum height of the element. [Docs](https://tailwindcss.com/docs/min-height)",
+            doc_string_prefix: "Sets the lower bound on height. This constraint can prevent flex shrinkage from reducing the element below the chosen size. [Docs](https://tailwindcss.com/docs/min-height)",
         },
         BoxStylePrefix {
             prefix: "max_size",
             auto_allowed: true,
             fields: vec![quote! {max_size.width}, quote! {max_size.height}],
-            doc_string_prefix: "Sets the maximum width and height of the element.",
+            doc_string_prefix: "Sets the upper bounds on width and height; layout does not grow either dimension beyond these limits.",
         },
         // TODO: These don't use the same size ramp as the others
         // see https://tailwindcss.com/docs/max-width
@@ -1459,7 +1565,7 @@ fn box_prefixes() -> Vec<BoxStylePrefix> {
             prefix: "max_w",
             auto_allowed: true,
             fields: vec![quote! { max_size.width }],
-            doc_string_prefix: "Sets the maximum width of the element. [Docs](https://tailwindcss.com/docs/max-width)",
+            doc_string_prefix: "Sets the upper bound on width; layout does not grow the element beyond this limit. [Docs](https://tailwindcss.com/docs/max-width)",
         },
         // TODO: These don't use the same size ramp as the others
         // see https://tailwindcss.com/docs/max-width
@@ -1467,25 +1573,25 @@ fn box_prefixes() -> Vec<BoxStylePrefix> {
             prefix: "max_h",
             auto_allowed: true,
             fields: vec![quote! { max_size.height }],
-            doc_string_prefix: "Sets the maximum height of the element. [Docs](https://tailwindcss.com/docs/max-height)",
+            doc_string_prefix: "Sets the upper bound on height; layout does not grow the element beyond this limit. [Docs](https://tailwindcss.com/docs/max-height)",
         },
         BoxStylePrefix {
             prefix: "gap",
             auto_allowed: false,
             fields: vec![quote! { gap.width }, quote! { gap.height }],
-            doc_string_prefix: "Sets the gap between rows and columns in flex layouts. [Docs](https://tailwindcss.com/docs/gap)",
+            doc_string_prefix: "Sets horizontal and vertical gaps between adjacent children in flex and grid layouts. Horizontal means left-to-right; vertical means top-to-bottom. [Docs](https://tailwindcss.com/docs/gap)",
         },
         BoxStylePrefix {
             prefix: "gap_x",
             auto_allowed: false,
             fields: vec![quote! { gap.width }],
-            doc_string_prefix: "Sets the gap between columns in flex layouts. [Docs](https://tailwindcss.com/docs/gap#changing-row-and-column-gaps-independently)",
+            doc_string_prefix: "Sets the horizontal (left-to-right) gap between adjacent children in flex and grid layouts. In a row flow this is the main-axis gap; in a column flow it is the cross-axis gap. [Docs](https://tailwindcss.com/docs/gap#changing-row-and-column-gaps-independently)",
         },
         BoxStylePrefix {
             prefix: "gap_y",
             auto_allowed: false,
             fields: vec![quote! { gap.height }],
-            doc_string_prefix: "Sets the gap between rows in flex layouts. [Docs](https://tailwindcss.com/docs/gap#changing-row-and-column-gaps-independently)",
+            doc_string_prefix: "Sets the vertical (top-to-bottom) gap between adjacent children in flex and grid layouts. In a column flow this is the main-axis gap; in a row flow it is the cross-axis gap. [Docs](https://tailwindcss.com/docs/gap#changing-row-and-column-gaps-independently)",
         },
     ]
 }
@@ -1665,12 +1771,12 @@ fn box_style_suffixes() -> Vec<BoxStyleSuffix> {
         BoxStyleSuffix {
             suffix: "1_3",
             length_tokens: quote! { relative(1./3.) },
-            doc_string_suffix: "33% (1/3)",
+            doc_string_suffix: "one third of the reference dimension (1/3)",
         },
         BoxStyleSuffix {
             suffix: "2_3",
             length_tokens: quote! { relative(2./3.) },
-            doc_string_suffix: "66% (2/3)",
+            doc_string_suffix: "two thirds of the reference dimension (2/3)",
         },
         BoxStyleSuffix {
             suffix: "1_4",
@@ -1710,17 +1816,17 @@ fn box_style_suffixes() -> Vec<BoxStyleSuffix> {
         BoxStyleSuffix {
             suffix: "1_6",
             length_tokens: quote! { relative(1./6.) },
-            doc_string_suffix: "16% (1/6)",
+            doc_string_suffix: "one sixth of the reference dimension (1/6)",
         },
         BoxStyleSuffix {
             suffix: "5_6",
             length_tokens: quote! { relative(5./6.) },
-            doc_string_suffix: "80% (5/6)",
+            doc_string_suffix: "five sixths of the reference dimension (5/6)",
         },
         BoxStyleSuffix {
             suffix: "1_12",
             length_tokens: quote! { relative(1./12.) },
-            doc_string_suffix: "8% (1/12)",
+            doc_string_suffix: "one twelfth of the reference dimension (1/12)",
         },
     ]
 }
@@ -1912,27 +2018,27 @@ fn border_prefixes() -> Vec<BorderStylePrefix> {
                 quote! { border_widths.bottom },
                 quote! { border_widths.left },
             ],
-            doc_string_prefix: "Sets the border width of the element. [Docs](https://tailwindcss.com/docs/border-width)",
+            doc_string_prefix: "Sets all four border widths. Numbered presets are logical pixels; custom values accept `AbsoluteLength` (pixels or rems), not percentages. Border color and border style are set separately. [Docs](https://tailwindcss.com/docs/border-width)",
         },
         BorderStylePrefix {
             prefix: "border_t",
             fields: vec![quote! { border_widths.top }],
-            doc_string_prefix: "Sets the border width of the top side of the element. [Docs](https://tailwindcss.com/docs/border-width#individual-sides)",
+            doc_string_prefix: "Sets the top border width. Numbered presets are logical pixels; custom values accept `AbsoluteLength` (pixels or rems), not percentages. [Docs](https://tailwindcss.com/docs/border-width#individual-sides)",
         },
         BorderStylePrefix {
             prefix: "border_b",
             fields: vec![quote! { border_widths.bottom }],
-            doc_string_prefix: "Sets the border width of the bottom side of the element. [Docs](https://tailwindcss.com/docs/border-width#individual-sides)",
+            doc_string_prefix: "Sets the bottom border width. Numbered presets are logical pixels; custom values accept `AbsoluteLength` (pixels or rems), not percentages. [Docs](https://tailwindcss.com/docs/border-width#individual-sides)",
         },
         BorderStylePrefix {
             prefix: "border_r",
             fields: vec![quote! { border_widths.right }],
-            doc_string_prefix: "Sets the border width of the right side of the element. [Docs](https://tailwindcss.com/docs/border-width#individual-sides)",
+            doc_string_prefix: "Sets the right border width. Numbered presets are logical pixels; custom values accept `AbsoluteLength` (pixels or rems), not percentages. [Docs](https://tailwindcss.com/docs/border-width#individual-sides)",
         },
         BorderStylePrefix {
             prefix: "border_l",
             fields: vec![quote! { border_widths.left }],
-            doc_string_prefix: "Sets the border width of the left side of the element. [Docs](https://tailwindcss.com/docs/border-width#individual-sides)",
+            doc_string_prefix: "Sets the left border width. Numbered presets are logical pixels; custom values accept `AbsoluteLength` (pixels or rems), not percentages. [Docs](https://tailwindcss.com/docs/border-width#individual-sides)",
         },
         BorderStylePrefix {
             prefix: "border_x",
@@ -1940,7 +2046,7 @@ fn border_prefixes() -> Vec<BorderStylePrefix> {
                 quote! { border_widths.left },
                 quote! { border_widths.right },
             ],
-            doc_string_prefix: "Sets the border width of the vertical sides of the element. [Docs](https://tailwindcss.com/docs/border-width#horizontal-and-vertical-sides)",
+            doc_string_prefix: "Sets left and right border widths (the vertical edges). Numbered presets are logical pixels; custom values accept `AbsoluteLength` (pixels or rems), not percentages. [Docs](https://tailwindcss.com/docs/border-width#horizontal-and-vertical-sides)",
         },
         BorderStylePrefix {
             prefix: "border_y",
@@ -1948,7 +2054,7 @@ fn border_prefixes() -> Vec<BorderStylePrefix> {
                 quote! { border_widths.top },
                 quote! { border_widths.bottom },
             ],
-            doc_string_prefix: "Sets the border width of the horizontal sides of the element. [Docs](https://tailwindcss.com/docs/border-width#horizontal-and-vertical-sides)",
+            doc_string_prefix: "Sets top and bottom border widths (the horizontal edges). Numbered presets are logical pixels; custom values accept `AbsoluteLength` (pixels or rems), not percentages. [Docs](https://tailwindcss.com/docs/border-width#horizontal-and-vertical-sides)",
         },
     ]
 }

@@ -5,15 +5,19 @@ description = "Choose the executor, retain the task, and handle a released view.
 weight = 50
 +++
 
-Use the foreground executor to coordinate UI state. Use the background executor
-for owned `Send` work that would block input if performed in a listener.
-Neither executor lets you keep a mutable app or window borrow across an await.
+Use the foreground executor to coordinate UI state and interact with GPUI
+entities. Use the background executor for independent `Send` work such as
+blocking I/O or computation that would otherwise delay input. A foreground
+future is not permission to hold a mutable entity, app, or window borrow across
+`.await`; reacquire access after the wait.
 
 ## Keep the task handle
 
-A returned `Task` is part of the lifecycle. Store it when the operation belongs
-to the view. Dropping it normally cancels the operation. Detaching makes the
-work independent of that handle, so use it deliberately.
+A returned [`Task`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Task.html) is part
+of the lifecycle. Store it when the operation belongs to the view. Dropping
+the handle cancels future polling; it cannot undo a side effect already sent to
+another process or service. Detaching makes the task independent of that handle,
+so choose an owner and completion path before detaching.
 
 The [async walkthrough](@/examples/async-task.md) keeps a task in a field, waits
 without blocking the UI thread, and updates the view through a weak handle.
@@ -26,8 +30,15 @@ current. Cancelling a task does not necessarily undo a request already sent to
 another service. A generation counter or request ID can prevent an old result
 from replacing newer state.
 
-The view may also be gone. Handle a failed weak update as teardown rather than
-unconditionally unwrapping it after an await.
+The view may also be gone. A `WeakEntity` update can fail after release; treat
+that as normal teardown rather than unconditionally unwrapping it after an
+await. If the result belongs to a window, use `AsyncWindowContext` so each
+operation reacquires the live window instead of retaining a window borrow.
+
+If a request can be superseded, keep a request ID or generation with the state.
+Check it when the result returns before applying the value. Cancellation and
+staleness solve different problems: cancellation asks work to stop, while a
+generation check prevents an old result from winning if it completes anyway.
 
 ## Test time without sleeping
 

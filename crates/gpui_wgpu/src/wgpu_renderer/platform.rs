@@ -127,6 +127,7 @@ impl WgpuRenderer {
     /// Returns `true` only when a frame was rendered and presented. Surface loss,
     /// timeout, validation failure, or an unconfigured target request a redraw and
     /// return `false`; a pending device error is retained for the recovery path.
+    /// `scene` must have been recorded and finished before drawing.
     pub fn draw(&mut self, scene: &Scene) -> bool {
         if !self.target.is_configured() {
             return false;
@@ -199,8 +200,9 @@ impl WgpuRenderer {
     /// Replaces the native surface while retaining the renderer and device.
     ///
     /// Surface capabilities are queried again because moving a window can change
-    /// the supported present modes. Returns an error when the adapter cannot
-    /// present to the new window.
+    /// the supported present modes. The supplied instance must belong to this
+    /// renderer's shared GPU context. Returns an error when surface creation or
+    /// adapter compatibility checks fail.
     pub fn replace_surface<W: HasWindowHandle>(
         &mut self,
         window: &W,
@@ -254,6 +256,9 @@ impl WgpuRenderer {
     }
 
     /// Releases renderer resources while leaving the value usable for inspection.
+    ///
+    /// Subsequent draw operations cannot use this renderer until resources are
+    /// recreated by the recovery path.
     pub fn destroy(&mut self) {
         self.resources.take();
     }
@@ -275,7 +280,8 @@ impl WgpuRenderer {
     ///
     /// Recovery can temporarily return an error while the driver stabilization
     /// delay is in effect; callers should retry when the platform schedules a
-    /// redraw.
+    /// redraw. After successful device recovery, custom GPU resources created
+    /// from the old context must also be recreated.
     pub fn recover<W>(&mut self, window: &W) -> anyhow::Result<()>
     where
         W: HasWindowHandle + HasDisplayHandle + std::fmt::Debug + Send + Sync + Clone + 'static,
@@ -378,6 +384,10 @@ impl WgpuRenderer {
     }
 
     #[cfg(target_os = "macos")]
+    /// Sets presentation synchronization for a Metal-backed WGPU surface.
+    ///
+    /// This is a no-op when the renderer has no surface or its surface is not
+    /// backed by Metal.
     pub fn set_presents_with_transaction(&self, enabled: bool) {
         let Some(surface) = self
             .resources

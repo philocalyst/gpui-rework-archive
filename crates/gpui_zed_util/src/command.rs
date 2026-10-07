@@ -1,8 +1,9 @@
 //! Platform-aware command construction.
 //!
 //! `Command` mirrors the standard process builder while selecting the asynchronous child type
-//! used by this crate. Builder methods mutate and return `&mut Self`; `spawn` is the only operation
-//! that starts a process and can fail. On Windows, commands are created without a console window.
+//! used by this crate. Builder methods mutate and return `&mut Self`; `spawn`, `output`, and
+//! `status` start a process and can fail. Windows commands are created without a console window.
+//! macOS uses a custom `posix_spawn` implementation with its own child-handle and stdio behavior.
 
 use std::ffi::OsStr;
 #[cfg(not(target_os = "macos"))]
@@ -19,7 +20,7 @@ const CREATE_NO_WINDOW: u32 = 0x0800_0000_u32;
 
 pub use gpui_util::new_std_command;
 
-/// Construct a platform-specific asynchronous command builder.
+/// Construct a platform-specific asynchronous command builder for `program`.
 pub fn new_command(program: impl AsRef<OsStr>) -> Command {
     Command::new(program)
 }
@@ -33,6 +34,9 @@ pub use std::process::Stdio;
 #[cfg(not(target_os = "macos"))]
 #[derive(Debug)]
 /// An asynchronous command builder used by the platform utility layer.
+///
+/// On non-macOS platforms this wraps `smol::process::Command`; on Windows it
+/// also suppresses creation of a console window.
 pub struct Command(smol::process::Command);
 
 #[cfg(not(target_os = "macos"))]

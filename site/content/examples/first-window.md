@@ -15,13 +15,16 @@ example_run = "cargo run -p gpui-documentation-examples --example first-window"
 <a id="render"></a>
 ## Return the elements to draw
 
-The window will display “Hello, GPUI”. Its view, `Greeting`, needs no state:
-it implements [`Render`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Render.html) and returns a [`div`](https://docs.rs/gpui-ce/0.2.2/gpui/fn.div.html) containing that string.
+The window will display “Hello, GPUI”. `Greeting` has no mutable fields, so
+its [`Render`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Render.html) method only returns a [`div`](https://docs.rs/gpui-ce/0.2.2/gpui/fn.div.html) containing the string. `Render`
+is the contract for an entity-backed view; the returned element tree is a
+description GPUI lays out and paints for the current frame.
 
 The [`Styled`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Styled.html) builders make the div fill its parent, center its child, and
-give the text a size and color. GPUI lays out and paints these elements in
-one window. The [rendering explanation](@/reference/rendering.md) describes
-the work between this return value and the displayed frame.
+set inherited text size and color. `size_full` needs a bounded parent; the
+window supplies that root constraint. Follow the [rendering explanation](@/reference/rendering.md)
+from this returned tree through layout, prepaint, scene construction, and
+presentation.
 
 ```rust
 use gpui::{AppContext, Context, IntoElement, Render, Window, div, prelude::*, rgb};
@@ -43,7 +46,7 @@ impl Render for Greeting {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/first-window/") }}#L13).
+[View this step in the source]({{ get_url(path="sources/first-window/") }}#L16).
 
 <a id="window"></a>
 ## Keep a root view in a window
@@ -51,10 +54,13 @@ impl Render for Greeting {
 [`AppContext::new`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.AppContext.html#tymethod.new) stores `Greeting` in the app and returns its entity
 handle. The window retains that entity as its root view.
 
-`support::run` opens the platform window through [`App::open_window`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.App.html#method.open_window). It
-also keeps the browser application's handle alive; native execution uses
-[`Application::run`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Application.html#method.run). The complete source includes this helper, so the
-downloadable program contains its entry point as well as its rendering code.
+`support::run` starts the application and opens a window through
+[`App::open_window`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.App.html#method.open_window). On native targets its platform application calls
+[`Application::run`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Application.html#method.run) to enter GPUI's event loop; the web branch uses the
+embedded platform runner. The returned entity is installed as that window's
+root, which keeps it alive while open. The downloadable Cargo example also
+includes the native launcher, so it can be run without reconstructing the
+setup around the view.
 
 ```rust
 fn component(_window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<Greeting> {
@@ -66,6 +72,6 @@ pub fn main() {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/first-window/") }}#L40).
+[View this step in the source]({{ get_url(path="sources/first-window/") }}#L46).
 
 [Download the complete source]({{ get_url(path="examples/first-window.rs") }}).

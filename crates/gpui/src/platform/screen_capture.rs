@@ -1,8 +1,9 @@
 //! Optional screen-capture source discovery and stream adaptation.
 //!
-//! Source enumeration is asynchronous because native capture APIs and desktop portals may prompt
-//! or negotiate permissions. The returned handles are reference-counted and platform-owned;
-//! callers should retain them while consuming a stream.
+//! This module is currently compiled for Windows when the `screen-capture` feature is enabled.
+//! Source enumeration is asynchronous because the native capture API may fail while enumerating
+//! monitors. The returned handles are reference-counted and platform-owned; retain a source while
+//! starting its stream. Dropping the stream stops capture.
 
 use crate::{
     ForegroundExecutor, ScreenCaptureFrame, ScreenCaptureSource, ScreenCaptureStream,
@@ -15,10 +16,11 @@ use std::rc::Rc;
 #[path = "screen_capture/windows.rs"]
 mod platform;
 
-/// Discover capture sources on the foreground executor.
+/// Discover Windows monitor capture sources.
 ///
-/// Wayland source discovery cannot enumerate portal targets; use the platform's default-target
-/// operation when available. Unsupported platforms resolve to an empty list.
+/// Enumeration runs off-thread and the receiver resolves on `foreground_executor`. The result may
+/// be empty when no monitor is available, or contain an error if monitor enumeration fails. A
+/// source can still fail later when [`ScreenCaptureSource::stream`] starts capture.
 pub fn screen_sources(
     foreground_executor: &ForegroundExecutor,
 ) -> oneshot::Receiver<Result<Vec<Rc<dyn ScreenCaptureSource>>>> {

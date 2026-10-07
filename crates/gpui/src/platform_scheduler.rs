@@ -33,6 +33,8 @@ pub struct PlatformScheduler {
 }
 
 impl PlatformScheduler {
+    /// Creates a scheduler that forwards tasks and timers to a platform
+    /// dispatcher.
     pub fn new(dispatcher: Arc<dyn PlatformDispatcher>) -> Self {
         Self {
             dispatcher: dispatcher.clone(),
@@ -43,6 +45,8 @@ impl PlatformScheduler {
         }
     }
 
+    /// Creates a foreground executor whose tasks are dispatched to the
+    /// platform's main thread.
     pub fn foreground_executor(self: &Arc<Self>) -> LocalExecutor {
         let session_id = self.next_session_id();
         let scheduler = Arc::downgrade(self);

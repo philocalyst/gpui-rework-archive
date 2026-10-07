@@ -202,11 +202,14 @@ impl ImageCacheItem {
     }
 }
 
-/// An object that can handle the caching and unloading of images.
-/// Implementations of this trait should ensure that images are removed from all windows when they are no longer needed.
+/// Loads and retains renderer images for resource-backed [`crate::img`] elements.
+///
+/// Return `None` while a request is pending and `Some(result)` after it has completed. A cache
+/// implementation owns the policy for sharing requests, retaining results, and releasing renderer
+/// resources. When an image is no longer needed, use the window/app resource-drop path so every
+/// window can release its reference.
 pub trait ImageCache: 'static {
-    /// Load an image given a resource
-    /// returns the result of loading the image if it has finished loading, or None if it is still loading
+    /// Poll or start loading `resource` and return its completed result, if available.
     fn load(
         &mut self,
         resource: &Resource,
@@ -215,10 +218,12 @@ pub trait ImageCache: 'static {
     ) -> Option<Result<Arc<RenderImage>, ImageCacheError>>;
 }
 
-/// An object that can create an ImageCache during the render phase.
-/// See the ImageCache trait for more information.
+/// Supplies the cache used by a subtree of image elements.
+///
+/// GPUI asks the provider for a cache during layout and installs it for descendant `img` elements
+/// while requesting layout and painting. A [`crate::Entity<T>`] provider reuses the entity on each call.
 pub trait ImageCacheProvider: 'static {
-    /// Called during the request_layout phase to create an ImageCache.
+    /// Return the cache for the current subtree.
     fn provide(&mut self, _window: &mut Window, _cx: &mut App) -> AnyImageCache;
 }
 
@@ -228,7 +233,10 @@ impl<T: ImageCache> ImageCacheProvider for Entity<T> {
     }
 }
 
-/// An implementation of ImageCache, that uses an LRU caching strategy to unload images when the cache is full
+/// An image cache that keeps each requested resource until it is removed, cleared, or released.
+///
+/// This cache does not evict entries automatically. Use [`clear`](Self::clear) or [`remove`](Self::remove)
+/// when the retained resources should be released earlier than the cache entity's lifetime.
 pub struct RetainAllImageCache(HashMap<u64, ImageCacheItem>);
 
 impl fmt::Debug for RetainAllImageCache {
@@ -240,7 +248,7 @@ impl fmt::Debug for RetainAllImageCache {
 }
 
 impl RetainAllImageCache {
-    /// Create a new image cache.
+    /// Create an entity-backed cache and release its renderer images when the entity is dropped.
     #[inline]
     pub fn new(cx: &mut App) -> Entity<Self> {
         let e = cx.new(|_cx| RetainAllImageCache(HashMap::new()));
@@ -255,9 +263,10 @@ impl RetainAllImageCache {
         e
     }
 
-    /// Load an image from the given source.
+    /// Load a resource once and reuse its pending task or completed result on later calls.
     ///
-    /// Returns `None` if the image is loading.
+    /// Returns `None` while the asset task is pending. Completion schedules the current view for
+    /// notification so it can request the image again.
     pub fn load(
         &mut self,
         source: &Resource,

@@ -189,7 +189,11 @@ fn calculate_seeds(
     (iter, is_multiple_runs)
 }
 
-/// A test struct for converting an observation callback into a stream.
+/// A stream of entity-change notifications that owns its observation
+/// subscription.
+///
+/// Dropping the stream unsubscribes. Notifications are signals rather than
+/// snapshots: read the entity after each item to observe its current state.
 pub struct Observation<T> {
     rx: Pin<Box<async_channel::Receiver<T>>>,
     _subscription: Subscription,
@@ -206,7 +210,11 @@ impl<T: 'static> futures::Stream for Observation<T> {
     }
 }
 
-/// observe returns a stream of the change events from the given `Entity`
+/// Observes changes to an entity as a stream of unit notifications.
+///
+/// The returned [`Observation`] keeps the underlying subscription alive; drop
+/// it to stop observing. Each notification indicates that the entity changed,
+/// so read the entity to obtain its state.
 pub fn observe<T: 'static>(entity: &Entity<T>, cx: &mut TestAppContext) -> Observation<()> {
     let (tx, rx) = async_channel::unbounded();
     let _subscription = cx.update(|cx| {

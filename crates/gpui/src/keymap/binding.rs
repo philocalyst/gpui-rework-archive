@@ -32,7 +32,12 @@ impl Clone for KeyBinding {
 }
 
 impl KeyBinding {
-    /// Construct a new keybinding from the given data. Panics on parse error.
+    /// Construct a key binding from keystrokes, action, and an optional context predicate.
+    ///
+    /// Separate strokes with whitespace to create a chord, such as `cmd-k left`. This convenience
+    /// constructor parses the context and keystrokes using the dummy keyboard mapper and panics if
+    /// either string is invalid. Use [`Self::load`] to supply platform mapping and handle invalid
+    /// keystrokes as an error.
     pub fn new<A: Action>(keystrokes: &str, action: A, context: Option<&str>) -> Self {
         let context_predicate =
             context.map(|context| KeyBindingContextPredicate::parse(context).unwrap().into());
@@ -47,7 +52,14 @@ impl KeyBinding {
         .unwrap()
     }
 
-    /// Load a keybinding from the given raw data.
+    /// Parse a key binding using an explicit keyboard mapper and optional metadata.
+    ///
+    /// `keystrokes` is a whitespace-separated sequence. `context_predicate` should be parsed
+    /// separately with [`KeyBindingContextPredicate::parse`]; malformed keystrokes return
+    /// [`InvalidKeystrokeError`]. An empty string creates a binding with no strokes, which cannot
+    /// match a key event. The optional `action_input` retains the original JSON payload text when a
+    /// binding was loaded from configuration. `use_key_equivalents` lets the platform mapper apply
+    /// equivalent characters so a binding can keep its intended meaning across layouts.
     pub fn load(
         keystrokes: &str,
         action: Box<dyn Action>,
@@ -77,18 +89,22 @@ impl KeyBinding {
         })
     }
 
-    /// Set the metadata for this binding.
+    /// Set the opaque metadata index associated with this binding and return it.
     pub fn with_meta(mut self, meta: KeyBindingMetaIndex) -> Self {
         self.meta = Some(meta);
         self
     }
 
-    /// Set the metadata for this binding.
+    /// Replace this binding's opaque metadata index.
     pub fn set_meta(&mut self, meta: KeyBindingMetaIndex) {
         self.meta = Some(meta);
     }
 
-    /// Check if the given keystrokes match this binding.
+    /// Match a typed prefix against this binding's sequence.
+    ///
+    /// Returns `None` if the strokes differ or the input is longer than the binding, `Some(true)`
+    /// if all typed strokes match but more strokes are required, and `Some(false)` for a complete
+    /// match. Context and keymap precedence are not checked here.
     pub fn match_keystrokes(&self, typed: &[impl AsKeystroke]) -> Option<bool> {
         if self.keystrokes.len() < typed.len() {
             return None;
@@ -103,27 +119,27 @@ impl KeyBinding {
         Some(self.keystrokes.len() > typed.len())
     }
 
-    /// Get the keystrokes associated with this binding
+    /// Return the parsed keystrokes in sequence order.
     pub fn keystrokes(&self) -> &[KeybindingKeystroke] {
         self.keystrokes.as_slice()
     }
 
-    /// Get the action associated with this binding
+    /// Return the action invoked by this binding.
     pub fn action(&self) -> &dyn Action {
         self.action.as_ref()
     }
 
-    /// Get the predicate used to match this binding
+    /// Clone the optional context predicate used to enable this binding.
     pub fn predicate(&self) -> Option<Rc<KeyBindingContextPredicate>> {
         self.context_predicate.as_ref().map(|rc| rc.clone())
     }
 
-    /// Get the metadata for this binding
+    /// Return the optional user-defined metadata index.
     pub fn meta(&self) -> Option<KeyBindingMetaIndex> {
         self.meta
     }
 
-    /// Get the action input associated with the action for this binding
+    /// Clone the original JSON payload text, if this binding was loaded with one.
     pub fn action_input(&self) -> Option<SharedString> {
         self.action_input.clone()
     }

@@ -6,7 +6,9 @@ pub use web_time::Instant;
 
 /// Supplies wall-clock and monotonic time to a scheduler.
 pub trait Clock {
+    /// Returns the current UTC wall-clock time.
     fn utc_now(&self) -> DateTime<Utc>;
+    /// Returns the current monotonic instant used for durations and timers.
     fn now(&self) -> Instant;
 }
 

@@ -65,9 +65,7 @@ impl LocalExecutor {
         self.session_id
     }
 
-    /// Returns the scheduler providing this executor's clock and dispatch services.
-    /// Returns the scheduler backing this executor.
-    /// Returns the scheduler backing this executor.
+    /// Returns the scheduler providing this executor's clock and timer services.
     pub fn scheduler(&self) -> &Arc<dyn Scheduler> {
         &self.scheduler
     }
@@ -268,12 +266,10 @@ impl BackgroundExecutor {
         Task(TaskState::Spawned(task))
     }
 
-    /// Spawns a future on a dedicated realtime thread for audio processing.
-    #[track_caller]
     /// Spawns a future on a dedicated realtime thread.
     ///
-    /// The thread is intended for low-latency work such as audio. Keep the future bounded and
-    /// avoid blocking operations that can starve the realtime loop.
+    /// The thread is intended for low-latency audio work. Keep the future
+    /// bounded and avoid blocking operations that can starve the realtime loop.
     pub fn spawn_realtime<F>(&self, future: F) -> Task<F::Output>
     where
         F: Future + Send + 'static,
@@ -314,6 +310,7 @@ impl BackgroundExecutor {
         self.scheduler.clock().now()
     }
 
+    /// Returns the scheduler backing this executor.
     pub fn scheduler(&self) -> &Arc<dyn Scheduler> {
         &self.scheduler
     }
@@ -398,17 +395,14 @@ impl DedicatedExecutor {
     }
 }
 
-/// Task is a primitive that allows work to happen in the background.
-///
-/// It implements [`Future`] so you can `.await` on it.
-///
-/// If you drop a task it will be cancelled immediately. Calling [`Task::detach`] allows
-/// the task to continue running, but with no way to return a value.
-#[must_use]
 /// A cancellable handle to a scheduled future.
 ///
-/// Awaiting observes its output. Dropping cancels the future, while
-/// [`Task::detach`] transfers it to the scheduler until completion.
+/// Awaiting observes its output. Dropping cancels unfinished work; detaching
+/// gives up the output and cancellation handle while the executor continues
+/// polling the future. The task always remains on the executor where it was
+/// spawned. [`Task::is_ready`] only observes completion and does not poll the
+/// future or retrieve its output.
+#[must_use]
 // docs:examples:begin
 #[doc = include_str!("docs/examples/gpui-Task-6abc8b50.md")]
 // docs:examples:end
@@ -548,7 +542,7 @@ impl<T> RendezvousSender<T> {
 }
 
 impl<T> Task<T> {
-    /// Creates a new task that will resolve with the value
+    /// Creates an already-completed task that yields `val` when awaited.
     pub fn ready(val: T) -> Self {
         Task(TaskState::Ready(Some(val)))
     }
@@ -567,12 +561,16 @@ impl<T> Task<T> {
         )
     }
 
-    /// Creates a Task from an async_task::Task
+    /// Wraps an `async_task::Task` with the scheduler metadata used by GPUI.
+    ///
+    /// Use this when integrating a task created outside GPUI's executor
+    /// handles. Dropping the returned handle cancels the wrapped task.
     pub fn from_async_task(task: async_task::Task<T, RunnableMeta>) -> Self {
         Task(TaskState::Spawned(task))
     }
 
-    /// Returns whether the task has already completed.
+    /// Returns whether the task has completed without polling it or consuming
+    /// its output.
     pub fn is_ready(&self) -> bool {
         match &self.0 {
             TaskState::Ready(_) => true,
@@ -582,7 +580,10 @@ impl<T> Task<T> {
         }
     }
 
-    /// Detaching a task runs it to completion in the background
+    /// Leaves this task scheduled on its executor until completion and discards its output.
+    ///
+    /// Detaching does not change which executor polls the task: a foreground
+    /// task continues on the foreground executor.
     pub fn detach(self) {
         match self {
             Task(TaskState::Ready(_)) => {}
@@ -592,7 +593,8 @@ impl<T> Task<T> {
         }
     }
 
-    /// Converts this task into a fallible task that returns `Option<T>`.
+    /// Converts this task into a future whose output is `Some(value)` on
+    /// completion and `None` if the task was cancelled before it completed.
     pub fn fallible(self) -> FallibleTask<T> {
         FallibleTask(match self.0 {
             TaskState::Ready(val) => FallibleTaskState::Ready(val),
@@ -636,7 +638,11 @@ impl<T> std::fmt::Debug for Task<T> {
     }
 }
 
-/// A task that returns `Option<T>` instead of panicking when cancelled.
+/// A future that yields `Some(output)` when its task completes or `None` if it
+/// is cancelled before completion.
+///
+/// Convert a [`Task`] with [`Task::fallible`] when cancellation should be
+/// handled as a value. It does not wrap errors from the task's own output.
 #[must_use]
 pub struct FallibleTask<T>(FallibleTaskState<T>);
 
@@ -658,12 +664,14 @@ enum FallibleTaskState<T> {
 }
 
 impl<T> FallibleTask<T> {
-    /// Creates a new fallible task that will resolve with the value.
+    /// Creates an already-completed fallible task that yields `Some(val)`.
     pub fn ready(val: T) -> Self {
         FallibleTask(FallibleTaskState::Ready(Some(val)))
     }
 
-    /// Detaching a task runs it to completion in the background.
+    /// Leaves this task scheduled on its executor until completion and discards its output.
+    ///
+    /// Detaching does not change which executor polls the task.
     pub fn detach(self) {
         match self.0 {
             FallibleTaskState::Ready(_) => {}

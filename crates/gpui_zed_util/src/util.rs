@@ -1,9 +1,10 @@
 //! Utility modules used by GPUI platform integrations.
 //!
 //! The crate groups path, shell, process, filesystem, markdown, JSON-schema, and test helpers.
-//! Platform modules are compiled only where their operating-system APIs exist. Functions that
-//! touch the filesystem or spawn commands report failures through `anyhow::Result`; pure formatters
-//! and path predicates are deterministic and side-effect free.
+//! Platform modules are compiled only where their operating-system APIs exist. Failure reporting
+//! is API-specific: command and archive helpers return errors, while some directory helpers log
+//! and skip individual failures. Environment lookup, path conversion, and shell selection may
+//! depend on the host or process environment.
 
 #[cfg(test)]
 extern crate self as util;
@@ -65,13 +66,17 @@ pub use self::shell::{
 };
 
 #[inline]
-/// Return whether a byte can begin a UTF-8 code point.
+/// Return whether `u8` is a UTF-8 leading-byte boundary rather than a continuation byte.
+///
+/// This tests one byte value only; it does not validate a byte sequence.
 pub const fn is_utf8_char_boundary(u8: u8) -> bool {
     // This is bit magic equivalent to: b < 128 || b >= 192
     (u8 as i8) >= -0x40
 }
 
-/// Truncate to at most `max_chars` Unicode scalar values at a valid UTF-8 boundary.
+/// Keep the first `max_chars` Unicode scalar values, without adding an ellipsis.
+///
+/// The limit counts Rust `char`s, not bytes or user-perceived grapheme clusters.
 pub fn truncate(s: &str, max_chars: usize) -> &str {
     match s.char_indices().nth(max_chars) {
         None => s,
@@ -79,13 +84,12 @@ pub fn truncate(s: &str, max_chars: usize) -> &str {
     }
 }
 
-/// Parses the contents of an `os-release` file (as found at `/etc/os-release`
-/// and described by the systemd spec) into a human-readable string such as
-/// `"ubuntu 24.04"`, combining the `ID` and `VERSION_ID` fields.
+/// Parse `ID` and optional `VERSION_ID` fields from `/etc/os-release`-style text.
 ///
-/// Returns `None` if no `ID` field is present. When `VERSION_ID` is absent
-/// (e.g. on rolling releases), only the `ID` is returned.
-/// Read `PRETTY_NAME` from Linux `/etc/os-release`-formatted content.
+/// Returns `None` when no `ID=` line appears; otherwise it returns `ID` or
+/// `ID VERSION_ID`. Values have only surrounding double-quote characters
+/// trimmed: this is not a shell parser and does not process escapes or comments.
+/// If a key occurs more than once, the last matching line wins.
 pub fn parse_os_release(content: &str) -> Option<String> {
     let mut id = None;
     let mut version_id = None;
@@ -103,9 +107,10 @@ pub fn parse_os_release(content: &str) -> Option<String> {
     })
 }
 
-/// Removes characters from the end of the string if its length is greater than `max_chars` and
-/// appends "..." to the string. Returns string unchanged if its length is smaller than max_chars.
-/// Truncate to `max_chars` characters and append an ellipsis when text was removed.
+/// Keep at most `max_chars` Unicode scalar values from the start, then append `…`
+/// if text was removed. The output can therefore contain `max_chars + 1` chars.
+/// A debug assertion expects `max_chars >= 5`; the limit counts scalar values,
+/// not bytes or grapheme clusters.
 pub fn truncate_and_trailoff(s: &str, max_chars: usize) -> String {
     debug_assert!(max_chars >= 5);
 
@@ -121,9 +126,9 @@ pub fn truncate_and_trailoff(s: &str, max_chars: usize) -> String {
     }
 }
 
-/// Removes characters from the front of the string if its length is greater than `max_chars` and
-/// prepends the string with "...". Returns string unchanged if its length is smaller than max_chars.
-/// Keep the final `max_chars` characters, prefixing an ellipsis when text was removed.
+/// Keep the final `max_chars - 1` Unicode scalar values and prefix `…` when text
+/// was removed. A debug assertion expects `max_chars >= 5`; the limit counts
+/// scalar values, not bytes or grapheme clusters.
 pub fn truncate_and_remove_front(s: &str, max_chars: usize) -> String {
     debug_assert!(max_chars >= 5);
 
@@ -143,10 +148,10 @@ pub fn truncate_and_remove_front(s: &str, max_chars: usize) -> String {
     }
 }
 
-/// Takes only `max_lines` from the string and, if there were more than `max_lines-1`, appends a
-/// a newline and "..." to the string, so that `max_lines` are returned.
-/// Returns string unchanged if its length is smaller than max_lines.
-/// Keep at most `max_lines` lines and append an ellipsis when later lines were removed.
+/// Keep the first `max_lines` lines; when the input has at least that many lines,
+/// drop the last collected line and append `…` on a new line. Joining uses `\n`
+/// and does not preserve a trailing newline. `max_lines` must be greater than
+/// zero; with `max_lines == 1`, truncated output is a newline followed by `…`.
 pub fn truncate_lines_and_trailoff(s: &str, max_lines: usize) -> String {
     let mut lines = s.lines().take(max_lines).collect::<Vec<_>>();
     if lines.len() > max_lines - 1 {
@@ -217,10 +222,15 @@ fn test_truncate_lines_to_byte_limit() {
     );
 }
 
-/// Extend a sorted vector with a sorted sequence of items, maintaining the vector's sort order and
-/// enforcing a maximum length. This also de-duplicates items. Sort the items according to the given callback. Before calling this,
-/// both `vec` and `new_items` should already be sorted according to the `cmp` comparator.
-/// Merge items into a sorted vector, retaining at most `limit` items under `cmp`.
+/// Merge sorted `new_items` into sorted `vec`, using `cmp` for placement and the
+/// size limit.
+///
+/// Both the existing vector and incoming sequence must already be sorted according
+/// to `cmp`. Items comparing equal are treated as duplicates and skipped; among
+/// equal values, the existing vector's item is retained. While `vec.len() < limit`,
+/// new unique items are inserted. Once full, an item is inserted only before an
+/// existing item and the last item is dropped. An initially oversized vector is
+/// not trimmed and remains oversized.
 pub fn extend_sorted<T, I, F>(vec: &mut Vec<T>, new_items: I, limit: usize, mut cmp: F)
 where
     I: IntoIterator<Item = T>,
@@ -987,7 +997,12 @@ fn emoji_regex() -> &'static Regex {
 
 /// Returns true if the given string consists of emojis only.
 /// E.g. "👨‍👩‍👧‍👧👋" will return true, but "👋!" will return false.
-/// Return whether every non-whitespace grapheme in `s` is an emoji.
+/// Return whether every character in `s` is matched by the helper's Unicode
+/// Emoji-property-or-ZWJ pattern. This is a character-pattern check, not
+/// grapheme-cluster validation; an empty string returns `true`, and sequences
+/// containing unmatched characters such as whitespace return `false`. Unicode
+/// Emoji-property characters are accepted even when they are not complete emoji
+/// graphemes (for example, a digit can match).
 pub fn word_consists_of_emojis(s: &str) -> bool {
     let mut prev_end = 0;
     for capture in emoji_regex().find_iter(s) {
@@ -999,8 +1014,10 @@ pub fn word_consists_of_emojis(s: &str) -> bool {
     prev_end == s.len()
 }
 
-/// Similar to `str::split`, but also provides byte-offset ranges of the results. Unlike
-/// `str::split`, this is not generic on pattern types and does not return an `Iterator`.
+/// Split at characters accepted by `pat`, returning each non-empty piece and its
+/// byte-offset range in the original string. Separators and empty pieces are
+/// omitted, unlike some `str::split` cases. Offsets are byte indices, so they can
+/// be used directly to slice the original `&str`.
 pub fn split_str_with_ranges<'s>(
     s: &'s str,
     pat: &dyn Fn(char) -> bool,

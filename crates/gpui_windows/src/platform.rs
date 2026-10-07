@@ -35,7 +35,10 @@ use gpui::*;
 /// Win32 platform implementation owned by the application's UI thread.
 ///
 /// Construction initializes COM/OLE and, in non-headless mode, DirectX and DirectWrite. Dropping
-/// the platform releases those resources after its windows and dispatch loop stop.
+/// the platform releases those resources after its windows and dispatch loop stop. `activate` and
+/// `hide` currently do nothing; `hide_other_apps` and `unhide_other_apps` panic because they are
+/// unimplemented. See the [platform guide](https://docs.rs/gpui-ce/0.2.2/gpui/_documentation/platforms/index.html)
+/// for other target-specific service behavior.
 pub struct WindowsPlatform {
     inner: Rc<WindowsPlatformInner>,
     raw_window_handles: Arc<RwLock<SmallVec<[SafeHwnd; 4]>>>,

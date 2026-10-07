@@ -20,6 +20,16 @@ spec.loader.exec_module(dev)
 
 
 class DevTests(unittest.TestCase):
+    def test_failed_miri_rebuild_keeps_the_running_workbench(self):
+        companion = object()
+        address = ('127.0.0.1', 49000)
+        with patch.object(dev.DocumentationHandler, 'workbench_address', address), \
+             patch.object(dev, 'start_workbench', side_effect=RuntimeError('invalid runtime revision')), \
+             patch.object(dev, 'stop_workbench') as stop:
+            self.assertIs(dev.restart_workbench(companion, {}, 1111), companion)
+            self.assertEqual(dev.DocumentationHandler.workbench_address, address)
+            stop.assert_not_called()
+
     def test_miri_binary_frames_and_cancellation_use_the_same_origin_proxy(self):
         requests = []
         frame = b'GPUIREP3\x00\xff\x80\x00'

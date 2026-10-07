@@ -162,10 +162,12 @@ impl<'a, T: 'static> Context<'a, T> {
 
     /// Subscribes to typed events emitted by another entity.
     ///
-    /// The emitter must implement [`EventEmitter<Evt>`]. Registration is
-    /// deferred until effect processing; install it before the update that
-    /// emits the event. The callback runs during app effect processing with
-    /// exclusive access to this entity. Retain the returned subscription.
+    /// The emitter must implement [`EventEmitter<Evt>`]. Registration and
+    /// delivery are deferred until effect processing; effects run in queue
+    /// order, so a subscription registered before an emission in the same
+    /// update is active for that emission. The callback runs after the current
+    /// entity borrow ends, with exclusive access to this entity. Retain the
+    /// returned subscription.
     pub fn subscribe<T2, Evt>(
         &mut self,
         entity: &Entity<T2>,
@@ -190,7 +192,8 @@ impl<'a, T: 'static> Context<'a, T> {
     /// Subscribes to typed events emitted by this entity.
     ///
     /// Registration and delivery follow [`subscribe`](Self::subscribe). The
-    /// callback runs after the emitting update has released its entity borrow.
+    /// callback runs during effect processing after the emitting update has
+    /// released its entity borrow.
     ///
     /// > [!WARNING]
     /// > The callback retains this entity strongly. Store the returned subscription
@@ -295,8 +298,10 @@ impl<'a, T: 'static> Context<'a, T> {
 
     /// Runs a callback as the application begins quitting.
     ///
-    /// The returned future is polled for at most [`crate::SHUTDOWN_TIMEOUT`].
-    /// Work that needs more time should be persisted before requesting quit.
+    /// Native applications poll the returned future for at most
+    /// [`crate::SHUTDOWN_TIMEOUT`]. On WebAssembly, cleanup is scheduled as
+    /// best effort because the browser event-loop thread cannot block. Persist
+    /// work that needs a completion guarantee before requesting quit.
     pub fn on_app_quit<Fut>(
         &self,
         mut on_quit: impl FnMut(&mut T, &mut Context<T>) -> Fut + 'static,
@@ -393,10 +398,11 @@ impl<'a, T: 'static> Context<'a, T> {
 
     /// Returns a guard that calls `f` when the guard is dropped.
     ///
-    /// The guard keeps only a weak entity handle and an async app context. If
-    /// either is gone at drop time, `f` is skipped. Dropping the guard during
-    /// an update of this same entity still attempts a recursive borrow and
-    /// can panic; use [`App::defer`] when the work needs a later effect cycle.
+    /// The guard holds a weak entity handle. If the entity has been released,
+    /// `f` is skipped. Otherwise, dropping the guard attempts an immediate
+    /// update through [`AsyncApp`]; it panics if the app has been released or
+    /// is already borrowed. Use [`App::defer`] to run cleanup after the current
+    /// app callback returns.
     pub fn on_drop(
         &self,
         f: impl FnOnce(&mut T, &mut Context<T>) + 'static,
@@ -410,8 +416,8 @@ impl<'a, T: 'static> Context<'a, T> {
 
     /// Focuses the handle returned by another view's [`Focusable`] implementation.
     ///
-    /// The view must already attach that handle to its element tree. Reading
-    /// this same entity through `view` during its update panics; use
+    /// The view must attach that handle when rendering for its element to
+    /// receive focused input. Reading this same entity through `view` during its update panics; use
     /// [`focus_self`](Self::focus_self) to focus the entity being updated.
     pub fn focus_view<W: Focusable>(&mut self, view: &Entity<W>, window: &mut Window) {
         window.focus(&view.focus_handle(self), self);

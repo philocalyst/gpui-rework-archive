@@ -2321,6 +2321,10 @@ impl Window {
     }
 
     /// Builds and installs a new root view, then schedules a redraw.
+    ///
+    /// The replacement changes the type checked by any existing [`WindowHandle`]; a handle for
+    /// the previous root type will fail its next typed read or update. The returned entity is a
+    /// clone of the new root and can be retained independently of the handle.
     pub fn replace_root<E>(
         &mut self,
         cx: &mut App,
@@ -2352,7 +2356,10 @@ impl Window {
             .map(|view| view.clone().downcast::<E>().ok())
     }
 
-    /// Obtain a handle to the window that belongs to this context.
+    /// Returns a copyable identity for this window.
+    ///
+    /// The handle does not keep the native window alive. Store it to reacquire the window later
+    /// through an [`AppContext`]; operations fail after the window closes.
     pub fn window_handle(&self) -> AnyWindowHandle {
         self.handle
     }
@@ -2365,7 +2372,10 @@ impl Window {
         }
     }
 
-    /// Close this window.
+    /// Marks this window for removal from the app.
+    ///
+    /// The app removes it after the current window update finishes. Use the platform close
+    /// callback when the user requests a close that may be vetoed.
     pub fn remove_window(&mut self) {
         self.removed = true;
     }
@@ -2495,11 +2505,11 @@ impl Window {
         self.platform_window.request_decorations(decorations);
     }
 
-    /// Set the exclusive zone for a layer-shell surface: how much screen space it
-    /// reserves so other surfaces avoid occluding it (e.g. a panel reserving space).
-    /// Positive values reserve that distance from the anchored edge, 0 lets the
-    /// surface be moved out of others' exclusive zones, and -1 ignores reserved
-    /// space and may extend under other surfaces. (Wayland layer-shell windows only)
+    /// Sets the exclusive zone for a Wayland layer-shell surface.
+    ///
+    /// A positive logical-pixel distance reserves space from the anchored edge. Zero lets the
+    /// compositor place the surface in other exclusive zones; `-1` opts out of exclusive-zone
+    /// handling. The value is ignored by backends without layer-shell support.
     pub fn set_exclusive_zone(&self, zone: Pixels) {
         self.platform_window.set_exclusive_zone(zone);
     }
@@ -2520,8 +2530,10 @@ impl Window {
         }
     }
 
-    /// Linux (wayland) only: Set the window's input region, the area that receives pointer
-    /// and touch input. Events outside it pass through to whatever is below the window.
+    /// Sets the Wayland surface's input region in logical window coordinates.
+    ///
+    /// Pointer and touch events outside the region pass through to surfaces below this one. Other
+    /// backends may ignore the request.
     ///
     /// - `Some(rects)` restricts input to the union of `rects`, in window coordinates.
     /// - `Some(&[])` is an empty region, so the window receives no pointer or touch input.
@@ -2530,12 +2542,18 @@ impl Window {
         self.platform_window.set_input_region(region);
     }
 
-    /// Returns the platform bounds to use when restoring or reopening this window.
+    /// Returns the platform bounds and state to use when restoring or reopening this window.
+    ///
+    /// The value may preserve windowed, maximized, or fullscreen state rather than just the
+    /// current rectangle. Use [`Self::inner_window_bounds`] when restoration should exclude
+    /// client-decoration insets where the backend reports them.
     pub fn window_bounds(&self) -> WindowBounds {
         self.platform_window.window_bounds()
     }
 
-    /// Returns the window bounds excluding client-decoration insets where supported.
+    /// Returns restoration bounds excluding client-decoration insets where supported.
+    ///
+    /// Backends without separate client decorations return the same value as [`Self::window_bounds`].
     pub fn inner_window_bounds(&self) -> WindowBounds {
         self.platform_window.inner_window_bounds()
     }
@@ -2930,26 +2948,33 @@ impl Window {
         self.platform_window.zoom();
     }
 
-    /// Opens the native title bar context menu, useful when implementing client side decorations (Wayland and X11)
+    /// Open the native titlebar context menu at a logical window-local point.
+    ///
+    /// Useful for custom client-side decorations on Wayland and X11; unsupported backends may
+    /// ignore the request.
     pub fn show_window_menu(&self, position: Point<Pixels>) {
         self.platform_window.show_window_menu(position)
     }
 
-    /// Handle window movement for Linux and macOS.
-    /// Tells the compositor to take control of window movement (Wayland and X11)
+    /// Ask the native window manager to move the window from the current pointer gesture.
     ///
-    /// Events may not be received during a move operation.
+    /// Used by custom titlebars on Wayland, X11, and macOS. The window manager owns the move;
+    /// GPUI may not receive pointer events until the operation ends.
     pub fn start_window_move(&self) {
         self.platform_window.start_window_move()
     }
 
-    /// When using client side decorations, set this to the width of the invisible decorations (Wayland and X11)
+    /// Set the logical-pixel inset occupied by invisible client-side decorations.
+    ///
+    /// Used by custom titlebars on Wayland and X11 to keep content aligned with the native frame.
+    /// The value is also forwarded to the backend; `None` from [`Self::client_inset`] means no
+    /// inset has been set through this API.
     pub fn set_client_inset(&mut self, inset: Pixels) {
         self.client_inset = Some(inset);
         self.platform_window.set_client_inset(inset);
     }
 
-    /// Returns the client_inset value by [`Self::set_client_inset`].
+    /// Return the inset most recently set through [`Self::set_client_inset`], if any.
     pub fn client_inset(&self) -> Option<Pixels> {
         self.client_inset
     }
@@ -2969,18 +2994,20 @@ impl Window {
         self.is_minimizable
     }
 
-    /// Returns the controls supported by the platform.
+    /// Return the native window controls reported by the backend.
+    ///
+    /// This describes available controls; it does not imply that the application draws them.
     pub fn window_controls(&self) -> WindowControls {
         self.platform_window.window_controls()
     }
 
-    /// Updates the window's title at the platform level.
+    /// Update the native window title and the window title exposed to accessibility.
     pub fn set_window_title(&mut self, title: &str) {
         self.platform_window.set_title(title);
         self.a11y.set_window_title(title.to_string());
     }
 
-    /// Sets the position of the macOS traffic light buttons.
+    /// Position macOS traffic-light buttons in logical window-local coordinates.
     #[cfg(target_os = "macos")]
     pub fn set_traffic_light_position(&self, position: Point<Pixels>) {
         self.platform_window.set_traffic_light_position(position);
@@ -3002,13 +3029,17 @@ impl Window {
         self.platform_window.set_edited(edited);
     }
 
-    /// Set the path of the file this window represents.
-    /// On macOS, this sets the window's accessibility document property (AXDocument).
+    /// Associate a document path with this window, or clear the association with `None`.
+    ///
+    /// On macOS this also sets the window's accessibility document property (`AXDocument`).
     pub fn set_document_path(&self, path: Option<&std::path::Path>) {
         self.platform_window.set_document_path(path);
     }
 
-    /// Determine the display on which the window is visible.
+    /// Returns the display currently associated with this window, if it can be identified.
+    ///
+    /// The result is resolved from the display ID last reported by the platform; it can be `None`
+    /// before a resize/display-change notification or when the backend exposes no matching display.
     pub fn display(&self, cx: &App) -> Option<Rc<dyn PlatformDisplay>> {
         cx.platform
             .displays()
@@ -3055,8 +3086,10 @@ impl Window {
         self.rem_size = rem_size.into();
     }
 
-    /// Acquire a globally unique identifier for the given ElementId.
-    /// Only valid for the duration of the provided closure.
+    /// Builds the full element ID for `element_id` and lends it to `f`.
+    ///
+    /// The ID includes the current parent ID stack. It is suitable for keyed state during the
+    /// closure, but the borrowed [`GlobalElementId`] must not be retained after `f` returns.
     pub fn with_global_id<R>(
         &mut self,
         element_id: ElementId,
@@ -3069,7 +3102,11 @@ impl Window {
         })
     }
 
-    /// Calls the provided closure with the element ID pushed on the stack.
+    /// Pushes `element_id` onto the element ID path for the duration of `f`.
+    ///
+    /// Nested calls build a [`GlobalElementId`](crate::GlobalElementId) from the full path. Use a
+    /// stable value for the same logical element across frames and a distinct value for repeated
+    /// siblings.
     #[inline]
     pub fn with_id<R>(
         &mut self,
@@ -3109,26 +3146,35 @@ impl Window {
         self.text_style().line_height_in_pixels(self.rem_size())
     }
 
-    /// Rounds a logical value to the nearest device pixel.
+    /// Snaps a logical-pixel value to the nearest device-pixel boundary.
+    ///
+    /// The returned value remains in logical pixels. Use this for crisp edges; do not multiply
+    /// the result by [`Self::scale_factor`] before passing it to layout or paint APIs.
     #[inline]
     pub fn pixel_snap(&self, value: Pixels) -> Pixels {
         px(round_to_device_pixel(value.0, self.scale_factor()) / self.scale_factor())
     }
 
-    /// f64 variant of [`Self::pixel_snap`].
+    /// Snaps an `f64` logical-pixel value to the nearest device-pixel boundary.
+    ///
+    /// Like [`Self::pixel_snap`], this returns logical pixels and is useful when calculations
+    /// need more precision than [`Pixels`] stores.
     #[inline]
     pub fn pixel_snap_f64(&self, value: f64) -> f64 {
         let scale_factor = f64::from(self.scale_factor());
         round_half_toward_zero_f64(value * scale_factor) / scale_factor
     }
 
-    /// Snaps a bounds' origin and size to the nearest device pixel.
+    /// Snaps each coordinate of a logical-pixel rectangle to a device-pixel boundary.
+    ///
+    /// The origin and far edge are snapped independently, so the returned size can differ from
+    /// the input size. The returned bounds remain in logical pixels.
     #[inline]
     pub fn pixel_snap_bounds(&self, bounds: Bounds<Pixels>) -> Bounds<Pixels> {
         bounds.map(|c| self.pixel_snap(c))
     }
 
-    /// Snaps a point's coordinates to the nearest device pixel.
+    /// Snaps a logical-pixel point to device-pixel boundaries, returning logical pixels.
     #[inline]
     pub fn pixel_snap_point(&self, position: Point<Pixels>) -> Point<Pixels> {
         position.map(|c| self.pixel_snap(c))
@@ -3187,12 +3233,17 @@ impl Window {
         self.default_prevented = true;
     }
 
-    /// Obtain whether default has been prevented for the event currently being dispatched.
+    /// Returns whether the current input event's default action has been prevented.
+    ///
+    /// The flag is reset between event dispatches. It is separate from stopping propagation.
     pub fn default_prevented(&self) -> bool {
         self.default_prevented
     }
 
-    /// Determine whether the given action is available along the dispatch path to the currently focused element.
+    /// Checks whether `action` is available on the current rendered dispatch path to the focused element.
+    ///
+    /// Availability uses key contexts and listeners from the most recently rendered frame. If no
+    /// focused node is present, GPUI checks the window's root dispatch path.
     pub fn is_action_available(&self, action: &dyn Action, cx: &App) -> bool {
         let node_id =
             self.focus_node_id_in_rendered_frame(self.focused(cx).map(|handle| handle.id));
@@ -3201,7 +3252,10 @@ impl Window {
             .is_action_available(action, node_id)
     }
 
-    /// Determine whether the given action is available along the dispatch path to the given focus_handle.
+    /// Checks action availability using the rendered dispatch path for `focus_handle`.
+    ///
+    /// This is useful for querying a candidate focus target without changing focus. If the handle
+    /// has no node in the current frame, availability is checked from the root.
     pub fn is_action_available_in(&self, action: &dyn Action, focus_handle: &FocusHandle) -> bool {
         let node_id = self.focus_node_id_in_rendered_frame(Some(focus_handle.id));
         self.rendered_frame
@@ -3248,7 +3302,7 @@ impl Window {
         self.long_press_capture == Some(entity.entity_id())
     }
 
-    /// The current state of the keyboard's modifiers
+    /// Returns the modifier state from the most recently received platform input.
     pub fn modifiers(&self) -> Modifiers {
         self.modifiers
     }
@@ -3263,13 +3317,18 @@ impl Window {
         self.last_input_modality == InputModality::Touch
     }
 
-    /// The current state of the keyboard's capslock
+    /// Returns the Caps Lock state from the most recently received platform input.
     pub fn capslock(&self) -> Capslock {
         self.capslock
     }
 
-    /// Produces a new frame and assigns it to `rendered_frame`. To actually show
-    /// the contents of the new [`Scene`], call `present_if_needed`.
+    /// Builds the next frame and makes it the current rendered frame.
+    ///
+    /// This runs layout, prepaint, paint, focus notifications, and accessibility updates. It does
+    /// not submit the scene to the native renderer; the platform frame loop presents it afterward.
+    /// The returned arena token must be cleared through [`ArenaClearNeeded::clear`] before the
+    /// app reuses the element arena. Test and benchmark callers that draw synchronously must also
+    /// present the frame when they need renderer output.
     #[profiling::function]
     pub fn draw(&mut self, cx: &mut App) -> ArenaClearNeeded {
         // Drain every draw in profiler builds so a previous frame's
@@ -4026,8 +4085,12 @@ impl Window {
         }
     }
 
-    /// Updates the global element offset relative to the current offset. This is used to implement
-    /// scrolling. This method should only be called during the prepaint phase of element drawing.
+    /// Adds a logical-pixel offset to the current element offset for this prepaint scope.
+    ///
+    /// Descendant layout bounds and hitboxes use the resulting window-local offset, which is how
+    /// scrolling shifts both what is painted and where input lands. Use
+    /// [`Self::with_absolute_element_offset`] when the supplied point should replace the current
+    /// offset. This method is only valid during prepaint.
     pub fn with_element_offset<R>(
         &mut self,
         offset: Point<Pixels>,
@@ -4059,9 +4122,11 @@ impl Window {
         self.style_transition_containing_bounds
     }
 
-    /// Updates the global element offset based on the given offset. This is used to implement
-    /// drag handles and other manual painting of elements. This method should only be called during
-    /// the prepaint phase of element drawing.
+    /// Sets the element offset to `offset` for this prepaint scope, replacing the current offset.
+    ///
+    /// The point is in logical window-local pixels and affects descendant layout bounds and
+    /// hitboxes. Use [`Self::with_element_offset`] to add to the current offset. This method is
+    /// only valid during prepaint.
     pub fn with_absolute_element_offset<R>(
         &mut self,
         offset: Point<Pixels>,
@@ -4092,11 +4157,13 @@ impl Window {
         result
     }
 
-    /// Perform prepaint on child elements in a "retryable" manner, so that any side effects
-    /// of prepaints can be discarded before prepainting again. This is used to support autoscroll
-    /// where we need to prepaint children to detect the autoscroll bounds, then adjust the
-    /// element offset and prepaint again. See [`crate::List`] for an example. This method should only be
-    /// called during the prepaint phase of element drawing.
+    /// Run prepaint work transactionally so it can be retried without keeping its frame records.
+    ///
+    /// If `f` returns `Err`, hitboxes, tooltip requests, deferred draws, dispatch nodes, accessed
+    /// element-state records, and text layouts created by the closure are truncated. Other side
+    /// effects, including mutations to entities or external state, are not rolled back. This is
+    /// used by autoscrolling containers that prepaint once to measure, adjust an offset, then
+    /// prepaint again. See [`crate::List`]. Only call during prepaint.
     pub fn transact<T, U>(&mut self, f: impl FnOnce(&mut Self) -> Result<T, U>) -> Result<T, U> {
         self.invalidator.debug_assert_prepaint();
         let index = self.prepaint_index();
@@ -4120,18 +4187,20 @@ impl Window {
         result
     }
 
-    /// When you call this method during the element prepaint phase, containing elements will attempt to
-    /// scroll to cause the specified bounds to become visible. When they decide to autoscroll, they will call
-    /// prepaint again with a new set of bounds. See [`crate::List`] for an example of an element
-    /// that supports this method being called on the elements it contains. This method should only be
-    /// called during the prepaint phase of element drawing.
+    /// Ask containing elements to scroll until these logical window-local bounds are visible.
+    ///
+    /// A scrollable ancestor can consume the request and retry prepaint after changing its
+    /// offset, so the final frame may use a different position. Requests are frame-local and
+    /// should be made during prepaint. See [`crate::List`] for a container that handles them.
     pub fn request_autoscroll(&mut self, bounds: Bounds<Pixels>) {
         self.invalidator.debug_assert_prepaint();
         self.requested_autoscroll = Some(bounds);
     }
 
-    /// This method can be called from a containing element such as [`crate::List`] to support the autoscroll behavior
-    /// described in [`Self::request_autoscroll`].
+    /// Take the pending child autoscroll request during prepaint.
+    ///
+    /// Taking it clears the request; containing elements such as [`crate::List`] use this to
+    /// decide whether to adjust their scroll offset and retry child prepaint.
     pub fn take_autoscroll(&mut self) -> Option<Bounds<Pixels>> {
         self.invalidator.debug_assert_prepaint();
         self.requested_autoscroll.take()
@@ -4434,7 +4503,10 @@ impl Window {
         Transition::new(state, motion)
     }
 
-    /// Executes the given closure within the context of a tab group.
+    /// Collect tab stops in a group with an optional ordering index.
+    ///
+    /// Lower indices sort before higher indices inside the group; `None` leaves the current tab
+    /// group unchanged. The scope only affects tab navigation order in the frame being built.
     #[inline]
     pub fn with_tab_group<R>(&mut self, index: Option<isize>, f: impl FnOnce(&mut Self) -> R) -> R {
         if let Some(index) = index {
@@ -4770,9 +4842,11 @@ impl Window {
         }
     }
 
-    /// Paint one or more quads into the scene for the next frame at the current stacking context.
-    /// Quads are colored rectangular regions with an optional background, border, and corner radius.
-    /// see [`fill`], [`outline`], and [`quad`] to construct this type.
+    /// Paint one or more quads into the next frame's scene at the current stacking context.
+    ///
+    /// Quad bounds are logical window-local pixels. GPUI snaps them to the device-pixel grid,
+    /// applies the current content mask and element opacity, and records them for presentation.
+    /// Use [`fill`], [`outline`], or [`quad`] to construct a quad.
     ///
     /// This method should only be called as part of the paint phase of element drawing.
     ///
@@ -4786,8 +4860,16 @@ impl Window {
         self.paint_quad_with_corner_smoothing(quad, 0.0);
     }
 
-    /// Imports a portable GPUI scene into this window's atlas. Keep the returned
-    /// value alive while displaying it; unused atlas resources are released on drop.
+    /// Uploads a captured scene's bitmap resources into this window's atlas.
+    ///
+    /// Retain `resources` between imports to reuse identical pixels, and keep
+    /// the returned [`ImportedScene`](crate::ImportedScene) alive while painting it.
+    /// Dropping the last imported scene that uses a resource releases its atlas
+    /// allocation; the resource cache holds only weak references.
+    ///
+    /// Returns an error for an invalid capture or a failed atlas upload. Import
+    /// before calling [`paint_scene`](Self::paint_scene); importing alone draws
+    /// nothing and installs no input listeners.
     pub fn import_scene_capture(
         &mut self,
         capture: &crate::SceneCapture,
@@ -4797,9 +4879,17 @@ impl Window {
     }
 
     /// Paints an imported GPUI scene through this window's normal renderer.
-    /// `source_scale_factor` is the density used when the source window drew it.
-    /// Layout coordinates are translated to `destination.origin`, retaining their logical size.
-    /// Call this during an element's paint phase, just like `paint_quad`.
+    ///
+    /// `source_scale_factor` is the display density used when the source window
+    /// drew the scene. GPUI converts it to this window's density and translates
+    /// logical coordinates to `destination.origin`. The destination size clips
+    /// the scene; it does not stretch it to fill the rectangle. The ancestor
+    /// content mask and current element opacity also apply.
+    ///
+    /// Call during an element's paint phase, like [`paint_quad`](Self::paint_quad).
+    /// Input routing and focus remain the embedding element's responsibility.
+    /// Returns an error if the resulting density ratio is not positive and
+    /// finite. Debug builds panic when called outside paint.
     pub fn paint_scene(
         &mut self,
         scene: &crate::ImportedScene,
@@ -5156,9 +5246,11 @@ impl Window {
         self.paint_glyph_from_atlas(integer_origin, params, color, self.element_opacity())
     }
 
-    /// Paint a monochrome SVG into the scene for the next frame at the current stacking context.
+    /// Paint a monochrome SVG into the next frame's scene at the current stacking context.
     ///
-    /// This method should only be called as part of the paint phase of element drawing.
+    /// `bounds` and the active content mask use logical window-local pixels. The SVG is rasterized
+    /// into this window's sprite atlas; decode, rasterization, or atlas errors are returned. Call
+    /// only during paint.
     pub fn paint_svg(
         &mut self,
         bounds: Bounds<Pixels>,
@@ -5349,9 +5441,10 @@ impl Window {
         Ok(())
     }
 
-    /// Paint a surface into the scene for the next frame at the current z-index.
+    /// Paint a surface into the next frame's scene at the current z-index.
     ///
-    /// This method should only be called as part of the paint phase of element drawing.
+    /// `bounds` use logical window-local pixels and are snapped to device pixels. The current
+    /// content mask and element opacity are applied. Call only during paint.
     pub fn paint_surface(
         &mut self,
         bounds: Bounds<Pixels>,
@@ -5403,11 +5496,11 @@ impl Window {
             })
     }
 
-    /// Add a node to the layout tree for the current frame. Takes the `Style` of the element for which
-    /// layout is being requested, along with the layout ids of any children. This method is called during
-    /// calls to the element layout-request method and enables any element to participate in layout.
+    /// Add a node to this frame's layout tree from a style and child layout IDs.
     ///
-    /// This method should only be called as part of the request_layout or prepaint phase of element drawing.
+    /// The returned ID is valid only for this frame's layout tree. Build child IDs first, then
+    /// request the parent; call [`Self::compute_layout`] during prepaint before asking for bounds.
+    /// Only call during layout request or prepaint.
     #[must_use]
 // docs:examples:begin
 #[doc = include_str!("docs/examples/gpui-Window-request-layout-a55457ac.md")]
@@ -5433,12 +5526,11 @@ impl Window {
         )
     }
 
-    /// Add a node to the layout tree for the current frame. Instead of taking a `Style` and children,
-    /// this variant takes a function that is invoked during layout so you can use arbitrary logic to
-    /// determine the element's size. One place this is used internally is when measuring text.
+    /// Add a measured node to this frame's layout tree.
     ///
-    /// The given closure is invoked at layout time with the known dimensions and available space and
-    /// returns a `Size`.
+    /// The closure runs during layout with known dimensions and available space, and returns the
+    /// node's logical-pixel size. Its result participates in the parent constraints like a normal
+    /// styled node. The returned ID is frame-local.
     ///
     /// This method should only be called as part of the request_layout or prepaint phase of element drawing.
     pub fn request_measured_layout<F>(&mut self, style: Style, measure: F) -> LayoutId
@@ -5456,11 +5548,11 @@ impl Window {
             .request_measured_layout(style, rem_size, scale_factor, measure)
     }
 
-    /// Compute the layout for the given id within the given available space.
-    /// This method is called for its side effect, typically by the framework prior to painting.
-    /// After calling it, you can request the bounds of the given layout node id or any descendant.
+    /// Compute a requested layout subtree within the supplied available space.
     ///
-    /// This method should only be called as part of the prepaint phase of element drawing.
+    /// After computation, [`Self::layout_bounds`] can read logical window-local bounds for this
+    /// node and its descendants. The ID belongs to the current frame's layout tree. Call during
+    /// prepaint before painting the subtree.
     pub fn compute_layout(
         &mut self,
         layout_id: LayoutId,
@@ -5480,10 +5572,10 @@ impl Window {
         self.layout_engine = Some(layout_engine);
     }
 
-    /// Obtain the bounds computed for the given LayoutId relative to the window. This method will usually be invoked by
-    /// GPUI itself automatically in order to pass your element its `Bounds` automatically.
+    /// Return computed bounds for `layout_id` in logical window-local pixels.
     ///
-    /// This method should only be called as part of element drawing.
+    /// The current element offset is included, and coordinates are snapped to the device-pixel
+    /// grid. The ID must belong to the layout tree computed for this frame. Call during prepaint.
     pub fn layout_bounds(&mut self, layout_id: LayoutId) -> Bounds<Pixels> {
         self.invalidator.debug_assert_prepaint();
 
@@ -5684,20 +5776,22 @@ impl Window {
             .map(|layout_engine| layout_engine.vertical_align(layout_id))
     }
 
-    /// This method should be called during `prepaint`. You can use the returned [Hitbox]
-    /// during `paint` or in an event handler to determine whether the inserted hitbox was the topmost.
+    /// Add a logical window-local hit region to this frame and return its identity.
+    ///
+    /// The current content mask is captured with the hitbox. Use the returned [`Hitbox`] during
+    /// paint or event handling to query hover and occlusion. Hitboxes are frame-local and must be
+    /// inserted during prepaint.
     ///
     /// This method should only be called as part of the prepaint phase of element drawing.
     pub fn insert_hitbox(&mut self, bounds: Bounds<Pixels>, behavior: HitboxBehavior) -> Hitbox {
         self.insert_hitbox_mut(bounds, behavior).clone()
     }
 
-    /// This method should be called during `prepaint`. You can use the returned [Hitbox]
-    /// during `paint` or in an event handler to determine whether the inserted hitbox was the topmost.
+    /// Add a logical window-local hit region and return a mutable reference to its frame record.
     ///
-    /// Returns a mutable reference to the hitbox inserted for the next frame.
-    ///
-    /// This method should only be called as part of the prepaint phase of element drawing.
+    /// The current content mask is captured with the hitbox. Use the returned [`Hitbox`] during
+    /// paint or event handling to query hover and occlusion. The reference is valid while building
+    /// this frame's prepaint records; call only during prepaint.
     pub fn insert_hitbox_mut(
         &mut self,
         bounds: Bounds<Pixels>,
@@ -5759,7 +5853,10 @@ impl Window {
         self.next_frame.dispatch_tree.set_view_id(view_id);
     }
 
-    /// Get the entity ID for the currently rendering view
+    /// Get the entity ID of the view whose element is currently drawing.
+    ///
+    /// This is available only while a view is on the render stack, during prepaint or paint;
+    /// calling it outside view drawing panics.
     pub fn current_view(&self) -> EntityId {
         self.invalidator.debug_assert_paint_or_prepaint();
         self.rendered_entity_stack.last().copied().unwrap()
@@ -5777,7 +5874,10 @@ impl Window {
         result
     }
 
-    /// Executes the provided function with the specified image cache.
+    /// Run drawing work with `image_cache` selected for image lookups.
+    ///
+    /// Passing `None` leaves the current cache selection unchanged. A supplied cache is scoped to
+    /// the closure and restored afterward.
     pub fn with_image_cache<F, R>(&mut self, image_cache: Option<AnyImageCache>, f: F) -> R
     where
         F: FnOnce(&mut Self) -> R,
@@ -5840,7 +5940,9 @@ impl Window {
     /// is determined by the first parameter of the given listener. When the next frame is rendered
     /// the listener will be cleared.
     ///
-    /// This method should only be called as part of the paint phase of element drawing.
+    /// The callback receives capture and bubble phases on the dispatch path for the hit target.
+    /// Register it during paint for the frame being built; it remains associated with that
+    /// rendered frame until a later frame replaces or reuses the listener record.
     pub fn on_mouse_event<Event: MouseEvent>(
         &mut self,
         mut listener: impl FnMut(&Event, DispatchPhase, &mut Window, &mut App) + 'static,
@@ -5858,7 +5960,9 @@ impl Window {
 
     /// Observes raw touch input before gesture recognition for the next painted frame.
     /// Stopping propagation transfers gesture recognition to the listener, which is
-    /// useful when embedding another GPUI window's input surface.
+    /// useful when embedding another GPUI window's input surface. The callback participates in
+    /// capture and bubble dispatch and is discarded when a later frame omits this registration.
+    /// Register it during paint.
     pub fn on_touch_event(
         &mut self,
         mut listener: impl FnMut(&TouchEvent, DispatchPhase, &mut Window, &mut App) + 'static,
@@ -5871,8 +5975,9 @@ impl Window {
         })));
     }
 
-    /// Observes native file drops before their conversion to mouse drag events.
-    /// Stopping propagation lets an embedded GPUI window own the drop.
+    /// Observes native file drops before their conversion to mouse drag events for the next frame.
+    /// Stopping propagation lets an embedded GPUI window own the drop. The listener participates
+    /// in capture and bubble dispatch and must be registered during paint.
     pub fn on_file_drop_event(
         &mut self,
         mut listener: impl FnMut(&crate::FileDropEvent, DispatchPhase, &mut Window, &mut App) + 'static,
@@ -5925,9 +6030,10 @@ impl Window {
         ));
     }
 
-    /// Register a listener to be called when the given focus handle or one of its descendants receives focus.
-    /// This does not fire if the given focus handle - or one of its descendants - was previously focused.
-    /// Returns a subscription and persists until the subscription is dropped.
+    /// Listen for focus entering `handle` or one of its descendants.
+    ///
+    /// It does not fire if focus was already within that subtree. The returned subscription keeps
+    /// the listener active until dropped; callbacks run during normal focus-event processing.
     pub fn on_focus_in(
         &mut self,
         handle: &FocusHandle,
@@ -5946,8 +6052,11 @@ impl Window {
         subscription
     }
 
-    /// Register a listener to be called when the given focus handle or one of its descendants loses focus.
-    /// Returns a subscription and persists until the subscription is dropped.
+    /// Listen for focus leaving `handle` or one of its descendants.
+    ///
+    /// The event identifies the leaf that lost focus through a weak focus handle. The returned
+    /// subscription keeps the listener active until dropped; callbacks run during normal
+    /// focus-event processing.
     pub fn on_focus_out(
         &mut self,
         handle: &FocusHandle,
@@ -7001,9 +7110,10 @@ impl Window {
         });
     }
 
-    /// Present a platform dialog.
-    /// The provided message will be presented, along with buttons for each answer.
-    /// When a button is clicked, the returned Receiver will receive the index of the clicked button.
+    /// Present a native prompt when available, otherwise show GPUI's custom prompt.
+    ///
+    /// The returned receiver resolves to the zero-based index of the selected answer. The prompt
+    /// is modal to this window; re-entrant prompting while another prompt is being built panics.
     pub fn prompt<T>(
         &mut self,
         level: PromptLevel,
@@ -7181,7 +7291,9 @@ impl Window {
         Some(context_stack)
     }
 
-    /// Returns a generic event listener that invokes the given listener with the view and context associated with the given view handle.
+    /// Build an event listener that updates a view while handling the event.
+    ///
+    /// The captured entity is weak: if it has been released, the callback silently does nothing.
     pub fn listener_for<T: 'static, E>(
         &self,
         view: &Entity<T>,
@@ -7193,7 +7305,9 @@ impl Window {
         }
     }
 
-    /// Returns a generic handler that invokes the given handler with the view and context associated with the given view handle.
+    /// Build a handler that updates an entity with its typed context.
+    ///
+    /// The captured entity is weak: if it has been released, the callback silently does nothing.
     pub fn handler_for<E: 'static, Callback: Fn(&mut E, &mut Window, &mut Context<E>) + 'static>(
         &self,
         entity: &Entity<E>,
@@ -7205,8 +7319,10 @@ impl Window {
         }
     }
 
-    /// Register a callback that can interrupt the closing of the current window based the returned boolean.
-    /// If the callback returns false, the window won't be closed.
+    /// Register the callback for a native close request.
+    ///
+    /// Return `false` to veto closing and `true` to allow it. If the app context is no longer
+    /// available when the native callback runs, GPUI allows the close.
     pub fn on_window_should_close(
         &self,
         cx: &App,
@@ -7814,9 +7930,11 @@ impl<V: 'static + Render> WindowHandle<V> {
         })?
     }
 
-    /// Read the root view out of this window.
+    /// Read the root view while borrowing the app.
     ///
-    /// This will fail if the window is closed or if the root view's type does not match `V`.
+    /// The returned reference is tied to `cx`. This fails if the window is closed or if the live
+    /// root view's type does not match `V`. Use [`Self::read_with`] when the caller has an
+    /// [`AppContext`] rather than an `App` borrow, and [`Self::update`] when the root must change.
     pub fn read<'a>(&self, cx: &'a App) -> Result<&'a V> {
         let x = cx
             .windows
@@ -7833,9 +7951,11 @@ impl<V: 'static + Render> WindowHandle<V> {
         Ok(x.read(cx))
     }
 
-    /// Read the root view out of this window, with a callback
+    /// Read the root view through an app-context callback.
     ///
-    /// This will fail if the window is closed or if the root view's type does not match `V`.
+    /// Use this when the caller has a generic [`AppContext`] or needs to compute a result without
+    /// returning a reference tied to a particular app borrow. It fails if the window is closed or
+    /// if the live root view's type does not match `V`.
     pub fn read_with<C, R>(&self, cx: &C, read_with: impl FnOnce(&V, &App) -> R) -> Result<R>
     where
         C: AppContext,
@@ -7977,29 +8097,31 @@ impl HasDisplayHandle for Window {
     }
 }
 
-/// An identifier for a rendered element.
+/// An identity component for a rendered element.
 ///
-/// Can be constructed with a string, a number, or both, as well
-/// as other internal representations.
+/// GPUI combines the element's nested IDs into a [`GlobalElementId`](crate::GlobalElementId) for
+/// retained element state and related per-element bookkeeping. Reuse the same ID for the same
+/// logical element across frames; use distinct IDs for repeated siblings. `CodeLocation` is
+/// convenient for a fixed call site, while list items generally need an item-specific key.
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub enum ElementId {
-    /// The ID of a View element
+    /// The identity of a view entity used as an element ID.
     View(EntityId),
-    /// An integer ID.
+    /// An integer ID, useful for indexed or generated elements.
     Integer(u64),
-    /// A string based ID.
+    /// A string ID, useful for named elements.
     Name(SharedString),
     /// A UUID.
     Uuid(Uuid),
     /// An ID that's equated with a focus handle.
     FocusHandle(FocusId),
-    /// A combination of a name and an integer.
+    /// A name and integer combined into one ID, useful for repeated named children.
     NamedInteger(SharedString, u64),
     /// A path.
     Path(Arc<std::path::Path>),
     /// A code location.
     CodeLocation(core::panic::Location<'static>),
-    /// A labeled child of an element.
+    /// A labeled child ID, preserving its parent identity and adding a child name.
     NamedChild(Arc<ElementId>, SharedString),
     /// A byte array ID (used for text-anchors)
     OpaqueId([u8; 20]),

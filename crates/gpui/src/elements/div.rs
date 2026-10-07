@@ -2,16 +2,21 @@
 //! hitboxes, and registers interaction and accessibility behavior. It resembles an HTML `<div>`
 //! but follows GPUI's frame lifecycle and typed event callbacks.
 //!
-//! # Build your own div
+//! # Build a container or an interactive element
 //!
-//! GPUI does not directly provide APIs for stateful, multi-step events like `click`
-//! and `drag`. We want GPUI users to be able to build their own abstractions for
-//! their own needs. However, as a UI framework, we're also obliged to provide some
-//! building blocks to make the process of building your own elements easier.
-//! For this we have the [`Interactivity`] and the [`StyleRefinement`] structs, as well
-//! as several associated traits. Together, these provide the full suite of Dom-like events
-//! and Tailwind-like styling that you can use to build your own custom elements. Div is
-//! constructed by combining these two systems into an all-in-one element.
+//! [`Div`] provides primitive pointer, keyboard, action, and drag/drop listeners, but it does not
+//! impose a single widget policy for multi-step behaviors. Use its [`on_click`](InteractiveElement::on_click)
+//! and drag callbacks directly when their built-in policy fits. Build a higher-level control when
+//! the component needs its own activation rules, keyboard model, or retained state. The
+//! [`Interactivity`] and [`StyleRefinement`] types, plus [`InteractiveElement`] and
+//! [`StatefulInteractiveElement`], are the building blocks shared by `Div` and custom elements.
+//! `Div` combines those systems with child layout and styling.
+//!
+//! Text and children styled as inline content can share a paragraph. Block children end the
+//! current paragraph and participate as separate flow children; inline child bounds may be made
+//! from several visual fragments when text wraps. A child such as [`crate::InteractiveText`] keeps its
+//! own hit testing and layout as an atomic inline box. GPUI tracks wrapped text fragments during
+//! layout so it can place inline children and derive their bounds across visual lines.
 //!
 //! Event methods follow one dispatch model:
 //!
@@ -901,6 +906,9 @@ impl Interactivity {
 /// [`id`](Self::id) returns a [`Stateful`] wrapper, enabling click, press, and
 /// accessibility builders in [`StatefulInteractiveElement`]. That wrapper's
 /// retained state is associated with its stable ID in the element tree.
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-InteractiveElement-25ee04de.md")]
+// docs:examples:end
 pub trait InteractiveElement: Sized {
     /// Retrieve the interactivity state associated with this element
     fn interactivity(&mut self) -> &mut Interactivity;

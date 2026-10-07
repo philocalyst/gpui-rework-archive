@@ -55,7 +55,11 @@ pub fn utf16_to_utf8_offset(text: &str, utf16_offset: usize) -> usize {
 ///
 /// See [`InputHandler`] for the callback contract for each method.
 pub trait EntityInputHandler: 'static + Sized {
-    /// See [`InputHandler::text_for_range`] for details
+    /// Return the text overlapping a UTF-16 document range.
+    ///
+    /// Set `adjusted_range` to the actual range represented by the returned string when the
+    /// requested range cannot be returned exactly. Return `None` when this handler cannot answer
+    /// the query. See [`InputHandler::text_for_range`] for the platform callback contract.
     fn text_for_range(
         &mut self,
         range: Range<usize>,
@@ -64,7 +68,11 @@ pub trait EntityInputHandler: 'static + Sized {
         cx: &mut Context<Self>,
     ) -> Option<String>;
 
-    /// See [`InputHandler::selected_text_range`] for details
+    /// Return the current selection, including which end is the active head.
+    ///
+    /// Return `None` when no selection can be reported. The `ignore_disabled_input` flag comes
+    /// from the platform query and lets the view decide whether to report selection while text
+    /// input is disabled. See [`InputHandler::selected_text_range`].
     fn selected_text_range(
         &mut self,
         ignore_disabled_input: bool,
@@ -72,24 +80,34 @@ pub trait EntityInputHandler: 'static + Sized {
         cx: &mut Context<Self>,
     ) -> Option<UTF16Selection>;
 
-    /// See [`InputHandler::marked_text_range`] for details
+    /// Return the UTF-16 range currently owned by an IME composition, if any.
+    ///
+    /// `None` means there is no marked/composing range. See [`InputHandler::marked_text_range`].
     fn marked_text_range(
         &self,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> Option<Range<usize>>;
 
-    /// See [`InputHandler::unmark_text`] for details
+    /// End the current marked/composing range without replacing it.
+    ///
+    /// See [`InputHandler::unmark_text`].
     fn unmark_text(&mut self, window: &mut Window, cx: &mut Context<Self>);
 
-    /// See [`InputHandler::paste`] for details
+    /// Handle a platform-initiated paste.
+    ///
+    /// The default implementation inserts the clipboard item's plain-text portion at the current
+    /// selection through [`Self::replace_text_in_range`]. Override it when the editor supports
+    /// richer clipboard content. See [`InputHandler::paste`].
     fn paste(&mut self, item: ClipboardItem, window: &mut Window, cx: &mut Context<Self>) {
         if let Some(text) = item.text() {
             self.replace_text_in_range(None, &text, window, cx);
         }
     }
 
-    /// See [`InputHandler::replace_text_in_range`] for details
+    /// Replace a UTF-16 document range, or the current selection when `range` is `None`.
+    ///
+    /// See [`InputHandler::replace_text_in_range`].
     fn replace_text_in_range(
         &mut self,
         range: Option<Range<usize>>,
@@ -98,7 +116,12 @@ pub trait EntityInputHandler: 'static + Sized {
         cx: &mut Context<Self>,
     );
 
-    /// See [`InputHandler::replace_and_mark_text_in_range`] for details
+    /// Replace a UTF-16 document range and mark the inserted text as active IME composition.
+    ///
+    /// `range: None` targets the current selection. `new_selected_range`, when supplied, is
+    /// relative to the newly inserted text. When it is `None`, choose the view's default
+    /// selection placement. See
+    /// [`InputHandler::replace_and_mark_text_in_range`].
     fn replace_and_mark_text_in_range(
         &mut self,
         range: Option<Range<usize>>,
@@ -108,7 +131,11 @@ pub trait EntityInputHandler: 'static + Sized {
         cx: &mut Context<Self>,
     );
 
-    /// See [`InputHandler::bounds_for_range`] for details
+    /// Return logical window-coordinate bounds for a UTF-16 document range.
+    ///
+    /// The supplied `element_bounds` locates this handler's painted element. An empty range asks
+    /// for caret bounds; return `None` when the text layout cannot provide geometry. See
+    /// [`InputHandler::bounds_for_range`].
     fn bounds_for_range(
         &mut self,
         range_utf16: Range<usize>,
@@ -117,7 +144,10 @@ pub trait EntityInputHandler: 'static + Sized {
         cx: &mut Context<Self>,
     ) -> Option<Bounds<Pixels>>;
 
-    /// See [`InputHandler::character_index_for_point`] for details
+    /// Map a logical window-coordinate point to a UTF-16 document offset.
+    ///
+    /// Return `None` when no text position can be determined for the point. See
+    /// [`InputHandler::character_index_for_point`].
     fn character_index_for_point(
         &mut self,
         point: crate::Point<Pixels>,
@@ -125,7 +155,11 @@ pub trait EntityInputHandler: 'static + Sized {
         cx: &mut Context<Self>,
     ) -> Option<usize>;
 
-    /// See [`InputHandler::set_selected_text_range`] for details
+    /// Apply a selection change requested by platform text UI.
+    ///
+    /// The default implementation does nothing. Override it when system selection handles or
+    /// commands such as Select All should update the view's model. See
+    /// [`InputHandler::set_selected_text_range`].
     fn set_selected_text_range(
         &mut self,
         _range_utf16: Range<usize>,
@@ -134,7 +168,9 @@ pub trait EntityInputHandler: 'static + Sized {
     ) {
     }
 
-    /// See [`InputHandler::text_length_utf16`] for details
+    /// Return the document length in UTF-16 code units when it is available.
+    ///
+    /// `None` leaves the platform without a known length. See [`InputHandler::text_length_utf16`].
     fn text_length_utf16(
         &mut self,
         _window: &mut Window,
@@ -143,12 +179,19 @@ pub trait EntityInputHandler: 'static + Sized {
         None
     }
 
-    /// See [`InputHandler::accepts_text_input`] for details
+    /// Report whether this view currently accepts inserted text.
+    ///
+    /// The default is `true`. Return `false` for states such as read-only content; this does not
+    /// remove key, pointer, or accessibility handlers. See [`InputHandler::accepts_text_input`].
     fn accepts_text_input(&self, _window: &mut Window, _cx: &mut Context<Self>) -> bool {
         true
     }
 
-    /// See [`InputHandler::text_input_configuration`] for details
+    /// Return platform preferences for keyboard and text assistance.
+    ///
+    /// The default is [`TextInputConfiguration::default`]. GPUI re-queries the configuration while
+    /// drawing and forwards changes to the platform, so keep this method inexpensive. See
+    /// [`InputHandler::text_input_configuration`].
     fn text_input_configuration(
         &mut self,
         _window: &mut Window,
@@ -157,7 +200,10 @@ pub trait EntityInputHandler: 'static + Sized {
         TextInputConfiguration::default()
     }
 
-    /// See [`InputHandler::text_input_editable_range`] for details
+    /// Bound the UTF-16 region that platform text input may read or edit around the selection.
+    ///
+    /// Return `None` for no bound. When set, include the current selection when possible. See
+    /// [`InputHandler::text_input_editable_range`].
     fn text_input_editable_range(
         &mut self,
         _window: &mut Window,
@@ -175,9 +221,12 @@ pub struct ElementInputHandler<V> {
 }
 
 impl<V: 'static> ElementInputHandler<V> {
-    /// Used in [`Element::paint`][element_paint] with the element's bounds, a `Window`, and a `App` context.
+    /// Create the adapter that forwards platform text callbacks to `view`.
     ///
-    /// [element_paint]: crate::Element::paint
+    /// Call this during the element's paint with that element's window-coordinate bounds and the
+    /// entity implementing [`EntityInputHandler`], then pass it to [`Window::handle_input`]. The
+    /// adapter owns an entity handle, not a borrow of the view, so the view is updated only while
+    /// servicing each platform callback.
     pub fn new(element_bounds: Bounds<Pixels>, view: Entity<V>) -> Self {
         ElementInputHandler {
             view,

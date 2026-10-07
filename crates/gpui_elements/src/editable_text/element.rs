@@ -16,10 +16,10 @@ use palette::IntoColor;
 use smallvec::SmallVec;
 use std::{cell::RefCell, ops::Range, rc::Rc, sync::Arc, time::Duration};
 
-/// Creates a text input element.
-/// See [`EditableTextElement`] for usage.
+/// Creates a multiline editable-text element with default styling.
 ///
-/// By default it is multiline, and therefore this is semantically equivalent to [`text_area`].
+/// This is an alias for [`text_area`]; call [`multiline`](EditableTextElement::multiline) to change
+/// that behavior. Set size, wrapping, overflow, padding, and border with GPUI's [`Styled`] methods.
 #[track_caller]
 pub fn editable_text(id: impl Into<ElementId>) -> EditableTextElement {
     let mut this = EditableTextElement {
@@ -42,21 +42,30 @@ pub fn editable_text(id: impl Into<ElementId>) -> EditableTextElement {
     this
 }
 
-/// Creates a singleline text input element.
-/// See [`EditableTextElement`] for usage.
+/// Creates a single-line editable-text element.
+///
+/// This disables Enter insertion and vertical line navigation. It does not sanitize pasted or IME
+/// text, so a newline can still enter the value through those paths. Use `whitespace_nowrap()` and
+/// `overflow_x_scroll()` for a horizontally scrolling form field.
 #[track_caller]
 pub fn text_input(id: impl Into<ElementId>) -> EditableTextElement {
     editable_text(id).multiline(false)
 }
 
-/// Creates a multiline text input element.
-/// See [`EditableTextElement`] for usage.
+/// Creates a multiline editable-text element.
+///
+/// Newlines and vertical navigation are enabled. For a message field, combine this with text
+/// wrapping, a minimum/maximum height, and vertical scrolling.
 #[track_caller]
 pub fn text_area(id: impl Into<ElementId>) -> EditableTextElement {
     editable_text(id).multiline(true)
 }
 
-/// An input field which users can type text into.
+/// A focusable text field with editable content supplied by [`EditableTextState`].
+///
+/// The element owns the interaction/focus behavior and resolves its state from the element id on
+/// first render unless one is supplied with [`state`](Self::state). It follows GPUI `Style` sizing
+/// and overflow rules; the builder methods here configure text behavior, highlights, and colors.
 pub struct EditableTextElement {
     interactivity: Interactivity,
     // Populated on first render with an entity stored/attached to the view.
@@ -73,13 +82,22 @@ pub struct EditableTextElement {
     highlights: TextHighlights,
 }
 
-/// Immutable syntax spans. Construct once per text edit and share across frames.
+/// Immutable colored UTF-8 byte spans for an editable text value.
+///
+/// Build these from the current text after syntax analysis or validation, then pass them to
+/// [`EditableTextElement::shared_highlights`]. Ranges must be valid UTF-8 byte boundaries, sorted,
+/// and non-overlapping. Invalid spans are skipped during layout. Highlights are paint-only: they
+/// do not alter selection, text contents, IME composition, or keyboard navigation.
 #[derive(Clone, Default)]
 pub struct TextHighlights {
     ranges: Arc<[(Range<usize>, Hsla)]>,
     hash: u64,
 }
 impl TextHighlights {
+    /// Creates reusable highlight spans from UTF-8 byte ranges and colors.
+    ///
+    /// For example, compute a token's byte range with `str::match_indices` and preserve that range
+    /// with the text snapshot that produced it. Do not use character counts as range endpoints.
     pub fn new(ranges: Vec<(Range<usize>, Hsla)>) -> Self {
         let hash = highlights_hash(&ranges);
         Self {
@@ -119,61 +137,71 @@ impl Default for EditableTextColors {
 }
 
 impl EditableTextElement {
-    /// Color UTF-8 byte ranges without changing selection, IME, or navigation.
+    /// Applies colored UTF-8 byte ranges without changing selection, IME, or navigation.
     /// Ranges must be ordered, non-overlapping, and on character boundaries.
     /// Invalid ranges are ignored. Useful for code editors and inline validation.
     pub fn highlights(mut self, highlights: Vec<(Range<usize>, Hsla)>) -> Self {
         self.highlights = TextHighlights::new(highlights);
         self
     }
-    /// Reuse immutable spans without hashing or copying them during caret/scroll frames.
+    /// Reuses immutable spans without hashing or copying them during caret and scroll frames.
     pub fn shared_highlights(mut self, highlights: TextHighlights) -> Self {
         self.highlights = highlights;
         self
     }
-    /// Assigns the underlying state of this element, which should persist across multiple frames.
-    /// The user should either create the entity once or utilize `Window::use_keyed_state`
-    /// to create an entity intrinsicly linked to the element.
-    /// If no state is configured, one will be linked to this element on first render via `Window::use_keyed_state`.
+    /// Assigns the state entity backing this element.
+    ///
+    /// Keep the entity alive across renders with [`EditableTextState::use_keyed`] or
+    /// [`EditableTextState::use_keyed_init`]. If omitted, the element lazily uses keyed state under
+    /// its own element id. Supplying the weak handle makes the state relationship explicit and
+    /// gives the caller an entity to subscribe to or update.
     pub fn state(self, state: WeakEntity<EditableTextState>) -> Self {
         *self.state_entity.borrow_mut() = state;
         self
     }
 
-    /// Configures whether the field supports multiple lines of text.
-    /// Disabling this prevents actions like `enter` and navigating up and down.
+    /// Enables or disables multiline keyboard behavior.
     ///
-    /// It doesnt not automatically sanitize inputs from containing newlines (e.g. on paste).
-    /// This is a limitation of the current state of implementation and requires further iteration.
+    /// When disabled, Enter insertion and vertical movement are unavailable. User-entered paste
+    /// and IME text has CR and LF removed by the input path, but programmatic state replacement can
+    /// still set multiline text. Add application validation if the value must always stay on one
+    /// line.
     pub fn multiline(mut self, enabled: bool) -> Self {
         self.supports_multiline = enabled;
         self
     }
 
-    /// Assigns the text that should be displayed when storage of the element is empty.
+    /// Sets the hint displayed when the backing text is empty.
     pub fn placeholder(mut self, text: impl Into<SharedString>) -> Self {
         self.placeholder = Some(text.into());
         self
     }
 
-    /// Configures whether the element can accept input (effectively means "is the element currently enabled").
+    /// Enables or disables user edits to this field.
+    ///
+    /// A disabled field remains a styled text element; it does not become a read-only selection
+    /// widget. Programmatic state updates remain available.
     pub fn accepts_input(mut self, enabled: bool) -> Self {
         self.accepts_input = enabled;
         self
     }
 
-    /// Sets the blinking interval of the caret.
+    /// Enables caret blinking at `duration` while the field has focus.
+    ///
+    /// A zero duration keeps the focused caret visible without scheduling blink timers. The
+    /// default is no blinking; use [`caret_blink_interval_500ms`](Self::caret_blink_interval_500ms)
+    /// for the standard 500 ms interval.
     pub fn caret_blink_interval(mut self, duration: Duration) -> Self {
         self.caret_blink_interval = Some(duration);
         self
     }
 
-    /// Sets the blinking interval of the caret to 500ms
+    /// Enables the standard 500 ms caret blink interval while focused.
     pub fn caret_blink_interval_500ms(self) -> Self {
         self.caret_blink_interval(BLINK_INTERVAL_500MS)
     }
 
-    /// Sets the color of the placeholder text which is rendered when the element's stored text is empty.
+    /// Sets the placeholder color used while the backing text is empty.
     ///
     /// Cannot be refined via [`StyleRefinement`](gpui::StyleRefinement) due to limitations in the fields of [`Style`](gpui::Style).
     pub fn placeholder_color(mut self, color: impl IntoColor<Hsla>) -> Self {
@@ -181,7 +209,7 @@ impl EditableTextElement {
         self
     }
 
-    /// Sets the width of the caret / text-cursor.
+    /// Sets the caret width. The default is 2 GPUI pixels.
     pub fn caret_w(mut self, width: impl Into<Pixels>) -> Self {
         self.caret_width = width.into();
         self
@@ -196,7 +224,7 @@ impl EditableTextElement {
         self
     }
 
-    /// Sets the color of the box highlighting selected text.
+    /// Sets the background color painted behind selected text.
     ///
     /// Cannot be refined via [`StyleRefinement`](gpui::StyleRefinement) due to limitations in the fields of [`Style`](gpui::Style).
     pub fn selection_color(mut self, color: Hsla) -> Self {
@@ -204,7 +232,7 @@ impl EditableTextElement {
         self
     }
 
-    /// Sets the color of the caret / text-cursor.
+    /// Sets the color of the insertion caret.
     ///
     /// Cannot be refined via [`StyleRefinement`](gpui::StyleRefinement) due to limitations in the fields of [`Style`](gpui::Style).
     pub fn caret_color(mut self, color: Hsla) -> Self {
@@ -212,8 +240,10 @@ impl EditableTextElement {
         self
     }
 
-    /// Sets the color of the underlines rendered underneath text being editted/marked by InputMethodEditors
-    /// (for writing Chinese, Japanese, and Korean utf-16).
+    /// Sets the underline color used for the active IME composition range.
+    ///
+    /// The composition range is stored internally as UTF-8 bytes; browser input boundaries may
+    /// represent it in UTF-16 code units.
     ///
     /// Cannot be refined via [`StyleRefinement`](gpui::StyleRefinement) due to limitations in the fields of [`Style`](gpui::Style).
     pub fn marked_color(mut self, color: Hsla) -> Self {

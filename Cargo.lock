@@ -1106,17 +1106,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "console"
-version = "0.16.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e96a4956774c13c126a8b5af4daa79384f4d826534c95a02d76afb39e2ab64e3"
-dependencies = [
- "encode_unicode",
- "libc",
- "windows-sys 0.61.2",
-]
-
-[[package]]
 name = "console_error_panic_hook"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1777,12 +1766,6 @@ dependencies = [
  "vswhom",
  "winreg",
 ]
-
-[[package]]
-name = "encode_unicode"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "34aa73646ffb006b8f5147f3dc182bd4bcb190227ce861fc4a4844bf8e3cb2c0"
 
 [[package]]
 name = "encoding_rs"
@@ -2485,7 +2468,6 @@ dependencies = [
  "gpui_ce_scheduler",
  "gpui_ce_shared_string",
  "gpui_ce_sum_tree",
- "gpui_ce_test",
  "gpui_ce_util",
  "hdrhistogram",
  "heapless",
@@ -2548,8 +2530,11 @@ name = "gpui-documentation-examples"
 version = "0.1.0"
 dependencies = [
  "gpui-ce",
+ "gpui_ce_codepen",
+ "gpui_ce_elements",
  "gpui_ce_platform",
  "gpui_ce_web",
+ "io-surface",
  "wasm-bindgen",
  "web-sys",
 ]
@@ -2633,6 +2618,7 @@ dependencies = [
  "palette",
  "smallvec",
  "unicode-segmentation",
+ "web-time",
 ]
 
 [[package]]
@@ -2796,7 +2782,6 @@ dependencies = [
  "gpui_ce_web",
  "gpui_ce_wgpu",
  "gpui_ce_windows",
- "serde_json",
 ]
 
 [[package]]
@@ -2810,14 +2795,9 @@ dependencies = [
 name = "gpui_ce_render"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "gpui-ce",
- "image",
  "naga 24.0.0",
  "naga 29.0.4",
- "proptest",
- "serde_json",
- "smallvec",
  "wgsl-rs",
  "windows 0.62.2",
 ]
@@ -2856,27 +2836,6 @@ dependencies = [
  "rand",
  "rayon",
  "tracing",
-]
-
-[[package]]
-name = "gpui_ce_test"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "flate2",
- "gpui-ce",
- "gpui_ce_parley",
- "gpui_ce_platform",
- "gpui_ce_render",
- "gpui_ce_wgpu",
- "image",
- "insta",
- "plotters",
- "proptest",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
 ]
 
 [[package]]
@@ -3042,6 +3001,7 @@ dependencies = [
  "anyhow",
  "bincode",
  "gpui-ce",
+ "gpui_ce_collections",
  "gpui_ce_parley",
  "image",
  "serde",
@@ -3467,19 +3427,6 @@ checksum = "879f10e63c20629ecabbb64a8010319738c66a5cd0c29b02d63d272b03751d01"
 dependencies = [
  "block-padding",
  "generic-array",
-]
-
-[[package]]
-name = "insta"
-version = "1.49.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b67d3d2e287e4b86c10b3f3b641033d1f89b74bdb39d05f34952e2b9a6fe21cd"
-dependencies = [
- "console",
- "once_cell",
- "serde",
- "similar",
- "tempfile",
 ]
 
 [[package]]
@@ -5957,12 +5904,6 @@ checksum = "95890f873bec569a0362c235787f3aca6e1e887302ba4840839bcc6459c42da6"
 dependencies = [
  "quote",
 ]
-
-[[package]]
-name = "similar"
-version = "2.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bbbb5d9659141646ae647b42fe094daf6c6192d1620870b449d9557f748b2daa"
 
 [[package]]
 name = "simplecss"

@@ -27,12 +27,16 @@ cannot start chapters. Duplicate anchors, empty explanations, empty code, and
 unknown API references are authoring errors. Markdown indentation is retained,
 including lists, code fences, and note or warning blocks.
 
-Declare the example in `site/examples.toml`. The canonical source is a Cargo example
-under `site/examples/examples`; it uses the shared `site/examples/src/support.rs`
-launcher. Define a `fn component(window, cx) -> Entity<View>` constructor and
-keep the native entry point as `pub fn main() { support::run(component); }`.
-The generator strips only that entry point and launcher from the workbench
-source; Miri runs the same component with the real GPUI crate:
+Declare the example in `site/examples.toml`. The canonical source is a Cargo
+example under `site/examples/examples`; it imports the shared
+`site/examples/src/support.rs` launcher. Give each example a component
+constructor that creates its root entity. Its concrete return type depends on
+the view, for example `Entity<Counter>`. Keep the native entry point as
+`pub fn main() { support::run(component); }`. The generator uses the canonical
+source to produce the displayed walkthrough and downloads. Keep runtime
+descriptions aligned with the implementation actually shipped: the current
+native Miri companion is not a browser-portable execution environment, and
+documentation must not describe it as one.
 
 ```toml
 [[examples]]
@@ -54,10 +58,11 @@ declaration = "pub struct Entity<"
 ```
 
 Run `python3 scripts/docs/generate.py` to write the chapter, full source
-download, Miri component source, component registry, and `site/static/api-examples.json`. `--check` performs a deterministic
-staleness check. Run `python3 scripts/docs/sync_links.py` after generation to
-create the docs.rs include files and bounded `docs:examples` attributes. Both
-commands are safe to rerun; they remove only their own generated outputs.
+download, component registry, and `site/static/api-examples.json`. `--check`
+performs a deterministic staleness check. Run
+`python3 scripts/docs/sync_links.py` after generation to create the docs.rs
+include files and bounded `docs:examples` attributes. Both commands are safe
+to rerun; they remove only their own generated outputs.
 
 The generated chapter uses stable anchors (`#state` above), links each annotated
 API to its versioned docs.rs page, and links back to the exact example step.

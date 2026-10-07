@@ -155,8 +155,12 @@ impl Drop for AppRefMut<'_> {
     }
 }
 
-/// A reference to a GPUI application, typically constructed in the `main` function of your app.
-/// You won't interact with this type much outside of initial configuration and startup.
+/// A platform-backed builder for starting a GPUI application.
+///
+/// Construct and configure this value before startup. [`run`](Self::run) owns
+/// the ordinary platform run loop; embedders use [`run_embedded`](Self::run_embedded)
+/// and keep its [`ApplicationHandle`] alive while their own loop drives GPUI.
+/// Neither type is the state context passed to callbacks: that is [`App`].
 // docs:examples:begin
 #[doc = include_str!("docs/examples/gpui-Application-eb7618d3.md")]
 // docs:examples:end
@@ -339,10 +343,11 @@ impl Application {
         ApplicationHandle { app: self.0 }
     }
 
-    /// Registers a handler for URLs delivered by the platform.
+    /// Registers the handler for URLs delivered by the platform.
     ///
-    /// The callback is retained by the platform for the application's lifetime;
-    /// register it before [`Self::run`].
+    /// Register before [`Self::run`]. The platform retains one handler for the
+    /// application; a later registration replaces the earlier one. Backends
+    /// that do not deliver external URLs never invoke it.
     pub fn on_open_urls<F>(&self, mut callback: F) -> &Self
     where
         F: 'static + FnMut(Vec<String>),
@@ -351,8 +356,12 @@ impl Application {
         self
     }
 
-    /// Invokes a handler when an already-running application is launched.
-    /// On macOS, this can occur when the application icon is double-clicked or the app is launched via the dock.
+    /// Registers a handler for a platform request to reopen the running app.
+    ///
+    /// On macOS this can happen when the user clicks the app icon in the Dock.
+    /// The handler receives synchronous [`App`] access and should return
+    /// promptly. Backends without a reopen event never invoke it; a later
+    /// registration replaces the earlier handler.
     pub fn on_reopen<F>(&self, mut callback: F) -> &Self
     where
         F: 'static + FnMut(&mut App),
@@ -366,22 +375,35 @@ impl Application {
         self
     }
 
-    /// Returns a handle to the [`BackgroundExecutor`] associated with this app, which can be used to spawn futures in the background.
+    /// Returns the background executor configured for this application.
+    ///
+    /// Use it for owned `Send` work that can run without UI access; return
+    /// results through a foreground task before updating entities or windows.
     pub fn background_executor(&self) -> BackgroundExecutor {
         self.0.borrow().background_executor.clone()
     }
 
-    /// Returns a handle to the [`ForegroundExecutor`] associated with this app, which can be used to spawn futures in the foreground.
+    /// Returns the foreground executor configured for this application.
+    ///
+    /// Foreground futures are polled on the UI thread and must not block while
+    /// doing long CPU or I/O work. Use the background executor for that work.
     pub fn foreground_executor(&self) -> ForegroundExecutor {
         self.0.borrow().foreground_executor.clone()
     }
 
-    /// Returns a reference to the [`TextSystem`] associated with this app.
+    /// Returns a shared handle to the text system configured for this app.
+    ///
+    /// The returned `Arc` can be retained independently of the application
+    /// builder and is also available from the live [`App`].
     pub fn text_system(&self) -> Arc<TextSystem> {
         self.0.borrow().text_system.clone()
     }
 
-    /// Returns the file URL of the executable with the specified name in the application bundle
+    /// Locates a helper executable named `name` according to platform bundle conventions.
+    ///
+    /// This is useful for native applications that ship helper binaries with
+    /// their app bundle. The platform may return an error when helper lookup
+    /// is unsupported or the executable is absent.
     pub fn path_for_auxiliary_executable(&self, name: &str) -> Result<PathBuf> {
         self.0.borrow().path_for_auxiliary_executable(name)
     }
@@ -773,7 +795,7 @@ enum PlatformOwnedDragState {
     RestoredInSourceWindow,
 }
 
-/// The application's synchronous state and access context.
+/// The live application's synchronous state and access context.
 ///
 /// GPUI passes `&mut App` to launch, window, and event callbacks. Use it to
 /// create entities, open windows, bind actions, access globals, and schedule
@@ -786,8 +808,20 @@ enum PlatformOwnedDragState {
 /// access rules and effect timing.
 ///
 /// Borrow this context only for the callback's duration. Use [`Self::to_async`]
-/// for access after an `await` and [`Self::background_executor`] for owned
-/// `Send` work that must leave the foreground thread.
+/// for foreground work that must reacquire app access after an `await`, and
+/// [`Self::background_executor`] for owned `Send` work that must leave the
+/// foreground thread. An [`AsyncApp`] does not keep this app alive.
+///
+/// ## Platform services
+///
+/// `App` also exposes services supplied by [`Platform`], including clipboard,
+/// file pickers, credentials, notifications, and display information. Prefer
+/// the async clipboard read when a callback can await it; the synchronous
+/// clipboard read cannot access browser clipboard contents. Treat methods with
+/// no result as best-effort requests, `Option` as a possibly absent value, and
+/// `Task<Result<...>>` or picker receivers as the place to inspect failures.
+/// Check the corresponding `is_*_supported` method when one exists, then still
+/// handle runtime failures.
 pub struct App {
     pub(crate) this: Weak<AppCell>,
     pub(crate) platform: Rc<dyn Platform>,
@@ -1119,17 +1153,28 @@ impl App {
         self.quitting = false;
     }
 
-    /// Get the id of the current keyboard layout
+    /// Returns the platform keyboard layout currently used to interpret keys.
+    ///
+    /// Register [`on_keyboard_layout_change`](Self::on_keyboard_layout_change)
+    /// when the app caches layout-dependent labels or mappings.
     pub fn keyboard_layout(&self) -> &dyn PlatformKeyboardLayout {
         self.keyboard_layout.as_ref()
     }
 
-    /// Get the current keyboard mapper.
+    /// Returns the mapper used to translate key equivalents and shortcut labels.
+    ///
+    /// Reacquire it after [`on_keyboard_layout_change`](Self::on_keyboard_layout_change)
+    /// when the active keyboard layout changes.
     pub fn keyboard_mapper(&self) -> &Rc<dyn PlatformKeyboardMapper> {
         &self.keyboard_mapper
     }
 
-    /// Invokes a handler when the current keyboard layout changes
+    /// Invokes `callback` when the platform reports a keyboard-layout change.
+    ///
+    /// Query [`keyboard_layout`](Self::keyboard_layout) or
+    /// [`keyboard_mapper`](Self::keyboard_mapper) again inside the callback;
+    /// the app refreshes those values before invoking observers. Dropping the
+    /// returned subscription unregisters this callback.
     pub fn on_keyboard_layout_change<F>(&self, mut callback: F) -> Subscription
     where
         F: 'static + FnMut(&mut App),
@@ -1309,10 +1354,12 @@ impl App {
 
     /// Receives typed events emitted by `entity` during app effect processing.
     ///
-    /// The callback receives the publisher's handle and event payload. Registration
-    /// is deferred; complete the registering update before emitting the event.
-    /// Retain the returned subscription or call [`Subscription::detach`] to leave
-    /// it registered without a cancellation handle.
+    /// The callback receives the publisher's handle and event payload.
+    /// Registration is deferred until effect processing. Effects run in queue
+    /// order, so a subscription registered before an emission in the same
+    /// update is active when the event is delivered. The callback runs after
+    /// the update closure returns. Retain the returned subscription or call
+    /// [`Subscription::detach`] to leave it registered without a cancellation handle.
     pub fn subscribe<T, Event>(
         &mut self,
         entity: &Entity<T>,
@@ -1384,15 +1431,20 @@ impl App {
         self.platform.window_stack()
     }
 
-    /// Register additional GPU device requirements (extra features and/or
-    /// limits) before opening any windows.  The `Box` must contain a
-    /// `gpui_wgpu::WgpuDeviceRequirements`.
+    /// Register GPU features or limits before opening the first window.
+    ///
+    /// The boxed value must contain `gpui_wgpu::WgpuDeviceRequirements` for
+    /// backends that use this API. Configure requirements before device
+    /// initialization; a backend may ignore requirements it does not support.
     pub fn set_gpu_requirements(&self, requirements: Box<dyn std::any::Any>) {
         self.platform.set_gpu_requirements(requirements);
     }
 
-    /// Sets the label applied to credentials stored in the system keyring.
-    /// Call before writing credentials. Only Linux/FreeBSD apply the label.
+    /// Sets the namespace label used for credentials in the system keyring.
+    ///
+    /// Configure it before reading, writing, or deleting credentials so all
+    /// three operations address the same entries. Linux and FreeBSD apply the
+    /// label; other backends ignore it.
     pub fn set_keyring_label(&self, label: impl Into<SharedString>) {
         self.platform.set_keyring_label(label.into());
     }
@@ -1402,9 +1454,13 @@ impl App {
         self.platform.active_window()
     }
 
-    /// Opens a new window with the given option and the root view returned by the given function.
-    /// The function is invoked with a `Window`, which can be used to interact with window-specific
-    /// functionality.
+    /// Opens a platform window and installs the entity returned by `build_root_view` as its root.
+    ///
+    /// The builder runs only after the platform creates the window and receives
+    /// that window for setup. Returns an error if the platform rejects the
+    /// request or creation fails; for example, the web backend allows one
+    /// normal window per document and rejects unsupported window kinds. Check
+    /// the error before retaining or using the returned handle.
 // docs:examples:begin
 #[doc = include_str!("docs/examples/gpui-App-open-window-f8ec0f6b.md")]
 // docs:examples:end
@@ -1453,42 +1509,67 @@ impl App {
         })
     }
 
-    /// Instructs the platform to activate the application by bringing it to the foreground.
+    /// Asks the platform to bring the application to the foreground.
+    ///
+    /// `ignoring_other_apps` is a platform hint. Some backends do not support
+    /// application activation, and this method has no result to report whether
+    /// activation succeeded.
     pub fn activate(&self, ignoring_other_apps: bool) {
         self.platform.activate(ignoring_other_apps);
     }
 
-    /// Hide the application at the platform level.
+    /// Asks the platform to hide the application.
+    ///
+    /// This is a no-op on backends without application hiding support, and
+    /// there is no result indicating whether the request succeeded.
     pub fn hide(&self) {
         self.platform.hide();
     }
 
-    /// Hide other applications at the platform level.
+    /// Asks the platform to hide other applications where supported.
     pub fn hide_other_apps(&self) {
         self.platform.hide_other_apps();
     }
 
-    /// Unhide other applications at the platform level.
+    /// Asks the platform to restore other applications hidden by
+    /// [`hide_other_apps`](Self::hide_other_apps), where supported.
     pub fn unhide_other_apps(&self) {
         self.platform.unhide_other_apps();
     }
 
-    /// Returns the list of currently active displays.
+    /// Returns the displays currently exposed by the platform.
+    ///
+    /// Use [`find_display`](Self::find_display) to resolve a saved
+    /// [`DisplayId`]. An empty list means the backend currently exposes no
+    /// displays; it does not establish stacking order for windows.
     pub fn displays(&self) -> Vec<Rc<dyn PlatformDisplay>> {
         self.platform.displays()
     }
 
-    /// Returns the primary display that will be used for new windows.
+    /// Returns the platform-designated primary display, if one exists.
+    ///
+    /// Use this when choosing an initial display; a backend may return `None`.
     pub fn primary_display(&self) -> Option<Rc<dyn PlatformDisplay>> {
         self.platform.primary_display()
     }
 
-    /// Returns whether `screen_capture_sources` may work.
+    /// Reports whether this backend may provide screen-capture sources.
+    ///
+    /// Screen capture must be enabled by the `screen-capture` feature on the
+    /// supported native backends. Check this before awaiting
+    /// [`screen_capture_sources`](Self::screen_capture_sources), and still
+    /// handle that receiver's error because availability can depend on the OS
+    /// version and runtime permissions.
     pub fn is_screen_capture_supported(&self) -> bool {
         self.platform.is_screen_capture_supported()
     }
 
-    /// Returns a list of available screen capture sources.
+    /// Requests the available screen-capture sources asynchronously.
+    ///
+    /// The receiver resolves to either the current sources or an error when
+    /// capture is unsupported or unavailable. Check
+    /// [`is_screen_capture_supported`](Self::is_screen_capture_supported)
+    /// first, but treat the result as authoritative.
     pub fn screen_capture_sources(
         &self,
     ) -> oneshot::Receiver<Result<Vec<Rc<dyn ScreenCaptureSource>>>> {
@@ -1496,6 +1577,9 @@ impl App {
     }
 
     /// Returns the display with the given ID, if one exists.
+    ///
+    /// Display IDs can become stale when monitors change; query
+    /// [`displays`](Self::displays) again when this returns `None`.
     pub fn find_display(&self, id: DisplayId) -> Option<Rc<dyn PlatformDisplay>> {
         self.displays()
             .iter()
@@ -1503,12 +1587,23 @@ impl App {
             .cloned()
     }
 
-    /// Returns the current thermal state of the system.
+    /// Returns the thermal state reported by the platform.
+    ///
+    /// macOS reports the system state; Linux, Windows, and Web currently
+    /// return [`ThermalState::Nominal`] because they do not expose this value.
+    /// Use [`on_thermal_state_change`](Self::on_thermal_state_change) when
+    /// responding to supported changes, and treat a constant value as an
+    /// unsupported report rather than an assertion about hardware.
     pub fn thermal_state(&self) -> ThermalState {
         self.platform.thermal_state()
     }
 
-    /// Invokes a handler when the thermal state changes
+    /// Invokes `callback` when the platform reports a thermal-state change.
+    ///
+    /// Query [`thermal_state`](Self::thermal_state) in the callback for the
+    /// current value. The returned subscription controls this app-level
+    /// callback. Currently macOS reports changes; Linux and Windows do not,
+    /// and Web may retain the callback without delivering changes.
     pub fn on_thermal_state_change<F>(&self, mut callback: F) -> Subscription
     where
         F: 'static + FnMut(&mut App),
@@ -1524,7 +1619,10 @@ impl App {
         subscription
     }
 
-    /// Invokes a handler when the system wakes from sleep.
+    /// Invokes `callback` when the platform reports that the system woke from sleep.
+    ///
+    /// The callback is retained until its [`Subscription`] is dropped. Backends
+    /// without a wake notification simply never invoke it.
     pub fn on_system_wake<F>(&self, mut callback: F) -> Subscription
     where
         F: 'static + FnMut(&mut App),
@@ -1540,7 +1638,11 @@ impl App {
         subscription
     }
 
-    /// Returns the appearance of the application's windows.
+    /// Returns the appearance currently reported for application windows.
+    ///
+    /// This reflects the platform's effective appearance (including an
+    /// override where supported), not necessarily the appearance of every
+    /// custom-painted element. See [`set_window_appearance`](Self::set_window_appearance).
     pub fn window_appearance(&self) -> WindowAppearance {
         self.platform.window_appearance()
     }
@@ -1559,38 +1661,54 @@ impl App {
         self.platform.set_window_appearance(appearance);
     }
 
-    /// Whether the current platform supports haptic feedback.
+    /// Returns whether this device currently supports haptic feedback.
+    ///
+    /// The macOS backend queries device support at runtime; other backends
+    /// currently report `false`. Check this before offering a haptic action,
+    /// then call [`play_haptic_feedback`](Self::play_haptic_feedback).
     pub fn supports_haptic_feedback(&self) -> bool {
         self.platform.supports_haptic_feedback()
     }
 
     /// Play a haptic feedback of the given style.
     ///
-    /// Must be called from the main thread. This is a no-op on platforms that
-    /// do not support haptic feedback. Styles correspond to
+    /// Must be called from the main thread. Unsupported devices ignore the
+    /// request; check [`supports_haptic_feedback`](Self::supports_haptic_feedback)
+    /// first when the action depends on feedback. Styles correspond to
     /// [`NSHapticFeedbackPattern`](https://developer.apple.com/documentation/appkit/nshapticfeedbackmanager/feedbackpattern)
     /// values on macOS.
     pub fn play_haptic_feedback(&self, style: HapticFeedbackStyle) {
         self.platform.play_haptic_feedback(style)
     }
 
-    /// Returns the window button layout configuration when supported.
+    /// Returns the platform's window-button layout when it exposes one.
+    ///
+    /// Use `None` to select a layout-independent fallback for controls placed
+    /// beside native title-bar buttons.
     pub fn button_layout(&self) -> Option<WindowButtonLayout> {
         self.platform.button_layout()
     }
 
-    /// Reads data from the platform clipboard.
+    /// Reads synchronously available data from the platform clipboard.
+    ///
+    /// `None` can mean that no supported item is available or that this
+    /// backend cannot read synchronously. For code that can await, prefer
+    /// [`read_from_clipboard_async`](Self::read_from_clipboard_async), which
+    /// distinguishes access failures from an empty or unsupported clipboard.
     pub fn read_from_clipboard(&self) -> Option<ClipboardItem> {
         self.platform.read_from_clipboard()
     }
 
-    /// Reads data from the platform clipboard, resolving once the contents
-    /// are available.
+    /// Reads clipboard data asynchronously and reports access or conversion errors.
     ///
     /// Prefer this over [`App::read_from_clipboard`] in code that can await:
     /// on platforms where clipboard access is asynchronous and
     /// permission-gated (e.g. web), the synchronous read always returns
-    /// `None` while this method performs a real read.
+    /// `None` while this method performs a real read. On the web, call this
+    /// method directly from the user action that initiates the read so the
+    /// browser still grants user activation. `Ok(None)` means no supported
+    /// item was returned; permission and unsupported-content failures are
+    /// represented by [`ClipboardReadError`].
     pub fn read_from_clipboard_async(
         &self,
     ) -> Task<Result<Option<ClipboardItem>, ClipboardReadError>> {
@@ -1607,20 +1725,25 @@ impl App {
         self.text_rendering_mode.get()
     }
 
-    /// Writes data to the platform clipboard.
+    /// Asks the platform to write `item` to the system clipboard.
+    ///
+    /// This operation has no completion result, and backends may support only
+    /// a subset of clipboard entry types (the web backend currently writes
+    /// text). On the web, call it directly in the user action that initiates
+    /// the copy. Use this for best-effort copy actions.
     pub fn write_to_clipboard(&self, item: ClipboardItem) {
         self.platform.write_to_clipboard(item)
     }
 
-    /// Reads data from the primary selection buffer.
-    /// Only available on Linux.
+    /// Reads the X11/Wayland primary selection, separate from the clipboard.
+    /// Only available on Linux and FreeBSD.
     #[cfg(any(target_os = "linux", target_os = "freebsd"))]
     pub fn read_from_primary(&self) -> Option<ClipboardItem> {
         self.platform.read_from_primary()
     }
 
-    /// Writes data to the primary selection buffer.
-    /// Only available on Linux.
+    /// Replaces the X11/Wayland primary selection, separate from the clipboard.
+    /// Only available on Linux and FreeBSD.
     #[cfg(any(target_os = "linux", target_os = "freebsd"))]
     pub fn write_to_primary(&self, item: ClipboardItem) {
         self.platform.write_to_primary(item)
@@ -1646,7 +1769,11 @@ impl App {
         self.platform.write_to_find_pasteboard(item)
     }
 
-    /// Writes credentials to the platform keychain.
+    /// Stores credentials for `url` in the platform credential store.
+    ///
+    /// Await the returned task to learn whether the write succeeded. A backend
+    /// may reject credential storage entirely; do not treat dropping the task
+    /// as confirmation that the write completed.
     pub fn write_credentials(
         &self,
         url: &str,
@@ -1656,47 +1783,63 @@ impl App {
         self.platform.write_credentials(url, username, password)
     }
 
-    /// Reads credentials from the platform keychain.
+    /// Reads credentials for `url` from the platform credential store.
+    ///
+    /// `Ok(None)` means no usable entry was found (some platforms also use it
+    /// when a credential prompt is canceled). Await the task to distinguish
+    /// that result from a backend error or unavailable credential store.
     pub fn read_credentials(&self, url: &str) -> Task<Result<Option<(String, Vec<u8>)>>> {
         self.platform.read_credentials(url)
     }
 
-    /// Deletes credentials from the platform keychain.
+    /// Deletes credentials for `url` from the platform credential store.
+    ///
+    /// Await the returned task to observe backend errors. Whether deleting a
+    /// missing entry is treated as success is platform-dependent.
     pub fn delete_credentials(&self, url: &str) -> Task<Result<()>> {
         self.platform.delete_credentials(url)
     }
 
-    /// Directs the platform's default browser to open the given URL.
+    /// Asks the platform's default handler to open `url`.
+    ///
+    /// This is a fire-and-forget request: the method does not validate that the
+    /// URL is handled or report whether the browser opened it.
     pub fn open_url(&self, url: &str) {
         self.platform.open_url(url);
     }
 
-    /// Registers the given URL scheme (e.g. `zed` for `zed://` urls) to be
-    /// opened by the current app.
+    /// Requests runtime registration of `scheme` (for example, `zed` for
+    /// `zed://` URLs) as a scheme handled by this app.
     ///
     /// On some platforms (e.g. macOS) you may be able to register URL schemes
     /// as part of app distribution, but this method exists to let you register
-    /// schemes at runtime.
+    /// schemes at runtime. Support and meaning vary by backend: unsupported
+    /// native platforms return an error, and the web backend completes without
+    /// registering a browser-level protocol handler. Await the task and do not
+    /// infer registration from `Ok(())` on every platform.
     pub fn register_url_scheme(&self, scheme: &str) -> Task<Result<()>> {
         self.platform.register_url_scheme(scheme)
     }
 
-    /// Sets the application's process-wide identity and user-visible name.
+    /// Sets the application's platform identity and user-visible name where supported.
     ///
     /// The identifier is used for platform identity mechanisms such as the
     /// Windows AppUserModelID. The name is used wherever the operating system
-    /// presents the application to the user. Call this once, early in startup,
-    /// before opening windows or posting notifications.
+    /// presents the application to the user. Linux uses the name for system
+    /// notifications; platforms without an identity hook ignore this call.
+    /// Call it once, early in startup, before opening windows or posting
+    /// notifications.
     pub fn set_app_identity(&self, identifier: &str, name: &str) {
         self.platform.set_app_identity(identifier, name);
     }
 
-    /// Posts a notification to the operating system's notification center.
+    /// Asks the platform to post a system notification.
     ///
     /// Posting a notification whose [`SystemNotification::tag`] matches an
     /// earlier one replaces that notification where the platform supports it.
     /// No-op on platforms without notification support, or when delivery is
-    /// unavailable (e.g. authorization was denied).
+    /// unavailable (e.g. authorization was denied). This method is
+    /// fire-and-forget, so it cannot confirm delivery or permission status.
     pub fn show_system_notification(&self, notification: SystemNotification) {
         self.platform.show_system_notification(notification);
     }
@@ -1711,7 +1854,9 @@ impl App {
 
     /// Registers the handler invoked when the user activates a system
     /// notification, either by clicking its body or one of its action
-    /// buttons. Subsequent registrations replace the handler.
+    /// buttons. The platform retains one handler for the application; a later
+    /// registration replaces it. Supported backends deliver it on the
+    /// foreground thread.
     pub fn on_system_notification_response<F>(&self, mut callback: F)
     where
         F: 'static + FnMut(SystemNotificationResponse, &mut App),
@@ -1725,30 +1870,42 @@ impl App {
             }));
     }
 
-    /// Returns the full pathname of the current app bundle.
+    /// Returns the app's bundle or executable path according to the platform.
     ///
-    /// Returns an error if the app is not being run from a bundle.
+    /// macOS returns the application bundle path; Linux and Windows return the
+    /// current executable path. The browser backend returns an error because
+    /// it has no local process path.
     pub fn app_path(&self) -> Result<PathBuf> {
         self.platform.app_path()
     }
 
-    /// On Linux, returns the name of the compositor in use.
+    /// Returns a diagnostic name for the active compositor or backend.
     ///
-    /// Returns an empty string on other platforms.
+    /// Linux reports its compositor, the web backend reports `Web`, and
+    /// backends without a name return an empty string. Do not use this value
+    /// for capability detection.
     pub fn compositor_name(&self) -> &'static str {
         self.platform.compositor_name()
     }
 
-    /// Returns the file URL of the executable with the specified name in the application bundle
+    /// Locates a helper executable named `name` according to platform bundle conventions.
+    ///
+    /// This is implemented for bundled macOS applications. Linux, Windows,
+    /// and the browser currently return an error when asked for an auxiliary
+    /// executable.
     pub fn path_for_auxiliary_executable(&self, name: &str) -> Result<PathBuf> {
         self.platform.path_for_auxiliary_executable(name)
     }
 
-    /// Displays a platform modal for selecting paths.
+    /// Opens a platform file or directory picker.
     ///
-    /// When one or more paths are selected, they'll be relayed asynchronously via the returned oneshot channel.
-    /// If cancelled, a `None` will be relayed instead.
-    /// May return an error on Linux if the file picker couldn't be opened.
+    /// Results arrive asynchronously through the returned receiver. Use
+    /// [`can_select_mixed_files_and_dirs`](Self::can_select_mixed_files_and_dirs)
+    /// when the picker must select both files and directories. The receiver
+    /// yields `Ok(Some(paths))` for a selection, `Ok(None)` for
+    /// cancellation (and on Linux builds without a picker backend), or `Err`
+    /// when the picker cannot open. The web backend reports unsupported with
+    /// an error. This is asynchronous; it does not block the app callback.
     pub fn prompt_for_paths(
         &self,
         options: PathPromptOptions,
@@ -1756,12 +1913,15 @@ impl App {
         self.platform.prompt_for_paths(options)
     }
 
-    /// Displays a platform modal for selecting a new path where a file can be saved.
+    /// Opens a platform save picker for a new file path.
     ///
     /// The provided directory will be used to set the initial location.
     /// When a path is selected, it is relayed asynchronously via the returned oneshot channel.
     /// If cancelled, a `None` will be relayed instead.
-    /// May return an error on Linux if the file picker couldn't be opened.
+    /// The receiver yields `Ok(Some(path))` for a selection, `Ok(None)` for
+    /// cancellation (and on Linux builds without a picker backend), or `Err`
+    /// when the picker cannot open. The web backend reports unsupported with
+    /// an error. This is asynchronous; it does not block the app callback.
     pub fn prompt_for_new_path(
         &self,
         directory: &Path,
@@ -1770,22 +1930,35 @@ impl App {
         self.platform.prompt_for_new_path(directory, suggested_name)
     }
 
-    /// Reveals the specified path at the platform level, such as in Finder on macOS.
+    /// Asks the platform file manager to reveal `path`, where supported.
+    ///
+    /// The operation is best effort and has no result; the web backend does
+    /// nothing.
     pub fn reveal_path(&self, path: &Path) {
         self.platform.reveal_path(path)
     }
 
-    /// Opens the specified path with the system's default application.
+    /// Asks the operating system to open `path` with its registered application.
+    ///
+    /// The operation is best effort and has no result; the web backend does
+    /// nothing.
     pub fn open_with_system(&self, path: &Path) {
         self.platform.open_with_system(path)
     }
 
-    /// Returns whether the user has configured scrollbars to auto-hide at the platform level.
+    /// Returns whether the backend reports that scrollbars should auto-hide.
+    ///
+    /// This reflects a system preference where available; some backends use a
+    /// fixed policy (the web backend currently returns `true`).
     pub fn should_auto_hide_scrollbars(&self) -> bool {
         self.platform.should_auto_hide_scrollbars()
     }
 
-    /// Restarts the application.
+    /// Runs app restart observers, then asks the platform to relaunch the app.
+    ///
+    /// Restart support is platform-dependent and this method has no result to
+    /// report failure. The configured restart path and arguments are consumed
+    /// by this request; without a path, the platform locates the current app.
     pub fn restart(&mut self) {
         self.restart_observers
             .clone()
@@ -1796,7 +1969,11 @@ impl App {
         )
     }
 
-    /// Sets the path to use when restarting the application.
+    /// Sets the path the platform should relaunch on the next
+    /// [`restart`](Self::restart) request.
+    ///
+    /// This value is consumed by that request; it does not affect the current
+    /// process or persist automatically for later restarts.
     pub fn set_restart_path(&mut self, path: PathBuf) {
         self.restart_path = Some(path);
     }
@@ -2120,7 +2297,12 @@ impl App {
         &self.background_executor
     }
 
-    /// Obtains a reference to the executor, which can be used to spawn futures.
+    /// Returns the executor for work that must run with foreground app access.
+    ///
+    /// This accessor panics while the application is running quit handlers.
+    /// Prefer [`spawn`](Self::spawn) when the future needs app access after an
+    /// `.await`; use the background executor for CPU or I/O work that can leave
+    /// the UI thread.
     pub fn foreground_executor(&self) -> &ForegroundExecutor {
         if self.quitting {
             panic!("Can't spawn on main thread after on_app_quit")
@@ -2135,8 +2317,13 @@ impl App {
         self.foreground_journal.clone()
     }
 
-    /// Spawns the future returned by the given function on the main thread. The closure will be invoked
-    /// with [AsyncApp], which allows the application state to be accessed across await points.
+    /// Spawns a future on the foreground executor with app access across awaits.
+    ///
+    /// The closure receives an [`AsyncApp`], which reacquires synchronous app
+    /// access for each operation. A poll runs on the UI thread, so move long
+    /// CPU or I/O work to [`background_executor`](Self::background_executor).
+    /// Dropping the returned task cancels remaining polling; detach it or keep
+    /// it on an owner when it should continue.
     #[track_caller]
     pub fn spawn<AsyncFn, R>(&self, f: AsyncFn) -> Task<R>
     where
@@ -2153,9 +2340,12 @@ impl App {
             .spawn(async move { f(&mut cx).await }.boxed_local())
     }
 
-    /// Spawns the future returned by the given function on the main thread with
-    /// the given priority. The closure will be invoked with [AsyncApp], which
-    /// allows the application state to be accessed across await points.
+    /// Spawns foreground work with app access and the given scheduling priority.
+    ///
+    /// The closure receives an [`AsyncApp`] and follows [`spawn`](Self::spawn)'s
+    /// borrowing, thread, and cancellation rules. Priority affects scheduling;
+    /// it does not move work to a background thread or interrupt a poll already
+    /// running.
     pub fn spawn_with_priority<AsyncFn, R>(&self, priority: Priority, f: AsyncFn) -> Task<R>
     where
         AsyncFn: AsyncFnOnce(&mut AsyncApp) -> R + 'static,
@@ -2171,8 +2361,12 @@ impl App {
             .spawn_with_priority(priority, async move { f(&mut cx).await }.boxed_local())
     }
 
-    /// Schedules the given function to be run at the end of the current effect cycle, allowing entities
-    /// that are currently on the stack to be returned to the app.
+    /// Queues `f` for the current effect cycle after active entity leases end.
+    ///
+    /// Use this to reacquire an entity that is currently being updated; the
+    /// callback runs with fresh app access while effects are flushed. It does
+    /// not wait for a frame. Use a task or a window's next-frame callback when
+    /// work needs a time-based or frame-based delay.
     pub fn defer(&mut self, f: impl FnOnce(&mut App) + 'static) {
         self.push_effect(Effect::Defer {
             callback: Box::new(f),
@@ -2210,7 +2404,11 @@ impl App {
             .map(|any_state| any_state.downcast_ref::<G>().unwrap())
     }
 
-    /// Access the global of the given type mutably. Panics if a global for that type has not been assigned.
+    /// Borrows an assigned global mutably and schedules its observers.
+    ///
+    /// Mutable access schedules observers even if the value is left unchanged.
+    /// Panics when no value of this type has been installed; use
+    /// [`try_global`](Self::try_global) when absence is expected.
     #[track_caller]
     pub fn global_mut<G: Global>(&mut self) -> &mut G {
         let global_type = TypeId::of::<G>();
@@ -2221,8 +2419,11 @@ impl App {
             .unwrap_or_else(|| panic!("no state of type {} exists", type_name::<G>()))
     }
 
-    /// Access the global of the given type mutably. A default value is assigned if a global of this type has not
-    /// yet been assigned.
+    /// Borrows a global mutably, inserting `G::default()` if it is absent.
+    ///
+    /// The access schedules observers even when the value already existed and
+    /// the callback makes no change. Use [`update_default_global`](crate::BorrowAppContext::update_default_global)
+    /// when the global also needs callback-scoped access to the app context.
     pub fn default_global<G: Global + Default>(&mut self) -> &mut G {
         let global_type = TypeId::of::<G>();
         self.push_effect(Effect::NotifyGlobalObservers { global_type });
@@ -2233,7 +2434,10 @@ impl App {
             .unwrap()
     }
 
-    /// Sets the value of the global of the given type.
+    /// Replaces the value of the global of type `G` and schedules its observers.
+    ///
+    /// The old value is dropped when replaced. Observers run during effect
+    /// processing after the current app update, and can query the new value.
     pub fn set_global<G: Global>(&mut self, global: G) {
         let global_type = TypeId::of::<G>();
         self.push_effect(Effect::NotifyGlobalObservers { global_type });
@@ -2246,7 +2450,10 @@ impl App {
         self.globals_by_type.drain();
     }
 
-    /// Remove the global of the given type from the app context. Does not notify global observers.
+    /// Removes and returns the assigned global, then schedules its observers.
+    ///
+    /// Observers run during effect processing and should handle the global now
+    /// being absent. Panics if no value of this type is assigned.
     pub fn remove_global<G: Global>(&mut self) -> G {
         let global_type = TypeId::of::<G>();
         self.push_effect(Effect::NotifyGlobalObservers { global_type });
@@ -2258,7 +2465,13 @@ impl App {
             .unwrap()
     }
 
-    /// Register a callback to be invoked when a global of the given type is updated.
+    /// Registers a callback for mutations or replacement of global type `G`.
+    ///
+    /// Registration becomes active during effect processing, so this callback
+    /// does not observe a change queued earlier in the same update. It receives
+    /// the app, not the global value; call [`try_global`](Self::try_global) or
+    /// [`global`](Self::global) to read the current value. Retain the returned
+    /// subscription to keep observing.
     pub fn observe_global<G: Global>(
         &mut self,
         mut f: impl FnMut(&mut Self) + 'static,
@@ -2303,8 +2516,13 @@ impl App {
         subscription
     }
 
-    /// Arrange for the given function to be invoked whenever a view of the specified type is created.
-    /// The function will be passed a mutable reference to the view along with an appropriate context.
+    /// Arrange for `on_new` to run whenever an entity of type `T` is created.
+    ///
+    /// This applies to models as well as renderable views. The callback gets
+    /// mutable access to the new value, its [`Context`], and the creating
+    /// window when construction happened inside a window; otherwise the window
+    /// argument is `None`. Retain the subscription while new entities should
+    /// be observed.
     pub fn observe_new<T: 'static>(
         &self,
         on_new: impl 'static + Fn(&mut T, Option<&mut Window>, &mut Context<T>),
@@ -2324,8 +2542,8 @@ impl App {
         )
     }
 
-    /// Observe the release of a entity. The callback is invoked after the entity
-    /// has no more strong references but before it has been dropped.
+    /// Observe the release of an entity. The callback runs after its last
+    /// strong handle is gone and before its value is dropped.
     pub fn observe_release<T>(
         &self,
         handle: &Entity<T>,
@@ -2345,8 +2563,11 @@ impl App {
         subscription
     }
 
-    /// Observe the release of a entity. The callback is invoked after the entity
-    /// has no more strong references but before it has been dropped.
+    /// Observe the release of an entity with access to a window.
+    ///
+    /// The callback runs after the last strong handle is gone but before the
+    /// value is dropped. If the window has closed or cannot be updated at that
+    /// time, the callback is skipped. Retain the subscription to keep it armed.
     pub fn observe_release_in<T>(
         &self,
         handle: &Entity<T>,

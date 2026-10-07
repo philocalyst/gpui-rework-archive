@@ -487,8 +487,10 @@ impl TestAppContext {
         lock.update(|cx| cx.update_global(update))
     }
 
-    /// Returns an `AsyncApp` which can be used to run tasks that expect to be on a background
-    /// thread on the current thread in tests.
+    /// Returns a weak app handle for foreground tasks that need app access after an await.
+    ///
+    /// This does not move work to a background thread. Use `executor()` for
+    /// `Send` background work and `spawn()` for a local foreground future.
     pub fn to_async(&self) -> AsyncApp {
         AsyncApp {
             app: Rc::downgrade(&self.app),
@@ -497,7 +499,11 @@ impl TestAppContext {
         }
     }
 
-    /// Wait until there are no more pending tasks.
+    /// Runs ready tasks until no runnable work remains.
+    ///
+    /// Pending timers do not advance automatically. The executor's
+    /// `advance_clock` method advances time and runs work due in that interval;
+    /// call this again only when more runnable work has since been queued.
     pub fn run_until_parked(&self) {
         self.dispatcher.run_until_parked();
     }
@@ -672,6 +678,11 @@ impl<T: 'static> Entity<T> {
 
 impl<V: 'static> Entity<V> {
     /// Returns a future that resolves when the view is next updated.
+    ///
+    /// The observation is installed and the test clock is advanced by
+    /// `advance_clock_by` before this method returns. Advancing the clock runs
+    /// due work immediately, so the returned future can already be ready when
+    /// first polled.
     pub fn next_notification(
         &self,
         advance_clock_by: Duration,
@@ -786,7 +797,11 @@ impl VisualTestContext {
         }
     }
 
-    /// Wait until there are no more pending tasks.
+    /// Runs ready tasks until no runnable work remains.
+    ///
+    /// Pending timers do not advance automatically; use the test context's
+    /// executor to advance time and run work due in that interval. Call this
+    /// again only when more runnable work has since been queued.
     pub fn run_until_parked(&self) {
         self.cx.background_executor.run_until_parked();
     }

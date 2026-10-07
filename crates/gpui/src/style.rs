@@ -2,10 +2,11 @@
 //!
 //! [`StyleRefinement`](crate::StyleRefinement) is the builder-facing, partial style: methods from
 //! [`Styled`](crate::Styled) add fields to it and later refinements override earlier fields.
-//! [`Style`] is the resolved value used for a frame. Lengths are expressed in logical [`Pixels`]
-//! unless a type explicitly says otherwise; `rem`s are resolved from the window's root text size,
-//! and device pixels are used only at the renderer boundary. Layout properties affect Taffy;
-//! paint properties are applied after bounds are known.
+//! [`Style`] is the resolved value used for a frame. Resolution applies inherited text properties
+//! and interaction-state refinements; it does not make layout or paint properties inherit.
+//! Lengths are expressed in logical [`Pixels`] unless a type explicitly says otherwise; `rem`s
+//! resolve from the window's configured root text size. Layout properties affect Taffy, which
+//! computes bounds before paint properties are applied.
 //!
 //! For a property-by-property tour, start with the [layout constraints example](https://gpui-ce.github.io/examples/layout/#constraints),
 //! then use the [drawing example](https://gpui-ce.github.io/examples/drawing/#paint) to see how
@@ -242,7 +243,15 @@ impl RingStyle {
     }
 }
 
-/// The CSS styling that can be applied to an element via the `Styled` trait
+/// The resolved layout, paint, and text style for one element.
+///
+/// [`Styled`] methods build a partial [`StyleRefinement`]; resolution merges
+/// those fields with defaults, inherited text properties, and interaction
+/// state to produce this value. Layout fields feed Taffy to compute bounds.
+/// Backgrounds, borders, filters, opacity, and other paint fields are consumed
+/// after layout. Geometry and paint values belong to this element. Text
+/// properties documented on [`TextStyle`] inherit to descendants, and
+/// [`LayoutDirection`] establishes inline direction for logical descendants.
 #[derive(Clone, Refineable, Debug)]
 #[refineable(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Style {
@@ -269,7 +278,8 @@ pub struct Style {
     /// Edge fade distances for overflow masking.
     #[refineable]
     pub overflow_fade: Edges<AbsoluteLength>,
-    /// How much space (in points) should be reserved for the scrollbars of `Overflow::Scroll` and `Overflow::Auto` nodes.
+    /// How much logical space should be reserved for scrollbars on `Overflow::Scroll` and
+    /// `Overflow::Auto` nodes. A zero width reserves no layout space.
     pub scrollbar_width: AbsoluteLength,
     /// Whether both x and y axis should be scrollable at the same time.
     pub allow_concurrent_scroll: bool,
@@ -308,7 +318,9 @@ pub struct Style {
     pub inset: Edges<Length>,
 
     // Size properties
-    /// Sets the initial size of the item
+    /// Sets the preferred width and height of the item. Flex layout may still
+    /// shrink the item; use `min_size` or `flex_shrink = 0` when it must retain
+    /// a lower bound or its preferred size.
     #[refineable]
     pub size: Size<Length>,
     /// Controls the minimum size of the item
@@ -353,9 +365,11 @@ pub struct Style {
     pub flex_wrap: FlexWrap,
     /// Sets the initial main axis size of the item
     pub flex_basis: Length,
-    /// The relative rate at which this item grows when it is expanding to fill space, 0.0 is the default value, and this value must be positive.
+    /// The relative rate at which this item grows to fill free space. The
+    /// default is `0.0`; use a non-negative factor.
     pub flex_grow: f32,
-    /// The relative rate at which this item shrinks when it is contracting to fit into space, 1.0 is the default value, and this value must be positive.
+    /// The relative rate at which this item shrinks when space is insufficient.
+    /// The default is `1.0`; set it to `0.0` to disable flex shrinking.
     pub flex_shrink: f32,
 
     /// The fill color of this element

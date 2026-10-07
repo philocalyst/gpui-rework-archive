@@ -15,14 +15,17 @@ example_run = "cargo run -p gpui-documentation-examples --example text"
 <a id="shaping"></a>
 ## Count bytes, scalars, and graphemes separately
 
-The [`Text`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Text.html) below contains `Café`: its final visible letter consists of
-an `e` and a separate combining accent. Two Rust `char`s form one grapheme.
-The [`text`](https://docs.rs/gpui-ce/0.2.2/gpui/macro.text.html) macro creates the text element from this UTF-8 string.
+The [`Text`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Text.html) below contains `Café`: the final visible letter is an `e` plus
+a combining accent. Rust counts those as two `char`s, Unicode grapheme
+segmentation groups them as one user-perceived character, and shaping may
+place one or more glyphs for that text. The [`text`](https://docs.rs/gpui-ce/0.2.2/gpui/macro.text.html) macro creates an element
+from the UTF-8 string.
 
-GPUI text positions use byte offsets. Those offsets do not count scalars,
-visible letters, or glyphs. [Unicode text segmentation](https://www.unicode.org/reports/tr29/)
-defines graphemes; [text shaping](https://en.wikipedia.org/wiki/Complex_text_layout)
-selects and positions the glyphs that display them.
+GPUI text positions use UTF-8 byte offsets. A byte offset is a storage
+location, not a count of scalars, graphemes, or glyphs. [Unicode text
+segmentation](https://www.unicode.org/reports/tr29/) defines grapheme
+boundaries; [text shaping](https://en.wikipedia.org/wiki/Complex_text_layout)
+maps text and font features to positioned glyphs.
 
 ```rust
 use gpui::{AppContext, Context, IntoElement, Render, Window, div, prelude::*, px, rgb, text};
@@ -30,15 +33,16 @@ use gpui::{AppContext, Context, IntoElement, Render, Window, div, prelude::*, px
 struct TextView;
 ```
 
-[View this step in the source]({{ get_url(path="sources/text/") }}#L14).
+[View this step in the source]({{ get_url(path="sources/text/") }}#L17).
 
 <a id="wrap"></a>
 ## Give wrapping a width
 
 The parent [`div`](https://docs.rs/gpui-ce/0.2.2/gpui/fn.div.html) limits the paragraph to 280 logical [`Pixels`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Pixels.html).
-[`Styled::text_size`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Styled.html#method.text_size) sets its font size and [`Styled::line_height`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Styled.html#method.line_height) sets
-the distance between baselines. The child inherits those styles; GPUI finds
-line breaks within the width requested by [`Styled::w`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Styled.html#method.w).
+[`Styled::text_size`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Styled.html#method.text_size) sets font size and [`Styled::line_height`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Styled.html#method.line_height) sets the
+line box height. The text inherits those styles, shapes the string, then
+wraps within the width requested by [`Styled::w`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Styled.html#method.w). Changing width changes
+the line breaks without changing the source bytes.
 
 For mixed styles, use [StyledText::with_runs](https://docs.rs/gpui-ce/0.2.2/gpui/struct.StyledText.html#method.with_runs).
 Each run length counts bytes, and the runs must cover the UTF-8 string at
@@ -70,7 +74,7 @@ impl Render for TextView {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/text/") }}#L33).
+[View this step in the source]({{ get_url(path="sources/text/") }}#L37).
 
 <a id="run"></a>
 ## Make the paragraph narrower
@@ -90,6 +94,6 @@ pub fn main() {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/text/") }}#L58).
+[View this step in the source]({{ get_url(path="sources/text/") }}#L62).
 
 [Download the complete source]({{ get_url(path="examples/text.rs") }}).

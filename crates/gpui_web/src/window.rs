@@ -95,6 +95,23 @@ pub(crate) struct WebWindowInner {
 }
 
 /// A GPUI window rendered into the browser's document-owned canvas.
+///
+/// GPUI window geometry uses logical pixels derived from the canvas's CSS size; `scale_factor`
+/// reports the browser device-pixel ratio used for the renderer's physical canvas size. Resize
+/// observation updates GPUI geometry as the browser viewport or DPR changes. The window title maps
+/// to `document.title`, visibility maps to the canvas display style, and fullscreen uses the
+/// browser Fullscreen API.
+///
+/// Browser input is routed through a private hidden textarea that mirrors text around the current
+/// selection in UTF-16 units for IME operation. [`TextInputConfiguration`] controls its browser
+/// autocorrect, spellcheck/suggestions, capitalization, and enter-key hint. The mirror is resynced
+/// after input events; it is not the application text store.
+///
+/// Native window prompts, minimize/maximize, window menus, decorations, move/resize drags, and
+/// custom client insets have no browser equivalent here. `window_controls` reports fullscreen
+/// support and no minimize/maximize/menu controls. The window owns its DOM listeners and frame
+/// callbacks for its lifetime; dropping the window unregisters those listeners. Each registered
+/// platform callback slot stores one callback, replacing the previous callback for that slot.
 pub struct WebWindow {
     inner: Rc<WebWindowInner>,
     display: Rc<dyn PlatformDisplay>,
@@ -661,6 +678,7 @@ impl PlatformWindow for WebWindow {
         self.inner.state.borrow().bounds.size
     }
 
+    /// Sets the canvas CSS size; resize observation updates physical canvas dimensions for drawing.
     fn resize(&mut self, size: Size<Pixels>) {
         let style = self.inner.canvas.style();
         style
@@ -695,18 +713,26 @@ impl PlatformWindow for WebWindow {
         self.inner.state.borrow().capslock
     }
 
+    /// Installs the active GPUI text input handler used by keyboard, paste, selection, and IME events.
     fn set_input_handler(&mut self, input_handler: PlatformInputHandler) {
         self.inner.state.borrow_mut().input_handler = Some(input_handler);
     }
 
+    /// Removes and returns the current text input handler, if one is installed.
     fn take_input_handler(&mut self) -> Option<PlatformInputHandler> {
         self.inner.state.borrow_mut().input_handler.take()
     }
 
+    /// Applies browser text-assistance attributes to the hidden IME textarea.
+    ///
+    /// GPUI forwards this only when the configuration changes because changing attributes can
+    /// restart the browser's IME connection.
     fn set_text_input_configuration(&mut self, configuration: TextInputConfiguration) {
         self.inner.ime_mirror.apply_configuration(&configuration);
     }
 
+    /// Focus transitions show or hide the virtual keyboard where the browser permits; text and
+    /// selection changes are reconciled by the deferred IME mirror sync.
     fn text_input_state_changed(&self, change: TextInputStateChange) {
         match change {
             TextInputStateChange::FocusGained => self.inner.sync_virtual_keyboard(true),
@@ -715,6 +741,7 @@ impl PlatformWindow for WebWindow {
         }
     }
 
+    /// Returns `None`; native prompt dialogs are not provided by the web platform.
     fn prompt(
         &self,
         _level: PromptLevel,
@@ -725,6 +752,7 @@ impl PlatformWindow for WebWindow {
         None
     }
 
+    /// Marks the window active only when no native activation token was requested.
     fn activate(&self, token: Option<&str>) -> bool {
         if token.is_some() {
             return false;
@@ -745,6 +773,7 @@ impl PlatformWindow for WebWindow {
         WindowBackgroundAppearance::Opaque
     }
 
+    /// Updates the document title as well as the GPUI window's stored title.
     fn set_title(&mut self, title: &str) {
         self.inner.state.borrow_mut().title = title.to_owned();
         if let Some(document) = self.inner.browser_window.document() {
@@ -754,6 +783,7 @@ impl PlatformWindow for WebWindow {
 
     fn set_background_appearance(&self, _background: WindowBackgroundAppearance) {}
 
+    /// Shows or hides the document canvas with its CSS `display` property.
     fn set_visible(&self, visible: bool) {
         self.inner
             .canvas
@@ -762,14 +792,18 @@ impl PlatformWindow for WebWindow {
             .unwrap_or_else(|error| log::error!("Failed to update canvas visibility: {error:?}"));
     }
 
+    /// Logs a warning; browsers do not expose native minimize behavior for this canvas window.
     fn minimize(&self) {
         log::warn!("WebWindow::minimize is not supported in the browser");
     }
 
+    /// Logs a warning; this canvas window does not support native maximize/zoom behavior.
     fn zoom(&self) {
         log::warn!("WebWindow::zoom is not supported in the browser");
     }
 
+    /// Requests or exits browser fullscreen for the canvas; fullscreen state follows the browser's
+    /// `fullscreenchange` event and the request may be denied by browser policy.
     fn toggle_fullscreen(&self) {
         let Some(document) = self.inner.browser_window.document() else {
             return;
@@ -789,6 +823,8 @@ impl PlatformWindow for WebWindow {
         self.inner.state.borrow().is_fullscreen
     }
 
+    /// Returns a frame waker that holds the window weakly, so retaining it cannot keep a closed
+    /// window alive.
     fn frame_waker(&self) -> Option<Rc<dyn Fn()>> {
         // Hold the inner window weakly: the waker is stored in the window's
         // invalidator, and `callbacks.request_frame` captures a clone of that
@@ -842,6 +878,7 @@ impl PlatformWindow for WebWindow {
         self.inner.callbacks.borrow_mut().appearance_changed = Some(callback);
     }
 
+    /// Applies a pending physical canvas resize, then renders `scene` through WGPU.
     fn draw(&self, scene: &Scene) {
         if let Some((width, height)) = self.inner.pending_physical_size.take() {
             if self.inner.canvas.width() != width || self.inner.canvas.height() != height {
@@ -864,6 +901,7 @@ impl PlatformWindow for WebWindow {
         self.inner.state.borrow().renderer.sprite_atlas().clone()
     }
 
+    /// Reports whether the selected WGPU adapter supports dual-source blending.
     fn is_subpixel_rendering_supported(&self) -> bool {
         self.inner
             .state
@@ -885,6 +923,7 @@ impl PlatformWindow for WebWindow {
             .map(|context| Box::new(context) as Box<dyn std::any::Any>)
     }
 
+    /// Does nothing because the hidden textarea is not positioned at the visible caret.
     fn update_ime_position(&self, _bounds: Bounds<Pixels>) {}
 
     fn request_decorations(&self, _decorations: WindowDecorations) {}
@@ -895,12 +934,16 @@ impl PlatformWindow for WebWindow {
 
     fn start_window_resize(&self, _edge: ResizeEdge) {}
 
+    /// Returns `Decorations::Server`; GPUI does not draw client-side native decorations for the
+    /// document canvas.
     fn window_decorations(&self) -> Decorations {
         Decorations::Server
     }
 
     fn set_app_id(&mut self, _app_id: &str) {}
 
+    /// Reports fullscreen as the only browser window control; maximize, minimize, and window menu
+    /// controls are unavailable.
     fn window_controls(&self) -> WindowControls {
         WindowControls {
             fullscreen: true,

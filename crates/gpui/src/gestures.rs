@@ -115,6 +115,8 @@ impl OngoingScroll {
 ///
 /// Platform values are best-effort. [`Default`] uses GPUI's iOS-like scroll feel and thresholds;
 /// callers embedding a recognizer can replace individual fields for a product's input model.
+/// Values are used directly: keep distances and fling thresholds non-negative, and use finite,
+/// positive friction/density values or a decay factor strictly between zero and one.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct GestureTuning {
     /// Distance a touch may travel before it stops being a potential tap and becomes a pan/drag.
@@ -352,7 +354,8 @@ mod friction_spline {
 ///
 /// Used by [`PlatformGestures::native_recognizers`] to declare which gestures
 /// the platform recognizes natively rather than leaving to gpui core's
-/// portable recognizers.
+/// portable recognizers. GPUI core currently does not consult this declaration; it is metadata
+/// for platform integration and does not disable any portable recognizer by itself.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct GestureKinds {
     /// Tap (and multi-tap), surfaced as [`ClickEvent::Touch`](crate::ClickEvent).
@@ -435,17 +438,21 @@ impl InputEvent for LongPressEvent {
 impl GestureEvent for LongPressEvent {}
 impl MouseEvent for LongPressEvent {}
 
-/// Platform gesture recognition services.
+/// Platform gesture tuning and recognition metadata.
 ///
-/// If your mobile platform supports native gesture recognition, use this
-/// to share it with GPUI.
+/// GPUI uses [`Self::tuning`] to configure its portable recognizer. The
+/// [`Self::native_recognizers`] declaration is not currently consulted by the core event path, so
+/// returning native kinds here does not replace or disable portable recognition.
 pub trait PlatformGestures {
     /// Feel constants for the portable recognizers on this platform.
     fn tuning(&self) -> GestureTuning {
         GestureTuning::default()
     }
 
-    /// The gesture kinds this platform recognizes natively.
+    /// Describes the gesture kinds this platform recognizes natively.
+    ///
+    /// This metadata currently has no effect on GPUI core dispatch; use it only where a platform
+    /// integration consumes the declaration itself.
     fn native_recognizers(&self) -> GestureKinds {
         GestureKinds::NONE
     }

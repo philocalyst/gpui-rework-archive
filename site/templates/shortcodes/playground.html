@@ -2,7 +2,7 @@
 <section class="playground" data-playground="{{ example }}" aria-label="{{ title }}">
   <header><h2>Try it</h2><p>The same Rust component runs here and in the native example.</p></header>
   <iframe title="{{ title }} — interactive GPUI preview" src="{{ get_url(path='preview/index.html') }}#{{ example }}" loading="lazy" data-preview></iframe>
-  <div class="editor-controls"><button type="button" data-edit>Edit Rust</button><button type="button" data-restore hidden>Original program</button><a data-workbench-link href="{{ get_url(path='preview/index.html') }}#edit/{{ example }}" target="_blank" rel="noopener" hidden>Open workbench in a tab</a><a href="{{ get_url(path='guides/live-editing/') }}">Editing guide</a></div>
+  <div class="editor-controls"><button type="button" data-edit>Edit Rust</button><button type="button" data-restore hidden>Original program</button><a data-workbench-link href="{{ get_url(path='preview/index.html') }}?workbench#edit/{{ example }}" target="_blank" rel="noopener" hidden>Open workbench in a tab</a><a href="{{ get_url(path='guides/live-editing/') }}">Editing guide</a></div>
   <p class="preview-status" data-preview-status role="status">The preview needs JavaScript and WebGL. The walkthrough and source work without them.</p>
 </section>
 {% endcomponent playground %}

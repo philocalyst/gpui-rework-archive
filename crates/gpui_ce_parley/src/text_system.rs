@@ -1,8 +1,17 @@
 //! Parley-backed implementation of GPUI's text shaping and layout interfaces.
 //!
-//! Layout cache keys include font generation, UTF-8 source, style runs, inline boxes, and line
-//! metrics. Re-registering fonts invalidates prior resolutions; returned ranges remain UTF-8
-//! boundaries even when shaping clusters contain multiple scalars.
+//! This backend resolves requested families through Fontique, uses Parley for shaping and layout,
+//! and delegates glyph pixels to a [`GlyphRasterizer`]. Layout caches include font generation,
+//! source text, shaping style runs, inline boxes, and line metrics. Registering valid fonts advances
+//! the generation and clears paragraph caches, so font registration should happen during startup
+//! rather than on every frame. The shaping and paragraph-result caches each retain up to 512
+//! insertion-ordered entries; prepared raster styles retain up to 256. Paint-only style changes
+//! can reuse shaping where the shaping inputs are unchanged.
+//!
+//! The backend returns UTF-8 byte ranges for caret, selection, and visual-line APIs. A shaped
+//! cluster can cover multiple scalars, and bidirectional text can paint clusters in a different
+//! order than their byte ranges. Use layout-provided movement and geometry for visual interaction;
+//! do not infer screen order from byte offsets.
 
 use crate::{
     ColorGlyphKind, FontStore, GlyphRasterizer, SwashGlyphRasterizer, SystemFonts,
@@ -1377,11 +1386,15 @@ impl ParleyState {
     }
 }
 
-/// Shapes text with Parley and paints exact font instances with an injected glyph rasterizer.
+/// Shapes and lays out text with Parley, then rasterizes glyphs from the exact resolved font face.
 ///
-/// Font registration increments the generation used by paragraph caches. Layout and selection
-/// APIs use UTF-8 byte ranges; clusters and visual lines may map several scalars to one caret step
-/// or reorder them for bidirectional text.
+/// The system owns its font catalog, resolved font-instance store, shaping contexts, rasterizer,
+/// and bounded insertion-ordered caches (512 shaped paragraphs, 512 layout results, 256 prepared
+/// raster styles). `add_fonts` validates the complete set before registering it;
+/// successful registration increments `font_generation` and clears paragraph caches. Construct it
+/// with [`SystemFonts::Load`] to search host fonts, or [`SystemFonts::Skip`] for an empty catalog
+/// that can be filled with application font bytes. Layout and selection APIs use UTF-8 byte ranges;
+/// clusters can cover multiple scalars and bidirectional runs can paint in visual order.
 pub struct ParleyTextSystem {
     font_instances: RwLock<FontStore>,
     font_generation: AtomicU64,
@@ -1399,12 +1412,19 @@ pub struct ParleyTextSystem {
 }
 
 impl ParleyTextSystem {
-    /// Creates a text system using GPUI's default system-font family.
+    /// Creates a text system using GPUI's `.SystemUIFont` alias and the default Swash rasterizer.
+    ///
+    /// If the alias is not available in the selected font catalog, resolution uses the concrete
+    /// fallback family `IBM Plex Sans`. Register that font or choose another explicit fallback when
+    /// using [`SystemFonts::Skip`].
     pub fn new(system_fonts: SystemFonts) -> Self {
         Self::new_with_system_font(system_fonts, ".SystemUIFont")
     }
 
-    /// Creates a text system with the concrete family used for GPUI's system-font alias.
+    /// Creates a text system with the concrete family used to resolve GPUI's `.SystemUIFont` alias.
+    ///
+    /// The alias is still offered as a generic system UI family first. `system_font_fallback` is
+    /// the named family attempted alongside it when a concrete fallback is needed.
     pub fn new_with_system_font(
         system_fonts: SystemFonts,
         system_font_fallback: impl Into<String>,
@@ -1416,7 +1436,11 @@ impl ParleyTextSystem {
         )
     }
 
-    /// Creates a text system which delegates only glyph rasterization to `rasterizer`.
+    /// Creates a text system that uses `rasterizer` for glyph pixel generation.
+    ///
+    /// Font discovery, family resolution, shaping, and layout remain handled by this backend; the
+    /// supplied rasterizer receives the exact face and instance chosen by Fontique/Parley. It must
+    /// report its color glyph support and style policy consistently with the buffers it returns.
     pub fn new_with_rasterizer(
         system_fonts: SystemFonts,
         system_font_fallback: impl Into<String>,
@@ -1452,7 +1476,10 @@ impl ParleyTextSystem {
         }
     }
 
-    /// Enables explicit optical sizing from each shaped run's logical font size.
+    /// Enables the `opsz` variation coordinate from each shaped run's logical font size.
+    ///
+    /// This affects variable-font instances with an optical-size axis. Without this option, the
+    /// font's normal variation defaults are used.
     pub fn with_automatic_optical_sizing(mut self) -> Self {
         self.automatic_optical_sizing = true;
 
@@ -1460,11 +1487,19 @@ impl ParleyTextSystem {
     }
 
     /// Creates a deterministic text system without operating-system fonts.
+    ///
+    /// The empty catalog still needs registered font bytes to render named families; the default
+    /// fallback family is `IBM Plex Sans`.
     pub fn without_system_fonts() -> Self {
         Self::new_with_system_font(SystemFonts::Skip, "IBM Plex Sans")
     }
 
-    /// Adds fallback families after those supplied by each text style.
+    /// Sets additional named fallback families after the requested family and style-level fallbacks.
+    ///
+    /// Families are tried in iterator order. This replaces any additional fallback list previously
+    /// set on the builder. Names supplement the font catalog; they do not load font files. Use
+    /// [`PlatformTextSystem::add_fonts`] to register font data first when the desired family is not
+    /// available from the host.
     pub fn with_fallback_families(
         mut self,
         families: impl IntoIterator<Item = impl Into<String>>,
@@ -2296,6 +2331,11 @@ fn face_families<'a>(
 }
 
 impl PlatformTextSystem for ParleyTextSystem {
+    /// Validates every supplied blob before adding any of them to the catalog.
+    ///
+    /// On invalid font data the call returns an error and leaves the catalog and font generation
+    /// unchanged. On success it increments the generation and clears both paragraph caches so
+    /// subsequent lookups and layouts resolve with the updated catalog.
     fn add_fonts(&self, fonts: Vec<Cow<'static, [u8]>>) -> Result<()> {
         let blobs = fonts
             .into_iter()
@@ -2314,6 +2354,7 @@ impl PlatformTextSystem for ParleyTextSystem {
         Ok(())
     }
 
+    /// Returns sorted, deduplicated family names from the current catalog, plus `.SystemUIFont`.
     fn all_font_names(&self) -> Vec<String> {
         let mut names = {
             let mut state = self.parley.lock();
@@ -2327,14 +2368,22 @@ impl PlatformTextSystem for ParleyTextSystem {
         names
     }
 
+    /// Returns the catalog generation, initially zero and incremented after successful `add_fonts`.
     fn font_generation(&self) -> u64 {
         self.font_generation.load(Ordering::Acquire)
     }
 
+    /// Resolves a descriptor to an interned exact face and variation instance.
+    ///
+    /// Returns an error when no requested or configured fallback family can be resolved.
     fn font_id(&self, descriptor: &Font) -> Result<FontId> {
         self.resolve_canonical_font(descriptor)
     }
 
+    /// Returns metrics for a font ID created by this text system.
+    ///
+    /// Passing an unknown or foreign ID violates the trait contract and panics because this method
+    /// returns metrics rather than a `Result`.
     fn font_metrics(&self, font_id: FontId) -> FontMetrics {
         self.font_instances
             .read()
@@ -2344,6 +2393,7 @@ impl PlatformTextSystem for ParleyTextSystem {
             .expect("stored font failed Skrifa metrics")
     }
 
+    /// Returns the font-relative bounds of one glyph, or an error for an unknown font/glyph.
     fn typographic_bounds(&self, font_id: FontId, glyph_id: GlyphId) -> Result<Bounds<f32>> {
         self.font_instances
             .read()
@@ -2352,6 +2402,7 @@ impl PlatformTextSystem for ParleyTextSystem {
             .glyph_bounds(glyph_id)
     }
 
+    /// Returns the font-relative advance of one glyph, or an error for an unknown font/glyph.
     fn advance(&self, font_id: FontId, glyph_id: GlyphId) -> Result<Size<f32>> {
         self.font_instances
             .read()
@@ -2360,6 +2411,7 @@ impl PlatformTextSystem for ParleyTextSystem {
             .advance(glyph_id)
     }
 
+    /// Looks up the glyph for `ch`; returns `None` when the font ID is unknown or has no mapping.
     fn glyph_for_char(&self, font_id: FontId, ch: char) -> Option<GlyphId> {
         self.font_instances
             .read()
@@ -2368,6 +2420,9 @@ impl PlatformTextSystem for ParleyTextSystem {
             .ok()?
     }
 
+    /// Rasterizes using the exact stored face and variation instance selected during shaping.
+    ///
+    /// Errors are annotated with font ID, source identity, face index, and variation coordinates.
     fn rasterize_glyph(&self, params: &RenderGlyphParams) -> Result<RasterizedGlyph> {
         let font_instances = self.font_instances.read();
         let font = font_instances
@@ -2387,6 +2442,11 @@ impl PlatformTextSystem for ParleyTextSystem {
             })
     }
 
+    /// Returns a cached raster style, including the color glyph's foreground dependency.
+    ///
+    /// Color-font inspection is performed at most once per `(font_id, glyph_id)`; rasterizer style
+    /// preparation is cached by the raster-style request. This keeps scene-color policy out of the
+    /// mutable pixel rasterization call.
     fn prepare_raster_style(&self, mut request: RasterStyleRequest) -> PreparedRasterStyle {
         request.foreground_dependency = if request.requested_mode == gpui::GlyphRenderMode::Color {
             let dependency_key = (request.font_id, request.glyph_id);
@@ -2429,6 +2489,7 @@ impl PlatformTextSystem for ParleyTextSystem {
         style
     }
 
+    /// Returns the rasterizer's fixed recommended mode; this implementation ignores font and size.
     fn recommended_rendering_mode(
         &self,
         _font_id: FontId,
@@ -2437,6 +2498,11 @@ impl PlatformTextSystem for ParleyTextSystem {
         self.recommended_rendering_mode
     }
 
+    /// Shapes and lays out a text request, expecting GPUI's validated layout inputs.
+    ///
+    /// Layout and selection ranges use source UTF-8 byte offsets. An internal Parley failure is
+    /// treated as a violated validated-request invariant and panics, matching the trait's
+    /// infallible return type.
     fn layout_text(&self, request: TextLayoutRequest<'_>) -> LineLayout {
         self.parley_layout(ParleyLayoutParams {
             text: request,
@@ -2446,6 +2512,10 @@ impl PlatformTextSystem for ParleyTextSystem {
         .layout
     }
 
+    /// Lays out text with inline boxes, styles, and bidirectional scopes.
+    ///
+    /// Input ranges use UTF-8 byte offsets. The returned inline boxes and line geometry follow
+    /// visual layout order, while text ranges remain logical source offsets.
     fn layout_inline(&self, request: InlineLayoutRequest<'_>) -> InlineLayout {
         let result = self
             .parley_layout(ParleyLayoutParams {

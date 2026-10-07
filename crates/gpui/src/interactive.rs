@@ -115,13 +115,13 @@ pub enum TouchPhase {
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord, serde::Serialize, serde::Deserialize)]
 pub struct TouchId(pub u64);
 
-/// A raw touch event from the platform.
+/// A raw touch contact update from the platform.
 ///
-///
-/// Dispatch contract (core implementation pending): a touch is hit-tested
-/// once, at [`TouchPhase::Started`], occlusion-aware; all subsequent events
-/// for the same [`TouchId`] are delivered to the elements under the starting
-/// position, even after the touch moves outside them.
+/// GPUI dispatches each update through the ordinary mouse-event path at its current `position`,
+/// then feeds it to the portable gesture recognizer. `id` connects the updates for one contact;
+/// `Started` begins provisional recognition and `Ended` or `Cancelled` closes that contact.
+/// A raw touch update is not itself a click: the recognizer may resolve the sequence as a tap,
+/// long press, pan, or cancellation.
 #[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 pub struct TouchEvent {
     /// Which touch this event belongs to.
@@ -292,19 +292,21 @@ pub struct TouchClickEvent {
     pub long_press: bool,
 }
 
-/// An activation produced by a mouse click, keyboard activation, or touch tap.
+/// An activation produced by a mouse click, keyboard activation, or platform touch activation.
 ///
 /// A click is not necessarily mouse input: use [`Self::mouse_position`] when
-/// a handler specifically needs a cursor position. Primary click listeners
-/// receive primary activation; aux-click listeners also receive secondary
-/// activation such as right clicks and touch long presses.
+/// a handler specifically needs a cursor position. The portable touch recognizer currently
+/// synthesizes a mouse press/release for a tap; this enum's touch variant is for input paths that
+/// provide touch activation directly. A recognized portable long press is delivered as a phased
+/// [`LongPressEvent`], not as a click. Primary click listeners receive primary activation;
+/// aux-click listeners receive secondary click activation such as a right click.
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub enum ClickEvent {
     /// A mouse button was pressed and released.
     Mouse(MouseClickEvent),
     /// A keyboard key activated the focused element.
     Keyboard(KeyboardClickEvent),
-    /// A click event triggered by a recognized tap gesture on a touch screen.
+    /// A touch activation supplied directly by an input path.
     Touch(TouchClickEvent),
 }
 
@@ -315,10 +317,11 @@ impl Default for ClickEvent {
 }
 
 impl ClickEvent {
-    /// Returns the modifiers that were held during the click event
+    /// Returns the modifiers that were held during the click event.
     ///
     /// `Keyboard`: The keyboard click events never have modifiers.
     /// `Mouse`: Modifiers that were held during the mouse key up event.
+    /// `Touch`: Always the default modifier set.
     pub fn modifiers(&self) -> Modifiers {
         match self {
             // Click events are only generated from keyboard events _without any modifiers_, so we know the modifiers are always Default
@@ -478,7 +481,9 @@ pub enum MouseButton {
 }
 
 impl MouseButton {
-    /// Get all the mouse buttons in a list.
+    /// Return every mouse button in a stable order.
+    ///
+    /// The list includes back and forward navigation buttons after the three standard buttons.
     pub fn all() -> Vec<Self> {
         vec![
             MouseButton::Left,
@@ -622,7 +627,11 @@ impl ScrollDelta {
         }
     }
 
-    /// Converts this scroll event into exact pixels.
+    /// Convert this delta to pixels, using `line_height` for line-based input.
+    ///
+    /// Pixel deltas are returned unchanged. Line deltas are multiplied by the supplied line
+    /// height on each axis; the result is a scale choice for the caller, not a platform-provided
+    /// exact distance.
     pub fn pixel_delta(&self, line_height: Pixels) -> Point<Pixels> {
         match self {
             ScrollDelta::Pixels(delta) => *delta,
@@ -630,10 +639,11 @@ impl ScrollDelta {
         }
     }
 
-    /// Combines two scroll deltas into one.
-    /// If the signs of the deltas are the same (both positive or both negative),
-    /// the deltas are added together. If the signs are opposite, the second delta
-    /// (other) is used, effectively overriding the first delta.
+    /// Combine deltas of the same unit for event coalescing.
+    ///
+    /// Per axis, matching signs are added and opposite signs use `other`, which preserves a
+    /// direction reversal. If one delta is in pixels and the other in lines, `other` is returned
+    /// unchanged because their units cannot be combined here.
     pub fn coalesce(self, other: ScrollDelta) -> ScrollDelta {
         match (self, other) {
             (ScrollDelta::Pixels(a), ScrollDelta::Pixels(b)) => {
@@ -745,6 +755,10 @@ impl Render for ExternalPaths {
 }
 
 /// A file drop event from the platform, generated when files are dragged and dropped onto the window.
+///
+/// `Entered` carries the offered paths. `Pending` updates only the pointer position while the
+/// platform drag remains over the window. `Submit` marks the drop at a position, while `Exited`
+/// and `Ended` report leaving the window and completion of the platform-owned drag session.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub enum FileDropEvent {
     /// The files have entered the window.

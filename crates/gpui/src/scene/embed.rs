@@ -20,13 +20,23 @@ impl Drop for Resource {
     }
 }
 
-/// Reuses imported atlas pixels across frames, without retaining unused resources.
+/// Reuses imported atlas pixels across frames without owning unused resources.
+///
+/// Each imported scene holds strong references to its atlas resources. The cache
+/// stores weak references so dropping the last [`ImportedScene`] removes its
+/// imported atlas entries. Keep the imported scene alive for as long as its
+/// sprites may be rendered.
 #[derive(Default)]
 pub struct SceneResources {
     entries: HashMap<u64, Vec<Weak<Resource>>>,
 }
 
 /// A captured scene whose sprite tiles belong to the destination window's atlas.
+///
+/// This handle keeps imported atlas pixels alive. Drop it when the scene will no
+/// longer be rendered so the atlas can release those entries. Use the window's
+/// scene-import and append APIs to compose it through the window's normal scene
+/// recorder and renderer.
 pub struct ImportedScene {
     scene: Scene,
     _resources: Vec<Arc<Resource>>,

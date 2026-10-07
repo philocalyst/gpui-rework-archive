@@ -89,10 +89,12 @@ pub fn take_all_stats(_included: TasksIncluded) -> Vec<gpui::ThreadTaskStatistic
 
 #[doc(hidden)]
 #[derive(Debug, Copy, Clone)]
+/// Monotonic instant when a task poll yielded or completed.
 pub struct YieldTime(pub Instant);
 
 #[doc(hidden)]
 #[derive(Copy, Clone)]
+/// Timing and spawn metadata for one task poll.
 pub struct TaskTiming {
     pub location: &'static core::panic::Location<'static>,
     pub spawned: SpawnTime,
@@ -113,6 +115,7 @@ impl std::fmt::Debug for TaskTiming {
 
 #[doc(hidden)]
 #[derive(Debug, Copy, Clone)]
+/// Metadata for a task poll currently in progress.
 pub struct ActiveTiming {
     pub location: &'static core::panic::Location<'static>,
     pub spawned: SpawnTime,
@@ -131,6 +134,7 @@ impl TaskTiming {
         }
     }
 
+    /// Returns how long the task ran during this single poll.
     #[inline(always)]
     pub fn poll_duration(&self) -> Duration {
         self.end.0 - self.start
@@ -144,6 +148,7 @@ impl TaskTiming {
 
 #[doc(hidden)]
 #[derive(Debug, Clone)]
+/// Collected task timings and aggregate statistics for one thread.
 pub struct ThreadTaskTimings {
     pub thread_name: Option<String>,
     pub thread_id: ThreadId,
@@ -153,7 +158,10 @@ pub struct ThreadTaskTimings {
 }
 
 impl ThreadTaskTimings {
-    /// Convert upgraded per-thread timings into their structured format.
+    /// Converts upgraded per-thread timing buffers into their structured form.
+    ///
+    /// Includes the active poll only with
+    /// [`TasksIncluded::CompletedAndRunning`].
     pub fn collect(
         timings: Vec<(ThreadId, Arc<GuardedTaskTimings>)>,
         included: TasksIncluded,
@@ -195,6 +203,7 @@ impl ThreadTaskTimings {
 
 #[doc(hidden)]
 #[derive(Debug)]
+/// Task statistics collected for one thread, resetting that thread's counters.
 pub struct ThreadTaskStatistics {
     pub thread_name: Option<String>,
     pub thread_id: ThreadId,
@@ -202,6 +211,8 @@ pub struct ThreadTaskStatistics {
 }
 
 impl ThreadTaskStatistics {
+    /// Takes and resets per-thread statistics, optionally counting each active
+    /// poll through the current instant.
     pub fn collect_and_reset(
         timings: Vec<(ThreadId, Arc<GuardedTaskTimings>)>,
         include_running: TasksIncluded,
@@ -274,11 +285,13 @@ pub struct SerializedTaskTiming {
 }
 
 impl SerializedTaskTiming {
-    /// Convert an array of [`TaskTiming`] into their serializable format
+    /// Converts task timings to nanoseconds relative to `anchor`.
     ///
     /// # Params
     ///
-    /// `anchor` - [`Instant`] that should be earlier than all timings to use as base anchor
+    /// Converts one task timing to nanoseconds relative to `anchor`.
+    ///
+    /// `anchor` must precede both timing instants.
     pub fn convert(anchor: Instant, timings: &[TaskTiming]) -> Vec<SerializedTaskTiming> {
         let serialized = timings
             .iter()
@@ -320,7 +333,7 @@ pub struct SerializedThreadTaskTimings {
 }
 
 impl SerializedThreadTaskTimings {
-    /// Convert [`ThreadTaskTimings`] into their serializable format
+    /// Converts thread timings to a serialized record relative to `anchor`.
     ///
     /// # Params
     ///
@@ -360,6 +373,7 @@ pub struct ProfilingCollector {
 }
 
 impl ProfilingCollector {
+    /// Creates a collector that reports timestamps relative to `startup_time`.
     pub fn new(startup_time: Instant) -> Self {
         Self {
             startup_time,
@@ -367,10 +381,16 @@ impl ProfilingCollector {
         }
     }
 
+    /// Returns the anchor used for serialized timing timestamps.
     pub fn startup_time(&self) -> Instant {
         self.startup_time
     }
 
+    /// Returns only task polls added since the previous call.
+    ///
+    /// If a thread's bounded ring buffer wrapped, the returned slice starts at
+    /// the oldest entry still available. Call [`Self::reset`] to start reading
+    /// from the beginning of the current buffers again.
     pub fn collect_unseen(
         &mut self,
         all_timings: Vec<ThreadTaskTimings>,
@@ -414,6 +434,8 @@ impl ProfilingCollector {
         deltas
     }
 
+    /// Forgets per-thread cursors so the next collection returns each current
+    /// buffer from its oldest retained entry.
     pub fn reset(&mut self) {
         self.cursors.clear();
     }
@@ -581,6 +603,7 @@ pub struct ThreadTimings {
 }
 
 impl ThreadTimings {
+    /// Creates empty timing history for a thread.
     pub fn new(thread_name: Option<String>, thread_id: ThreadId) -> Self {
         ThreadTimings {
             thread_name,
@@ -593,6 +616,7 @@ impl ThreadTimings {
     }
 
     #[cfg(feature = "profiler")]
+    /// Marks a task poll as active on this thread.
     pub fn update_running_task(
         &mut self,
         spawned: SpawnTime,
@@ -606,9 +630,12 @@ impl ThreadTimings {
         });
     }
     #[cfg(not(feature = "profiler"))]
+    /// No-op when profiler support is disabled.
     pub fn update_running_task(&mut self, _: SpawnTime, _: &'static std::panic::Location<'_>) {}
 
     #[cfg(feature = "profiler")]
+    /// Finishes the active poll, updates the longest-poll statistics, and
+    /// stores the timing when trace collection is enabled.
     pub fn save_task_timing(&mut self, ended: YieldTime) -> TaskTiming {
         let ActiveTiming {
             location,
@@ -639,10 +666,11 @@ impl ThreadTimings {
         timing
     }
     #[cfg(not(feature = "profiler"))]
+    /// No-op when profiler support is disabled.
     pub fn save_task_timing(&mut self, _: YieldTime) {}
 
-    // Running tasks are included in the reliability trace, which is written
-    // whenever the foreground executor makes no progress for > n seconds
+    /// Returns buffered timings and statistics, optionally including the
+    /// currently running poll through the current instant.
     pub fn get_thread_task_timings(&self, includes: TasksIncluded) -> ThreadTaskTimings {
         ThreadTaskTimings {
             thread_name: self.thread_name.clone(),
@@ -684,6 +712,7 @@ impl Drop for ThreadTimings {
 }
 
 #[doc(hidden)]
+/// Marks the beginning of a task poll for the current thread.
 pub fn update_running_task(spawned: SpawnTime, location: &'static std::panic::Location<'_>) {
     #[cfg(feature = "profiler")]
     journal::begin_foreground_turn();
@@ -693,6 +722,7 @@ pub fn update_running_task(spawned: SpawnTime, location: &'static std::panic::Lo
 }
 
 #[doc(hidden)]
+/// Records the end of the current thread's task poll.
 pub fn save_task_timing() {
     let yielded_at = YieldTime(Instant::now());
     #[cfg(feature = "profiler")]
@@ -707,6 +737,7 @@ pub fn save_task_timing() {
 }
 
 #[doc(hidden)]
+/// Returns the current thread's timing buffer and statistics.
 pub fn get_current_thread_task_timings(include_running: TasksIncluded) -> ThreadTaskTimings {
     THREAD_TIMINGS.with(|timings| timings.lock().get_thread_task_timings(include_running))
 }

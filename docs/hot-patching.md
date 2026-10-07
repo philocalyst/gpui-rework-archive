@@ -6,7 +6,8 @@ watches its source, and sends patches through GPUI's Subsecond integration.
 
 ## Run a walkthrough
 
-Install the CLI from its repository:
+The CLI repository currently requires access to `gpui-ce/cli`. With that access,
+install it from the repository:
 
 ```sh
 cargo install --git https://github.com/gpui-ce/cli --locked

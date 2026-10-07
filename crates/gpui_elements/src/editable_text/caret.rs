@@ -12,14 +12,18 @@ use std::time::Duration;
 /// Default interval for caret blinking (500ms).
 pub const BLINK_INTERVAL_500MS: Duration = Duration::from_millis(500);
 
-/// Events emitted that the [`Caret`] listens to.
+/// Event used to restart a subscribed [`Caret`]'s blink cycle after user activity.
 pub enum CaretNotify {
-    /// The caret should pause blinking in response to a user-action
+    /// Make a focused caret visible for one full interval, then resume blinking.
     PauseBlinking,
 }
 
-/// Controls caret visibility and blinking; text layout owns position and geometry.
-/// Blinking is disabled by default.
+/// Controls insertion-caret visibility and blinking for editable text.
+///
+/// Text layout owns the caret's position and geometry. This entity only tracks focus and timing;
+/// it is hidden while unfocused. Blinking is disabled by default, so use one of the interval
+/// builders to opt in. Subscribe it to the field's [`EditableTextState`] so edits restart the
+/// visible interval.
 #[derive(Default)]
 pub struct Caret {
     /// The frequency at which the caret blinks
@@ -35,29 +39,35 @@ pub struct Caret {
 }
 
 impl Caret {
-    /// Returns the duration of the current blink interval
+    /// Returns the duration between visibility changes; zero means no blinking.
     pub fn blink_interval(&self) -> Duration {
         self.interval
     }
 
-    /// Sets the blinking interval of the caret.
+    /// Sets the duration between visibility changes; zero disables blinking.
     pub fn set_blink_interval(&mut self, interval: Duration) {
         self.interval = interval;
     }
 
-    /// Sets the blinking interval of the caret.
+    /// Sets the duration between visibility changes and returns the caret.
     pub fn with_blink_interval(mut self, interval: Duration) -> Self {
         self.set_blink_interval(interval);
         self
     }
 
-    /// Sets the blinking interval of the caret to the global "default".
-    /// The true default of the caret is "do not blink".
+    /// Sets the common 500 ms blink interval.
+    ///
+    /// [`Caret::default`] does not blink; this method opts into the interval in
+    /// [`BLINK_INTERVAL_500MS`].
     pub fn with_blink_interval_500ms(self) -> Self {
         self.with_blink_interval(BLINK_INTERVAL_500MS)
     }
 
-    /// Listens for CaretNotify events on an entity (e.g. [`EditableTextState`]).
+    /// Listens for [`CaretNotify`] events on an entity, usually an [`EditableTextState`].
+    ///
+    /// Retains the subscription in this caret entity. The editable-text state emits
+    /// `PauseBlinking` after caret movement and text input; this keeps the caret visible for a full
+    /// interval after activity.
     pub fn subscribe_to<E>(&mut self, emitter: &Entity<E>, cx: &mut Context<Self>)
     where
         E: EventEmitter<CaretNotify>,

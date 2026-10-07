@@ -1,7 +1,10 @@
 //! User-input actions bound by editable text elements.
 //!
-//! [`DEFAULT_INPUT_CONTEXT`] names the default key context. Applications can extend or replace
-//! these bindings through GPUI's keymap system.
+//! Each editable element installs [`DEFAULT_INPUT_CONTEXT`] and handles these actions against its
+//! [`EditableTextState`](super::EditableTextState). Use [`default_bindings`] as a starting point
+//! for application keymaps, then add application-specific bindings in that context. On WebAssembly
+//! both Cmd-style and Ctrl-style common shortcuts are registered because the compile target cannot
+//! identify the host keyboard; browser clipboard events still supply paste data directly.
 use gpui::{InteractiveElement, WeakEntity, Window};
 use std::{cell::RefCell, rc::Rc};
 
@@ -82,8 +85,15 @@ gpui::actions!(
     ]
 );
 
-/// Creates a collection of default keystroke bindings for EditableText actions.
-/// See [`ActionBindingCollection`](gpui::ActionBindingCollection) docs on how to override these bindings.
+/// Creates the default keystroke bindings for editable-text actions.
+///
+/// Use this when constructing the application's keymap and extend it with the application's own
+/// bindings. The collection does not provide a way to remove an individual default binding. The
+/// mapping below lists the conventional desktop shortcuts; on WebAssembly, Ctrl and Cmd variants
+/// of common edit shortcuts are both installed because the target cannot infer browser OS.
+///
+/// See [`ActionBindingCollection`](gpui::ActionBindingCollection) for installing or extending a
+/// binding collection.
 ///
 /// Apple keyboards dont have Home or End keys, so there are common bindings that replace those keys.
 /// | Action                | All         | Linux & Windows           | MacOS           |
@@ -151,7 +161,21 @@ pub fn default_bindings() -> gpui::ActionBindingCollection {
         .with::<Escape>("escape")
         .with::<ShowCharacterPalette>("secondary-space");
 
-    #[cfg(target_os = "macos")]
+    // WebAssembly's compile target cannot identify the user's keyboard. Keep
+    // both conventional shortcut sets available to the browser input bridge.
+    #[cfg(target_family = "wasm")]
+    {
+        bindings = bindings
+            .with::<SelectAll>("cmd-a")
+            .with::<Copy>("cmd-c")
+            .with::<Cut>("cmd-x")
+            .with::<Paste>("cmd-v")
+            .with::<Undo>("cmd-z")
+            .with::<Redo>("cmd-shift-z")
+            .with::<ShowCharacterPalette>("cmd-space");
+    }
+
+    #[cfg(any(target_os = "macos", target_family = "wasm"))]
     {
         bindings = bindings
             .with::<DeleteWordLeft>("alt-backspace")
@@ -195,7 +219,12 @@ pub fn default_bindings() -> gpui::ActionBindingCollection {
     bindings
 }
 
-/// Declares stubs for all editable-text actions that an element's state entity can implement.
+/// Action methods that editable-text state entities can implement.
+///
+/// The element's built-in state implements these actions. A custom handler can implement this
+/// trait to reuse the action element's dispatch wiring for another state type; default methods are
+/// no-ops, so override only the actions that state supports. The action names are also useful when
+/// defining application keymaps or routing commands from menus.
 pub trait EditableTextActionHandler<Context>: Sized {
     /// Blur focus from the input.
     fn escape(&mut self, _: &Escape, _w: &mut Window, _cx: &mut Context) {}

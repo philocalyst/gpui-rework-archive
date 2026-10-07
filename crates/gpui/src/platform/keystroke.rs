@@ -7,7 +7,7 @@ use std::{
 
 use crate::PlatformKeyboardMapper;
 
-/// This is a helper trait so that we can simplify the implementation of some functions
+/// Provides the GPUI matching representation for a keystroke or its display wrapper.
 pub trait AsKeystroke {
     /// Returns the GPUI representation of the keystroke.
     fn as_keystroke(&self) -> &Keystroke;
@@ -128,11 +128,11 @@ impl Keystroke {
     /// The parser accepts a trailing `-` as the hyphen key and rejects missing or ambiguous keys
     /// with [`InvalidKeystrokeError`].
     ///
-    /// key syntax is:
-    /// `secondary-ctrl-alt-shift-cmd-fn-key->key_char`
-    /// key_char syntax is only used for generating test events,
-    /// secondary means "cmd" on macOS and "ctrl" on other platforms
-    /// when matching a key with an key_char set will be matched without it.
+    /// `secondary` means Command on macOS and Control elsewhere. `cmd`, `super`, and `win` all
+    /// set the platform modifier. A single uppercase ASCII key implies Shift, so `shift-p` and
+    /// `P` represent the same match. The optional `->character` suffix sets `key_char`, which is
+    /// used to model text produced by an input method in tests; it does not appear in `unparse`.
+    /// A final `-` represents the hyphen key, as in `ctrl--`.
     pub fn parse(source: &str) -> std::result::Result<Self, InvalidKeystrokeError> {
         let mut modifiers = Modifiers::none();
         let mut key = None;
@@ -280,7 +280,8 @@ impl Keystroke {
 
 impl KeybindingKeystroke {
     #[cfg(target_os = "windows")]
-    #[expect(missing_docs)]
+    /// Pair a dispatch keystroke with the modifiers and key label shown in Windows shortcuts.
+    /// Display labels do not change which keystroke matches a binding.
     pub fn new(inner: Keystroke, display_modifiers: Modifiers, display_key: String) -> Self {
         KeybindingKeystroke {
             inner,
@@ -289,7 +290,10 @@ impl KeybindingKeystroke {
         }
     }
 
-    /// Create a new keybinding keystroke from the given keystroke using the given keyboard mapper.
+    /// Create a display and matching wrapper using the platform keyboard mapper.
+    ///
+    /// Use this when the current layout may change the key equivalent or shortcut label. For a
+    /// raw keystroke with no platform mapping, use [`Self::from_keystroke`].
     pub fn new_with_mapper(
         inner: Keystroke,
         use_key_equivalents: bool,
@@ -298,7 +302,9 @@ impl KeybindingKeystroke {
         keyboard_mapper.map_key_equivalent(inner, use_key_equivalents)
     }
 
-    /// Create a new keybinding keystroke from the given keystroke, without any platform-specific mapping.
+    /// Wrap a keystroke without applying platform-specific mapping.
+    ///
+    /// Prefer [`Self::new_with_mapper`] when constructing keybinding data for the active layout.
     pub fn from_keystroke(keystroke: Keystroke) -> Self {
         #[cfg(target_os = "windows")]
         {
@@ -354,7 +360,7 @@ impl KeybindingKeystroke {
         }
     }
 
-    /// Sets the modifiers. On Windows this modifies both `inner.modifiers` and `display_modifiers`.
+    /// Sets the matching modifiers and, on Windows, the displayed modifiers too.
     pub fn set_modifiers(&mut self, modifiers: Modifiers) {
         self.inner.modifiers = modifiers;
         #[cfg(target_os = "windows")]
@@ -363,7 +369,7 @@ impl KeybindingKeystroke {
         }
     }
 
-    /// Sets the key. On Windows this modifies both `inner.key` and `display_key`.
+    /// Sets the matching key and, on Windows, the displayed key too.
     pub fn set_key(&mut self, key: String) {
         #[cfg(target_os = "windows")]
         {
@@ -524,7 +530,10 @@ impl Modifiers {
         Default::default()
     }
 
-    /// Returns [`Modifiers`] with just the command key.
+    /// Returns [`Modifiers`] with the platform modifier pressed.
+    ///
+    /// This is Command on macOS, Super on Linux, and the Windows key on Windows. Use
+    /// [`Self::secondary_key`] for Command on macOS and Control on other platforms.
     pub fn command() -> Modifiers {
         Modifiers {
             platform: true,
@@ -551,7 +560,7 @@ impl Modifiers {
         }
     }
 
-    /// Returns [`Modifiers`] with just the windows key.
+    /// Returns [`Modifiers`] with the platform modifier pressed (Windows key on Windows).
     pub fn windows() -> Modifiers {
         Modifiers {
             platform: true,
@@ -559,7 +568,7 @@ impl Modifiers {
         }
     }
 
-    /// Returns [`Modifiers`] with just the super key.
+    /// Returns [`Modifiers`] with the platform modifier pressed (Super on Linux).
     pub fn super_key() -> Modifiers {
         Modifiers {
             platform: true,
@@ -599,7 +608,7 @@ impl Modifiers {
         }
     }
 
-    /// Returns [`Modifiers`] with command + shift.
+    /// Returns the platform modifier plus Shift.
     pub fn command_shift() -> Modifiers {
         Modifiers {
             shift: true,
@@ -608,7 +617,7 @@ impl Modifiers {
         }
     }
 
-    /// Returns [`Modifiers`] with command + shift.
+    /// Returns [`Modifiers`] with Control and Shift pressed.
     pub fn control_shift() -> Modifiers {
         Modifiers {
             shift: true,

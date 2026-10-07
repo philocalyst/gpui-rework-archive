@@ -5,8 +5,10 @@
 //! resolve against the containing bounds, and `auto` values are captured from
 //! the current layout before being animated. Each property owns an independent
 //! [`Animated`] value, so changing one style does not reset unrelated
-//! properties. Reduced-motion mode bypasses interpolation while retaining the
-//! authored endpoint.
+//! properties. This state is stored with the element's interaction state and
+//! survives a render only while that element keeps the same identity; repeated
+//! elements built at one call site need distinct explicit IDs. Reduced-motion
+//! mode bypasses interpolation and presents the authored endpoint.
 
 use scheduler::Instant;
 

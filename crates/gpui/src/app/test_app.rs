@@ -21,7 +21,7 @@
 //! ```
 //!
 //! The harness remains single-threaded for foreground state. Use
-//! [`TestApp::advance_clock`] before `run_until_parked` to make a timer ready;
+//! [`TestApp::advance_clock`] to move time and run work due by that time;
 //! `run_until_parked` does not invent elapsed time. Window inspection methods
 //! panic if their window has already been closed, matching the test's invalid
 //! handle rather than silently testing a different window.
@@ -215,7 +215,11 @@ impl TestApp {
         self.background_executor.run_until_parked();
     }
 
-    /// Advances the test clock without polling tasks.
+    /// Advances the test clock and runs work due by the new time.
+    ///
+    /// The scheduler drains runnable work while crossing timers due within
+    /// `duration`, then leaves the clock at the requested destination. This
+    /// does not model production wall-clock scheduling or latency.
     pub fn advance_clock(&self, duration: Duration) {
         self.background_executor.advance_clock(duration);
     }

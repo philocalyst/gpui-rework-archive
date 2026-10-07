@@ -223,7 +223,11 @@ impl BackgroundExecutor {
         self.dispatcher.as_test().unwrap().simulate_random_delay()
     }
 
-    /// In tests, move time forward. This does not run any tasks, but does make `timer`s ready.
+    /// In tests, advance simulated time and run work due by the new time.
+    ///
+    /// The test scheduler drains runnable tasks while crossing timers whose
+    /// deadlines fall within `duration`, then leaves the clock at the requested
+    /// destination. This does not model wall-clock scheduling latency.
     #[cfg(any(test, feature = "headless"))]
     pub fn advance_clock(&self, duration: Duration) {
         self.dispatcher.as_test().unwrap().advance_clock(duration)
@@ -235,12 +239,11 @@ impl BackgroundExecutor {
         self.dispatcher.as_test().unwrap().scheduler().tick()
     }
 
-    /// In tests, run tasks until the scheduler would park.
+    /// In tests, poll ready tasks until the scheduler has no runnable work.
     ///
-    /// Under the scheduler-backed test dispatcher, `tick()` will not advance the clock, so a pending
-    /// timer can keep `has_pending_tasks()` true even after all currently-runnable tasks have been
-    /// drained. To preserve the historical semantics that tests relied on (drain all work that can
-    /// make progress), we advance the clock to the next timer when no runnable tasks remain.
+    /// This does not advance the test clock. Pending timers remain pending;
+    /// use [`Self::advance_clock`] to advance time and run work due in that
+    /// interval.
     #[cfg(any(test, feature = "headless"))]
     pub fn run_until_parked(&self) {
         let scheduler = self.dispatcher.as_test().unwrap().scheduler();

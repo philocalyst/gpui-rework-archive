@@ -676,6 +676,11 @@ impl MetalRenderer {
         // nothing to do
     }
 
+    /// Encodes and presents a finished scene to this renderer's drawable layer.
+    ///
+    /// This is a no-op for a headless renderer or when Metal cannot acquire a
+    /// drawable. Use `render_scene_to_image` or `render_scene` for offscreen
+    /// output.
     pub fn draw(&mut self, scene: &Scene) {
         let layer = match &self.layer {
             Some(l) => l.clone(),
@@ -2118,12 +2123,14 @@ fn align_offset(offset: &mut usize) {
 }
 
 #[cfg(any(test, feature = "bench-support", feature = "test-support"))]
+/// Surface-free Metal renderer adapter used by GPUI tests and benchmarks.
 pub struct MetalHeadlessRenderer {
     renderer: MetalRenderer,
 }
 
 #[cfg(any(test, feature = "bench-support", feature = "test-support"))]
 impl MetalHeadlessRenderer {
+    /// Creates a headless renderer with a fresh reusable instance-buffer pool.
     pub fn new() -> Self {
         let instance_buffer_pool = Arc::new(Mutex::new(InstanceBufferPool::default()));
         let renderer = MetalRenderer::new_headless(instance_buffer_pool);

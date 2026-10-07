@@ -1,8 +1,22 @@
-//! Traits and keys for asynchronous application asset loading.
+//! Typed asynchronous application resources.
 //!
-//! An [`Asset`] describes how a source key becomes a cloneable output. GPUI owns the cache and
-//! schedules the future through the application; implementations should keep source keys cheap to
-//! clone and avoid borrowing from the [`App`] passed to [`Asset::load`].
+//! [`crate::Asset`] describes how one cloneable source key becomes a cloneable output. The application
+//! supplies the cache and schedules the future returned by [`crate::Asset::load`]; an implementation
+//! should keep the key cheap to clone and capture owned data rather than borrowing from [`crate::App`].
+//! This is the asynchronous resource path. [`crate::AssetRegistry`] is a separate byte registry
+//! whose on-demand callbacks run synchronously.
+//!
+//! The typical flow is: choose a source key such as [`crate::Resource::Uri`] or [`crate::Resource::Embedded`],
+//! request the typed asset through GPUI's resource-loading API, and await the returned
+//! [`crate::Task`] in a foreground task that updates the owning entity. Keep that task alive by
+//! awaiting or storing it; dropping a GPUI task cancels its work. The associated `Output` is
+//! cloneable because the app cache can share the completed value among consumers. Errors remain
+//! part of the output type—for example `Result<T, E>`—and [`crate::AssetLogger`] can log a failed result
+//! while preserving it for the UI to handle.
+//!
+//! [`crate::Resource`] is only a family of source-key shapes. A URI is not fetched by this enum, a path
+//! is not read until the asset's loader does so, and an embedded key needs an implementation that
+//! knows how to resolve its name.
 
 use crate::{App, SharedString, SharedUri};
 use futures::{Future, TryFutureExt};
@@ -13,7 +27,9 @@ use std::marker::PhantomData;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
-/// Where an asset can be obtained.
+/// Common source-key forms for an asset implementation.
+///
+/// This enum describes a location; it does not perform I/O or guarantee that a resource exists.
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Resource {
     /// A URI resolved by the application's resource loader.
@@ -42,7 +58,12 @@ impl From<Arc<Path>> for Resource {
     }
 }
 
-/// Describes an asynchronously loaded, cloneable asset type.
+/// Maps a cheap, cloneable source key to an asynchronously loaded, cloneable output.
+///
+/// GPUI owns scheduling and caching. `load` receives a temporary mutable [`App`] only to obtain
+/// application services while constructing the future; the future must be `'static` and
+/// `Send`, so it cannot retain a borrow of that app. Represent expected failure in `Output`,
+/// commonly as `Result<OutputValue, Error>`, so the caller can present or recover from it.
 pub trait Asset: 'static {
     /// The key used to identify one load request.
     type Source: Clone + Hash + Send;
@@ -57,7 +78,10 @@ pub trait Asset: 'static {
     ) -> impl Future<Output = Self::Output> + Send + 'static;
 }
 
-/// An [`Asset`] adapter that logs failed `Result` loads before returning them unchanged.
+/// An [`Asset`] adapter that logs failed `Result` loads before returning the result unchanged.
+///
+/// This is useful when a load failure should appear in logs and still reach the requesting UI.
+/// It does not turn an error into a fallback value or consume the error.
 pub enum AssetLogger<T> {
     #[doc(hidden)]
     _Phantom(PhantomData<T>, &'static dyn crate::seal::Sealed),

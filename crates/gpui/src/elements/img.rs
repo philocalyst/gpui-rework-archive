@@ -1,3 +1,10 @@
+//! Image resources, decoded images, and the `img` element.
+//!
+//! [`img`] accepts a GPUI resource, predecoded [`Image`] or [`RenderImage`], or a caller-owned
+//! loader. Resource-backed images can use an explicit cache, an ancestor [`crate::image_cache`] scope, or
+//! the global asset path. Animated image frames use retained element state: give an animated image
+//! a stable ID if it should advance across frames. See the [rendering guide](crate::_documentation::rendering).
+
 use crate::{
     AnyElement, AnyImageCache, App, AppContext, Asset, AssetLogger, Bounds, DefiniteLength,
     Element, ElementId, Entity, GlobalElementId, Hitbox, Image, ImageCache, InspectorElementId,
@@ -91,6 +98,7 @@ pub enum ImageSource {
     /// Use already decoded CPU image data.
     Image(Arc<Image>),
     /// Poll a caller-owned loader. Return `None` while loading, or the result when complete.
+    /// The caller is responsible for notifying the owning view when the result becomes available.
     Custom(Arc<dyn Fn(&mut Window, &mut App) -> Option<Result<Arc<RenderImage>, ImageCacheError>>>),
 }
 
@@ -232,7 +240,11 @@ impl StyledImage for Stateful<Img> {
     }
 }
 
-/// An image element.
+/// An image element with optional loading/error replacement content and object fitting.
+///
+/// Resource and decoded-image sources can load asynchronously. Give an animated image a stable
+/// [`ElementId`] through [`InteractiveElement::id`] so its current frame and timing survive the
+/// next frame. A pending custom loader must arrange its own notification when its result changes.
 pub struct Img {
     interactivity: Interactivity,
     source: ImageSource,

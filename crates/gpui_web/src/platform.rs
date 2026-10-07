@@ -28,10 +28,23 @@ use std::{
 };
 use wasm_bindgen::prelude::*;
 
-/// Provides the GPUI platform implementation for web browsers.
+/// Provides GPUI's platform implementation for the current browser document.
 ///
-/// The platform starts with an empty font database. Applications must add fonts
-/// through [`gpui::App::text_system`] before opening a window.
+/// Construction must happen in a browser window context on the main thread. Graphics initialization
+/// begins in [`gpui::Platform::run`]; open the first window from its launch callback so the canvas
+/// and graphics surface are ready. The platform owns one document canvas and one normal top-level
+/// GPUI window. A closed window cannot be reopened in the same platform instance.
+///
+/// The text system begins with no operating-system fonts. Register application font data through
+/// [`gpui::App::text_system`] before opening a window when the page must use known fonts.
+///
+/// Browser policy constrains several platform services: native file/path prompts and credential
+/// storage are unavailable; synchronous clipboard reads return `None`, so use GPUI's asynchronous
+/// read path where needed; clipboard writes support text. Application menus, dock menus, process
+/// restart, hide/quit, and system wake hooks have no browser implementation. URL scheme
+/// registration is a successful no-op. Opening URLs delegates to `window.open` and remains subject
+/// to popup blocking. These limitations are reflected in the corresponding [`gpui::Platform`]
+/// trait methods.
 pub struct WebPlatform {
     browser_window: web_sys::Window,
     background_executor: BackgroundExecutor,
@@ -96,6 +109,11 @@ pub(crate) enum WebWindowLifecycle {
 }
 
 #[derive(Debug)]
+/// A requested browser window operation that the web platform cannot complete.
+///
+/// These errors distinguish timing from permanent limitations: retry
+/// [`GraphicsInitializationPending`](Self::GraphicsInitializationPending) from the launch callback;
+/// the other lifecycle and graphics errors require a new platform/runtime or a supported request.
 pub enum WebWindowError {
     /// A top-level GPUI window is already open.
     AlreadyOpen,
@@ -149,16 +167,28 @@ struct WebPlatformCallbacks {
 }
 
 impl WebPlatform {
-    /// Creates a browser platform, allowing worker threads when the build and
-    /// browser support them.
+    /// Creates a browser platform, preferring WebGPU and falling back to WebGL2.
+    ///
+    /// `allow_multi_threading` permits worker execution only when the crate is built with its
+    /// `multithreaded` feature and the browser supports shared WebAssembly memory and
+    /// `Atomics.waitAsync`. It does not require workers to be available. See [`WebDispatcher`].
+    ///
+    /// Use `false` to force all work onto the browser thread. GPUI's web application constructor
+    /// also installs this platform's Fetch client as the application's HTTP client.
     pub fn new(allow_multi_threading: bool) -> Self {
         Self::new_with_backend(allow_multi_threading, WebBackendPreference::Auto)
     }
 
     /// Creates a browser platform with an explicit graphics backend preference.
     ///
-    /// Browser graphics initialization is lazy; opening the first window may
-    /// return [`WebWindowError::GraphicsInitializationPending`].
+    /// Browser graphics initialization is asynchronous and starts in
+    /// [`gpui::Platform::run`]. Open the first window from that method's launch callback. A direct
+    /// call before initialization completes returns
+    /// [`WebWindowError::GraphicsInitializationPending`]. With `Auto`, the platform tries WebGPU,
+    /// then WebGL2; choosing a fixed backend disables that fallback.
+    ///
+    /// The backend preference selects graphics only; it does not change browser window, clipboard,
+    /// font catalog, or worker-thread policies.
     pub fn new_with_backend(
         allow_multi_threading: bool,
         backend_preference: WebBackendPreference,
@@ -206,7 +236,11 @@ impl WebPlatform {
         }
     }
 
-    /// Returns an HTTP client that runs browser Fetch operations on this platform's main thread.
+    /// Returns the browser Fetch HTTP client associated with this platform.
+    ///
+    /// The client uses the browser's main-thread Fetch API. Normal
+    /// `gpui_ce_platform::application` constructors install it automatically; callers constructing
+    /// `WebPlatform` directly can pass this value to `Application::with_http_client`.
     pub fn fetch_http_client(&self) -> FetchHttpClient {
         FetchHttpClient::default()
     }
@@ -306,6 +340,9 @@ impl Platform for WebPlatform {
         self.text_system.clone()
     }
 
+    /// Initializes WebGPU/WebGL asynchronously, then calls `on_finish_launching` on the browser
+    /// thread once a usable graphics context and canvas exist. If both backends fail, the callback
+    /// is not called and an unavailable message is rendered in the page.
     fn run(&self, on_finish_launching: Box<dyn 'static + FnOnce()>) {
         let wgpu_context = self.wgpu_context.clone();
         let prepared_window = self.prepared_window.clone();
@@ -332,18 +369,24 @@ impl Platform for WebPlatform {
         });
     }
 
+    /// Logs that quitting is unsupported; it does not close the browser tab or window.
     fn quit(&self) {
         log::warn!("WebPlatform::quit called, but quitting is not supported in the browser .");
     }
 
+    /// Does nothing because the browser cannot relaunch the application process.
     fn restart(&self, _binary_path: Option<PathBuf>, _arguments: Vec<std::ffi::OsString>) {}
 
+    /// Does nothing; browsers do not expose a process-wide application activation operation.
     fn activate(&self, _ignoring_other_apps: bool) {}
 
+    /// Does nothing because a page cannot hide its browser tab through this API.
     fn hide(&self) {}
 
+    /// Does nothing because browser tabs do not control activation of other applications.
     fn hide_other_apps(&self) {}
 
+    /// Does nothing because browser tabs cannot unhide other applications.
     fn unhide_other_apps(&self) {}
 
     fn displays(&self) -> Vec<Rc<dyn PlatformDisplay>> {
@@ -358,6 +401,12 @@ impl Platform for WebPlatform {
         *self.active_window.borrow()
     }
 
+    /// Opens the one normal window after graphics initialization.
+    ///
+    /// Returns a popup/window-kind error for unsupported kinds, a pending error before graphics
+    /// initialization finishes, or a lifecycle error for a second/reopened window. A failed
+    /// low-level creation makes this platform instance unavailable because its prepared canvas and
+    /// surface have been consumed.
     fn open_window(
         &self,
         handle: AnyWindowHandle,
@@ -439,20 +488,25 @@ impl Platform for WebPlatform {
         }
     }
 
+    /// Requests `window.open(url)`; browser popup and security policy determine whether it succeeds.
     fn open_url(&self, url: &str) {
         if let Err(error) = self.browser_window.open_with_url(url) {
             log::warn!("Failed to open URL '{url}': {error:?}");
         }
     }
 
+    /// Stores the callback; browser URL launches are not delivered to this platform hook.
     fn on_open_urls(&self, callback: Box<dyn FnMut(Vec<String>)>) {
         self.callbacks.borrow_mut().open_urls = Some(callback);
     }
 
+    /// Returns success without registering a scheme; browser URL handlers are outside this API.
     fn register_url_scheme(&self, _url: &str) -> Task<Result<()>> {
         Task::ready(Ok(()))
     }
 
+    /// Completes immediately with an unsupported-operation error; browser file inputs are a
+    /// separate application-level UI and do not return filesystem paths.
     fn prompt_for_paths(
         &self,
         _options: PathPromptOptions,
@@ -465,6 +519,8 @@ impl Platform for WebPlatform {
         rx
     }
 
+    /// Completes immediately with an unsupported-operation error; browsers cannot select a new
+    /// filesystem path through this native prompt contract.
     fn prompt_for_new_path(
         &self,
         _directory: &Path,
@@ -483,32 +539,42 @@ impl Platform for WebPlatform {
         false
     }
 
+    /// Does nothing because browser pages cannot reveal arbitrary local filesystem paths.
     fn reveal_path(&self, _path: &Path) {}
 
+    /// Does nothing because browser pages cannot launch a local system application for a path.
     fn open_with_system(&self, _path: &Path) {}
 
+    /// Stores the callback; the browser platform has no process-quit event to deliver it on.
     fn on_quit(&self, callback: Box<dyn FnMut() -> bool>) {
         self.callbacks.borrow_mut().quit = Some(callback);
     }
 
+    /// Stores the callback; browser tab lifecycle does not provide GPUI's native reopen event.
     fn on_reopen(&self, callback: Box<dyn FnMut()>) {
         self.callbacks.borrow_mut().reopen = Some(callback);
     }
 
+    /// Ignores the callback because browsers do not expose the native system-wake hook.
     fn on_system_wake(&self, _callback: Box<dyn FnMut()>) {}
 
+    /// Ignores native application menus; render application commands inside the page instead.
     fn set_menus(&self, _menus: Vec<Menu>, _keymap: &Keymap) {}
 
+    /// Ignores native dock menus, which have no browser-page equivalent.
     fn set_dock_menu(&self, _menu: Vec<MenuItem>, _keymap: &Keymap) {}
 
+    /// Stores the callback; no browser menu action invokes it.
     fn on_app_menu_action(&self, callback: Box<dyn FnMut(&dyn Action)>) {
         self.callbacks.borrow_mut().app_menu_action = Some(callback);
     }
 
+    /// Stores the callback; browser pages do not open the native application menu.
     fn on_will_open_app_menu(&self, callback: Box<dyn FnMut()>) {
         self.callbacks.borrow_mut().will_open_app_menu = Some(callback);
     }
 
+    /// Stores the callback; browser pages do not validate native application-menu commands.
     fn on_validate_app_menu_command(&self, callback: Box<dyn FnMut(&dyn Action) -> bool>) {
         self.callbacks.borrow_mut().validate_app_menu_command = Some(callback);
     }
@@ -517,6 +583,7 @@ impl Platform for WebPlatform {
         ThermalState::Nominal
     }
 
+    /// Stores the callback; this platform reports nominal thermal state and emits no changes.
     fn on_thermal_state_change(&self, callback: Box<dyn FnMut()>) {
         self.callbacks.borrow_mut().thermal_state_change = Some(callback);
     }
@@ -525,10 +592,12 @@ impl Platform for WebPlatform {
         "Web"
     }
 
+    /// Returns an error because a browser page has no application executable path.
     fn app_path(&self) -> Result<PathBuf> {
         Err(anyhow::anyhow!("app_path is not available on the web"))
     }
 
+    /// Returns an error because browser pages cannot locate local auxiliary executables.
     fn path_for_auxiliary_executable(&self, _name: &str) -> Result<PathBuf> {
         Err(anyhow::anyhow!(
             "path_for_auxiliary_executable is not available on the web"
@@ -581,10 +650,16 @@ impl Platform for WebPlatform {
         true
     }
 
+    /// Returns `None`: browser clipboard reads are asynchronous and may require user activation.
     fn read_from_clipboard(&self) -> Option<ClipboardItem> {
         None
     }
 
+    /// Reads supported text and image clipboard items through the browser Clipboard API.
+    ///
+    /// The `read()` promise is started synchronously in this call to retain user activation. The
+    /// returned task may fail with `Unavailable`, a permission/read error, or
+    /// `UnsupportedContent`; it returns `None` when no supported nonempty entries are present.
     fn read_from_clipboard_async(&self) -> Task<Result<Option<ClipboardItem>, ClipboardReadError>> {
         let navigator = self.browser_window.navigator();
         // `navigator.clipboard` is undefined outside secure contexts; probing
@@ -646,6 +721,9 @@ impl Platform for WebPlatform {
         })
     }
 
+    /// Fire-and-forgets a text-only `writeText`; image clipboard writes are not implemented.
+    ///
+    /// The call must occur during a browser user activation for the browser to permit the write.
     fn write_to_clipboard(&self, item: ClipboardItem) {
         if let Some(text) = item.text()
             && let Some(window) = web_sys::window()
@@ -656,16 +734,19 @@ impl Platform for WebPlatform {
         }
     }
 
+    /// Returns an error because browser credential storage is not implemented by this platform.
     fn write_credentials(&self, _url: &str, _username: &str, _password: &[u8]) -> Task<Result<()>> {
         Task::ready(Err(anyhow::anyhow!(
             "credential storage is not available on the web"
         )))
     }
 
+    /// Returns `Ok(None)` because browser credential storage is not implemented.
     fn read_credentials(&self, _url: &str) -> Task<Result<Option<(String, Vec<u8>)>>> {
         Task::ready(Ok(None))
     }
 
+    /// Returns an error because browser credential storage is not implemented by this platform.
     fn delete_credentials(&self, _url: &str) -> Task<Result<()>> {
         Task::ready(Err(anyhow::anyhow!(
             "credential storage is not available on the web"
@@ -680,6 +761,7 @@ impl Platform for WebPlatform {
         Rc::new(DummyKeyboardMapper)
     }
 
+    /// Stores the callback; this platform uses a dummy mapper and emits no layout-change event.
     fn on_keyboard_layout_change(&self, callback: Box<dyn FnMut()>) {
         self.callbacks.borrow_mut().keyboard_layout_change = Some(callback);
     }

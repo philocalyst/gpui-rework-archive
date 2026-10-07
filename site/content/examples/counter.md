@@ -18,9 +18,11 @@ example_run = "cargo run -p gpui-documentation-examples --example counter"
 Click Increment and the label gains one. The value behind that label is
 `Counter::count`; the button holds no separate count.
 
-GPUI stores the `Counter` and gives its owner an [`Entity`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Entity.html) handle. Cloning
-the handle keeps the same counter alive. It does not copy the field. During
-an update, [`Context`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html) grants access to this counter and the rest of the app.
+[`AppContext::new`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.AppContext.html#tymethod.new) stores `Counter` in the app and returns an [`Entity`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Entity.html)
+handle. Cloning that handle refers to the same counter and keeps it alive;
+it does not copy the field. [`Context`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html) is the scoped capability passed to
+callbacks and render methods, so this example mutates the view through its
+listener rather than borrowing the entity again.
 
 ```rust
 use gpui::{AppContext, Context, IntoElement, Render, Window, div, prelude::*, rgb};
@@ -30,14 +32,14 @@ struct Counter {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/counter/") }}#L12).
+[View this step in the source]({{ get_url(path="sources/counter/") }}#L14).
 
 <a id="render"></a>
 ## Read state into a frame
 
-[`Render`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Render.html) builds a label from the current count and puts a button below it.
-The styling controls their appearance; the button's ID keeps its interaction
-state associated with this button across frames.
+[`Render`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Render.html) reads the count while building the label and button for this
+frame. Styling sets their layout and appearance. The button ID gives its
+interaction state a stable identity as the element values are rebuilt.
 
 [`Context::listener`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html#method.listener) supplies the counter to the click handler. Its other
 arguments are the click event, the window, and the counter's context. The
@@ -73,14 +75,16 @@ impl Render for Counter {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/counter/") }}#L28).
+[View this step in the source]({{ get_url(path="sources/counter/") }}#L30).
 
 <a id="update"></a>
 ## Change the value, then notify
 
-[`Context::notify`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html#method.notify) queues a change notification. GPUI invalidates rendering
-that depends on this entity, and the next render reads the updated count.
-Assigning a field does not send that notification for you.
+[`Context::notify`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html#method.notify) reports that this entity's observable state changed.
+GPUI schedules affected views to render again; the next render reads the new
+count. Assigning a field alone does not schedule that update. This separates
+mutation from invalidation, which matters when state is changed outside a
+render callback.
 
 Remove `cx.notify()` and run again. Clicks still change the field, but the
 label can stay stale until other work causes a render. Restore the call and
@@ -104,6 +108,6 @@ pub fn main() {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/counter/") }}#L65).
+[View this step in the source]({{ get_url(path="sources/counter/") }}#L69).
 
 [Download the complete source]({{ get_url(path="examples/counter.rs") }}).

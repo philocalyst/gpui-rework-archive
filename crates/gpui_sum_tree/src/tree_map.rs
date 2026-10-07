@@ -2,7 +2,12 @@ use std::{cmp::Ordering, fmt::Debug};
 
 use crate::{Bias, ContextLessSummary, Dimension, Edit, Item, KeyedItem, SeekTarget, SumTree};
 
-/// A cheaply-cloneable ordered map based on a [SumTree](crate::SumTree).
+/// A cloneable ordered map backed by a [SumTree](crate::SumTree).
+///
+/// Iteration is in ascending key order. Cloning shares the tree structure until
+/// either copy is edited, and keys and values must implement `Clone` because
+/// edits may rebuild shared paths. Use [`SumTree`] directly when you need
+/// summaries or cursor navigation over a sequence rather than key lookup.
 #[derive(Clone, PartialEq, Eq)]
 pub struct TreeMap<K, V>(SumTree<MapEntry<K, V>>)
 where
@@ -43,7 +48,11 @@ where
     K: Clone + Ord;
 
 impl<K: Clone + Ord, V: Clone> TreeMap<K, V> {
-    /// Builds a map from entries already sorted by key.
+    /// Builds a map from entries in strictly ascending key order.
+    ///
+    /// The input must have no duplicate keys. This constructor does not sort,
+    /// deduplicate, or validate the entries; use [`Self::extend`] or repeated
+    /// [`Self::insert`] when input order is arbitrary.
     pub fn from_ordered_entries(entries: impl IntoIterator<Item = (K, V)>) -> Self {
         let tree = SumTree::from_iter(
             entries
@@ -80,7 +89,7 @@ impl<K: Clone + Ord, V: Clone> TreeMap<K, V> {
         }
     }
 
-    /// Inserts `value`, replacing any value with the same key.
+    /// Inserts `value`, replacing the value for an equal key.
     pub fn insert(&mut self, key: K, value: V) {
         self.0.insert_or_replace(MapEntry { key, value }, ());
     }
@@ -123,6 +132,11 @@ impl<K: Clone + Ord, V: Clone> TreeMap<K, V> {
     }
 
     /// Removes entries in the half-open range `[start, end)`.
+    ///
+    /// The endpoint types may implement [`MapSeekTarget`] to define a boundary
+    /// other than an exact key. For example, a custom end target can remove a
+    /// path and all of its descendants even when the key type's ordinary
+    /// ordering has no single successor for that subtree.
     pub fn remove_range(&mut self, start: &impl MapSeekTarget<K>, end: &impl MapSeekTarget<K>) {
         let start = MapSeekTargetAdaptor(start);
         let end = MapSeekTargetAdaptor(end);
@@ -153,7 +167,10 @@ impl<K: Clone + Ord, V: Clone> TreeMap<K, V> {
         cursor.map(|map_entry| (&map_entry.key, &map_entry.value))
     }
 
-    /// Updates a value in place and returns the closure's result, if present.
+    /// Applies `f` to the value for `key`, returning the closure result if found.
+    ///
+    /// Returns `None` without calling `f` when the key is absent. The tree may
+    /// copy the path to the entry when the map shares nodes with a clone.
     pub fn update<F, T>(&mut self, key: &K, f: F) -> Option<T>
     where
         F: FnOnce(&mut V) -> T,
@@ -211,7 +228,9 @@ impl<K: Clone + Ord, V: Clone> TreeMap<K, V> {
         self.0.last().map(|entry| (&entry.key, &entry.value))
     }
 
-    /// Inserts a cloned copy of every entry in `other`.
+    /// Inserts every entry in `other`, replacing values for keys already present.
+    ///
+    /// The entries are cloned into this map; `other` is consumed.
     pub fn insert_tree(&mut self, other: TreeMap<K, V>) {
         let edits = other
             .iter()
@@ -252,8 +271,15 @@ impl<'a, K: Clone + Ord, T: MapSeekTarget<K>> SeekTarget<'a, MapKey<K>, MapKeyRe
     }
 }
 
-/// A key-like value that can be compared while seeking a [`TreeMap`].
+/// A boundary that can be compared with keys while seeking a [`TreeMap`].
+///
+/// Return the ordering of this boundary relative to `cursor_location`. A
+/// [`TreeMap::remove_range`] start uses the boundary as an inclusive lower
+/// bound; its end uses it as an exclusive upper bound. Implement this trait
+/// when a range boundary covers multiple keys, such as a path and its
+/// descendants.
 pub trait MapSeekTarget<K> {
+    /// Compares this boundary with the key currently examined by the tree.
     fn cmp_cursor(&self, cursor_location: &K) -> Ordering;
 }
 
@@ -345,7 +371,10 @@ impl<K> TreeSet<K>
 where
     K: Clone + Ord,
 {
-    /// Builds a set from keys already sorted in ascending order.
+    /// Builds a set from unique keys in strictly ascending order.
+    ///
+    /// The input is not sorted, deduplicated, or validated by this method. Use
+    /// [`Self::extend`] or repeated [`Self::insert`] for arbitrary input.
     pub fn from_ordered_entries(entries: impl IntoIterator<Item = K>) -> Self {
         Self(TreeMap::from_ordered_entries(
             entries.into_iter().map(|key| (key, ())),

@@ -8,6 +8,7 @@ use crate::action::Action;
 
 #[doc(hidden)]
 #[derive(Clone)]
+/// Snapshot of a window's longest action handlers, plus its active handler.
 pub struct ActionStatistics {
     runtime_to_beat: Duration,
 
@@ -64,23 +65,37 @@ impl ActionStatistics {
         }
     }
 
+    /// Takes the collected long-running actions and resets the collection.
+    ///
+    /// An action currently running at the time of the call remains marked as
+    /// running in the reset statistics, so its eventual completion can still
+    /// be recorded.
     pub fn take(&mut self) -> Self {
         let taken = std::mem::take(self);
         self.running = taken.running;
         taken
     }
 
+    /// Returns whether any completed action timings are retained.
     pub fn is_empty(&self) -> bool {
         self.longest_runtimes.is_empty()
     }
 
+    /// Marks the action whose handler is currently running.
+    ///
+    /// With the profiler feature enabled, completed actions are retained only
+    /// when they are among the five longest and take at least 100 microseconds.
     #[cfg(feature = "profiler")]
     pub fn update_running_action(&mut self, action: &'static str, started: Instant) {
         self.running = Some((action, started));
     }
+    /// No-op when profiling support is disabled.
     #[cfg(not(feature = "profiler"))]
     pub fn update_running_action(&mut self, _action: &'static str, _started: Instant) {}
 
+    /// Records the end time of the currently marked action when profiling is
+    /// enabled. Concurrent test execution may leave no current action, in
+    /// which case this is a no-op.
     #[cfg(feature = "profiler")]
     pub fn save_action_timing(&mut self) {
         let now = Instant::now();
@@ -127,9 +142,13 @@ impl ActionStatistics {
                 .expect("never empty");
         }
     }
+    /// No-op when profiling support is disabled.
     #[cfg(not(feature = "profiler"))]
     pub fn save_action_timing(&mut self) {}
 
+    /// Returns retained completed timings and, when requested, an estimate for
+    /// the currently running action through the current instant. The iterator
+    /// is not sorted.
     pub fn longest_runtimes(&self, include_running: bool) -> impl Iterator<Item = ActionTiming> {
         self.longest_runtimes.iter().copied().chain(
             self.running
@@ -148,8 +167,11 @@ impl ActionStatistics {
 /// UNSTABLE only for use in the profiler and zed-reliability
 #[derive(Copy, Clone)]
 pub struct ActionTiming {
+    /// Registered action name.
     pub name: &'static str,
+    /// Start instant of the handler.
     pub start: Instant,
+    /// End instant of the handler.
     pub end: Instant,
 }
 
@@ -163,6 +185,7 @@ impl core::fmt::Debug for ActionTiming {
 }
 
 impl ActionTiming {
+    /// Returns the nonnegative elapsed duration between the recorded instants.
     pub fn duration(&self) -> Duration {
         self.end.saturating_duration_since(self.start)
     }
@@ -202,12 +225,14 @@ pub(crate) fn save_action_timing() {
 
 #[doc(hidden)]
 #[cfg(feature = "profiler")]
+/// Takes the global action timing sample and resets its completed timings.
 pub fn take_action_stats() -> ActionStatistics {
     ACTION_STATISTICS.lock().take()
 }
 
 #[doc(hidden)]
 #[cfg(not(feature = "profiler"))]
+/// Returns empty statistics when profiler support is disabled.
 pub fn take_action_stats() -> ActionStatistics {
     ActionStatistics::default()
 }

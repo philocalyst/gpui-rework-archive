@@ -1,9 +1,15 @@
+/// The first element found in one set but missing from the other.
+///
+/// `LeftMissing` means the left set does not contain a value present in the
+/// right set; `RightMissing` means the converse. The variants identify the side
+/// that is missing the value, not the side it came from.
 pub enum SetEqError<T> {
     LeftMissing(T),
     RightMissing(T),
 }
 
 impl<T> SetEqError<T> {
+    /// Transform the missing value while preserving which side lacked it.
     pub fn map<R, F: FnOnce(T) -> R>(self, update: F) -> SetEqError<R> {
         match self {
             SetEqError::LeftMissing(missing) => SetEqError::LeftMissing(update(missing)),
@@ -12,6 +18,9 @@ impl<T> SetEqError<T> {
     }
 }
 
+/// Return the first difference between two set-like collections, or `Ok(())`
+/// when each contains every value from the other. Iteration order determines
+/// which difference is reported when there is more than one.
 #[macro_export]
 macro_rules! set_eq {
     ($left:expr,$right:expr) => {{
@@ -40,6 +49,10 @@ macro_rules! set_eq {
     }};
 }
 
+/// Assert set equality and panic with the first missing value and both inputs.
+///
+/// Each expression is evaluated once. Values need `iter`, `contains`, `Clone`
+/// (for the missing item), and `Debug` (for a failure message).
 #[macro_export]
 macro_rules! assert_set_eq {
     ($left:expr,$right:expr) => {{

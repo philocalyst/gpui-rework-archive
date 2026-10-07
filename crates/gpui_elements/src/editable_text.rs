@@ -1,11 +1,59 @@
-//! Implementation for editable-text elements (gpui equivalent of html
-//! [`<input>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input) and
-//! [`<textarea>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/textarea)).
+//! Editable text fields built from GPUI elements.
 //!
-//! Both [`text_input`] and [`text_area`] create an [`EditableTextElement`]. This element supports:
+//! This module provides a single-line [`text_input`] and multiline [`text_area`], both
+//! backed by [`EditableTextState`]. Use these controls for forms, search boxes, and short messages.
+//! They are not a document editor: the default [`StringStorage`] rebuilds a shared text snapshot
+//! after mutations, and history is limited to one field with bounded patch entries.
+//!
+//! `EditableTextState` owns text, selection, composition, and focus. Keep that entity alive across
+//! renders with [`EditableTextState::use_keyed`] or initialize custom storage with
+//! [`EditableTextState::use_keyed_init`], then pass its downgraded handle to
+//! [`EditableTextElement::state`]. User edits emit [`TextChanged`]; use `emplace` for programmatic
+//! replacement. That event is after the change, so validate or normalize external input before
+//! calling `emplace` rather than treating it as an interception hook.
+//!
+//! GPUI stores selection positions as UTF-8 byte offsets. The web platform converts browser and
+//! IME UTF-16 positions at its input boundary; custom [`UnicodeTextStorage`] implementations must
+//! expose valid UTF-8 slices and implement UTF-16 length consistently. A byte offset is not a
+//! Unicode scalar count or a grapheme count. Use [`EditableTextState::nav_linear`] for
+//! character/word movement and [`EditableTextState::move_to`] when you already have a byte offset.
+//!
+//! # Field choice and layout
+//!
+//! `text_input` disables multiline navigation and newline keyboard insertion. It strips CR and LF
+//! from user-entered paste and IME text, but programmatic `emplace` can still set multiline content.
+//! For multiline input use `text_area`; add `whitespace_normal()` when you want wrapping. These
+//! functions only configure text behavior; apply GPUI style and overflow properties to size and
+//! scroll the field. `overflow_x_scroll` is useful for a nowrap input; use wrapping and usually
+//! vertical scroll for a message area.
+//!
+//! # Basic form field
+//!
+//! ```
+//! # use gpui::{App, AppContext, ElementId, IntoElement, RenderOnce, Window};
+//! # use gpui_ce_elements::editable_text::{EditableTextState, StringStorage, text_input};
+//! struct SearchField;
+//! impl RenderOnce for SearchField {
+//!     fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
+//!         let id = ElementId::from("search");
+//!         let state = EditableTextState::use_keyed_init(id.clone(), window, cx, |_, _| {
+//!             StringStorage::from("initial query")
+//!         });
+//!         text_input(id)
+//!             .state(state.downgrade())
+//!             .placeholder("Search")
+//!             .whitespace_nowrap()
+//!             .overflow_x_scroll()
+//!     }
+//! }
+//! ```
+//!
+//! The equivalent browser elements are [`<input>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input)
+//! and [`<textarea>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/textarea).
+//! Both constructors return [`EditableTextElement`]. It supports:
 //! - navigating via keyboard & mouse (by character, word, line, and document)
 //! - highlight selection via keyboard & mouse (holding shift, double/triple click mouse, mouse drag)
-//! - typing using an InputMethodEditor (IME) for writing Chinese, Japanese, and Korean utf-16
+//! - text input through an Input Method Editor (IME), including composition-based scripts
 //! - inserting newlines (`\n`) and tabs (`\t`)
 //! - cut/copy/paste
 //! - caret / text cursor that can blink
@@ -13,9 +61,9 @@
 //!
 //! For all input actions, see documentation in the [`actions`] module.
 //!
-//! Editable text elements will default to using [`String`] as the storage medium (see [`StringStorage`]).
-//! Standard library strings are not ideal though for large text documents. For such uses,
-//! it is encouraged that implementers consider rolling their own [`UnicodeTextStorage`] medium.
+//! Storage and history use UTF-8 byte ranges. [`StringStorage`] is a simple default for fields; a
+//! long document can provide a custom [`UnicodeTextStorage`] that avoids repeatedly materializing
+//! the whole document string. Custom storage must update its `version` whenever its content changes.
 //!
 //! Unlike other elements, editable text internally owns its [`FocusHandle`](gpui::FocusHandle).
 //! This is required due to limitations of the [`Interactivity`](gpui::Interactivity) api and
@@ -70,9 +118,9 @@
 //! ```
 //!
 //! The user-inputted text can be accessed via event callbacks on the element.
-//! There is no callback representing the concept of "user is done editing". Its recommended that
-//! users write a [debounce](https://developer.mozilla.org/en-US/docs/Glossary/Debounce)
-//! or some way to detect "focus lost" to signify the user leaving the field.
+//! There is no dedicated "editing finished" event. Subscribe to [`TextChanged`] for each content
+//! update and debounce expensive work when appropriate. `EditableTextState` clears selection on
+//! blur, but does not emit a separate focus-lost event for the field.
 //! ```
 //! # use gpui::{prelude::*, App, Entity, Window, AppContext, ElementId};
 //! # fn test(window: &mut Window, cx: &mut App) -> gpui_ce_elements::editable_text::EditableTextElement {
@@ -152,13 +200,16 @@
 //!
 //! Full-text examples can be found in the [examples folder](https://github.com/gpui-ce/gpui-ce/tree/main/crates/gpui_elements/examples)
 //!
-//! ### Backlog of not-yet implemented features:
-//! - detecting focus being lost on an EditableText field
-//! - text sanitation & validation (see no-op implementation of [`EditableTextState::validate_incoming_text`])
-//! - nav & select via PageUp/PageDown
-//! - screen reader support via a11y
-//! - masking text (e.g. for passwords)
-//! - disabling `insert_tab` if favor of tab being used to change focus between elements (i.e. escaping the field)
+//! ### Current limits
+//!
+//! There is no application-provided sanitation or validation hook. The built-in input path strips
+//! CR and LF from single-line paste/IME edits and enforces the optional byte limit, but it does not
+//! apply other application rules. PageUp and PageDown navigation, password masking, and
+//! screen-reader text support are also not implemented. Tab inserts a tab by default instead of
+//! moving focus to another control.
+//!
+//! For default key bindings and action overrides, see [`actions`]. For browser virtual-keyboard
+//! and UTF-16 mirror behavior, see [`gpui_ce_web`](https://docs.rs/gpui_ce_web).
 //!
 
 pub mod actions;

@@ -1,15 +1,15 @@
 /// A collection that provides a map interface but is backed by vectors.
 ///
-/// This is suitable for small key-value stores where the item count is not
-/// large enough to overcome the overhead of a more complex algorithm.
+/// This is suitable for small key-value stores where linear lookup is cheaper
+/// than the overhead of a hash table or tree. Lookup through [`Self::entry`]
+/// and [`Self::entry_ref`] scans the keys, so those operations take time
+/// proportional to the number of entries. The API is intentionally smaller
+/// than [`std::collections::HashMap`] and [`crate::HashMap`]; use it when its
+/// available operations fit the call site, not as an interchangeable map.
 ///
-/// If this meets your use cases, then [`VecMap`] should be a drop-in
-/// replacement for [`std::collections::HashMap`] or [`crate::HashMap`]. Note
-/// that we are adding APIs on an as-needed basis. If the API you need is not
-/// present yet, please add it!
-///
-/// Because it uses vectors as a backing store, the map also iterates over items
-/// in insertion order, like [`crate::IndexMap`].
+/// Because it uses vectors as a backing store, iteration follows insertion
+/// order, like [`crate::IndexMap`]. Replacing an existing value does not move
+/// its key; a new key is appended when the vacant entry is inserted.
 ///
 /// This struct uses a struct-of-arrays (SoA) representation which tends to be
 /// more cache efficient and promotes autovectorization when using simple key or

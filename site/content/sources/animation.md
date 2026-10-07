@@ -15,9 +15,9 @@ description = "The annotated Rust source used to build this walkthrough."
 <span id="L6" class="source-line"><a href="#L6" class="line-number" data-line="6" aria-label="Line 6" tabindex="-1"></a>// An [`Animation`] supplies its clock and a [`Motion`] describes its duration.</span>
 <span id="L7" class="source-line"><a href="#L7" class="line-number" data-line="7" aria-label="Line 7" tabindex="-1"></a>// The view stores only a replay number.</span>
 <span id="L8" class="source-line"><a href="#L8" class="line-number" data-line="8" aria-label="Line 8" tabindex="-1"></a>//</span>
-<span id="L9" class="source-line"><a href="#L9" class="line-number" data-line="9" aria-label="Line 9" tabindex="-1"></a>// Clicking Replay changes the animation key. The new key starts a new run;</span>
-<span id="L10" class="source-line"><a href="#L10" class="line-number" data-line="10" aria-label="Line 10" tabindex="-1"></a>// rendering again with the same key continues the existing run. This is why</span>
-<span id="L11" class="source-line"><a href="#L11" class="line-number" data-line="11" aria-label="Line 11" tabindex="-1"></a>// a click increments an identity rather than resetting a timer.</span>
+<span id="L9" class="source-line"><a href="#L9" class="line-number" data-line="9" aria-label="Line 9" tabindex="-1"></a>// Clicking Replay changes the animation&#x27;s retained element-state key. A new</span>
+<span id="L10" class="source-line"><a href="#L10" class="line-number" data-line="10" aria-label="Line 10" tabindex="-1"></a>// key starts at the beginning; rendering with the same key reuses its existing</span>
+<span id="L11" class="source-line"><a href="#L11" class="line-number" data-line="11" aria-label="Line 11" tabindex="-1"></a>// start time. The replay counter is therefore an identity, not a timer value.</span>
 <span id="L12" class="source-line"><a href="#L12" class="line-number" data-line="12" aria-label="Line 12" tabindex="-1"></a></span>
 <span id="L13" class="source-line"><a href="#L13" class="line-number" data-line="13" aria-label="Line 13" tabindex="-1"></a>use std::time::Duration;</span>
 <span id="L14" class="source-line"><a href="#L14" class="line-number" data-line="14" aria-label="Line 14" tabindex="-1"></a></span>
@@ -31,69 +31,73 @@ description = "The annotated Rust source used to build this walkthrough."
 <span id="L22" class="source-line"><a href="#L22" class="line-number" data-line="22" aria-label="Line 22" tabindex="-1"></a>&#125;</span>
 <span id="L23" class="source-line"><a href="#L23" class="line-number" data-line="23" aria-label="Line 23" tabindex="-1"></a></span>
 <span id="L24" class="source-line"><a href="#L24" class="line-number" data-line="24" aria-label="Line 24" tabindex="-1"></a>// ## Sample width and opacity together &#123;#animate&#125;</span>
-<span id="L25" class="source-line"><a href="#L25" class="line-number" data-line="25" aria-label="Line 25" tabindex="-1"></a>// [`AnimationExt::with_animation`] retains the clock under `(&quot;bar&quot;, replay)`.</span>
-<span id="L26" class="source-line"><a href="#L26" class="line-number" data-line="26" aria-label="Line 26" tabindex="-1"></a>// Its callback receives progress shaped by [`ease_in_out`] and applies it to</span>
-<span id="L27" class="source-line"><a href="#L27" class="line-number" data-line="27" aria-label="Line 27" tabindex="-1"></a>// [`Styled::w`] and [`Styled::opacity`]. GPUI requests frames while the motion</span>
-<span id="L28" class="source-line"><a href="#L28" class="line-number" data-line="28" aria-label="Line 28" tabindex="-1"></a>// is active and stops requesting them when it finishes.</span>
-<span id="L29" class="source-line"><a href="#L29" class="line-number" data-line="29" aria-label="Line 29" tabindex="-1"></a>//</span>
-<span id="L30" class="source-line"><a href="#L30" class="line-number" data-line="30" aria-label="Line 30" tabindex="-1"></a>// With [`App::reduce_motion`] enabled, this one-shot animation displays its end</span>
-<span id="L31" class="source-line"><a href="#L31" class="line-number" data-line="31" aria-label="Line 31" tabindex="-1"></a>// state without requesting animation frames. Replay still changes identity,</span>
-<span id="L32" class="source-line"><a href="#L32" class="line-number" data-line="32" aria-label="Line 32" tabindex="-1"></a>// but each new run is immediately presented at that end state.</span>
-<span id="L33" class="source-line"><a href="#L33" class="line-number" data-line="33" aria-label="Line 33" tabindex="-1"></a></span>
-<span id="L34" class="source-line"><a href="#L34" class="line-number" data-line="34" aria-label="Line 34" tabindex="-1"></a>impl Render for AnimationDemo &#123;</span>
-<span id="L35" class="source-line"><a href="#L35" class="line-number" data-line="35" aria-label="Line 35" tabindex="-1"></a>    fn render(&amp;mut self, _window: &amp;mut Window, cx: &amp;mut Context&lt;Self&gt;) -&gt; impl IntoElement &#123;</span>
-<span id="L36" class="source-line"><a href="#L36" class="line-number" data-line="36" aria-label="Line 36" tabindex="-1"></a>        let replay = self.replay;</span>
-<span id="L37" class="source-line"><a href="#L37" class="line-number" data-line="37" aria-label="Line 37" tabindex="-1"></a>        let animation =</span>
-<span id="L38" class="source-line"><a href="#L38" class="line-number" data-line="38" aria-label="Line 38" tabindex="-1"></a>            Animation::new(Motion::new(Duration::from_millis(700))).with_easing(ease_in_out);</span>
-<span id="L39" class="source-line"><a href="#L39" class="line-number" data-line="39" aria-label="Line 39" tabindex="-1"></a></span>
-<span id="L40" class="source-line"><a href="#L40" class="line-number" data-line="40" aria-label="Line 40" tabindex="-1"></a>        div()</span>
-<span id="L41" class="source-line"><a href="#L41" class="line-number" data-line="41" aria-label="Line 41" tabindex="-1"></a>            .size_full()</span>
-<span id="L42" class="source-line"><a href="#L42" class="line-number" data-line="42" aria-label="Line 42" tabindex="-1"></a>            .flex()</span>
-<span id="L43" class="source-line"><a href="#L43" class="line-number" data-line="43" aria-label="Line 43" tabindex="-1"></a>            .flex_col()</span>
-<span id="L44" class="source-line"><a href="#L44" class="line-number" data-line="44" aria-label="Line 44" tabindex="-1"></a>            .items_center()</span>
-<span id="L45" class="source-line"><a href="#L45" class="line-number" data-line="45" aria-label="Line 45" tabindex="-1"></a>            .justify_center()</span>
-<span id="L46" class="source-line"><a href="#L46" class="line-number" data-line="46" aria-label="Line 46" tabindex="-1"></a>            .gap_4()</span>
-<span id="L47" class="source-line"><a href="#L47" class="line-number" data-line="47" aria-label="Line 47" tabindex="-1"></a>            .bg(rgb(0xf4f1ea))</span>
-<span id="L48" class="source-line"><a href="#L48" class="line-number" data-line="48" aria-label="Line 48" tabindex="-1"></a>            .child(</span>
-<span id="L49" class="source-line"><a href="#L49" class="line-number" data-line="49" aria-label="Line 49" tabindex="-1"></a>                div()</span>
-<span id="L50" class="source-line"><a href="#L50" class="line-number" data-line="50" aria-label="Line 50" tabindex="-1"></a>                    .id(&quot;replay&quot;)</span>
-<span id="L51" class="source-line"><a href="#L51" class="line-number" data-line="51" aria-label="Line 51" tabindex="-1"></a>                    .px_4()</span>
-<span id="L52" class="source-line"><a href="#L52" class="line-number" data-line="52" aria-label="Line 52" tabindex="-1"></a>                    .py_2()</span>
-<span id="L53" class="source-line"><a href="#L53" class="line-number" data-line="53" aria-label="Line 53" tabindex="-1"></a>                    .rounded_md()</span>
-<span id="L54" class="source-line"><a href="#L54" class="line-number" data-line="54" aria-label="Line 54" tabindex="-1"></a>                    .bg(rgb(0x155b50))</span>
-<span id="L55" class="source-line"><a href="#L55" class="line-number" data-line="55" aria-label="Line 55" tabindex="-1"></a>                    .text_color(rgb(0xffffff))</span>
-<span id="L56" class="source-line"><a href="#L56" class="line-number" data-line="56" aria-label="Line 56" tabindex="-1"></a>                    .cursor_pointer()</span>
-<span id="L57" class="source-line"><a href="#L57" class="line-number" data-line="57" aria-label="Line 57" tabindex="-1"></a>                    .child(&quot;Replay&quot;)</span>
-<span id="L58" class="source-line"><a href="#L58" class="line-number" data-line="58" aria-label="Line 58" tabindex="-1"></a>                    .on_click(cx.listener(|this, _, _, cx| &#123;</span>
-<span id="L59" class="source-line"><a href="#L59" class="line-number" data-line="59" aria-label="Line 59" tabindex="-1"></a>                        this.replay = this.replay.wrapping_add(1);</span>
-<span id="L60" class="source-line"><a href="#L60" class="line-number" data-line="60" aria-label="Line 60" tabindex="-1"></a>                        cx.notify();</span>
-<span id="L61" class="source-line"><a href="#L61" class="line-number" data-line="61" aria-label="Line 61" tabindex="-1"></a>                    &#125;)),</span>
-<span id="L62" class="source-line"><a href="#L62" class="line-number" data-line="62" aria-label="Line 62" tabindex="-1"></a>            )</span>
-<span id="L63" class="source-line"><a href="#L63" class="line-number" data-line="63" aria-label="Line 63" tabindex="-1"></a>            .child(</span>
-<span id="L64" class="source-line"><a href="#L64" class="line-number" data-line="64" aria-label="Line 64" tabindex="-1"></a>                div().h(px(48.)).w(px(180.)).flex().items_center().child(</span>
-<span id="L65" class="source-line"><a href="#L65" class="line-number" data-line="65" aria-label="Line 65" tabindex="-1"></a>                    div()</span>
-<span id="L66" class="source-line"><a href="#L66" class="line-number" data-line="66" aria-label="Line 66" tabindex="-1"></a>                        .h(px(32.))</span>
-<span id="L67" class="source-line"><a href="#L67" class="line-number" data-line="67" aria-label="Line 67" tabindex="-1"></a>                        .rounded_full()</span>
-<span id="L68" class="source-line"><a href="#L68" class="line-number" data-line="68" aria-label="Line 68" tabindex="-1"></a>                        .bg(rgb(0x3478c8))</span>
-<span id="L69" class="source-line"><a href="#L69" class="line-number" data-line="69" aria-label="Line 69" tabindex="-1"></a>                        .with_animation((&quot;bar&quot;, replay), animation, |bar, progress| &#123;</span>
-<span id="L70" class="source-line"><a href="#L70" class="line-number" data-line="70" aria-label="Line 70" tabindex="-1"></a>                            bar.w(px(24. + 100. * progress))</span>
-<span id="L71" class="source-line"><a href="#L71" class="line-number" data-line="71" aria-label="Line 71" tabindex="-1"></a>                                .opacity(0.25 + 0.75 * progress)</span>
-<span id="L72" class="source-line"><a href="#L72" class="line-number" data-line="72" aria-label="Line 72" tabindex="-1"></a>                        &#125;),</span>
-<span id="L73" class="source-line"><a href="#L73" class="line-number" data-line="73" aria-label="Line 73" tabindex="-1"></a>                ),</span>
-<span id="L74" class="source-line"><a href="#L74" class="line-number" data-line="74" aria-label="Line 74" tabindex="-1"></a>            )</span>
-<span id="L75" class="source-line"><a href="#L75" class="line-number" data-line="75" aria-label="Line 75" tabindex="-1"></a>    &#125;</span>
-<span id="L76" class="source-line"><a href="#L76" class="line-number" data-line="76" aria-label="Line 76" tabindex="-1"></a>&#125;</span>
-<span id="L77" class="source-line"><a href="#L77" class="line-number" data-line="77" aria-label="Line 77" tabindex="-1"></a></span>
-<span id="L78" class="source-line"><a href="#L78" class="line-number" data-line="78" aria-label="Line 78" tabindex="-1"></a>// ## Test identity while it runs &#123;#clock&#125;</span>
-<span id="L79" class="source-line"><a href="#L79" class="line-number" data-line="79" aria-label="Line 79" tabindex="-1"></a>// Click Replay, then resize while the bar expands. The retained key lets</span>
-<span id="L80" class="source-line"><a href="#L80" class="line-number" data-line="80" aria-label="Line 80" tabindex="-1"></a>// progress continue through the new layout. Replace `(&quot;bar&quot;, replay)` with a</span>
-<span id="L81" class="source-line"><a href="#L81" class="line-number" data-line="81" aria-label="Line 81" tabindex="-1"></a>// constant key and run again: clicking Replay no longer creates a fresh run.</span>
-<span id="L82" class="source-line"><a href="#L82" class="line-number" data-line="82" aria-label="Line 82" tabindex="-1"></a>// The platform helper creates the view through [`AppContext::new`].</span>
-<span id="L83" class="source-line"><a href="#L83" class="line-number" data-line="83" aria-label="Line 83" tabindex="-1"></a></span>
-<span id="L84" class="source-line"><a href="#L84" class="line-number" data-line="84" aria-label="Line 84" tabindex="-1"></a>fn component(_window: &amp;mut Window, cx: &amp;mut gpui::App) -&gt; gpui::Entity&lt;AnimationDemo&gt; &#123;</span>
-<span id="L85" class="source-line"><a href="#L85" class="line-number" data-line="85" aria-label="Line 85" tabindex="-1"></a>    cx.new(|_cx| AnimationDemo &#123; replay: 0 &#125;)</span>
-<span id="L86" class="source-line"><a href="#L86" class="line-number" data-line="86" aria-label="Line 86" tabindex="-1"></a>&#125;</span>
+<span id="L25" class="source-line"><a href="#L25" class="line-number" data-line="25" aria-label="Line 25" tabindex="-1"></a>// [`AnimationExt::with_animation`] associates progress with `(&quot;bar&quot;, replay)`.</span>
+<span id="L26" class="source-line"><a href="#L26" class="line-number" data-line="26" aria-label="Line 26" tabindex="-1"></a>// Its callback receives eased progress from [`ease_in_out`] and derives width</span>
+<span id="L27" class="source-line"><a href="#L27" class="line-number" data-line="27" aria-label="Line 27" tabindex="-1"></a>// and opacity from that same value. [`Styled::w`] changes layout; [`Styled::opacity`]</span>
+<span id="L28" class="source-line"><a href="#L28" class="line-number" data-line="28" aria-label="Line 28" tabindex="-1"></a>// changes the rendered appearance without changing layout. GPUI requests</span>
+<span id="L29" class="source-line"><a href="#L29" class="line-number" data-line="29" aria-label="Line 29" tabindex="-1"></a>// frames while the motion is active and stops requesting animation frames when</span>
+<span id="L30" class="source-line"><a href="#L30" class="line-number" data-line="30" aria-label="Line 30" tabindex="-1"></a>// it completes.</span>
+<span id="L31" class="source-line"><a href="#L31" class="line-number" data-line="31" aria-label="Line 31" tabindex="-1"></a>//</span>
+<span id="L32" class="source-line"><a href="#L32" class="line-number" data-line="32" aria-label="Line 32" tabindex="-1"></a>// With [`App::reduce_motion`] enabled, this one-shot motion skips intermediate</span>
+<span id="L33" class="source-line"><a href="#L33" class="line-number" data-line="33" aria-label="Line 33" tabindex="-1"></a>// progress and presents its end state. Replay still changes the key, but each</span>
+<span id="L34" class="source-line"><a href="#L34" class="line-number" data-line="34" aria-label="Line 34" tabindex="-1"></a>// new run appears complete immediately. This is a useful check that decorative</span>
+<span id="L35" class="source-line"><a href="#L35" class="line-number" data-line="35" aria-label="Line 35" tabindex="-1"></a>// motion has a clear static result as well as an animated one.</span>
+<span id="L36" class="source-line"><a href="#L36" class="line-number" data-line="36" aria-label="Line 36" tabindex="-1"></a></span>
+<span id="L37" class="source-line"><a href="#L37" class="line-number" data-line="37" aria-label="Line 37" tabindex="-1"></a>impl Render for AnimationDemo &#123;</span>
+<span id="L38" class="source-line"><a href="#L38" class="line-number" data-line="38" aria-label="Line 38" tabindex="-1"></a>    fn render(&amp;mut self, _window: &amp;mut Window, cx: &amp;mut Context&lt;Self&gt;) -&gt; impl IntoElement &#123;</span>
+<span id="L39" class="source-line"><a href="#L39" class="line-number" data-line="39" aria-label="Line 39" tabindex="-1"></a>        let replay = self.replay;</span>
+<span id="L40" class="source-line"><a href="#L40" class="line-number" data-line="40" aria-label="Line 40" tabindex="-1"></a>        let animation =</span>
+<span id="L41" class="source-line"><a href="#L41" class="line-number" data-line="41" aria-label="Line 41" tabindex="-1"></a>            Animation::new(Motion::new(Duration::from_millis(700))).with_easing(ease_in_out);</span>
+<span id="L42" class="source-line"><a href="#L42" class="line-number" data-line="42" aria-label="Line 42" tabindex="-1"></a></span>
+<span id="L43" class="source-line"><a href="#L43" class="line-number" data-line="43" aria-label="Line 43" tabindex="-1"></a>        div()</span>
+<span id="L44" class="source-line"><a href="#L44" class="line-number" data-line="44" aria-label="Line 44" tabindex="-1"></a>            .size_full()</span>
+<span id="L45" class="source-line"><a href="#L45" class="line-number" data-line="45" aria-label="Line 45" tabindex="-1"></a>            .flex()</span>
+<span id="L46" class="source-line"><a href="#L46" class="line-number" data-line="46" aria-label="Line 46" tabindex="-1"></a>            .flex_col()</span>
+<span id="L47" class="source-line"><a href="#L47" class="line-number" data-line="47" aria-label="Line 47" tabindex="-1"></a>            .items_center()</span>
+<span id="L48" class="source-line"><a href="#L48" class="line-number" data-line="48" aria-label="Line 48" tabindex="-1"></a>            .justify_center()</span>
+<span id="L49" class="source-line"><a href="#L49" class="line-number" data-line="49" aria-label="Line 49" tabindex="-1"></a>            .gap_4()</span>
+<span id="L50" class="source-line"><a href="#L50" class="line-number" data-line="50" aria-label="Line 50" tabindex="-1"></a>            .bg(rgb(0xf4f1ea))</span>
+<span id="L51" class="source-line"><a href="#L51" class="line-number" data-line="51" aria-label="Line 51" tabindex="-1"></a>            .child(</span>
+<span id="L52" class="source-line"><a href="#L52" class="line-number" data-line="52" aria-label="Line 52" tabindex="-1"></a>                div()</span>
+<span id="L53" class="source-line"><a href="#L53" class="line-number" data-line="53" aria-label="Line 53" tabindex="-1"></a>                    .id(&quot;replay&quot;)</span>
+<span id="L54" class="source-line"><a href="#L54" class="line-number" data-line="54" aria-label="Line 54" tabindex="-1"></a>                    .px_4()</span>
+<span id="L55" class="source-line"><a href="#L55" class="line-number" data-line="55" aria-label="Line 55" tabindex="-1"></a>                    .py_2()</span>
+<span id="L56" class="source-line"><a href="#L56" class="line-number" data-line="56" aria-label="Line 56" tabindex="-1"></a>                    .rounded_md()</span>
+<span id="L57" class="source-line"><a href="#L57" class="line-number" data-line="57" aria-label="Line 57" tabindex="-1"></a>                    .bg(rgb(0x155b50))</span>
+<span id="L58" class="source-line"><a href="#L58" class="line-number" data-line="58" aria-label="Line 58" tabindex="-1"></a>                    .text_color(rgb(0xffffff))</span>
+<span id="L59" class="source-line"><a href="#L59" class="line-number" data-line="59" aria-label="Line 59" tabindex="-1"></a>                    .cursor_pointer()</span>
+<span id="L60" class="source-line"><a href="#L60" class="line-number" data-line="60" aria-label="Line 60" tabindex="-1"></a>                    .child(&quot;Replay&quot;)</span>
+<span id="L61" class="source-line"><a href="#L61" class="line-number" data-line="61" aria-label="Line 61" tabindex="-1"></a>                    .on_click(cx.listener(|this, _, _, cx| &#123;</span>
+<span id="L62" class="source-line"><a href="#L62" class="line-number" data-line="62" aria-label="Line 62" tabindex="-1"></a>                        this.replay = this.replay.wrapping_add(1);</span>
+<span id="L63" class="source-line"><a href="#L63" class="line-number" data-line="63" aria-label="Line 63" tabindex="-1"></a>                        cx.notify();</span>
+<span id="L64" class="source-line"><a href="#L64" class="line-number" data-line="64" aria-label="Line 64" tabindex="-1"></a>                    &#125;)),</span>
+<span id="L65" class="source-line"><a href="#L65" class="line-number" data-line="65" aria-label="Line 65" tabindex="-1"></a>            )</span>
+<span id="L66" class="source-line"><a href="#L66" class="line-number" data-line="66" aria-label="Line 66" tabindex="-1"></a>            .child(</span>
+<span id="L67" class="source-line"><a href="#L67" class="line-number" data-line="67" aria-label="Line 67" tabindex="-1"></a>                div().h(px(48.)).w(px(180.)).flex().items_center().child(</span>
+<span id="L68" class="source-line"><a href="#L68" class="line-number" data-line="68" aria-label="Line 68" tabindex="-1"></a>                    div()</span>
+<span id="L69" class="source-line"><a href="#L69" class="line-number" data-line="69" aria-label="Line 69" tabindex="-1"></a>                        .h(px(32.))</span>
+<span id="L70" class="source-line"><a href="#L70" class="line-number" data-line="70" aria-label="Line 70" tabindex="-1"></a>                        .rounded_full()</span>
+<span id="L71" class="source-line"><a href="#L71" class="line-number" data-line="71" aria-label="Line 71" tabindex="-1"></a>                        .bg(rgb(0x3478c8))</span>
+<span id="L72" class="source-line"><a href="#L72" class="line-number" data-line="72" aria-label="Line 72" tabindex="-1"></a>                        .with_animation((&quot;bar&quot;, replay), animation, |bar, progress| &#123;</span>
+<span id="L73" class="source-line"><a href="#L73" class="line-number" data-line="73" aria-label="Line 73" tabindex="-1"></a>                            bar.w(px(24. + 100. * progress))</span>
+<span id="L74" class="source-line"><a href="#L74" class="line-number" data-line="74" aria-label="Line 74" tabindex="-1"></a>                                .opacity(0.25 + 0.75 * progress)</span>
+<span id="L75" class="source-line"><a href="#L75" class="line-number" data-line="75" aria-label="Line 75" tabindex="-1"></a>                        &#125;),</span>
+<span id="L76" class="source-line"><a href="#L76" class="line-number" data-line="76" aria-label="Line 76" tabindex="-1"></a>                ),</span>
+<span id="L77" class="source-line"><a href="#L77" class="line-number" data-line="77" aria-label="Line 77" tabindex="-1"></a>            )</span>
+<span id="L78" class="source-line"><a href="#L78" class="line-number" data-line="78" aria-label="Line 78" tabindex="-1"></a>    &#125;</span>
+<span id="L79" class="source-line"><a href="#L79" class="line-number" data-line="79" aria-label="Line 79" tabindex="-1"></a>&#125;</span>
+<span id="L80" class="source-line"><a href="#L80" class="line-number" data-line="80" aria-label="Line 80" tabindex="-1"></a></span>
+<span id="L81" class="source-line"><a href="#L81" class="line-number" data-line="81" aria-label="Line 81" tabindex="-1"></a>// ## Test identity while it runs &#123;#clock&#125;</span>
+<span id="L82" class="source-line"><a href="#L82" class="line-number" data-line="82" aria-label="Line 82" tabindex="-1"></a>// Click Replay, then resize while the bar expands: the motion should continue</span>
+<span id="L83" class="source-line"><a href="#L83" class="line-number" data-line="83" aria-label="Line 83" tabindex="-1"></a>// while layout recalculates. Replace `(&quot;bar&quot;, replay)` with a constant key and</span>
+<span id="L84" class="source-line"><a href="#L84" class="line-number" data-line="84" aria-label="Line 84" tabindex="-1"></a>// click again. The old start time remains associated with that key, so no new</span>
+<span id="L85" class="source-line"><a href="#L85" class="line-number" data-line="85" aria-label="Line 85" tabindex="-1"></a>// run begins. [`AppContext::new`] creates the entity whose render method</span>
+<span id="L86" class="source-line"><a href="#L86" class="line-number" data-line="86" aria-label="Line 86" tabindex="-1"></a>// returns this animated element tree.</span>
 <span id="L87" class="source-line"><a href="#L87" class="line-number" data-line="87" aria-label="Line 87" tabindex="-1"></a></span>
-<span id="L88" class="source-line"><a href="#L88" class="line-number" data-line="88" aria-label="Line 88" tabindex="-1"></a>pub fn main() &#123;</span>
-<span id="L89" class="source-line"><a href="#L89" class="line-number" data-line="89" aria-label="Line 89" tabindex="-1"></a>    support::run(component);</span>
-<span id="L90" class="source-line"><a href="#L90" class="line-number" data-line="90" aria-label="Line 90" tabindex="-1"></a>&#125;</span></code></pre>
+<span id="L88" class="source-line"><a href="#L88" class="line-number" data-line="88" aria-label="Line 88" tabindex="-1"></a>fn component(_window: &amp;mut Window, cx: &amp;mut gpui::App) -&gt; gpui::Entity&lt;AnimationDemo&gt; &#123;</span>
+<span id="L89" class="source-line"><a href="#L89" class="line-number" data-line="89" aria-label="Line 89" tabindex="-1"></a>    cx.new(|_cx| AnimationDemo &#123; replay: 0 &#125;)</span>
+<span id="L90" class="source-line"><a href="#L90" class="line-number" data-line="90" aria-label="Line 90" tabindex="-1"></a>&#125;</span>
+<span id="L91" class="source-line"><a href="#L91" class="line-number" data-line="91" aria-label="Line 91" tabindex="-1"></a></span>
+<span id="L92" class="source-line"><a href="#L92" class="line-number" data-line="92" aria-label="Line 92" tabindex="-1"></a>pub fn main() &#123;</span>
+<span id="L93" class="source-line"><a href="#L93" class="line-number" data-line="93" aria-label="Line 93" tabindex="-1"></a>    support::run(component);</span>
+<span id="L94" class="source-line"><a href="#L94" class="line-number" data-line="94" aria-label="Line 94" tabindex="-1"></a>&#125;</span></code></pre>

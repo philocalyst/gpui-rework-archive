@@ -1,12 +1,15 @@
 //! Native application-menu descriptions.
 //!
-//! Menu values are declarative: GPUI translates them into the platform menu bar or submenu and
-//! dispatches action items through the application action system. An [`OsMenu`] or [`OsAction`]
-//! asks the operating system for behavior associated with a well-known menu role.
+//! Menu values are declarative: [`App::set_menus`] replaces the application's menu bar, and GPUI
+//! dispatches selected [`MenuItem::Action`] values through the application action system. Pass a
+//! [`Keymap`](crate::Keymap) to that setter so backends that support it can display shortcuts.
+//! An [`OsMenu`] or [`OsAction`] asks the operating system for behavior associated with a
+//! well-known menu role, such as the macOS Services menu or standard edit commands. Those native
+//! roles are optional backend capabilities; a normal action remains the portable choice.
 
 use crate::{Action, App, Platform, SharedString};
 
-/// A menu of the application, either a main menu or a submenu.
+/// A menu of the application, either a top-level menu or a submenu.
 pub struct Menu {
     /// The name of the menu
     pub name: SharedString,
@@ -19,7 +22,7 @@ pub struct Menu {
 }
 
 impl Menu {
-    /// Create a new Menu with the given name
+    /// Creates an enabled, empty menu with the given name.
     pub fn new(name: impl Into<SharedString>) -> Self {
         Self {
             name: name.into(),
@@ -28,19 +31,19 @@ impl Menu {
         }
     }
 
-    /// Set items to be in this menu
+    /// Replaces this menu's items.
     pub fn items(mut self, items: impl IntoIterator<Item = MenuItem>) -> Self {
         self.items = items.into_iter().collect();
         self
     }
 
-    /// Set whether this menu is disabled
+    /// Sets whether the whole menu is disabled.
     pub fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
         self
     }
 
-    /// Create an OwnedMenu from this Menu
+    /// Converts this menu to the owned representation used by platform menu readback.
     pub fn owned(self) -> OwnedMenu {
         OwnedMenu {
             name: self.name.to_string().into(),
@@ -239,7 +242,7 @@ pub struct OwnedOsMenu {
     pub menu_type: SystemMenuType,
 }
 
-/// A menu of the application, either a main menu or a submenu
+/// An owned menu snapshot returned by a backend that supports [`Platform::get_menus`].
 #[derive(Clone)]
 pub struct OwnedMenu {
     /// The name of the menu

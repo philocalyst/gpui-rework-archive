@@ -96,7 +96,7 @@ def audit(public: Path, rustdoc: Path | None = None, base_url='https://gpui-ce.g
             errors.append(f'{path}: missing {href}')
         elif fragment and target.suffix == '.html':
             # Preview fragments select a program rather than an HTML anchor.
-            if target == public / 'preview/index.html':
+            if target in {public / 'preview/index.html', public / 'workbench/index.html'}:
                 return
             if fragment not in document(target).ids:
                 errors.append(f'{path}: missing anchor {href}')
@@ -145,6 +145,9 @@ def audit(public: Path, rustdoc: Path | None = None, base_url='https://gpui-ce.g
                 wasm = preview / 'pkg' / bundle['wasm']
                 if wasm.is_file() and wasm.read_bytes()[:4] != b'\0asm':
                     errors.append(f'{wasm}: invalid WebAssembly artifact')
+                for name in ('index.html', 'editor.js', 'workbench.css', 'editor-build.json', 'licenses.txt'):
+                    if not (public / 'workbench' / name).is_file():
+                        errors.append(f'{public / "workbench"}: missing editor artifact {name}')
         except (OSError, ValueError, KeyError) as error:
             errors.append(f'{metadata}: invalid build artifacts: {error}')
     return errors

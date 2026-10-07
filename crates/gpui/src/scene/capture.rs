@@ -7,15 +7,21 @@
 use super::*;
 use anyhow::{Context, Result, ensure};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use collections::HashMap;
 
 /// Current serialized scene-capture format version.
+///
+/// Increment this when a change makes previously serialized capture data
+/// incompatible with the current validator or scene reconstruction logic.
 pub const SCENE_CAPTURE_VERSION: u32 = 2;
 
 /// A tightly packed standalone bitmap for one captured atlas tile.
+///
+/// Dimensions are physical pixels. `bytes` contains exactly one row after
+/// another with no row padding; the required channel count comes from `kind`.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CapturedBitmap {
-    /// Pixel format of this standalone tile.
+    /// Atlas pixel format, which determines the number of bytes per pixel.
     pub kind: AtlasTextureKind,
     /// Width in pixels.
     pub width: u32,
@@ -27,7 +33,10 @@ pub struct CapturedBitmap {
 }
 
 impl CapturedBitmap {
-    /// Checks dimensions and the byte count for this bitmap's native atlas format.
+    /// Checks positive dimensions and the byte count for this bitmap's atlas format.
+    ///
+    /// Returns an error for dimensions outside scene-coordinate limits or a
+    /// byte length that does not match the format and dimensions.
     pub fn validate(&self) -> Result<()> {
         ensure!(
             self.width > 0 && self.height > 0,
@@ -51,8 +60,15 @@ impl CapturedBitmap {
 
 /// A portable snapshot of a finished scene's sorted primitives and render commands.
 ///
-/// Native paint surfaces contain backend-owned handles and cannot be represented here; capture
-/// returns an error if the source scene contains any surfaces.
+/// A capture owns the bitmap pixels referenced by its sprites. Atlas identifiers
+/// are local to the capture, so a receiver can import it into a different
+/// window with [`Window::import_scene_capture`](crate::Window::import_scene_capture).
+/// The receiving window still uses GPUI's normal renderer and batching.
+///
+/// Captures contain drawing data, not entities, event listeners, focus, or the
+/// source window's layout cache. An embedding host supplies those separately.
+/// Native paint surfaces contain backend-owned handles; capturing a scene with
+/// such a surface returns an error.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct SceneCapture {
     version: u32,
@@ -76,8 +92,16 @@ pub struct SceneCapture {
 }
 
 impl SceneCapture {
-    /// Captures a finished scene. `resolve_tile` must return the tile's standalone pixels,
-    /// tightly packed according to its [`AtlasTextureKind`]. Each distinct tile is resolved once.
+    /// Copies a finished scene into a canonical snapshot.
+    ///
+    /// `resolve_tile` supplies each referenced atlas tile's standalone pixels,
+    /// tightly packed according to its [`AtlasTextureKind`]. Each distinct tile
+    /// is resolved once. Bitmap ordering is canonicalized so equivalent scenes
+    /// can be compared independently of their atlas allocation history.
+    ///
+    /// Returns an error for an unfinished scene, a native paint surface, invalid
+    /// scene data, or a failed tile lookup. Use [`capture_live`](Self::capture_live)
+    /// when transporting frames without requiring canonical bitmap order.
     pub fn capture(
         scene: &Scene,
         resolve_tile: impl FnMut(AtlasTile) -> Result<CapturedBitmap>,
@@ -88,6 +112,8 @@ impl SceneCapture {
     /// Captures a live frame without sorting bitmap contents for deterministic
     /// snapshot identity. Primitive order, filters, and renderer batching still
     /// use the normal scene compiler. Every referenced tile is self-contained.
+    /// As with [`Self::capture`], the scene must be finished and must not contain
+    /// native surfaces; a tile-resolution or validation failure returns an error.
     pub fn capture_live(
         scene: &Scene,
         resolve_tile: impl FnMut(AtlasTile) -> Result<CapturedBitmap>,
@@ -131,7 +157,10 @@ impl SceneCapture {
         Ok(capture)
     }
 
-    /// Returns the capture format version.
+    /// Returns the serialized capture format version.
+    ///
+    /// Compare with [`SCENE_CAPTURE_VERSION`] before implementing a custom
+    /// reader. GPUI reconstruction rejects unsupported versions.
     pub fn version(&self) -> u32 {
         self.version
     }
@@ -142,7 +171,11 @@ impl SceneCapture {
         &self.bitmaps
     }
 
-    /// Returns the canonical compiled renderer command stream.
+    /// Returns the compiled renderer command stream stored in this capture.
+    ///
+    /// Its batch ranges index this capture's primitive arrays, and its atlas
+    /// IDs index [`Self::bitmaps`]. Use [`Self::to_scene`] or
+    /// [`Self::into_scene`] to validate and reconstruct a scene.
     pub fn commands(&self) -> &[RenderCommand] {
         &self.commands
     }
@@ -151,6 +184,7 @@ impl SceneCapture {
     ///
     /// Paint operations and the layout cache belong to the live window. They are not
     /// restored, so this scene cannot act as a previous frame for [`Scene::replay`].
+    /// Returns an error if the serialized resources or command stream are invalid.
     pub fn to_scene(&self) -> Result<Scene> {
         self.validate_resources()?;
         let mut scene = self.clone_primitives();
@@ -161,6 +195,8 @@ impl SceneCapture {
 
     /// Restores a scene for renderer replay, preserving command order and batching.
     /// Like [`Self::to_scene`], this does not restore the live window's paint cache.
+    /// The capture is consumed, so primitive vectors and bitmap storage can be
+    /// moved instead of cloned. Returns an error if validation fails.
     pub fn into_scene(self) -> Result<Scene> {
         self.validate_resources()?;
         let mut scene = Scene {
@@ -191,7 +227,7 @@ impl SceneCapture {
         resolve_tile: &mut impl FnMut(AtlasTile) -> Result<CapturedBitmap>,
         canonical: bool,
     ) -> Result<()> {
-        let mut sources = HashMap::<AtlasTile, usize>::new();
+        let mut sources = HashMap::<AtlasTile, usize>::default();
         let mut resources = Vec::new();
         let tiles = self
             .monochrome_sprites
@@ -296,8 +332,13 @@ impl SceneCapture {
         }
     }
 
-    /// Checks the format version, primitive references, command ranges, filter nesting, bitmap
-    /// data, and finite floating-point values.
+    /// Checks the format version, primitive references, command ranges, filter
+    /// nesting, bitmap data, finite floating-point values, and non-negative
+    /// dimensions.
+    ///
+    /// Deserialization alone does not perform these checks. Validate a received
+    /// capture before relying on its contents. [`to_scene`](Self::to_scene) and
+    /// window import perform validation as part of reconstructing the scene.
     pub fn validate(&self) -> Result<()> {
         self.to_scene().map(|_| ())
     }

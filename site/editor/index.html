@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GPUI · Rust workbench</title>
+  <link rel="stylesheet" href="./workbench.css">
+</head>
+<body>
+  <main class="workbench" aria-label="Rust example workbench">
+    <header class="toolbar">
+      <div class="identity"><span class="wordmark">GPUI</span><h1 id="example-title">Rust workbench</h1></div>
+      <div class="actions">
+        <label class="auto"><input id="auto-run" type="checkbox" checked>Auto-run</label>
+        <button id="run" class="primary" type="button" title="Run Rust (Cmd+Enter or Ctrl+Enter)" disabled>Run</button>
+        <button id="download" type="button" title="Download the edited Rust component">Download</button>
+        <button id="restore" type="button" title="Restore the example's original source">Restore</button>
+      </div>
+    </header>
+    <nav class="view-controls" aria-label="Editor layout">
+      <div class="views" role="group" aria-label="Visible panels">
+        <button type="button" data-view="split" aria-pressed="true">Split</button>
+        <button type="button" data-view="code" aria-pressed="false">Rust</button>
+        <button type="button" data-view="result" aria-pressed="false">Result</button>
+      </div>
+      <span id="runtime-label">Preparing the preview</span>
+      <a id="walkthrough-link" href="../examples/">Walkthrough</a>
+    </nav>
+    <div id="panels" class="panels" data-view="split">
+      <section id="code-pane" class="pane code-pane" aria-label="Rust source">
+        <header class="panel-heading"><span>component.rs</span><button id="copy" type="button">Copy Rust</button></header>
+        <div id="editor"></div>
+      </section>
+      <div id="splitter" class="splitter" role="separator" tabindex="0" aria-label="Resize code and result panels" aria-orientation="vertical" aria-valuemin="20" aria-valuemax="80" aria-valuenow="50"></div>
+      <section id="result-pane" class="pane result-pane" aria-label="GPUI result">
+        <header class="panel-heading"><span>Result</span><button id="reset" type="button" disabled>Reset state</button></header>
+        <iframe id="preview" title="Interactive GPUI result" allow="clipboard-read; clipboard-write"></iframe>
+      </section>
+    </div>
+    <footer class="status-bar">
+      <span id="status" role="status">Loading the Rust source…</span>
+      <span id="position">Ln 1, Col 1</span>
+      <button id="diagnostics-toggle" type="button" aria-expanded="false" aria-controls="diagnostics">Diagnostics <span id="error-count"></span></button>
+      <a href="./licenses.txt" class="licenses" title="Editor dependency licenses">Licenses</a>
+    </footer>
+    <section id="diagnostics" class="diagnostics" aria-label="Rust diagnostics" hidden><pre id="diagnostic-text"></pre></section>
+  </main>
+  <noscript>This editor needs JavaScript. <a href="../examples/">Read the walkthroughs and download their source.</a></noscript>
+  <script type="module" src="./editor.js"></script>
+</body>
+</html>

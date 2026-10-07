@@ -24,11 +24,14 @@ pub(crate) use x11::*;
 
 use std::rc::Rc;
 
-/// Creates the Linux/FreeBSD platform implementation selected by the compositor.
+/// Creates the Linux/FreeBSD platform implementation selected from the process environment.
 ///
-/// `headless` bypasses Wayland/X11 and is intended for tests or offscreen use. In graphical mode,
-/// the enabled backend is selected from the compositor environment; X11 initialization failures
-/// are reported by the platform constructor before normal event processing begins.
+/// `headless` bypasses Wayland/X11 and selects a synthetic display for non-visual app and test
+/// work. Otherwise `ZED_HEADLESS` selects headless mode, then a non-empty `WAYLAND_DISPLAY`
+/// selects Wayland when enabled, then `DISPLAY` selects X11 when enabled. This constructor does
+/// not return a `Result`; connection or backend setup failures can panic. See the
+/// [platform guide](https://docs.rs/gpui-ce/0.2.2/gpui/_documentation/platforms/index.html) for
+/// target-specific service behavior.
 pub fn current_platform(headless: bool) -> Rc<dyn gpui::Platform> {
     #[cfg(feature = "x11")]
     use anyhow::Context as _;

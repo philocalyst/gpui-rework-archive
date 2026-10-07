@@ -6,6 +6,11 @@ use anyhow::Result;
 use gpui::{Bounds, DisplayId, Pixels, PlatformDisplay, Point, Size, px};
 
 /// The browser's single logical display.
+///
+/// `bounds` reports the browser screen size and `visible_bounds` reports the window viewport.
+/// These values are browser-provided CSS-pixel measurements represented as GPUI `Pixels`; the
+/// canvas separately tracks device-pixel ratio for rendering. If a screen or viewport query fails,
+/// the implementation falls back to 1920 × 1080.
 #[derive(Debug)]
 pub struct WebDisplay {
     id: DisplayId,

@@ -1,11 +1,14 @@
 //! Analytic damped springs and value projection for animation.
 //!
 //! [`SpringConfig`] uses the usual physical parameters: stiffness and mass
-//! must be positive and damping must be non-negative. Time arguments are
-//! seconds (`f32`); [`SpringConfig::step`] preserves velocity and is therefore
-//! suitable for retargeting each frame. A spring is settled when both position
-//! and velocity are within the requested epsilon. [`SpringAnimation`] adapts
-//! the scalar spring coordinate to richer values through [`SpringTarget`].
+//! must be finite and positive, and damping must be finite and non-negative.
+//! The constructor stores these values without validating them, so callers must
+//! enforce that contract. Time arguments are elapsed seconds (`f32`), and step
+//! deltas must be finite and non-negative. [`SpringConfig::step`] preserves
+//! velocity, making it suitable for retargeting each frame. A spring is settled
+//! only when both position and velocity satisfy the requested tolerance.
+//! [`SpringAnimation`] maps the scalar spring coordinate into richer outputs
+//! through [`SpringTarget`].
 
 use std::{ops::RangeInclusive, time::Duration};
 
@@ -17,7 +20,8 @@ pub(crate) const DEFAULT_SPRING_EPSILON: f32 = 0.001;
 /// The physical parameters of a damped harmonic oscillator.
 ///
 /// `stiffness` and `mass` must be finite and positive. `damping` must be finite
-/// and non-negative.
+/// and non-negative. [`SpringConfig::new`] stores the values as supplied and
+/// does not check them; invalid parameters can produce non-finite results.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct SpringConfig {
     /// The spring stiffness, conventionally written as $k$.
@@ -50,10 +54,12 @@ impl SpringConfig {
         (natural_frequency, damping_ratio)
     }
 
-    /// Advances a spring toward a target that remains fixed for `delta_time`.
+    /// Advances a spring toward a target that remains fixed for `delta_time` seconds.
     ///
     /// This analytic step is independent of frame rate and preserves velocity,
     /// allowing an interrupted spring to be retargeted without restarting it.
+    /// `delta_time` must be finite and non-negative; this method does not
+    /// validate its arguments.
     pub fn step(&self, state: SpringState, target: f32, delta_time: f32) -> SpringState {
         let propagator = self.propagator(delta_time);
         let displacement = state.position - target;
@@ -67,7 +73,9 @@ impl SpringConfig {
     /// Advances a spring toward a target moving at a constant velocity.
     ///
     /// A first-order hold avoids the frame-rate-dependent lag introduced by
-    /// treating a dragged target as stationary between frames.
+    /// treating a dragged target as stationary between frames. `target_velocity`
+    /// is in animated units per second and `delta_time` is elapsed seconds;
+    /// `delta_time` must be finite and non-negative. Arguments are not validated.
     pub fn step_ramp(
         &self,
         state: SpringState,
@@ -423,6 +431,10 @@ impl SpringTarget for AnimationPhase {
 }
 
 /// A value that supports linear interpolation and extrapolation.
+///
+/// `phase` is passed through unchanged: zero selects `from`, one selects `to`,
+/// and values outside that interval extrapolate. Use
+/// [`AnimationPhase::interpolate_clamped`] when overshoot should be limited.
 pub trait Interpolate: Sized {
     /// Resolves the value at `phase`, where 0 is `from` and 1 is `to`.
     fn interpolate(from: Self, to: Self, phase: f32) -> Self;
@@ -489,6 +501,10 @@ pub enum SpringPlayback {
 }
 
 /// A stateful spring animation targeting a value or projected path.
+///
+/// The spring evolves one scalar coordinate. [`SpringTarget::resolve`] maps
+/// each sampled coordinate to the output value; use [`AnimationPhase`] for a
+/// coordinate that drives multiple segments or discrete states.
 #[derive(Clone, Debug)]
 pub struct SpringAnimation<T = ()> {
     pub(crate) motion: Motion<SpringDescription>,

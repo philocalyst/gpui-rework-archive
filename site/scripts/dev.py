@@ -88,8 +88,10 @@ class DocumentationHandler(SimpleHTTPRequestHandler):
                     headers[name] = self.headers[name]
             connection.request("POST", route, self.rfile.read(length), headers)
             response = connection.getresponse()
-            data = response.read(64 * 1024 * 1024 + 1)
-            if len(data) > 64 * 1024 * 1024:
+            # Frame bytes plus the binary envelope and bounded diagnostics.
+            max_reply = 64 * 1024 * 1024 + 64 * 1024 + 32
+            data = response.read(max_reply + 1)
+            if len(data) > max_reply:
                 raise ValueError("Miri response exceeds the frame limit")
             self.send_response(response.status)
             self.send_header("Content-Type", response.getheader("Content-Type", "application/octet-stream"))
@@ -109,13 +111,17 @@ class DocumentationHandler(SimpleHTTPRequestHandler):
 
 def source_snapshot():
     """Ignore generated chapters and includes; watch changes to their inputs."""
-    directories = [ROOT / "site/content", ROOT / "site/examples", ROOT / "site/templates",
-                   ROOT / "site/scripts", ROOT / "scripts/docs", ROOT / "crates", ROOT / "assets"]
-    files = {ROOT / "Cargo.toml", ROOT / "Cargo.lock", ROOT / "site/examples.toml", ROOT / "site/zola.toml"}
+    directories = [ROOT / "site/content", ROOT / "site/examples", ROOT / "site/templates", ROOT / "site/editor",
+                   ROOT / "site/scripts", ROOT / "scripts/docs", ROOT / "scripts/codepen", ROOT / "crates", ROOT / "assets",
+                   ROOT / "vendor/miri/src", ROOT / "vendor/miri/cargo-miri/src"]
+    files = {ROOT / "Cargo.toml", ROOT / "Cargo.lock", ROOT / "site/examples.toml", ROOT / "site/zola.toml", ROOT / "site/package.json", ROOT / "site/package-lock.json",
+             ROOT / "vendor/miri/Cargo.toml", ROOT / "vendor/miri/Cargo.lock",
+             ROOT / "vendor/miri/cargo-miri/Cargo.toml", ROOT / "vendor/miri/cargo-miri/Cargo.lock"}
     files.update(path for directory in directories for path in directory.rglob("*") if path.is_file())
     # Also watch authored front-end files, without compiler/preview output.
     files.update(path for path in (ROOT / "site/static").rglob("*") if path.is_file()
-                 and "pkg" not in path.parts and "builds" not in path.parts and path.name != "build.json")
+                 and "pkg" not in path.parts and "builds" not in path.parts and path.name != "build.json"
+                 and not path.is_relative_to(ROOT / "site/static/workbench"))
     snapshot = {}
     for path in files:
         if not path.is_file():
@@ -140,6 +146,16 @@ def source_snapshot():
     return snapshot
 
 
+def stop_workbench(companion):
+    if companion is not None and companion.poll() is None:
+        os.killpg(companion.pid, signal.SIGTERM)
+        try:
+            companion.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            os.killpg(companion.pid, signal.SIGKILL)
+            companion.wait()
+
+
 def rebuild(env, base):
     for script in ("scripts/docs/generate.py", "scripts/docs/sync_links.py"):
         result = subprocess.run([sys.executable, str(ROOT / script)], cwd=ROOT, env=env)
@@ -159,6 +175,17 @@ def rebuild(env, base):
     if backup.exists():
         shutil.rmtree(backup)
     return True
+
+
+def restart_workbench(companion, env, port):
+    try:
+        replacement, address = start_workbench(env, port)
+    except (subprocess.CalledProcessError, RuntimeError, OSError) as error:
+        print(f"Miri rebuild failed; keeping the running workbench: {error}", file=sys.stderr)
+        return companion
+    DocumentationHandler.workbench_address = address
+    stop_workbench(companion)
+    return replacement
 
 
 def main():
@@ -183,7 +210,11 @@ def main():
                 continue
             time.sleep(0.3)
             inputs = source_snapshot()
-            rebuild(env, base)
+            if rebuild(env, base):
+                changed = {path for path in inputs.keys() | previous.keys() if inputs.get(path) != previous.get(path)}
+                runtime_roots = (ROOT / "crates", ROOT / "vendor", ROOT / "scripts/codepen")
+                if any(path.is_relative_to(directory) for path in changed for directory in runtime_roots):
+                    companion = restart_workbench(companion, env, port)
             # If an author saved during the build, the next loop rebuilds again.
             previous = inputs
         return companion.returncode or 1
@@ -193,13 +224,7 @@ def main():
         server.shutdown()
         server.server_close()
         DocumentationHandler.workbench_address = None
-        if companion is not None and companion.poll() is None:
-            os.killpg(companion.pid, signal.SIGTERM)
-            try:
-                companion.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                os.killpg(companion.pid, signal.SIGKILL)
-                companion.wait()
+        stop_workbench(companion)
 
 
 if __name__ == "__main__":

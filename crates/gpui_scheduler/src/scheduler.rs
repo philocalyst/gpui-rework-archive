@@ -26,14 +26,14 @@ use std::{
     time::Duration,
 };
 
-/// Task priority for background tasks.
+/// Relative scheduling priority for background tasks.
 ///
-/// Higher priority tasks are more likely to be scheduled before lower priority tasks,
-/// but this is not a strict guarantee - the scheduler may interleave tasks of different
-/// priorities to prevent starvation.
+/// On the weighted queue, high, medium, and low work has weights 60, 30, and
+/// 10, respectively. The scheduler still interleaves priorities to prevent
+/// starvation; this is not a completion-order guarantee. `RealtimeAudio` uses
+/// a separate dedicated thread and is intended only for audio work.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 #[repr(u8)]
-/// Ordering applied when multiple runnable tasks are ready at the same instant.
 pub enum Priority {
     /// Realtime priority
     ///
@@ -66,9 +66,9 @@ impl Priority {
 /// The instant at which a runnable item entered the scheduler.
 pub struct SpawnTime(pub Instant);
 
-/// Metadata attached to runnables for debugging and profiling.
-#[derive(Clone, Debug)]
 /// Scheduling metadata attached to a runnable task.
+/// Includes the spawn location and timestamp used by diagnostics and profiling.
+#[derive(Clone, Debug)]
 pub struct RunnableMeta {
     /// The source location where the task was spawned.
     pub location: &'static Location<'static>,

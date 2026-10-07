@@ -144,8 +144,22 @@ where
     }
 }
 
-/// A handle to a subscription created by GPUI. When dropped, the subscription
-/// is cancelled and the callback will no longer be invoked.
+/// The cancellation handle for a registered callback.
+///
+/// Keep it for as long as the callback should remain registered; dropping it
+/// unregisters the callback. Entity-context observers and subscribers commonly
+/// belong to the observing entity, so store their handles in that entity and
+/// let its release cancel them. [`detach`](Self::detach) intentionally gives
+/// up cancellation through this handle and is appropriate only when another
+/// lifetime (such as the application lifetime) is meant to own the callback.
+/// Registration may be deferred until GPUI flushes effects, depending on which
+/// API created the subscription.
+///
+/// The callback's ownership also depends on that API.
+/// [`Context::observe`](crate::Context::observe) holds the consumer weakly;
+/// [`Context::observe_self`](crate::Context::observe_self) holds it strongly.
+/// Store the latter subscription on a separate owner so it cannot keep its
+/// own target alive through a cycle.
 #[must_use]
 // docs:examples:begin
 #[doc = include_str!("docs/examples/gpui-Subscription-85109192.md")]
@@ -165,9 +179,11 @@ impl Subscription {
 
     /// Forgets the cancellation callback and leaves the subscription active.
     ///
-    /// Use this only when the subscription is intentionally application-lived. A
-    /// detached subscription cannot be cancelled through this handle; it ends when
-    /// the publisher removes it (usually when the observed entity is released).
+    /// There is no remaining handle with which to cancel this registration.
+    /// It ends when its publisher removes the callback, for example when an
+    /// observed entity is released or a weak consumer can no longer be upgraded.
+    /// Use this when that independent lifetime is intentional. Detaching does
+    /// not weaken any strong handles captured by the callback.
     pub fn detach(mut self) {
         self.unsubscribe.take();
     }

@@ -1,8 +1,29 @@
 //! Parse and rasterize SVG documents using registered and system fonts.
 //!
 //! Parsing resolves font references and converts text to paths. Keep the resulting
-//! [`ParsedSvg`] when drawing the same document at several sizes; rasterization is then the only
-//! repeated work. Output images use GPUI's BGRA storage convention.
+//! [`crate::ParsedSvg`] when drawing the same document at several sizes; rasterization is then the only
+//! repeated work. Output images use GPUI's BGRA storage convention and can then be submitted to
+//! the normal image renderer.
+//!
+//! # Rendering flow
+//!
+//! Supply SVG bytes directly to [`crate::SvgRenderer::parse_svg`], handle its parse error, then call
+//! [`crate::SvgRenderer::render_parsed`] for each requested output size. Use
+//! [`crate::SvgRenderer::render_single_frame`] when the bytes will only be rendered once. The renderer
+//! also accepts an [`crate::AssetRegistry`] so internal references such as bundled fonts can be resolved
+//! by exact application-defined asset keys. The SVG renderer owns font resolution for SVG text;
+//! it does not call GPUI's ordinary [`crate::TextSystem`] layout path.
+//!
+//! [`crate::SvgSize::Size`] sets a device-pixel width and preserves the document aspect ratio;
+//! [`crate::SvgSize::ExactSize`] stretches to the specified pixel dimensions; and
+//! [`crate::SvgSize::ScaleFactor`] multiplies the SVG's own dimensions. Scale-factor rendering applies
+//! [`crate::SMOOTH_SVG_SCALE_FACTOR`] to the raster and stores a correction on the [`crate::RenderImage`], so
+//! its logical display size remains consistent. Raster dimensions are capped at 8192 pixels per
+//! side to bound texture allocation; invalid or zero raster dimensions return a render error.
+//!
+//! Parse errors cover malformed XML, unsupported SVG features, and unresolved resources. Parsing
+//! may also resolve system fonts, so keep the resulting [`crate::ParsedSvg`] rather than parsing the same
+//! bytes for every frame or scale.
 
 use crate::{
     AssetRegistry, DevicePixels, IsZero, RenderImage, Result, SharedString, Size,
@@ -84,10 +105,16 @@ fn select_emoji_font(
     None
 }
 
-/// When rendering SVGs, we render them at twice the size to get a higher-quality result.
+/// Raster multiplier used for scale-factor SVG requests to improve edge quality.
+///
+/// [`SvgRenderer::render_parsed`] records the reciprocal scale on its [`RenderImage`] so the
+/// image's logical display dimensions remain consistent.
 pub const SMOOTH_SVG_SCALE_FACTOR: f32 = 2.;
 
-/// Parameters used when the renderer loads and rasterizes an SVG asset.
+/// Cache key for loading an SVG asset and rasterizing it at a target device-pixel size.
+///
+/// `path` is looked up exactly in the configured [`AssetRegistry`]. `size` is a device-pixel
+/// width and height; it is distinct from a logical GPUI size.
 #[derive(Clone, PartialEq, Hash, Eq)]
 pub struct RenderSvgParams {
     /// Asset path used when the SVG bytes are supplied by the registry.
@@ -114,11 +141,13 @@ pub struct ParsedSvg(usvg::Tree);
 /// The size in which to rasterize the SVG.
 #[derive(Clone, Copy)]
 pub enum SvgSize {
-    /// A width in device pixels. The SVG retains its aspect ratio.
+    /// A device-pixel size bound. The width determines the scale; the SVG retains its aspect
+    /// ratio and does not stretch to the requested height.
     Size(Size<DevicePixels>),
-    /// An exact width and height in device pixels.
+    /// An exact device-pixel width and height. The SVG is scaled independently on each axis.
     ExactSize(Size<DevicePixels>),
-    /// A logical scaling factor to apply to the size provided by the SVG.
+    /// A scale factor applied to the dimensions declared by the SVG. The renderer applies its
+    /// smooth-raster multiplier and records the inverse correction on the returned image.
     ScaleFactor(f32),
 }
 
@@ -129,7 +158,10 @@ impl From<f32> for SvgSize {
 }
 
 impl SvgRenderer {
-    /// Creates a new SVG renderer with the provided asset source.
+/// Creates a renderer using the provided byte registry for SVG resources and bundled fonts.
+///
+/// System fonts and registered bundled fonts are assembled lazily when a font is first resolved,
+/// so constructing a renderer alone does not load the system font database.
     pub fn new(asset_registry: Arc<AssetRegistry>) -> Self {
         static SYSTEM_FONT_DB: LazyLock<Arc<usvg::fontdb::Database>> = LazyLock::new(|| {
             let mut db = usvg::fontdb::Database::new();
@@ -198,6 +230,7 @@ impl SvgRenderer {
     /// Parses SVG bytes into a reusable [`ParsedSvg`].
     ///
     /// Parsing can fail for malformed XML, unsupported SVG features, or unresolved resources.
+    /// SVG text is resolved to paths during this step, so font choice is fixed in the parsed tree.
     #[tracing::instrument(skip_all)]
     pub fn parse_svg(&self, bytes: &[u8]) -> Result<ParsedSvg, usvg::Error> {
         usvg::Tree::from_data(bytes, &self.usvg_options).map(ParsedSvg)
@@ -206,7 +239,9 @@ impl SvgRenderer {
     /// Rasterizes a parsed SVG into a BGRA [`RenderImage`].
     ///
     /// `SvgSize::ScaleFactor` applies [`SMOOTH_SVG_SCALE_FACTOR`] internally and records the
-    /// correction on the image so logical display size remains unchanged.
+    /// correction on the image so logical display size remains unchanged. Any requested output
+    /// dimension above 8192 device pixels is scaled down to fit the cap; a size that cannot form
+    /// a nonzero pixmap returns [`usvg::Error::InvalidSize`].
     #[tracing::instrument(skip_all)]
     pub fn render_parsed(
         &self,
@@ -234,7 +269,10 @@ impl SvgRenderer {
         Ok(Arc::new(image))
     }
 
-    /// Renders the given bytes into an image buffer.
+    /// Parses and renders the given bytes into one image buffer.
+    ///
+    /// Use [`Self::parse_svg`] plus [`Self::render_parsed`] when the same bytes will be drawn at
+    /// several sizes, so parsing and font resolution happen once.
     pub fn render_single_frame(
         &self,
         bytes: &[u8],

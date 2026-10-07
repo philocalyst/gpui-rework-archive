@@ -10,7 +10,12 @@ use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 use std::ops::Range;
 
-/// Nested content-filter groups with dedicated isolation targets; deeper ones render inline.
+/// Maximum number of nested content-filter groups isolated at once.
+///
+/// When a scene nests more groups, deeper groups still receive begin/end
+/// commands but render inline into the current target. Their contents therefore
+/// do not get a separate offscreen surface for applying the group filter as a
+/// single composite. This limit bounds intermediate-target use across renderers.
 pub const MAX_FILTER_GROUP_DEPTH: usize = 2;
 
 /// Index of an offscreen texture reserved for an isolated content-filter group.
@@ -40,6 +45,10 @@ impl FilterRenderTarget {
 }
 
 /// Resource totals computed while a scene's render plan is compiled.
+///
+/// These describe work implied by the plan and help a backend size or prepare
+/// resources. They are counts and flags, not byte sizes or allocation
+/// guarantees; surface size, atlas residency, and backend limits still matter.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct ScenePlanRequirements {
     /// Number of commands in the compiled stream.
@@ -60,11 +69,22 @@ pub struct ScenePlanRequirements {
     pub isolated_target_count: usize,
     /// Whether path rasterization requires its dedicated target.
     pub uses_path_target: bool,
-    /// Whether any offscreen target is required.
+    /// Whether backdrop or isolated content filters need an offscreen target.
+    ///
+    /// The path rasterization target is reported separately by
+    /// [`Self::uses_path_target`].
     pub uses_offscreen_target: bool,
 }
 
 /// A compiled scene command stream, built by [`Scene::finish`] and shared by every renderer.
+///
+/// The stream preserves painter order across the scene's type-grouped primitive
+/// arrays. A [`RenderCommand::Batch`] identifies an adjacent run compatible
+/// with one pipeline and, for sprites, one atlas texture. Path batches first
+/// rasterize triangles into the path target and then composite the resulting
+/// sprites. Filter begin/end commands bracket isolated content groups; a
+/// backend follows their [`FilterRenderTarget`] assignment instead of choosing
+/// its own nesting policy.
 #[derive(Debug, Default)]
 pub struct ScenePlan {
     // Retain this allocation across `Scene::clear`/`Scene::finish`; scenes are rebuilt every frame.
@@ -205,12 +225,14 @@ impl ScenePlan {
         Ok(expected)
     }
 
-    /// Returns the ordered rendering commands.
+    /// Returns the ordered rendering commands for the finished scene.
+    ///
+    /// Each batch range indexes the matching primitive array on that scene.
     pub fn commands(&self) -> &[RenderCommand] {
         &self.commands
     }
 
-    /// Returns the resource totals collected while compiling this plan.
+    /// Returns work counts and target requirements collected while compiling this plan.
     pub fn requirements(&self) -> &ScenePlanRequirements {
         &self.requirements
     }
@@ -295,39 +317,68 @@ impl SceneLengths {
     }
 }
 
-/// A contiguous range of one primitive type drawn by a single pipeline invocation.
+/// A contiguous range of one primitive type drawn by a compatible pipeline invocation.
+///
+/// Ranges index the corresponding public primitive array on the same finished
+/// [`Scene`]. They are valid only while that scene's arrays remain unchanged.
+/// Batches remain in painter order: adjacent primitives can be merged only
+/// when their pipeline state and texture requirements match and no intervening
+/// primitive would change compositing order.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[allow(missing_docs)]
 pub enum PrimitiveBatch {
+    /// Drop shadows sharing a smoothing pipeline.
     Shadows {
+        /// Indices in [`Scene::shadows`].
         range: Range<usize>,
+        /// Whether this batch uses the smoothed pipeline.
         smoothed: bool,
     },
+    /// Rounded rectangles and borders sharing a smoothing pipeline.
     Quads {
+        /// Indices in [`Scene::quads`].
         range: Range<usize>,
+        /// Whether this batch uses the smoothed pipeline.
         smoothed: bool,
     },
+    /// Paths rasterized into a temporary target before compositing.
     Paths {
+        /// Indices in [`Scene::paths`].
         range: Range<usize>,
+        /// Total vertices sent through path rasterization.
         rasterization_vertex_count: usize,
+        /// Number of path sprites to composite.
         sprite_count: usize,
     },
+    /// Indices of text decorations in [`Scene::underlines`].
     Underlines(Range<usize>),
+    /// Grayscale sprites that sample the same atlas texture.
     MonochromeSprites {
+        /// Atlas texture sampled by every sprite in this batch.
         texture_id: AtlasTextureId,
+        /// Indices in [`Scene::monochrome_sprites`].
         range: Range<usize>,
     },
+    /// LCD text sprites that sample the same atlas texture.
     SubpixelSprites {
+        /// Atlas texture sampled by every sprite in this batch.
         texture_id: AtlasTextureId,
+        /// Indices in [`Scene::subpixel_sprites`].
         range: Range<usize>,
     },
+    /// Color sprites sharing an atlas texture and smoothing pipeline.
     PolychromeSprites {
+        /// Atlas texture sampled by every sprite in this batch.
         texture_id: AtlasTextureId,
+        /// Indices in [`Scene::polychrome_sprites`].
         range: Range<usize>,
+        /// Whether this batch uses the smoothed pipeline.
         smoothed: bool,
     },
+    /// Indices of native surfaces in [`Scene::surfaces`].
     Surfaces(Range<usize>),
+    /// Indices of backdrop effects in [`Scene::backdrop_filters`].
     BackdropFilters(Range<usize>),
+    /// One marker in [`Scene::filter_boundaries`].
     FilterBoundary(usize),
 }
 
@@ -355,7 +406,11 @@ pub enum RenderCommand {
 }
 
 impl RenderCommand {
-    /// Returns the opening filter boundary carried by a filter command.
+    /// Returns the opening filter boundary associated with a filter command.
+    ///
+    /// For an [`Self::EndFilter`] command this is the matching opening marker;
+    /// use `closing_boundary_index` to access the end marker. Batch commands
+    /// have no boundary and return `None`.
     pub fn boundary<'a>(&self, scene: &'a Scene) -> Option<&'a FilterBoundary> {
         match self {
             Self::BeginFilter { boundary_index, .. } | Self::EndFilter { boundary_index, .. } => {

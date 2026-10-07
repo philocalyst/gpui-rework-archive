@@ -27,7 +27,10 @@ struct ActionBindingEntry {
 }
 
 impl ActionBindingCollection {
-    /// Adds a keystroke to an action in the collection.
+    /// Add another keystroke that invokes `A`.
+    ///
+    /// Calling this repeatedly for the same action collects multiple alternatives. `A::default()`
+    /// supplies the action value when [`Self::as_keybindings`] constructs the bindings.
     pub fn with<A: Action + Default>(mut self, keystrokes: impl Into<SharedString>) -> Self {
         let action_id = TypeId::of::<A>();
         let entry = self.entries.entry(action_id);
@@ -39,8 +42,14 @@ impl ActionBindingCollection {
         self
     }
 
-    /// Creates an iterator of `KeyBinding` which represents all action+keystrokes in this collection bound to the same key-context.
-    /// This sequence can be provided to `App::bind_keys`, and any elements which use the same `InteractiveElement::key_context` will receive the bound actions.
+    /// Create one `KeyBinding` per action/keystroke pair with the same optional context.
+    ///
+    /// Pass the iterator to [`App::bind_keys`](crate::App::bind_keys). The bindings use the dummy
+    /// keyboard mapper, so use [`KeyBinding::load`] directly when platform key equivalents or
+    /// recoverable parse errors are required. This method panics if the context or a keystroke
+    /// cannot be parsed. Since actions are stored in a hash map, do not rely on the relative order
+    /// of bindings for different action types; use an ordered `Vec<KeyBinding>` when tie-breaking
+    /// precedence between actions matters.
     pub fn as_keybindings(&self, context: Option<&str>) -> impl Iterator<Item = KeyBinding> {
         let context_predicate =
             context.map(|context| KeyBindingContextPredicate::parse(context).unwrap().into());

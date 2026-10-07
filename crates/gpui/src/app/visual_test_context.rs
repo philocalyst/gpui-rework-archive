@@ -149,15 +149,20 @@ impl VisualTestAppContext {
         self.foreground_executor.clone()
     }
 
-    /// Runs all pending foreground and background tasks until there's nothing left to do.
-    /// This is essential for processing async operations like tooltip timers.
+    /// Runs ready foreground and background work until no runnable tasks remain.
+    ///
+    /// Pending timers do not advance automatically. [`Self::advance_clock`]
+    /// advances time and runs work due in that interval.
     pub fn run_until_parked(&self) {
         self.dispatcher.run_until_parked();
     }
 
-    /// Advances the simulated clock by the given duration and processes any tasks
-    /// that become ready. This is essential for testing time-based behaviors like
-    /// tooltip delays.
+    /// Advances the simulated clock and runs work due by the new time.
+    ///
+    /// The shared test scheduler drains runnable work while crossing timers
+    /// due within `duration`, then leaves the clock at the requested
+    /// destination. It does not model production wall-clock scheduling or
+    /// latency.
     pub fn advance_clock(&self, duration: Duration) {
         self.dispatcher.advance_clock(duration);
     }

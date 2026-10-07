@@ -1,47 +1,21 @@
 +++
 title = "Edit a running example"
-description = "Change Rust in the Miri workbench or save a native hot patch with the GPUI CLI."
+description = "Use the native hot-patching workflow and distinguish it from browser previews."
 weight = 110
 +++
 
-Change a label, click its button, and follow the value through the next frame.
-Each walkthrough uses one Rust component in its native program and browser
-workbench.
+Walkthrough previews are compiled GPUI WebAssembly applications. The editable
+Miri workbench is a separate runtime: its current companion runs natively. That
+does not meet the browser-portability requirement for an editor that must run
+Miri entirely in WebAssembly. Treat browser editing as unavailable until that
+runtime has been implemented and verified; the compiled preview remains useful
+for trying the published component.
 
-## Edit Rust in the browser
-
-Start the local documentation server from the checkout:
-
-```sh
-python3 site/scripts/dev.py
-```
-
-Open a walkthrough and choose **Edit Rust**. The workbench runs your component
-under [Miri](https://github.com/rust-lang/miri), using the real `gpui` crate.
-GPUI lays out and paints the component; the browser displays that scene and
-sends input back to the running interpreter. Clicks update the same entities
-between frames.
-
-Edits run after a short typing pause. **Run** or Ctrl/⌘ Enter runs immediately.
-A source change starts a fresh component; **Reset state** restarts the current
-source. Errors appear below the editor, with the last successful frame still
-visible. Fix the source to resume interaction.
-
-The workbench edits the component, including its setup function. The complete
-source download also contains the native application entry point. Use that
-program in your editor with ordinary Cargo:
-
-```sh
-cargo run -p gpui-documentation-examples --example counter
-```
-
-The published site can display the original programs without a local service.
-To execute edits, use the local server above.
-
-## Save a native hot patch
+## Patch a native example
 
 The [`gpui` CLI](https://github.com/gpui-ce/cli) builds and watches native
-applications. Install it, then select the walkthrough's Cargo example:
+applications. Its repository currently requires access to `gpui-ce/cli`. With
+that access, install it and select a walkthrough's Cargo example:
 
 ```sh
 cargo install --git https://github.com/gpui-ce/cli --locked
@@ -59,5 +33,5 @@ leaves the running application intact until the next valid save.
 
 Manifest, lockfile, build-script, shader, and local dependency changes cause a
 full rebuild and restart. Native hot patching supports macOS and Linux. See
-[the CLI's watch behavior](https://github.com/gpui-ce/cli#behavior-and-limitations) for
-its target selection and rebuild rules.
+[the CLI's watch behavior](https://github.com/gpui-ce/cli#behavior-and-limitations)
+for its target selection and rebuild rules.

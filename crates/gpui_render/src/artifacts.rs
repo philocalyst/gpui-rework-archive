@@ -20,7 +20,7 @@ pub const BASE_DOWNLEVEL_WGSL: &str =
 pub struct GeneratedBinding {
     /// Binding number in the generated bind group.
     pub binding: u32,
-    /// Shader-stage visibility bitmask.
+    /// Shader-stage visibility bitmask used to create the generated layout.
     pub visibility: u32,
     /// Resource kind and byte width, when applicable.
     pub kind: GeneratedBindingKind,
@@ -50,7 +50,9 @@ include!(concat!(env!("OUT_DIR"), "/shader_interface.rs"));
 /// D3D11 creation API by accident.
 #[derive(Clone, Copy)]
 pub struct Dx11Bytecode {
+    /// Compiled Direct3D 11 vertex shader bytecode.
     pub vertex: &'static [u8],
+    /// Compiled Direct3D 11 fragment shader bytecode.
     pub fragment: &'static [u8],
     /// Present for every pipeline whose vertex shader reads `instance_index`.
     ///
@@ -106,7 +108,9 @@ const _: () = assert!(std::mem::size_of::<Dx11DrawConstants>() == 16);
 /// escape hatch.
 #[derive(Clone, Copy)]
 pub enum Dx11Shader {
+    /// Compiled shader model 5.0 bytecode and per-draw binding metadata.
     Sm50(Dx11Bytecode),
+    /// This build host cannot provide compiled Direct3D 11 bytecode.
     NativeWindowsBuildRequired,
 }
 

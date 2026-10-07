@@ -19,8 +19,28 @@ extern "C" {
 
 /// GPUI HTTP client backed by the browser's global `fetch` function.
 ///
-/// The future resolves with response bytes after the browser response body has been read; HTTP
-/// status codes are returned in [`gpui::HttpResponse`] rather than treated as transport errors.
+/// `get` sends a GET request and buffers the complete response body before resolving. Non-success
+/// HTTP statuses are still successful transport results and appear in [`gpui::HttpResponse::status`];
+/// request creation, Fetch rejection, invalid status conversion (including an opaque redirect's
+/// zero status), and body-read failures return errors. Browser CORS, origin, redirect, and
+/// permission rules still apply. When `follow_redirects` is false, Fetch's `manual` redirect mode
+/// applies, including the browser's opaque-redirect behavior.
+/// `gpui_ce_platform::application` constructors install this client for GPUI's normal HTTP-client
+/// interface; construct it directly when embedding the web platform yourself.
+///
+/// ```no_run
+/// # async fn example() -> anyhow::Result<()> {
+/// use gpui::http_client::HttpClient;
+/// let response = gpui_ce_web::FetchHttpClient::default()
+///     .get("https://example.com/data", true)
+///     .await?;
+/// if response.status.is_success() {
+///     let json = String::from_utf8(response.body)?;
+///     # let _ = json;
+/// }
+/// # Ok(())
+/// # }
+/// ```
 pub struct FetchHttpClient;
 
 impl Default for FetchHttpClient {
@@ -35,8 +55,9 @@ impl FetchHttpClient {
     ///
     /// # Safety
     ///
-    /// The caller must ensure the client is only used with the browser runtime
-    /// and its main-thread Fetch integration.
+    /// The caller must ensure the client is used only with the browser runtime and its main-thread
+    /// Fetch integration. The returned future is marked `Send` to satisfy GPUI's HTTP-client
+    /// interface, but its JavaScript Fetch operations still run on the browser main thread.
     pub unsafe fn new() -> Self {
         Self
     }

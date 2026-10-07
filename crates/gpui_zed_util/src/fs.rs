@@ -4,8 +4,12 @@ use async_fs as fs;
 use futures_lite::StreamExt;
 use std::path::{Path, PathBuf};
 
-/// Removes all files and directories matching the given predicate
-/// Remove files and directories directly below `dir` that satisfy `predicate`.
+/// Removes matching direct children of `dir`.
+///
+/// The predicate is called on each entry's path. Matching files are removed;
+/// matching directories are removed recursively. Read and removal failures are logged
+/// and skipped; metadata failures are skipped. This function does not report whether every
+/// requested removal succeeded.
 pub async fn remove_matching<F>(dir: &Path, predicate: F)
 where
     F: Fn(&Path) -> bool,
@@ -28,7 +32,11 @@ where
     }
 }
 
-/// Collect direct children of `dir` that satisfy `predicate`.
+/// Collects matching direct children of `dir`.
+///
+/// The predicate is called on each entry's path. Read-directory and per-entry
+/// errors are logged and skipped; an empty vector therefore does not
+/// distinguish an empty directory from a read failure.
 pub async fn collect_matching<F>(dir: &Path, predicate: F) -> Vec<PathBuf>
 where
     F: Fn(&Path) -> bool,
@@ -48,7 +56,11 @@ where
     matching
 }
 
-/// Find the first direct child whose filename satisfies `predicate`.
+/// Finds the first direct child whose filename satisfies `predicate`.
+///
+/// Directory iteration order is filesystem-defined. Non-UTF-8 file names are
+/// passed to the predicate using their lossy string representation. Read
+/// errors are logged and treated like no match.
 pub async fn find_file_name_in_dir<F>(dir: &Path, predicate: F) -> Option<PathBuf>
 where
     F: Fn(&str) -> bool,
@@ -72,6 +84,13 @@ where
     None
 }
 
+/// Moves each direct child of `source_path` into an existing target directory.
+///
+/// The target directory must already exist. Each move uses filesystem rename,
+/// so crossing filesystems can fail; failures return immediately and may leave
+/// earlier entries moved. On success, the now-empty source directory is
+/// removed. Existing target entries may be replaced according to the platform's
+/// rename behavior.
 pub async fn move_folder_files_to_folder<P: AsRef<Path>>(
     source_path: P,
     target_path: P,
@@ -95,8 +114,8 @@ pub async fn move_folder_files_to_folder<P: AsRef<Path>>(
 }
 
 #[cfg(unix)]
-/// Set the permissions for the given path so that the file becomes executable.
-/// This is a noop for non-unix platforms.
+/// Sets the file mode to `0o755` on Unix, replacing its existing permission bits.
+///
 pub async fn make_file_executable(path: &Path) -> std::io::Result<()> {
     fs::set_permissions(
         path,
@@ -107,8 +126,7 @@ pub async fn make_file_executable(path: &Path) -> std::io::Result<()> {
 
 #[cfg(not(unix))]
 #[allow(clippy::unused_async)]
-/// Set the permissions for the given path so that the file becomes executable.
-/// This is a noop for non-unix platforms.
+/// Does nothing on non-Unix targets and returns success.
 pub async fn make_file_executable(_path: &Path) -> std::io::Result<()> {
     Ok(())
 }

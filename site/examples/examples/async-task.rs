@@ -3,8 +3,10 @@ mod support;
 
 // ## Let the view own the operation {#state}
 // Start waits two seconds, then displays Complete. Stop cancels that wait.
-// The view stores the returned [`Task`] so its own lifetime controls the work:
-// clearing the field drops the task; releasing the view drops it too.
+// The view stores the returned [`Task`] because the operation belongs to this
+// view. Clearing the field drops the handle and cancels its remaining polling;
+// releasing the view drops the field as well. Dropping a task is local
+// cancellation, not rollback of work already accepted elsewhere.
 //
 // `running` chooses the button label, and `message` supplies the displayed
 // status. Both are ordinary state updated through the view's [`Context`].
@@ -19,14 +21,16 @@ struct AsyncDemo {
 }
 
 // ## Wait, then reacquire the view {#completion}
-// [`Context::spawn`] runs a foreground future with a weak view handle. The
-// [`BackgroundExecutor::timer`] waits without blocking an input callback.
-// After the wait, [`WeakEntity::update`] reacquires the view and changes its
-// status. If the view has gone away, that update returns an error instead.
+// [`Context::spawn`] runs a foreground future and gives it a weak handle to the
+// view. The [`BackgroundExecutor::timer`] yields while the two seconds pass;
+// it does not block the input callback or hold a mutable view borrow. After
+// the wait, [`WeakEntity::update`] reacquires the live view to change its
+// status. If the view was released meanwhile, the update fails and there is no
+// UI state left to change.
 //
-// Both starting and completing call `notify`. The future does not hold a
-// mutable view borrow across `.await`; the completion closure obtains a new
-// one for the duration of that update.
+// Starting notifies immediately so “Waiting...” appears before the timer
+// completes. Completion obtains a fresh mutable borrow only inside `update`,
+// then notifies again. Never carry a `Context` or entity borrow across `.await`.
 
 impl AsyncDemo {
     fn start(&mut self, cx: &mut Context<Self>) {
@@ -57,7 +61,9 @@ impl AsyncDemo {
 // [`Context::listener`] gives the click handler access to the view. While
 // waiting, the button calls `stop`, which drops the task and displays Stopped.
 // Another Start begins a new two-second wait. Completion returns the button
-// to Start.
+// to Start. Observe that the status changes immediately on Stop and remains
+// Stopped after the old deadline; this distinguishes task cancellation from
+// merely hiding the pending result.
 //
 // > [!WARNING]
 // > Dropping a task stops its remaining polling. It does not undo an operation

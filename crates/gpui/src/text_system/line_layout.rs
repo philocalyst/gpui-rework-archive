@@ -20,21 +20,21 @@ use std::{
 /// A laid-out and styled text document.
 #[derive(Clone, Debug)]
 pub struct LineLayout {
-    /// The document's base font size.
+    /// Base font size requested for the document, in logical pixels.
     pub font_size: Pixels,
-    /// The width of the widest visual line.
+    /// Advance width of the widest visual row, before external alignment placement.
     pub width: Pixels,
-    /// The document's ascent.
+    /// Maximum ascent used by the document layout, in logical pixels.
     pub ascent: Pixels,
-    /// The document's descent.
+    /// Maximum descent used by the document layout, in logical pixels.
     pub descent: Pixels,
-    /// Visual lines in paint order. Unwrapped layouts contain one line.
+    /// Rows in paint order. A soft-wrapped source line can occupy several rows.
     pub visual_lines: SmallVec<[VisualLine; 1]>,
-    /// Style-specific paint runs referenced by `visual_lines`.
+    /// Positioned glyph fragments referenced by each row's `paint_fragment_range`.
     pub paint_fragments: Vec<PaintFragment>,
     /// The length of the source text in UTF-8 bytes.
     pub len: usize,
-    /// Backend-native interaction model.
+    /// Backend-native hit testing, caret movement, and selection geometry for this same text.
     pub platform_layout: Arc<dyn PlatformTextLayout>,
 }
 
@@ -43,11 +43,11 @@ pub struct LineLayout {
     Clone, Copy, Debug, Default, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize,
 )]
 pub struct InlineTextMetrics {
-    /// Distance above the text baseline.
+    /// Logical-pixel distance above the text baseline.
     pub ascent: Pixels,
-    /// Distance below the text baseline.
+    /// Logical-pixel distance below the text baseline.
     pub descent: Pixels,
-    /// Height of a lowercase x in the inline container's font.
+    /// Logical-pixel x-height used when aligning inline boxes.
     pub x_height: Pixels,
 }
 
@@ -85,15 +85,15 @@ pub struct InlineRangeGeometry {
 /// Text and element boxes laid out in one inline formatting context.
 #[derive(Clone, Debug)]
 pub struct InlineLayout {
-    /// The shaped text shared with the ordinary GPUI paint pipeline.
+    /// The shaped text shared with the ordinary GPUI glyph-paint pipeline.
     pub layout: Arc<LineLayout>,
-    /// Per-row block geometry from the text backend.
+    /// Per-row block geometry, including the adjusted baseline and height.
     pub lines: Vec<InlineVisualLine>,
-    /// Positioned element boxes.
+    /// Positioned element boxes. Layout computes these bounds but does not paint their contents.
     pub boxes: Vec<PositionedInlineBox>,
-    /// Shared horizontal anchor used to align every visual line.
+    /// Horizontal adjustment used to pixel-snap the common anchor for every visual line.
     pub alignment_offset: Pixels,
-    /// Natural size of the complete inline layout.
+    /// Natural logical-pixel size of text and inline boxes together.
     pub size: Size<Pixels>,
 }
 
@@ -141,7 +141,13 @@ fn aligned_inline_box_y(
     }
 }
 
-/// Applies CSS-like vertical alignment to boxes after a text backend assigns them to lines.
+/// Applies CSS-like vertical alignment and recomputes row heights after backend layout.
+///
+/// `requests` maps box IDs to vertical alignment. A box with no matching request uses baseline
+/// alignment. `line_metrics` and `text_bounds` are per-row values; missing entries use
+/// `fallback_metrics` and the supplied `line_height`. Boxes assigned to nonexistent rows are
+/// ignored. The function updates each row's vertical origin, height, and baseline, each accepted
+/// box's vertical origin, and `size.height`; horizontal geometry is left unchanged.
 pub fn align_inline_boxes(
     lines: &mut [InlineVisualLine],
     boxes: &mut [PositionedInlineBox],
@@ -236,21 +242,30 @@ pub trait PlatformTextLayout: Send + Sync + std::fmt::Debug {
     fn size(&self) -> Size<Pixels>;
 
     /// Returns the UTF-8 byte index of the cluster under a point in GPUI layout coordinates.
+    ///
+    /// The result is a logical source position even when the point falls in right-to-left text.
+    /// Implementations use `Ok` for a point on a visual row and `Err` for the closest logical
+    /// boundary at a point outside the row.
     fn byte_index_from_pixel_point(
         &self,
         pixel_point: Point<Pixels>,
         line_height: Pixels,
     ) -> Result<usize, usize>;
 
-    /// Returns the closest caret for a point in GPUI layout coordinates.
-    /// Points outside a visual row return `Err`.
+    /// Returns the closest affinity-aware caret for a point in GPUI layout coordinates.
+    ///
+    /// `Ok` means the point lies on a visual row; a point outside a row returns `Err` containing
+    /// the caret at the closest visual edge. The caret index is a UTF-8 byte boundary.
     fn caret_from_pixel_point(
         &self,
         pixel_point: Point<Pixels>,
         line_height: Pixels,
     ) -> Result<CaretPosition, CaretPosition>;
 
-    /// Returns the caret bounds in GPUI layout coordinates.
+    /// Returns the caret bounds in GPUI layout coordinates, if `caret` is representable.
+    ///
+    /// `line_height` supplies the row height used to place the caret; it need not equal the
+    /// backend's natural line height.
     fn caret_bounds(&self, caret: CaretPosition, line_height: Pixels) -> Option<Bounds<Pixels>>;
 
     /// Snaps a caret to a native cluster boundary.
@@ -263,7 +278,11 @@ pub trait PlatformTextLayout: Send + Sync + std::fmt::Debug {
         direction: VisualDirection,
     ) -> Option<CaretPosition>;
 
-    /// Returns bounds for a UTF-8 byte range in visual order.
+    /// Returns selection rectangles for a UTF-8 byte range in visual order.
+    ///
+    /// The range is in logical source order and may produce several rectangles when it crosses
+    /// visual rows or bidirectional runs. Backends may extend rectangles to paint selection
+    /// whitespace; use [`Self::inline_geometry`] for native text-only bounds.
     fn selection_bounds(
         &self,
         byte_range: Range<usize>,
@@ -293,7 +312,9 @@ pub trait PlatformTextLayout: Send + Sync + std::fmt::Debug {
         )
     }
 
-    /// Returns native geometry for several ranges in input order.
+    /// Returns native geometry for each input range, preserving input order.
+    ///
+    /// An empty range or a range with no drawable geometry produces an empty inner vector.
     fn inline_geometry_for_ranges(&self, ranges: &[Range<usize>]) -> Vec<Vec<InlineRangeGeometry>> {
         ranges
             .iter()
@@ -301,13 +322,16 @@ pub trait PlatformTextLayout: Send + Sync + std::fmt::Debug {
             .collect()
     }
 
-    /// Returns the atomic logical cluster before the caret.
+    /// Returns the atomic logical cluster immediately before the caret in source order.
     fn logical_cluster_before(&self, caret: CaretPosition) -> Option<Range<usize>>;
 
-    /// Returns the atomic logical cluster after the caret.
+    /// Returns the atomic logical cluster immediately after the caret in source order.
     fn logical_cluster_after(&self, caret: CaretPosition) -> Option<Range<usize>>;
 
     /// Returns the caret and retained horizontal coordinate after applying a movement.
+    ///
+    /// The coordinate is useful for consecutive up/down moves. Pass the returned value into the
+    /// next vertical movement; horizontal or boundary movement may clear it.
     fn caret_movement(
         &self,
         caret: CaretPosition,
@@ -315,7 +339,9 @@ pub trait PlatformTextLayout: Send + Sync + std::fmt::Debug {
         vertical_navigation_x: Option<Pixels>,
     ) -> CaretMovement;
 
-    /// Returns the word or line selected at a point in GPUI layout coordinates.
+    /// Returns a word, visual row, or hard line selected at a point in GPUI layout coordinates.
+    ///
+    /// The returned range uses UTF-8 bytes and logical source order.
     fn selection_from_pixel_point(
         &self,
         pixel_point: Point<Pixels>,
@@ -449,7 +475,7 @@ pub struct PaintFragment {
     pub font_size: Pixels,
     /// Positioned glyphs local to the visual line.
     pub glyphs: Arc<[ShapedGlyph]>,
-    /// Horizontal bounds of this fragment.
+    /// Horizontal bounds of this fragment in visual-row coordinates.
     pub x_range: Range<Pixels>,
     /// Paint properties shared by every glyph in the fragment.
     pub style: PaintStyle,
@@ -462,13 +488,13 @@ pub struct PaintFragment {
 /// A single glyph, ready to paint.
 #[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct ShapedGlyph {
-    /// The ID for this glyph, as determined by the text system.
+    /// Backend font glyph ID; it is not a source-text index.
     pub id: GlyphId,
 
-    /// The position of this glyph in its containing line.
+    /// Logical-pixel position in its containing visual row.
     pub position: Point<Pixels>,
 
-    /// Whether this glyph is an emoji
+    /// Whether painting should use the color-emoji rasterization path.
     pub is_emoji: bool,
 }
 
@@ -534,7 +560,8 @@ impl From<&str> for CaretAffinity {
     Clone, Copy, Debug, Default, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize,
 )]
 pub struct CaretPosition {
-    /// The logical UTF-8 byte index.
+    /// Logical UTF-8 byte offset in the source text. Layout normalizes offsets that are not
+    /// valid backend caret stops.
     pub index: usize,
     /// The logical neighbor that owns this position.
     pub affinity: CaretAffinity,
@@ -602,7 +629,9 @@ impl From<Range<usize>> for CaretSelection {
 }
 
 impl CaretSelection {
-    /// Returns whether the selection is empty.
+    /// Returns whether both endpoints have the same UTF-8 byte index.
+    ///
+    /// Different affinities at that same index still count as an empty selection.
     pub fn is_empty(&self) -> bool {
         self.anchor.index == self.caret.index
     }
@@ -612,7 +641,7 @@ impl CaretSelection {
         self.caret.index.cmp(&self.anchor.index)
     }
 
-    /// Returns the selected UTF-8 byte range in logical order.
+    /// Returns the selected UTF-8 byte range in logical source order, dropping endpoint affinity.
     pub fn byte_range(self) -> Range<usize> {
         self.anchor.index.min(self.caret.index)..self.anchor.index.max(self.caret.index)
     }
@@ -674,20 +703,23 @@ pub struct ShapedTextLayout {
 }
 
 impl ShapedTextLayout {
-    /// The length of the underlying text, in utf8 bytes.
+    /// The length of the underlying source text, in UTF-8 bytes.
     #[allow(clippy::len_without_is_empty)]
     pub fn len(&self) -> usize {
         self.layout.platform_layout.len()
     }
 
-    /// The document width, capped by the wrapping constraint.
+    /// The document's advance width, capped by the wrapping constraint when present.
     pub fn width(&self) -> Pixels {
         self.wrap_width
             .unwrap_or(Pixels::MAX)
             .min(self.layout.width)
     }
 
-    /// The size of the complete text for the given line height.
+    /// Returns the size of the complete text using the supplied visual-row height.
+    ///
+    /// Height is row count multiplied by `line_height`, rather than the backend's natural metrics
+    /// height. Width is the advance width capped by the wrap constraint.
     pub fn size(&self, line_height: Pixels) -> Size<Pixels> {
         Size {
             width: self.width(),
@@ -695,7 +727,7 @@ impl ShapedTextLayout {
         }
     }
 
-    /// Returns the number of visual lines in this layout.
+    /// Returns the number of visual rows after hard breaks and soft wrapping.
     pub fn line_count(&self) -> usize {
         self.layout.platform_layout.line_count()
     }
@@ -710,12 +742,12 @@ impl ShapedTextLayout {
         self.layout.descent
     }
 
-    /// Returns the visual lines in paint order.
+    /// Returns visual rows in paint order; their source ranges remain in logical UTF-8 order.
     pub fn visual_lines(&self) -> &[VisualLine] {
         &self.layout.visual_lines
     }
 
-    /// Returns the fragments belonging to a visual line.
+    /// Returns the positioned glyph fragments for a row, in visual paint order.
     pub fn fragments_for_line(&self, line: &VisualLine) -> &[PaintFragment] {
         &self.layout.paint_fragments[line.paint_fragment_range.clone()]
     }

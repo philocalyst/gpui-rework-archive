@@ -47,7 +47,12 @@ pub struct Session {
     pub elapsed_ms: u64,
 }
 impl Session {
-    pub fn request(&mut self, source: String, backend: Backend, event: Option<gpui_codepen_guest::InputMessage>) -> Request {
+    pub fn request(
+        &mut self,
+        source: String,
+        backend: Backend,
+        event: Option<gpui_codepen_guest::InputMessage>,
+    ) -> Request {
         self.generation = self.generation.wrapping_add(1);
         self.running = true;
         if self.id.is_empty() {
@@ -59,7 +64,10 @@ impl Session {
             source,
             backend,
             restart: false,
-            input: PreviewContext { events: event.into_iter().collect(), ..Default::default() },
+            input: PreviewContext {
+                events: event.into_iter().collect(),
+                ..Default::default()
+            },
         }
     }
     pub fn reset(&mut self) {

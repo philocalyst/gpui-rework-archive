@@ -1,27 +1,31 @@
 use crate::{App, BorrowAppContext};
 
-/// A marker trait for one application-wide value stored in GPUI's global state.
+/// Marks a type that can occupy one application-wide state slot in [`App`].
 ///
-/// This trait exists to provide type-safe access to globals by ensuring only
-/// types that implement [`Global`] can be used with the accessor methods. For
-/// example, trying to access a global with a type that does not implement
-/// [`Global`] will result in a compile-time error.
+/// A global is one value per app, keyed by its concrete type. It is useful for
+/// state shared across unrelated entities, such as configuration or a service
+/// handle. Prefer an [`Entity`](crate::Entity) when the value has its own
+/// lifecycle, needs weak handles, or must notify independently of other
+/// globals.
 ///
-/// Implement this on types you want to store in the context as a global. The
-/// [`'static`](https://doc.rust-lang.org/std/keyword.static.html) bound means the
-/// value cannot borrow a short-lived context; it can still contain interior
-/// mutability when that is appropriate for the global's ownership model.
+/// Implement the empty trait, then install a value with [`App::set_global`]:
 ///
-/// ## Restricting Access to Globals
+/// ```
+/// use gpui::{App, Global};
 ///
-/// In some situations you may need to store some global state, but want to
-/// restrict access to reading it or writing to it.
+/// struct Settings { font_size: f32 }
+/// impl Global for Settings {}
 ///
-/// In these cases, Rust's visibility system can be used to restrict access to
-/// a global value. For example, you can create a private struct that implements
-/// [`Global`] and holds the global state. Then create a newtype struct that wraps
-/// the global type and create custom accessor methods to expose the desired subset
-/// of operations.
+/// fn configure(cx: &mut App) {
+///     cx.set_global(Settings { font_size: 16.0 });
+///     assert_eq!(cx.global::<Settings>().font_size, 16.0);
+/// }
+/// ```
+///
+/// The `'static` bound excludes borrowed data with a shorter lifetime. It does
+/// not require the value to live until process exit; the app owns and drops it.
+/// To restrict access, keep the global type private and expose selected
+/// operations through your own functions or a public wrapper.
 pub trait Global: 'static {
     // This trait is intentionally left empty, by virtue of being a marker trait.
     //
@@ -29,7 +33,7 @@ pub trait Global: 'static {
     // to types that implement `Global`.
 }
 
-/// A trait for reading a global value from the context.
+/// A typed convenience trait for reading a global value from an [`App`].
 pub trait ReadGlobal {
     /// Returns the global instance of the implementing type.
     ///
@@ -44,11 +48,20 @@ impl<T: Global> ReadGlobal for T {
     }
 }
 
-/// A trait for updating a global value in the context.
+/// A typed convenience trait for setting or updating a global through an app context.
+///
+/// `update_global` temporarily leases the value to the callback and schedules
+/// observers for that type when it is restored. `set_global` replaces the
+/// stored value and schedules the same observers. Use the callback's context
+/// to access other app state without holding a direct borrow of the global.
 pub trait UpdateGlobal {
     /// Updates the global instance of the implementing type using the provided closure.
     ///
     /// This method provides the closure with mutable access to the context and the global simultaneously.
+    /// It panics if the value is missing or already being updated. Use
+    /// [`BorrowAppContext::update_default_global`] to initialize a missing value
+    /// from [`Default`]. During the callback, access this global through the
+    /// supplied value; reading it again through the context panics.
     fn update_global<C, F, R>(cx: &mut C, update: F) -> R
     where
         C: BorrowAppContext,

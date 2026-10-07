@@ -14,17 +14,22 @@ use crate::{
 };
 use std::{collections::VecDeque, time::Duration};
 
-#[allow(missing_docs)]
+/// How much frame-timing information to paint over the application.
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
 pub enum DebugFrameOverlayMode {
+    /// Draw no overlay.
     #[default]
     Hidden,
+    /// Show only the latest draw duration.
     Minimal,
+    /// Show the current draw duration, the 99th- and 90th-percentile durations,
+    /// the maximum, and the total frame count. Percentiles and maximum use the
+    /// retained rolling sample window; frame count is cumulative.
     Full,
 }
 
 impl DebugFrameOverlayMode {
-    /// Returns the next mode in the Hidden → FrameTime → Detailed cycle.
+    /// Cycle from `Hidden` to `Minimal` to `Full`, then back to `Hidden`.
     pub fn next(self) -> Self {
         match self {
             Self::Hidden => Self::Minimal,

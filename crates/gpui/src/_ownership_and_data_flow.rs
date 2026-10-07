@@ -34,6 +34,16 @@
 //! Create an entity with [`AppContext::new`](crate::AppContext::new). Its builder
 //! receives a context before returning the entity's initial value.
 //!
+//! `Application` configures the platform and starts its run loop; it is not
+//! the state context passed to callbacks. `App` is the live, synchronous state
+//! context. `Context<T>` is the same app access plus the identity and operations
+//! of the entity being constructed or updated. For work that crosses an
+//! `.await`, use [`AsyncApp`](crate::AsyncApp) or
+//! [`AsyncWindowContext`](crate::AsyncWindowContext): each operation reacquires
+//! access for its callback, so an entity or app borrow never spans the wait.
+//! These async handles are weak references to the app and cannot keep a shut
+//! down application alive.
+//!
 //! A lease is exclusive. Reading or updating the same entity from inside its
 //! update closure panics. Use the closure's `&mut T` instead of reaching through
 //! another handle to the same value. Updating a different entity is allowed,
@@ -78,14 +88,24 @@
 //! Both return a [`Subscription`](crate::Subscription). Dropping it cancels the
 //! relationship. Store it on the consumer when the relationship belongs to that
 //! consumer. [`Subscription::detach`](crate::Subscription::detach) leaves the
-//! callback registered without a cancellation handle. Callbacks installed by an
-//! entity context retain a weak target, so detaching does not keep that entity alive.
+//! callback registered without a cancellation handle. The callbacks installed
+//! by `Context::observe` and `Context::subscribe` hold their consumer weakly.
+//! Detaching those callbacks does not keep the consumer alive, unless the
+//! closure itself captures a strong handle.
 //!
-//! Registration is deferred until effect processing. Install a subscription in
-//! one app update before emitting an event in a later update. This also means an
-//! assertion later in the same update closure can run before its queued listener callback.
+//! [`Context::observe_self`](crate::Context::observe_self) and
+//! [`Context::subscribe_self`](crate::Context::subscribe_self) hold their target
+//! strongly. Keep their subscriptions on a separate owner. Storing either
+//! subscription on its own target creates a cycle: the target owns the
+//! subscription, whose callback owns the target.
 //!
-//! ## Let asynchronous work outlive a view
+//! Registration and event delivery are deferred until effect processing. When
+//! both are queued in one update, registration must come before emission; the
+//! queue activates the subscriber before delivering that event. The listener
+//! still runs after the update closure returns, so an assertion later in that
+//! closure runs before the queued callback.
+//!
+//! ## Reacquire state after waiting
 //!
 //! A [`WeakEntity`](crate::WeakEntity) identifies an entity without retaining it.
 //! [`WeakEntity::upgrade`](crate::WeakEntity::upgrade) returns `None` after the

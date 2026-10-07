@@ -1,8 +1,41 @@
-//! Asset registration and decoded image buffers used by GPUI.
+//! Asset bytes and decoded image frames used by GPUI.
 //!
-//! [`AssetRegistry`] maps stable paths to embedded bytes, owned bytes, or loaders that defer I/O
-//! until the path is requested. [`RenderImage`] is the decoded, possibly animated image handed to
-//! the renderer. Paths are application-defined; this module does not normalize or access them.
+//! There are two related but distinct layers. [`crate::AssetRegistry`] maps application-defined path
+//! keys to bytes, either already available or provided by a [`crate::AssetEntry::OnDemand`] loader.
+//! [`crate::AssetSource`] is a compatibility adapter for discovering such entries; its list and load
+//! methods do not define a path syntax or normalize names. For typed asynchronous resources, see
+//! [`crate::Asset`], which asks the application to load a cloneable output from a source key.
+//!
+//! The image decoder turns bytes into [`image::Frame`] values, and [`crate::RenderImage`] gives the
+//! renderer decoded BGRA frames with per-frame delays. Asset registration/loading happens before
+//! image decoding; decoding does not occur in [`crate::RenderImage::new`], which accepts frames that are
+//! already decoded. SVG bytes follow a separate parse-then-rasterize path through
+//! [`crate::SvgRenderer`].
+//!
+//! Keep asset keys stable and choose loading policy by when work is safe:
+//!
+//! * Use preloaded or embedded bytes when loading must not block a frame.
+//! * Use [`crate::AssetEntry::OnDemand`] for deferred synchronous loading only when the caller can
+//!   tolerate the loader's latency. [`crate::AssetRegistry::load`] invokes it inline.
+//! * Use [`crate::Asset`] when loading is asynchronous and should be scheduled by GPUI. The
+//!   returned [`crate::Task`] is the cancellation/ownership handle for that work.
+//!
+//! Duplicate paths are errors from [`crate::AssetRegistry::insert`] and are accumulated by
+//! [`crate::AssetRegistry::extend`]. A missing key returns `None`; it is distinct from an I/O error
+//! returned by a [`crate::AssetSource`] implementation. The convenience iterators on `AssetSource`
+//! currently log or suppress source errors as they adapt the source into registry entries, so
+//! use direct `load` when the caller must handle those errors.
+//!
+//! ```
+//! use std::borrow::Cow;
+//! use gpui::AssetRegistry;
+//!
+//! let mut assets = AssetRegistry::default();
+//! assets.insert("icons/check.svg", Cow::Borrowed(b"<svg/>".as_slice()))?;
+//! let bytes = assets.load("icons/check.svg").expect("registered asset");
+//! assert_eq!(bytes.as_ref(), b"<svg/>");
+//! # Ok::<(), gpui::DuplicateAssetPath>(())
+//! ```
 
 use crate::{DevicePixels, Pixels, Result, SharedString, Size, size};
 use gpui_util::ResultExt;
@@ -20,17 +53,24 @@ use std::{
     },
 };
 
-/// One way to store a set of assets for gpui to access.
-/// Can be provided to [`AssetRegistry`] to load asset binaries on-demand.
-/// Alternatively, assets can be provided pre-loaded to the registry while still using this api (though there are newer apis to do so).
+/// Compatibility interface for listing and loading application asset paths.
 ///
-/// Generally considered deprecated for new usages since [`AssetRegistry`] has more specific
-/// support for bundled, pre-loaded, and on-demand asset loading.
+/// Prefer inserting entries directly into [`AssetRegistry`] when the application already has
+/// the paths and bytes. A source is useful when it owns a discoverable path set. `load` and
+/// `list` return errors, but [`Self::iter_preloaded`] and [`Self::iter_ondemand`] are convenience
+/// adapters that cannot report those errors to their iterator consumer: the former skips failed
+/// entries, and the latter logs load errors when a deferred entry is requested.
 pub trait AssetSource: 'static + Send + Sync {
-    /// Load the given asset from the source path.
+    /// Load the exact source-specific path, returning `None` when it is absent.
+    ///
+    /// Return `Err` for an access or decoding problem. This path is interpreted by the source;
+    /// GPUI does not normalize or join it.
     fn load(&self, path: &str) -> Result<Option<Cow<'static, [u8]>>>;
 
-    /// List the assets at the given path.
+    /// List asset names under a source-specific path.
+    ///
+    /// The returned names become registry keys, so they must match the strings accepted by
+    /// [`Self::load`]. GPUI does not impose whether this list is recursive.
     fn list(&self, path: &str) -> Result<Vec<SharedString>>;
 
     /// Iterates over all paths (via [`Self::list`]) and loads each asset in turn (via [`Self::load`]),
@@ -74,15 +114,18 @@ impl AssetSource for () {
     }
 }
 
-/// Alias for a Cow byte vec, representing an asset that has been loaded.
+/// Loaded asset bytes that may be borrowed from static storage or owned.
 pub type AssetData = Cow<'static, [u8]>;
 /// A thread-safe callback that loads an asset on demand.
 ///
-/// Returning `None` means that the asset is unavailable. The callback may perform I/O, so a
-/// caller should avoid invoking [`AssetRegistry::load`] on a latency-sensitive UI path when using
-/// an on-demand entry.
+/// Returning `None` means that the asset is unavailable. The callback has no error channel and
+/// may perform synchronous I/O, so use it only when missing data can be represented as `None` and
+/// the caller can tolerate its latency.
 pub type FnAssetLoader = Arc<dyn Fn() -> Option<AssetData> + 'static + Send + Sync>;
 /// The storage policy for one [`AssetRegistry`] entry.
+///
+/// `PreLoaded` bytes are available immediately. `OnDemand` invokes its loader synchronously on
+/// each call to [`AssetRegistry::load`]; the registry does not memoize the callback result.
 pub enum AssetEntry {
     /// The bytes are already available, either borrowed from the binary or owned by the registry.
     PreLoaded(AssetData),
@@ -103,14 +146,20 @@ where
     }
 }
 
-/// Caused when multiple assets are registered to the [`AssetRegistry`] with the same path.
+/// Returned when multiple assets are registered to the [`AssetRegistry`] with the same path.
+///
+/// The conflicting path is included in the formatted error; this type does not expose a separate
+/// path accessor.
 #[derive(thiserror::Error, Debug)]
 #[error("An asset with the pathkey {0:?} already exists")]
 pub struct DuplicateAssetPath(SharedString);
 
-/// Collection of assets known to the [`App`](crate::App).
+/// Collection of named byte assets used by GPUI services such as [`crate::SvgRenderer`].
 ///
-/// Users can provide assets via [`AssetSource`] or directly via `from_iter`, `insert`, `extend_from_source`, or `extend_from_embed`.
+/// Registry keys are opaque application-defined strings. `AssetRegistry` does not join path
+/// components, canonicalize separators, or read the filesystem. Build it from an iterator or
+/// insert entries explicitly; converting an [`AssetSource`] creates deferred entries from the
+/// source's listed paths. A requested path not present in the registry returns `None`.
 #[derive(Default)]
 pub struct AssetRegistry {
     entries: BTreeMap<SharedString, AssetEntry>,
@@ -133,6 +182,10 @@ impl From<Arc<dyn AssetSource>> for AssetRegistry {
     }
 }
 
+/// Builds a registry from path-entry pairs.
+///
+/// Duplicate path errors are logged and ignored during collection; the first inserted entry
+/// remains in the registry. Use [`AssetRegistry::extend`] when the caller needs those errors.
 impl<KeyType, ValueType> FromIterator<(KeyType, ValueType)> for AssetRegistry
 where
     KeyType: AsRef<str>,
@@ -148,8 +201,11 @@ where
 }
 
 impl AssetRegistry {
-    /// Inserts a single asset into the registry. The asset can be static (embedded/bundled, `&'static [u8]`), pre-loaded ([`Vec<u8>`]), or loaded-on-demand ([`FnAssetLoader`]).
-    /// If there is already an entry at the provided key/path, an error is returned.
+    /// Inserts a single static, preloaded, or deferred byte entry.
+    ///
+    /// The path is stored exactly as supplied. A duplicate key returns
+    /// [`DuplicateAssetPath`] and leaves the existing entry in place. On-demand callbacks run
+    /// synchronously when [`Self::load`] is called.
     pub fn insert(
         &mut self,
         path: impl Into<SharedString>,
@@ -163,10 +219,10 @@ impl AssetRegistry {
         Ok(())
     }
 
-    /// Returns the asset data for a given path/key. If the asset is static/embedded or pre-loaded,
-    /// this will return [`Cow::Borrowed(&'this [u8])`] (the data may be 'static lifetime aka embedded/bundled or simply owned by the registry).
-    /// If the asset is load-on-demand, the loader is queried and its returned bytes are passed
-    /// through as an owned or borrowed [`Cow`] value.
+    /// Returns bytes for an exact path key, invoking an on-demand loader inline if necessary.
+    ///
+    /// `None` means the key is absent or its loader returned no asset. A loader that performs
+    /// I/O can block the calling thread; do not call it from latency-sensitive rendering work.
     pub fn load<'this>(&'this self, path: impl AsRef<str>) -> Option<Cow<'this, [u8]>> {
         match self.entries.get(path.as_ref())? {
             AssetEntry::PreLoaded(Cow::Borrowed(data)) => Some(Cow::Borrowed(data)),
@@ -202,10 +258,12 @@ impl AssetRegistry {
         result
     }
 
-    /// Convenience method to create an asset iterator over paths and asset-data for
-    /// [`RustEmbed`](rust_embed::RustEmbed), since the crate only provides an iterator over file names.
-    ///
-    /// Can be provided as the input to [`extend`].
+/// Creates an iterator over paths and embedded asset bytes from a
+/// [`rust_embed::RustEmbed`] type.
+///
+/// RustEmbed supplies file names separately from their bytes, so this method resolves each name
+/// with `T::get`. Names that no longer resolve are skipped. The iterator can be passed to
+/// [`Self::extend`].
     #[cfg(feature = "embedded-assets")]
     pub fn iter_embed<T: rust_embed::RustEmbed>()
     -> impl Iterator<Item = (Cow<'static, str>, AssetEntry)> + 'static {
@@ -221,6 +279,9 @@ impl AssetRegistry {
 pub struct ImageId(pub usize);
 
 /// Identifies one frame of one [`RenderImage`] in a sprite-atlas request.
+///
+/// Use the image's process-local [`ImageId`] and a zero-based frame index. This key is meaningful
+/// only while that decoded image remains available in the process.
 #[derive(PartialEq, Eq, Hash, Clone)]
 pub struct RenderImageParams {
     /// The image to draw.
@@ -229,11 +290,13 @@ pub struct RenderImageParams {
     pub frame_index: usize,
 }
 
-/// A decoded image, stored in the renderer's BGRA byte order.
+/// Decoded image frames in the renderer's BGRA byte order.
 ///
 /// A value can contain multiple frames. Out-of-range frame queries return an empty/default value;
 /// callers that need to distinguish a missing frame can compare `frame_index` with
-/// [`Self::frame_count`].
+/// [`Self::frame_count`]. The ID is process-local and identifies this decoded image for renderer
+/// cache requests; it is not a persistent asset key. Frame dimensions are device pixels, while
+/// display sizing additionally accounts for the image scale factor.
 pub struct RenderImage {
     /// The ID associated with this image
     pub id: ImageId,
@@ -251,7 +314,10 @@ impl PartialEq for RenderImage {
 impl Eq for RenderImage {}
 
 impl RenderImage {
-    /// Create a new image from the given data.
+    /// Create an image from already-decoded frames.
+    ///
+    /// This does not decode encoded file bytes. New images start with a scale factor of `1.0` and
+    /// receive a process-local [`ImageId`]. An empty frame collection is allowed.
     pub fn new(data: impl Into<SmallVec<[Frame; 1]>>) -> Self {
         static NEXT_ID: AtomicUsize = AtomicUsize::new(0);
 
@@ -262,14 +328,16 @@ impl RenderImage {
         }
     }
 
-    /// Convert this image into a byte slice.
+    /// Return a frame's raw BGRA pixel bytes, if the frame exists.
+    ///
+    /// The slice borrows from this `RenderImage`; its validity is tied to `self`.
     pub fn as_bytes(&self, frame_index: usize) -> Option<&[u8]> {
         self.data
             .get(frame_index)
             .map(|frame| frame.buffer().as_raw().as_slice())
     }
 
-    /// Get the size of this image, in pixels.
+    /// Return a frame's dimensions in device pixels, or a zero size if the frame is absent.
     pub fn size(&self, frame_index: usize) -> Size<DevicePixels> {
         self.data
             .get(frame_index)
@@ -296,7 +364,8 @@ impl RenderImage {
             .unwrap_or(Delay::from_numer_denom_ms(100, 1))
     }
 
-    /// Get the number of frames for this image.
+    /// Return the number of decoded frames. Compare an index with this count before relying on
+    /// [`Self::size`] or [`Self::as_bytes`] to distinguish a missing frame from an empty result.
     pub fn frame_count(&self) -> usize {
         self.data.len()
     }

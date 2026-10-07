@@ -2,7 +2,11 @@
 
 use std::fmt::{Display, Formatter};
 
-/// Generates a URL-friendly slug from heading text (e.g. "Hello World" → "hello-world").
+/// Generates a slug by lowercasing Unicode letters and digits and replacing
+/// spaces with hyphens (for example, `"Hello World"` becomes `"hello-world"`).
+///
+/// Other punctuation is removed. Repeated spaces produce repeated hyphens; the
+/// result is not guaranteed to be unique.
 pub fn generate_heading_slug(text: &str) -> String {
     text.trim()
         .chars()
@@ -36,8 +40,10 @@ fn has_uri_scheme(url: &str) -> bool {
     false
 }
 
-/// Splits a relative URL into its path and `#fragment` parts.
-/// Absolute URLs are returned as-is with no fragment.
+/// Splits a local URL at its first `#`, returning the path and nonempty fragment.
+///
+/// Inputs beginning with a URI scheme are returned unchanged with no fragment.
+/// A trailing `#` also produces no fragment. Query text is left in the path.
 pub fn split_local_url_fragment(url: &str) -> (&str, Option<&str>) {
     if has_uri_scheme(url) {
         return (url, None);
@@ -59,7 +65,12 @@ pub fn split_local_url_fragment(url: &str) -> (&str, Option<&str>) {
     }
 }
 
-/// Parse a `#L<line>` or `#L<line>-L<column>` source fragment.
+/// Parses a source-position fragment (without the leading `#`) into zero-based
+/// `(row, column)` coordinates.
+///
+/// Accepts forms such as `L12`, `L12-L20`, `L12,4`, `L12:4`, and `L12C4`; a
+/// range contributes only its starting line/column. Missing, zero, or invalid column
+/// values become column zero. A line must parse as a positive `u32`.
 pub fn source_position_from_fragment(fragment: &str) -> Option<(u32, u32)> {
     let fragment = fragment.strip_prefix('L').unwrap_or(fragment);
     let fragment = fragment

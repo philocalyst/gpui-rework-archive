@@ -33,6 +33,11 @@ impl Log for ConsoleLogger {
     fn flush(&self) {}
 }
 
+/// Installs panic reporting and forwards Rust log records to the browser console.
+///
+/// Call once during web startup, before creating the GPUI platform. Panic-hook installation is
+/// idempotent; if another logger already owns the global `log` facade, logger installation is left
+/// unchanged. Debug builds emit through `Debug`, release builds through `Info`.
 pub fn init_logging() {
     // Without this hook, panics abort with an opaque "unreachable executed"
     // in the browser console instead of a message and backtrace.

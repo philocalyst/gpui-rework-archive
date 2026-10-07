@@ -6,7 +6,11 @@ static REDACT_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| {
     regex::Regex::new(r#"([A-Z_][A-Z0-9_]*)=("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\S+)"#).unwrap()
 });
 
-/// Whether a given environment variable name should have its value redacted
+/// Returns whether an environment variable name should have its value redacted.
+///
+/// Matching is case-sensitive and uses suffixes such as `KEY`, `TOKEN`,
+/// `PASSWORD`, and `SECRET`; callers should pass the variable name without an
+/// assignment or value.
 pub fn should_redact(env_var_name: &str) -> bool {
     const REDACTED_SUFFIXES: &[&str] = &[
         "KEY",
@@ -22,7 +26,11 @@ pub fn should_redact(env_var_name: &str) -> bool {
         .any(|suffix| env_var_name.ends_with(suffix))
 }
 
-/// Redact a string which could include a command with environment variables
+/// Redacts secret-like assignments in a command string for diagnostics.
+///
+/// This is a best-effort textual filter, not a shell parser: it recognizes
+/// uppercase variable names followed by `=` and a quoted or non-whitespace
+/// value. Other spellings may pass through unchanged.
 pub fn redact_command(command: &str) -> String {
     REDACT_REGEX
         .replace_all(command, |caps: &regex::Captures| {

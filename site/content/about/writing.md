@@ -27,8 +27,8 @@ when a published link should survive a heading change. Rustdoc-style API links
 resolve to exact reference pages and generate links back to this chapter.
 
 Add the program to `site/examples.toml`. That manifest names the title, source,
-preview, run command, and exact API targets. The generator rejects missing or
-duplicate step IDs, empty chapters, and unknown API names. It generates the
+preview, run command, and exact API targets. The generator rejects empty or
+duplicate anchors, empty chapters, and unknown API names. It generates the
 page, clean source, Cargo download, and API-to-step index.
 
 ```sh
@@ -40,12 +40,14 @@ python3 site/scripts/build.py --with-api
 ## Share the constructor
 
 Define `component(window, cx)` to create the example's root entity. The native
-entry point calls `support::run(component)`. The generator removes that small
-launcher for the Miri workbench and keeps the component unchanged. Use real
-GPUI entities, listeners, tasks, and elements in both paths.
+entry point calls `support::run(component)`. Use the actual GPUI entities,
+listeners, tasks, and elements in the walkthrough source; do not substitute
+mock APIs to make an example easier to display. The generator owns the published
+chapter and source downloads, so regenerate them after changing comments or code.
 
-Before accepting a walkthrough, run its Cargo example and its Miri component.
-Make the suggested edit, exercise the input, and check the resulting frame.
+Before accepting a walkthrough, run its Cargo example and check the local
+preview. Verify any live-editing instructions against the runtime currently
+shipped; the native Miri companion is not a browser-portable runtime.
 
 ## Keep explanations at the right depth
 
@@ -58,12 +60,13 @@ Use meaningful links where a term becomes useful. Add a note for context, a tip
 for a shortcut, and a warning for a specific consequence. A warning should say
 what triggers the problem and what the reader can do about it.
 
-## Edit before accepting a score
+## Read against the implementation
 
 Read each sentence against the implementation. Remove claims that merely sound
 plausible, repeated signatures, decorative importance, and unsupported performance
-promises. Checkers can flag passages for another read; their output belongs
-beside the compilation, link, accessibility, and usability evidence.
+promises. Compile the examples, follow the links, use the keyboard controls,
+and make the edits the page suggests. Revise any sentence whose claim or
+instructions fail that check.
 
 The [reference survey](@/about/references.md) records the systems that informed
 this framework. The authoring contract and parser tests live in the repository's

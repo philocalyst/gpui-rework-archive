@@ -91,36 +91,34 @@ pub struct UniformListScrollHandle(pub Rc<RefCell<UniformListScrollState>>);
 pub enum ScrollStrategy {
     /// Place the element at the top of the list's viewport.
     Top,
-    /// Attempt to place the element in the middle of the list's viewport.
-    /// May not be possible if there's not enough list items above the item scrolled to:
-    /// in this case, the element will be placed at the closest possible position.
+    /// Center the element, clamping the scroll position at the list's ends.
     Center,
-    /// Attempt to place the element at the bottom of the list's viewport.
-    /// May not be possible if there's not enough list items above the item scrolled to:
-    /// in this case, the element will be placed at the closest possible position.
+    /// Align the element with the bottom edge, clamping at the list's ends.
     Bottom,
-    /// If the element is not visible attempt to place it at:
-    /// - The top of the list's viewport if the target element is above currently visible elements.
-    /// - The bottom of the list's viewport if the target element is above currently visible elements.
+    /// Keep a visible element in place. Otherwise align it with the top edge
+    /// when it lies above the viewport, or the bottom edge when it lies below.
     Nearest,
 }
 
+/// An item-scroll request consumed during the uniform list's next prepaint.
 #[derive(Clone, Copy, Debug)]
-#[allow(missing_docs)]
 pub struct DeferredScrollToItem {
     /// The item index to scroll to
     pub item_index: usize,
     /// The scroll strategy to use
     pub strategy: ScrollStrategy,
-    /// The offset in number of items
+    /// Inset from the top edge in item heights, used by `Top` and `Center`.
     pub offset: usize,
+    /// Align even if the item is already visible. `Nearest` still leaves visible items in place.
     pub scroll_strict: bool,
 }
 
+/// Persistent geometry and pending scroll requests shared by a uniform list and its handle.
 #[derive(Clone, Debug, Default)]
-#[allow(missing_docs)]
 pub struct UniformListScrollState {
+    /// Pixel-offset scroll state populated by the list.
     pub base_handle: ScrollHandle,
+    /// Request awaiting consumption by the next list prepaint.
     pub deferred_scroll_to_item: Option<DeferredScrollToItem>,
     /// Size of the item, captured during last layout.
     pub last_item_size: Option<ItemSize>,
@@ -184,11 +182,10 @@ impl UniformListScrollHandle {
     /// This uses non-strict scrolling: if the item is already visible within the offset region,
     /// no scrolling occurs.
     ///
-    /// The offset parameter shrinks the effective viewport by the specified number of items
-    /// from the corresponding edge, then applies the scroll strategy within that reduced viewport:
-    /// - `ScrollStrategy::Top`: Shrinks from top, positions item at the new top
-    /// - `ScrollStrategy::Center`: Shrinks from top, centers item in the reduced viewport
-    /// - `ScrollStrategy::Bottom`: Shrinks from bottom, positions item at the new bottom
+    /// `offset` reserves space above the target, measured in item heights.
+    /// `Top` aligns below that inset; `Center` centers in the remaining viewport.
+    /// `Bottom` ignores the offset. `Nearest` uses the inset when deciding whether
+    /// the target is above the visible region.
     pub fn scroll_to_item_with_offset(&self, ix: usize, strategy: ScrollStrategy, offset: usize) {
         self.0.borrow_mut().deferred_scroll_to_item = Some(DeferredScrollToItem {
             item_index: ix,
@@ -203,11 +200,9 @@ impl UniformListScrollHandle {
     /// This uses strict scrolling: the item will always be scrolled to match the strategy position,
     /// even if it's already visible.
     ///
-    /// The offset parameter shrinks the effective viewport by the specified number of items
-    /// from the corresponding edge, then applies the scroll strategy within that reduced viewport:
-    /// - `ScrollStrategy::Top`: Shrinks from top, positions item at the new top
-    /// - `ScrollStrategy::Center`: Shrinks from top, centers item in the reduced viewport
-    /// - `ScrollStrategy::Bottom`: Shrinks from bottom, positions item at the new bottom
+    /// `offset` reserves space above the target, measured in item heights.
+    /// `Top` aligns below that inset; `Center` centers in the remaining viewport.
+    /// `Bottom` ignores the offset. `Nearest` still leaves a visible item in place.
     pub fn scroll_to_item_strict_with_offset(
         &self,
         ix: usize,

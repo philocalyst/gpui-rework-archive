@@ -11,11 +11,12 @@ use std::{borrow::Cow, fmt, path::Path};
 #[cfg(windows)]
 use std::{path::PathBuf, sync::LazyLock};
 
-/// Shell configuration to open the terminal with.
+/// Describes which shell executable and arguments a terminal should start.
 #[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq, Eq, JsonSchema, Hash)]
 #[serde(rename_all = "snake_case")]
 pub enum Shell {
-    /// Use the system's default terminal configuration in /etc/passwd
+    /// Resolve the platform's configured shell when used. Unix reads `$SHELL`
+    /// and falls back to `/bin/sh`; Windows uses GPUI's system-shell selector.
     #[default]
     System,
     /// Use a specific program with no arguments.
@@ -26,7 +27,7 @@ pub enum Shell {
         program: String,
         /// The arguments to pass to the program.
         args: Vec<String>,
-        /// An optional string to override the title of the terminal tab
+        /// Optional terminal-tab title override; it is not a process argument.
         title_override: Option<String>,
     },
 }
@@ -41,7 +42,7 @@ impl Shell {
         }
     }
 
-    /// Return the executable and configured arguments as owned values.
+    /// Return an owned executable name and a borrow of configured arguments.
     pub fn program_and_args(&self) -> (String, &[String]) {
         match self {
             Shell::Program(program) => (program.clone(), &[]),
@@ -88,7 +89,9 @@ pub enum ShellKind {
     Elvish,
 }
 
-/// Return the configured shell executable for the current platform.
+/// Return `$SHELL` on Unix when set, otherwise `/bin/sh`; on Windows return the
+/// system shell selected by GPUI utilities. The Unix value is not checked for
+/// existence here.
 pub fn get_system_shell() -> String {
     if cfg!(windows) {
         get_windows_system_shell()
@@ -97,7 +100,7 @@ pub fn get_system_shell() -> String {
     }
 }
 
-/// Return the platform's default shell without user preference overrides.
+/// Return the platform's default shell without the Unix `$SHELL` override.
 pub fn get_default_system_shell() -> String {
     if cfg!(windows) {
         get_windows_system_shell()
@@ -106,8 +109,8 @@ pub fn get_default_system_shell() -> String {
     }
 }
 
-/// Get the default system shell, preferring bash on Windows.
-/// Return the default shell, preferring Bash when it is installed.
+/// Return `/bin/sh` on Unix. On Windows, prefer a discovered Git Bash or Scoop
+/// Bash installation and otherwise use the selected Windows system shell.
 pub fn get_default_system_shell_preferring_bash() -> String {
     #[cfg(windows)]
     {
@@ -163,7 +166,8 @@ pub fn get_windows_bash() -> Option<String> {
     (*BASH).clone()
 }
 
-/// Return PowerShell or the Windows command interpreter.
+/// Return GPUI's selected Windows system shell on Windows. On non-Windows
+/// targets this helper returns the literal fallback `cmd.exe`.
 pub fn get_windows_system_shell() -> String {
     #[cfg(windows)]
     return gpui_util::get_windows_system_shell();
@@ -191,36 +195,17 @@ impl fmt::Display for ShellKind {
 }
 
 impl ShellKind {
-    /// Construct a shell kind from an executable path and target platform.
-    /// Select the host's default shell kind.
+    /// Classify the current platform's selected shell executable.
     pub fn system() -> Self {
         Self::new(get_system_shell(), cfg!(windows))
     }
 
-    /// Returns whether this shell's command chaining syntax can be parsed by brush-parser.
-    ///
-    /// This is used to determine if we can safely parse shell commands to extract sub-commands
-    /// for security purposes (e.g., preventing shell injection in "always allow" patterns).
-    ///
-    /// The brush-parser handles `;` (sequential execution) and `|` (piping), which are
-    /// supported by all common shells. It also handles `&&` and `||` for conditional
-    /// execution, `$()` and backticks for command substitution, and process substitution.
-    ///
-    /// # Shell Notes
-    ///
-    /// - **Nushell**: Uses `;` for sequential execution. The `and`/`or` keywords are boolean
-    ///   operators on values (e.g., `$true and $false`), not command chaining operators.
-    /// - **Elvish**: Uses `;` to separate pipelines, which brush-parser handles. Elvish does
-    ///   not have `&&` or `||` operators. Its `and`/`or` are special commands that operate
-    ///   on values, not command chaining (e.g., `and $true $false`).
-    /// - **Rc (Plan 9)**: Uses `;` for sequential execution and `|` for piping. Does not
-    ///   have `&&`/`||` operators for conditional chaining.
-    ///   All current shell variants are listed here because brush-parser can handle
-    ///   their syntax. If a new `ShellKind` variant is added, evaluate whether
-    ///   brush-parser can safely parse its command chaining syntax before including
-    ///   it. Omitting a variant will cause `tool_permissions::from_input` to deny
-    ///   terminal commands that have `always_allow` patterns configured.
-    /// Return whether this shell supports POSIX `&&` and `;` chaining syntax.
+    /// Return whether the terminal-command parser supports this shell kind when
+    /// extracting chained commands for permission checks. This reports parser
+    /// support; it does not mean the shell uses POSIX operators. For example,
+    /// Nushell and Elvish use `;` for command sequencing and do not use `&&`.
+    /// Every current [`ShellKind`] returns `true`; re-evaluate parser support
+    /// when adding a new variant.
     pub fn supports_posix_chaining(&self) -> bool {
         matches!(
             self,
@@ -238,7 +223,8 @@ impl ShellKind {
         )
     }
 
-    /// Classify `program`; `is_windows` selects Windows-specific fallbacks.
+    /// Classify `program` by its file stem (case-sensitive). Unknown names fall
+    /// back to PowerShell on Windows and POSIX syntax elsewhere.
     pub fn new(program: impl AsRef<Path>, is_windows: bool) -> Self {
         let program = program.as_ref();
         let program = program
@@ -265,8 +251,10 @@ impl ShellKind {
         }
     }
 
-    /// Convert `input` into the variable syntax accepted by this shell.
-    /// Convert an input string into a shell variable assignment.
+    /// Convert a leading `$NAME` or `${NAME}` to this shell's environment
+    /// variable syntax where supported. Other shells leave the input unchanged;
+    /// this does not parse arbitrary expressions or default-value forms such as
+    /// `${NAME:-fallback}`.
     pub fn to_shell_variable(self, input: &str) -> String {
         match self {
             Self::PowerShell | Self::Pwsh => Self::to_powershell_variable(input),
@@ -395,7 +383,9 @@ impl ShellKind {
         }
     }
 
-    /// Build argv for running `combined_command`, optionally in interactive mode.
+    /// Build the arguments used to run `combined_command`. `interactive` adds
+    /// `-i` for shell kinds using the `-c` interface; it has no effect on
+    /// PowerShell or `cmd.exe` arguments.
     pub fn args_for_shell(&self, interactive: bool, combined_command: String) -> Vec<String> {
         match self {
             ShellKind::PowerShell | ShellKind::Pwsh => vec!["-C".to_owned(), combined_command],
@@ -698,7 +688,8 @@ impl ShellKind {
         })
     }
 
-    /// Split shell input into arguments according to this shell's quoting rules.
+    /// Split input with `shlex` quoting rules. Returns `None` for malformed or
+    /// unsupported quoting; this does not parse each shell's full language.
     pub fn split(&self, input: &str) -> Option<Vec<String>> {
         shlex::split(input)
     }

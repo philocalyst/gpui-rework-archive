@@ -4,21 +4,25 @@ mod support;
 // ## Give the row a height {#frame}
 // The layout has a header above two panes. Its root is a column of [`div`]
 // elements; the content row takes the height left after the header, padding,
-// and gap. `min_h_0` allows that row to shrink when the window is short.
+// and gap. `min_h_0` removes the row's automatic minimum-content floor, so it
+// can shrink when the window is short instead of forcing overflow.
 //
 // [`Styled`] builders describe constraints for the layout engine. Spacing such
-// as `p_6` and `gap_4` follows the rem scale; `px(40.)` requests a size in logical
-// pixels. Neither unit should be multiplied by the display scale factor.
+// as `p_6` and `gap_4` uses the rem scale; `px(40.)` uses logical pixels. GPUI
+// applies the window scale factor at the platform boundary, so do not multiply
+// either value by the monitor's device-pixel ratio yourself.
 
 use gpui::{AppContext, Context, IntoElement, Render, Window, div, prelude::*, px, rgb};
 
 struct LayoutDemo;
 
 // ## Let one pane yield {#constraints}
-// The right pane requests 180 logical pixels and disables shrinking. The
-// left pane uses [`Styled::flex_1`] to take the remaining space, then sets
-// [`Styled::min_w`] to zero so its content does not impose a larger minimum.
-// [`Styled::flex_shrink`] allows it to give space back when the row narrows.
+// The right pane requests 180 logical pixels and disables shrinking. The left
+// pane uses [`Styled::flex_1`] to take the remaining width, sets
+// [`Styled::min_w`] to zero so its text's min-content width does not force the
+// row wider, and permits shrinking through [`Styled::flex_shrink`]. These
+// constraints work together: flex growth allocates remaining space; shrink
+// and minimum size govern what happens when the row has too little.
 //
 // Resize the preview. The green pane yields while the orange pane keeps its
 // width. Below the fixed pane's width plus padding and gap, the row cannot fit:
@@ -75,9 +79,10 @@ impl Render for LayoutDemo {
 
 // ## Try a different constraint {#run}
 // The platform helper mounts this [`Render`] view in a window. Change the
-// fixed width from 180 to 100 and run again, then remove `min_w_0` from the
-// flexible pane. Compare where the long label wraps and which pane yields.
-// The same tree runs in the native example and browser preview.
+// fixed width from 180 to 100 and observe the flexible pane gain room. Then
+// remove `min_w_0`: the long text's minimum-content width can keep the row from
+// shrinking as far. This shows how intrinsic content size interacts with flex
+// sizing; it is not a responsive breakpoint.
 
 fn component(_window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<LayoutDemo> {
     cx.new(|_cx| LayoutDemo)

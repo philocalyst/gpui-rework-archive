@@ -11,6 +11,11 @@ use metal::Device;
 use parking_lot::Mutex;
 use std::borrow::Cow;
 
+/// Metal-backed glyph and image atlas owned by a [`super::metal_renderer::MetalRenderer`].
+///
+/// Atlas tiles are uploaded to Metal textures and remain valid while the atlas
+/// retains their backing texture. Recreating the renderer also recreates its
+/// atlas, so callers should resolve tiles through the renderer's current atlas.
 pub struct MetalAtlas(Mutex<MetalAtlasState>);
 
 impl MetalAtlas {

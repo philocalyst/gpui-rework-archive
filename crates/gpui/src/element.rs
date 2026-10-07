@@ -60,13 +60,14 @@ pub trait Element: 'static + IntoElement {
     /// Frame-local state produced after layout and reused by paint.
     type PrepaintState: 'static;
 
-    /// Return this element's identity, if it owns state that should persist across frames.
+    /// Return this element's local identity, if state should follow it across frames.
     ///
-    /// The global id can in turn be used to access state that's connected to an element with the same id across
-    /// frames. This id must be unique among children of the first containing element with an id.
+    /// GPUI appends this ID to the IDs of its containing elements to form a [`GlobalElementId`].
+    /// The local ID must be unique among siblings in the same identity scope. Return `None` for an
+    /// element that does not own cross-frame element state.
     fn id(&self) -> Option<ElementId>;
 
-    /// Return the source location used by the inspector to identify this element.
+    /// Return the construction call site shown by the inspector, when available.
     fn source_location(&self) -> Option<&'static panic::Location<'static>>;
 
     /// Request a Taffy layout node and initialize [`Self::RequestLayoutState`].
@@ -152,7 +153,12 @@ pub trait Element: 'static + IntoElement {
     }
 }
 
-/// Convert a value into a concrete or type-erased [`Element`].
+/// Convert a component value into its concrete [`Element`] representation.
+///
+/// `IntoElement` lets parents accept component values without naming each concrete return type.
+/// Use [`AnyElement`] when storing children of different concrete types in the same collection.
+/// Type erasure does not add persistent identity; the concrete element's ID determines whether
+/// GPUI can associate retained element state with it across frames.
 // docs:examples:begin
 #[doc = include_str!("docs/examples/gpui-IntoElement-1ab5061b.md")]
 // docs:examples:end
@@ -277,6 +283,12 @@ pub trait ParentElement {
 }
 
 /// A globally unique identifier for an element, used to track state across frames.
+/// The full path of [`ElementId`] values that identifies an element across frames.
+///
+/// GPUI builds this path from the IDs on the route through the element tree. It keys retained
+/// element state and accessibility nodes; it is distinct from [`LayoutId`], which is created for
+/// layout work in one frame. Application code supplies local [`ElementId`] values and normally
+/// receives this expanded path only in [`Element`] callbacks.
 #[derive(Deref, DerefMut, Clone, Default, Debug, Eq, PartialEq, Hash)]
 pub struct GlobalElementId(pub(crate) Arc<[ElementId]>);
 
@@ -749,7 +761,12 @@ where
     }
 }
 
-/// A dynamically typed element that can be used to store any element type.
+/// A type-erased [`Element`] value that can be stored in a heterogeneous child collection.
+///
+/// `AnyElement` owns the concrete element for the current frame and forwards its layout,
+/// prepaint, and paint phases. Downcast it with [`downcast_mut`](Self::downcast_mut) only when the
+/// concrete type is known. It does not supply persistent identity; the contained element's ID
+/// determines whether GPUI can associate retained element state with it on a later frame.
 pub struct AnyElement(ArenaBox<dyn ElementObject>);
 
 impl AnyElement {

@@ -41,7 +41,12 @@ struct SelectionDragVisualCaret {
     position: CaretPosition,
 }
 
-/// Internal state for an editable text element.
+/// Text, selection, input handling, and focus state for an [`EditableTextElement`].
+///
+/// The entity owns a [`UnicodeTextStorage`](super::UnicodeTextStorage); selection and edit ranges
+/// use UTF-8 byte offsets. Its [`FocusHandle`] is internal to the control, so callers observe focus
+/// through normal GPUI focus tracking rather than supplying a separate handle. Use keyed state
+/// constructors while rendering to preserve the entity across frames.
 pub struct EditableTextState {
     /// Backing text storage, usually `StringStorage`; custom storage can support long documents.
     storage: Box<dyn UnicodeTextStorage>,
@@ -81,14 +86,21 @@ pub struct EditableTextState {
 
 impl EventEmitter<CaretNotify> for EditableTextState {}
 
-/// Event emitted when an `EditableTextState` is changed.
+/// Event emitted after a text replacement or user edit in an [`EditableTextState`].
 ///
-/// This is not suitable for input sanitation (which should occur before the mutation).
+/// This event is for reacting to committed content, such as updating a search result or form model.
+/// It fires after mutation; it cannot reject or sanitize incoming text. It is emitted for user
+/// edits and programmatic replacement through [`EditableTextState::emplace`].
 pub struct TextChanged;
 impl EventEmitter<TextChanged> for EditableTextState {}
 /// Emitted when an edit exceeds an explicitly configured UTF-8 byte limit.
-/// The entire edit is rejected and the existing text/selection remain intact.
-pub struct TextLimitExceeded(pub usize);
+///
+/// The payload is the configured limit in bytes. The entire edit is rejected and the existing
+/// text and selection remain intact.
+pub struct TextLimitExceeded(
+    /// Maximum UTF-8 byte count configured for the field.
+    pub usize,
+);
 impl EventEmitter<TextLimitExceeded> for EditableTextState {}
 
 impl Focusable for EditableTextState {
@@ -104,14 +116,23 @@ impl AsRef<str> for EditableTextState {
 }
 
 impl EditableTextState {
-    /// Uses a pre-existing state attached to the element at `key`, as long as the element has existed over consecutive frames.
-    /// If the state does not yet exist, a new one is created using the default [`UnicodeTextStorage`] medium.
+    /// Gets or creates the state associated with `key`, using [`StringStorage`] when creating it.
+    ///
+    /// The `key` must match the editable element's id. The keyed state is retained while the
+    /// corresponding element is present on consecutive frames. Pass `state.downgrade()` to
+    /// [`EditableTextElement::state`](super::EditableTextElement::state) to make that relationship
+    /// explicit. Use [`use_keyed_init`](Self::use_keyed_init) to supply initial text or custom
+    /// storage.
     pub fn use_keyed(key: impl Into<ElementId>, window: &mut Window, cx: &mut App) -> Entity<Self> {
         Self::use_keyed_init(key, window, cx, |_, _| StringStorage::default())
     }
 
-    /// Uses a pre-existing state attached to the element at `key`, as long as the element has existed over consecutive frames.
-    /// If the state does not yet exist, a new one is created calling `init` to create a [`UnicodeTextStorage`] medium.
+    /// Gets or creates the state associated with `key`, calling `init` only on creation.
+    ///
+    /// The `key` must match the editable element's id. The keyed state is retained while the
+    /// corresponding element is present on consecutive frames. `init` can capture a default value
+    /// or construct a custom [`UnicodeTextStorage`](super::UnicodeTextStorage). Attach the returned
+    /// entity with [`EditableTextElement::state`](super::EditableTextElement::state).
     ///
     /// ```
     /// # use gpui::{RenderOnce, Window, App, IntoElement, ElementId};
@@ -139,9 +160,9 @@ impl EditableTextState {
         window.use_keyed_state(key, cx, |window, cx| Self::new(init(window, cx), cx))
     }
 
-    /// Creates a new EditableText state with a given storage medium.
+    /// Creates an editable-text state around `storage`.
     ///
-    /// Does not intrinsicly handle the state being attached to an element
+    /// This constructor does not intrinsically attach the state to an element
     /// over multiple frames (e.g. via [`RenderOnce`]). Use [`use_keyed`] or [`use_keyed_init`] for that.
     ///
     /// Expected to be called via [`AppContext::new`] such as:
@@ -180,26 +201,41 @@ impl EditableTextState {
         }
     }
 
-    /// Returns the current contents of [`storage`] as a string slice.
+    /// Returns the current contents as UTF-8 text.
     pub fn as_str(&self) -> &str {
         self.storage.content_utf8()
     }
 
-    /// Cheap snapshot, refreshed only when content changes (also on undo/IME).
+    /// Returns a shared snapshot refreshed when content changes, including undo and IME edits.
+    ///
+    /// Keep this snapshot to pass text to other GPUI APIs without borrowing the state. It represents
+    /// the whole value; it is rebuilt when the storage content changes.
     pub fn shared_text(&self) -> gpui::SharedString {
         self.shared_text.clone()
     }
 
-    /// Reject oversized user edits atomically, including paste and IME.
+    /// Sets a maximum content size in UTF-8 bytes.
+    ///
+    /// Edits that would make the whole value exceed `limit` are rejected atomically, including
+    /// paste and IME commits, and emit [`TextLimitExceeded`]. Programmatic [`emplace`](Self::emplace)
+    /// is subject to the same limit. Setting the limit does not truncate existing content; it is
+    /// checked on the next insertion or replacement. This is a byte limit, not a character count.
     pub fn with_max_bytes(mut self, limit: usize) -> Self {
         self.max_bytes = Some(limit);
         self
     }
+    /// Returns the backing storage generation used to detect content changes.
     pub fn version(&self) -> u16 {
         self.storage.version()
     }
 
-    /// Replaces the contents of the stored text with the provided string slice.
+    /// Replaces all contents with `content`, clears the current selection to the replacement caret,
+    /// and emits [`TextChanged`].
+    ///
+    /// If [`with_max_bytes`](Self::with_max_bytes) set a limit and `content` exceeds it in UTF-8
+    /// bytes, this leaves the existing text and selection unchanged and emits
+    /// [`TextLimitExceeded`]. A successful replacement is recorded in this field's undo history.
+    /// This is a programmatic replacement, not a sanitation callback.
     pub fn emplace(&mut self, content: &str, cx: &mut Context<Self>) {
         if let Some(limit) = self.max_bytes
             && content.len() > limit
@@ -610,10 +646,11 @@ impl EditableTextState {
         }
     }
 
-    /// Moves the caret to the provided position.
+    /// Moves the caret to a UTF-8 byte offset in the current text.
     ///
-    /// Will cause the current scroll position/offset to update on the next frame,
-    /// if the line the carent is on is out of view.
+    /// `caret_pos` should be a valid UTF-8 character boundary; offsets past the text end are
+    /// clamped. The current scroll position updates on the next frame if the caret's line is out
+    /// of view.
     pub fn move_to(&mut self, caret_pos: usize, cx: &mut Context<Self>) {
         self.move_to_caret(self.caret_for_index(caret_pos), cx);
     }
@@ -633,10 +670,11 @@ impl EditableTextState {
         }
     }
 
-    /// Changes the current selection to extend to the provided position.
+    /// Extends the selection's active end to a UTF-8 byte offset in the current text.
     ///
-    /// Will cause the current scroll position/offset to update on the next frame,
-    /// if the line the carent is on is out of view.
+    /// `caret_pos` should be a valid UTF-8 character boundary; offsets past the text end are
+    /// clamped. The current scroll position updates on the next frame if the caret's line is out
+    /// of view.
     pub fn select_to(&mut self, caret_pos: usize, cx: &mut Context<Self>) {
         self.select_to_caret(self.caret_for_index(caret_pos), cx);
     }
@@ -660,7 +698,7 @@ impl EditableTextState {
         cx.notify();
     }
 
-    /// Removes a chunk of text at the cursor/selection.
+    /// Deletes the selected text, or text on one side of the caret.
     /// No-op if the element is currently not accepting input.
     ///
     /// If there is a selection of multiple characters, the slice of text represented
@@ -671,7 +709,8 @@ impl EditableTextState {
     ///
     /// [`NavigationDirection::Forward`] represents scanning later in the text string from the caret.
     ///
-    /// [`TextBoundary`] describes how far to jump from the caret.
+    /// [`TextBoundary`] describes how far to move: a grapheme cluster, Unicode word, line, or
+    /// document. With a selection, the selected range is removed regardless of `direction`.
     pub fn delete_linear(
         &mut self,
         direction: NavigationDirection,
@@ -715,7 +754,7 @@ impl EditableTextState {
         cx.notify();
     }
 
-    /// Moves the caret somewhere relative to its current location, according to `direction` and `boundary`.
+    /// Moves the caret relative to its current location according to `direction` and `boundary`.
     ///
     /// If there is currently a selection, the cursor will jump to the start/end of that selection based on `direction`.
     ///
@@ -723,7 +762,9 @@ impl EditableTextState {
     ///
     /// [`NavigationDirection::Forward`] represents scanning later in the text string from the current caret.
     ///
-    /// [`TextBoundary`] describes how far to jump from the current caret
+    /// [`TextBoundary`] describes whether to move by grapheme cluster, Unicode word, line, or the
+    /// whole document. For `VisualLine`, movement uses current shaped layout when available; the
+    /// storage fallback uses newline boundaries.
     pub fn nav_linear(
         &mut self,
         direction: NavigationDirection,
@@ -831,20 +872,21 @@ impl EditableTextState {
         self.apply_selection_movement(self.selection_movement.move_or_select_to(caret, extend), cx);
     }
 
-    /// Sets the current selection to be the entire text in the storage medium
+    /// Selects the entire text, from byte offset zero through the UTF-8 byte length.
     pub fn select_document(&mut self, cx: &mut Context<Self>) {
         self.set_selection(self.storage_selection_at(0, SelectionGroup::Document));
         cx.notify();
     }
 
-    /// Extends the current selection to include some amount of textrelative the current
-    /// location of the caret, according to `direction` and `boundary`.
+    /// Extends the current selection from its caret according to `direction` and `boundary`.
     ///
     /// [`NavigationDirection::Back`] represents scanning earlier in the text string from the current caret.
     ///
     /// [`NavigationDirection::Forward`] represents scanning later in the text string from the current caret.
     ///
-    /// [`TextBoundary`] describes how far to jump from the current caret
+    /// [`TextBoundary`] describes whether to extend by grapheme cluster, Unicode word, line, or the
+    /// whole document. `VisualLine` uses shaped layout when it is current and newline fallback
+    /// otherwise.
     pub fn select_linear(
         &mut self,
         direction: NavigationDirection,
@@ -919,7 +961,12 @@ impl EditableTextState {
 
 // History management
 impl EditableTextState {
-    /// Returns the history log of the element, which is the data that supports undo/redo operations.
+    /// Returns the field's patch-based undo/redo history, when history is enabled.
+    ///
+    /// History is owned by this state and is not shared with another field. Its default grouping
+    /// combines compatible adjacent edits made within 300 ms of the group's first entry, and the
+    /// undo stack retains at most 1000 recorded entries. `Some` is returned for states created by
+    /// this implementation; the optional return preserves the history-enabled contract.
     pub fn history(&self) -> Option<&EditableTextHistory> {
         self.history.as_ref()
     }

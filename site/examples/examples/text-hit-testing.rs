@@ -2,10 +2,11 @@
 mod support;
 
 // ## Share the layout, not a guessed character width {#layout}
-// Click the paragraph to place a marker at a shaping-cluster boundary.
+// Click the paragraph to place a marker at the nearest shaped cluster index.
 // [`StyledText::layout`] returns a shared [`TextLayout`]. Cloning it lets the
-// input handler and the marker use the exact layout the text element measured.
-// Its positions become available after layout and prepaint, before input.
+// input handler and marker query the same shaped geometry the text element
+// measured. Position queries need layout and prepaint to have populated that
+// geometry; building the element tree is too early.
 //
 // The string includes a combining accent in `Café` and a multibyte `ß`.
 // Neither a Rust `char` count nor a fixed character width can locate every
@@ -24,10 +25,10 @@ struct HitTest {
 }
 
 // ## Keep the hit and the nearest edge distinct {#hit}
-// [`TextLayout::index_for_position`] returns `Ok(index)` for a cluster hit
-// and `Err(index)` for the nearest visual edge outside a line. Both indices
-// count UTF-8 bytes. The handler retains that distinction in the status label
-// and calls [`Context::notify`] to draw the new marker.
+// [`TextLayout::index_for_position`] returns `Ok(index)` for a hit on text and
+// `Err(index)` for the nearest visual edge when the position is outside a line.
+// Both are UTF-8 byte offsets. The handler keeps the hit/edge distinction in
+// its status and calls [`Context::notify`] so the marker is rendered again.
 //
 // This demonstrates a cluster marker. A text editor also needs caret affinity,
 // grapheme-aware movement, selection, focus, and input-method handling. See
@@ -107,8 +108,9 @@ impl Render for HitTest {
 // needs local coordinates. No extra offset belongs in this paint call.
 //
 // At a soft wrap, the following line owns the boundary position. A byte inside
-// an atomic shaping cluster maps to its logical start. This is why the marker
-// can move farther than one byte when you click the next visible cluster.
+// an atomic shaping cluster maps to its logical start, so adjacent visible
+// glyphs need not have adjacent byte indices. Click at the start of the next
+// wrapped line and compare the displayed byte offset with the marker position.
 
 fn component(_window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<HitTest> {
     cx.new(|_cx| HitTest {

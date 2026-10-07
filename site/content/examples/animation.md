@@ -19,9 +19,9 @@ The blue bar grows from 24 to 124 logical pixels over 700 milliseconds.
 An [`Animation`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Animation.html) supplies its clock and a [`Motion`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Motion.html) describes its duration.
 The view stores only a replay number.
 
-Clicking Replay changes the animation key. The new key starts a new run;
-rendering again with the same key continues the existing run. This is why
-a click increments an identity rather than resetting a timer.
+Clicking Replay changes the animation's retained element-state key. A new
+key starts at the beginning; rendering with the same key reuses its existing
+start time. The replay counter is therefore an identity, not a timer value.
 
 ```rust
 use std::time::Duration;
@@ -41,14 +41,17 @@ struct AnimationDemo {
 <a id="animate"></a>
 ## Sample width and opacity together
 
-[`AnimationExt::with_animation`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.AnimationExt.html#method.with_animation) retains the clock under `("bar", replay)`.
-Its callback receives progress shaped by [`ease_in_out`](https://docs.rs/gpui-ce/0.2.2/gpui/fn.ease_in_out.html) and applies it to
-[`Styled::w`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Styled.html#method.w) and [`Styled::opacity`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Styled.html#method.opacity). GPUI requests frames while the motion
-is active and stops requesting them when it finishes.
+[`AnimationExt::with_animation`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.AnimationExt.html#method.with_animation) associates progress with `("bar", replay)`.
+Its callback receives eased progress from [`ease_in_out`](https://docs.rs/gpui-ce/0.2.2/gpui/fn.ease_in_out.html) and derives width
+and opacity from that same value. [`Styled::w`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Styled.html#method.w) changes layout; [`Styled::opacity`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Styled.html#method.opacity)
+changes the rendered appearance without changing layout. GPUI requests
+frames while the motion is active and stops requesting animation frames when
+it completes.
 
-With [`App::reduce_motion`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.App.html#method.reduce_motion) enabled, this one-shot animation displays its end
-state without requesting animation frames. Replay still changes identity,
-but each new run is immediately presented at that end state.
+With [`App::reduce_motion`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.App.html#method.reduce_motion) enabled, this one-shot motion skips intermediate
+progress and presents its end state. Replay still changes the key, but each
+new run appears complete immediately. This is a useful check that decorative
+motion has a clear static result as well as an animated one.
 
 ```rust
 impl Render for AnimationDemo {
@@ -96,15 +99,16 @@ impl Render for AnimationDemo {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/animation/") }}#L34).
+[View this step in the source]({{ get_url(path="sources/animation/") }}#L37).
 
 <a id="clock"></a>
 ## Test identity while it runs
 
-Click Replay, then resize while the bar expands. The retained key lets
-progress continue through the new layout. Replace `("bar", replay)` with a
-constant key and run again: clicking Replay no longer creates a fresh run.
-The platform helper creates the view through [`AppContext::new`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.AppContext.html#tymethod.new).
+Click Replay, then resize while the bar expands: the motion should continue
+while layout recalculates. Replace `("bar", replay)` with a constant key and
+click again. The old start time remains associated with that key, so no new
+run begins. [`AppContext::new`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.AppContext.html#tymethod.new) creates the entity whose render method
+returns this animated element tree.
 
 ```rust
 fn component(_window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<AnimationDemo> {
@@ -116,6 +120,6 @@ pub fn main() {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/animation/") }}#L84).
+[View this step in the source]({{ get_url(path="sources/animation/") }}#L88).
 
 [Download the complete source]({{ get_url(path="examples/animation.rs") }}).

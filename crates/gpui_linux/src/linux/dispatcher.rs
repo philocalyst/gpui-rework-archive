@@ -158,6 +158,10 @@ impl PlatformDispatcher for LinuxDispatcher {
     }
 }
 
+/// Sender half of a priority queue attached to a Calloop ping source.
+///
+/// Dropping the sender wakes the receiver so its event source can report closure. Queue submission
+/// is currently crate-private; external users can hold or drop this value but cannot send items.
 pub struct PriorityQueueCalloopSender<T> {
     sender: PriorityQueueSender<T>,
     ping: calloop::ping::Ping,
@@ -183,6 +187,10 @@ impl<T> Drop for PriorityQueueCalloopSender<T> {
     }
 }
 
+/// Calloop event source for messages in a GPUI priority queue.
+///
+/// Insert this value into the event loop; queued items are delivered as `Event::Msg`, and dropping
+/// its sender produces `Event::Closed`.
 pub struct PriorityQueueCalloopReceiver<T> {
     receiver: PriorityQueueReceiver<T>,
     source: calloop::ping::PingSource,
@@ -190,6 +198,9 @@ pub struct PriorityQueueCalloopReceiver<T> {
 }
 
 impl<T> PriorityQueueCalloopReceiver<T> {
+    /// Creates a sender and a Calloop event source backed by one priority queue.
+    ///
+    /// Panics if Calloop cannot create the ping source used to wake the event loop.
     pub fn new() -> (PriorityQueueCalloopSender<T>, Self) {
         let (ping, source) = calloop::ping::make_ping().expect("Failed to create a Ping.");
 
@@ -209,6 +220,7 @@ impl<T> PriorityQueueCalloopReceiver<T> {
 use calloop::channel::Event;
 
 #[derive(Debug)]
+/// Error returned when the Calloop ping source cannot process readiness.
 pub struct ChannelError(calloop::ping::PingError);
 
 impl std::fmt::Display for ChannelError {

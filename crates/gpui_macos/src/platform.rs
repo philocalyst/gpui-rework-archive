@@ -190,7 +190,9 @@ impl GPUIApplicationDelegate {
 /// AppKit platform implementation bound to the main thread.
 ///
 /// All window, menu, pasteboard, and haptic operations must be initiated on that thread. A
-/// headless instance keeps scheduling and text services but does not present native windows.
+/// headless instance changes the run-loop path and disables haptic feedback; it is not a portable
+/// off-screen renderer. See the [platform guide](https://docs.rs/gpui-ce/0.2.2/gpui/_documentation/platforms/index.html)
+/// for target-specific service behavior.
 pub struct MacPlatform(Mutex<MacPlatformState>, MainThreadMarker);
 
 pub(crate) struct MacPlatformState {
@@ -229,7 +231,8 @@ impl MacPlatform {
     /// Initializes AppKit services and returns a main-thread-bound platform.
     ///
     /// Panics when called without an AppKit main-thread marker; callers should construct the
-    /// platform during application startup on the main thread. `headless` disables presentation.
+    /// platform during application startup on the main thread. `headless` selects the alternate
+    /// run-loop path and disables haptic feedback; it does not remove the main-thread requirement.
     pub fn new(headless: bool) -> Self {
         let marker = MainThreadMarker::new().expect("Mac platform not created on main thread");
         let dispatcher = Arc::new(MacDispatcher::new());

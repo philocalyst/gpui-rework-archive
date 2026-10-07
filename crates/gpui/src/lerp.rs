@@ -2,9 +2,13 @@
 //!
 //! [`Lerp::lerp`] accepts any `delta`: values below zero extrapolate before
 //! `self`, and values above one extrapolate beyond `to`. This is intentional;
-//! spring and custom easing curves can overshoot. Types implement interpolation
-//! component by component, while colors interpolate in the color space chosen
-//! by their implementation.
+//! spring and custom easing curves can overshoot. The result type is not always
+//! the input type (`bool` interpolates to `f32`), and some structured values
+//! switch discretely when their variants or units differ. In particular,
+//! [`Background`] interpolates only between solid colors; gradients and
+//! patterns stay at the starting value until the endpoint. [`Hsla`] interpolation
+//! converts through sRGB [`Rgba`]. Separately, painted gradients use their
+//! configured [`crate::ColorSpace`] to blend their stops.
 use crate::{
     AbsoluteLength, Background, Bounds, Corners, DefiniteLength, DevicePixels, Edges, Fill, Length,
     Percentage, Pixels, Point, Radians, Relative, Rems, RingColor, Size, colors::Colors,
@@ -18,7 +22,13 @@ use std::{
     ops::{Add, Mul, Sub},
 };
 
-/// A trait for types that can be linearly interpolated.
+/// A trait for values that can be interpolated at a scalar progress value.
+///
+/// `delta` is not clamped. Implementations may extrapolate below zero or above
+/// one, which is needed for spring overshoot. `Output` may differ from `Self`:
+/// for example, interpolating a `bool` produces an `f32`. Structured types
+/// choose their own behavior when their variants or units cannot be blended;
+/// consult the implementation when that distinction matters.
 pub trait Lerp<Output = Self>
 where
     Self: Sized,

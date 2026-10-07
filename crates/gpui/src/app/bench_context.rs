@@ -92,7 +92,12 @@ pub struct ForegroundWorkSummary {
     pub frame_budget_overruns_max: u64,
 }
 
-/// A small report produced by GPUI benchmarks.
+/// A report of frame and foreground-work timings collected by GPUI benchmarks.
+///
+/// Reports include Criterion warmup and calibration iterations. The frame
+/// budget overrun values are synthetic counts derived from foreground work
+/// duration; the harness has no vsync and these values are not observed missed
+/// frames or an FPS measurement.
 #[derive(Clone)]
 pub struct BenchReport {
     frame_snapshot: Rc<RefCell<WindowFrameSnapshot>>,

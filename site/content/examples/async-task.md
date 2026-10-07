@@ -16,8 +16,10 @@ example_run = "cargo run -p gpui-documentation-examples --example async-task"
 ## Let the view own the operation
 
 Start waits two seconds, then displays Complete. Stop cancels that wait.
-The view stores the returned [`Task`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Task.html) so its own lifetime controls the work:
-clearing the field drops the task; releasing the view drops it too.
+The view stores the returned [`Task`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Task.html) because the operation belongs to this
+view. Clearing the field drops the handle and cancels its remaining polling;
+releasing the view drops the field as well. Dropping a task is local
+cancellation, not rollback of work already accepted elsewhere.
 
 `running` chooses the button label, and `message` supplies the displayed
 status. Both are ordinary state updated through the view's [`Context`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html).
@@ -33,19 +35,21 @@ struct AsyncDemo {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/async-task/") }}#L12).
+[View this step in the source]({{ get_url(path="sources/async-task/") }}#L14).
 
 <a id="completion"></a>
 ## Wait, then reacquire the view
 
-[`Context::spawn`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html#method.spawn) runs a foreground future with a weak view handle. The
-[`BackgroundExecutor::timer`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.BackgroundExecutor.html#method.timer) waits without blocking an input callback.
-After the wait, [`WeakEntity::update`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.WeakEntity.html#method.update) reacquires the view and changes its
-status. If the view has gone away, that update returns an error instead.
+[`Context::spawn`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html#method.spawn) runs a foreground future and gives it a weak handle to the
+view. The [`BackgroundExecutor::timer`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.BackgroundExecutor.html#method.timer) yields while the two seconds pass;
+it does not block the input callback or hold a mutable view borrow. After
+the wait, [`WeakEntity::update`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.WeakEntity.html#method.update) reacquires the live view to change its
+status. If the view was released meanwhile, the update fails and there is no
+UI state left to change.
 
-Both starting and completing call `notify`. The future does not hold a
-mutable view borrow across `.await`; the completion closure obtains a new
-one for the duration of that update.
+Starting notifies immediately so “Waiting...” appears before the timer
+completes. Completion obtains a fresh mutable borrow only inside `update`,
+then notifies again. Never carry a `Context` or entity borrow across `.await`.
 
 ```rust
 impl AsyncDemo {
@@ -74,7 +78,7 @@ impl AsyncDemo {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/async-task/") }}#L31).
+[View this step in the source]({{ get_url(path="sources/async-task/") }}#L35).
 
 <a id="lifetime"></a>
 ## Expose Start and Stop
@@ -82,7 +86,9 @@ impl AsyncDemo {
 [`Context::listener`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html#method.listener) gives the click handler access to the view. While
 waiting, the button calls `stop`, which drops the task and displays Stopped.
 Another Start begins a new two-second wait. Completion returns the button
-to Start.
+to Start. Observe that the status changes immediately on Stop and remains
+Stopped after the old deadline; this distinguishes task cancellation from
+merely hiding the pending result.
 
 > [!WARNING]
 > Dropping a task stops its remaining polling. It does not undo an operation
@@ -125,7 +131,7 @@ impl Render for AsyncDemo {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/async-task/") }}#L67).
+[View this step in the source]({{ get_url(path="sources/async-task/") }}#L73).
 
 <a id="launch"></a>
 ## Try stopping before completion
@@ -149,6 +155,6 @@ pub fn main() {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/async-task/") }}#L107).
+[View this step in the source]({{ get_url(path="sources/async-task/") }}#L113).
 
 [Download the complete source]({{ get_url(path="examples/async-task.rs") }}).

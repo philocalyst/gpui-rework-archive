@@ -3,9 +3,10 @@
 //! This is the implementation behind [`Window::request_layout`](crate::Window::request_layout)
 //! and [`Window::request_measured_layout`](crate::Window::request_measured_layout). Applications
 //! normally interact with layout through [`Styled`](crate::Styled) methods and element callbacks.
-//! [`AvailableSpace`] distinguishes a definite constraint from an intrinsic min/max-content
-//! query; a measured element must return a size that satisfies the space passed to its measure
-//! closure. Layout IDs are frame-local handles and must not be retained as application state.
+//! [`AvailableSpace`] distinguishes a definite constraint from a min-content or max-content
+//! intrinsic-size query. A measured element returns its preferred size for that query; the layout
+//! engine then resolves that size against parent constraints and style. [`LayoutId`] is a
+//! frame-local handle, not an element identity or persistent state key.
 
 use crate::{
     AbsoluteLength, App, Bounds, DefiniteLength, Display, Edges, GridTemplate, InlineContent,
@@ -701,7 +702,11 @@ impl TaffyLayoutEngine {
     }
 }
 
-/// A unique identifier for a layout node, generated when requesting a layout from Taffy
+/// A frame-local identifier for a node in the Taffy layout tree.
+///
+/// A new layout request produces a node used to connect parent and child layout during the
+/// current frame. Do not store a `LayoutId` on a view or use it as a stable element key; use an
+/// [`crate::ElementId`] for cross-frame identity.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 #[repr(transparent)]
 pub struct LayoutId(NodeId);
@@ -1086,7 +1091,10 @@ where
     }
 }
 
-/// The space available for an element to be laid out in
+/// The sizing constraint passed to a layout or measurement request.
+///
+/// `Definite` supplies a concrete logical-pixel constraint. `MinContent` and `MaxContent` request
+/// intrinsic sizing behavior from the content and do not directly assign a final width or height.
 #[derive(Copy, Clone, Default, Debug, Eq, PartialEq)]
 pub enum AvailableSpace {
     /// The amount of space available is the specified number of pixels

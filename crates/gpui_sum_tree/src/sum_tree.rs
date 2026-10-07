@@ -41,6 +41,12 @@ impl<T> CapacityResultExt for Result<(), T> {
 pub trait Item: Clone {
     type Summary: Summary;
 
+    /// Produces the aggregate contribution of this item.
+    ///
+    /// The tree caches this value at leaves and combines cached values up the
+    /// tree. The summary operation must be associative and have a zero value
+    /// that acts as its identity; the tree relies on those laws when it
+    /// rebalances or combines nodes.
     fn summary(&self, cx: <Self::Summary as Summary>::Context<'_>) -> Self::Summary;
 }
 
@@ -57,13 +63,17 @@ pub trait KeyedItem: Item {
 /// which can be used to navigate the tree
 pub trait Summary: Clone {
     type Context<'a>: Copy;
+    /// Returns the identity summary for `cx`.
     fn zero<'a>(cx: Self::Context<'a>) -> Self;
+    /// Appends `summary` to this aggregate, preserving item order.
     fn add_summary<'a>(&mut self, summary: &Self, cx: Self::Context<'a>);
 }
 
 /// A summary that can be combined without access to an application context.
 pub trait ContextLessSummary: Clone {
+    /// Returns the identity aggregate.
     fn zero() -> Self;
+    /// Appends `summary` to this aggregate, preserving item order.
     fn add_summary(&mut self, summary: &Self);
 }
 
@@ -102,8 +112,10 @@ impl ContextLessSummary for NoSummary {
 /// Zed's rope has a `TextSummary` type that summarizes lines, characters, and bytes.
 /// Each of these are different dimensions we may want to seek to
 pub trait Dimension<'a, S: Summary>: Clone {
+    /// Returns the zero position for this coordinate system.
     fn zero(cx: S::Context<'_>) -> Self;
 
+    /// Advances this position by one item's summary.
     fn add_summary(&mut self, summary: &'a S, cx: S::Context<'_>);
     #[must_use]
     fn with_added_summary(mut self, summary: &'a S, cx: S::Context<'_>) -> Self {
@@ -129,6 +141,8 @@ impl<'a, T: Summary> Dimension<'a, T> for T {
 }
 
 pub trait SeekTarget<'a, S: Summary, D: Dimension<'a, S>> {
+    /// Compares the target with `cursor_location`; `Equal` means the target is
+    /// exactly at that boundary.
     fn cmp(&self, cursor_location: &D, cx: S::Context<'_>) -> Ordering;
 }
 
@@ -213,12 +227,15 @@ impl Bias {
     }
 }
 
-/// A B+ tree in which each leaf node contains `Item`s of type `T` and a `Summary`s for each `Item`.
-/// Each internal node contains a `Summary` of the items in its subtree.
+/// A persistent B+ tree in which each leaf stores items and their summaries,
+/// and each internal node stores the aggregate for its subtree.
 ///
 /// The maximum number of items per node is `TREE_BASE * 2`.
 ///
-/// Any [`Dimension`] supported by the [`Summary`] type can be used to seek to a specific location in the tree.
+/// Any [`Dimension`] supported by the [`Summary`] type can be used to seek to
+/// a location in the sequence. Cloning a tree shares its root; edits copy only
+/// shared nodes along the changed paths. Items themselves must be `Clone`
+/// because rebuilding a shared path may clone them.
 #[derive(Clone)]
 pub struct SumTree<T: Item>(Arc<Node<T>>);
 
@@ -242,7 +259,11 @@ impl<T: Item> SumTree<T> {
         }))
     }
 
-    /// Useful in cases where the item type has a non-trivial context type, but the zero value of the summary type doesn't depend on that context.
+    /// Creates an empty tree with a supplied summary.
+    ///
+    /// Use this when the summary context is nontrivial but the summary's zero
+    /// value does not depend on that context. `summary` must be the identity
+    /// summary for the tree; this method does not validate it.
     pub fn from_summary(summary: T::Summary) -> Self {
         SumTree(Arc::new(Node::Leaf {
             summary,
@@ -259,6 +280,8 @@ impl<T: Item> SumTree<T> {
     }
 
     /// Builds a balanced tree by summarizing the items from `iter`.
+    ///
+    /// Items retain the iterator's order.
     pub fn from_iter<I: IntoIterator<Item = T>>(
         iter: I,
         cx: <T::Summary as Summary>::Context<'_>,
@@ -328,6 +351,11 @@ impl<T: Item> SumTree<T> {
         }
     }
 
+    /// Builds a balanced tree from an indexed parallel iterator.
+    ///
+    /// The iterator's indexed order is preserved. Use this when item
+    /// summaries can be computed in parallel and `T`, its summary, and the
+    /// summary context satisfy the `Send`/`Sync` bounds.
     pub fn from_par_iter<I, Iter>(iter: I, cx: <T::Summary as Summary>::Context<'_>) -> Self
     where
         I: IntoParallelIterator<Iter = Iter>,
@@ -390,6 +418,7 @@ impl<T: Item> SumTree<T> {
         }
     }
 
+    /// Clones every item into a `Vec` in tree order.
     #[allow(unused)]
     pub fn items<'a>(&'a self, cx: <T::Summary as Summary>::Context<'a>) -> Vec<T> {
         let mut items = Vec::new();
@@ -407,9 +436,12 @@ impl<T: Item> SumTree<T> {
         Iter::new(self)
     }
 
-    /// A more efficient version of `Cursor::new()` + `Cursor::seek()` + `Cursor::item()`.
+    /// Finds an item whose end position exactly matches `target`.
     ///
-    /// Only returns the item that exactly has the target match.
+    /// Returns `(start, end, item)` for the matching item, or `(position,
+    /// position, None)` when no item ends exactly at the target. `bias` selects
+    /// which adjacent item owns an exact boundary. This avoids allocating a
+    /// [`Cursor`] for a one-off lookup.
     #[instrument(skip_all)]
     pub fn find_exact<'a, 'slf, D, Target>(
         &'slf self,
@@ -435,7 +467,13 @@ impl<T: Item> SumTree<T> {
         };
     }
 
-    /// A more efficient version of `Cursor::new()` + `Cursor::seek()` + `Cursor::item()`
+    /// Finds the item containing `target`, or the adjacent item selected by
+    /// `bias` when `target` is on a boundary.
+    ///
+    /// Returns `(start, end, item)` for the selected item. When the target is
+    /// beyond the tree in the direction selected by `bias`, returns the tree's
+    /// end position twice and `None`. Use [`Self::find_exact`] when only an
+    /// item ending exactly at the target should match.
     #[instrument(skip_all)]
     pub fn find<'a, 'slf, D, Target>(
         &'slf self,
@@ -520,7 +558,12 @@ impl<T: Item> SumTree<T> {
         }
     }
 
-    /// A more efficient version of `Cursor::new()` + `Cursor::seek()` + `Cursor::item()`
+    /// Finds the item containing `target` and also returns its predecessor.
+    ///
+    /// The result is `(start, end, Some((previous, item)))`; `previous` is
+    /// `None` when the match is the first item. If no item matches, the tuple's
+    /// final element is `None`. Boundary selection follows [`Bias`], as in
+    /// [`Self::find`].
     #[instrument(skip_all)]
     pub fn find_with_prev<'a, 'slf, D, Target>(
         &'slf self,
@@ -608,7 +651,10 @@ impl<T: Item> SumTree<T> {
         }
     }
 
-    /// Creates a position-aware cursor using dimension `D`.
+    /// Creates an unpositioned cursor using dimension `D`.
+    ///
+    /// Call [`Cursor::seek`], [`Cursor::next`], or [`Cursor::prev`] before
+    /// inspecting the cursor's item.
     pub fn cursor<'a, 'b, D>(
         &'a self,
         cx: <T::Summary as Summary>::Context<'b>,
@@ -619,8 +665,12 @@ impl<T: Item> SumTree<T> {
         Cursor::new(self, cx)
     }
 
-    /// Note: If the summary type requires a non `()` context, then the filter cursor
-    /// that is returned cannot be used with Rust's iterators.
+    /// Creates a cursor that skips subtrees whose summaries fail `filter_node`.
+    ///
+    /// The predicate is called for both subtree and item summaries. Return
+    /// `false` only when the summary cannot contain a desired item; a false
+    /// result prunes the entire subtree. The returned cursor supports both
+    /// explicit forward/backward movement and Rust iteration.
     pub fn filter<'a, 'b, F, U>(
         &'a self,
         cx: <T::Summary as Summary>::Context<'b>,

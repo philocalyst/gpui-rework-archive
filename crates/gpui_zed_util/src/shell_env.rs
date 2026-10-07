@@ -17,7 +17,8 @@ fn parse_env_map_from_noisy_output(output: &str) -> Result<collections::HashMap<
     anyhow::bail!("Failed to find JSON in shell output: {output}")
 }
 
-/// Print the current process environment in shell-assignment form.
+/// Print the current process environment as a pretty-printed JSON object.
+/// Exits the process if JSON serialization fails.
 pub fn print_env() {
     let env_vars: HashMap<String, String> = std::env::vars().collect();
     let json = serde_json::to_string_pretty(&env_vars).unwrap_or_else(|err| {
@@ -27,7 +28,13 @@ pub fn print_env() {
     println!("{}", json);
 }
 
-/// Capture all environment variables from the login shell in the given directory.
+/// Capture variables from a login shell after changing to `directory`.
+///
+/// `shell_path` selects the shell executable and `args` are passed to it before
+/// the helper's capture arguments. Shell startup output is tolerated when a JSON
+/// environment object can still be parsed. A nonzero shell exit with valid JSON
+/// is logged as a warning and still returns the captured map; spawn, capture, or
+/// parse failures return an error. This runs the user's shell startup scripts.
 pub async fn capture(
     shell_path: impl AsRef<Path>,
     args: &[String],

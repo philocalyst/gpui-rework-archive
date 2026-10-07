@@ -11,6 +11,11 @@ use fontique::{
 use parley::{FontContext, FontFamilyName};
 
 /// Controls whether a Parley text system loads operating-system fonts.
+///
+/// `Load` asks Fontique to enumerate fonts available to the host. `Skip` begins with an empty
+/// catalog, which is useful for deterministic applications and runtimes such as browsers; call
+/// [`gpui::PlatformTextSystem::add_fonts`] to register bundled font data. Either mode can be
+/// combined with [`ParleyTextSystem::with_fallback_families`](crate::ParleyTextSystem::with_fallback_families).
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum SystemFonts {
     /// Enumerate fonts installed on the operating system.

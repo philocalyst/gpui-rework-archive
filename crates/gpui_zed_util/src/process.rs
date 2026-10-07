@@ -1,14 +1,13 @@
 use anyhow::{Context as _, Result};
 use std::process::Stdio;
 
-/// A wrapper around `smol::process::Child` that ensures all subprocesses
-/// are killed when the process is terminated: on Unix by using process
-/// groups, and on Windows by using job objects.
-///
-/// On Windows, dropping this struct closes the job object handle, which
-/// terminates all processes in the job. This also applies when the Zed
-/// process exits for any reason (including crashes), since the OS closes
-/// its handles, so spawned process trees can never outlive Zed.
+/// A wrapper around `smol::process::Child` with platform-specific process-tree
+/// handling. On Unix, `spawn` attempts to start a new session and `kill` sends
+/// `SIGKILL` to the child's process group; the `setsid` and signal errors are
+/// ignored, and dropping the wrapper alone does not kill the group.
+/// On Windows, a job object is assigned when possible, and closing that job
+/// terminates its members. If job creation or assignment fails, the wrapper still
+/// spawns the child but only `kill` of the direct child is available.
 pub struct Child {
     process: smol::process::Child,
     #[cfg(windows)]
@@ -31,7 +30,10 @@ impl std::ops::DerefMut for Child {
 
 impl Child {
     #[cfg(not(windows))]
-    /// Spawn a child process and retain its process-group handle where supported.
+    /// Spawn a child while attempting to start a new Unix session, making it the
+    /// leader of a process group when `setsid` succeeds. The `setsid` result is
+    /// ignored. `kill` then attempts to signal that group; dropping the wrapper
+    /// does not terminate the process or its descendants.
     pub fn spawn(
         mut command: std::process::Command,
         stdin: Stdio,
@@ -55,7 +57,9 @@ impl Child {
     }
 
     #[cfg(windows)]
-    /// Spawn a child process using the platform process-group implementation.
+    /// Spawn a child and try to assign it to a Windows job object that terminates
+    /// its members when the job handle closes. Assignment errors are logged and
+    /// do not fail the spawn; in that case `kill` falls back to the direct child.
     pub fn spawn(
         command: std::process::Command,
         stdin: Stdio,
@@ -114,7 +118,10 @@ impl Child {
     }
 
     #[cfg(not(windows))]
-    /// Terminate the child process and its associated group when supported.
+    /// Send `SIGKILL` to the child's Unix process group.
+    ///
+    /// The system-call result is currently ignored, so this method returns `Ok(())`
+    /// even if the group could not be signalled.
     pub fn kill(&mut self) -> Result<()> {
         let pid = self.process.id();
         unsafe {
@@ -124,7 +131,8 @@ impl Child {
     }
 
     #[cfg(windows)]
-    /// Terminate the child process.
+    /// Terminate the Windows job and its assigned processes, or only the direct
+    /// child if job-object setup failed.
     pub fn kill(&mut self) -> Result<()> {
         if let Some(job) = &self.job {
             job.terminate()

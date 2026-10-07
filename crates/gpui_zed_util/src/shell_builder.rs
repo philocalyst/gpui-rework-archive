@@ -8,8 +8,11 @@ use std::borrow::Cow;
 use crate::shell::get_system_shell;
 use crate::shell::{Shell, ShellKind};
 
-/// ShellBuilder is used to turn a user-requested task into a
-/// program that can be executed by the shell.
+/// Assemble a shell executable and argument vector for a task command.
+///
+/// The builder classifies the configured shell, converts shell-variable shorthand
+/// in task arguments, and quotes those arguments according to that shell kind.
+/// It does not start the process or validate the command text itself.
 pub struct ShellBuilder {
     /// The shell to run
     program: String,
@@ -21,7 +24,9 @@ pub struct ShellBuilder {
 }
 
 impl ShellBuilder {
-    /// Create a new ShellBuilder as configured.
+    /// Create a builder from a shell configuration. `is_windows` controls shell
+    /// syntax classification and quoting; the configured program is not probed
+    /// for availability.
     pub fn new(shell: &Shell, is_windows: bool) -> Self {
         let (program, args) = match shell {
             Shell::System => (get_system_shell(), Vec::new()),
@@ -44,7 +49,9 @@ impl ShellBuilder {
         self
     }
 
-    /// Returns the label to show in the terminal tab
+    /// Return a display label for the terminal tab. Empty or whitespace-only
+    /// commands show only the executable; non-empty text is interpolated into a
+    /// shell-style command label and is not escaped for execution.
     pub fn command_label(&self, command_to_use_in_label: &str) -> String {
         if command_to_use_in_label.trim().is_empty() {
             self.program.clone()
@@ -74,13 +81,18 @@ impl ShellBuilder {
         }
     }
 
-    /// Redirect the child shell's standard input from `/dev/null` where supported.
+    /// Redirect the task command's stdin to the platform null device using
+    /// shell-specific syntax. This only affects a generated command when
+    /// `task_command` is `Some`.
     pub fn redirect_stdin_to_dev_null(mut self) -> Self {
         self.redirect_stdin = true;
         self
     }
 
-    /// Returns the program and arguments to run this task in a shell.
+    /// Return `(program, argv)` for the shell invocation. `task_command`, when
+    /// present, is passed as one combined command string; each `task_args` item
+    /// is variable-converted and shell-quoted before it is appended. If no
+    /// command is provided, the configured shell arguments are returned as-is.
     pub fn build(
         mut self,
         task_command: Option<String>,
@@ -192,7 +204,7 @@ impl ShellBuilder {
         (self.program, self.args)
     }
 
-    /// Builds a `smol::process::Command` with the given task command and arguments.
+    /// Build a `smol::process::Command` for this task without spawning it.
     ///
     /// Prefer this over manually constructing a command with the output of `Self::build`,
     /// as this method handles `cmd` weirdness on windows correctly.
@@ -204,7 +216,7 @@ impl ShellBuilder {
         smol::process::Command::from(self.build_std_command(task_command, task_args))
     }
 
-    /// Builds a `std::process::Command` with the given task command and arguments.
+    /// Build a `std::process::Command` for this task without spawning it.
     ///
     /// Prefer this over manually constructing a command with the output of `Self::build`,
     /// as this method handles `cmd` weirdness on windows correctly.

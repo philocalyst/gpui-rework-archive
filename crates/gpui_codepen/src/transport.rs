@@ -55,19 +55,24 @@ pub fn decode(bytes: &[u8]) -> Result<Reply, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use gpui_codepen_guest::{Frame, PROTOCOL_VERSION};
     use gpui::{Scene, SceneCapture, px, size};
+    use gpui_codepen_guest::{Frame, PROTOCOL_VERSION};
     #[test]
     fn browser_replies_preserve_frames_errors_and_reject_truncation() {
         for frame in [
             None,
             Some(Frame {
-                cursor:Default::default(),text:None,
+                cursor: Default::default(),
+                text: None,
                 next_frame_ms: None,
-            version: PROTOCOL_VERSION,
-                viewport: size(px(320.),px(240.)),
+                version: PROTOCOL_VERSION,
+                viewport: size(px(320.), px(240.)),
                 scale_factor: 1.,
-                scene: {let mut scene=Scene::default();scene.finish();SceneCapture::capture(&scene,|_|unreachable!()).unwrap()},
+                scene: {
+                    let mut scene = Scene::default();
+                    scene.finish();
+                    SceneCapture::capture(&scene, |_| unreachable!()).unwrap()
+                },
             }),
         ] {
             let reply = Reply {

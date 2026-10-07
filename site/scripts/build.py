@@ -27,12 +27,13 @@ def run(*command: str, env=None) -> None:
 
 def source_digest() -> str:
     digest = hashlib.sha256()
-    roots = (ROOT / "crates", ROOT / "assets", SITE / "content", SITE / "templates", SITE / "examples", ROOT / "scripts/docs", SITE / "scripts", SITE / "static")
-    files = {ROOT / "Cargo.toml", ROOT / "Cargo.lock", SITE / "zola.toml", SITE / "examples.toml", SITE / "redirects.json"}
+    roots = (ROOT / "crates", ROOT / "assets", SITE / "content", SITE / "templates", SITE / "examples", SITE / "editor", ROOT / "scripts/docs", SITE / "scripts", SITE / "static", ROOT / "scripts/codepen", ROOT / "vendor/miri/src", ROOT / "vendor/miri/cargo-miri/src")
+    files = {ROOT / "Cargo.toml", ROOT / "Cargo.lock", SITE / "zola.toml", SITE / "examples.toml", SITE / "redirects.json", SITE / "package.json", SITE / "package-lock.json"}
     for directory in roots:
         files.update(path for path in directory.rglob("*") if path.is_file()
                      and "target" not in path.parts and "pkg" not in path.parts and "builds" not in path.parts
-                     and "__pycache__" not in path.parts and path.name != "build.json")
+                     and "__pycache__" not in path.parts and path.name != "build.json"
+                     and not path.is_relative_to(SITE / "static/workbench"))
     for path in sorted(files):
         digest.update(str(path.relative_to(ROOT)).encode() + b"\0")
         digest.update(path.read_bytes())
@@ -52,6 +53,7 @@ def main() -> int:
     run(sys.executable, str(ROOT / "scripts/docs/generate.py"), "--check")
     run(sys.executable, str(ROOT / "scripts/docs/sync_links.py"), "--check")
     if not args.text_only:
+        run(sys.executable, str(SITE / "scripts/build_editor.py"))
         run(sys.executable, str(SITE / "scripts/build_preview.py"))
     if args.with_api:
         env = os.environ.copy()

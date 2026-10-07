@@ -1,8 +1,9 @@
 //! Tokio adapters for GPUI's executor traits.
 //!
-//! This crate bridges Tokio futures into GPUI's application scheduling model. It
-//! does not create a Tokio runtime; the embedding application owns runtime setup
-//! and shutdown.
+//! This crate bridges Tokio futures into GPUI's application scheduling model.
+//! [`init`] creates and owns a small multi-thread runtime; use
+//! [`init_from_handle`] when the embedding application owns runtime setup and
+//! shutdown.
 
 use std::future::Future;
 
@@ -13,8 +14,10 @@ pub use tokio::task::JoinError;
 
 /// Initializes the Tokio wrapper using a new Tokio runtime with 2 worker threads.
 ///
-/// If you need more threads (or access to the runtime outside of GPUI), you can create the runtime
-/// yourself and pass a Handle to `init_from_handle`.
+/// GPUI stores the runtime as an app global and shuts it down in the background
+/// when the app releases that global. If you need more threads or share the
+/// runtime with other application code, create it yourself and pass a handle to
+/// [`init_from_handle`].
 pub fn init(cx: &mut App) {
     let runtime = tokio::runtime::Builder::new_multi_thread()
         // Since we now have two executors, let's try to keep our footprint small
@@ -30,7 +33,10 @@ pub fn init(cx: &mut App) {
     });
 }
 
-/// Initializes the Tokio wrapper using a Tokio runtime handle.
+/// Initializes the Tokio wrapper using a Tokio runtime handle owned elsewhere.
+///
+/// GPUI does not shut down the supplied runtime when the app releases its
+/// global handle.
 pub fn init_from_handle(cx: &mut App, handle: tokio::runtime::Handle) {
     cx.set_global(GlobalTokio {
         owned_runtime: None,
@@ -57,8 +63,11 @@ impl Drop for GlobalTokio {
 pub struct Tokio {}
 
 impl Tokio {
-    /// Spawns the given future on Tokio's thread pool, and returns it via a GPUI task
-    /// Note that the Tokio task will be cancelled if the GPUI task is dropped
+    /// Spawns `f` on Tokio and returns its join result as a GPUI task.
+    ///
+    /// Await the task to receive `Ok(output)` or a Tokio [`JoinError`]. Dropping
+    /// the GPUI task aborts the Tokio task; detaching the GPUI task keeps the
+    /// join task alive so it can finish without a consumer.
     pub fn spawn<C, Fut, R>(cx: &C, f: Fut) -> Task<Result<R, JoinError>>
     where
         C: AppContext,
@@ -79,8 +88,10 @@ impl Tokio {
         })
     }
 
-    /// Spawns the given future on Tokio's thread pool, and returns it via a GPUI task
-    /// Note that the Tokio task will be cancelled if the GPUI task is dropped
+    /// Spawns `f` on Tokio and flattens its result into `anyhow::Result`.
+    ///
+    /// Both an error returned by `f` and a Tokio join failure become an error
+    /// in the returned GPUI task. Dropping the GPUI task aborts the Tokio task.
     pub fn spawn_result<C, Fut, R>(cx: &C, f: Fut) -> Task<anyhow::Result<R>>
     where
         C: AppContext,

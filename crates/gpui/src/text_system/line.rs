@@ -22,7 +22,7 @@ pub struct ShapedLine {
 }
 
 impl ShapedLine {
-    /// The length of the line in utf-8 bytes.
+    /// The number of UTF-8 bytes in the source line.
     #[allow(clippy::len_without_is_empty)]
     pub fn len(&self) -> usize {
         self.layout.len
@@ -36,7 +36,12 @@ impl ShapedLine {
         self.layout.width
     }
 
-    /// Paint the line of text to the window.
+    /// Paint glyphs and foreground decorations at a logical-pixel origin.
+    ///
+    /// `line_height` sets the row's vertical extent and baseline placement. `align_width` gives
+    /// the width used for alignment; if it is `None`, the shaped advance width is used. Call
+    /// [`Self::paint_background`] first when the run backgrounds should appear behind the text.
+    /// Paint-layer errors are returned; individual glyph paint errors are logged and skipped.
     pub fn paint(
         &self,
         origin: Point<Pixels>,
@@ -59,7 +64,10 @@ impl ShapedLine {
         )
     }
 
-    /// Paint the background of the line to the window.
+    /// Paint run background rectangles for this line.
+    ///
+    /// The rectangles use the supplied `line_height` and alignment width. Call this before
+    /// [`Self::paint`] to draw the backgrounds behind glyphs.
     pub fn paint_background(
         &self,
         origin: Point<Pixels>,
@@ -100,7 +108,13 @@ impl ShapedText {
         self.layout.len()
     }
 
-    /// Paint this text to the window.
+    /// Paint glyphs and foreground decorations at a logical-pixel origin.
+    ///
+    /// `line_height` determines each visual row's height. `bounds`, when supplied, contributes
+    /// its width for horizontal alignment; otherwise the wrap width is used when the text was
+    /// shaped with one. The bounds origin is not applied: `origin` remains the placement point.
+    /// Call [`Self::paint_background`] first to paint run backgrounds. Paint-layer errors are
+    /// returned; individual glyph paint errors are logged and skipped.
     pub fn paint(
         &self,
         origin: Point<Pixels>,
@@ -128,7 +142,10 @@ impl ShapedText {
         )
     }
 
-    /// Paint the background of this text to the window.
+    /// Paint the run background rectangles for all visual rows.
+    ///
+    /// Width selection matches [`Self::paint`]. Call this before `paint` to place the backgrounds
+    /// behind glyphs.
     pub fn paint_background(
         &self,
         origin: Point<Pixels>,
@@ -158,7 +175,11 @@ impl ShapedText {
 }
 
 impl InlineLayout {
-    /// Paint the text-run backgrounds in this inline layout.
+    /// Paint the text-run background rectangles in this inline layout.
+    ///
+    /// The boxes themselves are not painted by this method; use their positioned bounds from
+    /// [`InlineLayout::boxes`] to paint the corresponding elements. Call this before [`Self::paint`]
+    /// when backgrounds should sit behind text and inline elements.
     pub fn paint_background(
         &self,
         origin: Point<Pixels>,
@@ -168,7 +189,9 @@ impl InlineLayout {
         paint_inline_layout(self, origin, TextPaintPass::Background, window, cx)
     }
 
-    /// Paint the glyphs and foreground decorations in this inline layout.
+    /// Paint glyphs and foreground decorations, using the line and baseline geometry in this
+    /// layout. Inline element boxes are positioned here but remain the caller's responsibility to
+    /// paint.
     pub fn paint(&self, origin: Point<Pixels>, window: &mut Window, cx: &mut App) -> Result<()> {
         paint_inline_layout(self, origin, TextPaintPass::Foreground, window, cx)
     }

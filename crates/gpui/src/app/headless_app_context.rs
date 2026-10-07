@@ -1,11 +1,10 @@
-//! Cross-platform headless app context for tests that need real text shaping.
+//! Run GPUI without opening a native window.
 //!
-//! This replaces the macOS-only `HeadlessMetalAppContext` with a platform-neutral
-//! implementation backed by `TestPlatform`. Tests supply a real `PlatformTextSystem`
-//! to get accurate glyph measurements while keeping everything else deterministic.
-//!
-//! Optionally, a renderer factory can be provided to enable real GPU rendering
-//! and screenshot capture via [`HeadlessAppContext::capture_screenshot`].
+//! Supply a [`PlatformTextSystem`] for shaping and glyph rasterization. The
+//! context uses the regular entity, element, layout, and scene implementations,
+//! with [`TestPlatform`] providing a clock and event delivery that the caller
+//! controls. An optional renderer enables pixel screenshots; scene capture
+//! works without one.
 
 use crate::{
     AnyView, AnyWindowHandle, App, AppCell, AppContext, AssetRegistry, AssetSource,
@@ -19,23 +18,27 @@ use anyhow::Result;
 use image::RgbaImage;
 use std::{future::Future, rc::Rc, sync::Arc, time::Duration};
 
-/// A cross-platform headless app context for tests that need real text shaping.
+/// An app whose windows, clock, and frame delivery are driven by the caller.
 ///
-/// Unlike the old `HeadlessMetalAppContext`, this works on any platform. It uses
-/// `TestPlatform` for deterministic scheduling and accepts a pluggable
-/// `PlatformTextSystem` so tests get real glyph measurements.
+/// Use this for a headless test or an external execution host, such as the
+/// documentation's Miri workbench. Supply a text system with the fonts needed
+/// by the component. [`new`](Self::new) records scenes without a pixel renderer;
+/// [`with_platform`](Self::with_platform) can also supply a screenshot renderer.
 ///
-/// # Usage
+/// By default, flushing app effects draws dirty windows. A host with its own
+/// frame loop can disable that behavior with [`set_automatic_drawing`](Self::set_automatic_drawing),
+/// then deliver input and draw once at its chosen frame boundary. Advancing
+/// the clock and delivering frame callbacks are separate operations.
 ///
-/// ```ignore
-/// let text_system = Arc::new(gpui_parley::ParleyTextSystem::new(
-///     gpui_parley::SystemFonts::Load,
-/// ));
-/// let mut cx = HeadlessAppContext::with_platform(
-///     text_system,
-///     Arc::new(Assets),
-///     || gpui_platform::current_headless_renderer(),
-/// );
+/// ```
+/// use gpui::{HeadlessAppContext, PlatformTextSystem};
+/// use std::sync::Arc;
+///
+/// fn frame_driver(text: Arc<dyn PlatformTextSystem>) -> HeadlessAppContext {
+///     let mut cx = HeadlessAppContext::new(text);
+///     cx.set_automatic_drawing(false);
+///     cx
+/// }
 /// ```
 pub struct HeadlessAppContext {
     /// The underlying app cell.
@@ -158,12 +161,19 @@ impl HeadlessAppContext {
         result
     }
 
-    /// Runs all pending tasks until parked.
+    /// Runs ready tasks until no runnable work remains.
+    ///
+    /// Pending timers do not advance automatically. [`Self::advance_clock`]
+    /// advances time and runs work due in that interval.
     pub fn run_until_parked(&self) {
         self.dispatcher.run_until_parked();
     }
 
-    /// Advances the simulated clock.
+    /// Advances the simulated clock and runs work due by the new time.
+    ///
+    /// The scheduler drains runnable work while crossing timers due within
+    /// `duration`, then leaves the clock at the requested destination. This
+    /// does not model production wall-clock scheduling or latency.
     pub fn advance_clock(&self, duration: Duration) {
         self.dispatcher.advance_clock(duration);
     }

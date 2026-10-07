@@ -43,6 +43,7 @@ impl EventEmitter<CodeChanged> for Codepen {}
 struct CodeEditor {
     state: Entity<EditableTextState>,
     highlights: TextHighlights,
+    _state_changed: Subscription,
 }
 impl Render for CodeEditor {
     fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
@@ -120,9 +121,10 @@ impl Codepen {
             EditableTextState::new(StringStorage::from(source.clone()), cx)
                 .with_max_bytes(gpui_codepen_guest::MAX_SOURCE_BYTES)
         });
-        let editor_view = cx.new(|_| CodeEditor {
+        let editor_view = cx.new(|cx| CodeEditor {
             state: editor.clone(),
             highlights: TextHighlights::new(rust_highlights(&source)),
+            _state_changed: cx.observe(&editor, |_, _, cx| cx.notify()),
         });
         let weak = cx.weak_entity();
         let resize_weak = cx.weak_entity();
@@ -411,7 +413,7 @@ impl Render for Codepen {
                             if this.auto_run { this.schedule(None, true, cx); } else { this.invalidate(); }
                             cx.notify();
                         })))
-                    .child(pill(if compact { "Run" } else { "Run  ⌘ Enter" }, false).on_click(cx.listener(|this, _, _, cx| this.run(cx))))))
+                    .child(pill("Run", false).on_click(cx.listener(|this, _, _, cx| this.run(cx))))))
             .when(compact, |s| s.child(div().flex().gap_2()
                 .child(pill("Code", !self.show_preview).on_click(cx.listener(|this, _, _, cx| { this.show_preview = false; cx.notify(); })))
                 .child(pill("Preview", self.show_preview).on_click(cx.listener(|this, _, _, cx| { this.show_preview = true; cx.notify(); })))))
@@ -438,8 +440,8 @@ impl Render for Codepen {
                 .child(SharedString::from(if let Some(notice) = &self.input_notice { notice.clone() }
                     else if error { self.session.diagnostics.clone() }
                     else if self.session.running { "Miri is evaluating your Rust. You can keep editing.".into() }
-                    else if compact { "Edit Rust, then open Preview. Changes run automatically; ⌘/Ctrl Enter runs immediately.".into() }
-                    else { "Change Rust on the left. The last successful component stays visible while edits compile.\nState persists between clicks. Source changes reset the component. ⌘/Ctrl Enter runs immediately.".into() })))
+                    else if compact { "Edit Rust, then open Preview. Changes run automatically; Cmd+Enter or Ctrl+Enter runs immediately.".into() }
+                    else { "Edit Rust on the left. Cmd+Enter or Ctrl+Enter runs immediately.\nClicks keep state; source changes start a fresh component.".into() })))
     }
 }
 pub fn pill(label: &str, active: bool) -> gpui::Stateful<gpui::Div> {

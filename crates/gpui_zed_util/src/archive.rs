@@ -17,7 +17,14 @@ fn archive_path_is_normal(filename: &str) -> bool {
 }
 
 #[cfg(windows)]
-/// Extract a ZIP stream while rejecting absolute and parent-traversing entries.
+/// Extract a ZIP stream into `destination`, skipping entries with absolute or
+/// parent-traversal path components.
+///
+/// Entry paths are checked using the host
+/// platform's path-component rules; extraction can follow symlinks already
+/// present beneath the destination. Missing destination directories are created
+/// as needed. An I/O or malformed-archive error stops the operation but does not
+/// roll back files and directories already written.
 pub async fn extract_zip<R: AsyncRead + Unpin>(destination: &Path, reader: R) -> Result<()> {
     let mut reader = read::stream::ZipFileReader::new(BufReader::new(reader));
 
@@ -67,7 +74,14 @@ pub async fn extract_zip<R: AsyncRead + Unpin>(destination: &Path, reader: R) ->
 }
 
 #[cfg(unix)]
-/// Buffer a ZIP stream and extract it with Unix permission metadata preserved.
+/// Buffer a ZIP stream to a temporary file, then extract it with Unix file
+/// permissions preserved when the archive provides nonzero permission bits.
+///
+/// The archive is fully buffered on disk because permission metadata requires a
+/// seekable reader. Entry paths with absolute or parent components are skipped.
+/// Missing destination directories are created as needed; pre-existing symlinks
+/// below the destination may be followed. Errors can leave earlier entries
+/// extracted.
 pub async fn extract_zip<R: AsyncRead + Unpin>(destination: &Path, reader: R) -> Result<()> {
     // Unix needs file permissions copied when extracting.
     // This is only possible to do when a reader impls `AsyncSeek` and `seek::ZipFileReader` is used.
@@ -85,7 +99,10 @@ pub async fn extract_zip<R: AsyncRead + Unpin>(destination: &Path, reader: R) ->
 }
 
 #[cfg(unix)]
-/// Extract a seekable ZIP stream while preserving safe entry permissions.
+/// Extract a seekable ZIP stream, preserving nonzero Unix permission metadata.
+/// Entries with absolute or parent components are skipped. The destination
+/// is created as needed; pre-existing symlinks below the destination may be
+/// followed, and an error can leave earlier entries extracted.
 pub async fn extract_seekable_zip<R: AsyncRead + AsyncSeek + Unpin>(
     destination: &Path,
     reader: R,

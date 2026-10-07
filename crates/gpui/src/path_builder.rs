@@ -1,11 +1,12 @@
 //! Ergonomic path construction and lyon tessellation for GPUI scenes.
 //!
-//! Coordinates are logical [`Pixels`](crate::Pixels). Builder transforms are
-//! applied when commands are tessellated; they do not mutate earlier commands.
-//! A builder must contain enough geometry for lyon to tessellate before
-//! [`PathBuilder::build`] can return a path. Build errors come from lyon's
-//! tessellator and should be handled by callers that accept user supplied
-//! geometry.
+//! Coordinates and stroke widths are logical [`Pixels`](crate::Pixels). A
+//! finished path is scaled to scene pixels when it is painted into a window.
+//! Builder transforms apply to the completed path geometry at
+//! [`PathBuilder::build`] time, so commands added before and after a transform
+//! are transformed together. Building tessellates the path into triangles;
+//! handle errors when geometry comes from user input. For examples, see the
+//! [drawing walkthrough](https://gpui-ce.github.io/examples/drawing/#paint).
 
 use anyhow::Error;
 use etagere::euclid::{Point2D, Vector2D};
@@ -23,6 +24,8 @@ pub use lyon::tessellation::{FillOptions, FillRule, StrokeOptions};
 use crate::{Path, Pixels, Point, point, px};
 
 /// Tessellation style used by a [`PathBuilder`].
+///
+/// Fill and stroke options are passed to lyon when [`PathBuilder::build`] runs.
 pub enum PathStyle {
     /// Stroke the path with these options.
     Stroke(StrokeOptions),
@@ -93,7 +96,10 @@ impl Default for PathBuilder {
 }
 
 impl PathBuilder {
-    /// Creates a new [`PathBuilder`] to build a Stroke path.
+    /// Creates a stroke builder with `width` in logical pixels.
+    ///
+    /// The width is used during tessellation. A later window scale also scales
+    /// the resulting path geometry when it is painted.
     pub fn stroke(width: Pixels) -> Self {
         Self {
             style: PathStyle::Stroke(StrokeOptions::default().with_line_width(width.0)),
@@ -101,19 +107,24 @@ impl PathBuilder {
         }
     }
 
-    /// Creates a new [`PathBuilder`] to build a Fill path.
+    /// Creates a fill builder with lyon's default [`FillOptions`].
     pub fn fill() -> Self {
         Self::default()
     }
 
-    /// Sets the style of the [`PathBuilder`].
+    /// Replaces the fill or stroke options used by [`Self::build`].
     pub fn with_style(self, style: PathStyle) -> Self {
         Self { style, ..self }
     }
 
-    /// Sets the dash array of the [`PathBuilder`].
+    /// Sets the repeating on/off lengths for a stroked path, in logical pixels.
     ///
-    /// [MDN](https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Attribute/stroke-dasharray)
+    /// The slice must be non-empty and contain only positive lengths. If it has
+    /// an odd number of values, the full sequence is repeated so each pattern
+    /// has an even number of on/off entries. This setting is used only for
+    /// strokes; the builder does not validate the values.
+    ///
+    /// See the [SVG stroke-dasharray reference](https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Attribute/stroke-dasharray).
     pub fn dash_array(mut self, dash_array: &[Pixels]) -> Self {
         // If an odd number of values is provided, then the list of values is repeated to yield an even number of values.
         // Thus, 5,3,2 is equivalent to 5,3,2,5,3,2.
@@ -141,14 +152,13 @@ impl PathBuilder {
         self.raw.line_to(to.into());
     }
 
-    /// Draw a curve from the current point to the given point, using the given control point.
+    /// Adds a quadratic Bézier segment to `to` using `ctrl` as its control point.
     #[inline]
     pub fn curve_to(&mut self, to: Point<Pixels>, ctrl: Point<Pixels>) {
         self.raw.quadratic_bezier_to(ctrl.into(), to.into());
     }
 
-    /// Adds a cubic Bézier to the [`Path`] given its two control points
-    /// and its end point.
+    /// Adds a cubic Bézier segment to `to` using `control_a` and `control_b`.
     #[inline]
     pub fn cubic_bezier_to(
         &mut self,
@@ -160,7 +170,12 @@ impl PathBuilder {
             .cubic_bezier_to(control_a.into(), control_b.into(), to.into());
     }
 
-    /// Adds an elliptical arc.
+    /// Adds an elliptical arc from the current point to `to`.
+    ///
+    /// `radii` and `to` are in logical pixels. `x_rotation` is interpreted as
+    /// degrees, despite using the [`Pixels`] wrapper for compatibility with
+    /// lyon's SVG path builder. `large_arc` selects the larger candidate arc;
+    /// `sweep` selects its direction.
     pub fn arc_to(
         &mut self,
         radii: Point<Pixels>,
@@ -177,7 +192,9 @@ impl PathBuilder {
         );
     }
 
-    /// Equivalent to `arc_to` in relative coordinates.
+    /// Adds an elliptical arc using an endpoint relative to the current point.
+    ///
+    /// The radii and rotation use the same units and flags as [`Self::arc_to`].
     pub fn relative_arc_to(
         &mut self,
         radii: Point<Pixels>,
@@ -194,7 +211,7 @@ impl PathBuilder {
         );
     }
 
-    /// Adds a polygon.
+    /// Adds a polygon through `points`, optionally closing its contour.
     pub fn add_polygon(&mut self, points: &[Point<Pixels>], closed: bool) {
         let points = points.iter().copied().map(|p| p.into()).collect::<Vec<_>>();
         self.raw.add_polygon(Polygon {
@@ -203,19 +220,22 @@ impl PathBuilder {
         });
     }
 
-    /// Close the current sub-path.
+    /// Closes the current sub-path by connecting it back to its start point.
     #[inline]
     pub fn close(&mut self) {
         self.raw.close();
     }
 
-    /// Applies a transform to the path.
+    /// Replaces the transform applied to the path geometry during [`Self::build`].
+    ///
+    /// This sets the transform; it does not transform only the commands that
+    /// have already been added.
     #[inline]
     pub fn transform(&mut self, transform: Transform) {
         self.transform = Some(transform);
     }
 
-    /// Applies a translation to the path.
+    /// Adds a translation to the transform applied during [`Self::build`].
     #[inline]
     pub fn translate(&mut self, to: Point<Pixels>) {
         if let Some(transform) = self.transform {
@@ -225,7 +245,7 @@ impl PathBuilder {
         }
     }
 
-    /// Applies a scale to the path.
+    /// Adds a uniform scale to the transform applied during [`Self::build`].
     #[inline]
     pub fn scale(&mut self, scale: f32) {
         if let Some(transform) = self.transform {
@@ -235,9 +255,10 @@ impl PathBuilder {
         }
     }
 
-    /// Applies a rotation to the path.
+    /// Adds a rotation to the transform applied during [`Self::build`].
     ///
-    /// The `angle` is in degrees value in the range 0.0 to 360.0.
+    /// `angle` is in degrees. Values outside one full turn are accepted and
+    /// have the same rotational effect modulo 360 degrees.
     #[inline]
     pub fn rotate(&mut self, angle: f32) {
         let radians = angle.to_radians();
@@ -248,7 +269,12 @@ impl PathBuilder {
         }
     }
 
-    /// Builds into a [`Path`].
+    /// Tessellates the path into a triangle-based [`Path`].
+    ///
+    /// Fill paths use [`FillOptions`]; stroke paths use [`StrokeOptions`] and
+    /// any dash array set on the builder. Dash lengths should be positive.
+    /// The returned path is still in logical pixels; a window painting method
+    /// converts it to scene space.
     #[inline]
     pub fn build(self) -> Result<Path<Pixels>, Error> {
         let path = if let Some(transform) = self.transform {
@@ -327,7 +353,11 @@ impl PathBuilder {
         Ok(Self::build_path(buf))
     }
 
-    /// Builds a [`Path`] from a [`lyon::tessellation::VertexBuffers`].
+    /// Builds a [`Path`] from lyon's tessellated triangle buffers.
+    ///
+    /// Each index triple becomes one triangle. The vertex buffer's index list
+    /// must therefore contain complete triangles; any trailing one or two
+    /// indices are ignored.
     pub fn build_path(buf: VertexBuffers<lyon::math::Point, u16>) -> Path<Pixels> {
         if buf.vertices.is_empty() {
             return Path::new(Point::default());

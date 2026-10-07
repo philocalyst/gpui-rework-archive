@@ -1,8 +1,9 @@
-//! Ordered, deduplicated collections of paths.
+//! Path collections with stable storage and display orders.
 //!
-//! `PathList` stores paths in canonical lexical order and retains a separate permutation for the
-//! caller's input order. Equality and hashing ignore that presentation order; use `ordered_paths`
-//! when the original sequence matters.
+//! `PathList` sorts `PathBuf` values lexicographically and retains a separate permutation for the
+//! caller's input order. It does not canonicalize paths or remove duplicates. Equality and hashing
+//! ignore the presentation order but still include duplicate entries; use `ordered_paths` when the
+//! input sequence matters.
 
 use std::{
     hash::{Hash, Hasher},
@@ -14,7 +15,7 @@ use crate::paths::SanitizedPath;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-/// A list of absolute paths, with an associated display order.
+/// A list of paths, with an associated display order.
 ///
 /// Two `PathList` values are considered equal if they contain the same paths,
 /// regardless of the order in which those paths were originally provided.
@@ -55,7 +56,10 @@ pub struct SerializedPathList {
 }
 
 impl PathList {
-    /// Build a path list, retaining the input paths and their original order.
+    /// Sorts paths lexicographically while retaining their input order.
+    ///
+    /// This method neither requires absolute paths nor canonicalizes or
+    /// deduplicates them. Equal paths therefore remain as separate entries.
     pub fn new<P: AsRef<Path>>(paths: &[P]) -> Self {
         let mut indexed_paths: Vec<(usize, PathBuf)> = paths
             .iter()
@@ -77,8 +81,9 @@ impl PathList {
         self.paths.is_empty()
     }
 
-    /// Returns a new `PathList` with the given path removed.
-    /// Return a copy with every occurrence of `path_to_remove` omitted.
+    /// Returns a copy with every path equal to `path_to_remove` removed.
+    ///
+    /// Remaining paths retain their relative display order.
     pub fn without_path(&self, path_to_remove: &Path) -> PathList {
         let paths: Vec<PathBuf> = self
             .ordered_paths()
@@ -88,26 +93,22 @@ impl PathList {
         PathList::new(&paths)
     }
 
-    /// Get the paths in lexicographic order.
-    /// Borrow the stored paths in storage order.
+    /// Borrows the stored paths in lexicographic order.
     pub fn paths(&self) -> &[PathBuf] {
         self.paths.as_ref()
     }
 
-    /// Get the paths in the lexicographic order.
-    /// Clone the stored paths into an atomically shareable slice.
+    /// Clones the `Arc` holding the lexicographically ordered path slice.
     pub fn paths_owned(&self) -> Arc<[PathBuf]> {
         self.paths.clone()
     }
 
-    /// Get the order in which the paths were provided.
-    /// Borrow the indexes that define the display order.
+    /// Borrows indexes that map display order to positions in [`Self::paths`].
     pub fn order(&self) -> &[usize] {
         self.order.as_ref()
     }
 
-    /// Get the paths in the original order.
-    /// Iterate over paths in display order.
+    /// Iterates paths in their original display order.
     pub fn ordered_paths(&self) -> impl Iterator<Item = &PathBuf> {
         self.order
             .iter()
@@ -121,7 +122,14 @@ impl PathList {
         self.order.iter().enumerate().all(|(i, &j)| i == j)
     }
 
-    /// Decode a serialized list, repairing invalid indexes by using storage order.
+    /// Decode a serialized list, sorting paths and repairing inconsistent storage.
+    ///
+    /// When paths are not sorted or the parsed order has the wrong length, the
+    /// original display order cannot be recovered: paths are sorted and storage
+    /// order is used. Order indexes are not validated when their count matches;
+    /// malformed duplicate or out-of-range indexes can therefore produce an
+    /// incomplete or repeated display sequence. The format uses lossy path text
+    /// separated by newlines and comma-separated indexes.
     pub fn deserialize(serialized: &SerializedPathList) -> Self {
         let mut paths: Vec<PathBuf> = if serialized.paths.is_empty() {
             Vec::new()

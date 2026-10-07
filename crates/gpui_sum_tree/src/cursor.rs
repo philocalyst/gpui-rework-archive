@@ -35,6 +35,7 @@ impl<T: Item + fmt::Debug, D: fmt::Debug> fmt::Debug for StackEntry<'_, T, D> {
 pub struct Cursor<'a, 'b, T: Item, D> {
     tree: &'a SumTree<T>,
     stack: ArrayVec<StackEntry<'a, T, D>, 16, u8>,
+    /// Accumulated dimension immediately before the current item, or at end.
     pub position: D,
     did_seek: bool,
     at_end: bool,
@@ -67,7 +68,11 @@ where
     T: Item,
     D: Dimension<'a, T::Summary>,
 {
-    /// Creates a cursor at the start of `tree`.
+    /// Creates a cursor at the start of `tree` without positioning it for inspection.
+    ///
+    /// Call [`Self::seek`], [`Self::next`], or [`Self::prev`] before asking for
+    /// [`Self::item`] or [`Self::item_summary`]. `cx` is passed to summary
+    /// operations and must remain valid for the cursor's lifetime.
     pub fn new(tree: &'a SumTree<T>, cx: <T::Summary as Summary>::Context<'b>) -> Self {
         Self {
             tree,
@@ -80,6 +85,8 @@ where
     }
 
     /// Returns the cursor to the start position and clears any seek state.
+    ///
+    /// After reset, inspection methods panic until the next seek or movement.
     pub fn reset(&mut self) {
         self.did_seek = false;
         self.at_end = self.tree.is_empty();
@@ -104,7 +111,10 @@ where
         }
     }
 
-    /// Item is None, when the list is empty, or this cursor is at the end of the list.
+    /// Returns the current item, or `None` when the tree is empty or the cursor is at its end.
+    ///
+    /// Panics if the cursor has not been positioned by [`Self::seek`],
+    /// [`Self::next`], or [`Self::prev`].
     #[track_caller]
     pub fn item(&self) -> Option<&'a T> {
         self.assert_did_seek();
@@ -148,6 +158,8 @@ where
 
     #[track_caller]
     /// Peeks at the item after the current item without moving the cursor.
+    ///
+    /// Panics if the cursor has not been positioned.
     pub fn next_item(&self) -> Option<&'a T> {
         self.assert_did_seek();
         if let Some(entry) = self.stack.last() {
@@ -187,6 +199,8 @@ where
 
     #[track_caller]
     /// Peeks at the item before the current item without moving the cursor.
+    ///
+    /// Panics if the cursor has not been positioned.
     pub fn prev_item(&self) -> Option<&'a T> {
         self.assert_did_seek();
         if let Some(entry) = self.stack.last() {
@@ -224,12 +238,19 @@ where
         None
     }
 
+    /// Moves to the previous item, or to the last item if the cursor has not been positioned.
     #[track_caller]
     #[instrument(skip_all)]
     pub fn prev(&mut self) {
         self.search_backward(|_| true)
     }
 
+    /// Moves backward to the previous item whose summary passes `filter_node`.
+    ///
+    /// The predicate is called for subtree summaries as well as item summaries;
+    /// return `false` only when that entire summary cannot contain a desired
+    /// item, because a false result prunes the corresponding subtree. If the
+    /// cursor has not been positioned, the search starts from the end.
     #[track_caller]
     pub fn search_backward<F>(&mut self, mut filter_node: F)
     where
@@ -300,11 +321,18 @@ where
         }
     }
 
+    /// Moves to the next item, or to the first item if the cursor has not been positioned.
     #[track_caller]
     pub fn next(&mut self) {
         self.search_forward(|_| true)
     }
 
+    /// Moves forward to the next item whose summary passes `filter_node`.
+    ///
+    /// The predicate is called for subtree summaries as well as item summaries;
+    /// return `false` only when that entire summary cannot contain a desired
+    /// item, because a false result prunes the corresponding subtree. If the
+    /// cursor has not been positioned, the search starts from the beginning.
     #[track_caller]
     pub fn search_forward<F>(&mut self, mut filter_node: F)
     where
@@ -416,7 +444,14 @@ where
     T: Item,
     D: Dimension<'a, T::Summary>,
 {
-    /// Returns whether we found the item you were seeking for.
+    /// Seeks to `pos`, choosing the adjacent item according to `bias`.
+    ///
+    /// `Bias::Left` associates an exact item boundary with the item before it;
+    /// `Bias::Right` associates it with the item after it. The cursor's
+    /// [`Self::start`] and [`Self::end`] describe the selected item's range.
+    /// Returns `true` when `pos` matches the selected item's boundary under
+    /// that bias, and `false` when it lands inside an item or outside the
+    /// tree. A miss still positions the cursor at the nearest item or end.
     #[track_caller]
     #[instrument(skip_all)]
     pub fn seek<Target>(&mut self, pos: &Target, bias: Bias) -> bool
@@ -427,11 +462,12 @@ where
         self.seek_internal(pos, bias, &mut ())
     }
 
-    /// Returns whether we found the item you were seeking for.
+    /// Seeks forward from the current cursor position to `pos`.
     ///
-    /// # Panics
-    ///
-    /// If we did not seek before, use seek instead in that case.
+    /// Uses the same boundary and return-value rules as [`Self::seek`], but
+    /// does not reset to the start. It cannot move backward and panics if the
+    /// cursor has not yet been positioned; call [`Self::seek`] first in that
+    /// case.
     #[track_caller]
     #[instrument(skip_all)]
     pub fn seek_forward<Target>(&mut self, pos: &Target, bias: Bias) -> bool
@@ -441,7 +477,12 @@ where
         self.seek_internal(pos, bias, &mut ())
     }
 
-    /// Advances the cursor and returns traversed items as a tree.
+    /// Returns the items from the current position up to `end`, then advances
+    /// the cursor to that boundary.
+    ///
+    /// The `bias` argument controls whether items ending exactly at `end` are
+    /// included, following the same left/right boundary rule as [`Self::seek`].
+    /// Seeking backward from the current position panics.
     #[track_caller]
     pub fn slice<Target>(&mut self, end: &Target, bias: Bias) -> SumTree<T>
     where
@@ -457,11 +498,17 @@ where
         slice.tree
     }
 
+    /// Returns all remaining items and advances the cursor to the end.
     #[track_caller]
     pub fn suffix(&mut self) -> SumTree<T> {
         self.slice(&End::new(), Bias::Right)
     }
 
+    /// Accumulates `Output` from the current position up to `end` and advances
+    /// the cursor to that boundary.
+    ///
+    /// The `bias` argument controls inclusion of items ending exactly at
+    /// `end`. Seeking backward from the current position panics.
     #[track_caller]
     pub fn summary<Target, Output>(&mut self, end: &Target, bias: Bias) -> Output
     where
@@ -690,7 +737,11 @@ where
     }
 }
 
-/// A cursor that visits only items accepted by a filtering predicate.
+/// A cursor that visits items selected by a summary-based pruning predicate.
+///
+/// The predicate is also called for subtree summaries. Return `false` only
+/// when a summary cannot contain a desired item, because a false result skips
+/// that entire subtree.
 pub struct FilterCursor<'a, 'b, F, T: Item, D> {
     cursor: Cursor<'a, 'b, T, D>,
     filter_node: F,
@@ -702,7 +753,10 @@ where
     T: Item,
     D: Dimension<'a, T::Summary>,
 {
-    /// Creates a filtered cursor over `tree`.
+    /// Creates a filtered cursor over `tree`, initially unpositioned.
+    ///
+    /// Call [`Self::next`] or [`Self::prev`] before inspecting the current
+    /// item. It also implements Rust's standard [`Iterator`] interface.
     pub fn new(
         tree: &'a SumTree<T>,
         cx: <T::Summary as Summary>::Context<'b>,
@@ -735,12 +789,12 @@ where
         self.cursor.item_summary()
     }
 
-    /// Advances to the next matching item.
+    /// Advances to the next item whose summary passes the filter.
     pub fn next(&mut self) {
         self.cursor.search_forward(&mut self.filter_node);
     }
 
-    /// Moves to the previous matching item.
+    /// Moves to the previous item whose summary passes the filter.
     pub fn prev(&mut self) {
         self.cursor.search_backward(&mut self.filter_node);
     }

@@ -15,7 +15,7 @@ mod diagnostics;
 pub use diagnostics::*;
 
 #[cfg(all(target_os = "linux", feature = "wayland"))]
-#[expect(missing_docs)]
+/// Wayland layer-shell surfaces for panels, overlays, and other desktop shell UI.
 pub mod layer_shell;
 
 /// Types for configuring parent-anchored popup windows such as menus, dropdowns and tooltips.
@@ -162,7 +162,12 @@ pub enum MacActivationPolicy {
     Prohibited,
 }
 
-#[expect(missing_docs)]
+/// The operating-system services used by a GPUI application.
+///
+/// A backend owns the event loop, native windows, and system integration. GPUI
+/// calls this trait on the UI thread; work returned by [`Self::background_executor`]
+/// may run elsewhere. Application code normally uses [`App`] instead. Implement
+/// this trait when adding a backend or providing a controlled test environment.
 pub trait Platform: 'static {
     /// Executor for work that may run away from the UI thread.
     fn background_executor(&self) -> BackgroundExecutor;
@@ -244,26 +249,48 @@ pub trait Platform: 'static {
 
     /// Ask the operating system to open `url` using its default handler.
     fn open_url(&self, url: &str);
-    /// Register a callback for URLs delivered to an already-running application.
+    /// Register the callback for URLs delivered to an already-running application.
+    ///
+    /// The backend invokes it for URL-open events routed to this process. Registering the handler
+    /// does not itself register a scheme; use [`Self::register_url_scheme`] for that. The callback
+    /// is retained by the backend.
     fn on_open_urls(&self, callback: Box<dyn FnMut(Vec<String>)>);
-    /// Register a URL scheme for this application.
+    /// Register a URL scheme for this application and resolve with registration status.
+    ///
+    /// The task can fail when the operating system rejects the registration. Registration only
+    /// routes future opens to this app; use [`Self::on_open_urls`] to receive them.
     fn register_url_scheme(&self, url: &str) -> Task<Result<()>>;
 
+    /// Open a file/directory picker.
+    ///
+    /// The receiver resolves asynchronously to selected paths, `Ok(None)` on cancellation, or an
+    /// error if the picker fails. A dropped receiver does not imply that the platform canceled
+    /// the native dialog.
     fn prompt_for_paths(
         &self,
         options: PathPromptOptions,
     ) -> oneshot::Receiver<Result<Option<Vec<PathBuf>>>>;
+    /// Open a save dialog, initially showing `directory` and `suggested_name`.
+    ///
+    /// The receiver resolves to the selected path, `Ok(None)` on cancellation, or an error if the
+    /// dialog fails. A dropped receiver does not necessarily cancel the native dialog.
     fn prompt_for_new_path(
         &self,
         directory: &Path,
         suggested_name: Option<&str>,
     ) -> oneshot::Receiver<Result<Option<PathBuf>>>;
+    /// Whether one picker can select files and directories together.
     fn can_select_mixed_files_and_dirs(&self) -> bool;
+    /// Reveal a path in the platform's file manager.
     fn reveal_path(&self, path: &Path);
+    /// Open a path with its registered system application.
     fn open_with_system(&self, path: &Path);
 
+    /// Install the quit callback; its return value permits (`true`) or vetoes termination.
     fn on_quit(&self, callback: Box<dyn FnMut() -> bool>);
+    /// Install the callback for reopening an already-running application.
     fn on_reopen(&self, callback: Box<dyn FnMut()>);
+    /// Install the callback for waking from system sleep.
     fn on_system_wake(&self, callback: Box<dyn FnMut()>);
 
     // Mobile platform methods. On mobile the OS owns the application
@@ -290,14 +317,23 @@ pub trait Platform: 'static {
         None
     }
 
+    /// Replace the application menu, using `keymap` to display shortcut labels.
+    ///
+    /// Menu actions are dispatched through [`Self::on_app_menu_action`]; the backend may also ask
+    /// [`Self::on_validate_app_menu_command`] whether each action is currently enabled.
     fn set_menus(&self, menus: Vec<Menu>, keymap: &Keymap);
+    /// Read back the application menu, when the backend supports it.
     fn get_menus(&self) -> Option<Vec<OwnedMenu>> {
         None
     }
 
+    /// Replace the macOS Dock menu, using `keymap` to display shortcuts.
     fn set_dock_menu(&self, menu: Vec<MenuItem>, keymap: &Keymap);
+    /// Dispatch a Dock menu action by its backend-assigned index.
     fn perform_dock_menu_action(&self, _action: usize) {}
+    /// Add a path to the operating system's recent-document list, where supported.
     fn add_recent_document(&self, _path: &Path) {}
+    /// Update the Windows jump list and return entries the system rejected.
     fn update_jump_list(
         &self,
         _menus: Vec<MenuItem>,
@@ -305,11 +341,16 @@ pub trait Platform: 'static {
     ) -> Task<Vec<SmallVec<[PathBuf; 2]>>> {
         Task::ready(Vec::new())
     }
+    /// Install the callback that dispatches an application-menu action selected by the user.
     fn on_app_menu_action(&self, callback: Box<dyn FnMut(&dyn Action)>);
+    /// Install the callback invoked immediately before the application menu opens.
     fn on_will_open_app_menu(&self, callback: Box<dyn FnMut()>);
+    /// Install the callback that determines whether a menu action is enabled when the menu opens.
     fn on_validate_app_menu_command(&self, callback: Box<dyn FnMut(&dyn Action) -> bool>);
 
+    /// Current system thermal pressure, for reducing discretionary work.
     fn thermal_state(&self) -> ThermalState;
+    /// Install the callback for changes to [`Self::thermal_state`].
     fn on_thermal_state_change(&self, callback: Box<dyn FnMut()>);
 
     /// Sets the application's process-wide identity and user-visible name.
@@ -352,12 +393,16 @@ pub trait Platform: 'static {
         _ = callback;
     }
 
+    /// A diagnostic compositor name, or an empty string when unavailable.
     fn compositor_name(&self) -> &'static str {
         ""
     }
+    /// Locate the application bundle or executable, according to platform conventions.
     fn app_path(&self) -> Result<PathBuf>;
+    /// Locate a named helper executable shipped with the application.
     fn path_for_auxiliary_executable(&self, name: &str) -> Result<PathBuf>;
 
+    /// Change the cursor displayed over application windows.
     fn set_cursor_style(&self, style: CursorStyle);
 
     /// Hides the mouse cursor until the user moves the mouse over one of
@@ -367,9 +412,12 @@ pub trait Platform: 'static {
     /// Returns whether the mouse cursor is currently visible.
     fn is_cursor_visible(&self) -> bool;
 
+    /// Whether the user's system preference is to hide idle scrollbars.
     fn should_auto_hide_scrollbars(&self) -> bool;
 
+    /// Read synchronously available clipboard contents; prefer the async method on web.
     fn read_from_clipboard(&self) -> Option<ClipboardItem>;
+    /// Replace the system clipboard contents.
     fn write_to_clipboard(&self, item: ClipboardItem);
 
     /// Reads the clipboard, resolving once its contents are available.
@@ -384,21 +432,36 @@ pub trait Platform: 'static {
     }
 
     #[cfg(any(target_os = "linux", target_os = "freebsd"))]
+    /// Read the primary selection, which is separate from the regular clipboard.
     fn read_from_primary(&self) -> Option<ClipboardItem>;
     #[cfg(any(target_os = "linux", target_os = "freebsd"))]
+    /// Replace the primary selection.
     fn write_to_primary(&self, item: ClipboardItem);
 
     #[cfg(target_os = "macos")]
+    /// Read the macOS find pasteboard shared by application search fields.
     fn read_from_find_pasteboard(&self) -> Option<ClipboardItem>;
     #[cfg(target_os = "macos")]
+    /// Replace the macOS find pasteboard contents.
     fn write_to_find_pasteboard(&self, item: ClipboardItem);
 
+    /// Store credentials scoped to `url` in the platform credential store.
+    ///
+    /// The returned task reports access, encoding, or backend errors.
     fn write_credentials(&self, url: &str, username: &str, password: &[u8]) -> Task<Result<()>>;
+    /// Read stored credentials for `url`; `Ok(None)` means no entry exists.
     fn read_credentials(&self, url: &str) -> Task<Result<Option<(String, Vec<u8>)>>>;
+    /// Remove credentials scoped to `url`; the task reports store errors.
     fn delete_credentials(&self, url: &str) -> Task<Result<()>>;
 
+    /// Describe the currently selected keyboard layout for matching key input.
     fn keyboard_layout(&self) -> Box<dyn PlatformKeyboardLayout>;
+    /// Map key equivalents and shortcut labels for the current keyboard layout.
+    ///
+    /// Use the mapper for layout-sensitive matching or display; raw parsed [`Keystroke`] values
+    /// are appropriate when the keymap syntax itself is the data being stored.
     fn keyboard_mapper(&self) -> Rc<dyn PlatformKeyboardMapper>;
+    /// Install the callback for keyboard-layout changes.
     fn on_keyboard_layout_change(&self, callback: Box<dyn FnMut()>);
 
     /// Register additional GPU device requirements (features, limits) before
@@ -423,24 +486,29 @@ pub trait Platform: 'static {
 
 /// A handle to a platform's display, e.g. a monitor or laptop screen.
 pub trait PlatformDisplay: Debug {
-    /// Get the ID for this display
+    /// Return the backend-local ID for this display.
     fn id(&self) -> DisplayId;
 
-    /// Returns a stable identifier for this display that can be persisted and used
-    /// across system restarts.
+    /// Return a stable identifier suitable for persisting across system restarts.
+    ///
+    /// Returns an error when the backend cannot obtain a persistent display identity.
     fn uuid(&self) -> Result<Uuid>;
 
-    /// Get the bounds for this display
+    /// Return the full display rectangle in the shared global logical-pixel coordinate space.
     fn bounds(&self) -> Bounds<Pixels>;
 
-    /// Get the visible bounds for this display, excluding taskbar/dock areas.
-    /// This is the usable area where windows can be placed without being obscured.
-    /// Defaults to the full display bounds if not overridden.
+    /// Return the usable global logical-pixel rectangle, excluding reserved work areas.
+    ///
+    /// The default is the full display bounds; backends may subtract areas such as a taskbar or
+    /// dock when the window manager reports them.
     fn visible_bounds(&self) -> Bounds<Pixels> {
         self.bounds()
     }
 
-    /// Get the default bounds for this display to place a window
+    /// Return a default global logical-pixel rectangle for a new window on this display.
+    ///
+    /// The default centers `DEFAULT_WINDOW_SIZE` in the full display bounds, clipping the size to
+    /// fit the display. Backends may override this policy.
     fn default_bounds(&self) -> Bounds<Pixels> {
         let bounds = self.bounds();
         let center = bounds.center();
@@ -517,7 +585,7 @@ pub enum HapticFeedbackStyle {
     LevelChange,
 }
 
-/// Metadata for a given [ScreenCaptureSource]
+/// Metadata for a [`ScreenCaptureSource`] or its active stream.
 #[derive(Clone)]
 pub struct SourceMetadata {
     /// Opaque identifier of this screen.
@@ -526,17 +594,24 @@ pub struct SourceMetadata {
     pub label: Option<SharedString>,
     /// Whether this source is the main display.
     pub is_main: Option<bool>,
-    /// Video resolution of this source.
+    /// Video resolution of this source in device pixels.
     pub resolution: Size<DevicePixels>,
 }
 
-/// A source of on-screen video content that can be captured.
+/// A platform-owned source of on-screen video content that can be captured.
+///
+/// Keep the source alive while requesting a stream. Enumeration and stream startup can fail
+/// independently, so handle both receiver errors and the returned `Result`.
 pub trait ScreenCaptureSource {
     /// Returns metadata for this source.
     fn metadata(&self) -> Result<SourceMetadata>;
 
-    /// Start capture video from this source, invoking the given callback
-    /// with each frame.
+    /// Start video capture and invoke `frame_callback` for each available frame.
+    ///
+    /// The returned receiver resolves when the stream starts or startup fails. The callback may
+    /// run on a native capture thread; marshal UI work through the foreground executor instead
+    /// of borrowing GPUI state directly from it. Keep the returned stream alive to continue
+    /// capture; dropping it stops the stream where supported.
     fn stream(
         &self,
         foreground_executor: &ForegroundExecutor,
@@ -544,14 +619,20 @@ pub trait ScreenCaptureSource {
     ) -> oneshot::Receiver<Result<Box<dyn ScreenCaptureStream>>>;
 }
 
-/// A video stream captured from a screen.
+/// A running video stream captured from a screen.
+///
+/// The stream owns the native capture session. Drop it to stop capture; metadata describes the
+/// source associated with this session.
 pub trait ScreenCaptureStream {
     /// Returns metadata for this source.
     fn metadata(&self) -> Result<SourceMetadata>;
 }
 
 /// A frame of video captured from a screen.
-pub struct ScreenCaptureFrame(pub PlatformScreenCaptureFrame);
+pub struct ScreenCaptureFrame(
+    /// The native frame representation for this target and feature configuration.
+    pub PlatformScreenCaptureFrame,
+);
 
 /// An opaque identifier for a hardware display
 #[derive(PartialEq, Eq, Hash, Copy, Clone)]
@@ -830,8 +911,8 @@ pub struct A11yCallbacks {
     pub deactivation: Box<dyn Fn() + Send + 'static>,
 }
 
+/// Requirements attached to a platform's request for a new frame.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
-#[expect(missing_docs)]
 pub struct RequestFrameOptions {
     /// Whether a presentation is required.
     pub require_presentation: bool,
@@ -908,25 +989,30 @@ pub enum TextInputStateChange {
     ContentChanged,
 }
 
-#[expect(missing_docs)]
+/// The native peer of a [`Window`], including input, presentation, and window management.
+///
+/// Positions and sizes use logical [`Pixels`] unless explicitly stated otherwise.
+/// The scale factor converts them to device pixels. Callback setters connect the
+/// native event loop to GPUI; their callbacks must run on the UI thread. Optional
+/// services have defaults so a backend can omit unsupported system features.
 pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
-    /// Return the outer window bounds in logical pixels.
+    /// Return the outer window bounds in global logical pixels, including native decorations.
     fn bounds(&self) -> Bounds<Pixels>;
     /// Report whether the native window is maximized.
     fn is_maximized(&self) -> bool;
     /// Return the native window bounds, including platform-specific state.
     fn window_bounds(&self) -> WindowBounds;
-    /// Return the drawable content size in logical pixels.
+    /// Return the drawable content size in logical pixels, excluding native decorations.
     fn content_size(&self) -> Size<Pixels>;
     /// Request a content resize; native constraints may adjust the result asynchronously.
     fn resize(&mut self, size: Size<Pixels>);
-    /// Return logical pixels per device pixel.
+    /// Return device pixels per logical pixel (for example, `2.0` on a 2× display).
     fn scale_factor(&self) -> f32;
     /// Return the effective light/dark appearance for this window.
     fn appearance(&self) -> WindowAppearance;
     /// Return the display currently containing this window.
     fn display(&self) -> Option<Rc<dyn PlatformDisplay>>;
-    /// Return the current pointer position in window coordinates.
+    /// Return the current pointer position relative to the window's content origin, in logical pixels.
     fn mouse_position(&self) -> Point<Pixels>;
     /// Return current modifier key state.
     fn modifiers(&self) -> Modifiers;
@@ -941,6 +1027,8 @@ pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
     /// element on web). Called only when the configuration changes, because
     /// reconfiguring a live input session can restart the IME connection.
     fn set_text_input_configuration(&mut self, _configuration: TextInputConfiguration) {}
+    /// Show a native prompt and return the selected answer's zero-based index.
+    /// Return `None` when this backend cannot show native prompts.
     fn prompt(
         &self,
         level: PromptLevel,
@@ -980,21 +1068,38 @@ pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
     fn toggle_fullscreen(&self);
     /// Report native fullscreen state.
     fn is_fullscreen(&self) -> bool;
+    /// A callback that wakes frame scheduling, if the backend exposes one.
     fn frame_waker(&self) -> Option<Rc<dyn Fn()>> {
         None
     }
+    /// Install the callback invoked when the platform requests a frame.
     fn on_request_frame(&self, callback: Box<dyn FnMut(RequestFrameOptions)>);
+    /// Install the callback that routes native input into GPUI.
+    ///
+    /// The returned [`DispatchEventResult`] tells the backend whether GPUI stopped propagation or
+    /// prevented the platform default for this event.
     fn on_input(&self, callback: Box<dyn FnMut(PlatformInput) -> DispatchEventResult>);
+    /// Install the callback for native activation changes.
     fn on_active_status_change(&self, callback: Box<dyn FnMut(bool)>);
+    /// Install the callback for the pointer entering or leaving the window.
     fn on_hover_status_change(&self, callback: Box<dyn FnMut(bool)>);
+    /// Install the callback for content-size or scale-factor changes.
+    ///
+    /// The size is in logical pixels and the scale factor is device pixels per logical pixel.
     fn on_resize(&self, callback: Box<dyn FnMut(Size<Pixels>, f32)>);
+    /// Install the callback for window-position changes.
     fn on_moved(&self, callback: Box<dyn FnMut()>);
+    /// Install the close-request callback; `false` vetoes closing the window.
     fn on_should_close(&self, callback: Box<dyn FnMut() -> bool>);
+    /// Install hit testing for controls supplied by a custom titlebar.
     fn on_hit_test_window_control(&self, callback: Box<dyn FnMut() -> Option<WindowControlArea>>);
+    /// Install the callback invoked once the native window closes.
     fn on_close(&self, callback: Box<dyn FnOnce()>);
+    /// Install the callback for changes to the window's effective appearance.
     fn on_appearance_changed(&self, callback: Box<dyn FnMut()>);
+    /// Install the callback for native titlebar-button layout changes.
     fn on_button_layout_changed(&self, _callback: Box<dyn FnMut()>) {}
-    /// Submit a scene to the native renderer.
+    /// Submit a device-scaled scene to the native renderer for this window.
     fn draw(&self, scene: &Scene);
     /// Ask the backend to schedule its next presentation frame.
     fn schedule_frame(&self) {}
@@ -1004,22 +1109,30 @@ pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
     fn is_subpixel_rendering_supported(&self) -> bool;
 
     // macOS specific methods
+    /// Read the native title, or an empty string when unsupported.
     fn get_title(&self) -> String {
         String::new()
     }
+    /// Enumerate windows in this window's native tab group, if supported.
     fn tabbed_windows(&self) -> Option<Vec<SystemWindowTab>> {
         None
     }
+    /// Whether the native tab bar is visible.
     fn tab_bar_visible(&self) -> bool {
         false
     }
+    /// Set the document's edited indicator in native window chrome.
     fn set_edited(&mut self, _edited: bool) {}
+    /// Associate a document path with the window, or clear it with `None`.
     fn set_document_path(&self, _path: Option<&std::path::Path>) {}
+    /// Toggle fullscreen without moving the window to a dedicated macOS Space.
     fn toggle_simple_fullscreen(&self) {}
+    /// Whether the window is in that simple fullscreen mode.
     fn is_simple_fullscreen(&self) -> bool {
         false
     }
     #[cfg(target_os = "macos")]
+    /// Position native titlebar buttons in logical window coordinates.
     fn set_traffic_light_position(&self, _position: Point<Pixels>) {}
     /// Show the platform character palette.
     ///
@@ -1028,49 +1141,76 @@ pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
     fn show_character_palette(&self) {
         log::warn!("show_character_palette is not implemented by this platform backend");
     }
+    /// Apply the system preference for double-clicking a titlebar.
     fn titlebar_double_click(&self, _is_resizable: bool, _is_minimizable: bool) {}
+    /// Install the callback for moving the selected native tab to a new window.
     fn on_move_tab_to_new_window(&self, _callback: Box<dyn FnMut()>) {}
+    /// Install the callback for merging native windows into a tab group.
     fn on_merge_all_windows(&self, _callback: Box<dyn FnMut()>) {}
+    /// Install the callback for selecting the previous native tab.
     fn on_select_previous_tab(&self, _callback: Box<dyn FnMut()>) {}
+    /// Install the callback for selecting the next native tab.
     fn on_select_next_tab(&self, _callback: Box<dyn FnMut()>) {}
+    /// Install the callback for toggling the native tab bar.
     fn on_toggle_tab_bar(&self, _callback: Box<dyn FnMut()>) {}
+    /// Merge compatible native windows into this window's tab group.
     fn merge_all_windows(&self) {}
+    /// Detach this native tab into its own window.
     fn move_tab_to_new_window(&self) {}
+    /// Toggle the native overview of window tabs.
     fn toggle_window_tab_overview(&self) {}
+    /// Set the identifier used to group compatible native window tabs.
     fn set_tabbing_identifier(&self, _identifier: Option<String>) {}
 
     #[cfg(target_os = "windows")]
+    /// Return the Win32 window handle owned by this backend.
     fn get_raw_handle(&self) -> windows::Win32::Foundation::HWND;
 
     // Linux specific methods
+    /// Return bounds excluding client-side decorations, where applicable.
     fn inner_window_bounds(&self) -> WindowBounds {
         self.window_bounds()
     }
+    /// Request client- or server-side window decorations.
     fn request_decorations(&self, _decorations: WindowDecorations) {}
+    /// Show the compositor's window menu at a logical window position.
     fn show_window_menu(&self, _position: Point<Pixels>) {}
+    /// Begin an interactive window move using the current pointer gesture.
     fn start_window_move(&self) {}
+    /// Whether this backend can initiate a drag into another application.
     fn can_start_external_drag(&self) -> bool {
         false
     }
+    /// Start a native external drag; return whether the request was accepted.
     fn start_external_drag(&self, _payload: &ExternalDragPayload) -> bool {
         false
     }
+    /// Begin an interactive resize from `edge` using the current pointer gesture.
     fn start_window_resize(&self, _edge: ResizeEdge) {}
+    /// Reserve a logical-pixel region for a Wayland layer-shell surface.
     fn set_exclusive_zone(&self, _zone: Pixels) {}
     #[cfg(all(target_os = "linux", feature = "wayland"))]
+    /// Select the edge from which a layer-shell exclusive zone is measured.
     fn set_exclusive_edge(&self, _edge: layer_shell::Anchor) {}
+    /// Set pointer-input regions in logical window coordinates; `None` restores the whole surface.
     fn set_input_region(&self, _region: Option<&[Bounds<Pixels>]>) {}
+    /// Report the effective decoration mode.
     fn window_decorations(&self) -> Decorations {
         Decorations::Server
     }
+    /// Set the compositor's application identifier for this window.
     fn set_app_id(&mut self, _app_id: &str) {}
+    /// Make an initially unmapped native window available to the compositor.
     fn map_window(&mut self) -> anyhow::Result<()> {
         Ok(())
     }
+    /// Report which native window controls are available.
     fn window_controls(&self) -> WindowControls {
         WindowControls::default()
     }
+    /// Set the inset occupied by client-side window decorations.
     fn set_client_inset(&self, _inset: Pixels) {}
+    /// Describe the GPU selected by this window's renderer, if available.
     fn gpu_specs(&self) -> Option<GpuSpecs>;
 
     /// Returns the GPU context for this window's renderer.
@@ -1114,6 +1254,13 @@ pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
         None
     }
 
+    /// Position the native IME candidate window near logical window-local bounds.
+    ///
+    /// The bounds come from [`InputHandler::bounds_for_range`]. They are in the
+    /// same coordinate space as element layout, with an origin at the window's
+    /// content area; the backend converts them to native device or surface
+    /// coordinates as needed. GPUI supplies caret bounds during composition and
+    /// uses the active selection endpoint otherwise.
     fn update_ime_position(&self, _bounds: Bounds<Pixels>);
 
     // Mobile platform methods.
@@ -1148,6 +1295,7 @@ pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
     /// Inform the operating system that the text input state has changed
     fn text_input_state_changed(&self, _change: TextInputStateChange) {}
 
+    /// Request the user's configured system alert sound, where supported.
     fn play_system_bell(&self) {}
 
     /// Initialize the accessibility adapter with callbacks.
@@ -1160,6 +1308,7 @@ pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
     fn a11y_update_window_bounds(&self) {}
 
     #[cfg(any(test, feature = "headless", feature = "bench-support"))]
+    /// Expose a test window when this native peer is backed by GPUI's test platform.
     fn as_test(&mut self) -> Option<&mut TestWindow> {
         None
     }
@@ -1253,8 +1402,14 @@ pub trait PlatformDispatcher: Send + Sync {
     }
 }
 
-#[expect(missing_docs)]
+/// Font discovery, shaping, and glyph rasterization supplied by a platform backend.
+///
+/// Unlike native window services, this trait is thread-safe. Font identifiers
+/// belong to this text system; layout and rasterization must resolve them against
+/// the same font collection. Bump [`Self::font_generation`] when that collection
+/// changes so callers can invalidate cached layout.
 pub trait PlatformTextSystem: Send + Sync {
+    /// Add font files from owned or static bytes; reject files the backend cannot load.
     fn add_fonts(&self, fonts: Vec<Cow<'static, [u8]>>) -> Result<()>;
     /// Get all available font names.
     fn all_font_names(&self) -> Vec<String>;
@@ -1308,7 +1463,11 @@ mod tests {
     use anyhow::Result;
     use std::{borrow::Cow, ops::Range, sync::Arc};
 
-    #[expect(missing_docs)]
+    /// A deterministic text system for tests that do not need real font shaping.
+    ///
+    /// Every UTF-16 code unit has the same advance, all text occupies one visual
+    /// line, and rasterization produces no bitmap. Use a real platform text
+    /// system for wrapping, bidirectional text, font fallback, or pixel comparisons.
     pub struct TestTextSystem;
 
     #[derive(Debug)]
@@ -1570,9 +1729,9 @@ mod tests {
         }
     }
 
-    #[expect(missing_docs)]
     impl TestTextSystem {
         #[allow(dead_code)]
+        /// Construct the stateless test text system.
         pub fn new() -> Self {
             Self
         }
@@ -1906,19 +2065,29 @@ pub fn get_gamma_correction_ratios(gamma: f32) -> [f32; 4] {
     ]
 }
 
+/// Identifies bitmap content cached in a renderer's atlas.
+///
+/// Keys include the parameters that affect pixels. A key is meaningful to the
+/// owning [`PlatformAtlas`]; it is not a portable GPU texture handle.
 #[derive(PartialEq, Eq, Hash, Clone)]
-#[expect(missing_docs)]
 pub enum AtlasKey {
     /// A portable scene resource imported into this window's atlas.
     Captured {
+        /// Stable identity of the captured bitmap resource.
         resource: uuid::Uuid,
+        /// Pixel format required by this resource.
         kind: AtlasTextureKind,
     },
+    /// A glyph rasterized with these parameters and pixel format.
     Glyph {
+        /// Font, glyph, scale, and raster settings that determine the bitmap.
         params: RenderGlyphParams,
+        /// The bitmap's channel interpretation.
         format: RasterizedGlyphFormat,
     },
+    /// An SVG rendered at the requested dimensions.
     Svg(RenderSvgParams),
+    /// A decoded image frame at the requested scale.
     Image(RenderImageParams),
 }
 
@@ -2009,8 +2178,16 @@ impl GlyphAtlasCache {
     }
 }
 
-#[expect(missing_docs)]
+/// A window renderer's cache of glyph, image, and SVG bitmap tiles.
+///
+/// Tiles refer to textures owned by this atlas. Do not transfer them between
+/// windows; use a portable [`crate::SceneCapture`] to import scene resources.
 pub trait PlatformAtlas {
+    /// Look up `key`, calling `build` only on a cache miss.
+    ///
+    /// The builder supplies dimensions and tightly packed pixels in the key's
+    /// texture format. `Ok(None)` means there is no bitmap to insert. Errors
+    /// from decoding, validation, or allocation propagate to the caller.
     fn get_or_insert_with<'a>(
         &self,
         key: &AtlasKey,
@@ -2022,9 +2199,11 @@ pub trait PlatformAtlas {
         params: &RenderGlyphParams,
         build: &mut dyn FnMut() -> Result<ValidatedRasterizedGlyph>,
     ) -> Result<GlyphAtlasEntry>;
+    /// Evict the bitmap associated with `key`, if present.
     fn remove(&self, key: &AtlasKey);
 
     #[cfg(any(test, feature = "headless", feature = "bench-support"))]
+    /// Check residency when supported by the test backend; the default returns `false`.
     fn contains(&self, _key: &AtlasKey) -> bool {
         false
     }
@@ -2066,9 +2245,9 @@ impl<T> AtlasTextureList<T> {
     }
 }
 
+/// An allocated rectangle within a texture owned by one [`PlatformAtlas`].
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[repr(C)]
-#[expect(missing_docs)]
 pub struct AtlasTile {
     /// The texture this tile belongs to.
     pub texture_id: AtlasTextureId,
@@ -2080,9 +2259,9 @@ pub struct AtlasTile {
     pub bounds: Bounds<DevicePixels>,
 }
 
+/// Identifies one texture in its owning atlas, including its pixel format.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[repr(C)]
-#[expect(missing_docs)]
 pub struct AtlasTextureId {
     // We use u32 instead of usize for Metal Shader Language compatibility
     /// The index of this texture in the atlas.
@@ -2091,6 +2270,7 @@ pub struct AtlasTextureId {
     pub kind: AtlasTextureKind,
 }
 
+/// The channel interpretation of an atlas bitmap.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[repr(C)]
 #[cfg_attr(
@@ -2100,10 +2280,12 @@ pub struct AtlasTextureId {
     ),
     allow(dead_code)
 )]
-#[expect(missing_docs)]
 pub enum AtlasTextureKind {
+    /// One coverage byte per pixel, used for grayscale glyphs and SVG masks.
     Monochrome = 0,
+    /// Four BGRA bytes per pixel, used for color images and glyphs.
     Polychrome = 1,
+    /// Four bytes per pixel carrying BGRA subpixel coverage for LCD text.
     Subpixel = 2,
 }
 
@@ -2132,10 +2314,13 @@ impl AtlasTextureKind {
     }
 }
 
+/// Allocator identity of a tile within its atlas texture.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[repr(C)]
-#[expect(missing_docs)]
-pub struct TileId(pub u32);
+pub struct TileId(
+    /// Serialized atlas allocation identifier.
+    pub u32,
+);
 
 impl From<etagere::AllocId> for TileId {
     fn from(id: etagere::AllocId) -> Self {
@@ -2149,13 +2334,18 @@ impl From<TileId> for etagere::AllocId {
     }
 }
 
-#[expect(missing_docs)]
+/// Connects the platform's text-input session to a focused GPUI [`InputHandler`].
+///
+/// All text offsets and ranges count UTF-16 code units. Most methods briefly
+/// borrow the associated window and app; if the window has closed, queries
+/// return `None` and edits do nothing. Methods taking `window` and `cx` instead
+/// reuse an existing borrow. Native callbacks must not call the borrowing
+/// methods while GPUI already holds the app borrow.
 pub struct PlatformInputHandler {
     cx: AsyncWindowContext,
     handler: Box<dyn InputHandler>,
 }
 
-#[expect(missing_docs)]
 #[cfg_attr(
     all(
         any(target_os = "linux", target_os = "freebsd"),
@@ -2164,10 +2354,12 @@ pub struct PlatformInputHandler {
     allow(dead_code)
 )]
 impl PlatformInputHandler {
+    /// Wrap a focused handler with the window context needed by native callbacks.
     pub fn new(cx: AsyncWindowContext, handler: Box<dyn InputHandler>) -> Self {
         Self { cx, handler }
     }
 
+    /// Read the selection, optionally querying a handler that currently rejects text input.
     pub fn selected_text_range(&mut self, ignore_disabled_input: bool) -> Option<UTF16Selection> {
         self.cx
             .update(|window, cx| {
@@ -2179,6 +2371,7 @@ impl PlatformInputHandler {
     }
 
     #[cfg_attr(target_os = "windows", allow(dead_code))]
+    /// Read the active composition range, if any.
     pub fn marked_text_range(&mut self) -> Option<Range<usize>> {
         self.cx
             .update(|window, cx| self.handler.marked_text_range(window, cx))
@@ -2190,6 +2383,7 @@ impl PlatformInputHandler {
         any(target_os = "linux", target_os = "freebsd", target_os = "windows"),
         allow(dead_code)
     )]
+    /// Read text in a UTF-16 range, reporting any boundary adjustment through `adjusted`.
     pub fn text_for_range(
         &mut self,
         range_utf16: Range<usize>,
@@ -2204,6 +2398,7 @@ impl PlatformInputHandler {
             .flatten()
     }
 
+    /// Replace a UTF-16 range; `None` lets the handler choose the selection or composition.
     pub fn replace_text_in_range(&mut self, replacement_range: Option<Range<usize>>, text: &str) {
         self.cx
             .update(|window, cx| {
@@ -2213,6 +2408,8 @@ impl PlatformInputHandler {
             .ok();
     }
 
+    /// Replace text and mark it as an IME composition.
+    /// `new_selected_range` is relative to `new_text`, in UTF-16 code units.
     pub fn replace_and_mark_text_in_range(
         &mut self,
         range_utf16: Option<Range<usize>>,
@@ -2233,18 +2430,21 @@ impl PlatformInputHandler {
     }
 
     #[cfg_attr(target_os = "windows", allow(dead_code))]
+    /// Commit the current composition by clearing its marked range.
     pub fn unmark_text(&mut self) {
         self.cx
             .update(|window, cx| self.handler.unmark_text(window, cx))
             .ok();
     }
 
+    /// Deliver clipboard content directly to the focused handler.
     pub fn paste(&mut self, item: ClipboardItem) {
         self.cx
             .update(|window, cx| self.handler.paste(item, window, cx))
             .ok();
     }
 
+    /// Query the logical-pixel window bounds of a UTF-16 text range.
     pub fn bounds_for_range(&mut self, range_utf16: Range<usize>) -> Option<Bounds<Pixels>> {
         self.cx
             .update(|window, cx| self.handler.bounds_for_range(range_utf16, window, cx))
@@ -2253,14 +2453,21 @@ impl PlatformInputHandler {
     }
 
     #[allow(dead_code)]
+    /// Whether the handler permits Apple's press-and-hold accent picker.
     pub fn apple_press_and_hold_enabled(&mut self) -> bool {
         self.handler.apple_press_and_hold_enabled()
     }
 
+    /// Insert text using an existing window/app borrow and the handler's current selection.
     pub fn dispatch_input(&mut self, input: &str, window: &mut Window, cx: &mut App) {
         self.handler.replace_text_in_range(None, input, window, cx);
     }
 
+    /// Choose candidate-popup bounds from a selection and optional composition.
+    ///
+    /// During composition, use the start of the caret's visual line within the
+    /// marked range. Otherwise use the selection's active endpoint. The supplied
+    /// query receives UTF-16 ranges, including empty ranges for caret positions.
     pub fn compute_ime_candidate_bounds(
         marked_range: Option<Range<usize>>,
         selection: &UTF16Selection,
@@ -2296,6 +2503,7 @@ impl PlatformInputHandler {
         }
     }
 
+    /// Compute candidate-popup bounds using an existing window/app borrow.
     pub fn selected_bounds(&mut self, window: &mut Window, cx: &mut App) -> Option<Bounds<Pixels>> {
         let marked_range = self.handler.marked_text_range(window, cx);
         let selection = self.handler.selected_text_range(true, window, cx)?;
@@ -2304,6 +2512,7 @@ impl PlatformInputHandler {
         })
     }
 
+    /// Compute candidate-popup bounds by borrowing the associated window.
     pub fn ime_candidate_bounds(&mut self) -> Option<Bounds<Pixels>> {
         let marked_range = self.marked_text_range();
         let selection = self.selected_text_range(true)?;
@@ -2313,6 +2522,7 @@ impl PlatformInputHandler {
     }
 
     #[allow(unused)]
+    /// Hit-test a logical window position and return its UTF-16 text offset.
     pub fn character_index_for_point(&mut self, point: Point<Pixels>) -> Option<usize> {
         self.cx
             .update(|window, cx| self.handler.character_index_for_point(point, window, cx))
@@ -2347,11 +2557,13 @@ impl PlatformInputHandler {
     }
 
     #[allow(dead_code)]
+    /// Query whether the handler accepts text, using an existing window/app borrow.
     pub fn accepts_text_input(&mut self, window: &mut Window, cx: &mut App) -> bool {
         self.handler.accepts_text_input(window, cx)
     }
 
     #[allow(dead_code)]
+    /// Query whether the handler accepts text; defaults to `true` if the window is unavailable.
     pub fn query_accepts_text_input(&mut self) -> bool {
         self.cx
             .update(|window, cx| self.handler.accepts_text_input(window, cx))
@@ -2485,10 +2697,14 @@ pub trait InputHandler: 'static {
         }
     }
 
-    /// Get the bounds of the given document range in screen coordinates
+    /// Get the bounds of the given document range in logical window coordinates
     /// Corresponds to [firstRect(forCharacterRange:actualRange:)](https://developer.apple.com/documentation/appkit/nstextinputclient/1438240-firstrect)
     ///
-    /// This is used for positioning the IME candidate window
+    /// Return bounds in the coordinate space used by element layout, relative
+    /// to the window's content origin. Do not convert to device pixels or add
+    /// the window's screen position; the platform backend performs that mapping
+    /// when positioning the IME candidate window. An empty UTF-16 range denotes
+    /// a caret position.
     fn bounds_for_range(
         &mut self,
         range_utf16: Range<usize>,
@@ -2496,7 +2712,7 @@ pub trait InputHandler: 'static {
         cx: &mut App,
     ) -> Option<Bounds<Pixels>>;
 
-    /// Get the character offset for the given point in terms of UTF16 characters
+    /// Get the character offset for a logical window-local point in UTF-16 code units.
     ///
     /// Corresponds to [characterIndexForPoint:](https://developer.apple.com/documentation/appkit/nstextinputclient/characterindex(for:))
     fn character_index_for_point(
@@ -2767,6 +2983,10 @@ pub struct WindowOptions {
 impl FluentBuilder for WindowOptions {}
 
 /// The variables that can be configured when creating a new window
+/// Resolved window-creation parameters passed from GPUI to a platform backend.
+///
+/// Application code normally supplies [`WindowOptions`]; GPUI resolves display
+/// and geometry defaults before producing these parameters.
 #[derive(Debug)]
 #[cfg_attr(
     all(
@@ -2775,8 +2995,8 @@ impl FluentBuilder for WindowOptions {}
     ),
     allow(dead_code)
 )]
-#[allow(missing_docs)]
 pub struct WindowParams {
+    /// Initial window bounds in logical display coordinates.
     pub bounds: Bounds<Pixels>,
 
     /// The titlebar configuration of the window
@@ -2806,12 +3026,14 @@ pub struct WindowParams {
     #[cfg_attr(any(target_os = "linux", target_os = "freebsd"), allow(dead_code))]
     pub is_minimizable: bool,
 
+    /// Whether to request focus when the window opens.
     #[cfg_attr(
         any(target_os = "linux", target_os = "freebsd", target_os = "windows"),
         allow(dead_code)
     )]
     pub focus: bool,
 
+    /// Whether to show the window immediately after creation.
     #[cfg_attr(any(target_os = "linux", target_os = "freebsd"), allow(dead_code))]
     pub show: bool,
 
@@ -2820,15 +3042,19 @@ pub struct WindowParams {
     #[cfg_attr(feature = "wayland", allow(dead_code))]
     pub icon: Option<Arc<image::RgbaImage>>,
 
+    /// Display selected for the window, if explicitly resolved.
     #[cfg_attr(feature = "wayland", allow(dead_code))]
     pub display_id: Option<DisplayId>,
 
+    /// Compositor application identifier, where supported.
     #[cfg_attr(feature = "wayland", allow(dead_code))]
     pub app_id: Option<String>,
 
+    /// Minimum content size in logical pixels, if constrained.
     pub window_min_size: Option<Size<Pixels>>,
 
     #[cfg(target_os = "macos")]
+    /// Identifier used to group compatible native macOS window tabs.
     pub tabbing_identifier: Option<String>,
 }
 

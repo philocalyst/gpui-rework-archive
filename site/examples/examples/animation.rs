@@ -6,9 +6,9 @@ mod support;
 // An [`Animation`] supplies its clock and a [`Motion`] describes its duration.
 // The view stores only a replay number.
 //
-// Clicking Replay changes the animation key. The new key starts a new run;
-// rendering again with the same key continues the existing run. This is why
-// a click increments an identity rather than resetting a timer.
+// Clicking Replay changes the animation's retained element-state key. A new
+// key starts at the beginning; rendering with the same key reuses its existing
+// start time. The replay counter is therefore an identity, not a timer value.
 
 use std::time::Duration;
 
@@ -22,14 +22,17 @@ struct AnimationDemo {
 }
 
 // ## Sample width and opacity together {#animate}
-// [`AnimationExt::with_animation`] retains the clock under `("bar", replay)`.
-// Its callback receives progress shaped by [`ease_in_out`] and applies it to
-// [`Styled::w`] and [`Styled::opacity`]. GPUI requests frames while the motion
-// is active and stops requesting them when it finishes.
+// [`AnimationExt::with_animation`] associates progress with `("bar", replay)`.
+// Its callback receives eased progress from [`ease_in_out`] and derives width
+// and opacity from that same value. [`Styled::w`] changes layout; [`Styled::opacity`]
+// changes the rendered appearance without changing layout. GPUI requests
+// frames while the motion is active and stops requesting animation frames when
+// it completes.
 //
-// With [`App::reduce_motion`] enabled, this one-shot animation displays its end
-// state without requesting animation frames. Replay still changes identity,
-// but each new run is immediately presented at that end state.
+// With [`App::reduce_motion`] enabled, this one-shot motion skips intermediate
+// progress and presents its end state. Replay still changes the key, but each
+// new run appears complete immediately. This is a useful check that decorative
+// motion has a clear static result as well as an animated one.
 
 impl Render for AnimationDemo {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
@@ -76,10 +79,11 @@ impl Render for AnimationDemo {
 }
 
 // ## Test identity while it runs {#clock}
-// Click Replay, then resize while the bar expands. The retained key lets
-// progress continue through the new layout. Replace `("bar", replay)` with a
-// constant key and run again: clicking Replay no longer creates a fresh run.
-// The platform helper creates the view through [`AppContext::new`].
+// Click Replay, then resize while the bar expands: the motion should continue
+// while layout recalculates. Replace `("bar", replay)` with a constant key and
+// click again. The old start time remains associated with that key, so no new
+// run begins. [`AppContext::new`] creates the entity whose render method
+// returns this animated element tree.
 
 fn component(_window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<AnimationDemo> {
     cx.new(|_cx| AnimationDemo { replay: 0 })

@@ -10,8 +10,9 @@ pub use derive_refineable::Refineable;
 /// A trait for types that can be refined with partial updates.
 ///
 /// The `Refineable` trait enables hierarchical configuration patterns where a base configuration
-/// can be selectively overridden by refinements. This is particularly useful for styling and
-/// settings, and theme hierarchies.
+/// can be selectively overridden by refinements. A refinement records which fields were supplied,
+/// so a supplied value equal to the field's default still overrides an earlier value. This is
+/// particularly useful for styling, settings, and theme hierarchies.
 ///
 /// # Derive Macro
 ///
@@ -26,13 +27,32 @@ pub use derive_refineable::Refineable;
 ///
 /// ## Attributes
 ///
+/// The derive accepts a struct with named fields and generates a companion
+/// `StyleRefinement` type (using the source struct's name plus `Refinement`). Plain fields become
+/// `Option<FieldType>` in that type; a `None` means "leave the current value alone", while
+/// `Some(value)` replaces it. Fields marked `#[refineable]` use the nested type's refinement and
+/// merge recursively.
+///
+/// For a field whose type is `Option<T>`, the generated refinement field is also `Option<T>`.
+/// Consequently `Some(value)` sets the field to `Some(value)`, and `None` means "no update"; this
+/// derive cannot express clearing an existing `Some` back to `None` for that field. Use a different
+/// representation if a layer must distinguish "unset" from "set to none".
+///
 /// The derive macro supports these attributes on the struct:
 /// - `#[refineable(Debug)]`: Implements `Debug` for the refinement type
 /// - `#[refineable(Serialize)]`: Derives `Serialize` which skips serializing `None`
 /// - `#[refineable(OtherTrait)]`: Derives additional traits on the refinement type
 ///
 /// Fields can be marked with:
-/// - `#[refineable]`: Field is itself refineable (uses nested refinement type)
+/// - `#[refineable]`: Field is itself refineable (uses the nested refinement type and recursively
+///   applies updates). The field type must name the nested struct; this derive supports named-field
+///   structs, not tuple structs, unit structs, enums, or unions.
+///
+/// The generated refinement type implements [`Default`] as an empty update, [`IsEmpty`] to test
+/// whether any update is present, and `From<StyleRefinement> for Style` to turn it into a concrete
+/// value (omitted plain fields use `Default`). Its inherent `is_some` method is only a presence
+/// check; a field set to its default still counts as present. Use [`IsEmpty::is_empty`] to test
+/// whether the refinement contains any changes.
 pub trait Refineable: Clone {
     type Refinement: Refineable<Refinement = Self::Refinement> + IsEmpty + Default;
 
@@ -80,7 +100,10 @@ pub trait IsEmpty {
 ///
 /// A cascade maintains a sequence of optional refinements where later entries
 /// take precedence over earlier ones. The first slot (index 0) is always the
-/// base refinement and is guaranteed to be present.
+/// base refinement and is guaranteed to be present. A reserved slot starts
+/// inactive; setting it to `None` deactivates that layer without changing the
+/// precedence of later slots. A [`CascadeSlot`] belongs to the cascade that
+/// created it and must not be reused with another cascade.
 ///
 /// This is useful for implementing configuration hierarchies like CSS cascading,
 /// where styles from different sources (user agent, user, author) are combined

@@ -2,10 +2,12 @@ use crate::SharedString;
 use anyhow::{Context as _, Result};
 use std::fmt;
 
-/// A datastructure for resolving whether an action should be dispatched
-/// at this point in the element tree. Contains a set of identifiers
-/// and/or key value pairs representing the current context for the
-/// keymap.
+/// The named state contributed by one node on a key-dispatch path.
+///
+/// A context contains identifiers such as `Editor` and key-value entries such as `mode=insert`.
+/// GPUI collects contexts from the root toward the focused node; a binding predicate can match a
+/// context at any depth or express an ancestor/descendant relationship. Use
+/// [`KeyBindingContextPredicate`] to describe those matches.
 #[derive(Clone, Default, Eq, PartialEq, Hash)]
 pub struct KeyContext(Vec<ContextEntry>);
 
@@ -57,11 +59,16 @@ impl KeyContext {
         self.0.iter().filter(move |&p| Some(p) != primary)
     }
 
-    /// Parse a key context from a string.
-    /// The key context format is very simple:
-    /// - either a single identifier, such as `StatusBar`
-    /// - or a key value pair, such as `mode = visible`
-    /// - separated by whitespace, such as `StatusBar mode = visible`
+    /// Parse identifiers and key-value entries from a string.
+    ///
+    /// Entries are separated by whitespace. The accepted forms are:
+    ///
+    /// - a single identifier, such as `StatusBar`
+    /// - a key-value pair, such as `mode = visible`
+    /// - a mixture, such as `StatusBar mode = visible`
+    ///
+    /// Use [`KeyBindingContextPredicate::parse`] for the boolean expression syntax used by
+    /// keybinding `context` fields.
     pub fn parse(source: &str) -> Result<Self> {
         let mut context = Self::default();
         let source = skip_whitespace(source);
@@ -104,7 +111,9 @@ impl KeyContext {
         self.0.clear();
     }
 
-    /// Extend this context with another context.
+    /// Add entries from `other` whose keys are not already present.
+    ///
+    /// Existing values in `self` win; this does not replace an existing key's value.
     pub fn extend(&mut self, other: &Self) {
         for entry in &other.0 {
             if !self.contains(&entry.key) {
@@ -122,7 +131,10 @@ impl KeyContext {
         }
     }
 
-    /// Set a key value pair in this context, if it's not already set.
+    /// Add a key-value pair only if this context does not already contain `key`.
+    ///
+    /// This is an insert operation, not an overwrite. To change a value, construct or clear the
+    /// context with the desired entry before extending it.
     pub fn set<S1: Into<SharedString>, S2: Into<SharedString>>(&mut self, key: S1, value: S2) {
         let key = key.into();
         if !self.contains(&key) {
@@ -165,9 +177,12 @@ impl fmt::Debug for KeyContext {
     }
 }
 
-/// A datastructure for resolving whether an action should be dispatched
-/// Representing a small language for describing which contexts correspond
-/// to which actions.
+/// A predicate that determines whether a key binding is enabled on a context path.
+///
+/// Predicates are parsed from strings in a binding's `context` field. For example,
+/// `Editor && mode == insert` requires both terms on the matching path, while
+/// `Workspace > Editor` requires the editor context below the workspace context. The parser also
+/// accepts `!=`, `||`, and `!`; malformed expressions return an error.
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub enum KeyBindingContextPredicate {
     /// A predicate that will match a given identifier.
@@ -218,7 +233,7 @@ impl fmt::Display for KeyBindingContextPredicate {
 }
 
 impl KeyBindingContextPredicate {
-    /// Parse a string in the same format as the keymap's context field.
+    /// Parse a predicate expression in the same format as a keybinding's `context` field.
     ///
     /// A basic equivalence check against a set of identifiers can performed by
     /// simply writing a string:
@@ -244,8 +259,9 @@ impl KeyBindingContextPredicate {
     ///                                  and a child context that has the key `mode` with the
     ///                                  value `visible`
     ///
-    /// This syntax supports `!=`, `||` and `&&` as logical operators.
-    /// You can also preface an operation or check with a `!` to negate it.
+    /// This syntax supports `!=`, `||`, and `&&`; `!` negates a check or grouped expression.
+    /// `&&` binds more tightly than `||`. A malformed or partially consumed expression returns an
+    /// error rather than a partial predicate.
     pub fn parse(source: &str) -> Result<Self> {
         let source = skip_whitespace(source);
         let (predicate, rest) = Self::parse_expr(source, 0)?;
@@ -256,7 +272,11 @@ impl KeyBindingContextPredicate {
         }
     }
 
-    /// Find the deepest depth at which the predicate matches.
+    /// Return the deepest matching prefix depth on a context path.
+    ///
+    /// `contexts` are ordered from the outermost node to the focused node. `None` means the
+    /// predicate does not match any prefix; a returned depth is the number of contexts in the
+    /// deepest prefix where it matches.
     pub fn depth_of(&self, contexts: &[KeyContext]) -> Option<usize> {
         for depth in (0..=contexts.len()).rev() {
             let context_slice = &contexts[0..depth];
@@ -267,13 +287,16 @@ impl KeyBindingContextPredicate {
         None
     }
 
-    /// Eval a predicate against a set of contexts, arranged from lowest to highest.
+    /// Evaluate this predicate against a context path ordered outermost to innermost.
     #[allow(unused)]
     pub fn eval(&self, contexts: &[KeyContext]) -> bool {
         self.eval_inner(contexts, contexts)
     }
 
-    /// Eval a predicate against a set of contexts, arranged from lowest to highest.
+    /// Evaluate against a prefix while retaining the full path for descendant and negation checks.
+    ///
+    /// This helper is used by [`Self::depth_of`]; most callers should use [`Self::eval`].
+    /// `contexts` is the prefix currently being checked, and `all_contexts` is the complete path.
     pub fn eval_inner(&self, contexts: &[KeyContext], all_contexts: &[KeyContext]) -> bool {
         let Some(context) = contexts.last() else {
             return false;
@@ -323,8 +346,10 @@ impl KeyBindingContextPredicate {
         }
     }
 
-    /// Returns whether or not this predicate matches all possible contexts matched by
-    /// the other predicate.
+    /// Return whether this predicate subsumes `other` for keymap suppression.
+    ///
+    /// This is a structural predicate relation used to decide whether a disabled binding covers
+    /// another binding; it is not a general-purpose logical equivalence solver.
     pub fn is_superset(&self, other: &Self) -> bool {
         if self == other {
             return true;

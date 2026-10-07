@@ -56,13 +56,18 @@ fn binding_is_unbound(disabled_binding: &KeyBinding, binding: &KeyBinding) -> bo
 
 impl Keymap {
     /// Creates a keymap and adds `bindings` in iterator order.
+    ///
+    /// The input order is significant: later bindings win ties at equal context depth.
     pub fn new(bindings: Vec<KeyBinding>) -> Self {
         let mut this = Self::default();
         this.add_bindings(bindings);
         this
     }
 
-    /// Get the current version of the keymap.
+    /// Return the current opaque revision of this keymap.
+    ///
+    /// Compare versions only for equality to detect a change; they are not stable across
+    /// processes or suitable for ordering.
     pub fn version(&self) -> KeymapVersion {
         self.version
     }
@@ -101,8 +106,11 @@ impl Keymap {
         self.bindings.iter()
     }
 
-    /// Iterate over all bindings for the given action, in the order they were added. For display,
-    /// the last binding should take precedence.
+    /// Iterate over enabled bindings for an action, in the order they were added.
+    ///
+    /// This does not filter by a current context path. Later matching entries have higher
+    /// precedence for display, so consumers presenting one shortcut should inspect the iterator
+    /// from the back.
     pub fn bindings_for_action<'a>(
         &'a self,
         action: &'a dyn Action,
@@ -144,8 +152,10 @@ impl Keymap {
         })
     }
 
-    /// Returns all bindings that might match `input` without checking context. The bindings
-    /// returned in precedence order (reverse of the order they were added to the keymap).
+    /// Return complete sequence matches for `input` without checking context.
+    ///
+    /// Results are ordered by insertion precedence (reverse of the order they were added). Prefix
+    /// matches that need more keystrokes are excluded.
     pub fn all_bindings_for_input(&self, input: &[Keystroke]) -> Vec<KeyBinding> {
         self.bindings()
             .rev()
@@ -174,6 +184,10 @@ impl Keymap {
     /// are evaluated with the same precedence rules so you can disable a rule in a given context
     /// only. A disabled binding only suppresses bindings from sources with equal or weaker
     /// precedence: a base keymap null hides default bindings, but user bindings still apply.
+    ///
+    /// This method returns candidate actions in precedence order; action dispatch still follows
+    /// the focused element path and its propagation rules. A `true` pending result means the
+    /// caller may need to wait for another keystroke before choosing among the candidates.
     pub fn bindings_for_input(
         &self,
         input: &[impl AsKeystroke],
@@ -263,7 +277,10 @@ impl Keymap {
         }
     }
 
-    /// Find the bindings that can follow the current input sequence.
+    /// Return enabled longer bindings for which `input` is a proper prefix.
+    ///
+    /// Results are ordered by context depth and then insertion precedence. Complete bindings and
+    /// disabled `NoAction`/`Unbind` entries are omitted; context is checked against `context_stack`.
     pub fn possible_next_bindings_for_input(
         &self,
         input: &[Keystroke],

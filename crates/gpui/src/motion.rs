@@ -674,7 +674,12 @@ impl Motion<DurationDescription> {
     ///
     /// Pass selection, iteration parity, and completion use integer nanosecond
     /// arithmetic. Only the fraction within the selected pass is converted to
-    /// floating point for easing.
+    /// floating point for easing. Before the initial delay elapses, progress
+    /// holds at the run's starting endpoint. At an exact boundary between
+    /// restarting passes, the sample presents the preceding pass's endpoint
+    /// while the run remains active; a later sample begins the next pass. At
+    /// the finite end, completion is inclusive: elapsed time equal to the
+    /// configured extent returns an inactive completed sample.
     pub fn sample(&self, elapsed: Duration) -> MotionSample {
         if elapsed < self.delay {
             return MotionSample {
@@ -809,6 +814,11 @@ impl Motion<SpringDescription> {
     }
 
     /// Sets the spring's settling tolerance.
+    ///
+    /// `epsilon` must be finite and greater than zero to produce a finite
+    /// settling estimate. Other values leave the spring with an unbounded
+    /// estimate, so its sample remains active until the elapsed time reaches
+    /// [`Duration::MAX`].
     pub fn with_epsilon(mut self, epsilon: f32) -> Self {
         self.description.epsilon = epsilon;
         self.description.settle_after =

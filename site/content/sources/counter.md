@@ -14,74 +14,78 @@ description = "The annotated Rust source used to build this walkthrough."
 <span id="L5" class="source-line"><a href="#L5" class="line-number" data-line="5" aria-label="Line 5" tabindex="-1"></a>// Click Increment and the label gains one. The value behind that label is</span>
 <span id="L6" class="source-line"><a href="#L6" class="line-number" data-line="6" aria-label="Line 6" tabindex="-1"></a>// `Counter::count`; the button holds no separate count.</span>
 <span id="L7" class="source-line"><a href="#L7" class="line-number" data-line="7" aria-label="Line 7" tabindex="-1"></a>//</span>
-<span id="L8" class="source-line"><a href="#L8" class="line-number" data-line="8" aria-label="Line 8" tabindex="-1"></a>// GPUI stores the `Counter` and gives its owner an [`Entity`] handle. Cloning</span>
-<span id="L9" class="source-line"><a href="#L9" class="line-number" data-line="9" aria-label="Line 9" tabindex="-1"></a>// the handle keeps the same counter alive. It does not copy the field. During</span>
-<span id="L10" class="source-line"><a href="#L10" class="line-number" data-line="10" aria-label="Line 10" tabindex="-1"></a>// an update, [`Context`] grants access to this counter and the rest of the app.</span>
-<span id="L11" class="source-line"><a href="#L11" class="line-number" data-line="11" aria-label="Line 11" tabindex="-1"></a></span>
-<span id="L12" class="source-line"><a href="#L12" class="line-number" data-line="12" aria-label="Line 12" tabindex="-1"></a>use gpui::&#123;AppContext, Context, IntoElement, Render, Window, div, prelude::*, rgb&#125;;</span>
+<span id="L8" class="source-line"><a href="#L8" class="line-number" data-line="8" aria-label="Line 8" tabindex="-1"></a>// [`AppContext::new`] stores `Counter` in the app and returns an [`Entity`]</span>
+<span id="L9" class="source-line"><a href="#L9" class="line-number" data-line="9" aria-label="Line 9" tabindex="-1"></a>// handle. Cloning that handle refers to the same counter and keeps it alive;</span>
+<span id="L10" class="source-line"><a href="#L10" class="line-number" data-line="10" aria-label="Line 10" tabindex="-1"></a>// it does not copy the field. [`Context`] is the scoped capability passed to</span>
+<span id="L11" class="source-line"><a href="#L11" class="line-number" data-line="11" aria-label="Line 11" tabindex="-1"></a>// callbacks and render methods, so this example mutates the view through its</span>
+<span id="L12" class="source-line"><a href="#L12" class="line-number" data-line="12" aria-label="Line 12" tabindex="-1"></a>// listener rather than borrowing the entity again.</span>
 <span id="L13" class="source-line"><a href="#L13" class="line-number" data-line="13" aria-label="Line 13" tabindex="-1"></a></span>
-<span id="L14" class="source-line"><a href="#L14" class="line-number" data-line="14" aria-label="Line 14" tabindex="-1"></a>struct Counter &#123;</span>
-<span id="L15" class="source-line"><a href="#L15" class="line-number" data-line="15" aria-label="Line 15" tabindex="-1"></a>    count: u32,</span>
-<span id="L16" class="source-line"><a href="#L16" class="line-number" data-line="16" aria-label="Line 16" tabindex="-1"></a>&#125;</span>
-<span id="L17" class="source-line"><a href="#L17" class="line-number" data-line="17" aria-label="Line 17" tabindex="-1"></a></span>
-<span id="L18" class="source-line"><a href="#L18" class="line-number" data-line="18" aria-label="Line 18" tabindex="-1"></a>// ## Read state into a frame &#123;#render&#125;</span>
-<span id="L19" class="source-line"><a href="#L19" class="line-number" data-line="19" aria-label="Line 19" tabindex="-1"></a>// [`Render`] builds a label from the current count and puts a button below it.</span>
-<span id="L20" class="source-line"><a href="#L20" class="line-number" data-line="20" aria-label="Line 20" tabindex="-1"></a>// The styling controls their appearance; the button&#x27;s ID keeps its interaction</span>
-<span id="L21" class="source-line"><a href="#L21" class="line-number" data-line="21" aria-label="Line 21" tabindex="-1"></a>// state associated with this button across frames.</span>
-<span id="L22" class="source-line"><a href="#L22" class="line-number" data-line="22" aria-label="Line 22" tabindex="-1"></a>//</span>
-<span id="L23" class="source-line"><a href="#L23" class="line-number" data-line="23" aria-label="Line 23" tabindex="-1"></a>// [`Context::listener`] supplies the counter to the click handler. Its other</span>
-<span id="L24" class="source-line"><a href="#L24" class="line-number" data-line="24" aria-label="Line 24" tabindex="-1"></a>// arguments are the click event, the window, and the counter&#x27;s context. The</span>
-<span id="L25" class="source-line"><a href="#L25" class="line-number" data-line="25" aria-label="Line 25" tabindex="-1"></a>// handler uses the supplied `&amp;mut Counter` rather than borrowing it again</span>
-<span id="L26" class="source-line"><a href="#L26" class="line-number" data-line="26" aria-label="Line 26" tabindex="-1"></a>// through an entity handle.</span>
-<span id="L27" class="source-line"><a href="#L27" class="line-number" data-line="27" aria-label="Line 27" tabindex="-1"></a></span>
-<span id="L28" class="source-line"><a href="#L28" class="line-number" data-line="28" aria-label="Line 28" tabindex="-1"></a>impl Render for Counter &#123;</span>
-<span id="L29" class="source-line"><a href="#L29" class="line-number" data-line="29" aria-label="Line 29" tabindex="-1"></a>    fn render(&amp;mut self, _window: &amp;mut Window, cx: &amp;mut Context&lt;Self&gt;) -&gt; impl IntoElement &#123;</span>
-<span id="L30" class="source-line"><a href="#L30" class="line-number" data-line="30" aria-label="Line 30" tabindex="-1"></a>        div()</span>
-<span id="L31" class="source-line"><a href="#L31" class="line-number" data-line="31" aria-label="Line 31" tabindex="-1"></a>            .size_full()</span>
-<span id="L32" class="source-line"><a href="#L32" class="line-number" data-line="32" aria-label="Line 32" tabindex="-1"></a>            .flex()</span>
-<span id="L33" class="source-line"><a href="#L33" class="line-number" data-line="33" aria-label="Line 33" tabindex="-1"></a>            .flex_col()</span>
-<span id="L34" class="source-line"><a href="#L34" class="line-number" data-line="34" aria-label="Line 34" tabindex="-1"></a>            .items_center()</span>
-<span id="L35" class="source-line"><a href="#L35" class="line-number" data-line="35" aria-label="Line 35" tabindex="-1"></a>            .justify_center()</span>
-<span id="L36" class="source-line"><a href="#L36" class="line-number" data-line="36" aria-label="Line 36" tabindex="-1"></a>            .gap_4()</span>
-<span id="L37" class="source-line"><a href="#L37" class="line-number" data-line="37" aria-label="Line 37" tabindex="-1"></a>            .bg(rgb(0xf7f6f2))</span>
-<span id="L38" class="source-line"><a href="#L38" class="line-number" data-line="38" aria-label="Line 38" tabindex="-1"></a>            .text_color(rgb(0x202b29))</span>
-<span id="L39" class="source-line"><a href="#L39" class="line-number" data-line="39" aria-label="Line 39" tabindex="-1"></a>            .child(div().text_2xl().child(format!(&quot;Count: &#123;&#125;&quot;, self.count)))</span>
-<span id="L40" class="source-line"><a href="#L40" class="line-number" data-line="40" aria-label="Line 40" tabindex="-1"></a>            .child(</span>
-<span id="L41" class="source-line"><a href="#L41" class="line-number" data-line="41" aria-label="Line 41" tabindex="-1"></a>                div()</span>
-<span id="L42" class="source-line"><a href="#L42" class="line-number" data-line="42" aria-label="Line 42" tabindex="-1"></a>                    .id(&quot;increment&quot;)</span>
-<span id="L43" class="source-line"><a href="#L43" class="line-number" data-line="43" aria-label="Line 43" tabindex="-1"></a>                    .px_4()</span>
-<span id="L44" class="source-line"><a href="#L44" class="line-number" data-line="44" aria-label="Line 44" tabindex="-1"></a>                    .py_2()</span>
-<span id="L45" class="source-line"><a href="#L45" class="line-number" data-line="45" aria-label="Line 45" tabindex="-1"></a>                    .rounded_md()</span>
-<span id="L46" class="source-line"><a href="#L46" class="line-number" data-line="46" aria-label="Line 46" tabindex="-1"></a>                    .bg(rgb(0x155b50))</span>
-<span id="L47" class="source-line"><a href="#L47" class="line-number" data-line="47" aria-label="Line 47" tabindex="-1"></a>                    .text_color(rgb(0xffffff))</span>
-<span id="L48" class="source-line"><a href="#L48" class="line-number" data-line="48" aria-label="Line 48" tabindex="-1"></a>                    .cursor_pointer()</span>
-<span id="L49" class="source-line"><a href="#L49" class="line-number" data-line="49" aria-label="Line 49" tabindex="-1"></a>                    .child(&quot;Increment&quot;)</span>
-<span id="L50" class="source-line"><a href="#L50" class="line-number" data-line="50" aria-label="Line 50" tabindex="-1"></a>                    .on_click(cx.listener(|this, _event, _window, cx| this.increment(cx))),</span>
-<span id="L51" class="source-line"><a href="#L51" class="line-number" data-line="51" aria-label="Line 51" tabindex="-1"></a>            )</span>
-<span id="L52" class="source-line"><a href="#L52" class="line-number" data-line="52" aria-label="Line 52" tabindex="-1"></a>    &#125;</span>
-<span id="L53" class="source-line"><a href="#L53" class="line-number" data-line="53" aria-label="Line 53" tabindex="-1"></a>&#125;</span>
-<span id="L54" class="source-line"><a href="#L54" class="line-number" data-line="54" aria-label="Line 54" tabindex="-1"></a></span>
-<span id="L55" class="source-line"><a href="#L55" class="line-number" data-line="55" aria-label="Line 55" tabindex="-1"></a>// ## Change the value, then notify &#123;#update&#125;</span>
-<span id="L56" class="source-line"><a href="#L56" class="line-number" data-line="56" aria-label="Line 56" tabindex="-1"></a>// [`Context::notify`] queues a change notification. GPUI invalidates rendering</span>
-<span id="L57" class="source-line"><a href="#L57" class="line-number" data-line="57" aria-label="Line 57" tabindex="-1"></a>// that depends on this entity, and the next render reads the updated count.</span>
-<span id="L58" class="source-line"><a href="#L58" class="line-number" data-line="58" aria-label="Line 58" tabindex="-1"></a>// Assigning a field does not send that notification for you.</span>
-<span id="L59" class="source-line"><a href="#L59" class="line-number" data-line="59" aria-label="Line 59" tabindex="-1"></a>//</span>
-<span id="L60" class="source-line"><a href="#L60" class="line-number" data-line="60" aria-label="Line 60" tabindex="-1"></a>// Remove `cx.notify()` and run again. Clicks still change the field, but the</span>
-<span id="L61" class="source-line"><a href="#L61" class="line-number" data-line="61" aria-label="Line 61" tabindex="-1"></a>// label can stay stale until other work causes a render. Restore the call and</span>
-<span id="L62" class="source-line"><a href="#L62" class="line-number" data-line="62" aria-label="Line 62" tabindex="-1"></a>// the mutation and displayed value stay connected. `saturating_add` also makes</span>
-<span id="L63" class="source-line"><a href="#L63" class="line-number" data-line="63" aria-label="Line 63" tabindex="-1"></a>// the counter stop at `u32::MAX` rather than overflow.</span>
-<span id="L64" class="source-line"><a href="#L64" class="line-number" data-line="64" aria-label="Line 64" tabindex="-1"></a></span>
-<span id="L65" class="source-line"><a href="#L65" class="line-number" data-line="65" aria-label="Line 65" tabindex="-1"></a>impl Counter &#123;</span>
-<span id="L66" class="source-line"><a href="#L66" class="line-number" data-line="66" aria-label="Line 66" tabindex="-1"></a>    fn increment(&amp;mut self, cx: &amp;mut Context&lt;Self&gt;) &#123;</span>
-<span id="L67" class="source-line"><a href="#L67" class="line-number" data-line="67" aria-label="Line 67" tabindex="-1"></a>        self.count = self.count.saturating_add(1);</span>
-<span id="L68" class="source-line"><a href="#L68" class="line-number" data-line="68" aria-label="Line 68" tabindex="-1"></a>        cx.notify();</span>
-<span id="L69" class="source-line"><a href="#L69" class="line-number" data-line="69" aria-label="Line 69" tabindex="-1"></a>    &#125;</span>
-<span id="L70" class="source-line"><a href="#L70" class="line-number" data-line="70" aria-label="Line 70" tabindex="-1"></a>&#125;</span>
-<span id="L71" class="source-line"><a href="#L71" class="line-number" data-line="71" aria-label="Line 71" tabindex="-1"></a></span>
-<span id="L72" class="source-line"><a href="#L72" class="line-number" data-line="72" aria-label="Line 72" tabindex="-1"></a>fn component(_window: &amp;mut Window, cx: &amp;mut gpui::App) -&gt; gpui::Entity&lt;Counter&gt; &#123;</span>
-<span id="L73" class="source-line"><a href="#L73" class="line-number" data-line="73" aria-label="Line 73" tabindex="-1"></a>    cx.new(|_cx| Counter &#123; count: 0 &#125;)</span>
+<span id="L14" class="source-line"><a href="#L14" class="line-number" data-line="14" aria-label="Line 14" tabindex="-1"></a>use gpui::&#123;AppContext, Context, IntoElement, Render, Window, div, prelude::*, rgb&#125;;</span>
+<span id="L15" class="source-line"><a href="#L15" class="line-number" data-line="15" aria-label="Line 15" tabindex="-1"></a></span>
+<span id="L16" class="source-line"><a href="#L16" class="line-number" data-line="16" aria-label="Line 16" tabindex="-1"></a>struct Counter &#123;</span>
+<span id="L17" class="source-line"><a href="#L17" class="line-number" data-line="17" aria-label="Line 17" tabindex="-1"></a>    count: u32,</span>
+<span id="L18" class="source-line"><a href="#L18" class="line-number" data-line="18" aria-label="Line 18" tabindex="-1"></a>&#125;</span>
+<span id="L19" class="source-line"><a href="#L19" class="line-number" data-line="19" aria-label="Line 19" tabindex="-1"></a></span>
+<span id="L20" class="source-line"><a href="#L20" class="line-number" data-line="20" aria-label="Line 20" tabindex="-1"></a>// ## Read state into a frame &#123;#render&#125;</span>
+<span id="L21" class="source-line"><a href="#L21" class="line-number" data-line="21" aria-label="Line 21" tabindex="-1"></a>// [`Render`] reads the count while building the label and button for this</span>
+<span id="L22" class="source-line"><a href="#L22" class="line-number" data-line="22" aria-label="Line 22" tabindex="-1"></a>// frame. Styling sets their layout and appearance. The button ID gives its</span>
+<span id="L23" class="source-line"><a href="#L23" class="line-number" data-line="23" aria-label="Line 23" tabindex="-1"></a>// interaction state a stable identity as the element values are rebuilt.</span>
+<span id="L24" class="source-line"><a href="#L24" class="line-number" data-line="24" aria-label="Line 24" tabindex="-1"></a>//</span>
+<span id="L25" class="source-line"><a href="#L25" class="line-number" data-line="25" aria-label="Line 25" tabindex="-1"></a>// [`Context::listener`] supplies the counter to the click handler. Its other</span>
+<span id="L26" class="source-line"><a href="#L26" class="line-number" data-line="26" aria-label="Line 26" tabindex="-1"></a>// arguments are the click event, the window, and the counter&#x27;s context. The</span>
+<span id="L27" class="source-line"><a href="#L27" class="line-number" data-line="27" aria-label="Line 27" tabindex="-1"></a>// handler uses the supplied `&amp;mut Counter` rather than borrowing it again</span>
+<span id="L28" class="source-line"><a href="#L28" class="line-number" data-line="28" aria-label="Line 28" tabindex="-1"></a>// through an entity handle.</span>
+<span id="L29" class="source-line"><a href="#L29" class="line-number" data-line="29" aria-label="Line 29" tabindex="-1"></a></span>
+<span id="L30" class="source-line"><a href="#L30" class="line-number" data-line="30" aria-label="Line 30" tabindex="-1"></a>impl Render for Counter &#123;</span>
+<span id="L31" class="source-line"><a href="#L31" class="line-number" data-line="31" aria-label="Line 31" tabindex="-1"></a>    fn render(&amp;mut self, _window: &amp;mut Window, cx: &amp;mut Context&lt;Self&gt;) -&gt; impl IntoElement &#123;</span>
+<span id="L32" class="source-line"><a href="#L32" class="line-number" data-line="32" aria-label="Line 32" tabindex="-1"></a>        div()</span>
+<span id="L33" class="source-line"><a href="#L33" class="line-number" data-line="33" aria-label="Line 33" tabindex="-1"></a>            .size_full()</span>
+<span id="L34" class="source-line"><a href="#L34" class="line-number" data-line="34" aria-label="Line 34" tabindex="-1"></a>            .flex()</span>
+<span id="L35" class="source-line"><a href="#L35" class="line-number" data-line="35" aria-label="Line 35" tabindex="-1"></a>            .flex_col()</span>
+<span id="L36" class="source-line"><a href="#L36" class="line-number" data-line="36" aria-label="Line 36" tabindex="-1"></a>            .items_center()</span>
+<span id="L37" class="source-line"><a href="#L37" class="line-number" data-line="37" aria-label="Line 37" tabindex="-1"></a>            .justify_center()</span>
+<span id="L38" class="source-line"><a href="#L38" class="line-number" data-line="38" aria-label="Line 38" tabindex="-1"></a>            .gap_4()</span>
+<span id="L39" class="source-line"><a href="#L39" class="line-number" data-line="39" aria-label="Line 39" tabindex="-1"></a>            .bg(rgb(0xf7f6f2))</span>
+<span id="L40" class="source-line"><a href="#L40" class="line-number" data-line="40" aria-label="Line 40" tabindex="-1"></a>            .text_color(rgb(0x202b29))</span>
+<span id="L41" class="source-line"><a href="#L41" class="line-number" data-line="41" aria-label="Line 41" tabindex="-1"></a>            .child(div().text_2xl().child(format!(&quot;Count: &#123;&#125;&quot;, self.count)))</span>
+<span id="L42" class="source-line"><a href="#L42" class="line-number" data-line="42" aria-label="Line 42" tabindex="-1"></a>            .child(</span>
+<span id="L43" class="source-line"><a href="#L43" class="line-number" data-line="43" aria-label="Line 43" tabindex="-1"></a>                div()</span>
+<span id="L44" class="source-line"><a href="#L44" class="line-number" data-line="44" aria-label="Line 44" tabindex="-1"></a>                    .id(&quot;increment&quot;)</span>
+<span id="L45" class="source-line"><a href="#L45" class="line-number" data-line="45" aria-label="Line 45" tabindex="-1"></a>                    .px_4()</span>
+<span id="L46" class="source-line"><a href="#L46" class="line-number" data-line="46" aria-label="Line 46" tabindex="-1"></a>                    .py_2()</span>
+<span id="L47" class="source-line"><a href="#L47" class="line-number" data-line="47" aria-label="Line 47" tabindex="-1"></a>                    .rounded_md()</span>
+<span id="L48" class="source-line"><a href="#L48" class="line-number" data-line="48" aria-label="Line 48" tabindex="-1"></a>                    .bg(rgb(0x155b50))</span>
+<span id="L49" class="source-line"><a href="#L49" class="line-number" data-line="49" aria-label="Line 49" tabindex="-1"></a>                    .text_color(rgb(0xffffff))</span>
+<span id="L50" class="source-line"><a href="#L50" class="line-number" data-line="50" aria-label="Line 50" tabindex="-1"></a>                    .cursor_pointer()</span>
+<span id="L51" class="source-line"><a href="#L51" class="line-number" data-line="51" aria-label="Line 51" tabindex="-1"></a>                    .child(&quot;Increment&quot;)</span>
+<span id="L52" class="source-line"><a href="#L52" class="line-number" data-line="52" aria-label="Line 52" tabindex="-1"></a>                    .on_click(cx.listener(|this, _event, _window, cx| this.increment(cx))),</span>
+<span id="L53" class="source-line"><a href="#L53" class="line-number" data-line="53" aria-label="Line 53" tabindex="-1"></a>            )</span>
+<span id="L54" class="source-line"><a href="#L54" class="line-number" data-line="54" aria-label="Line 54" tabindex="-1"></a>    &#125;</span>
+<span id="L55" class="source-line"><a href="#L55" class="line-number" data-line="55" aria-label="Line 55" tabindex="-1"></a>&#125;</span>
+<span id="L56" class="source-line"><a href="#L56" class="line-number" data-line="56" aria-label="Line 56" tabindex="-1"></a></span>
+<span id="L57" class="source-line"><a href="#L57" class="line-number" data-line="57" aria-label="Line 57" tabindex="-1"></a>// ## Change the value, then notify &#123;#update&#125;</span>
+<span id="L58" class="source-line"><a href="#L58" class="line-number" data-line="58" aria-label="Line 58" tabindex="-1"></a>// [`Context::notify`] reports that this entity&#x27;s observable state changed.</span>
+<span id="L59" class="source-line"><a href="#L59" class="line-number" data-line="59" aria-label="Line 59" tabindex="-1"></a>// GPUI schedules affected views to render again; the next render reads the new</span>
+<span id="L60" class="source-line"><a href="#L60" class="line-number" data-line="60" aria-label="Line 60" tabindex="-1"></a>// count. Assigning a field alone does not schedule that update. This separates</span>
+<span id="L61" class="source-line"><a href="#L61" class="line-number" data-line="61" aria-label="Line 61" tabindex="-1"></a>// mutation from invalidation, which matters when state is changed outside a</span>
+<span id="L62" class="source-line"><a href="#L62" class="line-number" data-line="62" aria-label="Line 62" tabindex="-1"></a>// render callback.</span>
+<span id="L63" class="source-line"><a href="#L63" class="line-number" data-line="63" aria-label="Line 63" tabindex="-1"></a>//</span>
+<span id="L64" class="source-line"><a href="#L64" class="line-number" data-line="64" aria-label="Line 64" tabindex="-1"></a>// Remove `cx.notify()` and run again. Clicks still change the field, but the</span>
+<span id="L65" class="source-line"><a href="#L65" class="line-number" data-line="65" aria-label="Line 65" tabindex="-1"></a>// label can stay stale until other work causes a render. Restore the call and</span>
+<span id="L66" class="source-line"><a href="#L66" class="line-number" data-line="66" aria-label="Line 66" tabindex="-1"></a>// the mutation and displayed value stay connected. `saturating_add` also makes</span>
+<span id="L67" class="source-line"><a href="#L67" class="line-number" data-line="67" aria-label="Line 67" tabindex="-1"></a>// the counter stop at `u32::MAX` rather than overflow.</span>
+<span id="L68" class="source-line"><a href="#L68" class="line-number" data-line="68" aria-label="Line 68" tabindex="-1"></a></span>
+<span id="L69" class="source-line"><a href="#L69" class="line-number" data-line="69" aria-label="Line 69" tabindex="-1"></a>impl Counter &#123;</span>
+<span id="L70" class="source-line"><a href="#L70" class="line-number" data-line="70" aria-label="Line 70" tabindex="-1"></a>    fn increment(&amp;mut self, cx: &amp;mut Context&lt;Self&gt;) &#123;</span>
+<span id="L71" class="source-line"><a href="#L71" class="line-number" data-line="71" aria-label="Line 71" tabindex="-1"></a>        self.count = self.count.saturating_add(1);</span>
+<span id="L72" class="source-line"><a href="#L72" class="line-number" data-line="72" aria-label="Line 72" tabindex="-1"></a>        cx.notify();</span>
+<span id="L73" class="source-line"><a href="#L73" class="line-number" data-line="73" aria-label="Line 73" tabindex="-1"></a>    &#125;</span>
 <span id="L74" class="source-line"><a href="#L74" class="line-number" data-line="74" aria-label="Line 74" tabindex="-1"></a>&#125;</span>
 <span id="L75" class="source-line"><a href="#L75" class="line-number" data-line="75" aria-label="Line 75" tabindex="-1"></a></span>
-<span id="L76" class="source-line"><a href="#L76" class="line-number" data-line="76" aria-label="Line 76" tabindex="-1"></a>pub fn main() &#123;</span>
-<span id="L77" class="source-line"><a href="#L77" class="line-number" data-line="77" aria-label="Line 77" tabindex="-1"></a>    support::run(component);</span>
-<span id="L78" class="source-line"><a href="#L78" class="line-number" data-line="78" aria-label="Line 78" tabindex="-1"></a>&#125;</span></code></pre>
+<span id="L76" class="source-line"><a href="#L76" class="line-number" data-line="76" aria-label="Line 76" tabindex="-1"></a>fn component(_window: &amp;mut Window, cx: &amp;mut gpui::App) -&gt; gpui::Entity&lt;Counter&gt; &#123;</span>
+<span id="L77" class="source-line"><a href="#L77" class="line-number" data-line="77" aria-label="Line 77" tabindex="-1"></a>    cx.new(|_cx| Counter &#123; count: 0 &#125;)</span>
+<span id="L78" class="source-line"><a href="#L78" class="line-number" data-line="78" aria-label="Line 78" tabindex="-1"></a>&#125;</span>
+<span id="L79" class="source-line"><a href="#L79" class="line-number" data-line="79" aria-label="Line 79" tabindex="-1"></a></span>
+<span id="L80" class="source-line"><a href="#L80" class="line-number" data-line="80" aria-label="Line 80" tabindex="-1"></a>pub fn main() &#123;</span>
+<span id="L81" class="source-line"><a href="#L81" class="line-number" data-line="81" aria-label="Line 81" tabindex="-1"></a>    support::run(component);</span>
+<span id="L82" class="source-line"><a href="#L82" class="line-number" data-line="82" aria-label="Line 82" tabindex="-1"></a>&#125;</span></code></pre>

@@ -26,7 +26,11 @@ use path::rel_path::RelPathBuf;
 
 pub use path::PathStyle;
 
-/// Returns the path to the user's home directory.
+/// Return the cached home-directory path.
+///
+/// In test builds and with `test-support` enabled this is a fixed platform test
+/// path (`/Users/zed`, `C:\\Users\\zed`, or `/home/zed`); otherwise it comes
+/// from the OS home-directory lookup and panics if that lookup fails.
 #[cfg(not(target_family = "wasm"))]
 pub fn home_dir() -> &'static PathBuf {
     static HOME_DIR: std::sync::OnceLock<PathBuf> = std::sync::OnceLock::new();
@@ -56,7 +60,8 @@ pub trait PathExt {
     ///   Linux or macOS, the original path is returned unchanged.
     fn compact(&self) -> PathBuf;
 
-    /// Returns a file's extension or, if the file is hidden, its name without the leading dot
+    /// Return the extension, or the hidden filename without its leading dot.
+    /// For a non-hidden filename without an extension, return the full filename.
     fn extension_or_hidden_file_name(&self) -> Option<&str>;
 
     /// Construct a path value from bytes using the platform's path encoding.
@@ -91,14 +96,16 @@ pub trait PathExt {
         }
     }
 
-    /// Converts a local path to one that can be used inside of WSL.
-    /// Returns `None` if the path cannot be converted into a WSL one (network share).
+    /// Convert a Windows drive path to WSL's `/mnt/<lowercase-drive>/...` form.
+    /// UNC prefixes return `None`. This is a lexical conversion; it does not
+    /// check whether the drive or resulting path exists in WSL. On non-Windows
+    /// hosts it serializes the host path components with slash separators.
     fn local_to_wsl(&self) -> Option<PathBuf>;
 
-    /// Returns a file's "full" joined collection of extensions, in the case where a file does not
-    /// just have a singular extension but instead has multiple (e.g File.tar.gz, Component.stories.tsx)
-    ///
-    /// Will provide back the extensions joined together such as tar.gz or stories.tsx
+    /// Return all dot-separated suffix components after the first filename part,
+    /// joined with dots, when at least two such components exist. For example,
+    /// `archive.tar.gz` returns `Some("tar.gz")`; a single extension returns
+    /// `None`. Dotfiles follow the same split rule as ordinary names.
     fn multiple_extensions(&self) -> Option<String>;
 
     /// Try to make a shell-safe representation of the path.
@@ -237,8 +244,8 @@ pub fn strip_path_suffix<'a>(base: &'a Path, suffix: &Path) -> Option<&'a Path> 
     None
 }
 
-/// In memory, this is identical to `Path`. On non-Windows conversions to this type are no-ops. On
-/// windows, these conversions sanitize UNC paths by removing the `\\\\?\\` prefix.
+/// A transparent view of `Path` with the Windows verbatim path prefix simplified
+/// by checked constructors. On non-Windows systems this is the same path view.
 #[derive(Eq, PartialEq, Hash, Ord, PartialOrd)]
 #[repr(transparent)]
 pub struct SanitizedPath(Path);
@@ -261,7 +268,8 @@ impl SanitizedPath {
         unsafe { mem::transmute::<&Path, &Self>(path.as_ref()) }
     }
 
-    /// Convert an owned path into an owned sanitized path.
+    /// Convert an owned path into an owned sanitized path, allocating only when
+    /// Windows path simplification changes the path.
     pub fn from_arc(path: Arc<Path>) -> Arc<Self> {
         // safe because `Path` and `SanitizedPath` have the same repr and Drop impl
         #[cfg(not(target_os = "windows"))]
@@ -382,7 +390,7 @@ pub struct RemotePathBuf {
 }
 
 impl RemotePathBuf {
-    /// Construct a remote path with its wire-format style.
+    /// Store a remote path string and its syntax without parsing or normalizing it.
     pub fn new(string: String, style: PathStyle) -> Self {
         Self { style, string }
     }
@@ -410,6 +418,8 @@ impl Display for RemotePathBuf {
 }
 
 /// Return whether a string is absolute under the supplied remote path syntax.
+/// Unix syntax recognizes a leading `/`; Windows syntax also recognizes a
+/// leading slash or backslash and drive-rooted forms such as `C:\\path`.
 pub fn is_absolute(path_like: &str, path_style: PathStyle) -> bool {
     path_like.starts_with('/')
         || path_style == PathStyle::Windows
@@ -562,7 +572,7 @@ pub struct PathWithPosition {
 }
 
 impl PathWithPosition {
-    /// Returns a PathWithPosition from a path.
+    /// Create a path with no row or column suffix.
     pub fn from_path(path: PathBuf) -> Self {
         Self {
             path,
@@ -739,6 +749,7 @@ impl PathWithPosition {
         }
     }
 
+    /// Transform only the path, preserving the parsed row and column values.
     pub fn map_path<E>(
         self,
         mapping: impl FnOnce(PathBuf) -> Result<PathBuf, E>,
@@ -750,6 +761,8 @@ impl PathWithPosition {
         })
     }
 
+    /// Format the path through `path_to_string` and append any stored one-based
+    /// row and column as `:row` or `:row:column`.
     pub fn to_string(&self, path_to_string: &dyn Fn(&PathBuf) -> String) -> String {
         let path_string = path_to_string(&self.path);
         if let Some(row) = self.row {

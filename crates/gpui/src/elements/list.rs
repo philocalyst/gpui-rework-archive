@@ -335,9 +335,11 @@ impl ListState {
         this
     }
 
-    /// Set the list to measure all items in the list in the first layout phase.
+/// Measure every item during the first layout pass.
     ///
-    /// This is useful for ensuring that the scrollbar size is correct instead of based on only rendered elements.
+    /// This makes the initial total content height and scrollbar thumb reflect every item instead
+    /// of estimating from rendered rows. It can be expensive for a large list. For mostly uniform
+    /// rows, [`with_uniform_item_height`](Self::with_uniform_item_height) seeds cheaper height hints.
     pub fn measure_all(self) -> Self {
         self.0.borrow_mut().measuring_behavior = ListMeasuringBehavior::Measure(false);
         self
@@ -398,7 +400,7 @@ impl ListState {
         state.items = tree;
     }
 
-    /// Remeasure all items while preserving proportional scroll position.
+    /// Remeasure all items while preserving the proportional position inside the top item.
     ///
     /// Use this when item heights may have changed (e.g., font size changes)
     /// but the number and identity of items remains the same.
@@ -407,9 +409,9 @@ impl ListState {
         self.remeasure_items_with_scroll_anchor(0..count, ScrollAnchor::Proportional);
     }
 
-    /// Mark items in `range` as needing remeasurement while preserving
-    /// the current scroll position. Unlike [`Self::splice`], this does
-    /// not change the number of items or blow away `logical_scroll_top`.
+    /// Mark existing items in `range` as needing remeasurement while preserving
+    /// the pixel offset inside the current top item. Unlike [`Self::splice`], this does
+    /// not change the number of items or reset `logical_scroll_top`.
     ///
     /// Use this when an item's content has changed and its rendered
     /// height may be different (e.g., streaming text, tool results
@@ -553,7 +555,11 @@ impl ListState {
         }
     }
 
-    /// Set a handler that will be called when the list is scrolled.
+    /// Set a handler called after the list processes a scroll event.
+    ///
+    /// The event describes the resulting visible range and whether a scroll occurred or tail
+    /// following is active. The callback is retained by the list state; replace it when the
+    /// owning view rebuilds the list if it captures frame-specific data.
     pub fn set_scroll_handler(
         &self,
         handler: impl FnMut(&ListScrollEvent, &mut Window, &mut App) + 'static,
@@ -561,7 +567,10 @@ impl ListState {
         self.0.borrow_mut().scroll_handler = Some(Box::new(handler))
     }
 
-    /// Get the current scroll offset, in terms of the list's items.
+    /// Get the current logical scroll position as an item index and pixel offset within that item.
+    ///
+    /// The offset is measured from the item's top, even when the list is bottom-aligned. Before
+    /// the list has established a scroll position, the initial position depends on its alignment.
     pub fn logical_scroll_top(&self) -> ListOffset {
         self.0.borrow().logical_scroll_top()
     }
@@ -661,7 +670,10 @@ impl ListState {
         )
     }
 
-    /// Scroll the list to the given offset
+    /// Set the logical scroll position, clamped to the end sentinel when the index is out of range.
+    ///
+    /// A position before the last item exits tail-follow mode. Use [`scroll_to_end`](Self::scroll_to_end)
+    /// when appending content should keep the last item aligned with the viewport bottom.
     pub fn scroll_to(&self, mut scroll_top: ListOffset) {
         let state = &mut *self.0.borrow_mut();
         let item_count = state.items.summary().count;
@@ -678,7 +690,10 @@ impl ListState {
         state.logical_scroll_top = Some(scroll_top);
     }
 
-    /// Scroll the list to the given item, such that the item is fully visible.
+    /// Scroll the list just enough to reveal the given item, when its measured geometry permits.
+    ///
+    /// This uses the last known viewport and item heights. For an item whose bounds have not yet
+    /// been measured, the adjustment may be refined on a later layout pass.
     pub fn scroll_to_reveal_item(&self, ix: usize) {
         let state = &mut *self.0.borrow_mut();
 
@@ -1433,8 +1448,12 @@ impl std::fmt::Debug for ListItem {
     }
 }
 
-/// An offset into the list's items, in terms of the item index and the number
-/// of pixels off the top left of the item.
+/// A logical position in a variable-height list.
+///
+/// `item_ix` is the first item at the scroll position and `offset_in_item` is the number of
+/// logical pixels from that item's top. An index equal to the item count is the end sentinel used
+/// by [`ListState::scroll_to_end`]. Indices beyond the count are clamped when passed to
+/// [`ListState::scroll_to`].
 #[derive(Debug, Clone, Copy, Default)]
 pub struct ListOffset {
     /// The index of an item in the list

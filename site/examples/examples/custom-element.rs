@@ -2,13 +2,15 @@
 mod support;
 
 // ## Choose the three phase states {#phases}
-// A swatch needs one layout node and one paint quad. Implement [`Element`]
-// when you need to own that handoff instead of using a styled div or canvas.
-// `RequestLayoutState` carries nothing here; `PrepaintState` carries the quad
-// assembled after the layout engine assigns bounds.
+// A swatch needs one layout node and one paint quad. [`Element`] exposes the
+// three frame phases directly: request a layout node, prepare geometry after
+// bounds are known, then record paint commands. Use it when [`canvas`] or
+// ordinary styled elements do not provide enough control. `RequestLayoutState`
+// is empty here; `PrepaintState` carries the quad from prepaint into paint.
 //
-// [`IntoElement`] makes the swatch usable as a child. It returns the swatch
-// itself because this type already implements the low-level element contract.
+// [`IntoElement`] is the conversion expected by `.child`. Returning `Self`
+// avoids wrapping this value because `Swatch` already implements the low-level
+// [`Element`] contract.
 
 use gpui::{
     App, AppContext, Bounds, Context, Element, ElementId, GlobalElementId, Hsla,
@@ -29,14 +31,18 @@ impl IntoElement for Swatch {
 }
 
 // ## Measure, prepare, then paint {#draw}
-// [`Window::request_layout`] registers a 192-by-96 logical-pixel rectangle.
-// The resolved bounds arrive at `prepaint`, which turns them into a filled
-// quad. `paint` records that prepared quad through [`Window::paint_quad`].
+// [`Window::request_layout`] registers a 192-by-96 logical-pixel size with the
+// layout engine and returns a frame-local `LayoutId`. The engine resolves
+// that request against the parent's constraints; `prepaint` receives the
+// resulting bounds and prepares a filled quad. `paint` records that quad via
+// [`Window::paint_quad`]. A requested size is a layout input, not a guarantee
+// that every parent constraint will preserve it.
 //
 // The element has no interaction or retained state, so `id` returns `None`.
-// The phase states belong to this draw, not to the next frame. For retained
-// state, return a stable ID and use [`Window::with_element_state`] with the
-// global ID GPUI passes into these methods.
+// Both phase states belong to this draw and are discarded afterward; neither
+// `LayoutId` nor these state values identify an element on the next frame. For
+// state that must persist, return a stable `ElementId` and use
+// [`Window::with_element_state`] with the global ID GPUI passes into the phases.
 
 impl Element for Swatch {
     type RequestLayoutState = ();
@@ -90,13 +96,17 @@ impl Element for Swatch {
 }
 
 // ## Compose it with ordinary elements {#compose}
-// The parent centers the swatch and a label. Its [`Render`] implementation
-// creates a new swatch each time it runs. Change the requested width or color
-// and run again: layout controls the size, while paint supplies the pixels.
+// The parent centers the swatch and a label. Its [`Render`] method creates a
+// new element value on each render, which is normal: the element value carries
+// this frame's work, while its stable ID would be needed for retained element
+// state. Change the requested size or color and compare the resolved rectangle
+// with its painted fill.
 //
-// A custom element also owns any accessibility and input behavior it needs.
-// This decorative swatch has neither. Prefer [`canvas`] when custom painting
-// alone is sufficient; it already implements these phase methods for you.
+// A custom element also has to register the accessibility and hit-testing
+// behavior it needs; painting a shape does not create either one. This
+// decorative swatch needs neither. Prefer [`canvas`] for custom painting alone:
+// it already provides the phase handoff while your callbacks supply geometry
+// and drawing.
 
 struct SwatchView;
 

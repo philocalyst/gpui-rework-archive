@@ -5,5 +5,5 @@
 /examples/target/
 /static/preview/pkg/
 /static/preview/build.json
+/static/workbench/
 /.live/
-

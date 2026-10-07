@@ -3,16 +3,19 @@
 use std::collections::HashMap;
 use std::hash::Hash;
 
-/// Computes the minimum detail level needed for each item so that no two items
-/// share the same description. Items whose descriptions are unique at level 0
-/// stay at 0; items that collide get their detail level incremented until either
-/// the collision is resolved or increasing the level no longer changes the
-/// description (preventing infinite loops for truly identical items).
+/// Returns a detail level for each item, increasing the level for every item in a
+/// colliding description until the descriptions separate or stop changing.
+/// Items unique at level zero keep detail zero. An item whose description stops
+/// changing is no longer included in later collision checks; therefore identical
+/// descriptions may still collide in the result. The returned levels are the
+/// smallest levels reached by this iterative procedure, not proof that every
+/// final description is unique.
 ///
-/// The `get_description` closure must return a sequence that eventually reaches
-/// a "fixed point" where increasing `detail` no longer changes the output. If
-/// an item reaches its fixed point, it is assumed it will no longer change and
-/// will no longer be checked for collisions.
+/// `get_description(item, detail)` should produce progressively more identifying
+/// descriptions and eventually reach a fixed point. The function terminates when
+/// a full pass finds no collisions among descriptions that changed or have not yet
+/// reached a fixed point. Use a stable identity in the description if distinct
+/// items must always be distinguishable.
 pub fn compute_disambiguation_details<T, D>(
     items: &[T],
     get_description: impl Fn(&T, usize) -> D,

@@ -36,7 +36,11 @@ use settings::RenderingParameters;
 pub use settings::{FontRasterizationSettings, SubpixelOrder, WgpuSurfaceConfig};
 use target::RenderTarget;
 
-/// Shared GPU context reference, used to coordinate device recovery across multiple windows.
+/// Thread-local shared GPU context reference for coordinating recovery across windows.
+///
+/// This uses [`Rc`] and [`RefCell`], so it is not a cross-thread synchronization
+/// primitive. Windows sharing it must coordinate device recovery on the thread
+/// that owns their renderers.
 pub type GpuContext = Rc<RefCell<Option<WgpuContext>>>;
 
 struct GpuFaultState {
@@ -47,11 +51,15 @@ struct GpuFaultState {
     recovery_not_before: Option<std::time::Instant>,
 }
 
-/// Encodes GPUI scenes into a configured WGPU surface or off-screen target.
+/// Encodes finished GPUI scenes into a configured WGPU surface or off-screen target.
 ///
 /// A renderer keeps the atlas, pipelines, and intermediate textures associated
 /// with one device. Call `unconfigure_surface` when a native window is temporarily
-/// unavailable, and the platform recovery method after a lost device.
+/// unavailable, and `replace_surface` if it moves to a different native window.
+/// After device loss, use the platform recovery method to recreate device-bound
+/// resources, including this renderer's atlas. The renderer and its
+/// [`GpuContext`] coordination handle are thread-confined; keep surface and
+/// recovery calls on the renderer's owning thread.
 pub struct WgpuRenderer {
     /// Shared GPU context for device recovery coordination (unused on WASM).
     #[allow(dead_code)]

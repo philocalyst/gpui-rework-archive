@@ -5,18 +5,24 @@ description = "Understand entities, leases, contexts, notifications, and subscri
 weight = 10
 +++
 
-An entity handle identifies state owned by the application. A context grants
-access to that state for a specific operation. A notification tells consumers
-that the state changed. Those responsibilities are related, but distinct.
+An `Entity<T>` is a strong handle to app-owned `T`; cloning the handle does not
+clone the value. A context grants scoped access and provides operations such as
+`notify`, `observe`, and task spawning. A notification reports that consumers
+should read the latest value; it does not describe the mutation. These
+boundaries determine who can access a value, when a view is invalidated, and
+what ends an observation.
 
 Read the [ownership explanation](https://docs.rs/gpui-ce/0.2.2/gpui/_ownership_and_data_flow/index.html)
-for the entity map, borrowing rules, weak handles, and event lifecycle.
-Then use the [counter](@/examples/counter.md) to see a local update, or
-[subscriptions](@/examples/subscriptions.md) to see a separate model observed by a view.
+for entity leases, weak handles, coalesced notifications, and event lifecycle.
+Then use the [counter](@/examples/counter.md) for state owned by one view, or
+[subscriptions](@/examples/subscriptions.md) for a model observed by another
+view and a `Subscription` that owns that relationship.
 
 | Contract | API |
 | --- | --- |
-| Retain one value | [Entity](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Entity.html) |
-| Update a view and notify observers | [Context](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html) |
-| Refer to a value without retaining it | [WeakEntity](https://docs.rs/gpui-ce/0.2.2/gpui/struct.WeakEntity.html) |
-| Own an observation lifetime | [Subscription](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Subscription.html) |
+| Need | Use | Consequence |
+| --- | --- | --- |
+| Keep state alive and share one value | [Entity](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Entity.html) | A strong handle keeps the entity alive. |
+| Access state for one operation | [Context](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html) | The closure holds an exclusive lease; do not reborrow the same entity. |
+| Refer to state without extending its lifetime | [WeakEntity](https://docs.rs/gpui-ce/0.2.2/gpui/struct.WeakEntity.html) | Upgrade/update can fail after release. |
+| Keep an observer or event subscription active | [Subscription](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Subscription.html) | Dropping it cancels the relationship. |
