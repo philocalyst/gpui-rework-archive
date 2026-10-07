@@ -1,5 +1,7 @@
 use anyhow::{Context, Result, bail, ensure};
-use gpui_test::{Harness, RenderedSuite, ReportOptions, write_report};
+#[cfg(feature = "platform")]
+use gpui_test::RenderedSuite;
+use gpui_test::{Harness, ReportOptions, write_report};
 use std::{env, path::PathBuf};
 
 fn main() {
@@ -58,23 +60,29 @@ fn collect_command(args: &[String]) -> Result<()> {
             "--samples must be positive"
         );
     }
-    #[allow(unused_mut)] // Native replay exists only in GPU-enabled builds.
-    let mut suite = gpui_test::collect_reports(&parsed.names)?;
-    if parsed.gpu {
+    let options = ReportOptions {
+        baseline_dir: parsed.baseline,
+        selected_ids: Vec::new(),
+    };
+    let manifest = if parsed.gpu {
         #[cfg(feature = "gpu")]
-        gpui_test::native::replay_native(&mut suite, parsed.samples.unwrap_or(20))?;
-    }
-    let manifest = write_report(
-        &suite,
-        &parsed.output,
-        ReportOptions {
-            baseline_dir: parsed.baseline,
-            selected_ids: Vec::new(),
-        },
-    )?;
+        {
+            let mut suite = gpui_test::collect_reports(&parsed.names)?;
+            gpui_test::native::replay_native(&mut suite, parsed.samples.unwrap_or(20))?;
+            write_report(&suite, &parsed.output, options)?
+        }
+        #[cfg(not(feature = "gpu"))]
+        unreachable!("GPU feature validation returned above")
+    } else {
+        let mut writer = gpui_test::ReportWriter::new(&parsed.output, options)?;
+        for report_dir in &parsed.names {
+            writer.add_report(report_dir)?;
+        }
+        writer.finish()?
+    };
     println!(
         "collected {} scenarios; {} comparison change(s); report: {}",
-        suite.scenarios.len(),
+        manifest.scenarios.len(),
         manifest.changes.len(),
         parsed.output.display()
     );
@@ -162,12 +170,8 @@ fn run_command(args: &[String], mode: Mode) -> Result<()> {
         Some(samples) => harness.timing_samples(samples)?,
         None => harness,
     };
-    let mut captures = Vec::with_capacity(selected.len());
-    for scenario in selected {
-        captures.push(scenario.run(&harness)?);
-    }
     #[allow(unused_mut)] // The native replay pass exists only in GPU-enabled builds.
-    let mut suite = RenderedSuite::new(captures);
+    let mut suite = harness.run_all(&selected)?;
     if parsed.gpu {
         #[cfg(feature = "gpu")]
         gpui_test::native::replay_native(&mut suite, harness.timing_sample_count())?;
@@ -254,7 +258,7 @@ fn parse_args(args: &[String]) -> Result<Args> {
     })
 }
 
-fn select_scenarios(names: &[String]) -> Result<Vec<gpui_test::BuiltInScenario>> {
+fn select_scenarios(names: &[String]) -> Result<Vec<gpui_test::AnyScenario>> {
     let mut all = gpui_test::built_in_scenarios()?;
     if names.is_empty() {
         return Ok(all);

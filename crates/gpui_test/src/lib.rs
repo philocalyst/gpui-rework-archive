@@ -5,6 +5,7 @@
 //! [`write_report`] only when you want to persist the returned capture bundle.
 
 mod fonts;
+pub mod image_diff;
 #[cfg(feature = "gpu")]
 pub mod native;
 mod report;
@@ -13,17 +14,20 @@ mod snapshot;
 
 pub mod gallery;
 pub use fonts::{bundled_fonts, bundled_text_system};
-pub use gallery::{BuiltInScenario, built_in_scenarios};
+pub use gallery::built_in_scenarios;
+pub use image_diff::{
+    DiffMode, ImageComparison, ImageDifference, MotionDifference, PixelRegion, VisibleDifference,
+    compare_images, compare_transitions,
+};
 pub use report::{
-    CheckpointManifest, EnvironmentManifest, NativeCheckpointManifest, ReportChange,
-    ReportChangeKind, ReportManifest, ReportOptions, ReportStatus, ScenarioManifest,
-    collect_reports, compare_reports, compare_reports_selected, diff_images, read_manifest,
-    read_report, write_report,
+    CheckpointManifest, EnvironmentManifest, MotionComparison, NativeCheckpointManifest,
+    ReportChange, ReportChangeKind, ReportManifest, ReportOptions, ReportStatus, ReportWriter,
+    ScenarioManifest, collect_reports, compare_reports, compare_reports_selected, diff_images,
+    read_manifest, read_report, write_report,
 };
 pub use runner::{
-    Harness, ImageDifference, NativeCheckpoint, NativeReplayInfo, NativeReplayMetrics,
-    RenderedCheckpoint, RenderedScenario, RenderedSuite, ScenarioMetrics, TimingPercentiles,
-    Viewport,
+    Harness, NativeCheckpoint, NativeReplayInfo, NativeReplayMetrics, RenderedCheckpoint,
+    RenderedScenario, RenderedSuite, ScenarioMetrics, TimingPercentiles, Viewport,
 };
 
 use anyhow::{Result, ensure};
@@ -52,6 +56,57 @@ pub struct Checkpoint<V: Render + 'static> {
     name: String,
     at: Duration,
     update: Option<Box<dyn Fn(&mut HeadlessAppContext, &Entity<V>, WindowHandle<V>) -> Result<()>>>,
+}
+
+/// A type-erased scenario that can be run alongside other view types.
+///
+/// Use this when collecting a heterogeneous set of application-owned scenarios. The underlying
+/// view remains statically typed inside each scenario.
+pub struct AnyScenario {
+    scenario: Box<dyn RunnableScenario>,
+}
+
+trait RunnableScenario {
+    fn id(&self) -> &str;
+    fn title(&self) -> &str;
+    fn run(&self, harness: &Harness) -> Result<RenderedScenario>;
+}
+
+impl<V: gpui::Render + 'static> RunnableScenario for Scenario<V> {
+    fn id(&self) -> &str {
+        Scenario::id(self)
+    }
+    fn title(&self) -> &str {
+        Scenario::title(self)
+    }
+    fn run(&self, harness: &Harness) -> Result<RenderedScenario> {
+        harness.run(self)
+    }
+}
+
+impl<V: gpui::Render + 'static> From<Scenario<V>> for AnyScenario {
+    fn from(scenario: Scenario<V>) -> Self {
+        Self {
+            scenario: Box::new(scenario),
+        }
+    }
+}
+
+impl AnyScenario {
+    /// Stable identifier.
+    pub fn id(&self) -> &str {
+        self.scenario.id()
+    }
+
+    /// Human-readable title.
+    pub fn title(&self) -> &str {
+        self.scenario.title()
+    }
+
+    /// Runs the original typed scenario.
+    pub fn run(&self, harness: &Harness) -> Result<RenderedScenario> {
+        self.scenario.run(harness)
+    }
 }
 
 impl<V: Render + 'static> Scenario<V> {

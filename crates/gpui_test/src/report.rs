@@ -1,20 +1,25 @@
+mod views;
+use views::{write_html, write_markdown, write_svg};
+
+use crate::image_diff::{DiffMode, MotionDifference, compare_images, compare_transitions};
 use crate::{
     ImageDifference, NativeReplayInfo, NativeReplayMetrics, RenderedCheckpoint, RenderedScenario,
     RenderedSuite, ScenarioMetrics, Viewport, validate_id,
 };
 use anyhow::{Context, Result, ensure};
 use flate2::{Compression, GzBuilder, read::MultiGzDecoder};
-use plotters::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::{BTreeMap, BTreeSet, HashSet},
     fs,
     io::{Read, Write},
-    path::{Path, PathBuf},
+    path::{Component, Path, PathBuf},
 };
+use tempfile::TempDir;
 
 const MAX_COMPRESSED_SCENE_BYTES: u64 = 12 * 1024 * 1024;
 const MAX_DECOMPRESSED_SCENE_BYTES: usize = 12 * 1024 * 1024;
+const MAX_MANIFEST_BYTES: u64 = 12 * 1024 * 1024;
 
 /// Optional output settings for a capture report.
 #[derive(Clone, Debug, Default)]
@@ -45,6 +50,23 @@ pub struct ReportManifest {
     /// Complete comparison results for the selected baseline, including removed items.
     #[serde(default)]
     pub changes: Vec<ReportChange>,
+}
+
+impl ReportManifest {
+    /// Regenerate Markdown, SVG, and HTML views from this manifest without loading captures.
+    ///
+    /// The generated views link to artifacts by paths relative to `output_dir`; callers must
+    /// keep those scene and image artifacts available at the same relative paths. This method
+    /// does not rewrite `manifest.json` or re-encode captured scenes or PNGs.
+    pub fn write_views(&self, output_dir: impl AsRef<Path>) -> Result<()> {
+        let output_dir = output_dir.as_ref();
+        fs::create_dir_all(output_dir)
+            .with_context(|| format!("creating report views in {}", output_dir.display()))?;
+        write_markdown(self, output_dir)?;
+        write_svg(self, output_dir)?;
+        write_html(self, output_dir)?;
+        Ok(())
+    }
 }
 
 /// Environment fields that affect capture interpretation.
@@ -98,6 +120,9 @@ pub struct CheckpointManifest {
     pub name: String,
     /// Absolute simulated time in nanoseconds.
     pub time_ns: u64,
+    /// Previous checkpoint time when a baseline checkpoint matched this ID.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub before_time_ns: Option<u64>,
     /// Relative path to serialized scene JSON.
     pub scene_json: String,
     /// Relative path to rendered PNG.
@@ -114,11 +139,33 @@ pub struct CheckpointManifest {
     pub scene_changed: Option<bool>,
     /// Whether scenario or checkpoint metadata differs from an available baseline.
     pub metadata_changed: Option<bool>,
+    /// Exact and alpha-aware image difference statistics against the baseline.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub difference: Option<ImageDifference>,
+    /// Relative path to the magnitude heatmap when pixels changed against the baseline.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub heatmap_png: Option<String>,
+    /// Motion comparison for the preceding matched checkpoint, when both timelines are adjacent.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub motion: Option<MotionComparison>,
     /// CPU-side timing, primitive, batch, and bitmap metrics.
     pub metrics: ScenarioMetrics,
     /// Native replay artifacts and CPU-vs-native pixel statistics, when requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub native: Option<NativeCheckpointManifest>,
+}
+
+/// Frame-to-frame changes, paired by consecutive checkpoint IDs rather than wall time.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct MotionComparison {
+    /// The preceding checkpoint in both timelines.
+    pub previous_checkpoint_id: String,
+    /// Baseline elapsed time; absent when its timestamps run backwards.
+    pub before_duration_ns: Option<u64>,
+    /// Current elapsed time; absent when its timestamps run backwards.
+    pub current_duration_ns: Option<u64>,
+    /// Signed premultiplied color, alpha, and extent transition differences.
+    pub difference: MotionDifference,
 }
 
 /// Native replay artifacts for one checkpoint.
@@ -132,6 +179,9 @@ pub struct NativeCheckpointManifest {
     pub metrics: NativeReplayMetrics,
     /// Difference against the canonical CPU rendering.
     pub difference: ImageDifference,
+    /// Relative path to the CPU-vs-native magnitude heatmap when pixels differ.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub heatmap_png: Option<String>,
 }
 
 /// Summary status for a report artifact.
@@ -185,39 +235,301 @@ pub struct ReportChange {
 
 /// Writes a report suite with captured scenes, PNGs, metrics, and a static HTML viewer.
 ///
-/// The portable scene and rendered image remain as typed values until this function is called.
+/// This convenience function sends every scenario through ReportWriter.
 pub fn write_report(
     suite: &RenderedSuite,
     output_dir: impl AsRef<Path>,
     options: ReportOptions,
 ) -> Result<ReportManifest> {
-    let output_dir = output_dir.as_ref();
-    fs::create_dir_all(output_dir)
-        .with_context(|| format!("creating report directory {}", output_dir.display()))?;
-    let baseline_manifest = if let Some(baseline_dir) = &options.baseline_dir {
-        let output_canonical = output_dir.canonicalize()?;
-        let baseline_canonical = baseline_dir
-            .canonicalize()
-            .with_context(|| format!("opening baseline directory {}", baseline_dir.display()))?;
+    let mut writer = ReportWriter::new(output_dir, options)?;
+    writer.add_suite(suite)?;
+    writer.finish()
+}
+
+/// Incrementally writes captures or report inputs into one portable report directory.
+///
+/// Scenes and images are persisted as each scenario arrives, so report collection can keep only
+/// one input scenario in memory at a time.
+pub struct ReportWriter {
+    target_dir: PathBuf,
+    output_dir: PathBuf,
+    _staging_dir: TempDir,
+    options: ReportOptions,
+    baseline: Option<(PathBuf, ReportManifest)>,
+    scenarios: Vec<ScenarioManifest>,
+    scenario_indices: BTreeMap<String, usize>,
+    font_packs: BTreeSet<String>,
+    source_git_sha: Option<String>,
+    native_replay: Option<NativeReplayInfo>,
+    platform_checks: Option<gpui::WindowCheckReport>,
+    failed: bool,
+}
+
+impl ReportWriter {
+    /// Creates a staging directory beside the output and reads an optional baseline once.
+    pub fn new(output_dir: impl AsRef<Path>, options: ReportOptions) -> Result<Self> {
+        let requested = output_dir.as_ref();
         ensure!(
-            output_canonical != baseline_canonical
-                && !output_canonical.starts_with(&baseline_canonical)
-                && !baseline_canonical.starts_with(&output_canonical),
-            "output and baseline directories must not contain one another"
+            !requested.is_symlink(),
+            "report output directory cannot be a symlink"
         );
-        Some(read_manifest(baseline_dir)?)
-    } else {
-        None
-    };
-    let mut scenario_ids = HashSet::new();
-    let mut scenarios = Vec::with_capacity(suite.scenarios.len());
-    for scenario in &suite.scenarios {
+        let requested_output = resolved_candidate(requested)?;
+        if requested_output.exists() {
+            ensure!(
+                !fs::symlink_metadata(&requested_output)?
+                    .file_type()
+                    .is_symlink(),
+                "report output directory cannot be a symlink"
+            );
+            ensure!(
+                requested_output.is_dir(),
+                "report output is not a directory"
+            );
+        }
+        let baseline = if let Some(baseline_dir) = &options.baseline_dir {
+            let baseline_root = baseline_dir.canonicalize().with_context(|| {
+                format!("opening baseline directory {}", baseline_dir.display())
+            })?;
+            ensure!(
+                requested_output != baseline_root
+                    && !requested_output.starts_with(&baseline_root)
+                    && !baseline_root.starts_with(&requested_output),
+                "output and baseline directories must not contain one another"
+            );
+            Some((baseline_root.clone(), read_manifest(&baseline_root)?))
+        } else {
+            None
+        };
+        if requested_output.exists() {
+            let mut entries = fs::read_dir(&requested_output)?;
+            if entries.next().is_some() {
+                read_manifest(&requested_output).with_context(|| {
+                    format!(
+                        "refusing to replace non-report output directory {}",
+                        requested_output.display()
+                    )
+                })?;
+            }
+        }
+        let parent = requested_output
+            .parent()
+            .context("report output must have a parent directory")?;
+        fs::create_dir_all(parent)
+            .with_context(|| format!("creating report parent directory {}", parent.display()))?;
+        let staging_dir = tempfile::Builder::new()
+            .prefix(".gpui-report-")
+            .tempdir_in(parent)
+            .with_context(|| {
+                format!(
+                    "creating staging directory beside {}",
+                    requested_output.display()
+                )
+            })?;
+        let output_dir = staging_dir.path().join("report");
+        fs::create_dir(&output_dir)?;
+        Ok(Self {
+            target_dir: requested_output,
+            output_dir,
+            _staging_dir: staging_dir,
+            options,
+            baseline,
+            scenarios: Vec::new(),
+            scenario_indices: BTreeMap::new(),
+            font_packs: BTreeSet::new(),
+            source_git_sha: None,
+            native_replay: None,
+            platform_checks: None,
+            failed: false,
+        })
+    }
+
+    /// Writes one scenario, rejecting duplicate IDs.
+    pub fn add_scenario(&mut self, scenario: &RenderedScenario) -> Result<()> {
+        self.add(|writer| writer.add_scenario_inner(scenario))
+    }
+
+    fn add_scenario_inner(&mut self, scenario: &RenderedScenario) -> Result<()> {
         validate_id(&scenario.id)?;
         ensure!(
-            scenario_ids.insert(&scenario.id),
+            scenario
+                .checkpoints
+                .iter()
+                .all(|checkpoint| checkpoint.native.is_none())
+                || self.native_replay.is_some(),
+            "native checkpoint artifacts require suite native replay metadata; use add_suite"
+        );
+        ensure!(
+            !self.scenario_indices.contains_key(&scenario.id),
             "duplicate scenario id: {}",
             scenario.id
         );
+        self.write_scenario(scenario, None)
+    }
+
+    /// Adds an in-memory suite, including its optional native and platform metadata.
+    pub fn add_suite(&mut self, suite: &RenderedSuite) -> Result<()> {
+        self.add(|writer| writer.add_suite_inner(suite))
+    }
+
+    fn add_suite_inner(&mut self, suite: &RenderedSuite) -> Result<()> {
+        merge_optional_report_value(
+            &mut self.native_replay,
+            suite.native_replay.clone(),
+            "native WGPU adapter metadata",
+        )?;
+        merge_optional_report_value(
+            &mut self.platform_checks,
+            suite.platform_checks.clone(),
+            "platform lifecycle report",
+        )?;
+        for scenario in &suite.scenarios {
+            self.add_scenario(scenario)?;
+        }
+        Ok(())
+    }
+
+    /// Loads one report at a time and keeps the first identical copy of each scenario ID.
+    pub fn add_report(&mut self, report_dir: impl AsRef<Path>) -> Result<()> {
+        self.add(|writer| writer.add_report_inner(report_dir.as_ref()))
+    }
+
+    fn add_report_inner(&mut self, report_dir: &Path) -> Result<()> {
+        let root = report_dir
+            .canonicalize()
+            .with_context(|| format!("opening report directory {}", report_dir.display()))?;
+        ensure!(
+            root != self.target_dir
+                && !root.starts_with(&self.target_dir)
+                && !self.target_dir.starts_with(&root),
+            "input report and output directories must not contain one another"
+        );
+        let manifest = read_manifest(&root)?;
+        ensure!(
+            manifest.backend == "cpu",
+            "unsupported report backend {:?}",
+            manifest.backend
+        );
+        merge_optional_report_value(
+            &mut self.native_replay,
+            manifest.native_replay,
+            "native WGPU adapter metadata",
+        )?;
+        merge_optional_report_value(
+            &mut self.platform_checks,
+            manifest.platform_checks,
+            "platform lifecycle report",
+        )?;
+        if let Some(source_sha) = &manifest.environment.git_sha {
+            if let Some(existing_sha) = &self.source_git_sha {
+                ensure!(
+                    existing_sha == source_sha,
+                    "incompatible source revisions across collected reports"
+                );
+            } else {
+                self.source_git_sha = Some(source_sha.clone());
+            }
+        }
+        for scenario_manifest in manifest.scenarios {
+            if let Some(index) = self.scenario_indices.get(&scenario_manifest.id)
+                && identical_stored_scenarios(
+                    &root,
+                    &scenario_manifest,
+                    &manifest.environment,
+                    &self.output_dir,
+                    &self.scenarios[*index],
+                )?
+            {
+                continue;
+            }
+            let scenario = read_scenario(
+                &root,
+                &manifest.environment.font_pack,
+                scenario_manifest.clone(),
+            )?;
+            if let Some(index) = self.scenario_indices.get(&scenario.id).copied() {
+                let existing = read_scenario(&self.output_dir, "", self.scenarios[index].clone())?;
+                ensure!(
+                    scenarios_equal(&existing, &scenario),
+                    "conflicting duplicate scenario ID {:?}",
+                    scenario.id
+                );
+            } else {
+                self.write_scenario(&scenario, Some((&root, &scenario_manifest)))?;
+            }
+        }
+        Ok(())
+    }
+
+    /// Writes the final manifest and its report views.
+    pub fn finish(self) -> Result<ReportManifest> {
+        ensure!(
+            !self.failed,
+            "cannot finish a report writer after a failed add operation"
+        );
+        let ambient_git_sha = std::env::var("GIT_SHA").ok();
+        if let (Some(imported), Some(ambient)) = (&self.source_git_sha, &ambient_git_sha) {
+            ensure!(
+                imported == ambient,
+                "GIT_SHA {ambient:?} conflicts with imported report revision {imported:?}"
+            );
+        }
+        let git_sha = self.source_git_sha.or(ambient_git_sha);
+        let mut manifest = ReportManifest {
+            schema_version: 1,
+            backend: "cpu".into(),
+            environment: EnvironmentManifest {
+                renderer: "gpui-ce-cpu".into(),
+                font_pack: self.font_packs.into_iter().collect::<Vec<_>>().join(", "),
+                git_sha,
+            },
+            native_replay: self.native_replay,
+            platform_checks: self.platform_checks,
+            scenarios: self.scenarios,
+            changes: Vec::new(),
+        };
+        if let Some((_, baseline)) = &self.baseline {
+            manifest.changes = compare_manifests(
+                baseline,
+                &manifest,
+                &self.options.selected_ids,
+                |_, current| {
+                    Ok((
+                        current
+                            .pixels_changed
+                            .context("matched checkpoint has pixel comparison")?,
+                        current
+                            .scene_changed
+                            .context("matched checkpoint has scene comparison")?,
+                    ))
+                },
+            )?;
+        }
+        fs::write(
+            self.output_dir.join("manifest.json"),
+            serde_json::to_vec_pretty(&manifest)?,
+        )?;
+        manifest.write_views(&self.output_dir)?;
+        publish_report(&self.output_dir, &self.target_dir)?;
+        Ok(manifest)
+    }
+
+    fn add(&mut self, operation: impl FnOnce(&mut Self) -> Result<()>) -> Result<()> {
+        ensure!(
+            !self.failed,
+            "report writer is unusable after a failed add operation"
+        );
+        let result = operation(self);
+        self.failed |= result.is_err();
+        result
+    }
+
+    fn write_scenario(
+        &mut self,
+        scenario: &RenderedScenario,
+        source: Option<(&Path, &ScenarioManifest)>,
+    ) -> Result<()> {
+        let output_dir = self.output_dir.as_path();
+        let baseline_manifest = self.baseline.as_ref().map(|(_, manifest)| manifest);
         let previous_scenario = baseline_manifest.as_ref().and_then(|manifest| {
             manifest
                 .scenarios
@@ -241,7 +553,8 @@ pub fn write_report(
             .with_context(|| format!("creating scenario directory {}", dir.display()))?;
         let mut checkpoints = Vec::with_capacity(scenario.checkpoints.len());
         let mut checkpoint_ids = HashSet::new();
-        for checkpoint in &scenario.checkpoints {
+        let mut previous_pair: Option<(usize, image::RgbaImage)> = None;
+        for (index, checkpoint) in scenario.checkpoints.iter().enumerate() {
             validate_id(&checkpoint.id)?;
             ensure!(
                 checkpoint_ids.insert(&checkpoint.id),
@@ -252,45 +565,127 @@ pub fn write_report(
             let scene_file = format!("{}.scene.json.gz", checkpoint.id);
             let png_file = format!("{}.png", checkpoint.id);
             let scene_path = dir.join(&scene_file);
+            let source_checkpoint =
+                source.map(|(root, scenario)| (root, &scenario.checkpoints[index]));
             // Compress artifact bytes after serialization; comparison and snapshots still use
             // the original scene values, independent of their storage encoding.
-            let scene_bytes = serde_json::to_vec(&checkpoint.capture)?;
-            let compressed_scene = gzip_scene_json(&scene_bytes)?;
-            fs::write(&scene_path, &compressed_scene)
-                .with_context(|| format!("writing {}", scene_path.display()))?;
+            if let Some((root, source)) = source_checkpoint
+                && source.scene_json.ends_with(".gz")
+            {
+                fs::copy(artifact_path(root, &source.scene_json)?, &scene_path)?;
+            } else {
+                let scene_bytes = serde_json::to_vec(&checkpoint.capture)?;
+                fs::write(&scene_path, gzip_scene_json(&scene_bytes)?)
+                    .with_context(|| format!("writing {}", scene_path.display()))?;
+            }
             let png_path = dir.join(&png_file);
-            save_png(&png_path, &checkpoint.image)?;
+            if let Some((root, source)) = source_checkpoint {
+                fs::copy(artifact_path(root, &source.png)?, &png_path)?;
+            } else {
+                save_png(&png_path, &checkpoint.image)?;
+            }
             let native = if let Some(native) = &checkpoint.native {
                 let native_file = format!("{}.native.png", checkpoint.id);
                 let diff_file = format!("{}.native.diff.png", checkpoint.id);
-                save_png(&dir.join(&native_file), &native.image)?;
-                save_png(&dir.join(&diff_file), &native.diff)?;
+                if let Some((root, source)) = source_checkpoint
+                    && let Some(source_native) = &source.native
+                {
+                    fs::copy(
+                        artifact_path(root, &source_native.png)?,
+                        dir.join(&native_file),
+                    )?;
+                } else {
+                    save_png(&dir.join(&native_file), &native.image)?;
+                }
+                let different = native.image != checkpoint.image;
+                let exact = different
+                    .then(|| compare_images(&checkpoint.image, &native.image, DiffMode::Exact));
+                if let Some(exact) = &exact {
+                    save_png(&dir.join(&diff_file), &exact.image)?;
+                } else {
+                    save_png(&dir.join(&diff_file), &native.diff)?;
+                }
+                let heatmap_png = if different {
+                    let heatmap_file = format!("{}.native.heatmap.png", checkpoint.id);
+                    let magnitude =
+                        compare_images(&checkpoint.image, &native.image, DiffMode::Magnitude);
+                    save_png(&dir.join(&heatmap_file), &magnitude.image)?;
+                    Some(format!("{}/{}", scenario.id, heatmap_file))
+                } else {
+                    None
+                };
                 Some(NativeCheckpointManifest {
                     png: format!("{}/{}", scenario.id, native_file),
                     diff_png: format!("{}/{}", scenario.id, diff_file),
                     metrics: native.metrics.clone(),
-                    difference: native.difference.clone(),
+                    difference: exact
+                        .map(|exact| exact.difference)
+                        .unwrap_or_else(|| native.difference.clone()),
+                    heatmap_png,
                 })
             } else {
                 None
             };
-            let previous_checkpoint = previous_scenario.and_then(|previous| {
+            let baseline_index = previous_scenario.and_then(|previous| {
                 previous
                     .checkpoints
                     .iter()
-                    .find(|item| item.id == checkpoint.id)
+                    .position(|item| item.id == checkpoint.id)
             });
-            let previous_assets = previous_checkpoint.zip(options.baseline_dir.as_deref());
+            let previous_checkpoint = previous_scenario
+                .zip(baseline_index)
+                .map(|(scenario, index)| &scenario.checkpoints[index]);
+            let previous_assets =
+                previous_checkpoint.zip(self.baseline.as_ref().map(|(root, _)| root.as_path()));
             let before = previous_assets
                 .map(|(previous, root)| read_image(&root.join(&previous.png)))
                 .transpose()?;
-            let pixels_changed = before.as_ref().map(|image| image != &checkpoint.image);
+            // Do not bridge an added/removed or reordered checkpoint. Both sides must describe
+            // the same adjacent transition; unequal elapsed times remain explicit metadata.
+            let motion = previous_pair.as_ref().zip(before.as_ref()).and_then(
+                |((previous_baseline_index, previous_before), before)| {
+                    let baseline_index = baseline_index?;
+                    if baseline_index != previous_baseline_index + 1 {
+                        return None;
+                    }
+                    let previous_current = &scenario.checkpoints[index - 1];
+                    let previous_baseline =
+                        &previous_scenario?.checkpoints[*previous_baseline_index];
+                    Some(MotionComparison {
+                        previous_checkpoint_id: previous_current.id.clone(),
+                        before_duration_ns: previous_checkpoint?
+                            .time_ns
+                            .checked_sub(previous_baseline.time_ns),
+                        current_duration_ns: checkpoint
+                            .time_ns
+                            .checked_sub(previous_current.time_ns),
+                        difference: compare_transitions(
+                            previous_before,
+                            before,
+                            &previous_current.image,
+                            &checkpoint.image,
+                        ),
+                    })
+                },
+            );
+            let comparison = before
+                .as_ref()
+                .filter(|image| *image != &checkpoint.image)
+                .map(|image| compare_images(image, &checkpoint.image, DiffMode::Exact));
+            let pixels_changed = before.as_ref().map(|_| {
+                comparison.as_ref().is_some_and(|comparison| {
+                    comparison.difference.changed_pixels > 0 || comparison.difference.size_changed
+                })
+            });
+            let difference = comparison
+                .as_ref()
+                .map(|comparison| comparison.difference.clone());
             let scene_changed = previous_assets
                 .map(|(previous, root)| -> Result<bool> {
                     // Compare the persisted values: to_value widens f32 numbers
                     // differently from the JSON serializer used by capture files.
-                    Ok(read_json_value(&root.join(&previous.scene_json))?
-                        != serde_json::from_slice::<serde_json::Value>(&scene_bytes)?)
+                    Ok(read_capture(&artifact_path(root, &previous.scene_json)?)?
+                        != checkpoint.capture)
                 })
                 .transpose()?;
             let metadata_changed = previous_checkpoint.map(|previous| {
@@ -310,36 +705,44 @@ pub fn write_report(
                 }
                 (true, Some(_)) => ReportStatus::Unchanged,
             };
-            let (before_png, diff_png) = if pixels_changed == Some(true)
-                && let Some(before) = &before
+            let (before_png, diff_png, heatmap_png) = if pixels_changed == Some(true)
+                && let (Some(before), Some(exact)) = (&before, &comparison)
             {
                 let before_file = format!("{}.before.png", checkpoint.id);
                 let diff_file = format!("{}.diff.png", checkpoint.id);
+                let heatmap_file = format!("{}.heatmap.png", checkpoint.id);
                 save_png(&dir.join(&before_file), before)?;
-                let diff = diff_images(before, &checkpoint.image);
-                save_png(&dir.join(&diff_file), &diff)?;
+                save_png(&dir.join(&diff_file), &exact.image)?;
+                let magnitude = compare_images(before, &checkpoint.image, DiffMode::Magnitude);
+                save_png(&dir.join(&heatmap_file), &magnitude.image)?;
                 (
                     Some(format!("{}/{}", scenario.id, before_file)),
                     Some(format!("{}/{}", scenario.id, diff_file)),
+                    Some(format!("{}/{}", scenario.id, heatmap_file)),
                 )
             } else {
-                (None, None)
+                (None, None, None)
             };
             checkpoints.push(CheckpointManifest {
                 id: checkpoint.id.clone(),
                 name: checkpoint.name.clone(),
                 time_ns: checkpoint.time_ns,
+                before_time_ns: previous_checkpoint.map(|previous| previous.time_ns),
                 scene_json: format!("{}/{}", scenario.id, scene_file),
                 png: format!("{}/{}", scenario.id, png_file),
                 before_png,
                 diff_png,
+                heatmap_png,
                 status,
                 pixels_changed,
                 scene_changed,
                 metadata_changed,
+                difference,
+                motion,
                 metrics: checkpoint.metrics.clone(),
                 native,
             });
+            previous_pair = baseline_index.zip(before);
         }
         let checkpoint_set_changed = previous_scenario.is_some_and(|previous| {
             let old_ids: BTreeSet<_> = previous
@@ -373,7 +776,10 @@ pub fn write_report(
         } else {
             ReportStatus::Unchanged
         };
-        scenarios.push(ScenarioManifest {
+        self.scenario_indices
+            .insert(scenario.id.clone(), self.scenarios.len());
+        self.font_packs.insert(scenario.font_pack.clone());
+        self.scenarios.push(ScenarioManifest {
             id: scenario.id.clone(),
             title: scenario.title.clone(),
             viewport: scenario.viewport.clone(),
@@ -381,59 +787,17 @@ pub fn write_report(
             status,
             checkpoints,
         });
+        Ok(())
     }
-    let mut manifest = ReportManifest {
-        schema_version: 1,
-        backend: "cpu".into(),
-        environment: EnvironmentManifest {
-            renderer: "gpui-ce-cpu".into(),
-            font_pack: suite
-                .scenarios
-                .iter()
-                .map(|scenario| scenario.font_pack.as_str())
-                .collect::<BTreeSet<_>>()
-                .into_iter()
-                .collect::<Vec<_>>()
-                .join(", "),
-            git_sha: std::env::var("GIT_SHA").ok(),
-        },
-        native_replay: suite.native_replay.clone(),
-        platform_checks: suite.platform_checks.clone(),
-        scenarios,
-        changes: Vec::new(),
-    };
-    if let Some(baseline) = &baseline_manifest {
-        // Comparisons were measured while writing each checkpoint. Reuse those facts
-        // instead of writing, decoding, and comparing the entire report a second time.
-        manifest.changes =
-            compare_manifests(baseline, &manifest, &options.selected_ids, |_, current| {
-                Ok((
-                    current
-                        .pixels_changed
-                        .context("matched checkpoint has pixel comparison")?,
-                    current
-                        .scene_changed
-                        .context("matched checkpoint has scene comparison")?,
-                ))
-            })?;
-    }
-    fs::write(
-        output_dir.join("manifest.json"),
-        serde_json::to_vec_pretty(&manifest)?,
-    )?;
-    write_markdown(&manifest, output_dir)?;
-    write_svg(&manifest, output_dir)?;
-    write_html(&manifest, output_dir)?;
-    Ok(manifest)
 }
 
 /// Reads a suite manifest and validates its schema, viewport, identifiers, and artifact paths.
 /// Images and scene values are loaded only when a comparison needs them.
 pub fn read_manifest(report_dir: impl AsRef<Path>) -> Result<ReportManifest> {
     let path = report_dir.as_ref().join("manifest.json");
-    let manifest: ReportManifest = serde_json::from_slice(
-        &fs::read(&path).with_context(|| format!("reading {}", path.display()))?,
-    )?;
+    let manifest_bytes = read_limited_file(&path, MAX_MANIFEST_BYTES)
+        .with_context(|| format!("reading {}", path.display()))?;
+    let manifest: ReportManifest = serde_json::from_slice(&manifest_bytes)?;
     ensure!(
         manifest.schema_version == 1,
         "unsupported manifest schema version {}",
@@ -481,6 +845,8 @@ pub fn read_manifest(report_dir: impl AsRef<Path>) -> Result<ReportManifest> {
                     path == format!("{}/{}.before.png", scenario.id, checkpoint.id)
                 }) && checkpoint.diff_png.as_deref().is_none_or(|path| {
                     path == format!("{}/{}.diff.png", scenario.id, checkpoint.id)
+                }) && checkpoint.heatmap_png.as_deref().is_none_or(|path| {
+                    path == format!("{}/{}.heatmap.png", scenario.id, checkpoint.id)
                 }),
                 "noncanonical comparison image paths for {}/{}",
                 scenario.id,
@@ -496,6 +862,14 @@ pub fn read_manifest(report_dir: impl AsRef<Path>) -> Result<ReportManifest> {
                         && native.diff_png
                             == format!("{}/{}.native.diff.png", scenario.id, checkpoint.id),
                     "noncanonical native image paths for {}/{}",
+                    scenario.id,
+                    checkpoint.id
+                );
+                ensure!(
+                    native.heatmap_png.as_deref().is_none_or(|path| {
+                        path == format!("{}/{}.native.heatmap.png", scenario.id, checkpoint.id)
+                    }),
+                    "noncanonical native heatmap path for {}/{}",
                     scenario.id,
                     checkpoint.id
                 );
@@ -522,63 +896,11 @@ pub fn read_report(report_dir: impl AsRef<Path>) -> Result<RenderedSuite> {
     );
     let mut scenarios = Vec::with_capacity(manifest.scenarios.len());
     for scenario in manifest.scenarios {
-        let device_size = scenario.viewport.device_size()?;
-        let mut checkpoints = Vec::with_capacity(scenario.checkpoints.len());
-        for checkpoint in scenario.checkpoints {
-            let scene_path = artifact_path(&root, &checkpoint.scene_json)?;
-            let capture: gpui::SceneCapture =
-                serde_json::from_slice(&read_scene_json(&scene_path)?)
-                    .with_context(|| format!("parsing scene capture {}", scene_path.display()))?;
-            capture.validate().with_context(|| {
-                format!("validating scene capture {}/{}", scenario.id, checkpoint.id)
-            })?;
-
-            let image = read_image(&artifact_path(&root, &checkpoint.png)?)?;
-            ensure!(
-                image.dimensions() == (device_size.width.0 as u32, device_size.height.0 as u32),
-                "image dimensions do not match viewport for {}/{}",
-                scenario.id,
-                checkpoint.id
-            );
-            let native = checkpoint
-                .native
-                .map(|native| -> Result<_> {
-                    let native_image = read_image(&artifact_path(&root, &native.png)?)?;
-                    let diff = read_image(&artifact_path(&root, &native.diff_png)?)?;
-                    ensure!(
-                        native_image.dimensions() == image.dimensions()
-                            && diff.dimensions() == image.dimensions(),
-                        "native images have unexpected dimensions for {}/{}",
-                        scenario.id,
-                        checkpoint.id
-                    );
-                    Ok(crate::NativeCheckpoint {
-                        image: native_image,
-                        diff,
-                        metrics: native.metrics,
-                        difference: native.difference,
-                    })
-                })
-                .transpose()?;
-            checkpoints.push(RenderedCheckpoint {
-                id: checkpoint.id,
-                name: checkpoint.name,
-                time_ns: checkpoint.time_ns,
-                capture,
-                image,
-                metrics: checkpoint.metrics,
-                native,
-            });
-        }
-        scenarios.push(RenderedScenario {
-            id: scenario.id,
-            title: scenario.title,
-            viewport: scenario.viewport,
-            font_pack: scenario
-                .font_pack
-                .unwrap_or_else(|| manifest.environment.font_pack.clone()),
-            checkpoints,
-        });
+        scenarios.push(read_scenario(
+            &root,
+            &manifest.environment.font_pack,
+            scenario,
+        )?);
     }
     Ok(RenderedSuite {
         scenarios,
@@ -600,23 +922,33 @@ pub fn collect_reports(report_dirs: &[impl AsRef<Path>]) -> Result<RenderedSuite
     let mut suite = RenderedSuite::new(Vec::new());
     let mut scenario_indices = BTreeMap::<String, usize>::new();
     for report_dir in report_dirs {
-        let incoming = read_report(report_dir)?;
+        let report_dir = report_dir.as_ref();
+        let root = report_dir
+            .canonicalize()
+            .with_context(|| format!("opening report directory {}", report_dir.display()))?;
+        let manifest = read_manifest(&root)?;
+        ensure!(
+            manifest.backend == "cpu",
+            "unsupported report backend {:?}",
+            manifest.backend
+        );
         merge_optional_report_value(
             &mut suite.native_replay,
-            incoming.native_replay,
+            manifest.native_replay,
             "native WGPU adapter metadata",
         )?;
         merge_optional_report_value(
             &mut suite.platform_checks,
-            incoming.platform_checks,
+            manifest.platform_checks,
             "platform lifecycle report",
         )?;
-        for scenario in incoming.scenarios {
+        for scenario_manifest in manifest.scenarios {
+            let scenario =
+                read_scenario(&root, &manifest.environment.font_pack, scenario_manifest)?;
             if let Some(index) = scenario_indices.get(&scenario.id) {
                 let existing = &suite.scenarios[*index];
                 ensure!(
-                    existing.font_pack == scenario.font_pack
-                        && existing.snapshots()? == scenario.snapshots()?,
+                    scenarios_equal(existing, &scenario),
                     "conflicting duplicate scenario ID {:?}",
                     scenario.id
                 );
@@ -627,6 +959,163 @@ pub fn collect_reports(report_dirs: &[impl AsRef<Path>]) -> Result<RenderedSuite
         }
     }
     Ok(suite)
+}
+
+fn read_scenario(
+    root: &Path,
+    default_font_pack: &str,
+    scenario: ScenarioManifest,
+) -> Result<RenderedScenario> {
+    let device_size = scenario.viewport.device_size()?;
+    let mut checkpoints = Vec::with_capacity(scenario.checkpoints.len());
+    for checkpoint in scenario.checkpoints {
+        if let Some(path) = &checkpoint.heatmap_png {
+            artifact_path(root, path)?;
+        }
+        let scene_path = artifact_path(root, &checkpoint.scene_json)?;
+        let capture = read_capture(&scene_path).with_context(|| {
+            format!("validating scene capture {}/{}", scenario.id, checkpoint.id)
+        })?;
+
+        let image = read_image(&artifact_path(root, &checkpoint.png)?)?;
+        ensure!(
+            image.dimensions() == (device_size.width.0 as u32, device_size.height.0 as u32),
+            "image dimensions do not match viewport for {}/{}",
+            scenario.id,
+            checkpoint.id
+        );
+        let native = checkpoint
+            .native
+            .map(|native| -> Result<_> {
+                let native_image = read_image(&artifact_path(root, &native.png)?)?;
+                let diff = read_image(&artifact_path(root, &native.diff_png)?)?;
+                if let Some(path) = &native.heatmap_png {
+                    artifact_path(root, path)?;
+                }
+                ensure!(
+                    native_image.dimensions() == image.dimensions()
+                        && diff.dimensions() == image.dimensions(),
+                    "native images have unexpected dimensions for {}/{}",
+                    scenario.id,
+                    checkpoint.id
+                );
+                Ok(crate::NativeCheckpoint {
+                    image: native_image,
+                    diff,
+                    metrics: native.metrics,
+                    difference: native.difference,
+                })
+            })
+            .transpose()?;
+        checkpoints.push(RenderedCheckpoint {
+            id: checkpoint.id,
+            name: checkpoint.name,
+            time_ns: checkpoint.time_ns,
+            capture,
+            image,
+            metrics: checkpoint.metrics,
+            native,
+        });
+    }
+    Ok(RenderedScenario {
+        id: scenario.id,
+        title: scenario.title,
+        viewport: scenario.viewport,
+        font_pack: scenario
+            .font_pack
+            .unwrap_or_else(|| default_font_pack.to_owned()),
+        checkpoints,
+    })
+}
+
+fn scenarios_equal(left: &RenderedScenario, right: &RenderedScenario) -> bool {
+    left.title == right.title
+        && left.viewport == right.viewport
+        && left.font_pack == right.font_pack
+        && left.checkpoints.len() == right.checkpoints.len()
+        && left
+            .checkpoints
+            .iter()
+            .zip(&right.checkpoints)
+            .all(|(left, right)| {
+                left.id == right.id
+                    && left.name == right.name
+                    && left.time_ns == right.time_ns
+                    && left.capture == right.capture
+                    && left.image == right.image
+            })
+}
+
+// An already validated capture needs no second decode when its persisted bytes are identical.
+// Different encodings fall back to typed scene and decoded pixel comparison.
+fn identical_stored_scenarios(
+    source_root: &Path,
+    source: &ScenarioManifest,
+    environment: &EnvironmentManifest,
+    stored_root: &Path,
+    stored: &ScenarioManifest,
+) -> Result<bool> {
+    if source.metadata(environment) != stored.metadata(environment)
+        || source.checkpoints.len() != stored.checkpoints.len()
+    {
+        return Ok(false);
+    }
+    for (source, stored) in source.checkpoints.iter().zip(&stored.checkpoints) {
+        if source.id != stored.id || source.name != stored.name || source.time_ns != stored.time_ns
+        {
+            return Ok(false);
+        }
+        let mut paths = vec![
+            (&source.scene_json, &stored.scene_json),
+            (&source.png, &stored.png),
+        ];
+        match (&source.native, &stored.native) {
+            (Some(source), Some(stored)) => {
+                paths.extend([
+                    (&source.png, &stored.png),
+                    (&source.diff_png, &stored.diff_png),
+                ]);
+                if let Some(path) = &source.heatmap_png {
+                    artifact_path(source_root, path)?;
+                }
+            }
+            (None, None) => {}
+            _ => return Ok(false),
+        }
+        if let Some(path) = &source.heatmap_png {
+            artifact_path(source_root, path)?;
+        }
+        for (source_path, stored_path) in paths {
+            if !files_equal(
+                &artifact_path(source_root, source_path)?,
+                &artifact_path(stored_root, stored_path)?,
+            )? {
+                return Ok(false);
+            }
+        }
+    }
+    Ok(true)
+}
+
+fn files_equal(left: &Path, right: &Path) -> Result<bool> {
+    let mut left = fs::File::open(left)?;
+    let mut right = fs::File::open(right)?;
+    let mut remaining = left.metadata()?.len();
+    if remaining != right.metadata()?.len() {
+        return Ok(false);
+    }
+    let mut a = [0; 16 * 1024];
+    let mut b = [0; 16 * 1024];
+    while remaining > 0 {
+        let count = remaining.min(a.len() as u64) as usize;
+        left.read_exact(&mut a[..count])?;
+        right.read_exact(&mut b[..count])?;
+        if a[..count] != b[..count] {
+            return Ok(false);
+        }
+        remaining -= count as u64;
+    }
+    Ok(true)
 }
 
 fn merge_optional_report_value<T: Serialize>(
@@ -659,6 +1148,65 @@ fn artifact_path(root: &Path, relative: &str) -> Result<PathBuf> {
     Ok(path)
 }
 
+fn resolved_candidate(path: &Path) -> Result<PathBuf> {
+    let absolute = if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        std::env::current_dir()?.join(path)
+    };
+    let mut resolved = PathBuf::new();
+    for component in absolute.components() {
+        match component {
+            Component::Prefix(prefix) => resolved.push(prefix.as_os_str()),
+            Component::RootDir => resolved.push(component.as_os_str()),
+            Component::CurDir => {}
+            Component::ParentDir => {
+                resolved.pop();
+            }
+            Component::Normal(part) => {
+                let candidate = resolved.join(part);
+                resolved = match fs::symlink_metadata(&candidate) {
+                    Ok(_) => candidate.canonicalize()?,
+                    Err(error) if error.kind() == std::io::ErrorKind::NotFound => candidate,
+                    Err(error) => return Err(error.into()),
+                };
+            }
+        }
+    }
+    Ok(resolved)
+}
+
+fn publish_report(staged_report: &Path, target: &Path) -> Result<()> {
+    let parent = target
+        .parent()
+        .context("report output must have a parent")?;
+    if target.exists() {
+        let backup_root = tempfile::Builder::new()
+            .prefix(".gpui-report-backup-")
+            .tempdir_in(parent)?;
+        let backup = backup_root.path().join("previous");
+        fs::rename(target, &backup)
+            .with_context(|| format!("moving existing report {} aside", target.display()))?;
+        if let Err(error) = fs::rename(staged_report, target) {
+            let restore = fs::rename(&backup, target);
+            if let Err(restore_error) = restore {
+                let backup_location = backup.display().to_string();
+                let _preserved_tempdir = backup_root.keep();
+                anyhow::bail!(
+                    "publishing report failed ({error}); restoring previous report also failed ({restore_error}); previous report preserved at {backup_location}"
+                );
+            }
+            return Err(error)
+                .with_context(|| format!("publishing report to {}", target.display()));
+        }
+        drop(backup_root);
+    } else {
+        fs::rename(staged_report, target)
+            .with_context(|| format!("publishing report to {}", target.display()))?;
+    }
+    Ok(())
+}
+
 /// Compares two report directories. Any scenario/checkpoint addition, removal, metadata,
 /// serialized-scene, or decoded pixel change is returned as a human-readable entry.
 pub fn compare_reports(
@@ -674,15 +1222,16 @@ pub fn compare_reports_selected(
     current_dir: impl AsRef<Path>,
     selected_ids: &[String],
 ) -> Result<Vec<ReportChange>> {
-    let baseline_dir = baseline_dir.as_ref();
-    let current_dir = current_dir.as_ref();
-    let baseline = read_manifest(baseline_dir)?;
-    let current = read_manifest(current_dir)?;
+    let baseline_dir = baseline_dir.as_ref().canonicalize()?;
+    let current_dir = current_dir.as_ref().canonicalize()?;
+    let baseline = read_manifest(&baseline_dir)?;
+    let current = read_manifest(&current_dir)?;
     compare_manifests(&baseline, &current, selected_ids, |old, new| {
         Ok((
-            read_image(&baseline_dir.join(&old.png))? != read_image(&current_dir.join(&new.png))?,
-            read_json_value(&baseline_dir.join(&old.scene_json))?
-                != read_json_value(&current_dir.join(&new.scene_json))?,
+            read_image(&artifact_path(&baseline_dir, &old.png)?)?
+                != read_image(&artifact_path(&current_dir, &new.png)?)?,
+            read_capture(&artifact_path(&baseline_dir, &old.scene_json)?)?
+                != read_capture(&artifact_path(&current_dir, &new.scene_json)?)?,
         ))
     })
 }
@@ -856,28 +1405,9 @@ impl std::fmt::Display for ReportChangeKind {
     }
 }
 
-/// Highlights changed pixels and resized regions in red over a dimmed current frame.
+/// Marks exact RGBA differences in red over the current frame composited on a checkerboard.
 pub fn diff_images(before: &image::RgbaImage, current: &image::RgbaImage) -> image::RgbaImage {
-    let width = before.width().max(current.width());
-    let height = before.height().max(current.height());
-    let mut diff = image::RgbaImage::new(width, height);
-    for y in 0..height {
-        for x in 0..width {
-            let a = before.get_pixel_checked(x, y);
-            let b = current.get_pixel_checked(x, y);
-            diff.put_pixel(
-                x,
-                y,
-                if a == b {
-                    let pixel = b.copied().unwrap_or(image::Rgba([0; 4]));
-                    image::Rgba([pixel[0] / 3, pixel[1] / 3, pixel[2] / 3, 255])
-                } else {
-                    image::Rgba([255, 32, 32, 255])
-                },
-            );
-        }
-    }
-    diff
+    crate::compare_images(before, current, crate::DiffMode::Exact).image
 }
 
 fn save_png(path: &Path, image: &image::RgbaImage) -> Result<()> {
@@ -887,38 +1417,87 @@ fn save_png(path: &Path, image: &image::RgbaImage) -> Result<()> {
 }
 
 fn read_image(path: &Path) -> Result<image::RgbaImage> {
-    image::open(path)
-        .map(|image| image.to_rgba8())
-        .with_context(|| format!("reading report image {}", path.display()))
+    const MAX_RGBA_BYTES: u64 = 128 * 1024 * 1024;
+    let mut reader = image::ImageReader::open(path)
+        .with_context(|| format!("opening report image {}", path.display()))?;
+    reader.set_format(image::ImageFormat::Png);
+    let mut limits = image::Limits::default();
+    limits.max_alloc = Some(MAX_RGBA_BYTES);
+    reader.limits(limits);
+    let decoded = reader
+        .decode()
+        .with_context(|| format!("decoding report image {}", path.display()))?;
+    let (width, height) = (decoded.width(), decoded.height());
+    ensure!(
+        u64::from(width) * u64::from(height) * 4 <= MAX_RGBA_BYTES,
+        "decoded RGBA image exceeds 128 MiB: {}",
+        path.display()
+    );
+    Ok(decoded.to_rgba8())
 }
 
-fn read_json_value(path: &Path) -> Result<serde_json::Value> {
-    serde_json::from_slice(&read_scene_json(path)?)
-        .with_context(|| format!("parsing scene capture {}", path.display()))
+fn read_capture(path: &Path) -> Result<gpui::SceneCapture> {
+    let capture: gpui::SceneCapture = serde_json::from_slice(&read_scene_json(path)?)
+        .with_context(|| format!("parsing scene capture {}", path.display()))?;
+    capture
+        .validate()
+        .with_context(|| format!("validating scene capture {}", path.display()))?;
+    Ok(capture)
 }
 
 fn gzip_scene_json(bytes: &[u8]) -> Result<Vec<u8>> {
+    ensure!(
+        bytes.len() <= MAX_DECOMPRESSED_SCENE_BYTES,
+        "scene capture exceeds 12 MiB before compression"
+    );
     let mut encoder = GzBuilder::new()
         .mtime(0)
         .write(Vec::new(), Compression::fast());
     encoder
         .write_all(bytes)
         .context("compressing scene capture")?;
-    encoder
+    let compressed = encoder
         .finish()
-        .context("finishing compressed scene capture")
+        .context("finishing compressed scene capture")?;
+    ensure!(
+        compressed.len() as u64 <= MAX_COMPRESSED_SCENE_BYTES,
+        "compressed scene capture exceeds 12 MiB"
+    );
+    Ok(compressed)
 }
 
 fn read_scene_json(path: &Path) -> Result<Vec<u8>> {
     let compressed = path.extension().is_some_and(|extension| extension == "gz");
+    let limit = if compressed {
+        MAX_COMPRESSED_SCENE_BYTES
+    } else {
+        MAX_DECOMPRESSED_SCENE_BYTES as u64
+    };
     if compressed {
         ensure!(
-            path.metadata()?.len() <= MAX_COMPRESSED_SCENE_BYTES,
+            path.metadata()?.len() <= limit,
             "compressed scene capture exceeds 12 MiB: {}",
             path.display()
         );
+    } else {
+        ensure!(
+            path.metadata()?.len() <= limit,
+            "scene capture exceeds 12 MiB: {}",
+            path.display()
+        );
     }
-    let bytes = fs::read(path).with_context(|| format!("reading {}", path.display()))?;
+    let mut bounded_file = fs::File::open(path)
+        .with_context(|| format!("reading {}", path.display()))?
+        .take(limit + 1);
+    let mut bytes = Vec::new();
+    bounded_file
+        .read_to_end(&mut bytes)
+        .with_context(|| format!("reading {}", path.display()))?;
+    ensure!(
+        bytes.len() as u64 <= limit,
+        "scene artifact exceeds 12 MiB: {}",
+        path.display()
+    );
     if compressed {
         ensure!(
             bytes.len() as u64 <= MAX_COMPRESSED_SCENE_BYTES,
@@ -942,483 +1521,23 @@ fn read_scene_json(path: &Path) -> Result<Vec<u8>> {
     }
 }
 
-fn write_markdown(manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
-    let mut md = String::from("# GPUI scenario report\n\n");
-    if !manifest.scenarios.is_empty() {
-        md.push_str("Timings follow one warm-up frame. CPU replay reuses its target and excludes font setup, RGBA readback, capture serialization, and PNG encoding. Bitmap bytes measure captured atlas storage.\n\n| Scenario / checkpoint | Time (ms) | Samples | Build p50/p95/p99 (ms) | CPU p50/p95/p99 (ms) | Primitives | Batches | Bitmap bytes | Status |\n|---|---:|---:|---:|---:|---:|---:|---:|---|\n");
-        for scenario in &manifest.scenarios {
-            for checkpoint in &scenario.checkpoints {
-                let m = &checkpoint.metrics;
-                let title = format!("{} / {}", scenario.title, checkpoint.name)
-                    .replace('|', "\\|")
-                    .replace(['\n', '\r'], " ");
-                md.push_str(&format!(
-                    "| [{title}]({}) | {:.3} | {} | {} | {} | {} | {} | {} | {} |\n",
-                    checkpoint.png,
-                    checkpoint.time_ns as f64 / 1_000_000.0,
-                    m.frame_count,
-                    timing_triplet(
-                        m.scene_build_p50_ns,
-                        m.scene_build_p95_ns,
-                        m.scene_build_p99_ns
-                    ),
-                    timing_triplet(
-                        m.cpu_render_p50_ns,
-                        m.cpu_render_p95_ns,
-                        m.cpu_render_p99_ns
-                    ),
-                    m.primitive_count,
-                    m.batch_count,
-                    m.bitmap_storage_bytes,
-                    status_name(checkpoint.status),
-                ));
-            }
-        }
-        md.push_str("\n![Frame timings](metrics.svg)\n\n## Baseline changes\n\n");
-        if !manifest.changes.is_empty() {
-            for change in &manifest.changes {
-                md.push_str(&format!("- {change}\n"));
-            }
-        } else if manifest
-            .scenarios
-            .iter()
-            .all(|scenario| scenario.status == ReportStatus::BaselineUnavailable)
-        {
-            md.push_str("No baseline was supplied.\n");
-        } else {
-            md.push_str("No scenario or checkpoint changes.\n");
-        }
-    }
-    if let Some(adapter) = &manifest.native_replay {
-        md.push_str(&format!(
-            "\n## Native replay\n\nAdapter: {} ({}; {}; {}).\n\n",
-            adapter.adapter, adapter.backend, adapter.device_type, adapter.driver
-        ));
-        md.push_str("Encode/submit/completion latency covers CPU frame preparation through queue completion. Target creation, timestamp mapping, and pixel readback are excluded. GPU latency is the device timestamp interval.\n\n");
-        if let Some(reason) = &adapter.timestamp_reason {
-            md.push_str(&format!("GPU timestamps unavailable: {reason}\n\n"));
-        }
-        if let Some(native) = manifest
-            .scenarios
-            .iter()
-            .flat_map(|scenario| &scenario.checkpoints)
-            .find_map(|checkpoint| checkpoint.native.as_ref())
-        {
-            let m = &native.metrics;
-            md.push_str(&format!(
-                "Tracked allocation scope: {}.\n\nDevice allocation: {}.\n\n",
-                m.allocation_scope,
-                m.device_allocation_scope
-                    .as_deref()
-                    .or(m.allocation_reason.as_deref())
-                    .unwrap_or("unavailable")
-            ));
-        }
-        md.push_str("| Scenario / checkpoint | Samples | Encode/submit/completion p50/p95/p99 (ms) | GPU p50/p95/p99 (ms) | Tracked bytes | Device allocated bytes | CPU vs native pixels | Max / mean channel error |\n|---|---:|---:|---:|---:|---:|---:|---:|\n");
-        for scenario in &manifest.scenarios {
-            for checkpoint in &scenario.checkpoints {
-                let Some(native) = &checkpoint.native else {
-                    continue;
-                };
-                let m = &native.metrics;
-                let d = &native.difference;
-                let gpu = m
-                    .gpu
-                    .as_ref()
-                    .map(|p| timing_triplet(p.p50_ns, p.p95_ns, p.p99_ns))
-                    .unwrap_or_else(|| "n/a".into());
-                let device = m
-                    .device_allocated_bytes
-                    .map_or_else(|| "n/a".into(), |bytes| bytes.to_string());
-                md.push_str(&format!(
-                    "| [{} / {}]({}) | {} | {} | {} | {} | {} | [{}/{}]({}) | {} / {:.3} |\n",
-                    scenario.id,
-                    checkpoint.id,
-                    native.png,
-                    m.samples,
-                    timing_triplet(
-                        m.encode_submit_completion.p50_ns,
-                        m.encode_submit_completion.p95_ns,
-                        m.encode_submit_completion.p99_ns
-                    ),
-                    gpu,
-                    m.tracked_owned_bytes,
-                    device,
-                    d.changed_pixels,
-                    d.total_pixels,
-                    native.diff_png,
-                    d.max_channel_error,
-                    d.mean_channel_error,
-                ));
-            }
-        }
-    }
-    if let Some(checks) = &manifest.platform_checks {
-        md.push_str(&format!("\n## Native platform checks\n\nPlatform: {} · Status: {}\n\n| Capability | Available |\n|---|---|\n", checks.platform, checks.status));
-        for (name, available) in &checks.capabilities {
-            md.push_str(&format!("| {name} | {available} |\n"));
-        }
-        md.push_str("\n| Lifecycle event | Polls | Elapsed (ms) |\n|---|---:|---:|\n");
-        for event in &checks.events {
-            md.push_str(&format!(
-                "| {} | {} | {} |\n",
-                event.name, event.polls, event.elapsed_ms
-            ));
-        }
-        if manifest.scenarios.is_empty() {
-            md.push_str("\n![Lifecycle latency](metrics.svg)\n");
-        }
-        if let Some(frame) = &checks.frame {
-            md.push_str(&format!("\nCaptured frame: {}×{}, {} paints, {} quads, {} monochrome sprites, {} subpixel sprites, {} polychrome sprites, {} painted pixels.\n",
-                frame.capture_width, frame.capture_height, frame.render_count, frame.quads, frame.monochrome_sprites, frame.subpixel_sprites, frame.polychrome_sprites, frame.painted_pixels));
-        }
-        if let Some(resize) = &checks.resize {
-            md.push_str(&format!(
-                "Resize callback: {} events at {}×{} logical pixels.\n",
-                resize.callback_count, resize.width, resize.height
-            ));
-        }
-        for error in &checks.errors {
-            md.push_str(&format!("\n- Platform error: {error}\n"));
-        }
-    }
-    fs::write(output_dir.join("report.md"), md)?;
-    Ok(())
-}
-
-fn timing_triplet(p50: u64, p95: u64, p99: u64) -> String {
-    format!(
-        "{:.3} / {:.3} / {:.3}",
-        p50 as f64 / 1_000_000.0,
-        p95 as f64 / 1_000_000.0,
-        p99 as f64 / 1_000_000.0
-    )
-}
-
-fn write_svg(manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
-    let platform_only = manifest.scenarios.is_empty() && manifest.platform_checks.is_some();
-    let mut values: Vec<_> = manifest
-        .scenarios
-        .iter()
-        .flat_map(|scenario| {
-            scenario.checkpoints.iter().map(move |checkpoint| {
-                (
-                    format!("{} / {}", scenario.id, checkpoint.id),
-                    [
-                        Some(checkpoint.metrics.scene_build_p50_ns),
-                        Some(checkpoint.metrics.cpu_render_p50_ns),
-                        checkpoint
-                            .native
-                            .as_ref()
-                            .map(|native| native.metrics.encode_submit_completion.p50_ns),
-                        checkpoint
-                            .native
-                            .as_ref()
-                            .and_then(|native| native.metrics.gpu.as_ref())
-                            .map(|gpu| gpu.p50_ns),
-                    ],
-                )
-            })
-        })
-        .collect();
-    let frame_bars = [
-        ("Scene build", BLUE.mix(0.75)),
-        ("CPU replay", RED.mix(0.7)),
-        ("Native encode/submit/completion", GREEN.mix(0.75)),
-        ("GPU execution", MAGENTA.mix(0.75)),
-    ];
-    let platform_bars = [("Lifecycle latency", BLUE.mix(0.75))];
-    let bars = if platform_only {
-        if let Some(checks) = &manifest.platform_checks {
-            values = checks
-                .events
-                .iter()
-                .map(|event| {
-                    let ns = u64::try_from(event.elapsed_ms.saturating_mul(1_000_000))
-                        .unwrap_or(u64::MAX);
-                    (event.name.clone(), [Some(ns), None, None, None])
-                })
-                .collect();
-        }
-        &platform_bars[..]
-    } else {
-        let count = values
-            .iter()
-            .flat_map(|(_, timings)| timings.iter().enumerate())
-            .filter_map(|(index, value)| value.map(|_| index + 1))
-            .max()
-            .unwrap_or(2);
-        &frame_bars[..count]
-    };
-    let bars_per_row = bars.len();
-    let path = output_dir.join("metrics.svg");
-    let height = 140 + values.len().max(1) as u32 * 54;
-    let root = SVGBackend::new(&path, (1100, height)).into_drawing_area();
-    root.fill(&WHITE).map_err(plot_err)?;
-    let max = values
-        .iter()
-        .flat_map(|(_, timings)| timings.iter().flatten().copied())
-        .max()
-        .unwrap_or(1)
-        .max(1);
-    let rows = values.len().max(1) * bars_per_row;
-    let mut chart = ChartBuilder::on(&root)
-        .caption(
-            if platform_only {
-                "Native lifecycle latency"
-            } else {
-                "Median frame work by checkpoint"
-            },
-            ("sans-serif", 24),
-        )
-        .margin(18)
-        .x_label_area_size(48)
-        .y_label_area_size(300)
-        .build_cartesian_2d(
-            0u64..max.saturating_add(max / 10 + 1),
-            (0usize..rows).with_key_points(
-                (0..values.len())
-                    .map(|index| index * bars_per_row + bars_per_row / 2)
-                    .collect(),
-            ),
-        )
-        .map_err(plot_err)?;
-    chart
-        .configure_mesh()
-        .y_labels(values.len())
-        .y_label_formatter(&|index| {
-            values
-                .get(*index / bars_per_row)
-                .map(|value| value.0.clone())
-                .unwrap_or_default()
-        })
-        .x_desc("milliseconds")
-        .x_label_formatter(&|ns| format!("{:.1}", *ns as f64 / 1_000_000.0))
-        .disable_mesh()
-        .draw()
-        .map_err(plot_err)?;
-    let mut legend_added = [false; 4];
-    for (index, (_, timings)) in values.iter().enumerate() {
-        for (bar_index, ((label, color), value)) in bars.iter().zip(timings).enumerate() {
-            let Some(value) = value else {
-                continue;
-            };
-            let row = index * bars_per_row + bar_index;
-            let series = chart
-                .draw_series(std::iter::once(Rectangle::new(
-                    [(0, row), (*value, row + 1)],
-                    color.filled(),
-                )))
-                .map_err(plot_err)?;
-            if !legend_added[bar_index] {
-                legend_added[bar_index] = true;
-                let color = *color;
-                series.label(*label).legend(move |(x, y)| {
-                    Rectangle::new([(x, y - 4), (x + 16, y + 4)], color.filled())
-                });
-            }
-        }
-    }
-    chart
-        .configure_series_labels()
-        .background_style(WHITE.mix(0.9))
-        .border_style(BLACK)
-        .draw()
-        .map_err(plot_err)?;
-    root.present().map_err(plot_err)?;
-    Ok(())
-}
-
-fn write_html(manifest: &ReportManifest, output_dir: &Path) -> Result<()> {
-    let mut html = String::from(
-        r#"<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>GPUI scenario report</title>
-  <style>
-    body { font: 15px system-ui; line-height: 1.5; max-width: 1200px;
-           margin: 2rem; background: #111; color: #eee; }
-    nav a { display: inline-block; margin: 0 1rem .5rem 0; }
-    a { color: #8cc8ff; }
-    section { margin: 2rem 0; }
-    img { max-width: 100%; height: auto; border: 1px solid #555; }
-    .images { display: grid; gap: 1rem;
-              grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
-    figure { margin: 0 0 1rem; }
-    figcaption { margin: .5rem 0; }
-  </style>
-</head>
-<body>
-  <h1>GPUI scenario report</h1>
-  <p><a href="manifest.json">JSON manifest</a> · <a href="report.md">Markdown metrics</a></p>
-  <img src="metrics.svg" alt="Measured timings">
-"#,
+fn read_limited_file(path: &Path, max_bytes: u64) -> Result<Vec<u8>> {
+    ensure!(
+        path.metadata()?.len() <= max_bytes,
+        "file exceeds {} MiB: {}",
+        max_bytes / (1024 * 1024),
+        path.display()
     );
-    if let Some(native) = &manifest.native_replay {
-        html.push_str(&format!(
-            "<section><h2>Native replay</h2><p>Adapter: {} · Backend: {} · Device type: {} · Driver: {}</p>",
-            escape_html(&native.adapter),
-            escape_html(&native.backend),
-            escape_html(&native.device_type),
-            escape_html(&native.driver)
-        ));
-        html.push_str("<p>Encode/submit/completion latency covers CPU frame preparation through queue completion; it excludes target creation, timestamp mapping, and pixel readback. GPU latency is the device timestamp interval.</p>");
-        if let Some(reason) = &native.timestamp_reason {
-            html.push_str(&format!(
-                "<p>GPU timestamps unavailable: {}</p>",
-                escape_html(reason)
-            ));
-        }
-        if let Some(metrics) = manifest
-            .scenarios
-            .iter()
-            .flat_map(|scenario| scenario.checkpoints.iter())
-            .find_map(|checkpoint| checkpoint.native.as_ref())
-            .map(|checkpoint| &checkpoint.metrics)
-        {
-            html.push_str(&format!(
-                "<p>Tracked owned memory: {}.</p>",
-                escape_html(&metrics.allocation_scope)
-            ));
-            if let Some(source) = &metrics.device_allocation_scope {
-                html.push_str(&format!(
-                    "<p>Device allocation source: {}.</p>",
-                    escape_html(source)
-                ));
-            } else if let Some(reason) = &metrics.allocation_reason {
-                html.push_str(&format!(
-                    "<p>Device allocation unavailable: {}.</p>",
-                    escape_html(reason)
-                ));
-            }
-        }
-        html.push_str("</section>");
-    }
-    html.push_str("<nav aria-label=\"Scenarios\">");
-    for scenario in &manifest.scenarios {
-        html.push_str(&format!(
-            "<a href=\"#{}\">{}</a>",
-            scenario.id,
-            escape_html(&scenario.title)
-        ));
-    }
-    html.push_str("</nav>");
-    if !manifest.changes.is_empty() {
-        html.push_str("<section><h2>Baseline changes</h2><ul>");
-        for change in &manifest.changes {
-            html.push_str(&format!("<li>{}</li>", escape_html(&change.to_string())));
-        }
-        html.push_str("</ul></section>");
-    }
-    if let Some(checks) = &manifest.platform_checks {
-        html.push_str(&format!("<section><h2>Native platform checks</h2><p>{} · {}</p><table><thead><tr><th>Capability</th><th>Available</th></tr></thead><tbody>",
-            escape_html(&checks.platform), checks.status));
-        for (name, available) in &checks.capabilities {
-            html.push_str(&format!(
-                "<tr><td>{}</td><td>{available}</td></tr>",
-                escape_html(name)
-            ));
-        }
-        html.push_str("</tbody></table><table><thead><tr><th>Lifecycle event</th><th>Polls</th><th>Elapsed (ms)</th></tr></thead><tbody>");
-        for event in &checks.events {
-            html.push_str(&format!(
-                "<tr><td>{}</td><td>{}</td><td>{}</td></tr>",
-                escape_html(&event.name),
-                event.polls,
-                event.elapsed_ms
-            ));
-        }
-        html.push_str("</tbody></table>");
-        if let Some(frame) = &checks.frame {
-            html.push_str(&format!("<p>Captured frame: {}×{}, {} paints, {} quads, {} monochrome sprites, {} subpixel sprites, {} polychrome sprites, {} painted pixels.</p>",
-                frame.capture_width, frame.capture_height, frame.render_count, frame.quads, frame.monochrome_sprites, frame.subpixel_sprites, frame.polychrome_sprites, frame.painted_pixels));
-        }
-        if let Some(resize) = &checks.resize {
-            html.push_str(&format!(
-                "<p>Resize callback: {} events at {}×{} logical pixels.</p>",
-                resize.callback_count, resize.width, resize.height
-            ));
-        }
-        for error in &checks.errors {
-            html.push_str(&format!("<p>Platform error: {}</p>", escape_html(error)));
-        }
-        html.push_str("</section>");
-    }
-    for scenario in &manifest.scenarios {
-        html.push_str(&format!(
-            "<section id=\"{}\"><h2>{}</h2>",
-            scenario.id,
-            escape_html(&scenario.title)
-        ));
-        for checkpoint in &scenario.checkpoints {
-            html.push_str(&format!(
-                "<h3>{} · {:.1} ms · {}</h3><p><a href=\"{}\">{}</a></p>",
-                escape_html(&checkpoint.name),
-                checkpoint.time_ns as f64 / 1_000_000.0,
-                status_name(checkpoint.status),
-                checkpoint.scene_json,
-                if checkpoint.scene_json.ends_with(".gz") {
-                    "Captured scene JSON (gzip)"
-                } else {
-                    "Captured scene JSON"
-                }
-            ));
-            html.push_str("<div class=\"images\">");
-            let mut images = vec![
-                ("Before", checkpoint.before_png.as_deref()),
-                ("Current", Some(checkpoint.png.as_str())),
-                ("Changes in red", checkpoint.diff_png.as_deref()),
-            ];
-            if let Some(native) = &checkpoint.native {
-                images.push(("Native WGPU", Some(native.png.as_str())));
-                images.push(("CPU vs native", Some(native.diff_png.as_str())));
-                html.push_str(&format!(
-                    "<p>Native encode/submit/completion p50: {:.3} ms · GPU p50: {} · pixel error: {}/{} (max {}, mean {:.3}) · tracked bytes: {} · device allocation: {} ({})</p>",
-                    native.metrics.encode_submit_completion.p50_ns as f64 / 1_000_000.0,
-                    native.metrics.gpu.as_ref().map_or_else(|| "unavailable".to_owned(), |gpu| format!("{:.3} ms", gpu.p50_ns as f64 / 1_000_000.0)),
-                    native.difference.changed_pixels,
-                    native.difference.total_pixels,
-                    native.difference.max_channel_error,
-                    native.difference.mean_channel_error,
-                    native.metrics.tracked_owned_bytes,
-                    native.metrics.device_allocated_bytes.map_or_else(|| "unavailable".to_owned(), |bytes| bytes.to_string()),
-                    escape_html(native.metrics.device_allocation_scope.as_deref().or(native.metrics.allocation_reason.as_deref()).unwrap_or("scope unavailable"))
-                ));
-            }
-            for (label, path) in images {
-                if let Some(path) = path {
-                    html.push_str(&format!("<figure><figcaption>{label}</figcaption><a href=\"{path}\"><img loading=\"lazy\" src=\"{path}\" alt=\"{label}\"></a></figure>"));
-                }
-            }
-            html.push_str("</div>");
-        }
-        html.push_str("</section>");
-    }
-    html.push_str("</body></html>");
-    fs::write(output_dir.join("index.html"), html)?;
-    Ok(())
-}
-
-fn status_name(status: ReportStatus) -> &'static str {
-    match status {
-        ReportStatus::BaselineUnavailable => "baseline unavailable",
-        ReportStatus::New => "new",
-        ReportStatus::Unchanged => "unchanged",
-        ReportStatus::Changed => "changed",
-    }
-}
-
-fn escape_html(s: &str) -> String {
-    s.replace('&', "&amp;")
-        .replace('<', "&lt;")
-        .replace('>', "&gt;")
-        .replace('"', "&quot;")
-        .replace('\'', "&#39;")
-}
-fn plot_err<E: std::fmt::Debug>(error: E) -> anyhow::Error {
-    anyhow::anyhow!("plot error: {error:?}")
+    let mut file = fs::File::open(path)?.take(max_bytes + 1);
+    let mut bytes = Vec::new();
+    file.read_to_end(&mut bytes)?;
+    ensure!(
+        bytes.len() as u64 <= max_bytes,
+        "file exceeds {} MiB: {}",
+        max_bytes / (1024 * 1024),
+        path.display()
+    );
+    Ok(bytes)
 }
 
 #[cfg(test)]
@@ -1427,13 +1546,13 @@ mod tests {
     use image::{Rgba, RgbaImage};
 
     #[test]
-    fn pixel_diff_keeps_context_and_marks_transparent_resize_regions() {
+    fn exact_diff_keeps_context_and_marks_transparent_resize_regions() {
         let before = RgbaImage::from_pixel(2, 1, Rgba([90, 120, 150, 255]));
         let mut current = RgbaImage::new(3, 1);
         current.put_pixel(0, 0, before[(0, 0)]);
         current.put_pixel(1, 0, Rgba([91, 120, 150, 255]));
         let diff = diff_images(&before, &current);
-        assert_eq!(diff[(0, 0)], Rgba([30, 40, 50, 255]), "unchanged context");
+        assert_eq!(diff[(0, 0)], before[(0, 0)], "unchanged context");
         assert_eq!(diff[(1, 0)], Rgba([255, 32, 32, 255]), "one-channel change");
         assert_eq!(
             diff[(2, 0)],

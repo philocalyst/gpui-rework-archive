@@ -31,11 +31,7 @@ fn all_gallery_captures_replay_on_native_wgpu_when_required() -> Result<()> {
         return Ok(());
     }
     let harness = Harness::new();
-    let scenarios = built_in_scenarios()?
-        .iter()
-        .map(|scenario| scenario.run(&harness))
-        .collect::<Result<Vec<_>>>()?;
-    let mut suite = RenderedSuite::new(scenarios);
+    let mut suite = harness.run_all(&built_in_scenarios()?)?;
     replay_native(&mut suite, 1)?;
     let adapter = suite
         .native_replay

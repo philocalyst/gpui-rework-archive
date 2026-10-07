@@ -3,7 +3,7 @@ use flate2::{Compression, GzBuilder, read::MultiGzDecoder};
 use gpui::{Scene, SceneCapture, WindowCheckReport, WindowCheckStatus};
 use gpui_test::{
     ImageDifference, NativeCheckpoint, NativeReplayInfo, NativeReplayMetrics, RenderedCheckpoint,
-    RenderedScenario, RenderedSuite, ReportChangeKind, ReportOptions, ReportStatus,
+    RenderedScenario, RenderedSuite, ReportChangeKind, ReportOptions, ReportStatus, ReportWriter,
     ScenarioMetrics, TimingPercentiles, Viewport, collect_reports, compare_reports, read_report,
     write_report,
 };
@@ -137,6 +137,13 @@ fn read_report_round_trips_font_native_and_platform_metadata() -> Result<()> {
             total_pixels: 16,
             max_channel_error: 0,
             mean_channel_error: 0.0,
+            bounds: None,
+            visible: Some(gpui_test::VisibleDifference {
+                changed_pixels: 0,
+                max_channel_error: 0.0,
+                mean_channel_error: 0.0,
+            }),
+            size_changed: false,
         },
     });
     suite.native_replay = Some(NativeReplayInfo {
@@ -199,6 +206,18 @@ fn gzip_scene_artifacts_are_deterministic_and_compare_equal_to_legacy_json() -> 
         legacy.scenarios[0].snapshots()?
     );
     assert!(compare_reports(&legacy_path, &compressed_path)?.is_empty());
+
+    let compared_to_legacy = write_report(
+        &suite,
+        dirs.path("legacy-baseline-current"),
+        ReportOptions {
+            baseline_dir: Some(legacy_path),
+            ..Default::default()
+        },
+    )?;
+    let checkpoint = &compared_to_legacy.scenarios[0].checkpoints[0];
+    assert_eq!(checkpoint.pixels_changed, Some(false));
+    assert_eq!(checkpoint.scene_changed, Some(false));
     Ok(())
 }
 
@@ -264,6 +283,167 @@ fn collect_reports_keeps_first_identical_duplicate_and_ignores_timing_difference
 }
 
 #[test]
+fn report_writer_streams_and_deduplicates_report_inputs() -> Result<()> {
+    let dirs = TestDirs::new();
+    let first_path = dirs.path("first");
+    let second_path = dirs.path("second");
+    let output_path = dirs.path("output");
+    write(&sample_suite([1, 2, 3, 255]), &first_path);
+    let mut second = sample_suite([1, 2, 3, 255]);
+    second.scenarios[0].checkpoints[0].metrics.cpu_render_p50_ns += 10;
+    write(&second, &second_path);
+
+    let mut writer = ReportWriter::new(&output_path, ReportOptions::default())?;
+    writer.add_report(&first_path)?;
+    writer.add_report(&second_path)?;
+    let manifest = writer.finish()?;
+    assert_eq!(manifest.scenarios.len(), 1);
+    assert_eq!(manifest.scenarios[0].id, "sample");
+    let loaded = read_report(output_path)?;
+    assert_eq!(loaded.scenarios.len(), 1);
+    assert_eq!(
+        loaded.scenarios[0].checkpoints[0].metrics.cpu_render_p50_ns,
+        20
+    );
+    Ok(())
+}
+
+#[test]
+fn report_writer_rejects_input_output_containment() -> Result<()> {
+    let dirs = TestDirs::new();
+    let input_path = dirs.path("input");
+    write(&sample_suite([1, 2, 3, 255]), &input_path);
+
+    let mut same_dir = ReportWriter::new(&input_path, ReportOptions::default())?;
+    assert!(same_dir.add_report(&input_path).is_err());
+
+    let mut nested = ReportWriter::new(input_path.join("output"), ReportOptions::default())?;
+    assert!(nested.add_report(&input_path).is_err());
+    drop(nested);
+    assert!(!input_path.join("output").exists());
+
+    let nested_output = input_path.join("baseline-child");
+    let result = ReportWriter::new(
+        &nested_output,
+        ReportOptions {
+            baseline_dir: Some(input_path.clone()),
+            selected_ids: Vec::new(),
+        },
+    );
+    let error = match result {
+        Ok(_) => anyhow::bail!("nested output path should be rejected"),
+        Err(error) => error,
+    };
+    assert!(error.to_string().contains("must not contain one another"));
+    assert!(!nested_output.exists());
+    Ok(())
+}
+
+#[test]
+fn failed_report_write_preserves_existing_report_and_refuses_unrelated_directories() -> Result<()> {
+    let dirs = TestDirs::new();
+    let output = dirs.path("output");
+    write(&sample_suite([1, 2, 3, 255]), &output);
+    let old_manifest = fs::read(output.join("manifest.json"))?;
+    let old_image = fs::read(output.join("sample/frame.png"))?;
+
+    let mut broken = sample_suite([4, 5, 6, 255]);
+    let duplicate = broken.scenarios[0].checkpoints[0].clone();
+    broken.scenarios[0].checkpoints.push(duplicate);
+    let mut writer = ReportWriter::new(&output, ReportOptions::default())?;
+    assert!(writer.add_scenario(&broken.scenarios[0]).is_err());
+    assert!(writer.finish().is_err());
+    assert_eq!(fs::read(output.join("manifest.json"))?, old_manifest);
+    assert_eq!(fs::read(output.join("sample/frame.png"))?, old_image);
+
+    let unrelated = dirs.path("unrelated");
+    fs::create_dir(&unrelated)?;
+    fs::write(unrelated.join("keep.txt"), b"keep")?;
+    assert!(ReportWriter::new(&unrelated, ReportOptions::default()).is_err());
+    assert_eq!(fs::read(unrelated.join("keep.txt"))?, b"keep");
+    Ok(())
+}
+
+#[test]
+fn read_report_rejects_oversized_legacy_scene_json() -> Result<()> {
+    let dirs = TestDirs::new();
+    let report = dirs.path("report");
+    write(&sample_suite([1, 2, 3, 255]), &report);
+    let manifest_path = report.join("manifest.json");
+    let mut manifest: serde_json::Value = serde_json::from_slice(&fs::read(&manifest_path)?)?;
+    let compressed_path = manifest["scenarios"][0]["checkpoints"][0]["scene_json"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let raw_path = compressed_path.trim_end_matches(".gz").to_owned();
+    fs::write(report.join(&raw_path), vec![b' '; 12 * 1024 * 1024 + 1])?;
+    fs::remove_file(report.join(&compressed_path))?;
+    manifest["scenarios"][0]["checkpoints"][0]["scene_json"] = raw_path.into();
+    fs::write(manifest_path, serde_json::to_vec_pretty(&manifest)?)?;
+    let error = read_report(&report).unwrap_err();
+    assert!(format!("{error:#}").contains("scene capture exceeds 12 MiB"));
+    Ok(())
+}
+
+#[test]
+fn read_report_rejects_oversized_manifest() -> Result<()> {
+    let dirs = TestDirs::new();
+    let report = dirs.path("report");
+    write(&sample_suite([1, 2, 3, 255]), &report);
+    fs::write(
+        report.join("manifest.json"),
+        vec![b' '; 12 * 1024 * 1024 + 1],
+    )?;
+    let error = read_report(&report).unwrap_err();
+    assert!(format!("{error:#}").contains("file exceeds 12 MiB"));
+    Ok(())
+}
+
+#[cfg(unix)]
+#[test]
+fn report_writer_resolves_parent_symlinks_before_parent_components() -> Result<()> {
+    let dirs = TestDirs::new();
+    let real_parent = dirs.path("real");
+    fs::create_dir_all(real_parent.join("nested"))?;
+    let alias = dirs.path("alias");
+    std::os::unix::fs::symlink(real_parent.join("nested"), &alias)?;
+    let requested_output = alias.join("..").join("output");
+
+    let mut writer = ReportWriter::new(&requested_output, ReportOptions::default())?;
+    writer.add_suite(&sample_suite([1, 2, 3, 255]))?;
+    writer.finish()?;
+    assert!(real_parent.join("output/manifest.json").is_file());
+    assert!(!dirs.path("output").exists());
+    Ok(())
+}
+
+#[test]
+fn report_writer_rejects_conflicting_source_revisions() -> Result<()> {
+    let dirs = TestDirs::new();
+    let first = dirs.path("first");
+    let second = dirs.path("second");
+    write(&sample_suite([1, 2, 3, 255]), &first);
+    write(&sample_suite([1, 2, 3, 255]), &second);
+    for (report, sha) in [(&first, "revision-one"), (&second, "revision-two")] {
+        let path = report.join("manifest.json");
+        let mut manifest: serde_json::Value = serde_json::from_slice(&fs::read(&path)?)?;
+        manifest["environment"]["git_sha"] = sha.into();
+        fs::write(path, serde_json::to_vec_pretty(&manifest)?)?;
+    }
+
+    let mut writer = ReportWriter::new(dirs.path("output"), ReportOptions::default())?;
+    writer.add_report(&first)?;
+    let error = writer.add_report(&second).unwrap_err();
+    assert!(error.to_string().contains("incompatible source revisions"));
+
+    let mut preserving = ReportWriter::new(dirs.path("preserved"), ReportOptions::default())?;
+    preserving.add_report(&first)?;
+    let output = preserving.finish()?;
+    assert_eq!(output.environment.git_sha.as_deref(), Some("revision-one"));
+    Ok(())
+}
+
+#[test]
 fn collect_reports_rejects_pixel_conflicts_for_duplicate_ids() {
     let dirs = TestDirs::new();
     let first_path = dirs.path("first");
@@ -271,12 +451,111 @@ fn collect_reports_rejects_pixel_conflicts_for_duplicate_ids() {
     write(&sample_suite([1, 2, 3, 255]), &first_path);
     write(&sample_suite([4, 5, 6, 255]), &second_path);
 
-    let error = collect_reports(&[first_path, second_path]).unwrap_err();
+    let error = collect_reports(&[first_path.clone(), second_path.clone()]).unwrap_err();
     assert!(
         error
             .to_string()
             .contains("conflicting duplicate scenario ID")
     );
+    let output = dirs.path("streaming");
+    let mut writer = ReportWriter::new(&output, ReportOptions::default()).unwrap();
+    writer.add_report(&first_path).unwrap();
+    assert!(writer.add_report(&second_path).is_err());
+    assert!(writer.finish().is_err());
+    assert!(!output.exists());
+}
+
+#[test]
+fn motion_comparison_detects_a_frozen_frame_without_bridging_missing_checkpoints() -> Result<()> {
+    let dirs = TestDirs::new();
+    let baseline_path = dirs.path("baseline");
+    let mut baseline = sample_suite([0, 0, 0, 255]);
+    let template = baseline.scenarios[0].checkpoints[0].clone();
+    baseline.scenarios[0].checkpoints = [0, 64, 128]
+        .into_iter()
+        .enumerate()
+        .map(|(index, red)| RenderedCheckpoint {
+            id: format!("frame-{index}"),
+            time_ns: index as u64 * 100_000_000,
+            image: image::RgbaImage::from_pixel(4, 4, image::Rgba([red, 0, 0, 255])),
+            ..template.clone()
+        })
+        .collect();
+    write(&baseline, &baseline_path);
+    let mut current = baseline.clone();
+    current.scenarios[0].checkpoints[1].image = template.image;
+    current.scenarios[0].checkpoints[1].time_ns = 150_000_000;
+    let manifest = write_report(
+        &current,
+        dirs.path("current"),
+        ReportOptions {
+            baseline_dir: Some(baseline_path.clone()),
+            ..Default::default()
+        },
+    )?;
+    let checkpoints = &manifest.scenarios[0].checkpoints;
+    assert!(checkpoints[0].motion.is_none());
+    let frozen = checkpoints[1].motion.as_ref().unwrap();
+    assert_eq!(frozen.previous_checkpoint_id, "frame-0");
+    assert_eq!(frozen.before_duration_ns, Some(100_000_000));
+    assert_eq!(frozen.current_duration_ns, Some(150_000_000));
+    assert_eq!(frozen.difference.changed_pixels, 16);
+    assert_eq!(frozen.difference.max_channel_error, 64.0);
+    // The final image catches up, but its transition is still different from the baseline.
+    assert_eq!(checkpoints[2].pixels_changed, Some(false));
+    assert_eq!(
+        checkpoints[2]
+            .motion
+            .as_ref()
+            .unwrap()
+            .difference
+            .changed_pixels,
+        16
+    );
+
+    current.scenarios[0].checkpoints.remove(1);
+    let sparse = write_report(
+        &current,
+        dirs.path("sparse"),
+        ReportOptions {
+            baseline_dir: Some(baseline_path),
+            ..Default::default()
+        },
+    )?;
+    assert!(sparse.scenarios[0].checkpoints[1].motion.is_none());
+    Ok(())
+}
+
+#[test]
+fn streaming_collection_preserves_validated_source_encoding() -> Result<()> {
+    let dirs = TestDirs::new();
+    let input = dirs.path("input");
+    write(&sample_suite([1, 2, 3, 255]), &input);
+    let scene_path = input.join("sample/frame.scene.json.gz");
+    let mut json = Vec::new();
+    MultiGzDecoder::new(fs::File::open(&scene_path)?).read_to_end(&mut json)?;
+    let mut encoder = GzBuilder::new()
+        .mtime(123)
+        .write(Vec::new(), Compression::best());
+    encoder.write_all(&json)?;
+    let source_bytes = encoder.finish()?;
+    fs::write(&scene_path, &source_bytes)?;
+    let output = dirs.path("output");
+    let mut writer = ReportWriter::new(&output, ReportOptions::default())?;
+    writer.add_report(&input)?;
+    // A duplicate with different gzip bytes must take the semantic comparison fallback.
+    fs::write(&scene_path, gzip(&json))?;
+    writer.add_report(&input)?;
+    writer.finish()?;
+    assert_eq!(
+        fs::read(output.join("sample/frame.scene.json.gz"))?,
+        source_bytes
+    );
+    assert_eq!(
+        fs::read(output.join("sample/frame.png"))?,
+        fs::read(input.join("sample/frame.png"))?
+    );
+    Ok(())
 }
 
 #[test]
@@ -413,6 +692,9 @@ fn font_pack_changes_agree_in_scenario_checkpoint_and_comparison_results() -> Re
     assert_eq!(checkpoint.status, ReportStatus::Changed);
     assert_eq!(checkpoint.metadata_changed, Some(true));
     assert_eq!(checkpoint.pixels_changed, Some(false));
+    assert_eq!(checkpoint.before_time_ns, Some(0));
+    assert_eq!(checkpoint.difference, None);
+    assert_eq!(checkpoint.heatmap_png, None);
     assert_eq!(checkpoint.scene_changed, Some(false));
     assert_eq!(manifest.changes.len(), 1);
     assert_eq!(

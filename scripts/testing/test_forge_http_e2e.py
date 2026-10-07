@@ -16,6 +16,7 @@ from unittest.mock import patch
 import post_github_report as github
 import post_gitlab_comment as gitlab
 from test_post_github_report import PNG, add_native_replay, add_platform_checks, fixture_manifest, write_report
+import report_support as report
 
 
 class ForgeState:
@@ -68,7 +69,15 @@ def local_forge():
                     return self.send_error(404)
                 data = state.blobs[blob_sha]
                 self.send_response(200)
-                self.send_header("Content-Type", "text/html" if path.endswith(".html") else "image/png" if path.endswith(".png") else "image/svg+xml" if path.endswith(".svg") else "application/json")
+                content_type = (
+                    "text/html" if path.endswith(".html") else
+                    "text/javascript" if path.endswith(".js") else
+                    "text/css" if path.endswith(".css") else
+                    "text/markdown" if path.endswith(".md") else
+                    "image/png" if path.endswith(".png") else
+                    "image/svg+xml" if path.endswith(".svg") else "application/json"
+                )
+                self.send_header("Content-Type", content_type)
                 self.send_header("Content-Length", str(len(data)))
                 self.end_headers()
                 self.wfile.write(data)
@@ -237,6 +246,7 @@ class ForgeHttpEndToEndTests(unittest.TestCase):
             self.assertIn("![Timing graph]", comment)
             self.assertIn("Native GPU replay (diagnostic)", comment)
             self.assertIn("Native minus CPU (diagnostic difference)", comment)
+            self.assertIn("Native visible magnitude heatmap", comment)
             self.assertIn("Platform integration checks", comment)
             self.assertEqual(state.refs["heads/visual-results"] != "root-commit", True)
             self.assertTrue(any(method == "PATCH" and path.endswith("/git/refs/heads/visual-results") for method, path, *_ in state.requests))
@@ -247,9 +257,11 @@ class ForgeHttpEndToEndTests(unittest.TestCase):
             root_html = urllib.request.urlopen(base + "/pages/index.html", timeout=5).read().decode()
             run_html = urllib.request.urlopen(base + "/pages/runs/" + "a" * 40 + "/index.html", timeout=5).read().decode()
             self.assertIn("/pulls/17/index.html", root_html)
-            self.assertIn('src="metrics.svg"', run_html)
-            self.assertIn("4096", run_html)
-            self.assertIn('id="platform-checks"', run_html)
+            self.assertIn('href="metrics.svg"', run_html)
+            self.assertIn('id="report-data" type="application/json"', run_html)
+            self.assertIn('"bitmap_storage_bytes":4096', run_html)
+            self.assertIn("platform_checks", run_html)
+            self.assertIn('class: "graph-scroll"', run_html)
             pull_html = urllib.request.urlopen(base + "/pages/pulls/17/index.html", timeout=5).read().decode()
             registry = json.loads(urllib.request.urlopen(base + "/pages/runs.json", timeout=5).read())
             self.assertIn("/runs/" + "a" * 40 + "/index.html", pull_html)
@@ -264,6 +276,15 @@ class ForgeHttpEndToEndTests(unittest.TestCase):
             self.assertTrue(native_diff.startswith(b"\x89PNG"))
             chart = urllib.request.urlopen(base + "/pages/runs/" + "a" * 40 + "/metrics.svg", timeout=5).read()
             self.assertIn(b"<svg", chart)
+            run_root = base + "/pages/runs/" + "a" * 40 + "/"
+            for name, expected in {
+                "report.md": report.markdown_report(manifest),
+                **report._trusted_viewer_sources(),
+            }.items():
+                with self.subTest(asset=name):
+                    self.assertEqual(urllib.request.urlopen(run_root + name, timeout=5).read(), expected)
+            magnitude = urllib.request.urlopen(run_root + "gallery/initial.native.heatmap.png", timeout=5).read()
+            self.assertTrue(magnitude.startswith(b"\x89PNG"))
 
     def test_gitlab_note_update_and_stale_head_race_use_real_http(self):
         sha = "a" * 40

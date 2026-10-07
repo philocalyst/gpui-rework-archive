@@ -1,4 +1,4 @@
-use crate::{Scenario, bundled_text_system};
+use crate::{AnyScenario, ImageDifference, Scenario, bundled_text_system};
 use anyhow::{Context, Result, ensure};
 use gpui::{
     AssetSource, DevicePixels, HeadlessAppContext, PlatformAtlas, PlatformHeadlessRenderer,
@@ -158,19 +158,6 @@ pub struct NativeReplayMetrics {
     pub device_allocation_scope: Option<String>,
     /// Why allocation telemetry is unavailable; absent when a measurement exists.
     pub allocation_reason: Option<String>,
-}
-
-/// Pixel difference statistics between native replay and canonical CPU output.
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
-pub struct ImageDifference {
-    /// Pixels where at least one RGBA channel differs.
-    pub changed_pixels: u64,
-    /// Pixels in the union of both image bounds.
-    pub total_pixels: u64,
-    /// Largest absolute difference in an 8-bit channel.
-    pub max_channel_error: u8,
-    /// Mean absolute difference across all RGBA channels, in the range 0–255.
-    pub mean_channel_error: f64,
 }
 
 /// Explicit CPU-side performance and storage measurements.
@@ -402,6 +389,22 @@ impl Harness {
             font_pack: self.font_pack.clone(),
             checkpoints: output,
         })
+    }
+
+    /// Runs a heterogeneous set of scenarios and returns one suite in input order.
+    pub fn run_all<'a>(
+        &self,
+        scenarios: impl IntoIterator<Item = &'a AnyScenario>,
+    ) -> Result<RenderedSuite> {
+        let scenarios = scenarios
+            .into_iter()
+            .map(|scenario| {
+                scenario
+                    .run(self)
+                    .with_context(|| format!("capturing scenario {}", scenario.id()))
+            })
+            .collect::<Result<Vec<_>>>()?;
+        Ok(RenderedSuite::new(scenarios))
     }
 }
 

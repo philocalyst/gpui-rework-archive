@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>GPUI visual report</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { max-width: 1280px; margin: 1.5rem auto; padding: 0 1rem 3rem; color: CanvasText; background: Canvas; }
+    header.page-header { border-bottom: 1px solid color-mix(in srgb, CanvasText 22%, transparent); margin-bottom: 1rem; }
+    header.page-header h1, header.page-header p { margin-top: .5rem; }
+    @media (max-width: 780px) { body { margin-top: .75rem; } }
+  </style>
+  <style>{{STYLE}}</style>
+</head>
+<body>
+  <header class="page-header">
+    <h1>GPUI visual report</h1>
+    <p><a href="manifest.json">Manifest JSON</a> · <a href="report.md">Metrics report</a> · <a href="metrics.svg">Timing graph (SVG)</a></p>
+  </header>
+  <main id="report">
+    <p>This report needs JavaScript to select and inspect checkpoints.</p>
+    <p><a href="manifest.json">Open the report manifest</a>; captured images and scenes are linked there.</p>
+  </main>
+  <script id="report-data" type="application/json">{{DATA}}</script>
+  <script type="module">
+{{SCRIPT}}
+const data = document.getElementById("report-data"), root = document.getElementById("report");
+if (data && root) {
+  try { renderReport(root, JSON.parse(data.textContent)); }
+  catch (error) { root.replaceChildren(el(document, "p", `Report could not be rendered: ${error}`, { class: "error" })); }
+}
+  </script>
+</body>
+</html>

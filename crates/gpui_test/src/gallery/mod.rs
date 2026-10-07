@@ -11,59 +11,10 @@ pub use stress::StressScenario;
 pub use tasks::{AsyncTaskScenario, TaskState};
 pub use views::{AnimationScenario, EffectsScenario, LayoutScenario, TextScenario};
 
-use crate::Scenario;
+use crate::{AnyScenario, Scenario};
 use anyhow::Result;
 use gpui::{App, AppContext as _, point, px, size};
 use std::time::Duration;
-
-/// A registered scenario that can be listed and run alongside other view types.
-/// The view remains statically typed inside the scenario.
-pub struct BuiltInScenario {
-    scenario: Box<dyn RunnableScenario>,
-}
-
-trait RunnableScenario {
-    fn id(&self) -> &str;
-    fn title(&self) -> &str;
-    fn run(&self, harness: &crate::Harness) -> Result<crate::RenderedScenario>;
-}
-
-impl<V: gpui::Render + 'static> RunnableScenario for Scenario<V> {
-    fn id(&self) -> &str {
-        Scenario::id(self)
-    }
-    fn title(&self) -> &str {
-        Scenario::title(self)
-    }
-    fn run(&self, harness: &crate::Harness) -> Result<crate::RenderedScenario> {
-        harness.run(self)
-    }
-}
-
-impl<V: gpui::Render + 'static> From<Scenario<V>> for BuiltInScenario {
-    fn from(scenario: Scenario<V>) -> Self {
-        Self {
-            scenario: Box::new(scenario),
-        }
-    }
-}
-
-impl BuiltInScenario {
-    /// Stable identifier.
-    pub fn id(&self) -> &str {
-        self.scenario.id()
-    }
-
-    /// Human-readable title.
-    pub fn title(&self) -> &str {
-        self.scenario.title()
-    }
-
-    /// Runs the original typed scenario.
-    pub fn run(&self, harness: &crate::Harness) -> Result<crate::RenderedScenario> {
-        self.scenario.run(harness)
-    }
-}
 
 /// Shared wrapping and mixed-script scenarios used by the lesson and regression gallery.
 pub fn text_scenarios() -> Result<Vec<Scenario<TextScenario>>> {
@@ -322,10 +273,10 @@ pub fn tasks_scenario() -> Result<Scenario<AsyncTaskScenario>> {
 
 /// Returns the deterministic regression gallery. The same typed views and checkpoints are used
 /// by native examples through the builders above.
-pub fn built_in_scenarios() -> Result<Vec<BuiltInScenario>> {
+pub fn built_in_scenarios() -> Result<Vec<AnyScenario>> {
     let mut scenarios = text_scenarios()?
         .into_iter()
-        .map(BuiltInScenario::from)
+        .map(AnyScenario::from)
         .collect::<Vec<_>>();
     scenarios.extend([
         effects_scenario()?.into(),

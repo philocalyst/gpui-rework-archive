@@ -1,0 +1,76 @@
+.gpui-report { color: CanvasText; font: 15px/1.5 system-ui, sans-serif; }
+.gpui-report a { color: LinkText; }
+.gpui-report button, .gpui-report input, .gpui-report select { font: inherit; }
+.gpui-report h2, .gpui-report h3, .gpui-report p { margin-top: .5rem; }
+.gpui-report .summary, .gpui-report .controls, .gpui-report .scenario-nav, .gpui-report .timeline { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.gpui-report .summary { margin: 1rem 0; }
+.gpui-report .summary span, .gpui-report .chip, .gpui-report .status { border: 1px solid color-mix(in srgb, CanvasText 28%, transparent); border-radius: 999px; padding: .18rem .65rem; }
+.gpui-report .controls { margin: 1rem 0; }
+.gpui-report .controls label { display: flex; align-items: center; gap: .4rem; }
+.gpui-report input[type="search"] { min-width: 15rem; }
+.gpui-report .table-wrap { max-height: 30rem; overflow: auto; border: 1px solid color-mix(in srgb, CanvasText 20%, transparent); }
+.gpui-report table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+.gpui-report th, .gpui-report td { border-bottom: 1px solid color-mix(in srgb, CanvasText 20%, transparent); padding: .4rem .55rem; text-align: right; white-space: nowrap; }
+.gpui-report th:first-child, .gpui-report td:first-child { text-align: left; }
+.gpui-report tbody tr:hover { background: color-mix(in srgb, Highlight 12%, Canvas); }
+.gpui-report .scenario-nav { margin: .5rem 0; }
+.gpui-report .scenario-nav a, .gpui-report .timeline a { text-decoration: none; }
+.gpui-report .chip[aria-current="true"] { outline: 2px solid Highlight; }
+.gpui-report .checkpoint-panel { border: 1px solid color-mix(in srgb, CanvasText 28%, transparent); border-radius: .5rem; padding: 1rem; min-width: 0; margin: 1rem 0; }
+.gpui-report .timeline, .gpui-report .playback-controls, .gpui-report .compare-controls { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: .65rem 0; }
+.gpui-report .frame-scrubber { display: grid; grid-template-columns: minmax(12rem, 1fr) auto; align-items: center; gap: .75rem; margin: .75rem 0; }
+.gpui-report .frame-scrubber label { display: grid; grid-template-columns: auto minmax(6rem, 1fr); gap: .75rem; align-items: center; }
+.gpui-report .frame-scrubber output { font-variant-numeric: tabular-nums; }
+.gpui-report .frame-trend-section { margin: 1rem 0; }
+.gpui-report .motion-summary { border-left: 3px solid #8b52bd; padding: .25rem .75rem; margin: .75rem 0; }
+.gpui-report .trend-wrap { max-width: 100%; overflow-x: auto; }
+.gpui-report .frame-trend { display: block; width: 100%; min-width: 34rem; height: auto; overflow: visible; font: 12px system-ui, sans-serif; }
+.gpui-report .frame-trend text { fill: CanvasText; }
+.gpui-report .trend-grid { stroke: color-mix(in srgb, CanvasText 22%, transparent); stroke-width: 1; }
+.gpui-report .trend-exact { fill: none; stroke: #e5484d; stroke-width: 2; }
+.gpui-report .trend-visible { fill: none; stroke: #2878c8; stroke-width: 2; stroke-dasharray: 5 3; }
+.gpui-report .trend-motion { fill: none; stroke: #8b52bd; stroke-width: 2; stroke-dasharray: 2 3; }
+.gpui-report .trend-exact-point { fill: #e5484d; }
+.gpui-report .trend-visible-point { fill: #2878c8; }
+.gpui-report .trend-motion-point { fill: #8b52bd; }
+.gpui-report .trend-point { cursor: pointer; stroke: Canvas; stroke-width: 1.5; }
+.gpui-report .trend-point.selected { stroke: CanvasText; stroke-width: 2.5; }
+.gpui-report .trend-point:focus { outline: none; stroke: Highlight; stroke-width: 3; }
+.gpui-report .trend-time-mismatch { fill: #d88400; stroke: Canvas; stroke-width: 1; }
+.gpui-report .trend-legend { display: flex; flex-wrap: wrap; gap: 1rem; margin: .25rem 0; font-size: .9rem; }
+.gpui-report .legend-exact::before, .gpui-report .legend-visible::before, .gpui-report .legend-motion::before, .gpui-report .legend-mismatch::before { content: ""; display: inline-block; width: .7rem; height: .7rem; margin-right: .35rem; border-radius: 50%; background: #e5484d; }
+.gpui-report .legend-visible::before { background: #2878c8; }
+.gpui-report .legend-motion::before { background: #8b52bd; }
+.gpui-report .legend-mismatch::before { border-radius: 0; background: #d88400; transform: rotate(45deg); }
+.gpui-report .playback-label { margin-left: .5rem; }
+.gpui-report .compare-controls button[aria-pressed="true"] { outline: 2px solid Highlight; }
+.gpui-report .wipe-control { display: flex; align-items: center; gap: .5rem; min-width: 18rem; }
+.gpui-report .wipe-control input { flex: 1; }
+.gpui-report .comparison-scroll { max-width: 100%; max-height: 75vh; overflow: auto; border: 1px solid color-mix(in srgb, CanvasText 25%, transparent); }
+.gpui-report .comparison-stage { position: relative; width: 100%; background-color: #eee; background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%); background-size: 16px 16px; background-position: 0 0, 0 8px, 8px -8px, -8px 0; overflow: hidden; }
+.gpui-report .comparison-stage > img { position: absolute; left: 0; top: 0; display: block; max-width: none; }
+.gpui-report .comparison-stage > img[hidden], .gpui-report .wipe-control[hidden] { display: none !important; }
+.gpui-report .comparison-stage.mode-wipe::after { content: ""; position: absolute; top: 0; bottom: 0; left: var(--wipe-position, 50%); border-left: 2px solid #fff; pointer-events: none; }
+.gpui-report .comparison-stage .image-before { z-index: 1; }
+.gpui-report .comparison-stage .image-current { z-index: 2; }
+.gpui-report .comparison-stage .image-diff { z-index: 3; }
+.gpui-report .comparison-stage .image-heatmap { z-index: 4; }
+.gpui-report .comparison-stage.mode-side { display: flex; align-items: flex-start; overflow: visible; }
+.gpui-report .comparison-stage.mode-side > img { position: relative; left: auto; top: auto; flex: none; }
+.gpui-report .comparison-stage.mode-side .image-current { clip-path: none; }
+.gpui-report .comparison-stage.mode-blink .image-current { clip-path: none; }
+.gpui-report .comparison { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: .75rem; }
+.gpui-report .comparison-stage.pixel-zoom { width: max-content; max-width: none; min-height: 0; }
+.gpui-report .comparison-stage.pixel-zoom > img { image-rendering: pixelated; }
+.gpui-report .image-stats { font-variant-numeric: tabular-nums; }
+.gpui-report .table-wrap thead { position: sticky; top: 0; background: Canvas; }
+.gpui-report .table-wrap a { white-space: nowrap; }
+.gpui-report figure { margin: 0; min-width: 0; }
+.gpui-report figcaption { font-weight: 650; margin-bottom: .25rem; }
+.gpui-report figure img { display: block; width: 100%; height: auto; border: 1px solid color-mix(in srgb, CanvasText 25%, transparent); }
+.gpui-report details { margin: .8rem 0; }
+.gpui-report details > summary { cursor: pointer; font-weight: 650; }
+.gpui-report .graph-scroll { max-width: 100%; max-height: 32rem; overflow: auto; border: 1px solid color-mix(in srgb, CanvasText 25%, transparent); }
+.gpui-report .graph-scroll img { display: block; width: 1100px; max-width: none; height: auto; border: 0; }
+.gpui-report .muted { opacity: .75; }
+.gpui-report .error { color: #b42318; }

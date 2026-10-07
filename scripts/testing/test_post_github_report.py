@@ -2,6 +2,9 @@ import base64
 import copy
 import gzip
 import json
+import os
+import shutil
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -44,6 +47,7 @@ def add_native_replay(manifest):
     manifest["scenarios"][0]["checkpoints"][0]["native"] = {
         "png": "gallery/initial.native.png",
         "diff_png": "gallery/initial.native.diff.png",
+        "heatmap_png": "gallery/initial.native.heatmap.png",
         "metrics": {
             "samples": 4,
             "encode_submit_completion": {"p50_ns": 1_000_000, "p95_ns": 1_200_000, "p99_ns": 1_300_000},
@@ -55,6 +59,9 @@ def add_native_replay(manifest):
         "difference": {
             "changed_pixels": 12, "total_pixels": 64000,
             "max_channel_error": 8, "mean_channel_error": 0.125,
+            "bounds": {"x": 2, "y": 3, "width": 4, "height": 5},
+            "visible": {"changed_pixels": 8, "max_channel_error": 6.5, "mean_channel_error": 0.125},
+            "size_changed": False,
         },
     }
     return manifest
@@ -91,6 +98,11 @@ def write_report(root: Path, manifest: dict, *, png=PNG, scene=b'{"scene":1}') -
     if native:
         (root / native["png"]).write_bytes(PNG)
         (root / native["diff_png"]).write_bytes(PNG)
+        if native.get("heatmap_png"):
+            (root / native["heatmap_png"]).write_bytes(PNG)
+    checkpoint = manifest["scenarios"][0]["checkpoints"][0]
+    if checkpoint.get("heatmap_png"):
+        (root / checkpoint["heatmap_png"]).write_bytes(PNG)
     (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
     return root
 
@@ -110,6 +122,17 @@ class Response:
 
 
 class ReportSupportTests(unittest.TestCase):
+    def test_viewer_module_imports_without_a_document_global(self):
+        candidates = [shutil.which("node"), os.environ.get("NODE_BINARY"),
+                      "/Users/mileswirht/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node"]
+        node = next((candidate for candidate in candidates if candidate and Path(candidate).is_file()), None)
+        if node is None:
+            self.skipTest("Node.js is not available")
+        source = (Path(__file__).resolve().parents[2] / "crates/gpui_test/assets/report/viewer.js").read_bytes()
+        encoded = base64.b64encode(source).decode("ascii")
+        command = f'const viewer = await import("data:text/javascript;base64,{encoded}"); if (typeof viewer.renderReport !== "function") process.exit(1);'
+        subprocess.run([node, "--input-type=module", "-e", command], check=True, capture_output=True, text=True)
+
     def test_recorded_report_head_is_optional_but_must_match_when_present(self):
         manifest = fixture_manifest()
         support.validate_report_head(manifest, "a" * 40)
@@ -176,7 +199,7 @@ class ReportSupportTests(unittest.TestCase):
             self.assertEqual(assets["gallery/initial.scene.json.gz"], compressed)
             viewer = support.trusted_index(normalized).decode()
             self.assertIn("gallery/initial.scene.json.gz", viewer)
-            self.assertIn("Scene JSON (gzip)", viewer)
+            self.assertIn("Captured scene JSON (gzip)", viewer)
 
     def test_scene_json_gzip_rejects_invalid_truncated_and_expanded_overlimit(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -307,16 +330,18 @@ class ReportSupportTests(unittest.TestCase):
             assets = support.report_assets(loaded, report_root)
             self.assertIn("gallery/initial.native.png", assets)
             self.assertIn("gallery/initial.native.diff.png", assets)
+            self.assertIn("gallery/initial.native.heatmap.png", assets)
             self.assertEqual(support.comparison_summary(loaded), ([], True))
 
             viewer = support.trusted_index(loaded).decode()
-            self.assertIn("adapter &lt;trusted&gt;", viewer)
+            self.assertIn(r"adapter \u003ctrusted>", viewer)
             self.assertIn("Native GPU replay", viewer)
-            self.assertIn("Native minus CPU", viewer)
-            self.assertIn("0.80 ms", viewer)  # GPU timings are nanoseconds, converted to milliseconds.
-            self.assertIn("8192", viewer)
-            self.assertIn("allocator unavailable", viewer)
-            self.assertIn("CPU captures determine correctness", viewer)
+            self.assertIn("Native minus CPU · exact RGBA changes", viewer)
+            self.assertIn("Native minus CPU · visible magnitude heatmap", viewer)
+            self.assertIn("Exact red", viewer)
+            self.assertIn("Magnitude heatmap", viewer)
+            self.assertIn("nativeMetrics.device_allocated_bytes", viewer)
+            self.assertIn("CPU captures determine baseline status", viewer)
 
             table = support.markdown_metrics_table(loaded)
             self.assertIn("Native replay diagnostics", table)
@@ -337,6 +362,110 @@ class ReportSupportTests(unittest.TestCase):
             self.assertEqual(table.count("allocator unavailable"), 1)
             self.assertIn("12/64000", table)
             self.assertIn("8/0.125", table)
+
+    def test_exact_and_visible_difference_metadata_and_heatmap_asset(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "report"
+            manifest = fixture_manifest(status="changed", pixel=True)
+            checkpoint = manifest["scenarios"][0]["checkpoints"][0]
+            checkpoint.update(
+                before_time_ns=10,
+                heatmap_png="gallery/initial.heatmap.png",
+                difference={
+                    "changed_pixels": 10, "total_pixels": 64000,
+                    "max_channel_error": 255, "mean_channel_error": 12.5,
+                    "bounds": {"x": 2, "y": 3, "width": 4, "height": 5},
+                    "visible": {"changed_pixels": 3, "max_channel_error": 120.5, "mean_channel_error": 22.25},
+                    "size_changed": False,
+                },
+            )
+            write_report(root, manifest)
+            loaded, report_root = support.load_report(root)
+            assets = support.report_assets(loaded, report_root)
+            self.assertIn("gallery/initial.heatmap.png", assets)
+            viewer = support.trusted_index(loaded).decode()
+            self.assertIn('differenceText("CPU vs baseline"', viewer)
+            self.assertIn("some exact changes have no visible color or alpha error", viewer)
+            self.assertIn("before_time_ns", viewer)
+            self.assertIn("Visible magnitude heatmap", viewer)
+
+            checkpoint["heatmap_png"] = "gallery/another.heatmap.png"
+            (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "heatmap_png must be"):
+                support.load_report(root)
+
+            checkpoint["heatmap_png"] = "gallery/initial.heatmap.png"
+            checkpoint["difference"]["visible"]["mean_channel_error"] = float("nan")
+            (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "visible mean_channel_error"):
+                support.load_report(root)
+
+    def test_motion_metadata_requires_adjacent_matched_frames_and_valid_statistics(self):
+        def manifest_with_motion():
+            manifest = fixture_manifest(status="unchanged")
+            checkpoints = manifest["scenarios"][0]["checkpoints"]
+            previous = checkpoints[0]
+            previous.update(time_ns=10, before_time_ns=100)
+            current = copy.deepcopy(previous)
+            current.update(
+                id="next", name="Next", time_ns=30, before_time_ns=140,
+                status="changed", scene_json="gallery/next.scene.json", png="gallery/next.png",
+                motion={
+                    "previous_checkpoint_id": "initial", "before_duration_ns": 40,
+                    "current_duration_ns": 20,
+                    "difference": {
+                        "total_pixels": 64000, "changed_pixels": 100,
+                        "max_channel_error": 510, "mean_channel_error": 17.25,
+                        "bounds": {"x": 4, "y": 5, "width": 10, "height": 12},
+                    },
+                },
+            )
+            checkpoints.append(current)
+            return manifest
+
+        def load(candidate):
+            with tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary) / "report"
+                write_report(root, candidate)
+                return support.load_report(root)[0]
+
+        manifest = manifest_with_motion()
+        loaded = load(manifest)
+        motion = loaded["scenarios"][0]["checkpoints"][1]["motion"]
+        self.assertEqual(motion["difference"]["max_channel_error"], 510)
+        viewer = support.trusted_index(loaded).decode()
+        self.assertIn("Transition error · previous frame", viewer)
+        self.assertIn("pixels_changed === false ? 0", viewer)
+
+        malformed = [
+            (lambda m: m["scenarios"][0]["checkpoints"][1]["motion"].update(previous_checkpoint_id="other"), "immediately previous"),
+            (lambda m: m["scenarios"][0]["checkpoints"][1]["motion"].update(current_duration_ns=19), "durations must match"),
+            (lambda m: m["scenarios"][0]["checkpoints"][1]["motion"]["difference"].update(changed_pixels=64001), "exceeds total_pixels"),
+            (lambda m: m["scenarios"][0]["checkpoints"][1]["motion"]["difference"].update(max_channel_error=510.1), "between 0 and 510"),
+            (lambda m: m["scenarios"][0]["checkpoints"][1]["motion"]["difference"].update(mean_channel_error=float("nan")), "between 0 and 510"),
+            (lambda m: m["scenarios"][0]["checkpoints"][1]["motion"]["difference"].update(bounds={"x": 1, "y": 1, "width": 320, "height": 201}), "bounds area exceeds total_pixels"),
+        ]
+        for mutate, message in malformed:
+            with self.subTest(message=message):
+                candidate = manifest_with_motion()
+                mutate(candidate)
+                with self.assertRaisesRegex(ValueError, message):
+                    load(candidate)
+
+        resized = manifest_with_motion()
+        resized["scenarios"][0]["checkpoints"][1]["motion"]["difference"]["bounds"] = {"x": 319, "y": 199, "width": 2, "height": 2}
+        self.assertEqual(load(resized)["scenarios"][0]["checkpoints"][1]["motion"]["difference"]["bounds"]["width"], 2)
+
+        equal_time = manifest_with_motion()
+        frames = equal_time["scenarios"][0]["checkpoints"]
+        frames[0].update(time_ns=30, before_time_ns=140)
+        frames[1]["motion"].update(before_duration_ns=0, current_duration_ns=0)
+        self.assertEqual(load(equal_time)["scenarios"][0]["checkpoints"][1]["motion"]["current_duration_ns"], 0)
+
+        candidate = manifest_with_motion()
+        candidate["scenarios"][0]["checkpoints"][1]["status"] = "new"
+        with self.assertRaisesRegex(ValueError, "matched baseline/current"):
+            load(candidate)
 
     def test_native_replay_validation_rejects_paths_and_pixel_error_out_of_range(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -412,9 +541,9 @@ class ReportSupportTests(unittest.TestCase):
             write_report(root, manifest)
             loaded, _report_root = support.load_report(root)
             viewer = support.trusted_index(loaded).decode()
-            self.assertIn("Linux &lt;runner&gt;", viewer)
-            self.assertIn("window &lt;visible&gt;", viewer)
-            self.assertIn("<td>Frame</td>", viewer)
+            self.assertIn(r"Linux \u003crunner>", viewer)
+            self.assertIn(r"window \u003cvisible>", viewer)
+            self.assertIn("checks.frame.capture_width", viewer)
             summary = support.markdown_metrics_table(loaded)
             self.assertIn("Platform integration checks", summary)
             self.assertIn("native visibility", summary)
@@ -439,23 +568,34 @@ class ReportSupportTests(unittest.TestCase):
 
     def test_trusted_viewer_escapes_content_and_shows_semantic_comparison(self):
         manifest = fixture_manifest(
-            title="</h2><script>alert(1)</script>",
+            title="{{SCRIPT}}</h2><script>alert(1)</script>",
             status="changed",
             scene=True,
             metrics={"scene_build_p50_ns": 1_500_000, "bitmap_storage_bytes": 4096},
         )
         viewer = support.trusted_index(manifest).decode()
-        self.assertIn("&lt;/h2&gt;&lt;script&gt;", viewer)
-        self.assertNotIn("<script>", viewer)
-        self.assertIn("<figcaption>Current</figcaption>", viewer)
-        self.assertIn("<figcaption>Before</figcaption>", viewer)
-        self.assertIn("<figcaption>Difference</figcaption>", viewer)
-        self.assertIn("Scene JSON", viewer)
-        self.assertIn('src="metrics.svg"', viewer)
-        self.assertIn("<tr><th>Bitmap bytes</th><td>4096</td></tr>", viewer)
-        self.assertIn("<tr><th>Scene build p50</th><td>1.50 ms</td></tr>", viewer)
-        self.assertIn("n/a", viewer)
-        self.assertNotIn("<script", viewer)
+        self.assertIn(r"{{SCRIPT}}\u003c/h2>\u003cscript>alert(1)\u003c/script>", viewer)
+        self.assertNotIn("</h2><script>alert(1)</script>", viewer)
+        self.assertIn("Current capture", viewer)
+        self.assertIn("Before baseline", viewer)
+        self.assertIn("Exact RGBA differences in red", viewer)
+        self.assertIn("Before/current wipe position", viewer)
+        self.assertIn("Play timeline", viewer)
+        self.assertIn("Step next · timestamps need steps", viewer)
+        self.assertIn("checkpoint.pixels_changed === false", viewer)
+        self.assertIn("checkpoint.before_time_ns", viewer)
+        self.assertIn("Timestamps are equal, descending, or unavailable", viewer)
+        self.assertIn("next.time_ns - current.time_ns", viewer)
+        self.assertIn("Before: ${beforeImg ? imageSize(beforeImg)", viewer)
+        self.assertIn("Captured scene JSON (gzip)", viewer)
+        self.assertIn('href="metrics.svg"', viewer)
+        self.assertIn("metrics.bitmap_storage_bytes", viewer)
+        self.assertIn("metrics.scene_build_p50_ns", viewer)
+        self.assertIn("doc.createElement", viewer)
+        self.assertIn("node.textContent", viewer)
+        self.assertIn(r"\u003c", viewer)
+        self.assertNotIn("innerHTML", viewer)
+        self.assertNotIn("fetch(", viewer)
         table = support.markdown_metrics_table(manifest)
         self.assertIn("Scene build p50/p95/p99", table)
         self.assertIn("| Bitmap bytes |", table)
@@ -662,6 +802,15 @@ class ForgeAdapterTests(unittest.TestCase):
             "before_png": "gallery/checkpoint-7.before.png",
             "diff_png": "gallery/checkpoint-7.diff.png",
         })
+        motion_only = checkpoints[6]
+        motion_only["pixels_changed"] = False
+        motion_only["heatmap_png"] = "gallery/checkpoint-6.heatmap.png"
+        motion_only["motion"] = {
+            "previous_checkpoint_id": "checkpoint-5", "before_duration_ns": 2_000_000,
+            "current_duration_ns": 1_000_000,
+            "difference": {"total_pixels": 64000, "changed_pixels": 32,
+                           "max_channel_error": 80, "mean_channel_error": 2.5, "bounds": None},
+        }
         manifest["scenarios"][0]["checkpoints"] = checkpoints
         comment = github_report.make_comment(
             "owner/repo", "7", "42", "d" * 40, manifest,
@@ -671,6 +820,9 @@ class ForgeAdapterTests(unittest.TestCase):
         self.assertIn("gallery/checkpoint-7.before.png", comment)
         self.assertIn("gallery/checkpoint-7.png", comment)
         self.assertIn("gallery/checkpoint-7.diff.png", comment)
+        self.assertIn("gallery/checkpoint-6.png", comment)
+        self.assertIn("Transition error: 32/64000", comment)
+        self.assertIn("gallery/checkpoint-6.heatmap.png", comment)
         self.assertIn("gallery/checkpoint-7.native.png", comment)
         self.assertLess(
             comment.index("gallery/checkpoint-7.before.png"),

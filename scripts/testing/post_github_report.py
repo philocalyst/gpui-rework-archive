@@ -13,6 +13,7 @@ from urllib.parse import quote
 
 from report_support import (
     comparison_summary,
+    format_ms,
     load_report,
     markdown_metrics_table,
     markdown_text,
@@ -118,6 +119,7 @@ def preview_checkpoints(manifest: dict, baseline_available: bool) -> list[tuple[
     cpu_changes = [
         item for item in checkpoints
         if item[1].get("status") in {"changed", "new"}
+        or item[1].get("motion", {}).get("difference", {}).get("changed_pixels", 0) > 0
     ]
     native_diagnostics = [item for item in checkpoints if item[1].get("native")]
     cpu_change_keys = {(scenario["id"], checkpoint["id"]) for scenario, checkpoint in cpu_changes}
@@ -125,6 +127,27 @@ def preview_checkpoints(manifest: dict, baseline_available: bool) -> list[tuple[
         item for item in native_diagnostics
         if (item[0]["id"], item[1]["id"]) not in cpu_change_keys
     ]
+
+
+def _preview_stats(checkpoint: dict) -> str:
+    lines = []
+    difference = checkpoint.get("difference")
+    if difference:
+        changed, total = difference.get("changed_pixels"), difference.get("total_pixels")
+        percentage = f"{100 * changed / total:.3f}%" if isinstance(changed, int) and isinstance(total, int) and total else "n/a"
+        visible = difference.get("visible") or {}
+        visible_changed = visible.get("changed_pixels")
+        visible_text = "n/a" if not isinstance(visible_changed, int) or not total else f"{visible_changed}/{total} ({100 * visible_changed / total:.3f}%)"
+        lines.append(f"CPU pixel error: {changed}/{total} ({percentage}); visible {visible_text}; mean/peak {difference.get('mean_channel_error', 'n/a')}/{difference.get('max_channel_error', 'n/a')}.")
+    motion = checkpoint.get("motion")
+    if motion:
+        difference = motion["difference"]
+        changed, total = difference["changed_pixels"], difference["total_pixels"]
+        percentage = f"{100 * changed / total:.3f}%" if total else "n/a"
+        before = format_ms(motion.get("before_duration_ns"))
+        current = format_ms(motion.get("current_duration_ns"))
+        lines.append(f"Transition error: {changed}/{total} ({percentage}); signed premultiplied mean/peak {difference['mean_channel_error']}/{difference['max_channel_error']}; baseline/current elapsed {before}/{current}.")
+    return "\n".join(lines)
 
 
 def make_comment(repository: str, pr: str, run_id: str, head_sha: str, manifest: dict, page_url: str | None, changes: list[dict], baseline_available: bool) -> str:
@@ -154,7 +177,10 @@ def make_comment(repository: str, pr: str, run_id: str, head_sha: str, manifest:
         for scenario, checkpoint in image_checkpoints[:6]:
             lines.extend(["", "**" + markdown_text(scenario.get("title", scenario["id"]))
                 + " / " + markdown_text(checkpoint.get("name", checkpoint["id"])) + "**", ""])
-            for field, label in (("before_png", "Before"), ("png", "Current"), ("diff_png", "Changes in red")):
+            stats = _preview_stats(checkpoint)
+            if stats:
+                lines.append(stats)
+            for field, label in (("before_png", "Before"), ("png", "Current"), ("diff_png", "Changes in red"), ("heatmap_png", "Magnitude heatmap")):
                 asset = checkpoint.get(field)
                 if asset:
                     asset_url = page_url.rsplit("/index.html", 1)[0] + "/" + quote(asset, safe="/")
@@ -162,7 +188,7 @@ def make_comment(repository: str, pr: str, run_id: str, head_sha: str, manifest:
             native = checkpoint.get("native")
             if native:
                 lines.append("")
-                for field, label in (("png", "Native GPU replay (diagnostic)"), ("diff_png", "Native minus CPU (diagnostic difference)")):
+                for field, label in (("png", "Native GPU replay (diagnostic)"), ("diff_png", "Native minus CPU (diagnostic difference)"), ("heatmap_png", "Native visible magnitude heatmap")):
                     asset = native.get(field)
                     if asset:
                         asset_url = page_url.rsplit("/index.html", 1)[0] + "/" + quote(asset, safe="/")

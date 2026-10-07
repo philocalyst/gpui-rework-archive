@@ -35,6 +35,7 @@ plotters = { version = "0.3.7", default-features = false, features = ["line_seri
 serde.workspace = true
 serde_json.workspace = true
 sha2 = "0.10.9"
+tempfile.workspace = true
 
 [dev-dependencies]
 insta = { version = "1.43.1", features = ["json"] }

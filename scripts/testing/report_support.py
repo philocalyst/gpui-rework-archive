@@ -40,6 +40,7 @@ CHANGE_LABELS = {
 CHECKPOINT_CHANGE_KINDS = {
     "checkpoint_added", "checkpoint_removed", "checkpoint_metadata_changed", "pixels_changed", "scene_changed",
 }
+REPORT_VIEWER_DIR = Path(__file__).resolve().parents[2] / "crates/gpui_test/assets/report"
 
 
 def validate_relative(raw: object, suffixes: tuple[str, ...]) -> str:
@@ -134,12 +135,108 @@ def _validate_native_replay(manifest: dict) -> None:
         raise ValueError("native_replay timestamp_reason must be text or null")
 
 
+def _validate_image_difference(value: object, label: str) -> None:
+    if not isinstance(value, dict):
+        raise ValueError(f"{label} difference must be an object")
+    changed = _nonnegative_int(value.get("changed_pixels"), f"{label} changed_pixels")
+    total = value.get("total_pixels")
+    if total is not None:
+        total = _nonnegative_int(total, f"{label} total_pixels")
+        if changed > total:
+            raise ValueError(f"{label} changed_pixels exceeds total_pixels")
+    _validate_uint_fields(value, label, ("max_channel_error",), maximum=255)
+    mean_error = value.get("mean_channel_error")
+    if isinstance(mean_error, bool) or not isinstance(mean_error, (int, float)) or not math.isfinite(mean_error) or not 0 <= mean_error <= 255:
+        raise ValueError(f"{label} mean_channel_error must be finite and between 0 and 255")
+    bounds = value.get("bounds")
+    if bounds is not None:
+        if not isinstance(bounds, dict):
+            raise ValueError(f"{label} bounds must be an object or null")
+        _validate_uint_fields(bounds, f"{label} bounds", ("x", "y", "width", "height"), maximum=0xFFFFFFFF)
+        if bounds["width"] == 0 or bounds["height"] == 0 or bounds["x"] + bounds["width"] > 0xFFFFFFFF or bounds["y"] + bounds["height"] > 0xFFFFFFFF:
+            raise ValueError(f"{label} bounds are invalid")
+        if total is not None and bounds["width"] * bounds["height"] > total:
+            raise ValueError(f"{label} bounds area exceeds total_pixels")
+    visible = value.get("visible")
+    if visible is not None:
+        if not isinstance(visible, dict):
+            raise ValueError(f"{label} visible difference must be an object or null")
+        visible_changed = _nonnegative_int(visible.get("changed_pixels"), f"{label} visible changed_pixels")
+        if visible_changed > changed:
+            raise ValueError(f"{label} visible changed_pixels exceeds exact changed_pixels")
+        if total is not None and visible_changed > total:
+            raise ValueError(f"{label} visible changed_pixels exceeds total_pixels")
+        for field in ("max_channel_error", "mean_channel_error"):
+            error = visible.get(field)
+            if isinstance(error, bool) or not isinstance(error, (int, float)) or not math.isfinite(error) or not 0 <= error <= 255:
+                raise ValueError(f"{label} visible {field} must be finite and between 0 and 255")
+    if "size_changed" in value and not isinstance(value["size_changed"], bool):
+        raise ValueError(f"{label} size_changed must be a boolean")
+
+
+def _validate_motion(value: object, previous: dict | None, checkpoint: dict, label: str) -> None:
+    if not isinstance(value, dict):
+        raise ValueError(f"{label} motion must be an object")
+    if not {"previous_checkpoint_id", "before_duration_ns", "current_duration_ns", "difference"}.issubset(value):
+        raise ValueError(f"{label} motion is missing required fields")
+    previous_id = value.get("previous_checkpoint_id")
+    if not isinstance(previous_id, str) or not ID_RE.fullmatch(previous_id):
+        raise ValueError(f"{label} motion previous_checkpoint_id is invalid")
+    if previous is None or previous_id != previous.get("id"):
+        raise ValueError(f"{label} motion must reference the immediately previous checkpoint")
+    matched = {"unchanged", "changed"}
+    if previous.get("status") not in matched or checkpoint.get("status") not in matched:
+        raise ValueError(f"{label} motion requires adjacent matched baseline/current checkpoints")
+
+    for field in ("before_duration_ns", "current_duration_ns"):
+        _validate_uint_fields(value, f"{label} motion", (field,), optional=True)
+    expected = []
+    for current_time, previous_time in (
+        (checkpoint.get("before_time_ns"), previous.get("before_time_ns")),
+        (checkpoint.get("time_ns"), previous.get("time_ns")),
+    ):
+        expected.append(current_time - previous_time if isinstance(current_time, int) and not isinstance(current_time, bool)
+                        and isinstance(previous_time, int) and not isinstance(previous_time, bool)
+                        and current_time >= previous_time else None)
+    if value.get("before_duration_ns") != expected[0] or value.get("current_duration_ns") != expected[1]:
+        raise ValueError(f"{label} motion durations must match non-decreasing baseline/current timestamps")
+
+    difference = value.get("difference")
+    if not isinstance(difference, dict):
+        raise ValueError(f"{label} motion difference must be an object")
+    if not {"total_pixels", "changed_pixels", "max_channel_error", "mean_channel_error", "bounds"}.issubset(difference):
+        raise ValueError(f"{label} motion difference is missing required fields")
+    changed = _nonnegative_int(difference.get("changed_pixels"), f"{label} motion changed_pixels")
+    total = _nonnegative_int(difference.get("total_pixels"), f"{label} motion total_pixels")
+    if changed > total:
+        raise ValueError(f"{label} motion changed_pixels exceeds total_pixels")
+    for field in ("max_channel_error", "mean_channel_error"):
+        error = difference.get(field)
+        if isinstance(error, bool) or not isinstance(error, (int, float)) or not math.isfinite(error) or not 0 <= error <= 510:
+            raise ValueError(f"{label} motion {field} must be finite and between 0 and 510")
+    bounds = difference.get("bounds")
+    if bounds is not None:
+        if not isinstance(bounds, dict):
+            raise ValueError(f"{label} motion bounds must be an object or null")
+        _validate_uint_fields(bounds, f"{label} motion bounds", ("x", "y", "width", "height"), maximum=0xFFFFFFFF)
+        if bounds["width"] == 0 or bounds["height"] == 0 or bounds["x"] + bounds["width"] > 0xFFFFFFFF or bounds["y"] + bounds["height"] > 0xFFFFFFFF:
+            raise ValueError(f"{label} motion bounds are invalid")
+        if bounds["width"] * bounds["height"] > total:
+            raise ValueError(f"{label} motion bounds area exceeds total_pixels")
+
+
 def _validate_native_checkpoint(native: object, scenario: dict, checkpoint: dict, replay: dict, referenced_paths: set[str]) -> None:
     sid, cid = scenario["id"], checkpoint["id"]
     label = f"native replay {sid}/{cid}"
     if not isinstance(native, dict):
         raise ValueError(f"{label} must be an object")
-    for field, expected in (("png", f"{sid}/{cid}.native.png"), ("diff_png", f"{sid}/{cid}.native.diff.png")):
+    for field, expected in (
+        ("png", f"{sid}/{cid}.native.png"),
+        ("diff_png", f"{sid}/{cid}.native.diff.png"),
+        ("heatmap_png", f"{sid}/{cid}.native.heatmap.png"),
+    ):
+        if field == "heatmap_png" and native.get(field) is None:
+            continue
         relative = validate_relative(native.get(field), (".png",))
         if relative != expected:
             raise ValueError(f"{label} {field} must be {expected!r}")
@@ -175,9 +272,8 @@ def _validate_native_checkpoint(native: object, scenario: dict, checkpoint: dict
             raise ValueError(f"{label} {field} must be text or null")
 
     difference = native.get("difference")
-    if not isinstance(difference, dict):
-        raise ValueError(f"{label} difference must be an object")
-    changed = _nonnegative_int(difference.get("changed_pixels"), f"{label} changed_pixels")
+    _validate_image_difference(difference, label)
+    changed = difference["changed_pixels"]
     viewport = scenario.get("viewport") or {}
     width, height, scale = viewport.get("width"), viewport.get("height"), viewport.get("scale_factor", 1)
     if (
@@ -190,10 +286,6 @@ def _validate_native_checkpoint(native: object, scenario: dict, checkpoint: dict
     total = _nonnegative_int(difference.get("total_pixels"), f"{label} total_pixels", maximum=max_pixels)
     if changed > total:
         raise ValueError(f"{label} changed_pixels exceeds total_pixels")
-    _validate_uint_fields(difference, label, ("max_channel_error",), maximum=255)
-    mean_error = difference.get("mean_channel_error")
-    if isinstance(mean_error, bool) or not isinstance(mean_error, (int, float)) or not math.isfinite(mean_error) or not 0 <= mean_error <= 255:
-        raise ValueError(f"{label} mean_channel_error must be finite and between 0 and 255")
 
 
 PLATFORM_CAPABILITIES = (
@@ -352,7 +444,7 @@ def load_report(root: Path) -> tuple[dict, Path]:
         checkpoints = scenario.get("checkpoints")
         if not isinstance(checkpoints, list):
             raise ValueError(f"scenario {sid} checkpoints must be a list")
-        for checkpoint in checkpoints:
+        for checkpoint_index, checkpoint in enumerate(checkpoints):
             if not isinstance(checkpoint, dict):
                 raise ValueError(f"scenario {sid} checkpoint must be an object")
             cid = checkpoint.get("id")
@@ -362,7 +454,9 @@ def load_report(root: Path) -> tuple[dict, Path]:
             _validate_status_fields(checkpoint, f"checkpoint {sid}/{cid}")
             if "time_ns" in checkpoint and (not isinstance(checkpoint["time_ns"], int) or isinstance(checkpoint["time_ns"], bool) or checkpoint["time_ns"] < 0):
                 raise ValueError(f"checkpoint {sid}/{cid} time_ns must be a non-negative integer")
-            for field in ("png", "scene_json", "before_png", "diff_png"):
+            if "before_time_ns" in checkpoint and checkpoint["before_time_ns"] is not None:
+                _nonnegative_int(checkpoint["before_time_ns"], f"checkpoint {sid}/{cid} before_time_ns")
+            for field in ("png", "scene_json", "before_png", "diff_png", "heatmap_png"):
                 value = checkpoint.get(field)
                 if field in ("png", "scene_json") and value is None:
                     raise ValueError(f"checkpoint {sid}/{cid} is missing {field}")
@@ -373,6 +467,19 @@ def load_report(root: Path) -> tuple[dict, Path]:
                         raise ValueError(f"report asset is referenced more than once: {relative}")
                     referenced_paths.add(relative)
                     checkpoint[field] = relative
+            expected_heatmap = f"{sid}/{cid}.heatmap.png"
+            if checkpoint.get("heatmap_png") is not None and checkpoint["heatmap_png"] != expected_heatmap:
+                raise ValueError(f"checkpoint {sid}/{cid} heatmap_png must be {expected_heatmap!r}")
+            if checkpoint.get("difference") is not None:
+                _validate_image_difference(checkpoint["difference"], f"checkpoint {sid}/{cid}")
+            if checkpoint.get("motion") is not None:
+                _validate_motion(
+                    checkpoint["motion"],
+                    checkpoints[checkpoint_index - 1] if checkpoint_index > 0 else None,
+                    checkpoint, f"checkpoint {sid}/{cid}",
+                )
+            if checkpoint.get("heatmap_png") is not None and checkpoint.get("difference") is None:
+                raise ValueError(f"checkpoint {sid}/{cid} heatmap_png requires difference statistics")
             if checkpoint.get("native") is not None:
                 if manifest.get("native_replay") is None:
                     raise ValueError(f"checkpoint {sid}/{cid} has native data without native_replay metadata")
@@ -419,18 +526,38 @@ def read_asset(root: Path, relative: str) -> bytes:
     return data
 
 
+def _trusted_viewer_sources() -> dict[str, bytes]:
+    return {name: (REPORT_VIEWER_DIR / name).read_bytes() for name in ("viewer.js", "viewer.css")}
+
+
+def markdown_report(manifest: dict) -> bytes:
+    changes, baseline_available = comparison_summary(manifest)
+    lines = ["# GPUI visual report", "", "**Baseline comparison:** " + ("available" if baseline_available else "unavailable") + "."]
+    lines.extend(["", "## Visual comparison"])
+    if baseline_available and changes:
+        lines.extend(f"- **{item['label']}:** {markdown_text(item['subject'])} — {markdown_text(item['detail'])}" for item in changes)
+    elif baseline_available:
+        lines.append("No typed checkpoint, timeline, scene, or pixel changes were recorded.")
+    else:
+        lines.append("No baseline capture was available; current captures are shown without comparison diffs.")
+    lines.extend(["", "## Metrics", markdown_metrics_table(manifest)])
+    return ("\n".join(lines).rstrip() + "\n").encode("utf-8")
+
+
 def report_assets(manifest: dict, root: Path) -> dict[str, bytes]:
     paths = {"manifest.json"}
     for scenario in manifest["scenarios"]:
         for checkpoint in scenario["checkpoints"]:
-            paths.update(checkpoint[key] for key in ("png", "scene_json", "before_png", "diff_png") if checkpoint.get(key))
+            paths.update(checkpoint[key] for key in ("png", "scene_json", "before_png", "diff_png", "heatmap_png") if checkpoint.get(key))
             native = checkpoint.get("native")
             if native:
-                paths.update(native[key] for key in ("png", "diff_png"))
+                paths.update(native[key] for key in ("png", "diff_png", "heatmap_png") if native.get(key))
     assets: dict[str, bytes] = {}
     total = 0
-    for relative in sorted(paths):
-        data = read_asset(root, relative)
+    generated = {"report.md": markdown_report(manifest), **_trusted_viewer_sources()}
+    for relative, data in sorted({**generated, **{path: None for path in paths}}.items()):
+        if data is None:
+            data = read_asset(root, relative)
         total += len(data)
         if total > MAX_REPORT_BYTES:
             raise ValueError("report assets exceed the 48 MiB hosting limit")
@@ -663,203 +790,16 @@ def markdown_platform_checks(checks: dict | None) -> str:
     return "\n".join(lines)
 
 
-def _platform_checks_html(checks: dict) -> list[str]:
-    parts = [
-        '<section id="platform-checks">',
-        f"  <h2>Platform integration checks · {html.escape(checks['status'])}</h2>",
-        f"  <p>Platform: {html.escape(checks['platform'])}. These checks exercise OS-backed window behavior.</p>",
-        "  <table><caption>Check summary</caption><thead><tr><th>Check</th><th>Name</th><th>Result</th></tr></thead><tbody>",
-    ]
-    parts.extend("    <tr>" + "".join(f"<td>{html.escape(value)}</td>" for value in row) + "</tr>" for row in _platform_rows(checks))
-    parts.extend(["  </tbody></table>", "</section>"])
-    return parts
-
-
 def trusted_index(manifest: dict) -> bytes:
-    title = "GPUI visual scenario report"
-    environment = manifest.get("environment") or {}
-    parts = [
-        "<!doctype html>",
-        '<html lang="en">',
-        "<head>",
-        '  <meta charset="utf-8">',
-        '  <meta name="viewport" content="width=device-width">',
-        f"  <title>{html.escape(title)}</title>",
-        "  <style>",
-        "    body { font: 16px system-ui; margin: 2rem; max-width: 1200px; color: #20242b; }",
-        "    img { max-width: 100%; height: auto; border: 1px solid #bbb; }",
-        "    figure { margin: 1rem 0; }",
-        "    .images { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 1rem; }",
-        "    table { border-collapse: collapse; }",
-        "    th, td { border: 1px solid #aaa; padding: .4rem; text-align: left; }",
-        "    .status { font-weight: 600; }",
-        "  </style>",
-        "</head>",
-        "<body>",
-        "<header>",
-        f"  <h1>{html.escape(title)}</h1>",
-        "  <p>"
-        f"Backend: {html.escape(str(manifest.get('backend', 'unknown')))} · "
-        f"Renderer: {html.escape(str(environment.get('renderer', 'n/a')))} · "
-        f"Font pack: {html.escape(str(environment.get('font_pack', 'n/a')))}"
-        "</p>",
-        '  <p><a href="manifest.json">Manifest JSON</a> · '
-        '<a href="metrics.svg">Timing graph</a></p>',
-        "</header>",
-        "<main>",
-        '  <figure id="timing-graph">',
-        "    <figcaption>Timing graph</figcaption>",
-        '    <a href="metrics.svg"><img src="metrics.svg" alt="Scenario frame timing graph"></a>',
-        "  </figure>",
-    ]
-    replay = manifest.get("native_replay")
-    if replay is not None:
-        reason = replay.get("timestamp_reason")
-        timestamp_status = "available" if reason is None else "unavailable"
-        native_description = (
-            "  <aside><h2>Native replay diagnostics</h2><p>These captures are diagnostic; CPU captures determine correctness. "
-            f"Adapter: {html.escape(replay['adapter'])} · Driver: {html.escape(replay['driver'].strip() or 'n/a')} · "
-            f"Backend: {html.escape(replay['backend'])} · "
-            f"Device: {html.escape(replay['device_type'])} · GPU timestamps: {timestamp_status}"
-        )
-        if reason:
-            native_description += f" ({html.escape(reason)})"
-        parts.append(native_description + "</p></aside>")
-    if manifest.get("platform_checks"):
-        parts.extend(_platform_checks_html(manifest["platform_checks"]))
-    navigation = " ".join(
-        f'<a href="#{html.escape(scenario["id"], quote=True)}">'
-        f"{html.escape(str(scenario.get('title', scenario['id'])))}</a>"
-        for scenario in manifest["scenarios"]
-    )
-    parts.append(f'<nav aria-label="Scenarios">{navigation}</nav>')
-
-    for scenario in manifest["scenarios"]:
-        scenario_id = scenario["id"]
-        escaped_id = html.escape(scenario_id)
-        scenario_title = html.escape(str(scenario.get("title", scenario_id)))
-        viewport = scenario.get("viewport", {})
-        viewport_text = (
-            f"{html.escape(str(viewport.get('width', 'n/a')))} × "
-            f"{html.escape(str(viewport.get('height', 'n/a')))} @ "
-            f"{html.escape(str(viewport.get('scale_factor', 'n/a')))}x"
-        )
-        status = html.escape(str(scenario.get("status", "baseline_unavailable")))
-        parts.extend([
-            f'<section id="{html.escape(scenario_id, quote=True)}">',
-            f"  <h2>{scenario_title}</h2>",
-            f'  <p>Scenario: <code>{escaped_id}</code> · {viewport_text} '
-            f'<span class="status">{status}</span></p>',
-        ])
-
-        for checkpoint in scenario["checkpoints"]:
-            checkpoint_id = checkpoint["id"]
-            checkpoint_name = html.escape(str(checkpoint.get("name", checkpoint_id)))
-            checkpoint_status = html.escape(str(checkpoint.get("status", "baseline_unavailable")))
-            timestamp = html.escape(str(checkpoint.get("time_ns", "n/a")))
-            scene_path = validate_relative(checkpoint["scene_json"], (".json", ".json.gz"))
-            scene_url = html.escape(quote(scene_path, safe="/"), quote=True)
-            scene_label = "Scene JSON (gzip)" if scene_path.endswith(".json.gz") else "Scene JSON"
-            escaped_checkpoint_id = html.escape(checkpoint_id)
-            parts.extend([
-                "  <article>",
-                f"    <h3>{checkpoint_name}</h3>",
-                f'    <p><code>{escaped_id}/{escaped_checkpoint_id}</code> · {timestamp} ns · '
-                f'<span class="status">{checkpoint_status}</span> · '
-                f'<a href="{scene_url}">{scene_label}</a></p>',
-                '    <div class="images">',
-            ])
-            figures = (
-                ("Current", checkpoint.get("png")),
-                ("Before", checkpoint.get("before_png")),
-                ("Difference", checkpoint.get("diff_png")),
-            )
-            for label, asset in figures:
-                if not asset:
-                    continue
-                asset_path = validate_relative(asset, (".png",))
-                asset_url = html.escape(quote(asset_path, safe="/"), quote=True)
-                alt = html.escape(
-                    f"{label} {scenario.get('title', scenario_id)} / "
-                    f"{checkpoint.get('name', checkpoint_id)}",
-                    quote=True,
-                )
-                parts.extend([
-                    "      <figure>",
-                    f"        <figcaption>{label}</figcaption>",
-                    f'        <a href="{asset_url}"><img loading="lazy" src="{asset_url}" alt="{alt}"></a>',
-                    "      </figure>",
-                ])
-
-            native = checkpoint.get("native")
-            if native:
-                native_figures = (
-                    ("Native GPU replay", native.get("png")),
-                    ("Native minus CPU · diagnostic difference", native.get("diff_png")),
-                )
-                for label, asset in native_figures:
-                    if not asset:
-                        continue
-                    asset_path = validate_relative(asset, (".png",))
-                    expected = f"{scenario_id}/{checkpoint_id}.native.png" if label == "Native GPU replay" else f"{scenario_id}/{checkpoint_id}.native.diff.png"
-                    if asset_path != expected:
-                        raise ValueError(f"native replay asset must be {expected!r}")
-                    asset_url = html.escape(quote(asset_path, safe="/"), quote=True)
-                    alt = html.escape(f"{label} {scenario.get('title', scenario_id)} / {checkpoint.get('name', checkpoint_id)}", quote=True)
-                    parts.extend([
-                        "      <figure>",
-                        f"        <figcaption>{label}</figcaption>",
-                        f'        <a href="{asset_url}"><img loading="lazy" src="{asset_url}" alt="{alt}"></a>',
-                        "      </figure>",
-                    ])
-
-            parts.extend([
-                "    </div>",
-                "    <table>",
-                "      <caption>Checkpoint metrics</caption>",
-                "      <tbody>",
-            ])
-            values = checkpoint_metric_values(checkpoint)
-            for label, value in zip(METRIC_HEADERS, values):
-                parts.append(
-                    f"        <tr><th>{html.escape(label)}</th><td>{html.escape(value)}</td></tr>"
-                )
-            parts.extend(["      </tbody>", "    </table>"])
-            if native:
-                native_metrics = native["metrics"]
-                gpu = native_metrics.get("gpu") or {}
-                completion = native_metrics["encode_submit_completion"]
-                difference = native["difference"]
-                native_values = [
-                    ("GPU timestamp p50", format_ms(gpu.get("p50_ns"))),
-                    ("GPU timestamp p95", format_ms(gpu.get("p95_ns"))),
-                    ("GPU timestamp p99", format_ms(gpu.get("p99_ns"))),
-                    ("Encode/submit/completion p50", format_ms(completion.get("p50_ns"))),
-                    ("Encode/submit/completion p95", format_ms(completion.get("p95_ns"))),
-                    ("Encode/submit/completion p99", format_ms(completion.get("p99_ns"))),
-                    ("Tracked owned bytes", _count_text(native_metrics.get("tracked_owned_bytes"))),
-                    ("Device allocated bytes", _count_text(native_metrics.get("device_allocated_bytes"))),
-                    ("Tracked allocation scope", native_metrics.get("allocation_scope") or "n/a"),
-                    ("Device allocation scope", native_metrics.get("device_allocation_scope") or "n/a"),
-                    ("Allocation reason", native_metrics.get("allocation_reason") or "n/a"),
-                    ("Changed pixels (native vs CPU)", _count_text(difference.get("changed_pixels"))),
-                    ("Total pixels", _count_text(difference.get("total_pixels"))),
-                    ("Max channel error", _count_text(difference.get("max_channel_error"))),
-                    ("Mean channel error", _float_text(difference.get("mean_channel_error"))),
-                ]
-                parts.extend([
-                    "    <table>",
-                    "      <caption>Native replay diagnostics · does not change CPU comparison status</caption>",
-                    "      <tbody>",
-                ])
-                for label, value in native_values:
-                    parts.append(f"        <tr><th>{html.escape(label)}</th><td>{html.escape(str(value))}</td></tr>")
-                parts.append("      </tbody></table>")
-            parts.append("  </article>")
-        parts.append("</section>")
-
-    parts.extend(["</main>", "</body>", "</html>"])
-    return "\n".join(parts).encode()
+    """Embed a validated manifest in the checked-in, dependency-free report viewer."""
+    template = (REPORT_VIEWER_DIR / "index.html").read_text(encoding="utf-8")
+    sources = _trusted_viewer_sources()
+    style = sources["viewer.css"].decode("utf-8")
+    script = sources["viewer.js"].decode("utf-8")
+    data = json.dumps(manifest, ensure_ascii=False, allow_nan=False, separators=(",", ":"))
+    data = data.replace("<", r"\u003c")
+    page = template.replace("{{STYLE}}", style).replace("{{SCRIPT}}", script)
+    return page.replace("{{DATA}}", data).encode("utf-8")
 
 
 def pages_index(reports: list[dict], page_url: str) -> bytes:
