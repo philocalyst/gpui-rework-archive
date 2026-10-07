@@ -288,6 +288,13 @@ impl TestScheduler {
         !state.runnables.is_empty() || !state.timers.is_empty()
     }
 
+    /// Time remaining until the next scheduled timer, without advancing the clock.
+    pub fn next_timer_delay(&self) -> Option<Duration> {
+        self.state.lock().timers.first().map(|timer| {
+            timer.expiration.saturating_duration_since(self.clock.now())
+        })
+    }
+
     /// Returns counts of (foreground_tasks, background_tasks) currently queued.
     /// Foreground tasks are those with a session_id, background tasks have none.
     pub fn pending_task_counts(&self) -> (usize, usize) {

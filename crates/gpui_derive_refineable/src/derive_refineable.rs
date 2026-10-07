@@ -50,6 +50,16 @@ pub fn derive_refineable(input: TokenStream) -> TokenStream {
     let field_names: Vec<_> = fields.iter().map(|f| f.ident.as_ref().unwrap()).collect();
     let field_visibilities: Vec<_> = fields.iter().map(|f| &f.vis).collect();
     let wrapped_types: Vec<_> = fields.iter().map(|f| get_wrapper_type(f, &f.ty)).collect();
+    let refinement_defaults: Vec<_> = fields.iter().map(|field| {
+        if is_refineable_field(field) {
+            quote! { ::core::default::Default::default() }
+        } else {
+            // The generated wrapper is always Option for these fields. Spell
+            // its empty value directly instead of invoking one Default function
+            // per field when constructing an unrefined style.
+            quote! { ::core::option::Option::None }
+        }
+    }).collect();
 
     let field_attributes: Vec<TokenStream2> = fields
         .iter()
@@ -479,7 +489,7 @@ pub fn derive_refineable(input: TokenStream) -> TokenStream {
         {
             fn default() -> Self {
                 #refinement_ident {
-                    #( #field_names: Default::default() ),*
+                    #( #field_names: #refinement_defaults ),*
                 }
             }
         }

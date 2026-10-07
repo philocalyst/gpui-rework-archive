@@ -31,6 +31,50 @@ use super::{Stateful, StatefulInteractiveElement};
 /// The delay before showing the loading state.
 pub const LOADING_DELAY: Duration = Duration::from_millis(200);
 
+// Image decoders can provide a zero-delay frame. Give those frames a finite interval so
+// advancing a simulated clock cannot get stuck traversing an animation forever.
+const MIN_ANIMATION_FRAME_DELAY: Duration = Duration::from_millis(1);
+
+fn advance_animation(
+    frame_index: usize,
+    elapsed: Duration,
+    frame_count: usize,
+    mut frame_delay: impl FnMut(usize) -> Duration,
+) -> (usize, Duration) {
+    if frame_count == 0 {
+        return (0, elapsed);
+    }
+
+    let mut delay = |index| frame_delay(index).max(MIN_ANIMATION_FRAME_DELAY);
+    let frame_index = frame_index % frame_count;
+    let current_delay = delay(frame_index);
+    if elapsed < current_delay {
+        return (frame_index, elapsed);
+    }
+
+    // A huge clock jump should skip complete animation cycles in constant space, then
+    // visit at most one frame-count worth of delays to determine the visible frame.
+    let cycle_ns = (0..frame_count).fold(0u128, |total, index| {
+        total.saturating_add(delay(index).as_nanos())
+    });
+    let remainder_ns = elapsed.as_nanos() % cycle_ns;
+    let mut remaining = Duration::new(
+        (remainder_ns / 1_000_000_000) as u64,
+        (remainder_ns % 1_000_000_000) as u32,
+    );
+    let mut frame_index = frame_index;
+    for _ in 0..frame_count {
+        let duration = delay(frame_index);
+        if remaining < duration {
+            break;
+        }
+        remaining -= duration;
+        frame_index = (frame_index + 1) % frame_count;
+    }
+
+    (frame_index, remaining)
+}
+
 /// A type alias to the resource loader that the `img()` element uses.
 ///
 /// Note: that this is only for Resources, like URLs or file paths.
@@ -320,18 +364,17 @@ impl Element for Img {
                                 state.frame_index = state.frame_index.min(max_frame_index);
                                 if frame_count > 1 && !cx.reduce_motion() {
                                     if window.is_window_active() {
-                                        let current_time = Instant::now();
+                                        let current_time = cx.background_executor().now();
                                         if let Some(last_frame_time) = state.last_frame_time {
                                             let elapsed = current_time - last_frame_time;
-                                            let frame_duration =
-                                                Duration::from(data.delay(state.frame_index));
-
-                                            if elapsed >= frame_duration {
-                                                state.frame_index =
-                                                    (state.frame_index + 1) % frame_count;
-                                                state.last_frame_time =
-                                                    Some(current_time - (elapsed - frame_duration));
-                                            }
+                                            let (frame_index, remainder) = advance_animation(
+                                                state.frame_index,
+                                                elapsed,
+                                                frame_count,
+                                                |index| Duration::from(data.delay(index)),
+                                            );
+                                            state.frame_index = frame_index;
+                                            state.last_frame_time = Some(current_time - remainder);
                                         } else {
                                             state.last_frame_time = Some(current_time);
                                         }
@@ -400,7 +443,8 @@ impl Element for Img {
                         None => {
                             if let Some(state) = &mut state {
                                 if let Some((started_loading, _)) = state.started_loading {
-                                    if started_loading.elapsed() > LOADING_DELAY
+                                    if cx.background_executor().now() - started_loading
+                                        > LOADING_DELAY
                                         && let Some(loading) = self.style.loading.as_ref()
                                     {
                                         let mut element = loading();
@@ -416,7 +460,8 @@ impl Element for Img {
                                         })
                                         .ok();
                                     });
-                                    state.started_loading = Some((Instant::now(), task));
+                                    state.started_loading =
+                                        Some((cx.background_executor().now(), task));
                                 }
                             }
                         }
@@ -587,7 +632,7 @@ impl ImageSource {
 
     /// Check whether this image source is present in the asset system (loading
     /// or loaded), without fetching it.
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, feature = "headless"))]
     pub fn is_asset_cached(&self, cx: &App) -> bool {
         match self {
             ImageSource::Resource(resource) => cx.has_asset::<ImgResourceLoader>(resource),
@@ -800,8 +845,10 @@ impl From<image::ImageError> for ImageCacheError {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{ParentElement as _, TestAppContext, canvas, div, point, px, size};
-    use image::{Frame, ImageBuffer, Rgba};
+    use crate::{
+        Context, ParentElement as _, Render, TestAppContext, Window, canvas, div, point, px, size,
+    };
+    use image::{Delay, Frame, ImageBuffer, Rgba};
 
     const TEST_IMG_ID: &str = "test-img";
 
@@ -815,6 +862,117 @@ mod tests {
     fn test_image_with_size(width: u32, height: u32) -> Arc<RenderImage> {
         let frame = Frame::new(ImageBuffer::from_pixel(width, height, Rgba([0, 0, 0, 0])));
         Arc::new(RenderImage::new(SmallVec::from_elem(frame, 1)))
+    }
+
+    fn colored_animation() -> Arc<RenderImage> {
+        let frames = [
+            (Rgba([255, 0, 0, 255]), 1, 100),
+            (Rgba([0, 255, 0, 255]), 2, 200),
+            (Rgba([0, 0, 255, 255]), 3, 300),
+        ]
+        .into_iter()
+        .map(|(color, width, delay)| {
+            Frame::from_parts(
+                ImageBuffer::from_pixel(width, 1, color),
+                0,
+                0,
+                Delay::from_numer_denom_ms(delay, 1),
+            )
+        });
+        Arc::new(RenderImage::new(SmallVec::from_iter(frames)))
+    }
+
+    struct AnimatedImageView {
+        image: Arc<RenderImage>,
+    }
+
+    impl Render for AnimatedImageView {
+        fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+            img(ImageSource::Render(self.image.clone()))
+                .id(TEST_IMG_ID)
+                .size_full()
+        }
+    }
+
+    #[test]
+    fn animation_clock_preserves_elapsed_time_across_frame_delays() {
+        let delays = [
+            Duration::from_millis(100),
+            Duration::from_millis(200),
+            Duration::from_millis(300),
+        ];
+        assert_eq!(
+            advance_animation(0, Duration::ZERO, delays.len(), |index| delays[index]),
+            (0, Duration::ZERO)
+        );
+        assert_eq!(
+            advance_animation(0, Duration::from_millis(340), delays.len(), |index| delays
+                [index]),
+            (2, Duration::from_millis(40))
+        );
+        assert_eq!(
+            advance_animation(2, Duration::from_millis(375), delays.len(), |index| delays
+                [index]),
+            (0, Duration::from_millis(75))
+        );
+    }
+
+    #[test]
+    fn animation_clock_skips_whole_cycles_and_bounds_zero_delay_frames() {
+        let delays = [
+            Duration::ZERO,
+            Duration::from_millis(2),
+            Duration::from_millis(3),
+        ];
+        let cycle = Duration::from_millis(6);
+        let elapsed = Duration::from_secs(10_000) + Duration::from_millis(4);
+        assert_eq!(
+            advance_animation(1, elapsed, delays.len(), |index| delays[index]),
+            advance_animation(1, elapsed + cycle * 500_000, delays.len(), |index| delays
+                [index])
+        );
+        assert_eq!(
+            advance_animation(0, Duration::from_millis(1), 2, |_| Duration::ZERO),
+            (1, Duration::ZERO)
+        );
+    }
+
+    #[gpui::test]
+    fn animated_image_uses_simulated_clock_for_frames(cx: &mut TestAppContext) {
+        let image = colored_animation();
+        let (_, window) = cx.add_window_view(|_, _| AnimatedImageView { image });
+        window.update(|window, _| window.activate());
+        let draw = |window: &mut crate::VisualTestContext| {
+            window.update(|window, cx| {
+                window.simulate_next_frame(cx);
+                window.draw(cx).clear(cx);
+            });
+        };
+        let image_width = |window: &mut crate::VisualTestContext| {
+            window.update(|window, _| {
+                window
+                    .rendered_frame
+                    .scene
+                    .polychrome_sprites
+                    .last()
+                    .expect("animated image should paint a sprite")
+                    .tile
+                    .bounds
+                    .size
+                    .width
+                    .0
+            })
+        };
+        // Tile widths identify the frames. The large jump crosses distinct delays and a
+        // complete cycle; the following 99/1 ms steps check that the remainder survives.
+        for (elapsed_ms, expected_width) in [(0, 1), (99, 1), (1, 2), (1_100, 1), (99, 1), (1, 2)] {
+            window
+                .cx
+                .background_executor
+                .advance_clock(Duration::from_millis(elapsed_ms));
+            draw(window);
+            assert_eq!(image_width(window), expected_width, "after {elapsed_ms} ms");
+        }
     }
 
     /// Overwrites the cached `frame_index` of the sibling `img` during paint.

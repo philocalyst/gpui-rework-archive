@@ -1002,7 +1002,7 @@ pub trait InteractiveElement: Sized {
         self
     }
 
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, feature = "headless"))]
     /// Set a key that can be used to look up this element's bounds
     /// in the [`crate::VisualTestContext::debug_bounds`] map
     /// This is a noop in release builds
@@ -1011,7 +1011,7 @@ pub trait InteractiveElement: Sized {
         self
     }
 
-    #[cfg(not(any(test, feature = "test-support")))]
+    #[cfg(not(any(test, feature = "headless")))]
     /// Set a key that can be used to look up this element's bounds
     /// in the [`crate::VisualTestContext::debug_bounds`] map
     /// This is a noop in release builds
@@ -2210,7 +2210,7 @@ impl DivFrameState {
     }
 
     /// Returns the display text and layout used to paint each inline paragraph.
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, feature = "headless"))]
     pub fn measured_inline_paragraphs(&self) -> Vec<(SharedString, Arc<crate::InlineLayout>)> {
         self.inline
             .as_ref()
@@ -2673,7 +2673,7 @@ pub struct Interactivity {
     #[cfg(any(feature = "inspector", debug_assertions))]
     pub(crate) source_location: Option<&'static core::panic::Location<'static>>,
 
-    #[cfg(any(test, feature = "test-support"))]
+    #[cfg(any(test, feature = "headless"))]
     pub(crate) debug_selector: Option<String>,
 }
 
@@ -3047,7 +3047,7 @@ impl Interactivity {
                     cx,
                 );
 
-                #[cfg(any(feature = "test-support", test))]
+                #[cfg(any(feature = "headless", test))]
                 if let Some(debug_selector) = &self.debug_selector {
                     window
                         .next_frame

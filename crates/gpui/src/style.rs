@@ -454,7 +454,7 @@ pub enum LayoutDirection {
 
 /// An element direction after inheritance and automatic detection have been resolved.
 #[doc(hidden)]
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub enum ResolvedDirection {
     /// Left-to-right inline direction.
     #[default]
@@ -585,7 +585,7 @@ impl Filter {
 /// stays in device space like every other primitive, and so the renderers `match` on it
 /// exhaustively — adding a filter variant breaks each backend's match, forcing a deliberate
 /// implement-or-decline decision per backend instead of silently rendering nothing.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum ScaledFilter {
     /// A gaussian blur with the given radius, in scaled (device) pixels.
     Blur(ScaledPixels),
@@ -1196,6 +1196,7 @@ pub struct UnderlineStyle {
     pub thickness: Pixels,
 
     /// The color of the underline.
+    #[serde(with = "crate::color::serde_colors::optional_hsla")]
     pub color: Option<Hsla>,
 
     /// Whether the underline should be wavy, like in a spell checker.
@@ -1209,6 +1210,7 @@ pub struct StrikethroughStyle {
     pub thickness: Pixels,
 
     /// The color of the strikethrough.
+    #[serde(with = "crate::color::serde_colors::optional_hsla")]
     pub color: Option<Hsla>,
 }
 

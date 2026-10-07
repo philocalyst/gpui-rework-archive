@@ -24,7 +24,10 @@ members = [
   "./crates/gpui_ce_util/",
   "./crates/gpui_path/",
   "./tooling/perf/",
+  "./crates/gpui_codepen/",
+  "./crates/gpui_codepen/guest/",
 ]
+exclude = ["vendor/miri"]
 default-members = ["./crates/gpui/"]
 resolver = "3"
 
@@ -85,7 +88,7 @@ palette = { version = "0.7.6", features = ["serializing"] }
 parking_lot = "0.12.1"
 phf = { version = "0.13.1", features = ["macros"] }
 postage = { version = "0.5", features = ["futures-traits"] }
-proptest = { version = "1.10", features = ["attr-macro"] }
+proptest = { version = "1.10", default-features = false, features = ["attr-macro", "std", "bit-set"] }
 chrono = { version = "0.4", features = ["serde"] }
 profiling = "1"
 rand = "0.9.4"
@@ -323,6 +326,14 @@ features = [
 
 [workspace.lints.rust]
 unexpected_cfgs = { level = "allow" }
+
+[profile.codepen-web]
+inherits = "release"
+opt-level = 3
+debug = 0
+strip = "debuginfo"
+lto = "thin"
+codegen-units = 16
 
 [workspace.lints.clippy]
 dbg_macro = "deny"

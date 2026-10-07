@@ -809,7 +809,12 @@ impl TextLayout {
     ) -> Option<Pixels> {
         match white_space {
             WhiteSpace::Nowrap => None,
-            WhiteSpace::Normal => Self::evaluate_alignment_width(known_dimensions, available_space),
+            WhiteSpace::Normal => known_dimensions.width.or(match available_space.width {
+                crate::AvailableSpace::Definite(width) => Some(width),
+                // The narrowest intrinsic width is the longest unbreakable run.
+                crate::AvailableSpace::MinContent => Some(Pixels::ZERO),
+                crate::AvailableSpace::MaxContent => None,
+            }),
         }
     }
 

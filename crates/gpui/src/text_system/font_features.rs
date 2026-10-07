@@ -53,6 +53,10 @@ impl<'de> serde::Deserialize<'de> for FontFeatures {
     where
         D: serde::Deserializer<'de>,
     {
+        if !deserializer.is_human_readable() {
+            return <Vec<(String, u32)> as serde::Deserialize>::deserialize(deserializer)
+                .map(|features| Self(Arc::new(features)));
+        }
         use serde::de::{MapAccess, Visitor};
         use std::fmt;
 
@@ -117,9 +121,12 @@ impl serde::Serialize for FontFeatures {
     where
         S: serde::Serializer,
     {
+        if !serializer.is_human_readable() {
+            return serde::Serialize::serialize(self.tag_value_list(), serializer);
+        }
         use serde::ser::SerializeMap;
 
-        let mut map = serializer.serialize_map(None)?;
+        let mut map = serializer.serialize_map(Some(self.0.len()))?;
 
         for (tag, value) in self.tag_value_list() {
             map.serialize_entry(tag, value)?;
