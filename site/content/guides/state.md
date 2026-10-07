@@ -16,8 +16,10 @@ entity's update closure. Keep the borrow within that operation; another update
 cannot lease the same entity mutably at the same time.
 
 After changing visible state, call `cx.notify()` in that entity's context. A
-consumer view must observe the model and notify itself if it should redraw.
-The [subscription walkthrough](@/examples/subscriptions.md) shows both notifications.
+consumer that derives its own state from the model can observe it, update that
+state, and notify itself. The [subscription walkthrough](@/examples/subscriptions.md)
+shows both notifications. Views that read an entity during rendering are also
+tracked for invalidation.
 
 ## Retain the relationship
 

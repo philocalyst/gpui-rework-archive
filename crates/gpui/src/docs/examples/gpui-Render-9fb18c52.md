@@ -1,10 +1,13 @@
-Examples for `gpui::Render`.
 
-- [Constrain a layout](https://gpui-ce.github.io/examples/layout/#run)
-- [Finish a task after a delay](https://gpui-ce.github.io/examples/async-task/#launch)
-- [Make state visible](https://gpui-ce.github.io/examples/counter/#render)
-- [Open a window](https://gpui-ce.github.io/examples/first-window/#render)
-- [Paint a custom region](https://gpui-ce.github.io/examples/drawing/#bounds)
-- [Render a large list](https://gpui-ce.github.io/examples/lists/#run)
-- [Shape and wrap text](https://gpui-ce.github.io/examples/text/#run)
-- [Shape and wrap text](https://gpui-ce.github.io/examples/text/#shaping)
+
+<!-- gpui-walkthroughs:begin gpui::Render -->
+
+Walkthroughs:
+
+- [Constrain a layout: Try a different constraint](https://gpui-ce.github.io/examples/layout/#run)
+- [Implement an element: Compose it with ordinary elements](https://gpui-ce.github.io/examples/custom-element/#compose)
+- [Make state visible: Read state into a frame](https://gpui-ce.github.io/examples/counter/#render)
+- [Open a window: Return the elements to draw](https://gpui-ce.github.io/examples/first-window/#render)
+- [Shape and wrap text: Make the paragraph narrower](https://gpui-ce.github.io/examples/text/#run)
+
+<!-- gpui-walkthroughs:end gpui::Render -->

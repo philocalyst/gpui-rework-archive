@@ -1,23 +1,63 @@
 # Input, focus, and actions
 
-GPUI dispatches pointer input through hitboxes and keyboard input through the
-focused element's dispatch path. A callback runs with the window and application
-contexts that own that path. Input does not give a listener an independent
-reference to application state.
+Element callbacks receive the [`Window`](crate::Window) and [`App`](crate::App)
+that are dispatching the event. Use [`Context::listener`](crate::Context::listener)
+when a callback needs to update the view that built its element.
 
-## Pointer events
+## Activation and pointer events
 
-Give an interactive element a stable ID. Its hitbox, hover state, press state,
-and listeners belong to that identity. A click is a completed press/release
-interaction; it is not a synonym for every mouse-down event. Use the specific
-mouse or pointer listener when the earlier event is the operation you need.
+Use [`on_click`](crate::StatefulInteractiveElement::on_click) for primary activation.
+Its [`ClickEvent`](crate::ClickEvent) can represent a completed mouse click,
+keyboard activation, or a recognized touch tap. Use `on_mouse_down` when the
+operation starts on a mouse press, such as beginning a drag. A mouse press and
+an activation are different events.
 
-Capture handlers run from ancestors toward the target. Bubble handlers run
-back toward ancestors. A handler can stop propagation through
-[`App::stop_propagation`](crate::App::stop_propagation). Stopping propagation
-changes which later handlers run; it does not undo state already changed by
-an earlier handler. See [`InteractiveElement`](crate::InteractiveElement) for
-the individual event contracts.
+[`on_aux_click`](crate::StatefulInteractiveElement::on_aux_click) handles secondary
+activation, including a right click or touch long press. Do not require a mouse
+position from every click: [`ClickEvent::mouse_position`](crate::ClickEvent::mouse_position)
+returns `None` for keyboard and touch activation.
+
+Give an interactive element a stable ID to retain its press and hover state
+across frames. Pointer hitboxes determine where it receives input; keyboard
+activation follows the attached focus path.
+
+## Propagation has two defaults
+
+> [!NOTE]
+> Ordinary input handlers propagate by default. Call
+> [`App::stop_propagation`](crate::App::stop_propagation) to prevent later handlers
+> from seeing that event. A bubbling action handler stops by default: call
+> [`App::propagate`](crate::App::propagate) when an ancestor should have a chance
+> to handle the action.
+
+This handler consumes Save when it can save and passes it to its ancestor
+otherwise:
+
+```rust,standalone_crate
+use gpui::{Context, IntoElement, actions, div, prelude::*};
+
+actions!(documentation_input, [Save]);
+struct Editor { can_save: bool, saves: usize }
+
+fn save_handler(cx: &mut Context<Editor>) -> impl IntoElement {
+    div().on_action(cx.listener(|editor, _: &Save, _, cx| {
+        if editor.can_save {
+            editor.saves += 1;
+            cx.notify();
+        } else {
+            cx.propagate();
+        }
+    }))
+}
+```
+
+Capture dispatch visits ancestors toward the target; bubble dispatch travels
+back toward ancestors. Stopping propagation affects subsequent handlers, not
+work an earlier handler already performed.
+[`Window::prevent_default`](crate::Window::prevent_default) has a separate
+purpose: it prevents applicable GPUI default behaviors, including parent focus
+on mouse-down and touch gesture claiming. It does not promise to cancel every
+native or browser default action.
 
 ## Keyboard focus
 

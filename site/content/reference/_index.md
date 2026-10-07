@@ -10,5 +10,5 @@ with the implementation, and docs.rs publishes them with each crate release.
 These pages give you routes into that reference and back to the walkthroughs.
 
 A local documentation build can include the API for this exact checkout. The
-[published reference](https://docs.rs/gpui-ce/latest/gpui/) describes the published
+[published reference](https://docs.rs/gpui-ce/0.2.2/gpui/) describes the published
 crate; check the [version notes](@/reference/versions.md) before combining the two.

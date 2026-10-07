@@ -26,115 +26,126 @@ for (const block of document.querySelectorAll('pre:has(code)')) {
 const input = document.querySelector('[data-search]');
 if (input) {
   const results = document.querySelector('[data-search-results]');
-  let index;
-  const load = async () => {
-    if (!index) {
-      const response = await fetch(input.dataset.index);
-      if (!response.ok) throw new Error('Search index unavailable');
-      const data = await response.json();
-      index = Array.isArray(data) ? data : (data.documents || []);
-    }
-    return index;
+  const announcement = document.querySelector('[data-search-status]');
+  let indexes;
+  let generation = 0;
+  const load = () => indexes ||= Promise.all([input.dataset.index, input.dataset.apimap].map(async url => {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Search index unavailable');
+    return response.json();
+  })).catch(error => { indexes = null; throw error; });
+  const add = (title, url, detail) => {
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = url; link.textContent = title;
+    if (detail) { const label = document.createElement('small'); label.textContent = detail; link.append(label); }
+    li.append(link); results.append(li);
   };
   const search = async () => {
-    const query = input.value.trim().toLocaleLowerCase();
+    const current = ++generation;
+    const raw = input.value.trim();
+    const query = raw.toLocaleLowerCase();
     results.replaceChildren(); results.hidden = !query;
-    if (!query) return;
+    if (!query) { announcement.textContent = ''; return; }
+    announcement.textContent = 'Searching…';
     try {
-      const words = query.split(/\s+/);
-      const rows = (await load()).map(row => {
-        const title = (row.title || '').toLocaleLowerCase();
-        const text = `${title} ${row.description || ''} ${row.body || row.content || ''}`.toLocaleLowerCase();
-        return { row, score: words.every(word => text.includes(word)) ? words.reduce((score, word) => score + (title.includes(word) ? 10 : 1), 0) : 0 };
-      }).filter(result => result.score).sort((a, b) => b.score - a.score).slice(0, 8);
-      for (const { row } of rows) {
-        const li = document.createElement('li');
-        const a = document.createElement('a');
-        a.href = row.url || row.permalink || row.id;
-        a.textContent = row.title;
-        li.append(a); results.append(li);
+      const [pages, apis] = await load();
+      if (current !== generation) return;
+      const compact = query.replace(/^gpui::/, '');
+      const matches = Object.entries(apis).map(([symbol, entry]) => {
+        const name = symbol.toLocaleLowerCase().replace(/^gpui::/, '');
+        return { symbol, entry, score: name === compact ? 100 : name.endsWith(`::${compact}`) ? 50 : name.includes(compact) ? 10 : 0 };
+      }).filter(row => row.score).sort((a, b) => b.score - a.score).slice(0, 3);
+      const seen = new Set();
+      for (const { symbol, entry } of matches) {
+        add(symbol, entry.docs, 'API contract');
+        for (const example of entry.examples.slice(0, 2)) {
+          if (seen.has(example.url)) continue;
+          seen.add(example.url);
+          add(example.step_title, new URL(example.url.replace(/^\//, ''), input.dataset.base).href, example.title);
+        }
       }
-      if (!rows.length) { const li = document.createElement('li'); li.textContent = 'No matching guide.'; results.append(li); }
-      const api = document.createElement('li');
-      const apiLink = document.createElement('a');
+      const words = query.split(/\s+/);
+      const rows = (Array.isArray(pages) ? pages : pages.documents || []).map(row => {
+        const title = (row.title || '').toLocaleLowerCase();
+        const description = (row.description || '').toLocaleLowerCase();
+        const body = (row.body || row.content || '').toLocaleLowerCase();
+        const text = `${title} ${description} ${body}`;
+        return { row, score: words.every(word => text.includes(word)) ? words.reduce((score, word) => score + (title.includes(word) ? 10 : description.includes(word) ? 4 : 1), 0) : 0 };
+      }).filter(result => result.score).sort((a, b) => b.score - a.score).slice(0, matches.length ? 3 : 8);
+      for (const { row } of rows) add(row.title, row.url || row.permalink || row.id);
+      if (!rows.length && !matches.length) {
+        const li = document.createElement('li'); li.textContent = 'No matching topic. Try the API search below.'; results.append(li);
+      }
       const apiURL = new URL(input.dataset.api);
-      apiURL.searchParams.set('search', input.value.trim());
-      apiLink.href = apiURL.href;
-      apiLink.textContent = `Search the API for “${input.value.trim()}”`;
-      api.append(apiLink); results.append(api);
-    } catch { const li = document.createElement('li'); li.textContent = 'Search could not load. Use the topic indexes below.'; results.append(li); }
+      apiURL.searchParams.set('search', raw);
+      add(`Search all APIs for “${raw}”`, apiURL.href);
+      announcement.textContent = `${results.querySelectorAll('a').length} results for “${raw}”.`;
+    } catch {
+      if (current !== generation) return;
+      announcement.textContent = 'Search unavailable.';
+      const li = document.createElement('li'); li.textContent = 'Search could not load. Use the topic indexes below.'; results.append(li);
+    }
   };
   input.addEventListener('input', search);
   input.form.addEventListener('submit', event => { event.preventDefault(); search(); });
-  input.addEventListener('keydown', event => {
-    if (event.key === 'Escape') { results.hidden = true; }
-    if (event.key === 'ArrowDown') { results.querySelector('a')?.focus(); event.preventDefault(); }
+  input.form.addEventListener('keydown', event => {
+    if (event.key === 'Escape') { results.hidden = true; input.focus(); }
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      const links = [...results.querySelectorAll('a')];
+      const index = links.indexOf(document.activeElement);
+      const next = index + (event.key === 'ArrowDown' ? 1 : -1);
+      (next < 0 ? input : links[next] || links[0])?.focus();
+      event.preventDefault();
+    }
   });
   const query = new URLSearchParams(location.search).get('q');
   if (query) { input.value = query; search(); }
 }
 
-let compiler;
-const connect = async () => {
-  if (!local) return null;
-  if (!compiler) compiler = fetch('http://127.0.0.1:1117/health', { signal: AbortSignal.timeout(3000) })
-    .then(response => response.ok ? response.json() : null).catch(() => null);
-  return compiler;
-};
-
+// The editor is the Miri branch's GPUI Codepen, embedded in the same preview
+// bundle. Edited Rust never goes through a browser-WASM compilation endpoint.
 for (const playground of document.querySelectorAll('[data-playground]')) {
   const frame = playground.querySelector('[data-preview]');
   const status = playground.querySelector('[data-preview-status]');
-  const editor = playground.querySelector('[data-editor]');
-  const button = playground.querySelector('[data-run]');
-  const diagnostics = playground.querySelector('[data-diagnostics]');
-  const original = editor.value;
+  const edit = playground.querySelector('[data-edit]');
+  const restore = playground.querySelector('[data-restore]');
+  const open = playground.querySelector('[data-workbench-link]');
   const originalURL = frame.src;
-  let generation = 0;
-  const report = message => { diagnostics.textContent = message; };
+  let editing = false;
   window.addEventListener('message', event => {
-    if (event.source !== frame.contentWindow) return;
-    if (event.origin !== new URL(frame.src).origin) return;
-    if (event.data === 'gpui-preview-ready') status.textContent = 'Ready. Click inside the preview to use it.';
+    if (event.source !== frame.contentWindow || event.origin !== new URL(frame.src).origin) return;
+    if (event.data === 'gpui-preview-ready') {
+      status.textContent = editing ? 'Edit Rust in the workbench. Changes run under Miri.' : 'Ready. Click inside the preview to use it.';
+    }
     if (typeof event.data === 'object' && event.data?.type === 'gpui-preview-error') {
       status.textContent = `Preview unavailable: ${event.data.message}. The source and walkthrough remain available.`;
     }
   });
-  connect().then(service => {
-    button.disabled = !service?.ready;
-    report(service?.ready ? 'Local compiler ready. Run with Ctrl/⌘ + Enter.' : 'To run edits, start python3 site/scripts/dev.py and open its localhost URL.');
-  });
-  const run = async () => {
-    const service = await connect();
-    if (!service?.ready) return;
-    const current = ++generation;
-    report('Compiling Rust… The last successful preview stays visible.');
-    button.disabled = true;
+  edit.addEventListener('click', async () => {
+    edit.disabled = true;
     try {
-      const response = await fetch('http://127.0.0.1:1117/compile', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-GPUI-Compiler-Token': service.token },
-        body: JSON.stringify({ source: editor.value }), signal: AbortSignal.timeout(900000),
-      });
-      const result = await response.json();
-      if (current !== generation) return;
-      if (!response.ok || !result.url) {
-        report(result.diagnostics || result.error || 'Compilation failed.'); return;
+      const response = local && await fetch('/api/workbench', { signal: AbortSignal.timeout(3000), cache: 'no-store' });
+      if (!response?.ok || (await response.json()).backend !== 'miri') {
+        status.textContent = 'To edit Rust, start python3 site/scripts/dev.py and open this walkthrough on its localhost URL.';
+        return;
       }
-      frame.src = new URL(result.url, 'http://127.0.0.1:1117').href;
-      report(result.diagnostics || 'Build succeeded. The preview is running the edited source.');
-    } catch (error) { if (current === generation) report(`Compiler request failed: ${error.message}`); }
-    finally { if (current === generation) button.disabled = false; }
-  };
-  button.addEventListener('click', run);
-  editor.addEventListener('keydown', event => {
-    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') { event.preventDefault(); run(); }
-    if (event.key === 'Tab') {
-      // Keep Tab available for keyboard navigation; source editing can insert spaces normally.
-      return;
-    }
+      editing = true;
+      frame.src = open.href;
+      frame.title = `${playground.getAttribute('aria-label')} — Miri Rust editor and preview`;
+      playground.classList.add('editing');
+      edit.hidden = true; restore.hidden = false; open.hidden = false;
+      status.textContent = 'Opening the Miri workbench…';
+    } catch {
+      status.textContent = 'The Miri service is unavailable. Start python3 site/scripts/dev.py, then try again.';
+    } finally { edit.disabled = false; }
   });
-  playground.querySelector('[data-restore]').addEventListener('click', () => {
-    generation++; editor.value = original; frame.src = originalURL;
-    button.disabled = false; report('Original source and preview restored.');
+  restore.addEventListener('click', () => {
+    editing = false;
+    frame.src = originalURL;
+    frame.title = `${playground.getAttribute('aria-label')} — interactive GPUI preview`;
+    playground.classList.remove('editing');
+    edit.hidden = false; restore.hidden = true; open.hidden = true;
+    status.textContent = 'Opening the original program…';
   });
 }

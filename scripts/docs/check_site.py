@@ -63,7 +63,10 @@ def audit(public: Path, rustdoc: Path | None = None, base_url='https://gpui-ce.g
         if url.netloc and url.netloc != base.netloc:
             if url.hostname == 'docs.rs' and url.path.startswith('/gpui-ce/') and rustdoc:
                 segments = url.path.strip('/').split('/')
-                return (rustdoc / '/'.join(segments[2:])).resolve(), unquote(url.fragment)
+                target = (rustdoc / '/'.join(segments[2:])).resolve()
+                if target.is_dir() or url.path.endswith('/'):
+                    target /= 'index.html'
+                return target, unquote(url.fragment)
             return None, None
         route = unquote(url.path)
         if route.startswith('/'):
@@ -127,7 +130,9 @@ def audit(public: Path, rustdoc: Path | None = None, base_url='https://gpui-ce.g
             errors.append(f'{index}: invalid API/example index: {error}')
 
     metadata = public / 'documentation-build.json'
-    if metadata.is_file():
+    if not metadata.is_file():
+        errors.append(f'{metadata}: missing build identity')
+    else:
         try:
             build = json.loads(metadata.read_text())
             if build['browser_programs']:

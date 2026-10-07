@@ -549,7 +549,16 @@ impl FocusId {
     }
 }
 
-/// A handle which can be used to track and manipulate the focused element in a window.
+/// A retained identity for a focusable element in one window.
+///
+/// Create a handle with [`App::focus_handle`], store it on the view, and attach
+/// it through [`crate::InteractiveElement::track_focus`]. Creating a
+/// handle alone does not focus an element. Call [`Window::focus`] to select it.
+/// Keyboard dispatch follows the path that rendered the focused handle;
+/// visual selection and pointer hover are separate state.
+///
+/// Clones share the focus identity. Keep the handle stable across renders so
+/// the window can relate the next dispatch path to the previous one.
 // docs:examples:begin
 #[doc = include_str!("docs/examples/gpui-FocusHandle-4a40e532.md")]
 // docs:examples:end
@@ -1253,10 +1262,22 @@ enum InputModality {
     Touch,
 }
 
-/// Holds rendering, focus, input, and platform state for one native window.
+/// Rendering, focus, input, and platform state for one window.
 ///
-/// A `Window` is borrowed from a callback or render pass. Store a [`WindowHandle`] when work must
-/// outlive that borrow.
+/// GPUI passes a mutable window borrow to rendering and input callbacks. Use
+/// it for layout, painting, focus, and window-specific services. Store a
+/// [`WindowHandle`] when later work must find this window again; a closed
+/// window makes handle updates fail.
+///
+/// Layout and paint APIs use logical [`Pixels`]. GPUI applies the display
+/// scale before sending primitives to the renderer. Do not multiply layout
+/// coordinates by that scale yourself. Bounds and layout IDs belong to the
+/// current frame; retain entity or element identities instead.
+///
+/// Paint calls record a scene during the paint phase. Use [`crate::canvas`]
+/// for a custom region and [`crate::_documentation::rendering`] for the full
+/// request-layout, prepaint, and paint lifecycle. Platform operations such as
+/// decoration and fullscreen retain the limits of the selected backend.
 pub struct Window {
     pub(crate) handle: AnyWindowHandle,
     pub(crate) invalidator: WindowInvalidator,
@@ -2133,6 +2154,9 @@ pub struct DispatchEventResult {
 /// axis-aligned bounds and do not follow transforms. Complex masks are not supported.
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
 #[repr(C)]
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-ContentMask-596c376b.md")]
+// docs:examples:end
 pub struct ContentMask<P: Clone + Debug + Default + PartialEq> {
     /// Visible rectangle in the mask's coordinate unit.
     pub bounds: Bounds<P>,
@@ -2295,7 +2319,14 @@ impl Window {
         view
     }
 
-    /// Returns the root entity of the window, if it has one.
+    /// Returns this window's root view, preserving absence and type mismatch.
+    ///
+    /// - `None`: this window has no root view.
+    /// - `Some(None)`: a root exists, but its type is not `E`.
+    /// - `Some(Some(entity))`: the root is an `E`; the returned clone retains it.
+    ///
+    /// For access from outside a window callback, [`WindowHandle::read`]
+    /// returns an error for a closed window or a root-type mismatch.
     pub fn root<E>(&self) -> Option<Option<Entity<E>>>
     where
         E: 'static + Render,
@@ -2670,10 +2701,15 @@ impl Window {
         AsyncWindowContext::new_context(cx.to_async(), self.handle)
     }
 
-    /// Schedules `callback` immediately after the next frame is rendered.
+    /// Runs `callback` at the next platform frame opportunity, before drawing.
     ///
-    /// The callback is retained until that frame and receives a fresh mutable window borrow. This
-    /// schedules a frame even when the window is otherwise clean.
+    /// The callback receives a fresh window and app borrow. It can update and
+    /// notify a view so that the ensuing draw uses the new state. Registration
+    /// wakes the frame source even when the window is clean; the callback alone
+    /// does not invalidate a view or guarantee a new draw or presentation.
+    ///
+    /// The callback runs once. A callback queued during delivery waits for a
+    /// later frame opportunity. Closing the window discards pending callbacks.
     pub fn on_next_frame(&self, callback: impl FnOnce(&mut Window, &mut App) + 'static) {
         RefCell::borrow_mut(&self.next_frame_callbacks).push(Box::new(callback));
         self.platform_window.schedule_frame();
@@ -2682,18 +2718,24 @@ impl Window {
         self.invalidator.wake_platform();
     }
 
-    /// Schedule a frame to be drawn on the next animation frame.
+    /// Notifies the view being drawn at the next frame opportunity.
     ///
-    /// This is useful for elements that need to animate continuously, such as a video player or an animated GIF.
-    /// It will cause the window to redraw on the next frame, even if no other changes have occurred.
-    ///
-    /// If called from within a view, it will notify that view on the next frame. Otherwise, it will refresh the entire window.
+    /// Call while rendering or drawing an element that needs another frame,
+    /// such as a video player. The current view is notified at the next frame
+    /// opportunity, even if its other state did not change. From an ordinary
+    /// window callback, use [`on_next_frame`](Self::on_next_frame) and notify an
+    /// explicitly captured entity instead.
     ///
     /// Callers driving purely decorative animations (spinners, pulses, and the
     /// like) should prefer [`AnimationExt::with_animation`](crate::AnimationExt::with_animation),
     /// which automatically respects [`App::reduce_motion`]. When using this
     /// method directly for decorative motion, check [`App::reduce_motion`]
     /// and skip the frame request when it is set.
+    ///
+    /// # Panics
+    ///
+    /// Panics when no view is being drawn. Debug builds also check that the
+    /// window is in its prepaint or paint phase.
     pub fn request_animation_frame(&self) {
         let entity = self.current_view();
         self.on_next_frame(move |_, cx| cx.notify(entity));
@@ -3928,8 +3970,10 @@ impl Window {
         })
     }
 
-    /// Sets a tooltip to be rendered for the upcoming frame. This method should only be called
-    /// during the paint phase of element drawing.
+    /// Registers a tooltip for the upcoming frame during prepaint.
+    ///
+    /// The returned ID identifies this frame's request; it is not a persistent
+    /// tooltip identity. Calling this outside prepaint panics in debug builds.
     pub fn set_tooltip(&mut self, tooltip: AnyTooltip) -> TooltipId {
         self.invalidator.debug_assert_prepaint();
         let id = TooltipId(post_inc(&mut self.next_tooltip_id.0));
@@ -3946,6 +3990,9 @@ impl Window {
     // This function is called in a highly recursive manner in editor
     // prepainting, make sure its inlined to reduce the stack burden
     #[inline]
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Window-with-content-mask-6cbe82e3.md")]
+// docs:examples:end
     pub fn with_content_mask<R>(
         &mut self,
         mask: Option<ContentMask<Pixels>>,
@@ -4200,12 +4247,28 @@ impl Window {
         )
     }
 
-    /// Updates or initializes state for an element with the given id that lives across multiple
-    /// frames. If an element with this ID existed in the rendered frame, its state will be passed
-    /// to the given closure. The state returned by the closure will be stored so it can be referenced
-    /// when drawing the next frame.
+    /// Takes an element's retained state, then stores the state returned by `f`.
     ///
-    /// This method should only be called during `Render::render`, `RenderOnce::render`, or the drawing functions of `Element`.
+    /// State is keyed by both the full [`GlobalElementId`] and `S`. The first
+    /// call receives `None`; later calls in this draw or a consecutive frame
+    /// receive the previously returned state. The tuple's first value is the
+    /// result of this method; its second value becomes the retained state.
+    ///
+    /// Keep the ID stable when the same logical element is rebuilt. If its
+    /// state is not accessed in a frame, GPUI discards it rather than saving it
+    /// indefinitely for a later reappearance. This differs from [`Element`](crate::Element)'s
+    /// associated phase states, which carry data only through the current draw.
+    ///
+    /// Call this while rendering or drawing an element. Use [`use_keyed_state`](Self::use_keyed_state)
+    /// for retained entity state that should invalidate the view when notified.
+    ///
+    /// # Panics
+    ///
+    /// Panics on a recursive call with the same ID and state type. Debug
+    /// builds also check that the window is in its prepaint or paint phase.
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Window-with-element-state-c1e1a057.md")]
+// docs:examples:end
     pub fn with_element_state<S, R>(
         &mut self,
         global_id: &GlobalElementId,
@@ -5297,6 +5360,9 @@ impl Window {
     ///
     /// This method should only be called as part of the request_layout or prepaint phase of element drawing.
     #[must_use]
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Window-request-layout-a55457ac.md")]
+// docs:examples:end
     pub fn request_layout(
         &mut self,
         style: Style,
@@ -7634,7 +7700,10 @@ impl<V: 'static + Render> WindowHandle<V> {
 
     /// Updates the root view of this window.
     ///
-    /// This will fail if the window has been closed or if the root view's type does not match
+    /// Returns an error if the window has closed or its root is no longer `V`.
+    /// The callback borrows the root exclusively; reading or updating that
+    /// same entity through a handle inside the callback panics. Changing the
+    /// root's state does not notify automatically; call [`Context::notify`].
     pub fn update<C, R>(
         &self,
         cx: &mut C,
@@ -7729,7 +7798,13 @@ impl<V: 'static> From<WindowHandle<V>> for AnyWindowHandle {
     }
 }
 
-/// A handle to a window with any root view type, which can be downcast to a window with a specific root view type.
+/// A copyable window identity with the root type declared when it was opened.
+///
+/// This handle does not own the window; dropping all copies does not close it.
+/// Use [`update`](Self::update) to reacquire the live window through an app
+/// context. Closing the window makes those operations fail. The stored type
+/// metadata supports [`downcast`](Self::downcast), but replacing the live root
+/// can make a previously obtained typed handle fail its next read or update.
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 pub struct AnyWindowHandle {
     pub(crate) id: WindowId,
@@ -7748,8 +7823,12 @@ impl AnyWindowHandle {
         self.root_entity_type_name
     }
 
-    /// Attempt to convert this handle to a window handle with a specific root view type.
-    /// If the types do not match, this will return `None`.
+    /// Converts the stored root-type metadata to a typed window handle.
+    ///
+    /// Returns `None` when `T` differs from the declared type. This performs no
+    /// app lookup: success does not prove the window remains open or that its
+    /// live root has not been replaced. The next window operation checks those
+    /// conditions.
     pub fn downcast<T: 'static>(&self) -> Option<WindowHandle<T>> {
         if TypeId::of::<T>() == self.state_type {
             Some(WindowHandle {

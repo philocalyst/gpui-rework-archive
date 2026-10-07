@@ -9,15 +9,12 @@ Start with the [first window](../site/content/examples/first-window.md), then
 follow the [counter](../site/content/examples/counter.md) for state and
 updates. The [guides index](../site/content/guides/_index.md) collects setup,
 testing, async work, focus, text, and platform notes. Example source lives in
-[`site/examples/src/bin`](../site/examples/src/bin/), and the annotation rules
+[`site/examples/examples`](../site/examples/examples/), and the annotation rules
 are in [documentation authoring](documentation-authoring.md).
 
 Repository workflow documents remain here:
 
-- [visual scenario testing](testing.md)
-- [testing design](testing-design.md)
-- [mutation evidence](testing-mutations.md)
-- [performance profiles](testing-performance.md)
+- [examples](examples.md)
 - [releasing](releasing.md)
 - [hot patching](hot-patching.md)
 

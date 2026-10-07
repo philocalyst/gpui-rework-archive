@@ -32,8 +32,9 @@
     <aside class="sidebar">
       <form class="search" role="search" action="{{ get_url(path='search/') }}">
         <label for="search-input">Find a topic or API</label>
-        <input id="search-input" type="search" name="q" placeholder="Entity, focus, list…" autocomplete="off" data-search data-api="{{ config.extra.api }}" data-index="{{ get_url(path='search_index.en.json') }}">
-        <ul class="search-results" data-search-results hidden></ul>
+        <input id="search-input" type="search" name="q" placeholder="Entity, focus, list…" autocomplete="off" aria-controls="search-results" data-search data-base="{{ get_url(path='/') }}" data-apimap="{{ get_url(path='api-examples.json') }}" data-api="{{ config.extra.api }}" data-index="{{ get_url(path='search_index.en.json') }}">
+        <p class="search-status" data-search-status role="status"></p>
+        <ul id="search-results" class="search-results" data-search-results hidden></ul>
       </form>
       <nav aria-label="Documentation">
       {% for group in ['examples', 'guides', 'reference', 'about'] %}
@@ -44,10 +45,10 @@
         </details>
       {% endfor %}
       </nav>
-      <p class="sidebar-note">Examples in Zola.<br>Contracts in <a href="{{ config.extra.api }}">rustdoc</a>.<br>The same Rust behind both.</p>
+      <p class="sidebar-note">Complete examples.<br>API contracts in <a href="{{ config.extra.api }}">rustdoc</a>.</p>
     </aside>
     {% block main %}{% endblock main %}
   </div>
-  <footer class="footer"><p><a href="{{ config.extra.repository }}">Source</a> · <a href="{{ get_url(path='about/writing/') }}">How these docs are written</a> · <a href="{{ config.extra.repository }}/blob/main/LICENSE.md">Apache-2.0</a></p><p>Built from this checkout. See <a href="{{ get_url(path='reference/versions/') }}">version and platform notes</a>.</p></footer>
+  <footer class="footer"><p><a href="{{ config.extra.repository }}">Source</a> · <a href="{{ get_url(path='about/writing/') }}">How these docs are written</a> · <a href="{{ config.extra.repository }}/blob/main/LICENSE.md">Apache-2.0</a></p><p>Source snapshot <a href="{{ get_url(path='documentation-build.json') }}"><code>__GPUI_SOURCE_DIGEST__</code></a>. See <a href="{{ get_url(path='reference/versions/') }}">version and platform notes</a>.</p></footer>
 </body>
 </html>

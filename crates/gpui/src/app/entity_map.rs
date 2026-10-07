@@ -25,7 +25,7 @@ use crate::util::atomic_incr_if_not_zero;
 use collections::HashMap;
 
 slotmap::new_key_type! {
-    /// A unique identifier for a entity across the application.
+    /// The stable identity of one entity within its application.
     pub struct EntityId;
 }
 
@@ -414,12 +414,46 @@ impl std::fmt::Debug for AnyEntity {
     }
 }
 
-/// A strong, well-typed handle to state owned by [`App`].
+/// A strong handle to a value stored in an [`App`].
 ///
-/// Cloning an entity clones the handle, not the value. Read or mutate the value
-/// only through an [`AppContext`] operation such as [`Entity::read_with`] or
-/// [`Entity::update`]. This keeps one serialized access path and lets GPUI notify
-/// observers and release the value at the right time.
+/// Create an entity with [`AppContext::new`]. The handle identifies that value
+/// and keeps it alive; cloning the handle neither clones `T` nor creates a
+/// second entity. Use [`read`](Self::read) to borrow the value and
+/// [`update`](Self::update) to change it.
+///
+/// # Change notification
+///
+/// Updating a field does not notify observers. Call [`Context::notify`] inside
+/// the update when consumers need to see the change. [`write`](Self::write)
+/// replaces the entire value and sends that notification for you.
+///
+/// ```
+/// use gpui::{App, AppContext};
+///
+/// fn increment(cx: &mut App) {
+///     let count = cx.new(|_| 0_u32);
+///     let same_count = count.clone();
+///     count.update(cx, |value, cx| {
+///         *value += 1;
+///         cx.notify();
+///     });
+///     assert_eq!(*same_count.read(cx), 1);
+///     assert_eq!(count.entity_id(), same_count.entity_id());
+/// }
+/// ```
+///
+/// # Lifetime and identity
+///
+/// Dropping the last strong handle makes weak upgrades fail immediately. GPUI
+/// releases the stored value during effect processing, when it can run release
+/// callbacks with app access. Use [`downgrade`](Self::downgrade) for a callback
+/// that should stop working after its owner disappears. A value that stores a
+/// strong handle to itself creates an ownership cycle.
+///
+/// Equality and hashing compare entity identity, not the fields of `T`.
+/// Handles belong to the app that created them; use that app's context for
+/// every read and update. See [ownership and data flow](crate::_ownership_and_data_flow)
+/// for the relationship between entities, views, and subscriptions.
 #[derive(Deref, DerefMut)]
 // docs:examples:begin
 #[doc = include_str!("../docs/examples/gpui-Entity-39236474.md")]
@@ -457,7 +491,11 @@ impl<T: 'static> Entity<T> {
         self.any_entity.entity_id
     }
 
-    /// Downgrades this handle without changing the entity's lifetime.
+    /// Returns a weak handle to the same value.
+    ///
+    /// Creating or cloning the weak handle does not retain the entity. Its
+    /// [`upgrade`](WeakEntity::upgrade) returns `None` after the last strong
+    /// handle is dropped, even before GPUI has released the stored value.
     #[inline]
     pub fn downgrade(&self) -> WeakEntity<T> {
         WeakEntity {
@@ -466,7 +504,10 @@ impl<T: 'static> Entity<T> {
         }
     }
 
-    /// Convert this into a dynamically typed entity.
+    /// Erases the handle's `T` without copying or releasing the value.
+    ///
+    /// [`AnyEntity::downcast`] can recover the typed handle. A failed downcast
+    /// returns the original erased handle, so the caller retains ownership.
     #[inline]
     pub fn into_any(self) -> AnyEntity {
         self.any_entity
@@ -485,7 +526,16 @@ impl<T: 'static> Entity<T> {
         cx.entities.read(self)
     }
 
-    /// Read the entity referenced by this handle with the given function.
+    /// Calls `f` with the current value and its app.
+    ///
+    /// Use this form when the caller has an [`AppContext`] rather than a direct
+    /// `&App`. Return an owned result to carry data beyond the read closure.
+    /// It does not flush pending notifications.
+    ///
+    /// # Panics
+    ///
+    /// Panics if this entity is currently being updated. Inside an update,
+    /// read the supplied `&mut T` instead of borrowing the entity again.
     #[inline]
     pub fn read_with<R, C: AppContext>(&self, cx: &C, f: impl FnOnce(&T, &App) -> R) -> R {
         cx.read_entity(self, f)
@@ -493,8 +543,16 @@ impl<T: 'static> Entity<T> {
 
     /// Runs `update` with exclusive access to the entity and its [`Context`].
     ///
-    /// The callback may call [`Context::notify`] to invalidate observers. It must
-    /// not recursively update the same entity; such a double lease panics.
+    /// The callback's return value is returned unchanged. It can update other
+    /// entities through `cx`, but this entity is exclusively borrowed until
+    /// the callback returns. Mutation does not imply notification: call
+    /// [`Context::notify`] when observers or rendering need the new state.
+    ///
+    /// # Panics
+    ///
+    /// Reading or updating this same entity through a handle inside `update`
+    /// panics. Use its `&mut T` argument. For a callback that must access the
+    /// entity after this borrow ends, schedule it with [`App::defer`].
     #[inline]
 // docs:examples:begin
 #[doc = include_str!("../docs/examples/gpui-Entity-update-527f5c5d.md")]
@@ -509,15 +567,25 @@ impl<T: 'static> Entity<T> {
 
     /// Borrows the entity mutably for the lifetime of `cx`.
     ///
-    /// This form is useful for several field changes in one scope. It still
-    /// holds the entity lease, so do not access the same entity again until the
-    /// returned borrow is dropped.
+    /// The returned guard dereferences to `T`. Dropping it releases the lease
+    /// and notifies observers, even if no field changed. Use [`update`](Self::update)
+    /// when the callback needs a [`Context`] or should control notification.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the entity is already borrowed for an update. Asynchronous
+    /// contexts cannot return this guard and panic here; use `update` inside
+    /// the task instead. Keep a guard inside a synchronous scope, before `await`.
     #[inline]
     pub fn as_mut<'a, C: AppContext>(&self, cx: &'a mut C) -> GpuiBorrow<'a, T> {
         cx.as_mut(self)
     }
 
     /// Replaces the entity's value and notifies its observers.
+    ///
+    /// Use this for a complete replacement. Unlike [`update`](Self::update),
+    /// it always calls [`Context::notify`], even if the replacement compares
+    /// equal to the old value. The exclusive-access rules of `update` apply.
     pub fn write<C: AppContext>(&self, cx: &mut C, value: T) {
         self.update(cx, |entity, cx| {
             *entity = value;
@@ -525,9 +593,18 @@ impl<T: 'static> Entity<T> {
         })
     }
 
-    /// Updates the entity referenced by this handle with the given function if
-    /// the referenced entity still exists, within a visual context that has a window.
-    /// Returns an error if the window has been closed.
+    /// Updates the entity with access to its current window.
+    ///
+    /// This uses the window associated with the entity, which can differ from
+    /// the window handle stored in `cx`. [`VisualContext::Result`] determines
+    /// whether the result is returned directly or wrapped in a fallible result.
+    /// An [`AsyncWindowContext`](crate::AsyncWindowContext) returns an error if
+    /// the app is gone or the entity has no current window. Mutation still
+    /// requires [`Context::notify`] to notify observers.
+    ///
+    /// # Panics
+    ///
+    /// The exclusive-access rules of [`update`](Self::update) also apply here.
     #[inline]
     pub fn update_in<R, C: VisualContext>(
         &self,
@@ -594,7 +671,12 @@ impl<T: 'static> PartialOrd for Entity<T> {
     }
 }
 
-/// A type erased, weak reference to a entity.
+/// A weak entity handle whose value type is known only at runtime.
+///
+/// Obtain one with [`AnyEntity::downgrade`] or by converting a [`WeakEntity`].
+/// It records identity without retaining the value. [`upgrade`](Self::upgrade)
+/// returns a strong [`AnyEntity`]; downcast that handle to access a concrete
+/// type. Equality and hashing compare identity, including after release.
 #[derive(Clone)]
 pub struct AnyWeakEntity {
     pub(crate) entity_id: EntityId,
@@ -603,13 +685,17 @@ pub struct AnyWeakEntity {
 }
 
 impl AnyWeakEntity {
-    /// Get the entity ID associated with this weak reference.
+    /// Returns the entity's identity, whether or not it is still alive.
     #[inline]
     pub fn entity_id(&self) -> EntityId {
         self.entity_id
     }
 
-    /// Check if this weak handle can be upgraded, or if the entity has already been dropped
+    /// Reports whether a strong owner exists at the time of this check.
+    ///
+    /// This does not retain the entity. Use [`upgrade`](Self::upgrade) when the
+    /// next operation needs ownership; a later upgrade can fail after this
+    /// method returned `true`.
     pub fn is_upgradable(&self) -> bool {
         let ref_count = self
             .entity_ref_counts
@@ -619,7 +705,11 @@ impl AnyWeakEntity {
         ref_count > 0
     }
 
-    /// Upgrade this weak entity reference to a strong reference.
+    /// Retains the entity if a strong owner still exists.
+    ///
+    /// Returns `None` after the last strong handle is dropped or the owning
+    /// app is released. Checking and incrementing the strong count happen
+    /// together, so a successful upgrade keeps the value alive.
     pub fn upgrade(&self) -> Option<AnyEntity> {
         let ref_counts = &self.entity_ref_counts.upgrade()?;
         let ref_counts = ref_counts.read();
@@ -694,7 +784,11 @@ impl AnyWeakEntity {
         }
     }
 
-    /// Creates a weak entity that can never be upgraded.
+    /// Creates a distinct placeholder handle that can never be upgraded.
+    ///
+    /// Each call receives a different identity. Use this only when a field
+    /// requires a handle before an entity exists; prefer `Option<WeakEntity<T>>`
+    /// when the absence itself is meaningful.
     pub fn new_invalid() -> Self {
         /// To hold the invariant that all ids are unique, and considering that slotmap
         /// increases their IDs from `0`, we can decrease ours from `u64::MAX` so these
@@ -765,7 +859,30 @@ impl PartialOrd for AnyWeakEntity {
     }
 }
 
-/// A weak reference to a entity of the given type.
+/// A handle that identifies an entity without keeping it alive.
+///
+/// Create one with [`Entity::downgrade`] or [`Context::weak_entity`]. Use weak
+/// handles in long-lived callbacks and tasks when closing a view should let
+/// its state disappear. [`upgrade`](Self::upgrade) obtains a strong handle only
+/// if a strong owner still exists; it cannot resurrect a released entity.
+///
+/// [`update`](Self::update) combines that upgrade with an entity update. Handle
+/// its error when a task completes after the view has gone away. Successful
+/// upgrades still follow [`Entity`]'s exclusive-access rules.
+///
+/// # Example
+///
+/// ```
+/// use gpui::{App, AppContext};
+///
+/// fn retain_only_while_owned(cx: &mut App) {
+///     let model = cx.new(|_| String::from("draft"));
+///     let weak = model.downgrade();
+///     assert!(weak.upgrade().is_some());
+///     drop(model);
+///     assert!(weak.upgrade().is_none());
+/// }
+/// ```
 #[derive(Deref, DerefMut)]
 pub struct WeakEntity<T> {
     #[deref]
@@ -797,6 +914,9 @@ impl<T: 'static> WeakEntity<T> {
     ///
     /// Returns `None` once the last strong handle has been released; this is the
     /// normal branch for asynchronous callbacks racing entity teardown.
+    /// The returned handle retains the value until that handle is dropped.
+    /// Do not check [`is_upgradable`](AnyWeakEntity::is_upgradable) first:
+    /// this operation performs the check and retention together.
     pub fn upgrade(&self) -> Option<Entity<T>> {
         Some(Entity {
             any_entity: self.any_entity.upgrade()?,
@@ -807,8 +927,9 @@ impl<T: 'static> WeakEntity<T> {
     /// Updates the entity if it is still alive, otherwise returns an error.
     ///
     /// This is the preferred operation for callbacks that outlive their entity:
-    /// the callback is skipped rather than panicking when the handle cannot be
-    /// upgraded.
+    /// the callback is skipped when the handle cannot be upgraded. The error
+    /// describes entity release; it does not catch panics in the callback or
+    /// prevent a recursive entity borrow from panicking.
 // docs:examples:begin
 #[doc = include_str!("../docs/examples/gpui-WeakEntity-update-80df6484.md")]
 // docs:examples:end
@@ -824,9 +945,11 @@ impl<T: 'static> WeakEntity<T> {
         Ok(cx.update_entity(&entity, update))
     }
 
-    /// Updates the entity referenced by this handle with the given function if
-    /// the referenced entity still exists, within a visual context that has a window.
-    /// Returns an error if the entity has been released.
+    /// Updates the live entity with the window currently associated with it.
+    ///
+    /// Returns an error if the entity has been released or has no current
+    /// window. The callback receives exclusive entity, window, and app access;
+    /// it must follow the same borrow rules as [`Entity::update`].
     pub fn update_in<C, R>(
         &self,
         cx: &mut C,
@@ -842,9 +965,11 @@ impl<T: 'static> WeakEntity<T> {
         .context("entity has no current window")
     }
 
-    /// Reads the entity referenced by this handle with the given function if
-    /// the referenced entity still exists. Returns an error if the entity has
-    /// been released.
+    /// Calls `read` with the live entity and its app.
+    ///
+    /// Returns an error without calling `read` when the last strong handle has
+    /// gone away. A successful read follows [`Entity::read_with`]'s borrow rules
+    /// and does not flush pending effects.
     pub fn read_with<C, R>(&self, cx: &C, read: impl FnOnce(&T, &App) -> R) -> Result<R>
     where
         C: AppContext,

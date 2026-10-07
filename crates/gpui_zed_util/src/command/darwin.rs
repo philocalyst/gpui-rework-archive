@@ -250,7 +250,7 @@ impl Command {
 }
 
 #[derive(Debug)]
-    /// Handle to a spawned child process.
+/// Handle to a spawned child process.
 pub struct Child {
     pid: libc::pid_t,
     /// Child standard input, when configured as a pipe.

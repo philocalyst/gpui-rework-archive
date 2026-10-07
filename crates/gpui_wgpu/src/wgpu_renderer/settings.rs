@@ -16,7 +16,9 @@ pub struct WgpuSurfaceConfig {
 /// Physical order of the color components in an LCD subpixel layout.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum SubpixelOrder {
+    /// Red, green, then blue from left to right.
     RedGreenBlue,
+    /// Blue, green, then red from left to right.
     BlueGreenRed,
 }
 
@@ -30,7 +32,12 @@ pub struct FontRasterizationSettings {
 }
 
 impl FontRasterizationSettings {
-    /// Creates settings equivalent to the retired DirectWrite renderer's parameters.
+    /// Sets glyph gamma, contrast enhancement, and LCD subpixel order.
+    ///
+    /// Gamma is clamped to `1.0..=2.2`. Negative contrast is clamped to zero;
+    /// non-finite contrast becomes zero. Gamma must be finite: `NaN` reaches
+    /// the gamma-table calculation unchanged. Use [`Self::uncorrected`] for
+    /// neutral coverage without gamma or contrast enhancement.
     pub fn new(
         gamma: f32,
         grayscale_enhanced_contrast: f32,

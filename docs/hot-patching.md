@@ -1,45 +1,67 @@
 # Hot patching
 
-GPUI-CE can update UI rendering code in a running native debug application
-without restarting its process or recreating its windows. The integration uses
-Dioxus CLI's Subsecond runtime.
+Save a change to `Render::render` and see it in the existing window. The
+[`gpui` CLI](https://github.com/gpui-ce/cli) builds the native application,
+watches its source, and sends patches through GPUI's Subsecond integration.
 
-## Setup
+## Run a walkthrough
 
-Enable the `hot-patching` feature on the dependency. Until a release includes
-the feature, use the repository revision that contains it:
+Install the CLI from its repository:
+
+```sh
+cargo install --git https://github.com/gpui-ce/cli --locked
+```
+
+From this checkout, run the counter with hot patching enabled:
+
+```sh
+gpui watch -p gpui-documentation-examples --example counter --features gpui/hot-patching
+```
+
+Change the button's label in `site/examples/examples/counter.rs` and save. A
+successful patch redraws the running window. Invalid Rust leaves the current
+application running; correct the source and save again.
+
+For an ordinary build and restart, the same program is a Cargo example:
+
+```sh
+cargo run -p gpui-documentation-examples --example counter
+```
+
+## Use it in your application
+
+Enable `hot-patching` on your GPUI dependency, then run `gpui watch` from the
+application's Cargo directory. Use `--bin name` or `--example name` when there
+is more than one target. In a virtual workspace, select the package with `-p`.
 
 ```toml
 gpui-ce = { git = "https://github.com/gpui-ce/gpui-ce", features = ["hot-patching"] }
 ```
 
-Install the compatible Dioxus CLI:
+A path dependency on this checkout works too. On macOS, add the linking feature
+used by the CLI's generated application:
 
-```sh
-cargo install dioxus-cli --version 0.7.10 --locked
+```toml
+[target.'cfg(target_os = "macos")'.dependencies]
+io-surface = { version = "0.16.1", features = ["link"] }
 ```
 
-From the application Cargo project, run:
+## What survives a patch
 
-```sh
-dx serve --hot-patch
-```
+The process and its existing windows remain alive. GPUI's patch boundaries
+cover view rendering and element layout, prepaint, and paint. Edits to those
+functions can use the existing entity values.
 
-Edit and save a `Render::render` function. A successful patch redraws the
-existing window without starting a new process. The [browser and native
-examples](../site/content/examples/_index.md) provide small starting points for
-a separate application that depends on this checkout.
+Changes to data layouts, function signatures, statics, or code outside those
+boundaries need a restart. Manifest, lockfile, build-script, shader, and local
+dependency changes trigger a full rebuild and restart. The watcher does not
+watch arbitrary asset files. See the [CLI reference](https://github.com/gpui-ce/cli#behavior-and-limitations)
+for the current rebuild rules.
 
-## Limits
+> [!WARNING]
+> A patch does not migrate entity state to a new Rust type layout. Restart the
+> watcher after changing a struct's fields or an enum's variants.
 
-This feature is experimental. A patch can fail or crash the application, so
-keep the ordinary restart workflow available. Dioxus CLI monitors the
-application crate and its direct workspace dependencies; changes in indirect
-dependencies require a rebuild. Hot patching is unavailable on WASM and in
-release builds. The integration covers view rendering and element layout,
-prepaint, and paint; other functions may require a restart.
-
-Dioxus CLI 0.7.10 can reject examples launched directly from the GPUI-CE
-workspace with `Cycle in workspace dependency graph`. Run a separate application
-that depends on this checkout instead. Report problems in the
-[issue tracker](https://github.com/gpui-ce/gpui-ce/issues).
+The CLI targets native debug applications on macOS and Linux. It does not
+hot-patch the browser previews. Their editor runs Rust under Miri instead;
+see [editing a walkthrough](../site/content/guides/live-editing.md).

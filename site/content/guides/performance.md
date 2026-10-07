@@ -20,16 +20,18 @@ The [list example](@/examples/lists.md) removes hidden-row construction.
 The [async example](@/examples/async-task.md) leaves the foreground thread free
 while it waits. Neither example demonstrates a universal speedup.
 
-## Compare equivalent captures
+## Compare equivalent workloads
 
-Hold the viewport, data, fonts, backend, checkpoint, and sample policy constant.
-Read the report's scene-build and render measurements separately. A CPU render
-benchmark does not measure native presentation or GPU-driver behavior.
+Hold the viewport, data, fonts, backend, build profile, and sample policy
+constant. Measure the stage you are changing: time spent constructing a scene
+is different from GPU execution or the interval until native presentation.
+A faster scene build does not establish a faster displayed frame.
 
-Use the testing launcher's benchmark mode for the scenario suite. Record the
-command, revision, hardware, backend, and workload with any reported number.
-If a measurement cannot be reproduced, describe it as an observation rather
-than a performance guarantee.
+Use a release build when measuring application performance. Warm caches before
+sampling if the workload represents steady use; include startup when startup
+is the question. Record the command, revision, hardware, backend, workload,
+and distribution of results with a reported number. A single frame can reflect
+compilation, allocation, asset loading, or unrelated system activity.
 
 Read the profiler APIs and [rendering explanation](@/reference/rendering.md)
 when choosing a boundary to instrument.

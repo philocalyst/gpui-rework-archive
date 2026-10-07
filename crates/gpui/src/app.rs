@@ -1,9 +1,10 @@
 //! Application state, entities, windows, and the contexts used to access them.
 //!
 //! [`Application`] owns the platform run loop. Once it is running, [`App`] is
-//! the single gateway to entities, globals, windows, executors, and system
-//! services. Entity handles are cheap to clone, but their values are accessed
-//! only through an app or an [`AppContext`]. See the
+//! the root synchronous context for entities, globals, windows, executors,
+//! and system services. Entity and asynchronous contexts provide scoped access
+//! to that same application. Cloning an entity handle retains its value;
+//! reading or updating the value requires an [`AppContext`]. See the
 //! [counter walkthrough](https://gpui-ce.github.io/examples/counter/#state) for
 //! the smallest complete example, and the [update walkthrough](https://gpui-ce.github.io/examples/counter/#update)
 //! for the access rules in practice.
@@ -190,7 +191,7 @@ impl ApplicationHandle {
 }
 
 /// Represents an application before it is fully launched. Once your app is
-/// configured, you'll start the app with `App::run`.
+/// configured, start it with [`Application::run`].
 impl Application {
     /// Builds an application around a caller-provided platform implementation.
     ///
@@ -762,9 +763,21 @@ enum PlatformOwnedDragState {
     RestoredInSourceWindow,
 }
 
-/// Contains the state of the full application, and passed as a reference to a variety of callbacks.
-/// Other [Context] derefs to this type.
-/// You need a reference to an `App` to access the state of a [Entity].
+/// The application's synchronous state and access context.
+///
+/// GPUI passes `&mut App` to launch, window, and event callbacks. Use it to
+/// create entities, open windows, bind actions, access globals, and schedule
+/// work. [`Context<T>`] dereferences to this context and adds operations for
+/// one entity, such as [`Context::notify`] and [`Context::subscribe`].
+///
+/// An entity handle does not borrow its value until a read or update receives
+/// a context. Updates lease a value exclusively; recursively accessing the
+/// same leased entity panics. See [`crate::_ownership_and_data_flow`] for the
+/// access rules and effect timing.
+///
+/// Borrow this context only for the callback's duration. Use [`Self::to_async`]
+/// for access after an `await` and [`Self::background_executor`] for owned
+/// `Send` work that must leave the foreground thread.
 pub struct App {
     pub(crate) this: Weak<AppCell>,
     pub(crate) platform: Rc<dyn Platform>,
@@ -1192,7 +1205,11 @@ impl App {
         self.pending_updates -= 1;
     }
 
-    /// Arrange a callback to be invoked when the given entity calls `notify` on its respective context.
+    /// Observes notifications sent by `entity`.
+    ///
+    /// Registration is deferred until app effect processing. Retain the returned
+    /// subscription to keep the observer active; dropping it cancels future calls.
+    /// The callback receives the publisher's handle and can read its latest state.
     pub fn observe<W>(
         &mut self,
         entity: &Entity<W>,
@@ -1280,8 +1297,12 @@ impl App {
         )
     }
 
-    /// Arrange for the given callback to be invoked whenever the given entity emits an event of a given type.
-    /// The callback is provided a handle to the emitting entity and a reference to the emitted event.
+    /// Receives typed events emitted by `entity` during app effect processing.
+    ///
+    /// The callback receives the publisher's handle and event payload. Registration
+    /// is deferred; complete the registering update before emitting the event.
+    /// Retain the returned subscription or call [`Subscription::detach`] to leave
+    /// it registered without a cancellation handle.
     pub fn subscribe<T, Event>(
         &mut self,
         entity: &Entity<T>,
@@ -1334,8 +1355,9 @@ impl App {
     }
 
     /// Returns handles to all open windows in the application.
-    /// Each handle could be downcast to a handle typed for the root view of that window.
-    /// To find all windows of a given type, you could filter on
+    /// Use [`AnyWindowHandle::downcast`] to select windows whose root view has a
+    /// particular type. This collection has no stacking-order guarantee; use
+    /// [`Self::window_stack`] when front-to-back order matters.
     pub fn windows(&self) -> Vec<AnyWindowHandle> {
         self.windows
             .keys()
@@ -3247,7 +3269,14 @@ pub struct KeystrokeEvent {
     pub context_stack: Vec<KeyContext>,
 }
 
-/// A mutable reference to an entity owned by GPUI
+/// A mutable entity lease that notifies observers when it is dropped.
+///
+/// Obtain one with [`Entity::as_mut`]. It borrows the app and dereferences to
+/// the stored value, so the same app cannot be borrowed again while the guard
+/// is alive. Dropping the guard releases the entity before flushing effects;
+/// observers can then read the updated value. It notifies even if no mutation
+/// occurred. For access to the entity's [`Context`] and explicit notification,
+/// use [`Entity::update`] instead.
 pub struct GpuiBorrow<'a, T> {
     inner: Option<Lease<T>>,
     app: &'a mut App,

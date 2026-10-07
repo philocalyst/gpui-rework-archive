@@ -27,11 +27,15 @@ def run(*command: str, env=None) -> None:
 
 def source_digest() -> str:
     digest = hashlib.sha256()
-    for directory in (ROOT / "crates", SITE / "content", SITE / "templates", SITE / "examples" / "src"):
-        for path in sorted(directory.rglob("*")):
-            if path.is_file() and path.suffix in {".rs", ".md", ".html", ".toml"}:
-                digest.update(str(path.relative_to(ROOT)).encode())
-                digest.update(path.read_bytes())
+    roots = (ROOT / "crates", ROOT / "assets", SITE / "content", SITE / "templates", SITE / "examples", ROOT / "scripts/docs", SITE / "scripts", SITE / "static")
+    files = {ROOT / "Cargo.toml", ROOT / "Cargo.lock", SITE / "zola.toml", SITE / "examples.toml", SITE / "redirects.json"}
+    for directory in roots:
+        files.update(path for path in directory.rglob("*") if path.is_file()
+                     and "target" not in path.parts and "pkg" not in path.parts and "builds" not in path.parts
+                     and "__pycache__" not in path.parts and path.name != "build.json")
+    for path in sorted(files):
+        digest.update(str(path.relative_to(ROOT)).encode() + b"\0")
+        digest.update(path.read_bytes())
     return digest.hexdigest()
 
 
@@ -39,8 +43,10 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--with-api", action="store_true", help="include and link to rustdoc built from this checkout")
     parser.add_argument("--base-url", help="URL where the artifact will be served; supports a path prefix")
+    parser.add_argument("--output-dir", type=Path, help="write the processed artifact to this directory")
     parser.add_argument("--text-only", action="store_true", help="omit browser programs for a prose-only review")
     args = parser.parse_args()
+    public = (args.output_dir or PUBLIC).resolve()
     config = tomllib.loads((SITE / "zola.toml").read_text())
     base = (args.base_url or config["base_url"]).rstrip("/")
     run(sys.executable, str(ROOT / "scripts/docs/generate.py"), "--check")
@@ -51,38 +57,44 @@ def main() -> int:
         env = os.environ.copy()
         env["RUSTDOCFLAGS"] = " ".join(filter(None, [env.get("RUSTDOCFLAGS"), "-D rustdoc::broken_intra_doc_links -D rustdoc::bare_urls -D rustdoc::private_intra_doc_links -D missing_docs"]))
         run("cargo", "doc", "--locked", "--lib", "-p", "gpui-ce", "--no-deps", "--features", "test-support", env=env)
-    run("zola", "--root", str(SITE), "build", "--base-url", base)
+    run("zola", "--root", str(SITE), "build", "--base-url", base, "--output-dir", str(public), "--force")
     if args.with_api:
         source = Path(os.environ.get("CARGO_TARGET_DIR", ROOT / "target")) / "doc"
         if not source.is_absolute():
             source = ROOT / source
-        shutil.copytree(source, PUBLIC / "api")
-        process_tree(PUBLIC / "api", SITE / "static/api-examples.json", site_base=base)
+        shutil.copytree(source, public / "api")
+        process_tree(public / "api", SITE / "static/api-examples.json", site_base=base)
+    digest = source_digest()
+    revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    dirty = bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT, text=True).strip())
     docs_prefix = f'https://docs.rs/gpui-ce/{config["extra"]["version"]}/gpui/'
-    for path in PUBLIC.rglob("*"):
+    for path in public.rglob("*"):
         if not path.is_file() or path.suffix not in {".html", ".json", ".js"}:
             continue
         original = path.read_text(encoding="utf-8")
         text = callouts(original) if path.suffix == ".html" else original
+        text = text.replace("__GPUI_SOURCE_DIGEST__", digest[:12])
         if args.with_api:
             text = text.replace(docs_prefix, base + "/api/gpui/")
             text = text.replace("https://gpui-ce.github.io/examples/", base + "/examples/")
-            if path.suffix == ".html" and not path.is_relative_to(PUBLIC / "api"):
+            if path.suffix == ".html" and not path.is_relative_to(public / "api"):
                 text = text.replace(f'API {config["extra"]["version"]} ↗', "Checkout API ↗")
         if text != original:
             path.write_text(text, encoding="utf-8")
-    (PUBLIC / "documentation-build.json").write_text(json.dumps({
+    (public / "documentation-build.json").write_text(json.dumps({
         "format": 1,
-        "source_digest": source_digest(),
+        "source_digest": digest,
+        "revision": revision,
+        "local_changes": dirty,
         "base_url": base,
         "api": "checkout" if args.with_api else "docs.rs",
         "browser_programs": not args.text_only,
     }, indent=2) + "\n")
-    failures = audit(PUBLIC, PUBLIC / "api" if args.with_api else None, base)
+    failures = audit(public, public / "api" if args.with_api else None, base)
     if failures:
         print("\n".join(failures), file=sys.stderr)
         return 1
-    print(f"Documentation built and checked: {PUBLIC}")
+    print(f"Documentation built and checked: {public}")
     return 0
 
 

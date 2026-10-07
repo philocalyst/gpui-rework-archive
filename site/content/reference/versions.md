@@ -22,9 +22,9 @@ as the downloads do, or select examples and references from your dependency's re
 ## Practical limits
 
 The browser backend currently supports one window per document. Native services
-retain their platform-specific availability. The Miri guest API is a subset of
-GPUI and cannot execute arbitrary full-API programs. Hot patching is experimental
-and native-debug-only.
+retain their platform-specific availability. Hot patching is experimental
+and native-debug-only. The separate Miri workbench is under development; these
+walkthroughs currently execute compiled GPUI WebAssembly.
 
 GPUI draws its own controls rather than using a native widget for each element.
 Applications must supply the interaction and accessibility behavior their

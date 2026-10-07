@@ -2,10 +2,10 @@
 slug = "first-window"
 title = "Open a window"
 summary = "Create a view, return an element, and let the platform open a window."
-source = "site/examples/src/bin/first-window.rs"
+source = "site/examples/examples/first-window.rs"
 support = "site/examples/src/support.rs"
 downloadable_manifest = "site/examples/download-Cargo.toml"
-run = "cargo run --manifest-path site/examples/Cargo.toml --bin first-window"
+run = "cargo run -p gpui-documentation-examples --example first-window"
 preview = "first-window"
 weight = 10
 
@@ -13,10 +13,10 @@ weight = 10
 slug = "counter"
 title = "Make state visible"
 summary = "Give a view a count, change it on a click, and request the next frame."
-source = "site/examples/src/bin/counter.rs"
+source = "site/examples/examples/counter.rs"
 support = "site/examples/src/support.rs"
 downloadable_manifest = "site/examples/download-Cargo.toml"
-run = "cargo run --manifest-path site/examples/Cargo.toml --bin counter"
+run = "cargo run -p gpui-documentation-examples --example counter"
 preview = "counter"
 weight = 20
 
@@ -24,10 +24,10 @@ weight = 20
 slug = "layout"
 title = "Constrain a layout"
 summary = "Keep a sidebar fixed while a flexible pane gives text room to shrink."
-source = "site/examples/src/bin/layout.rs"
+source = "site/examples/examples/layout.rs"
 support = "site/examples/src/support.rs"
 downloadable_manifest = "site/examples/download-Cargo.toml"
-run = "cargo run --manifest-path site/examples/Cargo.toml --bin layout"
+run = "cargo run -p gpui-documentation-examples --example layout"
 preview = "layout"
 weight = 30
 
@@ -35,10 +35,10 @@ weight = 30
 slug = "actions"
 title = "Route a keyboard action"
 summary = "Connect a focus handle, a key context, a shortcut, and its handler."
-source = "site/examples/src/bin/actions.rs"
+source = "site/examples/examples/actions.rs"
 support = "site/examples/src/support.rs"
 downloadable_manifest = "site/examples/download-Cargo.toml"
-run = "cargo run --manifest-path site/examples/Cargo.toml --bin actions"
+run = "cargo run -p gpui-documentation-examples --example actions"
 preview = "actions"
 weight = 40
 
@@ -46,10 +46,10 @@ weight = 40
 slug = "lists"
 title = "Render a large list"
 summary = "Scroll through 10,000 rows while constructing only the requested range."
-source = "site/examples/src/bin/lists.rs"
+source = "site/examples/examples/lists.rs"
 support = "site/examples/src/support.rs"
 downloadable_manifest = "site/examples/download-Cargo.toml"
-run = "cargo run --manifest-path site/examples/Cargo.toml --bin lists"
+run = "cargo run -p gpui-documentation-examples --example lists"
 preview = "lists"
 weight = 50
 
@@ -57,10 +57,10 @@ weight = 50
 slug = "drawing"
 title = "Paint a custom region"
 summary = "Use layout-provided bounds to record your own drawing commands."
-source = "site/examples/src/bin/drawing.rs"
+source = "site/examples/examples/drawing.rs"
 support = "site/examples/src/support.rs"
 downloadable_manifest = "site/examples/download-Cargo.toml"
-run = "cargo run --manifest-path site/examples/Cargo.toml --bin drawing"
+run = "cargo run -p gpui-documentation-examples --example drawing"
 preview = "drawing"
 weight = 60
 
@@ -68,10 +68,10 @@ weight = 60
 slug = "animation"
 title = "Replay an animation"
 summary = "Keep animation identity stable, then change its key to restart it."
-source = "site/examples/src/bin/animation.rs"
+source = "site/examples/examples/animation.rs"
 support = "site/examples/src/support.rs"
 downloadable_manifest = "site/examples/download-Cargo.toml"
-run = "cargo run --manifest-path site/examples/Cargo.toml --bin animation"
+run = "cargo run -p gpui-documentation-examples --example animation"
 preview = "animation"
 weight = 70
 
@@ -79,10 +79,10 @@ weight = 70
 slug = "async-task"
 title = "Finish a task after a delay"
 summary = "Keep a task alive and return its result through a weak view handle."
-source = "site/examples/src/bin/async-task.rs"
+source = "site/examples/examples/async-task.rs"
 support = "site/examples/src/support.rs"
 downloadable_manifest = "site/examples/download-Cargo.toml"
-run = "cargo run --manifest-path site/examples/Cargo.toml --bin async-task"
+run = "cargo run -p gpui-documentation-examples --example async-task"
 preview = "async-task"
 weight = 80
 
@@ -90,10 +90,10 @@ weight = 80
 slug = "subscriptions"
 title = "Observe shared state"
 summary = "Keep one model, observe its changes, and retain the subscription."
-source = "site/examples/src/bin/subscriptions.rs"
+source = "site/examples/examples/subscriptions.rs"
 support = "site/examples/src/support.rs"
 downloadable_manifest = "site/examples/download-Cargo.toml"
-run = "cargo run --manifest-path site/examples/Cargo.toml --bin subscriptions"
+run = "cargo run -p gpui-documentation-examples --example subscriptions"
 preview = "subscriptions"
 weight = 90
 
@@ -101,12 +101,62 @@ weight = 90
 slug = "text"
 title = "Shape and wrap text"
 summary = "Lay out Unicode text, distinguish byte offsets from glyphs, and constrain a paragraph."
-source = "site/examples/src/bin/text.rs"
+source = "site/examples/examples/text.rs"
 support = "site/examples/src/support.rs"
 downloadable_manifest = "site/examples/download-Cargo.toml"
-run = "cargo run --manifest-path site/examples/Cargo.toml --bin text"
+run = "cargo run -p gpui-documentation-examples --example text"
 preview = "text"
 weight = 100
+
+[[examples]]
+slug = "custom-element"
+title = "Implement an element"
+summary = "Pass a swatch through layout, prepaint, and paint."
+source = "site/examples/examples/custom-element.rs"
+support = "site/examples/src/support.rs"
+downloadable_manifest = "site/examples/download-Cargo.toml"
+run = "cargo run -p gpui-documentation-examples --example custom-element"
+preview = "custom-element"
+weight = 65
+
+[[examples]]
+slug = "text-hit-testing"
+title = "Map text to a pointer position"
+summary = "Hit a shaped cluster, inspect its byte index, and paint its visual position."
+source = "site/examples/examples/text-hit-testing.rs"
+support = "site/examples/src/support.rs"
+downloadable_manifest = "site/examples/download-Cargo.toml"
+run = "cargo run -p gpui-documentation-examples --example text-hit-testing"
+preview = "text-hit-testing"
+weight = 110
+
+[api."gpui::TextLayout"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.TextLayout.html"
+source = "crates/gpui/src/elements/text.rs"
+declaration = "pub struct TextLayout("
+
+[api."gpui::StyledText::layout"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.StyledText.html#method.layout"
+source = "crates/gpui/src/elements/text.rs"
+declaration = "pub fn layout(&self) -> &TextLayout"
+
+[api."gpui::TextLayout::index_for_position"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.TextLayout.html#method.index_for_position"
+source = "crates/gpui/src/elements/text.rs"
+declaration = "pub fn index_for_position(&self, pixel_point: Point<Pixels>)"
+
+[api."gpui::TextLayout::position_for_index"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.TextLayout.html#method.position_for_index"
+source = "crates/gpui/src/elements/text.rs"
+declaration = "pub fn position_for_index(&self, byte_index: usize)"
 
 [api."gpui::Animation"]
 crate = "gpui-ce"
@@ -322,49 +372,49 @@ crate = "gpui-ce"
 version = "0.2.2"
 path = "gpui/trait.Styled.html#method.flex_1"
 source = "crates/gpui/src/styled.rs"
-declaration = "pub trait Styled"
+declaration = "fn flex_1"
 
 [api."gpui::Styled::flex_shrink"]
 crate = "gpui-ce"
 version = "0.2.2"
 path = "gpui/trait.Styled.html#method.flex_shrink"
 source = "crates/gpui/src/styled.rs"
-declaration = "pub trait Styled"
+declaration = "fn flex_shrink"
 
 [api."gpui::Styled::line_height"]
 crate = "gpui-ce"
 version = "0.2.2"
 path = "gpui/trait.Styled.html#method.line_height"
 source = "crates/gpui/src/styled.rs"
-declaration = "pub trait Styled"
+declaration = "fn line_height"
 
 [api."gpui::Styled::min_w"]
 crate = "gpui-ce"
 version = "0.2.2"
 path = "gpui/trait.Styled.html#method.min_w"
 source = "crates/gpui/src/styled.rs"
-declaration = "pub trait Styled"
+declaration = "min_w;"
 
 [api."gpui::Styled::opacity"]
 crate = "gpui-ce"
 version = "0.2.2"
 path = "gpui/trait.Styled.html#method.opacity"
 source = "crates/gpui/src/styled.rs"
-declaration = "pub trait Styled"
+declaration = "fn opacity"
 
 [api."gpui::Styled::text_size"]
 crate = "gpui-ce"
 version = "0.2.2"
 path = "gpui/trait.Styled.html#method.text_size"
 source = "crates/gpui/src/styled.rs"
-declaration = "pub trait Styled"
+declaration = "fn text_size"
 
 [api."gpui::Styled::w"]
 crate = "gpui-ce"
 version = "0.2.2"
 path = "gpui/trait.Styled.html#method.w"
 source = "crates/gpui/src/styled.rs"
-declaration = "pub trait Styled"
+declaration = "w;"
 
 [api."gpui::Subscription"]
 crate = "gpui-ce"
@@ -480,3 +530,45 @@ version = "0.2.2"
 path = "gpui/fn.uniform_list.html"
 source = "crates/gpui/src/elements/uniform_list.rs"
 declaration = "pub fn uniform_list"
+
+[api."gpui::ContentMask"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.ContentMask.html"
+source = "crates/gpui/src/window.rs"
+declaration = "pub struct ContentMask<"
+
+[api."gpui::Window::with_content_mask"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Window.html#method.with_content_mask"
+source = "crates/gpui/src/window.rs"
+declaration = "pub fn with_content_mask<R>("
+
+[api."gpui::Element"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/trait.Element.html"
+source = "crates/gpui/src/element.rs"
+declaration = "pub trait Element:"
+
+[api."gpui::IntoElement"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/trait.IntoElement.html"
+source = "crates/gpui/src/element.rs"
+declaration = "pub trait IntoElement:"
+
+[api."gpui::Window::request_layout"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Window.html#method.request_layout"
+source = "crates/gpui/src/window.rs"
+declaration = "pub fn request_layout("
+
+[api."gpui::Window::with_element_state"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/struct.Window.html#method.with_element_state"
+source = "crates/gpui/src/window.rs"
+declaration = "pub fn with_element_state<S, R>("

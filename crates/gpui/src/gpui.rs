@@ -89,6 +89,9 @@ pub mod _documentation {
     pub mod scheduling {}
     #[doc = include_str!("../docs/platforms.md")]
     pub mod platforms {}
+    #[cfg(feature = "test-support")]
+    #[doc = include_str!("../docs/testing.md")]
+    pub mod testing {}
 }
 
 /// Do not touch, here be dragons for use by gpui_macros and such.
@@ -195,13 +198,48 @@ pub use window::*;
 #[cfg(not(target_family = "wasm"))]
 pub use pollster::block_on;
 
-/// The context trait, allows the different contexts in GPUI to be used
-/// interchangeably for certain operations.
-// docs:examples:begin
-#[doc = include_str!("docs/examples/gpui-AppContext-55871093.md")]
-// docs:examples:end
+/// Entity and app operations shared by synchronous and asynchronous contexts.
+///
+/// Use this bound for a helper that creates, reads, or updates an entity
+/// without needing a particular caller's context type:
+///
+/// ```
+/// use gpui::{AppContext, Entity};
+///
+/// fn increment<C: AppContext>(count: &Entity<u32>, cx: &mut C) -> u32 {
+///     count.update(cx, |value, cx| {
+///         *value = value.saturating_add(1);
+///         cx.notify();
+///         *value
+///     })
+/// }
+/// ```
+///
+/// # Choose a context
+///
+/// | Context | Where it comes from | Access across `await` |
+/// | --- | --- | --- |
+/// | [`App`] | App and window callbacks | Keep the borrow inside the callback. |
+/// | [`Context<T>`](Context) | Construction or update of one entity | Keep the borrow inside the callback. |
+/// | [`AsyncApp`] | A foreground task or [`App::to_async`] | Reacquires app access for each operation. |
+/// | [`AsyncWindowContext`] | [`Window::to_async`] | Reacquires app/window access through handles. |
+///
+/// An async context does not hold a mutable app borrow while a future waits.
+/// Entity reads and updates still run synchronously, and recursive access to
+/// the same entity panics. Async entity operations can also panic after the
+/// app has been released; window-handle operations return errors instead.
+/// [`with_window`](Self::with_window) returns `None` when it cannot obtain
+/// the entity's currently associated window.
+///
+/// [`VisualContext`] adds operations that require a window. Test contexts
+/// implement these traits too when `test-support` is enabled.
 pub trait AppContext {
-    /// Create a new entity in the app context.
+    /// Builds a value, stores it in the app, and returns its strong handle.
+    ///
+    /// `build_entity` receives the new entity's [`Context`]. The value is not
+    /// available for a handle-based read until that closure has returned;
+    /// construct it from local values instead of reading `cx.entity()`.
+    /// Dropping the last returned or cloned handle schedules release.
     #[expect(
         clippy::wrong_self_convention,
         reason = "`App::new` is an ubiquitous function for creating entities"
@@ -224,7 +262,12 @@ pub trait AppContext {
         build_entity: impl FnOnce(&mut Context<T>) -> T,
     ) -> Entity<T>;
 
-    /// Update a entity in the app context.
+    /// Calls `update` with exclusive access to the value and its context.
+    ///
+    /// Returns the callback's result. Mutation does not notify automatically;
+    /// call [`Context::notify`] when consumers need to observe the change.
+    /// Reading or updating the same entity through another handle while this
+    /// callback runs panics. See [`Entity::update`].
     fn update_entity<T, R>(
         &mut self,
         handle: &Entity<T>,
@@ -233,12 +276,19 @@ pub trait AppContext {
     where
         T: 'static;
 
-    /// Update a entity in the app context.
+    /// Borrows an entity mutably until the returned guard is dropped.
+    ///
+    /// The guard ties the entity lease to this context's mutable borrow.
+    /// Recursive entity access panics. Async contexts cannot provide this
+    /// guard and panic; use [`update_entity`](Self::update_entity) instead.
     fn as_mut<'a, T>(&'a mut self, handle: &Entity<T>) -> GpuiBorrow<'a, T>
     where
         T: 'static;
 
-    /// Read a entity from the app context.
+    /// Calls `read` with the entity's value and app, returning its result.
+    ///
+    /// A read does not process pending effects. It panics if the entity is
+    /// currently leased by an update. See [`Entity::read_with`].
     fn read_entity<T, R>(&self, handle: &Entity<T>, read: impl FnOnce(&T, &App) -> R) -> R
     where
         T: 'static;
@@ -253,22 +303,34 @@ pub trait AppContext {
         EntityType: EventEmitter<EventType>,
         EventType: 'static;
 
-    /// Update a window for the given handle.
+    /// Calls `f` with the live window, its erased root view, and the app.
+    ///
+    /// Returns an error if the handle no longer names a window. An async
+    /// context also returns an error when the app has gone away, is quitting,
+    /// or is already borrowed. Panics from `f` are not converted to errors.
     fn update_window<T, F>(&mut self, window: AnyWindowHandle, f: F) -> Result<T>
     where
         F: FnOnce(AnyView, &mut Window, &mut App) -> T;
 
-    /// Run `f` against the entity's *current* window — the most recently
-    /// rendered window that referenced the entity. Returns `None` if the
-    /// entity has no current window or that window is unavailable. See
-    /// [`App::with_window`] for the underlying lookup.
+    /// Calls `f` with the window currently associated with this entity.
+    ///
+    /// The association comes from the most recent render that referenced the
+    /// entity, or from its creation window before its first render. Returns
+    /// `None` if no window is associated, the window has closed, or that window
+    /// is already being updated. Async contexts also return `None` if the app
+    /// was released, is quitting, or cannot be borrowed. See [`App::with_window`].
     fn with_window<R>(
         &mut self,
         entity_id: EntityId,
         f: impl FnOnce(&mut Window, &mut App) -> R,
     ) -> Option<R>;
 
-    /// Read a window off of the application context.
+    /// Reads the window's root entity as `T`, then calls `read` with it.
+    ///
+    /// Returns an error for a closed window or a root with a different type.
+    /// It does not provide a mutable window borrow. The async implementation
+    /// also returns an error after app release or while quitting. A conflicting
+    /// synchronous app borrow can still panic.
     fn read_window<T, R>(
         &self,
         window: &WindowHandle<T>,
@@ -277,7 +339,11 @@ pub trait AppContext {
     where
         T: 'static;
 
-    /// Spawn a future on a background thread
+    /// Spawns a `Send` future on the background executor.
+    ///
+    /// The future receives no foreground app access. Await its returned task
+    /// in a foreground future to deliver a result to an entity. Dropping the
+    /// task cancels remaining polling; [`Task::detach`] lets it continue.
     fn background_spawn<R>(&self, future: impl Future<Output = R> + Send + 'static) -> Task<R>
     where
         R: Send + 'static;
@@ -311,23 +377,69 @@ impl<T: 'static> Reservation<T> {
     }
 }
 
-/// This trait is used for the different visual contexts in GPUI that
-/// require a window to be present.
+/// App operations that can also supply a window to their callbacks.
+///
+/// [`AsyncWindowContext`] implements this trait for foreground tasks; the
+/// simulated visual test context implements it with `test-support`. Ordinary
+/// render and input callbacks already receive separate [`Window`] and
+/// [`Context`] arguments and can use those directly.
+///
+/// Each implementation chooses [`Result`](Self::Result). Async operations are
+/// fallible because the window can close while a future waits. Check the
+/// returned result before assuming a view was installed or focused.
+///
+/// A task can await work, then reacquire the window for one synchronous update:
+///
+/// ```no_run
+/// use gpui::{AsyncWindowContext, Entity};
+/// use std::time::Duration;
+///
+/// async fn rename_later(
+///     label: Entity<String>,
+///     cx: &mut AsyncWindowContext,
+/// ) -> anyhow::Result<()> {
+///     cx.background_executor().timer(Duration::from_secs(1)).await;
+///     label.update_in(cx, |text, window, cx| {
+///         *text = "Ready".into();
+///         window.set_window_title(text);
+///         cx.notify();
+///     })?;
+///     Ok(())
+/// }
+/// ```
+///
+/// Here `?` handles an unavailable app or associated window. It does not catch
+/// a recursive entity borrow: reading or updating `label` again inside that
+/// callback still panics. A visual test context returns the callback's value
+/// directly and panics when its required window is unavailable, so generic
+/// code must respect the implementation's `Result` type.
 pub trait VisualContext: AppContext {
-    /// The result type for window operations.
+    /// Wraps an operation's result according to this context's failure model.
+    ///
+    /// [`AsyncWindowContext`] uses `anyhow::Result<T>`; the visual test context
+    /// returns `T` directly and panics when its required window is absent.
     type Result<T>;
 
     /// Returns the handle of the window associated with this context.
     fn window_handle(&self) -> AnyWindowHandle;
 
-    /// Update a view with the given callback
+    /// Updates an entity with access to its current window.
+    ///
+    /// An entity can be associated with the most recently rendered window
+    /// that referenced it. The async implementation uses that association,
+    /// which can differ from [`window_handle`](Self::window_handle), and
+    /// returns an error when no associated window is available.
     fn update_window_entity<T: 'static, R>(
         &mut self,
         entity: &Entity<T>,
         update: impl FnOnce(&mut T, &mut Window, &mut Context<T>) -> R,
     ) -> Self::Result<R>;
 
-    /// Create a new entity, with access to `Window`.
+    /// Builds an entity while borrowing this context's window.
+    ///
+    /// The constructor receives the window and the new entity's context.
+    /// The async implementation returns an error if the window cannot be
+    /// obtained before construction.
     fn new_window_entity<T: 'static>(
         &mut self,
         build_entity: impl FnOnce(&mut Window, &mut Context<T>) -> T,

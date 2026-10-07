@@ -51,6 +51,7 @@ state attached to the same identity across frames.
 | Run work without blocking input | [`_documentation::scheduling`], [`Task`], and [`BackgroundExecutor`] |
 | Draw a custom region | [`canvas`], [`Window::paint_quad`], and [`PathBuilder`] |
 | Display a large collection | [`uniform_list`] for equal-height rows, [`list`] for measured rows |
+| Test state and input | `TestApp` and `TestAppContext` (enable `test-support`) |
 | Expose accessible controls | [`_accessibility`] |
 
 ## Before choosing GPUI

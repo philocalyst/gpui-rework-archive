@@ -1,36 +1,47 @@
 # Authoring examples
 
-Examples live in ordinary Rust files and carry a small, deliberately strict
-annotation language. The annotations are comments, so the source still builds
-as Rust and remains useful when copied into an editor.
+Write a Markdown explanation beside the Rust it explains:
 
 ```rust
-// docs:step state | Keep state in an entity
-// An entity owns the value that changes. The view reads it through its context.
-// docs:api gpui::Entity gpui::Context::notify
-// docs:code
-let counter = cx.new(|_| Counter { value: 0 });
-// docs:end
+// ## Own the count {#state}
+// An [`Entity`] handle keeps this value alive. Cloning the handle shares the
+// value; it does not copy the count.
+
+let count = cx.new(|_| 0_u32);
 ```
 
-Each step needs a unique lowercase `slug`, a title, at least one ordinary `//`
-prose line, and a non-empty code section. The parser rejects nesting, duplicate IDs,
-unmatched markers, missing prose or code, and marker-looking text inside a
-multiline Rust string or block comment. Normal comments inside the code section
-are retained in the downloadable source.
+A `// ##` heading starts a chapter. The following line comments are Markdown;
+the first Rust line starts its code block. The next heading starts the next
+chapter. There are no code delimiters or closing directives. An optional
+`{#state}` anchor keeps links stable when a heading is renamed; otherwise the
+parser derives an anchor from its title.
 
-Declare the example in `site/examples.toml`. The canonical source is a binary
-under `site/examples/src/bin`; it uses the shared `site/examples/src/support.rs`
-launcher so native and browser previews exercise the same program:
+Use rustdoc-style links such as ``[`Entity`]`` and ``[`Context::notify`]`` in
+the explanation. Each resolves through the API catalog in `examples.toml` to
+an exact type or method page. The same link adds a reciprocal walkthrough link
+to that API's documentation. Link an API where you explain its behavior, rather
+than appending a list of every imported type.
+
+Ordinary comments inside Rust stay in the code. Strings and block comments
+cannot start chapters. Duplicate anchors, empty explanations, empty code, and
+unknown API references are authoring errors. Markdown indentation is retained,
+including lists, code fences, and note or warning blocks.
+
+Declare the example in `site/examples.toml`. The canonical source is a Cargo example
+under `site/examples/examples`; it uses the shared `site/examples/src/support.rs`
+launcher. Define a `fn component(window, cx) -> Entity<View>` constructor and
+keep the native entry point as `pub fn main() { support::run(component); }`.
+The generator strips only that entry point and launcher from the workbench
+source; Miri runs the same component with the real GPUI crate:
 
 ```toml
 [[examples]]
 slug = "counter"
 title = "A counter with an entity"
 summary = "Build state, render it, and notify the view."
-source = "site/examples/src/bin/counter.rs"
+source = "site/examples/examples/counter.rs"
 support = "site/examples/src/support.rs"
-run = "cargo run --manifest-path site/examples/Cargo.toml --bin counter"
+run = "cargo run -p gpui-documentation-examples --example counter"
 preview = "counter"
 weight = 10
 
@@ -43,7 +54,7 @@ declaration = "pub struct Entity<"
 ```
 
 Run `python3 scripts/docs/generate.py` to write the chapter, full source
-download, and `site/static/api-examples.json`. `--check` performs a deterministic
+download, Miri component source, component registry, and `site/static/api-examples.json`. `--check` performs a deterministic
 staleness check. Run `python3 scripts/docs/sync_links.py` after generation to
 create the docs.rs include files and bounded `docs:examples` attributes. Both
 commands are safe to rerun; they remove only their own generated outputs.

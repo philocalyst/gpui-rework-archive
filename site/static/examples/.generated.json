@@ -4,23 +4,27 @@
     "animation",
     "async-task",
     "counter",
+    "custom-element",
     "drawing",
     "first-window",
     "layout",
     "lists",
     "subscriptions",
-    "text"
+    "text",
+    "text-hit-testing"
   ],
   "archives": [
     "actions",
     "animation",
     "async-task",
     "counter",
+    "custom-element",
     "drawing",
     "first-window",
     "layout",
     "lists",
     "subscriptions",
-    "text"
+    "text",
+    "text-hit-testing"
   ]
 }

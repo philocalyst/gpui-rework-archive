@@ -3,7 +3,7 @@
 //! High, medium, and low items share one receiver state. Selection is weighted and therefore
 //! favors higher priorities without promising strict FIFO order between priority levels. The
 //! sender and receiver are intentionally hidden from ordinary application code; platform code
-//! obtains them from [`PriorityQueueReceiver::new`].
+//! constructs a receiver and obtains its senders through this module.
 
 use std::{
     collections::VecDeque,

@@ -3,7 +3,9 @@
 //! stable identity, and can be invalidated with [`Context::notify`](crate::Context::notify).
 //! Rendering then follows the element lifecycle described by [`crate::Element`].
 //!
-//! Use [`RenderOnce`] for stateless composition and [`Render`] for stateful components. When a
+//! Use [`RenderOnce`] to consume parent-supplied component values and [`Render`] for an entity
+//! with its own identity. A `RenderOnce` component can also access separately retained state.
+//! When a
 //! view is placed in a list or repeated sibling position, give each stateful view a distinct
 //! entity identity. Reusing one entity ID for siblings makes their descendant element state share
 //! the same identity space. See the [counter walkthrough](https://gpui-ce.github.io/examples/counter/#render)
@@ -198,9 +200,9 @@ mod any_view {
 /// behind [`Render`] and [`RenderOnce`].
 ///
 /// When `entity_id()` returns `Some`, that id becomes the view's identity: it gets
-/// a unique element-id space (so internal `use_state` / `.id(..)` never collide
-/// across siblings) and `cx.notify()` on that entity re-renders only this view's
-/// subtree. `None` behaves like a stateless component.
+/// scoped element-id space for internal `use_state` / `.id(..)`. Notifications
+/// invalidate this view and other views that read its entity. `None` gives the
+/// component no independent entity identity.
 ///
 /// You rarely implement `View` directly. `Entity<T: Render>` and any `T: RenderOnce`
 /// get a blanket impl below; implement it by hand only when a component needs both

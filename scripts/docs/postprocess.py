@@ -13,10 +13,9 @@ import shutil
 
 
 _CALLOUT = re.compile(
-    r"<blockquote>\s*<p>\s*\[!(NOTE|TIP|WARNING)\]\s*(?:<br\s*/?>)?\s*(.*?)</p>\s*</blockquote>",
+    r"<blockquote>\s*<p>\s*\[!(NOTE|TIP|WARNING)\]\s*(?:<br\s*/?>)?(.*?)</p>(.*?)</blockquote>",
     re.I | re.S,
 )
-_CALLOUT_BLOCK = re.compile(r"<blockquote>\s*<p>\s*\[!(NOTE|TIP|WARNING)\]\s*(?:<br\s*/?>)?\s*</p>(.*?)</blockquote>", re.I | re.S)
 _BACKLINK_ID = "gpui-examples-backlinks"
 
 
@@ -26,24 +25,20 @@ def callouts(text: str) -> str:
         nonlocal counter
         counter += 1
         kind = match.group(1).lower()
-        body = match.group(2).strip()
-        role = "alert" if kind == "warning" else "note"
-        return f'<aside id="callout-{kind}-{counter}" class="callout callout-{kind}" role="{role}"><p><strong>{kind.title()}</strong> {body}</p></aside>'
-    def replace_block(match):
-        nonlocal counter
-        kind = match.group(1).lower()
-        counter += 1
-        role = "alert" if kind == "warning" else "note"
-        return f'<aside id="callout-{kind}-{counter}" class="callout callout-{kind}" role="{role}"><p><strong>{kind.title()}</strong></p>{match.group(2)}</aside>'
-    text = _CALLOUT_BLOCK.sub(replace_block, text)
+        first, rest = match.group(2).strip(), match.group(3)
+        label = f'<p class="callout-label"><strong>{kind.title()}</strong></p>'
+        body = (f'<p>{first}</p>' if first else '') + rest
+        return f'<aside id="callout-{kind}-{counter}" class="callout callout-{kind}" role="note">{label}{body}</aside>'
     return _CALLOUT.sub(replace, text)
 
 
 def rustdoc_backlinks(text: str, symbol: str, links: list[dict], anchor: str | None = None) -> str:
     if not links:
         return text
+    generated = re.compile(rf'<!-- gpui-walkthroughs:begin {re.escape(symbol)} -->.*?<!-- gpui-walkthroughs:end {re.escape(symbol)} -->', re.S)
+    text = generated.sub('', text)
     body = "".join(f'<li><a href="{html.escape(link["url"], quote=True)}">{html.escape(link["title"])}: {html.escape(link.get("step_title", link["step"]))}</a></li>' for link in links)
-    aside = f'<aside id="{_BACKLINK_ID}" class="doc-examples" aria-label="Examples"><h2>Examples</h2><ul>{body}</ul></aside>'
+    aside = f'<aside id="{_BACKLINK_ID}" class="doc-examples" aria-label="Examples"><p><strong>Walkthroughs</strong></p><ul>{body}</ul></aside>'
     # Rustdoc uses an h1 for the item declaration. Insert after the heading so
     # the backlink follows the symbol definition section in every theme.
     aside_id = _BACKLINK_ID + "-" + hashlib.sha1(symbol.encode()).hexdigest()[:10]

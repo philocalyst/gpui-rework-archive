@@ -1,6 +1,6 @@
 # Examples
 
-The [example guide](../crates/gpui/examples/README.md) lists the native targets, their purpose, and focused tests. Run `scripts/gpui-example <name>` from the repository, or call the launcher by its absolute path from another directory.
+The [example guide](../crates/gpui/examples/README.md) lists the native targets, their purpose, and focused tests. Run `cargo run --example <name>` from the repository. The walkthrough targets use `cargo run -p gpui-documentation-examples --example <name>`.
 
 ```sh
 cargo test -p gpui-ce --examples --features test-support

@@ -19,7 +19,7 @@ rendering its element means the bytes have arrived.
 For a complete application, run the repository's `image_loading` example:
 
 ```sh
-scripts/gpui-example run image_loading
+cargo run --example image_loading
 ```
 
 It shows local image sources and asynchronous loading through the example

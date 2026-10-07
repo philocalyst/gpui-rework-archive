@@ -18,9 +18,7 @@ jobs:
           targets: wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: |
-            .
-            site/examples
+          workspaces: .
       - name: Install native libraries
         run: |
           sudo apt-get update
@@ -35,11 +33,11 @@ jobs:
           python3 -m unittest discover -s scripts/docs -p 'test_*.py'
           python3 -m unittest discover -s site/tests -p 'test_*.py'
       - name: Check complete native programs
-        run: cargo check --locked --manifest-path site/examples/Cargo.toml --bins
+        run: cargo check --locked -p gpui-documentation-examples --examples
       - name: Check downloadable Cargo projects
         run: python3 site/scripts/check_downloads.py
       - name: Run API examples
-        run: cargo test --locked -p gpui-ce --doc
+        run: cargo test --locked -p gpui-ce --doc --features test-support
       - name: Build site, WebAssembly previews, and checkout API
         run: python3 site/scripts/build.py --with-api
       - uses: actions/upload-artifact@v4

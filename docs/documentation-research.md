@@ -20,15 +20,25 @@ The docs.rs crate should carry the implementation explanation that rustdoc can o
 
 ## Example format and implementation contract
 
-Use a small comment DSL in Rust source, designed to remain valid Rust and useful in an editor. Prefer explicit markers over line-number magic:
+Use ordinary Markdown headings in Rust line comments. The first Rust line
+starts the chapter's code; the next heading starts the next chapter:
 
 ```rust
-// docs:step start=window
-Application::new()
-// docs:step end=window
+// ## Open a window {#window}
+// The [`App::open_window`] constructor supplies its window and app.
+
+cx.open_window(WindowOptions::default(), component)?;
 ```
 
-The renderer should produce a numbered, copyable listing, a focused explanation for the active step, and links to the corresponding API symbols. Keep the source canonical: the example must compile in CI (prefer doctests or a workspace example), and the rendered page must include the commit/version it was built from. The DSL parser should report duplicate names, unclosed ranges, unknown references, and stale symbol links as build errors.
+The heading supplies the chapter title. An optional explicit anchor keeps links
+stable when a title changes. No range or closing marker is needed. Rustdoc-style
+links generate exact API links and reciprocal walkthrough links. The parser
+rejects duplicate anchors, empty chapters, and unknown symbols.
+
+Each canonical program defines `component(window, cx)` and a native entry point
+that calls `support::run(component)`. The generator removes only that native
+entry and platform helper for the Miri workbench. This keeps entities, input
+listeners, tasks, and custom elements on the real GPUI API in both paths.
 
 Admonitions are semantic, not decoration: `note` adds context, `tip` gives a shortcut, `warning` names a footgun, and `error` describes a failure or unsupported assumption. Every warning should say what happens, when it happens, and the safe alternative.
 
@@ -115,7 +125,7 @@ Wikipedia's “Signs of AI writing” page (`https://en.wikipedia.org/wiki/Wikip
 
 ### Pangram / “panagram”
 
-The name in the request is ambiguous. `https://pangram.com` resolves and presents Pangram's AI-text detection service; `panagram.dev` did not resolve when checked. Pangram's score can be an adversarial signal during editorial review, never a quality gate or proof of authorship. The useful practice is to inspect passages that score as generic and ask whether they contain specific GPUI observations, links, counterexamples, and tested code. Keep this process private to review tooling; do not expose a detector score to readers or contributors as a judgment.
+The user confirmed Pangram and other AI-text checkers as requested review tools. `https://pangram.com` resolves and presents Pangram's AI-text detection service; Browser attempts at Pangram, GPTZero, and ZeroGPT returned connection-reset errors in this environment; no score has been obtained. Pangram's score can be an adversarial signal during editorial review, never a quality gate or proof of authorship. The useful practice is to inspect passages that score as generic and ask whether they contain specific GPUI observations, links, counterexamples, and tested code. Keep this process private to review tooling; do not expose a detector score to readers or contributors as a judgment.
 
 ## Rubric for adversarial review
 
@@ -144,3 +154,13 @@ The supplied article was downloaded to `/tmp/gpui-docs-review.html`; its 276 abs
 * [fasterthanli.me](https://fasterthanli.me/), [Rust tag](https://fasterthanli.me/tags/rust), [arborium article](https://fasterthanli.me/articles/introducing-arborium-a-tree-sitter-distribution)
 * [Zola documentation](https://www.getzola.org/documentation/)
 * [Rustdoc book](https://doc.rust-lang.org/rustdoc/)
+
+## Native editing integration (2026-10-07)
+
+The authenticated `gpui-ce/cli` repository was inspected at
+`6774184ad4fe84bf0ecf3293222c27ca273fe52d`, including its README, Cargo manifest,
+watch target selection, and command-line help. The CLI owns Cargo compilation,
+linking, watching, and the local patch server; no Dioxus CLI invocation is needed.
+It accepts `--example`, `--bin`, `-p`, and dependency feature selection. Public
+unauthenticated access returned 404 during this survey, while the authenticated
+repository and its source were accessible.

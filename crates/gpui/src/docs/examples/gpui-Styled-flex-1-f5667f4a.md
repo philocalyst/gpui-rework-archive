@@ -1,3 +1,9 @@
-Examples for `gpui::Styled::flex_1`.
 
-- [Constrain a layout](https://gpui-ce.github.io/examples/layout/#constraints)
+
+<!-- gpui-walkthroughs:begin gpui::Styled::flex_1 -->
+
+Walkthroughs:
+
+- [Constrain a layout: Let one pane yield](https://gpui-ce.github.io/examples/layout/#constraints)
+
+<!-- gpui-walkthroughs:end gpui::Styled::flex_1 -->

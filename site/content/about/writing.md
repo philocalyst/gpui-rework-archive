@@ -7,25 +7,28 @@ weight = 10
 
 Write the program first. Each step should change something the reader can
 observe, explain why that code belongs there, and point to the contract behind it.
-The canonical source lives under `site/examples/src/bin`.
+The canonical source lives under `site/examples/examples`.
 
-## Four comment markers
+## Write Markdown beside the code
 
-A step has an ID, a title, prose, optional API names, and code. The prose is
-ordinary Markdown in line comments. The code remains ordinary Rust:
+A heading begins a chapter. Line comments explain it; the first Rust line
+starts the displayed code. The next heading begins another chapter:
 
 ```rust
-// docs:step state | Store the value
-// The view owns this count. Rendering reads it; a click will change it.
-// docs:api gpui::Entity
-// docs:code
+// ## Own the count {#state}
+// An [`Entity`] handle keeps the count alive. Cloning the handle shares the
+// value; it does not copy the field.
+
 struct Counter { count: u32 }
-// docs:end
 ```
+
+There are no code or end markers. Keep an explicit anchor such as `{#state}`
+when a published link should survive a heading change. Rustdoc-style API links
+resolve to exact reference pages and generate links back to this chapter.
 
 Add the program to `site/examples.toml`. That manifest names the title, source,
 preview, run command, and exact API targets. The generator rejects missing or
-duplicate step IDs, malformed ranges, and unknown API names. It generates the
+duplicate step IDs, empty chapters, and unknown API names. It generates the
 page, clean source, Cargo download, and API-to-step index.
 
 ```sh
@@ -33,6 +36,16 @@ python3 scripts/docs/generate.py
 python3 scripts/docs/sync_links.py
 python3 site/scripts/build.py --with-api
 ```
+
+## Share the constructor
+
+Define `component(window, cx)` to create the example's root entity. The native
+entry point calls `support::run(component)`. The generator removes that small
+launcher for the Miri workbench and keeps the component unchanged. Use real
+GPUI entities, listeners, tasks, and elements in both paths.
+
+Before accepting a walkthrough, run its Cargo example and its Miri component.
+Make the suggested edit, exercise the input, and check the resulting frame.
 
 ## Keep explanations at the right depth
 

@@ -29,9 +29,10 @@ cancels the task. Keep it in a field when the work belongs to the view's lifetim
 Calling `detach` lets the task continue without that handle; it also means the
 caller cannot later await the result through the dropped handle.
 
-Cancellation is not rollback. An operation may already have written a file,
-sent a request, or changed another resource before the task is dropped. Check
-the operation's own cancellation contract when that distinction matters.
+> [!WARNING]
+> Dropping the task cancels remaining work, but cannot undo a file write or
+> request already sent. Check the operation's own cancellation contract before
+> assuming that dropping a handle reverses its external effects.
 
 ## Return through a weak handle
 

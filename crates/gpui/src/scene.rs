@@ -7,10 +7,8 @@
 //! that recording into a [`ScenePlan`] shared by renderers. Finish is a frame
 //! boundary: mutate the scene again before drawing and finish it again.
 //!
-//! [`SceneCapture::capture`] provides a portable snapshot for tests and
-//! tooling. Native paint surfaces remain backend-owned and therefore cannot be
-//! serialized; captures containing one return an error. See the drawing example at
-//! <https://gpui-ce.github.io/examples/drawing/#paint>.
+//! The [drawing walkthrough](https://gpui-ce.github.io/examples/drawing/#paint)
+//! records a custom region through the window paint API.
 
 // todo("windows"): remove
 #![cfg_attr(windows, allow(dead_code))]

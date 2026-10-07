@@ -13,8 +13,8 @@ That page is the maintained source of the website’s setup instructions.
 From the repository root, check the setup by opening one window:
 
 ```sh
-cargo run --manifest-path site/examples/Cargo.toml --bin first-window
+cargo run -p gpui-documentation-examples --example first-window
 ```
 
 For browser builds and local editing, follow [documentation authoring](docs/documentation-authoring.md).
-For headless tests, follow [the testing guide](docs/testing.md).
+For headless tests, follow [the testing guide](site/content/guides/testing.md).

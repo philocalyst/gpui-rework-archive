@@ -17,14 +17,24 @@ EXAMPLES = ROOT / "site" / "examples"
 OUT = ROOT / "site" / "static" / "preview" / "pkg"
 
 
-def digest_inputs() -> str:
+def digest_paths(roots: tuple[Path, ...]) -> str:
     h = hashlib.sha256()
-    for path in sorted(EXAMPLES.rglob("*.rs")) + [EXAMPLES / "Cargo.toml", EXAMPLES / "Cargo.lock"]:
-        if "target" in path.parts:
-            continue
+    paths = []
+    for root in roots:
+        if root.exists():
+            paths.extend(path for path in root.rglob("*") if path.is_file() and "target" not in path.parts)
+    for path in sorted(paths):
         h.update(str(path.relative_to(ROOT)).encode())
         h.update(path.read_bytes())
+    for path in (ROOT / "Cargo.toml", ROOT / "Cargo.lock"):
+        if path.is_file():
+            h.update(str(path.relative_to(ROOT)).encode())
+            h.update(path.read_bytes())
     return h.hexdigest()
+
+
+def digest_inputs() -> str:
+    return digest_paths((ROOT / "crates", EXAMPLES, ROOT / "assets"))
 
 
 def file_digest(path: Path) -> str:
@@ -33,23 +43,40 @@ def file_digest(path: Path) -> str:
 
 def rust_toolchain_env() -> dict[str, str]:
     env = os.environ.copy()
-    toolchain = env.get("GPUI_DOCS_RUST_TOOLCHAIN", "1.98.1")
+    toolchain = env.get("GPUI_DOCS_RUST_TOOLCHAIN")
+    if not toolchain:
+        for name in ("rust-toolchain.toml", "rust-toolchain"):
+            path = ROOT / name
+            if path.is_file():
+                text = path.read_text()
+                toolchain = text.split('channel = "', 1)[1].split('"', 1)[0] if 'channel = "' in text else text.strip()
+                break
+    toolchain = toolchain or "1.98.1"
     rustup = shutil.which("rustup")
-    if rustup:
+    if rustup and toolchain:
         cargo = subprocess.run([rustup, "which", "cargo", "--toolchain", toolchain], capture_output=True, text=True, check=False)
         rustc = subprocess.run([rustup, "which", "rustc", "--toolchain", toolchain], capture_output=True, text=True, check=False)
         if cargo.returncode == 0 and rustc.returncode == 0:
             env["CARGO"] = cargo.stdout.strip()
             env["RUSTC"] = rustc.stdout.strip()
+            rustc_path = Path(env["RUSTC"]).resolve()
+            llvm = next((ancestor / "lib" / "libLLVM.dylib" for ancestor in rustc_path.parents if (ancestor / "lib" / "libLLVM.dylib").is_file()), None)
+            if llvm is not None:
+                env["DYLD_LIBRARY_PATH"] = f'{llvm.parent}:{env.get("DYLD_LIBRARY_PATH", "")}'.rstrip(":")
     return env
 
 
 def main() -> int:
     OUT.parent.mkdir(parents=True, exist_ok=True)
     digest = digest_inputs()
-    if (OUT.parent / "build.json").exists():
+    metadata_path = OUT.parent / "build.json"
+    if metadata_path.exists():
         try:
-            if json.loads((OUT.parent / "build.json").read_text()).get("digest") == digest:
+            metadata = json.loads(metadata_path.read_text())
+            entry = metadata.get("entry", "")
+            wasm = metadata.get("wasm", "")
+            if (metadata.get("digest") == digest and entry and wasm
+                    and (OUT / entry).is_file() and (OUT / wasm).is_file()):
                 return 0
         except (OSError, ValueError):
             pass
@@ -76,14 +103,20 @@ def main() -> int:
             shutil.rmtree(OUT)
         fresh.replace(OUT)
     entries = sorted(OUT.glob("*.js"))
-    entry = next((path.name for path in entries if path.name.endswith("_bg.js") is False), entries[0].name if entries else "")
+    entry = next((path.name for path in entries if not path.name.endswith("_bg.js")), entries[0].name if entries else "")
+    wasm_entries = sorted(OUT.glob("*.wasm"))
+    wasm = wasm_entries[0].name if wasm_entries else ""
+    if not entry or not wasm:
+        print("Trunk produced no JavaScript/WASM preview artifacts", file=sys.stderr)
+        return 3
     (OUT.parent / "build.json").write_text(json.dumps({
         "digest": digest,
         "source": str(EXAMPLES),
-        "source_digest": digest,
-        "workspace_digest": file_digest(ROOT / "Cargo.lock"),
-        "lock_digest": file_digest(EXAMPLES / "Cargo.lock"),
+        "source_digest": digest_paths((EXAMPLES,)),
+        "workspace_digest": digest_paths((ROOT / "crates", ROOT / "assets")),
+        "lock_digest": file_digest(ROOT / "Cargo.lock"),
         "entry": entry,
+        "wasm": wasm,
     }))
     return 0
 

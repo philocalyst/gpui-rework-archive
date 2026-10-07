@@ -27,8 +27,40 @@ use palette::{Hsla, IntoColor};
 use refineable::Refineable;
 const ELLIPSIS: SharedString = SharedString::new_static("…");
 
-/// A trait for elements that can be styled.
-/// Use this to opt-in to a utility CSS-like styling API.
+/// Builds an element's layout, paint, and inherited text style.
+///
+/// Each setter consumes and returns the element, so a style can be assembled
+/// alongside its children. Setters record a [`StyleRefinement`]; GPUI resolves
+/// it against inherited values and interaction state when drawing the element.
+///
+/// ```
+/// use gpui::{div, prelude::*, px, rgb};
+///
+/// let panel = div()
+///     .flex()
+///     .w(px(240.))
+///     .p_4()
+///     .bg(rgb(0xf7f6f2))
+///     .text_color(rgb(0x202b29))
+///     .child("Text inherits the panel's color");
+/// ```
+///
+/// # Units and constraints
+///
+/// [`Pixels`] are logical coordinates; the renderer applies the display scale.
+/// Numbered spacing helpers such as `p_4` and `gap_4` use rems. Relative sizes
+/// resolve against the parent. A width is an input to layout, not a guarantee
+/// against flex shrinking; configure minimum size and shrink behavior when
+/// that distinction matters. See the
+/// [layout walkthrough](https://gpui-ce.github.io/examples/layout/#constraints).
+///
+/// # Replacing and refining
+///
+/// Repeating a setter replaces that field: `.w(px(240.)).w(px(120.))` requests
+/// 120 pixels. [`refine_style`](Self::refine_style) replaces only fields present
+/// in the supplied refinement. Text styling is inherited by children;
+/// geometry and backgrounds are attached to this element. Filter convenience
+/// setters append to their chain, while [`filter`](Self::filter) replaces it.
 // gate on rust-analyzer so rust-analyzer never needs to expand this macro, it takes up to 10 seconds to expand due to inefficiencies in rust-analyzers proc-macro srv
 #[cfg_attr(
     all(any(feature = "inspector", debug_assertions), not(rust_analyzer)),
@@ -36,27 +68,6 @@ const ELLIPSIS: SharedString = SharedString::new_static("…");
 )]
 // docs:examples:begin
 #[doc = include_str!("docs/examples/gpui-Styled-1a58201f.md")]
-// docs:examples:end
-// docs:examples:begin
-#[doc = include_str!("docs/examples/gpui-Styled-flex-1-f5667f4a.md")]
-// docs:examples:end
-// docs:examples:begin
-#[doc = include_str!("docs/examples/gpui-Styled-flex-shrink-20b4a49b.md")]
-// docs:examples:end
-// docs:examples:begin
-#[doc = include_str!("docs/examples/gpui-Styled-line-height-656716f3.md")]
-// docs:examples:end
-// docs:examples:begin
-#[doc = include_str!("docs/examples/gpui-Styled-min-w-71eeddc8.md")]
-// docs:examples:end
-// docs:examples:begin
-#[doc = include_str!("docs/examples/gpui-Styled-opacity-4ad8a9d4.md")]
-// docs:examples:end
-// docs:examples:begin
-#[doc = include_str!("docs/examples/gpui-Styled-text-size-c72aa80f.md")]
-// docs:examples:end
-// docs:examples:begin
-#[doc = include_str!("docs/examples/gpui-Styled-w-2ede14d6.md")]
 // docs:examples:end
 pub trait Styled: Sized {
     /// Return the partial style storage mutated by all fluent setters.
@@ -68,8 +79,14 @@ pub trait Styled: Sized {
 
         self
     }
-
-    gpui_macros::style_helpers!();
+// docs:examples:begin
+gpui_macros::style_helpers! {
+    docs {
+        min_w: #[doc = include_str!("docs/examples/gpui-Styled-min-w-71eeddc8.md")],
+        w: #[doc = include_str!("docs/examples/gpui-Styled-w-2ede14d6.md")],
+    }
+}
+// docs:examples:end
     gpui_macros::visibility_style_methods!();
     gpui_macros::margin_style_methods!();
     gpui_macros::padding_style_methods!();
@@ -401,6 +418,9 @@ pub trait Styled: Sized {
 
     /// Sets the element to allow a flex item to grow and shrink as needed, ignoring its initial size.
     /// [Docs](https://tailwindcss.com/docs/flex#flex-1)
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Styled-flex-1-f5667f4a.md")]
+// docs:examples:end
     fn flex_1(mut self) -> Self {
         self.style().flex_grow = Some(1.);
         self.style().flex_shrink = Some(1.);
@@ -465,6 +485,9 @@ pub trait Styled: Sized {
 
     /// Sets the flex item's shrink factor.
     /// [Docs](https://tailwindcss.com/docs/flex-shrink)
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Styled-flex-shrink-20b4a49b.md")]
+// docs:examples:end
     fn flex_shrink(mut self, shrink: f32) -> Self {
         self.style().flex_shrink = Some(shrink);
         self
@@ -793,6 +816,9 @@ pub trait Styled: Sized {
     /// Sets the text size of this element.
     ///
     /// This value cascades to its child elements.
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Styled-text-size-c72aa80f.md")]
+// docs:examples:end
     fn text_size(mut self, size: impl Into<AbsoluteLength>) -> Self {
         self.text_style().font_size = Some(size.into());
         self
@@ -997,12 +1023,18 @@ pub trait Styled: Sized {
     }
 
     /// Sets the line height of this element and its children.
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Styled-line-height-656716f3.md")]
+// docs:examples:end
     fn line_height(mut self, line_height: impl Into<DefiniteLength>) -> Self {
         self.text_style().line_height = Some(line_height.into());
         self
     }
 
     /// Sets the opacity of this element and its children.
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Styled-opacity-4ad8a9d4.md")]
+// docs:examples:end
     fn opacity(mut self, opacity: f32) -> Self {
         self.style().opacity = Some(opacity);
         self

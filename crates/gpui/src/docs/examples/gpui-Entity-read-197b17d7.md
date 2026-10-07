@@ -1,3 +1,9 @@
-Examples for `gpui::Entity::read`.
 
-- [Observe shared state](https://gpui-ce.github.io/examples/subscriptions/#observe-state)
+
+<!-- gpui-walkthroughs:begin gpui::Entity::read -->
+
+Walkthroughs:
+
+- [Observe shared state: Read the model; display the observation](https://gpui-ce.github.io/examples/subscriptions/#observe-state)
+
+<!-- gpui-walkthroughs:end gpui::Entity::read -->

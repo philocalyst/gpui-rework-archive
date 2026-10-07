@@ -891,11 +891,16 @@ impl Interactivity {
     }
 }
 
-/// A trait for elements that want to use the standard GPUI event handlers that don't
-/// require any state.
-// docs:examples:begin
-#[doc = include_str!("../docs/examples/gpui-InteractiveElement-25ee04de.md")]
-// docs:examples:end
+/// Attaches input handlers, focus, and interaction styling to an element.
+///
+/// Callbacks receive their event, the current [`Window`], and the [`App`]. Use
+/// [`Context::listener`](crate::Context::listener) to also borrow the view that
+/// built the element. Ordinary event callbacks propagate by default; bubbling
+/// action callbacks consume their action unless they call [`App::propagate`].
+///
+/// [`id`](Self::id) returns a [`Stateful`] wrapper, enabling click, press, and
+/// accessibility builders in [`StatefulInteractiveElement`]. That wrapper's
+/// retained state is associated with its stable ID in the element tree.
 pub trait InteractiveElement: Sized {
     /// Retrieve the interactivity state associated with this element
     fn interactivity(&mut self) -> &mut Interactivity;
@@ -921,16 +926,24 @@ pub trait InteractiveElement: Sized {
         self
     }
 
-    /// Assign this element an ID, so that it can be used with interactivity
+    /// Assigns a stable ID and enables stateful interaction builders.
+    ///
+    /// GPUI combines the ID with its containing ID path to find retained state
+    /// on the next frame. IDs must be unique within that scope. Use a logical
+    /// item key for reordered rows; an index makes the state follow the row's
+    /// position instead of its item. Changing the ID starts a new identity.
     fn id(mut self, id: impl Into<ElementId>) -> Stateful<Self> {
         self.interactivity().element_id = Some(id.into());
 
         Stateful { element: self }
     }
 
-    /// Track the focus state of the given focus handle on this element.
-    /// If the focus handle is focused by the application, this element will
-    /// apply its focused styles.
+    /// Attaches `focus_handle` to this element's keyboard dispatch path.
+    ///
+    /// The element becomes focusable and retains a clone of the handle. This
+    /// call does not select it: use [`Window::focus`] to request focus. Once
+    /// selected, its focused refinements and keyboard handlers use this path.
+    /// See the [actions walkthrough](https://gpui-ce.github.io/examples/actions/#focus).
     fn track_focus(mut self, focus_handle: &FocusHandle) -> Self {
         self.interactivity().focusable = true;
         self.interactivity().tracked_focus_handle = Some(focus_handle.clone());
@@ -971,8 +984,12 @@ pub trait InteractiveElement: Sized {
         self
     }
 
-    /// Set the keymap context for this element. This will be used to determine
-    /// which action to dispatch from the keymap.
+    /// Adds a key context to this element's dispatch node.
+    ///
+    /// Key-binding predicates match contexts along the focused path. This
+    /// does not create focus or register a binding; combine it with
+    /// [`track_focus`](Self::track_focus) and [`App::bind_keys`]. If conversion
+    /// to [`KeyContext`] fails, GPUI logs the error and leaves the context unset.
     fn key_context<C, E>(mut self, key_context: C) -> Self
     where
         C: TryInto<KeyContext, Error = E>,
@@ -984,7 +1001,11 @@ pub trait InteractiveElement: Sized {
         self
     }
 
-    /// Apply the given style to this element when the mouse hovers over it
+    /// Applies a style refinement while the pointer hovers over this element.
+    ///
+    /// `f` builds the refinement once, during element construction; it is not
+    /// called for each pointer movement. Specify all hover fields in one call.
+    /// Calling this setter twice panics in debug builds.
     fn hover(mut self, f: impl FnOnce(StyleRefinement) -> StyleRefinement) -> Self {
         debug_assert!(
             self.interactivity().hover_style.is_none(),
@@ -1022,7 +1043,7 @@ pub trait InteractiveElement: Sized {
 
     #[cfg(any(test, feature = "test-support"))]
     /// Set a key that can be used to look up this element's bounds
-    /// in the [`crate::VisualTestContext::debug_bounds`] map
+    /// in the `VisualTestContext::debug_bounds` map (with `test-support` enabled)
     /// This is a noop in release builds
     fn debug_selector(mut self, f: impl FnOnce() -> String) -> Self {
         self.interactivity().debug_selector = Some(f());
@@ -1031,7 +1052,7 @@ pub trait InteractiveElement: Sized {
 
     #[cfg(not(any(test, feature = "test-support")))]
     /// Set a key that can be used to look up this element's bounds
-    /// in the [`crate::VisualTestContext::debug_bounds`] map
+    /// in the `VisualTestContext::debug_bounds` map (with `test-support` enabled)
     /// This is a noop in release builds
     #[inline]
     fn debug_selector(self, _: impl FnOnce() -> String) -> Self {
@@ -1509,9 +1530,6 @@ pub trait InteractiveElement: Sized {
 
 /// A trait for elements that want to use the standard GPUI interactivity features
 /// that require state.
-// docs:examples:begin
-#[doc = include_str!("../docs/examples/gpui-StatefulInteractiveElement-7da77baa.md")]
-// docs:examples:end
 pub trait StatefulInteractiveElement: InteractiveElement {
     /// Set the accessible role for this element.
     ///
@@ -2164,9 +2182,6 @@ pub fn div() -> Div {
 }
 
 /// A [`Div`] element, the all-in-one element for building complex UIs in GPUI
-// docs:examples:begin
-#[doc = include_str!("../docs/examples/gpui-Div-d35976e7.md")]
-// docs:examples:end
 pub struct Div {
     interactivity: Interactivity,
     children: SmallVec<[StackSafe<AnyElement>; 2]>,

@@ -26,9 +26,10 @@ pub struct BackgroundExecutor {
 
 /// A cloneable handle for work that must run on GPUI's foreground thread.
 ///
-/// Foreground tasks are polled in order by the local scheduler and may access
-/// `!Send` values. They still need to yield while doing long work so input and
-/// rendering can make progress.
+/// Tasks may retain `!Send` values, but every poll runs on the foreground
+/// thread. `async` does not move expensive synchronous work off that thread:
+/// use [`BackgroundExecutor::spawn`] for owned work that would block input.
+/// Awaiting another task or a timer lets the foreground scheduler do other work.
 #[derive(Clone)]
 pub struct ForegroundExecutor {
     inner: scheduler::LocalExecutor,

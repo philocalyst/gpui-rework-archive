@@ -292,13 +292,17 @@ pub struct TouchClickEvent {
     pub long_press: bool,
 }
 
-/// A click event, generated when a mouse button or keyboard button is pressed and released,
-/// or when a tap gesture is recognized on a touch screen.
+/// An activation produced by a mouse click, keyboard activation, or touch tap.
+///
+/// A click is not necessarily mouse input: use [`Self::mouse_position`] when
+/// a handler specifically needs a cursor position. Primary click listeners
+/// receive primary activation; aux-click listeners also receive secondary
+/// activation such as right clicks and touch long presses.
 #[derive(Clone, Debug)]
 pub enum ClickEvent {
-    /// A click event trigger by a mouse button being pressed and released.
+    /// A mouse button was pressed and released.
     Mouse(MouseClickEvent),
-    /// A click event trigger by a keyboard button being pressed and released.
+    /// A keyboard key activated the focused element.
     Keyboard(KeyboardClickEvent),
     /// A click event triggered by a recognized tap gesture on a touch screen.
     Touch(TouchClickEvent),

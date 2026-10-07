@@ -8,13 +8,19 @@ cargo run -p gpui-ce --example interaction
 cargo test -p gpui-ce --examples --features test-support
 ```
 
-From another directory, call the repository's launcher by its absolute path:
+From another directory, pass the workspace manifest:
 
 ```sh
-/path/to/gpui-ce/scripts/gpui-example animation
+cargo run --manifest-path /path/to/gpui-ce/Cargo.toml --example animation
 ```
 
-On Windows use `scripts/gpui-example.ps1`. Both launchers locate the workspace and its Cargo configuration themselves. Media and sample fonts are embedded, so examples also work when their compiled binaries are started elsewhere.
+Media and sample fonts are embedded, so the compiled examples also work when
+started from another directory. The [walkthroughs](../../../site/content/examples/_index.md)
+are ordinary examples in their own package:
+
+```sh
+cargo run -p gpui-documentation-examples --example counter
+```
 
 ## Find an example
 
@@ -47,7 +53,7 @@ Behavior tests live beside their lessons in `tests.rs` and use GPUI's existing `
 cargo test -p gpui-ce --example interaction --features test-support
 ```
 
-Native paint appearance, animated GIF playback, compositor behavior, display placement, notifications, keyrings, and haptics still need manual checks. There is no screenshot, reporting, or publication framework on this branch.
+Native paint appearance, animated GIF playback, compositor behavior, display placement, notifications, keyrings, and haptics still need manual checks.
 
 ## Consolidated targets
 

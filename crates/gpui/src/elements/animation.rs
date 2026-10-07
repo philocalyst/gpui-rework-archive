@@ -71,9 +71,6 @@ impl Animation {
 /// the element is rendered in a static state (the end state for oneshot
 /// animations, the start state for repeating ones) and no animation frames are
 /// scheduled.
-// docs:examples:begin
-#[doc = include_str!("../docs/examples/gpui-AnimationExt-70b5b5c8.md")]
-// docs:examples:end
 pub trait AnimationExt {
     /// Render this component or element with an animation
 // docs:examples:begin

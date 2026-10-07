@@ -23,9 +23,9 @@ use super::{Context, WeakEntity};
 /// For a complete task lifecycle example, see the
 /// [async task walkthrough](https://gpui-ce.github.io/examples/async-task/#completion).
 ///
-/// Internally, this holds a weak reference to an `App`. Methods will panic if the app has been dropped,
-/// but this should not happen in practice when using foreground tasks spawned via `cx.spawn()`,
-/// as the executor checks if the app is alive before running each task.
+/// Entity operations acquire synchronous app access for their closure; no
+/// entity or app borrow may cross the next `await`. [`AppContext::as_mut`] is
+/// unsupported and panics on this context. Use an update closure instead.
 #[derive(Clone)]
 pub struct AsyncApp {
     pub(crate) app: Weak<AppCell>,

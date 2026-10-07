@@ -15,12 +15,12 @@ Clone this repository and follow the [platform setup](site/content/guides/setup.
 The walkthroughs compile against the checkout, so their code and API agree:
 
 ```sh
-cargo run --manifest-path site/examples/Cargo.toml --bin first-window
+cargo run -p gpui-documentation-examples --example first-window
 ```
 
-The [first window](site/examples/src/bin/first-window.rs) introduces a view and its render method.
-The [counter](site/examples/src/bin/counter.rs) adds state and a click handler;
-[keyboard actions](site/examples/src/bin/actions.rs) adds focus and key bindings.
+The [first window](site/examples/examples/first-window.rs) introduces a view and its render method.
+The [counter](site/examples/examples/counter.rs) adds state and a click handler;
+[keyboard actions](site/examples/examples/actions.rs) adds focus and key bindings.
 Each program is also a step-by-step page with a browser preview and a complete Cargo download.
 
 ## Find an explanation
@@ -31,7 +31,7 @@ Each program is also a step-by-step page with a browser preview and a complete C
 | Understand the frame pipeline | [Rendering](crates/gpui/docs/rendering.md) |
 | Dispatch input and actions | [Input](crates/gpui/docs/input.md) |
 | Keep async work from blocking a view | [Scheduling](crates/gpui/docs/scheduling.md) |
-| Test behavior and rendered output | [Testing](docs/testing.md) and [test design](docs/testing-design.md) |
+| Test state and input | [Testing](site/content/guides/testing.md) |
 | Compare the learning examples | [Example catalogue](docs/examples.md) |
 | Build or edit these docs | [Documentation authoring](docs/documentation-authoring.md) |
 

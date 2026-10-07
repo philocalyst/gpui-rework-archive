@@ -1,56 +1,68 @@
 +++
 aliases = ["guide/system/testing/", "system/testing.html"]
-title = "Test the layer that can fail"
-description = "Separate state, deterministic rendering, GPU replay, and native behavior."
+title = "Test state, then interaction"
+description = "Exercise entity updates in a controlled app and check native behavior where it runs."
 weight = 90
 +++
 
-Start with a state test for the rule you changed. Add a rendering scenario when
-the result depends on layout, paint, or input dispatch. Use a native or GPU check
-when the behavior crosses that boundary.
+Start with the rule that can fail. If a click changes a count, test the state
+transition before checking the whole window. Add an input test when focus,
+coordinates, or dispatch order affects the result.
 
-## Run deterministic scenarios
+## Enable the controlled app
 
-The testing branch supplies a controlled app, viewport, and named checkpoints.
-The CPU renderer can produce a PNG and a scene capture without opening a native
-window. From the repository root:
+Enable `test-support` on the core crate in your development dependencies:
 
-```sh
-scripts/gpui-test list
-scripts/gpui-test run --output target/visual-report
-scripts/gpui-test run --output target/visual-report --baseline target/visual-baseline
+```toml
+[dev-dependencies]
+gpui = { package = "gpui-ce", path = "../../crates/gpui", features = ["test-support"] }
 ```
 
-Inspect the report's selected scenarios and checkpoint labels. A test that did
-not select a scenario is not evidence that the scenario passed. A changed
-snapshot is a request to inspect a change, not an instruction to accept it.
+Adjust the path to your checkout. [`TestApp`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.TestApp.html)
+creates a test platform and flushes pending effects after each update:
 
-## Capture an example
+```rust
+use gpui::TestApp;
 
-The larger repository examples share their view construction with capture
-scenarios. Use the example launcher to select a target, then its capture mode:
-
-```sh
-scripts/gpui-example list
-scripts/gpui-example run hello_world --capture --output target/hello-report
+#[test]
+fn increment_changes_the_count() {
+    let mut app = TestApp::new();
+    let counter = app.new_entity(|_| 0_u32);
+    app.update_entity(&counter, |count, cx| {
+        *count += 1;
+        cx.notify();
+    });
+    assert_eq!(app.read_entity(&counter, |count, _| *count), 1);
+}
 ```
 
-The ten small documentation walkthroughs are a separate compiled source suite.
-Their browser tests exercise the actual WASM renderer, and their downloads are
-checked as Cargo projects. Do not treat their preview as a native capture.
+For a larger fixture, [`TestAppContext`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.TestAppContext.html)
+and [`#[gpui::test]`](https://docs.rs/gpui-ce/0.2.2/gpui/attr.test.html) expose
+controlled scheduling and repeated seeded runs. Choose that lower-level context
+when the test needs to manage effect flushing explicitly.
 
-## Cross the renderer and platform boundaries
+## Exercise the window
+
+`TestApp::open_window` builds a view in a test window. Its returned handle can
+update the view, dispatch an action, send a keystroke, or simulate pointer input.
+Retain the same IDs and focus handles that the real view uses; rebuilding a
+fixture with different identities can conceal the bug you are investigating.
+
+> [!NOTE]
+> The default test text system does not reproduce native font shaping. Use
+> `TestApp::with_text_system` when measurements need a real text backend.
+
+## Check the platform boundary
+
+Run the relevant example with ordinary Cargo:
 
 ```sh
-scripts/gpui-test bench --output target/renderer-report --gpu
-scripts/gpui-test platform --output target/platform-report
+cargo run --example hello_world
+cargo run --example actions_and_keybinds
+cargo run -p gpui-documentation-examples --example counter
 ```
 
-GPU checks need a supported device. Native window checks need the platform
-services and session they exercise. A CPU scene match cannot prove decoration,
-clipboard, IME, GPU-driver, or browser permission behavior.
-
-The report distinguishes scene-building time, render time, platform captures,
-and checkpoints. Compare equivalent workloads before interpreting timings.
-See the [test crate](https://docs.rs/gpui_ce_test/latest/gpui_test/) and the
-repository's `docs/testing.md` for scenario and report contracts.
+A controlled app checks framework behavior. Native decoration, clipboard
+permissions, IME composition, accessibility integration, and GPU presentation
+also need checks on the platform that supplies them. See the
+[platform guide](@/guides/platforms.md) for those boundaries.

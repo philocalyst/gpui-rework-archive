@@ -41,7 +41,7 @@ sudo apt-get install -y build-essential pkg-config \
 ```
 
 Use your distribution's equivalents on other systems. Native examples need a
-graphical session and a supported GPU backend. Headless scenario tests have a
+graphical session and a supported GPU backend. Controlled app tests have a
 separate [testing workflow](@/guides/testing.md).
 
 ## Windows
@@ -53,7 +53,7 @@ explains the installer choices. Run Cargo from a shell that can find the toolcha
 ## Check one window
 
 ```sh
-cargo run --manifest-path site/examples/Cargo.toml --bin first-window
+cargo run -p gpui-documentation-examples --example first-window
 ```
 
 Expect a window containing “Hello, GPUI”. Closing the last walkthrough window

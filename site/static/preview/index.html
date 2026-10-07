@@ -18,6 +18,7 @@
         const module = await import(`./pkg/${entry}`);
         const wasm = `./pkg/${entry.replace(/\.js$/, "_bg.wasm")}`;
         await module.default({ module_or_path: wasm });
+        status.remove();
       } catch (error) {
         status.textContent = `Preview unavailable: ${error.message}`;
         window.parent.postMessage({ type: "gpui-preview-error", message: String(error) }, "*");

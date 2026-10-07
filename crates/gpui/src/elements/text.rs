@@ -395,11 +395,17 @@ impl IntoElement for SharedString {
     }
 }
 
-/// Renders text with runs of different styles.
+/// A text element with explicit style runs and a shareable layout.
 ///
-/// Callers are responsible for setting the correct style for each run.
-/// For text with a uniform style, you can usually avoid calling this constructor
-/// and just pass text directly.
+/// [`new`](Self::new) starts with the inherited text style. Use
+/// [`with_runs`](Self::with_runs) for a complete sequence of styled byte ranges,
+/// or [`with_highlights`](Self::with_highlights) to override selected ranges.
+/// A plain [`SharedString`] is sufficient when all text uses the parent's style.
+///
+/// Clone [`layout`](Self::layout) before moving the element into its parent to
+/// share its measured text positions with an input handler or paint callback.
+/// The layout is populated while this element is drawn; querying positions
+/// during `Render::render` is too early.
 pub struct StyledText {
     text: SharedString,
     runs: Option<Vec<TextRun>>,
@@ -409,7 +415,7 @@ pub struct StyledText {
 }
 
 impl StyledText {
-    /// Construct a new styled text element from the given string.
+    /// Creates a text element that initially uses the inherited style.
     pub fn new(text: impl Into<SharedString>) -> Self {
         StyledText {
             text: text.into(),
@@ -420,7 +426,14 @@ impl StyledText {
         }
     }
 
-    /// Get the layout for this element. This can be used to map indices to pixels and vice versa.
+    /// Returns the shared layout populated when this element is drawn.
+    ///
+    /// Clone the handle before moving the element into a parent. The clone
+    /// sees the same measurement and prepaint bounds; it does not copy a
+    /// snapshot. Pixel/index queries require those phases to have finished.
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-StyledText-layout-07cba400.md")]
+// docs:examples:end
     pub fn layout(&self) -> &TextLayout {
         &self.layout
     }
@@ -488,14 +501,17 @@ impl StyledText {
         runs
     }
 
-    /// Override the font family for specific byte ranges of the text.
+    /// Changes the font family of style runs fully contained in each byte range.
     ///
-    /// This is resolved lazily at layout time, so the overrides are applied
-    /// on top of the inherited text style from the parent element.
-    /// Can be combined with [`with_highlights`](Self::with_highlights).
+    /// Overrides are applied at layout time, after inherited styles and
+    /// [`with_highlights`](Self::with_highlights) have produced the runs. This
+    /// method does not split a run at an override boundary. A range covering
+    /// only part of a run leaves that entire run unchanged.
     ///
-    /// The overrides must be sorted by range start and non-overlapping.
-    /// Each override range must fall on character boundaries.
+    /// For a whole-string override, use `0..text.len()`. For a substring,
+    /// first establish run boundaries with [`with_runs`](Self::with_runs) or
+    /// `with_highlights`. Supply sorted, non-overlapping ranges within the
+    /// string, with endpoints on UTF-8 character boundaries.
     pub fn with_font_family_overrides(
         mut self,
         overrides: impl IntoIterator<Item = (Range<usize>, SharedString)>,
@@ -548,7 +564,17 @@ impl StyledText {
         runs.unwrap_or_else(|| vec![default_style.to_run(self.text.len())])
     }
 
-    /// Set the text runs for this piece of text.
+    /// Replaces the complete sequence of styles covering this text.
+    ///
+    /// Each [`TextRun::len`] counts bytes from the end of the preceding run.
+    /// Runs must cover the entire string exactly and end on UTF-8 boundaries.
+    /// To style a subset while preserving inherited attributes elsewhere, use
+    /// [`with_highlights`](Self::with_highlights).
+    ///
+    /// # Panics
+    ///
+    /// Panics if a run ends inside a UTF-8 scalar, exceeds the remaining text,
+    /// or leaves any text uncovered.
     pub fn with_runs(mut self, runs: Vec<TextRun>) -> Self {
         let mut text = &*self.text;
         for run in &runs {
@@ -625,8 +651,22 @@ impl IntoElement for StyledText {
     }
 }
 
-/// The Layout for TextElement. This can be used to map indices to pixels and vice versa.
+/// Shared measurement and position data for a text element.
+///
+/// Clone [`StyledText::layout`] before moving its element into the tree when
+/// an input callback needs to map a pointer position to a UTF-8 byte index.
+/// The clone shares the measurement populated by layout and the window-space
+/// bounds populated by prepaint. Query it after those phases have run.
+///
+/// [`index_for_position`](Self::index_for_position) identifies the cluster
+/// under a point; its `Err` value is the nearest boundary for an outside point.
+/// [`position_for_index`](Self::position_for_index) maps an index back to a
+/// visual position, including soft wraps. This is display geometry, not a
+/// complete selection or editable-text model.
 #[derive(Default, Clone)]
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-TextLayout-7e2379bf.md")]
+// docs:examples:end
 pub struct TextLayout(Rc<TextLayoutState>);
 
 #[derive(Default)]
@@ -1091,7 +1131,20 @@ impl TextLayout {
         })
     }
 
-    /// Get the byte index into the input of the pixel position.
+    /// Maps a window-space point to a UTF-8 byte index in the displayed text.
+    ///
+    /// `Ok(index)` identifies the cluster under the point. `Err(index)` gives
+    /// the boundary at the nearest visual edge when the point is outside a
+    /// line; a point above the text or an empty layout returns `Err(0)`.
+    /// A drag selection can use either branch's index; a hit-only operation
+    /// can require `Ok`. This selects a cluster start, not the nearest caret.
+    ///
+    /// # Panics
+    ///
+    /// Panics before measurement or before prepaint has supplied bounds.
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-TextLayout-index-for-position-e86c31c2.md")]
+// docs:examples:end
     pub fn index_for_position(&self, pixel_point: Point<Pixels>) -> Result<usize, usize> {
         let element_state = self.measured();
         let bounds = element_state
@@ -1110,7 +1163,18 @@ impl TextLayout {
         document.byte_index_for_pixel_point(pixel_point - bounds.origin, line_height)
     }
 
-    /// Get the pixel position for the given byte index.
+    /// Maps a UTF-8 byte index to a window-space visual position.
+    ///
+    /// Returns `None` for an index beyond the text or without a shaped layout.
+    /// An index inside an atomic cluster maps to that cluster's logical start.
+    /// At a soft-wrap boundary, the following visual line owns the position.
+    ///
+    /// # Panics
+    ///
+    /// Panics before measurement or before prepaint has supplied bounds.
+// docs:examples:begin
+#[doc = include_str!("../docs/examples/gpui-TextLayout-position-for-index-c7efd047.md")]
+// docs:examples:end
     pub fn position_for_index(&self, byte_index: usize) -> Option<Point<Pixels>> {
         let element_state = self.measured();
         let bounds = element_state
@@ -1122,14 +1186,22 @@ impl TextLayout {
         Some(bounds.origin + document.visual_position_for_byte_index(byte_index, line_height)?)
     }
 
-    /// Retrieve the layout for the line containing the given byte index.
+    /// Returns the shared shaped document layout when `index <= len()`.
+    ///
+    /// This compatibility method returns the same document layout for every
+    /// valid index, including the end index. It does not extract one visual
+    /// line. Use [`ShapedTextLayout::visual_lines`] to inspect wrapped lines.
+    /// Panics before measurement.
     pub fn line_layout_for_index(&self, index: usize) -> Option<Arc<ShapedTextLayout>> {
         let element_state = self.measured();
         let document = element_state.document.as_ref()?;
         (index <= document.len()).then(|| document.layout.clone())
     }
 
-    /// Retrieve all line layouts in source order.
+    /// Returns the shaped document layout, or an empty vector for empty text.
+    ///
+    /// The single returned layout can contain several visual lines. This
+    /// method does not return one entry per soft wrap. Panics before measurement.
     pub fn line_layouts(&self) -> SmallVec<[Arc<ShapedTextLayout>; 1]> {
         self.measured()
             .document
@@ -1138,17 +1210,23 @@ impl TextLayout {
             .collect()
     }
 
-    /// The bounds of this layout.
+    /// Returns the window-space bounds assigned during prepaint.
+    ///
+    /// Panics before measurement or prepaint.
     pub fn bounds(&self) -> Bounds<Pixels> {
         self.measured().bounds.unwrap()
     }
 
-    /// The line height for this layout.
+    /// Returns the measured distance between text baselines.
+    ///
+    /// Panics before measurement.
     pub fn line_height(&self) -> Pixels {
         self.measured().line_height
     }
 
-    /// The UTF-8 length of the underlying text.
+    /// Returns the UTF-8 byte length of the measured text.
+    ///
+    /// Panics before measurement. This counts neither graphemes nor glyphs.
     pub fn len(&self) -> usize {
         self.measured().len
     }

@@ -11,21 +11,25 @@
 //! those two states to draw. The tree and frame-local callbacks are rebuilt for the next frame;
 //! persistent state must live in a view, an entity, or an element state handle.
 //!
-//! But some state is too simple and voluminous to store in every view that needs it, e.g.
-//! whether a hover has been started or not. For this, GPUI provides the [`Element::PrepaintState`], associated type.
+//! `RequestLayoutState` and `PrepaintState` carry work between phases of this
+//! frame. For state that must survive another render, use an entity or
+//! [`Window::with_element_state`] under a stable element ID. The associated
+//! types alone do not make state persistent.
 //!
-//! # Implementing your own elements
+//! # Choose a component boundary
 //!
-//! Implement an element when a component needs a custom layout algorithm or direct paint access.
-//! The implementation owns the invariants of its subtree: ordinary children stay within their
-//! assigned bounds, while overlays may deliberately escape them through
-//! [`Window::with_content_mask`]. Keep any state needed between frames outside the element value.
+//! Use [`RenderOnce`] and `#[derive(IntoElement)]` for a reusable component built
+//! from inputs. Use [`Render`] for a component backed by an entity that can be
+//! notified independently. Implement [`Element`] when the component needs to
+//! control layout, hit testing, or the preparation passed into painting.
 //!
-//! For reusable components, prefer [`RenderOnce`] with `#[derive(IntoElement)]`; use [`Render`] when
-//! the component is backed by an entity and must be invalidated independently. The
-//! [layout constraints example](https://gpui-ce.github.io/examples/layout/#constraints) and
-//! [drawing example](https://gpui-ce.github.io/examples/drawing/#paint) show the public path from
-//! a component to an element tree and custom painting.
+//! Custom paint code uses the window's coordinate and clipping state. Layout
+//! bounds describe the assigned region; they do not clip drawing by themselves.
+//! [`Window::with_content_mask`] narrows the active clip. The
+//! [drawing walkthrough](https://gpui-ce.github.io/examples/drawing/#paint)
+//! shows how [`crate::canvas`] provides custom painting without a new element
+//! implementation. The [custom-element walkthrough](https://gpui-ce.github.io/examples/custom-element/)
+//! implements all three methods and shows their state handoff.
 
 use crate::{
     A11ySubtreeBuilder, App, ArenaBox, AvailableSpace, Bounds, Context, DispatchNodeId, ElementId,
@@ -42,10 +46,13 @@ use std::{
 
 /// Participate in layout, prepaint, and paint for one position in a window's element tree.
 ///
-/// GPUI calls these methods in order for each frame and passes the state returned by
+/// When drawing this element, GPUI calls these methods in order and passes the state returned by
 /// [`request_layout`](Self::request_layout) into the later phases. Return a stable [`ElementId`]
 /// when the element owns state that should follow it across frames; omit it for an ephemeral
 /// element. Layout IDs and `bounds` are frame-local and must not be retained.
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-Element-e02c3ee0.md")]
+// docs:examples:end
 pub trait Element: 'static + IntoElement {
     /// Frame-local state produced while requesting layout and reused by prepaint and paint.
     type RequestLayoutState: 'static;
@@ -146,6 +153,9 @@ pub trait Element: 'static + IntoElement {
 }
 
 /// Convert a value into a concrete or type-erased [`Element`].
+// docs:examples:begin
+#[doc = include_str!("docs/examples/gpui-IntoElement-1ab5061b.md")]
+// docs:examples:end
 pub trait IntoElement: Sized {
     /// The concrete element type produced by [`Self::into_element`].
     type Element: Element;
@@ -169,7 +179,13 @@ impl<T: IntoElement> FluentBuilder for T {}
 #[doc = include_str!("docs/examples/gpui-Render-9fb18c52.md")]
 // docs:examples:end
 pub trait Render: 'static + Sized {
-    /// Build the current element tree for this entity.
+    /// Builds an element tree describing the entity's current state.
+    ///
+    /// Return a correct tree whenever this method runs; rendering can be
+    /// cached or invalidated, so its call count is not a lifecycle signal.
+    /// Store persistent values on the entity or under stable element IDs.
+    /// Avoid starting a new task or subscription on each render: create those
+    /// relationships during construction or in response to an explicit event.
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement;
 }
 
@@ -179,12 +195,30 @@ impl Render for Empty {
     }
 }
 
-/// Render an owned, stateless component once into an element tree.
+/// Consumes an owned component to produce an element tree.
 ///
-/// Implement this trait (or derive [`IntoElement`]) for a reusable recipe made from plain data.
-/// Because rendering consumes `self`, fluent builder methods can assemble the component directly.
-/// Put persistent state in an [`Entity`](crate::Entity) and implement [`Render`] when it must be
-/// independently invalidated.
+/// Implement this trait for a component built from parent-supplied data, then
+/// derive [`IntoElement`] to use it as a child. Each value is rendered once;
+/// the parent creates another value when it renders again. Builder methods can
+/// therefore consume and return `self` without managing a persistent component.
+///
+/// ```
+/// use gpui::{App, IntoElement, RenderOnce, SharedString, Window, div, prelude::*};
+///
+/// #[derive(IntoElement)]
+/// struct Badge { label: SharedString }
+///
+/// impl RenderOnce for Badge {
+///     fn render(self, _window: &mut Window, _cx: &mut App) -> impl IntoElement {
+///         div().px_2().py_1().rounded_md().child(self.label)
+///     }
+/// }
+/// ```
+///
+/// This trait supplies no independent entity identity. It can still use state
+/// retained under stable element IDs, or hold handles to parent-owned entities.
+/// Implement [`Render`] on an entity when the component itself should own state
+/// and receive independent invalidation through [`Context::notify`].
 pub trait RenderOnce: 'static {
     /// Consume the component and build its element tree.
     fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement;

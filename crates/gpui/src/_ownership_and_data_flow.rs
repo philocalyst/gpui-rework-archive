@@ -1,109 +1,105 @@
 //! # Ownership and data flow
 //!
-//! GPUI keeps entity values in the application's entity map. An [`crate::Entity<T>`]
-//! is a typed, reference-counted handle into that map; cloning the handle does
-//! not clone `T`, and dropping one handle does not immediately drop `T`. The
-//! value is released after the last strong handle disappears and the app flushes
-//! its effects.
+//! An [`Entity`](crate::Entity) is a handle to a value stored in the application.
+//! Cloning the handle retains the same value; it does not clone that value.
+//! The last strong handle marks the value for release. GPUI drops the value and
+//! runs release callbacks while flushing the app's effects.
 //!
-//! The app is the access boundary. A handle alone cannot read or mutate its
-//! value. Use [`crate::Entity::read_with`] for a short read and [`crate::Entity::update`] for
-//! an exclusive mutation. The callback receives a [`crate::Context<T>`], which is the
-//! same app access plus entity services such as notifications and subscriptions.
+//! A view is an entity whose value implements [`Render`](crate::Render). Models
+//! use the same entity machinery without rendering anything. This gives a model
+//! the same update, observation, and release rules as a view.
 //!
-//! ## Create, update, notify
+//! ## Access belongs to the context
 //!
-//! ```no_run
-//! # use gpui::{App, AppContext, Context, Entity};
-//! # struct Counter { count: usize }
-//! # fn start() {
-//! gpui_platform::application().run(|cx: &mut App| {
-//!     let counter: Entity<Counter> = cx.new(|_cx| Counter { count: 0 });
-//!     counter.update(cx, |counter, cx| {
-//!         counter.count += 1;
+//! An entity handle identifies a value but cannot access it alone. A read needs
+//! an [`App`](crate::App); an update needs an [`AppContext`](crate::AppContext).
+//! An update temporarily leases the value out of the entity map and passes it
+//! to a closure with its [`Context`](crate::Context):
+//!
+//! ```
+//! use gpui::{App, Context, Entity};
+//!
+//! struct Counter { count: u32 }
+//!
+//! fn increment(counter: &Entity<Counter>, app: &mut App) {
+//!     counter.update(app, |counter, cx| {
+//!         counter.count = counter.count.saturating_add(1);
 //!         cx.notify();
 //!     });
-//! });
-//! # }
+//! }
 //! ```
 //!
-//! `notify` is an explicit invalidation signal. It does not diff fields and it
-//! does not clone the value; observers run during GPUI's normal effect cycle.
+//! The context dereferences to `App` and adds operations for this entity: notify
+//! observers, emit an event, retain a weak handle, or install a subscription.
+//! Create an entity with [`AppContext::new`](crate::AppContext::new). Its builder
+//! receives a context before returning the entity's initial value.
 //!
-//! ## Read without retaining a borrow
+//! A lease is exclusive. Reading or updating the same entity from inside its
+//! update closure panics. Use the closure's `&mut T` instead of reaching through
+//! another handle to the same value. Updating a different entity is allowed,
+//! provided it does not call back into an entity already leased on the stack.
 //!
-//! ```no_run
-//! # use gpui::{App, AppContext, Entity};
-//! # struct Counter { count: usize }
-//! # fn start() {
-//! gpui_platform::application().run(|cx: &mut App| {
-//!     let counter = cx.new(|_| Counter { count: 3 });
-//!     let count = counter.read_with(cx, |counter, _app| counter.count);
-//!     assert_eq!(count, 3);
-//! });
-//! # }
+//! For a short read, [`Entity::read_with`](crate::Entity::read_with) keeps the
+//! borrow inside a callback:
+//!
+//! ```
+//! # use gpui::{App, Entity};
+//! # struct Counter { count: u32 }
+//! fn displayed_count(counter: &Entity<Counter>, app: &App) -> String {
+//!     counter.read_with(app, |counter, _| format!("Count: {}", counter.count))
+//! }
 //! ```
 //!
-//! `read_with` keeps the borrow inside its callback. Calling `read` directly is
-//! useful when a larger expression needs a reference, but the reference is tied
-//! to the current app borrow and must not escape it. GPUI rejects a second lease
-//! of the same entity while an update is in progress.
+//! [`Entity::read`](crate::Entity::read) returns a reference tied to the app
+//! borrow. Use it when several expressions need the same borrowed value. Neither
+//! read operation copies the entity or schedules a notification.
 //!
-//! ## Weak handles and asynchronous work
+//! ## Notify after a change
 //!
-//! Long-lived callbacks should capture [`crate::WeakEntity<T>`] rather than a strong
-//! entity handle. Upgrading is a race-safe test of liveness:
+//! [`Context::notify`](crate::Context::notify) marks the entity as changed.
+//! GPUI does not inspect fields to discover mutations. Notifications invalidate
+//! rendering that depends on the entity and call registered observers during
+//! effect processing; they do not synchronously call every observer at the
+//! `notify` statement. Pending notifications for the same entity can be coalesced.
 //!
-//! ```no_run
-//! # use gpui::{AppContext, Entity, WeakEntity};
-//! # struct Counter { count: usize }
-//! # fn later(_: WeakEntity<Counter>) {}
-//! gpui_platform::application().run(|cx| {
-//!     let counter: Entity<Counter> = cx.new(|_| Counter { count: 0 });
-//!     let weak = counter.downgrade();
-//!     later(weak.clone());
-//!     drop(counter);
-//!     assert!(weak.upgrade().is_none());
-//! });
-//! ```
+//! This distinction matters when a view observes a model. The model notifies
+//! after its data changes. An observer can then update derived view state and
+//! notify that view. See [Observe shared state](https://gpui-ce.github.io/examples/subscriptions/)
+//! for a complete example, including the lifetime of the subscription.
 //!
-//! This prevents an async task or subscription from keeping a model alive
-//! accidentally. [`crate::AsyncApp::spawn`] can use a weak entity after an await;
-//! the update returns an error when the entity has gone away.
+//! ## Keep the subscription
 //!
-//! ## Notifications and typed events
+//! [`Context::observe`](crate::Context::observe) watches notifications.
+//! [`Context::subscribe`](crate::Context::subscribe) watches typed events; the
+//! publisher must implement [`EventEmitter<E>`](crate::EventEmitter).
+//! Use an event when its payload or occurrence matters, such as a completed
+//! operation. Use a notification when a consumer should read the current state.
 //!
-//! Notifications describe state invalidation. Typed events describe an action
-//! or occurrence and require [`crate::EventEmitter<E>`] on the emitting type:
+//! Both return a [`Subscription`](crate::Subscription). Dropping it cancels the
+//! relationship. Store it on the consumer when the relationship belongs to that
+//! consumer. [`Subscription::detach`](crate::Subscription::detach) leaves the
+//! callback registered without a cancellation handle. Callbacks installed by an
+//! entity context retain a weak target, so detaching does not keep that entity alive.
 //!
-//! ```no_run
-//! # use gpui::{App, AppContext, Context, Entity, EventEmitter};
-//! # struct Counter { count: usize }
-//! struct Incremented { amount: usize }
-//! impl EventEmitter<Incremented> for Counter {}
-//! gpui_platform::application().run(|cx: &mut App| {
-//!     let counter: Entity<Counter> = cx.new(|_| Counter { count: 0 });
-//!     let listener = cx.new(|cx: &mut Context<Counter>| {
-//!         cx.subscribe(&counter, |listener, _, event: &Incremented, _| {
-//!             listener.count += event.amount;
-//!         }).detach();
-//!         Counter { count: 0 }
-//!     });
-//!     counter.update(cx, |counter, cx| {
-//!         counter.count += 1;
-//!         cx.emit(Incremented { amount: 1 });
-//!     });
-//!     assert_eq!(listener.read(cx).count, 1);
-//! });
-//! ```
+//! Registration is deferred until effect processing. Install a subscription in
+//! one app update before emitting an event in a later update. This also means an
+//! assertion later in the same update closure can run before its queued listener callback.
 //!
-//! A [`crate::Subscription`] cancels its callback when dropped. Store it when the
-//! relationship has a bounded owner; call [`crate::Subscription::detach`] only when
-//! the callback should remain registered until its publisher or weak target is
-//! released. See the [subscription walkthrough](https://gpui-ce.github.io/examples/subscriptions/#lifetime).
+//! ## Let asynchronous work outlive a view
 //!
-//! ## The ownership rule in one sentence
+//! A [`WeakEntity`](crate::WeakEntity) identifies an entity without retaining it.
+//! [`WeakEntity::upgrade`](crate::WeakEntity::upgrade) returns `None` after the
+//! strong count reaches zero, even if the app has yet to drop the stored value.
+//! [`WeakEntity::update`](crate::WeakEntity::update) returns an error if the entity
+//! has disappeared; treat that as an ordinary outcome after an `await`.
 //!
-//! Handles identify and retain entities, the app owns their storage, contexts
-//! authorize access, `notify` drives invalidation, and weak handles make
-//! teardown explicit.
+//! [`Context::spawn`](crate::Context::spawn) passes a weak handle and an
+//! [`AsyncApp`](crate::AsyncApp) to its future. Keep or detach the returned
+//! [`Task`](crate::Task); dropping it cancels the work. Avoid capturing a strong
+//! view handle in a task stored on that same view: the task and view can then
+//! keep each other alive.
+//!
+//! The [delayed-task walkthrough](https://gpui-ce.github.io/examples/async-task/)
+//! shows the full sequence: store the task, wait without holding an app borrow,
+//! then attempt a weak update. The [scheduling explanation](crate::_documentation::scheduling)
+//! describes which executor runs that future and when to use a background task.

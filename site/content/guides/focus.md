@@ -26,9 +26,12 @@ listener is on that target's dispatch path, and whether the context predicate
 matches. A browser preview also needs page focus inside its iframe.
 
 A capture handler may stop propagation before a later handler sees the event.
-A key prefix may be waiting for another stroke. Those cases have different
+A bubbling action handler consumes the action by default; it must call
+`cx.propagate()` to pass it to an ancestor. Ordinary event listeners have the
+opposite default and call `cx.stop_propagation()` to stop. A key prefix may also
+be waiting for another stroke. Those cases have different
 contracts; see [input and actions](https://docs.rs/gpui-ce/0.2.2/gpui/_documentation/input/index.html)
-and the `Keymap` reference instead of adding another global handler.
+and the [`Keymap` reference](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Keymap.html) instead of adding another global handler.
 
 ## Keep selection separate
 

@@ -12,7 +12,7 @@ use std::{
 ///
 /// For example:
 ///
-/// ```
+/// ```rust,standalone_crate
 /// use gpui::actions;
 /// actions!(editor, [MoveUp, MoveDown, MoveLeft, MoveRight, Newline]);
 /// ```
@@ -49,7 +49,7 @@ macro_rules! actions {
 /// To declare a list of simple actions, you can use the actions! macro, which defines a simple unit
 /// struct action for each listed action name in the given namespace.
 ///
-/// ```
+/// ```rust,standalone_crate
 /// use gpui::actions;
 /// actions!(editor, [MoveUp, MoveDown, MoveLeft, MoveRight, Newline]);
 /// ```

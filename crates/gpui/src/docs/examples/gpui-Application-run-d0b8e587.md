@@ -1,5 +1,9 @@
-Examples for `gpui::Application::run`.
 
-- [Open a window](https://gpui-ce.github.io/examples/first-window/#window)
-- [Paint a custom region](https://gpui-ce.github.io/examples/drawing/#launch)
-- [Replay an animation](https://gpui-ce.github.io/examples/animation/#clock)
+
+<!-- gpui-walkthroughs:begin gpui::Application::run -->
+
+Walkthroughs:
+
+- [Open a window: Keep a root view in a window](https://gpui-ce.github.io/examples/first-window/#window)
+
+<!-- gpui-walkthroughs:end gpui::Application::run -->

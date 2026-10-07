@@ -88,8 +88,8 @@ pub enum ShellKind {
     Elvish,
 }
 
-    /// Return the configured shell executable for the current platform.
-    pub fn get_system_shell() -> String {
+/// Return the configured shell executable for the current platform.
+pub fn get_system_shell() -> String {
     if cfg!(windows) {
         get_windows_system_shell()
     } else {
@@ -97,8 +97,8 @@ pub enum ShellKind {
     }
 }
 
-    /// Return the platform's default shell without user preference overrides.
-    pub fn get_default_system_shell() -> String {
+/// Return the platform's default shell without user preference overrides.
+pub fn get_default_system_shell() -> String {
     if cfg!(windows) {
         get_windows_system_shell()
     } else {
@@ -107,8 +107,8 @@ pub enum ShellKind {
 }
 
 /// Get the default system shell, preferring bash on Windows.
-    /// Return the default shell, preferring Bash when it is installed.
-    pub fn get_default_system_shell_preferring_bash() -> String {
+/// Return the default shell, preferring Bash when it is installed.
+pub fn get_default_system_shell_preferring_bash() -> String {
     #[cfg(windows)]
     {
         get_windows_bash().unwrap_or_else(|| get_windows_system_shell())
@@ -121,8 +121,8 @@ pub enum ShellKind {
 }
 
 #[cfg(windows)]
-    /// Locate a Bash executable installed on Windows.
-    pub fn get_windows_bash() -> Option<String> {
+/// Locate a Bash executable installed on Windows.
+pub fn get_windows_bash() -> Option<String> {
     fn find_bash_in_installation(install_root: &Path) -> Option<PathBuf> {
         if !install_root.join("git-bash.exe").is_file() {
             return None;
@@ -163,8 +163,8 @@ pub enum ShellKind {
     (*BASH).clone()
 }
 
-    /// Return PowerShell or the Windows command interpreter.
-    pub fn get_windows_system_shell() -> String {
+/// Return PowerShell or the Windows command interpreter.
+pub fn get_windows_system_shell() -> String {
     #[cfg(windows)]
     return gpui_util::get_windows_system_shell();
 

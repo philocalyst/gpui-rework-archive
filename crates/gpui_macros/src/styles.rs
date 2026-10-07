@@ -2,7 +2,7 @@ use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
 use syn::{
-    Token, Visibility, braced,
+    Attribute, Token, Visibility, braced,
     parse::{Parse, ParseStream, Result},
     parse_macro_input,
 };
@@ -10,36 +10,113 @@ use syn::{
 #[derive(Debug)]
 struct StyleableMacroInput {
     method_visibility: Visibility,
+    method_docs: Vec<(syn::Ident, Vec<Attribute>)>,
 }
 
 impl Parse for StyleableMacroInput {
     fn parse(input: ParseStream) -> Result<Self> {
-        if !input.peek(syn::token::Brace) {
+        if input.is_empty() {
             return Ok(Self {
                 method_visibility: Visibility::Inherited,
+                method_docs: Vec::new(),
             });
         }
 
-        let content;
-        braced!(content in input);
+        if input.peek(syn::token::Brace) {
+            let content;
+            braced!(content in input);
+            return parse_styleable_items(&content);
+        }
+        parse_styleable_items(input)
+    }
+}
 
-        let mut method_visibility = None;
+fn parse_styleable_items(content: ParseStream) -> Result<StyleableMacroInput> {
+    let mut method_visibility = None;
+    let mut method_docs = Vec::new();
 
+    while !content.is_empty() {
         let ident: syn::Ident = content.parse()?;
         if ident == "visibility" {
             let _colon: Token![:] = content.parse()?;
             method_visibility = Some(content.parse()?);
+        } else if ident == "docs" {
+            let docs;
+            braced!(docs in content);
+            while !docs.is_empty() {
+                let method: syn::Ident = docs.parse()?;
+                let _colon: Token![:] = docs.parse()?;
+                let attrs = Attribute::parse_outer(&docs).map_err(|error| {
+                    syn::Error::new(method.span(), format!("invalid style helper docs: {error}"))
+                })?;
+                if attrs.is_empty() {
+                    return Err(syn::Error::new(
+                        method.span(),
+                        "expected at least one attribute",
+                    ));
+                }
+                method_docs.push((method, attrs));
+                if docs.peek(Token![,]) {
+                    docs.parse::<Token![,]>()?;
+                }
+            }
+        } else {
+            return Err(syn::Error::new(
+                ident.span(),
+                "expected `visibility` or `docs`",
+            ));
         }
-
-        Ok(Self {
-            method_visibility: method_visibility.unwrap_or(Visibility::Inherited),
-        })
+        if content.peek(Token![,]) {
+            content.parse::<Token![,]>()?;
+        }
     }
+
+    Ok(StyleableMacroInput {
+        method_visibility: method_visibility.unwrap_or(Visibility::Inherited),
+        method_docs,
+    })
 }
 
 pub fn style_helpers(input: TokenStream) -> TokenStream {
-    let _ = parse_macro_input!(input as StyleableMacroInput);
+    let input = parse_macro_input!(input as StyleableMacroInput);
     let methods = generate_methods();
+    let known: std::collections::HashSet<String> = methods
+        .iter()
+        .map(|method| {
+            syn::parse2::<syn::TraitItemFn>(method.clone())
+                .expect("generated style helper")
+                .sig
+                .ident
+                .to_string()
+        })
+        .collect();
+    let mut seen = std::collections::HashSet::new();
+    for (name, _) in &input.method_docs {
+        if !known.contains(&name.to_string()) {
+            return syn::Error::new(name.span(), format!("unknown style helper `{name}`"))
+                .to_compile_error()
+                .into();
+        }
+        if !seen.insert(name.to_string()) {
+            return syn::Error::new(
+                name.span(),
+                format!("duplicate style helper docs for `{name}`"),
+            )
+            .to_compile_error()
+            .into();
+        }
+    }
+    let methods = methods.into_iter().map(|method| {
+        let mut method: syn::TraitItemFn = syn::parse2(method).expect("generated style helper");
+        if let Some((_, attrs)) = input
+            .method_docs
+            .iter()
+            .find(|(name, _)| name == &method.sig.ident)
+        {
+            method.attrs.extend(attrs.iter().cloned());
+        }
+        quote!(#method)
+    });
     let output = quote! {
         #(#methods)*
     };

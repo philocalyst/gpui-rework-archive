@@ -1,28 +1,30 @@
-//! A clean testing API for GPUI applications.
+//! # Deterministic application tests
 //!
-//! `TestApp` provides a simpler alternative to `TestAppContext` with:
-//! - Automatic effect flushing after updates
-//! - Clean window creation and inspection
-//! - Input simulation helpers
+//! [`TestApp`] runs GPUI with a test platform and controllable schedulers. It
+//! is useful for testing entities, views, input dispatch, and task completion
+//! without creating a native window. [`TestApp::update`] and
+//! [`TestAppWindow::update`] flush queued effects and run currently ready work
+//! before returning; advancing time is a separate operation.
 //!
-//! # Example
-//! ```ignore
-//! #[test]
-//! fn test_my_view() {
-//!     let mut app = TestApp::new();
-//!
-//!     let mut window = app.open_window(|window, cx| {
-//!         MyView::new(window, cx)
-//!     });
-//!
-//!     window.update(|view, window, cx| {
-//!         view.do_something(cx);
-//!     });
-//!
-//!     // Check rendered state
-//!     assert_eq!(window.title(), Some("Expected Title"));
-//! }
 //! ```
+//! # use gpui::{AppContext, Context, Render, TestApp, Window, IntoElement, ParentElement, div};
+//! # struct Counter { count: u32 }
+//! # impl Render for Counter {
+//! #   fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+//! #     div().child(self.count.to_string())
+//! #   }
+//! # }
+//! let mut app = TestApp::new();
+//! let mut window = app.open_window(|_, _| Counter { count: 0 });
+//! window.update(|counter, _, cx| { counter.count += 1; cx.notify(); });
+//! assert_eq!(window.read(|counter, _| counter.count), 1);
+//! ```
+//!
+//! The harness remains single-threaded for foreground state. Use
+//! [`TestApp::advance_clock`] before `run_until_parked` to make a timer ready;
+//! `run_until_parked` does not invent elapsed time. Window inspection methods
+//! panic if their window has already been closed, matching the test's invalid
+//! handle rather than silently testing a different window.
 
 use crate::{
     AnyWindowHandle, App, AppCell, AppContext, AssetRegistry, AsyncApp, BackgroundExecutor,
@@ -33,7 +35,7 @@ use crate::{
 };
 use std::{future::Future, rc::Rc, sync::Arc, time::Duration};
 
-/// A test application context with a clean API.
+/// A deterministic application and its simulated platform.
 ///
 /// Unlike `TestAppContext`, `TestApp` automatically flushes effects after
 /// each update and provides simpler window management.
@@ -48,22 +50,25 @@ pub struct TestApp {
 }
 
 impl TestApp {
-    /// Create a new test application.
+    /// Creates a test app with the default deterministic seed (`0`).
     pub fn new() -> Self {
         Self::with_seed(0)
     }
 
-    /// Create a new test application with a specific random seed.
+    /// Creates a test app whose scheduler randomization uses `seed`.
     pub fn with_seed(seed: u64) -> Self {
         Self::build(seed, None, Arc::new(()))
     }
 
-    /// Create a new test application with a custom text system for real font shaping.
+    /// Creates a test app using a caller-provided text system for shaping.
+    ///
+    /// The text system is shared by the app and platform; callers own its
+    /// fonts and lifetime through the supplied `Arc`.
     pub fn with_text_system(text_system: Arc<dyn PlatformTextSystem>) -> Self {
         Self::build(0, Some(text_system), Arc::new(()))
     }
 
-    /// Create a new test application with a custom text system and asset source.
+    /// Creates a test app with custom text shaping and asset loading.
     pub fn with_text_system_and_assets(
         text_system: Arc<dyn PlatformTextSystem>,
         asset_source: Arc<dyn crate::AssetSource>,
@@ -110,8 +115,10 @@ impl TestApp {
         }
     }
 
-    /// Run a closure with mutable access to the App context.
-    /// Automatically runs until parked after the closure completes.
+    /// Runs `f` with mutable app access, then drains ready work and effects.
+    ///
+    /// This does not advance the simulated clock. A callback that recursively
+    /// borrows the app still panics like production app updates.
     pub fn update<R>(&mut self, f: impl FnOnce(&mut App) -> R) -> R {
         let result = {
             let mut app = self.app.borrow_mut();
@@ -121,7 +128,7 @@ impl TestApp {
         result
     }
 
-    /// Run a closure with read-only access to the App context.
+    /// Runs `f` with a read-only app borrow.
     pub fn read<R>(&self, f: impl FnOnce(&App) -> R) -> R {
         let app = self.app.borrow();
         f(&app)
@@ -147,7 +154,7 @@ impl TestApp {
         self.update(|cx| entity.update(cx, f))
     }
 
-    /// Read an entity.
+    /// Reads an entity for the duration of `f`.
     pub fn read_entity<T: 'static, R>(
         &self,
         entity: &Entity<T>,
@@ -156,7 +163,10 @@ impl TestApp {
         self.read(|cx| f(entity.read(cx), cx))
     }
 
-    /// Open a test window with the given root view, using maximized bounds.
+    /// Opens a test window with maximized test-platform bounds.
+    ///
+    /// The closure constructs the root view once. The returned window owns a
+    /// typed handle for inspection and input simulation.
     pub fn open_window<V: Render + 'static>(
         &mut self,
         build_view: impl FnOnce(&mut Window, &mut Context<V>) -> V,
@@ -178,7 +188,7 @@ impl TestApp {
         }
     }
 
-    /// Open a test window with specific options.
+    /// Opens a test window using explicit [`WindowOptions`].
     pub fn open_window_with_options<V: Render + 'static>(
         &mut self,
         options: WindowOptions,
@@ -197,17 +207,20 @@ impl TestApp {
         }
     }
 
-    /// Run pending tasks until there's nothing left to do.
+    /// Runs ready foreground and background tasks until the scheduler parks.
+    ///
+    /// Pending timers remain pending until [`Self::advance_clock`] makes them
+    /// ready. A task dropped before this call is cancelled and is not observed.
     pub fn run_until_parked(&self) {
         self.background_executor.run_until_parked();
     }
 
-    /// Advance the simulated clock by the given duration.
+    /// Advances the test clock without polling tasks.
     pub fn advance_clock(&self, duration: Duration) {
         self.background_executor.advance_clock(duration);
     }
 
-    /// Spawn a future on the foreground executor.
+    /// Spawns a local future on the foreground executor.
     pub fn spawn<Fut, R>(&self, f: impl FnOnce(AsyncApp) -> Fut) -> Task<R>
     where
         Fut: Future<Output = R> + 'static,
@@ -216,7 +229,7 @@ impl TestApp {
         self.foreground_executor.spawn(f(self.to_async()))
     }
 
-    /// Spawn a future on the background executor.
+    /// Spawns a `Send` future on the background executor.
     pub fn background_spawn<R>(&self, future: impl Future<Output = R> + Send + 'static) -> Task<R>
     where
         R: Send + 'static,
@@ -224,7 +237,7 @@ impl TestApp {
         self.background_executor.spawn(future)
     }
 
-    /// Get an async handle to the app.
+    /// Returns a weak async app handle for work across `await` points.
     pub fn to_async(&self) -> AsyncApp {
         AsyncApp {
             app: Rc::downgrade(&self.app),
@@ -233,32 +246,32 @@ impl TestApp {
         }
     }
 
-    /// Get the background executor.
+    /// Returns the app's deterministic background executor.
     pub fn background_executor(&self) -> &BackgroundExecutor {
         &self.background_executor
     }
 
-    /// Get the foreground executor.
+    /// Returns the app's deterministic foreground executor.
     pub fn foreground_executor(&self) -> &ForegroundExecutor {
         &self.foreground_executor
     }
 
-    /// Get the text system.
+    /// Returns the text system used by this test app.
     pub fn text_system(&self) -> &Arc<TextSystem> {
         &self.text_system
     }
 
-    /// Check if a global of the given type exists.
+    /// Returns whether a global of type `G` is installed.
     pub fn has_global<G: Global>(&self) -> bool {
         self.read(|cx| cx.has_global::<G>())
     }
 
-    /// Set a global value.
+    /// Installs or replaces a global value and flushes effects.
     pub fn set_global<G: Global>(&mut self, global: G) {
         self.update(|cx| cx.set_global(global));
     }
 
-    /// Read a global value.
+    /// Reads an installed global. Panics when `G` is absent.
     pub fn read_global<G: Global, R>(&self, f: impl FnOnce(&G, &App) -> R) -> R {
         self.read(|cx| f(cx.global(), cx))
     }
@@ -280,17 +293,17 @@ impl TestApp {
         self.platform.read_from_clipboard()
     }
 
-    /// Get URLs that have been opened via `cx.open_url()`.
+    /// Returns the most recent URL opened through `App::open_url`.
     pub fn opened_url(&self) -> Option<String> {
         self.platform.opened_url.borrow().clone()
     }
 
-    /// Check if a file path prompt is pending.
+    /// Returns whether a new-path prompt is pending.
     pub fn did_prompt_for_new_path(&self) -> bool {
         self.platform.did_prompt_for_new_path()
     }
 
-    /// Simulate answering a path selection dialog.
+    /// Answers the pending new-path prompt with a test selection callback.
     pub fn simulate_new_path_selection(
         &self,
         select: impl FnOnce(&std::path::Path) -> Option<std::path::PathBuf>,
@@ -298,17 +311,17 @@ impl TestApp {
         self.platform.simulate_new_path_selection(select);
     }
 
-    /// Check if a prompt dialog is pending.
+    /// Returns whether a platform prompt is pending.
     pub fn has_pending_prompt(&self) -> bool {
         self.platform.has_pending_prompt()
     }
 
-    /// Simulate answering a prompt dialog.
+    /// Answers the pending prompt by button label.
     pub fn simulate_prompt_answer(&self, button: &str) {
         self.platform.simulate_prompt_answer(button);
     }
 
-    /// Get all open windows.
+    /// Returns handles for all currently open test windows.
     pub fn windows(&self) -> Vec<AnyWindowHandle> {
         self.read(|cx| cx.windows())
     }
@@ -320,7 +333,7 @@ impl Default for TestApp {
     }
 }
 
-/// A test window with inspection and simulation capabilities.
+/// A typed test handle for one open window and its root view.
 pub struct TestAppWindow<V> {
     handle: WindowHandle<V>,
     app: Rc<AppCell>,
@@ -329,12 +342,14 @@ pub struct TestAppWindow<V> {
 }
 
 impl<V: 'static + Render> TestAppWindow<V> {
-    /// Get the window handle.
+    /// Returns the typed window handle.
     pub fn handle(&self) -> WindowHandle<V> {
         self.handle
     }
 
-    /// Get the root view entity.
+    /// Returns the root view entity.
+    ///
+    /// Panics if the window was closed or its root has a different type.
     pub fn root(&self) -> Entity<V> {
         let mut app = self.app.borrow_mut();
         let any_handle: AnyWindowHandle = self.handle.into();
@@ -344,7 +359,9 @@ impl<V: 'static + Render> TestAppWindow<V> {
         .expect("window not found")
     }
 
-    /// Update the root view.
+    /// Updates the root view, then drains ready tasks and effects.
+    ///
+    /// Panics if the window is closed or the root type does not match `V`.
     pub fn update<R>(&mut self, f: impl FnOnce(&mut V, &mut Window, &mut Context<V>) -> R) -> R {
         let result = {
             let mut app = self.app.borrow_mut();
@@ -359,7 +376,9 @@ impl<V: 'static + Render> TestAppWindow<V> {
         result
     }
 
-    /// Read the root view.
+    /// Reads the root view without flushing effects.
+    ///
+    /// Panics if the window or root view is unavailable.
     pub fn read<R>(&self, f: impl FnOnce(&V, &App) -> R) -> R {
         let app = self.app.borrow();
         let view = self
@@ -374,7 +393,10 @@ impl<V: 'static + Render> TestAppWindow<V> {
         f(view.read(&app), &app)
     }
 
-    /// Get the window title.
+    /// Returns the test platform's window title, when exposed.
+    ///
+    /// The current test platform does not expose a title through this API and
+    /// therefore returns `None` for an open window.
     pub fn title(&self) -> Option<String> {
         let app = self.app.borrow();
         app.read_window(&self.handle, |_, _cx| {
@@ -384,7 +406,9 @@ impl<V: 'static + Render> TestAppWindow<V> {
         .unwrap()
     }
 
-    /// Simulate a keystroke.
+    /// Parses and dispatches one keystroke, then drains ready work.
+    ///
+    /// Panics when `keystroke` cannot be parsed or the window is closed.
     pub fn simulate_keystroke(&mut self, keystroke: &str) {
         let keystroke = Keystroke::parse(keystroke).unwrap();
         {
@@ -398,21 +422,21 @@ impl<V: 'static + Render> TestAppWindow<V> {
         self.background_executor.run_until_parked();
     }
 
-    /// Simulate multiple keystrokes (space-separated).
+    /// Dispatches space-separated keystrokes in order.
     pub fn simulate_keystrokes(&mut self, keystrokes: &str) {
         for keystroke in keystrokes.split(' ') {
             self.simulate_keystroke(keystroke);
         }
     }
 
-    /// Simulate typing text.
+    /// Dispatches one keystroke for each Unicode scalar in `input`.
     pub fn simulate_input(&mut self, input: &str) {
         for char in input.chars() {
             self.simulate_keystroke(&char.to_string());
         }
     }
 
-    /// Simulate a mouse move.
+    /// Dispatches a mouse-move event at `position`.
     pub fn simulate_mouse_move(&mut self, position: Point<Pixels>) {
         self.simulate_event(MouseMoveEvent {
             position,
@@ -421,7 +445,7 @@ impl<V: 'static + Render> TestAppWindow<V> {
         });
     }
 
-    /// Simulate a mouse down event.
+    /// Dispatches a single left/right/etc. mouse-down event.
     pub fn simulate_mouse_down(&mut self, position: Point<Pixels>, button: MouseButton) {
         self.simulate_event(MouseDownEvent {
             position,
@@ -432,7 +456,7 @@ impl<V: 'static + Render> TestAppWindow<V> {
         });
     }
 
-    /// Simulate a mouse up event.
+    /// Dispatches a single mouse-up event.
     pub fn simulate_mouse_up(&mut self, position: Point<Pixels>, button: MouseButton) {
         self.simulate_event(MouseUpEvent {
             position,
@@ -442,13 +466,13 @@ impl<V: 'static + Render> TestAppWindow<V> {
         });
     }
 
-    /// Simulate a click at the given position.
+    /// Dispatches a mouse-down followed by a mouse-up at `position`.
     pub fn simulate_click(&mut self, position: Point<Pixels>, button: MouseButton) {
         self.simulate_mouse_down(position, button);
         self.simulate_mouse_up(position, button);
     }
 
-    /// Simulate a scroll event.
+    /// Dispatches a pixel scroll event at `position`.
     pub fn simulate_scroll(&mut self, position: Point<Pixels>, delta: Point<Pixels>) {
         self.simulate_event(crate::ScrollWheelEvent {
             position,
@@ -458,7 +482,7 @@ impl<V: 'static + Render> TestAppWindow<V> {
         });
     }
 
-    /// Simulate an input event.
+    /// Converts and dispatches a platform input event, then drains ready work.
     pub fn simulate_event<E: InputEvent>(&mut self, event: E) {
         let platform_input = event.to_platform_input();
         {
@@ -472,7 +496,7 @@ impl<V: 'static + Render> TestAppWindow<V> {
         self.background_executor.run_until_parked();
     }
 
-    /// Simulate resizing the window.
+    /// Resizes the simulated platform window and drains ready work.
     pub fn simulate_resize(&mut self, size: Size<Pixels>) {
         let window_id = self.handle.window_id();
         let mut app = self.app.borrow_mut();
@@ -485,7 +509,10 @@ impl<V: 'static + Render> TestAppWindow<V> {
         self.background_executor.run_until_parked();
     }
 
-    /// Force a redraw of the window.
+    /// Draws and clears the window immediately.
+    ///
+    /// Use this when a test needs layout/paint state before simulating pointer
+    /// input. It does not advance timers.
     pub fn draw(&mut self) {
         let mut app = self.app.borrow_mut();
         let any_handle: AnyWindowHandle = self.handle.into();

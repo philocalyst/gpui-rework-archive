@@ -1,56 +1,63 @@
 +++
 title = "Edit a running example"
-description = "Choose native hot patching, browser compilation, or the Miri guest workbench."
+description = "Change Rust in the Miri workbench or save a native hot patch with the GPUI CLI."
 weight = 110
 +++
 
-The workflows below execute different kinds of source. Choose the one that
-matches the program you are editing.
+Change a label, click its button, and follow the value through the next frame.
+Each walkthrough uses one Rust component in its native program and browser
+workbench.
 
-## Edit a full GPUI program in the browser
+## Edit Rust in the browser
 
-The walkthrough preview is built from its canonical Rust program. Open “Edit
-and run the Rust source” to change that program. A local compiler compiles it
-to WebAssembly and replaces the iframe after a successful build. Compiler
-errors leave the last successful preview visible.
+Start the local documentation server from the checkout:
 
 ```sh
 python3 site/scripts/dev.py
 ```
 
-This starts the Zola preview and the loopback compiler. The compiler uses the
-same checkout and dependencies as the walkthroughs. A production static host
-serves the prebuilt programs; it does not provide a public Rust compilation
-service. Downloads and reading remain available without a compiler.
+Open a walkthrough and choose **Edit Rust**. The workbench runs your component
+under [Miri](https://github.com/rust-lang/miri), using the real `gpui` crate.
+GPUI lays out and paints the component; the browser displays that scene and
+sends input back to the running interpreter. Clicks update the same entities
+between frames.
 
-## Hot-patch a native debug application
+Edits run after a short typing pause. **Run** or Ctrl/⌘ Enter runs immediately.
+A source change starts a fresh component; **Reset state** restarts the current
+source. Errors appear below the editor, with the last successful frame still
+visible. Fix the source to resume interaction.
 
-Enable `hot-patching` on the core dependency, then use the matching Dioxus CLI:
+The workbench edits the component, including its setup function. The complete
+source download also contains the native application entry point. Use that
+program in your editor with ordinary Cargo:
 
 ```sh
-cargo install dioxus-cli --version 0.7.10 --locked
-dx serve --hot-patch
+cargo run -p gpui-documentation-examples --example counter
 ```
 
-Use a separate Cargo application depending on this checkout. DX can reject
-examples launched directly from the workspace with a dependency-cycle error.
-Edits to supported render and element entry points can redraw existing windows;
-other changes require a rebuild or restart.
+The published site can display the original programs without a local service.
+To execute edits, use the local server above.
+
+## Save a native hot patch
+
+The [`gpui` CLI](https://github.com/gpui-ce/cli) builds and watches native
+applications. Install it, then select the walkthrough's Cargo example:
+
+```sh
+cargo install --git https://github.com/gpui-ce/cli --locked
+gpui watch -p gpui-documentation-examples --example counter --features gpui/hot-patching
+```
+
+Edit `site/examples/examples/counter.rs` and save. A supported render or element
+change redraws the existing window, keeping its entity values. Invalid Rust
+leaves the running application intact until the next valid save.
 
 > [!WARNING]
-> Hot patching is experimental and a patch can fail or crash the application.
-> Keep the ordinary restart workflow available. It does not run in WASM or
-> release builds, and indirect dependency changes may need a rebuild.
+> Restart after changing a struct's fields, an enum's variants, or a function's
+> signature. A hot patch replaces code; it does not migrate existing state to
+> a different Rust layout.
 
-## Use the Miri guest workbench
-
-The separate codepen integration interprets Rust through vendored Miri and
-transports a supported element tree to GPUI. Its source imports
-`gpui_codepen_guest`, a smaller API. It cannot execute an arbitrary `gpui::Render`
-program unchanged.
-
-The workbench uses a local companion at `/api/render` and `/api/cancel`, with
-its own setup and toolchain. Its speed settings disable several Miri checks;
-it is an execution workflow, not an undefined-behavior verification run.
-See the integration's README for its supported operations and setup. The full
-GPUI previews above continue to use compiled WebAssembly.
+Manifest, lockfile, build-script, shader, and local dependency changes cause a
+full rebuild and restart. Native hot patching supports macOS and Linux. See
+[the CLI's watch behavior](https://github.com/gpui-ce/cli#behavior-and-limitations) for
+its target selection and rebuild rules.

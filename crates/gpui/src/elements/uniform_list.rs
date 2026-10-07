@@ -62,9 +62,6 @@ where
 }
 
 /// A list element for efficiently laying out and displaying a list of uniform-height elements.
-// docs:examples:begin
-#[doc = include_str!("../docs/examples/gpui-UniformList-205679c7.md")]
-// docs:examples:end
 pub struct UniformList {
     item_count: usize,
     item_to_measure_index: usize,

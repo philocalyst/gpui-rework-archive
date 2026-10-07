@@ -38,5 +38,5 @@ use another entity when several views need the same model. Splitting files does
 not require another entity for every helper function.
 
 The repository's larger examples are under `crates/gpui/examples`. Run
-`scripts/gpui-example list` to see the available targets. Those examples include
-capture scenarios and platform helpers beyond the small walkthrough programs.
+`cargo run --example` to list the available targets. Those examples cover
+native services, larger layouts, and complete text editors.

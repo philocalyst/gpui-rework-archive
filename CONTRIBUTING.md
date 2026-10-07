@@ -19,14 +19,14 @@ cargo fmt --all -- --check
 cargo test -p gpui-ce --doc
 ```
 
-The [testing guide](docs/testing.md) distinguishes behavior assertions from scene and image comparisons.
+The [testing guide](site/content/guides/testing.md) covers controlled state and input checks, then the native behavior that needs a running application.
 A changed visual baseline needs an explanation of the intended output;
 a snapshot update alone does not establish that the behavior is correct.
 
 ## Documentation
 
 Walkthroughs are executable Rust with a small comment format.
-Edit their [canonical programs](site/examples/src/bin/), then regenerate pages,
+Edit their [canonical programs](site/examples/examples/), then regenerate pages,
 source downloads, and API backlinks:
 
 ```sh

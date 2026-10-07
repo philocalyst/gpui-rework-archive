@@ -121,8 +121,9 @@ impl Default for Easing {
 
 /// The duration and easing curve for one directional motion pass.
 ///
-/// A zero duration is not a meaningful pass and is rejected by motion
-/// sampling's internal assertions; use a positive duration for public motion.
+/// A zero-duration pass completes without sampling an intermediate time.
+/// A finite run resolves at its endpoint; an all-zero infinite run is inactive.
+/// See [`DurationDescription`] for repeat and reverse behavior.
 ///
 /// Local pass time advances from zero to one. The easing function maps that
 /// local time to presentation progress and may be non-monotonic or overshoot.

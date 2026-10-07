@@ -2,8 +2,8 @@
 use std::time::Duration;
 
 use gpui::{
-    div, ease_in_out, prelude::*, Animation, AnimationExt, AppContext, Context, IntoElement,
-    Motion, px, Render, rgb, Window,
+    Animation, AnimationExt, AppContext, Context, IntoElement, Motion, Render, Window, div,
+    ease_in_out, prelude::*, px, rgb,
 };
 
 struct AnimationDemo {
@@ -13,8 +13,8 @@ struct AnimationDemo {
 impl Render for AnimationDemo {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let replay = self.replay;
-        let animation = Animation::new(Motion::new(Duration::from_millis(700)))
-            .with_easing(ease_in_out);
+        let animation =
+            Animation::new(Motion::new(Duration::from_millis(700))).with_easing(ease_in_out);
 
         div()
             .size_full()
@@ -40,27 +40,26 @@ impl Render for AnimationDemo {
                     })),
             )
             .child(
-                div()
-                    .h(px(48.))
-                    .w(px(180.))
-                    .flex()
-                    .items_center()
-                    .child(
-                        div()
-                            .h(px(32.))
-                            .rounded_full()
-                            .bg(rgb(0x3478c8))
-                            .with_animation(("ball", replay), animation, |ball, progress| {
-                                ball.w(px(24. + 100. * progress))
-                                    .opacity(0.25 + 0.75 * progress)
-                            }),
-                    ),
+                div().h(px(48.)).w(px(180.)).flex().items_center().child(
+                    div()
+                        .h(px(32.))
+                        .rounded_full()
+                        .bg(rgb(0x3478c8))
+                        .with_animation(("bar", replay), animation, |bar, progress| {
+                            bar.w(px(24. + 100. * progress))
+                                .opacity(0.25 + 0.75 * progress)
+                        }),
+                ),
             )
     }
 }
 
+fn component(_window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<AnimationDemo> {
+    cx.new(|_cx| AnimationDemo { replay: 0 })
+}
+
 pub fn main() {
-    support::run(|_window, cx| cx.new(|_cx| AnimationDemo { replay: 0 }));
+    support::run(component);
 }
 
 mod support {
@@ -74,39 +73,45 @@ mod support {
                 if cx.windows().is_empty() {
                     cx.quit();
                 }
-            }).detach();
+            })
+            .detach();
             open(build, cx);
         });
 
         #[cfg(target_family = "wasm")]
         {
-            use std::{cell::RefCell, rc::Rc, sync::Arc};
             use gpui::{Application, ApplicationHandle};
+            use std::{cell::RefCell, rc::Rc, sync::Arc};
             thread_local! {
                 static APPLICATION: RefCell<Option<ApplicationHandle>> = const { RefCell::new(None) };
             }
             gpui_web::init_logging();
             let platform = Rc::new(gpui_web::WebPlatform::new(false));
             let client = Arc::new(platform.fetch_http_client());
-            let handle = Application::with_platform(platform).with_http_client(client)
+            let handle = Application::with_platform(platform)
+                .with_http_client(client)
                 .run_embedded(move |cx| {
                     use std::borrow::Cow;
-                    cx.text_system().add_fonts(vec![Cow::Borrowed(
-                        include_bytes!("../../../crates/gpui_test/assets/fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf") as &[u8],
-                    )]).expect("load the preview font");
+                    cx.text_system()
+                        .add_fonts(vec![Cow::Borrowed(include_bytes!(
+                            "../../../assets/fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf"
+                        ) as &[u8])])
+                        .expect("load the preview font");
                     open(build, cx);
                 });
             APPLICATION.with(|slot| *slot.borrow_mut() = Some(handle));
             if let Some(window) = web_sys::window() {
                 if let Ok(Some(parent)) = window.parent() {
-                    let _ = parent.post_message(&wasm_bindgen::JsValue::from_str("gpui-preview-ready"), "*");
+                    let _ = parent
+                        .post_message(&wasm_bindgen::JsValue::from_str("gpui-preview-ready"), "*");
                 }
             }
         }
     }
 
     fn open<V: Render>(build: impl FnOnce(&mut Window, &mut App) -> Entity<V> + 'static, cx: &mut App) {
-        cx.open_window(WindowOptions::default(), build).expect("open the example window");
+        cx.open_window(WindowOptions::default(), build)
+            .expect("open the example window");
         cx.activate(true);
     }
 }
