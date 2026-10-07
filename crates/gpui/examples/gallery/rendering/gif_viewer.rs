@@ -18,7 +18,7 @@ struct GifViewer {
 impl Render for GifViewer {
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
         img(self.image.clone())
-            // Img keeps its frame index and last simulated tick in element state under this ID.
+            // A stable element ID preserves playback state across view redraws.
             .id("gif-viewer-image")
             .size_full()
             .object_fit(gpui::ObjectFit::Contain)

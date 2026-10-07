@@ -12,11 +12,7 @@ use gpui_platform::application;
 
 struct WindowShadow {}
 
-// Things to do:
-// 1. We need a way of calculating which edge or corner the mouse is on,
-//    and then dispatch on that
-// 2. We need to improve the shadow rendering significantly
-// 3. We need to implement the techniques in here in Zed
+// Client-side decorations paint their own shadow and map pointer positions to resize edges.
 
 impl Render for WindowShadow {
     fn render(&mut self, window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
