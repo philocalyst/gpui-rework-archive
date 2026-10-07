@@ -1,7 +1,7 @@
 //! Tests for the input composition. Require the `test-support` feature:
 //!
 //! ```sh
-//! cargo test -p gpui --example view_example --features test-support
+//! cargo test -p gpui-ce --example view_example --features test-support
 //! ```
 
 #[cfg(test)]
@@ -15,12 +15,12 @@ mod tests {
     /// Two inputs, each backed by an editor we own (so the test can focus and
     /// read them). Proves data flows through the shared `String` and that
     /// sibling inputs stay isolated.
-    struct Harness {
+    struct TwoInputs {
         a: Entity<Editor>,
         b: Entity<Editor>,
     }
 
-    impl Render for Harness {
+    impl Render for TwoInputs {
         fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
             gpui::div()
                 .child(Input::editor(self.a.clone()))
@@ -51,16 +51,16 @@ mod tests {
     ) {
         bind_keys(cx);
 
-        let (harness, cx) = cx.add_window_view(|window, cx| {
+        let (inputs, cx) = cx.add_window_view(|window, cx| {
             let a_value = cx.new(|_| String::new());
             let b_value = cx.new(|_| String::new());
             let a = cx.new(|cx| Editor::over(a_value, window, cx));
             let b = cx.new(|cx| Editor::over(b_value, window, cx));
-            Harness { a, b }
+            TwoInputs { a, b }
         });
 
-        let a = cx.read_entity(&harness, |h, _| h.a.clone());
-        let b = cx.read_entity(&harness, |h, _| h.b.clone());
+        let a = cx.read_entity(&inputs, |h, _| h.a.clone());
+        let b = cx.read_entity(&inputs, |h, _| h.b.clone());
         let a_value = cx.read_entity(&a, |e, _| e.value.clone());
         let b_value = cx.read_entity(&b, |e, _| e.value.clone());
 
@@ -127,5 +127,28 @@ mod tests {
 
         cx.simulate_keystrokes("left left");
         cx.read_entity(&editor, |editor, _| assert_eq!(editor.cursor, 1));
+    }
+    #[gpui::test]
+    fn editing_respects_graphemes_across_scripts_and_emoji(cx: &mut TestAppContext) {
+        let (editor, value, _, cx) = setup(cx);
+        for (initial, keys, expected, cursor) in [
+            ("日本", "left backspace", "本", 0),
+            ("ab👩🏽‍💻cd", "left left backspace", "abcd", 2),
+            ("e\u{301}x", "left backspace", "x", 0),
+            ("αβγ", "home delete end", "βγ", 4),
+        ] {
+            cx.update(|_, cx| {
+                value.update(cx, |value, cx| {
+                    value.clear();
+                    cx.notify();
+                })
+            });
+            cx.simulate_input(initial);
+            cx.simulate_keystrokes(keys);
+            cx.read_entity(&value, |value, _| {
+                assert_eq!(value, expected, "editing {initial:?} with {keys:?}")
+            });
+            cx.read_entity(&editor, |editor, _| assert_eq!(editor.cursor, cursor));
+        }
     }
 }

@@ -4,15 +4,10 @@
 #![cfg_attr(target_family = "wasm", no_main)]
 
 use gpui::colors::Colors;
-use gpui::{
-    App, Bounds, Context, FocusHandle, KeyBinding, Window, WindowBounds, WindowOptions, actions,
-    div, prelude::*, px, size,
-};
+use gpui::{App, Context, FocusHandle, KeyBinding, Window, actions, div, prelude::*, px, size};
 
 #[path = "../shared/prelude.rs"]
 mod example_prelude;
-#[path = "../example_support/fonts.rs"]
-mod example_support;
 
 actions!(keybinds_example, [Increment, Reset]);
 
@@ -73,34 +68,32 @@ impl Render for ActionsExample {
     }
 }
 
-fn run_example() {
-    gpui_platform::application().run(|cx| {
-        if !example_support::load_fonts(cx) {
-            return;
-        }
-
-        register_keybinds(cx);
-
-        let bounds = Bounds::centered(None, size(px(480.0), px(240.0)), cx);
-        cx.open_window(
-            WindowOptions::new().window_bounds(Some(WindowBounds::Windowed(bounds))),
-            |window, cx| cx.new(|cx| ActionsExample::new(window, cx)),
-        )
-        .expect("Failed to open window");
-
-        example_prelude::init_example(cx, "Actions and keybinds");
-    });
-}
-
 #[cfg(not(target_family = "wasm"))]
 fn main() {
-    env_logger::init();
-    run_example();
+    example_prelude::run_example(
+        "Actions and keybinds",
+        size(px(480.), px(240.)),
+        |window, cx| {
+            register_keybinds(cx);
+            cx.new(|cx| ActionsExample::new(window, cx))
+        },
+    );
 }
 
 #[cfg(target_family = "wasm")]
 #[wasm_bindgen::prelude::wasm_bindgen(start)]
 pub fn start() {
     gpui_platform::web_init();
-    run_example();
+    example_prelude::run_example(
+        "Actions and keybinds",
+        size(px(480.), px(240.)),
+        |window, cx| {
+            register_keybinds(cx);
+            cx.new(|cx| ActionsExample::new(window, cx))
+        },
+    );
 }
+
+#[cfg(all(test, feature = "test-support"))]
+#[path = "actions_and_keybinds/tests.rs"]
+mod tests;

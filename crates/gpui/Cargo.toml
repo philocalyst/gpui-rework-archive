@@ -153,7 +153,6 @@ windows-061 = { workspace = true, features = ["Win32_Graphics_Direct3D11"] }
 [dev-dependencies]
 accesskit_consumer.workspace = true
 backtrace.workspace = true
-smol.workspace = true
 collections = { workspace = true, features = ["test-support"] }
 env_logger.workspace = true
 gpui_ce_elements = { path = "../gpui_elements" }
@@ -165,6 +164,7 @@ scheduler = { workspace = true, features = ["test-support"] }
 
 [target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
 proptest = { workspace = true }
+smol.workspace = true
 
 [target.'cfg(target_family = "wasm")'.dev-dependencies]
 wasm-bindgen = { workspace = true }
@@ -192,8 +192,8 @@ ignored-paths = ["src/_ownership_and_data_flow.rs"]
 # ============================================================================
 
 [[example]]
-name = "interactive_elements"
-path = "examples/learn/interactive_elements.rs"
+name = "interaction"
+path = "examples/learn/interaction.rs"
 
 [[example]]
 name = "actions_and_keybinds"
@@ -212,10 +212,6 @@ name = "layout"
 path = "examples/learn/layout.rs"
 
 [[example]]
-name = "styling"
-path = "examples/learn/styling.rs"
-
-[[example]]
 name = "async_tasks"
 path = "examples/learn/async_tasks.rs"
 
@@ -232,117 +228,109 @@ name = "text"
 path = "examples/learn/text.rs"
 
 [[example]]
-name = "transitions"
-path = "examples/learn/transitions.rs"
-
-[[example]]
-name = "style_transitions"
-path = "examples/learn/style_transitions.rs"
-
-[[example]]
-name = "motion_showcase"
-path = "examples/learn/motion_showcase.rs"
-
-[[example]]
-name = "haptic_feedback"
-path = "examples/learn/haptic_feedback.rs"
-
-[[example]]
-name = "blur"
-path = "examples/learn/blur.rs"
-
-[[example]]
 name = "corner_smoothing"
 path = "examples/learn/corner_smoothing.rs"
 
 [[example]]
-name = "keyring"
-path = "examples/learn/keyring.rs"
+name = "direction"
+path = "examples/learn/direction.rs"
+
+# ==========================================================================
+# View composition examples
+# ==========================================================================
+
+[[example]]
+name = "view_example"
+path = "examples/view_example/view_example_main.rs"
 
 # ============================================================================
-# Bench Examples - Performance benchmarks
+# Stress Examples - bounded paint and data workloads
 # ============================================================================
 
 [[example]]
 name = "data_table"
-path = "examples/bench/data_table.rs"
+path = "examples/stress/data_table.rs"
 
 [[example]]
 name = "paths_bench"
-path = "examples/bench/paths_bench.rs"
+path = "examples/stress/paths_bench.rs"
 
 [[example]]
 name = "pattern"
-path = "examples/bench/pattern.rs"
+path = "examples/stress/pattern.rs"
 
 [[example]]
-name = "shadow"
-path = "examples/bench/shadow.rs"
+name = "shadows"
+path = "examples/stress/shadows.rs"
 
 # ============================================================================
-# Legacy Examples - Original examples (to be updated)
+# Gallery Examples - focused demonstrations by topic
 # ============================================================================
 
 [[example]]
-name = "focus_visible"
-path = "examples/legacy/focus_visible.rs"
+name = "input_states"
+path = "examples/gallery/interaction/input_states.rs"
 
 [[example]]
 name = "gif_viewer"
-path = "examples/legacy/gif_viewer.rs"
+path = "examples/gallery/rendering/gif_viewer.rs"
 
 [[example]]
-name = "gradient"
-path = "examples/legacy/gradient.rs"
+name = "render_effects"
+path = "examples/gallery/rendering/render_effects.rs"
 
 [[example]]
 name = "hello_world"
-path = "examples/legacy/hello_world.rs"
+path = "examples/gallery/basics/hello_world.rs"
 
 [[example]]
 name = "image_loading"
-path = "examples/legacy/image_loading.rs"
+path = "examples/gallery/rendering/image_loading.rs"
 
 [[example]]
 name = "inline_layout"
-path = "examples/legacy/inline_layout.rs"
-
-[[example]]
-name = "layer_shell"
-path = "examples/legacy/layer_shell.rs"
-
-[[example]]
-name = "on_window_close_quit"
-path = "examples/legacy/on_window_close_quit.rs"
-
-[[example]]
-name = "opacity"
-path = "examples/legacy/opacity.rs"
-
-[[example]]
-name = "scrollable"
-path = "examples/legacy/scrollable.rs"
+path = "examples/gallery/interaction/inline_layout.rs"
 
 [[example]]
 name = "svg"
-path = "examples/legacy/svg/svg.rs"
+path = "examples/gallery/rendering/svg.rs"
+
+# ==========================================================================
+# Text examples - text-system inspection and transforms
+# ==========================================================================
 
 [[example]]
-name = "tab_stop"
-path = "examples/legacy/tab_stop.rs"
+name = "text_system"
+path = "examples/text/text_system.rs"
+
+# ==========================================================================
+# Platform examples - native integration and window lifecycle
+# ==========================================================================
 
 [[example]]
-name = "tree"
-path = "examples/legacy/tree.rs"
+name = "haptic_feedback"
+path = "examples/platform/haptic_feedback.rs"
 
 [[example]]
-name = "window"
-path = "examples/legacy/window.rs"
+name = "keyring"
+path = "examples/platform/keyring.rs"
 
 [[example]]
-name = "window_positioning"
-path = "examples/legacy/window_positioning.rs"
+name = "layer_shell"
+path = "examples/platform/layer_shell.rs"
+
+[[example]]
+name = "windows"
+path = "examples/platform/windows.rs"
 
 [[example]]
 name = "window_shadow"
-path = "examples/legacy/window_shadow.rs"
+path = "examples/platform/window_shadow.rs"
+
+[[example]]
+name = "system_notifications"
+path = "examples/platform/system_notifications.rs"
+
+[[example]]
+name = "window_movable"
+path = "examples/platform/window_movable.rs"

@@ -1,80 +1,59 @@
-//! Scroll through 10,000 rows with a virtualized list.
-//! Each row has the same height, and GPUI requests the ranges needed for the viewport.
-
-#![cfg_attr(target_family = "wasm", no_main)]
-
-use gpui::colors::Colors;
-use gpui::{
-    App, Bounds, Context, Window, WindowBounds, WindowOptions, div, prelude::*, px, size,
-    uniform_list,
-};
-use gpui_platform::application;
+//! Render only the visible portion of a 10,000-row list, with stable row identities.
 
 #[path = "../shared/prelude.rs"]
 mod example_prelude;
-#[path = "../example_support/fonts.rs"]
-mod example_support;
 
-struct UniformListExample {}
+use gpui::{App, Context, Render, Window, div, prelude::*, px, rgb, size, uniform_list};
+
+struct UniformListExample;
 
 impl Render for UniformListExample {
-    fn render(&mut self, window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
-        let colors = Colors::for_appearance(window);
-
+    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
         div()
+            .size_full()
             .flex()
             .flex_col()
-            .gap_3()
-            .size_full()
-            .p_4()
-            .overflow_hidden()
-            .bg(colors.background)
-            .text_color(colors.text)
-            .child("10,000 rows. Scroll to see more.")
+            .gap_2()
+            .p_3()
+            .bg(rgb(0xf8fafc))
             .child(
-                uniform_list("items", 10_000, |range, _window, _cx| {
+                div()
+                    .text_lg()
+                    .font_weight(gpui::FontWeight::BOLD)
+                    .child("10,000 rows"),
+            )
+            // The callback receives only the visible range. IDs follow data identity so
+            // recycled rows keep the right element state while scrolling.
+            .child(
+                uniform_list("virtual-rows", 10_000, |range, _, _| {
                     range
                         .map(|index| {
+                            let color =
+                                [0x93c5fd, 0x86efac, 0xfda4af, 0xfcd34d, 0xc4b5fd, 0x67e8f9]
+                                    [index % 6];
                             div()
                                 .id(index)
-                                .h(px(24.0))
+                                .h(px(36.))
+                                .mb_1()
                                 .px_2()
-                                .child(format!("Item {index}"))
+                                .flex()
+                                .items_center()
+                                .gap_3()
+                                .bg(rgb(0xe2e8f0))
+                                .child(div().size(px(18.)).rounded_full().bg(rgb(color)))
+                                .child(format!("Row {index:05}"))
                         })
                         .collect()
                 })
-                .h(px(300.0))
-                .bg(colors.container),
+                .size_full(),
             )
     }
 }
 
-fn run_example() {
-    application().run(|cx: &mut App| {
-        if !example_support::load_fonts(cx) {
-            return;
-        }
-
-        let bounds = Bounds::centered(None, size(px(400.0), px(400.0)), cx);
-        cx.open_window(
-            WindowOptions::new().window_bounds(Some(WindowBounds::Windowed(bounds))),
-            |_window, cx| cx.new(|_cx| UniformListExample {}),
-        )
-        .expect("Failed to open window");
-
-        example_prelude::init_example(cx, "Virtualized lists");
-    });
-}
-
-#[cfg(not(target_family = "wasm"))]
 fn main() {
-    env_logger::init();
-    run_example();
-}
-
-#[cfg(target_family = "wasm")]
-#[wasm_bindgen::prelude::wasm_bindgen(start)]
-pub fn start() {
-    gpui_platform::web_init();
-    run_example();
+    example_prelude::run_example(
+        "Uniform list",
+        size(px(520.), px(580.)),
+        |_, cx: &mut App| cx.new(|_| UniformListExample),
+    );
 }

@@ -1,7 +1,7 @@
 <img src="assets/readme/banner.png" alt="GPUI Community Edition banner" width="100%">
 
 <p align="center">
-  <a href="https://gpui-ce.github.io">Website</a> ​ · ​ <a href="crates/gpui/examples/learn">Examples</a> ​ · ​ <a href="https://discord.gg/ENGHGjrYEn">Discord</a>
+  <a href="https://gpui-ce.github.io">Website</a> ​ · ​ <a href="crates/gpui/examples/README.md">Examples</a> ​ · ​ <a href="https://discord.gg/ENGHGjrYEn">Discord</a>
 </p>
 
 # GPUI - Community Edition
@@ -31,7 +31,7 @@ It's mostly API compatible with upstream, but that is changing!
       .child("Hello, GPUI")
   ```
 
-  [Layout example](crates/gpui/examples/learn/layout.rs) ​ · ​ [Styling example](crates/gpui/examples/learn/styling.rs)
+  [Layout example](crates/gpui/examples/learn/layout.rs) ​ · ​ [Rendering example](crates/gpui/examples/gallery/rendering/render_effects.rs)
 
 - State and events
 
@@ -47,7 +47,7 @@ It's mostly API compatible with upstream, but that is changing!
       }))
   ```
 
-  [Interaction example](crates/gpui/examples/learn/interactive_elements.rs)
+  [Interaction example](crates/gpui/examples/learn/interaction.rs)
 
 - Actions and keybinds
 

@@ -1,277 +1,148 @@
-//! Animation Example
-//!
-//! This example demonstrates animation capabilities in GPUI:
-//!
-//! 1. Basic animations with `with_animation`
-//! 2. Easing functions - ease_in_out, bounce, linear
-//! 3. Transformations - rotate, scale, translate
-//! 4. Repeating and duration controls
+//! Three animation mechanisms: automatic progress, explicit sampling, and style interpolation.
 
 #[path = "../shared/prelude.rs"]
 mod example_prelude;
 
-use std::time::Duration;
-
-use anyhow::Result;
-use gpui::colors::Colors;
 use gpui::{
-    Animation, AnimationExt as _, App, AssetSource, Bounds, ColorExt, Context, Hsla, SharedString,
-    Transformation, Window, WindowBounds, WindowOptions, bounce, div, ease_in_out, linear,
-    percentage, prelude::*, px, rgb, size as gpui_size, svg,
+    Animation, AnimationExt, Context, Motion, MotionDurationExt, MotionSample, Window, bounce, div,
+    ease_in_out, millis, prelude::*, px, rgb, size,
 };
-use palette::IntoColor;
+use std::time::Instant;
 
-struct Assets {}
+#[derive(Default)]
+struct AnimationLesson {
+    motion_start: Option<Instant>,
+    bounce_generation: usize,
+}
 
-impl AssetSource for Assets {
-    fn load(&self, path: &str) -> Result<Option<std::borrow::Cow<'static, [u8]>>> {
-        std::fs::read(path)
-            .map(Into::into)
-            .map_err(Into::into)
-            .map(Some)
+impl AnimationLesson {
+    fn new(_cx: &mut Context<Self>) -> Self {
+        Self::default()
     }
 
-    fn list(&self, path: &str) -> Result<Vec<SharedString>> {
-        Ok(std::fs::read_dir(path)?
-            .filter_map(|entry| {
-                Some(SharedString::from(
-                    entry.ok()?.path().to_string_lossy().into_owned(),
-                ))
-            })
-            .collect::<Vec<_>>())
+    fn sample_motion(&self, now: Instant) -> Option<MotionSample> {
+        self.motion_start.map(|started| {
+            Motion::new(millis(900))
+                .with_easing(ease_in_out)
+                .sample(now.saturating_duration_since(started))
+        })
     }
 }
 
-const ARROW_CIRCLE_SVG: &str = concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/examples/legacy/image/arrow_circle.svg"
-);
-
-struct AnimationExample;
-
-impl Render for AnimationExample {
-    fn render(&mut self, window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
-        let colors = Colors::for_appearance(window);
+impl Render for AnimationLesson {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        // Sample the dispatcher clock, rather than frame count, so speed does not depend on FPS.
+        let sample = self.sample_motion(cx.background_executor().now());
+        if sample.is_some_and(|sample| sample.is_active) {
+            window.request_animation_frame();
+        }
+        let progress = sample.map_or(0., |sample| sample.progress.get());
 
         div()
-            .id("main")
             .size_full()
-            .p_6()
-            .bg(colors.background)
-            .overflow_scroll()
-            .child(
+            .p_5()
+            .flex()
+            .flex_col()
+            .gap_4()
+            .bg(rgb(0xf1f3f6))
+            .child(row(
+                "Animation: automatically requests frames",
+                track().child(
+                    marker().with_animation(
+                        "repeat",
+                        Animation::new(millis(1200))
+                            .repeat()
+                            .with_easing(ease_in_out),
+                        |marker, progress| marker.left(px(200. * progress)),
+                    ),
+                ),
+            ))
+            .child(row(
+                "Motion: sample and request frames yourself",
                 div()
                     .flex()
-                    .flex_col()
-                    .gap_6()
-                    .max_w(px(600.))
+                    .gap_3()
+                    .child(track().child(marker().left(px(200. * progress))))
                     .child(
-                        div()
-                            .flex()
-                            .flex_col()
-                            .gap_1()
-                            .child(
-                                div()
-                                    .text_xl()
-                                    .font_weight(gpui::FontWeight::BOLD)
-                                    .text_color(colors.text)
-                                    .child("Animation Patterns"),
-                            )
-                            .child(
-                                div()
-                                    .text_sm()
-                                    .text_color(colors.disabled)
-                                    .child("Animations, easing, and transformations in GPUI"),
-                            ),
-                    )
-                    .child(section(
-                        &colors,
-                        "Rotation Animation",
-                        rotation_example(&colors),
-                    ))
-                    .child(section(&colors, "Bounce Easing", bounce_example(&colors)))
-                    .child(section(&colors, "Scale Animation", scale_example(&colors)))
-                    .child(section(
-                        &colors,
-                        "Combined Animations",
-                        combined_example(&colors),
-                    )),
-            )
+                        control("play-motion", "Play / restart").on_click(cx.listener(
+                            |this, _, _, cx| {
+                                this.motion_start = Some(cx.background_executor().now());
+                                cx.notify();
+                            },
+                        )),
+                    ),
+            ))
+            .child(row(
+                "A new key restarts animation state",
+                div()
+                    .flex()
+                    .gap_3()
+                    .child(track().child(marker().with_animation(
+                        ("bounce", self.bounce_generation),
+                        Animation::new(millis(900)).with_easing(bounce(ease_in_out)),
+                        |marker, progress| marker.left(px(200. * progress)),
+                    )))
+                    .child(
+                        control("keyed-bounce", "Replay bounce").on_click(cx.listener(
+                            |this, _, _, cx| {
+                                this.bounce_generation += 1;
+                                cx.notify();
+                            },
+                        )),
+                    ),
+            ))
+            .child(row(
+                "Transitions interpolate hover and pressed styles",
+                control("style-transition", "Hover and press")
+                    .transitions(|transition| {
+                        transition
+                            .bg(millis(200).with_easing(ease_in_out))
+                            .p(gpui::spring(600., 22., 1.))
+                    })
+                    .hover(|style| style.bg(rgb(0x26785c)).p(px(20.)))
+                    .active(|style| style.bg(rgb(0x164d3a))),
+            ))
     }
 }
 
-fn rotation_example(colors: &Colors) -> impl IntoElement {
-    let text_muted = colors.disabled;
-    let accent = colors.selected;
-
-    div()
-        .flex()
-        .flex_col()
-        .gap_3()
-        .child(
-            div()
-                .text_xs()
-                .text_color(text_muted)
-                .child("Continuous rotation with ease_in_out easing"),
-        )
-        .child(
-            div().flex().items_center().justify_center().h_24().child(
-                svg()
-                    .size_16()
-                    .overflow_hidden()
-                    .path(ARROW_CIRCLE_SVG)
-                    .text_color(accent)
-                    .with_animation(
-                        "rotation",
-                        Animation::new(Duration::from_secs(2))
-                            .repeat()
-                            .with_easing(ease_in_out),
-                        |svg, delta| {
-                            svg.with_transformation(Transformation::rotate(percentage(delta)))
-                        },
-                    ),
-            ),
-        )
+fn row(label: &'static str, content: impl IntoElement) -> impl IntoElement {
+    div().flex().flex_col().gap_2().child(label).child(content)
 }
-
-fn bounce_example(colors: &Colors) -> impl IntoElement {
-    let text_muted = colors.disabled;
-    let success = rgb(0x388e3c);
-
+fn track() -> gpui::Div {
     div()
-        .flex()
-        .flex_col()
-        .gap_3()
-        .child(
-            div()
-                .text_xs()
-                .text_color(text_muted)
-                .child("Bouncing rotation with bounce(ease_in_out)"),
-        )
-        .child(
-            div().flex().items_center().justify_center().h_24().child(
-                svg()
-                    .size_16()
-                    .overflow_hidden()
-                    .path(ARROW_CIRCLE_SVG)
-                    .text_color(success)
-                    .with_animation(
-                        "bounce_rotation",
-                        Animation::new(Duration::from_secs(2))
-                            .repeat()
-                            .with_easing(bounce(ease_in_out)),
-                        |svg, delta| {
-                            svg.with_transformation(Transformation::rotate(percentage(delta)))
-                        },
-                    ),
-            ),
-        )
+        .relative()
+        .w(px(240.))
+        .h(px(40.))
+        .rounded_md()
+        .bg(rgb(0xe2e8f0))
 }
-
-fn scale_example(colors: &Colors) -> impl IntoElement {
-    let text_muted = colors.disabled;
-    let warning = rgb(0xf9a825);
-
+fn marker() -> gpui::Div {
     div()
-        .flex()
-        .flex_col()
-        .gap_3()
-        .child(
-            div()
-                .text_xs()
-                .text_color(text_muted)
-                .child("Scale pulsing with linear easing"),
-        )
-        .child(
-            div().flex().items_center().justify_center().h_24().child(
-                svg()
-                    .size_16()
-                    .overflow_hidden()
-                    .path(ARROW_CIRCLE_SVG)
-                    .text_color(warning)
-                    .with_animation(
-                        "scale",
-                        Animation::new(Duration::from_millis(1500))
-                            .repeat()
-                            .with_easing(bounce(linear)),
-                        |svg, delta| {
-                            let scale = 0.8 + (delta * 0.4);
-                            svg.with_transformation(Transformation::scale(gpui_size(scale, scale)))
-                        },
-                    ),
-            ),
-        )
+        .absolute()
+        .top(px(5.))
+        .size(px(30.))
+        .rounded_full()
+        .bg(rgb(0x3478c8))
 }
-
-fn combined_example(colors: &Colors) -> impl IntoElement {
-    let text_muted = colors.disabled;
-    let error = rgb(0xd32f2f);
-
+fn control(id: &'static str, label: &'static str) -> gpui::Stateful<gpui::Div> {
     div()
-        .flex()
-        .flex_col()
-        .gap_3()
-        .child(
-            div()
-                .text_xs()
-                .text_color(text_muted)
-                .child("Rotation + scale combined"),
-        )
-        .child(
-            div().flex().items_center().justify_center().h_24().child(
-                svg()
-                    .size_16()
-                    .overflow_hidden()
-                    .path(ARROW_CIRCLE_SVG)
-                    .text_color(error)
-                    .with_animation(
-                        "combined",
-                        Animation::new(Duration::from_secs(3))
-                            .repeat()
-                            .with_easing(ease_in_out),
-                        |svg, delta| {
-                            let scale = 0.7 + (delta * 0.6);
-                            svg.with_transformation(
-                                Transformation::rotate(percentage(delta))
-                                    .with_scaling(gpui_size(scale, scale)),
-                            )
-                        },
-                    ),
-            ),
-        )
-}
-
-fn section(colors: &Colors, title: &'static str, content: impl IntoElement) -> impl IntoElement {
-    let surface: Hsla = colors.container.into_color();
-
-    div()
-        .flex()
-        .flex_col()
-        .gap_2()
-        .p_4()
-        .bg(surface.opacity(0.5))
-        .rounded_lg()
-        .child(
-            div()
-                .text_sm()
-                .font_weight(gpui::FontWeight::SEMIBOLD)
-                .text_color(colors.text)
-                .child(title),
-        )
-        .child(content)
+        .id(id)
+        .debug_selector(|| id.into())
+        .px_3()
+        .py_2()
+        .rounded_md()
+        .bg(rgb(0x3478c8))
+        .text_color(rgb(0xffffff))
+        .cursor_pointer()
+        .child(label)
 }
 
 fn main() {
-    gpui_platform::application()
-        .with_assets(Assets {})
-        .run(|cx: &mut App| {
-            let bounds = Bounds::centered(None, gpui_size(px(500.), px(650.)), cx);
-            cx.open_window(
-                WindowOptions::new().window_bounds(Some(WindowBounds::Windowed(bounds))),
-                |_, cx| cx.new(|_| AnimationExample),
-            )
-            .expect("Failed to open window");
-
-            example_prelude::init_example(cx, "Animation");
-        });
+    example_prelude::run_example("Animation", size(px(640.), px(420.)), |_, cx| {
+        cx.new(AnimationLesson::new)
+    });
 }
+
+#[cfg(all(test, feature = "test-support"))]
+#[path = "animation/tests.rs"]
+mod tests;

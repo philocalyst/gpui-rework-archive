@@ -78,11 +78,11 @@ check-wasm-atomics:
         cargo +nightly -Zbuild-std=std,panic_abort check --target wasm32-unknown-unknown -p gpui_ce_platform
     }
 
-[doc('Check examples + WASM web package — requires wasm32-unknown-unknown target to be installed')]
+[doc('Test examples + check WASM web package — requires wasm32-unknown-unknown target')]
 [group('build')]
 check-examples:
     @echo "📐 Checking examples..."
-    cargo build --package gpui-ce --examples
+    cargo test --package gpui-ce --examples --features test-support
     cargo check --package gpui_ce_web --target wasm32-unknown-unknown --no-default-features
 
 
@@ -223,7 +223,7 @@ ci:
             skip "WASM atomics" "rustup not installed (required for +nightly)"
         })
         (run-check "check examples" {
-            cargo build --package gpui-ce --examples
+            cargo test --package gpui-ce --examples --features test-support
             cargo check --package gpui_ce_web --target wasm32-unknown-unknown
         })
         (if (available "typos") { run-check "typos" { typos } } else { skip "typos" "not installed" })
