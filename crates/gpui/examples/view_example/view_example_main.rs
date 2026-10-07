@@ -125,7 +125,7 @@ fn section(title: &str) -> Div {
 }
 
 fn view_scenario() -> anyhow::Result<gpui_test::Scenario<ViewExample>> {
-    Ok(gpui_test::Scenario::new(
+    gpui_test::Scenario::new(
         "view-example",
         "Composed text inputs and text areas",
         size(px(560.), px(480.)),
@@ -148,7 +148,7 @@ fn view_scenario() -> anyhow::Result<gpui_test::Scenario<ViewExample>> {
         "initial",
         "String-backed and editor-backed fields",
         Duration::ZERO,
-    )?)
+    )
 }
 
 #[cfg(not(target_family = "wasm"))]

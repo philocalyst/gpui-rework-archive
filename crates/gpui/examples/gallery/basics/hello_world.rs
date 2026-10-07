@@ -50,7 +50,7 @@ impl Render for HelloWorld {
 }
 
 fn hello_scenario() -> anyhow::Result<gpui_test::Scenario<HelloWorld>> {
-    Ok(gpui_test::Scenario::new(
+    gpui_test::Scenario::new(
         "hello-world",
         "Hello World",
         size(px(500.), px(500.)),
@@ -60,7 +60,7 @@ fn hello_scenario() -> anyhow::Result<gpui_test::Scenario<HelloWorld>> {
             })
         },
     )?
-    .checkpoint("default", "First window", Duration::ZERO)?)
+    .checkpoint("default", "First window", Duration::ZERO)
 }
 
 #[cfg(not(target_family = "wasm"))]

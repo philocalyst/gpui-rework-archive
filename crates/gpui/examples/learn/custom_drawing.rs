@@ -398,7 +398,7 @@ fn section(
 }
 
 fn drawing_scenario() -> anyhow::Result<gpui_test::Scenario<CustomDrawingExample>> {
-    Ok(gpui_test::Scenario::new(
+    gpui_test::Scenario::new(
         "custom-drawing",
         "Custom drawing",
         size(px(550.), px(800.)),
@@ -467,7 +467,7 @@ fn drawing_scenario() -> anyhow::Result<gpui_test::Scenario<CustomDrawingExample
                 Ok(())
             })
         },
-    )?)
+    )
 }
 
 fn main() {

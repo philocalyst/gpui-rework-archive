@@ -437,7 +437,7 @@ fn focus_button(id: &'static str, handle: &FocusHandle) -> gpui::Stateful<gpui::
 }
 
 fn lesson_scenario() -> anyhow::Result<gpui_test::Scenario<InteractionLesson>> {
-    Ok(gpui_test::Scenario::new(
+    gpui_test::Scenario::new(
         "interaction-lesson",
         "Pointer, hover, focus, and drag/drop",
         size(px(780.), px(700.)),
@@ -661,7 +661,7 @@ fn lesson_scenario() -> anyhow::Result<gpui_test::Scenario<InteractionLesson>> {
             );
             Ok(())
         },
-    )?)
+    )
 }
 
 fn send_key(

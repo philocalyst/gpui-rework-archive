@@ -160,7 +160,7 @@ impl Render for ImageLoading {
 }
 
 fn image_loading_scenario() -> anyhow::Result<gpui_test::Scenario<ImageLoading>> {
-    Ok(gpui_test::Scenario::new(
+    gpui_test::Scenario::new(
         "image-loading",
         "Image loading states",
         gpui::size(px(520.), px(320.)),
@@ -209,7 +209,7 @@ fn image_loading_scenario() -> anyhow::Result<gpui_test::Scenario<ImageLoading>>
             );
             Ok(())
         },
-    )?)
+    )
 }
 
 fn main() {

@@ -216,7 +216,7 @@ fn main() {
 }
 
 fn lesson_scenario() -> anyhow::Result<Scenario<AnimationLesson>> {
-    Ok(Scenario::new(
+    Scenario::new(
         "animation",
         "Animation",
         size(px(720.), px(640.)),
@@ -352,7 +352,7 @@ fn lesson_scenario() -> anyhow::Result<Scenario<AnimationLesson>> {
             anyhow::ensure!(progress == 0., "keyed bounce restart began at {progress}");
             Ok(())
         },
-    )?)
+    )
 }
 
 #[cfg(test)]

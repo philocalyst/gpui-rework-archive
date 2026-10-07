@@ -73,7 +73,7 @@ impl Render for ActionsExample {
 }
 
 fn actions_scenario() -> anyhow::Result<gpui_test::Scenario<ActionsExample>> {
-    Ok(gpui_test::Scenario::new(
+    gpui_test::Scenario::new(
         "actions-and-keybinds",
         "Actions and keybinds",
         size(px(480.), px(240.)),
@@ -118,7 +118,7 @@ fn actions_scenario() -> anyhow::Result<gpui_test::Scenario<ActionsExample>> {
             anyhow::ensure!(view.read_with(cx, |view, _| view.count) == 0);
             Ok(())
         },
-    )?)
+    )
 }
 
 #[cfg(not(target_family = "wasm"))]

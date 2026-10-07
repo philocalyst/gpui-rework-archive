@@ -25,11 +25,14 @@ impl Render for GifViewer {
 }
 
 fn gif_scenario() -> anyhow::Result<gpui_test::Scenario<GifViewer>> {
-    Ok(gpui_test::Scenario::new(
+    gpui_test::Scenario::new(
         "gif-viewer",
         "Animated GIF",
         size(px(640.), px(480.)),
-        |_, cx: &mut App| {
+        |window, cx: &mut App| {
+            // Image animation is paused in inactive windows; activate captures just as a native
+            // window does so fixed-clock checkpoints can observe real frame changes.
+            window.activate();
             // Decode the embedded bytes once so the simulated image clock starts on first paint.
             let resource = gpui::Resource::Embedded("images/typing-cat.gif".into());
             let image = futures::executor::block_on(ImageAssetLoader::load(resource, cx))
@@ -47,7 +50,7 @@ fn gif_scenario() -> anyhow::Result<gpui_test::Scenario<GifViewer>> {
         "loop",
         "Animation returns after a full cycle",
         Duration::from_secs(1),
-    )?)
+    )
 }
 
 #[cfg(not(target_family = "wasm"))]

@@ -89,13 +89,13 @@ impl Render for PatternExample {
 }
 
 fn pattern_scenario() -> anyhow::Result<gpui_test::Scenario<PatternExample>> {
-    Ok(gpui_test::Scenario::new(
+    gpui_test::Scenario::new(
         "pattern-fills",
         "Pattern fills",
         gpui::size(gpui::px(600.), gpui::px(600.)),
         |_, cx: &mut App| cx.new(|_| PatternExample),
     )?
-    .checkpoint("default", "Pattern and gradient fills", Duration::ZERO)?)
+    .checkpoint("default", "Pattern and gradient fills", Duration::ZERO)
 }
 
 #[cfg(not(target_family = "wasm"))]

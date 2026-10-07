@@ -134,7 +134,7 @@ impl Render for PaintingViewer {
 }
 
 fn path_scenario() -> anyhow::Result<gpui_test::Scenario<PaintingViewer>> {
-    Ok(gpui_test::Scenario::new(
+    gpui_test::Scenario::new(
         "path-rendering-stress",
         "Path rendering stress",
         size(px(1024.), px(768.)),
@@ -144,7 +144,7 @@ fn path_scenario() -> anyhow::Result<gpui_test::Scenario<PaintingViewer>> {
         "default",
         "256 concave, curved, and stroked paths",
         Duration::ZERO,
-    )?)
+    )
 }
 
 #[cfg(not(target_family = "wasm"))]

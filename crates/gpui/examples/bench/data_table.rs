@@ -233,7 +233,7 @@ impl Render for DataTable {
 }
 
 fn scenario() -> anyhow::Result<gpui_test::Scenario<DataTable>> {
-    Ok(gpui_test::Scenario::new(
+    gpui_test::Scenario::new(
         "data-table",
         "Data table",
         size(px(920.), px(600.)),
@@ -355,7 +355,7 @@ fn scenario() -> anyhow::Result<gpui_test::Scenario<DataTable>> {
             );
             Ok(())
         },
-    )?)
+    )
 }
 
 fn main() {

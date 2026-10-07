@@ -147,7 +147,7 @@ impl Render for CornerSmoothingExample {
 }
 
 fn smoothing_scenario() -> anyhow::Result<gpui_test::Scenario<CornerSmoothingExample>> {
-    Ok(gpui_test::Scenario::new(
+    gpui_test::Scenario::new(
         "corner-smoothing",
         "Corner smoothing",
         size(px(500.), px(650.)),
@@ -186,7 +186,7 @@ fn smoothing_scenario() -> anyhow::Result<gpui_test::Scenario<CornerSmoothingExa
             anyhow::ensure!(radius <= MIN_SIZE / 2., "radius was not clamped: {radius}");
             Ok(())
         },
-    )?)
+    )
 }
 
 fn main() {

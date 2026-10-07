@@ -459,7 +459,7 @@ impl Render for TextSystemExample {
 }
 
 fn text_system_scenario() -> anyhow::Result<gpui_test::Scenario<TextSystemExample>> {
-    Ok(gpui_test::Scenario::new(
+    gpui_test::Scenario::new(
         "text-system",
         "Text system",
         size(px(1000.), px(900.)),
@@ -469,7 +469,7 @@ fn text_system_scenario() -> anyhow::Result<gpui_test::Scenario<TextSystemExampl
         "default",
         "Font, fallback, and layout gallery",
         Duration::ZERO,
-    )?)
+    )
 }
 
 fn main() {
