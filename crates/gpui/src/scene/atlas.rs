@@ -66,9 +66,11 @@ impl SceneAtlas {
             "captured bitmap kind does not match texture id"
         );
         bitmap.validate()?;
+        let next_index = texture_id.index.checked_add(1)
+            .context("captured texture index cannot be incremented")?;
         let mut data = self.data.lock().unwrap();
         data.next_by_kind[kind_slot(texture_id.kind)] =
-            data.next_by_kind[kind_slot(texture_id.kind)].max(texture_id.index + 1);
+            data.next_by_kind[kind_slot(texture_id.kind)].max(next_index);
         data.bytes += bitmap.bytes.len();
         if let Some(previous) = data.bitmaps.insert(texture_id, Arc::new(bitmap)) {
             data.bytes -= previous.bytes.len();

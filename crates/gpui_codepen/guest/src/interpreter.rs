@@ -90,7 +90,7 @@ pub fn run<V: Render + 'static>(build: impl FnOnce(&mut Window, &mut App) -> Ent
                 };
                 if window.background_appearance() != background {
                     window.set_background_appearance(background);
-                    cx.refresh();
+                    cx.refresh_windows();
                 }
             })
             .expect("GPUI text coverage policy");

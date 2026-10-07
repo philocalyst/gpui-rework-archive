@@ -66,8 +66,14 @@ pub const SUBPIXEL_VARIANTS_Y: u8 = 1;
 /// The GPUI text rendering sub system.
 pub struct TextSystem {
     platform_text_system: Arc<dyn PlatformTextSystem>,
-    font_ids_by_font: RwLock<FxHashMap<Font, Result<FontId>>>,
+    font_ids_by_font: RwLock<FontLookupCache>,
     font_metrics: RwLock<FxHashMap<FontId, FontMetrics>>,
+}
+
+#[derive(Default)]
+struct FontLookupCache {
+    generation: u64,
+    ids: FxHashMap<Font, Result<FontId>>,
 }
 
 impl TextSystem {
@@ -99,7 +105,8 @@ impl TextSystem {
         // repopulate a stale miss after the newly registered fonts become available.
         let mut font_ids = self.font_ids_by_font.write();
         let result = self.platform_text_system.add_fonts(fonts);
-        font_ids.clear();
+        font_ids.ids.clear();
+        font_ids.generation = self.platform_text_system.font_generation();
         result
     }
 
@@ -112,21 +119,34 @@ impl TextSystem {
             }
         }
 
-        let font_id = self
-            .font_ids_by_font
-            .read()
-            .get(font)
-            .map(clone_font_id_result);
+        let generation = self.platform_text_system.font_generation();
+        let font_id = {
+            let cache = self.font_ids_by_font.read();
+            (cache.generation == generation)
+                .then(|| cache.ids.get(font).map(clone_font_id_result))
+                .flatten()
+        };
         if let Some(font_id) = font_id {
             font_id
         } else {
             let mut font_ids = self.font_ids_by_font.write();
-            if let Some(font_id) = font_ids.get(font) {
-                return clone_font_id_result(font_id);
+            loop {
+                let generation = self.platform_text_system.font_generation();
+                if font_ids.generation != generation {
+                    font_ids.ids.clear();
+                    font_ids.generation = generation;
+                }
+                if let Some(font_id) = font_ids.ids.get(font) {
+                    return clone_font_id_result(font_id);
+                }
+                let font_id = self.platform_text_system.font_id(font);
+                // The backend may be shared with a preview worker registering fonts.
+                if self.platform_text_system.font_generation() != generation {
+                    continue;
+                }
+                font_ids.ids.insert(font.clone(), clone_font_id_result(&font_id));
+                return font_id;
             }
-            let font_id = self.platform_text_system.font_id(font);
-            font_ids.insert(font.clone(), clone_font_id_result(&font_id));
-            font_id
         }
     }
 

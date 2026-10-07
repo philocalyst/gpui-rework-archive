@@ -63,6 +63,9 @@ impl Session {
         }
     }
     pub fn reset(&mut self) {
+        self.generation = self.generation.wrapping_add(1);
+        self.running = false;
+        self.elapsed_ms = 0;
         self.frame = None;
         self.diagnostics.clear();
     }
