@@ -31,7 +31,16 @@ pub(super) fn write_markdown(manifest: &ReportManifest, output_dir: &Path) -> Re
                     m.primitive_count,
                     m.batch_count,
                     m.bitmap_storage_bytes,
-                    status_name(checkpoint.status),
+                    if checkpoint.status == ReportStatus::Unchanged
+                        && checkpoint
+                            .motion
+                            .as_ref()
+                            .is_some_and(|motion| motion.difference.changed_pixels > 0)
+                    {
+                        "motion changed"
+                    } else {
+                        status_name(checkpoint.status)
+                    },
                 ));
             }
         }
@@ -68,7 +77,7 @@ pub(super) fn write_markdown(manifest: &ReportManifest, output_dir: &Path) -> Re
         })
         .collect();
     if !visual_changes.is_empty() {
-        md.push_str("\n## Image and transition differences\n\nExact RGBA errors include transparent extent changes. Visible errors use premultiplied color and alpha. Transition errors compare signed frame deltas, including extent, between adjacent matched checkpoints.\n\n| Checkpoint | Exact pixels | Visible pixels | Transition pixels | Baseline/current interval (ms) | Exact bounds |\n|---|---:|---:|---:|---:|---|\n");
+        md.push_str("\n## Image and transition differences\n\nExact RGBA errors include transparent extent changes. Visible errors use premultiplied color and alpha. Transition errors compare signed frame deltas, including extent, between adjacent matched checkpoints.\n\n| Checkpoint | Exact pixels | Visible pixels | Transition pixels | Baseline/current interval (ms) | Change bounds | Images |\n|---|---:|---:|---:|---:|---|---|\n");
         for (scenario, checkpoint) in visual_changes {
             let difference = checkpoint.difference.as_ref();
             let exact = difference
@@ -86,7 +95,13 @@ pub(super) fn write_markdown(manifest: &ReportManifest, output_dir: &Path) -> Re
                         .as_ref()
                         .map(|v| pixel_change(v.changed_pixels, d.total_pixels))
                 })
-                .unwrap_or_else(|| "n/a".into());
+                .unwrap_or_else(|| {
+                    if checkpoint.pixels_changed == Some(false) {
+                        "0".into()
+                    } else {
+                        "n/a".into()
+                    }
+                });
             let motion = checkpoint.motion.as_ref();
             let transition = motion
                 .map(|m| pixel_change(m.difference.changed_pixels, m.difference.total_pixels))
@@ -102,9 +117,23 @@ pub(super) fn write_markdown(manifest: &ReportManifest, output_dir: &Path) -> Re
                 .unwrap_or_else(|| "n/a".into());
             let bounds = difference
                 .and_then(|d| d.bounds)
+                .or_else(|| motion.and_then(|m| m.difference.bounds))
                 .map(|b| format!("{},{} {}×{}", b.x, b.y, b.width, b.height))
                 .unwrap_or_else(|| "none".into());
-            md.push_str(&format!("| [{} / {}](index.html#{}%2F{}) | {exact} | {visible} | {transition} | {interval} | {bounds} |\n", scenario.id, checkpoint.id, scenario.id, checkpoint.id));
+            let images = [
+                ("exact", checkpoint.diff_png.as_ref()),
+                ("magnitude", checkpoint.heatmap_png.as_ref()),
+                ("transition", motion.and_then(|m| m.diff_png.as_ref())),
+                (
+                    "transition magnitude",
+                    motion.and_then(|m| m.heatmap_png.as_ref()),
+                ),
+            ]
+            .into_iter()
+            .filter_map(|(label, path)| path.map(|path| format!("[{label}]({path})")))
+            .collect::<Vec<_>>()
+            .join(" · ");
+            md.push_str(&format!("| [{} / {}](index.html#{}%2F{}) | {exact} | {visible} | {transition} | {interval} | {bounds} | {images} |\n", scenario.id, checkpoint.id, scenario.id, checkpoint.id));
         }
     }
     if let Some(adapter) = &manifest.native_replay {

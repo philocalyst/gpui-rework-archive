@@ -77,6 +77,15 @@ pub struct MotionDifference {
     pub bounds: Option<PixelRegion>,
 }
 
+/// Pixel-motion statistics paired with a transition-difference visualization.
+#[derive(Clone, Debug)]
+pub struct TransitionComparison {
+    /// The exact transition mask or magnitude heatmap over the current frame.
+    pub image: image::RgbaImage,
+    /// Visible motion and frame-extent difference statistics.
+    pub difference: MotionDifference,
+}
+
 /// Compare two straight-alpha RGBA images without resizing either input.
 ///
 /// Pixels outside either input's bounds are treated as transparent black. Exact statistics count
@@ -191,6 +200,75 @@ pub fn compare_transitions(
     previous_current: &image::RgbaImage,
     current: &image::RgbaImage,
 ) -> MotionDifference {
+    compare_transitions_with(
+        previous_before,
+        before,
+        previous_current,
+        current,
+        |_, _, _, _| {},
+    )
+}
+
+/// Compare and visualize visible motion between two pairs of frames.
+///
+/// Exact mode marks every pixel whose visible frame-to-frame delta or image extent differs.
+/// Magnitude mode blends red in proportion to the largest per-channel motion error, scaled over
+/// the full 0–510 range. Both modes show the current image over the standard checker context.
+pub fn compare_transition_images(
+    previous_before: &image::RgbaImage,
+    before: &image::RgbaImage,
+    previous_current: &image::RgbaImage,
+    current: &image::RgbaImage,
+    mode: DiffMode,
+) -> TransitionComparison {
+    let width = previous_before
+        .width()
+        .max(before.width())
+        .max(previous_current.width())
+        .max(current.width());
+    let height = previous_before
+        .height()
+        .max(before.height())
+        .max(previous_current.height())
+        .max(current.height());
+    let mut image = image::RgbaImage::new(width, height);
+    let difference = compare_transitions_with(
+        previous_before,
+        before,
+        previous_current,
+        current,
+        |x, y, changed, error| {
+            let context = composite_over_checker(
+                current
+                    .get_pixel_checked(x, y)
+                    .map(|pixel| pixel.0)
+                    .unwrap_or([0; 4]),
+                x,
+                y,
+            );
+            image.put_pixel(
+                x,
+                y,
+                match mode {
+                    DiffMode::Exact if changed => image::Rgba([255, 32, 32, 255]),
+                    DiffMode::Magnitude if error > 0.0 => {
+                        blend_red(context, (error / 510.0).sqrt())
+                    }
+                    _ => context,
+                },
+            );
+        },
+    );
+    TransitionComparison { image, difference }
+}
+
+fn compare_transitions_with(
+    previous_before: &image::RgbaImage,
+    before: &image::RgbaImage,
+    previous_current: &image::RgbaImage,
+    current: &image::RgbaImage,
+    mut visit_pixel: impl FnMut(u32, u32, bool, f64),
+) -> MotionDifference {
     let width = previous_before
         .width()
         .max(before.width())
@@ -217,6 +295,7 @@ pub fn compare_transitions(
             let previous_current_value = previous_current_pixel.map(|p| p.0).unwrap_or([0; 4]);
             let current_value = current_pixel.map(|p| p.0).unwrap_or([0; 4]);
             let mut pixel_changed = false;
+            let mut pixel_error = 0.0f64;
 
             for channel in 0..4 {
                 let before_delta = premultiplied_channel(before_value, channel)
@@ -227,6 +306,7 @@ pub fn compare_transitions(
                 // motion must stay exactly equal rather than accumulate floating-point noise.
                 let error = f64::from((before_delta - current_delta).unsigned_abs()) / 255.0;
                 pixel_changed |= error > 0.0;
+                pixel_error = pixel_error.max(error);
                 max_channel_error = max_channel_error.max(error);
                 channel_error_sum += error;
             }
@@ -238,8 +318,11 @@ pub fn compare_transitions(
             let extent_error =
                 f64::from(before_extent_delta.abs_diff(current_extent_delta)) * 255.0;
             pixel_changed |= extent_error > 0.0;
+            pixel_error = pixel_error.max(extent_error);
             max_channel_error = max_channel_error.max(extent_error);
             channel_error_sum += extent_error;
+
+            visit_pixel(x, y, pixel_changed, pixel_error);
 
             if pixel_changed {
                 changed_pixels += 1;
@@ -311,7 +394,7 @@ fn mean(sum: f64, total_channels: u64) -> f64 {
 
 #[cfg(test)]
 mod tests {
-    use super::{DiffMode, compare_images, compare_transitions};
+    use super::{DiffMode, compare_images, compare_transition_images, compare_transitions};
     use crate::ImageDifference;
     use image::{Rgba, RgbaImage};
     use proptest::prelude::*;
@@ -476,6 +559,108 @@ mod tests {
         let motion = compare_transitions(&previous_before, &before, &previous_current, &current);
         assert_eq!(motion.changed_pixels, 1);
         assert_eq!(motion.max_channel_error, 510.0);
+    }
+
+    #[test]
+    fn transition_visualization_marks_motion_and_transparent_extent() {
+        let previous_before = RgbaImage::from_pixel(2, 1, Rgba([0, 0, 0, 255]));
+        let mut before = previous_before.clone();
+        before.put_pixel(0, 0, Rgba([80, 0, 0, 255]));
+        let previous_current = previous_before.clone();
+        let mut current = previous_current.clone();
+        current.put_pixel(0, 0, Rgba([40, 0, 0, 255]));
+
+        let motion = compare_transition_images(
+            &previous_before,
+            &before,
+            &previous_current,
+            &current,
+            DiffMode::Exact,
+        );
+        assert_eq!(motion.difference.changed_pixels, 1);
+        assert_eq!(motion.image[(0, 0)], Rgba([255, 32, 32, 255]));
+        assert_eq!(motion.image[(1, 0)], Rgba([0, 0, 0, 255]));
+
+        let previous_before = RgbaImage::new(1, 1);
+        let before = RgbaImage::new(2, 1);
+        let previous_current = RgbaImage::new(1, 1);
+        let current = RgbaImage::new(1, 1);
+        let extent = compare_transition_images(
+            &previous_before,
+            &before,
+            &previous_current,
+            &current,
+            DiffMode::Exact,
+        );
+        assert_eq!(extent.difference.bounds.unwrap().x, 1);
+        assert_eq!(extent.image[(1, 0)], Rgba([255, 32, 32, 255]));
+
+        // The current frames agree, but their prior frames differ, so the final frame must
+        // still be marked as having different motion.
+        let previous_before = RgbaImage::from_pixel(1, 1, Rgba([0, 0, 0, 255]));
+        let before = RgbaImage::from_pixel(1, 1, Rgba([80, 0, 0, 255]));
+        let previous_current = RgbaImage::from_pixel(1, 1, Rgba([40, 0, 0, 255]));
+        let current = before.clone();
+        let caught_up = compare_transition_images(
+            &previous_before,
+            &before,
+            &previous_current,
+            &current,
+            DiffMode::Exact,
+        );
+        assert_eq!(caught_up.difference.changed_pixels, 1);
+        assert_eq!(caught_up.image[(0, 0)], Rgba([255, 32, 32, 255]));
+    }
+
+    #[test]
+    fn identical_transition_visualizations_have_no_errors_and_match_statistics() {
+        let previous_before = RgbaImage::from_pixel(2, 1, Rgba([20, 40, 60, 128]));
+        let before = RgbaImage::from_pixel(2, 1, Rgba([80, 40, 60, 128]));
+        let previous_current = previous_before.clone();
+        let current = before.clone();
+
+        let stats = compare_transitions(&previous_before, &before, &previous_current, &current);
+        let exact = compare_transition_images(
+            &previous_before,
+            &before,
+            &previous_current,
+            &current,
+            DiffMode::Exact,
+        );
+        let magnitude = compare_transition_images(
+            &previous_before,
+            &before,
+            &previous_current,
+            &current,
+            DiffMode::Magnitude,
+        );
+        assert_eq!(stats.changed_pixels, 0);
+        assert_eq!(stats, exact.difference);
+        assert_eq!(stats, magnitude.difference);
+        assert_eq!(exact.image, magnitude.image);
+
+        let previous_current = RgbaImage::from_pixel(2, 1, Rgba([10, 40, 60, 128]));
+        let current = RgbaImage::from_pixel(2, 1, Rgba([60, 40, 60, 128]));
+        let stats = compare_transitions(&previous_before, &before, &previous_current, &current);
+        let exact = compare_transition_images(
+            &previous_before,
+            &before,
+            &previous_current,
+            &current,
+            DiffMode::Exact,
+        );
+        let magnitude = compare_transition_images(
+            &previous_before,
+            &before,
+            &previous_current,
+            &current,
+            DiffMode::Magnitude,
+        );
+        assert!(stats.changed_pixels > 0);
+        assert_eq!(stats, exact.difference);
+        assert_eq!(stats, magnitude.difference);
+        assert_eq!(exact.image[(0, 0)], Rgba([255, 32, 32, 255]));
+        assert!(magnitude.image[(0, 0)][0] > 0);
     }
 
     proptest! {

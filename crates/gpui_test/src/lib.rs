@@ -16,8 +16,9 @@ pub mod gallery;
 pub use fonts::{bundled_fonts, bundled_text_system};
 pub use gallery::built_in_scenarios;
 pub use image_diff::{
-    DiffMode, ImageComparison, ImageDifference, MotionDifference, PixelRegion, VisibleDifference,
-    compare_images, compare_transitions,
+    DiffMode, ImageComparison, ImageDifference, MotionDifference, PixelRegion,
+    TransitionComparison, VisibleDifference, compare_images, compare_transition_images,
+    compare_transitions,
 };
 pub use report::{
     CheckpointManifest, EnvironmentManifest, MotionComparison, NativeCheckpointManifest,

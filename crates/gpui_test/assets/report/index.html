@@ -28,7 +28,7 @@
 {{SCRIPT}}
 const data = document.getElementById("report-data"), root = document.getElementById("report");
 if (data && root) {
-  try { renderReport(root, JSON.parse(data.textContent)); }
+  try { renderReport(root, JSON.parse(data.textContent), {useHash: true}); }
   catch (error) { root.replaceChildren(el(document, "p", `Report could not be rendered: ${error}`, { class: "error" })); }
 }
   </script>

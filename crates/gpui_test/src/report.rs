@@ -1,7 +1,9 @@
 mod views;
 use views::{write_html, write_markdown, write_svg};
 
-use crate::image_diff::{DiffMode, MotionDifference, compare_images, compare_transitions};
+use crate::image_diff::{
+    DiffMode, MotionDifference, compare_images, compare_transition_images, compare_transitions,
+};
 use crate::{
     ImageDifference, NativeReplayInfo, NativeReplayMetrics, RenderedCheckpoint, RenderedScenario,
     RenderedSuite, ScenarioMetrics, Viewport, validate_id,
@@ -166,6 +168,12 @@ pub struct MotionComparison {
     pub current_duration_ns: Option<u64>,
     /// Signed premultiplied color, alpha, and extent transition differences.
     pub difference: MotionDifference,
+    /// Relative path to the exact transition mask when motion differs.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub diff_png: Option<String>,
+    /// Relative path to the transition magnitude heatmap when motion differs.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub heatmap_png: Option<String>,
 }
 
 /// Native replay artifacts for one checkpoint.
@@ -642,32 +650,59 @@ impl ReportWriter {
                 .transpose()?;
             // Do not bridge an added/removed or reordered checkpoint. Both sides must describe
             // the same adjacent transition; unequal elapsed times remain explicit metadata.
-            let motion = previous_pair.as_ref().zip(before.as_ref()).and_then(
-                |((previous_baseline_index, previous_before), before)| {
-                    let baseline_index = baseline_index?;
-                    if baseline_index != previous_baseline_index + 1 {
-                        return None;
-                    }
-                    let previous_current = &scenario.checkpoints[index - 1];
-                    let previous_baseline =
-                        &previous_scenario?.checkpoints[*previous_baseline_index];
-                    Some(MotionComparison {
-                        previous_checkpoint_id: previous_current.id.clone(),
-                        before_duration_ns: previous_checkpoint?
-                            .time_ns
-                            .checked_sub(previous_baseline.time_ns),
-                        current_duration_ns: checkpoint
-                            .time_ns
-                            .checked_sub(previous_current.time_ns),
-                        difference: compare_transitions(
+            let motion = if let (
+                Some((previous_baseline_index, previous_before)),
+                Some(before),
+                Some(baseline_index),
+                Some(previous_scenario),
+            ) = (
+                previous_pair.as_ref(),
+                before.as_ref(),
+                baseline_index,
+                previous_scenario,
+            ) && baseline_index == previous_baseline_index + 1
+            {
+                let previous_current = &scenario.checkpoints[index - 1];
+                let previous_baseline = &previous_scenario.checkpoints[*previous_baseline_index];
+                let difference = compare_transitions(
+                    previous_before,
+                    before,
+                    &previous_current.image,
+                    &checkpoint.image,
+                );
+                let (diff_png, heatmap_png) = if difference.changed_pixels > 0 {
+                    let write_visualization = |mode, suffix| -> Result<String> {
+                        let file = format!("{}.motion.{suffix}.png", checkpoint.id);
+                        let compared = compare_transition_images(
                             previous_before,
                             before,
                             &previous_current.image,
                             &checkpoint.image,
-                        ),
-                    })
-                },
-            );
+                            mode,
+                        );
+                        save_png(&dir.join(&file), &compared.image)?;
+                        Ok(format!("{}/{file}", scenario.id))
+                    };
+                    (
+                        Some(write_visualization(DiffMode::Exact, "diff")?),
+                        Some(write_visualization(DiffMode::Magnitude, "heatmap")?),
+                    )
+                } else {
+                    (None, None)
+                };
+                Some(MotionComparison {
+                    previous_checkpoint_id: previous_current.id.clone(),
+                    before_duration_ns: previous_scenario.checkpoints[baseline_index]
+                        .time_ns
+                        .checked_sub(previous_baseline.time_ns),
+                    current_duration_ns: checkpoint.time_ns.checked_sub(previous_current.time_ns),
+                    difference,
+                    diff_png,
+                    heatmap_png,
+                })
+            } else {
+                None
+            };
             let comparison = before
                 .as_ref()
                 .filter(|image| *image != &checkpoint.image)
@@ -831,6 +866,18 @@ pub fn read_manifest(report_dir: impl AsRef<Path>) -> Result<ReportManifest> {
                 scenario.id,
                 checkpoint.id
             );
+            if let Some(motion) = &checkpoint.motion {
+                ensure!(
+                    motion.diff_png.as_deref().is_none_or(|path| {
+                        path == format!("{}/{}.motion.diff.png", scenario.id, checkpoint.id)
+                    }) && motion.heatmap_png.as_deref().is_none_or(|path| {
+                        path == format!("{}/{}.motion.heatmap.png", scenario.id, checkpoint.id)
+                    }),
+                    "noncanonical transition image paths for {}/{}",
+                    scenario.id,
+                    checkpoint.id
+                );
+            }
             ensure!(
                 (checkpoint.scene_json == format!("{}/{}.scene.json", scenario.id, checkpoint.id)
                     || checkpoint.scene_json
@@ -972,6 +1019,14 @@ fn read_scenario(
         if let Some(path) = &checkpoint.heatmap_png {
             artifact_path(root, path)?;
         }
+        if let Some(motion) = &checkpoint.motion {
+            for path in [&motion.diff_png, &motion.heatmap_png]
+                .into_iter()
+                .flatten()
+            {
+                artifact_path(root, path)?;
+            }
+        }
         let scene_path = artifact_path(root, &checkpoint.scene_json)?;
         let capture = read_capture(&scene_path).with_context(|| {
             format!("validating scene capture {}/{}", scenario.id, checkpoint.id)
@@ -1084,6 +1139,14 @@ fn identical_stored_scenarios(
         }
         if let Some(path) = &source.heatmap_png {
             artifact_path(source_root, path)?;
+        }
+        if let Some(motion) = &source.motion {
+            for path in [&motion.diff_png, &motion.heatmap_png]
+                .into_iter()
+                .flatten()
+            {
+                artifact_path(source_root, path)?;
+            }
         }
         for (source_path, stored_path) in paths {
             if !files_equal(

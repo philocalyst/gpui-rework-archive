@@ -42,6 +42,7 @@ RUNNER = "crates/gpui_test/src/runner.rs"
 GALLERY = "crates/gpui_test/src/gallery/views.rs"
 CAPTURE = "crates/gpui/src/scene/capture.rs"
 REPORT = "crates/gpui_test/src/report.rs"
+IMAGE_DIFF = "crates/gpui_test/src/image_diff.rs"
 FONT = "crates/gpui_render/src/font.rs"
 GPUI_TEST = "crates/gpui/src/test.rs"
 PARLEY_TEXT = "crates/gpui_ce_parley/src/text_system.rs"
@@ -399,6 +400,60 @@ MUTANTS: tuple[Mutant, ...] = (
         "Some((first_start, _last_end)) => (first_start, end),",
         "GPU timestamp envelope covers overlapping render passes",
         ("cargo", "test", "--offline", "--locked", "-p", "gpui_ce_wgpu", "--features", "test-support", "--lib", "timestamp_envelope_contains_overlapping_passes_and_rejects_bad_pairs"),
+    ),
+    Mutant(
+        "compare-scene-storage-bytes",
+        "Compare stored scene bytes instead of the validated capture value, misclassifying equivalent legacy JSON and gzip encodings.",
+        REPORT,
+        "Ok(read_capture(&artifact_path(root, &previous.scene_json)?)?\n                        != checkpoint.capture)",
+        "Ok(fs::read(artifact_path(root, &previous.scene_json)?)?\n                        != gzip_scene_json(&serde_json::to_vec(&checkpoint.capture)?)?)",
+        "legacy JSON baseline compares semantically equal to gzip output",
+        ("cargo", "test", "--offline", "--locked", "-p", "gpui_ce_test", "--test", "report_collection", "gzip_scene_artifacts_are_deterministic_and_compare_equal_to_legacy_json"),
+    ),
+    Mutant(
+        "ignore-alpha-only-visible-error",
+        "Omit alpha differences from the alpha-aware visible error metrics.",
+        IMAGE_DIFF,
+        "let visible_error = if channel == 3 {\n                    f64::from(a[3].abs_diff(b[3]))\n                } else {",
+        "let visible_error = if channel == 3 {\n                    0.0\n                } else {",
+        "alpha-only changes count as visible differences",
+        ("cargo", "test", "--offline", "--locked", "-p", "gpui_ce_test", "--lib", "alpha_only_change_contributes_visible_error"),
+    ),
+    Mutant(
+        "count-hidden-transparent-rgb-as-visible",
+        "Compare straight RGB values instead of alpha-premultiplied channels when measuring visibility.",
+        IMAGE_DIFF,
+        "let a_premultiplied = u16::from(a[channel]) * u16::from(a[3]);\n                    let b_premultiplied = u16::from(b[channel]) * u16::from(b[3]);\n                    f64::from(a_premultiplied.abs_diff(b_premultiplied)) / 255.0",
+        "f64::from(a[channel].abs_diff(b[channel]))",
+        "hidden transparent RGB changes stay invisible",
+        ("cargo", "test", "--offline", "--locked", "-p", "gpui_ce_test", "--lib", "invisible_transparent_rgb_changes_are_exact_but_not_visible"),
+    ),
+    Mutant(
+        "ignore-transparent-image-extent",
+        "Treat transparent pixels outside one image's bounds as unchanged instead of exact extent changes.",
+        IMAGE_DIFF,
+        "let mut exact_changed = resized_pixel;",
+        "let mut exact_changed = false;",
+        "transparent out-of-bounds pixels count as exact size changes",
+        ("cargo", "test", "--offline", "--locked", "-p", "gpui_ce_test", "--lib", "transparent_out_of_bounds_pixels_still_count_as_exact_size_changes"),
+    ),
+    Mutant(
+        "drop-motion-transition-error",
+        "Ignore per-pixel signed motion deltas when comparing adjacent frames.",
+        IMAGE_DIFF,
+        "let error = f64::from((before_delta - current_delta).unsigned_abs()) / 255.0;",
+        "let error = 0.0;",
+        "motion comparison detects a frozen current frame",
+        ("cargo", "test", "--offline", "--locked", "-p", "gpui_ce_test", "--lib", "motion_detects_a_frozen_frame_and_different_opacity"),
+    ),
+    Mutant(
+        "publish-after-failed-add",
+        "Allow ReportWriter::finish to publish a staged report after an add operation failed.",
+        REPORT,
+        "self.failed |= result.is_err();",
+        "let _ = result.is_err();",
+        "failed report writes preserve the prior published report",
+        ("cargo", "test", "--offline", "--locked", "-p", "gpui_ce_test", "--test", "report_collection", "failed_report_write_preserves_existing_report_and_refuses_unrelated_directories"),
     ),
 )
 

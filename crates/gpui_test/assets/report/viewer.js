@@ -147,6 +147,10 @@ function changedCheckpoint(checkpoint) {
   return checkpoint.motion?.difference?.changed_pixels > 0 || checkpoint.pixels_changed === true || (checkpoint.pixels_changed == null &&
     (checkpoint.status === "new" || checkpoint.status === "changed"));
 }
+function checkpointStatus(checkpoint) {
+  return checkpoint.status === "unchanged" && checkpoint.motion?.difference?.changed_pixels > 0
+    ? "motion changed" : statusLabel(checkpoint.status);
+}
 function svgNode(doc, tag, attrs = {}, text) {
   const node = doc.createElementNS("http://www.w3.org/2000/svg", tag);
   for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, String(value));
@@ -178,15 +182,18 @@ function renderTrend(doc, scenario, selectedIndex, selectIndex) {
   }
   const width = 720, height = 180, left = 42, right = 12, top = 12, bottom = 30;
   const plotWidth = width - left - right, plotHeight = height - top - bottom;
+  const peak = Math.max(0, ...data.flatMap((point) => Object.values(point).filter(Number.isFinite)));
+  const magnitude = peak > 0 ? 10 ** Math.floor(Math.log10(peak)) : 1;
+  const scale = Math.min(100, [1, 2, 5, 10].map((step) => step * magnitude).find((limit) => limit >= peak) || 100);
   const x = (index) => left + (checkpoints.length <= 1 ? plotWidth / 2 : index * plotWidth / (checkpoints.length - 1));
-  const y = (percent) => top + plotHeight * (1 - percent / 100);
+  const y = (percent) => top + plotHeight * (1 - percent / scale);
   const svg = svgNode(doc, "svg", { class: "frame-trend", viewBox: `0 0 ${width} ${height}`, role: "img", "aria-label": "Per-frame exact and visible error plus transition error as a percentage of image area. Orange diamonds mark timestamp mismatches." });
   svg.append(svgNode(doc, "title", {}, "Pixel difference by checkpoint"));
   svg.append(svgNode(doc, "desc", {}, "Per-frame exact and visible errors plus previous-to-current transition error as a percentage of image area. Timestamp mismatches use an orange diamond."));
-  for (const pct of [0, 50, 100]) {
+  for (const pct of [0, scale / 2, scale]) {
     const py = y(pct);
     svg.append(svgNode(doc, "line", { x1: left, y1: py, x2: width - right, y2: py, class: "trend-grid" }));
-    svg.append(svgNode(doc, "text", { x: left - 7, y: py + 4, "text-anchor": "end" }, `${pct}%`));
+    svg.append(svgNode(doc, "text", { x: left - 7, y: py + 4, "text-anchor": "end" }, `${Number(pct.toPrecision(3))}%`));
   }
   for (const [key, className] of [["exact", "trend-exact"], ["visible", "trend-visible"], ["motion", "trend-motion"]]) {
     let segment = [];
@@ -223,7 +230,7 @@ function renderTrend(doc, scenario, selectedIndex, selectIndex) {
     }
   });
   const labels = el(doc, "p", undefined, { class: "trend-legend" });
-  labels.append(el(doc, "span", "Exact RGBA change", { class: "legend-exact" }), el(doc, "span", "Visible magnitude change", { class: "legend-visible" }), el(doc, "span", "Transition error", { class: "legend-motion" }), el(doc, "span", "Timestamp mismatch", { class: "legend-mismatch" }));
+  labels.append(el(doc, "span", "Exact RGBA change", { class: "legend-exact" }), el(doc, "span", "Visible pixel change", { class: "legend-visible" }), el(doc, "span", "Transition error", { class: "legend-motion" }), el(doc, "span", "Timestamp mismatch", { class: "legend-mismatch" }));
   const container = el(doc, "div", undefined, { class: "trend-wrap" });
   container.append(svg, labels);
   return container;
@@ -263,11 +270,16 @@ function renderComparison(doc, scenario, checkpoint, baseURL) {
   if (diffImg) stage.append(diffImg);
   const heatmapImg = checkpoint.heatmap_png ? image(doc, "Visible magnitude heatmap", checkpoint.heatmap_png, baseURL, { class: "image-heatmap", hidden: true }) : null;
   if (heatmapImg) stage.append(heatmapImg);
+  const motionImg = checkpoint.motion?.diff_png ? image(doc, "Transition differences in red", checkpoint.motion.diff_png, baseURL, { class: "image-motion", hidden: true }) : null;
+  if (motionImg) stage.append(motionImg);
+  const motionHeatmapImg = checkpoint.motion?.heatmap_png ? image(doc, "Transition magnitude heatmap", checkpoint.motion.heatmap_png, baseURL, { class: "image-motion-heatmap", hidden: true }) : null;
+  if (motionHeatmapImg) stage.append(motionHeatmapImg);
   stageScroll.append(stage);
   const modeButtons = new Map();
-  for (const [mode, label] of [["wipe", "Wipe"], ["blink", "Blink"], ["side", "Side by side"], ["diff", "Exact red"], ["heatmap", "Magnitude heatmap"]]) {
+  for (const [mode, label] of [["wipe", "Wipe"], ["blink", "Blink"], ["side", "Side by side"], ["diff", "Exact red"], ["heatmap", "Magnitude heatmap"], ["motion", "Transition red"], ["motion-heatmap", "Transition heatmap"]]) {
     const button = el(doc, "button", label, { type: "button", "aria-pressed": "false" });
-    button.disabled = mode === "diff" ? !diffImg : mode === "heatmap" ? !heatmapImg : !hasBaseline;
+    button.disabled = mode === "diff" ? !diffImg : mode === "heatmap" ? !heatmapImg :
+      mode === "motion" ? !motionImg : mode === "motion-heatmap" ? !motionHeatmapImg : !hasBaseline;
     controls.append(button); modeButtons.set(mode, button);
   }
   const rangeLabel = el(doc, "label", "Wipe divider", { class: "wipe-control" });
@@ -276,7 +288,7 @@ function renderComparison(doc, scenario, checkpoint, baseURL) {
   const wipeValue = el(doc, "output", "50% before / 50% current"); rangeLabel.append(wipe, wipeValue);
   const zoom = el(doc, "button", "Actual pixels", { type: "button", "aria-pressed": "false" });
   const focus = el(doc, "button", "Focus changes", { type: "button" });
-  const bounds = checkpoint.difference?.bounds;
+  const bounds = checkpoint.difference?.bounds || checkpoint.motion?.difference?.bounds;
   focus.disabled = !bounds;
   controls.append(rangeLabel, zoom, focus);
   section.append(controls, stageScroll);
@@ -298,9 +310,10 @@ function renderComparison(doc, scenario, checkpoint, baseURL) {
   const lines = [differenceText("CPU vs baseline", checkpoint.difference), differenceText("Native vs CPU", checkpoint.native?.difference)].filter(Boolean);
   stats.textContent = lines.join(" ");
 
-  let mode = diffImg ? "diff" : hasBaseline ? "wipe" : heatmapImg ? "heatmap" : "current";
+  let mode = diffImg ? "diff" : motionImg ? "motion" : hasBaseline ? "wipe" : "current";
   let blinkTimer = null;
   let actualPixels = false;
+  let disposed = false;
   const updateWipe = () => {
     const value = Number(wipe.value);
     const cutoff = stage.clientWidth * value / 100;
@@ -315,10 +328,13 @@ function renderComparison(doc, scenario, checkpoint, baseURL) {
     stage.className = `comparison-stage mode-${mode}${actualPixels ? " pixel-zoom" : ""}`;
     for (const [name, button] of modeButtons) button.setAttribute("aria-pressed", String(name === mode));
     rangeLabel.hidden = mode !== "wipe";
-    if (beforeImg) beforeImg.hidden = mode === "diff" || mode === "heatmap" || mode === "current";
-    if (currentImg) currentImg.hidden = mode === "diff" || mode === "heatmap";
+    const showingDifference = ["diff", "heatmap", "motion", "motion-heatmap"].includes(mode);
+    if (beforeImg) beforeImg.hidden = showingDifference || mode === "current";
+    if (currentImg) currentImg.hidden = showingDifference;
     if (diffImg) diffImg.hidden = mode !== "diff";
     if (heatmapImg) heatmapImg.hidden = mode !== "heatmap";
+    if (motionImg) motionImg.hidden = mode !== "motion";
+    if (motionHeatmapImg) motionHeatmapImg.hidden = mode !== "motion-heatmap";
     if (mode === "side" && beforeImg && currentImg) {
       stage.className = `comparison-stage mode-side${actualPixels ? " pixel-zoom" : ""}`;
       stage.append(beforeImg, currentImg);
@@ -356,13 +372,17 @@ function renderComparison(doc, scenario, checkpoint, baseURL) {
   zoom.addEventListener("click", () => setZoom(!actualPixels));
   focus.addEventListener("click", () => {
     if (!bounds) return;
-    if (diffImg) setMode("diff");
+    const motionSelected = mode === "motion" || mode === "motion-heatmap";
+    const selectedBounds = motionSelected ? checkpoint.motion?.difference?.bounds || bounds : bounds;
+    if (diffImg && !motionSelected) setMode("diff");
+    else if (motionImg) setMode("motion");
     setZoom(true);
-    stageScroll.scrollTo({ left: Math.max(0, bounds.x - 24), top: Math.max(0, bounds.y - 24) });
+    stageScroll.scrollTo({ left: Math.max(0, selectedBounds.x - 24), top: Math.max(0, selectedBounds.y - 24) });
   });
-  const allImages = [beforeImg, currentImg, diffImg, heatmapImg].filter(Boolean);
+  const allImages = [beforeImg, currentImg, diffImg, heatmapImg, motionImg, motionHeatmapImg].filter(Boolean);
   const imageSize = (img) => img.complete && img.naturalWidth ? `${img.naturalWidth}×${img.naturalHeight}` : "loading";
   const fitStage = () => {
+    if (disposed) return;
     const loaded = allImages.filter((img) => img.complete && img.naturalWidth && img.naturalHeight);
     if (!loaded.length) return;
     const unionWidth = Math.max(...loaded.map((img) => img.naturalWidth));
@@ -397,7 +417,7 @@ function renderComparison(doc, scenario, checkpoint, baseURL) {
   if (allImages.some((img) => img.complete && img.naturalWidth)) fitStage();
   setMode(mode);
   preloadNext(scenario, checkpoint, baseURL, doc);
-  return { element: section, layout: fitStage, cleanup: () => { if (blinkTimer) view.clearInterval(blinkTimer); view.removeEventListener("resize", onResize); } };
+  return { element: section, layout: fitStage, cleanup: () => { disposed = true; if (blinkTimer) view.clearInterval(blinkTimer); view.removeEventListener("resize", onResize); } };
 }
 
 function renderSelected(root, doc, selected, baseURL, playback, selectIndex) {
@@ -421,7 +441,7 @@ function renderSelected(root, doc, selected, baseURL, playback, selectIndex) {
   const scrubLabel = el(doc, "label", "Frame");
   const slider = el(doc, "input", undefined, { type: "range", min: "0", max: String(Math.max(0, scenario.checkpoints.length - 1)), step: "1", value: String(index) });
   const stamp = checkpoint.time_ns == null ? "time n/a" : `${ns(checkpoint.time_ns)} ms`;
-  const frameStatus = `${checkpoint.name} · ${stamp} · ${statusLabel(checkpoint.status)}`;
+  const frameStatus = `${checkpoint.name} · ${stamp} · ${checkpointStatus(checkpoint)}`;
   const scrubOutput = el(doc, "output", frameStatus, { "aria-live": "polite" });
   slider.setAttribute("aria-label", "Select checkpoint frame");
   slider.setAttribute("aria-valuetext", frameStatus);
@@ -430,7 +450,7 @@ function renderSelected(root, doc, selected, baseURL, playback, selectIndex) {
     const target = scenario.checkpoints[Number(slider.value)];
     if (!target) return;
     const time = target.time_ns == null ? "time n/a" : `${ns(target.time_ns)} ms`;
-    const label = `${target.name} · ${time} · ${statusLabel(target.status)}`;
+    const label = `${target.name} · ${time} · ${checkpointStatus(target)}`;
     scrubOutput.value = label; scrubOutput.textContent = label; slider.setAttribute("aria-valuetext", label);
   });
   slider.addEventListener("change", () => selectIndex(Number(slider.value)));
@@ -445,10 +465,10 @@ function renderSelected(root, doc, selected, baseURL, playback, selectIndex) {
   const nextChanged = el(doc, "button", "Next changed frame", { type: "button" });
   previousChanged.disabled = previousChangedIndex === undefined; nextChanged.disabled = nextChangedIndex === undefined;
   const equalTimes = stepOnly(scenario);
-  const idleLabel = equalTimes ? "Step next · timestamps need steps" : "Play timeline";
+  const idleLabel = equalTimes ? "Step next · timestamps need steps" : index === scenario.checkpoints.length - 1 ? "Replay timeline" : "Play timeline";
   const play = el(doc, "button", playback.playing ? "Pause timeline" : idleLabel, { type: "button", "data-idle-label": idleLabel });
   previous.disabled = index <= 0; next.disabled = index >= scenario.checkpoints.length - 1;
-  play.disabled = scenario.checkpoints.length < 2;
+  play.disabled = scenario.checkpoints.length < 2 || (equalTimes && index === scenario.checkpoints.length - 1);
   const delta = checkpointDelta(scenario, index);
   const playbackLabel = equalTimes
     ? "Timestamps are equal, descending, or unavailable; use explicit step controls."
@@ -489,7 +509,7 @@ function renderSelected(root, doc, selected, baseURL, playback, selectIndex) {
   const comparison = renderComparison(doc, scenario, checkpoint, baseURL);
   panel.append(comparison.element);
   const metrics = checkpoint.metrics || {};
-  panel.append(el(doc, "p", `Status: ${statusLabel(checkpoint.status)} · ${count(metrics.frame_count)} samples · build p50/p95/p99 ${ns(metrics.scene_build_p50_ns)}/${ns(metrics.scene_build_p95_ns)}/${ns(metrics.scene_build_p99_ns)} ms · CPU p50/p95/p99 ${ns(metrics.cpu_render_p50_ns)}/${ns(metrics.cpu_render_p95_ns)}/${ns(metrics.cpu_render_p99_ns)} ms · ${count(metrics.primitive_count)} primitives · ${count(metrics.batch_count)} batches · ${count(metrics.bitmap_storage_bytes)} bitmap bytes.`));
+  panel.append(el(doc, "p", `Status: ${checkpointStatus(checkpoint)} · ${count(metrics.frame_count)} samples · build p50/p95/p99 ${ns(metrics.scene_build_p50_ns)}/${ns(metrics.scene_build_p95_ns)}/${ns(metrics.scene_build_p99_ns)} ms · CPU p50/p95/p99 ${ns(metrics.cpu_render_p50_ns)}/${ns(metrics.cpu_render_p95_ns)}/${ns(metrics.cpu_render_p99_ns)} ms · ${count(metrics.primitive_count)} primitives · ${count(metrics.batch_count)} batches · ${count(metrics.bitmap_storage_bytes)} bitmap bytes.`));
   if (checkpoint.native) {
     const details = el(doc, "details"), native = checkpoint.native, nativeMetrics = native.metrics || {}, gpu = nativeMetrics.gpu || {};
     details.append(el(doc, "summary", `Native diagnostic · encode/submit p50 ${ns(nativeMetrics.encode_submit_completion?.p50_ns)} ms · GPU p50 ${ns(gpu.p50_ns)} ms · ${count(native.difference?.changed_pixels)} CPU/native differing pixels`));
@@ -506,7 +526,7 @@ function renderSelected(root, doc, selected, baseURL, playback, selectIndex) {
 }
 
 /** Render a validated report. Returns a disposer for web-site mount/unmount use. */
-export function renderReport(root, manifest, { baseURL = "" } = {}) {
+export function renderReport(root, manifest, { baseURL = "", useHash = false } = {}) {
   const doc = root.ownerDocument, view = doc.defaultView;
   const hadReportClass = root.classList.contains("gpui-report");
   root.classList.add("gpui-report");
@@ -515,8 +535,8 @@ export function renderReport(root, manifest, { baseURL = "" } = {}) {
   let selected = rows[0] || null, panelCleanup = null, disposed = false;
   root.replaceChildren();
   const summary = el(doc, "p", undefined, { class: "summary", "aria-label": "Report summary" });
-  const statuses = rows.map(({ checkpoint }) => checkpoint.status);
-  for (const value of [`${scenarios.length} scenarios`, `${rows.length} checkpoints`, `${statuses.filter((s) => s === "changed").length} changed`, `${statuses.filter((s) => s === "new").length} new`, `${changes.length} baseline changes`]) summary.append(el(doc, "span", value));
+  const statuses = rows.map(({ checkpoint }) => checkpointStatus(checkpoint));
+  for (const value of [`${scenarios.length} scenarios`, `${rows.length} checkpoints`, `${statuses.filter((s) => s === "changed" || s === "motion changed").length} changed`, `${statuses.filter((s) => s === "new").length} new`, `${changes.length} baseline changes`]) summary.append(el(doc, "span", value));
   root.append(summary); renderChanges(root, doc, changes); renderGlobalDetails(root, doc, manifest, baseURL);
 
   const search = el(doc, "input", undefined, { type: "search", placeholder: "Search scenarios or checkpoints", "aria-label": "Search scenarios or checkpoints" });
@@ -532,7 +552,8 @@ export function renderReport(root, manifest, { baseURL = "" } = {}) {
   head.append(header); table.append(head, body); tableWrap.append(table); root.append(tableWrap);
   const selectIndex = (index) => {
     if (index < 0 || !selected || index >= selected.scenario.checkpoints.length) return;
-    view.location.hash = encodeURIComponent(`${selected.scenario.id}/${selected.scenario.checkpoints[index].id}`);
+    if (useHash) view.location.hash = encodeURIComponent(`${selected.scenario.id}/${selected.scenario.checkpoints[index].id}`);
+    else { selected = { scenario: selected.scenario, checkpoint: selected.scenario.checkpoints[index] }; onHash(); }
   };
   const findHashSelection = () => {
     let hash = "";
@@ -541,7 +562,7 @@ export function renderReport(root, manifest, { baseURL = "" } = {}) {
     return rows.find(({ scenario, checkpoint }) => scenario.id === scenarioId && (!checkpointId || checkpoint.id === checkpointId)) || selected;
   };
   const drawSelection = () => {
-    selected = findHashSelection();
+    if (useHash) selected = findHashSelection();
     if (panelCleanup) panelCleanup();
     panelCleanup = renderSelected(selectedRoot, doc, selected, baseURL, playback, selectIndex);
   };
@@ -551,10 +572,12 @@ export function renderReport(root, manifest, { baseURL = "" } = {}) {
     for (const { scenario, checkpoint } of rows) {
       const status = checkpoint.status || scenario.status;
       const label = `${scenario.title} ${scenario.id} ${checkpoint.name} ${checkpoint.id}`.toLocaleLowerCase();
-      if ((query && !label.includes(query)) || (statusSelect.value !== "all" && status !== statusSelect.value)) continue;
+      const motionChanged = checkpoint.motion?.difference?.changed_pixels > 0;
+      const matchesStatus = statusSelect.value === "all" || (statusSelect.value === "changed" ? status === "changed" || motionChanged : status === statusSelect.value && !motionChanged);
+      if ((query && !label.includes(query)) || !matchesStatus) continue;
       const m = checkpoint.metrics || {}, row = el(doc, "tr"), item = el(doc, "td");
       item.append(el(doc, "a", `${scenario.title} / ${checkpoint.name}`, { href: targetOf(scenario, checkpoint) }));
-      row.append(item, el(doc, "td", statusLabel(status)));
+      row.append(item, el(doc, "td", checkpointStatus(checkpoint)));
       row.append(el(doc, "td", [m.scene_build_p50_ns, m.scene_build_p95_ns, m.scene_build_p99_ns].map(ns).join(" / ")));
       row.append(el(doc, "td", [m.cpu_render_p50_ns, m.cpu_render_p95_ns, m.cpu_render_p99_ns].map(ns).join(" / ")));
       body.append(row);
@@ -565,13 +588,30 @@ export function renderReport(root, manifest, { baseURL = "" } = {}) {
     playback.advancing = false;
     if (playback.playing && !automatic) playback.pause();
     drawSelection();
-    if (automatic && playback.playing) play();
+    if (automatic && playback.playing) {
+      const index = selected.scenario.checkpoints.indexOf(selected.checkpoint);
+      if (index === selected.scenario.checkpoints.length - 1) playback.pause();
+      else play();
+    }
   };
-  search.addEventListener("input", updateTable); statusSelect.addEventListener("change", updateTable); view.addEventListener("hashchange", onHash);
+  const onLocalLink = (event) => {
+    const anchor = event.target.closest?.("a[href^='#']");
+    if (!anchor || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    const [scenarioId, checkpointId] = decodeURIComponent(anchor.getAttribute("href").slice(1)).split("/");
+    const row = rows.find(({ scenario, checkpoint }) => scenario.id === scenarioId && (!checkpointId || checkpoint.id === checkpointId));
+    if (!row) return;
+    event.preventDefault(); selected = row; onHash();
+  };
+  search.addEventListener("input", updateTable); statusSelect.addEventListener("change", updateTable);
+  if (useHash) view.addEventListener("hashchange", onHash);
+  else root.addEventListener("click", onLocalLink);
   const play = () => {
     if (!selected || disposed) return;
     const scenario = selected.scenario, index = scenario.checkpoints.indexOf(selected.checkpoint);
-    if (index >= scenario.checkpoints.length - 1 || stepOnly(scenario)) { playback.pause(); return; }
+    if (stepOnly(scenario)) { playback.pause(); return; }
+    if (index >= scenario.checkpoints.length - 1) {
+      playback.playing = true; playback.advancing = true; selectIndex(0); return;
+    }
     const delta = checkpointDelta(scenario, index);
     if (delta === null) { playback.pause(); return; }
     view.clearTimeout(playback.timer);
@@ -589,6 +629,7 @@ export function renderReport(root, manifest, { baseURL = "" } = {}) {
     if (disposed) return;
     disposed = true; playback.pause(); if (panelCleanup) panelCleanup();
     view.removeEventListener("hashchange", onHash); root.replaceChildren();
+    root.removeEventListener("click", onLocalLink);
     if (!hadReportClass) root.classList.remove("gpui-report");
   };
 }
