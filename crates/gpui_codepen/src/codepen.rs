@@ -1,6 +1,6 @@
 use crate::{
     highlight::rust_highlights,
-    renderer::{InputHandler, InputState, ResizeHandler, scene_view},
+    renderer::{ErrorHandler, InputHandler, InputState, ResizeHandler, scene_view},
     session::{Backend, Reply, Request, Session},
 };
 use gpui::{
@@ -14,6 +14,18 @@ use std::{collections::VecDeque, rc::Rc, time::Duration};
 
 actions!(codepen, [Run]);
 pub struct CodeChanged(pub String);
+
+/// Controller state for native hosts and browser editor shells. Observe the
+/// Codepen entity with GPUI's ordinary `Context::observe` to receive changes.
+#[derive(Clone, Debug, serde::Serialize)]
+pub struct CodepenStatus {
+    pub revision: u64,
+    pub running: bool,
+    pub has_preview: bool,
+    pub diagnostics: String,
+    pub elapsed_ms: u64,
+    pub auto_run: bool,
+}
 
 /// A native GPUI editor and preview, backed exclusively by vendored Miri.
 pub struct Codepen {
@@ -35,6 +47,12 @@ pub struct Codepen {
     events: VecDeque<gpui_codepen_guest::InputMessage>,
     viewport: gpui::Size<gpui::Pixels>,
     scale_factor: f32,
+    viewport_ready: bool,
+    preview_visible: bool,
+    subpixel_rendering: bool,
+    text_rendering_mode: gpui::TextRenderingMode,
+    transparent_window: bool,
+    preview_only: bool,
     #[cfg(not(target_family = "wasm"))]
     worker: Worker,
 }
@@ -43,6 +61,7 @@ impl EventEmitter<CodeChanged> for Codepen {}
 struct CodeEditor {
     state: Entity<EditableTextState>,
     highlights: TextHighlights,
+    _state_changed: Subscription,
 }
 impl Render for CodeEditor {
     fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
@@ -84,21 +103,40 @@ struct Preview {
     input_state: InputState,
     on_input: InputHandler,
     on_resize: ResizeHandler,
+    on_error: ErrorHandler,
+    failed_frame: Option<std::sync::Arc<gpui_codepen_guest::Frame>>,
 }
 impl Render for Preview {
-    fn render(&mut self, window: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         if let Some(frame) = &self.frame {
             if self
                 .imported_frame
                 .as_ref()
                 .is_none_or(|previous| !std::sync::Arc::ptr_eq(previous, frame))
+                && self
+                    .failed_frame
+                    .as_ref()
+                    .is_none_or(|failed| !std::sync::Arc::ptr_eq(failed, frame))
             {
                 match window.import_scene_capture(&frame.scene, &mut self.resources) {
                     Ok(scene) => {
                         self.imported = Some(std::sync::Arc::new(scene));
                         self.imported_frame = Some(frame.clone());
+                        self.failed_frame = None;
                     }
-                    Err(e) => log::error!("invalid preview scene: {e}"),
+                    Err(e) => {
+                        self.failed_frame = Some(frame.clone());
+                        let frame = frame.clone();
+                        let error = self.on_error.clone();
+                        window.defer(cx, move |window, cx| {
+                            error(
+                                frame,
+                                format!("Could not import GPUI scene: {e:#}"),
+                                window,
+                                cx,
+                            )
+                        });
+                    }
                 }
             }
         }
@@ -110,6 +148,7 @@ impl Render for Preview {
             self.imported_frame.clone(),
             self.on_input.clone(),
             self.on_resize.clone(),
+            self.on_error.clone(),
         )
     }
 }
@@ -120,12 +159,14 @@ impl Codepen {
             EditableTextState::new(StringStorage::from(source.clone()), cx)
                 .with_max_bytes(gpui_codepen_guest::MAX_SOURCE_BYTES)
         });
-        let editor_view = cx.new(|_| CodeEditor {
+        let editor_view = cx.new(|cx| CodeEditor {
             state: editor.clone(),
             highlights: TextHighlights::new(rust_highlights(&source)),
+            _state_changed: cx.observe(&editor, |_, _, cx| cx.notify()),
         });
         let weak = cx.weak_entity();
         let resize_weak = cx.weak_entity();
+        let error_weak = cx.weak_entity();
         let preview = cx.new(|cx| Preview {
             frame: None,
             imported_frame: None,
@@ -133,19 +174,49 @@ impl Codepen {
             resources: Default::default(),
             focus: cx.focus_handle(),
             input_state: Default::default(),
-            on_resize: Rc::new(move |size, scale, _, cx| {
-                let _ = resize_weak.update(cx, |this: &mut Self, cx| {
-                    if this.viewport != size || this.scale_factor != scale {
-                        this.viewport = size;
-                        this.scale_factor = scale;
-                        if !this.session.running
-                            && this.displayed_source.as_deref() == Some(this.source.as_str())
-                        {
-                            this.schedule(None, true, cx);
-                        }
+            failed_frame: None,
+            on_error: Rc::new(move |frame, message, _, cx| {
+                let _ = error_weak.update(cx, |this: &mut Self, cx| {
+                    if this.session.diagnostics != message
+                        && this
+                            .session
+                            .frame
+                            .as_ref()
+                            .is_some_and(|current| std::sync::Arc::ptr_eq(current, &frame))
+                    {
+                        this.invalidate();
+                        this.session.diagnostics = message;
+                        cx.notify();
                     }
                 });
             }),
+            on_resize: Rc::new(
+                move |size, scale, subpixel, text_mode, transparent, _, cx| {
+                    let _ = resize_weak.update(cx, |this: &mut Self, cx| {
+                        if size.width < px(1.) || size.height < px(1.) {
+                            return;
+                        }
+                        this.viewport_ready = true;
+                        if this.viewport != size
+                            || this.scale_factor != scale
+                            || this.subpixel_rendering != subpixel
+                            || this.text_rendering_mode != text_mode
+                            || this.transparent_window != transparent
+                        {
+                            this.viewport = size;
+                            this.scale_factor = scale;
+                            this.subpixel_rendering = subpixel;
+                            this.text_rendering_mode = text_mode;
+                            this.transparent_window = transparent;
+                            if !this.session.running
+                                && this.displayed_source.as_deref() == Some(this.source.as_str())
+                            {
+                                this.schedule(None, true, cx);
+                            }
+                        }
+                    });
+                },
+            ),
             on_input: Rc::new(move |event, _, cx| {
                 let _ = weak.update(cx, |this: &mut Self, cx| {
                     if this.displayed_source.as_deref() != Some(this.source.as_str())
@@ -231,8 +302,14 @@ impl Codepen {
             events: VecDeque::new(),
             viewport: gpui::size(px(600.), px(500.)),
             scale_factor: 1.,
+            viewport_ready: false,
+            preview_visible: true,
+            subpixel_rendering: false,
+            text_rendering_mode: Default::default(),
+            transparent_window: false,
+            preview_only: false,
             #[cfg(not(target_family = "wasm"))]
-            worker: Worker::new(),
+            worker: Worker::new(cx.text_system().platform_backend()),
         }
     }
     fn invalidate(&mut self) {
@@ -269,6 +346,7 @@ impl Codepen {
             view.frame = None;
             view.imported_frame = None;
             view.imported = None;
+            view.failed_frame = None;
             view.input_state.reset();
             cx.notify();
         });
@@ -278,6 +356,70 @@ impl Codepen {
     }
     pub fn source(&self, _: &App) -> String {
         self.source.clone()
+    }
+    /// Uses GPUI's existing scene renderer and input routing, leaving editor
+    /// controls to the embedding application.
+    pub fn preview_only(source: impl Into<String>, cx: &mut Context<Self>) -> Self {
+        let mut this = Self::new(source, cx);
+        this.preview_only = true;
+        this
+    }
+    pub fn status(&self) -> CodepenStatus {
+        CodepenStatus {
+            revision: self.session.generation,
+            running: self.session.running,
+            has_preview: self.session.frame.is_some(),
+            diagnostics: self
+                .input_notice
+                .clone()
+                .unwrap_or_else(|| self.session.diagnostics.clone()),
+            elapsed_ms: self.session.elapsed_ms,
+            auto_run: self.auto_run,
+        }
+    }
+    /// Applies an editor change while keeping the last successful scene visible.
+    pub fn edit_source(&mut self, source: &str, cx: &mut Context<Self>) {
+        if source == self.source {
+            return;
+        }
+        if source.len() > gpui_codepen_guest::MAX_SOURCE_BYTES {
+            self.input_notice =
+                Some("Source exceeds 64 KiB. The existing source was kept intact.".into());
+            cx.notify();
+            return;
+        }
+        self.input_notice = None;
+        self.line_count = source.lines().count();
+        self.source = source.to_owned();
+        self.editor_view.update(cx, |view, cx| {
+            view.highlights = TextHighlights::new(rust_highlights(source));
+            cx.notify();
+        });
+        self.editor
+            .update(cx, |editor, cx| editor.emplace(source, cx));
+        self.invalidate();
+        cx.emit(CodeChanged(source.to_owned()));
+        if self.auto_run {
+            self.schedule(None, false, cx);
+        }
+        cx.notify();
+    }
+    pub fn set_auto_run(&mut self, enabled: bool, cx: &mut Context<Self>) {
+        if self.auto_run == enabled {
+            return;
+        }
+        self.auto_run = enabled;
+        if enabled {
+            self.schedule(None, true, cx);
+        } else {
+            self.invalidate();
+        }
+        cx.notify();
+    }
+    pub fn reset(&mut self, cx: &mut Context<Self>) {
+        self.restart = true;
+        self.events.clear();
+        self.run(cx);
     }
     pub fn run(&mut self, cx: &mut Context<Self>) {
         self.events.clear();
@@ -305,6 +447,16 @@ impl Codepen {
                     .timer(Duration::from_millis(100))
                     .await;
             }
+            while this
+                .update(cx, |this, _| !this.viewport_ready && this.preview_visible)
+                .unwrap_or(false)
+            {
+                // Construct a visible interpreted root only after the first host
+                // paint measures its viewport. Hidden compact previews use the fallback.
+                cx.background_executor()
+                    .timer(Duration::from_millis(16))
+                    .await;
+            }
             let Ok(request) = this.update(cx, |this, _| {
                 let mut request = this
                     .session
@@ -315,6 +467,9 @@ impl Codepen {
                 this.last_request = web_time::Instant::now();
                 request.input.viewport = this.viewport;
                 request.input.scale_factor = this.scale_factor;
+                request.input.subpixel_rendering = this.subpixel_rendering;
+                request.input.text_rendering_mode = this.text_rendering_mode;
+                request.input.transparent_window = this.transparent_window;
                 request.restart = std::mem::take(&mut this.restart);
                 #[cfg(not(target_family = "wasm"))]
                 this.worker
@@ -385,7 +540,25 @@ impl Codepen {
 }
 impl Render for Codepen {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        if !self.viewport_ready {
+            self.scale_factor = window.scale_factor();
+        }
+        if self.preview_only {
+            self.preview_visible = true;
+            return div()
+                .size_full()
+                .min_h_0()
+                .min_w_0()
+                .on_action(cx.listener(|this, _: &Run, _, cx| this.run(cx)))
+                .child(
+                    self.preview
+                        .clone()
+                        .cached(StyleRefinement::default().size_full()),
+                )
+                .into_any_element();
+        }
         let compact = window.viewport_size().width < px(760.);
+        self.preview_visible = !compact || self.show_preview;
         let status = if self.session.running {
             "Updating…"
         } else if !self.session.diagnostics.is_empty() {
@@ -411,7 +584,7 @@ impl Render for Codepen {
                             if this.auto_run { this.schedule(None, true, cx); } else { this.invalidate(); }
                             cx.notify();
                         })))
-                    .child(pill(if compact { "Run" } else { "Run  ⌘ Enter" }, false).on_click(cx.listener(|this, _, _, cx| this.run(cx))))))
+                    .child(pill("Run", false).on_click(cx.listener(|this, _, _, cx| this.run(cx))))))
             .when(compact, |s| s.child(div().flex().gap_2()
                 .child(pill("Code", !self.show_preview).on_click(cx.listener(|this, _, _, cx| { this.show_preview = false; cx.notify(); })))
                 .child(pill("Preview", self.show_preview).on_click(cx.listener(|this, _, _, cx| { this.show_preview = true; cx.notify(); })))))
@@ -439,7 +612,7 @@ impl Render for Codepen {
                     else if error { self.session.diagnostics.clone() }
                     else if self.session.running { "Miri is evaluating your Rust. You can keep editing.".into() }
                     else if compact { "Edit Rust, then open Preview. Changes run automatically; ⌘/Ctrl Enter runs immediately.".into() }
-                    else { "Change Rust on the left. The last successful component stays visible while edits compile.\nState persists between clicks. Source changes reset the component. ⌘/Ctrl Enter runs immediately.".into() })))
+                    else { "Change Rust on the left. The last successful component stays visible while edits compile.\nState persists between clicks. Source changes reset the component. Command/Ctrl Enter runs immediately.".into() }))).into_any_element()
     }
 }
 pub fn pill(label: &str, active: bool) -> gpui::Stateful<gpui::Div> {
@@ -495,7 +668,7 @@ struct MailboxState {
 }
 #[cfg(not(target_family = "wasm"))]
 impl Worker {
-    fn new() -> Self {
+    fn new(text_system: std::sync::Arc<dyn gpui::PlatformTextSystem>) -> Self {
         use std::sync::{
             Arc,
             atomic::{AtomicU64, Ordering},
@@ -505,7 +678,8 @@ impl Worker {
         let latest = Arc::new(AtomicU64::new(0));
         let generation = latest.clone();
         let thread = std::thread::spawn(move || {
-            let mut runtime = crate::runtime::Runtime::new();
+            let factory = Arc::new(move || Ok(text_system.clone()));
+            let mut runtime = crate::runtime::Runtime::with_text_system_factory(factory);
             loop {
                 let (request, response) = {
                     let mut state = incoming.state.lock().unwrap();

@@ -724,6 +724,19 @@ impl WebWindowInner {
                 return;
             }
 
+            // Paste needs the browser's ClipboardEvent, which carries the
+            // clipboard contents synchronously. Dispatching the GPUI paste
+            // binding here would prevent that event and read only the
+            // platform's cached clipboard instead.
+            let paste_modifier = if this.is_mac {
+                modifiers.platform
+            } else {
+                modifiers.control
+            };
+            if key == "v" && paste_modifier && !modifiers.alt && !modifiers.shift {
+                return;
+            }
+
             let keystroke = Keystroke {
                 modifiers,
                 key,
@@ -1075,6 +1088,7 @@ impl WebWindowInner {
                     this.with_input_handler(|handler| {
                         handler.paste(ClipboardItem::new_string(text));
                     });
+                    this.schedule_ime_mirror_sync();
                 }
                 return;
             }
@@ -1104,6 +1118,7 @@ impl WebWindowInner {
                 this.with_input_handler(|handler| {
                     handler.paste(ClipboardItem { entries });
                 });
+                this.schedule_ime_mirror_sync();
             });
         })
     }

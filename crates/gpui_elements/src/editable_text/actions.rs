@@ -148,7 +148,21 @@ pub fn default_bindings() -> gpui::ActionBindingCollection {
         .with::<Escape>("escape")
         .with::<ShowCharacterPalette>("secondary-space");
 
-    #[cfg(target_os = "macos")]
+    // WebAssembly's compile target cannot identify the user's keyboard. Keep
+    // both conventional shortcut sets available to the browser input bridge.
+    #[cfg(target_family = "wasm")]
+    {
+        bindings = bindings
+            .with::<SelectAll>("cmd-a")
+            .with::<Copy>("cmd-c")
+            .with::<Cut>("cmd-x")
+            .with::<Paste>("cmd-v")
+            .with::<Undo>("cmd-z")
+            .with::<Redo>("cmd-shift-z")
+            .with::<ShowCharacterPalette>("cmd-space");
+    }
+
+    #[cfg(any(target_os = "macos", target_family = "wasm"))]
     {
         bindings = bindings
             .with::<DeleteWordLeft>("alt-backspace")

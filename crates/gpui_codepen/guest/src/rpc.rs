@@ -117,6 +117,61 @@ pub enum Call {
         height: Pixels,
         kind: TextSelectionKind,
     },
+    PrewarmGlyphs {
+        requests: Vec<GlyphRasterRequest>,
+    },
+}
+
+type RasterStyleKey = (usize, u32, GlyphRenderMode, ForegroundDependency, [u32; 4]);
+fn style_key(request: RasterStyleRequest) -> RasterStyleKey {
+    let color = request.scene_color;
+    (
+        request.font_id.0,
+        request.glyph_id.0,
+        request.requested_mode,
+        request.foreground_dependency,
+        [
+            color.color.red.to_bits(),
+            color.color.green.to_bits(),
+            color.color.blue.to_bits(),
+            color.alpha.to_bits(),
+        ],
+    )
+}
+#[derive(Serialize, Deserialize)]
+struct PreparedGlyph {
+    request: GlyphRasterRequest,
+    params: RenderGlyphParams,
+    raster: Result<RasterizedGlyph, String>,
+}
+const MAX_PREPARED_BYTES: usize = 8 * 1024 * 1024;
+#[derive(Default)]
+struct PreparedRasters {
+    entries: collections::HashMap<RenderGlyphParams, Result<RasterizedGlyph, String>>,
+    bytes: usize,
+}
+impl PreparedRasters {
+    fn clear(&mut self) {
+        self.entries.clear();
+        self.bytes = 0;
+    }
+    fn remove(&mut self, params: &RenderGlyphParams) -> Option<Result<RasterizedGlyph, String>> {
+        let raster = self.entries.remove(params)?;
+        self.bytes -= raster.as_ref().map_or(0, |r| r.pixels.len());
+        Some(raster)
+    }
+    fn insert(&mut self, params: RenderGlyphParams, raster: Result<RasterizedGlyph, String>) {
+        self.remove(&params);
+        let bytes = raster.as_ref().map_or(0, |r| r.pixels.len());
+        if bytes > MAX_PREPARED_BYTES {
+            return;
+        }
+        if self.bytes + bytes > MAX_PREPARED_BYTES || self.entries.len() >= 4096 {
+            self.clear();
+        }
+        self.bytes += bytes;
+        self.entries.insert(params, raster);
+    }
 }
 #[derive(Serialize, Deserialize)]
 struct LineData {
@@ -205,12 +260,16 @@ impl LineData {
 pub struct RemoteTextSystem {
     generation: std::sync::atomic::AtomicU64,
     modes: std::sync::Mutex<collections::HashMap<(usize, u32), TextRenderingMode>>,
-    styles: std::sync::Mutex<
-        collections::HashMap<
-            (usize, u32, GlyphRenderMode, ForegroundDependency, [u32; 4]),
-            PreparedRasterStyle,
-        >,
-    >,
+    styles: std::sync::Mutex<collections::HashMap<RasterStyleKey, PreparedRasterStyle>>,
+    prepared: std::sync::Mutex<PreparedRasters>,
+    rasterized: std::sync::Mutex<collections::HashSet<RenderGlyphParams>>,
+}
+
+fn remember_raster(cache: &mut collections::HashSet<RenderGlyphParams>, params: RenderGlyphParams) {
+    if cache.len() >= 4096 && !cache.contains(&params) {
+        cache.clear();
+    }
+    cache.insert(params);
 }
 #[cfg(miri)]
 pub(crate) fn begin_session() {
@@ -235,6 +294,8 @@ impl PlatformTextSystem for RemoteTextSystem {
             .store(generation, std::sync::atomic::Ordering::Relaxed);
         self.styles.lock().unwrap().clear();
         self.modes.lock().unwrap().clear();
+        self.prepared.lock().unwrap().clear();
+        self.rasterized.lock().unwrap().clear();
         Ok(())
     }
     fn all_font_names(&self) -> Vec<String> {
@@ -265,30 +326,57 @@ impl PlatformTextSystem for RemoteTextSystem {
         call(Call::Glyph { font_id, ch }).expect("character mapping")
     }
     fn rasterize_glyph(&self, params: &RenderGlyphParams) -> anyhow::Result<RasterizedGlyph> {
-        call(Call::Raster {
+        if let Some(raster) = self.prepared.lock().unwrap().remove(params) {
+            return raster.map_err(anyhow::Error::msg);
+        }
+        let raster = call(Call::Raster {
             params: params.clone(),
-        })
+        })?;
+        remember_raster(&mut self.rasterized.lock().unwrap(), params.clone());
+        Ok(raster)
+    }
+    fn prewarm_glyphs(&self, requests: &mut dyn Iterator<Item = GlyphRasterRequest>) {
+        // Leftover prefetches belonged to the previous fragment. Its atlas may
+        // have already held those pixels, so no paint call consumed them.
+        self.prepared.lock().unwrap().clear();
+        let mut batch = Vec::new();
+        let mut scheduled = collections::HashSet::default();
+        for request in requests {
+            let key = style_key(request.style);
+            let style = self.styles.lock().unwrap().get(&key).copied();
+            if let Some(style) = style {
+                let params = request.with_style(style);
+                if self.rasterized.lock().unwrap().contains(&params)
+                    || self.prepared.lock().unwrap().entries.contains_key(&params)
+                {
+                    continue;
+                }
+            }
+            let key = (
+                key,
+                f32::from(request.font_size).to_bits(),
+                request.subpixel_variant,
+                request.scale_factor.to_bits(),
+            );
+            if scheduled.insert(key) {
+                batch.push(request);
+            }
+            if batch.len() == 256 {
+                self.prepare_batch(std::mem::take(&mut batch));
+            }
+        }
+        if !batch.is_empty() {
+            self.prepare_batch(batch);
+        }
     }
     fn prepare_raster_style(&self, request: RasterStyleRequest) -> PreparedRasterStyle {
-        let color = request.scene_color;
-        let key = (
-            request.font_id.0,
-            request.glyph_id.0,
-            request.requested_mode,
-            request.foreground_dependency,
-            [
-                color.color.red.to_bits(),
-                color.color.green.to_bits(),
-                color.color.blue.to_bits(),
-                color.alpha.to_bits(),
-            ],
-        );
+        let key = style_key(request);
         let mut styles = self.styles.lock().unwrap();
         if let Some(style) = styles.get(&key) {
             return *style;
         }
         let style = call(Call::Style { request }).expect("raster style");
-        if styles.len() > 4096 {
+        if styles.len() >= 4096 {
             styles.clear();
         }
         styles.insert(key, style);
@@ -297,6 +385,9 @@ impl PlatformTextSystem for RemoteTextSystem {
     fn recommended_rendering_mode(&self, font_id: FontId, font_size: Pixels) -> TextRenderingMode {
         let key = (font_id.0, f32::from(font_size).to_bits());
         let mut modes = self.modes.lock().unwrap();
+        if modes.len() >= 4096 {
+            modes.clear();
+        }
         *modes
             .entry(key)
             .or_insert_with(|| call(Call::Mode { font_id, font_size }).expect("raster mode"))
@@ -330,6 +421,27 @@ impl PlatformTextSystem for RemoteTextSystem {
             boxes: data.boxes,
             alignment_offset: data.alignment_offset,
             size: data.size,
+        }
+    }
+}
+impl RemoteTextSystem {
+    fn prepare_batch(&self, requests: Vec<GlyphRasterRequest>) {
+        // A failed optional batch falls back to ordinary per-glyph calls,
+        // retaining their original diagnostics and rasterization behavior.
+        if let Ok(glyphs) = call::<Vec<PreparedGlyph>>(Call::PrewarmGlyphs { requests }) {
+            let mut styles = self.styles.lock().unwrap();
+            let mut prepared = self.prepared.lock().unwrap();
+            let mut rasterized = self.rasterized.lock().unwrap();
+            for glyph in glyphs {
+                if styles.len() >= 4096 {
+                    styles.clear();
+                }
+                styles.insert(style_key(glyph.request.style), glyph.params.raster_style);
+                if glyph.raster.is_ok() {
+                    remember_raster(&mut rasterized, glyph.params.clone());
+                }
+                prepared.insert(glyph.params, glyph.raster);
+            }
         }
     }
 }
@@ -446,18 +558,29 @@ impl PlatformTextLayout for RemoteLayout {
 
 #[cfg(feature = "host-services")]
 pub struct TextService {
-    text: gpui_ce_parley::ParleyTextSystem,
+    text: Arc<dyn PlatformTextSystem>,
+    factory: TextSystemFactory,
     layouts: collections::HashMap<u64, Arc<dyn PlatformTextLayout>>,
     next: u64,
     dynamic_fonts: bool,
 }
 #[cfg(feature = "host-services")]
+pub type TextSystemFactory =
+    Arc<dyn Fn() -> anyhow::Result<Arc<dyn PlatformTextSystem>> + Send + Sync>;
+#[cfg(feature = "host-services")]
 impl TextService {
     pub fn new() -> anyhow::Result<Self> {
-        let text = gpui_ce_parley::ParleyTextSystem::new_with_system_font(
-            gpui_ce_parley::SystemFonts::Load,
-            "IBM Plex Sans",
-        );
+        Self::with_factory(Self::portable_factory())
+    }
+    pub fn portable_factory() -> TextSystemFactory {
+        Arc::new(|| {
+            Ok(Arc::new(
+                gpui_ce_parley::ParleyTextSystem::without_system_fonts(),
+            ))
+        })
+    }
+    pub fn with_factory(factory: TextSystemFactory) -> anyhow::Result<Self> {
+        let text = factory()?;
         text.add_fonts(vec![
             Cow::Borrowed(include_bytes!(
                 "../../assets/fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf"
@@ -465,12 +588,11 @@ impl TextService {
             Cow::Borrowed(include_bytes!(
                 "../../assets/fonts/ibm-plex-sans/IBMPlexSans-SemiBold.ttf"
             )),
-            Cow::Borrowed(include_bytes!(
-                "../../assets/fonts/lilex/Lilex-Regular.ttf"
-            )),
+            Cow::Borrowed(include_bytes!("../../assets/fonts/lilex/Lilex-Regular.ttf")),
         ])?;
         Ok(Self {
             text,
+            factory,
             layouts: Default::default(),
             next: 0,
             dynamic_fonts: false,
@@ -507,7 +629,7 @@ impl TextService {
                 Ok(match request {
                     Call::Reset => {
                         if self.dynamic_fonts {
-                            *self = Self::new()?;
+                            *self = Self::with_factory(self.factory.clone())?;
                         }
                         self.layouts.clear();
                         encode(&Ok::<_, String>(()))
@@ -677,6 +799,33 @@ impl TextService {
                         self.layout(id)?
                             .selection_from_pixel_point(point, height, kind),
                     )),
+                    Call::PrewarmGlyphs { requests } => {
+                        anyhow::ensure!(
+                            requests.len() <= 256,
+                            "glyph preparation batch exceeds budget"
+                        );
+                        let mut glyphs = Vec::with_capacity(requests.len());
+                        let mut bytes = 0;
+                        for request in requests {
+                            let style = self.text.prepare_raster_style(request.style);
+                            let params = request.with_style(style);
+                            let raster = self
+                                .text
+                                .rasterize_glyph(&params)
+                                .map_err(|error| format!("{error:#}"));
+                            bytes += raster.as_ref().map_or(0, |r| r.pixels.len());
+                            anyhow::ensure!(
+                                bytes <= MAX_PREPARED_BYTES,
+                                "glyph preparation pixels exceed batch budget"
+                            );
+                            glyphs.push(PreparedGlyph {
+                                request,
+                                params,
+                                raster,
+                            });
+                        }
+                        encode(&Ok::<_, String>(glyphs))
+                    }
                 })
             },
         ))
@@ -703,6 +852,62 @@ mod tests {
         let value: Result<R, String> =
             crate::wire::decode_value(&bytes).map_err(anyhow::Error::msg)?;
         value.map_err(anyhow::Error::msg)
+    }
+    #[test]
+    fn batched_glyphs_match_native_styles_placement_and_pixels() {
+        let mut service = TextService::new().unwrap();
+        let font_id = service
+            .text
+            .font_id(&Font {
+                family: "IBM Plex Sans".into(),
+                ..Default::default()
+            })
+            .unwrap();
+        let mut requests = Vec::new();
+        for ch in ['A', ' ', 'é'] {
+            let glyph_id = service.text.glyph_for_char(font_id, ch).unwrap();
+            for requested_mode in [
+                GlyphRenderMode::Grayscale,
+                GlyphRenderMode::Subpixel,
+                GlyphRenderMode::Color,
+            ] {
+                for scale_factor in [1., 2.] {
+                    for subpixel_variant in [point(0, 0), point(3, 2)] {
+                        requests.push(GlyphRasterRequest {
+                            style: RasterStyleRequest {
+                                font_id,
+                                glyph_id,
+                                scene_color: hsla_to_rgba(hsla(0.37, 0.61, 0.43, 0.83)),
+                                requested_mode,
+                                foreground_dependency: ForegroundDependency::Full,
+                            },
+                            font_size: px(16.),
+                            subpixel_variant,
+                            scale_factor,
+                        });
+                    }
+                }
+            }
+        }
+        let expected: Vec<_> = requests
+            .iter()
+            .map(|request| {
+                let params = request.with_style(service.text.prepare_raster_style(request.style));
+                let raster = service.text.rasterize_glyph(&params).unwrap();
+                (params, raster)
+            })
+            .collect();
+        let actual: Vec<PreparedGlyph> =
+            invoke(&mut service, Call::PrewarmGlyphs { requests }).unwrap();
+        assert_eq!(actual.len(), expected.len());
+        for (actual, (params, raster)) in actual.into_iter().zip(expected) {
+            assert_eq!(actual.params, params);
+            let actual = actual.raster.unwrap();
+            assert_eq!(actual.bounds, raster.bounds);
+            assert_eq!(actual.size, raster.size);
+            assert_eq!(actual.format, raster.format);
+            assert_eq!(actual.pixels, raster.pixels);
+        }
     }
     #[test]
     fn platform_bridge_preserves_bidi_carets_selection_and_layout_lifetimes() {
@@ -797,10 +1002,8 @@ mod tests {
             &mut service,
             Call::AddFonts {
                 fonts: vec![
-                    include_bytes!(
-                        "../../assets/fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf"
-                    )
-                    .to_vec(),
+                    include_bytes!("../../assets/fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf")
+                        .to_vec(),
                 ],
             },
         )

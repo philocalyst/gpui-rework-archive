@@ -35,6 +35,10 @@ wasm-bindgen-futures.workspace = true
 js-sys.workspace = true
 web-sys = { version = "0.3", features = ["Window", "Request", "RequestInit", "Response", "Headers", "Storage", "AbortController", "AbortSignal", "Navigator", "Blob", "BlobPropertyBag"] }
 
+[dev-dependencies]
+gpui = { workspace = true, features = ["headless"] }
+image.workspace = true
+
 [[bin]]
 name = "gpui-guide"
 path = "src/main.rs"

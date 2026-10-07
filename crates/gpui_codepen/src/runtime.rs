@@ -68,6 +68,15 @@ pub struct Runtime {
 }
 impl Runtime {
     pub fn new() -> Result<Self> {
+        Self::with_text_system_factory(gpui_codepen_guest::rpc::TextService::portable_factory())
+    }
+    /// Uses the same native text backend as ordinary GPUI windows.
+    pub fn native() -> Result<Self> {
+        Self::with_text_system_factory(Arc::new(gpui_platform::text_system))
+    }
+    pub fn with_text_system_factory(
+        factory: gpui_codepen_guest::rpc::TextSystemFactory,
+    ) -> Result<Self> {
         let directory = tempfile::Builder::new().prefix("gpui-codepen-").tempdir()?;
         // One shared dependency cache, unique component targets: concurrent views
         // cannot overwrite each other's MIR or force serde recompilation.
@@ -124,7 +133,9 @@ impl Runtime {
             sysroot,
             miri_sysroot: PathBuf::from(String::from_utf8(miri_sysroot.stdout)?.trim()),
             invocation: None,
-            platform: Arc::new(crate::platform_service::PlatformService::new()?),
+            platform: Arc::new(crate::platform_service::PlatformService::with_factory(
+                factory,
+            )?),
         })
     }
     pub fn evaluate(&mut self, request: Request, latest: &AtomicU64) -> Reply {

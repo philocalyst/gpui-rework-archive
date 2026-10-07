@@ -1,8 +1,9 @@
 use gpui::CaretSelection;
 use std::{
     ops::Range,
-    time::{Duration, Instant},
+    time::Duration,
 };
+use web_time::Instant;
 
 /// Maximum number of history entries to keep.
 pub const MAX_HISTORY_LEN: usize = 1000;

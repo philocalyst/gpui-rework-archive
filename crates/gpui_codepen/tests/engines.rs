@@ -72,7 +72,12 @@ fn component(window:&mut Window,cx:&mut App)->Entity<Animated>{
  cx.new(|_|Animated{renders:0})
 }"#;
     let mut runtime = Runtime::new().unwrap();
-    let input = PreviewContext { viewport: size(px(400.), px(300.)), scale_factor: 1.25, elapsed_ms: 16, ..Default::default() };
+    let input = PreviewContext {
+        viewport: size(px(400.), px(300.)),
+        scale_factor: 1.25,
+        elapsed_ms: 16,
+        ..Default::default()
+    };
     let mut backgrounds = Vec::new();
     for generation in 1..=3 {
         let reply = execute(&mut runtime, generation, source, input.clone());
@@ -83,7 +88,10 @@ fn component(window:&mut Window,cx:&mut App)->Entity<Animated>{
         assert_eq!(frame.next_frame_ms.is_some(), generation < 3);
     }
     for (index, background) in backgrounds.into_iter().enumerate() {
-        assert_eq!(background, gpui::Background::from(gpui::rgb(0x100001 + index as u32)));
+        assert_eq!(
+            background,
+            gpui::Background::from(gpui::rgb(0x100001 + index as u32))
+        );
     }
 }
 
@@ -133,15 +141,46 @@ fn component(window:&mut Window,cx:&mut App)->Entity<Input>{
     use gpui_ce_codepen::guest::{InputMessage, TextEdit};
     let mut runtime = Runtime::new().unwrap();
     let first = execute(&mut runtime, 1, source, Default::default());
-    let text = first.frame.expect(&first.diagnostics).text.expect("focused real input handler");
+    let text = first
+        .frame
+        .expect(&first.diagnostics)
+        .text
+        .expect("focused real input handler");
     assert_eq!(text.text, "A😀B");
     assert_eq!(text.length, Some(4));
-    let marked = execute(&mut runtime, 2, source, PreviewContext { events: vec![InputMessage::Text(TextEdit::Mark { range: Some(1..3), text: "é水".into(), selection: Some(0..2) })], ..Default::default() });
+    let marked = execute(
+        &mut runtime,
+        2,
+        source,
+        PreviewContext {
+            events: vec![InputMessage::Text(TextEdit::Mark {
+                range: Some(1..3),
+                text: "é水".into(),
+                selection: Some(0..2),
+            })],
+            ..Default::default()
+        },
+    );
     let text = marked.frame.expect(&marked.diagnostics).text.unwrap();
     assert_eq!(text.text, "Aé水B");
     assert_eq!(text.marked, Some(1..3));
     assert_eq!(text.selection.unwrap().range, 1..3);
-    let committed = execute(&mut runtime, 3, source, PreviewContext { events: vec![InputMessage::Text(TextEdit::Replace { range: None, text: "🌿".into() }), InputMessage::Text(TextEdit::Select { range: 0..1 }), InputMessage::Text(TextEdit::Unmark)], ..Default::default() });
+    let committed = execute(
+        &mut runtime,
+        3,
+        source,
+        PreviewContext {
+            events: vec![
+                InputMessage::Text(TextEdit::Replace {
+                    range: None,
+                    text: "🌿".into(),
+                }),
+                InputMessage::Text(TextEdit::Select { range: 0..1 }),
+                InputMessage::Text(TextEdit::Unmark),
+            ],
+            ..Default::default()
+        },
+    );
     let text = committed.frame.expect(&committed.diagnostics).text.unwrap();
     assert_eq!(text.text, "A🌿B");
     assert_eq!(text.marked, None);
@@ -277,4 +316,78 @@ fn profile_real_gpui_frames() {
     let reply = execute(&mut runtime, 5, LESSONS[0].source, Default::default());
     assert!(reply.frame.is_some(), "{}", reply.diagnostics);
     println!("Text lesson: {} ms", reply.elapsed_ms);
+}
+
+#[test]
+#[ignore = "requires setup.py and full vendored Miri"]
+fn interpreted_scene_matches_native_gpui_platform_text() {
+    use gpui::{prelude::*, *};
+    struct View;
+    impl Render for View {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            div()
+                .size_full()
+                .p_4()
+                .bg(rgb(0xffffff))
+                .text_color(rgb(0x24362c))
+                .child("Platform text Aé😀")
+        }
+    }
+    struct CaptureOnly(Arc<SceneAtlas>);
+    impl PlatformHeadlessRenderer for CaptureOnly {
+        fn render_scene_to_image(
+            &mut self,
+            _: &Scene,
+            _: Size<DevicePixels>,
+        ) -> anyhow::Result<image::RgbaImage> {
+            anyhow::bail!("capture only")
+        }
+        fn render_scene(&mut self, _: &Scene, _: Size<DevicePixels>) -> anyhow::Result<()> {
+            Ok(())
+        }
+        fn sprite_atlas(&self) -> Arc<dyn PlatformAtlas> {
+            self.0.clone()
+        }
+    }
+    let atlas = Arc::new(SceneAtlas::new());
+    let captured = atlas.clone();
+    let mut native = HeadlessAppContext::with_platform(
+        gpui_platform::text_system().unwrap(),
+        Arc::new(()),
+        move || Some(Box::new(CaptureOnly(captured.clone()))),
+    );
+    let viewport = size(px(400.), px(250.));
+    let window = native
+        .open_window_with_scale_factor(viewport, 2., |_, cx| cx.new(|_| View))
+        .unwrap();
+    let expected = native
+        .capture_scene(window.into(), |tile| atlas.resolve(tile))
+        .unwrap();
+    let source = r#"use gpui::{*, prelude::*};
+struct View;
+impl Render for View {
+ fn render(&mut self,_:&mut Window,_:&mut Context<Self>)->impl IntoElement {
+  div().size_full().p_4().bg(rgb(0xffffff)).text_color(rgb(0x24362c)).child("Platform text Aé😀")
+ }
+}
+fn component(_:&mut Window,cx:&mut App)->Entity<View>{cx.new(|_|View)}"#;
+    let mut runtime = Runtime::native().unwrap();
+    let reply = execute(
+        &mut runtime,
+        1,
+        source,
+        PreviewContext {
+            viewport,
+            scale_factor: 2.,
+            ..Default::default()
+        },
+    );
+    let actual = reply.frame.expect(&reply.diagnostics).scene;
+    let atlas = SceneAtlas::from_captured_bitmaps(actual.bitmaps()).unwrap();
+    let actual =
+        SceneCapture::capture(&actual.to_scene().unwrap(), |tile| atlas.resolve(tile)).unwrap();
+    assert_eq!(
+        actual, expected,
+        "interpreted GPUI must preserve native layout, styles, placements, and glyph pixels"
+    );
 }

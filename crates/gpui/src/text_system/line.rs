@@ -287,6 +287,36 @@ fn paint_text_fragment(
         .text_system
         .bounding_box(fragment.font_id, fragment.font_size)
         .size;
+    // Most platforms leave this lazy iterator untouched. Interpreter bridges
+    // use it to prepare visible glyphs in one backend call, then the exact same
+    // paint methods below consume the prepared styles and atlas pixels.
+    let mut requests = fragment
+        .glyphs
+        .iter()
+        .filter(|glyph| {
+            let cull_origin = point(
+                context.line_origin.x + glyph.position.x,
+                context.line_origin.y,
+            );
+            Bounds::new(cull_origin, max_glyph_size).intersects(&window.content_mask().bounds)
+        })
+        .map(|glyph| {
+            let origin = point(
+                context.line_origin.x + glyph.position.x,
+                context.baseline_y + glyph.position.y,
+            );
+            window
+                .glyph_raster_request(
+                    origin,
+                    fragment.font_id,
+                    glyph.id,
+                    fragment.font_size,
+                    fragment.style.color,
+                    glyph.is_emoji,
+                )
+                .1
+        });
+    context.text_system.prewarm_glyphs(&mut requests);
     for glyph in &*fragment.glyphs {
         let cull_origin = point(
             context.line_origin.x + glyph.position.x,

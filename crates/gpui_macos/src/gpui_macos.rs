@@ -37,3 +37,8 @@ pub(crate) use text_system::*;
 pub(crate) use window::*;
 
 pub use platform::MacPlatform;
+
+/// Creates the platform text backend without opening an AppKit window.
+pub fn text_system() -> std::sync::Arc<dyn gpui::PlatformTextSystem> {
+    std::sync::Arc::new(MacTextSystem::new())
+}

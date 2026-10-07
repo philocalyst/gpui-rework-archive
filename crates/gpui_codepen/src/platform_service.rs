@@ -7,7 +7,7 @@ use std::{
     net::{TcpListener, TcpStream},
     sync::{
         Arc, Mutex,
-        atomic::{AtomicBool, Ordering},
+        atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering},
     },
     thread,
     time::Duration,
@@ -16,33 +16,108 @@ use std::{
 pub struct PlatformService {
     pub address: String,
     stop: Arc<AtomicBool>,
-    failure: Arc<Mutex<Option<String>>>,
+    connections: Arc<Connections>,
     thread: Option<thread::JoinHandle<()>>,
 }
+#[derive(Default)]
+struct Connections {
+    latest: AtomicU64,
+    active: AtomicUsize,
+    failure: Mutex<Option<String>>,
+    idle: Mutex<Vec<gpui_codepen_guest::rpc::TextService>>,
+}
+impl Connections {
+    fn report(&self, id: u64, error: Option<String>) {
+        let mut failure = self.failure.lock().unwrap();
+        if self.latest.load(Ordering::Acquire) == id {
+            *failure = error;
+        }
+    }
+}
+struct ActiveConnection(Arc<Connections>);
+impl Drop for ActiveConnection {
+    fn drop(&mut self) {
+        self.0.active.fetch_sub(1, Ordering::AcqRel);
+    }
+}
 impl PlatformService {
+    #[cfg(test)]
     pub fn new() -> Result<Self> {
+        Self::with_factory(gpui_codepen_guest::rpc::TextService::portable_factory())
+    }
+    pub fn with_factory(factory: gpui_codepen_guest::rpc::TextSystemFactory) -> Result<Self> {
         let listener = TcpListener::bind("127.0.0.1:0")?;
         listener.set_nonblocking(true)?;
         let address = listener.local_addr()?.to_string();
         let stop = Arc::new(AtomicBool::new(false));
         let stopped = stop.clone();
-        let failure = Arc::new(Mutex::new(None));
-        let failed = failure.clone();
-        let mut text = gpui_codepen_guest::rpc::TextService::new()?;
+        let connections = Arc::new(Connections::default());
+        connections
+            .idle
+            .lock()
+            .unwrap()
+            .push(gpui_codepen_guest::rpc::TextService::with_factory(
+                factory.clone(),
+            )?);
+        let incoming = connections.clone();
         let thread = thread::spawn(move || {
             while !stopped.load(Ordering::Relaxed) {
                 match listener.accept() {
                     Ok((mut stream, _)) => {
-                        let result = serve(&mut stream, &stopped, &mut text, &failed);
-                        if let Err(error) = result {
-                            *failed.lock().unwrap() = Some(format!("{error:#}"));
+                        // A previous interpreter may have been cancelled inside a
+                        // native shaping operation. Its backend belongs to its
+                        // connection; the next edit never waits for that call.
+                        let id = incoming.latest.fetch_add(1, Ordering::AcqRel) + 1;
+                        incoming.report(id, None);
+                        if incoming.active.load(Ordering::Acquire) >= 4 {
+                            let message = "GPUI text service is busy with previous revisions. Run again in a moment.";
+                            incoming.report(id, Some(message.into()));
+                            if let Ok(reply) = gpui_codepen_guest::wire::encode_value(
+                                &Err::<(), _>(message.to_owned()),
+                            ) {
+                                // Fail explicitly without waiting for another
+                                // backend or retaining a fifth native operation.
+                                let _ = stream.set_write_timeout(Some(Duration::from_millis(100)));
+                                let _ = stream.write_all(&(reply.len() as u32).to_le_bytes());
+                                let _ = stream.write_all(&reply);
+                            }
+                            continue;
                         }
+                        incoming.active.fetch_add(1, Ordering::AcqRel);
+                        let active = ActiveConnection(incoming.clone());
+                        let stopped = stopped.clone();
+                        let factory = factory.clone();
+                        thread::spawn(move || {
+                            let connections = &active.0;
+                            let cached = connections.idle.lock().unwrap().pop();
+                            let text = cached.map(Ok).unwrap_or_else(|| {
+                                gpui_codepen_guest::rpc::TextService::with_factory(factory.clone())
+                            });
+                            match text {
+                                Ok(mut text) => {
+                                    let result =
+                                        serve(&mut stream, &stopped, &mut text, connections, id);
+                                    if let Err(error) = result {
+                                        connections.report(id, Some(format!("{error:#}")));
+                                    }
+                                    if !stopped.load(Ordering::Relaxed) {
+                                        // Keep one warm backend, without accumulating
+                                        // font collections after rapid revisions.
+                                        let mut idle = connections.idle.lock().unwrap();
+                                        if idle.is_empty() {
+                                            idle.push(text);
+                                        }
+                                    }
+                                }
+                                Err(error) => connections.report(id, Some(format!("{error:#}"))),
+                            }
+                        });
                     }
                     Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
                         thread::sleep(Duration::from_millis(5));
                     }
                     Err(error) => {
-                        *failed.lock().unwrap() =
+                        *incoming.failure.lock().unwrap() =
                             Some(format!("accept platform connection: {error}"));
                         break;
                     }
@@ -52,19 +127,20 @@ impl PlatformService {
         Ok(Self {
             address,
             stop,
-            failure,
+            connections,
             thread: Some(thread),
         })
     }
     pub fn failure(&self) -> Option<String> {
-        self.failure.lock().unwrap().clone()
+        self.connections.failure.lock().unwrap().clone()
     }
 }
 fn serve(
     stream: &mut TcpStream,
     stop: &AtomicBool,
     text: &mut gpui_codepen_guest::rpc::TextService,
-    failure: &Mutex<Option<String>>,
+    connections: &Connections,
+    id: u64,
 ) -> Result<()> {
     stream.set_nodelay(true)?;
     stream.set_read_timeout(Some(Duration::from_millis(100)))?;
@@ -123,18 +199,19 @@ fn serve(
         if std::env::var_os("GPUI_CODEPEN_PROFILE").is_some() {
             eprintln!("GPUI RPC received {received} bytes");
         }
-        let reply = text.handle(&request);
-        anyhow::ensure!(
-            reply.len() <= gpui_codepen_guest::MAX_FRAME_BYTES,
-            "platform response exceeds budget ({} bytes)",
-            reply.len()
-        );
+        let mut reply = text.handle(&request);
+        if reply.len() > gpui_codepen_guest::MAX_FRAME_BYTES {
+            reply = gpui_codepen_guest::wire::encode_value(&Err::<(), _>(
+                "platform response exceeds transport budget".to_owned(),
+            ))
+            .map_err(anyhow::Error::msg)?;
+        }
         let mut packet = (reply.len() as u32).to_le_bytes().to_vec();
         packet.extend_from_slice(&reply);
         stream
             .write_all(&packet)
             .with_context(|| format!("write platform response ({} bytes)", reply.len()))?;
-        *failure.lock().unwrap() = None;
+        connections.report(id, None);
     }
     Ok(())
 }
@@ -192,5 +269,26 @@ mod tests {
         assert!(service.failure().is_none());
         service.stop.store(true, Ordering::Relaxed);
         service.thread.take().unwrap().join().unwrap();
+    }
+
+    #[test]
+    fn stalled_previous_connection_does_not_block_a_new_interpreter() {
+        let service = PlatformService::new().unwrap();
+        let mut previous = TcpStream::connect(&service.address).unwrap();
+        // Leave the old stream within a request. The serial implementation
+        // would never accept the second interpreter until this stream closed.
+        previous.write_all(&[4]).unwrap();
+        let mut current = TcpStream::connect(&service.address).unwrap();
+        current
+            .set_read_timeout(Some(Duration::from_secs(5)))
+            .unwrap();
+        generation(&mut current, false);
+        assert!(service.failure().is_none());
+        let start = std::time::Instant::now();
+        drop(service);
+        assert!(
+            start.elapsed() < Duration::from_secs(1),
+            "service shutdown must not wait for an abandoned backend"
+        );
     }
 }
