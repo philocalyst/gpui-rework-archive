@@ -167,7 +167,7 @@ impl<V: Render + 'static> Scenario<V> {
         if options.window_bounds.is_none() {
             options.window_bounds = Some(WindowBounds::centered(self.size, cx));
         }
-        Ok(cx.open_window(options, |window, app| (self.build)(window, app))?)
+        cx.open_window(options, |window, app| (self.build)(window, app))
     }
 }
 

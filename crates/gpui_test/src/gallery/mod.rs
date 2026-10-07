@@ -119,18 +119,18 @@ pub fn text_scenarios() -> Result<Vec<Scenario<TextScenario>>> {
 
 /// Canonical layered painting scenario used by the rendering example.
 pub fn effects_scenario() -> Result<Scenario<EffectsScenario>> {
-    Ok(Scenario::new(
+    Scenario::new(
         "effects",
         "Clipping, opacity, gradients, paths, and nested filters",
         size(px(480.), px(420.)),
         |_, cx: &mut App| cx.new(|_| EffectsScenario),
     )?
-    .checkpoint("effects", "Layered effects", Duration::ZERO)?)
+    .checkpoint("effects", "Layered effects", Duration::ZERO)
 }
 
 /// Fixed-clock animation is captured using the same GPUI animation wrapper as its runnable view.
 pub fn animation_scenario() -> Result<Scenario<AnimationScenario>> {
-    Ok(Scenario::new(
+    Scenario::new(
         "animation-clock",
         "Animation at fixed dispatcher times",
         size(px(320.), px(220.)),
@@ -140,23 +140,23 @@ pub fn animation_scenario() -> Result<Scenario<AnimationScenario>> {
     .checkpoint("t300", "300 ms", Duration::from_millis(300))?
     .checkpoint("t600", "600 ms", Duration::from_millis(600))?
     .checkpoint("t900", "900 ms", Duration::from_millis(900))?
-    .checkpoint("t1200", "1200 ms", Duration::from_millis(1200))?)
+    .checkpoint("t1200", "1200 ms", Duration::from_millis(1200))
 }
 
 /// Canonical flexible-row example and its capture checkpoint.
 pub fn layout_scenario() -> Result<Scenario<LayoutScenario>> {
-    Ok(Scenario::new(
+    Scenario::new(
         "layout",
         "Flexible layout",
         size(px(620.), px(300.)),
         |_, cx: &mut App| cx.new(|_| LayoutScenario),
     )?
-    .checkpoint("default", "Default layout", Duration::ZERO)?)
+    .checkpoint("default", "Default layout", Duration::ZERO)
 }
 
 /// Selection, disclosure, focus, and scroll states after real input dispatch.
 pub fn interaction_scenario() -> Result<Scenario<InteractionScenario>> {
-    Ok(Scenario::new(
+    Scenario::new(
         "interaction-states",
         "Selection, disclosure, focus, and scroll input",
         size(px(420.), px(420.)),
@@ -217,34 +217,34 @@ pub fn interaction_scenario() -> Result<Scenario<InteractionScenario>> {
             );
             Ok(())
         },
-    )?)
+    )
 }
 
 /// Self-contained SVG and raster clipping/transformation example.
 pub fn media_scenario() -> Result<Scenario<MediaScenario>> {
-    Ok(Scenario::new(
+    Scenario::new(
         "media",
         "SVG and raster image clipping and transforms",
         size(px(360.), px(300.)),
         |_, cx: &mut App| cx.new(|_| MediaScenario),
     )?
-    .checkpoint("default", "Inline SVG and raster", Duration::ZERO)?)
+    .checkpoint("default", "Inline SVG and raster", Duration::ZERO)
 }
 
 /// Large virtual list and deliberate overlap used for paint stress captures.
 pub fn stress_scenario() -> Result<Scenario<StressScenario>> {
-    Ok(Scenario::new(
+    Scenario::new(
         "layered-stress",
         "Virtualized rows and overlapping paint layers",
         size(px(620.), px(480.)),
         |_, cx: &mut App| cx.new(|_| StressScenario),
     )?
-    .checkpoint("default", "Virtual rows", Duration::ZERO)?)
+    .checkpoint("default", "Virtual rows", Duration::ZERO)
 }
 
 /// Foreground cancellation and completion states driven by real button input.
 pub fn tasks_scenario() -> Result<Scenario<AsyncTaskScenario>> {
-    Ok(Scenario::new(
+    Scenario::new(
         "async-tasks",
         "Foreground task cancellation and completion",
         size(px(360.), px(220.)),
@@ -317,7 +317,7 @@ pub fn tasks_scenario() -> Result<Scenario<AsyncTaskScenario>> {
             );
             Ok(())
         },
-    )?)
+    )
 }
 
 /// Returns the deterministic regression gallery. The same typed views and checkpoints are used

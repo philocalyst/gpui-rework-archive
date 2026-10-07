@@ -51,7 +51,7 @@ fn sample_suite(color: [u8; 4]) -> RenderedSuite {
         name: "Frame".into(),
         time_ns: 0,
         capture,
-        image: image.clone(),
+        image,
         metrics: ScenarioMetrics {
             frame_count: 1,
             scene_build_p50_ns: 10,

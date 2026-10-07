@@ -134,7 +134,7 @@ pub struct NativeReplayInfo {
     pub backend: String,
     /// Adapter class, including integrated, discrete, and software devices.
     pub device_type: String,
-    /// Why hardware GPU timestamps are unavailable, if the adapter does not support them.
+    /// Why device timestamps are unavailable, including unsupported or invalid driver counters.
     pub timestamp_reason: Option<String>,
 }
 
@@ -146,7 +146,7 @@ pub struct NativeReplayMetrics {
     /// CPU elapsed time from frame preparation through encoding, queue submission, and completion
     /// wait. Excludes target creation, timestamp mapping, and pixel readback.
     pub encode_submit_completion: TimingPercentiles,
-    /// GPU command execution timestamps, absent when unsupported by the adapter.
+    /// GPU command execution timestamps, absent for clear-only frames or unavailable counters.
     pub gpu: Option<TimingPercentiles>,
     /// Renderer-owned GPU resource bytes, not total driver/device VRAM.
     pub tracked_owned_bytes: u64,

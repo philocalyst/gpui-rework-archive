@@ -14,13 +14,13 @@ impl Render for EmptyView {
 }
 
 fn empty_scenario() -> Result<Scenario<EmptyView>> {
-    Ok(Scenario::new(
+    Scenario::new(
         "native-empty-scene",
         "Clear-only scene",
         size(px(64.), px(48.)),
         |_, cx: &mut App| cx.new(|_| EmptyView),
     )?
-    .checkpoint("clear", "Clear", Duration::ZERO)?)
+    .checkpoint("clear", "Clear", Duration::ZERO)
 }
 
 /// Hardware CI opts in to replay every registered capture through the real WGPU renderer.
