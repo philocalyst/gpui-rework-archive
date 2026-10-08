@@ -1273,3 +1273,28 @@ run and seven test-harness examples, with one ignored. Its log is
 whitespace, JavaScript syntax, canonical generation, and link-generation
 checks pass. The combined artifact and its browser checks are the next
 validation boundary.
+
+### Host focus and strict-link repairs
+
+The combined build rejected two new intra-doc links: `on_drop` belongs to
+InteractiveElement, and the Focusable page needed a crate-qualified
+track_focus target. Both are corrected. The failed build log remains
+`target/documentation-input-lifetime-site.log`; it is not a successful artifact.
+
+A fresh browser-only counter session also exposed a second focus boundary.
+The browser textarea received focus, but the host GPUI preview had no selected
+focus handle. Pressing Tab moved to the workbench's Diagnostics control. A
+pointer click had concealed this omission in earlier checks. Codepen now
+exposes focus_preview, and the documentation host selects that surface during
+construction. The method explains the distinct host, interpreted-component,
+and browser-document focus requirements. Browser verification follows the
+next combined build.
+
+The complete Actix and Tokio homepages were read, including Actix's four code
+examples; the complete wgpu homepage text was read. These checks did not run
+their code or inspect their images. The egui homepage initially exposed only
+Loading to text extraction. Its loaded browser demo was then visually read:
+the complete visible About panel, its save-button example, the Arthur/age
+code example, and the visible widget gallery. Other demos and off-screen
+content remain unreviewed. The useful comparison is code beside an immediately
+usable result, with clear links to each example's source.

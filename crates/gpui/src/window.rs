@@ -813,7 +813,8 @@ impl PartialEq<WeakFocusHandle> for FocusHandle {
 /// Lets a caller obtain a view's retained keyboard-focus identity.
 ///
 /// Return a clone of a handle stored on the view, and attach that same
-/// identity to its element tree with [`InteractiveElement::track_focus`].
+/// identity to its element tree with
+/// [`track_focus`](crate::InteractiveElement::track_focus).
 /// Creating a new handle on each call gives callers an identity the rendered
 /// tree does not know. Implementing this trait does not focus the view or
 /// make its handle a tab stop.

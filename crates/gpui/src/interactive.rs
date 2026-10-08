@@ -818,7 +818,7 @@ impl Deref for MouseExitEvent {
 ///
 /// [`FileDropEvent::Entered`] carries this value. Ordinary element drop
 /// handlers can accept it through
-/// [`on_drop`](crate::StatefulInteractiveElement::on_drop). Receiving a path
+/// [`on_drop`](crate::InteractiveElement::on_drop). Receiving a path
 /// does not read the file or establish that it still exists; perform loading
 /// and report its errors separately from accepting the drop.
 ///

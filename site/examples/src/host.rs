@@ -41,7 +41,7 @@ struct Host {
 }
 
 impl Host {
-    fn new(source: &str, cx: &mut Context<Self>) -> Self {
+    fn new(source: &str, window: &mut Window, cx: &mut Context<Self>) -> Self {
         let browser = web_sys::window().expect("browser preview window");
         let parent = browser
             .parent()
@@ -51,6 +51,7 @@ impl Host {
         let preview = cx.new(|cx| {
             let mut preview = Codepen::preview_only(source, cx);
             preview.set_auto_run(false, cx);
+            preview.focus_preview(window, cx);
             preview
         });
         let changed = cx.observe(&preview, |host, _, cx| host.send_status(cx));
@@ -198,5 +199,5 @@ pub fn run(slug: &str) {
         }
         return;
     };
-    super::support::run(move |_, cx| cx.new(|cx| Host::new(source, cx)));
+    super::support::run(move |window, cx| cx.new(|cx| Host::new(source, window, cx)));
 }

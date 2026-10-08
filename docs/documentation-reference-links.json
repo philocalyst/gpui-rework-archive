@@ -6,7 +6,7 @@
   "links": [
     {
       "url": "https://actix.rs/",
-      "status": "fetched (200; not individually read)",
+      "status": "read (complete homepage text and four code examples; no execution or image review; 2026-10-08 UTC)",
       "http_status": "200"
     },
     {
@@ -1203,7 +1203,7 @@
     },
     {
       "url": "https://tokio.rs/",
-      "status": "fetched (200; not individually read)",
+      "status": "read (complete homepage text; no image review; 2026-10-08 UTC)",
       "http_status": "200"
     },
     {
@@ -1287,7 +1287,7 @@
     },
     {
       "url": "https://wgpu.rs/",
-      "status": "fetched (200; not individually read)",
+      "status": "read (complete homepage text and binding links; no image review; 2026-10-08 UTC)",
       "http_status": "200"
     },
     {
@@ -1297,7 +1297,7 @@
     },
     {
       "url": "https://www.egui.rs/",
-      "status": "fetched (200; not individually read)",
+      "status": "surveyed (loaded browser demo: visible About, code example and widget gallery; other demos and off-screen content unread; 2026-10-08 UTC)",
       "http_status": "200"
     },
     {
@@ -1444,9 +1444,9 @@
   "status_legend": {
     "read": "full representative primary page read",
     "surveyed": "primary page opened and key structure inspected",
-      "fetched": "HTTP content fetched but not read in full; status stored in http_status",
+    "fetched": "HTTP content fetched but not read in full; status stored in http_status",
     "inaccessible": "access failed",
-      "extracted": "URL came from article; retained only when no fetch result was available"
+    "extracted": "URL came from article; retained only when no fetch result was available"
   },
   "direct_survey_date": "2026-10-07 UTC"
 }

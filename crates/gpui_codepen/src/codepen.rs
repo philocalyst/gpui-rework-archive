@@ -410,12 +410,30 @@ impl Codepen {
     pub fn source(&self, _: &App) -> String {
         self.source.clone()
     }
-    /// Uses GPUI's existing scene renderer and input routing, leaving editor
-    /// controls to the embedding application.
+    /// Creates a preview whose editor and controls belong to the embedding application.
+    ///
+    /// Like [`new`](Self::new), this does not run the source. Call
+    /// [`run`](Self::run) for the first frame and
+    /// [`focus_preview`](Self::focus_preview) to receive keys without first
+    /// clicking the result.
     pub fn preview_only(source: impl Into<String>, cx: &mut Context<Self>) -> Self {
         let mut this = Self::new(source, cx);
         this.preview_only = true;
         this
+    }
+    /// Routes this window's keyboard input to the preview.
+    ///
+    /// Call this when opening a preview without a built-in editor, or when the
+    /// user moves from an external editor into its result. It can be called
+    /// before the first frame: rendering attaches the retained focus handle
+    /// to the preview's input surface.
+    ///
+    /// This selects the host surface. The interpreted component still chooses
+    /// its own focused element. In a browser, the preview document must also
+    /// receive browser focus for keyboard events to reach this window.
+    pub fn focus_preview(&self, window: &mut Window, cx: &mut App) {
+        let focus = self.preview.read(cx).focus.clone();
+        window.focus(&focus, cx);
     }
     /// Copies the controller state without running or resetting the component.
     pub fn status(&self) -> CodepenStatus {
