@@ -86,7 +86,7 @@ use crate::{
 /// pointer handling, insert a hitbox in prepaint, then pass it to paint and
 /// filter [`Window::on_mouse_event`] with it. That listener does not perform
 /// hit testing for you. See [`Canvas`] for its style boundary and the
-/// [drawing walkthrough](https://gpui-ce.github.io/examples/drawing/#paint)
+/// [drawing walkthrough](https://gpui-ce.github.io/examples/drawing/#bounds)
 /// for a complete program you can edit.
 // docs:examples:begin
 #[doc = include_str!("../docs/examples/gpui-canvas.md")]

@@ -5,6 +5,6 @@
 Walkthroughs:
 
 - [Implement an element: Measure, prepare, then paint](https://gpui-ce.github.io/examples/custom-element/#draw)
-- [Paint a custom region: Use the rectangle layout assigned](https://gpui-ce.github.io/examples/drawing/#paint)
+- [Paint a custom region: Paint inside the assigned bounds](https://gpui-ce.github.io/examples/drawing/#bounds)
 
 <!-- gpui-walkthroughs:end gpui::Window::paint_quad -->

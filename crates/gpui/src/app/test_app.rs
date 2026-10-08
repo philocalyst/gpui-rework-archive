@@ -439,6 +439,13 @@ impl<V: 'static + Render> TestAppWindow<V> {
 
     /// Updates the root view, then drains ready tasks and effects.
     ///
+    /// The callback already holds a mutable borrow of the root. Dispatching
+    /// input or an action whose listener updates that root would borrow it
+    /// again and panic. Use the `simulate_*` helpers for ordinary input, or
+    /// [`AppContext::update_window`] for window operations that may call back
+    /// into the view. The [accessible-activation test](https://gpui-ce.github.io/book/testing.html#check-accessible-activation-against-the-reported-node)
+    /// demonstrates that distinction.
+    ///
     /// Panics if the window is closed or the root type does not match `V`.
     pub fn update<R>(&mut self, f: impl FnOnce(&mut V, &mut Window, &mut Context<V>) -> R) -> R {
         let result = {

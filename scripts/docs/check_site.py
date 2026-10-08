@@ -66,7 +66,7 @@ def audit(public: Path, rustdoc: Path | None = None, base_url='https://gpui-ce.g
                 target = (rustdoc / '/'.join(segments[2:])).resolve()
                 if target.is_dir() or url.path.endswith('/'):
                     target /= 'index.html'
-                return target, unquote(url.fragment)
+                return target, url.fragment
             return None, None
         route = unquote(url.path)
         if route.startswith('/'):
@@ -86,7 +86,7 @@ def audit(public: Path, rustdoc: Path | None = None, base_url='https://gpui-ce.g
         if target.is_dir() or route.endswith('/'):
             target /= 'index.html'
         # Zola get_url can omit a trailing slash. The server adds it for directories.
-        return target, unquote(url.fragment)
+        return target, url.fragment
 
     def check_link(path, href):
         target, fragment = resolve(path, href)
@@ -119,7 +119,7 @@ def audit(public: Path, rustdoc: Path | None = None, base_url='https://gpui-ce.g
             source_range = (source_page and line_range
                             and int(line_range[1]) <= int(line_range[2])
                             and line_range[1] in ids and line_range[2] in ids)
-            if fragment not in ids and not source_range:
+            if fragment not in ids and unquote(fragment) not in ids and not source_range:
                 errors.append(f'{path}: missing anchor {href}')
 
     guides = [p for p in public.rglob('*.html') if not p.is_relative_to(public / 'api') and not p.is_relative_to(public / 'preview')]
@@ -137,16 +137,18 @@ def audit(public: Path, rustdoc: Path | None = None, base_url='https://gpui-ce.g
         for href in doc.links:
             check_link(path, href)
 
-    # Dependency rustdoc can render a valid Rust path as a literal URI when its
-    # crate has no documentation URL. Check our cross-crate links as rendered,
-    # including redirects from private module paths to public re-exports.
+    # Check local rustdoc links too: rustdoc resolves an item's path without
+    # checking a manually supplied fragment. Follow private-module redirects
+    # before checking the public page. Some cross-crate paths also appear as
+    # literal Rust URIs when the dependency has no documentation URL.
     for package in ('gpui', 'gpui_ce_elements'):
         for path in (public / 'api' / package).rglob('*.html'):
             for href in document(path).links:
                 url = urlparse(href)
-                if url.scheme in {'gpui', 'gpui_ce_elements'}:
+                if url.scheme and url.scheme not in {'http', 'https', 'mailto', 'tel', 'data', 'javascript'}:
                     errors.append(f'{path}: unresolved Rust documentation link {href}')
-                elif (url.netloc == base.netloc or
+                elif ((not url.scheme and not url.netloc) or
+                      url.netloc == base.netloc or
                       (url.hostname == 'docs.rs' and url.path.startswith('/gpui-ce/'))):
                     check_link(path, href)
 

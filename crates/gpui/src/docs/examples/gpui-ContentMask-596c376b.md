@@ -4,6 +4,6 @@
 
 Walkthroughs:
 
-- [Paint a custom region: Clip the overflow](https://gpui-ce.github.io/examples/drawing/#bounds)
+- [Paint a custom region: Paint inside the assigned bounds](https://gpui-ce.github.io/examples/drawing/#bounds)
 
 <!-- gpui-walkthroughs:end gpui::ContentMask -->

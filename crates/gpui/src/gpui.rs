@@ -198,7 +198,6 @@ macro_rules! bench_main {
 }
 pub use gpui_shared_string::*;
 pub use gpui_util::arc_cow::ArcCow;
-/// HTTP client abstraction for making requests.
 pub mod http_client;
 pub use input::*;
 pub use inspector::*;

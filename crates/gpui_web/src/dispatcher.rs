@@ -165,9 +165,9 @@ impl MainThreadMailbox {
 
 /// Dispatches GPUI foreground work and optional WebAssembly worker work.
 ///
-/// Applications normally receive this through [`WebPlatform`] rather than constructing it. Direct
-/// construction is useful for embedding GPUI's executors in a browser runtime; all browser-window
-/// interaction must stay on the main thread.
+/// Applications normally receive this through [`WebPlatform`](crate::WebPlatform).
+/// Construct it directly when embedding GPUI's executors in a browser runtime;
+/// all browser-window interaction must stay on the main thread.
 pub struct WebDispatcher {
     main_thread_id: std::thread::ThreadId,
     background_sender: PriorityQueueSender<RunnableVariant>,

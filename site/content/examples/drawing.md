@@ -13,16 +13,12 @@ example_run = "cargo run -p gpui-documentation-examples --example drawing"
 {{ <playground example="drawing" title="Paint a custom region" /> }}
 
 <a id="paint"></a>
-## Use the rectangle layout assigned
+## Define a view with no drawing state
 
-[`canvas`](https://docs.rs/gpui-ce/0.2.2/gpui/fn.canvas.html) separates prepaint from paint and supplies layout-resolved
-[`Bounds`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Bounds.html) to both callbacks. This example needs no prepared state. The paint
-callback makes three quads with [`fill`](https://docs.rs/gpui-ce/0.2.2/gpui/fn.fill.html) and records them with
-[`Window::paint_quad`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.paint_quad). The renderer later consumes these scene commands.
-
-Coordinates are logical [`Pixels`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Pixels.html), independent of display scale. Adding an
-offset to `bounds.origin` places each rectangle relative to the canvas, so
-layout movement also moves the drawing.
+`PaintDemo` stores no fields: the drawing below depends only on the space
+layout gives it. Its [`Render`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Render.html) implementation will create a fresh canvas
+for each render. A chart with changing data would keep that data on the
+view and notify it after an update; the canvas is where the picture is built.
 
 ```rust
 use gpui::{
@@ -33,10 +29,19 @@ use gpui::{
 struct PaintDemo;
 ```
 
-[View this step in the source]({{ get_url(path="sources/drawing/") }}#L14).
+[View this step in the source]({{ get_url(path="sources/drawing/") }}#L10).
 
 <a id="bounds"></a>
-## Clip the overflow
+## Paint inside the assigned bounds
+
+[`canvas`](https://docs.rs/gpui-ce/0.2.2/gpui/fn.canvas.html) supplies layout-resolved [`Bounds`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Bounds.html) to both callbacks. Prepaint
+has nothing to prepare here, so it returns `()`. Paint receives that value,
+makes three quads with [`fill`](https://docs.rs/gpui-ce/0.2.2/gpui/fn.fill.html), and records them with
+[`Window::paint_quad`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.paint_quad). The renderer consumes those commands after paint.
+
+Coordinates are logical [`Pixels`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Pixels.html), independent of display scale. Add an
+offset to `bounds.origin` to position each rectangle inside the canvas.
+Moving the canvas through layout then moves its drawing too.
 
 The first rectangle is inset by ten pixels. The second is positioned near
 the right edge, but cannot move left of the first. On a narrow canvas the
@@ -45,7 +50,9 @@ spacing can put it partly outside the canvas bounds.
 
 > [!NOTE]
 > Layout bounds do not clip paint. A [`ContentMask`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.ContentMask.html) intersects the current
-> mask for its closure, then the helper restores the previous mask.
+> mask for its closure, then the helper restores the previous mask. This
+> example has no input hitboxes. An interactive canvas needs the same clip
+> during prepaint; see the [clipped-control test](https://gpui-ce.github.io/book/testing.html#check-clipping-and-input-together).
 
 Paint order is draw order: background, red, then blue. Resize the viewport
 to see the next frame recompute bounds and record the same order; the mask
@@ -82,7 +89,7 @@ impl Render for PaintDemo {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/drawing/") }}#L35).
+[View this step in the source]({{ get_url(path="sources/drawing/") }}#L42).
 
 <a id="launch"></a>
 ## Compare clipping with resizing
@@ -108,6 +115,6 @@ pub fn main() {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/drawing/") }}#L76).
+[View this step in the source]({{ get_url(path="sources/drawing/") }}#L83).
 
 [Download the complete source]({{ get_url(path="examples/drawing.rs") }}).

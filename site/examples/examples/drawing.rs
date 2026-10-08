@@ -1,15 +1,11 @@
 #[path = "../src/support.rs"]
 mod support;
 
-// ## Use the rectangle layout assigned {#paint}
-// [`canvas`] separates prepaint from paint and supplies layout-resolved
-// [`Bounds`] to both callbacks. This example needs no prepared state. The paint
-// callback makes three quads with [`fill`] and records them with
-// [`Window::paint_quad`]. The renderer later consumes these scene commands.
-//
-// Coordinates are logical [`Pixels`], independent of display scale. Adding an
-// offset to `bounds.origin` places each rectangle relative to the canvas, so
-// layout movement also moves the drawing.
+// ## Define a view with no drawing state {#paint}
+// `PaintDemo` stores no fields: the drawing below depends only on the space
+// layout gives it. Its [`Render`] implementation will create a fresh canvas
+// for each render. A chart with changing data would keep that data on the
+// view and notify it after an update; the canvas is where the picture is built.
 
 use gpui::{
     AppContext, Bounds, ContentMask, Context, IntoElement, Render, Window, canvas, fill, point,
@@ -18,7 +14,16 @@ use gpui::{
 
 struct PaintDemo;
 
-// ## Clip the overflow {#bounds}
+// ## Paint inside the assigned bounds {#bounds}
+// [`canvas`] supplies layout-resolved [`Bounds`] to both callbacks. Prepaint
+// has nothing to prepare here, so it returns `()`. Paint receives that value,
+// makes three quads with [`fill`], and records them with
+// [`Window::paint_quad`]. The renderer consumes those commands after paint.
+//
+// Coordinates are logical [`Pixels`], independent of display scale. Add an
+// offset to `bounds.origin` to position each rectangle inside the canvas.
+// Moving the canvas through layout then moves its drawing too.
+//
 // The first rectangle is inset by ten pixels. The second is positioned near
 // the right edge, but cannot move left of the first. On a narrow canvas the
 // spacing can put it partly outside the canvas bounds.
@@ -26,7 +31,9 @@ struct PaintDemo;
 //
 // > [!NOTE]
 // > Layout bounds do not clip paint. A [`ContentMask`] intersects the current
-// > mask for its closure, then the helper restores the previous mask.
+// > mask for its closure, then the helper restores the previous mask. This
+// > example has no input hitboxes. An interactive canvas needs the same clip
+// > during prepaint; see the [clipped-control test](https://gpui-ce.github.io/book/testing.html#check-clipping-and-input-together).
 //
 // Paint order is draw order: background, red, then blue. Resize the viewport
 // to see the next frame recompute bounds and record the same order; the mask

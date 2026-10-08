@@ -18,6 +18,20 @@ _CALLOUT = re.compile(
 )
 _BACKLINK_ID = "gpui-examples-backlinks"
 _RUSTDOC_STYLE_ID = "gpui-documentation-notes"
+_DEPENDENCY_LINKS = {
+    "dispatcher#setting-the-default-subscriber": "https://docs.rs/tracing/latest/tracing/dispatcher/index.html#setting-the-default-subscriber",
+    "super::Subscriber": "https://docs.rs/tracing/latest/tracing/trait.Subscriber.html",
+    "crate::Span": "https://docs.rs/tracing/latest/tracing/struct.Span.html",
+    "super::Span::current()": "https://docs.rs/tracing/latest/tracing/struct.Span.html#method.current",
+    "futures_core::future::TryFuture": "https://docs.rs/futures-core/latest/futures_core/future/trait.TryFuture.html",
+    "TryFuture::Ok": "https://docs.rs/futures-core/latest/futures_core/future/trait.TryFuture.html#associatedtype.Ok",
+    "TryFuture::Error": "https://docs.rs/futures-core/latest/futures_core/future/trait.TryFuture.html#associatedtype.Error",
+    "futures_core::stream::Stream": "https://docs.rs/futures-core/latest/futures_core/stream/trait.Stream.html",
+    "Stream::poll_next": "https://docs.rs/futures-core/latest/futures_core/stream/trait.Stream.html#tymethod.poll_next",
+    "crate::io::AsyncBufRead": "https://docs.rs/futures-io/latest/futures_io/trait.AsyncBufRead.html",
+    **{f"Itertools::{method}": f"https://docs.rs/itertools/0.14.0/itertools/trait.Itertools.html#method.{method}"
+       for method in ("chunk_by", "merge", "tree_reduce")},
+}
 _RUSTDOC_STYLES = """
 .rustdoc .callout,.rustdoc .doc-examples {
     margin:1.2em 0;padding:1em 1.2em;
@@ -53,6 +67,27 @@ def rustdoc_notes(text: str) -> str:
         return text
     style = f'<style id="{_RUSTDOC_STYLE_ID}">{_RUSTDOC_STYLES}</style>'
     return text.replace("</head>", style + "</head>", 1)
+
+
+def rustdoc_dependency_links(text: str, file: Path, root: Path) -> str:
+    """Repair known links copied out of their dependency's documentation scope."""
+    links = _DEPENDENCY_LINKS.copy()
+    if file.name in {"struct.FillOptions.html", "struct.StrokeOptions.html"}:
+        links["index.html#flattening-and-tolerance"] = (
+            "https://docs.rs/lyon_tessellation/latest/lyon_tessellation/#flattening-and-tolerance")
+    text = re.sub(r'\bhref="([^"]+)"',
+                  lambda match: f'href="{links.get(match[1], match[1])}"', text)
+
+    def optional_implementors(match):
+        target = (file.parent / match[1]).resolve()
+        # Rustdoc may request a list under a trait's original private module
+        # even when it emitted no such list. Existing lists must keep loading.
+        if target.is_relative_to((root / "trait.impl").resolve()) and not target.is_file():
+            return ""
+        return match[0]
+
+    return re.sub(r'<script\b[^>]*\bsrc="([^"]*trait\.impl/[^"]+)"[^>]*>\s*</script>',
+                  optional_implementors, text)
 
 
 def rustdoc_backlinks(text: str, symbol: str, links: list[dict], anchor: str | None = None) -> str:
@@ -111,7 +146,7 @@ def process_tree(rustdoc: Path, index: Path, output: Path | None = None, site_ba
     # formatting throughout the API, rather than only touching indexed items.
     for file in destination.rglob("*.html"):
         text = file.read_text(encoding="utf-8")
-        rendered = rustdoc_notes(text)
+        rendered = rustdoc_notes(rustdoc_dependency_links(text, file, destination))
         if rendered != text:
             file.write_text(rendered, encoding="utf-8", newline="\n")
             changed.add(file)

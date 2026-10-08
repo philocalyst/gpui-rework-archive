@@ -1,35 +1,85 @@
-//! The small HTTP boundary used by GPUI services.
+//! HTTP GET requests for remote images and application services.
 //!
-//! [`crate::http_client::HttpClient`] separates a service's request from the application's
-//! transport policy. A caller passes the URI text and its redirect preference; the client owns
-//! TLS, proxy, timeout,
-//! and other transport choices, then resolves to a complete
-//! [`crate::http_client::HttpResponse`] or a transport
-//! error. The body is fully collected as `Vec<u8>` before the future completes; this interface
-//! has no streaming or response-size limit. Clients and callers should bound responses where
-//! needed. An HTTP status such as 404 is still a successful transport response; the service
-//! decides whether a status is acceptable.
+//! [`App::http_client`](crate::App::http_client) returns a shared handle to the
+//! app's installed client. Configure it before startup with
+//! [`Application::with_http_client`](crate::Application::with_http_client), or
+//! replace it later with [`App::set_http_client`](crate::App::set_http_client).
+//! Previously cloned handles keep the old client. The
+//! [assets chapter](crate::_documentation::assets#choose-an-image-source)
+//! explains which image sources use this service and how to retry cached loads.
 //!
-//! The returned future is `'static`, so implementations must own anything they need after
-//! `get` returns. A request can be cancelled by dropping the surrounding future or GPUI task if
-//! the implementation observes cancellation. This trait does not define retries, authentication,
-//! response-size limits, or redirect security policy; the caller and concrete client must agree
-//! on those behaviors.
+//! Core application constructors start with
+//! [`NullHttpClient`](crate::http_client::NullHttpClient), which returns
+//! an error for every request. On WebAssembly,
+//! [`gpui_platform::application()`](crate::_documentation::platforms#browser-startup)
+//! installs the browser's Fetch adapter. Native applications must supply their
+//! transport. [`BlockedHttpClient`](crate::http_client::BlockedHttpClient)
+//! deliberately rejects requests with
+//! [`PermissionDenied`](std::io::ErrorKind::PermissionDenied); it is useful when
+//! the installed service should report that network access is disabled.
 //!
-//! Use [`crate::http_client::NullHttpClient`] when no network service was configured, and
-//! [`crate::http_client::BlockedHttpClient`] when policy deliberately denies network access. Both
-//! fail the request, but the latter reports a permission-denied error. Under tests or the
-//! `headless` feature, the fake client's `with_200_response` and `with_404_response` constructors
-//! provide deterministic empty responses without inspecting the requested URL. Implement
-//! [`crate::http_client::HttpClient`] with a real transport to perform network I/O.
+//! # Check the status before using the body
+//!
+//! A completed request can return HTTP 404 or 500. Those are responses, not
+//! transport errors: `?` alone does not reject them. This helper accepts any
+//! successful status and returns the collected bytes:
+//!
+//! ```
+//! use gpui::http_client::HttpClient;
+//!
+//! async fn required_bytes(client: &dyn HttpClient, url: &str) -> anyhow::Result<Vec<u8>> {
+//!     let response = client.get(url, true).await?;
+//!     anyhow::ensure!(response.status.is_success(), "GET {url}: HTTP {}", response.status);
+//!     Ok(response.body)
+//! }
+//! # struct Fixture(http::StatusCode);
+//! # impl HttpClient for Fixture {
+//! #     fn get(&self, _: &str, _: bool)
+//! #         -> futures::future::BoxFuture<'static, anyhow::Result<gpui::http_client::HttpResponse>>
+//! #     {
+//! #         let status = self.0;
+//! #         Box::pin(async move {
+//! #             Ok(gpui::http_client::HttpResponse { status, body: b"bytes".to_vec() })
+//! #         })
+//! #     }
+//! # }
+//! # let ok = Fixture(http::StatusCode::OK);
+//! # assert_eq!(futures::executor::block_on(required_bytes(&ok, "https://example.test/data"))?, b"bytes");
+//! # let missing = Fixture(http::StatusCode::NOT_FOUND);
+//! # assert!(futures::executor::block_on(required_bytes(&missing, "https://example.test/data")).is_err());
+//! # Ok::<(), anyhow::Error>(())
+//! ```
+//!
+//! [`ImageAssetLoader`](crate::ImageAssetLoader) similarly rejects non-success
+//! statuses before decoding. A custom service can choose another policy, such
+//! as treating 404 as an absent optional resource.
+//!
+//! # Implement a transport
+//!
+//! [`HttpClient::get`](crate::http_client::HttpClient::get) returns an owned,
+//! `Send` future. Clone the transport handle and copy or parse the URL before
+//! returning; the future cannot borrow
+//! `self` or the caller's string. The client collects the entire body before
+//! producing [`HttpResponse`](crate::http_client::HttpResponse). Enforce byte
+//! limits while collecting it when responses need a bound; checking
+//! `body.len()` afterward cannot prevent that
+//! allocation. This interface exposes neither response headers nor a stream.
+//!
+//! Timeouts, redirects, authentication, and retries belong to the concrete
+//! transport. Dropping the returned future stops polling it, but only the
+//! transport can cancel an operation it already started. The browser adapter,
+//! for example, does not explicitly abort Fetch when its Rust future is dropped.
+//! Under `headless`, `FakeHttpClient` supplies empty 200 or 404 responses for
+//! every URL; use a custom fixture when the requested URL or body matters.
 
 use futures::future::BoxFuture;
 use http::StatusCode;
 
-/// A fully collected response returned by [`crate::http_client::HttpClient::get`].
+/// A status and complete body returned by [`HttpClient::get`].
 ///
-/// A non-success status is still represented as a response. Consumers should inspect `status`
-/// before interpreting the body; transport failures are returned as errors instead.
+/// A non-success status is still a response. Inspect [`status`](Self::status)
+/// before interpreting [`body`](Self::body); transport failures are returned
+/// as errors instead. Headers and the final URL after redirects are not retained.
 pub struct HttpResponse {
     /// The HTTP status code, including 4xx and 5xx responses.
     pub status: StatusCode,
@@ -37,18 +87,26 @@ pub struct HttpResponse {
     pub body: Vec<u8>,
 }
 
-/// Performs full-body GET requests for services that need remote bytes.
+/// The app's transport for full-body GET requests.
 ///
-/// Implementations choose their timeout, TLS, proxy, and cache policy. `follow_redirects` is a
-/// request from the caller, not a guarantee that redirects are safe or followed. HTTP status
-/// codes are returned in [`crate::http_client::HttpResponse`]; this method's error is for transport or client-side
-/// failures.
+/// Install an implementation with
+/// [`Application::with_http_client`](crate::Application::with_http_client).
+/// The client chooses connection handling and transport policy; services choose
+/// which response statuses and bodies they accept. See the
+/// [module](crate::http_client) for an example and the ownership boundary.
 pub trait HttpClient: 'static + Send + Sync {
-    /// Perform a GET request and collect the full response body.
+    /// Returns a future for a GET request and its complete response body.
     ///
-    /// The returned future is `'static` and can outlive the borrow of `self`; copy or parse `url`
-    /// before returning if the request needs it later. Treat the URL as opaque request text
-    /// unless the concrete client needs to parse it.
+    /// `follow_redirects` asks the client to follow redirects; the concrete
+    /// transport determines how that request is implemented. The image loader
+    /// passes `true`. An implementation may reject a URL or redirect before
+    /// sending a request.
+    ///
+    /// The future owns its inputs and can outlive both `self` and `url`. HTTP
+    /// error statuses belong in [`HttpResponse`]; errors report failures to
+    /// obtain that response, including request construction or body collection.
+    /// Calling this method does not guarantee that work waits for the first
+    /// poll: that timing and cancellation behavior belong to the implementation.
     fn get(
         &self,
         url: &str,
@@ -78,7 +136,7 @@ impl HttpClient for NullHttpClient {
 pub struct BlockedHttpClient;
 
 impl BlockedHttpClient {
-    /// Create a new `BlockedHttpClient`.
+    /// Creates a client that rejects every request with a permission error.
     pub fn new() -> Self {
         Self
     }
@@ -106,7 +164,12 @@ impl HttpClient for BlockedHttpClient {
     }
 }
 
-/// A fake HTTP client for testing.
+/// A fixed-status client with an empty body, available with `headless`.
+///
+/// Both constructors return a shared [`HttpClient`] handle. Every request
+/// completes successfully at the transport level with the chosen status;
+/// neither URL nor redirect preference affects it. Use a custom implementation
+/// when a test must inspect requests, supply bytes, or produce transport errors.
 #[cfg(any(test, feature = "headless"))]
 pub struct FakeHttpClient {
     status: StatusCode,

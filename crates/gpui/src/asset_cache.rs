@@ -64,8 +64,8 @@ impl From<Arc<Path>> for Resource {
 ///
 /// Use [`App::fetch_asset`] to schedule and cache a request, or
 /// [`Window::use_asset`](crate::Window::use_asset) to start or poll it while
-/// drawing a view. Calling [`load`](Self::load) directly only constructs a
-/// future: the caller must arrange its execution, caching, and notification.
+/// drawing a view. When calling [`load`](Self::load) directly, the caller must
+/// arrange polling, caching, and completion notification for the returned future.
 ///
 /// The app cache identifies a request by this asset type and the source's hash.
 /// Include all choices that affect the result in the source key. For example,

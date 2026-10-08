@@ -19,14 +19,22 @@ extern "C" {
 
 /// GPUI HTTP client backed by the browser's global `fetch` function.
 ///
-/// `get` sends a GET request and buffers the complete response body before resolving. Non-success
-/// HTTP statuses are still successful transport results and appear in [`gpui::HttpResponse::status`];
-/// request creation, Fetch rejection, invalid status conversion (including an opaque redirect's
-/// zero status), and body-read failures return errors. Browser CORS, origin, redirect, and
-/// permission rules still apply. When `follow_redirects` is false, Fetch's `manual` redirect mode
-/// applies, including the browser's opaque-redirect behavior.
-/// `gpui_ce_platform::application` constructors install this client for GPUI's normal HTTP-client
-/// interface; construct it directly when embedding the web platform yourself.
+/// `get` sends a GET request and buffers the complete response body. HTTP error
+/// statuses are returned in [`HttpResponse::status`]; check that field before
+/// using the body. Request construction, Fetch rejection, invalid status
+/// conversion, and body collection can return errors.
+///
+/// Browser CORS, origin, redirect, and permission rules apply. Setting
+/// `follow_redirects` to `false` selects Fetch's `manual` redirect mode. An
+/// [opaque redirect](https://fetch.spec.whatwg.org/#concept-filtered-response-opaque-redirect)
+/// then has status zero, which this adapter rejects as an invalid HTTP status
+/// rather than returning a 3xx response.
+///
+/// Dropping the future stops polling the response; this adapter does not attach
+/// an abort signal to stop a Fetch operation it has already started.
+///
+/// The web constructors in `gpui_ce_platform` install this client. Construct
+/// it directly when embedding the web platform yourself.
 ///
 /// ```no_run
 /// # async fn example() -> anyhow::Result<()> {

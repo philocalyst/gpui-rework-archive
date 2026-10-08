@@ -70,12 +70,25 @@ registry keys. Use a `Path` or `PathBuf` explicitly for a file. Creating an
 [`RenderImage`](crate::RenderImage) holds decoded frames. The
 [`ImageSource`](crate::ImageSource) reference describes each conversion.
 
-Remote resources need a client installed with
+Remote resources use the app's installed
+[`HttpClient`](crate::http_client::HttpClient). On WebAssembly,
+[`gpui_platform::application()`](crate::_documentation::platforms#browser-startup)
+installs the browser's Fetch adapter. Remote
+servers must permit cross-origin access through
+[CORS](https://fetch.spec.whatwg.org/#http-cors-protocol) when the resource's
+origin differs from the page's. Native applications start with a client
+that rejects requests: install a transport with
 [`Application::with_http_client`](crate::Application::with_http_client).
-The default client rejects requests. GPUI's small
-[`HttpClient`](crate::http_client::HttpClient) interface returns a complete
-response body; the concrete transport must supply the application's timeout,
-redirect, and response-size policy.
+Core [`Application::with_platform`](crate::Application::with_platform) and
+`gpui_platform::headless()` also leave
+that rejecting default in place.
+
+The interface returns a complete body. The image loader rejects non-success
+HTTP statuses before decoding; other consumers must check the status
+themselves. Timeouts, redirects, and byte limits belong to the transport.
+Changing the client with [`App::set_http_client`](crate::App::set_http_client)
+does not restart existing requests or evict cached results. Use the
+[retry procedure below](#retry-a-cached-failure) when a load must run again.
 
 Pixels already in a video buffer or GPU render target belong on a
 [`surface`](crate::surface). Read
@@ -166,6 +179,8 @@ loads and completed results across renders. Give sibling cache scopes distinct
 IDs. Retain a cache entity on the view instead when independent subtrees must
 share it, and pass clones to their [`image_cache`](crate::image_cache)
 containers or individual [`Img::image_cache`](crate::Img::image_cache) settings.
+
+### Retry a cached failure
 
 The retain-all provider uses its own cache rather than the app's typed asset
 cache. Both keep failed results as well as successful ones. Neither keeps

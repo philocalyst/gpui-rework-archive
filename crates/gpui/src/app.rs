@@ -267,8 +267,13 @@ impl Application {
 
     /// Installs the HTTP client used by app services and remote asset loading.
     ///
-    /// The default [`NullHttpClient`] rejects requests. Supply a concrete
-    /// [`HttpClient`] before startup when the app needs network access.
+    /// Core constructors start with [`NullHttpClient`], which rejects requests.
+    /// The [normal web constructor](crate::_documentation::platforms#browser-startup)
+    /// in `gpui_platform` installs the browser's Fetch client. Supply a concrete
+    /// [`HttpClient`] for native network access
+    /// or to replace that browser transport. See the
+    /// [assets chapter](crate::_documentation::assets#choose-an-image-source)
+    /// for the construction and caching rules.
     pub fn with_http_client(self, http_client: Arc<dyn HttpClient>) -> Self {
         let mut context_lock = self.0.borrow_mut();
         context_lock.http_client = http_client;

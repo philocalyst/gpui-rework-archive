@@ -156,10 +156,10 @@
     "examples": [
       {
         "example": "drawing",
-        "step": "paint",
-        "step_title": "Use the rectangle layout assigned",
+        "step": "bounds",
+        "step_title": "Paint inside the assigned bounds",
         "title": "Paint a custom region",
-        "url": "/examples/drawing/#paint"
+        "url": "/examples/drawing/#bounds"
       }
     ],
     "path": "gpui/struct.Bounds.html"
@@ -170,7 +170,7 @@
       {
         "example": "drawing",
         "step": "bounds",
-        "step_title": "Clip the overflow",
+        "step_title": "Paint inside the assigned bounds",
         "title": "Paint a custom region",
         "url": "/examples/drawing/#bounds"
       }
@@ -440,10 +440,10 @@
     "examples": [
       {
         "example": "drawing",
-        "step": "paint",
-        "step_title": "Use the rectangle layout assigned",
+        "step": "bounds",
+        "step_title": "Paint inside the assigned bounds",
         "title": "Paint a custom region",
-        "url": "/examples/drawing/#paint"
+        "url": "/examples/drawing/#bounds"
       },
       {
         "example": "text",
@@ -471,6 +471,13 @@
         "step_title": "Compose it with ordinary elements",
         "title": "Implement an element",
         "url": "/examples/custom-element/#compose"
+      },
+      {
+        "example": "drawing",
+        "step": "paint",
+        "step_title": "Define a view with no drawing state",
+        "title": "Paint a custom region",
+        "url": "/examples/drawing/#paint"
       },
       {
         "example": "first-window",
@@ -802,10 +809,10 @@
       },
       {
         "example": "drawing",
-        "step": "paint",
-        "step_title": "Use the rectangle layout assigned",
+        "step": "bounds",
+        "step_title": "Paint inside the assigned bounds",
         "title": "Paint a custom region",
-        "url": "/examples/drawing/#paint"
+        "url": "/examples/drawing/#bounds"
       }
     ],
     "path": "gpui/struct.Window.html#method.paint_quad"
@@ -829,7 +836,7 @@
       {
         "example": "drawing",
         "step": "bounds",
-        "step_title": "Clip the overflow",
+        "step_title": "Paint inside the assigned bounds",
         "title": "Paint a custom region",
         "url": "/examples/drawing/#bounds"
       }
@@ -881,10 +888,10 @@
       },
       {
         "example": "drawing",
-        "step": "paint",
-        "step_title": "Use the rectangle layout assigned",
+        "step": "bounds",
+        "step_title": "Paint inside the assigned bounds",
         "title": "Paint a custom region",
-        "url": "/examples/drawing/#paint"
+        "url": "/examples/drawing/#bounds"
       },
       {
         "example": "text-hit-testing",
@@ -941,10 +948,10 @@
     "examples": [
       {
         "example": "drawing",
-        "step": "paint",
-        "step_title": "Use the rectangle layout assigned",
+        "step": "bounds",
+        "step_title": "Paint inside the assigned bounds",
         "title": "Paint a custom region",
-        "url": "/examples/drawing/#paint"
+        "url": "/examples/drawing/#bounds"
       }
     ],
     "path": "gpui/fn.fill.html"

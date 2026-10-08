@@ -2245,3 +2245,71 @@ inputs and screenshots are saved as `colors-checker-first.md`,
 `scribbr-colors-final.png` under `target/documentation-proof/`. These results
 apply to those samples; they do not establish correctness or classify the
 whole documentation. No paraphraser or humanizer was used.
+
+## HTTP policy, accessibility hooks, and relative API links (2026-10-08)
+
+The clean combined artifact at `6d22ea9f606c5029f7a81e636223ed05c24e897b`
+was reviewed in the browser. The color chapter, book mirror, color constructors,
+opacity, gradients, pattern units, and Background methods were read in their
+rendered forms, including a 390-pixel book viewport. The counter retained one
+through an increment-five edit, reached six on activation, and kept that scene
+visible after E0308 opened diagnostics in the smaller split pane. Source
+restoration was checked byte-for-byte and reset returned to zero. The fitted
+scene is small in that short pane, with dark unused space; visual polish and
+interpreter latency remain open. One reset took 26.4 seconds. These browser
+checks close the earlier host-renderer verification step, not its performance
+or presentation work.
+
+The primary editor completed the sequential reading of Jiff 0.2.38's
+`civil/datetime.rs`, including its remaining configuration, traits, examples,
+and tests through line 4581. Zed's `component_layout.rs` and Hummingbird's
+`window_chrome.rs` were also read in full. This extends the reference reading;
+it does not mean every Jiff example or every reference website has been read.
+
+The core HTTP module, browser Fetch implementation, platform constructors,
+image loader, and App client accessors were checked together. Normal browser
+startup already installs Fetch; native and core constructors retain the
+rejecting default. The assets chapter had presented that default as universal.
+The corrected guide and HTTP reference explain construction, status handling,
+client replacement, retained cache entries, full-body collection, byte limits,
+and the absence of explicit Fetch abortion on future drop. The new status
+helper executes both a successful response and a rejected 404. Default core
+doctests pass 221 merged and three separate examples in
+`target/documentation-http-default-doctests.log`. A strict native API build
+passes in `target/documentation-http-strict-api.log`. The single-threaded WASM
+web API build passes in `target/documentation-http-wasm-api.log`, after repairing
+the HttpResponse field link and a WebDispatcher link. The failed mixed-toolchain
+and initial link checks are retained separately. Fetch's CORS protocol, manual
+redirect mode, and opaque-response definitions were checked in the standard.
+
+The complete element, canvas, asset-cache, registry/image, and PathBuilder
+source files were read again. The element accessibility hooks now state their
+activation and ID requirements, their order around prepaint, and the separate
+responsibilities of node properties and handlers. The drawing walkthrough's
+first explanation had described canvas painting while displaying only imports
+and a marker type. Its explanations now accompany the relevant code, and the
+canvas backlinks lead directly to the painting step. Executable drawing
+sources and browser starters are unchanged.
+
+The API link audit now checks relative rustdoc links and manually supplied
+fragments, follows re-export redirects, and rejects unresolved Rust-path URIs.
+Its first run revealed an obsolete synthetic-children anchor and inherited
+links that lost their dependency's documentation scope. The publisher repairs
+those known links and omits requests for absent optional implementation-list
+scripts while preserving existing lists. Fragment checks try literal IDs before
+percent decoding, as needed for rustdoc's generic implementation anchors.
+All 32 documentation-tool tests pass in
+`target/documentation-http-framework-tests.log`, including regressions for
+these publication defects. The broader final-artifact audit remains a separate
+build check.
+
+The testing chapter now exercises accessible activation through the node
+reported by the app. Its initial executed fixture exposed a recursive root
+borrow: TestAppWindow::update held the view while the click listener tried to
+update it. The repaired fixture uses AppContext::update_window, and both the
+chapter and TestAppWindow::update explain why. The initial failure remains in
+`target/documentation-accessibility-testing-doctests.log`; the corrected run's
+result belongs in `target/documentation-accessibility-testing-repaired-doctests.log`.
+The example checks the accessible name, advertised action, application state,
+and stable node identity after drawing. Native screen-reader behavior remains
+a separate manual check.

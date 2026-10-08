@@ -10,82 +10,89 @@ description = "The annotated Rust source used to build this walkthrough."
 <pre class="source-listing"><code><span id="L1" class="source-line"><a href="#L1" class="line-number" data-line="1" aria-label="Line 1" tabindex="-1"></a>#[path = &quot;../src/support.rs&quot;]</span>
 <span id="L2" class="source-line"><a href="#L2" class="line-number" data-line="2" aria-label="Line 2" tabindex="-1"></a>mod support;</span>
 <span id="L3" class="source-line"><a href="#L3" class="line-number" data-line="3" aria-label="Line 3" tabindex="-1"></a></span>
-<span id="L4" class="source-line"><a href="#L4" class="line-number" data-line="4" aria-label="Line 4" tabindex="-1"></a>// ## Use the rectangle layout assigned &#123;#paint&#125;</span>
-<span id="L5" class="source-line"><a href="#L5" class="line-number" data-line="5" aria-label="Line 5" tabindex="-1"></a>// [`canvas`] separates prepaint from paint and supplies layout-resolved</span>
-<span id="L6" class="source-line"><a href="#L6" class="line-number" data-line="6" aria-label="Line 6" tabindex="-1"></a>// [`Bounds`] to both callbacks. This example needs no prepared state. The paint</span>
-<span id="L7" class="source-line"><a href="#L7" class="line-number" data-line="7" aria-label="Line 7" tabindex="-1"></a>// callback makes three quads with [`fill`] and records them with</span>
-<span id="L8" class="source-line"><a href="#L8" class="line-number" data-line="8" aria-label="Line 8" tabindex="-1"></a>// [`Window::paint_quad`]. The renderer later consumes these scene commands.</span>
-<span id="L9" class="source-line"><a href="#L9" class="line-number" data-line="9" aria-label="Line 9" tabindex="-1"></a>//</span>
-<span id="L10" class="source-line"><a href="#L10" class="line-number" data-line="10" aria-label="Line 10" tabindex="-1"></a>// Coordinates are logical [`Pixels`], independent of display scale. Adding an</span>
-<span id="L11" class="source-line"><a href="#L11" class="line-number" data-line="11" aria-label="Line 11" tabindex="-1"></a>// offset to `bounds.origin` places each rectangle relative to the canvas, so</span>
-<span id="L12" class="source-line"><a href="#L12" class="line-number" data-line="12" aria-label="Line 12" tabindex="-1"></a>// layout movement also moves the drawing.</span>
-<span id="L13" class="source-line"><a href="#L13" class="line-number" data-line="13" aria-label="Line 13" tabindex="-1"></a></span>
-<span id="L14" class="source-line"><a href="#L14" class="line-number" data-line="14" aria-label="Line 14" tabindex="-1"></a>use gpui::&#123;</span>
-<span id="L15" class="source-line"><a href="#L15" class="line-number" data-line="15" aria-label="Line 15" tabindex="-1"></a>    AppContext, Bounds, ContentMask, Context, IntoElement, Render, Window, canvas, fill, point,</span>
-<span id="L16" class="source-line"><a href="#L16" class="line-number" data-line="16" aria-label="Line 16" tabindex="-1"></a>    prelude::*, px, rgb, size,</span>
-<span id="L17" class="source-line"><a href="#L17" class="line-number" data-line="17" aria-label="Line 17" tabindex="-1"></a>&#125;;</span>
-<span id="L18" class="source-line"><a href="#L18" class="line-number" data-line="18" aria-label="Line 18" tabindex="-1"></a></span>
-<span id="L19" class="source-line"><a href="#L19" class="line-number" data-line="19" aria-label="Line 19" tabindex="-1"></a>struct PaintDemo;</span>
-<span id="L20" class="source-line"><a href="#L20" class="line-number" data-line="20" aria-label="Line 20" tabindex="-1"></a></span>
-<span id="L21" class="source-line"><a href="#L21" class="line-number" data-line="21" aria-label="Line 21" tabindex="-1"></a>// ## Clip the overflow &#123;#bounds&#125;</span>
-<span id="L22" class="source-line"><a href="#L22" class="line-number" data-line="22" aria-label="Line 22" tabindex="-1"></a>// The first rectangle is inset by ten pixels. The second is positioned near</span>
-<span id="L23" class="source-line"><a href="#L23" class="line-number" data-line="23" aria-label="Line 23" tabindex="-1"></a>// the right edge, but cannot move left of the first. On a narrow canvas the</span>
-<span id="L24" class="source-line"><a href="#L24" class="line-number" data-line="24" aria-label="Line 24" tabindex="-1"></a>// spacing can put it partly outside the canvas bounds.</span>
-<span id="L25" class="source-line"><a href="#L25" class="line-number" data-line="25" aria-label="Line 25" tabindex="-1"></a>// [`Window::with_content_mask`] crops it to the canvas rectangle.</span>
+<span id="L4" class="source-line"><a href="#L4" class="line-number" data-line="4" aria-label="Line 4" tabindex="-1"></a>// ## Define a view with no drawing state &#123;#paint&#125;</span>
+<span id="L5" class="source-line"><a href="#L5" class="line-number" data-line="5" aria-label="Line 5" tabindex="-1"></a>// `PaintDemo` stores no fields: the drawing below depends only on the space</span>
+<span id="L6" class="source-line"><a href="#L6" class="line-number" data-line="6" aria-label="Line 6" tabindex="-1"></a>// layout gives it. Its [`Render`] implementation will create a fresh canvas</span>
+<span id="L7" class="source-line"><a href="#L7" class="line-number" data-line="7" aria-label="Line 7" tabindex="-1"></a>// for each render. A chart with changing data would keep that data on the</span>
+<span id="L8" class="source-line"><a href="#L8" class="line-number" data-line="8" aria-label="Line 8" tabindex="-1"></a>// view and notify it after an update; the canvas is where the picture is built.</span>
+<span id="L9" class="source-line"><a href="#L9" class="line-number" data-line="9" aria-label="Line 9" tabindex="-1"></a></span>
+<span id="L10" class="source-line"><a href="#L10" class="line-number" data-line="10" aria-label="Line 10" tabindex="-1"></a>use gpui::&#123;</span>
+<span id="L11" class="source-line"><a href="#L11" class="line-number" data-line="11" aria-label="Line 11" tabindex="-1"></a>    AppContext, Bounds, ContentMask, Context, IntoElement, Render, Window, canvas, fill, point,</span>
+<span id="L12" class="source-line"><a href="#L12" class="line-number" data-line="12" aria-label="Line 12" tabindex="-1"></a>    prelude::*, px, rgb, size,</span>
+<span id="L13" class="source-line"><a href="#L13" class="line-number" data-line="13" aria-label="Line 13" tabindex="-1"></a>&#125;;</span>
+<span id="L14" class="source-line"><a href="#L14" class="line-number" data-line="14" aria-label="Line 14" tabindex="-1"></a></span>
+<span id="L15" class="source-line"><a href="#L15" class="line-number" data-line="15" aria-label="Line 15" tabindex="-1"></a>struct PaintDemo;</span>
+<span id="L16" class="source-line"><a href="#L16" class="line-number" data-line="16" aria-label="Line 16" tabindex="-1"></a></span>
+<span id="L17" class="source-line"><a href="#L17" class="line-number" data-line="17" aria-label="Line 17" tabindex="-1"></a>// ## Paint inside the assigned bounds &#123;#bounds&#125;</span>
+<span id="L18" class="source-line"><a href="#L18" class="line-number" data-line="18" aria-label="Line 18" tabindex="-1"></a>// [`canvas`] supplies layout-resolved [`Bounds`] to both callbacks. Prepaint</span>
+<span id="L19" class="source-line"><a href="#L19" class="line-number" data-line="19" aria-label="Line 19" tabindex="-1"></a>// has nothing to prepare here, so it returns `()`. Paint receives that value,</span>
+<span id="L20" class="source-line"><a href="#L20" class="line-number" data-line="20" aria-label="Line 20" tabindex="-1"></a>// makes three quads with [`fill`], and records them with</span>
+<span id="L21" class="source-line"><a href="#L21" class="line-number" data-line="21" aria-label="Line 21" tabindex="-1"></a>// [`Window::paint_quad`]. The renderer consumes those commands after paint.</span>
+<span id="L22" class="source-line"><a href="#L22" class="line-number" data-line="22" aria-label="Line 22" tabindex="-1"></a>//</span>
+<span id="L23" class="source-line"><a href="#L23" class="line-number" data-line="23" aria-label="Line 23" tabindex="-1"></a>// Coordinates are logical [`Pixels`], independent of display scale. Add an</span>
+<span id="L24" class="source-line"><a href="#L24" class="line-number" data-line="24" aria-label="Line 24" tabindex="-1"></a>// offset to `bounds.origin` to position each rectangle inside the canvas.</span>
+<span id="L25" class="source-line"><a href="#L25" class="line-number" data-line="25" aria-label="Line 25" tabindex="-1"></a>// Moving the canvas through layout then moves its drawing too.</span>
 <span id="L26" class="source-line"><a href="#L26" class="line-number" data-line="26" aria-label="Line 26" tabindex="-1"></a>//</span>
-<span id="L27" class="source-line"><a href="#L27" class="line-number" data-line="27" aria-label="Line 27" tabindex="-1"></a>// &gt; [!NOTE]</span>
-<span id="L28" class="source-line"><a href="#L28" class="line-number" data-line="28" aria-label="Line 28" tabindex="-1"></a>// &gt; Layout bounds do not clip paint. A [`ContentMask`] intersects the current</span>
-<span id="L29" class="source-line"><a href="#L29" class="line-number" data-line="29" aria-label="Line 29" tabindex="-1"></a>// &gt; mask for its closure, then the helper restores the previous mask.</span>
-<span id="L30" class="source-line"><a href="#L30" class="line-number" data-line="30" aria-label="Line 30" tabindex="-1"></a>//</span>
-<span id="L31" class="source-line"><a href="#L31" class="line-number" data-line="31" aria-label="Line 31" tabindex="-1"></a>// Paint order is draw order: background, red, then blue. Resize the viewport</span>
-<span id="L32" class="source-line"><a href="#L32" class="line-number" data-line="32" aria-label="Line 32" tabindex="-1"></a>// to see the next frame recompute bounds and record the same order; the mask</span>
-<span id="L33" class="source-line"><a href="#L33" class="line-number" data-line="33" aria-label="Line 33" tabindex="-1"></a>// clips the overflow instead of changing either rectangle&#x27;s geometry.</span>
-<span id="L34" class="source-line"><a href="#L34" class="line-number" data-line="34" aria-label="Line 34" tabindex="-1"></a></span>
-<span id="L35" class="source-line"><a href="#L35" class="line-number" data-line="35" aria-label="Line 35" tabindex="-1"></a>impl Render for PaintDemo &#123;</span>
-<span id="L36" class="source-line"><a href="#L36" class="line-number" data-line="36" aria-label="Line 36" tabindex="-1"></a>    fn render(&amp;mut self, _window: &amp;mut Window, _cx: &amp;mut Context&lt;Self&gt;) -&gt; impl IntoElement &#123;</span>
-<span id="L37" class="source-line"><a href="#L37" class="line-number" data-line="37" aria-label="Line 37" tabindex="-1"></a>        canvas(</span>
-<span id="L38" class="source-line"><a href="#L38" class="line-number" data-line="38" aria-label="Line 38" tabindex="-1"></a>            |_bounds, _window, _cx| &#123;&#125;,</span>
-<span id="L39" class="source-line"><a href="#L39" class="line-number" data-line="39" aria-label="Line 39" tabindex="-1"></a>            |bounds: Bounds&lt;gpui::Pixels&gt;, _state, window, _cx| &#123;</span>
-<span id="L40" class="source-line"><a href="#L40" class="line-number" data-line="40" aria-label="Line 40" tabindex="-1"></a>                let mask = ContentMask &#123;</span>
-<span id="L41" class="source-line"><a href="#L41" class="line-number" data-line="41" aria-label="Line 41" tabindex="-1"></a>                    bounds,</span>
-<span id="L42" class="source-line"><a href="#L42" class="line-number" data-line="42" aria-label="Line 42" tabindex="-1"></a>                    fade_out: Default::default(),</span>
-<span id="L43" class="source-line"><a href="#L43" class="line-number" data-line="43" aria-label="Line 43" tabindex="-1"></a>                &#125;;</span>
-<span id="L44" class="source-line"><a href="#L44" class="line-number" data-line="44" aria-label="Line 44" tabindex="-1"></a>                window.with_content_mask(Some(mask), |window| &#123;</span>
-<span id="L45" class="source-line"><a href="#L45" class="line-number" data-line="45" aria-label="Line 45" tabindex="-1"></a>                    window.paint_quad(fill(bounds, rgb(0xf4f1ea)));</span>
-<span id="L46" class="source-line"><a href="#L46" class="line-number" data-line="46" aria-label="Line 46" tabindex="-1"></a>                    let left = bounds.origin + point(px(10.), px(10.));</span>
-<span id="L47" class="source-line"><a href="#L47" class="line-number" data-line="47" aria-label="Line 47" tabindex="-1"></a>                    let right_x =</span>
-<span id="L48" class="source-line"><a href="#L48" class="line-number" data-line="48" aria-label="Line 48" tabindex="-1"></a>                        (bounds.origin.x + bounds.size.width - px(70.)).max(left.x + px(70.));</span>
-<span id="L49" class="source-line"><a href="#L49" class="line-number" data-line="49" aria-label="Line 49" tabindex="-1"></a>                    window.paint_quad(fill(</span>
-<span id="L50" class="source-line"><a href="#L50" class="line-number" data-line="50" aria-label="Line 50" tabindex="-1"></a>                        Bounds::new(left, size(px(60.), px(40.))),</span>
-<span id="L51" class="source-line"><a href="#L51" class="line-number" data-line="51" aria-label="Line 51" tabindex="-1"></a>                        rgb(0xe05a47),</span>
-<span id="L52" class="source-line"><a href="#L52" class="line-number" data-line="52" aria-label="Line 52" tabindex="-1"></a>                    ));</span>
-<span id="L53" class="source-line"><a href="#L53" class="line-number" data-line="53" aria-label="Line 53" tabindex="-1"></a>                    window.paint_quad(fill(</span>
-<span id="L54" class="source-line"><a href="#L54" class="line-number" data-line="54" aria-label="Line 54" tabindex="-1"></a>                        Bounds::new(point(right_x, left.y), size(px(60.), px(40.))),</span>
-<span id="L55" class="source-line"><a href="#L55" class="line-number" data-line="55" aria-label="Line 55" tabindex="-1"></a>                        rgb(0x3478c8),</span>
-<span id="L56" class="source-line"><a href="#L56" class="line-number" data-line="56" aria-label="Line 56" tabindex="-1"></a>                    ));</span>
-<span id="L57" class="source-line"><a href="#L57" class="line-number" data-line="57" aria-label="Line 57" tabindex="-1"></a>                &#125;);</span>
-<span id="L58" class="source-line"><a href="#L58" class="line-number" data-line="58" aria-label="Line 58" tabindex="-1"></a>            &#125;,</span>
-<span id="L59" class="source-line"><a href="#L59" class="line-number" data-line="59" aria-label="Line 59" tabindex="-1"></a>        )</span>
-<span id="L60" class="source-line"><a href="#L60" class="line-number" data-line="60" aria-label="Line 60" tabindex="-1"></a>        .size_full()</span>
-<span id="L61" class="source-line"><a href="#L61" class="line-number" data-line="61" aria-label="Line 61" tabindex="-1"></a>    &#125;</span>
-<span id="L62" class="source-line"><a href="#L62" class="line-number" data-line="62" aria-label="Line 62" tabindex="-1"></a>&#125;</span>
-<span id="L63" class="source-line"><a href="#L63" class="line-number" data-line="63" aria-label="Line 63" tabindex="-1"></a></span>
-<span id="L64" class="source-line"><a href="#L64" class="line-number" data-line="64" aria-label="Line 64" tabindex="-1"></a>// ## Compare clipping with resizing &#123;#launch&#125;</span>
-<span id="L65" class="source-line"><a href="#L65" class="line-number" data-line="65" aria-label="Line 65" tabindex="-1"></a>// The platform helper creates this view with [`AppContext::new`]. Resize the</span>
-<span id="L66" class="source-line"><a href="#L66" class="line-number" data-line="66" aria-label="Line 66" tabindex="-1"></a>// preview until the blue rectangle reaches the edge. The mask crops it rather</span>
-<span id="L67" class="source-line"><a href="#L67" class="line-number" data-line="67" aria-label="Line 67" tabindex="-1"></a>// than making it narrower.</span>
-<span id="L68" class="source-line"><a href="#L68" class="line-number" data-line="68" aria-label="Line 68" tabindex="-1"></a>//</span>
-<span id="L69" class="source-line"><a href="#L69" class="line-number" data-line="69" aria-label="Line 69" tabindex="-1"></a>// To see the difference without the window edge hiding the overflow, replace</span>
-<span id="L70" class="source-line"><a href="#L70" class="line-number" data-line="70" aria-label="Line 70" tabindex="-1"></a>// the canvas&#x27;s `.size_full()` with `.w(px(100.)).h(px(100.))`. The blue quad</span>
-<span id="L71" class="source-line"><a href="#L71" class="line-number" data-line="71" aria-label="Line 71" tabindex="-1"></a>// starts at x=80 and remains 60 pixels wide, but its mask shows only 20 pixels.</span>
-<span id="L72" class="source-line"><a href="#L72" class="line-number" data-line="72" aria-label="Line 72" tabindex="-1"></a>// Change `Some(mask)` to `None` in `with_content_mask`: the complete quad now</span>
-<span id="L73" class="source-line"><a href="#L73" class="line-number" data-line="73" aria-label="Line 73" tabindex="-1"></a>// extends beyond the canvas into the rest of the window. Restore both changes</span>
-<span id="L74" class="source-line"><a href="#L74" class="line-number" data-line="74" aria-label="Line 74" tabindex="-1"></a>// afterward. Continue to the [drawing guide](@/guides/drawing.md) for paths and curves.</span>
-<span id="L75" class="source-line"><a href="#L75" class="line-number" data-line="75" aria-label="Line 75" tabindex="-1"></a></span>
-<span id="L76" class="source-line"><a href="#L76" class="line-number" data-line="76" aria-label="Line 76" tabindex="-1"></a>fn component(_window: &amp;mut Window, cx: &amp;mut gpui::App) -&gt; gpui::Entity&lt;PaintDemo&gt; &#123;</span>
-<span id="L77" class="source-line"><a href="#L77" class="line-number" data-line="77" aria-label="Line 77" tabindex="-1"></a>    cx.new(|_cx| PaintDemo)</span>
-<span id="L78" class="source-line"><a href="#L78" class="line-number" data-line="78" aria-label="Line 78" tabindex="-1"></a>&#125;</span>
-<span id="L79" class="source-line"><a href="#L79" class="line-number" data-line="79" aria-label="Line 79" tabindex="-1"></a></span>
-<span id="L80" class="source-line"><a href="#L80" class="line-number" data-line="80" aria-label="Line 80" tabindex="-1"></a>pub fn main() &#123;</span>
-<span id="L81" class="source-line"><a href="#L81" class="line-number" data-line="81" aria-label="Line 81" tabindex="-1"></a>    support::run(component);</span>
-<span id="L82" class="source-line"><a href="#L82" class="line-number" data-line="82" aria-label="Line 82" tabindex="-1"></a>&#125;</span></code></pre>
+<span id="L27" class="source-line"><a href="#L27" class="line-number" data-line="27" aria-label="Line 27" tabindex="-1"></a>// The first rectangle is inset by ten pixels. The second is positioned near</span>
+<span id="L28" class="source-line"><a href="#L28" class="line-number" data-line="28" aria-label="Line 28" tabindex="-1"></a>// the right edge, but cannot move left of the first. On a narrow canvas the</span>
+<span id="L29" class="source-line"><a href="#L29" class="line-number" data-line="29" aria-label="Line 29" tabindex="-1"></a>// spacing can put it partly outside the canvas bounds.</span>
+<span id="L30" class="source-line"><a href="#L30" class="line-number" data-line="30" aria-label="Line 30" tabindex="-1"></a>// [`Window::with_content_mask`] crops it to the canvas rectangle.</span>
+<span id="L31" class="source-line"><a href="#L31" class="line-number" data-line="31" aria-label="Line 31" tabindex="-1"></a>//</span>
+<span id="L32" class="source-line"><a href="#L32" class="line-number" data-line="32" aria-label="Line 32" tabindex="-1"></a>// &gt; [!NOTE]</span>
+<span id="L33" class="source-line"><a href="#L33" class="line-number" data-line="33" aria-label="Line 33" tabindex="-1"></a>// &gt; Layout bounds do not clip paint. A [`ContentMask`] intersects the current</span>
+<span id="L34" class="source-line"><a href="#L34" class="line-number" data-line="34" aria-label="Line 34" tabindex="-1"></a>// &gt; mask for its closure, then the helper restores the previous mask. This</span>
+<span id="L35" class="source-line"><a href="#L35" class="line-number" data-line="35" aria-label="Line 35" tabindex="-1"></a>// &gt; example has no input hitboxes. An interactive canvas needs the same clip</span>
+<span id="L36" class="source-line"><a href="#L36" class="line-number" data-line="36" aria-label="Line 36" tabindex="-1"></a>// &gt; during prepaint; see the [clipped-control test](https://gpui-ce.github.io/book/testing.html#check-clipping-and-input-together).</span>
+<span id="L37" class="source-line"><a href="#L37" class="line-number" data-line="37" aria-label="Line 37" tabindex="-1"></a>//</span>
+<span id="L38" class="source-line"><a href="#L38" class="line-number" data-line="38" aria-label="Line 38" tabindex="-1"></a>// Paint order is draw order: background, red, then blue. Resize the viewport</span>
+<span id="L39" class="source-line"><a href="#L39" class="line-number" data-line="39" aria-label="Line 39" tabindex="-1"></a>// to see the next frame recompute bounds and record the same order; the mask</span>
+<span id="L40" class="source-line"><a href="#L40" class="line-number" data-line="40" aria-label="Line 40" tabindex="-1"></a>// clips the overflow instead of changing either rectangle&#x27;s geometry.</span>
+<span id="L41" class="source-line"><a href="#L41" class="line-number" data-line="41" aria-label="Line 41" tabindex="-1"></a></span>
+<span id="L42" class="source-line"><a href="#L42" class="line-number" data-line="42" aria-label="Line 42" tabindex="-1"></a>impl Render for PaintDemo &#123;</span>
+<span id="L43" class="source-line"><a href="#L43" class="line-number" data-line="43" aria-label="Line 43" tabindex="-1"></a>    fn render(&amp;mut self, _window: &amp;mut Window, _cx: &amp;mut Context&lt;Self&gt;) -&gt; impl IntoElement &#123;</span>
+<span id="L44" class="source-line"><a href="#L44" class="line-number" data-line="44" aria-label="Line 44" tabindex="-1"></a>        canvas(</span>
+<span id="L45" class="source-line"><a href="#L45" class="line-number" data-line="45" aria-label="Line 45" tabindex="-1"></a>            |_bounds, _window, _cx| &#123;&#125;,</span>
+<span id="L46" class="source-line"><a href="#L46" class="line-number" data-line="46" aria-label="Line 46" tabindex="-1"></a>            |bounds: Bounds&lt;gpui::Pixels&gt;, _state, window, _cx| &#123;</span>
+<span id="L47" class="source-line"><a href="#L47" class="line-number" data-line="47" aria-label="Line 47" tabindex="-1"></a>                let mask = ContentMask &#123;</span>
+<span id="L48" class="source-line"><a href="#L48" class="line-number" data-line="48" aria-label="Line 48" tabindex="-1"></a>                    bounds,</span>
+<span id="L49" class="source-line"><a href="#L49" class="line-number" data-line="49" aria-label="Line 49" tabindex="-1"></a>                    fade_out: Default::default(),</span>
+<span id="L50" class="source-line"><a href="#L50" class="line-number" data-line="50" aria-label="Line 50" tabindex="-1"></a>                &#125;;</span>
+<span id="L51" class="source-line"><a href="#L51" class="line-number" data-line="51" aria-label="Line 51" tabindex="-1"></a>                window.with_content_mask(Some(mask), |window| &#123;</span>
+<span id="L52" class="source-line"><a href="#L52" class="line-number" data-line="52" aria-label="Line 52" tabindex="-1"></a>                    window.paint_quad(fill(bounds, rgb(0xf4f1ea)));</span>
+<span id="L53" class="source-line"><a href="#L53" class="line-number" data-line="53" aria-label="Line 53" tabindex="-1"></a>                    let left = bounds.origin + point(px(10.), px(10.));</span>
+<span id="L54" class="source-line"><a href="#L54" class="line-number" data-line="54" aria-label="Line 54" tabindex="-1"></a>                    let right_x =</span>
+<span id="L55" class="source-line"><a href="#L55" class="line-number" data-line="55" aria-label="Line 55" tabindex="-1"></a>                        (bounds.origin.x + bounds.size.width - px(70.)).max(left.x + px(70.));</span>
+<span id="L56" class="source-line"><a href="#L56" class="line-number" data-line="56" aria-label="Line 56" tabindex="-1"></a>                    window.paint_quad(fill(</span>
+<span id="L57" class="source-line"><a href="#L57" class="line-number" data-line="57" aria-label="Line 57" tabindex="-1"></a>                        Bounds::new(left, size(px(60.), px(40.))),</span>
+<span id="L58" class="source-line"><a href="#L58" class="line-number" data-line="58" aria-label="Line 58" tabindex="-1"></a>                        rgb(0xe05a47),</span>
+<span id="L59" class="source-line"><a href="#L59" class="line-number" data-line="59" aria-label="Line 59" tabindex="-1"></a>                    ));</span>
+<span id="L60" class="source-line"><a href="#L60" class="line-number" data-line="60" aria-label="Line 60" tabindex="-1"></a>                    window.paint_quad(fill(</span>
+<span id="L61" class="source-line"><a href="#L61" class="line-number" data-line="61" aria-label="Line 61" tabindex="-1"></a>                        Bounds::new(point(right_x, left.y), size(px(60.), px(40.))),</span>
+<span id="L62" class="source-line"><a href="#L62" class="line-number" data-line="62" aria-label="Line 62" tabindex="-1"></a>                        rgb(0x3478c8),</span>
+<span id="L63" class="source-line"><a href="#L63" class="line-number" data-line="63" aria-label="Line 63" tabindex="-1"></a>                    ));</span>
+<span id="L64" class="source-line"><a href="#L64" class="line-number" data-line="64" aria-label="Line 64" tabindex="-1"></a>                &#125;);</span>
+<span id="L65" class="source-line"><a href="#L65" class="line-number" data-line="65" aria-label="Line 65" tabindex="-1"></a>            &#125;,</span>
+<span id="L66" class="source-line"><a href="#L66" class="line-number" data-line="66" aria-label="Line 66" tabindex="-1"></a>        )</span>
+<span id="L67" class="source-line"><a href="#L67" class="line-number" data-line="67" aria-label="Line 67" tabindex="-1"></a>        .size_full()</span>
+<span id="L68" class="source-line"><a href="#L68" class="line-number" data-line="68" aria-label="Line 68" tabindex="-1"></a>    &#125;</span>
+<span id="L69" class="source-line"><a href="#L69" class="line-number" data-line="69" aria-label="Line 69" tabindex="-1"></a>&#125;</span>
+<span id="L70" class="source-line"><a href="#L70" class="line-number" data-line="70" aria-label="Line 70" tabindex="-1"></a></span>
+<span id="L71" class="source-line"><a href="#L71" class="line-number" data-line="71" aria-label="Line 71" tabindex="-1"></a>// ## Compare clipping with resizing &#123;#launch&#125;</span>
+<span id="L72" class="source-line"><a href="#L72" class="line-number" data-line="72" aria-label="Line 72" tabindex="-1"></a>// The platform helper creates this view with [`AppContext::new`]. Resize the</span>
+<span id="L73" class="source-line"><a href="#L73" class="line-number" data-line="73" aria-label="Line 73" tabindex="-1"></a>// preview until the blue rectangle reaches the edge. The mask crops it rather</span>
+<span id="L74" class="source-line"><a href="#L74" class="line-number" data-line="74" aria-label="Line 74" tabindex="-1"></a>// than making it narrower.</span>
+<span id="L75" class="source-line"><a href="#L75" class="line-number" data-line="75" aria-label="Line 75" tabindex="-1"></a>//</span>
+<span id="L76" class="source-line"><a href="#L76" class="line-number" data-line="76" aria-label="Line 76" tabindex="-1"></a>// To see the difference without the window edge hiding the overflow, replace</span>
+<span id="L77" class="source-line"><a href="#L77" class="line-number" data-line="77" aria-label="Line 77" tabindex="-1"></a>// the canvas&#x27;s `.size_full()` with `.w(px(100.)).h(px(100.))`. The blue quad</span>
+<span id="L78" class="source-line"><a href="#L78" class="line-number" data-line="78" aria-label="Line 78" tabindex="-1"></a>// starts at x=80 and remains 60 pixels wide, but its mask shows only 20 pixels.</span>
+<span id="L79" class="source-line"><a href="#L79" class="line-number" data-line="79" aria-label="Line 79" tabindex="-1"></a>// Change `Some(mask)` to `None` in `with_content_mask`: the complete quad now</span>
+<span id="L80" class="source-line"><a href="#L80" class="line-number" data-line="80" aria-label="Line 80" tabindex="-1"></a>// extends beyond the canvas into the rest of the window. Restore both changes</span>
+<span id="L81" class="source-line"><a href="#L81" class="line-number" data-line="81" aria-label="Line 81" tabindex="-1"></a>// afterward. Continue to the [drawing guide](@/guides/drawing.md) for paths and curves.</span>
+<span id="L82" class="source-line"><a href="#L82" class="line-number" data-line="82" aria-label="Line 82" tabindex="-1"></a></span>
+<span id="L83" class="source-line"><a href="#L83" class="line-number" data-line="83" aria-label="Line 83" tabindex="-1"></a>fn component(_window: &amp;mut Window, cx: &amp;mut gpui::App) -&gt; gpui::Entity&lt;PaintDemo&gt; &#123;</span>
+<span id="L84" class="source-line"><a href="#L84" class="line-number" data-line="84" aria-label="Line 84" tabindex="-1"></a>    cx.new(|_cx| PaintDemo)</span>
+<span id="L85" class="source-line"><a href="#L85" class="line-number" data-line="85" aria-label="Line 85" tabindex="-1"></a>&#125;</span>
+<span id="L86" class="source-line"><a href="#L86" class="line-number" data-line="86" aria-label="Line 86" tabindex="-1"></a></span>
+<span id="L87" class="source-line"><a href="#L87" class="line-number" data-line="87" aria-label="Line 87" tabindex="-1"></a>pub fn main() &#123;</span>
+<span id="L88" class="source-line"><a href="#L88" class="line-number" data-line="88" aria-label="Line 88" tabindex="-1"></a>    support::run(component);</span>
+<span id="L89" class="source-line"><a href="#L89" class="line-number" data-line="89" aria-label="Line 89" tabindex="-1"></a>&#125;</span></code></pre>

@@ -10,9 +10,59 @@ import os
 
 sys.path.insert(0, str(Path(__file__).parent))
 from parser import DocumentationError, parse_source
-from postprocess import callouts, process_tree, rustdoc_backlinks, rustdoc_notes
+from postprocess import callouts, process_tree, rustdoc_backlinks, rustdoc_notes, rustdoc_dependency_links
 from sync_links import sync
 from generate import cargo_zip, component_source, render
+from check_site import audit
+
+
+class SiteAuditTests(unittest.TestCase):
+    def test_rust_path_uri_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            public = Path(directory)
+            api = public / "api/gpui"
+            api.mkdir(parents=True)
+            (public / "api-examples.json").write_text("{}")
+            (public / "documentation-build.json").write_text('{"browser_programs": false}')
+            (api / "struct.Task.html").write_text('<a href="TryFuture::Ok">Output</a>')
+            self.assertTrue(any("unresolved Rust documentation link TryFuture::Ok" in error
+                                for error in audit(public)))
+
+    def test_relative_api_fragment_is_checked_after_reexport_redirect(self):
+        with tempfile.TemporaryDirectory() as directory:
+            public = Path(directory)
+            api = public / "api/gpui"
+            private = api / "element"
+            private.mkdir(parents=True)
+            (public / "api-examples.json").write_text("{}")
+            (public / "documentation-build.json").write_text('{"browser_programs": false}')
+            (private / "trait.Element.html").write_text(
+                '<meta http-equiv="refresh" content="0;url=../trait.Element.html">')
+            (api / "trait.Element.html").write_text('<section id="method.prepaint"></section>')
+            index = api / "index.html"
+            index.write_text('<a href="element/trait.Element.html#method.removed">Prepaint</a>')
+
+            errors = audit(public)
+            self.assertEqual(len(errors), 1)
+            self.assertIn("missing anchor element/trait.Element.html#method.removed", errors[0])
+
+            index.write_text('<a href="element/trait.Element.html#method.prepaint">Prepaint</a>')
+            self.assertEqual(audit(public), [])
+
+    def test_api_fragments_match_literal_ids_before_percent_decoding(self):
+        with tempfile.TemporaryDirectory() as directory:
+            public = Path(directory)
+            api = public / "api/gpui"
+            api.mkdir(parents=True)
+            (public / "api-examples.json").write_text("{}")
+            (public / "documentation-build.json").write_text('{"browser_programs": false}')
+            page = api / "struct.Item.html"
+            page.write_text('<a href="#impl-From%3CT%3E">From</a>'
+                            '<section id="impl-From%3CT%3E"></section>'
+                            '<a href="#two%20words">Words</a><section id="two words"></section>')
+            self.assertEqual(audit(public), [])
+            page.write_text('<a href="#impl-From%3CT%3E">From</a>')
+            self.assertTrue(any("missing anchor" in error for error in audit(public)))
 
 
 class ParserTests(unittest.TestCase):
@@ -64,6 +114,35 @@ class ParserTests(unittest.TestCase):
 
 
 class LinkTests(unittest.TestCase):
+    def test_dependency_links_keep_their_original_documentation_scope(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            page = root / "gpui/struct.FillOptions.html"
+            text = ('<a href="index.html#flattening-and-tolerance">Tolerance</a>'
+                    '<a href="super::Subscriber">Subscriber</a>'
+                    '<a href="futures_core::future::TryFuture">Future</a>')
+            revised = rustdoc_dependency_links(text, page, root)
+            self.assertIn('https://docs.rs/lyon_tessellation/latest/lyon_tessellation/#flattening-and-tolerance', revised)
+            self.assertIn('https://docs.rs/tracing/latest/tracing/trait.Subscriber.html', revised)
+            self.assertIn('https://docs.rs/futures-core/latest/futures_core/future/trait.TryFuture.html', revised)
+            unrelated = root / "gpui/struct.Other.html"
+            self.assertIn('href="index.html#flattening-and-tolerance"',
+                          rustdoc_dependency_links(text, unrelated, root))
+            self.assertEqual(rustdoc_dependency_links(revised, page, root), revised)
+
+    def test_only_missing_local_implementor_scripts_are_removed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            page = root / "gpui/trait.RenderOnce.html"
+            text = '<script src="../trait.impl/gpui/element/trait.RenderOnce.js" async></script>'
+            self.assertEqual(rustdoc_dependency_links(text, page, root), "")
+            script = root / "trait.impl/gpui/element/trait.RenderOnce.js"
+            script.parent.mkdir(parents=True)
+            script.write_text("window.register_implementors({});")
+            self.assertEqual(rustdoc_dependency_links(text, page, root), text)
+            external = '<script src="https://example.test/trait.impl/trait.External.js"></script>'
+            self.assertEqual(rustdoc_dependency_links(external, page, root), external)
+
     def test_unchanged_walkthrough_outputs_keep_their_timestamps(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

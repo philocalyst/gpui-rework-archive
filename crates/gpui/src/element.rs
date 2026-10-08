@@ -27,7 +27,7 @@
 //! Custom paint code uses the window's coordinate and clipping state. Layout
 //! bounds describe the assigned region; they do not clip drawing by themselves.
 //! [`Window::with_content_mask`] narrows the active clip. The
-//! [drawing walkthrough](https://gpui-ce.github.io/examples/drawing/#paint)
+//! [drawing walkthrough](https://gpui-ce.github.io/examples/drawing/#bounds)
 //! shows how [`crate::canvas`] provides custom painting without a new element
 //! implementation. The [custom-element walkthrough](https://gpui-ce.github.io/examples/custom-element/)
 //! implements all three methods and shows their state handoff.
@@ -156,13 +156,17 @@ pub trait Element: 'static + IntoElement {
         cx: &mut App,
     );
 
-    /// Returns the accessible role for this element, if any.
-    /// Elements that return `None` have no accessibility node unless
-    /// [`Element::is_a11y_hidden`] returns `true`.
+    /// Chooses this element's role in the accessibility tree.
     ///
-    /// Note: inclusion in accessibility tree requires non-`None` [`id`][Element::id].
+    /// A node needs a stable [`id`](Self::id) and active window accessibility.
+    /// Returning `None` omits this element's node unless
+    /// [`is_a11y_hidden`](Self::is_a11y_hidden) needs a container to hide its
+    /// subtree. Descendants can still have their own nodes.
     ///
-    /// See the [accessibility guide](crate::_accessibility) for an overview.
+    /// A role describes the control; it does not supply focus or activation.
+    /// Add its name and state in [`write_a11y_info`](Self::write_a11y_info),
+    /// and implement the corresponding input behavior. The
+    /// [accessibility guide](crate::_accessibility) connects these steps.
     fn a11y_role(&self) -> Option<accesskit::Role> {
         None
     }
@@ -171,29 +175,41 @@ pub trait Element: 'static + IntoElement {
     /// descendants.
     ///
     /// GPUI gives a hidden element without a role an internal container node.
-    /// AccessKit uses that node to omit the subtree.
+    /// AccessKit uses that node to omit the subtree. This still requires an
+    /// [`id`](Self::id). It leaves layout, painting, and input active, so do not
+    /// hide a control that remains reachable by keyboard focus.
     fn is_a11y_hidden(&self) -> bool {
         false
     }
 
-    /// Write accessibility properties to the given node.
-    /// GPUI calls this only when [`Element::a11y_role`] returns `Some` or
-    /// [`Element::is_a11y_hidden`] returns `true`.
+    /// Adds the accessible name, state, and capabilities to this element's node.
     ///
-    /// See the [accessibility guide](crate::_accessibility) for an overview.
+    /// GPUI initializes the role and scaled layout bounds before calling this
+    /// hook, before [`prepaint`](Self::prepaint). It runs only while window
+    /// accessibility is active, with an [`id`](Self::id), and when
+    /// [`a11y_role`](Self::a11y_role) returns `Some` or
+    /// [`is_a11y_hidden`](Self::is_a11y_hidden) returns `true`.
+    ///
+    /// Advertising an action here does not install a handler. For child nodes
+    /// whose geometry depends on prepaint, use
+    /// [`a11y_synthetic_children`](Self::a11y_synthetic_children). See the
+    /// [accessibility guide](crate::_accessibility#expose-parts-of-a-custom-element).
     fn write_a11y_info(&self, _node: &mut accesskit::Node) {}
 
-    /// Add synthetic child nodes to an [`Element`]. The element must have an
-    /// [`.id()`][Element::id]. It must also have a
-    /// [`.role()`][Element::a11y_role] or return `true` from
-    /// [`Element::is_a11y_hidden`].
+    /// Exposes accessible parts that have no corresponding child element.
     ///
-    /// Some elements may want to inject accessibility nodes that do not
-    /// correspond to any GPUI element. For example, a custom text field element
-    /// may want to inject synthetic child nodes for the text content.
+    /// GPUI calls this after [`prepaint`](Self::prepaint), while this element's
+    /// node is active on the builder stack. It requires active accessibility,
+    /// an [`id`](Self::id), and either an [`a11y_role`](Self::a11y_role) or
+    /// [`is_a11y_hidden`](Self::is_a11y_hidden). Use the supplied prepaint state
+    /// for measured geometry, such as a custom text field's lines.
     ///
-    /// See [Synthetic children](crate::_accessibility#synthetic-children) in
-    /// the accessibility guide for more detail.
+    /// Derive stable child IDs with [`A11ySubtreeBuilder::synthetic_node_id`]
+    /// and add nodes with [`A11ySubtreeBuilder::push_child`]. Store IDs needed
+    /// by paint in the prepaint state, then register child action handlers
+    /// with [`Window::on_a11y_action`]. See the
+    /// [custom-node guide](crate::_accessibility#expose-parts-of-a-custom-element)
+    /// for the relationship between geometry, selection, and actions.
     fn a11y_synthetic_children(
         &mut self,
         _prepaint: &mut Self::PrepaintState,

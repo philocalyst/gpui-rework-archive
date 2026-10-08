@@ -816,6 +816,67 @@ third question, checked separately with
 [keyboard focus](https://gpui-ce.github.io/book/input.html#keyboard-focus) for the ownership
 and tab-order rules behind these assertions.
 
+### Check accessible activation against the reported node
+
+A pointer test can pass while the accessibility node has the wrong name or
+advertises no action. Force tree construction, inspect the node the app
+reported, and activate that node through the native accessibility path:
+
+```rust
+use gpui::{AccessibleAction, AppContext, Context, Render, Role, TestApp, Text, Window,
+           div, prelude::*, px};
+
+struct SaveButton { saves: usize }
+impl Render for SaveButton {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        div().id("save").role(Role::Button).aria_label("Save draft")
+            .w(px(120.)).h(px(32.))
+            .on_click(cx.listener(|this, _, _, cx| {
+                this.saves += 1;
+                cx.notify();
+            }))
+            .child(Text::new_inaccessible("Save draft".into()))
+    }
+}
+
+let mut app = TestApp::new();
+let mut window = app.open_window(|_, _| SaveButton { saves: 0 });
+window.update(|_, window, _| window.set_a11y_forced(true));
+window.draw();
+let button = window.update(|_, window, _| {
+    let tree = window.a11y_tree().expect("a forced draw builds the tree");
+    let (id, node) = tree.nodes.iter()
+        .find(|(_, node)| node.role() == Role::Button && node.label() == Some("Save draft"))
+        .expect("the named button must be exposed");
+    assert!(node.supports_action(AccessibleAction::Click));
+    *id
+});
+let handle = window.handle();
+app.update(|cx| {
+    cx.update_window(handle.into(), |_, window, cx| {
+        window.perform_a11y_action(button, AccessibleAction::Click, None, cx);
+    }).unwrap();
+});
+assert_eq!(window.read(|view, _| view.saves), 1);
+window.draw();
+window.update(|_, window, _| {
+    assert!(window.a11y_tree().unwrap().nodes.iter()
+        .any(|(id, node)| *id == button && node.label() == Some("Save draft")));
+});
+```
+
+Dispatch through `AppContext::update_window` so the callback can update the
+root view. `TestAppWindow::update` already borrows that view; activating its
+listener there would attempt a second mutable borrow and panic. The final
+draw checks that the same control keeps its node ID after an update.
+Use IDs from [`Window::a11y_tree`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.a11y_tree), rather than the
+temporary letter keys in the JSON dump. This fixture checks the reported
+capability and GPUI's action routing. It does not check a screen reader's
+announcement or a native adapter's connection to that screen reader; verify
+those in the application on its target platform. The
+[accessibility chapter](https://gpui-ce.github.io/book/accessibility.html) explains node identity,
+properties, and custom children.
+
 ### Check the key binding as well as its action
 
 A key context decides whether a binding matches. It does not remove the
