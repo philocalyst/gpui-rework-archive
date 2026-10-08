@@ -48,6 +48,8 @@ pub struct CodepenStatus {
 /// leaves editor controls to a host such as the documentation's DOM editor.
 /// Source edits keep the last successful scene visible, but input to that scene
 /// is suspended until the displayed source matches the current source again.
+/// Resizing keeps that scene in view at its original aspect ratio; input resumes
+/// once a successful frame has been laid out for the new viewport.
 /// Input and animation reuse the running component. Compatible edits replace
 /// executable function bodies while retaining its entities. Changes to types,
 /// definitions, or captured closure data can require a fresh component, as does
@@ -269,6 +271,9 @@ impl Codepen {
                 let _ = weak.update(cx, |this: &mut Self, cx| {
                     if this.displayed_source.as_deref() != Some(this.source.as_str())
                         || !this.session.diagnostics.is_empty()
+                        || this.session.frame.as_ref().is_some_and(|frame| {
+                            frame.viewport != this.viewport
+                        })
                     {
                         return;
                     }
@@ -1007,6 +1012,43 @@ mod tests {
             })
             .unwrap();
         (app, handle, mailbox)
+    }
+
+    #[test]
+    fn input_waits_for_a_frame_laid_out_for_the_current_viewport() {
+        let (mut app, handle, mailbox) = input_test_app();
+        app.update_window(handle.into(), |root, window, cx| {
+            let root = root.downcast::<Codepen>().unwrap();
+            let input = root.update(cx, |pen, cx| {
+                let mut scene = gpui::Scene::default();
+                scene.finish();
+                pen.session.frame = Some(std::sync::Arc::new(gpui_codepen_guest::Frame {
+                    version: gpui_codepen_guest::PROTOCOL_VERSION,
+                    viewport: pen.viewport,
+                    scale_factor: 1.,
+                    scene: gpui::SceneCapture::capture(&scene, |_| unreachable!()).unwrap(),
+                    next_frame_ms: None,
+                    cursor: Default::default(),
+                    text: None,
+                }));
+                pen.viewport = gpui::size(px(400.), px(150.));
+                pen.preview.read(cx).on_input.clone()
+            });
+            input(gpui::PlatformInput::MouseDown(Default::default()).into(), window, cx);
+            assert!(!root.read(cx).session.running);
+
+            root.update(cx, |pen, _| {
+                std::sync::Arc::make_mut(pen.session.frame.as_mut().unwrap()).viewport = pen.viewport;
+            });
+            input(gpui::PlatformInput::MouseDown(Default::default()).into(), window, cx);
+            assert!(root.read(cx).session.running);
+        })
+        .unwrap();
+        app.run_until_parked();
+        let (request, _reply) = mailbox.state.lock().unwrap().pending.take().unwrap();
+        assert_eq!(request.input.events.len(), 1);
+        assert_eq!(request.input.viewport, gpui::size(px(400.), px(150.)));
+        drop(app);
     }
 
     #[test]

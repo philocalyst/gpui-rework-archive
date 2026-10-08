@@ -100,8 +100,14 @@ pub(crate) fn scene_view(
                     hitbox
                 },
                 move |bounds, hitbox, window, cx| {
+                    // A failed edit cannot produce a new layout. Keep the entire
+                    // retained scene visible when the host shrinks its pane,
+                    // rather than clipping its contents below the new viewport.
+                    let (destination, fit) = frame.as_ref().map_or((bounds, 1.), |frame| {
+                        fit_retained_scene(bounds, frame.viewport)
+                    });
                     if let Some(scene) = scene {
-                        if let Err(e) = window.paint_scene(&scene, bounds, scale) {
+                        if let Err(e) = window.paint_scene(&scene, destination, scale / fit) {
                             if let Some(frame) = frame.clone() {
                                 let error = error.clone();
                                 window.defer(cx, move |window, cx| {
@@ -114,6 +120,11 @@ pub(crate) fn scene_view(
                                 });
                             }
                         }
+                    }
+                    if frame.as_ref().is_some_and(|frame| frame.viewport != bounds.size) {
+                        // Input coordinates and IME geometry belong to the old
+                        // layout until the interpreter supplies a matching frame.
+                        return;
                     }
                     if let Some(frame) = frame {
                         window.set_cursor_style(frame.cursor, &hitbox);
@@ -234,6 +245,23 @@ pub(crate) fn scene_view(
             .size_full(),
         )
 }
+fn fit_retained_scene(
+    bounds: Bounds<Pixels>,
+    viewport: Size<Pixels>,
+) -> (Bounds<Pixels>, f32) {
+    let fit = (bounds.size.width / viewport.width)
+        .min(bounds.size.height / viewport.height)
+        .min(1.);
+    if fit <= 0. || !fit.is_finite() {
+        return (bounds, 1.);
+    }
+    let fitted = viewport.map(|length| length * fit);
+    let origin = bounds.origin + point(
+        (bounds.size.width - fitted.width) * 0.5,
+        (bounds.size.height - fitted.height) * 0.5,
+    );
+    (Bounds::new(origin, fitted), fit)
+}
 fn translate(input: &mut PlatformInput, origin: Point<Pixels>) {
     match input {
         PlatformInput::MouseDown(e) => e.position -= origin,
@@ -277,6 +305,23 @@ fn event_mouse_button(event: &PlatformInput) -> Option<MouseButton> {
 #[cfg(all(test, not(target_family = "wasm")))]
 mod tests {
     use super::*;
+
+    #[::core::prelude::v1::test]
+    fn retained_scene_fits_a_shorter_pane_without_clipping_or_stretching() {
+        let viewport = size(px(600.), px(500.));
+        let pane = Bounds::new(point(px(10.), px(20.)), size(px(532.), px(150.)));
+        let (destination, fit) = fit_retained_scene(pane, viewport);
+        assert!((fit - 0.3).abs() < 0.0001);
+        assert_eq!(destination.size, size(px(180.), px(150.)));
+        assert_eq!(destination.origin, point(px(186.), px(20.)));
+
+        // A larger pane preserves the source's size instead of enlarging it.
+        let larger = Bounds::new(point(px(10.), px(20.)), size(px(800.), px(700.)));
+        let (destination, fit) = fit_retained_scene(larger, viewport);
+        assert_eq!(fit, 1.);
+        assert_eq!(destination.size, viewport);
+        assert_eq!(destination.origin, point(px(110.), px(120.)));
+    }
 
     struct HostPreview {
         focus: FocusHandle,
