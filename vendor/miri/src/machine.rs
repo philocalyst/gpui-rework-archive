@@ -632,9 +632,14 @@ pub struct MiriMachine<'tcx> {
     // The total number of blocks that have been executed.
     pub(crate) basic_block_count: u64,
     pub(crate) codepen_rpc_stream: Option<std::net::TcpStream>,
+    #[cfg(not(target_family = "wasm"))]
+    pub(crate) codepen_control_stream: Option<std::net::TcpStream>,
     pub(crate) codepen_rpc_response: Vec<u8>,
+    pub(crate) codepen_overlay: Option<crate::codepen_reload::Overlay<'tcx>>,
     pub(crate) codepen_profile: Option<(std::time::Instant, u64)>,
     pub(crate) codepen_function_work: Option<FxHashMap<ty::Instance<'tcx>, (u64, u64)>>,
+    #[cfg(target_family = "wasm")]
+    codepen_host_float: bool,
 
     /// Handle of the optional shared object file for native functions.
     #[cfg(all(feature = "native-lib", unix))]
@@ -820,10 +825,16 @@ impl<'tcx> MiriMachine<'tcx> {
             report_progress: config.report_progress,
             basic_block_count: 0,
             codepen_rpc_stream: None,
+            #[cfg(not(target_family = "wasm"))]
+            codepen_control_stream: None,
             codepen_rpc_response: Vec::new(),
+            codepen_overlay: None,
             codepen_profile: None,
             codepen_function_work: (std::env::var("GPUI_CODEPEN_PROFILE").as_deref() == Ok("functions"))
                 .then(FxHashMap::default),
+            #[cfg(target_family = "wasm")]
+            codepen_host_float: std::env::var("GPUI_CODEPEN_IPC").as_deref() == Ok("1")
+                && std::env::var("GPUI_CODEPEN_SOFT_FLOAT").as_deref() != Ok("1"),
             monotonic_clock: MonotonicClock::new(config.isolated_op == IsolatedOp::Allow),
             #[cfg(all(feature = "native-lib", unix))]
             native_lib: config.native_lib.iter().map(|lib_file_path| {
@@ -1081,9 +1092,14 @@ impl VisitProvenance for MiriMachine<'_> {
             report_progress: _,
             basic_block_count: _,
             codepen_rpc_stream: _,
+            #[cfg(not(target_family = "wasm"))]
+            codepen_control_stream: _,
             codepen_rpc_response: _,
+            codepen_overlay: _,
             codepen_profile: _,
             codepen_function_work: _,
+            #[cfg(target_family = "wasm")]
+            codepen_host_float: _,
             native_lib: _,
             #[cfg(all(feature = "native-lib", unix))]
             native_lib_ecx_interchange: _,
@@ -1270,6 +1286,17 @@ impl<'tcx> Machine<'tcx> for MiriMachine<'tcx> {
     }
 
     #[inline(always)]
+    fn load_mir(ecx: &InterpCx<'tcx, Self>, instance: ty::InstanceKind<'tcx>) -> &'tcx mir::Body<'tcx> {
+        if let ty::InstanceKind::Item(def) = instance
+            && let Some(overlay) = &ecx.machine.codepen_overlay
+            && def.krate == overlay.krate
+            && let Some(body) = overlay.bodies.get(&def)
+        {
+            return body;
+        }
+        ecx.tcx.instance_mir(instance)
+    }
+
     fn find_mir_or_eval_fn(
         ecx: &mut MiriInterpCx<'tcx>,
         instance: ty::Instance<'tcx>,
@@ -1438,6 +1465,12 @@ impl<'tcx> Machine<'tcx> for MiriMachine<'tcx> {
             return interp_ok(());
         }
         ecx.atomic_fence(AtomicFenceOrd::from(ordering))
+    }
+
+    #[cfg(target_family = "wasm")]
+    #[inline(always)]
+    fn codepen_host_float(ecx: &InterpCx<'tcx, Self>) -> bool {
+        ecx.machine.codepen_host_float && !ecx.machine.float_nondet
     }
 
     #[inline(always)]
@@ -1943,6 +1976,12 @@ impl<'tcx> Machine<'tcx> for MiriMachine<'tcx> {
 
     fn before_terminator(ecx: &mut InterpCx<'tcx, Self>) -> InterpResult<'tcx> {
         ecx.machine.basic_block_count += 1u64; // a u64 that is only incremented by 1 will "never" overflow
+        #[cfg(target_family = "wasm")]
+        if std::env::var("GPUI_CODEPEN_IPC").as_deref() == Ok("1")
+            && crate::codepen_browser::checkpoint(ecx.machine.basic_block_count)
+        {
+            throw_machine_stop!(TerminationInfo::Exit { code: 0, leak_check: false });
+        }
         ecx.machine.since_gc += 1;
         // Possibly report our progress. This will point at the terminator we are about to execute.
         if let Some(report_progress) = ecx.machine.report_progress {

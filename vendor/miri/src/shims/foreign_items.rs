@@ -22,6 +22,30 @@ use crate::concurrency::GenmcEvalContextExt as _;
 use crate::helpers::EvalContextExt as _;
 use crate::*;
 
+/// The native guide's control stream is independent of interpreted stdin/stdout.
+/// Standalone interpreter fixtures can still use the original pipe protocol.
+#[cfg(not(target_family = "wasm"))]
+fn codepen_control<'tcx>(this: &mut MiriInterpCx<'tcx>) -> InterpResult<'tcx, Option<std::net::TcpStream>> {
+    if this.machine.codepen_control_stream.is_none() {
+        let Ok(address) = std::env::var("GPUI_CODEPEN_CONTROL") else { return interp_ok(None); };
+        let address: std::net::SocketAddr = match address.parse() {
+            Ok(address) => address,
+            Err(_) => throw_unsup_format!("invalid GPUI control endpoint"),
+        };
+        if !address.ip().is_loopback() { throw_unsup_format!("GPUI control endpoint must be loopback"); }
+        let stream = match std::net::TcpStream::connect(address) {
+            Ok(stream) => stream,
+            Err(error) => throw_unsup_format!("GPUI control connection failed: {error}"),
+        };
+        let _ = stream.set_nodelay(true);
+        this.machine.codepen_control_stream = Some(stream);
+    }
+    match this.machine.codepen_control_stream.as_ref().unwrap().try_clone() {
+        Ok(stream) => interp_ok(Some(stream)),
+        Err(error) => throw_unsup_format!("GPUI control stream failed: {error}"),
+    }
+}
+
 /// Type of dynamic symbols (for `dlsym` et al)
 #[derive(Debug, Copy, Clone)]
 pub struct DynSym(Symbol);
@@ -344,6 +368,16 @@ trait EvalContextExtPriv<'tcx>: crate::MiriInterpCxExt<'tcx> {
                 if len > 64 * 1024 * 1024 { throw_unsup_format!("GPUI platform request exceeds budget"); }
                 let ptr = this.read_pointer(buffer)?;
                 let input = this.read_bytes_ptr_strip_provenance(ptr, Size::from_bytes(len))?.to_vec();
+                #[cfg(target_family = "wasm")]
+                let length = {
+                    this.machine.codepen_rpc_response = match crate::codepen_browser::platform_call(&input) {
+                        Ok(reply) => reply,
+                        Err(error) => throw_unsup_format!("{error}"),
+                    };
+                    this.machine.codepen_rpc_response.len()
+                };
+                #[cfg(not(target_family = "wasm"))]
+                let length = {
                 if this.machine.codepen_rpc_stream.is_none() {
                     let address = std::env::var("GPUI_CODEPEN_RPC").unwrap_or_default();
                     if !address.starts_with("127.0.0.1:") { throw_unsup_format!("invalid GPUI platform endpoint"); }
@@ -364,6 +398,8 @@ trait EvalContextExtPriv<'tcx>: crate::MiriInterpCxExt<'tcx> {
                 if length > 64 * 1024 * 1024 { throw_unsup_format!("GPUI platform response exceeds budget"); }
                 this.machine.codepen_rpc_response.resize(length, 0);
                 if let Err(error) = stream.read_exact(&mut this.machine.codepen_rpc_response) { throw_unsup_format!("GPUI platform response failed: {error}"); }
+                    length
+                };
                 this.write_scalar(Scalar::from_target_usize(length as u64, this), dest)?;
             }
             "gpui_codepen_rpc_read" if std::env::var_os("GPUI_CODEPEN_IPC").as_deref()
@@ -388,8 +424,21 @@ trait EvalContextExtPriv<'tcx>: crate::MiriInterpCxExt<'tcx> {
                 if len > 64 * 1024 * 1024 {
                     throw_unsup_format!("GPUI frame exceeds its budget");
                 }
+                #[cfg(target_family = "wasm")]
+                {
+                    let bytes = if len == 0 { Vec::new() } else {
+                        let ptr = this.read_pointer(buffer)?;
+                        this.read_bytes_ptr_strip_provenance(ptr, Size::from_bytes(len))?.to_vec()
+                    };
+                    crate::codepen_browser::emit(&bytes);
+                }
+                #[cfg(not(target_family = "wasm"))]
+                {
                 let nonce = std::env::var("GPUI_CODEPEN_NONCE").unwrap_or_default();
-                let mut out = std::io::stdout().lock();
+                let mut out: Box<dyn Write> = match codepen_control(this)? {
+                    Some(stream) => Box::new(stream),
+                    None => Box::new(std::io::stdout().lock()),
+                };
                 let result = if len == 0 {
                     writeln!(out, "\nCODEPEN_{nonce}:READY:4")
                 } else {
@@ -402,10 +451,18 @@ trait EvalContextExtPriv<'tcx>: crate::MiriInterpCxExt<'tcx> {
                 if let Err(error) = result.and_then(|_| out.flush()) {
                     throw_unsup_format!("GPUI transport write failed: {error}");
                 }
+                            }
             }
             // Local GPUI transport only. All guest Rust, including deserialization,
             // rendering and serialization, remains interpreted.
             // No guest file descriptors or native pointers escape the interpreter.
+            "gpui_codepen_reload_revision" if std::env::var_os("GPUI_CODEPEN_IPC").as_deref()
+                == Some(std::ffi::OsStr::new("1")) =>
+            {
+                let [] = this.check_shim_sig(shim_sig!(extern "C" fn() -> usize), (link_name, abi, args))?;
+                let revision = this.machine.codepen_overlay.as_ref().map_or(0, |overlay| overlay.revision);
+                this.write_scalar(Scalar::from_target_usize(revision, this), dest)?;
+            }
             "gpui_codepen_receive" if std::env::var_os("GPUI_CODEPEN_IPC").as_deref()
                 == Some(std::ffi::OsStr::new("1")) =>
             {
@@ -418,7 +475,45 @@ trait EvalContextExtPriv<'tcx>: crate::MiriInterpCxExt<'tcx> {
                 if capacity == 0 || capacity > MAX_INPUT {
                     throw_unsup_format!("invalid GPUI transport capacity");
                 }
-                let mut input = std::io::stdin().lock();
+                if this.machine.codepen_overlay.is_none()
+                    && let Some(path) = std::env::var_os("GPUI_CODEPEN_BASELINE_MIR")
+                {
+                    let packet = match std::fs::read(path) {
+                        Ok(bytes) => bytes,
+                        Err(error) => throw_unsup_format!("GPUI starter MIR read failed: {error}"),
+                    };
+                    if let Err(error) = crate::codepen_reload::install_baseline(this, &packet) {
+                        throw_unsup_format!("GPUI starter MIR differs: {error}");
+                    }
+                }
+                #[cfg(target_family = "wasm")]
+                let bytes = loop {
+                    let bytes = match crate::codepen_browser::receive(capacity as usize) {
+                        Ok(bytes) => bytes,
+                        Err(error) => throw_unsup_format!("{error}"),
+                    };
+                    let packet = match crate::codepen_browser::patch() {
+                        Ok(packet) => packet,
+                        Err(error) => throw_unsup_format!("{error}"),
+                    };
+                    if let Some(packet) = packet {
+                        let accepted = crate::codepen_reload::install(this, &packet).is_ok();
+                        crate::codepen_browser::patched(accepted);
+                        if !accepted { continue; }
+                    }
+                    break bytes;
+                };
+                #[cfg(not(target_family = "wasm"))]
+                let bytes = {
+                let mut out: Box<dyn Write> = match codepen_control(this)? {
+                    Some(stream) => Box::new(stream),
+                    None => Box::new(std::io::stdout().lock()),
+                };
+                let mut input: Box<dyn Read> = match codepen_control(this)? {
+                    Some(stream) => Box::new(stream),
+                    None => Box::new(std::io::stdin().lock()),
+                };
+                loop {
                 let mut header = [0;4];
                 let mut received = 0;
                 while received < header.len() {
@@ -431,9 +526,24 @@ trait EvalContextExtPriv<'tcx>: crate::MiriInterpCxExt<'tcx> {
                     }
                 }
                 let length = if received == 0 {0} else {u32::from_le_bytes(header) as usize};
+                if length & 0x8000_0000 != 0 {
+                    let length = length & 0x7fff_ffff;
+                    if length > 64 * 1024 * 1024 { throw_unsup_format!("GPUI MIR packet exceeds its budget"); }
+                    let mut packet = vec![0; length];
+                    if let Err(error) = input.read_exact(&mut packet) { throw_unsup_format!("GPUI MIR transport failed: {error}"); }
+                    let accepted = crate::codepen_reload::install(this, &packet).is_ok();
+                    let nonce = std::env::var("GPUI_CODEPEN_NONCE").unwrap_or_default();
+                    if let Err(error) = writeln!(out, "\nCODEPEN_{nonce}:RELOADED:{}", u8::from(accepted)).and_then(|_| out.flush()) {
+                        throw_unsup_format!("GPUI MIR acknowledgement failed: {error}");
+                    }
+                    continue;
+                }
                 if length as u64 > MAX_INPUT {throw_unsup_format!("GPUI transport message exceeds its budget");}
                 let mut bytes = vec![0;length];
                 if let Err(error) = input.read_exact(&mut bytes) {throw_unsup_format!("GPUI transport body read failed: {error}");}
+                    break bytes;
+                }
+                };
                 if bytes.len() as u64 > capacity {
                     throw_unsup_format!("GPUI transport destination is too small");
                 }

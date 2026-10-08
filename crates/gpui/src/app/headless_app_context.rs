@@ -118,6 +118,13 @@ impl HeadlessAppContext {
         }
     }
 
+    /// Selects stable task order for an external frame driver. Timers and task
+    /// wakeups retain the normal executor behavior; test contexts default to
+    /// randomized scheduling.
+    pub fn set_randomize_task_order(&self, enabled: bool) {
+        self.dispatcher.scheduler().set_randomize_order(enabled);
+    }
+
     /// Mirrors the containing platform's support for subpixel text coverage.
     pub fn set_subpixel_rendering_supported(&mut self, supported: bool) {
         if self.platform.window_subpixel_rendering.replace(supported) != supported {

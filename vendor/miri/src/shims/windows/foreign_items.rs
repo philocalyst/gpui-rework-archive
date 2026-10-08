@@ -27,7 +27,7 @@ fn win_get_full_path_name<'tcx>(path: &Path) -> InterpResult<'tcx, io::Result<Pa
     interp_ok(path::absolute(path))
 }
 
-#[cfg(unix)]
+#[cfg(any(unix, target_os = "wasi"))]
 #[expect(clippy::get_first, clippy::arithmetic_side_effects)]
 fn win_get_full_path_name<'tcx>(path: &Path) -> InterpResult<'tcx, io::Result<PathBuf>> {
     use std::sync::LazyLock;

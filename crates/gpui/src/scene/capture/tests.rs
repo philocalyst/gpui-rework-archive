@@ -212,3 +212,53 @@ fn rejects_unsupported_versions_invalid_ranges_and_non_finite_values() {
             .contains("non-finite")
     );
 }
+
+#[test]
+fn direct_validation_covers_nested_geometry_and_inactive_background_fields() {
+    let bounds = test_bounds(0.0);
+    let quad = Quad {
+        bounds,
+        content_mask: ContentMask {
+            bounds,
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+    for change in [
+        (|quad: &mut Quad| quad.content_mask.fade_out.left.0 = f32::INFINITY) as fn(&mut Quad),
+        |quad| quad.background.colors[1].color.a = f32::NAN,
+        |quad| quad.border_color.gradient_angle_or_pattern_height = f32::NEG_INFINITY,
+        |quad| quad.corner_radii.bottom_right.0 = f32::NAN,
+        |quad| quad.border_dashed_gap = f32::INFINITY,
+    ] {
+        let mut invalid = quad;
+        change(&mut invalid);
+        assert!(matches!(
+            invalid.validate_numbers(),
+            Err(InvalidNumber::NonFinite)
+        ));
+    }
+    let mut invalid = quad;
+    invalid.content_mask.bounds.size.height.0 = -1.0;
+    assert!(matches!(
+        invalid.validate_numbers(),
+        Err(InvalidNumber::NegativeDimension)
+    ));
+    // Negative positions and non-dimension widths remain legal, as before.
+    let mut valid = quad;
+    valid.bounds.origin.x.0 = -1.0;
+    valid.border_widths.left.0 = -1.0;
+    assert!(valid.validate_numbers().is_ok());
+    let mut path = Path::new(point(crate::px(1.0), crate::px(2.0))).scale(1.0);
+    path.current.x.0 = f32::NAN;
+    assert!(matches!(
+        path.validate_numbers(),
+        Err(InvalidNumber::NonFinite)
+    ));
+    let mut transform = TransformationMatrix::unit();
+    transform.rotation_scale[1][0] = f32::INFINITY;
+    assert!(matches!(
+        transform.validate_numbers(),
+        Err(InvalidNumber::NonFinite)
+    ));
+}

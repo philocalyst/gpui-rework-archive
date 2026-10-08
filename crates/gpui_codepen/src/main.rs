@@ -173,8 +173,10 @@ impl Render for Guide {
         let lesson = &LESSONS[selected];
         let compact = window.viewport_size().width < px(1000.);
         let small = window.viewport_size().width < px(760.);
+        let short = window.viewport_size().height < px(800.);
         div().flex().flex_col().size_full().bg(rgb(0x1a281f)).text_color(rgb(0xdce9db)).font_family("IBM Plex Sans").whitespace_normal()
             .child(div().h(px(76.)).flex().items_center().justify_between().px_6().border_b_1().border_color(rgb(0x344137))
+                .when(short, |s| s.h(px(60.)))
                 .flex_shrink_0().when(small, |s| s.h(px(56.)).px_4())
                 .child(div().flex().items_center().gap_3()
                     .child(div().size(px(34.)).rounded_lg().bg(rgb(0xb9deac)).flex().items_center().justify_center().text_color(rgb(0x24472e)).font_weight(gpui::FontWeight::BOLD).child("g"))
@@ -200,6 +202,7 @@ impl Render for Guide {
                     .child(div().w_full().min_w_0().p_3().rounded_lg().bg(rgb(0x223426)).text_xs().text_color(rgb(0x99b393)).line_height(px(18.))
                         .child("Your edits are saved locally. Experiment freely; restore a lesson whenever you like."))))
                 .child(div().flex().flex_col().flex_1().min_w_0().min_h_0().p_6().gap_4()
+                    .when(short, |s| s.py_4().gap_3())
                     .when(compact, |s| s.p_4().gap_3())
                     .child(div().flex().items_start().justify_between().gap_4()
                         .flex_shrink_0()
@@ -210,9 +213,10 @@ impl Render for Guide {
                             this.drafts.sources[this.selected] = LESSONS[this.selected].source.to_owned();
                             this.codepen.update(cx, |pen, cx| pen.set_source(LESSONS[this.selected].source, cx));
                         }))))
-                    .when(!small, |s| s.child(div().flex_shrink_0().rounded_lg().px_4().py_3().bg(rgb(0x2c402d)).text_sm().text_color(rgb(0xbcd4b1)).child(lesson.challenge)))
+                    .when(!small, |s| s.child(div().flex_shrink_0().rounded_lg().px_4().py_3().when(short, |s| s.py_2()).bg(rgb(0x2c402d)).text_sm().text_color(rgb(0xbcd4b1)).child(lesson.challenge)))
                     .child(div().flex_1().min_h_0().child(self.codepen.clone()))))
             .child(div().px_6().py_3().flex().justify_between().text_xs().text_color(rgb(0x81987d)).border_t_1().border_color(rgb(0x344137))
+                .when(short, |s| s.py_2())
                 .flex_shrink_0().when(compact, |s| s.px_4().py_2())
                 .child(if compact { "Real Rust · saved locally" } else { "A workbench for real Rust.  /  Local developer code." })
                 .child(SharedString::from(format!("Lesson {} of {}", selected + 1, LESSONS.len()))))

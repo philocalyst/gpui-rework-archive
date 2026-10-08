@@ -623,6 +623,11 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
             std::os::unix::fs::symlink(src, dst)
         }
 
+        #[cfg(target_os = "wasi")]
+        fn create_link(src: &Path, dst: &Path) -> std::io::Result<()> {
+            std::os::wasi::fs::symlink_path(src, dst)
+        }
+
         #[cfg(windows)]
         fn create_link(src: &Path, dst: &Path) -> std::io::Result<()> {
             use std::os::windows::fs;

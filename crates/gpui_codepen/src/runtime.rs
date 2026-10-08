@@ -10,11 +10,12 @@ use gpui_codepen_guest::{Frame, MAX_FRAME_BYTES, MAX_SOURCE_BYTES};
 use std::{
     fs,
     io::{BufRead, BufReader, Read, Write},
+    net::TcpListener,
     path::{Path, PathBuf},
     process::{Child, Command, Stdio},
     sync::{
         Arc, Mutex,
-        atomic::{AtomicU64, Ordering},
+        atomic::{AtomicBool, AtomicU64, Ordering},
         mpsc,
     },
     thread,
@@ -23,7 +24,22 @@ use std::{
 
 pub const TOOLCHAIN: &str = "nightly-2026-09-30";
 const MAX_DIAGNOSTICS_BYTES: usize = 64 * 1024;
-const MIRI_FLAGS: &str = "-Zmiri-ignore-leaks -Zmiri-disable-leak-backtraces -Zmiri-disable-validation -Zmiri-disable-stacked-borrows -Zmiri-disable-data-race-detector -Zmiri-disable-alignment-check -Zmiri-disable-isolation -Zmiri-preemption-rate=0 -Zmiri-address-reuse-rate=0 -Zmiri-compare-exchange-weak-failure-rate=0";
+const COMPILER_FLAGS: &str = "-Znext-solver=globally -Zpolonius=next -Zremap-cwd-prefix=/gpui-codepen";
+const MIRI_FLAGS: &str = "-Zmiri-ignore-leaks -Zmiri-disable-leak-backtraces -Zmiri-disable-validation -Zmiri-disable-stacked-borrows -Zmiri-disable-data-race-detector -Zmiri-disable-alignment-check -Zmiri-disable-isolation -Zmiri-deterministic-floats -Zmiri-provenance-gc=250000 -Zmiri-preemption-rate=0 -Zmiri-address-reuse-rate=0 -Zmiri-compare-exchange-weak-failure-rate=0";
+
+#[derive(Debug)]
+struct KeepPreview;
+impl std::fmt::Display for KeepPreview {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { f.write_str("Edited Rust did not compile") }
+}
+impl std::error::Error for KeepPreview {}
+
+fn require_current(latest: &AtomicU64, generation: u64) -> Result<()> {
+    if latest.load(Ordering::Relaxed) != generation {
+        return Err(anyhow::anyhow!("Superseded by a newer edit").context(KeepPreview));
+    }
+    Ok(())
+}
 
 /// Cargo resolves the fixed SDK once. Reuse its exact compiler invocation for
 /// later edits, while rustc still parses and type-checks every new source.
@@ -63,6 +79,7 @@ pub struct Runtime {
     interpreter: Option<Interpreter>,
     sysroot: PathBuf,
     miri_sysroot: PathBuf,
+    optimization: String,
     invocation: Option<CompilerInvocation>,
     platform: Arc<crate::platform_service::PlatformService>,
 }
@@ -77,6 +94,12 @@ impl Runtime {
     pub fn with_text_system_factory(
         factory: gpui_codepen_guest::rpc::TextSystemFactory,
     ) -> Result<Self> {
+        let optimization =
+            std::env::var("GPUI_CODEPEN_MIR_OPT_LEVEL").unwrap_or_else(|_| "2".into());
+        anyhow::ensure!(
+            matches!(optimization.as_str(), "0" | "1" | "2" | "3" | "4"),
+            "unsupported Codepen MIR optimization level"
+        );
         let directory = tempfile::Builder::new().prefix("gpui-codepen-").tempdir()?;
         // One shared dependency cache, unique component targets: concurrent views
         // cannot overwrite each other's MIR or force serde recompilation.
@@ -109,6 +132,11 @@ impl Runtime {
         driver_libraries(&mut setup, &sysroot)?;
         let miri_sysroot = setup
             .args(["miri", "setup", "--print-sysroot"])
+            .env("GPUI_CODEPEN_SYSROOT_MIR_OPT_LEVEL", &optimization)
+            .env(
+                "MIRI_SYSROOT",
+                repository_root().join("target/codepen-sysroot").join(format!("mir-{optimization}")),
+            )
             .env(
                 "MIRI",
                 repository_root().join(format!(
@@ -132,6 +160,7 @@ impl Runtime {
             interpreter: None,
             sysroot,
             miri_sysroot: PathBuf::from(String::from_utf8(miri_sysroot.stdout)?.trim()),
+            optimization,
             invocation: None,
             platform: Arc::new(crate::platform_service::PlatformService::with_factory(
                 factory,
@@ -141,12 +170,17 @@ impl Runtime {
     pub fn evaluate(&mut self, request: Request, latest: &AtomicU64) -> Reply {
         let start = Instant::now();
         let result = self.execute(&request, latest);
+        let failure = result.as_ref().err().map(|error| {
+            if error.chain().any(|cause| cause.is::<std::io::Error>()) {
+                crate::session::FailureKind::Unavailable
+            } else { crate::session::FailureKind::Rust }
+        });
         let (frame, diagnostics) = match result {
             Ok(frame) => (Some(frame), String::new()),
             Err(e) => {
-                // A cancelled, panicking or invalid guest can never contaminate
-                // the next response. Drop kills descendants and joins pipe readers.
-                self.interpreter = None;
+                // A drained obsolete reply or failed edit leaves the resident
+                // heap usable. A hung or failed guest still drops its process.
+                if !e.is::<KeepPreview>() { self.interpreter = None; }
                 (None, format!("{e:#}"))
             }
         };
@@ -154,16 +188,12 @@ impl Runtime {
             generation: request.generation,
             frame,
             diagnostics,
+            failure,
             elapsed_ms: start.elapsed().as_millis() as u64,
         }
     }
     fn command(&self) -> Result<Command> {
-        let optimization =
-            std::env::var("GPUI_CODEPEN_MIR_OPT_LEVEL").unwrap_or_else(|_| "2".into());
-        anyhow::ensure!(
-            matches!(optimization.as_str(), "0" | "1" | "2"),
-            "unsupported Codepen MIR optimization level"
-        );
+        let optimization = &self.optimization;
         let root = repository_root();
         let driver = root.join(format!(
             "vendor/miri/target/release/miri{}",
@@ -192,6 +222,7 @@ impl Runtime {
                     .map(|(key, value)| (key, value)),
             );
             command.args(MIRI_FLAGS.split_whitespace());
+            command.args(COMPILER_FLAGS.split_whitespace());
             if optimization != "0" {
                 command.arg(format!("-Zmir-opt-level={optimization}"));
             }
@@ -213,7 +244,11 @@ impl Runtime {
             command
         };
         c.current_dir(self.directory.path());
-        c.env("CARGO_TARGET_DIR", root.join("target/codepen-real-miri"));
+        c.env("CARGO_TARGET_DIR", root.join("target/codepen-real-miri").join(format!("mir-{optimization}")));
+        // rustc disables MIR inlining at optimization level 2 for incremental
+        // builds. Dependencies are cached as metadata already; enabling that
+        // compiler mode would make every interpreted frame pay for tiny calls.
+        c.env("CARGO_INCREMENTAL", "0");
         for name in [
             "RUSTC_WRAPPER",
             "RUSTC_WORKSPACE_WRAPPER",
@@ -251,8 +286,9 @@ impl Runtime {
         c.env("PATH", std::env::join_paths(paths)?);
         c.env("MIRI", driver);
         c.env("MIRI_SYSROOT", &self.miri_sysroot);
-        c.env("MIRIFLAGS", MIRI_FLAGS);
+        c.env("MIRIFLAGS", format!("{MIRI_FLAGS} {COMPILER_FLAGS}"));
         c.env("GPUI_CODEPEN_IPC", "1");
+        c.env("GPUI_CODEPEN_HOT_RELOAD", "1");
         c.env("GPUI_CODEPEN_PARENT_PID", std::process::id().to_string());
         driver_libraries(&mut c, &self.sysroot)?;
         Ok(c)
@@ -261,7 +297,8 @@ impl Runtime {
         if self.invocation.is_some() {
             return;
         }
-        let targets = repository_root().join("target/codepen-real-miri/miri");
+        let targets = repository_root().join("target/codepen-real-miri")
+            .join(format!("mir-{}", self.optimization)).join("miri");
         if let Ok(entries) = fs::read_dir(targets) {
             for target in entries.flatten() {
                 let descriptor = target.path().join("debug").join(&self.bin);
@@ -275,11 +312,45 @@ impl Runtime {
         }
     }
     fn execute(&mut self, request: &Request, latest: &AtomicU64) -> Result<Frame> {
-        if latest.load(Ordering::Relaxed) != request.generation {
-            bail!("Superseded by a newer edit");
-        }
+        require_current(latest, request.generation)?;
         if request.source.len() > MAX_SOURCE_BYTES {
             bail!("Source exceeds 64 KiB");
+        }
+        let changed = self.source.as_deref() != Some(&request.source);
+        if changed || request.restart || self.interpreter.is_none() {
+            fs::write(self.directory.path().join("component.rs"), format!(
+                "{}\n\nfn main() {{ gpui_codepen_guest::run(component); }}\n", request.source))?;
+        }
+        if changed && !request.restart && self.interpreter.is_some() {
+            let path = self.directory.path().join("component.mir");
+            let _ = fs::remove_file(&path);
+            let mut compiler = self.command()?;
+            compiler.env("GPUI_CODEPEN_EXPORT_MIR", &path);
+            if std::env::var("GPUI_CODEPEN_INCREMENTAL").as_deref() == Ok("1") {
+                compiler.arg(format!("-Cincremental={}", self.directory.path().join("incremental").display()));
+            }
+            run_process(compiler, &[], latest, request.generation, Duration::from_secs(45))
+                .context(KeepPreview)?;
+            if fs::metadata(&path).context("Compiler did not produce MIR").context(KeepPreview)?.len() > MAX_FRAME_BYTES as u64 {
+                return Err(anyhow::anyhow!("Compiled MIR exceeds its transport budget").context(KeepPreview));
+            }
+            let bytes = fs::read(&path).context("Compiler did not produce MIR").context(KeepPreview)?;
+            if latest.load(Ordering::Relaxed) != request.generation {
+                return Err(anyhow::anyhow!("Superseded by a newer edit").context(KeepPreview));
+            }
+            if bytes.len() > MAX_FRAME_BYTES { bail!("Compiled MIR exceeds its transport budget"); }
+            let mut packet = ((bytes.len() as u32) | 0x8000_0000).to_le_bytes().to_vec();
+            packet.extend_from_slice(&bytes);
+            let interpreter = self.interpreter.as_mut().unwrap();
+            interpreter.input.as_ref().unwrap().try_send(packet).context("Miri reload transport is unavailable")?;
+            match interpreter.receive(latest, request.generation, Duration::from_secs(30), false)? {
+                Message::Reloaded(true) => self.source = Some(request.source.clone()),
+                Message::Reloaded(false) => {}, // A different Rust layout needs a fresh app.
+                _ => bail!("Unexpected Miri reload response"),
+            }
+            // An accepted obsolete patch changed the actual program. Commit
+            // its source before a newer request compares or reverts the edit.
+            require_current(latest, request.generation)?;
         }
         let fresh = request.restart
             || self.source.as_deref() != Some(&request.source)
@@ -288,28 +359,17 @@ impl Runtime {
         if fresh {
             context.elapsed_ms = 0;
         }
-        let input = gpui_codepen_guest::wire::encode_value(&context).map_err(anyhow::Error::msg)?;
-        if input.len() >= 64 * 1024 + 512 {
-            bail!("Input state exceeds 64 KiB");
-        }
-        request.input.validate().map_err(anyhow::Error::msg)?;
+        let input = gpui_codepen_guest::wire::encode_input(&context).map_err(anyhow::Error::msg)?;
         if fresh {
             self.interpreter = None;
-            fs::write(
-                self.directory.path().join("component.rs"),
-                format!(
-                    "{}\n\nfn main() {{ gpui_codepen_guest::run(component); }}\n",
-                    request.source
-                ),
-            )?;
-            let mut interpreter = Interpreter::spawn(self.command()?, self.platform.clone())?;
-            match interpreter.receive(latest, request.generation, Duration::from_secs(45))? {
+            self.interpreter = Some(Interpreter::spawn(self.command()?, self.platform.clone())?);
+            match self.interpreter.as_mut().unwrap().receive(latest, request.generation, Duration::from_secs(45), false)? {
                 Message::Ready => {}
-                Message::Frame(_) => bail!("Unexpected frame before interpreter initialization"),
+                _ => bail!("Unexpected response before interpreter initialization"),
             }
             self.cache_invocation();
             self.source = Some(request.source.clone());
-            self.interpreter = Some(interpreter);
+            require_current(latest, request.generation)?;
         }
         let mut packet = (input.len() as u32).to_le_bytes().to_vec();
         packet.extend_from_slice(&input);
@@ -322,10 +382,13 @@ impl Runtime {
             .try_send(packet)
             .context("Miri input transport is unavailable")?;
         let Message::Frame(bytes) =
-            interpreter.receive(latest, request.generation, Duration::from_secs(30))?
+            interpreter.receive(latest, request.generation, Duration::from_secs(30), true)?
         else {
             bail!("Unexpected interpreter restart");
         };
+        // Consuming the reply preserves the click's entity mutations even when
+        // a newer edit makes these pixels obsolete.
+        require_current(latest, request.generation)?;
         let frame = gpui_codepen_guest::wire::decode(&bytes)
             .map_err(anyhow::Error::msg)
             .context("Invalid Miri frame")?;
@@ -341,6 +404,7 @@ impl Drop for Runtime {
 
 enum Message {
     Ready,
+    Reloaded(bool),
     Frame(Vec<u8>),
 }
 struct Interpreter {
@@ -350,7 +414,9 @@ struct Interpreter {
     output: Option<mpsc::Receiver<Message>>,
     errors: Arc<Mutex<Vec<u8>>>,
     overflow: Arc<AtomicU64>,
+    transport_stop: Arc<AtomicBool>,
     threads: Vec<thread::JoinHandle<()>>,
+    frame_latency: Duration,
 }
 impl Interpreter {
     fn spawn(
@@ -360,22 +426,45 @@ impl Interpreter {
         command.env("GPUI_CODEPEN_RPC", &platform.address);
         let nonce = uuid::Uuid::new_v4().simple().to_string();
         command.env("GPUI_CODEPEN_NONCE", &nonce);
+        let listener = TcpListener::bind("127.0.0.1:0")?;
+        listener.set_nonblocking(true)?;
+        command.env("GPUI_CODEPEN_CONTROL", listener.local_addr()?.to_string());
         prepare_process(&mut command);
         command
-            .stdin(Stdio::piped())
+            .stdin(Stdio::null())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped());
         let mut tree = ProcessTree::new(command.spawn().context("Cannot start vendored Miri")?)?;
         let (send, output) = mpsc::sync_channel(2);
         let overflow = Arc::new(AtomicU64::new(0));
         let errors = Arc::new(Mutex::new(Vec::new()));
-        let stdout = tree.child.stdout.take().unwrap();
+        let transport_stop = Arc::new(AtomicBool::new(false));
+        let stopped = transport_stop.clone();
+        let (connection, connected) = mpsc::sync_channel(1);
         let excessive = overflow.clone();
         let reader = thread::spawn(move || {
-            let mut pipe = BufReader::new(stdout);
+            let stream = loop {
+                if stopped.load(Ordering::Relaxed) { return; }
+                match listener.accept() {
+                    Ok((stream, _)) => break stream,
+                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                        thread::sleep(Duration::from_millis(2));
+                    }
+                    Err(_) => return,
+                }
+            };
+            // Accepted sockets inherit O_NONBLOCK on Darwin. The listener is
+            // polled for shutdown, but its established stream is blocking I/O.
+            if stream.set_nonblocking(false).is_err() { return; }
+            let _ = stream.set_nodelay(true);
+            let Ok(writer) = stream.try_clone() else { return; };
+            if connection.send(writer).is_err() { return; }
+            let mut pipe = BufReader::new(stream);
             let mut noise = 0;
             let ready = format!("CODEPEN_{nonce}:READY:4\n").into_bytes();
             let prefix = format!("CODEPEN_{nonce}:FRAME:").into_bytes();
+            let reloaded = format!("CODEPEN_{nonce}:RELOADED:1\n").into_bytes();
+            let incompatible = format!("CODEPEN_{nonce}:RELOADED:0\n").into_bytes();
             loop {
                 let mut bytes = Vec::new();
                 match pipe
@@ -392,6 +481,8 @@ impl Interpreter {
                 }
                 let message = if bytes == ready {
                     Some(Message::Ready)
+                } else if bytes == reloaded { Some(Message::Reloaded(true))
+                } else if bytes == incompatible { Some(Message::Reloaded(false))
                 } else if let Some(header) = bytes.strip_prefix(prefix.as_slice()) {
                     let len = std::str::from_utf8(header)
                         .ok()
@@ -432,13 +523,16 @@ impl Interpreter {
         let mut stderr = tree.child.stderr.take().unwrap();
         let excessive = overflow.clone();
         let diagnostics = errors.clone();
+        let stopped = transport_stop.clone();
         let profile = std::env::var_os("GPUI_CODEPEN_PROFILE").is_some();
         let error_reader = thread::spawn(move || {
             let mut bytes = [0; 8192];
-            while let Ok(n) = stderr.read(&mut bytes) {
-                if n == 0 {
-                    break;
-                }
+            loop {
+                let n = match stderr.read(&mut bytes) {
+                    Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+                    Ok(0) | Err(_) => break,
+                    Ok(n) => n,
+                };
                 if profile {
                     eprint!("{}", String::from_utf8_lossy(&bytes[..n]));
                 }
@@ -449,12 +543,33 @@ impl Interpreter {
                 }
                 errors.extend_from_slice(&bytes[..n]);
             }
+            // Compilation may fail before Miri ever opens the control stream.
+            stopped.store(true, Ordering::Relaxed);
+        });
+        let mut stdout = tree.child.stdout.take().unwrap();
+        let excessive = overflow.clone();
+        let diagnostics = errors.clone();
+        let stdout_reader = thread::spawn(move || {
+            let mut bytes = [0; 8192];
+            loop {
+                let n = match stdout.read(&mut bytes) {
+                    Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+                    Ok(0) | Err(_) => break,
+                    Ok(n) => n,
+                };
+                let mut errors = diagnostics.lock().unwrap();
+                if errors.len() + n > MAX_DIAGNOSTICS_BYTES {
+                    excessive.store(1, Ordering::Relaxed);
+                    break;
+                }
+                errors.extend_from_slice(&bytes[..n]);
+            }
         });
         let (input, receive) = mpsc::sync_channel::<Vec<u8>>(1);
-        let mut stdin = tree.child.stdin.take().unwrap();
         let writer = thread::spawn(move || {
+            let Ok(mut control) = connected.recv() else { return; };
             while let Ok(bytes) = receive.recv() {
-                if stdin.write_all(&bytes).and_then(|_| stdin.flush()).is_err() {
+                if control.write_all(&bytes).and_then(|_| control.flush()).is_err() {
                     break;
                 }
             }
@@ -466,7 +581,9 @@ impl Interpreter {
             output: Some(output),
             errors,
             overflow,
-            threads: vec![reader, error_reader, writer],
+            transport_stop,
+            threads: vec![reader, error_reader, stdout_reader, writer],
+            frame_latency: Duration::ZERO,
         })
     }
     fn receive(
@@ -474,13 +591,22 @@ impl Interpreter {
         latest: &AtomicU64,
         generation: u64,
         timeout: Duration,
+        frame: bool,
     ) -> Result<Message> {
         let start = Instant::now();
+        let mut obsolete_since = None;
+        // Slow, valid scenes get time to finish without losing entity state.
+        // An infinite obsolete frame remains bounded independently of edits.
+        let grace = if frame { self.frame_latency.saturating_mul(2) } else { Duration::ZERO }
+            .max(Duration::from_secs(2));
         #[cfg(target_os = "macos")]
         let mut memory_sample = start;
         loop {
             if latest.load(Ordering::Relaxed) != generation {
-                bail!("Superseded by a newer edit");
+                let obsolete = obsolete_since.get_or_insert_with(Instant::now);
+                if obsolete.elapsed() >= grace {
+                    bail!("Superseded by a newer edit; obsolete Rust execution did not finish");
+                }
             }
             if start.elapsed() > timeout {
                 bail!(
@@ -504,11 +630,17 @@ impl Interpreter {
                 .unwrap()
                 .recv_timeout(Duration::from_millis(5))
             {
-                Ok(message) => return Ok(message),
+                Ok(message) => {
+                    if matches!(message, Message::Frame(_)) {
+                        self.frame_latency = start.elapsed();
+                    }
+                    return Ok(message);
+                },
                 Err(mpsc::RecvTimeoutError::Timeout) => {}
                 Err(mpsc::RecvTimeoutError::Disconnected) => {
                     // Wait for stderr as well, so UB/panic diagnostics cannot race EOF.
                     self.input.take();
+                    self.transport_stop.store(true, Ordering::Relaxed);
                     self.tree.terminate();
                     for thread in self.threads.drain(..) {
                         let _ = thread.join();
@@ -531,6 +663,7 @@ impl Drop for Interpreter {
     fn drop(&mut self) {
         self.input.take();
         self.output.take();
+        self.transport_stop.store(true, Ordering::Relaxed);
         self.tree.terminate();
         for thread in self.threads.drain(..) {
             let _ = thread.join();
@@ -676,7 +809,6 @@ impl Drop for ProcessTree {
 
 /// Read concurrently so a full pipe cannot deadlock the compiler. Limit bytes
 /// while reading; kill the entire process group on cancellation/timeout/overflow.
-#[cfg(test)]
 fn run_process(
     mut command: Command,
     input: &[u8],
@@ -773,6 +905,7 @@ fn run_process(
         }
         thread::sleep(Duration::from_millis(15));
     };
+    if latest.load(Ordering::Relaxed) != generation { stopped = Some("Superseded by a newer edit"); }
     tree.terminate();
     let _ = writer.join();
     let output = stdout.join().unwrap_or_default();

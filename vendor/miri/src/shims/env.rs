@@ -105,8 +105,15 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
 
     /// Get the process identifier.
     fn get_pid(&self) -> u32 {
+        // A browser Worker has one virtual process and no host PID API. Keep
+        // the guest's process/thread identifiers consistent in this host too.
+        #[cfg(target_family = "wasm")]
+        return 1000;
+        #[cfg(not(target_family = "wasm"))]
+        {
         let this = self.eval_context_ref();
         if this.machine.communicate() { std::process::id() } else { 1000 }
+        }
     }
 
     /// Get an "OS" thread ID for any thread.

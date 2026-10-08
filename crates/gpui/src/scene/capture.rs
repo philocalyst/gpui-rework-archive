@@ -6,8 +6,8 @@
 
 use super::*;
 use anyhow::{Context, Result, ensure};
-use serde::{Deserialize, Serialize};
 use collections::HashMap;
+use serde::{Deserialize, Serialize};
 
 /// Current serialized scene-capture format version.
 pub const SCENE_CAPTURE_VERSION: u32 = 2;
@@ -224,9 +224,9 @@ impl SceneCapture {
         // Equal bitmaps share one captured resource, even across distinct live tiles.
         if canonical {
             resources.sort_by(|(_, left), (_, right)| {
-            (left.kind as u32, left.width, left.height)
-                .cmp(&(right.kind as u32, right.width, right.height))
-                .then_with(|| left.bytes.cmp(&right.bytes))
+                (left.kind as u32, left.width, left.height)
+                    .cmp(&(right.kind as u32, right.width, right.height))
+                    .then_with(|| left.bytes.cmp(&right.bytes))
             });
         }
         let mut normalized = vec![None; resources.len()];
@@ -276,11 +276,11 @@ impl SceneCapture {
         // within an order, where atlas-dependent ordering cannot affect compositing.
         if canonical {
             self.monochrome_sprites
-            .sort_by(|a, b| sprite_order(a.order, a.tile, a.bounds, b.order, b.tile, b.bounds));
-        self.subpixel_sprites
-            .sort_by(|a, b| sprite_order(a.order, a.tile, a.bounds, b.order, b.tile, b.bounds));
-        self.polychrome_sprites
-            .sort_by(|a, b| sprite_order(a.order, a.tile, a.bounds, b.order, b.tile, b.bounds));
+                .sort_by(|a, b| sprite_order(a.order, a.tile, a.bounds, b.order, b.tile, b.bounds));
+            self.subpixel_sprites
+                .sort_by(|a, b| sprite_order(a.order, a.tile, a.bounds, b.order, b.tile, b.bounds));
+            self.polychrome_sprites
+                .sort_by(|a, b| sprite_order(a.order, a.tile, a.bounds, b.order, b.tile, b.bounds));
         }
         self.commands = ScenePlan::build_primitives(self.primitives(), Vec::new()).commands;
         Ok(())
@@ -288,10 +288,15 @@ impl SceneCapture {
 
     fn primitives(&self) -> ScenePrimitives<'_> {
         ScenePrimitives {
-            shadows: &self.shadows, quads: &self.quads, paths: &self.paths,
-            underlines: &self.underlines, monochrome_sprites: &self.monochrome_sprites,
-            subpixel_sprites: &self.subpixel_sprites, polychrome_sprites: &self.polychrome_sprites,
-            surfaces: &[], backdrop_filters: &self.backdrop_filters,
+            shadows: &self.shadows,
+            quads: &self.quads,
+            paths: &self.paths,
+            underlines: &self.underlines,
+            monochrome_sprites: &self.monochrome_sprites,
+            subpixel_sprites: &self.subpixel_sprites,
+            polychrome_sprites: &self.polychrome_sprites,
+            surfaces: &[],
+            backdrop_filters: &self.backdrop_filters,
             filter_boundaries: &self.filter_boundaries,
         }
     }
@@ -332,8 +337,8 @@ impl SceneCapture {
         for boundary in &self.filter_boundaries {
             validate_filters(&boundary.filters, boundary.opacity)?;
         }
-        // Geometry has no optional fields. serde_json encodes non-finite floats
-        // as null; reject them without expanding the bitmap bytes into JSON values.
+        // Validate the actual records directly. Building a JSON tree here adds
+        // allocations and repeated field-name walks to every imported frame.
         self.validate_numbers("shadows", &self.shadows)?;
         self.validate_numbers("quads", &self.quads)?;
         self.validate_numbers("paths", &self.paths)?;
@@ -366,17 +371,10 @@ impl SceneCapture {
         }
     }
 
-    fn validate_numbers(&self, kind: &str, primitives: &impl Serialize) -> Result<()> {
-        let value = serde_json::to_value(primitives)?;
-        ensure!(
-            !contains_json_null(&value),
-            "captured {kind} contain a non-finite number"
-        );
-        ensure!(
-            !contains_negative_dimensions(&value),
-            "captured {kind} contain a negative dimension"
-        );
-        Ok(())
+    fn validate_numbers(&self, kind: &str, primitives: &impl ValidateNumbers) -> Result<()> {
+        primitives
+            .validate_numbers()
+            .map_err(|error| anyhow::anyhow!("captured {kind} contain {error}"))
     }
 
     fn validate_tile(&self, tile: AtlasTile, kind: AtlasTextureKind, index: usize) -> Result<()> {
@@ -439,29 +437,223 @@ fn validate_filters(filters: &[ScaledFilter], opacity: f32) -> Result<()> {
     Ok(())
 }
 
-fn contains_json_null(value: &serde_json::Value) -> bool {
-    match value {
-        serde_json::Value::Null => true,
-        serde_json::Value::Array(values) => values.iter().any(contains_json_null),
-        serde_json::Value::Object(values) => values.values().any(contains_json_null),
-        _ => false,
+#[derive(Clone, Copy, Debug)]
+enum InvalidNumber {
+    NonFinite,
+    NegativeDimension,
+}
+
+impl std::fmt::Display for InvalidNumber {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Self::NonFinite => "a non-finite number",
+            Self::NegativeDimension => "a negative dimension",
+        })
     }
 }
 
-fn contains_negative_dimensions(value: &serde_json::Value) -> bool {
-    match value {
-        serde_json::Value::Array(values) => values.iter().any(contains_negative_dimensions),
-        serde_json::Value::Object(values) => {
-            let negative_size = values.get("size").is_some_and(|size| {
-                ["width", "height"].iter().any(|dimension| {
-                    size.get(*dimension)
-                        .and_then(serde_json::Value::as_f64)
-                        .is_some_and(|value| value < 0.0)
-                })
-            });
-            negative_size || values.values().any(contains_negative_dimensions)
+trait ValidateNumbers {
+    fn validate_numbers(&self) -> std::result::Result<(), InvalidNumber>;
+}
+
+impl ValidateNumbers for f32 {
+    #[inline]
+    fn validate_numbers(&self) -> std::result::Result<(), InvalidNumber> {
+        if self.is_finite() {
+            Ok(())
+        } else {
+            Err(InvalidNumber::NonFinite)
         }
-        _ => false,
+    }
+}
+
+impl<T: ValidateNumbers> ValidateNumbers for Vec<T> {
+    fn validate_numbers(&self) -> std::result::Result<(), InvalidNumber> {
+        self.iter().try_for_each(ValidateNumbers::validate_numbers)
+    }
+}
+
+impl<T: ValidateNumbers, const N: usize> ValidateNumbers for [T; N] {
+    fn validate_numbers(&self) -> std::result::Result<(), InvalidNumber> {
+        self.iter().try_for_each(ValidateNumbers::validate_numbers)
+    }
+}
+
+// Destructure every field: changing a scene record requires updating its numeric
+// validation, so newly added floating-point geometry cannot silently bypass it.
+macro_rules! validate_record {
+    ($ty:ty { $($field:ident),* $(,)? }) => {
+        impl ValidateNumbers for $ty {
+            #[inline]
+            fn validate_numbers(&self) -> std::result::Result<(), InvalidNumber> {
+                let Self { $($field),* } = self;
+                $($field.validate_numbers()?;)*
+                Ok(())
+            }
+        }
+    };
+}
+macro_rules! finite_scalar {
+    ($($ty:ty),* $(,)?) => {$(
+        impl ValidateNumbers for $ty {
+            #[inline]
+            fn validate_numbers(&self) -> std::result::Result<(), InvalidNumber> { Ok(()) }
+        }
+    )*};
+}
+finite_scalar!(
+    u32,
+    usize,
+    bool,
+    DevicePixels,
+    TileId,
+    PathId,
+    AtlasTextureKind,
+    ShaderBool,
+    BorderStyle,
+    crate::BackgroundTag,
+    crate::ColorSpace
+);
+impl ValidateNumbers for ScaledPixels {
+    #[inline]
+    fn validate_numbers(&self) -> std::result::Result<(), InvalidNumber> {
+        self.0.validate_numbers()
+    }
+}
+
+macro_rules! geometry {
+    ($unit:ty) => {
+        validate_record!(Point<$unit> { x, y });
+        validate_record!(Bounds<$unit> { origin, size });
+        validate_record!(Edges<$unit> { top, right, bottom, left });
+        validate_record!(Corners<$unit> { top_left, top_right, bottom_right, bottom_left });
+        validate_record!(ContentMask<$unit> { bounds, fade_out });
+        impl ValidateNumbers for Size<$unit> {
+            #[inline]
+            fn validate_numbers(&self) -> std::result::Result<(), InvalidNumber> {
+                let Self { width, height } = self;
+                width.validate_numbers()?;
+                height.validate_numbers()?;
+                if width.0 < 0 as _ || height.0 < 0 as _ {
+                    Err(InvalidNumber::NegativeDimension)
+                } else { Ok(()) }
+            }
+        }
+    };
+}
+geometry!(ScaledPixels);
+geometry!(DevicePixels);
+validate_record!(Point<f32> { x, y });
+validate_record!(SceneHsla { h, s, l, a });
+validate_record!(crate::LinearColorStop { color, percentage });
+validate_record!(Background {
+    tag,
+    color_space,
+    solid,
+    gradient_angle_or_pattern_height,
+    colors,
+    padding
+});
+validate_record!(TransformationMatrix {
+    rotation_scale,
+    translation
+});
+validate_record!(AtlasTextureId { index, kind });
+validate_record!(AtlasTile {
+    texture_id,
+    tile_id,
+    padding,
+    bounds
+});
+validate_record!(Quad {
+    order,
+    border_style,
+    border_dashed_length,
+    border_dashed_gap,
+    bounds,
+    content_mask,
+    background,
+    border_color,
+    corner_radii,
+    border_widths,
+    corner_smoothing,
+    padding
+});
+validate_record!(Shadow {
+    order,
+    blur_radius,
+    bounds,
+    corner_radii,
+    content_mask,
+    color,
+    element_bounds,
+    element_corner_radii,
+    inset,
+    corner_smoothing
+});
+validate_record!(Underline {
+    order,
+    padding,
+    bounds,
+    content_mask,
+    color,
+    thickness,
+    wavy
+});
+validate_record!(MonochromeSprite {
+    order,
+    padding,
+    bounds,
+    content_mask,
+    color,
+    tile,
+    transformation
+});
+validate_record!(SubpixelSprite {
+    order,
+    padding,
+    bounds,
+    content_mask,
+    color,
+    tile,
+    transformation
+});
+validate_record!(PolychromeSprite {
+    order,
+    grayscale,
+    opacity,
+    corner_smoothing,
+    bounds,
+    content_mask,
+    corner_radii,
+    tile
+});
+validate_record!(Path<ScaledPixels> { id, order, bounds, content_mask, vertices, color, start, current, contour_count });
+validate_record!(PathVertex<ScaledPixels> { xy_position, st_position, content_mask });
+validate_record!(BackdropFilter {
+    order,
+    bounds,
+    content_mask,
+    corner_radii,
+    corner_smoothing,
+    filters,
+    opacity
+});
+validate_record!(FilterBoundary {
+    order,
+    bounds,
+    content_mask,
+    corner_radii,
+    corner_smoothing,
+    filters,
+    opacity,
+    is_start
+});
+impl ValidateNumbers for SmallVec<[ScaledFilter; 4]> {
+    fn validate_numbers(&self) -> std::result::Result<(), InvalidNumber> {
+        self.iter().try_for_each(|filter| match filter {
+            ScaledFilter::Blur(radius) => radius.validate_numbers(),
+        })
     }
 }
 

@@ -13,6 +13,7 @@ pub use interpreter::run;
 
 pub const PROTOCOL_VERSION: u32 = 8;
 pub const MAX_SOURCE_BYTES: usize = 64 * 1024;
+pub const MAX_INPUT_BYTES: usize = 64 * 1024 + 512;
 pub const MAX_FRAME_BYTES: usize = 64 * 1024 * 1024;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

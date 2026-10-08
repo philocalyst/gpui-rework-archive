@@ -54,6 +54,8 @@ use crate::log::setup::{deinit_loggers, init_early_loggers, init_late_loggers};
 struct MiriCompilerCalls {
     miri_config: Option<MiriConfig>,
     many_seeds: Option<ManySeedsConfig>,
+    #[cfg(target_family = "wasm")]
+    codepen_return_code: i32,
 }
 
 struct MiriCodegenBackend {
@@ -63,6 +65,7 @@ struct MiriCodegenBackend {
     dep: bool,
 }
 
+#[derive(Clone)]
 struct ManySeedsConfig {
     seeds: Range<u32>,
     keep_going: bool,
@@ -70,7 +73,12 @@ struct ManySeedsConfig {
 
 impl MiriCompilerCalls {
     fn new(miri_config: MiriConfig, many_seeds: Option<ManySeedsConfig>) -> Self {
-        Self { miri_config: Some(miri_config), many_seeds }
+        Self {
+            miri_config: Some(miri_config),
+            many_seeds,
+            #[cfg(target_family = "wasm")]
+            codepen_return_code: 0,
+        }
     }
 }
 
@@ -133,6 +141,9 @@ impl rustc_driver::Callbacks for MiriCompilerCalls {
 
         // Register our custom extra symbols.
         config.extra_symbols = miri::sym::EXTRA_SYMBOLS.into();
+        if env::var_os("GPUI_CODEPEN_IPC").as_deref() == Some(std::ffi::OsStr::new("1")) {
+            config.override_queries = Some(miri::codepen_reload::override_queries);
+        }
     }
 
     fn after_analysis<'tcx>(
@@ -146,6 +157,16 @@ impl rustc_driver::Callbacks for MiriCompilerCalls {
         tcx.dcx().emit_stashed_diagnostics();
         tcx.dcx().abort_if_errors();
         tcx.dcx().flush_delayed();
+
+        if let Some(path) = env::var_os("GPUI_CODEPEN_EXPORT_MIR") {
+            let packet = miri::codepen_reload::export(tcx);
+            std::fs::write(path, packet).expect("write compiled Codepen MIR packet");
+            // Let rustc finalize its query cache for a compiler-only session.
+            // The dummy backend emits metadata, never a native executable.
+            return if env::var_os("GPUI_CODEPEN_INCREMENTAL").is_some() {
+                Compilation::Continue
+            } else { Compilation::Stop };
+        }
 
         // Miri is taking over. Start logging.
         init_late_loggers(&EarlyDiagCtxt::new(tcx.sess.opts.error_format), tcx);
@@ -202,6 +223,10 @@ impl rustc_driver::Callbacks for MiriCompilerCalls {
         }
 
         // Invoke the interpreter.
+        #[cfg(target_family = "wasm")]
+        if env::var_os("GPUI_CODEPEN_IPC").as_deref() == Some(std::ffi::OsStr::new("1")) {
+            miri::codepen_browser::compiler_phase(1);
+        }
         let res = if config.genmc_config.is_some() {
             assert!(self.many_seeds.is_none());
             run_genmc_mode(tcx, &config, |genmc_ctx: Rc<GenmcCtx>| {
@@ -220,6 +245,11 @@ impl rustc_driver::Callbacks for MiriCompilerCalls {
         };
         // Process interpreter result.
         if let Err(return_code) = res {
+            #[cfg(target_family = "wasm")]
+            if env::var_os("GPUI_CODEPEN_IPC").as_deref() == Some(std::ffi::OsStr::new("1")) {
+                self.codepen_return_code = return_code.get();
+                return Compilation::Stop;
+            }
             tcx.dcx().abort_if_errors();
             exit(return_code.get())
         } else {
@@ -323,7 +353,10 @@ impl rustc_driver::Callbacks for MiriDepCompilerCalls {
 
         // Queries overridden here affect the data stored in `rmeta` files of dependencies,
         // which will be used later in non-`MIRI_BE_RUSTC` mode.
-        config.override_queries = Some(|_, local_providers| {
+        config.override_queries = Some(|session, local_providers| {
+            if env::var_os("GPUI_CODEPEN_COMPONENT").as_deref() == Some(std::ffi::OsStr::new("1")) {
+                miri::codepen_reload::override_queries(session, local_providers);
+            }
             // `exported_non_generic_symbols` is usually empty because we don't codegen anything.
             // However, we need it for `lookup_link_section`.
             // So overwrite the query with a version that dooes something even without codegen.
@@ -751,6 +784,26 @@ fn main() -> ExitCode {
                 "warning: The native-lib tracer could not be started. Is this an x86 Linux system, and does Miri have permissions to ptrace?\n\
                 Falling back to non-tracing native-lib mode."
             );
+        }
+    }
+    #[cfg(target_family = "wasm")]
+    if env::var_os("GPUI_CODEPEN_IPC").as_deref() == Some(std::ffi::OsStr::new("1")) {
+        // Each compilation owns a fresh TyCtxt. No MIR, DefId, type or allocation
+        // from one compiler session is borrowed by another session.
+        loop {
+            miri::codepen_browser::compiler_phase(0);
+            let mut callbacks = MiriCompilerCalls::new(miri_config.clone(), many_seeds.clone());
+            let result = rustc_driver::catch_with_exit_code(|| {
+                rustc_driver::run_compiler(&rustc_args, &mut callbacks)
+            });
+            let exit_code = if result == ExitCode::SUCCESS {
+                callbacks.codepen_return_code
+            } else {
+                rustc_driver::EXIT_FAILURE
+            };
+            if !miri::codepen_browser::next_program(exit_code) {
+                exit(exit_code);
+            }
         }
     }
     run_compiler_and_exit(&rustc_args, &mut MiriCompilerCalls::new(miri_config, many_seeds))

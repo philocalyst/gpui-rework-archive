@@ -1,7 +1,7 @@
 use crate::{
     highlight::rust_highlights,
     renderer::{ErrorHandler, InputHandler, InputState, ResizeHandler, scene_view},
-    session::{Backend, Reply, Request, Session},
+    session::{Backend, FailureKind, Reply, Request, Session},
 };
 use gpui::{
     App, Context, Entity, EventEmitter, SharedString, StyleRefinement, Subscription, Task, Window,
@@ -23,6 +23,7 @@ pub struct CodepenStatus {
     pub running: bool,
     pub has_preview: bool,
     pub diagnostics: String,
+    pub failure: Option<FailureKind>,
     pub elapsed_ms: u64,
     pub auto_run: bool,
 }
@@ -36,6 +37,7 @@ pub struct Codepen {
     source: String,
     line_count: usize,
     auto_run: bool,
+    diagnostics_expanded: bool,
     show_preview: bool,
     restart: bool,
     pending: Task<()>,
@@ -119,24 +121,33 @@ impl Render for Preview {
                     .as_ref()
                     .is_none_or(|failed| !std::sync::Arc::ptr_eq(failed, frame))
             {
-                match window.import_scene_capture(&frame.scene, &mut self.resources) {
-                    Ok(scene) => {
-                        self.imported = Some(std::sync::Arc::new(scene));
-                        self.imported_frame = Some(frame.clone());
-                        self.failed_frame = None;
-                    }
-                    Err(e) => {
-                        self.failed_frame = Some(frame.clone());
-                        let frame = frame.clone();
-                        let error = self.on_error.clone();
-                        window.defer(cx, move |window, cx| {
-                            error(
-                                frame,
-                                format!("Could not import GPUI scene: {e:#}"),
-                                window,
-                                cx,
-                            )
-                        });
+                if self.imported_frame.as_ref().is_some_and(|previous| {
+                    previous.scale_factor == frame.scale_factor && previous.scene == frame.scene
+                }) {
+                    // Cursor, IME and timing can change without repainting. The
+                    // imported scene already owns the identical atlas leases.
+                    self.imported_frame = Some(frame.clone());
+                    self.failed_frame = None;
+                } else {
+                    match window.import_scene_capture(&frame.scene, &mut self.resources) {
+                        Ok(scene) => {
+                            self.imported = Some(std::sync::Arc::new(scene));
+                            self.imported_frame = Some(frame.clone());
+                            self.failed_frame = None;
+                        }
+                        Err(e) => {
+                            self.failed_frame = Some(frame.clone());
+                            let frame = frame.clone();
+                            let error = self.on_error.clone();
+                            window.defer(cx, move |window, cx| {
+                                error(
+                                    frame,
+                                    format!("Could not import GPUI scene: {e:#}"),
+                                    window,
+                                    cx,
+                                )
+                            });
+                        }
                     }
                 }
             }
@@ -294,6 +305,7 @@ impl Codepen {
             line_count,
             session: Session::default(),
             auto_run: true,
+            diagnostics_expanded: false,
             show_preview: false,
             restart: false,
             pending: Task::ready(()),
@@ -377,6 +389,7 @@ impl Codepen {
                 .input_notice
                 .clone()
                 .unwrap_or_else(|| self.session.diagnostics.clone()),
+            failure: self.session.failure,
             elapsed_ms: self.session.elapsed_ms,
             auto_run: self.auto_run,
         }
@@ -497,9 +510,19 @@ impl Codepen {
             #[cfg(target_family = "wasm")]
             let reply = browser_evaluate(request).await;
             let _ = this.update(cx, |this, cx| {
+                if reply.generation == this.session.generation
+                    && render_options_revision != this.render_options_revision
+                {
+                    // The interpreter processed the input, but its render policy
+                    // is obsolete. Keep the last displayed scene until a frame
+                    // for the current viewport and text policy is ready.
+                    this.schedule(None, true, cx);
+                    return;
+                }
                 let succeeded = reply.frame.is_some();
                 let accepted = this.session.accept_validated(reply);
                 if accepted {
+                    this.diagnostics_expanded = !this.session.diagnostics.is_empty();
                     if succeeded && this.session.diagnostics.is_empty() {
                         this.displayed_source = Some(rendered_source);
                         let frame = this.session.frame.clone();
@@ -509,9 +532,7 @@ impl Codepen {
                         });
                     }
                     if this.session.diagnostics.is_empty() {
-                        if render_options_revision != this.render_options_revision {
-                            this.schedule(None, true, cx);
-                        } else if let Some(event) = this.events.pop_front() {
+                        if let Some(event) = this.events.pop_front() {
                             this.schedule(Some(event), true, cx);
                         } else if let Some(delay) =
                             this.session.frame.as_ref().and_then(|f| f.next_frame_ms)
@@ -563,6 +584,8 @@ impl Render for Codepen {
         self.preview_visible = !compact || self.show_preview;
         let status = if self.session.running {
             "Updating…"
+        } else if self.session.failure == Some(FailureKind::Unavailable) {
+            "Runtime unavailable"
         } else if !self.session.diagnostics.is_empty() {
             if self.session.frame.is_some() {
                 "Needs a fix · last good preview retained"
@@ -575,7 +598,7 @@ impl Render for Codepen {
             "Ready"
         };
         let error = !self.session.diagnostics.is_empty();
-        div().size_full().flex().flex_col().min_h_0().gap_3().when(compact, |s| s.gap_2())
+        div().relative().size_full().flex().flex_col().min_h_0().gap_3().when(compact, |s| s.gap_2())
             .on_action(cx.listener(|this, _: &Run, _, cx| this.run(cx)))
             .child(div().flex().items_center().justify_between().gap_2()
                 .child(div().text_xs().text_color(rgb(0xa8d7b9)).child("Miri · real Rust"))
@@ -595,26 +618,32 @@ impl Render for Codepen {
                 .when(!compact || self.show_preview, |s| s.child(div().flex().flex_col().flex_1().min_w_0().min_h_0().rounded_xl().overflow_hidden().bg(rgb(0xe8ede5))
                     .child(panel_heading("Live preview", "GPUI"))
                     .child(self.preview.clone().cached(StyleRefinement::default().flex_1().min_h_0().w_full()))
-                    .child(div().flex().items_center().justify_between().p_3().border_t_1().border_color(rgb(0xd8dfd5))
+                    .child(div().flex().items_center().justify_between().px_3().py_1().border_t_1().border_color(rgb(0xd8dfd5))
                         .text_xs().text_color(rgb(0x637065)).child("GPUI layout · GPUI events")
-                        .child(pill("Reset state", false).on_click(cx.listener(|this, _, _, cx| {
+                        .child(pill("Reset state", false).py_1().on_click(cx.listener(|this, _, _, cx| {
                             this.session.reset(); this.restart = true; this.events.clear(); this.schedule(None, true, cx);
                         })))))))
             .child(div().flex().items_center().justify_between().text_xs().text_color(rgb(0x728477))
-                .child(div().text_color(rgb(if error { 0xe1b18b } else { 0xa8d7b9 })).child(status))
+                .child(div().text_color(rgb(if error { 0xe1b18b } else { 0xa8d7b9 })).child(status)
+                    .when(error, |s| s.cursor_pointer().on_mouse_down(gpui::MouseButton::Left, cx.listener(|this, _, _, cx| {
+                        this.diagnostics_expanded = !this.diagnostics_expanded; cx.notify();
+                    }))))
                 .child(if compact { format!("{} ms · {} lines", self.session.elapsed_ms, self.line_count) }
                     else { format!("{} ms  ·  {} lines  ·  {:.1} / 64 KiB", self.session.elapsed_ms, self.line_count, self.source.len() as f64 / 1024.) }))
-            // Constant footprint: compilation failures cannot resize either pane.
-            .child(div().id("diagnostics").h(px(90.)).flex_shrink_0().block().overflow_scroll().rounded_lg().p_3()
-                .when(compact, |s| s.h(px(54.)))
-                .bg(rgb(if error { 0x302923 } else { 0x1d2b22 }))
-                .text_color(rgb(if error { 0xe9bea0 } else { 0x809780 }))
-                .font_family("Lilex").text_size(px(12.)).line_height(px(18.))
-                .child(SharedString::from(if let Some(notice) = &self.input_notice { notice.clone() }
-                    else if error { self.session.diagnostics.clone() }
-                    else if self.session.running { "Miri is evaluating your Rust. You can keep editing.".into() }
-                    else if compact { "Edit Rust, then open Preview. Changes run automatically; ⌘/Ctrl Enter runs immediately.".into() }
-                    else { "Change Rust on the left. The last successful component stays visible while edits compile.\nState persists between clicks. Source changes reset the component. Command/Ctrl Enter runs immediately.".into() }))).into_any_element()
+            // Diagnostics float above the panes so successful editing keeps
+            // the entire available height and errors do not change the viewport.
+            .when(self.diagnostics_expanded && error || self.input_notice.is_some(), |s| s.child(
+                div().id("diagnostics").absolute().bottom(px(24.)).left_0().w_full().h(px(120.))
+                    .flex().flex_col().rounded_lg().p_3().bg(rgb(0x302923)).text_color(rgb(0xe9bea0))
+                    .child(div().flex().items_center().justify_between().text_xs().mb_2()
+                        .child(if self.session.failure == Some(FailureKind::Unavailable) { "Runtime unavailable" } else { "Rust diagnostics" })
+                        .child(pill("Close", false).py_1().on_click(cx.listener(|this, _, _, cx| {
+                            this.diagnostics_expanded = false; this.input_notice = None; cx.notify();
+                        }))))
+                    .child(div().id("diagnostic-message").flex_1().min_h_0().overflow_scroll().font_family("Lilex")
+                        .text_size(px(12.)).line_height(px(18.))
+                        .child(SharedString::from(self.input_notice.clone().unwrap_or_else(|| self.session.diagnostics.clone()))))))
+            .into_any_element()
     }
 }
 pub fn pill(label: &str, active: bool) -> gpui::Stateful<gpui::Div> {
@@ -702,6 +731,7 @@ impl Worker {
                         generation: request.generation,
                         frame: None,
                         diagnostics: format!("{error:#}"),
+                        failure: Some(FailureKind::Unavailable),
                         elapsed_ms: 0,
                     },
                 };
@@ -744,10 +774,17 @@ impl Drop for Codepen {
     fn drop(&mut self) {
         #[cfg(not(target_family = "wasm"))]
         self.worker.close();
+        #[cfg(all(target_family = "wasm", feature = "browser-miri"))]
+        crate::browser_runtime::release(&self.session.id);
     }
 }
 
-#[cfg(target_family = "wasm")]
+#[cfg(all(target_family = "wasm", feature = "browser-miri"))]
+async fn browser_evaluate(request: Request) -> Reply {
+    crate::browser_runtime::evaluate(request).await
+}
+
+#[cfg(all(target_family = "wasm", not(feature = "browser-miri")))]
 async fn browser_evaluate(request: Request) -> Reply {
     use wasm_bindgen::{JsCast, JsValue};
     use wasm_bindgen_futures::JsFuture;
@@ -818,6 +855,7 @@ async fn browser_evaluate(request: Request) -> Reply {
         diagnostics: format!(
             "Rust compiler service unavailable. Start gpui-codepen-server and trunk serve. {e:?}"
         ),
+        failure: Some(FailureKind::Unavailable),
         elapsed_ms: 0,
     })
 }

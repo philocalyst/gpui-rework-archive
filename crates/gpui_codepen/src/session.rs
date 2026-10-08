@@ -27,11 +27,20 @@ pub struct Request {
     pub input: PreviewContext,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum FailureKind {
+    Rust,
+    Unavailable,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Reply {
     pub generation: u64,
     pub frame: Option<Frame>,
     pub diagnostics: String,
+    #[serde(default)]
+    pub failure: Option<FailureKind>,
     pub elapsed_ms: u64,
 }
 
@@ -43,11 +52,17 @@ pub struct Session {
     pub generation: u64,
     pub frame: Option<std::sync::Arc<Frame>>,
     pub diagnostics: String,
+    pub failure: Option<FailureKind>,
     pub running: bool,
     pub elapsed_ms: u64,
 }
 impl Session {
-    pub fn request(&mut self, source: String, backend: Backend, event: Option<gpui_codepen_guest::InputMessage>) -> Request {
+    pub fn request(
+        &mut self,
+        source: String,
+        backend: Backend,
+        event: Option<gpui_codepen_guest::InputMessage>,
+    ) -> Request {
         self.generation = self.generation.wrapping_add(1);
         self.running = true;
         if self.id.is_empty() {
@@ -59,7 +74,10 @@ impl Session {
             source,
             backend,
             restart: false,
-            input: PreviewContext { events: event.into_iter().collect(), ..Default::default() },
+            input: PreviewContext {
+                events: event.into_iter().collect(),
+                ..Default::default()
+            },
         }
     }
     pub fn reset(&mut self) {
@@ -68,6 +86,7 @@ impl Session {
         self.elapsed_ms = 0;
         self.frame = None;
         self.diagnostics.clear();
+        self.failure = None;
     }
     pub fn accept(&mut self, mut reply: Reply) -> bool {
         if reply.generation != self.generation {
@@ -77,6 +96,7 @@ impl Session {
             if let Err(error) = frame.validate() {
                 reply.frame = None;
                 reply.diagnostics = error;
+                reply.failure = Some(FailureKind::Unavailable);
             }
         }
         self.accept_validated(reply)
@@ -90,6 +110,8 @@ impl Session {
         if let Some(frame) = reply.frame {
             self.frame = Some(std::sync::Arc::new(frame));
         }
+        self.failure = if reply.diagnostics.is_empty() { None }
+            else { reply.failure.or(Some(FailureKind::Rust)) };
         self.diagnostics = reply.diagnostics;
         self.elapsed_ms = reply.elapsed_ms;
         self.running = false;

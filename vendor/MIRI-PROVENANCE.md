@@ -8,21 +8,44 @@ https://github.com/rust-lang/rust/tree/5c543b0b8c73c7b72bc8284ced4fb22ead15734d/
 The source and its dual MIT/Apache-2.0 licenses are preserved. The local changes are:
 
 - `src/shims/foreign_items.rs`: opt-in bounded `gpui_codepen_receive` and
-  `gpui_codepen_emit` transport. Length-prefixed binary input and length-delimited binary output use
-  the worker's pipes; component evaluation stays in the Rust interpreter.
+  `gpui_codepen_emit` transport. The native guide uses a dedicated loopback
+  control stream; standalone fixtures can use pipes. Component evaluation stays
+  in the Rust interpreter. Guest stdin/stdout never carry guide control traffic.
   `gpui_codepen_rpc_start`/`gpui_codepen_rpc_read` connect the guest's actual
   GPUI platform text trait to the compiled Parley service over a separate,
   length-delimited loopback stream. An opt-in `gpui_codepen_profile` probe
   reports native elapsed time and MIR basic-block counts for frame phases.
 - `src/machine.rs`: owns that platform stream, its reusable response buffer, and optional
   profiling timestamps and per-function MIR work counters.
+- `src/codepen_reload.rs`: exports analyzed Rust MIR and installs compatible
+  body generations in the resident compiler arena. Stable definition identities,
+  signatures, type layouts, generic/trait contracts, capture identities/order,
+  const/promoted MIR and coroutine layouts guard existing state. Source maps and
+  hygiene remain generation-specific. Initial rlib packets are bound to their
+  bundled metadata hash; active calls retain their old body until they return.
+- `src/codepen_browser.rs`: JSPI input, frame, patch and cancellation boundaries,
+  plus the existing compiled GPUI platform text service inside the WASM module.
+- `src/concurrency/scheduler.rs`: bounded ordinary-statement batches avoid
+  rescheduling between statements while retaining Miri's actual step semantics.
 - `src/intrinsics/mod.rs`: executes integer rotations, unchecked funnel shifts,
   and disjoint bitwise OR directly with native scalar arithmetic, preserving
   Rust's integer width, signed bit patterns, and undefined-behavior checks.
   The corresponding pass and fail fixtures compare against native Rust and
   exercise invalid shift counts and overlapping operands.
 - `src/bin/miri.rs`: an opt-in Unix parent-lifetime watchdog prevents a running
-  guest from surviving a terminated guide/compiler companion.
+  guest from surviving a terminated guide/compiler companion. Compiler-only
+  packet export can finalize rustc's incremental query cache. Component MIR
+  disables inlining across local function boundaries so later calls can reload.
+
+`scripts/codepen/browser.py` builds the pinned compiler source as WASM with the
+patches in `browser-rustc.patch`. It links the original procedural macro callbacks
+through rustc's macro bridge, caches immutable metadata bytes, and reuses the
+single browser thread registry across fresh compiler sessions. Its opt-in Miri
+machine hook executes deterministic f32/f64 arithmetic/comparisons with host IEEE
+operations; NaNs, remainder, f16/f128 and other unsupported operations retain
+rustc's software path. `test-browser-float.rs` compares host results against the
+pinned APFloat implementation. Full production-worker probes are separate from
+the mocked browser transport tests.
 
 The transport additions activate only with `GPUI_CODEPEN_IPC=1`. Profiling is
 opt-in through `GPUI_CODEPEN_PROFILE` (`1` for phases, `functions` for function

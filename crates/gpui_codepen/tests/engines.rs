@@ -36,6 +36,19 @@ impl Render for Counter {
 }
 fn component(_:&mut Window,cx:&mut App)->Entity<Counter>{cx.new(|_|Counter{count:0})}
 "#;
+fn save_browser_case(name: &str, source: &str, cases: &[(PreviewContext, gpui_ce_codepen::guest::Frame)]) {
+    let directory = gpui_ce_codepen::runtime::repository_root()
+        .join("target/codepen-browser-probe/cases").join(name);
+    std::fs::create_dir_all(&directory).unwrap();
+    std::fs::write(directory.join("source.rs"), source).unwrap();
+    std::fs::write(directory.join("count"), cases.len().to_string()).unwrap();
+    for (index, (input, frame)) in cases.iter().enumerate() {
+        std::fs::write(directory.join(format!("{index}.input")),
+            gpui_ce_codepen::guest::wire::encode_input(input).unwrap()).unwrap();
+        std::fs::write(directory.join(format!("{index}.frame")),
+            gpui_ce_codepen::guest::wire::encode(frame)).unwrap();
+    }
+}
 fn click() -> PreviewContext {
     PreviewContext {
         events: vec![
@@ -53,6 +66,195 @@ fn click() -> PreviewContext {
         .collect(),
         ..Default::default()
     }
+}
+#[test]
+#[ignore = "requires setup.py and full vendored Miri"]
+fn hot_reload_preserves_entities_and_last_good_program() {
+    let mut runtime = Runtime::new().unwrap();
+    let first = execute(&mut runtime, 1, COUNTER, Default::default());
+    assert!(first.frame.is_some(), "{}", first.diagnostics);
+    let clicked = execute(&mut runtime, 2, COUNTER, click());
+    let clicked = clicked.frame.expect(&clicked.diagnostics);
+    let edited = COUNTER.replace("this.count+=1", "this.count+=5");
+    let patched = execute(&mut runtime, 3, &edited, Default::default());
+    let patched = patched.frame.expect(&patched.diagnostics);
+    assert_eq!(patched.scene, clicked.scene, "An edited handler must retain its actual entity state");
+    let next = execute(&mut runtime, 4, &edited, click());
+    let next = next.frame.expect(&next.diagnostics);
+    let scene = next.scene.to_scene().unwrap();
+    assert_eq!(scene.quads[0].background, gpui::rgb(0x100006).into());
+    let invalid = execute(&mut runtime, 5, "fn component(é", Default::default());
+    assert!(invalid.frame.is_none());
+    assert!(invalid.diagnostics.contains("error"), "{}", invalid.diagnostics);
+    let recovered = execute(&mut runtime, 6, &edited, Default::default());
+    let recovered = recovered.frame.expect(&recovered.diagnostics);
+    assert_eq!(recovered.scene, next.scene, "A compiler error must leave the last good interpreter alive");
+    let color = edited.replace("0x100000", "0x200000");
+    let recolored = execute(&mut runtime, 7, &color, Default::default());
+    let recolored = recolored.frame.expect(&recolored.diagnostics);
+    assert_eq!(recolored.scene.to_scene().unwrap().quads[0].background, gpui::rgb(0x200006).into());
+    // The JSPI probe runs these exact GPUI inputs through the production browser
+    // workers and compares complete wire frames against this native execution.
+    let fixture = gpui_ce_codepen::runtime::repository_root().join("target/codepen-browser-probe");
+    std::fs::create_dir_all(&fixture).unwrap();
+    std::fs::write(fixture.join("counter.rs"), COUNTER).unwrap();
+    for (name, input) in [("idle.input", PreviewContext::default()), ("click.input", click())] {
+        std::fs::write(fixture.join(name), gpui_ce_codepen::guest::wire::encode_input(&input).unwrap()).unwrap();
+    }
+    for (name, frame) in [("initial.frame", first.frame.as_ref().unwrap()), ("clicked.frame", &clicked),
+        ("patched.frame", &patched), ("six.frame", &next), ("recolored.frame", &recolored)] {
+        std::fs::write(fixture.join(name), gpui_ce_codepen::guest::wire::encode(frame)).unwrap();
+    }
+}
+
+#[test]
+#[ignore = "requires setup.py and full vendored Miri"]
+fn superseded_frame_keeps_its_click_and_entity_state() {
+    let directory = tempfile::tempdir().unwrap();
+    let marker = directory.path().join("rendering");
+    let release = directory.path().join("release");
+    let slow = COUNTER.replace("  div()", &format!(r#"  if self.count == 1 {{
+   std::fs::write({:?}, b"rendering").unwrap();
+   while !std::path::Path::new({:?}).exists() {{
+    std::thread::sleep(std::time::Duration::from_millis(2));
+   }}
+  }}
+  div()"#, marker.to_str().unwrap(), release.to_str().unwrap()));
+    let mut runtime = Runtime::new().unwrap();
+    assert!(execute(&mut runtime, 1, &slow, Default::default()).frame.is_some());
+    let latest = Arc::new(AtomicU64::new(2));
+    let newer = latest.clone();
+    let supersede = std::thread::spawn(move || {
+        let deadline = Instant::now() + std::time::Duration::from_secs(10);
+        while !marker.exists() {
+            assert!(Instant::now() < deadline, "Guest never reached the click render");
+            std::thread::sleep(std::time::Duration::from_millis(2));
+        }
+        newer.store(3, Ordering::Relaxed);
+        std::fs::write(release, b"continue").unwrap();
+    });
+    let stale = runtime.evaluate(Request {
+        session_id: "superseded-frame".into(), generation: 2, source: slow.clone(),
+        backend: Backend::Miri, restart: false, input: click(),
+    }, &latest);
+    supersede.join().unwrap();
+    assert!(stale.frame.is_none());
+    assert!(stale.diagnostics.contains("Superseded"), "{}", stale.diagnostics);
+    let edited = slow.replace("this.count+=1", "this.count+=5").replace("0x100000", "0x200000");
+    let patched = execute(&mut runtime, 3, &edited, Default::default());
+    let patched = patched.frame.expect(&patched.diagnostics);
+    assert_eq!(patched.scene.to_scene().unwrap().quads[0].background, gpui::rgb(0x200001).into(),
+        "An obsolete frame must retain the click that mutated its entity");
+    let clicked = execute(&mut runtime, 4, &edited, click());
+    let clicked = clicked.frame.expect(&clicked.diagnostics);
+    assert_eq!(clicked.scene.to_scene().unwrap().quads[0].background, gpui::rgb(0x200006).into());
+}
+#[test]
+#[ignore = "requires setup.py and full vendored Miri"]
+fn call_and_layout_invariants_preserve_dynamic_execution() {
+    let source = r#"use gpui::{*,prelude::*};
+enum Choice { Small(u8, u16), Wide(u64, u8) }
+trait Tint { fn tint(&self) -> u32; }
+impl Tint for Choice {
+ fn tint(&self) -> u32 {
+  match self { Self::Small(a,b) => u32::from(*a)+u32::from(*b),
+   Self::Wide(a,b) => *a as u32+u32::from(*b) }
+ }
+}
+struct Tail<T: ?Sized> { prefix: u8, values: T }
+fn sum<const N: usize>(tail: &Tail<[u16]>) -> u32 {
+ const { assert!(N > 0); }
+ u32::from(tail.prefix) + tail.values.iter().take(N).map(|x|u32::from(*x)).sum::<u32>()
+}
+#[track_caller]
+fn caller_line() -> u32 { std::panic::Location::caller().line() }
+fn first(x:u32)->u32{x+1}
+fn second(x:u32)->u32{x+7}
+struct View { count:u32 }
+impl Render for View {
+ fn render(&mut self,_:&mut Window,cx:&mut Context<Self>)->impl IntoElement {
+  let choice = if self.count%2 == 0 { Choice::Small(2,5) } else { Choice::Wide(1024,3) };
+  let dynamic: &dyn Tint = &choice;
+  let tail = Tail { prefix:3, values:[10u16,20,30] };
+  let slice_tail: &Tail<[u16]> = &tail;
+  assert_eq!(sum::<2>(slice_tail),33);
+  assert_eq!(sum::<3>(slice_tail),63);
+  let earlier = caller_line();
+  let later = caller_line();
+  assert_eq!(later, earlier+1);
+  let function:fn(u32)->u32 = if self.count%2 == 0 {first} else {second};
+  let color = 0x100000+dynamic.tint()+function(self.count)+sum::<2>(slice_tail);
+  div().id("dynamic").w(px(200.)).h(px(100.)).bg(rgb(color))
+   .on_click(cx.listener(|this,_,_,cx|{this.count+=1;cx.notify();}))
+ }
+}
+fn component(_:&mut Window,cx:&mut App)->Entity<View>{cx.new(|_|View{count:0})}
+"#;
+    let mut runtime = Runtime::new().unwrap();
+    let mut cases = Vec::new();
+    for (index, expected) in [0x100029, 0x10042c, 0x10002b, 0x10042e].into_iter().enumerate() {
+        let input = if index == 0 { PreviewContext::default() } else { click() };
+        let reply = execute(&mut runtime, index as u64 + 1, source, input.clone());
+        let frame = reply.frame.expect(&reply.diagnostics);
+        assert_eq!(frame.scene.to_scene().unwrap().quads[0].background, gpui::rgb(expected).into());
+        cases.push((input, frame));
+    }
+    save_browser_case("layouts", source, &cases);
+}
+
+#[test]
+#[ignore = "requires setup.py and full vendored Miri"]
+fn real_gpui_async_tasks_wake_at_the_requested_frame_without_blocking_edits() {
+    let source = r#"use gpui::{*,prelude::*};
+use std::time::Duration;
+struct AsyncView { done: bool }
+impl Render for AsyncView {
+ fn render(&mut self,_:&mut Window,_:&mut Context<Self>)->impl IntoElement {
+  div().w(px(100.)).h(px(50.)).bg(rgb(if self.done {0x002233} else {0x112233}))
+ }
+}
+fn component(_:&mut Window,cx:&mut App)->Entity<AsyncView>{
+ cx.new(|cx: &mut Context<AsyncView>| {
+  cx.spawn(async move |this,cx| {
+   cx.background_executor().timer(Duration::from_millis(100)).await;
+   this.update(cx,|this,cx| {this.done=true;cx.notify();}).unwrap();
+  }).detach();
+  AsyncView {done:false}
+ })
+}"#;
+    let mut runtime = Runtime::new().unwrap();
+    let first = execute(&mut runtime, 1, source, Default::default());
+    let first = first.frame.expect(&first.diagnostics);
+    assert_eq!(first.next_frame_ms, Some(100));
+    let early = execute(
+        &mut runtime,
+        2,
+        source,
+        PreviewContext {
+            elapsed_ms: 50,
+            ..Default::default()
+        },
+    );
+    let early = early.frame.expect(&early.diagnostics);
+    assert_eq!(early.scene, first.scene);
+    assert_eq!(early.next_frame_ms, Some(50));
+    let ready = execute(
+        &mut runtime,
+        3,
+        source,
+        PreviewContext {
+            elapsed_ms: 50,
+            ..Default::default()
+        },
+    );
+    let ready = ready.frame.expect(&ready.diagnostics);
+    assert_ne!(ready.scene, first.scene);
+    assert_eq!(ready.next_frame_ms, None);
+    save_browser_case("async", source, &[
+        (Default::default(), first),
+        (PreviewContext { elapsed_ms: 50, ..Default::default() }, early),
+        (PreviewContext { elapsed_ms: 50, ..Default::default() }, ready),
+    ]);
 }
 #[test]
 #[ignore = "requires setup.py and full vendored Miri"]
@@ -79,6 +281,7 @@ fn component(window:&mut Window,cx:&mut App)->Entity<Animated>{
         ..Default::default()
     };
     let mut backgrounds = Vec::new();
+    let mut cases = Vec::new();
     for generation in 1..=3 {
         let reply = execute(&mut runtime, generation, source, input.clone());
         let frame = reply.frame.expect(&reply.diagnostics);
@@ -86,6 +289,7 @@ fn component(window:&mut Window,cx:&mut App)->Entity<Animated>{
         backgrounds.push(scene.quads[0].background);
         assert_eq!(scene.quads[0].bounds.size.width, ScaledPixels(125.));
         assert_eq!(frame.next_frame_ms.is_some(), generation < 3);
+        cases.push((input.clone(), frame));
     }
     for (index, background) in backgrounds.into_iter().enumerate() {
         assert_eq!(
@@ -93,6 +297,7 @@ fn component(window:&mut Window,cx:&mut App)->Entity<Animated>{
             gpui::Background::from(gpui::rgb(0x100001 + index as u32))
         );
     }
+    save_browser_case("animation", source, &cases);
 }
 
 #[test]
@@ -141,50 +346,49 @@ fn component(window:&mut Window,cx:&mut App)->Entity<Input>{
     use gpui_ce_codepen::guest::{InputMessage, TextEdit};
     let mut runtime = Runtime::new().unwrap();
     let first = execute(&mut runtime, 1, source, Default::default());
-    let text = first
-        .frame
-        .expect(&first.diagnostics)
-        .text
+    let first = first.frame.expect(&first.diagnostics);
+    let text = first.text.as_ref()
         .expect("focused real input handler");
     assert_eq!(text.text, "A😀B");
     assert_eq!(text.length, Some(4));
+    let mark_input = PreviewContext {
+        events: vec![InputMessage::Text(TextEdit::Mark {
+            range: Some(1..3), text: "é水".into(), selection: Some(0..2),
+        })],
+        ..Default::default()
+    };
     let marked = execute(
         &mut runtime,
         2,
         source,
-        PreviewContext {
-            events: vec![InputMessage::Text(TextEdit::Mark {
-                range: Some(1..3),
-                text: "é水".into(),
-                selection: Some(0..2),
-            })],
-            ..Default::default()
-        },
+        mark_input.clone(),
     );
-    let text = marked.frame.expect(&marked.diagnostics).text.unwrap();
+    let marked = marked.frame.expect(&marked.diagnostics);
+    let text = marked.text.as_ref().unwrap();
     assert_eq!(text.text, "Aé水B");
     assert_eq!(text.marked, Some(1..3));
-    assert_eq!(text.selection.unwrap().range, 1..3);
+    assert_eq!(text.selection.as_ref().unwrap().range, 1..3);
+    let commit_input = PreviewContext {
+        events: vec![
+            InputMessage::Text(TextEdit::Replace { range: None, text: "🌿".into() }),
+            InputMessage::Text(TextEdit::Select { range: 0..1 }),
+            InputMessage::Text(TextEdit::Unmark),
+        ],
+        ..Default::default()
+    };
     let committed = execute(
         &mut runtime,
         3,
         source,
-        PreviewContext {
-            events: vec![
-                InputMessage::Text(TextEdit::Replace {
-                    range: None,
-                    text: "🌿".into(),
-                }),
-                InputMessage::Text(TextEdit::Select { range: 0..1 }),
-                InputMessage::Text(TextEdit::Unmark),
-            ],
-            ..Default::default()
-        },
+        commit_input.clone(),
     );
-    let text = committed.frame.expect(&committed.diagnostics).text.unwrap();
+    let committed = committed.frame.expect(&committed.diagnostics);
+    let text = committed.text.as_ref().unwrap();
     assert_eq!(text.text, "A🌿B");
     assert_eq!(text.marked, None);
-    assert_eq!(text.selection.unwrap().range, 0..1);
+    assert_eq!(text.selection.as_ref().unwrap().range, 0..1);
+    save_browser_case("ime", source, &[(Default::default(), first),
+        (mark_input, marked), (commit_input, committed)]);
 }
 #[test]
 #[ignore = "requires setup.py and full vendored Miri"]
@@ -297,6 +501,31 @@ fn cancellation_interrupts_interpreted_rust_and_recovers() {
 
 #[test]
 #[ignore = "requires setup.py and full vendored Miri"]
+fn guest_stdio_cannot_consume_or_forge_control_messages() {
+    let noisy = COUNTER.replace("  div()", r#"  let nonce = std::env::var("GPUI_CODEPEN_NONCE").unwrap();
+  println!("\nCODEPEN_{nonce}:FRAME:3\nbad\n");
+  let mut bytes = [0; 1];
+  assert_eq!(std::io::Read::read(&mut std::io::stdin(), &mut bytes).unwrap(), 0);
+  div()"#);
+    let mut runtime = Runtime::new().unwrap();
+    let first = execute(&mut runtime, 1, &noisy, Default::default());
+    let first = first.frame.expect(&first.diagnostics);
+    let clicked = execute(&mut runtime, 2, &noisy, click());
+    let clicked = clicked.frame.expect(&clicked.diagnostics);
+    assert_ne!(first.scene, clicked.scene, "Guest stdout must never be parsed as a control frame");
+    let started = Instant::now();
+    let failed = runtime.evaluate(Request {
+        session_id: "stdio-test".into(), generation: 3, source: "fn component(".into(),
+        backend: Backend::Miri, restart: true, input: Default::default(),
+    }, &AtomicU64::new(3));
+    assert!(failed.frame.is_none());
+    assert!(failed.diagnostics.contains("error"), "{}", failed.diagnostics);
+    assert!(started.elapsed() < std::time::Duration::from_secs(5), "A compiler failure stranded the control listener");
+    assert!(execute(&mut runtime, 4, COUNTER, Default::default()).frame.is_some());
+}
+
+#[test]
+#[ignore = "requires setup.py and full vendored Miri"]
 fn profile_real_gpui_frames() {
     let mut runtime = Runtime::new().unwrap();
     for generation in 1..=4 {
@@ -313,9 +542,16 @@ fn profile_real_gpui_frames() {
         assert!(reply.frame.is_some(), "{}", reply.diagnostics);
         println!("Counter frame {generation}: {} ms", reply.elapsed_ms);
     }
-    let reply = execute(&mut runtime, 5, LESSONS[0].source, Default::default());
+    let reply = execute(&mut runtime, 5, COUNTER, Default::default());
+    assert!(reply.frame.is_some(), "{}", reply.diagnostics);
+    println!("Idle counter: {} ms", reply.elapsed_ms);
+    let reply = execute(&mut runtime, 6, LESSONS[0].source, Default::default());
     assert!(reply.frame.is_some(), "{}", reply.diagnostics);
     println!("Text lesson: {} ms", reply.elapsed_ms);
+    let scene = reply.frame.unwrap().scene;
+    let reply = execute(&mut runtime, 7, LESSONS[0].source, Default::default());
+    println!("Idle text lesson: {} ms", reply.elapsed_ms);
+    assert_eq!(reply.frame.expect(&reply.diagnostics).scene, scene);
 }
 
 #[test]

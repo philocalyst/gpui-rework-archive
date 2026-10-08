@@ -41,6 +41,7 @@ mod native {
                             generation: input.generation,
                             frame: None,
                             diagnostics: error.to_string(),
+                            failure: Some(gpui_ce_codepen::session::FailureKind::Unavailable),
                             elapsed_ms: 0,
                         },
                     };

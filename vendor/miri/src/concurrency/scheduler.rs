@@ -191,6 +191,16 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
     /// termination).
     fn run_threads(&mut self) -> InterpResult<'tcx, !> {
         let this = self.eval_context_mut();
+        // Ordinary statements cannot schedule another thread: preemption is
+        // requested by before_terminator, and blocking/yielding calls are
+        // terminators too. The guide can therefore run a bounded batch through
+        // the unchanged stepper without rescheduling after every statement.
+        // Keep regular Miri runs on their original stepping/debugging path.
+        let batch_statements = std::env::var_os("GPUI_CODEPEN_IPC").as_deref()
+            == Some(std::ffi::OsStr::new("1"))
+            && std::env::var_os("GPUI_CODEPEN_BATCH_STEPS").as_deref()
+                != Some(std::ffi::OsStr::new("0"))
+            && this.machine.data_race.as_genmc_ref().is_none();
         loop {
             if CTRL_C_RECEIVED.load(Ordering::Relaxed) {
                 this.machine.handle_abnormal_termination();
@@ -198,7 +208,27 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
             }
             match this.schedule()? {
                 SchedulingAction::ExecuteStep => {
-                    this.step_current_thread()?;
+                    let statements = if batch_statements {
+                        this.active_thread_stack().last().map_or(0, |frame| {
+                            match frame.current_loc() {
+                                Either::Left(loc) => frame.body().basic_blocks[loc.block]
+                                    .statements.len().saturating_sub(loc.statement_index).min(256),
+                                Either::Right(_) => 0,
+                            }
+                        })
+                    } else { 0 };
+                    if statements > 1 {
+                        // Ordinary statements stay in this block and cannot
+                        // yield, block, push/pop a frame, or select a thread.
+                        // Keep the unchanged evaluator, but calculate the block
+                        // boundary once instead of checking it after every step.
+                        for _ in 0..statements {
+                            let running = this.step()?;
+                            debug_assert!(running);
+                        }
+                    } else {
+                        this.step_current_thread()?;
+                    }
                 }
                 SchedulingAction::SleepAndWaitForIo(duration) => {
                     if this.machine.communicate() {

@@ -35,13 +35,14 @@ pub fn run<V: Render + 'static>(build: impl FnOnce(&mut Window, &mut App) -> Ent
     {
         unsafe extern "C" {
             fn gpui_codepen_profile(phase: usize);
+            fn gpui_codepen_reload_revision() -> usize;
         }
         let profile = |phase| unsafe { gpui_codepen_profile(phase) };
         profile(0);
         crate::rpc::begin_session();
-        let text = crate::rpc::RemoteTextSystem::new();
+        let text = Arc::new(crate::rpc::RemoteTextSystem::new());
         let atlas = Arc::new(SceneAtlas::new());
-        let mut app = HeadlessAppContext::with_platform(Arc::new(text), Arc::new(()), {
+        let mut app = HeadlessAppContext::with_platform(text.clone(), Arc::new(()), {
             let atlas = atlas.clone();
             move || {
                 Some(Box::new(CaptureRenderer {
@@ -50,6 +51,7 @@ pub fn run<V: Render + 'static>(build: impl FnOnce(&mut Window, &mut App) -> Ent
             }
         });
         app.set_automatic_drawing(false);
+        app.set_randomize_task_order(false);
         profile(1);
         unsafe {
             gpui_codepen_emit(std::ptr::null(), 0);
@@ -58,16 +60,30 @@ pub fn run<V: Render + 'static>(build: impl FnOnce(&mut Window, &mut App) -> Ent
         let mut build = Some(build);
         let mut buffer = vec![0; 64 * 1024 + 512];
         let mut previous = None;
+        let mut last_frame: Option<Frame> = None;
+        let mut scene_bytes = Vec::new();
+        let mut frame_bytes = Vec::new();
+        let mut live_tiles = collections::HashSet::default();
+        let mut revision = 0;
+        let hot_reload = std::env::var_os("GPUI_CODEPEN_HOT_RELOAD").as_deref() == Some(std::ffi::OsStr::new("1"));
         loop {
             let len = unsafe { gpui_codepen_receive(buffer.as_mut_ptr(), buffer.len()) };
             if len == 0 {
                 break;
             }
             profile(2);
+            let updated = if hot_reload { unsafe { gpui_codepen_reload_revision() } } else { 0 };
+            if updated != revision {
+                app.update(|cx| cx.refresh_windows());
+                revision = updated;
+            }
             let input: PreviewContext =
                 wire::decode_value(&buffer[..len]).expect("invalid GPUI input");
             input.validate().expect("invalid GPUI viewport");
             let fresh = window.is_none();
+            if text.refresh_font_generation() {
+                app.update(|cx| cx.refresh_windows());
+            }
             app.set_subpixel_rendering_supported(input.subpixel_rendering);
             app.update(|cx| {
                 if cx.text_rendering_mode() != input.text_rendering_mode {
@@ -144,34 +160,65 @@ pub fn run<V: Render + 'static>(build: impl FnOnce(&mut Window, &mut App) -> Ent
             }
             profile(4);
             app.run_until_parked();
-            app.draw_window_if_dirty(handle.into()).expect("GPUI draw");
+            let redrawn = app.draw_window_if_dirty(handle.into()).expect("GPUI draw");
             profile(5);
-            let mut live_tiles = collections::HashSet::default();
-            let scene = app
-                .capture_live_scene(handle.into(), |tile| {
-                    live_tiles.insert(tile.texture_id);
-                    atlas.resolve(tile)
-                })
-                .expect("GPUI scene capture");
-            atlas.retain_frame_tiles(&live_tiles);
+            let scene = if redrawn || last_frame.is_none() {
+                live_tiles.clear();
+                let scene = app
+                    .capture_live_scene(handle.into(), |tile| {
+                        live_tiles.insert(tile.texture_id);
+                        atlas.resolve(tile)
+                    })
+                    .expect("GPUI scene capture");
+                atlas.retain_frame_tiles(&live_tiles);
+                wire::encode_value_into(&scene, &mut scene_bytes).expect("GPUI scene encoding");
+                Some(scene)
+            } else {
+                None
+            };
             profile(6);
-            let bytes = wire::encode(&Frame {
-                version: PROTOCOL_VERSION,
-                viewport: input.viewport,
-                scale_factor: input.scale_factor,
-                scene,
-                cursor: app.cursor_style(handle.into()).expect("GPUI cursor"),
-                text: app
-                    .with_platform_input_handler(handle.into(), crate::input::capture)
-                    .expect("GPUI text context"),
-                next_frame_ms: app
-                    .next_frame_delay(handle.into())
-                    .expect("GPUI frame demand")
-                    .map(|delay| delay.as_millis().max(1) as u64),
+            let cursor = app.cursor_style(handle.into()).expect("GPUI cursor");
+            let text = app
+                .with_platform_input_handler(handle.into(), crate::input::capture)
+                .expect("GPUI text context");
+            let next_frame_ms = app
+                .next_frame_delay(handle.into())
+                .expect("GPUI frame demand")
+                .map(|delay| delay.as_millis().max(1) as u64);
+            let unchanged = scene.is_none() && last_frame.as_ref().is_some_and(|frame| {
+                frame.viewport == input.viewport
+                    && frame.scale_factor == input.scale_factor
+                    && frame.cursor == cursor
+                    && frame.text == text
+                    && frame.next_frame_ms == next_frame_ms
             });
+            if let Some(frame) = &mut last_frame {
+                if let Some(scene) = scene {
+                    frame.scene = scene;
+                }
+                frame.viewport = input.viewport;
+                frame.scale_factor = input.scale_factor;
+                frame.cursor = cursor;
+                frame.text = text;
+                frame.next_frame_ms = next_frame_ms;
+            } else {
+                last_frame = Some(Frame {
+                    version: PROTOCOL_VERSION,
+                    viewport: input.viewport,
+                    scale_factor: input.scale_factor,
+                    scene: scene.expect("initial GPUI scene"),
+                    cursor,
+                    text,
+                    next_frame_ms,
+                });
+            }
+            if !unchanged {
+                wire::encode_cached_scene_into(last_frame.as_ref().unwrap(), &scene_bytes, &mut frame_bytes)
+                    .expect("GPUI frame encoding");
+            }
             profile(7);
             unsafe {
-                gpui_codepen_emit(bytes.as_ptr(), bytes.len());
+                gpui_codepen_emit(frame_bytes.as_ptr(), frame_bytes.len());
             }
             profile(8);
         }
