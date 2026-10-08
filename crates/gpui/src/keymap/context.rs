@@ -42,6 +42,8 @@ use std::fmt;
 /// existing entry. They do not replace it. Build the context from the current
 /// state on each render, or clear it before changing a stored value. See
 /// [`set`](Self::set) for an example.
+/// These methods store strings without validating the entry grammar;
+/// [`parse`](Self::parse) validates the textual form instead.
 ///
 /// # Comparisons
 ///
@@ -107,6 +109,19 @@ impl KeyContext {
     ///
     /// Key-value entries are skipped. Returns `None` when the context is
     /// empty or contains only key-value entries.
+    ///
+    /// ```rust
+    /// use gpui::KeyContext;
+    ///
+    /// let context = KeyContext::parse("mode=insert Editor selection").unwrap();
+    /// assert_eq!(context.primary().unwrap().key, "Editor");
+    /// let secondary: Vec<_> = context.secondary()
+    ///     .map(|entry| entry.key.as_ref()).collect();
+    /// assert_eq!(secondary, ["mode", "selection"]);
+    /// assert!(context.contains("selection"));
+    /// assert!(context.get("selection").is_none()); // A fact without a value.
+    /// assert!(!context.contains("missing"));
+    /// ```
     pub fn primary(&self) -> Option<&ContextEntry> {
         self.0.iter().find(|p| p.value.is_none())
     }
@@ -114,6 +129,7 @@ impl KeyContext {
     /// Iterate in insertion order, excluding the first bare identifier.
     ///
     /// If there is no [`primary`](Self::primary) entry, every entry is returned.
+    /// See its example for the order of bare and valued entries.
     pub fn secondary(&self) -> impl Iterator<Item = &ContextEntry> {
         let primary = self.primary();
         self.0.iter().filter(move |&p| Some(p) != primary)
@@ -355,7 +371,7 @@ impl KeyBindingContextPredicate {
     /// | `mode == insert` | The current node has that key and value |
     /// | `mode != readonly` | The current value differs, or the key is absent |
     /// | `Editor && mode == insert` | Both checks match the current node |
-    /// | `Editor || Terminal` | Either check matches the current node |
+    /// | `Editor \|\| Terminal` | Either check matches the current node |
     /// | `!Dialog` | No node on the path contains `Dialog` |
     /// | `Workspace > Editor` | The current node is below a matching ancestor |
     ///

@@ -9,8 +9,9 @@ use smallvec::SmallVec;
 /// A key sequence, the action it requests, and an optional context predicate.
 ///
 /// Add it to the app with [`App::bind_keys`](crate::App::bind_keys). A binding
-/// selects a command; an element handler must still accept that command along
-/// the focused path. Use [`new`](Self::new) for fixed strings in application
+/// selects a command; an action listener must still handle it. Element handlers
+/// follow the focused path, with [`App::on_action`](crate::App::on_action)
+/// providing an app-wide fallback. Use [`new`](Self::new) for fixed strings in application
 /// code, or [`load`](Self::load) for fallible configuration and platform mapping.
 ///
 /// A sequence such as `ctrl-k left` is a two-stroke shortcut, also called a

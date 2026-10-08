@@ -55,16 +55,17 @@ activating are separate requests. In the browser, visibility controls the
 canvas's CSS `display`; the document controls its size, and desktop minimum-size
 and placement requests do not apply.
 
-Choose the kind of surface according to the interaction:
+Choose the surface according to the interaction.
+[`WindowKind`](crate::WindowKind) selects the native window role:
 
 | Need | API |
 | --- | --- |
-| Main application content | [`WindowKind::Normal`](crate::WindowKind::Normal), supported by every supplied backend |
+| Main application content | [`Normal`](crate::WindowKind::Normal), supported by every supplied backend |
 | Menu or tooltip inside the current window | [`anchored`](crate::anchored) for placement and [`deferred`](crate::deferred) for foreground paint order |
-| Separate menu anchored to an explicit parent | [`WindowKind::AnchoredPopup`](crate::WindowKind::AnchoredPopup) with [`PopupOptions`](crate::popup::PopupOptions); currently requires Wayland |
+| Separate menu anchored to an explicit parent | [`AnchoredPopup`](crate::WindowKind::AnchoredPopup) with [`PopupOptions`](crate::popup::PopupOptions); currently requires Wayland |
 | Confirmation with a small set of answers | [`Window::prompt`](crate::Window::prompt), which chooses a native dialog or an in-window fallback |
-| Separate modal window | [`WindowKind::Dialog`](crate::WindowKind::Dialog); the backend chooses an available native parent |
-| Utility window | [`WindowKind::Floating`](crate::WindowKind::Floating); treatment varies by backend |
+| Separate modal window | [`Dialog`](crate::WindowKind::Dialog); the backend chooses an available native parent |
+| Utility window | [`Floating`](crate::WindowKind::Floating); treatment varies by backend |
 
 `PopUp` and `Floating` are not portable guarantees of parent-relative placement
 or always-on-top behavior. The [`WindowKind`](crate::WindowKind) variants

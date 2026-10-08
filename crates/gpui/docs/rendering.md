@@ -94,11 +94,14 @@ shows the subscription and checks both reuse and the new painted color.
 
 For each element value, GPUI calls these phases in order:
 
-| Phase | What GPUI knows | What the element does |
-| --- | --- | --- |
-| [`Element::request_layout`](crate::Element::request_layout) | The element's style and inherited context | Registers layout nodes and optional measurement callbacks; returns request-layout state. |
-| [`Element::prepaint`](crate::Element::prepaint) | Resolved bounds in logical pixels | Creates hitboxes and focus/accessibility data, prepares children, and returns prepaint state. |
-| [`Element::paint`](crate::Element::paint) | Bounds and both phase states | Adds drawing operations and installs this frame's dispatch handlers. |
+1. [`request_layout`](crate::Element::request_layout) uses the element's style
+   and inherited context to register layout nodes and optional measurement
+   callbacks. It returns the state needed to prepare and paint this element.
+2. [`prepaint`](crate::Element::prepaint) receives the resolved bounds in
+   logical pixels. It prepares children, creates hitboxes and
+   focus/accessibility data, and returns the state needed to paint.
+3. [`paint`](crate::Element::paint) receives the bounds and both phase states.
+   It records drawing operations and installs this frame's input handlers.
 
 `RequestLayoutState` and `PrepaintState` connect work within that frame. They do not persist when the tree is rebuilt. Keep cross-frame values on the view/entity, in a state handle, or in element state accessed through a stable ID. [`LayoutId`](crate::LayoutId) identifies a layout node for the current layout pass; it is not an application key.
 

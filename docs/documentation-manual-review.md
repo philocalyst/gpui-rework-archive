@@ -1622,3 +1622,60 @@ These are source-checked contracts and executable examples, not a claim that
 the entire API now meets the editorial target. The combined build and rendered
 review follow this revision. No subagents or prose generators were used for
 this pass; no new detector score is reported.
+
+## Action fallback and reading the rendered reference (2026-10-08)
+
+Revision `c7169c894e` passed the complete browser-program, strict API, Zola,
+mdBook, and link-audit build and was served locally. The primary editor read
+the new KeyContext introduction and eleven inherent method contracts;
+predicate parsing, depth, evaluation, and suppression contracts; binding
+construction/loading/matching; and the shortcut collection's introduction and
+two methods. WindowOptions and all seventeen fields visible on macOS,
+WindowBounds, TitlebarOptions, WindowKind, the gesture introductions, and the
+revised window helpers were read in the generated reference. The repaired
+drawing link and long-press chapter link were followed, and the canonical
+long-press and window-configuration sections were read in mdBook.
+
+This caught a formatting error that compilation and link auditing did not:
+the OR operator split its predicate-table row into extra cells. The pipes are
+now escaped. The corrected child-phase table fits a 390-pixel CSS viewport,
+with complete method names and 152/197-pixel content columns. The earlier
+three-column frame-phase table still needed horizontal scrolling; it is now an
+ordered explanation. Window-choice links use short variant labels after
+introducing WindowKind, so a long qualified name no longer forces the table
+wide. The last two changes still need their replacement-artifact browser check.
+
+The KeyBinding introduction incorrectly required an element handler. Window
+dispatch and App::on_action show that an app handler can consume the action
+after element propagation. The introduction now links that fallback. The
+canonical editor example now runs the actual shortcut twice: the editor
+consumes the first action, then propagates the second to an app handler after
+its state changes. Assertions check both local and fallback counts. A further
+KeyContext example checks primary/secondary ordering and a bare fact's
+presence without a value. Its introduction distinguishes unvalidated string
+insertion from parsing the textual grammar.
+
+The focus-handle production implementation and the input chapter's focus and
+action sections were reread together. The activity question now asks whether
+the native window is reported active, rather than treating that query as proof
+of actual key delivery. Jiff 0.2.38's Date source was read further, covering all
+public examples from constant through saturating_add. The useful pattern here
+is to connect a method's default to observable behavior and include the case
+where that behavior changes; it does not establish that all Jiff examples have
+been read.
+
+The assembled browser-only list, layout, text, and first-window programs
+reached complete Live frames with the unchanged `fe33dbce…` runtime manifest.
+The text program displayed its accented Unicode sentence on two lines; layout
+kept its fixed pane beside wrapping text. These were execution/render checks,
+not edited-source or native-platform checks. Screenshots are
+`target/documentation-proof/miri-{list-rebuilt,layout,text,first-window}-c716.png`.
+
+All 232 doctests pass: 225 merged examples and seven executed harness examples,
+with one ignored, in `target/documentation-action-fallback-doctests.log`.
+The extended standalone editor fixture is one of those executed examples.
+Strict default-feature rustdoc passes in
+`target/documentation-action-fallback-default-api.log`. The combined artifact
+check follows this revision. The
+public-surface review remains unfinished, and this batch makes no detector or
+framework-wide quality claim. The primary editor worked alone.

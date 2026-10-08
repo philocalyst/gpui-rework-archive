@@ -102,7 +102,8 @@ must keep its state and register its listener again when rendering a new frame.
 
 This canvas records the last phase on its view. The initial offer uses the
 hitbox; later phases use the retained view identity. It handles only the bubble
-phase and stops propagation once it accepts an event:
+phase and stops propagation once it accepts an event. The fixture at the end
+uses the `test-support` feature:
 
 ```rust
 use gpui::{canvas, prelude::*, Context, DispatchPhase, HitboxBehavior,
@@ -172,8 +173,8 @@ assert!(window.update(|_, window, cx| !window.has_long_press_capture(&cx.entity(
 # }
 ```
 
-The assertions run with `test-support`. They wait through the default hold
-interval, cross the hitbox boundary, and check cancellation after a redraw.
+The assertions wait through the default hold interval, cross the hitbox
+boundary, and check cancellation after a redraw.
 GPUI clears ownership after the terminal callback, so that callback can still
 recognize and clean up its gesture. A selection tool would commit provisional
 state on `Ended` and discard it on `Cancelled`.
@@ -299,7 +300,7 @@ Choose a query according to the question being asked:
 | Is this the selected GPUI identity? | [`FocusHandle::is_focused`](crate::FocusHandle::is_focused) |
 | Does this panel contain that identity? | [`FocusHandle::contains_focused`](crate::FocusHandle::contains_focused) |
 | Does the selected subtree contain this handle? | [`FocusHandle::within_focused`](crate::FocusHandle::within_focused) |
-| Is the operating system sending keys to this window? | [`Window::is_window_active`](crate::Window::is_window_active) |
+| Is the native window reported active? | [`Window::is_window_active`](crate::Window::is_window_active) |
 
 GPUI keeps its selected focus target when the native window deactivates.
 Check activation separately when focus styling should dim while the user
@@ -352,9 +353,11 @@ key binding maps one or more keystrokes to an action when its context predicate 
 listener handles the command on the dispatch path. Menus and application code can invoke the same
 operation directly without synthesizing its keyboard shortcut.
 
-This editor handles `Save` when it can save and lets the action continue to an ancestor otherwise.
-The binding is installed once during application setup; the focused editor contributes its context
-and listener when it renders:
+This editor handles `Save` when it can save and propagates it otherwise. An
+ancestor can then handle it; [`App::on_action`](crate::App::on_action) supplies
+a fallback after the element route. The binding is installed once during
+setup. The focused editor contributes its context and listener on render.
+The fixture uses `test-support` to check both local handling and fallback:
 
 ```rust,standalone_crate
 use gpui::{actions, div, prelude::*, App, Context, FocusHandle, IntoElement, KeyBinding, Render, Window};
@@ -400,7 +403,45 @@ impl Render for Editor {
 fn bind_save(cx: &mut App) {
     cx.bind_keys([KeyBinding::new("cmd-s", Save, Some("Editor"))]);
 }
+
+# fn main() {
+# #[cfg(feature = "test-support")]
+# {
+use std::{cell::Cell, rc::Rc};
+
+let fallback_saves = Rc::new(Cell::new(0));
+let mut app = gpui::TestApp::new();
+app.update(|cx| {
+    bind_save(cx);
+    let saves = fallback_saves.clone();
+    cx.on_action(move |_: &Save, _| saves.set(saves.get() + 1));
+});
+let mut window = app.open_window(|window, cx| {
+    let editor = Editor::new(cx);
+    editor.focus(window, cx);
+    editor
+});
+
+window.simulate_keystroke("cmd-s");
+assert_eq!(window.read(|editor, _| editor.saves), 1);
+assert_eq!(fallback_saves.get(), 0); // The editor consumed the action.
+
+window.update(|editor, _, cx| {
+    editor.can_save = false;
+    cx.notify();
+});
+window.simulate_keystroke("cmd-s");
+assert_eq!(window.read(|editor, _| editor.saves), 1);
+assert_eq!(fallback_saves.get(), 1); // Propagation reached the app handler.
+# }
+# }
 ```
+
+The same binding selects `Save` in both cases. Context matching chooses an
+action; a listener decides whether to handle it. Bubbling action listeners
+consume by default. Calling `cx.propagate()` lets the next listener try it.
+An app-wide handler is useful for commands shared across windows; keep
+view-specific behavior on the element route.
 
 Use `actions!` for simple unit actions. Derive `Action` for actions with data; JSON-loaded actions
 need `serde::Deserialize` and `schemars::JsonSchema` unless declared with `#[action(no_json)]`.
