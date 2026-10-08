@@ -777,3 +777,23 @@ TimeDifference, TimeRound, and whole versus individual fractional-field
 configuration. Private production helpers in that interval were read too;
 the remaining tests are outside this claim. The earlier limited reading scope
 above records the preceding checkpoint rather than the current endpoint.
+
+The combined artifact at `e15a831ba1` also passed, including the callback-borrow
+warning. A subsequent 390-pixel book check found that Right Arrow on a link
+inside an overflowing table invoked mdBook's next-chapter shortcut. The table
+handler now stops that shortcut for descendants as well as its wrapper, leaving
+the browser's default horizontal scroll intact. Actual key presses on the
+UniformListScrollHandle link and wrapper keep the lists chapter open and scroll
+the table. Left Arrow scrolls back. At desktop width both tables lose their
+extra tab stop and region role. This isolated book check used port 1118; the
+next combined artifact must include the fix. Proof:
+`lists-book-mobile-keyboard-fixed.png`.
+
+The animation editor was also checked at 390 by 844 pixels. Its source and
+result panels stack, the document stays 390 pixels wide, and the live result
+settles to the new canvas dimensions. A capture made during resizing showed
+an incomplete result; the settled frame contains Replay and the full endpoint
+without the duplicated-header capture seen under the earlier emulation setup.
+This check uses a single-pixel-scale CDP capture, not the tab screenshot API's
+incorrectly sized emulation output. Proof: `animation-editor-390.png`. Both
+temporary viewport overrides were cleared afterward.

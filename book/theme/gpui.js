@@ -28,10 +28,10 @@ for (const wrapper of document.querySelectorAll(".table-wrapper")) {
             wrapper.removeAttribute("aria-label");
         }
     };
-    // mdBook uses the same keys for chapter navigation. A focused table owns
-    // horizontal arrows so the browser can perform its normal scroll action.
+    // mdBook uses the same keys for chapter navigation. A focused table or
+    // one of its links owns the arrows so the browser can scroll the table.
     wrapper.addEventListener("keydown", (event) => {
-        if (event.target === wrapper && wrapper.tabIndex === 0
+        if (wrapper.tabIndex === 0
             && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
             event.stopPropagation();
         }
