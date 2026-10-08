@@ -523,6 +523,9 @@ impl<'a> Scope<'a> {
 #[cfg(not(target_family = "wasm"))]
 impl Drop for Scope<'_> {
     fn drop(&mut self) {
+        // Registration may unwind before these jobs are submitted. Their
+        // captured senders must be released before waiting for disconnection.
+        self.futures.clear();
         self.tx.take().unwrap();
 
         // Wait until the channel is closed, which means that all of the spawned
@@ -583,5 +586,50 @@ mod test {
             *task_ran.borrow(),
             "Task should run normally when app is alive"
         );
+    }
+
+    #[test]
+    #[cfg(not(target_family = "wasm"))]
+    fn scoped_registration_panic_destroys_unstarted_jobs() {
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            mpsc,
+        };
+
+        struct DropProbe(Arc<AtomicBool>);
+        impl Drop for DropProbe {
+            fn drop(&mut self) {
+                self.0.store(true, Ordering::SeqCst);
+            }
+        }
+
+        // A broken cleanup path blocks in Scope::drop. Keep that wait off
+        // the test thread so the regression fails with a bounded timeout.
+        let (completed_tx, completed_rx) = mpsc::channel();
+        let worker = std::thread::spawn(move || {
+            let dispatcher = Arc::new(TestDispatcher::new(0));
+            let executor = BackgroundExecutor::new(dispatcher);
+            let destroyed = Arc::new(AtomicBool::new(false));
+            let probe = DropProbe(destroyed.clone());
+            let unwound = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                futures::executor::block_on(executor.scoped(|scope| {
+                    scope.spawn(async move {
+                        drop(probe);
+                        panic!("an unsubmitted job must not run");
+                    });
+                    panic!("registration failed");
+                }));
+            }));
+            completed_tx
+                .send((unwound.is_err(), destroyed.load(Ordering::SeqCst)))
+                .unwrap();
+        });
+
+        assert_eq!(
+            completed_rx.recv_timeout(Duration::from_secs(5)),
+            Ok((true, true)),
+            "registration must unwind after destroying its unstarted futures"
+        );
+        worker.join().unwrap();
     }
 }

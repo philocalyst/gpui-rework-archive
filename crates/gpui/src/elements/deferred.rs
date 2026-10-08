@@ -157,9 +157,87 @@ impl DeferredPriorityStackCache {
 #[cfg(test)]
 mod tests {
     use crate::{
-        Context, Entity, StyleRefinement, TestAppContext, Window, anchored, deferred, div, point,
-        prelude::*, px, size,
+        Bounds, ContentMask, Context, Entity, Modifiers, MouseButton, MouseDownEvent,
+        PlatformInput, StyleRefinement, TestAppContext, Window, anchored, deferred, div, point,
+        prelude::*, px, rgb, size,
     };
+    use std::{cell::Cell, rc::Rc};
+
+    struct MaskedOverlay {
+        presses: Rc<Cell<usize>>,
+    }
+
+    impl Render for MaskedOverlay {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            let presses = self.presses.clone();
+            deferred(
+                div()
+                    .id("masked-overlay")
+                    .size(px(100.))
+                    .bg(rgb(0x155b50))
+                    .on_mouse_down(MouseButton::Left, move |_, _, _| {
+                        presses.set(presses.get() + 1);
+                    }),
+            )
+            .content_mask(ContentMask {
+                bounds: Bounds::new(point(px(0.), px(0.)), size(px(40.), px(40.))),
+                fade_out: Default::default(),
+            })
+        }
+    }
+
+    struct MaskedOverlayRoot {
+        overlay: Entity<MaskedOverlay>,
+    }
+
+    impl Render for MaskedOverlayRoot {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            div().size_full().child(
+                self.overlay
+                    .clone()
+                    .cached(StyleRefinement::default().size_full()),
+            )
+        }
+    }
+
+    #[gpui::test]
+    fn test_deferred_mask_clips_input_after_cached_reuse(cx: &mut TestAppContext) {
+        let presses = Rc::new(Cell::new(0));
+        let window = cx.open_window(size(px(200.), px(200.)), |_, cx| {
+            let overlay = cx.new(|_| MaskedOverlay {
+                presses: presses.clone(),
+            });
+            MaskedOverlayRoot { overlay }
+        });
+        cx.run_until_parked();
+
+        for draw in 0..3 {
+            window
+                .update(cx, |_, window, cx| {
+                    for position in [point(px(60.), px(60.)), point(px(20.), px(20.))] {
+                        window.dispatch_event(
+                            PlatformInput::MouseDown(MouseDownEvent {
+                                button: MouseButton::Left,
+                                position,
+                                modifiers: Modifiers::default(),
+                                click_count: 1,
+                                first_mouse: false,
+                            }),
+                            cx,
+                        );
+                    }
+                })
+                .unwrap();
+            assert_eq!(
+                presses.get(),
+                draw + 1,
+                "only the visible region accepts input"
+            );
+
+            window.update(cx, |_, _, cx| cx.notify()).unwrap();
+            cx.run_until_parked();
+        }
+    }
 
     /// A stand-in for a dock panel hosting a popover (deferred draw) whose
     /// content opens another popover (a deferred draw created while

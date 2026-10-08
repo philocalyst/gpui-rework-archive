@@ -892,7 +892,7 @@ impl StateInner {
         cursor.seek(&Count(scroll_top.item_ix), Bias::Right);
         let start_y = cursor.start().height + scroll_top.offset_in_item;
         cursor.seek_forward(&Height(start_y + height), Bias::Left);
-        scroll_top.item_ix..cursor.start().count + 1
+        scroll_top.item_ix..(cursor.start().count + 1).min(items.summary().count)
     }
 
     fn scroll(
@@ -916,23 +916,23 @@ impl StateInner {
         let new_scroll_top = (self.scroll_top(scroll_top) - delta.y)
             .max(px(0.))
             .min(scroll_max);
+        let (start, ..) =
+            self.items
+                .find::<ListItemSummary, _>((), &Height(new_scroll_top), Bias::Right);
+        let resulting_scroll_top = ListOffset {
+            item_ix: start.count,
+            offset_in_item: new_scroll_top - start.height,
+        };
 
         if self.alignment == ListAlignment::Bottom && new_scroll_top == scroll_max {
             self.pending_scroll = None;
             self.logical_scroll_top = None;
         } else {
-            let (start, ..) =
-                self.items
-                    .find::<ListItemSummary, _>((), &Height(new_scroll_top), Bias::Right);
-            let scroll_top = ListOffset {
-                item_ix: start.count,
-                offset_in_item: new_scroll_top - start.height,
-            };
             // The user's scroll supersedes the position stashed by a
             // remeasure; re-anchor the pending adjustment so it doesn't revert
             // this scroll on the next layout.
-            self.rebase_pending_scroll(scroll_top);
-            self.logical_scroll_top = Some(scroll_top);
+            self.rebase_pending_scroll(resulting_scroll_top);
+            self.logical_scroll_top = Some(resulting_scroll_top);
         }
 
         if delta.y > px(0.) {
@@ -940,7 +940,7 @@ impl StateInner {
         }
 
         if let Some(handler) = self.scroll_handler.as_mut() {
-            let visible_range = Self::visible_range(&self.items, height, scroll_top);
+            let visible_range = Self::visible_range(&self.items, height, &resulting_scroll_top);
             handler(
                 &ListScrollEvent {
                     visible_range,
@@ -1961,6 +1961,49 @@ mod test {
             })
             .w_full()
             .h_full()
+        }
+    }
+
+    #[gpui::test]
+    fn scroll_callback_reports_the_resulting_visible_range(cx: &mut TestAppContext) {
+        for alignment in [crate::ListAlignment::Top, crate::ListAlignment::Bottom] {
+            let cx = cx.add_empty_window();
+            let state = ListState::new(5, alignment, px(0.)).measure_all();
+            state.scroll_to(gpui::ListOffset {
+                item_ix: 0,
+                offset_in_item: px(0.),
+            });
+            let reported = Rc::new(std::cell::RefCell::new(Vec::new()));
+            state.set_scroll_handler({
+                let reported = reported.clone();
+                move |event, _, _| {
+                    reported.borrow_mut().push((
+                        event.visible_range.clone(),
+                        event.count,
+                        event.is_scrolled,
+                    ));
+                }
+            });
+            cx.draw(point(px(0.), px(0.)), size(px(100.), px(40.)), |_, cx| {
+                cx.new(|_| TestListView(state.clone())).into_any_element()
+            });
+
+            for distance in [-40., -1000.] {
+                cx.simulate_event(ScrollWheelEvent {
+                    position: point(px(50.), px(10.)),
+                    delta: ScrollDelta::Pixels(point(px(0.), px(distance))),
+                    ..Default::default()
+                });
+            }
+
+            assert_eq!(
+                &*reported.borrow(),
+                &[
+                    (2..4, 5, true),
+                    (3..5, 5, alignment == crate::ListAlignment::Top),
+                ],
+                "callbacks should report the new viewport, including a bottom anchor"
+            );
         }
     }
 
