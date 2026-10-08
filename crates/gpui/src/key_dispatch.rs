@@ -636,6 +636,22 @@ mod tests {
     }
 
     #[test]
+    fn shortcut_label_keeps_binding_from_stronger_source() {
+        let tree = test_dispatch_tree(vec![
+            KeyBinding::new("ctrl-s", TestAction, Some("Editor"))
+                .with_meta(crate::KeyBindingMetaIndex(0)),
+            KeyBinding::new("ctrl-s", crate::NoAction, Some("Editor"))
+                .with_meta(crate::KeyBindingMetaIndex(2)),
+        ]);
+        let contexts = [KeyContext::parse("Editor").unwrap()];
+        assert_eq!(tree.bindings_for_action(&TestAction, &contexts).len(), 1);
+        assert!(
+            tree.highest_precedence_binding_for_action(&TestAction, &contexts)
+                .is_some_and(|binding| binding.action.partial_eq(&TestAction))
+        );
+    }
+
+    #[test]
     fn test_bindings_for_action_hides_targeted_unbind_in_active_context() {
         let tree = test_dispatch_tree(vec![
             KeyBinding::new("tab", TestAction, Some("Editor")),
