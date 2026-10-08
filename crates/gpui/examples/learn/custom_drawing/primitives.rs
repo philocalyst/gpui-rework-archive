@@ -1,4 +1,4 @@
-//! Canvas shapes and cached vector geometry.
+//! Canvas shapes and vector geometry.
 use super::*;
 
 pub(super) fn basic_shapes_canvas(colors: &Colors) -> impl IntoElement {

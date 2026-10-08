@@ -111,17 +111,60 @@ transformed *before* stroking, so a builder scale leaves its stroke width and
 dash lengths unchanged. A later window display scale affects the complete
 tessellated result.
 
+### Choose how contours meet and fill
+
+A *contour* is a connected sequence of segments. `move_to` starts one without
+drawing a line from the preceding contour. Use `close` for a closed stroke:
+it joins the last edge to the first. Drawing a final line back to the start
+leaves two capped ends instead. [`StrokeOptions`](crate::StrokeOptions)
+controls those caps and joins, as well as width and curve tolerance.
+
+One builder uses one [`PathStyle`](crate::PathStyle) for every contour. To fill
+a shape and outline it, build a filled path and a stroked path separately.
+Color is a paint argument, so two differently colored copies of the same
+geometry can share the preparation work.
+
+For a shape with holes, choose a [`FillRule`](crate::FillRule). The default,
+`EvenOdd`, leaves a hole where two nested contours overlap, regardless of
+which way their points run. `NonZero` takes contour direction into account.
+Set it with `with_style(PathStyle::Fill(FillOptions::non_zero()))`. The
+[fill-rule diagrams](https://www.w3.org/TR/SVG/painting.html#FillRuleProperty)
+show the difference for nested and intersecting contours.
+
+For curves, the endpoint comes first in GPUI's `curve_to` and
+`cubic_bezier_to`, before the control points. All those points are absolute
+coordinates in the builder's space. Arcs use two radii, an ellipse rotation
+in degrees, and flags that choose the sweep. The
+[`arc_to` example](crate::PathBuilder::arc_to) draws an upper semicircle and
+explains the flags; `relative_arc_to` changes only the endpoint into an offset.
+
+### Place the geometry before stroking
+
+Transform order matters. `scale(2.)` followed by `translate(point(px(40.),
+px(0.)))` doubles a shape, then moves it forty logical pixels right. Reversing
+those calls doubles the translation too. Rotation acts about the origin;
+positive degrees turn clockwise in the window's downward-growing y axis.
+
+For a canvas, author the geometry near `(0, 0)`, apply its local scale or
+rotation, then translate by `bounds.origin` last. The resulting vertices are
+window-local. An element-offset scope does not move arbitrary vertices passed
+to `paint_path`, and scaling for display density yourself would scale them
+again when the window records the scene.
+
+### Handle failures before paint
+
 > [!WARNING]
 > Stroke dash lengths must be finite and positive, and the pattern must not
 > be empty. Invalid patterns return an error from `build`; handle it before
 > painting. Supply finite geometry and valid tessellation options as well:
 > a fallible tessellator is not a general sanitizer for arbitrary input.
 
-Keep a finished path when its geometry can be reused. Rebuild when the data,
-size, or relevant style changes, rather than tessellating unchanged geometry
-on every paint. Cloning a path copies its vertex vector, so include that cost
-when deciding whether a cache helps. A large plot may need a different
-representation; measure the work with the
+Keep a finished path when its geometry can be reused. Its positions are baked
+into the vertices: changing the data, size, stroke style, or window-local origin
+requires updating the geometry. Changing only the paint color does not.
+Cloning a path copies its vertex vector, so include that cost when deciding
+whether a cache helps. Avoid tessellating unchanged geometry on every paint.
+A large plot may need a different representation; measure the work with the
 [testing and measurement chapter](https://gpui-ce.github.io/book/testing.html).
 
 ## Composite an image already owned by the GPU

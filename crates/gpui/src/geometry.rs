@@ -2191,6 +2191,8 @@ pub fn radians(value: f32) -> Radians {
 /// [`percentage`] debug-asserts the range `0.0..=1.0`; construction through the
 /// public field and arithmetic do not enforce it. Converting to [`Radians`]
 /// treats `1.0` as one full turn.
+/// For a fraction in a style's width, padding, or line height, use [`relative`]
+/// instead; those properties accept [`Relative`].
 #[derive(
     Clone,
     Copy,
@@ -2392,7 +2394,7 @@ impl Pixels {
         self.0
     }
 
-    /// Round down to a whole logical pixel. This does not snap to the display's device grid.
+    /// Rounds down to a whole logical pixel. This does not snap to the display's device grid.
     pub fn floor(&self) -> Self {
         Self(self.0.floor())
     }
@@ -2405,35 +2407,35 @@ impl Pixels {
         Self(self.0.round())
     }
 
-    /// Round up to a whole logical pixel.
+    /// Rounds up to a whole logical pixel.
     pub fn ceil(&self) -> Self {
         Self(self.0.ceil())
     }
 
-    /// Multiply by the display scale to produce scene units. No rounding is applied.
+    /// Multiplies by the display scale to produce scene units. No rounding is applied.
     #[must_use]
     pub fn scale(&self, factor: f32) -> ScaledPixels {
         ScaledPixels(self.0 * factor)
     }
 
-    /// Apply [`f32::powf`] to the raw value, retaining the `Pixels` wrapper.
+    /// Applies [`f32::powf`] to the raw value, retaining the `Pixels` wrapper.
     /// This is numeric convenience, not dimensional analysis.
     pub fn pow(&self, exponent: f32) -> Self {
         Self(self.0.powf(exponent))
     }
 
-    /// Return the absolute value.
+    /// Returns the absolute value.
     pub fn abs(&self) -> Self {
         Self(self.0.abs())
     }
 
-    /// Return [`f32::signum`] of the raw value: ±1 for finite values, including signed zero,
+    /// Returns [`f32::signum`] of the raw value: ±1 for finite values, including signed zero,
     /// or NaN for NaN.
     pub fn signum(&self) -> f32 {
         self.0.signum()
     }
 
-    /// Widen the stored value to `f64`. This does not recover precision lost during construction.
+    /// Widens the stored value to `f64`. This does not recover precision lost during construction.
     pub fn to_f64(self) -> f64 {
         self.0 as f64
     }
@@ -2672,17 +2674,17 @@ impl ScaledPixels {
         self.0
     }
 
-    /// Round down to a whole scene pixel.
+    /// Rounds down to a whole scene pixel.
     pub fn floor(&self) -> Self {
         Self(self.0.floor())
     }
 
-    /// Round to the nearest whole scene pixel, with halfway cases away from zero.
+    /// Rounds to the nearest whole scene pixel, with halfway cases away from zero.
     pub fn round(&self) -> Self {
         Self(self.0.round())
     }
 
-    /// Round up to a whole scene pixel.
+    /// Rounds up to a whole scene pixel.
     pub fn ceil(&self) -> Self {
         Self(self.0.ceil())
     }
@@ -2831,7 +2833,7 @@ pub struct Rems(
 impl Rems {
     /// A length of zero.
     pub const ZERO: Self = Self(0.0);
-    /// Multiply by the logical pixel size of one rem.
+    /// Multiplies by the logical pixel size of one rem.
     pub fn to_pixels(self, rem_size: Pixels) -> Pixels {
         self * rem_size
     }
@@ -3022,7 +3024,7 @@ impl From<Rems> for AbsoluteLength {
 }
 
 impl AbsoluteLength {
-    /// Resolve rems against `rem_size`, leaving pixel values unchanged.
+    /// Resolves rems against `rem_size`, leaving pixel values unchanged.
     ///
     /// ```
     /// use gpui::{AbsoluteLength, px, rems};
@@ -3040,7 +3042,7 @@ impl AbsoluteLength {
         }
     }
 
-    /// Express pixels in rems by dividing by `rem_size`; preserve existing rem counts.
+    /// Expresses pixels in rems by dividing by `rem_size`; preserves existing rem counts.
     /// Supply a positive, finite rem size. A zero size follows floating-point division rules.
     pub fn to_rems(self, rem_size: Pixels) -> Rems {
         match self {
@@ -3135,8 +3137,8 @@ impl Serialize for AbsoluteLength {
 ///
 /// Unlike [`AbsoluteLength`], this accepts percentages. Unlike [`Length`], it cannot
 /// be `auto`. “Definite” describes the authored value; a fraction still needs a
-/// reference dimension before it becomes pixels. Layout selects that reference
-/// according to the property; [`to_pixels`](Self::to_pixels) takes one explicitly.
+/// reference dimension before it becomes pixels. The property's rules select
+/// that reference; [`to_pixels`](Self::to_pixels) takes one explicitly.
 /// Parsing and Serde use suffixes `px`, `rem`, or `%`.
 #[derive(Clone, Copy, Neg, PartialEq)]
 pub enum DefiniteLength {
@@ -3147,7 +3149,7 @@ pub enum DefiniteLength {
 }
 
 impl DefiniteLength {
-    /// Resolve fractions against `base_size` and rems against `rem_size`.
+    /// Resolves fractions against `base_size` and rems against `rem_size`.
     /// Pixel values need neither input. This converts units without enforcing layout constraints.
     ///
     /// ```

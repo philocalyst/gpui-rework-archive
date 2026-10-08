@@ -153,6 +153,26 @@ recording the scene; multiplying by it yourself would scale the drawing twice.
 | [`with_absolute_element_offset`](crate::Window::with_absolute_element_offset) | Replaces that translation | The child's own position within the layout tree |
 | [`with_content_mask`](crate::Window::with_content_mask) | Intersects the active clip with window-local bounds | Layout and drawing geometry |
 
+For a custom scrolling container, keep the viewport's mask fixed and prepaint
+the content under a negative scroll offset. The children then retain shifted
+bounds for painting and hit testing. Apply the viewport mask during painting
+too. An offset scope does not translate arbitrary points passed to
+[`paint_quad`](crate::Window::paint_quad) or other paint methods.
+
+Clipping has two parts. A hitbox captures the mask active when
+[`insert_hitbox`](crate::Window::insert_hitbox) runs in prepaint. A drawing
+command captures the mask active during paint. Clipping only paint can leave
+an invisible part of a control clickable. The
+[clipping test](https://gpui-ce.github.io/guides/testing/#check-clipping-and-input-together)
+checks both the recorded mask and presses on either side of its edge.
+
+For custom text placement,
+[`parent_relative_layout_bounds`](crate::Window::parent_relative_layout_bounds)
+still returns window-local bounds. Its name describes how it snaps the local
+origin and size before adding the parent's origin. Use ordinary `layout_bounds`
+for boxes whose adjoining edges must meet; use the parent-relative method when
+text must keep a stable position within a moving container.
+
 ### Round at the boundary that needs it
 
 [`Pixels`](crate::Pixels) stores a floating-point logical length.
@@ -165,9 +185,9 @@ Choose the rounding operation for the quantity you need:
 
 | Operation | Result | Halfway rule |
 | --- | --- | --- |
-| [`Pixels::round`](crate::Pixels::round) | A whole logical pixel | Away from zero |
-| [`Window::pixel_snap`](crate::Window::pixel_snap) | A device-grid position, returned in logical pixels | Toward zero |
-| `DevicePixels::from(scaled)` | A whole physical pixel | Upward |
+| [`round`](crate::Pixels::round) | Whole logical pixel | Away from zero |
+| [`pixel_snap`](crate::Window::pixel_snap) | Device-grid position in logical units | Toward zero |
+| [Convert to `DevicePixels`](crate::DevicePixels) | Whole physical pixel | Upward |
 
 At a display scale of two, `px(10.75)` is 21.5 physical pixels.
 `Pixels::round` gives `px(11.)`; `Window::pixel_snap` gives `px(10.5)`.
@@ -189,26 +209,6 @@ These conversions do not validate a buffer size or align its rows. Check
 dimensions and byte-count arithmetic at the allocation boundary. Likewise,
 rounding a width alone does not clip drawing or register a hitbox; those remain
 separate prepaint and paint decisions.
-
-For a custom scrolling container, keep the viewport's mask fixed and prepaint
-the content under a negative scroll offset. The children then retain shifted
-bounds for painting and hit testing. Apply the viewport mask during painting
-too. An offset scope does not translate arbitrary points passed to
-[`paint_quad`](crate::Window::paint_quad) or other paint methods.
-
-Clipping has two parts. A hitbox captures the mask active when
-[`insert_hitbox`](crate::Window::insert_hitbox) runs in prepaint. A drawing
-command captures the mask active during paint. Clipping only paint can leave
-an invisible part of a control clickable. The
-[clipping test](https://gpui-ce.github.io/guides/testing/#check-clipping-and-input-together)
-checks both the recorded mask and presses on either side of its edge.
-
-For custom text placement,
-[`parent_relative_layout_bounds`](crate::Window::parent_relative_layout_bounds)
-still returns window-local bounds. Its name describes how it snaps the local
-origin and size before adding the parent's origin. Use ordinary `layout_bounds`
-for boxes whose adjoining edges must meet; use the parent-relative method when
-text must keep a stable position within a moving container.
 
 ## Know which changes reach children
 

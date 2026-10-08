@@ -1489,19 +1489,31 @@ pub struct PathId(
 /// paths. `Path` is useful when supplying custom triangles directly. Its
 /// coordinate parameter is [`Pixels`] before painting and [`ScaledPixels`] in
 /// a recorded [`Scene`].
+///
+/// A path owns its vertex vector. Cloning copies those vertices; it does not
+/// tessellate them again. [`Window::paint_path`](crate::Window::paint_path)
+/// consumes a logical-pixel path and supplies its paint, clip, and display
+/// scale. Positions must already be window-local. See the
+/// [drawing chapter](crate::_documentation::drawing#prepare-a-path-once-when-its-geometry-is-stable)
+/// for choosing where to prepare and retain geometry.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Path<P: Clone + Debug + Default + PartialEq> {
-    /// Renderer-local path identifier.
+    /// Index assigned when the path is inserted into a scene.
+    /// Window painting replaces a previously stored ID.
     pub id: PathId,
     /// Draw-order key used when paths are sorted.
     pub order: DrawOrder,
-    /// Geometry bounds in the path's coordinate space.
+    /// Bounding rectangle used for overlap ordering and gradient placement.
+    /// Triangle-building methods expand it; direct edits to `vertices` do not.
     pub bounds: Bounds<P>,
-    /// Clip mask applied to the path.
+    /// Clip mask in the path's coordinate space.
+    /// [`Window::paint_path`](crate::Window::paint_path) replaces this with the active mask.
     pub content_mask: ContentMask<P>,
-    /// Triangle vertices consumed by the path shader.
+    /// Triangle list consumed by the path shader, three vertices per triangle.
+    /// Keep `bounds` current if these positions are edited directly.
     pub vertices: Vec<PathVertex<P>>,
-    /// Path paint.
+    /// Paint applied to the geometry.
+    /// [`Window::paint_path`](crate::Window::paint_path) replaces this with its paint argument.
     pub color: Background,
     start: Point<P>,
     current: Point<P>,
@@ -1510,6 +1522,11 @@ pub struct Path<P: Clone + Debug + Default + PartialEq> {
 
 impl Path<Pixels> {
     /// Creates a logical-pixel path with `start` as its current point.
+    ///
+    /// No vertices are added. The initial bounds are a zero-sized rectangle
+    /// at `start`; later triangles expand them. Use [`PathBuilder`](crate::PathBuilder)
+    /// to construct ordinary vector paths, or [`push_triangle`](Self::push_triangle)
+    /// to supply already tessellated geometry.
     pub fn new(start: Point<Pixels>) -> Self {
         Self {
             id: PathId(0),
@@ -1529,6 +1546,11 @@ impl Path<Pixels> {
 
     /// Converts this logical-pixel path to scene space by multiplying all
     /// positions and masks by `factor`.
+    ///
+    /// Allocates a new vertex vector and preserves shader coordinates, paint,
+    /// and ordering metadata. Normal drawing should pass the unscaled path
+    /// to [`Window::paint_path`](crate::Window::paint_path), which uses the
+    /// window's display scale.
     pub fn scale(&self, factor: f32) -> Path<ScaledPixels> {
         Path {
             id: self.id,
@@ -1547,7 +1569,12 @@ impl Path<Pixels> {
         }
     }
 
-    /// Starts a new contour at `to` and makes it the current point.
+    /// Sets the origin of subsequent fan triangles and the current point to `to`.
+    ///
+    /// This adds no vertices and leaves existing geometry and bounds intact.
+    /// It is part of this low-level triangle representation. Use
+    /// [`PathBuilder::move_to`](crate::PathBuilder::move_to) when constructing
+    /// independent vector contours with fill or stroke semantics.
     pub fn move_to(&mut self, to: Point<Pixels>) {
         self.contour_count += 1;
         self.start = to;
@@ -1556,9 +1583,10 @@ impl Path<Pixels> {
 
     /// Adds a straight segment from the current point to `to`.
     ///
-    /// The low-level path representation emits triangle vertices for segments;
-    /// this is not a general-purpose polygon fill operation. Use
-    /// [`crate::PathBuilder`] for normal vector paths.
+    /// As points are added, this emits fan triangles from the fan origin
+    /// through the previous point to `to`. It does not tessellate concave
+    /// polygons or resolve self-intersections. Use [`PathBuilder::line_to`](crate::PathBuilder::line_to)
+    /// for ordinary filled or stroked contours.
     pub fn line_to(&mut self, to: Point<Pixels>) {
         self.contour_count += 1;
         if self.contour_count > 1 {
@@ -1573,8 +1601,10 @@ impl Path<Pixels> {
     /// Adds a quadratic curve segment from the current point to `to` using `ctrl`.
     ///
     /// The control point is encoded in the path shader's `st_position` values.
-    /// Use [`crate::PathBuilder`] when lyon's general fill or stroke tessellation
-    /// is needed.
+    /// It also connects the segment to the current fan as needed. This method
+    /// supplies no stroke width and does not perform general tessellation.
+    /// Use [`PathBuilder::curve_to`](crate::PathBuilder::curve_to) for a normal
+    /// quadratic curve in a filled or stroked contour.
     pub fn curve_to(&mut self, to: Point<Pixels>, ctrl: Point<Pixels>) {
         self.contour_count += 1;
         if self.contour_count > 1 {
@@ -1597,6 +1627,20 @@ impl Path<Pixels> {
     /// callers constructing custom triangles must provide values appropriate
     /// for the shader's fill or quadratic-curve coverage calculation. The
     /// method appends three vertices and does not apply a content mask.
+    /// A constant `(0, 1)` at all three vertices fills the entire triangle:
+    ///
+    /// ```
+    /// use gpui::{Path, point, px, size};
+    ///
+    /// let a = point(px(8.), px(8.));
+    /// let b = point(px(40.), px(8.));
+    /// let c = point(px(8.), px(24.));
+    /// let mut path = Path::new(a);
+    /// let filled = point(0., 1.);
+    /// path.push_triangle((a, b, c), (filled, filled, filled));
+    /// assert_eq!(path.vertices.len(), 3);
+    /// assert_eq!(path.bounds.size, size(px(32.), px(16.)));
+    /// ```
     pub fn push_triangle(
         &mut self,
         xy: (Point<Pixels>, Point<Pixels>, Point<Pixels>),
@@ -1641,6 +1685,9 @@ where
 {
     #[allow(unused)]
     /// Returns the intersection of geometry bounds and the content mask bounds.
+    ///
+    /// This is a bounding rectangle for ordering and culling. It does not
+    /// modify vertices, cut triangles, or account for a mask's edge fade.
     pub fn clipped_bounds(&self) -> Bounds<T> {
         self.bounds.intersect(&self.content_mask.bounds)
     }

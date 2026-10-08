@@ -1851,3 +1851,79 @@ The served site still carries the preceding client until the next complete
 artifact build is checked and promoted. Incoming provenance is preserved in
 `target/documentation-proof/incoming-browser-scheduling-export-provenance.json`;
 its author's broader test results are separate from the checks above.
+
+## Vector paths and the drawing lifecycle (2026-10-08)
+
+Revision `c84a314d04` passed the complete strict API, browser-program, Zola,
+mdBook, and link-audit build in `target/documentation-units-site.log` and was
+promoted. The primary editor read the rendered length-family introductions,
+fields, and inherent methods, and Window's rem and snapping methods. The
+Length-to-layout link was followed. The complete new rounding section was
+read in the book. Browser review found that its heading separated the
+coordinate explanation from its clipping paragraphs, and its table required
+scrolling at 390 CSS pixels. This pass moves the heading below those
+paragraphs and shortens the table's labels. It also links Percentage to
+Relative, clarifies DefiniteLength's property-dependent reference, and
+standardizes the length methods' summary verbs. These follow-ups await the
+next rendered-artifact check; the preceding review is preserved in
+`target/documentation-proof/c84a314d04-review-evidence.json`.
+
+The primary editor reread the complete canvas and path-builder implementations,
+all Path and PathVertex methods, Window::paint_path, path insertion into Scene,
+the renderer's complete path-record and path-shader modules, the complete
+canonical drawing and custom-element programs, the drawing chapter, and the
+native custom-drawing primitives module. The pinned lyon SVG builder's
+contour and arc paths, its fill/stroke defaults, its ellipse conversion, and
+euclid's transform composition were checked. The W3C arc and fill-rule
+references were checked. Jiff 0.2.38's Span introduction through its two
+day-length examples was read for patterns in explaining similar-looking
+operations and their differing results.
+
+PathBuilder now defines contours and connects preparation, window-local
+placement, and painting. Every inherent method was checked in context.
+The documentation explains endpoint-first curve arguments, absolute versus
+relative arc endpoints, degree units, clockwise sweep, closed joins versus
+separate caps, fill rules, style replacement, and transform call order.
+Examples demonstrate nested same-direction contours, a valid dashed line
+and an invalid empty pattern, a quadratic curve, an upper semicircle, and a
+scaled then translated triangle. The arc example checks its upper extent;
+the transform example checks resulting bounds.
+
+Path now distinguishes its low-level triangle/fan helpers from general vector
+tessellation. Its ownership, clone cost, bounds maintenance, paint-time
+replacement of metadata, and display scaling are explicit. push_triangle
+demonstrates filled shader coordinates and the resulting vertex count and
+bounds. Window::paint_path explains that element-offset scopes do not move
+arbitrary vertices. The canonical drawing chapter carries the shared guidance
+into the site and book, including which changes invalidate prepared geometry.
+The native example's claim that it caches geometry was removed: it builds
+paths in its paint callback.
+
+All 246 core doctests pass: 239 merged examples and seven harness examples,
+with one ignored, in `target/documentation-paths-doctests.log`. The four edited
+core Rust files pass rustfmt, and the diff passes whitespace checks. Strict
+default-feature rustdoc for core and companion passes in
+`target/documentation-paths-default-api.log`; generated examples and backlinks
+are current. The complete combined artifact is the remaining build check for
+this batch. This is a manual source pass without subagents or scripted prose
+replacement; the complete public-surface review remains open.
+
+## Keep a full input batch within the protocol limit (2026-10-08)
+
+The primary editor reviewed the one-file follow-up
+`852b7060bb21eddf69602b1d99d21f4e3cf95415` against Session::request,
+PreviewContext::validate, the controller's input queue, and its accepted-reply
+follow-up scheduling. A captured first event can be accompanied by 128 queued
+events before the request task runs. Draining the whole queue produced 129
+events, exceeding the protocol limit.
+
+The imported headless-controller regression, with formatting adjusted locally,
+failed against this checkout's original drain with actual 129 versus expected
+128. Reserving room for the captured event makes the first request validate
+and leaves one event for the existing follow-up request. All ten native
+CodePen library tests then pass. Logs are
+`target/documentation-input-boundary-before.log` and
+`target/documentation-input-boundary-after.log`; incoming provenance is in
+`target/documentation-proof/incoming-bounded-input-export-provenance.json`.
+This imports no batching delay or interpreter/SDK experiment and makes no
+claim that Miri frame throughput has improved.

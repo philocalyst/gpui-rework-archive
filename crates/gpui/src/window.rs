@@ -5471,6 +5471,11 @@ impl Window {
     /// mask, applies element opacity, and scales it for the renderer. Construct
     /// the path with [`PathBuilder`](crate::PathBuilder); do not pre-scale it
     /// for display density. Call during paint; other phases panic in debug builds.
+    ///
+    /// The current element offset does not move these vertices. Translate
+    /// locally authored geometry by the element's resolved origin before
+    /// building it. The [drawing chapter](crate::_documentation::drawing#prepare-a-path-once-when-its-geometry-is-stable)
+    /// connects that placement with prepaint, clipping, and reuse.
     pub fn paint_path(&mut self, mut path: Path<Pixels>, color: impl Into<Background>) {
         self.invalidator.debug_assert_paint();
 
