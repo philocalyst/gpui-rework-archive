@@ -123,7 +123,10 @@ for (const playground of document.querySelectorAll('[data-playground]')) {
   window.addEventListener('message', event => {
     if (event.source !== frame.contentWindow || event.origin !== new URL(frame.src).origin) return;
     if (event.data === 'gpui-preview-ready') {
-      status.textContent = 'Ready. Click inside the preview to use it.';
+      status.textContent = 'Ready. Click inside to use the preview; press Escape to leave it.';
+    }
+    if (event.data?.type === 'gpui-preview-exit') {
+      (editing ? restore : edit).focus();
     }
     if (event.data?.type === 'gpui-workbench-shell-ready') {
       status.textContent = 'Rust editor open. Your edits are saved in this browser.';

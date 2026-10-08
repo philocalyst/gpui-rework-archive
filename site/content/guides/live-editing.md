@@ -40,6 +40,12 @@ divider accepts arrow keys as well as dragging, and **Wrap** makes long lines
 fit the source pane. API suggestions and hover links lead back to the contract
 and the walkthrough steps that explain it.
 
+Click inside **Result** to send keys to the running component. Examples with
+buttons route Tab and Shift+Tab between their controls; Enter or Space activates
+the focused button. Press Escape to return to **Reset state** in the workbench,
+or **Edit Rust** beside an original walkthrough preview. In the source editor,
+Tab indents; Escape followed by Tab moves to the next page control.
+
 ## Run the edited program natively
 
 Download the walkthrough's Cargo project and extract it into

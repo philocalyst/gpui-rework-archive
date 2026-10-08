@@ -23,7 +23,7 @@ fn draw_twice<V: gpui::Render + 'static>(
 }
 
 macro_rules! walkthrough {
-    ($name:ident, $source:literal) => {
+    ($name:ident, $source:literal $(, $test:item)*) => {
         #[allow(dead_code)]
         mod $name {
             include!($source);
@@ -32,12 +32,64 @@ macro_rules! walkthrough {
             fn initial_and_rebuilt_frames() {
                 super::draw_twice(component);
             }
+
+            $($test)*
         }
     };
 }
 
 walkthrough!(first_window, "../examples/first-window.rs");
-walkthrough!(counter, "../examples/counter.rs");
+walkthrough!(
+    counter,
+    "../examples/counter.rs",
+    #[test]
+    fn tab_then_keyboard_activation_changes_the_canonical_counter() {
+        use gpui::{InputEvent, KeyDownEvent, KeyUpEvent, Keystroke, TestApp, WindowOptions};
+        let mut app = TestApp::new();
+        let handle = app.update(|cx| cx.open_window(WindowOptions::default(), component).unwrap());
+        let window: gpui::AnyWindowHandle = handle.into();
+        let tab = app.update(|cx| {
+            window
+                .update(cx, |_, window, cx| {
+                    window.dispatch_event(
+                        KeyDownEvent {
+                            keystroke: Keystroke::parse("tab").unwrap(),
+                            is_held: false,
+                            prefer_character_input: false,
+                        }
+                        .to_platform_input(),
+                        cx,
+                    )
+                })
+                .unwrap()
+        });
+        assert!(
+            !tab.propagate,
+            "Tab must not escape to the containing browser page"
+        );
+        app.update(|cx| {
+            window
+                .update(cx, |_, window, cx| {
+                    assert!(window.focused(cx).is_some());
+                    for key in ["enter", "space"] {
+                        let keystroke = Keystroke::parse(key).unwrap();
+                        window.dispatch_event(
+                            KeyDownEvent {
+                                keystroke: keystroke.clone(),
+                                is_held: false,
+                                prefer_character_input: false,
+                            }
+                            .to_platform_input(),
+                            cx,
+                        );
+                        window.dispatch_event(KeyUpEvent { keystroke }.to_platform_input(), cx);
+                    }
+                })
+                .unwrap()
+        });
+        assert_eq!(app.read(|cx| handle.read(cx).unwrap().count), 2);
+    }
+);
 walkthrough!(layout, "../examples/layout.rs");
 walkthrough!(actions, "../examples/actions.rs");
 walkthrough!(lists, "../examples/lists.rs");

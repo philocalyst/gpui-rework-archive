@@ -1152,3 +1152,124 @@ were read. It introduces a type through its uses, links directly to those APIs,
 and gives a short asserting example for ordering before stating the unit-specific
 constraints. This extends the reference reading; the wider survey is still
 incomplete.
+
+## Entity lifetimes, window routing, and keyboard entry
+
+The coordinate build at `0c59c48a93dfcfa461eaab4ef8ad7d2aeed60317`
+passed strict feature-enabled rustdoc, Zola, mdBook, and the HTML/link audit.
+Its source digest is `1135d3f41bb67de12ad39ff0e317fe6facd144a2f1ad5e1b08b8b79abe5d18d5`;
+the build log is `target/documentation-coordinate-site.log`. The primary
+editor read the rendered content-mask, layout-request, element-offset, and
+prepaint-placement contracts and followed the clipping test into the guide.
+At 390 pixels, the layout book chapter kept its document width at 390 and its
+reading area at 350; wider tables scrolled inside that area. Evidence is
+`target/documentation-proof/book-coordinates-mobile.png`.
+
+The next manual pass read the complete scheduling and ownership chapters,
+Context's production/public implementation, the Task and FallibleTask
+implementations, the synchronous and asynchronous entity-update paths, and
+entity-map storage/release paths. It found three foreground priority helpers
+whose docs promised a scheduling distinction that the executor ignores. The
+helpers and scheduling chapter now state that actual behavior.
+
+A new executed two-window example establishes which window Entity::update_in
+selects. Drawing a shared entity in a second window replaces its association;
+an AsyncWindowContext remembering the first window does not override that
+selection. Explicit context.update chooses the remembered window. Closing
+the associated window makes the inferred operation fail, and drawing the
+first window establishes a usable association again. The passing chapter
+run is `target/documentation-window-routing-doctests.log`.
+
+Entity, AnyEntity, and WeakEntity introductions now contain executed
+assertions, including failed downcast recovery and the immediate failure of
+weak upgrade after the last strong handle drops. Release assertions now
+distinguish removal of the entity slot from destruction of its value. An
+executed Context::on_release example records the release callback before
+Drop, and establishes that assert_released can pass inside that callback.
+All 210 doctests passed before the subsequent keyboard changes (203 merged,
+seven test-harness examples, one ignored). The log is
+`target/documentation-lifetime-complete-doctests.log`.
+
+Actual browser checks of the compiled asynchronous walkthrough passed both
+Stop-before-deadline and later completion. Screenshots are
+`target/documentation-proof/async-stopped-after-deadline.png` and
+`async-completed-after-delay.png`. A subscriptions click changed both count
+and delivered-observation count to one. Its keyboard check failed: Tab moved
+browser focus to Edit Rust. The image named subscriptions-pointer-and-keyboard
+records an intermediate editor load, not successful keyboard activation.
+
+Source tracing found no Tab traversal binding in the shared launcher or guest
+harness. tab_index records order; it does not bind a key. A first new dispatch
+test then exposed the additional initial-focus requirement: a root element
+listener below GPUI's fallback dispatch root cannot receive keys while none
+of its descendants is selected. The four button walkthroughs now explicitly
+select and attach a retained root focus identity, and route Tab/Shift+Tab
+through the recorded stops. The input chapter has an executed two-target
+traversal example; the canonical counter test also checks keyboard activation
+and the returned propagation flag. These changes still require final build
+and browser verification at this entry.
+
+The browser shell reserves Escape to leave the wrapped GPUI order. Its parent
+validates message source and origin before returning focus to Edit Rust or
+the workbench's Reset state control. The exit is described before each embed
+and in the editor. This follows the scope of W3C's
+[keyboard-trap explanation](https://www.w3.org/WAI/WCAG22/Understanding/no-keyboard-trap.html),
+whose criterion, intent, examples, and technique links were read; it does not
+constitute a complete accessibility audit.
+
+Four revised starter programs were compiled against byte-exact copies of
+the previously verified GPUI and guest SDK metadata. They were appended to
+the existing paged bundle, preserving the browser compiler, runtime sources,
+SDK bytes, and old immutable assets. The manifest changes from
+`ec1f024edfb3793c03c6968764bf53abb386e3d1c53d4f66d816cbcaec14f994` to
+`fe33dbceb23f9b069901bb0bb31e724d2712a3deea69d254118cde058f14e896`.
+The build-only script and provenance are under
+`target/documentation-tab-starters/` and
+`target/prepare-documentation-tab-starters.py`; no internal testing-branch
+source was merged. Packaging reconstruction tests pass. Execution of these
+new starters in the served browser remains pending at this entry.
+
+The complete available Iced Book prose and code were read, including its
+introduction, architecture, state-first counter, runtime, Text and Container
+chapters, and complete FAQ. The text marks the book unfinished. Its useful
+patterns are assertions before UI construction and showing why alignment
+does nothing until a container gains space; its polemical FAQ tone is not a
+model for these docs. Images were not visually reviewed and code was not run.
+The time book overview and mdBook's complete SUMMARY format page and example
+were also read. The broader reference survey remains incomplete.
+
+The primary editor additionally read the complete input chapter, all focus
+handle and Focusable implementations, and interactive.rs through ScrollDelta.
+The changes connect key routing and traversal to initial focus, explain that
+release delivery need not pair with a press on the same element, and give an
+asserting example of a keyboard click's bottom-left anchor. This is manual
+source review; it is not a claim that every remaining public API has received
+the final solo pass.
+
+The subsequent complete interactive.rs read includes scrolling, pinch,
+incoming and outgoing file drags, PlatformInput, and its tests. Incoming file
+paths now explain acceptance versus loading and the browser limitation;
+outgoing payloads explain the directory flag, lack of filesystem validation,
+and the distinction between offering data and the recipient accepting it.
+
+The new canonical counter test passes, and all twelve programs pass their
+initial/rebuilt-frame tests: thirteen passing tests total, logged in
+`target/documentation-canonical-tab-test.log`. The filtered input-chapter
+doctests also pass. All twenty-five documentation-generation tests and the
+paged-packaging tests pass. A full doctest run remains pending here.
+
+Scribbr v7.1.0 scanned the new traversal section's prose, with its Rust fence
+omitted but its heading, inline code, and Markdown links retained. It displayed
+201 words and reported 0% AI-generated, 0% AI-refined, and 100% human-written.
+The exact input is `target/documentation-proof/traversal-checker-input.md`,
+SHA-256 `2fdc2201c80404a43149b6a95740d049a16c274d2ed00f1957ef52a126788ca1`;
+the screenshot is `target/documentation-proof/scribbr-traversal.png`.
+This is one prose sample, not the Rust example or the whole framework.
+No paraphraser was used.
+
+The complete post-edit doctest run passes 212 examples: 205 in the merged
+run and seven test-harness examples, with one ignored. Its log is
+`target/documentation-input-lifetime-complete-doctests.log`. Formatting,
+whitespace, JavaScript syntax, canonical generation, and link-generation
+checks pass. The combined artifact and its browser checks are the next
+validation boundary.

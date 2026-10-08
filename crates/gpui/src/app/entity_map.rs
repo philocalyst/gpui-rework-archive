@@ -266,9 +266,31 @@ pub(crate) struct Slot<T>(Entity<T>);
 
 /// A strong, dynamically typed entity handle.
 ///
-/// `AnyEntity` retains the entity just like [`Entity<T>`]. Use [`Self::downcast`]
-/// when the concrete type is known; a failed downcast returns the original
-/// handle so it is not lost.
+/// Use this to keep different entity types in one collection or pass a handle
+/// through code that does not know its value type. Erasing the type preserves
+/// ownership and identity. [`downcast`](Self::downcast) recovers a typed handle;
+/// a failed downcast returns the original strong handle:
+///
+/// ```
+/// # #[cfg(feature = "test-support")] {
+/// use gpui::TestApp;
+///
+/// let mut app = TestApp::new();
+/// let draft = app.new_entity(|_| String::from("draft"));
+/// let id = draft.entity_id();
+/// let erased = draft.into_any();
+///
+/// let erased = erased.downcast::<u32>().unwrap_err();
+/// assert_eq!(erased.entity_id(), id);
+/// let draft = erased.downcast::<String>().unwrap();
+/// assert_eq!(app.read_entity(&draft, |text, _| text.clone()), "draft");
+/// # }
+/// ```
+///
+/// The example uses `TestApp` from `test-support`. A renderable entity can
+/// instead become an [`AnyView`](crate::AnyView) when its consumer needs to
+/// draw it without knowing its concrete type. `AnyEntity` alone supplies no
+/// rendering operations.
 pub struct AnyEntity {
     pub(crate) entity_id: EntityId,
     pub(crate) entity_type: TypeId,
@@ -299,13 +321,13 @@ impl AnyEntity {
         }
     }
 
-    /// Returns the id associated with this entity.
+    /// Returns the entity's identity within its application.
     #[inline]
     pub fn entity_id(&self) -> EntityId {
         self.entity_id
     }
 
-    /// Returns the [TypeId] associated with this entity.
+    /// Returns the stored value's [`TypeId`], preserved by type erasure.
     #[inline]
     pub fn entity_type(&self) -> TypeId {
         self.entity_type
@@ -450,19 +472,25 @@ impl std::fmt::Debug for AnyEntity {
 /// replaces the entire value and sends that notification for you.
 ///
 /// ```
-/// use gpui::{App, AppContext};
+/// # #[cfg(feature = "test-support")] {
+/// use gpui::TestApp;
 ///
-/// fn increment(cx: &mut App) {
-///     let count = cx.new(|_| 0_u32);
-///     let same_count = count.clone();
+/// let mut app = TestApp::new();
+/// let count = app.new_entity(|_| 0_u32);
+/// let same_count = count.clone();
+/// app.update(|cx| {
 ///     count.update(cx, |value, cx| {
 ///         *value += 1;
 ///         cx.notify();
 ///     });
-///     assert_eq!(*same_count.read(cx), 1);
-///     assert_eq!(count.entity_id(), same_count.entity_id());
-/// }
+/// });
+/// assert_eq!(app.read(|cx| *same_count.read(cx)), 1);
+/// assert_eq!(count.entity_id(), same_count.entity_id());
+/// # }
 /// ```
+///
+/// The example uses `TestApp` from `test-support` to supply app access. In an
+/// application, use the `App` or `Context` passed to the current callback.
 ///
 /// # Lifetime and identity
 ///
@@ -471,6 +499,7 @@ impl std::fmt::Debug for AnyEntity {
 /// callbacks with app access. Use [`downgrade`](Self::downgrade) for a callback
 /// that should stop working after its owner disappears. A value that stores a
 /// strong handle to itself creates an ownership cycle.
+/// An entity handle does not keep the application itself alive.
 ///
 /// Equality and hashing compare entity identity, not the fields of `T`.
 /// Handles belong to the app that created them; use that app's context for
@@ -624,6 +653,8 @@ impl<T: 'static> Entity<T> {
     /// An [`AsyncWindowContext`](crate::AsyncWindowContext) returns an error if
     /// the app is gone or the entity has no current window. Mutation still
     /// requires [`Context::notify`] to notify observers.
+    /// The [two-window test](https://gpui-ce.github.io/guides/testing/#check-which-window-an-update-selects)
+    /// contrasts this association with explicitly updating a window handle.
     ///
     /// # Panics
     ///
@@ -759,11 +790,11 @@ impl AnyWeakEntity {
         })
     }
 
-    /// Asserts that no strong handles or stored value remain for this entity.
+    /// Asserts that no strong handles or entity slot remain.
     ///
     /// A failed [`upgrade`](Self::upgrade) establishes that there are no strong
     /// owners. This assertion also checks that effect processing has removed
-    /// the stored value. Keep the app alive and flush its effects first:
+    /// the entity's slot. Keep the app alive and flush its effects first:
     ///
     /// ```
     /// # #[cfg(feature = "test-support")] {
@@ -785,6 +816,11 @@ impl AnyWeakEntity {
     /// harness from `test-support`. See [teardown tests](https://gpui-ce.github.io/book/testing.html#check-that-teardown-releases-the-owner)
     /// for checking a consumer and its subscriptions together.
     ///
+    /// Slot removal precedes release callbacks and `T::drop`. This assertion
+    /// can therefore pass inside a release callback while the value is still
+    /// accessible there. Use a drop guard when a test must establish that a
+    /// resource's destructor ran; see [`Context::on_release`].
+    ///
     /// # Diagnose a retained handle
     ///
     /// If this method panics due to leaked handles, set the `LEAK_BACKTRACE` environment
@@ -797,7 +833,7 @@ impl AnyWeakEntity {
     /// # Panics
     ///
     /// Panics if a strong handle remains or the app has not yet removed the
-    /// stored value. Also panics if the app's reference-count storage has been
+    /// entity's slot. Also panics if the app's reference-count storage has been
     /// dropped, or this is a placeholder from [`new_invalid`](Self::new_invalid).
     #[cfg(any(test, feature = "leak-detection"))]
     pub fn assert_released(&self) {
@@ -909,16 +945,21 @@ impl PartialOrd for AnyWeakEntity {
 /// # Example
 ///
 /// ```
-/// use gpui::{App, AppContext};
+/// # #[cfg(feature = "test-support")] {
+/// use gpui::TestApp;
 ///
-/// fn retain_only_while_owned(cx: &mut App) {
-///     let model = cx.new(|_| String::from("draft"));
-///     let weak = model.downgrade();
-///     assert!(weak.upgrade().is_some());
-///     drop(model);
-///     assert!(weak.upgrade().is_none());
-/// }
+/// let mut app = TestApp::new();
+/// let model = app.new_entity(|_| String::from("draft"));
+/// let weak = model.downgrade();
+/// assert!(weak.upgrade().is_some());
+/// drop(model);
+/// assert!(weak.upgrade().is_none());
+/// # }
 /// ```
+///
+/// The example uses `TestApp` from `test-support`. The failed upgrade does not
+/// require an effect flush: the last strong handle is already gone, even if
+/// GPUI has not yet destroyed the stored value.
 #[derive(Deref, DerefMut)]
 pub struct WeakEntity<T> {
     #[deref]
@@ -1020,7 +1061,20 @@ impl<T: 'static> WeakEntity<T> {
         Ok(cx.read_entity(&entity, read))
     }
 
-    /// Create a new weak entity that can never be upgraded.
+    /// Creates a distinct placeholder that can never be upgraded.
+    ///
+    /// Prefer `Option<WeakEntity<T>>` when the missing entity is meaningful.
+    /// Use a placeholder only when an interface requires a handle before a
+    /// real entity exists. Each call receives a different identity:
+    ///
+    /// ```
+    /// use gpui::WeakEntity;
+    ///
+    /// let first = WeakEntity::<String>::new_invalid();
+    /// let second = WeakEntity::<String>::new_invalid();
+    /// assert!(first.upgrade().is_none());
+    /// assert_ne!(first.entity_id(), second.entity_id());
+    /// ```
     #[inline]
     pub fn new_invalid() -> Self {
         Self {

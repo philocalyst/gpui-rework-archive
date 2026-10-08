@@ -11,6 +11,21 @@ the window. The [actions walkthrough](@/examples/actions.md) contains all
 three steps. A handle is an identity for a focus target; it does not itself
 attach the target to the element tree or route a key to a listener.
 
+## Connect Tab to the focus order
+
+Register each control with `tab_index(0)`, or mark its retained focus handle
+with `tab_stop(true)`. Then route Tab to `window.focus_next(cx)` and Shift+Tab
+to `window.focus_prev(cx)` on an ancestor of those controls. Recording the
+stops alone does not install traversal. Give the window an initial rendered
+focus target so that ancestor is on the first key's route.
+
+The [counter's root listener](@/examples/counter.md#render) shows the setup;
+the [input chapter's executed example](https://gpui-ce.github.io/book/input.html#connect-tab-to-traversal)
+checks both directions through dispatch. A child editor can consume Tab for
+indentation before the root handles it. The browser examples reserve Escape
+to return to the surrounding page, which provides a way out of the wrapped
+GPUI focus order.
+
 ## Bind an operation
 
 Define a typed action for an operation, then bind one or more key sequences to

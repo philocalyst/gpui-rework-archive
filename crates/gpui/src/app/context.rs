@@ -229,6 +229,42 @@ impl<'a, T: 'static> Context<'a, T> {
     /// up the value. Registration is immediate, and the callback runs before
     /// `T::drop` during effect processing. Retain the returned subscription;
     /// dropping it cancels the callback without releasing the entity.
+    ///
+    /// This test records that order. The entity's slot is already gone inside
+    /// the callback, but its value is still available:
+    ///
+    /// ```
+    /// # #[cfg(feature = "test-support")] {
+    /// use gpui::TestApp;
+    /// use std::{cell::RefCell, rc::Rc};
+    ///
+    /// struct Model(Rc<RefCell<Vec<&'static str>>>);
+    /// impl Drop for Model {
+    ///     fn drop(&mut self) {
+    ///         self.0.borrow_mut().push("drop");
+    ///     }
+    /// }
+    ///
+    /// let mut app = TestApp::new();
+    /// let events = Rc::new(RefCell::new(Vec::new()));
+    /// let model = app.new_entity(|_| Model(events.clone()));
+    /// let weak = model.downgrade();
+    /// let _release = app.update_entity(&model, |_, cx| {
+    ///     cx.on_release(move |model, _| {
+    ///         weak.assert_released();
+    ///         model.0.borrow_mut().push("release");
+    ///     })
+    /// });
+    ///
+    /// drop(model);
+    /// assert!(events.borrow().is_empty());
+    /// app.update(|_| {});
+    /// assert_eq!(*events.borrow(), ["release", "drop"]);
+    /// # }
+    /// ```
+    ///
+    /// The example uses `TestApp` from `test-support`. Outside a test, the
+    /// app flushes release effects after the current update returns.
     pub fn on_release(&self, on_release: impl FnOnce(&mut T, &mut App) + 'static) -> Subscription
     where
         T: 'static,
@@ -514,8 +550,10 @@ impl<'a, T: 'static> Context<'a, T> {
     /// and notification timing follow [`observe`](Self::observe).
     ///
     /// Both entity handles are weak. Delivery is skipped if either entity is
-    /// released or its current window is closed or already borrowed. Retain
-    /// the returned subscription.
+    /// released or this observer's current window is closed or already borrowed.
+    /// Retain the returned subscription. See the
+    /// [two-window test](https://gpui-ce.github.io/guides/testing/#check-which-window-an-update-selects)
+    /// for the difference between an entity's association and a fixed window handle.
     pub fn observe_in<V2>(
         &mut self,
         observed: &Entity<V2>,
@@ -947,11 +985,11 @@ impl<'a, T: 'static> Context<'a, T> {
         window.spawn(self, async move |cx| f(view, cx).await)
     }
 
-    /// Starts a window-aware foreground task with the given scheduling priority.
+    /// Starts a window-aware foreground task; `priority` is currently ignored.
     ///
     /// Ownership, cancellation, and teardown follow [`spawn_in`](Self::spawn_in).
-    /// Priority affects scheduling; it does not move the future to a background
-    /// thread or interrupt a poll already running.
+    /// Scheduling follows [`App::spawn_with_priority`], which treats every
+    /// priority like an ordinary foreground task.
     #[track_caller]
     pub fn spawn_in_with_priority<AsyncFn, R>(
         &self,

@@ -361,6 +361,71 @@ back to that owner. Closing a window likewise does not cancel a task supplied
 with an [`AsyncWindowContext`](crate::AsyncWindowContext); the future must
 handle a failed window update if it can outlive the window.
 
+## Check which window an update selects
+
+A shared entity can appear in more than one window. Its current window is the
+last one whose rendered tree read it. An
+[`AsyncWindowContext`](crate::AsyncWindowContext), in contrast, remembers the
+window that created that context. Test both choices when a completion must
+return to the window that started the operation:
+
+```rust
+use gpui::{AppContext as _, Context, Entity, IntoElement, Render, TestApp,
+           Window, div, prelude::*};
+
+struct DocumentView {
+    document: Entity<String>,
+}
+
+impl Render for DocumentView {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        div().child(self.document.read(cx).clone())
+    }
+}
+
+let mut app = TestApp::new();
+let mut first = app.open_window(|_, cx| DocumentView {
+    document: cx.new(|_| String::from("shared draft")),
+});
+let document = first.read(|view, _| view.document.clone());
+let mut origin = first.update(|_, window, cx| window.to_async(cx));
+let first_id = origin.window_handle();
+assert_eq!(
+    document.update_in(&mut origin, |_, window, _| window.window_handle()).unwrap(),
+    first_id,
+);
+
+let mut second = app.open_window(|_, _| DocumentView { document: document.clone() });
+let second_id = second.update(|_, window, _| window.window_handle());
+second.draw();
+
+// Entity-scoped access follows the latest rendered read, even through `origin`.
+assert_eq!(
+    document.update_in(&mut origin, |_, window, _| window.window_handle()).unwrap(),
+    second_id,
+);
+// Explicit window access still targets the first window.
+assert_eq!(origin.update(|window, cx| {
+    document.update(cx, |_, _| window.window_handle())
+}).unwrap(), first_id);
+
+second.update(|_, window, _| window.remove_window());
+assert!(document.update_in(&mut origin, |_, _, _| ()).is_err());
+assert!(origin.update(|_, _| ()).is_ok());
+
+first.draw(); // Reestablish the document's association with the surviving window.
+assert_eq!(
+    document.update_in(&mut origin, |_, window, _| window.window_handle()).unwrap(),
+    first_id,
+);
+```
+
+The failed entity-scoped update after closure is deliberate. GPUI does not
+search other open windows for a substitute. A later draw establishes a new
+association; a retained window handle instead always identifies the same
+window. See [ownership and data flow](crate::_ownership_and_data_flow#choose-the-window-an-operation-belongs-to)
+before choosing an `_in` helper for shared state.
+
 ## Reject a result from a replaced request
 
 Cancellation cannot reject a result that has already escaped the cancelled
@@ -475,6 +540,13 @@ ignores every entity already present, including extra clones of those entities
 made later. Pair it with a targeted weak-handle or drop assertion when checking
 the lifetime of an existing owner. It does not detect arbitrary `Rc` cycles,
 GPU allocations, or a resource intentionally retained by another subsystem.
+
+An entity's slot is removed before its release callbacks and destructor run.
+[`WeakEntity::assert_released`](crate::AnyWeakEntity::assert_released) checks
+that slot and its strong handles; it can pass inside a release callback.
+Record a drop guard as well when the test needs to establish destruction of a
+resource. [`Context::on_release`](crate::Context::on_release) shows the callback
+and destructor order in an asserting example.
 
 ## Keep row state with its record
 

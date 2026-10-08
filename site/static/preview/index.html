@@ -10,6 +10,13 @@
     <div id="status">Preparing the WebAssembly preview…</div>
     <script type="module">
       const status = document.querySelector("#status");
+      // Keep an exit from GPUI's wrapped tab order, including the Miri host.
+      window.addEventListener("keydown", event => {
+        if (event.key !== "Escape" || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || window.parent === window) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        window.parent.postMessage({ type: "gpui-preview-exit" }, location.origin);
+      }, true);
       try {
         if (location.hash.startsWith("#host/")) {
           await import("./miri/bootstrap.js");

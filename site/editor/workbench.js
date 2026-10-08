@@ -177,6 +177,10 @@ $('#diagnostics-toggle').addEventListener('click', () => showDiagnostics($('#dia
 window.addEventListener('message', event => {
   if (event.source !== preview.contentWindow || event.origin !== location.origin) return;
   const message = event.data;
+  if (message?.type === 'gpui-preview-exit') {
+    $('#reset').focus();
+    return;
+  }
   if (message?.type === 'gpui-workbench-ready') {
     if (ready) return;
     ready = true;
@@ -240,7 +244,7 @@ try {
   editor = new EditorView({ parent: $('#editor'), state: EditorState.create({
     doc: draft || original,
     extensions: [basicSetup, rust(), wrapping.of([]), keymap.of([{ key: 'Mod-Enter', run: () => { run(); return true; } }, { key: 'Ctrl-Enter', run: () => { run(); return true; } }, indentWithTab]),
-      EditorView.contentAttributes.of({ 'aria-label': 'Rust source', spellcheck: 'false' }),
+      EditorView.contentAttributes.of({ 'aria-label': 'Rust source', 'aria-description': 'Tab indents. Press Escape, then Tab to move focus out of the editor.', spellcheck: 'false' }),
       autocompletion({ override: [completeAPI] }), apiHover,
       EditorState.transactionFilter.of(transaction => {
         if (transaction.docChanged && encoder.encode(transaction.newDoc.toString()).length > 65536) {

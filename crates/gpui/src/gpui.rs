@@ -494,6 +494,16 @@ impl<T: 'static> Reservation<T> {
 /// callback still panics. A visual test context returns the callback's value
 /// directly and panics when its required window is unavailable, so generic
 /// code must respect the implementation's `Result` type.
+///
+/// # Choose the target window
+///
+/// With [`AsyncWindowContext`], an entity update follows the entity's most
+/// recent window association. It can select a different window from the one
+/// remembered by that context. Enter [`AsyncWindowContext::update`] first
+/// when the operation must target its remembered window, then update the
+/// entity through the callback's [`App`]. The
+/// [two-window test](https://gpui-ce.github.io/guides/testing/#check-which-window-an-update-selects)
+/// checks both choices and the effect of closing the associated window.
 pub trait VisualContext: AppContext {
     /// Wraps an operation's result according to this context's failure model.
     ///

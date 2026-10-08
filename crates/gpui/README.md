@@ -49,26 +49,29 @@ impl Render for Counter {
 The [counter walkthrough](https://gpui-ce.github.io/examples/counter/) supplies
 the window and explains each step. The ID keeps the element's interaction
 state attached to the same identity across frames.
-The text macro exposes the count to accessibility clients. The button is named,
-reachable by Tab, and activatable with Enter or Space through the same listener.
+The text macro exposes the count to accessibility clients. The button has a
+name and a recorded tab stop. Once focused, Enter or Space activates the same
+listener. The application must route Tab to traversal; the
+[input chapter](crate::_documentation::input#connect-tab-to-traversal) shows that
+setup, and the walkthrough includes it.
 
 ## Choose an entry point
 
 | You need to… | Start here |
 | --- | --- |
-| Store or share state | [`Entity`], [`Context`], and [`_ownership_and_data_flow`] |
+| Store or share state | [`Entity`], [`Context`], and [ownership and data flow](crate::_ownership_and_data_flow) |
 | Return an element tree | [`Render`], [`RenderOnce`], [`div`], and [`Styled`] |
-| Understand a frame | [`_documentation::rendering`] and [`Element`] |
-| Size and place elements | [`_documentation::layout`], [`Styled`], and [`Bounds`] |
-| Display and measure text | [`_documentation::text`], [`Text`], and [`WindowTextSystem`] |
-| Animate a changing value | [`_documentation::animation`], [`Animated`], and [`AnimationExt`] |
-| Handle keys and clicks | [`_documentation::input`], [`InteractiveElement`], and [`FocusHandle`] |
-| Run work without blocking input | [`_documentation::scheduling`], [`Task`], and [`BackgroundExecutor`] |
-| Draw a custom region | [`_documentation::drawing`], [`canvas`], and [`PathBuilder`] |
-| Load or retry an image | [`_documentation::assets`], [`ImageSource`], and [`ImageCache`] |
-| Display a large collection | [`_documentation::lists`], [`uniform_list`] for equal-height rows, [`list`] for measured rows |
-| Test state and input | `TestApp` and `TestAppContext` (enable `test-support`) |
-| Expose accessible controls | [`_accessibility`] |
+| Understand a frame | The [rendering chapter](crate::_documentation::rendering) and [`Element`] |
+| Size and place elements | The [layout chapter](crate::_documentation::layout), [`Styled`], and [`Bounds`] |
+| Display and measure text | The [text chapter](crate::_documentation::text), [`Text`], and [`WindowTextSystem`] |
+| Animate a changing value | The [animation chapter](crate::_documentation::animation), [`Animated`], and [`AnimationExt`] |
+| Handle keys and clicks | The [input chapter](crate::_documentation::input), [`InteractiveElement`], and [`FocusHandle`] |
+| Run work without blocking input | The [scheduling chapter](crate::_documentation::scheduling), [`Task`], and [`BackgroundExecutor`] |
+| Draw a custom region | The [drawing chapter](crate::_documentation::drawing), [`canvas`], and [`PathBuilder`] |
+| Load or retry an image | The [assets chapter](crate::_documentation::assets), [`ImageSource`], and [`ImageCache`] |
+| Display a large collection | The [lists chapter](crate::_documentation::lists), [`uniform_list`] for equal-height rows, [`list`] for measured rows |
+| Test state and input | The [testing chapter](https://gpui-ce.github.io/book/testing.html), `TestApp`, and `TestAppContext` (enable `test-support`) |
+| Expose accessible controls | The [accessibility chapter](crate::_accessibility) |
 
 `Application` configures the platform and starts its run loop. The `App`
 passed to launch and event callbacks is the live synchronous context. An
@@ -77,7 +80,7 @@ read or update that value. `Context<T>` is supplied while constructing or
 updating one entity and adds entity-specific operations such as `notify`,
 `emit`, and callback registration. Use `AsyncApp` or `AsyncWindowContext` in a
 foreground task that crosses an `.await`; their methods reacquire app access
-for each callback. See [`_ownership_and_data_flow`] for ownership and effect
+for each callback. See [ownership and data flow](crate::_ownership_and_data_flow) for ownership and effect
 timing behind these choices.
 
 ## Before choosing GPUI
@@ -91,7 +94,7 @@ The current checkout and a published release can differ. See the
 [version guide](https://gpui-ce.github.io/reference/versions/) before combining
 code from a walkthrough with a crates.io dependency. Platform requirements,
 feature flags, and the renderer split are documented in
-[`_documentation::platforms`].
+the [platform chapter](crate::_documentation::platforms).
 
 Public APIs document their behavior here. Complete applications live in the
 walkthroughs so a short reference example does not have to conceal its setup.

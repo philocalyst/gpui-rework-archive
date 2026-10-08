@@ -268,6 +268,11 @@
 //! update the entity through the supplied app. Follow the same borrow rules
 //! as any nested entity update.
 //!
+//! Closing the currently associated window does not select another open window
+//! that once displayed the entity. Rendering the entity there again establishes
+//! that association. The [two-window test](https://gpui-ce.github.io/guides/testing/#check-which-window-an-update-selects)
+//! checks both routing choices and this teardown case.
+//!
 //! Creating app state has a different requirement. Calling
 //! [`AppContext::new`](crate::AppContext::new) through an async window context
 //! attempts window-associated creation, then falls back to app-only creation

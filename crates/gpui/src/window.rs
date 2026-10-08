@@ -567,6 +567,7 @@ impl FocusId {
 /// handle alone does not focus an element. Call [`Window::focus`] to select it.
 /// Keyboard dispatch follows the path that rendered the focused handle;
 /// visual selection and pointer hover are separate state.
+/// Use the handle only with windows belonging to the app that created it.
 ///
 /// Clones share the focus identity. Keep the handle stable across renders so
 /// the window can relate the next dispatch path to the previous one.
@@ -657,6 +658,8 @@ impl FocusHandle {
     /// the setting is shared with future clones and upgrades; existing copies
     /// keep their field values.
     /// Request a redraw to replace an already painted traversal order.
+    /// This does not install a key binding; call [`Window::focus_next`] or
+    /// [`Window::focus_prev`] from the application's traversal handler.
     pub fn tab_stop(mut self, tab_stop: bool) -> Self {
         self.tab_stop = tab_stop;
         if let Some(focus) = self.handles.write().get_mut(self.id) {
@@ -807,9 +810,24 @@ impl PartialEq<WeakFocusHandle> for FocusHandle {
     }
 }
 
-/// Gives a view a stable focus handle that callers can focus or use for traversal.
+/// Lets a caller obtain a view's retained keyboard-focus identity.
+///
+/// Return a clone of a handle stored on the view, and attach that same
+/// identity to its element tree with [`InteractiveElement::track_focus`].
+/// Creating a new handle on each call gives callers an identity the rendered
+/// tree does not know. Implementing this trait does not focus the view or
+/// make its handle a tab stop.
+///
+/// [`Context::focus_view`] selects another view through this trait;
+/// [`Context::focus_self`] selects the current view. An `Entity<V>` also
+/// implements `Focusable` when `V` does, so callers can work through the entity
+/// without knowing which field owns its handle. See the
+/// [input chapter](crate::_documentation::input#keyboard-focus) for selecting,
+/// attaching, and querying that identity.
 pub trait Focusable: 'static {
-    /// Returns the focus handle associated with this view.
+    /// Returns a strong clone of the identity attached to this view's focus target.
+    ///
+    /// This queries the handle; it does not request focus or activate a window.
     fn focus_handle(&self, cx: &App) -> FocusHandle;
 }
 
@@ -2563,6 +2581,9 @@ impl Window {
     /// With no focus, or a target absent from that order, starts at its first
     /// stop. A selected non-stop container remains a position in the order:
     /// traversal starts after it. The order comes from the last painted frame.
+    /// This method does not install a Tab binding. See the
+    /// [input chapter](crate::_documentation::input#connect-tab-to-traversal)
+    /// for the key listener that invokes it.
     pub fn focus_next(&mut self, cx: &mut App) {
         if !self.focus_enabled {
             return;
@@ -2579,6 +2600,8 @@ impl Window {
     /// With no focus, or a target absent from that order, starts at its last
     /// stop. A selected non-stop container remains a position in the order:
     /// traversal starts before it. The order comes from the last painted frame.
+    /// Call this for Shift+Tab in the application's traversal handler; see
+    /// [`Self::focus_next`] for the corresponding forward operation.
     pub fn focus_prev(&mut self, cx: &mut App) {
         if !self.focus_enabled {
             return;
@@ -2970,10 +2993,11 @@ impl Window {
         })
     }
 
-    /// Starts a foreground task at the requested scheduling priority.
+    /// Starts a window-aware foreground task; `priority` is currently ignored.
     ///
     /// Its lifetime and asynchronous window access follow [`spawn`](Self::spawn).
-    /// Priority changes scheduling order; it does not move work off the UI thread.
+    /// Scheduling follows [`App::spawn_with_priority`], which treats every
+    /// priority like an ordinary foreground task.
     #[track_caller]
     pub fn spawn_with_priority<AsyncFn, R>(
         &self,
@@ -4346,7 +4370,7 @@ impl Window {
     /// restored when `f` returns.
     ///
     /// Apply the same mask during prepaint and paint when a region must clip
-    /// both input and drawing. [`Self::insert_hitbox`] captures the prepaint
+    /// both input and drawing. [`insert_hitbox`](Self::insert_hitbox) captures the prepaint
     /// mask; painting captures the paint mask. Neither changes layout or
     /// translates the supplied bounds. See the
     /// [coordinate guide](crate::_documentation::layout#keep-geometry-in-one-coordinate-space).
@@ -4376,13 +4400,13 @@ impl Window {
 
     /// Adds a logical-pixel offset to the current element offset for this prepaint scope.
     ///
-    /// [`Self::layout_bounds`] includes the resulting offset. Prepainting a
+    /// [`layout_bounds`](Self::layout_bounds) includes the resulting offset. Prepainting a
     /// child inside this scope therefore gives it shifted bounds for its
     /// hitboxes and later painting. This does not recompute layout, move the
     /// content mask, or translate coordinates passed directly to paint calls.
     /// Do not add the offset again to bounds returned by `layout_bounds`.
     ///
-    /// Use [`Self::with_absolute_element_offset`] to replace the current offset.
+    /// Use [`with_absolute_element_offset`](Self::with_absolute_element_offset) to replace the current offset.
     /// Call during prepaint; other phases panic in debug builds.
     pub fn with_element_offset<R>(
         &mut self,

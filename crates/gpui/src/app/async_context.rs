@@ -16,9 +16,11 @@ use super::{Context, WeakEntity};
 ///
 /// `AsyncApp` does not keep the application alive. It is usually created by
 /// [`App::to_async`] or supplied to [`App::spawn`], and each operation briefly
-/// borrows the live app. If the app has already shut down, operations that need
-/// it panic through the handle's internal upgrade; window operations instead
-/// return an error or `None` where their API permits it.
+/// borrows the live app. If the app has been released, entity operations and
+/// [`update`](Self::update) panic when they try to obtain app access.
+/// [`update_window`](AppContext::update_window) instead returns an error;
+/// [`with_window`](AppContext::with_window) returns `None`. These window
+/// operations also reject a conflicting app borrow or an app currently quitting.
 ///
 /// For a complete task lifecycle example, see the
 /// [async task walkthrough](https://gpui-ce.github.io/examples/async-task/#completion).

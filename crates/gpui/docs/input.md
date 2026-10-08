@@ -1,11 +1,17 @@
 # Input, focus, and actions
 
-GPUI input has three stages: the platform reports an event, GPUI invokes the frame's listeners,
-and a component decides whether that input changes its state. Pointer handlers use hit testing
-to decide whether their region is eligible; keyboard handlers follow the currently focused
-node's ancestor path. A [hitbox](crate::Hitbox) is the input region recorded for an
-element, and its [behavior](crate::HitboxBehavior) determines whether it blocks or occludes
-hitboxes behind it.
+Use [`on_click`](crate::StatefulInteractiveElement::on_click) to activate a
+control and [`on_action`](crate::InteractiveElement::on_action) for a command
+shared by shortcuts and menus. Use raw key or pointer listeners when the
+individual press, release, or movement matters. Text editing also needs the
+platform input-handler protocol; a stream of key presses cannot represent
+composition or replacement ranges.
+
+Pointer input follows the frame's painted regions. A [hitbox](crate::Hitbox)
+records such a region, and its [behavior](crate::HitboxBehavior) determines
+whether it blocks hitboxes behind it. Keyboard input follows the selected
+focus node and its ancestors. A listener outside that route cannot handle the
+key, even when its element is visible beside the focused control.
 
 Element callbacks receive the [`Window`](crate::Window) and [`App`](crate::App) that are
 dispatching the event. Use [`Context::listener`](crate::Context::listener) when a callback needs
@@ -94,10 +100,85 @@ its field leaves keyboard lookup with the last registered node. Track one
 handle on the panel and another on the field when their relationship matters.
 
 Focus is separate from visual selection, hover, and domain state. A list can keep one selected row
-while a search field owns keyboard focus. Tab navigation uses the recorded focus handles and tab
-order; custom widgets that change focus order should use the tab-stop APIs on their focus handles.
+while a search field owns keyboard focus. Tab traversal uses the recorded focus handles and tab
+order, but the application must connect a key or action to that traversal.
 An embedded browser can also have two focus systems: the page must focus its iframe before the
 GPUI window can receive keys.
+
+### Connect Tab to traversal
+
+`tab_index(0)` makes an element a candidate for traversal. It does not install
+a key binding. Call [`Window::focus_next`](crate::Window::focus_next) for Tab
+and [`Window::focus_prev`](crate::Window::focus_prev) for Shift+Tab, from a
+listener on the root or another ancestor of the controls. Both methods wrap
+at the ends of the last painted order; neither changes focus when there are
+no enabled stops.
+
+Here two targets retain their own handles, and setup selects the first. The
+root handles Tab only when no modifier other than Shift is pressed, leaving
+application shortcuts alone:
+
+```rust
+use gpui::{App, Context, FocusHandle, IntoElement, KeyDownEvent, Render, Window,
+    div, prelude::*};
+
+fn traverse(event: &KeyDownEvent, window: &mut Window, cx: &mut App) {
+    let mut modifiers = event.keystroke.modifiers;
+    let reverse = modifiers.shift;
+    modifiers.shift = false;
+    if event.keystroke.key == "tab" && !modifiers.modified() {
+        if reverse {
+            window.focus_prev(cx);
+        } else {
+            window.focus_next(cx);
+        }
+        cx.stop_propagation();
+    }
+}
+
+struct Fields {
+    first: FocusHandle,
+    second: FocusHandle,
+}
+
+impl Render for Fields {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        div().on_key_down(traverse)
+            .child(div().track_focus(&self.first).child("First"))
+            .child(div().track_focus(&self.second).child("Second"))
+    }
+}
+
+# #[cfg(feature = "test-support")]
+# {
+let mut app = gpui::TestApp::new();
+let mut window = app.open_window(|window, cx| {
+    let first = cx.focus_handle().tab_stop(true);
+    window.focus(&first, cx);
+    Fields { first, second: cx.focus_handle().tab_stop(true) }
+});
+assert!(window.update(|fields, window, _| fields.first.is_focused(window)));
+window.simulate_keystroke("tab");
+assert!(window.update(|fields, window, _| fields.second.is_focused(window)));
+window.simulate_keystroke("shift-tab");
+assert!(window.update(|fields, window, _| fields.first.is_focused(window)));
+window.simulate_keystroke("shift-tab");
+assert!(window.update(|fields, window, _| fields.second.is_focused(window)));
+# }
+```
+
+The assertions run with `test-support`. They exercise dispatch through the
+rendered tree, including backward wrapping; calling the traversal methods
+directly would leave the key listener untested.
+
+The listener bubbles, so a child can handle Tab first by stopping propagation.
+For example, an editor may use Tab to indent. Once the root handles the key,
+it stops further dispatch. The web backend also cancels the browser's Tab
+action for a stopped key event, keeping browser and GPUI focus together.
+An embedded preview needs a way to leave that wrapped order: these walkthroughs
+reserve Escape to return focus to their page controls.
+See W3C's [keyboard-trap guidance](https://www.w3.org/WAI/WCAG22/Understanding/no-keyboard-trap.html)
+for the exit rule and examples of embedded applications.
 
 ### Put listeners on the focused path
 

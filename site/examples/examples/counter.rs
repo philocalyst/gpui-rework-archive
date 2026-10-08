@@ -8,10 +8,13 @@ mod support;
 // GPUI stores the view in an [`Entity`]. Cloning its handle keeps the same
 // counter alive, with the same field. The constructor below starts it at zero.
 
-use gpui::{AppContext, Context, IntoElement, Render, Role, Window, div, prelude::*, rgb, text};
+use gpui::{
+    AppContext, Context, FocusHandle, IntoElement, Render, Role, Window, div, prelude::*, rgb, text,
+};
 
 struct Counter {
     count: u32,
+    focus: FocusHandle,
 }
 
 // ## Read state into a frame {#render}
@@ -27,7 +30,9 @@ struct Counter {
 //
 // [`text`] gives the changing label an accessibility node. The button's
 // [`StatefulInteractiveElement::role`] and label identify its purpose;
-// [`InteractiveElement::tab_index`] makes it reachable with Tab. Once focused,
+// [`InteractiveElement::tab_index`] records its place in the focus order.
+// The root's key listener moves through that order on Tab or Shift+Tab;
+// registering a tab stop alone does not bind those keys. Once focused,
 // [`StatefulInteractiveElement::on_click`] also accepts Enter and Space.
 // `focus_visible` draws a ring during keyboard navigation. Try clicking, then
 // use Tab and Enter or Space to reach the same operation. Run the native
@@ -36,6 +41,20 @@ struct Counter {
 impl Render for Counter {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         div()
+            .track_focus(&self.focus)
+            .on_key_down(|event, window, cx| {
+                let mut modifiers = event.keystroke.modifiers;
+                let reverse = modifiers.shift;
+                modifiers.shift = false;
+                if event.keystroke.key == "tab" && !modifiers.modified() {
+                    if reverse {
+                        window.focus_prev(cx);
+                    } else {
+                        window.focus_next(cx);
+                    }
+                    cx.stop_propagation();
+                }
+            })
             .size_full()
             .flex()
             .flex_col()
@@ -98,12 +117,21 @@ impl Counter {
 // and uses the returned entity as its root view. On desktop, closing the last
 // example window quits the application.
 //
+// The constructor selects a root [`FocusHandle`] before the first frame.
+// `track_focus` attaches it when rendering, so the root can receive the first
+// Tab even before any button has been clicked. Focus and the count belong to
+// the same view, but represent separate state.
+//
 // Run it with `cargo run -p gpui-documentation-examples --example counter`.
 // To change window options or application setup, continue
 // with [the first-window example](@/examples/first-window.md).
 
-fn component(_window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<Counter> {
-    cx.new(|_cx| Counter { count: 0 })
+fn component(window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<Counter> {
+    cx.new(|cx| {
+        let focus = cx.focus_handle();
+        window.focus(&focus, cx);
+        Counter { count: 0, focus }
+    })
 }
 
 pub fn main() {

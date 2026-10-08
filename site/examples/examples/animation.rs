@@ -15,12 +15,13 @@ mod support;
 use std::time::Duration;
 
 use gpui::{
-    Animation, AnimationExt, AppContext, Context, IntoElement, Motion, Render, Role, Window, div,
-    ease_in_out, prelude::*, px, rgb,
+    Animation, AnimationExt, AppContext, Context, FocusHandle, IntoElement, Motion, Render, Role,
+    Window, div, ease_in_out, prelude::*, px, rgb,
 };
 
 struct AnimationDemo {
     replay: usize,
+    focus: FocusHandle,
 }
 
 // ## Sample width and opacity together {#animate}
@@ -38,6 +39,7 @@ struct AnimationDemo {
 //
 // Replay is a named button and a tab stop, with a visible keyboard-focus ring.
 // Its click listener handles Enter and Space as well as pointer activation.
+// The root routes Tab and Shift+Tab as in the [counter](@/examples/counter.md#render).
 // The bar is decorative; its width does not communicate a result or status.
 
 impl Render for AnimationDemo {
@@ -47,6 +49,20 @@ impl Render for AnimationDemo {
             Animation::new(Motion::new(Duration::from_millis(700))).with_easing(ease_in_out);
 
         div()
+            .track_focus(&self.focus)
+            .on_key_down(|event, window, cx| {
+                let mut modifiers = event.keystroke.modifiers;
+                let reverse = modifiers.shift;
+                modifiers.shift = false;
+                if event.keystroke.key == "tab" && !modifiers.modified() {
+                    if reverse {
+                        window.focus_prev(cx);
+                    } else {
+                        window.focus_next(cx);
+                    }
+                    cx.stop_propagation();
+                }
+            })
             .size_full()
             .flex()
             .flex_col()
@@ -95,8 +111,12 @@ impl Render for AnimationDemo {
 // run begins. [`AppContext::new`] creates the entity whose render method
 // returns this animated element tree.
 
-fn component(_window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<AnimationDemo> {
-    cx.new(|_cx| AnimationDemo { replay: 0 })
+fn component(window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<AnimationDemo> {
+    cx.new(|cx| {
+        let focus = cx.focus_handle();
+        window.focus(&focus, cx);
+        AnimationDemo { replay: 0, focus }
+    })
 }
 
 pub fn main() {

@@ -2448,12 +2448,13 @@ impl App {
             .spawn(async move { f(&mut cx).await }.boxed_local())
     }
 
-    /// Spawns foreground work with app access and the given scheduling priority.
+    /// Spawns foreground work with app access; `priority` is currently ignored.
     ///
     /// The closure receives an [`AsyncApp`] and follows [`spawn`](Self::spawn)'s
-    /// borrowing, thread, and cancellation rules. Priority affects scheduling;
-    /// it does not move work to a background thread or interrupt a poll already
-    /// running.
+    /// borrowing, thread, and cancellation rules. This delegates to
+    /// [`ForegroundExecutor::spawn_with_priority`], which schedules every
+    /// priority like an ordinary foreground task. Use
+    /// [`BackgroundExecutor::spawn_with_priority`] for prioritized background work.
     pub fn spawn_with_priority<AsyncFn, R>(&self, priority: Priority, f: AsyncFn) -> Task<R>
     where
         AsyncFn: AsyncFnOnce(&mut AsyncApp) -> R + 'static,

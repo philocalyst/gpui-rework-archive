@@ -32,6 +32,11 @@ fallback cannot safely run that blocking audio loop. The Tokio adapter's
 or pass an externally owned runtime to
 [`gpui_tokio::init_from_handle`](https://docs.rs/gpui_tokio/latest/gpui_tokio/fn.init_from_handle.html).
 
+Foreground `spawn_with_priority` methods currently ignore their priority
+argument. They neither reorder foreground tasks nor give a poll more time.
+Use `spawn_when_idle` when work should wait for an idle slice, and keep every
+foreground poll short regardless of how it was scheduled.
+
 On native targets, [`ForegroundExecutor::block_on`](crate::ForegroundExecutor::block_on)
 and [`ForegroundExecutor::block_with_timeout`](crate::ForegroundExecutor::block_with_timeout)
 are synchronous escape hatches. Calling one from a

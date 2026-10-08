@@ -1048,6 +1048,11 @@ pub trait InteractiveElement: Sized {
     /// traversal. Use [`Self::tab_group`] to
     /// scope ordering within a composite widget. With [`Self::track_focus`],
     /// configure [`FocusHandle::tab_index`] and [`FocusHandle::tab_stop`] instead.
+    ///
+    /// This records an order; it does not bind the Tab key. Route that key to
+    /// [`Window::focus_next`] and Shift+Tab to [`Window::focus_prev`]. The
+    /// [input chapter](crate::_documentation::input#connect-tab-to-traversal)
+    /// shows a root listener and tests both directions.
     // docs:examples:begin
     #[doc = include_str!("../docs/examples/gpui-InteractiveElement-tab-index-9f15feb8.md")]
     // docs:examples:end

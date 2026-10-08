@@ -120,7 +120,7 @@
     },
     {
       "url": "https://book.iced.rs/index.html",
-      "status": "fetched (200; not individually read)",
+      "status": "read (complete introductory page; 2026-10-08 UTC)",
       "http_status": "200"
     },
     {
@@ -1153,7 +1153,7 @@
     },
     {
       "url": "https://rust-lang.github.io/mdBook/format/summary.html",
-      "status": "fetched (200; not individually read)",
+      "status": "read (complete primary page and example; 2026-10-08 UTC)",
       "http_status": "200"
     },
     {
@@ -1188,7 +1188,7 @@
     },
     {
       "url": "https://time-rs.github.io/book/",
-      "status": "fetched (200; not individually read)",
+      "status": "read (complete overview prose and examples; 2026-10-08 UTC)",
       "http_status": "200"
     },
     {
@@ -1429,6 +1429,16 @@
       "url": "https://docs.rs/jiff/0.2.35/jiff/enum.Unit.html",
       "status": "read (complete introduction, variants, and examples; 2026-10-08 UTC)",
       "reason": "read the links to span differences and rounding, ordering assertions, and the calendar/clock distinctions; code was read, not executed"
+    },
+    {
+      "url": "https://book.iced.rs/print.html",
+      "status": "read (complete available book prose and code; 2026-10-08 UTC)",
+      "reason": "includes introduction, philosophy, architecture, counter construction, runtime, text, container, further resources, and the complete FAQ; the book identifies unfinished chapters; images were not visually reviewed and code was not executed"
+    },
+    {
+      "url": "https://www.w3.org/WAI/WCAG22/Understanding/no-keyboard-trap.html",
+      "status": "read (complete criterion, intent, examples, and technique links; 2026-10-08 UTC)",
+      "reason": "used to check the keyboard exit from embedded GPUI previews; no claim of a complete accessibility audit"
     }
   ],
   "status_legend": {

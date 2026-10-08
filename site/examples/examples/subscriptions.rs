@@ -10,8 +10,8 @@ mod support;
 // That signal means “read my current state”, without describing each mutation.
 
 use gpui::{
-    AppContext, Context, Entity, IntoElement, Render, Role, Subscription, Window, div, prelude::*,
-    rgb, text,
+    AppContext, Context, Entity, FocusHandle, IntoElement, Render, Role, Subscription, Window, div,
+    prelude::*, rgb, text,
 };
 
 struct Model {
@@ -38,24 +38,31 @@ impl Model {
 //
 // > [!NOTE]
 // > GPUI may coalesce pending notifications. Therefore this number counts
-// > observer callback deliveries, not model assignments or clicks. Use a typed
-// > event when each operation must carry its own payload or remain individually
-// > observable.
+// > observer callback deliveries, not model assignments or clicks. Use a
+// > [typed event](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html#method.emit)
+// > when each operation must carry its own payload or remain individually
+// > observable. The [event-payload test](https://gpui-ce.github.io/book/testing.html#preserve-each-events-payload)
+// > checks two saves delivered in order, even though the current model retains
+// > only the latest revision.
 
 struct CounterView {
     model: Entity<Model>,
+    focus: FocusHandle,
     notifications: u32,
     _model_subscription: Subscription,
 }
 
 impl CounterView {
-    fn new(model: Entity<Model>, cx: &mut Context<Self>) -> Self {
+    fn new(model: Entity<Model>, window: &mut Window, cx: &mut Context<Self>) -> Self {
+        let focus = cx.focus_handle();
+        window.focus(&focus, cx);
         let _model_subscription = cx.observe(&model, |view: &mut Self, _model, cx| {
             view.notifications = view.notifications.saturating_add(1);
             cx.notify();
         });
         Self {
             model,
+            focus,
             notifications: 0,
             _model_subscription,
         }
@@ -66,6 +73,10 @@ impl CounterView {
 // [`Entity::read`] borrows the model for this render. GPUI records the read so
 // a model notification can invalidate windows that displayed it. The explicit
 // observer serves a different purpose: it updates this view's callback count.
+// Its `cx.notify()` also invalidates this view's own content. Keep that call
+// when caching the view: a window redraw can reuse a cached view's old drawing.
+// The [cached-view test](https://gpui-ce.github.io/book/testing.html#check-that-a-shared-model-invalidates-a-cached-view)
+// checks this distinction by asserting the painted result after a model change.
 //
 // The click handler uses [`Context::listener`] to access the view and
 // [`Entity::update`] to access its model. Those are different entities. The
@@ -75,11 +86,27 @@ impl CounterView {
 // Both labels use [`text`] so their values appear in the accessibility tree.
 // Increment has a button role, an accessible name, and a tab stop. Use Tab and
 // Enter to check that the same state transition works without a pointer.
+// As in the [counter](@/examples/counter.md#render), the root explicitly routes
+// Tab and Shift+Tab through the window's recorded focus order.
 
 impl Render for CounterView {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let count = self.model.read(cx).count;
         div()
+            .track_focus(&self.focus)
+            .on_key_down(|event, window, cx| {
+                let mut modifiers = event.keystroke.modifiers;
+                let reverse = modifiers.shift;
+                modifiers.shift = false;
+                if event.keystroke.key == "tab" && !modifiers.modified() {
+                    if reverse {
+                        window.focus_prev(cx);
+                    } else {
+                        window.focus_next(cx);
+                    }
+                    cx.stop_propagation();
+                }
+            })
             .size_full()
             .flex()
             .flex_col()
@@ -119,15 +146,17 @@ impl Render for CounterView {
 // of its handle and the returned [`Subscription`]. The window keeps the root
 // view alive. Releasing that view drops the subscription and stops observation;
 // the model can then be released when its remaining strong handles are gone.
+// The [teardown test](https://gpui-ce.github.io/book/testing.html#check-that-teardown-releases-the-owner)
+// checks that the consumer is released while its model remains alive.
 //
 // Click once and both numbers increase. Try discarding the subscription in
 // the constructor: the model still changes, but the notification count stays
 // zero. The platform helper starts the app through [`Application`].
 
-fn component(_window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<CounterView> {
+fn component(window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<CounterView> {
     let model = cx.new(|_cx| Model { count: 0 });
     let model_for_view = model.clone();
-    cx.new(|cx| CounterView::new(model_for_view, cx))
+    cx.new(|cx| CounterView::new(model_for_view, window, cx))
 }
 
 pub fn main() {

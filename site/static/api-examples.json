@@ -359,6 +359,13 @@
         "step_title": "Keep a keyboard target",
         "title": "Route a keyboard action",
         "url": "/examples/actions/#focus"
+      },
+      {
+        "example": "counter",
+        "step": "launch",
+        "step_title": "Create the view and open a window",
+        "title": "Make state visible",
+        "url": "/examples/counter/#launch"
       }
     ],
     "path": "gpui/struct.FocusHandle.html"

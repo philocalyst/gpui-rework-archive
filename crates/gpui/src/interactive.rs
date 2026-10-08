@@ -15,16 +15,36 @@ pub trait InputEvent: Sealed + 'static {
     fn to_platform_input(self) -> PlatformInput;
 }
 
-/// A key event from the platform.
+/// A keyboard event accepted by [`Window::on_key_event`].
+///
+/// Implemented by [`KeyDownEvent`], [`KeyUpEvent`], and
+/// [`ModifiersChangedEvent`]. This sealed trait selects keyboard dispatch;
+/// it does not turn text composition into key events.
 pub trait KeyEvent: InputEvent {}
 
-/// A mouse event from the platform.
+/// An event accepted by [`Window::on_mouse_event`].
+///
+/// This dispatch family includes wheel input and recognized long presses or
+/// touch drags as well as mouse buttons and movement. It describes routing,
+/// not proof that a physical mouse produced the event. Raw [`TouchEvent`]
+/// updates use this route internally without implementing this trait; observe
+/// them with [`Window::on_touch_event`].
 pub trait MouseEvent: InputEvent {}
 
-/// A gesture event from the platform.
+/// A recognized gesture: pinch, long press, or direct touch drag.
+///
+/// These events also implement [`MouseEvent`] for low-level pointer dispatch.
+/// They are distinct from the provisional contacts in [`TouchEvent`].
 pub trait GestureEvent: InputEvent {}
 
 /// A key press, including repeated key-down notifications.
+///
+/// Element key-down listeners run after key-binding resolution. A consumed
+/// action or pending chord can keep the raw listener from receiving this
+/// event. Use an action for a command shared with menus; use the event when
+/// the stroke itself matters. See the [input chapter](crate::_documentation::input).
+/// Text composition and replacement use [`crate::EntityInputHandler`], not
+/// [`Keystroke::key_char`].
 #[derive(Clone, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct KeyDownEvent {
     /// The keystroke that was generated.
@@ -35,6 +55,8 @@ pub struct KeyDownEvent {
 
     /// Whether text insertion should take priority over keymap dispatch.
     /// In some cases, like AltGr on Windows, modifiers are significant for character input.
+    /// GPUI gives character entry precedence over a completed binding only
+    /// when the focused platform input handler also accepts text input.
     pub prefer_character_input: bool,
 }
 
@@ -47,6 +69,11 @@ impl InputEvent for KeyDownEvent {
 impl KeyEvent for KeyDownEvent {}
 
 /// A key release event.
+///
+/// Dispatch follows the focus selected at release. The receiving element may
+/// not have seen the press: a shortcut can consume it or move focus before
+/// the key is released. Do not treat this callback as proof of a paired
+/// [`KeyDownEvent`] on the same element.
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct KeyUpEvent {
     /// The keystroke that was released.
@@ -226,7 +253,10 @@ pub struct MouseUpEvent {
     /// The modifiers that were held down when the mouse was released.
     pub modifiers: Modifiers,
 
-    /// The number of times the button has been clicked.
+    /// The backend's consecutive-click count for this release.
+    ///
+    /// This follows the input sequence, not the number of activations of one
+    /// element. See [`MouseDownEvent::click_count`] for the corresponding press.
     pub click_count: usize,
 }
 
@@ -375,6 +405,18 @@ impl ClickEvent {
     /// corner, so a popup can be placed beside the control without a cursor.
     /// Use [`mouse_position`](Self::mouse_position) when the operation
     /// specifically requires mouse input rather than an activation anchor.
+    ///
+    /// ```
+    /// use gpui::{Bounds, ClickEvent, KeyboardButton, KeyboardClickEvent, point, px, size};
+    ///
+    /// let click = ClickEvent::Keyboard(KeyboardClickEvent {
+    ///     button: KeyboardButton::Enter,
+    ///     bounds: Bounds::new(point(px(20.), px(30.)), size(px(80.), px(24.))),
+    /// });
+    /// assert_eq!(click.position(), point(px(20.), px(54.)));
+    /// assert_eq!(click.mouse_position(), None);
+    /// assert!(click.standard_click());
+    /// ```
     pub fn position(&self) -> Point<Pixels> {
         match self {
             ClickEvent::Keyboard(event) => event.bounds.bottom_left(),
@@ -772,7 +814,17 @@ impl Deref for MouseExitEvent {
     }
 }
 
-/// A collection of paths from the platform, such as from a file drop.
+/// Filesystem paths offered by an incoming platform drag.
+///
+/// [`FileDropEvent::Entered`] carries this value. Ordinary element drop
+/// handlers can accept it through
+/// [`on_drop`](crate::StatefulInteractiveElement::on_drop). Receiving a path
+/// does not read the file or establish that it still exists; perform loading
+/// and report its errors separately from accepting the drop.
+///
+/// The web backend does not synthesize these paths from browser `File`
+/// objects. Those objects do not expose usable native filesystem paths.
+/// For a drag leaving the application, use [`FileDragPaths`] instead.
 #[derive(Debug, Clone, Default, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct ExternalPaths(pub SmallVec<[PathBuf; 2]>);
 
@@ -785,6 +837,11 @@ impl ExternalPaths {
 
 /// Data offered to the platform when an internal drag leaves the window and is
 /// promoted to a native drag session.
+///
+/// Return this from
+/// [`external_drag_payload`](crate::StatefulInteractiveElement::external_drag_payload),
+/// after registering the internal drag. It describes what to offer another
+/// application; it does not report that application accepted the drop.
 #[derive(Debug, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum ExternalDragPayload {
     /// Real on-disk paths, handed to the platform as an outbound file drag.
@@ -793,6 +850,12 @@ pub enum ExternalDragPayload {
 
 /// Paths handed to the platform for a native file drag. Directory metadata is
 /// provided by the caller to avoid querying it when the platform drag starts.
+///
+/// Each entry pairs a path with `true` for a directory or `false` for a file.
+/// Construction preserves the entries and performs no filesystem checks.
+/// Wrap the result in [`ExternalDragPayload::Files`] to offer it from an
+/// internal drag's external-payload callback. Use [`ExternalPaths`] for files
+/// arriving from the platform instead.
 #[derive(Debug, Clone, Default, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct FileDragPaths(SmallVec<[(PathBuf, bool); 2]>);
 
@@ -820,6 +883,12 @@ impl Render for ExternalPaths {
 /// `Entered` carries the offered paths. `Pending` updates only the pointer position while the
 /// platform drag remains over the window. `Submit` marks the drop at a position, while `Exited`
 /// and `Ended` report leaving the window and completion of the platform-owned drag session.
+///
+/// Submission is not proof of a successful file load. The app decides whether
+/// to accept the offered [`ExternalPaths`], then handles I/O separately.
+/// `Exited` can occur without a submission; discard provisional hover state
+/// in that case. `Ended` closes the platform session and does not identify a
+/// particular accepting element.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub enum FileDropEvent {
     /// The files have entered the window.
@@ -853,7 +922,19 @@ impl InputEvent for FileDropEvent {
 }
 impl MouseEvent for FileDropEvent {}
 
-/// An enum corresponding to all kinds of platform input events.
+/// Input delivered by a platform adapter to a GPUI window.
+///
+/// [`Window::dispatch_event`] routes one value through the last rendered
+/// frame and returns its propagation/default-handling flags. Application
+/// controls usually register typed element listeners instead; test hosts and
+/// platform adapters use this enum to supply events. [`InputEvent::to_platform_input`]
+/// converts a concrete event into its matching variant.
+///
+/// This enum describes event delivery, not committed text. Simulated typing
+/// can use [`Window::dispatch_keystroke`]; platform composition uses the
+/// [`InputHandler`](crate::InputHandler) protocol. A raw [`TouchEvent`] can
+/// also produce recognized gesture events during dispatch, so the physical
+/// input source and the final event variant need not correspond one-to-one.
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub enum PlatformInput {
     /// A key was pressed.

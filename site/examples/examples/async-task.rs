@@ -11,11 +11,13 @@ mod support;
 // status. Both are ordinary state updated through the view's [`Context`].
 
 use gpui::{
-    AppContext, Context, IntoElement, Render, Role, Task, Window, div, prelude::*, rgb, text,
+    AppContext, Context, FocusHandle, IntoElement, Render, Role, Task, Window, div, prelude::*,
+    rgb, text,
 };
 use std::time::Duration;
 
 struct AsyncDemo {
+    focus: FocusHandle,
     task: Option<Task<()>>,
     running: bool,
     message: String,
@@ -69,16 +71,37 @@ impl AsyncDemo {
 // The accessible button label follows its visible Start/Stop label. Its stable
 // ID keeps keyboard focus when the label changes. [`text`] exposes the status
 // to the accessibility tree; it does not by itself request a live announcement.
+// The root routes Tab and Shift+Tab as in the [counter](@/examples/counter.md#render).
 //
 // > [!WARNING]
 // > Dropping a task stops its remaining polling. It does not undo an operation
 // > already accepted by another service. A network request may still complete
 // > on the server even after the local task is cancelled.
+//
+// The [cancellation test](https://gpui-ce.github.io/book/testing.html#test-cancellation-after-work-has-started)
+// makes future destruction observable without waiting two real seconds. The
+// [request-ordering test](https://gpui-ce.github.io/book/testing.html#reject-a-result-from-a-replaced-request)
+// covers a separate rule: an older result must not replace a newer one even
+// when both operations finish.
 
 impl Render for AsyncDemo {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let action = if self.running { "Stop" } else { "Start" };
         div()
+            .track_focus(&self.focus)
+            .on_key_down(|event, window, cx| {
+                let mut modifiers = event.keystroke.modifiers;
+                let reverse = modifiers.shift;
+                modifiers.shift = false;
+                if event.keystroke.key == "tab" && !modifiers.modified() {
+                    if reverse {
+                        window.focus_prev(cx);
+                    } else {
+                        window.focus_next(cx);
+                    }
+                    cx.stop_propagation();
+                }
+            })
             .size_full()
             .flex()
             .flex_col()
@@ -119,11 +142,16 @@ impl Render for AsyncDemo {
 // then press Stop: the status should remain Stopped after the original deadline.
 // Start again and let the operation finish to check the completion path too.
 
-fn component(_window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<AsyncDemo> {
-    cx.new(|_cx| AsyncDemo {
-        task: None,
-        running: false,
-        message: "Ready".into(),
+fn component(window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<AsyncDemo> {
+    cx.new(|cx| {
+        let focus = cx.focus_handle();
+        window.focus(&focus, cx);
+        AsyncDemo {
+            focus,
+            task: None,
+            running: false,
+            message: "Ready".into(),
+        }
     })
 }
 
