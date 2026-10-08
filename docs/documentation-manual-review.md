@@ -2056,3 +2056,11 @@ unsupported pairs instead of implying that constructing a pair validates it.
 The wrapped-caret regression now checks Home/End at the final row too; those
 checks passed without another implementation change. The complete 61-test
 library run passes in `target/documentation-text-caret-final-tests.log`.
+
+The direct ShapedTextLayout movement methods were then read against the
+document adapter, grapheme queries, visual caret stops, and selection-collapse
+implementation. Their contracts now distinguish source-order deletion ranges
+from visual movement, explain an index inside a grapheme, retain wrap affinity,
+and state the logical-order fallback when selection endpoint geometry is
+unavailable. The return value is connected to the editor state the caller
+must update; these methods do not apply an edit themselves.

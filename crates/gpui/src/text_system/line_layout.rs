@@ -329,7 +329,17 @@ pub trait PlatformTextLayout: Send + Sync + std::fmt::Debug {
     /// Snaps a caret to a native cluster boundary.
     fn normalized_caret(&self, caret: CaretPosition) -> CaretPosition;
 
-    /// Returns the adjacent caret stop in visual order.
+    /// Finds the adjacent legal caret stop to the visual left or right.
+    ///
+    /// Returns `None` at that outer edge, or when the backend cannot produce a
+    /// neighboring stop. The returned [`CaretPosition`] keeps affinity: at a
+    /// soft wrap, another visual position can have the same byte index and a
+    /// different affinity. Do not require the index to increase when moving
+    /// right through bidirectional text.
+    ///
+    /// Use [`Self::logical_cluster_before`] or [`Self::logical_cluster_after`]
+    /// for source-order editing ranges. Use [`ShapedTextLayout::selection_movement`] when
+    /// arrow-key behavior also needs to collapse or extend a selection.
     fn adjacent_visual_caret(
         &self,
         caret: CaretPosition,
@@ -1068,7 +1078,16 @@ impl ShapedTextLayout {
         self.layout.platform_layout.normalized_caret(caret)
     }
 
-    /// Returns the adjacent caret stop in visual order.
+    /// Finds the adjacent legal caret stop to the visual left or right.
+    ///
+    /// Returns `None` at the corresponding outer edge, or when the backend
+    /// cannot produce a neighboring stop. Keep the returned affinity: another
+    /// visual position can have the same byte index at a soft wrap. An index
+    /// can decrease when moving right through bidirectional text.
+    ///
+    /// Use [`Self::logical_cluster_before`] or [`Self::logical_cluster_after`]
+    /// for source-order editing ranges, and [`Self::selection_movement`] when
+    /// an arrow key should also collapse or extend the current selection.
     pub fn adjacent_visual_caret(
         &self,
         caret: CaretPosition,
@@ -1079,18 +1098,39 @@ impl ShapedTextLayout {
             .adjacent_visual_caret(caret, direction)
     }
 
-    /// Returns the logical cluster immediately before the caret.
+    /// Finds the preceding editing unit in logical source order.
+    ///
+    /// The returned range uses UTF-8 bytes. This follows the source, not the
+    /// visual left edge of bidirectional text. The supplied Parley backend
+    /// returns grapheme ranges, so a base letter and combining accent can be
+    /// removed together. It returns `None` at the source start.
+    ///
+    /// If the index is inside a grapheme, Parley returns that containing range.
+    /// A pointer's shaping-cluster hit can therefore lie inside the returned
+    /// editing unit; it need not identify one endpoint. Keep caret movement
+    /// and deletion policy explicit when building an editor.
     pub fn logical_cluster_before(&self, caret: CaretPosition) -> Option<Range<usize>> {
         self.layout.platform_layout.logical_cluster_before(caret)
     }
 
-    /// Returns the logical cluster immediately after the caret.
+    /// Finds the following editing unit in logical source order.
+    ///
+    /// The supplied Parley backend returns a UTF-8 grapheme range and `None`
+    /// at the source end. An index inside a grapheme selects that containing
+    /// range. This follows the source rather than the visual right edge; see
+    /// [`Self::logical_cluster_before`] for the corresponding backward query
+    /// and its distinction from a shaping-cluster hit.
     pub fn logical_cluster_after(&self, caret: CaretPosition) -> Option<Range<usize>> {
         self.layout.platform_layout.logical_cluster_after(caret)
     }
 
-    /// Returns the caret and retained horizontal coordinate after applying `movement`.
-    /// This only calculates the destination and does not mutate editor state.
+    /// Calculates a caret's destination and preferred column for later vertical moves.
+    ///
+    /// [`TextMovement`] describes the direction/boundary pairs supported by the
+    /// supplied backend. Carry the returned `vertical_navigation_x` into the
+    /// next movement, and store the returned caret on the editor. This method
+    /// changes no editor state and edits no text. Use [`Self::selection_movement`]
+    /// when the current selection also determines where movement should begin.
     pub fn caret_movement(
         &self,
         caret: CaretPosition,
@@ -1102,11 +1142,13 @@ impl ShapedTextLayout {
             .caret_movement(caret, movement, vertical_navigation_x)
     }
 
-    /// Returns a moved or extended affinity-aware selection using visual text order.
+    /// Calculates a moved or extended selection while preserving caret affinity.
     ///
     /// A left/right cluster or word movement without extension collapses a nonempty selection
     /// to the requested visual edge, without taking another step. Other movements start at the
     /// active caret. Extending keeps the anchor fixed.
+    /// If either endpoint has no representable geometry, collapsing falls back
+    /// to logical byte order.
     ///
     /// `selection` is the current anchor and active caret.
     /// `movement` supplies the direction and boundary.
