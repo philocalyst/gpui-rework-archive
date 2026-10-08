@@ -854,7 +854,7 @@ impl CaretMovement<CaretSelection> {
 
 /// Measurement and editing geometry for one shaped document.
 ///
-/// [`crate::WindowTextSystem::shape_text`] returns a [`crate::ShapedText`]
+/// [`shape_text`](crate::WindowTextSystem::shape_text) returns a [`ShapedText`](crate::ShapedText)
 /// that dereferences to this layout and adds paint methods. Keep that one
 /// result for measuring, drawing, and pointer handling. Recomputing any of
 /// those with a different string, wrap width, or font can produce a caret
@@ -867,7 +867,7 @@ impl CaretMovement<CaretSelection> {
 /// painted. Subtract that placement from a pointer point before hit testing,
 /// and add it to a returned caret or selection rectangle before painting.
 /// Any additional alignment applied at paint time must also be accounted
-/// for. [`crate::TextLayout`] is different: an element's shared layout handle
+/// for. [`TextLayout`](crate::TextLayout) is different: an element's shared layout handle
 /// remembers its prepainted window position and converts coordinates for you.
 ///
 /// Byte indices address the exact UTF-8 source that was shaped. Use an

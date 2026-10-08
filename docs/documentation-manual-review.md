@@ -2064,3 +2064,22 @@ from visual movement, explain an index inside a grapheme, retain wrap affinity,
 and state the logical-order fallback when selection endpoint geometry is
 unavailable. The return value is connected to the editor state the caller
 must update; these methods do not apply an edit themselves.
+
+Strict default-feature rustdoc passed in
+`target/documentation-text-final-default-api.log`. The complete core doctest
+run passed in `target/documentation-text-final-doctests.log`: 240 merged tests
+and seven separate tests passed, with one additional test ignored. The primary
+editor read the complete rendered ShapedTextLayout introduction and its
+inherent methods, followed TextMovement's selection link, and checked the
+movement table at a 390-pixel viewport. The table fits within the document,
+without horizontal overflow. That view also prompted shorter method-link
+labels. Text-system and shaped-layout introductions now use readable symbol
+names instead of displaying their `crate::` qualification.
+
+Reference reading in this pass includes Jiff 0.2.38's complete crate cookbook,
+`span.rs` through line 540, and `civil/datetime.rs` through line 810. The latter
+includes every public example before that point, ending with the end-of-day
+example. These extents do not imply a complete reference-library review.
+Scribbr's current page exposed no input widget, so no new detector score was
+obtained. The final artifact build and browser check of the caret fix remain
+pending here.

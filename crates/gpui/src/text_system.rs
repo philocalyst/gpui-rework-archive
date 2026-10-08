@@ -1,32 +1,32 @@
 //! Font selection, text layout, interaction geometry, and glyph pixels.
 //!
-//! These are separate stages with different outputs. [`crate::TextSystem`] owns the shared platform
-//! font database, resolves [`crate::Font`] requests to [`crate::FontId`]s, and caches font metrics. A
-//! [`crate::WindowTextSystem`] shapes text and asks the platform backend to break it into visual rows.
-//! The resulting [`crate::LineLayout`] retains the backend's interaction model and paint fragments.
+//! These stages produce different results. [`TextSystem`] owns the shared platform
+//! font database, resolves [`Font`] requests to [`FontId`]s, and caches font metrics.
+//! [`WindowTextSystem`] shapes text and asks the backend to break it into visual rows.
+//! The resulting [`LineLayout`] retains interaction geometry and paint fragments.
 //! During painting, glyph IDs and positions are sent to the rasterizer, whose pixels are uploaded
 //! to the glyph atlas. A layout therefore describes advances and caret geometry; it is not a
 //! bitmap, and rasterizing glyphs does not decide line breaks.
 //!
 //! # Choosing a layout entry point
 //!
-//! Use [`crate::WindowTextSystem::shape_line`] for one already-broken row, and
-//! [`crate::WindowTextSystem::shape_text`] for a document with hard breaks or wrapping. The latter
+//! Use [`shape_line`](WindowTextSystem::shape_line) for one already-broken row, and
+//! [`shape_text`](WindowTextSystem::shape_text) for a document with hard breaks or wrapping. The latter
 //! delegates paragraph direction, bidi resolution, line breaking, alignment, and line clamping
-//! to one backend layout request. Use [`crate::WindowTextSystem::layout_inline`] when atomic UI boxes
+//! to one backend layout request. Use [`layout_inline`](WindowTextSystem::layout_inline) when atomic UI boxes
 //! such as icons participate in the same wrapping and baseline calculation as text. The
-//! lower-level [`crate::WindowTextSystem::layout_line`] returns geometry without the paintable
-//! [`crate::ShapedLine`] wrapper.
+//! lower-level [`layout_line`](WindowTextSystem::layout_line) returns geometry without the paintable
+//! [`ShapedLine`] wrapper.
 //!
 //! # Text positions
 //!
 //! Every text range and caret index in this module is a UTF-8 byte offset into the exact source
 //! string passed to layout. It is not a Unicode scalar index, UTF-16 code-unit index, grapheme
-//! count, or glyph index. Use [`crate::TextRangeExt::contains_range`] before slicing an external range;
+//! count, or glyph index. Use [`contains_range`](TextRangeExt::contains_range) before slicing an external range;
 //! an in-bounds offset can still split a UTF-8 code point. Shape run lengths are UTF-8 byte
 //! lengths and must cover the complete string. A backend caret cluster can include multiple
 //! scalars, such as a combining sequence or emoji ZWJ sequence; normalize a caret through
-//! [`crate::PlatformTextLayout::normalized_caret`] before assuming a position is a valid editing stop.
+//! [`normalized_caret`](PlatformTextLayout::normalized_caret) before assuming a position is a valid editing stop.
 //! Glyph IDs are backend font glyph identifiers and cannot be used as text offsets.
 //!
 //! Unicode has several useful units, and they answer different questions:
@@ -42,26 +42,26 @@
 //! # Visual order and carets
 //!
 //! Logical source ranges remain in UTF-8 order even when a paragraph contains right-to-left text.
-//! [`crate::VisualLine`] records the visual row's logical range and resolved base direction;
-//! [`crate::CaretPosition`] adds [`crate::CaretAffinity`] because the same byte boundary may occupy two visual
+//! [`VisualLine`] records the visual row's logical range and resolved base direction;
+//! [`CaretPosition`] adds [`CaretAffinity`] because the same byte boundary may occupy two visual
 //! positions at a bidi boundary or soft wrap. Affinity describes the logical neighbor attached to
-//! the caret, not a left/right movement direction. Use [`crate::TextMovement`] and the platform layout
+//! the caret, not a left/right movement direction. Use [`TextMovement`] and the platform layout
 //! for visual navigation instead of incrementing byte offsets.
 //!
 //! # Fonts and units
 //!
-//! Build a request with [`crate::font`], then choose [`crate::FontWeight`], [`crate::FontWidth`], and [`crate::FontStyle`]
-//! as needed. [`crate::FontFeatures`] supplies OpenType feature tags, and [`crate::FontFallbacks`] supplies
+//! Build a request with [`font`], then choose [`FontWeight`], [`FontWidth`], and [`FontStyle`]
+//! as needed. [`FontFeatures`] supplies OpenType feature tags, and [`FontFallbacks`] supplies
 //! ordered family names for missing characters. The backend may resolve aliases or select a
-//! fallback for an individual character, so one [`crate::TextRun`] is not guaranteed to become one
-//! [`crate::PaintFragment`] or one font face. [`crate::FontMetrics`] are reported in the face's font units;
+//! fallback for an individual character, so one [`TextRun`] is not guaranteed to become one
+//! [`PaintFragment`] or one font face. [`FontMetrics`] are reported in the face's font units;
 //! pixel helpers scale by `font_size / units_per_em`. Advances are shaped-run geometry, while
-//! [`crate::TextSystem::typographic_bounds`] and [`crate::TextSystem::bounding_box`] describe glyph or face
+//! [`typographic_bounds`](TextSystem::typographic_bounds) and [`bounding_box`](TextSystem::bounding_box) describe glyph or face
 //! bounds and should not be substituted for the width of a shaped string.
 //!
 //! # Cache lifetime
 //!
-//! Share one [`crate::TextSystem`] across windows. Keep each window's [`crate::WindowTextSystem`] alive so its
+//! Share one [`TextSystem`] across windows. Keep each window's [`WindowTextSystem`] alive so its
 //! current-frame and previous-frame layout caches can reuse matching requests. The cache key
 //! includes text, shaping properties, and layout options; paint-only changes can reuse shaped
 //! geometry and refresh paint fragments. Font registration invalidates font resolution, and a
@@ -88,7 +88,7 @@
 //! ```
 //!
 //! The snippet shows the single-line path. For user-provided content that may contain line
-//! breaks, use [`crate::WindowTextSystem::shape_text`] and retain the returned [`crate::ShapedText`] for both
+//! breaks, use [`shape_text`](WindowTextSystem::shape_text) and retain the returned [`ShapedText`] for both
 //! painting and hit testing. The [text walkthrough](https://gpui-ce.github.io/examples/text/)
 //! demonstrates inherited styles and paragraph constraints.
 
