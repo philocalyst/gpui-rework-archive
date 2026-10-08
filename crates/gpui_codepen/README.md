@@ -14,6 +14,10 @@ cargo run -p gpui_ce_codepen --bin gpui-guide
 The setup script builds the pinned interpreter and cargo wrapper, prepares its
 sysroot, and compiles the shared framework dependencies. It does not change the
 default toolchain. See [Miri provenance](../../vendor/MIRI-PROVENANCE.md).
+Native and browser Miri share the interpreter's immutable call and layout caches.
+The native build requires GNU or BSD `patch` and caches its patched interpreter
+under `target/codepen-native-interpreter`; setup verifies CTFE, guest execution
+and cancellation after building it.
 
 For the web guide, install Trunk and the pinned WASM target, then run:
 
@@ -166,6 +170,7 @@ GPUI_CODEPEN_TEST_STARTER=1 python3 scripts/codepen/test-mir-reload.py
 node scripts/codepen/test-browser-runtime.mjs
 node scripts/codepen/test-browser-metadata.mjs
 python3 scripts/codepen/test-page-metadata.py
+python3 scripts/codepen/test-native-interpreter.py
 node scripts/codepen/probe-browser-incremental.mjs
 node scripts/codepen/probe-browser-reload.mjs
 node scripts/codepen/probe-browser-reload.mjs target/codepen-browser/miri --documentation-starters
@@ -181,3 +186,11 @@ for state-preserving edits, animation, async timers and UTF-16 IME composition.
 Generate its references with the engine tests and include
 `--starter-dir target/codepen-browser-probe` when bundling. Mock transport tests
 are separate from the full compiler/interpreter probe.
+
+For interpreter comparisons, run the canonical engine test to generate all 21
+counter frames, then compare two bundles with
+`benchmark-redraw.py CONTROL CANDIDATE --output target/redraw-comparison`.
+It alternates fresh-process arms, performs 20 real clicks per arm, checks every
+complete frame against native GPUI, and reports wall time and Worker CPU time.
+Run this without competing builds or probes; it disables compiler prewarming
+and profiling so the measurement reflects resident redraw execution.

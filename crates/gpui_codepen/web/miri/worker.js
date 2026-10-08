@@ -103,7 +103,8 @@ function nextProgram(exitCode) {
     postMessage({ kind: "compiled", generation: current.generation, patch,
       ...(profileMetadata ? { metadata_pages: diagnostics } : {}),
       ...(profileContract ? { contract_map: new TextDecoder().decode(root.dir.contents.get("contract.map")?.data) } : {}),
-      diagnostics: patch ? "" : diagnostics.trim(), compile_ms: performance.now() - compileStarted },
+      diagnostics: patch ? "" : diagnostics.trim(), compile_ms: performance.now() - compileStarted,
+      wasm_memory_bytes: instance.exports.memory.buffer.byteLength },
       patch ? [patch.buffer] : []);
     return new Promise(resolve => {
       programWaiter = message => { programWaiter = undefined; resolve(beginProgram(message)); };
@@ -189,7 +190,8 @@ function emitFrame(pointer, length) {
   const frame = new Uint8Array(instance.exports.memory.buffer, pointer, length).slice();
   const executionMs = performance.now() - executionStarted;
   postMessage({ kind: "reply", generation: current.generation, frame, diagnostics: "",
-    timings: { compile_ms: compileMs, execution_ms: executionMs, ...patchTimings },
+    timings: { compile_ms: compileMs, execution_ms: executionMs,
+      wasm_memory_bytes: instance.exports.memory.buffer.byteLength, ...patchTimings },
     ...(profileFunctions ? { profile: diagnostics } : {}),
     ...(profileMetadata ? { metadata_reads: Object.fromEntries(metadataReads), metadata_pages: diagnostics } : {}) }, [frame.buffer]);
   if (profileFunctions || profileMetadata) diagnostics = "";

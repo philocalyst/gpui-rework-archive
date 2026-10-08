@@ -14,6 +14,7 @@ const guideLessons = process.argv.includes("--guide-lessons");
 const warmOnly = process.argv.includes("--warm-only");
 const prewarmBenchmark = process.argv.includes("--prewarm-benchmark");
 const prewarmOverlap = process.argv.includes("--prewarm-overlap");
+const redrawBenchmark = process.argv.includes("--redraw-benchmark");
 const profileFrames = Number(process.env.GPUI_CODEPEN_CPU_PROFILE_FRAMES || 1);
 assert(Number.isInteger(profileFrames) && profileFrames > 0 && profileFrames <= 100);
 const fixture = resolve("target/codepen-browser-probe");
@@ -56,6 +57,7 @@ class BrowserWorker {
         (this.completedCompiles ||= new Set()).add(data.generation);
         timing.compiler_finished_ms = performance.now();
         timing.compile_ms = data.compile_ms;
+        timing.compiler_wasm_memory_bytes = data.wasm_memory_bytes;
         timing.patch_bytes = data.patch?.byteLength || 0;
         if (data.patch && !prewarmBenchmark) artifacts.push(writeFile(join(fixture, `browser-${data.generation}.mir`), data.patch.slice()));
       } else if (data.kind === "patched") {
@@ -200,6 +202,19 @@ try {
       }
       console.log(`PASS shipped documentation browser/native parity: ${name}`);
     }
+    passed = true;
+  } else if (redrawBenchmark) {
+    assert(documentationCounter, "Measure the canonical documentation counter");
+    const directory = join(fixture, "cases", "redraw-counter");
+    assert.equal(await readFile(join(directory, "source.rs"), "utf8"), source);
+    const count = Number(await readFile(join(directory, "count"), "utf8"));
+    assert.equal(count, 21);
+    for (let index = 0; index < count; index++) {
+      await evaluate(source, new Uint8Array(await readFile(join(directory, `${index}.input`))),
+        `cases/redraw-counter/${index}.frame`);
+    }
+    assert.equal(vmBoots, 1);
+    console.log("PASS 20 canonical redraws: every actual click matches its entire native GPUI frame");
     passed = true;
   } else if (prewarmBenchmark) {
     assert(documentationCounter, "Use the canonical documentation counter for warmup comparisons");

@@ -61,12 +61,21 @@ The differential tests compare sparse/dense, colliding, wrapping and short table
 with the pinned implementation and check lazy page initialization.
 
 `browser-interpreter.patch` caches successful call metadata, field/local layouts,
-trivially-sized local classification, required-constant checks, and always-live
-local sets. Keys include the generic instance and immutable MIR body identity
+trivially-sized local classification, required-constant checks, and ordered
+always-live local lists. Keys include the generic instance and immutable MIR body identity
 where revisions can change results. Frame-local handles avoid repeated map
 lookups; aggregate caps fall back to ordinary interpretation. Profiling counters
 are excluded from normal builds. JSPI cancellation checkpoints sample work at
 bounded intervals and set their timestamp after resumption to avoid a yield storm.
+
+`scripts/codepen/native_interpreter.py` builds that patched interpreter from the
+same checksum-verified compiler source for native Miri. Its separately identified
+`gpui_codepen_const_eval` crate uses the installed pinned rustc-private metadata;
+the narrow Cargo compiler wrapper selects it only for the Miri library. The
+installed driver's CTFE query providers and Ctrl-C flag remain upstream. Cache
+keys include the patches, builder, compiler revision, flags and installed private
+crate metadata hashes. The setup smoke test exercises both CTFE and Miri, then
+interrupts a running guest loop to verify the shared driver cancellation flag.
 
 The transport additions activate only with `GPUI_CODEPEN_IPC=1`. Profiling is
 opt-in through `GPUI_CODEPEN_PROFILE` (`1` for phases, `functions` for function

@@ -7,6 +7,9 @@ use std::task::Poll;
 use std::time::Duration;
 
 use rand::seq::IteratorRandom;
+#[cfg(codepen_native_interpreter)]
+use codepen_rustc_const_eval_original::CTRL_C_RECEIVED;
+#[cfg(not(codepen_native_interpreter))]
 use rustc_const_eval::CTRL_C_RECEIVED;
 use rustc_index::Idx;
 use rustc_span::DUMMY_SP;

@@ -6,6 +6,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+from native_interpreter import build_miri
 
 ROOT = Path(__file__).resolve().parents[2]
 TOOLCHAIN = "nightly-2026-09-30"
@@ -32,12 +33,15 @@ def main():
     env.pop("CARGO_ENCODED_RUSTFLAGS", None)
     env.pop("RUSTC_WRAPPER", None)
     cargo = ["rustup", "run", TOOLCHAIN, "cargo"]
-    run(cargo + ["build", "--release", "--locked", "--manifest-path", ROOT / "vendor/miri/Cargo.toml", "--no-default-features", "--features", "stack-cache"], env=env, cwd=ROOT)
+    build_miri(env)
     run(cargo + ["build", "--locked", "--manifest-path", ROOT / "vendor/miri/cargo-miri/Cargo.toml"], env=env, cwd=ROOT)
     # Fetch the fixed framework and interpreter dependencies. Per-edit builds use --offline.
     run(cargo + ["fetch", "--locked", "--manifest-path", ROOT / "Cargo.toml"], env=env, cwd=ROOT)
     env["MIRI"] = str(ROOT / f"vendor/miri/target/release/miri{EXE}")
     env["PATH"] = os.pathsep.join([str(ROOT / "vendor/miri/cargo-miri/target/debug"), str(sysroot / "bin"), str(sysroot / "lib"), env["PATH"]])
+    if os.name != "nt":
+        library_path = "DYLD_LIBRARY_PATH" if sys.platform == "darwin" else "LD_LIBRARY_PATH"
+        env[library_path] = os.pathsep.join([str(sysroot / "lib"), env.get(library_path, "")])
     env["GPUI_CODEPEN_SYSROOT_MIR_OPT_LEVEL"] = optimization
     env["MIRI_SYSROOT"] = str(ROOT / "target/codepen-sysroot" / ("mir-" + optimization))
     run(cargo + ["miri", "setup"], env=env, cwd=ROOT)
@@ -59,6 +63,7 @@ def main():
     shutil.copy2(ROOT / "Cargo.lock", warmup / "Cargo.lock")
     (warmup / "warmup.rs").write_text('use gpui::prelude::*; fn main() { let _ = gpui::div().p_4(); }')
     run(cargo + ["miri", "run", "--offline", "--quiet"], env=env, cwd=warmup)
+    run([sys.executable, ROOT / "scripts/codepen/test-native-interpreter.py", "--sysroot", env["MIRI_SYSROOT"]], env=env, cwd=ROOT)
     print("Ready. Run: cargo run -p gpui_ce_codepen --bin gpui-guide")
 
 if __name__ == "__main__":

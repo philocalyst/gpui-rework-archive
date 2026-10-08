@@ -196,6 +196,46 @@ fn documentation_keyboard_actions_use_the_focused_dispatch_path() {
 
 #[test]
 #[ignore = "requires setup.py and full vendored Miri"]
+fn canonical_counter_redraw_reference_frames() {
+    let source = include_str!("fixtures/documentation_counter.rs");
+    let mut runtime = Runtime::new().unwrap();
+    let initial = execute(&mut runtime, 1, source, PreviewContext::default());
+    let initial = initial.frame.expect(&initial.diagnostics);
+    let scene = initial.scene.to_scene().unwrap();
+    let button = scene.quads.iter().find(|quad| quad.background == gpui::rgb(0x155b50).into()).unwrap();
+    let center = button.bounds.center();
+    let mut input = click();
+    for event in &mut input.events {
+        match event {
+            gpui_ce_codepen::guest::InputMessage::Event(PlatformInput::MouseDown(event)) => event.position = point(px(center.x.0), px(center.y.0)),
+            gpui_ce_codepen::guest::InputMessage::Event(PlatformInput::MouseUp(event)) => event.position = point(px(center.x.0), px(center.y.0)),
+            _ => {}
+        }
+    }
+    let mut frames = vec![(PreviewContext::default(), initial)];
+    let started = Instant::now();
+    for generation in 2..=21 {
+        let result = execute(&mut runtime, generation, source, input.clone());
+        println!("Canonical native redraw {generation}: {} ms", result.elapsed_ms);
+        let frame = result.frame.expect(&result.diagnostics);
+        assert!(frame.scene != frames.last().unwrap().1.scene, "Every measured click must redraw the real counter");
+        frames.push((input.clone(), frame));
+    }
+    println!("20 canonical native redraws: {:?}", started.elapsed());
+    if std::env::var_os("GPUI_CODEPEN_VERIFY_REFERENCES").is_some() {
+        let references = gpui_ce_codepen::runtime::repository_root()
+            .join("target/codepen-browser-probe/cases/redraw-counter");
+        for (index, (_, frame)) in frames.iter().enumerate() {
+            assert_eq!(gpui_ce_codepen::guest::wire::encode(frame),
+                std::fs::read(references.join(format!("{index}.frame"))).unwrap(),
+                "A different interpreter must match the complete reference frame {index}");
+        }
+    }
+    save_browser_case("redraw-counter", source, &frames);
+}
+
+#[test]
+#[ignore = "requires setup.py and full vendored Miri"]
 fn documentation_text_hit_testing_maps_a_wrapped_utf8_cluster() {
     let source = include_str!("fixtures/documentation/text-hit-testing.rs");
     let mut runtime = Runtime::new().unwrap();

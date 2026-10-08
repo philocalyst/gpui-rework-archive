@@ -9,7 +9,7 @@
 +codepen-cache-profile = []
 --- a/compiler/rustc_const_eval/src/interpret/eval_context.rs
 +++ b/compiler/rustc_const_eval/src/interpret/eval_context.rs
-@@ -1,9 +1,11 @@
+@@ -1,9 +1,10 @@
  use std::cell::RefCell;
 +use std::rc::Rc;
  use std::collections::hash_map::Entry;
@@ -17,12 +17,11 @@
  use either::{Left, Right};
  use rustc_abi::{Align, HasDataLayout, Size, TargetDataLayout};
 -use rustc_data_structures::fx::FxHashMap;
-+use rustc_index::bit_set::DenseBitSet;
 +use rustc_data_structures::fx::{FxHashMap, FxHashSet};
  use rustc_hir::def_id::DefId;
  use rustc_middle::mir;
  use rustc_middle::mir::interpret::{ErrorHandled, InvalidMetaKind, ReportedErrorInfo};
-@@ -27,6 +29,17 @@
+@@ -27,6 +28,17 @@
  };
  use crate::{enter_trace_span, util};
  
@@ -40,7 +39,7 @@
  pub struct InterpCx<'tcx, M: Machine<'tcx>> {
      /// Stores the `Machine` instance.
      ///
-@@ -44,6 +57,35 @@
+@@ -44,6 +56,36 @@
  
      /// The query cache is slow so we have our own cache in front of it.
      pub(super) layout_cache: RefCell<FxHashMap<Ty<'tcx>, rustc_abi::Layout<'tcx>>>,
@@ -51,7 +50,8 @@
 +
 +    /// MIR bodies are arena-owned and immutable, including retained reload
 +    /// revisions. Scan their StorageLive/Dead annotations once per body.
-+    pub(super) storage_live_cache: FxHashMap<*const mir::Body<'tcx>, Rc<DenseBitSet<mir::Local>>>,
++    pub(super) storage_live_cache: FxHashMap<*const mir::Body<'tcx>, Rc<[mir::Local]>>,
++    pub(super) storage_live_entries: usize,
 +
 +    /// Successful post-monomorphization const checks are invariant for an
 +    /// instance and immutable MIR body. Never cache failures.
@@ -94,12 +94,13 @@
      }
  }
  
-@@ -253,6 +304,16 @@
+@@ -253,6 +304,17 @@
              tcx: tcx.at(root_span),
              typing_env,
              layout_cache: RefCell::new(FxHashMap::default()),
 +            field_layout_cache: RefCell::new(FxHashMap::default()),
 +            storage_live_cache: FxHashMap::default(),
++            storage_live_entries: 0,
 +            required_consts_cache: FxHashSet::default(),
 +            call_signature_cache: FxHashMap::default(),
 +            direct_call_cache: FxHashMap::default(),
@@ -273,25 +274,42 @@
          }
  
          // Finish things up.
-@@ -484,7 +525,16 @@
+@@ -484,10 +525,31 @@
          self.storage_live(mir::RETURN_PLACE)?;
  
          let body = self.body();
 -        let always_live = always_storage_live_locals(body);
+-        for local in body.vars_and_temps_iter() {
+-            if always_live.contains(local) {
 +        let key = body as *const _;
-+        let always_live = if let Some(locals) = self.storage_live_cache.get(&key) {
-+            Rc::clone(locals)
-+        } else {
-+            let locals = Rc::new(always_storage_live_locals(body));
-+            if self.storage_live_cache.len() < 65_536 {
-+                self.storage_live_cache.insert(key, Rc::clone(&locals));
-+            }
-+            locals
-+        };
-         for local in body.vars_and_temps_iter() {
-             if always_live.contains(local) {
++        if let Some(locals) = self.storage_live_cache.get(&key).cloned() {
++            // Preserve MIR local order and every storage_live machine hook.
++            for &local in locals.iter() {
                  self.storage_live(local)?;
-@@ -496,6 +546,19 @@
++            }
++        } else {
++            let always_live = always_storage_live_locals(body);
++            if self.storage_live_cache.len() < 65_536
++                && body.local_decls.len() <= 1_048_576 - self.storage_live_entries {
++                let locals: Rc<[mir::Local]> = body.vars_and_temps_iter()
++                    .filter(|&local| always_live.contains(local)).collect();
++                self.storage_live_entries += locals.len();
++                self.storage_live_cache.insert(key, Rc::clone(&locals));
++                for &local in locals.iter() {
++                    self.storage_live(local)?;
++                }
++            } else {
++                // A large generated body or exhausted cache keeps the upstream
++                // bitset traversal without allocating another local vector.
++                for local in body.vars_and_temps_iter() {
++                    if always_live.contains(local) {
++                        self.storage_live(local)?;
++                    }
++                }
+             }
+         }
+ 
+@@ -496,6 +558,19 @@
  
          interp_ok(())
      }
@@ -311,7 +329,7 @@
  
      pub fn storage_live_dyn(
          &mut self,
-@@ -549,7 +612,21 @@
+@@ -549,7 +624,21 @@
  
          // This is a hot function, we avoid computing the layout when possible.
          // `unsized_` will be `None` for sized types and `Some(layout)` for unsized types.
@@ -334,7 +352,7 @@
              None
          } else {
              // We need the layout.
-@@ -629,6 +706,21 @@
+@@ -629,6 +718,21 @@
              return interp_ok(layout);
          }
  
@@ -356,7 +374,7 @@
          let layout = from_known_layout(self.tcx, self.typing_env, layout, || {
              let local_ty = frame.body.local_decls[local].ty;
              let local_ty =
-@@ -638,6 +730,7 @@
+@@ -638,6 +742,7 @@
  
          // Layouts of locals are requested a lot, so we cache them.
          state.layout.set(Some(layout));

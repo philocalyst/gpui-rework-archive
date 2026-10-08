@@ -65,7 +65,12 @@ extern crate rustc_apfloat;
 extern crate rustc_ast;
 extern crate rustc_attr_ir;
 extern crate rustc_codegen_ssa;
+#[cfg_attr(codepen_native_interpreter, allow(unused_extern_crates))]
 extern crate rustc_const_eval;
+// The native CodePen interpreter uses a private, patched const-eval crate.
+// rustc_driver still owns its original crate and process-wide Ctrl-C flag.
+#[cfg(codepen_native_interpreter)]
+extern crate codepen_rustc_const_eval_original;
 extern crate rustc_data_structures;
 extern crate rustc_errors;
 extern crate rustc_hir;
@@ -75,6 +80,8 @@ extern crate rustc_log;
 extern crate rustc_middle;
 extern crate rustc_session;
 extern crate rustc_serialize;
+#[cfg(target_family = "wasm")]
+extern crate rustc_metadata;
 extern crate rustc_span;
 extern crate rustc_structures;
 extern crate rustc_symbol_mangling;
