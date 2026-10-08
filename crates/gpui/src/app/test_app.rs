@@ -508,13 +508,18 @@ impl<V: 'static + Render> TestAppWindow<V> {
     /// Resizes the simulated platform window and drains ready work.
     pub fn simulate_resize(&mut self, size: Size<Pixels>) {
         let window_id = self.handle.window_id();
-        let mut app = self.app.borrow_mut();
-        if let Some(Some(window)) = app.windows.get_mut(window_id) {
-            if let Some(test_window) = window.platform_window.as_test() {
-                test_window.simulate_resize(size);
-            }
+        let test_window = {
+            let mut app = self.app.borrow_mut();
+            app.windows
+                .get_mut(window_id)
+                .and_then(Option::as_mut)
+                .and_then(|window| window.platform_window.as_test())
+                .cloned()
+        };
+        // The resize callback reacquires the app to update the viewport.
+        if let Some(mut test_window) = test_window {
+            test_window.simulate_resize(size);
         }
-        drop(app);
         self.background_executor.run_until_parked();
     }
 
@@ -595,6 +600,20 @@ mod tests {
 
         drop(window);
         app.update(|cx| cx.shutdown());
+    }
+
+    #[test]
+    fn test_resize_updates_gpui_viewport() {
+        let mut app = TestApp::new();
+        let mut window = app.open_window(Counter::new);
+
+        for expected in [
+            crate::size(crate::px(300.), crate::px(200.)),
+            crate::size(crate::px(150.), crate::px(120.)),
+        ] {
+            window.simulate_resize(expected);
+            window.update(|_, window, _| assert_eq!(window.viewport_size(), expected));
+        }
     }
 
     #[test]
