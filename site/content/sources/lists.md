@@ -12,7 +12,7 @@ description = "The annotated Rust source used to build this walkthrough."
 <span id="L3" class="source-line"><a href="#L3" class="line-number" data-line="3" aria-label="Line 3" tabindex="-1"></a></span>
 <span id="L4" class="source-line"><a href="#L4" class="line-number" data-line="4" aria-label="Line 4" tabindex="-1"></a>// ## Reserve a scrolling viewport &#123;#viewport&#125;</span>
 <span id="L5" class="source-line"><a href="#L5" class="line-number" data-line="5" aria-label="Line 5" tabindex="-1"></a>// The data set has 10,000 indices, but the callback constructs only the range</span>
-<span id="L6" class="source-line"><a href="#L6" class="line-number" data-line="6" aria-label="Line 6" tabindex="-1"></a>// needed near the visible viewport (plus the list&#x27;s overdraw). [`uniform_list`]</span>
+<span id="L6" class="source-line"><a href="#L6" class="line-number" data-line="6" aria-label="Line 6" tabindex="-1"></a>// needed near the visible viewport, plus a region beyond it called overdraw. [`uniform_list`]</span>
 <span id="L7" class="source-line"><a href="#L7" class="line-number" data-line="7" aria-label="Line 7" tabindex="-1"></a>// can map scroll offsets to indices because every row has the same measured</span>
 <span id="L8" class="source-line"><a href="#L8" class="line-number" data-line="8" aria-label="Line 8" tabindex="-1"></a>// height. The parent requests 320 logical pixels and may shrink in a short</span>
 <span id="L9" class="source-line"><a href="#L9" class="line-number" data-line="9" aria-label="Line 9" tabindex="-1"></a>// window; the list fills the resulting finite scrolling viewport.</span>
@@ -46,7 +46,7 @@ description = "The annotated Rust source used to build this walkthrough."
 <span id="L37" class="source-line"><a href="#L37" class="line-number" data-line="37" aria-label="Line 37" tabindex="-1"></a>// &gt; [!WARNING]</span>
 <span id="L38" class="source-line"><a href="#L38" class="line-number" data-line="38" aria-label="Line 38" tabindex="-1"></a>// &gt; Every row must have the same block-axis height. Wrapping text or expanding</span>
 <span id="L39" class="source-line"><a href="#L39" class="line-number" data-line="39" aria-label="Line 39" tabindex="-1"></a>// &gt; one row breaks the estimate used to map offsets to indices, so visible</span>
-<span id="L40" class="source-line"><a href="#L40" class="line-number" data-line="40" aria-label="Line 40" tabindex="-1"></a>// &gt; rows and scrollbar positions can be wrong. Use `list` for individually</span>
+<span id="L40" class="source-line"><a href="#L40" class="line-number" data-line="40" aria-label="Line 40" tabindex="-1"></a>// &gt; rows and scrollbar positions can be wrong. Use [list](https://docs.rs/gpui-ce/0.2.2/gpui/fn.list.html) for individually</span>
 <span id="L41" class="source-line"><a href="#L41" class="line-number" data-line="41" aria-label="Line 41" tabindex="-1"></a>// &gt; measured, variable-height rows.</span>
 <span id="L42" class="source-line"><a href="#L42" class="line-number" data-line="42" aria-label="Line 42" tabindex="-1"></a></span>
 <span id="L43" class="source-line"><a href="#L43" class="line-number" data-line="43" aria-label="Line 43" tabindex="-1"></a>impl Render for Rows &#123;</span>

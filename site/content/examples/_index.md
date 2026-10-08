@@ -10,8 +10,10 @@ independent: each has its own complete program and names the API contracts it us
 
 The browser previews run GPUI compiled to WebAssembly. The Rust in the page is
 extracted from the same canonical source used for the native download. A
-compiled preview and an editable Miri session are different execution paths;
-follow the editing guide for the current availability and limits of each.
+compiled preview and an editable Miri session are different execution paths.
+Choose **Edit Rust** to change a component with the compiler and interpreter
+running in your browser. The [editing guide](@/guides/live-editing.md) covers
+state retention, diagnostics, and downloading an edited native program.
 Download and run the native example when you need to check OS windowing or
 platform services.
 

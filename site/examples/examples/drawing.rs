@@ -64,8 +64,14 @@ impl Render for PaintDemo {
 // ## Compare clipping with resizing {#launch}
 // The platform helper creates this view with [`AppContext::new`]. Resize the
 // preview until the blue rectangle reaches the edge. The mask crops it rather
-// than making it narrower. Remove the mask and run again to compare.
-// Continue to the [drawing guide](@/guides/drawing.md) for paths and curves.
+// than making it narrower.
+//
+// To see the difference without the window edge hiding the overflow, replace
+// the canvas's `.size_full()` with `.w(px(100.)).h(px(100.))`. The blue quad
+// starts at x=80 and remains 60 pixels wide, but its mask shows only 20 pixels.
+// Change `Some(mask)` to `None` in `with_content_mask`: the complete quad now
+// extends beyond the canvas into the rest of the window. Restore both changes
+// afterward. Continue to the [drawing guide](@/guides/drawing.md) for paths and curves.
 
 fn component(_window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<PaintDemo> {
     cx.new(|_cx| PaintDemo)

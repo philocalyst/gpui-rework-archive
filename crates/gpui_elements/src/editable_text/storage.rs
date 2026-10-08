@@ -22,9 +22,9 @@ use unicode_segmentation::UnicodeSegmentation;
 /// Implement this trait to replace the default [`StringStorage`] with a document representation
 /// suited to the application's size and mutation pattern. GPUI currently requests a contiguous
 /// `&str` for layout and snapshots the current contents as a [`gpui::SharedString`], so this trait
-/// does not by itself make the rendering pipeline zero-copy. `replace_range` receives UTF-8 byte
-/// indices and must reject neither valid in-range edits nor break UTF-8 boundaries. Increase
-/// `version` whenever content changes so the element knows to rebuild its text layout.
+/// does not by itself make the rendering pipeline zero-copy. [`replace_range`](Self::replace_range)
+/// receives UTF-8 byte indices and must apply valid in-range edits while preserving UTF-8.
+/// Advance [`version`](Self::version) whenever content changes so the element rebuilds its layout.
 pub trait UnicodeTextStorage {
     /// Returns the current content generation.
     ///
@@ -50,8 +50,9 @@ pub trait UnicodeTextStorage {
 
     /// Converts a UTF-8 byte offset to a UTF-16 code-unit offset.
     ///
-    /// Offsets at or beyond the text length map to the end. Interior offsets should be on a
-    /// character boundary.
+    /// The default implementation clamps offsets past the end. An offset inside an encoded
+    /// character rounds forward to that character's end, as in [`utf8_to_utf16_offset`].
+    /// This converts units; it does not normalize to a grapheme boundary.
     fn utf_offset_8to16(&self, pos_uft8: usize) -> usize {
         // Fast path: if offset is 0, return 0
         if pos_uft8 == 0 {
@@ -68,8 +69,17 @@ pub trait UnicodeTextStorage {
 
     /// Converts a UTF-16 code-unit offset to a UTF-8 byte offset.
     ///
-    /// Offsets past the UTF-16 length map to the end. An offset inside a surrogate pair is
-    /// resolved by GPUI's conversion helper to a valid UTF-8 boundary.
+    /// The default implementation clamps offsets past the end and rounds an offset inside a
+    /// surrogate pair forward to that character's end, as in [`utf16_to_utf8_offset`].
+    ///
+    /// ```
+    /// use gpui_ce_elements::editable_text::{StringStorage, UnicodeTextStorage};
+    ///
+    /// let text = StringStorage::from("a😀b");
+    /// assert_eq!(text.utf_offset_8to16(5), 3); // After the emoji: bytes become code units.
+    /// assert_eq!(text.utf_offset_16to8(3), 5); // The same boundary in the other direction.
+    /// assert_eq!(text.utf_offset_16to8(2), 5); // Inside the surrogate pair: round forward.
+    /// ```
     fn utf_offset_16to8(&self, pos_utf16: usize) -> usize {
         // Fast path: if offset is 0, return 0
         if pos_utf16 == 0 {
@@ -79,20 +89,28 @@ pub trait UnicodeTextStorage {
         utf16_to_utf8_offset(self.content_utf8(), pos_utf16)
     }
 
-    /// Converts a utf8 character range into a utf16 character range.
+    /// Converts both endpoints of a UTF-8 byte range to UTF-16 code units.
+    ///
+    /// Each endpoint follows [`utf_offset_8to16`](Self::utf_offset_8to16), including its clamping
+    /// and rounding rules. This does not sort endpoints or expand to whole graphemes.
     fn utf_range_8to16(&self, range_utf8: &Range<usize>) -> Range<usize> {
         self.utf_offset_8to16(range_utf8.start)..self.utf_offset_8to16(range_utf8.end)
     }
 
-    /// Converts a utf16 character range into a utf8 character range.
+    /// Converts both endpoints of a UTF-16 code-unit range to UTF-8 bytes.
+    ///
+    /// Each endpoint follows [`utf_offset_16to8`](Self::utf_offset_16to8), including its clamping
+    /// and rounding rules. This does not sort endpoints or expand to whole graphemes.
     fn utf_range_16to8(&self, range_utf16: &Range<usize>) -> Range<usize> {
         self.utf_offset_16to8(range_utf16.start)..self.utf_offset_16to8(range_utf16.end)
     }
 
-    /// Builds a UTF-8 byte range based on a caret offset within the storage,
-    /// the direction to traverse, and the boundary to stop at.
-    /// The start of the range will be the earlier position (destination if Back, caret if Forward),
-    /// and the end will be the later position (caret if Back, destination if Forward).
+    /// Returns the source range between `caret` and its navigation destination.
+    ///
+    /// Supply an in-bounds UTF-8 character boundary. Backward movement returns `destination..caret`;
+    /// forward movement returns `caret..destination`. The default delegates to
+    /// [`offset_from_caret`](Self::offset_from_caret) and preserves the supplied caret endpoint;
+    /// it does not clamp that endpoint or validate a range returned by a custom implementation.
     fn range_from_caret(
         &self,
         caret: usize,
@@ -106,12 +124,17 @@ pub trait UnicodeTextStorage {
         }
     }
 
-    /// Finds the next UTF-8 byte offset from the caret according to a navigation boundary.
+    /// Finds a navigation destination in logical source order, in UTF-8 bytes.
     ///
-    /// `Cluster` uses Unicode grapheme clusters. `Word` uses Unicode word segments and skips the
-    /// separator preceding/following the next word as implemented by `unicode-segmentation`.
-    /// `VisualLine` and `HardLine` share newline-based fallback behavior here; when a current text
-    /// layout is available, `EditableTextState` uses shaped visual-line geometry instead.
+    /// Backward means earlier in the string, which can differ from visually left in bidirectional
+    /// text. Supply a UTF-8 character boundary; the default implementation slices at the caret and
+    /// can panic for an interior byte. Grapheme movement also needs a grapheme boundary if it must
+    /// preserve whole clusters.
+    ///
+    /// `Cluster` uses Unicode grapheme segmentation. `Word` moves to the preceding word's start or
+    /// the following word's end, using `unicode_word_indices`. Both `VisualLine` and `HardLine`
+    /// stop at newline boundaries here: storage has no wrapping geometry. Keyboard actions on
+    /// the field use shaped layout when available; these storage helpers do not.
     fn offset_from_caret(
         &self,
         caret: usize,
@@ -181,10 +204,21 @@ pub trait UnicodeTextStorage {
         }
     }
 
-    /// Returns the UTF-8 byte range of the Unicode word containing `position`.
+    /// Returns the UTF-8 byte range of the Unicode word at or ending at `position`.
     ///
-    /// A position outside a word (including whitespace and punctuation) returns an empty range at
-    /// the clamped offset.
+    /// The default uses Unicode word segmentation and includes a word's end when testing the
+    /// position. Thus an offset exactly between a word and its following punctuation selects
+    /// that word. Other gaps return an empty range at the offset. Positions past the text end
+    /// clamp to the end and can select the final word.
+    ///
+    /// ```
+    /// use gpui_ce_elements::editable_text::{StringStorage, UnicodeTextStorage};
+    ///
+    /// let text = StringStorage::from("cat! dog");
+    /// assert_eq!(text.word_range_at(3), 0..3); // The end of "cat", just before '!'.
+    /// assert_eq!(text.word_range_at(4), 4..4); // The gap after '!'.
+    /// assert_eq!(text.word_range_at(99), 5..8); // Clamped to the final word's end.
+    /// ```
     fn word_range_at(&self, position: usize) -> Range<usize> {
         let offset = position.min(self.content_utf8().len());
 

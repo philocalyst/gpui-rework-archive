@@ -77,7 +77,7 @@
       {
         "example": "async-task",
         "step": "launch",
-        "step_title": "Try stopping before completion",
+        "step_title": "Start from an idle view",
         "title": "Finish a task after a delay",
         "url": "/examples/async-task/#launch"
       },

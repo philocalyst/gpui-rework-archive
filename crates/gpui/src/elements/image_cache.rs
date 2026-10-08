@@ -36,7 +36,12 @@ pub fn image_cache(image_cache_provider: impl ImageCacheProvider) -> ImageCacheE
     }
 }
 
-/// A type-erased image-cache handle for generic element code.
+/// A shared, type-erased image-cache handle for generic element code.
+///
+/// Convert an [`Entity<T>`] where `T: ImageCache` with `.into()`. Cloning this
+/// handle retains the same cache entity and its entries; it does not copy the
+/// cached images. Keep the concrete entity too when the owner needs
+/// provider-specific operations such as [`RetainAllImageCache::remove`].
 #[derive(Clone)]
 pub struct AnyImageCache {
     image_cache: AnyEntity,
@@ -191,9 +196,9 @@ pub type ImageLoadingTask = Shared<Task<Result<Arc<RenderImage>, ImageCacheError
 
 /// A pending or completed image-cache entry, including cached failures.
 pub enum ImageCacheItem {
-    /// The associated image is currently loading
+    /// A request that has not yet been observed as complete by [`Self::get`].
     Loading(ImageLoadingTask),
-    /// This item has loaded an image.
+    /// A completed request, containing either the decoded image or its failure.
     Loaded(Result<Arc<RenderImage>, ImageCacheError>),
 }
 
@@ -270,6 +275,9 @@ impl<T: ImageCache> ImageCacheProvider for Entity<T> {
 ///
 /// This cache does not evict entries automatically. Use [`clear`](Self::clear) or [`remove`](Self::remove)
 /// when the retained resources should be released earlier than the cache entity's lifetime.
+/// Requests are keyed by the resource's hash, and failures remain cached too.
+/// Choose [`retain_all`] for a cache retained by element identity or
+/// [`Self::new`] for a cache entity explicitly owned by the view.
 pub struct RetainAllImageCache(HashMap<u64, ImageCacheItem>);
 
 impl fmt::Debug for RetainAllImageCache {

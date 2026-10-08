@@ -41,12 +41,13 @@ struct SelectionDragVisualCaret {
     position: CaretPosition,
 }
 
-/// Text, selection, input handling, and focus state for an [`EditableTextElement`].
+/// Text, selection, input handling, and focus state for an [`EditableTextElement`](super::EditableTextElement).
 ///
 /// The entity owns a [`UnicodeTextStorage`](super::UnicodeTextStorage); selection and edit ranges
-/// use UTF-8 byte offsets. Its [`FocusHandle`] is internal to the control, so callers observe focus
-/// through normal GPUI focus tracking rather than supplying a separate handle. Use keyed state
-/// constructors while rendering to preserve the entity across frames.
+/// use UTF-8 byte offsets. It implements [`Focusable`], so use its [`FocusHandle`] to focus the
+/// field or observe focus changes. Retain its entity on the owning view, or use the keyed-state
+/// constructors while rendering when its lifetime should follow the element. See the
+/// [module examples](super) for both choices.
 pub struct EditableTextState {
     /// Backing text storage, usually `StringStorage`; custom storage can support long documents.
     storage: Box<dyn UnicodeTextStorage>,
@@ -88,9 +89,10 @@ impl EventEmitter<CaretNotify> for EditableTextState {}
 
 /// Event emitted after a text replacement or user edit in an [`EditableTextState`].
 ///
-/// This event is for reacting to committed content, such as updating a search result or form model.
-/// It fires after mutation; it cannot reject or sanitize incoming text. It is emitted for user
-/// edits and programmatic replacement through [`EditableTextState::emplace`].
+/// Subscribe to update a search result or form model after mutation. The event carries no value;
+/// read the state for its current text. It is emitted for user edits, undo/redo, IME composition
+/// updates, and programmatic replacement through [`EditableTextState::emplace`]. Composition text
+/// may still be provisional. This event cannot reject an edit and does not indicate submission.
 pub struct TextChanged;
 impl EventEmitter<TextChanged> for EditableTextState {}
 /// Emitted when an edit exceeds an explicitly configured UTF-8 byte limit.
@@ -160,12 +162,16 @@ impl EditableTextState {
         window.use_keyed_state(key, cx, |window, cx| Self::new(init(window, cx), cx))
     }
 
-    /// Creates an editable-text state around `storage`.
+    /// Creates an editable field's state around `storage`.
     ///
-    /// This constructor does not intrinsically attach the state to an element
-    /// over multiple frames (e.g. via [`RenderOnce`]). Use [`use_keyed`] or [`use_keyed_init`] for that.
+    /// Use [`AppContext::new`](gpui::AppContext::new) and retain the resulting entity on its
+    /// owning view. Pass a weak handle to [`EditableTextElement::state`](super::EditableTextElement::state)
+    /// when rendering. Construction starts with a collapsed selection at byte zero, no composition,
+    /// a new focus handle, and empty undo history; it does not focus the field.
     ///
-    /// Expected to be called via [`AppContext::new`] such as:
+    /// For a field whose state should instead follow its element's presence, use
+    /// [`use_keyed_init`](Self::use_keyed_init) during rendering.
+    ///
     /// ```
     /// # use gpui::{AppContext, Window, App, Entity};
     /// # use gpui_ce_elements::editable_text::{StringStorage, EditableTextState};
@@ -224,7 +230,10 @@ impl EditableTextState {
         self.max_bytes = Some(limit);
         self
     }
-    /// Returns the backing storage generation used to detect content changes.
+    /// Returns the backing storage's wrapping generation counter.
+    ///
+    /// Layout uses this to detect content changes. It is a `u16`, not a unique revision ID;
+    /// see [`UnicodeTextStorage::version`] for the storage contract.
     pub fn version(&self) -> u16 {
         self.storage.version()
     }
@@ -648,9 +657,10 @@ impl EditableTextState {
 
     /// Moves the caret to a UTF-8 byte offset in the current text.
     ///
-    /// `caret_pos` should be a valid UTF-8 character boundary; offsets past the text end are
-    /// clamped. The current scroll position updates on the next frame if the caret's line is out
-    /// of view.
+    /// This collapses the selection at `caret_pos`, clamped to the text's byte length. Supply a
+    /// valid UTF-8 character boundary: this method does not validate interior bytes or snap to
+    /// a grapheme boundary. It notifies the field and requests scrolling the caret into view on
+    /// the next frame. Use [`nav_linear`](Self::nav_linear) to move relative to the existing caret.
     pub fn move_to(&mut self, caret_pos: usize, cx: &mut Context<Self>) {
         self.move_to_caret(self.caret_for_index(caret_pos), cx);
     }
@@ -672,9 +682,9 @@ impl EditableTextState {
 
     /// Extends the selection's active end to a UTF-8 byte offset in the current text.
     ///
-    /// `caret_pos` should be a valid UTF-8 character boundary; offsets past the text end are
-    /// clamped. The current scroll position updates on the next frame if the caret's line is out
-    /// of view.
+    /// The anchor remains fixed; the active caret moves to `caret_pos`, clamped to the text's byte
+    /// length. Supply a valid UTF-8 character boundary; interior bytes and grapheme boundaries
+    /// are not normalized. Notification and scrolling follow [`move_to`](Self::move_to).
     pub fn select_to(&mut self, caret_pos: usize, cx: &mut Context<Self>) {
         self.select_to_caret(self.caret_for_index(caret_pos), cx);
     }
@@ -698,19 +708,17 @@ impl EditableTextState {
         cx.notify();
     }
 
-    /// Deletes the selected text, or text on one side of the caret.
-    /// No-op if the element is currently not accepting input.
+    /// Deletes the selection, or a neighboring range when the selection is empty.
     ///
-    /// If there is a selection of multiple characters, the slice of text represented
-    /// by range is replaced with an empty string.
-    /// If there is no selection, `direction` and `boundary` are used to determine the slice of text to remove.
+    /// A nonempty selection is removed regardless of `direction` and `boundary`. Otherwise the
+    /// current shaped layout supplies cluster, word, and hard-line deletion ranges when available.
+    /// Visual-line and document deletion, or an unavailable layout, use the storage's
+    /// [`range_from_caret`](UnicodeTextStorage::range_from_caret); its line fallback uses newlines.
     ///
-    /// [`NavigationDirection::Back`] represents scanning earlier in the text string from the caret.
-    ///
-    /// [`NavigationDirection::Forward`] represents scanning later in the text string from the caret.
-    ///
-    /// [`TextBoundary`] describes how far to move: a grapheme cluster, Unicode word, line, or
-    /// document. With a selection, the selected range is removed regardless of `direction`.
+    /// Successful handling records history, emits [`TextChanged`], and notifies the field, even
+    /// when the selected deletion range is empty. It does nothing when input is disabled in the
+    /// last laid-out field, including before the state's first layout. Use [`emplace`](Self::emplace)
+    /// to replace a value programmatically before it is rendered.
     pub fn delete_linear(
         &mut self,
         direction: NavigationDirection,
@@ -754,17 +762,18 @@ impl EditableTextState {
         cx.notify();
     }
 
-    /// Moves the caret relative to its current location according to `direction` and `boundary`.
+    /// Moves the caret earlier or later in logical source order.
     ///
-    /// If there is currently a selection, the cursor will jump to the start/end of that selection based on `direction`.
+    /// For cluster, word, and line movement, a nonempty selection first collapses to its earlier
+    /// or later endpoint without moving farther. With no selection, movement follows
+    /// [`UnicodeTextStorage::offset_from_caret`]. Both line boundaries use newlines, including
+    /// `VisualLine`; this API does not consult wrapping geometry. `Document` instead goes directly
+    /// to byte zero or the text's end, whether or not a selection exists.
     ///
-    /// [`NavigationDirection::Back`] represents scanning earlier in the text string from the current caret.
-    ///
-    /// [`NavigationDirection::Forward`] represents scanning later in the text string from the current caret.
-    ///
-    /// [`TextBoundary`] describes whether to move by grapheme cluster, Unicode word, line, or the
-    /// whole document. For `VisualLine`, movement uses current shaped layout when available; the
-    /// storage fallback uses newline boundaries.
+    /// The field's keyboard actions use shaped visual navigation when available. Use those actions
+    /// for Left/Right and Up/Down commands; a logical backward step can move visually right in
+    /// bidirectional text. See [`actions::NavLeft`](super::actions::NavLeft) and
+    /// [`actions::NavUp`](super::actions::NavUp).
     pub fn nav_linear(
         &mut self,
         direction: NavigationDirection,
@@ -878,15 +887,12 @@ impl EditableTextState {
         cx.notify();
     }
 
-    /// Extends the current selection from its caret according to `direction` and `boundary`.
+    /// Extends the selection earlier or later in logical source order, keeping its anchor fixed.
     ///
-    /// [`NavigationDirection::Back`] represents scanning earlier in the text string from the current caret.
-    ///
-    /// [`NavigationDirection::Forward`] represents scanning later in the text string from the current caret.
-    ///
-    /// [`TextBoundary`] describes whether to extend by grapheme cluster, Unicode word, line, or the
-    /// whole document. `VisualLine` uses shaped layout when it is current and newline fallback
-    /// otherwise.
+    /// Cluster, word, and line destinations come from [`UnicodeTextStorage::offset_from_caret`];
+    /// both line variants use newlines. `Document` extends to byte zero or the text's end. Unlike
+    /// [`nav_linear`](Self::nav_linear), a nonempty selection is extended rather than collapsed.
+    /// Use the field's keyboard selection actions when movement should follow visual layout.
     pub fn select_linear(
         &mut self,
         direction: NavigationDirection,
@@ -965,8 +971,9 @@ impl EditableTextState {
     ///
     /// History is owned by this state and is not shared with another field. Its default grouping
     /// combines compatible adjacent edits made within 300 ms of the group's first entry, and the
-    /// undo stack retains at most 1000 recorded entries. `Some` is returned for states created by
-    /// this implementation; the optional return preserves the history-enabled contract.
+    /// undo stack retains at most 1000 recorded entries. States created by [`new`](Self::new)
+    /// currently always have history. Use [`EditableTextHistory::has_next`] and
+    /// [`HistoryKind`](super::HistoryKind) to determine whether an Undo or Redo control is enabled.
     pub fn history(&self) -> Option<&EditableTextHistory> {
         self.history.as_ref()
     }
@@ -1005,13 +1012,16 @@ impl EditableTextState {
 
         // Push the entry onto the redo stack so the undo can be undone
         let selection = entry.selected_range;
+        let mut inverse = entry.as_inverted(removed_text);
+        inverse.selected_range = self.selection_movement.result;
         self.history
             .as_mut()
             .expect("history was available when the entry was taken")
-            .push(dst, entry.as_inverted(removed_text));
+            .push(dst, inverse);
         self.set_selection(selection);
 
         self.scroll_to_caret();
+        self.emit_text_changed(cx);
         cx.notify();
     }
 }
@@ -2819,6 +2829,56 @@ mod tests {
                 [0, 1, 5, 6, 9, 12]
             );
         });
+    }
+
+    #[gpui::test]
+    fn redo_restores_the_selection_from_before_undo(cx: &mut TestAppContext) {
+        let view = create_test_input(cx, "A😀B", 1..5);
+        update_movement_input(view, cx, |input, window, cx| {
+            without_history_grouping(input);
+            let before_edit = input.caret_selection();
+            input.replace_text_in_range(None, "日本", window, cx);
+            let after_edit = input.caret_selection();
+            assert_ne!(before_edit, after_edit);
+
+            input.undo(&Undo, window, cx);
+            assert_eq!(input.as_str(), "A😀B");
+            assert_eq!(input.caret_selection(), before_edit);
+
+            input.redo(&Redo, window, cx);
+            assert_eq!(input.as_str(), "A日本B");
+            assert_eq!(input.caret_selection(), after_edit);
+        });
+    }
+
+    #[gpui::test]
+    fn undo_and_redo_publish_text_changes(cx: &mut TestAppContext) {
+        let view = create_test_input(cx, "before", 6);
+        let entity = view.update(cx, |view, _, _| view.input.clone()).unwrap();
+        let changes = Rc::new(Cell::new(0));
+        let _subscription = cx.update(|cx| {
+            let changes = changes.clone();
+            cx.subscribe(&entity, move |_, _: &TextChanged, _| {
+                changes.set(changes.get() + 1);
+            })
+        });
+        update_movement_input(view, cx, |input, _, cx| {
+            without_history_grouping(input);
+            input.emplace("after", cx);
+        });
+        assert_eq!(changes.get(), 1);
+
+        update_movement_input(view, cx, |input, window, cx| {
+            input.undo(&Undo, window, cx);
+            assert_eq!(input.as_str(), "before");
+        });
+        assert_eq!(changes.get(), 2);
+
+        update_movement_input(view, cx, |input, window, cx| {
+            input.redo(&Redo, window, cx);
+            assert_eq!(input.as_str(), "after");
+        });
+        assert_eq!(changes.get(), 3);
     }
 
     #[gpui::test]

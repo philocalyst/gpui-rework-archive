@@ -22,8 +22,9 @@ pub enum CaretNotify {
 ///
 /// Text layout owns the caret's position and geometry. This entity only tracks focus and timing;
 /// it is hidden while unfocused. Blinking is disabled by default, so use one of the interval
-/// builders to opt in. Subscribe it to the field's [`EditableTextState`] so edits restart the
-/// visible interval.
+/// builders to opt in. The editable element creates and subscribes its caret automatically;
+/// configure it with [`caret_blink_interval`](super::EditableTextElement::caret_blink_interval).
+/// A custom field can subscribe its own caret to [`CaretNotify`] events.
 #[derive(Default)]
 pub struct Caret {
     /// The frequency at which the caret blinks
@@ -45,6 +46,10 @@ impl Caret {
     }
 
     /// Sets the duration between visibility changes; zero disables blinking.
+    ///
+    /// This changes the interval without starting a timer or notifying the entity. A focused
+    /// caret starts or restarts its cycle on the next [`CaretNotify::PauseBlinking`] event or
+    /// focus change. Configure a new caret before its first prepaint when possible.
     pub fn set_blink_interval(&mut self, interval: Duration) {
         self.interval = interval;
     }
@@ -63,7 +68,7 @@ impl Caret {
         self.with_blink_interval(BLINK_INTERVAL_500MS)
     }
 
-    /// Listens for [`CaretNotify`] events on an entity, usually an [`EditableTextState`].
+    /// Listens for [`CaretNotify`] events on an entity, usually an [`EditableTextState`](super::EditableTextState).
     ///
     /// Retains the subscription in this caret entity. The editable-text state emits
     /// `PauseBlinking` after caret movement and text input; this keeps the caret visible for a full

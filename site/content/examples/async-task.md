@@ -18,8 +18,7 @@ example_run = "cargo run -p gpui-documentation-examples --example async-task"
 Start waits two seconds, then displays Complete. Stop cancels that wait.
 The view stores the returned [`Task`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Task.html) because the operation belongs to this
 view. Clearing the field drops the handle and cancels its remaining polling;
-releasing the view drops the field as well. Dropping a task is local
-cancellation, not rollback of work already accepted elsewhere.
+releasing the view drops the field as well.
 
 `running` chooses the button label, and `message` supplies the displayed
 status. Both are ordinary state updated through the view's [`Context`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html).
@@ -37,7 +36,7 @@ struct AsyncDemo {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/async-task/") }}#L14).
+[View this step in the source]({{ get_url(path="sources/async-task/") }}#L13).
 
 <a id="completion"></a>
 ## Wait, then reacquire the view
@@ -80,7 +79,7 @@ impl AsyncDemo {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/async-task/") }}#L37).
+[View this step in the source]({{ get_url(path="sources/async-task/") }}#L36).
 
 <a id="lifetime"></a>
 ## Expose Start and Stop
@@ -141,15 +140,15 @@ impl Render for AsyncDemo {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/async-task/") }}#L79).
+[View this step in the source]({{ get_url(path="sources/async-task/") }}#L78).
 
 <a id="launch"></a>
-## Try stopping before completion
+## Start from an idle view
 
-Click Start, wait less than two seconds, then click Stop. The status stays
-Stopped after the original delay would have elapsed. Start again and let it
-finish. The view and its task are created under [`AppContext::new`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.AppContext.html#tymethod.new); no task
-is detached from that owner.
+[`AppContext::new`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.AppContext.html#tymethod.new) creates the view with no task, a Start button, and Ready
+status. Press Start to create the view-owned task. Wait less than two seconds,
+then press Stop: the status should remain Stopped after the original deadline.
+Start again and let the operation finish to check the completion path too.
 
 ```rust
 fn component(_window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<AsyncDemo> {
@@ -165,6 +164,6 @@ pub fn main() {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/async-task/") }}#L123).
+[View this step in the source]({{ get_url(path="sources/async-task/") }}#L122).
 
 [Download the complete source]({{ get_url(path="examples/async-task.rs") }}).

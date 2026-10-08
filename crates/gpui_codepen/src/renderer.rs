@@ -62,7 +62,9 @@ pub(crate) fn scene_view(
                 if event.keystroke.key_char.is_none()
                     || event.keystroke.modifiers.control
                     || event.keystroke.modifiers.platform
-                { cx.stop_propagation(); }
+                {
+                    cx.stop_propagation();
+                }
             }
         })
         .on_key_up(move |event, window, cx| {
@@ -285,9 +287,16 @@ mod tests {
     impl Render for HostPreview {
         fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
             let events = self.events.clone();
-            scene_view(None, 1., self.focus.clone(), self.state.clone(), None,
+            scene_view(
+                None,
+                1.,
+                self.focus.clone(),
+                self.state.clone(),
+                None,
                 Rc::new(move |event, _, _| events.borrow_mut().push(event)),
-                Rc::new(|_, _, _, _, _, _, _| {}), Rc::new(|_, _, _, _| {}))
+                Rc::new(|_, _, _, _, _, _, _| {}),
+                Rc::new(|_, _, _, _| {}),
+            )
         }
     }
 
@@ -297,34 +306,78 @@ mod tests {
         let text = gpui_codepen_guest::rpc::TextService::portable_factory()().unwrap();
         let mut app = HeadlessAppContext::new(text);
         let root_events = events.clone();
-        let handle = app.open_window(size(px(200.), px(100.)), |_, cx| {
-            cx.new(|cx| HostPreview { focus: cx.focus_handle(), other: cx.focus_handle(),
-                events: root_events, state: InputState::default() })
-        }).unwrap();
+        let handle = app
+            .open_window(size(px(200.), px(100.)), |_, cx| {
+                cx.new(|cx| HostPreview {
+                    focus: cx.focus_handle(),
+                    other: cx.focus_handle(),
+                    events: root_events,
+                    state: InputState::default(),
+                })
+            })
+            .unwrap();
         app.draw_window(handle.into()).unwrap();
         for input in [
-            PlatformInput::MouseMove(MouseMoveEvent { position: point(px(20.), px(20.)), ..Default::default() }),
-            PlatformInput::MouseDown(MouseDownEvent { position: point(px(20.), px(20.)), ..Default::default() }),
-            PlatformInput::MouseUp(MouseUpEvent { position: point(px(20.), px(20.)), ..Default::default() }),
-        ] { app.dispatch_input(handle.into(), input).unwrap(); }
+            PlatformInput::MouseMove(MouseMoveEvent {
+                position: point(px(20.), px(20.)),
+                ..Default::default()
+            }),
+            PlatformInput::MouseDown(MouseDownEvent {
+                position: point(px(20.), px(20.)),
+                ..Default::default()
+            }),
+            PlatformInput::MouseUp(MouseUpEvent {
+                position: point(px(20.), px(20.)),
+                ..Default::default()
+            }),
+        ] {
+            app.dispatch_input(handle.into(), input).unwrap();
+        }
         app.draw_window(handle.into()).unwrap();
-        let focused = app.update_window(handle.into(), |root, window, cx| {
-            root.downcast::<HostPreview>().unwrap().read(cx).focus.is_focused(window)
-        }).unwrap();
-        assert!(focused, "Clicking the embedded scene must focus its host handle; delivered: {:?}", events.borrow());
+        let focused = app
+            .update_window(handle.into(), |root, window, cx| {
+                root.downcast::<HostPreview>()
+                    .unwrap()
+                    .read(cx)
+                    .focus
+                    .is_focused(window)
+            })
+            .unwrap();
+        assert!(
+            focused,
+            "Clicking the embedded scene must focus its host handle; delivered: {:?}",
+            events.borrow()
+        );
         let mut keystroke = Keystroke::parse("space").unwrap();
         keystroke.key_char = Some(" ".into());
-        let key = PlatformInput::KeyDown(KeyDownEvent { keystroke, is_held: false, prefer_character_input: false });
+        let key = PlatformInput::KeyDown(KeyDownEvent {
+            keystroke,
+            is_held: false,
+            prefer_character_input: false,
+        });
         events.borrow_mut().clear();
         app.dispatch_input(handle.into(), key.clone()).unwrap();
-        assert!(matches!(events.borrow().as_slice(), [gpui_codepen_guest::InputMessage::Event(PlatformInput::KeyDown(_))]),
-            "A clicked preview must forward Space through the host's focused dispatch path");
+        assert!(
+            matches!(
+                events.borrow().as_slice(),
+                [gpui_codepen_guest::InputMessage::Event(
+                    PlatformInput::KeyDown(_)
+                )]
+            ),
+            "A clicked preview must forward Space through the host's focused dispatch path"
+        );
         app.update_window(handle.into(), |root, window, cx| {
-            root.downcast::<HostPreview>().unwrap().update(cx, |view, cx| window.focus(&view.other, cx));
-        }).unwrap();
+            root.downcast::<HostPreview>()
+                .unwrap()
+                .update(cx, |view, cx| window.focus(&view.other, cx));
+        })
+        .unwrap();
         app.draw_window(handle.into()).unwrap();
         events.borrow_mut().clear();
         app.dispatch_input(handle.into(), key).unwrap();
-        assert!(events.borrow().is_empty(), "The preview must not steal keys from another focused target");
+        assert!(
+            events.borrow().is_empty(),
+            "The preview must not steal keys from another focused target"
+        );
     }
 }

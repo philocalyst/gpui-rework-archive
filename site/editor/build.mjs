@@ -2,6 +2,7 @@ import { build } from 'esbuild';
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { createHash } from 'node:crypto';
 
 const site = dirname(dirname(fileURLToPath(import.meta.url)));
 const output = join(site, 'static/workbench');
@@ -19,9 +20,13 @@ const result = await build({
 });
 // Keep the editor's source and stylesheet beside its bundled script. The
 // published page uses only local assets; npm is a build dependency.
-for (const name of ['index.html', 'workbench.css']) {
-  await writeFile(join(output, name), await readFile(join(site, 'editor', name)));
-}
+const stylesheet = await readFile(join(site, 'editor/workbench.css'));
+await writeFile(join(output, 'workbench.css'), stylesheet);
+const fingerprint = bytes => createHash('sha256').update(bytes).digest('hex').slice(0, 16);
+const page = (await readFile(join(site, 'editor/index.html'), 'utf8'))
+  .replace('./editor.js', `./editor.js?v=${fingerprint(await readFile(join(output, 'editor.js')))}`)
+  .replace('./workbench.css', `./workbench.css?v=${fingerprint(stylesheet)}`);
+await writeFile(join(output, 'index.html'), page);
 
 // Include the notices for packages whose code appears in the browser bundle.
 const packages = new Map();

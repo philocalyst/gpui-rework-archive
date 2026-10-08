@@ -1307,13 +1307,15 @@ enum InputModality {
 ///
 /// Layout and paint APIs use logical [`Pixels`]. GPUI applies the display
 /// scale before sending primitives to the renderer. Do not multiply layout
-/// coordinates by that scale yourself. Bounds and layout IDs belong to the
-/// current frame; retain entity or element identities instead.
+/// coordinates by that scale yourself. Bounds describe the current frame,
+/// and layout IDs belong to that frame's tree. Keep entity or element identities
+/// when later work needs to find the same logical control.
 ///
-/// Paint calls record a scene during the paint phase. Use [`crate::canvas`]
-/// for a custom region and [`crate::_documentation::rendering`] for the full
-/// request-layout, prepaint, and paint lifecycle. Platform operations such as
-/// decoration and fullscreen retain the limits of the selected backend.
+/// Paint calls record a scene for later presentation. Use [`canvas`](crate::canvas)
+/// for a custom region; the [rendering chapter](crate::_documentation::rendering)
+/// explains layout, prepaint, paint, and the state carried between them.
+/// Platform operations such as decoration and fullscreen have the limits of
+/// the selected backend. A request can return before the platform applies it.
 ///
 /// # Find the operation you need
 ///
@@ -2340,9 +2342,12 @@ impl Window {
         }
     }
 
-    /// Registers a callback invoked after the window appearance changes.
+    /// Observes changes to this window's platform appearance.
     ///
-    /// The callback remains active until the returned [`Subscription`] is dropped.
+    /// Read [`appearance`](Self::appearance) once for the initial value; registration does not
+    /// invoke the callback. Later callbacks receive a fresh window and app borrow. Retain the
+    /// returned subscription to keep observing. Neither registration nor the subscription
+    /// keeps the window alive. See the [colors module](crate::colors) for palette updates.
     pub fn observe_window_appearance(
         &self,
         mut callback: impl FnMut(&mut Window, &mut App) + 'static,
@@ -2727,10 +2732,17 @@ impl Window {
         });
     }
 
-    /// Observes changes to an entity and returns a subscription tied to its lifetime.
+    /// Observes an entity's notifications in this window.
     ///
-    /// The callback receives a fresh handle to the entity and runs with the current window. It is
-    /// removed automatically when the entity is released or the returned subscription is dropped.
+    /// The callback receives the entity's current state through a fresh handle;
+    /// several pending notifications can coalesce. It does not run immediately
+    /// at registration. Use [`Self::subscribe`] when each occurrence needs its
+    /// own payload, rather than counting notifications as changes.
+    ///
+    /// Retain the returned subscription to keep observing. This registration
+    /// retains neither the entity nor the window; delivery ends when either
+    /// is unavailable or the subscription is dropped. It stays attached to
+    /// this window even if the observed view is later rendered elsewhere.
     pub fn observe<T: 'static>(
         &mut self,
         observed: &Entity<T>,
@@ -2759,8 +2771,14 @@ impl Window {
 
     /// Subscribes to events emitted by an [`EventEmitter`] entity.
     ///
-    /// The callback runs with the emitted event and a fresh entity handle. Dropping the returned
-    /// subscription stops delivery; a released entity also removes the subscription.
+    /// The callback runs during effect processing with the emitted payload,
+    /// a fresh entity handle, and this window. The emitter's current fields
+    /// may already reflect later changes; read the payload for the occurrence
+    /// being reported. See [`EventEmitter`] for a save-revision example.
+    ///
+    /// Retain the returned subscription to receive events. The registration
+    /// retains neither the emitter nor the window, and delivery ends when
+    /// either is unavailable or the subscription is dropped.
     pub fn subscribe<Emitter, Evt>(
         &mut self,
         entity: &Entity<Emitter>,
@@ -2796,6 +2814,12 @@ impl Window {
     }
 
     /// Registers a one-shot callback for release of `entity`.
+    ///
+    /// The callback receives the value being destroyed, after its last strong
+    /// handle was dropped. This registration does not retain the entity.
+    /// Keep the returned subscription until release; if this window has closed,
+    /// the callback is skipped. Use [`App::observe_release`] for cleanup that
+    /// must run independently of a window.
     pub fn observe_release<T>(
         &self,
         entity: &Entity<T>,
@@ -2820,8 +2844,10 @@ impl Window {
 
     /// Creates an [`AsyncWindowContext`] that can be held across `await` points.
     ///
-    /// Operations performed through it reacquire the window by handle, so they remain valid only
-    /// while the native window still exists.
+    /// The context retains neither the app nor this window. Its updates
+    /// reacquire this same window by handle and return an error after it
+    /// closes. See [`AsyncWindowContext::update`] for a complete example that
+    /// also handles release of the entity being updated.
     pub fn to_async(&self, cx: &App) -> AsyncWindowContext {
         AsyncWindowContext::new_context(cx.to_async(), self.handle)
     }
@@ -2989,17 +3015,22 @@ impl Window {
         self.rendered_frame.scene.quads.clone()
     }
 
-    /// Requests a new native content size in logical pixels.
+    /// Requests a new content size in logical pixels.
     ///
     /// The platform may clamp or defer the resize. Read [`Self::viewport_size`]
     /// for the applied size, or retain a [`Context::observe_window_bounds`]
     /// subscription to respond to changes. [`Self::bounds_changed`] is the
     /// notification entry point, rather than an observation method.
+    /// The browser backend sets the canvas's CSS size; it does not resize the
+    /// page or an enclosing iframe.
     pub fn resize(&mut self, size: Size<Pixels>) {
         self.platform_window.resize(size);
     }
 
-    /// Returns whether or not the window is currently fullscreen
+    /// Returns the fullscreen state last reported by the platform.
+    ///
+    /// [`Self::toggle_fullscreen`] requests a transition; this query need not
+    /// change before that request returns. Browser requests can be denied.
     pub fn is_fullscreen(&self) -> bool {
         self.platform_window.is_fullscreen()
     }
@@ -3044,14 +3075,20 @@ impl Window {
         self.viewport_size
     }
 
-    /// Returns whether this window is focused by the operating system (receiving key events).
+    /// Returns whether the platform considers this window active for keyboard input.
+    ///
+    /// This is separate from the selected element returned by [`Self::focused`].
+    /// Deactivating a window preserves that element's focus identity. Use both
+    /// when a control's focus styling should dim in an inactive window.
     pub fn is_window_active(&self) -> bool {
         self.active.get()
     }
 
-    /// Returns whether this window is considered to be the window
-    /// that currently owns the mouse cursor.
-    /// On mac, this is equivalent to `is_window_active`.
+    /// Returns the window-level hover flag on Windows, Linux, and FreeBSD.
+    ///
+    /// Other targets, including macOS and the browser, return
+    /// [`Self::is_window_active`] instead. This does not hit-test an element;
+    /// use [`Hitbox::is_hovered`] for a region in the current frame.
     pub fn is_window_hovered(&self) -> bool {
         if cfg!(any(
             target_os = "windows",
@@ -3201,9 +3238,11 @@ impl Window {
         self.platform_window.show_character_palette();
     }
 
-    /// The scale factor of the display associated with the window. For example, it could
-    /// return 2.0 for a "retina" display, indicating that each logical pixel should actually
-    /// be rendered as two pixels on screen.
+    /// Returns the factor converting logical lengths to device-pixel lengths.
+    ///
+    /// At a factor of `2.0`, a 100-by-50 logical-pixel box occupies 200-by-100
+    /// device pixels. Element bounds, pointer events, and style values remain
+    /// in logical [`Pixels`]; GPUI applies this factor when painting.
     pub fn scale_factor(&self) -> f32 {
         self.scale_factor
     }
@@ -4410,6 +4449,9 @@ impl Window {
     /// the task stored by [`App::fetch_asset`]. Only the call that creates that
     /// entry arranges a notification for its current view when loading finishes.
     /// Other consumers need their own invalidation if they must update then.
+    /// This includes a view reading an entry prefetched with `fetch_asset`:
+    /// prefetching already created the entry, so `use_asset` adds no completion
+    /// notification for that view.
     ///
     /// Call while drawing a view: a newly pending load needs the current view's
     /// identity. To manage loading outside drawing, use `fetch_asset` directly.
@@ -5771,6 +5813,10 @@ impl Window {
     ///
     /// `bounds` use logical window-local pixels and are snapped to device pixels. The current
     /// content mask and element opacity are applied. Call only during paint.
+    /// This does not size, fit, or decode the source. Use [`surface`](crate::surface)
+    /// for an element with layout and object fitting, and check [`SurfaceSource`](crate::SurfaceSource)
+    /// for the selected renderer's device and format requirements. Source import
+    /// happens during rendering, so this recording method cannot report an import failure.
     pub fn paint_surface(
         &mut self,
         bounds: Bounds<Pixels>,
@@ -6343,14 +6389,22 @@ impl Window {
             })));
     }
 
-    /// Registers a key listener on this node for the next rendered frame. The type of event
-    /// is determined by the first parameter of the given listener. When the next frame is rendered
-    /// the listener will be cleared.
+    /// Registers a raw key listener on the current dispatch node during paint.
     ///
-    /// This is a fairly low-level method, so prefer using event handlers on elements unless you have
-    /// a specific need to register a listener yourself.
+    /// `Event` selects key-down or key-up delivery. Capture visits the focused
+    /// node's ancestors from root to leaf; bubble visits the same path in
+    /// reverse. A listener on a child of the focused node lies outside that
+    /// route. Attach it to the node carrying the focus handle or an ancestor.
     ///
-    /// This method should only be called as part of the paint phase of element drawing.
+    /// Key binding resolution precedes raw key-down delivery, including
+    /// capture. A consumed action or pending chord can prevent this listener
+    /// from running. Use [`App::intercept_keystrokes`] before resolution, or
+    /// the [`InteractiveElement`](crate::InteractiveElement) builders for an
+    /// ordinary element handler.
+    ///
+    /// The listener belongs to this frame's dispatch tree. Register it again
+    /// when rebuilding the node; a cached subtree can reuse its previous
+    /// listener record. This method must be called during paint.
     pub fn on_key_event<Event: KeyEvent>(
         &mut self,
         listener: impl Fn(&Event, DispatchPhase, &mut Window, &mut App) + 'static,
@@ -6372,6 +6426,7 @@ impl Window {
     /// when a listener calls [`App::stop_propagation`]. This is not a global
     /// window listener. Its frame lifetime follows [`Self::on_key_event`];
     /// register it again when rebuilding the node.
+    /// A modifier-only shortcut can consume a change before this route.
     pub fn on_modifiers_changed(
         &mut self,
         listener: impl Fn(&ModifiersChangedEvent, &mut Window, &mut App) + 'static,
@@ -6391,7 +6446,8 @@ impl Window {
     /// includes native activation while the handle lies on the focus path.
     /// Callbacks run while a draw compares the previous and new focus paths;
     /// [`Self::focus`] does not call them synchronously. Keep the returned
-    /// subscription to keep listening.
+    /// subscription to keep listening. Registration becomes active during
+    /// effect processing after the current update.
     pub fn on_focus_in(
         &mut self,
         handle: &FocusHandle,
@@ -6416,7 +6472,8 @@ impl Window {
     /// includes native deactivation. The event carries a weak handle to the
     /// previously focused leaf, which may already have been dropped.
     /// Callbacks run while a draw compares focus paths; keep the returned
-    /// subscription to keep listening. See [`Self::on_focus_in`].
+    /// subscription to keep listening. Registration is deferred until effect
+    /// processing after the current update. See [`Self::on_focus_in`].
     pub fn on_focus_out(
         &mut self,
         handle: &FocusHandle,
@@ -7415,8 +7472,16 @@ impl Window {
         }
     }
 
-    /// Register the given handler to be invoked whenever the global of the given type
-    /// is updated.
+    /// Observes mutations, replacement, or removal of global type `G` in this window.
+    ///
+    /// Registration becomes active during effect processing and does not
+    /// deliver changes queued before activation. Pending notifications can
+    /// coalesce; the callback reads the current value, not a change log.
+    /// Use [`App::try_global`] if removal is possible.
+    ///
+    /// Retain the returned subscription. The callback stops when it is dropped
+    /// or this window becomes unavailable. [`App::observe_global`] supplies
+    /// the same observation without a window borrow.
     pub fn observe_global<G: Global>(
         &mut self,
         cx: &mut App,
@@ -7435,7 +7500,11 @@ impl Window {
         subscription
     }
 
-    /// Focus the current window and bring it to the foreground at the platform level.
+    /// Asks the platform to activate this window.
+    ///
+    /// Desktop focus-stealing rules may deny the request. This does not select
+    /// a GPUI element; use [`Self::focus`] for that. The browser backend marks
+    /// its canvas window active but cannot bring a background tab forward.
     pub fn activate(&self) {
         self.platform_window.activate(None);
     }
@@ -7474,7 +7543,12 @@ impl Window {
         self.platform_window.is_visible()
     }
 
-    /// Toggle full screen status on the current window at the platform level.
+    /// Requests a transition into or out of platform fullscreen.
+    ///
+    /// Read [`Self::is_fullscreen`] for the reported state after the platform
+    /// responds. The browser backend requests fullscreen for its canvas;
+    /// browser policy can reject that request, including without a user gesture.
+    /// See the [browser request rules](https://fullscreen.spec.whatwg.org/#dom-element-requestfullscreen).
     pub fn toggle_fullscreen(&self) {
         self.platform_window.toggle_fullscreen();
     }
@@ -7604,6 +7678,8 @@ impl Window {
     /// presence does not prove it will handle a particular value, and a key
     /// binding is not required. Use [`is_action_available`](Self::is_action_available)
     /// to check a supplied action against this window's path.
+    /// Results are ordered by action type identity, not by a user-facing name;
+    /// sort and label them before constructing a command menu.
     pub fn available_actions(&self, cx: &App) -> Vec<Box<dyn Action>> {
         let node_id = self.focus_node_id_in_rendered_frame(self.focus);
         let mut actions = self.rendered_frame.dispatch_tree.available_actions(node_id);
@@ -7623,21 +7699,26 @@ impl Window {
     /// Bindings must match the action's value as well as its type. Results retain
     /// insertion order; the last result is the usual shortcut to display. This
     /// looks up bindings, not whether a listener will handle the action.
+    /// Contexts come from the selected focus path in the last rendered tree.
+    /// A focus change between existing nodes affects this query immediately;
+    /// a changed tree must be drawn before its new contexts can be queried.
     pub fn bindings_for_action(&self, action: &dyn Action) -> Vec<KeyBinding> {
         self.rendered_frame
             .dispatch_tree
-            .bindings_for_action(action, &self.rendered_frame.dispatch_tree.context_stack)
+            .bindings_for_action(action, &self.context_stack())
     }
 
-    /// Returns the highest precedence key binding that invokes an action on the currently focused
-    /// element. This is more efficient than getting the last result of `bindings_for_action`.
+    /// Returns the last unshadowed binding for `action` on the selected focus path.
+    ///
+    /// This has the same context and action-value rules as
+    /// [`Self::bindings_for_action`], without collecting all matches. Use it
+    /// to display one shortcut for a command. For a command aimed at another
+    /// panel, query [`Self::highest_precedence_binding_for_action_in`] with
+    /// that panel's focus handle instead.
     pub fn highest_precedence_binding_for_action(&self, action: &dyn Action) -> Option<KeyBinding> {
         self.rendered_frame
             .dispatch_tree
-            .highest_precedence_binding_for_action(
-                action,
-                &self.rendered_frame.dispatch_tree.context_stack,
-            )
+            .highest_precedence_binding_for_action(action, &self.context_stack())
     }
 
     /// Returns unshadowed bindings for this action using exactly one supplied context.
@@ -7653,8 +7734,11 @@ impl Window {
         dispatch_tree.bindings_for_action(action, &[context])
     }
 
-    /// Returns the highest precedence key binding for an action in a context. This is more
-    /// efficient than getting the last result of `bindings_for_action_in_context`.
+    /// Returns the last unshadowed binding for `action` in one supplied context.
+    ///
+    /// Like [`Self::bindings_for_action_in_context`], this excludes ancestor
+    /// contexts. Use [`Self::highest_precedence_binding_for_action_in`] when
+    /// the query should include a rendered panel's whole focus path.
     pub fn highest_precedence_binding_for_action_in_context(
         &self,
         action: &dyn Action,
@@ -7681,9 +7765,11 @@ impl Window {
         dispatch_tree.bindings_for_action(action, &context_stack)
     }
 
-    /// Returns the highest precedence key binding that would invoke an action on the given focus
-    /// handle if it were focused. This is more efficient than getting the last result of
-    /// `bindings_for_action_in`.
+    /// Returns the last unshadowed binding on a candidate focus path.
+    ///
+    /// This does not move focus. It returns `None` if the handle has no node
+    /// in the rendered tree or no binding matches. It follows the same rules
+    /// as [`Self::bindings_for_action_in`], without collecting all matches.
     pub fn highest_precedence_binding_for_action_in(
         &self,
         action: &dyn Action,
@@ -7694,7 +7780,13 @@ impl Window {
         dispatch_tree.highest_precedence_binding_for_action(action, &context_stack)
     }
 
-    /// Find the bindings that can follow the current input sequence for the current context stack.
+    /// Returns longer bindings for which `input` is a proper prefix on the focus path.
+    ///
+    /// Complete bindings and removal actions are omitted. Results are sorted
+    /// by context depth, then later insertion first. Removal entries are not
+    /// applied to the other candidates, so this is a completion list rather
+    /// than a guarantee that each binding will dispatch. See
+    /// [`Keymap::possible_next_bindings_for_input`](crate::Keymap::possible_next_bindings_for_input).
     pub fn possible_bindings_for_input(&self, input: &[Keystroke]) -> Vec<KeyBinding> {
         self.rendered_frame
             .dispatch_tree
@@ -7767,8 +7859,9 @@ impl Window {
     ///
     /// Call this during paint, while building the node's frame. The resulting
     /// listener receives both dispatch phases and remains attached to that
-    /// frame; redraws must register it again. Use [`DispatchPhase`] to choose
-    /// when to handle the action.
+    /// frame. Register it when rebuilding the node; a cached subtree can reuse
+    /// its previous listener record. Use [`DispatchPhase`] to choose when to
+    /// handle the action.
     ///
     /// Prefer [`InteractiveElement::on_action`](crate::InteractiveElement::on_action)
     /// for a typed handler on a view's element. This method accepts erased
@@ -8352,6 +8445,10 @@ impl From<u64> for WindowId {
 /// [`Self::entity`] to retain the root entity independently of the window.
 /// The handle's `Deref` exposes [`AnyWindowHandle`] operations when the root
 /// type is not needed. See [ownership](crate::_ownership_and_data_flow).
+///
+/// Use the handle with the app that opened the window. Its ID identifies an
+/// app-local slot and generation; the handle carries no app identity to reject
+/// a different app that happens to contain the same slot.
 #[derive(Deref, DerefMut)]
 pub struct WindowHandle<V> {
     #[deref]
@@ -8369,8 +8466,13 @@ impl<V> Debug for WindowHandle<V> {
 }
 
 impl<V: 'static + Render> WindowHandle<V> {
-    /// Creates a new handle from a window ID.
-    /// This does not check if the root type of the window is `V`.
+    /// Declares a window ID to have root view type `V`, without looking it up.
+    ///
+    /// Prefer the handle returned by [`App::open_window`]. This constructor is
+    /// for integrations that already know an ID and its root type; it neither
+    /// creates nor retains a window. Reads and updates check the live root and
+    /// return an error if the window is absent or its type differs from `V`.
+    /// Pass the resulting handle only to the app that supplied `id`.
     pub fn new(id: WindowId) -> Self {
         WindowHandle {
             any_handle: AnyWindowHandle {
@@ -8382,9 +8484,12 @@ impl<V: 'static + Render> WindowHandle<V> {
         }
     }
 
-    /// Get the root view out of this window.
+    /// Clones the live root entity through mutable window access.
     ///
-    /// This will fail if the window is closed or if the root view's type does not match `V`.
+    /// Returns an error when the window is absent, already being updated, or
+    /// no longer has a root of type `V`. The returned entity retains its value
+    /// independently of the window. Use [`Self::entity`] when a read-only app
+    /// context is available and the window is not already being updated.
     #[cfg(any(test, feature = "headless"))]
     pub fn root<C>(&self, cx: &mut C) -> Result<Entity<V>>
     where
@@ -8547,6 +8652,8 @@ impl<V: 'static> From<WindowHandle<V>> for AnyWindowHandle {
 /// context. Closing the window makes those operations fail. The stored type
 /// metadata supports [`downcast`](Self::downcast), but replacing the live root
 /// can make a previously obtained typed handle fail its next read or update.
+/// Use it only with the app that opened the window; the stored ID does not
+/// distinguish identical slot values in different app instances.
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 pub struct AnyWindowHandle {
     pub(crate) id: WindowId,
@@ -8555,7 +8662,10 @@ pub struct AnyWindowHandle {
 }
 
 impl AnyWindowHandle {
-    /// Get the ID of this window.
+    /// Returns the window's app-local slot and generation.
+    ///
+    /// The ID does not retain or look up the window. Keep its originating app
+    /// alongside it when passing it through an integration boundary.
     pub fn window_id(&self) -> WindowId {
         self.id
     }
@@ -10182,6 +10292,90 @@ mod tests {
     struct FocusForwarder {
         a: FocusHandle,
         b: FocusHandle,
+    }
+
+    crate::actions!(shortcut_lookup_test, [LookupShortcut]);
+
+    struct ShortcutTargets {
+        a: FocusHandle,
+        b: FocusHandle,
+    }
+
+    impl Render for ShortcutTargets {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            div()
+                .key_context("ShortcutRoot")
+                .child(div().key_context("ShortcutA").track_focus(&self.a))
+                .child(div().key_context("ShortcutB").track_focus(&self.b))
+        }
+    }
+
+    #[gpui::test]
+    fn shortcut_lookup_follows_focus_between_rendered_nodes(cx: &mut TestAppContext) {
+        cx.update(|cx| {
+            cx.bind_keys([
+                KeyBinding::new("ctrl-r", LookupShortcut, Some("ShortcutRoot")),
+                KeyBinding::new("ctrl-a", LookupShortcut, Some("ShortcutRoot > ShortcutA")),
+                KeyBinding::new("ctrl-b", LookupShortcut, Some("ShortcutRoot > ShortcutB")),
+            ])
+        });
+        let handle = cx.add_window(|window, cx| {
+            let a = cx.focus_handle();
+            let b = cx.focus_handle();
+            window.focus(&a, cx);
+            ShortcutTargets { a, b }
+        });
+        handle
+            .update(cx, |this, window, cx| {
+                let keys = |window: &Window| {
+                    window
+                        .bindings_for_action(&LookupShortcut)
+                        .into_iter()
+                        .map(|binding| binding.keystrokes[0].key().to_owned())
+                        .collect::<Vec<_>>()
+                };
+                assert_eq!(keys(window), ["r", "a"]);
+                assert_eq!(
+                    window
+                        .highest_precedence_binding_for_action(&LookupShortcut)
+                        .unwrap()
+                        .keystrokes[0]
+                        .key(),
+                    "a"
+                );
+
+                // Both nodes already exist. A focus change must affect lookup
+                // immediately, without waiting for another draw.
+                window.focus(&this.b, cx);
+                assert_eq!(keys(window), ["r", "b"]);
+                assert_eq!(
+                    window
+                        .highest_precedence_binding_for_action(&LookupShortcut)
+                        .unwrap()
+                        .keystrokes[0]
+                        .key(),
+                    "b"
+                );
+                assert_eq!(
+                    window
+                        .bindings_for_action_in(&LookupShortcut, &this.a)
+                        .last()
+                        .unwrap()
+                        .keystrokes[0]
+                        .key(),
+                    "a"
+                );
+
+                window.blur(cx);
+                // The fallback node is above this view's context-bearing div.
+                assert!(keys(window).is_empty());
+                assert!(
+                    window
+                        .highest_precedence_binding_for_action(&LookupShortcut)
+                        .is_none()
+                );
+            })
+            .unwrap();
     }
 
     impl Render for FocusForwarder {

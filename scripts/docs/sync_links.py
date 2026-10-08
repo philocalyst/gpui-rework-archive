@@ -15,6 +15,13 @@ ROOT = Path(__file__).resolve().parents[2]
 BEGIN, END = "// docs:examples:begin", "// docs:examples:end"
 
 
+def write_changed(path: Path, text: str) -> None:
+    if path.is_file() and path.read_text(encoding="utf-8") == text:
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8", newline="\n")
+
+
 def example_markdown(symbol: str, rows: list[tuple[str, str, str, str]]) -> str:
     # Raw HTML comments survive rustdoc rendering. The local postprocessor can
     # replace exactly this block, while docs.rs keeps the ordinary links.
@@ -94,7 +101,7 @@ def sync(root: Path, check: bool = False) -> list[str]:
                     errors.append(f"stale generated example doc: {doc_file}")
             else:
                 doc_file.parent.mkdir(parents=True, exist_ok=True)
-                doc_file.write_text(doc_text, encoding="utf-8", newline="\n")
+                write_changed(doc_file, doc_text)
             include = Path(os.path.relpath(doc_file, source.parent)).as_posix()
             method = _api["declaration"][:-1]
             docs.append(f'        {method}: #[doc = include_str!("{include}")],')
@@ -167,7 +174,7 @@ def sync(root: Path, check: bool = False) -> list[str]:
             if not doc_file.is_file() or doc_file.read_text(encoding="utf-8") != doc_text:
                 errors.append(f"stale generated example doc: {doc_file}")
         else:
-            doc_file.write_text(doc_text, encoding="utf-8", newline="\n")
+            write_changed(doc_file, doc_text)
         line_no = matches[0]
         indent = clean[line_no][:len(clean[line_no]) - len(clean[line_no].lstrip())]
         block = [indent + line for line in generated_block(source, source, symbol).splitlines()]
@@ -180,7 +187,7 @@ def sync(root: Path, check: bool = False) -> list[str]:
             if source.read_text(encoding="utf-8").replace("\r\n", "\n") != output:
                 errors.append(f"stale generated links: {source}")
         else:
-            source.write_text(output, encoding="utf-8", newline="\n")
+            write_changed(source, output)
     # Remove bounded attributes for API symbols that no longer exist in the
     # registry. Only files containing our markers are candidates; authored
     # documentation and unrelated Rust files are never touched.

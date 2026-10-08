@@ -100,6 +100,37 @@ when deciding whether a cache helps. A large plot may need a different
 representation; measure the work with the
 [testing and measurement chapter](https://gpui-ce.github.io/book/testing.html).
 
+## Composite an image already owned by the GPU
+
+Use [`img`](https://docs.rs/gpui-ce/0.2.2/gpui/fn.img.html) for a raster image loaded from bytes, a file, or a URL.
+Use [`surface`](https://docs.rs/gpui-ce/0.2.2/gpui/fn.surface.html) when the pixels already belong to a video
+buffer, screen-capture frame, or custom GPU render target. The surface retains
+that source's handle and lets the selected renderer import it.
+
+A source has pixel dimensions, but a surface has no intrinsic layout size.
+Give the element a size, then choose how to fit the source into it with
+[`Surface::object_fit`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Surface.html#method.object_fit). The default is
+[`ObjectFit::Contain`](https://docs.rs/gpui-ce/0.2.2/gpui/enum.ObjectFit.html#variant.Contain): the whole image is visible,
+with unused space when its aspect ratio differs from the box. `Cover` fills
+the box and can draw beyond it. An enclosing content mask supplies the crop;
+fitting alone does not clip.
+
+For custom WGPU drawing, acquire `gpui_wgpu::WgpuContextHandle` from the window
+and create a `WgpuRenderTarget` on that device. Render into its texture, then
+place the element returned by `target.surface()` in the view. Recreate that
+element after resizing the target: an existing surface still retains the old
+texture. Notify the view when new pixels are ready; changing a texture's
+contents does not tell GPUI to draw a frame.
+
+Check [`SurfaceSource`](https://docs.rs/gpui-ce/0.2.2/gpui/enum.SurfaceSource.html) before choosing a source. Its
+variants and supported formats depend on the backend. A WGPU texture must
+come from GPUI's device and use its WGPU version; enabling the core texture
+variant does not switch the native renderer. The
+[platform feature guide](https://gpui-ce.github.io/book/platforms.html#cargo-features)
+explains that selection. A native handle also cannot cross the scene-capture
+boundary described below. Use capture-compatible sprite pixels when a frame
+must travel to another renderer.
+
 ## Add behavior separately
 
 A painted shape has no input or accessibility behavior by itself. A decorative

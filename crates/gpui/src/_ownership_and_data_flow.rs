@@ -227,4 +227,33 @@
 //! shows the full sequence: store the task, wait without holding an app borrow,
 //! then attempt a weak update. The [scheduling explanation](crate::_documentation::scheduling)
 //! describes which executor runs that future and when to use a background task.
+//!
+//! ## Choose the window an operation belongs to
+//!
+//! An entity is app state, not the property of one window. A shared model can
+//! be read by several windows. [`App::with_window`](crate::App::with_window)
+//! uses the most recently rendered window that referenced the entity, falling
+//! back to its creation window before a render establishes another association.
+//! This lookup can therefore change without replacing the entity.
+//!
+//! [`Context::observe_in`](crate::Context::observe_in),
+//! [`subscribe_in`](crate::Context::subscribe_in), and
+//! [`defer_in`](crate::Context::defer_in) use that current association. Their
+//! supplied window establishes a fallback only when the entity has no window
+//! yet; it does not pin later callbacks to that window. Delivery is skipped
+//! when the selected window is closed or already borrowed.
+//!
+//! Retain a [`WindowHandle`](crate::WindowHandle) or
+//! [`AnyWindowHandle`](crate::AnyWindowHandle) when the operation belongs to a
+//! particular window, such as changing the title of the window that started a
+//! request. Updating that handle targets the same window and returns an error
+//! after closure. The handle does not keep a closed window open.
+//!
+//! An [`AsyncWindowContext`](crate::AsyncWindowContext) also remembers one
+//! window: [`update`](crate::AsyncWindowContext::update) borrows that window
+//! and the app together. Calling [`Entity::update_in`](crate::Entity::update_in)
+//! through the same context still selects the entity's current association.
+//! To use the remembered window, enter the context's window update first, then
+//! update the entity through the supplied app. Follow the same borrow rules
+//! as any nested entity update.
 #![doc = "\n\n[Read this chapter in the GPUI Book](https://gpui-ce.github.io/book/ownership.html)."]

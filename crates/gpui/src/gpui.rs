@@ -75,7 +75,7 @@ pub mod _accessibility;
 #[cfg(doc)]
 pub mod _ownership_and_data_flow;
 
-/// Explanations of rendering, layout, text, drawing, input, scheduling, testing, and platform contracts.
+/// Explanations of state ownership, rendering, resources, input, and testing.
 ///
 /// Complete programs and browser previews live in the
 /// [walkthroughs](https://gpui-ce.github.io/examples/).
@@ -103,6 +103,10 @@ pub mod _documentation {
     ///
     /// [Read this chapter in the GPUI Book](https://gpui-ce.github.io/book/drawing.html).
     pub mod drawing {}
+    #[doc = include_str!("../docs/assets.md")]
+    ///
+    /// [Read this chapter in the GPUI Book](https://gpui-ce.github.io/book/assets.html).
+    pub mod assets {}
     #[doc = include_str!("../docs/input.md")]
     ///
     /// [Read this chapter in the GPUI Book](https://gpui-ce.github.io/book/input.html).
@@ -539,6 +543,42 @@ pub trait VisualContext: AppContext {
 /// [`App::subscribe`]. Events carry a payload and are delivered during effect
 /// processing; they are separate from [`Context::notify`], which tells
 /// consumers to reread the entity's current state.
+///
+/// An event can describe an earlier state than a later read of its emitter.
+/// Put the information subscribers need into the payload. For example, report
+/// the revision that was saved, even if another edit happens before delivery:
+///
+/// ```no_run
+/// use gpui::{App, Context, Entity, EventEmitter, Subscription};
+///
+/// struct Document {
+///     revision: u64,
+/// }
+///
+/// struct Saved {
+///     revision: u64,
+/// }
+///
+/// impl EventEmitter<Saved> for Document {}
+///
+/// impl Document {
+///     // Pass the revision whose write succeeded, even if it is no longer current.
+///     fn did_save(&self, revision: u64, cx: &mut Context<Self>) {
+///         cx.emit(Saved { revision });
+///     }
+/// }
+///
+/// fn watch_saves(document: &Entity<Document>, cx: &mut App) -> Subscription {
+///     cx.subscribe(document, |_, saved: &Saved, _| {
+///         eprintln!("saved revision {}", saved.revision);
+///     })
+/// }
+/// ```
+///
+/// Retain the returned subscription to receive events. An entity can
+/// implement this trait for several payload types; each subscription selects
+/// one type. The [event-payload test](https://gpui-ce.github.io/book/testing.html#preserve-each-events-payload)
+/// checks two emissions before delivery against the emitter's final state.
 pub trait EventEmitter<E: Any>: 'static {}
 
 /// Global mutation methods available to values that can borrow an [`App`].

@@ -922,13 +922,31 @@ impl Tiling {
     }
 }
 
-/// Callbacks for the accessibility adapter.
+/// Connects a native accessibility adapter to GPUI's tree and action handling.
+///
+/// Passed to [`PlatformWindow::a11y_init`] during native window construction.
+/// Callback threads depend on the adapter; forward work to the foreground
+/// executor before accessing an app or window. GPUI's window setup uses
+/// channels to request a new frame or deliver an action on that executor.
+/// See the [accessibility chapter](crate::_accessibility)
+/// for the application-facing node and action APIs.
 pub struct A11yCallbacks {
-    /// Called when the adapter is activated (a screen reader connects).
+    /// Requests the initial tree when an accessibility client activates the adapter.
+    ///
+    /// This can be called again without an intervening deactivation. Follow
+    /// [`accesskit::ActivationHandler`] for synchronous or deferred tree delivery;
+    /// activation is not a one-time screen-reader connection notification.
     pub activation: Box<dyn Fn() -> Option<accesskit::TreeUpdate> + Send + 'static>,
-    /// Called when an action is requested by the screen reader.
+    /// Delivers an action requested by assistive technology or another client.
+    ///
+    /// The request identifies its target node and optional action data.
+    /// Queue it for foreground handling rather than blocking the adapter.
     pub action: Box<dyn Fn(accesskit::ActionRequest) + Send + 'static>,
-    /// Called when the adapter is deactivated (screen reader disconnects).
+    /// Reports that the adapter no longer needs an active tree.
+    ///
+    /// The supplied Unix adapters use this callback; the macOS and Windows
+    /// adapters do not currently install it. It is not a general window-close
+    /// callback or a guaranteed notification when a screen reader exits.
     pub deactivation: Box<dyn Fn() + Send + 'static>,
 }
 
@@ -1326,13 +1344,30 @@ pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
     /// Request the user's configured system alert sound, where supported.
     fn play_system_bell(&self) {}
 
-    /// Initialize the accessibility adapter with callbacks.
+    /// Installs the window's native accessibility adapter and its callbacks.
+    ///
+    /// GPUI calls this while constructing a native window unless accessibility
+    /// was disabled for the app. macOS, Windows, X11, and Wayland supply
+    /// adapters. The default implementation does nothing, and browser window
+    /// construction does not call it. Implementing this hook is necessary for
+    /// a custom platform to expose GPUI nodes to assistive technology.
     fn a11y_init(&self, _callbacks: A11yCallbacks) {}
 
-    /// Provide a TreeUpdate to the accessibility adapter.
+    /// Sends a completed frame's node changes to the accessibility adapter.
+    ///
+    /// The supplied native adapters publish only while active. Calling this
+    /// does not activate the adapter or draw a frame; the default discards the
+    /// update. Tree inspection through
+    /// [`Window::debug_a11y_tree_json`](crate::Window::debug_a11y_tree_json) remains
+    /// separate from delivery to the operating system.
     fn a11y_tree_update(&self, _tree_update: accesskit::TreeUpdate) {}
 
-    /// Inform the adapter of updated window bounds.
+    /// Updates the adapter's mapping between window and screen coordinates.
+    ///
+    /// X11 supplies its current scaled outer and inner window bounds. macOS
+    /// and Windows track this through their native accessibility APIs; Wayland
+    /// exposes no ordinary global window position, so this hook does nothing
+    /// there. The default also does nothing.
     fn a11y_update_window_bounds(&self) {}
 
     #[cfg(any(test, feature = "headless", feature = "bench-support"))]

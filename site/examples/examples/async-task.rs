@@ -5,8 +5,7 @@ mod support;
 // Start waits two seconds, then displays Complete. Stop cancels that wait.
 // The view stores the returned [`Task`] because the operation belongs to this
 // view. Clearing the field drops the handle and cancels its remaining polling;
-// releasing the view drops the field as well. Dropping a task is local
-// cancellation, not rollback of work already accepted elsewhere.
+// releasing the view drops the field as well.
 //
 // `running` chooses the button label, and `message` supplies the displayed
 // status. Both are ordinary state updated through the view's [`Context`].
@@ -114,11 +113,11 @@ impl Render for AsyncDemo {
     }
 }
 
-// ## Try stopping before completion {#launch}
-// Click Start, wait less than two seconds, then click Stop. The status stays
-// Stopped after the original delay would have elapsed. Start again and let it
-// finish. The view and its task are created under [`AppContext::new`]; no task
-// is detached from that owner.
+// ## Start from an idle view {#launch}
+// [`AppContext::new`] creates the view with no task, a Start button, and Ready
+// status. Press Start to create the view-owned task. Wait less than two seconds,
+// then press Stop: the status should remain Stopped after the original deadline.
+// Start again and let the operation finish to check the completion path too.
 
 fn component(_window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<AsyncDemo> {
     cx.new(|_cx| AsyncDemo {

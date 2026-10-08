@@ -108,6 +108,14 @@ text system starts without system fonts. A browser preview is useful for shared 
 logic; it does not validate native window chrome, compositor behavior, OS dialogs, or native GPU
 integration.
 
+The supplied web backend also has no accessibility adapter. Setting a GPUI
+role or label describes its node but does not create an HTML control or expose
+that node to the browser's accessibility tree. Use the
+[accessibility chapter](crate::_accessibility) to build and
+inspect the shared tree, then test its delivery through a supported native
+adapter. The editor's own HTML controls and the GPUI canvas are separate
+accessibility boundaries.
+
 ## Threading, callbacks, and native handles
 
 The backend owns its event loop. GPUI invokes platform operations on the UI thread; work submitted

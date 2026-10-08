@@ -75,9 +75,14 @@ pub trait AssetSource: 'static + Send + Sync {
     /// [`Self::load`]. GPUI does not impose whether this list is recursive.
     fn list(&self, path: &str) -> Result<Vec<SharedString>>;
 
-    /// Iterates over all paths (via [`Self::list`]) and loads each asset in turn (via [`Self::load`]),
-    /// yielding an iterator over all assets that were loaded successfully.
-    /// Output can be provided directly to [`AssetRegistry::extend`].
+    /// Lists the source once, then loads each entry as the iterator advances.
+    ///
+    /// Calls [`Self::list`] with the empty string. A listing error produces an
+    /// empty iterator; a missing entry or load error skips that entry. These
+    /// errors are neither returned nor logged. Call `list` and `load` directly
+    /// when failure must be reported.
+    ///
+    /// Pass the resulting preloaded entries to [`AssetRegistry::extend`].
     fn iter_preloaded(&self) -> Box<dyn Iterator<Item = (SharedString, AssetEntry)> + '_> {
         let paths = self.list("").unwrap_or_default();
         let iter = paths.into_iter().filter_map(move |path| {
@@ -87,9 +92,16 @@ pub trait AssetSource: 'static + Send + Sync {
         Box::new(iter)
     }
 
-    /// Iterates over all paths (via [`Self::list`]) and constructs an [`AssetEntry::OnDemand`],
-    /// which calls [`Self::load`] on this shared source when a path is requested.
-    /// Output can be provided directly to [`AssetRegistry::extend`].
+    /// Lists the source once and creates a deferred loader for each entry.
+    ///
+    /// Calls [`Self::list`] with the empty string. A listing error produces an
+    /// empty iterator without logging. Each resulting [`AssetEntry::OnDemand`]
+    /// retains this source and calls [`Self::load`] synchronously whenever the
+    /// registry requests its key. Load errors are logged and become `None`;
+    /// successful results are not memoized by the registry.
+    ///
+    /// Pass the entries to [`AssetRegistry::extend`]. To retain loaded bytes
+    /// instead, use [`Self::iter_preloaded`] before entering rendering work.
     fn iter_ondemand(self: Arc<Self>) -> Box<dyn Iterator<Item = (SharedString, AssetEntry)>> {
         use gpui_util::ResultExt;
         let paths = self.list("").unwrap_or_default();
@@ -156,12 +168,29 @@ where
 #[error("An asset with the pathkey {0:?} already exists")]
 pub struct DuplicateAssetPath(SharedString);
 
-/// Collection of named byte assets used by GPUI services such as [`crate::SvgRenderer`].
+/// Collection of named byte assets used by services such as [`SvgRenderer`](crate::SvgRenderer).
 ///
 /// Registry keys are opaque application-defined strings. `AssetRegistry` does not join path
 /// components, canonicalize separators, or read the filesystem. Build it from an iterator or
 /// insert entries explicitly; converting an [`AssetSource`] creates deferred entries from the
 /// source's listed paths. A requested path not present in the registry returns `None`.
+///
+/// ```
+/// use gpui::AssetRegistry;
+/// use std::borrow::Cow;
+///
+/// let mut assets = AssetRegistry::default();
+/// assets.insert("icons/check.svg", Cow::Borrowed(b"first".as_slice()))?;
+/// assert!(assets.insert("icons/check.svg", Cow::Borrowed(b"second".as_slice())).is_err());
+/// assert_eq!(assets.load("icons/check.svg").as_deref(), Some(b"first".as_slice()));
+/// assert!(assets.load("./icons/check.svg").is_none());
+/// # Ok::<(), gpui::DuplicateAssetPath>(())
+/// ```
+///
+/// Register it through [`Application::with_assets`](crate::Application::with_assets).
+/// Registry loading returns encoded bytes; it does not decode an image or
+/// retain a renderer upload. See the [assets chapter](crate::_documentation::assets)
+/// for those separate lifetimes and the asynchronous loading path.
 #[derive(Default)]
 pub struct AssetRegistry {
     entries: BTreeMap<SharedString, AssetEntry>,
@@ -223,8 +252,13 @@ impl AssetRegistry {
 
     /// Returns bytes for an exact path key, invoking an on-demand loader inline if necessary.
     ///
-    /// `None` means the key is absent or its loader returned no asset. A loader that performs
-    /// I/O can block the calling thread; do not call it from latency-sensitive rendering work.
+    /// Preloaded entries return a borrowed slice without copying their bytes.
+    /// An on-demand entry calls its loader on every request, even after a
+    /// successful load. Keep slow I/O out of those callbacks when a caller such
+    /// as [`Svg`](crate::Svg) may request the bytes during a frame.
+    ///
+    /// `None` means the key is absent or its loader returned no asset. The
+    /// registry provides no separate error channel for a failed callback.
     pub fn load<'this>(&'this self, path: impl AsRef<str>) -> Option<Cow<'this, [u8]>> {
         match self.entries.get(path.as_ref())? {
             AssetEntry::PreLoaded(Cow::Borrowed(data)) => Some(Cow::Borrowed(data)),
@@ -300,8 +334,37 @@ pub struct RenderImageParams {
 /// [`Self::frame_count`]. The ID is process-local and identifies this decoded image for renderer
 /// cache requests; it is not a persistent asset key. Frame dimensions are device pixels, while
 /// display sizing additionally accounts for the image scale factor.
+///
+/// Share the image through `Arc` when several elements draw it. Equality
+/// compares IDs, not pixels: constructing two images from identical frames
+/// still gives two distinct renderer resources. Keep that ID unchanged while
+/// the image can be referenced by a renderer.
+///
+/// # Example: supply decoded pixels
+///
+/// The `image` crate names its buffer type `Rgba`, but GPUI expects its stored
+/// bytes in **BGRA** order. This constructor does not swap channels for you:
+///
+/// ```
+/// use gpui::{DevicePixels, RenderImage, img, size};
+/// use image::{Frame, ImageBuffer, Rgba};
+/// use std::sync::Arc;
+///
+/// // One opaque red pixel, stored as blue, green, red, alpha.
+/// let pixels = ImageBuffer::from_pixel(1, 1, Rgba([0, 0, 255, 255]));
+/// let image = Arc::new(RenderImage::new([Frame::new(pixels)]));
+/// assert_eq!(image.as_bytes(0), Some([0, 0, 255, 255].as_slice()));
+/// assert_eq!(image.size(0), size(DevicePixels(1), DevicePixels(1)));
+/// assert_eq!(image.as_bytes(1), None);
+/// let element = img(image);
+/// ```
+///
+/// For encoded PNG, JPEG, or SVG bytes, use [`Image`](crate::Image) or an
+/// [`ImageSource`](crate::ImageSource) resource and let its loader decode them. Removing a
+/// load-cache entry and releasing renderer uploads are separate operations;
+/// see the [assets chapter](crate::_documentation::assets#give-the-cache-an-owner).
 pub struct RenderImage {
-    /// The ID associated with this image
+    /// The process-local renderer identity assigned by [`Self::new`].
     pub id: ImageId,
     /// The scale factor of this image on render.
     pub(crate) scale_factor: f32,

@@ -29,6 +29,12 @@ Check the focus target first. Then check whether the element carrying the
 listener is on that target's dispatch path, and whether the context predicate
 matches. A browser preview also needs page focus inside its iframe.
 
+If a container owns the focused handle, put its keyboard listener on that
+container or an ancestor. A listener on a canvas child is outside the route;
+the focused container does not forward keys into its descendants. The
+[input chapter's routing section](https://gpui-ce.github.io/book/input.html#put-listeners-on-the-focused-path)
+explains how the same rule affects key contexts and action handlers.
+
 A capture handler may stop propagation before a later handler sees the event.
 A bubbling action handler consumes the action by default; call
 `cx.propagate()` when an ancestor should handle it too. Ordinary event

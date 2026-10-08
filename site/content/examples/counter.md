@@ -19,8 +19,7 @@ Click Increment and the label gains one. `Counter` owns the count; the label
 and button are rebuilt from that value when GPUI renders the view.
 
 GPUI stores the view in an [`Entity`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Entity.html). Cloning its handle keeps the same
-counter alive, with the same field. The constructor at the end of this
-program creates that entity; first, define what it stores and renders.
+counter alive, with the same field. The constructor below starts it at zero.
 
 ```rust
 use gpui::{AppContext, Context, IntoElement, Render, Role, Window, div, prelude::*, rgb, text};
@@ -30,7 +29,7 @@ struct Counter {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/counter/") }}#L12).
+[View this step in the source]({{ get_url(path="sources/counter/") }}#L11).
 
 <a id="render"></a>
 ## Read state into a frame
@@ -90,7 +89,7 @@ impl Render for Counter {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/counter/") }}#L37).
+[View this step in the source]({{ get_url(path="sources/counter/") }}#L36).
 
 <a id="update"></a>
 ## Change the value, then notify
@@ -100,10 +99,16 @@ affected views for rendering; the next frame reads the new count. Notification
 does not paint the label inside this callback. Assigning the field alone
 does not request that frame.
 
-Remove `cx.notify()` and run again. Clicks still change the field, but the
-label can stay stale until other work causes a render. Restore the call and
-the label follows the field again. `saturating_add` makes the counter stop
-at `u32::MAX` rather than overflow.
+Other work, including a button's interaction styling, can also redraw the
+window and conceal a missing notification. Do not rely on that redraw to
+publish a model change. The [notification test](@/guides/testing.md#make-the-assertion-at-the-right-boundary)
+checks the consumer directly, so removing `notify` breaks its assertion.
+`saturating_add` makes this counter stop at `u32::MAX` rather than overflow.
+
+To change its behavior, replace `saturating_add(1)` with `saturating_add(5)`.
+Run while the count is one: a compatible edit keeps that one, and the next
+activation displays six. The [editing guide](@/guides/live-editing.md)
+explains when an edit requires a fresh component instead.
 
 ```rust
 impl Counter {
@@ -114,7 +119,7 @@ impl Counter {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/counter/") }}#L83).
+[View this step in the source]({{ get_url(path="sources/counter/") }}#L88).
 
 <a id="launch"></a>
 ## Create the view and open a window
@@ -138,6 +143,6 @@ pub fn main() {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/counter/") }}#L100).
+[View this step in the source]({{ get_url(path="sources/counter/") }}#L105).
 
 [Download the complete source]({{ get_url(path="examples/counter.rs") }}).

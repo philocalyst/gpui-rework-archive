@@ -5,6 +5,17 @@
 //! for application keymaps, then add application-specific bindings in that context. On WebAssembly
 //! both Cmd-style and Ctrl-style common shortcuts are registered because the compile target cannot
 //! identify the host keyboard; browser clipboard events still supply paste data directly.
+//!
+//! Movement actions follow the current shaped layout when available, including wrapping and
+//! bidirectional text. Selection actions retain the anchor and move the active caret. The
+//! storage-only fallback follows source order and newline boundaries; it cannot reproduce visual
+//! navigation. See [`EditableTextState::nav_linear`](super::EditableTextState::nav_linear) for
+//! that separate API.
+//!
+//! Deletion actions remove the selection first. With no selection, `DeleteLeft` and `DeleteRight`
+//! remove the preceding or following grapheme in source order; word deletion uses visual
+//! left/right movement when the current layout is available. Line commands use hard lines,
+//! separated by newlines, rather than rows introduced by wrapping.
 use gpui::{InteractiveElement, WeakEntity, Window};
 use std::{cell::RefCell, rc::Rc};
 
@@ -14,35 +25,41 @@ pub const DEFAULT_INPUT_CONTEXT: &str = "EditableText";
 gpui::actions!(
     actions,
     [
-        /// Blur focus from the input.
+        /// Reset the field's selection to byte zero and blur window focus.
         Escape,
-        /// Insert a newline at the cursor position.
+        /// Replace the selection with a newline in an input-enabled multiline field.
         Enter,
-        /// Insert a tab character at the cursor position.
+        /// Replace the selection with a tab, including in a single-line field.
+        ///
+        /// This inserts text; it does not traverse form controls.
         Tab,
-        /// Delete the character before the cursor.
+        /// Delete the selection, or the preceding grapheme cluster in source order.
         DeleteLeft,
-        /// Delete the character after the cursor.
+        /// Delete the selection, or the following grapheme cluster in source order.
         DeleteRight,
-        /// Delete the word before the cursor.
+        /// Delete the selection, or the range to the word boundary visually left of the caret.
         DeleteWordLeft,
-        /// Delete the word after the cursor.
+        /// Delete the selection, or the range to the word boundary visually right of the caret.
         DeleteWordRight,
-        /// Delete from the cursor to the beginning of the line.
+        /// Delete the selection, or the range to the current hard line's logical start.
         DeleteToLineStart,
-        /// Delete from the cursor to the end of the line.
+        /// Delete the selection, or the range to the current hard line's logical end.
         DeleteToLineEnd,
-        /// Move the cursor one character to the left.
+        /// Move visually left by a grapheme cluster, collapsing an existing selection first.
         NavLeft,
-        /// Move the cursor one character to the right.
+        /// Move visually right by a grapheme cluster, collapsing an existing selection first.
         NavRight,
-        /// Move the cursor up one visual line.
+        /// Move up one visual row, retaining the horizontal target for successive vertical moves.
+        ///
+        /// A single-line field instead moves to the current visual row's start.
         NavUp,
-        /// Move the cursor down one visual line.
+        /// Move down one visual row, retaining the horizontal target for successive vertical moves.
+        ///
+        /// A single-line field instead moves to the current visual row's end.
         NavDown,
-        /// Move cursor to the start of the current line.
+        /// Collapse the selection at the current hard line's logical start.
         NavLineStart,
-        /// Move cursor to the end of the current line.
+        /// Collapse the selection at the current hard line's logical end.
         NavLineEnd,
         /// Move cursor to the beginning of the content.
         NavDocumentStart,
@@ -54,13 +71,13 @@ gpui::actions!(
         NavWordRight,
         /// Select all text content.
         SelectAll,
-        /// Extend selection one character to the left.
+        /// Extend the selection visually left by one grapheme cluster.
         SelectLeft,
-        /// Extend selection one character to the right.
+        /// Extend the selection visually right by one grapheme cluster.
         SelectRight,
-        /// Extend selection up one visual line.
+        /// Extend the selection up one visual row, or to the document start in a single-line field.
         SelectUp,
-        /// Extend selection down one visual line.
+        /// Extend the selection down one visual row, or to the document end in a single-line field.
         SelectDown,
         /// Extend selection to the beginning of the content.
         SelectDocumentStart,
@@ -70,15 +87,15 @@ gpui::actions!(
         SelectWordLeft,
         /// Extend selection one word to the right.
         SelectWordRight,
-        /// Cut selected text to clipboard.
+        /// Cut the selection to the clipboard, or the current hard line when no text is selected.
         Cut,
-        /// Copy selected text to clipboard.
+        /// Copy the selection to the clipboard; an empty selection leaves the clipboard unchanged.
         Copy,
-        /// Paste from clipboard at the cursor position.
+        /// Replace the selection with clipboard text, applying newline and byte-limit rules.
         Paste,
-        /// Undo the last edit.
+        /// Undo the latest grouped edit and restore its preceding selection.
         Undo,
-        /// Redo the last undone edit.
+        /// Reapply the latest undone edit and restore the selection from before undo.
         Redo,
         /// Show the platform character palette.
         ShowCharacterPalette,
@@ -95,7 +112,28 @@ gpui::actions!(
 /// See [`ActionBindingCollection`](gpui::ActionBindingCollection) for installing or extending a
 /// binding collection.
 ///
-/// Apple keyboards dont have Home or End keys, so there are common bindings that replace those keys.
+/// Install defaults first, then add ordered overrides with [`App::bind_keys`](gpui::App::bind_keys).
+/// Later bindings at the same context depth take precedence. For example, this suppresses the
+/// field's default Tab insertion:
+///
+/// ```
+/// use gpui::{KeyBinding, NoAction};
+/// use gpui_ce_elements::editable_text::actions::{DEFAULT_INPUT_CONTEXT, default_bindings};
+///
+/// # fn setup(cx: &mut gpui::App) {
+/// cx.bind_keys(default_bindings().as_keybindings(Some(DEFAULT_INPUT_CONTEXT)));
+/// cx.bind_keys([KeyBinding::new("tab", NoAction, Some(DEFAULT_INPUT_CONTEXT))]);
+/// # }
+/// ```
+///
+/// Suppressing insertion does not implement focus traversal. Bind your application's focus
+/// command instead of `NoAction` when Tab should move between controls.
+///
+/// Compact Apple keyboards commonly omit dedicated Home and End keys. The macOS set supplies
+/// Command-arrow equivalents. Shift-Home, Shift-End, and Command-Shift-Left/Right use navigation
+/// actions and **collapse** the selection; they do not extend it. Override these bindings when
+/// your application needs another convention.
+///
 /// | Action                | All         | Linux & Windows           | MacOS           |
 /// | --------------------- | ----------- | ------------------------- | --------------- |
 /// | Escape                | escape      |                           |                 |
@@ -133,7 +171,6 @@ gpui::actions!(
 /// | Redo                  |             | ctrl + shift + z          | cmd + shift + z  |
 /// | ShowCharacterPalette  |             | ctrl + space              | cmd + space      |
 ///
-/// TODO: Collection does not supply a way to unbind a default keystroke
 pub fn default_bindings() -> gpui::ActionBindingCollection {
     let mut bindings = gpui::ActionBindingCollection::default()
         .with::<DeleteLeft>("backspace")
@@ -219,12 +256,13 @@ pub fn default_bindings() -> gpui::ActionBindingCollection {
     bindings
 }
 
-/// Action methods that editable-text state entities can implement.
+/// Handlers for the editing commands and pointer-selection events in this module.
 ///
-/// The element's built-in state implements these actions. A custom handler can implement this
-/// trait to reuse the action element's dispatch wiring for another state type; default methods are
-/// no-ops, so override only the actions that state supports. The action names are also useful when
-/// defining application keymaps or routing commands from menus.
+/// [`EditableTextState`](super::EditableTextState) implements these methods and the element wires
+/// its actions to that state. A custom state can implement this trait, but must supply its own
+/// element dispatch wiring. Methods do nothing by default except
+/// [`show_character_palette`](Self::show_character_palette), which calls the window's platform
+/// service. The action types can also route menu commands through GPUI's focused dispatch path.
 pub trait EditableTextActionHandler<Context>: Sized {
     /// Blur focus from the input.
     fn escape(&mut self, _: &Escape, _w: &mut Window, _cx: &mut Context) {}
@@ -309,6 +347,10 @@ pub trait EditableTextActionHandler<Context>: Sized {
         window.show_character_palette();
     }
 
+    /// Begins pointer selection at `text_position`, measured from the laid-out document's origin.
+    ///
+    /// The element has already filtered for a primary press within its bounds and requested focus.
+    /// The event still carries window coordinates and modifiers. The default implementation does nothing.
     fn on_mouse_down(
         &mut self,
         _event: &gpui::MouseDownEvent,
@@ -317,7 +359,13 @@ pub trait EditableTextActionHandler<Context>: Sized {
         _cx: &mut Context,
     ) {
     }
+    /// Ends pointer selection after a primary release, including one outside the field's bounds.
+    /// The default implementation does nothing.
     fn on_mouse_up(&mut self, _event: &gpui::MouseUpEvent, _w: &mut Window, _cx: &mut Context) {}
+    /// Updates pointer selection with a position relative to the laid-out document's origin.
+    ///
+    /// Moves can arrive outside the field; the handler decides whether a selection drag is active.
+    /// The default implementation does nothing.
     fn on_mouse_move(
         &mut self,
         _event: &gpui::MouseMoveEvent,

@@ -136,13 +136,43 @@ The site is a useful model for voice and deep explanation, not a template to rep
 
 Jiff is the editorial model: state the goal of a page, explain the domain before the API, name unsupported features, show competing designs fairly, and answer “why?” questions with concrete consequences. API docs include examples and exceptional behavior; links are deep and reciprocal. For GPUI, each central type should answer: what state does it represent, what invariant does it protect, how is it created, what can fail, what is the common path, and where is a complete example?
 
-The later source reading covers every public example in `SpanTotal` and
-`SpanRound` through line 5240 of Jiff 0.2.35's `span.rs`, in addition to the
+The later source reading covers every public example in `SpanTotal`,
+`SpanRound`, and `SpanRelativeTo` through line 5745 of Jiff 0.2.35's `span.rs`, in addition to the
 earlier comparison and arithmetic reading. These pages show a useful pattern:
 change one option, assert its consequence, then explain when that choice is
 valid. Their own prose still needs scrutiny: the fall-back transition example
 says “24 hours” where its assertion correctly expects 25. Examples and source
 must check one another; a respected reference is not proof of every sentence.
+
+The civil-date reading now reaches line 2020, including every public example
+before the internal-method block. Its difference examples establish the
+default's reversibility, change the largest unit, then demonstrate the exact
+counterexample and explain it. Its series examples answer concrete questions
+and include a sub-day period that repeats dates. This suggests a useful check
+for GPUI examples: make the cache lifetime, coordinate reference, or scheduler
+assumption visible, then assert the behavior when that assumption changes.
+The subsequent reading covers the public arithmetic conversions,
+`DateArithmetic`, `DateDifference`, and every `DateWith` example through line
+3395. The builders distinguish setting an option from validating the completed
+value, document override order, and assert both valid and invalid combinations.
+GPUI's builders need the same care: registering a callback, requesting a size,
+or assigning a role does not by itself establish the later behavior.
+
+The `Zoned` reading reaches `nth_weekday_of_month` (line 1680), starting at the
+module overview and including every public example before that point. Its
+fractional-second examples distinguish the signed timestamp from positive
+civil clock fields; its day-boundary examples show ordinary midnight, a gap,
+and representational overflow. GPUI needs similarly explicit reference
+systems for a window point versus a local point, a display-string offset
+versus an editing-buffer offset, and a requested platform state versus the
+state the platform has actually reported. A type-compatible value can still
+refer to the wrong object or phase.
+
+`SpanRelativeTo::days_are_24_hours` makes an assumption explicit, then shows
+the same operation failing without it, succeeding with it, and changing under
+a real time zone. That pattern is useful for GPUI's context-sensitive values:
+show the reference a length or coordinate needs, and demonstrate what changes
+when the reference changes. It is stronger than listing accepted Rust types.
 
 ### Gwern's style guide
 
@@ -194,6 +224,21 @@ The supplied article was downloaded to `/tmp/gpui-docs-review.html`; its 276 abs
 * [fasterthanli.me](https://fasterthanli.me/), [Rust tag](https://fasterthanli.me/tags/rust), [arborium article](https://fasterthanli.me/articles/introducing-arborium-a-tree-sitter-distribution)
 * [Zola documentation](https://www.getzola.org/documentation/)
 * [Rustdoc book](https://doc.rust-lang.org/rustdoc/)
+
+## Rand examples and reproducibility
+
+The later Rand reading covers [the guide](https://rust-random.github.io/book/guide.html),
+[getting started](https://rust-random.github.io/book/guide-start.html),
+[error handling](https://rust-random.github.io/book/guide-err.html),
+[testing functions with an RNG](https://rust-random.github.io/book/guide-test-fn-rng.html),
+[all seeding examples](https://rust-random.github.io/book/guide-seeding.html), and
+[reproducibility](https://rust-random.github.io/book/crate-reprod.html).
+The testing recipe makes the production dependency injectable and asserts
+controlled results; the reproducibility chapter separates a seeded invocation
+from a portable, version-stable generator. Some examples mix historical Rand
+APIs, so their patterns need compilation against the chosen dependency before
+reuse. GPUI's scheduler currently uses `StdRng`; its documentation should retain
+the checkout and lockfile with a failure seed.
 
 ## Native editing integration (2026-10-07)
 

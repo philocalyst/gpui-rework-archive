@@ -4,8 +4,9 @@ mod support;
 // ## Keep a keyboard target {#focus}
 // Pressing Space will increment this counter. [`FocusHandle`] identifies a
 // focus target; `track_focus` attaches it to the element tree through the
-// [`InteractiveElement`] trait and places it on the path that receives keyboard actions. Merely storing
-// the handle on the view creates no path and receives no keys.
+// [`InteractiveElement`] trait and places it on the path that receives
+// keyboard actions. Merely storing the handle on the view creates no path and
+// receives no keys.
 //
 // Click inside the preview before pressing Space. In a browser there are two
 // focus boundaries: the page must focus the preview frame, then GPUI must
@@ -31,9 +32,8 @@ struct KeyboardCounter {
 // opens. Binding and handling are separate: a key produces an action, then an
 // element on the dispatch path decides what that action does.
 //
-// A shortcut belongs to an operation, not to a particular input device. A
-// menu or another control can dispatch the same action without synthesizing
-// Space.
+// A menu or another control can dispatch `Increment` through the same action
+// listener. It need not synthesize Space or duplicate the counter update.
 
 fn component(window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<KeyboardCounter> {
     cx.bind_keys([KeyBinding::new("space", Increment, Some("Counter"))]);
@@ -49,9 +49,10 @@ pub fn main() {
 }
 
 // ## Handle the action on its path {#dispatch}
-// The root's `key_context` supplies the context predicate used by the binding.
-// [`Context::listener`] gives the handler scoped access to this view, and
-// [`Context::notify`] schedules a render after the count changes. The keymap
+// The root's `key_context` contributes `Counter` to the focused path; the
+// binding's predicate tests for that entry. [`Context::listener`] gives the
+// handler scoped access to this view, and [`Context::notify`] schedules a
+// render after the count changes. The keymap
 // chooses *when* the operation is dispatched; the action listener defines its
 // effect on this view.
 //

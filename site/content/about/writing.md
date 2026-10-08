@@ -11,24 +11,24 @@ The canonical source lives under `site/examples/examples`.
 
 ## Write Markdown beside the code
 
-A heading begins a chapter. Line comments explain it; the first Rust line
-starts the displayed code. The next heading begins another chapter:
+A heading begins a step. Line comments explain it; the first Rust line
+starts the displayed code. The next heading begins another step:
 
 ```rust
 // ## Own the count {#state}
 // An [`Entity`] handle keeps the count alive. Cloning the handle shares the
 // value; it does not copy the field.
 
-struct Counter { count: u32 }
+let count = cx.new(|_| 0_u32);
 ```
 
 There are no code or end markers. Keep an explicit anchor such as `{#state}`
 when a published link should survive a heading change. Rustdoc-style API links
-resolve to exact reference pages and generate links back to this chapter.
+resolve to exact reference pages and generate links back to this step.
 
 Add the program to `site/examples.toml`. That manifest names the title, source,
 preview, run command, and exact API targets. The generator rejects empty or
-duplicate anchors, empty chapters, and unknown API names. It generates the
+duplicate anchors, empty steps, and unknown API names. It generates the
 page, clean source, Cargo download, and API-to-step index.
 
 ```sh
@@ -43,11 +43,13 @@ Define `component(window, cx)` to create the example's root entity. The native
 entry point calls `support::run(component)`. Use the actual GPUI entities,
 listeners, tasks, and elements in the walkthrough source; do not substitute
 mock APIs to make an example easier to display. The generator owns the published
-chapter and source downloads, so regenerate them after changing comments or code.
+walkthrough and source downloads, so regenerate them after changing comments or code.
 
-Before accepting a walkthrough, run its Cargo example and check the local
-preview. Verify any live-editing instructions against the runtime currently
-shipped; the native Miri companion is not a browser-portable runtime.
+Before accepting a walkthrough, run its Cargo example and check the browser
+editor. Its compiler and Miri run in browser Workers. Function-body edits can
+keep the running state; changes to a type or closure capture can restart the
+component. Try the edits the walkthrough recommends, including any expected
+compiler error and the correction that follows it.
 
 ## Keep explanations at the right depth
 
@@ -57,8 +59,8 @@ problem. An API entry defines behavior, errors, panics, lifetimes, and alternati
 An explanation connects those contracts and the choices behind them.
 
 Conceptual guides are also chapters in the [GPUI Book](https://gpui-ce.github.io/book/). The book and
-rustdoc read the same sources; testing and accessibility use those sources on
-this site too. Revise the canonical chapter when a contract changes, then
+rustdoc read the same sources; testing, accessibility, drawing, and assets use
+those sources on this site too. Revise the canonical chapter when a contract changes, then
 rebuild all three surfaces.
 
 Use meaningful links where a term becomes useful. Add a note for context, a tip

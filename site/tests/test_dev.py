@@ -20,6 +20,30 @@ spec.loader.exec_module(dev)
 
 
 class DevTests(unittest.TestCase):
+    def test_changes_during_the_initial_build_are_rebuilt(self):
+        with tempfile.TemporaryDirectory() as directory, patch.object(dev, "ROOT", Path(directory)):
+            source = Path(directory) / "book/src/ownership.md"
+            source.parent.mkdir(parents=True)
+            source.write_text("before the build")
+            builds = []
+
+            def rebuild(_env, _base):
+                builds.append(source.read_text())
+                if len(builds) == 1:
+                    source.write_text("saved during the build")
+                return True
+
+            server = SimpleNamespace(shutdown=lambda: None, server_close=lambda: None,
+                                     serve_forever=lambda: None)
+            thread = SimpleNamespace(start=lambda: None)
+            with patch.object(dev, "rebuild", side_effect=rebuild), \
+                 patch.object(dev, "ThreadingHTTPServer", return_value=server), \
+                 patch.object(dev.threading, "Thread", return_value=thread), \
+                 patch.object(dev.time, "sleep", side_effect=[None, None, None, KeyboardInterrupt]), \
+                 patch.object(dev.sys, "argv", ["dev.py"]):
+                self.assertEqual(dev.main(), 130)
+            self.assertEqual(builds, ["before the build", "saved during the build"])
+
     def test_failed_miri_rebuild_keeps_the_running_workbench(self):
         companion = object()
         address = ('127.0.0.1', 49000)
@@ -103,13 +127,30 @@ class DevTests(unittest.TestCase):
             root = Path(directory)
             authored = root / "site/examples/examples/counter.rs"
             generated = root / "site/static/api-examples.json"
+            runtime_copy = root / "site/static/preview/miri/assets.json"
+            runtime_manifest = root / "target/codepen-browser/miri/assets.json"
+            guide = root / "site/content/guides/assets.md"
             authored.parent.mkdir(parents=True)
             generated.parent.mkdir(parents=True)
+            runtime_copy.parent.mkdir(parents=True)
+            runtime_manifest.parent.mkdir(parents=True)
+            guide.parent.mkdir(parents=True)
             authored.write_text('fn main() {}')
             generated.write_text('{}')
+            runtime_copy.write_text('{}')
+            runtime_manifest.write_text('{}')
+            guide.write_text('+++\ntitle = "Assets"\n+++\nOld generated body')
             before = dev.source_snapshot()
             generated.write_text('{"generated": true}')
+            runtime_copy.write_text('{"generated": true}')
+            guide.write_text('+++\ntitle = "Assets"\n+++\nNew generated body')
             self.assertEqual(before, dev.source_snapshot())
+            guide.write_text('+++\ntitle = "Assets and images"\n+++\nNew generated body')
+            self.assertNotEqual(before, dev.source_snapshot())
+            before = dev.source_snapshot()
+            runtime_manifest.write_text('{"runtime": "new build"}')
+            self.assertNotEqual(before, dev.source_snapshot())
+            before = dev.source_snapshot()
             authored.write_text('fn main() { println!("changed"); }')
             self.assertNotEqual(before, dev.source_snapshot())
 

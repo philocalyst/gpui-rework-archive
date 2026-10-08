@@ -143,6 +143,48 @@ assert_eq!(task.fallible().await, Some(Err("request rejected")));
 `fallible` does not catch panics inside the operation. Detaching also cannot
 keep an executor or dedicated session alive during shutdown.
 
+## Capture shutdown work before windows close
+
+[`App::on_app_quit`](crate::App::on_app_quit) has two stages. Its callback
+runs with synchronous app access; the owned future it returns runs after
+shutdown has removed the windows. Read the data to save in that first stage.
+Trying to recover it later through an async window handle is too late.
+
+For example, a native application can take a final snapshot of a notes entity
+and write it in the background:
+
+```no_run
+use gpui::{App, Entity, Subscription};
+use std::path::PathBuf;
+
+fn save_on_shutdown(notes: Entity<String>, path: PathBuf, cx: &App) -> Subscription {
+    cx.on_app_quit(move |cx| {
+        let snapshot = notes.read(cx).clone();
+        let path = path.clone();
+        let background = cx.background_executor().clone();
+        async move {
+            let result = background.spawn(async move {
+                std::fs::write(path, snapshot)
+            }).await;
+            if let Err(error) = result {
+                eprintln!("could not save notes: {error}");
+            }
+        }
+    })
+}
+```
+
+Retain the returned subscription on an application owner. This callback
+captures `notes` strongly, so the entity remains available for the snapshot.
+[`Context::on_app_quit`](crate::Context::on_app_quit) instead holds its entity
+weakly and skips the callback if that entity has already been released.
+
+Native shutdown waits at most [`SHUTDOWN_TIMEOUT`](crate::SHUTDOWN_TIMEOUT)
+for all cleanup futures together. Browser shutdown schedules them without
+blocking, and page teardown can interrupt them. Use this hook for a final
+attempt; also save valuable edits during normal operation. Dropping an
+unrelated task or detaching it does not enroll it in shutdown's wait.
+
 ## Borrow data for a group of background jobs
 
 On native targets, [`BackgroundExecutor::scoped`](crate::BackgroundExecutor::scoped)

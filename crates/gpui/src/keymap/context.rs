@@ -30,7 +30,12 @@ impl<'a> TryFrom<&'a str> for KeyContext {
 }
 
 impl KeyContext {
-    /// Initialize a new [`KeyContext`] that contains an `os` key set to either `macos`, `linux`, `windows` or `unknown`.
+    /// Create a context containing the compile target's `os` entry.
+    ///
+    /// The value is `macos`, `linux` (also on FreeBSD), `windows`, or
+    /// `unknown` on other targets, including WebAssembly. This does not
+    /// inspect a browser's host operating system. [`Self::default`] creates
+    /// an empty context instead.
     pub fn new_with_defaults() -> Self {
         let mut context = Self::default();
         #[cfg(target_os = "macos")]
@@ -49,12 +54,17 @@ impl KeyContext {
         context
     }
 
-    /// Returns the primary context entry (usually the name of the component)
+    /// Return the first bare identifier, usually the component's name.
+    ///
+    /// Key-value entries are skipped. Returns `None` when the context is
+    /// empty or contains only key-value entries.
     pub fn primary(&self) -> Option<&ContextEntry> {
         self.0.iter().find(|p| p.value.is_none())
     }
 
-    /// Returns everything except the primary context entry.
+    /// Iterate in insertion order, excluding the first bare identifier.
+    ///
+    /// If there is no [`primary`](Self::primary) entry, every entry is returned.
     pub fn secondary(&self) -> impl Iterator<Item = &ContextEntry> {
         let primary = self.primary();
         self.0.iter().filter(move |&p| Some(p) != primary)
@@ -159,7 +169,10 @@ impl KeyContext {
         self.0.iter().any(|entry| entry.key.as_ref() == key)
     }
 
-    /// Get the associated value for a given identifier or key.
+    /// Return a key's associated value.
+    ///
+    /// A bare identifier and an absent key both return `None`. Use
+    /// [`Self::contains`] when that distinction matters.
     pub fn get(&self, key: &str) -> Option<&SharedString> {
         self.0
             .iter()
@@ -188,25 +201,31 @@ impl fmt::Debug for KeyContext {
 
 /// A predicate that determines whether a key binding is enabled on a context path.
 ///
-/// Predicates are parsed from strings in a binding's `context` field. For example,
-/// `Editor && mode == insert` requires both terms on one matching node, while
-/// `Workspace > Editor` requires the editor context below the workspace context. The parser also
-/// accepts `!=`, `||`, and `!`; malformed expressions return an error.
+/// A binding uses [`Self::depth_of`] to find the deepest matching context.
+/// `Editor && mode == insert` requires both entries on that node;
+/// `Workspace > Editor` relates separate ancestor and descendant nodes.
+/// [`Self::parse`] describes the operators, including the different scopes of
+/// `!=` and `!`. See the [input chapter](crate::_documentation::input#actions-and-key-bindings)
+/// for the connection between contexts, bindings, and action listeners.
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub enum KeyBindingContextPredicate {
     /// A predicate that will match a given identifier.
     Identifier(SharedString),
     /// A predicate that will match a given key-value pair.
     Equal(SharedString, SharedString),
-    /// A predicate that will match a given key-value pair not being present.
+    /// Match when the current node's value differs, including an absent key.
     NotEqual(SharedString, SharedString),
-    /// A predicate that will match a given predicate appearing below another predicate.
-    /// in the element tree
+    /// Match a child predicate below the first ancestor matching the parent.
+    ///
+    /// The nodes need not be adjacent. The child is evaluated on the path
+    /// below that ancestor, which also bounds negation in the child predicate.
     Descendant(
         Box<KeyBindingContextPredicate>,
         Box<KeyBindingContextPredicate>,
     ),
-    /// Predicate that will invert another predicate.
+    /// Match when the predicate matches no node on the current path.
+    ///
+    /// Unlike [`Self::NotEqual`], this checks the path rather than one node.
     Not(Box<KeyBindingContextPredicate>),
     /// A predicate that will match if both of its children match.
     And(
@@ -242,37 +261,39 @@ impl fmt::Display for KeyBindingContextPredicate {
 }
 
 impl KeyBindingContextPredicate {
-    /// Parse a predicate expression in the same format as a keybinding's `context` field.
+    /// Parse the expression used in a key binding's `context` field.
     ///
-    /// A basic equivalence check against a set of identifiers can performed by
-    /// simply writing a string:
+    /// An element supplies entries such as `Editor mode=insert` through
+    /// [`KeyContext::parse`]. A binding tests them with this expression syntax:
     ///
-    /// `StatusBar` -> A predicate that will match a context with the identifier `StatusBar`
+    /// | Expression | Matches when |
+    /// | --- | --- |
+    /// | `Editor` | The current node contains the identifier or key `Editor` |
+    /// | `mode == insert` | The current node has that key and value |
+    /// | `mode != readonly` | The current value differs, or the key is absent |
+    /// | `Editor && mode == insert` | Both checks match the current node |
+    /// | `Editor || Terminal` | Either check matches the current node |
+    /// | `!Dialog` | No node on the path contains `Dialog` |
+    /// | `Workspace > Editor` | The current node is below a matching ancestor |
     ///
-    /// You can also specify a key-value pair:
+    /// From tightest to loosest, precedence is `!`, `==`/`!=`, `&&`, `||`,
+    /// then `>`. Use parentheses to make a grouping explicit. In particular,
+    /// write `!(mode == readonly)` to negate an equality. Write spaces around
+    /// `>`: the parser also accepts Vim operator characters within identifiers.
     ///
-    /// `mode == visible` -> A predicate that will match a context with the key `mode`
-    ///                      with the value `visible`
+    /// `!=` and `!` answer different questions. The former checks one node;
+    /// the latter rejects a match anywhere on its path. After `>`, that path
+    /// begins below the first matching ancestor. For example,
+    /// `Workspace > !Dialog` ignores a `Dialog` above the matching workspace.
     ///
-    /// And a logical operations combining these two checks:
+    /// # Errors
     ///
-    /// `StatusBar && mode == visible` -> A predicate that will match a context with the
-    ///                                   identifier `StatusBar` and the key `mode`
-    ///                                   with the value `visible`
+    /// Empty input, missing operands, unmatched parentheses, unsupported
+    /// characters, and trailing unparsed input return an error. The operands
+    /// of `==` and `!=` must be identifiers, not grouped boolean expressions.
+    /// Use an absent binding predicate for an unconditional binding.
     ///
-    ///
-    /// There is also a special child `>` operator that will match a predicate that is
-    /// below another predicate:
-    ///
-    /// `StatusBar > mode == visible` -> A predicate that will match a context identifier `StatusBar`
-    ///                                  and a child context that has the key `mode` with the
-    ///                                  value `visible`
-    ///
-    /// This syntax supports `!=`, `||`, and `&&`; `!` negates a check or grouped expression.
-    /// `&&` binds more tightly than `||`. A malformed or partially consumed expression returns an
-    /// error rather than a partial predicate.
-    /// Write spaces around `>` to distinguish the relationship operator from
-    /// identifiers containing Vim operator characters.
+    /// # Example
     ///
     /// ```rust
     /// use gpui::{KeyBindingContextPredicate as Predicate, KeyContext};
@@ -282,6 +303,20 @@ impl KeyBindingContextPredicate {
     /// ];
     /// assert!(Predicate::parse("Workspace > Editor && mode == insert").unwrap().eval(&path));
     /// assert!(!Predicate::parse("Workspace && Editor").unwrap().eval(&path));
+    /// ```
+    ///
+    /// A read-only ancestor does not replace the editor's local mode, but a
+    /// path-wide exclusion can still see it:
+    ///
+    /// ```rust
+    /// use gpui::{KeyBindingContextPredicate as Predicate, KeyContext};
+    /// let path = [
+    ///     KeyContext::parse("Workspace mode=readonly").unwrap(),
+    ///     KeyContext::parse("Editor mode=insert").unwrap(),
+    /// ];
+    /// assert!(Predicate::parse("Editor && mode != readonly").unwrap().eval(&path));
+    /// assert!(!Predicate::parse("Editor && !(mode == readonly)").unwrap().eval(&path));
+    /// assert!(Predicate::parse("Workspace > Editor && !(mode == readonly)").unwrap().eval(&path));
     /// ```
     pub fn parse(source: &str) -> Result<Self> {
         let source = skip_whitespace(source);
@@ -308,7 +343,12 @@ impl KeyBindingContextPredicate {
         None
     }
 
-    /// Evaluate this predicate against a context path ordered outermost to innermost.
+    /// Evaluate this predicate at the last node of a context path.
+    ///
+    /// Order contexts outermost to innermost. An identifier or equality checks
+    /// only the last node; descendant and negation checks can inspect the path.
+    /// An empty path never matches. Use [`Self::depth_of`] to search for the
+    /// deepest match, as key binding resolution does.
     #[allow(unused)]
     pub fn eval(&self, contexts: &[KeyContext]) -> bool {
         self.eval_inner(contexts, contexts)

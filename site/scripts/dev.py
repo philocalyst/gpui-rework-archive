@@ -116,25 +116,33 @@ def source_snapshot():
                    ROOT / "site/scripts", ROOT / "scripts/docs", ROOT / "scripts/codepen", ROOT / "crates", ROOT / "assets",
                    ROOT / "vendor/miri/src", ROOT / "vendor/miri/cargo-miri/src"]
     files = {ROOT / "Cargo.toml", ROOT / "Cargo.lock", ROOT / "site/examples.toml", ROOT / "site/zola.toml", ROOT / "site/package.json", ROOT / "site/package-lock.json",
+             ROOT / "target/codepen-browser/miri/assets.json",
              ROOT / "vendor/miri/Cargo.toml", ROOT / "vendor/miri/Cargo.lock",
              ROOT / "vendor/miri/cargo-miri/Cargo.toml", ROOT / "vendor/miri/cargo-miri/Cargo.lock"}
     files.update(path for directory in directories for path in directory.rglob("*") if path.is_file())
     # Also watch authored front-end files, without compiler/preview output.
     files.update(path for path in (ROOT / "site/static").rglob("*") if path.is_file()
                  and "pkg" not in path.parts and "builds" not in path.parts and path.name != "build.json"
+                 and not path.is_relative_to(ROOT / "site/static/preview/miri")
                  and not path.is_relative_to(ROOT / "site/static/workbench"))
     snapshot = {}
     for path in files:
         if not path.is_file():
             continue
         relative = path.relative_to(ROOT)
-        if any(part in {"target", "__pycache__", ".live"} for part in relative.parts):
+        if any(part in {"target", "__pycache__", ".live"} for part in relative.parts) and relative != Path("target/codepen-browser/miri/assets.json"):
             continue
         if str(relative) == "site/static/api-examples.json":
             continue
         if str(relative) == "site/examples/src/components.rs":
             continue
         if str(relative).startswith(("site/content/examples/", "site/content/sources/", "site/static/examples/", "site/static/components/")) and path.name != "_index.md":
+            continue
+        if relative.parent == Path("site/content/guides") and path.stem in {"testing", "accessibility", "drawing", "assets", "text"}:
+            # Watch authored frontmatter; the mirrored body comes from an
+            # already-watched canonical chapter and changes during its build.
+            frontmatter = path.read_text().split("\n+++\n", 1)[0]
+            snapshot[path] = hashlib.sha256(frontmatter.encode()).digest()
             continue
         if "/src/docs/examples/" in "/" + str(relative):
             continue
@@ -197,6 +205,7 @@ def main():
     env = os.environ.copy()
     port = int(env.get("GPUI_DOCS_SITE_PORT", "1111"))
     base = f"http://127.0.0.1:{port}"
+    previous = source_snapshot()
     if not rebuild(env, base):
         return 1
     server = ThreadingHTTPServer(("127.0.0.1", port), DocumentationHandler)
@@ -204,7 +213,6 @@ def main():
     server_thread = threading.Thread(target=server.serve_forever, daemon=True)
     server_thread.start()
     print(f"Documentation and checkout API: {base}", flush=True)
-    previous = source_snapshot()
     try:
         if args.native_companion:
             companion, DocumentationHandler.workbench_address = start_workbench(env, port)

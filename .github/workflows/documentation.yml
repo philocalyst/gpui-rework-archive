@@ -2,14 +2,36 @@ name: Documentation
 
 on:
   pull_request:
-    paths: ['book/**', 'site/**', 'scripts/docs/**', 'crates/**', 'docs/**', 'Cargo.*', '.github/workflows/documentation.yml']
+    paths: ['book/**', 'site/**', 'scripts/docs/**', 'scripts/codepen/**', 'vendor/miri/**', 'vendor/browser_wasi_shim/**', 'crates/**', 'docs/**', 'Cargo.*', '.github/workflows/documentation.yml']
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
+  browser-runtime:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v5
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            .
+            vendor/miri
+            vendor/miri/cargo-miri
+      - name: Prepare pinned native Miri and framework metadata
+        run: python3 scripts/codepen/setup.py
+      - name: Validate state-preserving edits and generate the dependency fixture
+        run: cargo test --locked -p gpui_ce_codepen --test engines hot_reload_preserves_entities_and_last_good_program -- --ignored --nocapture
+      - name: Build the full browser compiler, interpreter, and canonical starters
+        run: python3 scripts/codepen/browser.py all --starter-dir site/static/components
+      - uses: actions/upload-artifact@v4
+        with:
+          name: documentation-browser-runtime
+          path: target/codepen-browser/miri
+          if-no-files-found: error
   documentation:
+    needs: browser-runtime
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -37,12 +59,23 @@ jobs:
           python3 scripts/docs/sync_links.py --check
           python3 -m unittest discover -s scripts/docs -p 'test_*.py'
           python3 -m unittest discover -s site/tests -p 'test_*.py'
+          node --test site/tests/test_editor_*.mjs
       - name: Check complete native programs
         run: cargo check --locked -p gpui-documentation-examples --examples
+      - name: Draw every canonical walkthrough
+        run: cargo test --locked -p gpui-documentation-examples --features test-support --test walkthroughs
       - name: Check downloadable Cargo projects
         run: python3 site/scripts/check_downloads.py
       - name: Run API examples
-        run: cargo test --locked -p gpui-ce --doc --features test-support,bench-support
+        run: cargo test --locked -p gpui-ce -p gpui_ce_elements --doc --features gpui-ce/test-support,gpui-ce/bench-support
+      - name: Check companion API documentation
+        env:
+          RUSTDOCFLAGS: -D rustdoc::broken_intra_doc_links -D rustdoc::bare_urls -D rustdoc::private_intra_doc_links -D missing_docs
+        run: cargo doc --locked --lib -p gpui_ce_elements --no-deps
+      - uses: actions/download-artifact@v4
+        with:
+          name: documentation-browser-runtime
+          path: target/codepen-browser/miri
       - name: Build site, WebAssembly previews, and checkout API
         run: python3 site/scripts/build.py --with-api
       - uses: actions/upload-artifact@v4

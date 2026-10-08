@@ -41,8 +41,11 @@ pub struct Request {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
+/// Distinguishes a program diagnostic from an unavailable execution service.
 pub enum FailureKind {
+    /// The compiler or interpreter rejected the program.
     Rust,
+    /// Execution could not proceed, for example because assets or transport failed.
     Unavailable,
 }
 
@@ -62,8 +65,11 @@ pub struct Reply {
     pub elapsed_ms: u64,
 }
 
-/// State transitions are independent of the GPUI view, so stale compiler replies
-/// can never replace a newer component or commit state from an older click.
+/// Reply identity and the last successful frame for one preview.
+///
+/// Stale replies cannot replace the displayed frame. Rejecting a reply does not
+/// roll back mutations already made by the resident interpreter; transport
+/// cancellation and input ordering remain the controller's responsibility.
 #[derive(Default)]
 pub struct Session {
     /// Stable session UUID, allocated by the first [`request`](Self::request).

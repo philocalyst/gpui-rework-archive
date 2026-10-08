@@ -20,6 +20,7 @@ Choose an entry point for the content and interaction you need:
 | A label with one style | [`Text`](crate::Text), usually constructed with `text!` |
 | Ranges with different weights, colors, or decorations | [`StyledText`](crate::StyledText) |
 | Pointer callbacks on ranges in styled text | [`InteractiveText`](crate::InteractiveText) |
+| A form field, search box, or short message | The companion crate's [editable fields](#choose-an-editable-field) |
 | Text in a custom-painted element | [`WindowTextSystem::shape_line`](crate::WindowTextSystem::shape_line) or [`shape_text`](crate::WindowTextSystem::shape_text) |
 | Text wrapping around embedded element boxes | [`WindowTextSystem::layout_inline`](crate::WindowTextSystem::layout_inline) |
 
@@ -35,7 +36,7 @@ scopes element identity.
 > links. For several links, create separate focusable controls and give each its
 > own accessibility role and action. See the [accessibility chapter](crate::_accessibility).
 
-## Keep editable text on its owner
+## Separate presentation text from editable state
 
 [`SharedString`](crate::SharedString) is immutable presentation text. A clone
 retains the same contents without copying a long string. Use
@@ -123,6 +124,22 @@ hitboxes rather than treating that bounding rectangle as a clickable region.
 > overflow must be hidden. An ellipsis on ordinary text does not imply that
 > embedded widgets will be removed or replaced.
 
+### Query a text element's own geometry
+
+[`StyledText::layout`](crate::StyledText::layout) exposes the geometry of an
+independently measured text element. Clone the handle before moving the text
+into the tree, then query it after layout and prepaint. Put that text directly
+in a flex container so it receives its own measurement. The text can still
+wrap to the container's width.
+
+A block or inline div can gather the same text into a shared paragraph.
+The paragraph then owns the layout and does not populate the individual text
+handle. Waiting until paint does not make that handle describe the paragraph. The
+[hit-testing walkthrough](https://gpui-ce.github.io/examples/text-hit-testing/#layout)
+uses a flex column and queries its text handle from an input callback and a
+later sibling's prepaint callback. It maps a click to a byte offset and paints
+that offset back at the corresponding window-space position.
+
 ## Measure the text you will paint
 
 Shaping selects fonts and glyphs, applies substitutions and positioning, and
@@ -198,8 +215,47 @@ to move or extend it. Converting `start..end` places the active caret at
 > display string. Platform input protocols can also use UTF-16 indices; convert
 > those at the input boundary rather than passing them into layout unchanged.
 
-The [text walkthrough](https://gpui-ce.github.io/examples/text/) shows inherited
-styles and wrapping in a complete program. For a text editor, continue with the
-[input chapter](crate::_documentation::input), then use the
-[testing chapter](https://gpui-ce.github.io/book/testing.html) to exercise edits and selection
-without relying on a human to type them.
+## Choose an editable field
+
+The companion crate `gpui_ce_elements` provides `text_input` and `text_area` for
+forms, search boxes, and short messages. Their `EditableTextState` owns the
+text, selection, composition, focus, and field-local undo history. Give each
+field a stable ID, and install the module's default keyboard bindings once
+when starting the app. The element installs action handlers, but those handlers
+need a keymap to receive keyboard commands.
+
+Keep the state on an owning entity when its contents must survive removing
+the field from the tree. Use `EditableTextState::use_keyed_init` during
+rendering when the contents should instead follow the field's presence.
+Create subscriptions once with that state, rather than adding a new detached
+subscription on each render. The [ownership chapter](crate::_ownership_and_data_flow)
+explains both lifetimes.
+
+Read the companion module and run its complete native example from this
+checkout:
+
+```sh
+cargo doc -p gpui_ce_elements --no-deps --open
+cargo run -p gpui_ce_elements --example editable_text
+```
+
+`text_input` removes CR and LF from user-entered paste and composition text;
+programmatic replacement can still supply them. A byte limit constrains the
+encoded size, not the number of visible characters. Neither behavior validates
+an email address, search expression, or other application value. Check those
+rules before accepting or submitting the value.
+
+For a custom editor built directly on
+[`EntityInputHandler`](crate::EntityInputHandler), run
+`cargo run --example view_example`. Its implementation is in
+`crates/gpui/examples/view_example/example_editor.rs`, with drawing in
+`example_editor/paint.rs`. This lower-level route gives you the editing model
+and painting policy to maintain as well as the platform input contract. Read
+the [input chapter](crate::_documentation::input) before implementing that
+contract, then use the [testing chapter](https://gpui-ce.github.io/book/testing.html)
+to exercise edits and selection without relying on a human to type them.
+
+For a complete program that displays text, the
+[text walkthrough](https://gpui-ce.github.io/examples/text/) shows inherited
+styles and wrapping. The [hit-testing walkthrough](https://gpui-ce.github.io/examples/text-hit-testing/)
+adds the connection between byte offsets, pointer positions, and a painted marker.

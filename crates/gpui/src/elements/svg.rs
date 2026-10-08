@@ -12,7 +12,19 @@ use crate::{
 };
 use gpui_util::ResultExt;
 
-/// An interactive SVG element loaded from a resource, external path, or raw bytes.
+/// An SVG painted as a single-color icon inside a styled layout box.
+///
+/// Construct it with [`svg`], choose a source, set its size, and supply the tint
+/// through [`Styled::text_color`]. Source RGB colors are discarded; their alpha
+/// determines where the tint is visible. For a multicolor illustration, use
+/// [`img`](crate::img) to decode an SVG resource as a [`RenderImage`](crate::RenderImage),
+/// or rasterize it explicitly with [`SvgRenderer`](crate::SvgRenderer).
+///
+/// The SVG's dimensions do not determine this element's layout size. Its
+/// assigned width determines the raster scale while preserving aspect ratio;
+/// the raster is centered in the box. A tall result can extend beyond that box.
+/// Use an ancestor's content mask when it must be clipped. Unlike [`Img`](crate::Img),
+/// `Svg` has no loading or error replacement builder.
 pub struct Svg {
     interactivity: Interactivity,
     transformation: Option<Transformation>,
@@ -22,8 +34,29 @@ pub struct Svg {
     data_path: Option<SharedString>,
 }
 
-/// Construct an SVG element. Set exactly one of [`Svg::path`], [`Svg::external_path`], or
-/// [`Svg::data`] before rendering; the selected source is decoded during paint.
+/// Constructs a single-color SVG element without a source or intrinsic size.
+///
+/// Here the bytes are part of the program, so no asset registration is needed:
+///
+/// ```
+/// use gpui::{prelude::*, px, rgb, svg};
+///
+/// let check = svg()
+///     .data(br#"<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+///         <path d="M3 8 L7 12 L13 4" fill="none" stroke="black"/>
+///     </svg>"#)
+///     .size(px(16.))
+///     .text_color(rgb(0x155b50));
+/// ```
+///
+/// Choose [`Svg::path`] for a bundled asset, [`Svg::external_path`] for a
+/// native file, or [`Svg::data`] for bytes already in memory. If several are
+/// set, data takes precedence, then the external path, then the registry path.
+/// A source-less SVG paints no icon. Missing registry data also paints no icon;
+/// load, parse, and rasterization failures are logged. Handle those errors
+/// explicitly with [`SvgRenderer`](crate::SvgRenderer) when the UI must present
+/// or recover from them. The [assets chapter](crate::_documentation::assets)
+/// explains source selection and loading lifetimes.
 #[track_caller]
 pub fn svg() -> Svg {
     Svg {
@@ -37,7 +70,18 @@ pub fn svg() -> Svg {
 }
 
 impl Svg {
-    /// Load an SVG from a resource path resolved by GPUI's asset system.
+    /// Selects an exact key in the app's [`AssetRegistry`](crate::AssetRegistry).
+    ///
+    /// Install the registry with
+    /// [`Application::with_assets`](crate::Application::with_assets). A URL
+    /// or filesystem spelling is still only a registry key here; this method
+    /// does not fetch or read it. On the first uncached paint, registry loading
+    /// and rasterization run synchronously. Preload the bytes when an on-demand
+    /// registry loader would block that frame.
+    ///
+    /// Repeated calls replace this path. A source already set through
+    /// [`data`](Self::data) or [`external_path`](Self::external_path) takes
+    /// precedence. Missing data leaves the icon empty; decoding errors are logged.
     pub fn path(mut self, path: impl Into<SharedString>) -> Self {
         self.path = Some(path.into());
         self
@@ -47,12 +91,27 @@ impl Svg {
     ///
     /// This bypasses [`AssetSource`](crate::AssetSource). It is intended for
     /// native applications; a browser cannot read an arbitrary native path.
+    /// While the read is pending, the icon is empty. Completion notifies the
+    /// view that started the request. Reading errors are logged and remain in
+    /// the typed asset cache; this element has no built-in retry or fallback.
+    /// Parsing and rasterization still happen during paint after bytes arrive.
+    ///
+    /// Repeated calls replace this path. In-memory [`data`](Self::data) takes
+    /// precedence over it.
     pub fn external_path(mut self, path: impl Into<SharedString>) -> Self {
         self.external_path = Some(path.into());
         self
     }
 
-    /// Use raw SVG bytes. The bytes are retained and identified by a deterministic cache key.
+    /// Copies SVG bytes into the element and derives their raster-cache key.
+    ///
+    /// The element owns its copy, so `data` may be a temporary slice. This
+    /// method does not validate or rasterize it; parsing happens on an uncached
+    /// paint and failures are logged. The content hash supplies a stable key
+    /// for reusing the same bytes at the same raster size.
+    ///
+    /// Repeated calls replace the bytes. In-memory data takes precedence over
+    /// both path sources, regardless of which builder was called last.
     pub fn data(mut self, data: &[u8]) -> Self {
         // Generate a unique deterministic path based on the data hash for caching
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
@@ -64,7 +123,13 @@ impl Svg {
         self
     }
 
-    /// Transform only the rendered SVG; layout bounds and the hitbox are unchanged.
+    /// Replaces the transformation of the painted icon.
+    ///
+    /// Scale and rotation act about the element's center, then translation
+    /// shifts the result in logical pixels. Layout bounds, the hitbox, and
+    /// the content mask do not move with it. Size the element for layout and
+    /// use this transform for a visual effect, such as rotating a disclosure
+    /// icon without moving its clickable row. See [`Transformation`].
     pub fn with_transformation(mut self, transformation: Transformation) -> Self {
         self.transformation = Some(transformation);
         self
@@ -217,6 +282,22 @@ impl InteractiveElement for Svg {
 /// logical pixels and happens afterward. The layout box, hitbox, and clipping
 /// region are unchanged. Builders replace their corresponding component,
 /// rather than composing another transformation.
+///
+/// For a half-turn about the icon's center, followed by a two-pixel shift:
+///
+/// ```
+/// use gpui::{Transformation, point, px, radians};
+///
+/// let transform = Transformation::rotate(radians(std::f32::consts::PI))
+///     .with_translation(point(px(2.), px(0.)));
+/// assert_eq!(
+///     transform.with_rotation(radians(0.)),
+///     Transformation::translate(point(px(2.), px(0.))),
+/// );
+/// ```
+///
+/// The equality shows replacement: `with_rotation(0)` removes the half-turn.
+/// It does not append a second rotation to it.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Transformation {
     scale: Size<f32>,
@@ -235,7 +316,11 @@ impl Default for Transformation {
 }
 
 impl Transformation {
-    /// Create a new Transformation with the specified scale along each axis.
+    /// Creates a center-relative scale with no rotation or translation.
+    ///
+    /// `size(1., 1.)` preserves both axes; `size(2., 1.)` doubles only width.
+    /// Negative factors reflect the drawing. Use [`Self::with_scaling`] to
+    /// change the scale while retaining existing rotation and translation.
     pub fn scale(scale: Size<f32>) -> Self {
         Self {
             scale,
@@ -244,7 +329,10 @@ impl Transformation {
         }
     }
 
-    /// Create a new Transformation with the specified translation.
+    /// Creates a logical-pixel translation with unit scale and no rotation.
+    ///
+    /// Positive x moves right and positive y moves down. Use
+    /// [`Self::with_translation`] to preserve other transformation components.
     pub fn translate(translate: Point<Pixels>) -> Self {
         Self {
             scale: size(1.0, 1.0),
@@ -253,7 +341,11 @@ impl Transformation {
         }
     }
 
-    /// Create a new Transformation with the specified rotation in radians.
+    /// Creates a center-relative rotation with unit scale and no translation.
+    ///
+    /// The angle uses [`Radians`]; positive angles rotate clockwise in the
+    /// window's downward-y coordinate system. Use [`Self::with_rotation`] to
+    /// retain an existing scale and translation.
     pub fn rotate(rotate: impl Into<Radians>) -> Self {
         let rotate = rotate.into();
         Self {
@@ -263,19 +355,25 @@ impl Transformation {
         }
     }
 
-    /// Update the scaling factor of this transformation.
+    /// Replaces the scale on each axis, preserving rotation and translation.
+    ///
+    /// Calling this twice keeps the second scale; it does not multiply them.
     pub fn with_scaling(mut self, scale: Size<f32>) -> Self {
         self.scale = scale;
         self
     }
 
-    /// Update the translation value of this transformation.
+    /// Replaces the logical-pixel translation, preserving scale and rotation.
+    ///
+    /// Translation applies after the center-relative scale and rotation.
     pub fn with_translation(mut self, translate: Point<Pixels>) -> Self {
         self.translate = translate;
         self
     }
 
-    /// Update the rotation angle of this transformation.
+    /// Replaces the angle in radians, preserving scale and translation.
+    ///
+    /// Calling this twice keeps the second angle; it does not add them.
     pub fn with_rotation(mut self, rotate: impl Into<Radians>) -> Self {
         self.rotate = rotate.into();
         self

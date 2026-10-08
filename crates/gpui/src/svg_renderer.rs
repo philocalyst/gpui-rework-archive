@@ -109,24 +109,38 @@ fn select_emoji_font(
 
 /// Raster multiplier used for scale-factor SVG requests to improve edge quality.
 ///
-/// [`SvgRenderer::render_parsed`] records the reciprocal scale on its [`RenderImage`] so the
-/// image's logical display dimensions remain consistent.
+/// [`SvgRenderer::render_parsed`] stores this multiplier as the [`RenderImage`]'s
+/// scale factor. Logical display dimensions divide by it, compensating for
+/// the extra raster pixels.
 pub const SMOOTH_SVG_SCALE_FACTOR: f32 = 2.;
 
 /// Cache key for loading an SVG asset and rasterizing it at a target device-pixel size.
 ///
-/// `path` is looked up exactly in the configured [`AssetRegistry`]. `size` is a device-pixel
-/// width and height; it is distinct from a logical GPUI size.
+/// `path` is looked up exactly in the configured [`AssetRegistry`]. `size` uses
+/// device pixels. Its width determines the raster scale while the SVG keeps
+/// its aspect ratio; the supplied height does not stretch or clip the raster.
 #[derive(Clone, PartialEq, Hash, Eq)]
 pub struct RenderSvgParams {
     /// Asset path used when the SVG bytes are supplied by the registry.
     pub path: SharedString,
-    /// Target size in device pixels.
+    /// Device-pixel raster request; width determines the aspect-preserving scale.
     pub size: Size<DevicePixels>,
 }
 
-#[derive(Clone)]
 /// SVG parser and rasterizer configured with an [`AssetRegistry`].
+///
+/// Use [`Self::parse_svg`] once and retain its [`ParsedSvg`] when rendering the
+/// same document at several sizes. [`Self::render_parsed`] produces full-color
+/// BGRA frames for [`img`](crate::img); the [`svg`](crate::svg) element instead uses an
+/// alpha mask tinted by its text color.
+///
+/// Parsing and rasterization are synchronous. The renderer does not schedule
+/// work or cache parsed trees for the caller. SVG text uses a separate font
+/// database from [`TextSystem`](crate::TextSystem); see [`Self::new`] for its bundled keys.
+/// A successful parse can omit unsupported content or missing external images.
+/// Network image references are not fetched. Embed their bytes in the SVG
+/// when the document must render without host files.
+#[derive(Clone)]
 pub struct SvgRenderer {
     asset_registry: Arc<AssetRegistry>,
     usvg_options: Arc<usvg::Options<'static>>,
@@ -143,8 +157,9 @@ pub struct ParsedSvg(usvg::Tree);
 /// The size in which to rasterize the SVG.
 #[derive(Clone, Copy)]
 pub enum SvgSize {
-    /// A device-pixel size bound. The width determines the scale; the SVG retains its aspect
-    /// ratio and does not stretch to the requested height.
+    /// An aspect-preserving request whose device-pixel width determines the scale.
+    /// The supplied height does not constrain the raster. Output can be smaller
+    /// than the requested width when the renderer's 8192-pixel cap applies.
     Size(Size<DevicePixels>),
     /// An exact device-pixel width and height. The SVG is scaled independently on each axis.
     ExactSize(Size<DevicePixels>),
@@ -165,7 +180,7 @@ impl SvgRenderer {
     /// The registry is queried for
     /// `fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf` and
     /// `fonts/lilex/Lilex-Regular.ttf`. It is not searched for arbitrary font
-    /// files or SVG image references. Fonts installed in the app's [`crate::TextSystem`]
+    /// files or SVG image references. Fonts installed in the app's [`TextSystem`](crate::TextSystem)
     /// are not automatically registered here.
     ///
     /// Font resolution loads the system database lazily and adds the bundled
@@ -280,6 +295,8 @@ impl SvgRenderer {
     /// correction on the image so logical display size remains unchanged. Any requested output
     /// dimension above 8192 device pixels is scaled down to fit the cap; a size that cannot form
     /// a nonzero pixmap returns [`usvg::Error::InvalidSize`].
+    /// The returned image retains full color. To display it, wrap the result
+    /// in [`img`](crate::img); to control its layout, assign the element a size.
     #[tracing::instrument(skip_all)]
     pub fn render_parsed(
         &self,
@@ -311,6 +328,9 @@ impl SvgRenderer {
     ///
     /// Use [`Self::parse_svg`] plus [`Self::render_parsed`] when the same bytes will be drawn at
     /// several sizes, so parsing and font resolution happen once.
+    /// This is equivalent to parsing and passing `scale_factor` as
+    /// [`SvgSize::ScaleFactor`]. Parse and raster-size errors are returned to
+    /// the caller; nothing is scheduled, cached, or painted by this method.
     pub fn render_single_frame(
         &self,
         bytes: &[u8],

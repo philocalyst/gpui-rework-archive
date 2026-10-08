@@ -39,6 +39,27 @@ impl crate::Global for DebugBelow {}
 ///
 /// `Contain`, `Cover`, and `ScaleDown` preserve aspect ratio and center the result.
 /// `Fill` can distort it. Fitting computes bounds; clipping is a separate paint operation.
+///
+/// A 4:3 image in a 16:9 box leaves horizontal space with `Contain`. `Cover`
+/// instead extends above and below the box:
+///
+/// ```
+/// use gpui::{Bounds, DevicePixels, ObjectFit, point, px, size};
+///
+/// let box_bounds = Bounds::new(point(px(0.), px(0.)), size(px(320.), px(180.)));
+/// let image = size(DevicePixels(640), DevicePixels(480));
+/// assert_eq!(
+///     ObjectFit::Contain.get_bounds(box_bounds, image),
+///     Bounds::new(point(px(40.), px(0.)), size(px(240.), px(180.))),
+/// );
+/// assert_eq!(
+///     ObjectFit::Cover.get_bounds(box_bounds, image),
+///     Bounds::new(point(px(0.), px(-30.)), size(px(320.), px(240.))),
+/// );
+/// ```
+///
+/// Image and surface elements use these bounds for painting. Use an enclosing
+/// content mask to crop the second result to the original box.
 pub enum ObjectFit {
     /// Match the box's width and height, without preserving aspect ratio.
     Fill,

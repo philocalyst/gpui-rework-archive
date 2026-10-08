@@ -413,8 +413,10 @@ impl IntoElement for SharedString {
 ///
 /// Clone [`layout`](Self::layout) before moving the element into its parent to
 /// share its measured text positions with an input handler or paint callback.
-/// The layout is populated while this element is drawn; querying positions
-/// during `Render::render` is too early.
+/// Place it directly in a flex container so it has its own measured text box,
+/// then query the handle after prepaint. A block or inline [`Div`](crate::Div)
+/// can gather the text into a paragraph instead; that paragraph does not
+/// populate this handle. See [`layout`](Self::layout) for the distinction.
 ///
 /// # Highlight a substring
 ///
@@ -422,7 +424,7 @@ impl IntoElement for SharedString {
 /// string instead of counting its visible characters:
 ///
 /// ```rust
-/// use gpui::{FontWeight, HighlightStyle, StyledText};
+/// use gpui::{FontWeight, HighlightStyle, StyledText, div, prelude::*, px};
 ///
 /// let label = "Open café";
 /// let start = label.find("café").unwrap();
@@ -431,7 +433,8 @@ impl IntoElement for SharedString {
 ///     HighlightStyle { font_weight: Some(FontWeight::BOLD), ..Default::default() },
 /// )]);
 /// let positions = text.layout().clone();
-/// // Move `text` into the element tree. Query `positions` after prepaint.
+/// let paragraph = div().flex().w(px(240.)).child(text);
+/// // Render `paragraph`, then query `positions` after its text is prepainted.
 /// ```
 pub struct StyledText {
     text: SharedString,
@@ -444,8 +447,8 @@ pub struct StyledText {
 impl StyledText {
     /// Create text using the inherited style unless explicit runs override it.
     ///
-    /// The layout starts unmeasured. Attach the element to a rendered tree
-    /// before querying the handle returned by [`Self::layout`].
+    /// The layout starts unmeasured. To query [`Self::layout`], render the
+    /// element as an independent text box, as described on that method.
     pub fn new(text: impl Into<SharedString>) -> Self {
         StyledText {
             text: text.into(),
@@ -456,11 +459,17 @@ impl StyledText {
         }
     }
 
-    /// Returns the shared layout populated when this element is drawn.
+    /// Returns the shared layout for this element's independent text box.
     ///
     /// Clone the handle before moving the element into a parent. The clone
     /// sees the same measurement and prepaint bounds; it does not copy a
     /// snapshot. Pixel/index queries require those phases to have finished.
+    ///
+    /// Place the element directly in a flex container when you need this
+    /// handle. A block or inline [`Div`](crate::Div) can gather its text into
+    /// a shared paragraph instead. That paragraph owns the measurement;
+    /// rendering it does not populate this handle, and querying the handle
+    /// can panic. See [paragraph layout](crate::_documentation::text#wrap-text-and-element-boxes-in-one-paragraph).
     // docs:examples:begin
     #[doc = include_str!("../docs/examples/gpui-StyledText-layout-07cba400.md")]
     // docs:examples:end
@@ -701,6 +710,10 @@ impl IntoElement for StyledText {
 /// an input callback needs to map a pointer position to a UTF-8 byte index.
 /// The clone shares the measurement populated by layout and the window-space
 /// bounds populated by prepaint. Query it after those phases have run.
+/// The element must have its own layout box: place it directly in a flex
+/// container rather than letting a block or inline [`Div`](crate::Div)
+/// gather it into a shared paragraph. [`StyledText::layout`] explains this
+/// boundary. A paragraph's geometry is not copied into each child's handle.
 ///
 /// [`index_for_position`](Self::index_for_position) identifies the cluster
 /// under a point; its `Err` value is the nearest boundary for an outside point.

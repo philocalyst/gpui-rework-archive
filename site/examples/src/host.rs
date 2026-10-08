@@ -1,7 +1,7 @@
 //! Connect the documentation's DOM editor to the GPUI preview controller.
 
 use gpui::{App, AppContext, Context, Entity, Render, Subscription, Window};
-use gpui_ce_codepen::Codepen;
+use gpui_ce_codepen::{Codepen, session::FailureKind};
 use serde::Deserialize;
 use wasm_bindgen::{JsCast, closure::Closure};
 
@@ -144,7 +144,7 @@ impl Host {
             "running"
         } else if self.edited {
             "edited"
-        } else if state.diagnostics.starts_with("Preview service unavailable.") {
+        } else if state.failure == Some(FailureKind::Unavailable) {
             "unavailable"
         } else if !state.diagnostics.is_empty() {
             "error"
@@ -162,9 +162,7 @@ impl Host {
                 "phase": phase,
                 "diagnostics": state.diagnostics,
                 "elapsed_ms": state.elapsed_ms,
-                // The controller currently uses the development companion. Replace
-                // this only when the browser Worker actually owns the interpreter.
-                "backend": "miri-native",
+                "backend": "miri-wasm",
                 "has_frame": state.has_preview,
             }),
         );

@@ -11,6 +11,9 @@
     <script type="module">
       const status = document.querySelector("#status");
       try {
+        if (location.hash.startsWith("#host/")) {
+          await import("./miri/bootstrap.js");
+        }
         const build = await fetch("./build.json", { cache: "no-store" });
         if (!build.ok) throw new Error("preview bundle metadata is missing");
         const metadata = await build.json();

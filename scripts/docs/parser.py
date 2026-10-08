@@ -1,7 +1,7 @@
 """Parse the small documentation DSL embedded in Rust source files.
 
 Authors write Markdown comments followed by ordinary Rust. Headings divide
-chapters; Rustdoc-style links supply exact API targets and reciprocal links.
+steps; Rustdoc-style links supply exact API targets and reciprocal links.
 """
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ class Step:
     api: list[str] = field(default_factory=list)
 
 
-# A Markdown heading starts a chapter; ordinary Rust starts its code block.
+# A Markdown heading starts a step; ordinary Rust starts its code block.
 # An optional explicit anchor keeps published links stable when a title changes.
 _STEP = re.compile(r"^\s*// ## (.+?)(?: \{#([a-z0-9][a-z0-9-]*)\})?\s*$")
 _REFERENCE = re.compile(r"\[`([A-Za-z_][A-Za-z0-9_:]*)`\](?![\[(])")
@@ -42,7 +42,7 @@ def _lexical_marker_state(line: str, block_depth: int, raw_end: str | None, quot
 
     This is a deliberately small lexer, sufficient to prevent accidental
     marker recognition in Rust raw/multiline strings and block comments while
-    leaving ordinary line comments available for Markdown chapters.
+    leaving ordinary line comments available for Markdown steps.
     """
     i = 0
     while i < len(line):
@@ -124,9 +124,9 @@ def parse_source(path: str | Path, text: str | None = None, *, catalog: dict | N
         while current.code and not current.code[-1].strip():
             current.code.pop()
         if not current.prose:
-            raise DocumentationError(path, current.source_start, "chapter needs an explanation before its Rust")
+            raise DocumentationError(path, current.source_start, "step needs an explanation before its Rust")
         if not current.code:
-            raise DocumentationError(path, current.source_start, "chapter needs Rust after its explanation")
+            raise DocumentationError(path, current.source_start, "step needs Rust after its explanation")
         current.source_end = end
         try:
             current.api = api_references("\n".join(current.prose), catalog)
@@ -141,7 +141,7 @@ def parse_source(path: str | Path, text: str | None = None, *, catalog: dict | N
             title, slug = heading.groups()
             slug = slug or re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
             if not slug or slug in seen:
-                raise DocumentationError(path, number, f"duplicate or empty chapter anchor {slug!r}")
+                raise DocumentationError(path, number, f"duplicate or empty step anchor {slug!r}")
             seen.add(slug)
             current = Step(slug, title.strip(), number)
             steps.append(current)

@@ -377,6 +377,36 @@ impl AsyncApp {
 /// [`VisualContext`] adds view construction and focus operations; its entity
 /// updates follow the entity's associated window, which can differ from this
 /// handle's window.
+///
+/// # Update this window explicitly
+///
+/// Enter this context's [`update`](Self::update) closure, then update the
+/// entity through the supplied [`App`], when the operation must use this
+/// particular window. Calling [`Entity::update_in`] instead follows the
+/// entity's current window association.
+///
+/// ```no_run
+/// use gpui::{AsyncWindowContext, WeakEntity};
+/// use std::time::Duration;
+///
+/// async fn rename_later(
+///     label: WeakEntity<String>,
+///     cx: &mut AsyncWindowContext,
+/// ) -> anyhow::Result<()> {
+///     cx.background_executor().timer(Duration::from_secs(1)).await;
+///     cx.update(|window, cx| {
+///         label.update(cx, |label, cx| {
+///             *label = "Ready".into();
+///             window.set_window_title(label.as_str());
+///             cx.notify();
+///         })
+///     })??;
+///     Ok(())
+/// }
+/// ```
+///
+/// The first `?` handles an unavailable app or window; the second handles a
+/// released entity. Neither handle retains its target while the timer waits.
 #[derive(Clone, Deref, DerefMut)]
 pub struct AsyncWindowContext {
     #[deref]

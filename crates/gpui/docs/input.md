@@ -94,6 +94,20 @@ order; custom widgets that change focus order should use the tab-stop APIs on th
 An embedded browser can also have two focus systems: the page must focus its iframe before the
 GPUI window can receive keys.
 
+### Put listeners on the focused path
+
+Focusing a container does not send keys down through its children. If a
+preview's root carries the focus handle, a key listener on its canvas child
+is outside the route. Put that listener on the root alongside `track_focus`,
+or give the child its own handle and focus it. Ancestors remain on the route
+and can handle a key that the target propagates.
+
+This applies to action handlers and key contexts too. A child `key_context`
+cannot qualify a shortcut while its parent is the focused target. The
+[actions walkthrough](https://gpui-ce.github.io/examples/actions/#dispatch)
+keeps its focus handle, context, and action handler on one element so their
+relationship is visible.
+
 Choose a query according to the question being asked:
 
 | Question | Query |
@@ -213,6 +227,15 @@ between an ancestor and a descendant, with spaces around `>`. See
 [`KeyBindingContextPredicate::parse`](crate::KeyBindingContextPredicate::parse)
 for executable matching examples.
 
+Choose the scope of an exclusion deliberately. `Editor && mode != readonly`
+checks the mode on the editor's own node, and also matches when that key is
+absent. `Editor && !(mode == readonly)` rejects a read-only mode anywhere on
+the path, including an ancestor. After a descendant operator, negation checks
+only the path below its matching ancestor. For example,
+`Workspace > Editor && !(mode == readonly)` excludes read-only nodes below
+the workspace. Parentheses matter: `!` binds more tightly than `==`, so negate
+the complete equality with `!(mode == readonly)`.
+
 For programmatic bindings, [`KeyBinding::new`](crate::KeyBinding::new) panics when a keystroke or
 context string is invalid. [`KeyBinding::load`](crate::KeyBinding::load) returns
 [`InvalidKeystrokeError`](crate::InvalidKeystrokeError) for malformed keystrokes; parse the
@@ -223,6 +246,30 @@ An unqualified binding is eligible at the deepest context. This lets a user bind
 after built-in bindings override a built-in binding while a focused editor can override a
 workspace shortcut. See [`Keymap::bindings_for_input`](crate::Keymap::bindings_for_input) for
 disabled-binding and prefix details.
+
+### Show the shortcut for the command's target
+
+A toolbar button and an editor can invoke the same action while belonging to
+different focus paths. To show the editor's shortcut on that button, query
+[`Window::highest_precedence_binding_for_action_in`](crate::Window::highest_precedence_binding_for_action_in)
+with the editor's focus handle. That query includes the editor's ancestors
+and leaves focus where it is. Passing a single `KeyContext` instead omits
+those ancestors, which can change the winning binding.
+
+For a command aimed at the currently focused control, use
+[`Window::highest_precedence_binding_for_action`](crate::Window::highest_precedence_binding_for_action).
+It returns one unshadowed binding; `bindings_for_action` returns all of them
+in insertion order. Both compare the action's data as well as its type. A
+shortcut for “open file A” need not match an action carrying file B.
+
+Binding lookup does not establish that a command is enabled. Availability
+queries check for a listener of the action's type, and that listener can
+still reject the particular value or state. Keep the command's enablement
+rule with its owner. Contexts come from the last rendered tree; draw changed
+ancestry before querying it. Changing focus between nodes already in that
+tree changes the current-focus lookup immediately.
+
+### Wait for a pending chord
 
 Separate keystrokes with spaces to define a chord, for example `cmd-k left`.
 While a prefix can still complete a longer binding, GPUI holds it pending.
@@ -246,6 +293,12 @@ keystroke interceptors run before key binding resolution and can stop it; elemen
 handlers run after key binding matching when no binding has consumed the keystroke. Text
 composition, candidate selection, and replacement ranges must use the input-handler contract;
 seeing a printable [`KeyDownEvent`](crate::KeyDownEvent) does not model an IME session.
+
+`capture_key_down` captures the raw key route; it still runs after binding
+resolution. Use [`App::intercept_keystrokes`](crate::App::intercept_keystrokes)
+when interception must precede that resolution. Key-up delivery follows the
+focus at release, so an element can receive a release without having handled
+the press. A shortcut may have consumed the press or moved focus in between.
 
 ## Text input and offsets
 

@@ -502,10 +502,13 @@ impl Interactivity {
             }));
     }
 
-    /// Bind the given callback to an action dispatch during the capture phase.
-    /// The imperative API equivalent to [`InteractiveElement::capture_action`].
+    /// Registers a handler for `A` while dispatch descends the focused path.
     ///
-    /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
+    /// Capture runs from the root toward the focused node. Call
+    /// [`App::stop_propagation`] to prevent later action handlers from running;
+    /// otherwise dispatch continues. This does not intercept raw keystrokes.
+    /// See [`InteractiveElement::capture_action`] for the builder form and
+    /// [`Context::listener`](crate::Context::listener) for entity access.
     pub fn capture_action<A: Action>(
         &mut self,
         listener: impl Fn(&A, &mut Window, &mut App) + 'static,
@@ -523,10 +526,14 @@ impl Interactivity {
         ));
     }
 
-    /// Bind the given callback to an action dispatch during the bubble phase.
-    /// The imperative API equivalent to [`InteractiveElement::on_action`].
+    /// Registers a handler for `A` while dispatch bubbles from the focused node.
     ///
-    /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
+    /// The callback receives the dispatched value, including its fields.
+    /// A bubbling action handler consumes the action by default; call
+    /// [`App::propagate`] to let later handlers try it. The element must lie
+    /// on the focused path. See [`InteractiveElement::on_action`] for the
+    /// builder form and [`Context::listener`](crate::Context::listener) for
+    /// entity access.
     #[track_caller]
     pub fn on_action<A: Action>(&mut self, listener: impl Fn(&A, &mut Window, &mut App) + 'static) {
         self.action_listeners.push((
@@ -567,10 +574,13 @@ impl Interactivity {
         ));
     }
 
-    /// Bind the given callback to key down events during the bubble phase.
-    /// The imperative API equivalent to [`InteractiveElement::on_key_down`].
+    /// Registers a raw key-down handler on the focused node's bubbling path.
     ///
-    /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
+    /// Key binding resolution happens first; a consumed action or pending
+    /// chord can prevent this callback. Raw key events propagate by default.
+    /// See [`InteractiveElement::on_key_down`] for placement and text-input
+    /// guidance, and [`Context::listener`](crate::Context::listener) for
+    /// entity access.
     pub fn on_key_down(
         &mut self,
         listener: impl Fn(&KeyDownEvent, &mut Window, &mut App) + 'static,
@@ -583,10 +593,13 @@ impl Interactivity {
             }));
     }
 
-    /// Bind the given callback to key down events during the capture phase.
-    /// The imperative API equivalent to [`InteractiveElement::capture_key_down`].
+    /// Registers a raw key-down handler while dispatch descends the focused path.
     ///
-    /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
+    /// Capture precedes raw bubbling handlers, but follows key binding
+    /// resolution. Use [`App::intercept_keystrokes`] to intercept before that
+    /// resolution. See [`InteractiveElement::capture_key_down`] for the
+    /// builder form and [`Context::listener`](crate::Context::listener) for
+    /// entity access.
     pub fn capture_key_down(
         &mut self,
         listener: impl Fn(&KeyDownEvent, &mut Window, &mut App) + 'static,
@@ -599,10 +612,12 @@ impl Interactivity {
             }));
     }
 
-    /// Bind the given callback to key up events during the bubble phase.
-    /// The imperative API equivalent to [`InteractiveElement::on_key_up`].
+    /// Registers a key-up handler on the focused node's bubbling path.
     ///
-    /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
+    /// The release follows the current focus, which can differ from the
+    /// target of the press. See [`InteractiveElement::on_key_up`] for the
+    /// builder form and [`Context::listener`](crate::Context::listener) for
+    /// entity access.
     pub fn on_key_up(&mut self, listener: impl Fn(&KeyUpEvent, &mut Window, &mut App) + 'static) {
         self.key_up_listeners
             .push(Box::new(move |event, phase, window, cx| {
@@ -612,10 +627,10 @@ impl Interactivity {
             }));
     }
 
-    /// Bind the given callback to key up events during the capture phase.
-    /// The imperative API equivalent to [`InteractiveElement::on_key_up`].
+    /// Registers a key-up handler while dispatch descends the focused path.
     ///
-    /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
+    /// See [`InteractiveElement::capture_key_up`] for the builder form and
+    /// [`Context::listener`](crate::Context::listener) for entity access.
     pub fn capture_key_up(
         &mut self,
         listener: impl Fn(&KeyUpEvent, &mut Window, &mut App) + 'static,
@@ -628,10 +643,11 @@ impl Interactivity {
             }));
     }
 
-    /// Bind the given callback to modifiers changing events.
-    /// The imperative API equivalent to [`InteractiveElement::on_modifiers_changed`].
+    /// Registers a modifier-change handler on the focused node's bubbling path.
     ///
-    /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
+    /// See [`InteractiveElement::on_modifiers_changed`] for routing and the
+    /// builder form, and [`Context::listener`](crate::Context::listener) for
+    /// entity access.
     pub fn on_modifiers_changed(
         &mut self,
         listener: impl Fn(&ModifiersChangedEvent, &mut Window, &mut App) + 'static,
@@ -993,6 +1009,10 @@ pub trait InteractiveElement: Sized {
     /// Configure tab order on the supplied [`FocusHandle`]; element-level
     /// [`Self::tab_index`] and [`Self::tab_stop`] configure only an internally
     /// retained handle and do not override this one.
+    ///
+    /// Keyboard dispatch visits this node and its ancestors. A listener on a
+    /// child does not receive keys merely because this parent is focused.
+    /// Attach the listener here, or focus a handle on that child instead.
     /// See the [actions walkthrough](https://gpui-ce.github.io/examples/actions/#focus).
     fn track_focus(mut self, focus_handle: &FocusHandle) -> Self {
         self.interactivity().focusable = true;
@@ -1333,10 +1353,13 @@ pub trait InteractiveElement: Sized {
         self.interactivity().capture_pinch(listener);
         self
     }
-    /// Capture the given action, before normal action dispatch can fire.
-    /// The fluent API equivalent to [`Interactivity::capture_action`].
+    /// Handles `A` while action dispatch descends the focused path.
     ///
-    /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
+    /// This element must be the focused node or one of its ancestors. Capture
+    /// runs before bubbling action handlers and continues unless the callback
+    /// calls [`App::stop_propagation`]. Use it to intercept an operation at a
+    /// containing panel; use [`Self::on_action`] for its ordinary handler.
+    /// [`Context::listener`](crate::Context::listener) supplies entity access.
     fn capture_action<A: Action>(
         mut self,
         listener: impl Fn(&A, &mut Window, &mut App) + 'static,
@@ -1345,10 +1368,17 @@ pub trait InteractiveElement: Sized {
         self
     }
 
-    /// Bind the given callback to an action dispatch during the bubble phase.
-    /// The fluent API equivalent to [`Interactivity::on_action`].
+    /// Handles `A` while action dispatch bubbles from the focused node.
     ///
-    /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
+    /// This element must lie on the focused node's ancestor path. The callback
+    /// receives the dispatched action's fields and consumes the action by
+    /// default. Call [`App::propagate`] when a later handler should try it,
+    /// such as when this view cannot perform the operation in its current state.
+    ///
+    /// Register the listener again whenever this element is rebuilt. Binding
+    /// a shortcut and handling its action are separate operations; see the
+    /// [worked save handler](crate::_documentation::input#actions-and-key-bindings)
+    /// and [`Context::listener`](crate::Context::listener) for entity access.
     #[track_caller]
     fn on_action<A: Action>(
         mut self,
@@ -1377,10 +1407,19 @@ pub trait InteractiveElement: Sized {
         self
     }
 
-    /// Bind the given callback to key down events during the bubble phase.
-    /// The fluent API equivalent to [`Interactivity::on_key_down`].
+    /// Handles raw key presses while dispatch bubbles from the focused node.
     ///
-    /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
+    /// Put the listener on the focused element or an ancestor. Focusing a
+    /// container does not route keys through its children. Attach an explicit
+    /// handle with [`Self::track_focus`] when application code chooses focus.
+    ///
+    /// Key binding resolution happens first. A consumed action or pending
+    /// chord can prevent raw delivery. This callback propagates by default;
+    /// call [`App::stop_propagation`] to prevent later raw handlers. Prefer
+    /// [`Self::on_action`] for an operation shared by shortcuts and menus.
+    /// Text composition uses [`EntityInputHandler`](crate::EntityInputHandler),
+    /// because a key press cannot describe replacement ranges or candidates.
+    /// [`Context::listener`](crate::Context::listener) supplies entity access.
     fn on_key_down(
         mut self,
         listener: impl Fn(&KeyDownEvent, &mut Window, &mut App) + 'static,
@@ -1389,10 +1428,14 @@ pub trait InteractiveElement: Sized {
         self
     }
 
-    /// Bind the given callback to key down events during the capture phase.
-    /// The fluent API equivalent to [`Interactivity::capture_key_down`].
+    /// Handles raw key presses while dispatch descends the focused path.
     ///
-    /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
+    /// This runs before [`Self::on_key_down`] handlers, after key binding
+    /// resolution. It cannot intercept a shortcut already consumed by an
+    /// action; use [`App::intercept_keystrokes`] for that. Call
+    /// [`App::stop_propagation`] to stop the remaining raw route, including
+    /// bubbling handlers. [`Context::listener`](crate::Context::listener)
+    /// supplies entity access.
     fn capture_key_down(
         mut self,
         listener: impl Fn(&KeyDownEvent, &mut Window, &mut App) + 'static,
@@ -1401,10 +1444,13 @@ pub trait InteractiveElement: Sized {
         self
     }
 
-    /// Bind the given callback to key up events during the bubble phase.
-    /// The fluent API equivalent to [`Interactivity::on_key_up`].
+    /// Handles key releases while dispatch bubbles from the focused node.
     ///
-    /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
+    /// Delivery follows the current focus. A shortcut may have consumed the
+    /// press or moved focus, so this callback need not pair with a prior
+    /// [`Self::on_key_down`] call on this element. Propagation continues unless
+    /// the callback calls [`App::stop_propagation`].
+    /// [`Context::listener`](crate::Context::listener) supplies entity access.
     fn on_key_up(
         mut self,
         listener: impl Fn(&KeyUpEvent, &mut Window, &mut App) + 'static,
@@ -1413,10 +1459,12 @@ pub trait InteractiveElement: Sized {
         self
     }
 
-    /// Bind the given callback to key up events during the capture phase.
-    /// The fluent API equivalent to [`Interactivity::capture_key_up`].
+    /// Handles key releases while dispatch descends the focused path.
     ///
-    /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
+    /// Capture runs from the root toward the focused node before
+    /// [`Self::on_key_up`] handlers. Call [`App::stop_propagation`] to stop
+    /// the remaining route. [`Context::listener`](crate::Context::listener)
+    /// supplies entity access.
     fn capture_key_up(
         mut self,
         listener: impl Fn(&KeyUpEvent, &mut Window, &mut App) + 'static,
@@ -1425,10 +1473,13 @@ pub trait InteractiveElement: Sized {
         self
     }
 
-    /// Bind the given callback to modifiers changing events.
-    /// The fluent API equivalent to [`Interactivity::on_modifiers_changed`].
+    /// Handles propagated modifier changes from the focused node outward.
     ///
-    /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
+    /// This element must lie on the focused path. A modifier-only shortcut
+    /// can consume the change before this route; the callback is not a log
+    /// of every platform modifier transition. Call [`App::stop_propagation`]
+    /// to stop later listeners. [`Context::listener`](crate::Context::listener)
+    /// supplies entity access.
     fn on_modifiers_changed(
         mut self,
         listener: impl Fn(&ModifiersChangedEvent, &mut Window, &mut App) + 'static,

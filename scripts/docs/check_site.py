@@ -149,6 +149,21 @@ def audit(public: Path, rustdoc: Path | None = None, base_url='https://gpui-ce.g
                 for name in ('index.html', 'editor.js', 'workbench.css', 'editor-build.json', 'licenses.txt'):
                     if not (public / 'workbench' / name).is_file():
                         errors.append(f'{public / "workbench"}: missing editor artifact {name}')
+                runtime = preview / 'miri'
+                manifest = json.loads((runtime / 'assets.json').read_text())
+                names = [manifest['module'], *manifest.get('metadata_parts', [manifest['metadata']]),
+                         'runtime.js', 'worker.js', 'bootstrap.js', 'wasi-clock.js', 'wasi/index.js']
+                if manifest.get('metadata_paging'):
+                    names.append('metadata-files.js')
+                    names.extend(chunk for entry in manifest['files'] for chunk in entry.get('chunks', []))
+                for name in names:
+                    asset = (runtime / name).resolve()
+                    if not asset.is_relative_to(runtime.resolve()) or not asset.is_file():
+                        errors.append(f'{runtime}: missing or invalid browser Miri asset {name}')
+                starters = {item['source'] for item in manifest.get('starters', [])}
+                for component in (public / 'components').glob('*.rs'):
+                    if component.read_text() not in starters:
+                        errors.append(f'{component}: browser Miri starter does not match the published source')
         except (OSError, ValueError, KeyError) as error:
             errors.append(f'{metadata}: invalid build artifacts: {error}')
     return errors

@@ -19,6 +19,13 @@ provides widget patterns, including [buttons](https://www.w3.org/WAI/ARIA/apg/pa
 GPUI uses similar property names, but an ARIA property does not supply browser
 behavior automatically.
 
+The supplied native backends connect GPUI's tree to AccessKit adapters. The
+browser backend currently paints to a canvas without that adapter or a
+corresponding semantic HTML tree. The site preview can exercise keyboard
+behavior, but its painted controls do not establish screen-reader support.
+Check the native application with the assistive technology you intend to
+support; see [platform boundaries](https://gpui-ce.github.io/book/platforms.html#browser-startup).
+
 ## Give a control a role, name, and behavior
 
 A `div` needs a stable ID and a role to become an ordinary accessibility node.

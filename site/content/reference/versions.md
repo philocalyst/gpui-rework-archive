@@ -23,15 +23,17 @@ as the downloads do, or select examples and references from your dependency's re
 
 The browser backend currently supports one window per document. Native services
 retain their platform-specific availability. Hot patching is experimental and
-native-debug-only. The walkthrough previews execute compiled GPUI WebAssembly.
-The Miri editing path has a separate runtime and its browser-portable status is
-not established by the compiled preview; consult the [editing guide](@/guides/live-editing.md)
-before relying on it.
+native-debug-only. The walkthrough previews execute compiled GPUI WebAssembly;
+their editors run the bundled Rust compiler and Miri in browser Workers.
+Compatible body edits can retain state, while changes to types or closure
+captures can restart the component. The [editing guide](@/guides/live-editing.md)
+explains those controls and how to run an edited program natively.
 
 GPUI draws its own controls rather than using a native widget for each element.
 Applications must supply the interaction and accessibility behavior their
 controls require. The [accessibility reference](https://docs.rs/gpui-ce/0.2.2/gpui/_accessibility/index.html)
-describes the framework integration.
+describes the framework integration. The web backend currently has no adapter
+that exposes painted GPUI nodes to the browser's accessibility tree.
 
 GPUI Community Edition and upstream GPUI share history but can diverge. Treat
 cross-fork recipes as source to adapt, and keep their version and fork names visible.

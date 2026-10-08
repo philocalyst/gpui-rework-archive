@@ -223,11 +223,11 @@ def render(root: Path, *, check: bool = False) -> list[str]:
         except ValueError: old_manifest = []
     errors = []
     for path, value in expected.items():
+        current = path.read_bytes() if isinstance(value, bytes) and path.is_file() else (path.read_text(encoding="utf-8") if path.is_file() else None)
         if check:
-            current = path.read_bytes() if isinstance(value, bytes) and path.is_file() else (path.read_text(encoding="utf-8") if path.is_file() else None)
             if current != value:
                 errors.append(f"stale generated file: {path}")
-        else:
+        elif current != value:
             path.parent.mkdir(parents=True, exist_ok=True)
             if isinstance(value, bytes): path.write_bytes(value)
             else: path.write_text(value, encoding="utf-8", newline="\n")

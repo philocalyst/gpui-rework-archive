@@ -41,6 +41,38 @@ def file_digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest() if path.exists() else "missing"
 
 
+def copy_runtime() -> None:
+    """Publish the full browser runtime, including matching canonical starters."""
+    source = ROOT / "target/codepen-browser/miri"
+    manifest_path = source / "assets.json"
+    if not manifest_path.is_file():
+        raise RuntimeError("Browser Miri bundle is missing. Build scripts/codepen/browser.py all --starter-dir site/static/components first.")
+    manifest = json.loads(manifest_path.read_text())
+    if manifest.get("protocol") != 8:
+        raise RuntimeError("Browser Miri frame protocol differs from this preview build.")
+    starters = {item["source"] for item in manifest.get("starters", [])}
+    for path in sorted((ROOT / "site/static/components").glob("*.rs")):
+        if path.read_text() not in starters:
+            raise RuntimeError(f"Browser Miri starter is stale: {path.name}. Rebuild the runtime bundle.")
+    files = [manifest["module"], *manifest.get("metadata_parts", [manifest["metadata"]]),
+             "runtime.js", "worker.js", "bootstrap.js", "wasi-clock.js", "wasi/index.js"]
+    if manifest.get("metadata_paging"):
+        files.append("metadata-files.js")
+        files.extend(chunk for entry in manifest["files"] for chunk in entry.get("chunks", []))
+    for name in files:
+        path = (source / name).resolve()
+        if not path.is_relative_to(source.resolve()) or not path.is_file():
+            raise RuntimeError(f"Browser Miri asset is missing or outside its bundle: {name}")
+    destination = OUT.parent / "miri"
+    fresh = destination.with_name("miri.tmp")
+    if fresh.exists():
+        shutil.rmtree(fresh)
+    shutil.copytree(source, fresh)
+    if destination.exists():
+        shutil.rmtree(destination)
+    fresh.replace(destination)
+
+
 def rust_toolchain_env() -> dict[str, str]:
     env = os.environ.copy()
     toolchain = env.get("GPUI_DOCS_RUST_TOOLCHAIN")
@@ -68,6 +100,7 @@ def rust_toolchain_env() -> dict[str, str]:
 
 def main() -> int:
     OUT.parent.mkdir(parents=True, exist_ok=True)
+    copy_runtime()
     digest = digest_inputs()
     metadata_path = OUT.parent / "build.json"
     if metadata_path.exists():

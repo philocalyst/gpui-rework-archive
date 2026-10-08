@@ -35,10 +35,16 @@ several windows in one GPUI web application.
 The browser renderer needs JavaScript, WebAssembly, and a supported graphics
 backend. It tries WebGPU and can fall back to WebGL2. Browser APIs govern
 clipboard permissions, installed/bundled fonts, input methods, and worker
-availability; native service behavior should not be assumed. The compiled
-walkthrough preview runs GPUI in Wasm. The editable Miri runtime is a separate
-path; it is browser-portable only when compilation and interpretation both run
-inside WebAssembly, so do not infer that capability from a working preview.
+availability; native service behavior should not be assumed. The initial
+walkthrough preview runs compiled GPUI Wasm. Its editor runs the bundled
+Rust compiler and Miri in browser Workers. Read the
+[editing guide](@/guides/live-editing.md) for state retention, diagnostics, and
+native downloads.
+
+The web backend has no accessibility adapter or semantic HTML tree for GPUI's
+painted controls. Setting a role or label on an element does not expose it to
+a browser screen reader. Test that integration through a supported native
+backend, as described in the [accessibility guide](@/guides/accessibility.md).
 
 Read the [platform explanation](https://docs.rs/gpui-ce/0.2.2/gpui/_documentation/platforms/index.html)
 for crate boundaries and features. Read the method contract for a particular

@@ -17,8 +17,9 @@ example_run = "cargo run -p gpui-documentation-examples --example actions"
 
 Pressing Space will increment this counter. [`FocusHandle`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.FocusHandle.html) identifies a
 focus target; `track_focus` attaches it to the element tree through the
-[`InteractiveElement`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.InteractiveElement.html) trait and places it on the path that receives keyboard actions. Merely storing
-the handle on the view creates no path and receives no keys.
+[`InteractiveElement`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.InteractiveElement.html) trait and places it on the path that receives
+keyboard actions. Merely storing the handle on the view creates no path and
+receives no keys.
 
 Click inside the preview before pressing Space. In a browser there are two
 focus boundaries: the page must focus the preview frame, then GPUI must
@@ -38,7 +39,7 @@ struct KeyboardCounter {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/actions/") }}#L14).
+[View this step in the source]({{ get_url(path="sources/actions/") }}#L15).
 
 <a id="bindings"></a>
 ## Bind an operation in a context
@@ -50,9 +51,8 @@ during setup; [`Window::focus`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window
 opens. Binding and handling are separate: a key produces an action, then an
 element on the dispatch path decides what that action does.
 
-A shortcut belongs to an operation, not to a particular input device. A
-menu or another control can dispatch the same action without synthesizing
-Space.
+A menu or another control can dispatch `Increment` through the same action
+listener. It need not synthesize Space or duplicate the counter update.
 
 ```rust
 fn component(window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<KeyboardCounter> {
@@ -74,9 +74,10 @@ pub fn main() {
 <a id="dispatch"></a>
 ## Handle the action on its path
 
-The root's `key_context` supplies the context predicate used by the binding.
-[`Context::listener`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html#method.listener) gives the handler scoped access to this view, and
-[`Context::notify`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html#method.notify) schedules a render after the count changes. The keymap
+The root's `key_context` contributes `Counter` to the focused path; the
+binding's predicate tests for that entry. [`Context::listener`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html#method.listener) gives the
+handler scoped access to this view, and [`Context::notify`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html#method.notify) schedules a
+render after the count changes. The keymap
 chooses *when* the operation is dispatched; the action listener defines its
 effect on this view.
 
@@ -109,6 +110,6 @@ impl Render for KeyboardCounter {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/actions/") }}#L62).
+[View this step in the source]({{ get_url(path="sources/actions/") }}#L63).
 
 [Download the complete source]({{ get_url(path="examples/actions.rs") }}).

@@ -17,13 +17,13 @@ SOURCES = {
     "ownership": "crates/gpui/src/_ownership_and_data_flow.rs",
     "accessibility": "crates/gpui/docs/accessibility.md",
     **{name: f"crates/gpui/docs/{name}.md"
-       for name in ("rendering", "layout", "animation", "text", "drawing", "input", "scheduling", "testing", "platforms")},
+       for name in ("rendering", "layout", "animation", "text", "drawing", "assets", "input", "scheduling", "testing", "platforms")},
 }
 CHAPTERS = {
     "_ownership_and_data_flow": "ownership.md",
     "_accessibility": "accessibility.md",
     **{f"_documentation::{name}": f"{name}.md"
-       for name in ("rendering", "layout", "animation", "text", "drawing", "input", "scheduling", "testing", "platforms")},
+       for name in ("rendering", "layout", "animation", "text", "drawing", "assets", "input", "scheduling", "testing", "platforms")},
 }
 KINDS = ("struct", "enum", "trait", "type", "fn", "macro", "attr", "constant", "static")
 
@@ -197,13 +197,15 @@ def main() -> int:
         docs = ROOT / docs
     if len(sys.argv) > 1 and sys.argv[1] == "--site-guides":
         links = ApiLinks(docs, config["extra"]["api"], config["base_url"].rstrip("/") + "/book")
-        for name in ("testing", "accessibility", "drawing"):
+        for name in ("testing", "accessibility", "drawing", "assets", "text"):
             destination = ROOT / f"site/content/guides/{name}.md"
             frontmatter, _old = destination.read_text().split("\n+++\n", 1)
             source = canonical_source(name)
             _heading, body = source.split("\n", 1)
             mirrored = render_markdown(body.lstrip(), links, config["base_url"])
-            destination.write_text(frontmatter + "\n+++\n\n<!-- Mirrored from crates/gpui/docs/" + name + ".md; edit that source. -->\n\n" + mirrored)
+            output = frontmatter + "\n+++\n\n<!-- Mirrored from crates/gpui/docs/" + name + ".md; edit that source. -->\n\n" + mirrored
+            if destination.read_text() != output:
+                destination.write_text(output)
         return 0
     _context, book = json.load(sys.stdin)
     links = ApiLinks(docs, os.environ.get("GPUI_BOOK_API_BASE", config["extra"]["api"]))

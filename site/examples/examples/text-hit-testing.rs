@@ -8,13 +8,18 @@ mod support;
 // measured. Position queries need layout and prepaint to have populated that
 // geometry; building the element tree is too early.
 //
+// The paragraph container uses `.flex().flex_col()` so the text is measured
+// as its own child. A block div instead gathers text into a shared paragraph;
+// that paragraph owns the geometry and leaves this handle unpopulated. The
+// text still wraps within its 280-pixel width in the flex container.
+//
 // The string includes a combining accent in `Café` and a multibyte `ß`.
 // Neither a Rust `char` count nor a fixed character width can locate every
 // displayed cluster. Change the paragraph width and try the wrapped lines.
 
 use gpui::{
     AppContext, Bounds, Context, IntoElement, MouseButton, MouseDownEvent, Render, Role,
-    StyledText, Window, canvas, div, fill, prelude::*, px, rgb, size, text,
+    StyledText, TextLayout, Window, canvas, div, fill, prelude::*, px, rgb, size, text,
 };
 
 const PARAGRAPH: &str = "Café — Straße — click a wrapped line to inspect its UTF-8 byte index.";
@@ -22,6 +27,13 @@ const PARAGRAPH: &str = "Café — Straße — click a wrapped line to inspect 
 struct HitTest {
     index: usize,
     hit: bool,
+}
+
+fn component(_window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<HitTest> {
+    cx.new(|_cx| HitTest {
+        index: 0,
+        hit: false,
+    })
 }
 
 // ## Keep the hit and the nearest edge distinct {#hit}
@@ -58,6 +70,8 @@ impl Render for HitTest {
                     .role(Role::Label)
                     .aria_label(PARAGRAPH)
                     .relative()
+                    .flex()
+                    .flex_col()
                     .w(px(280.))
                     .text_size(px(18.))
                     .line_height(px(28.))
@@ -72,27 +86,7 @@ impl Render for HitTest {
                         }),
                     )
                     .child(text)
-                    .child(
-                        canvas(
-                            move |_bounds, _window, _cx| {
-                                // The text child was prepainted before this sibling.
-                                (
-                                    marker_layout.position_for_index(index),
-                                    marker_layout.line_height(),
-                                )
-                            },
-                            |_bounds, (position, height), window, _cx| {
-                                if let Some(position) = position {
-                                    window.paint_quad(fill(
-                                        Bounds::new(position, size(px(2.), height)),
-                                        rgb(0xd04736),
-                                    ));
-                                }
-                            },
-                        )
-                        .absolute()
-                        .inset_0(),
-                    ),
+                    .child(marker(marker_layout, index)),
             )
             .child(text!(format!(
                 "Byte {} / {} · {}",
@@ -118,11 +112,23 @@ impl Render for HitTest {
 // glyphs need not have adjacent byte indices. Click at the start of the next
 // wrapped line and compare the displayed byte offset with the marker position.
 
-fn component(_window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<HitTest> {
-    cx.new(|_cx| HitTest {
-        index: 0,
-        hit: false,
-    })
+fn marker(layout: TextLayout, index: usize) -> impl IntoElement {
+    canvas(
+        move |_bounds, _window, _cx| {
+            // The preceding text child has already completed prepaint.
+            (layout.position_for_index(index), layout.line_height())
+        },
+        |_bounds, (position, height), window, _cx| {
+            if let Some(position) = position {
+                window.paint_quad(fill(
+                    Bounds::new(position, size(px(2.), height)),
+                    rgb(0xd04736),
+                ));
+            }
+        },
+    )
+    .absolute()
+    .inset_0()
 }
 
 pub fn main() {

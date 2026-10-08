@@ -1121,11 +1121,17 @@ pub(crate) struct LeakDetector {
     entity_handles: HashMap<EntityId, EntityLeakData>,
 }
 
-/// A snapshot of the set of alive entities at a point in time.
+/// The entity IDs with live strong handles when an app takes a leak snapshot.
 ///
-/// Created by `LeakDetector::snapshot`. Can later be passed to
-/// `LeakDetector::assert_no_new_leaks` to verify that no new entity
-/// handles remain between the snapshot and the current state.
+/// Obtain this from [`App::leak_detector_snapshot`] and pass it back to that
+/// app's [`App::assert_no_new_leaks`] after tearing down a fixture. The check
+/// ignores every ID in the snapshot, including handles cloned for those
+/// entities later. It checks newly retained entities, not arbitrary allocations
+/// or the exact number of handles to an existing entity.
+///
+/// Available with `leak-detection`, which `test-support` enables. See the
+/// [teardown test](https://gpui-ce.github.io/book/testing.html#check-that-teardown-releases-the-owner)
+/// for a fixture that keeps its model while releasing a consumer.
 #[cfg(any(test, feature = "leak-detection"))]
 pub struct LeakDetectorSnapshot {
     entity_ids: collections::HashSet<EntityId>,

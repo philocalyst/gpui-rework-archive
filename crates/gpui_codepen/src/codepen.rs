@@ -45,11 +45,14 @@ pub struct CodepenStatus {
 /// leaves editor controls to a host such as the documentation's DOM editor.
 /// Source edits keep the last successful scene visible, but input to that scene
 /// is suspended until the displayed source matches the current source again.
-/// Input and animation reuse the running component. A different source or an
-/// explicit [`reset`](Self::reset) constructs a fresh component.
+/// Input and animation reuse the running component. Compatible edits replace
+/// executable function bodies while retaining its entities. Changes to types,
+/// definitions, or captured closure data can require a fresh component, as does
+/// an explicit [`reset`](Self::reset).
 ///
-/// The current browser transport calls the development companion. Rendering
-/// the preview in WebAssembly does not put that interpreter in the browser.
+/// On WebAssembly, the `browser-miri` feature runs the compiler and interpreter
+/// in browser Workers and requires the bundled runtime assets. Without that
+/// feature, the browser transport calls the native development companion.
 pub struct Codepen {
     /// Source buffer for the built-in editor. Hosts should edit through [`Self::edit_source`].
     pub editor: Entity<EditableTextState>,

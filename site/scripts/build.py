@@ -66,7 +66,8 @@ def main() -> int:
     # artifact links to docs.rs rather than carrying a local API copy.
     env = os.environ.copy()
     env["RUSTDOCFLAGS"] = " ".join(filter(None, [env.get("RUSTDOCFLAGS"), "-D rustdoc::broken_intra_doc_links -D rustdoc::bare_urls -D rustdoc::private_intra_doc_links -D missing_docs"]))
-    run("cargo", "doc", "--locked", "--lib", "-p", "gpui-ce", "--no-deps", "--features", "test-support,bench-support", env=env)
+    run("cargo", "doc", "--locked", "--lib", "-p", "gpui-ce", "-p", "gpui_ce_elements",
+        "--no-deps", "--features", "gpui-ce/test-support,gpui-ce/bench-support", env=env)
     run(sys.executable, str(ROOT / "scripts/docs/book.py"), "--site-guides")
     run("zola", "--root", str(SITE), "build", "--base-url", base, "--output-dir", str(public), "--force")
     if args.with_api:
@@ -109,6 +110,8 @@ def main() -> int:
         "base_url": base,
         "api": "checkout" if args.with_api else "docs.rs",
         "browser_programs": not args.text_only,
+        "editor_runtime": "browser-wasm-miri" if not args.text_only else None,
+        "runtime_manifest_sha256": hashlib.sha256((public / "preview/miri/assets.json").read_bytes()).hexdigest() if not args.text_only else None,
         "book": "canonical-guides",
     }, indent=2) + "\n")
     failures = audit(public, public / "api" if args.with_api else None, base)

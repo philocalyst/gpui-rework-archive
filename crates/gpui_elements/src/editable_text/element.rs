@@ -44,9 +44,9 @@ pub fn editable_text(id: impl Into<ElementId>) -> EditableTextElement {
 
 /// Creates a single-line editable-text element.
 ///
-/// This disables Enter insertion and vertical line navigation. It does not sanitize pasted or IME
-/// text, so a newline can still enter the value through those paths. Use `whitespace_nowrap()` and
-/// `overflow_x_scroll()` for a horizontally scrolling form field.
+/// This disables Enter insertion and vertical line navigation. The user-input path removes CR
+/// and LF from paste and IME text; programmatic [`EditableTextState::emplace`] can still supply
+/// them. Use `whitespace_nowrap()` and `overflow_x_scroll()` for a horizontally scrolling field.
 #[track_caller]
 pub fn text_input(id: impl Into<ElementId>) -> EditableTextElement {
     editable_text(id).multiline(false)
@@ -63,9 +63,10 @@ pub fn text_area(id: impl Into<ElementId>) -> EditableTextElement {
 
 /// A focusable text field with editable content supplied by [`EditableTextState`].
 ///
-/// The element owns the interaction/focus behavior and resolves its state from the element id on
-/// first render unless one is supplied with [`state`](Self::state). It follows GPUI `Style` sizing
-/// and overflow rules; the builder methods here configure text behavior, highlights, and colors.
+/// Supply an owned state's weak handle with [`state`](Self::state), or let the element create
+/// keyed state under its ID. Reuse that ID for the same logical field across frames.
+/// [`Styled`] controls sizing and overflow; the methods here configure editing, highlighting,
+/// caret geometry, and colors. See the [module guide](super) for keyboard setup and state ownership.
 pub struct EditableTextElement {
     interactivity: Interactivity,
     // Populated on first render with an entity stored/attached to the view.
@@ -151,10 +152,13 @@ impl EditableTextElement {
     }
     /// Assigns the state entity backing this element.
     ///
-    /// Keep the entity alive across renders with [`EditableTextState::use_keyed`] or
-    /// [`EditableTextState::use_keyed_init`]. If omitted, the element lazily uses keyed state under
-    /// its own element id. Supplying the weak handle makes the state relationship explicit and
-    /// gives the caller an entity to subscribe to or update.
+    /// Retain the strong handle on an owning view, or create keyed state with
+    /// [`EditableTextState::use_keyed_init`] while rendering. This method stores a weak handle;
+    /// it does not keep the supplied entity alive on its own. If the handle cannot be upgraded,
+    /// the element falls back to keyed state under its own ID, initially empty on creation.
+    /// Use separate state entities for simultaneously displayed fields: each state stores one
+    /// focus handle and one text layout.
+    /// See the [module example](super#own-the-value-and-react-to-edits) for state owned by a view.
     pub fn state(self, state: WeakEntity<EditableTextState>) -> Self {
         *self.state_entity.borrow_mut() = state;
         self
@@ -162,10 +166,11 @@ impl EditableTextElement {
 
     /// Enables or disables multiline keyboard behavior.
     ///
-    /// When disabled, Enter insertion and vertical movement are unavailable. User-entered paste
-    /// and IME text has CR and LF removed by the input path, but programmatic state replacement can
-    /// still set multiline text. Add application validation if the value must always stay on one
-    /// line.
+    /// When disabled, Enter does not insert a newline, and Up/Down move to the current visual
+    /// line's start/end instead of an adjacent line. Shift-Up/Down extend the selection to the
+    /// document's start/end. Paste and IME input have CR and LF removed, but programmatic state
+    /// replacement can still set multiline text. Validate that path too if the value must always
+    /// stay on one line.
     pub fn multiline(mut self, enabled: bool) -> Self {
         self.supports_multiline = enabled;
         self
@@ -203,19 +208,20 @@ impl EditableTextElement {
 
     /// Sets the placeholder color used while the backing text is empty.
     ///
-    /// Cannot be refined via [`StyleRefinement`](gpui::StyleRefinement) due to limitations in the fields of [`Style`](gpui::Style).
+    /// This color is independent of inherited text color and style refinements. It is used only
+    /// for the hint; entered text keeps its normal text style.
     pub fn placeholder_color(mut self, color: impl IntoColor<Hsla>) -> Self {
         self.colors.placeholder = color.into_color();
         self
     }
 
-    /// Sets the caret width. The default is 2 GPUI pixels.
+    /// Sets insertion-caret width in logical pixels; the default is 2.
     pub fn caret_w(mut self, width: impl Into<Pixels>) -> Self {
         self.caret_width = width.into();
         self
     }
 
-    /// Sets the height of the caret / text-cursor.
+    /// Sets insertion-caret height.
     ///
     /// Relative lengths are resolved against the current line height. The default is
     /// `relative(1.)`, which makes the caret as tall as the line.
@@ -226,7 +232,8 @@ impl EditableTextElement {
 
     /// Sets the background color painted behind selected text.
     ///
-    /// Cannot be refined via [`StyleRefinement`](gpui::StyleRefinement) due to limitations in the fields of [`Style`](gpui::Style).
+    /// This color is independent of style refinements and does not replace the selected glyphs'
+    /// foreground color.
     pub fn selection_color(mut self, color: Hsla) -> Self {
         self.colors.selection = color;
         self
@@ -234,7 +241,7 @@ impl EditableTextElement {
 
     /// Sets the color of the insertion caret.
     ///
-    /// Cannot be refined via [`StyleRefinement`](gpui::StyleRefinement) due to limitations in the fields of [`Style`](gpui::Style).
+    /// This color is independent of inherited text color and style refinements.
     pub fn caret_color(mut self, color: Hsla) -> Self {
         self.colors.caret = color;
         self
@@ -245,7 +252,7 @@ impl EditableTextElement {
     /// The composition range is stored internally as UTF-8 bytes; browser input boundaries may
     /// represent it in UTF-16 code units.
     ///
-    /// Cannot be refined via [`StyleRefinement`](gpui::StyleRefinement) due to limitations in the fields of [`Style`](gpui::Style).
+    /// This color is independent of inherited text color and style refinements.
     pub fn marked_color(mut self, color: Hsla) -> Self {
         self.colors.ime_underline = color;
         self

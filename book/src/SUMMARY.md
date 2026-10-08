@@ -8,6 +8,7 @@
 - [Animation and interruption](animation.md)
 - [Text and fonts](text.md)
 - [Custom drawing](drawing.md)
+- [Assets and images](assets.md)
 - [Input and focus](input.md)
 - [Scheduling work](scheduling.md)
 - [Accessibility](accessibility.md)

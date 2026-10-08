@@ -184,9 +184,14 @@ impl ApplicationHandle {
     /// not be called while another app update is active: the nested borrow
     /// panics. Keep the closure short and use [`AsyncApp::spawn`] for work that
     /// waits.
+    ///
+    /// The closure forms one app update. On normal return, GPUI processes
+    /// notifications, deferred callbacks, and releases before returning the
+    /// closure's result. Nested entity/window updates do not flush halfway
+    /// through this closure. This does not poll queued tasks or advance a clock.
     pub fn update<R>(&self, f: impl FnOnce(&mut App) -> R) -> R {
         let cx = &mut *self.app.borrow_mut();
-        f(cx)
+        cx.update(f)
     }
 
     /// An [`AsyncApp`] for use across await points. It holds the app weakly; keeping the
@@ -706,7 +711,7 @@ impl SystemWindowTabController {
                 tabs.push(tab);
             }
         } else {
-            let new_group_id = controller.tab_groups.len();
+            let new_group_id = controller.tab_groups.keys().max().map_or(0, |id| id + 1);
             controller.tab_groups.insert(new_group_id, tabs);
         }
     }
@@ -1155,6 +1160,9 @@ impl App {
     /// The returned [`LeakDetectorSnapshot`] can later be passed to
     /// [`assert_no_new_leaks`](Self::assert_no_new_leaks) to verify that no
     /// entities created after the snapshot are still alive.
+    /// Take it after creating shared test services and before creating the
+    /// owner whose teardown is under test. Use the snapshot with this same app;
+    /// it carries no app identity to reject a snapshot from another instance.
     #[cfg(any(test, feature = "leak-detection"))]
     pub fn leak_detector_snapshot(&self) -> LeakDetectorSnapshot {
         self.entities.leak_detector_snapshot()
@@ -1165,6 +1173,10 @@ impl App {
     /// Entities that were already tracked at the time of the snapshot are ignored,
     /// even if they still have handles. Only *new* entities (those whose
     /// `EntityId` was not present in the snapshot) are considered leaks.
+    /// Flush app effects after dropping fixture handles so released values
+    /// can drop their own subscriptions and tasks. This checks entity handles,
+    /// not arbitrary memory, and does not require an entity already present in
+    /// the snapshot to be released. See [`LeakDetectorSnapshot`] for its scope.
     ///
     /// # Panics
     ///
@@ -2677,9 +2689,11 @@ impl App {
     ///
     /// The callback runs after key-binding resolution and dispatch. A consumed
     /// action is still reported in [`KeystrokeEvent::action`]; raw key events
-    /// stopped by an element handler are not reported. Pending multi-key
-    /// sequences are reported when resolved or replayed, rather than at every
-    /// prefix. Keep the returned subscription while observation is needed.
+    /// stopped by an element handler are not reported. Pending chord prefixes
+    /// are not reported as they arrive. A handled replay reports its action
+    /// with an empty context stack; unhandled replayed keys are not reported.
+    /// Observations concern key-down, not key-up or text composition.
+    /// Registration is immediate; keep the returned subscription.
     ///
     /// Use [`intercept_keystrokes`](Self::intercept_keystrokes) to prevent an
     /// input from reaching action dispatch.
@@ -2884,6 +2898,11 @@ impl App {
     /// scheduled without blocking and may be interrupted by page teardown.
     /// Keep the returned subscription until shutdown or detach it for app-wide
     /// cleanup. See [`Context::on_app_quit`] for entity-scoped cleanup.
+    ///
+    /// Copy any data needed from windows in the synchronous callback. Shutdown
+    /// removes the windows before polling the returned futures, so a future
+    /// cannot rely on reacquiring them. The timeout bounds the cleanup attempt;
+    /// save irreplaceable work during normal operation as well.
     pub fn on_app_quit<Fut>(
         &self,
         mut on_quit: impl FnMut(&mut App) -> Fut + 'static,
@@ -2902,9 +2921,13 @@ impl App {
         subscription
     }
 
-    /// Register a callback to be invoked when the application is about to restart.
+    /// Observe a restart request before the platform attempts to relaunch.
     ///
-    /// These callbacks are called before any `on_app_quit` callbacks.
+    /// Registration is immediate. Retain the returned subscription; dropping
+    /// it cancels the callback. The callback runs synchronously from
+    /// [`restart`](Self::restart), before any quit callbacks the platform's
+    /// restart path triggers. A request does not guarantee that the backend
+    /// supports restart or that a replacement process starts successfully.
     pub fn on_app_restart(&self, mut on_restart: impl 'static + FnMut(&mut App)) -> Subscription {
         let (subscription, activate) = self.restart_observers.insert(
             (),
@@ -3293,10 +3316,18 @@ impl App {
         self.platform.can_select_mixed_files_and_dirs()
     }
 
-    /// Removes an image from the sprite atlas on all windows.
+    /// Removes a decoded image's uploads from the windows' sprite atlases.
     ///
-    /// If the current window is being updated, it will be removed from `App.windows`, you can use `current_window` to specify the current window.
-    /// This is a no-op if the image is not in the sprite atlas.
+    /// Pass the currently borrowed window as `current_window`: an update
+    /// temporarily takes it out of the app's window collection. Other windows
+    /// are handled automatically. An atlas without this image is unchanged;
+    /// renderer errors during removal are ignored.
+    ///
+    /// This neither removes the app's [`fetch_asset`](Self::fetch_asset) entry
+    /// nor invalidates copies of the [`RenderImage`] held by callers. Painting
+    /// that image again can upload it again. Evict the owning load cache too
+    /// when a later request should reread or decode the source. See the
+    /// [cache ownership guide](crate::_documentation::assets#give-the-cache-an-owner).
     pub fn drop_image(&mut self, image: Arc<RenderImage>, current_window: Option<&mut Window>) {
         // remove the texture from all other windows
         for window in self.windows.values_mut().flatten() {
@@ -3680,16 +3711,29 @@ pub struct AnyTooltip {
     pub check_visible_and_update: Rc<dyn Fn(Bounds<Pixels>, &mut Window, &mut App) -> bool>,
 }
 
-/// A keystroke event, and potentially the associated action
+/// A key press reported before or after key binding resolution.
+///
+/// [`App::intercept_keystrokes`] reports the press before resolution, with no
+/// action. [`App::observe_keystrokes`] reports a consumed action or an unhandled
+/// ordinary key press after dispatch. Neither is a stream of key releases or
+/// composed text; see the [input chapter](crate::_documentation::input).
 #[derive(Debug)]
 pub struct KeystrokeEvent {
-    /// The keystroke that occurred
+    /// The key and modifiers of the reported press.
     pub keystroke: Keystroke,
 
-    /// The action that was resolved for the keystroke, if any
+    /// The action whose dispatch stopped propagation, if any.
+    ///
+    /// This is always `None` for interceptors. For observers, `None` does not
+    /// prove that no binding matched: its action handlers may all have
+    /// propagated. An action's presence describes dispatch, not whether its
+    /// handler changed application state.
     pub action: Option<Box<dyn Action>>,
 
-    /// The context stack at the time
+    /// Key contexts ordered from the root toward the focused node.
+    ///
+    /// Nodes without a context contribute no entry. A consumed action replayed
+    /// from pending chord input is currently reported with an empty stack.
     pub context_stack: Vec<KeyContext>,
 }
 
@@ -3773,6 +3817,63 @@ mod test {
             self.0.set(self.0.get() + 1);
             Empty
         }
+    }
+
+    #[test]
+    fn embedded_update_flushes_effects_after_the_outer_closure() {
+        let cx = TestAppContext::single();
+        let handle = super::ApplicationHandle {
+            app: cx.app.clone(),
+        };
+        let completed = Rc::new(Cell::new(false));
+
+        handle.update(|app| {
+            app.defer({
+                let completed = completed.clone();
+                move |_| completed.set(true)
+            });
+            app.new(|_| 0_u32);
+            assert!(
+                !completed.get(),
+                "nested entity creation must not end the outer update"
+            );
+        });
+
+        assert!(
+            completed.get(),
+            "the embedder must not need another event to flush effects"
+        );
+    }
+
+    #[gpui::test]
+    fn adding_a_tab_group_after_removal_preserves_other_groups(cx: &mut TestAppContext) {
+        use super::{SystemWindowTab, SystemWindowTabController};
+
+        let windows: Vec<_> = (0..4).map(|_| cx.add_window(|_, _| Empty)).collect();
+        cx.update(|app| {
+            for (index, window) in windows.iter().take(3).enumerate() {
+                SystemWindowTabController::add_tab(
+                    app,
+                    window.window_id(),
+                    vec![SystemWindowTab::new(
+                        format!("Window {index}").into(),
+                        (*window).into(),
+                    )],
+                );
+            }
+            SystemWindowTabController::remove_tab(app, windows[0].window_id());
+            SystemWindowTabController::add_tab(
+                app,
+                windows[3].window_id(),
+                vec![SystemWindowTab::new("New window".into(), windows[3].into())],
+            );
+
+            let controller = app.global::<SystemWindowTabController>();
+            assert_eq!(controller.tab_groups().len(), 3);
+            for window in &windows[1..] {
+                assert_eq!(controller.tabs(window.window_id()).unwrap().len(), 1);
+            }
+        });
     }
 
     #[gpui::test]

@@ -73,13 +73,19 @@ description = "The annotated Rust source used to build this walkthrough."
 <span id="L64" class="source-line"><a href="#L64" class="line-number" data-line="64" aria-label="Line 64" tabindex="-1"></a>// ## Compare clipping with resizing &#123;#launch&#125;</span>
 <span id="L65" class="source-line"><a href="#L65" class="line-number" data-line="65" aria-label="Line 65" tabindex="-1"></a>// The platform helper creates this view with [`AppContext::new`]. Resize the</span>
 <span id="L66" class="source-line"><a href="#L66" class="line-number" data-line="66" aria-label="Line 66" tabindex="-1"></a>// preview until the blue rectangle reaches the edge. The mask crops it rather</span>
-<span id="L67" class="source-line"><a href="#L67" class="line-number" data-line="67" aria-label="Line 67" tabindex="-1"></a>// than making it narrower. Remove the mask and run again to compare.</span>
-<span id="L68" class="source-line"><a href="#L68" class="line-number" data-line="68" aria-label="Line 68" tabindex="-1"></a>// Continue to the [drawing guide](@/guides/drawing.md) for paths and curves.</span>
-<span id="L69" class="source-line"><a href="#L69" class="line-number" data-line="69" aria-label="Line 69" tabindex="-1"></a></span>
-<span id="L70" class="source-line"><a href="#L70" class="line-number" data-line="70" aria-label="Line 70" tabindex="-1"></a>fn component(_window: &amp;mut Window, cx: &amp;mut gpui::App) -&gt; gpui::Entity&lt;PaintDemo&gt; &#123;</span>
-<span id="L71" class="source-line"><a href="#L71" class="line-number" data-line="71" aria-label="Line 71" tabindex="-1"></a>    cx.new(|_cx| PaintDemo)</span>
-<span id="L72" class="source-line"><a href="#L72" class="line-number" data-line="72" aria-label="Line 72" tabindex="-1"></a>&#125;</span>
-<span id="L73" class="source-line"><a href="#L73" class="line-number" data-line="73" aria-label="Line 73" tabindex="-1"></a></span>
-<span id="L74" class="source-line"><a href="#L74" class="line-number" data-line="74" aria-label="Line 74" tabindex="-1"></a>pub fn main() &#123;</span>
-<span id="L75" class="source-line"><a href="#L75" class="line-number" data-line="75" aria-label="Line 75" tabindex="-1"></a>    support::run(component);</span>
-<span id="L76" class="source-line"><a href="#L76" class="line-number" data-line="76" aria-label="Line 76" tabindex="-1"></a>&#125;</span></code></pre>
+<span id="L67" class="source-line"><a href="#L67" class="line-number" data-line="67" aria-label="Line 67" tabindex="-1"></a>// than making it narrower.</span>
+<span id="L68" class="source-line"><a href="#L68" class="line-number" data-line="68" aria-label="Line 68" tabindex="-1"></a>//</span>
+<span id="L69" class="source-line"><a href="#L69" class="line-number" data-line="69" aria-label="Line 69" tabindex="-1"></a>// To see the difference without the window edge hiding the overflow, replace</span>
+<span id="L70" class="source-line"><a href="#L70" class="line-number" data-line="70" aria-label="Line 70" tabindex="-1"></a>// the canvas&#x27;s `.size_full()` with `.w(px(100.)).h(px(100.))`. The blue quad</span>
+<span id="L71" class="source-line"><a href="#L71" class="line-number" data-line="71" aria-label="Line 71" tabindex="-1"></a>// starts at x=80 and remains 60 pixels wide, but its mask shows only 20 pixels.</span>
+<span id="L72" class="source-line"><a href="#L72" class="line-number" data-line="72" aria-label="Line 72" tabindex="-1"></a>// Change `Some(mask)` to `None` in `with_content_mask`: the complete quad now</span>
+<span id="L73" class="source-line"><a href="#L73" class="line-number" data-line="73" aria-label="Line 73" tabindex="-1"></a>// extends beyond the canvas into the rest of the window. Restore both changes</span>
+<span id="L74" class="source-line"><a href="#L74" class="line-number" data-line="74" aria-label="Line 74" tabindex="-1"></a>// afterward. Continue to the [drawing guide](@/guides/drawing.md) for paths and curves.</span>
+<span id="L75" class="source-line"><a href="#L75" class="line-number" data-line="75" aria-label="Line 75" tabindex="-1"></a></span>
+<span id="L76" class="source-line"><a href="#L76" class="line-number" data-line="76" aria-label="Line 76" tabindex="-1"></a>fn component(_window: &amp;mut Window, cx: &amp;mut gpui::App) -&gt; gpui::Entity&lt;PaintDemo&gt; &#123;</span>
+<span id="L77" class="source-line"><a href="#L77" class="line-number" data-line="77" aria-label="Line 77" tabindex="-1"></a>    cx.new(|_cx| PaintDemo)</span>
+<span id="L78" class="source-line"><a href="#L78" class="line-number" data-line="78" aria-label="Line 78" tabindex="-1"></a>&#125;</span>
+<span id="L79" class="source-line"><a href="#L79" class="line-number" data-line="79" aria-label="Line 79" tabindex="-1"></a></span>
+<span id="L80" class="source-line"><a href="#L80" class="line-number" data-line="80" aria-label="Line 80" tabindex="-1"></a>pub fn main() &#123;</span>
+<span id="L81" class="source-line"><a href="#L81" class="line-number" data-line="81" aria-label="Line 81" tabindex="-1"></a>    support::run(component);</span>
+<span id="L82" class="source-line"><a href="#L82" class="line-number" data-line="82" aria-label="Line 82" tabindex="-1"></a>&#125;</span></code></pre>

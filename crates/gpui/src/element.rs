@@ -62,17 +62,47 @@ pub trait Element: 'static + IntoElement {
     /// Frame-local state produced after layout and reused by paint.
     type PrepaintState: 'static;
 
-    /// Return this element's local identity, if state should follow it across frames.
+    /// Returns this element's component of the window's identity path.
     ///
     /// GPUI appends this ID to the IDs of its containing elements to form a [`GlobalElementId`].
-    /// The local ID must be unique among siblings in the same identity scope. Return `None` for an
-    /// element that does not own cross-frame element state.
+    /// The local ID must be unique among siblings in the same identity scope
+    /// and remain the same through this element's layout, prepaint, and paint.
+    /// Use a record's key for a row that can move; its position would transfer
+    /// retained state to a different record after reordering.
+    ///
+    /// Return `None` when this element needs no identity of its own. Its
+    /// children can still supply their own IDs within the enclosing scope.
+    /// An ID allows retained element state and accessibility nodes; it does
+    /// not retain the element value itself. See
+    /// [element identity](crate::_ownership_and_data_flow#give-retained-element-state-an-identity).
     fn id(&self) -> Option<ElementId>;
 
-    /// Return the construction call site shown by the inspector, when available.
+    /// Returns the construction call site shown by the inspector, when available.
+    ///
+    /// Store [`std::panic::Location::caller()`] in a `#[track_caller]`
+    /// constructor to report the application's call site. Computing it here
+    /// would report the rendering machinery's call instead. Return `None`
+    /// when the element does not record its origin.
     fn source_location(&self) -> Option<&'static panic::Location<'static>>;
 
-    /// Request a Taffy layout node and initialize [`Self::RequestLayoutState`].
+    /// Registers this element's layout request and prepares its children.
+    ///
+    /// Return a node from [`Window::request_layout`] or
+    /// [`Window::request_measured_layout`], together with the state needed by
+    /// later phases. A container requests its children's layout first, passes
+    /// their IDs to its own request, and retains those child element values
+    /// for prepaint and paint.
+    ///
+    /// This method records inputs to layout; the final bounds are not known
+    /// yet. For intrinsic content such as text, a measured-layout callback
+    /// receives the known dimensions and available-space query when the
+    /// layout engine measures it. That callback can run several times for one
+    /// layout request, so it must tolerate repeated queries.
+    ///
+    /// `id` includes this element's local ID and its ID-bearing ancestors.
+    /// GPUI has already entered that identity scope for this call. Use the
+    /// supplied ID with [`Window::with_element_state`] when the element needs
+    /// bookkeeping that survives a rebuilt tree.
     fn request_layout(
         &mut self,
         id: Option<&GlobalElementId>,
@@ -81,7 +111,18 @@ pub trait Element: 'static + IntoElement {
         cx: &mut App,
     ) -> (LayoutId, Self::RequestLayoutState);
 
-    /// Receive resolved bounds and record frame-local hitboxes, focus, or child state.
+    /// Prepares interaction and frame state after layout has resolved `bounds`.
+    ///
+    /// The bounds use logical, window-local pixels, including the active
+    /// element offset. Insert hitboxes, associate focus handles, and prepaint
+    /// retained child elements here. Return the data paint needs, such as a
+    /// hitbox ID or prepared drawing geometry. `request_layout` is the state
+    /// returned by this element's layout request; it can also be updated here.
+    ///
+    /// GPUI calls [`Self::a11y_synthetic_children`] after this method when the
+    /// element has an active accessibility node. Store any geometry that hook
+    /// needs in [`Self::PrepaintState`]. Painting a shape alone creates neither
+    /// a hitbox nor an accessible control.
     fn prepaint(
         &mut self,
         id: Option<&GlobalElementId>,
@@ -92,7 +133,18 @@ pub trait Element: 'static + IntoElement {
         cx: &mut App,
     ) -> Self::PrepaintState;
 
-    /// Paint using the resolved bounds and both phase states.
+    /// Records drawing and input handlers for the prepared element.
+    ///
+    /// GPUI passes the same bounds and phase states prepared for this draw.
+    /// Paint retained children and register handlers using the hitboxes
+    /// created during prepaint. Keyboard handlers attach to the dispatch node
+    /// GPUI created for this element in that phase.
+    ///
+    /// Bounds do not clip drawing automatically. Use
+    /// [`Window::with_content_mask`] when drawing must stay in a smaller
+    /// region, and arrange the same clip during prepaint when it must also
+    /// constrain hit testing. The [custom-element walkthrough](https://gpui-ce.github.io/examples/custom-element/#draw)
+    /// shows the complete state handoff.
     fn paint(
         &mut self,
         id: Option<&GlobalElementId>,

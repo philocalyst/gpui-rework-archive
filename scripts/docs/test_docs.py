@@ -6,6 +6,7 @@ import tempfile
 import unittest
 import shutil
 import subprocess
+import os
 
 sys.path.insert(0, str(Path(__file__).parent))
 from parser import DocumentationError, parse_source
@@ -63,6 +64,30 @@ class ParserTests(unittest.TestCase):
 
 
 class LinkTests(unittest.TestCase):
+    def test_unchanged_walkthrough_outputs_keep_their_timestamps(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            site = root / "site"
+            site.mkdir()
+            (site / "examples.toml").write_text('''[[examples]]
+slug = "setup"
+title = "Setup"
+summary = "Start the program."
+source = "example.rs"
+run = "cargo run"
+weight = 1
+downloadable_manifest = "Cargo.toml"
+''')
+            (root / "example.rs").write_text('// ## Start\n// Run the program.\nfn main() {}\n')
+            (root / "Cargo.toml").write_text('[package]\nname = "demo"\nversion = "0.1.0"\n')
+            self.assertEqual(render(root), [])
+            outputs = [path for path in site.rglob("*") if path.is_file() and path.name != "examples.toml"]
+            self.assertTrue(any(path.suffix == ".zip" for path in outputs))
+            for output in outputs:
+                os.utime(output, ns=(1, 1))
+            self.assertEqual(render(root), [])
+            self.assertTrue(all(output.stat().st_mtime_ns == 1 for output in outputs))
+
     @unittest.skipUnless(shutil.which("rustfmt"), "rustfmt is required for this integration check")
     def test_generated_method_links_remain_current_after_rustfmt(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -169,8 +194,12 @@ declaration = "pub struct Entity<"
             ex.write_text('// ## State {#state}\n// Keep an [`Entity`].\nlet x = 1;\n')
             self.assertEqual(sync(root), [])
             first = source.read_text()
+            outputs = [source, *source.parent.parent.glob("docs/examples/*.md")]
+            for output in outputs:
+                os.utime(output, ns=(1, 1))
             self.assertEqual(sync(root), [])
             self.assertEqual(source.read_text(), first)
+            self.assertTrue(all(output.stat().st_mtime_ns == 1 for output in outputs))
             self.assertIn("docs:examples:begin", first)
 
     def test_sync_links_keeps_multiple_symbols_in_one_source(self):

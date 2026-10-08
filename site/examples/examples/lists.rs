@@ -3,7 +3,7 @@ mod support;
 
 // ## Reserve a scrolling viewport {#viewport}
 // The data set has 10,000 indices, but the callback constructs only the range
-// needed near the visible viewport (plus the list's overdraw). [`uniform_list`]
+// needed near the visible viewport, plus a region beyond it called overdraw. [`uniform_list`]
 // can map scroll offsets to indices because every row has the same measured
 // height. The parent requests 320 logical pixels and may shrink in a short
 // window; the list fills the resulting finite scrolling viewport.
@@ -37,7 +37,7 @@ struct Rows {
 // > [!WARNING]
 // > Every row must have the same block-axis height. Wrapping text or expanding
 // > one row breaks the estimate used to map offsets to indices, so visible
-// > rows and scrollbar positions can be wrong. Use `list` for individually
+// > rows and scrollbar positions can be wrong. Use [list](https://docs.rs/gpui-ce/0.2.2/gpui/fn.list.html) for individually
 // > measured, variable-height rows.
 
 impl Render for Rows {

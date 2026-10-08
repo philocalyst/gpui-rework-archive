@@ -1,6 +1,10 @@
 # Build an element tree and render a frame
 
-GPUI separates a component's description of the interface from the work that measures and draws it. A [`View`](crate::View) produces an [`Element`](crate::Element) tree. GPUI then requests layout, prepares interaction and accessibility data, and paints the tree into the window's scene.
+Rendering starts with the application's current state and ends with a scene
+the platform can present. An entity implementing [`Render`](crate::Render)
+builds an [`Element`](crate::Element) tree. Layout assigns its rectangles;
+prepaint prepares interaction and accessibility; paint records drawing and
+this frame's input handlers.
 
 Start with the component boundary that matches the component's ownership:
 
@@ -8,7 +12,10 @@ Start with the component boundary that matches the component's ownership:
 - Implement [`Render`](crate::Render) for a component stored in an [`Entity`](crate::Entity), with state that can notify and invalidate its own view through [`Context::notify`](crate::Context::notify).
 - Implement [`Element`](crate::Element) when the component must control layout, prepaint, or paint. For a small custom drawing operation, [`canvas`](crate::canvas) often supplies enough control without a new element type.
 
-These boundaries compose: a `RenderOnce` component can contain an entity handle, and a custom `Element` can contain child elements. The choice is about who owns state and when the component can participate in layout, not about how visually complex it is.
+These boundaries compose. A `RenderOnce` component can contain an entity
+handle, and a custom `Element` can contain child elements. A complicated
+toolbar can therefore remain an ordinary component assembled from inputs,
+while a small text editor may need custom measurement and hit testing.
 
 ## Build a component from inputs
 
@@ -49,11 +56,19 @@ For each element value, GPUI calls these phases in order:
 
 | Phase | What GPUI knows | What the element does |
 | --- | --- | --- |
-| [`Element::request_layout`](crate::Element::request_layout) | Parent styles and available constraints | Creates layout nodes and returns request-layout state. |
+| [`Element::request_layout`](crate::Element::request_layout) | The element's style and inherited context | Registers layout nodes and optional measurement callbacks; returns request-layout state. |
 | [`Element::prepaint`](crate::Element::prepaint) | Resolved bounds in logical pixels | Creates hitboxes and focus/accessibility data, prepares children, and returns prepaint state. |
 | [`Element::paint`](crate::Element::paint) | Bounds and both phase states | Adds drawing operations and installs this frame's dispatch handlers. |
 
 `RequestLayoutState` and `PrepaintState` connect work within that frame. They do not persist when the tree is rebuilt. Keep cross-frame values on the view/entity, in a state handle, or in element state accessed through a stable ID. [`LayoutId`](crate::LayoutId) identifies a layout node for the current layout pass; it is not an application key.
+
+Layout runs between the request and prepaint. A requested width is an input
+to that calculation; the resolved width is its result. A measured element
+receives the available-space query through
+[`Window::request_measured_layout`](crate::Window::request_measured_layout)'s
+callback, which can run more than once. Construct the tree and register
+measurements during `request_layout`; use the resulting bounds during
+`prepaint` and `paint`.
 
 Bounds are logical [`Pixels`](crate::Pixels); GPUI accounts for the window scale when resolving and painting. A layout box does not automatically clip arbitrary drawing. Containers with scrolling overflow apply a content mask to their children. Custom paint should stay within the active mask or narrow it with [`Window::with_content_mask`](crate::Window::with_content_mask).
 
@@ -61,17 +76,47 @@ Bounds are logical [`Pixels`](crate::Pixels); GPUI accounts for the window scale
 
 Use [`canvas`](crate::canvas) when layout can be described by style and only the prepaint/paint callbacks are custom. Prepaint runs after layout and can return frame-local data, such as a hitbox. Paint receives that value and records drawing commands. Both closures are consumed once for that element value, so construct a new canvas when the view renders again. The [drawing walkthrough](https://gpui-ce.github.io/examples/drawing/#paint) shows custom quads and masks; the [custom-element walkthrough](https://gpui-ce.github.io/examples/custom-element/) shows when to implement all three `Element` phases.
 
-Implement [`Element`](crate::Element) directly when custom measurement or layout, accessibility hooks, or the timing of child preparation is part of the behavior. In `request_layout`, request child layout IDs and combine them into the parent node. In `prepaint`, query each child's resolved bounds and prepare hitboxes or frame state. In `paint`, borrow that prepared state to record drawing operations. The associated state lasts through this draw; use an entity or retained element state for values needed on a later frame.
+Implement [`Element`](crate::Element) directly when custom measurement or
+layout, accessibility hooks, or child preparation is part of the behavior:
+
+1. In `request_layout`, request the children's layout IDs and combine them
+   into the parent node. Keep the child element values in the request state.
+2. In `prepaint`, prepare those children using their resolved bounds and
+   create hitboxes or other frame state.
+3. In `paint`, paint the children and record the parent's drawing and handlers
+   in their intended order.
+
+The [custom-element walkthrough](https://gpui-ce.github.io/examples/custom-element/#draw)
+implements a swatch with an empty request state and a prepared quad as its
+prepaint state. Adding a child or a listener changes what those states must
+carry; it does not change the phase order.
 
 ## Choose a layout constraint
 
-GPUI uses a Taffy-backed layout engine. A definite available size constrains a dimension. [`AvailableSpace::MinContent`](crate::AvailableSpace::MinContent) and [`AvailableSpace::MaxContent`](crate::AvailableSpace::MaxContent) ask for intrinsic sizes; they do not mean zero and infinity as final element sizes. A custom measured element should return a size appropriate to both the dimensions already known and the available-space query. Parent constraints and min/max styles can still limit the final size.
+GPUI uses a Taffy-backed layout engine. A definite available size gives it a
+finite reference for a dimension; an explicitly sized child can still overflow.
+[`AvailableSpace::MinContent`](crate::AvailableSpace::MinContent) and
+[`AvailableSpace::MaxContent`](crate::AvailableSpace::MaxContent) ask for
+intrinsic sizes; they do not mean zero and infinity as final element sizes.
+A custom measured element should return a size appropriate to both the
+dimensions already known and the available-space query. Parent constraints
+and min/max styles can still limit the final size.
 
 Scrolling content needs a finite viewport. A flexible text pane may need `.min_w_0()` so its intrinsic width does not prevent it from shrinking. The [layout walkthrough](https://gpui-ce.github.io/examples/layout/#constraints) shows a fixed sidebar beside a flexible pane. [`container_query`](crate::container_query) chooses its child after its own bounds are assigned, so that child cannot affect the query element's size; size the query container through its style or parent.
 
 ## Render large lists lazily
 
-Use [`list`](crate::list) when row heights can differ. Keep its [`ListState`](crate::ListState) on the owning view and update the state when the data changes: splice/reset when rows are inserted, removed, or replaced; remeasure when existing rows may have changed height. By default, the list measures visible rows plus overdraw. `measure_all` makes the initial total height more accurate at the cost of measuring every item; uniform height hints estimate the scrollbar while rows are measured as they become visible.
+Use [`list`](crate::list) when row heights can differ. Keep its
+[`ListState`](crate::ListState) on the owning view alongside the row data.
+Splice or reset its row records when the data's shape changes; remeasure
+existing rows when their height may have changed. Notify the owning view
+after the update. The [`ListState` example](crate::ListState#keep-measurements-in-step-with-the-data) shows
+both an append and an edited row.
+
+By default, the list measures visible rows plus overdraw: extra content
+prepared beyond the viewport to reduce work during scrolling. `measure_all`
+measures every row, including again after invalidation. Uniform height hints
+estimate unmeasured rows while actual measurements replace those estimates.
 
 `ListSizingBehavior::Infer` sizes the list from its items, while `Auto` leaves size resolution to its style and parent constraints. Choose `Infer` when content should determine the list's measured size; a scroll view still needs a bounded viewport to scroll. See [`ListSizingBehavior`](crate::ListSizingBehavior).
 
@@ -96,9 +141,26 @@ For variable-height lists, [`ListAlignment::Bottom`](crate::ListAlignment::Botto
 
 ## Load and paint images
 
-[`img`](crate::img) accepts a resource path/URI, already decoded renderer or CPU image data, or a caller-owned loader. Resource images use GPUI's asset system. A cache can be supplied directly, inherited from an ancestor [`image_cache`](crate::image_cache) element, or resolved through the global default. A pending resource load returns no image until it completes; the built-in retain-all cache schedules a notification so the owning view can render again. A custom loader must arrange notification when its result becomes available. Optional loading content appears after a short delay, and fallback content is used for a load error. Give animated images a stable ID so their frame index and timing persist and can schedule later frames. See [`ImageSource`](crate::ImageSource), [`ImageCache`](crate::ImageCache), and [`StyledImage`](crate::StyledImage).
+[`img`](crate::img) accepts a resource key, file path, URI, encoded
+[`Image`](crate::Image), decoded [`RenderImage`](crate::RenderImage), or
+caller-owned loader. A pending load paints no image until it completes.
+Assign a stable ID for delayed loading content or animation, and provide a
+fallback for errors when an empty image would be confusing.
 
-[`svg`](crate::svg) loads an SVG resource or raw bytes and can transform the rendered image without changing its layout box or hitbox. [`surface`](crate::surface) composites a platform surface or GPU texture supported by the build target. Both are styled elements, but surface source variants are platform/feature dependent. Use [`ObjectFit`](crate::ObjectFit) to control how image content fits its bounds.
+Resource images use an explicit or ancestor [`ImageCache`](crate::ImageCache)
+when one is provided, and the app's typed asset cache otherwise. A custom
+loader supplies its own completion notification. The
+[assets chapter](crate::_documentation::assets) explains those ownership and
+retry choices; [`StyledImage`](crate::StyledImage) configures fitting and
+replacement content.
+
+[`svg`](crate::svg) loads an SVG resource or raw bytes and can transform the
+rendered image without changing its layout box or hitbox. [`surface`](crate::surface)
+composites a platform surface or GPU texture supported by the selected renderer.
+It needs a layout size; its source dimensions do not supply an intrinsic size.
+See [GPU-owned images](crate::_documentation::drawing#composite-an-image-already-owned-by-the-gpu)
+for device sharing, resizing, and redraws. [`ObjectFit`](crate::ObjectFit)
+controls placement within a box, while a content mask controls clipping.
 
 ## Other element helpers
 
@@ -112,7 +174,17 @@ These helpers compose with `Div`, but their timing still matters: `container_que
 
 An element enters the accessibility tree when it has a stable ID and either an accessibility role or is explicitly hidden. Hidden containers can omit their subtree from assistive technology. Synthetic accessibility children let a custom element expose content that has no corresponding GPUI element; add them after prepaint and provide the parent ID and role/hidden contract. See the [accessibility guide](crate::_accessibility).
 
-`Div` combines style, children, and interaction. Event handlers are retained by the current element value, so bind them while building the tree and keep state in an entity or captured handle. Keyboard handlers follow the focus path; pointer handlers run in paint order during capture and reverse paint order during bubble, with element builders applying hitbox filters. Methods with a button or typed payload apply that filter, while `*_all` methods expose the dispatch phase and hitbox. Assign a stable ID before using the stateful interaction builders. See [`InteractiveElement`](crate::InteractiveElement), [`StatefulInteractiveElement`](crate::StatefulInteractiveElement), and the [actions walkthrough](https://gpui-ce.github.io/examples/actions/#focus).
+`Div` combines style, children, and interaction. Attach handlers while building
+the element tree; painting installs them in that frame's dispatch tree. A
+later render must attach them again. Keep the state they update on an entity
+or captured handle. Keyboard handlers follow the focus path; pointer handlers
+run in paint order during capture and reverse paint order during bubble, with
+element builders applying hitbox filters. Methods with a button or typed
+payload apply that filter, while `*_all` methods expose the dispatch phase and
+hitbox. Assign a stable ID before using the stateful interaction builders.
+See [`InteractiveElement`](crate::InteractiveElement),
+[`StatefulInteractiveElement`](crate::StatefulInteractiveElement), and the
+[actions walkthrough](https://gpui-ce.github.io/examples/actions/#focus).
 
 ## Scene and renderer boundary
 

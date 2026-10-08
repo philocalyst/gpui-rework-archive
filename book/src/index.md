@@ -14,6 +14,9 @@ Follow [rendering](rendering.md) to understand the work behind a frame, then
 [Accessibility](accessibility.md) connects its controls to names, roles, and
 keyboard navigation.
 [Custom drawing](drawing.md) covers coordinate systems, clipping, and paths.
+[Assets and images](assets.md) explains loading, cache ownership, and retries.
+Start there when an image stays empty, a retry reuses an error, or a gallery
+keeps images after closing.
 [Scheduling](scheduling.md) covers work that outlives a callback;
 [testing](testing.md) shows how to make its order and timing observable.
 [Platform boundaries](platforms.md) explains which services come from GPUI and

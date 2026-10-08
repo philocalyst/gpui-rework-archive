@@ -65,6 +65,7 @@ reachable by Tab, and activatable with Enter or Space through the same listener.
 | Handle keys and clicks | [`_documentation::input`], [`InteractiveElement`], and [`FocusHandle`] |
 | Run work without blocking input | [`_documentation::scheduling`], [`Task`], and [`BackgroundExecutor`] |
 | Draw a custom region | [`_documentation::drawing`], [`canvas`], and [`PathBuilder`] |
+| Load or retry an image | [`_documentation::assets`], [`ImageSource`], and [`ImageCache`] |
 | Display a large collection | [`uniform_list`] for equal-height rows, [`list`] for measured rows |
 | Test state and input | `TestApp` and `TestAppContext` (enable `test-support`) |
 | Expose accessible controls | [`_accessibility`] |

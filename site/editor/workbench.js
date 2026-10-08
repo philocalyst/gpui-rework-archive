@@ -5,6 +5,8 @@ import { indentWithTab } from '@codemirror/commands';
 import { rust } from '@codemirror/lang-rust';
 import { autocompletion } from '@codemirror/autocomplete';
 import { setDiagnostics } from '@codemirror/lint';
+import { compilerDiagnostics } from './diagnostics.js';
+import { nativeSource } from './native-source.js';
 
 /** @typedef {{type:'gpui-workbench-command', command:'source'|'run'|'reset'|'auto', revision:number, source?:string, enabled?:boolean}} Command */
 /** @typedef {{type:'gpui-workbench-status', revision:number, phase:'ready'|'edited'|'running'|'live'|'error'|'unavailable', diagnostics:string, elapsed_ms:number, backend:string, has_frame:boolean}} Status */
@@ -18,6 +20,8 @@ const encoder = new TextEncoder();
 const slug = decodeURIComponent(location.hash.slice(1));
 const sourceURL = new URL(`../components/${encodeURIComponent(slug)}.rs`, location.href);
 const draftKey = `gpui-example:${slug}`;
+// A fragment change selects another program and must replace its runtime too.
+addEventListener('hashchange', () => location.reload());
 let original = '', editor, revision = 0, ready = false, timer, startupTimer, apiEntries = [];
 let split = 50;
 const wrapping = new Compartment();
@@ -52,22 +56,7 @@ function showDiagnostics(show) {
   $('#diagnostics-toggle').setAttribute('aria-expanded', String(show));
 }
 function diagnosticRanges(text) {
-  const lines = text.split('\n');
-  const diagnostics = [];
-  let message = '';
-  for (const line of lines) {
-    if (/^(error|warning)(\[.*?\])?:/.test(line)) message = line;
-    const position = line.match(/(?:-->|:::)\s+.*?:(\d+):(\d+)/);
-    if (!position || !message) continue;
-    const number = Number(position[1]);
-    if (number > editor.state.doc.lines || number < 1) continue;
-    const sourceLine = editor.state.doc.line(number);
-    // rustc columns count characters, rather than JavaScript UTF-16 units.
-    const offset = [...sourceLine.text].slice(0, Number(position[2]) - 1).join('').length;
-    const from = Math.min(sourceLine.to, sourceLine.from + offset);
-    diagnostics.push({ from, to: Math.min(sourceLine.to, from + 1), severity: message.startsWith('warning') ? 'warning' : 'error', message });
-  }
-  return diagnostics;
+  return compilerDiagnostics(text, editor.state.doc.toString());
 }
 function apiInfo(entry) {
   const box = document.createElement('div');
@@ -170,11 +159,19 @@ $('#copy').addEventListener('click', async () => {
   catch { editor.dispatch({ selection: { anchor: 0, head: editor.state.doc.length } }); editor.focus(); $('#copy').textContent = 'Selected; copy now'; }
   setTimeout(() => $('#copy').textContent = 'Copy Rust', 2000);
 });
-$('#download').addEventListener('click', () => {
+$('#download').addEventListener('click', async () => {
   if (!editor) return;
-  const url = URL.createObjectURL(new Blob([editor.state.doc.toString()], { type: 'text/plain;charset=utf-8' }));
-  const link = document.createElement('a'); link.href = url; link.download = `${slug}-component.rs`; link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  const component = editor.state.doc.toString();
+  try {
+    const response = await fetch(new URL(`../examples/${encodeURIComponent(slug)}.rs`, location.href));
+    if (!response.ok) throw new Error('The native launcher could not be loaded. Your Rust source is still available through Copy Rust.');
+    const program = nativeSource(component, await response.text());
+    const url = URL.createObjectURL(new Blob([program], { type: 'text/plain;charset=utf-8' }));
+    const link = document.createElement('a'); link.href = url; link.download = 'main.rs'; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (error) {
+    announce(error.message, 'error');
+  }
 });
 $('#diagnostics-toggle').addEventListener('click', () => showDiagnostics($('#diagnostics').hidden));
 window.addEventListener('message', event => {

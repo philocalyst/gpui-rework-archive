@@ -12,12 +12,18 @@ remain unchanged. Start with an entity test for a state transition. Add a
 window when the rule depends on focus, layout, or input dispatch. Advance the
 test clock when the rule depends on time.
 
-These harnesses are available with the `test-support` feature:
+Enable `test-support` on the GPUI dependency used by the application. For an
+application beside this checkout, the development dependency is:
 
 ```toml
 [dev-dependencies]
-gpui = { package = "gpui-ce", version = "0.2.2", features = ["test-support"] }
+gpui = { package = "gpui-ce", path = "../gpui-ce/crates/gpui", features = ["test-support"] }
 ```
+
+Adjust the path to your checkout. Keep the application and its tests on the
+same GPUI source: the version declared by a development checkout does not
+establish that these APIs exist in the published crate with that number.
+For a published dependency, use its matching documentation and release.
 
 | Harness | Choose it when |
 | --- | --- |
@@ -79,6 +85,48 @@ typed event with [`Context::emit`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Con
 [`EventEmitter<E>`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.EventEmitter.html). Test its payload and occurrence with
 [`TestAppContext::events`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.TestAppContext.html#method.events), rather than counting
 notifications as if they were events.
+
+### Preserve each event's payload
+
+An event can record an occurrence that is no longer visible in the publisher's
+current state. This document publishes two saves in one update. The event
+stream must preserve both revisions in order, although reading the document
+after the update sees only revision two:
+
+```rust,test_harness
+use futures::{FutureExt as _, StreamExt as _};
+use gpui::{AppContext as _, EventEmitter, TestAppContext};
+
+#[derive(Clone, Debug, PartialEq)]
+struct Saved { revision: u64 }
+
+struct Document { revision: u64 }
+impl EventEmitter<Saved> for Document {}
+
+#[gpui::test]
+async fn each_save_keeps_its_revision(cx: &mut TestAppContext) {
+    let document = cx.new(|_| Document { revision: 0 });
+    let mut saves = cx.events(&document);
+
+    document.update(cx, |document, cx| {
+        for _ in 0..2 {
+            document.revision += 1;
+            cx.emit(Saved { revision: document.revision });
+        }
+        cx.notify();
+    });
+
+    assert_eq!(saves.next().await, Some(Saved { revision: 1 }));
+    assert_eq!(saves.next().await, Some(Saved { revision: 2 }));
+    assert!(saves.next().now_or_never().is_none());
+    assert_eq!(document.read_with(cx, |document, _| document.revision), 2);
+}
+```
+
+The third assertion checks that no extra event is queued at this boundary;
+it does not wait for future work. For one expected occurrence, install
+[`Entity::next_event`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Entity.html#method.next_event) before starting the operation.
+That future owns its subscription and unsubscribes on drop.
 
 ## Observe before starting the operation
 
@@ -286,6 +334,54 @@ application. Hummingbird's
 [async-resource tests](https://github.com/hummingbird-player/hummingbird/blob/2e1ee5f1c8d415ef7f835801fe368ab4106035b5/src/ui/components/async_resource.rs#L345-L393)
 exercise the same distinction between abandoning work and rejecting its result.
 
+## Check that teardown releases the owner
+
+An entity can disappear from the screen while a callback or task still retains
+it. Take a [`leak snapshot`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.App.html#method.leak_detector_snapshot) before creating
+the owner, then close or release the fixture and flush effects before checking
+for new retained entities. `test-support` enables this handle tracking.
+
+This fixture keeps a model alive but releases its observer. The snapshot
+exempts the existing model, so the check is specific to the new consumer:
+
+```rust
+use gpui::{Subscription, TestApp};
+
+struct Consumer {
+    _observation: Subscription,
+}
+
+let mut app = TestApp::new();
+let model = app.new_entity(|_| 0_u32);
+let before = app.read(|cx| cx.leak_detector_snapshot());
+let consumer = app.new_entity(|cx| Consumer {
+    _observation: cx.observe(&model, |_: &mut Consumer, _, _| {}),
+});
+let weak_consumer = consumer.downgrade();
+
+drop(consumer);
+app.update(|_| {}); // Release the value and drop its subscription.
+assert!(weak_consumer.upgrade().is_none());
+app.read(|cx| cx.assert_no_new_leaks(&before));
+assert_eq!(app.read_entity(&model, |value, _| *value), 0);
+```
+
+For a view, close its window and drop any root handle retained by the test.
+For a pending task, establish that it started before releasing its owner, as
+in the cancellation test above. If the assertion fails, inspect callbacks
+that capture a strong owner, tasks stored on the same entity they retain,
+and detached subscriptions. `Context::observe` holds the consumer weakly;
+`observe_self` and `subscribe_self` retain their target and need a separate
+subscription owner. The [ownership chapter](https://gpui-ce.github.io/book/ownership.html#keep-the-subscription)
+explains that difference.
+
+Rerun a failing test with `LEAK_BACKTRACE=1` to include the retained handles'
+creation sites. A snapshot compares entity IDs, not allocation totals: it
+ignores every entity already present, including extra clones of those entities
+made later. Pair it with a targeted weak-handle or drop assertion when checking
+the lifetime of an existing owner. It does not detect arbitrary `Rc` cycles,
+GPU allocations, or a resource intentionally retained by another subsystem.
+
 ## Exercise the input path
 
 Calling a handler directly checks its state transition. Simulating input also
@@ -346,6 +442,65 @@ application. To test a key binding, install the binding, set its
 [`KeyContext`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.KeyContext.html) on the focused element, and simulate the
 keystroke. Dispatching the action directly bypasses key matching and cannot
 detect an incorrect context expression.
+
+### Check the key binding as well as its action
+
+A key context decides whether a binding matches. It does not remove the
+action listener. This test keeps one listener installed in both modes, then
+checks that Ctrl-S reaches it only in edit mode:
+
+```rust
+use gpui::{Context, FocusHandle, KeyBinding, Render, TestApp, Window, actions, div, prelude::*};
+
+actions!(documentation_key_matching, [SaveDraft]);
+
+struct Document {
+    editing: bool,
+    saves: usize,
+    focus: FocusHandle,
+}
+
+impl Render for Document {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        div()
+            .id("document")
+            .track_focus(&self.focus)
+            .key_context(if self.editing { "Document mode=edit" } else { "Document mode=review" })
+            .on_action(cx.listener(|this, _: &SaveDraft, _, cx| {
+                this.saves += 1;
+                cx.notify();
+            }))
+            .child(if self.editing { "Edit mode" } else { "Review mode" })
+    }
+}
+
+let mut app = TestApp::new();
+app.update(|cx| cx.bind_keys([
+    KeyBinding::new("ctrl-s", SaveDraft, Some("Document && mode == edit")),
+]));
+let mut window = app.open_window(|window, cx| {
+    let focus = cx.focus_handle();
+    window.focus(&focus, cx);
+    Document { editing: false, saves: 0, focus }
+});
+window.draw();
+window.simulate_keystroke("ctrl-s");
+assert_eq!(window.read(|document, _| document.saves), 0);
+
+window.update(|document, _, cx| {
+    document.editing = true;
+    cx.notify();
+});
+window.draw();
+window.simulate_keystroke("ctrl-s");
+assert_eq!(window.read(|document, _| document.saves), 1);
+```
+
+Dispatching `SaveDraft` directly would bypass the binding and reach the
+listener in either mode. Drawing after the mode change matters too: matching
+uses the context in the rendered dispatch tree. See
+[key matching and dispatch](https://gpui-ce.github.io/book/input.html#actions-and-key-bindings)
+for the connection between bindings, contexts, and listeners.
 
 [`TestAppWindow::simulate_input`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.TestAppWindow.html#method.simulate_input)
 dispatches keystrokes for Unicode scalars; it does not reproduce native
@@ -425,6 +580,13 @@ also use `SEED` for case generation. Add explicit yield points or controlled
 channels at the boundaries that can race; repeating a test cannot reveal an
 ordering the fixture makes impossible.
 
+Keep the failing checkout and `Cargo.lock` with the seed. A seed reproduces a
+sequence of scheduler choices, not an execution across arbitrary code or
+dependency versions. Changing the runnable work or the random-number generator
+can change that sequence. See the Rand book's
+[reproducibility discussion](https://rust-random.github.io/book/crate-reprod.html)
+for the distinction between a seeded run and a stable generator contract.
+
 ## Assert drawing before comparing pixels
 
 If the regression concerns a requested color, border, or paint rectangle,
@@ -499,6 +661,43 @@ Supply its asset source when the view needs SVGs; the default source is empty.
 Control fonts, scale, viewport, and motion when comparing screenshots. Use
 platform integration tests for native IME, accessibility announcements,
 window-manager behavior, clipboard permissions, and GPU presentation.
+
+### Check a failed load and an explicit retry
+
+A failure is a completed cache result. The default fake HTTP client makes
+that behavior testable without a server:
+
+```rust
+use futures::FutureExt as _;
+use gpui::{ImageAssetLoader, ImageCacheError, Resource, TestApp};
+
+let mut app = TestApp::new();
+let source = Resource::Uri("https://example.invalid/cover.png".into());
+let (request, started) = app.update(|cx| cx.fetch_asset::<ImageAssetLoader>(&source));
+assert!(started);
+
+// update drained ready work; the fake client has already returned its 404.
+let error = request.now_or_never()
+    .expect("the fake response should be ready")
+    .expect_err("the default client returns 404");
+assert!(matches!(error, ImageCacheError::BadStatus { status, .. }
+    if status.as_u16() == 404));
+
+let (_, started) = app.update(|cx| cx.fetch_asset::<ImageAssetLoader>(&source));
+assert!(!started, "a cached failure must not start another request");
+
+app.update(|cx| cx.remove_asset::<ImageAssetLoader>(&source));
+let (_, started) = app.update(|cx| cx.fetch_asset::<ImageAssetLoader>(&source));
+assert!(started, "eviction must allow a new request");
+```
+
+This checks loading and cache reuse. To check the failure UI, draw a view with
+[`Img::with_fallback`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.StyledImage.html#method.with_fallback) and assert its
+replacement. `Img` uses a logging wrapper with a separate typed cache key;
+evict that request with [`ImageSource::remove_asset`](https://docs.rs/gpui-ce/0.2.2/gpui/enum.ImageSource.html#method.remove_asset).
+When a view uses an image-cache provider, remove the provider's entry instead.
+The [assets chapter](https://gpui-ce.github.io/book/assets.html#give-the-cache-an-owner)
+explains those lifetimes and the notification needed to render a retry.
 
 ## Measure work separately
 

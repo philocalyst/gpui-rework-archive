@@ -90,23 +90,69 @@ fn advance_animation(
 ///
 /// Custom loaders and decoded [`ImageSource::Render`] values bypass this loader.
 /// [`ImageSource::Image`] uses a separate decoder for its encoded bytes.
+///
+/// Use this type with [`App::fetch_asset`] when prefetching for an image that
+/// uses the app cache. Fetching [`ImageAssetLoader`] directly creates a
+/// different cache entry because this alias includes [`AssetLogger`]. Await
+/// the prefetched task and notify the view; a later image render adds no
+/// completion notification to an entry that already exists.
+///
+/// Prefetching here does not populate an explicit or ancestor [`ImageCache`]
+/// provider. Request through that provider when it owns the image, or pass an
+/// already decoded `Arc<RenderImage>` to [`img`].
 pub type ImgResourceLoader = AssetLogger<ImageAssetLoader>;
 
 /// The input source for an [`Img`] element.
 ///
 /// Strings that parse as URLs become [`Resource::Uri`]; other strings become
 /// embedded registry keys. A [`Path`] or [`PathBuf`] selects the filesystem
-/// explicitly. Only resource sources use an [`ImageCache`] provider.
+/// explicitly. A [`SharedUri`] always selects the URI variant. Constructing a
+/// source only describes the input; an image requests its data during layout
+/// and paint.
+///
+/// # Example: distinguish a registry key from a file
+///
+/// The same path text can name two different resources:
+///
+/// ```
+/// use gpui::{ImageSource, Resource};
+/// use std::path::Path;
+///
+/// let bundled: ImageSource = "images/cover.png".into();
+/// assert!(matches!(bundled, ImageSource::Resource(Resource::Embedded(_))));
+///
+/// let file: ImageSource = Path::new("images/cover.png").into();
+/// assert!(matches!(file, ImageSource::Resource(Resource::Path(_))));
+///
+/// let remote: ImageSource = "https://example.com/cover.png".into();
+/// assert!(matches!(remote, ImageSource::Resource(Resource::Uri(_))));
+/// ```
+///
+/// Only resource sources use an [`ImageCache`] provider. Without one, they
+/// use [`ImgResourceLoader`] in the app's typed cache. Encoded [`Image`] values
+/// use a separate decoder in that app cache; ready [`RenderImage`] values and
+/// custom closures bypass it. Cloning a ready image source shares its `Arc`
+/// rather than copying pixels.
+///
+/// Configure pending and failed content through [`StyledImage::with_loading`]
+/// and [`StyledImage::with_fallback`]. Cached failures persist until removed;
+/// the [assets chapter](crate::_documentation::assets) follows loading,
+/// notification, cache ownership, and retries.
 #[derive(Clone)]
 pub enum ImageSource {
-    /// Load image data from a GPUI resource such as an embedded path or URI.
+    /// Load and decode bytes from a registry key, file, or URI through the
+    /// selected cache. See [`ImageAssetLoader`] for loading and error behavior.
     Resource(Resource),
-    /// Use already decoded renderer image data.
+    /// Share already decoded BGRA frames. Painting can still upload these
+    /// pixels to a renderer; no loader or provider is queried.
     Render(Arc<RenderImage>),
     /// Decode the encoded bytes of an [`Image`] through the app's asset cache.
     Image(Arc<Image>),
-    /// Poll a caller-owned loader. Return `None` while loading, or the result when complete.
-    /// The caller is responsible for notifying the owning view when the result becomes available.
+    /// Poll a caller-owned loader. Return `None` while pending or the completed
+    /// result otherwise. The closure can run more than once during a frame;
+    /// keep pending state outside the element instead of starting a new load
+    /// on every call. It runs on the foreground thread, so avoid blocking work.
+    /// Notify the owning view when the result becomes available.
     Custom(Arc<dyn Fn(&mut Window, &mut App) -> Option<Result<Arc<RenderImage>, ImageCacheError>>>),
 }
 
@@ -304,7 +350,7 @@ impl Img {
 
     /// Uses an explicit cache for this element's resource source.
     ///
-    /// Without one, resource loading uses the nearest [`crate::image_cache`]
+    /// Without one, resource loading uses the nearest [`image_cache`](crate::image_cache)
     /// scope, then the app's typed asset cache. This setting has no effect on
     /// encoded [`Image`], decoded [`RenderImage`], or custom-loader sources.
     #[inline]
@@ -658,8 +704,11 @@ impl ImageSource {
 
     /// Removes this source's entry from the app's typed asset cache.
     ///
-    /// This does not clear an explicit or ancestor [`ImageCache`] provider and
-    /// has no effect on decoded or custom-loader sources. It does not release
+    /// This removes requests for resource locations and encoded [`Image`]
+    /// values. It does not clear an explicit or ancestor [`ImageCache`] provider
+    /// and has no effect on ready [`RenderImage`] or custom-loader sources.
+    /// Notify the view after removing an entry so it requests a fresh load.
+    /// This does not release
     /// sprite-atlas uploads; use [`App::drop_image`] for a decoded image that
     /// should be released by the renderers.
     pub fn remove_asset(&self, cx: &mut App) {
@@ -672,8 +721,12 @@ impl ImageSource {
         }
     }
 
-    /// Check whether this image source is present in the asset system (loading
-    /// or loaded), without fetching it.
+    /// Checks this source's entry in the app's typed cache without starting a load.
+    ///
+    /// `true` includes pending, successful, and failed requests. This does not
+    /// inspect an explicit or ancestor [`ImageCache`] provider. Ready
+    /// [`RenderImage`] and custom-loader sources return `false` because they
+    /// have no entry in this cache.
     #[cfg(any(test, feature = "headless"))]
     pub fn is_asset_cached(&self, cx: &App) -> bool {
         match self {
@@ -703,9 +756,23 @@ impl Asset for ImageDecoder {
 /// Loads and decodes an image resource through the typed asset system.
 ///
 /// Paths use filesystem reads, URIs use the app's HTTP client, and embedded
-/// keys use its [`crate::AssetRegistry`]. GIF and animated WebP resources retain
+/// keys use its [`AssetRegistry`](crate::AssetRegistry). GIF and animated WebP resources retain
 /// their frames; static raster images apply the decoder's orientation and are
 /// converted to BGRA. Bytes not recognized as a raster format are parsed as SVG.
+///
+/// Request it through [`App::fetch_asset`] to share a background task, or
+/// [`Window::use_asset`] to poll it during rendering. Calling [`Asset::load`]
+/// directly constructs an unpolled future and captures the current HTTP
+/// client, registry, and SVG renderer. It creates no cache entry or completion
+/// notification.
+///
+/// An unsuccessful HTTP response returns [`ImageCacheError::BadStatus`]
+/// before decoding its body. A missing registry key returns
+/// [`ImageCacheError::Asset`]. See the [assets chapter](crate::_documentation::assets)
+/// for source selection, placeholders, and retrying cached failures. An
+/// [`Img`] uses [`ImgResourceLoader`], a logging wrapper around this loader,
+/// with a separate typed cache entry. Use [`ImageSource::remove_asset`] to
+/// evict the image element's request.
 #[derive(Clone)]
 pub enum ImageAssetLoader {}
 
@@ -835,32 +902,42 @@ impl Asset for ImageAssetLoader {
     }
 }
 
-/// An error that can occur when interacting with the image cache.
+/// A failure to obtain or decode an image.
+///
+/// Built-in image caches retain this result just as they retain successful
+/// images. Rendering a fallback does not retry the request; remove it from
+/// the owning cache first. See [`ImageSource::remove_asset`] and
+/// [`RetainAllImageCache::remove`](crate::RetainAllImageCache::remove).
+/// Clones share the underlying errors through `Arc` where applicable.
 #[derive(Debug, Error, Clone)]
 pub enum ImageCacheError {
-    /// Some other kind of error occurred
+    /// A failure without a more specific variant, such as an HTTP transport
+    /// error or an animation whose frames all failed to decode.
     #[error("error: {0}")]
     Other(#[from] Arc<anyhow::Error>),
-    /// An error that occurred while reading the image from disk.
+    /// A filesystem read failure, or another `std::io::Error` converted by a loader.
     #[error("IO error: {0}")]
     Io(Arc<std::io::Error>),
     /// The image request returned an unsuccessful HTTP status.
     #[error("unexpected http status for {uri}: {status}, body: {body}")]
     BadStatus {
-        /// The URI of the image.
+        /// The requested image URI.
         uri: SharedUri,
         /// The HTTP status code.
         status: http::StatusCode,
-        /// The first line of the response body, decoded lossily for diagnostics.
+        /// The first line of the response body, decoded lossily and trimmed at
+        /// its end by [`ImageAssetLoader`]. This can contain server-provided text.
         body: String,
     },
-    /// An error that occurred while processing an asset.
+    /// An asset lookup failure. [`ImageAssetLoader`] uses this for an absent
+    /// embedded registry key.
     #[error("asset error: {0}")]
     Asset(SharedString),
-    /// An error that occurred while processing an image.
+    /// A raster-format or frame-decoding error from the `image` crate.
     #[error("image error: {0}")]
     Image(Arc<ImageError>),
-    /// An error that occurred while processing an SVG.
+    /// An SVG parsing error converted directly from [`usvg::Error`]. A loader
+    /// that wraps the error in `anyhow::Error` instead returns [`Self::Other`].
     #[error("svg error: {0}")]
     Usvg(Arc<usvg::Error>),
 }
