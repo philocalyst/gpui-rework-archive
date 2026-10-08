@@ -130,6 +130,45 @@ when its paint must stay inside a region. Similarly,
 [`ObjectFit::Cover`](crate::ObjectFit::Cover) computes image placement that can
 extend outside its box; fitting alone does not guarantee clipping.
 
+## Keep geometry in one coordinate space
+
+An element's `prepaint` and `paint` bounds are already in logical,
+window-local pixels. A child at `(20, 30)` inside a parent at `(100, 50)` has
+window-local origin `(120, 80)`. Use that origin for painting and hitboxes;
+adding the parent's origin again would move it twice.
+
+[`Window::layout_bounds`](crate::Window::layout_bounds) includes ancestor
+layout positions and the active element offset. It also snaps edges to the
+device-pixel grid, then returns logical pixels. Keep those logical bounds
+through prepaint and paint. The paint methods apply the display scale when
+recording the scene; multiplying by it yourself would scale the drawing twice.
+
+| Operation | What changes | What stays in place |
+| --- | --- | --- |
+| [`with_element_offset`](crate::Window::with_element_offset) | Adds a translation to layout bounds queried within the prepaint scope | Layout calculations and the content mask |
+| [`with_absolute_element_offset`](crate::Window::with_absolute_element_offset) | Replaces that translation | The child's own position within the layout tree |
+| [`with_content_mask`](crate::Window::with_content_mask) | Intersects the active clip with window-local bounds | Layout and drawing geometry |
+
+For a custom scrolling container, keep the viewport's mask fixed and prepaint
+the content under a negative scroll offset. The children then retain shifted
+bounds for painting and hit testing. Apply the viewport mask during painting
+too. An offset scope does not translate arbitrary points passed to
+[`paint_quad`](crate::Window::paint_quad) or other paint methods.
+
+Clipping has two parts. A hitbox captures the mask active when
+[`insert_hitbox`](crate::Window::insert_hitbox) runs in prepaint. A drawing
+command captures the mask active during paint. Clipping only paint can leave
+an invisible part of a control clickable. The
+[clipping test](https://gpui-ce.github.io/guides/testing/#check-clipping-and-input-together)
+checks both the recorded mask and presses on either side of its edge.
+
+For custom text placement,
+[`parent_relative_layout_bounds`](crate::Window::parent_relative_layout_bounds)
+still returns window-local bounds. Its name describes how it snaps the local
+origin and size before adding the parent's origin. Use ordinary `layout_bounds`
+for boxes whose adjoining edges must meet; use the parent-relative method when
+text must keep a stable position within a moving container.
+
 ## Know which changes reach children
 
 Text properties such as font, color, and line height are inherited. Box properties

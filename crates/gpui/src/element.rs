@@ -306,7 +306,10 @@ impl Render for Empty {
 /// returned by `render` is applied later: it cannot scope an earlier
 /// [`Window::use_state`] call inside that method. The
 /// [identity chapter](crate::_ownership_and_data_flow#give-retained-element-state-an-identity)
-/// explains keys, removal, and retained state.
+/// explains keys, removal, and retained state. The
+/// [row-state test](https://gpui-ce.github.io/guides/testing/#keep-row-state-with-its-record)
+/// changes one row, reverses the records, and checks that each record keeps
+/// its own state.
 pub trait RenderOnce: 'static {
     /// Consume the component and build its element tree.
     fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement;
@@ -890,7 +893,9 @@ impl AnyElement {
     /// Call after layout has been computed and before [`paint`](Self::paint).
     /// This records hitboxes and other frame data. It returns the subtree's
     /// focused handle only if focus had not already been recorded in this frame.
-    /// Calling before layout or preparing the same element value again panics.
+    /// Panics if layout has not been requested or this element value has
+    /// already entered prepaint or paint. Requesting layout alone does not
+    /// compute it; the containing tree must be laid out before this call.
     pub fn prepaint(&mut self, window: &mut Window, cx: &mut App) -> Option<FocusHandle> {
         let focus_assigned = window.next_frame.focus.is_some();
 
@@ -925,10 +930,17 @@ impl AnyElement {
         self.0.layout_as_root(available_space, window, cx)
     }
 
-    /// Prepares the laid-out element at a logical window-local origin.
+    /// Prepares the laid-out element with a logical, window-local translation.
     ///
-    /// The origin replaces the current element offset for this scope. The
-    /// returned focus handle follows the rules of [`prepaint`](Self::prepaint).
+    /// This replaces the active element offset. The element's position within
+    /// its layout tree still contributes to its bounds; `origin` does not
+    /// replace that position or recompute layout. A child already laid out at
+    /// `(12, 0)` receives bounds at `(32, 30)` when `origin` is `(20, 30)`.
+    /// A separately computed root normally starts at `(0, 0)`.
+    ///
+    /// Call after layout has been computed. The phase, panic, and returned
+    /// focus-handle rules follow [`prepaint`](Self::prepaint). See
+    /// [coordinate spaces](crate::_documentation::layout#keep-geometry-in-one-coordinate-space).
     pub fn prepaint_at(
         &mut self,
         origin: Point<Pixels>,
@@ -938,10 +950,12 @@ impl AnyElement {
         window.with_absolute_element_offset(origin, |window| self.prepaint(window, cx))
     }
 
-    /// Measures the element as a root, then prepares it at a logical window-local origin.
+    /// Lays out the element as a root, then prepaints it with the supplied translation.
     ///
     /// Use this for a separately positioned subtree, such as an overlay. The
-    /// returned focus handle follows the rules of [`prepaint`](Self::prepaint).
+    /// `origin` follows [`prepaint_at`](Self::prepaint_at)'s coordinate rules.
+    /// Measurement follows [`layout_as_root`](Self::layout_as_root), and the
+    /// returned focus handle follows [`prepaint`](Self::prepaint).
     pub fn prepaint_as_root(
         &mut self,
         origin: Point<Pixels>,

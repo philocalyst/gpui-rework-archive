@@ -877,6 +877,78 @@ a difference image beside the expected image so a changed baseline can be
 reviewed. Choose a pixel tolerance according to the behavior under test, rather
 than silently accepting every change near an edge.
 
+### Check clipping and input together
+
+A clipped control should reject input outside its visible region. Test the
+paint mask and the input path separately: a quad's full bounds can extend
+beyond its mask, and a pointer listener does not filter itself by that mask.
+
+This canvas draws a 100-pixel square through a 40-pixel mask. Prepaint applies
+the mask when inserting the hitbox; paint applies it again when recording the
+quad. The listener checks that hitbox before counting a press:
+
+```rust
+use gpui::{Bounds, ContentMask, Context, HitboxBehavior, IntoElement, MouseButton,
+           MouseDownEvent, Render, TestApp, Window, canvas, fill, point,
+           prelude::*, px, rgb, size};
+use std::{cell::Cell, rc::Rc};
+
+struct ClippedControl { presses: Rc<Cell<usize>> }
+impl Render for ClippedControl {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        let presses = self.presses.clone();
+        canvas(
+            |bounds, window, _| {
+                let mask = ContentMask {
+                    bounds: Bounds::new(bounds.origin, size(px(40.), px(40.))),
+                    ..Default::default()
+                };
+                let hitbox = window.with_content_mask(Some(mask.clone()), |window| {
+                    window.insert_hitbox(bounds, HitboxBehavior::Normal)
+                });
+                (mask, hitbox)
+            },
+            move |bounds, (mask, hitbox), window, _| {
+                window.with_content_mask(Some(mask), |window| {
+                    window.paint_quad(fill(bounds, rgb(0x155b50)));
+                });
+                window.on_mouse_event(move |event: &MouseDownEvent, phase, window, _| {
+                    if phase.bubble() && event.button == MouseButton::Left
+                        && hitbox.is_hovered(window)
+                    {
+                        presses.set(presses.get() + 1);
+                    }
+                });
+            },
+        ).size(px(100.))
+    }
+}
+
+let presses = Rc::new(Cell::new(0));
+let mut app = TestApp::new();
+let mut window = app.open_window(|_, _| ClippedControl { presses: presses.clone() });
+window.draw();
+window.update(|_, window, _| {
+    let quad = window.painted_quads().into_iter()
+        .find(|quad| quad.background == rgb(0x155b50).into())
+        .expect("the control should have been painted");
+    assert_eq!(quad.bounds.size, size(px(100.), px(100.)).scale(window.scale_factor()));
+    assert_eq!(quad.content_mask.bounds.size, size(px(40.), px(40.)).scale(window.scale_factor()));
+});
+
+window.simulate_mouse_down(point(px(60.), px(20.)), MouseButton::Left);
+assert_eq!(presses.get(), 0, "the clipped part must not accept a press");
+window.simulate_mouse_up(point(px(60.), px(20.)), MouseButton::Left);
+window.simulate_mouse_down(point(px(20.), px(20.)), MouseButton::Left);
+assert_eq!(presses.get(), 1);
+```
+
+Removing the prepaint mask makes the first press count. Removing the paint
+mask makes the recorded-mask assertion fail. This checks GPUI's clipping and
+input records without depending on a GPU's rasterization. See
+[coordinate spaces](https://gpui-ce.github.io/book/layout.html#keep-geometry-in-one-coordinate-space)
+for the corresponding layout and offset rules.
+
 ### Check that a shared model invalidates a cached view
 
 A cache test needs two draws: one that reuses unchanged content and one that

@@ -1044,3 +1044,111 @@ The subsequent default-feature rustdoc check caught links to the conditional
 testing module. Those four links now use the always-published guide; the prose
 is unchanged from the scanned sample. This is one sample's classifier result,
 not a whole-framework result. No paraphraser was used.
+
+## Coordinates, clipping, and the rendered integration
+
+The combined build at `f3cbf04eff49d573cb5d3c5d7584ace7c267b089` passed
+strict feature-enabled rustdoc, Zola, mdBook, and the HTML/link audit. Its source
+digest is `86ddd29ead5ba01b3efc7668865887fe92b7d3b92953f1ace3658823f744867a`;
+the published runtime manifest matches the verified SDK-inlining candidate.
+It replaced the local site only after the build passed. The preceding `bec3`
+site is preserved in `target/documentation-before-rendering-runtime-f3cbf04eff`.
+The separate strict default-feature API build also passed after the four
+conditional testing links were corrected.
+
+The primary editor followed Entity::cached's test link into the new guide,
+read the rendered RenderOnce contract and keyed example, and read the rendering
+chapter in mdBook. At a 390-pixel viewport, that book page's document width
+remained 390 pixels and its main reading area was 350 pixels. The screenshot
+is `target/documentation-proof/book-rendering-mobile.png`. This checks that
+page and width, not every chapter's responsive layout.
+
+The primary editor independently executed the production WASM Worker probe
+against the integrated bundle. Six counter generations matched the supplied
+native reference frames, including compatible helper and local-variable edits;
+both patches were accepted, with one interpreter boot. Its log is
+`target/documentation-sdk-inline-probe.log`. The native reference frames came
+from the runtime owner's fixture directory; this is an independent Worker run,
+not a new native reference run or a performance benchmark.
+
+Actual browser checks then exercised the newly served editor: canonical
+increment to one, helper replacement with `saturating_add(5)`, preserved count
+one, and the next click producing six. An undefined `missing_step` produced
+the compiler's E0425 diagnostic while six remained visible. Restoring the last
+valid source retained six; explicit Reset state returned zero. Complete source
+copied through the editor matched the intended edit byte-for-byte. Temporary
+logging in the ignored rendered runtime confirmed an accepted patch without
+a VM restart; that file was restored byte-for-byte afterward. Intermediate
+screenshots that appeared to show zero were rechecked against the settled
+frame before drawing a conclusion. Evidence is in
+`target/documentation-proof/counter-compatible-helper-six.png`,
+`counter-compiler-error-retains-six.png`, and `counter-recovery-retains-six.png`.
+
+The already-open page also accepted a click after site replacement. The local
+server's automatic HTML reload means this alone does not establish that an
+old Worker stays alive indefinitely across upgrades. Retained immutable assets
+and their matching hashes remain the separate compatibility evidence.
+
+The next manual pass read the complete canonical layout chapter, the first
+half of the testing chapter, the complete custom-element program and canvas
+implementation, Window's coordinate/clip/layout/hitbox methods, Drawable's
+layout and prepaint paths, and the corresponding Taffy registration,
+computation, measurement, and snapping implementations. It corrected guidance
+that implied ordinary elements must compute their own layout and a prepaint
+panic claim that confused requested layout with computed layout. Offset scopes
+now distinguish translation from layout and clipping; AnyElement's placement
+helpers preserve an already-computed child position. Hitbox geometry now explains
+fragments, fades, capture, modality, and occlusion at their respective boundaries.
+
+An independent drawing assertion checks a child laid out at `(12, 0)` and
+prepainted with translation `(20, 30)`: its painted origin is `(32, 30)` before
+density conversion. The check is saved in
+`target/documentation-clipping-negative/translated-root.md`, with the passing
+run in `translated-child.log`. An earlier proposed root-margin example failed:
+a separately computed root did not retain that margin as an origin offset.
+That claim was removed before publication. The coordinate rules describe
+computed positions, not an assumed root-margin behavior.
+
+A new layout section connects these APIs, and an executable clipping example
+checks a 100-pixel quad through a 40-pixel mask plus presses inside and outside
+that mask. All nineteen testing-chapter examples pass. The same new example
+was executed independently with each mask removed: omitting the prepaint mask
+fails the outside-press assertion; omitting the paint mask fails the
+recorded-mask assertion. Those intentional failures are saved in
+`target/documentation-clipping-negative/`. The complete doctest run passes
+206 examples (199 merged and seven test-harness examples), with one ignored.
+Formatting and whitespace checks pass. The next rendered build remains
+pending at this entry.
+
+The strict default-feature API build passes for GPUI and the companion elements
+crate. Its log is `target/documentation-coordinate-default-api.log`; the next
+combined build will validate the final feature-enabled API and book links.
+
+Scribbr v7.1.0 scanned the complete new coordinate-space section, including
+its heading, Markdown table, inline code, and links. It displayed 303 words
+and reported 5% AI-generated, 0% AI-refined, and 95% human-written. The exact
+input is `target/documentation-proof/coordinates-checker-input.md`, SHA-256
+`44c9b19d2445e39e9f1c8c35ff26479954bd6cb4af979ce076c524ee039dc6c7`;
+the screenshot is `target/documentation-proof/scribbr-coordinates.png`.
+The detector highlighted the sentence linking the clipping test. That useful
+cross-reference was retained. This is a recorded sample result, not a score
+for the full documentation. No paraphraser was used.
+
+### Further reference reading
+
+The complete combined [Embassy Book](https://embassy.dev/book/) prose and code
+were read, including setup, the PAC-to-HAL-to-async progression, shared-peripheral
+choices, and the entire FAQ. Its diagrams were not visually reviewed and its
+code was not executed. The useful comparison is one observable task developed
+through successive abstractions, with specific troubleshooting repairs.
+
+The complete text and snippet of the [published GPUI homepage](https://gpui-ce.github.io/)
+were also read. Its snippet uses an older Render signature and listener
+arguments; its claims are not treated as implementation evidence. This was
+a text review, not a visual or execution check of the old site.
+
+Jiff 0.2.35's [Unit introduction, variants, and all examples](https://docs.rs/jiff/0.2.35/jiff/enum.Unit.html)
+were read. It introduces a type through its uses, links directly to those APIs,
+and gives a short asserting example for ordering before stating the unit-specific
+constraints. This extends the reference reading; the wider survey is still
+incomplete.

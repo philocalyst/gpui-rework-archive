@@ -770,7 +770,8 @@
     },
     {
       "url": "https://embassy.dev/book/index.html",
-      "status": "read (primary page; 2026-10-07 UTC)"
+      "status": "read (complete combined book prose and code; 2026-10-08 UTC)",
+      "reason": "read setup, incremental PAC/HAL/async examples, shared-peripheral guidance, and the complete FAQ; diagrams were not visually reviewed and code was not executed"
     },
     {
       "url": "https://en.wikipedia.org/wiki/Proleptic_Gregorian_calendar",
@@ -1391,8 +1392,8 @@
     },
     {
       "url": "https://gpui-ce.github.io",
-      "status": "fetched",
-      "reason": "current replacement site homepage; HTTP 200, not in article inventory"
+      "status": "read (complete published homepage text and snippet; 2026-10-08 UTC)",
+      "reason": "current replacement site homepage, not in article inventory; the snippet has an older Render signature and listener arguments; its code was not executed"
     },
     {
       "url": "https://rocket.rs/guide/v0.5/pastebin/",
@@ -1423,6 +1424,11 @@
       "url": "https://fasterthanli.me/articles/my-ideal-rust-workflow",
       "status": "surveyed (content-pipeline and local-workflow excerpt read; 2026-10-08 UTC)",
       "reason": "read the one-time efforts and dreaming-bigger pipeline discussion; the complete article was not read"
+    },
+    {
+      "url": "https://docs.rs/jiff/0.2.35/jiff/enum.Unit.html",
+      "status": "read (complete introduction, variants, and examples; 2026-10-08 UTC)",
+      "reason": "read the links to span differences and rounding, ordering assertions, and the calendar/clock distinctions; code was read, not executed"
     }
   ],
   "status_legend": {

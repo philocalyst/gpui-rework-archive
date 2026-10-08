@@ -1043,10 +1043,10 @@ impl HitboxId {
 pub struct Hitbox {
     /// A unique identifier for the hitbox.
     pub id: HitboxId,
-    /// The bounds of the hitbox.
+    /// Input bounds in logical, window-local pixels, before clipping.
     #[deref]
     pub bounds: Bounds<Pixels>,
-    /// The content mask when the hitbox was inserted.
+    /// The logical, window-local clip captured when the hitbox was inserted.
     pub content_mask: ContentMask<Pixels>,
     /// Flags that specify hitbox behavior.
     pub behavior: HitboxBehavior,
@@ -1057,7 +1057,16 @@ pub struct Hitbox {
 }
 
 impl Hitbox {
-    /// Tests the actual regions, including the content mask, without occlusion checks.
+    /// Tests a logical, window-local point against the clipped geometry.
+    ///
+    /// With inline fragments, the point must lie in one of those fragments;
+    /// otherwise it must lie in [`Self::bounds`]. It must also lie within the
+    /// content mask's rectangle. Edge fades do not narrow this input region.
+    ///
+    /// This ignores blocking regions, keyboard input modality, and pointer
+    /// capture. Use [`Self::is_hovered`] for ordinary pointer handlers, where
+    /// those policies matter. Checking `bounds.contains(point)` alone would
+    /// also ignore clipping and gaps between inline fragments.
     pub fn contains(&self, point: &Point<Pixels>) -> bool {
         self.content_mask.bounds.contains(point)
             && self.fragments.as_ref().map_or_else(
@@ -4330,10 +4339,18 @@ impl Window {
         id
     }
 
-    /// Executes `f` with `mask` intersected into the current content mask.
+    /// Intersects `mask` with the active clip while `f` runs.
     ///
-    /// The temporary mask is popped even when `f` returns early through its normal return value;
-    /// this helper must be called during prepaint or paint.
+    /// The bounds use logical, window-local pixels. `None` keeps the current
+    /// clip; it does not remove an enclosing clip. The previous mask is
+    /// restored when `f` returns.
+    ///
+    /// Apply the same mask during prepaint and paint when a region must clip
+    /// both input and drawing. [`Self::insert_hitbox`] captures the prepaint
+    /// mask; painting captures the paint mask. Neither changes layout or
+    /// translates the supplied bounds. See the
+    /// [coordinate guide](crate::_documentation::layout#keep-geometry-in-one-coordinate-space).
+    /// Call during prepaint or paint; other phases panic in debug builds.
     // This function is called in a highly recursive manner in editor
     // prepainting, make sure its inlined to reduce the stack burden
     #[inline]
@@ -4359,10 +4376,14 @@ impl Window {
 
     /// Adds a logical-pixel offset to the current element offset for this prepaint scope.
     ///
-    /// Descendant layout bounds and hitboxes use the resulting window-local offset, which is how
-    /// scrolling shifts both what is painted and where input lands. Use
-    /// [`Self::with_absolute_element_offset`] when the supplied point should replace the current
-    /// offset. This method is only valid during prepaint.
+    /// [`Self::layout_bounds`] includes the resulting offset. Prepainting a
+    /// child inside this scope therefore gives it shifted bounds for its
+    /// hitboxes and later painting. This does not recompute layout, move the
+    /// content mask, or translate coordinates passed directly to paint calls.
+    /// Do not add the offset again to bounds returned by `layout_bounds`.
+    ///
+    /// Use [`Self::with_absolute_element_offset`] to replace the current offset.
+    /// Call during prepaint; other phases panic in debug builds.
     pub fn with_element_offset<R>(
         &mut self,
         offset: Point<Pixels>,
@@ -4396,9 +4417,11 @@ impl Window {
 
     /// Sets the element offset to `offset` for this prepaint scope, replacing the current offset.
     ///
-    /// The point is in logical window-local pixels and affects descendant layout bounds and
-    /// hitboxes. Use [`Self::with_element_offset`] to add to the current offset. This method is
-    /// only valid during prepaint.
+    /// The point is a logical-pixel translation from the layout tree's origin,
+    /// not the desired origin of a particular child. Bounds returned by
+    /// [`Self::layout_bounds`] include this translation. The same coordinate
+    /// rules as [`Self::with_element_offset`] apply; that method adds to the
+    /// current offset instead. Call during prepaint.
     pub fn with_absolute_element_offset<R>(
         &mut self,
         offset: Point<Pixels>,
@@ -5911,9 +5934,16 @@ impl Window {
 
     /// Add a node to this frame's layout tree from a style and child layout IDs.
     ///
-    /// The returned ID is valid only for this frame's layout tree. Build child IDs first, then
-    /// request the parent; call [`Self::compute_layout`] during prepaint before asking for bounds.
-    /// Only call during layout request or prepaint.
+    /// Build the children's nodes first, then pass their IDs to this parent.
+    /// In [`Element::request_layout`](crate::Element::request_layout), return
+    /// this ID to GPUI; it computes the containing tree before calling
+    /// `prepaint`. A separately laid-out subtree instead needs
+    /// [`Self::compute_layout`] before its bounds can be read.
+    ///
+    /// The ID belongs to this frame's layout tree. Call during layout request
+    /// or prepaint; other phases panic in debug builds. See
+    /// [`Self::request_measured_layout`] for content that needs intrinsic
+    /// measurement.
     #[must_use]
     // docs:examples:begin
     #[doc = include_str!("docs/examples/gpui-Window-request-layout-a55457ac.md")]
@@ -5967,9 +5997,16 @@ impl Window {
 
     /// Compute a requested layout subtree within the supplied available space.
     ///
-    /// After computation, [`Self::layout_bounds`] can read logical window-local bounds for this
-    /// node and its descendants. The ID belongs to the current frame's layout tree. Call during
-    /// prepaint before painting the subtree.
+    /// Use this for a subtree laid out independently of its containing tree.
+    /// Ordinary [`Element`](crate::Element) implementations return their node
+    /// from `request_layout`; GPUI computes the containing tree for them.
+    /// [`AnyElement::layout_as_root`](crate::AnyElement::layout_as_root)
+    /// requests and computes an element subtree in one operation.
+    ///
+    /// After computation, [`Self::layout_bounds`] returns the node's and its
+    /// descendants' bounds in logical, window-local pixels. The ID must belong
+    /// to the current frame's layout tree. Call during prepaint before
+    /// prepainting or painting that subtree.
     pub fn compute_layout(
         &mut self,
         layout_id: LayoutId,
