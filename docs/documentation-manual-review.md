@@ -2111,3 +2111,64 @@ canonical text chapter explain their distinct conventions. The exact drawing
 walkthrough source was restored after the probe. The first full WASM compiler
 build completed; the decoration fix requires a subsequent rebuild before
 publishing that module. Its browser verification remains pending.
+
+## Inline inputs and feature-independent examples (2026-10-08)
+
+The primary editor checked TextRun, TextLayoutRequest, InlineBoxRequest,
+InlineTextStyle, and InlineLayoutRequest against the Parley paragraph split,
+source-to-backend index mapping, style application, and box alignment code.
+Their contracts now state which inputs cover the complete string, which may
+leave gaps, their ordering requirements, logical-pixel units, and the caller's
+responsibility for each embedded child's lifecycle. The previously referenced
+but unstated inline range contract is now explicit. WindowTextSystem::layout_inline
+has a complete request example using measured child bounds and scaled font
+metrics. The rendered request pages and this method's complete example were
+read through the standalone cargo-doc server.
+
+TextRun no longer describes letter spacing as an adjustment between every
+glyph: Parley 0.11.1 applies it to shaping-cluster advances. The canonical text
+chapter now gives middle alignment's position as half an x-height above the
+baseline and connects custom paragraph construction to the request contracts.
+The generated Zola chapter mirrors that source. TextSelectionKind explains
+pointer selection separately from movement and notes Parley's inclusion of
+paragraph separators. TextBoundary::HardLine now distinguishes a hard line
+break from a paragraph separator: U+2028 breaks a row without restarting
+paragraph direction. CaretAffinity::for_inserted_text explains its empty and
+trailing-break cases, with assertions, and CaretPosition explains why an index
+alone cannot retain a placement at a shared boundary. The Parley selection
+entry points and hard-line movement implementations were read for this pass.
+
+A default-feature doctest run exposed five examples referring to test-only
+APIs. Four references were hidden validation code for otherwise ordinary
+views; the fifth was an explicitly shown test. The validation blocks are now
+feature-gated, and the visible test names the required feature and links to
+its setup guide. Default doctests pass: 218 merged and three separate tests
+in `target/documentation-default-doctests-repaired.log`. Feature-enabled
+doctests also pass: 242 merged and seven separate tests, with one additional
+test ignored, in `target/documentation-inline-feature-doctests.log`. The failed
+default run remains in `target/documentation-inline-inputs-doctests.log`.
+
+Jiff 0.2.38's civil datetime source has now been read sequentially through
+line 2175, including all examples before the datetime-rounding introduction.
+This extends the earlier reading; it does not establish that the rest of
+Jiff has been reviewed. Sapling accepted the exact 2,492-character Markdown
+body of the text chapter's source/visual-position section. Neither its overall
+nor sentence-score view returned a score. The submitted text, screenshot,
+and limited outcome are saved under `target/documentation-proof/sapling-text-navigation-*`.
+There is no new detector pass to report.
+
+The rendered FontMetrics fields and scaling helpers, PaintFragment decoration
+fields, and TextSystem::bounding_box were read afterward. FontMetrics now
+links the em square, cap height, and x-height to their OpenType definitions,
+describes the latter two as nominal measurements, and states Parley's ascent
+fallback when either is absent. All pixel helpers now name logical pixels.
+The OpenType metric definitions and TrueType fundamentals sections on the
+em square and coordinate grid were checked against the local font-store
+implementation; this is not a review of the whole specification.
+
+Strict default and feature-enabled API builds pass in
+`target/documentation-inline-default-final-api.log` and
+`target/documentation-inline-feature-final-api.log`. The WASM compiler rebuild
+including both text implementation fixes completed successfully in 18m42s;
+its log is `target/documentation-text-miri-final-build.log`. Publishing the
+module and verifying it in the browser remain separate, pending checks here.

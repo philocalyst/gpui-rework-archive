@@ -331,7 +331,7 @@ impl TextSystem {
     /// This scales [`FontMetrics::bounding_box`] to logical pixels. Parley uses
     /// maximum advance width and typographic height, so the rectangle need not
     /// enclose every glyph's ink. It does not measure a particular string.
-    /// Shape the string to obtain its advance, or use [`Self::typographic_bounds`]
+    /// Shape the string to obtain its advance, or use [`typographic_bounds`](Self::typographic_bounds)
     /// for one character's selected glyph.
     pub fn bounding_box(&self, font_id: FontId, font_size: Pixels) -> Bounds<Pixels> {
         self.read_metrics(font_id, |metrics| metrics.bounding_box(font_size))
@@ -677,6 +677,52 @@ impl WindowTextSystem {
     /// request's borrowed slices go out of scope. Use this when a box must wrap with text; lay
     /// out an independent icon separately when it should not affect text flow.
     ///
+    /// This example reserves space for an already measured badge between two
+    /// words. The two spaces in the source remain on either side of the box.
+    /// After layout, find the badge's bounds by its ID in [`InlineLayout::boxes`]
+    /// and place the child at those bounds plus the paragraph's window origin.
+    ///
+    /// ```
+    /// use gpui::{
+    ///     InlineBoxRequest, InlineLayout, InlineLayoutRequest, InlineTextMetrics,
+    ///     Pixels, Size, TextLayoutOptions, VerticalAlign, Window, px,
+    /// };
+    /// use std::sync::Arc;
+    ///
+    /// fn status_with_badge(window: &Window, badge_size: Size<Pixels>) -> Arc<InlineLayout> {
+    ///     let text = "Build  is ready.";
+    ///     let run = window.text_style().to_run(text.len());
+    ///     let system = window.text_system();
+    ///     let font_id = system.resolve_font(&run.font);
+    ///     let font_size = px(16.);
+    ///     let badge = InlineBoxRequest {
+    ///         id: 0,
+    ///         index: "Build ".len(),
+    ///         size: badge_size,
+    ///         vertical_align: VerticalAlign::Middle,
+    ///     };
+    ///
+    ///     system.layout_inline(InlineLayoutRequest {
+    ///         text,
+    ///         runs: &[run],
+    ///         text_styles: &[],
+    ///         boxes: &[badge],
+    ///         font_size,
+    ///         line_height: px(24.),
+    ///         text_metrics: InlineTextMetrics {
+    ///             ascent: system.ascent(font_id, font_size),
+    ///             descent: system.descent(font_id, font_size),
+    ///             x_height: system.x_height(font_id, font_size),
+    ///         },
+    ///         options: TextLayoutOptions {
+    ///             wrap_width: Some(px(280.)),
+    ///             ..Default::default()
+    ///         },
+    ///         bidi_scopes: &[],
+    ///     })
+    /// }
+    /// ```
+    ///
     /// # Panics
     ///
     /// Backend layout failures panic, including invalid Parley font features as described on
@@ -809,12 +855,25 @@ impl Display for FontStyle {
     }
 }
 
-/// Shaping and paint properties for a byte range passed to [`WindowTextSystem::shape_text`].
+/// The font and paint style for a consecutive stretch of source text.
+///
+/// A run describes its length, not its starting offset. The first run starts at
+/// byte zero; each later run starts where the preceding one ends. Together,
+/// the runs must cover the complete UTF-8 string at character boundaries.
+/// [`TextStyle::to_run`](crate::TextStyle::to_run) constructs a run from a view's
+/// resolved style. For occasional emphasis in an element, prefer
+/// [`StyledText::with_highlights`](crate::StyledText::with_highlights), which
+/// fills the gaps with the inherited style.
+///
+/// A run is an input to shaping, not necessarily one output fragment. Font
+/// fallback, bidirectional ordering, or wrapping can split it into several
+/// [`PaintFragment`] values. Use the shaped result to measure and position its
+/// glyphs; adding character widths cannot reproduce that result.
 #[derive(Clone, Debug, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 pub struct TextRun {
     /// Number of UTF-8 bytes styled by this run.
     ///
-    /// Runs are consumed in order and should cover the full input string. Boundaries must be
+    /// Runs are consumed in order and must cover the full input string. Boundaries must be
     /// UTF-8 character boundaries. This is not a count of graphemes, Unicode scalar values, or
     /// shaped glyphs.
     pub len: usize,
@@ -830,7 +889,12 @@ pub struct TextRun {
     pub underline: Option<UnderlineStyle>,
     /// Optional strikethrough painted as a foreground decoration.
     pub strikethrough: Option<StrikethroughStyle>,
-    /// Additional spacing applied between glyphs, in logical pixels.
+    /// Additional spacing requested between shaping clusters, in logical pixels.
+    ///
+    /// Parley adds this amount to each cluster's advance. A cluster can contain
+    /// several characters or glyphs; this does not space every glyph separately.
+    /// See the [text chapter](crate::_documentation::text#keep-source-positions-separate-from-visual-positions)
+    /// for the distinction between shaping clusters and editing boundaries.
     pub letter_spacing: Option<Pixels>,
 }
 
@@ -927,15 +991,22 @@ pub struct TextLayoutOptions {
     pub unicode_bidi: UnicodeBidi,
 }
 
-/// Complete input for one backend-owned text document layout.
+/// Source and styles passed to a text backend for one complete document.
 ///
-/// `runs` must cover all UTF-8 bytes of `text` using character-boundary lengths. The borrowed
-/// values are consumed synchronously by the backend layout request.
+/// [`PlatformTextSystem::layout_text`] consumes this request synchronously and
+/// returns an owned [`LineLayout`]. Its output does not borrow these inputs.
+/// Application code normally calls [`WindowTextSystem::shape_text`] instead:
+/// that method also retains the source and provides a paintable [`ShapedText`].
+///
+/// Runs describe consecutive UTF-8 byte lengths and must cover `text` at
+/// character boundaries. The font size applies throughout the document;
+/// use [`InlineLayoutRequest::text_styles`] for ranges with different sizes
+/// or line heights. Neither request edits or truncates the source string.
 #[derive(Clone, Copy, Debug)]
 pub struct TextLayoutRequest<'a> {
     /// UTF-8 source text.
     pub text: &'a str,
-    /// Font size shared by all style runs.
+    /// Font size shared by all style runs, in logical pixels.
     pub font_size: Pixels,
     /// Complete shaping and paint styles covering `text`.
     pub runs: &'a [TextRun],
@@ -943,50 +1014,104 @@ pub struct TextLayoutRequest<'a> {
     pub options: TextLayoutOptions,
 }
 
-/// An atomic element inserted at a UTF-8 character boundary in an inline document.
+/// The measured space to reserve for one element inside a text paragraph.
+///
+/// Add it to [`InlineLayoutRequest::boxes`] after measuring the child. The
+/// paragraph treats the box as a unit when wrapping; it cannot break the
+/// child's contents across rows. The returned [`PositionedInlineBox`] gives
+/// its placement. The caller still lays out, paints, and registers input for
+/// the child itself. A block [`Div`](crate::Div) handles that work for its
+/// inline children; see the [text chapter](crate::_documentation::text#wrap-text-and-element-boxes-in-one-paragraph).
+///
+/// Insertion reserves space without replacing a source character. An index
+/// of zero places the box before the text; `text.len()` places it after the
+/// text. Use UTF-8 character boundaries within the original source, and keep
+/// the request's boxes in ascending index order.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct InlineBoxRequest {
-    /// Identifier returned with the positioned box.
+    /// Caller-chosen key returned in [`PositionedInlineBox::id`].
+    ///
+    /// Use a distinct key for each box in one request. This is neither an
+    /// [`ElementId`](crate::ElementId) nor a source offset.
     pub id: u64,
     /// UTF-8 byte index at which to insert the box. This is not a character or glyph count.
     pub index: usize,
-    /// Measured size of the element.
+    /// Measured width and height of the child, in logical pixels.
     pub size: Size<Pixels>,
     /// Vertical alignment within the line containing this element.
     pub vertical_align: crate::VerticalAlign,
 }
 
-/// Resolved font size and line height for part of an inline document.
+/// A font size and line height applied to a source range in an inline paragraph.
+///
+/// [`TextRun`] supplies fonts and paint styles; this record supplies the two
+/// measurements that can vary within an [`InlineLayoutRequest`]. Keep styles
+/// in ascending, nonoverlapping range order. Both endpoints must be UTF-8
+/// character boundaries within the request's original source string.
+/// Uncovered text uses the request's base font size and line height.
+///
+/// A requested line height is not a clip. A larger font or an embedded box
+/// can expand a row; read its actual height from [`InlineLayout::lines`].
 #[derive(Clone, Debug, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct InlineTextStyle {
     /// UTF-8 range receiving these resolved metrics.
     pub range: Range<usize>,
-    /// Font size for this range.
+    /// Font size for this range, in logical pixels.
     pub font_size: Pixels,
-    /// Absolute line height for this range.
+    /// Requested line height in logical pixels, not a font-size multiplier.
     pub line_height: Pixels,
 }
 
-/// Complete input for a document containing text and element boxes.
+/// Source, styles, and measured element boxes to lay out together.
+///
+/// Pass this to [`WindowTextSystem::layout_inline`] when implementing a custom
+/// paragraph. For ordinary views, a block [`Div`](crate::Div) already collects
+/// adjacent text and inline children into this form. The [text chapter](crate::_documentation::text#wrap-text-and-element-boxes-in-one-paragraph)
+/// shows how to choose between a flowing text span and an atomic box.
+///
+/// All indices refer to the original `text`, in UTF-8 bytes:
+///
+/// * Run lengths must cover the full string at character boundaries.
+/// * Text-style ranges must be nonoverlapping, ordered by their start, and
+///   contained in the string. Gaps use the base measurements.
+/// * Box indices must be character boundaries from zero through `text.len()`,
+///   in ascending order. Give each box a distinct ID so its returned position
+///   and vertical alignment identify the same child.
+///
+/// These are caller requirements, not a promise that malformed inputs will
+/// be rejected consistently by every backend.
+///
+/// The returned [`InlineLayout`] owns its geometry and outlives the borrowed
+/// inputs. Its positions are relative to the paragraph's origin. Layout
+/// reserves space for boxes but does not paint their contents or register
+/// their input handlers. Fonts and boxes can expand individual rows beyond
+/// the requested line height, so use the returned row heights and baselines
+/// rather than multiplying a row number by `line_height`.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct InlineLayoutRequest<'a> {
     /// UTF-8 source text.
     pub text: &'a str,
     /// Complete shaping and paint styles covering `text`.
     pub runs: &'a [TextRun],
-    /// Resolved font sizes and line heights for UTF-8 ranges within the document.
+    /// Ordered, nonoverlapping metric overrides; uncovered text uses the base values.
     pub text_styles: &'a [InlineTextStyle],
-    /// Atomic boxes inserted into the text.
+    /// Measured boxes in ascending source-index order, each with a distinct ID.
     pub boxes: &'a [InlineBoxRequest],
-    /// Base font size.
+    /// Font size in logical pixels for text outside `text_styles`.
     pub font_size: Pixels,
-    /// Requested height of an ordinary text row.
+    /// Requested line height in logical pixels for text outside `text_styles`.
     pub line_height: Pixels,
-    /// Metrics for the inline container's base font.
+    /// Scaled metrics for the container's base font, used as alignment fallbacks.
+    ///
+    /// Supply logical-pixel lengths from [`TextSystem::ascent`],
+    /// [`TextSystem::descent`], and [`TextSystem::x_height`], rather than the raw
+    /// design-unit fields of [`FontMetrics`].
     pub text_metrics: InlineTextMetrics,
     /// Wrapping, alignment, and bidirectional layout options.
     pub options: TextLayoutOptions,
     /// Directional scopes established by nested inline elements.
+    ///
+    /// Leave empty when the paragraph has no nested directional scopes.
     pub bidi_scopes: &'a [InlineBidiScope],
 }
 
@@ -1464,8 +1589,11 @@ impl Font {
 /// [`TextSystem::typographic_bounds`] for one glyph's bounds.
 #[derive(Clone, Copy, Debug, serde::Serialize, serde::Deserialize)]
 pub struct FontMetrics {
-    /// The number of font units that make up the "em square",
-    /// a scalable grid for determining the size of a typeface.
+    /// Number of design units along one side of the
+    /// [em square](https://learn.microsoft.com/en-us/typography/opentype/spec/ttch01#funits-and-the-em-square).
+    ///
+    /// This defines the font's coordinate scale. Glyph outlines can extend
+    /// beyond that square.
     pub units_per_em: u32,
 
     /// Typographic distance above the baseline. Individual glyphs can extend beyond it.
@@ -1489,10 +1617,18 @@ pub struct FontMetrics {
     /// The suggested thickness of the underline.
     pub underline_thickness: f32,
 
-    /// The height of a capital letter measured from the baseline of the font.
+    /// Nominal [cap height](https://learn.microsoft.com/en-us/typography/opentype/spec/os2#scapheight),
+    /// measured upward from the baseline.
+    ///
+    /// This is a font metric, not the bounds of a particular capital letter.
+    /// Parley substitutes the ascent when the font supplies no cap height.
     pub cap_height: f32,
 
-    /// The height of a lowercase x.
+    /// Nominal [x-height](https://learn.microsoft.com/en-us/typography/opentype/spec/os2#sxheight),
+    /// measuring lowercase letters without ascenders.
+    ///
+    /// Inline middle alignment uses half this height above the baseline.
+    /// Parley substitutes the ascent when the font supplies no x-height.
     pub x_height: f32,
 
     /// Backend-provided estimate of the font's extents, in design units.
@@ -1514,7 +1650,7 @@ impl FontMetrics {
         Pixels((self.descent / self.units_per_em as f32) * font_size.0)
     }
 
-    /// Returns the recommended additional space to add between lines of type in pixels.
+    /// Scales the recommended extra line spacing to logical pixels.
     pub fn line_gap(&self, font_size: Pixels) -> Pixels {
         Pixels((self.line_gap / self.units_per_em as f32) * font_size.0)
     }
@@ -1528,17 +1664,17 @@ impl FontMetrics {
         Pixels((self.underline_position / self.units_per_em as f32) * font_size.0)
     }
 
-    /// Returns the suggested thickness of the underline in pixels.
+    /// Scales the suggested underline thickness to logical pixels.
     pub fn underline_thickness(&self, font_size: Pixels) -> Pixels {
         Pixels((self.underline_thickness / self.units_per_em as f32) * font_size.0)
     }
 
-    /// Returns the height of a capital letter measured from the baseline of the font in pixels.
+    /// Scales the nominal cap height to logical pixels.
     pub fn cap_height(&self, font_size: Pixels) -> Pixels {
         Pixels((self.cap_height / self.units_per_em as f32) * font_size.0)
     }
 
-    /// Returns the height of a lowercase x in pixels.
+    /// Scales the nominal x-height to logical pixels.
     pub fn x_height(&self, font_size: Pixels) -> Pixels {
         Pixels((self.x_height / self.units_per_em as f32) * font_size.0)
     }

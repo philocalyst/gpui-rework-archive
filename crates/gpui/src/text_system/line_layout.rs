@@ -468,10 +468,12 @@ pub enum TextBoundary {
     Word,
     /// One visual row produced by line breaking, including soft wrapping.
     VisualLine,
-    /// A source line delimited by a hard paragraph separator.
+    /// A source line delimited by a hard line break.
     ///
-    /// Soft wrapping does not create another hard line. See
-    /// [`is_paragraph_separator`] for recognized separators; CRLF is one break.
+    /// Soft wrapping does not create another hard line. Parley also recognizes
+    /// Unicode line separator (`U+2028`), which breaks a row without beginning
+    /// another paragraph. [`is_paragraph_separator`] identifies the breaks
+    /// that also restart paragraph direction; CRLF is one break.
     HardLine,
     /// The complete text document.
     Document,
@@ -523,12 +525,23 @@ impl TextDirection {
     }
 }
 
-/// A semantic selection derived from a point.
+/// The extent to select around a pointer hit in a shaped document.
+///
+/// Pass it to [`ShapedTextLayout::selection_from_pixel_point`], for example
+/// to select a word on a double click or a line on a triple click. The result
+/// is a logical UTF-8 byte range; this choice does not set the active endpoint,
+/// extend an existing selection, or move an editor's caret.
+///
+/// Word boundaries come from the backend, rather than splitting the string
+/// at ASCII spaces. A visual line is one drawn row, while a hard line can
+/// occupy several wrapped rows. With Parley, selecting the final row or hard
+/// line of a paragraph also includes its paragraph separator, when present.
+/// Use [`TextMovement`] for keyboard navigation instead.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum TextSelectionKind {
     /// Select a word.
     Word,
-    /// Select a soft-wrapped visual row.
+    /// Select one visual row, including a row created by soft wrapping.
     VisualLine,
     /// Select a line delimited by a hard break.
     HardLine,
@@ -681,7 +694,23 @@ pub fn is_paragraph_separator(character: char) -> bool {
 }
 
 impl CaretAffinity {
-    /// Returns the affinity for a caret placed after inserted text.
+    /// Choose which neighbor owns a caret immediately after inserted text.
+    ///
+    /// Ordinary text attaches to the preceding cluster (`Upstream`). An empty
+    /// insertion or one ending in a hard line break attaches to the next
+    /// cluster (`Downstream`). After a trailing hard break, that places the
+    /// caret at the following row's start. Hard breaks include Unicode line
+    /// separator (`U+2028`) as well as the breaks
+    /// recognized by [`is_paragraph_separator`]. It chooses only the affinity;
+    /// the editor must also compute the insertion's ending byte index.
+    ///
+    /// ```
+    /// use gpui::CaretAffinity::{self, Downstream, Upstream};
+    ///
+    /// assert_eq!(CaretAffinity::for_inserted_text("é"), Upstream);
+    /// assert_eq!(CaretAffinity::for_inserted_text("é\n"), Downstream);
+    /// assert_eq!(CaretAffinity::for_inserted_text(""), Downstream);
+    /// ```
     pub fn for_inserted_text(text: &str) -> Self {
         Self::from(text)
     }
@@ -701,10 +730,17 @@ impl From<&str> for CaretAffinity {
     }
 }
 
-/// A byte position together with the information needed to place it visually.
+/// A source byte offset together with the neighbor that owns its visual placement.
+///
+/// Keep this value rather than a bare index when a caret can sit on either
+/// side of a soft wrap or bidirectional boundary. The same byte offset can
+/// then have two visual placements; [`CaretAffinity`] selects its logical
+/// neighbor, not a direction on screen.
 ///
 /// Constructing this value does not check the index. Use
-/// [`ShapedTextLayout::normalized_caret`] to obtain a valid editing stop in a particular layout.
+/// [`ShapedTextLayout::normalized_caret`] to obtain a valid editing stop in a
+/// particular layout. Positions address the string that was shaped; they do
+/// not track edits or map an offset from another version of that string.
 #[derive(
     Clone, Copy, Debug, Default, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize,
 )]

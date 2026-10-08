@@ -112,11 +112,21 @@ child contributes no inline box. A flex parent instead gives each child an
 independent flex-item box, so `flex_wrap` cannot replace paragraph wrapping.
 
 [`VerticalAlign`](crate::VerticalAlign) positions an inline box against its
-line's text metrics. `align_middle` aligns its midpoint with the parent
-baseline plus half the font's x-height; it does not center the badge in the
+line's text metrics. `align_middle` places its midpoint half the font's
+[x-height](https://learn.microsoft.com/en-us/typography/opentype/spec/os2#sxheight)
+above the parent baseline; it does not center the badge in the
 whole paragraph. A wrapped or bidirectional span may have several disjoint
 regions. Its enclosing bounds include the gaps, so use GPUI's registered
 hitboxes rather than treating that bounding rectangle as a clickable region.
+
+For a custom paragraph, measure the children first, then pass their sizes in
+[`InlineBoxRequest`](crate::InlineBoxRequest) values to `layout_inline`.
+[`InlineLayoutRequest`](crate::InlineLayoutRequest) states the source-range
+and ordering requirements. Its font sizes and line heights use logical
+pixels, and each returned row can grow to accommodate its contents. The
+[`layout_inline` example](crate::WindowTextSystem::layout_inline) builds a
+request from the window's font metrics. The result owns its geometry; you
+still place, paint, and register input for each child at its returned bounds.
 
 > [!NOTE]
 > Text-rewriting truncation is currently skipped for a paragraph containing
