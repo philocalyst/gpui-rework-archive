@@ -141,10 +141,17 @@ or prepaint state.
 
 Choose how the child participates in layout:
 
-| Placement | During layout request | During prepaint | During paint |
-| --- | --- | --- | --- |
-| Child sized with its parent | Request the child's layout and include its ID in the parent's layout request. | Call the child's `prepaint`; its bounds already include its position in the containing tree. | Call the child's `paint`. |
-| Subtree sized independently | Reserve the parent's own space, without this child's layout ID. | Call `prepaint_as_root` with the available space and window-local translation. | Call the prepared child's `paint`. |
+| Child placement | Calls, in order |
+| --- | --- |
+| Part of the parent's layout | `request_layout` → `prepaint` → `paint` |
+| Positioned independently | `layout_as_root` → `prepaint_at` → `paint` |
+
+Include an ordinary child's layout ID in the parent's layout request. GPUI
+computes the containing tree before prepaint, so the child's bounds already
+include its position in that tree. For independent placement, reserve the
+parent's own space without this child's layout ID. During prepaint, supply
+the child's available space and window-local translation, or use
+`prepaint_as_root` to combine those two calls.
 
 For independent placement, split the operation into `layout_as_root` and
 `prepaint_at` when the measured size is needed to choose a position. Layout

@@ -875,10 +875,15 @@ where
 ///
 /// A custom parent drives the child's phases. Choose one layout path:
 ///
-/// | Child placement | Layout | Prepaint | Paint |
-/// | --- | --- | --- | --- |
-/// | Part of the parent's layout | Call [`request_layout`](Self::request_layout) and include the returned ID in the parent's layout request. | After GPUI computes the containing tree, call [`prepaint`](Self::prepaint). | Call [`paint`](Self::paint). |
-/// | Positioned independently | Call [`layout_as_root`](Self::layout_as_root) with the available space. | Call [`prepaint_at`](Self::prepaint_at) with a window-local translation. | Call [`paint`](Self::paint). |
+/// | Child placement | Calls, in order |
+/// | --- | --- |
+/// | Part of the parent's layout | [`request_layout`](Self::request_layout) → [`prepaint`](Self::prepaint) → [`paint`](Self::paint) |
+/// | Positioned independently | [`layout_as_root`](Self::layout_as_root) → [`prepaint_at`](Self::prepaint_at) → [`paint`](Self::paint) |
+///
+/// Include an ordinary child's returned layout ID in the parent's layout
+/// request. GPUI then computes the containing tree before prepaint. For an
+/// independent subtree, supply its available space to `layout_as_root` and
+/// its window-local translation to `prepaint_at`.
 ///
 /// [`prepaint_as_root`](Self::prepaint_as_root) combines the independent layout
 /// and prepaint steps. Retain the same `AnyElement` between phases: creating a

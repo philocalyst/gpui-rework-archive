@@ -1512,3 +1512,13 @@ default and feature-enabled API builds pass in
 prose and link labels only. The combined artifact and its rendered review follow
 this revision. No new detector score or complete-framework quality claim is
 made by this entry.
+
+Revision `52944affa7` then passed the combined build and was served locally.
+The complete new AnyElement introduction and prepaint-as-root example were
+read in rustdoc, following the link from prepaint_at. Drawing and the custom
+element ran successfully in browser Miri, with their expected rectangles
+visible. At an actual 390-pixel CSS viewport, rustdoc's four-column phase table
+wrapped method identifiers into fragments despite having no document-wide
+horizontal overflow. Both versions now use two columns for placement and call
+sequence, with layout timing explained beneath the table. The revised rendering
+checks follow this entry; the browser viewport will be restored afterward.
