@@ -20,7 +20,7 @@ use smol_str::SmolStr;
 ///
 /// Short strings fit inline, longer strings share reference-counted storage,
 /// and [`new_static`](Self::new_static) retains a static string directly. The
-/// representation is backed by [`SmolStr`]; callers should not depend on its
+/// representation is backed by [`SmolStr`](smol_str::SmolStr); callers should not depend on its
 /// inline capacity. Equality, ordering, and hashing compare string contents.
 ///
 /// Converting a borrowed `&str` copies its contents into this representation;

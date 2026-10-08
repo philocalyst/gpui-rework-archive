@@ -124,7 +124,7 @@ impl Eq for AnyView {}
 
 /// `AnyView` is the type-erased [`View`]: its `render` is a function pointer rather
 /// than a concrete type, but it participates in the reactive graph exactly like any
-/// other view via [`ViewElement`].
+/// other view via [`ViewElement`](crate::ViewElement).
 impl View for AnyView {
     fn entity_id(&self) -> Option<EntityId> {
         Some(self.entity.entity_id())
@@ -329,7 +329,7 @@ impl<T: Render> View for Entity<T> {
 }
 
 impl<T: Render> Entity<T> {
-    /// Embed this entity as a cached [`ViewElement`] laid out at `style`.
+    /// Embed this entity as a cached [`ViewElement`](crate::ViewElement) laid out at `style`.
     ///
     /// GPUI can reuse the subtree's prepaint and paint records while the entity
     /// is clean and its bounds, clipping mask, text style, and text direction

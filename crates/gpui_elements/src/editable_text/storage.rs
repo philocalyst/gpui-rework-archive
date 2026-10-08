@@ -51,7 +51,8 @@ pub trait UnicodeTextStorage {
     /// Converts a UTF-8 byte offset to a UTF-16 code-unit offset.
     ///
     /// The default implementation clamps offsets past the end. An offset inside an encoded
-    /// character rounds forward to that character's end, as in [`utf8_to_utf16_offset`].
+    /// character rounds forward to that character's end, as in
+    /// [`utf8_to_utf16_offset`](gpui::utf8_to_utf16_offset).
     /// This converts units; it does not normalize to a grapheme boundary.
     fn utf_offset_8to16(&self, pos_uft8: usize) -> usize {
         // Fast path: if offset is 0, return 0
@@ -70,7 +71,8 @@ pub trait UnicodeTextStorage {
     /// Converts a UTF-16 code-unit offset to a UTF-8 byte offset.
     ///
     /// The default implementation clamps offsets past the end and rounds an offset inside a
-    /// surrogate pair forward to that character's end, as in [`utf16_to_utf8_offset`].
+    /// surrogate pair forward to that character's end, as in
+    /// [`utf16_to_utf8_offset`](gpui::utf16_to_utf8_offset).
     ///
     /// ```
     /// use gpui_ce_elements::editable_text::{StringStorage, UnicodeTextStorage};

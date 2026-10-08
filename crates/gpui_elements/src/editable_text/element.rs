@@ -19,7 +19,8 @@ use std::{cell::RefCell, ops::Range, rc::Rc, sync::Arc, time::Duration};
 /// Creates a multiline editable-text element with default styling.
 ///
 /// This is an alias for [`text_area`]; call [`multiline`](EditableTextElement::multiline) to change
-/// that behavior. Set size, wrapping, overflow, padding, and border with GPUI's [`Styled`] methods.
+/// that behavior. Set size, wrapping, overflow, padding, and border with GPUI's
+/// [`Styled`](gpui::Styled) methods.
 #[track_caller]
 pub fn editable_text(id: impl Into<ElementId>) -> EditableTextElement {
     let mut this = EditableTextElement {
@@ -65,7 +66,7 @@ pub fn text_area(id: impl Into<ElementId>) -> EditableTextElement {
 ///
 /// Supply an owned state's weak handle with [`state`](Self::state), or let the element create
 /// keyed state under its ID. Reuse that ID for the same logical field across frames.
-/// [`Styled`] controls sizing and overflow; the methods here configure editing, highlighting,
+/// [`Styled`](gpui::Styled) controls sizing and overflow; the methods here configure editing, highlighting,
 /// caret geometry, and colors. See the [module guide](super) for keyboard setup and state ownership.
 pub struct EditableTextElement {
     interactivity: Interactivity,

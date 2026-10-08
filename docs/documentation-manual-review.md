@@ -364,6 +364,28 @@ The primary editor also read the resulting `EditableTextHistory` and
 `HistoryEntry` pages, including every field and inherent method. The subsequent
 action and caret prose adjustments still require the next combined build.
 
+The action/caret pass now passes strict feature-enabled rustdoc and twelve
+companion doctests (`target/documentation-field-final-rustdoc.log` and
+`target/documentation-field-final-doctests.log`). The primary editor read every
+rendered inherent `EditableTextState` method too. That browser review found
+imported focus, styling, conversion, and view links rendered as literal bracketed
+references despite successful strict checks. Explicit public paths replace
+those references; the next build must confirm the rendered links themselves.
+
+Runtime export `edba695b71` was imported locally as `0b65a518c5`, preserving the
+documentation branch's production renderer fixes and adopting the expanded
+focus regression. The full paged bundle has eighteen exact starters, including
+all twelve canonical walkthroughs, and module `06509386dfbe3ef708a6`.
+The runtime owner reports complete native-frame parity and compiler recovery;
+the primary editor's own browser pass on the assembled bundle remains open.
+Locally, all seven CodePen library tests pass, as do the transport/prewarm,
+immutable metadata, and paged-packaging test suites. The first combined site
+build passes strict rustdoc, Zola, mdBook, and the HTML audit at
+`target/documentation-paged-review`; a subsequent link edit requires a fresh
+build before publication. Packaging now checks every cold metadata chunk as
+well as the bootstrap, and its regression preserves the previous runtime when
+a chunk is missing. No changes have been pushed.
+
 Zed was inspected at `da0a7a78cf296a6d8a75894f46b71a8e7f19cb2f` and Hummingbird
 at `2e1ee5f1c8d415ef7f835801fe368ab4106035b5`. The testing pass read Zed's
 collaboration update-button timer test and context-menu action tests, and
@@ -403,6 +425,12 @@ before the epoch, day boundaries and overflow, month/year boundaries, missing
 calendar dates, and tomorrow/yesterday disambiguation. This reading reinforces
 two checks in the GPUI pass: name the reference system of a returned value,
 and show what an apparently ordinary operation does at its boundary.
+
+The subsequent `Zoned` reading covers every example through `saturating_sub`,
+including forward/backward weekday searches, week-boundary inclusion,
+timestamp/civil/ISO-week projections, offsets, calendar versus absolute
+arithmetic, automatic disambiguation, negative durations, overflow, and
+saturation. The `until` introduction was read but its examples remain open.
 
 The Rand book's guide overview, getting-started page, error handling,
 function-testing recipe, all seeding examples, and reproducibility chapter

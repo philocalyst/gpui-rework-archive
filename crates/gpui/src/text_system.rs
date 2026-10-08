@@ -624,8 +624,8 @@ impl WindowTextSystem {
     /// Shape a complete document with explicit direction, bidi, wrapping, and alignment options.
     ///
     /// Run lengths must cover the complete UTF-8 source, with every boundary on a character
-    /// boundary. Use [`TextLayoutOptions::wrap_width`] to control line breaking and
-    /// [`TextLayoutOptions::alignment_width`] to align the resulting rows within a separate box
+    /// boundary. Use [`wrap_width`](crate::TextLayoutOptions::wrap_width) to control line breaking and
+    /// [`alignment_width`](crate::TextLayoutOptions::alignment_width) to align the resulting rows within a separate box
     /// width.
     pub fn shape_text_with_options<S: AsRef<str> + Into<SharedString>>(
         &self,

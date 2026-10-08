@@ -44,8 +44,9 @@ struct SelectionDragVisualCaret {
 /// Text, selection, input handling, and focus state for an [`EditableTextElement`](super::EditableTextElement).
 ///
 /// The entity owns a [`UnicodeTextStorage`](super::UnicodeTextStorage); selection and edit ranges
-/// use UTF-8 byte offsets. It implements [`Focusable`], so use its [`FocusHandle`] to focus the
-/// field or observe focus changes. Retain its entity on the owning view, or use the keyed-state
+/// use UTF-8 byte offsets. It implements [`Focusable`](gpui::Focusable), so use its
+/// [`FocusHandle`](gpui::FocusHandle) to focus the field or observe focus changes. Retain its entity
+/// on the owning view, or use the keyed-state
 /// constructors while rendering when its lifetime should follow the element. See the
 /// [module examples](super) for both choices.
 pub struct EditableTextState {
