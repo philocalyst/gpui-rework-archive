@@ -17,6 +17,25 @@ use crate::shims::unix::UnixFileDescription;
 use crate::shims::unix::socket::{SocketFamily, UnixSocketFileDescription};
 use crate::*;
 
+// WASI's standard library reports unavailable sockets as ordinary I/O errors;
+// mio intentionally does not expose these constructors on that host.
+#[cfg(target_os = "wasi")]
+fn bind_listener(address: SocketAddr) -> io::Result<TcpListener> {
+    std::net::TcpListener::bind(address).map(TcpListener::from_std)
+}
+#[cfg(not(target_os = "wasi"))]
+fn bind_listener(address: SocketAddr) -> io::Result<TcpListener> {
+    TcpListener::bind(address)
+}
+#[cfg(target_os = "wasi")]
+fn connect_stream(address: SocketAddr) -> io::Result<TcpStream> {
+    std::net::TcpStream::connect(address).map(TcpStream::from_std)
+}
+#[cfg(not(target_os = "wasi"))]
+fn connect_stream(address: SocketAddr) -> io::Result<TcpStream> {
+    TcpStream::connect(address)
+}
+
 /// On Linux a TCP socket is initally in the TCP_CLOSE state:
 /// See <https://github.com/torvalds/linux/blob/cee9395/net/core/sock.c#L3753>
 /// For a socket in this state, (E)POLLHUP is reported:
@@ -308,7 +327,7 @@ impl UnixSocketFileDescription for TcpSocket {
 
         match *state {
             SocketState::Bound(socket_addr) =>
-                match TcpListener::bind(socket_addr) {
+                match bind_listener(socket_addr) {
                     Ok(listener) => {
                         *state = SocketState::Listening(listener);
                         drop(state);
@@ -410,7 +429,7 @@ impl UnixSocketFileDescription for TcpSocket {
 
         // This begins establishing the connection, but does not block until the stream is fully connected.
         // We deal with that below.
-        match TcpStream::connect(address) {
+        match connect_stream(address) {
             Ok(stream) => {
                 *self.state.borrow_mut() = SocketState::Connecting(stream);
 

@@ -6,6 +6,9 @@ license.workspace = true
 publish = false
 description = "A native GPUI guide with live, executable Rust components"
 
+[features]
+browser-miri = []
+
 [dependencies]
 gpui.workspace = true
 gpui_platform.workspace = true

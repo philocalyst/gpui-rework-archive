@@ -136,7 +136,22 @@ pub fn setup(
     // But keep the overflow checks, they are cheap. This completely overwrites flags
     // the user might have set, which is consistent with normal `cargo build` that does
     // not apply `RUSTFLAGS` to the sysroot either.
-    let rustflags = &["-Cdebug-assertions=off", "-Coverflow-checks=on"];
+    let mut rustflags = vec!["-Cdebug-assertions=off", "-Coverflow-checks=on"];
+    // The interactive GPUI runtime owns a separate sysroot cache. Optimize
+    // standard-library MIR there as well as component MIR: tiny core/alloc
+    // calls otherwise dominate every interpreted frame. Ordinary Miri setup
+    // retains its upstream defaults.
+    if let Some(level) = env::var_os("GPUI_CODEPEN_SYSROOT_MIR_OPT_LEVEL") {
+        let flag = match level.to_str() {
+            Some("0") => "-Zmir-opt-level=0",
+            Some("1") => "-Zmir-opt-level=1",
+            Some("2") => "-Zmir-opt-level=2",
+            Some("3") => "-Zmir-opt-level=3",
+            Some("4") => "-Zmir-opt-level=4",
+            _ => show_error!("GPUI_CODEPEN_SYSROOT_MIR_OPT_LEVEL must be between 0 and 4"),
+        };
+        rustflags.extend(["-Copt-level=3", flag, "-Zinline-mir=yes"]);
+    }
 
     let mut after_build_output = String::new(); // what should be printed when the build is done.
     let notify = || {
@@ -165,7 +180,7 @@ pub fn setup(
         .build_mode(BuildMode::Build) // not a real build, since we use dummy codegen
         .rustc_version(rustc_version.clone())
         .sysroot_config(sysroot_config)
-        .rustflags(rustflags)
+        .rustflags(&rustflags)
         .cargo(cargo_cmd)
         .when_build_required(notify)
         .build_from_source(&rust_src);

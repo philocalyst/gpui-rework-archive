@@ -284,6 +284,22 @@ impl RemoteTextSystem {
             ..Default::default()
         }
     }
+    #[cfg(miri)]
+    pub(crate) fn refresh_font_generation(&self) -> bool {
+        let generation: u64 = call(Call::Generation {}).expect("font generation");
+        if self
+            .generation
+            .swap(generation, std::sync::atomic::Ordering::Relaxed)
+            == generation
+        {
+            return false;
+        }
+        self.styles.lock().unwrap().clear();
+        self.modes.lock().unwrap().clear();
+        self.prepared.lock().unwrap().clear();
+        self.rasterized.lock().unwrap().clear();
+        true
+    }
 }
 impl PlatformTextSystem for RemoteTextSystem {
     fn add_fonts(&self, fonts: Vec<Cow<'static, [u8]>>) -> anyhow::Result<()> {

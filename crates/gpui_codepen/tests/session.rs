@@ -1,7 +1,7 @@
 use gpui::{Scene, SceneCapture, px, size};
 use gpui_ce_codepen::{
     guest::{Frame, PROTOCOL_VERSION, wire},
-    session::{Backend, Reply, Session},
+    session::{Backend, FailureKind, Reply, Session},
 };
 fn frame() -> Frame {
     let mut scene = Scene::default();
@@ -31,6 +31,7 @@ fn frame() -> Frame {
 }
 fn reply(generation: u64, frame: Option<Frame>, diagnostics: &str) -> Reply {
     Reply {
+        failure: None,
         generation,
         frame,
         diagnostics: diagnostics.into(),
@@ -51,11 +52,29 @@ fn stale_replies_and_errors_preserve_last_good_scene() {
     ));
     assert!(session.accept(reply(next.generation, None, "compile error")));
     assert_eq!(session.diagnostics, "compile error");
+    assert_eq!(session.failure, Some(FailureKind::Rust));
     assert!(!session.running);
     assert!(std::sync::Arc::ptr_eq(
         &current,
         session.frame.as_ref().unwrap()
     ));
+}
+#[test]
+fn runtime_availability_is_distinct_from_source_errors_and_recovers() {
+    let mut session = Session::default();
+    let first = session.request("valid source".into(), Backend::Miri, None);
+    session.accept(reply(first.generation, Some(frame()), ""));
+    let previous = session.frame.clone().unwrap();
+    let next = session.request("valid source".into(), Backend::Miri, None);
+    let mut unavailable = reply(next.generation, None, "Compiler assets are missing");
+    unavailable.failure = Some(FailureKind::Unavailable);
+    assert!(session.accept(unavailable));
+    assert_eq!(session.failure, Some(FailureKind::Unavailable));
+    assert!(std::sync::Arc::ptr_eq(&previous, session.frame.as_ref().unwrap()));
+    let recovered = session.request("valid source".into(), Backend::Miri, None);
+    session.accept(reply(recovered.generation, Some(frame()), ""));
+    assert_eq!(session.failure, None);
+    assert!(session.diagnostics.is_empty());
 }
 #[test]
 fn binary_scenes_reject_wrong_version_and_trailing_bytes() {

@@ -6,6 +6,3 @@ dist = "dist"
 addresses = ["127.0.0.1"]
 port = 8080
 headers = { "Cache-Control" = "no-store", "Cross-Origin-Embedder-Policy" = "require-corp", "Cross-Origin-Opener-Policy" = "same-origin" }
-
-[[proxy]]
-backend = "http://127.0.0.1:8092/api/"

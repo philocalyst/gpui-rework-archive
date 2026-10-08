@@ -9,6 +9,7 @@
     feature(abort_unwind)
 )]
 #![feature(rustc_private)]
+#![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 #![feature(dirfd)]
 #![feature(f16)]
 #![feature(float_gamma)]
@@ -73,6 +74,7 @@ extern crate rustc_index;
 extern crate rustc_log;
 extern crate rustc_middle;
 extern crate rustc_session;
+extern crate rustc_serialize;
 extern crate rustc_span;
 extern crate rustc_structures;
 extern crate rustc_symbol_mangling;
@@ -97,6 +99,11 @@ mod math;
 mod operator;
 mod provenance_gc;
 mod shims;
+#[doc(hidden)]
+pub mod codepen_reload;
+#[cfg(target_family = "wasm")]
+#[doc(hidden)]
+pub mod codepen_browser;
 pub mod sym;
 
 // Establish a "crate-wide prelude": we often import `crate::*`.

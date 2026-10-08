@@ -19,13 +19,37 @@ For the web guide, install Trunk and the pinned WASM target, then run:
 
 ```sh
 rustup target add --toolchain nightly-2026-09-30 wasm32-unknown-unknown
+python3 scripts/codepen/browser.py all
 python3 scripts/codepen/web.py
 ```
 
-Open http://127.0.0.1:8080. The script starts a local compiler companion on an
-available port and proxies it through the web server. Rust compilation and full
-Miri execution run in the companion. The browser runs the actual GPUI WASM
-application and its existing renderer. It does not contain rustc or Miri.
+Open http://127.0.0.1:8080. The browser build includes the pinned Rust compiler
+and full Miri in a WebAssembly Worker, using JavaScript Promise Integration to
+suspend for input without blocking the editor. The default mode needs no compiler
+server. Its initial full compiler build is substantial; generated assets live in
+`target/codepen-browser/miri`. Use a browser with `WebAssembly.Suspending` and
+`WebAssembly.promising` support.
+
+The bundle contains precompiled MIR for the built-in lessons. Add
+`--starter-dir /path/to/components` to `browser.py bundle` to include exact initial
+`.rs` sources from a documentation site. Matching source executes its shipped
+MIR; edits use the real Rust frontend in an independent compiler Worker. Compiler
+assets are compressed and cached. Compatible edits install compiled MIR into
+the resident interpreter at an input boundary, retaining actual GPUI entities,
+boxed callbacks, vtables, state and the last good frame. The compiler's optional
+incremental query cache is still being validated in WASM.
+
+Changing definitions, Rust type layouts, closure capture order, compile-time
+values or coroutine layouts starts a fresh app. Reset also starts a fresh app.
+Active calls finish with their original MIR; later calls use the installed body.
+Resident compiler arenas currently retain old MIR, so a bounded revision/memory
+budget also requires a fresh interpreter. Reclaiming retired bodies remains work.
+
+`python3 scripts/codepen/web.py --native-companion` explicitly selects the local
+compiler development mode, with an automatically chosen loopback port and proxy.
+The full browser Worker probe verifies state-preserving edits and exact native
+frame parity for events, animation, asynchronous tasks, IME and dynamic layouts.
+Cold startup and rendering latency still need improvement.
 
 ## Component source
 
@@ -51,8 +75,8 @@ fn component(_: &mut Window, cx: &mut App) -> Entity<Counter> {
 ```
 
 The harness calls `component` once. Its entity, state, subscriptions and callbacks
-stay alive in the interpreter across input and animation frames. Source edits
-compile a new component and restart that component's state. Reset state restarts
+stay alive in the interpreter across input and animation frames. Compatible source
+edits update their executable bodies without rebuilding the app. Reset state restarts
 the same source. Restore lesson restores the original lesson source. Drafts use
 versioned local storage, independently for each lesson.
 
@@ -70,12 +94,20 @@ composes scene primitives into the containing window. Paths, shadows, sprites,
 clipping, opacity and filter groups use the existing GPUI renderers. No extra
 preview rasterizer or limited element/style vocabulary is involved.
 
-Edits debounce for 100 ms. A newer edit cancels the previous compiler/interpreter
-process group immediately. Stale replies cannot replace newer source. Compilation
+Edits debounce for 100 ms. A newer edit cancels obsolete compilation while the
+last valid app remains resident. Native process groups support cancellation;
+browser compiler cancellation is independent of the VM. Browser input stays
+ordered, with a bounded interruption deadline for obsolete execution. JSPI
+basic-block checkpoints acknowledge cancellation; a hard-stop fallback covers
+unresponsive Workers. Compiler Workers and their caches survive VM restarts
+when their crate identity remains the same.
+Stale replies cannot replace newer source. Compilation
 errors retain the last good preview. Native workers and browser requests are
 asynchronous. Ordered event batches coalesce consecutive pointer moves. Frame
 callbacks and async timers determine when another frame is requested; idle
-components do not continuously render.
+components do not continuously render. Inputs that do not redraw GPUI reuse the
+captured scene and its wire bytes while refreshing cursor, text-input and timer
+metadata. The host likewise reuses the imported scene for unchanged pixels.
 
 The input bridge includes mouse, keyboard, scrolling, raw touch, native file
 drops, cursor state, and typed text/IME mutations through GPUI's platform input
@@ -88,8 +120,13 @@ the component's GPUI API, but they remain integration work.
 
 Miri validation, borrowing, race, alignment, leak backtraces and isolation are
 disabled for this interpreter use case. Source is capped at 64 KiB and binary
-frames at 64 MiB. The companion is local and the interpreter has access to the
-user's process environment and filesystem.
+frames at 64 MiB. The native companion is local and has access to the user's
+process environment and filesystem. The browser interpreter uses its
+Worker-owned virtual filesystem.
+
+The native guide uses a dedicated control socket; interpreted stdin/stdout cannot
+consume input packets or forge frame messages. Standalone Miri transport fixtures
+retain the pipe protocol. The browser uses Worker messages and JSPI host imports.
 
 ## Verification
 
@@ -98,9 +135,18 @@ cargo test -p gpui_ce_codepen --lib --test session
 cargo test -p gpui_codepen_guest --features host-services
 cargo test -p gpui_ce_codepen --test engines -- --ignored --nocapture --test-threads=1
 cargo test -p gpui_ce_codepen --test server -- --ignored --nocapture
+python3 scripts/codepen/test-mir-reload.py
+GPUI_CODEPEN_TEST_STARTER=1 python3 scripts/codepen/test-mir-reload.py
+node scripts/codepen/test-browser-runtime.mjs
+node scripts/codepen/probe-browser-reload.mjs
 ```
 
 The full Miri tests execute real GPUI render implementations, entity callbacks,
 source edits, scale/resize changes, all lessons, cancellation and recovery, and
 report resident-frame timings. The companion tests cover browser sessions and
 cancellation. Platform tests compare bidi/caret/selection results with Parley.
+The full browser probe uses production workers and compares entire native frames
+for state-preserving edits, animation, async timers and UTF-16 IME composition.
+Generate its references with the engine tests and include
+`--starter-dir target/codepen-browser-probe` when bundling. Mock transport tests
+are separate from the full compiler/interpreter probe.

@@ -82,6 +82,12 @@ impl SceneAtlas {
             .checked_add(1)
             .context("captured texture index cannot be incremented")?;
         let mut data = self.data.lock().unwrap();
+        if data.bitmaps.contains_key(&texture_id) {
+            data.ids_by_key
+                .retain(|_, tile| tile.texture_id != texture_id);
+            data.ids_by_glyph
+                .retain(|_, entry| entry.tile.is_none_or(|tile| tile.texture_id != texture_id));
+        }
         data.next_by_kind[kind_slot(texture_id.kind)] =
             data.next_by_kind[kind_slot(texture_id.kind)].max(next_index);
         data.bytes += bitmap.bytes.len();
@@ -175,7 +181,9 @@ impl SceneAtlas {
         }
         let slot = kind_slot(kind);
         let index = data.next_by_kind[slot];
-        data.next_by_kind[slot] += 1;
+        data.next_by_kind[slot] = index
+            .checked_add(1)
+            .context("scene atlas texture indices exhausted")?;
         let tile = AtlasTile {
             texture_id: AtlasTextureId { kind, index },
             tile_id: TileId(0),
@@ -291,6 +299,82 @@ mod tests {
         FontId, GlyphId, GlyphRenderMode, PreparedRasterStyle, RasterizedGlyph,
         RasterizedGlyphFormat, point, px, size,
     };
+
+    #[test]
+    fn replacing_captured_pixels_invalidates_glyph_metadata_and_preserves_leases() {
+        let atlas = SceneAtlas::new();
+        let params = RenderGlyphParams {
+            font_id: FontId(0),
+            glyph_id: GlyphId(1),
+            font_size: px(12.),
+            subpixel_variant: point(0, 0),
+            scale_factor: 1.,
+            raster_style: PreparedRasterStyle::independent(GlyphRenderMode::Grayscale),
+        };
+        let mut builds = 0;
+        let mut build = || {
+            builds += 1;
+            ValidatedRasterizedGlyph::new(RasterizedGlyph {
+                bounds: Bounds::new(
+                    point(DevicePixels(0), DevicePixels(0)),
+                    size(DevicePixels(1), DevicePixels(1)),
+                ),
+                size: size(DevicePixels(1), DevicePixels(1)),
+                format: RasterizedGlyphFormat::AlphaMask,
+                pixels: vec![37],
+            })
+        };
+        let first = atlas
+            .get_or_insert_glyph_with(&params, &mut build)
+            .unwrap()
+            .tile
+            .unwrap();
+        let lease = atlas.resolve_shared(first).unwrap();
+        atlas
+            .insert_captured(
+                first.texture_id,
+                CapturedBitmap {
+                    kind: AtlasTextureKind::Monochrome,
+                    width: 1,
+                    height: 1,
+                    bytes: vec![99],
+                },
+            )
+            .unwrap();
+        assert_eq!(lease.bytes, [37]);
+        assert_eq!(atlas.resolve(first).unwrap().bytes, [99]);
+        let second = atlas
+            .get_or_insert_glyph_with(&params, &mut build)
+            .unwrap()
+            .tile
+            .unwrap();
+        assert_ne!(first.texture_id, second.texture_id);
+        assert_eq!(atlas.resolve(second).unwrap().bytes, [37]);
+        assert_eq!(builds, 2);
+    }
+
+    #[test]
+    fn exhausted_texture_indices_return_an_error_without_mutating_the_atlas() {
+        let atlas = SceneAtlas::new();
+        let bitmap = CapturedBitmap {
+            kind: AtlasTextureKind::Monochrome,
+            width: 1,
+            height: 1,
+            bytes: vec![0],
+        };
+        assert!(
+            atlas
+                .insert_captured(
+                    AtlasTextureId {
+                        kind: bitmap.kind,
+                        index: u32::MAX
+                    },
+                    bitmap
+                )
+                .is_err()
+        );
+        assert!(atlas.data.lock().unwrap().bitmaps.is_empty());
+    }
 
     #[test]
     fn changing_glyph_variants_keep_live_tiles_and_bound_cached_pixels() {

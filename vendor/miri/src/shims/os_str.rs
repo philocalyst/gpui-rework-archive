@@ -2,6 +2,8 @@ use std::borrow::Cow;
 use std::ffi::{OsStr, OsString};
 #[cfg(unix)]
 use std::os::unix::ffi::{OsStrExt, OsStringExt};
+#[cfg(target_os = "wasi")]
+use std::os::wasi::ffi::{OsStrExt, OsStringExt};
 #[cfg(windows)]
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
 use std::path::{Path, PathBuf};
@@ -17,11 +19,11 @@ pub enum PathConversion {
     TargetToHost,
 }
 
-#[cfg(unix)]
+#[cfg(any(unix, target_os = "wasi"))]
 pub fn bytes_to_os_str<'tcx>(bytes: &[u8]) -> InterpResult<'tcx, &OsStr> {
     interp_ok(OsStr::from_bytes(bytes))
 }
-#[cfg(not(unix))]
+#[cfg(not(any(unix, target_os = "wasi")))]
 pub fn bytes_to_os_str<'tcx>(bytes: &[u8]) -> InterpResult<'tcx, &OsStr> {
     // We cannot use `from_encoded_bytes_unchecked` here since we can't trust `bytes`.
     let s = std::str::from_utf8(bytes)

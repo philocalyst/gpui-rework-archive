@@ -39,6 +39,13 @@ pub struct Request {
     pub input: PreviewContext,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum FailureKind {
+    Rust,
+    Unavailable,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 /// An interpreter result whose identity must match the outstanding request.
 pub struct Reply {
@@ -48,6 +55,9 @@ pub struct Reply {
     pub frame: Option<Frame>,
     /// Compiler, interpreter, transport, or validation diagnostics.
     pub diagnostics: String,
+    /// Whether execution failed because of the source or runtime availability.
+    #[serde(default)]
+    pub failure: Option<FailureKind>,
     /// Execution time in milliseconds, as reported by the backend.
     pub elapsed_ms: u64,
 }
@@ -64,6 +74,8 @@ pub struct Session {
     pub frame: Option<std::sync::Arc<Frame>>,
     /// Diagnostics from the latest accepted reply.
     pub diagnostics: String,
+    /// The failure category from the latest accepted reply, if it failed.
+    pub failure: Option<FailureKind>,
     /// Whether a request is outstanding.
     pub running: bool,
     /// Time reported by the latest accepted reply, in milliseconds.
@@ -108,6 +120,7 @@ impl Session {
         self.elapsed_ms = 0;
         self.frame = None;
         self.diagnostics.clear();
+        self.failure = None;
     }
     /// Validates and accepts a reply for the current generation.
     ///
@@ -122,6 +135,7 @@ impl Session {
             if let Err(error) = frame.validate() {
                 reply.frame = None;
                 reply.diagnostics = error;
+                reply.failure = Some(FailureKind::Unavailable);
             }
         }
         self.accept_validated(reply)
@@ -135,6 +149,8 @@ impl Session {
         if let Some(frame) = reply.frame {
             self.frame = Some(std::sync::Arc::new(frame));
         }
+        self.failure = if reply.diagnostics.is_empty() { None }
+            else { reply.failure.or(Some(FailureKind::Rust)) };
         self.diagnostics = reply.diagnostics;
         self.elapsed_ms = reply.elapsed_ms;
         self.running = false;

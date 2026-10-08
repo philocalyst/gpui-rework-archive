@@ -13,3 +13,5 @@ pub use codepen::Codepen;
 pub use gpui_codepen_guest as guest;
 
 mod text_input;
+#[cfg(all(target_family = "wasm", feature = "browser-miri"))]
+mod browser_runtime;
