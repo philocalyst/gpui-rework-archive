@@ -407,7 +407,8 @@ def starters(target, directories, externs, miri_sysroot, extra_directories=()):
     canonical_args = [normalized.get(str(arg), str(arg)) for arg in common]
     identity = hashlib.sha256(json.dumps({"revision": REVISION, "version": VERSION,
         "args": canonical_args, "wrapper": wrapper, "format": "codepen-mir-3",
-        "component": env["GPUI_CODEPEN_COMPONENT"]}, sort_keys=True).encode())
+        "component": env["GPUI_CODEPEN_COMPONENT"],
+        "source_path": "/gpui-codepen/component.rs"}, sort_keys=True).encode())
     with driver.open("rb") as executable:
         identity.update(hashlib.file_digest(executable, "sha256").digest())
     for artifact in sorted((miri_sysroot / "lib/rustlib" / target / "lib").glob("lib*.rmeta")):
@@ -434,7 +435,10 @@ def starters(target, directories, externs, miri_sysroot, extra_directories=()):
         write_changed(code, source + wrapper)
         metadata = directory / ("lib" + name + ".rmeta")
         if not metadata.exists() or code.stat().st_mtime > metadata.stat().st_mtime:
-            run(common + ["--crate-name", name, code, "-o", metadata], env=env, cwd=ROOT)
+            # Preserve the same file!()/track_caller/text! identity in starter MIR
+            # and subsequent browser edits. Keep the input absolute so rustc
+            # applies cwd remapping to the macro-visible source filename.
+            run(common + ["--crate-name", name, code, "-o", metadata], env=env, cwd=directory)
         packet = directory / (name + ".mir")
         if not packet.exists() or code.stat().st_mtime > packet.stat().st_mtime or driver.stat().st_mtime > packet.stat().st_mtime:
             export_env = env.copy()
@@ -443,7 +447,7 @@ def starters(target, directories, externs, miri_sysroot, extra_directories=()):
             crate_hash = re.search(r"^hash ([0-9a-f]+) ", metadata_info, re.M)
             if not crate_hash: raise SystemExit("Cannot identify starter metadata hash")
             export_env.update(GPUI_CODEPEN_IPC="1", GPUI_CODEPEN_EXPORT_MIR=str(packet), GPUI_CODEPEN_BASELINE_HASH=crate_hash[1])
-            run(common + ["--crate-name", name, code, "-o", metadata], env=export_env, cwd=ROOT)
+            run(common + ["--crate-name", name, code, "-o", metadata], env=export_env, cwd=directory)
         result.append({"source": source, "crate": name, "path": "/deps/" + metadata.name,
                        "packet": "/deps/" + packet.name, "artifact": metadata, "packet_artifact": packet})
     return result
