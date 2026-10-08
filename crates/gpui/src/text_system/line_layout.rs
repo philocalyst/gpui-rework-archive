@@ -479,10 +479,10 @@ pub enum TextBoundary {
 
 /// A direction and unit for moving a caret or extending a selection.
 ///
-/// Pass it to [`ShapedTextLayout::caret_movement`] for a caret, or
-/// [`ShapedTextLayout::selection_movement`] when an editor also needs to keep
-/// or collapse a selection anchor. The supplied Parley backend supports these
-/// combinations:
+/// Use [`caret_movement`](ShapedTextLayout::caret_movement) to move the caret.
+/// Use [`selection_movement`](ShapedTextLayout::selection_movement) to keep or
+/// collapse a selection's anchor as well. The supplied Parley backend supports
+/// these combinations:
 ///
 /// | Operation | [Direction](TextDirection) | [Boundary](TextBoundary) |
 /// | --- | --- | --- |
