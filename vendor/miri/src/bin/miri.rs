@@ -142,6 +142,15 @@ impl rustc_driver::Callbacks for MiriCompilerCalls {
         // Register our custom extra symbols.
         config.extra_symbols = miri::sym::EXTRA_SYMBOLS.into();
         if env::var_os("GPUI_CODEPEN_IPC").as_deref() == Some(std::ffi::OsStr::new("1")) {
+            // Cargo fingerprints the SDK's more aggressive MIR inlining in
+            // RUSTFLAGS. Its runnable crate inherits those arguments too, but
+            // editable code must keep the ordinary optimization settings.
+            // Dependency compilation uses MiriDepCompilerCalls instead.
+            #[allow(rustc::bad_opt_access)]
+            {
+                config.opts.unstable_opts.inline_mir_threshold = None;
+                config.opts.unstable_opts.inline_mir_hint_threshold = None;
+            }
             config.override_queries = Some(miri::codepen_reload::override_queries);
         }
     }

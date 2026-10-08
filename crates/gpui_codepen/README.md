@@ -63,6 +63,14 @@ until their Worker is replaced. Bootstrap reads retain the shared Blob without
 a second JS page cache; cold-chunk eviction and a measured memory ceiling remain
 outstanding.
 
+The fixed SDK uses MIR inline thresholds of 150 (ordinary calls) and 300
+(`#[inline]` calls). These are explicit Cargo `RUSTFLAGS`, so changing them
+invalidates the dependency cache. Edited component code keeps the pinned
+compiler's ordinary thresholds and its reload boundaries; SDK flags are removed
+from captured component invocations. The optimization trades larger SDK metadata
+for fewer interpreted calls. Compare both redraw CPU and cold startup when
+changing these settings.
+
 Changing definitions, Rust type layouts, closure capture order, compile-time
 values or coroutine layouts starts a fresh app. Reset also starts a fresh app.
 Active calls finish with their original MIR; later calls use the installed body.

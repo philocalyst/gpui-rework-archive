@@ -219,6 +219,10 @@ impl Runtime {
             command.args(invocation.args.iter().filter(|arg| {
                 !arg.starts_with("--error-format=")
                     && !arg.starts_with("--json=")
+                    // SDK optimization belongs to the cached dependencies.
+                    // Edited functions retain their ordinary MIR and reload boundaries.
+                    && !arg.starts_with("-Zinline-mir-threshold=")
+                    && !arg.starts_with("-Zinline-mir-hint-threshold=")
                     && !(metadata_only && arg.starts_with("--emit="))
                     && arg.as_str() != "--force-warn=unused_crate_dependencies"
             }));
@@ -292,7 +296,7 @@ impl Runtime {
         let rustflags = if optimization == "0" {
             "-Cdebug-assertions=no -Awarnings".to_owned()
         } else {
-            format!("-Cdebug-assertions=no -Awarnings -Copt-level=3 -Zmir-opt-level={optimization}")
+            format!("-Cdebug-assertions=no -Awarnings -Copt-level=3 -Zmir-opt-level={optimization} -Zinline-mir-threshold=150 -Zinline-mir-hint-threshold=300")
         };
         c.env("RUSTFLAGS", rustflags);
         let mut paths = vec![
