@@ -163,7 +163,7 @@ impl ApplicationHandle {
     /// double borrow.
     pub fn update<R>(&self, f: impl FnOnce(&mut App) -> R) -> R {
         let cx = &mut *self.app.borrow_mut();
-        f(cx)
+        cx.update(f)
     }
 
     /// An [`AsyncApp`] for use across await points. It holds the app weakly; keeping the
@@ -603,7 +603,7 @@ impl SystemWindowTabController {
                 tabs.push(tab);
             }
         } else {
-            let new_group_id = controller.tab_groups.len();
+            let new_group_id = controller.tab_groups.keys().max().map_or(0, |id| id + 1);
             controller.tab_groups.insert(new_group_id, tabs);
         }
     }
@@ -3293,6 +3293,63 @@ mod test {
             self.0.set(self.0.get() + 1);
             Empty
         }
+    }
+
+    #[test]
+    fn embedded_update_flushes_effects_after_the_outer_closure() {
+        let cx = TestAppContext::single();
+        let handle = super::ApplicationHandle {
+            app: cx.app.clone(),
+        };
+        let completed = Rc::new(Cell::new(false));
+
+        handle.update(|app| {
+            app.defer({
+                let completed = completed.clone();
+                move |_| completed.set(true)
+            });
+            app.new(|_| 0_u32);
+            assert!(
+                !completed.get(),
+                "nested entity creation must not end the outer update"
+            );
+        });
+
+        assert!(
+            completed.get(),
+            "the embedder must not need another event to flush effects"
+        );
+    }
+
+    #[gpui::test]
+    fn adding_a_tab_group_after_removal_preserves_other_groups(cx: &mut TestAppContext) {
+        use super::{SystemWindowTab, SystemWindowTabController};
+
+        let windows: Vec<_> = (0..4).map(|_| cx.add_window(|_, _| Empty)).collect();
+        cx.update(|app| {
+            for (index, window) in windows.iter().take(3).enumerate() {
+                SystemWindowTabController::add_tab(
+                    app,
+                    window.window_id(),
+                    vec![SystemWindowTab::new(
+                        format!("Window {index}").into(),
+                        (*window).into(),
+                    )],
+                );
+            }
+            SystemWindowTabController::remove_tab(app, windows[0].window_id());
+            SystemWindowTabController::add_tab(
+                app,
+                windows[3].window_id(),
+                vec![SystemWindowTab::new("New window".into(), windows[3].into())],
+            );
+
+            let controller = app.global::<SystemWindowTabController>();
+            assert_eq!(controller.tab_groups().len(), 3);
+            for window in &windows[1..] {
+                assert_eq!(controller.tabs(window.window_id()).unwrap().len(), 1);
+            }
+        });
     }
 
     #[gpui::test]
