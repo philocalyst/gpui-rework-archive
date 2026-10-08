@@ -59,18 +59,17 @@ pub trait Along {
     fn apply_along(&self, axis: Axis, f: impl FnOnce(Self::Unit) -> Self::Unit) -> Self;
 }
 
-/// A location in a 2D coordinate space.
+/// Two coordinates in one unit and coordinate space.
 ///
 /// `x` and `y` use the same unit and coordinate space. The coordinate type must
 /// implement `Clone`, `Debug`, `Default`, and `PartialEq`; GPUI's common choice
 /// for UI geometry is [`Pixels`].
 ///
-/// # Examples
-///
 /// ```
-/// # use gpui::Point;
-/// let point = Point { x: 10, y: 20 };
-/// println!("{:?}", point); // Outputs: Point { x: 10, y: 20 }
+/// use gpui::{point, px};
+/// let origin = point(px(10.), px(20.));
+/// let local = point(px(15.), px(28.)).relative_to(&origin);
+/// assert_eq!(local, point(px(5.), px(8.)));
 /// ```
 #[derive(
     Refineable,
@@ -98,18 +97,8 @@ pub struct Point<T: Clone + Debug + Default + PartialEq> {
     pub y: T,
 }
 
-/// Constructs a new `Point<T>` with the given x and y coordinates.
-///
-/// # Arguments
-///
-/// * `x` - The x coordinate of the point.
-/// * `y` - The y coordinate of the point.
-///
-/// # Returns
-///
-/// Returns a `Point<T>` with the specified coordinates.
-///
-/// # Examples
+/// Construct a point from horizontal and vertical coordinates.
+/// Equivalent to [`Point::new`].
 ///
 /// ```
 /// use gpui::point;
@@ -122,36 +111,12 @@ pub const fn point<T: Clone + Debug + Default + PartialEq>(x: T, y: T) -> Point<
 }
 
 impl<T: Clone + Debug + Default + PartialEq> Point<T> {
-    /// Creates a new `Point` with the specified `x` and `y` coordinates.
-    ///
-    /// # Arguments
-    ///
-    /// * `x` - The horizontal coordinate of the point.
-    /// * `y` - The vertical coordinate of the point.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use gpui::Point;
-    /// let p = Point::new(10, 20);
-    /// assert_eq!(p.x, 10);
-    /// assert_eq!(p.y, 20);
-    /// ```
+    /// Construct a point from horizontal and vertical coordinates. Equivalent to [`point`].
     pub const fn new(x: T, y: T) -> Self {
         Self { x, y }
     }
 
-    /// Transforms the point to a `Point<U>` by applying the given function to both coordinates.
-    ///
-    /// This method allows for converting a `Point<T>` to a `Point<U>` by specifying a closure
-    /// that defines how to convert between the two types. The closure is applied to both the `x`
-    /// and `y` coordinates, resulting in a new point of the desired type.
-    ///
-    /// # Arguments
-    ///
-    /// * `f` - A closure that takes a value of type `T` and returns a value of type `U`.
-    ///
-    /// # Examples
+    /// Map both coordinates into a new point, visiting `x` before `y`.
     ///
     /// ```
     /// # use gpui::Point;
@@ -193,14 +158,8 @@ impl<T: Clone + Debug + Default + PartialEq> Along for Point<T> {
 }
 
 impl Point<Pixels> {
-    /// Scales the point by a given factor, which is typically derived from the resolution
-    /// of a target display to ensure proper sizing of UI elements.
-    ///
-    /// # Arguments
-    ///
-    /// * `factor` - The scaling factor to apply to both the x and y coordinates.
-    ///
-    /// # Examples
+    /// Convert logical coordinates to scene coordinates using the display scale factor.
+    /// This multiplies both coordinates without rounding; it does not change their origin.
     ///
     /// ```
     /// # use gpui::{Point, Pixels, ScaledPixels};
@@ -217,8 +176,6 @@ impl Point<Pixels> {
 
     /// Calculates the Euclidean distance from the origin (0, 0) to this point.
     ///
-    /// # Examples
-    ///
     /// ```
     /// # use gpui::{Pixels, Point};
     /// let p = Point { x: Pixels::from(3.0), y: Pixels::from(4.0) };
@@ -228,9 +185,8 @@ impl Point<Pixels> {
         ((self.x.0.powi(2) + self.y.0.powi(2)) as f64).sqrt()
     }
 
-    /// Returns true if the difference between self and `other` is less than `epsilon` in both coordinates.
-    ///
-    /// # Examples
+    /// Compare both coordinates using a strict absolute tolerance.
+    /// Each difference must be less than `epsilon`; zero or negative tolerances never match.
     ///
     /// ```
     /// # use gpui::{Pixels, Point};
@@ -248,7 +204,7 @@ impl<T> Point<T>
 where
     T: Sub<T, Output = T> + Clone + Debug + Default + PartialEq,
 {
-    /// Get the position of this point, relative to the given origin
+    /// Subtract `origin` to express this point in a coordinate space with that origin.
     pub fn relative_to(&self, origin: &Point<T>) -> Point<T> {
         point(
             self.x.clone() - origin.x.clone(),
@@ -304,12 +260,6 @@ where
 {
     /// Returns a new point with the maximum values of each dimension from `self` and `other`.
     ///
-    /// # Arguments
-    ///
-    /// * `other` - A reference to another `Point` to compare with `self`.
-    ///
-    /// # Examples
-    ///
     /// ```
     /// # use gpui::Point;
     /// let p1 = Point { x: 3, y: 7 };
@@ -334,12 +284,6 @@ where
 
     /// Returns a new point with the minimum values of each dimension from `self` and `other`.
     ///
-    /// # Arguments
-    ///
-    /// * `other` - A reference to another `Point` to compare with `self`.
-    ///
-    /// # Examples
-    ///
     /// ```
     /// # use gpui::Point;
     /// let p1 = Point { x: 3, y: 7 };
@@ -362,19 +306,10 @@ where
         }
     }
 
-    /// Clamps the point to a specified range.
+    /// Clamp each coordinate between the corresponding inclusive minimum and maximum.
     ///
-    /// Given a minimum point and a maximum point, this method constrains the current point
-    /// such that its coordinates do not exceed the range defined by the minimum and maximum points.
-    /// If the current point's coordinates are less than the minimum, they are set to the minimum.
-    /// If they are greater than the maximum, they are set to the maximum.
-    ///
-    /// # Arguments
-    ///
-    /// * `min` - A reference to a `Point` representing the minimum allowable coordinates.
-    /// * `max` - A reference to a `Point` representing the maximum allowable coordinates.
-    ///
-    /// # Examples
+    /// Supply ordered limits: this is `self.max(min).min(max)` and does not validate
+    /// them. A reversed pair produces that coordinate's `max` value.
     ///
     /// ```
     /// # use gpui::Point;
@@ -432,14 +367,7 @@ impl<T: Clone + Debug + Default + PartialEq> Size<T> {
     }
 }
 
-/// Constructs a new `Size<T>` with the provided width and height.
-///
-/// # Arguments
-///
-/// * `width` - The width component of the `Size`.
-/// * `height` - The height component of the `Size`.
-///
-/// # Examples
+/// Construct dimensions from width and height. Equivalent to [`Size::new`].
 ///
 /// ```
 /// use gpui::size;
@@ -458,17 +386,7 @@ impl<T> Size<T>
 where
     T: Clone + Debug + Default + PartialEq,
 {
-    /// Applies a function to the width and height of the size, producing a new `Size<U>`.
-    ///
-    /// This method allows for converting a `Size<T>` to a `Size<U>` by specifying a closure
-    /// that defines how to convert between the two types. The closure is applied to both the `width`
-    /// and `height`, resulting in a new size of the desired type.
-    ///
-    /// # Arguments
-    ///
-    /// * `f` - A closure that takes a value of type `T` and returns a value of type `U`.
-    ///
-    /// # Examples
+    /// Map both dimensions into a new size, visiting width before height.
     ///
     /// ```
     /// # use gpui::Size;
@@ -491,7 +409,8 @@ impl<T> Size<T>
 where
     T: Clone + Debug + Default + PartialEq + Half,
 {
-    /// Compute the center point of the size.g
+    /// Return the center of a rectangle of this size whose origin is zero.
+    /// Integer units use their [`Half`] implementation and can round the result.
     pub fn center(&self) -> Point<T> {
         Point {
             x: self.width.half(),
@@ -499,7 +418,7 @@ where
         }
     }
 
-    /// Returns a point at an anchor along the imaginary edge of a box with this size.
+    /// Return an anchor's offset from the top-left of a rectangle of this size.
     pub fn at_anchor(&self, anchor: Anchor) -> Point<T> {
         match anchor {
             Anchor::TopLeft => Point::new(T::default(), T::default()),
@@ -515,17 +434,8 @@ where
 }
 
 impl Size<Pixels> {
-    /// Scales the size by a given factor.
-    ///
-    /// This method multiplies both the width and height by the provided scaling factor,
-    /// resulting in a new `Size<ScaledPixels>` that is proportionally larger or smaller
-    /// depending on the factor.
-    ///
-    /// # Arguments
-    ///
-    /// * `factor` - The scaling factor to apply to the width and height.
-    ///
-    /// # Examples
+    /// Convert logical dimensions to scene dimensions by multiplying by the display scale.
+    /// This does not round to device-pixel counts.
     ///
     /// ```
     /// # use gpui::{Size, Pixels, ScaledPixels};
@@ -554,7 +464,7 @@ where
         }
     }
 
-    /// Returns the value of this size along the given axis.
+    /// Transform one dimension while preserving the other.
     fn apply_along(&self, axis: Axis, f: impl FnOnce(T) -> T) -> Self {
         match axis {
             Axis::Horizontal => Size {
@@ -574,12 +484,6 @@ where
     T: PartialOrd + Clone + Debug + Default + PartialEq,
 {
     /// Returns a new `Size` with the maximum width and height from `self` and `other`.
-    ///
-    /// # Arguments
-    ///
-    /// * `other` - A reference to another `Size` to compare with `self`.
-    ///
-    /// # Examples
     ///
     /// ```
     /// # use gpui::Size;
@@ -604,12 +508,6 @@ where
     }
 
     /// Returns a new `Size` with the minimum width and height from `self` and `other`.
-    ///
-    /// # Arguments
-    ///
-    /// * `other` - A reference to another `Size` to compare with `self`.
-    ///
-    /// # Examples
     ///
     /// ```
     /// # use gpui::Size;
@@ -705,15 +603,8 @@ impl From<Size<Pixels>> for Size<AbsoluteLength> {
 }
 
 impl Size<Length> {
-    /// Returns a `Size` with both width and height set to fill the available space.
-    ///
-    /// This function creates a `Size` instance where both the width and height are set to
-    /// `Length::Definite(DefiniteLength::Relative(Relative(1.0)))`,
-    /// which represents 100% of the available space in both dimensions.
-    ///
-    /// # Returns
-    ///
-    /// A `Size<Length>` that will fill the available space when used in a layout.
+    /// Request 100% of the layout reference dimension on each axis.
+    /// Parent constraints and flex sizing still determine the final size.
     pub fn full() -> Self {
         Self {
             width: relative(1.).into(),
@@ -723,15 +614,7 @@ impl Size<Length> {
 }
 
 impl Size<Length> {
-    /// Returns a `Size` with both width and height set to `auto`, which allows the layout engine to determine the size.
-    ///
-    /// This function creates a `Size` instance where both the width and height are set to `Length::Auto`,
-    /// indicating that their size should be computed based on the layout context, such as the content size or
-    /// available space.
-    ///
-    /// # Returns
-    ///
-    /// A `Size<Length>` with width and height set to `Length::Auto`.
+    /// Leave both dimensions to layout by setting them to [`Length::Auto`].
     pub fn auto() -> Self {
         Self {
             width: Length::Auto,
@@ -740,13 +623,13 @@ impl Size<Length> {
     }
 }
 
-/// Represents a rectangular area in a 2D space with an origin point and a size.
+/// A rectangle described by its top-left origin and dimensions in one coordinate space.
 ///
-/// The `Bounds` struct is generic over a type `T` which represents the type of the coordinate system.
-/// The origin is represented as a `Point<T>` which defines the top left corner of the rectangle,
-/// and the size is represented as a `Size<T>` which defines the width and height of the rectangle.
-///
-/// # Examples
+/// Construction does not normalize corners or reject negative dimensions. Keep both
+/// rectangles in the same space before comparing them; sharing a unit type does not
+/// distinguish window coordinates from an element's local coordinates.
+/// [`contains`](Self::contains) includes the top and left edges, excluding the bottom and right;
+/// [`intersects`](Self::intersects) excludes mere edge contact.
 ///
 /// ```
 /// # use gpui::{Bounds, Point, Size};
@@ -779,7 +662,11 @@ pub fn bounds<T: Clone + Debug + Default + PartialEq>(
 }
 
 impl Bounds<Pixels> {
-    /// Generate a centered bounds for the given display or primary display if none is provided
+    /// Center the requested size on the selected display.
+    ///
+    /// An absent or unknown ID falls back to the primary display. Without any display,
+    /// the result starts at `(0, 0)` and preserves `size`. This computes bounds; it
+    /// does not open a window or constrain a size larger than the display.
     pub fn centered(display_id: Option<DisplayId>, size: Size<Pixels>, cx: &App) -> Self {
         let display = display_id
             .and_then(|id| cx.find_display(id))
@@ -793,7 +680,9 @@ impl Bounds<Pixels> {
             })
     }
 
-    /// Generate maximized bounds for the given display or primary display if none is provided
+    /// Return the selected display's full bounds, falling back to the primary display.
+    /// Without any display, return a 1024×768 rectangle at `(0, 0)`.
+    /// This does not request native maximization or subtract system-reserved areas.
     pub fn maximized(display_id: Option<DisplayId>, cx: &App) -> Self {
         let display = display_id
             .and_then(|id| cx.find_display(id))
@@ -812,16 +701,7 @@ impl<T> Bounds<T>
 where
     T: Clone + Debug + Default + PartialEq,
 {
-    /// Creates a new `Bounds` with the specified origin and size.
-    ///
-    /// # Arguments
-    ///
-    /// * `origin` - A `Point<T>` representing the origin of the bounds.
-    /// * `size` - A `Size<T>` representing the size of the bounds.
-    ///
-    /// # Returns
-    ///
-    /// Returns a `Bounds<T>` that has the given origin and size.
+    /// Store the supplied origin and size. Equivalent to [`bounds`].
     pub fn new(origin: Point<T>, size: Size<T>) -> Self {
         Bounds { origin, size }
     }
@@ -831,22 +711,9 @@ impl<T> Bounds<T>
 where
     T: Sub<Output = T> + Clone + Debug + Default + PartialEq,
 {
-    /// Constructs a `Bounds` from two corner points: the top left and bottom right corners.
-    ///
-    /// This function calculates the origin and size of the `Bounds` based on the provided corner points.
-    /// The origin is set to the top left corner, and the size is determined by the difference between
-    /// the x and y coordinates of the bottom right and top left points.
-    ///
-    /// # Arguments
-    ///
-    /// * `top_left` - A `Point<T>` representing the top left corner of the rectangle.
-    /// * `bottom_right` - A `Point<T>` representing the bottom right corner of the rectangle.
-    ///
-    /// # Returns
-    ///
-    /// Returns a `Bounds<T>` that encompasses the area defined by the two corner points.
-    ///
-    /// # Examples
+    /// Store `top_left` and compute the size as `bottom_right - top_left`.
+    /// The corners are not reordered. Reversed corners produce negative dimensions
+    /// for signed units or can underflow for unsigned units.
     ///
     /// ```
     /// # use gpui::{Bounds, Point};
@@ -875,8 +742,8 @@ impl<T> Bounds<T>
 where
     T: Sub<Output = T> + Half + Clone + Debug + Default + PartialEq,
 {
-    /// Constructs a `Bounds` from a corner point and size, where the new origin is the point
-    /// at the anchor along the edges of size subtracted from the original origin.
+    /// Place the rectangle so that the requested anchor lies at `origin`.
+    /// The stored top-left is `origin - size.at_anchor(corner)`.
     pub fn from_anchor_and_size(corner: Anchor, origin: Point<T>, size: Size<T>) -> Bounds<T> {
         let origin = origin - size.at_anchor(corner);
         Bounds { origin, size }
@@ -938,20 +805,10 @@ impl<T> Bounds<T>
 where
     T: PartialOrd + Add<T, Output = T> + Clone + Debug + Default + PartialEq,
 {
-    /// Checks if this `Bounds` intersects with another `Bounds`.
-    ///
-    /// Two `Bounds` instances intersect if they overlap in the 2D space they occupy.
-    /// This method checks if there is any overlapping area between the two bounds.
-    ///
-    /// # Arguments
-    ///
-    /// * `other` - A reference to another `Bounds` to check for intersection with.
-    ///
-    /// # Returns
-    ///
-    /// Returns `true` if there is any intersection between the two bounds, `false` otherwise.
-    ///
-    /// # Examples
+    /// Test strict overlap on both axes. Rectangles touching only at an edge do not intersect.
+    /// Dimensions are not validated. Check [`is_empty`](Self::is_empty) first when
+    /// zero-area rectangles must never match: a zero-width rectangle inside another
+    /// rectangle can still satisfy these inequalities.
     ///
     /// ```
     /// # use gpui::{Bounds, Point, Size};
@@ -986,17 +843,8 @@ impl<T> Bounds<T>
 where
     T: Add<T, Output = T> + Half + Clone + Debug + Default + PartialEq,
 {
-    /// Returns the center point of the bounds.
-    ///
-    /// Calculates the center by taking the origin's x and y coordinates and adding half the width and height
-    /// of the bounds, respectively. The center is represented as a `Point<T>` where `T` is the type of the
-    /// coordinate system.
-    ///
-    /// # Returns
-    ///
-    /// A `Point<T>` representing the center of the bounds.
-    ///
-    /// # Examples
+    /// Return the origin plus half of each dimension.
+    /// Integer units follow [`Half`] and can round the result.
     ///
     /// ```
     /// # use gpui::{Bounds, Point, Size};
@@ -1019,14 +867,7 @@ impl<T> Bounds<T>
 where
     T: Add<T, Output = T> + Clone + Debug + Default + PartialEq,
 {
-    /// Calculates the half perimeter of a rectangle defined by the bounds.
-    ///
-    /// The half perimeter is calculated as the sum of the width and the height of the rectangle.
-    /// This method is generic over the type `T` which must implement the `Sub` trait to allow
-    /// calculation of the width and height from the bounds' origin and size, as well as the `Add` trait
-    /// to sum the width and height for the half perimeter.
-    ///
-    /// # Examples
+    /// Return width plus height.
     ///
     /// ```
     /// # use gpui::{Bounds, Point, Size};
@@ -1046,19 +887,8 @@ impl<T> Bounds<T>
 where
     T: Add<T, Output = T> + Sub<Output = T> + Clone + Debug + Default + PartialEq,
 {
-    /// Dilates the bounds by a specified amount in all directions.
-    ///
-    /// This method expands the bounds by the given `amount`, increasing the size
-    /// and adjusting the origin so that the bounds grow outwards equally in all directions.
-    /// The resulting bounds will have its width and height increased by twice the `amount`
-    /// (since it grows in both directions), and the origin will be moved by `-amount`
-    /// in both the x and y directions.
-    ///
-    /// # Arguments
-    ///
-    /// * `amount` - The amount by which to dilate the bounds.
-    ///
-    /// # Examples
+    /// Move each edge outward by `amount`, adding twice that amount to each dimension.
+    /// Negative amounts shrink the rectangle; dimensions are not clamped to zero.
     ///
     /// ```
     /// # use gpui::{Bounds, Point, Size};
@@ -1108,9 +938,8 @@ where
         + Default
         + PartialEq,
 {
-    /// Inset the bounds by a specified amount. Equivalent to `dilate` with the amount negated.
-    ///
-    /// Note that this may panic if T does not support negative values.
+    /// Move each edge inward by `amount`, equivalent to [`dilate`](Self::dilate) with `-amount`.
+    /// A large inset can produce negative dimensions; this does not normalize them.
     pub fn inset(&self, amount: T) -> Self {
         self.dilate(-amount)
     }
@@ -1119,21 +948,11 @@ where
 impl<T: PartialOrd + Add<T, Output = T> + Sub<Output = T> + Clone + Debug + Default + PartialEq>
     Bounds<T>
 {
-    /// Calculates the intersection of two `Bounds` objects.
+    /// Return the overlapping rectangle, clamping each nonoverlapping axis to zero length.
     ///
-    /// This method computes the overlapping region of two `Bounds`. If the bounds do not intersect,
-    /// the resulting `Bounds` will have a size with width and height of zero.
-    ///
-    /// # Arguments
-    ///
-    /// * `other` - A reference to another `Bounds` to intersect with.
-    ///
-    /// # Returns
-    ///
-    /// Returns a `Bounds` representing the intersection area. If there is no intersection,
-    /// the returned `Bounds` will have a size with width and height of zero.
-    ///
-    /// # Examples
+    /// The origin is the componentwise maximum of the two origins. If only one axis
+    /// is disjoint, only that dimension becomes zero; the other can remain positive.
+    /// Use [`is_empty`](Self::is_empty) to test the result's area.
     ///
     /// ```
     /// # use gpui::{Bounds, Point, Size};
@@ -1161,21 +980,7 @@ impl<T: PartialOrd + Add<T, Output = T> + Sub<Output = T> + Clone + Debug + Defa
         Self::from_corners(upper_left, bottom_right)
     }
 
-    /// Computes the union of two `Bounds`.
-    ///
-    /// This method calculates the smallest `Bounds` that contains both the current `Bounds` and the `other` `Bounds`.
-    /// The resulting `Bounds` will have an origin that is the minimum of the origins of the two `Bounds`,
-    /// and a size that encompasses the furthest extents of both `Bounds`.
-    ///
-    /// # Arguments
-    ///
-    /// * `other` - A reference to another `Bounds` to create a union with.
-    ///
-    /// # Returns
-    ///
-    /// Returns a `Bounds` representing the union of the two `Bounds`.
-    ///
-    /// # Examples
+    /// Return the smallest rectangle enclosing both rectangles, including the space between them.
     ///
     /// ```
     /// # use gpui::{Bounds, Point, Size};
@@ -1205,7 +1010,8 @@ impl<T> Bounds<T>
 where
     T: Add<T, Output = T> + Sub<T, Output = T> + Clone + Debug + Default + PartialEq,
 {
-    /// Computes the space available within outer bounds.
+    /// Return the signed gap between each edge of this rectangle and `outer`.
+    /// A negative gap means this rectangle extends past that edge. No containment check is made.
     pub fn space_within(&self, outer: &Self) -> Edges<T> {
         Edges {
             top: self.top() - outer.top(),
@@ -1300,49 +1106,27 @@ impl<T> Bounds<T>
 where
     T: Add<T, Output = T> + Clone + Debug + Default + PartialEq,
 {
-    /// Returns the top edge of the bounds.
-    ///
-    /// # Returns
-    ///
-    /// A value of type `T` representing the y-coordinate of the top edge of the bounds.
+    /// Return the top edge's y-coordinate.
     pub fn top(&self) -> T {
         self.origin.y.clone()
     }
 
-    /// Returns the bottom edge of the bounds.
-    ///
-    /// # Returns
-    ///
-    /// A value of type `T` representing the y-coordinate of the bottom edge of the bounds.
+    /// Return the bottom edge's y-coordinate: origin y plus height.
     pub fn bottom(&self) -> T {
         self.origin.y.clone() + self.size.height.clone()
     }
 
-    /// Returns the left edge of the bounds.
-    ///
-    /// # Returns
-    ///
-    /// A value of type `T` representing the x-coordinate of the left edge of the bounds.
+    /// Return the left edge's x-coordinate.
     pub fn left(&self) -> T {
         self.origin.x.clone()
     }
 
-    /// Returns the right edge of the bounds.
-    ///
-    /// # Returns
-    ///
-    /// A value of type `T` representing the x-coordinate of the right edge of the bounds.
+    /// Return the right edge's x-coordinate: origin x plus width.
     pub fn right(&self) -> T {
         self.origin.x.clone() + self.size.width.clone()
     }
 
-    /// Returns the top right corner point of the bounds.
-    ///
-    /// # Returns
-    ///
-    /// A `Point<T>` representing the top right corner of the bounds.
-    ///
-    /// # Examples
+    /// Return the top-right corner.
     ///
     /// ```
     /// # use gpui::{Bounds, Point, Size};
@@ -1360,13 +1144,7 @@ where
         }
     }
 
-    /// Returns the bottom right corner point of the bounds.
-    ///
-    /// # Returns
-    ///
-    /// A `Point<T>` representing the bottom right corner of the bounds.
-    ///
-    /// # Examples
+    /// Return the bottom-right corner. This lies outside [`contains`](Self::contains).
     ///
     /// ```
     /// # use gpui::{Bounds, Point, Size};
@@ -1384,13 +1162,7 @@ where
         }
     }
 
-    /// Returns the bottom left corner point of the bounds.
-    ///
-    /// # Returns
-    ///
-    /// A `Point<T>` representing the bottom left corner of the bounds.
-    ///
-    /// # Examples
+    /// Return the bottom-left corner.
     ///
     /// ```
     /// # use gpui::{Bounds, Point, Size};
@@ -1413,13 +1185,7 @@ impl<T> Bounds<T>
 where
     T: Add<T, Output = T> + Half + Clone + Debug + Default + PartialEq,
 {
-    /// Returns the requested corner point of the bounds.
-    ///
-    /// # Returns
-    ///
-    /// A `Point<T>` representing the corner of the bounds requested by the parameter.
-    ///
-    /// # Examples
+    /// Return the requested anchor, including edge midpoints as well as corners.
     ///
     /// ```
     /// use gpui::{Bounds, Anchor, Point, Size};
@@ -1448,22 +1214,8 @@ impl<T> Bounds<T>
 where
     T: Add<T, Output = T> + PartialOrd + Clone + Debug + Default + PartialEq,
 {
-    /// Checks if the given point is within the bounds.
-    ///
-    /// This method determines whether a point lies inside the rectangle defined by the bounds,
-    /// including the edges. The point is considered inside if its x-coordinate is greater than
-    /// or equal to the left edge and less than or equal to the right edge, and its y-coordinate
-    /// is greater than or equal to the top edge and less than or equal to the bottom edge of the bounds.
-    ///
-    /// # Arguments
-    ///
-    /// * `point` - A reference to a `Point<T>` that represents the point to check.
-    ///
-    /// # Returns
-    ///
-    /// Returns `true` if the point is within the bounds, `false` otherwise.
-    ///
-    /// # Examples
+    /// Test point membership with half-open edges: `left <= x < right` and `top <= y < bottom`.
+    /// A point shared by adjacent boxes belongs to the box whose top or left edge contains it.
     ///
     /// ```
     /// # use gpui::{Point, Bounds, Size};
@@ -1476,6 +1228,8 @@ where
     ///
     /// assert!(bounds.contains(&inside_point));
     /// assert!(!bounds.contains(&outside_point));
+    /// assert!(bounds.contains(&Point { x: 0, y: 0 }));
+    /// assert!(!bounds.contains(&Point { x: 10, y: 5 }));
     /// ```
     pub fn contains(&self, point: &Point<T>) -> bool {
         point.x >= self.origin.x
@@ -1484,21 +1238,12 @@ where
             && point.y < self.origin.y.clone() + self.size.height.clone()
     }
 
-    /// Checks if this bounds is completely contained within another bounds.
+    /// Test whether `other` contains both this origin and this bottom-right corner.
     ///
-    /// This method determines whether the current bounds is entirely enclosed by the given bounds.
-    /// A bounds is considered to be contained within another if its origin (top-left corner) and
-    /// its bottom-right corner are both contained within the other bounds.
-    ///
-    /// # Arguments
-    ///
-    /// * `other` - A reference to another `Bounds` that might contain this bounds.
-    ///
-    /// # Returns
-    ///
-    /// Returns `true` if this bounds is completely inside the other bounds, `false` otherwise.
-    ///
-    /// # Examples
+    /// This uses [`contains`](Self::contains), whose bottom and right edges are excluded.
+    /// A rectangle sharing either of those edges with `other` fails this test; even
+    /// `rect.is_contained_within(&rect)` is false. Compare the four edges directly
+    /// when an inclusive enclosure test is required.
     ///
     /// ```
     /// # use gpui::{Bounds, Point, Size};
@@ -1517,26 +1262,13 @@ where
     ///
     /// assert!(inner_bounds.is_contained_within(&outer_bounds));
     /// assert!(!overlapping_bounds.is_contained_within(&outer_bounds));
+    /// assert!(!outer_bounds.is_contained_within(&outer_bounds));
     /// ```
     pub fn is_contained_within(&self, other: &Self) -> bool {
         other.contains(&self.origin) && other.contains(&self.bottom_right())
     }
 
-    /// Applies a function to the origin and size of the bounds, producing a new `Bounds<U>`.
-    ///
-    /// This method allows for converting a `Bounds<T>` to a `Bounds<U>` by specifying a closure
-    /// that defines how to convert between the two types. The closure is applied to the `origin` and
-    /// `size` fields, resulting in new bounds of the desired type.
-    ///
-    /// # Arguments
-    ///
-    /// * `f` - A closure that takes a value of type `T` and returns a value of type `U`.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new `Bounds<U>` with the origin and size mapped by the provided function.
-    ///
-    /// # Examples
+    /// Map coordinates and dimensions into a new unit, visiting x, y, width, then height.
     ///
     /// ```
     /// # use gpui::{Bounds, Point, Size};
@@ -1561,9 +1293,7 @@ where
         }
     }
 
-    /// Applies a function to the origin  of the bounds, producing a new `Bounds` with the new origin
-    ///
-    /// # Examples
+    /// Transform the origin's coordinates while preserving the size.
     ///
     /// ```
     /// # use gpui::{Bounds, Point, Size};
@@ -1585,9 +1315,7 @@ where
         }
     }
 
-    /// Applies a function to the origin  of the bounds, producing a new `Bounds` with the new origin
-    ///
-    /// # Examples
+    /// Transform the size's dimensions while preserving the origin.
     ///
     /// ```
     /// # use gpui::{Bounds, Point, Size};
@@ -1614,7 +1342,8 @@ impl<T> Bounds<T>
 where
     T: Add<T, Output = T> + Sub<T, Output = T> + PartialOrd + Clone + Debug + Default + PartialEq,
 {
-    /// Convert a point to the coordinate space defined by this Bounds
+    /// Subtract the origin from a point inside this rectangle; return `None` outside.
+    /// Membership uses [`contains`](Self::contains), including top/left and excluding bottom/right.
     pub fn localize(&self, point: &Point<T>) -> Option<Point<T>> {
         self.contains(point)
             .then(|| point.relative_to(&self.origin))
@@ -1622,11 +1351,8 @@ where
 }
 
 impl<T: PartialOrd + Clone + Debug + Default + PartialEq> Bounds<T> {
-    /// Checks if the bounds represent an empty area.
-    ///
-    /// # Returns
-    ///
-    /// Returns `true` if either the width or the height of the bounds is less than or equal to zero, indicating an empty area.
+    /// Return whether either dimension is at or below its unit's default value.
+    /// For GPUI's pixel units that threshold is zero, so zero-area and negative sizes are empty.
     #[must_use]
     pub fn is_empty(&self) -> bool {
         self.size.width <= T::default() || self.size.height <= T::default()
@@ -1656,7 +1382,8 @@ impl Size<DevicePixels> {
 }
 
 impl Size<Pixels> {
-    /// Converts the size from logical to physical pixels.
+    /// Convert logical dimensions to device-pixel counts, rounding each to the nearest integer.
+    /// This rounds dimensions independently; it does not guarantee enclosure of painted content.
     pub fn to_device_pixels(self, scale_factor: f32) -> Size<DevicePixels> {
         size(
             DevicePixels((self.width.0 * scale_factor).round() as i32),
@@ -1666,22 +1393,7 @@ impl Size<Pixels> {
 }
 
 impl Bounds<Pixels> {
-    /// Scales the bounds by a given factor, typically used to adjust for display scaling.
-    ///
-    /// This method multiplies the origin and size of the bounds by the provided scaling factor,
-    /// resulting in a new `Bounds<ScaledPixels>` that is proportionally larger or smaller
-    /// depending on the scaling factor. This can be used to ensure that the bounds are properly
-    /// scaled for different display densities.
-    ///
-    /// # Arguments
-    ///
-    /// * `factor` - The scaling factor to apply to the origin and size, typically the display's scaling factor.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new `Bounds<ScaledPixels>` that represents the scaled bounds.
-    ///
-    /// # Examples
+    /// Multiply the origin and size by the display scale, without rounding.
     ///
     /// ```
     /// # use gpui::{Bounds, Point, Size, Pixels, ScaledPixels, DevicePixels};
@@ -1709,7 +1421,8 @@ impl Bounds<Pixels> {
         }
     }
 
-    /// Convert the bounds from logical pixels to physical pixels
+    /// Round the scaled origin and size independently to device-pixel counts.
+    /// This can move an edge inward; it is not an enclosing rectangle conversion.
     pub fn to_device_pixels(self, factor: f32) -> Bounds<DevicePixels> {
         Bounds {
             origin: point(
@@ -1800,21 +1513,7 @@ where
 impl<T: Clone + Debug + Default + PartialEq + Copy> Copy for Edges<T> {}
 
 impl<T: Clone + Debug + Default + PartialEq> Edges<T> {
-    /// Constructs `Edges` where all sides are set to the same specified value.
-    ///
-    /// This function creates an `Edges` instance with the `top`, `right`, `bottom`, and `left` fields all initialized
-    /// to the same value provided as an argument. This is useful when you want to have uniform edges around a box,
-    /// such as padding or margin with the same size on all sides.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - The value to set for all four sides of the edges.
-    ///
-    /// # Returns
-    ///
-    /// An `Edges` instance with all sides set to the given value.
-    ///
-    /// # Examples
+    /// Set all four edges to the same value.
     ///
     /// ```
     /// # use gpui::Edges;
@@ -1877,21 +1576,7 @@ impl<T: Clone + Debug + Default + PartialEq> Edges<T> {
         }
     }
 
-    /// Applies a function to each field of the `Edges`, producing a new `Edges<U>`.
-    ///
-    /// This method allows for converting an `Edges<T>` to an `Edges<U>` by specifying a closure
-    /// that defines how to convert between the two types. The closure is applied to each field
-    /// (`top`, `right`, `bottom`, `left`), resulting in new edges of the desired type.
-    ///
-    /// # Arguments
-    ///
-    /// * `f` - A closure that takes a reference to a value of type `T` and returns a value of type `U`.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new `Edges<U>` with each field mapped by the provided function.
-    ///
-    /// # Examples
+    /// Map the edge values into a new unit, visiting top, right, bottom, then left.
     ///
     /// ```
     /// # use gpui::Edges;
@@ -1911,19 +1596,7 @@ impl<T: Clone + Debug + Default + PartialEq> Edges<T> {
         }
     }
 
-    /// Checks if any of the edges satisfy a given predicate.
-    ///
-    /// This method applies a predicate function to each field of the `Edges` and returns `true` if any field satisfies the predicate.
-    ///
-    /// # Arguments
-    ///
-    /// * `predicate` - A closure that takes a reference to a value of type `T` and returns a `bool`.
-    ///
-    /// # Returns
-    ///
-    /// Returns `true` if the predicate returns `true` for any of the edge values, `false` otherwise.
-    ///
-    /// # Examples
+    /// Test top, right, bottom, and left, stopping at the first predicate match.
     ///
     /// ```
     /// # use gpui::Edges;
@@ -1947,15 +1620,9 @@ impl<T: Clone + Debug + Default + PartialEq> Edges<T> {
 }
 
 impl Edges<Length> {
-    /// Sets the edges of the `Edges` struct to `auto`, which is a special value that allows the layout engine to automatically determine the size of the edges.
-    ///
-    /// This is typically used in layout contexts where the exact size of the edges is not important, or when the size should be calculated based on the content or container.
-    ///
-    /// # Returns
-    ///
-    /// Returns an `Edges<Length>` with all edges set to `Length::Auto`.
-    ///
-    /// # Examples
+    /// Set all four edges to [`Length::Auto`].
+    /// The property determines the meaning: auto margins can absorb free space,
+    /// while auto position offsets leave an edge unspecified.
     ///
     /// ```
     /// # use gpui::{Edges, Length};
@@ -1974,16 +1641,7 @@ impl Edges<Length> {
         }
     }
 
-    /// Sets the edges of the `Edges` struct to zero, which means no size or thickness.
-    ///
-    /// This is typically used when you want to specify that a box (like a padding or margin area)
-    /// should have no edges, effectively making it non-existent or invisible in layout calculations.
-    ///
-    /// # Returns
-    ///
-    /// Returns an `Edges<Length>` with all edges set to zero length.
-    ///
-    /// # Examples
+    /// Set all four edges to zero logical pixels. This is an explicit value, unlike `auto`.
     ///
     /// ```
     /// # use gpui::{DefiniteLength, Edges, Length, Pixels};
@@ -2004,16 +1662,7 @@ impl Edges<Length> {
 }
 
 impl Edges<DefiniteLength> {
-    /// Sets the edges of the `Edges` struct to zero, which means no size or thickness.
-    ///
-    /// This is typically used when you want to specify that a box (like a padding or margin area)
-    /// should have no edges, effectively making it non-existent or invisible in layout calculations.
-    ///
-    /// # Returns
-    ///
-    /// Returns an `Edges<DefiniteLength>` with all edges set to zero length.
-    ///
-    /// # Examples
+    /// Set all four edges to zero logical pixels.
     ///
     /// ```
     /// # use gpui::{px, DefiniteLength, Edges};
@@ -2032,21 +1681,11 @@ impl Edges<DefiniteLength> {
         }
     }
 
-    /// Converts the `DefiniteLength` to `Pixels` based on the parent size and the REM size.
+    /// Resolve each edge using the supplied reference size and root font size.
     ///
-    /// This method allows for a `DefiniteLength` value to be converted into pixels, taking into account
-    /// the size of the parent element (for percentage-based lengths) and the size of a rem unit (for rem-based lengths).
-    ///
-    /// # Arguments
-    ///
-    /// * `parent_size` - `Size<AbsoluteLength>` representing the size of the parent element.
-    /// * `rem_size` - `Pixels` representing the size of one REM unit.
-    ///
-    /// # Returns
-    ///
-    /// Returns an `Edges<Pixels>` representing the edges with lengths converted to pixels.
-    ///
-    /// # Examples
+    /// Top and bottom fractions use `parent_size.height`; left and right use its
+    /// width. This explicit conversion is not a substitute for layout's percentage
+    /// rules, which can choose a different reference for a particular property.
     ///
     /// ```
     /// # use gpui::{Edges, DefiniteLength, px, relative, AbsoluteLength, rems, Size};
@@ -2079,16 +1718,7 @@ impl Edges<DefiniteLength> {
 }
 
 impl Edges<AbsoluteLength> {
-    /// Sets the edges of the `Edges` struct to zero, which means no size or thickness.
-    ///
-    /// This is typically used when you want to specify that a box (like a padding or margin area)
-    /// should have no edges, effectively making it non-existent or invisible in layout calculations.
-    ///
-    /// # Returns
-    ///
-    /// Returns an `Edges<AbsoluteLength>` with all edges set to zero length.
-    ///
-    /// # Examples
+    /// Set all four edges to zero logical pixels.
     ///
     /// ```
     /// # use gpui::{AbsoluteLength, Edges, Pixels};
@@ -2107,20 +1737,7 @@ impl Edges<AbsoluteLength> {
         }
     }
 
-    /// Converts the `AbsoluteLength` to `Pixels` based on the `rem_size`.
-    ///
-    /// If the `AbsoluteLength` is already in pixels, it simply returns the corresponding `Pixels` value.
-    /// If the `AbsoluteLength` is in rems, it multiplies the number of rems by the `rem_size` to convert it to pixels.
-    ///
-    /// # Arguments
-    ///
-    /// * `rem_size` - The size of one rem unit in pixels.
-    ///
-    /// # Returns
-    ///
-    /// Returns an `Edges<Pixels>` representing the edges with lengths converted to pixels.
-    ///
-    /// # Examples
+    /// Resolve rem-valued edges against `rem_size`, preserving pixel-valued edges.
     ///
     /// ```
     /// # use gpui::{Edges, AbsoluteLength, Pixels, px, rems};
@@ -2149,19 +1766,7 @@ impl Edges<AbsoluteLength> {
 }
 
 impl Edges<Pixels> {
-    /// Scales the `Edges<Pixels>` by a given factor, returning `Edges<ScaledPixels>`.
-    ///
-    /// This method is typically used for adjusting the edge sizes for different display densities or scaling factors.
-    ///
-    /// # Arguments
-    ///
-    /// * `factor` - The scaling factor to apply to each edge.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new `Edges<ScaledPixels>` where each edge is the result of scaling the original edge by the given factor.
-    ///
-    /// # Examples
+    /// Multiply every edge by the display scale, without rounding.
     ///
     /// ```
     /// # use gpui::{Edges, Pixels, ScaledPixels};
@@ -2186,11 +1791,7 @@ impl Edges<Pixels> {
         }
     }
 
-    /// Returns the maximum value of any edge.
-    ///
-    /// # Returns
-    ///
-    /// The maximum `Pixels` value among all four edges.
+    /// Return the largest edge value.
     pub fn max(&self) -> Pixels {
         self.top.max(self.right).max(self.bottom).max(self.left)
     }
@@ -2236,7 +1837,7 @@ pub enum Anchor {
 }
 
 impl Anchor {
-    /// Returns the directly opposite corner.
+    /// Return the anchor on the opposite side of the box, including edge midpoints.
     ///
     /// # Examples
     ///
@@ -2258,7 +1859,7 @@ impl Anchor {
         }
     }
 
-    /// Returns the corner across from this corner, moving along the specified axis.
+    /// Reflect this anchor along an axis. An anchor centered on that axis stays unchanged.
     ///
     /// # Examples
     ///
@@ -2293,7 +1894,7 @@ impl Anchor {
         }
     }
 
-    /// Returns true if at the center.
+    /// Return whether this is an edge midpoint. There is no box-center variant.
     #[inline]
     pub fn is_center(&self) -> bool {
         matches!(
@@ -2324,21 +1925,7 @@ impl<T> Corners<T>
 where
     T: Add<T, Output = T> + Half + Clone + Debug + Default + PartialEq,
 {
-    /// Constructs `Corners` where all sides are set to the same specified value.
-    ///
-    /// This function creates a `Corners` instance with the `top_left`, `top_right`, `bottom_right`, and `bottom_left` fields all initialized
-    /// to the same value provided as an argument. This is useful when you want to have uniform corners around a box,
-    /// such as a uniform border radius on a rectangle.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - The value to set for all four corners.
-    ///
-    /// # Returns
-    ///
-    /// An `Corners` instance with all corners set to the given value.
-    ///
-    /// # Examples
+    /// Set all four corners to the same value.
     ///
     /// ```
     /// # use gpui::Corners;
@@ -2357,19 +1944,8 @@ where
         }
     }
 
-    /// Returns the requested corner value, supporting all eight corner positions.
-    ///
-    /// For the four basic corners (TopLeft, TopRight, BottomLeft, BottomRight),
-    /// this returns the corresponding field value directly.
-    ///
-    /// For the center positions (TopCenter, BottomCenter, LeftCenter, RightCenter),
-    /// this calculates the average of the two adjacent corners.
-    ///
-    /// # Returns
-    ///
-    /// A value of type `T` representing the corner requested by the parameter.
-    ///
-    /// # Examples
+    /// Read a corner value or average the two adjacent values for an edge midpoint.
+    /// Integer averages follow [`Half`] and can round.
     ///
     /// Basic corner positions:
     ///
@@ -2416,17 +1992,7 @@ where
 }
 
 impl Corners<AbsoluteLength> {
-    /// Converts the `AbsoluteLength` to `Pixels` based on the provided rem size.
-    ///
-    /// # Arguments
-    ///
-    /// * `rem_size` - The size of one REM unit in pixels, used for conversion if the `AbsoluteLength` is in REMs.
-    ///
-    /// # Returns
-    ///
-    /// Returns a `Corners<Pixels>` instance with each corner's length converted to pixels.
-    ///
-    /// # Examples
+    /// Resolve rem-valued corners against `rem_size`, preserving pixel-valued corners.
     ///
     /// ```
     /// # use gpui::{Corners, AbsoluteLength, Pixels, Rems, Size};
@@ -2455,19 +2021,7 @@ impl Corners<AbsoluteLength> {
 }
 
 impl Corners<Pixels> {
-    /// Scales the `Corners<Pixels>` by a given factor, returning `Corners<ScaledPixels>`.
-    ///
-    /// This method is typically used for adjusting the corner sizes for different display densities or scaling factors.
-    ///
-    /// # Arguments
-    ///
-    /// * `factor` - The scaling factor to apply to each corner.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new `Corners<ScaledPixels>` where each corner is the result of scaling the original corner by the given factor.
-    ///
-    /// # Examples
+    /// Multiply every corner value by the display scale, without rounding.
     ///
     /// ```
     /// # use gpui::{Corners, Pixels, ScaledPixels};
@@ -2493,11 +2047,7 @@ impl Corners<Pixels> {
         }
     }
 
-    /// Returns the maximum value of any corner.
-    ///
-    /// # Returns
-    ///
-    /// The maximum `Pixels` value among all four corners.
+    /// Return the largest corner value.
     #[must_use]
     pub fn max(&self) -> Pixels {
         self.top_left
@@ -2508,15 +2058,8 @@ impl Corners<Pixels> {
 }
 
 impl<T: Div<f32, Output = T> + Ord + Clone + Debug + Default + PartialEq> Corners<T> {
-    /// Clamps corner radii to be less than or equal to half the shortest side of a quad.
-    ///
-    /// # Arguments
-    ///
-    /// * `size` - The size of the quad which limits the size of the corner radii.
-    ///
-    /// # Returns
-    ///
-    /// Anchor radii values clamped to fit.
+    /// Limit each radius to half the shorter dimension of `size`.
+    /// Radii are capped independently, not scaled as a group. Negative values are not raised to zero.
     #[must_use]
     pub fn clamp_radii_for_quad_size(self, size: Size<T>) -> Corners<T> {
         let max = cmp::min(size.width, size.height) / 2.;
@@ -2530,21 +2073,7 @@ impl<T: Div<f32, Output = T> + Ord + Clone + Debug + Default + PartialEq> Corner
 }
 
 impl<T: Clone + Debug + Default + PartialEq> Corners<T> {
-    /// Applies a function to each field of the `Corners`, producing a new `Corners<U>`.
-    ///
-    /// This method allows for converting a `Corners<T>` to a `Corners<U>` by specifying a closure
-    /// that defines how to convert between the two types. The closure is applied to each field
-    /// (`top_left`, `top_right`, `bottom_right`, `bottom_left`), resulting in new corners of the desired type.
-    ///
-    /// # Arguments
-    ///
-    /// * `f` - A closure that takes a reference to a value of type `T` and returns a value of type `U`.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new `Corners<U>` with each field mapped by the provided function.
-    ///
-    /// # Examples
+    /// Map values into a new unit, visiting top-left, top-right, bottom-right, then bottom-left.
     ///
     /// ```
     /// # use gpui::{Corners, Pixels, Rems};
@@ -2659,9 +2188,9 @@ pub fn radians(value: f32) -> Radians {
 
 /// A normalized fraction used where an API describes a percentage.
 ///
-/// Values are represented as `0.0..=1.0`; [`percentage`] debug-asserts that
-/// its input is in that range. Converting to [`Radians`] treats `1.0` as one
-/// full turn.
+/// [`percentage`] debug-asserts the range `0.0..=1.0`; construction through the
+/// public field and arithmetic do not enforce it. Converting to [`Radians`]
+/// treats `1.0` as one full turn.
 #[derive(
     Clone,
     Copy,
@@ -2707,18 +2236,15 @@ impl From<Percentage> for Radians {
 /// physical pixel depends on the operation and renderer; rounding is not part
 /// of this type's representation.
 ///
-/// # Examples
-///
 /// ```
-/// use gpui::{Pixels, ScaledPixels};
-///
-/// // Define a length of 10 pixels
-/// let length = Pixels::from(10.0);
-///
-/// // Define a length and scale it by a factor of 2
-/// let scaled_length = length.scale(2.0);
-/// assert_eq!(scaled_length, ScaledPixels::from(20.0));
+/// use gpui::{ScaledPixels, px};
+/// let logical = px(10.5);
+/// assert_eq!(logical.scale(2.), ScaledPixels(21.));
 /// ```
+///
+/// Construction accepts any `f32`; it does not reject infinities or NaNs.
+/// Parsing with `TryFrom<&str>` requires a `px` suffix. Integer conversions use
+/// Rust casts, which discard fractions, rather than a rounding policy.
 #[derive(
     Clone,
     Copy,
@@ -2856,84 +2382,45 @@ impl Pixels {
         self.0
     }
 
-    /// Floors the `Pixels` value to the nearest whole number.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new `Pixels` instance with the floored value.
+    /// Round down to a whole logical pixel. This does not snap to the display's device grid.
     pub fn floor(&self) -> Self {
         Self(self.0.floor())
     }
 
-    /// Rounds the `Pixels` value to the nearest whole number.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new `Pixels` instance with the rounded value.
+    /// Round to the nearest whole logical pixel, with halfway cases away from zero.
     pub fn round(&self) -> Self {
         Self(self.0.round())
     }
 
-    /// Returns the ceiling of the `Pixels` value to the nearest whole number.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new `Pixels` instance with the ceiling value.
+    /// Round up to a whole logical pixel.
     pub fn ceil(&self) -> Self {
         Self(self.0.ceil())
     }
 
-    /// Scales the `Pixels` value by a given factor, producing `ScaledPixels`.
-    ///
-    /// This method is used when adjusting pixel values for display scaling factors,
-    /// such as high DPI (dots per inch) or Retina displays, where the pixel density is higher and
-    /// thus requires scaling to maintain visual consistency and readability.
-    ///
-    /// The resulting `ScaledPixels` represent the scaled value which can be used for rendering
-    /// calculations where display scaling is considered.
+    /// Multiply by the display scale to produce scene units. No rounding is applied.
     #[must_use]
     pub fn scale(&self, factor: f32) -> ScaledPixels {
         ScaledPixels(self.0 * factor)
     }
 
-    /// Raises the `Pixels` value to a given power.
-    ///
-    /// # Arguments
-    ///
-    /// * `exponent` - The exponent to raise the `Pixels` value by.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new `Pixels` instance with the value raised to the given exponent.
+    /// Apply [`f32::powf`] to the raw value, retaining the `Pixels` wrapper.
+    /// This is numeric convenience, not dimensional analysis.
     pub fn pow(&self, exponent: f32) -> Self {
         Self(self.0.powf(exponent))
     }
 
-    /// Returns the absolute value of the `Pixels`.
-    ///
-    /// # Returns
-    ///
-    /// A new `Pixels` instance with the absolute value of the original `Pixels`.
+    /// Return the absolute value.
     pub fn abs(&self) -> Self {
         Self(self.0.abs())
     }
 
-    /// Returns the sign of the `Pixels` value.
-    ///
-    /// # Returns
-    ///
-    /// Returns:
-    /// * `1.0` if the value is positive
-    /// * `-1.0` if the value is negative
+    /// Return [`f32::signum`] of the raw value: ±1 for finite values, including signed zero,
+    /// or NaN for NaN.
     pub fn signum(&self) -> f32 {
         self.0.signum()
     }
 
-    /// Returns the f64 value of `Pixels`.
-    ///
-    /// # Returns
-    ///
-    /// A f64 value of the `Pixels`.
+    /// Widen the stored value to `f64`. This does not recover precision lost during construction.
     pub fn to_f64(self) -> f64 {
         self.0 as f64
     }
@@ -3048,20 +2535,12 @@ pub struct DevicePixels(
 );
 
 impl DevicePixels {
-    /// Converts the `DevicePixels` value to the number of bytes needed to represent it in memory.
+    /// Multiply a nonnegative pixel count by its storage size in bytes.
     ///
-    /// This function is useful when working with graphical data that needs to be stored in a buffer,
-    /// such as images or framebuffers, where each pixel may be represented by a specific number of bytes.
-    ///
-    /// # Arguments
-    ///
-    /// * `bytes_per_pixel` - The number of bytes used to represent a single pixel.
-    ///
-    /// # Returns
-    ///
-    /// The number of bytes required to represent the `DevicePixels` value in memory.
-    ///
-    /// # Examples
+    /// Applied to an image width, this gives a packed row size, without row alignment
+    /// or the image height. The signed count is cast to `u32` without validation;
+    /// reject negative counts and check large products before sizing a buffer.
+    /// Arithmetic overflow panics with overflow checks enabled and otherwise wraps.
     ///
     /// ```
     /// # use gpui::DevicePixels;
@@ -3134,6 +2613,8 @@ impl From<usize> for DevicePixels {
 /// Convert logical [`Pixels`] to `ScaledPixels` when producing scene geometry.
 /// Unlike [`DevicePixels`], this unit preserves fractional values; a renderer
 /// may rasterize those coordinates across physical pixels.
+/// `DevicePixels::from(scaled)` rounds upward; integer casts such as `u32::from(scaled)`
+/// discard fractions instead. Choose the conversion that matches the caller's bounds policy.
 #[derive(
     Clone,
     Copy,
@@ -3160,29 +2641,17 @@ impl ScaledPixels {
         self.0
     }
 
-    /// Floors the `ScaledPixels` value to the nearest whole number.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new `ScaledPixels` instance with the floored value.
+    /// Round down to a whole scene pixel.
     pub fn floor(&self) -> Self {
         Self(self.0.floor())
     }
 
-    /// Rounds the `ScaledPixels` value to the nearest whole number.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new `ScaledPixels` instance with the rounded value.
+    /// Round to the nearest whole scene pixel, with halfway cases away from zero.
     pub fn round(&self) -> Self {
         Self(self.0.round())
     }
 
-    /// Ceils the `ScaledPixels` value to the nearest whole number.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new `ScaledPixels` instance with the ceiled value.
+    /// Round up to a whole scene pixel.
     pub fn ceil(&self) -> Self {
         Self(self.0.ceil())
     }
@@ -3321,11 +2790,12 @@ pub struct Rems(
 impl Rems {
     /// A length of zero.
     pub const ZERO: Self = Self(0.0);
-    /// Convert this Rem value to pixels.
+    /// Multiply by the logical pixel size of one rem.
     pub fn to_pixels(self, rem_size: Pixels) -> Pixels {
         self * rem_size
     }
-    /// Convert from pixels to Rem
+    /// Divide a logical length by the window's current rem size.
+    /// This captures that size now; the returned rem count does not track later changes.
     pub fn from_pixels(length: Pixels, window: &gpui::Window) -> Self {
         Self(length / window.rem_size())
     }
@@ -3445,12 +2915,15 @@ impl TryFrom<&'_ str> for Relative {
     }
 }
 
-/// Represents an absolute length in pixels or rems.
+/// A length that needs no containing dimension to resolve.
 ///
-/// `AbsoluteLength` can be either a fixed number of pixels, which is an absolute measurement not
-/// affected by the current font size, or a number of rems, which is relative to the font size of
-/// the root element. It is used for specifying dimensions that are either independent of or
-/// related to the typographic scale.
+/// Pixels are already logical lengths; rems resolve against the window's root font size.
+/// “Absolute” excludes percentages and `auto`, not display scaling. Border widths,
+/// for example, accept this type. Use [`DefiniteLength`] when fractions are allowed
+/// and [`Length`] when layout may choose an automatic value.
+///
+/// Parsing and Serde use strings with a `px` or `rem` suffix, such as `"12px"` or `"0.5rem"`.
+/// Neither construction nor parsing clamps negative values.
 #[derive(Clone, Copy, Neg, PartialEq)]
 pub enum AbsoluteLength {
     /// A length in pixels.
@@ -3482,17 +2955,7 @@ impl From<Rems> for AbsoluteLength {
 }
 
 impl AbsoluteLength {
-    /// Converts an `AbsoluteLength` to `Pixels` based on a given `rem_size`.
-    ///
-    /// # Arguments
-    ///
-    /// * `rem_size` - The size of one rem in pixels.
-    ///
-    /// # Returns
-    ///
-    /// Returns the `AbsoluteLength` as `Pixels`.
-    ///
-    /// # Examples
+    /// Resolve rems against `rem_size`, leaving pixel values unchanged.
     ///
     /// ```
     /// # use gpui::{AbsoluteLength, Pixels, Rems};
@@ -3510,15 +2973,8 @@ impl AbsoluteLength {
         }
     }
 
-    /// Converts an `AbsoluteLength` to `Rems` based on a given `rem_size`.
-    ///
-    /// # Arguments
-    ///
-    /// * `rem_size` - The size of one rem in pixels.
-    ///
-    /// # Returns
-    ///
-    /// Returns the `AbsoluteLength` as `Pixels`.
+    /// Express pixels in rems by dividing by `rem_size`; preserve existing rem counts.
+    /// Supply a positive, finite rem size. A zero size follows floating-point division rules.
     pub fn to_rems(self, rem_size: Pixels) -> Rems {
         match self {
             AbsoluteLength::Pixels(pixels) => Rems(pixels.0 / rem_size.0),
@@ -3608,11 +3064,13 @@ impl Serialize for AbsoluteLength {
     }
 }
 
-/// A non-auto length that can be defined in pixels, rems, or percent of parent.
+/// A length specified in logical pixels, rems, or a fraction of a reference dimension.
 ///
-/// This enum represents lengths that have a specific value, as opposed to lengths that are automatically
-/// determined by the context. It includes absolute lengths in pixels or rems, and relative lengths as a
-/// fraction of the parent's size.
+/// Unlike [`AbsoluteLength`], this accepts percentages. Unlike [`Length`], it cannot
+/// be `auto`. “Definite” describes the authored value; a fraction still needs a
+/// reference dimension before it becomes pixels. Layout selects that reference
+/// according to the property; [`to_pixels`](Self::to_pixels) takes one explicitly.
+/// Parsing and Serde use suffixes `px`, `rem`, or `%`.
 #[derive(Clone, Copy, Neg, PartialEq)]
 pub enum DefiniteLength {
     /// An absolute length specified in pixels or rems.
@@ -3622,21 +3080,8 @@ pub enum DefiniteLength {
 }
 
 impl DefiniteLength {
-    /// Converts the `DefiniteLength` to `Pixels` based on a given `base_size` and `rem_size`.
-    ///
-    /// If the `DefiniteLength` is an absolute length, it will be directly converted to `Pixels`.
-    /// If it is a fraction, the fraction will be multiplied by the `base_size` to get the length in pixels.
-    ///
-    /// # Arguments
-    ///
-    /// * `base_size` - The base size in `AbsoluteLength` to which the fraction will be applied.
-    /// * `rem_size` - The size of one rem in pixels, used to convert rems to pixels.
-    ///
-    /// # Returns
-    ///
-    /// Returns the `DefiniteLength` as `Pixels`.
-    ///
-    /// # Examples
+    /// Resolve fractions against `base_size` and rems against `rem_size`.
+    /// Pixel values need neither input. This converts units without enforcing layout constraints.
     ///
     /// ```
     /// # use gpui::{DefiniteLength, AbsoluteLength, Pixels, px, relative, rems};
@@ -3766,7 +3211,12 @@ impl Default for DefiniteLength {
     }
 }
 
-/// A length that can be defined in pixels, rems, percent of parent, or auto.
+/// A specified length or a request for layout to choose the value.
+///
+/// Use [`auto`] for automatic sizing, margins, or position offsets when the property
+/// accepts it. Padding and border setters do not accept `auto`. The type's default
+/// is zero pixels, not `auto`; an element's [`crate::Style`] chooses its own defaults.
+/// Parsing and Serde accept `"auto"` or a suffixed [`DefiniteLength`].
 #[derive(Clone, Copy, PartialEq)]
 pub enum Length {
     /// A definite length specified either in pixels, rems, or as a fraction of the parent's size.
@@ -3850,64 +3300,34 @@ impl Serialize for Length {
     }
 }
 
-/// Constructs a `Relative` value representing a fraction of another length.
+/// Store a fraction of a reference length, without clamping or resolving it.
 ///
 /// A fraction of `1.0` represents the full reference length. Values outside the range from `0.0`
 /// to `1.0` represent lengths below zero or greater than the full reference length.
 ///
-/// # Arguments
-///
-/// * `fraction` - The fraction of the reference length.
-///
-/// # Returns
-///
-/// A `Relative` value that can be converted into a [`DefiniteLength`] or [`Length`].
 pub const fn relative(fraction: f32) -> Relative {
     Relative(fraction)
 }
 
-/// Returns the Golden Ratio, i.e. `~(1.0 + sqrt(5.0)) / 2.0`.
+/// Return the [golden ratio](https://en.wikipedia.org/wiki/Golden_ratio), approximately 1.618,
+/// as a relative length. Resolving it produces a length greater than its reference.
 pub const fn phi() -> Relative {
     relative(GOLDEN_RATIO)
 }
 
-/// Constructs a `Rems` value representing a length in rems.
-///
-/// # Arguments
-///
-/// * `rems` - The number of rems for the length.
-///
-/// # Returns
-///
-/// A `Rems` representing the specified number of rems.
+/// Store a length in root-font-size units. See [`Rems`] for resolution.
 pub const fn rems(rems: f32) -> Rems {
     Rems(rems)
 }
 
-/// Constructs a `Pixels` value representing a length in pixels.
-///
-/// # Arguments
-///
-/// * `pixels` - The number of pixels for the length.
-///
-/// # Returns
-///
-/// A `Pixels` representing the specified number of pixels.
+/// Store a logical-pixel length, without validation or display scaling.
 pub const fn px(pixels: f32) -> Pixels {
     Pixels(pixels)
 }
 
-/// Returns a `Length` representing an automatic length.
-///
-/// The `auto` length is often used in layout calculations where the length should be determined
-/// by the layout context itself rather than being explicitly set. This is commonly used in CSS
-/// for properties like `width`, `height`, `margin`, `padding`, etc., where `auto` can be used
-/// to instruct the layout engine to calculate the size based on other factors like the size of the
-/// container or the intrinsic size of the content.
-///
-/// # Returns
-///
-/// A `Length` variant set to `Auto`.
+/// Return [`Length::Auto`], leaving the value to the property's layout rules.
+/// Width and height can use intrinsic sizing; auto margins can absorb free space.
+/// Padding setters accept [`DefiniteLength`] and cannot use this value.
 pub const fn auto() -> Length {
     Length::Auto
 }
@@ -3954,23 +3374,36 @@ impl From<()> for Length {
     }
 }
 
-/// A location in a grid layout.
+/// Start and end specifications for a child's grid rows and columns.
+///
+/// Each range stores two placement rules; it is not an iterator over cell
+/// indices. For example, `Line(1)..Line(-1)` covers the explicit grid from its
+/// first line to its last. See the [layout chapter](crate::_documentation::layout)
+/// for track sizing and placement.
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize, JsonSchema, Default)]
 pub struct GridLocation {
-    /// The rows this item uses within the grid.
+    /// Start and end placement along the row axis.
     pub row: Range<GridPlacement>,
-    /// The columns this item uses within the grid.
+    /// Start and end placement along the column axis.
     pub column: Range<GridPlacement>,
 }
 
-/// The placement of an item within a grid layout's column or row.
+/// One boundary rule for a grid item along a row or column axis.
+///
+/// A track is a row or column; a line is a boundary between tracks. A pair of
+/// these rules determines placement, so a span still needs a line or automatic
+/// placement to determine where the item starts.
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize, JsonSchema, Default)]
 pub enum GridPlacement {
-    /// The grid line index to place this item.
+    /// A one-based line index. Negative indices count backward from the
+    /// explicit grid's last line; `-1` names that last line. Zero is treated as
+    /// [`Auto`](Self::Auto).
     Line(i16),
-    /// The number of grid lines to span.
+    /// The number of tracks to span from the other boundary or an automatically
+    /// chosen position.
     Span(u16),
-    /// Automatically determine the placement, equivalent to Span(1)
+    /// Let grid placement choose this boundary. An otherwise unspecified item
+    /// occupies one track; an explicit opposite boundary or span can change it.
     #[default]
     Auto,
 }
@@ -3985,17 +3418,10 @@ impl From<GridPlacement> for taffy::GridPlacement {
     }
 }
 
-/// Provides a trait for types that can calculate half of their value.
-///
-/// The `Half` trait is used for types that can be evenly divided, returning a new instance of the same type
-/// representing half of the original value. This is commonly used for types that represent measurements or sizes,
-/// such as lengths or pixels, where halving is a frequent operation during layout calculations or animations.
+/// Divide a value by two without changing its unit type.
+/// Integer implementations truncate toward zero; floating-point units preserve fractional halves.
 pub trait Half {
-    /// Returns half of the current value.
-    ///
-    /// # Returns
-    ///
-    /// A new instance of the implementing type, representing half of the original value.
+    /// Return half the value, following the implementing unit's rounding rules.
     fn half(&self) -> Self;
 }
 
@@ -4041,18 +3467,14 @@ impl Half for Relative {
     }
 }
 
-/// A trait for checking if a value is zero.
+/// Test zero length or zero area, according to the value's geometry.
 ///
-/// This trait provides a method to determine if a value is considered to be zero.
-/// It is implemented for various numeric and length-related types where the concept
-/// of zero is applicable. This can be useful for comparisons, optimizations, or
-/// determining if an operation has a neutral effect.
+/// Points and corners require every component to be zero. Sizes and bounds require
+/// either dimension to be zero; a 0×10 size therefore matches. This differs from
+/// [`Bounds::is_empty`], which also accepts negative dimensions. [`Length::Auto`]
+/// is not zero.
 pub trait IsZero {
-    /// Determines if the value is zero.
-    ///
-    /// # Returns
-    ///
-    /// Returns `true` if the value is zero, `false` otherwise.
+    /// Test the implementing type's zero condition, without an approximate tolerance.
     fn is_zero(&self) -> bool;
 }
 

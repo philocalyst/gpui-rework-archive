@@ -1,9 +1,11 @@
 //! Internal state for style-property transitions.
 //!
-//! Style transitions interpolate authored values in their resolved layout
-//! space. Absolute lengths resolve against the rem size, relative lengths
-//! resolve against the containing bounds, and `auto` values are captured from
-//! the current layout before being animated. Each property owns an independent
+//! Style transitions keep an independent interpolation state per property.
+//! Widths, heights, and position offsets resolve to pixels when possible;
+//! relative widths and heights bypass interpolation, while relative offsets
+//! use the containing bounds. `auto` endpoints use retained layout bounds.
+//! Other lengths interpolate in their authored unit through `Lerp`.
+//! Each property owns an independent
 //! [`Animated`] value, so changing one style does not reset unrelated
 //! properties. This state is stored with the element's interaction state and
 //! survives a render only while that element keeps the same identity; repeated

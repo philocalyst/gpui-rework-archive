@@ -69,7 +69,9 @@ mod visual_test_context;
 
 pub use async_context::*;
 #[cfg(feature = "bench-support")]
-pub use bench_context::{BenchAppContext, BenchReport, BenchWindowContext, bench_platform};
+pub use bench_context::{
+    BenchAppContext, BenchReport, BenchWindowContext, ForegroundWorkSummary, bench_platform,
+};
 pub use context::*;
 pub use entity_map::*;
 #[cfg(any(test, feature = "headless"))]
@@ -303,9 +305,9 @@ impl Application {
     /// On native platforms this call normally blocks until the app quits. On
     /// Wasm the browser owns the loop, so startup is scheduled and this method
     /// returns; the application is retained for the page lifetime.
-// docs:examples:begin
-#[doc = include_str!("docs/examples/gpui-Application-run-d0b8e587.md")]
-// docs:examples:end
+    // docs:examples:begin
+    #[doc = include_str!("docs/examples/gpui-Application-run-d0b8e587.md")]
+    // docs:examples:end
     pub fn run<F>(self, on_finish_launching: F)
     where
         F: 'static + FnOnce(&mut App),
@@ -1279,9 +1281,9 @@ impl App {
 
     /// Returns whether non-essential animations (e.g. loading spinners) should
     /// be rendered in a static state instead of animating.
-// docs:examples:begin
-#[doc = include_str!("docs/examples/gpui-App-reduce-motion-bcfa3417.md")]
-// docs:examples:end
+    // docs:examples:begin
+    #[doc = include_str!("docs/examples/gpui-App-reduce-motion-bcfa3417.md")]
+    // docs:examples:end
     pub fn reduce_motion(&self) -> bool {
         self.reduce_motion
     }
@@ -1522,9 +1524,9 @@ impl App {
     /// request or creation fails; for example, the web backend allows one
     /// normal window per document and rejects unsupported window kinds. Check
     /// the error before retaining or using the returned handle.
-// docs:examples:begin
-#[doc = include_str!("docs/examples/gpui-App-open-window-f8ec0f6b.md")]
-// docs:examples:end
+    // docs:examples:begin
+    #[doc = include_str!("docs/examples/gpui-App-open-window-f8ec0f6b.md")]
+    // docs:examples:end
     pub fn open_window<V: 'static + Render>(
         &mut self,
         options: crate::WindowOptions,
@@ -2738,9 +2740,9 @@ impl App {
     /// selects an action; register a handler separately with an element's
     /// [`on_action`](crate::InteractiveElement::on_action) or [`Self::on_action`].
     /// See [`KeyBinding`] for sequences and context predicates.
-// docs:examples:begin
-#[doc = include_str!("docs/examples/gpui-App-bind-keys-b1c931c1.md")]
-// docs:examples:end
+    // docs:examples:begin
+    #[doc = include_str!("docs/examples/gpui-App-bind-keys-b1c931c1.md")]
+    // docs:examples:end
     pub fn bind_keys(&mut self, bindings: impl IntoIterator<Item = KeyBinding>) {
         self.keymap.borrow_mut().add_bindings(bindings);
         self.pending_effects.push_back(Effect::RefreshWindows);
@@ -3187,8 +3189,17 @@ impl App {
         }
     }
 
-    /// Set the prompt renderer for GPUI. This will replace the default or platform specific
-    /// prompts with this custom implementation.
+    /// Installs an app-wide builder for prompts rendered inside a GPUI window.
+    ///
+    /// [`Window::prompt`] calls this instead of asking the platform for a
+    /// native dialog. The builder receives message text and ordered answers;
+    /// attach its view with [`PromptHandle::with_view`] and return the resulting
+    /// handle. Emit [`PromptResponse`](crate::PromptResponse) to choose an answer. The builder owns
+    /// the view's keyboard, accessibility, and styling behavior.
+    ///
+    /// Use `cx.set_prompt_builder(gpui::fallback_prompt_renderer)` for the
+    /// built-in in-window appearance on every platform. Do not call
+    /// [`Window::prompt`] from the builder: reentrant construction panics.
     pub fn set_prompt_builder(
         &mut self,
         renderer: impl Fn(
@@ -3205,7 +3216,9 @@ impl App {
         self.prompt_builder = Some(PromptBuilder::Custom(Box::new(renderer)));
     }
 
-    /// Reset the prompt builder to the default implementation.
+    /// Restores native prompts with GPUI's in-window fallback when unavailable.
+    ///
+    /// This changes future prompts; it does not replace an already displayed view.
     pub fn reset_prompt_builder(&mut self) {
         self.prompt_builder = Some(PromptBuilder::Default);
     }
@@ -3311,9 +3324,13 @@ impl App {
         self.inspector_element_registry.register(f);
     }
 
-    /// Initializes gpui's default colors for the application.
+    /// Installs the light semantic palette as [`GlobalColors`].
     ///
-    /// These colors can be accessed through `cx.default_colors()`.
+    /// This replaces any existing palette and schedules its global observers.
+    /// It does not inspect a window's appearance or subscribe to changes.
+    /// Use [`Colors::for_appearance`] and [`Self::set_global`] when appearance
+    /// should choose the palette. Import [`DefaultColors`](crate::colors::DefaultColors)
+    /// to read the installed value with `cx.default_colors()`.
     pub fn init_colors(&mut self) {
         self.set_global(GlobalColors(Arc::new(Colors::default())));
     }
@@ -3633,9 +3650,12 @@ impl AnyDrag {
         self
     }
 
-    /// Returns true if the type of the internal value matches the provided type.
+    /// Returns whether the dragged payload has concrete type `T`.
+    ///
+    /// This tests the value inside the shared pointer, not the pointer's type.
+    /// Borrow it with `drag.value.downcast_ref::<T>()` when the payload is needed.
     pub fn is_type<T: 'static>(&self) -> bool {
-        self.value.type_id() == TypeId::of::<T>()
+        self.value.as_ref().type_id() == TypeId::of::<T>()
     }
 }
 
@@ -3753,6 +3773,18 @@ mod test {
             self.0.set(self.0.get() + 1);
             Empty
         }
+    }
+
+    #[gpui::test]
+    fn drag_type_matches_payload_instead_of_shared_pointer(cx: &mut TestAppContext) {
+        cx.update(|cx| {
+            let view = cx.new(|_| Empty);
+            let drag = super::AnyDrag::new(String::from("row"), view);
+            assert!(drag.is_type::<String>());
+            assert!(!drag.is_type::<usize>());
+            assert!(!drag.is_type::<std::sync::Arc<dyn std::any::Any>>());
+            assert_eq!(drag.value.downcast_ref::<String>().unwrap(), "row");
+        });
     }
 
     #[gpui::test]

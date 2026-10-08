@@ -6,7 +6,12 @@ use crate::{
 };
 use smallvec::SmallVec;
 
-/// A keybinding and its associated metadata, from the keymap.
+/// A key sequence, the action it requests, and an optional context predicate.
+///
+/// Add it to the app with [`App::bind_keys`](crate::App::bind_keys). A binding
+/// selects a command; an element handler must still accept that command along
+/// the focused path. Use [`new`](Self::new) for fixed strings in application
+/// code, or [`load`](Self::load) for fallible configuration and platform mapping.
 // docs:examples:begin
 #[doc = include_str!("../docs/examples/gpui-KeyBinding-12b9082b.md")]
 // docs:examples:end
@@ -89,7 +94,10 @@ impl KeyBinding {
         })
     }
 
-    /// Set the opaque metadata index associated with this binding and return it.
+    /// Sets the source metadata index and returns the binding.
+    ///
+    /// The index also controls source precedence for [`NoAction`](crate::NoAction)
+    /// removals; see [`KeyBindingMetaIndex`].
     pub fn with_meta(mut self, meta: KeyBindingMetaIndex) -> Self {
         self.meta = Some(meta);
         self
@@ -155,8 +163,13 @@ impl std::fmt::Debug for KeyBinding {
     }
 }
 
-/// A unique identifier for retrieval of metadata associated with a key binding.
-/// Intended to be used as an index or key into a user-defined store of metadata
-/// associated with the binding, such as the source of the binding.
+/// An index into application-owned key-binding source metadata.
+///
+/// For example, a configuration loader can use this to find the file that
+/// supplied a shortcut. The numeric value also affects [`NoAction`](crate::NoAction)
+/// suppression in [`Keymap`](crate::Keymap): smaller values represent stronger
+/// sources, and an absent index is treated as `0`. Assign user bindings stronger
+/// precedence than base-map removals when those removals should preserve user
+/// overrides.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct KeyBindingMetaIndex(pub u32);

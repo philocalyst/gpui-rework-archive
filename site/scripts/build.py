@@ -19,6 +19,7 @@ PUBLIC = SITE / "public"
 sys.path.insert(0, str(ROOT / "scripts" / "docs"))
 from postprocess import callouts, process_tree
 from check_site import audit
+from book import accessible_chrome, prepare_search_assets
 
 
 def run(*command: str, env=None) -> None:
@@ -27,7 +28,7 @@ def run(*command: str, env=None) -> None:
 
 def source_digest() -> str:
     digest = hashlib.sha256()
-    roots = (ROOT / "crates", ROOT / "assets", SITE / "content", SITE / "templates", SITE / "examples", SITE / "editor", ROOT / "scripts/docs", SITE / "scripts", SITE / "static", ROOT / "scripts/codepen", ROOT / "vendor/miri/src", ROOT / "vendor/miri/cargo-miri/src")
+    roots = (ROOT / "book", ROOT / "crates", ROOT / "assets", SITE / "content", SITE / "templates", SITE / "examples", SITE / "editor", ROOT / "scripts/docs", SITE / "scripts", SITE / "static", ROOT / "scripts/codepen", ROOT / "vendor/miri/src", ROOT / "vendor/miri/cargo-miri/src")
     files = {ROOT / "Cargo.toml", ROOT / "Cargo.lock", SITE / "zola.toml", SITE / "examples.toml", SITE / "redirects.json", SITE / "package.json", SITE / "package-lock.json"}
     for directory in roots:
         files.update(path for path in directory.rglob("*") if path.is_file()
@@ -50,15 +51,23 @@ def main() -> int:
     public = (args.output_dir or PUBLIC).resolve()
     config = tomllib.loads((SITE / "zola.toml").read_text())
     base = (args.base_url or config["base_url"]).rstrip("/")
+    mdbook = os.environ.get("MDBOOK") or shutil.which("mdbook")
+    if not mdbook:
+        bundled = ROOT / "target/doc-tools/bin/mdbook"
+        mdbook = str(bundled) if bundled.is_file() else None
+    if not mdbook:
+        parser.error("mdBook 0.5.4 is required; install it or set MDBOOK to its executable")
     run(sys.executable, str(ROOT / "scripts/docs/generate.py"), "--check")
     run(sys.executable, str(ROOT / "scripts/docs/sync_links.py"), "--check")
     if not args.text_only:
         run(sys.executable, str(SITE / "scripts/build_editor.py"))
         run(sys.executable, str(SITE / "scripts/build_preview.py"))
-    if args.with_api:
-        env = os.environ.copy()
-        env["RUSTDOCFLAGS"] = " ".join(filter(None, [env.get("RUSTDOCFLAGS"), "-D rustdoc::broken_intra_doc_links -D rustdoc::bare_urls -D rustdoc::private_intra_doc_links -D missing_docs"]))
-        run("cargo", "doc", "--locked", "--lib", "-p", "gpui-ce", "--no-deps", "--features", "test-support", env=env)
+    # The book resolves links against this checkout even when the published
+    # artifact links to docs.rs rather than carrying a local API copy.
+    env = os.environ.copy()
+    env["RUSTDOCFLAGS"] = " ".join(filter(None, [env.get("RUSTDOCFLAGS"), "-D rustdoc::broken_intra_doc_links -D rustdoc::bare_urls -D rustdoc::private_intra_doc_links -D missing_docs"]))
+    run("cargo", "doc", "--locked", "--lib", "-p", "gpui-ce", "--no-deps", "--features", "test-support,bench-support", env=env)
+    run(sys.executable, str(ROOT / "scripts/docs/book.py"), "--site-guides")
     run("zola", "--root", str(SITE), "build", "--base-url", base, "--output-dir", str(public), "--force")
     if args.with_api:
         source = Path(os.environ.get("CARGO_TARGET_DIR", ROOT / "target")) / "doc"
@@ -66,6 +75,13 @@ def main() -> int:
             source = ROOT / source
         shutil.copytree(source, public / "api")
         process_tree(public / "api", SITE / "static/api-examples.json", site_base=base)
+    book_env = os.environ.copy()
+    book_env["GPUI_BOOK_SITE_BASE"] = base
+    book_env["GPUI_BOOK_API_BASE"] = base + "/api/gpui/" if args.with_api else config["extra"]["api"]
+    from urllib.parse import urlparse
+    book_env["MDBOOK_OUTPUT__HTML__SITE_URL"] = urlparse(base).path.rstrip("/") + "/book/"
+    run(mdbook, "build", str(ROOT / "book"), "--dest-dir", str(public / "book"), env=book_env)
+    prepare_search_assets(public / "book")
     digest = source_digest()
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     dirty = bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT, text=True).strip())
@@ -75,10 +91,12 @@ def main() -> int:
             continue
         original = path.read_text(encoding="utf-8")
         text = callouts(original) if path.suffix == ".html" else original
+        if path.suffix == ".html" and path.is_relative_to(public / "book"):
+            text = accessible_chrome(text, base)
         text = text.replace("__GPUI_SOURCE_DIGEST__", digest[:12])
+        text = text.replace("https://gpui-ce.github.io/", base + "/")
         if args.with_api:
             text = text.replace(docs_prefix, base + "/api/gpui/")
-            text = text.replace("https://gpui-ce.github.io/examples/", base + "/examples/")
             if path.suffix == ".html" and not path.is_relative_to(public / "api"):
                 text = text.replace(f'API {config["extra"]["version"]} ↗', "Checkout API ↗")
         if text != original:
@@ -91,6 +109,7 @@ def main() -> int:
         "base_url": base,
         "api": "checkout" if args.with_api else "docs.rs",
         "browser_programs": not args.text_only,
+        "book": "canonical-guides",
     }, indent=2) + "\n")
     failures = audit(public, public / "api" if args.with_api else None, base)
     if failures:

@@ -27,7 +27,7 @@ start time. The replay counter is therefore an identity, not a timer value.
 use std::time::Duration;
 
 use gpui::{
-    Animation, AnimationExt, AppContext, Context, IntoElement, Motion, Render, Window, div,
+    Animation, AnimationExt, AppContext, Context, IntoElement, Motion, Render, Role, Window, div,
     ease_in_out, prelude::*, px, rgb,
 };
 
@@ -53,6 +53,10 @@ progress and presents its end state. Replay still changes the key, but each
 new run appears complete immediately. This is a useful check that decorative
 motion has a clear static result as well as an animated one.
 
+Replay is a named button and a tab stop, with a visible keyboard-focus ring.
+Its click listener handles Enter and Space as well as pointer activation.
+The bar is decorative; its width does not communicate a result or status.
+
 ```rust
 impl Render for AnimationDemo {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
@@ -71,6 +75,10 @@ impl Render for AnimationDemo {
             .child(
                 div()
                     .id("replay")
+                    .role(Role::Button)
+                    .aria_label("Replay")
+                    .tab_index(0)
+                    .focus_visible(|style| style.ring_2().ring_color(rgb(0x3478c8)))
                     .px_4()
                     .py_2()
                     .rounded_md()
@@ -99,7 +107,7 @@ impl Render for AnimationDemo {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/animation/") }}#L37).
+[View this step in the source]({{ get_url(path="sources/animation/") }}#L41).
 
 <a id="clock"></a>
 ## Test identity while it runs
@@ -120,6 +128,6 @@ pub fn main() {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/animation/") }}#L88).
+[View this step in the source]({{ get_url(path="sources/animation/") }}#L96).
 
 [Download the complete source]({{ get_url(path="examples/animation.rs") }}).

@@ -16,7 +16,7 @@
 //! An update temporarily leases the value out of the entity map and passes it
 //! to a closure with its [`Context`](crate::Context):
 //!
-//! ```
+//! ```rust
 //! use gpui::{App, Context, Entity};
 //!
 //! struct Counter { count: u32 }
@@ -52,9 +52,9 @@
 //! For a short read, [`Entity::read_with`](crate::Entity::read_with) keeps the
 //! borrow inside a callback:
 //!
-//! ```
-//! # use gpui::{App, Entity};
-//! # struct Counter { count: u32 }
+//! ```rust
+//! use gpui::{App, Entity};
+//! struct Counter { count: u32 }
 //! fn displayed_count(counter: &Entity<Counter>, app: &App) -> String {
 //!     counter.read_with(app, |counter, _| format!("Count: {}", counter.count))
 //! }
@@ -63,6 +63,68 @@
 //! [`Entity::read`](crate::Entity::read) returns a reference tied to the app
 //! borrow. Use it when several expressions need the same borrowed value. Neither
 //! read operation copies the entity or schedules a notification.
+//!
+//! ## Give retained element state an identity
+//!
+//! A view entity survives while its strong handles do. The element values it
+//! returns are rebuilt as the view renders. GPUI uses a separate identity path
+//! to carry interaction and animation state from one element value to the next.
+//! [`ElementId`](crate::ElementId) supplies one component of that path;
+//! [`GlobalElementId`](crate::GlobalElementId) contains the full path through
+//! the element's ID-bearing ancestors, within one window.
+//!
+//! For repeated rows, use the record's key rather than its current position:
+//!
+//! ```rust
+//! use gpui::{div, prelude::*, text};
+//!
+//! fn contacts(records: &[(u64, String)]) -> impl IntoElement {
+//!     div().id("contacts").children(records.iter().map(|(id, name)| {
+//!         div().id(("contact", *id)).child(text!(name.clone()))
+//!     }))
+//! }
+//! ```
+//!
+//! Sorting these records preserves each row's identity. Using the row index
+//! would attach retained state to a position, so a reordered row could inherit
+//! another record's hover or animation state. A random ID on each render
+//! has the opposite problem: every frame starts with fresh element state.
+//! A named ancestor creates a scope, so different rows can each contain a
+//! child named `"edit"`. Two siblings within the same scope need different IDs.
+//!
+//! Choose storage according to how long the value must survive:
+//!
+//! | Storage | Lifetime and purpose |
+//! | --- | --- |
+//! | A field on an entity | Application state retained by strong entity handles, even when the view is absent from the element tree |
+//! | [`Window::use_keyed_state`](crate::Window::use_keyed_state) | An entity retained under an element identity while that state participates in consecutive frames; notifying it invalidates the containing view |
+//! | [`Window::with_element_state`](crate::Window::with_element_state) | A caller-defined value under an element identity and state type, for custom element bookkeeping |
+//! | [`Element::RequestLayoutState`](crate::Element::RequestLayoutState) and [`PrepaintState`](crate::Element::PrepaintState) | Values carried through the phases of one draw, rather than retained by an ID between draws |
+//!
+//! Cached subtrees carry their accessed element state forward when GPUI reuses
+//! their drawing. Once an identity is absent from a finished frame, the window
+//! releases its retained state. An entity obtained through `use_keyed_state`
+//! can still survive through another strong handle, but a later mount at that
+//! key creates a new entity. Store drafts, selections, or other state that must
+//! survive removal on a longer-lived owner.
+//!
+//! [`Window::use_state`](crate::Window::use_state) uses its Rust call site as the
+//! key. That is sufficient for one instance in a scope. Repeated calls at the
+//! same site, including calls inside a helper or loop, need distinct keyed
+//! state or parent identity scopes.
+//! IDs on a returned element enter the path when that element is drawn.
+//! Assigning `.id(...)` to a `div` after calling a state hook does not scope
+//! that earlier hook. Pass the item key to `use_keyed_state`, or use
+//! [`Window::with_id`](crate::Window::with_id) around repeated construction.
+//!
+//! Focus has its own retained handle. Keep a [`FocusHandle`](crate::FocusHandle)
+//! on its owner and attach it to the rendered control with `track_focus`.
+//! Merely giving a new control the old element ID does not recreate a dropped
+//! focus handle. [`LayoutId`](crate::LayoutId), in contrast, names layout work
+//! within the draw and is not an application identity. The
+//! [rendering chapter](crate::_documentation::rendering) follows these values
+//! through a frame, and the [input chapter](crate::_documentation::input)
+//! explains how a focus handle becomes part of the dispatch path.
 //!
 //! ## Notify after a change
 //!
@@ -105,6 +167,48 @@
 //! still runs after the update closure returns, so an assertion later in that
 //! closure runs before the queued callback.
 //!
+//! ## Share one value across the app
+//!
+//! A [`Global`](crate::Global) is one value of a Rust type stored in an `App`.
+//! It is shared by that app's windows, not by every app in the process. Use it
+//! for settings or a service that belongs to the whole application. Use an
+//! entity when consumers need distinct instances or a handle with its own
+//! observation and release lifetime.
+//!
+//! ```rust
+//! use gpui::{App, Global};
+//!
+//! #[derive(Default)]
+//! struct Preferences {
+//!     show_line_numbers: bool,
+//! }
+//! impl Global for Preferences {}
+//!
+//! fn install_preferences(cx: &mut App) {
+//!     cx.set_global(Preferences::default());
+//! }
+//!
+//! fn toggle_line_numbers(cx: &mut App) {
+//!     let preferences = cx.global_mut::<Preferences>();
+//!     preferences.show_line_numbers = !preferences.show_line_numbers;
+//! }
+//! ```
+//!
+//! Install the value before using [`App::global`](crate::App::global) or
+//! [`App::global_mut`](crate::App::global_mut); these lookups panic when it is
+//! absent. Use [`App::try_global`](crate::App::try_global) for optional state.
+//! Mutable global access schedules its observers even when the caller makes
+//! no change. Replacing the global also schedules observers, but a copied
+//! value or cloned handle still refers to what the consumer retained earlier.
+//!
+//! Reading a global during rendering does not establish a redraw dependency.
+//! A view that depends on these preferences should retain a
+//! [`Context::observe_global`](crate::Context::observe_global) subscription
+//! and notify itself in that callback. Read the current global when rendering
+//! again. The [`colors` module](crate::colors) applies this pattern to a shared
+//! palette and explains why following a window's appearance is a separate
+//! policy decision.
+//!
 //! ## Reacquire state after waiting
 //!
 //! A [`WeakEntity`](crate::WeakEntity) identifies an entity without retaining it.
@@ -123,3 +227,4 @@
 //! shows the full sequence: store the task, wait without holding an app borrow,
 //! then attempt a weak update. The [scheduling explanation](crate::_documentation::scheduling)
 //! describes which executor runs that future and when to use a background task.
+#![doc = "\n\n[Read this chapter in the GPUI Book](https://gpui-ce.github.io/book/ownership.html)."]

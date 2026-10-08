@@ -100,6 +100,10 @@ def sync(root: Path, check: bool = False) -> list[str]:
             docs.append(f'        {method}: #[doc = include_str!("{include}")],')
         if docs:
             block = "// docs:examples:begin\n" + "gpui_macros::style_helpers! {\n    docs {\n" + "\n".join(docs) + "\n    }\n}\n// docs:examples:end\n"
+            # These helpers are emitted inside the Styled trait. Keep the
+            # generated wrapper at the trait body's indentation so rustfmt
+            # does not make a freshly synced source appear stale.
+            block = "\n".join("    " + line for line in block.splitlines()) + "\n"
             # The call is intentionally replaced as one unit, making repeated
             # syncs deterministic and allowing removed methods to disappear.
             call = re.compile(
@@ -165,7 +169,8 @@ def sync(root: Path, check: bool = False) -> list[str]:
         else:
             doc_file.write_text(doc_text, encoding="utf-8", newline="\n")
         line_no = matches[0]
-        block = generated_block(source, source, symbol).splitlines()
+        indent = clean[line_no][:len(clean[line_no]) - len(clean[line_no].lstrip())]
+        block = [indent + line for line in generated_block(source, source, symbol).splitlines()]
         result = clean[:line_no] + block + clean[line_no:]
         output = "\n".join(result).rstrip() + "\n"
         prepared_outputs[source] = output

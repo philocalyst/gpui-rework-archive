@@ -137,6 +137,27 @@ path = "gpui/struct.TextLayout.html"
 source = "crates/gpui/src/elements/text.rs"
 declaration = "pub struct TextLayout("
 
+[api."gpui::InteractiveElement::tab_index"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/trait.InteractiveElement.html#method.tab_index"
+source = "crates/gpui/src/elements/div.rs"
+declaration = "fn tab_index(mut self, index: isize)"
+
+[api."gpui::StatefulInteractiveElement::role"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/trait.StatefulInteractiveElement.html#method.role"
+source = "crates/gpui/src/elements/div.rs"
+declaration = "fn role(mut self, role: accesskit::Role)"
+
+[api."gpui::StatefulInteractiveElement::on_click"]
+crate = "gpui-ce"
+version = "0.2.2"
+path = "gpui/trait.StatefulInteractiveElement.html#method.on_click"
+source = "crates/gpui/src/elements/div.rs"
+declaration = "fn on_click(mut self, listener: impl Fn(&ClickEvent, &mut Window, &mut App)"
+
 [api."gpui::StyledText::layout"]
 crate = "gpui-ce"
 version = "0.2.2"

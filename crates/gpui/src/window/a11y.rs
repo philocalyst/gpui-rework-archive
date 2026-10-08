@@ -322,8 +322,13 @@ impl A11y {
     }
 }
 
-/// Builder API for synthetic children. See the docs for
-/// [`Element::a11y_synthetic_children`].
+/// Add accessibility nodes that have no separate GPUI element.
+///
+/// GPUI supplies this builder to [`Element::a11y_synthetic_children`] after
+/// that element's prepaint. Each inserted node becomes a leaf child of the
+/// element's accessibility node. Use it for parts of a custom control, such
+/// as text runs, that assistive technology must inspect independently.
+/// See the [accessibility guide](crate::_accessibility).
 pub struct A11ySubtreeBuilder<'a> {
     parent_id: NodeId,
     nodes: &'a mut A11yNodeBuilder,
@@ -352,9 +357,10 @@ impl<'a> A11ySubtreeBuilder<'a> {
     /// Derive a [`NodeId`] for a synthetic child.
     ///
     /// The generated ID is based on the hash of `key`, as well as the parent's
-    /// ID. This means that `key`s must be unique within the same
-    /// [`Element::a11y_synthetic_children`] call, but may be duplicated across
-    /// different calls.
+    /// ID. Keep the key stable for the same logical child across frames, and
+    /// unique among children of this parent. Another parent may reuse it.
+    /// The key is not an index unless the child's identity is its fixed slot;
+    /// use the item's own key for reordered content.
     pub fn synthetic_node_id(&self, key: impl Hash) -> NodeId {
         let mut hasher = std::hash::DefaultHasher::default();
         self.parent_id.0.hash(&mut hasher);
@@ -364,8 +370,9 @@ impl<'a> A11ySubtreeBuilder<'a> {
 
     /// Append a synthetic leaf node as a child of this element's node.
     ///
-    /// Returns `false` if a node with this id is already present in the tree,
-    /// in which case the node is discarded.
+    /// In debug builds a duplicate ID panics. In release builds it returns
+    /// `false` and discards the duplicate. IDs must be unique throughout the
+    /// frame's accessibility tree; derive them with [`Self::synthetic_node_id`].
     pub fn push_child(&mut self, id: NodeId, node: accesskit::Node) -> bool {
         let pushed = self.nodes.push_leaf(id, node);
         #[cfg(debug_assertions)]
@@ -383,7 +390,11 @@ impl<'a> A11ySubtreeBuilder<'a> {
         pushed
     }
 
-    /// A mutable reference to the parent node.
+    /// Modify the element's own accessibility node.
+    ///
+    /// For example, set a text selection referring to the synthetic text-run
+    /// IDs just inserted. This does not modify the element's application state
+    /// or register an input handler.
     pub fn parent_node(&mut self) -> &mut accesskit::Node {
         self.nodes
             .current_node_mut()

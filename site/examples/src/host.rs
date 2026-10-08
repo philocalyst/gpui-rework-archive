@@ -59,10 +59,12 @@ impl Host {
         let expected_origin = origin.clone();
         let expected_parent = parent.clone();
         let callback = Closure::wrap(Box::new(move |event: web_sys::MessageEvent| {
-            if event.origin() != expected_origin
-                || event.source().as_ref().map(|value| value.as_ref())
-                    != Some(expected_parent.as_ref())
-            {
+            let from_parent = event.source().is_some_and(|source| {
+                let source: &wasm_bindgen::JsValue = source.as_ref();
+                let parent: &wasm_bindgen::JsValue = expected_parent.as_ref();
+                source == parent
+            });
+            if event.origin() != expected_origin || !from_parent {
                 return;
             }
             let Ok(json) = js_sys::JSON::stringify(&event.data()) else {
@@ -142,6 +144,8 @@ impl Host {
             "running"
         } else if self.edited {
             "edited"
+        } else if state.diagnostics.starts_with("Preview service unavailable.") {
+            "unavailable"
         } else if !state.diagnostics.is_empty() {
             "error"
         } else if state.has_preview {

@@ -14,6 +14,20 @@ use std::{collections::HashMap, fmt, sync::Arc};
 ///
 /// The provider may be an `Entity<T>` where `T: ImageCache`; loading can remain pending across
 /// frames, while completed results are reused by descendants.
+/// Use [`retain_all`] for a cache owned by a stable element ID, or retain an
+/// [`Entity<RetainAllImageCache>`] yourself when several subtrees share it.
+///
+/// ```
+/// use gpui::{image_cache, img, retain_all, ParentElement};
+///
+/// let gallery = image_cache(retain_all("gallery-images"))
+///     .child(img("images/cover.png"))
+///     .child(img("images/diagram.png"));
+/// ```
+///
+/// This element supplies layout and cache scope. For a painted background,
+/// clipping, or interaction, put it inside a [`crate::div`]. An individual
+/// image's [`crate::Img::image_cache`] setting overrides this scope.
 pub fn image_cache(image_cache_provider: impl ImageCacheProvider) -> ImageCacheElement {
     ImageCacheElement {
         image_cache_provider: Box::new(image_cache_provider),
@@ -46,8 +60,9 @@ impl<I: ImageCache> From<Entity<I>> for AnyImageCache {
 impl AnyImageCache {
     /// Poll the cache for `resource`.
     ///
-    /// Returns `None` while loading is in progress, or the cached image/result once loading has
-    /// completed. A returned error is the provider's terminal result for that request.
+    /// Returns `None` while loading is pending, or the provider's image or
+    /// error result. Retention, retries, and completion notifications are the
+    /// provider's responsibility, as described by [`ImageCache::load`].
     pub fn load(
         &self,
         resource: &Resource,
@@ -72,7 +87,10 @@ mod any_image_cache {
     }
 }
 
-/// An image cache element.
+/// A layout container that supplies an image cache to descendants.
+///
+/// Construct it with [`image_cache`]. Its [`Styled`] settings affect layout;
+/// it does not paint its own background, border, or shadow.
 pub struct ImageCacheElement {
     image_cache_provider: Box<dyn ImageCacheProvider>,
     style: StyleRefinement,
@@ -165,10 +183,13 @@ impl Element for ImageCacheElement {
     }
 }
 
-/// An image loading task associated with an image cache.
+/// A shared loading task whose clones deliver the same image or error result.
+///
+/// Holding a clone keeps the underlying task alive. Polling can complete it,
+/// but does not by itself notify a view.
 pub type ImageLoadingTask = Shared<Task<Result<Arc<RenderImage>, ImageCacheError>>>;
 
-/// An image cache item
+/// A pending or completed image-cache entry, including cached failures.
 pub enum ImageCacheItem {
     /// The associated image is currently loading
     Loading(ImageLoadingTask),
@@ -189,7 +210,10 @@ impl std::fmt::Debug for ImageCacheItem {
 }
 
 impl ImageCacheItem {
-    /// Attempt to get the image from the cache item.
+    /// Polls once and returns the completed result, if available.
+    ///
+    /// A completed task replaces `Loading` with `Loaded`, including on error.
+    /// Later calls clone that result. This does not block or schedule a redraw.
     pub fn get(&mut self) -> Option<Result<Arc<RenderImage>, ImageCacheError>> {
         match self {
             ImageCacheItem::Loading(task) => {
@@ -206,10 +230,17 @@ impl ImageCacheItem {
 ///
 /// Return `None` while a request is pending and `Some(result)` after it has completed. A cache
 /// implementation owns the policy for sharing requests, retaining results, and releasing renderer
-/// resources. When an image is no longer needed, use the window/app resource-drop path so every
-/// window can release its reference.
+/// resources. When an image is no longer needed, [`App::drop_image`] removes
+/// its sprite-atlas uploads from all windows; dropping the `Arc` alone does
+/// not explicitly evict those uploads.
 pub trait ImageCache: 'static {
-    /// Poll or start loading `resource` and return its completed result, if available.
+    /// Polls or starts loading `resource` and returns a completed result, if available.
+    ///
+    /// Return `None` while pending. Arrange a notification for the view that
+    /// needs the result; `Img` does not poll continuously just because this
+    /// method returned `None`. An implementation may cache errors or retry
+    /// them, but should document that policy. Avoid blocking I/O here: this
+    /// method is called during layout and paint.
     fn load(
         &mut self,
         resource: &Resource,
@@ -220,8 +251,10 @@ pub trait ImageCache: 'static {
 
 /// Supplies the cache used by a subtree of image elements.
 ///
-/// GPUI asks the provider for a cache during layout and installs it for descendant `img` elements
-/// while requesting layout and painting. A [`crate::Entity<T>`] provider reuses the entity on each call.
+/// GPUI asks for a cache during both layout and paint, then installs it for
+/// descendants during that phase. Return the same cache on both calls when
+/// those phases should share requests and results. An [`Entity<T>`] provider
+/// reuses its entity; [`retain_all`] retains one by element identity.
 pub trait ImageCacheProvider: 'static {
     /// Return the cache for the current subtree.
     fn provide(&mut self, _window: &mut Window, _cx: &mut App) -> AnyImageCache;
@@ -265,8 +298,12 @@ impl RetainAllImageCache {
 
     /// Load a resource once and reuse its pending task or completed result on later calls.
     ///
-    /// Returns `None` while the asset task is pending. Completion schedules the current view for
-    /// notification so it can request the image again.
+    /// Returns `None` while the task is pending and caches both images and
+    /// failures. The first request records the current view; completion
+    /// notifies that view on the window's next frame. Later callers reuse the
+    /// entry without registering additional completion notifications. When
+    /// independently rendered views share this cache, arrange notifications
+    /// for those consumers too.
     pub fn load(
         &mut self,
         source: &Resource,
@@ -298,7 +335,12 @@ impl RetainAllImageCache {
         None
     }
 
-    /// Clear the image cache.
+    /// Removes every pending or completed entry.
+    ///
+    /// Completed images are also removed from all windows' sprite atlases.
+    /// Pass the currently borrowed window so it is included. Detached load
+    /// waiters can still finish after removal; this is not a cancellation API.
+    /// Notify the owning view separately to redraw or request the images again.
     pub fn clear(&mut self, window: &mut Window, cx: &mut App) {
         for (_, mut item) in std::mem::replace(&mut self.0, HashMap::new()) {
             if let Some(Ok(image)) = item.get() {
@@ -307,7 +349,12 @@ impl RetainAllImageCache {
         }
     }
 
-    /// Remove the image from the cache by the given source.
+    /// Removes one entry, allowing the next request to load it again.
+    ///
+    /// A completed image is also removed from all windows' sprite atlases,
+    /// including `window`. Removing a pending entry does not cancel its
+    /// detached completion waiter. Notify the view separately to retry a
+    /// failed image or update the display.
     pub fn remove(&mut self, source: &Resource, window: &mut Window, cx: &mut App) {
         let hash = hash(source);
         if let Some(mut item) = self.0.remove(&hash)
@@ -317,7 +364,7 @@ impl RetainAllImageCache {
         }
     }
 
-    /// Returns the number of images in the cache.
+    /// Counts pending loads and completed entries, including failures.
     pub fn len(&self) -> usize {
         self.0.len()
     }
@@ -339,12 +386,18 @@ impl ImageCache for RetainAllImageCache {
     }
 }
 
-/// Constructs a retain-all image cache that uses the element state associated with the given ID.
+/// Supplies a retain-all cache stored under a stable element ID.
+///
+/// Pass the provider to [`image_cache`]. Reuse `id` on subsequent renders to
+/// retain the cache; changing the ID creates another cache. The ID is scoped
+/// by the current element path, so give sibling cache scopes distinct IDs.
+/// Entries live until explicitly removed or the retained cache entity is
+/// released. Use a cache entity directly for sharing across independent scopes.
 pub fn retain_all(id: impl Into<ElementId>) -> RetainAllImageCacheProvider {
     RetainAllImageCacheProvider { id: id.into() }
 }
 
-/// A provider struct for creating a retain-all image cache inline
+/// An element-state provider created by [`retain_all`].
 pub struct RetainAllImageCacheProvider {
     id: ElementId,
 }

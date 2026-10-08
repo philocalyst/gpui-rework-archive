@@ -43,7 +43,10 @@ impl Svg {
         self
     }
 
-    /// Load an SVG from a path supplied to the external resource loader.
+    /// Loads SVG bytes from a filesystem path on the background executor.
+    ///
+    /// This bypasses [`AssetSource`](crate::AssetSource). It is intended for
+    /// native applications; a browser cannot read an arbitrary native path.
     pub fn external_path(mut self, path: impl Into<SharedString>) -> Self {
         self.external_path = Some(path.into());
         self
@@ -208,7 +211,12 @@ impl InteractiveElement for Svg {
     }
 }
 
-/// A transformation to apply to an SVG element.
+/// Scale, rotation, and translation applied to an SVG's painted pixels.
+///
+/// Scaling and rotation are about the element's center; translation is in
+/// logical pixels and happens afterward. The layout box, hitbox, and clipping
+/// region are unchanged. Builders replace their corresponding component,
+/// rather than composing another transformation.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Transformation {
     scale: Size<f32>,

@@ -1,6 +1,6 @@
 //! Image resources, decoded images, and the `img` element.
 //!
-//! [`img`] accepts a GPUI resource, predecoded [`Image`] or [`RenderImage`], or a caller-owned
+//! [`img`] accepts a GPUI resource, encoded [`Image`] bytes, decoded [`RenderImage`] frames, or a caller-owned
 //! loader. Resource-backed images can use an explicit cache, an ancestor [`crate::image_cache`] scope, or
 //! the global asset path. Animated image frames use retained element state: give an animated image
 //! a stable ID if it should advance across frames. See the [rendering guide](crate::_documentation::rendering).
@@ -35,7 +35,11 @@ use thiserror::Error;
 
 use super::{Stateful, StatefulInteractiveElement};
 
-/// The delay before showing the loading state.
+/// How long an identified [`Img`] waits before showing its loading replacement.
+///
+/// This avoids flashing a placeholder for a fast load. The delay starts on the
+/// first pending layout; [`StyledImage::with_loading`] needs a stable element ID
+/// to retain that timer.
 pub const LOADING_DELAY: Duration = Duration::from_millis(200);
 
 // Image decoders can provide a zero-delay frame. Give those frames a finite interval so
@@ -84,18 +88,22 @@ fn advance_animation(
 
 /// The asset loader used by [`img`] for [`ImageSource::Resource`] values.
 ///
-/// Custom loaders and already decoded [`ImageSource::Render`] or [`ImageSource::Image`] values do
-/// not use this loader.
+/// Custom loaders and decoded [`ImageSource::Render`] values bypass this loader.
+/// [`ImageSource::Image`] uses a separate decoder for its encoded bytes.
 pub type ImgResourceLoader = AssetLogger<ImageAssetLoader>;
 
 /// The input source for an [`Img`] element.
+///
+/// Strings that parse as URLs become [`Resource::Uri`]; other strings become
+/// embedded registry keys. A [`Path`] or [`PathBuf`] selects the filesystem
+/// explicitly. Only resource sources use an [`ImageCache`] provider.
 #[derive(Clone)]
 pub enum ImageSource {
     /// Load image data from a GPUI resource such as an embedded path or URI.
     Resource(Resource),
     /// Use already decoded renderer image data.
     Render(Arc<RenderImage>),
-    /// Use already decoded CPU image data.
+    /// Decode the encoded bytes of an [`Image`] through the app's asset cache.
     Image(Arc<Image>),
     /// Poll a caller-owned loader. Return `None` while loading, or the result when complete.
     /// The caller is responsible for notifying the owning view when the result becomes available.
@@ -177,7 +185,11 @@ where
     }
 }
 
-/// The style of an image element.
+/// Image-specific presentation and replacement content.
+///
+/// Use [`StyledImage`] to configure these settings. An image defaults to color
+/// rendering with [`ObjectFit::Contain`] and no loading or error replacement.
+/// Layout, borders, and backgrounds are configured separately through [`Styled`].
 pub struct ImageStyle {
     grayscale: bool,
     object_fit: ObjectFit,
@@ -196,7 +208,7 @@ impl Default for ImageStyle {
     }
 }
 
-/// Style an image element.
+/// Configures image fitting, grayscale, and loading or error replacements.
 pub trait StyledImage: Sized {
     /// Get a mutable [ImageStyle] from the element.
     fn image_style(&mut self) -> &mut ImageStyle;
@@ -207,21 +219,30 @@ pub trait StyledImage: Sized {
         self
     }
 
-    /// Set the object fit for the image.
+    /// Chooses how decoded pixels fit inside the image element's bounds.
+    ///
+    /// The default is [`ObjectFit::Contain`]. This changes image placement and
+    /// cropping, not the element's layout size; set dimensions through [`Styled`].
     fn object_fit(mut self, object_fit: ObjectFit) -> Self {
         self.image_style().object_fit = object_fit;
         self
     }
 
-    /// Set a fallback function that will be invoked to render an error view should
-    /// the image fail to load.
+    /// Builds replacement content when loading or decoding returns an error.
+    ///
+    /// The callback can run again on later layouts. With no fallback, an
+    /// unsuccessful image paints no image content. This does not retry a cached
+    /// failure; remove that cache entry before requesting a retry.
     fn with_fallback(mut self, fallback: impl Fn() -> AnyElement + 'static) -> Self {
         self.image_style().fallback = Some(Box::new(fallback));
         self
     }
 
-    /// Set a fallback function that will be invoked to render a view while the image
-    /// is still being loaded.
+    /// Builds replacement content while an identified image remains pending.
+    ///
+    /// The replacement appears after [`LOADING_DELAY`]. Assign a stable ID with
+    /// [`InteractiveElement::id`] to retain the timer. Without an ID, the image
+    /// has no retained loading timer and this replacement is not shown.
     fn with_loading(mut self, loading: impl Fn() -> AnyElement + 'static) -> Self {
         self.image_style().loading = Some(Box::new(loading));
         self
@@ -242,9 +263,13 @@ impl StyledImage for Stateful<Img> {
 
 /// An image element with optional loading/error replacement content and object fitting.
 ///
-/// Resource and decoded-image sources can load asynchronously. Give an animated image a stable
+/// Resource and encoded-image sources load asynchronously. Decoded renderer
+/// images are available immediately. Give an animated image a stable
 /// [`ElementId`] through [`InteractiveElement::id`] so its current frame and timing survive the
 /// next frame. A pending custom loader must arrange its own notification when its result changes.
+/// Animation pauses while the window is inactive or the app requests reduced
+/// motion, preserving the current frame. A stable ID is also needed for the
+/// delayed loading replacement.
 pub struct Img {
     interactivity: Interactivity,
     source: ImageSource,
@@ -252,7 +277,11 @@ pub struct Img {
     image_cache: Option<AnyImageCache>,
 }
 
-/// Construct an image element from a resource, decoded image, or custom loader.
+/// Constructs an image element from a resource, encoded bytes, decoded frames, or custom loader.
+///
+/// For an embedded asset, use `img("images/logo.png")`. To read a native file,
+/// pass a [`Path`] instead. Give the element explicit dimensions when loading
+/// should not change surrounding layout.
 #[track_caller]
 pub fn img(source: impl Into<ImageSource>) -> Img {
     Img {
@@ -273,15 +302,11 @@ impl Img {
         ]
     }
 
-    /// Sets the image cache for the current node.
+    /// Uses an explicit cache for this element's resource source.
     ///
-    /// If the `image_cache` is not explicitly provided, the function will determine the image cache by:
-    ///
-    /// 1. Checking if any ancestor node of the current node contains an `ImageCacheElement`, If such a node exists, the image cache specified by that ancestor will be used.
-    /// 2. If no ancestor node contains an `ImageCacheElement`, the global image cache will be used as a fallback.
-    ///
-    /// This mechanism provides a flexible way to manage image caching, allowing precise control when needed,
-    /// while ensuring a default behavior when no cache is explicitly specified.
+    /// Without one, resource loading uses the nearest [`crate::image_cache`]
+    /// scope, then the app's typed asset cache. This setting has no effect on
+    /// encoded [`Image`], decoded [`RenderImage`], or custom-loader sources.
     #[inline]
     pub fn image_cache<I: ImageCache>(self, image_cache: &Entity<I>) -> Self {
         Self {
@@ -631,7 +656,12 @@ impl ImageSource {
         }
     }
 
-    /// Remove this image source from the asset system
+    /// Removes this source's entry from the app's typed asset cache.
+    ///
+    /// This does not clear an explicit or ancestor [`ImageCache`] provider and
+    /// has no effect on decoded or custom-loader sources. It does not release
+    /// sprite-atlas uploads; use [`App::drop_image`] for a decoded image that
+    /// should be released by the renderers.
     pub fn remove_asset(&self, cx: &mut App) {
         match self {
             ImageSource::Resource(resource) => {
@@ -670,7 +700,12 @@ impl Asset for ImageDecoder {
     }
 }
 
-/// An image loader for the GPUI asset system
+/// Loads and decodes an image resource through the typed asset system.
+///
+/// Paths use filesystem reads, URIs use the app's HTTP client, and embedded
+/// keys use its [`crate::AssetRegistry`]. GIF and animated WebP resources retain
+/// their frames; static raster images apply the decoder's orientation and are
+/// converted to BGRA. Bytes not recognized as a raster format are parsed as SVG.
 #[derive(Clone)]
 pub enum ImageAssetLoader {}
 
@@ -809,14 +844,14 @@ pub enum ImageCacheError {
     /// An error that occurred while reading the image from disk.
     #[error("IO error: {0}")]
     Io(Arc<std::io::Error>),
-    /// An error that occurred while processing an image.
+    /// The image request returned an unsuccessful HTTP status.
     #[error("unexpected http status for {uri}: {status}, body: {body}")]
     BadStatus {
         /// The URI of the image.
         uri: SharedUri,
         /// The HTTP status code.
         status: http::StatusCode,
-        /// The HTTP response body.
+        /// The first line of the response body, decoded lossily for diagnostics.
         body: String,
     },
     /// An error that occurred while processing an asset.

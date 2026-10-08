@@ -22,7 +22,7 @@ description = "The annotated Rust source used to build this walkthrough."
 <span id="L13" class="source-line"><a href="#L13" class="line-number" data-line="13" aria-label="Line 13" tabindex="-1"></a></span>
 <span id="L14" class="source-line"><a href="#L14" class="line-number" data-line="14" aria-label="Line 14" tabindex="-1"></a>use gpui::&#123;</span>
 <span id="L15" class="source-line"><a href="#L15" class="line-number" data-line="15" aria-label="Line 15" tabindex="-1"></a>    AppContext, Context, FocusHandle, IntoElement, KeyBinding, Render, Window, actions, div,</span>
-<span id="L16" class="source-line"><a href="#L16" class="line-number" data-line="16" aria-label="Line 16" tabindex="-1"></a>    prelude::*, rgb,</span>
+<span id="L16" class="source-line"><a href="#L16" class="line-number" data-line="16" aria-label="Line 16" tabindex="-1"></a>    prelude::*, rgb, text,</span>
 <span id="L17" class="source-line"><a href="#L17" class="line-number" data-line="17" aria-label="Line 17" tabindex="-1"></a>&#125;;</span>
 <span id="L18" class="source-line"><a href="#L18" class="line-number" data-line="18" aria-label="Line 18" tabindex="-1"></a></span>
 <span id="L19" class="source-line"><a href="#L19" class="line-number" data-line="19" aria-label="Line 19" tabindex="-1"></a>actions!(counter_keys, [Increment]);</span>
@@ -86,7 +86,7 @@ description = "The annotated Rust source used to build this walkthrough."
 <span id="L77" class="source-line"><a href="#L77" class="line-number" data-line="77" aria-label="Line 77" tabindex="-1"></a>            .gap_4()</span>
 <span id="L78" class="source-line"><a href="#L78" class="line-number" data-line="78" aria-label="Line 78" tabindex="-1"></a>            .bg(rgb(0xf7f6f2))</span>
 <span id="L79" class="source-line"><a href="#L79" class="line-number" data-line="79" aria-label="Line 79" tabindex="-1"></a>            .text_color(rgb(0x202b29))</span>
-<span id="L80" class="source-line"><a href="#L80" class="line-number" data-line="80" aria-label="Line 80" tabindex="-1"></a>            .child(format!(&quot;Count: &#123;&#125;&quot;, self.count))</span>
-<span id="L81" class="source-line"><a href="#L81" class="line-number" data-line="81" aria-label="Line 81" tabindex="-1"></a>            .child(&quot;Press Space to increment&quot;)</span>
+<span id="L80" class="source-line"><a href="#L80" class="line-number" data-line="80" aria-label="Line 80" tabindex="-1"></a>            .child(text!(format!(&quot;Count: &#123;&#125;&quot;, self.count)))</span>
+<span id="L81" class="source-line"><a href="#L81" class="line-number" data-line="81" aria-label="Line 81" tabindex="-1"></a>            .child(text!(&quot;Press Space to increment&quot;))</span>
 <span id="L82" class="source-line"><a href="#L82" class="line-number" data-line="82" aria-label="Line 82" tabindex="-1"></a>    &#125;</span>
 <span id="L83" class="source-line"><a href="#L83" class="line-number" data-line="83" aria-label="Line 83" tabindex="-1"></a>&#125;</span></code></pre>

@@ -1,4 +1,9 @@
-/// A unique identifier for an element that can be inspected.
+/// Identifies an element instance in the inspector's rendered tree.
+///
+/// Debug builds and the `inspector` feature retain a source path and an
+/// instance number. Optimized builds without that feature omit those fields.
+/// This identifier is for inspecting rendered elements; use [`ElementId`](crate::ElementId)
+/// to give application elements stable retained state.
 #[derive(Debug, Eq, PartialEq, Hash, Clone)]
 pub struct InspectorElementId {
     /// Stable part of the ID.
@@ -25,7 +30,7 @@ mod conditional {
     use collections::{FxHashMap, TypeIdHashMap};
     use std::any::{Any, TypeId};
 
-    /// `GlobalElementId` qualified by source location of element construction.
+    /// An element's retained ID path and construction site.
     #[derive(Debug, Eq, PartialEq, Hash)]
     pub struct InspectorElementPath {
         /// The path to the nearest ancestor element that has an `ElementId`.
@@ -55,8 +60,13 @@ mod conditional {
     pub type InspectorRenderer =
         Box<dyn Fn(&mut Inspector, &mut Window, &mut Context<Inspector>) -> AnyElement>;
 
-    /// Manages inspector state - which element is currently selected and whether the inspector is
-    /// in picking mode.
+    /// Tracks the inspector's selected element and picking mode.
+    ///
+    /// GPUI creates this view when the window inspector opens. An application
+    /// supplies its UI through [`App::set_inspector_renderer`], and registers
+    /// renderers for individual state types through
+    /// [`App::register_inspector_element`]. With no inspector renderer, this
+    /// view draws [`Empty`].
     pub struct Inspector {
         active_element: Option<InspectedElement>,
         pub(crate) pick_depth: Option<f32>,
@@ -142,7 +152,10 @@ mod conditional {
             result
         }
 
-        /// Starts element picking mode, allowing the user to select elements by clicking.
+        /// Enters picking mode, resetting the candidate depth to the frontmost element.
+        ///
+        /// This changes inspector state without requesting a redraw. Notify
+        /// the inspector view when calling it from an input handler.
         pub fn start_picking(&mut self) {
             self.pick_depth = Some(0.0);
         }
@@ -152,7 +165,10 @@ mod conditional {
             self.pick_depth.is_some()
         }
 
-        /// Renders elements for all registered inspector states of the active inspector element.
+        /// Builds the registered state panels for the selected element.
+        ///
+        /// State types with no registered renderer are skipped. Panel order
+        /// follows the state map's iteration order and is not an ordering API.
         pub fn render_inspector_states(
             &mut self,
             window: &mut Window,
@@ -242,7 +258,16 @@ pub mod inspector_reflection {
     }
 
     impl<T: 'static> FunctionReflection<T> {
-        /// Invoke this method on a value and return the result.
+        /// Invokes the reflected function with `value` and returns its result.
+        ///
+        /// Generated reflections arrange for both argument and result to be
+        /// `T`. A manually constructed reflection must uphold the same contract.
+        ///
+        /// # Panics
+        ///
+        /// Panics if the function returns a boxed value of another type. The
+        /// function itself may also panic, including on an invalid argument
+        /// downcast.
         pub fn invoke(&self, value: T) -> T {
             let boxed = Box::new(value) as Box<dyn Any>;
             let result = (self.function)(boxed);

@@ -1,9 +1,10 @@
 //! App and window backed transitions for values implementing [`Lerp`].
 //!
 //! A transition stores its target in an [`Entity`] and samples it during
-//! rendering. [`Transition::evaluate`] caches one sample for the current
-//! render, requests another frame while motion is active, and returns a
-//! reference to the cached value. Updating a target is continuous by default:
+//! rendering. [`Transition::evaluate`] caches one sample in its wrapper,
+//! requests another frame while motion is active, and returns a reference to
+//! that sample. Recreate the wrapper with a window hook on each render to
+//! sample again while retaining the animated entity. Updating a target is continuous by default:
 //! the next run starts from the value currently presented. Use
 //! [`Transition::continuous`] to choose restart semantics. The hook that owns
 //! this state must keep a stable key across renders; see
@@ -62,19 +63,23 @@ impl<T> TransitionCache<T> {
 ///
 /// # Example
 ///
-/// ```ignore
-/// let transition = window.use_transition(cx, Duration::from_millis(300), |_, _| 0.0_f32)
-///     .with_easing(ease_in_out);
-///
-/// // Get the current interpolated value
-/// let value = transition.evaluate(window, cx);
-///
-/// // Update the goal
-/// transition.update(cx, |val, cx| {
-///     *val = 1.0;
-///     cx.notify();
-/// });
 /// ```
+/// use std::time::Duration;
+/// use gpui::{App, Window, ease_in_out};
+///
+/// fn opacity(window: &mut Window, cx: &mut App, visible: bool) -> f32 {
+///     let transition = window
+///         .use_keyed_transition("opacity", cx, Duration::from_millis(300), |_, _| 0.0_f32)
+///         .with_easing(ease_in_out);
+///     transition.update(cx, |goal, _| *goal = if visible { 1.0 } else { 0.0 });
+///     let value = *transition.evaluate(window, cx);
+///     value
+/// }
+/// ```
+///
+/// Call the hook while rendering. Its wrapper has a fresh sample cache while
+/// the keyed state remembers the previous target and animation. Target changes
+/// made outside rendering need an explicit notification to begin drawing.
 #[derive(Clone)]
 pub struct Transition<T: Lerp + Clone + PartialEq + 'static> {
     motion: Motion,
@@ -140,15 +145,13 @@ impl<T: Lerp + Clone + PartialEq + 'static> Transition<T> {
         self.cache.borrow_mut().clear();
     }
 
-    /// Evaluates and returns the current interpolated value of the transition.
+    /// Returns the wrapper's cached sample, computing it on first access.
     ///
-    /// This method calculates the value based on the elapsed time since the last
-    /// goal update, applies the easing function, and caches the result. If the
-    /// transition is still in progress, it automatically requests an animation
-    /// frame to continue the animation.
-    ///
-    /// The returned value is cached for the duration of the current frame to avoid
-    /// redundant calculations when called multiple times.
+    /// An active sample requests another animation frame for the view currently
+    /// being drawn. Recreate the wrapper through a window hook on each render;
+    /// merely retaining this wrapper across frames does not clear its cache.
+    /// Target updates and the mutation methods also clear this wrapper's cache.
+    /// Drop the returned borrow before mutating the transition.
     pub fn evaluate(&self, window: &mut Window, cx: &mut App) -> Ref<'_, T> {
         let sample = self.sample(cx);
         if sample.is_active {
@@ -158,7 +161,7 @@ impl<T: Lerp + Clone + PartialEq + 'static> Transition<T> {
         Ref::map(sample, |sample| sample.value.as_ref().unwrap())
     }
 
-    /// Reads the end goal of the transitions.
+    /// Borrows the logical target, which may differ from the value currently painted.
     pub fn read_goal<'b>(&'b self, cx: &'b mut App) -> &'b T {
         self.state.read(cx).value()
     }
@@ -215,11 +218,12 @@ impl<T: Lerp + Clone + PartialEq + 'static> Transition<T> {
         was_updated
     }
 
-    /// Instantly set the transition to the given target value without animation.
+    /// Presents `target` immediately and cancels the active animation.
     ///
     /// Sets both the start and end goals to `target` so that subsequent evaluations
     /// return `target` immediately. This is useful for transitions that require a
-    /// different start value on each update.
+    /// different start value on each update. The original initialization value
+    /// used by [`reset`](Self::reset) is unchanged. This does not notify observers.
     pub fn jump_to(&self, target: T, cx: &mut App) {
         self.state.update(cx, |state, _cx| state.jump_to(target));
         self.clear_cache();
@@ -230,7 +234,8 @@ impl<T: Lerp + Clone + PartialEq + 'static> Transition<T> {
     /// This preserves the relative progress of an in-flight animation when the
     /// coordinate space changes (e.g. on window resize).  Both the start and
     /// end goal are multiplied by `ratio` so the interpolated value remains
-    /// proportionally correct.
+    /// proportionally correct. The original initialization value used by
+    /// [`reset`](Self::reset) is unchanged. This does not notify observers.
     pub fn scale_by(&self, ratio: f32, cx: &mut App)
     where
         T: std::ops::Mul<f32, Output = T>,
@@ -250,14 +255,14 @@ impl<T: Lerp + Clone + PartialEq + 'static> Transition<T> {
     ///
     /// This clears all progress and sets both the start and end goals back to
     /// the initial value that was provided when the transition was created.
-    /// The cache is also cleared.
+    /// The cache is also cleared. This does not notify observers.
     pub fn reset(&self, cx: &mut App) {
         self.state.update(cx, |state, _cx| state.reset());
         self.clear_cache();
     }
 }
 
-/// The animated value stored by the legacy transition hooks.
+/// The animated value retained by [`Window::use_keyed_transition`].
 pub type TransitionState<T> = Animated<T, Instant>;
 
 #[cfg(all(test, feature = "headless"))]
@@ -286,6 +291,37 @@ mod tests {
     struct TransitionTestView {
         transition: Transition<f32>,
         rendered_values: Rc<RefCell<Vec<f32>>>,
+    }
+
+    #[gpui::test]
+    fn unkeyed_hooks_use_distinct_caller_locations_and_retain_state(cx: &mut TestAppContext) {
+        struct Hooks {
+            seen: Rc<RefCell<Vec<[EntityId; 2]>>>,
+        }
+        impl Render for Hooks {
+            fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+                let first = window.use_transition(cx, Duration::from_secs(1), |_, _| 2.0_f32);
+                let second = window.use_transition(cx, Duration::from_secs(1), |_, _| 7.0_f32);
+                assert_eq!(*first.read_goal(cx), 2.0);
+                assert_eq!(*second.read_goal(cx), 7.0);
+                self.seen
+                    .borrow_mut()
+                    .push([first.entity_id(), second.entity_id()]);
+                crate::Empty
+            }
+        }
+        let seen = Rc::new(RefCell::new(Vec::new()));
+        let window = cx.open_window(size(px(100.0), px(100.0)), {
+            let seen = seen.clone();
+            move |_, _| Hooks { seen }
+        });
+        cx.run_until_parked();
+        window.update(cx, |_, _, cx| cx.notify()).unwrap();
+        cx.run_until_parked();
+        let seen = seen.borrow();
+        assert!(seen.len() >= 2);
+        assert_ne!(seen[0][0], seen[0][1]);
+        assert!(seen.iter().all(|ids| *ids == seen[0]));
     }
 
     impl Render for TransitionTestView {

@@ -14,7 +14,7 @@ categories = ["gui"]
 rust-version = "1.95"                                                  # required for Vec::push_mut
 
 [package.metadata.docs.rs]
-features = ["test-support"]
+features = ["test-support", "bench-support"]
 rustdoc-args = ["-D", "rustdoc::broken_intra_doc_links", "-D", "rustdoc::bare_urls"]
 
 [lints]
@@ -163,6 +163,7 @@ backtrace.workspace = true
 collections = { workspace = true, features = ["test-support"] }
 env_logger.workspace = true
 gpui_ce_elements = { path = "../gpui_elements" }
+gpui_parley.workspace = true
 gpui_platform = { workspace = true, features = ["font-kit", "wayland", "x11"] }
 gpui_util = { workspace = true }
 lyon = { version = "1.0", features = ["extra"] }

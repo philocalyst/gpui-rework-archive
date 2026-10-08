@@ -12,7 +12,11 @@ use std::{
     time::Duration,
 };
 
-/// A helper trait for building complex objects with imperative conditionals in a fluent style.
+/// Branches within a builder chain without giving up ownership of the value.
+///
+/// Each selected closure receives the value and returns its replacement.
+/// Unselected closures do not run. [`Self::map`] can also change the type;
+/// the conditional helpers keep the same type so the chain can continue.
 pub trait FluentBuilder {
     /// Imperatively modify self with the given closure.
     fn map<U>(self, f: impl FnOnce(Self) -> U) -> U
@@ -22,7 +26,7 @@ pub trait FluentBuilder {
         f(self)
     }
 
-    /// Conditionally modify self with the given closure.
+    /// Applies `then` when `condition` is true, otherwise returns `self`.
     fn when(self, condition: bool, then: impl FnOnce(Self) -> Self) -> Self
     where
         Self: Sized,
@@ -30,7 +34,7 @@ pub trait FluentBuilder {
         self.map(|this| if condition { then(this) } else { this })
     }
 
-    /// Conditionally modify self with the given closure.
+    /// Applies exactly one of `then` and `else_fn` according to `condition`.
     fn when_else(
         self,
         condition: bool,
@@ -43,7 +47,8 @@ pub trait FluentBuilder {
         self.map(|this| if condition { then(this) } else { else_fn(this) })
     }
 
-    /// Conditionally unwrap and modify self with the given closure, if the given option is Some.
+    /// Passes a present option's value to `then`, otherwise returns `self`.
+    /// The option is consumed; its value need not implement `Clone`.
     fn when_some<T>(self, option: Option<T>, then: impl FnOnce(Self, T) -> Self) -> Self
     where
         Self: Sized,
@@ -56,7 +61,8 @@ pub trait FluentBuilder {
             }
         })
     }
-    /// Conditionally unwrap and modify self with the given closure, if the given option is None.
+    /// Applies `then` when the borrowed option is `None`.
+    /// The option and any contained value remain with the caller.
     fn when_none<T>(self, option: &Option<T>, then: impl FnOnce(Self) -> Self) -> Self
     where
         Self: Sized,
@@ -65,12 +71,21 @@ pub trait FluentBuilder {
     }
 }
 
-/// Extensions for Future types that provide additional combinators and utilities.
+/// Adds a GPUI executor timer to any future.
 pub trait FutureExt {
     /// Resolve the future if it completes before `timeout`, otherwise return [`Timeout`].
     ///
     /// The timer is scheduled on `executor`; dropping the returned future drops both the timer and
     /// the underlying future. This method does not cancel work already spawned elsewhere.
+    ///
+    /// If the wrapped future and timer are both ready on the same poll, the
+    /// wrapped future wins. The timeout is cooperative: a future whose poll
+    /// blocks cannot be interrupted by this timer. Keep blocking work on a
+    /// suitable thread rather than using a timeout to bound its poll.
+    ///
+    /// The result is nested when the wrapped future also returns a `Result`:
+    /// `Ok(Err(error))` is its own failure; `Err(Timeout)` means it did not
+    /// resolve before the timer was observed ready.
     fn with_timeout(self, timeout: Duration, executor: &BackgroundExecutor) -> WithTimeout<Self>
     where
         Self: Sized;

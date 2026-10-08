@@ -1,19 +1,46 @@
-//! Theme colors shared by GPUI components.
+//! A small semantic palette shared through application state.
 //!
-//! [`crate::colors::Colors`] is a deliberately small semantic palette. Values are sRGB
-//! [`crate::Rgba`] colors, and the light/dark constructors are defaults rather
-//! than an exhaustive theme system. Install [`crate::colors::GlobalColors`] in
-//! application state when views should read the same palette through
-//! [`crate::colors::DefaultColors`].
+//! [`Colors`](crate::colors::Colors) names roles such as text, selection, and
+//! border. Its values are sRGB [`crate::Rgba`] colors. Use
+//! [`Colors::light`](crate::colors::Colors::light) or
+//! [`Colors::dark`](crate::colors::Colors::dark) as a starting point, then
+//! install the palette as [`GlobalColors`](crate::colors::GlobalColors):
+//!
+//! ```rust
+//! use gpui::{App, colors::{Colors, GlobalColors}, rgb};
+//! use std::sync::Arc;
+//!
+//! fn install_dark_palette(cx: &mut App) {
+//!     let mut palette = Colors::dark();
+//!     palette.selected = rgb(0x315a46);
+//!     cx.set_global(GlobalColors(Arc::new(palette)));
+//! }
+//! ```
+//!
+//! Import [`DefaultColors`](crate::colors::DefaultColors) to read the palette with
+//! `cx.default_colors()`. Reading it does not subscribe a view to changes.
+//! Views that should redraw after a replacement can retain a
+//! [`Context::observe_global`](crate::Context::observe_global) subscription
+//! whose callback calls [`Context::notify`](crate::Context::notify).
+//!
+//! [`Colors::for_appearance`](crate::colors::Colors::for_appearance) takes a
+//! snapshot of one window's appearance; it
+//! does not install colors or watch for changes. Follow appearance changes
+//! with [`Window::observe_window_appearance`] when that is the application's
+//! theme policy. The global palette is shared by all windows, so choose which
+//! window or user preference governs it. Applications needing independent
+//! window themes can keep their palettes on each window's root entity.
 
 use crate::{App, Global, Window, WindowAppearance, rgb};
 use palette::rgb::Rgba;
 use std::ops::Deref;
 use std::sync::Arc;
 
-/// The default semantic color set for GPUI components.
+/// Colors for common interface roles, independent of layout and interaction.
 ///
-/// These are used for styling base components, examples and more.
+/// `Default` returns the light palette. Construction neither installs a
+/// global nor applies colors to elements; a component chooses which role to
+/// pass to its text, background, or border style.
 #[derive(Clone, Debug)]
 pub struct Colors {
     /// Primary text color.
@@ -41,7 +68,10 @@ impl Default for Colors {
 }
 
 impl Colors {
-    /// Returns the default colors for the given window appearance.
+    /// Builds the light or dark palette for the window's current appearance.
+    ///
+    /// Vibrant appearances select the corresponding light or dark palette.
+    /// This is a snapshot, with no subscription or change to [`GlobalColors`].
     pub fn for_appearance(window: &Window) -> Self {
         match window.appearance() {
             WindowAppearance::Light | WindowAppearance::VibrantLight => Self::light(),
@@ -77,13 +107,25 @@ impl Colors {
         }
     }
 
-    /// Returns the application-wide palette.
+    /// Borrows the palette installed in this app.
+    ///
+    /// [`App::init_colors`] installs the light defaults. Use [`App::set_global`]
+    /// to install a customized [`GlobalColors`] instead.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `GlobalColors` has not been installed or is temporarily leased
+    /// by a global update. Use [`App::try_global`] when absence is expected.
     pub fn get_global(cx: &App) -> &Arc<Colors> {
         &cx.global::<GlobalColors>().0
     }
 }
 
-/// Application-wide palette stored behind an [`Arc`].
+/// The application's shared palette, installed with [`App::set_global`].
+///
+/// Cloning this wrapper retains the same immutable palette. Replacing the
+/// app's global schedules global observers; previously cloned `Arc`s keep
+/// their old palette. Re-read the global when a consumer needs current colors.
 #[derive(Clone, Debug)]
 pub struct GlobalColors(
     /// Shared semantic palette.
@@ -100,9 +142,15 @@ impl Deref for GlobalColors {
 
 impl Global for GlobalColors {}
 
-/// Implement this trait to allow global [Colors] access via `cx.default_colors()`.
+/// Method syntax for borrowing an app's installed [`GlobalColors`].
+///
+/// Import this trait to call `cx.default_colors()` on [`App`] or a context that
+/// dereferences to it. The lookup has the same initialization requirements as
+/// [`Colors::get_global`].
 pub trait DefaultColors {
-    /// Returns the default [`Colors`]
+    /// Borrows the installed palette without observing future replacements.
+    ///
+    /// The [`App`] implementation panics when [`GlobalColors`] is absent or leased.
     fn default_colors(&self) -> &Arc<Colors>;
 }
 
@@ -112,9 +160,10 @@ impl DefaultColors for App {
     }
 }
 
-/// The appearance of the base GPUI colors, used to style GPUI elements
+/// A light/dark classification of [`WindowAppearance`].
 ///
-/// Varies based on the system's current [`WindowAppearance`].
+/// Conversion folds vibrant variants into their corresponding light or dark
+/// value. The enum does not observe the platform or install a palette.
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum DefaultAppearance {
     /// Use the set of colors for light appearances.

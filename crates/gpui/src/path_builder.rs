@@ -33,7 +33,25 @@ pub enum PathStyle {
     Fill(FillOptions),
 }
 
-/// A [`Path`] builder.
+/// Build filled or stroked contours, then tessellate them into a [`Path`].
+///
+/// Begin each contour with [`move_to`](Self::move_to), add line or curve
+/// segments, and consume the builder with [`build`](Self::build). Coordinates
+/// are logical pixels. Paint the result with [`Window::paint_path`](crate::Window::paint_path).
+/// See the [drawing chapter](crate::_documentation::drawing) for coordinate,
+/// clipping, and caching choices.
+///
+/// ```rust
+/// use gpui::{PathBuilder, point, px};
+/// let mut outline = PathBuilder::stroke(px(2.));
+/// outline.move_to(point(px(0.), px(0.)));
+/// outline.line_to(point(px(40.), px(0.)));
+/// outline.line_to(point(px(20.), px(24.)));
+/// outline.close();
+/// let path = outline.build()?;
+/// assert!(!path.vertices.is_empty());
+/// # Ok::<(), anyhow::Error>(())
+/// ```
 pub struct PathBuilder {
     raw: lyon::path::builder::WithSvg<lyon::path::BuilderImpl>,
     transform: Option<lyon::math::Transform>,
@@ -122,7 +140,10 @@ impl PathBuilder {
     /// The slice must be non-empty and contain only positive lengths. If it has
     /// an odd number of values, the full sequence is repeated so each pattern
     /// has an even number of on/off entries. This setting is used only for
-    /// strokes; the builder does not validate the values.
+    /// strokes. [`Self::build`] returns an error for an empty pattern,
+    /// non-finite or non-positive lengths, or lengths too small to advance
+    /// along the measured path. The pattern runs across the measured path;
+    /// this is not a complete implementation of SVG stroke semantics.
     ///
     /// See the [SVG stroke-dasharray reference](https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Attribute/stroke-dasharray).
     pub fn dash_array(mut self, dash_array: &[Pixels]) -> Self {
@@ -245,7 +266,11 @@ impl PathBuilder {
         }
     }
 
-    /// Adds a uniform scale to the transform applied during [`Self::build`].
+    /// Append a uniform scale to the path geometry's transform.
+    ///
+    /// Geometry is transformed before stroking. This does not multiply the
+    /// configured stroke width or dash lengths; the window's display scale
+    /// later scales the entire tessellated result.
     #[inline]
     pub fn scale(&mut self, scale: f32) {
         if let Some(transform) = self.transform {
@@ -275,6 +300,11 @@ impl PathBuilder {
     /// any dash array set on the builder. Dash lengths should be positive.
     /// The returned path is still in logical pixels; a window painting method
     /// converts it to scene space.
+    ///
+    /// Returns an error when lyon cannot tessellate the path or a stroke's
+    /// dash pattern is invalid. Builder commands are not a general validator
+    /// for arbitrary floating-point geometry; supply finite coordinates and
+    /// sensible tessellation options.
     #[inline]
     pub fn build(self) -> Result<Path<Pixels>, Error> {
         let path = if let Some(transform) = self.transform {
@@ -313,6 +343,13 @@ impl PathBuilder {
         options: &StrokeOptions,
     ) -> Result<Path<Pixels>, Error> {
         let path = if let Some(dash_array) = dash_array {
+            anyhow::ensure!(
+                !dash_array.is_empty()
+                    && dash_array
+                        .iter()
+                        .all(|length| length.0.is_finite() && length.0 > 0.),
+                "dash lengths must be finite, positive, and non-empty"
+            );
             let measurements = lyon::algorithms::measure::PathMeasurements::from_path(path, 0.01);
             let mut sampler = measurements
                 .create_sampler(path, lyon::algorithms::measure::SampleType::Normalized);
@@ -325,6 +362,10 @@ impl PathBuilder {
             while pos < total_length {
                 let dash_length = dash_array[dash_index % dash_array_len].0;
                 let next_pos = (pos + dash_length).min(total_length);
+                anyhow::ensure!(
+                    next_pos > pos,
+                    "dash length is too small to advance along the path"
+                );
                 if dash_index % 2 == 0 {
                     let start = pos / total_length;
                     let end = next_pos / total_length;
@@ -358,6 +399,9 @@ impl PathBuilder {
     /// Each index triple becomes one triangle. The vertex buffer's index list
     /// must therefore contain complete triangles; any trailing one or two
     /// indices are ignored.
+    ///
+    /// Panics if a complete triangle references a missing vertex. Prefer
+    /// [`Self::build`] when the buffers did not come from a trusted tessellator.
     pub fn build_path(buf: VertexBuffers<lyon::math::Point, u16>) -> Path<Pixels> {
         if buf.vertices.is_empty() {
             return Path::new(Point::default());
@@ -382,5 +426,34 @@ impl PathBuilder {
         }
 
         path
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn invalid_dash_patterns_return_errors() {
+        for pattern in [
+            vec![],
+            vec![px(0.)],
+            vec![px(-1.)],
+            vec![px(f32::NAN)],
+            vec![px(f32::INFINITY)],
+        ] {
+            let mut builder = PathBuilder::stroke(px(1.)).dash_array(&pattern);
+            builder.move_to(point(px(0.), px(0.)));
+            builder.line_to(point(px(10.), px(0.)));
+            assert!(builder.build().is_err(), "accepted {pattern:?}");
+        }
+    }
+
+    #[test]
+    fn dash_pattern_must_advance_in_floating_point() {
+        let mut builder = PathBuilder::stroke(px(1.)).dash_array(&[px(1.), px(f32::MIN_POSITIVE)]);
+        builder.move_to(point(px(0.), px(0.)));
+        builder.line_to(point(px(10.), px(0.)));
+        assert!(builder.build().is_err());
     }
 }

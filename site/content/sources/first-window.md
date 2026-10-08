@@ -12,7 +12,7 @@ description = "The annotated Rust source used to build this walkthrough."
 <span id="L3" class="source-line"><a href="#L3" class="line-number" data-line="3" aria-label="Line 3" tabindex="-1"></a></span>
 <span id="L4" class="source-line"><a href="#L4" class="line-number" data-line="4" aria-label="Line 4" tabindex="-1"></a>// ## Return the elements to draw &#123;#render&#125;</span>
 <span id="L5" class="source-line"><a href="#L5" class="line-number" data-line="5" aria-label="Line 5" tabindex="-1"></a>// The window will display “Hello, GPUI”. `Greeting` has no mutable fields, so</span>
-<span id="L6" class="source-line"><a href="#L6" class="line-number" data-line="6" aria-label="Line 6" tabindex="-1"></a>// its [`Render`] method only returns a [`div`] containing the string. `Render`</span>
+<span id="L6" class="source-line"><a href="#L6" class="line-number" data-line="6" aria-label="Line 6" tabindex="-1"></a>// its [`Render`] method only returns a [`div`] containing [`text`]. `Render`</span>
 <span id="L7" class="source-line"><a href="#L7" class="line-number" data-line="7" aria-label="Line 7" tabindex="-1"></a>// is the contract for an entity-backed view; the returned element tree is a</span>
 <span id="L8" class="source-line"><a href="#L8" class="line-number" data-line="8" aria-label="Line 8" tabindex="-1"></a>// description GPUI lays out and paints for the current frame.</span>
 <span id="L9" class="source-line"><a href="#L9" class="line-number" data-line="9" aria-label="Line 9" tabindex="-1"></a>//</span>
@@ -21,41 +21,46 @@ description = "The annotated Rust source used to build this walkthrough."
 <span id="L12" class="source-line"><a href="#L12" class="line-number" data-line="12" aria-label="Line 12" tabindex="-1"></a>// window supplies that root constraint. Follow the [rendering explanation](@/reference/rendering.md)</span>
 <span id="L13" class="source-line"><a href="#L13" class="line-number" data-line="13" aria-label="Line 13" tabindex="-1"></a>// from this returned tree through layout, prepaint, scene construction, and</span>
 <span id="L14" class="source-line"><a href="#L14" class="line-number" data-line="14" aria-label="Line 14" tabindex="-1"></a>// presentation.</span>
-<span id="L15" class="source-line"><a href="#L15" class="line-number" data-line="15" aria-label="Line 15" tabindex="-1"></a></span>
-<span id="L16" class="source-line"><a href="#L16" class="line-number" data-line="16" aria-label="Line 16" tabindex="-1"></a>use gpui::&#123;AppContext, Context, IntoElement, Render, Window, div, prelude::*, rgb&#125;;</span>
-<span id="L17" class="source-line"><a href="#L17" class="line-number" data-line="17" aria-label="Line 17" tabindex="-1"></a></span>
-<span id="L18" class="source-line"><a href="#L18" class="line-number" data-line="18" aria-label="Line 18" tabindex="-1"></a>struct Greeting;</span>
-<span id="L19" class="source-line"><a href="#L19" class="line-number" data-line="19" aria-label="Line 19" tabindex="-1"></a></span>
-<span id="L20" class="source-line"><a href="#L20" class="line-number" data-line="20" aria-label="Line 20" tabindex="-1"></a>impl Render for Greeting &#123;</span>
-<span id="L21" class="source-line"><a href="#L21" class="line-number" data-line="21" aria-label="Line 21" tabindex="-1"></a>    fn render(&amp;mut self, _window: &amp;mut Window, _cx: &amp;mut Context&lt;Self&gt;) -&gt; impl IntoElement &#123;</span>
-<span id="L22" class="source-line"><a href="#L22" class="line-number" data-line="22" aria-label="Line 22" tabindex="-1"></a>        div()</span>
-<span id="L23" class="source-line"><a href="#L23" class="line-number" data-line="23" aria-label="Line 23" tabindex="-1"></a>            .size_full()</span>
-<span id="L24" class="source-line"><a href="#L24" class="line-number" data-line="24" aria-label="Line 24" tabindex="-1"></a>            .flex()</span>
-<span id="L25" class="source-line"><a href="#L25" class="line-number" data-line="25" aria-label="Line 25" tabindex="-1"></a>            .items_center()</span>
-<span id="L26" class="source-line"><a href="#L26" class="line-number" data-line="26" aria-label="Line 26" tabindex="-1"></a>            .justify_center()</span>
-<span id="L27" class="source-line"><a href="#L27" class="line-number" data-line="27" aria-label="Line 27" tabindex="-1"></a>            .bg(rgb(0xf7f6f2))</span>
-<span id="L28" class="source-line"><a href="#L28" class="line-number" data-line="28" aria-label="Line 28" tabindex="-1"></a>            .text_color(rgb(0x155b50))</span>
-<span id="L29" class="source-line"><a href="#L29" class="line-number" data-line="29" aria-label="Line 29" tabindex="-1"></a>            .text_2xl()</span>
-<span id="L30" class="source-line"><a href="#L30" class="line-number" data-line="30" aria-label="Line 30" tabindex="-1"></a>            .child(&quot;Hello, GPUI&quot;)</span>
-<span id="L31" class="source-line"><a href="#L31" class="line-number" data-line="31" aria-label="Line 31" tabindex="-1"></a>    &#125;</span>
-<span id="L32" class="source-line"><a href="#L32" class="line-number" data-line="32" aria-label="Line 32" tabindex="-1"></a>&#125;</span>
-<span id="L33" class="source-line"><a href="#L33" class="line-number" data-line="33" aria-label="Line 33" tabindex="-1"></a></span>
-<span id="L34" class="source-line"><a href="#L34" class="line-number" data-line="34" aria-label="Line 34" tabindex="-1"></a>// ## Keep a root view in a window &#123;#window&#125;</span>
-<span id="L35" class="source-line"><a href="#L35" class="line-number" data-line="35" aria-label="Line 35" tabindex="-1"></a>// [`AppContext::new`] stores `Greeting` in the app and returns its entity</span>
-<span id="L36" class="source-line"><a href="#L36" class="line-number" data-line="36" aria-label="Line 36" tabindex="-1"></a>// handle. The window retains that entity as its root view.</span>
-<span id="L37" class="source-line"><a href="#L37" class="line-number" data-line="37" aria-label="Line 37" tabindex="-1"></a>//</span>
-<span id="L38" class="source-line"><a href="#L38" class="line-number" data-line="38" aria-label="Line 38" tabindex="-1"></a>// `support::run` starts the application and opens a window through</span>
-<span id="L39" class="source-line"><a href="#L39" class="line-number" data-line="39" aria-label="Line 39" tabindex="-1"></a>// [`App::open_window`]. On native targets its platform application calls</span>
-<span id="L40" class="source-line"><a href="#L40" class="line-number" data-line="40" aria-label="Line 40" tabindex="-1"></a>// [`Application::run`] to enter GPUI&#x27;s event loop; the web branch uses the</span>
-<span id="L41" class="source-line"><a href="#L41" class="line-number" data-line="41" aria-label="Line 41" tabindex="-1"></a>// embedded platform runner. The returned entity is installed as that window&#x27;s</span>
-<span id="L42" class="source-line"><a href="#L42" class="line-number" data-line="42" aria-label="Line 42" tabindex="-1"></a>// root, which keeps it alive while open. The downloadable Cargo example also</span>
-<span id="L43" class="source-line"><a href="#L43" class="line-number" data-line="43" aria-label="Line 43" tabindex="-1"></a>// includes the native launcher, so it can be run without reconstructing the</span>
-<span id="L44" class="source-line"><a href="#L44" class="line-number" data-line="44" aria-label="Line 44" tabindex="-1"></a>// setup around the view.</span>
-<span id="L45" class="source-line"><a href="#L45" class="line-number" data-line="45" aria-label="Line 45" tabindex="-1"></a></span>
-<span id="L46" class="source-line"><a href="#L46" class="line-number" data-line="46" aria-label="Line 46" tabindex="-1"></a>fn component(_window: &amp;mut Window, cx: &amp;mut gpui::App) -&gt; gpui::Entity&lt;Greeting&gt; &#123;</span>
-<span id="L47" class="source-line"><a href="#L47" class="line-number" data-line="47" aria-label="Line 47" tabindex="-1"></a>    cx.new(|_cx| Greeting)</span>
-<span id="L48" class="source-line"><a href="#L48" class="line-number" data-line="48" aria-label="Line 48" tabindex="-1"></a>&#125;</span>
-<span id="L49" class="source-line"><a href="#L49" class="line-number" data-line="49" aria-label="Line 49" tabindex="-1"></a></span>
-<span id="L50" class="source-line"><a href="#L50" class="line-number" data-line="50" aria-label="Line 50" tabindex="-1"></a>pub fn main() &#123;</span>
-<span id="L51" class="source-line"><a href="#L51" class="line-number" data-line="51" aria-label="Line 51" tabindex="-1"></a>    support::run(component);</span>
-<span id="L52" class="source-line"><a href="#L52" class="line-number" data-line="52" aria-label="Line 52" tabindex="-1"></a>&#125;</span></code></pre>
+<span id="L15" class="source-line"><a href="#L15" class="line-number" data-line="15" aria-label="Line 15" tabindex="-1"></a>//</span>
+<span id="L16" class="source-line"><a href="#L16" class="line-number" data-line="16" aria-label="Line 16" tabindex="-1"></a>// `text!` assigns the greeting a stable accessibility identity at this source</span>
+<span id="L17" class="source-line"><a href="#L17" class="line-number" data-line="17" aria-label="Line 17" tabindex="-1"></a>// location. A plain string can also be a child, but GPUI omits that anonymous</span>
+<span id="L18" class="source-line"><a href="#L18" class="line-number" data-line="18" aria-label="Line 18" tabindex="-1"></a>// text from its accessibility tree. Use `text!` for content a reader needs to</span>
+<span id="L19" class="source-line"><a href="#L19" class="line-number" data-line="19" aria-label="Line 19" tabindex="-1"></a>// discover with assistive technology.</span>
+<span id="L20" class="source-line"><a href="#L20" class="line-number" data-line="20" aria-label="Line 20" tabindex="-1"></a></span>
+<span id="L21" class="source-line"><a href="#L21" class="line-number" data-line="21" aria-label="Line 21" tabindex="-1"></a>use gpui::&#123;AppContext, Context, IntoElement, Render, Window, div, prelude::*, rgb, text&#125;;</span>
+<span id="L22" class="source-line"><a href="#L22" class="line-number" data-line="22" aria-label="Line 22" tabindex="-1"></a></span>
+<span id="L23" class="source-line"><a href="#L23" class="line-number" data-line="23" aria-label="Line 23" tabindex="-1"></a>struct Greeting;</span>
+<span id="L24" class="source-line"><a href="#L24" class="line-number" data-line="24" aria-label="Line 24" tabindex="-1"></a></span>
+<span id="L25" class="source-line"><a href="#L25" class="line-number" data-line="25" aria-label="Line 25" tabindex="-1"></a>impl Render for Greeting &#123;</span>
+<span id="L26" class="source-line"><a href="#L26" class="line-number" data-line="26" aria-label="Line 26" tabindex="-1"></a>    fn render(&amp;mut self, _window: &amp;mut Window, _cx: &amp;mut Context&lt;Self&gt;) -&gt; impl IntoElement &#123;</span>
+<span id="L27" class="source-line"><a href="#L27" class="line-number" data-line="27" aria-label="Line 27" tabindex="-1"></a>        div()</span>
+<span id="L28" class="source-line"><a href="#L28" class="line-number" data-line="28" aria-label="Line 28" tabindex="-1"></a>            .size_full()</span>
+<span id="L29" class="source-line"><a href="#L29" class="line-number" data-line="29" aria-label="Line 29" tabindex="-1"></a>            .flex()</span>
+<span id="L30" class="source-line"><a href="#L30" class="line-number" data-line="30" aria-label="Line 30" tabindex="-1"></a>            .items_center()</span>
+<span id="L31" class="source-line"><a href="#L31" class="line-number" data-line="31" aria-label="Line 31" tabindex="-1"></a>            .justify_center()</span>
+<span id="L32" class="source-line"><a href="#L32" class="line-number" data-line="32" aria-label="Line 32" tabindex="-1"></a>            .bg(rgb(0xf7f6f2))</span>
+<span id="L33" class="source-line"><a href="#L33" class="line-number" data-line="33" aria-label="Line 33" tabindex="-1"></a>            .text_color(rgb(0x155b50))</span>
+<span id="L34" class="source-line"><a href="#L34" class="line-number" data-line="34" aria-label="Line 34" tabindex="-1"></a>            .text_2xl()</span>
+<span id="L35" class="source-line"><a href="#L35" class="line-number" data-line="35" aria-label="Line 35" tabindex="-1"></a>            .child(text!(&quot;Hello, GPUI&quot;))</span>
+<span id="L36" class="source-line"><a href="#L36" class="line-number" data-line="36" aria-label="Line 36" tabindex="-1"></a>    &#125;</span>
+<span id="L37" class="source-line"><a href="#L37" class="line-number" data-line="37" aria-label="Line 37" tabindex="-1"></a>&#125;</span>
+<span id="L38" class="source-line"><a href="#L38" class="line-number" data-line="38" aria-label="Line 38" tabindex="-1"></a></span>
+<span id="L39" class="source-line"><a href="#L39" class="line-number" data-line="39" aria-label="Line 39" tabindex="-1"></a>// ## Keep a root view in a window &#123;#window&#125;</span>
+<span id="L40" class="source-line"><a href="#L40" class="line-number" data-line="40" aria-label="Line 40" tabindex="-1"></a>// [`AppContext::new`] stores `Greeting` in the app and returns its entity</span>
+<span id="L41" class="source-line"><a href="#L41" class="line-number" data-line="41" aria-label="Line 41" tabindex="-1"></a>// handle. The window retains that entity as its root view.</span>
+<span id="L42" class="source-line"><a href="#L42" class="line-number" data-line="42" aria-label="Line 42" tabindex="-1"></a>//</span>
+<span id="L43" class="source-line"><a href="#L43" class="line-number" data-line="43" aria-label="Line 43" tabindex="-1"></a>// `support::run` starts the application and opens a window through</span>
+<span id="L44" class="source-line"><a href="#L44" class="line-number" data-line="44" aria-label="Line 44" tabindex="-1"></a>// [`App::open_window`]. On native targets its platform application calls</span>
+<span id="L45" class="source-line"><a href="#L45" class="line-number" data-line="45" aria-label="Line 45" tabindex="-1"></a>// [`Application::run`] to enter GPUI&#x27;s event loop; the web branch uses the</span>
+<span id="L46" class="source-line"><a href="#L46" class="line-number" data-line="46" aria-label="Line 46" tabindex="-1"></a>// embedded platform runner. The returned entity is installed as that window&#x27;s</span>
+<span id="L47" class="source-line"><a href="#L47" class="line-number" data-line="47" aria-label="Line 47" tabindex="-1"></a>// root, which keeps it alive while open. The downloadable Cargo example also</span>
+<span id="L48" class="source-line"><a href="#L48" class="line-number" data-line="48" aria-label="Line 48" tabindex="-1"></a>// includes the native launcher, so it can be run without reconstructing the</span>
+<span id="L49" class="source-line"><a href="#L49" class="line-number" data-line="49" aria-label="Line 49" tabindex="-1"></a>// setup around the view.</span>
+<span id="L50" class="source-line"><a href="#L50" class="line-number" data-line="50" aria-label="Line 50" tabindex="-1"></a></span>
+<span id="L51" class="source-line"><a href="#L51" class="line-number" data-line="51" aria-label="Line 51" tabindex="-1"></a>fn component(_window: &amp;mut Window, cx: &amp;mut gpui::App) -&gt; gpui::Entity&lt;Greeting&gt; &#123;</span>
+<span id="L52" class="source-line"><a href="#L52" class="line-number" data-line="52" aria-label="Line 52" tabindex="-1"></a>    cx.new(|_cx| Greeting)</span>
+<span id="L53" class="source-line"><a href="#L53" class="line-number" data-line="53" aria-label="Line 53" tabindex="-1"></a>&#125;</span>
+<span id="L54" class="source-line"><a href="#L54" class="line-number" data-line="54" aria-label="Line 54" tabindex="-1"></a></span>
+<span id="L55" class="source-line"><a href="#L55" class="line-number" data-line="55" aria-label="Line 55" tabindex="-1"></a>pub fn main() &#123;</span>
+<span id="L56" class="source-line"><a href="#L56" class="line-number" data-line="56" aria-label="Line 56" tabindex="-1"></a>    support::run(component);</span>
+<span id="L57" class="source-line"><a href="#L57" class="line-number" data-line="57" aria-label="Line 57" tabindex="-1"></a>&#125;</span></code></pre>

@@ -15,7 +15,7 @@ These boundaries compose: a `RenderOnce` component can contain an entity handle,
 Derive `IntoElement` to use an owned component as a child. Its `render` method can consume fields and return the usual builder-based tree:
 
 ```rust
-use gpui::{div, prelude::*, App, IntoElement, RenderOnce, SharedString, Window};
+use gpui::{div, prelude::*, text, App, IntoElement, RenderOnce, SharedString, Window};
 
 #[derive(IntoElement)]
 struct Badge {
@@ -24,7 +24,7 @@ struct Badge {
 
 impl RenderOnce for Badge {
     fn render(self, _window: &mut Window, _cx: &mut App) -> impl IntoElement {
-        div().px_2().py_1().rounded_md().child(self.label)
+        div().px_2().py_1().rounded_md().child(text!(self.label))
     }
 }
 ```
@@ -61,7 +61,7 @@ Bounds are logical [`Pixels`](crate::Pixels); GPUI accounts for the window scale
 
 Use [`canvas`](crate::canvas) when layout can be described by style and only the prepaint/paint callbacks are custom. Prepaint runs after layout and can return frame-local data, such as a hitbox. Paint receives that value and records drawing commands. Both closures are consumed once for that element value, so construct a new canvas when the view renders again. The [drawing walkthrough](https://gpui-ce.github.io/examples/drawing/#paint) shows custom quads and masks; the [custom-element walkthrough](https://gpui-ce.github.io/examples/custom-element/) shows when to implement all three `Element` phases.
 
-Implement [`Element`](crate::Element) directly when custom measurement or layout, accessibility hooks, or the timing of child preparation is part of the behavior. In `request_layout`, request child layout IDs and combine them into the parent node. In `prepaint`, query each child's resolved bounds and prepare hitboxes or frame state. In `paint`, consume that prepared state. A useful element walkthrough should make each value's lifetime explicit.
+Implement [`Element`](crate::Element) directly when custom measurement or layout, accessibility hooks, or the timing of child preparation is part of the behavior. In `request_layout`, request child layout IDs and combine them into the parent node. In `prepaint`, query each child's resolved bounds and prepare hitboxes or frame state. In `paint`, borrow that prepared state to record drawing operations. The associated state lasts through this draw; use an entity or retained element state for values needed on a later frame.
 
 ## Choose a layout constraint
 
@@ -75,7 +75,7 @@ Use [`list`](crate::list) when row heights can differ. Keep its [`ListState`](cr
 
 `ListSizingBehavior::Infer` sizes the list from its items, while `Auto` leaves size resolution to its style and parent constraints. Choose `Infer` when content should determine the list's measured size; a scroll view still needs a bounded viewport to scroll. See [`ListSizingBehavior`](crate::ListSizingBehavior).
 
-Use [`uniform_list`](crate::uniform_list) when all rows share one height. It measures one row and lays out the requested range arithmetically, avoiding per-row Taffy layout. The callback receives a half-open range and must return one element per index, in the same order, with the same block-axis size as the measured row. The list is virtualized: do not expect the callback to run for every item.
+Use [`uniform_list`](crate::uniform_list) when all rows share one height. It measures a representative row to calculate the visible range, then lays out that range. The callback receives a half-open range and must return one element per index, in the same order, with the same height as the measured row. It also receives separate one-item measurement requests. Do not expect one callback per frame or a callback for every item. Choose the representative row with [`UniformList::with_width_from_item`](crate::UniformList::with_width_from_item) when horizontal scrolling needs the widest content.
 
 ```rust
 use gpui::{div, prelude::*, px, uniform_list, IntoElement, ParentElement};
@@ -103,7 +103,7 @@ For variable-height lists, [`ListAlignment::Bottom`](crate::ListAlignment::Botto
 ## Other element helpers
 
 - [`anchored`](crate::anchored) places a subtree relative to a parent point or window point, then flips its anchor or snaps it into the window when it would overflow.
-- [`deferred`](crate::deferred) keeps a child's layout but paints it in the deferred pass, after its ancestors. Use it for overlays that need to appear above surrounding content; deferred work has a depth limit.
+- [`deferred`](crate::deferred) draws above the main tree and escapes enclosing clipping while retaining the child's layout and keyboard dispatch parent. Use `content_mask` when the overlay needs an explicit clip. The [drawing chapter](crate::_documentation::drawing#choose-what-should-paint-above-what) combines deferral with anchored positioning.
 - [`AnimationExt`](crate::AnimationExt) animates a component or element under a stable ID. The ID retains animation state between frames. These helpers respect reduced-motion settings; repeating animations keep scheduling frames while their element remains in the tree.
 
 These helpers compose with `Div`, but their timing still matters: `container_query` chooses content after its size is known, `anchored` positions after child layout, and `deferred` changes paint order without removing the child from layout.
@@ -112,7 +112,7 @@ These helpers compose with `Div`, but their timing still matters: `container_que
 
 An element enters the accessibility tree when it has a stable ID and either an accessibility role or is explicitly hidden. Hidden containers can omit their subtree from assistive technology. Synthetic accessibility children let a custom element expose content that has no corresponding GPUI element; add them after prepaint and provide the parent ID and role/hidden contract. See the [accessibility guide](crate::_accessibility).
 
-`Div` combines style, children, and interaction. Event handlers are retained by the current element value, so bind them while building the tree and keep state in an entity or captured handle. Capture handlers run from the window toward the target; ordinary handlers bubble back toward the root. Methods with a button or typed payload apply that filter, while `*_all` methods expose the dispatch phase and hitbox. Assign a stable ID before using the stateful interaction builders. See [`InteractiveElement`](crate::InteractiveElement), [`StatefulInteractiveElement`](crate::StatefulInteractiveElement), and the [actions walkthrough](https://gpui-ce.github.io/examples/actions/#focus).
+`Div` combines style, children, and interaction. Event handlers are retained by the current element value, so bind them while building the tree and keep state in an entity or captured handle. Keyboard handlers follow the focus path; pointer handlers run in paint order during capture and reverse paint order during bubble, with element builders applying hitbox filters. Methods with a button or typed payload apply that filter, while `*_all` methods expose the dispatch phase and hitbox. Assign a stable ID before using the stateful interaction builders. See [`InteractiveElement`](crate::InteractiveElement), [`StatefulInteractiveElement`](crate::StatefulInteractiveElement), and the [actions walkthrough](https://gpui-ce.github.io/examples/actions/#focus).
 
 ## Scene and renderer boundary
 

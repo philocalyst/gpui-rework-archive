@@ -9,6 +9,22 @@
 //! only when both position and velocity satisfy the requested tolerance.
 //! [`SpringAnimation`] maps the scalar spring coordinate into richer outputs
 //! through [`SpringTarget`].
+//!
+//! For a UI, pass a [`SpringAnimation`] to
+//! [`AnimationExt::with_spring`](crate::AnimationExt::with_spring).
+//! The element keeps position and velocity between frames. For a simulation
+//! with its own clock, keep a [`SpringState`] and advance it yourself:
+//!
+//! ```
+//! use gpui::{SpringConfig, SpringState};
+//!
+//! let spring = SpringConfig::new(100.0, 20.0, 1.0);
+//! let state = spring.step(SpringState::default(), 80.0, 0.016);
+//! // A new target does not erase the velocity acquired toward the old one.
+//! let state = spring.step(state, 20.0, 0.016);
+//! assert!(state.position > 0.0);
+//! assert!(!spring.is_settled(state, 20.0, 0.01));
+//! ```
 
 use std::{ops::RangeInclusive, time::Duration};
 
@@ -47,7 +63,13 @@ impl SpringConfig {
         }
     }
 
-    /// Returns the natural angular frequency and damping ratio $(\omega_0, \zeta)$.
+    /// Returns `(natural angular frequency, damping ratio)`.
+    ///
+    /// Frequency is `sqrt(stiffness / mass)` in radians per second. The
+    /// dimensionless ratio is `damping / (2 * sqrt(stiffness * mass))`:
+    /// below one the response oscillates; at one it is critically damped;
+    /// above one it returns without oscillating. See the
+    /// [damped harmonic oscillator](https://en.wikipedia.org/wiki/Harmonic_oscillator#Damped_harmonic_oscillator).
     pub fn canonical(&self) -> (f32, f32) {
         let natural_frequency = (self.stiffness / self.mass).sqrt();
         let damping_ratio = self.damping / (2.0 * (self.stiffness * self.mass).sqrt());
@@ -72,8 +94,9 @@ impl SpringConfig {
 
     /// Advances a spring toward a target moving at a constant velocity.
     ///
-    /// A first-order hold avoids the frame-rate-dependent lag introduced by
-    /// treating a dragged target as stationary between frames. `target_velocity`
+    /// A [first-order hold](https://en.wikipedia.org/wiki/First-order_hold)
+    /// models the target as a straight ramp over this step. `target` is its
+    /// position at the start of the step, and `target_velocity`
     /// is in animated units per second and `delta_time` is elapsed seconds;
     /// `delta_time` must be finite and non-negative. Arguments are not validated.
     pub fn step_ramp(
@@ -175,8 +198,15 @@ impl SpringConfig {
 
     /// Returns a conservative time after which the spring remains settled.
     ///
-    /// An undamped spring has no finite settling time and returns
-    /// [`Duration::MAX`].
+    /// This bounds both displacement and velocity; it can exceed the first
+    /// time [`Self::is_settled`] returns true, since an oscillating spring
+    /// can leave the tolerance again. A state already at the target with
+    /// zero velocity returns zero.
+    ///
+    /// A non-positive or non-finite natural frequency, damping ratio, or
+    /// `epsilon` returns [`Duration::MAX`], as does an unrepresentable settling
+    /// time, unless the state is already at rest at the target. In particular,
+    /// an undamped spring does not settle.
     pub fn settle_time(&self, state: SpringState, target: f32, epsilon: f32) -> Duration {
         let displacement = state.position - target;
         if displacement == 0.0 && state.velocity == 0.0 {
@@ -287,6 +317,10 @@ pub struct SpringState {
 /// Implementations may project the spring coordinate into a richer output,
 /// allowing a discrete state or a path through a multidimensional value to be
 /// driven by one spring.
+///
+/// `f32`, [`Pixels`], and [`Rems`] resolve to their own types. A `bool`
+/// targets zero or one and resolves to an [`AnimationPhase`], so callers can
+/// interpolate several properties from the same spring.
 pub trait SpringTarget: 'static {
     /// The value supplied to the spring animator.
     type Output;
@@ -543,6 +577,10 @@ impl SpringAnimation<()> {
 
 impl<T> SpringAnimation<T> {
     /// Sets the settling tolerance in the target's scalar coordinate space.
+    ///
+    /// Use a finite positive value. For a pixel target this is a distance in
+    /// logical pixels; for a boolean target it is a fraction of the zero-to-one
+    /// transition. See [`Motion::with_epsilon`].
     pub fn with_epsilon(mut self, epsilon: f32) -> Self {
         self.motion = self.motion.with_epsilon(epsilon);
         self

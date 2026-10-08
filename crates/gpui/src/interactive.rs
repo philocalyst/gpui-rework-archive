@@ -112,7 +112,19 @@ pub enum TouchPhase {
 ///
 /// The value is opaque and assigned by the platform. A platform window must
 /// not reuse an identifier for a later touch.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord, serde::Serialize, serde::Deserialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Default,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    serde::Serialize,
+    serde::Deserialize,
+)]
 pub struct TouchId(pub u64);
 
 /// A raw touch contact update from the platform.
@@ -150,7 +162,13 @@ impl InputEvent for TouchEvent {
     }
 }
 
-/// A mouse-button press from the platform.
+/// A mouse-button press in logical window coordinates.
+///
+/// A press alone is not activation. Use
+/// [`StatefulInteractiveElement::on_click`](crate::StatefulInteractiveElement::on_click)
+/// for a control that should activate after a matching release, including
+/// keyboard activation. Use a press listener when the interaction must begin
+/// immediately, such as placing a caret or starting a drag.
 #[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 pub struct MouseDownEvent {
     /// Which mouse button was pressed.
@@ -162,10 +180,17 @@ pub struct MouseDownEvent {
     /// The modifiers that were held down when the mouse was pressed.
     pub modifiers: Modifiers,
 
-    /// The number of times the button has been clicked.
+    /// The platform's consecutive-click count for this press.
+    ///
+    /// A first click normally has count one. Timing and distance thresholds
+    /// belong to the input backend; this is not a count of all clicks on an
+    /// element.
     pub click_count: usize,
 
-    /// Whether this is the first, focusing click.
+    /// Whether the backend marks this as the click activating the window.
+    ///
+    /// This does not report whether a particular element acquired focus.
+    /// Backends that do not supply this distinction leave it false.
     pub first_mouse: bool,
 }
 
@@ -178,7 +203,9 @@ impl InputEvent for MouseDownEvent {
 impl MouseEvent for MouseDownEvent {}
 
 impl MouseDownEvent {
-    /// Returns `true` when this press conventionally focuses the target (currently left button).
+    /// Whether this button conventionally requests focus: currently the left button.
+    ///
+    /// This classification does not focus an element or inspect window focus.
     pub fn is_focusing(&self) -> bool {
         match self.button {
             MouseButton::Left => true,
@@ -213,7 +240,9 @@ impl InputEvent for MouseUpEvent {
 impl MouseEvent for MouseUpEvent {}
 
 impl MouseUpEvent {
-    /// Returns `true` when this release conventionally focuses the target (currently left button).
+    /// Whether this button conventionally requests focus: currently the left button.
+    ///
+    /// This classification does not focus an element or inspect window focus.
     pub fn is_focusing(&self) -> bool {
         match self.button {
             MouseButton::Left => true,
@@ -222,7 +251,11 @@ impl MouseUpEvent {
     }
 }
 
-/// A click assembled from a matching mouse press and release.
+/// The press and release retained for a mouse activation.
+///
+/// Their positions and modifiers may differ. [`ClickEvent::position`] and
+/// [`ClickEvent::modifiers`] use the release; inspect `down` when the starting
+/// position or initial modifiers matter.
 #[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 pub struct MouseClickEvent {
     /// The mouse event when the button was pressed.
@@ -317,11 +350,11 @@ impl Default for ClickEvent {
 }
 
 impl ClickEvent {
-    /// Returns the modifiers that were held during the click event.
+    /// Modifiers at mouse release, or an empty set for keyboard and touch activation.
     ///
-    /// `Keyboard`: The keyboard click events never have modifiers.
-    /// `Mouse`: Modifiers that were held during the mouse key up event.
-    /// `Touch`: Always the default modifier set.
+    /// GPUI generates keyboard clicks only without modifiers. For a mouse
+    /// click whose modifiers changed while held, inspect the stored
+    /// [`MouseClickEvent::down`] separately if the initial state matters.
     pub fn modifiers(&self) -> Modifiers {
         match self {
             // Click events are only generated from keyboard events _without any modifiers_, so we know the modifiers are always Default
@@ -335,11 +368,13 @@ impl ClickEvent {
         }
     }
 
-    /// Returns the position of the click event
+    /// An anchor in logical window coordinates for this activation.
     ///
-    /// `Keyboard`: The bottom left corner of the clicked hitbox
-    /// `Mouse`: The position of the mouse when the button was released.
-    /// `Touch`: The position of the tap.
+    /// Mouse activation uses the release position; touch activation uses the
+    /// tap position. Keyboard activation uses the element's bottom-left
+    /// corner, so a popup can be placed beside the control without a cursor.
+    /// Use [`mouse_position`](Self::mouse_position) when the operation
+    /// specifically requires mouse input rather than an activation anchor.
     pub fn position(&self) -> Point<Pixels> {
         match self {
             ClickEvent::Keyboard(event) => event.bounds.bottom_left(),
@@ -348,11 +383,11 @@ impl ClickEvent {
         }
     }
 
-    /// Returns the mouse position of the click event
+    /// The mouse release position, if this is a mouse activation.
     ///
-    /// `Keyboard`: None
-    /// `Mouse`: The position of the mouse when the button was released.
-    /// `Touch`: None, touches are not mouse input and there is no cursor.
+    /// Keyboard and direct touch activation return `None`. Portable touch
+    /// taps currently synthesize mouse events, however, and arrive as
+    /// [`ClickEvent::Mouse`]; this method cannot identify their physical device.
     pub fn mouse_position(&self) -> Option<Point<Pixels>> {
         match self {
             ClickEvent::Keyboard(_) => None,
@@ -361,10 +396,10 @@ impl ClickEvent {
         }
     }
 
-    /// Returns if this was a right click
+    /// Whether both mouse events used the right button.
     ///
-    /// `Keyboard`: false
-    /// `Mouse`: Whether the right button was pressed and released
+    /// Returns false for keyboard and touch variants. Use
+    /// [`is_secondary`](Self::is_secondary) to include a direct touch long press.
     pub fn is_right_click(&self) -> bool {
         match self {
             ClickEvent::Keyboard(_) => false,
@@ -375,10 +410,9 @@ impl ClickEvent {
         }
     }
 
-    /// Returns if this was a middle click
+    /// Whether both mouse events used the middle button.
     ///
-    /// `Keyboard`: false
-    /// `Mouse`: Whether the middle button was pressed and released
+    /// Returns false for keyboard and touch variants.
     pub fn is_middle_click(&self) -> bool {
         match self {
             ClickEvent::Keyboard(_) => false,
@@ -403,11 +437,9 @@ impl ClickEvent {
         }
     }
 
-    /// Returns whether the click was a standard click
+    /// Whether this is primary activation: a left click, keyboard click, or tap.
     ///
-    /// `Keyboard`: Always true
-    /// `Mouse`: Left button pressed and released
-    /// `Touch`: A tap, but not a long press
+    /// A direct touch long press is secondary activation and returns false.
     pub fn standard_click(&self) -> bool {
         match self {
             ClickEvent::Keyboard(_) => true,
@@ -418,11 +450,12 @@ impl ClickEvent {
         }
     }
 
-    /// Returns whether the click focused the element
+    /// The mouse press's window-activation flag, or false for other variants.
     ///
-    /// `Keyboard`: false, keyboard clicks only work if an element is already focused
-    /// `Mouse`: Whether this was the first focusing click
-    /// `Touch`: false, mobile windows are already active when tappable
+    /// This does not establish that the clicked element acquired focus.
+    /// See [`MouseDownEvent::first_mouse`] for the backend-dependent flag and
+    /// [`FocusHandle::is_focused`](crate::FocusHandle::is_focused) to query
+    /// an element's focus.
     pub fn first_focus(&self) -> bool {
         match self {
             ClickEvent::Keyboard(_) => false,
@@ -431,11 +464,9 @@ impl ClickEvent {
         }
     }
 
-    /// Returns the click count of the click event
+    /// The mouse release's consecutive-click count, the tap count, or one for a key.
     ///
-    /// `Keyboard`: Always 1
-    /// `Mouse`: Count of clicks from MouseUpEvent
-    /// `Touch`: Count of consecutive taps
+    /// The count follows the input sequence, not the lifetime of the control.
     pub fn click_count(&self) -> usize {
         match self {
             ClickEvent::Keyboard(_) => 1,
@@ -454,7 +485,9 @@ impl ClickEvent {
 }
 
 /// An enum representing the keyboard button that was pressed for a click event.
-#[derive(Hash, PartialEq, Eq, Copy, Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
+#[derive(
+    Hash, PartialEq, Eq, Copy, Clone, Debug, Default, serde::Serialize, serde::Deserialize,
+)]
 pub enum KeyboardButton {
     /// Enter key was clicked
     #[default]
@@ -464,7 +497,9 @@ pub enum KeyboardButton {
 }
 
 /// An enum representing the mouse button that was pressed.
-#[derive(Hash, Default, PartialEq, Eq, Copy, Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(
+    Hash, Default, PartialEq, Eq, Copy, Clone, Debug, serde::Serialize, serde::Deserialize,
+)]
 pub enum MouseButton {
     /// The left mouse button.
     #[default]
@@ -496,7 +531,9 @@ impl MouseButton {
 }
 
 /// A navigation direction, such as back or forward.
-#[derive(Hash, Default, PartialEq, Eq, Copy, Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(
+    Hash, Default, PartialEq, Eq, Copy, Clone, Debug, serde::Serialize, serde::Deserialize,
+)]
 pub enum NavigationDirection {
     /// The back button.
     #[default]
@@ -534,19 +571,28 @@ impl MouseMoveEvent {
     }
 }
 
-/// A mouse wheel event from the platform.
+/// Scrolling input from a wheel, trackpad, or GPUI's portable pan recognizer.
+///
+/// [`ScrollDelta`] distinguishes logical-pixel movement from line-based input.
+/// A scrolling [`Div`](crate::Div) adds the converted delta to its content
+/// offset: positive values move content right/down, and negative values reveal
+/// content farther along that axis. Use [`ScrollDelta::pixel_delta`] when a
+/// custom handler needs the same conversion.
 #[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 pub struct ScrollWheelEvent {
-    /// The position of the mouse on the window.
+    /// The reported pointer or pan position in logical window coordinates.
     pub position: Point<Pixels>,
 
-    /// The change in scroll wheel position for this event.
+    /// Incremental content movement, with its pixel or line unit preserved.
     pub delta: ScrollDelta,
 
-    /// The modifiers that were held down when the mouse was moved.
+    /// Modifiers held when this scrolling event was reported.
     pub modifiers: Modifiers,
 
-    /// The phase of the touch event.
+    /// The phase of a scroll gesture when the input path supplies one.
+    ///
+    /// Some paths, including ordinary browser wheel input, report only `Moved`.
+    /// Do not require `Started` before accepting a delta.
     pub touch_phase: TouchPhase,
 }
 
@@ -566,12 +612,16 @@ impl Deref for ScrollWheelEvent {
     }
 }
 
-/// The scroll delta for a scroll wheel event.
+/// Incremental scrolling in logical pixels or caller-scaled line units.
+///
+/// Use [`Self::pixel_delta`] to convert a line delta with the control's line
+/// height. A precise pixel delta is already in logical pixels; do not multiply
+/// it by the display scale.
 #[derive(Clone, Copy, Debug, serde::Serialize, serde::Deserialize)]
 pub enum ScrollDelta {
-    /// An exact scroll delta in pixels.
+    /// A precise movement in logical pixels, typically from a trackpad.
     Pixels(Point<Pixels>),
-    /// An inexact scroll delta in lines.
+    /// Movement in line units; the control chooses each line's pixel extent.
     Lines(Point<f32>),
 }
 
@@ -581,17 +631,28 @@ impl Default for ScrollDelta {
     }
 }
 
-/// A pinch gesture event from the platform, generated when the user performs
-/// a pinch-to-zoom gesture (typically on a trackpad).
+/// A platform-provided pinch gesture, typically from a desktop trackpad.
+///
+/// GPUI's portable touch recognizer currently recognizes taps, pans, and long
+/// presses; it does not synthesize this event from two touch contacts. Support
+/// and scale conventions depend on the platform input path.
 ///
 #[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 pub struct PinchEvent {
-    /// The position of the pinch center on the window.
+    /// The reported gesture location in logical window coordinates.
+    ///
+    /// Current desktop backends use the pointer location, which need not be the
+    /// centroid of the user's fingers.
     pub position: Point<Pixels>,
 
-    /// The zoom delta for this event.
-    /// Positive values indicate zooming in, negative values indicate zooming out.
-    /// For example, 0.1 represents a 10% zoom increase.
+    /// Signed scale change for this update: positive zooms in, negative zooms out.
+    ///
+    /// Current macOS and Windows paths report a fractional change from the
+    /// preceding update. X11 and Wayland instead subtract successive scales
+    /// relative to the gesture's start. For example, a gesture scale changing
+    /// from 1.5 to 1.6 produces `0.1` on those Linux paths, rather than
+    /// `1.6 / 1.5 - 1.0`. This field is therefore not a uniform multiplicative
+    /// scale across backends, nor an absolute scale to assign to a view.
     pub delta: f32,
 
     /// The modifiers that were held down during the pinch gesture.

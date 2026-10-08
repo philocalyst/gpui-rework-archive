@@ -65,6 +65,7 @@ impl Render for TextView {
             .child(
                 div()
                     .w(px(280.))
+                    .flex_shrink_0()
                     .text_size(px(18.))
                     .line_height(px(28.))
                     .text_color(rgb(0x202b29))
@@ -94,6 +95,6 @@ pub fn main() {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/text/") }}#L62).
+[View this step in the source]({{ get_url(path="sources/text/") }}#L63).
 
 [Download the complete source]({{ get_url(path="examples/text.rs") }}).

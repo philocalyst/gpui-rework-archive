@@ -3,9 +3,9 @@
 //! received record can become a Rust value; geometry validation follows capture
 //! decoding, before any renderer consumes it.
 use super::*;
+use crate::{BackgroundTag, ColorSpace, LinearColorStop};
 use serde::{Deserialize, Serialize};
 use std::mem::{align_of, offset_of, size_of};
-use crate::{BackgroundTag, ColorSpace, LinearColorStop};
 
 // Check each field's type, offset, and width, including nested records. A new
 // field, a changed field type, or implicit padding must fail compilation rather
@@ -195,7 +195,9 @@ mod tests {
         records: Vec<T>,
     }
     fn exercise<T: Record + PartialEq + std::fmt::Debug>(record: T, enums: &[usize]) {
-        let value = Records { records: vec![record, record] };
+        let value = Records {
+            records: vec![record, record],
+        };
         let bytes = bincode::serialize(&value).unwrap();
         assert_eq!(bytes.len(), 8 + 2 * size_of::<T>());
         let decoded: Records<T> = bincode::deserialize(&bytes).unwrap();
@@ -216,38 +218,117 @@ mod tests {
         }
         // A correct byte-string envelope containing a partial record must be
         // rejected before read_unaligned can construct a value.
-        let truncated = bincode::serialize(&serde_bytes::Bytes::new(&bytes[8..bytes.len() - 1])).unwrap();
+        let truncated =
+            bincode::serialize(&serde_bytes::Bytes::new(&bytes[8..bytes.len() - 1])).unwrap();
         assert!(bincode::deserialize::<Records<T>>(&truncated).is_err());
     }
     #[test]
     fn all_shader_records_preserve_fields_and_reject_invalid_discriminants() {
-        let bounds = Bounds::new(point(ScaledPixels(1.), ScaledPixels(2.)), crate::size(ScaledPixels(12.), ScaledPixels(14.)));
-        let mask = ContentMask { bounds, ..Default::default() };
-        let background_enums = [offset_of!(Background, tag), offset_of!(Background, color_space)];
+        let bounds = Bounds::new(
+            point(ScaledPixels(1.), ScaledPixels(2.)),
+            crate::size(ScaledPixels(12.), ScaledPixels(14.)),
+        );
+        let mask = ContentMask {
+            bounds,
+            ..Default::default()
+        };
+        let background_enums = [
+            offset_of!(Background, tag),
+            offset_of!(Background, color_space),
+        ];
         let mut quad_enums = vec![offset_of!(Quad, border_style)];
         for base in [offset_of!(Quad, background), offset_of!(Quad, border_color)] {
             quad_enums.extend(background_enums.map(|offset| base + offset));
         }
-        exercise(Quad { bounds, content_mask: mask, background: crate::rgb(0xff0088).into(), ..Default::default() }, &quad_enums);
-        exercise(Shadow {
-            order: 1, blur_radius: ScaledPixels(2.), bounds, corner_radii: Default::default(),
-            content_mask: mask, color: crate::rgb(0x123456).into(), element_bounds: bounds,
-            element_corner_radii: Default::default(), inset: true.into(), corner_smoothing: 0.5,
-        }, &[offset_of!(Shadow, inset), offset_of!(Shadow, color) + background_enums[0], offset_of!(Shadow, color) + background_enums[1]]);
-        exercise(Underline { order: 2, padding: 0, bounds, content_mask: mask,
-            color: SceneHsla::default(), thickness: ScaledPixels(1.), wavy: true.into(),
-        }, &[offset_of!(Underline, wavy)]);
-        let tile = |kind| AtlasTile { texture_id: AtlasTextureId { index: 3, kind }, tile_id: TileId(7), padding: 1,
-            bounds: Bounds::new(point(DevicePixels(1), DevicePixels(2)), crate::size(DevicePixels(4), DevicePixels(5))) };
+        exercise(
+            Quad {
+                bounds,
+                content_mask: mask,
+                background: crate::rgb(0xff0088).into(),
+                ..Default::default()
+            },
+            &quad_enums,
+        );
+        exercise(
+            Shadow {
+                order: 1,
+                blur_radius: ScaledPixels(2.),
+                bounds,
+                corner_radii: Default::default(),
+                content_mask: mask,
+                color: crate::rgb(0x123456).into(),
+                element_bounds: bounds,
+                element_corner_radii: Default::default(),
+                inset: true.into(),
+                corner_smoothing: 0.5,
+            },
+            &[
+                offset_of!(Shadow, inset),
+                offset_of!(Shadow, color) + background_enums[0],
+                offset_of!(Shadow, color) + background_enums[1],
+            ],
+        );
+        exercise(
+            Underline {
+                order: 2,
+                padding: 0,
+                bounds,
+                content_mask: mask,
+                color: SceneHsla::default(),
+                thickness: ScaledPixels(1.),
+                wavy: true.into(),
+            },
+            &[offset_of!(Underline, wavy)],
+        );
+        let tile = |kind| AtlasTile {
+            texture_id: AtlasTextureId { index: 3, kind },
+            tile_id: TileId(7),
+            padding: 1,
+            bounds: Bounds::new(
+                point(DevicePixels(1), DevicePixels(2)),
+                crate::size(DevicePixels(4), DevicePixels(5)),
+            ),
+        };
         let tile_kind = offset_of!(AtlasTile, texture_id) + offset_of!(AtlasTextureId, kind);
-        exercise(MonochromeSprite { order: 2, padding: 0, bounds, content_mask: mask,
-            color: SceneHsla::default(), tile: tile(AtlasTextureKind::Monochrome), transformation: TransformationMatrix::unit(),
-        }, &[offset_of!(MonochromeSprite, tile) + tile_kind]);
-        exercise(SubpixelSprite { order: 2, padding: 0, bounds, content_mask: mask,
-            color: SceneHsla::default(), tile: tile(AtlasTextureKind::Subpixel), transformation: TransformationMatrix::unit(),
-        }, &[offset_of!(SubpixelSprite, tile) + tile_kind]);
-        exercise(PolychromeSprite { order: 2, grayscale: false.into(), opacity: 0.4,
-            corner_smoothing: 0.6, bounds, content_mask: mask, corner_radii: Default::default(), tile: tile(AtlasTextureKind::Polychrome),
-        }, &[offset_of!(PolychromeSprite, grayscale), offset_of!(PolychromeSprite, tile) + tile_kind]);
+        exercise(
+            MonochromeSprite {
+                order: 2,
+                padding: 0,
+                bounds,
+                content_mask: mask,
+                color: SceneHsla::default(),
+                tile: tile(AtlasTextureKind::Monochrome),
+                transformation: TransformationMatrix::unit(),
+            },
+            &[offset_of!(MonochromeSprite, tile) + tile_kind],
+        );
+        exercise(
+            SubpixelSprite {
+                order: 2,
+                padding: 0,
+                bounds,
+                content_mask: mask,
+                color: SceneHsla::default(),
+                tile: tile(AtlasTextureKind::Subpixel),
+                transformation: TransformationMatrix::unit(),
+            },
+            &[offset_of!(SubpixelSprite, tile) + tile_kind],
+        );
+        exercise(
+            PolychromeSprite {
+                order: 2,
+                grayscale: false.into(),
+                opacity: 0.4,
+                corner_smoothing: 0.6,
+                bounds,
+                content_mask: mask,
+                corner_radii: Default::default(),
+                tile: tile(AtlasTextureKind::Polychrome),
+            },
+            &[
+                offset_of!(PolychromeSprite, grayscale),
+                offset_of!(PolychromeSprite, tile) + tile_kind,
+            ],
+        );
     }
 }

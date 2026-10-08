@@ -1,13 +1,14 @@
 //! Linear interpolation implementations used by GPUI motion.
 //!
-//! [`Lerp::lerp`] accepts any `delta`: values below zero extrapolate before
-//! `self`, and values above one extrapolate beyond `to`. This is intentional;
-//! spring and custom easing curves can overshoot. The result type is not always
+//! [`Lerp::lerp`] accepts an unclamped `delta`. Scalar implementations
+//! extrapolate outside `0..=1`, allowing spring and custom easing overshoot.
+//! The result type is not always
 //! the input type (`bool` interpolates to `f32`), and some structured values
 //! switch discretely when their variants or units differ. In particular,
 //! [`Background`] interpolates only between solid colors; gradients and
 //! patterns stay at the starting value until the endpoint. [`Hsla`] interpolation
-//! converts through sRGB [`Rgba`]. Separately, painted gradients use their
+//! converts through sRGB [`Rgba`] and clamps to the endpoints, as does
+//! [`Background`] interpolation. Separately, painted gradients use their
 //! configured [`crate::ColorSpace`] to blend their stops.
 use crate::{
     AbsoluteLength, Background, Bounds, Corners, DefiniteLength, DevicePixels, Edges, Fill, Length,
@@ -24,11 +25,31 @@ use std::{
 
 /// A trait for values that can be interpolated at a scalar progress value.
 ///
-/// `delta` is not clamped. Implementations may extrapolate below zero or above
-/// one, which is needed for spring overshoot. `Output` may differ from `Self`:
-/// for example, interpolating a `bool` produces an `f32`. Structured types
-/// choose their own behavior when their variants or units cannot be blended;
-/// consult the implementation when that distinction matters.
+/// Implementations receive `delta` unchanged: zero selects the starting
+/// value and one selects the target. Floating-point scalars extrapolate
+/// outside that interval. Integers interpolate through a floating-point
+/// value, then use Rust's integer cast, which truncates and saturates.
+/// `bool` produces an `f32` rather than another boolean.
+///
+/// [`Hsla`] interpolates through sRGB and clamps at both endpoints.
+/// [`Background`] does the same for solid colors; gradients and patterns
+/// retain the starting background until `delta >= 1`. Lengths with
+/// incompatible units also switch at one, except that zero can interpolate
+/// into either absolute unit.
+///
+/// [`Interpolate`](crate::Interpolate) is the companion API for
+/// [`AnimationPhase`](crate::AnimationPhase). Its HSL implementation follows
+/// the shortest hue path and permits overshoot. Choose the trait deliberately
+/// when animating colors: the two paths can produce different intermediate
+/// colors.
+///
+/// ```
+/// use gpui::{Lerp, px};
+///
+/// assert_eq!(px(10.0).lerp(&px(30.0), 0.25), px(15.0));
+/// assert_eq!(px(10.0).lerp(&px(30.0), 1.5), px(40.0));
+/// assert_eq!(false.lerp(&true, 0.25), 0.25);
+/// ```
 pub trait Lerp<Output = Self>
 where
     Self: Sized,

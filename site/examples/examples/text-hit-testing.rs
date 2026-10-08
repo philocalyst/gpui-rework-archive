@@ -13,8 +13,8 @@ mod support;
 // displayed cluster. Change the paragraph width and try the wrapped lines.
 
 use gpui::{
-    AppContext, Bounds, Context, IntoElement, MouseButton, MouseDownEvent, Render, StyledText,
-    Window, canvas, div, fill, prelude::*, px, rgb, size,
+    AppContext, Bounds, Context, IntoElement, MouseButton, MouseDownEvent, Render, Role,
+    StyledText, Window, canvas, div, fill, prelude::*, px, rgb, size, text,
 };
 
 const PARAGRAPH: &str = "Café — Straße — click a wrapped line to inspect its UTF-8 byte index.";
@@ -33,6 +33,9 @@ struct HitTest {
 // This demonstrates a cluster marker. A text editor also needs caret affinity,
 // grapheme-aware movement, selection, focus, and input-method handling. See
 // the [text guide](@/guides/text.md) before building those on a display element.
+// The paragraph has an accessible text label and the byte report uses [`text`].
+// Moving this diagnostic marker remains a pointer-only operation; it is not a
+// keyboard-accessible text selection control.
 
 impl Render for HitTest {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
@@ -51,6 +54,9 @@ impl Render for HitTest {
             .text_color(rgb(0x202b29))
             .child(
                 div()
+                    .id("paragraph")
+                    .role(Role::Label)
+                    .aria_label(PARAGRAPH)
                     .relative()
                     .w(px(280.))
                     .text_size(px(18.))
@@ -88,7 +94,7 @@ impl Render for HitTest {
                         .inset_0(),
                     ),
             )
-            .child(format!(
+            .child(text!(format!(
                 "Byte {} / {} · {}",
                 self.index,
                 PARAGRAPH.len(),
@@ -97,7 +103,7 @@ impl Render for HitTest {
                 } else {
                     "visual edge"
                 },
-            ))
+            )))
     }
 }
 

@@ -41,6 +41,31 @@ pub struct AnimatedSample<T> {
 /// The type parameter `Time` is the clock used by the caller. It only needs to
 /// support subtraction into [`Duration`], which makes deterministic tests easy
 /// with a numeric or duration clock. The default is [`std::time::Instant`].
+///
+/// Unlike [`Transition`](crate::Transition), this type neither requests frames
+/// nor applies the app's reduced-motion preference. Its owner decides when to
+/// sample, notify, and draw. Keep clock values in order: once a sample settles
+/// the run, sampling an earlier time does not rewind it.
+///
+/// # Example
+///
+/// Retargeting halfway through a run preserves the displayed value while
+/// changing the logical destination:
+///
+/// ```
+/// use gpui::{Animated, Motion};
+/// use std::time::Duration;
+///
+/// let motion = Motion::new(Duration::from_secs(1));
+/// let mut width = Animated::<f32, Duration>::new(0.0, &motion);
+/// width.set(10.0, &motion, Duration::ZERO);
+/// assert_eq!(width.sample(Duration::from_millis(500)).value, 5.0);
+///
+/// width.set(20.0, &motion, Duration::from_millis(500));
+/// assert_eq!(*width.value(), 20.0);
+/// assert_eq!(width.sample(Duration::from_millis(500)).value, 5.0);
+/// assert_eq!(width.sample(Duration::from_secs(1)).value, 12.5);
+/// ```
 #[derive(Clone)]
 pub struct Animated<T, Time = std::time::Instant> {
     value: T,
@@ -57,7 +82,10 @@ where
     T: Lerp + Clone + PartialEq,
     Time: Copy + Sub<Time, Output = Duration>,
 {
-    /// Creates a completed animated value.
+    /// Creates an inactive value presenting `value` immediately.
+    ///
+    /// `value` is also the origin restored by [`Self::reset`]. The first
+    /// [`Self::set`] call supplies the motion for that new run.
     pub fn new(value: T, motion: impl Into<AnyMotion>) -> Self {
         Self {
             initial_value: value.clone(),
@@ -70,7 +98,10 @@ where
         }
     }
 
-    /// Returns the logical target value.
+    /// Borrows the logical destination, which can differ from the displayed value.
+    ///
+    /// Use [`Self::sample`] to obtain the current presentation. An alternating
+    /// or custom motion can also settle away from this logical destination.
     pub fn value(&self) -> &T {
         &self.value
     }
@@ -140,7 +171,9 @@ where
         true
     }
 
-    /// Sets the logical and sampled value without animation.
+    /// Sets the logical and displayed value immediately, ending the active run.
+    ///
+    /// The original value retained for [`Self::reset`] is unchanged.
     pub fn jump_to(&mut self, value: T) {
         self.value = value.clone();
         self.last_value = value;
@@ -160,7 +193,9 @@ where
         }
     }
 
-    /// Restores the value used to initialize this animation.
+    /// Ends any active run and restores the value passed to [`Self::new`].
+    ///
+    /// This also undoes later [`Self::jump_to`] calls; it does not restart motion.
     pub fn reset(&mut self) {
         self.value = self.initial_value.clone();
         self.last_value = self.initial_value.clone();
@@ -168,7 +203,13 @@ where
         self.started_at = None;
     }
 
-    /// Evaluates the interpolated value at the supplied time.
+    /// Evaluates the presentation and records it if the motion has settled.
+    ///
+    /// Use `is_active` to decide whether continued sampling is needed. Eased
+    /// progress may overshoot, and a custom or alternating motion need not
+    /// finish at the logical target. After settling, this method returns the
+    /// recorded presentation until [`Self::set`], [`Self::jump_to`], or
+    /// [`Self::reset`] changes it. Sampling does not schedule a redraw.
     pub fn sample(&mut self, now: Time) -> AnimatedSample<T> {
         let Some(started_at) = self.started_at else {
             return AnimatedSample {

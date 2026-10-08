@@ -26,9 +26,24 @@ use collections::HashMap;
 
 slotmap::new_key_type! {
     /// The stable identity of one entity within its application.
+    ///
+    /// Obtain it from [`Entity::entity_id`] or [`AnyEntity::entity_id`]. It
+    /// identifies an allocation, not the value's current fields or its
+    /// position in an element tree. Slot generations distinguish a released
+    /// entity from a later allocation that reuses its storage.
+    ///
+    /// An ID does not retain an entity or prove that it is alive. Use a
+    /// strong handle to retain state or a [`WeakEntity`] to attempt access
+    /// later. IDs from different apps can compare equal; do not combine
+    /// them in an index without keeping their app scope separate.
+    /// The numeric representation is unsuitable as a persistent record key.
     pub struct EntityId;
 }
 
+/// Reconstruct the numeric key representation without checking an app.
+///
+/// This does not look up an entity, validate that it exists, or create an
+/// owning handle. Prefer retaining the handle or ID supplied by the app.
 impl From<u64> for EntityId {
     fn from(value: u64) -> Self {
         Self(KeyData::from_ffi(value))
@@ -36,12 +51,19 @@ impl From<u64> for EntityId {
 }
 
 impl EntityId {
-    /// Converts this entity id to a [NonZeroU64]
+    /// Return the slot-and-generation representation as a nonzero integer.
+    ///
+    /// This is useful for an in-process map or diagnostic. It does not make
+    /// the ID globally unique or stable across application runs.
     pub fn as_non_zero_u64(self) -> NonZeroU64 {
         NonZeroU64::new(self.0.as_ffi()).unwrap()
     }
 
-    /// Converts this entity id to a [u64]
+    /// Return the slot-and-generation representation.
+    ///
+    /// Converting it back with `EntityId::from` preserves the key but does
+    /// not establish that its entity still exists. Keep persistent domain
+    /// IDs on the model instead of serializing this allocation identity.
     pub fn as_u64(self) -> u64 {
         self.0.as_ffi()
     }
@@ -452,7 +474,8 @@ impl std::fmt::Debug for AnyEntity {
 ///
 /// Equality and hashing compare entity identity, not the fields of `T`.
 /// Handles belong to the app that created them; use that app's context for
-/// every read and update. See [ownership and data flow](crate::_ownership_and_data_flow)
+/// every read and update. The context mismatch check is a debug assertion,
+/// not a release-build validation boundary. See [ownership and data flow](crate::_ownership_and_data_flow)
 /// for the relationship between entities, views, and subscriptions.
 #[derive(Deref, DerefMut)]
 // docs:examples:begin
@@ -519,9 +542,9 @@ impl<T: 'static> Entity<T> {
     /// borrow ends. Calling this while the entity is already being updated
     /// panics because GPUI cannot create two simultaneous leases.
     #[inline]
-// docs:examples:begin
-#[doc = include_str!("../docs/examples/gpui-Entity-read-197b17d7.md")]
-// docs:examples:end
+    // docs:examples:begin
+    #[doc = include_str!("../docs/examples/gpui-Entity-read-197b17d7.md")]
+    // docs:examples:end
     pub fn read<'a>(&self, cx: &'a App) -> &'a T {
         cx.entities.read(self)
     }
@@ -554,9 +577,9 @@ impl<T: 'static> Entity<T> {
     /// panics. Use its `&mut T` argument. For a callback that must access the
     /// entity after this borrow ends, schedule it with [`App::defer`].
     #[inline]
-// docs:examples:begin
-#[doc = include_str!("../docs/examples/gpui-Entity-update-527f5c5d.md")]
-// docs:examples:end
+    // docs:examples:begin
+    #[doc = include_str!("../docs/examples/gpui-Entity-update-527f5c5d.md")]
+    // docs:examples:end
     pub fn update<R, C: AppContext>(
         &self,
         cx: &mut C,
@@ -930,9 +953,9 @@ impl<T: 'static> WeakEntity<T> {
     /// the callback is skipped when the handle cannot be upgraded. The error
     /// describes entity release; it does not catch panics in the callback or
     /// prevent a recursive entity borrow from panicking.
-// docs:examples:begin
-#[doc = include_str!("../docs/examples/gpui-WeakEntity-update-80df6484.md")]
-// docs:examples:end
+    // docs:examples:begin
+    #[doc = include_str!("../docs/examples/gpui-WeakEntity-update-80df6484.md")]
+    // docs:examples:end
     pub fn update<C, R>(
         &self,
         cx: &mut C,

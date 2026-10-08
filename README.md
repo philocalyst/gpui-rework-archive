@@ -7,7 +7,7 @@ Views own state, return element trees, and paint through a GPU renderer.
 The framework supplies layout, input dispatch, text shaping, and platform services;
 your application supplies the controls and their behavior.
 
-[Walkthroughs](https://gpui-ce.github.io/examples/) · [API reference](https://docs.rs/gpui-ce/) · [Discord](https://discord.gg/ENGHGjrYEn)
+[Walkthroughs](https://gpui-ce.github.io/examples/) · [Book](https://gpui-ce.github.io/book/) · [API reference](https://docs.rs/gpui-ce/) · [Discord](https://discord.gg/ENGHGjrYEn)
 
 ## Open a window
 
@@ -29,14 +29,20 @@ Each program is also a step-by-step page with a browser preview and a complete C
 | --- | --- |
 | Understand ownership and updates | [Ownership and data flow](crates/gpui/src/_ownership_and_data_flow.rs) |
 | Understand the frame pipeline | [Rendering](crates/gpui/docs/rendering.md) |
+| Size and place elements | [Layout](crates/gpui/docs/layout.md) |
+| Animate a changing value | [Animation](crates/gpui/docs/animation.md) |
+| Measure text and move a caret | [Text](crates/gpui/docs/text.md) |
+| Paint a custom region | [Drawing](crates/gpui/docs/drawing.md) |
 | Dispatch input and actions | [Input](crates/gpui/docs/input.md) |
 | Keep async work from blocking a view | [Scheduling](crates/gpui/docs/scheduling.md) |
-| Test state and input | [Testing](site/content/guides/testing.md) |
+| Test state, input, and drawing | [Testing](crates/gpui/docs/testing.md) |
+| Expose accessible controls | [Accessibility](crates/gpui/docs/accessibility.md) |
 | Compare the learning examples | [Example catalogue](docs/examples.md) |
 | Build or edit these docs | [Documentation authoring](docs/documentation-authoring.md) |
 
 The [Zola site](site/) holds tasks and walkthroughs.
 Long API explanations are included in rustdoc, where they stay beside the types and methods they explain.
+The book publishes those same chapters as a continuous reading path.
 API entries link back to the exact walkthrough steps that use them.
 
 ## Choose a revision

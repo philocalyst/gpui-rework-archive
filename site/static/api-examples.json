@@ -83,10 +83,10 @@
       },
       {
         "example": "counter",
-        "step": "state",
-        "step_title": "Own the count",
+        "step": "launch",
+        "step_title": "Create the view and open a window",
         "title": "Make state visible",
-        "url": "/examples/counter/#state"
+        "url": "/examples/counter/#launch"
       },
       {
         "example": "drawing",
@@ -189,10 +189,10 @@
       },
       {
         "example": "counter",
-        "step": "state",
-        "step_title": "Own the count",
+        "step": "render",
+        "step_title": "Read state into a frame",
         "title": "Make state visible",
-        "url": "/examples/counter/#state"
+        "url": "/examples/counter/#render"
       }
     ],
     "path": "gpui/struct.Context.html"
@@ -376,6 +376,19 @@
     ],
     "path": "gpui/trait.InteractiveElement.html"
   },
+  "gpui::InteractiveElement::tab_index": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.InteractiveElement.html#method.tab_index",
+    "examples": [
+      {
+        "example": "counter",
+        "step": "render",
+        "step_title": "Read state into a frame",
+        "title": "Make state visible",
+        "url": "/examples/counter/#render"
+      }
+    ],
+    "path": "gpui/trait.InteractiveElement.html#method.tab_index"
+  },
   "gpui::IntoElement": {
     "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.IntoElement.html",
     "examples": [
@@ -475,6 +488,32 @@
       }
     ],
     "path": "gpui/trait.Render.html"
+  },
+  "gpui::StatefulInteractiveElement::on_click": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.StatefulInteractiveElement.html#method.on_click",
+    "examples": [
+      {
+        "example": "counter",
+        "step": "render",
+        "step_title": "Read state into a frame",
+        "title": "Make state visible",
+        "url": "/examples/counter/#render"
+      }
+    ],
+    "path": "gpui/trait.StatefulInteractiveElement.html#method.on_click"
+  },
+  "gpui::StatefulInteractiveElement::role": {
+    "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.StatefulInteractiveElement.html#method.role",
+    "examples": [
+      {
+        "example": "counter",
+        "step": "render",
+        "step_title": "Read state into a frame",
+        "title": "Make state visible",
+        "url": "/examples/counter/#render"
+      }
+    ],
+    "path": "gpui/trait.StatefulInteractiveElement.html#method.role"
   },
   "gpui::Styled": {
     "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/trait.Styled.html",
@@ -907,11 +946,46 @@
     "docs": "https://docs.rs/gpui-ce/0.2.2/gpui/macro.text.html",
     "examples": [
       {
+        "example": "async-task",
+        "step": "lifetime",
+        "step_title": "Expose Start and Stop",
+        "title": "Finish a task after a delay",
+        "url": "/examples/async-task/#lifetime"
+      },
+      {
+        "example": "counter",
+        "step": "render",
+        "step_title": "Read state into a frame",
+        "title": "Make state visible",
+        "url": "/examples/counter/#render"
+      },
+      {
+        "example": "first-window",
+        "step": "render",
+        "step_title": "Return the elements to draw",
+        "title": "Open a window",
+        "url": "/examples/first-window/#render"
+      },
+      {
+        "example": "subscriptions",
+        "step": "observe-state",
+        "step_title": "Read the model; display the observation",
+        "title": "Observe shared state",
+        "url": "/examples/subscriptions/#observe-state"
+      },
+      {
         "example": "text",
         "step": "shaping",
         "step_title": "Count bytes, scalars, and graphemes separately",
         "title": "Shape and wrap text",
         "url": "/examples/text/#shaping"
+      },
+      {
+        "example": "text-hit-testing",
+        "step": "hit",
+        "step_title": "Keep the hit and the nearest edge distinct",
+        "title": "Map text to a pointer position",
+        "url": "/examples/text-hit-testing/#hit"
       }
     ],
     "path": "gpui/macro.text.html"

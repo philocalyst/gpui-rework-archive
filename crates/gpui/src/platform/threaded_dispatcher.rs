@@ -14,17 +14,19 @@ use crate::{
 
 const MIN_THREADS: usize = 2;
 
-/// A multithreaded [`PlatformDispatcher`] for tests and benchmarks.
+/// A real-time worker pool with a manually driven foreground queue.
 ///
-/// Background tasks run in parallel on a pool of worker threads and timers fire
-/// in real time on a dedicated timer thread, mirroring the production
-/// dispatchers (see `LinuxDispatcher`). Main-thread tasks are queued until the
-/// creating thread drains them via [`Self::run_until_idle`], since there is no
-/// platform run loop pumping them.
+/// Use this dispatcher for tests or benchmarks that need background threads
+/// to run concurrently. It starts at least two workers and a timer thread.
+/// Foreground tasks run only when the creating thread calls
+/// [`run_ready_main_tasks`](Self::run_ready_main_tasks) or
+/// [`run_until_idle`](Self::run_until_idle); there is no native event loop to
+/// drive them.
 ///
-/// Unlike [`TestDispatcher`](crate::TestDispatcher), which runs everything on a
-/// single thread with a virtual clock, work dispatched through this dispatcher
-/// executes with production concurrency.
+/// For reproducible task ordering and simulated time, use
+/// `TestDispatcher` (available with `headless` or `test-support`) instead. This dispatcher uses
+/// wall-clock deadlines and OS threads, so a passing run does not reproduce
+/// every possible interleaving. See the [testing chapter](https://gpui-ce.github.io/book/testing.html).
 pub struct ThreadedDispatcher {
     background_sender: PriorityQueueSender<RunnableVariant>,
     main_sender: PriorityQueueSender<RunnableVariant>,
@@ -120,8 +122,13 @@ impl Default for ThreadedDispatcher {
 impl ThreadedDispatcher {
     /// Creates a dispatcher whose main thread is the calling thread.
     ///
-    /// Worker and timer threads live for the lifetime of the process; the
-    /// dispatcher is expected to be created once and reused.
+    /// Reuse a dispatcher across workloads. Each instance starts a worker
+    /// pool, and its timer thread currently has no shutdown path. Worker
+    /// threads exit when the last background sender is dropped.
+    ///
+    /// # Panics
+    ///
+    /// Panics if a worker or timer thread cannot be started.
     pub fn new() -> Self {
         let (background_sender, background_receiver) = PriorityQueueReceiver::new();
         let (main_sender, main_receiver) = PriorityQueueReceiver::new();
@@ -215,8 +222,16 @@ impl ThreadedDispatcher {
     /// the dispatcher runs in real time and cannot skip ahead like the
     /// `TestDispatcher`'s virtual clock, so waiting on a future timer would
     /// block for its full real duration. Tasks sleeping on such timers are
-    /// considered idle. Must be called on the thread that created this
-    /// dispatcher.
+    /// considered idle. A task that continually requeues itself can keep this
+    /// call from returning. Use [`Self::run_ready_main_tasks`] to advance the
+    /// foreground queue by a bounded number of polls.
+    ///
+    /// This only tracks work submitted to this dispatcher. An external thread
+    /// can submit more work after the call returns.
+    ///
+    /// # Panics
+    ///
+    /// Panics on a thread other than the one that created this dispatcher.
     pub fn run_until_idle(&self) {
         assert!(
             self.is_main_thread(),
@@ -312,10 +327,17 @@ impl ThreadedDispatcher {
         }
     }
 
-    /// Runs the main-thread tasks that were queued when the call began,
-    /// returning whether any ran. Tasks dispatched while running (e.g. a task
-    /// re-queuing itself after yielding) are left for the next call, as on
-    /// the platform run loops.
+    /// Runs at most the initial foreground queue length, returning whether any task ran.
+    ///
+    /// Each task is selected by priority when it is popped. A newly submitted
+    /// high-priority task can therefore run before an older low-priority task
+    /// within this limit. The limit prevents a yielding task from extending
+    /// the call indefinitely; it is not a snapshot of particular tasks.
+    /// Background work and timers continue independently and are not awaited.
+    ///
+    /// # Panics
+    ///
+    /// Panics on a thread other than the one that created this dispatcher.
     pub fn run_ready_main_tasks(&self) -> bool {
         assert!(
             self.is_main_thread(),
@@ -358,8 +380,11 @@ impl ThreadedDispatcher {
         canceled
     }
 
-    /// Describes the dispatcher's idle-tracking state, for diagnosing
-    /// workloads that fail to reach quiescence.
+    /// Describes tracked work for diagnosing a workload that does not become idle.
+    ///
+    /// Counts are read separately while workers may be running, so this string
+    /// is a diagnostic sample rather than an atomic snapshot. Its format is
+    /// not a serialization contract.
     pub fn debug_state(&self) -> String {
         let inflight = *self.idle.inflight.lock();
         let timers = self.timers.state.lock().heap.len();

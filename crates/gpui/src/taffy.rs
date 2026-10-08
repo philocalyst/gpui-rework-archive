@@ -1091,26 +1091,36 @@ where
     }
 }
 
-/// The sizing constraint passed to a layout or measurement request.
+/// The space available along one axis during layout or intrinsic measurement.
 ///
-/// `Definite` supplies a concrete logical-pixel constraint. `MinContent` and `MaxContent` request
-/// intrinsic sizing behavior from the content and do not directly assign a final width or height.
+/// [`Window::request_measured_layout`] passes one value per axis to its
+/// measurement callback. `Definite` supplies a logical-pixel constraint;
+/// `MinContent` and `MaxContent` ask how the content would size itself without
+/// a concrete constraint. These values describe a query, not the element's
+/// final assigned size. Parent constraints and the element's [`Style`] also
+/// participate in layout.
+///
+/// For text, min-content measurement usually wraps at every allowed break;
+/// max-content measurement keeps soft lines unwrapped. Hard line breaks still
+/// separate rows. A custom measured element decides how to answer each query.
+/// See the [layout chapter](crate::_documentation::layout) for known dimensions
+/// versus available space.
 #[derive(Copy, Clone, Default, Debug, Eq, PartialEq)]
 pub enum AvailableSpace {
-    /// The amount of space available is the specified number of pixels
+    /// A concrete available extent in logical pixels, which need not be the final size.
     Definite(Pixels),
-    /// The amount of space available is indefinite and the node should be laid out under a min-content constraint
+    /// Ask for the smallest intrinsic extent the content can take under its break rules.
     #[default]
     MinContent,
-    /// The amount of space available is indefinite and the node should be laid out under a max-content constraint
+    /// Ask for the intrinsic extent without soft wrapping or a definite constraint.
     MaxContent,
 }
 
 impl AvailableSpace {
-    /// Returns a `Size` with both width and height set to `AvailableSpace::MinContent`.
+    /// Ask for min-content sizing on both axes.
     ///
-    /// This function is useful when you want to create a `Size` with the minimum content constraints
-    /// for both dimensions.
+    /// Use this to measure intrinsic size; use `size(width, height).into()`
+    /// to provide a definite [`Size<Pixels>`] constraint instead.
     ///
     /// # Examples
     ///

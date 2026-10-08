@@ -13,7 +13,7 @@ mod support;
 
 use gpui::{
     AppContext, Context, FocusHandle, IntoElement, KeyBinding, Render, Window, actions, div,
-    prelude::*, rgb,
+    prelude::*, rgb, text,
 };
 
 actions!(counter_keys, [Increment]);
@@ -77,7 +77,7 @@ impl Render for KeyboardCounter {
             .gap_4()
             .bg(rgb(0xf7f6f2))
             .text_color(rgb(0x202b29))
-            .child(format!("Count: {}", self.count))
-            .child("Press Space to increment")
+            .child(text!(format!("Count: {}", self.count)))
+            .child(text!("Press Space to increment"))
     }
 }

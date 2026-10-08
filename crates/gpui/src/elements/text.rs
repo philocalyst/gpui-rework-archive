@@ -27,56 +27,50 @@ use std::{
 };
 use unicode_segmentation::UnicodeSegmentation;
 
-/// An [`Element`] that shapes, lays out, and paints text.
+/// Text that inherits its parent's typography and can identify itself to
+/// assistive technology.
 ///
-/// Text layout is measured under the width and height constraints supplied by the parent. Keep a
-/// stable ID when changing the string if assistive technology should observe an update to the same
-/// node; use a new ID when the replacement is semantically a different node. Methods on
-/// [`TextLayout`] use UTF-8 byte indices, not grapheme or character counts.
+/// Use [`text!`](crate::text!) for ordinary labels. The parent supplies font,
+/// color, wrapping, and overflow styles, and its layout constraints determine
+/// the space available to the text. Use [`StyledText`] when different byte
+/// ranges need different styles or a callback needs the measured positions.
 ///
-/// In general, [`Text`] objects should be created via the [`crate::text!`] macro:
 /// ```rust
-/// # use gpui::*;
-/// # fn render() -> impl IntoElement {
-/// div().child(text!("hello"))
-/// # }
+/// use gpui::{IntoElement, ParentElement as _, Styled as _, div, text};
+///
+/// fn greeting() -> impl IntoElement {
+///     div().text_lg().child(text!("Hello"))
+/// }
 /// ```
-/// ## IDs and Accessibility
 ///
-/// [`Text`] elements have an ID. This ID is primarily used to produce nodes in
-/// the accessibility tree, which allows the text to be visible to screen
-/// readers and other assistive technologies.
+/// # Preserve the identity of a label
 ///
-/// This ID is stable across frames. If the same text, with the same ID, is
-/// present in two consecutive frames, no updates are reported to the screen
-/// reader. If the text changes, but the ID stays the same, then the screen
-/// reader will be notified that a text node's content has changed. **However**,
-/// if the ID changes, then the screen reader will be notified that a node has
-/// been removed, and a new node has been added.
+/// An ID gives this element a `Label` node in the accessibility tree. Keep it
+/// stable when the same label changes content, such as a counter or status.
+/// Changing the ID replaces the node. Tree updates allow assistive technology
+/// to inspect the change; they do not guarantee a spoken announcement.
 ///
-/// When using the [`crate::text!`] macro, each invocation of the macro will get a
-/// unique ID, derived from its position in the source code (filename, line, and
-/// column). For example:
+/// The macro derives its default ID from its source location. One invocation
+/// in a helper or loop therefore produces the same ID on every call:
+///
 /// ```rust
-/// # use gpui::*;
-/// let x = text!("hello");
-/// let y = text!("hello");
-/// // not equal, because different `text!` invocations produced them
-/// assert_ne!(x.id(), y.id());
+/// use gpui::{Text, text};
 ///
-/// fn make_text(s: &str) -> Text { text!(s) }
-/// let x = make_text("hello");
-/// let y = make_text("hello");
-/// // equal, because the same `text!` invocation produced them
-/// assert_eq!(x.id(), y.id());
+/// fn status(message: &str) -> Text { text!(message) }
+/// assert_eq!(status("Loading").id(), status("Ready").id());
+/// assert_ne!(text!("Loading").id(), text!("Ready").id());
 /// ```
-/// When the contents of an invocation of [`crate::text!`] do not change, this
-/// distinction is less relevant (with the caveat that you still need to take
-/// care to ensure that duplicate IDs do not appear).
 ///
-/// However, when a [`crate::text!`] invocation's argument *does* change, you should
-/// consider whether this change should be reported as a node "updating its
-/// contents", or an old node being destroyed and a new node being created.
+/// IDs must be unique within their parent identity path. Repeated rows need
+/// their own parent IDs or an explicit text ID, for example
+/// `text!(id = ("row-label", row_id), label)`. See the
+/// [accessibility guide](crate::_accessibility) for repeated elements and
+/// naming a whole control.
+///
+/// [`Self::new_inaccessible`] draws text without a node of its own. Use it for
+/// the visible label inside a control whose parent already supplies the
+/// accessible name. Bare strings and [`SharedString`] children also have no
+/// accessibility node; adding text visually does not name a control.
 #[derive(Debug, Clone)]
 // docs:examples:begin
 #[doc = include_str!("../docs/examples/gpui-Text-897555e2.md")]
@@ -87,10 +81,11 @@ pub struct Text {
 }
 
 impl Text {
-    /// Create accessible text with a specific stable ID.
+    /// Create a label node with an explicit element ID.
     ///
-    /// If you want a unique ID to be assigned automatically, use the [`crate::text!`]
-    /// macro. The docs for [`Text`] have more detail about choosing IDs.
+    /// Keep the ID stable for the same semantic label and unique within its
+    /// parent identity path. [`text!`](crate::text!) supplies an ID derived
+    /// from the macro's source location when an explicit ID is unnecessary.
     #[inline]
     pub const fn new(id: ElementId, text: SharedString) -> Self {
         Self { id: Some(id), text }
@@ -98,13 +93,10 @@ impl Text {
 
     /// Create text without an accessibility node of its own.
     ///
-    /// In order for text to be accessible to screen readers, it must have an ID
-    /// provided. If you want text to be accessible, either use [`crate::text!`] to have
-    /// an ID automatically assigned, or use [`Text::new`] to manually assign an
-    /// ID.
-    ///
-    /// This function is intended for use inside custom UI components, where
-    /// accessible properties may be set on parent containers.
+    /// Use this inside a control whose parent supplies the accessible name,
+    /// avoiding a second label node for the same content. For an independent
+    /// label, use [`text!`](crate::text!) or [`Self::new`]. This choice changes
+    /// accessibility metadata, not drawing or layout.
     #[inline]
     pub const fn new_inaccessible(text: SharedString) -> Self {
         Self { id: None, text }
@@ -116,13 +108,19 @@ impl Text {
         self.id.as_ref()
     }
 
-    /// Produce a new [`Text`] with the given `id`.
+    /// Set or replace the element's ID, enabling its label node.
+    ///
+    /// Replacing the ID between frames replaces the accessibility node. Prefer
+    /// changing the string while keeping the ID for a continuing label.
     pub fn with_id(mut self, id: impl Into<ElementId>) -> Self {
         self.id = Some(id.into());
         self
     }
 
-    /// Return the displayed UTF-8 text.
+    /// Return the source string before layout transforms or truncation.
+    ///
+    /// It can differ from the displayed text when the parent applies
+    /// [`TextTransform`] or [`TextOverflow`].
     #[inline]
     pub const fn text(&self) -> &SharedString {
         &self.text
@@ -161,18 +159,19 @@ pub const fn __hash_text_macro_location_unstable_do_not_use(s: &'static str) -> 
     hash
 }
 
-/// Create a new [`Text`] element.
+/// Create a [`Text`] label with a source-location ID or an explicit ID.
 ///
 /// ```rust
-/// # use gpui::*;
+/// use gpui::text;
 /// let a = text!("hello");
-/// let b = text!(id = "farewell-message", "hello");
-///
+/// let b = text!(id = "farewell-message", "goodbye");
 /// ```
 ///
-/// Text created with this macro is *accessible*. The macro generates an ID
-/// based on the source location. See the docs for [`Text`] for a more in-depth
-/// explanation of the significance of the ID of a [`Text`] element.
+/// The default ID is the same whenever execution reaches this macro invocation.
+/// In a loop, give each row its own parent ID or pass a unique explicit ID.
+/// The string may change without changing the label's identity. See [`Text`]
+/// for the accessibility contract and [`Text::new_inaccessible`] for visible
+/// text whose parent already provides an accessible name.
 #[macro_export]
 // docs:examples:begin
 #[doc = include_str!("../docs/examples/gpui-text.md")]
@@ -409,11 +408,31 @@ impl IntoElement for SharedString {
 /// [`with_runs`](Self::with_runs) for a complete sequence of styled byte ranges,
 /// or [`with_highlights`](Self::with_highlights) to override selected ranges.
 /// A plain [`SharedString`] is sufficient when all text uses the parent's style.
+/// Neither form creates an accessibility node. Use [`Text`] for an independent
+/// accessible label, or give the containing control an accessible name.
 ///
 /// Clone [`layout`](Self::layout) before moving the element into its parent to
 /// share its measured text positions with an input handler or paint callback.
 /// The layout is populated while this element is drawn; querying positions
 /// during `Render::render` is too early.
+///
+/// # Highlight a substring
+///
+/// Ranges refer to UTF-8 bytes in the source string. Derive a range from the
+/// string instead of counting its visible characters:
+///
+/// ```rust
+/// use gpui::{FontWeight, HighlightStyle, StyledText};
+///
+/// let label = "Open café";
+/// let start = label.find("café").unwrap();
+/// let text = StyledText::new(label).with_highlights([(
+///     start..label.len(),
+///     HighlightStyle { font_weight: Some(FontWeight::BOLD), ..Default::default() },
+/// )]);
+/// let positions = text.layout().clone();
+/// // Move `text` into the element tree. Query `positions` after prepaint.
+/// ```
 pub struct StyledText {
     text: SharedString,
     runs: Option<Vec<TextRun>>,
@@ -423,7 +442,10 @@ pub struct StyledText {
 }
 
 impl StyledText {
-    /// Creates a text element that initially uses the inherited style.
+    /// Create text using the inherited style unless explicit runs override it.
+    ///
+    /// The layout starts unmeasured. Attach the element to a rendered tree
+    /// before querying the handle returned by [`Self::layout`].
     pub fn new(text: impl Into<SharedString>) -> Self {
         StyledText {
             text: text.into(),
@@ -439,9 +461,9 @@ impl StyledText {
     /// Clone the handle before moving the element into a parent. The clone
     /// sees the same measurement and prepaint bounds; it does not copy a
     /// snapshot. Pixel/index queries require those phases to have finished.
-// docs:examples:begin
-#[doc = include_str!("../docs/examples/gpui-StyledText-layout-07cba400.md")]
-// docs:examples:end
+    // docs:examples:begin
+    #[doc = include_str!("../docs/examples/gpui-StyledText-layout-07cba400.md")]
+    // docs:examples:end
     pub fn layout(&self) -> &TextLayout {
         &self.layout
     }
@@ -451,6 +473,10 @@ impl StyledText {
     /// The ranges are interpreted in the original string. Supply them in ascending order,
     /// without overlap, and with endpoints on UTF-8 boundaries. Unhighlighted bytes use
     /// `default_style`.
+    ///
+    /// Choose this, [`Self::with_highlights`], or [`Self::with_runs`] as the
+    /// source of the runs; do not combine them. Mixing delayed highlights
+    /// with this method panics in debug builds.
     pub fn with_default_highlights(
         mut self,
         default_style: &TextStyle,
@@ -469,6 +495,10 @@ impl StyledText {
     /// The ranges are interpreted in the original string. Supply them in ascending order,
     /// without overlap, and with endpoints on UTF-8 boundaries. The inherited style is read when
     /// layout is requested, so this method does not capture the current style by itself.
+    ///
+    /// A later call replaces earlier highlights. Do not combine it with
+    /// [`Self::with_runs`] or [`Self::with_default_highlights`]; supplying
+    /// explicit runs first panics in debug builds.
     pub fn with_highlights(
         mut self,
         highlights: impl IntoIterator<Item = (Range<usize>, HighlightStyle)>,
@@ -677,6 +707,20 @@ impl IntoElement for StyledText {
 /// [`position_for_index`](Self::position_for_index) maps an index back to a
 /// visual position, including soft wraps. This is display geometry, not a
 /// complete selection or editable-text model.
+///
+/// # Keep the string and its geometry together
+///
+/// A byte offset addresses the string returned by [`Self::text`]. It counts
+/// neither Unicode scalars nor [grapheme clusters](https://www.unicode.org/reports/tr29/#Grapheme_Cluster_Boundaries),
+/// which approximate characters as a reader perceives them. A shaped cluster
+/// may also contain several scalars or a ligature. Use the position methods
+/// to interpret the layout instead of multiplying an index by a character width.
+///
+/// > [!WARNING]
+/// > Truncation inserts an affix and removes source bytes. Indices into this
+/// > measured display string are not a mapping back to the untruncated source.
+/// > Keep overflow truncation off when source-based selection or click ranges
+/// > need to preserve their offsets.
 #[derive(Default, Clone)]
 // docs:examples:begin
 #[doc = include_str!("../docs/examples/gpui-TextLayout-7e2379bf.md")]
@@ -870,7 +914,12 @@ impl TextLayoutTruncation {
 }
 
 impl TextLayout {
-    /// Evaluates the width to wrap the text at.
+    /// Choose the wrapping width from the layout constraints.
+    ///
+    /// [`WhiteSpace::Nowrap`] returns `None`. With normal wrapping, a known
+    /// width wins over a definite available width. A min-content probe uses
+    /// zero to request the narrowest unbreakable content; max-content leaves
+    /// the text unconstrained.
     pub fn evaluate_wrap_width(
         white_space: &WhiteSpace,
         known_dimensions: Size<Option<Pixels>>,
@@ -887,7 +936,11 @@ impl TextLayout {
         }
     }
 
-    /// Evaluates the containing width used to align text independently of wrapping.
+    /// Choose the containing width used for row alignment.
+    ///
+    /// A known width wins over a definite available width. Intrinsic min- and
+    /// max-content probes have no alignment width. This choice is independent
+    /// of [`WhiteSpace`], so unwrapped text can still align in a wider box.
     pub fn evaluate_alignment_width(
         known_dimensions: Size<Option<Pixels>>,
         available_space: Size<crate::AvailableSpace>,
@@ -898,7 +951,12 @@ impl TextLayout {
         })
     }
 
-    /// Evaluates how truncation should be applied if the text overflows the available space.
+    /// Resolve the overflow affix, cut direction, and available width.
+    ///
+    /// Without [`TextStyle::text_overflow`], the result has no width and
+    /// [`Self::apply_truncation`] leaves the source alone. Intrinsic sizing
+    /// probes also have no truncation width. With a definite width, the
+    /// overflow variant chooses whether to remove the start, end, or middle.
     pub fn evaluate_overflow(
         text_style: &TextStyle,
         known_dimensions: Size<Option<Pixels>>,
@@ -947,7 +1005,19 @@ impl TextLayout {
         (options, truncation)
     }
 
-    /// Conditionally applies truncation to some text and outputs how the text should be displayed.
+    /// Fit text by removing complete grapheme clusters and inserting an affix.
+    ///
+    /// The result contains the displayed string and corresponding style runs.
+    /// If no truncation width is supplied, or the shaped text already fits
+    /// its width and line limit, it returns the original string with borrowed
+    /// runs. A truncated result owns rebuilt runs whose lengths address the
+    /// new string. When even the affix exceeds the width, the affix is still
+    /// retained; this operation is not a clipping mask.
+    ///
+    /// The cut uses logical source order. `paragraph_direction` and
+    /// `unicode_bidi` affect shaping; they do not turn a start cut into a
+    /// visual-left cut. Callers must provide runs covering the complete source
+    /// on UTF-8 boundaries, as for [`StyledText::with_runs`].
     pub fn apply_truncation<'runs>(
         text: SharedString,
         text_style: &TextStyle,
@@ -1165,9 +1235,9 @@ impl TextLayout {
     /// # Panics
     ///
     /// Panics before measurement or before prepaint has supplied bounds.
-// docs:examples:begin
-#[doc = include_str!("../docs/examples/gpui-TextLayout-index-for-position-e86c31c2.md")]
-// docs:examples:end
+    // docs:examples:begin
+    #[doc = include_str!("../docs/examples/gpui-TextLayout-index-for-position-e86c31c2.md")]
+    // docs:examples:end
     pub fn index_for_position(&self, pixel_point: Point<Pixels>) -> Result<usize, usize> {
         let element_state = self.measured();
         let bounds = element_state
@@ -1195,9 +1265,9 @@ impl TextLayout {
     /// # Panics
     ///
     /// Panics before measurement or before prepaint has supplied bounds.
-// docs:examples:begin
-#[doc = include_str!("../docs/examples/gpui-TextLayout-position-for-index-c7efd047.md")]
-// docs:examples:end
+    // docs:examples:begin
+    #[doc = include_str!("../docs/examples/gpui-TextLayout-position-for-index-c7efd047.md")]
+    // docs:examples:end
     pub fn position_for_index(&self, byte_index: usize) -> Option<Point<Pixels>> {
         let element_state = self.measured();
         let bounds = element_state
@@ -1221,10 +1291,12 @@ impl TextLayout {
         (index <= document.len()).then(|| document.layout.clone())
     }
 
-    /// Returns the shaped document layout, or an empty vector for empty text.
+    /// Return the shaped document layout, if shaping produced one.
     ///
     /// The single returned layout can contain several visual lines. This
-    /// method does not return one entry per soft wrap. Panics before measurement.
+    /// method does not return one entry per soft wrap. An empty string can
+    /// still have a shaped document; the vector is empty only when no document
+    /// was produced. Panics before measurement.
     pub fn line_layouts(&self) -> SmallVec<[Arc<ShapedTextLayout>; 1]> {
         self.measured()
             .document
@@ -1254,7 +1326,11 @@ impl TextLayout {
         self.measured().len
     }
 
-    /// The text for this layout.
+    /// Copy the measured display string, after transforms and truncation.
+    ///
+    /// Returns an empty string if no shaped document was produced. Panics
+    /// before measurement. Use this string when interpreting the byte offsets
+    /// returned by the position methods.
     pub fn text(&self) -> String {
         self.measured()
             .document
@@ -1262,7 +1338,12 @@ impl TextLayout {
             .map_or_else(String::new, |document| document.text.to_string())
     }
 
-    /// The text for this layout (with soft-wraps as newlines)
+    /// Copy the displayed visual rows, separated by newlines.
+    ///
+    /// Soft wrapping therefore changes the returned string. This is useful for
+    /// exporting the visual arrangement, not for reconstructing source text
+    /// or preserving its byte offsets. Returns an empty string if there is no
+    /// shaped document. Panics before measurement.
     pub fn wrapped_text(&self) -> String {
         let mut accumulator = String::new();
         let element_state = self.measured();
@@ -1801,6 +1882,14 @@ mod truncation_tests {
 /// resolve inside the same configured range. Hover and tooltip indices identify the text cluster
 /// under the pointer. Use [`TextLayout`] directly when you need geometry but not this element's
 /// built-in range-based mouse behavior.
+///
+/// Its accessibility node is a label, not a separate operable link for every
+/// range. For navigable links, prefer individual elements with a link role,
+/// focus handle, and activation behavior; see the
+/// [accessibility guide](crate::_accessibility).
+///
+/// Ranges address the displayed string. Avoid overflow truncation when the
+/// ranges were derived from the source: removing bytes changes those indices.
 pub struct InteractiveText {
     element_id: ElementId,
     text: StyledText,
@@ -1825,7 +1914,6 @@ pub struct InteractiveTextState {
     active_tooltip: Rc<RefCell<Option<ActiveTooltip>>>,
 }
 
-/// InteractiveTest is a wrapper around StyledText that adds mouse interactions.
 impl InteractiveText {
     /// Creates interactive text with a stable element ID.
     ///
@@ -1847,7 +1935,11 @@ impl InteractiveText {
     ///
     /// The callback receives the range's index in this vector. It runs only if both the mouse-down
     /// and mouse-up positions map into that same range; dragging into or out of a range does not
-    /// activate it. Ranges should be sorted, non-overlapping, and aligned to UTF-8 boundaries.
+    /// activate it. Ranges should be non-overlapping and aligned to UTF-8
+    /// boundaries. The implementation invokes every matching range in vector
+    /// order, so overlapping ranges can invoke the listener more than once.
+    /// Any mouse button can start this interaction; it is not restricted to
+    /// primary clicks and does not supply keyboard activation.
     pub fn on_click(
         mut self,
         ranges: Vec<Range<usize>>,
@@ -1868,8 +1960,13 @@ impl InteractiveText {
     /// Notify when the pointer moves to another text cluster.
     ///
     /// The optional index is a UTF-8 byte offset for the cluster under the pointer. The callback
-    /// receives `None` when the pointer is outside the text; no callback runs if the resolved
-    /// cluster has not changed.
+    /// receives `None` over blank space within this element's hitbox. No
+    /// callback runs if the resolved cluster has not changed.
+    ///
+    /// This listener is evaluated only while the hitbox is hovered; leaving
+    /// the element does not itself deliver `None`. For enter/leave behavior
+    /// over the whole control, use [`StatefulInteractiveElement::on_hover`](crate::StatefulInteractiveElement::on_hover)
+    /// on a containing element.
     pub fn on_hover(
         mut self,
         listener: impl Fn(Option<usize>, MouseMoveEvent, &mut Window, &mut App) + 'static,

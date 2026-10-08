@@ -1,9 +1,9 @@
-//! Visual test platform that combines real rendering (macOs-only for now) with controllable TestDispatcher.
+//! Native windows and text services with a controlled GPUI task scheduler.
 //!
-//! This platform is used for visual tests that need:
-//! - Real rendering (e.g. Metal/compositor) for accurate screenshots
-//! - Deterministic task scheduling via TestDispatcher
-//! - Controllable time via `advance_clock`
+//! This macOS test adapter delegates rendering to a supplied platform. It does
+//! not make operating-system callbacks or GPU completion deterministic. See
+//! [`VisualTestAppContext`](crate::VisualTestAppContext) for an app fixture and
+//! the [testing chapter](https://gpui-ce.github.io/book/testing.html) for assertion boundaries.
 
 use crate::ScreenCaptureSource;
 use crate::{
@@ -22,12 +22,20 @@ use std::{
     sync::Arc,
 };
 
-/// A platform that combines real Mac rendering with controllable TestDispatcher.
+/// Wraps a native platform with seeded GPUI scheduling and simulated services.
 ///
-/// This allows visual tests to:
-/// - Render real UI via Metal for accurate screenshots
-/// - Control task scheduling deterministically via TestDispatcher
-/// - Advance simulated time for testing time-based behaviors (tooltips, animations, etc.)
+/// Window creation, text, display information, and selected native operations
+/// are forwarded to the supplied platform. GPUI's foreground and background
+/// executors instead share a [`TestDispatcher`], whose clock controls their
+/// timers. Native window events and renderer completion remain external to it.
+///
+/// Clipboard contents stay in memory. Path prompts report cancellation,
+/// credential reads report absence, and credential writes are discarded. Menu
+/// installation and application activation are ignored. Successful calls to
+/// these simulated services do not establish that their native equivalents work.
+/// [`Platform::run`] panics: drive the fixture through
+/// [`VisualTestAppContext`](crate::VisualTestAppContext) instead of starting an
+/// application event loop.
 pub struct VisualTestPlatform {
     dispatcher: TestDispatcher,
     background_executor: BackgroundExecutor,
@@ -38,9 +46,11 @@ pub struct VisualTestPlatform {
 }
 
 impl VisualTestPlatform {
-    /// Creates a new VisualTestPlatform with the given random seed.
+    /// Creates the adapter with a seeded scheduler and empty clipboard stores.
     ///
-    /// The seed is used for deterministic random number generation in the TestDispatcher.
+    /// `seed` chooses runnable ordering, not fonts, rendering, or OS timing.
+    /// The supplied platform keeps its own thread and initialization requirements;
+    /// this adapter neither opens a window nor starts its event loop.
     pub fn new(platform: Rc<dyn Platform>, seed: u64) -> Self {
         let dispatcher = TestDispatcher::new(seed);
         let arc_dispatcher = Arc::new(dispatcher.clone());
@@ -58,7 +68,10 @@ impl VisualTestPlatform {
         }
     }
 
-    /// Returns a reference to the TestDispatcher for controlling task scheduling and time.
+    /// Returns the shared scheduler for draining work and advancing its clock.
+    ///
+    /// Advancing this clock does not advance the operating system's clock or
+    /// complete an external callback. See [`TestDispatcher::advance_clock`].
     pub fn dispatcher(&self) -> &TestDispatcher {
         &self.dispatcher
     }

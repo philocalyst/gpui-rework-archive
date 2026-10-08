@@ -1,6 +1,6 @@
 use gpui::{
-    AppContext, Bounds, Context, IntoElement, MouseButton, MouseDownEvent, Render, StyledText,
-    Window, canvas, div, fill, prelude::*, px, rgb, size,
+    AppContext, Bounds, Context, IntoElement, MouseButton, MouseDownEvent, Render, Role,
+    StyledText, Window, canvas, div, fill, prelude::*, px, rgb, size, text,
 };
 
 const PARAGRAPH: &str = "Café — Straße — click a wrapped line to inspect its UTF-8 byte index.";
@@ -27,6 +27,9 @@ impl Render for HitTest {
             .text_color(rgb(0x202b29))
             .child(
                 div()
+                    .id("paragraph")
+                    .role(Role::Label)
+                    .aria_label(PARAGRAPH)
                     .relative()
                     .w(px(280.))
                     .text_size(px(18.))
@@ -64,7 +67,7 @@ impl Render for HitTest {
                         .inset_0(),
                     ),
             )
-            .child(format!(
+            .child(text!(format!(
                 "Byte {} / {} · {}",
                 self.index,
                 PARAGRAPH.len(),
@@ -73,7 +76,7 @@ impl Render for HitTest {
                 } else {
                     "visual edge"
                 },
-            ))
+            )))
     }
 }
 

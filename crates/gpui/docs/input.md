@@ -1,9 +1,9 @@
 # Input, focus, and actions
 
-GPUI input has three distinct stages: the platform reports an input event, GPUI routes it through
-the rendered element tree, and a component decides whether that input changes its state. Pointer
-events target the topmost eligible hitbox at the pointer position; keyboard events target the
-currently focused node. A [hitbox](crate::Hitbox) is the rectangular input region recorded for an
+GPUI input has three stages: the platform reports an event, GPUI invokes the frame's listeners,
+and a component decides whether that input changes its state. Pointer handlers use hit testing
+to decide whether their region is eligible; keyboard handlers follow the currently focused
+node's ancestor path. A [hitbox](crate::Hitbox) is the input region recorded for an
 element, and its [behavior](crate::HitboxBehavior) determines whether it blocks or occludes
 hitboxes behind it.
 
@@ -14,10 +14,12 @@ the context itself is not retained.
 
 ## Event routing and propagation
 
-Most element input callbacks run in the bubble phase. GPUI first runs capture handlers from the
-root toward the target, then bubble handlers from the target back toward the root. For pointer
-events the target comes from hit testing and occlusion; for keyboard events it comes from the
-focus path. APIs named `capture_*` register a capture-phase callback; APIs such as `on_mouse_down`
+Most element input callbacks run in the bubble phase. Keyboard listeners capture from the root
+toward the focused node, then bubble back along that path. Pointer listeners capture in paint
+order, from back to front, then bubble in reverse order. Low-level pointer listeners receive
+events even outside their own hitbox; the ordinary element builders filter by hit testing and
+occlusion. This lets an outside-click handler observe a click without being its target.
+APIs named `capture_*` register a capture-phase callback; APIs such as `on_mouse_down`
 and `on_key_down` register bubble-phase callbacks. Some event families, including click
 activation, expose only their standard callback API.
 
@@ -60,8 +62,12 @@ matters.
 Interactive elements need stable IDs when their hover, pressed, or other retained element state
 must survive a rerender. Pointer delivery is governed by hitboxes and their occlusion behavior;
 adding an event callback does not make a visually covered region receive the pointer. Pointer
-capture is a separate mechanism for continuing mouse move/up delivery after a drag leaves its
-starting hitbox; GPUI releases it on mouse-up.
+capture makes its chosen hitbox eligible for mouse move/up handling after a
+drag leaves the region. It does not request native capture outside the window
+or make delivery exclusive. A rebuilt hitbox has a new ID, so a custom drag
+must keep its active state on an owner and renew capture during prepaint.
+GPUI releases it after a received mouse-up. See
+[`Window::capture_pointer`](crate::Window::capture_pointer).
 
 Raw touch updates are keyed by [`TouchId`](crate::TouchId) from `Started` through `Ended` or
 `Cancelled`; cancellation drops provisional state without completing a tap. The portable
@@ -87,6 +93,48 @@ while a search field owns keyboard focus. Tab navigation uses the recorded focus
 order; custom widgets that change focus order should use the tab-stop APIs on their focus handles.
 An embedded browser can also have two focus systems: the page must focus its iframe before the
 GPUI window can receive keys.
+
+Choose a query according to the question being asked:
+
+| Question | Query |
+| --- | --- |
+| Is this the selected GPUI identity? | [`FocusHandle::is_focused`](crate::FocusHandle::is_focused) |
+| Does this panel contain that identity? | [`FocusHandle::contains_focused`](crate::FocusHandle::contains_focused) |
+| Does the selected subtree contain this handle? | [`FocusHandle::within_focused`](crate::FocusHandle::within_focused) |
+| Is the operating system sending keys to this window? | [`Window::is_window_active`](crate::Window::is_window_active) |
+
+GPUI keeps its selected focus target when the native window deactivates.
+Check activation separately when focus styling should dim while the user
+works in another window. Subtree queries use the last rendered dispatch
+tree; they do not traverse fields on a view. Changes to rendered ancestry
+take effect after GPUI draws again.
+
+[`Window::on_focus_in`](crate::Window::on_focus_in) and
+[`Window::on_focus_out`](crate::Window::on_focus_out) watch a whole subtree.
+Moving between its descendants produces neither event. Native activation
+and deactivation do count as entering and leaving. These listeners run when
+a draw compares focus paths, so a call to `focus` changes the selected
+identity before it invokes those listeners. Keep their subscriptions alive.
+
+Choose who owns the handle according to what the component needs:
+
+| Need | Pattern |
+| --- | --- |
+| A button reached through ordinary tab traversal | Give the element a stable ID and `tab_index(0)`; GPUI retains its internal handle |
+| A search field that application code must focus | Store a `FocusHandle` on the view and attach it with `track_focus` |
+| A focusable container that should be skipped during traversal | Keep its handle's `tab_stop` false; focus it explicitly when needed |
+
+An explicit handle starts with `tab_stop` false. Configure it before retaining
+it, for example `cx.focus_handle().tab_stop(true)`, to make it a tab stop.
+[`FocusHandle::tab_index`](crate::FocusHandle::tab_index) controls its order
+within a tab group. Element tab setters configure internally retained handles;
+they do not change a handle passed to `track_focus`.
+
+Use [`InteractiveElement::focus_visible`](crate::InteractiveElement::focus_visible)
+for a keyboard-focus ring. It applies when the element is focused and the
+window's last input was a keyboard event. This is an input-modality check,
+so programmatic focus can also show the ring. Give the control an accessible
+role and name as described in the [accessibility chapter](crate::_accessibility).
 
 ## Actions and key bindings
 
@@ -156,6 +204,15 @@ match an identifier (`Editor`), a key-value pair (`mode == insert`), or combine 
 `&&`, `||`, `!`, and the descendant operator (`Workspace > Editor`). These terms are parsed by
 [`KeyBindingContextPredicate`](crate::KeyBindingContextPredicate).
 
+An element's `key_context` uses entry syntax such as `Editor mode=insert`.
+A binding's predicate uses expression syntax such as `Editor && mode == insert`.
+The contexts stay separate along the path: `Editor && mode == insert` requires
+both entries on one node. Use `Workspace > Editor` when the relationship is
+between an ancestor and a descendant, with spaces around `>`. See
+[`KeyContext::parse`](crate::KeyContext::parse) for accepted entry characters and
+[`KeyBindingContextPredicate::parse`](crate::KeyBindingContextPredicate::parse)
+for executable matching examples.
+
 For programmatic bindings, [`KeyBinding::new`](crate::KeyBinding::new) panics when a keystroke or
 context string is invalid. [`KeyBinding::load`](crate::KeyBinding::load) returns
 [`InvalidKeystrokeError`](crate::InvalidKeystrokeError) for malformed keystrokes; parse the
@@ -167,12 +224,21 @@ after built-in bindings override a built-in binding while a focused editor can o
 workspace shortcut. See [`Keymap::bindings_for_input`](crate::Keymap::bindings_for_input) for
 disabled-binding and prefix details.
 
-Separate keystrokes with spaces to define a chord, for example `cmd-k left`. While a prefix can
-still complete a longer binding, GPUI holds it pending. If the chord does not complete, GPUI
-flushes the pending input after about one second and can replay the prefix as a regular key event
-or action. Pending input belongs to the focus that started it and is discarded when focus changes.
-When a printable key may belong to an active text input, GPUI also allows the input handler's IME
-policy to resolve that ambiguity before committing to a key binding.
+Separate keystrokes with spaces to define a chord, for example `cmd-k left`.
+While a prefix can still complete a longer binding, GPUI holds it pending.
+If that prefix also completes a shorter binding, GPUI gives the longer one a
+one-second deadline before replaying the prefix. Pending printable input also
+gets a deadline when the focused input handler accepts text. A command prefix
+with neither ambiguity can remain pending without a timer. Further pending
+strokes restart an existing deadline; a mismatching stroke can trigger replay
+immediately. Replay tries eligible actions, then ordinary key and text input.
+Changing focus discards the pending sequence.
+
+The platform can mark a key-down event with
+[`prefer_character_input`](crate::KeyDownEvent::prefer_character_input).
+When the focused input handler accepts text, this lets character entry take
+precedence over a completed binding. Use the text-input protocol for composing
+and replacing that text; a key event alone cannot describe those operations.
 
 Use raw key handlers when the keystroke itself matters, for example for editor navigation or
 terminal input. Use actions when several input routes should invoke the same operation. Application
@@ -199,6 +265,71 @@ and [`utf16_to_utf8_offset`](crate::utf16_to_utf8_offset). These helpers clamp o
 end of the string and snap offsets inside an encoded character to that character's end; they do
 not choose grapheme boundaries. Use grapheme segmentation when implementing user-visible cursor
 movement.
+
+### Replace provisional text instead of appending it
+
+An [input method](https://en.wikipedia.org/wiki/Input_method) can revise a word
+while the user chooses its spelling. The marked range identifies the text the
+input method still owns. Keep that range on the editor alongside the selection;
+it is not a separate copy of the buffer.
+
+Suppose the buffer is `a🦀z`, and the input method replaces the crab. These ranges
+count UTF-16 code units from the document's start:
+
+| Callback | Buffer afterward | Marked range |
+| --- | --- | --- |
+| `replace_and_mark_text_in_range(Some(1..3), "に", …)` | `aにz` | `Some(1..2)` |
+| `replace_and_mark_text_in_range(None, "日本", …)` | `a日本z` | `Some(1..3)` |
+| `replace_text_in_range(None, "日本語")` | `a日本語z` | `None` |
+
+The second and third calls target the current marked range. Inserting each
+candidate at the caret would leave `に日本日本語` in the buffer. An explicit
+replacement range takes precedence; without one, use the marked range, then
+the selection. [`unmark_text`](crate::EntityInputHandler::unmark_text) ends the
+composition without changing its text.
+
+The `new_selected_range` on a marked replacement is relative to the **inserted
+text**. After inserting `日本` at document offset one, a relative selection of
+`0..2` becomes document selection `1..3`. Convert each endpoint to UTF-8 before
+using it to slice a Rust string. Do not add a UTF-16 offset to a byte offset:
+
+```rust
+use gpui::{utf16_to_utf8_offset, utf8_to_utf16_offset};
+
+let source = "a🦀z";
+let bytes = utf16_to_utf8_offset(source, 1)..utf16_to_utf8_offset(source, 3);
+assert_eq!(&source[bytes.clone()], "🦀");
+assert_eq!(bytes, 1..5);
+assert_eq!(utf8_to_utf16_offset(source, 5), 3);
+```
+
+Keep the selection's anchor and active end, even when the platform asks for a
+sorted range. [`UTF16Selection::reversed`](crate::UTF16Selection::reversed)
+records an active end at the range's start. Implement
+[`set_selected_text_range`](crate::EntityInputHandler::set_selected_text_range)
+so a platform selection command updates the same state used by replacement and
+painting. Otherwise Select All can appear to succeed in system UI while the
+next edit still inserts at the old caret.
+
+### Answer geometry from the painted layout
+
+The platform uses [`bounds_for_range`](crate::EntityInputHandler::bounds_for_range)
+to place candidate UI and
+[`character_index_for_point`](crate::EntityInputHandler::character_index_for_point)
+to locate text under a point. Keep the [`ShapedText`](crate::ShapedText) used for
+painting, its origin, and its line height. Translate a window point into layout
+coordinates before hit testing, and translate the resulting byte index back to
+UTF-16. Translate bounds in the other direction; leave device scaling and screen
+coordinates to the platform.
+
+An edit invalidates the old layout even if its allocation remains alive. Return
+`None` until a matching layout is available, rather than placing candidates
+beside the wrong character. An empty range asks for caret bounds. A nonempty
+range can cross visual rows; the platform's single rectangle can describe its
+first visual segment. The [text chapter](crate::_documentation::text) explains
+caret affinity and visual movement. The
+[composition example's editor](https://github.com/gpui-ce/gpui-ce/blob/main/crates/gpui/examples/view_example/example_editor.rs)
+shows the buffer, selection, marked range, and geometry callbacks together.
 
 ## Accessibility actions and identities
 

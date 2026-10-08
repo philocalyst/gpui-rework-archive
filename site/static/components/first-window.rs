@@ -1,4 +1,4 @@
-use gpui::{AppContext, Context, IntoElement, Render, Window, div, prelude::*, rgb};
+use gpui::{AppContext, Context, IntoElement, Render, Window, div, prelude::*, rgb, text};
 
 struct Greeting;
 
@@ -12,7 +12,7 @@ impl Render for Greeting {
             .bg(rgb(0xf7f6f2))
             .text_color(rgb(0x155b50))
             .text_2xl()
-            .child("Hello, GPUI")
+            .child(text!("Hello, GPUI"))
     }
 }
 

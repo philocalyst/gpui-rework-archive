@@ -24,7 +24,7 @@ description = "The annotated Rust source used to build this walkthrough."
 <span id="L15" class="source-line"><a href="#L15" class="line-number" data-line="15" aria-label="Line 15" tabindex="-1"></a>use gpui::&#123;</span>
 <span id="L16" class="source-line"><a href="#L16" class="line-number" data-line="16" aria-label="Line 16" tabindex="-1"></a>    App, AppContext, Bounds, Context, Element, ElementId, GlobalElementId, Hsla,</span>
 <span id="L17" class="source-line"><a href="#L17" class="line-number" data-line="17" aria-label="Line 17" tabindex="-1"></a>    InspectorElementId, IntoElement, LayoutId, PaintQuad, Pixels, Render, Style, Window, div, fill,</span>
-<span id="L18" class="source-line"><a href="#L18" class="line-number" data-line="18" aria-label="Line 18" tabindex="-1"></a>    hsla, prelude::*, px, rgb,</span>
+<span id="L18" class="source-line"><a href="#L18" class="line-number" data-line="18" aria-label="Line 18" tabindex="-1"></a>    hsla, prelude::*, px, rgb, text,</span>
 <span id="L19" class="source-line"><a href="#L19" class="line-number" data-line="19" aria-label="Line 19" tabindex="-1"></a>&#125;;</span>
 <span id="L20" class="source-line"><a href="#L20" class="line-number" data-line="20" aria-label="Line 20" tabindex="-1"></a></span>
 <span id="L21" class="source-line"><a href="#L21" class="line-number" data-line="21" aria-label="Line 21" tabindex="-1"></a>struct Swatch &#123;</span>
@@ -133,7 +133,7 @@ description = "The annotated Rust source used to build this walkthrough."
 <span id="L124" class="source-line"><a href="#L124" class="line-number" data-line="124" aria-label="Line 124" tabindex="-1"></a>            .child(Swatch &#123;</span>
 <span id="L125" class="source-line"><a href="#L125" class="line-number" data-line="125" aria-label="Line 125" tabindex="-1"></a>                color: hsla(0.43, 0.62, 0.22, 1.),</span>
 <span id="L126" class="source-line"><a href="#L126" class="line-number" data-line="126" aria-label="Line 126" tabindex="-1"></a>            &#125;)</span>
-<span id="L127" class="source-line"><a href="#L127" class="line-number" data-line="127" aria-label="Line 127" tabindex="-1"></a>            .child(&quot;One layout node, one prepared quad&quot;)</span>
+<span id="L127" class="source-line"><a href="#L127" class="line-number" data-line="127" aria-label="Line 127" tabindex="-1"></a>            .child(text!(&quot;One layout node, one prepared quad&quot;))</span>
 <span id="L128" class="source-line"><a href="#L128" class="line-number" data-line="128" aria-label="Line 128" tabindex="-1"></a>    &#125;</span>
 <span id="L129" class="source-line"><a href="#L129" class="line-number" data-line="129" aria-label="Line 129" tabindex="-1"></a>&#125;</span>
 <span id="L130" class="source-line"><a href="#L130" class="line-number" data-line="130" aria-label="Line 130" tabindex="-1"></a></span>

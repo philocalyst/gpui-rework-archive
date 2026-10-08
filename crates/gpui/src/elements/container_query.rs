@@ -20,6 +20,9 @@ use crate::{
 /// By default the element fills its parent (equivalent to `.size_full()`);
 /// use the [`Styled`] methods to size it differently. Because the contents
 /// don't exist until after layout, they cannot influence the element's size.
+/// Style methods set the query container's layout. To paint a background,
+/// border, or shadow, put a styled [`Div`](crate::Div) around it or return one
+/// from the callback; this element does not paint its own style.
 ///
 /// # Example
 ///

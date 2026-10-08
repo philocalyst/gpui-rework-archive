@@ -1,4 +1,4 @@
-use gpui::{AppContext, Context, IntoElement, Render, Window, div, prelude::*, rgb};
+use gpui::{AppContext, Context, IntoElement, Render, Role, Window, div, prelude::*, rgb, text};
 
 struct Counter {
     count: u32,
@@ -15,10 +15,18 @@ impl Render for Counter {
             .gap_4()
             .bg(rgb(0xf7f6f2))
             .text_color(rgb(0x202b29))
-            .child(div().text_2xl().child(format!("Count: {}", self.count)))
+            .child(
+                div()
+                    .text_2xl()
+                    .child(text!(format!("Count: {}", self.count))),
+            )
             .child(
                 div()
                     .id("increment")
+                    .role(Role::Button)
+                    .aria_label("Increment")
+                    .tab_index(0)
+                    .focus_visible(|style| style.ring_2().ring_color(rgb(0x3478c8)))
                     .px_4()
                     .py_2()
                     .rounded_md()

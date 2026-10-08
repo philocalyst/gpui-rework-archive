@@ -1,8 +1,9 @@
-//! An [`Arc`] backed copy-on-write reference that can borrow for a caller-chosen lifetime.
+//! Borrowed or reference-counted immutable access through one type.
 //!
-//! `ArcCow` avoids copying when a borrowed value is sufficient and gives owned values shared,
-//! clone-cheap storage. Conversions from `String`, `Vec`, and `Cow` allocate an owned `Arc`; a
-//! borrowed conversion never outlives its source.
+//! [`ArcCow`] keeps a borrow when constructed from `&T` or a borrowed [`Cow`],
+//! and shared ownership when constructed from an [`Arc`]. Converting an owned
+//! `String`, `Vec`, or `Cow` creates owned `Arc` storage. In contrast, converting
+//! `&String` copies into owned storage; pass `value.as_str()` to keep a borrow.
 
 use std::{
     borrow::Cow,
@@ -13,8 +14,18 @@ use std::{
 };
 
 /// Either a borrowed value or an atomically reference-counted owned value.
+///
+/// Cloning preserves the variant: it copies a borrow or clones the `Arc`,
+/// without cloning `T`. Both variants dereference to `T`; equality, ordering,
+/// and hashing use its contents rather than the variant or pointer address.
+/// A borrowed value cannot outlive its source, including after a clone.
+///
+/// This type exposes no mutable access or automatic copy-on-write operation.
+/// Match [`Self::Owned`] when access to the owned `Arc` itself is needed.
 pub enum ArcCow<'a, T: ?Sized> {
+    /// A reference whose lifetime remains tied to its source.
     Borrowed(&'a T),
+    /// Shared ownership of the referenced value.
     Owned(Arc<T>),
 }
 

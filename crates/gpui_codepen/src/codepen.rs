@@ -70,6 +70,7 @@ pub struct Codepen {
     viewport: gpui::Size<gpui::Pixels>,
     scale_factor: f32,
     viewport_ready: bool,
+    render_options_revision: u64,
     preview_visible: bool,
     subpixel_rendering: bool,
     text_rendering_mode: gpui::TextRenderingMode,
@@ -235,6 +236,8 @@ impl Codepen {
                             this.subpixel_rendering = subpixel;
                             this.text_rendering_mode = text_mode;
                             this.transparent_window = transparent;
+                            this.render_options_revision =
+                                this.render_options_revision.wrapping_add(1);
                             if !this.session.running
                                 && this.displayed_source.as_deref() == Some(this.source.as_str())
                             {
@@ -330,6 +333,7 @@ impl Codepen {
             viewport: gpui::size(px(600.), px(500.)),
             scale_factor: 1.,
             viewport_ready: false,
+            render_options_revision: 0,
             preview_visible: true,
             subpixel_rendering: false,
             text_rendering_mode: Default::default(),
@@ -508,7 +512,7 @@ impl Codepen {
                     .timer(Duration::from_millis(16))
                     .await;
             }
-            let Ok(request) = this.update(cx, |this, _| {
+            let Ok((request, render_options_revision)) = this.update(cx, |this, _| {
                 let mut request = this
                     .session
                     .request(this.source.clone(), Backend::Miri, event);
@@ -526,7 +530,7 @@ impl Codepen {
                 this.worker
                     .latest
                     .store(request.generation, std::sync::atomic::Ordering::Relaxed);
-                request
+                (request, this.render_options_revision)
             }) else {
                 return;
             };
@@ -556,9 +560,7 @@ impl Codepen {
                         });
                     }
                     if this.session.diagnostics.is_empty() {
-                        if this.session.frame.as_ref().is_some_and(|f| {
-                            f.viewport != this.viewport || f.scale_factor != this.scale_factor
-                        }) {
+                        if render_options_revision != this.render_options_revision {
                             this.schedule(None, true, cx);
                         } else if let Some(event) = this.events.pop_front() {
                             this.schedule(Some(event), true, cx);
@@ -848,12 +850,11 @@ async fn browser_evaluate(request: Request) -> Reply {
             .await?
             .dyn_into()?;
         if !response.ok() {
-            let text = JsFuture::from(response.text()?)
-                .await?
-                .as_string()
-                .unwrap_or_default();
             abort.completed = true;
-            return Err(JsValue::from_str(&text));
+            return Err(JsValue::from_str(&format!(
+                "The preview service returned HTTP {}. Try Run again once it is available.",
+                response.status()
+            )));
         }
         let buffer = JsFuture::from(response.array_buffer()?).await?;
         abort.completed = true;
@@ -865,7 +866,8 @@ async fn browser_evaluate(request: Request) -> Reply {
         generation,
         frame: None,
         diagnostics: format!(
-            "Rust compiler service unavailable. Start gpui-codepen-server and trunk serve. {e:?}"
+            "Preview service unavailable. {}",
+            e.as_string().unwrap_or_else(|| "The browser could not reach the preview service. Try Run again.".into())
         ),
         elapsed_ms: 0,
     })

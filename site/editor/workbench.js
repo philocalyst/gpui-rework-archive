@@ -1,13 +1,13 @@
 import { basicSetup } from 'codemirror';
 import { EditorView, keymap, hoverTooltip } from '@codemirror/view';
-import { EditorState } from '@codemirror/state';
+import { Compartment, EditorState } from '@codemirror/state';
 import { indentWithTab } from '@codemirror/commands';
 import { rust } from '@codemirror/lang-rust';
 import { autocompletion } from '@codemirror/autocomplete';
 import { setDiagnostics } from '@codemirror/lint';
 
 /** @typedef {{type:'gpui-workbench-command', command:'source'|'run'|'reset'|'auto', revision:number, source?:string, enabled?:boolean}} Command */
-/** @typedef {{type:'gpui-workbench-status', revision:number, phase:'ready'|'edited'|'running'|'live'|'error', diagnostics:string, elapsed_ms:number, backend:string, has_frame:boolean}} Status */
+/** @typedef {{type:'gpui-workbench-status', revision:number, phase:'ready'|'edited'|'running'|'live'|'error'|'unavailable', diagnostics:string, elapsed_ms:number, backend:string, has_frame:boolean}} Status */
 
 const $ = selector => document.querySelector(selector);
 const preview = $('#preview');
@@ -20,6 +20,7 @@ const sourceURL = new URL(`../components/${encodeURIComponent(slug)}.rs`, locati
 const draftKey = `gpui-example:${slug}`;
 let original = '', editor, revision = 0, ready = false, timer, startupTimer, apiEntries = [];
 let split = 50;
+const wrapping = new Compartment();
 
 function announce(text, state = '') {
   status.textContent = text;
@@ -35,6 +36,7 @@ function run() {
   if (!editor || !ready) return;
   clearTimeout(timer);
   command('run');
+  showDiagnostics(false);
   announce('Running Rust…', 'running');
 }
 function schedule() {
@@ -144,6 +146,12 @@ for (const button of document.querySelectorAll('button[data-view]')) button.addE
   if (button.dataset.view === 'code') editor?.focus();
 });
 $('#run').addEventListener('click', run);
+$('#wrap').addEventListener('click', () => {
+  if (!editor) return;
+  const enabled = $('#wrap').getAttribute('aria-pressed') !== 'true';
+  $('#wrap').setAttribute('aria-pressed', String(enabled));
+  editor.dispatch({ effects: wrapping.reconfigure(enabled ? EditorView.lineWrapping : []) });
+});
 $('#reset').addEventListener('click', () => command('reset'));
 $('#auto-run').addEventListener('change', () => {
   clearTimeout(timer);
@@ -199,7 +207,10 @@ window.addEventListener('message', event => {
   const ranges = diagnosticRanges(diagnostics);
   editor.dispatch(setDiagnostics(editor.state, ranges));
   $('#error-count').textContent = ranges.length ? String(ranges.length) : diagnostics ? '!' : '';
-  if (diagnostics) {
+  if (update.phase === 'unavailable') {
+    announce(update.has_frame ? 'Preview unavailable. The last working result is still visible.' : 'Preview unavailable. Your source is still editable.', 'error');
+    showDiagnostics(true);
+  } else if (diagnostics) {
     announce(update.has_frame ? 'Rust needs a fix. The last working result is still visible.' : 'Rust needs a fix.', 'error');
     showDiagnostics(true);
   } else if (update.phase === 'live') {
@@ -231,7 +242,7 @@ try {
   $('#walkthrough-link').href = new URL(`../examples/${slug}/`, location.href);
   editor = new EditorView({ parent: $('#editor'), state: EditorState.create({
     doc: draft || original,
-    extensions: [basicSetup, rust(), keymap.of([{ key: 'Mod-Enter', run: () => { run(); return true; } }, { key: 'Ctrl-Enter', run: () => { run(); return true; } }, indentWithTab]),
+    extensions: [basicSetup, rust(), wrapping.of([]), keymap.of([{ key: 'Mod-Enter', run: () => { run(); return true; } }, { key: 'Ctrl-Enter', run: () => { run(); return true; } }, indentWithTab]),
       EditorView.contentAttributes.of({ 'aria-label': 'Rust source', spellcheck: 'false' }),
       autocompletion({ override: [completeAPI] }), apiHover,
       EditorState.transactionFilter.of(transaction => {
@@ -249,6 +260,9 @@ try {
         try { localStorage.setItem(draftKey, update.state.doc.toString()); } catch {}
         setSource(); schedule();
         announce($('#auto-run').checked ? 'Waiting for edits…' : 'Edited · press Run');
+        $('#error-count').textContent = '';
+        $('#diagnostic-text').textContent = 'Source changed. Run it to refresh diagnostics.';
+        showDiagnostics(false);
         queueMicrotask(() => editor.dispatch(setDiagnostics(editor.state, [])));
       }),
     ],

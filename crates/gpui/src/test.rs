@@ -1,30 +1,44 @@
-//! Test support for GPUI.
+//! Seeded async tests and observation streams.
 //!
-//! GPUI provides first-class support for testing, which includes a macro to run test that rely on having a context,
-//! and a test implementation of the `ForegroundExecutor` and `BackgroundExecutor` which ensure that your tests run
-//! deterministically even in the face of arbitrary parallelism.
+//! `#[gpui::test]` constructs a [`TestAppContext`] for each context argument.
+//! The applications have separate state but share a scheduler and test clock.
+//! Their foreground and background tasks are polled in an order selected by
+//! the scheduler seed. Use `iterations`, `seed`, or `seeds(...)` to choose the
+//! schedules to exercise; rerun a failure with the reported `SEED` value.
 //!
-//! The output of the `gpui::test` macro is understood by other rust test runners, so you can use it with `cargo test`
-//! or `cargo-nextest`, or another runner of your choice.
+//! The macro emits an ordinary Rust test, usable with Cargo or nextest.
+//! Its async runner polls the test future on the controlled foreground
+//! executor. This example waits for a notification rather than sleeping or
+//! assuming the task ran immediately:
 //!
-//! To make it possible to test collaborative user interfaces (like Zed) you can ask for as many different contexts
-//! as you need.
-//!
-//! ## Example
-//!
-//! ```
-//! use gpui;
-//!
-//! #[gpui::test]
-//! async fn test_example(cx: &TestAppContext) {
-//!   assert!(true)
-//! }
+//! ```rust,test_harness
+//! use futures::StreamExt as _;
+//! use gpui::{AppContext as _, TestAppContext};
 //!
 //! #[gpui::test]
-//! async fn test_collaboration_example(cx_a: &TestAppContext, cx_b: &TestAppContext) {
-//!   assert!(true)
+//! async fn task_publishes_a_change(cx: &mut TestAppContext) {
+//!     let count = cx.new(|_| 0_u32);
+//!     let mut changes = gpui::observe(&count, cx);
+//!     let task = cx.spawn({
+//!         let count = count.clone();
+//!         |mut cx| async move {
+//!             count.update(&mut cx, |count, cx| {
+//!                 *count = 3;
+//!                 cx.notify();
+//!             });
+//!         }
+//!     });
+//!
+//!     assert_eq!(changes.next().await, Some(()));
+//!     task.await;
+//!     assert_eq!(count.read_with(cx, |count, _| *count), 3);
 //! }
 //! ```
+//!
+//! Retain a task to keep it running and retain a subscription to keep it
+//! observing. [`observe`] packages a subscription with its stream so dropping
+//! the stream unsubscribes. See the [testing guide](https://gpui-ce.github.io/book/testing.html)
+//! for timer boundaries, cancellation, input, and platform checks.
 use crate::{Entity, Subscription, TestAppContext, TestDispatcher};
 use futures::StreamExt as _;
 use proptest::prelude::{Just, Strategy, any};
@@ -154,39 +168,54 @@ fn calculate_seeds(
         .map(|seed| seed.parse().expect("invalid SEED variable as integer"))
         .ok();
 
-    let empty_range = || 0..0;
-
-    let iter = {
-        let env_range = if let Some(env_num) = env_num {
-            env_num..env_num + 1
-        } else {
-            empty_range()
-        };
-
-        // if `iterations` is 1 and !(`explicit_seeds` is non-empty || `SEED` is set), then add     the run `0`
-        // if `iterations` is 1 and  (`explicit_seeds` is non-empty || `SEED` is set), then discard the run `0`
-        // if `iterations` isn't 1 and `SEED` is set, do `SEED..SEED+iterations`
-        // otherwise, do `0..iterations`
-        let iterations_range = match (iterations, env_num) {
-            (1, None) if explicit_seeds.is_empty() => 0..1,
-            (1, None) | (1, Some(_)) => empty_range(),
-            (iterations, Some(env)) => env..env + iterations,
-            (iterations, None) => 0..iterations,
-        };
-
-        // if `SEED` is set, ignore `explicit_seeds`
-        let explicit_seeds = if env_num.is_some() {
-            &[]
-        } else {
-            explicit_seeds
-        };
-
-        env_range
-            .chain(iterations_range)
-            .chain(explicit_seeds.iter().copied())
-    };
+    let iter = seed_sequence(iterations, explicit_seeds, env_num);
     let is_multiple_runs = iter.clone().nth(1).is_some();
     (iter, is_multiple_runs)
+}
+
+fn seed_sequence(
+    iterations: u64,
+    explicit_seeds: &[u64],
+    environment_seed: Option<u64>,
+) -> impl Iterator<Item = u64> + Clone + '_ {
+    let range = match (iterations, environment_seed) {
+        (1, None) if !explicit_seeds.is_empty() => 0..0,
+        (iterations, Some(start)) => start..start + iterations,
+        (iterations, None) => 0..iterations,
+    };
+    let explicit_seeds = if environment_seed.is_some() {
+        &[][..]
+    } else {
+        explicit_seeds
+    };
+    range.chain(explicit_seeds.iter().copied())
+}
+
+#[cfg(test)]
+mod seed_tests {
+    use super::seed_sequence;
+
+    #[test]
+    fn environment_seed_starts_one_sequence_without_duplicate_first_run() {
+        assert_eq!(
+            seed_sequence(3, &[80], Some(17)).collect::<Vec<_>>(),
+            [17, 18, 19]
+        );
+        assert_eq!(seed_sequence(1, &[80], Some(17)).collect::<Vec<_>>(), [17]);
+    }
+
+    #[test]
+    fn explicit_seeds_replace_default_run_or_extend_iteration_range() {
+        assert_eq!(seed_sequence(1, &[], None).collect::<Vec<_>>(), [0]);
+        assert_eq!(
+            seed_sequence(1, &[17, 80], None).collect::<Vec<_>>(),
+            [17, 80]
+        );
+        assert_eq!(
+            seed_sequence(3, &[80], None).collect::<Vec<_>>(),
+            [0, 1, 2, 80]
+        );
+    }
 }
 
 /// A stream of entity-change notifications that owns its observation

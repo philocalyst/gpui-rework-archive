@@ -66,8 +66,12 @@ const DEFAULT_FPS: u64 = 120;
 
 const NANOS_PER_SECOND: u128 = 1_000_000_000;
 
-/// Aggregate statistics for total foreground executor work observed during a
-/// measured interval, returned by [`BenchReport::foreground_work`].
+/// Timings for foreground work observed by [`BenchReport::foreground_work`].
+///
+/// `total` sums the recorded durations. `max` and the percentiles come from
+/// histogram buckets and can be rounded above the original sample. A folded
+/// batch of short polls contributes one sample, so `count` is not a task count.
+/// Drawing and presentation have separate histograms in the report.
 #[derive(Clone, Copy, Debug)]
 pub struct ForegroundWorkSummary {
     /// Number of foreground work items recorded: task polls, action
@@ -94,10 +98,15 @@ pub struct ForegroundWorkSummary {
 
 /// A report of frame and foreground-work timings collected by GPUI benchmarks.
 ///
-/// Reports include Criterion warmup and calibration iterations. The frame
-/// budget overrun values are synthetic counts derived from foreground work
-/// duration; the harness has no vsync and these values are not observed missed
-/// frames or an FPS measurement.
+/// Reports include Criterion warmup and calibration iterations. Cloning a
+/// report shares its collected samples; it does not start a fresh measurement.
+/// [`Self::print`] writes the histograms, while [`Self::foreground_work`]
+/// returns a summary for a workload that may not draw a window at all.
+///
+/// A frame budget is a comparison threshold. At 120 Hz, one budget is about
+/// 8.33 ms. An operation lasting 10 ms exceeds that threshold by one budget;
+/// it does not establish that a displayed frame was missed. The harness has
+/// no vsync, and its overrun counts are not an FPS measurement.
 #[derive(Clone)]
 pub struct BenchReport {
     frame_snapshot: Rc<RefCell<WindowFrameSnapshot>>,
@@ -111,16 +120,34 @@ impl Default for BenchReport {
 }
 
 impl BenchReport {
-    /// Creates a report whose per-frame budget is one frame at `fps` when
-    /// counting frame budget overruns.
+    /// Set the comparison budget to one second divided by `fps`.
+    ///
+    /// The duration is truncated to whole nanoseconds. The default report uses
+    /// 120 Hz. This setting changes the reported budget comparisons, not the
+    /// rate at which the benchmark draws or presents frames.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `fps` is zero or exceeds one billion, which would produce a
+    /// zero-nanosecond budget.
     pub fn with_fps(fps: u64) -> Self {
         assert!(fps > 0, "frame rate must be greater than zero");
         Self::with_frame_budget_nanos(NANOS_PER_SECOND / fps as u128)
     }
 
-    /// Creates a report that treats `frame_budget_nanos` as the per-frame budget
-    /// when counting frame budget overruns.
+    /// Set an explicit comparison budget in nanoseconds.
+    ///
+    /// Use this when the target budget is not best expressed as a whole-number
+    /// frame rate. It does not change the benchmark's scheduler or renderer.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the budget is zero.
     pub fn with_frame_budget_nanos(frame_budget_nanos: u128) -> Self {
+        assert!(
+            frame_budget_nanos > 0,
+            "frame budget must be greater than zero"
+        );
         Self {
             frame_snapshot: Rc::new(RefCell::new(WindowFrameSnapshot::new())),
             frame_budget_nanos,
@@ -471,12 +498,22 @@ where
         .run_until(|| output.borrow_mut().take())
 }
 
-/// A GPUI app context for Criterion benchmarks.
+/// An application and Criterion measurement loop for GPUI benchmarks.
 ///
-/// `BenchAppContext` is intentionally separate from `TestAppContext`: it owns a
-/// benchmark app instance and exposes only the app/window operations needed by
-/// benchmark setup. Criterion remains responsible for the measured loop via its
-/// `Bencher` API.
+/// Set up entities and windows before calling a measurement method. Choose
+/// [`Self::bench_iter`] for synchronous work, [`Self::bench_task`] for a task
+/// through completion, or [`Self::bench_batched_task`] to exclude per-iteration
+/// setup. [`Self::bench_renderer`] includes drawing and presentation for a view
+/// already attached to a window.
+///
+/// The platform uses real workers and wall-clock timers. Use
+/// [`TestAppContext`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.TestAppContext.html) to check behavior under a controlled
+/// schedule; use this context to measure the cost of that behavior. Enable the
+/// `bench-support` feature to use it. `#[gpui::bench]` supplies the platform,
+/// Criterion bencher, report, and teardown.
+///
+/// Clones share the application and bencher. A measurement cannot be nested
+/// inside another measurement, including through a clone.
 #[derive(Clone)]
 pub struct BenchAppContext<'a, 'measurement> {
     app: Rc<AppCell>,
@@ -531,13 +568,13 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
              ThreadedDispatcher; construct one with gpui::bench_platform"
         );
         let foreground_executor = platform.foreground_executor();
-        let asset_source = Arc::new(());
+        let asset_registry = Arc::new(crate::AssetRegistry::default());
         // Benchmark setup must not make accidental network requests. The
         // production `BlockedHttpClient` reports them without enabling a
         // configurable test double through `test-support`.
         let http_client: Arc<dyn crate::http_client::HttpClient> =
             Arc::new(crate::http_client::BlockedHttpClient::new());
-        let app = App::new_app(platform, asset_source, http_client);
+        let app = App::new_app(platform, asset_registry, http_client);
 
         Self {
             app,
@@ -629,13 +666,18 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
         self.read(|app| app.foreground_journal().collector())
     }
 
-    /// Measures a generic benchmark workload using Criterion's iteration loop.
+    /// Measure synchronous work with Criterion's iteration loop.
     ///
     /// The closure is invoked once per Criterion iteration with this
     /// benchmark app context so it can update GPUI state.
     ///
-    /// Any window draws triggered by the workload are recorded into the
-    /// benchmark's frame report through the GPUI frame profiler.
+    /// Window draws and foreground work are collected in the report. A task
+    /// merely spawned by the closure is not awaited; use [`Self::bench_task`]
+    /// when completion belongs inside the timed interval.
+    ///
+    /// # Panics
+    ///
+    /// Panics if another measurement is already running on this context.
     pub fn bench_iter(&mut self, mut benchmark: impl FnMut(&mut Self)) {
         let bencher = self.take_bencher("bench_iter");
         let collector = TraceScope::start(self.foreground_journal_collector());
@@ -725,16 +767,27 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
         self.replace_bencher(bencher);
     }
 
-    /// Measures frame latency after updating a GPUI entity in its current window.
+    /// Measure an entity update, its draw, and presentation in its current window.
     ///
     /// Each iteration runs `update` against the entity in its current window. In
     /// bench builds, flushing the update's effects synchronously draws dirty
     /// windows. The entity should be part of the window's render tree, such as the
     /// root view or a child of it.
     ///
-    /// Frame events are collected through the GPUI frame profiler
-    /// ([`crate::profiler::record_frame_event`]), which is enabled for the
-    /// duration of the measurement.
+    /// The update must invalidate the view when its rendered state changes,
+    /// usually with [`Context::notify`]. Ready foreground work is drained inside
+    /// the timed interval. The effect flush draws dirty windows, then this
+    /// method presents the resulting frame. GPU submission is included only
+    /// when the supplied platform has a headless renderer.
+    ///
+    /// Frame timings are filtered to this view's window. Foreground-work
+    /// timings cover the whole app, so keep unrelated windows and tasks out of
+    /// the fixture. These are wall-clock costs, not display-refresh latency.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the entity has no current window or a measurement is already
+    /// running on this context.
     pub fn bench_renderer<V>(
         &mut self,
         view: Entity<V>,
@@ -977,10 +1030,12 @@ impl AppContext for BenchAppContext<'_, '_> {
     }
 }
 
-/// A window-specific context for GPUI benchmarks.
+/// Access to one window in a [`BenchAppContext`].
 ///
-/// This is separate from `VisualTestContext`; it provides access to a benchmark
-/// window without exposing test-only helpers such as input simulation.
+/// Obtained from [`BenchAppContext::add_empty_window`]. Replace its empty root
+/// with [`VisualContext::replace_root_view`] before measuring rendering. The
+/// context supports app and window operations; input simulation belongs to
+/// the testing harnesses described in the [testing guide](https://gpui-ce.github.io/book/testing.html).
 #[derive(Clone)]
 pub struct BenchWindowContext<'a, 'measurement> {
     cx: BenchAppContext<'a, 'measurement>,
@@ -1004,7 +1059,14 @@ impl<'a, 'measurement> BenchWindowContext<'a, 'measurement> {
         self.cx.run_until_idle();
     }
 
-    /// Updates the benchmark window.
+    /// Update the window and flush app effects before returning.
+    ///
+    /// This does not drain all ready tasks. Use [`Self::run_until_idle`] when
+    /// setup depends on their completion.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the window has closed.
     pub fn update<R>(&mut self, update: impl FnOnce(&mut Window, &mut App) -> R) -> R {
         self.cx
             .update_window(self.window, |_, window, cx| update(window, cx))
@@ -1185,6 +1247,18 @@ mod tests {
     use crate::profiler::journal::install_test_foreground_journal;
 
     #[test]
+    #[should_panic(expected = "frame budget must be greater than zero")]
+    fn report_rejects_zero_budget_before_recording_work() {
+        BenchReport::with_frame_budget_nanos(0);
+    }
+
+    #[test]
+    #[should_panic(expected = "frame budget must be greater than zero")]
+    fn report_rejects_frame_rate_that_truncates_budget_to_zero() {
+        BenchReport::with_fps(1_000_000_001);
+    }
+
+    #[test]
     fn foreground_work_reports_long_task_without_window_draw() {
         let (journal, _journal_guard) = install_test_foreground_journal(1024, 64);
         let dispatcher = Arc::new(ThreadedDispatcher::new());
@@ -1200,9 +1274,15 @@ mod tests {
         run_task_to_completion(&foreground_executor, task);
 
         let events = trace_scope.finish();
+        // The frame collector is process-wide: another test can draw while
+        // this task sleeps. The fresh journal belongs to this thread and
+        // establishes whether this operation drew or presented a window.
         assert!(
-            events.frame_events.is_empty(),
-            "no window was involved, so no frame events should be recorded"
+            events.foreground_events().all(|event| !matches!(
+                event,
+                ForegroundEvent::Draw(_) | ForegroundEvent::Present(_)
+            )),
+            "this foreground operation should not draw or present a window"
         );
 
         let report = BenchReport::default();
@@ -1272,7 +1352,7 @@ mod tests {
 
     #[test]
     fn bench_task_reports_long_task_without_window() {
-        let platform = bench_platform(None, Arc::new(crate::NoopTextSystem::new()));
+        let platform = bench_platform(None, Arc::new(crate::TestTextSystem::new()));
         let report = BenchReport::default();
         let name = "bench_task_reports_long_task_without_window";
 
@@ -1311,7 +1391,7 @@ mod tests {
     fn benchmark_contexts_forward_global_entity_operations() {
         struct GlobalEntity;
 
-        let platform = bench_platform(None, Arc::new(crate::NoopTextSystem::new()));
+        let platform = bench_platform(None, Arc::new(crate::TestTextSystem::new()));
         let name = "benchmark_contexts_forward_global_entity_operations";
         let mut criterion = criterion::Criterion::default()
             .without_plots()

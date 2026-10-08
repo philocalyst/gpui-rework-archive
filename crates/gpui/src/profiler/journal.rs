@@ -3,8 +3,11 @@
 //! The foreground thread records task polls, action handlers, input dispatches,
 //! draws, and presentations as [`ForegroundEvent`]s in a bounded journal ring.
 //! Task polls shorter than [`TASK_POLL_FLOOR`] are folded into summaries, which
-//! bound the stream by the number of slow polls while preserving their exact
-//! count and total duration.
+//! retain the count and total duration within recorded activity intervals.
+//! If a foreground turn contains only these tiny polls and returns to true
+//! idle with no runnable or frame pending, its summary is discarded. The
+//! journal therefore describes retained activity, not every CPU instruction
+//! or every short wake-up.
 //!
 //! Presentation and the foreground going idle are explicit [`IntervalBoundary`]
 //! entries in the same stream. Independent [`ForegroundJournalCollector`]s
@@ -27,8 +30,9 @@ use super::{ActionTiming, FrameTiming, PresentTiming, TaskTiming};
 use crate::WindowId;
 
 /// Task polls shorter than this are folded into a [`PollSummary`] instead of
-/// being recorded individually. This keeps the stream bounded by the number
-/// of *slow* polls while preserving their exact count and total duration.
+/// being recorded individually. Summaries retain the count and total duration
+/// within an activity interval. Folded-only work is discarded on a return to
+/// true idle with no runnable or frame pending.
 pub const TASK_POLL_FLOOR: Duration = Duration::from_micros(100);
 
 /// A dirty frame that has not been presented by this deadline stops blocking
@@ -239,7 +243,7 @@ pub enum ForegroundJournalEntry {
     },
 }
 
-/// An immutable view of one sealed foreground interval, produced by
+/// An owned snapshot of one sealed foreground interval, produced by
 /// [`IntervalSealer`].
 #[derive(Debug, Clone)]
 pub struct FrameSnapshot {
@@ -936,7 +940,9 @@ pub struct ForegroundJournalCollector {
 impl ForegroundJournalCollector {
     /// Returns entries recorded since the previous call (or since the
     /// collector was created), reporting how many were unavailable before this
-    /// drain observed them.
+    /// call observed them. Reading advances this collector's cursor without
+    /// removing entries from the shared ring or affecting other collectors.
+    /// A newly offered entry can remain pending publication until a later call.
     pub fn collect_unseen(&mut self) -> DrainedEntries {
         let end = self.ring.finalized.load(Ordering::Acquire);
         if self.cursor >= end {
@@ -974,6 +980,10 @@ impl ForegroundJournalCollector {
 /// until an explicit [`IntervalBoundary`] arrives. Idle time before an
 /// interval's first event is excluded without relying on an elapsed-time
 /// heuristic.
+///
+/// Pass `DrainedEntries::entries` directly, including its ordered
+/// discontinuity markers. Do not also pass that drain's `lost` count to
+/// [`Self::note_lost`], or the same losses will be counted twice.
 #[derive(Debug)]
 pub struct IntervalSealer {
     interval_start: Instant,

@@ -11,7 +11,19 @@ pub struct AnchoredState {
     child_layout_ids: SmallVec<[LayoutId; 4]>,
 }
 
-/// An absolutely positioned subtree that fits itself to the window when it would overflow.
+/// An overlay positioned by a corner and an anchor point, then fitted to the window.
+///
+/// By default, the top-left corner sits at the element's layout origin. Use
+/// [`Self::position`] for an explicit point and [`Self::anchor`] to choose the
+/// corner attached to it. Coordinates are logical pixels in the window unless
+/// [`Self::position_mode`] selects [`AnchoredPositionMode::Local`].
+///
+/// When the children would extend past a window edge, the default fit mode tries
+/// the opposite corner on that axis. If neither corner fits, it moves the overlay
+/// against the window edge. An overlay larger than the viewport is aligned to
+/// the top or left edge; fitting does not shrink its children.
+///
+/// Use [`crate::deferred`] to paint a popup after its surrounding content.
 pub struct Anchored {
     children: SmallVec<[AnyElement; 2]>,
     anchor: Anchor,
@@ -37,7 +49,9 @@ pub fn anchored() -> Anchored {
 }
 
 impl Anchored {
-    /// Sets which corner of the anchored element should be anchored to the current position.
+    /// Choose the corner attached to the anchor point. The default is [`Anchor::TopLeft`].
+    ///
+    /// The default fit mode may switch this corner to avoid a window edge.
     pub fn anchor(mut self, anchor: Anchor) -> Self {
         self.anchor = anchor;
         self
@@ -49,13 +63,19 @@ impl Anchored {
         self
     }
 
-    /// Offset the fitted position by a logical-pixel amount.
+    /// Offsets the desired position in logical pixels before fitting it to the window.
+    ///
+    /// Fitting can change this position to avoid overflow; the offset does not
+    /// guarantee a fixed gap after an anchor switch.
     pub fn offset(mut self, offset: Point<Pixels>) -> Self {
         self.offset = Some(offset);
         self
     }
 
-    /// Choose whether [`Self::position`] is relative to the parent or the window.
+    /// Choose the coordinate system for [`Self::position`].
+    ///
+    /// [`AnchoredPositionMode::Window`] is the default. In local mode, the point
+    /// is added to this element's layout origin. Both modes fit against the window.
     pub fn position_mode(mut self, mode: AnchoredPositionMode) -> Self {
         self.position_mode = mode;
         self
@@ -67,7 +87,10 @@ impl Anchored {
         self
     }
 
-    /// Snap to window edge and leave some margins.
+    /// Snap overflowing edges inward by the given margins, in logical pixels.
+    ///
+    /// Margins apply when an edge is fitted; they do not reserve space around an
+    /// overlay that already fits. The window's client inset is added to them.
     pub fn snap_to_window_with_margin(mut self, edges: impl Into<Edges<Pixels>>) -> Self {
         self.fit_mode = AnchoredFitMode::SnapToWindowWithMargin(edges.into());
         self
@@ -235,23 +258,23 @@ impl IntoElement for Anchored {
     }
 }
 
-/// Which algorithm to use when fitting the anchored element to be inside the window.
+/// How an [`Anchored`] overlay responds to overflow on each axis.
 #[derive(Copy, Clone, PartialEq)]
 pub enum AnchoredFitMode {
     /// Snap the anchored element to the window edge.
     SnapToWindow,
-    /// Snap to window edge and leave some margins.
+    /// Snap overflowing edges inward by these margins, plus the window's client inset.
     SnapToWindowWithMargin(Edges<Pixels>),
-    /// Switch which corner anchor this anchored element is attached to.
+    /// Try the opposite corner, then snap to the window if neither corner fits.
     SwitchAnchor,
 }
 
-/// Which algorithm to use when positioning the anchored element.
+/// Coordinate system of an [`Anchored::position`] point.
 #[derive(Copy, Clone, PartialEq)]
 pub enum AnchoredPositionMode {
     /// Position the anchored element relative to the window.
     Window,
-    /// Position the anchored element relative to its parent.
+    /// Add the point to the anchored element's layout origin.
     Local,
 }
 
@@ -268,17 +291,13 @@ impl AnchoredPositionMode {
 
         match self {
             AnchoredPositionMode::Window => {
-                let anchor_position = anchor_position.unwrap_or(bounds.origin);
-                let bounds = Bounds::from_anchor_and_size(anchor, anchor_position + offset, size);
+                let anchor_position = anchor_position.unwrap_or(bounds.origin) + offset;
+                let bounds = Bounds::from_anchor_and_size(anchor, anchor_position, size);
                 (anchor_position, bounds)
             }
             AnchoredPositionMode::Local => {
-                let anchor_position = anchor_position.unwrap_or_default();
-                let bounds = Bounds::from_anchor_and_size(
-                    anchor,
-                    bounds.origin + anchor_position + offset,
-                    size,
-                );
+                let anchor_position = bounds.origin + anchor_position.unwrap_or_default() + offset;
+                let bounds = Bounds::from_anchor_and_size(anchor, anchor_position, size);
                 (anchor_position, bounds)
             }
         }
@@ -291,6 +310,73 @@ mod tests {
         Context, Pixels, PlatformInput, Point, TestAppContext, Window, deferred, div, point,
         prelude::*, px, size,
     };
+
+    #[test]
+    fn anchor_switch_uses_the_same_window_point_as_initial_placement() {
+        let layout_bounds = crate::Bounds::new(point(px(500.), px(100.)), size(px(200.), px(100.)));
+        for (mode, expected) in [
+            (
+                super::AnchoredPositionMode::Window,
+                point(px(125.), px(25.)),
+            ),
+            (
+                super::AnchoredPositionMode::Local,
+                point(px(625.), px(125.)),
+            ),
+        ] {
+            let (origin, bounds) = mode.get_position_and_bounds(
+                Some(point(px(100.), px(20.))),
+                crate::Anchor::TopLeft,
+                size(px(200.), px(300.)),
+                layout_bounds,
+                Some(point(px(25.), px(5.))),
+            );
+            assert_eq!(origin, expected);
+            assert_eq!(bounds.origin, expected);
+            let switched =
+                crate::Bounds::from_anchor_and_size(crate::Anchor::TopRight, origin, bounds.size);
+            assert_eq!(switched.right(), bounds.left());
+        }
+    }
+
+    struct LocalAnchoredTestView;
+
+    impl Render for LocalAnchoredTestView {
+        fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+            div().size_full().child(
+                div()
+                    .absolute()
+                    .left(px(500.))
+                    .top(px(100.))
+                    .child(deferred(
+                        super::anchored()
+                            .position_mode(super::AnchoredPositionMode::Local)
+                            .position(point(px(100.), px(20.)))
+                            .offset(point(px(25.), px(5.)))
+                            .child(
+                                div()
+                                    .debug_selector(|| "LOCAL_MENU".into())
+                                    .w(px(200.))
+                                    .h(px(300.)),
+                            ),
+                    )),
+            )
+        }
+    }
+
+    #[gpui::test]
+    fn local_anchor_switch_preserves_the_parent_origin_and_offset(cx: &mut TestAppContext) {
+        let window = cx.open_window(size(px(800.), px(600.)), |_, _| LocalAnchoredTestView);
+        cx.run_until_parked();
+        let bounds = window
+            .update(
+                cx,
+                |_, window, _| window.rendered_frame.debug_bounds["LOCAL_MENU"],
+            )
+            .unwrap();
+        assert_eq!(bounds.origin, point(px(425.), px(125.)));
+        assert_eq!(bounds.size, size(px(200.), px(300.)));
+    }
 
     struct AnchoredTestView {
         position: Point<Pixels>,

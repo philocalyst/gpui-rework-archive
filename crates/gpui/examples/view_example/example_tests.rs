@@ -6,7 +6,9 @@
 
 #[cfg(test)]
 mod tests {
-    use gpui::{Context, Entity, KeyBinding, TestAppContext, Window, prelude::*};
+    use gpui::{
+        Context, Entity, EntityInputHandler, KeyBinding, TestAppContext, Window, prelude::*,
+    };
 
     use crate::example_editor::Editor;
     use crate::example_input::Input;
@@ -23,20 +25,20 @@ mod tests {
     impl Render for TwoInputs {
         fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
             gpui::div()
-                .child(Input::editor(self.a.clone()))
-                .child(Input::editor(self.b.clone()))
+                .child(Input::editor(self.a.clone(), "First input"))
+                .child(Input::editor(self.b.clone(), "Second input"))
         }
     }
 
     fn bind_keys(cx: &mut TestAppContext) {
         cx.update(|cx| {
             cx.bind_keys([
-                KeyBinding::new("backspace", Backspace, None),
-                KeyBinding::new("delete", Delete, None),
-                KeyBinding::new("left", Left, None),
-                KeyBinding::new("right", Right, None),
-                KeyBinding::new("home", Home, None),
-                KeyBinding::new("end", End, None),
+                KeyBinding::new("backspace", Backspace, Some("TextInput")),
+                KeyBinding::new("delete", Delete, Some("TextInput")),
+                KeyBinding::new("left", Left, Some("TextInput")),
+                KeyBinding::new("right", Right, Some("TextInput")),
+                KeyBinding::new("home", Home, Some("TextInput")),
+                KeyBinding::new("end", End, Some("TextInput")),
             ]);
         });
     }
@@ -127,6 +129,103 @@ mod tests {
 
         cx.simulate_keystrokes("left left");
         cx.read_entity(&editor, |editor, _| assert_eq!(editor.cursor, 1));
+    }
+
+    #[gpui::test]
+    fn composition_replaces_candidates_then_commits(cx: &mut TestAppContext) {
+        let (editor, value, _, cx) = setup(cx);
+        cx.simulate_input("a🦀z");
+        cx.update(|window, cx| {
+            editor.update(cx, |editor, cx| {
+                // UTF-16 1..3 covers the four-byte crab. The inserted selection
+                // is relative to the candidate, not to the document.
+                editor.replace_and_mark_text_in_range(Some(1..3), "に", Some(1..1), window, cx);
+                assert_eq!(editor.marked_text_range(window, cx), Some(1..2));
+                assert_eq!(
+                    editor.selected_text_range(false, window, cx).unwrap().range,
+                    2..2
+                );
+                editor.replace_and_mark_text_in_range(None, "日本", Some(0..2), window, cx);
+                assert_eq!(editor.marked_text_range(window, cx), Some(1..3));
+                assert_eq!(
+                    editor.selected_text_range(false, window, cx).unwrap().range,
+                    1..3
+                );
+            })
+        });
+        cx.read_entity(&value, |value, _| assert_eq!(value, "a日本z"));
+        // Observing our own buffer notification must not end composition.
+        cx.update(|window, cx| {
+            editor.update(cx, |editor, cx| {
+                assert_eq!(editor.marked_text_range(window, cx), Some(1..3));
+                editor.replace_text_in_range(None, "日本語", window, cx);
+                assert_eq!(editor.marked_text_range(window, cx), None);
+                assert_eq!(
+                    editor.selected_text_range(false, window, cx).unwrap().range,
+                    4..4
+                );
+            })
+        });
+        cx.read_entity(&value, |value, _| assert_eq!(value, "a日本語z"));
+    }
+
+    #[gpui::test]
+    fn reversed_selection_and_invalid_offsets_are_normalized(cx: &mut TestAppContext) {
+        let (editor, value, _, cx) = setup(cx);
+        cx.simulate_input("a🦀z");
+        cx.update(|window, cx| {
+            editor.update(cx, |editor, cx| {
+                // A reversed selection keeps the active end at byte one.
+                editor.set_selected_text_range(3..1, window, cx);
+                let selection = editor.selected_text_range(false, window, cx).unwrap();
+                assert_eq!(selection.range, 1..3);
+                assert!(selection.reversed);
+                assert_eq!(editor.text_length_utf16(window, cx), Some(4));
+                editor.replace_text_in_range(None, "x", window, cx);
+                let mut adjusted = None;
+                assert_eq!(
+                    editor
+                        .text_for_range(usize::MAX..0, &mut adjusted, window, cx)
+                        .as_deref(),
+                    Some("axz")
+                );
+                assert_eq!(adjusted, Some(0..3));
+            })
+        });
+        cx.read_entity(&value, |value, _| assert_eq!(value, "axz"));
+        cx.simulate_keystrokes("home delete");
+        cx.read_entity(&value, |value, _| assert_eq!(value, "xz"));
+    }
+
+    #[gpui::test]
+    fn unmark_keeps_text_and_external_replacement_ends_composition(cx: &mut TestAppContext) {
+        let (editor, value, _, cx) = setup(cx);
+        cx.update(|window, cx| {
+            editor.update(cx, |editor, cx| {
+                editor.replace_and_mark_text_in_range(None, "に", None, window, cx);
+                editor.unmark_text(window, cx);
+                assert_eq!(editor.text(cx), "に");
+                assert_eq!(editor.marked_text_range(window, cx), None);
+                editor.replace_and_mark_text_in_range(Some(0..1), "日本", Some(0..2), window, cx);
+            })
+        });
+        cx.update(|_, cx| {
+            value.update(cx, |value, cx| {
+                *value = "a".into();
+                cx.notify();
+            })
+        });
+        cx.update(|window, cx| {
+            editor.update(cx, |editor, cx| {
+                assert_eq!(editor.marked_text_range(window, cx), None);
+                assert_eq!(
+                    editor.selected_text_range(false, window, cx).unwrap().range,
+                    0..1
+                );
+                editor.replace_text_in_range(None, "b", window, cx);
+            })
+        });
+        cx.read_entity(&value, |value, _| assert_eq!(value, "b"));
     }
     #[gpui::test]
     fn editing_respects_graphemes_across_scripts_and_emoji(cx: &mut TestAppContext) {

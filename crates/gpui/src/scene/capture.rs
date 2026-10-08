@@ -6,8 +6,8 @@
 
 use super::*;
 use anyhow::{Context, Result, ensure};
-use serde::{Deserialize, Serialize};
 use collections::HashMap;
+use serde::{Deserialize, Serialize};
 
 /// Current serialized scene-capture format version.
 ///
@@ -180,11 +180,17 @@ impl SceneCapture {
         &self.commands
     }
 
-    /// Restores a finished scene for renderer replay without consuming this capture.
+    /// Validates and clones the captured primitives into a finished scene.
     ///
-    /// Paint operations and the layout cache belong to the live window. They are not
-    /// restored, so this scene cannot act as a previous frame for [`Scene::replay`].
-    /// Returns an error if the serialized resources or command stream are invalid.
+    /// Sprite tiles still refer to this capture's [`bitmaps`](Self::bitmaps),
+    /// not to an atlas allocated by a renderer. Use
+    /// [`Window::import_scene_capture`](crate::Window::import_scene_capture) to
+    /// upload those pixels and remap the references for a receiving window.
+    ///
+    /// Paint operations are not restored, so this scene cannot serve as the
+    /// source of [`Scene::replay`]. Layout and input state are not captured.
+    /// Returns an error for an unsupported version, invalid resources, or a
+    /// command stream that differs from the scene's canonical compilation.
     pub fn to_scene(&self) -> Result<Scene> {
         self.validate_resources()?;
         let mut scene = self.clone_primitives();
@@ -193,10 +199,14 @@ impl SceneCapture {
         Ok(scene)
     }
 
-    /// Restores a scene for renderer replay, preserving command order and batching.
-    /// Like [`Self::to_scene`], this does not restore the live window's paint cache.
-    /// The capture is consumed, so primitive vectors and bitmap storage can be
-    /// moved instead of cloned. Returns an error if validation fails.
+    /// Validates and moves the captured primitives into a finished scene.
+    ///
+    /// This avoids cloning the primitive vectors. The capture's bitmap storage
+    /// is dropped: the returned scene retains only capture-local tile references.
+    /// Keep those pixels separately if implementing a custom receiver, or use
+    /// [`Window::import_scene_capture`](crate::Window::import_scene_capture).
+    /// As with [`Self::to_scene`], no paint-operation cache is restored, and
+    /// validation failures return an error.
     pub fn into_scene(self) -> Result<Scene> {
         self.validate_resources()?;
         let mut scene = Scene {
@@ -260,9 +270,9 @@ impl SceneCapture {
         // Equal bitmaps share one captured resource, even across distinct live tiles.
         if canonical {
             resources.sort_by(|(_, left), (_, right)| {
-            (left.kind as u32, left.width, left.height)
-                .cmp(&(right.kind as u32, right.width, right.height))
-                .then_with(|| left.bytes.cmp(&right.bytes))
+                (left.kind as u32, left.width, left.height)
+                    .cmp(&(right.kind as u32, right.width, right.height))
+                    .then_with(|| left.bytes.cmp(&right.bytes))
             });
         }
         let mut normalized = vec![None; resources.len()];
@@ -312,11 +322,11 @@ impl SceneCapture {
         // within an order, where atlas-dependent ordering cannot affect compositing.
         if canonical {
             self.monochrome_sprites
-            .sort_by(|a, b| sprite_order(a.order, a.tile, a.bounds, b.order, b.tile, b.bounds));
-        self.subpixel_sprites
-            .sort_by(|a, b| sprite_order(a.order, a.tile, a.bounds, b.order, b.tile, b.bounds));
-        self.polychrome_sprites
-            .sort_by(|a, b| sprite_order(a.order, a.tile, a.bounds, b.order, b.tile, b.bounds));
+                .sort_by(|a, b| sprite_order(a.order, a.tile, a.bounds, b.order, b.tile, b.bounds));
+            self.subpixel_sprites
+                .sort_by(|a, b| sprite_order(a.order, a.tile, a.bounds, b.order, b.tile, b.bounds));
+            self.polychrome_sprites
+                .sort_by(|a, b| sprite_order(a.order, a.tile, a.bounds, b.order, b.tile, b.bounds));
         }
         self.commands = ScenePlan::build_primitives(self.primitives(), Vec::new()).commands;
         Ok(())
@@ -324,10 +334,15 @@ impl SceneCapture {
 
     fn primitives(&self) -> ScenePrimitives<'_> {
         ScenePrimitives {
-            shadows: &self.shadows, quads: &self.quads, paths: &self.paths,
-            underlines: &self.underlines, monochrome_sprites: &self.monochrome_sprites,
-            subpixel_sprites: &self.subpixel_sprites, polychrome_sprites: &self.polychrome_sprites,
-            surfaces: &[], backdrop_filters: &self.backdrop_filters,
+            shadows: &self.shadows,
+            quads: &self.quads,
+            paths: &self.paths,
+            underlines: &self.underlines,
+            monochrome_sprites: &self.monochrome_sprites,
+            subpixel_sprites: &self.subpixel_sprites,
+            polychrome_sprites: &self.polychrome_sprites,
+            surfaces: &[],
+            backdrop_filters: &self.backdrop_filters,
             filter_boundaries: &self.filter_boundaries,
         }
     }

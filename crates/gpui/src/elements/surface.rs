@@ -112,7 +112,12 @@ pub struct Surface {
     style: StyleRefinement,
 }
 
-/// Construct a surface element. The default [`ObjectFit`] is [`ObjectFit::Contain`].
+/// Composites a platform surface or GPU texture with [`ObjectFit::Contain`] by default.
+///
+/// Set its layout size through [`Styled`]. Surface painting applies opacity
+/// but does not paint style backgrounds, borders, shadows, or rounded corners;
+/// use a surrounding [`Div`](crate::Div) for those decorations. Available
+/// source variants depend on the platform and enabled features.
 pub fn surface(source: impl Into<SurfaceSource>) -> Surface {
     Surface {
         source: source.into(),

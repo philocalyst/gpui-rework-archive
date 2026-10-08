@@ -1,4 +1,4 @@
-//! Platform contracts shared by GPUI's native backends and test doubles.
+//! Platform contracts shared by GPUI's native, browser, and test backends.
 //!
 //! The traits in this module describe capabilities rather than a particular window toolkit:
 //! executors, displays, windows, text shaping, clipboard, image decoding, and optional capture.
@@ -164,10 +164,16 @@ pub enum MacActivationPolicy {
 
 /// The operating-system services used by a GPUI application.
 ///
-/// A backend owns the event loop, native windows, and system integration. GPUI
+/// A backend owns the event loop, window peers, and system integration. GPUI
 /// calls this trait on the UI thread; work returned by [`Self::background_executor`]
 /// may run elsewhere. Application code normally uses [`App`] instead. Implement
 /// this trait when adding a backend or providing a controlled test environment.
+///
+/// Optional methods often default to doing nothing or returning `None`. That
+/// default lets a backend omit a service; it does not establish that the
+/// service succeeded. Follow the result/callback contract of the operation,
+/// and see the [platform chapter](crate::_documentation::platforms) for backend
+/// selection and known differences.
 pub trait Platform: 'static {
     /// Executor for work that may run away from the UI thread.
     fn background_executor(&self) -> BackgroundExecutor;
@@ -684,17 +690,21 @@ pub enum ResizeEdge {
     TopLeft,
 }
 
-/// A type to describe the appearance of a window
+/// Requested owner of window decorations such as the titlebar and borders.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Default)]
 pub enum WindowDecorations {
     #[default]
-    /// Server side decorations
+    /// Ask the window manager or compositor to draw decorations.
     Server,
-    /// Client side decorations
+    /// Draw decorations within the application surface.
     Client,
 }
 
-/// A type to describe how this window is currently configured
+/// Effective decoration mode reported by the backend.
+///
+/// This can differ from the requested [`WindowDecorations`] when the window
+/// system applies its own policy. Client decorations also carry the edge-tiling
+/// state needed to decide which borders to draw.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Default)]
 pub enum Decorations {
     /// The window is configured to use server side decorations
@@ -707,7 +717,11 @@ pub enum Decorations {
     },
 }
 
-/// What window controls this platform supports
+/// Window-management controls the backend reports as available.
+///
+/// The default enables all four controls. It is a backend fallback, not an
+/// operating-system capability probe; obtain the window's reported value when
+/// deciding which controls to show.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct WindowControls {
     /// Whether this platform supports fullscreen
@@ -780,7 +794,7 @@ pub struct WindowButtonLayout {
 
 #[cfg(any(target_os = "linux", target_os = "freebsd"))]
 impl WindowButtonLayout {
-    /// Returns Zed's built-in fallback button layout for Linux titlebars.
+    /// Return GPUI's Linux fallback: minimize, maximize, and close on the right.
     pub fn linux_default() -> Self {
         Self {
             left: [None; MAX_BUTTONS_PER_SIDE],
@@ -793,6 +807,13 @@ impl WindowButtonLayout {
     }
 
     /// Parses a GNOME-style `button-layout` string (e.g. `"close,minimize:maximize"`).
+    ///
+    /// A colon separates the left and right sides. Without one, all buttons
+    /// belong to the right. Whitespace and empty comma-separated entries are
+    /// ignored, and each recognized button appears only once across both sides.
+    /// Unknown names are ignored if at least one valid button remains; a
+    /// non-empty set of only unknown names returns an error. An empty string
+    /// deliberately produces no buttons.
     pub fn parse(layout_string: &str) -> Result<Self> {
         fn parse_side(
             s: &str,
@@ -945,12 +966,12 @@ pub enum AppLifecyclePhase {
     Foreground,
 }
 
-/// Regions of a window that are obscured or reserved by the system.
+/// Edge distances reserved by system UI, display cutouts, and the soft keyboard.
 ///
-/// Mobile applications often share space in their window with system-specific
-/// geometry, from keyboards to camera notches. In GPUI, all this is abstracted
-/// into a single "inset" which should be overlaid on the window's bounds.
-/// It is up to the application develop to determine how to handle these cases.
+/// Each field uses logical pixels measured inward from the corresponding
+/// window edge. [`effective`](Self::effective) combines overlapping reservations
+/// by taking the maximum at each edge. The application decides how its layout
+/// responds; reporting an inset does not automatically pad the element tree.
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct WindowInsets {
     /// Regions covered by system UI or hardware: status bar, display
@@ -965,7 +986,9 @@ pub struct WindowInsets {
 }
 
 impl WindowInsets {
-    /// The combined inset content should avoid.
+    /// Combine system and keyboard reservations with a per-edge maximum.
+    ///
+    /// This does not add the two distances: overlapping areas are avoided once.
     pub fn effective(&self) -> Edges<Pixels> {
         Edges {
             top: self.safe_area.top.max(self.ime.top),
@@ -996,7 +1019,12 @@ pub enum TextInputStateChange {
 /// native event loop to GPUI; their callbacks must run on the UI thread. Optional
 /// services have defaults so a backend can omit unsupported system features.
 pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
-    /// Return the outer window bounds in global logical pixels, including native decorations.
+    /// Return backend window geometry in logical pixels.
+    ///
+    /// Global position and decoration coverage depend on the window system.
+    /// Wayland top-level surfaces and browser canvases cannot supply a normal
+    /// desktop position. Use [`Self::content_size`] for drawable dimensions
+    /// and [`Self::window_bounds`] for restoration state.
     fn bounds(&self) -> Bounds<Pixels>;
     /// Report whether the native window is maximized.
     fn is_maximized(&self) -> bool;
@@ -1411,25 +1439,51 @@ pub trait PlatformDispatcher: Send + Sync {
 pub trait PlatformTextSystem: Send + Sync {
     /// Add font files from owned or static bytes; reject files the backend cannot load.
     fn add_fonts(&self, fonts: Vec<Cow<'static, [u8]>>) -> Result<()>;
-    /// Get all available font names.
+    /// Enumerate the family names available to this backend.
+    ///
+    /// A family can contain several faces. Use [`Self::font_id`] to resolve a
+    /// descriptor with a particular weight, style, and feature configuration.
     fn all_font_names(&self) -> Vec<String>;
-    /// Generation of the font collection used by layout cache invalidation.
+    /// Version of the font collection used to invalidate cached layout.
+    ///
+    /// Backends with a mutable collection must change this value after adding
+    /// fonts. The default constant is suitable only for an immutable collection.
     fn font_generation(&self) -> u64 {
         0
     }
-    /// Get the font ID for a font descriptor.
+    /// Resolve a descriptor to a font identity owned by this text system.
+    ///
+    /// Return an error when the backend cannot resolve a face. A resolved face
+    /// need not contain every character; shaping can select fallback faces.
     fn font_id(&self, descriptor: &Font) -> Result<FontId>;
     /// Prewarm any system font caches needed to shape text.
     fn prewarm_fonts(&self, _font_ids: &[FontId]) {}
-    /// Get metrics for a font.
+    /// Read metrics in font design units for a previously resolved font.
+    ///
+    /// The ID must belong to this text system. Implementations may panic for
+    /// an unknown ID; this method has no error return. Scale distances by
+    /// `font_size / units_per_em` when converting them to logical pixels.
     fn font_metrics(&self, font_id: FontId) -> FontMetrics;
-    /// Get typographic bounds for a glyph.
+    /// Read a glyph's bounds in font design units, or report a backend error.
+    ///
+    /// These are font-relative bounds, not a positioned text-layout rectangle
+    /// or a raster bitmap's device-pixel bounds. An empty glyph can have empty
+    /// bounds and a nonzero advance.
     fn typographic_bounds(&self, font_id: FontId, glyph_id: GlyphId) -> Result<Bounds<f32>>;
-    /// Get the advance width for a glyph.
+    /// Read a glyph's isolated advance in font design units.
+    ///
+    /// This does not apply contextual shaping, kerning, or ligatures. Measure
+    /// a string with [`Self::layout_text`] rather than summing these advances.
     fn advance(&self, font_id: FontId, glyph_id: GlyphId) -> Result<Size<f32>>;
-    /// Get the glyph ID for a character.
+    /// Map one Unicode scalar to a nominal glyph in this face, if present.
+    ///
+    /// This does not search fallback fonts or shape a sequence of scalars.
     fn glyph_for_char(&self, font_id: FontId, ch: char) -> Option<GlyphId>;
-    /// Rasterize a glyph, including its atlas placement and pixels.
+    /// Rasterize a glyph into device-pixel bounds and bitmap data.
+    ///
+    /// The returned bounds position the bitmap relative to the glyph origin;
+    /// [`PlatformAtlas`] allocates its texture tile separately. Return an error
+    /// if the font, glyph, or requested raster settings cannot be rendered.
     fn rasterize_glyph(&self, params: &RenderGlyphParams) -> Result<RasterizedGlyph>;
     /// Optionally prepares a lazy batch for subsequent ordinary glyph painting.
     /// The default does not consume the iterator or allocate. A platform bridge
@@ -2477,6 +2531,11 @@ impl PlatformInputHandler {
         selection: &UTF16Selection,
         mut bounds_for_range: impl FnMut(Range<usize>) -> Option<Bounds<Pixels>>,
     ) -> Option<Bounds<Pixels>> {
+        let caret = if selection.reversed {
+            selection.range.start
+        } else {
+            selection.range.end
+        };
         if let Some(marked_range) = marked_range {
             // Default to the start of the marked (composing) range.
             let mut line_start = marked_range.start;
@@ -2484,7 +2543,6 @@ impl PlatformInputHandler {
             // Walk backward from the caret looking for a line break. A change in
             // the Y coordinate means we crossed into the previous visual line, so
             // the line start is one position after the break point.
-            let caret = selection.range.end;
             if let Some(caret_bounds) = bounds_for_range(caret..caret) {
                 for i in (marked_range.start..caret).rev() {
                     if let Some(b) = bounds_for_range(i..i) {
@@ -2498,12 +2556,7 @@ impl PlatformInputHandler {
             bounds_for_range(line_start..line_start)
         } else {
             // No active composition — use the selection endpoint.
-            let offset = if selection.reversed {
-                selection.range.start
-            } else {
-                selection.range.end
-            };
-            bounds_for_range(offset..offset)
+            bounds_for_range(caret..caret)
         }
     }
 
@@ -2614,27 +2667,104 @@ impl PlatformInputHandler {
     }
 }
 
-/// A struct representing a selection in a text buffer, in UTF16 characters.
-/// This is different from a range because the head may be before the tail.
+#[cfg(test)]
+mod ime_candidate_bounds_tests {
+    use super::*;
+    use crate::size;
+
+    fn bounds_at(offset: usize) -> Bounds<Pixels> {
+        let line = if offset < 3 { 0. } else { 20. };
+        Bounds::new(point(px(offset as f32), px(line)), size(px(1.), px(20.)))
+    }
+
+    #[test]
+    fn composition_follows_the_active_endpoint_of_a_reversed_selection() {
+        let selection = UTF16Selection {
+            range: 2..7,
+            reversed: true,
+        };
+        let bounds =
+            PlatformInputHandler::compute_ime_candidate_bounds(Some(0..8), &selection, |range| {
+                Some(bounds_at(range.start))
+            });
+        assert_eq!(bounds, Some(bounds_at(0)));
+    }
+
+    #[test]
+    fn composition_uses_the_start_of_the_active_visual_line() {
+        let selection = UTF16Selection {
+            range: 2..7,
+            reversed: false,
+        };
+        let bounds =
+            PlatformInputHandler::compute_ime_candidate_bounds(Some(0..8), &selection, |range| {
+                Some(bounds_at(range.start))
+            });
+        assert_eq!(bounds, Some(bounds_at(3)));
+    }
+
+    #[test]
+    fn without_composition_uses_the_active_endpoint() {
+        let selection = UTF16Selection {
+            range: 2..7,
+            reversed: true,
+        };
+        let bounds =
+            PlatformInputHandler::compute_ime_candidate_bounds(None, &selection, |range| {
+                Some(bounds_at(range.start))
+            });
+        assert_eq!(bounds, Some(bounds_at(2)));
+    }
+}
+
+/// A text selection measured in UTF-16 code units, including its direction.
+///
+/// `range` is ordered from the lower offset to the higher offset. `reversed`
+/// identifies which endpoint is the active head, where movement extends or
+/// contracts the selection. An empty range denotes a caret.
+///
+/// ```
+/// use gpui::UTF16Selection;
+///
+/// // The user selected backward from offset 7 to offset 3.
+/// let selection = UTF16Selection { range: 3..7, reversed: true };
+/// let head = if selection.reversed { selection.range.start } else { selection.range.end };
+/// assert_eq!(head, 3);
+/// ```
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct UTF16Selection {
-    /// The range of text in the document this selection corresponds to
-    /// in UTF16 characters.
+    /// The selected half-open document range, in UTF-16 code units.
     pub range: Range<usize>,
-    /// Whether the head of this selection is at the start (true), or end (false)
-    /// of the range
+    /// Whether the active head is at `range.start` rather than `range.end`.
     pub reversed: bool,
 }
 
-/// Zed's interface for handling text input from the platform's IME system
-/// This is currently a 1:1 exposure of the NSTextInputClient API:
+/// The focused text region's interface to platform text input.
 ///
-/// <https://developer.apple.com/documentation/appkit/nstextinputclient>
+/// The platform uses this protocol to query surrounding text, replace ranges,
+/// maintain an [input method](https://en.wikipedia.org/wiki/Input_method)
+/// composition, and position native text UI. A composition is provisional text
+/// that the input method can replace repeatedly before committing it; its
+/// *marked range* belongs to that session.
+///
+/// Every offset and range counts **UTF-16 code units**, even when the document
+/// stores UTF-8. For example, `"a🦀"` has five UTF-8 bytes and three UTF-16 code
+/// units. Convert at the boundary with [`crate::utf8_to_utf16_offset`] and
+/// [`crate::utf16_to_utf8_offset`]. Neither encoding chooses user-visible
+/// [grapheme boundaries](https://www.unicode.org/reports/tr29/).
+///
+/// Implement [`crate::EntityInputHandler`] on a view and install its
+/// [`crate::ElementInputHandler`] during paint with [`Window::handle_input`].
+/// Implement this lower-level trait directly when the handler is not an entity.
+/// Keyboard listeners alone cannot represent composition or platform-driven
+/// replacement. See the [input chapter](crate::_documentation::input) for routing and focus.
 pub trait InputHandler: 'static {
-    /// Get the range of the user's currently selected text, if any
-    /// Corresponds to [selectedRange()](https://developer.apple.com/documentation/appkit/nstextinputclient/1438242-selectedrange)
+    /// Read the selection and its active endpoint, or `None` if unavailable.
     ///
-    /// Return value is in terms of UTF-16 characters, from 0 to the length of the document
+    /// A caret is `Some` with an empty range. When `ignore_disabled_input` is
+    /// true, report the selection even if the region currently rejects edits,
+    /// when that query is supported. Otherwise the handler can return `None`
+    /// while disabled. See [`Self::accepts_text_input`].
     fn selected_text_range(
         &mut self,
         ignore_disabled_input: bool,
@@ -2642,16 +2772,18 @@ pub trait InputHandler: 'static {
         cx: &mut App,
     ) -> Option<UTF16Selection>;
 
-    /// Get the range of the currently marked text, if any
-    /// Corresponds to [markedRange()](https://developer.apple.com/documentation/appkit/nstextinputclient/1438250-markedrange)
+    /// Read the provisional composition range in document coordinates.
     ///
-    /// Return value is in terms of UTF-16 characters, from 0 to the length of the document
+    /// `None` means there is no active marked range. Keep this range in sync
+    /// with replacements made by [`Self::replace_and_mark_text_in_range`].
     fn marked_text_range(&mut self, window: &mut Window, cx: &mut App) -> Option<Range<usize>>;
 
-    /// Get the text for the given document range in UTF-16 characters
-    /// Corresponds to [attributedSubstring(forProposedRange: actualRange:)](https://developer.apple.com/documentation/appkit/nstextinputclient/1438238-attributedsubstring)
+    /// Read text overlapping a UTF-16 document range.
     ///
-    /// range_utf16 is in terms of UTF-16 characters
+    /// Return `None` when the query cannot be answered. If the requested range
+    /// must be clamped or adjusted to a valid boundary, set `adjusted_range` to
+    /// the document range represented by the returned string. The string
+    /// itself is UTF-8, as usual for Rust.
     fn text_for_range(
         &mut self,
         range_utf16: Range<usize>,
@@ -2660,10 +2792,13 @@ pub trait InputHandler: 'static {
         cx: &mut App,
     ) -> Option<String>;
 
-    /// Replace the text in the given document range with the given text
-    /// Corresponds to [insertText(_:replacementRange:)](https://developer.apple.com/documentation/appkit/nstextinputclient/1438258-inserttext)
+    /// Commit `text` by replacing a UTF-16 document range.
     ///
-    /// replacement_range is in terms of UTF-16 characters
+    /// For `None`, replace the current marked range if composing, or the
+    /// current selection otherwise. Update the selection and clear the marked
+    /// range as part of the edit. Notify the view so its next frame reflects
+    /// the new text and caret. Repeated composition updates instead use
+    /// [`Self::replace_and_mark_text_in_range`].
     fn replace_text_in_range(
         &mut self,
         replacement_range: Option<Range<usize>>,
@@ -2672,12 +2807,16 @@ pub trait InputHandler: 'static {
         cx: &mut App,
     );
 
-    /// Replace the text in the given document range with the given text,
-    /// and mark the given text as part of an IME 'composing' state
-    /// Corresponds to [setMarkedText(_:selectedRange:replacementRange:)](https://developer.apple.com/documentation/appkit/nstextinputclient/1438246-setmarkedtext)
+    /// Replace text and mark the inserted text as provisional composition.
     ///
-    /// range_utf16 is in terms of UTF-16 characters
-    /// new_selected_range is in terms of UTF-16 characters
+    /// `range_utf16` is a document range. For `None`, replace the previous
+    /// marked range, or the selection when starting a composition.
+    /// `new_selected_range` is relative to `new_text`, also in UTF-16 code
+    /// units; translate it to document coordinates after insertion. When it
+    /// is absent, choose the handler's default selection placement.
+    ///
+    /// A later call can replace this marked text again. Do not append every
+    /// provisional update as if it were a separately committed keystroke.
     fn replace_and_mark_text_in_range(
         &mut self,
         range_utf16: Option<Range<usize>>,
@@ -2687,16 +2826,18 @@ pub trait InputHandler: 'static {
         cx: &mut App,
     );
 
-    /// Remove the IME 'composing' state from the document
-    /// Corresponds to [unmarkText()](https://developer.apple.com/documentation/appkit/nstextinputclient/1438239-unmarktext)
+    /// End composition without deleting or replacing the marked text.
+    ///
+    /// Clear the marked range and any composition decoration, keeping the text.
     fn unmark_text(&mut self, window: &mut Window, cx: &mut App);
 
-    /// Insert a platform-initiated paste at the current selection.
+    /// Commit the plain-text portion of a platform-initiated paste.
     ///
     /// Platforms that deliver paste as an input event rather than through an
     /// application-defined action (e.g. the DOM `paste` event on web) call
     /// this with the full clipboard contents. The default implementation
-    /// inserts only the plain-text portion of the item.
+    /// calls [`Self::replace_text_in_range`] without an explicit range,
+    /// replacing marked text during composition or the current selection.
     fn paste(&mut self, item: ClipboardItem, window: &mut Window, cx: &mut App) {
         if let Some(text) = item.text() {
             self.replace_text_in_range(None, &text, window, cx);
@@ -2736,7 +2877,8 @@ pub trait InputHandler: 'static {
     /// invokes Select All from system UI (iOS `UITextInput setSelectedTextRange:`,
     /// Android `InputConnection.setSelection`).
     ///
-    /// range_utf16 is in terms of UTF-16 characters, from 0 to the length of the document
+    /// `range_utf16` counts code units from the start of the document. The
+    /// default does nothing; override it to support platform-driven selection.
     fn set_selected_text_range(
         &mut self,
         _range_utf16: Range<usize>,
@@ -2755,21 +2897,25 @@ pub trait InputHandler: 'static {
         None
     }
 
-    /// Get the length of the document in UTF-16 characters, if known.
+    /// Read the document's UTF-16 code-unit length, or `None` if unavailable.
     fn text_length_utf16(&mut self, _window: &mut Window, _cx: &mut App) -> Option<usize> {
         None
     }
 
-    /// Allows a given input context to opt into getting raw key repeats instead of
-    /// sending these to the platform.
-    /// TODO: Ideally we should be able to set ApplePressAndHoldEnabled in NSUserDefaults
-    /// (which is how iTerm does it) but it doesn't seem to work for me.
+    /// Permit the macOS press-and-hold accent picker; the default is `true`.
+    ///
+    /// Return `false` when held printable keys should instead reach raw key
+    /// handling as repeated input, for example in a terminal.
     #[allow(dead_code)]
     fn apple_press_and_hold_enabled(&mut self) -> bool {
         true
     }
 
-    /// Returns whether this handler is accepting text input to be inserted.
+    /// Whether this region accepts text insertion; the default is `true`.
+    ///
+    /// Returning `false` informs platform text routing. It does not disable
+    /// pointer, key, or accessibility listeners, or guard direct calls to the
+    /// edit methods. Enforce read-only rules in the document's edit operations.
     fn accepts_text_input(&mut self, _window: &mut Window, _cx: &mut App) -> bool {
         true
     }
@@ -2797,9 +2943,11 @@ pub trait InputHandler: 'static {
     /// is active. This prevents multi-stroke keybindings like `jj` from intercepting
     /// keys that the IME should compose.
     ///
-    /// Defaults to `false`. The editor overrides this based on whether it expects
-    /// character input (e.g. Vim insert mode returns `true`, normal mode returns `false`).
-    /// The terminal keeps the default `false` so that raw keys reach the terminal process.
+    /// The default is `false`, useful for raw-key input such as a terminal.
+    /// [`crate::ElementInputHandler`] instead follows its view's
+    /// [`crate::EntityInputHandler::accepts_text_input`] result. A pending
+    /// multi-stroke key binding overrides this preference; see
+    /// [`PlatformInputHandler::query_prefers_ime_for_printable_keys`].
     fn prefers_ime_for_printable_keys(&mut self, _window: &mut Window, _cx: &mut App) -> bool {
         false
     }
@@ -2903,9 +3051,14 @@ pub enum TextInputAction {
 #[derive(Debug, derive_setters::Setters)]
 #[setters(into)]
 pub struct WindowOptions {
-    /// Specifies the state and bounds of the window in screen coordinates.
-    /// - `None`: Inherit the bounds.
-    /// - `Some(WindowBounds)`: Open a window with corresponding state and its restore size.
+    /// Initial state and normal/restore geometry in logical pixels.
+    ///
+    /// `None` reuses an available active window's state and size, or the
+    /// display's default bounds, then chooses a cascaded placement. Supply
+    /// bounds explicitly when the initial size matters. For maximized or
+    /// fullscreen windows, the supplied bounds describe the
+    /// size to restore. Native placement remains subject to the window manager;
+    /// Wayland and browser windows do not expose global desktop positioning.
     pub window_bounds: Option<WindowBounds>,
 
     /// The titlebar configuration of the window
@@ -2949,8 +3102,10 @@ pub struct WindowOptions {
     /// Whether the window should be minimized by the user
     pub is_minimizable: bool,
 
-    /// The display to create the window on, if this is None,
-    /// the window will be created on the main display
+    /// Preferred display, or `None` to let the platform choose its primary display.
+    ///
+    /// Display IDs belong to the running platform session. Check a restored ID
+    /// with [`App::find_display`] before requesting it.
     pub display_id: Option<DisplayId>,
 
     /// The background appearance of a macOS window.
@@ -2979,7 +3134,7 @@ pub struct WindowOptions {
     /// The platform may ignore requests it cannot satisfy.
     pub window_decorations: Option<WindowDecorations>,
 
-    /// Icon image (X11 only)
+    /// Native icon on X11 and on Wayland compositors supporting the icon protocol.
     pub icon: Option<Arc<image::RgbaImage>>,
 
     /// Tab group name, allows opening the window as a native tab on macOS 10.12+. Windows with the same tabbing identifier will be grouped together.
@@ -2988,7 +3143,6 @@ pub struct WindowOptions {
 
 impl FluentBuilder for WindowOptions {}
 
-/// The variables that can be configured when creating a new window
 /// Resolved window-creation parameters passed from GPUI to a platform backend.
 ///
 /// Application code normally supplies [`WindowOptions`]; GPUI resolves display
@@ -3064,7 +3218,11 @@ pub struct WindowParams {
     pub tabbing_identifier: Option<String>,
 }
 
-/// Represents the status of how a window should be opened.
+/// A window's normal, maximized, or fullscreen state with its restore geometry.
+///
+/// Use [`Window::window_bounds`] to record this value for reopening a window.
+/// [`Self::get_bounds`] extracts the normal/restore bounds, which can differ
+/// from its current fullscreen or maximized viewport.
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum WindowBounds {
     /// Indicates that the window should open in a windowed state with the given bounds.
@@ -3084,7 +3242,7 @@ impl Default for WindowBounds {
 }
 
 impl WindowBounds {
-    /// Retrieve the inner bounds
+    /// Extract normal bounds, or restore bounds for a maximized/fullscreen window.
     pub fn get_bounds(&self) -> Bounds<Pixels> {
         match self {
             WindowBounds::Windowed(bounds) => *bounds,
@@ -3093,7 +3251,7 @@ impl WindowBounds {
         }
     }
 
-    /// Creates a new window bounds that centers the window on the screen.
+    /// Request a normal window centered on the primary display.
     pub fn centered(size: Size<Pixels>, cx: &App) -> Self {
         WindowBounds::Windowed(Bounds::centered(None, size, cx))
     }
@@ -3509,42 +3667,72 @@ pub struct PathPromptOptions {
     pub prompt: Option<SharedString>,
 }
 
-/// What kind of prompt styling to show
+/// Severity passed to a native or custom prompt renderer.
+///
+/// Native backends use it for alert styling. The built-in
+/// [`FallbackPromptRenderer`](crate::FallbackPromptRenderer) currently uses
+/// the same appearance for all three levels. This value does not change
+/// the answer list or the meaning of its indices.
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum PromptLevel {
-    /// A prompt that is shown when the user should be notified of something
+    /// Information or a routine decision.
     Info,
 
-    /// A prompt that is shown when the user needs to be warned of a potential problem
+    /// A decision with a potentially unwanted consequence.
     Warning,
 
-    /// A prompt that is shown when a critical problem has occurred
+    /// A serious failure or urgent decision.
     Critical,
 }
 
-/// Prompt Button
+/// A prompt answer's visible label and conventional role.
+///
+/// Pass these to [`Window::prompt`] in the desired answer order. Its result
+/// is the answer's index in that slice, regardless of visual button placement.
+/// Use at most one `Ok` and one `Cancel`: the Windows backend maps each role
+/// to one native button ID, so duplicate roles cannot be distinguished there.
+///
+/// The role guides native behavior and the built-in fallback's keyboard
+/// handling; it does not describe the answer's safety. A destructive answer
+/// still needs an explicit label, such as “Discard changes.”
+///
+/// Converting an `&str` recognizes `"ok"` and `"cancel"` without regard to
+/// case and uses the canonical labels `"OK"` and `"Cancel"`. Other strings
+/// become `Other` unchanged. Use the constructors to choose the role and label
+/// independently: `PromptButton::new("Cancel")` deliberately remains `Other`.
+///
+/// ```
+/// use gpui::PromptButton;
+///
+/// let answers = [
+///     PromptButton::cancel("Keep editing"),
+///     PromptButton::ok("Discard changes"),
+/// ];
+/// assert!(answers[0].is_cancel());
+/// assert_eq!(answers[1].label().as_ref(), "Discard changes");
+/// ```
 #[derive(Clone, Debug, PartialEq)]
 pub enum PromptButton {
-    /// Ok button
+    /// The affirmative or default answer, with an application-chosen label.
     Ok(SharedString),
-    /// Cancel button
+    /// The cancellation answer, with an application-chosen label.
     Cancel(SharedString),
-    /// Other button
+    /// An answer with no conventional affirmative or cancellation role.
     Other(SharedString),
 }
 
 impl PromptButton {
-    /// Create a button with label
+    /// Creates an [`Other`](Self::Other) answer without inferring a role from its label.
     pub fn new(label: impl Into<SharedString>) -> Self {
         PromptButton::Other(label.into())
     }
 
-    /// Create an Ok button
+    /// Creates an [`Ok`](Self::Ok) answer with `label`.
     pub fn ok(label: impl Into<SharedString>) -> Self {
         PromptButton::Ok(label.into())
     }
 
-    /// Create a Cancel button
+    /// Creates a [`Cancel`](Self::Cancel) answer with `label`.
     pub fn cancel(label: impl Into<SharedString>) -> Self {
         PromptButton::Cancel(label.into())
     }
@@ -3555,7 +3743,7 @@ impl PromptButton {
         matches!(self, PromptButton::Cancel(_))
     }
 
-    /// Returns the label of the button
+    /// Returns the visible label, independently of the answer's role.
     pub fn label(&self) -> &SharedString {
         match self {
             PromptButton::Ok(label) => label,
@@ -3663,7 +3851,12 @@ pub enum CursorStyle {
     ContextualMenu,
 }
 
-/// A clipboard item that should be copied to the clipboard
+/// Clipboard content represented as an ordered sequence of entries.
+///
+/// Entries can contain text, encoded images, or external file paths. A platform
+/// may support only some of them. Use [`Self::text`] for a plain-text paste;
+/// inspect [`Self::entries`] when preserving richer content matters. Transfer
+/// the item through [`App::write_to_clipboard`] or [`InputHandler::paste`].
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ClipboardItem {
     /// The entries in this clipboard item.
@@ -3704,7 +3897,7 @@ impl std::fmt::Display for ClipboardReadError {
 
 impl std::error::Error for ClipboardReadError {}
 
-/// Either a ClipboardString or a ClipboardImage
+/// One text, image, or external-path entry in a [`ClipboardItem`].
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ClipboardEntry {
     /// A string entry
@@ -3716,14 +3909,16 @@ pub enum ClipboardEntry {
 }
 
 impl ClipboardItem {
-    /// Create a new ClipboardItem::String with no associated metadata
+    /// Create an item containing one plain-text entry.
     pub fn new_string(text: String) -> Self {
         Self {
             entries: vec![ClipboardEntry::String(ClipboardString::new(text))],
         }
     }
 
-    /// Create a new ClipboardItem::String with the given text and associated metadata
+    /// Create one text entry with application-defined metadata.
+    ///
+    /// Other applications and platform clipboard APIs need not preserve the metadata.
     pub fn new_string_with_metadata(text: String, metadata: String) -> Self {
         Self {
             entries: vec![ClipboardEntry::String(ClipboardString {
@@ -3733,7 +3928,12 @@ impl ClipboardItem {
         }
     }
 
-    /// Create a new ClipboardItem::String with the given text and associated metadata
+    /// Create one text entry after serializing its metadata as JSON.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `metadata` cannot be serialized. To handle serialization errors,
+    /// serialize it first and call [`Self::new_string_with_metadata`].
     pub fn new_string_with_json_metadata<T: Serialize>(text: String, metadata: T) -> Self {
         Self {
             entries: vec![ClipboardEntry::String(
@@ -3742,15 +3942,29 @@ impl ClipboardItem {
         }
     }
 
-    /// Create a new ClipboardItem::Image with the given image with no associated metadata
+    /// Create one image entry by cloning the encoded [`Image`].
     pub fn new_image(image: &Image) -> Self {
         Self {
             entries: vec![ClipboardEntry::Image(image.clone())],
         }
     }
 
-    /// Concatenates together all the ClipboardString entries in the item.
-    /// Returns None if there were no ClipboardString entries.
+    /// Flatten the item to nonempty text, with no separators between entries.
+    ///
+    /// Text entries take precedence. If their concatenation is empty, concatenate
+    /// the display forms of external file paths instead. Image entries contribute
+    /// nothing. Returns `None` if neither source produces any text, including an
+    /// item containing only an empty string.
+    ///
+    /// ```
+    /// use gpui::{ClipboardEntry, ClipboardItem};
+    ///
+    /// let item = ClipboardItem {
+    ///     entries: vec![ClipboardEntry::from("one".to_owned()), "two".to_owned().into()],
+    /// };
+    /// assert_eq!(item.text().as_deref(), Some("onetwo"));
+    /// assert_eq!(ClipboardItem::new_string(String::new()).text(), None);
+    /// ```
     pub fn text(&self) -> Option<String> {
         let mut answer = String::new();
 
@@ -3778,7 +3992,7 @@ impl ClipboardItem {
         }
     }
 
-    /// If this item is one ClipboardEntry::String, returns its metadata.
+    /// Read metadata only when the item consists of exactly one text entry.
     #[cfg_attr(not(target_os = "windows"), allow(dead_code))]
     pub fn metadata(&self) -> Option<&String> {
         match self.entries().first() {
@@ -3789,12 +4003,12 @@ impl ClipboardItem {
         }
     }
 
-    /// Get the item's entries
+    /// Borrow the entries in their original order.
     pub fn entries(&self) -> &[ClipboardEntry] {
         &self.entries
     }
 
-    /// Get owned versions of the item's entries
+    /// Consume the item and iterate over its entries in order.
     pub fn into_entries(self) -> impl Iterator<Item = ClipboardEntry> {
         self.entries.into_iter()
     }
@@ -3915,14 +4129,20 @@ impl ImageFormat {
     }
 }
 
-/// An image, with a format and certain bytes
+/// Encoded image bytes with an explicit file format.
+///
+/// Creating an `Image` does not decode it. Use [`crate::img`] to load it
+/// asynchronously, or [`Self::to_image_data`] when synchronous decoding is
+/// appropriate. [`RenderImage`] holds the decoded frames used for painting.
+/// Keep the bytes, format, and ID consistent when sharing this value through
+/// `Arc`; the asset cache uses its ID when hashing it.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Image {
     /// The image format the bytes represent (e.g. PNG)
     pub format: ImageFormat,
-    /// The raw image bytes
+    /// Encoded file bytes, such as a complete PNG file, rather than raw pixels.
     pub bytes: Vec<u8>,
-    /// The unique ID for the image
+    /// A content hash used for asset lookup; it is not a guaranteed unique ID.
     pub id: u64,
 }
 
@@ -3960,12 +4180,17 @@ impl Hash for Image {
 }
 
 impl Image {
-    /// An empty image containing no data
+    /// Creates a PNG-format value with no bytes.
+    ///
+    /// This is a placeholder, not a valid encoded image. Decoding it fails.
     pub fn empty() -> Self {
         Self::from_bytes(ImageFormat::Png, Vec::new())
     }
 
-    /// Create an image from a format and bytes
+    /// Stores encoded bytes and computes their content hash.
+    ///
+    /// This does not validate that the bytes match `format`. Decoding reports
+    /// an invalid file later; use [`Self::to_image_data`] to decode immediately.
     pub fn from_bytes(format: ImageFormat, bytes: Vec<u8>) -> Self {
         Self {
             id: hash(&bytes),
@@ -3974,12 +4199,17 @@ impl Image {
         }
     }
 
-    /// Get this image's ID
+    /// Returns the content hash assigned by [`Self::from_bytes`].
     pub fn id(&self) -> u64 {
         self.id
     }
 
-    /// Use the GPUI `use_asset` API to make this image renderable
+    /// Starts or polls asynchronous decoding through [`Window::use_asset`].
+    ///
+    /// Returns `None` while decoding is pending or if it fails. The request that
+    /// first starts the load arranges a notification for its current view.
+    /// Failures are logged; use an [`ImageSource::Custom`] loader when the UI
+    /// needs to distinguish an error from a pending result.
     pub fn use_render_image(
         self: Arc<Self>,
         window: &mut Window,
@@ -3990,7 +4220,10 @@ impl Image {
             .and_then(|result| result.ok())
     }
 
-    /// Use the GPUI `get_asset` API to make this image renderable
+    /// Starts or polls decoding without arranging a view notification.
+    ///
+    /// Like [`Self::use_render_image`], this returns `None` for both pending
+    /// loads and failures. The caller must arrange a redraw to poll again.
     pub fn get_render_image(
         self: Arc<Self>,
         window: &mut Window,
@@ -4001,7 +4234,10 @@ impl Image {
             .and_then(|result| result.ok())
     }
 
-    /// Use the GPUI `remove_asset` API to drop this image, if possible.
+    /// Removes the cached decoding request or result for these encoded bytes.
+    ///
+    /// This does not release renderer uploads. Use [`App::drop_image`] when a
+    /// decoded [`RenderImage`] is no longer needed by the windows.
     pub fn remove_asset(self: Arc<Self>, cx: &mut App) {
         ImageSource::Image(self).remove_asset(cx);
     }
@@ -4013,7 +4249,13 @@ impl Image {
         ImageSource::Image(self.clone()).is_asset_cached(cx)
     }
 
-    /// Convert the clipboard image to an `ImageData` object.
+    /// Decodes these bytes synchronously into renderer-ready BGRA frames.
+    ///
+    /// GIF preserves its animation frames. Other raster formats, including WebP,
+    /// use the static decoder and apply image orientation. SVG uses the supplied
+    /// renderer at scale `1.0`. Invalid or unsupported data returns an error.
+    /// This can be expensive; [`Self::use_render_image`] moves decoding off the
+    /// foreground thread.
     pub fn to_image_data(&self, svg_renderer: SvgRenderer) -> Result<Arc<RenderImage>> {
         let frames = match self.format {
             ImageFormat::Gif => {
@@ -4069,7 +4311,12 @@ impl Image {
     }
 }
 
-/// A clipboard item that should be copied to the clipboard
+/// Text with optional application-defined clipboard metadata.
+///
+/// The metadata is an opaque string. [`Self::with_json_metadata`] and
+/// [`Self::metadata_json`] provide a JSON convention for applications sharing
+/// structured text. It is not part of the plain text returned by
+/// [`ClipboardItem::text`], and another application may discard it.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ClipboardString {
     /// The text content.
@@ -4087,8 +4334,13 @@ impl ClipboardString {
         }
     }
 
-    /// Return a new clipboard item with the metadata replaced by the given metadata,
-    /// after serializing it as JSON.
+    /// Replace the metadata with the JSON encoding of `metadata`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if serialization fails, for example for a map with keys that JSON
+    /// cannot represent. Serialize separately and set [`Self::metadata`] when
+    /// the error needs to be handled.
     pub fn with_json_metadata<T: Serialize>(mut self, metadata: T) -> Self {
         self.metadata = Some(serde_json::to_string(&metadata).unwrap());
         self
@@ -4104,7 +4356,10 @@ impl ClipboardString {
         self.text
     }
 
-    /// Get the metadata of the clipboard string, formatted as JSON
+    /// Decode metadata as JSON into `T`.
+    ///
+    /// Returns `None` for absent metadata, invalid JSON, or a value that cannot
+    /// be deserialized as `T`.
     pub fn metadata_json<T>(&self) -> Option<T>
     where
         T: for<'a> Deserialize<'a>,
@@ -4143,8 +4398,7 @@ mod image_tests {
     fn test_image_to_image_data_applies_exif_orientation() {
         let image = Image::from_bytes(
             ImageFormat::Jpeg,
-            include_bytes!("../examples/gallery/rendering/image/exif-orientation-rotate-180.jpg")
-                .to_vec(),
+            include_bytes!("../examples/assets/images/exif-orientation-rotate-180.jpg").to_vec(),
         );
 
         let render_image = image

@@ -69,3 +69,35 @@ API to its versioned docs.rs page, and links back to the exact example step.
 `scripts/docs/postprocess.py` adds those backlinks to local rustdoc HTML and
 turns rendered `> [!NOTE]`, `> [!TIP]`, and `> [!WARNING]` blocks into accessible
 `aside` elements. It accepts a path prefix and does not fetch the network.
+
+## Share conceptual chapters
+
+The mdBook under `book/` renders the same explanations as the conceptual API
+guides. Its chapter stubs select canonical sources through `scripts/docs/book.py`;
+the preprocessor adapts links, not prose. Edit `crates/gpui/docs/*.md`, or the
+ownership module's inner documentation, rather than maintaining a second copy.
+Testing, accessibility, and drawing also render at their Zola guide routes.
+
+Build local rustdoc before building the book so every API member link can be
+checked against an actual page and anchor:
+
+```sh
+cargo doc --locked -p gpui-ce --lib --no-deps --features test-support,bench-support
+mdbook build book
+```
+
+The full site build includes the book and checks its links. It needs mdBook
+0.5.4; CI installs that version. Set `MDBOOK` to an executable outside `PATH`
+when using a task-local installation. `--with-api` directs book links to the
+checkout's API, while the published build uses versioned docs.rs links.
+
+Run `python3 site/scripts/dev.py` to serve the combined artifact at
+`http://127.0.0.1:1111` and rebuild after changes to API docs, walkthroughs,
+site assets, or the book. A failed build keeps the previous checked artifact.
+The server does not start a native compiler or interpreter service by default.
+`--native-companion` explicitly enables the native Miri service for runtime
+development; it does not establish browser-only editing.
+
+Use `rust,test_harness` for a fenced example containing `#[gpui::test]` so
+rustdoc executes the generated test. A plain Rust fence around a test
+declaration can compile without running its assertions.

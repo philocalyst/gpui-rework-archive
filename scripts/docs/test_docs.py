@@ -4,6 +4,8 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+import shutil
+import subprocess
 
 sys.path.insert(0, str(Path(__file__).parent))
 from parser import DocumentationError, parse_source
@@ -61,6 +63,33 @@ class ParserTests(unittest.TestCase):
 
 
 class LinkTests(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("rustfmt"), "rustfmt is required for this integration check")
+    def test_generated_method_links_remain_current_after_rustfmt(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "crates/gpui/src/lib.rs"
+            source.parent.mkdir(parents=True)
+            (root / "crates/gpui/Cargo.toml").write_text("[package]\nname='gpui'\n")
+            source.write_text("pub trait Example {\n    fn update(&mut self);\n}\n")
+            site = root / "site"
+            site.mkdir()
+            (site / "examples.toml").write_text('''[[examples]]
+slug = "counter"
+title = "Counter"
+summary = "A counter"
+source = "counter.rs"
+run = "cargo run"
+weight = 1
+
+[api."gpui::Example::update"]
+source = "crates/gpui/src/lib.rs"
+declaration = "fn update("
+''')
+            (root / "counter.rs").write_text('// ## Update\n// Call [`Example::update`].\nlet x = 1;\n')
+            self.assertEqual(sync(root), [])
+            subprocess.run(["rustfmt", "--edition", "2024", str(source)], check=True)
+            self.assertEqual(sync(root, check=True), [])
+
     def test_miri_component_keeps_the_same_constructor_and_api(self):
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory) / 'counter.rs'

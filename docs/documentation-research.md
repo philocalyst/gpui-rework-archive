@@ -107,6 +107,27 @@ The survey found no contradiction that invalidates the article's core recommenda
 
 ## Reference systems surveyed
 
+### Deeper example reading (2026-10-08 UTC)
+
+This is separate from the landing-page survey. It records examples actually
+read, rather than pages fetched:
+
+| Source | Reading and application |
+| --- | --- |
+| Jiff 0.2.35, local registry source | All top-level cookbook examples, the complete `DESIGN.md`, public `Span` examples through its duration conversions, `SpanFieldwise`, `ToSpan`, `Unit`, `SpanArithmetic`, and `SpanCompare` through line 4445; some private helpers were skipped. The useful pattern is to explain a unit's meaning before its representation, then show defaults and configured behavior with assertions. Its conversion docs enumerate failures and explain why overflow cannot occur where that is guaranteed. The fieldwise example makes two plausible meanings of equality concrete before recommending one. The GPUI length, motion, prompt, and drawing chapters follow that progression. This pin differs from the newer live version in the survey. |
+| [egui 0.36.2 overview](https://docs.rs/egui/0.36.2/egui/) | Complete top-level prose and examples, including frame-dependent interaction and renderer troubleshooting. GPUI's rendering chapter needs equally explicit boundaries between a view description, a built frame, and presentation. |
+| [Iced architecture chapter](https://book.iced.rs/architecture.html) | Chapter body, including the counter's state, messages, update, and view. The lesson is to establish the relationship between objects before introducing their methods, rather than presenting a vocabulary list. |
+| [Ratatui snapshot recipe](https://ratatui.rs/recipes/testing/snapshots/) | Recipe body and examples. The GPUI testing chapter now distinguishes recorded drawing from rasterized pixels and calls for reviewable actual/difference images rather than automatic baseline acceptance. |
+| [Tokio shared-state tutorial](https://tokio.rs/tokio/tutorial/shared-state) | Complete chapter and examples, including mutex guards across `await`, asynchronous mutexes, message passing, and sharding. The GPUI scheduling chapter likewise explains the lifetime of a borrow and demonstrates scoped jobs with actual disjoint output slots. Compiler-specific claims require checking against this checkout's compiler. |
+| [Axum 0.8.9 `State`](https://docs.rs/axum/0.8.9/axum/extract/struct.State.html) | All explanatory examples through shared mutable state, including nested routers, separate scopes, substates, and library extractors. These distinguish the scope of state from its Rust type. GPUI's ownership chapter now makes that distinction for per-app globals, entity instances, and per-window element identities. |
+| [Clap 4.6.7 builder tutorial](https://docs.rs/clap/4.6.7/clap/_tutorial/index.html) | Every tutorial example through its testing section, including expected output, rejected input, parser defaults, argument relations, and custom validation. GPUI examples should establish observable results and failure boundaries, not merely show a chain of builder calls. |
+| [Snafu 0.9.2 generated code](https://docs.rs/snafu/0.9.2/snafu/guide/what_code_is_generated/index.html) and [missing-source troubleshooting](https://docs.rs/snafu/0.9.2/snafu/guide/troubleshooting/missing_field_source/index.html) | Both complete page bodies and examples. The troubleshooting page gives a failing program, compiler diagnostics, a precise replacement, and the generated-type explanation behind it. The GPUI refinement and component-derive explanations should likewise identify what the macro adds, which type owns an operation, and which dependency supplies generated names. |
+| [Tokio 1.53.2 task spawning](https://docs.rs/tokio/1.53.2/tokio/task/fn.spawn.html) | Complete page and all four examples, including result ordering and a scoped `Rc` before an await versus one retained across it. Task documentation needs separate statements about scheduling, retained state, completion, and shutdown. GPUI's own executors and task handles decide those contracts; Tokio's scheduling and handle-drop behavior cannot be imported by analogy. |
+
+The remaining linked reference examples and the final contextual pass are
+still open. This table does not turn the initial fetch inventory into a claim
+that every example in every referenced project has been read.
+
 ### fasterthanli.me
 
 The site is a useful model for voice and deep explanation, not a template to reproduce. Its article/series/tag structure gives readers several entry points; visible reading time sets expectations; long essays mix a concrete project with implementation reasoning; and articles link out to source, tools, and adjacent concepts. The 2025 “Introducing arborium” article is especially relevant because it discusses the docs.rs relationship and asks what a documentation site can add. Apply the lesson with GPUI series pages and stable topic tags, but keep the product documentation quieter and more task-oriented than a personal blog. Avoid making personality, chronology, or a huge essay the only route to an answer.
@@ -114,6 +135,14 @@ The site is a useful model for voice and deep explanation, not a template to rep
 ### Jiff
 
 Jiff is the editorial model: state the goal of a page, explain the domain before the API, name unsupported features, show competing designs fairly, and answer “why?” questions with concrete consequences. API docs include examples and exceptional behavior; links are deep and reciprocal. For GPUI, each central type should answer: what state does it represent, what invariant does it protect, how is it created, what can fail, what is the common path, and where is a complete example?
+
+The later source reading covers every public example in `SpanTotal` and
+`SpanRound` through line 5240 of Jiff 0.2.35's `span.rs`, in addition to the
+earlier comparison and arithmetic reading. These pages show a useful pattern:
+change one option, assert its consequence, then explain when that choice is
+valid. Their own prose still needs scrutiny: the fall-back transition example
+says “24 hours” where its assertion correctly expects 25. Examples and source
+must check one another; a respected reference is not proof of every sentence.
 
 ### Gwern's style guide
 
@@ -125,7 +154,18 @@ Wikipedia's “Signs of AI writing” page (`https://en.wikipedia.org/wiki/Wikip
 
 ### Pangram / “panagram”
 
-The user confirmed Pangram and other AI-text checkers as requested review tools. `https://pangram.com` resolves and presents Pangram's AI-text detection service; Browser attempts at Pangram, GPTZero, and ZeroGPT returned connection-reset errors in this environment; no score has been obtained. Pangram's score can be an adversarial signal during editorial review, never a quality gate or proof of authorship. The useful practice is to inspect passages that score as generic and ask whether they contain specific GPUI observations, links, counterexamples, and tested code. Keep this process private to review tooling; do not expose a detector score to readers or contributors as a judgment.
+The user confirmed Pangram and other AI-text checkers as requested review tools.
+Initial attempts at Pangram, GPTZero, and ZeroGPT failed to connect. A later
+Pangram attempt reached a human-verification challenge; browser control could
+not complete it after the user's approval. The authorized fallback, Scribbr,
+scanned the complete canonical text chapter on 2026-10-08 and reported 36%
+AI-generated, then 35% after revision. The source hashes, model version,
+category breakdowns, and screenshots
+are recorded in [the manual-review ledger](documentation-manual-review.md#writing-detector-check).
+This is an obtained result, not a passing score or evidence of technical
+accuracy. Inspect highlighted passages for vague claims, repetition, missing
+examples, and weak connections to the actual APIs. Detector scores do not
+belong in the reader's documentation or contributor requirements.
 
 ## Rubric for adversarial review
 

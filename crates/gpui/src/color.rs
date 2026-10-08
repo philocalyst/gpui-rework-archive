@@ -1,9 +1,9 @@
 //! Color values and backgrounds used by GPUI painting APIs.
 //!
 //! Hex helpers interpret bytes in conventional big-endian order (`0xRRGGBB`
-//! and `0xRRGGBBAA`). [`Hsla`] stores hue, saturation, lightness, and alpha as
-//! normalized values; [`hsla`] clamps all four inputs to `0..=1` (hue is a
-//! turn, not degrees). Background gradients use an angle in degrees and stop
+//! and `0xRRGGBBAA`). [`Hsla`] uses Palette's hue angle in degrees and normalized
+//! saturation, lightness, and alpha. The [`hsla`] helper instead accepts hue in
+//! turns and clamps all four arguments to `0..=1`. Background gradients use an angle in degrees and stop
 //! positions as normalized fractions. `linear_gradient` defaults to Oklab
 //! interpolation between stops; solid-color interpolation and `ColorSpace`
 //! are separate choices. For examples, see
@@ -18,7 +18,7 @@ use std::fmt::{self, Display, Formatter};
 // Re-exported for api maintenance
 pub use palette::{Hsla, rgb::Rgba};
 
-/// Converts `0xRRGGBB` into opaque sRGB [`Rgba`].
+/// Converts `0xRRGGBB` into opaque sRGB [`Rgba`], ignoring the highest byte.
 pub fn rgb(hex: u32) -> Rgba {
     let [_, r, g, b] = hex.to_be_bytes().map(|b| (b as f32) / 255.0);
     Rgba {
@@ -46,11 +46,17 @@ pub fn hsla_to_rgba(color: Hsla) -> Rgba {
     color.into_color()
 }
 
-/// Swaps a premultiplied RGBA byte buffer to BGRA in place.
+/// Convert one premultiplied RGBA pixel to straight-alpha BGRA in place.
 ///
 /// `color` must contain at least four bytes in `[r, g, b, a]` order. The
 /// function swaps the red and blue channels and unpremultiplies RGB when
-/// alpha is nonzero; it panics if the slice is shorter than four bytes.
+/// alpha is nonzero. Bytes after the first pixel are unchanged; call it on
+/// each four-byte chunk to convert an image. With zero alpha, the swapped
+/// channel bytes are preserved.
+///
+/// # Panics
+///
+/// Panics if the slice contains fewer than four bytes.
 pub fn swap_rgba_pa_to_bgra(color: &mut [u8]) {
     color.swap(0, 2);
     if color[3] > 0 {
@@ -102,7 +108,10 @@ pub const fn transparent_white() -> Hsla {
     Hsla::new_const(RgbHue::new(0.), 0., 1., 0.)
 }
 
-/// Opaque grey in [`Hsla`], values must be provided in the range [0, 1]
+/// A gray color with the supplied lightness and alpha.
+///
+/// Despite the name, the result is opaque only when `opacity` is `1.0`.
+/// Supply both arguments in `0.0..=1.0`; this helper does not clamp them.
 pub const fn opaque_grey(lightness: f32, opacity: f32) -> Hsla {
     Hsla::new_const(RgbHue::new(0.), 0., lightness, opacity)
 }
@@ -186,9 +195,22 @@ pub fn rgba_schemar(_generator: &mut schemars::SchemaGenerator) -> schemars::Sch
     })
 }
 
-/// Alpha and source-over helpers for GPUI color values.
+/// Alpha adjustment and compositing for GPUI color values.
 pub trait ColorExt {
-    /// Blends `self` over `other` using source alpha.
+    /// Composite `other` over `self`, preserving alpha in the result.
+    ///
+    /// A transparent `other` leaves the base unchanged; an opaque `other`
+    /// replaces it. HSL values are converted to sRGB for this operation.
+    /// Compositing uses the stored sRGB channels without a linear-light
+    /// conversion. This differs from interpolating two colors with [`crate::Lerp`].
+    ///
+    /// ```
+    /// use gpui::{ColorExt, Rgba};
+    ///
+    /// let base = Rgba::new(1.0, 0.0, 0.0, 1.0);
+    /// let overlay = Rgba::new(0.0, 0.0, 1.0, 0.25);
+    /// assert_eq!(base.blend(&overlay), Rgba::new(0.75, 0.0, 0.25, 1.0));
+    /// ```
     fn blend(&self, other: &Self) -> Self
     where
         Self: Sized;
@@ -199,7 +221,9 @@ pub trait ColorExt {
     /// `1.0` makes it transparent.
     fn fade_out(&mut self, factor: f32);
 
-    /// Multiplies the alpha value of the color by a given factor and returns a new color.
+    /// Return a color whose alpha is multiplied by `factor`, clamped to `0.0..=1.0`.
+    ///
+    /// The factor is clamped, not the resulting alpha. Color channels are unchanged.
     /// If the color was previously opaque, then this is equivalent to
     /// [`with_alpha`](palette::WithAlpha::with_alpha).
     ///
@@ -233,10 +257,8 @@ pub trait ColorExt {
 }
 impl ColorExt for Rgba {
     fn blend(&self, other: &Self) -> Self {
-        use palette::blend::{BlendWith, Equations, Parameter};
-        let blend_mode =
-            Equations::from_parameters(Parameter::OneMinusSourceAlpha, Parameter::SourceAlpha);
-        self.blend_with(*other, blend_mode)
+        use palette::blend::Compose;
+        other.over(*self)
     }
 
     fn fade_out(&mut self, factor: f32) {
@@ -356,6 +378,16 @@ impl Default for Background {
 }
 
 /// Creates diagonal stripes with the given logical-pixel width and gap.
+///
+/// Supply a finite `width` in `0.0..=257.0` and a finite `interval` in
+/// `0.0..257.0`. The packed representation quantizes both values to steps of
+/// `1.0 / 255.0`; floating-point storage can reduce precision further as width
+/// increases. Use small values for narrow stripes. No validation is performed.
+///
+/// # Panics
+///
+/// Widths outside the packed range can overflow integer arithmetic in debug
+/// builds and produce an invalid pattern in release builds.
 pub fn pattern_slash(color: impl IntoColor<Hsla>, width: f32, interval: f32) -> Background {
     const PATTERN_COMPONENT_SCALE: f32 = u8::MAX as f32;
     const PATTERN_PACKING_RADIX: u32 = u16::MAX as u32;
@@ -373,6 +405,8 @@ pub fn pattern_slash(color: impl IntoColor<Hsla>, width: f32, interval: f32) -> 
 }
 
 /// Creates alternating colored and transparent squares of `size` logical pixels.
+///
+/// Supply a finite, positive size. The value is stored without validation.
 pub fn checkerboard(color: impl IntoColor<Hsla>, size: f32) -> Background {
     Background {
         tag: BackgroundTag::Checkerboard,
@@ -499,8 +533,8 @@ impl Background {
                 const PATTERN_COMPONENT_SCALE: f32 = u8::MAX as f32;
                 const PATTERN_PACKING_RADIX: f32 = u16::MAX as f32;
 
-                // `pattern_slash` packs both values into one exactly representable f32;
-                // floor + rem_euclid inverts it, since truncation and `%` give the wrong entry.
+                // Decode the quantized components from the packed float. Large widths may
+                // lose low bits of the interval when the integer is converted to f32.
                 let packed = self.gradient_angle_or_pattern_height;
                 BackgroundKind::PatternSlash {
                     color: self.solid.into(),
@@ -528,7 +562,9 @@ impl Background {
         self.color_space
     }
 
-    /// Returns a new background color with the same hue, saturation, and lightness, but with a modified alpha value.
+    /// Multiply the alpha of every color by `factor`, clamped to `0.0..=1.0`.
+    ///
+    /// This preserves gradient positions, interpolation space, and pattern geometry.
     pub fn opacity(&self, factor: f32) -> Self {
         let mut background = *self;
         let solid: Hsla = background.solid.into();
@@ -564,6 +600,42 @@ impl<T: IntoColor<Hsla>> From<T> for Background {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn color_blend_composites_the_overlay_over_the_base() {
+        let base = Rgba::new(1.0, 0.0, 0.0, 1.0);
+        assert_eq!(base.blend(&Rgba::new(0.0, 0.0, 1.0, 0.0)), base);
+        assert_eq!(
+            base.blend(&Rgba::new(0.0, 0.0, 1.0, 1.0)),
+            Rgba::new(0.0, 0.0, 1.0, 1.0)
+        );
+        assert_eq!(
+            base.blend(&Rgba::new(0.0, 0.0, 1.0, 0.25)),
+            Rgba::new(0.75, 0.0, 0.25, 1.0)
+        );
+
+        let translucent = Rgba::new(1.0, 0.0, 0.0, 0.5);
+        let result = translucent.blend(&Rgba::new(0.0, 0.0, 1.0, 0.5));
+        assert!((result.red - 1.0 / 3.0).abs() < 1e-6);
+        assert!((result.blue - 2.0 / 3.0).abs() < 1e-6);
+        assert_eq!(result.alpha, 0.75);
+    }
+
+    #[test]
+    fn highlight_keeps_the_base_when_the_overlay_is_transparent() {
+        let base = crate::TextStyle {
+            color: red(),
+            ..Default::default()
+        };
+        let highlighted = base
+            .clone()
+            .highlight(crate::HighlightStyle::color(transparent_blue()));
+        assert_eq!(highlighted.color, base.color);
+
+        fn transparent_blue() -> Hsla {
+            Hsla::new_const(RgbHue::new(240.), 1., 0.5, 0.)
+        }
+    }
 
     #[test]
     fn test_background_solid() {

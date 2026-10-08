@@ -11,7 +11,9 @@ mod support;
 // `running` chooses the button label, and `message` supplies the displayed
 // status. Both are ordinary state updated through the view's [`Context`].
 
-use gpui::{AppContext, Context, IntoElement, Render, Task, Window, div, prelude::*, rgb};
+use gpui::{
+    AppContext, Context, IntoElement, Render, Role, Task, Window, div, prelude::*, rgb, text,
+};
 use std::time::Duration;
 
 struct AsyncDemo {
@@ -65,6 +67,10 @@ impl AsyncDemo {
 // Stopped after the old deadline; this distinguishes task cancellation from
 // merely hiding the pending result.
 //
+// The accessible button label follows its visible Start/Stop label. Its stable
+// ID keeps keyboard focus when the label changes. [`text`] exposes the status
+// to the accessibility tree; it does not by itself request a live announcement.
+//
 // > [!WARNING]
 // > Dropping a task stops its remaining polling. It does not undo an operation
 // > already accepted by another service. A network request may still complete
@@ -82,10 +88,14 @@ impl Render for AsyncDemo {
             .gap_4()
             .bg(rgb(0xf7f6f2))
             .text_color(rgb(0x202b29))
-            .child(div().text_2xl().child(self.message.clone()))
+            .child(div().text_2xl().child(text!(self.message.clone())))
             .child(
                 div()
                     .id("task-action")
+                    .role(Role::Button)
+                    .aria_label(action)
+                    .tab_index(0)
+                    .focus_visible(|style| style.ring_2().ring_color(rgb(0x3478c8)))
                     .px_4()
                     .py_2()
                     .rounded_md()

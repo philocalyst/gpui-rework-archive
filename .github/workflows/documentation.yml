@@ -2,7 +2,7 @@ name: Documentation
 
 on:
   pull_request:
-    paths: ['site/**', 'scripts/docs/**', 'crates/**', 'docs/**', 'Cargo.*', '.github/workflows/documentation.yml']
+    paths: ['book/**', 'site/**', 'scripts/docs/**', 'crates/**', 'docs/**', 'Cargo.*', '.github/workflows/documentation.yml']
   workflow_dispatch:
 
 permissions:
@@ -30,7 +30,7 @@ jobs:
           sudo apt-get install -y libxkbcommon-dev libxkbcommon-x11-dev libwayland-dev libx11-dev libxcb-shape0-dev libxcb-xfixes0-dev libfontconfig-dev
       - uses: taiki-e/install-action@v2
         with:
-          tool: zola@0.23.4,trunk
+          tool: zola@0.23.4,mdbook@0.5.4,trunk
       - name: Check generated files and tooling
         run: |
           python3 scripts/docs/generate.py --check
@@ -42,7 +42,7 @@ jobs:
       - name: Check downloadable Cargo projects
         run: python3 site/scripts/check_downloads.py
       - name: Run API examples
-        run: cargo test --locked -p gpui-ce --doc --features test-support
+        run: cargo test --locked -p gpui-ce --doc --features test-support,bench-support
       - name: Build site, WebAssembly previews, and checkout API
         run: python3 site/scripts/build.py --with-api
       - uses: actions/upload-artifact@v4

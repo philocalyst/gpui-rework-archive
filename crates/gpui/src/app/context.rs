@@ -95,9 +95,9 @@ impl<'a, T: 'static> Context<'a, T> {
     /// Registration takes effect when the app next flushes effects. Dropping
     /// the returned subscription cancels the observer. The callback holds a
     /// weak handle to this entity and is skipped after this entity is released.
-// docs:examples:begin
-#[doc = include_str!("../docs/examples/gpui-Context-observe-803e9c7a.md")]
-// docs:examples:end
+    // docs:examples:begin
+    #[doc = include_str!("../docs/examples/gpui-Context-observe-803e9c7a.md")]
+    // docs:examples:end
     pub fn observe<W>(
         &mut self,
         entity: &Entity<W>,
@@ -327,9 +327,9 @@ impl<'a, T: 'static> Context<'a, T> {
     /// Call after changing state that a consumer displays or observes. GPUI
     /// does not detect field mutations automatically. Observers run during
     /// effect processing; repeated pending notifications may be coalesced.
-// docs:examples:begin
-#[doc = include_str!("../docs/examples/gpui-Context-notify-d32eb388.md")]
-// docs:examples:end
+    // docs:examples:begin
+    #[doc = include_str!("../docs/examples/gpui-Context-notify-d32eb388.md")]
+    // docs:examples:end
     pub fn notify(&mut self) {
         self.app.notify(self.entity_state.entity_id);
     }
@@ -345,9 +345,9 @@ impl<'a, T: 'static> Context<'a, T> {
     /// long CPU work into [`BackgroundExecutor::spawn`](crate::BackgroundExecutor::spawn),
     /// then await that task here to deliver its result.
     #[track_caller]
-// docs:examples:begin
-#[doc = include_str!("../docs/examples/gpui-Context-spawn-b83a55ae.md")]
-// docs:examples:end
+    // docs:examples:begin
+    #[doc = include_str!("../docs/examples/gpui-Context-spawn-b83a55ae.md")]
+    // docs:examples:end
     pub fn spawn<AsyncFn, R>(&self, f: AsyncFn) -> Task<R>
     where
         T: 'static,
@@ -367,9 +367,9 @@ impl<'a, T: 'static> Context<'a, T> {
     ///
     /// Calling it while this entity is already leased panics. Use the `&mut T`
     /// passed to `f` rather than reading this entity again through a handle.
-// docs:examples:begin
-#[doc = include_str!("../docs/examples/gpui-Context-listener-350baf86.md")]
-// docs:examples:end
+    // docs:examples:begin
+    #[doc = include_str!("../docs/examples/gpui-Context-listener-350baf86.md")]
+    // docs:examples:end
     pub fn listener<E: ?Sized>(
         &self,
         f: impl Fn(&mut T, &E, &mut Window, &mut Context<T>) + 'static,

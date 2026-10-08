@@ -26,8 +26,10 @@ actions!(
     [Backspace, Delete, Left, Right, Home, End, Enter, Quit]
 );
 
-/// A tiny stateless view that reads an editor's cursor and is composed *beside*
-/// the thing editing it — two views over one entity, zero wiring.
+/// A stateless sibling that reads the same editor as the input.
+///
+/// Reading the entity during rendering registers the containing view's
+/// dependency. The editor's notifications therefore refresh this readout too.
 #[derive(IntoElement)]
 struct CursorReadout {
     editor: Entity<Editor>,
@@ -59,11 +61,11 @@ impl ViewExample {
 
 impl Render for ViewExample {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        // The data plane: plain strings, allocated at the top by the hook.
+        // Each hook call site retains one buffer or editor between frames.
         let name = window.use_state(cx, |_, _| String::new());
         let email = window.use_state(cx, |_, _| String::from("me@example.com"));
         let bio = window.use_state(cx, |_, _| String::new());
-        // Editors that own their own string internally — no extra wiring up top.
+        // Retain editors directly when another component needs their caret state.
         let notes = window.use_state(cx, |window, cx| Editor::new("multi\nline", window, cx));
         let owned = window.use_state(cx, |window, cx| Editor::new("editable", window, cx));
 
@@ -76,9 +78,9 @@ impl Render for ViewExample {
             .gap(px(24.))
             .child(
                 section("Inputs — from a String (cursor stays internal)")
-                    .child(Input::new(name).width(px(320.)))
+                    .child(Input::new(name, "Name").width(px(320.)))
                     .child(
-                        Input::new(email)
+                        Input::new(email, "Email")
                             .width(px(320.))
                             .color(hsla(0., 0., 0.3, 1.)),
                     ),
@@ -89,19 +91,19 @@ impl Render for ViewExample {
                         .flex()
                         .items_center()
                         .gap(px(12.))
-                        .child(Input::editor(owned.clone()).width(px(320.)))
+                        .child(Input::editor(owned.clone(), "Shared editor").width(px(320.)))
                         .child(CursorReadout::new(owned)),
                 ),
             )
             .child(
                 section("Text areas — from a String, or from an Editor")
-                    .child(TextArea::new(bio, 3))
+                    .child(TextArea::new(bio, 3, "Biography"))
                     .child(
                         div()
                             .flex()
                             .items_start()
                             .gap(px(12.))
-                            .child(TextArea::editor(notes.clone(), 3).color(hsla(
+                            .child(TextArea::editor(notes.clone(), 3, "Notes").color(hsla(
                                 250. / 360.,
                                 0.7,
                                 0.4,
@@ -125,13 +127,13 @@ fn section(title: &str) -> Div {
 
 fn view_factory(_window: &mut Window, cx: &mut App) -> Entity<ViewExample> {
     cx.bind_keys([
-        KeyBinding::new("backspace", Backspace, None),
-        KeyBinding::new("delete", Delete, None),
-        KeyBinding::new("left", Left, None),
-        KeyBinding::new("right", Right, None),
-        KeyBinding::new("home", Home, None),
-        KeyBinding::new("end", End, None),
-        KeyBinding::new("enter", Enter, None),
+        KeyBinding::new("backspace", Backspace, Some("TextInput")),
+        KeyBinding::new("delete", Delete, Some("TextInput")),
+        KeyBinding::new("left", Left, Some("TextInput")),
+        KeyBinding::new("right", Right, Some("TextInput")),
+        KeyBinding::new("home", Home, Some("TextInput")),
+        KeyBinding::new("end", End, Some("TextInput")),
+        KeyBinding::new("enter", Enter, Some("TextInput")),
         KeyBinding::new("cmd-q", Quit, None),
     ]);
     cx.on_action(|_: &Quit, cx| cx.quit());

@@ -5,10 +5,10 @@
 //!
 //! Use [`RenderOnce`] to consume parent-supplied component values and [`Render`] for an entity
 //! with its own identity. A `RenderOnce` component can also access separately retained state.
-//! When a
-//! view is placed in a list or repeated sibling position, give each stateful view a distinct
-//! entity identity. Reusing one entity ID for siblings makes their descendant element state share
-//! the same identity space. See the [counter walkthrough](https://gpui-ce.github.io/examples/counter/#render)
+//! Give repeated components separate identity scopes. Rendering the same entity
+//! twice as siblings gives their descendants the same element-state paths.
+//! Use separate entities or distinct parent IDs to keep those paths independent.
+//! See the [counter walkthrough](https://gpui-ce.github.io/examples/counter/#render)
 //! for the smallest complete stateful example.
 
 use crate::{
@@ -24,11 +24,27 @@ use refineable::Refineable;
 use std::mem;
 use std::{any::TypeId, fmt, ops::Range};
 
-/// A dynamically-typed view handle that can be downcast to a specific `Entity<V>`.
+/// A strong view handle whose concrete render type has been erased.
 ///
-/// This is the type-erased counterpart to [`ViewElement`]: it holds an entity plus
-/// a function pointer to its render, and is itself a [`View`], so embedding it as an
-/// element goes through the same [`ViewElement`] machinery as any other view.
+/// Convert an `Entity<V>` into `AnyView` to store views with different types in
+/// one collection or root slot. Cloning retains the same entity; it does not
+/// clone its state. It can be added as an element like a typed view. Use
+/// [`downcast`](Self::downcast) to recover the concrete handle when needed.
+///
+/// ```rust
+/// use gpui::{AnyView, Entity, Render};
+///
+/// fn panes<A: Render, B: Render>(first: Entity<A>, second: Entity<B>) -> Vec<AnyView> {
+///     vec![first.into(), second.into()]
+/// }
+/// ```
+///
+/// Erasing the type preserves the entity's identity and render implementation.
+/// It does not create an independently owned copy of a view. Retaining a
+/// collection of these handles keeps its views alive even when they are not
+/// currently mounted. Use [`AnyWeakView`] when an index or callback should
+/// remember a view without becoming an owner. See the
+/// [ownership chapter](crate::_ownership_and_data_flow).
 #[derive(Clone, Debug)]
 pub struct AnyView {
     entity: AnyEntity,
@@ -45,16 +61,20 @@ impl<V: Render> From<Entity<V>> for AnyView {
 }
 
 impl AnyView {
-    /// Embed this view as a cached [`ViewElement`] laid out at `style`.
+    /// Embeds this view with subtree caching and the supplied outer layout style.
     ///
-    /// The rendered subtree is recycled from the previous frame unless
-    /// [Context::notify] was called on the backing entity since it was rendered
-    /// (or [Window::refresh] is called, which ignores caching).
+    /// The outer layout must supply its size; GPUI does not measure that size
+    /// from the cached contents. Invalidation and cache reuse follow
+    /// [`Entity::cached`]. Add the view directly as a child when its contents
+    /// should determine its layout size.
     pub fn cached(self, style: StyleRefinement) -> ViewElement<AnyView> {
         ViewElement::new(self).cached(style)
     }
 
-    /// Convert this to a weak handle.
+    /// Remember this view without retaining its state.
+    ///
+    /// The weak handle can be upgraded while any strong owner remains.
+    /// Creating it does not remove this handle's ownership.
     pub fn downgrade(&self) -> AnyWeakView {
         AnyWeakView {
             entity: self.entity.downgrade(),
@@ -62,8 +82,12 @@ impl AnyView {
         }
     }
 
-    /// Convert this to a [Entity] of a specific type.
-    /// If this handle does not contain a view of the specified type, returns itself in an `Err` variant.
+    /// Recover a typed handle when this view's concrete type is `T`.
+    ///
+    /// On a mismatch, return the original `AnyView` in `Err`, preserving its
+    /// ownership and render implementation. No state is copied or converted.
+    /// Cloning before the downcast retains an erased handle as well as the
+    /// successful typed one; both then refer to the same entity.
     pub fn downcast<T: 'static>(self) -> Result<Entity<T>, Self> {
         match self.entity.downcast() {
             Ok(entity) => Ok(entity),
@@ -74,12 +98,17 @@ impl AnyView {
         }
     }
 
-    /// Gets the [TypeId] of the underlying view.
+    /// Return the concrete view value's Rust [`TypeId`].
+    ///
+    /// Use it for runtime type checks, not as a persistent document or plugin ID.
     pub fn entity_type(&self) -> TypeId {
         self.entity.entity_type
     }
 
-    /// The [`EntityId`] of this view.
+    /// Return this view's entity identity within its app.
+    ///
+    /// Clones and successful downcasts keep this identity. Equality compares
+    /// it, rather than the rendered elements or state fields.
     pub fn entity_id(&self) -> EntityId {
         self.entity.entity_id()
     }
@@ -122,14 +151,25 @@ impl IntoElement for AnyView {
     }
 }
 
-/// A weak, dynamically-typed view handle.
+/// A remembered view identity that does not keep the view alive.
+///
+/// Obtain it from [`AnyView::downgrade`] or convert a [`WeakEntity<V>`] whose
+/// value implements [`Render`]. It retains the information needed to render
+/// after a successful [`Self::upgrade`], but supplies no access to released
+/// state. Use it for callbacks or indexes whose lifetime should not own the
+/// view. Equality compares entity identity within an app, even after release.
 pub struct AnyWeakView {
     entity: AnyWeakEntity,
     render: fn(&AnyView, &mut Window, &mut App) -> AnyElement,
 }
 
 impl AnyWeakView {
-    /// Upgrade to a strong `AnyView` handle, if the view is still alive.
+    /// Retain the view if a strong owner still exists.
+    ///
+    /// Return `None` after the last strong handle is dropped or the app is
+    /// released. This can happen before effect processing destroys the stored
+    /// view value. A successful upgrade becomes another owner; it neither
+    /// remounts a removed view nor recreates a released one.
     pub fn upgrade(&self) -> Option<AnyView> {
         let entity = self.entity.upgrade()?;
         Some(AnyView {
@@ -196,17 +236,17 @@ mod any_view {
     }
 }
 
-/// A renderable that participates in GPUI's reactive graph — the unifying model
-/// behind [`Render`] and [`RenderOnce`].
+/// Connects a renderable value to an optional entity identity.
 ///
-/// When `entity_id()` returns `Some`, that id becomes the view's identity: it gets
-/// scoped element-id space for internal `use_state` / `.id(..)`. Notifications
-/// invalidate this view and other views that read its entity. `None` gives the
-/// component no independent entity identity.
+/// [`Entity<T>`] implements this trait when `T` implements [`Render`]; its
+/// entity identity scopes descendant element IDs and lets notifications
+/// invalidate rendering that reads it. A [`RenderOnce`] value also implements
+/// `View`, but returns no entity identity. Its parent supplies its lifetime and
+/// invalidation.
 ///
-/// You rarely implement `View` directly. `Entity<T: Render>` and any `T: RenderOnce`
-/// get a blanket impl below; implement it by hand only when a component needs both
-/// parent-supplied props *and* a backing entity for identity.
+/// Usually implement `Render` or `RenderOnce`. Implement `View` directly when
+/// a component combines parent-supplied properties with a retained entity whose
+/// identity should scope its subtree.
 pub trait View: 'static + Sized {
     /// This view's identity, if it has one. A view typically holds the backing
     /// entity as a field and returns its [`EntityId`] here.
@@ -291,11 +331,16 @@ impl<T: Render> View for Entity<T> {
 impl<T: Render> Entity<T> {
     /// Embed this entity as a cached [`ViewElement`] laid out at `style`.
     ///
-    /// The rendered subtree is reused until the entity is notified (or the
-    /// cached bounds / text style change). Caching requires a definite size:
-    /// a cached view is laid out from `style` and is *not* measured from its
-    /// contents. Use [`ViewElement::new`] (or `.child(entity)`) for the
-    /// uncached case.
+    /// GPUI can reuse the subtree's prepaint and paint records while the entity
+    /// is clean and its bounds, clipping mask, text style, and text direction
+    /// are unchanged. [`Context::notify`] invalidates it; [`Window::refresh`]
+    /// bypasses reuse. State changes still need notification, just as in an
+    /// uncached view.
+    ///
+    /// Caching requires a definite outer size: `style` determines the layout
+    /// box instead of measuring the view's contents. Use `.child(entity)`
+    /// without `cached` when content should determine that size. See
+    /// [`crate::_documentation::rendering`] for frame phases and retained state.
     #[track_caller]
     pub fn cached(self, style: StyleRefinement) -> ViewElement<Entity<T>> {
         ViewElement::new(self).cached(style)

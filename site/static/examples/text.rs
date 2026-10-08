@@ -14,6 +14,7 @@ impl Render for TextView {
             .child(
                 div()
                     .w(px(280.))
+                    .flex_shrink_0()
                     .text_size(px(18.))
                     .line_height(px(28.))
                     .text_color(rgb(0x202b29))

@@ -8,18 +8,24 @@ use std::{
     fmt::Display,
 };
 
-/// Defines and registers unit structs that can be used as actions. For more complex data types, derive `Action`.
+/// Defines and registers payload-free action types in a namespace.
 ///
-/// For example:
+/// Use this when a command needs only a name. Derive [`Action`] on a struct
+/// when callers must supply data, such as a destination or selection policy.
 ///
 /// ```rust,standalone_crate
 /// use gpui::actions;
 /// actions!(editor, [MoveUp, MoveDown, MoveLeft, MoveRight, Newline]);
 /// ```
 ///
-/// This will create actions with names like `editor::MoveUp`, `editor::MoveDown`, etc.
+/// Each generated type implements `Clone`, `PartialEq`, `Default`, `Debug`,
+/// and [`Action`]. Its registered name includes the namespace, such as
+/// `editor::MoveUp`. Attributes and doc comments may precede each listed name.
 ///
-/// The namespace argument `editor` can also be omitted, though it is required for Zed actions.
+/// The namespace is optional, but helps avoid collisions between commands
+/// from different modules. Declaration does not install a key binding or a
+/// handler: use [`App::bind_keys`](crate::App::bind_keys) and
+/// [`InteractiveElement::on_action`](crate::InteractiveElement::on_action).
 #[macro_export]
 // docs:examples:begin
 #[doc = include_str!("docs/examples/gpui-actions.md")]
@@ -42,82 +48,78 @@ macro_rules! actions {
     };
 }
 
-/// An action is a named, type-safe command that can be bound to keys and handled in the element
-/// tree. The same action can therefore be invoked by a key binding, a menu, or code without
-/// coupling those callers to a view implementation.
+/// A typed command shared by key bindings, menus, and programmatic dispatch.
 ///
-/// To declare a list of simple actions, you can use the actions! macro, which defines a simple unit
-/// struct action for each listed action name in the given namespace.
+/// An action describes the requested operation. A handler decides what that
+/// operation means in the focused view: for example, a movement command can
+/// move an editor's cursor or a list's selection. Declare the type, bind an
+/// input if needed, then attach a handler. Registration by name lets
+/// [`App::build_action`](crate::App::build_action) construct it from configuration;
+/// registration alone does not make it available in the element tree.
 ///
-/// ```rust,standalone_crate
-/// use gpui::actions;
-/// actions!(editor, [MoveUp, MoveDown, MoveLeft, MoveRight, Newline]);
-/// ```
+/// Use [`actions!`] for commands without data, and the derive macro for commands
+/// carrying data. Dispatch follows the focused element path; a bubbling
+/// handler consumes the action unless it calls [`App::propagate`](crate::App::propagate).
+/// See the [keyboard walkthrough](https://gpui-ce.github.io/examples/actions/)
+/// for the complete focus, context, binding, and handler setup.
 ///
-/// Registering two actions with the same name causes a panic while [`App`](crate::App) is created.
+/// # Declare a command with data
 ///
-/// # Derive Macro
-///
-/// More complex data types can also be actions, by using the derive macro for `Action`:
-///
-/// ```
+/// ```no_run
 /// use gpui::Action;
+///
+/// /// Select the next match, optionally replacing the newest selection.
 /// #[derive(Clone, PartialEq, serde::Deserialize, schemars::JsonSchema, Action)]
 /// #[action(namespace = editor)]
+/// #[serde(deny_unknown_fields)]
 /// pub struct SelectNext {
 ///     pub replace_newest: bool,
 /// }
+///
+/// # fn configure(cx: &mut gpui::App) -> Result<(), gpui::ActionBuildError> {
+/// let action = cx.build_action(
+///     "editor::SelectNext",
+///     Some(serde_json::json!({"replace_newest": true})),
+/// )?;
+/// cx.dispatch_action(action.as_ref());
+/// # Ok(())
+/// # }
 /// ```
 ///
-/// The derive macro for `Action` requires that the type implement `Clone` and `PartialEq`. It also
-/// requires `serde::Deserialize` and `schemars::JsonSchema` unless `#[action(no_json)]` is
-/// specified. In Zed these trait impls are used to load keymaps from JSON.
+/// The type must be `'static` and `Send`. The derive needs `Clone` and
+/// `PartialEq`; types with fields also need `serde::Deserialize` and
+/// `schemars::JsonSchema` unless JSON construction is disabled. Unit actions
+/// do not need those JSON traits and ignore the supplied JSON value.
+/// `serde::Serialize` is not required. `deny_unknown_fields` is an application
+/// choice that helps catch misspelled configuration keys.
 ///
-/// Multiple arguments separated by commas may be specified in `#[action(...)]`:
+/// # Configure the derive
 ///
-/// - `namespace = some_namespace` sets the namespace. In Zed this is required.
+/// Combine these options in `#[action(...)]`:
 ///
-/// - `name = "ActionName"` overrides the action's name. This must not contain `::`.
+/// | Option | Effect |
+/// | --- | --- |
+/// | `namespace = editor` | Prefix the name with this identifier and `::`. |
+/// | `name = "SelectNext"` | Override the type's name; this string cannot contain `::`. |
+/// | `no_json` | Make [`build`](Self::build) return an error and omit the JSON schema. |
+/// | `no_register` | Implement the trait without adding the type to the named registry. |
+/// | `deprecated_aliases = ["editor::OldName"]` | Accept old names through the same builder. |
+/// | `deprecated = "Use another command"` | Expose a migration message to configuration tools. |
 ///
-/// - `no_json` causes the `build` method to always error and `action_json_schema` to return `None`,
-///   and allows actions not implement `serde::Serialize` and `schemars::JsonSchema`.
+/// Canonical names and aliases must be unique across the application's linked
+/// action types. A collision panics during app construction. `no_register`
+/// does not disable the trait's builder; combine it with `no_json` for an
+/// action that should only be constructed directly in Rust.
 ///
-/// - `no_register` skips registering the action. This is useful for implementing the `Action` trait
-///   while not supporting invocation by name or JSON deserialization.
+/// # Implement the trait manually
 ///
-/// - `deprecated_aliases = ["editor::SomeAction"]` specifies deprecated old names for the action.
-///   These action names should *not* correspond to any actions that are registered. These old names
-///   can then still be used to refer to invoke this action. In Zed, the keymap JSON schema will
-///   accept these old names and provide warnings.
-///
-/// - `deprecated = "Message about why this action is deprecation"` specifies a deprecation message.
-///   In Zed, the keymap JSON schema will cause this to be displayed as a warning.
-///
-/// # Manual Implementation
-///
-/// If you want to control the behavior of the action trait manually, you can use the lower-level
-/// `#[register_action]` macro, which only generates the code needed to register your action before
-/// `main`.
-///
-/// ```
-/// use gpui::{SharedString, register_action};
-/// #[derive(Clone, PartialEq, Eq, serde::Deserialize, schemars::JsonSchema)]
-/// pub struct Paste {
-///     pub content: SharedString,
-/// }
-///
-/// impl gpui::Action for Paste {
-///     # fn boxed_clone(&self) -> Box<dyn gpui::Action> { unimplemented!()}
-///     # fn partial_eq(&self, other: &dyn gpui::Action) -> bool { unimplemented!() }
-///     # fn name(&self) -> &'static str { "Paste" }
-///     # fn name_for_type() -> &'static str { "Paste" }
-///     # fn build(value: serde_json::Value) -> anyhow::Result<Box<dyn gpui::Action>> {
-///     #     unimplemented!()
-///     # }
-/// }
-///
-/// register_action!(Paste);
-/// ```
+/// Usually the derive supplies the correct clone, equality, name, and builder
+/// behavior. For a custom implementation, keep [`name`](Self::name) consistent
+/// with [`name_for_type`](Self::name_for_type), and make
+/// [`partial_eq`](Self::partial_eq) return `false` for a different concrete type.
+/// Invoke [`register_action!`](crate::register_action) with the type's identifier
+/// if it should also be constructible by name. The registration macro supplies
+/// registry metadata; it does not implement this trait or attach a handler.
 pub trait Action: Any + Send {
     /// Clone the action into an owned trait object.
     fn boxed_clone(&self) -> Box<dyn Action>;
@@ -135,8 +137,10 @@ pub trait Action: Any + Send {
 
     /// Build this action from its JSON payload.
     ///
-    /// Unit actions receive `{}`. Return an error when the payload is malformed; callers surface
-    /// that error as [`ActionBuildError::BuildError`].
+    /// The named registry supplies `{}` when no payload is given. Derived unit
+    /// actions ignore the value; derived actions with fields deserialize it.
+    /// Return an error for invalid input. Registry callers report it as
+    /// [`ActionBuildError::BuildError`].
     fn build(value: serde_json::Value) -> Result<Box<dyn Action>>
     where
         Self: Sized;
@@ -187,7 +191,10 @@ impl std::fmt::Debug for dyn Action {
 }
 
 impl dyn Action {
-    /// Type-erase Action type.
+    /// Exposes the concrete action for type tests and downcasting.
+    ///
+    /// Handlers registered through typed element APIs already receive `&A`.
+    /// Use this when processing an erased action in custom dispatch code.
     pub fn as_any(&self) -> &dyn Any {
         self as &dyn Any
     }
@@ -417,10 +424,14 @@ impl ActionRegistry {
     }
 }
 
-/// Generate a list of all the registered actions.
-/// Useful for transforming the list of available actions into a
-/// format suited for static analysis such as in validating keymaps, or
-/// generating documentation.
+/// Iterates the linked action registrations before constructing an app.
+///
+/// This supplies registry metadata for tools that generate configuration
+/// schemas or action documentation. It includes types registered by the
+/// derive or [`register_action!`](crate::register_action), excludes
+/// `no_register` types, and has no guaranteed order. Use
+/// [`App::is_action_available`](crate::App::is_action_available) to check live
+/// handlers instead.
 pub fn generate_list_of_all_registered_actions() -> impl Iterator<Item = MacroActionData> {
     inventory::iter::<MacroActionBuilder>
         .into_iter()
@@ -435,18 +446,26 @@ mod no_action {
     actions!(
         zed,
         [
-            /// Action with special handling which unbinds the keybinding this is associated with,
-            /// if it is the highest precedence match.
+            /// A keymap marker that suppresses lower-precedence bindings for the same input.
+            ///
+            /// Bind it in a context to remove a shortcut there. Source metadata
+            /// also participates: a base-map removal does not suppress a user
+            /// binding with stronger source precedence. This is interpreted by
+            /// [`Keymap`](crate::Keymap), rather than dispatched as a command.
             NoAction
         ]
     );
 
-    /// Action with special handling which unbinds later bindings for the same keystrokes when they
-    /// dispatch the named action, regardless of that action's context.
+    /// A keymap marker that suppresses a named action for matching keystrokes.
     ///
-    /// In keymap JSON this is written as:
+    /// Bind it in the desired context. During context-aware lookup, it suppresses
+    /// matching candidates reached later in precedence order; it does not
+    /// suppress other actions on those keys. In Zed-style keymap JSON:
     ///
     /// `["zed::Unbind", "editor::NewLine"]`
+    ///
+    /// In Rust, construct `Unbind("editor::NewLine".into())` and pass it to
+    /// [`KeyBinding::new`](crate::KeyBinding::new).
     #[derive(Clone, Debug, PartialEq, Deserialize, JsonSchema, gpui::Action)]
     #[action(namespace = zed)]
     pub struct Unbind(pub gpui::SharedString);

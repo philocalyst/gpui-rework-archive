@@ -37,8 +37,10 @@ use std::{future::Future, rc::Rc, sync::Arc, time::Duration};
 
 /// A deterministic application and its simulated platform.
 ///
-/// Unlike `TestAppContext`, `TestApp` automatically flushes effects after
-/// each update and provides simpler window management.
+/// Updates flush app effects and then drain ready tasks. [`TestAppContext`](crate::TestAppContext)
+/// also flushes effects inside its `update` closure, but leaves draining tasks
+/// to the test. Use that context with `#[gpui::test]` when several applications
+/// need to share one scheduler; use `TestApp` for a self-contained `#[test]`.
 pub struct TestApp {
     app: Rc<AppCell>,
     platform: Rc<TestPlatform>,
@@ -410,8 +412,11 @@ impl<V: 'static + Render> TestAppWindow<V> {
         .unwrap()
     }
 
-    /// Parses and dispatches one keystroke, then drains ready work.
+    /// Dispatch a key press with simulated committed text, then drain ready work.
     ///
+    /// This sends a key-down event, not a key release. Use
+    /// [`Self::simulate_event`] with [`crate::KeyUpEvent`] as well when
+    /// testing a button's press/release activation.
     /// Panics when `keystroke` cannot be parsed or the window is closed.
     pub fn simulate_keystroke(&mut self, keystroke: &str) {
         let keystroke = Keystroke::parse(keystroke).unwrap();

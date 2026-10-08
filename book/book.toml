@@ -1,0 +1,31 @@
+[book]
+title = "The GPUI Book"
+description = "Ownership, rendering, input, and testing in GPUI Community Edition."
+language = "en"
+src = "src"
+
+[build]
+build-dir = "../target/gpui-book"
+
+[preprocessor.gpui]
+command = "python3 ../scripts/docs/book.py"
+before = ["links"]
+renderers = ["html"]
+
+[output.html]
+default-theme = "light"
+preferred-dark-theme = "navy"
+additional-css = ["theme/gpui.css"]
+additional-js = ["theme/gpui.js"]
+git-repository-url = "https://github.com/gpui-ce/gpui-ce"
+site-url = "/book/"
+no-section-label = true
+admonitions = true
+
+[output.html.playground]
+runnable = false
+copyable = true
+
+[output.html.search]
+use-boolean-and = true
+heading-split-level = 3

@@ -1,14 +1,24 @@
-//! Touch gesture recognition vocabulary.
+//! Touch recognition, scroll direction, and fling physics.
 //!
-//! GPUI recognizes gestures from raw [`TouchEvent`](crate::TouchEvent)s in a
-//! single, portable arena in gpui core: recognizers compete for in-flight
-//! touches, winners claim them, and losers are cancelled. Recognized gestures
-//! are surfaced through *existing* semantic events wherever possible, a tap
-//! becomes [`ClickEvent::Touch`](crate::ClickEvent), a pan becomes
-//! [`ScrollWheelEvent`](crate::ScrollWheelEvent)s carrying a
-//! [`TouchPhase`](crate::TouchPhase), and a pinch becomes
-//! [`PinchEvent`](crate::PinchEvent)s — so components written against
-//! `on_click` and scroll containers work untouched on mobile.
+//! The window's portable recognizer follows one touch at a time. A short
+//! touch becomes a synthesized left mouse press and release, so ordinary
+//! click handlers and text selection receive it. Movement beyond
+//! [`GestureTuning::touch_slop`] becomes axis-locked scrolling, delivered as
+//! [`ScrollWheelEvent`]s. Releasing a moving touch can start a fling.
+//!
+//! A custom element can claim the touch earlier by listening for
+//! [`TouchDragEvent`], or claim a timed [`LongPressEvent`]. Register either
+//! listener with [`Window::on_mouse_event`](crate::Window::on_mouse_event)
+//! during paint, filter it to the element's hitbox, and call
+//! [`Window::prevent_default`](crate::Window::prevent_default) on its
+//! `Started` event. An unclaimed offer leaves the touch eligible for a tap
+//! or scroll.
+//!
+//! > [!NOTE]
+//! > Portable recognition currently ignores additional touches and does not
+//! > recognize pinches. A platform can deliver [`PinchEvent`](crate::PinchEvent)
+//! > directly. [`GestureKinds`] describes platform capabilities; it does not
+//! > enable or disable the portable recognizer.
 
 use std::collections::VecDeque;
 use std::mem;
@@ -47,8 +57,9 @@ fn movements_oppose(left: Point<Pixels>, right: Point<Pixels>) -> bool {
 /// Tracks and filters the dominant axis of a scroll gesture.
 ///
 /// The first non-zero delta chooses an axis. Small contradictory movement remains locked to that
-/// axis; a sufficiently large perpendicular movement unlocks the gesture so the next event can
-/// choose again. [`TouchPhase::Ended`] and [`TouchPhase::Cancelled`] reset the tracker.
+/// axis; a sufficiently large perpendicular movement unlocks it. It remains
+/// unlocked until a new gesture starts or a gap of at least 28ms separates
+/// events. [`TouchPhase::Ended`] and [`TouchPhase::Cancelled`] reset the tracker.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct OngoingScroll {
     last_event: Option<Instant>,
@@ -358,7 +369,8 @@ mod friction_spline {
 /// for platform integration and does not disable any portable recognizer by itself.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct GestureKinds {
-    /// Tap (and multi-tap), surfaced as [`ClickEvent::Touch`](crate::ClickEvent).
+    /// Native tap and multi-tap recognition.
+    /// Portable taps currently use synthesized mouse events instead.
     pub tap: bool,
     /// Long press, surfaced as [`LongPressEvent`].
     pub long_press: bool,
@@ -370,7 +382,7 @@ pub struct GestureKinds {
 }
 
 impl GestureKinds {
-    /// No gestures; gpui core's portable recognizers handle everything.
+    /// Declares no native gesture recognizers.
     pub const NONE: Self = Self {
         tap: false,
         long_press: false,

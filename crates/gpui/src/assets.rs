@@ -18,7 +18,9 @@
 //! * Use [`crate::AssetEntry::OnDemand`] for deferred synchronous loading only when the caller can
 //!   tolerate the loader's latency. [`crate::AssetRegistry::load`] invokes it inline.
 //! * Use [`crate::Asset`] when loading is asynchronous and should be scheduled by GPUI. The
-//!   returned [`crate::Task`] is the cancellation/ownership handle for that work.
+//!   returned shared task lets callers await the result while the app retains
+//!   the cached request. See [`crate::App::fetch_asset`] for ownership and
+//!   [`crate::Window::use_asset`] for rendering-time polling.
 //!
 //! Duplicate paths are errors from [`crate::AssetRegistry::insert`] and are accumulated by
 //! [`crate::AssetRegistry::extend`]. A missing key returns `None`; it is distinct from an I/O error
@@ -231,10 +233,11 @@ impl AssetRegistry {
         }
     }
 
-    /// Iterates over the provided and inserts each entry using the provided path in the item tuple.
-    /// Errors from insert are logged, and all errors are returned as a vec.
-    /// Returns OK if no duplicate paths are found (can occur if the iterator provided a path
-    /// that was already in the collection by the time that entry is inserted).
+    /// Inserts every path-entry pair, continuing after duplicate keys.
+    ///
+    /// The first entry for a key remains in place. Returns `Ok(())` when every
+    /// insertion succeeds; otherwise logs and returns all duplicate-key
+    /// errors. Successful insertions remain even when the method returns `Err`.
     pub fn extend<IterType, KeyType, EntryType>(
         &mut self,
         into_iter: IterType,
@@ -258,12 +261,12 @@ impl AssetRegistry {
         result
     }
 
-/// Creates an iterator over paths and embedded asset bytes from a
-/// [`rust_embed::RustEmbed`] type.
-///
-/// RustEmbed supplies file names separately from their bytes, so this method resolves each name
-/// with `T::get`. Names that no longer resolve are skipped. The iterator can be passed to
-/// [`Self::extend`].
+    /// Creates an iterator over paths and embedded asset bytes from a
+    /// [`rust_embed::RustEmbed`] type.
+    ///
+    /// RustEmbed supplies file names separately from their bytes, so this method resolves each name
+    /// with `T::get`. Names that no longer resolve are skipped. The iterator can be passed to
+    /// [`Self::extend`].
     #[cfg(feature = "embedded-assets")]
     pub fn iter_embed<T: rust_embed::RustEmbed>()
     -> impl Iterator<Item = (Cow<'static, str>, AssetEntry)> + 'static {
@@ -356,7 +359,8 @@ impl RenderImage {
 
     /// Return the duration for which a frame should be displayed.
     ///
-    /// Missing frames use a 100 ms fallback, matching the image decoder's conservative default.
+    /// Missing frames use a 100 ms fallback. Existing frames keep the delay
+    /// supplied by their decoder, including zero-duration delays.
     pub fn delay(&self, frame_index: usize) -> Delay {
         self.data
             .get(frame_index)

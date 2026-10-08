@@ -1,7 +1,8 @@
 //! A virtualized scroll container for large collections whose items may have different heights.
 //!
-//! The renderer receives an item index and is called only for the visible range plus configured
-//! overdraw. [`ListState`] owns measured heights and must be kept by the owning view. When item
+//! The renderer receives one item index at a time. The default policy renders the visible region
+//! plus configured overdraw; explicit measurement and focus retention can request other items.
+//! [`ListState`] owns measured heights and must be kept by the owning view. When item
 //! heights or the count change, update it with [`ListState::remeasure`],
 //! [`ListState::remeasure_items`], [`ListState::splice`], or [`ListState::reset`].
 //!
@@ -21,11 +22,17 @@ use sum_tree::{Bias, Dimensions, SumTree};
 
 type RenderItemFn = dyn FnMut(usize, &mut Window, &mut App) -> AnyElement + 'static;
 
-/// Construct a virtualized list whose renderer receives the visible item range.
+/// Constructs a virtualized list that renders one requested item at a time.
 ///
-/// Keep `state` in the owning view and pass it back on every render. The callback's output order
-/// must match the requested indices so measured bounds and interaction remain associated with the
-/// correct item.
+/// Keep `state` in the owning view and pass a clone back on every render. The
+/// callback receives a zero-based index into that state's current item count;
+/// return the element for that item. GPUI can call it more than once while
+/// measuring or retrying prepaint. Do not use callback counts as a lifecycle
+/// signal or start a fresh task for every call.
+///
+/// Give stateful rows stable logical IDs. The index selects current data; after
+/// an insertion it may refer to a different item. Use [`crate::uniform_list`]
+/// when every row shares one height.
 pub fn list(
     state: ListState,
     render_item: impl FnMut(usize, &mut Window, &mut App) -> AnyElement + 'static,
@@ -38,7 +45,7 @@ pub fn list(
     }
 }
 
-/// A list element
+/// A variable-height list built from a retained [`ListState`] and item renderer.
 pub struct List {
     state: ListState,
     render_item: Box<RenderItemFn>,
@@ -54,7 +61,73 @@ impl List {
     }
 }
 
-/// The list state that views must hold on behalf of the list element.
+/// Shared measurements and scroll position for a variable-height list.
+///
+/// Store this on the owning view and clone it into each [`list`] element.
+/// Clones refer to the same state. Update its item count with [`splice`](Self::splice)
+/// or [`reset`](Self::reset), and invalidate changed row measurements with
+/// [`remeasure_items`](Self::remeasure_items). These operations do not notify
+/// the view: schedule a render after modifying the data and list state together.
+///
+/// # Keep measurements in step with the data
+///
+/// The list remembers geometry, not your collection. An append needs both a
+/// data change and a matching splice; changing a row's text needs measurement
+/// invalidation if its height can change. For example, these methods belong
+/// on the view that owns both:
+///
+/// ```
+/// use gpui::{Context, ListAlignment, ListState, SharedString, px};
+///
+/// struct Messages {
+///     rows: Vec<SharedString>,
+///     list: ListState,
+/// }
+///
+/// impl Messages {
+///     fn new() -> Self {
+///         Self {
+///             rows: Vec::new(),
+///             list: ListState::new(0, ListAlignment::Top, px(100.)),
+///         }
+///     }
+///
+///     fn append(&mut self, text: SharedString, cx: &mut Context<Self>) {
+///         let index = self.rows.len();
+///         self.rows.push(text);
+///         self.list.splice(index..index, 1);
+///         cx.notify();
+///     }
+///
+///     fn replace(&mut self, index: usize, text: SharedString, cx: &mut Context<Self>) {
+///         self.rows[index] = text;
+///         self.list.remeasure_items(index..index + 1);
+///         cx.notify();
+///     }
+/// }
+/// ```
+///
+/// Give rendered rows IDs derived from message identity, rather than their
+/// current indices, if rows can move or be inserted before one another.
+/// [`remeasure`](Self::remeasure) invalidates every height and preserves a
+/// *fraction* of the top row: an offset of 40 pixels into a 100-pixel row
+/// becomes 20 pixels if that row shrinks to 50 pixels.
+/// [`remeasure_items`](Self::remeasure_items) instead preserves the pixel
+/// offset, clamped to the row's new height. Use it for a message that grows
+/// while text streams in; use `remeasure` when a font or zoom change scales
+/// all rows. A changed viewport width invalidates measurements automatically.
+///
+/// # Let the reader leave the end
+///
+/// [`set_follow_mode(FollowMode::Tail)`](Self::set_follow_mode) moves to the
+/// end and keeps it visible as content grows. Scrolling toward earlier items
+/// pauses following; reaching the bottom resumes it on a subsequent layout.
+/// Set this policy when the user chooses to follow, rather than on every
+/// render, which would repeatedly pull them away from older messages.
+///
+/// [`scroll_to_end`](Self::scroll_to_end) requests a position once.
+/// [`ListAlignment::Bottom`] chooses the default anchor when no explicit
+/// position exists. Neither is a substitute for the pause-and-resume policy.
 #[derive(Clone)]
 pub struct ListState(Rc<RefCell<StateInner>>);
 
@@ -164,12 +237,17 @@ impl FollowState {
     }
 }
 
-/// Whether the list is scrolling from top to bottom or bottom to top.
+/// The edge used when the list has no explicit scroll position.
+///
+/// Items keep their index order in both alignments. This chooses the initial
+/// position and the placement of content shorter than the viewport; it does
+/// not reverse the data. Use [`FollowMode`] for a reader-controlled policy
+/// that follows appended content while the reader remains at the end.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ListAlignment {
-    /// The list is scrolling from top to bottom, like most lists.
+    /// Start at item zero and place short content against the top edge.
     Top,
-    /// The list is scrolling from bottom to top, like a chat log.
+    /// Start at the end and place short content against the bottom edge.
     Bottom,
 }
 
@@ -178,10 +256,11 @@ pub struct ListScrollEvent {
     /// The range of items currently visible in the list, after applying the scroll event.
     pub visible_range: Range<usize>,
 
-    /// The number of items that are currently visible in the list, after applying the scroll event.
+    /// The total item count in the list, including offscreen items.
     pub count: usize,
 
-    /// Whether the list has been scrolled.
+    /// Whether the list has an explicit logical scroll position.
+    /// This is not a comparison with the position before this event.
     pub is_scrolled: bool,
 
     /// Whether the list is currently in follow-tail mode (auto-scrolling to end).
@@ -201,10 +280,11 @@ pub enum ListSizingBehavior {
 /// The measuring behavior to apply during layout.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ListMeasuringBehavior {
-    /// Measure all items in the list.
-    /// Note: This can be expensive for the first frame in a large list.
+    /// Measure all items once after initialization or a measurement reset.
+    /// The flag records whether that pass has completed. Prefer
+    /// [`ListState::measure_all`] to configure this policy.
     Measure(bool),
-    /// Only measure visible items
+    /// Measure the visible region and overdraw, plus rows needed to retain focus.
     #[default]
     Visible,
 }
@@ -335,22 +415,27 @@ impl ListState {
         this
     }
 
-/// Measure every item during the first layout pass.
+    /// Measure every item during the first layout pass.
     ///
-    /// This makes the initial total content height and scrollbar thumb reflect every item instead
-    /// of estimating from rendered rows. It can be expensive for a large list. For mostly uniform
-    /// rows, [`with_uniform_item_height`](Self::with_uniform_item_height) seeds cheaper height hints.
+    /// This makes the initial total content height and scrollbar thumb reflect
+    /// every item. The pass repeats after measurement invalidation, including
+    /// a changed viewport width. It can be expensive for a large collection.
+    /// For mostly uniform rows,
+    /// [`with_uniform_item_height`](Self::with_uniform_item_height) supplies
+    /// cheaper estimates.
     pub fn measure_all(self) -> Self {
         self.0.borrow_mut().measuring_behavior = ListMeasuringBehavior::Measure(false);
         self
     }
 
-    /// Pre-populate every unmeasured item with a uniform height hint so the scrollbar thumb
-    /// is correctly sized from the first frame, without measuring all items up front.
+    /// Supply a height estimate for rows that have no measurement or hint.
     ///
-    /// As items are actually rendered their real heights replace the hint, so the scrollbar
-    /// converges to the exact size over time. This is a cheaper alternative to [`Self::measure_all`]
-    /// for lists where items have roughly uniform heights (e.g. table rows).
+    /// Existing measurements and hints take precedence. As rows are rendered,
+    /// their measured heights replace the estimates. The initial scrollbar
+    /// size is therefore approximate unless the hints match every row.
+    /// This is a cheaper alternative to [`measure_all`](Self::measure_all)
+    /// when rows have similar heights. A changed viewport width discards the
+    /// hints along with cached measurements.
     pub fn with_uniform_item_height(self, height: Pixels) -> Self {
         self.apply_uniform_item_height(height);
         self
@@ -373,9 +458,11 @@ impl ListState {
         self.splice(0..old_count, element_count);
     }
 
-    /// Reset the list to `element_count` items, pre-populating every item with a
-    /// uniform height hint so the scrollbar thumb is correctly sized from the first
-    /// frame even for off-screen items.
+    /// Replace all rows and seed their heights with `height` estimates.
+    ///
+    /// This has the scroll-reset behavior of [`reset`](Self::reset). Hints
+    /// let off-screen rows contribute to the initial scrollbar size; actual
+    /// measurements replace them as rows are rendered.
     pub fn reset_with_uniform_height(&self, element_count: usize, height: Pixels) {
         self.reset(element_count);
         self.apply_uniform_item_height(height);
@@ -557,9 +644,11 @@ impl ListState {
 
     /// Set a handler called after the list processes a scroll event.
     ///
-    /// The event describes the resulting visible range and whether a scroll occurred or tail
-    /// following is active. The callback is retained by the list state; replace it when the
-    /// owning view rebuilds the list if it captures frame-specific data.
+    /// The event reports a visible range computed from the new position and
+    /// currently known heights. A later layout can refine that geometry.
+    /// `is_scrolled` means an explicit position is set; it does not say that
+    /// this event moved the list. This callback is retained by the state.
+    /// Replace it when rendering if it captures data that changes per frame.
     pub fn set_scroll_handler(
         &self,
         handler: impl FnMut(&ListScrollEvent, &mut Window, &mut App) + 'static,
@@ -575,7 +664,12 @@ impl ListState {
         self.0.borrow().logical_scroll_top()
     }
 
-    /// Scroll the list by the given offset
+    /// Moves the logical scroll position by `distance` using known row heights.
+    ///
+    /// Positive distances move toward later items; negative distances move
+    /// toward earlier items and pause active tail-following. A later layout
+    /// clamps the position to the viewport and can refine unmeasured heights.
+    /// Schedule a redraw separately.
     pub fn scroll_by(&self, distance: Pixels) {
         if distance == px(0.) {
             return;
@@ -912,7 +1006,7 @@ impl StateInner {
         cursor.seek(&Count(scroll_top.item_ix), Bias::Right);
         let start_y = cursor.start().height + scroll_top.offset_in_item;
         cursor.seek_forward(&Height(start_y + height), Bias::Left);
-        scroll_top.item_ix..cursor.start().count + 1
+        scroll_top.item_ix..(cursor.start().count + 1).min(items.summary().count)
     }
 
     fn scroll(
@@ -936,23 +1030,23 @@ impl StateInner {
         let new_scroll_top = (self.scroll_top(scroll_top) - delta.y)
             .max(px(0.))
             .min(scroll_max);
+        let (start, ..) =
+            self.items
+                .find::<ListItemSummary, _>((), &Height(new_scroll_top), Bias::Right);
+        let resulting_scroll_top = ListOffset {
+            item_ix: start.count,
+            offset_in_item: new_scroll_top - start.height,
+        };
 
         if self.alignment == ListAlignment::Bottom && new_scroll_top == scroll_max {
             self.pending_scroll = None;
             self.logical_scroll_top = None;
         } else {
-            let (start, ..) =
-                self.items
-                    .find::<ListItemSummary, _>((), &Height(new_scroll_top), Bias::Right);
-            let scroll_top = ListOffset {
-                item_ix: start.count,
-                offset_in_item: new_scroll_top - start.height,
-            };
             // The user's scroll supersedes the position stashed by a
             // remeasure; re-anchor the pending adjustment so it doesn't revert
             // this scroll on the next layout.
-            self.rebase_pending_scroll(scroll_top);
-            self.logical_scroll_top = Some(scroll_top);
+            self.rebase_pending_scroll(resulting_scroll_top);
+            self.logical_scroll_top = Some(resulting_scroll_top);
         }
 
         if delta.y > px(0.) {
@@ -960,7 +1054,7 @@ impl StateInner {
         }
 
         if let Some(handler) = self.scroll_handler.as_mut() {
-            let visible_range = Self::visible_range(&self.items, height, scroll_top);
+            let visible_range = Self::visible_range(&self.items, height, &resulting_scroll_top);
             handler(
                 &ListScrollEvent {
                     visible_range,
@@ -1985,6 +2079,49 @@ mod test {
             })
             .w_full()
             .h_full()
+        }
+    }
+
+    #[gpui::test]
+    fn scroll_callback_reports_the_resulting_visible_range(cx: &mut TestAppContext) {
+        for alignment in [crate::ListAlignment::Top, crate::ListAlignment::Bottom] {
+            let cx = cx.add_empty_window();
+            let state = ListState::new(5, alignment, px(0.)).measure_all();
+            state.scroll_to(gpui::ListOffset {
+                item_ix: 0,
+                offset_in_item: px(0.),
+            });
+            let reported = Rc::new(std::cell::RefCell::new(Vec::new()));
+            state.set_scroll_handler({
+                let reported = reported.clone();
+                move |event, _, _| {
+                    reported.borrow_mut().push((
+                        event.visible_range.clone(),
+                        event.count,
+                        event.is_scrolled,
+                    ));
+                }
+            });
+            cx.draw(point(px(0.), px(0.)), size(px(100.), px(40.)), |_, cx| {
+                cx.new(|_| TestListView(state.clone())).into_any_element()
+            });
+
+            for distance in [-40., -1000.] {
+                cx.simulate_event(ScrollWheelEvent {
+                    position: point(px(50.), px(10.)),
+                    delta: ScrollDelta::Pixels(point(px(0.), px(distance))),
+                    ..Default::default()
+                });
+            }
+
+            assert_eq!(
+                &*reported.borrow(),
+                &[
+                    (2..4, 5, true),
+                    (3..5, 5, alignment == crate::ListAlignment::Top),
+                ],
+                "callbacks should report the new viewport, including a bottom anchor"
+            );
         }
     }
 

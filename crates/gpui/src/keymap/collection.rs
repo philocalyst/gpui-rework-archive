@@ -1,16 +1,21 @@
 use crate::{Action, DummyKeyboardMapper, KeyBinding, KeyBindingContextPredicate, SharedString};
 use std::{any::TypeId, collections::HashMap};
 
-/// A generic collection of `Action` -> keystrokes which can be bound under a shared key-context.
-/// Use `as_keybindings` to create an iterator of `KeyBinding` to provide to `App::bind_keys`.
+/// Alternative shortcuts for default-constructible actions under one predicate.
+///
+/// [`with`](Self::with) collects shortcut strings by action type.
+/// [`as_keybindings`](Self::as_keybindings) parses them into bindings suitable
+/// for [`App::bind_keys`](crate::App::bind_keys). Use an ordered collection of
+/// [`KeyBinding`] values when relative precedence between action types matters.
 ///
 /// ```rust
-/// # use gpui::{ActionBindingCollection, Action};
+/// use gpui::ActionBindingCollection;
 /// gpui::actions!([MyAction]);
-/// # #[gpui::test]
-/// # fn test(app: &mut gpui::TestAppContext) {
-/// app.bind_keys(ActionBindingCollection::default().with::<MyAction>("enter").as_keybindings(None));
-/// # }
+/// let alternatives = ActionBindingCollection::default()
+///     .with::<MyAction>("enter")
+///     .with::<MyAction>("ctrl-enter");
+/// let bindings: Vec<_> = alternatives.as_keybindings(Some("Editor")).collect();
+/// assert_eq!(bindings.len(), 2);
 /// ```
 #[derive(Default)]
 pub struct ActionBindingCollection {

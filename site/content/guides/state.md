@@ -43,6 +43,27 @@ otherwise outlive the UI that motivated it.
 it for app-wide services or configuration, not to avoid deciding which view
 owns a model. `App::global` panics when the value is absent; use `try_global`
 when absence is a normal state and the caller can proceed without it.
+Reading a global while rendering does not register a redraw dependency. Retain
+a `Context::observe_global` subscription and notify the view in its callback
+when a replacement should change the interface. See
+[app-wide state](https://gpui-ce.github.io/book/ownership.html#share-one-value-across-the-app)
+for initialization and observer timing.
+
+## Keep row state with its record
+
+A view entity and its returned elements have different lifetimes. The entity
+survives through strong handles; the element values are rebuilt during render.
+Give a repeated row an ID derived from its record's key so retained interaction
+or animation state follows that record after sorting. An index instead ties
+state to a position.
+
+`Window::use_keyed_state` retains an entity under an element identity while the
+state participates in consecutive frames. It is suitable for mounted component
+state, not a draft that must survive removing and later reopening the component.
+Keep such a draft on a longer-lived owner. The
+[identity section](https://gpui-ce.github.io/book/ownership.html#give-retained-element-state-an-identity)
+shows the storage choices and the call-site collision to avoid in repeated
+`use_state` calls.
 
 ## Let a view disappear
 

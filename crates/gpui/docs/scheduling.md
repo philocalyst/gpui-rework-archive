@@ -14,10 +14,19 @@ lifetime.
 | [`BackgroundExecutor::scoped`](crate::BackgroundExecutor::scoped) | Background workers in production; controlled scheduler in tests; native targets only | A group of `Send` jobs that borrow data owned by the caller |
 | [`Tokio::spawn`](https://docs.rs/gpui_tokio/latest/gpui_tokio/struct.Tokio.html#method.spawn) | The configured Tokio runtime | Libraries already built around Tokio |
 
+In the browser, background dispatch uses workers only when the build and
+browser support them and the application enables them. Otherwise it schedules
+ordinary work on the browser thread. Keep polls short there: `Send` makes a
+future transferable, but does not establish that another thread will run it.
+See the [platform chapter](crate::_documentation::platforms) for browser
+capabilities.
+
 Use [`BackgroundExecutor::spawn_with_priority`](crate::BackgroundExecutor::spawn_with_priority)
 when ordinary background work needs a priority. `Priority::RealtimeAudio` is a
-special dedicated-thread path for audio processing, not a general way to get
-more CPU time. The Tokio adapter's `spawn` returns `Task<Result<T, JoinError>>`;
+special dedicated-thread path for native audio processing, not a general way
+to get more CPU time. The browser dispatcher has no realtime thread, and its
+fallback cannot safely run that blocking audio loop. The Tokio adapter's
+`spawn` returns `Task<Result<T, JoinError>>`;
 `spawn_result` also flattens the future's `anyhow::Result`. Initialize it with
 [`gpui_tokio::init`](https://docs.rs/gpui_tokio/latest/gpui_tokio/fn.init.html)
 or pass an externally owned runtime to
@@ -65,16 +74,21 @@ impl SearchResults {
                     .collect::<Vec<_>>()
             }).await;
 
-            if this.update(cx, |this, cx| {
+            let _ = this.update(cx, |this, cx| {
                 this.matches = matches;
                 cx.notify();
-            }).is_err() {
-                // The view was released while the search was running.
-            }
+            }); // A released view no longer needs the result.
         })
     }
 }
 ```
+
+Return or retain the task so its caller controls the search's lifetime. If a
+new query can start before the previous search finishes, also decide which
+result is allowed to win. Replacing the retained task cancels the old future;
+a generation check rejects an old result even when the underlying operation
+cannot be canceled. The [testing chapter](https://gpui-ce.github.io/book/testing.html#reject-a-result-from-a-replaced-request)
+shows that race with controlled completion order.
 
 The entity update closure is synchronous. Never keep `&mut App`, `&mut Window`,
 or an entity borrow across an await. `AsyncApp` and `AsyncWindowContext` provide
@@ -96,20 +110,38 @@ path in its streaming text update loop ([`acp_thread.rs`](https://github.com/zed
 
 [`Task<T>`](crate::Task) is a future and a cancellation handle. Await it when
 the caller needs its output or needs to sequence later work. [`Task::is_ready`](crate::Task::is_ready)
-only checks completion; it does not return the output or drive a task by itself.
-Dropping a task cancels unfinished work after its current poll returns.
-Detaching transfers the work to the executor and gives up the output handle:
-
-Keep the returned handle in a field if the view owns the work's lifetime.
-Calling `detach` lets it continue without a handle that can cancel or await it.
+reports whether the task has finished or been cancelled; it does not prove
+that an output exists, retrieve that output, or poll the future. Dropping a
+task requests cancellation after its current poll returns, without waiting
+for cleanup. Keep
+the handle in a field if the view owns the work's lifetime. Calling
+[`Task::detach`](crate::Task::detach) lets the work continue without a handle
+that can cancel it or retrieve its output.
 
 Dropping or detaching controls GPUI's future, not side effects it already
 performed. A network request or write needs its own cancellation and
 transaction contract. To report `Result` failures from intentionally detached
 work, use [`TaskExt::detach_and_log_err`](crate::TaskExt::detach_and_log_err)
 or [`TaskExt::detach_and_log_err_with_backtrace`](crate::TaskExt::detach_and_log_err_with_backtrace).
-[`Task::fallible`](crate::Task::fallible) makes cancellation observable as
-`None`; it does not convert an operation's own error into an `Option`.
+The supplied task keeps running on its original executor; a foreground task
+waits for and logs the error.
+
+An executor can also cancel work by discarding its runnable. Awaiting an
+ordinary `Task` then panics. [`Task::fallible`](crate::Task::fallible) yields
+`None` for that case and `Some(output)` for a completed operation. For a task
+returning `Result`, the two failure cases remain distinct:
+
+```rust
+use gpui::Task;
+
+# futures::executor::block_on(async {
+let task = Task::ready(Err::<(), _>("request rejected"));
+assert_eq!(task.fallible().await, Some(Err("request rejected")));
+# });
+```
+
+`fallible` does not catch panics inside the operation. Detaching also cannot
+keep an executor or dedicated session alive during shutdown.
 
 ## Borrow data for a group of background jobs
 
@@ -121,35 +153,57 @@ those jobs and waits for their futures to be destroyed before returning. These
 methods are unavailable on `wasm` targets; use owned `'static` inputs with
 `spawn` there.
 
-```rust,ignore
-let records = load_records();
-executor.scoped(|scope| {
-    for chunk in records.chunks(128) {
-        scope.spawn(async move {
-            index_chunk(chunk).await;
-        });
-    }
-}).await;
+The closure registers jobs synchronously; they are submitted after it returns.
+If registration panics, the unstarted futures are destroyed before the panic
+propagates. Once jobs are running, cancellation still has to wait for their
+current polls to return. A blocking job can therefore delay scope cleanup.
+
+```rust
+use gpui::BackgroundExecutor;
+
+async fn word_counts(executor: &BackgroundExecutor, documents: &[String]) -> Vec<usize> {
+    let mut counts = vec![0; documents.len()];
+    executor.scoped(|scope| {
+        for (document, count) in documents.iter().zip(&mut counts) {
+            scope.spawn(async move {
+                *count = document.split_whitespace().count();
+            });
+        }
+    }).await;
+    counts
+}
 ```
 
+Each job borrows one document and a different output slot. The scope finishes
+before `counts` is returned, so no job can retain a reference into the returned
+vector. Batch small inputs in real workloads: scheduling a job has a cost.
 Each scoped future must be `Send`, and the scope's completion is part of the
-caller task's lifetime. For a large synchronous operation that needs a larger
-stack, consider [`BackgroundExecutor::spawn_dedicated`](crate::BackgroundExecutor::spawn_dedicated);
-it uses a fresh session rather than the shared background workers. Its test
-scheduler runs that session in the test loop, while production uses a dedicated
-thread. Dedicated web workers require the `wasm-threads` feature and shared
-memory, and should be long-lived because creating one is expensive.
+caller task's lifetime.
+
+For a long-lived future that needs its own execution thread, consider
+[`BackgroundExecutor::spawn_dedicated`](crate::BackgroundExecutor::spawn_dedicated).
+Its closure creates the future on that thread, so the future itself may hold
+`!Send` values. The test scheduler runs it in the test loop instead. Dedicated
+web workers require the `wasm-threads` feature and shared memory, and should be
+long-lived because creating one is expensive.
+
+[`DedicatedExecutor`](crate::DedicatedExecutor) reuses one dedicated session
+for several `Send` futures. Its constructor takes the scheduler-level handle
+from [`BackgroundExecutor::scheduler_executor`](crate::BackgroundExecutor::scheduler_executor).
+Retain the dedicated executor as well as any job handles: detaching a job
+does not preserve the session after the executor is dropped.
 
 ## Test scheduling is not production timing
 
-The test scheduler randomizes runnable ordering from a seed and exposes a
-controllable clock. [`TestApp::run_until_parked`](crate::TestApp::run_until_parked)
+Enable `test-support` for GPUI's test harnesses. The test scheduler randomizes
+runnable ordering from a seed and exposes a controllable clock. `TestApp::run_until_parked`
 drains work that can run now; it does not advance future timers. Advancing the
 clock with `advance_clock` runs work as it becomes due and ends at the requested
 time. `run_with_clock_advancement` instead advances through timers until the
 scheduler reaches quiescence. `TestAppContext` uses the same test
-dispatcher through its [`run_until_parked`](crate::TestAppContext::run_until_parked)
-and [`executor`](crate::TestAppContext::executor) methods.
+dispatcher through its `run_until_parked` and `executor` methods. The
+[testing chapter](https://gpui-ce.github.io/book/testing.html) shows complete
+fixtures for notification, timer, cancellation, and input behavior.
 
 This proves behavior under the chosen task interleavings and simulated time. It
 does not measure production latency, guarantee a particular OS-thread order, or

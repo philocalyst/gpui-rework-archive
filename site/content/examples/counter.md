@@ -15,24 +15,22 @@ example_run = "cargo run -p gpui-documentation-examples --example counter"
 <a id="state"></a>
 ## Own the count
 
-Click Increment and the label gains one. The value behind that label is
-`Counter::count`; the button holds no separate count.
+Click Increment and the label gains one. `Counter` owns the count; the label
+and button are rebuilt from that value when GPUI renders the view.
 
-[`AppContext::new`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.AppContext.html#tymethod.new) stores `Counter` in the app and returns an [`Entity`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Entity.html)
-handle. Cloning that handle refers to the same counter and keeps it alive;
-it does not copy the field. [`Context`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html) is the scoped capability passed to
-callbacks and render methods, so this example mutates the view through its
-listener rather than borrowing the entity again.
+GPUI stores the view in an [`Entity`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Entity.html). Cloning its handle keeps the same
+counter alive, with the same field. The constructor at the end of this
+program creates that entity; first, define what it stores and renders.
 
 ```rust
-use gpui::{AppContext, Context, IntoElement, Render, Window, div, prelude::*, rgb};
+use gpui::{AppContext, Context, IntoElement, Render, Role, Window, div, prelude::*, rgb, text};
 
 struct Counter {
     count: u32,
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/counter/") }}#L14).
+[View this step in the source]({{ get_url(path="sources/counter/") }}#L12).
 
 <a id="render"></a>
 ## Read state into a frame
@@ -41,10 +39,19 @@ struct Counter {
 frame. Styling sets their layout and appearance. The button ID gives its
 interaction state a stable identity as the element values are rebuilt.
 
-[`Context::listener`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html#method.listener) supplies the counter to the click handler. Its other
+The [`Context`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html) belongs to this counter for the duration of `render`.
+[`Context::listener`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html#method.listener) creates a callback that can update it later, when the
+button is activated. The callback receives `&mut Counter`; its other
 arguments are the click event, the window, and the counter's context. The
-handler uses the supplied `&mut Counter` rather than borrowing it again
-through an entity handle.
+entity is already borrowed there, so use that supplied counter to change it.
+
+[`text`](https://docs.rs/gpui-ce/0.2.2/gpui/macro.text.html) gives the changing label an accessibility node. The button's
+[`StatefulInteractiveElement::role`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.StatefulInteractiveElement.html#method.role) and label identify its purpose;
+[`InteractiveElement::tab_index`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.InteractiveElement.html#method.tab_index) makes it reachable with Tab. Once focused,
+[`StatefulInteractiveElement::on_click`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.StatefulInteractiveElement.html#method.on_click) also accepts Enter and Space.
+`focus_visible` draws a ring during keyboard navigation. Try clicking, then
+use Tab and Enter or Space to reach the same operation. Run the native
+example with assistive technology to check its named button and Click action.
 
 ```rust
 impl Render for Counter {
@@ -58,10 +65,18 @@ impl Render for Counter {
             .gap_4()
             .bg(rgb(0xf7f6f2))
             .text_color(rgb(0x202b29))
-            .child(div().text_2xl().child(format!("Count: {}", self.count)))
+            .child(
+                div()
+                    .text_2xl()
+                    .child(text!(format!("Count: {}", self.count))),
+            )
             .child(
                 div()
                     .id("increment")
+                    .role(Role::Button)
+                    .aria_label("Increment")
+                    .tab_index(0)
+                    .focus_visible(|style| style.ring_2().ring_color(rgb(0x3478c8)))
                     .px_4()
                     .py_2()
                     .rounded_md()
@@ -75,21 +90,20 @@ impl Render for Counter {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/counter/") }}#L30).
+[View this step in the source]({{ get_url(path="sources/counter/") }}#L37).
 
 <a id="update"></a>
 ## Change the value, then notify
 
-[`Context::notify`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html#method.notify) reports that this entity's observable state changed.
-GPUI schedules affected views to render again; the next render reads the new
-count. Assigning a field alone does not schedule that update. This separates
-mutation from invalidation, which matters when state is changed outside a
-render callback.
+`increment` changes the field, then calls [`Context::notify`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html#method.notify). GPUI marks
+affected views for rendering; the next frame reads the new count. Notification
+does not paint the label inside this callback. Assigning the field alone
+does not request that frame.
 
 Remove `cx.notify()` and run again. Clicks still change the field, but the
 label can stay stale until other work causes a render. Restore the call and
-the mutation and displayed value stay connected. `saturating_add` also makes
-the counter stop at `u32::MAX` rather than overflow.
+the label follows the field again. `saturating_add` makes the counter stop
+at `u32::MAX` rather than overflow.
 
 ```rust
 impl Counter {
@@ -98,7 +112,23 @@ impl Counter {
         cx.notify();
     }
 }
+```
 
+[View this step in the source]({{ get_url(path="sources/counter/") }}#L83).
+
+<a id="launch"></a>
+## Create the view and open a window
+
+[`AppContext::new`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.AppContext.html#tymethod.new) stores a counter starting at zero and returns its entity
+handle. The shared launcher calls this constructor while opening a window
+and uses the returned entity as its root view. On desktop, closing the last
+example window quits the application.
+
+Run it with `cargo run -p gpui-documentation-examples --example counter`.
+To change window options or application setup, continue
+with [the first-window example](@/examples/first-window.md).
+
+```rust
 fn component(_window: &mut Window, cx: &mut gpui::App) -> gpui::Entity<Counter> {
     cx.new(|_cx| Counter { count: 0 })
 }
@@ -108,6 +138,6 @@ pub fn main() {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/counter/") }}#L69).
+[View this step in the source]({{ get_url(path="sources/counter/") }}#L100).
 
 [Download the complete source]({{ get_url(path="examples/counter.rs") }}).

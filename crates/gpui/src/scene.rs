@@ -140,20 +140,31 @@ struct ScenePrimitives<'a> {
 impl<'a> From<&'a Scene> for ScenePrimitives<'a> {
     fn from(scene: &'a Scene) -> Self {
         Self {
-            shadows: &scene.shadows, quads: &scene.quads, paths: &scene.paths,
-            underlines: &scene.underlines, monochrome_sprites: &scene.monochrome_sprites,
-            subpixel_sprites: &scene.subpixel_sprites, polychrome_sprites: &scene.polychrome_sprites,
-            surfaces: &scene.surfaces, backdrop_filters: &scene.backdrop_filters,
+            shadows: &scene.shadows,
+            quads: &scene.quads,
+            paths: &scene.paths,
+            underlines: &scene.underlines,
+            monochrome_sprites: &scene.monochrome_sprites,
+            subpixel_sprites: &scene.subpixel_sprites,
+            polychrome_sprites: &scene.polychrome_sprites,
+            surfaces: &scene.surfaces,
+            backdrop_filters: &scene.backdrop_filters,
             filter_boundaries: &scene.filter_boundaries,
         }
     }
 }
 impl ScenePrimitives<'_> {
     fn len(self) -> usize {
-        self.shadows.len() + self.quads.len() + self.paths.len() + self.underlines.len()
-            + self.monochrome_sprites.len() + self.subpixel_sprites.len()
-            + self.polychrome_sprites.len() + self.surfaces.len()
-            + self.backdrop_filters.len() + self.filter_boundaries.len()
+        self.shadows.len()
+            + self.quads.len()
+            + self.paths.len()
+            + self.underlines.len()
+            + self.monochrome_sprites.len()
+            + self.subpixel_sprites.len()
+            + self.polychrome_sprites.len()
+            + self.surfaces.len()
+            + self.backdrop_filters.len()
+            + self.filter_boundaries.len()
     }
 }
 
@@ -182,6 +193,10 @@ impl Scene {
     }
 
     /// Returns the number of recorded paint operations, including layer markers.
+    ///
+    /// This counts operations available to [`Self::replay`], not primitives or
+    /// batches. A scene reconstructed from a [`SceneCapture`] has no recorded
+    /// operations and reports zero even when it contains visible primitives.
     pub fn len(&self) -> usize {
         self.paint_operations.len()
     }
@@ -345,6 +360,10 @@ impl Scene {
     /// and therefore receive draw ordering from this scene's current bounds
     /// tree and layer stack. This copies recorded drawing operations; it does
     /// not restore a window's layout cache or event state.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `range` is not a valid slice range within `prev_scene.len()`.
     pub fn replay(&mut self, range: Range<usize>, prev_scene: &Scene) {
         for operation in &prev_scene.paint_operations[range] {
             match operation {
@@ -410,8 +429,9 @@ impl Scene {
     )]
     /// Iterates the finished plan as primitive batches and filter boundaries.
     ///
-    /// The iterator borrows the compiled command stream and yields nothing
-    /// useful until [`Self::finish`] has been called.
+    /// Call [`Self::finish`] first and leave the primitive arrays unchanged
+    /// while using their batch ranges. Debug builds panic if the scene is
+    /// unfinished or its array lengths have changed since compilation.
     pub fn batches(&self) -> impl Iterator<Item = PrimitiveBatch> + '_ {
         self.render_commands().iter().map(|command| match command {
             RenderCommand::Batch(batch) => batch.clone(),
@@ -435,6 +455,13 @@ impl Scene {
     }
 
     /// Returns the compiled render plan for this finished scene.
+    ///
+    /// # Panics
+    ///
+    /// Debug builds panic if [`Self::finish`] has not been called since the
+    /// last recording operation, or if a primitive array's length changed
+    /// afterwards. These checks do not detect every field edit: leave all
+    /// primitive data unchanged until the renderer has consumed the plan.
     pub fn render_plan(&self) -> &ScenePlan {
         debug_assert!(
             self.is_finished,
@@ -463,7 +490,9 @@ impl Scene {
 
 /// Internal representation of [`palette::Hsla`] with a renderer-sensitive layout.
 ///
-/// Hue, saturation, lightness, and alpha are each normalized to `0.0..=1.0`.
+/// Hue is stored in turns: conversion from [`palette::Hsla`] wraps it into
+/// `0.0..1.0`. Saturation, lightness, and alpha are copied without clamping.
+/// Application code normally uses [`crate::Hsla`] or [`crate::Rgba`].
 #[derive(Clone, Copy, Debug, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[repr(C)]
 pub struct SceneHsla {
@@ -564,7 +593,11 @@ impl Primitive {
         }
     }
 
-    /// Returns the primitive's geometry bounds in scene space.
+    /// Returns the stored geometry bounds, before a sprite's affine transform.
+    ///
+    /// For monochrome and subpixel sprites, this rectangle is transformed
+    /// before overlap ordering. Their content mask already uses the final
+    /// scene coordinates and does not follow that transform.
     pub fn bounds(&self) -> &Bounds<ScaledPixels> {
         match self {
             Primitive::Shadow(shadow) => &shadow.bounds,
@@ -1184,7 +1217,24 @@ pub enum BorderStyle {
     Dashed = 1,
 }
 
-/// A data type representing a 2 dimensional transformation that can be applied to an element.
+/// A two-dimensional affine transform used by monochrome and subpixel sprites.
+///
+/// The matrix transforms a point first; translation is added afterwards.
+/// [`compose`](Self::compose) applies its argument before `self`, so chained
+/// builder calls act on points from right to left:
+///
+/// ```
+/// use gpui::{ScaledPixels, TransformationMatrix, point, px, size};
+///
+/// let transform = TransformationMatrix::unit()
+///     .translate(point(ScaledPixels(10.), ScaledPixels(0.)))
+///     .scale(size(2., 2.));
+/// // Scale (3, 4) to (6, 8), then translate it to (16, 8).
+/// assert_eq!(transform.apply(point(px(3.), px(4.))), point(px(16.), px(8.)));
+/// ```
+///
+/// For element styling, use [`crate::Transformation`]. This lower-level matrix
+/// carries no layout information and does not transform a sprite's clip mask.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[repr(C)]
 pub struct TransformationMatrix {
@@ -1197,7 +1247,7 @@ pub struct TransformationMatrix {
 impl Eq for TransformationMatrix {}
 
 impl TransformationMatrix {
-    /// The unit matrix, has no effect.
+    /// Returns the identity transform, which leaves every point unchanged.
     pub fn unit() -> Self {
         Self {
             rotation_scale: [[1.0, 0.0], [0.0, 1.0]],
@@ -1205,15 +1255,17 @@ impl TransformationMatrix {
         }
     }
 
-    /// Move the origin by a given point
-    pub fn translate(mut self, point: Point<ScaledPixels>) -> Self {
+    /// Adds a translation that is applied before the existing transform.
+    pub fn translate(self, point: Point<ScaledPixels>) -> Self {
         self.compose(Self {
             rotation_scale: [[1.0, 0.0], [0.0, 1.0]],
             translation: [point.x.0, point.y.0],
         })
     }
 
-    /// Clockwise rotation in radians around the origin
+    /// Adds a clockwise rotation about the origin, before the existing transform.
+    ///
+    /// Positive angles appear clockwise in GPUI's coordinates, where y grows downwards.
     pub fn rotate(self, angle: Radians) -> Self {
         self.compose(Self {
             rotation_scale: [
@@ -1224,7 +1276,7 @@ impl TransformationMatrix {
         })
     }
 
-    /// Scale around the origin
+    /// Adds a scale about the origin, before the existing transform.
     pub fn scale(self, size: Size<f32>) -> Self {
         self.compose(Self {
             rotation_scale: [[size.width, 0.0], [0.0, size.height]],
@@ -1267,7 +1319,12 @@ impl TransformationMatrix {
         }
     }
 
-    /// Apply transformation to a point, mainly useful for debugging
+    /// Applies the matrix and then its translation to `point`.
+    ///
+    /// Despite the [`Pixels`] type in this signature, this performs no display
+    /// density conversion. Supply numbers in the same coordinate system as the
+    /// matrix's translation. The method is primarily useful for inspection;
+    /// scene sprites are transformed by the renderer.
     pub fn apply(&self, point: Point<Pixels>) -> Point<Pixels> {
         let input = [point.x.0, point.y.0];
         let mut output = self.translation;

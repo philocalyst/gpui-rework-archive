@@ -6,7 +6,7 @@
 //! interval whose total foreground spend reached the frame budget also
 //! counts, even when no single event crossed the threshold: many small
 //! pieces of work can drop a frame — or starve a headless app — as
-//! thoroughly as one long stall. [`HangDetector`] drains the journal and
+//! thoroughly as one long stall. [`HangDetector`] reads new journal entries and
 //! reports each completed activity interval containing hangs as a
 //! [`HangIncident`].
 
@@ -26,6 +26,30 @@ use super::journal::{
 /// Detection is post-hoc: a hang is reported once an explicit presentation
 /// or foreground-idle boundary completes its interval. Work that never
 /// yields back to the foreground is not observed until it does.
+///
+/// Construct a detector before the activity you want to observe, then retain
+/// it and call [`Self::poll`] periodically. Its collector is independent of
+/// other journal readers, and does not require process-wide trace collection:
+///
+/// ```
+/// use std::time::Duration;
+/// use gpui::{App, profiler::hang::HangDetector};
+///
+/// fn detector(cx: &App) -> HangDetector {
+///     HangDetector::new(
+///         cx.foreground_journal(),
+///         Duration::from_millis(50),
+///         Duration::from_millis(16),
+///     )
+/// }
+/// ```
+///
+/// These thresholds are a monitoring policy, not a promise about display
+/// refresh rate. The budget measures recorded foreground occupancy, not the
+/// elapsed time from invalidation to presentation. A late frame with little
+/// foreground work may indicate scheduling or submission delay and does not
+/// necessarily qualify. Journal gaps suppress budget inference while leaving
+/// individually observed threshold violations available.
 pub struct HangDetector {
     collector: ForegroundJournalCollector,
     sealer: IntervalSealer,
@@ -84,8 +108,11 @@ impl HangDetector {
         self.first_present_at
     }
 
-    /// Drains newly recorded events and returns the incidents sealed since
-    /// the previous poll.
+    /// Reads new entries and returns incidents sealed since the previous poll.
+    ///
+    /// Work without a presentation or idle boundary remains pending. An empty
+    /// result can mean there is no completed interval yet, rather than no work
+    /// having occurred. Other collectors retain their own cursors.
     pub fn poll(&mut self) -> Vec<HangIncident> {
         let drained = self.collector.collect_unseen();
         if self.first_present_at.is_none() {
@@ -140,7 +167,8 @@ pub struct SerializedHangIncident {
     /// `0.0..=1.0`. Low values with a high `dirty_to_present_ms` indicate
     /// throttling or scheduling delay rather than application work.
     pub busy_fraction: f64,
-    /// Total events recorded in the interval (before the contributor cap).
+    /// Individually timed events retained in the snapshot, before the
+    /// contributor cap. Folded small polls are counted separately.
     pub event_count: usize,
     /// Count of task polls below the journal's floor.
     pub small_poll_count: u64,
@@ -153,8 +181,8 @@ pub struct SerializedHangIncident {
     /// conclusions and boundary attribution are not trusted across the gap.
     pub journal_discontinuous: bool,
     /// The incident's contributors (see [`HangIncident::contributors`]) in
-    /// start order. The cap keeps the longest ones; `stall_ms` is always
-    /// among them.
+    /// start order. The cap keeps the longest ones; when the cap is nonzero,
+    /// the event determining `stall_ms` is among them.
     pub contributors: Vec<SerializedHangContributor>,
     /// Contributors elided by the cap.
     pub contributors_elided: usize,

@@ -16,7 +16,7 @@ example_run = "cargo run -p gpui-documentation-examples --example first-window"
 ## Return the elements to draw
 
 The window will display “Hello, GPUI”. `Greeting` has no mutable fields, so
-its [`Render`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Render.html) method only returns a [`div`](https://docs.rs/gpui-ce/0.2.2/gpui/fn.div.html) containing the string. `Render`
+its [`Render`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Render.html) method only returns a [`div`](https://docs.rs/gpui-ce/0.2.2/gpui/fn.div.html) containing [`text`](https://docs.rs/gpui-ce/0.2.2/gpui/macro.text.html). `Render`
 is the contract for an entity-backed view; the returned element tree is a
 description GPUI lays out and paints for the current frame.
 
@@ -26,8 +26,13 @@ window supplies that root constraint. Follow the [rendering explanation](@/refer
 from this returned tree through layout, prepaint, scene construction, and
 presentation.
 
+`text!` assigns the greeting a stable accessibility identity at this source
+location. A plain string can also be a child, but GPUI omits that anonymous
+text from its accessibility tree. Use `text!` for content a reader needs to
+discover with assistive technology.
+
 ```rust
-use gpui::{AppContext, Context, IntoElement, Render, Window, div, prelude::*, rgb};
+use gpui::{AppContext, Context, IntoElement, Render, Window, div, prelude::*, rgb, text};
 
 struct Greeting;
 
@@ -41,12 +46,12 @@ impl Render for Greeting {
             .bg(rgb(0xf7f6f2))
             .text_color(rgb(0x155b50))
             .text_2xl()
-            .child("Hello, GPUI")
+            .child(text!("Hello, GPUI"))
     }
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/first-window/") }}#L16).
+[View this step in the source]({{ get_url(path="sources/first-window/") }}#L21).
 
 <a id="window"></a>
 ## Keep a root view in a window
@@ -72,6 +77,6 @@ pub fn main() {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/first-window/") }}#L46).
+[View this step in the source]({{ get_url(path="sources/first-window/") }}#L51).
 
 [Download the complete source]({{ get_url(path="examples/first-window.rs") }}).

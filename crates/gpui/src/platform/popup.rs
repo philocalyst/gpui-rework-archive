@@ -15,6 +15,10 @@ use crate::{AnyWindowHandle, Bounds, Pixels, Point, util::FluentBuilder};
 ///
 /// Pass the parent window and anchor rectangle to [`Self::new`], then chain setters
 /// to configure placement and input grabbing.
+/// Install the options as [`crate::WindowKind::AnchoredPopup`] when opening the
+/// window. Native anchored popups currently require Wayland; other supplied
+/// native and browser backends return [`PopupNotSupportedError`]. For a popup
+/// inside an existing window, use [`crate::anchored`] with [`crate::deferred`].
 ///
 /// ```
 /// use gpui::{

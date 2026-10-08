@@ -24,7 +24,8 @@ That signal means “read my current state”, without describing each mutation.
 
 ```rust
 use gpui::{
-    AppContext, Context, Entity, IntoElement, Render, Subscription, Window, div, prelude::*, rgb,
+    AppContext, Context, Entity, IntoElement, Render, Role, Subscription, Window, div, prelude::*,
+    rgb, text,
 };
 
 struct Model {
@@ -82,7 +83,7 @@ impl CounterView {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/subscriptions/") }}#L44).
+[View this step in the source]({{ get_url(path="sources/subscriptions/") }}#L45).
 
 <a id="observe-state"></a>
 ## Read the model; display the observation
@@ -95,6 +96,10 @@ The click handler uses [`Context::listener`](https://docs.rs/gpui-ce/0.2.2/gpui/
 [`Entity::update`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Entity.html#method.update) to access its model. Those are different entities. The
 model update completes before the handler returns; the queued observer runs
 during effect processing, after the model's update borrow has ended.
+
+Both labels use [`text`](https://docs.rs/gpui-ce/0.2.2/gpui/macro.text.html) so their values appear in the accessibility tree.
+Increment has a button role, an accessible name, and a tab stop. Use Tab and
+Enter to check that the same state transition works without a pointer.
 
 ```rust
 impl Render for CounterView {
@@ -109,11 +114,18 @@ impl Render for CounterView {
             .gap_4()
             .bg(rgb(0xf7f6f2))
             .text_color(rgb(0x202b29))
-            .child(div().text_2xl().child(format!("Count: {count}")))
-            .child(format!("Notifications received: {}", self.notifications))
+            .child(div().text_2xl().child(text!(format!("Count: {count}"))))
+            .child(text!(format!(
+                "Notifications received: {}",
+                self.notifications
+            )))
             .child(
                 div()
                     .id("increment-model")
+                    .role(Role::Button)
+                    .aria_label("Increment")
+                    .tab_index(0)
+                    .focus_visible(|style| style.ring_2().ring_color(rgb(0x3478c8)))
                     .px_4()
                     .py_2()
                     .rounded_md()
@@ -129,7 +141,7 @@ impl Render for CounterView {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/subscriptions/") }}#L74).
+[View this step in the source]({{ get_url(path="sources/subscriptions/") }}#L79).
 
 <a id="lifetime"></a>
 ## Give the relationship an owner
@@ -155,6 +167,6 @@ pub fn main() {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/subscriptions/") }}#L115).
+[View this step in the source]({{ get_url(path="sources/subscriptions/") }}#L127).
 
 [Download the complete source]({{ get_url(path="examples/subscriptions.rs") }}).

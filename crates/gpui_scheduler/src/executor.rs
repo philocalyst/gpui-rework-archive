@@ -23,10 +23,16 @@ pub type DedicatedFn = Box<
         + 'static,
 >;
 
-/// A `!Send` executor pinned to a single session. Tasks spawned on it run in
-/// order on whichever thread drains the dispatch destination supplied at
-/// construction time — typically the main thread for the default session, or
-/// a dedicated OS thread for sessions created by `spawn_dedicated_thread`.
+/// An executor for futures confined to their spawning thread.
+///
+/// A session identifies the queue to which the dispatch closure sends runnable
+/// work. Ordinary GPUI sessions use the foreground thread; dedicated sessions
+/// use their own thread. The dispatch destination must poll and destroy local
+/// futures on the thread that spawned them. Tasks can interleave at await
+/// points, and the scheduler decides which ready task runs next.
+///
+/// This handle is `!Send`. A future spawned through it may retain `Rc`,
+/// `RefCell`, and other values that cannot move between threads.
 #[derive(Clone)]
 pub struct LocalExecutor {
     session_id: SessionId,
@@ -337,16 +343,25 @@ impl BackgroundExecutor {
     }
 }
 
-/// A long-lived handle to one dedicated session: every future spawned on it
-/// runs on that session's single thread, never on the background pool.
+/// A reusable execution session for tasks that must share one thread.
 ///
-/// Use this when tasks rely on thread-local state being coherent across
-/// spawns, or when the per-thread setup cost of the work is high enough that
-/// it should be paid once. Creating the session costs a thread (on the web, a
-/// worker — expensive); each spawn afterwards is just a channel send.
+/// Use this when several jobs need the same thread-local state or expensive
+/// per-thread setup. Production sessions use a dedicated OS thread, or a web
+/// worker with `wasm-threads` and shared memory. The test scheduler runs the
+/// session in its own loop without creating a thread. Reuse a session for
+/// related jobs instead of creating one per small operation.
 ///
-/// Dropping the handle cancels the session: queued and future spawns resolve
-/// to cancelled tasks.
+/// [`Self::spawn`] accepts `Send` futures because the caller constructs them
+/// before sending them to the session. To construct a `!Send` future on the
+/// destination thread, use [`BackgroundExecutor::spawn_dedicated`] and its
+/// supplied [`LocalExecutor`].
+///
+/// Dropping this executor requests cancellation of the session's dispatch
+/// loop. After the current poll returns and the loop is destroyed, queued
+/// runnables are discarded and later wakeups cannot schedule more work. A
+/// pending job need not observe cancellation until it wakes. Dropping the
+/// executor does not join the thread. Retain it for as long as its jobs should
+/// continue.
 pub struct DedicatedExecutor {
     sender: flume::Sender<Runnable<RunnableMeta>>,
     _session: Task<()>,
@@ -372,9 +387,9 @@ impl DedicatedExecutor {
 
     /// Spawns a future onto the dedicated session's thread.
     ///
-    /// The returned task has the usual semantics: dropping it cancels the
-    /// future, `.await`ing it yields the output, `.detach()`ing it lets it
-    /// run to completion on its own.
+    /// Retain or await the returned handle to own the job's lifetime, or
+    /// detach it to discard its output. Detaching the job does not keep this
+    /// executor's session alive: its future still needs the session to poll it.
     #[track_caller]
     pub fn spawn<F>(&self, future: F) -> Task<F::Output>
     where
@@ -397,11 +412,26 @@ impl DedicatedExecutor {
 
 /// A cancellable handle to a scheduled future.
 ///
-/// Awaiting observes its output. Dropping cancels unfinished work; detaching
-/// gives up the output and cancellation handle while the executor continues
-/// polling the future. The task always remains on the executor where it was
-/// spawned. [`Task::is_ready`] only observes completion and does not poll the
-/// future or retrieve its output.
+/// Spawning schedules the future; awaiting this handle waits for its output.
+/// The executor polls the future on the execution context where it was
+/// spawned, even when another executor awaits its handle.
+///
+/// Dropping the handle requests cancellation. A running poll must return
+/// before cancellation can destroy the future, and dropping the handle does
+/// not wait for that cleanup. It cannot interrupt blocking code or undo a
+/// side effect already performed. [`Self::detach`] gives up both the output
+/// and the cancellation handle while leaving the future scheduled.
+///
+/// Keep a task in the object that owns the work, await it when its result is
+/// needed, or deliberately detach it. A detached task still needs its
+/// executor to remain alive. Shutting down that executor can cancel it.
+///
+/// # Cancellation while awaiting
+///
+/// An executor can discard a runnable before the future finishes. Awaiting
+/// the ordinary handle then panics. Use [`Self::fallible`] to receive `None`
+/// in that case. This is separate from an operation returning `Result::Err`,
+/// and does not catch a panic inside the operation.
 #[must_use]
 // docs:examples:begin
 #[doc = include_str!("docs/examples/gpui-Task-6abc8b50.md")]
@@ -569,8 +599,12 @@ impl<T> Task<T> {
         Task(TaskState::Spawned(task))
     }
 
-    /// Returns whether the task has completed without polling it or consuming
-    /// its output.
+    /// Return whether the task has finished or been cancelled.
+    ///
+    /// This observes its current state without polling it or retrieving an
+    /// output. `true` does not prove that an output exists: a cancelled task
+    /// is also ready. Await [`Self::fallible`] when that distinction matters.
+    /// The task may finish immediately after this method returns `false`.
     pub fn is_ready(&self) -> bool {
         match &self.0 {
             TaskState::Ready(_) => true,
@@ -580,10 +614,11 @@ impl<T> Task<T> {
         }
     }
 
-    /// Leaves this task scheduled on its executor until completion and discards its output.
+    /// Give up the output and cancellation handle, leaving the task scheduled.
     ///
     /// Detaching does not change which executor polls the task: a foreground
-    /// task continues on the foreground executor.
+    /// task continues on the foreground executor. This does not keep an
+    /// executor or dedicated session alive through shutdown.
     pub fn detach(self) {
         match self {
             Task(TaskState::Ready(_)) => {}
@@ -593,8 +628,12 @@ impl<T> Task<T> {
         }
     }
 
-    /// Converts this task into a future whose output is `Some(value)` on
-    /// completion and `None` if the task was cancelled before it completed.
+    /// Observe executor cancellation as `None` instead of a panic.
+    ///
+    /// A completed task yields `Some(output)`, including `Some(Err(error))`
+    /// when the operation itself returns an error. A discarded runnable
+    /// yields `None`. The future stays on its original executor, and dropping
+    /// the returned handle still cancels unfinished work.
     pub fn fallible(self) -> FallibleTask<T> {
         FallibleTask(match self.0 {
             TaskState::Ready(val) => FallibleTaskState::Ready(val),
@@ -642,7 +681,10 @@ impl<T> std::fmt::Debug for Task<T> {
 /// is cancelled before completion.
 ///
 /// Convert a [`Task`] with [`Task::fallible`] when cancellation should be
-/// handled as a value. It does not wrap errors from the task's own output.
+/// handled as a value. Dropping this handle requests cancellation, just as
+/// dropping `Task` does. Its `Option` describes whether the task produced an
+/// output; a `Result` inside that output describes the operation's success or
+/// failure. Neither wrapper catches panics inside the future.
 #[must_use]
 pub struct FallibleTask<T>(FallibleTaskState<T>);
 

@@ -104,7 +104,10 @@ impl ScenePlan {
         Self::build_primitives(scene.into(), commands)
     }
 
-    pub(super) fn build_primitives(scene: ScenePrimitives<'_>, mut commands: Vec<RenderCommand>) -> Self {
+    pub(super) fn build_primitives(
+        scene: ScenePrimitives<'_>,
+        mut commands: Vec<RenderCommand>,
+    ) -> Self {
         commands.clear();
         commands.reserve(scene.len());
         let mut matched_starts =
@@ -411,6 +414,11 @@ impl RenderCommand {
     /// For an [`Self::EndFilter`] command this is the matching opening marker;
     /// use `closing_boundary_index` to access the end marker. Batch commands
     /// have no boundary and return `None`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if a filter command's index is outside `scene.filter_boundaries`.
+    /// Use the scene that supplied the command, with its arrays unchanged.
     pub fn boundary<'a>(&self, scene: &'a Scene) -> Option<&'a FilterBoundary> {
         match self {
             Self::BeginFilter { boundary_index, .. } | Self::EndFilter { boundary_index, .. } => {

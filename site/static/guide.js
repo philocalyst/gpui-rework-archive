@@ -108,8 +108,18 @@ for (const playground of document.querySelectorAll('[data-playground]')) {
   const edit = playground.querySelector('[data-edit]');
   const restore = playground.querySelector('[data-restore]');
   const open = playground.querySelector('[data-workbench-link]');
+  const toolbar = playground.querySelector('[data-preview-toolbar]');
+  const width = playground.querySelector('[data-preview-width]');
+  const measuredSize = playground.querySelector('[data-preview-size]');
   const originalURL = frame.src;
   let editing = false;
+  const resizePreview = () => {
+    frame.style.width = editing || width.value === 'fit' ? '100%' : `${width.value}px`;
+  };
+  width.addEventListener('change', resizePreview);
+  new ResizeObserver(() => {
+    measuredSize.value = `${Math.round(frame.getBoundingClientRect().width)} px`;
+  }).observe(frame);
   window.addEventListener('message', event => {
     if (event.source !== frame.contentWindow || event.origin !== new URL(frame.src).origin) return;
     if (event.data === 'gpui-preview-ready') {
@@ -127,6 +137,8 @@ for (const playground of document.querySelectorAll('[data-playground]')) {
     frame.src = open.href;
     frame.title = `${playground.getAttribute('aria-label')} — Rust editor and GPUI result`;
     playground.classList.add('editing');
+    toolbar.hidden = true;
+    resizePreview();
     edit.hidden = true; restore.hidden = false; open.hidden = false;
     status.textContent = 'Opening the Rust editor…';
   });
@@ -135,6 +147,8 @@ for (const playground of document.querySelectorAll('[data-playground]')) {
     frame.src = originalURL;
     frame.title = `${playground.getAttribute('aria-label')} — interactive GPUI preview`;
     playground.classList.remove('editing');
+    toolbar.hidden = false;
+    resizePreview();
     edit.hidden = false; restore.hidden = true; open.hidden = true;
     status.textContent = 'Opening the original program…';
   });

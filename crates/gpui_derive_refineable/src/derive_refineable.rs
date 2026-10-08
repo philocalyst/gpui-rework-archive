@@ -58,16 +58,19 @@ pub fn derive_refineable(input: TokenStream) -> TokenStream {
     let field_names: Vec<_> = fields.iter().map(|f| f.ident.as_ref().unwrap()).collect();
     let field_visibilities: Vec<_> = fields.iter().map(|f| &f.vis).collect();
     let wrapped_types: Vec<_> = fields.iter().map(|f| get_wrapper_type(f, &f.ty)).collect();
-    let refinement_defaults: Vec<_> = fields.iter().map(|field| {
-        if is_refineable_field(field) {
-            quote! { ::core::default::Default::default() }
-        } else {
-            // The generated wrapper is always Option for these fields. Spell
-            // its empty value directly instead of invoking one Default function
-            // per field when constructing an unrefined style.
-            quote! { ::core::option::Option::None }
-        }
-    }).collect();
+    let refinement_defaults: Vec<_> = fields
+        .iter()
+        .map(|field| {
+            if is_refineable_field(field) {
+                quote! { ::core::default::Default::default() }
+            } else {
+                // The generated wrapper is always Option for these fields. Spell
+                // its empty value directly instead of invoking one Default function
+                // per field when constructing an unrefined style.
+                quote! { ::core::option::Option::None }
+            }
+        })
+        .collect();
 
     let field_attributes: Vec<TokenStream2> = fields
         .iter()
@@ -273,20 +276,12 @@ pub fn derive_refineable(input: TokenStream) -> TokenStream {
 
     let refinement_is_empty_conditions: Vec<TokenStream2> = fields
         .iter()
-        .enumerate()
-        .map(|(i, field)| {
+        .map(|field| {
             let name = &field.ident;
-
-            let condition = if is_refineable_field(field) {
+            if is_refineable_field(field) {
                 quote! { self.#name.is_empty() }
             } else {
                 quote! { self.#name.is_none() }
-            };
-
-            if i < fields.len() - 1 {
-                quote! { #condition && }
-            } else {
-                condition
             }
         })
         .collect();
@@ -406,8 +401,12 @@ pub fn derive_refineable(input: TokenStream) -> TokenStream {
         derive_stream.extend(quote! { #[derive(#trait_to_derive)] })
     }
 
+    let refinement_doc = format!(
+        "Partial overrides for [`{ident}`]. Omitted fields preserve earlier values; \
+         see [`Refineable`] for merge and optional-field rules."
+    );
     let r#gen = quote! {
-        /// A refinable version of [`#ident`], see that documentation for details.
+        #[doc = #refinement_doc]
         #[derive(Clone)]
         #derive_stream
         pub struct #refinement_ident #impl_generics {
@@ -478,7 +477,7 @@ pub fn derive_refineable(input: TokenStream) -> TokenStream {
             #where_clause
         {
             fn is_empty(&self) -> bool {
-                #( #refinement_is_empty_conditions )*
+                true #( && #refinement_is_empty_conditions )*
             }
         }
 
@@ -507,9 +506,8 @@ pub fn derive_refineable(input: TokenStream) -> TokenStream {
         {
             /// Return `true` when at least one refinement field is set.
             ///
-            /// This is a presence check, not a semantic check: a field containing its type's
-            /// default value still counts as present. Use the `IsEmpty` trait for the latter
-            /// question.
+            /// This is the opposite of `IsEmpty::is_empty`. An explicit field
+            /// equal to its type's default still counts as present.
             pub fn is_some(&self) -> bool {
                 #(
                     if self.#field_names.is_some() {

@@ -25,7 +25,9 @@ cancellation, not rollback of work already accepted elsewhere.
 status. Both are ordinary state updated through the view's [`Context`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html).
 
 ```rust
-use gpui::{AppContext, Context, IntoElement, Render, Task, Window, div, prelude::*, rgb};
+use gpui::{
+    AppContext, Context, IntoElement, Render, Role, Task, Window, div, prelude::*, rgb, text,
+};
 use std::time::Duration;
 
 struct AsyncDemo {
@@ -78,7 +80,7 @@ impl AsyncDemo {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/async-task/") }}#L35).
+[View this step in the source]({{ get_url(path="sources/async-task/") }}#L37).
 
 <a id="lifetime"></a>
 ## Expose Start and Stop
@@ -89,6 +91,10 @@ Another Start begins a new two-second wait. Completion returns the button
 to Start. Observe that the status changes immediately on Stop and remains
 Stopped after the old deadline; this distinguishes task cancellation from
 merely hiding the pending result.
+
+The accessible button label follows its visible Start/Stop label. Its stable
+ID keeps keyboard focus when the label changes. [`text`](https://docs.rs/gpui-ce/0.2.2/gpui/macro.text.html) exposes the status
+to the accessibility tree; it does not by itself request a live announcement.
 
 > [!WARNING]
 > Dropping a task stops its remaining polling. It does not undo an operation
@@ -108,10 +114,14 @@ impl Render for AsyncDemo {
             .gap_4()
             .bg(rgb(0xf7f6f2))
             .text_color(rgb(0x202b29))
-            .child(div().text_2xl().child(self.message.clone()))
+            .child(div().text_2xl().child(text!(self.message.clone())))
             .child(
                 div()
                     .id("task-action")
+                    .role(Role::Button)
+                    .aria_label(action)
+                    .tab_index(0)
+                    .focus_visible(|style| style.ring_2().ring_color(rgb(0x3478c8)))
                     .px_4()
                     .py_2()
                     .rounded_md()
@@ -131,7 +141,7 @@ impl Render for AsyncDemo {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/async-task/") }}#L73).
+[View this step in the source]({{ get_url(path="sources/async-task/") }}#L79).
 
 <a id="launch"></a>
 ## Try stopping before completion
@@ -155,6 +165,6 @@ pub fn main() {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/async-task/") }}#L113).
+[View this step in the source]({{ get_url(path="sources/async-task/") }}#L123).
 
 [Download the complete source]({{ get_url(path="examples/async-task.rs") }}).

@@ -1,12 +1,29 @@
-//! Optional timing and frame instrumentation for GPUI applications.
+//! Task, input, drawing, and submission timings for diagnosing slow frames.
 //!
-//! The profiler records task polls, action handlers, input dispatch, drawing,
-//! and platform presentation as separate intervals. Durations are measured
-//! with the scheduler clock and are meaningful for comparison within one
-//! process; they are not a wall-clock trace suitable for comparing machines.
-//! Histograms aggregate all observed frames, while event collectors only see
-//! events recorded while tracing is enabled. The profiler feature gates the
-//! expensive event stream; disabled builds return empty snapshots.
+//! Enable the `profiler` feature to collect window measurements. Read
+//! `Window::frame_duration_snapshot` for drawing and animation intervals,
+//! or `Window::input_latency_snapshot` for input that caused a redraw.
+//! These are cumulative histograms for that window; reading a snapshot does not
+//! reset them. For a controlled benchmark, see the
+//! [testing chapter](https://gpui-ce.github.io/book/testing.html#measure-work-separately).
+//!
+//! For individual frame events, enable [`set_trace_enabled`] and create a
+//! `FrameTimingCollector`. That stream is process-wide: filter by window ID
+//! when other windows or tests may draw concurrently. Its bounded buffers can
+//! lose old events, so it is a diagnostic trace rather than an audit log.
+//!
+//! Timings use the scheduler's monotonic clock. A task poll measures work until
+//! the future yields; time since spawn also includes waiting. A *present* interval
+//! measures the platform submission call, not when a physical display lights
+//! its pixels. Those distinctions matter when deciding whether a delay belongs
+//! to application work, scheduling, drawing, or presentation.
+
+#![cfg_attr(
+    feature = "profiler",
+    doc = "See [`crate::Window::frame_duration_snapshot`], \
+[`crate::Window::input_latency_snapshot`], and [`FrameTimingCollector`] for the \
+measurement and collection APIs."
+)]
 
 #[cfg(feature = "profiler")]
 use hdrhistogram::Histogram;
@@ -287,10 +304,6 @@ pub struct SerializedTaskTiming {
 impl SerializedTaskTiming {
     /// Converts task timings to nanoseconds relative to `anchor`.
     ///
-    /// # Params
-    ///
-    /// Converts one task timing to nanoseconds relative to `anchor`.
-    ///
     /// `anchor` must precede both timing instants.
     pub fn convert(anchor: Instant, timings: &[TaskTiming]) -> Vec<SerializedTaskTiming> {
         let serialized = timings
@@ -514,16 +527,17 @@ impl TaskStatistics {
             let to_replace = self
                 .longest_poll_times
                 .iter()
-                .position_min_by_key(|task| task.since_spawn())
+                .position_min_by_key(|task| task.poll_duration())
                 .expect("guarded by the comparison with nth_longest_yield_time");
             self.longest_poll_times[to_replace] = task;
 
             self.poll_time_to_beat = self
                 .longest_poll_times
                 .iter()
-                .map(|task| task.since_spawn())
+                .map(|task| task.poll_duration())
                 .min()
-                .expect("never empty");
+                .expect("never empty")
+                .max(Duration::from_micros(100));
         }
     }
 
@@ -544,7 +558,8 @@ impl TaskStatistics {
                 .iter()
                 .map(|task| task.since_spawn())
                 .min()
-                .expect("never empty");
+                .expect("never empty")
+                .max(Duration::from_micros(100));
         }
     }
 }
@@ -1243,8 +1258,15 @@ pub fn record_frame_event(event: FrameEvent) {
     frames.total_pushed += 1;
 }
 
-/// Drains frame events recorded after this collector was created, tracking a
-/// cursor so each call to [`Self::collect_unseen`] returns only new entries.
+/// Reads new events from the process-wide frame trace without consuming them.
+///
+/// Each collector has its own cursor, starting at construction. Reading one
+/// does not advance another. Events require the `profiler` feature and active
+/// tracing; see [`set_trace_enabled`]. Filter [`FrameEvent`] values by window ID
+/// when collecting one window's work.
+///
+/// Create a new collector after tracing is fully disabled and its buffers are
+/// cleared. A cursor from the previous trace does not identify the new trace.
 #[cfg(feature = "profiler")]
 pub struct FrameTimingCollector {
     cursor: u64,
@@ -1289,6 +1311,51 @@ impl FrameTimingCollector {
 mod tests {
     use super::*;
     use std::sync::{Mutex, MutexGuard};
+
+    #[test]
+    fn long_poll_sample_is_ranked_by_poll_time_not_wait_time() {
+        let spawned = Instant::now();
+        let mut stats = TaskStatistics::default();
+        for microseconds in [500, 100, 400, 200, 300, 50, 350, 150, 600] {
+            let start = spawned + Duration::from_secs(10);
+            stats.add_yield_timing(TaskTiming {
+                location: std::panic::Location::caller(),
+                spawned: SpawnTime(spawned),
+                start,
+                end: YieldTime(start + Duration::from_micros(microseconds)),
+            });
+        }
+        let mut retained = stats.longest_poll_times.map(|task| task.poll_duration());
+        retained.sort();
+        assert_eq!(
+            retained,
+            [300, 350, 400, 500, 600].map(Duration::from_micros)
+        );
+        assert_eq!(stats.poll_time_to_beat, Duration::from_micros(300));
+    }
+
+    #[test]
+    fn short_polls_do_not_fill_unused_long_poll_slots() {
+        let spawned = Instant::now();
+        let mut stats = TaskStatistics::default();
+        for microseconds in [200, 50, 100, 20] {
+            stats.add_yield_timing(TaskTiming {
+                location: std::panic::Location::caller(),
+                spawned: SpawnTime(spawned),
+                start: spawned,
+                end: YieldTime(spawned + Duration::from_micros(microseconds)),
+            });
+        }
+        assert_eq!(stats.poll_time_to_beat, Duration::from_micros(100));
+        assert_eq!(
+            stats
+                .longest_poll_times
+                .iter()
+                .filter(|task| !task.poll_duration().is_zero())
+                .count(),
+            2
+        );
+    }
 
     #[test]
     fn records_draw_events_only_while_tracing() {

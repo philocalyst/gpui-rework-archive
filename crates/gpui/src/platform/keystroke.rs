@@ -13,25 +13,29 @@ pub trait AsKeystroke {
     fn as_keystroke(&self) -> &Keystroke;
 }
 
-/// A physical key stroke plus the text it could produce.
+/// A keymap matching key, its modifiers, and the text it could produce.
 ///
 /// `key` identifies the key used for matching bindings; `key_char` is the optional character
 /// produced by the platform's keyboard layout or IME. They can differ for AltGr, dead keys, and
-/// non-US layouts.
+/// non-US layouts. `key` is a logical name, not a hardware scan code. Use
+/// [`crate::KeyBinding`] to bind it to an action and [`crate::InputHandler`]
+/// for text replacement and composition.
 #[derive(Clone, Debug, Eq, PartialEq, Default, Serialize, Deserialize, Hash)]
 pub struct Keystroke {
     /// Modifier state captured with this keystroke.
     pub modifiers: Modifiers,
 
-    /// Logical key name used for keymap matching.
-    /// e.g. for option-s, key is "s"
-    /// On layouts that do not have ascii keys (e.g. Thai)
-    /// this will be the ASCII-equivalent character (q instead of ๆ),
-    /// and the typed character will be present in key_char.
+    /// Logical key name used for keymap matching, such as `"s"` or `"enter"`.
+    ///
+    /// A backend can supply an ASCII equivalent for a non-ASCII keyboard layout;
+    /// the produced text belongs in [`Self::key_char`].
     pub key: String,
 
-    /// Character that would have been inserted by text input, when known.
-    /// e.g. for s this is "s", for option-s "ß", and cmd-s None
+    /// Text that the keystroke would insert, when supplied by the platform.
+    ///
+    /// On a US macOS layout, Option-S can have `key = "s"` and
+    /// `key_char = Some("ß")`. A shortcut such as Command-S usually has no text.
+    /// `None` alone does not establish that an IME composition is active.
     pub key_char: Option<String>,
 }
 
@@ -52,8 +56,7 @@ pub struct KeybindingKeystroke {
     display_key: String,
 }
 
-/// Error type for `Keystroke::parse`. This is used instead of `anyhow::Error` so that Zed can use
-/// markdown to display it.
+/// A keymap string that [`Keystroke::parse`] could not separate into one key and modifiers.
 #[derive(Debug)]
 pub struct InvalidKeystrokeError {
     /// The invalid keystroke.
@@ -72,20 +75,20 @@ impl Display for InvalidKeystrokeError {
     }
 }
 
-/// Sentence explaining what keystroke parser expects, starting with "Expected ..."
+/// Syntax guidance included in an [`InvalidKeystrokeError`]'s display text.
 pub const KEYSTROKE_PARSE_EXPECTED_MESSAGE: &str = "Expected a sequence of modifiers \
     (`ctrl`, `alt`, `shift`, `fn`, `cmd`, `super`, or `win`) \
     followed by a key, separated by `-`.";
 
 impl Keystroke {
-    /// When matching a key we cannot know whether the user intended to type
-    /// the key_char or the key itself. On some non-US keyboards keys we use in our
-    /// bindings are behind option (for example `$` is typed `alt-ç` on a Czech keyboard),
-    /// and on some keyboards the IME handler converts a sequence of keys into a
-    /// specific character (for example `"` is typed as `" space` on a brazilian keyboard).
+    /// Whether this input keystroke matches a mapped key binding.
     ///
-    /// This method assumes that `self` was typed and `target' is in the keymap, and checks
-    /// both possibilities for self against the target.
+    /// An exact key-and-modifier match succeeds. When `key_char` differs from
+    /// `key`, GPUI also tries that produced text: on Windows it matches an
+    /// unmodified binding; elsewhere it retains Control and the platform
+    /// modifier while ignoring Alt, Shift, and Fn used to produce the text.
+    /// This permits bindings to characters reached through another key or an
+    /// input method. It does not compare the binding's display label.
     pub fn should_match(&self, target: &KeybindingKeystroke) -> bool {
         #[cfg(not(target_os = "windows"))]
         if let Some(key_char) = self
@@ -121,18 +124,29 @@ impl Keystroke {
 
     /// Parses a keymap string such as `secondary-shift-p` or `ctrl-alt-delete`.
     ///
-    /// Modifiers are case-insensitive and are separated from the key by `-`. `secondary` means
-    /// Command on macOS and Control elsewhere. The optional `->character` suffix is test/input
-    /// metadata and is not included by [`Self::unparse`].
+    /// Separate modifiers from the key with `-`. Modifier names are
+    /// case-insensitive. `secondary` selects Command on a macOS build and
+    /// Control on other targets; `cmd`, `super`, and `win` all select the
+    /// platform modifier. A single uppercase ASCII key implies Shift.
+    /// Use `ctrl--` for Control with the hyphen key.
     ///
-    /// The parser accepts a trailing `-` as the hyphen key and rejects missing or ambiguous keys
-    /// with [`InvalidKeystrokeError`].
+    /// The parser checks the string's structure, not whether a keyboard can
+    /// produce the named key. A modifier can itself be the key: `shift` means
+    /// pressing Shift with no other modifiers. Whitespace is not trimmed.
     ///
-    /// `secondary` means Command on macOS and Control elsewhere. `cmd`, `super`, and `win` all
-    /// set the platform modifier. A single uppercase ASCII key implies Shift, so `shift-p` and
-    /// `P` represent the same match. The optional `->character` suffix sets `key_char`, which is
-    /// used to model text produced by an input method in tests; it does not appear in `unparse`.
-    /// A final `-` represents the hyphen key, as in `ctrl--`.
+    /// An optional `->text` suffix sets [`Self::key_char`] for simulated input.
+    /// [`Self::unparse`] omits that text. For application text input, use the
+    /// platform's input handler rather than constructing these strings.
+    ///
+    /// ```
+    /// use gpui::Keystroke;
+    ///
+    /// assert_eq!(Keystroke::parse("P")?, Keystroke::parse("shift-p")?);
+    /// assert_eq!(Keystroke::parse("ctrl--")?.key, "-");
+    /// assert_eq!(Keystroke::parse("alt-s->ß")?.key_char.as_deref(), Some("ß"));
+    /// assert!(Keystroke::parse("ctrl-a-b").is_err());
+    /// # Ok::<(), gpui::InvalidKeystrokeError>(())
+    /// ```
     pub fn parse(source: &str) -> std::result::Result<Self, InvalidKeystrokeError> {
         let mut modifiers = Modifiers::none();
         let mut key = None;
@@ -235,12 +249,28 @@ impl Keystroke {
         })
     }
 
-    /// Produces a canonical representation accepted by [`Self::parse`].
+    /// Formats the modifiers and key as a string accepted by [`Self::parse`].
+    ///
+    /// Platform-modifier aliases become `cmd` on macOS, `win` on Windows, and
+    /// `super` elsewhere. The optional [`Self::key_char`] is omitted, so this
+    /// preserves the shortcut rather than all data from a text-input event.
+    ///
+    /// ```
+    /// use gpui::Keystroke;
+    ///
+    /// let shortcut = Keystroke::parse("super-shift-p")?;
+    /// assert_eq!(Keystroke::parse(&shortcut.unparse())?, shortcut);
+    /// # Ok::<(), gpui::InvalidKeystrokeError>(())
+    /// ```
     pub fn unparse(&self) -> String {
         unparse(&self.modifiers, &self.key)
     }
 
-    /// Returns whether the IME did not provide a committed character.
+    /// Whether this event may be waiting for text from an input method.
+    ///
+    /// This is a routing heuristic: no `key_char`, a printable or empty key,
+    /// and no modifier other than Shift. It does not query the input method's
+    /// actual composition state. See [`crate::InputHandler::marked_text_range`].
     pub fn is_ime_in_progress(&self) -> bool {
         self.key_char.is_none()
             && (is_printable_key(&self.key) || self.key.is_empty())
@@ -250,9 +280,12 @@ impl Keystroke {
                 || self.modifiers.alt)
     }
 
-    /// Returns a new keystroke with the key_char filled.
-    /// This is used for dispatch_keystroke where we want users to
-    /// be able to simulate typing "space", etc.
+    /// Supply text for a simulated printable key when no text was already supplied.
+    ///
+    /// Control, Alt, Fn, or the platform modifier suppress this fallback.
+    /// Space, Tab, and Enter become `" "`, `"\t"`, and `"\n"`; other printable
+    /// keys use their name, uppercased when Shift is held. This does not model
+    /// keyboard layouts, dead keys, or multi-event composition.
     pub fn with_simulated_ime(mut self) -> Self {
         if self.key_char.is_none()
             && !self.modifiers.platform
@@ -327,12 +360,11 @@ impl KeybindingKeystroke {
         &self.inner
     }
 
-    /// Returns the modifiers.
+    /// Modifiers to show in a shortcut label.
     ///
-    /// Platform-specific behavior:
-    /// - On macOS and Linux, this modifiers is the same as `inner.modifiers`, which is the GPUI representation of the keystroke.
-    /// - On Windows, this modifiers is the display modifiers, for example, a `ctrl-@` keystroke will have `inner.modifiers` as
-    /// `Modifiers::control()` and `display_modifiers` as `Modifiers::control_shift()`.
+    /// On Windows, these can include Shift needed to produce the matching key:
+    /// Control-@ can be displayed as Control-Shift-2 on a US layout. Other
+    /// targets use the matching modifiers. Use [`Self::inner`] for dispatch.
     pub fn modifiers(&self) -> &Modifiers {
         #[cfg(target_os = "windows")]
         {
@@ -344,11 +376,11 @@ impl KeybindingKeystroke {
         }
     }
 
-    /// Returns the key.
+    /// Key label to show in a shortcut.
     ///
-    /// Platform-specific behavior:
-    /// - On macOS and Linux, this key is the same as `inner.key`, which is the GPUI representation of the keystroke.
-    /// - On Windows, this key is the display key, for example, a `ctrl-@` keystroke will have `inner.key` as `@` and `display_key` as `2`.
+    /// On Windows, this can name the unshifted key while the matching key names
+    /// its produced character, such as `2` for `@` on a US layout. Other targets
+    /// use the matching key. Use [`Self::inner`] for dispatch.
     pub fn key(&self) -> &str {
         #[cfg(target_os = "windows")]
         {
@@ -378,7 +410,10 @@ impl KeybindingKeystroke {
         self.inner.key = key;
     }
 
-    /// Produces a representation of this key that Parse can understand.
+    /// Serialize the displayed shortcut in keymap syntax.
+    ///
+    /// On Windows this uses the display modifiers and key. To serialize the
+    /// matching representation, use `self.inner().unparse()` instead.
     pub fn unparse(&self) -> String {
         #[cfg(target_os = "windows")]
         {
@@ -390,7 +425,7 @@ impl KeybindingKeystroke {
         }
     }
 
-    /// Removes the key_char
+    /// Remove produced text from the matching keystroke.
     pub fn remove_key_char(&mut self) {
         self.inner.key_char = None;
     }
@@ -541,7 +576,7 @@ impl Modifiers {
         }
     }
 
-    /// A Returns [`Modifiers`] with just the secondary key pressed.
+    /// Return Command on a macOS build and Control on other targets.
     pub fn secondary_key() -> Modifiers {
         #[cfg(target_os = "macos")]
         {
@@ -726,7 +761,7 @@ fn display_modifiers(modifiers: &Modifiers, f: &mut std::fmt::Formatter<'_>) -> 
         #[cfg(target_os = "macos")]
         f.write_char('⌘')?;
 
-        #[cfg(any(target_os = "linux", target_os = "freebsd"))]
+        #[cfg(not(any(target_os = "macos", target_os = "windows")))]
         f.write_char('❖')?;
 
         #[cfg(target_os = "windows")]
@@ -789,7 +824,7 @@ fn unparse(modifiers: &Modifiers, key: &str) -> String {
         #[cfg(target_os = "macos")]
         result.push_str("cmd-");
 
-        #[cfg(any(target_os = "linux", target_os = "freebsd"))]
+        #[cfg(not(any(target_os = "macos", target_os = "windows")))]
         result.push_str("super-");
 
         #[cfg(target_os = "windows")]

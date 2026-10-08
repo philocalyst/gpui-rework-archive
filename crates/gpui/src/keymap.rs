@@ -279,8 +279,11 @@ impl Keymap {
 
     /// Return enabled longer bindings for which `input` is a proper prefix.
     ///
-    /// Results are ordered by context depth and then insertion precedence. Complete bindings and
-    /// disabled `NoAction`/`Unbind` entries are omitted; context is checked against `context_stack`.
+    /// Results are ordered by context depth and then insertion precedence.
+    /// Complete bindings and entries whose own action is `NoAction` or `Unbind`
+    /// are omitted. This does not apply those removal entries to other
+    /// candidates, so the result is a completion list rather than the final
+    /// enabled dispatch set. Context is checked against `context_stack`.
     pub fn possible_next_bindings_for_input(
         &self,
         input: &[Keystroke],

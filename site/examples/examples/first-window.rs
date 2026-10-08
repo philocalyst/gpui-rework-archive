@@ -3,7 +3,7 @@ mod support;
 
 // ## Return the elements to draw {#render}
 // The window will display “Hello, GPUI”. `Greeting` has no mutable fields, so
-// its [`Render`] method only returns a [`div`] containing the string. `Render`
+// its [`Render`] method only returns a [`div`] containing [`text`]. `Render`
 // is the contract for an entity-backed view; the returned element tree is a
 // description GPUI lays out and paints for the current frame.
 //
@@ -12,8 +12,13 @@ mod support;
 // window supplies that root constraint. Follow the [rendering explanation](@/reference/rendering.md)
 // from this returned tree through layout, prepaint, scene construction, and
 // presentation.
+//
+// `text!` assigns the greeting a stable accessibility identity at this source
+// location. A plain string can also be a child, but GPUI omits that anonymous
+// text from its accessibility tree. Use `text!` for content a reader needs to
+// discover with assistive technology.
 
-use gpui::{AppContext, Context, IntoElement, Render, Window, div, prelude::*, rgb};
+use gpui::{AppContext, Context, IntoElement, Render, Window, div, prelude::*, rgb, text};
 
 struct Greeting;
 
@@ -27,7 +32,7 @@ impl Render for Greeting {
             .bg(rgb(0xf7f6f2))
             .text_color(rgb(0x155b50))
             .text_2xl()
-            .child("Hello, GPUI")
+            .child(text!("Hello, GPUI"))
     }
 }
 

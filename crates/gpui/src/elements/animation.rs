@@ -30,8 +30,9 @@ pub struct Animation {
     pub motion: Motion,
     /// Whether to derive the phase from a shared clock. See [`Animation::repeat_synced`].
     pub synced: bool,
-    /// The maximum number of times per second this animation re-renders.
-    /// When `None`, the animation re-renders on every frame.
+    /// The frequency limit for this animation's own redraw requests.
+    /// Other invalidations can still render it sooner. `None` requests the
+    /// next platform frame while the motion is active.
     pub max_fps: Option<f32>,
 }
 
@@ -73,8 +74,10 @@ impl Animation {
         self
     }
 
-    /// Limits re-renders to `max_fps` by scheduling a timer between frames.
-    /// Non-finite and non-positive values are ignored.
+    /// Throttles animation-driven redraw requests with a timer between frames.
+    ///
+    /// Other view invalidations can still render the animation sooner. Non-finite
+    /// and non-positive values use the ordinary next-frame request instead.
     pub fn with_max_fps(mut self, max_fps: f32) -> Self {
         self.max_fps = Some(max_fps);
         self
@@ -85,14 +88,20 @@ impl Animation {
 ///
 /// Animations rendered through this trait respect
 /// [`App::reduce_motion`](crate::App::reduce_motion): when it is set,
-/// the element is rendered in a static state (the end state for oneshot
-/// animations, the start state for repeating ones) and no animation frames are
-/// scheduled.
+/// duration animations use the configured final endpoint for finite playback
+/// and the configured starting endpoint for infinite playback. A sequence uses
+/// its last motion's resting endpoint. Running springs settle at their target;
+/// explicit paused, stopped, completed, or cancelled spring policies still
+/// apply. These wrappers then schedule no further animation-driven frames.
 pub trait AnimationExt {
-    /// Render this component or element with an animation
-// docs:examples:begin
-#[doc = include_str!("../docs/examples/gpui-AnimationExt-with-animation-68cbf08d.md")]
-// docs:examples:end
+    /// Applies a motion to a freshly built component under a stable element ID.
+    ///
+    /// The animator receives eased progress, which can overshoot `0..=1`.
+    /// The ID retains the clock and sequence position between frames; changing
+    /// it restarts that state. See [`Animation`] for repetition and throttling.
+    // docs:examples:begin
+    #[doc = include_str!("../docs/examples/gpui-AnimationExt-with-animation-68cbf08d.md")]
+    // docs:examples:end
     fn with_animation(
         self,
         id: impl Into<ElementId>,
@@ -114,7 +123,9 @@ pub trait AnimationExt {
     ///
     /// The animator receives the active animation's zero-based index and progress value. The
     /// next motion starts after the current motion completes. Supply at least one animation; an
-    /// empty sequence has no active motion to sample.
+    /// empty sequence panics when drawn. A repeating motion never advances to
+    /// later entries. Keep the sequence compatible with its retained index
+    /// across frames, or change the element ID when replacing it.
     fn with_animations(
         self,
         id: impl Into<ElementId>,
@@ -528,9 +539,9 @@ mod easing {
     }
 
     /// The quadratic ease-in-out function, which starts and ends slowly but speeds up in the middle
-// docs:examples:begin
-#[doc = include_str!("../docs/examples/gpui-ease-in-out.md")]
-// docs:examples:end
+    // docs:examples:begin
+    #[doc = include_str!("../docs/examples/gpui-ease-in-out.md")]
+    // docs:examples:end
     pub fn ease_in_out(delta: f32) -> f32 {
         if delta < 0.5 {
             2.0 * delta * delta

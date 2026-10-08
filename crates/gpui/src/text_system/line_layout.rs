@@ -282,18 +282,22 @@ pub trait PlatformTextLayout: Send + Sync + std::fmt::Debug {
     ///
     /// The range is in logical source order and may produce several rectangles when it crosses
     /// visual rows or bidirectional runs. Backends may extend rectangles to paint selection
-    /// whitespace; use [`Self::inline_geometry`] for native text-only bounds.
+    /// whitespace. Backends can override [`Self::inline_geometry`] to provide text-only bounds.
     fn selection_bounds(
         &self,
         byte_range: Range<usize>,
         line_height: Pixels,
     ) -> Vec<Bounds<Pixels>>;
 
-    /// Native range rectangles and their visual line indices, without selection-only extensions.
+    /// Range rectangles and their visual line indices.
     ///
-    /// Returns `None` for an empty input range. A nonempty range can produce an empty vector when
-    /// it has no drawable geometry. Backends supporting inline flow should preserve actual
-    /// vertical metrics here.
+    /// The default delegates to [`Self::selection_bounds`] using the average row height. It
+    /// inherits any selection extensions and estimates row indices from rectangle origins.
+    /// Backends supporting inline flow should override it with native text-only geometry and
+    /// actual row metrics.
+    ///
+    /// Returns `None` for an empty range. A nonempty range can produce an empty vector when it
+    /// has no drawable geometry.
     fn inline_geometry(&self, range: Range<usize>) -> Option<Vec<InlineRangeGeometry>> {
         if range.is_empty() {
             return None;
@@ -556,12 +560,14 @@ impl From<&str> for CaretAffinity {
 }
 
 /// A byte position together with the information needed to place it visually.
+///
+/// Constructing this value does not check the index. Use
+/// [`ShapedTextLayout::normalized_caret`] to obtain a valid editing stop in a particular layout.
 #[derive(
     Clone, Copy, Debug, Default, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize,
 )]
 pub struct CaretPosition {
-    /// Logical UTF-8 byte offset in the source text. Layout normalizes offsets that are not
-    /// valid backend caret stops.
+    /// Logical UTF-8 byte offset in the source text, before any layout normalization.
     pub index: usize,
     /// The logical neighbor that owns this position.
     pub affinity: CaretAffinity,
@@ -595,11 +601,25 @@ impl CaretPosition {
 ///
 /// The anchor stays fixed while the caret is the active endpoint. Either endpoint may be the
 /// logical start or end of the selected byte range.
+///
+/// Converting a byte range places the caret at its **start** and the anchor at its **end**,
+/// both with downstream affinity. Construct the endpoints explicitly when the direction of
+/// selection matters.
+///
+/// ```
+/// use gpui::CaretSelection;
+///
+/// let selection = CaretSelection::from(3..7);
+/// assert_eq!(selection.caret.index, 3);
+/// assert_eq!(selection.anchor.index, 7);
+/// assert_eq!(selection.byte_range(), 3..7);
+/// ```
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct CaretSelection {
     /// The fixed position of the selection, which may be its logical start or end.
     pub anchor: CaretPosition,
-    /// The active position of the selection. When it equals `anchor`, the selection is empty.
+    /// The active position of the selection. Equal byte indices make the selection empty,
+    /// even when the endpoints have different affinities.
     pub caret: CaretPosition,
 }
 
@@ -647,6 +667,9 @@ impl CaretSelection {
     }
 
     /// Limits both selection endpoints to `max_idx` while preserving their affinities.
+    ///
+    /// This is a numeric clamp. It does not check UTF-8 or cluster boundaries; normalize each
+    /// endpoint with [`ShapedTextLayout::normalized_caret`] before using it as an editing stop.
     pub fn min(mut self, max_idx: usize) -> Self {
         self.caret.index = self.caret.index.min(max_idx);
         self.anchor.index = self.anchor.index.min(max_idx);
@@ -692,13 +715,43 @@ impl CaretMovement<CaretSelection> {
     }
 }
 
-/// The layout of shaped text, including its optional wrapping constraint.
+/// Measurement and editing geometry for one shaped document.
+///
+/// [`crate::WindowTextSystem::shape_text`] returns a [`crate::ShapedText`]
+/// that dereferences to this layout and adds paint methods. Keep that one
+/// result for measuring, drawing, and pointer handling. Recomputing any of
+/// those with a different string, wrap width, or font can produce a caret
+/// that disagrees with the displayed text.
+///
+/// # Coordinates and source positions
+///
+/// Points and rectangles here use logical pixels relative to the layout's
+/// own origin. They do not include the window position at which it is
+/// painted. Subtract that placement from a pointer point before hit testing,
+/// and add it to a returned caret or selection rectangle before painting.
+/// Any additional alignment applied at paint time must also be accounted
+/// for. [`crate::TextLayout`] is different: an element's shared layout handle
+/// remembers its prepainted window position and converts coordinates for you.
+///
+/// Byte indices address the exact UTF-8 source that was shaped. Use an
+/// affinity-aware [`CaretPosition`] when a soft-wrap boundary can belong to
+/// either neighboring row. Visual left/right movement follows the drawn
+/// order; logical cluster queries follow source order. See the
+/// [text chapter](crate::_documentation::text) for choosing between them.
+///
+/// The `line_height` passed to geometry queries determines each visual row's
+/// vertical position. Use the same value when painting those rows. This type
+/// calculates geometry; it does not keep an editor's selection, apply edits,
+/// or register input handlers.
 #[derive(Debug)]
 pub struct ShapedTextLayout {
-    /// The laid out document.
+    /// Resolved rows, glyph fragments, and backend interaction geometry.
     pub layout: Arc<LineLayout>,
 
-    /// The width constraint, when wrapping is enabled.
+    /// The wrap width used when this document was shaped, if any.
+    ///
+    /// Changing this field changes the reported width cap but does not
+    /// recompute line breaks. Shape a new document to change wrapping.
     pub wrap_width: Option<Pixels>,
 }
 
@@ -709,7 +762,11 @@ impl ShapedTextLayout {
         self.layout.platform_layout.len()
     }
 
-    /// The document's advance width, capped by the wrapping constraint when present.
+    /// Return the widest row's advance, capped by the requested wrap width.
+    ///
+    /// This is a reported layout width, not an ink bound or a clip. A row
+    /// containing unbreakable content can draw beyond it. Use a content mask
+    /// when the region must clip, and reshape when its wrap width changes.
     pub fn width(&self) -> Pixels {
         self.wrap_width
             .unwrap_or(Pixels::MAX)
@@ -732,12 +789,14 @@ impl ShapedTextLayout {
         self.layout.platform_layout.line_count()
     }
 
-    /// The ascent of a line in this layout
+    /// Return the layout's maximum ascent above the baseline, in logical pixels.
+    ///
+    /// This is a font metric, not the height of the ink in a particular row.
     pub fn ascent(&self) -> Pixels {
         self.layout.ascent
     }
 
-    /// The descent of a line in this layout
+    /// Return the layout's maximum descent below the baseline, in logical pixels.
     pub fn descent(&self) -> Pixels {
         self.layout.descent
     }
@@ -748,20 +807,28 @@ impl ShapedTextLayout {
     }
 
     /// Returns the positioned glyph fragments for a row, in visual paint order.
+    ///
+    /// Pass a row from [`Self::visual_lines`]. The method indexes this layout's fragment array
+    /// directly and panics if the row's fragment range is out of bounds.
     pub fn fragments_for_line(&self, line: &VisualLine) -> &[PaintFragment] {
         &self.layout.paint_fragments[line.paint_fragment_range.clone()]
     }
 
-    /// The font size of this layout
+    /// Return the base font size requested during shaping, in logical pixels.
+    ///
+    /// Individual resolved fragments may use a different font or size.
     pub fn font_size(&self) -> Pixels {
         self.layout.font_size
     }
 
-    /// The UTF-8 byte index for a point in GPUI layout coordinates.
+    /// Find the source cluster under a point relative to this layout's origin.
     ///
     /// The backend returns the logical start of the visual cluster under the point.
-    /// Whitespace is hit like any other cluster. Positions outside the line return the boundary at
-    /// that visual edge in `Err`.
+    /// Whitespace is hit like any other cluster. `Ok` identifies a hit on a
+    /// visual row; `Err` carries the closest boundary when the point lies
+    /// outside it. `Err` is useful for dragging a selection beyond the text,
+    /// rather than an indication that shaping failed. Supply the same row
+    /// height used to paint the document.
     ///
     /// See also [`Self::closest_byte_index_for_pixel_point`].
     pub fn byte_index_for_pixel_point(
@@ -774,14 +841,15 @@ impl ShapedTextLayout {
             .byte_index_from_pixel_point(pixel_point, line_height)
     }
 
-    /// The closest UTF-8 byte index to a point in GPUI layout coordinates.
+    /// Find the nearest caret stop, discarding its affinity.
     ///
     /// Closest means the character boundary closest to the given position.
     /// The backend only returns cluster boundaries. For right-to-left clusters, the
     /// visual left edge maps to the logical end and the visual right edge maps to the logical
     /// start. Zero-width clusters share a stop with an adjacent cluster and use visual order to
-    /// break ties.
-    ///
+    /// break ties. The point is relative to this layout's origin. `Ok` and
+    /// `Err` preserve the hit-versus-nearest-edge distinction from
+    /// [`Self::closest_caret_for_pixel_point`].
     pub fn closest_byte_index_for_pixel_point(
         &self,
         pixel_point: Point<Pixels>,
@@ -792,10 +860,29 @@ impl ShapedTextLayout {
             .map_err(|caret| caret.index)
     }
 
-    /// Returns the closest backend-native caret for a point in GPUI layout coordinates.
+    /// Find the nearest caret while preserving its soft-wrap affinity.
     ///
     /// Positions outside a visual line return the caret at that edge in `Err`, matching
-    /// [`Self::closest_byte_index_for_pixel_point`].
+    /// [`Self::closest_byte_index_for_pixel_point`]. The point is relative to
+    /// this layout's origin, and `line_height` must match painting. A pointer
+    /// selection usually accepts either result, allowing its endpoint to
+    /// follow the nearest edge outside the text:
+    ///
+    /// ```rust
+    /// use gpui::{CaretPosition, Pixels, Point, ShapedTextLayout};
+    ///
+    /// fn caret_at_pointer(
+    ///     layout: &ShapedTextLayout,
+    ///     pointer: Point<Pixels>,
+    ///     painted_origin: Point<Pixels>,
+    ///     line_height: Pixels,
+    /// ) -> CaretPosition {
+    ///     // No extra alignment has been applied beyond the stored layout.
+    ///     layout
+    ///         .closest_caret_for_pixel_point(pointer - painted_origin, line_height)
+    ///         .unwrap_or_else(|nearest_edge| nearest_edge)
+    /// }
+    /// ```
     pub fn closest_caret_for_pixel_point(
         &self,
         pixel_point: Point<Pixels>,
@@ -806,11 +893,13 @@ impl ShapedTextLayout {
             .caret_from_pixel_point(pixel_point, line_height)
     }
 
-    /// Returns the visual position in pixels for a UTF-8 byte index.
+    /// Return a byte index's caret position relative to this layout's origin.
     ///
     /// The backend maps cluster boundaries to direction-aware visual edges. An index
     /// inside an atomic cluster snaps to its logical start. On a shared wrap boundary, the cluster
     /// starting at the index owns the position, so the caret moves to the following visual line.
+    /// An index beyond the source length returns `None`. Use
+    /// [`Self::visual_position_for_caret`] to retain an explicit affinity.
     pub fn visual_position_for_byte_index(
         &self,
         byte_index: usize,
@@ -826,7 +915,11 @@ impl ShapedTextLayout {
         )
     }
 
-    /// Returns the visual position in pixels for an affinity-aware caret.
+    /// Return a caret's top-left point relative to this layout's origin.
+    ///
+    /// Affinity resolves the two possible rows at a soft-wrap boundary. The
+    /// backend can return `None` when it cannot represent the position. Add
+    /// the painted origin before using this point in a window paint method.
     pub fn visual_position_for_caret(
         &self,
         caret: CaretPosition,
@@ -838,7 +931,12 @@ impl ShapedTextLayout {
             .map(|bounds| bounds.origin)
     }
 
-    /// Snaps a byte position to a valid cluster boundary while preserving affinity when possible.
+    /// Snap an external caret to a backend cluster boundary.
+    ///
+    /// Constructing [`CaretPosition`] does not validate its byte index.
+    /// Normalize positions received from another source before movement or
+    /// painting. This preserves affinity when possible; it does not map a
+    /// position from a different source string into this one.
     pub fn normalized_caret(&self, caret: CaretPosition) -> CaretPosition {
         self.layout.platform_layout.normalized_caret(caret)
     }
@@ -879,8 +977,9 @@ impl ShapedTextLayout {
 
     /// Returns a moved or extended affinity-aware selection using visual text order.
     ///
-    /// Horizontal movement without extension collapses a non-empty selection toward the requested
-    /// visual edge. Other movement starts at the caret. Extending keeps the anchor fixed.
+    /// A left/right cluster or word movement without extension collapses a nonempty selection
+    /// to the requested visual edge, without taking another step. Other movements start at the
+    /// active caret. Extending keeps the anchor fixed.
     ///
     /// `selection` is the current anchor and active caret.
     /// `movement` supplies the direction and boundary.
@@ -951,7 +1050,10 @@ impl ShapedTextLayout {
         }
     }
 
-    /// Selects the word or line at a point in GPUI layout coordinates.
+    /// Select a word, visual row, or hard line at a layout-relative point.
+    ///
+    /// `kind` chooses the boundary rule. The result is a range in logical
+    /// UTF-8 source order, even when the selected text reads right to left.
     pub fn selection_from_pixel_point(
         &self,
         pixel_point: Point<Pixels>,
@@ -963,7 +1065,14 @@ impl ShapedTextLayout {
             .selection_from_pixel_point(pixel_point, line_height, kind)
     }
 
-    /// Returns rectangles covering all selected clusters in visual order.
+    /// Return layout-relative rectangles covering a source range.
+    ///
+    /// `byte_range` uses logical UTF-8 source order. One range can produce
+    /// several rectangles when it crosses rows or bidirectional runs; do
+    /// not replace them with a single bounding box. An empty range produces
+    /// no rectangles. Backends may extend selection into row whitespace.
+    /// Add the painted origin to each rectangle and use the same row height
+    /// as the text. For a collapsed selection, query the caret separately.
     pub fn selection_bounds(
         &self,
         byte_range: Range<usize>,

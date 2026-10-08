@@ -1,3 +1,12 @@
+//! Wayland desktop surfaces for panels, backgrounds, and overlays.
+//!
+//! Pass [`LayerShellOptions`] through [`crate::WindowKind::LayerShell`]. The
+//! compositor must support the
+//! [layer-shell protocol](https://gitlab.freedesktop.org/wlroots/wlr-protocols/-/blob/master/unstable/wlr-layer-shell-unstable-v1.xml);
+//! otherwise opening the window returns [`LayerShellNotSupportedError`].
+//! This is a desktop-shell capability, not an in-window stacking order. Use
+//! [`crate::deferred`] or [`crate::anchored`] for content within an ordinary window.
+
 use bitflags::bitflags;
 use thiserror::Error;
 
@@ -10,21 +19,24 @@ pub enum Layer {
     /// The background layer, typically used for wallpapers.
     Background,
 
-    /// The bottom layer.
+    /// Below ordinary application windows and above the background layer.
     Bottom,
 
-    /// The top layer, typically used for fullscreen windows.
+    /// Above ordinary application windows; fullscreen windows commonly occupy this layer too.
     Top,
 
-    /// The overlay layer, used for surfaces that should always be on top.
+    /// Above the top layer. Ordering among overlay surfaces is compositor-defined.
     #[default]
     Overlay,
 }
 
 bitflags! {
-    /// Screen anchor point for layer_shell surfaces. These can be used in any combination, e.g.
-    /// specifying `Anchor::LEFT | Anchor::RIGHT` will stretch the surface across the width of the
-    /// screen.
+    /// Output edges used to place a layer-shell surface.
+    ///
+    /// Combine adjacent edges for a corner, or leave empty for centered placement.
+    /// To let the compositor assign a dimension, request zero for that dimension
+    /// in [`crate::WindowOptions::window_bounds`] and anchor to both opposite
+    /// edges. Opposite anchors alone do not replace a nonzero requested size.
     #[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
     pub struct Anchor: u32 {
         /// Anchor to the top edge of the screen.
@@ -45,8 +57,11 @@ pub enum KeyboardInteractivity {
     /// keyboard focus.
     None,
 
-    /// The surface will receive exclusive keyboard focus as long as it is above the shell surface
-    /// layer, and no other layer_shell surfaces are above it.
+    /// Request exclusive focus in the top or overlay layer.
+    ///
+    /// The highest layer with an exclusive surface takes keyboard focus. If
+    /// several such surfaces share it, the compositor chooses among them.
+    /// Lower layers may use ordinary focus rules.
     Exclusive,
 
     /// The surface can be focused similarly to a normal window.
@@ -54,10 +69,13 @@ pub enum KeyboardInteractivity {
     OnDemand,
 }
 
-/// Options for creating a layer_shell window.
+/// Initial placement and input policy for a Wayland layer-shell window.
 ///
 /// Chain setters on [`LayerShellOptions::default`] to configure the surface.
-/// Pass `None` to clear the exclusive zone, exclusive edge, or margins.
+/// Defaults select the overlay layer, centered placement, no exclusive zone or
+/// margins, and on-demand keyboard focus. Optional fields left as `None` retain
+/// the protocol defaults. All lengths are logical pixels, converted to integers
+/// at the protocol boundary.
 ///
 /// ```
 /// use gpui::{
@@ -82,13 +100,20 @@ pub struct LayerShellOptions {
     pub layer: Layer,
     /// The anchor point of the surface.
     pub anchor: Anchor,
-    /// Requests that the compositor avoids occluding an area with other surfaces.
+    /// Space requested from the compositor at the anchored edge.
+    ///
+    /// A positive distance asks other surfaces to leave that space available.
+    /// Zero avoids other exclusive zones without reserving one; `-1` ignores
+    /// those zones. The compositor decides how to honor this request. A positive
+    /// zone needs one anchored edge, optionally with both perpendicular edges.
+    /// Margins on the exclusive edge count toward the zone.
     pub exclusive_zone: Option<Pixels>,
     /// The anchor point of the exclusive zone, will be determined using the anchor if left
     /// unspecified.
     pub exclusive_edge: Option<Anchor>,
-    /// Margins between the surface and its anchor point(s).
-    /// Specified in CSS order: top, right, bottom, left.
+    /// Distances from anchored edges, in `(top, right, bottom, left)` order.
+    ///
+    /// Values for edges absent from [`Self::anchor`] have no effect.
     pub margin: Option<(Pixels, Pixels, Pixels, Pixels)>,
     /// How keyboard events should be delivered to the surface.
     pub keyboard_interactivity: KeyboardInteractivity,

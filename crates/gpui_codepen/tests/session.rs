@@ -84,3 +84,15 @@ fn reset_discards_the_scene_and_preserves_session_identity() {
     assert!(session.frame.is_none());
     assert_eq!(session.id, request.session_id);
 }
+
+#[test]
+fn reset_rejects_an_outstanding_reply() {
+    let mut session = Session::default();
+    let request = session.request("source".into(), Backend::Miri, None);
+    assert!(session.running);
+    session.reset();
+    assert!(!session.running);
+    assert!(!session.accept(reply(request.generation, Some(frame()), "")));
+    assert!(session.frame.is_none());
+    assert_eq!(session.elapsed_ms, 0);
+}

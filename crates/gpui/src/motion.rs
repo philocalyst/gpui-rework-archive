@@ -1,14 +1,29 @@
-//! Time based and spring based motion primitives.
+//! Sample animation progress at an elapsed time.
 //!
-//! Motion is sampled, rather than ticked: give [`Motion::sample`] an elapsed
-//! duration or [`Motion::sample_at`] two clock values and it returns the
-//! current phase, direction, progress, and activity. Durations include the
-//! configured delay and every pass; an easing function receives normalized
-//! `0..=1` local pass time and may return a finite overshoot. Spring motion has
-//! the same sampling interface, but its duration is derived from settling
-//! criteria. The [`crate::animated::Animated`] and
-//! [`crate::transition::Transition`] types use these results to retarget UI
-//! values without losing their current presentation.
+//! A [`Motion`] describes timing; it owns no clock and requests no frames.
+//! [`Animated`](crate::Animated) stores a value's presentation between
+//! renders, while [`Transition`](crate::Transition) retains motion state for
+//! an element. Use those adapters to animate a UI. Sample a motion directly
+//! when you already own the clock or want to inspect its timing in a test.
+//!
+//! ```
+//! use gpui::{Motion, MotionExtent, millis};
+//!
+//! let motion = Motion::new(millis(200)).alternate().iterations(2);
+//! assert_eq!(motion.checked_extent(), Some(MotionExtent::Finite(millis(400))));
+//! assert_eq!(motion.sample(millis(100)).progress.get(), 0.5);
+//! assert_eq!(motion.sample(millis(300)).progress.get(), 0.5);
+//! let finished = motion.sample(millis(400));
+//! assert!(finished.is_complete());
+//! assert_eq!(finished.progress.get(), 0.0);
+//! ```
+//!
+//! Duration motion divides a run into passes. An easing function receives
+//! local pass time in `0..=1`; its result may overshoot that interval but must
+//! be finite. A settling [`Motion::spring`] instead samples a spring's
+//! response from zero to one. Direct sampling always starts that response
+//! from rest. Use [`SpringAnimation`] with an element to preserve velocity
+//! when its target changes.
 
 use std::{
     num::NonZeroU32,
@@ -45,7 +60,11 @@ impl Progress {
     /// The end of an animation.
     pub const END: Self = Self(1.0);
 
-    /// Returns progress clamped to the normalized range.
+    /// Clamps progress to `0..=1`, including infinite inputs.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `value` is NaN.
     pub fn clamped(value: f32) -> Self {
         assert!(!value.is_nan(), "progress must not be NaN");
         Self(value.clamp(Self::START.0, Self::END.0))
@@ -107,7 +126,14 @@ impl Easing {
         Self(Rc::new(easing))
     }
 
-    /// Evaluates normalized progress without clamping the eased result.
+    /// Applies this curve to progress without clamping its input or output.
+    ///
+    /// Motion passes supply normalized input. Calling this with a previously
+    /// eased [`Progress`] can supply an overshoot to the curve instead.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the curve returns NaN or an infinite value.
     pub fn sample(&self, progress: Progress) -> Progress {
         Progress::eased((self.0)(progress.get()))
     }
@@ -424,8 +450,12 @@ impl Motion<DurationDescription> {
         self
     }
 
-    /// Replaces easing with a spring sampled over this motion's duration.
-    /// Use [`Motion::spring`] for a spring that settles and preserves velocity across retargets.
+    /// Replaces easing with a spring sampled over the forward pass's duration.
+    ///
+    /// The spring starts at zero with zero velocity and is forced to one at
+    /// the pass endpoint, even if it has not settled. Use [`Motion::spring`]
+    /// to derive the duration from settling, or [`SpringAnimation`] to retain
+    /// velocity when an element's target changes.
     pub fn with_spring(self, config: SpringConfig) -> Self {
         let duration = self.forward.duration.as_secs_f32();
         let initial_state = SpringState {
@@ -790,7 +820,12 @@ impl From<Duration> for Motion<DurationDescription> {
 pub type MotionInfo = Motion;
 
 impl Motion<SpringDescription> {
-    /// Creates a spring motion that runs until it settles.
+    /// Creates a spring response from rest at zero to a target of one.
+    ///
+    /// The default settling tolerance is `0.001`. Sampling stops at the
+    /// conservative cutoff from [`SpringConfig::settle_time`], then returns
+    /// exactly one. This description has no mutable position or velocity;
+    /// use [`Self::to`] to build a stateful element animation.
     pub fn spring(config: SpringConfig) -> Self {
         let epsilon = DEFAULT_SPRING_EPSILON;
 

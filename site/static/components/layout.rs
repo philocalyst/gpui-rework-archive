@@ -1,4 +1,4 @@
-use gpui::{AppContext, Context, IntoElement, Render, Window, div, prelude::*, px, rgb};
+use gpui::{AppContext, Context, IntoElement, Render, Window, div, prelude::*, px, rgb, text};
 
 struct LayoutDemo;
 
@@ -14,12 +14,13 @@ impl Render for LayoutDemo {
             .child(
                 div()
                     .h(px(40.))
+                    .flex_shrink_0()
                     .flex()
                     .items_center()
                     .px_3()
                     .bg(rgb(0x155b50))
                     .text_color(rgb(0xffffff))
-                    .child("A stable header in normal flow"),
+                    .child(text!("A stable header in normal flow")),
             )
             .child(
                 div()
@@ -36,7 +37,9 @@ impl Render for LayoutDemo {
                             .p_4()
                             .bg(rgb(0xdbeee8))
                             .text_color(rgb(0x202b29))
-                            .child("This pane yields before its sibling when the row gets narrow."),
+                            .child(text!(
+                                "This pane yields before its sibling when the row gets narrow."
+                            )),
                     )
                     .child(
                         div()
@@ -45,7 +48,7 @@ impl Render for LayoutDemo {
                             .p_4()
                             .bg(rgb(0xffd8a8))
                             .text_color(rgb(0x202b29))
-                            .child("Fixed pane"),
+                            .child(text!("Fixed pane")),
                     ),
             )
     }

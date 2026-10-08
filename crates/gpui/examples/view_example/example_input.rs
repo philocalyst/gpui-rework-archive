@@ -1,18 +1,16 @@
-//! `Input` — a single-line text input. The shaping layer over `Editor`.
+//! A one-row frame around an editor.
 //!
-//! Construct it two ways, depending on how much state you want to own:
-//!   * `Input::new(value: Entity<String>)`  — you hold just the string; the input
-//!     allocates the `Editor` internally via `use_state`. Value readable, cursor hidden.
-//!   * `Input::editor(editor: Entity<Editor>)` — you hold the editor; cursor/selection
-//!     are now yours to read and drive too.
-//!
-//! Either way the chrome is identical. Because the string (or editor) is the
-//! input's *identity*, the internal `use_state(Editor)` is collision-safe across
-//! any number of inputs.
+//! `Input::new` retains an internal editor under the buffer entity's identity.
+//! `Input::editor` uses an existing editor, letting the caller also inspect its
+//! caret. Both forms share the same border, focus handling, and key actions.
+//! Different buffers have different identity scopes. Mounting the same buffer
+//! twice in one scope needs an additional identity, and independent selections
+//! need separate editor entities. The frame clips long text; it does not scroll
+//! or validate pasted content.
 
 use gpui::{
-    App, BoxShadow, CursorStyle, Entity, EntityId, Hsla, IntoElement, Pixels, StyleRefinement,
-    Window, div, hsla, point, prelude::*, px, white,
+    App, BoxShadow, CursorStyle, Entity, EntityId, Hsla, IntoElement, Pixels, Role, SharedString,
+    StyleRefinement, Window, div, hsla, point, prelude::*, px, white,
 };
 
 use crate::example_editor::{Editor, standard_actions};
@@ -25,34 +23,43 @@ enum Source {
 #[derive(IntoElement)]
 pub struct Input {
     source: Source,
+    label: SharedString,
     width: Option<Pixels>,
     color: Option<Hsla>,
 }
 
 impl Input {
-    /// Backed by a bare string; the editor is allocated internally.
-    pub fn new(value: Entity<String>) -> Self {
+    /// Retain an editor for this buffer while the input remains mounted.
+    ///
+    /// `label` names the field for assistive technology; use its visible form label.
+    pub fn new(value: Entity<String>, label: impl Into<SharedString>) -> Self {
         Self {
             source: Source::Value(value),
+            label: label.into(),
             width: None,
             color: None,
         }
     }
 
-    /// Backed by an editor you own (so you can read/drive its cursor).
-    pub fn editor(editor: Entity<Editor>) -> Self {
+    /// Display an editor retained by the caller, including its current selection.
+    ///
+    /// `label` names this field independently of the buffer's contents.
+    pub fn editor(editor: Entity<Editor>, label: impl Into<SharedString>) -> Self {
         Self {
             source: Source::Editor(editor),
+            label: label.into(),
             width: None,
             color: None,
         }
     }
 
+    /// Set the outer width in logical pixels; the default is 300 px.
     pub fn width(mut self, width: Pixels) -> Self {
         self.width = Some(width);
         self
     }
 
+    /// Set the inherited text color without changing the border or focus ring.
     pub fn color(mut self, color: Hsla) -> Self {
         self.color = Some(color);
         self
@@ -68,8 +75,7 @@ impl gpui::View for Input {
     }
 
     fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
-        // Get the editor: use the one we were handed, or allocate it under our
-        // own (string-derived) identity so it persists and never collides.
+        // View::entity_id scopes this hook under the source entity.
         let editor = match self.source {
             Source::Value(value) => {
                 window.use_state(cx, move |window, cx| Editor::over(value, window, cx))
@@ -90,6 +96,9 @@ impl gpui::View for Input {
 
         div()
             .id("input")
+            .role(Role::TextInput)
+            .aria_label(self.label)
+            .aria_value(editor.read(cx).value.read(cx).clone())
             .key_context("TextInput")
             .track_focus(&focus_handle)
             .cursor(CursorStyle::IBeam)

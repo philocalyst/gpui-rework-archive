@@ -29,7 +29,7 @@ avoids wrapping this value because `Swatch` already implements the low-level
 use gpui::{
     App, AppContext, Bounds, Context, Element, ElementId, GlobalElementId, Hsla,
     InspectorElementId, IntoElement, LayoutId, PaintQuad, Pixels, Render, Style, Window, div, fill,
-    hsla, prelude::*, px, rgb,
+    hsla, prelude::*, px, rgb, text,
 };
 
 struct Swatch {
@@ -150,7 +150,7 @@ impl Render for SwatchView {
             .child(Swatch {
                 color: hsla(0.43, 0.62, 0.22, 1.),
             })
-            .child("One layout node, one prepared quad")
+            .child(text!("One layout node, one prepared quad"))
     }
 }
 

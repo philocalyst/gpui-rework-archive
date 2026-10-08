@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import http.client
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -111,7 +112,7 @@ class DocumentationHandler(SimpleHTTPRequestHandler):
 
 def source_snapshot():
     """Ignore generated chapters and includes; watch changes to their inputs."""
-    directories = [ROOT / "site/content", ROOT / "site/examples", ROOT / "site/templates", ROOT / "site/editor",
+    directories = [ROOT / "book", ROOT / "site/content", ROOT / "site/examples", ROOT / "site/templates", ROOT / "site/editor",
                    ROOT / "site/scripts", ROOT / "scripts/docs", ROOT / "scripts/codepen", ROOT / "crates", ROOT / "assets",
                    ROOT / "vendor/miri/src", ROOT / "vendor/miri/cargo-miri/src"]
     files = {ROOT / "Cargo.toml", ROOT / "Cargo.lock", ROOT / "site/examples.toml", ROOT / "site/zola.toml", ROOT / "site/package.json", ROOT / "site/package-lock.json",
@@ -189,6 +190,10 @@ def restart_workbench(companion, env, port):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--native-companion", action="store_true",
+                        help="also start the native Miri development service; not browser-only execution")
+    args = parser.parse_args()
     env = os.environ.copy()
     port = int(env.get("GPUI_DOCS_SITE_PORT", "1111"))
     base = f"http://127.0.0.1:{port}"
@@ -201,9 +206,13 @@ def main():
     print(f"Documentation and checkout API: {base}", flush=True)
     previous = source_snapshot()
     try:
-        companion, DocumentationHandler.workbench_address = start_workbench(env, port)
-        print("Miri workbench ready. Open a walkthrough and choose Edit Rust.", flush=True)
-        while companion.poll() is None:
+        if args.native_companion:
+            companion, DocumentationHandler.workbench_address = start_workbench(env, port)
+            print("Native Miri companion ready (development only).", flush=True)
+        while True:
+            if companion is not None and companion.poll() is not None:
+                print("The native Miri companion stopped.", file=sys.stderr)
+                return companion.returncode or 1
             time.sleep(0.35)
             current = source_snapshot()
             if current == previous:
@@ -213,11 +222,10 @@ def main():
             if rebuild(env, base):
                 changed = {path for path in inputs.keys() | previous.keys() if inputs.get(path) != previous.get(path)}
                 runtime_roots = (ROOT / "crates", ROOT / "vendor", ROOT / "scripts/codepen")
-                if any(path.is_relative_to(directory) for path in changed for directory in runtime_roots):
+                if args.native_companion and any(path.is_relative_to(directory) for path in changed for directory in runtime_roots):
                     companion = restart_workbench(companion, env, port)
             # If an author saved during the build, the next loop rebuilds again.
             previous = inputs
-        return companion.returncode or 1
     except KeyboardInterrupt:
         return 130
     finally:

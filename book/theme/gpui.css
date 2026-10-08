@@ -1,0 +1,60 @@
+:root {
+    --content-max-width: 760px;
+}
+.light {
+    --bg: #f7f6f2;
+    --sidebar-bg: #eeede7;
+    --fg: #242923;
+    --sidebar-fg: #242923;
+    --links: #236147;
+    --sidebar-active: #236147;
+}
+.navy, .coal, .ayu {
+    --links: #9cdbb9;
+    --sidebar-active: #9cdbb9;
+}
+.content {
+    line-height: 1.65;
+}
+.content h1, .content h2, .content h3 {
+    line-height: 1.2;
+    letter-spacing: -.015em;
+}
+.content pre {
+    line-height: 1.5;
+}
+.content pre > .buttons {
+    visibility: visible;
+    opacity: 1;
+}
+.content pre:has(.buttons) > code {
+    padding-top: 2.75rem;
+}
+.content button:focus-visible, .content a:focus-visible,
+.content .table-wrapper:focus-visible,
+.menu-bar button:focus-visible, .menu-bar a:focus-visible {
+    outline: 2px solid var(--links);
+    outline-offset: 3px;
+}
+.menu-title a {
+    color: var(--links);
+    text-decoration: none;
+}
+.content table {
+    width: 100%;
+    min-width: 36em;
+}
+.content table th, .content table td {
+    text-align: start;
+    vertical-align: top;
+    padding: .55em .75em;
+}
+.content .callout {
+    border-inline-start: 3px solid var(--links);
+    padding: .25rem 1rem;
+    margin: 1.25rem 0;
+    background: var(--quote-bg);
+}
+.content .callout-warning {
+    border-inline-start-color: #a86613;
+}

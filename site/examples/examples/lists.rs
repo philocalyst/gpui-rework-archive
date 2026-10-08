@@ -5,15 +5,15 @@ mod support;
 // The data set has 10,000 indices, but the callback constructs only the range
 // needed near the visible viewport (plus the list's overdraw). [`uniform_list`]
 // can map scroll offsets to indices because every row has the same measured
-// height. The parent reserves 320 logical pixels; the list fills that finite
-// scrolling viewport.
+// height. The parent requests 320 logical pixels and may shrink in a short
+// window; the list fills the resulting finite scrolling viewport.
 //
 // An unbounded height gives scrolling no useful viewport. Keep the scrolling
 // region constrained even when its parent can grow.
 
 use gpui::{
     AppContext, Context, IntoElement, Render, UniformListScrollHandle, Window, div, prelude::*, px,
-    rgb, uniform_list,
+    rgb, text, uniform_list,
 };
 
 struct Rows {
@@ -30,6 +30,9 @@ struct Rows {
 // list. The list ID identifies the scrolling element; row IDs identify any
 // per-row interaction state. Use stable logical keys for rows when data can be
 // reordered, since an index names a position rather than an item.
+// Here `text!(id = ix, ...)` distinguishes labels created at the same source
+// location. Only the constructed rows appear in the accessibility tree; a
+// virtualized viewport does not expose all 10,000 rows at once.
 //
 // > [!WARNING]
 // > Every row must have the same block-axis height. Wrapping text or expanding
@@ -50,10 +53,10 @@ impl Render for Rows {
                 div()
                     .text_2xl()
                     .text_color(rgb(0x202b29))
-                    .child("10,000 uniform rows"),
+                    .child(text!("10,000 uniform rows")),
             )
             .child(
-                div().h(px(320.)).w_full().child(
+                div().h(px(320.)).min_h_0().w_full().child(
                     uniform_list("rows", 10_000, |range, _window, _cx| {
                         range
                             .map(|ix| {
@@ -68,7 +71,7 @@ impl Render for Rows {
                                         rgb(0xe8efed)
                                     })
                                     .text_color(rgb(0x202b29))
-                                    .child(format!("Row {ix}"))
+                                    .child(text!(id = ix, format!("Row {ix}")))
                             })
                             .collect()
                     })

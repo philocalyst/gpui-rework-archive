@@ -7,9 +7,11 @@
 //! whose on-demand callbacks run synchronously.
 //!
 //! The typical flow is: choose a source key such as [`crate::Resource::Uri`] or [`crate::Resource::Embedded`],
-//! request the typed asset through GPUI's resource-loading API, and await the returned
-//! [`crate::Task`] in a foreground task that updates the owning entity. Keep that task alive by
-//! awaiting or storing it; dropping a GPUI task cancels its work. The associated `Output` is
+//! request it with [`crate::App::fetch_asset`], and await the shared task in a
+//! foreground task that updates the owning entity. The app retains the cached
+//! request; dropping one caller's shared task does not cancel it. During
+//! rendering, [`crate::Window::use_asset`] polls the cache and arranges a
+//! notification for the view that starts the request. The associated `Output` is
 //! cloneable because the app cache can share the completed value among consumers. Errors remain
 //! part of the output type—for example `Result<T, E>`—and [`crate::AssetLogger`] can log a failed result
 //! while preserving it for the UI to handle.

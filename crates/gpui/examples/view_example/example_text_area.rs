@@ -1,10 +1,12 @@
-//! `TextArea` — a multi-line text box. Same `Editor` workhorse, taller chrome,
-//! and `Enter` inserts a newline instead of being ignored. Constructible from a
-//! string or an editor, exactly like [`Input`](crate::example_input::Input).
+//! A fixed-height multiline frame using the same editor as [`Input`](crate::example_input::Input).
+//!
+//! Enter replaces the selection with a newline. `rows` sets the visible height;
+//! it does not limit the buffer's line count. This example clips overflow and
+//! leaves scrolling and soft wrapping to a fuller text-area implementation.
 
 use gpui::{
-    App, BoxShadow, CursorStyle, Entity, EntityId, Hsla, IntoElement, StyleRefinement, Window, div,
-    hsla, point, prelude::*, px, white,
+    App, BoxShadow, CursorStyle, Entity, EntityId, Hsla, IntoElement, Role, SharedString,
+    StyleRefinement, Window, div, hsla, point, prelude::*, px, white,
 };
 
 use crate::Enter;
@@ -18,27 +20,37 @@ enum Source {
 #[derive(IntoElement)]
 pub struct TextArea {
     source: Source,
+    label: SharedString,
     rows: usize,
     color: Option<Hsla>,
 }
 
 impl TextArea {
-    pub fn new(value: Entity<String>, rows: usize) -> Self {
+    /// Retain an internal editor for a shared buffer, showing `rows` lines.
+    ///
+    /// `label` is the field's accessible name, not placeholder text.
+    pub fn new(value: Entity<String>, rows: usize, label: impl Into<SharedString>) -> Self {
         Self {
             source: Source::Value(value),
+            label: label.into(),
             rows,
             color: None,
         }
     }
 
-    pub fn editor(editor: Entity<Editor>, rows: usize) -> Self {
+    /// Display an existing editor in a frame with space for `rows` lines.
+    ///
+    /// `label` identifies the field to assistive technology.
+    pub fn editor(editor: Entity<Editor>, rows: usize, label: impl Into<SharedString>) -> Self {
         Self {
             source: Source::Editor(editor),
+            label: label.into(),
             rows,
             color: None,
         }
     }
 
+    /// Set the inherited text color without changing the frame's colors.
     pub fn color(mut self, color: Hsla) -> Self {
         self.color = Some(color);
         self
@@ -75,6 +87,9 @@ impl gpui::View for TextArea {
 
         div()
             .id("text-area")
+            .role(Role::MultilineTextInput)
+            .aria_label(self.label)
+            .aria_value(editor.read(cx).value.read(cx).clone())
             .key_context("TextInput")
             .track_focus(&focus_handle)
             .cursor(CursorStyle::IBeam)
@@ -104,9 +119,7 @@ impl gpui::View for TextArea {
             .line_height(row_height)
             .text_size(px(14.))
             .text_color(text_color)
-            // The cache style is computed from the `rows` prop: change `rows` and
-            // the editor's cached bounds change, busting its cache and re-laying
-            // out the text. (`Input` just uses `size_full()` — nothing to vary.)
+            // Cache reuse includes this style: changing rows changes the bounds.
             .child(
                 editor.cached(
                     StyleRefinement::default()

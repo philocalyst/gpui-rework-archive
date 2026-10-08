@@ -28,6 +28,8 @@ mod components;
 #[cfg(target_family = "wasm")]
 mod host;
 #[cfg(target_family = "wasm")]
+mod support;
+#[cfg(target_family = "wasm")]
 mod workbench;
 
 fn main() {

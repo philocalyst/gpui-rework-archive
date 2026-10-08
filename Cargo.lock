@@ -2463,6 +2463,7 @@ dependencies = [
  "gpui_ce_collections",
  "gpui_ce_elements",
  "gpui_ce_macros",
+ "gpui_ce_parley",
  "gpui_ce_platform",
  "gpui_ce_refineable",
  "gpui_ce_scheduler",

@@ -1,9 +1,10 @@
 # GPUI-CE documentation
 
-The maintained documentation is the [Zola site](../site/), published at
-<https://gpui-ce.github.io/>. It separates the two jobs that used to be mixed
-in the Typst shell: the site walks through complete programs, while docs.rs
-explains the contracts of the library types and links back to those examples.
+The maintained documentation has three entry points: the
+[Zola walkthrough site](../site/), the [API reference](https://docs.rs/gpui-ce/),
+and the [GPUI Book](../book/). Walkthroughs explain complete programs. The API
+reference states each operation's contract. The book publishes the reference's
+conceptual chapters from the same source.
 
 Start with the [first window](../site/content/examples/first-window.md), then
 follow the [counter](../site/content/examples/counter.md) for state and
@@ -18,7 +19,7 @@ Repository workflow documents remain here:
 - [releasing](releasing.md)
 - [hot patching](hot-patching.md)
 
-The old Typst pages and their sidebar/template files were a presentation shell,
-not a second technical source. Their useful hot-patching instructions now live
-in [hot-patching.md](hot-patching.md); the Zola content and crate rustdoc are
-the sources to update when behavior changes.
+Edit walkthrough comments in their canonical Rust programs. Edit shared
+conceptual chapters in `crates/gpui/docs` and ownership in
+`crates/gpui/src/_ownership_and_data_flow.rs`. The authoring guide explains the
+generator, link checks, and local API/site/book build.

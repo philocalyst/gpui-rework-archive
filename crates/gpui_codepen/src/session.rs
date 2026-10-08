@@ -97,11 +97,15 @@ impl Session {
             },
         }
     }
-    /// Clears the stored frame and diagnostics without starting a new generation.
+    /// Invalidates outstanding replies and clears the stored result.
     ///
-    /// This does not cancel a pending request. A controller must invalidate its
-    /// generation separately before using this to switch lessons.
+    /// Advances the generation, clears `running`, and removes the frame,
+    /// diagnostics, and elapsed time. The interpreter's work is not canceled by
+    /// this state change alone; controllers must cancel their transport task too.
     pub fn reset(&mut self) {
+        self.generation = self.generation.wrapping_add(1);
+        self.running = false;
+        self.elapsed_ms = 0;
         self.frame = None;
         self.diagnostics.clear();
     }

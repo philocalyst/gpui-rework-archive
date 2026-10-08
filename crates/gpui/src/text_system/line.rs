@@ -11,37 +11,67 @@ use std::sync::{
 static GLYPH_PAINT_ERRORS: AtomicUsize = AtomicUsize::new(0);
 const MAX_LOGGED_GLYPH_PAINT_ERRORS: usize = 20;
 
-/// A line of text that has been shaped and decorated.
+/// One unwrapped line, with resolved glyphs, styles, and interaction geometry.
+///
+/// Obtain it from [`crate::WindowTextSystem::shape_line`] when custom drawing
+/// needs a label's width or direct control over painting. Use [`ShapedText`]
+/// for hard breaks or wrapping, and [`crate::Text`] for an ordinary element
+/// that should measure and paint itself.
+///
+/// Shaping selects glyphs and their advances; it does not rasterize them.
+/// [`Self::width`] is the advance width, including spacing, rather than the
+/// rectangle enclosing the visible ink. The dereferenced layout's
+/// [`LineLayout::platform_layout`] supplies byte-index and position queries
+/// for this same source string.
+/// Retain that layout when pointer handling must agree with the painted text.
+/// See the [text chapter](crate::_documentation::text) for source positions,
+/// visual order, and caret affinity.
 #[derive(Clone, Debug, Deref, DerefMut)]
 pub struct ShapedLine {
     #[deref]
     #[deref_mut]
     pub(crate) layout: Arc<LineLayout>,
-    /// The text that was shaped for this line.
+    /// The source text paired with this layout.
+    ///
+    /// Changing this field does not reshape the glyphs or update byte indices. To change the
+    /// line, obtain a new [`ShapedLine`] from [`crate::WindowTextSystem::shape_line`].
     pub text: SharedString,
 }
 
 impl ShapedLine {
-    /// The number of UTF-8 bytes in the source line.
+    /// Return the source length recorded by shaping, in UTF-8 bytes.
+    ///
+    /// This counts neither characters nor glyphs. It reads the layout, so
+    /// assigning a different string to [`Self::text`] does not change it.
     #[allow(clippy::len_without_is_empty)]
     pub fn len(&self) -> usize {
         self.layout.len
     }
 
-    /// The width of the shaped line in pixels.
+    /// Return the line's advance width in logical pixels.
     ///
     /// This is the glyph advance width computed by the text shaping system and is useful for
-    /// incrementally advancing a "pen" when painting multiple fragments on the same row.
+    /// allocating space for the label. It is not the width of its visible ink.
+    /// Shape a whole string together when kerning or ligatures can span what
+    /// would otherwise be separate fragments.
     pub fn width(&self) -> Pixels {
         self.layout.width
     }
 
-    /// Paint glyphs and foreground decorations at a logical-pixel origin.
+    /// Paint glyphs, underlines, and strikethroughs into the current scene.
     ///
     /// `line_height` sets the row's vertical extent and baseline placement. `align_width` gives
     /// the width used for alignment; if it is `None`, the shaped advance width is used. Call
     /// [`Self::paint_background`] first when the run backgrounds should appear behind the text.
-    /// Paint-layer errors are returned; individual glyph paint errors are logged and skipped.
+    /// `origin` is the row box's top-left in window-local logical pixels,
+    /// rather than its baseline. Alignment moves the glyphs within
+    /// `align_width`; it neither wraps the line nor clips it. Use
+    /// [`Window::with_content_mask`] when drawing must stop at an edge.
+    ///
+    /// Call during an element's paint phase. Individual glyph-rasterization
+    /// or atlas errors are logged and that glyph is skipped; an `Ok` result
+    /// therefore does not establish that every glyph was drawn. Painting
+    /// registers no input handlers or accessibility nodes.
     pub fn paint(
         &self,
         origin: Point<Pixels>,
@@ -66,8 +96,10 @@ impl ShapedLine {
 
     /// Paint run background rectangles for this line.
     ///
-    /// The rectangles use the supplied `line_height` and alignment width. Call this before
-    /// [`Self::paint`] to draw the backgrounds behind glyphs.
+    /// Each run's background spans its horizontal fragment and the supplied
+    /// `line_height`. Runs without a background color draw nothing in this
+    /// pass. Call it before [`Self::paint`], using the same origin, height,
+    /// alignment, and alignment width, so the rectangles sit behind the glyphs.
     pub fn paint_background(
         &self,
         origin: Point<Pixels>,
@@ -91,30 +123,82 @@ impl ShapedLine {
     }
 }
 
-/// Text that has been shaped and decorated by the text layout system.
+/// A shaped document whose visual rows can be painted and queried together.
+///
+/// Obtain it from [`crate::WindowTextSystem::shape_text`] or
+/// [`crate::WindowTextSystem::shape_text_with_options`]. Hard line breaks,
+/// optional soft wrapping, font fallback, and bidirectional ordering are
+/// resolved in one layout. Its dereferenced [`ShapedTextLayout`] supplies
+/// measurement, caret movement, hit testing, and selection rectangles.
+/// Those queries address UTF-8 byte offsets in the string that was shaped.
+///
+/// Use the same layout for drawing and interaction. A caret calculated with
+/// another wrap width or line height will disagree with the displayed rows.
+/// Rebuild the layout when its text, fonts, or layout options change; calling
+/// [`Self::paint`] with different bounds does not reshape it. See the
+/// [text chapter](crate::_documentation::text) for choosing between text
+/// elements and custom text drawing.
 #[derive(Debug, Deref, DerefMut)]
 pub struct ShapedText {
     #[deref]
     #[deref_mut]
     pub(crate) layout: Arc<ShapedTextLayout>,
-    /// The text that was shaped.
+    /// The source text paired with this layout.
+    ///
+    /// Changing this field does not reshape the glyphs or update byte indices. To change the
+    /// document, obtain a new [`ShapedText`] from [`crate::WindowTextSystem::shape_text`].
     pub text: SharedString,
 }
 
 impl ShapedText {
-    /// The length of the text in UTF-8 bytes.
+    /// Return the UTF-8 source length recorded by this layout.
+    ///
+    /// Hard-break bytes remain part of that length. Visual row counts and
+    /// glyph counts are separate quantities.
     #[allow(clippy::len_without_is_empty)]
     pub fn len(&self) -> usize {
         self.layout.len()
     }
 
-    /// Paint glyphs and foreground decorations at a logical-pixel origin.
+    /// Paint the laid-out rows, glyphs, underlines, and strikethroughs.
     ///
     /// `line_height` determines each visual row's height. `bounds`, when supplied, contributes
     /// its width for horizontal alignment; otherwise the wrap width is used when the text was
     /// shaped with one. The bounds origin is not applied: `origin` remains the placement point.
-    /// Call [`Self::paint_background`] first to paint run backgrounds. Paint-layer errors are
-    /// returned; individual glyph paint errors are logged and skipped.
+    /// `origin` is the first row box's top-left in window-local logical
+    /// pixels. The rows retain the breaks established during shaping;
+    /// changing `bounds` changes alignment space, not wrapping or clipping.
+    /// `TextAlign::Start` and `End` follow each row's resolved direction.
+    ///
+    /// Call [`Self::paint_background`] first for run backgrounds, with the
+    /// same placement parameters. Individual glyph-rasterization or atlas
+    /// errors are logged and that glyph is skipped, so `Ok` does not prove
+    /// that every glyph was drawn. Call during paint; this creates no input
+    /// handlers or accessibility nodes.
+    ///
+    /// ```rust
+    /// use gpui::{App, Bounds, Pixels, ShapedText, TextAlign, Window, px};
+    ///
+    /// // `label` was shaped during preparation with this region's width.
+    /// fn paint_label(
+    ///     label: &ShapedText,
+    ///     region: Bounds<Pixels>,
+    ///     window: &mut Window,
+    ///     cx: &mut App,
+    /// ) -> anyhow::Result<()> {
+    ///     let line_height = px(24.);
+    ///     label.paint_background(
+    ///         region.origin, line_height, TextAlign::Start, Some(region), window, cx,
+    ///     )?;
+    ///     label.paint(
+    ///         region.origin, line_height, TextAlign::Start, Some(region), window, cx,
+    ///     )
+    /// }
+    /// ```
+    ///
+    /// Use [`Window::with_content_mask`] around both passes if the region
+    /// must clip text. Supply the same `line_height` to interaction queries
+    /// such as [`ShapedTextLayout::closest_caret_for_pixel_point`].
     pub fn paint(
         &self,
         origin: Point<Pixels>,
@@ -144,8 +228,10 @@ impl ShapedText {
 
     /// Paint the run background rectangles for all visual rows.
     ///
-    /// Width selection matches [`Self::paint`]. Call this before `paint` to place the backgrounds
-    /// behind glyphs.
+    /// Width selection and row placement match [`Self::paint`]. Call this
+    /// first with the same parameters. Each colored run fragment gets a
+    /// rectangle with the supplied row height; rows without a run background
+    /// draw nothing. The optional `bounds` supplies alignment width, not a clip.
     pub fn paint_background(
         &self,
         origin: Point<Pixels>,

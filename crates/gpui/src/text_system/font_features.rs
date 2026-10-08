@@ -7,16 +7,25 @@ use schemars::{JsonSchema, json_schema};
 ///
 /// Tags must be four ASCII alphanumeric characters. Human-readable deserialization accepts
 /// booleans (`false`/`true`) and stores them as `0`/`1`; serialization emits numeric values.
-/// Malformed tags and non-integer values are ignored and logged while deserializing. Integer
-/// values are read as unsigned 64-bit numbers and cast to `u32`, so values above `u32::MAX` are
-/// truncated by that cast.
+/// Human-readable deserialization skips malformed tags, negative numbers, and fractional
+/// numbers, logging those cases. It also skips `null` values. Unsupported value types, such
+/// as strings, fail deserialization. Accepted integers are read as `u64` and cast to `u32`,
+/// so values above `u32::MAX` are truncated by that cast.
+///
+/// The public tuple field also permits constructing features directly. That path does not
+/// validate tags. A feature takes effect only when the selected font supports it; see the
+/// [OpenType feature registry](https://learn.microsoft.com/en-us/typography/opentype/spec/featurelist)
+/// for tag definitions.
 #[derive(Default, Clone, Eq, PartialEq, Hash)]
 pub struct FontFeatures(pub Arc<Vec<(String, u32)>>);
 
 impl FontFeatures {
-    /// Disable contextual alternates (`calt`), which also disables common ligature substitution.
+    /// Disable the font's contextual alternates (`calt`).
     ///
-    /// Other feature tags remain at the font backend's defaults.
+    /// Some programming fonts implement their code ligatures with this feature. Despite this
+    /// method's name, it does not disable `liga`, `clig`, or `dlig`; other features retain their
+    /// backend defaults. To control those features, construct [`FontFeatures`] with the
+    /// corresponding tags.
     pub fn disable_ligatures() -> Self {
         Self(Arc::new(vec![("calt".into(), 0)]))
     }

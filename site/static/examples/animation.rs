@@ -2,7 +2,7 @@
 use std::time::Duration;
 
 use gpui::{
-    Animation, AnimationExt, AppContext, Context, IntoElement, Motion, Render, Window, div,
+    Animation, AnimationExt, AppContext, Context, IntoElement, Motion, Render, Role, Window, div,
     ease_in_out, prelude::*, px, rgb,
 };
 
@@ -27,6 +27,10 @@ impl Render for AnimationDemo {
             .child(
                 div()
                     .id("replay")
+                    .role(Role::Button)
+                    .aria_label("Replay")
+                    .tab_index(0)
+                    .focus_visible(|style| style.ring_2().ring_color(rgb(0x3478c8)))
                     .px_4()
                     .py_2()
                     .rounded_md()

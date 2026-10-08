@@ -107,7 +107,8 @@ def audit(public: Path, rustdoc: Path | None = None, base_url='https://gpui-ce.g
         errors.extend(f'{path}: {error}' for error in doc.errors)
         if len(doc.ids) != len(set(doc.ids)):
             errors.append(f'{path}: duplicate ids')
-        if not doc.redirect:
+        book_auxiliary = path in {public / 'book/toc.html', public / 'book/print.html'}
+        if not doc.redirect and not book_auxiliary:
             if doc.tags.get('main') != 1:
                 errors.append(f'{path}: expected one main')
             if doc.tags.get('h1') != 1:

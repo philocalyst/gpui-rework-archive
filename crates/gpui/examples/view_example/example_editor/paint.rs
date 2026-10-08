@@ -1,4 +1,4 @@
-//! Text shaping, multiline placement, and cursor painting for the editor.
+//! One shaped document supplies glyphs, selection rectangles, and IME geometry.
 use super::*;
 
 impl gpui::Render for Editor {
@@ -9,16 +9,14 @@ impl gpui::Render for Editor {
     }
 }
 
-// ---------------------------------------------------------------------------
-// EditorText — the specialized renderer: shapes the text and paints the cursor.
-// ---------------------------------------------------------------------------
-
 struct EditorText {
     editor: Entity<Editor>,
 }
 
 struct EditorTextPrepaint {
-    lines: Vec<ShapedLine>,
+    text: Arc<ShapedText>,
+    placeholder: Option<ShapedText>,
+    selection: Vec<PaintQuad>,
     cursor: Option<PaintQuad>,
 }
 
@@ -49,13 +47,10 @@ impl Element for EditorText {
         window: &mut Window,
         cx: &mut App,
     ) -> (LayoutId, Self::RequestLayoutState) {
-        let editor = self.editor.read(cx);
-        let content = editor.value.read(cx);
-        let line_count = content.split('\n').count().max(1);
-        let line_height = window.line_height();
+        let content = self.editor.read(cx).value.read(cx);
         let mut style = gpui::Style::default();
         style.size.width = relative(1.).into();
-        style.size.height = (line_height * line_count as f32).into();
+        style.size.height = (window.line_height() * content.split('\n').count() as f32).into();
         (window.request_layout(style, [], cx), ())
     }
 
@@ -69,98 +64,76 @@ impl Element for EditorText {
         cx: &mut App,
     ) -> Self::PrepaintState {
         let editor = self.editor.read(cx);
-        let content = editor.value.read(cx).clone();
-        let cursor_offset = editor.cursor;
-        let cursor_visible = editor.cursor_visible;
-        let is_focused = editor.focus_handle.is_focused(window);
-
+        let content = editor.value.read(cx);
         let style = window.text_style();
-        let text_color = style.color;
         let font_size = style.font_size.to_pixels(window.rem_size());
         let line_height = window.line_height();
+        let focused = editor.focus_handle.is_focused(window);
 
-        let is_placeholder = content.is_empty();
-
-        let lines: Vec<ShapedLine> = if is_placeholder {
-            let placeholder: SharedString = "Type here...".into();
-            let run = TextRun {
-                len: placeholder.len(),
-                font: style.font(),
-                color: hsla(0., 0., 0.5, 0.5),
-                background_color: None,
-                underline: None,
-                strikethrough: None,
-                letter_spacing: None,
-            };
-            vec![
-                window
-                    .text_system()
-                    .shape_line(placeholder, font_size, &[run]),
-            ]
+        // Run lengths are consecutive UTF-8 byte lengths. Underlining does not
+        // change the buffer, so every geometry query still addresses that buffer.
+        let mut runs = Vec::new();
+        if let Some(marked) = &editor.marked_range {
+            if marked.start > 0 {
+                runs.push(style.to_run(marked.start));
+            }
+            let mut run = style.to_run(marked.len());
+            run.underline = Some(gpui::UnderlineStyle {
+                thickness: px(1.),
+                color: None,
+                wavy: false,
+            });
+            runs.push(run);
+            if marked.end < content.len() {
+                runs.push(style.to_run(content.len() - marked.end));
+            }
         } else {
-            content
-                .split('\n')
-                .map(|line_str| {
-                    let text: SharedString = SharedString::from(line_str.to_string());
-                    let run = TextRun {
-                        len: text.len(),
-                        font: style.font(),
-                        color: text_color,
-                        background_color: None,
-                        underline: None,
-                        strikethrough: None,
-                        letter_spacing: None,
-                    };
-                    window.text_system().shape_line(text, font_size, &[run])
+            runs.push(style.to_run(content.len()));
+        }
+        let text = Arc::new(
+            window
+                .text_system()
+                .shape_text(SharedString::new(content), font_size, &runs, None, None)
+                .expect("editor text layout"),
+        );
+
+        let placeholder = content.is_empty().then(|| {
+            let source = SharedString::new_static("Type here…");
+            let mut run = style.to_run(source.len());
+            run.color = hsla(0., 0., 0.5, 0.5);
+            window
+                .text_system()
+                .shape_text(source, font_size, &[run], None, None)
+                .expect("placeholder text layout")
+        });
+        let selection = if focused {
+            text.selection_bounds(editor.selection(), line_height)
+                .into_iter()
+                .map(|mut rect| {
+                    rect.origin += bounds.origin;
+                    fill(rect, hsla(220. / 360., 0.8, 0.5, 0.25))
                 })
                 .collect()
+        } else {
+            Vec::new()
         };
-
-        let cursor = if is_focused && cursor_visible && !is_placeholder {
-            let (cursor_line, offset_in_line) = cursor_line_and_offset(&content, cursor_offset);
-            let cursor_line = cursor_line.min(lines.len().saturating_sub(1));
-            let line_text = lines[cursor_line].text.clone();
-            let run = TextRun {
-                len: line_text.len(),
-                font: style.font(),
-                color: text_color,
-                background_color: None,
-                underline: None,
-                strikethrough: None,
-                letter_spacing: None,
-            };
-            let cursor_x = window
-                .text_system()
-                .shape_text(line_text, font_size, &[run], None, None)
-                .ok()
-                .and_then(|layout| {
-                    layout.visual_position_for_byte_index(offset_in_line, line_height)
-                })
-                .unwrap_or_default()
-                .x;
+        let cursor = if focused && editor.cursor_visible {
+            let position = text
+                .visual_position_for_byte_index(editor.cursor, line_height)
+                .unwrap_or_default();
             Some(fill(
-                Bounds::new(
-                    point(
-                        bounds.left() + cursor_x,
-                        bounds.top() + line_height * cursor_line as f32,
-                    ),
-                    size(px(1.5), line_height),
-                ),
-                text_color,
-            ))
-        } else if is_focused && cursor_visible && is_placeholder {
-            Some(fill(
-                Bounds::new(
-                    point(bounds.left(), bounds.top()),
-                    size(px(1.5), line_height),
-                ),
-                text_color,
+                Bounds::new(bounds.origin + position, size(px(1.5), line_height)),
+                style.color,
             ))
         } else {
             None
         };
-
-        EditorTextPrepaint { lines, cursor }
+        EditorTextPrepaint {
+            text,
+            placeholder,
+            selection,
+            cursor,
+        }
     }
 
     fn paint(
@@ -173,6 +146,14 @@ impl Element for EditorText {
         window: &mut Window,
         cx: &mut App,
     ) {
+        let line_height = window.line_height();
+        self.editor.update(cx, |editor, _| {
+            editor.painted = Some(PaintedText {
+                text: prepaint.text.clone(),
+                origin: bounds.origin,
+                line_height,
+            });
+        });
         let focus_handle = self.editor.read(cx).focus_handle.clone();
         window.handle_input(
             &focus_handle,
@@ -180,30 +161,30 @@ impl Element for EditorText {
             cx,
         );
 
-        let line_height = window.line_height();
-        for (i, line) in prepaint.lines.iter().enumerate() {
-            let origin = point(bounds.left(), bounds.top() + line_height * i as f32);
-            line.paint(origin, line_height, gpui::TextAlign::Left, None, window, cx)
-                .unwrap();
+        for quad in prepaint.selection.drain(..) {
+            window.paint_quad(quad);
         }
-
+        let text = prepaint.placeholder.as_ref().unwrap_or(&prepaint.text);
+        text.paint_background(
+            bounds.origin,
+            line_height,
+            gpui::TextAlign::Left,
+            None,
+            window,
+            cx,
+        )
+        .expect("editor text background");
+        text.paint(
+            bounds.origin,
+            line_height,
+            gpui::TextAlign::Left,
+            None,
+            window,
+            cx,
+        )
+        .expect("editor text paint");
         if let Some(cursor) = prepaint.cursor.take() {
             window.paint_quad(cursor);
         }
     }
-}
-
-fn cursor_line_and_offset(content: &str, cursor: usize) -> (usize, usize) {
-    let mut line_index = 0;
-    let mut line_start = 0;
-    for (i, ch) in content.char_indices() {
-        if i >= cursor {
-            break;
-        }
-        if ch == '\n' {
-            line_index += 1;
-            line_start = i + 1;
-        }
-    }
-    (line_index, cursor - line_start)
 }

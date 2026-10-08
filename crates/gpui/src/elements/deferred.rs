@@ -12,10 +12,17 @@ pub fn deferred(child: impl IntoElement) -> Deferred {
     }
 }
 
-/// Paint a child after its ancestors while keeping the child's layout in the current tree.
+/// Draws a child above the main element tree, using its existing layout.
 ///
-/// Deferred draws are processed by the window's deferred-draw pass. A deferred child that queues
-/// more deferred work is depth-limited, so recursive deferral is unsuitable for an unbounded loop.
+/// Use this for an overlay that must escape an ancestor's clipping, such as
+/// a popover. The child still contributes to layout where this wrapper appears;
+/// combine it with [`crate::anchored`] when it needs independent positioning.
+/// Its keyboard dispatch parent also stays at that location in the tree.
+///
+/// The default priority is zero. Higher priorities paint above lower ones;
+/// equal priorities keep their registration order. Use [`Self::priority_auto`]
+/// when one overlay opens another. Nested deferrals are limited to ten prepaint
+/// rounds, so they cannot implement an unbounded recursive draw.
 pub struct Deferred {
     child: Option<AnyElement>,
     priority: DeferredPriority,
@@ -82,23 +89,30 @@ impl IntoElement for Deferred {
 }
 
 impl Deferred {
-    /// Sets a priority for the element. A higher priority conceptually means painting the element
-    /// on top of deferred draws with a lower priority (i.e. closer to the viewer).
+    /// Sets the overlay's paint order relative to other deferred elements.
+    ///
+    /// Higher values paint on top; equal values keep their registration order.
+    /// All deferred elements paint above the main tree, including priority zero.
     pub fn priority(mut self, priority: impl Into<DeferredPriority>) -> Self {
         self.priority = priority.into();
         self
     }
 
-    /// Configures the priority of the deferred element to be 1 greater than the previous
-    /// deferred element (when this element is caused by another deferred element, even if indirectly).
-    /// Defaults to 1 when this is a deferred element caused by non-deferred elements.
+    /// Paints above the deferred element whose prepaint created this one.
+    ///
+    /// Uses that element's priority plus one, saturating at `usize::MAX`.
+    /// Uses one when no deferred element is currently being prepainted.
+    /// This follows the active deferral, rather than the preceding sibling.
     pub fn priority_auto(mut self) -> Self {
         self.priority = DeferredPriority::Auto;
         self
     }
 
-    /// When a content mask is provided, the deferred element will be clipped to that region during
-    /// both prepaint and paint.
+    /// Clips the overlay's hitboxes and drawing to this window-local mask.
+    ///
+    /// The mask uses logical pixels and intersects the window's mask during
+    /// deferred prepaint and paint. Without this setter, deferred drawing
+    /// escapes the enclosing element's clipping. Layout is unchanged.
     pub fn content_mask(mut self, mask: ContentMask<Pixels>) -> Self {
         self.content_mask = Some(mask);
         self
@@ -155,9 +169,87 @@ impl DeferredPriorityStackCache {
 #[cfg(test)]
 mod tests {
     use crate::{
-        Context, Entity, StyleRefinement, TestAppContext, Window, anchored, deferred, div, point,
-        prelude::*, px, size,
+        Bounds, ContentMask, Context, Entity, Modifiers, MouseButton, MouseDownEvent,
+        PlatformInput, StyleRefinement, TestAppContext, Window, anchored, deferred, div, point,
+        prelude::*, px, rgb, size,
     };
+    use std::{cell::Cell, rc::Rc};
+
+    struct MaskedOverlay {
+        presses: Rc<Cell<usize>>,
+    }
+
+    impl Render for MaskedOverlay {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            let presses = self.presses.clone();
+            deferred(
+                div()
+                    .id("masked-overlay")
+                    .size(px(100.))
+                    .bg(rgb(0x155b50))
+                    .on_mouse_down(MouseButton::Left, move |_, _, _| {
+                        presses.set(presses.get() + 1);
+                    }),
+            )
+            .content_mask(ContentMask {
+                bounds: Bounds::new(point(px(0.), px(0.)), size(px(40.), px(40.))),
+                fade_out: Default::default(),
+            })
+        }
+    }
+
+    struct MaskedOverlayRoot {
+        overlay: Entity<MaskedOverlay>,
+    }
+
+    impl Render for MaskedOverlayRoot {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            div().size_full().child(
+                self.overlay
+                    .clone()
+                    .cached(StyleRefinement::default().size_full()),
+            )
+        }
+    }
+
+    #[gpui::test]
+    fn test_deferred_mask_clips_input_after_cached_reuse(cx: &mut TestAppContext) {
+        let presses = Rc::new(Cell::new(0));
+        let window = cx.open_window(size(px(200.), px(200.)), |_, cx| {
+            let overlay = cx.new(|_| MaskedOverlay {
+                presses: presses.clone(),
+            });
+            MaskedOverlayRoot { overlay }
+        });
+        cx.run_until_parked();
+
+        for draw in 0..3 {
+            window
+                .update(cx, |_, window, cx| {
+                    for position in [point(px(60.), px(60.)), point(px(20.), px(20.))] {
+                        window.dispatch_event(
+                            PlatformInput::MouseDown(MouseDownEvent {
+                                button: MouseButton::Left,
+                                position,
+                                modifiers: Modifiers::default(),
+                                click_count: 1,
+                                first_mouse: false,
+                            }),
+                            cx,
+                        );
+                    }
+                })
+                .unwrap();
+            assert_eq!(
+                presses.get(),
+                draw + 1,
+                "only the visible region accepts input"
+            );
+
+            window.update(cx, |_, _, cx| cx.notify()).unwrap();
+            cx.run_until_parked();
+        }
+    }
 
     /// A stand-in for a dock panel hosting a popover (deferred draw) whose
     /// content opens another popover (a deferred draw created while

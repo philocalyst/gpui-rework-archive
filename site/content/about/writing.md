@@ -56,6 +56,11 @@ setup and a visible result. A task guide assumes the setup and addresses a
 problem. An API entry defines behavior, errors, panics, lifetimes, and alternatives.
 An explanation connects those contracts and the choices behind them.
 
+Conceptual guides are also chapters in the [GPUI Book](https://gpui-ce.github.io/book/). The book and
+rustdoc read the same sources; testing and accessibility use those sources on
+this site too. Revise the canonical chapter when a contract changes, then
+rebuild all three surfaces.
+
 Use meaningful links where a term becomes useful. Add a note for context, a tip
 for a shortcut, and a warning for a specific consequence. A warning should say
 what triggers the problem and what the reader can do about it.

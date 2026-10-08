@@ -22,6 +22,7 @@
     <a class="wordmark" href="{{ get_url(path='/') }}">GPUI <span>Community Edition</span></a>
     <nav aria-label="Primary">
       <a href="{{ get_url(path='examples/') }}">Learn</a>
+      <a href="{{ get_url(path='book/') }}">Book</a>
       <a href="{{ get_url(path='guides/') }}">Solve</a>
       <a href="{{ get_url(path='reference/') }}">Reference</a>
       <a href="{{ get_url(path='about/') }}">Contribute</a>
@@ -45,7 +46,7 @@
         </details>
       {% endfor %}
       </nav>
-      <p class="sidebar-note">Complete examples.<br>API contracts in <a href="{{ config.extra.api }}">rustdoc</a>.</p>
+      <p class="sidebar-note">Read the <a href="{{ get_url(path='book/') }}">GPUI Book</a>.<br>API contracts in <a href="{{ config.extra.api }}">rustdoc</a>.</p>
     </aside>
     {% block main %}{% endblock main %}
   </div>

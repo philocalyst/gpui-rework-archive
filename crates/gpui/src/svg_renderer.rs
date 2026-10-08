@@ -1,4 +1,4 @@
-//! Parse and rasterize SVG documents using registered and system fonts.
+//! Parse SVG documents once and rasterize them at the sizes needed for display.
 //!
 //! Parsing resolves font references and converts text to paths. Keep the resulting
 //! [`crate::ParsedSvg`] when drawing the same document at several sizes; rasterization is then the only
@@ -9,10 +9,9 @@
 //!
 //! Supply SVG bytes directly to [`crate::SvgRenderer::parse_svg`], handle its parse error, then call
 //! [`crate::SvgRenderer::render_parsed`] for each requested output size. Use
-//! [`crate::SvgRenderer::render_single_frame`] when the bytes will only be rendered once. The renderer
-//! also accepts an [`crate::AssetRegistry`] so internal references such as bundled fonts can be resolved
-//! by exact application-defined asset keys. The SVG renderer owns font resolution for SVG text;
-//! it does not call GPUI's ordinary [`crate::TextSystem`] layout path.
+//! [`crate::SvgRenderer::render_single_frame`] when the bytes will only be rendered once.
+//! SVG text uses the renderer's font database, separate from GPUI's ordinary
+//! [`crate::TextSystem`]. See [`crate::SvgRenderer::new`] for the bundled font keys.
 //!
 //! [`crate::SvgSize::Size`] sets a device-pixel width and preserves the document aspect ratio;
 //! [`crate::SvgSize::ExactSize`] stretches to the specified pixel dimensions; and
@@ -21,9 +20,12 @@
 //! its logical display size remains consistent. Raster dimensions are capped at 8192 pixels per
 //! side to bound texture allocation; invalid or zero raster dimensions return a render error.
 //!
-//! Parse errors cover malformed XML, unsupported SVG features, and unresolved resources. Parsing
-//! may also resolve system fonts, so keep the resulting [`crate::ParsedSvg`] rather than parsing the same
-//! bytes for every frame or scale.
+//! A successful parse does not prove that every feature or external image was
+//! rendered. usvg can skip unsupported content and missing resources. Embedded
+//! image data is handled by usvg; file references use its default filesystem
+//! resolver, without looking up arbitrary paths in the asset registry. Network
+//! image URLs are not fetched. Bundle image data into the SVG when the document
+//! must render independently of the host's filesystem.
 
 use crate::{
     AssetRegistry, DevicePixels, IsZero, RenderImage, Result, SharedString, Size,
@@ -158,10 +160,17 @@ impl From<f32> for SvgSize {
 }
 
 impl SvgRenderer {
-/// Creates a renderer using the provided byte registry for SVG resources and bundled fonts.
-///
-/// System fonts and registered bundled fonts are assembled lazily when a font is first resolved,
-/// so constructing a renderer alone does not load the system font database.
+    /// Create a renderer with system fonts and two optional bundled font families.
+    ///
+    /// The registry is queried for
+    /// `fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf` and
+    /// `fonts/lilex/Lilex-Regular.ttf`. It is not searched for arbitrary font
+    /// files or SVG image references. Fonts installed in the app's [`crate::TextSystem`]
+    /// are not automatically registered here.
+    ///
+    /// Font resolution loads the system database lazily and adds the bundled
+    /// fonts. Construction alone does not enumerate system fonts. Keep the
+    /// renderer and parsed documents when drawing the same content again.
     pub fn new(asset_registry: Arc<AssetRegistry>) -> Self {
         static SYSTEM_FONT_DB: LazyLock<Arc<usvg::fontdb::Database>> = LazyLock::new(|| {
             let mut db = usvg::fontdb::Database::new();
@@ -227,10 +236,39 @@ impl SvgRenderer {
         }
     }
 
-    /// Parses SVG bytes into a reusable [`ParsedSvg`].
+    /// Parse SVG bytes into a document that can be rasterized repeatedly.
     ///
-    /// Parsing can fail for malformed XML, unsupported SVG features, or unresolved resources.
-    /// SVG text is resolved to paths during this step, so font choice is fixed in the parsed tree.
+    /// SVG text is converted to paths during parsing, fixing its font choice
+    /// in the returned tree. Unsupported content or missing image resources
+    /// can be skipped; `Ok` does not establish visual equivalence to a browser.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`usvg::Error`] for invalid UTF-8 or XML, invalid document size,
+    /// an exceeded element limit, or compressed input that cannot be decoded.
+    /// Inspect the resulting image when resource completeness matters.
+    ///
+    /// # Example
+    ///
+    /// Reuse one parse for an aspect-preserving icon and a stretched image:
+    ///
+    /// ```
+    /// use gpui::{AssetRegistry, DevicePixels, SvgRenderer, SvgSize, size};
+    /// use std::sync::Arc;
+    ///
+    /// let renderer = SvgRenderer::new(Arc::new(AssetRegistry::default()));
+    /// let document = renderer.parse_svg(
+    ///     br##"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="12">
+    ///         <rect width="24" height="12" fill="#155b50"/>
+    ///     </svg>"##,
+    /// )?;
+    /// let square = size(DevicePixels(48), DevicePixels(48));
+    /// let icon = renderer.render_parsed(&document, SvgSize::Size(square))?;
+    /// assert_eq!(icon.size(0), size(DevicePixels(48), DevicePixels(24)));
+    /// let stretched = renderer.render_parsed(&document, SvgSize::ExactSize(square))?;
+    /// assert_eq!(stretched.size(0), square);
+    /// # Ok::<(), Box<dyn std::error::Error>>(())
+    /// ```
     #[tracing::instrument(skip_all)]
     pub fn parse_svg(&self, bytes: &[u8]) -> Result<ParsedSvg, usvg::Error> {
         usvg::Tree::from_data(bytes, &self.usvg_options).map(ParsedSvg)

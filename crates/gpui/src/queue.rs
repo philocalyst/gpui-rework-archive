@@ -88,12 +88,10 @@ impl<T> PriorityQueueState<T> {
     fn recv<'a>(&'a self) -> Result<parking_lot::MutexGuard<'a, PriorityQueues<T>>, RecvError> {
         let mut queues = self.queues.lock();
 
-        let sender_count = self.sender_count.load(std::sync::atomic::Ordering::Relaxed);
-        if queues.is_empty() && sender_count == 0 {
-            return Err(crate::queue::RecvError);
-        }
-
         while queues.is_empty() {
+            if self.sender_count.load(std::sync::atomic::Ordering::Acquire) == 0 {
+                return Err(RecvError);
+            }
             self.condvar.wait(&mut queues);
         }
 
@@ -152,6 +150,10 @@ impl<T> PriorityQueueSender<T> {
     }
 
     /// Enqueue `item`, returning it unchanged if every receiver has been dropped.
+    ///
+    /// # Panics
+    ///
+    /// Panics for [`Priority::RealtimeAudio`], which requires a dedicated thread.
     pub fn send(&self, priority: Priority, item: T) -> Result<(), SendError<T>> {
         self.state.send(priority, item)?;
         Ok(())
@@ -160,6 +162,7 @@ impl<T> PriorityQueueSender<T> {
     /// Enqueue without sleeping while another thread holds the queue lock.
     ///
     /// Use only on a short, latency-sensitive path; it may consume a CPU while contended.
+    /// Like [`Self::send`], panics for [`Priority::RealtimeAudio`].
     pub fn spin_send(&self, priority: Priority, item: T) -> Result<(), SendError<T>> {
         self.state.spin_send(priority, item)?;
         Ok(())
@@ -168,9 +171,15 @@ impl<T> PriorityQueueSender<T> {
 
 impl<T> Drop for PriorityQueueSender<T> {
     fn drop(&mut self) {
-        self.state
+        let _queues = self.state.queues.lock();
+        if self
+            .state
             .sender_count
-            .fetch_sub(1, std::sync::atomic::Ordering::AcqRel);
+            .fetch_sub(1, std::sync::atomic::Ordering::AcqRel)
+            == 1
+        {
+            self.state.condvar.notify_all();
+        }
     }
 }
 
@@ -420,7 +429,7 @@ impl<T> Iterator for TryIter<T> {
         }
 
         let res = self.receiver.try_pop();
-        self.ended = res.is_err();
+        self.ended = !matches!(&res, Ok(Some(_)));
 
         res.transpose()
     }
@@ -432,6 +441,43 @@ mod tests {
     use collections::HashSet;
 
     use super::*;
+
+    #[test]
+    fn dropping_the_last_sender_wakes_a_waiting_receiver() {
+        let (sender, mut receiver) = PriorityQueueReceiver::<usize>::new();
+        let (finished, result) = std::sync::mpsc::channel();
+        let ready = Arc::new(std::sync::Barrier::new(2));
+        let receiver_ready = ready.clone();
+        let waiter = std::thread::spawn(move || {
+            // Hold the queue lock until entering the condition-variable wait.
+            // Sender::drop cannot acquire it and notify before that wait starts.
+            let state = receiver.state.clone();
+            let mut queues = state.queues.lock();
+            receiver_ready.wait();
+            state.condvar.wait(&mut queues);
+            drop(queues);
+            finished.send(receiver.pop().is_err()).unwrap();
+        });
+        ready.wait();
+        drop(sender);
+        assert!(
+            result
+                .recv_timeout(std::time::Duration::from_secs(2))
+                .unwrap()
+        );
+        waiter.join().unwrap();
+    }
+
+    #[test]
+    fn nonblocking_iterator_stays_finished_after_observing_an_empty_queue() {
+        let (sender, receiver) = PriorityQueueReceiver::new();
+        sender.send(Priority::Medium, 1).unwrap();
+        let mut items = receiver.try_iter();
+        assert!(matches!(items.next(), Some(Ok(1))));
+        assert!(items.next().is_none());
+        sender.send(Priority::High, 2).unwrap();
+        assert!(items.next().is_none());
+    }
 
     #[test]
     fn all_tasks_get_yielded() {

@@ -21,7 +21,11 @@ struct TestClockState {
 }
 
 impl TestClock {
-    /// Starts at a fixed instant, making tests independent of the host clock.
+    /// Start with a fixed UTC value and the host's current monotonic instant.
+    ///
+    /// Both readings subsequently change only through this clock's setters.
+    /// Compare elapsed durations within one clock; its monotonic origin is
+    /// not a reproducible timestamp shared with another test.
     pub fn new() -> Self {
         const START_TIME: &str = "2025-07-01T23:59:58-00:00";
         let utc_now = DateTime::parse_from_rfc3339(START_TIME).unwrap().to_utc();

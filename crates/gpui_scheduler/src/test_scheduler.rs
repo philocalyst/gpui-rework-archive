@@ -31,7 +31,28 @@ use std::{
 
 const PENDING_TRACES_VAR_NAME: &str = "PENDING_TRACES";
 
-/// Deterministic scheduler for tests, with controllable time and randomized task interleavings.
+/// A test-controlled clock and runnable queue shared by several executors.
+///
+/// Background work and local sessions run on the test thread. A seed chooses
+/// among eligible runnables, including priority-weighted choices for background
+/// work; it does not create actual worker-thread concurrency. This makes an
+/// ordering failure reproducible while leaving native thread safety to
+/// integration tests.
+///
+/// [`run`](Self::run) drains ready work without jumping to future deadlines.
+/// [`advance_clock`](Self::advance_clock) drains work through a chosen interval,
+/// which lets a test assert both sides of a timer deadline.
+/// [`run_with_clock_advancement`](Self::run_with_clock_advancement) instead
+/// follows timers until no work remains; a periodic operation can keep it
+/// running forever. Blocking waits also advance to the next timer when they
+/// otherwise cannot progress and parking is forbidden.
+///
+/// Real I/O and operating-system threads are outside that schedule. Parking
+/// is disabled by default: a wait with no runnable work, timer, or timeout
+/// fails instead of silently waiting for external progress. Enable parking
+/// only for a test that deliberately includes such progress. The clock then
+/// advances by elapsed wall time while parked, and seed replay no longer
+/// controls the complete test.
 pub struct TestScheduler {
     clock: Arc<TestClock>,
     rng: Arc<Mutex<StdRng>>,
@@ -318,9 +339,11 @@ impl TestScheduler {
 
     /// Time remaining until the next scheduled timer, without advancing the clock.
     pub fn next_timer_delay(&self) -> Option<Duration> {
-        self.state.lock().timers.first().map(|timer| {
-            timer.expiration.saturating_duration_since(self.clock.now())
-        })
+        self.state
+            .lock()
+            .timers
+            .first()
+            .map(|timer| timer.expiration.saturating_duration_since(self.clock.now()))
     }
 
     /// Returns counts of (foreground_tasks, background_tasks) currently queued.
@@ -453,9 +476,10 @@ impl TestScheduler {
 
     /// Drops all queued runnables and timers without polling their futures.
     ///
-    /// This is used by the leak detector to ensure that all tasks have been dropped as tasks may keep entities alive otherwise.
-    /// Why do we even have tasks left when tests finish you may ask. The reason for that is simple, the scheduler itself is the executor and it retains the scheduled runnables.
-    /// A lot of tasks, including every foreground task contain an executor handle that keeps the test scheduler alive, causing a reference cycle, thus the need for this function right now.
+    /// Test teardown uses this to release captures retained by queued work.
+    /// Destructors can enqueue further work, so draining repeats until both
+    /// queues remain empty. It does not wait for external operations or
+    /// discover pending futures that have no runnable in this queue.
     pub fn drain_tasks(&self) {
         // dropping runnables may reschedule tasks
         // due to drop impls with executors in them
@@ -631,13 +655,14 @@ fn assert_correct_thread(expected: &Thread, state: &Arc<Mutex<SchedulerState>>) 
 }
 
 impl Scheduler for TestScheduler {
-    /// Block until the given future completes, with an optional timeout. If the
-    /// future is unable to make progress at any moment before the timeout and
-    /// no other tasks or timers remain, we panic unless parking is allowed. If
-    /// parking is allowed, we block up to the timeout or indefinitely if none
-    /// is provided. This is to allow testing a mix of deterministic and
-    /// non-deterministic async behavior, such as when interacting with I/O in
-    /// an otherwise deterministic test.
+    /// Drive the future, excluding work from the blocked local session.
+    ///
+    /// With parking forbidden, idle waits advance to the next timer. A wait
+    /// with no remaining progress source panics when there is no timeout, or
+    /// returns false when there is one. Timed waits also have a seeded tick
+    /// budget. With parking allowed, elapsed wall time advances the clock;
+    /// each parking episode has a fifteen-second ceiling even without a
+    /// caller-supplied timeout.
     #[cfg(not(target_family = "wasm"))]
     fn block(
         &self,
@@ -783,6 +808,12 @@ fn schedule_local_dispatch(
     }
 }
 
+/// Initial policy for a [`TestScheduler`].
+///
+/// The default uses seed zero, randomized runnable ordering, forbidden parking,
+/// and a timeout poll budget in `1..=1000`. `PENDING_TRACES=1` or `true` enables
+/// pending-waker backtraces. Direct construction uses these fields;
+/// environment overrides for repeated runs belong to [`TestScheduler::many`].
 #[derive(Clone, Debug)]
 pub struct TestSchedulerConfig {
     /// Seed for randomized scheduling and generated yield points.
@@ -951,8 +982,11 @@ impl TracingWaker {
 /// A deterministic yield point that asks the test scheduler to defer work.
 pub struct Yield(usize);
 
-/// A wrapper around `Arc<Mutex<StdRng>>` that provides convenient methods
-/// for random number generation without requiring explicit locking.
+/// A cloneable handle to the scheduler's seeded random source.
+///
+/// Clones consume one shared sequence; they do not start independent generators.
+/// Drawing test data from this handle also changes later scheduling choices.
+/// Keep fixture generation separate when an unchanged scheduler sequence matters.
 #[derive(Clone)]
 pub struct SharedRng(Arc<Mutex<StdRng>>);
 

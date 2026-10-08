@@ -9,14 +9,17 @@ use anyhow::anyhow;
 use image::RgbaImage;
 use std::{future::Future, rc::Rc, sync::Arc, time::Duration};
 
-/// A test context that uses real macOS rendering instead of mocked rendering.
-/// This is used for visual tests that need to capture actual screenshots.
+/// A macOS visual-test app with caller-supplied platform rendering and seeded tasks.
 ///
-/// Unlike `TestAppContext` which uses `TestPlatform` with mocked rendering,
-/// `VisualTestAppContext` uses the real `MacPlatform` to produce actual rendered output.
+/// [`VisualTestPlatform`] delegates window creation and text to the supplied
+/// platform, while GPUI tasks use a controlled scheduler. Off-screen windows
+/// can be captured through their renderer. This differs from
+/// [`TestAppContext`](crate::TestAppContext), which uses a simulated window
+/// and text system.
 ///
-/// Windows created through this context are positioned off-screen (at coordinates like -10000, -10000)
-/// so they are invisible to the user but still fully rendered by the compositor.
+/// [`Self::advance_clock`] controls scheduled GPUI timers; it does not control
+/// OS callbacks, GPU completion, or `web_time::Instant`. Set the viewport,
+/// fonts, density, and motion policy deliberately for reproducible captures.
 #[derive(Clone)]
 pub struct VisualTestAppContext {
     /// The underlying app cell
@@ -32,16 +35,13 @@ pub struct VisualTestAppContext {
 }
 
 impl VisualTestAppContext {
-    /// Creates a new `VisualTestAppContext` with real macOS platform rendering
-    /// but deterministic task scheduling via TestDispatcher.
+    /// Wraps `platform` with controlled task scheduling and an empty asset source.
     ///
-    /// This provides:
-    /// - Real Metal/compositor rendering for accurate screenshots
-    /// - Deterministic task scheduling via TestDispatcher
-    /// - Controllable time via `advance_clock`
-    ///
-    /// Note: This uses a no-op asset source, so SVG icons won't render.
-    /// Use `with_asset_source` to provide real assets for icon rendering.
+    /// Windows and text shaping come from the supplied platform. The `SEED`
+    /// environment variable selects the scheduler seed; a missing or invalid
+    /// value uses zero. HTTP requests use the test client's default 404 response.
+    /// Use [`Self::with_asset_source`] when the view needs bundled resources,
+    /// including SVG icons.
     pub fn new(platform: Rc<dyn Platform>) -> Self {
         Self::with_asset_source(platform, Arc::new(()))
     }
@@ -90,14 +90,12 @@ impl VisualTestAppContext {
         }
     }
 
-    /// Opens a window positioned off-screen for invisible rendering.
+    /// Request a window of `size` at logical position `(-10000, -10000)`.
     ///
-    /// The window is positioned at (-10000, -10000) so it's not visible on any display,
-    /// but it's still fully rendered by the compositor and can be captured via ScreenCaptureKit.
-    ///
-    /// # Arguments
-    /// * `size` - The size of the window to create
-    /// * `build_root` - A closure that builds the root view for the window
+    /// The window is shown but initially unfocused; the requested origin puts
+    /// it outside a usual desktop. Placement still belongs to the supplied
+    /// platform. [`Self::capture_screenshot`] reads the renderer's texture and
+    /// does not require an on-screen capture session.
     pub fn open_offscreen_window<V: Render + 'static>(
         &mut self,
         size: Size<Pixels>,
@@ -167,7 +165,10 @@ impl VisualTestAppContext {
         self.dispatcher.advance_clock(duration);
     }
 
-    /// Updates the app state.
+    /// Borrow the app for a synchronous operation without draining tasks.
+    ///
+    /// Calls the closure directly without flushing app effects. Use
+    /// [`Self::update_window`] for window work that queues effects.
     pub fn update<R>(&mut self, f: impl FnOnce(&mut App) -> R) -> R {
         let mut app = self.app.borrow_mut();
         f(&mut app)
@@ -226,9 +227,10 @@ impl VisualTestAppContext {
         })
     }
 
-    /// Simulates a sequence of keystrokes on the given window.
+    /// Simulate whitespace-separated key presses, then drain ready tasks.
     ///
-    /// Keystrokes are specified as a space-separated string, e.g., "cmd-p escape".
+    /// Uses [`Keystroke::parse`] and [`Window::dispatch_keystroke`]. No key
+    /// releases are sent. Panics on invalid syntax; a closed window is ignored.
     pub fn simulate_keystrokes(&mut self, window: AnyWindowHandle, keystrokes: &str) {
         for keystroke_text in keystrokes.split_whitespace() {
             let keystroke = Keystroke::parse(keystroke_text)
@@ -238,7 +240,10 @@ impl VisualTestAppContext {
         self.run_until_parked();
     }
 
-    /// Dispatches a single keystroke to a window.
+    /// Dispatch a key press and simulated committed text without draining tasks.
+    ///
+    /// A closed window is ignored. Use [`Self::simulate_event`] to send a
+    /// matching [`crate::KeyUpEvent`] when testing press/release activation.
     pub fn dispatch_keystroke(&mut self, window: AnyWindowHandle, keystroke: Keystroke) {
         self.update_window(window, |_, window, cx| {
             window.dispatch_keystroke(keystroke, cx);
@@ -246,7 +251,10 @@ impl VisualTestAppContext {
         .ok();
     }
 
-    /// Simulates typing text input on the given window.
+    /// Dispatch one key press and committed string per Unicode scalar.
+    ///
+    /// Drains ready tasks afterward. This does not reproduce native IME
+    /// composition, and a closed window is ignored.
     pub fn simulate_input(&mut self, window: AnyWindowHandle, input: &str) {
         for char in input.chars() {
             let key = char.to_string();
@@ -328,7 +336,10 @@ impl VisualTestAppContext {
         self.simulate_mouse_up(window, position, MouseButton::Left, modifiers);
     }
 
-    /// Simulates an input event on the given window.
+    /// Dispatch platform input through GPUI and drain ready tasks.
+    ///
+    /// Uses the last drawn frame's listeners and normal dispatch rules. A
+    /// closed window is ignored. It does not send input through native OS APIs.
     pub fn simulate_event<E: InputEvent>(&mut self, window: AnyWindowHandle, event: E) {
         self.update_window(window, |_, window, cx| {
             window.dispatch_event(event.to_platform_input(), cx);
@@ -337,7 +348,9 @@ impl VisualTestAppContext {
         self.run_until_parked();
     }
 
-    /// Dispatches an action to the given window.
+    /// Dispatch an action on the focus path, then drain ready tasks.
+    ///
+    /// This bypasses key matching; a closed window is ignored.
     pub fn dispatch_action(&mut self, window: AnyWindowHandle, action: impl Action) {
         self.update_window(window, |_, window, cx| {
             window.dispatch_action(action.boxed_clone(), cx);
@@ -346,17 +359,25 @@ impl VisualTestAppContext {
         self.run_until_parked();
     }
 
-    /// Writes to the clipboard.
+    /// Write to this visual test platform's in-memory clipboard.
+    ///
+    /// This does not write the native platform clipboard or test its permissions.
     pub fn write_to_clipboard(&self, item: ClipboardItem) {
         self.platform.write_to_clipboard(item);
     }
 
-    /// Reads from the clipboard.
+    /// Read this visual test platform's in-memory clipboard.
     pub fn read_from_clipboard(&self) -> Option<ClipboardItem> {
         self.platform.read_from_clipboard()
     }
 
-    /// Waits for a condition to become true, with a timeout.
+    /// Poll an entity predicate with a wall-clock timeout and test-clock delays.
+    ///
+    /// Checks the predicate, checks elapsed `web_time::Instant`, drains ready
+    /// work, then awaits a ten-millisecond scheduler timer before repeating.
+    /// A caller must drive test time for that timer to wake. Advancing test
+    /// time alone does not advance the wall-clock timeout. Returns an error
+    /// on timeout; panics if the entity is unavailable.
     pub async fn wait_for<T: 'static>(
         &mut self,
         entity: &Entity<T>,
@@ -383,16 +404,26 @@ impl VisualTestAppContext {
         }
     }
 
-    /// Captures a screenshot of the specified window using direct texture capture.
+    /// Reads the last built scene through the supplied platform's pixel renderer.
     ///
-    /// This renders the scene to a Metal texture and reads the pixels directly,
-    /// which does not require the window to be visible on screen.
+    /// This does not draw a new frame or wait for animation completion. Build
+    /// the intended frame with [`Window::draw`] and clear its arena token before
+    /// capturing. The window need not be on screen: this reads the renderer's
+    /// texture rather than capturing the desktop.
+    ///
+    /// Returns an error for a closed window or failed renderer readback. Image
+    /// dimensions are in device pixels. See [`Window::render_to_image`].
     #[cfg(any(test, feature = "headless"))]
     pub fn capture_screenshot(&mut self, window: AnyWindowHandle) -> Result<RgbaImage> {
         self.update_window(window, |_, window, _cx| window.render_to_image())?
     }
 
-    /// Waits for animations to complete by waiting a couple of frames.
+    /// Await 32 milliseconds of scheduler time, then drain ready tasks.
+    ///
+    /// Despite the name, this does not inspect animation state or guarantee
+    /// completion. Longer and repeating animations can remain active, and
+    /// frame callbacks are separate from timers. Prefer advancing the clock
+    /// to a specific sample and drawing before a screenshot assertion.
     pub async fn wait_for_animations(&self) {
         self.background_executor
             .timer(Duration::from_millis(32))

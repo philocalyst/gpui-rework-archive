@@ -1,6 +1,6 @@
 use gpui::{
     AppContext, Context, IntoElement, Render, UniformListScrollHandle, Window, div, prelude::*, px,
-    rgb, uniform_list,
+    rgb, text, uniform_list,
 };
 
 struct Rows {
@@ -20,10 +20,10 @@ impl Render for Rows {
                 div()
                     .text_2xl()
                     .text_color(rgb(0x202b29))
-                    .child("10,000 uniform rows"),
+                    .child(text!("10,000 uniform rows")),
             )
             .child(
-                div().h(px(320.)).w_full().child(
+                div().h(px(320.)).min_h_0().w_full().child(
                     uniform_list("rows", 10_000, |range, _window, _cx| {
                         range
                             .map(|ix| {
@@ -38,7 +38,7 @@ impl Render for Rows {
                                         rgb(0xe8efed)
                                     })
                                     .text_color(rgb(0x202b29))
-                                    .child(format!("Row {ix}"))
+                                    .child(text!(id = ix, format!("Row {ix}")))
                             })
                             .collect()
                     })

@@ -22,8 +22,8 @@ description = "The annotated Rust source used to build this walkthrough."
 <span id="L13" class="source-line"><a href="#L13" class="line-number" data-line="13" aria-label="Line 13" tabindex="-1"></a>// displayed cluster. Change the paragraph width and try the wrapped lines.</span>
 <span id="L14" class="source-line"><a href="#L14" class="line-number" data-line="14" aria-label="Line 14" tabindex="-1"></a></span>
 <span id="L15" class="source-line"><a href="#L15" class="line-number" data-line="15" aria-label="Line 15" tabindex="-1"></a>use gpui::&#123;</span>
-<span id="L16" class="source-line"><a href="#L16" class="line-number" data-line="16" aria-label="Line 16" tabindex="-1"></a>    AppContext, Bounds, Context, IntoElement, MouseButton, MouseDownEvent, Render, StyledText,</span>
-<span id="L17" class="source-line"><a href="#L17" class="line-number" data-line="17" aria-label="Line 17" tabindex="-1"></a>    Window, canvas, div, fill, prelude::*, px, rgb, size,</span>
+<span id="L16" class="source-line"><a href="#L16" class="line-number" data-line="16" aria-label="Line 16" tabindex="-1"></a>    AppContext, Bounds, Context, IntoElement, MouseButton, MouseDownEvent, Render, Role,</span>
+<span id="L17" class="source-line"><a href="#L17" class="line-number" data-line="17" aria-label="Line 17" tabindex="-1"></a>    StyledText, Window, canvas, div, fill, prelude::*, px, rgb, size, text,</span>
 <span id="L18" class="source-line"><a href="#L18" class="line-number" data-line="18" aria-label="Line 18" tabindex="-1"></a>&#125;;</span>
 <span id="L19" class="source-line"><a href="#L19" class="line-number" data-line="19" aria-label="Line 19" tabindex="-1"></a></span>
 <span id="L20" class="source-line"><a href="#L20" class="line-number" data-line="20" aria-label="Line 20" tabindex="-1"></a>const PARAGRAPH: &amp;str = &quot;Café — Straße — click a wrapped line to inspect its UTF-8 byte index.&quot;;</span>
@@ -42,92 +42,98 @@ description = "The annotated Rust source used to build this walkthrough."
 <span id="L33" class="source-line"><a href="#L33" class="line-number" data-line="33" aria-label="Line 33" tabindex="-1"></a>// This demonstrates a cluster marker. A text editor also needs caret affinity,</span>
 <span id="L34" class="source-line"><a href="#L34" class="line-number" data-line="34" aria-label="Line 34" tabindex="-1"></a>// grapheme-aware movement, selection, focus, and input-method handling. See</span>
 <span id="L35" class="source-line"><a href="#L35" class="line-number" data-line="35" aria-label="Line 35" tabindex="-1"></a>// the [text guide](@/guides/text.md) before building those on a display element.</span>
-<span id="L36" class="source-line"><a href="#L36" class="line-number" data-line="36" aria-label="Line 36" tabindex="-1"></a></span>
-<span id="L37" class="source-line"><a href="#L37" class="line-number" data-line="37" aria-label="Line 37" tabindex="-1"></a>impl Render for HitTest &#123;</span>
-<span id="L38" class="source-line"><a href="#L38" class="line-number" data-line="38" aria-label="Line 38" tabindex="-1"></a>    fn render(&amp;mut self, _window: &amp;mut Window, cx: &amp;mut Context&lt;Self&gt;) -&gt; impl IntoElement &#123;</span>
-<span id="L39" class="source-line"><a href="#L39" class="line-number" data-line="39" aria-label="Line 39" tabindex="-1"></a>        let text = StyledText::new(PARAGRAPH);</span>
-<span id="L40" class="source-line"><a href="#L40" class="line-number" data-line="40" aria-label="Line 40" tabindex="-1"></a>        let input_layout = text.layout().clone();</span>
-<span id="L41" class="source-line"><a href="#L41" class="line-number" data-line="41" aria-label="Line 41" tabindex="-1"></a>        let marker_layout = text.layout().clone();</span>
-<span id="L42" class="source-line"><a href="#L42" class="line-number" data-line="42" aria-label="Line 42" tabindex="-1"></a>        let index = self.index;</span>
-<span id="L43" class="source-line"><a href="#L43" class="line-number" data-line="43" aria-label="Line 43" tabindex="-1"></a>        div()</span>
-<span id="L44" class="source-line"><a href="#L44" class="line-number" data-line="44" aria-label="Line 44" tabindex="-1"></a>            .size_full()</span>
-<span id="L45" class="source-line"><a href="#L45" class="line-number" data-line="45" aria-label="Line 45" tabindex="-1"></a>            .flex()</span>
-<span id="L46" class="source-line"><a href="#L46" class="line-number" data-line="46" aria-label="Line 46" tabindex="-1"></a>            .flex_col()</span>
-<span id="L47" class="source-line"><a href="#L47" class="line-number" data-line="47" aria-label="Line 47" tabindex="-1"></a>            .items_center()</span>
-<span id="L48" class="source-line"><a href="#L48" class="line-number" data-line="48" aria-label="Line 48" tabindex="-1"></a>            .justify_center()</span>
-<span id="L49" class="source-line"><a href="#L49" class="line-number" data-line="49" aria-label="Line 49" tabindex="-1"></a>            .gap_4()</span>
-<span id="L50" class="source-line"><a href="#L50" class="line-number" data-line="50" aria-label="Line 50" tabindex="-1"></a>            .bg(rgb(0xf7f6f2))</span>
-<span id="L51" class="source-line"><a href="#L51" class="line-number" data-line="51" aria-label="Line 51" tabindex="-1"></a>            .text_color(rgb(0x202b29))</span>
-<span id="L52" class="source-line"><a href="#L52" class="line-number" data-line="52" aria-label="Line 52" tabindex="-1"></a>            .child(</span>
-<span id="L53" class="source-line"><a href="#L53" class="line-number" data-line="53" aria-label="Line 53" tabindex="-1"></a>                div()</span>
-<span id="L54" class="source-line"><a href="#L54" class="line-number" data-line="54" aria-label="Line 54" tabindex="-1"></a>                    .relative()</span>
-<span id="L55" class="source-line"><a href="#L55" class="line-number" data-line="55" aria-label="Line 55" tabindex="-1"></a>                    .w(px(280.))</span>
-<span id="L56" class="source-line"><a href="#L56" class="line-number" data-line="56" aria-label="Line 56" tabindex="-1"></a>                    .text_size(px(18.))</span>
-<span id="L57" class="source-line"><a href="#L57" class="line-number" data-line="57" aria-label="Line 57" tabindex="-1"></a>                    .line_height(px(28.))</span>
-<span id="L58" class="source-line"><a href="#L58" class="line-number" data-line="58" aria-label="Line 58" tabindex="-1"></a>                    .cursor_text()</span>
-<span id="L59" class="source-line"><a href="#L59" class="line-number" data-line="59" aria-label="Line 59" tabindex="-1"></a>                    .on_mouse_down(</span>
-<span id="L60" class="source-line"><a href="#L60" class="line-number" data-line="60" aria-label="Line 60" tabindex="-1"></a>                        MouseButton::Left,</span>
-<span id="L61" class="source-line"><a href="#L61" class="line-number" data-line="61" aria-label="Line 61" tabindex="-1"></a>                        cx.listener(move |this, event: &amp;MouseDownEvent, _window, cx| &#123;</span>
-<span id="L62" class="source-line"><a href="#L62" class="line-number" data-line="62" aria-label="Line 62" tabindex="-1"></a>                            let result = input_layout.index_for_position(event.position);</span>
-<span id="L63" class="source-line"><a href="#L63" class="line-number" data-line="63" aria-label="Line 63" tabindex="-1"></a>                            this.hit = result.is_ok();</span>
-<span id="L64" class="source-line"><a href="#L64" class="line-number" data-line="64" aria-label="Line 64" tabindex="-1"></a>                            this.index = result.unwrap_or_else(|edge| edge);</span>
-<span id="L65" class="source-line"><a href="#L65" class="line-number" data-line="65" aria-label="Line 65" tabindex="-1"></a>                            cx.notify();</span>
-<span id="L66" class="source-line"><a href="#L66" class="line-number" data-line="66" aria-label="Line 66" tabindex="-1"></a>                        &#125;),</span>
-<span id="L67" class="source-line"><a href="#L67" class="line-number" data-line="67" aria-label="Line 67" tabindex="-1"></a>                    )</span>
-<span id="L68" class="source-line"><a href="#L68" class="line-number" data-line="68" aria-label="Line 68" tabindex="-1"></a>                    .child(text)</span>
-<span id="L69" class="source-line"><a href="#L69" class="line-number" data-line="69" aria-label="Line 69" tabindex="-1"></a>                    .child(</span>
-<span id="L70" class="source-line"><a href="#L70" class="line-number" data-line="70" aria-label="Line 70" tabindex="-1"></a>                        canvas(</span>
-<span id="L71" class="source-line"><a href="#L71" class="line-number" data-line="71" aria-label="Line 71" tabindex="-1"></a>                            move |_bounds, _window, _cx| &#123;</span>
-<span id="L72" class="source-line"><a href="#L72" class="line-number" data-line="72" aria-label="Line 72" tabindex="-1"></a>                                // The text child was prepainted before this sibling.</span>
-<span id="L73" class="source-line"><a href="#L73" class="line-number" data-line="73" aria-label="Line 73" tabindex="-1"></a>                                (</span>
-<span id="L74" class="source-line"><a href="#L74" class="line-number" data-line="74" aria-label="Line 74" tabindex="-1"></a>                                    marker_layout.position_for_index(index),</span>
-<span id="L75" class="source-line"><a href="#L75" class="line-number" data-line="75" aria-label="Line 75" tabindex="-1"></a>                                    marker_layout.line_height(),</span>
-<span id="L76" class="source-line"><a href="#L76" class="line-number" data-line="76" aria-label="Line 76" tabindex="-1"></a>                                )</span>
-<span id="L77" class="source-line"><a href="#L77" class="line-number" data-line="77" aria-label="Line 77" tabindex="-1"></a>                            &#125;,</span>
-<span id="L78" class="source-line"><a href="#L78" class="line-number" data-line="78" aria-label="Line 78" tabindex="-1"></a>                            |_bounds, (position, height), window, _cx| &#123;</span>
-<span id="L79" class="source-line"><a href="#L79" class="line-number" data-line="79" aria-label="Line 79" tabindex="-1"></a>                                if let Some(position) = position &#123;</span>
-<span id="L80" class="source-line"><a href="#L80" class="line-number" data-line="80" aria-label="Line 80" tabindex="-1"></a>                                    window.paint_quad(fill(</span>
-<span id="L81" class="source-line"><a href="#L81" class="line-number" data-line="81" aria-label="Line 81" tabindex="-1"></a>                                        Bounds::new(position, size(px(2.), height)),</span>
-<span id="L82" class="source-line"><a href="#L82" class="line-number" data-line="82" aria-label="Line 82" tabindex="-1"></a>                                        rgb(0xd04736),</span>
-<span id="L83" class="source-line"><a href="#L83" class="line-number" data-line="83" aria-label="Line 83" tabindex="-1"></a>                                    ));</span>
-<span id="L84" class="source-line"><a href="#L84" class="line-number" data-line="84" aria-label="Line 84" tabindex="-1"></a>                                &#125;</span>
-<span id="L85" class="source-line"><a href="#L85" class="line-number" data-line="85" aria-label="Line 85" tabindex="-1"></a>                            &#125;,</span>
-<span id="L86" class="source-line"><a href="#L86" class="line-number" data-line="86" aria-label="Line 86" tabindex="-1"></a>                        )</span>
-<span id="L87" class="source-line"><a href="#L87" class="line-number" data-line="87" aria-label="Line 87" tabindex="-1"></a>                        .absolute()</span>
-<span id="L88" class="source-line"><a href="#L88" class="line-number" data-line="88" aria-label="Line 88" tabindex="-1"></a>                        .inset_0(),</span>
-<span id="L89" class="source-line"><a href="#L89" class="line-number" data-line="89" aria-label="Line 89" tabindex="-1"></a>                    ),</span>
-<span id="L90" class="source-line"><a href="#L90" class="line-number" data-line="90" aria-label="Line 90" tabindex="-1"></a>            )</span>
-<span id="L91" class="source-line"><a href="#L91" class="line-number" data-line="91" aria-label="Line 91" tabindex="-1"></a>            .child(format!(</span>
-<span id="L92" class="source-line"><a href="#L92" class="line-number" data-line="92" aria-label="Line 92" tabindex="-1"></a>                &quot;Byte &#123;&#125; / &#123;&#125; · &#123;&#125;&quot;,</span>
-<span id="L93" class="source-line"><a href="#L93" class="line-number" data-line="93" aria-label="Line 93" tabindex="-1"></a>                self.index,</span>
-<span id="L94" class="source-line"><a href="#L94" class="line-number" data-line="94" aria-label="Line 94" tabindex="-1"></a>                PARAGRAPH.len(),</span>
-<span id="L95" class="source-line"><a href="#L95" class="line-number" data-line="95" aria-label="Line 95" tabindex="-1"></a>                if self.hit &#123;</span>
-<span id="L96" class="source-line"><a href="#L96" class="line-number" data-line="96" aria-label="Line 96" tabindex="-1"></a>                    &quot;cluster hit&quot;</span>
-<span id="L97" class="source-line"><a href="#L97" class="line-number" data-line="97" aria-label="Line 97" tabindex="-1"></a>                &#125; else &#123;</span>
-<span id="L98" class="source-line"><a href="#L98" class="line-number" data-line="98" aria-label="Line 98" tabindex="-1"></a>                    &quot;visual edge&quot;</span>
-<span id="L99" class="source-line"><a href="#L99" class="line-number" data-line="99" aria-label="Line 99" tabindex="-1"></a>                &#125;,</span>
-<span id="L100" class="source-line"><a href="#L100" class="line-number" data-line="100" aria-label="Line 100" tabindex="-1"></a>            ))</span>
-<span id="L101" class="source-line"><a href="#L101" class="line-number" data-line="101" aria-label="Line 101" tabindex="-1"></a>    &#125;</span>
-<span id="L102" class="source-line"><a href="#L102" class="line-number" data-line="102" aria-label="Line 102" tabindex="-1"></a>&#125;</span>
-<span id="L103" class="source-line"><a href="#L103" class="line-number" data-line="103" aria-label="Line 103" tabindex="-1"></a></span>
-<span id="L104" class="source-line"><a href="#L104" class="line-number" data-line="104" aria-label="Line 104" tabindex="-1"></a>// ## Map the index back after prepaint &#123;#marker&#125;</span>
-<span id="L105" class="source-line"><a href="#L105" class="line-number" data-line="105" aria-label="Line 105" tabindex="-1"></a>// The [`canvas`] runs after the paragraph&#x27;s text child. Its prepaint callback</span>
-<span id="L106" class="source-line"><a href="#L106" class="line-number" data-line="106" aria-label="Line 106" tabindex="-1"></a>// asks [`TextLayout::position_for_index`] for the marker&#x27;s window-space point;</span>
-<span id="L107" class="source-line"><a href="#L107" class="line-number" data-line="107" aria-label="Line 107" tabindex="-1"></a>// paint uses that point directly. Subtract the text bounds only if the caller</span>
-<span id="L108" class="source-line"><a href="#L108" class="line-number" data-line="108" aria-label="Line 108" tabindex="-1"></a>// needs local coordinates. No extra offset belongs in this paint call.</span>
-<span id="L109" class="source-line"><a href="#L109" class="line-number" data-line="109" aria-label="Line 109" tabindex="-1"></a>//</span>
-<span id="L110" class="source-line"><a href="#L110" class="line-number" data-line="110" aria-label="Line 110" tabindex="-1"></a>// At a soft wrap, the following line owns the boundary position. A byte inside</span>
-<span id="L111" class="source-line"><a href="#L111" class="line-number" data-line="111" aria-label="Line 111" tabindex="-1"></a>// an atomic shaping cluster maps to its logical start, so adjacent visible</span>
-<span id="L112" class="source-line"><a href="#L112" class="line-number" data-line="112" aria-label="Line 112" tabindex="-1"></a>// glyphs need not have adjacent byte indices. Click at the start of the next</span>
-<span id="L113" class="source-line"><a href="#L113" class="line-number" data-line="113" aria-label="Line 113" tabindex="-1"></a>// wrapped line and compare the displayed byte offset with the marker position.</span>
-<span id="L114" class="source-line"><a href="#L114" class="line-number" data-line="114" aria-label="Line 114" tabindex="-1"></a></span>
-<span id="L115" class="source-line"><a href="#L115" class="line-number" data-line="115" aria-label="Line 115" tabindex="-1"></a>fn component(_window: &amp;mut Window, cx: &amp;mut gpui::App) -&gt; gpui::Entity&lt;HitTest&gt; &#123;</span>
-<span id="L116" class="source-line"><a href="#L116" class="line-number" data-line="116" aria-label="Line 116" tabindex="-1"></a>    cx.new(|_cx| HitTest &#123;</span>
-<span id="L117" class="source-line"><a href="#L117" class="line-number" data-line="117" aria-label="Line 117" tabindex="-1"></a>        index: 0,</span>
-<span id="L118" class="source-line"><a href="#L118" class="line-number" data-line="118" aria-label="Line 118" tabindex="-1"></a>        hit: false,</span>
-<span id="L119" class="source-line"><a href="#L119" class="line-number" data-line="119" aria-label="Line 119" tabindex="-1"></a>    &#125;)</span>
-<span id="L120" class="source-line"><a href="#L120" class="line-number" data-line="120" aria-label="Line 120" tabindex="-1"></a>&#125;</span>
-<span id="L121" class="source-line"><a href="#L121" class="line-number" data-line="121" aria-label="Line 121" tabindex="-1"></a></span>
-<span id="L122" class="source-line"><a href="#L122" class="line-number" data-line="122" aria-label="Line 122" tabindex="-1"></a>pub fn main() &#123;</span>
-<span id="L123" class="source-line"><a href="#L123" class="line-number" data-line="123" aria-label="Line 123" tabindex="-1"></a>    support::run(component);</span>
-<span id="L124" class="source-line"><a href="#L124" class="line-number" data-line="124" aria-label="Line 124" tabindex="-1"></a>&#125;</span></code></pre>
+<span id="L36" class="source-line"><a href="#L36" class="line-number" data-line="36" aria-label="Line 36" tabindex="-1"></a>// The paragraph has an accessible text label and the byte report uses [`text`].</span>
+<span id="L37" class="source-line"><a href="#L37" class="line-number" data-line="37" aria-label="Line 37" tabindex="-1"></a>// Moving this diagnostic marker remains a pointer-only operation; it is not a</span>
+<span id="L38" class="source-line"><a href="#L38" class="line-number" data-line="38" aria-label="Line 38" tabindex="-1"></a>// keyboard-accessible text selection control.</span>
+<span id="L39" class="source-line"><a href="#L39" class="line-number" data-line="39" aria-label="Line 39" tabindex="-1"></a></span>
+<span id="L40" class="source-line"><a href="#L40" class="line-number" data-line="40" aria-label="Line 40" tabindex="-1"></a>impl Render for HitTest &#123;</span>
+<span id="L41" class="source-line"><a href="#L41" class="line-number" data-line="41" aria-label="Line 41" tabindex="-1"></a>    fn render(&amp;mut self, _window: &amp;mut Window, cx: &amp;mut Context&lt;Self&gt;) -&gt; impl IntoElement &#123;</span>
+<span id="L42" class="source-line"><a href="#L42" class="line-number" data-line="42" aria-label="Line 42" tabindex="-1"></a>        let text = StyledText::new(PARAGRAPH);</span>
+<span id="L43" class="source-line"><a href="#L43" class="line-number" data-line="43" aria-label="Line 43" tabindex="-1"></a>        let input_layout = text.layout().clone();</span>
+<span id="L44" class="source-line"><a href="#L44" class="line-number" data-line="44" aria-label="Line 44" tabindex="-1"></a>        let marker_layout = text.layout().clone();</span>
+<span id="L45" class="source-line"><a href="#L45" class="line-number" data-line="45" aria-label="Line 45" tabindex="-1"></a>        let index = self.index;</span>
+<span id="L46" class="source-line"><a href="#L46" class="line-number" data-line="46" aria-label="Line 46" tabindex="-1"></a>        div()</span>
+<span id="L47" class="source-line"><a href="#L47" class="line-number" data-line="47" aria-label="Line 47" tabindex="-1"></a>            .size_full()</span>
+<span id="L48" class="source-line"><a href="#L48" class="line-number" data-line="48" aria-label="Line 48" tabindex="-1"></a>            .flex()</span>
+<span id="L49" class="source-line"><a href="#L49" class="line-number" data-line="49" aria-label="Line 49" tabindex="-1"></a>            .flex_col()</span>
+<span id="L50" class="source-line"><a href="#L50" class="line-number" data-line="50" aria-label="Line 50" tabindex="-1"></a>            .items_center()</span>
+<span id="L51" class="source-line"><a href="#L51" class="line-number" data-line="51" aria-label="Line 51" tabindex="-1"></a>            .justify_center()</span>
+<span id="L52" class="source-line"><a href="#L52" class="line-number" data-line="52" aria-label="Line 52" tabindex="-1"></a>            .gap_4()</span>
+<span id="L53" class="source-line"><a href="#L53" class="line-number" data-line="53" aria-label="Line 53" tabindex="-1"></a>            .bg(rgb(0xf7f6f2))</span>
+<span id="L54" class="source-line"><a href="#L54" class="line-number" data-line="54" aria-label="Line 54" tabindex="-1"></a>            .text_color(rgb(0x202b29))</span>
+<span id="L55" class="source-line"><a href="#L55" class="line-number" data-line="55" aria-label="Line 55" tabindex="-1"></a>            .child(</span>
+<span id="L56" class="source-line"><a href="#L56" class="line-number" data-line="56" aria-label="Line 56" tabindex="-1"></a>                div()</span>
+<span id="L57" class="source-line"><a href="#L57" class="line-number" data-line="57" aria-label="Line 57" tabindex="-1"></a>                    .id(&quot;paragraph&quot;)</span>
+<span id="L58" class="source-line"><a href="#L58" class="line-number" data-line="58" aria-label="Line 58" tabindex="-1"></a>                    .role(Role::Label)</span>
+<span id="L59" class="source-line"><a href="#L59" class="line-number" data-line="59" aria-label="Line 59" tabindex="-1"></a>                    .aria_label(PARAGRAPH)</span>
+<span id="L60" class="source-line"><a href="#L60" class="line-number" data-line="60" aria-label="Line 60" tabindex="-1"></a>                    .relative()</span>
+<span id="L61" class="source-line"><a href="#L61" class="line-number" data-line="61" aria-label="Line 61" tabindex="-1"></a>                    .w(px(280.))</span>
+<span id="L62" class="source-line"><a href="#L62" class="line-number" data-line="62" aria-label="Line 62" tabindex="-1"></a>                    .text_size(px(18.))</span>
+<span id="L63" class="source-line"><a href="#L63" class="line-number" data-line="63" aria-label="Line 63" tabindex="-1"></a>                    .line_height(px(28.))</span>
+<span id="L64" class="source-line"><a href="#L64" class="line-number" data-line="64" aria-label="Line 64" tabindex="-1"></a>                    .cursor_text()</span>
+<span id="L65" class="source-line"><a href="#L65" class="line-number" data-line="65" aria-label="Line 65" tabindex="-1"></a>                    .on_mouse_down(</span>
+<span id="L66" class="source-line"><a href="#L66" class="line-number" data-line="66" aria-label="Line 66" tabindex="-1"></a>                        MouseButton::Left,</span>
+<span id="L67" class="source-line"><a href="#L67" class="line-number" data-line="67" aria-label="Line 67" tabindex="-1"></a>                        cx.listener(move |this, event: &amp;MouseDownEvent, _window, cx| &#123;</span>
+<span id="L68" class="source-line"><a href="#L68" class="line-number" data-line="68" aria-label="Line 68" tabindex="-1"></a>                            let result = input_layout.index_for_position(event.position);</span>
+<span id="L69" class="source-line"><a href="#L69" class="line-number" data-line="69" aria-label="Line 69" tabindex="-1"></a>                            this.hit = result.is_ok();</span>
+<span id="L70" class="source-line"><a href="#L70" class="line-number" data-line="70" aria-label="Line 70" tabindex="-1"></a>                            this.index = result.unwrap_or_else(|edge| edge);</span>
+<span id="L71" class="source-line"><a href="#L71" class="line-number" data-line="71" aria-label="Line 71" tabindex="-1"></a>                            cx.notify();</span>
+<span id="L72" class="source-line"><a href="#L72" class="line-number" data-line="72" aria-label="Line 72" tabindex="-1"></a>                        &#125;),</span>
+<span id="L73" class="source-line"><a href="#L73" class="line-number" data-line="73" aria-label="Line 73" tabindex="-1"></a>                    )</span>
+<span id="L74" class="source-line"><a href="#L74" class="line-number" data-line="74" aria-label="Line 74" tabindex="-1"></a>                    .child(text)</span>
+<span id="L75" class="source-line"><a href="#L75" class="line-number" data-line="75" aria-label="Line 75" tabindex="-1"></a>                    .child(</span>
+<span id="L76" class="source-line"><a href="#L76" class="line-number" data-line="76" aria-label="Line 76" tabindex="-1"></a>                        canvas(</span>
+<span id="L77" class="source-line"><a href="#L77" class="line-number" data-line="77" aria-label="Line 77" tabindex="-1"></a>                            move |_bounds, _window, _cx| &#123;</span>
+<span id="L78" class="source-line"><a href="#L78" class="line-number" data-line="78" aria-label="Line 78" tabindex="-1"></a>                                // The text child was prepainted before this sibling.</span>
+<span id="L79" class="source-line"><a href="#L79" class="line-number" data-line="79" aria-label="Line 79" tabindex="-1"></a>                                (</span>
+<span id="L80" class="source-line"><a href="#L80" class="line-number" data-line="80" aria-label="Line 80" tabindex="-1"></a>                                    marker_layout.position_for_index(index),</span>
+<span id="L81" class="source-line"><a href="#L81" class="line-number" data-line="81" aria-label="Line 81" tabindex="-1"></a>                                    marker_layout.line_height(),</span>
+<span id="L82" class="source-line"><a href="#L82" class="line-number" data-line="82" aria-label="Line 82" tabindex="-1"></a>                                )</span>
+<span id="L83" class="source-line"><a href="#L83" class="line-number" data-line="83" aria-label="Line 83" tabindex="-1"></a>                            &#125;,</span>
+<span id="L84" class="source-line"><a href="#L84" class="line-number" data-line="84" aria-label="Line 84" tabindex="-1"></a>                            |_bounds, (position, height), window, _cx| &#123;</span>
+<span id="L85" class="source-line"><a href="#L85" class="line-number" data-line="85" aria-label="Line 85" tabindex="-1"></a>                                if let Some(position) = position &#123;</span>
+<span id="L86" class="source-line"><a href="#L86" class="line-number" data-line="86" aria-label="Line 86" tabindex="-1"></a>                                    window.paint_quad(fill(</span>
+<span id="L87" class="source-line"><a href="#L87" class="line-number" data-line="87" aria-label="Line 87" tabindex="-1"></a>                                        Bounds::new(position, size(px(2.), height)),</span>
+<span id="L88" class="source-line"><a href="#L88" class="line-number" data-line="88" aria-label="Line 88" tabindex="-1"></a>                                        rgb(0xd04736),</span>
+<span id="L89" class="source-line"><a href="#L89" class="line-number" data-line="89" aria-label="Line 89" tabindex="-1"></a>                                    ));</span>
+<span id="L90" class="source-line"><a href="#L90" class="line-number" data-line="90" aria-label="Line 90" tabindex="-1"></a>                                &#125;</span>
+<span id="L91" class="source-line"><a href="#L91" class="line-number" data-line="91" aria-label="Line 91" tabindex="-1"></a>                            &#125;,</span>
+<span id="L92" class="source-line"><a href="#L92" class="line-number" data-line="92" aria-label="Line 92" tabindex="-1"></a>                        )</span>
+<span id="L93" class="source-line"><a href="#L93" class="line-number" data-line="93" aria-label="Line 93" tabindex="-1"></a>                        .absolute()</span>
+<span id="L94" class="source-line"><a href="#L94" class="line-number" data-line="94" aria-label="Line 94" tabindex="-1"></a>                        .inset_0(),</span>
+<span id="L95" class="source-line"><a href="#L95" class="line-number" data-line="95" aria-label="Line 95" tabindex="-1"></a>                    ),</span>
+<span id="L96" class="source-line"><a href="#L96" class="line-number" data-line="96" aria-label="Line 96" tabindex="-1"></a>            )</span>
+<span id="L97" class="source-line"><a href="#L97" class="line-number" data-line="97" aria-label="Line 97" tabindex="-1"></a>            .child(text!(format!(</span>
+<span id="L98" class="source-line"><a href="#L98" class="line-number" data-line="98" aria-label="Line 98" tabindex="-1"></a>                &quot;Byte &#123;&#125; / &#123;&#125; · &#123;&#125;&quot;,</span>
+<span id="L99" class="source-line"><a href="#L99" class="line-number" data-line="99" aria-label="Line 99" tabindex="-1"></a>                self.index,</span>
+<span id="L100" class="source-line"><a href="#L100" class="line-number" data-line="100" aria-label="Line 100" tabindex="-1"></a>                PARAGRAPH.len(),</span>
+<span id="L101" class="source-line"><a href="#L101" class="line-number" data-line="101" aria-label="Line 101" tabindex="-1"></a>                if self.hit &#123;</span>
+<span id="L102" class="source-line"><a href="#L102" class="line-number" data-line="102" aria-label="Line 102" tabindex="-1"></a>                    &quot;cluster hit&quot;</span>
+<span id="L103" class="source-line"><a href="#L103" class="line-number" data-line="103" aria-label="Line 103" tabindex="-1"></a>                &#125; else &#123;</span>
+<span id="L104" class="source-line"><a href="#L104" class="line-number" data-line="104" aria-label="Line 104" tabindex="-1"></a>                    &quot;visual edge&quot;</span>
+<span id="L105" class="source-line"><a href="#L105" class="line-number" data-line="105" aria-label="Line 105" tabindex="-1"></a>                &#125;,</span>
+<span id="L106" class="source-line"><a href="#L106" class="line-number" data-line="106" aria-label="Line 106" tabindex="-1"></a>            )))</span>
+<span id="L107" class="source-line"><a href="#L107" class="line-number" data-line="107" aria-label="Line 107" tabindex="-1"></a>    &#125;</span>
+<span id="L108" class="source-line"><a href="#L108" class="line-number" data-line="108" aria-label="Line 108" tabindex="-1"></a>&#125;</span>
+<span id="L109" class="source-line"><a href="#L109" class="line-number" data-line="109" aria-label="Line 109" tabindex="-1"></a></span>
+<span id="L110" class="source-line"><a href="#L110" class="line-number" data-line="110" aria-label="Line 110" tabindex="-1"></a>// ## Map the index back after prepaint &#123;#marker&#125;</span>
+<span id="L111" class="source-line"><a href="#L111" class="line-number" data-line="111" aria-label="Line 111" tabindex="-1"></a>// The [`canvas`] runs after the paragraph&#x27;s text child. Its prepaint callback</span>
+<span id="L112" class="source-line"><a href="#L112" class="line-number" data-line="112" aria-label="Line 112" tabindex="-1"></a>// asks [`TextLayout::position_for_index`] for the marker&#x27;s window-space point;</span>
+<span id="L113" class="source-line"><a href="#L113" class="line-number" data-line="113" aria-label="Line 113" tabindex="-1"></a>// paint uses that point directly. Subtract the text bounds only if the caller</span>
+<span id="L114" class="source-line"><a href="#L114" class="line-number" data-line="114" aria-label="Line 114" tabindex="-1"></a>// needs local coordinates. No extra offset belongs in this paint call.</span>
+<span id="L115" class="source-line"><a href="#L115" class="line-number" data-line="115" aria-label="Line 115" tabindex="-1"></a>//</span>
+<span id="L116" class="source-line"><a href="#L116" class="line-number" data-line="116" aria-label="Line 116" tabindex="-1"></a>// At a soft wrap, the following line owns the boundary position. A byte inside</span>
+<span id="L117" class="source-line"><a href="#L117" class="line-number" data-line="117" aria-label="Line 117" tabindex="-1"></a>// an atomic shaping cluster maps to its logical start, so adjacent visible</span>
+<span id="L118" class="source-line"><a href="#L118" class="line-number" data-line="118" aria-label="Line 118" tabindex="-1"></a>// glyphs need not have adjacent byte indices. Click at the start of the next</span>
+<span id="L119" class="source-line"><a href="#L119" class="line-number" data-line="119" aria-label="Line 119" tabindex="-1"></a>// wrapped line and compare the displayed byte offset with the marker position.</span>
+<span id="L120" class="source-line"><a href="#L120" class="line-number" data-line="120" aria-label="Line 120" tabindex="-1"></a></span>
+<span id="L121" class="source-line"><a href="#L121" class="line-number" data-line="121" aria-label="Line 121" tabindex="-1"></a>fn component(_window: &amp;mut Window, cx: &amp;mut gpui::App) -&gt; gpui::Entity&lt;HitTest&gt; &#123;</span>
+<span id="L122" class="source-line"><a href="#L122" class="line-number" data-line="122" aria-label="Line 122" tabindex="-1"></a>    cx.new(|_cx| HitTest &#123;</span>
+<span id="L123" class="source-line"><a href="#L123" class="line-number" data-line="123" aria-label="Line 123" tabindex="-1"></a>        index: 0,</span>
+<span id="L124" class="source-line"><a href="#L124" class="line-number" data-line="124" aria-label="Line 124" tabindex="-1"></a>        hit: false,</span>
+<span id="L125" class="source-line"><a href="#L125" class="line-number" data-line="125" aria-label="Line 125" tabindex="-1"></a>    &#125;)</span>
+<span id="L126" class="source-line"><a href="#L126" class="line-number" data-line="126" aria-label="Line 126" tabindex="-1"></a>&#125;</span>
+<span id="L127" class="source-line"><a href="#L127" class="line-number" data-line="127" aria-label="Line 127" tabindex="-1"></a></span>
+<span id="L128" class="source-line"><a href="#L128" class="line-number" data-line="128" aria-label="Line 128" tabindex="-1"></a>pub fn main() &#123;</span>
+<span id="L129" class="source-line"><a href="#L129" class="line-number" data-line="129" aria-label="Line 129" tabindex="-1"></a>    support::run(component);</span>
+<span id="L130" class="source-line"><a href="#L130" class="line-number" data-line="130" aria-label="Line 130" tabindex="-1"></a>&#125;</span></code></pre>

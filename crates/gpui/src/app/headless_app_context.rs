@@ -53,7 +53,11 @@ pub struct HeadlessAppContext {
 }
 
 impl HeadlessAppContext {
-    /// Creates a new headless app context with the given text system.
+    /// Create a simulated app with `platform_text_system` and no pixel renderer.
+    ///
+    /// Scenes still record layout and drawing. The asset source is empty and
+    /// the fake HTTP client returns 404. Scheduler seed comes from `SEED`,
+    /// falling back to zero when absent or invalid.
     pub fn new(platform_text_system: Arc<dyn PlatformTextSystem>) -> Self {
         Self::with_platform(platform_text_system, Arc::new(()), || None)
     }
@@ -66,8 +70,12 @@ impl HeadlessAppContext {
         Self::with_platform(platform_text_system, asset_source, || None)
     }
 
-    /// Creates a new headless app context with the given text system, asset source,
-    /// and an optional renderer factory for screenshot support.
+    /// Create a simulated app with custom text, assets, and a renderer factory.
+    ///
+    /// The factory runs for each opened window. Return `Some` to supply that
+    /// window's atlas and pixel rendering; `None` keeps scene recording alone.
+    /// This does not start a native event loop. Drive time, input, frame
+    /// callbacks, and drawing through this context's methods.
     pub fn with_platform(
         platform_text_system: Arc<dyn PlatformTextSystem>,
         asset_source: Arc<dyn AssetSource>,
@@ -202,13 +210,21 @@ impl HeadlessAppContext {
         self.dispatcher.forbid_parking();
     }
 
-    /// Updates app state.
+    /// Borrow the app for a synchronous operation.
+    ///
+    /// This helper calls the closure directly; it does not flush app effects
+    /// or drain tasks. Use [`Self::update_window`] for window work that queues
+    /// effects, then [`Self::run_until_parked`] for ready tasks.
     pub fn update<R>(&mut self, f: impl FnOnce(&mut App) -> R) -> R {
         let mut app = self.app.borrow_mut();
         f(&mut app)
     }
 
-    /// Updates a window and calls draw to render.
+    /// Update an open window through the app's effect boundary.
+    ///
+    /// Returns an error for a closed window. Effect flushing draws dirty
+    /// windows only when automatic drawing is enabled. This does not drain
+    /// tasks; use [`Self::draw_window`] for an explicit draw.
     pub fn update_window<R>(
         &mut self,
         window: AnyWindowHandle,
@@ -343,7 +359,11 @@ impl HeadlessAppContext {
         self.update_window(window, |_, window, _| read(&window.rendered_frame.scene))
     }
 
-    /// Captures a portable scene with the bitmaps supplied by its renderer's atlas.
+    /// Capture the last drawn scene, resolving each atlas tile through the callback.
+    ///
+    /// This does not draw a new frame. The caller supplies bitmap access;
+    /// capture can work without a pixel renderer. Errors from tile resolution
+    /// or scene capture propagate to the caller.
     pub fn capture_scene(
         &mut self,
         window: AnyWindowHandle,
@@ -354,8 +374,11 @@ impl HeadlessAppContext {
         })?
     }
 
-    /// Captures a live frame without content-sorting atlas bitmaps for snapshot
-    /// identity; drawing and command compilation use the same GPUI scene path.
+    /// Capture the last drawn scene with the live capture policy.
+    ///
+    /// Unlike [`Self::capture_scene`], this avoids content-sorting atlas
+    /// bitmaps for snapshot identity. It does not draw, deliver frame callbacks,
+    /// or advance time; resolve tiles from the atlas that owns the scene.
     pub fn capture_live_scene(
         &mut self,
         window: AnyWindowHandle,

@@ -12,6 +12,8 @@ but its Rust library is imported as `gpui`.
 Start with the [first window walkthrough](https://gpui-ce.github.io/examples/first-window/).
 It includes the complete program, a browser preview, and an editor download.
 For a particular operation, use the [task guides](https://gpui-ce.github.io/guides/).
+The [GPUI Book](https://gpui-ce.github.io/book/) collects the conceptual chapters
+from this API reference into a reading path with search and code copying.
 
 ## A view with state
 
@@ -20,18 +22,26 @@ This view stores a count, displays it, and changes it on a click.
 requests a redraw after the value changes.
 
 ```no_run
-use gpui::{Context, IntoElement, Render, Window, div, prelude::*};
+use gpui::{Context, IntoElement, Render, Role, Window, div, prelude::*, rgb, text};
 
 struct Counter { count: u32 }
 
 impl Render for Counter {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        div().id("counter").p_4()
-            .child(format!("Count: {}", self.count))
-            .on_click(cx.listener(|this, _event, _window, cx| {
-                this.count = this.count.saturating_add(1);
-                cx.notify();
-            }))
+        div().flex().items_center().gap_4()
+            .child(text!(format!("Count: {}", self.count)))
+            .child(
+                div().id("increment").p_4()
+                    .role(Role::Button)
+                    .aria_label("Increment")
+                    .tab_index(0)
+                    .focus_visible(|style| style.ring_2().ring_color(rgb(0x3478c8)))
+                    .child("Increment")
+                    .on_click(cx.listener(|this, _event, _window, cx| {
+                        this.count = this.count.saturating_add(1);
+                        cx.notify();
+                    })),
+            )
     }
 }
 ```
@@ -39,6 +49,8 @@ impl Render for Counter {
 The [counter walkthrough](https://gpui-ce.github.io/examples/counter/) supplies
 the window and explains each step. The ID keeps the element's interaction
 state attached to the same identity across frames.
+The text macro exposes the count to accessibility clients. The button is named,
+reachable by Tab, and activatable with Enter or Space through the same listener.
 
 ## Choose an entry point
 
@@ -47,9 +59,12 @@ state attached to the same identity across frames.
 | Store or share state | [`Entity`], [`Context`], and [`_ownership_and_data_flow`] |
 | Return an element tree | [`Render`], [`RenderOnce`], [`div`], and [`Styled`] |
 | Understand a frame | [`_documentation::rendering`] and [`Element`] |
+| Size and place elements | [`_documentation::layout`], [`Styled`], and [`Bounds`] |
+| Display and measure text | [`_documentation::text`], [`Text`], and [`WindowTextSystem`] |
+| Animate a changing value | [`_documentation::animation`], [`Animated`], and [`AnimationExt`] |
 | Handle keys and clicks | [`_documentation::input`], [`InteractiveElement`], and [`FocusHandle`] |
 | Run work without blocking input | [`_documentation::scheduling`], [`Task`], and [`BackgroundExecutor`] |
-| Draw a custom region | [`canvas`], [`Window::paint_quad`], and [`PathBuilder`] |
+| Draw a custom region | [`_documentation::drawing`], [`canvas`], and [`PathBuilder`] |
 | Display a large collection | [`uniform_list`] for equal-height rows, [`list`] for measured rows |
 | Test state and input | `TestApp` and `TestAppContext` (enable `test-support`) |
 | Expose accessible controls | [`_accessibility`] |

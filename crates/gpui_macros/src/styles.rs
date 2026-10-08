@@ -317,28 +317,48 @@ pub fn style_transitions(input: TokenStream) -> TokenStream {
 
 fn style_transition_docs(name: &str) -> &'static str {
     match name {
-        "m" => "Transitions changes made by [`Styled::m`] and its side/axis variants. The selected motion applies to all four margins; narrower builders can override individual sides.",
+        "m" => {
+            "Transitions changes made by [`Styled::m`] and its side/axis variants. The selected motion applies to all four margins; narrower builders can override individual sides."
+        }
         "mt" => "Transitions changes made by [`Styled::mt`]. Selects only the top margin.",
         "mb" => "Transitions changes made by [`Styled::mb`]. Selects only the bottom margin.",
         "my" => "Transitions changes made by [`Styled::my`]. Selects the top and bottom margins.",
         "mx" => "Transitions changes made by [`Styled::mx`]. Selects the left and right margins.",
         "ml" => "Transitions changes made by [`Styled::ml`]. Selects only the left margin.",
         "mr" => "Transitions changes made by [`Styled::mr`]. Selects only the right margin.",
-        "p" => "Transitions changes made by [`Styled::p`] and its side/axis variants. The selected motion applies to all four padding edges.",
+        "p" => {
+            "Transitions changes made by [`Styled::p`] and its side/axis variants. The selected motion applies to all four padding edges."
+        }
         "pt" => "Transitions changes made by [`Styled::pt`]. Selects only the top padding.",
         "pb" => "Transitions changes made by [`Styled::pb`]. Selects only the bottom padding.",
         "px" => "Transitions changes made by [`Styled::px`]. Selects left and right padding.",
         "py" => "Transitions changes made by [`Styled::py`]. Selects top and bottom padding.",
         "pl" => "Transitions changes made by [`Styled::pl`]. Selects only the left padding.",
         "pr" => "Transitions changes made by [`Styled::pr`]. Selects only the right padding.",
-        "inset" => "Transitions top, right, bottom, and left offsets set by [`Styled::inset`]. Use side builders to choose different motions per edge. Relative offsets are resolved against the containing block; auto offsets use the current laid-out position as their starting or ending value.",
-        "top" => "Transitions the top offset set by [`Styled::top`]. Relative lengths resolve against the containing block; auto uses the current laid-out position when available.",
-        "right" => "Transitions the right offset set by [`Styled::right`]. Relative lengths resolve against the containing block; auto uses the current laid-out position when available.",
-        "bottom" => "Transitions the bottom offset set by [`Styled::bottom`]. Relative lengths resolve against the containing block; auto uses the current laid-out position when available.",
-        "left" => "Transitions the left offset set by [`Styled::left`]. Relative lengths resolve against the containing block; auto uses the current laid-out position when available.",
-        "w" => "Transitions the width set by [`Styled::w`]. Auto width is sampled from layout bounds; relative values resolve against the containing width.",
-        "h" => "Transitions the height set by [`Styled::h`]. Auto height is sampled from layout bounds; relative values resolve against the containing height.",
-        "size" => "Transitions width and height set by [`Styled::size`]. Auto dimensions are sampled from layout bounds; relative values resolve against the matching containing dimension.",
+        "inset" => {
+            "Transitions top, right, bottom, and left offsets set by [`Styled::inset`]. Use side builders to choose different motions per edge. Relative offsets are resolved against the containing block; auto offsets use the current laid-out position as their starting or ending value."
+        }
+        "top" => {
+            "Transitions the top offset set by [`Styled::top`]. Relative lengths resolve against the containing block; auto uses the current laid-out position when available."
+        }
+        "right" => {
+            "Transitions the right offset set by [`Styled::right`]. Relative lengths resolve against the containing block; auto uses the current laid-out position when available."
+        }
+        "bottom" => {
+            "Transitions the bottom offset set by [`Styled::bottom`]. Relative lengths resolve against the containing block; auto uses the current laid-out position when available."
+        }
+        "left" => {
+            "Transitions the left offset set by [`Styled::left`]. Relative lengths resolve against the containing block; auto uses the current laid-out position when available."
+        }
+        "w" => {
+            "Transitions absolute width changes made by [`Styled::w`]. Pixels and rems resolve to pixels; auto uses retained layout bounds. Relative widths are presented immediately rather than interpolated."
+        }
+        "h" => {
+            "Transitions absolute height changes made by [`Styled::h`]. Pixels and rems resolve to pixels; auto uses retained layout bounds. Relative heights are presented immediately rather than interpolated."
+        }
+        "size" => {
+            "Transitions width and height set by [`Styled::size`]. Absolute lengths resolve to pixels and auto uses retained layout bounds. Relative dimensions are presented immediately rather than interpolated."
+        }
         "min_size" => "Transitions the minimum width and height set by [`Styled::min_size`].",
         "min_w" => "Transitions the minimum width set by [`Styled::min_w`].",
         "min_h" => "Transitions the minimum height set by [`Styled::min_h`].",
@@ -348,41 +368,101 @@ fn style_transition_docs(name: &str) -> &'static str {
         "gap" => "Transitions horizontal and vertical child gaps set by [`Styled::gap`].",
         "gap_x" => "Transitions the horizontal child gap set by [`Styled::gap_x`].",
         "gap_y" => "Transitions the vertical child gap set by [`Styled::gap_y`].",
-        "rounded" => "Transitions all corner radii set by [`Styled::rounded`]. Lengths resolve using the current root font size, then each radius is limited to half the smaller element dimension while the transition runs.",
-        "rounded_t" => "Transitions the top-left and top-right radii set by [`Styled::rounded_t`]. Radii are limited to half the smaller element dimension while the transition runs.",
-        "rounded_b" => "Transitions the bottom-left and bottom-right radii set by [`Styled::rounded_b`]. Radii are limited to half the smaller element dimension while the transition runs.",
-        "rounded_r" => "Transitions the right-side radii set by [`Styled::rounded_r`]. Radii are limited to half the smaller element dimension while the transition runs.",
-        "rounded_l" => "Transitions the left-side radii set by [`Styled::rounded_l`]. Radii are limited to half the smaller element dimension while the transition runs.",
-        "rounded_tl" => "Transitions the top-left radius set by [`Styled::rounded_tl`]. The radius is limited to half the smaller element dimension while the transition runs.",
-        "rounded_tr" => "Transitions the top-right radius set by [`Styled::rounded_tr`]. The radius is limited to half the smaller element dimension while the transition runs.",
-        "rounded_bl" => "Transitions the bottom-left radius set by [`Styled::rounded_bl`]. The radius is limited to half the smaller element dimension while the transition runs.",
-        "rounded_br" => "Transitions the bottom-right radius set by [`Styled::rounded_br`]. The radius is limited to half the smaller element dimension while the transition runs.",
-        "border" => "Transitions all four border widths set by [`Styled::border`]. Numbered presets use logical pixels; custom absolute lengths preserve their unit.",
-        "border_t" => "Transitions the top border width set by [`Styled::border_t`]. Numbered presets use logical pixels; custom absolute lengths preserve their unit.",
-        "border_b" => "Transitions the bottom border width set by [`Styled::border_b`]. Numbered presets use logical pixels; custom absolute lengths preserve their unit.",
-        "border_r" => "Transitions the right border width set by [`Styled::border_r`]. Numbered presets use logical pixels; custom absolute lengths preserve their unit.",
-        "border_l" => "Transitions the left border width set by [`Styled::border_l`]. Numbered presets use logical pixels; custom absolute lengths preserve their unit.",
-        "border_x" => "Transitions left and right border widths set by [`Styled::border_x`]. Numbered presets use logical pixels; custom absolute lengths preserve their unit.",
-        "border_y" => "Transitions top and bottom border widths set by [`Styled::border_y`]. Numbered presets use logical pixels; custom absolute lengths preserve their unit.",
-        "scrollbar_width" => "Transitions the scrollbar width. This is layout space reserved for scroll overflow, in logical pixels.",
+        "rounded" => {
+            "Transitions all corner radii set by [`Styled::rounded`]. Lengths resolve using the current root font size, then each radius is limited to half the smaller element dimension while the transition runs."
+        }
+        "rounded_t" => {
+            "Transitions the top-left and top-right radii set by [`Styled::rounded_t`]. Radii are limited to half the smaller element dimension while the transition runs."
+        }
+        "rounded_b" => {
+            "Transitions the bottom-left and bottom-right radii set by [`Styled::rounded_b`]. Radii are limited to half the smaller element dimension while the transition runs."
+        }
+        "rounded_r" => {
+            "Transitions the right-side radii set by [`Styled::rounded_r`]. Radii are limited to half the smaller element dimension while the transition runs."
+        }
+        "rounded_l" => {
+            "Transitions the left-side radii set by [`Styled::rounded_l`]. Radii are limited to half the smaller element dimension while the transition runs."
+        }
+        "rounded_tl" => {
+            "Transitions the top-left radius set by [`Styled::rounded_tl`]. The radius is limited to half the smaller element dimension while the transition runs."
+        }
+        "rounded_tr" => {
+            "Transitions the top-right radius set by [`Styled::rounded_tr`]. The radius is limited to half the smaller element dimension while the transition runs."
+        }
+        "rounded_bl" => {
+            "Transitions the bottom-left radius set by [`Styled::rounded_bl`]. The radius is limited to half the smaller element dimension while the transition runs."
+        }
+        "rounded_br" => {
+            "Transitions the bottom-right radius set by [`Styled::rounded_br`]. The radius is limited to half the smaller element dimension while the transition runs."
+        }
+        "border" => {
+            "Transitions all four border widths set by [`Styled::border`]. Numbered presets use logical pixels; custom absolute lengths preserve their unit."
+        }
+        "border_t" => {
+            "Transitions the top border width set by [`Styled::border_t`]. Numbered presets use logical pixels; custom absolute lengths preserve their unit."
+        }
+        "border_b" => {
+            "Transitions the bottom border width set by [`Styled::border_b`]. Numbered presets use logical pixels; custom absolute lengths preserve their unit."
+        }
+        "border_r" => {
+            "Transitions the right border width set by [`Styled::border_r`]. Numbered presets use logical pixels; custom absolute lengths preserve their unit."
+        }
+        "border_l" => {
+            "Transitions the left border width set by [`Styled::border_l`]. Numbered presets use logical pixels; custom absolute lengths preserve their unit."
+        }
+        "border_x" => {
+            "Transitions left and right border widths set by [`Styled::border_x`]. Numbered presets use logical pixels; custom absolute lengths preserve their unit."
+        }
+        "border_y" => {
+            "Transitions top and bottom border widths set by [`Styled::border_y`]. Numbered presets use logical pixels; custom absolute lengths preserve their unit."
+        }
+        "scrollbar_width" => {
+            "Transitions the scrollbar width. This is layout space reserved for scroll overflow, in logical pixels."
+        }
         "aspect_ratio" => "Transitions the optional aspect ratio set by [`Styled::aspect_ratio`].",
-        "flex_basis" => "Transitions the preferred main-axis size set by [`Styled::flex_basis`]; flex growth and shrinkage can still change the final size.",
-        "flex_grow" => "Transitions the flex growth factor set by [`Styled::flex_grow`]. This is a unitless share of positive free space, not a size.",
-        "flex_shrink" => "Transitions the flex shrink factor set by [`Styled::flex_shrink`]. This is a unitless weight used when the line has negative free space.",
-        "bg" => "Transitions the background set by [`Styled::bg`]. Solid backgrounds interpolate as colors; gradients and other backgrounds do not have a color interpolation path and switch at the endpoint.",
-        "border_color" => "Transitions the border background set by [`Styled::border_color`]. Solid colors interpolate; gradients and other backgrounds switch at the endpoint.",
-        "ring" => "Transitions the outer ring width and color. Use [`StyleTransitions::ring_color`] to select a separate color motion; builder order controls the motion for the overlapping color field.",
-        "ring_color" => "Transitions the outer ring color set by [`Styled::ring_color`]. Solid colors interpolate; gradients and other backgrounds switch at the endpoint.",
-        "inset_ring" => "Transitions the inset ring width and color. Use [`StyleTransitions::inset_ring_color`] to select a separate color motion.",
-        "inset_ring_color" => "Transitions the inset ring color set by [`Styled::inset_ring_color`]. Solid colors interpolate; gradients and other backgrounds switch at the endpoint.",
-        "text_color" => "Transitions the optional text color set by [`Styled::text_color`]. Colors interpolate through sRGB; see [`Lerp`](crate::Lerp).",
+        "flex_basis" => {
+            "Transitions the preferred main-axis size set by [`Styled::flex_basis`]; flex growth and shrinkage can still change the final size."
+        }
+        "flex_grow" => {
+            "Transitions the flex growth factor set by [`Styled::flex_grow`]. This is a unitless share of positive free space, not a size."
+        }
+        "flex_shrink" => {
+            "Transitions the flex shrink factor set by [`Styled::flex_shrink`]. This is a unitless weight used when the line has negative free space."
+        }
+        "bg" => {
+            "Transitions the background set by [`Styled::bg`]. Solid backgrounds interpolate as colors; gradients and other backgrounds do not have a color interpolation path and switch at the endpoint."
+        }
+        "border_color" => {
+            "Transitions the border background set by [`Styled::border_color`]. Solid colors interpolate; gradients and other backgrounds switch at the endpoint."
+        }
+        "ring" => {
+            "Transitions the outer ring width and color. Use [`StyleTransitions::ring_color`] to select a separate color motion; builder order controls the motion for the overlapping color field."
+        }
+        "ring_color" => {
+            "Transitions the outer ring color set by [`Styled::ring_color`]. Solid colors interpolate; gradients and other backgrounds switch at the endpoint."
+        }
+        "inset_ring" => {
+            "Transitions the inset ring width and color. Use [`StyleTransitions::inset_ring_color`] to select a separate color motion."
+        }
+        "inset_ring_color" => {
+            "Transitions the inset ring color set by [`Styled::inset_ring_color`]. Solid colors interpolate; gradients and other backgrounds switch at the endpoint."
+        }
+        "text_color" => {
+            "Transitions the optional text color set by [`Styled::text_color`]. Colors interpolate through sRGB; see [`Lerp`](crate::Lerp)."
+        }
         "text_bg" => "Transitions the optional text background color set by [`Styled::text_bg`].",
         "text_size" => "Transitions the optional font size set by [`Styled::text_size`].",
         "line_height" => "Transitions the optional line height set by [`Styled::line_height`].",
-        "letter_spacing" => "Transitions the optional letter spacing set by [`Styled::letter_spacing`].",
-        "line_clamp" => "Transitions the optional line clamp count set by [`Styled::line_clamp`]. The interpolated numeric value is converted back to an integer at each sample.",
+        "letter_spacing" => {
+            "Transitions the optional letter spacing set by [`Styled::letter_spacing`]."
+        }
+        "line_clamp" => {
+            "Transitions the optional line clamp count set by [`Styled::line_clamp`]. The interpolated numeric value is converted back to an integer at each sample."
+        }
         "opacity" => "Transitions the optional opacity set by [`Styled::opacity`].",
-        "rounded_smoothing" => "Transitions the corner-smoothing factor set by [`Styled::rounded_smoothing`], from 0 (circular corners) toward 1 (maximum smoothing).",
+        "rounded_smoothing" => {
+            "Transitions the corner-smoothing factor set by [`Styled::rounded_smoothing`], from 0 (circular corners) toward 1 (maximum smoothing)."
+        }
         _ => "Transitions the corresponding style property when its authored value changes.",
     }
 }
@@ -681,8 +761,11 @@ pub fn position_style_methods(input: TokenStream) -> TokenStream {
             self
         }
 
-        /// Removes the element from normal flex layout and positions it from its nearest positioned
-        /// ancestor, or the origin when it has none. Use [`crate::Display::None`] to omit it from layout.
+        /// Positions the element independently of its siblings within its layout parent.
+        ///
+        /// The parent does not reserve space for it. Set offsets with [`Self::top`],
+        /// [`Self::left`], or their counterparts; its size still follows layout constraints.
+        /// Use [`crate::Display::None`] to remove both layout and painting.
         /// [Docs](https://tailwindcss.com/docs/position)
         #visibility fn absolute(mut self) -> Self {
             self.style().position = Some(gpui::Position::Absolute);
@@ -967,7 +1050,7 @@ pub fn box_shadow_style_methods(input: TokenStream) -> TokenStream {
                 let method = format_ident!("{}_{}", prefix, suffix.suffix);
                 let field = format_ident!("{}", prefix);
                 quote! {
-                    #[doc = concat!("Sets the ", #prefix, " width to ", #width_doc, " logical pixels. This changes the width only; ring color remains unchanged.")]
+                    #[doc = concat!("Sets the ", #prefix, " width to ", #width_doc, ". The unit is logical pixels. Ring color remains unchanged.")]
                     /// [Docs](https://tailwindcss.com/docs/box-shadow)
                     #visibility fn #method(mut self) -> Self {
                         use gpui::px;
@@ -1198,7 +1281,7 @@ fn generate_box_style_methods(
                     &box_style_suffix.length_tokens,
                     false,
                     &format!(
-                        "{prefix}\n\n{suffix}\n\nNonzero numbered presets use rems (pixel equivalents assume a 16px root font size); `_0` is zero and `_px` is one logical pixel. Fraction and `_full` suffixes are relative lengths resolved by layout against the parent or containing block. `auto` is available only for properties whose custom setter accepts `Length`.",
+                        "{prefix}\n\nPreset: {suffix}. Pixel equivalents for rem values assume a 16px root font size; see [`Rems`](gpui::Rems).",
                         prefix = box_style_prefix.doc_string_prefix,
                         suffix = box_style_suffix.doc_string_suffix,
                     ),
@@ -1214,7 +1297,7 @@ fn generate_box_style_methods(
                     &box_style_suffix.length_tokens,
                     true,
                     &format!(
-                        "{prefix}\n\n{suffix}\n\nNonzero numbered presets use rems (pixel equivalents assume a 16px root font size); `_0` is zero and `_px` is one logical pixel. Fraction and `_full` suffixes are relative lengths resolved by layout against the parent or containing block. `auto` is available only for properties whose custom setter accepts `Length`.",
+                        "{prefix}\n\nPreset: {suffix}. Pixel equivalents for rem values assume a 16px root font size; see [`Rems`](gpui::Rems).",
                         prefix = box_style_prefix.doc_string_prefix,
                         suffix = box_style_suffix.doc_string_suffix,
                     ),
@@ -1380,43 +1463,43 @@ fn margin_box_style_prefixes() -> Vec<BoxStylePrefix> {
                 quote! { margin.left },
                 quote! { margin.right },
             ],
-            doc_string_prefix: "Sets the margin of the element. Presets use rems (pixel examples assume a 16px root size); `_px` is one logical pixel, and percentage fractions resolve against the relevant layout dimension. Custom values accept `Length`, including `auto`. [Docs](https://tailwindcss.com/docs/margin)",
+            doc_string_prefix: "Sets all four margins. Accepts pixels, rems, relative lengths, or `auto`; see [`Length`](gpui::Length). [Margin notation](https://tailwindcss.com/docs/margin)",
         },
         BoxStylePrefix {
             prefix: "mt",
             auto_allowed: true,
             fields: vec![quote! { margin.top }],
-            doc_string_prefix: "Sets the top margin. Presets use rems (pixel examples assume a 16px root size); `_px` is one logical pixel, and percentage fractions resolve against the relevant layout dimension. Custom values accept `Length`, including `auto`. [Docs](https://tailwindcss.com/docs/margin#add-margin-to-a-single-side)",
+            doc_string_prefix: "Sets the top margin, preserving the other sides. Accepts pixels, rems, relative lengths, or `auto`. [Margin notation](https://tailwindcss.com/docs/margin#add-margin-to-a-single-side)",
         },
         BoxStylePrefix {
             prefix: "mb",
             auto_allowed: true,
             fields: vec![quote! { margin.bottom }],
-            doc_string_prefix: "Sets the bottom margin. Presets use rems (pixel examples assume a 16px root size); `_px` is one logical pixel, and percentage fractions resolve against the relevant layout dimension. Custom values accept `Length`, including `auto`. [Docs](https://tailwindcss.com/docs/margin#add-margin-to-a-single-side)",
+            doc_string_prefix: "Sets the bottom margin, preserving the other sides. Accepts pixels, rems, relative lengths, or `auto`. [Margin notation](https://tailwindcss.com/docs/margin#add-margin-to-a-single-side)",
         },
         BoxStylePrefix {
             prefix: "my",
             auto_allowed: true,
             fields: vec![quote! { margin.top }, quote! { margin.bottom }],
-            doc_string_prefix: "Sets top and bottom margins. Presets use rems (pixel examples assume a 16px root size); `_px` is one logical pixel, and percentage fractions resolve against the relevant layout dimension. Custom values accept `Length`, including `auto`. [Docs](https://tailwindcss.com/docs/margin#add-vertical-margin)",
+            doc_string_prefix: "Sets top and bottom margins, preserving left and right. Accepts pixels, rems, relative lengths, or `auto`. [Margin notation](https://tailwindcss.com/docs/margin#add-vertical-margin)",
         },
         BoxStylePrefix {
             prefix: "mx",
             auto_allowed: true,
             fields: vec![quote! { margin.left }, quote! { margin.right }],
-            doc_string_prefix: "Sets left and right margins. Presets use rems (pixel examples assume a 16px root size); `_px` is one logical pixel, and percentage fractions resolve against the relevant layout dimension. Custom values accept `Length`, including `auto`. [Docs](https://tailwindcss.com/docs/margin#add-horizontal-margin)",
+            doc_string_prefix: "Sets left and right margins, preserving top and bottom. Accepts pixels, rems, relative lengths, or `auto`. [Margin notation](https://tailwindcss.com/docs/margin#add-horizontal-margin)",
         },
         BoxStylePrefix {
             prefix: "ml",
             auto_allowed: true,
             fields: vec![quote! { margin.left }],
-            doc_string_prefix: "Sets the left margin. Presets use rems (pixel examples assume a 16px root size); `_px` is one logical pixel, and percentage fractions resolve against the relevant layout dimension. Custom values accept `Length`, including `auto`. [Docs](https://tailwindcss.com/docs/margin#add-margin-to-a-single-side)",
+            doc_string_prefix: "Sets the left margin, preserving the other sides. Accepts pixels, rems, relative lengths, or `auto`. [Margin notation](https://tailwindcss.com/docs/margin#add-margin-to-a-single-side)",
         },
         BoxStylePrefix {
             prefix: "mr",
             auto_allowed: true,
             fields: vec![quote! { margin.right }],
-            doc_string_prefix: "Sets the right margin. Presets use rems (pixel examples assume a 16px root size); `_px` is one logical pixel, and percentage fractions resolve against the relevant layout dimension. Custom values accept `Length`, including `auto`. [Docs](https://tailwindcss.com/docs/margin#add-margin-to-a-single-side)",
+            doc_string_prefix: "Sets the right margin, preserving the other sides. Accepts pixels, rems, relative lengths, or `auto`. [Margin notation](https://tailwindcss.com/docs/margin#add-margin-to-a-single-side)",
         },
     ]
 }

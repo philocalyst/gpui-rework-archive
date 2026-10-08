@@ -349,21 +349,40 @@ fn interpreted_scene_matches_native_gpui_platform_text() {
             self.0.clone()
         }
     }
-    let atlas = Arc::new(SceneAtlas::new());
-    let captured = atlas.clone();
-    let mut native = HeadlessAppContext::with_platform(
-        gpui_platform::text_system().unwrap(),
-        Arc::new(()),
-        move || Some(Box::new(CaptureOnly(captured.clone()))),
-    );
-    let viewport = size(px(400.), px(250.));
-    let window = native
-        .open_window_with_scale_factor(viewport, 2., |_, cx| cx.new(|_| View))
-        .unwrap();
-    let expected = native
-        .capture_scene(window.into(), |tile| atlas.resolve(tile))
-        .unwrap();
-    let source = r#"use gpui::{*, prelude::*};
+    for (mode, transparent) in [
+        (TextRenderingMode::PlatformDefault, false),
+        (TextRenderingMode::Grayscale, false),
+        (TextRenderingMode::Subpixel, false),
+        (TextRenderingMode::Subpixel, true),
+    ] {
+        let atlas = Arc::new(SceneAtlas::new());
+        let captured = atlas.clone();
+        let mut native = HeadlessAppContext::with_platform(
+            gpui_platform::text_system().unwrap(),
+            Arc::new(()),
+            move || Some(Box::new(CaptureOnly(captured.clone()))),
+        );
+        native.set_automatic_drawing(false);
+        native.set_subpixel_rendering_supported(true);
+        native.update(|cx| cx.set_text_rendering_mode(mode));
+        let viewport = size(px(400.), px(250.));
+        let window = native
+            .open_window_with_scale_factor(viewport, 2., |_, cx| cx.new(|_| View))
+            .unwrap();
+        native
+            .update_window(window.into(), |_, window, _| {
+                window.set_background_appearance(if transparent {
+                    WindowBackgroundAppearance::Transparent
+                } else {
+                    WindowBackgroundAppearance::Opaque
+                });
+            })
+            .unwrap();
+        native.draw_window(window.into()).unwrap();
+        let expected = native
+            .capture_scene(window.into(), |tile| atlas.resolve(tile))
+            .unwrap();
+        let source = r#"use gpui::{*, prelude::*};
 struct View;
 impl Render for View {
  fn render(&mut self,_:&mut Window,_:&mut Context<Self>)->impl IntoElement {
@@ -371,23 +390,27 @@ impl Render for View {
  }
 }
 fn component(_:&mut Window,cx:&mut App)->Entity<View>{cx.new(|_|View)}"#;
-    let mut runtime = Runtime::native().unwrap();
-    let reply = execute(
-        &mut runtime,
-        1,
-        source,
-        PreviewContext {
-            viewport,
-            scale_factor: 2.,
-            ..Default::default()
-        },
-    );
-    let actual = reply.frame.expect(&reply.diagnostics).scene;
-    let atlas = SceneAtlas::from_captured_bitmaps(actual.bitmaps()).unwrap();
-    let actual =
-        SceneCapture::capture(&actual.to_scene().unwrap(), |tile| atlas.resolve(tile)).unwrap();
-    assert_eq!(
-        actual, expected,
-        "interpreted GPUI must preserve native layout, styles, placements, and glyph pixels"
-    );
+        let mut runtime = Runtime::native().unwrap();
+        let reply = execute(
+            &mut runtime,
+            1,
+            source,
+            PreviewContext {
+                viewport,
+                scale_factor: 2.,
+                subpixel_rendering: true,
+                text_rendering_mode: mode,
+                transparent_window: transparent,
+                ..Default::default()
+            },
+        );
+        let actual = reply.frame.expect(&reply.diagnostics).scene;
+        let atlas = SceneAtlas::from_captured_bitmaps(actual.bitmaps()).unwrap();
+        let actual =
+            SceneCapture::capture(&actual.to_scene().unwrap(), |tile| atlas.resolve(tile)).unwrap();
+        assert_eq!(
+            actual, expected,
+            "interpreted GPUI must preserve native layout, styles, placements, and glyph pixels"
+        );
+    }
 }

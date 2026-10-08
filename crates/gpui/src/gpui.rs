@@ -15,7 +15,7 @@ mod asset_cache;
 mod assets;
 mod bounds_tree;
 mod color;
-/// The default colors used by GPUI.
+/// Semantic color palettes that applications can install and observe.
 pub mod colors;
 #[cfg(feature = "profiler")]
 mod debug_overlay;
@@ -75,22 +75,50 @@ pub mod _accessibility;
 #[cfg(doc)]
 pub mod _ownership_and_data_flow;
 
-/// Explanations of the framework's rendering, input, scheduling, and platform contracts.
+/// Explanations of rendering, layout, text, drawing, input, scheduling, testing, and platform contracts.
 ///
 /// Complete programs and browser previews live in the
 /// [walkthroughs](https://gpui-ce.github.io/examples/).
+/// These chapters also appear in the [GPUI Book](https://gpui-ce.github.io/book/),
+/// built from the same source as this API reference.
 #[cfg(doc)]
 pub mod _documentation {
     #[doc = include_str!("../docs/rendering.md")]
+    ///
+    /// [Read this chapter in the GPUI Book](https://gpui-ce.github.io/book/rendering.html).
     pub mod rendering {}
+    #[doc = include_str!("../docs/layout.md")]
+    ///
+    /// [Read this chapter in the GPUI Book](https://gpui-ce.github.io/book/layout.html).
+    pub mod layout {}
+    #[doc = include_str!("../docs/animation.md")]
+    ///
+    /// [Read this chapter in the GPUI Book](https://gpui-ce.github.io/book/animation.html).
+    pub mod animation {}
+    #[doc = include_str!("../docs/text.md")]
+    ///
+    /// [Read this chapter in the GPUI Book](https://gpui-ce.github.io/book/text.html).
+    pub mod text {}
+    #[doc = include_str!("../docs/drawing.md")]
+    ///
+    /// [Read this chapter in the GPUI Book](https://gpui-ce.github.io/book/drawing.html).
+    pub mod drawing {}
     #[doc = include_str!("../docs/input.md")]
+    ///
+    /// [Read this chapter in the GPUI Book](https://gpui-ce.github.io/book/input.html).
     pub mod input {}
     #[doc = include_str!("../docs/scheduling.md")]
+    ///
+    /// [Read this chapter in the GPUI Book](https://gpui-ce.github.io/book/scheduling.html).
     pub mod scheduling {}
     #[doc = include_str!("../docs/platforms.md")]
+    ///
+    /// [Read this chapter in the GPUI Book](https://gpui-ce.github.io/book/platforms.html).
     pub mod platforms {}
     #[cfg(feature = "test-support")]
     #[doc = include_str!("../docs/testing.md")]
+    ///
+    /// [Read this chapter in the GPUI Book](https://gpui-ce.github.io/book/testing.html).
     pub mod testing {}
 }
 
@@ -244,9 +272,9 @@ pub trait AppContext {
         clippy::wrong_self_convention,
         reason = "`App::new` is an ubiquitous function for creating entities"
     )]
-// docs:examples:begin
-#[doc = include_str!("docs/examples/gpui-AppContext-new-d959d7f1.md")]
-// docs:examples:end
+    // docs:examples:begin
+    #[doc = include_str!("docs/examples/gpui-AppContext-new-d959d7f1.md")]
+    // docs:examples:end
     fn new<T: 'static>(&mut self, build_entity: impl FnOnce(&mut Context<T>) -> T) -> Entity<T>;
 
     /// Allocates an identity for an entity before constructing its value.
@@ -348,7 +376,8 @@ pub trait AppContext {
     /// Returns an error for a closed window or a root with a different type.
     /// It does not provide a mutable window borrow. The async implementation
     /// also returns an error after app release or while quitting. A conflicting
-    /// synchronous app borrow can still panic.
+    /// synchronous app borrow can still panic, as can reading a window that is
+    /// already being updated.
     fn read_window<T, R>(
         &self,
         window: &WindowHandle<T>,
@@ -492,7 +521,7 @@ pub trait VisualContext: AppContext {
     where
         V: 'static + Render;
 
-    /// Focuses the entity's [`FocusHandle`](crate::FocusHandle) in this window.
+    /// Focuses the entity's [`FocusHandle`] in this window.
     ///
     /// Attach that handle to its rendered element with
     /// [`track_focus`](crate::InteractiveElement::track_focus) so keyboard input

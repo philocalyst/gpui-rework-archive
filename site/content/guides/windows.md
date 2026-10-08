@@ -65,3 +65,20 @@ Use `request_animation_frame` for continued animation demand, and respect
 `App::reduce_motion` for decorative motion. The
 [animation walkthrough](@/examples/animation.md) uses the higher-level animation
 wrapper, which applies that preference.
+
+## Keep document changes on the model
+
+[`Window::set_window_edited`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.set_window_edited)
+sets the native unsaved-changes indicator on macOS. It does not notify a view,
+write a file, or stop the window from closing. Keep the modified flag on the
+document model, notify after changing it, and update the native indicator as
+part of presenting that state.
+
+Use `on_window_should_close` when closing requires a save or discard decision.
+Return `false` while the decision is pending; returning `true` allows the native
+close immediately. Track the pending decision so repeated close requests do not
+open several prompts. The
+[prompt example](https://gpui-ce.github.io/book/platforms.html#wait-for-a-prompt-without-blocking-the-window)
+shows the callback, pending flag, receiver, and approved removal together. The
+[platform chapter](https://gpui-ce.github.io/book/platforms.html#appearance-backdrops-and-document-state)
+also distinguishes document state from the window's color appearance and backdrop.

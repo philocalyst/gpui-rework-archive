@@ -1,5 +1,6 @@
 use gpui::{
-    AppContext, Context, Entity, IntoElement, Render, Subscription, Window, div, prelude::*, rgb,
+    AppContext, Context, Entity, IntoElement, Render, Role, Subscription, Window, div, prelude::*,
+    rgb, text,
 };
 
 struct Model {
@@ -45,11 +46,18 @@ impl Render for CounterView {
             .gap_4()
             .bg(rgb(0xf7f6f2))
             .text_color(rgb(0x202b29))
-            .child(div().text_2xl().child(format!("Count: {count}")))
-            .child(format!("Notifications received: {}", self.notifications))
+            .child(div().text_2xl().child(text!(format!("Count: {count}"))))
+            .child(text!(format!(
+                "Notifications received: {}",
+                self.notifications
+            )))
             .child(
                 div()
                     .id("increment-model")
+                    .role(Role::Button)
+                    .aria_label("Increment")
+                    .tab_index(0)
+                    .focus_visible(|style| style.ring_2().ring_color(rgb(0x3478c8)))
                     .px_4()
                     .py_2()
                     .rounded_md()

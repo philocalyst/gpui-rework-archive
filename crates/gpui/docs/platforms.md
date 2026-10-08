@@ -13,7 +13,7 @@ crate name does not make different source revisions compatible.
 For a native application, use the platform facade and open a window from the application callback:
 
 ```rust,no_run
-use gpui::{App, Empty, WindowOptions};
+use gpui::{App, AppContext as _, Empty, WindowOptions};
 
 fn main() {
     gpui_platform::application().run(|cx: &mut App| {
@@ -35,7 +35,7 @@ shows a slightly fuller version with menus, assets, window bounds, and closing b
 | Target | Native window system | Text and rendering setup | Selection and constraints |
 | --- | --- | --- | --- |
 | macOS | AppKit | GPUI's Parley-backed text system; Metal renderer by default. Enable `macos-wgpu` on `gpui_platform` to use WGPU instead. | Construct the platform on the AppKit main thread. `MacPlatform::new` panics without a main-thread marker. Anchored native popup windows are currently rejected so GPUI can use an in-window popover fallback. |
-| Windows | Win32 | DirectWrite text; DirectX renderer. | `WindowsPlatform::new` returns an error if OLE, DirectX, or DirectWrite initialization fails. |
+| Windows | Win32 | Parley shaping with a DirectWrite glyph rasterizer; DirectX renderer. | `WindowsPlatform::new` returns an error if OLE, DirectX, or DirectWrite initialization fails. |
 | Linux and FreeBSD | Wayland or X11 | Parley with system fonts when either display backend is enabled; WGPU rendering. | `gpui_linux` enables both `wayland` and `x11` by default. The facade exposes the same switches as `wayland` and `x11`; compositor selection follows the process environment. |
 | WebAssembly | Browser document and canvas | Parley without system fonts; WGPU selects WebGPU or WebGL2. | One top-level GPUI window per document. Browser permissions, fonts, graphics support, and threading rules apply. |
 
@@ -125,18 +125,127 @@ callback, or call UI APIs from an arbitrary native worker thread; schedule that 
 foreground executor.
 
 [`Window::window_handle()`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.window_handle)
-returns GPUI's typed window identity, not an OS handle. `Window` also exposes the borrowed
+returns GPUI's typed window identity. `Window` also exposes the borrowed
 `raw_window_handle::HasWindowHandle` and `HasDisplayHandle` views for integrations that need native
 interop. Their returned handles are tied to the borrow; do not keep their raw pointers after that
 borrow ends. A headless backend may return `HandleError::NotSupported`, so check the result before
 entering platform-specific code. See the [`raw-window-handle` API](https://docs.rs/raw-window-handle/0.6/raw_window_handle/)
 for the lifetime contract.
 
+Use [`Window::viewport_size`](crate::Window::viewport_size) for layout and drawing
+inside a window. [`Window::bounds`](crate::Window::bounds) reports backend window
+geometry; its origin and decoration coverage depend on the window system.
+Wayland does not provide an ordinary top-level window's global desktop position,
+and a browser canvas has no desktop window rectangle. For persistence, use
+[`Window::window_bounds`](crate::Window::window_bounds), which also carries
+restoration state such as fullscreen or maximized. Keep these values separate
+from element bounds, whose origin is inside the window's drawable area.
+
+## Appearance, backdrops, and document state
+
+[`Window::appearance`](crate::Window::appearance) reports the platform's light,
+dark, or vibrant appearance. It does not apply a theme. Choose colors in the
+application and observe appearance changes when the theme should follow the
+system. The [`colors`](crate::colors) module supplies a small palette and
+explains how to install and observe it.
+
+[`Window::set_background_appearance`](crate::Window::set_background_appearance)
+instead requests transparency or a native backdrop, such as blur. The desktop
+and renderer determine which effects are available. An opaque background
+painted by the root view covers whatever is behind it, even when the native
+window supports transparency.
+
+Document state is a third concern. On macOS,
+[`Window::set_window_edited`](crate::Window::set_window_edited) updates the
+unsaved-changes indicator in the window controls, and
+[`set_document_path`](crate::Window::set_document_path) associates a represented
+filename with the window. Other supplied native backends ignore these requests.
+Keep the document's actual path and modified flag on its model. Changing native
+chrome neither notifies that model nor saves its contents. Install a
+[`Window::on_window_should_close`](crate::Window::on_window_should_close)
+callback if closing requires a save or discard decision; return `false` while
+that decision is pending.
+
+## Wait for a prompt without blocking the window
+
+[`Window::prompt`](crate::Window::prompt) returns a receiver. Await it in a
+foreground task, then reacquire the window to apply the answer. This example
+confirms every native close request; an editor would install the same pattern
+around its unsaved-document check:
+
+```rust,no_run
+use gpui::{App, PromptButton, PromptLevel, Window};
+use std::{cell::Cell, rc::Rc};
+
+fn confirm_before_close(window: &Window, cx: &App) {
+    let pending = Rc::new(Cell::new(false));
+    window.on_window_should_close(cx, move |window, cx| {
+        if pending.replace(true) {
+            return false; // A decision is already in progress.
+        }
+        let answer = window.prompt(
+            PromptLevel::Warning,
+            "Close this window?",
+            Some("Unsaved changes will be discarded."),
+            &[
+                PromptButton::cancel("Keep editing"),
+                PromptButton::ok("Discard changes"),
+            ],
+            cx,
+        );
+        let pending = pending.clone();
+        window.spawn(cx, async move |cx| {
+            let discard = matches!(answer.await, Ok(1));
+            // The window can close through another route while we wait.
+            let _ = cx.update(|window, _| {
+                pending.set(false);
+                if discard {
+                    window.remove_window();
+                }
+            });
+        }).detach();
+        false // Veto this request while the task waits for an answer.
+    });
+}
+```
+
+The answer is an index into the supplied slice, so cancellation and discard
+have explicit meanings here. A dropped response channel also keeps the window
+open. Detaching the task lets it finish after the close-request callback returns;
+dropping an ordinary [`Task`](crate::Task) would cancel that wait. If the window
+has already gone, the final update fails and there is no close decision left to
+apply. [`Window::remove_window`](crate::Window::remove_window) removes it directly
+after approval, without asking the same close callback again.
+
+With the default builder, macOS and Windows use native dialogs; the other
+supplied window backends use the in-window fallback. Set
+[`App::set_prompt_builder`](crate::App::set_prompt_builder) to choose the
+built-in fallback or your own view on every target. Custom views report an
+answer by emitting [`PromptResponse`](crate::PromptResponse) after attachment
+through [`PromptHandle::with_view`](crate::PromptHandle::with_view).
+
+In-window prompts replace one another rather than forming a stack. Guard an
+outstanding decision as above when several requests should share it. A late
+response from a replaced view cannot dismiss the current prompt. When the
+current prompt answers, GPUI restores the focus target selected before the
+first prompt; it does not activate the native window.
+
+Native keyboard conventions differ. Use at most one `Ok` and one `Cancel`
+answer, name each consequence clearly, and test the native dialog on the
+platform you ship. See [`PromptButton`](crate::PromptButton) and
+[`FallbackPromptRenderer`](crate::FallbackPromptRenderer) for role and keyboard
+details. The [testing chapter](https://gpui-ce.github.io/book/testing.html)
+separates testing the decision from checking the operating-system dialog.
+
 ## Capability and error behavior
 
 The common platform traits describe capabilities, but individual operating systems do not
-implement every service the same way. For example, Linux's hide/activate operations are no-ops,
-macOS rejects anchored popup windows, and browser windows cannot provide a desktop file chooser.
+implement every service the same way. For example, Linux's application-level
+hide/activate operations are no-ops, while its window-level visibility and
+activation operations have separate implementations. macOS rejects anchored
+popup windows. The browser backend reports an unsupported error for the native
+path-picker contract; a browser file input instead provides files without
+ordinary desktop filesystem paths.
 Some operations return an error or a task that resolves to an error; others use an optional
 result, invoke a fallback, or intentionally do nothing. Check the method contract and handle its
 unsupported result in shared application code. Do not infer support from a successful build or
@@ -145,7 +254,7 @@ from a no-op that is silent.
 The platform-level popup, layer-shell, and screen-capture APIs are target- or feature-gated. Layer
 shell is only exposed for Linux builds with the Wayland feature. Screen capture currently has
 native frame representations on macOS and Windows, gated by `screen-capture`; the default platform
-trait reports unavailable on other targets. Consult the [platform API reference](https://docs.rs/gpui-ce/0.2.2/gpui/platform/index.html)
+trait reports unavailable on other targets. Consult the [`Platform`](crate::Platform) trait
 and the specific operation's return type for the behavior your app needs.
 
 These native `Platform` methods have notable target-specific behavior in this checkout:

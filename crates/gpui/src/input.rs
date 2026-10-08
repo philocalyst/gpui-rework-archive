@@ -44,16 +44,60 @@ pub fn utf16_to_utf8_offset(text: &str, utf16_offset: usize) -> usize {
     text.len()
 }
 
-/// Implement this trait to let a view handle platform text input, such as an editor or text field.
+/// Lets an entity participate in the platform's text-editing protocol.
 ///
-/// Once your view implements this trait, you can use it to construct an [`ElementInputHandler<V>`].
-/// This input handler can then be assigned during paint by calling [`Window::handle_input`].
+/// Implement this for an editor or text field. The entity owns its buffer,
+/// selection, and provisional [IME](https://en.wikipedia.org/wiki/Input_method)
+/// composition; GPUI forwards requests to read or change that state. Ordinary
+/// key listeners cannot replace this protocol: one composition can replace the
+/// same candidate text several times before committing it.
 ///
-/// Every range passed to this trait is in UTF-16 code units, matching [`InputHandler`] and the
-/// platform IME contract. Implementations may receive callbacks while the view is being painted;
-/// use the supplied [`Window`] and [`Context`] rather than retaining either value.
+/// # Attach the handler during paint
 ///
-/// See [`InputHandler`] for the callback contract for each method.
+/// Keep a [`FocusHandle`](crate::FocusHandle) on the editor and attach it to the rendered subtree
+/// with [`InteractiveElement::track_focus`](crate::InteractiveElement::track_focus). During the text element's paint,
+/// install an adapter using that element's logical window-coordinate bounds:
+///
+/// ```
+/// use gpui::{App, Bounds, ElementInputHandler, Entity, EntityInputHandler,
+///            FocusHandle, Pixels, Window};
+///
+/// fn install_editor_input<T: EntityInputHandler>(
+///     editor: Entity<T>,
+///     focus: &FocusHandle,
+///     bounds: Bounds<Pixels>,
+///     window: &mut Window,
+///     cx: &mut App,
+/// ) {
+///     window.handle_input(focus, ElementInputHandler::new(bounds, editor), cx);
+/// }
+/// ```
+///
+/// Installing the handler does not request focus. GPUI selects the handler for
+/// the focused node while finishing the frame. Reinstall it when the element
+/// paints again; a cached subtree carries its recorded handler forward.
+///
+/// # Keep one buffer and one selection
+///
+/// All ranges use UTF-16 code units, as in [`InputHandler`]. Rust strings and
+/// text layouts use UTF-8 bytes. Convert at this boundary with
+/// [`utf16_to_utf8_offset`] and [`utf8_to_utf16_offset`]; the adapter does not
+/// convert for you. Track the active selection end separately from its sorted
+/// range so [`selected_text_range`](Self::selected_text_range) can preserve
+/// selection direction.
+///
+/// For a replacement without an explicit range, target the existing marked
+/// range, or the selection when no composition is active. A marked replacement
+/// leaves the inserted text provisional; a committed replacement clears that
+/// mark. [`unmark_text`](Self::unmark_text) also clears the mark, keeping the
+/// text. Notify after editing or changing visible selection state.
+///
+/// Geometry must describe the buffer being queried. Reuse the layout that
+/// painted it, and return `None` when an edit has made that layout stale.
+/// Callbacks can arrive during painting; use the supplied [`Window`] and
+/// [`Context`] for each call. The [input chapter](crate::_documentation::input)
+/// follows a composition through its replacements, and [`InputHandler`]
+/// documents the platform contract for each callback.
 pub trait EntityInputHandler: 'static + Sized {
     /// Return the text overlapping a UTF-16 document range.
     ///
@@ -96,18 +140,21 @@ pub trait EntityInputHandler: 'static + Sized {
 
     /// Handle a platform-initiated paste.
     ///
-    /// The default implementation inserts the clipboard item's plain-text portion at the current
-    /// selection through [`Self::replace_text_in_range`]. Override it when the editor supports
-    /// richer clipboard content. See [`InputHandler::paste`].
+    /// The default implementation commits the item's plain text through
+    /// [`Self::replace_text_in_range`] with no explicit range. That targets
+    /// marked text during composition, or the selection otherwise. Override
+    /// this for richer clipboard content. See [`InputHandler::paste`].
     fn paste(&mut self, item: ClipboardItem, window: &mut Window, cx: &mut Context<Self>) {
         if let Some(text) = item.text() {
             self.replace_text_in_range(None, &text, window, cx);
         }
     }
 
-    /// Replace a UTF-16 document range, or the current selection when `range` is `None`.
+    /// Commit text by replacing a UTF-16 document range.
     ///
-    /// See [`InputHandler::replace_text_in_range`].
+    /// `None` targets the marked range during composition, or the current
+    /// selection otherwise. Clear composition and update the selection as
+    /// described in [`InputHandler::replace_text_in_range`].
     fn replace_text_in_range(
         &mut self,
         range: Option<Range<usize>>,
@@ -118,8 +165,9 @@ pub trait EntityInputHandler: 'static + Sized {
 
     /// Replace a UTF-16 document range and mark the inserted text as active IME composition.
     ///
-    /// `range: None` targets the current selection. `new_selected_range`, when supplied, is
-    /// relative to the newly inserted text. When it is `None`, choose the view's default
+    /// `range: None` targets the previous marked range, or the selection when
+    /// starting composition. `new_selected_range`, when supplied, is relative
+    /// to the newly inserted text. When it is `None`, choose the view's default
     /// selection placement. See
     /// [`InputHandler::replace_and_mark_text_in_range`].
     fn replace_and_mark_text_in_range(
@@ -213,8 +261,12 @@ pub trait EntityInputHandler: 'static + Sized {
     }
 }
 
-/// The canonical implementation of [`crate::PlatformInputHandler`]. Call [`Window::handle_input`]
-/// with an instance during your element's paint.
+/// Forwards platform text callbacks to an entity implementing [`EntityInputHandler`].
+///
+/// Install it with [`Window::handle_input`] during the element's paint. It keeps
+/// a strong entity handle and the bounds from that frame; each callback updates
+/// the entity through the supplied app context. Its IME preference follows
+/// [`EntityInputHandler::accepts_text_input`].
 pub struct ElementInputHandler<V> {
     view: Entity<V>,
     element_bounds: Bounds<Pixels>,

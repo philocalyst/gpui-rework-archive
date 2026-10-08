@@ -10,7 +10,8 @@ mod support;
 // That signal means “read my current state”, without describing each mutation.
 
 use gpui::{
-    AppContext, Context, Entity, IntoElement, Render, Subscription, Window, div, prelude::*, rgb,
+    AppContext, Context, Entity, IntoElement, Render, Role, Subscription, Window, div, prelude::*,
+    rgb, text,
 };
 
 struct Model {
@@ -70,6 +71,10 @@ impl CounterView {
 // [`Entity::update`] to access its model. Those are different entities. The
 // model update completes before the handler returns; the queued observer runs
 // during effect processing, after the model's update borrow has ended.
+//
+// Both labels use [`text`] so their values appear in the accessibility tree.
+// Increment has a button role, an accessible name, and a tab stop. Use Tab and
+// Enter to check that the same state transition works without a pointer.
 
 impl Render for CounterView {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
@@ -83,11 +88,18 @@ impl Render for CounterView {
             .gap_4()
             .bg(rgb(0xf7f6f2))
             .text_color(rgb(0x202b29))
-            .child(div().text_2xl().child(format!("Count: {count}")))
-            .child(format!("Notifications received: {}", self.notifications))
+            .child(div().text_2xl().child(text!(format!("Count: {count}"))))
+            .child(text!(format!(
+                "Notifications received: {}",
+                self.notifications
+            )))
             .child(
                 div()
                     .id("increment-model")
+                    .role(Role::Button)
+                    .aria_label("Increment")
+                    .tab_index(0)
+                    .focus_visible(|style| style.ring_2().ring_color(rgb(0x3478c8)))
                     .px_4()
                     .py_2()
                     .rounded_md()

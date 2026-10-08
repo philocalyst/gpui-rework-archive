@@ -7,9 +7,10 @@
 //!
 //! A frame runs in three ordered phases. [`Element::request_layout`] creates layout nodes and
 //! returns the element's layout state. [`Element::prepaint`] receives the resolved bounds and
-//! records hitboxes, focus information, and other frame-local state. [`Element::paint`] consumes
-//! those two states to draw. The tree and frame-local callbacks are rebuilt for the next frame;
-//! persistent state must live in a view, an entity, or an element state handle.
+//! records hitboxes, focus information, and other frame-local state. [`Element::paint`] borrows
+//! those two states to draw. A newly rendered tree builds its own phase state
+//! and callbacks; cached views can reuse earlier frame records. Persistent state
+//! belongs in an entity or under a stable element ID.
 //!
 //! `RequestLayoutState` and `PrepaintState` carry work between phases of this
 //! frame. For state that must survive another render, use an entity or
@@ -49,7 +50,8 @@ use std::{
 /// When drawing this element, GPUI calls these methods in order and passes the state returned by
 /// [`request_layout`](Self::request_layout) into the later phases. Return a stable [`ElementId`]
 /// when the element owns state that should follow it across frames; omit it for an ephemeral
-/// element. Layout IDs and `bounds` are frame-local and must not be retained.
+/// element. A [`LayoutId`] is valid only for its frame. Bounds may be retained
+/// as the last measured geometry, but must be refreshed when layout changes.
 // docs:examples:begin
 #[doc = include_str!("docs/examples/gpui-Element-e02c3ee0.md")]
 // docs:examples:end
@@ -230,9 +232,13 @@ pub trait RenderOnce: 'static {
     fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement;
 }
 
-/// A variation on [`ParentElement`] which only supports children of a particular type.
+/// Appends children of one component-specific type.
+///
+/// Use this trait for a parent whose children carry information beyond an
+/// element tree, such as a tab label or a menu item's action. [`ParentElement`]
+/// accepts any value that implements [`IntoElement`] instead.
 pub trait ParentElementTyped {
-    /// The specific item type that this element accepts (could simply implement IntoElement or be an element itself).
+    /// The value accepted for each child. It need not implement [`IntoElement`].
     type Child;
 
     /// Extend this element's children with the given child elements.
@@ -257,8 +263,12 @@ pub trait ParentElementTyped {
     }
 }
 
-/// This is a helper trait to provide a uniform interface for constructing elements that
-/// can accept any number of any kind of child elements
+/// Appends element children in the order supplied.
+///
+/// Builders such as [`Div`](crate::Div) implement this trait so callers can
+/// mix strings, entity-backed views, and owned components. The default builders
+/// erase each child's concrete type into [`AnyElement`]. They append to the
+/// existing children; they do not replace them.
 pub trait ParentElement {
     /// Extend this element's children with the given child elements.
     fn extend(&mut self, elements: impl IntoIterator<Item = AnyElement>);
@@ -282,8 +292,7 @@ pub trait ParentElement {
     }
 }
 
-/// A globally unique identifier for an element, used to track state across frames.
-/// The full path of [`ElementId`] values that identifies an element across frames.
+/// The path of local [`ElementId`] values identifying an element in its window.
 ///
 /// GPUI builds this path from the IDs on the route through the element tree. It keys retained
 /// element state and accessibility nodes; it is distinct from [`LayoutId`], which is created for
@@ -330,9 +339,12 @@ trait ElementObject {
     ) -> Size<Pixels>;
 }
 
-/// A wrapper around an implementer of [`Element`] that allows it to be drawn in a window.
+/// An element and the state of its current layout, prepaint, and paint sequence.
+///
+/// GPUI creates this wrapper when an element is erased into [`AnyElement`].
+/// Application code normally uses that interface to draw children.
 pub struct Drawable<E: Element> {
-    /// The drawn element.
+    /// The concrete element being drawn.
     pub element: E,
     phase: ElementDrawPhase<E::RequestLayoutState, E::PrepaintState>,
 }
@@ -366,7 +378,6 @@ enum ElementDrawPhase<RequestLayoutState, PrepaintState> {
     Painted,
 }
 
-/// A wrapper around an implementer of [`Element`] that allows it to be drawn in a window.
 impl<E: Element> Drawable<E> {
     pub(crate) fn new(element: E) -> Self {
         Drawable {
@@ -780,19 +791,25 @@ impl AnyElement {
         AnyElement(element)
     }
 
-    /// Attempt to downcast a reference to the boxed element to a specific type.
+    /// Borrows the concrete element as `T`, or returns `None` for a different type.
     pub fn downcast_mut<T: 'static>(&mut self) -> Option<&mut T> {
         self.0.inner_element().downcast_mut::<T>()
     }
 
-    /// Request the layout ID of the element stored in this `AnyElement`.
-    /// Used for laying out child elements in a parent element.
+    /// Requests the child's layout node and initializes its layout-phase state.
+    ///
+    /// A custom parent calls this once per child from its own
+    /// [`Element::request_layout`], then includes the returned ID in its layout
+    /// request. Calling it twice on the same element value panics.
     pub fn request_layout(&mut self, window: &mut Window, cx: &mut App) -> LayoutId {
         self.0.request_layout(window, cx)
     }
 
-    /// Prepares the element to be painted by storing its bounds, giving it a chance to draw hitboxes and
-    /// request autoscroll before the final paint pass is confirmed.
+    /// Prepares the child using its resolved layout bounds.
+    ///
+    /// Call after layout has been computed and before [`paint`](Self::paint).
+    /// This records hitboxes and other frame data. It returns the subtree's
+    /// focused handle only if focus had not already been recorded in this frame.
     pub fn prepaint(&mut self, window: &mut Window, cx: &mut App) -> Option<FocusHandle> {
         let focus_assigned = window.next_frame.focus.is_some();
 
@@ -805,12 +822,19 @@ impl AnyElement {
         None
     }
 
-    /// Paints the element stored in this `AnyElement`.
+    /// Paints the prepared child and installs its input handlers for this frame.
+    ///
+    /// Call once, after [`prepaint`](Self::prepaint). Calling before prepaint
+    /// or painting the same element value again panics.
     pub fn paint(&mut self, window: &mut Window, cx: &mut App) {
         self.0.paint(window, cx);
     }
 
-    /// Performs layout for this element within the given available space and returns its size.
+    /// Measures the element as a layout root and returns its logical-pixel size.
+    ///
+    /// This also requests layout if needed. Before prepaint, it can be called
+    /// again with different available space to recompute the size. It panics
+    /// after the element has entered prepaint or paint.
     pub fn layout_as_root(
         &mut self,
         available_space: Size<AvailableSpace>,
@@ -820,8 +844,10 @@ impl AnyElement {
         self.0.layout_as_root(available_space, window, cx)
     }
 
-    /// Prepaints this element at the given absolute origin.
-    /// If any element in the subtree beneath this element is focused, its FocusHandle is returned.
+    /// Prepares the laid-out element at a logical window-local origin.
+    ///
+    /// The origin replaces the current element offset for this scope. The
+    /// returned focus handle follows the rules of [`prepaint`](Self::prepaint).
     pub fn prepaint_at(
         &mut self,
         origin: Point<Pixels>,
@@ -831,8 +857,10 @@ impl AnyElement {
         window.with_absolute_element_offset(origin, |window| self.prepaint(window, cx))
     }
 
-    /// Performs layout on this element in the available space, then prepaints it at the given absolute origin.
-    /// If any element in the subtree beneath this element is focused, its FocusHandle is returned.
+    /// Measures the element as a root, then prepares it at a logical window-local origin.
+    ///
+    /// Use this for a separately positioned subtree, such as an overlay. The
+    /// returned focus handle follows the rules of [`prepaint`](Self::prepaint).
     pub fn prepaint_as_root(
         &mut self,
         origin: Point<Pixels>,
@@ -906,7 +934,9 @@ impl IntoElement for AnyElement {
     }
 }
 
-/// The empty element, which renders nothing.
+/// An element with `display: none`: it occupies no layout space and paints nothing.
+///
+/// Use this for an absent child when the surrounding API needs an element value.
 pub struct Empty;
 
 impl IntoElement for Empty {

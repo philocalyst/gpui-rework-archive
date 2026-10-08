@@ -5,18 +5,19 @@ use std::fmt;
 /// The named state contributed by one node on a key-dispatch path.
 ///
 /// A context contains identifiers such as `Editor` and key-value entries such as `mode=insert`.
-/// GPUI collects contexts from the root toward the focused node; a binding predicate can match a
-/// context at any depth or express an ancestor/descendant relationship. Use
-/// [`KeyBindingContextPredicate`] to describe those matches.
+/// GPUI collects contexts from the root toward the focused node. A binding's
+/// [`KeyBindingContextPredicate`] tests those nodes; it does not merge their
+/// entries into one map. For example, `Editor && mode == insert` needs both
+/// entries on the same node, while `Workspace > Editor` relates two nodes.
 #[derive(Clone, Default, Eq, PartialEq, Hash)]
 pub struct KeyContext(Vec<ContextEntry>);
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
-/// An entry in a KeyContext
+/// An identifier or key-value entry in a [`KeyContext`].
 pub struct ContextEntry {
-    /// The key (or name if no value)
+    /// The entry's key, or its identifier when `value` is `None`.
     pub key: SharedString,
-    /// The value
+    /// The value of a keyed entry; `None` for a bare identifier.
     pub value: Option<SharedString>,
 }
 
@@ -69,6 +70,9 @@ impl KeyContext {
     ///
     /// Use [`KeyBindingContextPredicate::parse`] for the boolean expression syntax used by
     /// keybinding `context` fields.
+    /// Identifiers and values accept Unicode letters and numbers, `_`, and `-`.
+    /// Empty input creates an empty context. Unsupported punctuation or a
+    /// missing key/value returns an error. Repeated keys retain their first entry.
     pub fn parse(source: &str) -> Result<Self> {
         let mut context = Self::default();
         let source = skip_whitespace(source);
@@ -77,28 +81,33 @@ impl KeyContext {
     }
 
     fn parse_expr(mut source: &str, context: &mut Self) -> Result<()> {
-        if source.is_empty() {
-            return Ok(());
-        }
-
-        let key = source
-            .chars()
-            .take_while(|c| is_identifier_char(*c))
-            .collect::<String>();
-        source = skip_whitespace(&source[key.len()..]);
-        if let Some(suffix) = source.strip_prefix('=') {
-            source = skip_whitespace(suffix);
-            let value = source
+        while !source.is_empty() {
+            let key = source
                 .chars()
                 .take_while(|c| is_identifier_char(*c))
                 .collect::<String>();
-            source = skip_whitespace(&source[value.len()..]);
-            context.set(key, value);
-        } else {
-            context.add(key);
+            anyhow::ensure!(
+                !key.is_empty(),
+                "expected a context identifier at {source:?}"
+            );
+            source = skip_whitespace(&source[key.len()..]);
+            if let Some(suffix) = source.strip_prefix('=') {
+                source = skip_whitespace(suffix);
+                let value = source
+                    .chars()
+                    .take_while(|c| is_identifier_char(*c))
+                    .collect::<String>();
+                anyhow::ensure!(
+                    !value.is_empty(),
+                    "expected a value for context key {key:?}"
+                );
+                source = skip_whitespace(&source[value.len()..]);
+                context.set(key, value);
+            } else {
+                context.add(key);
+            }
         }
-
-        Self::parse_expr(source, context)
+        Ok(())
     }
 
     /// Check if this context is empty.
@@ -180,7 +189,7 @@ impl fmt::Debug for KeyContext {
 /// A predicate that determines whether a key binding is enabled on a context path.
 ///
 /// Predicates are parsed from strings in a binding's `context` field. For example,
-/// `Editor && mode == insert` requires both terms on the matching path, while
+/// `Editor && mode == insert` requires both terms on one matching node, while
 /// `Workspace > Editor` requires the editor context below the workspace context. The parser also
 /// accepts `!=`, `||`, and `!`; malformed expressions return an error.
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
@@ -262,6 +271,18 @@ impl KeyBindingContextPredicate {
     /// This syntax supports `!=`, `||`, and `&&`; `!` negates a check or grouped expression.
     /// `&&` binds more tightly than `||`. A malformed or partially consumed expression returns an
     /// error rather than a partial predicate.
+    /// Write spaces around `>` to distinguish the relationship operator from
+    /// identifiers containing Vim operator characters.
+    ///
+    /// ```rust
+    /// use gpui::{KeyBindingContextPredicate as Predicate, KeyContext};
+    /// let path = [
+    ///     KeyContext::parse("Workspace").unwrap(),
+    ///     KeyContext::parse("Editor mode=insert").unwrap(),
+    /// ];
+    /// assert!(Predicate::parse("Workspace > Editor && mode == insert").unwrap().eval(&path));
+    /// assert!(!Predicate::parse("Workspace && Editor").unwrap().eval(&path));
+    /// ```
     pub fn parse(source: &str) -> Result<Self> {
         let source = skip_whitespace(source);
         let (predicate, rest) = Self::parse_expr(source, 0)?;
@@ -573,6 +594,28 @@ mod tests {
             expected
         );
         assert_eq!(KeyContext::parse(" baz foo = bar").unwrap(), expected);
+    }
+
+    #[test]
+    fn malformed_context_returns_an_error() {
+        for source in [
+            ".",
+            "Editor && enabled",
+            "mode=",
+            "=insert",
+            "mode==insert",
+            "mode=\"insert\"",
+        ] {
+            assert!(KeyContext::parse(source).is_err(), "accepted {source:?}");
+        }
+        assert!(KeyContext::parse(" \n ").unwrap().is_empty());
+        assert_eq!(
+            KeyContext::parse("mode=insert mode=normal")
+                .unwrap()
+                .get("mode")
+                .unwrap(),
+            "insert"
+        );
     }
 
     #[test]

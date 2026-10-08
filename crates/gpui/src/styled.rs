@@ -79,14 +79,14 @@ pub trait Styled: Sized {
 
         self
     }
-// docs:examples:begin
-gpui_macros::style_helpers! {
-    docs {
-        min_w: #[doc = include_str!("docs/examples/gpui-Styled-min-w-71eeddc8.md")],
-        w: #[doc = include_str!("docs/examples/gpui-Styled-w-2ede14d6.md")],
+    // docs:examples:begin
+    gpui_macros::style_helpers! {
+        docs {
+            min_w: #[doc = include_str!("docs/examples/gpui-Styled-min-w-71eeddc8.md")],
+            w: #[doc = include_str!("docs/examples/gpui-Styled-w-2ede14d6.md")],
+        }
     }
-}
-// docs:examples:end
+    // docs:examples:end
     gpui_macros::visibility_style_methods!();
     gpui_macros::margin_style_methods!();
     gpui_macros::padding_style_methods!();
@@ -169,37 +169,68 @@ gpui_macros::style_helpers! {
         self
     }
 
-    /// Sets the display type of the element.
+    /// Choose how this element participates in layout and arranges its children.
+    ///
+    /// [`Display::Inline`] participates in a surrounding paragraph;
+    /// [`Display::InlineFlex`] participates as a single box with flex layout
+    /// inside. Block, flex, and grid containers arrange their children by
+    /// their respective layout rules. See the
+    /// [layout chapter](crate::_documentation::layout) for sizing and the
+    /// [text chapter](crate::_documentation::text#wrap-text-and-element-boxes-in-one-paragraph)
+    /// for inline content.
     fn display(mut self, display: Display) -> Self {
         self.style().display = Some(display);
         self
     }
 
-    /// Sets the display type of the element to `block`.
-    /// [Docs](https://tailwindcss.com/docs/display)
+    /// Arrange text and inline children into paragraphs, with block children between them.
+    ///
+    /// This is a [`Div`](crate::Div)'s default display. Adjacent text children
+    /// wrap together; separate block children start separate flow boxes.
     fn block(self) -> Self {
         self.display(Display::Block)
     }
 
-    /// Sets the display type of the element to `flex`.
-    /// [Docs](https://tailwindcss.com/docs/display)
+    /// Arrange children as flex items, initially along a row.
+    ///
+    /// Each child has its own layout box. Use [`flex_col`](Self::flex_col)
+    /// for a column and [`flex_wrap`](Self::flex_wrap) to allow several flex
+    /// lines. Flex wrapping moves whole items between lines; it does not
+    /// combine their text into one paragraph as [`block`](Self::block) does.
     fn flex(self) -> Self {
         self.display(Display::Flex)
     }
 
-    /// Sets the display type of the element to `grid`.
-    /// [Docs](https://tailwindcss.com/docs/display)
+    /// Arrange children in grid tracks.
+    ///
+    /// Configure columns and rows with helpers such as
+    /// [`grid_cols`](Self::grid_cols). The
+    /// [layout chapter](crate::_documentation::layout#choose-grid-tracks-deliberately)
+    /// explains track sizing and placement.
     fn grid(self) -> Self {
         self.display(Display::Grid)
     }
 
     /// Contributes this element's contents to a block parent's paragraph.
-    /// Nested inline elements wrap together without adding whitespace or breaks.
+    ///
+    /// Nested inline elements wrap together without adding whitespace or
+    /// breaks. Supply spaces in the text itself. A span may occupy several
+    /// disjoint fragments when it wraps or contains bidirectional text; its
+    /// enclosing layout bounds can include space between those fragments.
+    ///
+    /// At the root or as a flex/grid item, the element lays out independently
+    /// using block flow. Use [`inline_flex`](Self::inline_flex) when a badge,
+    /// icon, or control should stay together as one box inside a paragraph.
     fn inline(self) -> Self {
         self.display(Display::Inline)
     }
 
     /// Places this element in a paragraph as one atomic box with flex layout inside.
+    ///
+    /// Text wraps around the box, not through its children. Use
+    /// [`vertical_align`](Self::vertical_align) to choose its placement against
+    /// surrounding text. [`align_middle`](Self::align_middle) uses text metrics;
+    /// it does not center the box in the full paragraph's height.
     fn inline_flex(self) -> Self {
         self.display(Display::InlineFlex)
     }
@@ -274,51 +305,63 @@ gpui_macros::style_helpers! {
         self.overflow_fade(Edges::vertical(fade.into()))
     }
 
-    /// Sets the whitespace of the element.
+    /// Set the inherited soft-wrapping policy for text.
+    ///
+    /// This controls line breaking, not CSS-style whitespace collapsing. Hard breaks in the
+    /// source remain distinct lines. See [`WhiteSpace`] and [`Self::text_overflow`].
     /// [Docs](https://tailwindcss.com/docs/whitespace)
     fn whitespace(mut self, white_space: WhiteSpace) -> Self {
         self.text_style().white_space = Some(white_space);
         self
     }
 
-    /// Sets the whitespace of the element to `normal`.
+    /// Allow text to wrap at the available width. This does not collapse source whitespace.
     /// [Docs](https://tailwindcss.com/docs/whitespace#normal)
     fn whitespace_normal(mut self) -> Self {
         self.text_style().white_space = Some(WhiteSpace::Normal);
         self
     }
 
-    /// Sets the whitespace of the element to `nowrap`.
+    /// Disable soft wrapping while preserving hard line breaks.
+    /// Text can overflow its box unless clipping or truncation is configured.
     /// [Docs](https://tailwindcss.com/docs/whitespace#nowrap)
     fn whitespace_nowrap(mut self) -> Self {
         self.text_style().white_space = Some(WhiteSpace::Nowrap);
         self
     }
 
-    /// Sets the truncate overflowing text with an ellipsis (…) at the end if needed.
+    /// Replace the logical end of overflowing text with an ellipsis (`…`).
+    ///
+    /// This sets the inherited truncation policy. [`Self::truncate`] also disables soft wrapping
+    /// and clips overflow; use this method alone when keeping normal wrapping or a line clamp.
     /// [Docs](https://tailwindcss.com/docs/text-overflow#ellipsis)
     fn text_ellipsis(mut self) -> Self {
         self.text_style().text_overflow = Some(TextOverflow::Truncate(ELLIPSIS));
         self
     }
 
-    /// Sets the truncate overflowing text with an ellipsis (…) at the start if needed.
-    /// Typically more adequate for file paths where the end is more important than the beginning.
-    /// Note: This doesn't exist in Tailwind CSS.
+    /// Replace the logical start of overflowing text with an ellipsis (`…`).
+    ///
+    /// Use this for paths where the final component matters most. The cut follows source order,
+    /// not the visual left edge in bidirectional text. Wrapping and clipping remain unchanged.
     fn text_ellipsis_start(mut self) -> Self {
         self.text_style().text_overflow = Some(TextOverflow::TruncateStart(ELLIPSIS));
         self
     }
 
-    /// Sets the truncate overflowing text with an ellipsis (…) in the middle if needed.
-    /// Preserves the beginning and end of the text. Useful for filenames.
-    /// Note: This doesn't exist in Tailwind CSS.
+    /// Replace the logical middle of overflowing text with an ellipsis (`…`).
+    ///
+    /// This preserves a prefix and suffix, useful for a filename whose extension matters.
+    /// Wrapping and clipping remain unchanged. Cuts preserve complete grapheme clusters.
     fn text_ellipsis_middle(mut self) -> Self {
         self.text_style().text_overflow = Some(TextOverflow::TruncateMiddle(ELLIPSIS));
         self
     }
 
-    /// Sets the text overflow behavior of the element.
+    /// Set the inherited truncation affix and the part of the source to remove.
+    ///
+    /// Truncation changes display text. It does not clip arbitrary painting or disable wrapping;
+    /// configure those separately with [`Self::overflow_hidden`] and [`Self::whitespace_nowrap`].
     fn text_overflow(mut self, overflow: TextOverflow) -> Self {
         self.text_style().text_overflow = Some(overflow);
         self
@@ -355,25 +398,33 @@ gpui_macros::style_helpers! {
         self.text_align(TextAlign::Right)
     }
 
-    /// Sets the letter spacing for text in this element and its children.
+    /// Set additional spacing during shaping, in logical pixels, inherited by descendants.
+    /// Positive values widen the text; negative values tighten it. Backend limits may apply.
     fn letter_spacing(mut self, spacing: impl Into<Pixels>) -> Self {
         self.text_style().letter_spacing = Some(spacing.into());
         self
     }
 
-    /// Sets the case transformation for text in this element and its children.
+    /// Set a byte-length-preserving case mapping, inherited by descendants.
+    /// See [`TextTransform`] for which Unicode mappings are left unchanged.
     fn text_transform(mut self, transform: TextTransform) -> Self {
         self.text_style().text_transform = Some(transform);
         self
     }
 
-    /// Sets the truncate to prevent text from wrapping and truncate overflowing text with an ellipsis (…) if needed.
+    /// Disable soft wrapping, truncate with a trailing ellipsis, and clip overflow on both axes.
+    ///
+    /// The available width must be constrained for truncation to occur. This combines
+    /// [`Self::whitespace_nowrap`], [`Self::text_ellipsis`], and [`Self::overflow_hidden`].
     /// [Docs](https://tailwindcss.com/docs/text-overflow#truncate)
     fn truncate(mut self) -> Self {
         self.overflow_hidden().whitespace_nowrap().text_ellipsis()
     }
 
-    /// Sets number of lines to show before truncating the text.
+    /// Set the inherited line-breaking limit and clip overflow on both axes.
+    ///
+    /// This does not select an affix. Add [`Self::text_ellipsis`] to mark removed text, and
+    /// provide a constrained width for soft wrapping. See [`TextStyle::line_clamp`](crate::TextStyle::line_clamp).
     /// [Docs](https://tailwindcss.com/docs/line-clamp)
     fn line_clamp(mut self, lines: usize) -> Self {
         let mut text_style = self.text_style();
@@ -418,9 +469,9 @@ gpui_macros::style_helpers! {
 
     /// Sets the element to allow a flex item to grow and shrink as needed, ignoring its initial size.
     /// [Docs](https://tailwindcss.com/docs/flex#flex-1)
-// docs:examples:begin
-#[doc = include_str!("docs/examples/gpui-Styled-flex-1-f5667f4a.md")]
-// docs:examples:end
+    // docs:examples:begin
+    #[doc = include_str!("docs/examples/gpui-Styled-flex-1-f5667f4a.md")]
+    // docs:examples:end
     fn flex_1(mut self) -> Self {
         self.style().flex_grow = Some(1.);
         self.style().flex_shrink = Some(1.);
@@ -485,9 +536,9 @@ gpui_macros::style_helpers! {
 
     /// Sets the flex item's shrink factor.
     /// [Docs](https://tailwindcss.com/docs/flex-shrink)
-// docs:examples:begin
-#[doc = include_str!("docs/examples/gpui-Styled-flex-shrink-20b4a49b.md")]
-// docs:examples:end
+    // docs:examples:begin
+    #[doc = include_str!("docs/examples/gpui-Styled-flex-shrink-20b4a49b.md")]
+    // docs:examples:end
     fn flex_shrink(mut self, shrink: f32) -> Self {
         self.style().flex_shrink = Some(shrink);
         self
@@ -805,9 +856,10 @@ gpui_macros::style_helpers! {
         self
     }
 
-    /// Sets the background color of this element.
+    /// Set the inherited background color behind text runs.
     ///
-    /// This value cascades to its child elements.
+    /// Use [`Self::bg`] for the element's box. This color follows text fragments and does not
+    /// fill the complete layout box.
     fn text_bg(mut self, bg: impl IntoColor<Hsla>) -> Self {
         self.text_style().background_color = Some(bg.into_color());
         self
@@ -816,9 +868,9 @@ gpui_macros::style_helpers! {
     /// Sets the text size of this element.
     ///
     /// This value cascades to its child elements.
-// docs:examples:begin
-#[doc = include_str!("docs/examples/gpui-Styled-text-size-c72aa80f.md")]
-// docs:examples:end
+    // docs:examples:begin
+    #[doc = include_str!("docs/examples/gpui-Styled-text-size-c72aa80f.md")]
+    // docs:examples:end
     fn text_size(mut self, size: impl Into<AbsoluteLength>) -> Self {
         self.text_style().font_size = Some(size.into());
         self
@@ -909,15 +961,17 @@ gpui_macros::style_helpers! {
         self
     }
 
-    /// Removes the text decoration on this element.
+    /// Remove the underline authored on this element, leaving strikethrough unchanged.
     ///
-    /// This value cascades to its child elements.
+    /// This clears the local refinement. It does not suppress an inherited underline;
+    /// [`Self::text_decoration_0`] supplies an explicit zero thickness for that purpose.
     fn text_decoration_none(mut self) -> Self {
         self.text_style().underline = None;
         self
     }
 
-    /// Sets the color for the underline on this element
+    /// Set the underline color, creating a default underline if none was authored here.
+    /// This does not change strikethrough color.
     fn text_decoration_color(mut self, color: impl IntoColor<Hsla>) -> Self {
         let style = self.text_style();
         let underline = style.underline.get_or_insert_with(Default::default);
@@ -925,7 +979,8 @@ gpui_macros::style_helpers! {
         self
     }
 
-    /// Sets the text decoration style to a solid line.
+    /// Use a straight underline, creating a default underline if needed.
+    /// Strikethrough remains unchanged.
     /// [Docs](https://tailwindcss.com/docs/text-decoration-style)
     fn text_decoration_solid(mut self) -> Self {
         let style = self.text_style();
@@ -934,7 +989,8 @@ gpui_macros::style_helpers! {
         self
     }
 
-    /// Sets the text decoration style to a wavy line.
+    /// Use a wavy underline, creating a default underline if needed.
+    /// Strikethrough remains unchanged.
     /// [Docs](https://tailwindcss.com/docs/text-decoration-style)
     fn text_decoration_wavy(mut self) -> Self {
         let style = self.text_style();
@@ -943,7 +999,7 @@ gpui_macros::style_helpers! {
         self
     }
 
-    /// Sets the text decoration to be 0px thick.
+    /// Set underline thickness to zero logical pixels. Strikethrough remains unchanged.
     /// [Docs](https://tailwindcss.com/docs/text-decoration-thickness)
     fn text_decoration_0(mut self) -> Self {
         let style = self.text_style();
@@ -952,7 +1008,7 @@ gpui_macros::style_helpers! {
         self
     }
 
-    /// Sets the text decoration to be 1px thick.
+    /// Set underline thickness to one logical pixel. Strikethrough remains unchanged.
     /// [Docs](https://tailwindcss.com/docs/text-decoration-thickness)
     fn text_decoration_1(mut self) -> Self {
         let style = self.text_style();
@@ -961,7 +1017,7 @@ gpui_macros::style_helpers! {
         self
     }
 
-    /// Sets the text decoration to be 2px thick.
+    /// Set underline thickness to two logical pixels. Strikethrough remains unchanged.
     /// [Docs](https://tailwindcss.com/docs/text-decoration-thickness)
     fn text_decoration_2(mut self) -> Self {
         let style = self.text_style();
@@ -970,7 +1026,7 @@ gpui_macros::style_helpers! {
         self
     }
 
-    /// Sets the text decoration to be 4px thick.
+    /// Set underline thickness to four logical pixels. Strikethrough remains unchanged.
     /// [Docs](https://tailwindcss.com/docs/text-decoration-thickness)
     fn text_decoration_4(mut self) -> Self {
         let style = self.text_style();
@@ -979,7 +1035,7 @@ gpui_macros::style_helpers! {
         self
     }
 
-    /// Sets the text decoration to be 8px thick.
+    /// Set underline thickness to eight logical pixels. Strikethrough remains unchanged.
     /// [Docs](https://tailwindcss.com/docs/text-decoration-thickness)
     fn text_decoration_8(mut self) -> Self {
         let style = self.text_style();
@@ -994,7 +1050,8 @@ gpui_macros::style_helpers! {
         self
     }
 
-    /// Sets the font features of this element and its children.
+    /// Replace inherited OpenType feature settings for this element and its descendants.
+    /// Features take effect only when the chosen font supports their tags. See [`FontFeatures`].
     fn font_features(mut self, features: FontFeatures) -> Self {
         self.text_style().font_features = Some(features);
         self
@@ -1022,19 +1079,23 @@ gpui_macros::style_helpers! {
         self
     }
 
-    /// Sets the line height of this element and its children.
-// docs:examples:begin
-#[doc = include_str!("docs/examples/gpui-Styled-line-height-656716f3.md")]
-// docs:examples:end
+    /// Set visual-row height, inherited by descendants.
+    ///
+    /// Absolute lengths use logical pixels or rems. A relative value multiplies the resolved
+    /// font size, so `relative(1.5)` requests one and a half times that size. Font size itself
+    /// remains unchanged.
+    // docs:examples:begin
+    #[doc = include_str!("docs/examples/gpui-Styled-line-height-656716f3.md")]
+    // docs:examples:end
     fn line_height(mut self, line_height: impl Into<DefiniteLength>) -> Self {
         self.text_style().line_height = Some(line_height.into());
         self
     }
 
     /// Sets the opacity of this element and its children.
-// docs:examples:begin
-#[doc = include_str!("docs/examples/gpui-Styled-opacity-4ad8a9d4.md")]
-// docs:examples:end
+    // docs:examples:begin
+    #[doc = include_str!("docs/examples/gpui-Styled-opacity-4ad8a9d4.md")]
+    // docs:examples:end
     fn opacity(mut self, opacity: f32) -> Self {
         self.style().opacity = Some(opacity);
         self
@@ -1059,7 +1120,10 @@ gpui_macros::style_helpers! {
         self
     }
 
-    /// Sets the grid columns with max-content maximum sizing for content-based column widths.
+    /// Create `cols` content-sized columns using `minmax(0, max-content)`.
+    ///
+    /// Their maximum is the intrinsic width without soft wrapping. They can shrink
+    /// toward zero and do not divide spare space equally like [`Self::grid_cols`].
     fn grid_cols_max_content(mut self, cols: u16) -> Self {
         self.style().grid_cols = Some(GridTemplate {
             repeat: cols,
@@ -1087,7 +1151,8 @@ gpui_macros::style_helpers! {
         self
     }
 
-    /// Sets the grid rows with max-content maximum sizing for content-based row heights.
+    /// Create `rows` content-sized rows using `minmax(0, max-content)`.
+    /// These can shrink toward zero and do not divide spare space into equal fractions.
     fn grid_rows_max_content(mut self, rows: u16) -> Self {
         self.style().grid_rows = Some(GridTemplate {
             repeat: rows,
@@ -1131,7 +1196,7 @@ gpui_macros::style_helpers! {
         self
     }
 
-    /// Sets the row span of this element.
+    /// Span every explicit grid column, from line 1 through line -1.
     fn col_span_full(mut self) -> Self {
         let grid_location = self.style().grid_location_mut();
         grid_location.column = GridPlacement::Line(1)..GridPlacement::Line(-1);
@@ -1173,7 +1238,7 @@ gpui_macros::style_helpers! {
         self
     }
 
-    /// Sets the row span of this element.
+    /// Span every explicit grid row, from line 1 through line -1.
     fn row_span_full(mut self) -> Self {
         let grid_location = self.style().grid_location_mut();
         grid_location.row = GridPlacement::Line(1)..GridPlacement::Line(-1);
@@ -1196,6 +1261,7 @@ gpui_macros::style_helpers! {
 
     /// Sets the amount of smoothing applied to rounded corners.
     /// Use values from `0.0` for circular corners to `1.0` for maximum smoothing.
+    /// Panics in debug builds for values outside that range.
     fn rounded_smoothing(mut self, amount: f32) -> Self {
         debug_assert!(
             (0.0..=1.0).contains(&amount),

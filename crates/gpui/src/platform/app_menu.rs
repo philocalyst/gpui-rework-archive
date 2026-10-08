@@ -1,8 +1,9 @@
 //! Native application-menu descriptions.
 //!
 //! Menu values are declarative: [`App::set_menus`] replaces the application's menu bar, and GPUI
-//! dispatches selected [`MenuItem::Action`] values through the application action system. Pass a
-//! [`Keymap`](crate::Keymap) to that setter so backends that support it can display shortcuts.
+//! dispatches selected [`MenuItem::Action`] values through the application action system.
+//! The setter supplies the app's keymap to backends that display shortcuts;
+//! register bindings with [`App::bind_keys`] before installing the menus.
 //! An [`OsMenu`] or [`OsAction`] asks the operating system for behavior associated with a
 //! well-known menu role, such as the macOS Services menu or standard edit commands. Those native
 //! roles are optional backend capabilities; a normal action remains the portable choice.
@@ -203,7 +204,9 @@ impl MenuItem {
         }
     }
 
-    /// Set whether this menu item is disabled
+    /// Set whether an action or submenu is disabled.
+    ///
+    /// Separators and system-managed menus are unchanged.
     pub fn disabled(mut self, disabled: bool) -> Self {
         match &mut self {
             MenuItem::Action { disabled: old, .. } => {

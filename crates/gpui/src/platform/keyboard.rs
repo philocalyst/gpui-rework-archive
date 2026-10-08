@@ -1,9 +1,10 @@
 //! Keyboard-layout information and mapping used by keybinding dispatch and display.
 //!
 //! A [`Keystroke`] carries GPUI's matching representation. A backend mapper may produce a
-//! [`KeybindingKeystroke`] that preserves that representation while supplying platform-specific
-//! equivalents or shortcut labels. Keep matching data and display data together in that wrapper;
-//! do not rewrite a keystroke merely to change how a shortcut is shown.
+//! [`KeybindingKeystroke`] that maps a binding to the active layout and supplies
+//! its shortcut label. Mapping can change the matching key as well as the label.
+//! Keep both in that wrapper; use [`KeybindingKeystroke::inner`] for dispatch
+//! and its display accessors for a shortcut shown to the user.
 
 use collections::HashMap;
 
@@ -21,8 +22,8 @@ pub trait PlatformKeyboardLayout {
 ///
 /// Implementations account for the active keyboard layout. When `use_key_equivalents` is true,
 /// a platform may use equivalent characters so a binding keeps its intended meaning across
-/// layouts. The returned wrapper retains the dispatch keystroke even when its displayed key
-/// differs.
+/// layouts. The returned wrapper contains the mapped dispatch keystroke and its
+/// display representation, which can differ from each other and from the input.
 pub trait PlatformKeyboardMapper {
     /// Maps a keystroke, optionally applying the layout's key equivalents.
     fn map_key_equivalent(
