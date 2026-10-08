@@ -166,6 +166,10 @@ def prepare_source():
         else:
             dependencies.append(f'{name} = {{ path="../compiler/{name}" }}')
     dependencies.append('gpui_codepen_guest = { path=' + json.dumps(str(ROOT / "crates/gpui_codepen/guest")) + ', features=["host-services"] }')
+    # The dedicated browser release executes MIR in a very hot loop. Compile
+    # out unused informational tracing throughout the target dependency graph;
+    # keep warnings/errors and rustc's normal diagnostics intact.
+    dependencies.append('tracing = { version="0.1", features=["release_max_level_warn"] }')
     manifest = manifest.replace("[dependencies]\n", "[dependencies]\n" + "\n".join(dependencies) + "\n", 1)
     manifest = manifest.replace("[features]\n", '[features]\ncodepen-cache-profile = ["rustc_const_eval/codepen-cache-profile"]\n', 1)
     write_changed(SOURCE / "miri/Cargo.toml", manifest)

@@ -350,14 +350,42 @@ trait EvalContextExtPriv<'tcx>: crate::MiriInterpCxExt<'tcx> {
                     if let Some((previous, previous_blocks)) = this.machine.codepen_profile {
                         eprintln!("GPUI phase {phase}: {} us, {} MIR blocks", now.duration_since(previous).as_micros(), blocks - previous_blocks);
                     }
-                    this.machine.codepen_profile = Some((now, blocks));
+                    #[cfg(target_family = "wasm")]
+                    if let Some(report) = this.codepen_local_cache_report() {
+                        eprintln!("{report}");
+                    }
                     if let Some(work) = &mut this.machine.codepen_function_work {
                         let mut work: Vec<_> = work.drain().collect();
-                        work.sort_unstable_by_key(|(_, (blocks, _))| std::cmp::Reverse(*blocks));
-                        for (instance, (blocks, calls)) in work.into_iter().take(15) {
+                        let mut groups = rustc_data_structures::fx::FxHashMap::<String, (u64, u64)>::default();
+                        for (instance, (blocks, calls, inclusive)) in &work {
+                            // DefPath excludes generic arguments: one shared
+                            // implementation remains one source group even
+                            // when used by many different monomorphizations.
+                            let path = this.tcx.def_path_str(instance.def_id());
+                            let group = path.split("::").take(3).collect::<Vec<_>>().join("::");
+                            let counts = groups.entry(group).or_default();
+                            counts.0 += blocks;
+                            counts.1 += calls;
+                            if path.ends_with("::compute_layout_with_measure")
+                                || path.ends_with("::compute_resolved_layout")
+                                || path.ends_with("::capture_live_scene")
+                            {
+                                eprintln!("GPUI inclusive phase {phase}: {inclusive} blocks / {calls} calls: {path}");
+                            }
+                        }
+                        let mut groups: Vec<_> = groups.into_iter().collect();
+                        groups.sort_unstable_by_key(|(_, (blocks, _))| std::cmp::Reverse(*blocks));
+                        for (group, (blocks, calls)) in groups.into_iter().take(25) {
+                            eprintln!("GPUI group phase {phase}: {blocks} self blocks / {calls} calls: {group}");
+                        }
+                        work.sort_unstable_by_key(|(_, (blocks, _, _))| std::cmp::Reverse(*blocks));
+                        for (instance, (blocks, calls, _)) in work.into_iter().take(15) {
                             eprintln!("GPUI work phase {phase}: {blocks} blocks / {calls} calls: {instance}");
                         }
                     }
+                    // Sorting/formatting the previous report is profiler work,
+                    // rather than execution time in the following frame phase.
+                    this.machine.codepen_profile = Some((std::time::Instant::now(), blocks));
                 }
             }
             "gpui_codepen_rpc_start" if std::env::var_os("GPUI_CODEPEN_IPC").as_deref()
@@ -497,7 +525,9 @@ trait EvalContextExtPriv<'tcx>: crate::MiriInterpCxExt<'tcx> {
                         Err(error) => throw_unsup_format!("{error}"),
                     };
                     if let Some(packet) = packet {
-                        let accepted = crate::codepen_reload::install(this, &packet).is_ok();
+                        let result = crate::codepen_reload::install(this, &packet);
+                        if let Err(error) = &result { eprintln!("GPUI MIR reload: {error}"); }
+                        let accepted = result.is_ok();
                         crate::codepen_browser::patched(accepted);
                         if !accepted { continue; }
                     }
@@ -531,7 +561,9 @@ trait EvalContextExtPriv<'tcx>: crate::MiriInterpCxExt<'tcx> {
                     if length > 64 * 1024 * 1024 { throw_unsup_format!("GPUI MIR packet exceeds its budget"); }
                     let mut packet = vec![0; length];
                     if let Err(error) = input.read_exact(&mut packet) { throw_unsup_format!("GPUI MIR transport failed: {error}"); }
-                    let accepted = crate::codepen_reload::install(this, &packet).is_ok();
+                    let result = crate::codepen_reload::install(this, &packet);
+                    if let Err(error) = &result { eprintln!("GPUI MIR reload: {error}"); }
+                    let accepted = result.is_ok();
                     let nonce = std::env::var("GPUI_CODEPEN_NONCE").unwrap_or_default();
                     if let Err(error) = writeln!(out, "\nCODEPEN_{nonce}:RELOADED:{}", u8::from(accepted)).and_then(|_| out.flush()) {
                         throw_unsup_format!("GPUI MIR acknowledgement failed: {error}");

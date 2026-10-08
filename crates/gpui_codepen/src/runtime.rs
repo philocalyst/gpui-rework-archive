@@ -27,6 +27,12 @@ const MAX_DIAGNOSTICS_BYTES: usize = 64 * 1024;
 const COMPILER_FLAGS: &str = "-Znext-solver=globally -Zpolonius=next -Zremap-cwd-prefix=/gpui-codepen";
 const MIRI_FLAGS: &str = "-Zmiri-ignore-leaks -Zmiri-disable-leak-backtraces -Zmiri-disable-validation -Zmiri-disable-stacked-borrows -Zmiri-disable-data-race-detector -Zmiri-disable-alignment-check -Zmiri-disable-isolation -Zmiri-deterministic-floats -Zmiri-provenance-gc=250000 -Zmiri-preemption-rate=0 -Zmiri-address-reuse-rate=0 -Zmiri-compare-exchange-weak-failure-rate=0";
 
+fn interpreter_driver() -> PathBuf {
+    std::env::var_os("GPUI_CODEPEN_MIRI_DRIVER").map(PathBuf::from).unwrap_or_else(|| {
+        repository_root().join(format!("vendor/miri/target/release/miri{}", std::env::consts::EXE_SUFFIX))
+    })
+}
+
 #[derive(Debug)]
 struct KeepPreview;
 impl std::fmt::Display for KeepPreview {
@@ -56,17 +62,22 @@ pub fn repository_root() -> PathBuf {
 }
 
 fn driver_libraries(command: &mut Command, sysroot: &Path) -> Result<()> {
-    #[cfg(unix)]
+    #[cfg(any(unix, windows))]
     {
-        let variable = if cfg!(target_os = "macos") {
+        let variable = if cfg!(windows) {
+            "PATH"
+        } else if cfg!(target_os = "macos") {
             "DYLD_LIBRARY_PATH"
         } else {
             "LD_LIBRARY_PATH"
         };
         let mut paths = vec![sysroot.join("lib")];
-        paths.extend(std::env::split_paths(
-            &std::env::var_os(variable).unwrap_or_default(),
-        ));
+        // Preserve paths already selected for this command, including the
+        // Cargo-Miri wrapper and pinned compiler on Windows.
+        let inherited = command.get_envs().find(|(key, _)| *key == variable)
+            .map(|(_, value)| value.map(ToOwned::to_owned).unwrap_or_default())
+            .unwrap_or_else(|| std::env::var_os(variable).unwrap_or_default());
+        paths.extend(std::env::split_paths(&inherited));
         command.env(variable, std::env::join_paths(paths)?);
     }
     Ok(())
@@ -139,10 +150,7 @@ impl Runtime {
             )
             .env(
                 "MIRI",
-                repository_root().join(format!(
-                    "vendor/miri/target/release/miri{}",
-                    std::env::consts::EXE_SUFFIX
-                )),
+                interpreter_driver(),
             )
             .env(
                 "RUSTC",
@@ -195,10 +203,7 @@ impl Runtime {
     fn command(&self, compiler_only: bool) -> Result<Command> {
         let optimization = &self.optimization;
         let root = repository_root();
-        let driver = root.join(format!(
-            "vendor/miri/target/release/miri{}",
-            std::env::consts::EXE_SUFFIX
-        ));
+        let driver = interpreter_driver();
         let wrapper = root.join(format!(
             "vendor/miri/cargo-miri/target/debug/cargo-miri{}",
             std::env::consts::EXE_SUFFIX
@@ -539,6 +544,10 @@ impl Interpreter {
         let diagnostics = errors.clone();
         let stopped = transport_stop.clone();
         let profile = std::env::var_os("GPUI_CODEPEN_PROFILE").is_some();
+        // Explicit function profiling prints several bounded reports before
+        // the initial frame. Keep those reports from tripping the ordinary
+        // guest-stderr budget while retaining a finite diagnostic buffer.
+        let diagnostic_limit = if profile { MAX_DIAGNOSTICS_BYTES * 16 } else { MAX_DIAGNOSTICS_BYTES };
         let error_reader = thread::spawn(move || {
             let mut bytes = [0; 8192];
             loop {
@@ -551,7 +560,7 @@ impl Interpreter {
                     eprint!("{}", String::from_utf8_lossy(&bytes[..n]));
                 }
                 let mut errors = diagnostics.lock().unwrap();
-                if errors.len() + n > MAX_DIAGNOSTICS_BYTES {
+                if errors.len() + n > diagnostic_limit {
                     excessive.store(1, Ordering::Relaxed);
                     break;
                 }
@@ -937,6 +946,33 @@ fn run_process(
         bail!("{}", String::from_utf8_lossy(&errors));
     }
     Ok(output)
+}
+
+#[cfg(all(test, any(unix, windows)))]
+mod driver_library_tests {
+    use super::*;
+
+    #[test]
+    fn driver_libraries_preserve_command_paths_and_supply_the_pinned_library_directory() {
+        let variable = if cfg!(windows) { "PATH" } else if cfg!(target_os = "macos") {
+            "DYLD_LIBRARY_PATH"
+        } else { "LD_LIBRARY_PATH" };
+        let sysroot = PathBuf::from("toolchain-test");
+        let first = PathBuf::from("wrapper-test");
+        let second = PathBuf::from("compiler-test");
+        for explicit in [true, false] {
+            let inherited = if explicit {
+                std::env::join_paths([&first, &second]).unwrap()
+            } else { std::env::var_os(variable).unwrap_or_default() };
+            let mut command = Command::new("unused");
+            if explicit { command.env(variable, &inherited); }
+            driver_libraries(&mut command, &sysroot).unwrap();
+            let value = command.get_envs().find(|(key, _)| *key == variable).unwrap().1.unwrap();
+            let mut expected = vec![sysroot.join("lib")];
+            expected.extend(std::env::split_paths(&inherited));
+            assert_eq!(std::env::split_paths(value).collect::<Vec<_>>(), expected);
+        }
+    }
 }
 
 #[cfg(all(test, unix))]

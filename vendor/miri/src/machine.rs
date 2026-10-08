@@ -637,7 +637,9 @@ pub struct MiriMachine<'tcx> {
     pub(crate) codepen_rpc_response: Vec<u8>,
     pub(crate) codepen_overlay: Option<crate::codepen_reload::Overlay<'tcx>>,
     pub(crate) codepen_profile: Option<(std::time::Instant, u64)>,
-    pub(crate) codepen_function_work: Option<FxHashMap<ty::Instance<'tcx>, (u64, u64)>>,
+    // Self blocks, completed calls, inclusive blocks. Only allocated when
+    // explicitly profiling; normal interpretation does not update counters.
+    pub(crate) codepen_function_work: Option<FxHashMap<ty::Instance<'tcx>, (u64, u64, u64)>>,
     #[cfg(target_family = "wasm")]
     codepen_host_float: bool,
     #[cfg(target_family = "wasm")]
@@ -2039,6 +2041,7 @@ impl<'tcx> Machine<'tcx> for MiriMachine<'tcx> {
                 .entry(instance).or_default();
             work.0 += total - child_blocks;
             work.1 += 1;
+            work.2 += total;
             let index = ecx.frame_idx();
             if index > 0 {
                 if let Some((_, parent_children)) = &mut ecx.active_thread_stack_mut()[index - 1].extra.codepen_work {
