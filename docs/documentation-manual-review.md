@@ -1679,3 +1679,82 @@ Strict default-feature rustdoc passes in
 check follows this revision. The
 public-surface review remains unfinished, and this batch makes no detector or
 framework-wide quality claim. The primary editor worked alone.
+
+## Shadow and filter contracts across the public entry points (2026-10-08)
+
+Revision `d3aa64131e` passed the combined browser-program, strict API, Zola,
+mdBook, and link-audit build and was served locally. The rendered predicate
+table now gives `Editor || Terminal` exactly two cells. At a 390-pixel CSS
+viewport, the ordered frame-phase explanation and window-choice table both
+fit the 350-pixel content column. The Save fixture was read in rustdoc and
+mdBook, and the canvas constructor's complete visible explanation and example
+were read in rustdoc. This does not claim that the wider platform comparison
+tables fit without their horizontal scrolling containers.
+
+The primary editor reread the complete testing chapter, canvas and surface
+modules, path builder including its tests, quad constructors/builders, and
+the window's shadow, filter, and paint-recording paths. The style box's
+production paint order, scene filter records and radius reduction, bounded
+filter target allocation, relevant scene ordering tests, and the Metal, WGPU,
+and DirectX filter dispatch paths were checked together. Shared quad and
+shadow shader excerpts were read for border placement and inset clipping;
+this is not a complete shader-math or native-renderer execution audit.
+
+The existing Luna scene report recorded the two-level isolation limit, but
+the public style and window entry points did not explain it. Their filter
+prose also implied successive operations, while all three supplied renderer
+paths reduce the list to its largest blur radius. Filter, ScaledFilter,
+Styled's four filter methods, both scene filter records, and the window's
+shadow/filter methods now describe those actual contracts. The shared drawing
+chapter contrasts sharp content over a blurred backdrop with content that is
+itself blurred, gives styled and custom-paint examples, defines the offscreen
+target, and explains the radius and nesting limits. Layout links that account.
+
+BoxShadow now explains its zero-blur/zero-spread defaults, the opposite effects
+of signed spread on outer silhouettes and inset holes, and the two paint
+passes. PaintQuad explains its outer bounds, inside borders, unclamped corner
+radii, dash defaults, and why setting a fill's border color alone draws no
+border. A complete construction example sets both color and width and links
+the phase handoff in the custom-element walkthrough. Runtime behavior is
+unchanged in this batch.
+
+The browser-only editor compiled a temporary comparison against runtime
+manifest `fe33dbce…`. The initial draft omitted the required component
+constructor and received a compiler error; after adding it, the comparison
+reached Live in 7426 ms and its resized result in 2440 ms. The upper notice
+kept sharp text above blurred stripes; the lower notice blurred its text and
+box while stripes outside it remained sharp. Source and screenshot are
+`target/documentation-proof/filter-comparison-component.rs` and
+`target/documentation-proof/browser-miri-filter-comparison.png`.
+The canonical drawing program was restored and reached Live again. This
+checks those two visual effects through the assembled browser runtime, not
+native renderer parity or every nesting case.
+
+The testing chapter linked to main's older four-test example while describing
+this checkout's composition tests. The linked editor on main also returned no
+marked range or geometry. Input and testing now identify the same-checkout
+files and give the exact Cargo command instead of promising those features
+in the older source. That command passes all twelve tests in
+`target/documentation-native-composition-tests.log`, including the editor's
+geometry and UTF-offset fixtures.
+
+All 236 doctests pass: 229 merged examples and seven executed harness examples,
+with one ignored, in `target/documentation-paint-quad-doctests.log`.
+Strict default-feature rustdoc passes in
+`target/documentation-paint-final-default-api.log`. An earlier strict run
+caught a test-support-only chapter link and an unqualified Styled link; both
+were repaired before that result. Strict feature-enabled rustdoc passes in
+`target/documentation-paint-feature-api.log`, and canonical guide mirroring
+passes against it. All 27 documentation-tool tests pass in
+`target/documentation-paint-generator-tests.log`; the edited Rust files pass
+rustfmt, generated examples and backlinks are current, and the diff passes
+whitespace checks. The complete combined artifact check follows this source
+revision.
+
+Jiff 0.2.38's Date reading now covers every public example before its internal
+API block, including differences, reversibility, series, parsing, and lenient
+versus fallible formatting. The complete pinned Hummingbird window-chrome
+source and excerpts of Zed's painting example were also read. Their usage is
+comparative evidence; this checkout defines the contracts. No detector was
+run, no subagents were used, and the complete public-surface review remains
+unfinished.

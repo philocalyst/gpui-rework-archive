@@ -226,6 +226,75 @@ ancestors receive keyboard events. See the
 > batch when it overlaps. Use a content mask when pixels must stop at an
 > edge; use a filter layer when the group needs an offscreen image.
 
+## Choose which pixels to blur
+
+Use [`Styled::blur`](crate::Styled::blur) when the element itself should look
+soft: its background, contents, and border are filtered together. Use
+[`backdrop_blur`](crate::Styled::backdrop_blur) for a sharp panel over a soft
+backdrop. The backdrop must already have been painted, and the panel needs
+some transparency to show it:
+
+```rust
+use gpui::{div, prelude::*, px, rgba};
+
+let frosted_notice = div()
+    .p_4()
+    .bg(rgba(0xffffffb3))
+    .backdrop_blur(px(8.))
+    .child("This text stays sharp");
+
+let soft_notice = div()
+    .p_4()
+    .bg(rgba(0xffffffb3))
+    .blur(px(8.))
+    .child("This text is blurred with its box");
+```
+
+Put the first notice above a patterned or otherwise detailed backdrop to see
+the effect. An opaque fill would hide the filtered pixels. Put the second
+notice above any background: its own text and box are the blur's input.
+Drop shadows and outer rings remain outside a styled element's content-filter
+group. Neither kind of blur changes the element's layout or hit region.
+
+For custom drawing, the corresponding window methods make the order explicit.
+Call this helper during paint, after recording the drawing behind the panel:
+
+```rust
+use gpui::{Bounds, Filter, Pixels, Window, fill, px, rgba};
+
+fn paint_frosted_panel(bounds: Bounds<Pixels>, window: &mut Window) {
+    let corners = px(8.).into();
+    window.paint_backdrop_filter(bounds, corners, &[Filter::Blur(px(8.))]);
+    window.paint_quad(fill(bounds, rgba(0xffffffb3)).corner_radii(corners));
+    // Paint the panel's text and controls afterward so they remain sharp.
+}
+```
+
+Use [`Window::with_filter_layer`](crate::Window::with_filter_layer) when the
+closure's drawing should be the input instead. The group draws into a separate
+texture, an *offscreen target*. The renderer blurs that image and combines it
+with the receiving frame inside the group's rounded bounds. The active content
+mask clips the result. This does not establish an input mask or move any
+geometry; arrange those during prepaint as usual.
+
+Two limits matter when composing these effects:
+
+- A filter list uses its largest blur radius for **one** operation. Calling
+  `.blur(px(4.)).blur(px(8.))` retains two entries but uses an eight-pixel blur;
+  it does not blur successively. `filter` replaces the list, and an empty list
+  clears it. Backdrop filters follow the same rule.
+- [`MAX_FILTER_GROUP_DEPTH`](crate::MAX_FILTER_GROUP_DEPTH) is currently two.
+  Deeper content groups draw inline without a separate blur. An enclosing
+  group's filter still affects their drawing. Prefer a single group around
+  the content that needs to soften together.
+
+Supply finite radii; zero and negative values are skipped. The CSS
+[blur](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/filter-function/blur)
+and [backdrop-filter](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/backdrop-filter)
+references illustrate the visual distinction. GPUI's filter-list and nesting
+rules above define its behavior; CSS's complete filter and backdrop-root
+semantics do not carry over.
+
 ## Capture a frame for another window
 
 A [`SceneCapture`](crate::SceneCapture) packages a finished frame's primitives,

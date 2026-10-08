@@ -623,9 +623,14 @@ An edit invalidates the old layout even if its allocation remains alive. Return
 beside the wrong character. An empty range asks for caret bounds. A nonempty
 range can cross visual rows; the platform's single rectangle can describe its
 first visual segment. The [text chapter](crate::_documentation::text) explains
-caret affinity and visual movement. The
-[composition example's editor](https://github.com/gpui-ce/gpui-ce/blob/main/crates/gpui/examples/view_example/example_editor.rs)
-shows the buffer, selection, marked range, and geometry callbacks together.
+caret affinity and visual movement.
+
+In this checkout, `crates/gpui/examples/view_example/example_editor.rs` keeps
+the buffer, selection, marked range, and painted layout together. Its
+[composition tests](https://gpui-ce.github.io/book/testing.html#test-composition-as-a-sequence)
+exercise candidate replacement, selection direction, and stale geometry.
+Use the source from the same checkout as these docs: older versions of the
+example did not retain marked text or answer geometry queries.
 
 ## Accessibility actions and identities
 

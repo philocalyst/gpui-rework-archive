@@ -187,8 +187,12 @@ on an owner that can notify the affected views, as the
 A later setter replaces the same field, while
 [`refine_style`](crate::Styled::refine_style) merges only supplied fields.
 Setting `w` twice therefore keeps the second request. Filter convenience methods
-are an exception: `blur` appends to a chain, while `filter` replaces the chain.
-See [`Style::paint`](crate::Style::paint) for the grouping and paint order.
+are an exception: `blur` appends to a list, while `filter` replaces the list.
+The supplied renderers use that list's largest blur radius for one operation,
+rather than applying entries successively. See the
+[drawing chapter](crate::_documentation::drawing#choose-which-pixels-to-blur)
+for content versus backdrop filtering and the nesting limit, and
+[`Style::paint`](crate::Style::paint) for the grouping and paint order.
 
 ## Override a field, or leave it alone
 

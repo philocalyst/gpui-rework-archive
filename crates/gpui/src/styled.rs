@@ -122,15 +122,18 @@ pub trait Styled: Sized {
         self
     }
 
-    /// Blur this element's own content and children, like CSS `filter: blur(<radius>)`.
+    /// Blurs this element's background, contents, and border together.
     ///
-    /// This isolates the element's subtree, blurs it as a group, and composites the
-    /// result back. To blur the content *behind* the element instead (frosted glass),
-    /// use [`Styled::backdrop_blur`].
+    /// `radius` uses logical pixels. The element's drop shadow and outer ring
+    /// remain outside this group. For a sharp panel over a softened backdrop,
+    /// use [`backdrop_blur`](Self::backdrop_blur) instead.
     ///
-    /// *Appends* to the element's filter chain, so it composes with other convenience
-    /// setters (`.blur(8.).<other_filter>()`). To replace the whole chain, use
-    /// [`Styled::filter`].
+    /// This appends a [`Filter::Blur`] entry; [`filter`](Self::filter) replaces
+    /// the list. The supplied renderers blur once with its largest radius, so
+    /// `.blur(px(4.)).blur(px(8.))` has the same blur radius as `.blur(px(8.))`.
+    /// See [`Filter`] for nesting limits and accepted values. The
+    /// [drawing chapter](crate::_documentation::drawing#choose-which-pixels-to-blur)
+    /// compares content and backdrop filtering.
     fn blur(mut self, radius: impl Into<Pixels>) -> Self {
         self.style()
             .filter
@@ -139,20 +142,27 @@ pub trait Styled: Sized {
         self
     }
 
-    /// Set (replacing any existing) the full list of filters applied to this element's own
-    /// content, like CSS `filter`. To add a single filter to the chain instead, use the
-    /// convenience setters such as [`Styled::blur`].
+    /// Replaces the filters applied to this element's own box and contents.
+    ///
+    /// An empty list clears them; [`blur`](Self::blur) appends one entry.
+    /// The supplied renderers use the largest blur radius in the list for
+    /// one operation. See [`Filter`] for the content-isolation limit.
     fn filter(mut self, filters: impl Into<Vec<Filter>>) -> Self {
         self.style().filter = Some(filters.into());
         self
     }
 
-    /// Blur the content rendered behind this element — a frosted-glass effect — like CSS
-    /// `backdrop-filter: blur(<radius>)`. Typically paired with a translucent [`Styled::bg`]
-    /// so the background tints the blurred backdrop.
+    /// Blurs already-painted content behind this element's box.
     ///
-    /// *Appends* to the element's backdrop-filter chain. To replace the whole chain, use
-    /// [`Styled::backdrop_filter`].
+    /// The element's own background and contents remain sharp. Use a
+    /// translucent [`bg`](Self::bg) so the backdrop remains visible; an
+    /// opaque background covers the effect. `radius` uses logical pixels.
+    ///
+    /// This appends a [`Filter::Blur`] entry; [`backdrop_filter`](Self::backdrop_filter)
+    /// replaces the list. The supplied renderers use its largest radius for
+    /// one blur operation. See [`Filter`] and the
+    /// [drawing chapter](crate::_documentation::drawing#choose-which-pixels-to-blur)
+    /// for the distinction from content filtering.
     fn backdrop_blur(mut self, radius: impl Into<Pixels>) -> Self {
         self.style()
             .backdrop_filter
@@ -161,9 +171,12 @@ pub trait Styled: Sized {
         self
     }
 
-    /// Set (replacing any existing) the full list of filters applied to the content behind this
-    /// element, like CSS `backdrop-filter`. To add a single filter to the chain instead, use the
-    /// convenience setters such as [`Styled::backdrop_blur`].
+    /// Replaces the filters applied to the already-painted backdrop.
+    ///
+    /// An empty list clears them; [`backdrop_blur`](Self::backdrop_blur)
+    /// appends one entry. The supplied renderers use the largest blur radius
+    /// in the list for one operation. This does not blur the element's own
+    /// background, border, or contents; use [`filter`](Self::filter) for those.
     fn backdrop_filter(mut self, filters: impl Into<Vec<Filter>>) -> Self {
         self.style().backdrop_filter = Some(filters.into());
         self

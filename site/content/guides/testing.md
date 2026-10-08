@@ -900,9 +900,19 @@ the crab spans four UTF-8 bytes and two UTF-16 code units. Then exercise the
 Also test `unmark_text` without a replacement: its text must remain. Set a
 reversed selection and check both the sorted range and active-end flag before
 replacing it. If another owner can replace the buffer, test how the editor
-repairs its selection and abandons stale composition. The
-[composed-input example's tests](https://github.com/gpui-ce/gpui-ce/blob/main/crates/gpui/examples/view_example/example_tests.rs)
-run these sequences against the example's editor.
+repairs its selection and abandons stale composition.
+
+In this checkout, `crates/gpui/examples/view_example/example_tests.rs` runs
+these sequences against the composed-input editor. Run it from the workspace
+root:
+
+```sh
+cargo test --locked -p gpui-ce --example view_example --features test-support
+```
+
+Read the test and editor from the same checkout. Older versions of this
+example tested typing and cursor movement but did not implement the composition
+protocol above.
 
 Geometry assertions need a matching layout. GPUI's default simulated text
 system reports one visual row even for hard line breaks. Use

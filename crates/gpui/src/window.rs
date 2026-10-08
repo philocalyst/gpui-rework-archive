@@ -4982,11 +4982,18 @@ impl Window {
         result
     }
 
-    /// Paint the drop (non-inset) shadows from `shadows` into the scene at the current
-    /// z-index. Inset shadows are skipped; paint those with [`Self::paint_inset_shadows`]
-    /// after the element's background so they layer on top of the fill.
+    /// Records a box's drop shadows.
     ///
-    /// This method should only be called as part of the paint phase of element drawing.
+    /// Paint them before the box's background. `bounds`, corner radii, and
+    /// shadow lengths use logical window pixels. Each non-inset entry shifts
+    /// the box's silhouette and applies its spread before
+    /// blurring; the current content mask and element opacity apply. This
+    /// changes drawing, not layout or hit testing.
+    ///
+    /// Inset entries are skipped. Paint those with [`Self::paint_inset_shadows`]
+    /// after the background. [`Style::paint`] performs both passes in the
+    /// usual order for styled elements. Call during paint; other phases
+    /// panic in debug builds.
     pub fn paint_drop_shadows(
         &mut self,
         bounds: Bounds<Pixels>,
@@ -4996,8 +5003,11 @@ impl Window {
         self.paint_drop_shadows_with_corner_smoothing(bounds, corner_radii, 0.0, shadows);
     }
 
-    /// Paints drop shadows with smoothed element and shadow corners.
-    /// Inset shadows in `shadows` are ignored.
+    /// Records [`Self::paint_drop_shadows`]'s shadows with smoothed corners.
+    ///
+    /// Supply a finite `corner_smoothing`; it is clamped to `0..=1`. Zero
+    /// gives the ordinary drop-shadow behavior. Units, masking, opacity, and
+    /// skipped inset entries follow `paint_drop_shadows`. Call during paint.
     pub fn paint_drop_shadows_with_corner_smoothing(
         &mut self,
         bounds: Bounds<Pixels>,
@@ -5033,9 +5043,17 @@ impl Window {
         }
     }
 
-    /// Paint the inset shadows from `shadows` into the scene at the current z-index. Should
-    /// be called after the element's background so the shadow layers on top of the fill.
-    /// Drop shadows are skipped; paint those with [`Self::paint_drop_shadows`] before the background.
+    /// Records the inset shadows for a box above its background.
+    ///
+    /// Paint the background first, then these shadows, then the contents.
+    /// Positive spread shrinks each shadow's unshadowed hole; negative spread
+    /// expands it. The result is confined to the box's rounded shape and the
+    /// active content mask. Coordinates and shadow lengths use logical pixels,
+    /// and the active element opacity applies.
+    ///
+    /// Drop-shadow entries are skipped; send those to [`Self::paint_drop_shadows`]
+    /// before the background. [`Style::paint`] handles this ordering for styled
+    /// elements. Call during paint; other phases panic in debug builds.
     pub fn paint_inset_shadows(
         &mut self,
         bounds: Bounds<Pixels>,
@@ -5045,8 +5063,11 @@ impl Window {
         self.paint_inset_shadows_with_corner_smoothing(bounds, corner_radii, 0.0, shadows);
     }
 
-    /// Paints inset shadows with smoothed element and shadow corners.
-    /// Drop shadows in `shadows` are ignored.
+    /// Records [`Self::paint_inset_shadows`]'s shadows with smoothed corners.
+    ///
+    /// Supply a finite `corner_smoothing`; it is clamped to `0..=1`. Zero
+    /// gives the ordinary inset-shadow behavior. Units, masking, opacity, and
+    /// skipped drop-shadow entries follow `paint_inset_shadows`. Call during paint.
     pub fn paint_inset_shadows_with_corner_smoothing(
         &mut self,
         bounds: Bounds<Pixels>,
@@ -5091,15 +5112,20 @@ impl Window {
         }
     }
 
-    /// Paint a backdrop filter into the scene for the next frame at the current z-index. The
-    /// renderer blurs the content already painted behind `bounds` and composites the result
-    /// into the rounded rectangle described by `bounds` and `corner_radii` — the CSS
-    /// `backdrop-filter` effect (frosted glass). Typically the element then paints a translucent
-    /// background quad on top so its color tints the blurred backdrop.
+    /// Blurs already-painted content behind a rounded rectangle.
     ///
-    /// Does nothing when `filters` produce no visible blur.
+    /// Call after painting the backdrop and before painting the panel's own
+    /// translucent background and sharp contents. An opaque fill covers the
+    /// effect. `bounds` and radii use logical window pixels; the active mask
+    /// and element opacity apply to the filtered result. This does not change
+    /// layout, clip later drawing, or blur content painted afterward.
     ///
-    /// This method should only be called as part of the paint phase of element drawing.
+    /// An empty or all-identity list records nothing. The supplied renderers
+    /// use the largest blur radius for one operation, rather than applying
+    /// each entry successively. Use [`Self::with_filter_layer`] to blur the
+    /// drawing produced by a closure instead. The
+    /// [drawing chapter](crate::_documentation::drawing#choose-which-pixels-to-blur)
+    /// shows the paint order. Call during paint; other phases panic in debug builds.
     pub fn paint_backdrop_filter(
         &mut self,
         bounds: Bounds<Pixels>,
@@ -5109,7 +5135,12 @@ impl Window {
         self.paint_backdrop_filter_with_corner_smoothing(bounds, corner_radii, 0.0, filters);
     }
 
-    /// Paints a backdrop filter clipped to smoothed corners.
+    /// Records [`Self::paint_backdrop_filter`]'s effect with smoothed corners.
+    ///
+    /// Supply a finite `corner_smoothing`; it is clamped to `0..=1`. Zero
+    /// gives the ordinary rounded rectangle. Units, paint order, masking,
+    /// opacity, and filter-list behavior follow `paint_backdrop_filter`.
+    /// Call during paint.
     pub fn paint_backdrop_filter_with_corner_smoothing(
         &mut self,
         bounds: Bounds<Pixels>,
@@ -5140,15 +5171,30 @@ impl Window {
         });
     }
 
-    /// Isolate the painting performed by `f` into a content-filter group: the renderer renders
-    /// everything `f` paints into an offscreen target, blurs it as a single layer, and
-    /// composites the result back into the rounded rectangle described by `bounds` and
-    /// `corner_radii` — the CSS `filter` effect (e.g. blurring an element and its children).
+    /// Blurs the drawing performed by `f` as one content group.
     ///
-    /// When `filters` produce no visible blur this simply runs `f` with no offscreen
-    /// indirection.
+    /// The renderer draws the group into an offscreen target, filters it,
+    /// and composites it into the rounded rectangle described by `bounds`
+    /// and `corner_radii`. Those values use logical window pixels. The active
+    /// content mask clips the composite; layout and hit testing are unchanged.
+    /// For ordinary styled elements, [`Styled::blur`](crate::Styled::blur)
+    /// supplies this grouping.
     ///
-    /// This method should only be called as part of the paint phase of element drawing.
+    /// Active element opacity is applied to each primitive painted by `f`;
+    /// the composite does not apply that same opacity a second time. An empty
+    /// or all-identity filter list simply runs `f`. Otherwise, the supplied
+    /// renderers use the list's largest blur radius for one operation.
+    ///
+    /// > [!WARNING]
+    /// > The current limit is two nested content groups
+    /// > ([`MAX_FILTER_GROUP_DEPTH`](crate::MAX_FILTER_GROUP_DEPTH)). Deeper groups draw
+    /// > inline without their own blur, although an enclosing group's blur
+    /// > still affects them. Avoid relying on a separate filter at those depths.
+    ///
+    /// Use [`Self::paint_backdrop_filter`] to soften previously painted content
+    /// while leaving a panel's own contents sharp. See the
+    /// [drawing chapter](crate::_documentation::drawing#choose-which-pixels-to-blur).
+    /// Call during paint; other phases panic in debug builds.
     pub fn with_filter_layer<R>(
         &mut self,
         bounds: Bounds<Pixels>,
@@ -5159,7 +5205,11 @@ impl Window {
         self.with_filter_layer_with_corner_smoothing(bounds, corner_radii, 0.0, filters, f)
     }
 
-    /// Runs `f` in a content-filter group clipped to smoothed corners.
+    /// Runs [`Self::with_filter_layer`]'s group with smoothed composite corners.
+    ///
+    /// Supply a finite `corner_smoothing`; it is clamped to `0..=1`. Zero
+    /// gives the ordinary rounded rectangle. The filter list, opacity,
+    /// masking, and nesting limit follow `with_filter_layer`. Call during paint.
     pub fn with_filter_layer_with_corner_smoothing<R>(
         &mut self,
         bounds: Bounds<Pixels>,
@@ -5248,7 +5298,7 @@ impl Window {
         }
     }
 
-    /// Paint one or more quads into the next frame's scene at the current stacking context.
+    /// Records a filled and bordered rectangle in the current stacking context.
     ///
     /// Quad bounds are logical window-local pixels. GPUI snaps them to the device-pixel grid,
     /// applies the current content mask and element opacity, and records them for presentation.
@@ -5256,9 +5306,9 @@ impl Window {
     ///
     /// This method should only be called as part of the paint phase of element drawing.
     ///
-    /// Note that the `quad.corner_radii` are allowed to exceed the bounds, creating sharp corners
-    /// where the circular arcs meet. This will not display well when combined with dashed borders.
-    /// Use `Corners::clamp_radii_for_quad_size` if the radii should fit within the bounds.
+    /// Corner radii can exceed the bounds, creating sharp joins where the
+    /// circular arcs meet; dashed borders can then look irregular. Use
+    /// [`Corners::clamp_radii_for_quad_size`] when the radii should fit the box.
     // docs:examples:begin
     #[doc = include_str!("docs/examples/gpui-Window-paint-quad-572d1922.md")]
     // docs:examples:end
@@ -9083,28 +9133,58 @@ impl From<[u8; 20]> for ElementId {
 /// Coordinates, radii, and border widths are in logical pixels. Construct one
 /// with [`fill`], [`outline`], or [`quad`], then adjust its fields or use the
 /// builder methods. Constructing the value does not paint it.
+///
+/// A fill starts with zero border widths. Set both width and color to add a
+/// visible border; setting its color alone leaves it borderless:
+///
+/// ```
+/// use gpui::{Bounds, fill, point, px, rgb, size};
+///
+/// let bounds = Bounds::new(point(px(20.), px(12.)), size(px(120.), px(48.)));
+/// let panel = fill(bounds, rgb(0xf7f6f2))
+///     .border_widths(px(2.))
+///     .border_color(rgb(0x155b50))
+///     .corner_radii(px(6.));
+/// // Submit `panel` with window.paint_quad(panel) during paint.
+/// ```
+///
+/// The bounds are the outer box. Borders occupy its inside edge without
+/// changing layout. The active content mask and element opacity are applied
+/// when the window records it. The
+/// [custom-element walkthrough](https://gpui-ce.github.io/examples/custom-element/#draw)
+/// prepares a quad in prepaint and records it in paint.
 #[derive(Clone)]
 pub struct PaintQuad {
-    /// The bounds of the quad within the window.
+    /// Outer rectangle in logical, window-local pixels.
     pub bounds: Bounds<Pixels>,
-    /// The radii of the quad's corners.
+    /// Radius at each corner, in logical pixels.
+    ///
+    /// These are not clamped when painted. Use
+    /// [`Corners::clamp_radii_for_quad_size`] when they should fit the box.
     pub corner_radii: Corners<Pixels>,
-    /// The fill inside the rectangle; it may be a color or gradient.
+    /// Color or gradient filling the rectangle, including beneath its border.
     pub background: Background,
-    /// The widths of the quad's borders.
+    /// Width of each inside border edge, in logical pixels; zero hides that edge.
     pub border_widths: Edges<Pixels>,
-    /// The background painted into the quad's borders.
+    /// Color or gradient painted over the fill along edges with nonzero width.
     pub border_color: Background,
-    /// The style of the quad's borders.
+    /// Whether nonzero border edges are solid or dashed.
     pub border_style: BorderStyle,
-    /// The length of each border dash, as a multiple of the border width.
+    /// Dash length as a multiple of border width, used for [`BorderStyle::Dashed`].
+    ///
+    /// Constructors use `2.0`; a two-pixel border therefore has four-pixel dashes.
     pub border_dashed_length: f32,
-    /// The gap between border dashes, as a multiple of the border width.
+    /// Gap length as a multiple of border width, used for [`BorderStyle::Dashed`].
+    ///
+    /// Constructors use `1.0`; a two-pixel border therefore has two-pixel gaps.
     pub border_dashed_gap: f32,
 }
 
 impl PaintQuad {
-    /// Sets the corner radii of the quad.
+    /// Sets the corner radii in logical pixels without changing the bounds.
+    ///
+    /// A single length sets all four corners. Values are stored without
+    /// clamping; see [`Window::paint_quad`] for oversized radii.
     pub fn corner_radii(self, corner_radii: impl Into<Corners<Pixels>>) -> Self {
         PaintQuad {
             corner_radii: corner_radii.into(),
@@ -9112,7 +9192,11 @@ impl PaintQuad {
         }
     }
 
-    /// Sets the border widths of the quad.
+    /// Sets the inside border widths in logical pixels.
+    ///
+    /// A single length sets all four edges. This leaves the outer bounds and
+    /// border color unchanged; adding widths to a [`fill`] also needs a
+    /// visible [`border_color`](Self::border_color).
     pub fn border_widths(self, border_widths: impl Into<Edges<Pixels>>) -> Self {
         PaintQuad {
             border_widths: border_widths.into(),
@@ -9120,7 +9204,10 @@ impl PaintQuad {
         }
     }
 
-    /// Sets the background painted into the quad's borders.
+    /// Sets the border's color or gradient, leaving its widths unchanged.
+    ///
+    /// Edges with zero width remain invisible. The rectangle's fill remains
+    /// underneath translucent borders.
     pub fn border_color(self, border_color: impl Into<Background>) -> Self {
         PaintQuad {
             border_color: border_color.into(),

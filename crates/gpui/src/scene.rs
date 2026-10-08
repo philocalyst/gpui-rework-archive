@@ -1118,9 +1118,13 @@ impl From<Shadow> for Primitive {
     }
 }
 
-/// A backdrop filter blurs (and may otherwise filter) the content already rendered behind
-/// `bounds`, compositing the result into a rounded rectangle — the frosted-glass effect.
-/// Emitted by [`crate::Window::paint_backdrop_filter`]; produces the CSS `backdrop-filter` effect.
+/// A recorded blur of the content already drawn behind a rounded rectangle.
+///
+/// [`Window::paint_backdrop_filter`](crate::Window::paint_backdrop_filter)
+/// records it in scaled scene coordinates. The renderer filters the backdrop
+/// before later primitives paint, so a panel's translucent fill can tint it
+/// while its text remains sharp. See [`Filter`](crate::Filter) for the
+/// supported filter-list behavior.
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct BackdropFilter {
     /// Draw-order key used when primitives are sorted.
@@ -1133,19 +1137,20 @@ pub struct BackdropFilter {
     pub corner_radii: Corners<ScaledPixels>,
     /// Corner smoothing factor consumed by the renderer.
     pub corner_smoothing: f32,
-    /// The filter chain applied to the backdrop, in scene (device-pixel) space. Identity filters
-    /// are dropped at paint time, so a `BackdropFilter` is only emitted when this is non-empty.
+    /// Filters in scaled scene pixels, with identities omitted by window painting.
     ///
-    /// Inline capacity is 4: a `SmallVec<[ScaledFilter; 4]>` is the same size as capacity 1 here
-    /// (the heap repr already occupies that space), so chains up to 4 filters avoid allocating
-    /// at no extra struct size.
+    /// The supplied renderers use [`Self::max_blur_radius`] for one blur
+    /// operation; entries are not applied successively.
     pub filters: SmallVec<[ScaledFilter; 4]>,
     /// Element opacity captured at paint time, multiplied into the composited result.
     pub opacity: f32,
 }
 
 impl BackdropFilter {
-    /// Largest gaussian blur radius in this filter chain, in device pixels.
+    /// Returns the largest positive blur radius in scaled scene pixels.
+    ///
+    /// An empty list, negative radii, and NaN contribute zero. The supplied
+    /// renderers use this value for the backdrop's blur operation.
     pub fn max_blur_radius(&self) -> f32 {
         max_blur_radius(&self.filters)
     }
@@ -1157,10 +1162,14 @@ impl From<BackdropFilter> for Primitive {
     }
 }
 
-/// The start or end marker of a content-filter (`filter`) isolation group. The element's
-/// subtree is painted between a matched start/end pair; the renderer redirects that span into
-/// an offscreen target, filters it, and composites it back at `bounds`. Produces the CSS
-/// `filter` effect (e.g. blurring the element and its children as a single group).
+/// A start or end marker enclosing drawing that should be filtered together.
+///
+/// Prefer [`Window::with_filter_layer`](crate::Window::with_filter_layer) when
+/// recording application drawing. It supplies the matched markers and scaled
+/// coordinates. [`Scene::finish`] pairs them into render commands and assigns
+/// isolation targets up to [`MAX_FILTER_GROUP_DEPTH`]; deeper groups draw
+/// inline. The supplied renderers blur each isolated group once, using its
+/// largest radius.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct FilterBoundary {
     /// Draw-order key used when primitives are sorted.
@@ -1173,18 +1182,25 @@ pub struct FilterBoundary {
     pub corner_radii: Corners<ScaledPixels>,
     /// Corner smoothing factor consumed by the renderer.
     pub corner_smoothing: f32,
-    /// The filter chain applied to the isolated group, in scene (device-pixel) space. Identity
-    /// filters are dropped at paint time, so a `FilterBoundary` is only emitted when non-empty.
-    /// Inline capacity 4 (same struct size as 1 here — see [`BackdropFilter::filters`]).
+    /// Filters in scaled scene pixels, with identities omitted by window painting.
+    ///
+    /// The supplied renderers use [`Self::max_blur_radius`] for one blur
+    /// operation, subject to the group's isolation limit.
     pub filters: SmallVec<[ScaledFilter; 4]>,
-    /// Element opacity multiplied into the composited group.
+    /// Opacity multiplied into the composited group.
+    ///
+    /// Window painting records `1.0` here because its child primitives already
+    /// carry the active element opacity.
     pub opacity: f32,
     /// `true` for the start marker (opens the group), `false` for the end marker (closes it).
     pub is_start: bool,
 }
 
 impl FilterBoundary {
-    /// Largest gaussian blur radius in this filter chain, in device pixels.
+    /// Returns the largest positive blur radius in scaled scene pixels.
+    ///
+    /// An empty list, negative radii, and NaN contribute zero. The supplied
+    /// renderers use this value when the group receives an isolation target.
     pub fn max_blur_radius(&self) -> f32 {
         max_blur_radius(&self.filters)
     }

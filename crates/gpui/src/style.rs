@@ -647,6 +647,21 @@ pub enum UnicodeBidi {
 /// Configure [`Style::box_shadow`] directly or use [`Styled::shadow`]. The offset moves the
 /// shadow from the box, spread changes its extent, and blur softens its edge. Ancestor
 /// content masks can clip the result.
+///
+/// This panel casts a soft shadow three logical pixels below its box:
+///
+/// ```
+/// use gpui::{BoxShadow, div, prelude::*, px, rgb, rgba};
+///
+/// let panel = div().w(px(160.)).h(px(80.)).bg(rgb(0xffffff)).shadow(vec![
+///     BoxShadow::new(px(0.), px(3.), rgba(0x00000033)).blur_radius(px(8.)),
+/// ]);
+/// ```
+///
+/// Drop shadows paint before the background; inset shadows paint after it.
+/// [`Style::paint`] handles that ordering for styled elements. Custom paint
+/// code uses [`Window::paint_drop_shadows`](crate::Window::paint_drop_shadows)
+/// and [`Window::paint_inset_shadows`](crate::Window::paint_inset_shadows).
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct BoxShadow {
     /// The shadow color or gradient.
@@ -655,16 +670,21 @@ pub struct BoxShadow {
     pub offset: Point<Pixels>,
     /// Blur radius in logical pixels; zero leaves a hard edge.
     pub blur_radius: Pixels,
-    /// Expansion of the shadow before blurring, in logical pixels. Negative values contract it.
+    /// Spread before blurring, in logical pixels.
+    ///
+    /// A positive value expands a drop shadow's silhouette or shrinks an inset
+    /// shadow's unshadowed hole. A negative value has the opposite effect.
     pub spread_radius: Pixels,
     /// Whether this is an inset shadow (drawn inside the element's bounds).
     pub inset: bool,
 }
 
 impl BoxShadow {
-    /// Creates a new [`BoxShadow`] with the given offset and color, matching the order
-    /// of the CSS `box-shadow` property. Use the builder methods to set blur radius,
-    /// spread radius, and inset.
+    /// Creates a hard-edged drop shadow with the given offset and color.
+    ///
+    /// Both blur and spread start at zero. Use [`blur_radius`](Self::blur_radius)
+    /// to soften it, [`spread_radius`](Self::spread_radius) to change its extent,
+    /// and [`inset`](Self::inset) to place it inside the box.
     pub fn new(offset_x: Pixels, offset_y: Pixels, color: impl Into<Background>) -> Self {
         Self {
             color: color.into(),
@@ -675,49 +695,73 @@ impl BoxShadow {
         }
     }
 
-    /// Sets the shadow blur radius.
+    /// Sets the blur radius in logical pixels; zero leaves a hard edge.
+    ///
+    /// Supply a finite, nonnegative radius. This setter stores the value
+    /// without validating it or changing the spread.
     pub fn blur_radius(mut self, blur_radius: Pixels) -> Self {
         self.blur_radius = blur_radius;
         self
     }
 
-    /// Sets the shadow spread radius.
+    /// Sets the signed spread in logical pixels, leaving blur and offset unchanged.
+    ///
+    /// Positive values expand a drop shadow or shrink an inset shadow's
+    /// unshadowed hole. Negative values reverse that effect.
     pub fn spread_radius(mut self, spread_radius: Pixels) -> Self {
         self.spread_radius = spread_radius;
         self
     }
 
-    /// Marks the shadow as inset (drawn inside the element's bounds).
+    /// Places the shadow inside the box, leaving its other parameters unchanged.
+    ///
+    /// [`Style::paint`] paints it above the background and below the contents.
+    /// Custom paint code must pass it to [`Window::paint_inset_shadows`](crate::Window::paint_inset_shadows);
+    /// the drop-shadow method skips inset entries.
     pub fn inset(mut self) -> Self {
         self.inset = true;
         self
     }
 }
 
-/// A graphical filter that can be applied either to an element's own content
-/// (via [`Styled::filter`], like CSS `filter`) or to the content rendered behind
-/// it (via [`Styled::backdrop_filter`], like CSS `backdrop-filter`).
+/// A blur applied to an element's content or to the drawing behind it.
+///
+/// [`Styled::blur`] softens the element's background, contents, and border
+/// together. [`Styled::backdrop_blur`] leaves those sharp and softens the
+/// already-painted backdrop. The [drawing chapter](crate::_documentation::drawing#choose-which-pixels-to-blur)
+/// shows both operations and their paint order.
+///
+/// Supply finite radii. Zero and negative blur radii are skipped during paint.
+/// The supplied renderers use the largest radius in a filter list for one
+/// blur operation: repeated entries do not apply successive blurs. Content
+/// isolation is also bounded by [`MAX_FILTER_GROUP_DEPTH`](crate::MAX_FILTER_GROUP_DEPTH).
+/// These APIs provide the corresponding visual effects, not every behavior
+/// of CSS filter lists and backdrop roots.
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub enum Filter {
-    /// A gaussian blur with the given radius, in logical pixels. Maps to CSS `blur(<px>)`.
+    /// A Gaussian blur with a radius in logical pixels.
+    ///
+    /// Zero and negative radii are identities. The window applies display
+    /// scaling; do not multiply this radius by the scale factor yourself.
     Blur(Pixels),
 }
 
 impl Filter {
-    /// Whether this filter has no visible effect, so painting can skip it entirely (and the
-    /// element can avoid the offscreen isolation pass when *all* of its filters are identities).
+    /// Returns whether paint can skip this filter.
     ///
-    /// Each variant declares its own no-op case here rather than the pipeline special-casing
-    /// blur — adding a filter that this returns `true` for is silently dropped before it ever
-    /// reaches the renderer.
+    /// A blur is an identity when its radius is zero or negative. If every
+    /// entry is an identity, content painting needs no filter group. This
+    /// query does not validate floating-point input; NaN is not an identity.
     pub fn is_identity(&self) -> bool {
         match self {
             Filter::Blur(radius) => *radius <= Pixels::ZERO,
         }
     }
 
-    /// Lower this logical-pixel filter into its scene-space ([`ScaledFilter`]) form for the
-    /// renderer, scaling any pixel magnitudes by `factor` (the window scale factor).
+    /// Converts the radius to scene pixels by multiplying it by `factor`.
+    ///
+    /// Window painting supplies the display scale and performs this conversion
+    /// for ordinary callers. It does not remove identities or validate `factor`.
     pub fn scale(&self, factor: f32) -> ScaledFilter {
         match self {
             Filter::Blur(radius) => ScaledFilter::Blur(radius.scale(factor)),
@@ -725,13 +769,12 @@ impl Filter {
     }
 }
 
-/// The scene-space (device-pixel) form of a [`Filter`], carried on the scene primitives that the
-/// renderers consume. Produced by [`Filter::scale`]; pixel magnitudes are in [`ScaledPixels`].
+/// A [`Filter`] converted to the renderer's scene coordinates.
 ///
-/// This is intentionally a separate enum from [`Filter`] (rather than reusing it) so the scene
-/// stays in device space like every other primitive, and so the renderers `match` on it
-/// exhaustively — adding a filter variant breaks each backend's match, forcing a deliberate
-/// implement-or-decline decision per backend instead of silently rendering nothing.
+/// Radii use [`ScaledPixels`]. Window painting creates these values with
+/// [`Filter::scale`]; application element styles use logical-pixel [`Filter`]
+/// values instead. Scene captures retain these scaled radii along with the
+/// frame's geometry.
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum ScaledFilter {
     /// A gaussian blur with the given radius, in scaled (device) pixels.
