@@ -23,7 +23,8 @@ use std::{
 /// `editor::MoveUp`. Attributes and doc comments may precede each listed name.
 ///
 /// The namespace is optional, but helps avoid collisions between commands
-/// from different modules. Declaration does not install a key binding or a
+/// from different modules. Use one identifier for it, such as `editor`.
+/// Declaration does not install a key binding or a
 /// handler: use [`App::bind_keys`](crate::App::bind_keys) and
 /// [`InteractiveElement::on_action`](crate::InteractiveElement::on_action).
 #[macro_export]
@@ -92,6 +93,8 @@ macro_rules! actions {
 /// do not need those JSON traits and ignore the supplied JSON value.
 /// `serde::Serialize` is not required. `deny_unknown_fields` is an application
 /// choice that helps catch misspelled configuration keys.
+/// The derive accepts concrete types; implement the trait manually when a
+/// generic command needs its own registration and naming policy.
 ///
 /// # Configure the derive
 ///
@@ -124,13 +127,20 @@ pub trait Action: Any + Send {
     /// Clone the action into an owned trait object.
     fn boxed_clone(&self) -> Box<dyn Action>;
 
-    /// Compare the payload of this action with another action of the same type.
+    /// Compares type and payload with another action.
+    ///
+    /// Return false for a different concrete type. Key-binding lookup uses
+    /// this comparison, so two values of the same command type can have
+    /// different shortcuts when their payloads differ.
     fn partial_eq(&self, action: &dyn Action) -> bool;
 
-    /// Return the registered name used in keymaps and user-facing command lists.
+    /// Returns the canonical name used in configuration and command lists.
+    ///
+    /// Deriving with `no_register` still supplies a name. Constructing through
+    /// a deprecated alias also leaves this canonical name unchanged.
     fn name(&self) -> &'static str;
 
-    /// Return the registered name for the concrete action type.
+    /// Returns the same canonical name as [`Self::name`], without an instance.
     fn name_for_type() -> &'static str
     where
         Self: Sized;
@@ -141,11 +151,36 @@ pub trait Action: Any + Send {
     /// actions ignore the value; derived actions with fields deserialize it.
     /// Return an error for invalid input. Registry callers report it as
     /// [`ActionBuildError::BuildError`].
+    /// Calling this trait method directly does not require registration.
+    ///
+    /// # Example: validate a command's data
+    ///
+    /// This command is deliberately absent from the named registry, but its
+    /// derived builder still validates the payload:
+    ///
+    /// ```rust
+    /// use gpui::Action;
+    ///
+    /// #[derive(Clone, PartialEq, serde::Deserialize, schemars::JsonSchema, Action)]
+    /// #[action(namespace = documentation_action_build, no_register)]
+    /// #[serde(deny_unknown_fields)]
+    /// struct JumpToRow { row: u32 }
+    ///
+    /// let command = JumpToRow::build(serde_json::json!({"row": 12})).unwrap();
+    /// assert!(command.partial_eq(&JumpToRow { row: 12 }));
+    /// assert!(!command.partial_eq(&JumpToRow { row: 13 }));
+    /// assert!(JumpToRow::build(serde_json::json!({"row": "twelve"})).is_err());
+    /// assert!(JumpToRow::build(serde_json::json!({"row": 12, "typo": true})).is_err());
+    /// ```
     fn build(value: serde_json::Value) -> Result<Box<dyn Action>>
     where
         Self: Sized;
 
-    /// Optional JSON schema for the action's input data.
+    /// Returns a JSON schema for the command's payload, if one is available.
+    ///
+    /// The default is `None`. The derive also returns `None` for unit actions
+    /// and `no_json` actions; it otherwise asks `schemars` for the type's schema.
+    /// Schema absence alone therefore does not mean JSON construction fails.
     fn action_json_schema(_: &mut schemars::SchemaGenerator) -> Option<schemars::Schema>
     where
         Self: Sized,
@@ -153,9 +188,12 @@ pub trait Action: Any + Send {
         None
     }
 
-    /// A list of alternate, deprecated names for this action. These names can still be used to
-    /// invoke the action. In Zed, the keymap JSON schema will accept these old names and provide
-    /// warnings.
+    /// Lists old names that the registry should accept for this command.
+    ///
+    /// Each alias uses the same builder as the canonical name. The default is
+    /// an empty slice. Applications can use
+    /// [`App::deprecated_actions_to_preferred_actions`](crate::App::deprecated_actions_to_preferred_actions)
+    /// to offer configuration migrations; GPUI does not display warnings itself.
     fn deprecated_aliases() -> &'static [&'static str]
     where
         Self: Sized,
@@ -163,8 +201,12 @@ pub trait Action: Any + Send {
         &[]
     }
 
-    /// Returns the deprecation message for this action, if any. In Zed, the keymap JSON schema will
-    /// cause this to be displayed as a warning.
+    /// Returns migration guidance for this command, if it is deprecated.
+    ///
+    /// The default is `None`. This is metadata for application configuration
+    /// tools; it neither disables the command nor emits a warning. Registered
+    /// messages are available through
+    /// [`App::action_deprecation_messages`](crate::App::action_deprecation_messages).
     fn deprecation_message() -> Option<&'static str>
     where
         Self: Sized,
@@ -172,8 +214,11 @@ pub trait Action: Any + Send {
         None
     }
 
-    /// The documentation for this action, if any. When using the derive macro for actions
-    /// this will be automatically generated from the doc comments on the action struct.
+    /// Returns prose that configuration tools can show for this command.
+    ///
+    /// The default is `None`. The derive collects the struct's literal doc
+    /// comments, trimming each line. Retrieve registered prose through
+    /// [`App::action_documentation`](crate::App::action_documentation).
     fn documentation() -> Option<&'static str>
     where
         Self: Sized,
@@ -203,17 +248,19 @@ impl dyn Action {
 /// Error returned when the action registry cannot construct a named action from JSON.
 #[derive(Debug)]
 pub enum ActionBuildError {
-    /// Indicates that an action with this name has not been registered.
+    /// No canonical name or registered alias matched the request.
     NotFound {
-        /// Name of the action that was not found.
+        /// The requested name, unchanged from the caller's input.
         name: String,
     },
-    /// Indicates that an error occurred while building the action, typically a JSON deserialization
-    /// error.
+    /// The registered builder rejected the payload.
+    ///
+    /// Derived builders reject invalid field data and all JSON construction
+    /// for `#[action(no_json)]` types. A custom builder can report other errors.
     BuildError {
-        /// Name of the action that was attempting to be built.
+        /// The requested name, which may be a deprecated alias.
         name: String,
-        /// Error that occurred while building the action.
+        /// The error returned by the builder, including its context.
         error: anyhow::Error,
     },
 }

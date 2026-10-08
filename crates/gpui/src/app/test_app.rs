@@ -169,6 +169,9 @@ impl TestApp {
     ///
     /// The closure constructs the root view once. The returned window owns a
     /// typed handle for inspection and input simulation.
+    /// [`App::open_window`] performs the initial draw after that closure
+    /// returns. Draw again after state changes when an assertion or input
+    /// event depends on the new layout, hitboxes, or dispatch ancestry.
     pub fn open_window<V: Render + 'static>(
         &mut self,
         build_view: impl FnOnce(&mut Window, &mut Context<V>) -> V,

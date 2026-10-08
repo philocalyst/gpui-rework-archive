@@ -1013,6 +1013,10 @@ pub trait InteractiveElement: Sized {
     /// Keyboard dispatch visits this node and its ancestors. A listener on a
     /// child does not receive keys merely because this parent is focused.
     /// Attach the listener here, or focus a handle on that child instead.
+    /// Attach each identity to one element per window. Reusing a handle on
+    /// siblings does not create a group: keyboard lookup finds only the last
+    /// node registered with that identity. Use separate handles for the
+    /// container and its controls.
     /// See the [actions walkthrough](https://gpui-ce.github.io/examples/actions/#focus).
     fn track_focus(mut self, focus_handle: &FocusHandle) -> Self {
         self.interactivity().focusable = true;
@@ -1020,12 +1024,15 @@ pub trait InteractiveElement: Sized {
         self
     }
 
-    /// Set whether this element's internally retained focus handle is a tab stop.
+    /// Sets whether tab traversal may select this element's internal handle.
     ///
-    /// When false, the element remains in tab-index order but cannot be reached via keyboard navigation.
-    /// Useful for container elements: focus the container, then call `window.focus_next(cx)` to focus
-    /// the first tab stop inside it while having the container element itself be unreachable via the keyboard.
-    /// Should only be used with `tab_index`.
+    /// Setting this alone does not make an element focusable. Use
+    /// [`Self::tab_index`] first; that method makes it focusable and resets
+    /// this flag to `true`, so the order of those builder calls matters.
+    /// A false flag skips the element during traversal while still allowing
+    /// pointer or programmatic focus. For a container with [`Self::tab_group`],
+    /// this lets application code focus the container and then call
+    /// [`Window::focus_next`] to enter its first child stop.
     /// With [`Self::track_focus`], configure [`FocusHandle::tab_stop`] instead.
     fn tab_stop(mut self, tab_stop: bool) -> Self {
         self.interactivity().tab_stop = tab_stop;
@@ -1036,7 +1043,9 @@ pub trait InteractiveElement: Sized {
     ///
     /// This also enables [`Self::tab_stop`]. Use a stable [`Self::id`] so GPUI
     /// can retain the internal handle across frames. Lower indices sort first;
-    /// equal indices follow their recorded order. Use [`Self::tab_group`] to
+    /// equal indices follow their recorded order. Negative indices participate
+    /// too; use `.tab_stop(false)` after this call to exclude the element from
+    /// traversal. Use [`Self::tab_group`] to
     /// scope ordering within a composite widget. With [`Self::track_focus`],
     /// configure [`FocusHandle::tab_index`] and [`FocusHandle::tab_stop`] instead.
     // docs:examples:begin
@@ -1049,10 +1058,14 @@ pub trait InteractiveElement: Sized {
         self
     }
 
-    /// Designate this div as a "tab group". Tab groups have their own location in the tab-index order,
-    /// but for children of the tab group, the tab index is reset to 0. This can be useful for swapping
-    /// the order of tab stops within the group, without having to renumber all the tab stops in the whole
-    /// application.
+    /// Groups descendants into one position in the surrounding tab order.
+    ///
+    /// The group's index defaults to zero; [`Self::tab_index`] sets it.
+    /// Descendants keep their own indices, which order them within the group.
+    /// For example, a child at index 100 in group 1 precedes a child at index
+    /// zero in group 2. Equal indices follow their recorded order.
+    /// Groups can nest, and reordering children needs no changes to sibling
+    /// groups. This call does not make the container a focusable tab stop.
     fn tab_group(mut self) -> Self {
         self.interactivity().tab_group = true;
         if self.interactivity().tab_index.is_none() {

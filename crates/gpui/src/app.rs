@@ -1551,6 +1551,12 @@ impl App {
     /// request or creation fails; for example, the web backend allows one
     /// normal window per document and rejects unsupported window kinds. Check
     /// the error before retaining or using the returned handle.
+    ///
+    /// After the builder returns, GPUI lays out and draws the root before this
+    /// method returns its handle. The builder can select an initial focus
+    /// handle, but rendered ancestry and hitboxes do not exist during that
+    /// setup closure. Drawing here does not guarantee that the platform has
+    /// presented the frame on screen.
     // docs:examples:begin
     #[doc = include_str!("docs/examples/gpui-App-open-window-f8ec0f6b.md")]
     // docs:examples:end
@@ -2845,7 +2851,21 @@ impl App {
         self.propagate_event = true;
     }
 
-    /// Build an action from some arbitrary data, typically a keymap entry.
+    /// Builds a registered command from its canonical name or deprecated alias.
+    ///
+    /// With `data: None`, the builder receives an empty JSON object. Derived
+    /// unit actions ignore that value; actions with fields deserialize it,
+    /// using any defaults configured through serde. Use an explicit payload
+    /// for required fields. This does not dispatch the returned action, install
+    /// a listener, or establish that it is available on a focus path.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ActionBuildError::NotFound`] for an unregistered name and
+    /// [`ActionBuildError::BuildError`] when its builder fails, including
+    /// invalid field data or a derived `no_json` action. `no_register` types
+    /// cannot be found here unless registered separately; their direct
+    /// [`Action::build`] method remains available.
     pub fn build_action(
         &self,
         name: &str,
@@ -2854,8 +2874,11 @@ impl App {
         self.actions.build_action(name, data)
     }
 
-    /// Get all action names that have been registered. Note that registration only allows for
-    /// actions to be built dynamically, and is unrelated to binding actions in the element tree.
+    /// Returns all canonical action names and registered deprecated aliases.
+    ///
+    /// The order comes from linked registrations and is not stable. Registration
+    /// supplies named builders; it does not imply that a shortcut or listener
+    /// exists. Use [`Self::is_action_available`] to inspect live handlers.
     pub fn all_action_names(&self) -> &[&'static str] {
         self.actions.all_action_names()
     }
@@ -2866,11 +2889,18 @@ impl App {
     /// Prefixes awaiting another key are excluded. These are possible matches,
     /// not a prediction of the focused element's dispatch: context predicates
     /// and propagation can change which action actually runs.
+    /// Removal markers and the bindings they suppress are included too.
+    /// See [`Keymap::all_bindings_for_input`] for the structural-query contract.
     pub fn all_bindings_for_input(&self, input: &[Keystroke]) -> Vec<KeyBinding> {
         RefCell::borrow(&self.keymap).all_bindings_for_input(input)
     }
 
-    /// Get all non-internal actions that have been registered, along with their schemas.
+    /// Builds a payload schema for every registered name, including aliases.
+    ///
+    /// Each name is paired with its builder's optional schema. Derived unit
+    /// and `no_json` actions have no schema, but remain in this list. `no_register`
+    /// types are absent unless registered separately. Results follow
+    /// [`Self::all_action_names`]; sort them for a stable user-facing list.
     pub fn action_schemas(
         &self,
         generator: &mut schemars::SchemaGenerator,
@@ -2878,10 +2908,12 @@ impl App {
         self.actions.action_schemas(generator)
     }
 
-    /// Get the schema for a specific action by name.
-    /// Returns `None` if the action is not found.
-    /// Returns `Some(None)` if the action exists but has no schema.
-    /// Returns `Some(Some(schema))` if the action exists and has a schema.
+    /// Builds the payload schema for one canonical name or deprecated alias.
+    ///
+    /// `None` means the name is unregistered. `Some(None)` means its registered
+    /// builder supplies no schema, as with derived unit or `no_json` actions.
+    /// `Some(Some(schema))` contains the schema. Thus schema absence is distinct
+    /// from an unknown command and does not by itself forbid JSON construction.
     pub fn action_schema_by_name(
         &self,
         name: &str,
@@ -2890,17 +2922,29 @@ impl App {
         self.actions.action_schema_by_name(name, generator)
     }
 
-    /// Get a map from a deprecated action name to the canonical name.
+    /// Returns registered deprecated aliases mapped to their canonical names.
+    ///
+    /// Alias construction uses the canonical builder. Use this map to suggest
+    /// migrations when reading configuration; the constructed action's
+    /// [`Action::name`] already reports the canonical name.
     pub fn deprecated_actions_to_preferred_actions(&self) -> &HashMap<&'static str, &'static str> {
         self.actions.deprecated_aliases()
     }
 
-    /// Get a map from an action name to the deprecation messages.
+    /// Returns deprecation messages keyed by canonical action name.
+    ///
+    /// Entries come from [`Action::deprecation_message`]. Aliases are not
+    /// duplicated here; resolve one with [`Self::deprecated_actions_to_preferred_actions`]
+    /// before looking up its message. Presence does not disable the command.
     pub fn action_deprecation_messages(&self) -> &HashMap<&'static str, &'static str> {
         self.actions.deprecation_messages()
     }
 
-    /// Get a map from an action name to the documentation.
+    /// Returns command documentation keyed by canonical action name.
+    ///
+    /// Entries come from [`Action::documentation`], including doc comments
+    /// collected by the derive. Resolve aliases with
+    /// [`Self::deprecated_actions_to_preferred_actions`] before querying this map.
     pub fn action_documentation(&self) -> &HashMap<&'static str, &'static str> {
         self.actions.documentation()
     }
@@ -2979,11 +3023,15 @@ impl App {
         }
     }
 
-    /// Returns whether the focused path or an app-wide listener can handle this action type.
+    /// Checks for this action type on the active window's path or the app.
     ///
     /// This checks handler registration, not whether a key binding exists or
     /// whether a handler will accept the action's particular payload. If the
     /// active window cannot be accessed, only app-wide listeners are checked.
+    /// In particular, an in-progress update has already borrowed that window;
+    /// use [`Window::is_action_available`] to inspect its supplied `Window`.
+    /// The platform chooses which window is active. This query does not search
+    /// every open window or move focus to a candidate target.
     pub fn is_action_available(&mut self, action: &dyn Action) -> bool {
         let mut action_available = false;
         if let Some(window) = self.active_window()
@@ -3315,6 +3363,8 @@ impl App {
     /// [`track_focus`](crate::InteractiveElement::track_focus). Creating the
     /// handle does not select a window or move focus; call [`FocusHandle::focus`]
     /// with the window that should receive keyboard input.
+    /// Its tab index starts at zero and its tab-stop flag at false. Configure
+    /// [`FocusHandle::tab_stop`] to include an explicit handle in traversal.
     #[track_caller]
     pub fn focus_handle(&self) -> FocusHandle {
         FocusHandle::new(&self.focus_handles)

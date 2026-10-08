@@ -797,3 +797,67 @@ without the duplicated-header capture seen under the earlier emulation setup.
 This check uses a single-pixel-scale CDP capture, not the tab screenshot API's
 incorrectly sized emulation output. Proof: `animation-editor-390.png`. Both
 temporary viewport overrides were cleared afterward.
+
+## Focus, bindings, and action configuration
+
+The next contextual pass reread FocusId, FocusHandle, weak handles, Focusable,
+ManagedView, the Window focus setters and queries, focus notifications, the
+relevant dispatch-tree construction and lookup paths, tab-stop ordering, and
+the element focus/tab builders with their group-entry regression. It also
+reread the full Keymap production implementation, KeyBinding and binding
+collection implementations, Action's public contracts and registry, and the
+action derive implementation.
+
+The docs now distinguish a selected identity from a rendered target, describe
+the direct focus fields as snapshots of shared configuration, explain negative
+tab indices and builder-call order, and correct the old claim that a tab group
+resets its children's indices. A new asserting test moves a focused field out
+of its panel while retaining the identity, checking old ancestry before the
+next draw and new ancestry afterward. The setup assertions run inside the
+window builder because App::open_window draws the initial root before returning.
+The focused testing-chapter run passes all 15 examples at that checkpoint.
+
+The source comparison also exposed a live discrepancy between shortcut
+dispatch and shortcut labels. A weaker-source NoAction marker preserved a
+stronger binding during input lookup, but action lookup discarded it before
+the window's label query. The new regression failed before the fix. The
+isolated implementation and two regressions are committed as `8634be1bc2`;
+all 506 core library tests pass. The browser bundle B predates this label fix;
+its owner received the isolated commit for the next SDK refresh. None of the
+twelve starter components changed.
+
+New Keymap examples assert context-depth precedence, removal and restoration,
+and a complete shortcut that is also a chord prefix. The source descriptions
+separate structural sequence inspection, context-aware candidate lookup,
+shortcut display, listener presence, and actual handling. The focus task guide
+uses those APIs as a diagnostic path and links both the binding and rendered
+focus tests. All 25 documentation-tool tests, all 13 site tests, and formatting
+pass at this checkpoint. The complete final doctest and combined-artifact runs
+remain required after the configuration documentation is finished.
+
+The intervening complete doctest run passes 196 examples (189 merged and
+seven test-harness examples), with two ignored. The action-configuration pass
+then expands App's named construction and metadata APIs, Action's builder and
+metadata hooks, ActionBuildError's requested-name fields, and the re-exported
+derive and registration macro docs. In particular, schema absence is distinct
+from an unknown action and from JSON construction being disabled; aliases use
+the canonical builder but metadata maps use canonical names. The new direct
+builder example asserts valid data, payload-sensitive equality, wrong field
+types, and unknown-field rejection. It needs the next doctest run.
+
+### Further reference reading
+
+The primary editor reread the ecosystem review's complete article prose and
+code snippets from the cached 2026-10-07 HTML, including its comparisons,
+analysis, and conclusion. The web tool could not reopen the article during
+this pass. This does not claim a new visual review of its embedded images or
+a complete reading of every linked site's examples.
+
+The complete [Rocket 0.5 pastebin tutorial](https://rocket.rs/guide/v0.5/pastebin/)
+was read from the official site: the working result, incremental setup,
+storage decisions, first retrieval attempt and its validation problem,
+typed parameter repair, streamed upload, verification commands, and proposed
+extensions. Its useful pattern is to give each new part an observable result
+and a reason before introducing the next part. Its code was read, not executed
+in this workspace. The Embassy Book's introduction was also revisited; its
+remaining chapters and FAQ body were not completed in this pass.

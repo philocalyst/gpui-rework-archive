@@ -19,9 +19,50 @@ pub struct KeymapVersion(usize);
 
 /// Ordered key bindings for an application.
 ///
-/// Later bindings have higher precedence at the same context depth. Context-aware lookup also
-/// considers the dispatch path, so a binding on a focused child wins over an otherwise identical
-/// binding on its parent.
+/// Each [`KeyBinding`] maps a sequence of strokes to an [`Action`] under an
+/// optional context predicate. For application setup, pass bindings to
+/// [`App::bind_keys`](crate::App::bind_keys); keep a separate `Keymap` when
+/// inspecting or testing a set of bindings without a window.
+///
+/// Context-aware lookup compares matches along a root-to-target context path.
+/// A deeper match wins; at the same depth, a later binding wins. An unqualified
+/// binding matches at the deepest depth. Lookup returns candidates without
+/// invoking listeners. See the [input chapter](crate::_documentation::input)
+/// for the connection between focus, contexts, and action handling.
+///
+/// # Example: resolve a shortcut on a focused path
+///
+/// The later workspace binding does not displace the deeper editor binding.
+/// Adding a removal hides the shortcut in that editor context; a binding
+/// added afterward restores it:
+///
+/// ```rust
+/// use gpui::{KeyBinding, KeyContext, Keymap, Keystroke, NoAction, actions};
+///
+/// actions!(documentation_keymap, [Save, SaveDraft, SaveWorkspace]);
+///
+/// let mut keymap = Keymap::new(vec![
+///     KeyBinding::new("ctrl-s", Save, None),
+///     KeyBinding::new("ctrl-s", SaveDraft, Some("Editor")),
+///     KeyBinding::new("ctrl-s", SaveWorkspace, Some("Workspace")),
+/// ]);
+/// let path = [
+///     KeyContext::parse("Workspace").unwrap(),
+///     KeyContext::parse("Editor").unwrap(),
+/// ];
+/// let input = [Keystroke::parse("ctrl-s").unwrap()];
+/// let (candidates, pending) = keymap.bindings_for_input(&input, &path);
+/// assert!(candidates[0].action().as_any().is::<SaveDraft>());
+/// assert!(!pending);
+///
+/// keymap.add_bindings([KeyBinding::new("ctrl-s", NoAction, Some("Editor"))]);
+/// assert!(keymap.bindings_for_input(&input, &path).0.is_empty());
+///
+/// keymap.add_bindings([KeyBinding::new("ctrl-s", SaveDraft, Some("Editor"))]);
+/// let (candidates, _) = keymap.bindings_for_input(&input, &path);
+/// assert_eq!(candidates.len(), 1);
+/// assert!(candidates[0].action().as_any().is::<SaveDraft>());
+/// ```
 #[derive(Default)]
 pub struct Keymap {
     bindings: Vec<KeyBinding>,
@@ -30,7 +71,9 @@ pub struct Keymap {
     version: KeymapVersion,
 }
 
-/// Index of a binding within a keymap.
+/// An insertion position used to order candidates within one [`Keymap`].
+///
+/// This is not a stable identity for a binding across keymaps or clears.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub struct BindingIndex(usize);
 
@@ -76,6 +119,7 @@ impl Keymap {
     ///
     /// The iterator is consumed before this method returns. Existing bindings remain in place,
     /// so appended bindings win ties at the same context depth.
+    /// An empty iterator still advances the revision.
     pub fn add_bindings<T: IntoIterator<Item = KeyBinding>>(&mut self, bindings: T) {
         for binding in bindings {
             let action_id = binding.action().as_any().type_id();
@@ -106,11 +150,18 @@ impl Keymap {
         self.bindings.iter()
     }
 
-    /// Iterate over enabled bindings for an action, in the order they were added.
+    /// Finds bindings for the same action value, in insertion order.
     ///
-    /// This does not filter by a current context path. Later matching entries have higher
-    /// precedence for display, so consumers presenting one shortcut should inspect the iterator
-    /// from the back.
+    /// Action comparison includes its data, not just its type. Later
+    /// [`NoAction`](crate::NoAction) and [`Unbind`] entries remove a binding
+    /// when their predicates are known to cover its predicate. `NoAction`
+    /// preserves a binding from a stronger metadata source.
+    ///
+    /// This does not test a current context path or account for a different
+    /// action bound to the same strokes. For a shortcut label on a real
+    /// target, use [`Window::bindings_for_action`](crate::Window::bindings_for_action)
+    /// or its candidate-focus variant. Those queries also check the rendered
+    /// contexts and competing bindings.
     pub fn bindings_for_action<'a>(
         &'a self,
         action: &'a dyn Action,
@@ -160,6 +211,9 @@ impl Keymap {
     ///
     /// Results are ordered by insertion precedence (reverse of the order they were added). Prefix
     /// matches that need more keystrokes are excluded.
+    /// Removal markers and bindings they suppress are included: this is a
+    /// structural query for inspection, not a dispatch result. Use
+    /// [`Self::bindings_for_input`] to apply contexts and removals.
     pub fn all_bindings_for_input(&self, input: &[Keystroke]) -> Vec<KeyBinding> {
         self.bindings()
             .rev()
@@ -172,26 +226,55 @@ impl Keymap {
             .collect()
     }
 
-    /// Returns matching bindings and whether a longer input may still match another binding.
+    /// Resolves complete candidates and whether more strokes can complete a chord.
     ///
-    /// The returned boolean is `true` when at least one binding is a prefix of a longer sequence.
-    /// Returns are in precedence order, with the highest-precedence binding first.
+    /// `context_stack` runs from the root toward the keyboard target. The
+    /// returned bindings match the complete `input` and are ordered from
+    /// highest to lowest precedence. The boolean is true when a longer
+    /// matching sequence survives the prefix rules; it can be true even when
+    /// complete candidates are present. This method neither buffers input nor
+    /// waits for a timeout. The window handles that pending state.
     ///
     /// Precedence is defined by the depth in the tree (matches on the Editor take precedence over
     /// matches on the Pane, then the Workspace, etc.). Bindings with no context are treated as the
     /// same as the deepest context.
     ///
-    /// In the case of multiple bindings at the same depth, the ones added to the keymap later take
-    /// precedence. User bindings are added after built-in bindings so that they take precedence.
+    /// At the same depth, later bindings win. Append user bindings after
+    /// built-ins when users should be able to override them.
     ///
-    /// If a binding has been disabled with `"x": null` it will not be returned. Disabled bindings
-    /// are evaluated with the same precedence rules so you can disable a rule in a given context
-    /// only. A disabled binding only suppresses bindings from sources with equal or weaker
-    /// precedence: a base keymap null hides default bindings, but user bindings still apply.
+    /// [`NoAction`](crate::NoAction) removes lower-precedence complete matches
+    /// from equal or weaker metadata sources; [`Unbind`] removes only its named
+    /// action. The markers are omitted from the returned candidates. Metadata
+    /// source precedence controls `NoAction` suppression, not ordinary binding
+    /// order. See [`KeyBindingMetaIndex`] for the numeric convention.
     ///
-    /// This method returns candidate actions in precedence order; action dispatch still follows
-    /// the focused element path and its propagation rules. A `true` pending result means the
-    /// caller may need to wait for another keystroke before choosing among the candidates.
+    /// A longer binding added before the highest-precedence complete candidate
+    /// does not hold that candidate pending. Longer bindings added afterward
+    /// can do so. Removal markers also participate in prefix filtering.
+    ///
+    /// A returned candidate may have no listener or be declined by its handler.
+    /// Dispatch still follows the focused path and its propagation rules.
+    ///
+    /// # Example: a complete shortcut can also be a chord prefix
+    ///
+    /// ```rust
+    /// use gpui::{KeyBinding, Keymap, Keystroke, actions};
+    ///
+    /// actions!(documentation_chord, [OpenMenu, MoveLeft]);
+    /// let keymap = Keymap::new(vec![
+    ///     KeyBinding::new("ctrl-k", OpenMenu, None),
+    ///     KeyBinding::new("ctrl-k left", MoveLeft, None),
+    /// ]);
+    /// let prefix = [Keystroke::parse("ctrl-k").unwrap()];
+    /// let (candidates, pending) = keymap.bindings_for_input(&prefix, &[]);
+    /// assert!(candidates[0].action().as_any().is::<OpenMenu>());
+    /// assert!(pending);
+    ///
+    /// let chord = [prefix[0].clone(), Keystroke::parse("left").unwrap()];
+    /// let (candidates, pending) = keymap.bindings_for_input(&chord, &[]);
+    /// assert!(candidates[0].action().as_any().is::<MoveLeft>());
+    /// assert!(!pending);
+    /// ```
     pub fn bindings_for_input(
         &self,
         input: &[impl AsKeystroke],
@@ -281,13 +364,15 @@ impl Keymap {
         }
     }
 
-    /// Return enabled longer bindings for which `input` is a proper prefix.
+    /// Lists context-matching chord completions for the proper prefix `input`.
     ///
     /// Results are ordered by context depth and then insertion precedence.
     /// Complete bindings and entries whose own action is `NoAction` or `Unbind`
     /// are omitted. This does not apply those removal entries to other
     /// candidates, so the result is a completion list rather than the final
-    /// enabled dispatch set. Context is checked against `context_stack`.
+    /// dispatch set. Use [`Self::bindings_for_input`] for a pending decision
+    /// that also accounts for complete candidates and removals. Context is
+    /// checked against the root-to-target `context_stack`.
     pub fn possible_next_bindings_for_input(
         &self,
         input: &[Keystroke],

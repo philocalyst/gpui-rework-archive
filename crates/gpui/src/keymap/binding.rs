@@ -40,9 +40,13 @@ impl KeyBinding {
     /// Construct a key binding from keystrokes, action, and an optional context predicate.
     ///
     /// Separate strokes with whitespace to create a chord, such as `cmd-k left`. This convenience
-    /// constructor parses the context and keystrokes using the dummy keyboard mapper and panics if
-    /// either string is invalid. Use [`Self::load`] to supply platform mapping and handle invalid
-    /// keystrokes as an error.
+    /// constructor uses the dummy keyboard mapper. Use [`Self::load`] to
+    /// supply platform mapping and report invalid configuration as an error.
+    ///
+    /// # Panics
+    ///
+    /// Panics if a keystroke or the context predicate cannot be parsed.
+    /// An empty keystroke string is accepted, but cannot match a key event.
     pub fn new<A: Action>(keystrokes: &str, action: A, context: Option<&str>) -> Self {
         let context_predicate =
             context.map(|context| KeyBindingContextPredicate::parse(context).unwrap().into());
@@ -103,7 +107,9 @@ impl KeyBinding {
         self
     }
 
-    /// Replace this binding's opaque metadata index.
+    /// Replaces this binding's source metadata index.
+    ///
+    /// This has the same removal-precedence effect as [`Self::with_meta`].
     pub fn set_meta(&mut self, meta: KeyBindingMetaIndex) {
         self.meta = Some(meta);
     }
@@ -142,7 +148,9 @@ impl KeyBinding {
         self.context_predicate.as_ref().map(|rc| rc.clone())
     }
 
-    /// Return the optional user-defined metadata index.
+    /// Returns the optional source metadata index.
+    ///
+    /// Absence is treated as source zero during [`crate::NoAction`] removal.
     pub fn meta(&self) -> Option<KeyBindingMetaIndex> {
         self.meta
     }

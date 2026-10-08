@@ -570,6 +570,10 @@ impl FocusId {
 ///
 /// Clones share the focus identity. Keep the handle stable across renders so
 /// the window can relate the next dispatch path to the previous one.
+/// Each keyboard target needs its own handle: attaching clones to two elements
+/// in one window gives both the same identity, and lookup finds the last
+/// registered node. A parent and child that need focus queries should each
+/// track a separate handle.
 /// [`is_focused`](Self::is_focused) reports the window's selected identity,
 /// even while the native window is inactive. The subtree queries use the
 /// last rendered dispatch tree; they do not inspect a view's stored children.
@@ -581,11 +585,15 @@ impl FocusId {
 pub struct FocusHandle {
     pub(crate) id: FocusId,
     handles: Arc<FocusMap>,
-    /// This handle's index within its rendered tab group.
-    /// Use [`tab_index`](Self::tab_index) to also update future clones and upgrades.
+    /// This copy's tab index, read from the shared configuration when cloned.
+    ///
+    /// Use [`tab_index`](Self::tab_index) to configure traversal. Assigning this
+    /// field alone does not update the map used by clones or `track_focus`.
     pub tab_index: isize,
-    /// Whether this handle participates in tab navigation when rendered.
-    /// Use [`tab_stop`](Self::tab_stop) to also update future clones and upgrades.
+    /// This copy's tab-stop flag, read from the shared configuration when cloned.
+    ///
+    /// Use [`tab_stop`](Self::tab_stop) to configure traversal. Assigning this
+    /// field alone does not update the map used by clones or `track_focus`.
     pub tab_stop: bool,
 }
 
@@ -630,6 +638,10 @@ impl FocusHandle {
     /// Lower indices sort first within a tab group. This updates the returned
     /// handle and shared map, which future clones and weak upgrades read.
     /// Already-held handles keep their public field values until replaced.
+    /// Negative indices also participate; use [`Self::tab_stop`] to exclude
+    /// a handle from traversal. Setting the index does not enable its tab stop.
+    /// The window's recorded traversal order changes on its next paint, so
+    /// request a redraw after changing a retained view's configuration.
     pub fn tab_index(mut self, index: isize) -> Self {
         self.tab_index = index;
         if let Some(focus) = self.handles.write().get_mut(self.id) {
@@ -644,6 +656,7 @@ impl FocusHandle {
     /// its tab group's order. This does not focus it. As with [`Self::tab_index`],
     /// the setting is shared with future clones and upgrades; existing copies
     /// keep their field values.
+    /// Request a redraw to replace an already painted traversal order.
     pub fn tab_stop(mut self, tab_stop: bool) -> Self {
         self.tab_stop = tab_stop;
         if let Some(focus) = self.handles.write().get_mut(self.id) {
@@ -682,6 +695,9 @@ impl FocusHandle {
     /// Ancestry comes from the last rendered dispatch tree. This is useful for
     /// styling a panel while one of its controls has focus. Native window
     /// activation does not affect the result.
+    /// The handle contains itself even without a rendered node. For distinct
+    /// handles, both must appear on the same rendered ancestor path. See
+    /// [`Self::contains`] to compare two handles without consulting focus.
     pub fn contains_focused(&self, window: &Window, cx: &App) -> bool {
         self.id.contains_focused(window, cx)
     }
@@ -690,6 +706,9 @@ impl FocusHandle {
     ///
     /// This reverses [`Self::contains_focused`]: it asks whether the focused
     /// subtree contains this handle, using the last rendered dispatch tree.
+    /// For example, focusing a panel makes this true for its rendered search
+    /// field. Focusing that field makes it false for the panel. A focused
+    /// handle always lies within itself, including before it is rendered.
     pub fn within_focused(&self, window: &Window, cx: &mut App) -> bool {
         self.id.within_focused(window, cx)
     }
@@ -748,6 +767,8 @@ impl Drop for FocusHandle {
 ///
 /// Upgrade before use. This returns `None` after the last strong focus handle
 /// is dropped, even if the window still records the old focus ID.
+/// Rendered elements and tab-order records can retain strong clones, so
+/// dropping the owning view's copy alone need not make an upgrade fail.
 #[derive(Clone, Debug)]
 pub struct WeakFocusHandle {
     pub(crate) id: FocusId,
@@ -755,7 +776,11 @@ pub struct WeakFocusHandle {
 }
 
 impl WeakFocusHandle {
-    /// Attempts to upgrade the [WeakFocusHandle] to a [FocusHandle].
+    /// Retains the identity if at least one strong handle still exists.
+    ///
+    /// Returns `None` after the app's focus map or its last strong handle is
+    /// gone. A successful upgrade does not establish that an element currently
+    /// renders the handle, or that any window has selected it.
     pub fn upgrade(&self) -> Option<FocusHandle> {
         let handles = self.handles.upgrade()?;
         FocusHandle::for_id(self.id, &handles)
@@ -2494,7 +2519,12 @@ impl Window {
         self.refresh();
     }
 
-    /// Remove focus from all elements within this context's window.
+    /// Clears this window's selected GPUI focus target and pending key sequence.
+    ///
+    /// This requests a redraw without deactivating the native window. With no
+    /// selected target, keyboard dispatch falls back to the rendered root.
+    /// Later calls to [`Self::focus`] remain valid; use [`Self::disable_focus`]
+    /// to prevent them. Focus listeners observe the change on a subsequent draw.
     pub fn blur(&mut self, cx: &mut App) {
         self.clear_pending_keystrokes(cx);
 
@@ -2521,6 +2551,9 @@ impl Window {
     /// Moves focus to the next enabled tab stop, wrapping at the end of the rendered order.
     ///
     /// This is a no-op while focus is disabled or when the current frame contains no tab stops.
+    /// With no focus, or a target absent from that order, starts at its first
+    /// stop. A selected non-stop container remains a position in the order:
+    /// traversal starts after it. The order comes from the last painted frame.
     pub fn focus_next(&mut self, cx: &mut App) {
         if !self.focus_enabled {
             return;
@@ -2534,6 +2567,9 @@ impl Window {
     /// Moves focus to the previous enabled tab stop, wrapping at the beginning of the rendered order.
     ///
     /// This is a no-op while focus is disabled or when the current frame contains no tab stops.
+    /// With no focus, or a target absent from that order, starts at its last
+    /// stop. A selected non-stop container remains a position in the order:
+    /// traversal starts before it. The order comes from the last painted frame.
     pub fn focus_prev(&mut self, cx: &mut App) {
         if !self.focus_enabled {
             return;

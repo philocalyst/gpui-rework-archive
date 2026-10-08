@@ -497,6 +497,76 @@ application. To test a key binding, install the binding, set its
 keystroke. Dispatching the action directly bypasses key matching and cannot
 detect an incorrect context expression.
 
+### Check focus against the rendered tree
+
+Selecting a handle changes `is_focused` immediately. Ancestry queries have a
+different boundary: they use the last rendered dispatch tree. This matters
+when a panel moves a control elsewhere while keeping its focus identity.
+
+Here the field starts inside a panel, then moves beside it. The field keeps
+focus, but the panel stops containing focus only after the next draw:
+
+```rust
+use gpui::{Context, FocusHandle, Render, TestApp, Window, div, prelude::*};
+
+struct Workspace {
+    panel: FocusHandle,
+    field: FocusHandle,
+    field_inside_panel: bool,
+}
+
+impl Render for Workspace {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        let field = div().track_focus(&self.field);
+        let panel = div().track_focus(&self.panel);
+        if self.field_inside_panel {
+            panel.child(field)
+        } else {
+            div().child(panel).child(field)
+        }
+    }
+}
+
+let mut app = TestApp::new();
+let mut window = app.open_window(|window, cx| {
+    let panel = cx.focus_handle();
+    let field = cx.focus_handle();
+    window.focus(&field, cx);
+    assert!(field.is_focused(window));
+    assert!(!panel.contains_focused(window, cx)); // No rendered ancestry yet.
+    Workspace { panel, field, field_inside_panel: true }
+});
+
+window.update(|view, window, cx| {
+    assert!(view.panel.contains_focused(window, cx));
+    assert!(!view.panel.within_focused(window, cx));
+
+    window.focus(&view.panel, cx);
+    assert!(view.field.within_focused(window, cx));
+    assert!(!view.field.contains_focused(window, cx));
+
+    window.focus(&view.field, cx);
+    view.field_inside_panel = false;
+    cx.notify();
+    assert!(view.panel.contains_focused(window, cx)); // Still the previous frame.
+});
+window.draw();
+window.update(|view, window, cx| {
+    assert!(view.field.is_focused(window));
+    assert!(!view.panel.contains_focused(window, cx));
+});
+```
+
+The panel and field need separate handles even though they belong to one
+view. Reusing a handle would give them the same identity; querying that
+identity cannot distinguish the two nodes. Opening the window performs its
+initial draw after the setup closure returns. The later `draw` publishes the
+changed ancestry. Native window activation is a
+third question, checked separately with
+[`Window::is_window_active`](crate::Window::is_window_active). See
+[keyboard focus](crate::_documentation::input#keyboard-focus) for the ownership
+and tab-order rules behind these assertions.
+
 ### Check the key binding as well as its action
 
 A key context decides whether a binding matches. It does not remove the

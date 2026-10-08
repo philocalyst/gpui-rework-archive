@@ -66,7 +66,7 @@ reachable by Tab, and activatable with Enter or Space through the same listener.
 | Run work without blocking input | [`_documentation::scheduling`], [`Task`], and [`BackgroundExecutor`] |
 | Draw a custom region | [`_documentation::drawing`], [`canvas`], and [`PathBuilder`] |
 | Load or retry an image | [`_documentation::assets`], [`ImageSource`], and [`ImageCache`] |
-| Display a large collection | [`uniform_list`] for equal-height rows, [`list`] for measured rows |
+| Display a large collection | [`_documentation::lists`], [`uniform_list`] for equal-height rows, [`list`] for measured rows |
 | Test state and input | `TestApp` and `TestAppContext` (enable `test-support`) |
 | Expose accessible controls | [`_accessibility`] |
 

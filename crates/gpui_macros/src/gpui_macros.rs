@@ -24,15 +24,37 @@ mod derive_inspector_reflection;
 use proc_macro::TokenStream;
 use syn::{DeriveInput, Ident};
 
-/// `Action` derive macro - see the trait documentation for details.
+/// Implements a typed GPUI command's clone, equality, name, and JSON builder.
+///
+/// Derive `Clone` and `PartialEq` alongside this macro. Commands with fields
+/// also need `serde::Deserialize` and `schemars::JsonSchema`, unless marked
+/// `#[action(no_json)]`. Payload-free commands can use `gpui::actions!` instead.
+/// The type must satisfy the `gpui::Action` trait's `Send` and `'static` bounds.
+///
+/// The derive registers the command by name. `#[action(namespace = editor)]`
+/// gives it a name such as `editor::Save`; use one identifier for the namespace.
+/// `no_register` omits that registration while retaining the trait implementation.
+/// Registration does not install a shortcut or an action handler.
+///
+/// See the [Action trait](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Action.html)
+/// for the complete attribute table, payload validation example, aliases, and
+/// manual implementation contract.
 #[proc_macro_derive(Action, attributes(action))]
 pub fn derive_action(input: TokenStream) -> TokenStream {
     derive_action::derive_action(input)
 }
 
-/// This can be used to register an action with the GPUI runtime when you want to manually implement
-/// the `Action` trait. Typically you should use the `Action` derive macro or `actions!` macro
-/// instead.
+/// Adds a manually implemented GPUI action to the named registry.
+///
+/// Pass the type's identifier, such as `register_action!(Save)`, in the module
+/// where it is defined. The type must already implement `gpui::Action`; this
+/// macro records its builder and metadata without implementing the trait or
+/// installing a handler. Canonical names and aliases must be unique across
+/// linked registrations, or app construction panics.
+///
+/// The [`Action`] derive registers automatically unless given `no_register`.
+/// See the [trait's manual implementation guide](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Action.html#implement-the-trait-manually)
+/// before registering a custom implementation.
 #[proc_macro]
 pub fn register_action(ident: TokenStream) -> TokenStream {
     register_action::register_action(ident)

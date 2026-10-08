@@ -21,13 +21,25 @@ different shortcut without pretending those inputs were keyboard events.
 
 A menu can dispatch the same action. This keeps “save” independent of the key
 combination that happens to trigger it on one platform. Use a raw key listener
-when the keystroke itself matters, such as editor movement or text handling.
+when the keystroke itself matters, such as navigation by a physical key.
+Use the [text-input protocol](https://gpui-ce.github.io/book/input.html#text-input-and-offsets)
+for composed text, replacement, and selection; a printable key event cannot
+describe those operations.
 
 ## Diagnose a shortcut that does nothing
 
-Check the focus target first. Then check whether the element carrying the
-listener is on that target's dispatch path, and whether the context predicate
-matches. A browser preview also needs page focus inside its iframe.
+Draw after changing the target's ancestry or key context, then inspect the
+focus and binding state. Selection changes immediately; contexts and
+listeners come from the last rendered tree. A browser preview also needs
+page focus inside its iframe.
+
+| Check | Inspect | If it is wrong |
+| --- | --- | --- |
+| Which identity is selected? | [`window.focused(cx)`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.focused) | Keep the handle, attach it with `track_focus`, then request focus. A selected handle can still be absent from the rendered tree. |
+| Which contexts qualify the shortcut? | [`window.context_stack()`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.context_stack) | Put the context on the target or an ancestor. Match the binding's predicate against that path. |
+| Does this command have an unshadowed shortcut? | [`window.highest_precedence_binding_for_action(&action)`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.highest_precedence_binding_for_action) | Check the strokes, context, removals, and later competing bindings. The action's data must match too. |
+| Is there an action listener on this path? | [`window.is_action_available(&action, cx)`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.is_action_available) | Register the listener on the focused path. [`App::is_action_available`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.App.html#method.is_action_available) checks globals and the accessible active window. Presence alone does not prove the handler accepts the current state. |
+| Is GPUI waiting for another stroke? | [`window.has_pending_keystrokes()`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.has_pending_keystrokes) | Complete the chord or check its [replay rules](https://gpui-ce.github.io/book/input.html#wait-for-a-pending-chord). |
 
 If a container owns the focused handle, put its keyboard listener on that
 container or an ancestor. A listener on a canvas child is outside the route;
@@ -43,6 +55,13 @@ multi-stroke key prefix may also be waiting for another stroke. These have
 different causes and fixes; see [input and actions](https://docs.rs/gpui-ce/0.2.2/gpui/_documentation/input/index.html)
 and the [`Keymap`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Keymap.html)
 reference before adding a global key listener.
+
+The [binding test](https://gpui-ce.github.io/book/testing.html#check-the-key-binding-as-well-as-its-action)
+keeps a listener installed in two modes and checks that the shortcut reaches
+it only in edit mode. The
+[focus test](https://gpui-ce.github.io/book/testing.html#check-focus-against-the-rendered-tree)
+separately checks selection and rendered ancestry. These catch different
+failures; directly calling the action handler catches neither.
 
 ## Keep selection separate
 

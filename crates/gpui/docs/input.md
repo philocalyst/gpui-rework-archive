@@ -88,6 +88,11 @@ request focus. If the handle has no node in the current rendered dispatch tree, 
 no element node to target (dispatch falls back to the root); attach the handle before relying on
 it to receive element-level keyboard input.
 
+Give each target its own handle. Cloning a handle shares its identity; it
+does not create a child identity. Attaching the same handle to a panel and
+its field leaves keyboard lookup with the last registered node. Track one
+handle on the panel and another on the field when their relationship matters.
+
 Focus is separate from visual selection, hover, and domain state. A list can keep one selected row
 while a search field owns keyboard focus. Tab navigation uses the recorded focus handles and tab
 order; custom widgets that change focus order should use the tab-stop APIs on their focus handles.
@@ -122,6 +127,9 @@ Check activation separately when focus styling should dim while the user
 works in another window. Subtree queries use the last rendered dispatch
 tree; they do not traverse fields on a view. Changes to rendered ancestry
 take effect after GPUI draws again.
+The [rendered-focus test](https://gpui-ce.github.io/book/testing.html#check-focus-against-the-rendered-tree)
+selects a field before its first draw, moves it outside its panel, and checks
+exactly when each query changes.
 
 [`Window::on_focus_in`](crate::Window::on_focus_in) and
 [`Window::on_focus_out`](crate::Window::on_focus_out) watch a whole subtree.
@@ -143,6 +151,14 @@ it, for example `cx.focus_handle().tab_stop(true)`, to make it a tab stop.
 [`FocusHandle::tab_index`](crate::FocusHandle::tab_index) controls its order
 within a tab group. Element tab setters configure internally retained handles;
 they do not change a handle passed to `track_focus`.
+
+GPUI orders negative indices like any other indices. To skip a stop, set its
+`tab_stop` flag to false. For an internal handle, write
+`.tab_index(0).tab_stop(false)` in that order: `tab_index` enables the stop.
+Use [`tab_group`](crate::InteractiveElement::tab_group) to keep a composite
+widget's ordering local. A child at index 100 in group 1 still precedes a
+child at index zero in group 2; the group positions are compared first.
+Groups may nest, and equal indices follow the order recorded during paint.
 
 Use [`InteractiveElement::focus_visible`](crate::InteractiveElement::focus_visible)
 for a keyboard-focus ring. It applies when the element is focused and the

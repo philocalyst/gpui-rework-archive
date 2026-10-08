@@ -1393,6 +1393,11 @@
       "url": "https://gpui-ce.github.io",
       "status": "fetched",
       "reason": "current replacement site homepage; HTTP 200, not in article inventory"
+    },
+    {
+      "url": "https://rocket.rs/guide/v0.5/pastebin/",
+      "status": "read (complete primary tutorial prose and code; 2026-10-08 UTC)",
+      "reason": "follow-up to the article's Rocket tutorial discussion; examples read, not executed"
     }
   ],
   "status_legend": {
