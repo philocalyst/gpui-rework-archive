@@ -1044,6 +1044,8 @@ impl AnyElement {
     ///         )
     ///     }
     /// }
+    /// # #[cfg(feature = "test-support")]
+    /// # {
     /// # let mut app = gpui::TestApp::new();
     /// # let mut window = app.open_window(|_, _| Preview);
     /// # window.draw();
@@ -1055,6 +1057,7 @@ impl AnyElement {
     /// #     assert_eq!(marker.bounds.size,
     /// #         gpui::size(px(24.), px(12.)).scale(window.scale_factor()));
     /// # });
+    /// # }
     /// ```
     ///
     /// The parent's padding contributes twenty pixels to each coordinate;

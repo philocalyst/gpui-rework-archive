@@ -8842,7 +8842,13 @@ impl<V: 'static + Render> WindowHandle<V> {
     ///
     /// # Example: retain state after closing the window
     ///
+    /// This test uses the `test-support` feature. See the
+    /// [testing chapter](https://gpui-ce.github.io/book/testing.html)
+    /// for configuring the test dependency.
+    ///
     /// ```rust,test_harness
+    /// # #[cfg(feature = "test-support")]
+    /// # mod example {
     /// use gpui::{Context, Render, TestAppContext, Window, div, prelude::*, px, size};
     ///
     /// struct Root { value: usize }
@@ -8862,6 +8868,7 @@ impl<V: 'static + Render> WindowHandle<V> {
     ///     assert!(window.entity(cx).is_err());
     ///     assert_eq!(root.read_with(cx, |root, _| root.value), 7);
     /// }
+    /// # }
     /// ```
     pub fn entity<C>(&self, cx: &C) -> Result<Entity<V>>
     where

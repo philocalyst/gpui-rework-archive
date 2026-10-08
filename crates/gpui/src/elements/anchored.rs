@@ -67,6 +67,8 @@ pub struct Anchored {
 ///         )
 ///     }
 /// }
+/// # #[cfg(feature = "test-support")]
+/// # {
 /// # let mut app = gpui::TestApp::new();
 /// # let mut window = app.open_window(|_, _| Notice { at: gpui::point(px(20.), px(20.)) });
 /// # window.simulate_resize(gpui::size(px(300.), px(200.)));
@@ -82,6 +84,7 @@ pub struct Anchored {
 /// #         assert_eq!(quad.bounds.origin, gpui::point(px(expected.0), px(expected.1))
 /// #             .scale(window.scale_factor()));
 /// #     });
+/// # }
 /// # }
 /// ```
 ///

@@ -50,6 +50,8 @@ use crate::{
 ///         })
 ///     }
 /// }
+/// # #[cfg(feature = "test-support")]
+/// # {
 /// # let mut app = gpui::TestApp::new();
 /// # let mut window = app.open_window(|_, _| Adaptive);
 /// # for (width, color) in [(239., 0x155b50), (240., 0x315ac6), (480., 0x315ac6)] {
@@ -60,6 +62,7 @@ use crate::{
 /// #             .find(|quad| quad.background == rgb(color).into()).unwrap();
 /// #         assert_eq!(quad.bounds.size, gpui::size(px(width), px(96.)).scale(window.scale_factor()));
 /// #     });
+/// # }
 /// # }
 /// ```
 ///

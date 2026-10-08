@@ -52,6 +52,8 @@ use crate::{
 ///         )
 ///     }
 /// }
+/// # #[cfg(feature = "test-support")]
+/// # {
 /// # let mut app = gpui::TestApp::new();
 /// # let mut window = app.open_window(|_, _| Swatch);
 /// # window.draw();
@@ -61,6 +63,7 @@ use crate::{
 /// #     assert_eq!(quad.bounds, Bounds::new(point(px(20.), px(20.)), size(px(104.), px(32.)))
 /// #         .scale(window.scale_factor()));
 /// # });
+/// # }
 /// ```
 ///
 /// `T` belongs to this frame. Keep data that must survive another render on
