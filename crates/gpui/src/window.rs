@@ -3355,8 +3355,14 @@ impl Window {
 
     /// Sets the base logical-pixel size used to resolve [`Rems`](crate::Rems).
     ///
+    /// Windows start at sixteen logical pixels per rem. Set a positive, finite
+    /// value; this setter stores it without validation. A temporary
+    /// [`with_rem_size`](Self::with_rem_size) override still takes precedence
+    /// until its closure returns.
+    ///
     /// This does not schedule a redraw. Call [`refresh`](Self::refresh) when
     /// changing it outside an update that already invalidates the window.
+    /// See the [layout chapter](crate::_documentation::layout#choose-a-length-for-its-reference).
     pub fn set_rem_size(&mut self, rem_size: impl Into<Pixels>) {
         self.rem_size = rem_size.into();
     }
@@ -3396,9 +3402,15 @@ impl Window {
         result
     }
 
-    /// Executes `f` with a temporary root-font (`rem`) size override.
+    /// Runs `f` with a temporary logical-pixel size for one rem.
     ///
-    /// This method must only be called as part of element drawing.
+    /// `Some(size)` takes precedence over the base [`rem_size`](Self::rem_size)
+    /// and any enclosing override. `None` preserves the current size. After
+    /// the closure returns, the previous reference is active again.
+    ///
+    /// This changes rem resolution inside the closure; it does not recompute
+    /// already-laid-out bounds or schedule another frame. Use it for custom
+    /// prepaint and paint work. Calls outside those phases panic in debug builds.
     // This function is called in a highly recursive manner in editor
     // prepainting, make sure its inlined to reduce the stack burden
     #[inline]
@@ -3428,8 +3440,13 @@ impl Window {
 
     /// Snaps a logical-pixel value to the nearest device-pixel boundary.
     ///
-    /// The returned value remains in logical pixels. Use this for crisp edges; do not multiply
-    /// the result by [`Self::scale_factor`] before passing it to layout or paint APIs.
+    /// Halfway cases go toward zero. At a display scale of two, `px(10.75)`
+    /// becomes 21.5 device pixels and snaps to 21, returned as `px(10.5)`.
+    /// [`Pixels::round`] instead rounds to a whole logical pixel and sends
+    /// halfway cases away from zero.
+    ///
+    /// Use this for crisp edges. The result remains in logical pixels, ready
+    /// for layout or paint APIs; those methods apply the display scale.
     #[inline]
     pub fn pixel_snap(&self, value: Pixels) -> Pixels {
         px(round_to_device_pixel(value.0, self.scale_factor()) / self.scale_factor())
@@ -5003,7 +5020,7 @@ impl Window {
         self.paint_drop_shadows_with_corner_smoothing(bounds, corner_radii, 0.0, shadows);
     }
 
-    /// Records [`Self::paint_drop_shadows`]'s shadows with smoothed corners.
+    /// Records drop shadows with smoothed corners.
     ///
     /// Supply a finite `corner_smoothing`; it is clamped to `0..=1`. Zero
     /// gives the ordinary drop-shadow behavior. Units, masking, opacity, and
@@ -5063,7 +5080,7 @@ impl Window {
         self.paint_inset_shadows_with_corner_smoothing(bounds, corner_radii, 0.0, shadows);
     }
 
-    /// Records [`Self::paint_inset_shadows`]'s shadows with smoothed corners.
+    /// Records inset shadows with smoothed corners.
     ///
     /// Supply a finite `corner_smoothing`; it is clamped to `0..=1`. Zero
     /// gives the ordinary inset-shadow behavior. Units, masking, opacity, and
@@ -5135,7 +5152,7 @@ impl Window {
         self.paint_backdrop_filter_with_corner_smoothing(bounds, corner_radii, 0.0, filters);
     }
 
-    /// Records [`Self::paint_backdrop_filter`]'s effect with smoothed corners.
+    /// Blurs the already-painted backdrop with smoothed corners.
     ///
     /// Supply a finite `corner_smoothing`; it is clamped to `0..=1`. Zero
     /// gives the ordinary rounded rectangle. Units, paint order, masking,
@@ -5205,7 +5222,7 @@ impl Window {
         self.with_filter_layer_with_corner_smoothing(bounds, corner_radii, 0.0, filters, f)
     }
 
-    /// Runs [`Self::with_filter_layer`]'s group with smoothed composite corners.
+    /// Blurs a content group with smoothed composite corners.
     ///
     /// Supply a finite `corner_smoothing`; it is clamped to `0..=1`. Zero
     /// gives the ordinary rounded rectangle. The filter list, opacity,

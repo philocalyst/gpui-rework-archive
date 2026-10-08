@@ -1758,3 +1758,64 @@ source and excerpts of Zed's painting example were also read. Their usage is
 comparative evidence; this checkout defines the contracts. No detector was
 run, no subagents were used, and the complete public-surface review remains
 unfinished.
+
+## Length choices and rounding boundaries (2026-10-08)
+
+Revision `9e396a0d20` passed the complete strict API, browser-program, Zola,
+mdBook, and link-audit build and was promoted to the server on port 1111.
+The primary editor read the rendered Filter and ScaledFilter introductions,
+variants, and inherent methods; all BoxShadow fields and builders; Styled's
+four filter methods; Window's shadow and filter methods, including corner
+smoothing, and paint_quad; all PaintQuad fields and builders; both scene filter
+records and their radius queries; and the shared depth constant. The actual
+Window-to-drawing and input-to-composition-testing links were followed. The
+complete blur section was read in rustdoc, mdBook, and Zola. The book's
+390-pixel viewport kept the document at 390 pixels and code containers at
+350 pixels; temporary viewport overrides were restored. Evidence is in
+`target/documentation-proof/9e396a0d20-review-evidence.json`.
+
+A fresh Sapling page accepted four prose paragraphs from the blur section,
+without the code examples, and its Check again button was activated. No score
+or error appeared in the visible result area. The 1198-character attempt is
+recorded in that evidence file and its screenshot; no passing detector result
+is claimed. It occurred after the preceding source checkpoint's statement
+that no detector had been run.
+
+The next source pass reread the angle and length types, conversions, parsers,
+and arithmetic implementations from Radians through Length; the layout
+adapter's unit conversions; the window constructor's rem default, rem queries,
+base setter, scoped override, and snapping functions; the rounding helpers;
+the text-style line-height resolution; and deferred drawing's rem scopes.
+The existing layout chapter's length and coordinate sections were read with
+those paths. Rust's primary numeric-cast reference was checked for integer
+conversion semantics. Jiff's Timestamp::round explanation and all three of
+its examples were read, along with Date's arithmetic trait contracts.
+
+Pixels now directs normal callers to pass logical values to window methods
+and distinguishes units from coordinate origins. Its finite constants and
+integer-conversion account are explicit. ScaledPixels demonstrates the
+one-pixel allocation difference between upward rounding and truncation.
+DevicePixels explains signed coordinates, unchecked integer conversions,
+and packed row-byte sizing without redundant arithmetic comments. Rems shows
+the same authored spacing resolved at two text scales, and from_pixels explains
+what happens when that scale later changes. Relative distinguishes layout
+fractions from Percentage and connects its numeric and parsed forms.
+
+AbsoluteLength now compares the three accepted-length types, demonstrates a
+valid rem value and rejected percentage, and links the layout guidance. Its
+and DefiniteLength's resolution examples use the public constructor functions
+and conversions instead of nested enum constructors. Length explains why auto
+has no general conversion to pixels. Window's rem APIs explain the default,
+override precedence, redraw ownership, and drawing-phase boundary. pixel_snap
+states its halfway-toward-zero rule and contrasts logical rounding at a twofold
+display scale. The canonical layout chapter mirrors that distinction in the
+book and demonstrates the texture-extent conversion. Four corner-smoothing
+method summaries were also rewritten after their rendered reading.
+
+All 240 doctests pass: 233 merged examples and seven executed harness examples,
+with one ignored, in `target/documentation-units-doctests.log`. The edited Rust
+files pass rustfmt. Strict default-feature rustdoc for core and companion
+passes in `target/documentation-units-default-api.log`; generated examples and
+backlinks are current, and the diff passes whitespace checks. The complete
+combined-artifact check follows this source revision. This batch changes documentation only;
+the broader review remains open, and the primary editor worked alone.

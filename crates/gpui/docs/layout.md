@@ -17,6 +17,10 @@ remains 16 logical pixels when the window moves to a denser display; the rendere
 applies the display scale. [`Rems`](crate::Rems) instead follow the window's
 configured root font size, which you can change with
 [`Window::set_rem_size`](crate::Window::set_rem_size).
+Windows start at sixteen logical pixels per rem. Changing a label's font size
+does not change that reference. When changing the window's base rem size,
+schedule a [`refresh`](crate::Window::refresh) unless the surrounding update
+already invalidates the window; the setter does not request a frame.
 
 | Authored value | Meaning | Example |
 | --- | --- | --- |
@@ -148,6 +152,43 @@ recording the scene; multiplying by it yourself would scale the drawing twice.
 | [`with_element_offset`](crate::Window::with_element_offset) | Adds a translation to layout bounds queried within the prepaint scope | Layout calculations and the content mask |
 | [`with_absolute_element_offset`](crate::Window::with_absolute_element_offset) | Replaces that translation | The child's own position within the layout tree |
 | [`with_content_mask`](crate::Window::with_content_mask) | Intersects the active clip with window-local bounds | Layout and drawing geometry |
+
+### Round at the boundary that needs it
+
+[`Pixels`](crate::Pixels) stores a floating-point logical length.
+[`ScaledPixels`](crate::ScaledPixels) stores the floating-point result of
+applying display scaling. [`DevicePixels`](crate::DevicePixels) stores an
+integer in physical pixels. The last two belong at scene, renderer, and
+pixel-buffer boundaries; ordinary window paint methods take logical pixels.
+
+Choose the rounding operation for the quantity you need:
+
+| Operation | Result | Halfway rule |
+| --- | --- | --- |
+| [`Pixels::round`](crate::Pixels::round) | A whole logical pixel | Away from zero |
+| [`Window::pixel_snap`](crate::Window::pixel_snap) | A device-grid position, returned in logical pixels | Toward zero |
+| `DevicePixels::from(scaled)` | A whole physical pixel | Upward |
+
+At a display scale of two, `px(10.75)` is 21.5 physical pixels.
+`Pixels::round` gives `px(11.)`; `Window::pixel_snap` gives `px(10.5)`.
+Both results still use logical units. The latter lies on the actual display
+grid and can be passed straight to a paint method.
+
+For a positive texture extent, rounding upward can preserve room for its
+fractional last pixel. A `u32` conversion instead truncates that fraction:
+
+```rust
+use gpui::{DevicePixels, px};
+
+let extent = px(10.25).scale(2.);
+assert_eq!(DevicePixels::from(extent), DevicePixels(21));
+assert_eq!(u32::from(extent), 20);
+```
+
+These conversions do not validate a buffer size or align its rows. Check
+dimensions and byte-count arithmetic at the allocation boundary. Likewise,
+rounding a width alone does not clip drawing or register a hitbox; those remain
+separate prepaint and paint decisions.
 
 For a custom scrolling container, keep the viewport's mask fixed and prepaint
 the content under a negative scroll offset. The children then retain shifted

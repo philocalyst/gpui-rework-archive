@@ -2230,11 +2230,15 @@ impl From<Percentage> for Radians {
 
 /// A logical-pixel length, the base unit of GPUI layout and painting.
 ///
-/// A `Pixels` value is independent of display density and may contain a
-/// fractional value. Convert it with the window's scale factor when an API
-/// requires device or scene coordinates. Whether a result is snapped to a
-/// physical pixel depends on the operation and renderer; rounding is not part
-/// of this type's representation.
+/// Create one with [`px`]. Styles, element bounds, pointer positions, and
+/// [`Window`](crate::Window) paint methods use this unit. Pass those methods
+/// logical values; the window applies its display scale when recording drawing.
+/// Direct scene and backend APIs instead use [`ScaledPixels`] or [`DevicePixels`].
+///
+/// Logical lengths can be fractional. Scaling preserves that fraction;
+/// [`Window::pixel_snap`](crate::Window::pixel_snap) snaps to the display grid
+/// while returning a logical length. [`round`](Self::round) rounds to a whole
+/// logical pixel, which is a different grid on a dense display.
 ///
 /// ```
 /// use gpui::{ScaledPixels, px};
@@ -2242,9 +2246,15 @@ impl From<Percentage> for Radians {
 /// assert_eq!(logical.scale(2.), ScaledPixels(21.));
 /// ```
 ///
-/// Construction accepts any `f32`; it does not reject infinities or NaNs.
-/// Parsing with `TryFrom<&str>` requires a `px` suffix. Integer conversions use
-/// Rust casts, which discard fractions, rather than a rounding policy.
+/// `Pixels` records a unit, not an origin: a [`Point<Pixels>`] can still be
+/// canvas-local, window-local, or screen-local. Keep the API's coordinate origin
+/// when combining points. The [layout chapter](crate::_documentation::layout#keep-geometry-in-one-coordinate-space)
+/// follows a child's bounds through prepaint and paint.
+///
+/// Construction accepts any `f32`, including infinities and NaNs. Parsing with
+/// `TryFrom<&str>` requires a `px` suffix. Conversions to `u32` and `usize` use
+/// Rust's [float-to-integer casts](https://doc.rust-lang.org/reference/expressions/operator-expr.html#numeric-cast):
+/// they truncate fractions, saturate out-of-range values, and convert NaN to zero.
 #[derive(
     Clone,
     Copy,
@@ -2372,9 +2382,9 @@ impl TryFrom<&'_ str> for Pixels {
 impl Pixels {
     /// Represents zero pixels.
     pub const ZERO: Pixels = Pixels(0.0);
-    /// The maximum value that can be represented by `Pixels`.
+    /// The largest finite value, [`f32::MAX`].
     pub const MAX: Pixels = Pixels(f32::MAX);
-    /// The minimum value that can be represented by `Pixels`.
+    /// The smallest finite value, [`f32::MIN`].
     pub const MIN: Pixels = Pixels(f32::MIN);
 
     /// Returns the raw `f32` value of this `Pixels`.
@@ -2387,7 +2397,10 @@ impl Pixels {
         Self(self.0.floor())
     }
 
-    /// Round to the nearest whole logical pixel, with halfway cases away from zero.
+    /// Rounds to the nearest whole logical pixel, with halfway cases away from zero.
+    ///
+    /// Use [`Window::pixel_snap`](crate::Window::pixel_snap) for the display's
+    /// device grid; it also uses a different halfway rule.
     pub fn round(&self) -> Self {
         Self(self.0.round())
     }
@@ -2511,6 +2524,11 @@ impl From<usize> for Pixels {
 /// Unlike [`Pixels`], this unit is already in device space and is not scaled by
 /// display density. Use it at backend and pixel-buffer boundaries; ordinary UI
 /// layout and paint APIs use logical pixels instead.
+///
+/// The signed field can represent positions outside the image or window.
+/// Validate dimensions before allocating a buffer. Integer `From` conversions
+/// use Rust casts, so a negative value converted to `u32` becomes a large unsigned
+/// value, and a large unsigned input can wrap when converted to this type.
 #[derive(
     Add,
     AddAssign,
@@ -2535,19 +2553,18 @@ pub struct DevicePixels(
 );
 
 impl DevicePixels {
-    /// Multiply a nonnegative pixel count by its storage size in bytes.
+    /// Returns the packed byte count for a nonnegative number of pixels.
     ///
-    /// Applied to an image width, this gives a packed row size, without row alignment
-    /// or the image height. The signed count is cast to `u32` without validation;
+    /// For an image width, this gives one row's size before alignment; multiply
+    /// by the height separately when sizing the image. The signed count is cast to `u32` without validation;
     /// reject negative counts and check large products before sizing a buffer.
     /// Arithmetic overflow panics with overflow checks enabled and otherwise wraps.
     ///
     /// ```
-    /// # use gpui::DevicePixels;
-    /// let pixels = DevicePixels(10); // 10 device pixels
-    /// let bytes_per_pixel = 4; // Assume each pixel is represented by 4 bytes (e.g., RGBA)
-    /// let total_bytes = pixels.to_bytes(bytes_per_pixel);
-    /// assert_eq!(total_bytes, 40); // 10 pixels * 4 bytes/pixel = 40 bytes
+    /// use gpui::DevicePixels;
+    ///
+    /// let row_bytes = DevicePixels(120).to_bytes(4); // RGBA or BGRA, eight bits per channel.
+    /// assert_eq!(row_bytes, 480);
     /// ```
     pub fn to_bytes(self, bytes_per_pixel: u8) -> u32 {
         self.0 as u32 * bytes_per_pixel as u32
@@ -2613,8 +2630,22 @@ impl From<usize> for DevicePixels {
 /// Convert logical [`Pixels`] to `ScaledPixels` when producing scene geometry.
 /// Unlike [`DevicePixels`], this unit preserves fractional values; a renderer
 /// may rasterize those coordinates across physical pixels.
-/// `DevicePixels::from(scaled)` rounds upward; integer casts such as `u32::from(scaled)`
-/// discard fractions instead. Choose the conversion that matches the caller's bounds policy.
+/// Window paint methods perform this conversion themselves; pass them logical
+/// values to avoid applying the display scale twice.
+///
+/// Conversion to [`DevicePixels`] rounds upward. Conversion to `u32` truncates
+/// toward zero. For a positive texture extent, those choices differ by one pixel:
+///
+/// ```
+/// use gpui::{DevicePixels, ScaledPixels, px};
+///
+/// let extent = px(10.25).scale(2.);
+/// assert_eq!(extent, ScaledPixels(20.5));
+/// assert_eq!(DevicePixels::from(extent), DevicePixels(21));
+/// assert_eq!(u32::from(extent), 20);
+/// ```
+///
+/// These conversions do not validate an extent or establish a clipping region.
 #[derive(
     Clone,
     Copy,
@@ -2775,12 +2806,22 @@ impl MulAssign<f32> for ScaledPixels {
 
 /// A length measured in root-font-size units.
 ///
-/// GPUI resolves one rem using the window's configured rem size, set with
-/// [`crate::Window::set_rem_size`]. For example, when that size is 16 logical pixels,
-/// `rems(2.)` resolves to 32 logical pixels. This is a typographic scale chosen
-/// by the application or platform; it is not automatically tied to display
-/// density.
+/// Create one with [`rems`]. The window starts with 16 logical pixels per rem;
+/// [`Window::set_rem_size`](crate::Window::set_rem_size) changes that base.
+/// A rem-valued style is resolved using the current rem size, so keeping it in
+/// rems lets spacing follow the application's text scale:
 ///
+/// ```
+/// use gpui::{px, rems};
+///
+/// let padding = rems(0.5);
+/// assert_eq!(padding.to_pixels(px(16.)), px(8.));
+/// assert_eq!(padding.to_pixels(px(20.)), px(10.));
+/// ```
+///
+/// The reference is the window's [`rem_size`](crate::Window::rem_size), including
+/// a temporary drawing override. Changing one label's font size does not change
+/// that reference. Display scaling is applied after resolution to [`Pixels`].
 #[derive(Clone, Copy, Default, Add, Sub, Mul, Div, Neg, PartialEq)]
 pub struct Rems(
     /// Number of root-font-size units.
@@ -2794,8 +2835,12 @@ impl Rems {
     pub fn to_pixels(self, rem_size: Pixels) -> Pixels {
         self * rem_size
     }
-    /// Divide a logical length by the window's current rem size.
-    /// This captures that size now; the returned rem count does not track later changes.
+    /// Expresses a logical length using the window's current rem size.
+    ///
+    /// With a 16-pixel rem, converting `px(8.)` gives `rems(0.5)`. Resolving that
+    /// count with a later 20-pixel rem gives ten pixels, not the original eight.
+    /// Supply a window with a positive, finite rem size; this method does not
+    /// validate the divisor.
     pub fn from_pixels(length: Pixels, window: &gpui::Window) -> Self {
         Self(length / window.rem_size())
     }
@@ -2841,18 +2886,24 @@ impl TryFrom<&'_ str> for Rems {
 
 /// A length stored as a fraction of another length.
 ///
-/// `1.0` uses the full reference length, and `0.5` uses half. Fractions may be negative or greater
-/// than `1.0`.
+/// Create one with [`relative`]: `relative(1.)` uses the full reference length,
+/// and `relative(0.5)` uses half. A style property's rules choose the reference;
+/// [`to_pixels`](Self::to_pixels) takes it explicitly. Fractions can
+/// be negative or exceed one and are stored without validation.
+///
+/// String parsing takes percentages, so `"50%"` means the same fraction as
+/// `relative(0.5)`. Use [`Relative`] for layout fractions; [`Percentage`] is a
+/// separate type used, for example, to express a fraction of a turn.
 ///
 /// # Examples
 ///
 /// ```
-/// use gpui::{AbsoluteLength, Relative, px};
+/// use gpui::{Relative, px, relative};
 ///
-/// let half = Relative::from(0.5);
-/// let base_size = AbsoluteLength::Pixels(px(200.0));
+/// let half = relative(0.5);
 ///
-/// assert_eq!(half.to_pixels(base_size, px(16.0)), px(100.0));
+/// assert_eq!(half.to_pixels(px(200.).into(), px(16.)), px(100.));
+/// assert_eq!(Relative::try_from("50%").unwrap(), half);
 /// assert_eq!(half.to_string(), "50%");
 /// ```
 #[derive(Clone, Copy, Default, Add, Sub, Mul, Div, Neg, PartialEq)]
@@ -2917,18 +2968,34 @@ impl TryFrom<&'_ str> for Relative {
 
 /// A length that needs no containing dimension to resolve.
 ///
-/// Pixels are already logical lengths; rems resolve against the window's root font size.
-/// “Absolute” excludes percentages and `auto`, not display scaling. Border widths,
-/// for example, accept this type. Use [`DefiniteLength`] when fractions are allowed
-/// and [`Length`] when layout may choose an automatic value.
+/// Pixels are already logical lengths; rems resolve against the window's rem
+/// size. Border widths accept this type because their thickness does not depend
+/// on the containing box's dimensions. The related types add other choices:
+///
+/// | Type | Accepts | Common use |
+/// | --- | --- | --- |
+/// | `AbsoluteLength` | [`px`], [`rems`] | Border width |
+/// | [`DefiniteLength`] | Pixels, rems, [`relative`] | Padding |
+/// | [`Length`] | Pixels, rems, fractions, [`auto`] | Width, height, margin |
 ///
 /// Parsing and Serde use strings with a `px` or `rem` suffix, such as `"12px"` or `"0.5rem"`.
 /// Neither construction nor parsing clamps negative values.
+///
+/// ```
+/// use gpui::{AbsoluteLength, px};
+///
+/// let spacing = AbsoluteLength::try_from("0.75rem").unwrap();
+/// assert_eq!(spacing.to_pixels(px(16.)), px(12.));
+/// assert!(AbsoluteLength::try_from("50%").is_err());
+/// ```
+///
+/// The [layout chapter](crate::_documentation::layout#choose-a-length-for-its-reference)
+/// shows these choices in styled elements.
 #[derive(Clone, Copy, Neg, PartialEq)]
 pub enum AbsoluteLength {
-    /// A length in pixels.
+    /// A length in logical pixels, independent of the rem size.
     Pixels(Pixels),
-    /// A length in rems.
+    /// A length resolved against the window's rem size.
     Rems(Rems),
 }
 
@@ -2958,13 +3025,13 @@ impl AbsoluteLength {
     /// Resolve rems against `rem_size`, leaving pixel values unchanged.
     ///
     /// ```
-    /// # use gpui::{AbsoluteLength, Pixels, Rems};
-    /// let length_in_pixels = AbsoluteLength::Pixels(Pixels::from(42.0));
-    /// let length_in_rems = AbsoluteLength::Rems(Rems(2.0));
-    /// let rem_size = Pixels::from(16.0);
+    /// use gpui::{AbsoluteLength, px, rems};
     ///
-    /// assert_eq!(length_in_pixels.to_pixels(rem_size), Pixels::from(42.0));
-    /// assert_eq!(length_in_rems.to_pixels(rem_size), Pixels::from(32.0));
+    /// let fixed: AbsoluteLength = px(42.).into();
+    /// let spacing: AbsoluteLength = rems(2.).into();
+    ///
+    /// assert_eq!(fixed.to_pixels(px(16.)), px(42.));
+    /// assert_eq!(spacing.to_pixels(px(16.)), px(32.));
     /// ```
     pub fn to_pixels(self, rem_size: Pixels) -> Pixels {
         match self {
@@ -3075,7 +3142,7 @@ impl Serialize for AbsoluteLength {
 pub enum DefiniteLength {
     /// An absolute length specified in pixels or rems.
     Absolute(AbsoluteLength),
-    /// A length relative to the parent's size.
+    /// A fraction whose reference dimension is selected by the property or caller.
     Relative(Relative),
 }
 
@@ -3084,16 +3151,17 @@ impl DefiniteLength {
     /// Pixel values need neither input. This converts units without enforcing layout constraints.
     ///
     /// ```
-    /// # use gpui::{DefiniteLength, AbsoluteLength, Pixels, px, relative, rems};
-    /// let length_in_pixels = DefiniteLength::Absolute(AbsoluteLength::Pixels(px(42.0)));
-    /// let length_in_rems = DefiniteLength::Absolute(AbsoluteLength::Rems(rems(2.0)));
-    /// let length_as_fraction = DefiniteLength::from(relative(0.5));
-    /// let base_size = AbsoluteLength::Pixels(px(100.0));
-    /// let rem_size = px(16.0);
+    /// use gpui::{DefiniteLength, px, relative, rems};
     ///
-    /// assert_eq!(length_in_pixels.to_pixels(base_size, rem_size), Pixels::from(42.0));
-    /// assert_eq!(length_in_rems.to_pixels(base_size, rem_size), Pixels::from(32.0));
-    /// assert_eq!(length_as_fraction.to_pixels(base_size, rem_size), Pixels::from(50.0));
+    /// let fixed: DefiniteLength = px(42.).into();
+    /// let spacing: DefiniteLength = rems(2.).into();
+    /// let half: DefiniteLength = relative(0.5).into();
+    /// let base = px(100.).into();
+    /// let rem_size = px(16.);
+    ///
+    /// assert_eq!(fixed.to_pixels(base, rem_size), px(42.));
+    /// assert_eq!(spacing.to_pixels(base, rem_size), px(32.));
+    /// assert_eq!(half.to_pixels(base, rem_size), px(50.));
     /// ```
     pub fn to_pixels(self, base_size: AbsoluteLength, rem_size: Pixels) -> Pixels {
         match self {
@@ -3217,9 +3285,14 @@ impl Default for DefiniteLength {
 /// accepts it. Padding and border setters do not accept `auto`. The type's default
 /// is zero pixels, not `auto`; an element's [`crate::Style`] chooses its own defaults.
 /// Parsing and Serde accept `"auto"` or a suffixed [`DefiniteLength`].
+///
+/// There is no general conversion from `Length` to pixels: automatic width,
+/// margin, and position offsets follow different layout rules. Pass the value
+/// to the intended [`Styled`](crate::Styled) method and read the resulting
+/// bounds after layout. See [choosing a length](crate::_documentation::layout#choose-a-length-for-its-reference).
 #[derive(Clone, Copy, PartialEq)]
 pub enum Length {
-    /// A definite length specified either in pixels, rems, or as a fraction of the parent's size.
+    /// A length specified in pixels, rems, or a fraction of a reference dimension.
     Definite(DefiniteLength),
     /// An automatic length that is determined by the context in which it is used.
     Auto,
