@@ -110,7 +110,16 @@ def audit(public: Path, rustdoc: Path | None = None, base_url='https://gpui-ce.g
             # Preview fragments select a program rather than an HTML anchor.
             if target in {public / 'preview/index.html', public / 'workbench/index.html'}:
                 return
-            if fragment not in document(target).ids:
+            ids = document(target).ids
+            # Rustdoc's source viewer selects a line range in JavaScript. HTML
+            # supplies one ID per line rather than an ID for the entire range.
+            line_range = re.fullmatch(r'(\d+)-(\d+)', fragment)
+            source_page = (target.is_relative_to(public / 'api/src') or
+                           (rustdoc is not None and target.is_relative_to(rustdoc / 'src')))
+            source_range = (source_page and line_range
+                            and int(line_range[1]) <= int(line_range[2])
+                            and line_range[1] in ids and line_range[2] in ids)
+            if fragment not in ids and not source_range:
                 errors.append(f'{path}: missing anchor {href}')
 
     guides = [p for p in public.rglob('*.html') if not p.is_relative_to(public / 'api') and not p.is_relative_to(public / 'preview')]

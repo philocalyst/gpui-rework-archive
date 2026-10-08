@@ -1046,7 +1046,11 @@ pub trait Styled: Sized {
         self
     }
 
-    /// Sets the font family of this element and its children.
+    /// Set the preferred family for this element's text and its descendants.
+    ///
+    /// Weight, width, features, and fallback preferences retain their inherited values.
+    /// The family must be installed or registered; this method does not load font bytes.
+    /// Use [`Self::font`] to set several font-request properties together.
     fn font_family(mut self, family_name: impl Into<SharedString>) -> Self {
         self.text_style().font_family = Some(family_name.into());
         self
@@ -1059,7 +1063,12 @@ pub trait Styled: Sized {
         self
     }
 
-    /// Sets the font of this element and its children.
+    /// Set the family, features, weight, width, and face style together, inherited by descendants.
+    ///
+    /// Font size, line height, and color remain unchanged. A `Some` fallback list replaces
+    /// inherited preferences; `None` leaves them inherited. To add no named fallback
+    /// preferences, supply `Some(FontFallbacks::default())`. Backend fallback can still occur.
+    /// See [`Font`] for the difference between a request and a resolved face.
     fn font(mut self, font: Font) -> Self {
         let Font {
             family,

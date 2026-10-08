@@ -5,17 +5,52 @@ use schemars::{JsonSchema, json_schema};
 
 /// OpenType feature tags and numeric values applied during shaping.
 ///
-/// Tags must be four ASCII alphanumeric characters. Human-readable deserialization accepts
-/// booleans (`false`/`true`) and stores them as `0`/`1`; serialization emits numeric values.
-/// Human-readable deserialization skips malformed tags, negative numbers, and fractional
-/// numbers, logging those cases. It also skips `null` values. Unsupported value types, such
-/// as strings, fail deserialization. Accepted integers are read as `u64` and cast to `u32`,
-/// so values above `u32::MAX` are truncated by that cast.
+/// Features ask the font to change glyph selection or positioning. For example,
+/// [tabular figures](https://learn.microsoft.com/en-us/typography/opentype/spec/features_pt#tag-tnum)
+/// give digits equal advances, useful for a changing total. Set features on a
+/// [`Font`](crate::Font) request or with [`Styled::font_features`](crate::Styled::font_features):
 ///
-/// The public tuple field also permits constructing features directly. That path does not
-/// validate tags. A feature takes effect only when the selected font supports it; see the
-/// [OpenType feature registry](https://learn.microsoft.com/en-us/typography/opentype/spec/featurelist)
-/// for tag definitions.
+/// ```
+/// use std::sync::Arc;
+/// use gpui::{FontFeatures, div, prelude::*};
+///
+/// let digits = FontFeatures(Arc::new(vec![("tnum".into(), 1)]));
+/// let total = div().font_features(digits).child("Total: 123.45");
+/// ```
+///
+/// The selected font must implement the requested feature. An empty list preserves backend
+/// defaults; it does not disable all features. Usually `0` disables a feature and `1` enables
+/// it. Some features use larger values to choose an alternate. The
+/// [OpenType registry](https://learn.microsoft.com/en-us/typography/opentype/spec/featurelist)
+/// defines each tag's meaning.
+///
+/// # Input contract
+///
+/// Use four ASCII alphanumeric characters per tag and values no larger than `u16::MAX` for
+/// the Parley backend. The tuple constructor does not validate either. Malformed tags or
+/// larger values cause Parley layout to panic, including through
+/// [`WindowTextSystem::shape_text`](crate::WindowTextSystem::shape_text); that method's
+/// `Result` does not turn a backend invariant failure into an error.
+///
+/// # Serialization
+///
+/// Human-readable formats use an object mapping tags to values. Booleans deserialize as
+/// `0` and `1`; serialization writes numbers:
+///
+/// ```
+/// use gpui::FontFeatures;
+///
+/// let features: FontFeatures = serde_json::from_str(r#"{"calt": false, "tnum": true}"#)?;
+/// assert_eq!(features.is_calt_enabled(), Some(false));
+/// assert_eq!(serde_json::to_value(features)?, serde_json::json!({"calt": 0, "tnum": 1}));
+/// # Ok::<(), serde_json::Error>(())
+/// ```
+///
+/// Deserialization logs and skips malformed tags, negative numbers, and fractional numbers;
+/// it also skips `null`. Unsupported value types, such as strings, fail deserialization.
+/// Accepted integers are cast from `u64` to `u32`, truncating larger values. This parser
+/// therefore does not establish the shaping contract above. Non-human-readable formats
+/// store the `(String, u32)` sequence directly, without tag validation.
 #[derive(Default, Clone, Eq, PartialEq, Hash)]
 pub struct FontFeatures(pub Arc<Vec<(String, u32)>>);
 
@@ -35,10 +70,11 @@ impl FontFeatures {
         self.0.as_slice()
     }
 
-    /// Report whether the configured `calt` value is exactly `1`.
+    /// Report whether the first configured `calt` value is exactly `1`.
     ///
     /// Returns `None` if the feature is not present. Other numeric values, including values
-    /// greater than one, return `Some(false)`.
+    /// greater than one, return `Some(false)`. This inspects the request, not the font's
+    /// support or the backend's default: `None` does not mean alternates are disabled.
     pub fn is_calt_enabled(&self) -> Option<bool> {
         self.0
             .iter()

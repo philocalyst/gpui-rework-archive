@@ -522,6 +522,14 @@ impl TextSystem {
 /// layout for both painting and hit testing so the two use the same string,
 /// fonts, wrapping, and direction. [`StyledText`](crate::StyledText) handles
 /// ordinary styled labels without requiring a manual shaping call.
+///
+/// # Backend failures
+///
+/// Layout assumes valid font features and source ranges. The platform layout trait has an
+/// infallible return type, so a backend failure can panic even through a method returning
+/// `Result`. In Parley, malformed feature tags or values above `u16::MAX` panic during layout.
+/// [`FontFeatures`] explains which inputs are accepted; deserializing a request does not
+/// establish that it is valid for shaping.
 #[derive(Deref)]
 pub struct WindowTextSystem {
     line_layout_cache: LineLayoutCache,
@@ -574,6 +582,11 @@ impl WindowTextSystem {
     ///     window.text_system().shape_line(text, px(16.), &[run]).width()
     /// }
     /// ```
+    ///
+    /// # Panics
+    ///
+    /// In debug builds, panics if `text` contains LF. Backend layout failures also panic;
+    /// see [`WindowTextSystem`]'s backend-failure contract.
     pub fn shape_line(
         &self,
         text: SharedString,
@@ -603,6 +616,11 @@ impl WindowTextSystem {
     ///
     /// The backend receives the complete string. Hard breaks, trailing empty lines, bidi
     /// paragraphs, wrapping, and `line_clamp` therefore share one layout model.
+    ///
+    /// # Panics
+    ///
+    /// Backend layout failures panic rather than becoming `Err`. In particular, Parley
+    /// requires the feature tags and values described by [`FontFeatures`].
     pub fn shape_text<S: AsRef<str> + Into<SharedString>>(
         &self,
         text: S,
@@ -629,6 +647,10 @@ impl WindowTextSystem {
     /// boundary. Use [`TextLayoutOptions::wrap_width`] to control line breaking and
     /// [`TextLayoutOptions::alignment_width`] to supply a box for unwrapped alignment.
     /// Backend-specific interactions between those options are documented on the fields.
+    ///
+    /// # Panics
+    ///
+    /// Backend layout failures panic rather than becoming `Err`; see [`Self::shape_text`].
     pub fn shape_text_with_options<S: AsRef<str> + Into<SharedString>>(
         &self,
         text: S,
@@ -650,6 +672,11 @@ impl WindowTextSystem {
     /// `request.text`. The returned layout owns its geometry and can be retained after the
     /// request's borrowed slices go out of scope. Use this when a box must wrap with text; lay
     /// out an independent icon separately when it should not affect text flow.
+    ///
+    /// # Panics
+    ///
+    /// Backend layout failures panic, including invalid Parley font features as described on
+    /// [`WindowTextSystem`]. The request must satisfy [`InlineLayoutRequest`]'s range contract.
     pub fn layout_inline(&self, request: InlineLayoutRequest<'_>) -> Arc<InlineLayout> {
         self.line_layout_cache.layout_inline(request)
     }
@@ -660,6 +687,10 @@ impl WindowTextSystem {
     /// This returns geometry for measurement and interaction; prefer [`Self::shape_line`] when
     /// the result will be painted through its convenience wrapper. Text may be retained in the
     /// cache, so the returned layout does not borrow from `text`.
+    ///
+    /// # Panics
+    ///
+    /// Backend layout failures panic; see [`WindowTextSystem`]'s backend-failure contract.
     pub fn layout_line(&self, text: &str, font_size: Pixels, runs: &[TextRun]) -> Arc<LineLayout> {
         self.line_layout_cache
             .layout_line(&SharedString::new(text), font_size, runs)
@@ -1361,12 +1392,12 @@ impl Hash for RenderGlyphParams {
 /// glyph in a run comes from the same resolved face.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub struct Font {
-    /// The font family name.
+    /// Preferred family name, resolved against the backend's registered and system fonts.
     ///
     /// The special name ".SystemUIFont" is used to identify the system UI font, which varies based on platform.
     pub family: SharedString,
 
-    /// The font features to use.
+    /// OpenType feature overrides. An empty list retains backend defaults; see [`FontFeatures`].
     pub features: FontFeatures,
 
     /// Ordered fallback family names consulted when this family lacks a character.
@@ -1375,13 +1406,13 @@ pub struct Font {
     /// guarantee that a listed family is installed or contains the glyph.
     pub fallbacks: Option<FontFallbacks>,
 
-    /// The font weight.
+    /// Requested face weight, with [`FontWeight::NORMAL`] as the default.
     pub weight: FontWeight,
 
-    /// The font width. Exhaustive font literals must supply this field.
+    /// Requested face width or variable-font `wdth` coordinate; see [`FontWidth`].
     pub width: FontWidth,
 
-    /// The font style.
+    /// Requested upright, italic, or oblique face style.
     pub style: FontStyle,
 }
 

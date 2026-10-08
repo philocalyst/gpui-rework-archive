@@ -60,6 +60,23 @@ class SiteAuditTests(unittest.TestCase):
             self.assertTrue(any('unresolved Rust documentation link' in error for error in errors))
             self.assertTrue(any('missing anchor' in error for error in errors))
 
+    def test_rustdoc_source_ranges_require_both_endpoint_lines(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.make_site(root)
+            source = root / 'api/src/gpui/source.rs.html'
+            source.parent.mkdir(parents=True)
+            source.write_text('<a id="20"></a><a id="21"></a><a id="22"></a>')
+            page = root / 'api/gpui/struct.Example.html'
+            page.parent.mkdir(parents=True, exist_ok=True)
+            url = 'https://example.com/docs/api/src/gpui/source.rs.html'
+            page.write_text(f'<a href="{url}#20-22">Source</a>')
+            self.assertEqual(audit.audit(root, base_url='https://example.com/docs'), [])
+            for fragment in ('20-23', '19-22', '22-20'):
+                page.write_text(f'<a href="{url}#{fragment}">Source</a>')
+                self.assertTrue(any('missing anchor' in error for error in
+                                    audit.audit(root, base_url='https://example.com/docs')))
+
 
 if __name__ == '__main__':
     unittest.main()

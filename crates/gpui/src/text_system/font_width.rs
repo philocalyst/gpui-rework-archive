@@ -7,12 +7,27 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-/// Font width as a percentage, with 100 representing normal width.
+/// Requested face width as a percentage, with 100 representing normal width.
 ///
-/// Selects static width variants or a variable font's `wdth` axis. Requests outside
-/// a variable font's axis range are clamped to that range by the text backend. Creating this
-/// newtype directly does not validate the value; generated JSON Schema requires it to be
-/// positive.
+/// Set [`Font::width`](crate::Font::width) or use [`Styled::font_width`](crate::Styled::font_width).
+/// The backend selects a static face or a variable font's `wdth` coordinate. A request can
+/// match the nearest available width; requesting 75 does not guarantee glyphs exactly three
+/// quarters as wide as the normal face. Variable coordinates outside the available axis
+/// range are clamped. Use a font with the appropriate face or axis when width matters.
+///
+/// Supply positive, finite values. Construction, parsing, and Serde deserialization do not
+/// validate that requirement; the generated JSON Schema requires a positive number.
+/// Parsing accepts the bare number, while display adds a percent sign:
+///
+/// ```
+/// use gpui::FontWidth;
+///
+/// let width: FontWidth = "82.5".parse()?;
+/// assert_eq!(width, FontWidth(82.5));
+/// assert_eq!(width.to_string(), "82.5%");
+/// assert!("82.5%".parse::<FontWidth>().is_err());
+/// # Ok::<(), std::num::ParseFloatError>(())
+/// ```
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Serialize, Deserialize, Add, Sub, FromStr)]
 #[serde(transparent)]
 pub struct FontWidth(pub f32);

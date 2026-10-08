@@ -444,6 +444,38 @@ site tests pass with the cross-crate redirect regression. Evidence:
 `target/documentation-style-doctests.log` and
 `target/documentation-style-site-tests.log`.
 
+The `b061273f95` build passed strict rustdoc, Zola, and mdBook but the expanded
+audit initially rejected 63 source links. Every failure was a rustdoc
+JavaScript line-range fragment, such as `#2147-2152`, whose endpoints exist as
+separate HTML IDs. The audit now requires both endpoints in ascending order;
+the regression rejects a missing start, missing end, and reversed range.
+All thirteen site tests pass, and rechecking that assembled artifact passes
+(`target/documentation-style-repaired-audit.log`). The next combined build
+will include the correction and the later font prose.
+
+The primary editor read every rendered `Style` field and inherent method,
+then every rendered `TextStyle` field and inherent method on the cargo-doc
+server. The next edit shortens link labels that read awkwardly in sentences
+and corrects the rings' solid-color claim. The companion state overview now
+renders `Focusable` and `FocusHandle` as actual versioned core links rather
+than Rust-path URIs. Their adaptation to local links still needs a browser
+check in the next assembled artifact.
+
+The font pass read the complete feature, fallback, and width types again,
+alongside Parley's family selection, feature parsing, face synthesis, and
+variable-width regressions. It also read the complete native text-system font
+and paragraph recipes. New API examples show applying tabular digits, Serde
+feature values, ordered fallback names, and bare-number width parsing. All
+four pass (`target/documentation-font-request-doctests.log`). The feature docs
+now lead with use, put serialization in its own section, and state the Parley
+`u16` value limit and panic path. `shape_text` currently wraps an infallible
+backend layout in `Ok`; it does not return backend invariant failures as `Err`.
+The shared text chapter and all public shaping operations now explain that
+boundary. `Styled::font` also documents the actual refinement semantics of
+an absent fallback list rather than implying it clears inherited preferences.
+All five canonical text-chapter examples also pass, including the new total
+label (`target/documentation-font-chapter-doctests.log`).
+
 Zed was inspected at `da0a7a78cf296a6d8a75894f46b71a8e7f19cb2f` and Hummingbird
 at `2e1ee5f1c8d415ef7f835801fe368ab4106035b5`. The testing pass read Zed's
 collaboration update-button timer test and context-menu action tests, and
@@ -497,6 +529,15 @@ public `ZonedDifference` configuration. Its default-unit prose itself contains
 stale statements, reinforcing the need to compare reference patterns with code
 rather than copying their claims. `ZonedRound`'s overview examples were read;
 its methods and later builders remain open.
+
+The subsequent reading completes every public `ZonedRound` and `ZonedWith`
+example through the end of the public API, plus the remaining tests through
+the file's end. It covers builder override order and validation at `build`,
+individual versus whole fractional-second settings, offset preference,
+disambiguation, and exact counterexamples across time-zone gaps and folds.
+Every public example in Jiff 0.2.35's `zoned.rs` has now been read; private
+helpers skipped in earlier portions remain outside that claim. Other Jiff
+types and the wider reference inventory remain open.
 
 The Rand book's guide overview, getting-started page, error handling,
 function-testing recipe, all seeding examples, and reproducibility chapter
@@ -574,3 +615,6 @@ Exact input SHA-256:
 Inputs and screenshots are `style-api-checker-input.md`, `style-api-first.md`,
 `style-api-final.md`, `scribbr-style-first.png`, and `scribbr-style-final.png`
 under `target/documentation-proof`.
+
+That style scan records the comments at `b061273f95`. Later link-label and
+ring-description changes have not been rescanned.

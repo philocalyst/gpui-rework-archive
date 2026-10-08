@@ -71,7 +71,7 @@ pub(super) fn open_type_and_spacing() -> impl IntoElement {
             div().font_family("Lilex").text_2xl().child(ligature_text),
         ))
         .child(sample(
-            "Ligatures disabled",
+            "Contextual alternates disabled",
             div()
                 .font_family("Lilex")
                 .font_features(FontFeatures::disable_ligatures())

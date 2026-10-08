@@ -287,7 +287,8 @@ impl RingStyle {
 /// [`Styled`] methods build a partial [`StyleRefinement`]; resolution merges
 /// those fields with defaults and interaction state to produce this value.
 /// The `text` field remains a refinement, merged with inherited text when the
-/// element establishes its rendering scope. Layout fields feed Taffy to compute bounds.
+/// element establishes its rendering scope. Layout fields feed the
+/// [Taffy layout engine](https://docs.rs/taffy/0.12.2/taffy/) to compute bounds.
 /// Backgrounds, borders, filters, opacity, and other paint fields are consumed
 /// after layout. Geometry and paint values belong to this element. Text
 /// properties documented on [`TextStyle`] inherit to descendants, and
@@ -323,7 +324,7 @@ pub struct Style {
     /// Inline direction inherited by logical descendants.
     ///
     /// The default inherits the parent direction. This affects text and logical inline
-    /// placement; it does not reverse a flex row. Use [`Self::flex_direction`] for that.
+    /// placement; it does not reverse a flex row. Use [`flex_direction`](Self::flex_direction) for that.
     pub direction: LayoutDirection,
 
     /// Bidirectional scope requested for inline text.
@@ -370,13 +371,13 @@ pub struct Style {
     /// Precise pixel gestures also lock to their initially dominant axis. A strong direction
     /// change can release the lock. Touch phases delimit the gesture when available; a timeout
     /// handles platforms that supply only move events. This is separate from allowing both
-    /// components of one event through [`Self::allow_concurrent_scroll`].
+    /// components of one event through [`allow_concurrent_scroll`](Self::allow_concurrent_scroll).
     pub restrict_scroll_to_axis: bool,
 
     // Position properties
     /// Whether insets offset a normally laid-out item or position an absolute item.
     pub position: Position,
-    /// Offsets from the edges selected by [`Self::position`]. `Auto` leaves an edge unspecified.
+    /// Offsets from the edges selected by [`position`](Self::position). `Auto` leaves an edge unspecified.
     #[refineable]
     pub inset: Edges<Length>,
 
@@ -394,7 +395,7 @@ pub struct Style {
     pub min_size: Size<Length>,
     /// Upper size bounds. `Auto` leaves an axis without an explicit maximum.
     ///
-    /// A maximum limits the box; use [`Self::overflow`] to control content that no longer fits.
+    /// A maximum limits the box; use [`overflow`](Self::overflow) to control content that no longer fits.
     #[refineable]
     pub max_size: Size<Length>,
     /// Preferred width divided by height, used when layout determines an automatic dimension.
@@ -420,20 +421,20 @@ pub struct Style {
     pub align_items: Option<AlignItems>,
     /// This item's cross-axis alignment in flex layout, or block-axis alignment in grid layout.
     ///
-    /// `None` uses the parent's [`Self::align_items`]. This belongs to the child; setting
+    /// `None` uses the parent's [`align_items`](Self::align_items). This belongs to the child; setting
     /// `align_items` on the child instead controls that child's own children.
     pub align_self: Option<AlignSelf>,
     /// How this element aligns vertically when it participates in an inline formatting context.
     pub vertical_align: VerticalAlign,
     /// Distribution of flex lines or grid tracks across the cross/block axis.
-    /// Use [`Self::align_items`] to align individual children within a line or track.
+    /// Use [`align_items`](Self::align_items) to align individual children within a line or track.
     pub align_content: Option<AlignContent>,
     /// Distribution of flex items or grid tracks along the main/inline axis.
     pub justify_content: Option<JustifyContent>,
     /// Horizontal (`width`) and vertical (`height`) gaps between flex items or grid tracks.
     ///
     /// Gaps separate adjacent items; they do not add space at the container's outer edges.
-    /// Use [`Self::padding`] for space inside those edges.
+    /// Use [`padding`](Self::padding) for space inside those edges.
     #[refineable]
     pub gap: Size<DefiniteLength>,
 
@@ -465,7 +466,7 @@ pub struct Style {
 
     /// Color or gradient painted in the border's thickness.
     ///
-    /// `None` leaves the border unpainted. [`Self::border_widths`] still consumes layout space.
+    /// `None` leaves the border unpainted. [`border_widths`](Self::border_widths) still consumes layout space.
     pub border_color: Option<Background>,
 
     /// Border stroke pattern. Widths and color are configured separately.
@@ -494,11 +495,11 @@ pub struct Style {
     /// not layout size, and can be clipped by an ancestor's content mask.
     pub box_shadow: Vec<BoxShadow>,
 
-    /// A solid ring painted outside the element.
+    /// Ring painted outside the element; see [`RingStyle`] for width and color.
     #[refineable]
     pub ring: RingStyle,
 
-    /// A solid ring painted inside the element.
+    /// Ring painted inside the element; see [`RingStyle`] for width and color.
     #[refineable]
     pub inset_ring: RingStyle,
 
@@ -528,17 +529,17 @@ pub struct Style {
     /// Repeated column tracks when this element uses [`Display::Grid`].
     ///
     /// [`GridTemplate`] chooses both the count and track sizing. This configures the
-    /// container; [`Self::grid_location`] places an item inside its parent's grid.
+    /// container; [`grid_location`](Self::grid_location) places an item inside its parent's grid.
     pub grid_cols: Option<GridTemplate>,
 
     /// Template for the element's grid rows. Placement within a parent grid belongs to
-    /// [`Self::grid_location`].
+    /// [`grid_location`](Self::grid_location).
     pub grid_rows: Option<GridTemplate>,
 
     /// This item's row and column placement in its parent's grid.
     ///
     /// `None` leaves placement automatic. Track definitions belong to the parent through
-    /// [`Self::grid_cols`] and [`Self::grid_rows`]; see [`GridLocation`] for line indices and spans.
+    /// [`grid_cols`](Self::grid_cols) and [`grid_rows`](Self::grid_rows); see [`GridLocation`] for line indices and spans.
     pub grid_location: Option<GridLocation>,
 
     /// Paint a red outline around this box in debug builds. This does not change its size.
@@ -831,7 +832,7 @@ pub enum TextTransform {
 /// replace their font and paint properties with complete [`TextRun`] values.
 ///
 /// Font size, line height, wrapping, alignment, and truncation describe the document's layout.
-/// [`Self::to_run`] copies the font and paint properties for a byte range; it does not copy those
+/// [`to_run`](Self::to_run) copies the font and paint properties for a byte range; it does not copy those
 /// document-wide layout settings. See the [text chapter](https://gpui-ce.github.io/book/text.html)
 /// for choosing a text element and working with measured positions.
 #[derive(Refineable, Clone, Debug, PartialEq)]
@@ -845,10 +846,10 @@ pub struct TextStyle {
     /// A family request need not supply every glyph; shaping can select fallback faces.
     pub font_family: SharedString,
 
-    /// OpenType feature settings passed to shaping. See [`FontFeatures`] for supported tags.
+    /// OpenType feature settings passed to shaping. See [`FontFeatures`] for tags, values, and validation limits.
     pub font_features: FontFeatures,
 
-    /// Ordered fallback families for characters missing from the preferred face.
+    /// Preferred families after the primary family, used when it is unavailable or lacks a character.
     ///
     /// `None` leaves fallback choice to the backend. A configured list supplements the font
     /// request; it does not install fonts or guarantee that a family contains a character.
@@ -898,7 +899,7 @@ pub struct TextStyle {
     ///
     /// This alone does not remove source text or insert an ellipsis. In Parley, remaining
     /// text can overflow the last soft row, and hard breaks still create rows. Configure
-    /// [`Self::text_overflow`] for a truncation affix and the element's overflow style for
+    /// [`text_overflow`](Self::text_overflow) for a truncation affix and the element's overflow style for
     /// clipping. See [`TextLayoutOptions::line_clamp`](crate::TextLayoutOptions::line_clamp).
     pub line_clamp: Option<usize>,
 
@@ -1097,7 +1098,7 @@ impl Style {
     /// Return whether a background exists and is not fully transparent.
     ///
     /// Despite the name, a partially transparent background also returns `true`.
-    /// The method does not inspect [`Self::visibility`] or [`Self::opacity`].
+    /// The method does not inspect [`visibility`](Self::visibility) or [`opacity`](Self::opacity).
     pub fn has_opaque_background(&self) -> bool {
         self.background
             .as_ref()
@@ -1187,7 +1188,7 @@ impl Style {
     ///
     /// [`List`](crate::List) and [`UniformList`](crate::UniformList) always need that mask,
     /// regardless of the authored vertical policy. The horizontal policy, border, and fades
-    /// otherwise follow [`Self::overflow_mask`], including its finite rectangular bounds.
+    /// otherwise follow [`overflow_mask`](Self::overflow_mask), including its finite rectangular bounds.
     /// This method computes clipping; it does not install scroll input handling.
     pub fn scroll_mask(&self, bounds: Bounds<Pixels>, rem_size: Pixels) -> ContentMask<Pixels> {
         let scroll_style = Style {

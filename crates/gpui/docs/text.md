@@ -140,6 +140,52 @@ uses a flex column and queries its text handle from an input callback and a
 later sibling's prepaint callback. It maps a click to a byte offset and paints
 that offset back at the corresponding window-space position.
 
+## Choose a font request, then measure its result
+
+[`font`](crate::font) creates a family request with normal weight, width, and
+face style. It does not load a font or resolve every character to one face.
+Register bundled bytes through [`TextSystem::add_fonts`](crate::TextSystem::add_fonts)
+before opening views that use them. Native backends can also find installed
+families; the browser backend needs registered bytes. A font's embedded family
+name identifies it, not its asset filename.
+
+Use [`font_family`](crate::Styled::font_family) to change just the family while
+preserving inherited weight and other typography. Use [`font`](crate::Styled::font)
+to set the family, features, weight, width, and face style together. Neither
+method changes font size, line height, or color. A font request's `None` fallback
+list leaves the parent's preferences inherited; supply an empty
+[`FontFallbacks`](crate::FontFallbacks) list when you want no additional named
+preferences. Backend fallback remains available.
+
+An [OpenType feature](https://learn.microsoft.com/en-us/typography/opentype/spec/featurelist)
+asks the font for a particular substitution or positioning rule. For example,
+tabular figures give digits equal advances, so replacing one digit need not
+shift the rest of a total:
+
+```rust
+use std::sync::Arc;
+use gpui::{FontFeatures, SharedString, div, prelude::*};
+
+fn total_label(value: &str) -> impl IntoElement {
+    div()
+        .font_features(FontFeatures(Arc::new(vec![("tnum".into(), 1)])))
+        .child(SharedString::new(value))
+}
+```
+
+The inherited font must support `tnum` for that request to change its figures.
+[`FontFeatures::disable_ligatures`](crate::FontFeatures::disable_ligatures)
+disables only contextual alternates (`calt`), often used for programming-font
+ligatures. It does not disable every ligature feature. Read a tag's definition
+and check the chosen font rather than treating all feature settings as booleans.
+
+> [!WARNING]
+> Deserializing font features does not validate a shaping request. Parley layout
+> panics on malformed tags or values above `u16::MAX`, including through
+> `shape_text`, whose `Result` does not capture backend invariant failures.
+> Validate externally supplied settings against [`FontFeatures`](crate::FontFeatures)'s
+> contract before applying them to a view.
+
 ## Measure the text you will paint
 
 Shaping selects fonts and glyphs, applies substitutions and positioning, and
