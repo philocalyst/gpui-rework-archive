@@ -422,6 +422,11 @@ pub enum VisualDirection {
 }
 
 /// The direction of a semantic text movement.
+///
+/// Pair it with a [`TextBoundary`] through [`Self::with_boundary`]. Left and
+/// right follow visual order. Start and end select the logical edges of the
+/// requested row, hard line, or document; the logical start of a right-to-left
+/// row can be on its visual right. See [`TextMovement`] for supported pairs.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum TextDirection {
     /// Move toward the visual left.
@@ -432,9 +437,9 @@ pub enum TextDirection {
     Up,
     /// Move to the visual row below.
     Down,
-    /// Move to the start of a line or document boundary.
+    /// Move to the logical start of the requested line or document.
     Start,
-    /// Move to the end of a line or document boundary.
+    /// Move to the logical end of the requested line or document.
     End,
 }
 
@@ -453,16 +458,43 @@ pub enum TextBoundary {
     Word,
     /// One visual row produced by line breaking, including soft wrapping.
     VisualLine,
-    /// A line delimited by a hard break.
+    /// A source line delimited by a hard paragraph separator.
+    ///
+    /// Soft wrapping does not create another hard line. See
+    /// [`is_paragraph_separator`] for recognized separators; CRLF is one break.
     HardLine,
     /// The complete text document.
     Document,
 }
 
-/// A semantic caret movement handled by the native text layout.
+/// A direction and unit for moving a caret or extending a selection.
 ///
-/// `direction` chooses where to move, and `boundary` chooses the unit. Consecutive vertical
-/// movements reuse the returned preferred horizontal coordinate.
+/// Pass it to [`ShapedTextLayout::caret_movement`] for a caret, or
+/// [`ShapedTextLayout::selection_movement`] when an editor also needs to keep
+/// or collapse a selection anchor. The supplied Parley backend supports these
+/// combinations:
+///
+/// | Operation | [Direction](TextDirection) | [Boundary](TextBoundary) |
+/// | --- | --- | --- |
+/// | Editing stop | Left / Right | [Cluster](TextBoundary::Cluster) |
+/// | Word boundary | Left / Right | [Word](TextBoundary::Word) |
+/// | Other row | Up / Down | [VisualLine](TextBoundary::VisualLine) |
+/// | Wrapped row edge | Start / End | [VisualLine](TextBoundary::VisualLine) |
+/// | Source line edge | Start / End | [HardLine](TextBoundary::HardLine) |
+/// | Document edge | Start / End | [Document](TextBoundary::Document) |
+///
+/// Construct a pair with [`TextDirection::with_boundary`], for example
+/// `TextDirection::Down.with_boundary(TextBoundary::VisualLine)`. Construction
+/// does not validate the pair. Parley normalizes the caret but performs no
+/// movement for unsupported combinations; a custom [`PlatformTextLayout`]
+/// defines its own behavior.
+///
+/// Carry the returned [`CaretMovement::vertical_navigation_x`] into consecutive
+/// up/down moves. It remembers the intended horizontal position when an
+/// intervening row is shorter. Store the returned value after every movement,
+/// including horizontal and boundary moves, so an old column does not leak
+/// into the next vertical sequence. Layout computes these positions; the
+/// editor still owns its caret, selection, and text buffer.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct TextMovement {
     /// The direction in which to move.

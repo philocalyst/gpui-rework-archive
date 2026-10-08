@@ -2711,6 +2711,23 @@ mod tests {
                     line_height,
                 );
                 assert_eq!(hit, Err(text.len()), "{family}, {width:?}");
+                for (direction, expected) in [
+                    (
+                        Direction::Start,
+                        layout.visual_lines.last().unwrap().text_range.start,
+                    ),
+                    (Direction::End, text.len()),
+                ] {
+                    let moved = native.caret_movement(
+                        CaretPosition::attached_to_next_cluster(text.len()),
+                        direction.with_boundary(Boundary::VisualLine),
+                        None,
+                    );
+                    assert_eq!(
+                        moved.result.index, expected,
+                        "row edge: {family}, {width:?}, {direction:?}"
+                    );
+                }
 
                 let mut caret = CaretPosition::attached_to_next_cluster(0);
                 let mut navigation_x = None;

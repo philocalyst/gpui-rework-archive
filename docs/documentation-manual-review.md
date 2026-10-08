@@ -2046,3 +2046,13 @@ no longer equates every shaping-cluster hit with an editing caret step;
 Parley's logical ranges use graphemes. These were manual edits, checked
 against both construction and consumption of the records. Strict links and
 the final rendered review remain pending at this entry.
+
+The follow-up movement pass checked the Parley document adapter as well as
+Parley's pinned Cursor and Selection implementations. TextMovement now gives
+the supported direction/boundary pairs, distinguishes visual left/right from
+logical start/end, and explains retaining the preferred column between
+vertical moves. It also states the normalization/no-movement behavior for
+unsupported pairs instead of implying that constructing a pair validates it.
+The wrapped-caret regression now checks Home/End at the final row too; those
+checks passed without another implementation change. The complete 61-test
+library run passes in `target/documentation-text-caret-final-tests.log`.
