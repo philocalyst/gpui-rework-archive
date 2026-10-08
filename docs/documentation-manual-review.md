@@ -1522,3 +1522,67 @@ wrapped method identifiers into fragments despite having no document-wide
 horizontal overflow. Both versions now use two columns for placement and call
 sequence, with layout timing explained beneath the table. The revised rendering
 checks follow this entry; the browser viewport will be restored afterward.
+
+## Context construction and native window configuration (2026-10-08)
+
+Revision `518e8b6e45` passed the combined build and was served locally. The
+revised two-column AnyElement table fits a 390-pixel CSS viewport without
+fragmenting method names. The book's matching table still required horizontal
+scrolling because the custom theme imposed a 36-em minimum width on every
+table. That minimum has been removed; the rendered book check follows this
+revision. This review distinguishes readable content from merely having no
+document-wide overflow.
+
+The browser-only drawing and custom-element programs completed and showed
+their expected rectangles. The list program completed after a real wheel
+event and showed rows 21–25. Evidence is in
+`target/documentation-proof/miri-{drawing-preview,custom-element-preview,list-scroll}.png`.
+These checks exercise those programs, not every input path or animation frame.
+
+The primary editor reread the complete key-context parser and tests, complete
+binding and action-binding-collection modules, the keymap's production lookup
+implementation, and the canonical input chapter. The rendered KeyContext
+methods and WindowOptions introduction and fields were also read. The context
+rewrite supplies asserting examples for constructing facts, insertion without
+replacement, order-sensitive equality, syntax errors, deepest matching, and
+path-wide negation. Binding examples check incomplete, complete, and rejected
+sequences and preserve the offending stroke in a load error. The collection
+example checks actual alternatives and their predicate instead of just length.
+
+Two contracts were misleading. `key_context` logs a failed conversion while
+retaining a previously set context. `ActionBindingCollection::with` stores
+the first default action for its type; conversion clones that stored action.
+Its context parse happens on the conversion call, while stroke parsing happens
+as the iterator advances. The revised docs distinguish these cases. The input
+chapter explains rebuilding current facts on render and links to the mutation
+example; the same canonical source feeds mdBook.
+
+Window configuration was checked against GPUI's complete option resolution
+and the relevant native creation, titlebar, parenting, tabbing, decoration,
+and browser-window paths. This was a focused backend review, not a complete
+rereading of those backend modules. The revised WindowOptions, WindowBounds,
+TitlebarOptions, and WindowKind pages cover defaults, logical units, restore
+geometry, native activation versus control focus, hidden-window creation,
+animation throttling, chrome, and backend limits. Window's resize/minimize
+policy queries now say that they return the supplied options, rather than
+probing current native capabilities. PopUp and Floating no longer promise
+universal stacking or parenting behavior. The canonical platform chapter adds
+a choice guide connecting ordinary windows, in-window overlays, native anchored
+popups, prompts, and separate dialogs.
+
+For consumer context, the complete pinned Hummingbird `src/ui/keymap.rs` was
+read again, and Zed's Pane context construction and scoped action registration
+were read as an excerpt. Jiff 0.2.38's Date type overview was read from both its
+published API and local source, including its construction/error examples.
+No claim is made that every Jiff example or every ecosystem-review link has
+been read. No detector was run for this batch.
+
+All 230 doctests pass: 223 merged examples and seven executed harness examples,
+with one ignored, in `target/documentation-window-options-doctests.log`.
+The earlier keymap-only run passed 229. Subsequent changes only refine prose
+and links. The six edited Rust files pass rustfmt, generated walkthrough
+sources and backlinks are current, and the diff passes whitespace checks.
+The strict default-feature API check passes in
+`target/documentation-keymap-window-default-api.log`; the complete combined
+build follows this revision. The final rendered review remains a primary-editor task; no subagents
+were used for these passes, and the complete public-surface review is unfinished.

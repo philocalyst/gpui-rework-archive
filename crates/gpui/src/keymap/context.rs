@@ -9,6 +9,55 @@ use std::fmt;
 /// [`KeyBindingContextPredicate`] tests those nodes; it does not merge their
 /// entries into one map. For example, `Editor && mode == insert` needs both
 /// entries on the same node, while `Workspace > Editor` relates two nodes.
+///
+/// Attach the context with [`InteractiveElement::key_context`](crate::InteractiveElement::key_context).
+/// It qualifies shortcuts on the focused path; attach a
+/// [`FocusHandle`](crate::FocusHandle) and register an action listener separately.
+/// The [input chapter](crate::_documentation::input#actions-and-key-bindings)
+/// shows these parts together.
+///
+/// # Build a context
+///
+/// [`parse`](Self::parse) accepts a list of facts. The binding predicate is a
+/// separate expression that tests those facts:
+///
+/// ```rust
+/// use gpui::{KeyBindingContextPredicate as Predicate, KeyContext};
+///
+/// let editor = KeyContext::parse("Editor mode=insert").unwrap();
+/// assert!(editor.contains("Editor"));
+/// assert_eq!(editor.get("mode").unwrap(), "insert");
+/// assert!(Predicate::parse("Editor && mode == insert")
+///     .unwrap().eval(&[editor]));
+/// ```
+///
+/// [`Default`] creates an empty context. [`new_with_defaults`](Self::new_with_defaults)
+/// adds the compile target's operating system, not its focused component.
+/// Names and values are case-sensitive. A bare identifier occupies its key
+/// just as a key-value entry does.
+///
+/// # Change the facts
+///
+/// [`add`](Self::add), [`set`](Self::set), and [`extend`](Self::extend) keep an
+/// existing entry. They do not replace it. Build the context from the current
+/// state on each render, or clear it before changing a stored value. See
+/// [`set`](Self::set) for an example.
+///
+/// # Comparisons
+///
+/// Equality and hashing include entry order, even when two contexts answer
+/// every predicate the same way:
+///
+/// ```rust
+/// use gpui::{KeyBindingContextPredicate as Predicate, KeyContext};
+///
+/// let first = KeyContext::parse("Editor mode=insert").unwrap();
+/// let second = KeyContext::parse("mode=insert Editor").unwrap();
+/// assert_ne!(first, second);
+/// let predicate = Predicate::parse("Editor && mode == insert").unwrap();
+/// assert!(predicate.eval(&[first]));
+/// assert!(predicate.eval(&[second]));
+/// ```
 #[derive(Clone, Default, Eq, PartialEq, Hash)]
 pub struct KeyContext(Vec<ContextEntry>);
 
@@ -81,8 +130,21 @@ impl KeyContext {
     /// Use [`KeyBindingContextPredicate::parse`] for the boolean expression syntax used by
     /// keybinding `context` fields.
     /// Identifiers and values accept Unicode letters and numbers, `_`, and `-`.
-    /// Empty input creates an empty context. Unsupported punctuation or a
-    /// missing key/value returns an error. Repeated keys retain their first entry.
+    /// Empty input creates an empty context. Repeated keys retain their first entry.
+    ///
+    /// # Errors
+    ///
+    /// Unsupported punctuation or a missing key/value returns an error.
+    /// Quotes are not supported; a value must fit the identifier syntax.
+    ///
+    /// ```rust
+    /// use gpui::KeyContext;
+    ///
+    /// assert!(KeyContext::parse("Editor mode=insert").is_ok());
+    /// assert!(KeyContext::parse("Editor && mode == insert").is_err());
+    /// assert!(KeyContext::parse("mode=\"insert\"").is_err());
+    /// assert!(KeyContext::parse("mode=").is_err());
+    /// ```
     pub fn parse(source: &str) -> Result<Self> {
         let mut context = Self::default();
         let source = skip_whitespace(source);
@@ -141,7 +203,10 @@ impl KeyContext {
         }
     }
 
-    /// Add an identifier to this context, if it's not already in this context.
+    /// Add a bare identifier when its key is absent.
+    ///
+    /// An existing key-value entry also prevents insertion. For example,
+    /// adding `mode` to `mode=insert` preserves the value `insert`.
     pub fn add<I: Into<SharedString>>(&mut self, identifier: I) {
         let key = identifier.into();
 
@@ -154,6 +219,24 @@ impl KeyContext {
     ///
     /// This is an insert operation, not an overwrite. To change a value, construct or clear the
     /// context with the desired entry before extending it.
+    ///
+    /// ```rust
+    /// use gpui::KeyContext;
+    ///
+    /// let mut context = KeyContext::parse("Editor mode=insert").unwrap();
+    /// context.set("mode", "normal");
+    /// assert_eq!(context.get("mode").unwrap(), "insert");
+    ///
+    /// context.clear();
+    /// context.add("Editor");
+    /// context.set("mode", "normal");
+    /// assert_eq!(context.get("mode").unwrap(), "normal");
+    ///
+    /// context.add("selection");
+    /// context.set("selection", "multiple");
+    /// assert!(context.contains("selection"));
+    /// assert!(context.get("selection").is_none()); // The bare entry wins too.
+    /// ```
     pub fn set<S1: Into<SharedString>, S2: Into<SharedString>>(&mut self, key: S1, value: S2) {
         let key = key.into();
         if !self.contains(&key) {
@@ -333,6 +416,24 @@ impl KeyBindingContextPredicate {
     /// `contexts` are ordered from the outermost node to the focused node. `None` means the
     /// predicate does not match any prefix; a returned depth is the number of contexts in the
     /// deepest prefix where it matches.
+    /// Negation still sees the complete `contexts` path, including nodes below
+    /// the prefix being tested. A descendant predicate narrows that scope as
+    /// described in [`Self::parse`].
+    ///
+    /// ```rust
+    /// use gpui::{KeyBindingContextPredicate as Predicate, KeyContext};
+    ///
+    /// let path = [
+    ///     KeyContext::parse("Workspace").unwrap(),
+    ///     KeyContext::parse("Editor").unwrap(),
+    ///     KeyContext::parse("Dialog").unwrap(),
+    /// ];
+    /// let editor = Predicate::parse("Editor").unwrap();
+    /// assert!(!editor.eval(&path)); // The last node is Dialog.
+    /// assert_eq!(editor.depth_of(&path), Some(2));
+    /// assert_eq!(Predicate::parse("Editor && !Dialog").unwrap().depth_of(&path), None);
+    /// assert_eq!(editor.depth_of(&[]), None);
+    /// ```
     pub fn depth_of(&self, contexts: &[KeyContext]) -> Option<usize> {
         for depth in (0..=contexts.len()).rev() {
             let context_slice = &contexts[0..depth];
@@ -356,8 +457,14 @@ impl KeyBindingContextPredicate {
 
     /// Evaluate against a prefix while retaining the full path for descendant and negation checks.
     ///
-    /// This helper is used by [`Self::depth_of`]; most callers should use [`Self::eval`].
-    /// `contexts` is the prefix currently being checked, and `all_contexts` is the complete path.
+    /// This helper is used by [`Self::depth_of`]. Use [`Self::eval`] to test a
+    /// complete path, or `depth_of` to find a matching ancestor.
+    ///
+    /// Pass a prefix as `contexts` and the complete path as `all_contexts`.
+    /// The last prefix node supplies local identifiers and values. `!` checks
+    /// `all_contexts`, so a negated fact below the prefix can reject it. After
+    /// a matching `>`, both paths are narrowed to the suffix below that ancestor.
+    /// An empty prefix returns false.
     pub fn eval_inner(&self, contexts: &[KeyContext], all_contexts: &[KeyContext]) -> bool {
         let Some(context) = contexts.last() else {
             return false;

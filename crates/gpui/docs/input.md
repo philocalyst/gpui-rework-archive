@@ -324,6 +324,13 @@ between an ancestor and a descendant, with spaces around `>`. See
 [`KeyBindingContextPredicate::parse`](crate::KeyBindingContextPredicate::parse)
 for executable matching examples.
 
+Build a fresh context from the component's state when rendering. The entry
+setters keep the first value: calling `set("mode", "normal")` on a context
+that already has `mode=insert` leaves it in insert mode. The
+[`set` example](crate::KeyContext::set) shows how to replace the facts by
+clearing and rebuilding them. Changing a stored context takes effect in
+dispatch after the changed element is rendered again.
+
 Choose the scope of an exclusion deliberately. `Editor && mode != readonly`
 checks the mode on the editor's own node, and also matches when that key is
 absent. `Editor && !(mode == readonly)` rejects a read-only mode anywhere on

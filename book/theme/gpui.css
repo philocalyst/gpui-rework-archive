@@ -42,7 +42,6 @@
 }
 .content table {
     width: 100%;
-    min-width: 36em;
 }
 .content table th, .content table td {
     text-align: start;

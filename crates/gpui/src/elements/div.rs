@@ -1084,7 +1084,9 @@ pub trait InteractiveElement: Sized {
     /// Key-binding predicates match contexts along the focused path. This
     /// does not create focus or register a binding; combine it with
     /// [`track_focus`](Self::track_focus) and [`App::bind_keys`]. If conversion
-    /// to [`KeyContext`] fails, GPUI logs the error and leaves the context unset.
+    /// to [`KeyContext`] fails, GPUI logs the error and retains any context
+    /// already set on this element. Parse user-supplied strings before calling
+    /// this method when the application needs to report an error to the user.
     fn key_context<C, E>(mut self, key_context: C) -> Self
     where
         C: TryInto<KeyContext, Error = E>,

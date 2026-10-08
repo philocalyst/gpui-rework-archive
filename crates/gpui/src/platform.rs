@@ -3067,22 +3067,38 @@ pub enum TextInputAction {
     Send,
 }
 
-/// Options for creating a window.
+/// Configuration passed to [`App::open_window`].
 ///
 /// Chain setters on [`WindowOptions::default`] (or [`WindowOptions::new`]) to
 /// override individual fields. Optional setters accept a value or an `Option`.
 /// Pass `None` to clear the field.
 ///
-/// The window background is configured per platform, so consumers explicitly
-/// decide what each target needs:
+/// Defaults request a visible, focused normal window with a titlebar and
+/// movable, resizable, minimizable native chrome. GPUI chooses its initial
+/// geometry. Native window options are requests to the backend and window
+/// manager; they do not set constraints on the root element's layout.
+/// See the [platform chapter](crate::_documentation::platforms#configure-a-window)
+/// for backend differences and the relationship between window and element bounds.
+///
+/// # Example: configure a preview window
+///
+/// This prepares a preview window with explicit initial and minimum sizes.
+/// Pass the result to `open_window` with a closure that creates its root view:
 ///
 /// ```
-/// use gpui::WindowOptions;
+/// use gpui::{Bounds, SharedString, TitlebarOptions, WindowBounds, WindowOptions, point, px, size};
 ///
 /// let options = WindowOptions::new()
+///     .window_bounds(WindowBounds::Windowed(Bounds::new(
+///         point(px(40.), px(40.)), size(px(800.), px(500.)),
+///     )))
+///     .window_min_size(size(px(320.), px(240.)))
 ///     .focus(false)
-///     .titlebar(None)
-///     .app_id("org.example.app".to_owned());
+///     .titlebar(TitlebarOptions::default().title(SharedString::from("Preview")));
+/// assert!(options.show);
+/// assert!(!options.focus);
+/// assert_eq!(options.window_bounds.unwrap().get_bounds().size, size(px(800.), px(500.)));
+/// assert_eq!(options.window_min_size, Some(size(px(320.), px(240.))));
 /// ```
 #[derive(Debug, derive_setters::Setters)]
 #[setters(into)]
@@ -3097,21 +3113,40 @@ pub struct WindowOptions {
     /// Wayland and browser windows do not expose global desktop positioning.
     pub window_bounds: Option<WindowBounds>,
 
-    /// The titlebar configuration of the window
+    /// Initial title and native titlebar treatment.
+    ///
+    /// Defaults to `Some(TitlebarOptions::default())`. `None` requests a window
+    /// without the ordinary native titlebar; the application supplies its own
+    /// chrome. See [`TitlebarOptions::appears_transparent`] for drawing beneath
+    /// the titlebar while retaining its configuration.
     pub titlebar: Option<TitlebarOptions>,
 
-    /// Whether the window should be focused when created
+    /// Whether to request native activation when creating the window; defaults to true.
+    ///
+    /// This chooses which native window receives keys. Select a control inside
+    /// it separately with [`Window::focus`]. Native activation can be denied
+    /// by the window manager; [`Window::activate`] requests it again later.
     pub focus: bool,
 
-    /// Whether the window should be shown when created
+    /// Whether to show the window immediately; defaults to true.
+    ///
+    /// The root view is still created when false. Use [`Window::set_visible`]
+    /// to show or hide the resulting window. The web backend applies this
+    /// setting through the canvas's CSS `display` property.
     pub show: bool,
 
-    /// The kind of window to create
+    /// Native role and stacking treatment; defaults to [`WindowKind::Normal`].
+    ///
+    /// Supported roles vary by backend. Use an in-window overlay for a popup
+    /// that must also work in the browser; see [`WindowKind`].
     pub kind: WindowKind,
 
-    /// Whether the window can be moved by the user. When `false`, the user cannot drag
-    /// the window (on macOS this sets `NSWindow.isMovable`, which also disables the
-    /// Window-menu tiling items); programmatic moves are still allowed.
+    /// Whether to permit user dragging of the window; defaults to true.
+    ///
+    /// macOS applies this to `NSWindow.isMovable`, also affecting Window-menu
+    /// tiling items. Windows checks it when hit-testing custom titlebar drag
+    /// regions. The supplied Linux and web backends ignore this option.
+    /// Programmatic move requests remain separate.
     pub is_movable: bool,
 
     /// Whether the application owns dragging of the (custom) titlebar, rather than
@@ -3129,13 +3164,23 @@ pub struct WindowOptions {
 
     /// The minimum interval between animation frames while the window is inactive.
     ///
-    /// Set to `None` to disable inactive-window animation frame throttling.
+    /// Defaults to 33,333 microseconds, approximately 30 frames per second.
+    /// This throttles pending animation callbacks and forced renders, rather
+    /// than making an idle window draw. Required presentations and sustained
+    /// high-rate input bypass the inactive limit. `None` disables this limit;
+    /// thermal throttling can still apply. See [`Window::on_next_frame`].
     pub inactive_frame_interval: Option<Duration>,
 
-    /// Whether the window should be resizable by the user
+    /// Whether native controls should permit user resizing; defaults to true.
+    ///
+    /// This does not prevent programmatic [`Window::resize`] requests. Native
+    /// support depends on the window role and chrome.
     pub is_resizable: bool,
 
-    /// Whether the window should be minimized by the user
+    /// Whether native chrome should offer minimization; defaults to true.
+    ///
+    /// Use [`Window::minimize_window`] to request minimization programmatically.
+    /// The browser has no minimization operation for its canvas window.
     pub is_minimizable: bool,
 
     /// Preferred display, or `None` to let the platform choose its primary display.
@@ -3144,36 +3189,59 @@ pub struct WindowOptions {
     /// with [`App::find_display`] before requesting it.
     pub display_id: Option<DisplayId>,
 
-    /// The background appearance of a macOS window.
+    /// Initial macOS backdrop; defaults to [`MacosWindowBackground::Opaque`].
+    ///
+    /// An opaque root background covers a translucent backdrop. Choose the
+    /// view's colors and the native backdrop together.
     #[cfg(target_os = "macos")]
     pub macos_window_background: MacosWindowBackground,
 
-    /// The background appearance of a Windows window.
+    /// Initial Windows backdrop; defaults to [`WindowsWindowBackground::Opaque`].
+    ///
+    /// Available materials depend on the Windows version and renderer. An
+    /// opaque root background covers a translucent backdrop.
     #[cfg(target_os = "windows")]
     pub windows_window_background: WindowsWindowBackground,
 
-    /// The background appearance of a Linux window.
+    /// Initial Linux/FreeBSD backdrop; defaults to [`LinuxWindowBackground::Opaque`].
+    ///
+    /// Blur depends on compositor support; X11 treats it as plain transparency.
     #[cfg(any(target_os = "linux", target_os = "freebsd"))]
     pub linux_window_background: LinuxWindowBackground,
 
-    /// The background appearance of a web window.
+    /// Browser canvas backdrop, currently always [`WebWindowBackground::Opaque`].
     #[cfg(target_family = "wasm")]
     pub web_window_background: WebWindowBackground,
 
-    /// Application identifier of the window. Can by used by desktop environments to group applications together.
+    /// Application identifier used for desktop grouping, where supported.
+    ///
+    /// For example, `org.example.Editor` can identify the corresponding desktop
+    /// application on Linux. This is separate from the window title and GPUI's
+    /// window handle. Defaults to `None`.
     pub app_id: Option<String>,
 
-    /// Window minimum size
+    /// Requested minimum content size in logical pixels; defaults to no constraint.
+    ///
+    /// This constrains native window resizing where supported. It does not set
+    /// an element's minimum width or height. The web backend instead takes its
+    /// size from the canvas's CSS layout and ignores this request.
     pub window_min_size: Option<Size<Pixels>>,
 
     /// Whether to use client or server-side decorations on X11 and Wayland.
-    /// The platform may ignore requests it cannot satisfy.
+    /// `None` requests [`WindowDecorations::Server`]. The platform may ignore
+    /// requests it cannot satisfy. Check [`Window::window_decorations`] when
+    /// deciding which border and titlebar the application must draw.
     pub window_decorations: Option<WindowDecorations>,
 
     /// Native icon on X11 and on Wayland compositors supporting the icon protocol.
     pub icon: Option<Arc<image::RgbaImage>>,
 
-    /// Tab group name, allows opening the window as a native tab on macOS 10.12+. Windows with the same tabbing identifier will be grouped together.
+    /// Identifier supplied to AppKit for native macOS window tabs.
+    ///
+    /// `Some` enables automatic tabbing. GPUI's automatic attachment to the main
+    /// window depends on the user's tabbing preference and that window's
+    /// fullscreen state. `None`, the default, disables automatic tabbing during
+    /// creation. Other supplied backends ignore this field.
     pub tabbing_identifier: Option<String>,
 }
 
@@ -3259,6 +3327,23 @@ pub struct WindowParams {
 /// Use [`Window::window_bounds`] to record this value for reopening a window.
 /// [`Self::get_bounds`] extracts the normal/restore bounds, which can differ
 /// from its current fullscreen or maximized viewport.
+/// Coordinates and sizes use logical [`Pixels`], with the backend-specific
+/// window origin described by [`Window::bounds`].
+///
+/// [`Default`] is a zero-sized `Windowed` rectangle at the origin. To let GPUI
+/// choose placement and size, leave [`WindowOptions::window_bounds`] as `None`.
+/// To request centering, use [`Self::centered`] instead.
+///
+/// ```rust
+/// use gpui::{Bounds, WindowBounds, point, px, size};
+///
+/// let restore = Bounds::new(point(px(40.), px(60.)), size(px(800.), px(600.)));
+/// let saved = WindowBounds::Maximized(restore);
+/// assert_eq!(saved.get_bounds(), restore);
+/// // Reopen in normal mode using the same restore rectangle.
+/// let normal = WindowBounds::Windowed(saved.get_bounds());
+/// assert_eq!(normal, WindowBounds::Windowed(restore));
+/// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum WindowBounds {
     /// Indicates that the window should open in a windowed state with the given bounds.
@@ -3287,7 +3372,13 @@ impl WindowBounds {
         }
     }
 
-    /// Request a normal window centered on the primary display.
+    /// Compute normal-window bounds centered on the primary display.
+    ///
+    /// Uses the display's full bounds, including system-reserved areas.
+    /// Without a display, returns the requested size at `(0, 0)`. A size larger
+    /// than the display is preserved. This computes a request; the backend
+    /// decides actual placement when the window opens.
+    /// For another display, wrap [`Bounds::centered`] in [`Self::Windowed`].
     pub fn centered(size: Size<Pixels>, cx: &App) -> Self {
         WindowBounds::Windowed(Bounds::centered(None, size, cx))
     }
@@ -3370,6 +3461,11 @@ impl WindowOptions {
 ///
 /// Chain setters on [`TitlebarOptions::default`] and pass the result to
 /// [`WindowOptions::titlebar()`]. Pass `None` to clear the title or traffic light position.
+/// The default has no title or custom button position and keeps the ordinary
+/// titlebar appearance. Transparent titlebar treatment lets content extend
+/// into that region on macOS and Windows. The platform-specific background
+/// field on [`WindowOptions`] instead selects window translucency;
+/// [`WindowOptions::background_appearance`] reports that choice.
 ///
 /// ```
 /// use gpui::{SharedString, TitlebarOptions, point, px};
@@ -3378,31 +3474,57 @@ impl WindowOptions {
 ///     .title(SharedString::from("My app"))
 ///     .appears_transparent(true)
 ///     .traffic_light_position(point(px(16.0), px(16.0)));
+/// assert_eq!(titlebar.title.as_deref(), Some("My app"));
+/// assert!(titlebar.appears_transparent);
 /// ```
 #[derive(Debug, Default, derive_setters::Setters)]
 #[setters(into)]
 pub struct TitlebarOptions {
-    /// The initial title of the window
+    /// Initial native title, or `None` for no supplied title.
+    ///
+    /// Use [`Window::set_window_title`] to change it after opening. A title
+    /// remains useful for native window lists even when custom chrome hides
+    /// its normal display.
     pub title: Option<SharedString>,
 
-    /// Should the default system titlebar be hidden to allow for a custom-drawn titlebar? (macOS and Windows only)
-    /// Refer to [`WindowOptions::window_decorations`] on Linux
+    /// Whether macOS or Windows should let application content occupy the titlebar region.
+    ///
+    /// Defaults to false. The application draws the titlebar content when true.
+    /// On Linux, select client decorations with [`WindowOptions::window_decorations`].
+    /// This flag does not choose a translucent window background.
     pub appears_transparent: bool,
 
-    /// The position of the macOS traffic light buttons
+    /// Custom inset for macOS's close, minimize, and zoom buttons, in logical pixels.
+    ///
+    /// `x` places the close button from the titlebar's left edge; `y` supplies
+    /// its vertical margin. GPUI preserves the native button sizes and spacing.
+    /// `None` keeps native placement. Other supplied backends ignore this field.
     pub traffic_light_position: Option<Point<Pixels>>,
 }
 
 impl FluentBuilder for TitlebarOptions {}
 
-/// The kind of window to create
+/// Native window role requested by [`WindowOptions::kind`].
+///
+/// A role affects stacking, parenting, and native chrome; it does not create
+/// an element or style its contents. The browser backend accepts only
+/// [`Normal`](Self::Normal). Other roles return an error there.
+/// For a menu inside an existing window, combine [`anchored`](crate::anchored)
+/// and [`deferred`](crate::deferred), as the
+/// [overlays walkthrough](https://gpui-ce.github.io/examples/overlays/) demonstrates.
+/// See the [platform chapter](crate::_documentation::platforms#configure-a-window)
+/// for the supplied native backends' role differences.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum WindowKind {
     /// A normal application window
     Normal,
 
-    /// A window that appears above all other windows, usually used for alerts or popups
-    /// use sparingly!
+    /// A detached popup or notification window.
+    ///
+    /// macOS uses a nonactivating popup-level panel; Windows uses a topmost
+    /// tool window; X11 uses an override-redirect notification window. Wayland
+    /// currently creates an ordinary toplevel. Use [`Self::AnchoredPopup`] for
+    /// native placement relative to an explicit parent.
     PopUp,
 
     /// A parent-anchored, platform-native popup window for menus, comboboxes, context menus and
@@ -3413,7 +3535,11 @@ pub enum WindowKind {
     /// implementation reject it with [`popup::PopupNotSupportedError`].
     AnchoredPopup(popup::PopupOptions),
 
-    /// A floating window that appears on top of its parent window
+    /// A utility window requesting floating or transient treatment.
+    ///
+    /// macOS raises it to the floating window level. X11 and Wayland relate it
+    /// to the keyboard-focused window when one exists. Windows currently
+    /// creates an ordinary application window for this role.
     Floating,
 
     /// A Wayland LayerShell window, used to draw overlays or backgrounds for applications such as
@@ -3421,8 +3547,13 @@ pub enum WindowKind {
     #[cfg(all(target_os = "linux", feature = "wayland"))]
     LayerShell(layer_shell::LayerShellOptions),
 
-    /// A window that appears on top of its parent window and blocks interaction with it
-    /// until the modal window is closed
+    /// A separate modal dialog, with a parent selected by the backend when available.
+    ///
+    /// macOS attaches a sheet to the main window or its current sheet; Windows
+    /// disables the active parent; X11 and Wayland use the keyboard-focused
+    /// window and request modal treatment. With no parent, these mechanisms
+    /// cannot block a particular parent window. For a confirmation question,
+    /// [`Window::prompt`] supplies a native or in-window dialog and an answer receiver.
     Dialog,
 }
 

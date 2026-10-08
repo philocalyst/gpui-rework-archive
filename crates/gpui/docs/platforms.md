@@ -30,6 +30,54 @@ windows. The [shared example startup](https://github.com/gpui-ce/gpui-ce/blob/ma
 shows a slightly fuller version with menus, assets, window bounds, and closing behavior. See the
 [setup guide](https://gpui-ce.github.io/guides/setup/) for build prerequisites and commands.
 
+## Configure a window
+
+[`WindowOptions`](crate::WindowOptions) describes the window to create;
+the root view describes what to draw inside it. Defaults request a visible,
+focused, resizable normal window with a native titlebar. Native options remain
+subject to the backend and window manager. They do not set the root element's
+width, height, or layout style.
+
+Leave `window_bounds` as `None` to let GPUI choose initial geometry, or supply
+[`WindowBounds`](crate::WindowBounds) when restoring a saved window. Its
+maximized and fullscreen variants carry the normal rectangle to restore,
+rather than the current enlarged viewport. `WindowBounds::default()` is a
+zero-sized normal rectangle; it does not request automatic placement.
+[`WindowBounds::centered`](crate::WindowBounds::centered) computes a normal
+rectangle on the primary display. That calculation uses the full display,
+including system-reserved areas; the window manager still decides placement.
+
+The `focus` option requests native activation. Select a field inside that
+window separately with [`Window::focus`](crate::Window::focus). A hidden
+window still has a root view: set `show` to false when preparing it, then use
+[`Window::set_visible`](crate::Window::set_visible) to reveal it. Showing and
+activating are separate requests. In the browser, visibility controls the
+canvas's CSS `display`; the document controls its size, and desktop minimum-size
+and placement requests do not apply.
+
+Choose the kind of surface according to the interaction:
+
+| Need | API |
+| --- | --- |
+| Main application content | [`WindowKind::Normal`](crate::WindowKind::Normal), supported by every supplied backend |
+| Menu or tooltip inside the current window | [`anchored`](crate::anchored) for placement and [`deferred`](crate::deferred) for foreground paint order |
+| Separate menu anchored to an explicit parent | [`WindowKind::AnchoredPopup`](crate::WindowKind::AnchoredPopup) with [`PopupOptions`](crate::popup::PopupOptions); currently requires Wayland |
+| Confirmation with a small set of answers | [`Window::prompt`](crate::Window::prompt), which chooses a native dialog or an in-window fallback |
+| Separate modal window | [`WindowKind::Dialog`](crate::WindowKind::Dialog); the backend chooses an available native parent |
+| Utility window | [`WindowKind::Floating`](crate::WindowKind::Floating); treatment varies by backend |
+
+`PopUp` and `Floating` are not portable guarantees of parent-relative placement
+or always-on-top behavior. The [`WindowKind`](crate::WindowKind) variants
+describe their native implementations. The browser rejects every kind except
+`Normal`; an in-window overlay works within its single GPUI surface.
+
+Custom chrome is a further choice. [`TitlebarOptions::appears_transparent`](crate::TitlebarOptions::appears_transparent)
+lets application content occupy the titlebar region on macOS and Windows.
+On Linux, request [`WindowDecorations::Client`](crate::WindowDecorations::Client)
+and check the effective [`Window::window_decorations`](crate::Window::window_decorations)
+before drawing native controls and borders. Titlebar treatment does not select
+a translucent window background; see [appearance and backdrops](#appearance-backdrops-and-document-state).
+
 ## Choose a backend
 
 | Target | Native window system | Text and rendering setup | Selection and constraints |

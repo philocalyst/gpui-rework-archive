@@ -12,6 +12,12 @@ use smallvec::SmallVec;
 /// selects a command; an element handler must still accept that command along
 /// the focused path. Use [`new`](Self::new) for fixed strings in application
 /// code, or [`load`](Self::load) for fallible configuration and platform mapping.
+///
+/// A sequence such as `ctrl-k left` is a two-stroke shortcut, also called a
+/// chord. [`Keymap::bindings_for_input`](crate::Keymap::bindings_for_input)
+/// resolves complete matches and pending prefixes. The window buffers those
+/// prefixes and dispatches the selected action; see
+/// [pending chords](crate::_documentation::input#wait-for-a-pending-chord).
 // docs:examples:begin
 #[doc = include_str!("../docs/examples/gpui-KeyBinding-12b9082b.md")]
 // docs:examples:end
@@ -39,8 +45,11 @@ impl Clone for KeyBinding {
 impl KeyBinding {
     /// Construct a key binding from keystrokes, action, and an optional context predicate.
     ///
-    /// Separate strokes with whitespace to create a chord, such as `cmd-k left`. This convenience
-    /// constructor uses the dummy keyboard mapper. Use [`Self::load`] to
+    /// Separate strokes with whitespace to create a chord, such as `cmd-k left`.
+    /// Each stroke follows [`Keystroke::parse`]. The context follows
+    /// [`KeyBindingContextPredicate::parse`]; `None` leaves it unconditional.
+    /// This convenience constructor uses [`DummyKeyboardMapper`], preserving
+    /// the parsed key without layout-specific equivalents. Use [`Self::load`] to
     /// supply platform mapping and report invalid configuration as an error.
     ///
     /// # Panics
@@ -61,14 +70,49 @@ impl KeyBinding {
         .unwrap()
     }
 
-    /// Parse a key binding using an explicit keyboard mapper and optional metadata.
+    /// Parse a sequence and map its strokes for a keyboard layout.
     ///
     /// `keystrokes` is a whitespace-separated sequence. `context_predicate` should be parsed
-    /// separately with [`KeyBindingContextPredicate::parse`]; malformed keystrokes return
-    /// [`InvalidKeystrokeError`]. An empty string creates a binding with no strokes, which cannot
-    /// match a key event. The optional `action_input` retains the original JSON payload text when a
-    /// binding was loaded from configuration. `use_key_equivalents` lets the platform mapper apply
-    /// equivalent characters so a binding can keep its intended meaning across layouts.
+    /// separately with [`KeyBindingContextPredicate::parse`]. The supplied
+    /// `action` is already constructed. `action_input` stores its original JSON
+    /// payload for later inspection; this method does not parse that payload.
+    /// [`Self::with_meta`] can record which configuration source supplied the binding.
+    ///
+    /// Each stroke is parsed with [`Keystroke::parse`], then passed to
+    /// [`PlatformKeyboardMapper::map_key_equivalent`] with `use_key_equivalents`.
+    /// The mapper controls the matching key and its display label. GPUI keeps
+    /// those together in a [`KeybindingKeystroke`].
+    ///
+    /// # Errors
+    ///
+    /// A malformed stroke returns [`InvalidKeystrokeError`], which contains
+    /// that stroke rather than the whole sequence. An empty sequence succeeds
+    /// but cannot match a key event. Context errors come from the separate
+    /// predicate parse.
+    ///
+    /// # Example
+    ///
+    /// A configuration loader can report both parsing errors instead of
+    /// panicking. This example deliberately uses an unmapped keyboard:
+    ///
+    /// ```rust
+    /// use gpui::{DummyKeyboardMapper, KeyBinding, KeyBindingContextPredicate, actions};
+    ///
+    /// actions!(documentation_binding_load, [MoveLeft]);
+    /// let context = KeyBindingContextPredicate::parse("Editor && mode == normal")?;
+    /// let binding = KeyBinding::load(
+    ///     "ctrl-k left", Box::new(MoveLeft), Some(context.into()),
+    ///     false, None, &DummyKeyboardMapper,
+    /// )?;
+    /// assert_eq!(binding.keystrokes().len(), 2);
+    ///
+    /// let invalid = KeyBinding::load(
+    ///     "ctrl-k ctrl-a-b", Box::new(MoveLeft), None,
+    ///     false, None, &DummyKeyboardMapper,
+    /// );
+    /// assert_eq!(invalid.unwrap_err().keystroke, "ctrl-a-b");
+    /// # Ok::<(), anyhow::Error>(())
+    /// ```
     pub fn load(
         keystrokes: &str,
         action: Box<dyn Action>,
@@ -119,6 +163,23 @@ impl KeyBinding {
     /// Returns `None` if the strokes differ or the input is longer than the binding, `Some(true)`
     /// if all typed strokes match but more strokes are required, and `Some(false)` for a complete
     /// match. Context and keymap precedence are not checked here.
+    /// Matching uses [`Keystroke::should_match`], including its produced-text
+    /// rules, rather than comparing shortcut display labels.
+    ///
+    /// ```rust
+    /// use gpui::{KeyBinding, Keystroke, actions};
+    ///
+    /// actions!(documentation_binding_prefix, [MoveLeft]);
+    /// let binding = KeyBinding::new("ctrl-k left", MoveLeft, Some("Editor"));
+    /// let prefix = [Keystroke::parse("ctrl-k")?];
+    /// assert_eq!(binding.match_keystrokes(&prefix), Some(true));
+    ///
+    /// let complete = [prefix[0].clone(), Keystroke::parse("left")?];
+    /// assert_eq!(binding.match_keystrokes(&complete), Some(false));
+    /// let wrong = [prefix[0].clone(), Keystroke::parse("right")?];
+    /// assert_eq!(binding.match_keystrokes(&wrong), None);
+    /// # Ok::<(), gpui::InvalidKeystrokeError>(())
+    /// ```
     pub fn match_keystrokes(&self, typed: &[impl AsKeystroke]) -> Option<bool> {
         if self.keystrokes.len() < typed.len() {
             return None;

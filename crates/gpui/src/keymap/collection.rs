@@ -9,13 +9,20 @@ use std::{any::TypeId, collections::HashMap};
 /// [`KeyBinding`] values when relative precedence between action types matters.
 ///
 /// ```rust
-/// use gpui::ActionBindingCollection;
-/// gpui::actions!([MyAction]);
+/// use gpui::{ActionBindingCollection, KeyContext, actions};
+///
+/// actions!(documentation_alternatives, [Submit]);
 /// let alternatives = ActionBindingCollection::default()
-///     .with::<MyAction>("enter")
-///     .with::<MyAction>("ctrl-enter");
+///     .with::<Submit>("enter")
+///     .with::<Submit>("ctrl-enter");
 /// let bindings: Vec<_> = alternatives.as_keybindings(Some("Editor")).collect();
 /// assert_eq!(bindings.len(), 2);
+/// assert_eq!(bindings[0].keystrokes()[0].inner().key, "enter");
+/// assert!(bindings[1].keystrokes()[0].inner().modifiers.control);
+/// let editor = KeyContext::parse("Editor").unwrap();
+/// for binding in &bindings {
+///     assert!(binding.predicate().unwrap().eval(&[editor.clone()]));
+/// }
 /// ```
 #[derive(Default)]
 pub struct ActionBindingCollection {
@@ -34,8 +41,14 @@ struct ActionBindingEntry {
 impl ActionBindingCollection {
     /// Add another keystroke that invokes `A`.
     ///
-    /// Calling this repeatedly for the same action collects multiple alternatives. `A::default()`
-    /// supplies the action value when [`Self::as_keybindings`] constructs the bindings.
+    /// The first call for a type stores `A::default()`; later calls for that
+    /// type append alternatives in order. Duplicate strings are retained.
+    /// [`Self::as_keybindings`] clones the stored action for each alternative.
+    /// Use [`KeyBinding::new`] directly for an action carrying a particular
+    /// value, such as a destination path.
+    ///
+    /// The string is stored without parsing. Invalid syntax is reported as a
+    /// panic when the [`as_keybindings`](Self::as_keybindings) iterator reaches it.
     pub fn with<A: Action + Default>(mut self, keystrokes: impl Into<SharedString>) -> Self {
         let action_id = TypeId::of::<A>();
         let entry = self.entries.entry(action_id);
@@ -51,10 +64,15 @@ impl ActionBindingCollection {
     ///
     /// Pass the iterator to [`App::bind_keys`](crate::App::bind_keys). The bindings use the dummy
     /// keyboard mapper, so use [`KeyBinding::load`] directly when platform key equivalents or
-    /// recoverable parse errors are required. This method panics if the context or a keystroke
-    /// cannot be parsed. Since actions are stored in a hash map, do not rely on the relative order
+    /// recoverable parse errors are required. Since actions are stored in a hash map, do not rely on the relative order
     /// of bindings for different action types; use an ordered `Vec<KeyBinding>` when tie-breaking
     /// precedence between actions matters.
+    /// Alternatives for one type keep the order of their `with` calls.
+    ///
+    /// # Panics
+    ///
+    /// An invalid context panics when this method is called. An invalid
+    /// keystroke panics later, when the iterator reaches that alternative.
     pub fn as_keybindings(&self, context: Option<&str>) -> impl Iterator<Item = KeyBinding> {
         let context_predicate =
             context.map(|context| KeyBindingContextPredicate::parse(context).unwrap().into());

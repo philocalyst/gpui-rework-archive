@@ -3207,17 +3207,30 @@ impl Window {
         self.client_inset
     }
 
-    /// Returns whether the title bar window controls need to be rendered by the application (Wayland and X11)
+    /// Returns the backend's reported decoration mode.
+    ///
+    /// On Wayland and X11, use [`Decorations::Client`] and its tiling state to
+    /// decide which titlebar and borders the application should draw. The
+    /// reported mode can differ from the requested
+    /// [`WindowOptions::window_decorations`]. Other backends can report the
+    /// trait's default [`Decorations::Server`]; this is not a capability probe
+    /// for every native control.
     pub fn window_decorations(&self) -> Decorations {
         self.platform_window.window_decorations()
     }
 
-    /// Returns whether this window is resizable.
+    /// Returns the `is_resizable` option supplied when this window was created.
+    ///
+    /// This is the requested policy, not a query of the native window manager.
+    /// The backend or window role can restrict what is actually supported.
     pub fn is_resizable(&self) -> bool {
         self.is_resizable
     }
 
-    /// Returns whether this window is minimizable.
+    /// Returns the `is_minimizable` option supplied when this window was created.
+    ///
+    /// This is the requested policy, not a native capability query. The browser,
+    /// for example, has no minimization operation for its canvas window.
     pub fn is_minimizable(&self) -> bool {
         self.is_minimizable
     }
