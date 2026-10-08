@@ -412,18 +412,32 @@ globalThis.clearTimeout = handle => {
   return originalClearTimeout(handle);
 };
 try {
-  warm = await warmSession("warm-input-deadline");
-  assert(backgroundDeadline);
-  const inputBeforeWarmCompletion = warmRuntime.evaluate("warm-input-deadline", 2, "identity A", false, input);
-  await tick();
-  warm.vm.reply(2); await inputBeforeWarmCompletion;
-  assert.equal(cancelledBackgroundDeadline, false,
-    "A foreground VM reply must retain the independent background compiler's deadline");
-  originalClearTimeout(backgroundDeadline.handle);
-  backgroundDeadline.callback();
-  assert.equal(warm.compiler.terminated, true, "A stuck background compiler must still expire");
-  assert.equal(warm.vm.terminated, false, "Background expiry must retain the live application");
-  warmRuntime.release("warm-input-deadline");
+  for (const action of ["reply", "cancel"]) {
+    backgroundDeadline = undefined;
+    cancelledBackgroundDeadline = false;
+    const id = `warm-input-deadline-${action}`;
+    warm = await warmSession(id);
+    assert(backgroundDeadline);
+    const inputBeforeWarmCompletion = warmRuntime.evaluate(id, 2, "identity A", false, input);
+    await tick();
+    if (action === "cancel") {
+      warmRuntime.cancel(id, 2);
+      assert.match((await inputBeforeWarmCompletion).diagnostics, /Superseded/);
+      assert.equal(cancelledBackgroundDeadline, false,
+        "Cancelling a VM input must retain the independent background compiler's deadline");
+      // The superseded input can drain normally without stopping either Worker.
+      warm.vm.reply(2);
+    } else {
+      warm.vm.reply(2); await inputBeforeWarmCompletion;
+    }
+    assert.equal(cancelledBackgroundDeadline, false,
+      "A foreground VM reply must retain the independent background compiler's deadline");
+    originalClearTimeout(backgroundDeadline.handle);
+    backgroundDeadline.callback();
+    assert.equal(warm.compiler.terminated, true, "A stuck background compiler must still expire");
+    assert.equal(warm.vm.terminated, false, "Background expiry must retain the live application");
+    warmRuntime.release(id);
+  }
 } finally {
   globalThis.setTimeout = originalSetTimeout;
   globalThis.clearTimeout = originalClearTimeout;

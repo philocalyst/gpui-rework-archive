@@ -1819,3 +1819,35 @@ passes in `target/documentation-units-default-api.log`; generated examples and
 backlinks are current, and the diff passes whitespace checks. The complete
 combined-artifact check follows this source revision. This batch changes documentation only;
 the broader review remains open, and the primary editor worked alone.
+
+## Independent compiler deadlines and stopped-worker recovery (2026-10-08)
+
+The primary editor reviewed export `19162ba3a1230c1949251a1164d18e72eba018da`
+against this checkout and its production parent `2ac6e12ac4c20a97dfed85c65b9a7709522a7f28`.
+Only the controller, browser client, and browser scheduling regression were
+imported. The editable-text history notification change was omitted because
+this checkout already emits the required source-change events for Undo/Redo.
+No testing-branch merge, interpreter binary, SDK, or asset manifest was imported.
+
+The browser regression was first run against this checkout's original client,
+which is identical to the export's production-parent client. It failed because
+cancelling a VM input removed the independent warming compiler's deadline.
+With the reviewed four-line client change, the complete same scheduling suite
+passed, including background expiry retaining the live application. Logs are
+`target/documentation-runtime-cancel-before.log` and
+`target/documentation-runtime-cancel-after.log`. These are mocked scheduling
+tests, not browser timing measurements.
+
+The native controller now releases replies when its worker stops, installs a
+replacement for a current-generation failure, and reports the failure rather
+than leaving the session pending. Its paused label distinguishes an edited
+source from the retained scene, and an obsolete overflow notice is cleared.
+All nine native CodePen library tests pass, including the new bounded worker-
+panic regression, in `target/documentation-runtime-scheduling-tests.log`.
+
+The target browser bundle received only the matching client file. Its existing
+runtime manifest remains `fe33dbceb23f9b069901bb0bb31e724d2712a3deea69d254118cde058f14e896`.
+The served site still carries the preceding client until the next complete
+artifact build is checked and promoted. Incoming provenance is preserved in
+`target/documentation-proof/incoming-browser-scheduling-export-provenance.json`;
+its author's broader test results are separate from the checks above.

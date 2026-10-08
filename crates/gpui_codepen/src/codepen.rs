@@ -16,6 +16,9 @@ actions!(codepen, [Run]);
 /// An accepted source edit. Selection and caret changes do not emit this event.
 pub struct CodeChanged(pub String);
 
+const INPUT_OVERFLOW_NOTICE: &str =
+    "The preview is busy. That input was dropped; try again when it catches up.";
+
 /// A snapshot for an editor's status bar and diagnostics panel.
 ///
 /// Observe the [`Codepen`] entity with [`Context::observe`] and read
@@ -287,10 +290,7 @@ impl Codepen {
                         } else if this.events.len() < 128 {
                             this.events.push_back(event);
                         } else {
-                            this.input_notice = Some(
-                                "Waiting for previous clicks to finish. Try again in a moment."
-                                    .into(),
-                            );
+                            this.input_notice = Some(INPUT_OVERFLOW_NOTICE.into());
                             cx.notify();
                         }
                     } else {
@@ -363,6 +363,9 @@ impl Codepen {
         self.session.generation = self.session.generation.wrapping_add(1);
         self.session.running = false;
         self.events.clear();
+        if self.input_notice.as_deref() == Some(INPUT_OVERFLOW_NOTICE) {
+            self.input_notice = None;
+        }
         self.pending = Task::ready(());
         self.animation = Task::ready(());
         #[cfg(not(target_family = "wasm"))]
@@ -575,9 +578,24 @@ impl Codepen {
                 let Ok(worker) = this.update(cx, |this, _| this.worker.clone()) else {
                     return;
                 };
+                let generation = request.generation;
                 match worker.submit(request).await {
                     Ok(reply) => reply,
-                    Err(_) => return,
+                    Err(_) => {
+                        let _ = this.update(cx, |this, cx| {
+                            if this.session.generation == generation {
+                                this.worker.close();
+                                this.worker = Worker::new(cx.text_system().platform_backend());
+                            }
+                        });
+                        Reply {
+                            generation,
+                            frame: None,
+                            diagnostics: "Rust interpreter worker stopped. Run again to retry.".into(),
+                            failure: Some(FailureKind::Unavailable),
+                            elapsed_ms: 0,
+                        }
+                    }
                 }
             };
             #[cfg(target_family = "wasm")]
@@ -603,6 +621,11 @@ impl Codepen {
                             view.frame = frame;
                             cx.notify();
                         });
+                    }
+                    if (this.events.is_empty() || !this.session.diagnostics.is_empty())
+                        && this.input_notice.as_deref() == Some(INPUT_OVERFLOW_NOTICE)
+                    {
+                        this.input_notice = None;
                     }
                     if this.session.diagnostics.is_empty() {
                         if let Some(event) = this.events.pop_front() {
@@ -666,7 +689,11 @@ impl Render for Codepen {
                 "Needs a fix"
             }
         } else if self.session.frame.is_some() {
-            "Live"
+            if self.displayed_source.as_deref() == Some(self.source.as_str()) {
+                "Live"
+            } else {
+                "Paused · run to update preview"
+            }
         } else {
             "Ready"
         };
@@ -765,6 +792,23 @@ struct Mailbox {
     ready: std::sync::Condvar,
 }
 #[cfg(not(target_family = "wasm"))]
+impl Mailbox {
+    fn close(&self) {
+        let mut state = self.state.lock().unwrap_or_else(|error| error.into_inner());
+        state.closed = true;
+        state.pending = None;
+        self.ready.notify_one();
+    }
+}
+#[cfg(not(target_family = "wasm"))]
+struct WorkerExit(std::sync::Arc<Mailbox>);
+#[cfg(not(target_family = "wasm"))]
+impl Drop for WorkerExit {
+    fn drop(&mut self) {
+        self.0.close();
+    }
+}
+#[cfg(not(target_family = "wasm"))]
 #[derive(Default)]
 struct MailboxState {
     pending: Option<(Request, futures::channel::oneshot::Sender<Reply>)>,
@@ -782,6 +826,7 @@ impl Worker {
         let latest = Arc::new(AtomicU64::new(0));
         let generation = latest.clone();
         let thread = std::thread::spawn(move || {
+            let _exit = WorkerExit(incoming.clone());
             let factory = Arc::new(move || Ok(text_system.clone()));
             let mut runtime = crate::runtime::Runtime::with_text_system_factory(factory);
             loop {
@@ -819,7 +864,7 @@ impl Worker {
     }
     fn submit(&self, request: Request) -> futures::channel::oneshot::Receiver<Reply> {
         let (sender, receiver) = futures::channel::oneshot::channel();
-        let mut state = self.mailbox.state.lock().unwrap();
+        let mut state = self.mailbox.state.lock().unwrap_or_else(|error| error.into_inner());
         if !state.closed {
             // Replace a queued stale edit rather than retain arbitrary copies.
             state.pending = Some((request, sender));
@@ -830,11 +875,7 @@ impl Worker {
     fn close(&self) {
         self.latest
             .store(u64::MAX, std::sync::atomic::Ordering::Relaxed);
-        let mut state = self.mailbox.state.lock().unwrap();
-        state.closed = true;
-        state.pending = None;
-        self.mailbox.ready.notify_one();
-        drop(state);
+        self.mailbox.close();
         if let Some(thread) = self.thread.lock().unwrap().take() {
             // Closing a component must not wait for compiler teardown on UI.
             std::thread::spawn(move || {
@@ -936,6 +977,35 @@ async fn browser_evaluate(request: Request) -> Reply {
 #[cfg(all(test, not(target_family = "wasm")))]
 mod tests {
     use super::*;
+    #[test]
+    fn worker_panic_releases_active_and_queued_replies() {
+        let worker = Worker {
+            mailbox: Default::default(),
+            latest: Default::default(),
+            thread: Default::default(),
+        };
+        let mut session = Session::default();
+        let mut first = worker.submit(session.request("active".into(), Backend::Miri, None));
+        let incoming = worker.mailbox.clone();
+        let (started, ready) = std::sync::mpsc::channel();
+        let (release, wait) = std::sync::mpsc::channel();
+        let thread = std::thread::spawn(move || {
+            let _exit = WorkerExit(incoming.clone());
+            let _active = incoming.state.lock().unwrap().pending.take().unwrap();
+            started.send(()).unwrap();
+            wait.recv().unwrap();
+            panic!("simulated interpreter failure");
+        });
+        ready.recv_timeout(Duration::from_secs(5)).unwrap();
+        let mut queued = worker.submit(session.request("newest".into(), Backend::Miri, None));
+        release.send(()).unwrap();
+        assert!(thread.join().is_err());
+        assert!(first.try_recv().is_err(), "Active work must release its reply");
+        assert!(queued.try_recv().is_err(), "Queued work must not wait on a dead worker");
+        let mut next = worker.submit(session.request("retry".into(), Backend::Miri, None));
+        assert!(next.try_recv().is_err(), "A closed mailbox must reject new work");
+        worker.close();
+    }
     #[test]
     fn newer_queued_edit_releases_older_source_and_reply() {
         let worker = Worker {
