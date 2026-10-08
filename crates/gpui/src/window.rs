@@ -7626,7 +7626,7 @@ impl Window {
     pub fn bindings_for_action(&self, action: &dyn Action) -> Vec<KeyBinding> {
         self.rendered_frame
             .dispatch_tree
-            .bindings_for_action(action, &self.rendered_frame.dispatch_tree.context_stack)
+            .bindings_for_action(action, &self.context_stack())
     }
 
     /// Returns the highest precedence key binding that invokes an action on the currently focused
@@ -7634,10 +7634,7 @@ impl Window {
     pub fn highest_precedence_binding_for_action(&self, action: &dyn Action) -> Option<KeyBinding> {
         self.rendered_frame
             .dispatch_tree
-            .highest_precedence_binding_for_action(
-                action,
-                &self.rendered_frame.dispatch_tree.context_stack,
-            )
+            .highest_precedence_binding_for_action(action, &self.context_stack())
     }
 
     /// Returns unshadowed bindings for this action using exactly one supplied context.
@@ -10182,6 +10179,90 @@ mod tests {
     struct FocusForwarder {
         a: FocusHandle,
         b: FocusHandle,
+    }
+
+    crate::actions!(shortcut_lookup_test, [LookupShortcut]);
+
+    struct ShortcutTargets {
+        a: FocusHandle,
+        b: FocusHandle,
+    }
+
+    impl Render for ShortcutTargets {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            div()
+                .key_context("ShortcutRoot")
+                .child(div().key_context("ShortcutA").track_focus(&self.a))
+                .child(div().key_context("ShortcutB").track_focus(&self.b))
+        }
+    }
+
+    #[gpui::test]
+    fn shortcut_lookup_follows_focus_between_rendered_nodes(cx: &mut TestAppContext) {
+        cx.update(|cx| {
+            cx.bind_keys([
+                KeyBinding::new("ctrl-r", LookupShortcut, Some("ShortcutRoot")),
+                KeyBinding::new("ctrl-a", LookupShortcut, Some("ShortcutRoot > ShortcutA")),
+                KeyBinding::new("ctrl-b", LookupShortcut, Some("ShortcutRoot > ShortcutB")),
+            ])
+        });
+        let handle = cx.add_window(|window, cx| {
+            let a = cx.focus_handle();
+            let b = cx.focus_handle();
+            window.focus(&a, cx);
+            ShortcutTargets { a, b }
+        });
+        handle
+            .update(cx, |this, window, cx| {
+                let keys = |window: &Window| {
+                    window
+                        .bindings_for_action(&LookupShortcut)
+                        .into_iter()
+                        .map(|binding| binding.keystrokes[0].key().to_owned())
+                        .collect::<Vec<_>>()
+                };
+                assert_eq!(keys(window), ["r", "a"]);
+                assert_eq!(
+                    window
+                        .highest_precedence_binding_for_action(&LookupShortcut)
+                        .unwrap()
+                        .keystrokes[0]
+                        .key(),
+                    "a"
+                );
+
+                // Both nodes already exist. A focus change must affect lookup
+                // immediately, without waiting for another draw.
+                window.focus(&this.b, cx);
+                assert_eq!(keys(window), ["r", "b"]);
+                assert_eq!(
+                    window
+                        .highest_precedence_binding_for_action(&LookupShortcut)
+                        .unwrap()
+                        .keystrokes[0]
+                        .key(),
+                    "b"
+                );
+                assert_eq!(
+                    window
+                        .bindings_for_action_in(&LookupShortcut, &this.a)
+                        .last()
+                        .unwrap()
+                        .keystrokes[0]
+                        .key(),
+                    "a"
+                );
+
+                window.blur(cx);
+                // The fallback node is above this view's context-bearing div.
+                assert!(keys(window).is_empty());
+                assert!(
+                    window
+                        .highest_precedence_binding_for_action(&LookupShortcut)
+                        .is_none()
+                );
+            })
+            .unwrap();
     }
 
     impl Render for FocusForwarder {
