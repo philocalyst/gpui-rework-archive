@@ -354,7 +354,8 @@ impl<'a> A11ySubtreeBuilder<'a> {
         self
     }
 
-    /// Derive a [`NodeId`](crate::accesskit::NodeId) for a synthetic child.
+    /// Derive a [`NodeId`](https://docs.rs/accesskit/0.24.1/accesskit/struct.NodeId.html)
+    /// for a synthetic child.
     ///
     /// The generated ID is based on the hash of `key`, as well as the parent's
     /// ID. Keep the key stable for the same logical child across frames, and

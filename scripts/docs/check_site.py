@@ -92,6 +92,18 @@ def audit(public: Path, rustdoc: Path | None = None, base_url='https://gpui-ce.g
         target, fragment = resolve(path, href)
         if target is None:
             return
+        visited = set()
+        while target.is_file() and target.suffix == '.html' and document(target).redirect:
+            if target in visited:
+                errors.append(f'{path}: redirect cycle {href}')
+                return
+            visited.add(target)
+            redirect = document(target).redirect
+            redirected, redirect_fragment = resolve(target, redirect)
+            if redirected is None:
+                return
+            target = redirected
+            fragment = redirect_fragment or fragment
         if not target.is_file():
             errors.append(f'{path}: missing {href}')
         elif fragment and target.suffix == '.html':
@@ -115,6 +127,19 @@ def audit(public: Path, rustdoc: Path | None = None, base_url='https://gpui-ce.g
                 errors.append(f'{path}: expected one h1')
         for href in doc.links:
             check_link(path, href)
+
+    # Dependency rustdoc can render a valid Rust path as a literal URI when its
+    # crate has no documentation URL. Check our cross-crate links as rendered,
+    # including redirects from private module paths to public re-exports.
+    for package in ('gpui', 'gpui_ce_elements'):
+        for path in (public / 'api' / package).rglob('*.html'):
+            for href in document(path).links:
+                url = urlparse(href)
+                if url.scheme in {'gpui', 'gpui_ce_elements'}:
+                    errors.append(f'{path}: unresolved Rust documentation link {href}')
+                elif (url.netloc == base.netloc or
+                      (url.hostname == 'docs.rs' and url.path.startswith('/gpui-ce/'))):
+                    check_link(path, href)
 
     index = public / 'api-examples.json'
     if not index.is_file():

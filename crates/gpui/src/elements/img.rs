@@ -936,7 +936,8 @@ pub enum ImageCacheError {
     /// A raster-format or frame-decoding error from the `image` crate.
     #[error("image error: {0}")]
     Image(Arc<ImageError>),
-    /// An SVG parsing error converted directly from [`usvg::Error`]. A loader
+    /// An SVG parsing error converted directly from
+    /// [`usvg::Error`](https://docs.rs/usvg/0.48.1/usvg/enum.Error.html). A loader
     /// that wraps the error in `anyhow::Error` instead returns [`Self::Other`].
     #[error("svg error: {0}")]
     Usvg(Arc<usvg::Error>),

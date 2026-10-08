@@ -596,8 +596,10 @@ impl WindowTextSystem {
     /// complete string and end on UTF-8 character boundaries.
     ///
     /// If `wrap_width` is provided, the backend may insert soft breaks to fit that width. Hard
-    /// breaks in the source remain part of the same document layout. `line_clamp` limits visual
-    /// rows after line breaking; `None` leaves the backend's complete result available.
+    /// breaks in the source remain part of the same document layout. `line_clamp` limits
+    /// soft wrapping; `None` leaves wrapping unrestricted. This is a line-breaking request,
+    /// not source truncation or clipping. In the Parley backend, hard breaks remain and the
+    /// final permitted soft row can overflow horizontally. See [`TextLayoutOptions::line_clamp`].
     ///
     /// The backend receives the complete string. Hard breaks, trailing empty lines, bidi
     /// paragraphs, wrapping, and `line_clamp` therefore share one layout model.
@@ -624,9 +626,9 @@ impl WindowTextSystem {
     /// Shape a complete document with explicit direction, bidi, wrapping, and alignment options.
     ///
     /// Run lengths must cover the complete UTF-8 source, with every boundary on a character
-    /// boundary. Use [`wrap_width`](crate::TextLayoutOptions::wrap_width) to control line breaking and
-    /// [`alignment_width`](crate::TextLayoutOptions::alignment_width) to align the resulting rows within a separate box
-    /// width.
+    /// boundary. Use [`TextLayoutOptions::wrap_width`] to control line breaking and
+    /// [`TextLayoutOptions::alignment_width`] to supply a box for unwrapped alignment.
+    /// Backend-specific interactions between those options are documented on the fields.
     pub fn shape_text_with_options<S: AsRef<str> + Into<SharedString>>(
         &self,
         text: S,
@@ -798,7 +800,6 @@ pub struct TextRun {
 }
 
 /// The paragraph base-direction policy supplied to a text backend.
-#[doc(hidden)]
 #[derive(
     Clone, Copy, Debug, Default, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize,
 )]
@@ -834,17 +835,54 @@ pub struct InlineBidiScope {
 }
 
 /// Direction, wrapping, and alignment options for a complete text document.
-#[doc(hidden)]
+///
+/// Pass this to [`WindowTextSystem::shape_text_with_options`] when the defaults of
+/// [`WindowTextSystem::shape_text`] are insufficient. Wrapping decides where a visual row
+/// breaks; alignment decides where that row sits in its box. For unwrapped text, supply
+/// an alignment width when the box is wider than the text's advance.
+///
+/// The default leaves wrapping, clamping, and alignment width unset, detects paragraph
+/// direction from the source, and aligns at the direction's start edge. These options
+/// affect geometry, not the source string or its UTF-8 byte indices.
+///
+/// ```
+/// use gpui::{ParagraphDirection, TextAlign, TextLayoutOptions, Window, px};
+///
+/// fn caption(window: &Window) -> gpui::Result<gpui::ShapedText> {
+///     let source = "Saved";
+///     let run = window.text_style().to_run(source.len());
+///     window.text_system().shape_text_with_options(
+///         source,
+///         px(16.),
+///         &[run],
+///         TextLayoutOptions {
+///             alignment_width: Some(px(240.)),
+///             text_align: TextAlign::Center,
+///             direction: ParagraphDirection::LeftToRight,
+///             ..Default::default()
+///         },
+///     )
+/// }
+/// ```
 #[derive(
     Clone, Copy, Debug, Default, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize,
 )]
 pub struct TextLayoutOptions {
     /// Optional maximum width, in logical pixels, that triggers soft wrapping.
     pub wrap_width: Option<Pixels>,
-    /// Optional maximum number of visual rows.
+    /// Optional soft-wrapping budget, not a source-truncation or clipping operation.
+    ///
+    /// Parley wraps the preceding rows, then lays out the remainder without further soft
+    /// breaks. Hard breaks remain, so the result can have more rows than this value.
+    /// `Some(0)` and `Some(1)` both leave the first hard paragraph unwrapped. To hide
+    /// overflow or add an ellipsis, use element clipping and
+    /// [`TextStyle::text_overflow`](crate::TextStyle::text_overflow).
     pub line_clamp: Option<usize>,
-    /// Width, in logical pixels, used for horizontal alignment independently of wrapping. Set
-    /// this when a line should align within a wider box than the width at which it wrapped.
+    /// Box width, in logical pixels, used to align unwrapped rows.
+    ///
+    /// In Parley this width is used when both `wrap_width` and `line_clamp` are `None`.
+    /// Wrapped text aligns within the wrapping width instead; a separate alignment width
+    /// does not widen that box. This sets geometry, not an element's layout width.
     pub alignment_width: Option<Pixels>,
     /// Horizontal alignment, including direction-aware `Start` and `End` values.
     pub text_align: TextAlign,

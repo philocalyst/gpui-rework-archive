@@ -259,7 +259,8 @@ impl SvgRenderer {
     ///
     /// # Errors
     ///
-    /// Returns [`usvg::Error`] for invalid UTF-8 or XML, invalid document size,
+    /// Returns [`usvg::Error`](https://docs.rs/usvg/0.48.1/usvg/enum.Error.html)
+    /// for invalid UTF-8 or XML, invalid document size,
     /// an exceeded element limit, or compressed input that cannot be decoded.
     /// Inspect the resulting image when resource completeness matters.
     ///
@@ -294,7 +295,8 @@ impl SvgRenderer {
     /// `SvgSize::ScaleFactor` applies [`SMOOTH_SVG_SCALE_FACTOR`] internally and records the
     /// correction on the image so logical display size remains unchanged. Any requested output
     /// dimension above 8192 device pixels is scaled down to fit the cap; a size that cannot form
-    /// a nonzero pixmap returns [`usvg::Error::InvalidSize`].
+    /// a nonzero pixmap returns
+    /// [`usvg::Error::InvalidSize`](https://docs.rs/usvg/0.48.1/usvg/enum.Error.html#variant.InvalidSize).
     /// The returned image retains full color. To display it, wrap the result
     /// in [`img`](crate::img); to control its layout, assign the element a size.
     #[tracing::instrument(skip_all)]

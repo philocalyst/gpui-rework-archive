@@ -1,6 +1,6 @@
 //! Cheaply cloned, immutable strings for GPUI's public APIs.
 //!
-//! [`SharedString`] accepts the common string forms through `From` and keeps an
+//! [`SharedString`] accepts the common string forms through `From` and keeps a
 //! value independent of the source borrow, suitable for elements and
 //! asynchronous work. Use [`SharedString::new_static`] for a literal and
 //! [`SharedString::new`] for text borrowed from a local value. Use
@@ -20,7 +20,7 @@ use smol_str::SmolStr;
 ///
 /// Short strings fit inline, longer strings share reference-counted storage,
 /// and [`new_static`](Self::new_static) retains a static string directly. The
-/// representation is backed by [`SmolStr`](smol_str::SmolStr); callers should not depend on its
+/// representation is backed by [`SmolStr`](https://docs.rs/smol_str/0.3.6/smol_str/struct.SmolStr.html); callers should not depend on its
 /// inline capacity. Equality, ordering, and hashing compare string contents.
 ///
 /// Converting a borrowed `&str` copies its contents into this representation;

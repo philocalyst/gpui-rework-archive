@@ -86,7 +86,7 @@ def main() -> int:
     digest = source_digest()
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     dirty = bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT, text=True).strip())
-    docs_prefix = f'https://docs.rs/gpui-ce/{config["extra"]["version"]}/gpui/'
+    docs_prefix = f'https://docs.rs/gpui-ce/{config["extra"]["version"]}/'
     for path in public.rglob("*"):
         if not path.is_file() or path.suffix not in {".html", ".json", ".js"}:
             continue
@@ -97,7 +97,7 @@ def main() -> int:
         text = text.replace("__GPUI_SOURCE_DIGEST__", digest[:12])
         text = text.replace("https://gpui-ce.github.io/", base + "/")
         if args.with_api:
-            text = text.replace(docs_prefix, base + "/api/gpui/")
+            text = text.replace(docs_prefix, base + "/api/")
             if path.suffix == ".html" and not path.is_relative_to(public / "api"):
                 text = text.replace(f'API {config["extra"]["version"]} ↗', "Checkout API ↗")
         if text != original:

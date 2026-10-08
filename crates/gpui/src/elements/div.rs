@@ -1901,7 +1901,8 @@ pub trait StatefulInteractiveElement: InteractiveElement {
     }
 
     /// Set how urgently assistive technology should announce updates to this
-    /// element, as an ARIA live region. See [`accesskit::Live`].
+    /// element, as an ARIA live region. See
+    /// [`accesskit::Live`](https://docs.rs/accesskit/0.24.1/accesskit/enum.Live.html).
     fn aria_live(mut self, live: accesskit::Live) -> Self {
         self.interactivity().aria.live = Some(live);
         self

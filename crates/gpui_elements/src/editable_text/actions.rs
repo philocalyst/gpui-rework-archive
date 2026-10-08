@@ -61,13 +61,13 @@ gpui::actions!(
         NavLineStart,
         /// Collapse the selection at the current hard line's logical end.
         NavLineEnd,
-        /// Move cursor to the beginning of the content.
+        /// Collapse the selection at byte zero.
         NavDocumentStart,
-        /// Move cursor to the end of the content.
+        /// Collapse the selection at the end of the UTF-8 source.
         NavDocumentEnd,
-        /// Move cursor one word to the left.
+        /// Move to the word boundary visually left of the caret.
         NavWordLeft,
-        /// Move cursor one word to the right.
+        /// Move to the word boundary visually right of the caret.
         NavWordRight,
         /// Select all text content.
         SelectAll,
@@ -79,13 +79,13 @@ gpui::actions!(
         SelectUp,
         /// Extend the selection down one visual row, or to the document end in a single-line field.
         SelectDown,
-        /// Extend selection to the beginning of the content.
+        /// Keep the selection anchor and move the caret to byte zero.
         SelectDocumentStart,
-        /// Extend selection to the end of the content.
+        /// Keep the selection anchor and move the caret to the end of the UTF-8 source.
         SelectDocumentEnd,
-        /// Extend selection one word to the left.
+        /// Extend the selection to the word boundary visually left of the caret.
         SelectWordLeft,
-        /// Extend selection one word to the right.
+        /// Extend the selection to the word boundary visually right of the caret.
         SelectWordRight,
         /// Cut the selection to the clipboard, or the current hard line when no text is selected.
         Cut,
@@ -219,7 +219,7 @@ pub fn default_bindings() -> gpui::ActionBindingCollection {
             .with::<DeleteWordRight>("alt-delete")
             .with::<DeleteToLineStart>("cmd-backspace")
             .with::<DeleteToLineEnd>("ctrl-k")
-            // Mac keyboards don't have Home/End keys, so cmd-left/right are standard
+            // Supply line-boundary shortcuts for compact Apple keyboards.
             .with::<NavLineStart>("cmd-left")
             .with::<NavLineEnd>("cmd-right")
             .with::<NavDocumentStart>("cmd-up")
@@ -264,77 +264,79 @@ pub fn default_bindings() -> gpui::ActionBindingCollection {
 /// [`show_character_palette`](Self::show_character_palette), which calls the window's platform
 /// service. The action types can also route menu commands through GPUI's focused dispatch path.
 pub trait EditableTextActionHandler<Context>: Sized {
-    /// Blur focus from the input.
+    /// Handle [`Escape`]: reset selection to byte zero and blur the window's focus.
     fn escape(&mut self, _: &Escape, _w: &mut Window, _cx: &mut Context) {}
 
-    /// Insert a newline at the cursor position.
+    /// Handle [`Enter`]: replace the selection with a newline when multiline input is enabled.
     fn insert_enter(&mut self, _: &Enter, _w: &mut Window, _cx: &mut Context) {}
-    /// Insert a tab character at the cursor position.
+    /// Handle [`Tab`]: replace the selection with a tab when input is enabled.
+    ///
+    /// This command inserts text even in a single-line field; it does not move focus.
     fn insert_tab(&mut self, _: &Tab, _w: &mut Window, _cx: &mut Context) {}
 
-    /// Delete the character before the cursor.
+    /// Handle [`DeleteLeft`]: delete the selection, or the preceding source-order grapheme.
     fn delete_left(&mut self, _: &DeleteLeft, _w: &mut Window, _cx: &mut Context) {}
-    /// Delete the character after the cursor.
+    /// Handle [`DeleteRight`]: delete the selection, or the following source-order grapheme.
     fn delete_right(&mut self, _: &DeleteRight, _w: &mut Window, _cx: &mut Context) {}
-    /// Delete the word before the cursor.
+    /// Handle [`DeleteWordLeft`]: delete the selection, or the range to the visual left word boundary.
     fn delete_word_left(&mut self, _: &DeleteWordLeft, _w: &mut Window, _cx: &mut Context) {}
-    /// Delete the word after the cursor.
+    /// Handle [`DeleteWordRight`]: delete the selection, or the range to the visual right word boundary.
     fn delete_word_right(&mut self, _: &DeleteWordRight, _w: &mut Window, _cx: &mut Context) {}
-    /// Delete from the cursor to the beginning of the line.
+    /// Handle [`DeleteToLineStart`]: delete the selection, or the range to the hard line's start.
     fn delete_to_line_start(&mut self, _: &DeleteToLineStart, _w: &mut Window, _cx: &mut Context) {}
-    /// Delete from the cursor to the end of the line.
+    /// Handle [`DeleteToLineEnd`]: delete the selection, or the range to the hard line's end.
     fn delete_to_line_end(&mut self, _: &DeleteToLineEnd, _w: &mut Window, _cx: &mut Context) {}
 
-    /// Move the cursor one character to the left.
+    /// Handle [`NavLeft`]: collapse a selection toward the left, or move left by one grapheme.
     fn nav_left(&mut self, _: &NavLeft, _w: &mut Window, _cx: &mut Context) {}
-    /// Move the cursor one character to the right.
+    /// Handle [`NavRight`]: collapse a selection toward the right, or move right by one grapheme.
     fn nav_right(&mut self, _: &NavRight, _w: &mut Window, _cx: &mut Context) {}
-    /// Move the cursor up one visual line.
+    /// Handle [`NavUp`]: move up a visual row, or to the row's start in a single-line field.
     fn nav_up(&mut self, _: &NavUp, _w: &mut Window, _cx: &mut Context) {}
-    /// Move the cursor down one visual line.
+    /// Handle [`NavDown`]: move down a visual row, or to the row's end in a single-line field.
     fn nav_down(&mut self, _: &NavDown, _w: &mut Window, _cx: &mut Context) {}
-    /// Move cursor to the start of the current line.
+    /// Handle [`NavLineStart`]: collapse the selection at the current hard line's logical start.
     fn nav_line_start(&mut self, _: &NavLineStart, _w: &mut Window, _cx: &mut Context) {}
-    /// Move cursor to the end of the current line.
+    /// Handle [`NavLineEnd`]: collapse the selection at the current hard line's logical end.
     fn nav_line_end(&mut self, _: &NavLineEnd, _w: &mut Window, _cx: &mut Context) {}
-    /// Move cursor to the start of the document.
+    /// Handle [`NavDocumentStart`]: collapse the selection at byte zero.
     fn nav_start(&mut self, _: &NavDocumentStart, _w: &mut Window, _cx: &mut Context) {}
-    /// Move cursor to the end of the document.
+    /// Handle [`NavDocumentEnd`]: collapse the selection at the end of the source.
     fn nav_end(&mut self, _: &NavDocumentEnd, _w: &mut Window, _cx: &mut Context) {}
-    /// Move cursor one word to the left.
+    /// Handle [`NavWordLeft`]: move to the word boundary visually left of the caret.
     fn nav_left_word(&mut self, _: &NavWordLeft, _w: &mut Window, _cx: &mut Context) {}
-    /// Move cursor one word to the right.
+    /// Handle [`NavWordRight`]: move to the word boundary visually right of the caret.
     fn nav_right_word(&mut self, _: &NavWordRight, _w: &mut Window, _cx: &mut Context) {}
 
-    /// Select the entire document.
+    /// Handle [`SelectAll`]: select from byte zero to the end of the source.
     fn select_all(&mut self, _: &SelectAll, _w: &mut Window, _cx: &mut Context) {}
-    /// Extend selection one character to the left.
+    /// Handle [`SelectLeft`]: keep the anchor and move the caret visually left by one grapheme.
     fn select_left(&mut self, _: &SelectLeft, _w: &mut Window, _cx: &mut Context) {}
-    /// Extend selection one character to the right.
+    /// Handle [`SelectRight`]: keep the anchor and move the caret visually right by one grapheme.
     fn select_right(&mut self, _: &SelectRight, _w: &mut Window, _cx: &mut Context) {}
-    /// Extend selection up one visual line.
+    /// Handle [`SelectUp`]: extend up a visual row, or to byte zero in a single-line field.
     fn select_up(&mut self, _: &SelectUp, _w: &mut Window, _cx: &mut Context) {}
-    /// Extend selection down one visual line.
+    /// Handle [`SelectDown`]: extend down a visual row, or to the source's end in a single-line field.
     fn select_down(&mut self, _: &SelectDown, _w: &mut Window, _cx: &mut Context) {}
-    /// Extend selection to the beginning of the document.
+    /// Handle [`SelectDocumentStart`]: keep the anchor and move the caret to byte zero.
     fn select_start(&mut self, _: &SelectDocumentStart, _w: &mut Window, _cx: &mut Context) {}
-    /// Extend selection to the end of the document.
+    /// Handle [`SelectDocumentEnd`]: keep the anchor and move the caret to the end of the source.
     fn select_end(&mut self, _: &SelectDocumentEnd, _w: &mut Window, _cx: &mut Context) {}
-    /// Extend selection one word to the left.
+    /// Handle [`SelectWordLeft`]: extend to the word boundary visually left of the caret.
     fn select_left_word(&mut self, _: &SelectWordLeft, _w: &mut Window, _cx: &mut Context) {}
-    /// Extend selection one word to the right.
+    /// Handle [`SelectWordRight`]: extend to the word boundary visually right of the caret.
     fn select_right_word(&mut self, _: &SelectWordRight, _w: &mut Window, _cx: &mut Context) {}
 
-    /// Cut selected text to clipboard.
+    /// Handle [`Cut`]: copy and remove the selection, or the current hard line if it is empty.
     fn cut(&mut self, _: &Cut, _w: &mut Window, _cx: &mut Context) {}
-    /// Copy selected text to clipboard.
+    /// Handle [`Copy`](struct@Copy): copy the selection, leaving the clipboard alone when the selection is empty.
     fn copy(&mut self, _: &Copy, _w: &mut Window, _cx: &mut Context) {}
-    /// Paste from clipboard at the cursor position.
+    /// Handle [`Paste`]: replace the selection with clipboard text, subject to the field's limits.
     fn paste(&mut self, _: &Paste, _w: &mut Window, _cx: &mut Context) {}
 
-    /// Undo the last edit.
+    /// Handle [`Undo`]: apply the preceding grouped edit's inverse and restore its selection.
     fn undo(&mut self, _: &Undo, _w: &mut Window, _cx: &mut Context) {}
-    /// Redo the last undone edit.
+    /// Handle [`Redo`]: reapply an undone edit and restore the selection from before undo.
     fn redo(&mut self, _: &Redo, _w: &mut Window, _cx: &mut Context) {}
 
     /// Show the platform character palette.

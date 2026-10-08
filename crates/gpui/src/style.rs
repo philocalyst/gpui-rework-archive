@@ -1,12 +1,14 @@
-//! Resolved style and style refinements used by GPUI's layout and paint pipeline.
+//! Box properties and inherited typography for layout and painting.
 //!
-//! [`StyleRefinement`](crate::StyleRefinement) is the builder-facing, partial style: methods from
-//! [`Styled`](crate::Styled) add fields to it and later refinements override earlier fields.
-//! [`Style`] is the resolved value used for a frame. Resolution applies inherited text properties
-//! and interaction-state refinements; it does not make layout or paint properties inherit.
-//! Lengths are expressed in logical [`Pixels`] unless a type explicitly says otherwise; `rem`s
-//! resolve from the window's configured root text size. Layout properties affect Taffy, which
-//! computes bounds before paint properties are applied.
+//! [`Styled`] methods record a partial [`StyleRefinement`]. Elements apply their base and
+//! interaction refinements to a [`Style`] before layout. Its box properties are then concrete;
+//! its [`text`](Style::text) field still contains partial overrides. The rendering scope merges
+//! those overrides with inherited typography, available through [`Window::text_style`].
+//!
+//! Box properties do not inherit. Text properties do. Length types distinguish logical
+//! [`Pixels`], root-font-size units, and fractions of a property's reference dimension.
+//! The [layout chapter](crate::_documentation::layout) explains those units and how preferred
+//! sizes, minimum sizes, and flex shrinking work together.
 //!
 //! For a property-by-property tour, start with the [layout constraints example](https://gpui-ce.github.io/examples/layout/#constraints),
 //! then use the [drawing example](https://gpui-ce.github.io/examples/drawing/#paint) to see how
@@ -26,9 +28,10 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::{iter, mem, ops::Range};
 
-/// Use this struct for interfacing with the 'debug_below' styling from your own elements.
-/// If a parent element has this style set on it, then this struct will be set as a global in
-/// GPUI.
+/// Marker installed while [`Style::paint`] draws a subtree with [`Style::debug_below`].
+///
+/// A custom element can query this global to decide whether to draw its own debug outline.
+/// Available only in debug builds.
 #[cfg(debug_assertions)]
 pub struct DebugBelow;
 
@@ -279,15 +282,34 @@ impl RingStyle {
     }
 }
 
-/// The resolved layout, paint, and text style for one element.
+/// Box style and inherited-text overrides for one element.
 ///
 /// [`Styled`] methods build a partial [`StyleRefinement`]; resolution merges
-/// those fields with defaults, inherited text properties, and interaction
-/// state to produce this value. Layout fields feed Taffy to compute bounds.
+/// those fields with defaults and interaction state to produce this value.
+/// The `text` field remains a refinement, merged with inherited text when the
+/// element establishes its rendering scope. Layout fields feed Taffy to compute bounds.
 /// Backgrounds, borders, filters, opacity, and other paint fields are consumed
 /// after layout. Geometry and paint values belong to this element. Text
 /// properties documented on [`TextStyle`] inherit to descendants, and
 /// [`LayoutDirection`] establishes inline direction for logical descendants.
+///
+/// Prefer [`Styled`] when constructing an element. Use this resolved value when
+/// implementing layout or painting, and [`StyleRefinement`] when supplying an
+/// override that should preserve unspecified properties. The [layout chapter](crate::_documentation::layout)
+/// connects preferred sizes, intrinsic minima, flex shrinking, and overflow.
+///
+/// ```
+/// use gpui::{Refineable, Style, StyleRefinement};
+///
+/// let growing_item = StyleRefinement {
+///     flex_grow: Some(1.),
+///     ..Default::default()
+/// };
+/// let mut style = Style::default();
+/// style.refine(&growing_item);
+/// assert_eq!(style.flex_grow, 1.);
+/// assert_eq!(style.flex_shrink, 1.); // The unset field keeps its default.
+/// ```
 #[derive(Clone, Refineable, Debug)]
 #[refineable(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Style {
@@ -298,10 +320,16 @@ pub struct Style {
     /// Use [`Display::None`] to omit it from layout as well.
     pub visibility: Visibility,
 
-    /// The inline direction of this element and its descendants.
+    /// Inline direction inherited by logical descendants.
+    ///
+    /// The default inherits the parent direction. This affects text and logical inline
+    /// placement; it does not reverse a flex row. Use [`Self::flex_direction`] for that.
     pub direction: LayoutDirection,
 
-    /// How this element participates in Unicode bidirectional text formatting.
+    /// Bidirectional scope requested for inline text.
+    ///
+    /// An explicitly authored direction establishes isolation unless the bidi policy is
+    /// also explicitly authored. Use [`Styled::unicode_bidi`] to select that policy.
     pub unicode_bidi: UnicodeBidi,
 
     /// Whether `unicode_bidi` was authored rather than supplied by its initial value.
@@ -309,42 +337,40 @@ pub struct Style {
     pub unicode_bidi_explicit: bool,
 
     // Overflow properties
-    /// How children overflowing their container should affect layout
+    /// Overflow policy on the horizontal (`x`) and vertical (`y`) axes.
+    ///
+    /// Both default to [`Overflow::Visible`]. The choice affects intrinsic minimum sizes
+    /// as well as clipping; see [`Overflow`]. An identified [`Div`](crate::Div) also
+    /// installs input handling for its `Scroll` axes. A custom element must do that itself.
     #[refineable]
     pub overflow: Point<Overflow>,
-    /// Edge fade distances for overflow masking.
+    /// Fade distances inside clipped edges, in logical pixels or rems.
+    ///
+    /// Zero produces a hard edge. Distances on an axis whose overflow is `Visible` are
+    /// ignored. This changes the content mask; it does not remove or shorten the content.
     #[refineable]
     pub overflow_fade: Edges<AbsoluteLength>,
-    /// How much logical space should be reserved for scrollbars on `Overflow::Scroll` and
-    /// `Overflow::Auto` nodes. A zero width reserves no layout space.
+    /// Space reserved by layout for [`Overflow::Scroll`] scrollbars, in pixels or rems.
+    ///
+    /// The default zero reserves no space. Reserving space does not draw a scrollbar;
+    /// the application supplies its visible control separately.
     pub scrollbar_width: AbsoluteLength,
-    /// Whether both x and y axis should be scrollable at the same time.
+    /// Whether one scroll event may move both scrollable axes.
+    ///
+    /// The default `false` keeps only the larger component of a diagonal delta, choosing
+    /// vertical movement on a tie. Both axes must still use [`Overflow::Scroll`].
     pub allow_concurrent_scroll: bool,
-    /// Whether scrolling should be restricted to the input gesture's axis.
+    /// Keep scroll input on its reported axis instead of remapping it to the only scrollable axis.
     ///
-    /// Pixel-based scroll gestures are locked to their initially dominant axis. The lock may be
-    /// released when the gesture changes direction strongly. Touch phases delimit gestures when
-    /// available, with a timeout fallback for platforms that only emit moved events.
+    /// The default `false` lets a vertical wheel delta scroll a horizontal-only container.
+    /// Set this to `true` for a horizontal strip inside a vertical page when that remapping
+    /// would intercept the page's wheel input. Horizontal scrolling then needs horizontal
+    /// input, such as a touchpad gesture or the platform's Shift-wheel convention.
     ///
-    /// This also prevents input from being remapped to another axis. For example, horizontal input
-    /// will not scroll a container that only has vertical overflow enabled. Mouse wheel platforms
-    /// typically report ordinary wheel input on the Y axis and Shift-modified input on the X axis.
-    ///
-    /// ## Motivation
-    ///
-    /// On the web when scrolling with the mouse wheel, scrolling up and down will always scroll the Y axis, even when
-    /// the mouse is over a horizontally-scrollable element.
-    ///
-    /// The only way to scroll horizontally is to hold down `Shift` while scrolling, which then changes the scroll axis
-    /// to the X axis.
-    ///
-    /// Currently, GPUI operates differently from the web in that it will scroll an element in either the X or Y axis
-    /// when scrolling with just the mouse wheel. This causes problems when scrolling in a vertical list that contains
-    /// horizontally-scrollable elements, as when you get to the horizontally-scrollable elements the scroll will be
-    /// hijacked.
-    ///
-    /// Ideally we would match the web's behavior and not have a need for this, but right now we're adding this opt-in
-    /// style property to limit the potential blast radius.
+    /// Precise pixel gestures also lock to their initially dominant axis. A strong direction
+    /// change can release the lock. Touch phases delimit the gesture when available; a timeout
+    /// handles platforms that supply only move events. This is separate from allowing both
+    /// components of one event through [`Self::allow_concurrent_scroll`].
     pub restrict_scroll_to_axis: bool,
 
     // Position properties
@@ -360,13 +386,21 @@ pub struct Style {
     /// a lower bound or its preferred size.
     #[refineable]
     pub size: Size<Length>,
-    /// Controls the minimum size of the item
+    /// Lower size bounds, evaluated in the parent's available space.
+    ///
+    /// `Auto` uses the layout algorithm's intrinsic minimum, which also depends on overflow.
+    /// Set an axis to zero when a flex or grid item must shrink below its content's minimum.
     #[refineable]
     pub min_size: Size<Length>,
-    /// Controls the maximum size of the item
+    /// Upper size bounds. `Auto` leaves an axis without an explicit maximum.
+    ///
+    /// A maximum limits the box; use [`Self::overflow`] to control content that no longer fits.
     #[refineable]
     pub max_size: Size<Length>,
-    /// Sets the preferred aspect ratio for the item. The ratio is calculated as width divided by height.
+    /// Preferred width divided by height, used when layout determines an automatic dimension.
+    ///
+    /// `None` imposes no ratio. This sizes the box; [`ObjectFit`] controls how an image fits
+    /// inside an already sized box.
     pub aspect_ratio: Option<f32>,
 
     // Spacing Properties
@@ -384,7 +418,10 @@ pub struct Style {
     // Alignment properties
     /// Alignment of children on the flex cross axis or grid block axis.
     pub align_items: Option<AlignItems>,
-    /// How this node should be aligned in the cross/block axis. Falls back to the parents [`AlignItems`] if not set
+    /// This item's cross-axis alignment in flex layout, or block-axis alignment in grid layout.
+    ///
+    /// `None` uses the parent's [`Self::align_items`]. This belongs to the child; setting
+    /// `align_items` on the child instead controls that child's own children.
     pub align_self: Option<AlignSelf>,
     /// How this element aligns vertically when it participates in an inline formatting context.
     pub vertical_align: VerticalAlign,
@@ -393,16 +430,27 @@ pub struct Style {
     pub align_content: Option<AlignContent>,
     /// Distribution of flex items or grid tracks along the main/inline axis.
     pub justify_content: Option<JustifyContent>,
-    /// Horizontal and vertical gaps between flex items or grid tracks.
+    /// Horizontal (`width`) and vertical (`height`) gaps between flex items or grid tracks.
+    ///
+    /// Gaps separate adjacent items; they do not add space at the container's outer edges.
+    /// Use [`Self::padding`] for space inside those edges.
     #[refineable]
     pub gap: Size<DefiniteLength>,
 
     // Flexbox properties
-    /// Which direction does the main axis flow in?
+    /// Main-axis direction when this element is a flex container; the default is [`FlexDirection::Row`].
+    ///
+    /// This arranges children. It does not choose the direction of text within each child.
     pub flex_direction: FlexDirection,
-    /// Should elements wrap, or stay in a single line?
+    /// Whether this flex container creates additional flex lines when items do not fit.
+    ///
+    /// The default is [`FlexWrap::NoWrap`]. This wraps boxes, not words in a paragraph;
+    /// text wrapping belongs to [`TextStyle::white_space`].
     pub flex_wrap: FlexWrap,
-    /// Sets the initial main axis size of the item
+    /// Initial main-axis size of this item within its parent's flex layout.
+    ///
+    /// The default `Auto` consults its preferred size or contents. Grow and shrink then
+    /// distribute the difference between that basis and the space available.
     pub flex_basis: Length,
     /// The relative rate at which this item grows to fill free space. The
     /// default is `0.0`; use a non-negative factor.
@@ -415,10 +463,12 @@ pub struct Style {
     /// [`TextStyle::background_color`].
     pub background: Option<Fill>,
 
-    /// The background painted into the border of this element
+    /// Color or gradient painted in the border's thickness.
+    ///
+    /// `None` leaves the border unpainted. [`Self::border_widths`] still consumes layout space.
     pub border_color: Option<Background>,
 
-    /// The border style of this element
+    /// Border stroke pattern. Widths and color are configured separately.
     pub border_style: BorderStyle,
 
     /// The length of each border dash, as a multiple of the border width.
@@ -427,7 +477,10 @@ pub struct Style {
     /// The gap between border dashes, as a multiple of the border width.
     pub border_dashed_gap: f32,
 
-    /// The radius of the corners of this element
+    /// Radii for the box's painted corners, in pixels or rems.
+    ///
+    /// Paint clamps the resolved radii to fit the box. Rounded backgrounds and borders
+    /// do not, by themselves, supply rounded clipping for descendant contents.
     #[refineable]
     pub corner_radii: Corners<AbsoluteLength>,
 
@@ -435,7 +488,10 @@ pub struct Style {
     /// `0.0` produces circular corners. `1.0` applies maximum smoothing.
     pub corner_smoothing: Option<f32>,
 
-    /// Box shadow of the element
+    /// Shadows around or inside this box, distinguished by [`BoxShadow::inset`].
+    ///
+    /// Outer shadows precede the background; inset shadows follow it. Shadows affect paint,
+    /// not layout size, and can be clipped by an ancestor's content mask.
     pub box_shadow: Vec<BoxShadow>,
 
     /// A solid ring painted outside the element.
@@ -452,32 +508,46 @@ pub struct Style {
     /// Filters applied to the content rendered behind this element (CSS `backdrop-filter`).
     pub backdrop_filter: Vec<Filter>,
 
-    /// The text style of this element
+    /// Authored text overrides merged with inherited text properties.
+    ///
+    /// Unset fields preserve inheritance. Use [`Window::text_style`] for the resolved
+    /// style in the current rendering scope; this refinement is only the authored portion.
     #[refineable]
     pub text: TextStyleRefinement,
 
     /// The mouse cursor style shown when the mouse pointer is over an element.
     pub mouse_cursor: Option<CursorStyle>,
 
-    /// Opacity applied to this element and its subtree during element painting.
+    /// Opacity multiplier applied to this element's painting and its descendants.
+    ///
+    /// `None` adds no multiplier. Nested values multiply: two `0.5` values produce `0.25`.
+    /// Opacity is applied to individual drawing primitives, so overlapping children are
+    /// not composited as one isolated group before fading.
     pub opacity: Option<f32>,
 
-    /// The grid columns of this element
-    /// Roughly equivalent to the Tailwind `grid-cols-<number>`
+    /// Repeated column tracks when this element uses [`Display::Grid`].
+    ///
+    /// [`GridTemplate`] chooses both the count and track sizing. This configures the
+    /// container; [`Self::grid_location`] places an item inside its parent's grid.
     pub grid_cols: Option<GridTemplate>,
 
     /// Template for the element's grid rows. Placement within a parent grid belongs to
     /// [`Self::grid_location`].
     pub grid_rows: Option<GridTemplate>,
 
-    /// The grid location of this element
+    /// This item's row and column placement in its parent's grid.
+    ///
+    /// `None` leaves placement automatic. Track definitions belong to the parent through
+    /// [`Self::grid_cols`] and [`Self::grid_rows`]; see [`GridLocation`] for line indices and spans.
     pub grid_location: Option<GridLocation>,
 
-    /// Whether to draw a red debugging outline around this element
+    /// Paint a red outline around this box in debug builds. This does not change its size.
     #[cfg(debug_assertions)]
     pub debug: bool,
 
-    /// Whether to draw a red debugging outline around this element and all of its conforming children
+    /// Paint red outlines around this box and descendants that use [`Style::paint`].
+    ///
+    /// Available only in debug builds; custom elements that paint directly need their own outlines.
     #[cfg(debug_assertions)]
     pub debug_below: bool,
 }
@@ -489,13 +559,18 @@ impl Styled for StyleRefinement {
 }
 
 impl StyleRefinement {
-    /// The grid location of this element
+    /// Get the authored grid placement, inserting an automatic placement when it is absent.
+    ///
+    /// This does not change the parent to grid layout; it only provides a mutable child placement.
     pub fn grid_location_mut(&mut self) -> &mut GridLocation {
         self.grid_location.get_or_insert_default()
     }
 }
 
-/// The value of the visibility property, similar to the CSS property `visibility`
+/// Whether an element draws while retaining its layout space.
+///
+/// Use [`Display::None`] when the subtree should occupy no space. This is the value of
+/// [`Style::visibility`]; ordinary element lifecycle code applies it before painting.
 #[derive(Default, Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub enum Visibility {
     /// The element should be drawn as normal.
@@ -566,16 +641,20 @@ pub enum UnicodeBidi {
     Plaintext,
 }
 
-/// The possible values of the box-shadow property
+/// A shadow painted around or inside a box, without changing its layout size.
+///
+/// Configure [`Style::box_shadow`] directly or use [`Styled::shadow`]. The offset moves the
+/// shadow from the box, spread changes its extent, and blur softens its edge. Ancestor
+/// content masks can clip the result.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct BoxShadow {
     /// The shadow color or gradient.
     pub color: Background,
-    /// How should it be offset from its element?
+    /// Horizontal and vertical displacement from the box, in logical pixels.
     pub offset: Point<Pixels>,
-    /// How much should the shadow be blurred?
+    /// Blur radius in logical pixels; zero leaves a hard edge.
     pub blur_radius: Pixels,
-    /// How much should the shadow spread?
+    /// Expansion of the shadow before blurring, in logical pixels. Negative values contract it.
     pub spread_radius: Pixels,
     /// Whether this is an inset shadow (drawn inside the element's bounds).
     pub inset: bool,
@@ -693,7 +772,12 @@ pub enum TextOverflow {
     TruncateMiddle(SharedString),
 }
 
-/// How to align text within the element
+/// Horizontal placement of each visual row within the text layout's alignment width.
+///
+/// `Start` and `End` follow the row's bidirectional direction. `Left` and `Right` name physical
+/// edges. This aligns text, not the element's box; use [`Style::align_self`] or
+/// [`Style::justify_content`] for box placement. See [`TextLayoutOptions`](crate::TextLayoutOptions)
+/// when supplying an alignment width to the text system directly.
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
 pub enum TextAlign {
     /// Align text to the start edge for the line's direction.
@@ -706,10 +790,10 @@ pub enum TextAlign {
     /// Align the text to the physical left edge of the element.
     Left,
 
-    /// Center the text within the element
+    /// Center each visual row within the alignment width.
     Center,
 
-    /// Align the text to the right of the element
+    /// Align text to the physical right edge.
     Right,
 }
 
@@ -753,54 +837,69 @@ pub enum TextTransform {
 #[derive(Refineable, Clone, Debug, PartialEq)]
 #[refineable(Debug, PartialEq, Serialize, Deserialize)]
 pub struct TextStyle {
-    /// The color of the text
+    /// Foreground color for glyphs and decorations without their own color.
     pub color: Hsla,
 
-    /// The font family to use
+    /// Preferred font family. The default `".SystemUIFont"` requests the platform's UI font.
+    ///
+    /// A family request need not supply every glyph; shaping can select fallback faces.
     pub font_family: SharedString,
 
-    /// The font features to use
+    /// OpenType feature settings passed to shaping. See [`FontFeatures`] for supported tags.
     pub font_features: FontFeatures,
 
-    /// The fallback fonts to use
+    /// Ordered fallback families for characters missing from the preferred face.
+    ///
+    /// `None` leaves fallback choice to the backend. A configured list supplements the font
+    /// request; it does not install fonts or guarantee that a family contains a character.
     pub font_fallbacks: Option<FontFallbacks>,
 
-    /// The font size to use, in pixels or rems.
+    /// Font size in logical pixels or rems. The default is one rem.
     pub font_size: AbsoluteLength,
 
     /// Visual-row height. A relative value multiplies the resolved font size;
     /// an absolute value uses logical pixels or rems.
     pub line_height: DefiniteLength,
 
-    /// The font weight, e.g. bold
+    /// Requested face weight, such as [`FontWeight::NORMAL`] or [`FontWeight::BOLD`].
     pub font_weight: FontWeight,
 
-    /// The font width as a percentage of normal width.
+    /// Requested face width as a percentage of normal width; see [`FontWidth`].
+    /// This selects a face or variable-font instance rather than stretching painted glyphs.
     pub font_width: FontWidth,
 
-    /// The font style, e.g. italic
+    /// Requested upright, italic, or oblique face style.
     pub font_style: FontStyle,
 
-    /// The background color of the text
+    /// Fill behind text fragments, covering their row height.
+    /// Use [`Style::background`] for the containing box's background.
     pub background_color: Option<Hsla>,
 
-    /// The underline style of the text
+    /// Underline decoration. `None` adds no underline; see [`UnderlineStyle`] for color fallback.
     pub underline: Option<UnderlineStyle>,
 
-    /// The strikethrough style of the text
+    /// Strikethrough decoration, positioned using the shaped font's metrics when available.
     pub strikethrough: Option<StrikethroughStyle>,
 
-    /// How to handle whitespace in the text
+    /// Whether to allow soft wrapping. Both variants preserve source whitespace and hard breaks.
     pub white_space: WhiteSpace,
 
-    /// The text should be truncated if it overflows the width of the element
+    /// Optional replacement of overflowing text with an affix, such as an ellipsis.
+    ///
+    /// This changes the measured display string. It does not edit the application's source
+    /// buffer, and its affix is not guaranteed to fit. See [`TextOverflow`] and the
+    /// [text chapter](crate::_documentation::text) before using display indices for editing.
     pub text_overflow: Option<TextOverflow>,
 
-    /// How the text should be aligned within the element
+    /// Horizontal alignment of visual rows. The default follows each row's start edge.
     pub text_align: TextAlign,
 
-    /// Optional limit passed to line breaking. This alone does not insert an ellipsis;
-    /// configure [`Self::text_overflow`] for an affix and clip through the element's overflow style.
+    /// Optional soft-wrapping budget passed to the text backend.
+    ///
+    /// This alone does not remove source text or insert an ellipsis. In Parley, remaining
+    /// text can overflow the last soft row, and hard breaks still create rows. Configure
+    /// [`Self::text_overflow`] for a truncation affix and the element's overflow style for
+    /// clipping. See [`TextLayoutOptions::line_clamp`](crate::TextLayoutOptions::line_clamp).
     pub line_clamp: Option<usize>,
 
     /// Letter spacing added between characters, in pixels (positive widens, negative tightens).
@@ -808,7 +907,8 @@ pub struct TextStyle {
     /// The platform text stack may clamp values outside the range it supports.
     pub letter_spacing: Option<Pixels>,
 
-    /// Case transformation applied at layout time.
+    /// Case transformation applied at layout time, subject to [`TextTransform`]'s byte-length
+    /// restrictions. `None` leaves the source unchanged.
     pub text_transform: Option<TextTransform>,
 }
 
@@ -898,6 +998,20 @@ impl TextStyle {
 
     /// Resolve the line height against this style's font size and the window's rem size,
     /// then round to the nearest logical pixel.
+    ///
+    /// A relative line height follows the element's font size, not the root font size:
+    ///
+    /// ```
+    /// use gpui::{TextStyle, px, relative, rems};
+    ///
+    /// let style = TextStyle {
+    ///     font_size: rems(0.8).into(),
+    ///     line_height: relative(1.25).into(),
+    ///     ..Default::default()
+    /// };
+    /// // At a 20-pixel root size, the font is 16 pixels and each row is 20 pixels high.
+    /// assert_eq!(style.line_height_in_pixels(px(20.)), px(20.));
+    /// ```
     pub fn line_height_in_pixels(&self, rem_size: Pixels) -> Pixels {
         self.line_height.to_pixels(self.font_size, rem_size).round()
     }
@@ -940,25 +1054,25 @@ impl TextStyle {
 /// [`crate::StyledText::with_default_highlights`]).
 #[derive(Copy, Clone, Debug, Default, PartialEq)]
 pub struct HighlightStyle {
-    /// The color of the text
+    /// Color blended over the base foreground. A translucent color retains part of that base.
     pub color: Option<Hsla>,
 
-    /// The font weight, e.g. bold
+    /// Replacement face weight. Changing weight can change glyph advances and line breaks.
     pub font_weight: Option<FontWeight>,
 
-    /// The font width as a percentage of normal width.
+    /// Replacement face width, expressed as a percentage of normal width.
     pub font_width: Option<FontWidth>,
 
-    /// The font style, e.g. italic
+    /// Replacement upright, italic, or oblique face style.
     pub font_style: Option<FontStyle>,
 
-    /// The background color of the text
+    /// Replacement fragment background. `None` preserves an existing background.
     pub background_color: Option<Hsla>,
 
-    /// The underline style of the text
+    /// Replacement underline. `None` preserves an existing decoration rather than removing it.
     pub underline: Option<UnderlineStyle>,
 
-    /// The strikethrough style of the text
+    /// Replacement strikethrough. `None` preserves an existing decoration.
     pub strikethrough: Option<StrikethroughStyle>,
 
     /// Fraction of foreground alpha to remove, clamped to `0..=1` when applied.
@@ -1001,8 +1115,15 @@ impl Style {
         }
     }
 
-    /// Get the content mask for this element style, based on the given bounds.
-    /// If the element does not hide its overflow, this will return `None`.
+    /// Compute a rectangular content mask, or `None` when both overflow axes are visible.
+    ///
+    /// The rectangle starts from `bounds`; a nontransparent border can inset its edges.
+    /// Fade distances apply only on axes whose
+    /// overflow is not [`Overflow::Visible`]. The returned rectangle is finite on both axes:
+    /// a visible axis does not become an unbounded paint region. Corner radii do not affect it.
+    ///
+    /// This only computes the mask. Apply it with [`Window::with_content_mask`] when painting
+    /// a custom element, and use the same region for its hitboxes.
     pub fn overflow_mask(
         &self,
         bounds: Bounds<Pixels>,
@@ -1062,11 +1183,12 @@ impl Style {
         }
     }
 
-    /// Get the content mask for a container that always clips and scrolls
-    /// vertically, like [`List`](crate::List) and
-    /// [`UniformList`](crate::UniformList): the vertical axis always clips,
-    /// the horizontal axis clips according to `overflow.x`, and
-    /// `overflow_fade` distances apply on each clipped axis.
+    /// Compute the list-viewport mask by treating vertical overflow as [`Overflow::Scroll`].
+    ///
+    /// [`List`](crate::List) and [`UniformList`](crate::UniformList) always need that mask,
+    /// regardless of the authored vertical policy. The horizontal policy, border, and fades
+    /// otherwise follow [`Self::overflow_mask`], including its finite rectangular bounds.
+    /// This method computes clipping; it does not install scroll input handling.
     pub fn scroll_mask(&self, bounds: Bounds<Pixels>, rem_size: Pixels) -> ContentMask<Pixels> {
         let scroll_style = Style {
             overflow: Point {
@@ -1307,13 +1429,17 @@ impl Default for Style {
     }
 }
 
-/// The properties that can be applied to an underline.
+/// Thickness, color, and shape of an underline decoration.
+///
+/// Text painting chooses the vertical position from font metrics and uses the fragment's
+/// foreground when [`Self::color`] is absent. Calling [`Window::paint_underline`] directly
+/// requires the caller to choose the position and resolve that color itself.
 #[derive(Refineable, Copy, Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct UnderlineStyle {
-    /// The thickness of the underline.
+    /// Stroke thickness in logical pixels, snapped to device pixels during painting.
     pub thickness: Pixels,
 
-    /// The color of the underline.
+    /// Decoration color, or the text fragment's foreground when painted as part of text.
     #[serde(with = "crate::color::serde_colors::optional_hsla")]
     pub color: Option<Hsla>,
 
@@ -1321,13 +1447,16 @@ pub struct UnderlineStyle {
     pub wavy: bool,
 }
 
-/// The properties that can be applied to a strikethrough.
+/// Thickness and color of a line through text.
+///
+/// Text painting positions it from font metrics, with an ascent-based fallback. For a manually
+/// positioned line, use [`Window::paint_strikethrough`].
 #[derive(Refineable, Copy, Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StrikethroughStyle {
-    /// The thickness of the strikethrough.
+    /// Stroke thickness in logical pixels, snapped to device pixels during painting.
     pub thickness: Pixels,
 
-    /// The color of the strikethrough.
+    /// Decoration color, or the text fragment's foreground when painted as part of text.
     #[serde(with = "crate::color::serde_colors::optional_hsla")]
     pub color: Option<Hsla>,
 }
@@ -1335,14 +1464,15 @@ pub struct StrikethroughStyle {
 /// The kinds of fill that can be applied to a shape.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub enum Fill {
-    /// A solid color fill.
+    /// A background fill, including solid colors, gradients, and patterns supported by [`Background`].
     Color(Background),
 }
 
 impl Fill {
-    /// Unwrap this fill into a solid color, if it is one.
+    /// Copy the contained background.
     ///
-    /// If the fill is not a solid color, this method returns `None`.
+    /// The current sole variant always returns `Some`. The background can itself be a gradient
+    /// or pattern; the variant name `Color` does not restrict it to a solid color.
     pub fn color(&self) -> Option<Background> {
         match self {
             Fill::Color(color) => Some(*color),
@@ -1384,15 +1514,19 @@ impl From<&TextStyle> for HighlightStyle {
 }
 
 impl HighlightStyle {
-    /// Create a highlight style with just a color
+    /// Create a foreground-only highlight. Applying it blends `color` over the base foreground.
     pub fn color(color: Hsla) -> Self {
         Self {
             color: Some(color),
             ..Default::default()
         }
     }
-    /// Blend this highlight style with another.
-    /// Non-continuous properties, like font_weight and font_style, are overwritten.
+    /// Merge another highlight over this one.
+    ///
+    /// The other foreground blends over this foreground. Its specified font, background, and
+    /// decoration fields replace their counterparts; absent fields preserve them. If both
+    /// styles contain a fade, the result is `self_fade * (1 + other_fade)`, clamped to `0..=1`.
+    /// This merge is ordered and is not equivalent to applying two opacity multipliers.
     #[must_use]
     pub fn highlight(self, other: HighlightStyle) -> Self {
         Self {
@@ -1525,54 +1659,58 @@ pub fn combine_highlights(
     })
 }
 
-/// Used to control how child nodes are aligned.
-/// For Flexbox it controls alignment in the cross axis
-/// For Grid it controls alignment in the block axis
+/// Alignment of children across a flex line or within grid rows.
 ///
-/// [MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/align-items)
+/// Set [`Style::align_items`] on the parent, or override one child with [`Style::align_self`].
+/// In a flex row the cross axis is vertical; in a flex column it is horizontal. Reversing the
+/// main axis does not reverse that cross axis. [`FlexWrap::WrapReverse`] does reverse it,
+/// which distinguishes `FlexStart` from `Start` and `FlexEnd` from `End`.
+/// In a grid, these values align each item vertically within its grid area.
+///
+/// Use [`AlignContent`] to distribute whole flex lines or grid tracks instead. The
+/// [CSS alignment reference](https://developer.mozilla.org/en-US/docs/Web/CSS/align-items)
+/// illustrates the related terminology.
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Serialize, Deserialize, JsonSchema)]
 // Copy of taffy::style type of the same name, to derive JsonSchema.
 pub enum AlignItems {
-    /// Items are packed toward the start of the axis
+    /// Place items at the top of a row or grid area, or the left of a flex column.
     Start,
-    /// Items are packed toward the end of the axis
+    /// Place items at the bottom of a row or grid area, or the right of a flex column.
     End,
-    /// Items are packed towards the flex-relative start of the axis.
+    /// Place items at the flex cross-axis start.
     ///
-    /// For flex containers with flex_direction RowReverse or ColumnReverse this is equivalent
-    /// to End. In all other cases it is equivalent to Start.
+    /// Matches `Start` unless the container uses [`FlexWrap::WrapReverse`], when it matches `End`.
+    /// In grid layout it matches `Start`.
     FlexStart,
-    /// Items are packed towards the flex-relative end of the axis.
+    /// Place items at the flex cross-axis end.
     ///
-    /// For flex containers with flex_direction RowReverse or ColumnReverse this is equivalent
-    /// to Start. In all other cases it is equivalent to End.
+    /// Matches `End` unless the container uses [`FlexWrap::WrapReverse`], when it matches `Start`.
+    /// In grid layout it matches `End`.
     FlexEnd,
-    /// Items are packed along the center of the cross axis
+    /// Center each item across its flex line or within its grid area.
     Center,
-    /// Items are aligned such as their baselines align
+    /// Align participating items by their first baseline. Flex columns fall back to cross-axis start.
     Baseline,
-    /// Stretch to fill the container
+    /// Stretch an automatically sized item across its flex line or grid area, subject to size constraints.
     Stretch,
 }
-/// Used to control how child nodes are aligned.
-/// Does not apply to Flexbox, and will be ignored if specified on a flex container
-/// For Grid it controls alignment in the inline axis
+/// Horizontal alignment of grid items within their areas, using the [`AlignItems`] values.
 ///
-/// [MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/justify-items)
+/// This alias supplies shared layout terminology; [`Style`] currently has no `justify_items`
+/// field. It does not apply to flex layout. See the
+/// [CSS reference](https://developer.mozilla.org/en-US/docs/Web/CSS/justify-items).
 pub type JustifyItems = AlignItems;
-/// Used to control how the specified nodes is aligned.
-/// Overrides the parent Node's `AlignItems` property.
-/// For Flexbox it controls alignment in the cross axis
-/// For Grid it controls alignment in the block axis
+/// One child's override of its parent's [`Style::align_items`].
 ///
-/// [MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/align-self)
+/// Set [`Style::align_self`] on the child. `None` inherits the parent's choice; `Some(...)`
+/// uses the corresponding [`AlignItems`] behavior for that item. See the
+/// [CSS reference](https://developer.mozilla.org/en-US/docs/Web/CSS/align-self).
 pub type AlignSelf = AlignItems;
-/// Used to control how the specified nodes is aligned.
-/// Overrides the parent Node's `JustifyItems` property.
-/// Does not apply to Flexbox, and will be ignored if specified on a flex child
-/// For Grid it controls alignment in the inline axis
+/// One grid item's horizontal alignment within its area, using the [`AlignItems`] values.
 ///
-/// [MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/justify-self)
+/// This alias supplies shared layout terminology; [`Style`] currently has no `justify_self`
+/// field. It does not apply to flex layout. See the
+/// [CSS reference](https://developer.mozilla.org/en-US/docs/Web/CSS/justify-self).
 pub type JustifySelf = AlignItems;
 
 /// Controls the vertical position of an element box in an inline formatting context.
@@ -1593,48 +1731,45 @@ pub enum VerticalAlign {
     Bottom,
 }
 
-/// Sets the distribution of space between and around content items
-/// For Flexbox it controls alignment in the cross axis
-/// For Grid it controls alignment in the block axis
+/// Distribution of flex lines across the cross axis, or grid tracks along the block axis.
 ///
-/// [MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/align-content)
+/// Set [`Style::align_content`] on the container. In flex layout this distributes lines;
+/// [`AlignItems`] aligns the items within each line. A single-line `NoWrap` flex container
+/// has no additional lines to distribute. In grid layout it distributes rows.
+///
+/// [`JustifyContent`] reuses these values for the other axis. The meaning of `FlexStart` and
+/// `FlexEnd` follows the selected axis: reverse wrapping for `align_content`, and reverse
+/// flex direction for `justify_content`. See the
+/// [CSS reference](https://developer.mozilla.org/en-US/docs/Web/CSS/align-content).
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Serialize, Deserialize, JsonSchema)]
 // Copy of taffy::style type of the same name, to derive JsonSchema.
 pub enum AlignContent {
-    /// Items are packed toward the start of the axis
+    /// Pack content at the axis's physical start, ignoring flex reversal.
     Start,
-    /// Items are packed toward the end of the axis
+    /// Pack content at the axis's physical end, ignoring flex reversal.
     End,
-    /// Items are packed towards the flex-relative start of the axis.
-    ///
-    /// For flex containers with flex_direction RowReverse or ColumnReverse this is equivalent
-    /// to End. In all other cases it is equivalent to Start.
+    /// Pack content at the active flex axis's start. In grid layout this matches `Start`.
     FlexStart,
-    /// Items are packed towards the flex-relative end of the axis.
-    ///
-    /// For flex containers with flex_direction RowReverse or ColumnReverse this is equivalent
-    /// to Start. In all other cases it is equivalent to End.
+    /// Pack content at the active flex axis's end. In grid layout this matches `End`.
     FlexEnd,
-    /// Items are centered around the middle of the axis
+    /// Center the content, leaving equal free space at the two outer edges.
     Center,
-    /// Items are stretched to fill the container
+    /// Expand eligible automatically sized flex lines or grid tracks to consume free space.
     Stretch,
-    /// The first and last items are aligned flush with the edges of the container (no gap)
-    /// The gap between items is distributed evenly.
+    /// Add equal space between adjacent lines or tracks, with no added space at the outer edges.
     SpaceBetween,
-    /// The gap between the first and last items is exactly THE SAME as the gap between items.
-    /// The gaps are distributed evenly
+    /// Add equal space between adjacent lines or tracks and at both outer edges.
     SpaceEvenly,
-    /// The gap between the first and last items is exactly HALF the gap between items.
-    /// The gaps are distributed evenly in proportion to these ratios.
+    /// Add equal space around each line or track, giving each outer edge half an interior space.
     SpaceAround,
 }
 
-/// Sets the distribution of space between and around content items
-/// For Flexbox it controls alignment in the main axis
-/// For Grid it controls alignment in the inline axis
+/// Distribution of flex items along the main axis, or grid columns along the inline axis.
 ///
-/// [MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/justify-content)
+/// Set [`Style::justify_content`] on the container. Flex growth and auto margins consume free
+/// space before this distribution; a row filled by growing children may have no space left
+/// to distribute. Values are shared with [`AlignContent`], but operate along the other axis.
+/// See the [CSS reference](https://developer.mozilla.org/en-US/docs/Web/CSS/justify-content).
 pub type JustifyContent = AlignContent;
 
 /// Sets the layout used for the children of this node
@@ -1676,9 +1811,10 @@ pub enum FlexWrap {
     /// Items will not wrap and stay on a single line
     #[default]
     NoWrap,
-    /// Items will wrap according to this item's [`FlexDirection`]
+    /// Create additional lines when items do not fit along the main axis.
     Wrap,
-    /// Items will wrap in the opposite direction to this item's [`FlexDirection`]
+    /// Wrap onto additional lines while reversing the cross-axis start and end.
+    /// This does not reverse the order of items within each line.
     WrapReverse,
 }
 

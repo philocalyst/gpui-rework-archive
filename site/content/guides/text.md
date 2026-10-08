@@ -179,6 +179,19 @@ geometry. The line height passed to paint and hit testing must agree. Its
 it does not measure the ink around the glyphs. Paint run backgrounds before
 foreground glyphs and decorations.
 
+For unwrapped text centered or right-aligned inside a wider box, use
+[`shape_text_with_options`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.WindowTextSystem.html#method.shape_text_with_options)
+with [`TextLayoutOptions::alignment_width`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.TextLayoutOptions.html#structfield.alignment_width).
+That width positions the rows; it does not size an element. In the Parley backend,
+wrapped rows align within the wrapping width instead.
+
+> [!NOTE]
+> A line-breaking budget does not necessarily hide text. Parley stops inserting
+> soft breaks after the budget, so the remaining text can overflow horizontally;
+> source newlines still create rows. Use element overflow clipping to hide excess
+> content and `text_ellipsis` when removed text needs a visible marker. See
+> [`TextStyle::line_clamp`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.TextStyle.html#structfield.line_clamp) for the style-level request.
+
 [`FontMetrics`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.FontMetrics.html) helps place baselines and decorations.
 Its raw values are in font design units; the helper methods scale them to
 logical [`Pixels`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Pixels.html). Font-wide bounds are backend estimates,

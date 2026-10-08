@@ -386,6 +386,64 @@ build before publication. Packaging now checks every cold metadata chunk as
 well as the bootstrap, and its regression preserves the previous runtime when
 a chunk is missing. No changes have been pushed.
 
+The second assembled build at `018b6124fc` was promoted to the local server on
+port 1111. Its source digest is
+`8a7eb5ca860c3020563ca9264cf61bfeebc23d1086b2deebf4bb1188e7d1e01f`.
+The primary editor independently repeated the counter sequence on this bundle:
+zero to one, edit the helper to add five while retaining one, then click to six.
+A syntax error kept six visible and paused input; fixing the program retained
+six, and the next click reached eleven. Restoring the canonical increment kept
+eleven. At a 390-pixel viewport the panels stacked without document-wide
+horizontal overflow, and another click reached twelve. The emulated viewport
+was restored afterward. The narrow screenshot has a repeated header below the
+host's original 720-pixel capture boundary that is absent from the DOM; its
+capture/rendering origin remains unconfirmed. The geometry and pointer checks
+passed, but that image is not evidence of flawless responsive painting.
+Evidence: `counter-paged-recovery.png` and `counter-paged-mobile.png` in the
+proof directory. The compiled text-hit-testing page also now renders its first
+frame in this artifact; its synchronized source uses the independent flex layout.
+
+The rendered-link review found the cause of unresolved companion references:
+the core crate had no `html_root_url`. It now supplies the version root, and
+local publication adapts that root for both API and source links. Rustdoc's
+private-module paths can be valid redirects to public re-exports; the site audit
+now follows those redirects while preserving fragments. A regression checks
+that case, an unresolved Rust-path URI, and a missing target anchor. External
+dependency links are outside that project's link check. `TextLayoutOptions`
+and `ParagraphDirection` are now visible because public shaping methods expose
+them. Hidden view-implementation references were replaced with public entry
+points, and the SVG, AccessKit, and small-string dependency targets were checked
+against their published versions.
+
+The primary editor read every `Style` field again with its defaults, Taffy
+adapter, scroll listener, box painter, opacity scope, and mask implementation.
+The rewrite distinguishes authored text refinements from inherited typography,
+preferred sizes from minima, box wrapping from word wrapping, child alignment
+from parent alignment, and grid-track definitions from item placement. It also
+corrects the nonexistent `Overflow::Auto` reference, the flex cross-axis reversal
+claims, and the description of a `Fill::Color` as necessarily solid. Typography,
+highlight merging, decoration color fallback, and finite rectangular masks now
+describe the actual implementations. The cross-axis check includes Taffy
+0.12.2's alignment calculation and GPUI's left-to-right box-layout adapter.
+
+Parley's shaping implementation was read again against the text options. Its
+line clamp limits soft breaking, not every visual row: hard breaks can still
+produce rows and the remaining soft line can overflow. An explicit alignment
+width is used only without wrapping or clamping; wrapped text aligns within
+its wrap width. The API and canonical text chapter now agree on those limits.
+The new `TextLayoutOptions` example passes. All twelve companion doctests pass
+after the editing-command review, which distinguishes byte offsets, graphemes,
+visual rows, and hard lines. An ambiguous `Copy` action link initially failed
+strict rustdoc and was corrected explicitly. The latest style prose still
+requires the next combined strict build and rendered-page reading.
+
+The four style doctests pass, including the new refinement and relative-line-height
+examples. The line-height example initially omitted the conversion into
+`DefiniteLength`; the corrected sample was executed successfully. All twelve
+site tests pass with the cross-crate redirect regression. Evidence:
+`target/documentation-style-doctests.log` and
+`target/documentation-style-site-tests.log`.
+
 Zed was inspected at `da0a7a78cf296a6d8a75894f46b71a8e7f19cb2f` and Hummingbird
 at `2e1ee5f1c8d415ef7f835801fe368ab4106035b5`. The testing pass read Zed's
 collaboration update-button timer test and context-menu action tests, and
@@ -430,7 +488,15 @@ The subsequent `Zoned` reading covers every example through `saturating_sub`,
 including forward/backward weekday searches, week-boundary inclusion,
 timestamp/civil/ISO-week projections, offsets, calendar versus absolute
 arithmetic, automatic disambiguation, negative durations, overflow, and
-saturation. The `until` introduction was read but its examples remain open.
+saturation. The later reading covers every `Zoned` example through line 4535:
+`until` and `since`, calendar versus absolute differences, rounding and invalid
+increments, periodic series across gaps and folds, skipped dates, printf-style
+parsing and formatting, Debug/Display, arithmetic operators and their ownership
+and panic contracts, series iteration, arithmetic conversions, and the complete
+public `ZonedDifference` configuration. Its default-unit prose itself contains
+stale statements, reinforcing the need to compare reference patterns with code
+rather than copying their claims. `ZonedRound`'s overview examples were read;
+its methods and later builders remain open.
 
 The Rand book's guide overview, getting-started page, error handling,
 function-testing recipe, all seeding examples, and reproducibility chapter
@@ -493,3 +559,18 @@ Screenshots are `scribbr-scheduling-first-prose-only.png` and
 `scribbr-scheduling-final-prose-only.png`; the exact extracted text is saved
 as `scheduling-prose-only.md` in the proof directory. Neither scan replaces
 source review or execution of the Rust examples.
+
+The `Style` overview and field comments were extracted in source order, retaining
+the refinement example and Rustdoc link notation but excluding declarations.
+This includes the hidden bidi-authorship flag's comment. The 1,347-word input
+was split before the flex-direction field to fit the checker limit. Scribbr
+v7.1.0 displayed 819 words for the first section and 520 for the second; it
+reported 6% AI-generated, 0% AI-refined, 94% human-written, then 2%, 0%, 98%.
+The first result flags the Rust example and an adjacent field summary; the
+second flags the grid-template reference. These are section results from the
+extracted comments, not a score for the complete style module or documentation.
+Exact input SHA-256:
+`aa4c9acb6260a3c1d7672a5ca6b4ca6dd0300ec030ae7487a0d25277f7981990`.
+Inputs and screenshots are `style-api-checker-input.md`, `style-api-first.md`,
+`style-api-final.md`, `scribbr-style-first.png`, and `scribbr-style-final.png`
+under `target/documentation-proof`.

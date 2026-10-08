@@ -425,6 +425,8 @@ pub trait Styled: Sized {
     ///
     /// This does not select an affix. Add [`Self::text_ellipsis`] to mark removed text, and
     /// provide a constrained width for soft wrapping. See [`TextStyle::line_clamp`](crate::TextStyle::line_clamp).
+    /// Hard breaks can still create additional rows; constrain height as well when those
+    /// rows must be clipped.
     /// [Docs](https://tailwindcss.com/docs/line-clamp)
     fn line_clamp(mut self, lines: usize) -> Self {
         let mut text_style = self.text_style();
@@ -1092,7 +1094,11 @@ pub trait Styled: Sized {
         self
     }
 
-    /// Sets the opacity of this element and its children.
+    /// Multiply the opacity of this element's drawing and its descendants.
+    ///
+    /// Use a value from zero (transparent) to one (unchanged); this setter does not validate
+    /// or clamp it. Nested values multiply. Fading applies to individual primitives rather
+    /// than one isolated image of the subtree, as described on [`Style::opacity`](crate::Style::opacity).
     // docs:examples:begin
     #[doc = include_str!("docs/examples/gpui-Styled-opacity-4ad8a9d4.md")]
     // docs:examples:end

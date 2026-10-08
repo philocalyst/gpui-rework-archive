@@ -42,6 +42,24 @@ class SiteAuditTests(unittest.TestCase):
             (preview / 'pkg/program.wasm').write_bytes(b'<html>error</html>')
             self.assertTrue(any('invalid WebAssembly artifact' in error for error in audit.audit(root, base_url='https://example.com/docs')))
 
+    def test_cross_crate_api_links_follow_reexport_redirects(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.make_site(root)
+            core = root / 'api/gpui'
+            companion = root / 'api/gpui_ce_elements'
+            (core / 'window').mkdir(parents=True)
+            companion.mkdir(parents=True)
+            (core / 'trait.Focusable.html').write_text('<h1>Focusable</h1><h2 id="tymethod.focus_handle">Handle</h2>')
+            (core / 'window/trait.Focusable.html').write_text('<meta http-equiv="refresh" content="0;URL=../trait.Focusable.html">')
+            page = companion / 'struct.Field.html'
+            page.write_text('<a href="https://example.com/docs/api/gpui/window/trait.Focusable.html#tymethod.focus_handle">Focus</a>')
+            self.assertEqual(audit.audit(root, base_url='https://example.com/docs'), [])
+            page.write_text('<a href="gpui::Focusable">Focus</a><a href="https://example.com/docs/api/gpui/trait.Focusable.html#absent">Missing</a>')
+            errors = audit.audit(root, base_url='https://example.com/docs')
+            self.assertTrue(any('unresolved Rust documentation link' in error for error in errors))
+            self.assertTrue(any('missing anchor' in error for error in errors))
+
 
 if __name__ == '__main__':
     unittest.main()

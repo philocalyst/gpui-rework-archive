@@ -934,7 +934,8 @@ pub struct A11yCallbacks {
     /// Requests the initial tree when an accessibility client activates the adapter.
     ///
     /// This can be called again without an intervening deactivation. Follow
-    /// [`accesskit::ActivationHandler`] for synchronous or deferred tree delivery;
+    /// [`accesskit::ActivationHandler`](https://docs.rs/accesskit/0.24.1/accesskit/trait.ActivationHandler.html)
+    /// for synchronous or deferred tree delivery;
     /// activation is not a one-time screen-reader connection notification.
     pub activation: Box<dyn Fn() -> Option<accesskit::TreeUpdate> + Send + 'static>,
     /// Delivers an action requested by assistive technology or another client.
