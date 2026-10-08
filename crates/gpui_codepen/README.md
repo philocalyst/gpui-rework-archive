@@ -36,8 +36,28 @@ The bundle contains precompiled MIR for the built-in lessons. Add
 MIR; edits use the real Rust frontend in an independent compiler Worker. Compiler
 assets are compressed and cached. Compatible edits install compiled MIR into
 the resident interpreter at an input boundary, retaining actual GPUI entities,
-boxed callbacks, vtables, state and the last good frame. The compiler's optional
-incremental query cache is still being validated in WASM.
+boxed callbacks, vtables, state and the last good frame. The browser compiler
+reuses an incremental query cache with ICH verification enabled. Arena-keyed
+stable-hash memos are reset at every compiler session boundary.
+After the first preview frame, its separate compiler warms the initial source
+in the background. This never applies MIR or publishes diagnostics; edits reuse
+that compiler and coalesce behind an unfinished warmup. Set the bundle manifest's
+`prewarm_compiler` to `false` to compare startup and first-edit latency.
+
+Immutable SDK metadata is loaded in 16 KiB pages. A measured prefetch plan ships
+the common working set; content-addressed 256 KiB chunks provide every remaining
+byte when arbitrary Rust uses another API. Starter MIR is cached separately from
+the SDK. The exact full bundle remains in `target/codepen-browser/miri-full` for
+comparison. Set `GPUI_CODEPEN_PAGED_METADATA=0` for the contiguous reference build.
+The prefetch plan affects loading only, never which Rust or GPUI APIs are available.
+Definition hash tables use their original serialized format with range probes,
+so discovering a dependency does not materialize its entire table. Regenerate
+the plan from actual worker page reports with
+`measure-metadata-working-set.py --write-prefetch path.json profile.txt ...`.
+Initialized Rust metadata pages and fetched JS chunks are currently retained
+until their Worker is replaced. Bootstrap reads retain the shared Blob without
+a second JS page cache; cold-chunk eviction and a measured memory ceiling remain
+outstanding.
 
 Changing definitions, Rust type layouts, closure capture order, compile-time
 values or coroutine layouts starts a fresh app. Reset also starts a fresh app.
@@ -94,13 +114,19 @@ composes scene primitives into the containing window. Paths, shadows, sprites,
 clipping, opacity and filter groups use the existing GPUI renderers. No extra
 preview rasterizer or limited element/style vocabulary is involved.
 
-Edits debounce for 100 ms. A newer edit cancels obsolete compilation while the
-last valid app remains resident. Native process groups support cancellation;
+Edits debounce for 100 ms. Rapid browser edits keep one active compilation and
+one latest source slot, skipping intermediate sources while retaining the warm
+compiler. An exact-source undo reuses the active result with the newest input.
+Obsolete compilation has a fixed escape deadline; the last valid app stays
+resident. Native process groups support cancellation;
 browser compiler cancellation is independent of the VM. Browser input stays
 ordered, with a bounded interruption deadline for obsolete execution. JSPI
 basic-block checkpoints acknowledge cancellation; a hard-stop fallback covers
 unresponsive Workers. Compiler Workers and their caches survive VM restarts
 when their crate identity remains the same.
+Native incremental exports can be enabled with `GPUI_CODEPEN_INCREMENTAL=1`;
+the wrapper keeps the initial VM and compiler-only metadata output contracts
+identical, and compiler options precede the guest argument separator.
 Stale replies cannot replace newer source. Compilation
 errors retain the last good preview. Native workers and browser requests are
 asynchronous. Ordered event batches coalesce consecutive pointer moves. Frame
@@ -138,7 +164,12 @@ cargo test -p gpui_ce_codepen --test server -- --ignored --nocapture
 python3 scripts/codepen/test-mir-reload.py
 GPUI_CODEPEN_TEST_STARTER=1 python3 scripts/codepen/test-mir-reload.py
 node scripts/codepen/test-browser-runtime.mjs
+node scripts/codepen/test-browser-metadata.mjs
+python3 scripts/codepen/test-page-metadata.py
+node scripts/codepen/probe-browser-incremental.mjs
 node scripts/codepen/probe-browser-reload.mjs
+node scripts/codepen/probe-browser-reload.mjs target/codepen-browser/miri --documentation-starters
+node scripts/codepen/probe-browser-reload.mjs target/codepen-browser/miri --guide-lessons
 ```
 
 The full Miri tests execute real GPUI render implementations, entity callbacks,

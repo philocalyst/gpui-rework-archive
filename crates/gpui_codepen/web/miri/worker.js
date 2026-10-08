@@ -1,5 +1,6 @@
 import { WASI, WASIProcExit, Fd, File, Directory, PreopenDirectory, ConsoleStdout } from "./wasi/index.js";
 import { pollClock } from "./wasi-clock.js";
+import { BlobMetadataFile, MetadataPageStore, PagedMetadataFile, readMetadata } from "./metadata-files.js";
 
 let instance;
 let mode = "vm";
@@ -23,6 +24,9 @@ let compileMs = 0;
 let patchTimings;
 let patchStarted;
 let profileFunctions = false;
+let profileMetadata = false;
+let profileContract = false;
+const metadataReads = new Map();
 let firstInput = true;
 const stdoutDecoder = new TextDecoder();
 const stderrDecoder = new TextDecoder();
@@ -37,37 +41,6 @@ for (const channel of yields) channel.port1.onmessage = () => {
   resume();
 };
 
-class MetadataFile extends File {
-  constructor(blob) {
-    super(new ArrayBuffer(0), { readonly: true });
-    this.blob = blob;
-    this.cachedBytes = undefined;
-  }
-  get size() { return BigInt(this.blob.size); }
-  get data() {
-    return this.cachedBytes ??= new Uint8Array(new FileReaderSync().readAsArrayBuffer(this.blob));
-  }
-  set data(bytes) { this.cachedBytes = bytes; }
-  path_open(...args) {
-    const result = super.path_open(...args);
-    if (result.fd_obj) {
-      const close = result.fd_obj.fd_close.bind(result.fd_obj);
-      const file = result.fd_obj;
-      file.fd_read = size => {
-        const data = this.data.subarray(Number(file.file_pos), Number(file.file_pos) + size);
-        file.file_pos += BigInt(data.length);
-        return { ret: 0, data };
-      };
-      file.fd_pread = (size, offset) => ({ ret: 0, data: this.data.subarray(Number(offset), Number(offset) + size) });
-      result.fd_obj.fd_close = () => {
-        // rustc owns the file it just read. Release the temporary JS copy.
-        this.cachedBytes = undefined;
-        return close();
-      };
-    }
-    return result;
-  }
-}
 
 function copyInput(message, pointer, capacity) {
   if (message.kind === "cancel") return 0;
@@ -123,7 +96,13 @@ function nextProgram(exitCode) {
     const artifact = root.dir.contents.get("component.mir");
     const patch = exitCode === 0 && artifact ? artifact.data.slice() : undefined;
     root.dir.contents.delete("component.mir");
+    // MIR is the output we install. The ordinary rmeta output is temporary;
+    // incremental rustc owns its reusable metadata under /incremental. WASI
+    // does not expose POSIX write-mode bits for a retained output file.
+    root.dir.contents.delete("component.rmeta");
     postMessage({ kind: "compiled", generation: current.generation, patch,
+      ...(profileMetadata ? { metadata_pages: diagnostics } : {}),
+      ...(profileContract ? { contract_map: new TextDecoder().decode(root.dir.contents.get("contract.map")?.data) } : {}),
       diagnostics: patch ? "" : diagnostics.trim(), compile_ms: performance.now() - compileStarted },
       patch ? [patch.buffer] : []);
     return new Promise(resolve => {
@@ -179,6 +158,7 @@ function reloadResult(accepted) {
   patchTimings.apply_ms = performance.now() - patchStarted;
   executionStarted = performance.now();
   postMessage({ kind: "patched", generation: current.generation, accepted: accepted !== 0,
+    diagnostics: accepted ? "" : diagnostics.trim(),
     timings: patchTimings });
 }
 
@@ -210,8 +190,9 @@ function emitFrame(pointer, length) {
   const executionMs = performance.now() - executionStarted;
   postMessage({ kind: "reply", generation: current.generation, frame, diagnostics: "",
     timings: { compile_ms: compileMs, execution_ms: executionMs, ...patchTimings },
-    ...(profileFunctions ? { profile: diagnostics } : {}) }, [frame.buffer]);
-  if (profileFunctions) diagnostics = "";
+    ...(profileFunctions ? { profile: diagnostics } : {}),
+    ...(profileMetadata ? { metadata_reads: Object.fromEntries(metadataReads), metadata_pages: diagnostics } : {}) }, [frame.buffer]);
+  if (profileFunctions || profileMetadata) diagnostics = "";
   compileMs = 0;
   patchTimings = undefined;
 }
@@ -261,29 +242,40 @@ async function start(message) {
   // load each immutable metadata file lazily. Headless JS runtimes use an eager
   // view of the same bytes when FileReaderSync is unavailable.
   const bytes = typeof FileReaderSync === "undefined" ? new Uint8Array(await message.metadata.arrayBuffer()) : undefined;
+  profileMetadata = message.manifest.profile_metadata === true;
+  profileContract = message.manifest.profile_contract === true;
   root = new PreopenDirectory("/", []);
+  const pageStore = message.manifest.metadata_paging
+    ? new MetadataPageStore(message.manifest, message.metadata, bytes) : undefined;
+  const recordRead = profileMetadata ? (path, length) =>
+    metadataReads.set(path, (metadataReads.get(path) || 0) + length) : undefined;
   for (const entry of message.manifest.files) {
-    const file = bytes ? new File(new ArrayBuffer(0), { readonly: true })
-      : new MetadataFile(message.metadata.slice(entry.offset, entry.offset + entry.length));
-    if (bytes) file.data = bytes.subarray(entry.offset, entry.offset + entry.length);
+    const file = pageStore ? new PagedMetadataFile(pageStore, entry, recordRead)
+      : new BlobMetadataFile(message.metadata.slice(entry.offset, entry.offset + entry.length),
+        entry.path, bytes?.subarray(entry.offset, entry.offset + entry.length), recordRead);
     put(root.dir, entry.path, file);
   }
   put(root.dir, "/component.rs", new File(new TextEncoder().encode(programSource(message.source))));
   put(root.dir, "/tmp", new Directory([]));
   const record = decoder => chunk => {
     diagnostics += decoder.decode(chunk, { stream: true });
-    if (diagnostics.length > 128 * 1024) diagnostics = diagnostics.slice(-128 * 1024);
+    const limit = profileMetadata ? 8 * 1024 * 1024 : 128 * 1024;
+    if (diagnostics.length > limit) diagnostics = diagnostics.slice(-limit);
   };
   const args = message.manifest.args.slice();
   const env = ["GPUI_CODEPEN_IPC=1", "GPUI_CODEPEN_HOT_RELOAD=1", "RUST_BACKTRACE=0", "RUSTC_ICE=0", "PWD=/", "TMPDIR=/tmp"];
   profileFunctions = message.manifest.profile_functions === true;
   if (profileFunctions) env.push("GPUI_CODEPEN_PROFILE=functions");
+  if (profileMetadata) env.push("GPUI_CODEPEN_PROFILE_METADATA=1");
+  if (profileContract) env.push("GPUI_CODEPEN_CONTRACT_MAP=/contract.map");
   if (message.manifest.software_float === true) env.push("GPUI_CODEPEN_SOFT_FLOAT=1");
   if (mode === "compiler") {
     env.push("GPUI_CODEPEN_EXPORT_MIR=/component.mir");
+    args.push("-o", "/component.rmeta");
     if (message.manifest.incremental_compiler) {
       put(root.dir, "/incremental", new Directory([]));
       args.push("-Cincremental=/incremental");
+      if (message.manifest.incremental_verify_ich) args.push("-Zincremental-verify-ich");
       env.push("GPUI_CODEPEN_INCREMENTAL=1");
     }
     if (compilerIdentity) {
@@ -301,7 +293,9 @@ async function start(message) {
   startup("instantiate");
   instance = await WebAssembly.instantiate(message.module, {
     wasi_snapshot_preview1: { ...wasi.wasiImport,
-      poll_oneoff: new WebAssembly.Suspending((...args) => pollClock(wasi, ...args)) },
+      poll_oneoff: new WebAssembly.Suspending((...args) => pollClock(wasi, ...args)),
+      fd_read: new WebAssembly.Suspending((...args) => readMetadata(wasi, "fd_read", args)),
+      fd_pread: new WebAssembly.Suspending((...args) => readMetadata(wasi, "fd_pread", args)) },
     gpui_codepen: { emit_frame: emitFrame, receive_input: new WebAssembly.Suspending(receiveInput),
       next_program: new WebAssembly.Suspending(nextProgram), checkpoint: new WebAssembly.Suspending(checkpoint),
       compiler_phase: compilerPhase, receive_patch: receivePatch, reload_result: reloadResult },

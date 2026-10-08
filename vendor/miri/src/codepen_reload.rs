@@ -291,6 +291,8 @@ fn binding_identity<'tcx>(tcx: TyCtxt<'tcx>, binding: rustc_hir::HirId) -> (DefP
 /// generic contract, closure capture layout, impl mapping and compile-time MIR
 /// must remain compatible with the resident compiler's already cached queries.
 fn contract(tcx: TyCtxt<'_>) -> Vec<u8> {
+    let debug_path = std::env::var_os("GPUI_CODEPEN_CONTRACT_MAP");
+    let mut sections = Vec::new();
     let mut e = PacketEncoder::<false>::new(tcx, false);
     tcx.sess.target.llvm_target.encode(&mut e);
     tcx.sess.target.data_layout.to_string().encode(&mut e);
@@ -302,7 +304,9 @@ fn contract(tcx: TyCtxt<'_>) -> Vec<u8> {
     dependencies.encode(&mut e);
     let defs = definitions(tcx);
     defs.len().encode(&mut e);
+    if debug_path.is_some() { sections.push(format!("0\t{}\tcompiler and dependencies", e.bytes.len())); }
     for def in defs {
+        let start = e.bytes.len();
         let kind = tcx.def_kind(def);
         tcx.def_path_hash(def.to_def_id()).encode(&mut e);
         format!("{kind:?}").encode(&mut e);
@@ -404,8 +408,17 @@ fn contract(tcx: TyCtxt<'_>) -> Vec<u8> {
                 tcx.instance_mir(ty::InstanceKind::Item(def.to_def_id())).encode(&mut e);
             }
         }
+        if debug_path.is_some() {
+            sections.push(format!("{start}\t{}\t{kind:?} {}", e.bytes.len(), tcx.def_path_str(def)));
+        }
     }
-    e.finish().0
+    let start = e.bytes.len();
+    let bytes = e.finish().0;
+    if let Some(path) = debug_path {
+        sections.push(format!("{start}\t{}\tallocations and sentinel", bytes.len()));
+        std::fs::write(path, sections.join("\n")).expect("MIR contract diagnostic map");
+    }
+    bytes
 }
 
 /// Serialize executable function bodies after ordinary Rust analysis succeeds.
@@ -475,7 +488,13 @@ impl<'tcx> Overlay<'tcx> {
         if origin != tcx.stable_crate_id(self.krate) || expected != self.expected || keys.len() != expected.len() {
             return Err("MIR function identity set changed".into());
         }
-        if Vec::<u8>::decode(&mut header) != self.contract { return Err("Rust type or compile-time contract changed".into()); }
+        let contract = Vec::<u8>::decode(&mut header);
+        if contract != self.contract {
+            let first = contract.iter().zip(&self.contract).position(|(new, old)| new != old)
+                .unwrap_or(contract.len().min(self.contract.len()));
+            return Err(format!("Rust type or compile-time contract changed at byte {first} ({} -> {} bytes)",
+                self.contract.len(), contract.len()));
+        }
         if cross_crate { self.decode::<true>(tcx, packet.len(), &mut header) }
         else { self.decode::<false>(tcx, packet.len(), &mut header) }
     }

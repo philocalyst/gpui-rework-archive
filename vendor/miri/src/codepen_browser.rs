@@ -21,17 +21,18 @@ unsafe extern "C" {
 /// receive edits without rebuilding the instance or instrumenting guest Rust.
 /// The interpreter's entire heap can then be dropped through its normal exit
 /// path before another compiler session is created.
-pub fn checkpoint(blocks: u64) -> bool {
-    if !blocks.is_multiple_of(4096) {
-        return false;
-    }
+pub fn checkpoint() -> bool {
     LAST_CHECKPOINT.with(|last| {
         let now = std::time::Instant::now();
         if last.get().is_some_and(|previous| now.duration_since(previous).as_millis() < 16) {
             return false;
         }
-        last.set(Some(now));
-        unsafe { host_checkpoint() != 0 }
+        let interrupted = unsafe { host_checkpoint() != 0 };
+        // Time spent suspended is not interpreter work. Starting the next
+        // interval before yielding makes a busy host trigger another yield
+        // immediately on resume, starving Rust under concurrent load.
+        last.set(Some(std::time::Instant::now()));
+        interrupted
     })
 }
 
@@ -49,6 +50,11 @@ pub fn platform_call(bytes: &[u8]) -> Result<Vec<u8>, String> {
 }
 
 pub fn emit(bytes: &[u8]) {
+    if !bytes.is_empty() {
+        if let Some(profile) = rustc_metadata::codepen_metadata_profile() {
+            eprint!("{profile}");
+        }
+    }
     unsafe {
         emit_frame(bytes.as_ptr(), bytes.len());
     }
@@ -68,6 +74,9 @@ pub fn receive(capacity: usize) -> Result<Vec<u8>, &'static str> {
 /// interpreter allocations and GPUI entities have been dropped. The host keeps
 /// the WASM instance, immutable dependency files and incremental query cache.
 pub fn next_program(exit_code: i32) -> bool {
+    if let Some(profile) = rustc_metadata::codepen_metadata_profile() {
+        eprint!("{profile}");
+    }
     unsafe { host_next_program(exit_code) != 0 }
 }
 

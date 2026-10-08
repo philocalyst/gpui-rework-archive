@@ -4,35 +4,38 @@ const sessions = new Map();
 const base = new URL("./", import.meta.url);
 let assets;
 
-async function cached(url) {
+async function cached(url, timings) {
   const cache = await globalThis.caches?.open("gpui-miri-v1").catch(() => undefined);
   const hit = await cache?.match(url);
-  if (hit) return hit;
+  if (hit) { timings.assets_cache_hits++; return hit; }
+  timings.assets_fetches++;
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Could not load Miri: ${response.status} ${url.pathname}`);
   if (cache) void cache.put(url, response.clone()).catch(() => {});
   return response;
 }
 
-async function compilerModule(url, compression) {
-  let response = await cached(url);
+async function compilerModule(url, compression, timings) {
+  const started = performance.now();
+  let response = await cached(url, timings);
   if (compression === "gzip") {
     response = new Response(response.body.pipeThrough(new DecompressionStream("gzip")),
       { headers: { "Content-Type": "application/wasm" } });
   } else if (compression) throw new Error(`Unsupported Miri module compression: ${compression}`);
-  if (WebAssembly.compileStreaming && response.headers.get("Content-Type")?.split(";")[0] === "application/wasm") {
-    return WebAssembly.compileStreaming(response);
-  }
-  return WebAssembly.compile(await response.arrayBuffer());
+  const module = WebAssembly.compileStreaming && response.headers.get("Content-Type")?.split(";")[0] === "application/wasm"
+    ? await WebAssembly.compileStreaming(response)
+    : await WebAssembly.compile(await response.arrayBuffer());
+  timings.assets_module_ms = performance.now() - started;
+  return module;
 }
 
-async function compilerMetadata(url) {
+async function compilerMetadata(url, timings) {
   const cache = await globalThis.caches?.open("gpui-miri-v1").catch(() => undefined);
   const expanded = new URL(url);
   expanded.pathname += ".raw";
   const hit = await cache?.match(expanded);
-  if (hit) return hit.blob();
-  const compressed = await cached(url);
+  if (hit) { timings.assets_expanded_cache_hits++; return hit.blob(); }
+  const compressed = await cached(url, timings);
   const response = new Response(compressed.body.pipeThrough(new DecompressionStream("gzip")));
   const cacheResponse = cache ? response.clone() : undefined;
   // Inflate once per immutable dependency bundle, not once per edited program.
@@ -46,7 +49,8 @@ async function compilerMetadata(url) {
 async function pruneCache(manifest) {
   const cache = await globalThis.caches?.open("gpui-miri-v1").catch(() => undefined);
   if (!cache?.keys) return;
-  const keep = new Set([manifest.module, ...(manifest.metadata_parts || [manifest.metadata])]
+  const keep = new Set([manifest.module, ...(manifest.metadata_parts || [manifest.metadata]),
+    ...(manifest.files || []).flatMap(file => file.chunks || [])]
     .flatMap(part => [new URL(part, base).href, new URL(part + ".raw", base).href]));
   for (const request of await cache.keys()) {
     const url = new URL(request.url);
@@ -59,23 +63,68 @@ async function pruneCache(manifest) {
 
 function load() {
   if (!assets) assets = (async () => {
+    const started = performance.now();
+    const timings = { assets_cache_hits: 0, assets_expanded_cache_hits: 0, assets_fetches: 0 };
     if (!globalThis.Worker || !WebAssembly.Suspending || !WebAssembly.promising) {
       throw new Error("This browser needs WebAssembly Promise Integration to run Rust. Use a current browser.");
     }
     const response = await fetch(new URL("assets.json", base), { cache: "no-cache" });
     if (!response.ok) throw new Error("Browser Miri bundle is missing. Run scripts/codepen/browser.py all.");
     const manifest = await response.json();
+    const metadataStarted = performance.now();
     const [module, metadata] = await Promise.all([
-      compilerModule(new URL(manifest.module, base), manifest.module_compression),
+      compilerModule(new URL(manifest.module, base), manifest.module_compression, timings),
       // Blob structured clones share immutable storage across Workers. A source
       // edit does not copy the full compressed dependency archive on the UI thread.
       Promise.all((manifest.metadata_parts || [manifest.metadata])
-        .map(part => compilerMetadata(new URL(part, base)))).then(parts => new Blob(parts)),
+        .map(part => compilerMetadata(new URL(part, base), timings))).then(parts => {
+          timings.assets_metadata_ms = performance.now() - metadataStarted;
+          return new Blob(parts);
+        }),
     ]);
+    timings.assets_load_ms = performance.now() - started;
+    timings.assets_metadata_bytes = metadata.size;
     void pruneCache(manifest).catch(() => {});
-    return { manifest, module, metadata };
+    return { manifest, module, metadata, assetTimings: timings };
   })().catch(error => { assets = undefined; throw error; });
   return assets;
+}
+
+function stopCompiler(session) {
+  clearTimeout(session.warmCompilerTimer);
+  session.warmCompilerTimer = undefined;
+  clearTimeout(session.compileTimer);
+  clearTimeout(session.obsoleteCompileTimer);
+  session.obsoleteCompileTimer = undefined;
+  session.compiler?.terminate();
+  session.compiler = undefined;
+  session.compilerBusy = undefined;
+}
+
+function prewarmCompiler(id, session, generation) {
+  if (session.bundle.manifest.prewarm_compiler === false || session.compiler
+    || session.warmCompilerTimer || session.needsReload) return;
+  const source = session.vmSource;
+  // The shipped MIR can show the first frame immediately. Warm its separate
+  // incremental compiler after that frame, before the reader starts editing.
+  // This never patches the interpreter or publishes a frame/diagnostic.
+  session.warmCompilerTimer = setTimeout(() => {
+    session.warmCompilerTimer = undefined;
+    if (sessions.get(id) !== session || session.pending || !session.worker
+      || session.compiler || session.needsReload || session.vmSource !== source) return;
+    compile(id, session, { generation, source, background: true });
+  }, 250);
+}
+
+function boundObsoleteCompilation(id, session) {
+  const busy = session.compilerBusy;
+  if (!busy || session.obsoleteCompileTimer) return;
+  session.obsoleteCompileTimer = setTimeout(() => {
+    if (sessions.get(id) !== session || session.compilerBusy !== busy) return;
+    stopCompiler(session);
+    const current = session.pending;
+    if (current?.phase === "compile") compile(id, session, current);
+  }, 2000);
 }
 
 function close(id, session, reason = "Superseded by a newer edit") {
@@ -83,7 +132,7 @@ function close(id, session, reason = "Superseded by a newer edit") {
   clearTimeout(session.compileTimer);
   clearTimeout(session.patchTimer);
   session.worker?.terminate();
-  session.compiler?.terminate();
+  stopCompiler(session);
   session.pending?.reject(new Error(reason));
   session.pending = undefined;
   if (sessions.get(id) === session) sessions.delete(id);
@@ -98,9 +147,9 @@ function cancel(id, generation) {
   clearTimeout(session.compileTimer);
   clearTimeout(session.patchTimer);
   if (phase === "compile") {
-    // Compiler cancellation never touches the interpreter or its entity heap.
-    session.compiler?.terminate();
-    session.compiler = undefined;
+    // A short obsolete compilation can finish into the same incremental
+    // cache. Coalesce new edits while it drains, with a fixed escape deadline.
+    boundObsoleteCompilation(id, session);
     return;
   }
   if (!session.worker) { close(id, session); return; }
@@ -141,12 +190,15 @@ function boundObsoleteWork(id, session, generation) {
 function reply(session, data) {
   const pending = session.pending;
   if (!pending || pending.generation !== data.generation) return;
-  clearTimeout(session.compileTimer);
+  // An input can finish while the independent compiler is still warming.
+  // Its VM response must not cancel that compiler job's deadline.
+  if (!session.compilerBusy) clearTimeout(session.compileTimer);
   clearTimeout(session.patchTimer);
   session.pending = undefined;
   pending.resolve({ frame: data.frame, diagnostics: data.diagnostics || "",
     failure: data.failure || (data.diagnostics ? "rust" : undefined),
-    elapsed_ms: performance.now() - pending.started, timings: data.timings });
+    elapsed_ms: performance.now() - pending.started,
+    timings: { ...session.bundle?.assetTimings, ...data.timings } });
 }
 
 function startVm(id, session, source, generation, input) {
@@ -157,8 +209,7 @@ function startVm(id, session, source, generation, input) {
   session.worker?.terminate();
   session.identity = session.bundle.manifest.starters?.find(program => program.source === source);
   if (session.compilerIdentity !== session.identity?.crate) {
-    session.compiler?.terminate();
-    session.compiler = undefined;
+    stopCompiler(session);
   }
   session.vmSource = source;
   session.patchSources = new Map();
@@ -238,6 +289,7 @@ function startVm(id, session, source, generation, input) {
         session.cancelTimer = undefined;
       }
       if (session.pending?.phase !== "compile") reply(session, data);
+      if (!session.pending && !data.diagnostics) prewarmCompiler(id, session, data.generation);
     }
   };
   worker.onerror = event => {
@@ -252,15 +304,35 @@ function startVm(id, session, source, generation, input) {
 
 function compile(id, session, pending) {
   pending.phase = "compile";
+  if (session.compilerBusy) {
+    boundObsoleteCompilation(id, session);
+    return; // session.pending is the single newest queued source.
+  }
+  const job = { generation: pending.generation, source: pending.source, background: pending.background };
+  session.compilerBusy = job;
   const accept = ({ data }) => {
     if (sessions.get(id) !== session || session.compiler !== worker) return;
     if (data.kind !== "compiled" && !(data.kind === "reply" && data.failed)) return;
-    const current = session.pending;
-    if (!current || current.generation !== data.generation || current.phase !== "compile") return;
+    if (session.compilerBusy?.generation !== data.generation) return;
+    const completed = session.compilerBusy;
+    session.compilerBusy = undefined;
+    clearTimeout(session.obsoleteCompileTimer);
+    session.obsoleteCompileTimer = undefined;
     clearTimeout(session.compileTimer);
+    const current = session.pending;
+    // Undo can return to the exact source still being compiled. Its MIR and
+    // diagnostics are valid for the latest input under this same compiler
+    // identity; adopt them without running rustc a second time.
+    if (!data.failed && current?.phase === "compile" && current.source === completed.source) {
+      data = { ...data, generation: current.generation };
+    }
+    if (!current || current.generation !== data.generation || current.phase !== "compile") {
+      if (data.failed) stopCompiler(session);
+      if (current?.phase === "compile") compile(id, session, current);
+      return;
+    }
     if (data.failed) {
-      worker.terminate();
-      session.compiler = undefined;
+      stopCompiler(session);
       reply(session, { generation: data.generation, diagnostics: data.diagnostics || "Rust compiler Worker stopped", failure: "unavailable" });
       return;
     }
@@ -293,11 +365,13 @@ function compile(id, session, pending) {
     session.compilerIdentity = session.identity?.crate;
     worker.onmessage = accept;
     worker.onerror = event => {
-      if (session.compiler !== worker) return;
-      worker.terminate();
-      session.compiler = undefined;
+      if (sessions.get(id) !== session || session.compiler !== worker) return;
       const current = session.pending;
-      if (current?.phase === "compile") reply(session, { generation: current.generation,
+      const obsolete = session.compilerBusy?.generation !== current?.generation;
+      stopCompiler(session);
+      if (current?.phase !== "compile") return;
+      if (obsolete) compile(id, session, current);
+      else reply(session, { generation: current.generation,
         diagnostics: event.message || "Rust compiler Worker stopped", failure: "unavailable" });
     };
     worker.onmessageerror = () => worker.onerror({ message: "Could not exchange a Rust compiler message" });
@@ -308,9 +382,12 @@ function compile(id, session, pending) {
     worker.postMessage({ kind: "compile", generation: pending.generation, source: pending.source });
   }
   session.compileTimer = setTimeout(() => {
-    if (session.pending !== pending) return;
-    worker.terminate();
-    session.compiler = undefined;
+    if (session.compilerBusy !== job || !job.background && session.pending !== pending) return;
+    stopCompiler(session);
+    if (job.background) {
+      if (session.pending?.phase === "compile") compile(id, session, session.pending);
+      return;
+    }
     reply(session, { generation: pending.generation, diagnostics: "Rust compilation exceeded its 45 second time budget", failure: "unavailable" });
   }, 45000);
 }

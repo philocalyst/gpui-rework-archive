@@ -192,7 +192,7 @@ impl Runtime {
             elapsed_ms: start.elapsed().as_millis() as u64,
         }
     }
-    fn command(&self) -> Result<Command> {
+    fn command(&self, compiler_only: bool) -> Result<Command> {
         let optimization = &self.optimization;
         let root = repository_root();
         let driver = root.join(format!(
@@ -206,12 +206,15 @@ impl Runtime {
         if !driver.is_file() || !wrapper.is_file() {
             bail!("Vendored Miri is not built. Run: python3 scripts/codepen/setup.py");
         }
+        let metadata_only = std::env::var("GPUI_CODEPEN_INCREMENTAL").as_deref() == Ok("1");
+        let incremental = compiler_only && self.invocation.is_some() && metadata_only;
         let mut c = if let Some(invocation) = &self.invocation {
             let mut command = Command::new(&driver);
             command.arg("--sysroot").arg(&self.miri_sysroot);
             command.args(invocation.args.iter().filter(|arg| {
                 !arg.starts_with("--error-format=")
                     && !arg.starts_with("--json=")
+                    && !(metadata_only && arg.starts_with("--emit="))
                     && arg.as_str() != "--force-warn=unused_crate_dependencies"
             }));
             command.envs(
@@ -225,6 +228,15 @@ impl Runtime {
             command.args(COMPILER_FLAGS.split_whitespace());
             if optimization != "0" {
                 command.arg(format!("-Zmir-opt-level={optimization}"));
+            }
+            if metadata_only { command.arg("--emit=metadata"); }
+            if incremental {
+                // These are rustc options, before the separator for guest
+                // arguments. Metadata emission finalizes the query cache
+                // without asking Miri's backend to produce an executable.
+                command.arg("-o").arg(self.directory.path().join("component.rmeta"))
+                    .arg(format!("-Cincremental={}", self.directory.path().join("incremental").display()))
+                    .arg("-Zincremental-verify-ich");
             }
             command.arg("--");
             command
@@ -249,6 +261,9 @@ impl Runtime {
         // builds. Dependencies are cached as metadata already; enabling that
         // compiler mode would make every interpreted frame pay for tiny calls.
         c.env("CARGO_INCREMENTAL", "0");
+        c.env_remove("GPUI_CODEPEN_INCREMENTAL");
+        if incremental { c.env("GPUI_CODEPEN_INCREMENTAL", "1"); }
+        c.env("GPUI_CODEPEN_METADATA_ONLY", if metadata_only { "1" } else { "0" });
         for name in [
             "RUSTC_WRAPPER",
             "RUSTC_WORKSPACE_WRAPPER",
@@ -286,7 +301,8 @@ impl Runtime {
         c.env("PATH", std::env::join_paths(paths)?);
         c.env("MIRI", driver);
         c.env("MIRI_SYSROOT", &self.miri_sysroot);
-        c.env("MIRIFLAGS", format!("{MIRI_FLAGS} {COMPILER_FLAGS}"));
+        let emission = if metadata_only { " --emit=metadata" } else { "" };
+        c.env("MIRIFLAGS", format!("{MIRI_FLAGS} {COMPILER_FLAGS}{emission}"));
         c.env("GPUI_CODEPEN_IPC", "1");
         c.env("GPUI_CODEPEN_HOT_RELOAD", "1");
         c.env("GPUI_CODEPEN_PARENT_PID", std::process::id().to_string());
@@ -324,13 +340,11 @@ impl Runtime {
         if changed && !request.restart && self.interpreter.is_some() {
             let path = self.directory.path().join("component.mir");
             let _ = fs::remove_file(&path);
-            let mut compiler = self.command()?;
+            let mut compiler = self.command(true)?;
             compiler.env("GPUI_CODEPEN_EXPORT_MIR", &path);
-            if std::env::var("GPUI_CODEPEN_INCREMENTAL").as_deref() == Ok("1") {
-                compiler.arg(format!("-Cincremental={}", self.directory.path().join("incremental").display()));
-            }
-            run_process(compiler, &[], latest, request.generation, Duration::from_secs(45))
-                .context(KeepPreview)?;
+            let compiled = run_process(compiler, &[], latest, request.generation, Duration::from_secs(45));
+            let _ = fs::remove_file(self.directory.path().join("component.rmeta"));
+            compiled.context(KeepPreview)?;
             if fs::metadata(&path).context("Compiler did not produce MIR").context(KeepPreview)?.len() > MAX_FRAME_BYTES as u64 {
                 return Err(anyhow::anyhow!("Compiled MIR exceeds its transport budget").context(KeepPreview));
             }
@@ -362,7 +376,7 @@ impl Runtime {
         let input = gpui_codepen_guest::wire::encode_input(&context).map_err(anyhow::Error::msg)?;
         if fresh {
             self.interpreter = None;
-            self.interpreter = Some(Interpreter::spawn(self.command()?, self.platform.clone())?);
+            self.interpreter = Some(Interpreter::spawn(self.command(false)?, self.platform.clone())?);
             match self.interpreter.as_mut().unwrap().receive(latest, request.generation, Duration::from_secs(45), false)? {
                 Message::Ready => {}
                 _ => bail!("Unexpected response before interpreter initialization"),

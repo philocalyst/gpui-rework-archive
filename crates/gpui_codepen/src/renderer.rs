@@ -285,9 +285,11 @@ mod tests {
     impl Render for HostPreview {
         fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
             let events = self.events.clone();
-            scene_view(None, 1., self.focus.clone(), self.state.clone(), None,
-                Rc::new(move |event, _, _| events.borrow_mut().push(event)),
-                Rc::new(|_, _, _, _, _, _, _| {}), Rc::new(|_, _, _, _| {}))
+            div().size_full().flex()
+                .child(div().w(px(180.)).h_full().child(scene_view(None, 1., self.focus.clone(), self.state.clone(), None,
+                    Rc::new(move |event, _, _| events.borrow_mut().push(event)),
+                    Rc::new(|_, _, _, _, _, _, _| {}), Rc::new(|_, _, _, _| {}))))
+                .child(div().id("other-target").track_focus(&self.other).w(px(20.)).h_full())
         }
     }
 
@@ -314,10 +316,20 @@ mod tests {
         assert!(focused, "Clicking the embedded scene must focus its host handle; delivered: {:?}", events.borrow());
         let mut keystroke = Keystroke::parse("space").unwrap();
         keystroke.key_char = Some(" ".into());
-        let key = PlatformInput::KeyDown(KeyDownEvent { keystroke, is_held: false, prefer_character_input: false });
+        let key = PlatformInput::KeyDown(KeyDownEvent { keystroke: keystroke.clone(), is_held: false, prefer_character_input: false });
+        let up = PlatformInput::KeyUp(KeyUpEvent { keystroke });
+        let modifiers = PlatformInput::ModifiersChanged(ModifiersChangedEvent {
+            modifiers: Modifiers { shift: true, ..Default::default() }, ..Default::default()
+        });
         events.borrow_mut().clear();
         app.dispatch_input(handle.into(), key.clone()).unwrap();
-        assert!(matches!(events.borrow().as_slice(), [gpui_codepen_guest::InputMessage::Event(PlatformInput::KeyDown(_))]),
+        app.dispatch_input(handle.into(), up.clone()).unwrap();
+        app.dispatch_input(handle.into(), modifiers.clone()).unwrap();
+        assert!(matches!(events.borrow().as_slice(), [
+            gpui_codepen_guest::InputMessage::Event(PlatformInput::KeyDown(_)),
+            gpui_codepen_guest::InputMessage::Event(PlatformInput::KeyUp(_)),
+            gpui_codepen_guest::InputMessage::Event(PlatformInput::ModifiersChanged(_)),
+        ]),
             "A clicked preview must forward Space through the host's focused dispatch path");
         app.update_window(handle.into(), |root, window, cx| {
             root.downcast::<HostPreview>().unwrap().update(cx, |view, cx| window.focus(&view.other, cx));
@@ -325,6 +337,8 @@ mod tests {
         app.draw_window(handle.into()).unwrap();
         events.borrow_mut().clear();
         app.dispatch_input(handle.into(), key).unwrap();
+        app.dispatch_input(handle.into(), up).unwrap();
+        app.dispatch_input(handle.into(), modifiers).unwrap();
         assert!(events.borrow().is_empty(), "The preview must not steal keys from another focused target");
     }
 }

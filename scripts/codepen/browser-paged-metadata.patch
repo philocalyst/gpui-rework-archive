@@ -1,0 +1,229 @@
+--- a/compiler/rustc_metadata/src/lib.rs
++++ b/compiler/rustc_metadata/src/lib.rs
+@@ -34,6 +34,10 @@
+ 
+ #[cfg(target_family="wasm")]
+ mod browser_metadata;
++#[cfg(target_family="wasm")]
++mod browser_paged_metadata;
++#[cfg(target_family="wasm")]
++mod browser_paged_hash_map;
+ 
+ #[cfg(target_family="wasm")]
+ #[doc(hidden)]
+--- a/compiler/rustc_metadata/src/locator.rs
++++ b/compiler/rustc_metadata/src/locator.rs
+@@ -830,6 +830,14 @@
+     if !filename.exists() {
+         return Err(MetadataError::NotPresent(filename));
+     }
++    #[cfg(target_family="wasm")]
++    let paged = if matches!(flavor, CrateFlavor::Rmeta)
++        && (filename.starts_with("/deps") || filename.starts_with("/sysroot")) {
++        Some(MetadataBlob::from_path(filename).map_err(MetadataError::LoadFailure)?)
++    } else { None };
++    #[cfg(not(target_family="wasm"))]
++    let paged: Option<MetadataBlob> = None;
++    let blob = if let Some(blob) = paged { blob } else {
+     let raw_bytes = match flavor {
+         CrateFlavor::Rlib => {
+             loader.get_rlib_metadata(target, filename).map_err(MetadataError::LoadFailure)?
+@@ -919,6 +927,8 @@
+             "corrupt metadata encountered in {}",
+             filename.display()
+         )));
++    };
++    blob
+     };
+     match blob.check_compatibility(cfg_version) {
+         Ok(()) => {
+--- a/compiler/rustc_metadata/src/rmeta/decoder.rs
++++ b/compiler/rustc_metadata/src/rmeta/decoder.rs
+@@ -27,7 +27,12 @@
+ use rustc_middle::ty::codec::{TyDecoder, forward_all_decoder_methods_to};
+ use rustc_middle::ty::{RestrictionKind, Visibility};
+ use rustc_proc_macro::bridge::client::Client as ProcMacroClient;
+-use rustc_serialize::opaque::MemDecoder;
++#[cfg(not(target_family="wasm"))]
++use rustc_serialize::opaque::MemDecoder as OpaqueMetadataDecoder;
++#[cfg(target_family="wasm")]
++use crate::browser_paged_metadata::{Bytes as MetadataBytes, MetadataDecoder as OpaqueMetadataDecoder};
++#[cfg(not(target_family="wasm"))]
++type MetadataBytes = OwnedSlice;
+ use rustc_serialize::{Decodable, Decoder};
+ use rustc_session::config::TargetModifier;
+ use rustc_session::config::mitigation_coverage::DeniedPartialMitigation;
+@@ -49,8 +54,9 @@
+ /// A reference to the raw binary version of crate metadata.
+ /// This struct applies [`MemDecoder`]'s validation when constructed
+ /// so that later constructions are guaranteed to succeed.
+-pub(crate) struct MetadataBlob(OwnedSlice);
+-
++pub(crate) struct MetadataBlob(MetadataBytes);
++
++#[cfg(not(target_family="wasm"))]
+ impl std::ops::Deref for MetadataBlob {
+     type Target = [u8];
+ 
+@@ -63,13 +69,37 @@
+ impl MetadataBlob {
+     /// Runs the [`MemDecoder`] validation and if it passes, constructs a new [`MetadataBlob`].
+     pub(crate) fn new(slice: OwnedSlice) -> Result<Self, ()> {
+-        if MemDecoder::new(&slice, 0).is_ok() { Ok(Self(slice)) } else { Err(()) }
++        #[cfg(target_family="wasm")]
++        let slice = MetadataBytes::Owned(slice);
++        let blob = Self(slice);
++        blob.opaque_decoder(0).map(|_| ())?;
++        Ok(blob)
+     }
+ 
+     /// Since this has passed the validation of [`MetadataBlob::new`], this returns bytes which are
+     /// known to pass the [`MemDecoder`] validation.
+-    pub(crate) fn bytes(&self) -> &OwnedSlice {
+-        &self.0
++    pub(crate) fn bytes(&self) -> &MetadataBytes { &self.0 }
++
++    #[cfg(target_family="wasm")]
++    pub(crate) fn from_path(path: &Path) -> Result<Self, String> {
++        let blob = Self(crate::browser_metadata::open(path).map_err(|error| error.to_string())?);
++        blob.opaque_decoder(0).map_err(|_| format!("corrupt metadata encountered in {}", path.display()))?;
++        Ok(blob)
++    }
++
++    fn opaque_decoder(&self, position: usize) -> Result<OpaqueMetadataDecoder<'_>, ()> {
++        OpaqueMetadataDecoder::new(&self.0, position)
++    }
++
++    pub(crate) fn range(&self, start: usize, length: usize) -> std::borrow::Cow<'_ , [u8]> {
++        #[cfg(target_family="wasm")]
++        { self.0.range(start, length) }
++        #[cfg(not(target_family="wasm"))]
++        { std::borrow::Cow::Borrowed(&self.0[start..start.checked_add(length).expect("metadata range overflow")]) }
++    }
++
++    fn starts_with(&self, prefix: &[u8]) -> bool {
++        self.range(0, prefix.len().min(self.0.len())).as_ref() == prefix
+     }
+ }
+ 
+@@ -167,7 +197,7 @@
+ /// and [`CrateRoot`]. After that, [`MetadataDecodeContext`] can be used.
+ /// Most notably, [`BlobDecodeContext]` doesn't implement [`SpanDecoder`]
+ pub(super) struct BlobDecodeContext<'a> {
+-    opaque: MemDecoder<'a>,
++    opaque: OpaqueMetadataDecoder<'a>,
+     blob: &'a MetadataBlob,
+     lazy_state: LazyState,
+     #[cfg(target_family = "wasm")]
+@@ -289,7 +319,7 @@
+             // self-referential struct which is downright goofy because `MetadataBlob` is already
+             // self-referential. Probably `MemDecoder` should contain an `OwnedSlice`, but that
+             // demands a significant refactoring due to our crate graph.
+-            opaque: MemDecoder::new(self, pos).unwrap(),
++            opaque: self.opaque_decoder(pos).unwrap(),
+             lazy_state: LazyState::NoNode,
+             #[cfg(target_family = "wasm")]
+             profile_start: pos,
+@@ -378,6 +408,9 @@
+ 
+ impl<'a> BlobDecodeContext<'a> {
+     #[inline]
++    #[cfg(target_family="wasm")]
++    pub(super) fn skip_bytes(&mut self, length: usize) { self.opaque.skip_bytes(length); }
++
+     pub(crate) fn blob(&self) -> &'a MetadataBlob {
+         self.blob
+     }
+@@ -386,7 +419,7 @@
+         &mut self,
+         new_from_index: impl Fn(u32) -> S,
+         read_and_intern_str_or_byte_str_this: impl Fn(&mut Self) -> S,
+-        read_and_intern_str_or_byte_str_opaque: impl Fn(&mut MemDecoder<'a>) -> S,
++        read_and_intern_str_or_byte_str_opaque: impl Fn(&mut OpaqueMetadataDecoder<'a>) -> S,
+     ) -> S {
+         let tag = self.read_u8();
+ 
+@@ -738,13 +771,13 @@
+     }
+ 
+     fn root_pos(&self) -> NonZero<usize> {
+-        let pos_bytes = self[ROOT_POS_OFFSET..][..8].try_into().unwrap();
++        let pos_bytes = self.range(ROOT_POS_OFFSET, 8).as_ref().try_into().unwrap();
+         let pos = u64::from_le_bytes(pos_bytes);
+         NonZero::new(pos as usize).unwrap()
+     }
+ 
+     fn unhashed_pos(&self) -> NonZero<usize> {
+-        let pos_bytes = self[UNHASHED_POS_OFFSET..][..8].try_into().unwrap();
++        let pos_bytes = self.range(UNHASHED_POS_OFFSET, 8).as_ref().try_into().unwrap();
+         let pos = u64::from_le_bytes(pos_bytes);
+         NonZero::new(pos as usize).unwrap()
+     }
+@@ -770,7 +803,7 @@
+ 
+     pub(crate) fn get_crate_hash(&self) -> Svh {
+         let bytes: [u8; CRATE_HASH_LEN] =
+-            self[CRATE_HASH_OFFSET..][..CRATE_HASH_LEN].try_into().unwrap();
++            self.range(CRATE_HASH_OFFSET, CRATE_HASH_LEN).as_ref().try_into().unwrap();
+         Svh::new(Fingerprint::from_le_bytes(bytes))
+     }
+ 
+--- a/compiler/rustc_metadata/src/rmeta/table.rs
++++ b/compiler/rustc_metadata/src/rmeta/table.rs
+@@ -525,13 +525,13 @@
+         let end = start + width;
+         #[cfg(target_family = "wasm")]
+         crate::browser_metadata::record(metadata.blob().bytes(), start, width, "table");
+-        let bytes = &metadata.blob()[start..end];
+-
+-        if let Ok(fixed) = bytes.try_into() {
++        let bytes = metadata.blob().range(start, end - start);
++
++        if let Ok(fixed) = bytes.as_ref().try_into() {
+             FixedSizeEncoding::from_bytes(fixed)
+         } else {
+             let mut fixed = [0u8; N];
+-            fixed[..width].copy_from_slice(bytes);
++            fixed[..width].copy_from_slice(bytes.as_ref());
+             FixedSizeEncoding::from_bytes(&fixed)
+         }
+     }
+--- a/compiler/rustc_metadata/src/rmeta/def_path_hash_map.rs
++++ b/compiler/rustc_metadata/src/rmeta/def_path_hash_map.rs
+@@ -10,7 +10,10 @@
+ use crate::rmeta::decoder::BlobDecodeContext;
+ 
+ pub(crate) enum DefPathHashMapRef<'tcx> {
++    #[cfg(not(target_family="wasm"))]
+     OwnedFromMetadata(odht::HashTable<HashMapConfig, OwnedSlice>, SortedMap<Hash64, DefIndex>),
++    #[cfg(target_family="wasm")]
++    OwnedFromMetadata(crate::browser_paged_hash_map::PagedHashTable<HashMapConfig>, SortedMap<Hash64, DefIndex>),
+     BorrowedFromTcx(&'tcx DefPathToIndexMap),
+ }
+ 
+@@ -59,16 +62,25 @@
+         let pos = d.position();
+         #[cfg(target_family = "wasm")]
+         crate::browser_metadata::record(d.blob().bytes(), pos, len, "def-path-map");
++        #[cfg(not(target_family="wasm"))]
+         let o = d.blob().bytes().clone().slice(|blob| &blob[pos..pos + len]);
++
+ 
+         // Although we already have the data we need via the `OwnedSlice`, we still need
+         // to advance the `DecodeContext`'s position so it's in a valid state after
+         // the method. We use `read_raw_bytes()` for that.
++        #[cfg(not(target_family="wasm"))]
+         let _ = d.read_raw_bytes(len);
++        #[cfg(target_family="wasm")]
++        d.skip_bytes(len);
+ 
++        #[cfg(not(target_family="wasm"))]
+         let inner = odht::HashTable::from_raw_bytes(o).unwrap_or_else(|e| {
+             panic!("decode error: {e}");
+         });
++        #[cfg(target_family="wasm")]
++        let inner = crate::browser_paged_hash_map::PagedHashTable::new(d.blob().bytes().clone(), pos, len)
++            .unwrap_or_else(|e| panic!("decode error: {e}"));
+ 
+         let elements = Vec::<(Hash64, DefIndex)>::decode(d);
+         let non_det_map = SortedMap::from_presorted_elements(elements);

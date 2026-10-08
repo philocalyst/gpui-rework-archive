@@ -640,6 +640,8 @@ pub struct MiriMachine<'tcx> {
     pub(crate) codepen_function_work: Option<FxHashMap<ty::Instance<'tcx>, (u64, u64)>>,
     #[cfg(target_family = "wasm")]
     codepen_host_float: bool,
+    #[cfg(target_family = "wasm")]
+    codepen_ipc: bool,
 
     /// Handle of the optional shared object file for native functions.
     #[cfg(all(feature = "native-lib", unix))]
@@ -835,6 +837,8 @@ impl<'tcx> MiriMachine<'tcx> {
             #[cfg(target_family = "wasm")]
             codepen_host_float: std::env::var("GPUI_CODEPEN_IPC").as_deref() == Ok("1")
                 && std::env::var("GPUI_CODEPEN_SOFT_FLOAT").as_deref() != Ok("1"),
+            #[cfg(target_family = "wasm")]
+            codepen_ipc: std::env::var("GPUI_CODEPEN_IPC").as_deref() == Ok("1"),
             monotonic_clock: MonotonicClock::new(config.isolated_op == IsolatedOp::Allow),
             #[cfg(all(feature = "native-lib", unix))]
             native_lib: config.native_lib.iter().map(|lib_file_path| {
@@ -1100,6 +1104,8 @@ impl VisitProvenance for MiriMachine<'_> {
             codepen_function_work: _,
             #[cfg(target_family = "wasm")]
             codepen_host_float: _,
+            #[cfg(target_family = "wasm")]
+            codepen_ipc: _,
             native_lib: _,
             #[cfg(all(feature = "native-lib", unix))]
             native_lib_ecx_interchange: _,
@@ -1977,8 +1983,9 @@ impl<'tcx> Machine<'tcx> for MiriMachine<'tcx> {
     fn before_terminator(ecx: &mut InterpCx<'tcx, Self>) -> InterpResult<'tcx> {
         ecx.machine.basic_block_count += 1u64; // a u64 that is only incremented by 1 will "never" overflow
         #[cfg(target_family = "wasm")]
-        if std::env::var("GPUI_CODEPEN_IPC").as_deref() == Ok("1")
-            && crate::codepen_browser::checkpoint(ecx.machine.basic_block_count)
+        if ecx.machine.codepen_ipc
+            && ecx.machine.basic_block_count.is_multiple_of(512)
+            && crate::codepen_browser::checkpoint()
         {
             throw_machine_stop!(TerminationInfo::Exit { code: 0, leak_check: false });
         }

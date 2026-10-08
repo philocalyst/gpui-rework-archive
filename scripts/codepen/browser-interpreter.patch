@@ -1,0 +1,448 @@
+--- a/compiler/rustc_const_eval/Cargo.toml
++++ b/compiler/rustc_const_eval/Cargo.toml
+@@ -26,3 +26,6 @@
+ rustc_trait_selection = { path = "../rustc_trait_selection" }
+ tracing = "0.1"
+ # tidy-alphabetical-end
++
++[features]
++codepen-cache-profile = []
+--- a/compiler/rustc_const_eval/src/interpret/eval_context.rs
++++ b/compiler/rustc_const_eval/src/interpret/eval_context.rs
+@@ -1,9 +1,11 @@
+ use std::cell::RefCell;
++use std::rc::Rc;
+ use std::collections::hash_map::Entry;
+ 
+ use either::{Left, Right};
+ use rustc_abi::{Align, HasDataLayout, Size, TargetDataLayout};
+-use rustc_data_structures::fx::FxHashMap;
++use rustc_index::bit_set::DenseBitSet;
++use rustc_data_structures::fx::{FxHashMap, FxHashSet};
+ use rustc_hir::def_id::DefId;
+ use rustc_middle::mir;
+ use rustc_middle::mir::interpret::{ErrorHandled, InvalidMetaKind, ReportedErrorInfo};
+@@ -27,6 +29,17 @@
+ };
+ use crate::{enter_trace_span, util};
+ 
++#[cfg(feature="codepen-cache-profile")]
++#[derive(Clone, Copy, Default)]
++pub(super) struct LocalCacheMetrics {
++    pub frame_hits: u64, pub frame_misses: u64,
++    pub layout_hits: u64, pub layout_misses: u64,
++    pub classification_hits: u64, pub classification_misses: u64,
++}
++#[cfg(feature="codepen-cache-profile")]
++static PROFILE_LOCAL_CACHE: std::sync::LazyLock<bool> = std::sync::LazyLock::new(||
++    std::env::var("GPUI_CODEPEN_PROFILE").as_deref() == Ok("functions"));
++
+ pub struct InterpCx<'tcx, M: Machine<'tcx>> {
+     /// Stores the `Machine` instance.
+     ///
+@@ -44,6 +57,35 @@
+ 
+     /// The query cache is slow so we have our own cache in front of it.
+     pub(super) layout_cache: RefCell<FxHashMap<Ty<'tcx>, rustc_abi::Layout<'tcx>>>,
++
++    /// Field traversal bypasses `layout_cache` in rustc's TyAndLayout API.
++    /// Include the full layout: enum/coroutine variants can share a Ty.
++    pub(super) field_layout_cache: RefCell<FxHashMap<(TyAndLayout<'tcx>, usize), TyAndLayout<'tcx>>>,
++
++    /// MIR bodies are arena-owned and immutable, including retained reload
++    /// revisions. Scan their StorageLive/Dead annotations once per body.
++    pub(super) storage_live_cache: FxHashMap<*const mir::Body<'tcx>, Rc<DenseBitSet<mir::Local>>>,
++
++    /// Successful post-monomorphization const checks are invariant for an
++    /// instance and immutable MIR body. Never cache failures.
++    pub(super) required_consts_cache: FxHashSet<(ty::Instance<'tcx>, *const mir::Body<'tcx>)>,
++
++    /// Monomorphic call signatures and direct-call metadata do not depend on
++    /// runtime values. Dynamic pointer/vtable lookup and argument evaluation
++    /// still run on every call.
++    pub(super) call_signature_cache: FxHashMap<Ty<'tcx>, (ty::PolyFnSig<'tcx>, ty::FnSig<'tcx>)>,
++    pub(super) direct_call_cache: FxHashMap<(Ty<'tcx>, &'tcx ty::List<Ty<'tcx>>), super::step::DirectCallMetadata<'tcx>>,
++
++    /// Frame setup asks for the callee ABI independently of the call site.
++    /// Share successful immutable ABI queries between those two paths.
++    pub(super) instance_fn_abi_cache: RefCell<FxHashMap<(ty::Instance<'tcx>, &'tcx ty::List<Ty<'tcx>>), &'tcx FnAbi<'tcx, Ty<'tcx>>>>,
++
++    /// Bound the aggregate local slots, not only the number of bodies: a
++    /// single generated function can contain a very large number of locals.
++    pub(super) local_metadata_cache: FxHashMap<(ty::Instance<'tcx>, *const mir::Body<'tcx>), Rc<rustc_index::IndexVec<mir::Local, super::stack::SharedLocalMetadata<'tcx>>>>,
++    pub(super) local_metadata_entries: usize,
++    #[cfg(feature="codepen-cache-profile")]
++    pub(super) local_cache_metrics: Option<std::cell::Cell<LocalCacheMetrics>>,
+ 
+     /// The virtual memory system.
+     pub memory: Memory<'tcx, M>,
+@@ -175,7 +217,16 @@
+         extra_args: &'tcx ty::List<Ty<'tcx>>,
+     ) -> <Self as FnAbiOfHelpers<'tcx>>::FnAbiOfResult {
+         let _trace = enter_trace_span!(M, layouting::fn_abi_of_instance, ?instance, ?extra_args);
+-        FnAbiOf::fn_abi_of_instance_no_deduced_attrs(self, instance, extra_args)
++        let key = (instance, extra_args);
++        let cached = self.instance_fn_abi_cache.borrow().get(&key).copied();
++        if let Some(abi) = cached {
++            return Ok(abi);
++        }
++        let abi = FnAbiOf::fn_abi_of_instance_no_deduced_attrs(self, instance, extra_args)?;
++        if self.instance_fn_abi_cache.borrow().len() < 131_072 {
++            self.instance_fn_abi_cache.borrow_mut().insert(key, abi);
++        }
++        Ok(abi)
+     }
+ }
+ 
+@@ -253,6 +304,16 @@
+             tcx: tcx.at(root_span),
+             typing_env,
+             layout_cache: RefCell::new(FxHashMap::default()),
++            field_layout_cache: RefCell::new(FxHashMap::default()),
++            storage_live_cache: FxHashMap::default(),
++            required_consts_cache: FxHashSet::default(),
++            call_signature_cache: FxHashMap::default(),
++            direct_call_cache: FxHashMap::default(),
++            instance_fn_abi_cache: RefCell::new(FxHashMap::default()),
++            local_metadata_cache: FxHashMap::default(),
++            local_metadata_entries: 0,
++            #[cfg(feature="codepen-cache-profile")]
++            local_cache_metrics: PROFILE_LOCAL_CACHE.then(|| std::cell::Cell::new(LocalCacheMetrics::default())),
+             memory: Memory::new(),
+             recursion_limit: tcx.recursion_limit(),
+         }
+--- a/compiler/rustc_const_eval/src/interpret/projection.rs
++++ b/compiler/rustc_const_eval/src/interpret/projection.rs
+@@ -141,6 +141,20 @@
+     Prov: Provenance,
+     M: Machine<'tcx, Provenance = Prov>,
+ {
++    /// Cache only immutable layout metadata. Runtime lengths, bounds,
++    /// unsized alignment and pointer/provenance operations still run normally.
++    fn cached_field_layout(&self, base: TyAndLayout<'tcx>, field: usize) -> TyAndLayout<'tcx> {
++        let key = (base, field);
++        if let Some(layout) = self.field_layout_cache.borrow().get(&key).copied() {
++            return layout;
++        }
++        let layout = base.field(self, field);
++        if self.field_layout_cache.borrow().len() < 131_072 {
++            self.field_layout_cache.borrow_mut().insert(key, layout);
++        }
++        layout
++    }
++
+     /// Offset a pointer to project to a field of a struct/union. Unlike `place_field`, this is
+     /// always possible without allocating, so it can take `&self`. Also return the field's layout.
+     /// This supports both struct and array fields, but not slices!
+@@ -160,7 +174,7 @@
+         let offset = base.layout().fields.offset(field.as_usize());
+         // Computing the layout does normalization, so we get a normalized type out of this
+         // even if the field type is non-normalized (possible e.g. via associated types).
+-        let field_layout = base.layout().field(self, field.as_usize());
++        let field_layout = self.cached_field_layout(base.layout(), field.as_usize());
+ 
+         // Offset may need adjustment for unsized fields.
+         let (meta, offset) = if field_layout.is_unsized() {
+@@ -265,7 +279,7 @@
+                     .ok_or_else(|| err_ub!(PointerArithOverflow))?;
+ 
+                 // All fields have the same layout.
+-                let field_layout = base.layout().field(self, 0);
++                let field_layout = self.cached_field_layout(base.layout(), 0);
+                 (offset, field_layout)
+             }
+             _ => span_bug!(
+@@ -329,7 +343,7 @@
+             );
+         };
+         let len = base.len(self)?;
+-        let field_layout = base.layout().field(self, 0);
++        let field_layout = self.cached_field_layout(base.layout(), 0);
+         // Ensure that all the offsets are in-bounds once, up-front.
+         debug!("project_array_fields: {base:?} {len}");
+         base.offset(len * stride, self.layout_of(self.tcx.types.unit).unwrap(), self)?;
+--- a/compiler/rustc_const_eval/src/interpret/stack.rs
++++ b/compiler/rustc_const_eval/src/interpret/stack.rs
+@@ -1,6 +1,7 @@
+ //! Manages the low-level pushing and popping of stack frames and the (de)allocation of local variables.
+ //! For handling of argument passing and return values, see the `call` module.
+ use std::cell::Cell;
++use std::rc::Rc;
+ use std::{fmt, mem};
+ 
+ use either::{Either, Left, Right};
+@@ -57,6 +58,15 @@
+     }
+ }
+ 
++/// Successful, instance-specific local metadata shared by repeated calls.
++/// Cells are filled only when execution actually requests that local. Eager
++/// classification/normalization could expose invalid types in dead MIR.
++#[derive(Clone)]
++pub(super) struct SharedLocalMetadata<'tcx> {
++    trivially_sized: Cell<Option<bool>>,
++    layout: Cell<Option<TyAndLayout<'tcx>>>,
++}
++
+ /// A stack frame.
+ pub struct Frame<'tcx, Prov: Provenance = CtfeProvenance, Extra = ()> {
+     ////////////////////////////////////////////////////////////////////////////////
+@@ -67,6 +77,10 @@
+ 
+     /// The def_id and args of the current function.
+     pub(super) instance: ty::Instance<'tcx>,
++
++    /// Owned by this interpreter and keyed by instance + immutable MIR body.
++    /// Reloaded bodies therefore cannot reuse another revision's layouts.
++    shared_local_metadata: Option<Rc<IndexVec<mir::Local, SharedLocalMetadata<'tcx>>>>,
+ 
+     /// Extra data for the machine.
+     pub extra: Extra,
+@@ -258,6 +272,7 @@
+             return_cont: self.return_cont,
+             return_place: self.return_place,
+             locals: self.locals,
++            shared_local_metadata: self.shared_local_metadata,
+             va_list: self.va_list,
+             loc: self.loc,
+             extra,
+@@ -388,6 +403,25 @@
+ 
+         // First push a stack frame so we have access to `instantiate_from_current_frame` and other
+         // `self.frame()`-based functions.
++        let local_key = (instance, body as *const _);
++        let shared_local_metadata = if let Some(shared) = self.local_metadata_cache.get(&local_key) {
++            #[cfg(feature="codepen-cache-profile")]
++            if let Some(metrics) = &self.local_cache_metrics {
++                let mut value = metrics.get(); value.frame_hits += 1; metrics.set(value);
++            }
++            Some(Rc::clone(shared))
++        } else if self.local_metadata_entries + body.local_decls.len() <= 1_048_576
++            && self.local_metadata_cache.len() < 65_536 {
++            #[cfg(feature="codepen-cache-profile")]
++            if let Some(metrics) = &self.local_cache_metrics {
++                let mut value = metrics.get(); value.frame_misses += 1; metrics.set(value);
++            }
++            let empty = SharedLocalMetadata { trivially_sized: Cell::new(None), layout: Cell::new(None) };
++            let shared = Rc::new(IndexVec::from_elem(empty, &body.local_decls));
++            self.local_metadata_entries += body.local_decls.len();
++            self.local_metadata_cache.insert(local_key, Rc::clone(&shared));
++            Some(shared)
++        } else { None };
+         let dead_local = LocalState { value: LocalValue::Dead, layout: Cell::new(None) };
+         let locals = IndexVec::from_elem(dead_local, &body.local_decls);
+         let pre_frame = Frame {
+@@ -396,6 +430,7 @@
+             return_cont,
+             return_place: return_place.clone(),
+             locals,
++            shared_local_metadata,
+             va_list: vec![],
+             instance,
+             tracing_span: SpanGuard::new(),
+@@ -405,16 +440,22 @@
+         self.stack_mut().push(frame);
+ 
+         // Make sure all the constants required by this frame evaluate successfully (post-monomorphization check).
+-        for &const_ in body.required_consts() {
+-            // We can't use `eval_mir_constant` here as that assumes that all required consts have
+-            // already been checked, so we need a separate tracing call.
+-            let _trace = enter_trace_span!(M, const_eval::required_consts, ?const_.const_);
+-            let c =
+-                self.instantiate_from_current_frame_and_normalize_erasing_regions(const_.const_)?;
+-            c.eval(*self.tcx, self.typing_env, const_.span).map_err(|err| {
+-                err.emit_note(*self.tcx);
+-                err
+-            })?;
++        let const_key = (instance, body as *const _);
++        if !body.required_consts().is_empty() && !self.required_consts_cache.contains(&const_key) {
++            for &const_ in body.required_consts() {
++                // Keep failure diagnostics at the current call site; insert
++                // only after every required constant evaluated successfully.
++                let _trace = enter_trace_span!(M, const_eval::required_consts, ?const_.const_);
++                let c = self
++                    .instantiate_from_current_frame_and_normalize_erasing_regions(const_.const_)?;
++                c.eval(*self.tcx, self.typing_env, const_.span).map_err(|err| {
++                    err.emit_note(*self.tcx);
++                    err
++                })?;
++            }
++            if self.required_consts_cache.len() < 131_072 {
++                self.required_consts_cache.insert(const_key);
++            }
+         }
+ 
+         // Finish things up.
+@@ -484,7 +525,16 @@
+         self.storage_live(mir::RETURN_PLACE)?;
+ 
+         let body = self.body();
+-        let always_live = always_storage_live_locals(body);
++        let key = body as *const _;
++        let always_live = if let Some(locals) = self.storage_live_cache.get(&key) {
++            Rc::clone(locals)
++        } else {
++            let locals = Rc::new(always_storage_live_locals(body));
++            if self.storage_live_cache.len() < 65_536 {
++                self.storage_live_cache.insert(key, Rc::clone(&locals));
++            }
++            locals
++        };
+         for local in body.vars_and_temps_iter() {
+             if always_live.contains(local) {
+                 self.storage_live(local)?;
+@@ -496,6 +546,19 @@
+ 
+         interp_ok(())
+     }
++
++    /// Optional diagnostics never retain types outside this interpreter.
++    #[cfg(feature="codepen-cache-profile")]
++    pub fn codepen_local_cache_report(&self) -> Option<String> {
++        let metrics = self.local_cache_metrics.as_ref()?.get();
++        Some(format!("GPUI_LOCAL_CACHE bodies={} slots={} frame_hits={} frame_misses={} layout_hits={} layout_misses={} classification_hits={} classification_misses={}",
++            self.local_metadata_cache.len(), self.local_metadata_entries,
++            metrics.frame_hits, metrics.frame_misses, metrics.layout_hits, metrics.layout_misses,
++            metrics.classification_hits, metrics.classification_misses))
++    }
++
++    #[cfg(not(feature="codepen-cache-profile"))]
++    pub fn codepen_local_cache_report(&self) -> Option<String> { None }
+ 
+     pub fn storage_live_dyn(
+         &mut self,
+@@ -549,7 +612,21 @@
+ 
+         // This is a hot function, we avoid computing the layout when possible.
+         // `unsized_` will be `None` for sized types and `Some(layout)` for unsized types.
+-        let unsized_ = if is_very_trivially_sized(self.body().local_decls[local].ty) {
++        let trivial = if let Some(shared) = &self.frame().shared_local_metadata {
++            #[cfg(feature="codepen-cache-profile")]
++            if let Some(metrics) = &self.local_cache_metrics {
++                let mut value = metrics.get();
++                if shared[local].trivially_sized.get().is_some() { value.classification_hits += 1; }
++                else { value.classification_misses += 1; }
++                metrics.set(value);
++            }
++            shared[local].trivially_sized.get().unwrap_or_else(|| {
++                let trivial = is_very_trivially_sized(self.body().local_decls[local].ty);
++                shared[local].trivially_sized.set(Some(trivial));
++                trivial
++            })
++        } else { is_very_trivially_sized(self.body().local_decls[local].ty) };
++        let unsized_ = if trivial {
+             None
+         } else {
+             // We need the layout.
+@@ -629,6 +706,21 @@
+             return interp_ok(layout);
+         }
+ 
++        // Known-layout requests retain their existing validation path. Only
++        // successful ordinary local layouts are shared between activations.
++        let shared = if layout.is_none() { frame.shared_local_metadata.as_deref() } else { None };
++        if let Some(cached) = shared.and_then(|shared| shared[local].layout.get()) {
++            #[cfg(feature="codepen-cache-profile")]
++            if let Some(metrics) = &self.local_cache_metrics {
++                let mut value = metrics.get(); value.layout_hits += 1; metrics.set(value);
++            }
++            state.layout.set(Some(cached));
++            return interp_ok(cached);
++        }
++        #[cfg(feature="codepen-cache-profile")]
++        if shared.is_some() && let Some(metrics) = &self.local_cache_metrics {
++            let mut value = metrics.get(); value.layout_misses += 1; metrics.set(value);
++        }
+         let layout = from_known_layout(self.tcx, self.typing_env, layout, || {
+             let local_ty = frame.body.local_decls[local].ty;
+             let local_ty =
+@@ -638,6 +730,7 @@
+ 
+         // Layouts of locals are requested a lot, so we cache them.
+         state.layout.set(Some(layout));
++        if let Some(shared) = shared { shared[local].layout.set(Some(layout)); }
+         interp_ok(layout)
+     }
+ }
+--- a/compiler/rustc_const_eval/src/interpret/step.rs
++++ b/compiler/rustc_const_eval/src/interpret/step.rs
+@@ -20,6 +20,13 @@
+     MemPlaceMeta, PlaceTy, Projectable, RetagMode, interp_ok, throw_ub, throw_unsup_format,
+ };
+ use crate::{enter_trace_span, util};
++
++#[derive(Clone, Copy)]
++pub(super) struct DirectCallMetadata<'tcx> {
++    instance: Instance<'tcx>,
++    fn_abi: Option<&'tcx FnAbi<'tcx, Ty<'tcx>>>,
++    with_caller_location: bool,
++}
+ 
+ struct EvaluatedCalleeAndArgs<'tcx, M: Machine<'tcx>> {
+     callee: FnVal<'tcx, M::ExtraFnVal>,
+@@ -479,11 +486,20 @@
+             .map(|arg| self.eval_fn_call_argument(&arg.node, move_definitely_disjoint))
+             .collect::<InterpResult<'tcx, Vec<_>>>()?;
+ 
+-        let fn_sig_binder = {
+-            let _trace = enter_trace_span!(M, "fn_sig", ty = ?func.layout.ty.kind());
+-            func.layout.ty.fn_sig(*self.tcx)
+-        };
+-        let fn_sig = self.tcx.normalize_erasing_late_bound_regions(self.typing_env, fn_sig_binder);
++        let signature_key = func.layout.ty;
++        let (fn_sig_binder, fn_sig) =
++            if let Some(signature) = self.call_signature_cache.get(&signature_key) {
++                *signature
++            } else {
++                let _trace = enter_trace_span!(M, "fn_sig", ty = ?signature_key.kind());
++                let binder = signature_key.fn_sig(*self.tcx);
++                let signature =
++                    self.tcx.normalize_erasing_late_bound_regions(self.typing_env, binder);
++                if self.call_signature_cache.len() < 131_072 {
++                    self.call_signature_cache.insert(signature_key, (binder, signature));
++                }
++                (binder, signature)
++            };
+         let extra_args = &args[fn_sig.inputs().len()..];
+         let extra_args =
+             self.tcx.mk_type_list_from_iter(extra_args.iter().map(|arg| arg.layout().ty));
+@@ -495,18 +511,27 @@
+                 (fn_val, Some(self.fn_abi_of_fn_ptr(fn_sig_binder, extra_args)?), false)
+             }
+             ty::FnDef(def_id, args) => {
+-                let instance = self.resolve(def_id, args.no_bound_vars().unwrap())?;
+-                // Don't compute FnAbi for LLVM intrinsics. Trying to do that would panic.
+-                // Rust intrinsics however *do* need a FnAbi as we may invoke the
+-                // fallback body like a regular function.
+-                let has_fn_abi = !matches!(instance.def, ty::InstanceKind::LlvmIntrinsic(_));
+-                (
+-                    FnVal::Instance(instance),
+-                    has_fn_abi
+-                        .then(|| self.fn_abi_of_instance_no_deduced_attrs(instance, extra_args))
+-                        .transpose()?,
+-                    instance.def.requires_caller_location(*self.tcx),
+-                )
++                let key = (func.layout.ty, extra_args);
++                let metadata = if let Some(metadata) = self.direct_call_cache.get(&key) {
++                    *metadata
++                } else {
++                    let instance = self.resolve(def_id, args.no_bound_vars().unwrap())?;
++                    // LLVM intrinsics cannot have FnAbi computed. Rust
++                    // intrinsics can execute their ordinary fallback bodies.
++                    let has_fn_abi = !matches!(instance.def, ty::InstanceKind::LlvmIntrinsic(_));
++                    let metadata = DirectCallMetadata {
++                        instance,
++                        fn_abi: has_fn_abi
++                            .then(|| self.fn_abi_of_instance_no_deduced_attrs(instance, extra_args))
++                            .transpose()?,
++                        with_caller_location: instance.def.requires_caller_location(*self.tcx),
++                    };
++                    if self.direct_call_cache.len() < 131_072 {
++                        self.direct_call_cache.insert(key, metadata);
++                    }
++                    metadata
++                };
++                (FnVal::Instance(metadata.instance), metadata.fn_abi, metadata.with_caller_location)
+             }
+             _ => {
+                 span_bug!(terminator.source_info.span, "invalid callee of type {}", func.layout.ty)
