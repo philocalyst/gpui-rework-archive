@@ -8563,11 +8563,15 @@ impl<V: 'static + Render> WindowHandle<V> {
         })?
     }
 
-    /// Read the root view while borrowing the app.
+    /// Reads the root view through an existing app borrow.
     ///
-    /// The returned reference is tied to `cx`. This fails if the window is closed or if the live
-    /// root view's type does not match `V`. Use [`Self::read_with`] when the caller has an
-    /// [`AppContext`] rather than an `App` borrow, and [`Self::update`] when the root must change.
+    /// The returned reference is tied to `cx`. Returns an error if the window
+    /// is closed, already being updated, or has a root of another type. Reading
+    /// a root entity that is itself already under update still panics.
+    ///
+    /// Use [`read_with`](Self::read_with) for a generic [`AppContext`], or
+    /// [`update`](Self::update) to change the root. Unlike this method,
+    /// `read_with` panics when an app-backed window is already being updated.
     pub fn read<'a>(&self, cx: &'a App) -> Result<&'a V> {
         let x = cx
             .windows
@@ -8594,6 +8598,8 @@ impl<V: 'static + Render> WindowHandle<V> {
     ///
     /// With an app-backed context, panics if this window is already being
     /// updated. Read the root supplied to that update callback instead.
+    /// Reading an already borrowed root entity or acquiring conflicting async
+    /// app access also panics; see [`AppContext::read_window`].
     pub fn read_with<C, R>(&self, cx: &C, read_with: impl FnOnce(&V, &App) -> R) -> Result<R>
     where
         C: AppContext,
@@ -8643,10 +8649,11 @@ impl<V: 'static + Render> WindowHandle<V> {
         cx.read_window(self, |root_view, _cx| root_view)
     }
 
-    /// Check if this window is 'active'.
+    /// Reports whether the platform considers this window active.
     ///
-    /// Will return `None` if the window is closed or currently
-    /// borrowed.
+    /// Returns `None` if the window is closed or already being updated.
+    /// Activation belongs to the platform window; it does not identify the
+    /// selected [`FocusHandle`] inside it. See [`Window::is_window_active`].
     pub fn is_active(&self, cx: &mut App) -> Option<bool> {
         cx.update_window(self.any_handle, |_, window, _| window.is_window_active())
             .ok()
@@ -8733,6 +8740,8 @@ impl AnyWindowHandle {
     /// Unlike [`WindowHandle::update`], this does not lease the root entity
     /// before invoking the callback; update the supplied [`AnyView`] when
     /// needed. Returns an error for a closed or already borrowed window.
+    /// Async app-access failures follow [`AppContext::update_window`]; panics
+    /// from `update` propagate.
     pub fn update<C, R>(
         self,
         cx: &mut C,
@@ -8750,6 +8759,12 @@ impl AnyWindowHandle {
     /// Returns an error on either mismatch or when the window is closed.
     /// The callback receives a strong entity handle; retaining it keeps the
     /// root entity alive independently of the window.
+    ///
+    /// # Panics
+    ///
+    /// With an app-backed context, panics if this window is already being
+    /// updated. Async app borrowing follows [`AppContext::read_window`].
+    /// Panics from `read` propagate.
     pub fn read<T, C, R>(self, cx: &C, read: impl FnOnce(Entity<T>, &App) -> R) -> Result<R>
     where
         C: AppContext,

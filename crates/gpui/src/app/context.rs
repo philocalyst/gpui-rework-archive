@@ -27,12 +27,14 @@ use super::{App, AsyncWindowContext, Entity, KeystrokeEvent};
 ///
 /// # Callbacks and ownership
 ///
-/// [`listener`](Self::listener), [`observe`](Self::observe), and
-/// [`spawn`](Self::spawn) refer to this entity weakly. They can work with it
-/// while an owner remains and stop calling it after release. Keep returned
-/// [`Subscription`] and [`Task`] handles on the owner when dropping that owner
-/// should cancel the work. [`processor`](Self::processor) retains a strong
-/// handle because its caller requires a return value.
+/// [`listener`](Self::listener) and [`observe`](Self::observe) hold this entity
+/// weakly and skip their callback after its release. [`spawn`](Self::spawn)
+/// also supplies a weak handle, but the future keeps running while its
+/// [`Task`] is retained or detached. Entity release alone does not cancel it.
+/// Store the task on the entity when releasing that entity should cancel the
+/// work; store a returned [`Subscription`] there when it should end observation.
+/// [`processor`](Self::processor) retains a strong handle because its caller
+/// requires a return value.
 /// [`observe_self`](Self::observe_self) and [`subscribe_self`](Self::subscribe_self)
 /// also retain this entity; keep those subscriptions on an external owner.
 ///
@@ -87,7 +89,8 @@ impl<'a, T: 'static> Context<'a, T> {
 
     /// Returns a weak handle to this entity without extending its lifetime.
     ///
-    /// Use it for callbacks whose work should stop after the last owner leaves.
+    /// Use it when a callback should skip entity access after the last owner
+    /// leaves. The handle does not cancel a future or unregister a callback.
     pub fn weak_entity(&self) -> WeakEntity<T> {
         self.entity_state.clone()
     }
@@ -362,7 +365,10 @@ impl<'a, T: 'static> Context<'a, T> {
     /// The operation receives a weak handle to this entity and an [`AsyncApp`]
     /// that can cross `await` points. It does not retain the entity. Attempt a
     /// weak update after waiting and handle the error if the entity disappeared.
-    /// Keep or detach the returned task; dropping it cancels remaining work.
+    /// Store the returned task on this entity when releasing the entity should
+    /// cancel the operation. A task retained elsewhere or detached keeps running
+    /// after entity release; its weak updates then return errors. See the
+    /// [task ownership test](https://gpui-ce.github.io/book/testing.html#separate-task-ownership-from-entity-ownership).
     ///
     /// A foreground future still blocks input while it is being polled. Move
     /// long CPU work into [`BackgroundExecutor::spawn`](crate::BackgroundExecutor::spawn),
@@ -916,8 +922,10 @@ impl<'a, T: 'static> Context<'a, T> {
     /// Starts a foreground task with weak entity ownership and a window context.
     ///
     /// The [`AsyncWindowContext`] can cross `await`; it reacquires app and window
-    /// access for each operation. Handle failed updates after teardown. Keep or
-    /// detach the returned task, because dropping it cancels remaining work.
+    /// access for each operation. Releasing the entity or closing the window
+    /// does not cancel the future: the returned [`Task`] controls its lifetime.
+    /// Retain that task on the entity when its release should cancel the work,
+    /// and handle failed updates if the future can outlive its targets.
     /// Each poll runs on the foreground thread; use the background executor for
     /// long CPU work, as described by [`spawn`](Self::spawn).
     #[track_caller]

@@ -759,20 +759,33 @@ impl AnyWeakEntity {
         })
     }
 
-    /// Asserts that the entity referenced by this weak handle has been fully released.
+    /// Asserts that no strong handles or stored value remain for this entity.
     ///
-    /// # Example
+    /// A failed [`upgrade`](Self::upgrade) establishes that there are no strong
+    /// owners. This assertion also checks that effect processing has removed
+    /// the stored value. Keep the app alive and flush its effects first:
     ///
-    /// ```ignore
-    /// let entity = cx.new(|_| MyEntity::new());
+    /// ```
+    /// # #[cfg(feature = "test-support")] {
+    /// use gpui::TestApp;
+    ///
+    /// let mut app = TestApp::new();
+    /// let entity = app.new_entity(|_| String::from("draft"));
     /// let weak = entity.downgrade();
     /// drop(entity);
+    /// assert!(weak.upgrade().is_none());
     ///
-    /// // Verify the entity was released
+    /// app.update(|_| {}); // Flush release callbacks and destroy the value.
     /// weak.assert_released();
+    /// # }
     /// ```
     ///
-    /// # Debugging Leaks
+    /// This method requires `leak-detection`, which `test-support` enables.
+    /// The example uses the [`TestApp`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.TestApp.html)
+    /// harness from `test-support`. See [teardown tests](https://gpui-ce.github.io/book/testing.html#check-that-teardown-releases-the-owner)
+    /// for checking a consumer and its subscriptions together.
+    ///
+    /// # Diagnose a retained handle
     ///
     /// If this method panics due to leaked handles, set the `LEAK_BACKTRACE` environment
     /// variable to see where the leaked handles were allocated:
@@ -783,9 +796,9 @@ impl AnyWeakEntity {
     ///
     /// # Panics
     ///
-    /// - Panics if any strong handles to the entity are still alive.
-    /// - Panics if the entity was recently dropped but cleanup hasn't completed yet
-    ///   (resources are retained until the end of the effect cycle).
+    /// Panics if a strong handle remains or the app has not yet removed the
+    /// stored value. Also panics if the app's reference-count storage has been
+    /// dropped, or this is a placeholder from [`new_invalid`](Self::new_invalid).
     #[cfg(any(test, feature = "leak-detection"))]
     pub fn assert_released(&self) {
         self.entity_ref_counts
@@ -952,7 +965,8 @@ impl<T: 'static> WeakEntity<T> {
     /// This is the preferred operation for callbacks that outlive their entity:
     /// the callback is skipped when the handle cannot be upgraded. The error
     /// describes entity release; it does not catch panics in the callback or
-    /// prevent a recursive entity borrow from panicking.
+    /// prevent a recursive entity borrow from panicking. With an async context,
+    /// acquiring app access can also panic; see [`AsyncApp`](crate::AsyncApp).
     // docs:examples:begin
     #[doc = include_str!("../docs/examples/gpui-WeakEntity-update-80df6484.md")]
     // docs:examples:end
@@ -970,9 +984,12 @@ impl<T: 'static> WeakEntity<T> {
 
     /// Updates the live entity with the window currently associated with it.
     ///
-    /// Returns an error if the entity has been released or has no current
-    /// window. The callback receives exclusive entity, window, and app access;
-    /// it must follow the same borrow rules as [`Entity::update`].
+    /// Returns an error if the entity has been released or its current window
+    /// cannot be accessed. This includes a closed or already borrowed window;
+    /// async contexts also return an error for unavailable app access. See
+    /// [`AppContext::with_window`] for association and failure rules.
+    /// The callback receives exclusive entity, window, and app access and
+    /// follows [`Entity::update`]'s borrow rules. Callback panics propagate.
     pub fn update_in<C, R>(
         &self,
         cx: &mut C,
@@ -992,7 +1009,9 @@ impl<T: 'static> WeakEntity<T> {
     ///
     /// Returns an error without calling `read` when the last strong handle has
     /// gone away. A successful read follows [`Entity::read_with`]'s borrow rules
-    /// and does not flush pending effects.
+    /// and does not flush pending effects. The error reports entity release;
+    /// acquiring app access through an [`AsyncApp`](crate::AsyncApp) can still
+    /// panic, as can `read` itself.
     pub fn read_with<C, R>(&self, cx: &C, read: impl FnOnce(&T, &App) -> R) -> Result<R>
     where
         C: AppContext,

@@ -4,9 +4,10 @@ use crate::{App, BorrowAppContext};
 ///
 /// A global is one value per app, keyed by its concrete type. It is useful for
 /// state shared across unrelated entities, such as configuration or a service
-/// handle. Prefer an [`Entity`](crate::Entity) when the value has its own
-/// lifecycle, needs weak handles, or must notify independently of other
-/// globals.
+/// handle. Prefer an [`Entity`](crate::Entity) when consumers need distinct
+/// instances of the same type, weak handles, or a value whose lifetime follows
+/// its owners. Global observation is per type; changing one global does not
+/// notify observers of every other global.
 ///
 /// Implement the empty trait, then install a value with [`App::set_global`]:
 ///

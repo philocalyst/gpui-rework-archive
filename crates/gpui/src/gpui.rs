@@ -277,6 +277,11 @@ pub trait AppContext {
     /// available for a handle-based read until that closure has returned;
     /// construct it from local values instead of reading `cx.entity()`.
     /// Dropping the last returned or cloned handle schedules release.
+    ///
+    /// With [`AsyncWindowContext`], construction attempts to associate the
+    /// entity with that window, but falls back to app-only creation if window
+    /// access fails. Use [`VisualContext::new_window_entity`] when construction
+    /// requires a live window.
     #[expect(
         clippy::wrong_self_convention,
         reason = "`App::new` is an ubiquitous function for creating entities"
@@ -360,9 +365,10 @@ pub trait AppContext {
 
     /// Calls `f` with the live window, its erased root view, and the app.
     ///
-    /// Returns an error if the handle no longer names a window. An async
-    /// context also returns an error when the app has gone away, is quitting,
-    /// or is already borrowed. Panics from `f` are not converted to errors.
+    /// Returns an error if the window has closed or is already being updated.
+    /// An async context also returns an error when the app has gone away, is
+    /// quitting, or is already borrowed. Panics from `f` are not converted to
+    /// errors.
     fn update_window<T, F>(&mut self, window: AnyWindowHandle, f: F) -> Result<T>
     where
         F: FnOnce(AnyView, &mut Window, &mut App) -> T;

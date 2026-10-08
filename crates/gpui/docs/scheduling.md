@@ -118,6 +118,16 @@ the handle in a field if the view owns the work's lifetime. Calling
 [`Task::detach`](crate::Task::detach) lets the work continue without a handle
 that can cancel it or retrieve its output.
 
+Entity and task ownership are separate. The weak handle supplied by
+[`Context::spawn`](crate::Context::spawn) stops retaining the entity; it does
+not stop the future. A task retained elsewhere or detached can continue after
+that entity is released. Likewise, an [`AsyncWindowContext`](crate::AsyncWindowContext)
+does not cancel its future when the window closes. Handle failed access after
+waiting, or put the task on an owner whose destruction should cancel it. The
+[task ownership test](https://gpui-ce.github.io/book/testing.html#separate-task-ownership-from-entity-ownership)
+releases an entity while its externally owned task waits, then completes the
+task and checks its failed update.
+
 Dropping or detaching controls GPUI's future, not side effects it already
 performed. A network request or write needs its own cancellation and
 transaction contract. To report `Result` failures from intentionally detached

@@ -1398,6 +1398,26 @@
       "url": "https://rocket.rs/guide/v0.5/pastebin/",
       "status": "read (complete primary tutorial prose and code; 2026-10-08 UTC)",
       "reason": "follow-up to the article's Rocket tutorial discussion; examples read, not executed"
+    },
+    {
+      "url": "https://gwern.net/style-guide",
+      "status": "surveyed (selected sections read; 2026-10-08 UTC)",
+      "reason": "read the condensed manual, opening writing guidance, prose/reference conventions, and the complete LLM Writing Guide including examples, checklist, and footnotes; the complete page was not read"
+    },
+    {
+      "url": "https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing",
+      "status": "surveyed (selected sections read; 2026-10-08 UTC)",
+      "reason": "read the introduction and caveats, selected content examples, language/grammar, and style sections; the complete page was not read; encyclopedia-specific formatting advice is not treated as a ban on useful Rust documentation markup"
+    },
+    {
+      "url": "https://fasterthanli.me/series/updating-fasterthanli-me-for-2022",
+      "status": "read (complete series index; 2026-10-08 UTC)",
+      "reason": "index only; this does not claim the linked series installments were read"
+    },
+    {
+      "url": "https://fasterthanli.me/articles/my-ideal-rust-workflow",
+      "status": "surveyed (content-pipeline and local-workflow excerpt read; 2026-10-08 UTC)",
+      "reason": "read the one-time efforts and dreaming-bigger pipeline discussion; the complete article was not read"
     }
   ],
   "status_legend": {

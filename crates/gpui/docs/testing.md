@@ -321,6 +321,46 @@ a weak entity handle for updates after an await.
 > performed. Test the external operation's own cancellation or transaction
 > contract separately.
 
+## Separate task ownership from entity ownership
+
+[`Context::spawn`](crate::Context::spawn) gives the future a weak entity handle.
+That prevents the future from retaining the entity, but does not cancel the
+future when the entity is released. This test keeps the task outside its
+entity, releases the entity while the task waits, then lets the task finish:
+
+```rust
+use futures::{channel::oneshot, FutureExt as _};
+use gpui::TestApp;
+
+let mut app = TestApp::new();
+let entity = app.new_entity(|_| String::from("draft"));
+let weak = entity.downgrade();
+let (complete, completion) = oneshot::channel();
+let task = app.update_entity(&entity, |_, cx| {
+    cx.spawn(async move |this, cx| {
+        completion.await.unwrap();
+        this.update(cx, |_, _| ()).is_err()
+    })
+});
+
+drop(entity);
+app.update(|_| {}); // Release the value while the task waits on its channel.
+assert!(weak.upgrade().is_none());
+assert!(!task.is_ready());
+
+complete.send(()).unwrap();
+app.run_until_parked();
+assert_eq!(task.now_or_never(), Some(true)); // Completed; entity update failed.
+```
+
+The final assertion retrieves the task's output. It establishes both that the
+future ran after release and that its attempted entity update returned an error.
+A detached task can outlive the entity in the same way. Store the task on the
+entity when releasing the entity should cancel it, and avoid a strong handle
+back to that owner. Closing a window likewise does not cancel a task supplied
+with an [`AsyncWindowContext`](crate::AsyncWindowContext); the future must
+handle a failed window update if it can outlive the window.
+
 ## Reject a result from a replaced request
 
 Cancellation cannot reject a result that has already escaped the cancelled

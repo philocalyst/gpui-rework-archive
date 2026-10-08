@@ -378,6 +378,51 @@ impl AsyncApp {
 /// updates follow the entity's associated window, which can differ from this
 /// handle's window.
 ///
+/// # Create app state or window state
+///
+/// [`AppContext::new`] and [`AppContext::insert_entity`] attempt construction
+/// in this window, giving the entity an initial window association. If window
+/// access fails, they fall back to app-only construction. A closed window
+/// therefore does not prevent these methods from creating an entity. The
+/// fallback retains [`AsyncApp`]'s panic behavior if the app cannot be borrowed
+/// or has been released.
+///
+/// Use [`VisualContext::new_window_entity`] when construction needs a live
+/// [`Window`]. It returns an error without calling the constructor when this
+/// window cannot be accessed. App-only entity reads and updates do not require
+/// the window to remain open.
+///
+/// ```
+/// # #[cfg(feature = "test-support")] {
+/// use gpui::{AppContext as _, Context, Render, TestApp, VisualContext as _,
+///            Window, div, prelude::*};
+/// use std::cell::Cell;
+///
+/// struct Root;
+/// impl Render for Root {
+///     fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+///         div()
+///     }
+/// }
+///
+/// let mut app = TestApp::new();
+/// let mut window = app.open_window(|_, _| Root);
+/// let mut cx = window.update(|_, window, cx| window.to_async(cx));
+/// window.update(|_, window, _| window.remove_window());
+///
+/// let draft = cx.new(|_| String::from("draft"));
+/// assert_eq!(draft.read_with(&cx, |draft, _| draft.clone()), "draft");
+/// assert!(draft.update_in(&mut cx, |_, _, _| ()).is_err());
+///
+/// let constructed = Cell::new(false);
+/// assert!(cx.new_window_entity(|_, _| {
+///     constructed.set(true);
+///     String::from("window state")
+/// }).is_err());
+/// assert!(!constructed.get());
+/// # }
+/// ```
+///
 /// # Update this window explicitly
 ///
 /// Enter this context's [`update`](Self::update) closure, then update the
@@ -427,7 +472,8 @@ impl AsyncWindowContext {
 
     /// Borrows this context's window and app for one synchronous update.
     ///
-    /// Returns an error if the window is closed or app access is unavailable.
+    /// Returns an error if the window is closed, already being updated, or app
+    /// access is unavailable.
     /// Panics raised by `update` propagate. See [`AppContext::update_window`].
     pub fn update<R>(&mut self, update: impl FnOnce(&mut Window, &mut App) -> R) -> Result<R> {
         self.app
@@ -489,6 +535,8 @@ impl AsyncWindowContext {
     /// Await background work in the future, then call [`update`](Self::update)
     /// to apply its result. Dropping the returned [`Task`] cancels the future;
     /// neither the task's context nor its window handle keeps the window open.
+    /// Closing the window does not cancel the future. A later window update
+    /// returns an error, which the future can handle before returning.
     #[track_caller]
     pub fn spawn<AsyncFn, R>(&self, f: AsyncFn) -> Task<R>
     where

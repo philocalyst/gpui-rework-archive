@@ -843,7 +843,92 @@ derive and registration macro docs. In particular, schema absence is distinct
 from an unknown action and from JSON construction being disabled; aliases use
 the canonical builder but metadata maps use canonical names. The new direct
 builder example asserts valid data, payload-sensitive equality, wrong field
-types, and unknown-field rejection. It needs the next doctest run.
+types, and unknown-field rejection. The subsequent complete run passes 197
+examples (190 merged and seven test-harness examples), with two ignored.
+
+The combined browser-program, strict API, Zola, and mdBook build then passed
+at `7360ebfc34089ed5024efe3ceaf9f82c71e50af1`. The first attempt exhausted disk
+space while writing Cargo incremental caches. Only reproducible incremental
+caches were cleared; the source and previous site artifacts were preserved.
+The successful rerun used `CARGO_INCREMENTAL=0`. Its source digest is
+`ad8a594ce413773c975c7478f76cd4d26b9cdf5e910118a381cb7f24c139256d`, and its
+browser runtime manifest remains bundle B's
+`9c69e9709b1922c946d8d166d4b51647df650a7223e26abda80b98fe8c1ef2d6`.
+That checked artifact replaced the local site on port 1111; the prior artifact
+is preserved in `target/documentation-before-focus-actions-7360ebfc34`.
+
+The primary editor read the rendered Keymap and Action contracts, followed the
+focus guide's link to the rendered focus test, and inspected the guide at a
+390px CSS viewport. The table stayed within the document width but squeezed
+API names and questions into difficult fragments. The source now expresses
+those checks as an ordered diagnostic sequence. A fresh combined build and
+browser check are required for that change; absence of horizontal overflow
+alone did not establish readability.
+
+Scribbr v7.1.0 scanned the complete Keymap Markdown sample, including Rust,
+at 452 displayed words: 32% AI-generated, 0% AI-refined, 68% human. The input
+is `target/documentation-proof/keymap-complete-checker-input.md`, SHA-256
+`f7aafeb51ea87e5a43880ed3b934f908a5e68b151c817fa63a3dd9a6ef2204a2`;
+the result is `scribbr-keymap-complete.png` in the same directory.
+The same text with fenced code removed, without a prose rewrite, scored
+0% AI-generated, 0% AI-refined, 100% human at 360 displayed words. That input
+is `keymap-prose-checker-input.md`, SHA-256
+`9140648a60b463eac48d25e5cc40114605cb5d29b1743790a9241a48902c6aab`;
+its result is `scribbr-keymap-prose.png`. These are sample-specific scores,
+not evidence of accuracy or a framework-wide result. No Pangram score was
+obtained, and no paraphraser was used.
+
+## Entity, task, and window ownership
+
+The next solo pass read the complete production implementations of Context,
+AsyncApp, and AsyncWindowContext; AppContext and VisualContext; the public
+entity and weak-entity methods; the leak detector's production implementation;
+Global and Subscription; and all WindowHandle and AnyWindowHandle methods.
+It traced window lookup, association, entity creation, and observer/release
+registration into App. This does not claim the remaining entity-map or
+subscription test modules were read in this pass.
+
+The existing Context overview grouped weak listeners and spawned futures
+together too loosely. A listener skips a released consumer, but an externally
+owned or detached task can continue after entity release. The docs now state
+who owns cancellation, and the testing chapter adds a controlled completion
+channel that proves the task runs after release and returns a failed weak
+update. Scheduling, ownership, and the async task guide link that assertion.
+The async guide's repeated generation-counter paragraphs were rewritten as
+one request-identity explanation linked to the existing out-of-order test.
+
+Async window construction has two contracts: AppContext creation falls back
+to app-only state when the window is unavailable; VisualContext creation
+requires a window and skips the constructor on failure. A new asserting
+example closes the window and checks both outcomes. Window access docs also
+distinguish an already borrowed window's update error from read_window's panic,
+and WeakEntity's release error from async app-borrow panics. The ignored leak
+assertion snippet was replaced with an executable effect-flush example.
+Global's overview no longer implies all globals share one notification stream.
+
+Consumer comparisons included Hummingbird's complete
+`src/ui/components/async_resource.rs`, including its tests, and complete
+`src/ui/search/model.rs`, at
+`2e1ee5f1c8d415ef7f835801fe368ab4106035b5`. The async resource retains a Tokio
+abort handle while detaching its GPUI completion task; its tests distinguish
+bridge completion, foreground publication, replacement, and stale results.
+The search model checks both generation and visibility before publication.
+Zed's `crates/acp_thread/src/acp_thread.rs` lines 4950–5030 at
+`da0a7a78cf296a6d8a75894f46b71a8e7f19cb2f` were reread: its streaming loop
+explicitly exits when a weak update fails. These consumer sources were read,
+not executed here. The canonical async-task and subscriptions walkthroughs,
+ownership chapter, and state, async, focus, and live-editing guides were also
+reread for this ownership correction.
+
+The first complete doctest run for this pass, with `test-support`, passed
+198 examples (191 merged and seven test-harness examples), with one ignored.
+The subsequent complete run with both `test-support` and `bench-support`
+passes 200 examples (193 merged and seven test-harness examples), with one
+ignored. This executes the new task-ownership, closed-window construction,
+and leak-cleanup assertions. Strict default-feature rustdoc for the core and
+companion crates also passes, with broken/private links, bare URLs, and missing
+docs denied. Formatting and the diff whitespace check pass. Final rendering
+remains to be checked for this pass.
 
 ### Further reference reading
 
@@ -861,3 +946,33 @@ extensions. Its useful pattern is to give each new part an observable result
 and a reason before introducing the next part. Its code was read, not executed
 in this workspace. The Embassy Book's introduction was also revisited; its
 remaining chapters and FAQ body were not completed in this pass.
+
+The next editorial reference pass read Gwern's condensed manual, opening
+writing guidance, prose/reference conventions, and complete LLM Writing Guide
+(including its examples, workflow, pitfalls, checklist, and footnotes). It did
+not read every section of the full style-guide page. The applicable principles
+are to preserve concrete constraints, make formatting carry meaning, link
+unfamiliar terms where they first matter, and check claims against their source
+before polishing the sentence.
+
+Wikipedia's Signs of AI Writing introduction and caveats, selected content
+examples, language/grammar section, and style section were read. This was a
+selected-section reading, not the whole page. Its advice describes patterns
+seen in encyclopedia contributions; it does not justify removing useful
+Markdown structure from API documentation. Correcting an unsupported claim
+matters more than replacing a detector-associated word.
+
+Fasterthanlime's complete Updating fasterthanli.me for 2022 series index was
+read, along with the content-pipeline and local-workflow excerpt of My Ideal
+Rust Workflow. The linked installments and the whole workflow article were
+not read in this pass. The relevant comparison is a local replica with an
+observable reload path and reproducible content/assets, while retaining this
+site's smaller canonical-source workflow.
+
+Jiff 0.2.35's rendered Timestamp page was read from the overview through the
+complete millisecond-constructor examples, including parsing, leap-second
+handling, comparisons, arithmetic, rounding, offset/time-zone distinctions,
+constant boundaries, current-time panics, normalized signs, and saturating
+construction. The microsecond constructor's opening contract was also read;
+its examples and the remaining Timestamp page are still open. This extends
+the earlier Jiff reading without claiming every API example has been read.

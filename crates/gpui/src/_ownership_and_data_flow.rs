@@ -223,6 +223,12 @@
 //! view handle in a task stored on that same view: the task and view can then
 //! keep each other alive.
 //!
+//! Releasing the entity does not itself cancel that future. A task retained
+//! elsewhere or detached can keep running; a later weak update returns an
+//! error. Store the task on the entity when releasing the entity should cancel
+//! its work. The [task ownership test](https://gpui-ce.github.io/book/testing.html#separate-task-ownership-from-entity-ownership)
+//! checks the case where the task deliberately outlives its entity.
+//!
 //! The [delayed-task walkthrough](https://gpui-ce.github.io/examples/async-task/)
 //! shows the full sequence: store the task, wait without holding an app borrow,
 //! then attempt a weak update. The [scheduling explanation](crate::_documentation::scheduling)
@@ -256,4 +262,12 @@
 //! To use the remembered window, enter the context's window update first, then
 //! update the entity through the supplied app. Follow the same borrow rules
 //! as any nested entity update.
+//!
+//! Creating app state has a different requirement. Calling
+//! [`AppContext::new`](crate::AppContext::new) through an async window context
+//! attempts window-associated creation, then falls back to app-only creation
+//! when that window is unavailable. Use
+//! [`VisualContext::new_window_entity`](crate::VisualContext::new_window_entity)
+//! when the constructor needs a live window; it returns an error rather than
+//! calling that constructor without one.
 #![doc = "\n\n[Read this chapter in the GPUI Book](https://gpui-ce.github.io/book/ownership.html)."]

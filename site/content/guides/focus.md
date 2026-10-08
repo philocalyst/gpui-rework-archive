@@ -33,13 +33,28 @@ focus and binding state. Selection changes immediately; contexts and
 listeners come from the last rendered tree. A browser preview also needs
 page focus inside its iframe.
 
-| Check | Inspect | If it is wrong |
-| --- | --- | --- |
-| Which identity is selected? | [`window.focused(cx)`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.focused) | Keep the handle, attach it with `track_focus`, then request focus. A selected handle can still be absent from the rendered tree. |
-| Which contexts qualify the shortcut? | [`window.context_stack()`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.context_stack) | Put the context on the target or an ancestor. Match the binding's predicate against that path. |
-| Does this command have an unshadowed shortcut? | [`window.highest_precedence_binding_for_action(&action)`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.highest_precedence_binding_for_action) | Check the strokes, context, removals, and later competing bindings. The action's data must match too. |
-| Is there an action listener on this path? | [`window.is_action_available(&action, cx)`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.is_action_available) | Register the listener on the focused path. [`App::is_action_available`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.App.html#method.is_action_available) checks globals and the accessible active window. Presence alone does not prove the handler accepts the current state. |
-| Is GPUI waiting for another stroke? | [`window.has_pending_keystrokes()`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.has_pending_keystrokes) | Complete the chord or check its [replay rules](https://gpui-ce.github.io/book/input.html#wait-for-a-pending-chord). |
+1. **Check the selected identity** with
+   [`window.focused(cx)`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.focused).
+   Keep the handle, attach it with `track_focus`, then request focus. A selected
+   handle can still be absent from the rendered tree.
+2. **Check the context path** with
+   [`window.context_stack()`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.context_stack).
+   Put the context on the target or an ancestor, then match the binding's
+   predicate against that path.
+3. **Check the command's shortcut** with
+   [`window.highest_precedence_binding_for_action(&action)`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.highest_precedence_binding_for_action).
+   Check the strokes, context, removals, and later competing bindings. The
+   action's data must match too.
+4. **Check for a listener** with
+   [`window.is_action_available(&action, cx)`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.is_action_available).
+   Register the listener on the focused path.
+   [`App::is_action_available`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.App.html#method.is_action_available)
+   checks globals and the accessible active window. Presence alone does not
+   prove the handler accepts the current state.
+5. **Check for a pending chord** with
+   [`window.has_pending_keystrokes()`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.has_pending_keystrokes).
+   Complete the chord or check its
+   [replay rules](https://gpui-ce.github.io/book/input.html#wait-for-a-pending-chord).
 
 If a container owns the focused handle, put its keyboard listener on that
 container or an ancestor. A listener on a canvas child is outside the route;
