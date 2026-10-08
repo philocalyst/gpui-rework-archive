@@ -42,6 +42,9 @@ use std::{future::Future, rc::Rc, sync::Arc, time::Duration};
 /// also flushes effects inside its `update` closure, but leaves draining tasks
 /// to the test. Use that context with `#[gpui::test]` when several applications
 /// need to share one scheduler; use `TestApp` for a self-contained `#[test]`.
+/// Effect flushing also draws dirty simulated windows. Explicit drawing is
+/// useful when a geometry assertion needs a frame at a particular clock value;
+/// draining tasks and advancing time are separate operations.
 ///
 /// The default platform records drawing without rasterizing it, uses simulated
 /// text metrics, and answers HTTP requests with 404. Use

@@ -1140,18 +1140,28 @@ pub trait InteractiveElement: Sized {
     }
 
     #[cfg(any(test, feature = "headless"))]
-    /// Set a key that can be used to look up this element's bounds
-    /// in the `VisualTestContext::debug_bounds` map (with `test-support` enabled)
-    /// This is a noop in release builds
+    /// Records this element's logical bounds under a diagnostic string.
+    ///
+    /// Read the last completed frame's value with
+    /// [`VisualTestContext::debug_bounds`](crate::VisualTestContext::debug_bounds).
+    /// Choose a unique string: another element using it overwrites the value.
+    /// This does not assign an [`ElementId`] or affect retained state.
+    ///
+    /// Enabled by `headless` (including `test-support`) or this crate's own
+    /// tests, in both debug and release profiles. Otherwise it is a no-op
+    /// and does not call `f`.
     fn debug_selector(mut self, f: impl FnOnce() -> String) -> Self {
         self.interactivity().debug_selector = Some(f());
         self
     }
 
     #[cfg(not(any(test, feature = "headless")))]
-    /// Set a key that can be used to look up this element's bounds
-    /// in the `VisualTestContext::debug_bounds` map (with `test-support` enabled)
-    /// This is a noop in release builds
+    /// Records this element's logical bounds under a diagnostic string.
+    ///
+    /// This does not assign an [`ElementId`] or affect retained state. It is
+    /// enabled by `headless` (including `test-support`) or this crate's own
+    /// tests, in both debug and release profiles. In this configuration it is
+    /// a no-op and does not call `f`.
     #[inline]
     fn debug_selector(self, _: impl FnOnce() -> String) -> Self {
         self

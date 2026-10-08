@@ -17,6 +17,18 @@ _CALLOUT = re.compile(
     re.I | re.S,
 )
 _BACKLINK_ID = "gpui-examples-backlinks"
+_RUSTDOC_STYLE_ID = "gpui-documentation-notes"
+_RUSTDOC_STYLES = """
+.rustdoc .callout,.rustdoc .doc-examples {
+    margin:1.2em 0;padding:1em 1.2em;
+    border:1px solid var(--border-color);
+    border-left:4px solid var(--border-color);border-radius:4px;
+    background:var(--code-block-background-color);color:var(--main-color);
+}
+.rustdoc .callout-warning {border-left-color:var(--warning-border-color)}
+.rustdoc .callout-label,.rustdoc .doc-examples>p {margin-bottom:.5em}
+.rustdoc .callout>:last-child,.rustdoc .doc-examples>:last-child {margin-bottom:0}
+""".strip()
 
 
 def callouts(text: str) -> str:
@@ -30,6 +42,17 @@ def callouts(text: str) -> str:
         body = (f'<p>{first}</p>' if first else '') + rest
         return f'<aside id="callout-{kind}-{counter}" class="callout callout-{kind}" role="note">{label}{body}</aside>'
     return _CALLOUT.sub(replace, text)
+
+
+def rustdoc_notes(text: str) -> str:
+    """Keep generated notes readable in rustdoc's light and dark themes."""
+    text = callouts(text)
+    if f'id="{_RUSTDOC_STYLE_ID}"' in text:
+        return text
+    if 'class="callout ' not in text and 'class="doc-examples"' not in text:
+        return text
+    style = f'<style id="{_RUSTDOC_STYLE_ID}">{_RUSTDOC_STYLES}</style>'
+    return text.replace("</head>", style + "</head>", 1)
 
 
 def rustdoc_backlinks(text: str, symbol: str, links: list[dict], anchor: str | None = None) -> str:
@@ -67,7 +90,7 @@ def process_tree(rustdoc: Path, index: Path, output: Path | None = None, site_ba
     if output:
         if destination.exists(): raise ValueError("rustdoc output already exists; choose a new directory")
         shutil.copytree(rustdoc, destination)
-    changed = 0
+    changed = set()
     for symbol, item in data.items():
         raw_docs = item.get("docs", "").split("docs.rs", 1)[-1].lstrip("/")
         docs_path, _, anchor = raw_docs.partition("#")
@@ -82,9 +105,17 @@ def process_tree(rustdoc: Path, index: Path, output: Path | None = None, site_ba
                 raise ValueError(f"{symbol}: missing rustdoc anchor #{anchor}")
             rendered = rustdoc_backlinks(text, symbol, links, anchor or None)
             if rendered != text:
-                file.write_text(rendered, encoding="utf-8", newline="\n"); changed += 1
+                file.write_text(rendered, encoding="utf-8", newline="\n"); changed.add(file)
                 break
-    return changed
+    # Notes also occur on pages without walkthrough backlinks. Preserve their
+    # formatting throughout the API, rather than only touching indexed items.
+    for file in destination.rglob("*.html"):
+        text = file.read_text(encoding="utf-8")
+        rendered = rustdoc_notes(text)
+        if rendered != text:
+            file.write_text(rendered, encoding="utf-8", newline="\n")
+            changed.add(file)
+    return len(changed)
 
 
 def main(argv=None):

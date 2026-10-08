@@ -10,7 +10,7 @@ import os
 
 sys.path.insert(0, str(Path(__file__).parent))
 from parser import DocumentationError, parse_source
-from postprocess import callouts, rustdoc_backlinks
+from postprocess import callouts, process_tree, rustdoc_backlinks, rustdoc_notes
 from sync_links import sync
 from generate import cargo_zip, component_source, render
 
@@ -171,6 +171,36 @@ declaration = "fn update("
         linked = rustdoc_backlinks(method, "gpui::Context::spawn", links, "method.spawn")
         self.assertLess(linked.index("</summary>"), linked.index("gpui-examples-backlinks"))
         with self.assertRaises(ValueError): rustdoc_backlinks(method, "gpui::Context::spawn", links, "method.missing")
+
+    def test_rustdoc_notes_preserve_content_and_theme(self):
+        page = '<html><head></head><body class="rustdoc"><main><blockquote><p>[!WARNING]</p><p>Keep the clip.</p></blockquote></main></body></html>'
+        rendered = rustdoc_notes(page)
+        self.assertIn('<p>Keep the clip.</p>', rendered)
+        self.assertIn('role="note"', rendered)
+        self.assertIn('var(--warning-border-color)', rendered)
+        self.assertIn('var(--main-color)', rendered)
+        self.assertEqual(rustdoc_notes(rendered), rendered)
+        self.assertEqual(rendered.count('id="gpui-documentation-notes"'), 1)
+        plain = '<html><head></head><body><main><p>Ordinary docs.</p></main></body></html>'
+        self.assertEqual(rustdoc_notes(plain), plain)
+        backlinks = rustdoc_backlinks(plain, 'gpui::Canvas', [
+            {"url": "/examples/drawing/#paint", "title": "Drawing", "step": "paint"}
+        ])
+        self.assertIn('gpui-documentation-notes', rustdoc_notes(backlinks))
+
+    def test_rustdoc_notes_do_not_require_a_walkthrough(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            index = root / 'examples.json'
+            index.write_text('{}')
+            rustdoc = root / 'api'
+            rustdoc.mkdir()
+            page = rustdoc / 'struct.Canvas.html'
+            page.write_text('<html><head></head><body class="rustdoc"><blockquote><p>[!WARNING]<br>Keep the clip.</p></blockquote></body></html>')
+            self.assertEqual(process_tree(rustdoc, index), 1)
+            self.assertIn('gpui-documentation-notes', page.read_text())
+            self.assertNotIn('[!WARNING]', page.read_text())
+            self.assertEqual(process_tree(rustdoc, index), 0)
 
     def test_sync_links_is_idempotent(self):
         with tempfile.TemporaryDirectory() as directory:

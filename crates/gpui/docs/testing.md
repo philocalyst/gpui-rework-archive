@@ -36,6 +36,14 @@ app borrow, and drains ready tasks before returning. Its entity and window
 update helpers follow the same pattern. Reads inspect the resulting state;
 they do not run tasks or flush effects.
 
+Both `TestApp` and `TestAppContext` draw dirty simulated windows while flushing
+effects by default. `TestAppContext::skip_drawing` disables drawing for a
+model-only test. An explicit draw is useful when the assertion needs a frame
+at a chosen clock value, including a frame that is not otherwise dirty. Use
+[`TestAppWindow::draw`](crate::TestAppWindow::draw) outside a root-view update:
+drawing while that update still holds the root's mutable borrow would try to
+borrow it again for rendering.
+
 Here an observer copies the model's count into a display. The test checks both
 the changed model and the consumer, so omitting `notify` breaks the test:
 
@@ -547,6 +555,63 @@ that slot and its strong handles; it can pass inside a release callback.
 Record a drop guard as well when the test needs to establish destruction of a
 resource. [`Context::on_release`](crate::Context::on_release) shows the callback
 and destructor order in an asserting example.
+
+### Separate a close decision from teardown
+
+A close request asks whether the window may close. Teardown removes the window
+and releases its root. [`VisualTestContext::simulate_close`](crate::VisualTestContext::simulate_close)
+tests the first step: it calls the installed callback and returns the decision.
+It does not perform the platform's subsequent removal, even when the decision
+is `true`.
+
+This fixture vetoes a request while the document is dirty, then allows one after
+saving. The window remains open after both decisions. Explicit removal and
+dropping the test's root handle establish the separate release boundary:
+
+```rust
+use gpui::{Context, IntoElement, Render, TestAppContext, VisualTestContext,
+           Window, div};
+
+struct Document { dirty: bool }
+impl Render for Document {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        div()
+    }
+}
+
+let mut app = TestAppContext::single();
+let handle = app.add_window(|window, cx: &mut Context<Document>| {
+    let document = cx.entity().downgrade();
+    window.on_window_should_close(cx, move |_, cx| {
+        document.read_with(cx, |document, _| !document.dirty).unwrap_or(true)
+    });
+    Document { dirty: true }
+});
+let root = handle.root(&mut app).unwrap();
+let weak = root.downgrade();
+let mut window = VisualTestContext::from_window(*handle, &app);
+
+assert!(!window.simulate_close());
+root.update(&mut app, |document, _| document.dirty = false);
+assert!(window.simulate_close());
+assert_eq!(app.windows().len(), 1);
+
+window.update(|window, _| window.remove_window());
+assert!(app.windows().is_empty());
+assert!(weak.upgrade().is_some()); // The test still owns `root`.
+drop(root);
+app.update(|_| {}); // Flush release effects.
+assert!(weak.upgrade().is_none());
+app.quit();
+```
+
+Do not remove the window inside the callback used by `simulate_close`: the
+helper restores that callback after obtaining its decision and panics if the
+window has disappeared. For an asynchronous confirmation, return `false`,
+answer the prompt, then remove the window from the continuation. Test the
+continuation separately from the initial veto. The
+[platform chapter](crate::_documentation::platforms#wait-for-a-prompt-without-blocking-the-window)
+shows that ownership pattern.
 
 ## Keep row state with its record
 

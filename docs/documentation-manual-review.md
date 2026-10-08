@@ -1378,3 +1378,75 @@ code execution or image review. The broader linked-example review remains open.
 A fresh Scribbr visit left its detector panel blank; its linked QuillBot
 fallback failed with a connection reset. No new detector score is claimed
 for this batch. Earlier recorded samples are still only samples.
+
+## Test-context contracts and rendered API notes
+
+The canvas batch at `ce6f9b3734ac5c4cf2e9e37c4fb90e3c351b7906`
+passed the complete API/site/book build and link audit. Its source digest is
+`8c29bf70416141af068bd842aa7632da66b5cc5423d856723bf76718279fc6c5`;
+the runtime manifest remains `fe33dbceb23f9b069901bb0bb31e724d2712a3deea69d254118cde058f14e896`.
+The artifact was served locally. The primary editor read the rendered canvas
+constructor and type explanation and followed its clipping link into the
+local book. The type's warning had no visible boundary: the HTML conversion
+removed rustdoc's blockquote styling without supplying replacement styles.
+The postprocessor now styles notes and walkthrough backlinks using rustdoc's
+own theme variables, including pages absent from the walkthrough index.
+Two new regression tests check theme-aware, idempotent formatting and an
+unindexed warning page. All 27 documentation-tool tests pass.
+
+The primary editor reread the complete TestAppContext/VisualTestContext module,
+the complete VisualTestAppContext module, prompt queues, resize and activation
+callbacks, key parsing and dispatch, window updates and removal, and the
+automatic-drawing branch in effect flushing. The rewrite distinguishes app
+effects, ready tasks, elapsed test time, and dirty-window drawing. It covers
+constructor defaults, cleanup ordering, window and root ownership, queued
+prompt answers, global leases, input event details, and diagnostic selectors.
+The debug-selector docs incorrectly described a release-profile no-op; the
+actual switch is the headless/test feature configuration, including release.
+
+simulate_close calls and restores the installed close-request callback. It
+does not remove a window when that callback allows closing. The new canonical
+testing fixture checks a veto, an allowed request, the still-open window,
+explicit removal, and root release after dropping the test's independent
+handle. next_notification now distinguishes a notification from a value
+mutation and demonstrates that installing its observation and advancing time
+happen before the returned future is awaited.
+
+The first doctest run caught missing constructor type information; the next
+caught an immutable context passed to WindowHandle::root. Both were corrected.
+The corrected run passes 218 doctests (211 merged, seven harness examples),
+with one ignored: `target/documentation-close-request-doctest.log`.
+The first strict API check caught a method link addressed to App instead of
+its BorrowAppContext trait; the corrected feature-enabled check passes in
+`target/documentation-test-context-api-corrected.log`. A final default-feature
+check and combined artifact are pending at this entry. Edited Rust files pass
+rustfmt and the diff passes whitespace checks.
+
+The served browser-only counter retained one across an edit from +1 to +5;
+the next keyboard activation produced six. A syntax error preserved that
+result and showed its compiler diagnostic; repairing it recovered without
+resetting state. Reset state then produced zero. The original source and
+auto-run setting were restored. Evidence is under
+`target/documentation-proof/miri-counter-{hotpatch-six,compile-error,reset-zero}.png`.
+The canonical animation source was restored from an older local draft and
+executed successfully; keyboard Replay completed without a runtime error.
+Its final state is recorded in `miri-animation-keyboard.png`; that still image
+does not establish smooth frame pacing or verify an intermediate width.
+The stopped async state is recorded in `miri-async-stopped-keyboard.png`.
+
+A fresh GPTZero navigation failed with a connection reset. Together with the
+blank Scribbr detector and QuillBot reset above, this leaves no new detector
+score for these revised API passages. The reference article also remained
+unavailable to the web tool on this attempt; earlier source/reference reads
+remain the evidence for its survey.
+
+No Luna agent is currently running. Their earlier reports are incomplete
+first-pass material; the primary editor's source and browser review remains
+unfinished. This entry records the specific work above, not complete coverage
+of all APIs or an overall Jiff-quality judgment.
+
+The final doctest run also passes all 218 examples (211 merged, seven harness
+examples), with one ignored, in `target/documentation-test-context-doctests-final.log`.
+The strict default-feature API build passes in
+`target/documentation-test-context-default-api.log`. The combined feature-enabled
+artifact and rendered callout checks follow this revision.
