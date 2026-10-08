@@ -17,7 +17,26 @@ use std::{
     },
 };
 
-/// A laid-out and styled text document.
+/// Resolved glyph fragments and interaction geometry for a text document.
+///
+/// One document can contain several [`VisualLine`] rows after hard breaks or
+/// wrapping. Each row selects a range of [`PaintFragment`] values; each fragment
+/// supplies a resolved font, glyph positions, and paint properties. The
+/// [`platform_layout`](Self::platform_layout) describes pointer hits, carets,
+/// and selection for the same source and line breaks.
+///
+/// [`WindowTextSystem::layout_line`](crate::WindowTextSystem::layout_line) returns
+/// this record for unwrapped measurement. For application drawing, usually keep
+/// the [`ShapedLine`](crate::ShapedLine) or [`ShapedText`](crate::ShapedText)
+/// returned by the window's shaping methods: those wrappers pair the record
+/// with its source and provide paint methods. A backend implements
+/// [`PlatformTextSystem::layout_text`] to produce the record itself.
+///
+/// Treat the fields as one shaping result. Editing a row, glyph, or length does
+/// not update the backend's interaction geometry. Shape the new source again
+/// when its contents, font request, or wrapping constraint changes. Widths are
+/// advances in logical pixels, rather than bounds around visible ink; the
+/// [text chapter](crate::_documentation::text) explains that distinction.
 #[derive(Clone, Debug)]
 pub struct LineLayout {
     /// Base font size requested for the document, in logical pixels.
@@ -38,7 +57,12 @@ pub struct LineLayout {
     pub platform_layout: Arc<dyn PlatformTextLayout>,
 }
 
-/// Font metrics used to construct the vertical extents of an inline line.
+/// Logical-pixel font metrics used to align text and embedded boxes in a row.
+///
+/// Pass these as the fallback metrics in [`InlineLayoutRequest`] or to
+/// [`align_inline_boxes`]. Ascent and descent measure outward from the baseline;
+/// x-height supplies the reference for [`VerticalAlign::Middle`]. These are
+/// already scaled lengths, unlike the design-unit fields of [`crate::FontMetrics`].
 #[derive(
     Clone, Copy, Debug, Default, Eq, Hash, PartialEq, serde::Serialize, serde::Deserialize,
 )]
@@ -51,38 +75,68 @@ pub struct InlineTextMetrics {
     pub x_height: Pixels,
 }
 
-/// A row in an inline layout.
+/// The origin, size, and baseline assigned to one inline row.
+///
+/// [`InlineLayout::lines`] follows [`LineLayout::visual_lines`] in paint order.
+/// Rows can have different heights when an embedded box or a larger font expands
+/// them. Use each row's origin and baseline for placement rather than deriving
+/// all positions from a single line height.
 #[derive(Clone, Copy, Debug, Default, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct InlineVisualLine {
-    /// The row origin relative to the inline layout.
+    /// The row's top-left relative to the complete inline layout, in logical pixels.
     pub origin: Point<Pixels>,
-    /// The row size before it is placed in its containing element.
+    /// The row's advance width and allocated height, in logical pixels.
     pub size: Size<Pixels>,
-    /// The baseline relative to `origin.y`.
+    /// Distance from the row's top to its text baseline, in logical pixels.
     pub baseline: Pixels,
 }
 
-/// The position assigned to an element embedded in text.
+/// The layout position assigned to an atomic element box embedded in text.
+///
+/// The ID identifies an [`InlineBoxRequest`]; it is not an element identity or
+/// a byte offset. The containing element uses this record to place and paint
+/// that child. Text layout reserves the box's space but does not paint its
+/// contents or register its input handlers.
 #[derive(Clone, Copy, Debug, Default, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct PositionedInlineBox {
-    /// The caller-provided box identifier.
+    /// The caller-provided [`InlineBoxRequest::id`].
     pub id: u64,
-    /// Index of the visual line containing this box.
+    /// Index into [`InlineLayout::lines`] of the row containing this box.
     pub line_index: usize,
-    /// The box bounds relative to the complete inline layout.
+    /// The box bounds relative to the complete inline layout, in logical pixels.
     pub bounds: Bounds<Pixels>,
 }
 
-/// The native geometry occupied by a text range on one visual line.
+/// One visual region occupied by a logical text range in an inline layout.
+///
+/// [`PlatformTextLayout::inline_geometry`] can return several regions for one
+/// range because wrapping or bidirectional ordering separates its contents.
+/// Keep the regions separate for hit testing; their union can include gaps
+/// that do not belong to the text. The geometry is relative to the text layout,
+/// so add its placed origin before using it in a window paint method.
 #[derive(Clone, Copy, Debug, Default, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct InlineRangeGeometry {
-    /// Bounds relative to the complete text layout.
+    /// Bounds relative to the complete text layout, in logical pixels.
     pub bounds: Bounds<Pixels>,
-    /// Index of the visual line containing these bounds.
+    /// Index of the visual row containing these bounds.
     pub visual_line_index: usize,
 }
 
-/// Text and element boxes laid out in one inline formatting context.
+/// Text and atomic element boxes laid out together in a paragraph.
+///
+/// Obtain it from [`WindowTextSystem::layout_inline`](crate::WindowTextSystem::layout_inline)
+/// with an [`InlineLayoutRequest`]. It owns the resolved geometry, so the
+/// request's borrowed source and style slices can go out of scope. A block
+/// [`Div`](crate::Div) uses this mechanism to wrap text around inline children;
+/// ordinary application views can let the div manage placement and painting.
+///
+/// For a custom paragraph, [`layout`](Self::layout) supplies glyph fragments,
+/// [`lines`](Self::lines) supplies the rows' baselines and heights, and
+/// [`boxes`](Self::boxes) supplies child positions. These coordinates are in
+/// logical pixels relative to the paragraph, before placement in the window.
+/// The box records reserve space; the caller still owns each child's element
+/// lifecycle. See the [text chapter](crate::_documentation::text#wrap-text-and-element-boxes-in-one-paragraph)
+/// for how inline boxes differ from independent flex items.
 #[derive(Clone, Debug)]
 pub struct InlineLayout {
     /// The shaped text shared with the ordinary GPUI glyph-paint pipeline.
@@ -228,9 +282,13 @@ pub fn align_inline_boxes(
 /// Byte positions are UTF-8 boundaries. Geometry is in GPUI layout coordinates, using the
 /// caller-provided line height. Implementations must preserve visual order and caret affinity.
 ///
-/// A cluster is one backend-defined caret step. It may contain several Unicode scalar values, such
-/// as a combining sequence or an emoji ZWJ sequence. Logical clusters are independent of visual
-/// direction and soft-wrapped rows.
+/// A shaping-cluster hit, a caret stop, and a logical editing range need not
+/// have the same boundaries. Use [`Self::byte_index_from_pixel_point`] to
+/// identify shaped text under a pointer, and the caret operations for movement.
+/// Do not assume that movement visits every index returned by hit testing.
+/// The backend defines the ranges returned by [`Self::logical_cluster_before`]
+/// and [`Self::logical_cluster_after`]; Parley uses grapheme clusters for those
+/// logical ranges, independently of visual direction and soft-wrapped rows.
 pub trait PlatformTextLayout: Send + Sync + std::fmt::Debug {
     /// Length of the source text in UTF-8 bytes.
     fn len(&self) -> usize;
@@ -434,11 +492,19 @@ pub enum TextSelectionKind {
     HardLine,
 }
 
-/// A horizontal row produced by shaping and line breaking. Soft wrapping can split one logical
-/// line across several rows; bidirectional ordering does not change logical UTF-8 byte ranges.
+/// One visual row produced by shaping and line breaking.
+///
+/// A logical source line can occupy several rows after wrapping. This record
+/// connects a logical UTF-8 source range to the fragments painted on that row.
+/// Bidirectional text can put fragments in a different order from their source
+/// bytes. Use [`PlatformTextLayout`] or [`ShapedTextLayout`] for pointer and caret
+/// queries rather than interpolating a byte position across the advance width.
 #[derive(Clone, Debug, Default, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct VisualLine {
-    /// The logical UTF-8 byte range assigned to this row.
+    /// The logical UTF-8 byte range assigned to this row in the shaped source.
+    ///
+    /// This is a source range, not a count of characters or glyphs. Do not use
+    /// its order to infer left-to-right movement within bidirectional text.
     pub text_range: Range<usize>,
     /// Indices into [`LineLayout::paint_fragments`] for the positioned glyph runs
     /// painted on this row, ordered by visual position.
@@ -447,19 +513,27 @@ pub struct VisualLine {
     /// measured to the backend's final text pen position. Inline layouts include
     /// advances from embedded boxes.
     pub advance_width: Pixels,
-    /// Horizontal offset assigned by backend layout.
+    /// Horizontal offset assigned by backend layout, in logical pixels.
+    ///
+    /// Paint placement adds this to the row's requested origin and alignment.
     pub offset: Pixels,
     /// Base direction used to order and align this visual line.
     pub direction: crate::ResolvedDirection,
 }
 
-/// GPUI paint properties carried through Parley's brush.
+/// Colors and decorations attached to a resolved glyph fragment.
+///
+/// [`PaintFragment::style`] carries the properties selected from a [`TextRun`]
+/// through backend shaping. This record does not select a font or shape text.
+/// When using [`ShapedText`](crate::ShapedText), paint run backgrounds before
+/// foreground glyphs and decorations so a later background does not cover
+/// earlier text.
 #[derive(Clone, Debug, Default, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct PaintStyle {
     /// Glyph foreground color.
     #[serde(with = "crate::color::serde_colors::hsla")]
     pub color: Hsla,
-    /// Optional background color.
+    /// Optional run background color, painted separately from foreground glyphs.
     #[serde(with = "crate::color::serde_colors::optional_hsla")]
     pub background_color: Option<Hsla>,
     /// Optional underline style.
@@ -468,18 +542,31 @@ pub struct PaintStyle {
     pub strikethrough: Option<StrikethroughStyle>,
 }
 
-/// A positioned, style-specific glyph run painted on one visual line.
+/// A resolved font and paint style for glyphs on one visual row.
+///
+/// [`VisualLine::paint_fragment_range`] selects these records from
+/// [`LineLayout::paint_fragments`]. One input [`TextRun`] can produce several
+/// fragments through wrapping or font fallback; its index does not identify
+/// a unique fragment. Glyph IDs belong to the fragment's resolved [`FontId`].
+///
+/// Glyph x positions are relative to the visual row, and y positions are
+/// relative to its baseline. They are not relative to the fragment's
+/// [`x_range`](Self::x_range). Usually let [`ShapedLine`](crate::ShapedLine) or
+/// [`ShapedText`](crate::ShapedText) paint these records so baseline placement,
+/// rasterization, and atlas allocation stay together.
 #[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct PaintFragment {
     /// Index of the input text run that supplies paint properties.
     pub source_run: usize,
-    /// Canonical font used by the glyphs.
+    /// Resolved font instance used by the glyphs, including fallback selection.
     pub font_id: FontId,
-    /// Resolved size of this shaped run.
+    /// Resolved size of this shaped run, in logical pixels.
     pub font_size: Pixels,
-    /// Positioned glyphs local to the visual line.
+    /// Positioned glyphs, with row-relative x and baseline-relative y coordinates.
     pub glyphs: Arc<[ShapedGlyph]>,
-    /// Horizontal bounds of this fragment in visual-row coordinates.
+    /// The fragment's horizontal advance range in visual-row coordinates.
+    ///
+    /// This includes spacing and is not a tight bound around visible ink.
     pub x_range: Range<Pixels>,
     /// Paint properties shared by every glyph in the fragment.
     pub style: PaintStyle,
@@ -489,13 +576,21 @@ pub struct PaintFragment {
     pub strikethrough_offset: Option<Pixels>,
 }
 
-/// A single glyph, ready to paint.
+/// One positioned glyph selected by shaping.
+///
+/// The containing [`PaintFragment`] supplies its font, size, and color. A glyph
+/// ID is meaningful only with that font; it is not a Unicode scalar or a source
+/// byte index. Shaping can map several source characters to one glyph or one
+/// character to several glyphs, so these records are unsuitable for counting
+/// characters or defining an editor's selection boundaries.
 #[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct ShapedGlyph {
     /// Backend font glyph ID; it is not a source-text index.
     pub id: GlyphId,
 
-    /// Logical-pixel position in its containing visual row.
+    /// Logical-pixel position with x relative to the row and y relative to its baseline.
+    ///
+    /// Add the placed row origin to x and the placed baseline to y before painting.
     pub position: Point<Pixels>,
 
     /// Whether painting should use the color-emoji rasterization path.

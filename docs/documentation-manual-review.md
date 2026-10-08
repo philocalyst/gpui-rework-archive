@@ -2026,3 +2026,23 @@ source preparation also revealed that the copy filter omitted nested
 Cargo.toml files, including genmc-sys's manifest. The filter now replaces only
 Miri's root manifest and preserves its path-dependency manifests. The compiler
 build and final browser verification remain pending at this entry.
+
+## Text records and their coordinate systems (2026-10-08)
+
+The primary editor read the public text-layout records and the corresponding
+Parley fragment construction, paragraph composition, inline-box alignment,
+and glyph-paint paths. LineLayout now explains the relationship between source
+ranges, visual rows, resolved fragments, and backend interaction geometry.
+InlineLayout and its row/box/region records explain ownership, placement,
+variable row heights, and why disjoint regions should not be replaced with
+one hit rectangle.
+
+PaintFragment and ShapedGlyph now make the mixed coordinate origin explicit:
+glyph x is relative to the visual row, while glyph y is relative to its
+baseline. Fragment advances are not ink bounds or another origin to add to
+each glyph. The docs also explain how fallback and wrapping can produce
+several fragments from one input TextRun. PlatformTextLayout's introduction
+no longer equates every shaping-cluster hit with an editing caret step;
+Parley's logical ranges use graphemes. These were manual edits, checked
+against both construction and consumption of the records. Strict links and
+the final rendered review remain pending at this entry.
