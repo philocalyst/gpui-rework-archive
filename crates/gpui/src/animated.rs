@@ -65,6 +65,11 @@ pub struct AnimatedSample<T> {
 /// assert_eq!(*width.value(), 20.0);
 /// assert_eq!(width.sample(Duration::from_millis(500)).value, 5.0);
 /// assert_eq!(width.sample(Duration::from_secs(1)).value, 12.5);
+///
+/// // An equal target keeps the running motion, even when given a zero duration.
+/// assert!(!width.set(20.0, Motion::new(Duration::ZERO), Duration::from_secs(1)));
+/// assert_eq!(width.sample(Duration::from_secs(1)).value, 12.5);
+/// assert_eq!(width.sample(Duration::from_millis(1500)).value, 20.0);
 /// ```
 #[derive(Clone)]
 pub struct Animated<T, Time = std::time::Instant> {

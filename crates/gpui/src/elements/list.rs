@@ -54,7 +54,17 @@ pub struct List {
 }
 
 impl List {
-    /// Set the sizing behavior for the list.
+    /// Chooses whether content contributes an intrinsic size to layout.
+    ///
+    /// [`ListSizingBehavior::Auto`] (the default) uses the list's style and
+    /// parent constraints. [`ListSizingBehavior::Infer`] uses the sum of known
+    /// row heights and estimates, capped by definite available height. That
+    /// estimate can change as more rows are measured; it does not require an
+    /// eager measurement of every row.
+    ///
+    /// Give a large scrolling list a finite viewport. Inferring its full
+    /// content height without a parent constraint can make it expand instead
+    /// of scroll. See the [lists chapter](crate::_documentation::lists).
     pub fn with_sizing_behavior(mut self, behavior: ListSizingBehavior) -> Self {
         self.sizing_behavior = behavior;
         self
@@ -267,12 +277,23 @@ pub struct ListScrollEvent {
     pub is_following_tail: bool,
 }
 
-/// The sizing behavior to apply during layout.
+/// Whether a [`List`] or [`crate::UniformList`] supplies an intrinsic content size.
+///
+/// This controls the viewport's contribution to layout, not which rows are
+/// rendered. Style dimensions and parent constraints still apply. Use a
+/// bounded viewport for a large collection so scrolling can limit the work.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ListSizingBehavior {
-    /// The list should calculate its size based on the size of its items.
+    /// Infer height from the content, capped by definite available height.
+    ///
+    /// A uniform list multiplies its representative row height by the item
+    /// count. A variable-height list sums measured heights and available
+    /// estimates; that sum can change as rows are measured. Both fill definite
+    /// available width, or supply a measured content width for an intrinsic
+    /// width query.
     Infer,
-    /// The list should not calculate a fixed size.
+    /// Resolve the viewport from style and parent layout without supplying an
+    /// intrinsic content size. This is the default.
     #[default]
     Auto,
 }
@@ -298,13 +319,25 @@ impl ListMeasuringBehavior {
     }
 }
 
-/// The horizontal sizing behavior to apply during layout.
+/// How a [`crate::UniformList`] determines its horizontal scrollable extent.
+///
+/// Rows lay out as separate roots with an available width. They do not
+/// automatically stretch to fill it; use [`Styled::w_full`] for a full-width
+/// background or hit target.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ListHorizontalSizingBehavior {
-    /// List items' width can never exceed the width of the list.
+    /// Use the viewport width as the content width. This is the default.
+    ///
+    /// Rows receive that available width, but an explicit row width can still
+    /// exceed it. A wider row does not enlarge the horizontal scroll extent.
     #[default]
     FitList,
-    /// List items' width may go over the width of the list, if any item is wider.
+    /// Allow horizontal scrolling when the representative row is wider than
+    /// the viewport.
+    ///
+    /// The list does not scan every row for a maximum. Choose a representative
+    /// with [`crate::UniformList::with_width_from_item`]; wider unmeasured rows
+    /// do not automatically enlarge the scroll extent.
     Unconstrained,
 }
 
@@ -390,12 +423,19 @@ struct Count(usize);
 struct Height(Pixels);
 
 impl ListState {
-    /// Construct a new list state, for storage on a view.
+    /// Creates shared state for `item_count` rows, initially unmeasured.
     ///
-    /// The overdraw parameter controls how much extra space is rendered
-    /// above and below the visible area. Elements within this area will
-    /// be measured even though they are not visible. This can help ensure
-    /// that the list doesn't flicker or pop in when scrolling.
+    /// Keep this on the owning view and pass a clone to [`list`] each render.
+    /// `alignment` selects the initial scroll anchor; `overdraw` sets how much
+    /// extra vertical content to prepare outside the viewport. Those extra
+    /// rows are measured even while clipped, reducing new measurement work
+    /// when the user scrolls into them.
+    ///
+    /// The default policy measures visible rows and overdraw. Use
+    /// [`measure_all`](Self::measure_all) for an eager first pass or
+    /// [`with_uniform_item_height`](Self::with_uniform_item_height) for cheaper
+    /// initial height estimates. Neither this state nor its clones own the row
+    /// data; keep the data and item records in step as described on [`ListState`].
     pub fn new(item_count: usize, alignment: ListAlignment, overdraw: Pixels) -> Self {
         let this = Self(Rc::new(RefCell::new(StateInner {
             last_layout_bounds: None,
@@ -418,8 +458,10 @@ impl ListState {
     /// Measure every item during the first layout pass.
     ///
     /// This makes the initial total content height and scrollbar thumb reflect
-    /// every item. The pass repeats after measurement invalidation, including
-    /// a changed viewport width. It can be expensive for a large collection.
+    /// every item. The pass repeats after [`reset`](Self::reset),
+    /// [`remeasure`](Self::remeasure), [`remeasure_items`](Self::remeasure_items),
+    /// or a changed viewport width. A [`splice`](Self::splice) alone does not
+    /// restart an already completed pass. It can be expensive for a large collection.
     /// For mostly uniform rows,
     /// [`with_uniform_item_height`](Self::with_uniform_item_height) supplies
     /// cheaper estimates.
@@ -430,20 +472,34 @@ impl ListState {
 
     /// Supply a height estimate for rows that have no measurement or hint.
     ///
-    /// Existing measurements and hints take precedence. As rows are rendered,
-    /// their measured heights replace the estimates. The initial scrollbar
+    /// Existing sizes take precedence: measured rows become unmeasured records
+    /// with their old sizes as hints, and existing hints are kept. As rows are
+    /// rendered, new measurements replace the estimates. The initial scrollbar
     /// size is therefore approximate unless the hints match every row.
     /// This is a cheaper alternative to [`measure_all`](Self::measure_all)
     /// when rows have similar heights. A changed viewport width discards the
     /// hints along with cached measurements.
+    ///
+    /// Configure this before the first render. It changes the shared state
+    /// seen by every clone and does not restart a completed eager-measurement pass.
     pub fn with_uniform_item_height(self, height: Pixels) -> Self {
         self.apply_uniform_item_height(height);
         self
     }
 
-    /// Reset this instantiation of the list state.
+    /// Discards all row records and starts over with `element_count` rows.
     ///
-    /// Note that this will cause scroll events to be dropped until the next paint.
+    /// Measurements, height hints, row focus handles, pending remeasurement
+    /// anchors, and scrollbar-drag state are cleared. The explicit scroll
+    /// anchor is removed; the configured [`ListAlignment`] and follow policy
+    /// choose the next position. The measurement policy and scroll handler
+    /// remain configured too.
+    ///
+    /// Use this when replacing the collection. For an insertion or deletion
+    /// within the same collection, [`splice`](Self::splice) preserves records
+    /// outside the changed range. Neither operation changes your data or
+    /// notifies the view. Scroll events are ignored until the next prepaint
+    /// establishes geometry for the replacement rows.
     pub fn reset(&self, element_count: usize) {
         let old_count = {
             let state = &mut *self.0.borrow_mut();
@@ -592,16 +648,29 @@ impl ListState {
         Some(scroll_top >= scroll_max)
     }
 
-    /// Inform the list state that the items in `old_range` have been replaced
-    /// by `count` new items that must be recalculated.
+    /// Replaces row records in `old_range` with `count` unmeasured records.
+    ///
+    /// Update the underlying collection by the same insertion, deletion, or
+    /// replacement, then notify the owning view. An empty range inserts rows;
+    /// a zero count deletes them. Use a valid range within the old item count.
+    /// Measurements and focus handles outside that range are retained.
+    ///
+    /// A scroll anchor after the range shifts by the change in count. An
+    /// anchor inside it moves to the range's start with zero offset. New rows
+    /// have no focus handle; use [`splice_focusable`](Self::splice_focusable)
+    /// when offscreen rows must retain keyboard focus.
     pub fn splice(&self, old_range: Range<usize>, count: usize) {
         self.splice_focusable(old_range, (0..count).map(|_| None))
     }
 
-    /// Register with the list state that the items in `old_range` have been replaced
-    /// by new items. As opposed to [`Self::splice`], this method allows an iterator of optional focus handles
-    /// to be supplied to properly integrate with items in the list that can be focused. If a focused item
-    /// is scrolled out of view, the list will continue to render it to allow keyboard interaction.
+    /// Replaces row records as [`splice`](Self::splice) does, with one optional
+    /// focus handle per new row.
+    ///
+    /// The iterator's length determines the replacement count. Retain each
+    /// handle on the corresponding row and attach it to the row's keyboard
+    /// target. When that target contains focus, the list also renders it
+    /// outside the visible region so keyboard dispatch can still reach it.
+    /// Supplying a handle here neither focuses the row nor installs a target.
     pub fn splice_focusable(
         &self,
         old_range: Range<usize>,
@@ -820,8 +889,18 @@ impl ListState {
         state.logical_scroll_top = Some(scroll_top);
     }
 
-    /// Get the bounds for the given item in window coordinates, if it's
-    /// been rendered.
+    /// Projects a cached row measurement into window coordinates.
+    ///
+    /// Returns `None` for an index before the logical scroll-top item or one
+    /// without a measured height. A returned rectangle can lie below the
+    /// viewport: `Some` does not establish visibility. Its width is the list's
+    /// viewport width, rather than the rendered child's width.
+    ///
+    /// This uses the current logical anchor and last viewport geometry; it is
+    /// not the child's recorded paint bounds. A pending layout can change the
+    /// result. Use [`item_is_above_viewport`](Self::item_is_above_viewport) and
+    /// [`item_is_below_viewport`](Self::item_is_below_viewport) for their explicit
+    /// visibility queries, including their unknown-measurement cases.
     pub fn bounds_for_item(&self, ix: usize) -> Option<Bounds<Pixels>> {
         let state = &*self.0.borrow();
 
@@ -876,7 +955,13 @@ impl ListState {
         self.0.borrow().scrollbar_drag_start_height.is_some()
     }
 
-    /// Set the offset from the scrollbar
+    /// Applies a scrollbar position, with negative `y` moving toward later rows.
+    ///
+    /// The `x` component is ignored. Before the first layout this does nothing;
+    /// afterward the vertical position is clamped using known content height,
+    /// or the height captured by [`scrollbar_drag_started`](Self::scrollbar_drag_started).
+    /// Moving away from the end pauses tail-following. Reaching the end while
+    /// in [`FollowMode::Tail`] resumes it. Schedule a redraw separately.
     pub fn set_offset_from_scrollbar(&self, point: Point<Pixels>) {
         self.0.borrow_mut().set_offset_from_scrollbar(point);
     }
@@ -909,7 +994,9 @@ impl ListState {
         Point::new(px(0.), -offset)
     }
 
-    /// Return the bounds of the viewport in pixels.
+    /// Returns the last laid-out viewport in window coordinates.
+    ///
+    /// Before the first prepaint, returns an empty rectangle at the origin.
     pub fn viewport_bounds(&self) -> Bounds<Pixels> {
         self.0.borrow().last_layout_bounds.unwrap_or_default()
     }

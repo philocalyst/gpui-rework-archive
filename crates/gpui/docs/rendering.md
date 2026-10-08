@@ -135,9 +135,9 @@ let rows = uniform_list("search-results", result_count, move |range, _window, _c
 
 Keep the list ID stable across frames. If rows can reorder and retain their own state, give each row a stable logical key or a distinct entity identity. Bind a [`UniformListScrollHandle`](crate::UniformListScrollHandle) with `.track_scroll(&handle)` when another element needs scroll state or controls. [`ScrollStrategy::Nearest`](crate::ScrollStrategy::Nearest) leaves an already visible item in place; when an item is outside the viewport it aligns above items to the top and below items to the bottom. Offset variants reserve space above the target for `Top` and `Center`; `Bottom` ignores the offset.
 
-For horizontal sizing, [`ListHorizontalSizingBehavior::FitList`](crate::ListHorizontalSizingBehavior::FitList) keeps each row within the list width. `Unconstrained` allows a wide row to determine the horizontal content size and makes the uniform list horizontally scrollable.
+For horizontal sizing, [`ListHorizontalSizingBehavior::FitList`](crate::ListHorizontalSizingBehavior::FitList) supplies the viewport width to each row; it does not force an explicitly wider row to shrink. `Unconstrained` enables horizontal scrolling using the representative row's measured width. Wider unmeasured rows do not automatically enlarge that extent. Use `.w_full()` when a row's background or hit target should fill the available width.
 
-For variable-height lists, [`ListAlignment::Bottom`](crate::ListAlignment::Bottom) is useful for chat-like content, and follow-tail behavior is managed by [`ListState::set_follow_mode`](crate::ListState::set_follow_mode). See the [list walkthrough](https://gpui-ce.github.io/examples/lists/#rows) for visible ranges and scrolling.
+For variable-height lists, [`ListAlignment::Bottom`](crate::ListAlignment::Bottom) is useful for chat-like content, and follow-tail behavior is managed by [`ListState::set_follow_mode`](crate::ListState::set_follow_mode). The [lists chapter](crate::_documentation::lists) connects sizing, scroll anchoring, data edits, and focus retention. See the [list walkthrough](https://gpui-ce.github.io/examples/lists/#rows) for a complete equal-height example.
 
 ## Load and paint images
 

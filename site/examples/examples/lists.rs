@@ -2,11 +2,11 @@
 mod support;
 
 // ## Reserve a scrolling viewport {#viewport}
-// The data set has 10,000 indices, but the callback constructs only the range
-// needed near the visible viewport, plus a region beyond it called overdraw. [`uniform_list`]
-// can map scroll offsets to indices because every row has the same measured
-// height. The parent requests 320 logical pixels and may shrink in a short
-// window; the list fills the resulting finite scrolling viewport.
+// The data set has 10,000 indices, but the callback constructs only the rows
+// intersecting the viewport, plus separate one-row samples for measurement.
+// [`uniform_list`] maps scroll offsets to indices using one shared row height.
+// The parent requests 320 logical pixels and may shrink in a short window;
+// the list fills the resulting finite scrolling viewport.
 //
 // An unbounded height gives scrolling no useful viewport. Keep the scrolling
 // region constrained even when its parent can grow.
@@ -25,6 +25,9 @@ struct Rows {
 // included and the end is excluded. Return one row for each index, in order.
 // Constructing rows in this callback avoids building 10,000 element values
 // before the list knows which ones it needs.
+// The callback can also receive a one-row measurement request more than once
+// in a frame. Build the requested elements there; keep data loading and other
+// work that should happen once on the owning view.
 //
 // [`UniformList::track_scroll`] connects the view-owned scroll handle to this
 // list. The list ID identifies the scrolling element; row IDs identify any
@@ -85,7 +88,8 @@ impl Render for Rows {
 // ## Keep the handle between renders {#run}
 // Create the [`UniformListScrollHandle::new`] handle once on the view and
 // pass it back on every render. A toolbar can keep a clone to call
-// `scroll_to_item`; both clones control the same list position.
+// `scroll_to_item`; both clones control the same list position. That method
+// queues a request, so the toolbar must also notify the view to draw it.
 //
 // Scroll halfway down, resize the viewport, then continue scrolling. The
 // requested range should change while the same handle keeps the scroll

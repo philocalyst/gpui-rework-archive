@@ -5,6 +5,7 @@
 - [Ownership and data flow](ownership.md)
 - [Rendering a frame](rendering.md)
 - [Layout and style](layout.md)
+- [Lists, measurement, and scroll position](lists.md)
 - [Animation and interruption](animation.md)
 - [Text and fonts](text.md)
 - [Custom drawing](drawing.md)

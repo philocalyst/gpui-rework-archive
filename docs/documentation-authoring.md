@@ -98,7 +98,8 @@ The mdBook under `book/` renders the same explanations as the conceptual API
 guides. Its chapter stubs select canonical sources through `scripts/docs/book.py`;
 the preprocessor adapts links, not prose. Edit `crates/gpui/docs/*.md`, or the
 ownership module's inner documentation, rather than maintaining a second copy.
-Testing, accessibility, drawing, assets, and text also render at their Zola guide routes.
+Testing, accessibility, drawing, assets, text, and lists also render at their
+Zola guide routes.
 
 Build local rustdoc before building the book so every API member link can be
 checked against an actual page and anchor:

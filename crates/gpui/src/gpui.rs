@@ -92,6 +92,10 @@ pub mod _documentation {
     ///
     /// [Read this chapter in the GPUI Book](https://gpui-ce.github.io/book/layout.html).
     pub mod layout {}
+    #[doc = include_str!("../docs/lists.md")]
+    ///
+    /// [Read this chapter in the GPUI Book](https://gpui-ce.github.io/book/lists.html).
+    pub mod lists {}
     #[doc = include_str!("../docs/animation.md")]
     ///
     /// [Read this chapter in the GPUI Book](https://gpui-ce.github.io/book/animation.html).

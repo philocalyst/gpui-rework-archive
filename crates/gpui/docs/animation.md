@@ -104,6 +104,17 @@ cache belongs to that render. Retaining one wrapper indefinitely also retains
 its cached sample. See [`Transition::evaluate`](crate::Transition::evaluate)
 for the borrowing and frame-request contract.
 
+The hook's motion configures the next **changed** goal. Replacing its easing
+while keeping the goal equal does not retime the run already in progress.
+To replay an effect without changing its goal, use a duration animation with
+a new identity, as the walkthrough does.
+
+Value transitions sample `std::time::Instant`. Duration and spring animation
+elements sample the app executor's clock, which a test can advance. Keep clock
+advancement separate from frame delivery; the
+[animation test](https://gpui-ce.github.io/book/testing.html#separate-animation-time-from-frame-delivery)
+checks the initial, halfway, and final painted widths.
+
 ## Use a spring when velocity should survive an interruption
 
 A spring keeps both position and velocity. If a user reverses a toggle while
@@ -178,6 +189,15 @@ value without continuing the usual animation. A repeating or alternating
 duration effect can have a different resting endpoint from a single forward
 pass; keep essential information in application state rather than conveying
 it only through movement.
+
+The app flag starts as `false`. Connect an application setting or the native
+platform's preference to [`App::set_reduce_motion`](crate::App::set_reduce_motion);
+GPUI does not populate it automatically. In a browser, the corresponding
+setting is [`prefers-reduced-motion`](https://www.w3.org/TR/mediaqueries-5/#prefers-reduced-motion).
+To try the static result in a walkthrough, add `cx.set_reduce_motion(true);`
+at the start of `component` and
+reset the running app so its setup runs again. Changing a setup function in
+an already-mounted view does not reconstruct that view.
 
 Direct `Motion` and `Animated` sampling have no application context, and the
 value-transition hook does not apply reduced motion automatically. Check the

@@ -1,13 +1,13 @@
-//! App and window backed transitions for values implementing [`Lerp`].
+//! Follow a changing goal with a value sampled during rendering.
 //!
 //! A transition stores its target in an [`Entity`] and samples it during
 //! rendering. [`Transition::evaluate`] caches one sample in its wrapper,
 //! requests another frame while motion is active, and returns a reference to
 //! that sample. Recreate the wrapper with a window hook on each render to
-//! sample again while retaining the animated entity. Updating a target is continuous by default:
-//! the next run starts from the value currently presented. Use
-//! [`Transition::continuous`] to choose restart semantics. The hook that owns
-//! this state must keep a stable key across renders; see
+//! sample again while retaining the animated entity. A changed goal starts
+//! from the current presentation; [`Transition::continuous`] can instead
+//! restart from the initial value. The hook that owns this state must keep a
+//! stable key across renders; see
 //! [`Window::use_keyed_transition`](crate::Window::use_keyed_transition).
 //! This value-transition API does not consult reduced-motion preferences;
 //! style-property transitions have their own reduced-motion handling.
@@ -40,28 +40,25 @@ impl<T> TransitionCache<T> {
     }
 }
 
-/// An animated transition between values of type `T`.
+/// A value that moves toward a changing goal, with one cached sample per wrapper.
 ///
-/// `Transition` owns an entity-backed animated value and samples it during
-/// rendering. It supports customizable easing functions and can continue from
-/// the current presentation or restart from its initial value when the goal
-/// changes. Keep the owning transition state stable across renders with
-/// [`Window::use_keyed_transition`](crate::Window::use_keyed_transition).
-/// This API does not apply reduced-motion preferences automatically.
+/// Obtain a fresh wrapper from [`Window::use_keyed_transition`] during each
+/// render. The window retains the [`Animated`] entity under that key; the
+/// wrapper holds the motion for the next changed goal and a cache for this
+/// render. Call [`update`](Self::update) to set the goal, then
+/// [`evaluate`](Self::evaluate) to paint its current presentation. An active
+/// sample requests another frame.
 ///
-/// # Type Parameters
-///
-/// * `T` - The type of value being transitioned. Must implement [`Lerp`], [`Clone`],
-///   and [`PartialEq`].
-///
-/// # Continuous vs Non-Continuous Mode
-///
-/// By default, a changed goal starts from the currently presented value. With
-/// `.continuous(false)`, each changed goal starts from the value used to
-/// initialize the transition instead. The new run uses the motion passed to
-/// `update`; a goal that compares equal does not start a run.
+/// Goal and presentation are different values. If opacity is halfway from
+/// zero to one, [`read_goal`](Self::read_goal) returns one while `evaluate`
+/// returns about one half. Changing the goal then starts from that half,
+/// avoiding a jump back to zero. With [`.continuous(false)`](Self::continuous),
+/// each changed goal instead starts from the state's original value.
 ///
 /// # Example
+///
+/// This render helper retains opacity independently of the element that uses
+/// it. The first call starts at zero; later calls keep the same animated state.
 ///
 /// ```
 /// use std::time::Duration;
@@ -71,15 +68,35 @@ impl<T> TransitionCache<T> {
 ///     let transition = window
 ///         .use_keyed_transition("opacity", cx, Duration::from_millis(300), |_, _| 0.0_f32)
 ///         .with_easing(ease_in_out);
-///     transition.update(cx, |goal, _| *goal = if visible { 1.0 } else { 0.0 });
+///     let goal = if visible { 1.0 } else { 0.0 };
+///     if cx.reduce_motion() {
+///         transition.jump_to(goal, cx);
+///     } else {
+///         transition.update(cx, |value, _| *value = goal);
+///     }
 ///     let value = *transition.evaluate(window, cx);
 ///     value
 /// }
 /// ```
 ///
-/// Call the hook while rendering. Its wrapper has a fresh sample cache while
-/// the keyed state remembers the previous target and animation. Target changes
-/// made outside rendering need an explicit notification to begin drawing.
+/// This API does not apply reduced motion itself. The helper checks the
+/// preference and presents the target immediately when requested.
+///
+/// # State and clock
+///
+/// Updating a goal outside rendering requires a notification to start drawing;
+/// see [`update`](Self::update). Retaining the same wrapper across frames also
+/// retains its cached sample. Cloning shares the animated entity but copies
+/// the cache: a mutation through one wrapper does not clear another's sample.
+/// Prefer one fresh wrapper per render over storing it on the view.
+/// Drop sample and cache borrows before changing that wrapper: its cache uses
+/// [`RefCell`], so a conflicting write panics.
+///
+/// Sampling uses [`std::time::Instant`], not the app executor's test clock.
+/// Use [`Animated`] with an explicit clock to test exact interpolation times,
+/// or an [animation element](crate::AnimationExt) for executor-clock playback.
+/// The [animation chapter](crate::_documentation::animation) compares these
+/// adapters and their ownership rules.
 #[derive(Clone)]
 pub struct Transition<T: Lerp + Clone + PartialEq + 'static> {
     motion: Motion,
@@ -96,7 +113,13 @@ pub struct Transition<T: Lerp + Clone + PartialEq + 'static> {
 }
 
 impl<T: Lerp + Clone + PartialEq + 'static> Transition<T> {
-    /// Create a new transition with the given motion using the specified state.
+    /// Wraps an existing animated entity with an empty sample cache.
+    ///
+    /// `motion` applies to the next changed goal. It does not replace a run
+    /// already stored in `state`. The initial value restored by [`Self::reset`]
+    /// also belongs to that state, not to this wrapper. Prefer
+    /// [`Window::use_keyed_transition`] when the state should follow a
+    /// rendered element's lifetime.
     pub fn new(state: Entity<TransitionState<T>>, motion: impl Into<Motion>) -> Self {
         Self {
             motion: motion.into(),
@@ -106,10 +129,12 @@ impl<T: Lerp + Clone + PartialEq + 'static> Transition<T> {
         }
     }
 
-    /// Sets the forward pass's easing function for this transition.
+    /// Sets forward easing for the next changed goal and clears this wrapper's cache.
     ///
     /// The easing function maps normalized local pass time to presentation
     /// progress, which may be non-monotonic or overshoot zero through one.
+    /// An existing run keeps its original motion. Updating to an equal goal
+    /// does not start a run with the new easing.
     pub fn with_easing(mut self, easing: impl Fn(f32) -> f32 + 'static) -> Self {
         self.motion = self.motion.with_easing(easing);
         self.clear_cache();
@@ -150,8 +175,13 @@ impl<T: Lerp + Clone + PartialEq + 'static> Transition<T> {
     /// An active sample requests another animation frame for the view currently
     /// being drawn. Recreate the wrapper through a window hook on each render;
     /// merely retaining this wrapper across frames does not clear its cache.
-    /// Target updates and the mutation methods also clear this wrapper's cache.
+    /// A changed goal and the mutation methods also clear this wrapper's cache.
     /// Drop the returned borrow before mutating the transition.
+    ///
+    /// # Panics
+    ///
+    /// Panics on a conflicting cache borrow, such as evaluating an empty cache
+    /// while holding the result of [`Self::read_cache`].
     pub fn evaluate(&self, window: &mut Window, cx: &mut App) -> Ref<'_, T> {
         let sample = self.sample(cx);
         if sample.is_active {
@@ -166,7 +196,12 @@ impl<T: Lerp + Clone + PartialEq + 'static> Transition<T> {
         self.state.read(cx).value()
     }
 
-    /// Reads the current value of the cached transition, if it exists.
+    /// Borrows this wrapper's last sample, or `None` before it has sampled.
+    ///
+    /// This does not advance the animation or request a frame. A changed goal,
+    /// [`Self::with_easing`], [`Self::jump_to`], [`Self::scale_by`], or
+    /// [`Self::reset`] clears this cache. Drop the borrow before an operation
+    /// that needs to write the cache.
     pub fn read_cache(&self) -> Ref<'_, Option<T>> {
         Ref::map(self.cache.borrow(), |cache| &cache.value)
     }
@@ -174,6 +209,11 @@ impl<T: Lerp + Clone + PartialEq + 'static> Transition<T> {
     /// Returns eased presentation progress, which may overshoot zero through one.
     /// This does not indicate whole-run completion: restarting iterations begin
     /// again and alternating iterations run in reverse.
+    ///
+    /// Uses the cached sample's progress when present. Otherwise it reads
+    /// progress at the current wall-clock time without filling the cache,
+    /// settling the animated state, or requesting a frame. The two paths can
+    /// therefore refer to different sampling times.
     pub fn evaluate_delta(&self, cx: &App) -> f32 {
         if self.cache.borrow().value.is_some() {
             return self.cache.borrow().progress.get();
@@ -182,18 +222,23 @@ impl<T: Lerp + Clone + PartialEq + 'static> Transition<T> {
         self.state.read(cx).progress_at(Instant::now()).get()
     }
 
-    /// Updates the goal value for the transition.
+    /// Edits a copy of the logical goal and starts a run if the result differs.
     ///
-    /// The provided closure receives a mutable reference to the current goal value
-    /// and can modify it. If the goal changes (and continuous mode is enabled),
-    /// a new animation will begin from the current interpolated value toward the
-    /// new goal.
+    /// The closure's return value is discarded. A changed goal uses this
+    /// wrapper's motion, clears its cache, and returns `true`. An equal goal
+    /// returns `false` without changing the run or cache, even if this wrapper
+    /// has a different motion. [`Self::continuous`] selects the new run's origin.
     ///
-    /// Returns `true` if the goal was actually updated (i.e., the new value differs
-    /// from the previous goal), `false` otherwise.
+    /// This does not notify. During rendering, the following
+    /// [`evaluate`](Self::evaluate) schedules frames while the sample is active.
+    /// For an update outside rendering, call `cx.notify()` inside this closure
+    /// to notify the animated entity. A window hook observes that entity and
+    /// invalidates the view that created it. A manually constructed transition
+    /// needs its own observation or an explicit notification of its owning view.
     ///
-    /// Note: This method does not automatically notify GPUI of changes. You should
-    /// call `cx.notify()` within the closure if you want to trigger a re-render.
+    /// # Panics
+    ///
+    /// Panics if the goal changes while a sample or cache borrow is held.
     pub fn update<R>(
         &self,
         cx: &mut App,
@@ -220,22 +265,30 @@ impl<T: Lerp + Clone + PartialEq + 'static> Transition<T> {
 
     /// Presents `target` immediately and cancels the active animation.
     ///
-    /// Sets both the start and end goals to `target` so that subsequent evaluations
-    /// return `target` immediately. This is useful for transitions that require a
-    /// different start value on each update. The original initialization value
-    /// used by [`reset`](Self::reset) is unchanged. This does not notify observers.
+    /// Subsequent evaluations return `target` until the next changed goal.
+    /// Use this for an immediate reset or a reduced-motion presentation.
+    /// The original value restored by [`reset`](Self::reset) is unchanged.
+    /// This does not notify observers.
+    ///
+    /// # Panics
+    ///
+    /// Panics if a sample or cache borrow is held.
     pub fn jump_to(&self, target: T, cx: &mut App) {
         self.state.update(cx, |state, _cx| state.jump_to(target));
         self.clear_cache();
     }
 
-    /// Scale the transition's start and end goals by the given ratio.
+    /// Multiplies the presentation anchor and logical goal by `ratio`.
     ///
-    /// This preserves the relative progress of an in-flight animation when the
-    /// coordinate space changes (e.g. on window resize).  Both the start and
-    /// end goal are multiplied by `ratio` so the interpolated value remains
-    /// proportionally correct. The original initialization value used by
+    /// For linearly interpolated coordinates, scaling both endpoints preserves
+    /// the relative progress of an in-flight animation after a resize. The
+    /// operation does not validate `ratio`; choose a finite value suitable for
+    /// `T`'s multiplication and interpolation. The original value restored by
     /// [`reset`](Self::reset) is unchanged. This does not notify observers.
+    ///
+    /// # Panics
+    ///
+    /// Panics if a sample or cache borrow is held.
     pub fn scale_by(&self, ratio: f32, cx: &mut App)
     where
         T: std::ops::Mul<f32, Output = T>,
@@ -244,18 +297,21 @@ impl<T: Lerp + Clone + PartialEq + 'static> Transition<T> {
         self.clear_cache();
     }
 
-    /// Returns the entity ID associated with this transition's state.
+    /// Returns the animated entity's identity, shared by all its wrappers.
     ///
-    /// This can be useful for tracking or comparing transitions.
+    /// This identifies retained state, not a sample, goal, or element ID.
     pub fn entity_id(&self) -> EntityId {
         self.state.entity_id()
     }
 
-    /// Resets the transition to its initial state.
+    /// Restores the animated state's original value and ends the current run.
     ///
-    /// This clears all progress and sets both the start and end goals back to
-    /// the initial value that was provided when the transition was created.
-    /// The cache is also cleared. This does not notify observers.
+    /// This also undoes [`Self::jump_to`] and [`Self::scale_by`]. The wrapper's
+    /// cache is cleared; observers are not notified.
+    ///
+    /// # Panics
+    ///
+    /// Panics if a sample or cache borrow is held.
     pub fn reset(&self, cx: &mut App) {
         self.state.update(cx, |state, _cx| state.reset());
         self.clear_cache();

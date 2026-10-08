@@ -8,6 +8,7 @@ result.
 Start with [ownership and data flow](ownership.md) if you are new to GPUI.
 Follow [rendering](rendering.md) to understand the work behind a frame, then
 [layout and style](layout.md) to size and place its elements,
+[lists](lists.md) to keep a viewport over a large or changing collection,
 [animation](animation.md) to keep changes continuous across frames,
 [text and fonts](text.md) for labels, measurement, and caret positions, and
 [input and focus](input.md) to connect that frame to a user's actions.

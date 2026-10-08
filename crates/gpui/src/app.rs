@@ -1291,8 +1291,19 @@ impl App {
         self.platform.is_cursor_visible()
     }
 
-    /// Returns whether non-essential animations (e.g. loading spinners) should
-    /// be rendered in a static state instead of animating.
+    /// Returns the app's preference for a static presentation of decorative motion.
+    ///
+    /// This starts as `false`; GPUI does not read an operating-system or browser
+    /// preference into it automatically. The application sets it through
+    /// [`Self::set_reduce_motion`], usually from its settings or by reading the
+    /// platform's accessibility preference.
+    ///
+    /// Style transitions and [`AnimationExt`](crate::AnimationExt) consult this
+    /// flag. Caller-owned [`Animated`](crate::Animated), [`Motion`](crate::Motion),
+    /// and [`Transition`](crate::Transition) values do not. A reduced duration
+    /// effect presents its configured resting endpoint, which can differ from
+    /// the forward endpoint for reverse or repeating playback. See the
+    /// [animation chapter](crate::_documentation::animation#respect-reduced-motion-at-the-adapter-boundary).
     // docs:examples:begin
     #[doc = include_str!("docs/examples/gpui-App-reduce-motion-bcfa3417.md")]
     // docs:examples:end
@@ -1300,8 +1311,12 @@ impl App {
         self.reduce_motion
     }
 
-    /// Sets whether non-essential animations (e.g. loading spinners) should be
-    /// rendered in a static state instead of animating.
+    /// Changes the app's reduced-motion preference and refreshes all windows.
+    ///
+    /// An equal value does nothing. This queues a refresh rather than drawing
+    /// synchronously. Animation adapters apply the preference when next built;
+    /// their retained identities and application state are not recreated.
+    /// Custom animation code must read [`Self::reduce_motion`] itself.
     pub fn set_reduce_motion(&mut self, reduce_motion: bool) {
         if self.reduce_motion != reduce_motion {
             self.reduce_motion = reduce_motion;

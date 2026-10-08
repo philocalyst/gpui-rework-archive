@@ -29,7 +29,7 @@ that its explanation is sufficient.
 | Inspector, colors, prelude, and small public helpers | Complete inspector, FluentBuilder/FutureExt, Global, SharedUri, Subscription, Colors, and prelude implementations read; palette installation and observation traced through App and Context | Final contextual reading |
 | Re-exported string and refinement types | Complete SharedString, ArcCow, Refineable, Cascade, and refinement-derive implementations read; storage, conversion, merge order, defaults, and derive dependency explained | Final contextual reading in the GPUI reference |
 | SVG rasterization and intrinsic layout | Complete SVG element and renderer modules, including tests, read against usvg parsing and image resolvers; source precedence, synchronous work, alpha tinting, width-based scaling, font registry, skipped content, and transformations corrected; AvailableSpace variants and conversions read and explained | Final contextual reading |
-| Shared conceptual chapters | Ownership, rendering, layout, animation, text, drawing, assets, input, scheduling, accessibility, testing, and platforms mirrored into mdBook; search paste, clipboard contents, keyboard contents toggle, and actual automatic reload checked | Final contextual edit and combined-artifact checks, including responsive layout and theme contrast |
+| Shared conceptual chapters | Ownership, rendering, layout, lists, animation, text, drawing, assets, input, scheduling, accessibility, testing, and platforms mirrored into mdBook; search paste, clipboard contents, keyboard contents toggle, and actual automatic reload checked | Final contextual edit and combined-artifact checks, including responsive layout and theme contrast |
 | Walkthroughs and authoring DSL | Primary editor read all twelve canonical programs; eleven corrected for accessible text, button roles/names, tab stops, focus rings, and accurate claims; all twelve pass native `cargo check --examples` | Rebuild final browser programs and exercise every walkthrough in the final site |
 
 ## Testing evidence
@@ -618,3 +618,133 @@ under `target/documentation-proof`.
 
 That style scan records the comments at `b061273f95`. Later link-label and
 ring-description changes have not been rescanned.
+
+## Animation, list geometry, and the resize boundary
+
+The solo pass reread the complete production Transition, Animated, and
+animation-element paths, all three transition tests, and their retaining and
+observing window hooks. Contracts now distinguish entity lifetime from wrapper
+cache lifetime, goal from presentation, equal-target updates from retargeting,
+and executor time from `std::time::Instant`. Clones share the animated entity
+but copy the cache. Cache-borrow panics and notification ownership are explicit.
+Duration playback explains identity-based replay, changes to configuration at
+an existing elapsed time, sequence boundaries, and mapped-element callbacks.
+Asserting bounce and sinusoidal-pulse examples and an equal-goal interruption
+assertion pass. Reduced-motion documentation now states that the flag starts
+false and is not populated automatically from OS or browser preferences. The
+W3C `prefers-reduced-motion` section was checked and linked.
+
+The uniform-list constructor, sizing, measurement, prepaint, item requests,
+flipping, and decoration paths were reread. The walkthrough's overdraw claim
+was wrong: configurable overdraw belongs to variable lists. Uniform lists
+request intersecting rows and separate measurement samples. Row roots receive
+available width without automatically stretching. Horizontal extent comes
+from a representative row, not a scan of all rows. Decoration bounds already
+include scroll offset; their range names physical slots even when rows are
+reversed. Geometry describes the preceding prepaint; item requests are
+deferred and do not notify.
+
+Variable-list sizing, measurement policies, row replacement, anchoring, focus
+retention, scrollbar adaptation, and viewport queries were rechecked against
+implementation. `splice` does not restart a completed `measure_all` pass.
+Adding uniform hints after measurement demotes measured records to hints.
+Reset clears the explicit anchor while retaining alignment and follow policy;
+active following can still select the end. The new canonical lists chapter
+connects these decisions and appears in rustdoc, mdBook, and the Zola guide.
+
+An API concern remains: feature-gated
+`UniformListScrollHandle::logical_scroll_top_index` reads a pending target or
+the base ScrollHandle's child-bound index, but uniform-list prepaint does not
+populate those child bounds. Its docs now warn against using it as an actual
+visible-row assertion after drawing; its behavior was not changed here.
+`is_scrolled_to_end` reports physical bottom even when `scroll_to_bottom`
+requests a reversed list's logical end.
+
+The testing chapter checks initial, intermediate, and final painted animation
+widths, separating clock advancement from frame delivery. A new list recipe
+checks row 5,000 before and after a queued scroll and after resizing. It
+initially failed: the painted row stayed 1,920 logical pixels wide after a
+300-pixel resize. TestAppWindow held the app borrow while invoking a platform
+callback that must reacquire it. `simulate_resize` now clones the simulated
+window handle, releases the borrow, then invokes the callback. Its two-resize
+viewport regression passes. The full library run passes 504 tests; the full
+doctest run passes 193 examples (186 merged and seven test-harness examples),
+with two ignored. Logs under `target/`: `documentation-test-window-resize.log`,
+`documentation-animation-lists-all-tests.log`, and
+`documentation-animation-lists-all-doctests.log`. All 25 generator, book,
+link-adaptation, and postprocessor tests pass.
+
+### Combined artifact and actual browser use
+
+The full font-review build at `418f0782aa` passed. All 19 changed files in
+isolated runtime checkpoint `6a4a4303ae1969948ebf458f28f8911d00d31147` were
+reviewed before its local import as `ab20ec12d9`. All eight CodePen library
+tests pass here, including native driver-path checks. Native patched-interpreter
+CTFE and interruption tests were reported by the runtime thread, not executed
+in this workspace. No fixed speed improvement is claimed from its variable
+benchmark results.
+
+The combined strict API, Zola, mdBook, compiled-preview, and browser-Miri build
+at `ab20ec12d9` passed and was served at port 1111. Source digest:
+`b0ed6f21ec145ebf5eec17e6e3412449a6aa5b4203dac3b793966c2494a22d3f`.
+Interpreter: `miri-dea00e88313656025d67.wasm.gz`. Runtime-manifest SHA-256:
+`9c69e9709b1922c946d8d166d4b51647df650a7223e26abda80b98fe8c1ef2d6`.
+The preceding artifact remains at
+`target/documentation-before-runtime-b-ab20ec12d9`.
+
+Independent counter checks pass: click 0 to 1, change the helper to add five
+while retaining 1, click to 6, introduce a syntax error while retaining 6,
+verify input pauses, repair the helper while retaining 6, then click to 7.
+Proof files under `target/documentation-proof/`:
+`counter-runtime-b-helper.png`, `counter-runtime-b-error.png`, and
+`counter-runtime-b-recovered.png`.
+
+Actual navigation from companion editable-state docs through FocusHandle,
+the postprocessed keyboard-action walkthrough link, and its source-step link
+reaches the expected local pages and line. The compiled list scrolls to row
+5,000, keeps it when resized to 240 pixels, then scrolls to row 5,020. The
+compiled animation replays, continues through a width change, and reaches its
+endpoint. Proof: `lists-scrolled-resized.png`,
+`animation-replay-intermediate.png`, and `animation-resized-settled.png`.
+
+The browser-only interpreter plays the animation too. A temporary 30-second
+duration made intermediate frames observable: Replay starts with a short pale
+bar, then grows and darkens it. Setting reduced motion in setup and resetting
+the app presents the full 124-pixel endpoint. Replay then presents that endpoint
+on the next result, before the 30-second interval elapses. Proof:
+`animation-miri-progress.png`, `animation-miri-later-progress.png`, and
+`animation-miri-reduced-motion.png`. This checks behavior, not smooth frame
+pacing or performance equivalence. These checks preceded the latest prose
+checkpoint; its combined build and rendered-page reading remain required.
+
+### List-chapter detector checks
+
+Scribbr v7.1.0 scanned two contiguous sections. The first full-Markdown section,
+before button-accessibility additions, displayed 750 words and returned 16%
+AI-generated, 0% AI-refined, 84% human-written. Its strongest flags include
+the Rust sample. Input SHA-256:
+`8d50f34e9185d0bf46e5535381227a1382905cfceeb1362574455108fda4ea55`.
+The initial remainder displayed 614 words and returned 7%, 0%, 93%, at SHA-256
+`68e76da06e1b389c542026aa3fa5bfb1e185d774084a60222752c8ae10215c10`.
+After correcting reset's interaction with following and linking the actual
+painted-row recipe, it displayed 632 words and returned 8%, 0%, 92%, at SHA-256
+`cc61cab81a55822bca5450493eeabf01dd731d73c2f9978a5e4cc94c98d5edb1`.
+The accuracy correction is retained despite the increased score.
+
+The revised first section with its fenced Rust sample removed displayed 687
+words and returned 3% AI-generated, 0% AI-refined, 97% human-written. Input:
+`8973349be3abbbff85fe3fa3a393967edafcbc65c5fafcb16c1aad5ae6c9e049`.
+Inputs and screenshots use `lists-` and `scribbr-lists-` prefixes in the proof
+directory. These are section results, not a whole-framework score, and do not
+establish accuracy or authorship. The complete final chapter has not passed
+the user's requested checker standard.
+
+### Further Jiff reading
+
+The primary editor read Jiff 0.2.35's `civil/time.rs` from its overview through
+all examples ending with `saturating_sub` (approximately line 1,071): parsing
+time from larger datetimes, leap-second constraining, default and comparison,
+validated construction, fractional fields before the Unix epoch, date
+combination, and wrapping, checked, and saturating arithmetic. Later Time
+APIs remain open. This does not claim a complete reading of Jiff or every
+article-linked project.

@@ -65,7 +65,20 @@ where
     }
 }
 
-/// A list element for efficiently laying out and displaying a list of uniform-height elements.
+/// A scrolling viewport whose rows all share one measured height.
+///
+/// Construct this with [`uniform_list`], then use [`Styled`] to give it a
+/// finite size. The default [`ListSizingBehavior::Auto`] uses those layout
+/// constraints; [`Self::with_sizing_behavior`] can infer an intrinsic size
+/// from the representative row instead. An unbounded content height does
+/// not provide a useful scrolling viewport.
+///
+/// Rows are separate layout roots with the viewport width available to them.
+/// They do not automatically stretch to that width: use [`Styled::w_full`]
+/// when a row's background or hit target should fill it. Keep row heights
+/// equal and positive; choose [`crate::list`] when content determines each
+/// row's height. See [`Self::with_width_from_item`] for representative
+/// measurement and [`Self::track_scroll`] for controlling the position.
 pub struct UniformList {
     item_count: usize,
     item_to_measure_index: usize,
@@ -79,7 +92,11 @@ pub struct UniformList {
     horizontal_sizing_behavior: ListHorizontalSizingBehavior,
 }
 
-/// Frame state used by the [UniformList].
+/// Rows and decorations carried through one [`UniformList`] draw.
+///
+/// The list's [`Element`] implementation creates this during layout and fills
+/// it during prepaint. It does not retain a scroll position between frames;
+/// use [`UniformListScrollHandle`] for that state.
 pub struct UniformListFrameState {
     items: SmallVec<[AnyElement; 32]>,
     decorations: SmallVec<[AnyElement; 2]>,
@@ -92,6 +109,10 @@ pub struct UniformListFrameState {
 /// request for the next prepaint; they do not notify the view or request a
 /// redraw. Call [`Context::notify`](crate::Context::notify) or [`Window::refresh`]
 /// after changing the position.
+///
+/// Clones share geometry and one pending item request. A later request replaces
+/// an earlier unconsumed one. Geometry queries describe the last prepaint;
+/// queuing a request does not immediately update them.
 #[derive(Clone, Debug, Default)]
 pub struct UniformListScrollHandle(pub Rc<RefCell<UniformListScrollState>>);
 
@@ -129,9 +150,10 @@ pub struct UniformListScrollState {
     pub base_handle: ScrollHandle,
     /// Request awaiting consumption by the next list prepaint.
     pub deferred_scroll_to_item: Option<DeferredScrollToItem>,
-    /// Size of the item, captured during last layout.
+    /// Viewport and total content size from the last prepaint, not one row's size.
     pub last_item_size: Option<ItemSize>,
-    /// Whether the list was vertically flipped during last layout.
+    /// Whether logical rows are displayed in reverse vertical order.
+    /// Set through [`UniformList::y_flipped`] after attaching this handle.
     pub y_flipped: bool,
 }
 
@@ -158,11 +180,12 @@ impl UniformListScrollHandle {
         })))
     }
 
-    /// Scroll the list so that the given item index is visible.
+    /// Queues a request to reveal a logical item index.
     ///
-    /// This uses non-strict scrolling: if the item is already fully visible, no scrolling occurs.
-    /// If the item is out of view, it scrolls the minimum amount to bring it into view according
-    /// to the strategy.
+    /// A fully visible item stays in place. Otherwise `strategy` selects its
+    /// alignment; [`ScrollStrategy::Nearest`] moves only far enough to reveal
+    /// it. The next prepaint consumes the request and clamps the resulting
+    /// offset to the scrollable extent. Schedule a redraw separately.
     pub fn scroll_to_item(&self, ix: usize, strategy: ScrollStrategy) {
         self.0.borrow_mut().deferred_scroll_to_item = Some(DeferredScrollToItem {
             item_index: ix,
@@ -226,12 +249,21 @@ impl UniformListScrollHandle {
         });
     }
 
-    /// Check if the list is flipped vertically.
+    /// Returns the row direction last set on this handle.
+    ///
+    /// This starts as `false`. It describes logical row order, not the sign
+    /// of the pixel scroll offset.
     pub fn y_flipped(&self) -> bool {
         self.0.borrow().y_flipped
     }
 
-    /// Get the index of the topmost visible child.
+    /// Returns a pending item target, or the base handle's top child index.
+    ///
+    /// This testing helper does not calculate a uniform row index from the
+    /// pixel offset. After consumption, it delegates to
+    /// [`ScrollHandle::logical_scroll_top`], whose child bounds are normally
+    /// populated by a `Div`; an ordinary uniform list does not populate them.
+    /// Do not use this as an assertion of the visible row after a scroll.
     #[cfg(any(test, feature = "headless"))]
     pub fn logical_scroll_top_index(&self) -> usize {
         let this = self.0.borrow();
@@ -241,7 +273,10 @@ impl UniformListScrollHandle {
             .unwrap_or_else(|| this.base_handle.logical_scroll_top().0)
     }
 
-    /// Checks if the list can be scrolled vertically.
+    /// Returns whether the last measured content is taller than the viewport.
+    ///
+    /// Returns `false` before the first prepaint. This describes geometry;
+    /// a pending scroll request does not change it.
     pub fn is_scrollable(&self) -> bool {
         if let Some(size) = self.0.borrow().last_item_size {
             size.contents.height > size.item.height
@@ -250,8 +285,14 @@ impl UniformListScrollHandle {
         }
     }
 
-    /// Whether the list is scrolled to the end, or `None` if the list is
-    /// not scrollable.
+    /// Reports whether the viewport is at the physical bottom of its scroll extent.
+    ///
+    /// Returns `None` before usable scroll geometry exists or when there is
+    /// no vertical overflow. This uses the base handle's last offset and does
+    /// not account for a pending item request. Row order does not change its
+    /// meaning: with [`UniformList::y_flipped`], the physical bottom contains
+    /// the beginning of logical item order. [`Self::scroll_to_bottom`] instead
+    /// requests the logical end.
     pub fn is_scrolled_to_end(&self) -> Option<bool> {
         let state = self.0.borrow();
         let max_offset = state.base_handle.max_offset();
@@ -598,11 +639,25 @@ impl IntoElement for UniformList {
     }
 }
 
-/// A decoration for a [`UniformList`]. This can be used for various things,
-/// such as rendering indent guides, or other visual effects.
+/// An element painted over a uniform list's rows, such as an indentation guide.
+///
+/// Attach it with [`UniformList::with_decoration`]. Decorations are laid out
+/// and prepainted after the visible rows, inside the list's scroll mask, then
+/// painted in registration order. They do not contribute to row measurement
+/// or the scroll extent. An empty list does not compute decorations.
 pub trait UniformListDecoration {
-    /// Compute the decoration element, given the visible range of list items,
-    /// the bounds of the list, and the height of each item.
+    /// Builds the decoration during list prepaint using this frame's geometry.
+    ///
+    /// `bounds` has the viewport's size but its origin already includes
+    /// `scroll_offset`, in logical window coordinates. The returned element
+    /// is laid out with that size available and prepainted at that origin.
+    /// Do not add the scroll offset a second time.
+    ///
+    /// `visible_range` indexes physical row slots, including partially visible
+    /// rows. With reversed row order, logical indices instead occupy
+    /// `item_count - visible_range.end .. item_count - visible_range.start`.
+    /// `item_height` is the shared measured height, and `item_count` is the
+    /// full collection size, not the number of constructed rows.
     fn compute(
         &self,
         visible_range: Range<usize>,
@@ -652,7 +707,17 @@ impl UniformList {
         self
     }
 
-    /// Sets the sizing behavior, similar to the `List` element.
+    /// Chooses between style-based sizing and an inferred content size.
+    ///
+    /// [`ListSizingBehavior::Auto`] (the default) leaves sizing to the style
+    /// and parent layout. [`ListSizingBehavior::Infer`] uses the representative
+    /// row's height times the item count, capped by definite available height.
+    /// It fills definite available width or uses the representative row's
+    /// intrinsic width. Parent constraints and explicit dimensions still apply.
+    ///
+    /// Inferring size without a finite parent constraint can make the viewport
+    /// as tall as the collection. Prefer explicit viewport dimensions for a
+    /// large scrolling list.
     pub fn with_sizing_behavior(mut self, behavior: ListSizingBehavior) -> Self {
         self.sizing_behavior = behavior;
         self
@@ -680,7 +745,11 @@ impl UniformList {
         self
     }
 
-    /// Adds a decoration element to the list.
+    /// Appends an overlay computed after the visible rows during prepaint.
+    ///
+    /// Decorations paint over rows in registration order, share the list's
+    /// scroll mask, and do not enlarge its content. See
+    /// [`UniformListDecoration::compute`] for coordinate and row-index rules.
     pub fn with_decoration(mut self, decoration: impl UniformListDecoration + 'static) -> Self {
         self.decorations.push(Box::new(decoration));
         self

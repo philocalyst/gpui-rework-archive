@@ -3,12 +3,14 @@ mod support;
 
 // ## Make Replay change identity {#state}
 // The blue bar grows from 24 to 124 logical pixels over 700 milliseconds.
-// An [`Animation`] supplies its clock and a [`Motion`] describes its duration.
-// The view stores only a replay number.
+// [`Animation`] configures playback, [`Motion`] describes timing, and GPUI
+// samples the app executor's clock. The view stores only a replay number.
 //
 // Clicking Replay changes the animation's retained element-state key. A new
 // key starts at the beginning; rendering with the same key reuses its existing
 // start time. The replay counter is therefore an identity, not a timer value.
+// Changing the duration with that same key changes how the existing elapsed
+// time is sampled; it does not begin a new run.
 
 use std::time::Duration;
 

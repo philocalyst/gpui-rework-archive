@@ -20,7 +20,19 @@ use crate::{
 pub use easing::*;
 use smallvec::SmallVec;
 
-/// Motion and scheduling policy used by [`AnimationExt::with_animation`].
+/// Playback settings for a duration-based element effect.
+///
+/// Attach this to an element with [`AnimationExt::with_animation`]. Its
+/// [`Motion`] maps elapsed time to progress; the animator maps progress to
+/// properties such as width or opacity. A stable element ID retains the
+/// starting time across renders. Constructing another `Animation` with that
+/// same ID does not replay it; change the ID to begin again.
+///
+/// The element samples [`BackgroundExecutor::now`](crate::BackgroundExecutor::now)
+/// and requests frames while active. [`Self::max_fps`] can limit its own
+/// requests, and [`App::reduce_motion`] selects a resting endpoint instead
+/// of playing intermediate frames. See the [animation chapter](crate::_documentation::animation)
+/// for choosing between a timed effect, a changing goal, and a spring.
 #[derive(Clone)]
 // docs:examples:begin
 #[doc = include_str!("../docs/examples/gpui-Animation-de31f72e.md")]
@@ -39,7 +51,10 @@ pub struct Animation {
 impl Animation {
     /// Creates an animation with the given motion.
     ///
-    /// Duration inputs create one linear motion pass.
+    /// A [`Duration`] creates one linear forward pass; zero presents its endpoint
+    /// on the first sample. Pass a configured [`Motion`] for delay, reverse
+    /// playback, easing, or repetition. Shared-clock synchronization and frame
+    /// throttling start disabled.
     pub fn new(motion: impl Into<Motion>) -> Self {
         Self {
             motion: motion.into(),
@@ -99,6 +114,10 @@ pub trait AnimationExt {
     /// The animator receives eased progress, which can overshoot `0..=1`.
     /// The ID retains the clock and sequence position between frames; changing
     /// it restarts that state. See [`Animation`] for repetition and throttling.
+    /// A changed motion with the same ID samples the existing elapsed time
+    /// under the new settings. It does not retarget from the last presentation;
+    /// use a [style transition](crate::StyleTransitions) or
+    /// [`Transition`](crate::Transition) for that behavior.
     // docs:examples:begin
     #[doc = include_str!("../docs/examples/gpui-AnimationExt-with-animation-68cbf08d.md")]
     // docs:examples:end
@@ -119,13 +138,23 @@ pub trait AnimationExt {
         }
     }
 
-    /// Render this component or element with a sequence of motions.
+    /// Plays a sequence of motions on a freshly built component.
     ///
     /// The animator receives the active animation's zero-based index and progress value. The
     /// next motion starts after the current motion completes. Supply at least one animation; an
-    /// empty sequence panics when drawn. A repeating motion never advances to
-    /// later entries. Keep the sequence compatible with its retained index
-    /// across frames, or change the element ID when replacing it.
+    /// empty sequence panics. The completing frame still uses the old entry's
+    /// endpoint. It resets the local clock for the next entry, which is sampled
+    /// on a later draw; excess elapsed time is not carried forward. An entry
+    /// with [`Animation::synced`] instead samples the app's shared epoch.
+    /// A repeating motion never advances to later entries.
+    /// Keep the sequence compatible with its retained index across frames, or
+    /// change the element ID when replacing it.
+    ///
+    /// # Panics
+    ///
+    /// Debug builds panic immediately for an empty sequence; other builds panic
+    /// when drawing it. Drawing also panics if a retained entry index is beyond
+    /// a shortened replacement sequence.
     fn with_animations(
         self,
         id: impl Into<ElementId>,
@@ -224,8 +253,10 @@ impl<E: ParentElement> ParentElement for SpringAnimationElement<E> {
 }
 
 impl<E> SpringAnimationElement<E> {
-    /// Returns a new [`SpringAnimationElement<E>`] after applying the given function
-    /// to the element being animated.
+    /// Configures the child before the spring animator receives it.
+    ///
+    /// This runs now, during construction; it is not called again for each
+    /// sample. The retained spring identity and playback settings are unchanged.
     pub fn map_element(mut self, f: impl FnOnce(E) -> E) -> SpringAnimationElement<E> {
         self.element = self.element.map(f);
         self
@@ -251,8 +282,10 @@ impl<E: ParentElement> ParentElement for AnimationElement<E> {
 }
 
 impl<E> AnimationElement<E> {
-    /// Returns a new [`AnimationElement<E>`] after applying the given function
-    /// to the element being animated.
+    /// Configures the child before the duration animator receives it.
+    ///
+    /// This runs now, during construction; it is not called again for each
+    /// sample. The retained animation identity and playback settings are unchanged.
     pub fn map_element(mut self, f: impl FnOnce(E) -> E) -> AnimationElement<E> {
         self.element = self.element.map(f);
         self
@@ -528,17 +561,27 @@ impl<E: IntoElement + 'static> Element for AnimationElement<E> {
 mod easing {
     use std::f32::consts::PI;
 
-    /// The linear easing function, or delta itself
+    /// Returns time unchanged, giving constant-speed interpolation.
+    ///
+    /// This is [`Motion`](crate::Motion)'s default easing. Like the other easing functions,
+    /// it does not clamp its argument or result.
     pub fn linear(delta: f32) -> f32 {
         delta
     }
 
-    /// The quadratic easing function, delta * delta
+    /// Squares time, starting slowly and accelerating toward the endpoint.
+    ///
+    /// At half of a pass, presentation progress is one quarter. Use
+    /// [`ease_in_out`] when both endpoints should approach rest.
     pub fn quadratic(delta: f32) -> f32 {
         delta * delta
     }
 
-    /// The quadratic ease-in-out function, which starts and ends slowly but speeds up in the middle
+    /// Applies quadratic acceleration, then quadratic deceleration.
+    ///
+    /// Zero, one half, and one map to themselves. The slope is zero at both
+    /// endpoints and greatest in the middle, so a single pass starts and ends
+    /// at rest. Output is not clamped for arguments outside zero through one.
     // docs:examples:begin
     #[doc = include_str!("../docs/examples/gpui-ease-in-out.md")]
     // docs:examples:end
@@ -551,15 +594,33 @@ mod easing {
         }
     }
 
-    /// The Quint ease-out function, which starts quickly and decelerates to a stop
+    /// Returns a quintic ease-out curve: `1 - (1 - time)^5`.
+    ///
+    /// A pass starts quickly, covers most of its distance early, and approaches
+    /// its endpoint with zero slope. Pass the returned function to
+    /// [`Motion::with_easing`](crate::Motion::with_easing); [`ease_in_out`] is gentler at the start.
     pub fn ease_out_quint() -> impl Fn(f32) -> f32 {
         move |delta| 1.0 - (1.0 - delta).powi(5)
     }
 
-    /// Apply the given easing function over a forward-then-reverse progress ramp.
+    /// Plays an easing curve forward, then backward, within one pass.
     ///
     /// The input rises from zero to one over the first half, then falls from one to zero over the
-    /// second half. The easing function receives a normalized value on both halves.
+    /// second half. Unlike [`Motion::alternate`](crate::Motion::alternate), this fits both directions
+    /// inside one pass's duration and can remain continuous when repeated.
+    /// The callback's output is not clamped. Despite the name, this is a time
+    /// reversal, not a physical bounce or spring.
+    ///
+    /// ```
+    /// use gpui::{bounce, ease_in_out};
+    ///
+    /// let pulse = bounce(ease_in_out);
+    /// assert_eq!(pulse(0.0), 0.0);
+    /// assert_eq!(pulse(0.25), 0.5);
+    /// assert_eq!(pulse(0.5), 1.0);
+    /// assert_eq!(pulse(0.75), 0.5);
+    /// assert_eq!(pulse(1.0), 0.0);
+    /// ```
     pub fn bounce(easing: impl Fn(f32) -> f32) -> impl Fn(f32) -> f32 {
         move |delta| {
             if delta < 0.5 {
@@ -570,10 +631,22 @@ mod easing {
         }
     }
 
-    /// Return an easing function that oscillates between `min` and `max` once per motion pass.
+    /// Returns a smooth pulse between `min` and `max`, starting at their midpoint.
     ///
-    /// This is useful for alpha or another property that should pulse rather than move in only
-    /// one direction. The range is not clamped or reordered; choose finite values with `min <= max`.
+    /// One pass reaches `max` at one quarter, `min` at three quarters, and the
+    /// midpoint again at its endpoint. Repetition therefore joins at the same
+    /// value and slope. Use this to drive opacity directly, or as a restricted
+    /// interpolation range. Bounds are not clamped, validated, or reordered;
+    /// reversed bounds reverse the pulse's phase.
+    ///
+    /// ```
+    /// use gpui::pulsating_between;
+    ///
+    /// let opacity = pulsating_between(0.0, 1.0);
+    /// assert_eq!(opacity(0.0), 0.5);
+    /// assert_eq!(opacity(0.25), 1.0);
+    /// assert_eq!(opacity(0.75), 0.0);
+    /// ```
     pub fn pulsating_between(min: f32, max: f32) -> impl Fn(f32) -> f32 {
         let range = max - min;
 

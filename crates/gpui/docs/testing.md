@@ -211,6 +211,67 @@ advances through pending timers until no work remains. That is convenient for
 finishing a finite operation, but it cannot establish a “not yet” assertion
 and will not finish an operation that schedules timers forever.
 
+### Separate animation time from frame delivery
+
+An [animation element](crate::AnimationExt) samples the app executor's clock
+when it builds its child. Moving that clock does not by itself establish that
+a new frame was drawn. Sample both boundaries: advance time, then draw and
+inspect the result.
+
+Here a bar grows from 20 to 120 logical pixels in one second. The assertions
+check its initial width, the halfway width, and the endpoint. A repeated initial
+value would expose lost element identity; an immediate endpoint would expose
+an animation that never ran.
+
+```rust
+use gpui::{Animation, AnimationExt, Context, IntoElement, Render, TestApp,
+           Window, div, prelude::*, px, rgb, size};
+use std::time::Duration;
+
+struct LoadingBar;
+impl Render for LoadingBar {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        div().size_full().child(
+            div()
+                .h(px(12.))
+                .bg(rgb(0x155b50))
+                .with_animation(
+                    "loading-bar",
+                    Animation::new(Duration::from_secs(1)),
+                    |bar, progress| bar.w(px(20. + 100. * progress)),
+                )
+        )
+    }
+}
+
+let mut app = TestApp::new();
+let mut window = app.open_window(|_, _| LoadingBar);
+for (elapsed, expected_width) in [(0, 20.), (500, 70.), (500, 120.)] {
+    app.advance_clock(Duration::from_millis(elapsed));
+    window.draw();
+    window.update(|_, window, _| {
+        let bar = window.painted_quads().into_iter()
+            .find(|quad| quad.background == rgb(0x155b50).into())
+            .expect("the frame must contain the bar");
+        assert_eq!(bar.bounds.size,
+            size(px(expected_width), px(12.)).scale(window.scale_factor()));
+    });
+}
+```
+
+Keep the animation's ID stable across those draws. To test replay, change that
+ID and assert the initial width again. For a frame-request regression, deliver
+[`Window::simulate_next_frame`](crate::Window::simulate_next_frame) as well;
+an explicit `draw` checks the resulting frame even if the animation failed to
+request one.
+
+The clock belongs to the adapter. [`Animated`](crate::Animated) accepts an
+explicit clock type, so a `Duration` clock can test interpolation without an
+app. [`Transition`](crate::Transition) uses `std::time::Instant`; advancing the
+executor clock does not advance its run. Duration and spring animation elements
+use the executor clock. See the [animation chapter](crate::_documentation::animation)
+before choosing which layer to test.
+
 ## Test cancellation after work has started
 
 Dropping a [`Task`](crate::Task) cancels its future after its current poll
@@ -633,6 +694,69 @@ capturing alone does not rebuild a dirty view. Keep a failing actual image and
 a difference image beside the expected image so a changed baseline can be
 reviewed. Choose a pixel tolerance according to the behavior under test, rather
 than silently accepting every change near an edge.
+
+### Check the row after a scroll request
+
+A queued scroll is not yet a visible row. For a uniform list, draw after the
+request and assert the target's painted position. This example gives row
+5,000 a distinct fill, scrolls it to the top, and resizes the same window.
+The second assertion catches a lost handle or element identity during resize.
+
+```rust
+use gpui::{Context, IntoElement, Render, ScrollStrategy, TestApp,
+           UniformListScrollHandle, Window, div, prelude::*, px, rgb, size, uniform_list};
+
+struct Rows {
+    scroll: UniformListScrollHandle,
+}
+impl Render for Rows {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        uniform_list("rows", 10_000, |range, _, _| {
+            range.map(|index| {
+                div().w_full().h(px(20.)).bg(if index == 5_000 {
+                    rgb(0x155b50)
+                } else {
+                    rgb(0xffffff)
+                })
+            }).collect::<Vec<_>>()
+        }).size_full().track_scroll(&self.scroll)
+    }
+}
+
+let mut app = TestApp::new();
+let mut window = app.open_window(|_, _| Rows {
+    scroll: UniformListScrollHandle::new(),
+});
+window.simulate_resize(size(px(300.), px(200.)));
+window.draw();
+window.update(|_, window, _| {
+    assert!(!window.painted_quads().iter()
+        .any(|quad| quad.background == rgb(0x155b50).into()));
+});
+window.update(|view, _, cx| {
+    view.scroll.scroll_to_item_strict(5_000, ScrollStrategy::Top);
+    cx.notify();
+});
+
+for viewport in [size(px(300.), px(200.)), size(px(150.), px(120.))] {
+    window.simulate_resize(viewport);
+    window.draw();
+    window.update(|_, window, _| {
+        let row = window.painted_quads().into_iter()
+            .find(|quad| quad.background == rgb(0x155b50).into())
+            .expect("row 5,000 must be in the painted viewport");
+        assert_eq!(row.bounds.top(), px(0.).scale(window.scale_factor()));
+        assert_eq!(row.bounds.size,
+            size(viewport.width, px(20.)).scale(window.scale_factor()));
+    });
+}
+```
+
+This checks layout and recorded drawing, not wheel-event routing. To cover the
+latter, draw first to install the hitbox, send
+[`simulate_scroll`](crate::TestAppWindow::simulate_scroll) inside the list,
+and draw again. The [lists chapter](crate::_documentation::lists) explains
+which changes require a splice, a measurement reset, or only a redraw.
 
 ## Choose what a simulated platform can establish
 

@@ -16,12 +16,14 @@ example_run = "cargo run -p gpui-documentation-examples --example animation"
 ## Make Replay change identity
 
 The blue bar grows from 24 to 124 logical pixels over 700 milliseconds.
-An [`Animation`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Animation.html) supplies its clock and a [`Motion`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Motion.html) describes its duration.
-The view stores only a replay number.
+[`Animation`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Animation.html) configures playback, [`Motion`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Motion.html) describes timing, and GPUI
+samples the app executor's clock. The view stores only a replay number.
 
 Clicking Replay changes the animation's retained element-state key. A new
 key starts at the beginning; rendering with the same key reuses its existing
 start time. The replay counter is therefore an identity, not a timer value.
+Changing the duration with that same key changes how the existing elapsed
+time is sampled; it does not begin a new run.
 
 ```rust
 use std::time::Duration;
@@ -36,7 +38,7 @@ struct AnimationDemo {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/animation/") }}#L13).
+[View this step in the source]({{ get_url(path="sources/animation/") }}#L15).
 
 <a id="animate"></a>
 ## Sample width and opacity together
@@ -107,7 +109,7 @@ impl Render for AnimationDemo {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/animation/") }}#L41).
+[View this step in the source]({{ get_url(path="sources/animation/") }}#L43).
 
 <a id="clock"></a>
 ## Test identity while it runs
@@ -128,6 +130,6 @@ pub fn main() {
 }
 ```
 
-[View this step in the source]({{ get_url(path="sources/animation/") }}#L96).
+[View this step in the source]({{ get_url(path="sources/animation/") }}#L98).
 
 [Download the complete source]({{ get_url(path="examples/animation.rs") }}).

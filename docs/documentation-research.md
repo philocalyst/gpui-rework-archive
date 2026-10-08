@@ -249,3 +249,13 @@ linking, watching, and the local patch server; no Dioxus CLI invocation is neede
 It accepts `--example`, `--bin`, `-p`, and dependency feature selection. Public
 unauthenticated access returned 404 during this survey, while the authenticated
 repository and its source were accessible.
+
+## Continued Jiff reading (2026-10-08)
+
+The manual-review ledger records the later reading of every public `Zoned`
+example and the civil `Time` overview through `saturating_sub` in Jiff 0.2.35.
+The useful pattern is to make a boundary observable: pair a normal operation
+with the exact case where overflow, ambiguity, or a default changes its result.
+The GPUI pass applies that pattern to equal-target animation updates,
+measurement resets, and painted geometry after a resize. Later Time APIs and
+unread portions of the other reference projects remain open.

@@ -563,7 +563,7 @@ impl FocusId {
 /// A retained identity that a rendered element can use for keyboard focus.
 ///
 /// Create a handle with [`App::focus_handle`], store it on the view, and attach
-/// it through [`crate::InteractiveElement::track_focus`]. Creating a
+/// it through [`track_focus`](crate::InteractiveElement::track_focus). Creating a
 /// handle alone does not focus an element. Call [`Window::focus`] to select it.
 /// Keyboard dispatch follows the path that rendered the focused handle;
 /// visual selection and pointer hover are separate state.
