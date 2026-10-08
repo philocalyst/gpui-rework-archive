@@ -85,6 +85,104 @@ synthesized mouse press/release, a pan as phased scroll-wheel events, and a long
 `LongPressEvent`s (with `TouchDragEvent` available for elements that claim a touch drag).
 The portable recognizer does not currently recognize pinch gestures.
 
+### Claim a long press
+
+A long press starts as an offer. Register a [`LongPressEvent`](crate::LongPressEvent)
+listener during paint, check the element's prepared hitbox, and call
+[`Window::prevent_default`](crate::Window::prevent_default) on `Started` to
+accept it. Stopping propagation alone does not claim the contact. An unclaimed
+offer leaves it available for a tap or pan and has no later long-press phases.
+
+After claiming, accept `Moved`, `Ended`, and `Cancelled` by ownership rather
+than hover. The contact can leave the original rectangle. The helpers
+[`capture_long_press`](crate::Window::capture_long_press) and
+[`has_long_press_capture`](crate::Window::has_long_press_capture) record and
+compare an entity ID; they do not reroute the low-level event stream. The owner
+must keep its state and register its listener again when rendering a new frame.
+
+This canvas records the last phase on its view. The initial offer uses the
+hitbox; later phases use the retained view identity. It handles only the bubble
+phase and stops propagation once it accepts an event:
+
+```rust
+use gpui::{canvas, prelude::*, Context, DispatchPhase, HitboxBehavior,
+    IntoElement, LongPressEvent, Render, TouchPhase, Window, px};
+
+struct HoldTarget {
+    phase: Option<TouchPhase>,
+}
+
+impl Render for HoldTarget {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let owner = cx.entity();
+        canvas(
+            |bounds, window, _| window.insert_hitbox(bounds, HitboxBehavior::Normal),
+            move |_, hitbox, window, _| {
+                window.on_mouse_event(move |event: &LongPressEvent, phase, window, cx| {
+                    if phase != DispatchPhase::Bubble {
+                        return;
+                    }
+                    if event.phase == TouchPhase::Started {
+                        if !hitbox.is_hovered(window) {
+                            return;
+                        }
+                        window.prevent_default();
+                        window.capture_long_press(&owner);
+                    } else if !window.has_long_press_capture(&owner) {
+                        return;
+                    }
+                    owner.update(cx, |target, cx| {
+                        target.phase = Some(event.phase);
+                        cx.notify();
+                    });
+                    cx.stop_propagation();
+                });
+            },
+        ).size(px(100.))
+    }
+}
+
+# #[cfg(feature = "test-support")]
+# {
+use gpui::{point, TouchEvent, TouchId};
+use std::time::Duration;
+
+let mut app = gpui::TestApp::new();
+let mut window = app.open_window(|_, _| HoldTarget { phase: None });
+window.simulate_event(TouchEvent {
+    id: TouchId(1), phase: TouchPhase::Started,
+    position: point(px(10.), px(10.)), ..Default::default()
+});
+assert!(window.read(|target, _| target.phase.is_none()));
+app.advance_clock(Duration::from_millis(500));
+assert_eq!(window.read(|target, _| target.phase), Some(TouchPhase::Started));
+
+// Move beyond the 100×100 canvas after claiming the hold.
+window.simulate_event(TouchEvent {
+    id: TouchId(1), phase: TouchPhase::Moved,
+    position: point(px(200.), px(200.)), ..Default::default()
+});
+assert_eq!(window.read(|target, _| target.phase), Some(TouchPhase::Moved));
+window.simulate_event(TouchEvent {
+    id: TouchId(1), phase: TouchPhase::Cancelled,
+    position: point(px(200.), px(200.)), ..Default::default()
+});
+assert_eq!(window.read(|target, _| target.phase), Some(TouchPhase::Cancelled));
+assert!(window.update(|_, window, cx| !window.has_long_press_capture(&cx.entity())));
+# }
+```
+
+The assertions run with `test-support`. They wait through the default hold
+interval, cross the hitbox boundary, and check cancellation after a redraw.
+GPUI clears ownership after the terminal callback, so that callback can still
+recognize and clean up its gesture. A selection tool would commit provisional
+state on `Ended` and discard it on `Cancelled`.
+
+Use [`TouchDragEvent`](crate::TouchDragEvent) to offer direct dragging when the
+contact first begins, without waiting for a hold. It uses the same
+`prevent_default` claim rule. Keep that claimed state on the view too. These
+touch gestures are separate from GPUI's typed application drag-and-drop payloads.
+
 ## Keyboard focus
 
 A [`FocusHandle`](crate::FocusHandle) names a focusable identity. Keep the handle with the view,

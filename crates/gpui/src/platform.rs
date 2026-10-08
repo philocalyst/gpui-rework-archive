@@ -3511,7 +3511,7 @@ impl FluentBuilder for TitlebarOptions {}
 /// [`Normal`](Self::Normal). Other roles return an error there.
 /// For a menu inside an existing window, combine [`anchored`](crate::anchored)
 /// and [`deferred`](crate::deferred), as the
-/// [overlays walkthrough](https://gpui-ce.github.io/examples/overlays/) demonstrates.
+/// [drawing chapter](crate::_documentation::drawing#choose-what-should-paint-above-what) demonstrates.
 /// See the [platform chapter](crate::_documentation::platforms#configure-a-window)
 /// for the supplied native backends' role differences.
 #[derive(Clone, Debug, PartialEq, Eq)]

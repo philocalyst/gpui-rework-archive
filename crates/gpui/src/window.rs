@@ -3589,16 +3589,26 @@ impl Window {
         self.captured_hitbox
     }
 
-    /// Captures the current long press for the given entity.
+    /// Records an entity as the owner of the current long press.
     ///
     /// The capture is released when the gesture ends or is cancelled, or when
     /// a replacement touch begins. A listener must also call
     /// [`Self::prevent_default`] on the started event to claim the gesture.
+    ///
+    /// This stores the entity's ID, without retaining a strong handle or
+    /// changing event routing. Low-level listeners use
+    /// [`Self::has_long_press_capture`] to accept later phases even outside the
+    /// original hitbox. The [input chapter](crate::_documentation::input#claim-a-long-press)
+    /// demonstrates that pattern across redraws and cancellation.
     pub fn capture_long_press<T: 'static>(&mut self, entity: &Entity<T>) {
         self.long_press_capture = Some(entity.entity_id());
     }
 
-    /// Returns whether the given entity has captured the current long press.
+    /// Returns whether this entity's ID is the recorded long-press owner.
+    ///
+    /// Use this in the listener for `Moved`, `Ended`, and `Cancelled` phases.
+    /// Ownership is cleared after dispatching a terminal event, so the owner
+    /// can still recognize and clean up that event inside its callback.
     pub fn has_long_press_capture<T: 'static>(&self, entity: &Entity<T>) -> bool {
         self.long_press_capture == Some(entity.entity_id())
     }

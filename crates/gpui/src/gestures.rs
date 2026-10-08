@@ -125,9 +125,19 @@ impl OngoingScroll {
 /// Tunable thresholds and physics used by touch gesture recognizers.
 ///
 /// Platform values are best-effort. [`Default`] uses GPUI's iOS-like scroll feel and thresholds;
-/// callers embedding a recognizer can replace individual fields for a product's input model.
+/// a platform supplies its values through [`PlatformGestures::tuning`]. GPUI
+/// copies them when creating a window. Changing the provider afterward does
+/// not retune an existing window.
 /// Values are used directly: keep distances and fling thresholds non-negative, and use finite,
 /// positive friction/density values or a decay factor strictly between zero and one.
+///
+/// The portable recognizer follows one touch at a time. A short contact becomes
+/// a synthesized mouse press and release; movement beyond `touch_slop` becomes
+/// axis-locked scrolling. An element can instead claim a [`TouchDragEvent`]
+/// immediately or a [`LongPressEvent`] after the hold interval. See
+/// [claiming a long press](crate::_documentation::input#claim-a-long-press)
+/// for the listener, hitbox, and ownership rules. Portable pinch recognition
+/// is not implemented.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct GestureTuning {
     /// Distance a touch may travel before it stops being a potential tap and becomes a pan/drag.
@@ -361,7 +371,7 @@ mod friction_spline {
     }
 }
 
-/// The set of gesture kinds that participate in recognition.
+/// Native gesture capabilities reported by a platform.
 ///
 /// Used by [`PlatformGestures::native_recognizers`] to declare which gestures
 /// the platform recognizes natively rather than leaving to gpui core's
@@ -401,13 +411,28 @@ impl GestureKinds {
 
 /// A direct touch drag claimed by an element before touch input becomes a tap,
 /// long press, or scrolling gesture.
+///
+/// The portable recognizer offers `Started` as soon as an eligible contact
+/// begins. Register a listener with [`Window::on_mouse_event`](crate::Window::on_mouse_event)
+/// during paint, check the element's hitbox, and call
+/// [`Window::prevent_default`](crate::Window::prevent_default) to claim the offer.
+/// It then sends `Moved` events until `Ended` or `Cancelled`, without producing
+/// a tap, pan, or long press for that contact. An unclaimed offer has no matching
+/// terminal event on this route.
+///
+/// Keep the claimed state on the owning view so it survives redraws. The
+/// low-level listener receives input outside its hitbox too. Drag hit testing
+/// uses `start_position` throughout the gesture; use `position` to follow the
+/// current contact. This event does not create an application drag payload for
+/// [`InteractiveElement::on_drop`](crate::InteractiveElement::on_drop).
+/// For a hold before dragging, use [`LongPressEvent`] instead.
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct TouchDragEvent {
     /// The phase of the touch drag.
     pub phase: TouchPhase,
-    /// The position where the touch started.
+    /// Where the contact began, in logical window-local pixels.
     pub start_position: Point<Pixels>,
-    /// The touch's current position.
+    /// The current contact position, in logical window-local pixels.
     pub position: Point<Pixels>,
 }
 
@@ -421,13 +446,33 @@ impl GestureEvent for TouchDragEvent {}
 impl MouseEvent for TouchDragEvent {}
 
 /// A phased long-press gesture recognized from a touch.
+///
+/// In portable recognition, `Started` is an offer after the contact has stayed
+/// within [`GestureTuning::touch_slop`] for the hold interval. The default is
+/// 500 ms. Claim it by calling [`Window::prevent_default`](crate::Window::prevent_default)
+/// from the listener. Otherwise the contact remains eligible for a tap or pan,
+/// and the offer has no matching terminal event on this route.
+///
+/// A claimed hold produces `Moved` updates, then `Ended` on release or
+/// `Cancelled` when interrupted. Keep provisional selection or drag state with
+/// the view and discard it on cancellation. Positions use logical window-local
+/// pixels. Unlike [`TouchDragEvent`], subsequent long-press hit testing follows
+/// the current position, so a simple hover filter loses the gesture when it
+/// leaves the element. Record the owner with
+/// [`Window::capture_long_press`](crate::Window::capture_long_press), then use
+/// [`Window::has_long_press_capture`](crate::Window::has_long_press_capture)
+/// to accept its remaining phases. Those helpers record ownership; they do not
+/// filter or reroute listeners themselves.
+///
+/// See [claim a long press](crate::_documentation::input#claim-a-long-press)
+/// for a complete custom-element listener and a timed input test.
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct LongPressEvent {
     /// The phase of the long press.
     pub phase: TouchPhase,
-    /// The position where the touch started.
+    /// Where the contact began, in logical window-local pixels.
     pub start_position: Point<Pixels>,
-    /// The touch's current position.
+    /// The current contact position, in logical window-local pixels.
     pub position: Point<Pixels>,
 }
 

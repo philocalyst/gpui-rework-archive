@@ -1586,3 +1586,39 @@ The strict default-feature API check passes in
 `target/documentation-keymap-window-default-api.log`; the complete combined
 build follows this revision. The final rendered review remains a primary-editor task; no subagents
 were used for these passes, and the complete public-surface review is unfinished.
+
+## Gesture ownership and rendered-link correction (2026-10-08)
+
+The combined build for `3efbe940d9` compiled the browser programs, strict
+feature-enabled API, Zola site, and mdBook, then failed its link audit. The new
+WindowKind introduction linked to a nonexistent overlays walkthrough. It now
+links to the drawing chapter's actual worked overlay example. The failed
+artifact was not served; its metadata and build log remain in
+`target/documentation-proof/3efbe940d9-failed-build.json` and
+`target/documentation-keymap-window-site.log`. The book table correction in that
+commit still needs its rendered check on the replacement artifact.
+
+The primary editor read the public gesture contracts, portable recognizer's
+state transitions and momentum path, and window touch dispatch, timer, claim,
+hit-test, and capture paths. This pass did not reread every recognizer test or
+the complete velocity estimator. Useful recognition guidance was attached to a
+private module. The public GestureTuning, TouchDragEvent, and LongPressEvent
+introductions now explain when offers arrive, how prevent_default claims them,
+which later phases follow, and which position controls hit testing. Long-press
+capture stores an entity ID; it neither retains that entity nor reroutes input.
+The window helpers and canonical input chapter now explain retaining ownership
+across redraws and accepting movement outside the original hitbox.
+
+The new complete listener example checks the initial wait, timed Started,
+movement outside its 100-by-100 canvas, cancellation, and clearing ownership.
+All 231 doctests pass: 224 merged examples and seven executed harness examples,
+with one ignored, in `target/documentation-gesture-contract-doctests.log`.
+Strict default-feature rustdoc passes in
+`target/documentation-gesture-default-api.log`. The integration note's obsolete
+description of a server-backed editor was also corrected after checking the
+development server, bundle builder, and browser Worker paths.
+
+These are source-checked contracts and executable examples, not a claim that
+the entire API now meets the editorial target. The combined build and rendered
+review follow this revision. No subagents or prose generators were used for
+this pass; no new detector score is reported.

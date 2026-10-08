@@ -30,8 +30,13 @@ Every walkthrough defines one component constructor. The generated workbench
 source removes its native entry and platform launcher; Miri executes the same
 constructor against the real `gpui` crate. The browser mounts the existing
 Codepen component and imports its GPUI scene through the ordinary renderer.
-The local documentation server proxies render and explicit cancellation on the
-same origin. It has no source-to-WASM edit endpoint.
+The static bundle includes a WebAssembly compiler and Miri interpreter. Editing
+compiles Rust to MIR in a browser Worker; another Worker installs compatible
+bodies into the resident interpreter. The GPUI renderer displays its scene.
+This path needs no compiler service. The documentation development server serves
+the bundle and reloads pages after a successful documentation build. Its explicit
+`--native-companion` option enables the separate native development service;
+that service is not part of the portable editor.
 
 Native editing uses `gpui-ce/cli` at the reference commit recorded in the research
 notes. Its `gpui watch --example` path selects the same ordinary Cargo example.
