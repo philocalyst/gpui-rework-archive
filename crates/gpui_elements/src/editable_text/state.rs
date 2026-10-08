@@ -965,6 +965,7 @@ impl EditableTextState {
         self.set_selection(selection);
 
         self.scroll_to_caret();
+        self.emit_text_changed(cx);
         cx.notify();
     }
 }
@@ -1674,10 +1675,10 @@ mod tests {
         backend
             .add_fonts(vec![
                 Cow::Borrowed(include_bytes!(
-                    "../../../../assets/fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf"
+                    "../../../gpui_test/assets/fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf"
                 )),
                 Cow::Borrowed(include_bytes!(
-                    "../../../../assets/fonts/noto-color-emoji/NotoColorEmoji.subset.ttf"
+                    "../../../gpui_test/assets/fonts/noto-color-emoji/NotoColorEmoji.subset.ttf"
                 )),
             ])
             .unwrap();
@@ -2728,6 +2729,44 @@ mod tests {
     // ============================================================
     // UNDO / REDO
     // ============================================================
+
+    #[gpui::test]
+    fn undo_redo_publish_current_content_once(cx: &mut TestAppContext) {
+        let view = create_test_input(cx, "hello", 5);
+        update_movement_input(view, cx, |input, _window, _cx| {
+            input.layout_data.supports_multiline = true;
+        });
+        let entity = view
+            .update(cx, |view, _window, _cx| view.input.clone())
+            .unwrap();
+        let sources = Rc::new(std::cell::RefCell::new(Vec::new()));
+        let _subscription = cx.update(|cx| {
+            let sources = sources.clone();
+            cx.subscribe(&entity, move |entity, _event: &TextChanged, cx| {
+                sources.borrow_mut().push(entity.read(cx).as_str().to_owned());
+            })
+        });
+
+        update_movement_input(view, cx, |input, window, cx| {
+            without_history_grouping(input);
+            input.undo(&Undo, window, cx);
+            input.redo(&Redo, window, cx);
+        });
+        assert!(sources.borrow().is_empty(), "Empty history must not publish edits");
+        update_movement_input(view, cx, |input, window, cx| {
+            input.replace_text_in_range(None, "\n日本😀", window, cx);
+        });
+        update_movement_input(view, cx, |input, window, cx| {
+            input.undo(&Undo, window, cx);
+        });
+        update_movement_input(view, cx, |input, window, cx| {
+            input.redo(&Redo, window, cx);
+        });
+        update_movement_input(view, cx, |input, window, cx| {
+            input.redo(&Redo, window, cx);
+        });
+        assert_eq!(sources.borrow().as_slice(), ["hello\n日本😀", "hello", "hello\n日本😀"]);
+    }
 
     #[gpui::test]
     fn test_undo_restores_content(cx: &mut TestAppContext) {

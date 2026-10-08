@@ -144,7 +144,9 @@ function cancel(id, generation) {
   const phase = session.pending.phase;
   session.pending.reject(new Error("Superseded by a newer edit"));
   session.pending = undefined;
-  clearTimeout(session.compileTimer);
+  // Input cancellation must not erase the independent warming compiler's
+  // deadline. Obsolete foreground compilation gets its own drain deadline.
+  if (phase === "compile" || !session.compilerBusy) clearTimeout(session.compileTimer);
   clearTimeout(session.patchTimer);
   if (phase === "compile") {
     // A short obsolete compilation can finish into the same incremental
