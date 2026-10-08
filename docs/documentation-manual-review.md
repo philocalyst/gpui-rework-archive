@@ -2172,3 +2172,76 @@ Strict default and feature-enabled API builds pass in
 including both text implementation fixes completed successfully in 18m42s;
 its log is `target/documentation-text-miri-final-build.log`. Publishing the
 module and verifying it in the browser remain separate, pending checks here.
+
+## Published text fixes, retained previews, and color contracts (2026-10-08)
+
+The primary editor published the rebuilt Miri module without changing any of
+the 3,901 SDK metadata assets or 22 starter sources. The combined artifact at
+`b7206b0685bc362f13995a9d1a53cbd8269c8bce` passed its API, book, Zola, and link
+checks. HTTP responses were compared with the published manifest and client,
+and the browser loaded the new content-addressed module with status 200.
+The manifest digest is `a4a50eacfc8a76d1e1d16711a8f02859785a23f886c5a55a82b31d4c8ec94684`.
+
+The browser interpreter now places the final text caret after byte 76 on the
+last row, matching the compiled preview. The shared byte-39 boundary places
+its marker at the next row's start. The separate decoration probe now paints
+the underline below its letters and the strike through them. The canonical
+drawing source was restored and compared byte-for-byte after that probe.
+Screenshots, source, module identity, and publication checks are retained in
+`target/documentation-proof/`. These checks close the two implementation fixes'
+browser-verification steps; they do not establish performance parity with an
+ordinary compiled program.
+
+A real counter edit changed its increment from one to five while retaining
+the count: the next activation took it from one to six. A deliberate type
+error reported E0308 at the changed argument and retained count six. Source
+restoration was checked byte-for-byte and reset returned to zero. Switching
+to the stacked layout and opening diagnostics also exposed a retained-scene
+clipping problem: the old scene could sit below the smaller result pane.
+The renderer now fits that scene without changing its aspect ratio or
+enlarging it. Input waits for a frame matching the measured viewport. The
+12 native Codepen library tests pass, including new geometry and input-resume
+checks, in `target/documentation-retained-scene-final-tests.log`. Verification
+of that host-renderer fix in a fresh combined browser artifact is pending here.
+
+The primary editor read every public item and implementation in `color.rs`,
+the color interpolation implementations in `lerp.rs`, Palette 0.7.7's alpha
+default, and the shared shader's color conversion, gradient, stripe, and
+checkerboard paths. Pattern dimensions were incorrectly described as logical
+pixels: they reach the shader without density scaling. Their docs now name
+renderer pixels and explain the explicit conversion for a constant logical
+size. Gradient docs state increasing stop positions, endpoint extension,
+unsupported equal positions, the independent alpha interpolation, and the
+legacy transfer-curve limitation. ColorExt's opacity recipe now demonstrates
+successive multiplication rather than describing each line of two examples.
+Background explains construction, default paint, inspection, and transparency.
+The canonical drawing chapter connects these choices and supplies a complete
+gradient. The W3C color-interpolation and alpha sections and Oklab's comparison
+and blending sections were read as conceptual references, not assumed to be
+the renderer's implementation.
+
+The complete SVG, surface, image-cache, and semantic-palette production files
+were also read; their current contracts were retained. This is a source read,
+not a claim that every platform surface was executed. Jiff 0.2.38's civil
+datetime source has now been read sequentially through line 2804, including
+the Display/Debug precision examples and arithmetic trait contracts. The
+remaining configuration and trait examples still require review.
+
+The strict feature-enabled API build passes in
+`target/documentation-colors-final-api.log`. The core feature-enabled doctest
+run passes 244 merged and seven separate tests, with one additional test
+ignored, in `target/documentation-colors-feature-doctests.log`. Generated
+example and reciprocal-link checks pass. The final combined artifact and its
+rendered color review remain pending at this entry.
+
+Scribbr's embedded QuillBot detector, model v7.1.0, completed two scans of
+the new color section's exact Markdown body. The first counted 441 words
+and classified 13% as AI-generated, 0% as AI-refined, and 87% as human-written.
+After replacing the hexadecimal introduction with concrete color values and
+an explicit HSL conversion, the final 465-word sample scored 17%, 0%, and
+83%, respectively. The more concrete explanation was retained. Both exact
+inputs and screenshots are saved as `colors-checker-first.md`,
+`colors-checker-final.md`, `scribbr-colors-first.png`, and
+`scribbr-colors-final.png` under `target/documentation-proof/`. These results
+apply to those samples; they do not establish correctness or classify the
+whole documentation. No paraphraser or humanizer was used.

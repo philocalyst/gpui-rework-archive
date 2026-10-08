@@ -93,6 +93,80 @@ for both phases and a check outside the visible region.
 > Its default bounds are empty; use `None` in `with_content_mask` to retain
 > the enclosing clip rather than supplying a default mask.
 
+## Choose colors and backgrounds
+
+Start with [`rgb(0x155b50)`](https://docs.rs/gpui-ce/0.2.2/gpui/fn.rgb.html) for an opaque green. To let the
+background show through it, use [`rgba(0x155b5080)`](https://docs.rs/gpui-ce/0.2.2/gpui/fn.rgba.html): the same
+RGB bytes, followed by an alpha byte. Here `80` gives alpha `128 / 255`;
+`00` would be transparent and `ff` opaque. Both helpers produce sRGB
+[`Rgba`](https://docs.rs/gpui-ce/0.2.2/gpui/type.Rgba.html) values with RGB stored separately from alpha.
+
+Some fields, including [`TextStyle::color`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.TextStyle.html#structfield.color), store
+[`Hsla`](https://docs.rs/gpui-ce/0.2.2/gpui/type.Hsla.html) instead. Convert with
+[`rgb_to_hsla(rgb(0x155b50))`](https://docs.rs/gpui-ce/0.2.2/gpui/fn.rgb_to_hsla.html) before assigning such a field.
+The conversion preserves alpha.
+
+[`hsla`](https://docs.rs/gpui-ce/0.2.2/gpui/fn.hsla.html) takes hue in turns: `0.5` is halfway around the circle.
+Constructing `Hsla` directly, or passing a numeric hue to [`oklcha`](https://docs.rs/gpui-ce/0.2.2/gpui/fn.oklcha.html),
+uses degrees instead. Gradient angles below also use degrees.
+
+Choose the operation according to what should change:
+
+| Intention | Operation |
+| --- | --- |
+| Make an existing color contribute less | [`ColorExt::opacity`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.ColorExt.html#tymethod.opacity) multiplies its alpha |
+| Find the color of an overlay on a base | [`ColorExt::blend`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.ColorExt.html#tymethod.blend) composites the overlay over the base |
+| Move a solid color toward another during animation | [`Lerp`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Lerp.html) computes a progress value; [`Interpolate`](https://docs.rs/gpui-ce/0.2.2/gpui/trait.Interpolate.html) has a separate hue policy |
+| Vary a fill across an element | [`linear_gradient`](https://docs.rs/gpui-ce/0.2.2/gpui/fn.linear_gradient.html) interpolates two stops across the painted bounds |
+
+Opacity multiplies what is already there: halving alpha `0.8` gives `0.4`,
+then halving again gives `0.2`. Replacing alpha is a different operation.
+Compositing also depends on the base's alpha; it does not simply choose the
+midpoint between two colors.
+
+A [`Background`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Background.html) holds the paint. A color converts directly
+to a solid background. A gradient supplies two colors and two positions:
+
+```rust
+use gpui::{div, linear_color_stop, linear_gradient, prelude::*, rgb};
+
+let panel = div().w_64().h_24().bg(linear_gradient(
+    90.0,
+    linear_color_stop(rgb(0x155b50), 0.0),
+    linear_color_stop(rgb(0x3478c8), 1.0),
+));
+```
+
+Here `90.0` points right; `0.0` points up and `180.0` points down. Stop positions
+are fractions: `0.25` is one quarter of the gradient line. Supply finite,
+strictly increasing positions in `0.0..=1.0`. The constructors preserve their
+inputs and do not sort stops or repair equal positions.
+
+Gradients use [`ColorSpace::Oklab`](https://docs.rs/gpui-ce/0.2.2/gpui/enum.ColorSpace.html#variant.Oklab) by default.
+Call [`Background::color_space`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Background.html#method.color_space) with
+`ColorSpace::Srgb` to try the other mode. The stops stay the same; the colors
+between them change. [Oklab's comparison diagrams](https://bottosson.github.io/posts/oklab/#blending-colors)
+illustrate how that choice affects a white-to-blue blend.
+
+A solid background's animation follows a separate policy:
+`Lerp` animates solids through sRGB, while a gradient or pattern stays at the
+starting background until progress reaches one.
+
+> [!NOTE]
+> The supplied gradient shader uses legacy transfer curves and interpolates
+> color and alpha separately. It does not implement CSS's
+> [premultiplied interpolation](https://www.w3.org/TR/css-color-4/#interpolation-alpha).
+> For a color fading away, use that same color with zero alpha at the other
+> stop. Transparent black would change both the color and its opacity.
+
+[`checkerboard`](https://docs.rs/gpui-ce/0.2.2/gpui/fn.checkerboard.html) and [`pattern_slash`](https://docs.rs/gpui-ce/0.2.2/gpui/fn.pattern_slash.html)
+alternate a color with transparency. Their gaps reveal earlier drawing;
+paint a solid base first when both sets of tiles or stripes should be opaque.
+Their dimensions are currently renderer pixels, without automatic display
+scaling. Multiply the requested logical size by `window.scale_factor()` when
+constructing a pattern that should retain its size across display densities.
+This differs from ordinary quad bounds, which GPUI scales for you.
+
 ## Prepare a path once when its geometry is stable
 
 [`PathBuilder`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.PathBuilder.html) builds contours from lines and

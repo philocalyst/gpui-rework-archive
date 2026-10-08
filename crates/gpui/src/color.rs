@@ -1,13 +1,17 @@
-//! Color values and backgrounds used by GPUI painting APIs.
+//! Colors for text, fills, and borders, with gradients and repeating patterns.
 //!
-//! Hex helpers interpret bytes in conventional big-endian order (`0xRRGGBB`
-//! and `0xRRGGBBAA`). [`Hsla`] uses Palette's hue angle in degrees and normalized
-//! saturation, lightness, and alpha. The [`hsla`] helper instead accepts hue in
-//! turns and clamps all four arguments to `0..=1`. Background gradients use an angle in degrees and stop
-//! positions as normalized fractions. `linear_gradient` defaults to Oklab
-//! interpolation between stops; solid-color interpolation and `ColorSpace`
-//! are separate choices. For examples, see
-//! <https://gpui-ce.github.io/examples/drawing/#paint>.
+//! Start with [`rgb`] for an opaque hexadecimal color or [`rgba`] when the
+//! last byte supplies alpha. Both return sRGB [`Rgba`]. APIs that store [`Hsla`]
+//! accept an explicit [`rgb_to_hsla`] conversion; background builders accept
+//! either representation. [`Background`] describes paint, including a solid
+//! color, a two-stop gradient, or a procedural pattern.
+//!
+//! Three operations answer different questions: [`ColorExt::opacity`] changes
+//! how much a color contributes, [`ColorExt::blend`] composites an overlay over
+//! a base, and [`Lerp`](crate::Lerp) finds an intermediate animation value.
+//! A gradient instead varies across its drawing bounds and uses its own
+//! [`ColorSpace`]. The [drawing chapter](crate::_documentation::drawing#choose-colors-and-backgrounds)
+//! connects those choices to painting.
 
 use palette::{IntoColor, OklabHue, Oklcha, RgbHue};
 pub(crate) mod serde_colors;
@@ -19,6 +23,16 @@ use std::fmt::{self, Display, Formatter};
 pub use palette::{Hsla, rgb::Rgba};
 
 /// Converts `0xRRGGBB` into opaque sRGB [`Rgba`], ignoring the highest byte.
+///
+/// Each channel becomes its byte value divided by 255. Use [`rgba`] when
+/// the input also contains an alpha byte; `rgb(0x000000)` is opaque black.
+///
+/// ```
+/// use gpui::{rgb, rgba};
+///
+/// assert_eq!(rgb(0x155b50), rgba(0x155b50ff));
+/// assert_eq!(rgb(0x000000).alpha, 1.0);
+/// ```
 pub fn rgb(hex: u32) -> Rgba {
     let [_, r, g, b] = hex.to_be_bytes().map(|b| (b as f32) / 255.0);
     Rgba {
@@ -28,6 +42,10 @@ pub fn rgb(hex: u32) -> Rgba {
 }
 
 /// Converts `0xRRGGBBAA` into sRGB [`Rgba`].
+///
+/// The lowest byte is alpha: `00` is transparent and `ff` is opaque. These
+/// are straight-alpha channels; RGB is not multiplied by alpha. In particular,
+/// `rgba(0x155b5080)` has alpha `128 / 255`, slightly more than one half.
 pub fn rgba(hex: u32) -> Rgba {
     let [r, g, b, a] = hex.to_be_bytes().map(|b| (b as f32) / 255.0);
     Rgba::new(r, g, b, a)
@@ -35,13 +53,16 @@ pub fn rgba(hex: u32) -> Rgba {
 
 /// Convert an sRGB color to GPUI's HSL-with-alpha representation.
 ///
-/// This is the explicit conversion boundary for APIs that store [`Hsla`]. It
-/// avoids exposing Palette's conversion traits to applications and examples.
+/// Use this when a field requires [`Hsla`], such as [`TextStyle::color`](crate::TextStyle::color).
+/// Alpha is preserved. Converting the representation does not composite the
+/// color over a background or apply opacity.
 pub fn rgb_to_hsla(color: Rgba) -> Hsla {
     color.into_color()
 }
 
 /// Convert GPUI's HSL-with-alpha representation to sRGB.
+///
+/// Alpha is preserved. See [`rgb_to_hsla`] for the reverse conversion.
 pub fn hsla_to_rgba(color: Hsla) -> Rgba {
     color.into_color()
 }
@@ -70,7 +91,9 @@ pub fn swap_rgba_pa_to_bgra(color: &mut [u8]) {
 /// Constructs [`Hsla`] from normalized hue, saturation, lightness, and alpha.
 ///
 /// Hue is expressed in turns (`1.0` is a full circle), not degrees. Every
-/// input is clamped to `0.0..=1.0`.
+/// finite input is clamped to `0.0..=1.0`. Thus `0.0` and `1.0` both select
+/// red, while `0.5` selects cyan. Constructing [`Hsla`] directly uses degrees
+/// and does not apply this helper's clamping.
 pub const fn hsla(h: f32, s: f32, l: f32, a: f32) -> Hsla {
     Hsla {
         color: palette::Hsl::new_const(
@@ -87,8 +110,11 @@ pub const fn hsla(h: f32, s: f32, l: f32, a: f32) -> Hsla {
 /// Constructs a [`palette::Oklcha`] value from its components.
 ///
 /// Lightness and chroma use Oklab coordinates; `hue` accepts a Palette Oklab
-/// hue value, and `alpha` is stored as supplied. This helper does not clamp or
-/// validate the components.
+/// hue value, or degrees when supplied as a plain number. This differs from
+/// [`hsla`], whose hue argument is in turns. For ordinary `f32` colors, use
+/// lightness and alpha in `0.0..=1.0` and nonnegative chroma; the available
+/// chroma depends on the target gamut. This helper stores every component
+/// without clamping or validation.
 pub fn oklcha<T>(lightness: T, chroma: T, hue: impl Into<OklabHue<T>>, alpha: T) -> Oklcha<T> {
     Oklcha::new(lightness, chroma, hue, alpha)
 }
@@ -141,7 +167,12 @@ pub const fn yellow() -> Hsla {
     Hsla::new_const(RgbHue::new(60.), 1., 0.5, 1.)
 }
 
-/// Generates the JsonSchema for palette::Hsla
+/// Builds an object schema for Palette's serialized [`Hsla`] field names.
+///
+/// The schema describes numeric `hue`, `saturation`, `lightness`, and `alpha`
+/// properties. It imposes no component ranges and does not make the fields
+/// required. The generator argument is unused; this helper supplies a schema,
+/// not color parsing or validation.
 pub fn hsla_schemar(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
     // https://github.com/Ogeon/palette/blob/9aa1ac21a7da60db398e8c044a43dbf3fdaf4855/palette/src/hsl.rs#L633-L636
     // https://github.com/Ogeon/palette/blob/9aa1ac21a7da60db398e8c044a43dbf3fdaf4855/palette/src/alpha/alpha.rs#L1197
@@ -168,7 +199,10 @@ pub fn hsla_schemar(_generator: &mut schemars::SchemaGenerator) -> schemars::Sch
     })
 }
 
-/// Generates the JsonSchema for palette::Rgba
+/// Builds an object schema for Palette's serialized [`Rgba`] field names.
+///
+/// The numeric properties are `red`, `green`, `blue`, and `alpha`. As with
+/// [`hsla_schemar`], this schema specifies neither required fields nor ranges.
 pub fn rgba_schemar(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
     // https://github.com/Ogeon/palette/blob/9aa1ac21a7da60db398e8c044a43dbf3fdaf4855/palette/src/rgb/rgb.rs#L1690
     // https://github.com/Ogeon/palette/blob/9aa1ac21a7da60db398e8c044a43dbf3fdaf4855/palette/src/alpha/alpha.rs#L1197
@@ -195,7 +229,11 @@ pub fn rgba_schemar(_generator: &mut schemars::SchemaGenerator) -> schemars::Sch
     })
 }
 
-/// Alpha adjustment and compositing for GPUI color values.
+/// Alpha adjustment and source-over compositing for [`Rgba`] and [`Hsla`].
+///
+/// [`opacity`](Self::opacity) returns a faded copy; [`fade_out`](Self::fade_out)
+/// changes the existing value. Both multiply its current alpha. Use
+/// [`blend`](Self::blend) when an overlay must contribute its color to a base.
 pub trait ColorExt {
     /// Composite `other` over `self`, preserving alpha in the result.
     ///
@@ -221,36 +259,20 @@ pub trait ColorExt {
     /// `1.0` makes it transparent.
     fn fade_out(&mut self, factor: f32);
 
-    /// Return a color whose alpha is multiplied by `factor`, clamped to `0.0..=1.0`.
+    /// Returns a copy with alpha multiplied by a factor clamped to `0.0..=1.0`.
     ///
     /// The factor is clamped, not the resulting alpha. Color channels are unchanged.
-    /// If the color was previously opaque, then this is equivalent to
-    /// [`with_alpha`](palette::WithAlpha::with_alpha).
+    /// Repeated calls multiply their effects. To replace alpha instead, use
+    /// Palette's [`with_alpha`](palette::WithAlpha::with_alpha).
     ///
-    /// Useful for transforming colors with dynamic opacity,
-    /// like a color from an external source.
-    ///
-    /// Example:
     /// ```
-    /// use gpui::ColorExt;
-    /// let color = gpui::red();
-    /// let faded_color = color.opacity(0.5);
-    /// assert_eq!(faded_color.alpha, 0.5);
+    /// use gpui::{ColorExt, hsla};
+    ///
+    /// let color = hsla(0.7, 1.0, 0.5, 0.8);
+    /// assert_eq!(color.opacity(0.5).alpha, 0.4);
+    /// assert_eq!(color.opacity(0.5).opacity(0.5).alpha, 0.2);
+    /// assert_eq!(color.opacity(2.0).alpha, 0.8);
     /// ```
-    ///
-    /// This will return a red color with half the opacity.
-    ///
-    /// Example:
-    /// ```
-    /// use gpui::{hsla, ColorExt};
-    /// let color = hsla(0.7, 1.0, 0.5, 0.7); // A saturated blue
-    /// let faded_color = color.opacity(0.16);
-    /// assert!((faded_color.alpha - 0.112).abs() < 1e-6);
-    /// ```
-    ///
-    /// This will return a blue color with around ~10% opacity,
-    /// suitable for an element's hover or selected state.
-    ///
     fn opacity(&self, factor: f32) -> Self
     where
         Self: Sized;
@@ -303,18 +325,27 @@ pub enum BackgroundTag {
     Checkerboard = 3,
 }
 
-/// A color space for color interpolation.
+/// Selects the renderer's interpolation path between gradient stops.
 ///
-/// References:
-/// - <https://developer.mozilla.org/en-US/docs/Web/CSS/color-interpolation-method>
-/// - <https://www.w3.org/TR/css-color-4/#typedef-color-space>
+/// Set it with [`Background::color_space`]. [`linear_gradient`] selects
+/// [`Oklab`](Self::Oklab); this enum's standalone default is [`Srgb`](Self::Srgb).
+/// The choice affects the intermediate colors, not the stop positions, output
+/// display profile, or [`Lerp`](crate::Lerp) implementation for solid colors.
+/// [Oklab](https://bottosson.github.io/posts/oklab/) was designed to make
+/// equal coordinate steps more nearly equal in perceived color difference.
+///
+/// > [!NOTE]
+/// > The supplied shader preserves legacy transfer curves, including a
+/// > gamma-2.2 approximation in its Oklab conversion. It interpolates color
+/// > components and alpha separately, without premultiplying the stops.
+/// > These modes do not promise pixel equivalence with CSS gradients.
 #[derive(Debug, Clone, Copy, PartialEq, Default, Serialize, Deserialize, JsonSchema)]
 #[repr(u32)]
 pub enum ColorSpace {
     #[default]
-    /// The sRGB color space.
+    /// The renderer's sRGB interpolation mode.
     Srgb = 0,
-    /// The Oklab color space.
+    /// The renderer's Oklab interpolation mode, selected by [`linear_gradient`].
     Oklab = 1,
 }
 
@@ -328,6 +359,16 @@ impl Display for ColorSpace {
 }
 
 /// A paintable background: solid, gradient, or procedural pattern.
+///
+/// A color converts directly into a solid background. Use [`linear_gradient`],
+/// [`checkerboard`], or [`pattern_slash`] for the other forms, then pass the
+/// result to [`Styled::bg`](crate::Styled::bg) or a window paint operation.
+/// Constructing a background draws nothing and chooses no layout size.
+///
+/// [`kind`](Self::kind) exposes its paint parameters; gradient interpolation
+/// space is queried separately with [`interpolation_space`](Self::interpolation_space).
+/// The default background is opaque black. To paint nothing, use
+/// [`transparent_black`] or apply [`opacity(0.)`](Self::opacity).
 #[derive(Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[repr(C)]
 pub struct Background {
@@ -377,12 +418,18 @@ impl Default for Background {
     }
 }
 
-/// Creates diagonal stripes with the given logical-pixel width and gap.
+/// Creates diagonal colored stripes separated by transparent gaps.
+///
+/// `width` and `interval` are measured in renderer pixels. They are not scaled
+/// with the window's display density; multiply both by
+/// [`Window::scale_factor`](crate::Window::scale_factor)
+/// when the pattern should keep a chosen logical-pixel size. The pattern starts
+/// at the painted bounds' origin.
 ///
 /// Supply a finite `width` in `0.0..=257.0` and a finite `interval` in
 /// `0.0..257.0`. The packed representation quantizes both values to steps of
 /// `1.0 / 255.0`; floating-point storage can reduce precision further as width
-/// increases. Use small values for narrow stripes. No validation is performed.
+/// increases. Keep their sum positive. No validation is performed.
 ///
 /// # Panics
 ///
@@ -404,9 +451,14 @@ pub fn pattern_slash(color: impl IntoColor<Hsla>, width: f32, interval: f32) -> 
     }
 }
 
-/// Creates alternating colored and transparent squares of `size` logical pixels.
+/// Creates alternating colored and transparent squares.
 ///
-/// Supply a finite, positive size. The value is stored without validation.
+/// `size` is each square's side in renderer pixels, measured from the painted
+/// bounds' origin. The display scale is not applied to it. Multiply by
+/// [`Window::scale_factor`](crate::Window::scale_factor) for a constant
+/// logical-pixel size. Supply a finite, positive value; it is stored without
+/// validation. Transparent squares reveal
+/// what was painted underneath, so draw a solid base first for two opaque colors.
 pub fn checkerboard(color: impl IntoColor<Hsla>, size: f32) -> Background {
     Background {
         tag: BackgroundTag::Checkerboard,
@@ -417,6 +469,9 @@ pub fn checkerboard(color: impl IntoColor<Hsla>, size: f32) -> Background {
 }
 
 /// Creates a solid background color.
+///
+/// Equivalent to converting the color with [`Background::from`]. Alpha is
+/// preserved; this does not composite the color with another background.
 pub fn solid_background(color: impl IntoColor<Hsla>) -> Background {
     Background {
         solid: color.into_color().into(),
@@ -427,12 +482,29 @@ pub fn solid_background(color: impl IntoColor<Hsla>) -> Background {
 /// Creates a two-stop linear gradient, with stops blended in Oklab by default.
 ///
 /// `angle` is measured in degrees: `0.0` points up and larger values rotate
-/// clockwise. The value is stored as supplied; use `0.0..=360.0` for one
-/// clockwise turn. Stop positions are normalized fractions in `0.0..=1.0`;
-/// [`linear_color_stop`] preserves the supplied value, so validate untrusted
-/// positions before constructing a gradient.
+/// clockwise: `90.0` points right and `180.0` points down. Supply finite stop
+/// positions with `0.0 <= from.percentage < to.percentage <= 1.0`; `0.25`
+/// means one quarter, not 25 percent as a whole number. Before the first stop
+/// and after the second, the nearest endpoint color continues. The constructor
+/// neither sorts nor validates stops; equal positions divide by zero in the
+/// supplied shader and are not a supported way to request a hard edge.
 ///
-/// <https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/linear-gradient>
+/// ```
+/// use gpui::{ColorSpace, div, linear_color_stop, linear_gradient, prelude::*, rgb};
+///
+/// let background = linear_gradient(
+///     90.0,
+///     linear_color_stop(rgb(0x155b50), 0.0),
+///     linear_color_stop(rgb(0x3478c8), 1.0),
+/// );
+/// assert_eq!(background.interpolation_space(), ColorSpace::Oklab);
+/// let panel = div().w_64().h_24().bg(background);
+/// ```
+///
+/// [`Background::color_space`] changes interpolation. For a fade to transparency,
+/// keep the endpoint's RGB color and reduce its alpha: fading to transparent
+/// black also changes the color along the way. See [`ColorSpace`] for the
+/// supplied renderer's conversion and alpha policy.
 pub fn linear_gradient(
     angle: f32,
     from: impl Into<LinearColorStop>,
@@ -447,13 +519,16 @@ pub fn linear_gradient(
     }
 }
 
-/// A color stop in a linear gradient.
+/// One color and position in the two-stop [`linear_gradient`] representation.
 ///
-/// <https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/linear-gradient#linear-color-stop>
+/// Construct with [`linear_color_stop`] to convert an ordinary color to the
+/// scene representation. The position is a fraction along the gradient's line,
+/// not a pixel distance. Gradient construction preserves the two stops in the
+/// supplied order; it does not apply CSS's stop-order correction rules.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[repr(C)]
 pub struct LinearColorStop {
-    /// The color of the color stop.
+    /// The stop's color in GPUI's scene representation, including alpha.
     pub color: crate::SceneHsla,
     /// The normalized position in the gradient, conventionally `0.0..=1.0`.
     pub percentage: f32,
@@ -461,8 +536,9 @@ pub struct LinearColorStop {
 
 /// Creates a linear color stop at normalized position `percentage`.
 ///
-/// Values are expected in `0.0..=1.0`; the renderer preserves the supplied
-/// value, so callers should clamp or validate untrusted input.
+/// Use a finite fraction in `0.0..=1.0`, such as `0.25` for one quarter.
+/// The value is stored unchanged. The pair passed to [`linear_gradient`]
+/// must be strictly increasing; constructing one stop does not validate that pair.
 pub fn linear_color_stop(color: impl IntoColor<Hsla>, percentage: f32) -> LinearColorStop {
     LinearColorStop {
         color: color.into_color().into(),
@@ -471,7 +547,10 @@ pub fn linear_color_stop(color: impl IntoColor<Hsla>, percentage: f32) -> Linear
 }
 
 impl LinearColorStop {
-    /// Returns a new color stop with the same color, but with a modified alpha value.
+    /// Multiplies this stop's alpha by a factor clamped to `0.0..=1.0`.
+    ///
+    /// Preserves its position and color components. Repeated calls multiply
+    /// their effects, as in [`ColorExt::opacity`].
     pub fn opacity(&self, factor: f32) -> Self {
         let color: Hsla = self.color.into();
         Self {
@@ -497,16 +576,16 @@ pub enum BackgroundKind {
     PatternSlash {
         /// The stripe color.
         color: Hsla,
-        /// The stripe width, in logical pixels.
+        /// The decoded stripe width in renderer pixels; packing can lose precision.
         width: f32,
-        /// The gap between stripes, in logical pixels.
+        /// The decoded gap in renderer pixels; packing can lose precision.
         interval: f32,
     },
     /// Alternating squares of one color and full transparency.
     Checkerboard {
         /// The color of one set of squares. The other set is fully transparent.
         color: Hsla,
-        /// The width and height of each square, in logical pixels.
+        /// Each square's side in renderer pixels, without display-density scaling.
         size: f32,
     },
 }
@@ -521,7 +600,11 @@ impl Background {
         }
     }
 
-    /// Returns the decoded form of this background.
+    /// Returns the paint parameters decoded from this background.
+    ///
+    /// Pattern dimensions can differ slightly from their constructor inputs
+    /// because of packing. The result omits the gradient's interpolation space;
+    /// query [`interpolation_space`](Self::interpolation_space) separately.
     pub fn kind(&self) -> BackgroundKind {
         match self.tag {
             BackgroundTag::Solid => BackgroundKind::Solid(self.solid.into()),
@@ -551,18 +634,22 @@ impl Background {
 
     /// Selects the color space used to interpolate this background's gradient stops.
     ///
-    /// <https://developer.mozilla.org/en-US/docs/Web/CSS/color-interpolation-method>
+    /// This setting has no visual effect on solids or patterns and does not
+    /// change how [`Lerp`](crate::Lerp) animates a background. See [`ColorSpace`]
+    /// for the supplied renderer's interpolation policy.
     pub fn color_space(mut self, color_space: ColorSpace) -> Self {
         self.color_space = color_space;
         self
     }
 
-    /// The color space used to interpolate this background, set by [`Background::color_space`].
+    /// Returns the gradient interpolation setting, including on a solid or pattern.
+    ///
+    /// Solids and patterns retain this setting but do not use it when painted.
     pub fn interpolation_space(&self) -> ColorSpace {
         self.color_space
     }
 
-    /// Multiply the alpha of every color by `factor`, clamped to `0.0..=1.0`.
+    /// Multiplies every color's alpha by a factor clamped to `0.0..=1.0`.
     ///
     /// This preserves gradient positions, interpolation space, and pattern geometry.
     pub fn opacity(&self, factor: f32) -> Self {
@@ -576,7 +663,11 @@ impl Background {
         background
     }
 
-    /// Returns whether the background color is transparent.
+    /// Returns whether every color used by this background has exactly zero alpha.
+    ///
+    /// A patterned background with opaque stripes or squares returns `false`,
+    /// even though its gaps are transparent. Geometry, clipping, and whether
+    /// the background is currently on screen do not affect this query.
     pub fn is_transparent(&self) -> bool {
         match self.tag {
             BackgroundTag::Solid => self.solid.a == 0.,
