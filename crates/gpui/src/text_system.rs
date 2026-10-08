@@ -56,8 +56,9 @@
 //! fallback for an individual character, so one [`TextRun`] is not guaranteed to become one
 //! [`PaintFragment`] or one font face. [`FontMetrics`] are reported in the face's font units;
 //! pixel helpers scale by `font_size / units_per_em`. Advances are shaped-run geometry, while
-//! [`typographic_bounds`](TextSystem::typographic_bounds) and [`bounding_box`](TextSystem::bounding_box) describe glyph or face
-//! bounds and should not be substituted for the width of a shaped string.
+//! [`typographic_bounds`](TextSystem::typographic_bounds) describes one glyph's bounds, while
+//! [`bounding_box`](TextSystem::bounding_box) returns a font-wide estimate. Neither measures
+//! the width of a shaped string.
 //!
 //! # Cache lifetime
 //!
@@ -325,10 +326,13 @@ impl TextSystem {
         self.platform_text_system.prewarm_fonts(&font_ids);
     }
 
-    /// Return the font-wide glyph bounds scaled to `font_size`.
+    /// Returns the backend's font-wide extent estimate at `font_size`.
     ///
-    /// This is the smallest rectangle that encloses every glyph in the face, not the bounds of a
-    /// particular string.
+    /// This scales [`FontMetrics::bounding_box`] to logical pixels. Parley uses
+    /// maximum advance width and typographic height, so the rectangle need not
+    /// enclose every glyph's ink. It does not measure a particular string.
+    /// Shape the string to obtain its advance, or use [`Self::typographic_bounds`]
+    /// for one character's selected glyph.
     pub fn bounding_box(&self, font_id: FontId, font_size: Pixels) -> Bounds<Pixels> {
         self.read_metrics(font_id, |metrics| metrics.bounding_box(font_size))
     }
@@ -737,7 +741,7 @@ impl Hash for FontWeight {
 impl Eq for FontWeight {}
 
 impl FontWeight {
-    /// Thin weight (100), the thinnest value.
+    /// Named thin weight (100).
     pub const THIN: FontWeight = FontWeight(100.0);
     /// Extra light weight (200).
     pub const EXTRA_LIGHT: FontWeight = FontWeight(200.0);
@@ -753,10 +757,10 @@ impl FontWeight {
     pub const BOLD: FontWeight = FontWeight(700.0);
     /// Extra-bold weight (800).
     pub const EXTRA_BOLD: FontWeight = FontWeight(800.0);
-    /// Black weight (900), the thickest value.
+    /// Named black weight (900).
     pub const BLACK: FontWeight = FontWeight(900.0);
 
-    /// All of the font weights, in order from thinnest to thickest.
+    /// The nine named standard weights, in ascending order.
     pub const ALL: [FontWeight; 9] = [
         Self::THIN,
         Self::EXTRA_LIGHT,

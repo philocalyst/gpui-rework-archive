@@ -2083,3 +2083,13 @@ example. These extents do not imply a complete reference-library review.
 Scribbr's current page exposed no input widget, so no new detector score was
 obtained. The final artifact build and browser check of the caret fix remain
 pending here.
+
+The follow-up font review traced TextSystem's metric wrappers through
+`LoadedFont::metrics` in the Parley store. TextSystem::bounding_box still
+promised the smallest rectangle enclosing every glyph, contradicting both
+that implementation and FontMetrics's corrected contract. The wrapper now
+describes the estimate, names Parley's advance/typographic-height inputs, and
+directs string and per-glyph measurement to their respective operations.
+FontWeight's constants no longer call 100 and 900 absolute endpoints, or call
+the nine named weights every possible weight. The scalar constructor accepts
+other values; the names describe standard requests rather than validation.
