@@ -109,6 +109,7 @@ pub(crate) struct PlatformHandlers {
     pub(crate) keyboard_layout_change: Option<Box<dyn FnMut()>>,
     pub(crate) system_sleep: Option<Box<dyn FnMut()>>,
     pub(crate) system_wake: Option<Box<dyn FnMut()>>,
+    pub(crate) displays_changed: Option<Box<dyn FnMut()>>,
 }
 
 /// A logind `PrepareForSleep` signal, forwarded from the D-Bus listener to
@@ -480,7 +481,8 @@ impl LinuxPlatform {
     fn replace_connection(&self, connection: DisplayConnection) {
         let previous = std::mem::replace(&mut *self.connection.borrow_mut(), connection);
         drop(previous);
-        // The app caches the keyboard layout, which belongs to the connection.
+        // The app caches the keyboard layout and the displays, which belong to
+        // the connection.
         let callback = self
             .common
             .borrow_mut()
@@ -494,6 +496,15 @@ impl LinuxPlatform {
             if common.callbacks.keyboard_layout_change.is_none() {
                 common.callbacks.keyboard_layout_change = Some(callback);
             }
+        }
+        let callback = self.common.borrow_mut().callbacks.displays_changed.take();
+        if let Some(mut callback) = callback {
+            callback();
+            self.common
+                .borrow_mut()
+                .callbacks
+                .displays_changed
+                .get_or_insert(callback);
         }
     }
 
