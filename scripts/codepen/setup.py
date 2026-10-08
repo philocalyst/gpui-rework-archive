@@ -50,7 +50,9 @@ def main():
     env["CARGO_TARGET_DIR"] = str(ROOT / "target/codepen-real-miri" / ("mir-" + optimization))
     env["CARGO_INCREMENTAL"] = "0"
     env["RUSTFLAGS"] = "-Cdebug-assertions=no -Awarnings" + (
-        f" -Copt-level=3 -Zmir-opt-level={optimization}" if optimization != "0" else "")
+        f" -Copt-level=3 -Zmir-opt-level={optimization}"
+        " -Zinline-mir-threshold=150 -Zinline-mir-hint-threshold=300"
+        if optimization != "0" else "")
     env["MIRIFLAGS"] = "-Zmiri-ignore-leaks -Zmiri-disable-leak-backtraces -Zmiri-disable-validation -Zmiri-disable-stacked-borrows -Zmiri-disable-data-race-detector -Zmiri-disable-alignment-check -Zmiri-disable-isolation"
     # cargo-miri caches the compiler's working directory in its invocation.
     # Keep this tiny generated crate at a stable location so subsequent setup

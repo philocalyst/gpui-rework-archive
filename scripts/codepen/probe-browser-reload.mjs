@@ -1,7 +1,7 @@
 // Production browser runtime, real full rustc/Miri Workers, and native GPUI
 // reference frames. No compiler, interpreter, or rendering mocks are used.
 import assert from "node:assert/strict";
-import { readFile, writeFile, mkdtemp, rm, readdir } from "node:fs/promises";
+import { readFile, writeFile, mkdtemp, rm, readdir, mkdir } from "node:fs/promises";
 import { Worker as ThreadWorker } from "node:worker_threads";
 import { pathToFileURL } from "node:url";
 import { tmpdir } from "node:os";
@@ -18,6 +18,8 @@ const redrawBenchmark = process.argv.includes("--redraw-benchmark");
 const profileFrames = Number(process.env.GPUI_CODEPEN_CPU_PROFILE_FRAMES || 1);
 assert(Number.isInteger(profileFrames) && profileFrames > 0 && profileFrames <= 100);
 const fixture = resolve("target/codepen-browser-probe");
+const artifactDirectory = resolve(process.env.GPUI_CODEPEN_ARTIFACTS || fixture);
+await mkdir(artifactDirectory, { recursive: true });
 const temporary = await mkdtemp(join(tmpdir(), "gpui-miri-reload-"));
 const bootstrap = join(temporary, "worker.mjs");
 await writeFile(bootstrap, `import { parentPort, workerData } from "node:worker_threads";
@@ -59,7 +61,7 @@ class BrowserWorker {
         timing.compile_ms = data.compile_ms;
         timing.compiler_wasm_memory_bytes = data.wasm_memory_bytes;
         timing.patch_bytes = data.patch?.byteLength || 0;
-        if (data.patch && !prewarmBenchmark) artifacts.push(writeFile(join(fixture, `browser-${data.generation}.mir`), data.patch.slice()));
+        if (data.patch && !prewarmBenchmark) artifacts.push(writeFile(join(artifactDirectory, `browser-${data.generation}.mir`), data.patch.slice()));
       } else if (data.kind === "patched") {
         timing.patch_roundtrip_ms = performance.now() - timing.patch_started;
         Object.assign(timing, data.timings);
@@ -80,17 +82,19 @@ class BrowserWorker {
         }).catch(() => { timing.cpu_unavailable = true; }));
       }
       if (data.profile) console.log(`Guest MIR profile, generation ${data.generation}:\n${data.profile}`);
-      if (data.metadata_reads) artifacts.push(writeFile(join(fixture, `${this.mode}-${data.generation}-metadata-reads.json`),
+      if (data.metadata_reads) artifacts.push(writeFile(join(artifactDirectory, `${this.mode}-${data.generation}-metadata-reads.json`),
         JSON.stringify(data.metadata_reads, null, 2) + "\n"));
-      if (data.metadata_pages) artifacts.push(writeFile(join(fixture, `${this.mode}-${data.generation}-metadata-pages.txt`),
+      if (data.metadata_pages) artifacts.push(writeFile(join(artifactDirectory, `${this.mode}-${data.generation}-metadata-pages.txt`),
         data.metadata_pages));
-      if (data.contract_map) artifacts.push(writeFile(join(fixture, `${this.mode}-${data.generation}-contract-map.txt`),
+      if (data.contract_map) artifacts.push(writeFile(join(artifactDirectory, `${this.mode}-${data.generation}-contract-map.txt`),
         data.contract_map));
       if (this.profile && data.kind === "reply" && --this.profileRemaining === 0) {
         const profile = this.profile;
         this.profile = undefined;
         profiles.push(profile.then(async handle => {
-          const path = resolve(`target/codepen-browser-${this.mode}-${data.generation}.cpuprofile`);
+          const path = process.env.GPUI_CODEPEN_ARTIFACTS
+            ? join(artifactDirectory, `${this.mode}-${data.generation}.cpuprofile`)
+            : resolve(`target/codepen-browser-${this.mode}-${data.generation}.cpuprofile`);
           await writeFile(path, await handle.stop());
           console.log(`Saved warm Worker CPU profile: ${path}`);
         }));

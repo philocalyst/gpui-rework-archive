@@ -25,7 +25,7 @@ VERSION = "1.101.0-nightly (5c543b0b8 2026-09-29)"
 SOURCE_HASH = "3522f62a0a3d0c5cf667c867802f7e2340ab9d7ac22887f11d9e8070846724f7"
 PAGED_METADATA = os.environ.get("GPUI_CODEPEN_PAGED_METADATA", "1") != "0"
 SOURCE = ROOT / "target/browser-rustc-source"
-OUTPUT = ROOT / "target/codepen-browser"
+OUTPUT = Path(os.environ.get("GPUI_CODEPEN_BROWSER_OUTPUT", ROOT / "target/codepen-browser")).resolve()
 MIR_OPT_LEVEL = os.environ.get("GPUI_CODEPEN_MIR_OPT_LEVEL", "2")
 if MIR_OPT_LEVEL not in ("0", "1", "2", "3", "4"):
     raise SystemExit("GPUI_CODEPEN_MIR_OPT_LEVEL must be between 0 and 4")
