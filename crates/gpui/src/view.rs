@@ -340,8 +340,9 @@ impl<T: Render> Entity<T> {
     ///
     /// Caching requires a definite outer size: `style` determines the layout
     /// box instead of measuring the view's contents. Use `.child(entity)`
-    /// without `cached` when content should determine that size. See
-    /// [`crate::_documentation::rendering`] for frame phases and retained state.
+    /// without `cached` when content should determine that size. The
+    /// [rendering chapter](crate::_documentation::rendering) explains frame
+    /// phases and retained state.
     ///
     /// ```
     /// use gpui::{Entity, IntoElement, Render, StyleRefinement, prelude::*, px};
@@ -702,7 +703,11 @@ impl<V: View> Element for ViewElement<V> {
     }
 }
 
-/// A view that renders nothing
+/// A view whose element tree is [`Empty`].
+///
+/// Store it in an [`Entity`] when an API needs a view, such as a placeholder
+/// window root. Use `Empty` directly for an absent child when no entity is
+/// needed. The empty element occupies no layout space and paints nothing.
 pub struct EmptyView;
 
 impl Render for EmptyView {

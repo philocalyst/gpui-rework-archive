@@ -864,13 +864,16 @@ enum PlatformOwnedDragState {
 ///
 /// An entity handle does not borrow its value until a read or update receives
 /// a context. Updates lease a value exclusively; recursively accessing the
-/// same leased entity panics. See [`crate::_ownership_and_data_flow`] for the
-/// access rules and effect timing.
+/// same leased entity panics. The
+/// [ownership chapter](crate::_ownership_and_data_flow) explains the access
+/// rules and effect timing.
 ///
 /// Borrow this context only for the callback's duration. Use [`Self::to_async`]
 /// for foreground work that must reacquire app access after an `await`, and
-/// [`Self::background_executor`] for owned `Send` work that must leave the
-/// foreground thread. An [`AsyncApp`] does not keep this app alive.
+/// [`Self::background_executor`] for owned `Send` work that can run away from
+/// the foreground thread. Execution depends on the platform;
+/// [`BackgroundExecutor`] explains the browser-thread fallback. An [`AsyncApp`]
+/// does not keep this app alive.
 ///
 /// ## Platform services
 ///

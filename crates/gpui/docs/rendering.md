@@ -131,6 +131,37 @@ implements a swatch with an empty request state and a prepared quad as its
 prepaint state. Adding a child or a listener changes what those states must
 carry; it does not change the phase order.
 
+### Carry child elements through the phases
+
+A custom parent can store mixed child types as [`AnyElement`](crate::AnyElement).
+Erasure preserves each child's implementation and ID. The parent must still
+request, prepare, and paint each child, retaining the same value between those
+calls. A newly constructed replacement has none of the first value's layout
+or prepaint state.
+
+Choose how the child participates in layout:
+
+| Placement | During layout request | During prepaint | During paint |
+| --- | --- | --- | --- |
+| Child sized with its parent | Request the child's layout and include its ID in the parent's layout request. | Call the child's `prepaint`; its bounds already include its position in the containing tree. | Call the child's `paint`. |
+| Subtree sized independently | Reserve the parent's own space, without this child's layout ID. | Call `prepaint_as_root` with the available space and window-local translation. | Call the prepared child's `paint`. |
+
+For independent placement, split the operation into `layout_as_root` and
+`prepaint_at` when the measured size is needed to choose a position. Layout
+can be recomputed with different available space before prepaint; prepaint
+and paint each run once. Available space does not create a clip. The
+[`prepaint_as_root` example](crate::AnyElement::prepaint_as_root) places a
+marker inside a padded parent and checks the resulting window coordinates.
+For common overlays, prefer [`anchored`](crate::anchored) for edge fitting and
+[`deferred`](crate::deferred) for paint order.
+
+Keep these prepared child values within the current draw. GPUI's element
+arena destroys them when that draw is cleared; accessing an `AnyElement`
+after its arena is cleared panics. Retain entities, view handles, or component
+inputs between frames and construct another element tree from them. Cached
+views reuse recorded frame data rather than preserving an `AnyElement` for
+the next draw.
+
 ## Choose a layout constraint
 
 GPUI uses a Taffy-backed layout engine. A definite available size gives it a

@@ -1,30 +1,32 @@
-//! Cheaply cloneable URI text used as an asset and resource key.
-//!
-//! `SharedUri` preserves the caller's spelling. It does not parse, canonicalize, validate, or
-//! resolve a URI; use the target service to apply those policies. Equality and hashing compare
-//! the stored string, so semantically equivalent spellings can be distinct keys.
-//!
-//! Convert at a boundary where a URI is expected to make intent clear without copying the text:
-//!
-//! ```
-//! use gpui::SharedUri;
-//!
-//! let avatar: SharedUri = "https://example.test/avatar.png".into();
-//! assert_eq!(avatar.as_ref(), "https://example.test/avatar.png");
-//! ```
-//!
-//! A [`crate::SharedUri`] can identify a [`crate::Resource::Uri`] or be passed to a higher-level image
-//! source. The wrapper itself never starts network work. Fetching is a separate policy owned by
-//! an [`crate::Asset`] implementation or an application-provided [`crate::HttpClient`].
-
 use derive_more::{Deref, DerefMut};
 
 use crate::SharedString;
 
-/// A shared string that is intended to contain a URI.
+/// Cheaply cloneable URI text used as an asset or resource key.
 ///
-/// The wrapper documents intent at API boundaries while retaining [`SharedString`] comparison,
-/// hashing, and dereferencing behavior.
+/// This wrapper preserves the spelling and storage behavior of [`SharedString`].
+/// It does not parse, validate, normalize, or resolve a URI. Equality and hashing
+/// compare the stored text, so equivalent URI spellings can be distinct cache
+/// keys. Apply any normalization before constructing the key when requests
+/// should share a cached result.
+///
+/// ```
+/// use gpui::{Resource, SharedUri};
+///
+/// let avatar: SharedUri = "https://example.test/avatar.png".into();
+/// assert_eq!(avatar.as_ref(), "https://example.test/avatar.png");
+/// let different_spelling: SharedUri = "https://EXAMPLE.test/avatar.png".into();
+/// assert_ne!(avatar, different_spelling);
+///
+/// let source: Resource = avatar.into();
+/// assert!(matches!(source, Resource::Uri(_)));
+/// ```
+///
+/// Constructing this value or converting it to [`Resource::Uri`](crate::Resource::Uri)
+/// starts no network work. Fetching belongs to an [`Asset`](crate::Asset)
+/// implementation or the application's [`HttpClient`](crate::http_client::HttpClient).
+/// The [assets chapter](crate::_documentation::assets) explains source keys,
+/// cached requests, and rendering-time notification.
 #[derive(Deref, DerefMut, Default, PartialEq, Eq, Hash, Clone)]
 pub struct SharedUri(SharedString);
 

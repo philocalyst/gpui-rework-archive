@@ -1450,3 +1450,65 @@ examples), with one ignored, in `target/documentation-test-context-doctests-fina
 The strict default-feature API build passes in
 `target/documentation-test-context-default-api.log`. The combined feature-enabled
 artifact and rendered callout checks follow this revision.
+
+## Child draw sequences and visible API explanations (2026-10-08)
+
+Revision `767b1d4231` passed the combined API, Zola, mdBook, and link audit and
+was served locally. The primary editor checked the canvas warning in both
+rustdoc themes: the dark background was `rgb(42, 42, 42)` with light text,
+the light background was `rgb(245, 245, 245)` with black text, and both used
+the four-pixel warning border. The original system theme setting was restored.
+Screenshots are `target/documentation-proof/canvas-warning-styled-{dark,light}.png`.
+The editor also followed `VisualTestContext::simulate_close` into its canonical
+test, read that section in mdBook, and read the rendered `next_notification`
+contract and timer fixture.
+
+The complete cached ecosystem-review article was subsequently read as text,
+including its examples, in bounded excerpts. This does not cover its images
+or establish that every linked site has been read. A fresh attempt to read
+the pinned Jiff Zoned page through the web tool failed; the previously recorded
+Jiff reads remain the source evidence.
+
+The primary editor reread the complete Element, View, Arena, and Subscription
+implementations; the window's arena scopes, layout bounds, absolute and relative
+offsets, and layout computation paths; and the complete SharedUri, Global, and
+HTTP client modules. Zed's complete `crates/ui/src/components/sticky_items.rs`
+was read in the pinned reference checkout. Hummingbird's MaybeStateful wrapper
+and the opening rendering branches in Lyrics were read as excerpts. These
+consumer implementations informed the distinction between ordinary child
+layout and independently positioned subtrees; GPUI CE's implementation remains
+the contract being documented.
+
+AnyElement now explains both draw sequences, preservation of the same child
+between phases, repeated measurement, coordinate translation, and the arena
+lifetime. Its worked prepaint-as-root example asserts the marker's painted
+origin and size inside a padded parent. The canonical rendering chapter shares
+that guidance with mdBook. Subscription's constructor and join examples check
+cleanup; the join example also checks that detaching calls neither cleanup.
+Detach's explanation now distinguishes dropping the cancellation closure from
+removing the registered observer.
+
+SharedUri's useful explanation was attached to a private module and therefore
+absent from its public type page. It now appears on the type, with assertions
+for spelling-sensitive keys and Resource conversion. This was a visibility
+gap, not just a shortage of source comments. App's overview now qualifies
+background execution on the browser, and the App and cached-view explanations
+use readable chapter labels. EmptyView explains when a view placeholder is
+needed instead of an Empty child.
+
+The rendered AnyView introduction and all five inherent methods, AnyWeakView's
+introduction and upgrade method, and Entity::cached were read together. The
+cached-view test link was followed into the Zola testing guide. Its opening
+now describes establishing a frame, checking reuse, then checking invalidation;
+the previous wording implied that two draws covered the complete fixture.
+
+The first doctest run caught a missing ParentElement import in the mixed-child
+example. After correction, all 222 doctests pass (215 merged examples and
+seven harness examples), with one ignored:
+`target/documentation-element-phases-doctests-corrected.log`. The strict
+default and feature-enabled API builds pass in
+`target/documentation-element-phases-default-api-complete.log` and
+`target/documentation-element-phases-feature-api.log`. Subsequent edits change
+prose and link labels only. The combined artifact and its rendered review follow
+this revision. No new detector score or complete-framework quality claim is
+made by this entry.

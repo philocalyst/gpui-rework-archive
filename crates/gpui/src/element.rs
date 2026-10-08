@@ -855,12 +855,44 @@ where
     }
 }
 
-/// A type-erased [`Element`] value that can be stored in a heterogeneous child collection.
+/// An element whose concrete type is erased, together with its current draw state.
 ///
-/// `AnyElement` owns the concrete element for the current frame and forwards its layout,
-/// prepaint, and paint phases. Downcast it with [`downcast_mut`](Self::downcast_mut) only when the
-/// concrete type is known. It does not supply persistent identity; the contained element's ID
-/// determines whether GPUI can associate retained element state with it on a later frame.
+/// Obtain one with [`IntoElement::into_any_element`] when a parent must store
+/// children of different types. Conversion preserves the contained element's
+/// identity and behavior; it adds no ID or layout box of its own. A
+/// [`Div`](crate::Div), a view backed by an entity, and an owned component can
+/// therefore share one collection:
+///
+/// ```
+/// use gpui::{AnyElement, Entity, IntoElement, ParentElement, Render, div};
+///
+/// fn children<V: Render>(view: Entity<V>) -> Vec<AnyElement> {
+///     vec![div().child("Details").into_any_element(), view.into_any_element()]
+/// }
+/// ```
+///
+/// # Prepare each child once
+///
+/// A custom parent drives the child's phases. Choose one layout path:
+///
+/// | Child placement | Layout | Prepaint | Paint |
+/// | --- | --- | --- | --- |
+/// | Part of the parent's layout | Call [`request_layout`](Self::request_layout) and include the returned ID in the parent's layout request. | After GPUI computes the containing tree, call [`prepaint`](Self::prepaint). | Call [`paint`](Self::paint). |
+/// | Positioned independently | Call [`layout_as_root`](Self::layout_as_root) with the available space. | Call [`prepaint_at`](Self::prepaint_at) with a window-local translation. | Call [`paint`](Self::paint). |
+///
+/// [`prepaint_as_root`](Self::prepaint_as_root) combines the independent layout
+/// and prepaint steps. Retain the same `AnyElement` between phases: creating a
+/// replacement discards the prepared state. Measurement may be repeated before
+/// prepaint, but prepaint and paint each run once per element value. Calling
+/// phases out of order panics.
+///
+/// The element is allocated in GPUI's temporary element arena. Keep it within
+/// the draw that created it; clearing that arena destroys the element, and
+/// accessing its `AnyElement` afterward panics. Store an [`Entity`](crate::Entity),
+/// [`AnyView`](crate::AnyView), or component inputs when something must survive
+/// another frame, then build a new element from them. An element ID retains
+/// associated state across those new values, not the values themselves. See
+/// the [rendering chapter](crate::_documentation::rendering).
 pub struct AnyElement(ArenaBox<dyn ElementObject>);
 
 impl AnyElement {
@@ -875,6 +907,11 @@ impl AnyElement {
     }
 
     /// Borrows the concrete element as `T`, or returns `None` for a different type.
+    ///
+    /// `T` must be the element produced by [`IntoElement::into_element`], which
+    /// can differ from the component value passed to that conversion. Mutating
+    /// it does not restart completed phases: finish configuration before
+    /// requesting layout when the change affects size or child structure.
     pub fn downcast_mut<T: 'static>(&mut self) -> Option<&mut T> {
         self.0.inner_element().downcast_mut::<T>()
     }
@@ -919,8 +956,18 @@ impl AnyElement {
     /// Measures the element as a layout root and returns its logical-pixel size.
     ///
     /// This also requests layout if needed. Before prepaint, it can be called
-    /// again with different available space to recompute the size. It panics
-    /// after the element has entered prepaint or paint.
+    /// again with different available space to recompute the size; it does not
+    /// rebuild the element or repeat its layout request. Use this to measure a
+    /// detached subtree before choosing where to place it. For an ordinary
+    /// child, include its [`request_layout`](Self::request_layout) ID in the
+    /// parent's request instead, so the parent participates in sizing it.
+    ///
+    /// Available space constrains layout; it does not clip drawing or force
+    /// an explicitly sized element to fit. The result is a size, not a new
+    /// origin. Follow with [`prepaint_at`](Self::prepaint_at) and
+    /// [`paint`](Self::paint), or use [`prepaint_as_root`](Self::prepaint_as_root)
+    /// when the origin is already known. Calling after the element has entered
+    /// prepaint or paint panics.
     pub fn layout_as_root(
         &mut self,
         available_space: Size<AvailableSpace>,
@@ -939,7 +986,12 @@ impl AnyElement {
     /// A separately computed root normally starts at `(0, 0)`.
     ///
     /// Call after layout has been computed. The phase, panic, and returned
-    /// focus-handle rules follow [`prepaint`](Self::prepaint). See
+    /// focus-handle rules follow [`prepaint`](Self::prepaint). Paint subsequently
+    /// uses the prepared bounds; do not add this translation again to drawing
+    /// coordinates. The translation moves neither the content mask nor sibling
+    /// elements. Use [`Window::with_content_mask`] in both phases when a subtree
+    /// must clip input and paint. See the worked
+    /// [`prepaint_as_root`](Self::prepaint_as_root) example and
     /// [coordinate spaces](crate::_documentation::layout#keep-geometry-in-one-coordinate-space).
     pub fn prepaint_at(
         &mut self,
@@ -956,6 +1008,56 @@ impl AnyElement {
     /// `origin` follows [`prepaint_at`](Self::prepaint_at)'s coordinate rules.
     /// Measurement follows [`layout_as_root`](Self::layout_as_root), and the
     /// returned focus handle follows [`prepaint`](Self::prepaint).
+    ///
+    /// # Position a subtree during prepaint
+    ///
+    /// This canvas prepares a 24-by-12 marker twelve pixels from its left edge
+    /// and eight from its top. The marker is laid out independently, so it does
+    /// not determine the canvas's size. The prepaint closure returns the same
+    /// prepared element for the paint closure to consume:
+    ///
+    /// ```
+    /// use gpui::{Context, IntoElement, Render, Window, canvas, div, point,
+    ///            prelude::*, px, rgb};
+    ///
+    /// struct Preview;
+    /// impl Render for Preview {
+    ///     fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+    ///         div().p(px(20.)).child(
+    ///             canvas(
+    ///                 |bounds, window, cx| {
+    ///                     let mut marker = div().w(px(24.)).h(px(12.))
+    ///                         .bg(rgb(0x155b50)).into_any_element();
+    ///                     marker.prepaint_as_root(
+    ///                         bounds.origin + point(px(12.), px(8.)),
+    ///                         bounds.size.into(), window, cx,
+    ///                     );
+    ///                     marker
+    ///                 },
+    ///                 |_, mut marker, window, cx| marker.paint(window, cx),
+    ///             ).w(px(80.)).h(px(40.))
+    ///         )
+    ///     }
+    /// }
+    /// # let mut app = gpui::TestApp::new();
+    /// # let mut window = app.open_window(|_, _| Preview);
+    /// # window.draw();
+    /// # window.update(|_, window, _| {
+    /// #     let marker = window.painted_quads().into_iter()
+    /// #         .find(|quad| quad.background == rgb(0x155b50).into()).unwrap();
+    /// #     assert_eq!(marker.bounds.origin,
+    /// #         point(px(32.), px(28.)).scale(window.scale_factor()));
+    /// #     assert_eq!(marker.bounds.size,
+    /// #         gpui::size(px(24.), px(12.)).scale(window.scale_factor()));
+    /// # });
+    /// ```
+    ///
+    /// The parent's padding contributes twenty pixels to each coordinate;
+    /// `origin` therefore places the marker at `(32, 28)` in the window. No
+    /// paint-time offset is needed. This method does not defer paint order or
+    /// escape the enclosing clip. Use [`anchored`](crate::anchored) for edge
+    /// fitting and [`deferred`](crate::deferred) for a popup that must draw above
+    /// surrounding content.
     pub fn prepaint_as_root(
         &mut self,
         origin: Point<Pixels>,

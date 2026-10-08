@@ -1081,10 +1081,11 @@ for the corresponding layout and offset rules.
 
 ### Check that a shared model invalidates a cached view
 
-A cache test needs two draws: one that reuses unchanged content and one that
-shows a change. Reading a model during rendering registers a window redraw
-dependency. It does not give that model the reading view's identity. Retain
-an observation that notifies the view when the model changes; otherwise a
+A cache test first draws the view, draws again to check reuse, then changes an
+input and draws to check invalidation. Reading a model during rendering
+registers a window redraw dependency. It does not give that model the reading
+view's identity. Retain an observation that notifies the view when the model
+changes; otherwise a
 window redraw can reuse the view's old cached content.
 
 Here the child reads a shared color. Its observation forwards notification

@@ -169,21 +169,46 @@ pub struct Subscription {
 }
 
 impl Subscription {
-    /// Creates a new subscription with a callback that gets invoked when
-    /// this subscription is dropped.
+    /// Creates a cancellation handle that calls `unsubscribe` when dropped.
+    ///
+    /// This does not register an observer or event callback. Use it to package
+    /// cleanup for a registration you created elsewhere; use
+    /// [`Context::observe`](crate::Context::observe) or
+    /// [`Context::subscribe`](crate::Context::subscribe) for entity callbacks.
+    /// Calling [`detach`](Self::detach) discards the cleanup closure without
+    /// invoking it.
+    ///
+    /// ```
+    /// use gpui::Subscription;
+    /// use std::{cell::Cell, rc::Rc};
+    ///
+    /// let cancelled = Rc::new(Cell::new(false));
+    /// let subscription = Subscription::new({
+    ///     let cancelled = cancelled.clone();
+    ///     move || cancelled.set(true)
+    /// });
+    /// assert!(!cancelled.get());
+    /// drop(subscription);
+    /// assert!(cancelled.get());
+    /// ```
     pub fn new(unsubscribe: impl 'static + FnOnce()) -> Self {
         Self {
             unsubscribe: Some(Box::new(unsubscribe)),
         }
     }
 
-    /// Forgets the cancellation callback and leaves the subscription active.
+    /// Gives up this handle's ability to cancel its registration.
     ///
-    /// There is no remaining handle with which to cancel this registration.
-    /// It ends when its publisher removes the callback, for example when an
-    /// observed entity is released or a weak consumer can no longer be upgraded.
+    /// The cancellation closure is dropped without being called. For GPUI
+    /// observers and subscribers, the registered callback remains active until
+    /// its publisher removes it, for example when the observed entity is
+    /// released or a weak consumer can no longer be upgraded. There is no
+    /// remaining handle with which to cancel that registration early.
+    ///
     /// Use this when that independent lifetime is intentional. Detaching does
-    /// not weaken any strong handles captured by the callback.
+    /// not weaken strong entity handles captured by the registered callback;
+    /// it can still create an ownership cycle. A handle made with
+    /// [`Self::new`] simply discards its supplied cleanup closure.
     pub fn detach(mut self) {
         self.unsubscribe.take();
     }
@@ -193,6 +218,24 @@ impl Subscription {
     /// Dropping the returned handle cancels both inputs. Calling [`Self::detach`]
     /// on it deliberately detaches both inputs as well. The inputs are consumed,
     /// so there is only one owner responsible for their cancellation.
+    ///
+    /// ```
+    /// use gpui::Subscription;
+    /// use std::{cell::Cell, rc::Rc};
+    ///
+    /// let cancellations = Rc::new(Cell::new(0));
+    /// let make_handle = || Subscription::new({
+    ///     let cancellations = cancellations.clone();
+    ///     move || cancellations.set(cancellations.get() + 1)
+    /// });
+    /// let pair = Subscription::join(make_handle(), make_handle());
+    /// assert_eq!(cancellations.get(), 0);
+    /// drop(pair);
+    /// assert_eq!(cancellations.get(), 2);
+    ///
+    /// Subscription::join(make_handle(), make_handle()).detach();
+    /// assert_eq!(cancellations.get(), 2); // Neither cleanup closure was called.
+    /// ```
     pub fn join(mut subscription_a: Self, mut subscription_b: Self) -> Self {
         let a_unsubscribe = subscription_a.unsubscribe.take();
         let b_unsubscribe = subscription_b.unsubscribe.take();
