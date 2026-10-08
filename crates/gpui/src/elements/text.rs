@@ -1244,6 +1244,11 @@ impl TextLayout {
     /// line; a point above the text or an empty layout returns `Err(0)`.
     /// A drag selection can use either branch's index; a hit-only operation
     /// can require `Ok`. This selects a cluster start, not the nearest caret.
+    /// A shaping cluster is the backend's grouping of source bytes and glyphs;
+    /// it need not be one [grapheme cluster](https://www.unicode.org/reports/tr29/#Grapheme_Cluster_Boundaries).
+    /// For an editor, use the caret and selection operations described in the
+    /// [text chapter](crate::_documentation::text#keep-source-positions-separate-from-visual-positions)
+    /// to define movement and selection. A cluster hit alone is not an editing policy.
     ///
     /// # Panics
     ///

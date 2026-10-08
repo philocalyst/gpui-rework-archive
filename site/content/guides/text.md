@@ -254,6 +254,13 @@ accent is one cluster, and an emoji sequence can contain several scalars.
 A glyph is a drawing shape selected by the font. Neither cluster counts nor
 glyph counts are byte offsets.
 
+A **shaping cluster** groups the source bytes and glyphs the shaper handles
+together. It can differ from a grapheme cluster. A pointer hit from
+[`TextLayout::index_for_position`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.TextLayout.html#method.index_for_position)
+identifies a shaping cluster; it does not define which perceived character an
+editing command should delete or how a selection should extend. Use the caret
+and movement operations below for those decisions.
+
 Logical order follows the source string. Visual order follows the laid-out
 rows, which can contain both left-to-right and right-to-left text. Incrementing
 a byte offset is therefore unsuitable for moving a caret to the right. Use

@@ -151,9 +151,16 @@ def prepare_source():
         stamp.write_text(stamp_value)
     copy_changed(ROOT / "scripts/codepen/browser-flock.rs", SOURCE / "compiler/rustc_data_structures/src/flock/browser.rs")
     copy_changed(ROOT / "scripts/codepen/browser-float.rs", SOURCE / "compiler/rustc_const_eval/src/interpret/codepen_float.rs")
+    def ignore_miri_build_files(directory, names):
+        ignored = {"target", ".git", "Cargo.lock"}
+        if Path(directory) == ROOT / "vendor/miri":
+            # Replace the root manifest below, but preserve path dependencies'
+            # manifests (including the optional genmc-sys package).
+            ignored.add("Cargo.toml")
+        return ignored.intersection(names)
+
     shutil.copytree(ROOT / "vendor/miri", SOURCE / "miri", dirs_exist_ok=True,
-                    copy_function=copy_changed,
-                    ignore=shutil.ignore_patterns("target", ".git", "Cargo.lock", "Cargo.toml"))
+                    copy_function=copy_changed, ignore=ignore_miri_build_files)
     manifest = (ROOT / "vendor/miri/Cargo.toml").read_text()
     crates = re.findall(r"^extern crate (rustc_\w+);", (ROOT / "vendor/miri/src/lib.rs").read_text(), re.M)
     crates += ["rustc_driver", "rustc_interface", "rustc_log", "rustc_metadata", "rustc_session"]

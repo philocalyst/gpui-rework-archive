@@ -1150,7 +1150,9 @@ impl PlatformTextLayout for ParleyLayout {
 
         let cursor = self.cursor(caret);
         let geometry = cursor.geometry(&self.layout, 0.0);
-        let line_index = self.line_index_at_block(geometry.y0 as f32);
+        // Adjacent line bounds can overlap slightly after floating-point rounding.
+        // Sample inside the caret rectangle rather than on its shared top edge.
+        let line_index = self.line_index_at_block(((geometry.y0 + geometry.y1) * 0.5) as f32);
 
         Some(Bounds::from_corners(
             point(px(geometry.x0 as f32), line_height * line_index),
@@ -1318,7 +1320,8 @@ impl PlatformTextLayout for ParleyLayout {
                 };
 
                 let geometry = cursor.geometry(&self.layout, 0.0);
-                let line_index = self.line_index_at_block(geometry.y0 as f32);
+                let line_index =
+                    self.line_index_at_block(((geometry.y0 + geometry.y1) * 0.5) as f32);
                 let target_ix = line_index
                     .checked_add_signed(delta)
                     .filter(|&target_ix| self.layout.get(target_ix).is_some());
@@ -2676,6 +2679,71 @@ mod tests {
                 ..Default::default()
             },
         })
+    }
+
+    #[test]
+    fn wrapped_document_end_caret_stays_on_the_final_visual_line() {
+        let system = test_system();
+        let text = "Cafe\u{301} — Straße — click a wrapped line to inspect its UTF-8 byte index.";
+        let line_height = px(28.);
+
+        for family in [IBM_PLEX.family, SOURCE_SERIF.family] {
+            for width in [px(120.), px(240.), px(280.)] {
+                let layout = layout_wrapped(
+                    &system,
+                    text,
+                    px(18.),
+                    &[text_run(text, family)],
+                    width,
+                    None,
+                );
+                let native = &layout.platform_layout;
+                let last_line = native.line_count() - 1;
+                let end = native
+                    .caret_bounds(
+                        CaretPosition::attached_to_next_cluster(text.len()),
+                        line_height,
+                    )
+                    .unwrap();
+                assert_eq!(end.origin.y, line_height * last_line, "{family}, {width:?}");
+                let hit = native.byte_index_from_pixel_point(
+                    point(px(10000.), line_height * last_line + line_height / 2.),
+                    line_height,
+                );
+                assert_eq!(hit, Err(text.len()), "{family}, {width:?}");
+
+                let mut caret = CaretPosition::attached_to_next_cluster(0);
+                let mut navigation_x = None;
+                for expected_line in 1..=last_line {
+                    let moved = native.caret_movement(
+                        caret,
+                        Direction::Down.with_boundary(Boundary::VisualLine),
+                        navigation_x,
+                    );
+                    caret = moved.result;
+                    navigation_x = moved.vertical_navigation_x;
+                    assert_eq!(
+                        native.caret_bounds(caret, line_height).unwrap().origin.y,
+                        line_height * expected_line,
+                        "down: {family}, {width:?}"
+                    );
+                }
+                for expected_line in (0..last_line).rev() {
+                    let moved = native.caret_movement(
+                        caret,
+                        Direction::Up.with_boundary(Boundary::VisualLine),
+                        navigation_x,
+                    );
+                    caret = moved.result;
+                    navigation_x = moved.vertical_navigation_x;
+                    assert_eq!(
+                        native.caret_bounds(caret, line_height).unwrap().origin.y,
+                        line_height * expected_line,
+                        "up: {family}, {width:?}"
+                    );
+                }
+            }
+        }
     }
 
     #[test]

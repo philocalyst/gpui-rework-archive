@@ -1990,3 +1990,39 @@ The next complete artifact build and rendered review remain pending for
 these mask changes. Prose was edited by hand, with no subagents. Jiff's
 complete crate-level cookbook was also read; this does not claim that every
 Jiff example or every GPUI public surface has received the final review.
+
+## Wrapped text: verify the displayed position (2026-10-08)
+
+The complete `6b1c5346bc` artifact build passed and was served on port 1111.
+Its source digest is `4eb7e4460f9b464c51d996b3a92b3228294602303455c1652a07ff375150a314`.
+The primary editor read the rendered ContentMask fields and methods,
+PathId, PathVertex, and PathBuilder's errors and panics, then checked the
+mask explanation in both the book and Zola guide. All twelve walkthroughs'
+rendered prose and source were read. This establishes reading, not successful
+execution of every suggested edit or every platform configuration.
+
+The text-hit-testing preview exposed a real discrepancy. Clicking past the
+final wrapped line reported the correct end offset, 76, but painted its marker
+on the preceding row. A native regression reproduced the problem with IBM
+Plex Sans at an 18-pixel size and 240-pixel wrap width. Adjacent Parley row
+bounds overlapped by a few millionths of a pixel after rounding; looking up
+the caret's top edge selected the earlier row. Caret placement and vertical
+movement now sample inside the caret rectangle instead.
+
+The regression checks the end position, the out-of-line hit, and movement down
+and back through every row for two font families and three widths. The initial
+failure is in `target/documentation-text-end-caret.log`; the metrics trace is
+in `target/documentation-text-end-caret-trace.log`. All 61 text-backend library
+tests pass in `target/documentation-text-caret-tests.log`. The direct API and
+canonical text chapter also distinguish a shaping cluster from a grapheme
+cluster and connect pointer hits to the separate movement/selection policy.
+
+The browser compiler is being rebuilt from the pinned upstream archive and
+this checkout's patches so the browser interpreter receives the same fix.
+Existing build outputs were cloned as a cache; compiler experiment sources
+were not imported. The four native procedural-macro identities were checked
+against the published SDK metadata before generating their clients. A fresh
+source preparation also revealed that the copy filter omitted nested
+Cargo.toml files, including genmc-sys's manifest. The filter now replaces only
+Miri's root manifest and preserves its path-dependency manifests. The compiler
+build and final browser verification remain pending at this entry.
