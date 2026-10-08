@@ -748,3 +748,32 @@ validated construction, fractional fields before the Unix epoch, date
 combination, and wrapping, checked, and saturating arithmetic. Later Time
 APIs remain open. This does not claim a complete reading of Jiff or every
 article-linked project.
+
+The `3c9b750bca` combined build subsequently passed and was promoted at port
+1111 with source digest
+`1bfc8b7dc7978bd3b36bb1a42fb2b8c5fad40519b99cb2bc7be5ea558705249f`.
+The browser-Miri runtime manifest is unchanged from `ab20ec12d9`. All 13 site
+tests and the core formatting check also pass. Further source review then
+traced the variable list's scroll-handler invocation and row renderers under
+the ListState mutable borrow. The API and shared chapter now explain that
+reentering its query/mutation methods from either callback panics and link
+Window::defer as the mutation boundary. That final addition needs the next
+combined artifact and has not been included in the preceding detector scores.
+
+Browser checks completed for the first-window, layout, and custom-element
+compiled previews. The greeting renders and remains centered at a 120-pixel
+viewport, with slight horizontal clipping at that width. At 390 pixels the
+layout shows a yielding pane beside the 180-pixel fixed pane; at 240 pixels
+it clips as its documented desktop constraints predict. The custom element
+paints its 192-by-96 quad and clips it within a 120-pixel iframe. Proof files:
+`first-window-120.png`, `layout-390.png`, `layout-240.png`,
+`custom-element-preview.png`, and `custom-element-120.png`.
+
+The subsequent Jiff reading completes every public example in `civil/time.rs`
+through TimeWith (approximately line 3,200), including differences, signed and
+unsigned duration conversions, rounding and wraparound, periodic iteration,
+printf-style parsing and formatting, precision, operators, TimeArithmetic,
+TimeDifference, TimeRound, and whole versus individual fractional-field
+configuration. Private production helpers in that interval were read too;
+the remaining tests are outside this claim. The earlier limited reading scope
+above records the preceding checkpoint rather than the current endpoint.

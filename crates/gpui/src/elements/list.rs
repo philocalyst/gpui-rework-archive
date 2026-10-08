@@ -33,6 +33,12 @@ type RenderItemFn = dyn FnMut(usize, &mut Window, &mut App) -> AnyElement + 'sta
 /// Give stateful rows stable logical IDs. The index selects current data; after
 /// an insertion it may refer to a different item. Use [`crate::uniform_list`]
 /// when every row shares one height.
+///
+/// # Panics
+///
+/// Calling queries or mutations on this same [`ListState`] from `render_item`
+/// panics: layout already holds its mutable borrow. Use the supplied index
+/// and the owning view's data to construct a row.
 pub fn list(
     state: ListState,
     render_item: impl FnMut(usize, &mut Window, &mut App) -> AnyElement + 'static,
@@ -138,6 +144,15 @@ impl List {
 /// [`scroll_to_end`](Self::scroll_to_end) requests a position once.
 /// [`ListAlignment::Bottom`] chooses the default anchor when no explicit
 /// position exists. Neither is a substitute for the pause-and-resume policy.
+///
+/// # Callback borrows
+///
+/// Layout holds a mutable borrow of this shared state while calling the row
+/// renderer. The scroll handler runs under the same borrowing rule. Do not
+/// call this state's query or mutation methods from either callback; they
+/// panic on that conflicting borrow. Read row data through its owning view,
+/// use the scroll event's fields, and defer state changes with [`Window::defer`]
+/// when they must follow a callback.
 #[derive(Clone)]
 pub struct ListState(Rc<RefCell<StateInner>>);
 
@@ -718,6 +733,11 @@ impl ListState {
     /// `is_scrolled` means an explicit position is set; it does not say that
     /// this event moved the list. This callback is retained by the state.
     /// Replace it when rendering if it captures data that changes per frame.
+    ///
+    /// The handler runs while this state is mutably borrowed. Calling its
+    /// query or mutation methods from the handler panics. Read geometry from
+    /// the event, or use [`Window::defer`] to change state after the handler
+    /// returns, then request a redraw.
     pub fn set_scroll_handler(
         &self,
         handler: impl FnMut(&ListScrollEvent, &mut Window, &mut App) + 'static,

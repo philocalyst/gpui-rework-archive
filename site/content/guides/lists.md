@@ -142,6 +142,13 @@ scroll position. It does not own the collection. If the data changes without
 a matching state update, old measurements can be attached to new rows.
 Change both, then notify the owning view.
 
+> [!WARNING]
+> The row renderer and scroll handler run while `ListState` is mutably borrowed.
+> Querying or changing that same state from either callback panics. Build rows
+> from the supplied index and your view's data; inspect scrolling through the
+> event's fields. Use [`Window::defer`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.defer) for a state change
+> that must follow one of those callbacks, and request a redraw afterward.
+
 | Change to the data or presentation | Update the retained state |
 | --- | --- |
 | Insert, remove, or replace a contiguous range | [`splice`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.ListState.html#method.splice), or `splice_focusable` for rows that need focus retention |
