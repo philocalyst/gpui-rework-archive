@@ -33,10 +33,64 @@ pub struct Anchored {
     offset: Option<Point<Pixels>>,
 }
 
-/// Construct an anchored overlay.
+/// Positions an overlay by a corner and fits it inside the window.
 ///
-/// Its children should have no margin: margins participate in layout before the overlay is fitted
-/// and can make the apparent anchor differ from the visible content.
+/// Use [`position`](Anchored::position) to supply an anchor point in
+/// window-local logical pixels, such as the bottom-left corner of a button's
+/// resolved bounds. The overlay's top-left corner attaches there by default.
+/// [`anchor`](Anchored::anchor) chooses another corner, and
+/// [`position_mode`](Anchored::position_mode) can make the point local to this
+/// element's layout origin instead.
+///
+/// Placement happens after child layout. The default fit first tries the
+/// opposite corner on an overflowing axis, then moves the overlay against
+/// the window edge if neither corner fits. It does not shrink the children.
+/// The overlay is absolutely positioned and does not push surrounding content
+/// aside. It retains the enclosing clip and paint order; wrap it with
+/// [`deferred`](crate::deferred) when it must escape that clip and paint later.
+///
+/// # Fit a notice near an edge
+///
+/// This view places an 80-by-40 notice at a window-local point. Near the right
+/// or bottom edge, GPUI can attach the opposite corner instead. The point
+/// remains the anchor; it is not a guaranteed final top-left position:
+///
+/// ```
+/// use gpui::{Context, IntoElement, Point, Pixels, Render, Window, anchored,
+///            div, prelude::*, px, rgb};
+///
+/// struct Notice { at: Point<Pixels> }
+/// impl Render for Notice {
+///     fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+///         anchored().position(self.at).child(
+///             div().w(px(80.)).h(px(40.)).bg(rgb(0x155b50)).child("Saved")
+///         )
+///     }
+/// }
+/// # let mut app = gpui::TestApp::new();
+/// # let mut window = app.open_window(|_, _| Notice { at: gpui::point(px(20.), px(20.)) });
+/// # window.simulate_resize(gpui::size(px(300.), px(200.)));
+/// # for (at, expected) in [((20., 20.), (20., 20.)), ((280., 180.), (200., 140.))] {
+/// #     window.update(|notice, _, cx| {
+/// #         notice.at = gpui::point(px(at.0), px(at.1));
+/// #         cx.notify();
+/// #     });
+/// #     window.draw();
+/// #     window.update(|_, window, _| {
+/// #         let quad = window.painted_quads().into_iter()
+/// #             .find(|quad| quad.background == rgb(0x155b50).into()).unwrap();
+/// #         assert_eq!(quad.bounds.origin, gpui::point(px(expected.0), px(expected.1))
+/// #             .scale(window.scale_factor()));
+/// #     });
+/// # }
+/// ```
+///
+/// Children should have no outer margin: it participates in layout before
+/// fitting and can separate the visible content from the apparent anchor.
+/// Put internal spacing in the child's padding. Use [`Anchored::offset`] for
+/// a desired gap, remembering that fitting can change it. See the
+/// [overlay guide](crate::_documentation::drawing#choose-what-should-paint-above-what)
+/// for retaining measured bounds and combining placement with deferral.
 pub fn anchored() -> Anchored {
     Anchored {
         children: SmallVec::new(),

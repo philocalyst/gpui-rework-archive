@@ -13,6 +13,36 @@ prepare those values in the first closure and consume them in the second.
 See the [rendering chapter](crate::_documentation::rendering) for the phase
 contract and the difference between building an element and painting it.
 
+Choose an element according to the work it needs to do:
+
+| Work | Element |
+| --- | --- |
+| A styled rectangle, label, or ordinary button | [`div`](crate::div), with text and interaction builders |
+| Geometry that fits a box supplied by layout | [`canvas`](crate::canvas), with preparation and paint callbacks |
+| Custom measurement, child layout, or retained element state | An [`Element`](crate::Element) implementation |
+| Pixels from an existing video or GPU render target | [`surface`](crate::surface) |
+
+## Give a canvas space and an owner
+
+A canvas does not measure its drawing to choose a size. Set its width and
+height, or use `size_full` inside a parent that already has a resolved size.
+The callback bounds cover that complete box. A rectangle drawn outside it
+does not enlarge the canvas or push a sibling aside.
+
+The prepaint result belongs to one frame. Use it to pass a prepared path,
+label geometry, or hitbox into paint. Keep the chart's data, selection, and
+reusable geometry on an entity; notify the view when they change. Rebuilding
+the canvas then captures the current values in new callbacks. Retaining the
+canvas value or its prepaint result is not a cross-frame state mechanism.
+
+Put ordinary behavior on a surrounding div. That div can own a name, role,
+focus handle, and click listener while the canvas supplies the picture.
+Canvas itself has no accessibility node or automatic hit region. Its
+[`style boundary`](crate::Canvas#style-boundary) also differs from Div's:
+put overflow clipping, opacity, and inherited text styling on the parent.
+The constructor's [inset-swatch example](crate::canvas#prepare-geometry-then-paint-it)
+shows the phase handoff without requiring a custom element type.
+
 ## Keep coordinates and clipping explicit
 
 Window paint methods take window-local logical [`Pixels`](crate::Pixels).

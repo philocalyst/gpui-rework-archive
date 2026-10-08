@@ -3,7 +3,37 @@ use crate::{
     IntoElement, LayoutId, Pixels, Window,
 };
 
-/// Build an element whose child keeps its layout but paints in the deferred-draw pass.
+/// Draws a child after the main tree without changing its layout or keyboard parent.
+///
+/// Use this for a menu, tooltip, or other overlay that needs to escape an
+/// ancestor's clipping. Deferral moves the child's prepaint and paint into a
+/// later pass of the **same frame**; it does not schedule a task or wait for
+/// another frame. The child still supplies the layout size at this position.
+/// Use [`anchored`](crate::anchored) when it also needs independent placement.
+///
+/// For example, place a notice below a control using its window-local bounds:
+///
+/// ```
+/// use gpui::{Bounds, Pixels, anchored, deferred, div, prelude::*, px, rgb};
+///
+/// fn notice(control: Bounds<Pixels>) -> impl IntoElement {
+///     deferred(
+///         anchored().position(control.bottom_left()).child(
+///             div().w(px(160.)).p_3().bg(rgb(0x155b50))
+///                 .text_color(rgb(0xffffff)).child("Saved")
+///         )
+///     )
+/// }
+/// ```
+///
+/// Retain the open/closed state and the control's measured bounds on the owning
+/// view; this wrapper does not manage a popup's lifetime or dismiss it. The
+/// [overlay guide](crate::_documentation::drawing#choose-what-should-paint-above-what)
+/// connects positioning, clipping, paint order, and state ownership.
+///
+/// The default priority is zero. Use [`Deferred::priority`] to order unrelated
+/// overlays or [`Deferred::priority_auto`] for a nested overlay. To restrict
+/// its hitboxes and drawing again, set [`Deferred::content_mask`].
 pub fn deferred(child: impl IntoElement) -> Deferred {
     Deferred {
         child: Some(child.into_any_element()),
@@ -121,9 +151,10 @@ impl Deferred {
 
 /// Describes how the priority for a [`Deferred`] element is calculated.
 pub enum DeferredPriority {
-    /// The priority is calculated based on whether the deferred element is a by-product of another deferred element.
-    /// If this is the first deferred element in a rendering stack, priority is 1.
-    /// Otherwise the priority is the previous priority + 1 (so this element renders in front of the previous in the stack).
+    /// Uses the active deferred prepaint's priority plus one, saturating at `usize::MAX`.
+    ///
+    /// With no active deferral, uses one. This follows nesting, not sibling
+    /// order; unrelated automatic overlays can have the same priority.
     Auto,
     /// Takes an explicit priority value for the deferred element.
     Value(usize),

@@ -22,9 +22,10 @@
 //!
 //! The harness remains single-threaded for foreground state. Use
 //! [`TestApp::advance_clock`] to move time and run work due by that time;
-//! `run_until_parked` does not invent elapsed time. Window inspection methods
-//! panic if their window has already been closed, matching the test's invalid
-//! handle rather than silently testing a different window.
+//! `run_until_parked` does not invent elapsed time. Window reads, updates, and
+//! input dispatch panic on a closed window; `simulate_resize` ignores it.
+//! Dropping a [`TestAppWindow`] does not close the window. Close it explicitly
+//! when testing teardown.
 
 use crate::{
     AnyWindowHandle, App, AppCell, AppContext, AssetRegistry, AsyncApp, BackgroundExecutor,
@@ -41,6 +42,13 @@ use std::{future::Future, rc::Rc, sync::Arc, time::Duration};
 /// also flushes effects inside its `update` closure, but leaves draining tasks
 /// to the test. Use that context with `#[gpui::test]` when several applications
 /// need to share one scheduler; use `TestApp` for a self-contained `#[test]`.
+///
+/// The default platform records drawing without rasterizing it, uses simulated
+/// text metrics, and answers HTTP requests with 404. Use
+/// [`with_text_system`](Self::with_text_system) when assertions depend on real
+/// shaping, and [`App::set_http_client`] for a controlled resource response.
+/// See the [testing chapter](crate::_documentation::testing) for fixtures that
+/// distinguish state, notifications, time, layout, and renderer output.
 pub struct TestApp {
     app: Rc<AppCell>,
     platform: Rc<TestPlatform>,
@@ -130,7 +138,10 @@ impl TestApp {
         result
     }
 
-    /// Runs `f` with a read-only app borrow.
+    /// Reads app state without flushing effects or polling tasks.
+    ///
+    /// Use [`Self::update`] when the operation changes state; a read does not
+    /// establish that previously queued work has finished.
     pub fn read<R>(&self, f: impl FnOnce(&App) -> R) -> R {
         let app = self.app.borrow();
         f(&app)
@@ -140,6 +151,8 @@ impl TestApp {
     ///
     /// This test-only spelling forwards to [`AppContext::new`]. Production code
     /// normally receives an [`App`] or [`Context`] and calls `cx.new` directly.
+    /// Unlike that direct call, this helper also flushes effects and drains
+    /// ready tasks before returning.
     pub fn new_entity<T: 'static>(
         &mut self,
         build: impl FnOnce(&mut Context<T>) -> T,
@@ -147,7 +160,10 @@ impl TestApp {
         self.update(|cx| cx.new(build))
     }
 
-    /// Updates an entity and runs the test app's pending effects.
+    /// Updates an entity, flushes effects, and drains ready tasks.
+    ///
+    /// The callback follows [`Entity::update`]'s borrowing rules. Advancing
+    /// future timers and explicitly drawing a new frame are separate steps.
     pub fn update_entity<T: 'static, R>(
         &mut self,
         entity: &Entity<T>,
@@ -215,7 +231,8 @@ impl TestApp {
     /// Runs ready foreground and background tasks until the scheduler parks.
     ///
     /// Pending timers remain pending until [`Self::advance_clock`] makes them
-    /// ready. A task dropped before this call is cancelled and is not observed.
+    /// ready. Keep each [`Task`] whose work the test needs: dropping its handle
+    /// requests cancellation, and draining also processes that cancellation.
     pub fn run_until_parked(&self) {
         self.background_executor.run_until_parked();
     }
@@ -229,7 +246,12 @@ impl TestApp {
         self.background_executor.advance_clock(duration);
     }
 
-    /// Spawns a local future on the foreground executor.
+    /// Queues a local foreground future with a weak async app handle.
+    ///
+    /// This does not drain the scheduler. Keep or await the returned [`Task`]
+    /// to keep the future running, or detach it. Call
+    /// [`Self::run_until_parked`] to run work that is already ready; use
+    /// [`Self::advance_clock`] when its next step waits on a test timer.
     pub fn spawn<Fut, R>(&self, f: impl FnOnce(AsyncApp) -> Fut) -> Task<R>
     where
         Fut: Future<Output = R> + 'static,
@@ -238,7 +260,11 @@ impl TestApp {
         self.foreground_executor.spawn(f(self.to_async()))
     }
 
-    /// Spawns a `Send` future on the background executor.
+    /// Queues a `Send` future on the test scheduler's background executor.
+    ///
+    /// This uses the same controlled clock and scheduler as foreground work,
+    /// rather than a production worker pool. Retain or await the [`Task`],
+    /// then drain ready work or advance time at the boundary being tested.
     pub fn background_spawn<R>(&self, future: impl Future<Output = R> + Send + 'static) -> Task<R>
     where
         R: Send + 'static,
@@ -285,19 +311,21 @@ impl TestApp {
         self.read(|cx| f(cx.global(), cx))
     }
 
-    /// Update a global value.
+    /// Updates an installed global, flushes effects, and drains ready tasks.
+    ///
+    /// Panics if `G` is absent. Use [`Self::set_global`] to install it first.
     pub fn update_global<G: Global, R>(&mut self, f: impl FnOnce(&mut G, &mut App) -> R) -> R {
         self.update(|cx| cx.update_global(f))
     }
 
     // Platform simulation methods
 
-    /// Write text to the simulated clipboard.
+    /// Replaces the simulated clipboard's item without using the system clipboard.
     pub fn write_to_clipboard(&self, item: ClipboardItem) {
         self.platform.write_to_clipboard(item);
     }
 
-    /// Read from the simulated clipboard.
+    /// Returns a clone of the simulated clipboard item, or `None` if none was written.
     pub fn read_from_clipboard(&self) -> Option<ClipboardItem> {
         self.platform.read_from_clipboard()
     }
@@ -342,7 +370,40 @@ impl Default for TestApp {
     }
 }
 
-/// A typed test handle for one open window and its root view.
+/// A typed handle for inspecting and driving one simulated window.
+///
+/// Reads inspect the current root. Updates and simulated input flush effects
+/// and drain ready tasks; neither advances future timers. Call [`draw`](Self::draw)
+/// when the next assertion needs current layout, hitboxes, or drawing records.
+/// The [input fixture](crate::_documentation::testing#exercise-the-input-path)
+/// demonstrates the order of drawing, pressing, releasing, and asserting.
+///
+/// Clones share the window and keep its app alive. Dropping a handle does not
+/// close the window. This test closes it explicitly and shows that a separately
+/// retained root still owns its entity:
+///
+/// ```
+/// use gpui::{Empty, TestApp};
+///
+/// let mut app = TestApp::new();
+/// let window = app.open_window(|_, _| Empty);
+/// let handle = window.handle();
+/// let root = window.root();
+/// let weak_root = root.downgrade();
+/// drop(window);
+/// assert_eq!(app.windows(), vec![handle.into()]);
+///
+/// app.update(|cx| handle.update(cx, |_, window, _| window.remove_window()).unwrap());
+/// assert!(app.windows().is_empty());
+/// assert!(weak_root.upgrade().is_some());
+/// drop(root);
+/// app.update(|_| {});
+/// assert!(weak_root.upgrade().is_none());
+/// ```
+///
+/// Reads, updates, drawing, and input dispatch panic if the window is closed.
+/// [`simulate_resize`](Self::simulate_resize) instead ignores a closed window,
+/// while [`handle`](Self::handle) still returns its identifying handle.
 pub struct TestAppWindow<V> {
     handle: WindowHandle<V>,
     app: Rc<AppCell>,
@@ -351,7 +412,10 @@ pub struct TestAppWindow<V> {
 }
 
 impl<V: 'static + Render> TestAppWindow<V> {
-    /// Returns the typed window handle.
+    /// Returns the window's identity without checking whether it remains open.
+    ///
+    /// Use it with [`WindowHandle::update`] when a failed update should return
+    /// an error instead of the test helper panicking.
     pub fn handle(&self) -> WindowHandle<V> {
         self.handle
     }
@@ -359,6 +423,8 @@ impl<V: 'static + Render> TestAppWindow<V> {
     /// Returns the root view entity.
     ///
     /// Panics if the window was closed or its root has a different type.
+    /// Retaining the returned entity keeps the root alive after window closure;
+    /// drop it too when asserting teardown.
     pub fn root(&self) -> Entity<V> {
         let mut app = self.app.borrow_mut();
         let any_handle: AnyWindowHandle = self.handle.into();
@@ -385,7 +451,7 @@ impl<V: 'static + Render> TestAppWindow<V> {
         result
     }
 
-    /// Reads the root view without flushing effects.
+    /// Reads the current root without flushing effects or polling tasks.
     ///
     /// Panics if the window or root view is unavailable.
     pub fn read<R>(&self, f: impl FnOnce(&V, &App) -> R) -> R {
@@ -406,6 +472,9 @@ impl<V: 'static + Render> TestAppWindow<V> {
     ///
     /// The current test platform does not expose a title through this API and
     /// therefore returns `None` for an open window.
+    /// Panics on a closed window. [`VisualTestContext::window_title`](crate::VisualTestContext::window_title)
+    /// reads the simulated platform's stored title when that is the assertion
+    /// the test needs.
     pub fn title(&self) -> Option<String> {
         let app = self.app.borrow();
         app.read_window(&self.handle, |_, _cx| {
@@ -434,21 +503,36 @@ impl<V: 'static + Render> TestAppWindow<V> {
         self.background_executor.run_until_parked();
     }
 
-    /// Dispatches space-separated keystrokes in order.
+    /// Dispatches space-separated key presses, draining ready work after each one.
+    ///
+    /// Each token follows [`Self::simulate_keystroke`], including simulated
+    /// committed text and the absence of a key release. Panics on an invalid
+    /// token or a closed window. For releases or modifiers not represented by
+    /// the string syntax, use [`Self::simulate_event`].
     pub fn simulate_keystrokes(&mut self, keystrokes: &str) {
         for keystroke in keystrokes.split(' ') {
             self.simulate_keystroke(keystroke);
         }
     }
 
-    /// Dispatches one keystroke for each Unicode scalar in `input`.
+    /// Dispatches one key press per Unicode scalar, draining work after each one.
+    ///
+    /// This exercises simulated committed text, not native input-method
+    /// composition. It sends no releases. Test marked ranges and provisional
+    /// replacements through [`EntityInputHandler`](crate::EntityInputHandler),
+    /// then exercise the native path separately. See the
+    /// [composition fixture](crate::_documentation::testing#test-composition-as-a-sequence).
     pub fn simulate_input(&mut self, input: &str) {
         for char in input.chars() {
             self.simulate_keystroke(&char.to_string());
         }
     }
 
-    /// Dispatches a mouse-move event at `position`.
+    /// Moves the simulated pointer to a window-local logical-pixel position.
+    ///
+    /// Sends no held button or modifiers. Use [`Self::simulate_event`] for
+    /// dragging or modifier-sensitive behavior, and draw first to install the
+    /// intended hitboxes and listeners. Ready tasks are drained afterward.
     pub fn simulate_mouse_move(&mut self, position: Point<Pixels>) {
         self.simulate_event(MouseMoveEvent {
             position,
@@ -457,7 +541,11 @@ impl<V: 'static + Render> TestAppWindow<V> {
         });
     }
 
-    /// Dispatches a single left/right/etc. mouse-down event.
+    /// Presses `button` at a window-local logical-pixel position.
+    ///
+    /// Sends click count one, no modifiers, and no window-activation flag,
+    /// then drains ready work. It does not send a preceding pointer move or
+    /// a release; use [`Self::simulate_click`] for a press/release pair.
     pub fn simulate_mouse_down(&mut self, position: Point<Pixels>, button: MouseButton) {
         self.simulate_event(MouseDownEvent {
             position,
@@ -468,7 +556,10 @@ impl<V: 'static + Render> TestAppWindow<V> {
         });
     }
 
-    /// Dispatches a single mouse-up event.
+    /// Releases `button` at a window-local logical-pixel position and drains work.
+    ///
+    /// Sends click count one and no modifiers. This does not synthesize a
+    /// preceding press. Use [`Self::simulate_event`] for other event fields.
     pub fn simulate_mouse_up(&mut self, position: Point<Pixels>, button: MouseButton) {
         self.simulate_event(MouseUpEvent {
             position,
@@ -478,13 +569,23 @@ impl<V: 'static + Render> TestAppWindow<V> {
         });
     }
 
-    /// Dispatches a mouse-down followed by a mouse-up at `position`.
+    /// Presses and releases `button` at a window-local logical-pixel position.
+    ///
+    /// Drains ready work after each event. This does not send a preceding
+    /// pointer move or advance time between the two events. Draw first so
+    /// hit testing uses the intended frame.
     pub fn simulate_click(&mut self, position: Point<Pixels>, button: MouseButton) {
         self.simulate_mouse_down(position, button);
         self.simulate_mouse_up(position, button);
     }
 
-    /// Dispatches a pixel scroll event at `position`.
+    /// Sends one pixel-scroll update at a window-local logical-pixel position.
+    ///
+    /// `delta` follows [`ScrollDelta::Pixels`](crate::ScrollDelta::Pixels).
+    /// The event has no modifiers and uses [`TouchPhase::Moved`](crate::TouchPhase::Moved);
+    /// it does not synthesize gesture-start, gesture-end, or momentum events.
+    /// Draw before dispatch to install the scroll region and afterward to
+    /// inspect its new contents. Ready work is drained after dispatch.
     pub fn simulate_scroll(&mut self, position: Point<Pixels>, delta: Point<Pixels>) {
         self.simulate_event(crate::ScrollWheelEvent {
             position,
@@ -495,6 +596,10 @@ impl<V: 'static + Render> TestAppWindow<V> {
     }
 
     /// Converts and dispatches a platform input event, then drains ready work.
+    ///
+    /// [`InputEvent`] selects the corresponding platform event. Unlike
+    /// [`Self::simulate_keystroke`], this does not add a simulated text commit
+    /// after a key-down event. Panics if the window is closed.
     pub fn simulate_event<E: InputEvent>(&mut self, event: E) {
         let platform_input = event.to_platform_input();
         {
@@ -509,6 +614,10 @@ impl<V: 'static + Render> TestAppWindow<V> {
     }
 
     /// Resizes the simulated platform window and drains ready work.
+    ///
+    /// `size` uses logical pixels. A closed window is ignored. Draw again
+    /// before asserting the resulting geometry; draining the scheduler is
+    /// not proof that the expected frame was built.
     pub fn simulate_resize(&mut self, size: Size<Pixels>) {
         let window_id = self.handle.window_id();
         let test_window = {
@@ -526,10 +635,12 @@ impl<V: 'static + Render> TestAppWindow<V> {
         self.background_executor.run_until_parked();
     }
 
-    /// Draws and clears the window immediately.
+    /// Builds the current frame and clears its temporary element arena.
     ///
     /// Use this when a test needs layout/paint state before simulating pointer
-    /// input. It does not advance timers.
+    /// input. Clearing releases frame-building storage, not the recorded
+    /// scene. Inspect it through the window's paint-record helpers. This does
+    /// not advance timers or drain the task scheduler.
     pub fn draw(&mut self) {
         let mut app = self.app.borrow_mut();
         let any_handle: AnyWindowHandle = self.handle.into();

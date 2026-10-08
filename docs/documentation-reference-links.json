@@ -76,7 +76,7 @@
     },
     {
       "url": "https://blog.rust-lang.org/",
-      "status": "fetched (200; not individually read)",
+      "status": "read (complete homepage and dated index; linked articles unread; no image review; 2026-10-08 UTC)",
       "http_status": "200"
     },
     {
@@ -1183,7 +1183,7 @@
     },
     {
       "url": "https://this-week-in-rust.org/",
-      "status": "fetched (200; not individually read)",
+      "status": "read (complete homepage; linked issues unread; no image review; 2026-10-08 UTC)",
       "http_status": "200"
     },
     {
@@ -1267,7 +1267,7 @@
     },
     {
       "url": "https://webring.antaresph.dev",
-      "status": "fetched (200; not individually read)",
+      "status": "read (complete webring homepage, instructions and FAQ; member sites unread; no image review or code execution; 2026-10-08 UTC)",
       "http_status": "200"
     },
     {

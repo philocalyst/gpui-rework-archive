@@ -1298,3 +1298,83 @@ the complete visible About panel, its save-button example, the Arthur/age
 code example, and the visible widget gallery. Other demos and off-screen
 content remain unreviewed. The useful comparison is code beside an immediately
 usable result, with clear links to each example's source.
+
+## Canvas, responsive subtrees, overlays, and test-window ownership
+
+The host-focus artifact at `63da94018dd511f4bac547b797d0cfbd537a2dad`
+passed the combined strict feature-enabled API, Zola, mdBook, and HTML/link
+checks. Its source digest is
+`70aabd62501d661d6e299f73eb9cbe94f61f389323d3067ed05e89337ff9971e`,
+with runtime manifest `fe33dbceb23f9b069901bb0bb31e724d2712a3deea69d254118cde058f14e896`.
+It was promoted to the local server. The build log is
+`target/documentation-host-focus-site.log`.
+
+Without clicking the preview, the primary editor used normal browser Tab
+navigation to enter the Miri counter, selected its button with Tab, activated
+it with Enter, traversed backward with Shift-Tab, and activated it with Space.
+The count reached two. Escape selected the workbench's Reset state control.
+The source editor's Escape-then-Tab exit also worked. Evidence is
+`target/documentation-proof/miri-counter-keyboard.png`.
+The compiled subscriptions preview passed the corresponding route; both
+count and notifications reached two, and Escape selected Edit Rust.
+Evidence is `target/documentation-proof/compiled-subscriptions-keyboard.png`.
+The revised subscriptions starter also executed in Miri: Tab then Enter
+produced count one and notification one. Evidence is
+`target/documentation-proof/miri-subscriptions-keyboard.png`.
+
+The primary editor read the complete canvas, container-query, anchored, and
+deferred production implementations; Style::paint and overflow-mask paths;
+the relevant AnyElement lifecycle, hitbox insertion, and mouse-listener paths;
+and both complete canonical drawing/custom-element programs. Reference reads
+included Zed's scrollbar canvas and gradient canvas, and Hummingbird's
+window-chrome canvas. These are source reads, not execution of those projects.
+
+Canvas now explains size, coordinate origin, phase handoff, retained-state
+ownership, invalidation, clipping, hit testing, and its style boundary. Its
+new inset-swatch example asserts the recorded rectangle. Container queries
+now assert the compact/full boundary and resulting bounds at three widths.
+Anchored placement asserts ordinary placement and both-axis edge fitting.
+Deferred's constructor explains same-frame deferral and connects layout,
+dispatch ancestry, placement, clipping, and popup ownership.
+The drawing chapter carries the shared explanation into the site and book.
+
+The complete TestApp/TestAppWindow implementation and tests, the complete
+testing chapter, test.rs including seed logic, and TestAppContext through
+the VisualTestContext constructor/input entry points were read again.
+TestAppWindow now explains that its clones retain the app and dropping the
+handle does not close the window. An executed example checks explicit closure
+and independent root ownership. Drawing clears temporary element storage;
+it does not erase the scene. Input helpers now distinguish press/release,
+committed text, IME composition, pointer movement, and scroll phases, and
+state which boundary drains tasks. simulate_resize's closed-window no-op is
+documented rather than covered by a false general panic claim.
+
+The full post-edit doctest run passes 216 examples: 209 merged and seven
+test-harness examples, with one ignored. Its log is
+`target/documentation-canvas-neighbors-doctests.log`. The new canvas example
+also passed separately. The default-feature strict API build caught a link
+to the feature-gated testing module; the canvas page now links to the canonical
+book instead. The corrected strict build and combined artifact remain pending
+at this entry. All five edited GPUI source files pass rustfmt; the workspace
+check still reports formatting in the previously integrated codepen runtime.
+
+The corrected default-feature strict API build and the feature-enabled strict
+API build both pass. Logs are `target/documentation-canvas-default-api.log`
+and `target/documentation-canvas-feature-api.log`. The site guide mirror was
+then refreshed against the feature-enabled API. The combined artifact is the
+remaining check for this batch.
+
+The revised async starter also passed browser-only keyboard checks: Start
+reached Complete, and Start then Tab then Enter reached Stopped. The completed
+state is recorded in
+`target/documentation-proof/miri-async-complete-keyboard.png`. These checks use
+the served host-focus artifact above, not the as-yet-unbuilt canvas revision.
+
+The complete Rust blog homepage/index, This Week in Rust homepage, and Pinoy
+Websites webring homepage were read. Linked articles and member sites were
+not read by implication. These are reference/navigation surveys, without
+code execution or image review. The broader linked-example review remains open.
+
+A fresh Scribbr visit left its detector panel blank; its linked QuillBot
+fallback failed with a connection reset. No new detector score is claimed
+for this batch. Earlier recorded samples are still only samples.

@@ -123,7 +123,7 @@ for (const playground of document.querySelectorAll('[data-playground]')) {
   window.addEventListener('message', event => {
     if (event.source !== frame.contentWindow || event.origin !== new URL(frame.src).origin) return;
     if (event.data === 'gpui-preview-ready') {
-      status.textContent = 'Ready. Click inside to use the preview; press Escape to leave it.';
+      status.textContent = 'Ready. Click or Tab into the preview; press Escape to leave it.';
     }
     if (event.data?.type === 'gpui-preview-exit') {
       (editing ? restore : edit).focus();
