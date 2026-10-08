@@ -1478,7 +1478,12 @@ pub struct FontMetrics {
     /// The recommended additional space to add between lines of type.
     pub line_gap: f32,
 
-    /// The suggested position of the underline.
+    /// Suggested underline offset from the baseline, in font design units.
+    ///
+    /// Parley preserves the font's upward-growing y axis: a negative value
+    /// places the underline below the baseline. The pixel helper scales this
+    /// value without reversing its sign. Resolved [`PaintFragment`] offsets
+    /// instead use window coordinates, whose y axis grows downward.
     pub underline_position: f32,
 
     /// The suggested thickness of the underline.
@@ -1514,7 +1519,11 @@ impl FontMetrics {
         Pixels((self.line_gap / self.units_per_em as f32) * font_size.0)
     }
 
-    /// Returns the suggested position of the underline in pixels.
+    /// Scales the suggested underline offset to logical pixels, preserving its sign.
+    ///
+    /// Parley's font metrics use negative offsets below the baseline. This
+    /// does not convert to a downward-growing window offset; use the resolved
+    /// [`PaintFragment::underline_offset`] when painting shaped text.
     pub fn underline_position(&self, font_size: Pixels) -> Pixels {
         Pixels((self.underline_position / self.units_per_em as f32) * font_size.0)
     }

@@ -612,9 +612,14 @@ pub struct PaintFragment {
     pub x_range: Range<Pixels>,
     /// Paint properties shared by every glyph in the fragment.
     pub style: PaintStyle,
-    /// Resolved underline offset from the baseline.
+    /// Resolved underline offset from the baseline, positive downward.
+    ///
+    /// Painting adds this to the placed baseline. `None` uses a descent-based fallback.
     pub underline_offset: Option<Pixels>,
-    /// Resolved strikethrough offset from the baseline.
+    /// Resolved strikethrough offset from the baseline, positive downward.
+    ///
+    /// A line through ordinary letters uses a negative offset. `None` uses an
+    /// ascent-based fallback.
     pub strikethrough_offset: Option<Pixels>,
 }
 

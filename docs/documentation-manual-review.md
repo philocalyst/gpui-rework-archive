@@ -2093,3 +2093,21 @@ directs string and per-glyph measurement to their respective operations.
 FontWeight's constants no longer call 100 and 900 absolute endpoints, or call
 the nine named weights every possible weight. The scalar constructor accepts
 other values; the names describe standard requests rather than validation.
+
+The decoration trace then found a second coordinate conversion error. Parley
+copies signed OpenType underline and strikeout positions, whose y axis grows
+upward. GPUI's fragment painter adds its offsets to a downward-growing window
+baseline. The bridge passed those raw signs through unchanged. A native
+regression failed because an IBM Plex Sans underline sat above the baseline;
+a browser Rust probe visibly placed the underline through the letters and
+the strikethrough below them. The before image and probe are saved in
+`target/documentation-proof/text-decorations-before.png` and
+`target/documentation-proof/text-decoration-probe.rs`.
+
+The bridge now reverses both offsets. All 62 text-backend tests pass in
+`target/documentation-text-decorations-after.log`, including both decoration
+signs in IBM Plex Sans and Source Serif. FontMetrics, PaintFragment, and the
+canonical text chapter explain their distinct conventions. The exact drawing
+walkthrough source was restored after the probe. The first full WASM compiler
+build completed; the decoration fix requires a subsequent rebuild before
+publishing that module. Its browser verification remains pending.

@@ -242,6 +242,13 @@ wrapped rows align within the wrapping width instead.
 Its raw values are in font design units; the helper methods scale them to
 logical [`Pixels`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Pixels.html). Font-wide bounds are backend estimates,
 not a substitute for a shaped string's width or a glyph's painted bounds.
+Parley's raw underline position uses the font's upward-growing y axis: a
+negative value sits below the baseline. Scaling that metric to pixels does
+not reverse its sign. A resolved [`PaintFragment`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.PaintFragment.html)
+instead supplies decoration offsets in window coordinates, positive downward.
+Its paint wrapper applies those offsets to the placed baseline; use that
+wrapper when drawing shaped text.
+
 [`FontId`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.FontId.html) identifies a face within one text backend. It is not
 a portable font identifier to save and reuse in another app.
 

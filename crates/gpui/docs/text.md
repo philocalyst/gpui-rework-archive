@@ -235,6 +235,13 @@ wrapped rows align within the wrapping width instead.
 Its raw values are in font design units; the helper methods scale them to
 logical [`Pixels`](crate::Pixels). Font-wide bounds are backend estimates,
 not a substitute for a shaped string's width or a glyph's painted bounds.
+Parley's raw underline position uses the font's upward-growing y axis: a
+negative value sits below the baseline. Scaling that metric to pixels does
+not reverse its sign. A resolved [`PaintFragment`](crate::PaintFragment)
+instead supplies decoration offsets in window coordinates, positive downward.
+Its paint wrapper applies those offsets to the placed baseline; use that
+wrapper when drawing shaped text.
+
 [`FontId`](crate::FontId) identifies a face within one text backend. It is not
 a portable font identifier to save and reuse in another app.
 
