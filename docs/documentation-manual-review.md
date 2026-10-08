@@ -969,10 +969,78 @@ not read in this pass. The relevant comparison is a local replica with an
 observable reload path and reproducible content/assets, while retaining this
 site's smaller canonical-source workflow.
 
-Jiff 0.2.35's rendered Timestamp page was read from the overview through the
-complete millisecond-constructor examples, including parsing, leap-second
-handling, comparisons, arithmetic, rounding, offset/time-zone distinctions,
-constant boundaries, current-time panics, normalized signs, and saturating
-construction. The microsecond constructor's opening contract was also read;
-its examples and the remaining Timestamp page are still open. This extends
-the earlier Jiff reading without claiming every API example has been read.
+Jiff 0.2.35's rendered Timestamp page was read through all inherent methods
+and their examples, including configurable differences, rounding, periodic
+iteration, parsing, and formatting. Its Debug/Display examples, subtraction
+operators, and system-time conversions were also read. This extends the earlier
+Jiff reading without claiming every Jiff API example has been read.
+
+## Cached views and repeated component identity
+
+The next solo pass read the complete production `view.rs` and `element.rs`,
+the canonical rendering chapter, and the window-lifetime guide. It traced
+render-time entity reads through App's accessed-entity tracking, notification
+routing, WindowInvalidator, dirty-view ancestry, and cached-view reuse. It
+also read the state-hook implementation and IntoElement derive. Consumer
+comparisons included Zed's editor constructor observations at lines 2495–2550
+of `crates/editor/src/editor.rs` at
+`da0a7a78cf296a6d8a75894f46b71a8e7f19cb2f`, Hummingbird's complete
+`src/ui/right_sidebar.rs`, and its cached page helper at lines 630–685 of
+`src/ui/library.rs`, at `2e1ee5f1c8d415ef7f835801fe368ab4106035b5`.
+These source comparisons were read, not executed here.
+
+The previous notification wording obscured a cache boundary: a shared model's
+notification can request a window redraw without invalidating a cached view
+that read it. Context, AppContext, Entity::cached, View, ownership, and rendering
+now distinguish those operations and show where a retained observation must
+notify the view. A new testing example checks unchanged reuse and the changed
+painted color. Removing notification forwarding made the render assertion fail;
+restoring it passes. The failing run is retained in
+`target/documentation-cached-view-without-forwarding.log`.
+
+RenderOnce and the rendering chapter now explain the automatic type-name scope,
+its limits for repeated instances, and why an ID on the returned element cannot
+scope an earlier state hook. A new asserting example changes one row's state,
+reverses the records, and checks distinct, preserved state identities. The
+AsyncWindowContext example also now checks explicit app-only updating after
+window close, alongside the window-scoped update error. The window guide no
+longer implies all operations need a live window.
+
+The complete doctest run with `test-support,bench-support` passes 205 examples
+(198 merged and seven test-harness examples), with one ignored. Formatting and
+diff whitespace checks pass. The canonical chapters were mirrored into the
+site guides; the combined artifact and its browser checks remain pending for
+this checkpoint.
+
+### Browser runtime integration
+
+The isolated SDK inlining commit `2ac6e12ac4` was imported locally as
+`2aafb11043`. The primary editor read its source changes, verified all seven
+source hashes and all 2,196 exported asset hashes against the supplied
+provenance, checked protocol 8, and matched all twelve canonical walkthrough
+sources byte-for-byte against the eighteen compiled starters. The candidate
+manifest SHA-256 is
+`ec1f024edfb3793c03c6968764bf53abb386e3d1c53d4f66d816cbcaec14f994`.
+The previous runtime is preserved at
+`target/documentation-runtime-before-sdk-inline`; 1,693 previous assets absent
+from the new bundle were retained for already-open Workers.
+
+The independent paged-packaging check passes byte reconstruction, bootstrap
+offsets, partial-page handling, and malformed-profile rejection. The native
+engine test target compiles, but its seventeen tests are ignored by default;
+this checkout lacks the prepared native interpreter/sysroot, so that compile
+is not reported as seventeen passing engine tests. The runtime owner's native
+parity, browser probe, and performance results remain supplied evidence. The
+primary editor's browser editing checks on the new combined artifact are
+still pending here.
+
+Scribbr v7.1.0 scanned the cached-view section of the rendering chapter,
+including its heading and Markdown links. It displayed 189 words and reported
+0% AI-generated, 0% AI-refined, and 100% human-written. The input is
+`target/documentation-proof/cached-view-checker-input.md`, SHA-256
+`83e93757850a4acff32b5ff10946b700ac25575df295a7d505c45494cde6c618`;
+the result screenshot is `target/documentation-proof/scribbr-cached-view.png`.
+The subsequent default-feature rustdoc check caught links to the conditional
+testing module. Those four links now use the always-published guide; the prose
+is unchanged from the scanned sample. This is one sample's classifier result,
+not a whole-framework result. No paraphraser was used.

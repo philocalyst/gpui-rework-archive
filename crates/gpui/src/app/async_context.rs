@@ -374,6 +374,9 @@ impl AsyncApp {
 ///
 /// This type dereferences to [`AsyncApp`] for app-only operations. Those methods
 /// retain their own failure behavior, including panics when the app is gone.
+/// Its window-scoped methods take precedence over methods of the same name on
+/// `AsyncApp`. Use `AsyncApp::update(&cx, |cx| ...)` explicitly for an app-only
+/// update; `cx.update(|window, cx| ...)` requires this window.
 /// [`VisualContext`] adds view construction and focus operations; its entity
 /// updates follow the entity's associated window, which can differ from this
 /// handle's window.
@@ -394,7 +397,7 @@ impl AsyncApp {
 ///
 /// ```
 /// # #[cfg(feature = "test-support")] {
-/// use gpui::{AppContext as _, Context, Render, TestApp, VisualContext as _,
+/// use gpui::{AppContext as _, AsyncApp, Context, Render, TestApp, VisualContext as _,
 ///            Window, div, prelude::*};
 /// use std::cell::Cell;
 ///
@@ -413,6 +416,11 @@ impl AsyncApp {
 /// let draft = cx.new(|_| String::from("draft"));
 /// assert_eq!(draft.read_with(&cx, |draft, _| draft.clone()), "draft");
 /// assert!(draft.update_in(&mut cx, |_, _, _| ()).is_err());
+/// assert!(cx.update(|_, _| ()).is_err());
+/// AsyncApp::update(&cx, |cx| {
+///     draft.update(cx, |draft, _| draft.push_str(" saved"));
+/// });
+/// assert_eq!(draft.read_with(&cx, |draft, _| draft.clone()), "draft saved");
 ///
 /// let constructed = Cell::new(false);
 /// assert!(cx.new_window_entity(|_, _| {

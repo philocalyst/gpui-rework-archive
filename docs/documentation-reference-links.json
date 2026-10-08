@@ -1415,6 +1415,11 @@
       "reason": "index only; this does not claim the linked series installments were read"
     },
     {
+      "url": "https://docs.rs/jiff/0.2.35/jiff/struct.Timestamp.html",
+      "status": "read (all inherent methods and examples; 2026-10-08 UTC)",
+      "reason": "also read Debug/Display examples, subtraction operator contracts, and system-time conversions; this does not claim all Jiff API pages were read"
+    },
+    {
       "url": "https://fasterthanli.me/articles/my-ideal-rust-workflow",
       "status": "surveyed (content-pipeline and local-workflow excerpt read; 2026-10-08 UTC)",
       "reason": "read the one-time efforts and dreaming-bigger pipeline discussion; the complete article was not read"

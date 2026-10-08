@@ -36,7 +36,34 @@ impl RenderOnce for Badge {
 }
 ```
 
-The parent creates another value when it renders again. Put durable state on an entity or use a stable element ID for a supported retained element state; a `RenderOnce` value does not receive notifications of its own. See [`RenderOnce`](crate::RenderOnce), [`Render`](crate::Render), and [`View`](crate::View).
+The parent creates another value when it renders again. Put durable state on an
+entity, or use retained element state when its lifetime should follow the
+rendered component. A `RenderOnce` value does not receive notifications of its
+own.
+
+The derived element gives `Badge` a scope based on its Rust type name. That
+separates it from other component types, but not from another `Badge`. For
+repeated components, wrap each in a parent with a stable record ID:
+
+```rust
+# use gpui::{App, IntoElement, RenderOnce, SharedString, Window, div, prelude::*};
+# #[derive(IntoElement)]
+# struct Badge { label: SharedString }
+# impl RenderOnce for Badge {
+#     fn render(self, _: &mut Window, _: &mut App) -> impl IntoElement { div().child(self.label) }
+# }
+fn badges(records: &[(u64, SharedString)]) -> impl IntoElement {
+    div().children(records.iter().map(|(id, label)| {
+        div().id(("badge", *id)).child(Badge { label: label.clone() })
+    }))
+}
+```
+
+This outer ID is active when `Badge::render` runs, so it scopes both child IDs
+and state hooks inside that method. Adding an ID to the returned element cannot
+scope a state hook that has already run. See
+[`RenderOnce`](crate::RenderOnce) and the
+[identity rules](crate::_ownership_and_data_flow#give-retained-element-state-an-identity).
 
 ## Give a stateful view an identity
 
@@ -48,7 +75,20 @@ Each entity-backed view contributes its `EntityId` to the element identity path.
 
 `entity.cached(style)` and `AnyView::cached(style)` opt into reusing a rendered subtree. The supplied style determines the cached root's layout; GPUI does not render the contents to measure them on a cache hit. Give the cached view a definite size that matches its role in the parent layout. Use an ordinary `.child(entity)` when the parent should measure the contents.
 
-Cache reuse also depends on the assigned bounds, content mask, text style, resolved direction, and bidi mode. Entity notifications invalidate the cached view. `Window::refresh` forces a fresh render, and inspector picking disables the view cache. This is a rendering optimization; the view must still describe correct content whenever it is rendered. See [`Entity::cached`](crate::Entity::cached) and [`AnyView::cached`](crate::AnyView::cached).
+Cache reuse also depends on the assigned bounds, content mask, text style,
+resolved direction, and bidi mode. Notifying the view invalidates its cache.
+`Window::refresh` forces a fresh render, and inspector picking disables the
+view cache. See [`Entity::cached`](crate::Entity::cached) and
+[`AnyView::cached`](crate::AnyView::cached).
+
+**A redraw request is not the same as view invalidation.** Reading a shared
+model during rendering tracks a dependency for the window. If the model changes,
+the window can draw again while this cached view remains clean. Retain an
+observation that calls `cx.notify()` on the view when the model notifies. Use
+`observe_global` for global inputs, and notify the view when a parent changes
+its fields. Reused input handlers keep their previous captures too. The
+[cached-view test](https://gpui-ce.github.io/guides/testing/#check-that-a-shared-model-invalidates-a-cached-view)
+shows the subscription and checks both reuse and the new painted color.
 
 ## Understand the frame phases
 

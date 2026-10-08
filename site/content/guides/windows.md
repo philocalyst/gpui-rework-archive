@@ -22,11 +22,19 @@ changed. Do not read or update that same root through another handle inside the
 closure; it is already leased. A strong handle to the former root can keep that
 entity alive without keeping its former window open.
 
-Use `AsyncWindowContext` across an await. Each operation reacquires access by
-window handle; it does not reserve the window while the task waits. Check the
-update result after the await because the window may close in between. If work
-only needs an entity, a weak entity handle may be enough; see the
-[async guide](@/guides/async.md).
+Use `AsyncWindowContext` across an await when later work needs this window.
+Its `update` method reacquires window and app access for the closure; it does
+not reserve either while the task waits. Check the result because the window
+may close in between. Closing the window does not cancel an externally owned
+or detached task.
+
+App-only entity operations can still work after close. In particular,
+`AppContext::new` falls back to app-only construction when the window is
+unavailable. Use `VisualContext::new_window_entity` when the constructor needs
+a live window; it returns an error without calling that constructor. The
+[`AsyncWindowContext` example](https://docs.rs/gpui-ce/0.2.2/gpui/struct.AsyncWindowContext.html#create-app-state-or-window-state)
+checks both outcomes. If later work only needs an entity, a weak entity handle
+and `AsyncApp` may be enough; see the [async guide](@/guides/async.md).
 
 ## Give retained state a stable identity
 

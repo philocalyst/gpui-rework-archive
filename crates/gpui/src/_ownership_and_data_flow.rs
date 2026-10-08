@@ -129,15 +129,20 @@
 //! ## Notify after a change
 //!
 //! [`Context::notify`](crate::Context::notify) marks the entity as changed.
-//! GPUI does not inspect fields to discover mutations. Notifications invalidate
-//! rendering that depends on the entity and call registered observers during
-//! effect processing; they do not synchronously call every observer at the
-//! `notify` statement. Pending notifications for the same entity can be coalesced.
+//! GPUI does not inspect fields to discover mutations. Notifying a view
+//! invalidates its subtree; notifying a model read during rendering requests a
+//! redraw of the window that read it. Registered observers run during effect
+//! processing, rather than synchronously at every `notify` statement. Pending
+//! notifications for the same entity can be coalesced.
 //!
 //! This distinction matters when a view observes a model. The model notifies
 //! after its data changes. An observer can then update derived view state and
-//! notify that view. See [Observe shared state](https://gpui-ce.github.io/examples/subscriptions/)
-//! for a complete example, including the lifetime of the subscription.
+//! notify that view. This relationship is required for a cached view: a window
+//! redraw alone can reuse its old content. The
+//! [cached-view test](https://gpui-ce.github.io/guides/testing/#check-that-a-shared-model-invalidates-a-cached-view)
+//! checks that boundary. See
+//! [Observe shared state](https://gpui-ce.github.io/examples/subscriptions/)
+//! for a complete walkthrough, including the lifetime of the subscription.
 //!
 //! ## Keep the subscription
 //!

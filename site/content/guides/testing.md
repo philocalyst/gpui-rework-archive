@@ -483,6 +483,71 @@ made later. Pair it with a targeted weak-handle or drop assertion when checking
 the lifetime of an existing owner. It does not detect arbitrary `Rc` cycles,
 GPU allocations, or a resource intentionally retained by another subsystem.
 
+## Keep row state with its record
+
+A list can look correct while its retained state belongs to the wrong row.
+Test identity by changing one row's state, reordering the records, and checking
+that the state follows its record. Distinct initial values catch an accidental
+shared key before the reorder.
+
+This `RenderOnce` component uses one `use_state` call site for every row. The
+parent's record key gives each call a separate scope. The map lets the test
+inspect those state handles without depending on text shaping:
+
+```rust
+use gpui::{App, Context, Entity, IntoElement, Render, RenderOnce, TestApp,
+           Window, div, prelude::*, text};
+use std::{cell::RefCell, collections::BTreeMap, rc::Rc};
+
+type States = Rc<RefCell<BTreeMap<u64, Entity<u64>>>>;
+
+#[derive(IntoElement)]
+struct Row { id: u64, states: States }
+impl RenderOnce for Row {
+    fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
+        let state = window.use_state(cx, |_, _| self.id);
+        self.states.borrow_mut().insert(self.id, state.clone());
+        div().child(text!(state.read(cx).to_string()))
+    }
+}
+
+struct Records { ids: Vec<u64>, states: States }
+impl Render for Records {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        div().children(self.ids.iter().map(|id| {
+            div().id(("record", *id)).child(Row { id: *id, states: self.states.clone() })
+        }))
+    }
+}
+
+let mut app = TestApp::new();
+let states = States::default();
+let mut window = app.open_window(|_, _| Records {
+    ids: vec![10, 20], states: states.clone(),
+});
+window.draw();
+let first = states.borrow()[&10].clone();
+let second = states.borrow()[&20].clone();
+assert_ne!(first.entity_id(), second.entity_id());
+assert_eq!(app.read_entity(&first, |value, _| *value), 10);
+assert_eq!(app.read_entity(&second, |value, _| *value), 20);
+
+app.update_entity(&first, |value, cx| { *value = 99; cx.notify(); });
+window.update(|records, _, cx| { records.ids.reverse(); cx.notify(); });
+window.draw();
+assert_eq!(states.borrow()[&10].entity_id(), first.entity_id());
+assert_eq!(states.borrow()[&20].entity_id(), second.entity_id());
+assert_eq!(app.read_entity(&first, |value, _| *value), 99);
+assert_eq!(app.read_entity(&second, |value, _| *value), 20);
+```
+
+Removing the parent's ID makes the first identity assertion fail. Keying by
+position instead makes the state move to the other record after reversal.
+Putting an ID on the div returned by `Row::render` is too late to scope its
+earlier state hook. For state that must survive removing a row, keep it on a
+longer-lived entity; this fixture tests continuity while both rows remain
+mounted. See [element identity](https://gpui-ce.github.io/book/ownership.html#give-retained-element-state-an-identity).
+
 ## Exercise the input path
 
 Calling a handler directly checks its state transition. Simulating input also
@@ -811,6 +876,78 @@ capturing alone does not rebuild a dirty view. Keep a failing actual image and
 a difference image beside the expected image so a changed baseline can be
 reviewed. Choose a pixel tolerance according to the behavior under test, rather
 than silently accepting every change near an edge.
+
+### Check that a shared model invalidates a cached view
+
+A cache test needs two draws: one that reuses unchanged content and one that
+shows a change. Reading a model during rendering registers a window redraw
+dependency. It does not give that model the reading view's identity. Retain
+an observation that notifies the view when the model changes; otherwise a
+window redraw can reuse the view's old cached content.
+
+Here the child reads a shared color. Its observation forwards notification
+without copying the color into a second field:
+
+```rust
+use gpui::{AppContext as _, Context, Entity, IntoElement, Render, StyleRefinement,
+           Subscription, TestApp, Window, div, prelude::*, rgb};
+use std::{cell::Cell, rc::Rc};
+
+struct Swatch {
+    color: Entity<u32>,
+    renders: Rc<Cell<usize>>,
+    _observation: Subscription,
+}
+impl Render for Swatch {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        self.renders.set(self.renders.get() + 1);
+        div().size_full().bg(rgb(*self.color.read(cx)))
+    }
+}
+
+struct Panel { swatch: Entity<Swatch> }
+impl Render for Panel {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        self.swatch.clone().cached(StyleRefinement::default().size_full())
+    }
+}
+
+let mut app = TestApp::new();
+let color = app.new_entity(|_| 0x155b50_u32);
+let renders = Rc::new(Cell::new(0));
+let mut window = app.open_window(|_, cx| Panel {
+    swatch: cx.new(|cx| Swatch {
+        color: color.clone(),
+        renders: renders.clone(),
+        _observation: cx.observe(&color, |_, _, cx| cx.notify()),
+    }),
+});
+
+window.draw();
+let first_draws = renders.get();
+assert!(first_draws > 0);
+window.draw();
+assert_eq!(renders.get(), first_draws, "unchanged content should be reused");
+
+app.update_entity(&color, |color, cx| {
+    *color = 0x315ac6;
+    cx.notify();
+});
+window.draw();
+assert!(renders.get() > first_draws);
+window.update(|_, window, _| {
+    let quads = window.painted_quads();
+    assert!(quads.iter().any(|quad| quad.background == rgb(0x315ac6).into()));
+    assert!(!quads.iter().any(|quad| quad.background == rgb(0x155b50).into()));
+});
+```
+
+The render count checks reuse, not a general promise about how often `render`
+runs. The painted-color assertions establish the visible result. Removing
+the observation leaves the old color cached even though the model notifies.
+The same ownership rule applies to a view that reads a global: retain an
+[`observe_global`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Context.html#method.observe_global) subscription and notify the
+view. See [cached views](https://gpui-ce.github.io/book/rendering.html#cache-a-view-with-known-dimensions).
 
 ### Check the row after a scroll request
 

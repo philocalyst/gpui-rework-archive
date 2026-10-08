@@ -343,12 +343,14 @@ pub trait AppContext {
     where
         T: 'static;
 
-    /// Marks an entity changed and invalidates rendering that depends on it.
+    /// Marks an entity changed, schedules observers, and requests dependent redraws.
     ///
     /// Observers run during effect processing after the current update closure
     /// returns; repeated pending notifications can be coalesced. GPUI does not
     /// infer changes from field mutation. Use this for state changes consumers
     /// should reread, and use [`emit`](Self::emit) when they need an event payload.
+    /// Notifying a model does not invalidate a separate cached view that reads
+    /// it; retain an observation that notifies the view. See [`Context::notify`].
     fn notify(&mut self, entity_id: EntityId);
 
     /// Queues a typed event from `entity` for its subscribers.

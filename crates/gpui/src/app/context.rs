@@ -103,6 +103,8 @@ impl<'a, T: 'static> Context<'a, T> {
     /// Pending notifications can be coalesced: read the observed entity's current
     /// state in the callback. Use [`subscribe`](Self::subscribe) with an
     /// event payload when each intermediate change matters.
+    /// A view that displays the observed model should call `cx.notify()` in
+    /// this callback to invalidate its own cached content; see [`Self::notify`].
     // docs:examples:begin
     #[doc = include_str!("../docs/examples/gpui-Context-observe-803e9c7a.md")]
     // docs:examples:end
@@ -348,11 +350,18 @@ impl<'a, T: 'static> Context<'a, T> {
         })
     }
 
-    /// Invalidates rendering that depends on this entity and schedules its observers.
+    /// Marks this entity changed, requests redraws, and schedules its observers.
     ///
     /// Call after changing state that a consumer displays or observes. GPUI
     /// does not detect field mutations automatically. Observers run during
     /// effect processing; repeated pending notifications may be coalesced.
+    ///
+    /// Notifying a view invalidates its subtree. Notifying a model read during
+    /// rendering requests a redraw of the window that read it, but does not
+    /// invalidate every cached view that reads that model. Those views need a
+    /// retained [`observe`](Self::observe) subscription that notifies them.
+    /// The [cached-view test](https://gpui-ce.github.io/guides/testing/#check-that-a-shared-model-invalidates-a-cached-view)
+    /// checks both reuse and the rendered result after a change.
     // docs:examples:begin
     #[doc = include_str!("../docs/examples/gpui-Context-notify-d32eb388.md")]
     // docs:examples:end

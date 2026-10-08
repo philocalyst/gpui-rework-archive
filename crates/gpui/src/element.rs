@@ -279,6 +279,34 @@ impl Render for Empty {
 /// retained under stable element IDs, or hold handles to parent-owned entities.
 /// Implement [`Render`] on an entity when the component itself should own state
 /// and receive independent invalidation through [`Context::notify`].
+///
+/// # Give repeated instances separate scopes
+///
+/// Deriving `IntoElement` scopes the component's element state by its Rust type
+/// name. Two `Badge` siblings still have the same type, so put each inside a
+/// parent with a stable record key when they use retained state or child IDs:
+///
+/// ```
+/// # use gpui::{App, IntoElement, RenderOnce, SharedString, Window, div, prelude::*};
+/// # #[derive(IntoElement)]
+/// # struct Badge { label: SharedString }
+/// # impl RenderOnce for Badge {
+/// #     fn render(self, _: &mut Window, _: &mut App) -> impl IntoElement {
+/// #         div().child(self.label)
+/// #     }
+/// # }
+/// fn badges(records: &[(u64, SharedString)]) -> impl IntoElement {
+///     div().children(records.iter().map(|(id, label)| {
+///         div().id(("badge", *id)).child(Badge { label: label.clone() })
+///     }))
+/// }
+/// ```
+///
+/// The parent's ID is active when `Badge::render` runs. An ID on the element
+/// returned by `render` is applied later: it cannot scope an earlier
+/// [`Window::use_state`] call inside that method. The
+/// [identity chapter](crate::_ownership_and_data_flow#give-retained-element-state-an-identity)
+/// explains keys, removal, and retained state.
 pub trait RenderOnce: 'static {
     /// Consume the component and build its element tree.
     fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement;
@@ -862,6 +890,7 @@ impl AnyElement {
     /// Call after layout has been computed and before [`paint`](Self::paint).
     /// This records hitboxes and other frame data. It returns the subtree's
     /// focused handle only if focus had not already been recorded in this frame.
+    /// Calling before layout or preparing the same element value again panics.
     pub fn prepaint(&mut self, window: &mut Window, cx: &mut App) -> Option<FocusHandle> {
         let focus_assigned = window.next_frame.focus.is_some();
 

@@ -122,9 +122,7 @@ impl PartialEq for AnyView {
 
 impl Eq for AnyView {}
 
-/// `AnyView` is the type-erased [`View`]: its `render` is a function pointer rather
-/// than a concrete type, but it participates in the reactive graph exactly like any
-/// other view through its [`IntoElement`] implementation.
+/// Renders the retained entity through its original [`Render`] implementation.
 impl View for AnyView {
     fn entity_id(&self) -> Option<EntityId> {
         Some(self.entity.entity_id())
@@ -240,9 +238,8 @@ mod any_view {
 ///
 /// [`Entity<T>`] implements this trait when `T` implements [`Render`]; its
 /// entity identity scopes descendant element IDs and lets notifications
-/// invalidate rendering that reads it. A [`RenderOnce`] value also implements
-/// `View`, but returns no entity identity. Its parent supplies its lifetime and
-/// invalidation.
+/// invalidate its subtree. A [`RenderOnce`] value also implements `View`, but
+/// returns no entity identity. Its parent supplies its lifetime and invalidation.
 ///
 /// Usually implement `Render` or `RenderOnce`. Implement `View` directly when
 /// a component combines parent-supplied properties with a retained entity whose
@@ -256,6 +253,11 @@ pub trait View: 'static + Sized {
     /// (e.g. as siblings under the same parent): their internal element state
     /// (`use_state`, scroll offsets, etc.) would silently collide. Nesting is
     /// fine — the id is scoped by the parent path.
+    ///
+    /// Returning `None` uses the view's Rust type name as an element-state
+    /// scope. That separates different component types, not two instances of
+    /// one type. Wrap repeated instances in parents with distinct, stable IDs;
+    /// see [`RenderOnce`].
     fn entity_id(&self) -> Option<EntityId>;
 
     /// Render this view into an element tree, consuming `self`.
@@ -278,7 +280,7 @@ fn render_view<V: View>(view: V, window: &mut Window, cx: &mut App) -> AnyElemen
     element.into_any_element()
 }
 
-/// A stateless component (`RenderOnce`) is a `View` with no identity.
+/// An owned component has a type-name scope, but no entity identity.
 impl<T: RenderOnce> View for T {
     fn entity_id(&self) -> Option<EntityId> {
         None
@@ -329,18 +331,37 @@ impl<T: Render> View for Entity<T> {
 }
 
 impl<T: Render> Entity<T> {
-    /// Embed this entity as a cached element laid out at `style`.
+    /// Embeds this view with subtree caching and the supplied outer layout style.
     ///
     /// GPUI can reuse the subtree's prepaint and paint records while the entity
     /// is clean and its bounds, clipping mask, text style, and text direction
     /// are unchanged. [`Context::notify`] invalidates it; [`Window::refresh`]
-    /// bypasses reuse. State changes still need notification, just as in an
-    /// uncached view.
+    /// bypasses reuse.
     ///
     /// Caching requires a definite outer size: `style` determines the layout
     /// box instead of measuring the view's contents. Use `.child(entity)`
     /// without `cached` when content should determine that size. See
     /// [`crate::_documentation::rendering`] for frame phases and retained state.
+    ///
+    /// ```
+    /// use gpui::{Entity, IntoElement, Render, StyleRefinement, prelude::*, px};
+    ///
+    /// fn sidebar<V: Render>(view: Entity<V>) -> impl IntoElement {
+    ///     view.cached(StyleRefinement::default().w(px(240.)).h_full())
+    /// }
+    /// ```
+    ///
+    /// # Invalidate the view when its inputs change
+    ///
+    /// Reading a shared model while rendering records which window needs a
+    /// redraw; it does not notify this view. Retain a [`Context::observe`]
+    /// subscription that calls `cx.notify()` on the view when the model changes.
+    /// Do the same with [`Context::observe_global`] for global inputs. When a
+    /// parent updates this view's fields, notify it in that update too. A cache
+    /// hit reuses both drawing and input handlers, including their captures.
+    ///
+    /// The [cached-view test](https://gpui-ce.github.io/guides/testing/#check-that-a-shared-model-invalidates-a-cached-view)
+    /// checks reuse and the new painted color after a model notification.
     #[track_caller]
     pub fn cached(self, style: StyleRefinement) -> ViewElement<Entity<T>> {
         ViewElement::new(self).cached(style)
