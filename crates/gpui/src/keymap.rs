@@ -119,7 +119,11 @@ impl Keymap {
                     }
 
                     if is_no_action(&*disabled_binding.action) {
-                        if disabled_binding_matches_context(disabled_binding, binding) {
+                        let source = binding.meta.map_or(0, |meta| meta.0);
+                        let removal_source = disabled_binding.meta.map_or(0, |meta| meta.0);
+                        if source >= removal_source
+                            && disabled_binding_matches_context(disabled_binding, binding)
+                        {
                             return None;
                         }
                     } else if is_unbind(&*disabled_binding.action)
@@ -925,5 +929,32 @@ mod tests {
         assert_eq!(result.len(), 2);
         assert!(result[0].action.partial_eq(&ActionBeta {}));
         assert!(result[1].action.partial_eq(&ActionAlpha {}));
+    }
+
+    #[test]
+    fn action_lookup_keeps_stronger_source_than_later_removal() {
+        for (source, expected) in [
+            (None, 1),
+            (Some(KeyBindingMetaIndex(0)), 1),
+            (Some(KeyBindingMetaIndex(1)), 1),
+            (Some(KeyBindingMetaIndex(2)), 0),
+            (Some(KeyBindingMetaIndex(3)), 0),
+        ] {
+            let mut binding = KeyBinding::new("ctrl-s", ActionAlpha, Some("Editor"));
+            if let Some(source) = source {
+                binding.set_meta(source);
+            }
+            let keymap = Keymap::new(vec![
+                binding,
+                KeyBinding::new("ctrl-s", NoAction, Some("Editor"))
+                    .with_meta(KeyBindingMetaIndex(2)),
+            ]);
+            let (candidates, _) = keymap.bindings_for_input(
+                &[Keystroke::parse("ctrl-s").unwrap()],
+                &[KeyContext::parse("Editor").unwrap()],
+            );
+            assert_eq!(candidates.len(), expected);
+            assert_eq!(keymap.bindings_for_action(&ActionAlpha).count(), expected);
+        }
     }
 }
