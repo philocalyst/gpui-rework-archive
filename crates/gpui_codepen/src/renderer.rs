@@ -44,10 +44,38 @@ pub(crate) fn scene_view(
         touches,
         file_drop,
     } = state;
+    let down_focus = focus.clone();
+    let down_input = input.clone();
+    let up_focus = focus.clone();
+    let up_input = input.clone();
+    let modifiers_focus = focus.clone();
+    let modifiers_input = input.clone();
     div()
         .id("gpui-interpreter-scene")
         .size_full()
         .track_focus(&focus)
+        // Keyboard listeners belong to the node carrying the focus handle.
+        // The canvas is a child dispatch node, outside that focused path.
+        .on_key_down(move |event, window, cx| {
+            if down_focus.is_focused(window) {
+                down_input(event.clone().to_platform_input().into(), window, cx);
+                if event.keystroke.key_char.is_none()
+                    || event.keystroke.modifiers.control
+                    || event.keystroke.modifiers.platform
+                { cx.stop_propagation(); }
+            }
+        })
+        .on_key_up(move |event, window, cx| {
+            if up_focus.is_focused(window) {
+                up_input(event.clone().to_platform_input().into(), window, cx);
+                cx.stop_propagation();
+            }
+        })
+        .on_modifiers_changed(move |event, window, cx| {
+            if modifiers_focus.is_focused(window) {
+                modifiers_input(event.clone().to_platform_input().into(), window, cx);
+            }
+        })
         .child(
             canvas(
                 move |bounds, window, cx| {
@@ -199,35 +227,6 @@ pub(crate) fn scene_view(
                             handler(event.into(), window, cx);
                         }
                     });
-                    let key_input = input.clone();
-                    let key_focus = focus.clone();
-                    window.on_key_event(move |event: &KeyDownEvent, phase, window, cx| {
-                        if phase == DispatchPhase::Bubble && key_focus.is_focused(window) {
-                            key_input(event.clone().to_platform_input().into(), window, cx);
-                            // Native committed text and IME composition arrive separately
-                            // through the installed PlatformInputHandler.
-                            if event.keystroke.key_char.is_none()
-                                || event.keystroke.modifiers.control
-                                || event.keystroke.modifiers.platform
-                            {
-                                cx.stop_propagation();
-                            }
-                        }
-                    });
-                    let key_input = input.clone();
-                    let key_focus = focus.clone();
-                    window.on_key_event(move |event: &KeyUpEvent, phase, window, cx| {
-                        if phase == DispatchPhase::Bubble && key_focus.is_focused(window) {
-                            key_input(event.clone().to_platform_input().into(), window, cx);
-                            cx.stop_propagation();
-                        }
-                    });
-                    let handler = input.clone();
-                    window.on_modifiers_changed(move |event, window, cx| {
-                        if focus.is_focused(window) {
-                            handler(event.clone().to_platform_input().into(), window, cx);
-                        }
-                    });
                 },
             )
             .size_full(),
@@ -270,5 +269,62 @@ fn event_mouse_button(event: &PlatformInput) -> Option<MouseButton> {
     match event {
         PlatformInput::MouseExited(event) => event.pressed_button,
         _ => None,
+    }
+}
+
+#[cfg(all(test, not(target_family = "wasm")))]
+mod tests {
+    use super::*;
+
+    struct HostPreview {
+        focus: FocusHandle,
+        other: FocusHandle,
+        events: Rc<RefCell<Vec<gpui_codepen_guest::InputMessage>>>,
+        state: InputState,
+    }
+    impl Render for HostPreview {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            let events = self.events.clone();
+            scene_view(None, 1., self.focus.clone(), self.state.clone(), None,
+                Rc::new(move |event, _, _| events.borrow_mut().push(event)),
+                Rc::new(|_, _, _, _, _, _, _| {}), Rc::new(|_, _, _, _| {}))
+        }
+    }
+
+    #[::core::prelude::v1::test]
+    fn clicking_the_scene_routes_keys_and_releasing_focus_stops_them() {
+        let events = Rc::new(RefCell::new(Vec::new()));
+        let text = gpui_codepen_guest::rpc::TextService::portable_factory()().unwrap();
+        let mut app = HeadlessAppContext::new(text);
+        let root_events = events.clone();
+        let handle = app.open_window(size(px(200.), px(100.)), |_, cx| {
+            cx.new(|cx| HostPreview { focus: cx.focus_handle(), other: cx.focus_handle(),
+                events: root_events, state: InputState::default() })
+        }).unwrap();
+        app.draw_window(handle.into()).unwrap();
+        for input in [
+            PlatformInput::MouseMove(MouseMoveEvent { position: point(px(20.), px(20.)), ..Default::default() }),
+            PlatformInput::MouseDown(MouseDownEvent { position: point(px(20.), px(20.)), ..Default::default() }),
+            PlatformInput::MouseUp(MouseUpEvent { position: point(px(20.), px(20.)), ..Default::default() }),
+        ] { app.dispatch_input(handle.into(), input).unwrap(); }
+        app.draw_window(handle.into()).unwrap();
+        let focused = app.update_window(handle.into(), |root, window, cx| {
+            root.downcast::<HostPreview>().unwrap().read(cx).focus.is_focused(window)
+        }).unwrap();
+        assert!(focused, "Clicking the embedded scene must focus its host handle; delivered: {:?}", events.borrow());
+        let mut keystroke = Keystroke::parse("space").unwrap();
+        keystroke.key_char = Some(" ".into());
+        let key = PlatformInput::KeyDown(KeyDownEvent { keystroke, is_held: false, prefer_character_input: false });
+        events.borrow_mut().clear();
+        app.dispatch_input(handle.into(), key.clone()).unwrap();
+        assert!(matches!(events.borrow().as_slice(), [gpui_codepen_guest::InputMessage::Event(PlatformInput::KeyDown(_))]),
+            "A clicked preview must forward Space through the host's focused dispatch path");
+        app.update_window(handle.into(), |root, window, cx| {
+            root.downcast::<HostPreview>().unwrap().update(cx, |view, cx| window.focus(&view.other, cx));
+        }).unwrap();
+        app.draw_window(handle.into()).unwrap();
+        events.borrow_mut().clear();
+        app.dispatch_input(handle.into(), key).unwrap();
+        assert!(events.borrow().is_empty(), "The preview must not steal keys from another focused target");
     }
 }
