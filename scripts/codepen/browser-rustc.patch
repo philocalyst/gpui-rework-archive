@@ -1,11 +1,20 @@
 --- a/compiler/rustc_interface/src/util.rs
 +++ b/compiler/rustc_interface/src/util.rs
-@@ -185,10 +185,14 @@
+@@ -185,10 +185,23 @@
      // the parallel compiler, in particular to ensure there is no accidental
      // sharing of data between the main thread and the compilation thread
      // (which might cause problems for the parallel compiler).
 +    #[cfg(target_family = "wasm")]
-+    return rustc_span::create_session_globals_then(edition, extra_symbols, Some(sm_inputs), || f(CurrentGcx::new()));
++    {
++        // Native compilation starts a fresh thread. WASM cannot spawn one, so
++        // explicitly end the lifetime of pointer-keyed stable-hash memo tables.
++        return rustc_span::create_session_globals_then(
++            edition, extra_symbols, Some(sm_inputs), || {
++                rustc_middle::ty::reset_stable_hash_caches();
++                f(CurrentGcx::new())
++            },
++        );
++    }
 +    #[cfg(not(target_family = "wasm"))]
      let builder = thread::Builder::new().name("rustc".to_string()).stack_size(thread_stack_size);
  
@@ -15,7 +24,7 @@
      thread::scope(|s| {
          // `unwrap` is ok here because `spawn_scoped` only panics if the thread
          // name contains null bytes.
-@@ -232,6 +236,21 @@
+@@ -228,7 +241,22 @@
      let thread_stack_size = init_stack_size(thread_builder_diag);
  
      let jobs_frontend = jobs.frontend.or(NonZero::new(1)).unwrap();
@@ -37,7 +46,8 @@
 +    };
  
      let Some(proof) = sync::check_dyn_thread_safe() else {
-@@ -245,6 +262,7 @@
+         assert_eq!(jobs_frontend.get(), 1);
+@@ -239,6 +267,7 @@
              extra_symbols,
              |current_gcx| {
                  // Register the thread for use with the `WorkerLocal` type.
@@ -211,3 +221,220 @@
                  interp_ok(match fty {
                      FloatTy::F16 => {
                          self.binary_float_op(bin_op, layout, left.to_f16()?, right.to_f16()?)
+--- a/compiler/rustc_middle/src/ty/impls_ty.rs
++++ b/compiler/rustc_middle/src/ty/impls_ty.rs
+@@ -13,6 +13,18 @@
+ 
+ use crate::{mir, ty};
+ 
++// These keys contain arena addresses and are valid only within one compiler
++// session. Native rustc drops the thread; browser rustc reuses its Worker.
++thread_local! {
++    static RAW_LIST_HASH_CACHE: RefCell<FxHashMap<(*const (), StableHashControls), Fingerprint>> =
++        RefCell::new(Default::default());
++}
++
++#[cfg(target_family = "wasm")]
++pub(super) fn reset_stable_hash_cache() {
++    RAW_LIST_HASH_CACHE.with(|cache| cache.borrow_mut().clear());
++}
++
+ impl<'tcx, H, T> StableHash for &'tcx ty::list::RawList<H, T>
+ where
+     T: StableHash,
+@@ -21,12 +33,7 @@
+         // Note: this cache makes an *enormous* performance difference on certain benchmarks. E.g.
+         // without it, compiling `diesel-2.2.10` can be 74% slower, and compiling
+         // `deeply-nested-multi` can be ~4,000x slower(!)
+-        thread_local! {
+-            static CACHE: RefCell<FxHashMap<(*const (), StableHashControls), Fingerprint>> =
+-                RefCell::new(Default::default());
+-        }
+-
+-        let hash = CACHE.with(|cache| {
++        let hash = RAW_LIST_HASH_CACHE.with(|cache| {
+             let key = (ptr::from_ref(*self).cast::<()>(), hcx.stable_hash_controls());
+             if let Some(&hash) = cache.borrow().get(&key) {
+                 return hash;
+--- a/compiler/rustc_middle/src/ty/adt.rs
++++ b/compiler/rustc_middle/src/ty/adt.rs
+@@ -156,13 +156,20 @@
+     }
+ }
+ 
++// AdtDefData lives in the current TyCtxt arena. Reused addresses in the next
++// browser compiler session must never reuse the previous session's fingerprint.
++thread_local! {
++    static ADT_HASH_CACHE: RefCell<FxHashMap<(usize, StableHashControls), Fingerprint>> = Default::default();
++}
++
++#[cfg(target_family = "wasm")]
++pub(super) fn reset_stable_hash_cache() {
++    ADT_HASH_CACHE.with(|cache| cache.borrow_mut().clear());
++}
++
+ impl StableHash for AdtDefData {
+     fn stable_hash<Hcx: StableHashCtxt>(&self, hcx: &mut Hcx, hasher: &mut StableHasher) {
+-        thread_local! {
+-            static CACHE: RefCell<FxHashMap<(usize, StableHashControls), Fingerprint>> = Default::default();
+-        }
+-
+-        let hash: Fingerprint = CACHE.with(|cache| {
++        let hash: Fingerprint = ADT_HASH_CACHE.with(|cache| {
+             let addr = self as *const AdtDefData as usize;
+             let stable_hash_controls = hcx.stable_hash_controls();
+             *cache.borrow_mut().entry((addr, stable_hash_controls)).or_insert_with(|| {
+--- a/compiler/rustc_middle/src/ty/mod.rs
++++ b/compiler/rustc_middle/src/ty/mod.rs
+@@ -153,6 +153,16 @@
+ mod generic_args;
+ mod generics;
+ mod impls_ty;
++
++/// Reset memo tables whose pointer keys belong to the previous compiler arena.
++/// Call only between compiler sessions on the browser's single compiler thread.
++#[doc(hidden)]
++#[cfg(target_family = "wasm")]
++pub fn reset_stable_hash_caches() {
++    impls_ty::reset_stable_hash_cache();
++    adt::reset_stable_hash_cache();
++}
++
+ mod instance;
+ mod intrinsic;
+ mod list;
+--- a/compiler/rustc_middle/src/verify_ich.rs
++++ b/compiler/rustc_middle/src/verify_ich.rs
+@@ -64,6 +64,9 @@
+     };
+ 
+     let old_in_panic = INSIDE_VERIFY_PANIC.replace(true);
++    // A browser compiler session may recover from this panic and reuse the
++    // thread. Restore the reentrancy flag during unwind as well as on return.
++    let _reset_in_panic = rustc_data_structures::defer(|| INSIDE_VERIFY_PANIC.set(old_in_panic));
+ 
+     if old_in_panic {
+         tcx.dcx().emit_err(crate::diagnostics::Reentrant);
+@@ -82,5 +85,4 @@
+         panic!("Found unstable fingerprints for {dep_node:?}: {}", result());
+     }
+ 
+-    INSIDE_VERIFY_PANIC.set(old_in_panic);
+ }
+--- a/compiler/rustc_metadata/src/rmeta/decoder.rs
++++ b/compiler/rustc_metadata/src/rmeta/decoder.rs
+@@ -170,6 +170,8 @@
+     opaque: MemDecoder<'a>,
+     blob: &'a MetadataBlob,
+     lazy_state: LazyState,
++    #[cfg(target_family = "wasm")]
++    profile_start: usize,
+ }
+ 
+ /// This trait abstracts over decoders that can decode lazy values using [`LazyState`]:
+@@ -211,6 +213,21 @@
+     }
+ }
+ 
++#[cfg(target_family = "wasm")]
++impl BlobDecodeContext<'_> {
++    fn record_profile_run(&mut self) {
++        let end = self.opaque.position();
++        crate::browser_metadata::record(self.blob.bytes(), self.profile_start,
++            end - self.profile_start, "decoder");
++        self.profile_start = end;
++    }
++}
++
++#[cfg(target_family = "wasm")]
++impl Drop for BlobDecodeContext<'_> {
++    fn drop(&mut self) { self.record_profile_run(); }
++}
++
+ impl<'a> LazyDecoder for BlobDecodeContext<'a> {
+     fn set_lazy_state(&mut self, state: LazyState) {
+         self.lazy_state = state;
+@@ -274,6 +291,8 @@
+             // demands a significant refactoring due to our crate graph.
+             opaque: MemDecoder::new(self, pos).unwrap(),
+             lazy_state: LazyState::NoNode,
++            #[cfg(target_family = "wasm")]
++            profile_start: pos,
+             blob: self.blob(),
+         }
+     }
+@@ -378,7 +397,13 @@
+                 let pos = self.read_usize();
+ 
+                 // move to str offset and read
+-                self.opaque.with_position(pos, |d| read_and_intern_str_or_byte_str_opaque(d))
++                let blob = self.blob;
++                self.opaque.with_position(pos, |d| {
++                    let result = read_and_intern_str_or_byte_str_opaque(d);
++                    #[cfg(target_family = "wasm")]
++                    crate::browser_metadata::record(blob.bytes(), pos, d.position() - pos, "symbol");
++                    result
++                })
+             }
+             SYMBOL_PREDEFINED => new_from_index(self.read_u32()),
+             _ => unreachable!(),
+@@ -410,11 +435,19 @@
+     where
+         F: FnOnce(&mut Self) -> R,
+     {
++        #[cfg(target_family = "wasm")]
++        self.blob_decoder.record_profile_run();
+         let new_opaque = self.blob_decoder.opaque.split_at(pos);
+         let old_opaque = mem::replace(&mut self.blob_decoder.opaque, new_opaque);
+         let old_state = mem::replace(&mut self.blob_decoder.lazy_state, LazyState::NoNode);
++        #[cfg(target_family = "wasm")]
++        { self.blob_decoder.profile_start = pos; }
+         let r = f(self);
++        #[cfg(target_family = "wasm")]
++        self.blob_decoder.record_profile_run();
+         self.blob_decoder.opaque = old_opaque;
++        #[cfg(target_family = "wasm")]
++        { self.blob_decoder.profile_start = self.blob_decoder.opaque.position(); }
+         self.blob_decoder.lazy_state = old_state;
+         r
+     }
+@@ -1023,7 +1056,16 @@
+             .enumerate()
+             .find(|(_pos, (i, _))| *i == id)
+             .unwrap();
+-        (self.raw_proc_macros.unwrap()[pos], kind.decode((self, tcx)))
++        let kind = kind.decode((self, tcx));
++        #[cfg(target_family="wasm")]
++        {
++            let Some(client) = crate::browser_macros::client(self.hash(), self.root.stable_crate_id(), &kind) else {
++                tcx.sess.dcx().fatal(format!("proc macro from {} is not bundled with this GPUI interpreter", self.root.name()));
++            };
++            (client, kind)
++        }
++        #[cfg(not(target_family="wasm"))]
++        (self.raw_proc_macros.unwrap()[pos], kind)
+     }
+ 
+     fn opt_item_name(&self, item_index: DefIndex) -> Option<Symbol> {
+--- a/compiler/rustc_metadata/src/rmeta/table.rs
++++ b/compiler/rustc_metadata/src/rmeta/table.rs
+@@ -523,6 +523,8 @@
+         let width = self.width;
+         let start = self.position.get() + (width * i.index());
+         let end = start + width;
++        #[cfg(target_family = "wasm")]
++        crate::browser_metadata::record(metadata.blob().bytes(), start, width, "table");
+         let bytes = &metadata.blob()[start..end];
+ 
+         if let Ok(fixed) = bytes.try_into() {
+--- a/compiler/rustc_metadata/src/rmeta/def_path_hash_map.rs
++++ b/compiler/rustc_metadata/src/rmeta/def_path_hash_map.rs
+@@ -57,6 +57,8 @@
+     fn decode(d: &mut BlobDecodeContext<'a>) -> DefPathHashMapRef<'static> {
+         let len = d.read_usize();
+         let pos = d.position();
++        #[cfg(target_family = "wasm")]
++        crate::browser_metadata::record(d.blob().bytes(), pos, len, "def-path-map");
+         let o = d.blob().bytes().clone().slice(|blob| &blob[pos..pos + len]);
+ 
+         // Although we already have the data we need via the `OwnedSlice`, we still need

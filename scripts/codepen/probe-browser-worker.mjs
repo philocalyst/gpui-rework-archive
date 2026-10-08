@@ -27,6 +27,14 @@ const metadata = new Blob(await Promise.all((manifest.metadata_parts || [manifes
 const temporary = await mkdtemp(join(tmpdir(), "gpui-miri-worker-"));
 const bootstrap = join(temporary, "worker.mjs");
 await writeFile(bootstrap, `import { parentPort, workerData } from "node:worker_threads";
+// Node adapter for production Workers fetching immutable range assets.
+const nativeFetch = globalThis.fetch;
+globalThis.fetch = async (url, options) => {
+  const resolved = new URL(url);
+  if (resolved.protocol !== "file:") return nativeFetch(url, options);
+  const { readFile } = await import("node:fs/promises");
+  return new Response(await readFile(resolved));
+};
 globalThis.onmessage = undefined;
 globalThis.postMessage = (data, transfer) => parentPort.postMessage(data, transfer);
 parentPort.postMessage({kind: "startup", phase: "adapter"});
@@ -168,7 +176,7 @@ try {
   assert.notDeepEqual(reloaded.frame, first.frame, "Reload must execute the edited render body in the same Worker");
   valid(await send("reload", source));
   if (bootstrapOnly) {
-    console.log("PASS: first full WASM compiler/Miri module, actual GPUI scenes and resident reload; error recovery and incremental caching require the unwind build");
+    console.log("PASS: full WASM compiler/Miri, actual GPUI scenes and resident reload; --bootstrap-only skips error/cancellation recovery checks");
   } else {
   const broken = await send("reload", "fn component(é");
   assert.equal(broken.failed, true);

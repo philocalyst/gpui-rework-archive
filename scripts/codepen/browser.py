@@ -14,6 +14,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 import tarfile
 import urllib.request
 
@@ -22,6 +23,7 @@ TOOLCHAIN = "nightly-2026-09-30"
 REVISION = "5c543b0b8c73c7b72bc8284ced4fb22ead15734d"
 VERSION = "1.101.0-nightly (5c543b0b8 2026-09-29)"
 SOURCE_HASH = "3522f62a0a3d0c5cf667c867802f7e2340ab9d7ac22887f11d9e8070846724f7"
+PAGED_METADATA = os.environ.get("GPUI_CODEPEN_PAGED_METADATA", "1") != "0"
 SOURCE = ROOT / "target/browser-rustc-source"
 OUTPUT = ROOT / "target/codepen-browser"
 MIR_OPT_LEVEL = os.environ.get("GPUI_CODEPEN_MIR_OPT_LEVEL", "2")
@@ -124,7 +126,10 @@ def prepare_source():
         raise SystemExit("Pinned Rust source archive checksum differs")
     stamp = SOURCE / ".gpui-browser-source"
     patch = ROOT / "scripts/codepen/browser-rustc.patch"
+    page_patch = ROOT / "scripts/codepen/browser-paged-metadata.patch"
     stamp_value = REVISION + "\n" + hashlib.sha256(patch.read_bytes()).hexdigest() + "\n"
+    if PAGED_METADATA:
+        stamp_value += hashlib.sha256(page_patch.read_bytes()).hexdigest() + "\n"
     if not stamp.exists() or stamp.read_text() != stamp_value:
         # Restore only files this build customizes when adopting an existing tree.
         with tarfile.open(archive) as tar:
@@ -139,7 +144,8 @@ def prepare_source():
                     if parts:
                         member.name = str(Path(*parts))
                         tar.extract(member, SOURCE, filter="data")
-            for name in ["compiler/rustc_interface/src/util.rs", "compiler/rustc_interface/src/callbacks.rs", "compiler/rustc_session/src/config.rs", "compiler/rustc_metadata/src/host_dylib.rs", "compiler/rustc_symbol_mangling/src/v0.rs", "compiler/rustc_data_structures/src/flock.rs", "compiler/rustc_data_structures/src/memmap.rs", "compiler/rustc_const_eval/src/interpret/mod.rs", "compiler/rustc_const_eval/src/interpret/machine.rs", "compiler/rustc_const_eval/src/interpret/operator.rs"]:
+            customized = patch.read_text() + (page_patch.read_text() if page_patch.exists() else "")
+            for name in set(re.findall(r"^--- a/(.*)$", customized, re.M)):
                 (SOURCE / name).write_bytes(tar.extractfile(prefix + "/" + name).read())
         run(["patch", "-p1", "-i", ROOT / "scripts/codepen/browser-rustc.patch"], cwd=SOURCE)
         stamp.write_text(stamp_value)
@@ -161,7 +167,24 @@ def prepare_source():
             dependencies.append(f'{name} = {{ path="../compiler/{name}" }}')
     dependencies.append('gpui_codepen_guest = { path=' + json.dumps(str(ROOT / "crates/gpui_codepen/guest")) + ', features=["host-services"] }')
     manifest = manifest.replace("[dependencies]\n", "[dependencies]\n" + "\n".join(dependencies) + "\n", 1)
+    manifest = manifest.replace("[features]\n", '[features]\ncodepen-cache-profile = ["rustc_const_eval/codepen-cache-profile"]\n', 1)
     write_changed(SOURCE / "miri/Cargo.toml", manifest)
+
+
+def prepare_interpreter():
+    # Keep performance patches independently versioned: changing an interpreter
+    # cache must not rebuild every compiler crate or alter bootstrap defaults.
+    patch = ROOT / "scripts/codepen/browser-interpreter.patch"
+    stamp = SOURCE / ".gpui-browser-interpreter"
+    value = REVISION + "\n" + hashlib.sha256(patch.read_bytes()).hexdigest() + "\n"
+    if stamp.exists() and stamp.read_text() == value:
+        return
+    with tarfile.open(ROOT / "target/browser-rustc-source.tar.gz") as tar:
+        prefix = tar.getmembers()[0].name.split("/")[0]
+        for name in re.findall(r"^--- a/(.*)$", patch.read_text(), re.M):
+            (SOURCE / name).write_bytes(tar.extractfile(prefix + "/" + name).read())
+    run(["patch", "-p1", "-i", patch], cwd=SOURCE)
+    stamp.write_text(value)
 
 
 def invocation():
@@ -225,7 +248,8 @@ def macro_wrappers():
         manifest = f'[package]\nname="{package}"\nversion="0.0.0"\nedition="2024"\n[lib]\npath="src/{lib}"\n[features]\ninspector=[]\ndeserialize_in_place=[]\n[dependencies]\nproc-macro2="=1.0.107"\nquote="=1.0.47"\n{deps}\n'
         manifest += '[target.\'cfg(target_family="wasm")\'.dependencies]\nrustc_proc_macro={path="../../compiler/rustc_proc_macro"}\n'
         write_changed(directory / "Cargo.toml", manifest)
-        files = [file for directory in directories for file in directory.glob(f"lib{name}-*.dylib")]
+        files = sorted({file for directory in directories for suffix in ("dylib", "so")
+                        for file in directory.glob(f"lib{name}-*.{suffix}")})
         if len(files) != 1:
             raise SystemExit(f"Expected one current macro artifact for {name}, got {files}")
         metadata = OUTPUT / "macro-metadata" / (files[0].stem + ".rmeta")
@@ -342,6 +366,8 @@ syn3={package="syn",path="browser-macros/vendor/syn-3.0.4"}
     text = path.read_text()
     if "mod browser_metadata;" not in text:
         text += '\n#[cfg(target_family="wasm")]\nmod browser_metadata;\n'
+    if "pub fn codepen_metadata_profile()" not in text:
+        text += '\n#[cfg(target_family="wasm")]\n#[doc(hidden)]\npub fn codepen_metadata_profile() -> Option<String> { browser_metadata::report() }\n'
     write_changed(path, text)
     path = SOURCE / "compiler/rustc_metadata/src/locator.rs"
     text = path.read_text()
@@ -358,6 +384,19 @@ fn read_rmeta_metadata_section<'a, 'p>(filename: &'p Path) -> Result<OwnedSlice,
     write_changed(path, text)
 
 
+def prepare_paged_metadata():
+    if not PAGED_METADATA:
+        return
+    library = SOURCE / "compiler/rustc_metadata/src/lib.rs"
+    if "mod browser_paged_metadata;" not in library.read_text():
+        run(["patch", "-p1", "-i", ROOT / "scripts/codepen/browser-paged-metadata.patch"], cwd=SOURCE)
+    for filename, helper in (("browser_metadata.rs", "browser-page-cache.rs"),
+                             ("browser_paged_metadata.rs", "browser-paged-metadata.rs"),
+                             ("browser_paged_hash_map.rs", "browser-paged-hash-map.rs")):
+        copy_changed(ROOT / "scripts/codepen" / helper,
+                     SOURCE / "compiler/rustc_metadata/src" / filename)
+
+
 def build():
     sysroot = toolchain()
     run(["rustup", "target", "add", "--toolchain", TOOLCHAIN, "wasm32-wasip1"])
@@ -372,8 +411,11 @@ def build():
     env.setdefault("CARGO_BUILD_JOBS", "2")
     env.pop("CARGO_ENCODED_RUSTFLAGS", None)
     env.pop("RUSTC_WRAPPER", None)
+    features = "stack-cache"
+    if os.environ.get("GPUI_CODEPEN_CACHE_PROFILE") == "1":
+        features += ",codepen-cache-profile"
     run(["cargo", "build", "-Zbuild-std=std,panic_unwind", "--locked", "--manifest-path", SOURCE / "Cargo.toml", "-p", "miri", "--target",
-         "wasm32-wasip1", "--release", "--no-default-features", "--features", "stack-cache"], env=env, cwd=ROOT)
+         "wasm32-wasip1", "--release", "--no-default-features", "--features", features], env=env, cwd=ROOT)
 
 
 def starters(target, directories, externs, miri_sysroot, extra_directories=()):
@@ -435,9 +477,9 @@ def starters(target, directories, externs, miri_sysroot, extra_directories=()):
         write_changed(code, source + wrapper)
         metadata = directory / ("lib" + name + ".rmeta")
         if not metadata.exists() or code.stat().st_mtime > metadata.stat().st_mtime:
-            # Preserve the same file!()/track_caller/text! identity in starter MIR
-            # and subsequent browser edits. Keep the input absolute so rustc
-            # applies cwd remapping to the macro-visible source filename.
+            # file!(), track_caller and GPUI's text! identity are part of the
+            # compiled program. Match the editable Worker's virtual filename,
+            # including constants embedded in promoted MIR and allocations.
             run(common + ["--crate-name", name, code, "-o", metadata], env=env, cwd=directory)
         packet = directory / (name + ".mir")
         if not packet.exists() or code.stat().st_mtime > packet.stat().st_mtime or driver.stat().st_mtime > packet.stat().st_mtime:
@@ -511,7 +553,7 @@ def metadata_closure(candidates, roots):
 
 def bundle(extra_directories=()):
     target, directories, externs = invocation()
-    destination = OUTPUT / "miri"
+    destination = OUTPUT / ("miri-full" if PAGED_METADATA else "miri")
     destination.mkdir(parents=True, exist_ok=True)
     shutil.copytree(ROOT / "crates/gpui_codepen/web/miri", destination, dirs_exist_ok=True)
     shutil.copytree(ROOT / "vendor/browser_wasi_shim/dist", destination / "wasi", dirs_exist_ok=True)
@@ -539,7 +581,7 @@ def bundle(extra_directories=()):
     for directory in sorted(directories):
         for artifact in sorted(directory.glob("lib*.rmeta")):
             candidate("/deps/" + artifact.name, artifact)
-        for artifact in sorted(directory.glob("*.dylib")):
+        for artifact in sorted({file for suffix in ("dylib", "so") for file in directory.glob(f"*.{suffix}")}):
             metadata = OUTPUT / "macro-metadata" / (artifact.stem + ".rmeta")
             if not metadata.exists():
                 run([helper, target, artifact, metadata], stdout=subprocess.DEVNULL)
@@ -583,7 +625,7 @@ def bundle(extra_directories=()):
         (destination / name).write_bytes(compressed)
         metadata_parts.append(name)
         metadata_bytes += len(compressed)
-    module = SOURCE / "target/wasm32-wasip1/release/miri.wasm"
+    module = Path(os.environ.get("GPUI_CODEPEN_MODULE", str(SOURCE / "target/wasm32-wasip1/release/miri.wasm")))
     if not module.exists():
         raise SystemExit("Build the full browser Miri driver before bundling")
     executable = distribution_module(module)
@@ -601,6 +643,7 @@ def bundle(extra_directories=()):
     # The VM adds only its selected starter to the tiny bootstrap crate.
     args += MIRI_FLAGS.split()
     manifest = {"version": VERSION, "protocol": 8, "module": module_name, "module_compression": "gzip", "metadata": metadata_name,
+                "incremental_compiler": True, "incremental_verify_ich": True,
                 "metadata_parts": metadata_parts, "files": files, "args": args, "starters": initial_programs}
     write_changed(destination / "assets.json", json.dumps(manifest, separators=(",", ":")))
     # Trunk copies this entire directory. Retain only the assets named by the
@@ -610,6 +653,13 @@ def bundle(extra_directories=()):
             if stale.name not in {module_name, *metadata_parts}:
                 stale.unlink()
     print(f"Browser bundle: {len(compressed_module) / 1024**2:.1f} MiB compressed driver ({len(executable) / 1024**2:.1f} MiB executable), {metadata_bytes / 1024**2:.1f} MiB compressed metadata ({len(files)} files)")
+    if PAGED_METADATA:
+        # Keep the exact full SDK available for diagnostics and parity tests.
+        # The measured plan affects prefetch only: all other bytes remain
+        # available in independently cached immutable ranges.
+        run([sys.executable, ROOT / "scripts/codepen/page-metadata.py", destination, OUTPUT / "miri",
+             "--profile", ROOT / "scripts/codepen/browser-metadata-prefetch.json"])
+        destination = OUTPUT / "miri"
     print(destination)
 
 
@@ -622,7 +672,9 @@ def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
     if args.command in ("prepare", "all"):
         prepare_source()
+        prepare_interpreter()
         macro_wrappers()
+        prepare_paged_metadata()
     if args.command in ("build", "all"):
         build()
     if args.command in ("bundle", "all"):

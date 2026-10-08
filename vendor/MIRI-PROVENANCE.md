@@ -36,6 +36,9 @@ The source and its dual MIT/Apache-2.0 licenses are preserved. The local changes
   guest from surviving a terminated guide/compiler companion. Compiler-only
   packet export can finalize rustc's incremental query cache. Component MIR
   disables inlining across local function boundaries so later calls can reload.
+- `cargo-miri/src/phases.rs`: the opt-in native incremental Codepen path removes
+  Cargo's executable/dep-info emission requests before metadata-only Miri startup.
+  This keeps the resident VM's compiler contract identical to subsequent exports.
 
 `scripts/codepen/browser.py` builds the pinned compiler source as WASM with the
 patches in `browser-rustc.patch`. It links the original procedural macro callbacks
@@ -45,7 +48,25 @@ machine hook executes deterministic f32/f64 arithmetic/comparisons with host IEE
 operations; NaNs, remainder, f16/f128 and other unsupported operations retain
 rustc's software path. `test-browser-float.rs` compares host results against the
 pinned APFloat implementation. Full production-worker probes are separate from
-the mocked browser transport tests.
+the mocked browser transport tests. The rustc patch resets arena-address-keyed
+stable-hash TLS caches between compiler sessions. `browser-paged-metadata.patch`
+and its backing-store helpers retain immutable initialized 16 KiB pages, using
+the existing opaque encoding and decoder-local scratch for spanning reads.
+Mutable compiler output retains its original owned storage. The browser's
+content-addressed range assets preserve the entire metadata byte stream.
+`browser-paged-hash-map.rs` probes the pinned ODHT definition hash tables directly
+from those pages, retaining the original header, key encoding and probe sequence.
+It avoids the contiguous table copy while native metadata retains upstream ODHT.
+The differential tests compare sparse/dense, colliding, wrapping and short tables
+with the pinned implementation and check lazy page initialization.
+
+`browser-interpreter.patch` caches successful call metadata, field/local layouts,
+trivially-sized local classification, required-constant checks, and always-live
+local sets. Keys include the generic instance and immutable MIR body identity
+where revisions can change results. Frame-local handles avoid repeated map
+lookups; aggregate caps fall back to ordinary interpretation. Profiling counters
+are excluded from normal builds. JSPI cancellation checkpoints sample work at
+bounded intervals and set their timestamp after resumption to avoid a yield storm.
 
 The transport additions activate only with `GPUI_CODEPEN_IPC=1`. Profiling is
 opt-in through `GPUI_CODEPEN_PROFILE` (`1` for phases, `functions` for function

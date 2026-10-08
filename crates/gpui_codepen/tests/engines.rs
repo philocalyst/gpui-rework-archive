@@ -109,6 +109,242 @@ fn hot_reload_preserves_entities_and_last_good_program() {
 
 #[test]
 #[ignore = "requires setup.py and full vendored Miri"]
+fn documentation_helper_method_edit_preserves_counter_state() {
+    let source = include_str!("fixtures/documentation_counter.rs");
+    let mut runtime = Runtime::new().unwrap();
+    let initial = execute(&mut runtime, 1, source, PreviewContext::default());
+    let initial = initial.frame.expect(&initial.diagnostics);
+    let scene = initial.scene.to_scene().unwrap();
+    let button = scene.quads.iter().find(|quad| quad.background == gpui::rgb(0x155b50).into())
+        .expect("Canonical documentation counter has its real GPUI increment button");
+    let center = button.bounds.center();
+    let center = point(px(center.x.0), px(center.y.0));
+    let mut input = click();
+    for event in &mut input.events {
+        match event {
+            gpui_ce_codepen::guest::InputMessage::Event(PlatformInput::MouseDown(event)) => event.position = center,
+            gpui_ce_codepen::guest::InputMessage::Event(PlatformInput::MouseUp(event)) => event.position = center,
+            _ => {}
+        }
+    }
+    let clicked = execute(&mut runtime, 2, source, input.clone());
+    let clicked = clicked.frame.expect(&clicked.diagnostics);
+    assert_ne!(clicked.scene, initial.scene, "Click must execute the actual helper method");
+    let edited = source.replace("saturating_add(1)", "saturating_add(5)");
+    assert_ne!(edited, source);
+    let patched = execute(&mut runtime, 3, &edited, PreviewContext::default());
+    let patched = patched.frame.expect(&patched.diagnostics);
+    assert_eq!(patched.scene, clicked.scene, "Editing a helper method must retain the counter's entity state");
+    let next = execute(&mut runtime, 4, &edited, input.clone());
+    let next = next.frame.expect(&next.diagnostics);
+    assert_ne!(next.scene, patched.scene);
+    let mut reference_runtime = Runtime::new().unwrap();
+    let reference = execute(&mut reference_runtime, 1,
+        &source.replace("Counter { count: 0 }", "Counter { count: 6 }"), PreviewContext::default());
+    let reference = reference.frame.expect(&reference.diagnostics);
+    assert_eq!(next.scene, reference.scene, "The edited Rust helper must produce Count: 6");
+    let local_edit = edited.replace("self.count = self.count.saturating_add(5);",
+        "let step = u32::from(5_u8);\n        self.count = self.count.saturating_add(step);");
+    assert_ne!(local_edit, edited);
+    let local_patched = execute(&mut runtime, 5, &local_edit, PreviewContext::default());
+    let local_patched = local_patched.frame.expect(&local_patched.diagnostics);
+    assert_eq!(local_patched.scene, next.scene, "Changing helper locals must preserve its live entity");
+    let eleven = execute(&mut runtime, 6, &local_edit, input.clone());
+    let eleven = eleven.frame.expect(&eleven.diagnostics);
+    let mut eleven_runtime = Runtime::new().unwrap();
+    let eleven_reference = execute(&mut eleven_runtime, 1,
+        &source.replace("Counter { count: 0 }", "Counter { count: 11 }"), PreviewContext::default());
+    assert_eq!(eleven.scene, eleven_reference.frame.expect(&eleven_reference.diagnostics).scene,
+        "The new local layout and conversion must execute and produce Count: 11");
+    let directory = gpui_ce_codepen::runtime::repository_root().join("target/codepen-browser-probe/documentation-counter");
+    std::fs::create_dir_all(&directory).unwrap();
+    std::fs::write(directory.join("source.rs"), source).unwrap();
+    std::fs::write(directory.join("edited.rs"), &edited).unwrap();
+    std::fs::write(directory.join("local-edit.rs"), &local_edit).unwrap();
+    std::fs::write(directory.join("idle.input"), gpui_ce_codepen::guest::wire::encode_input(&PreviewContext::default()).unwrap()).unwrap();
+    std::fs::write(directory.join("click.input"), gpui_ce_codepen::guest::wire::encode_input(&input).unwrap()).unwrap();
+    for (name, frame) in [("initial", initial), ("clicked", clicked), ("patched", patched), ("six", next), ("eleven", eleven)] {
+        std::fs::write(directory.join(format!("{name}.frame")), gpui_ce_codepen::guest::wire::encode(&frame)).unwrap();
+    }
+}
+
+#[test]
+#[ignore = "requires setup.py and full vendored Miri"]
+fn documentation_keyboard_actions_use_the_focused_dispatch_path() {
+    let source = include_str!("fixtures/documentation_actions.rs");
+    let mut runtime = Runtime::new().unwrap();
+    let initial = execute(&mut runtime, 1, source, PreviewContext::default());
+    let initial = initial.frame.expect(&initial.diagnostics);
+    let input = PreviewContext {
+        events: vec![PlatformInput::KeyDown(gpui::KeyDownEvent {
+            keystroke: gpui::Keystroke::parse("space").unwrap(),
+            is_held: false,
+            prefer_character_input: false,
+        }).into()],
+        ..Default::default()
+    };
+    let incremented = execute(&mut runtime, 2, source, input.clone());
+    let incremented = incremented.frame.expect(&incremented.diagnostics);
+    let mut reference = Runtime::new().unwrap();
+    let reference = execute(&mut reference, 1,
+        &source.replace("KeyboardCounter { count: 0, focus }", "KeyboardCounter { count: 1, focus }"),
+        PreviewContext::default());
+    assert_eq!(incremented.scene, reference.frame.expect(&reference.diagnostics).scene,
+        "Space must dispatch the canonical Increment action to the focused guest view");
+    save_browser_case("actions", source, &[(PreviewContext::default(), initial), (input, incremented)]);
+}
+
+#[test]
+#[ignore = "requires setup.py and full vendored Miri"]
+fn documentation_text_hit_testing_maps_a_wrapped_utf8_cluster() {
+    let source = include_str!("fixtures/documentation/text-hit-testing.rs");
+    let mut runtime = Runtime::new().unwrap();
+    let first = execute(&mut runtime, 1, source, PreviewContext::default());
+    let first = first.frame.expect(&first.diagnostics);
+    let scene = first.scene.to_scene().unwrap();
+    let marker = scene.quads.iter().find(|quad| quad.background == gpui::rgb(0xd04736).into())
+        .expect("The canonical canvas must query and paint its measured text caret");
+    let mut input = click();
+    let accent = scene.monochrome_sprites.iter().filter(|sprite| sprite.order == 3).nth(3)
+        .expect("The paragraph must paint its combining e-accent cluster");
+    let position = point(px(accent.bounds.origin.x.0 + accent.bounds.size.width.0 * 0.25),
+        px(marker.bounds.origin.y.0 + 12.));
+    for event in &mut input.events {
+        match event {
+            gpui_ce_codepen::guest::InputMessage::Event(PlatformInput::MouseDown(event)) => event.position = position,
+            gpui_ce_codepen::guest::InputMessage::Event(PlatformInput::MouseUp(event)) => event.position = position,
+            _ => {}
+        }
+    }
+    let clicked = execute(&mut runtime, 2, source, input.clone());
+    let clicked = clicked.frame.expect(&clicked.diagnostics);
+    let updated = clicked.scene.to_scene().unwrap();
+    let moved = updated.quads.iter().find(|quad| quad.background == gpui::rgb(0xd04736).into()).unwrap();
+    assert_ne!(moved.bounds.origin, marker.bounds.origin, "Mouse hit testing must move the actual canvas caret");
+    let mut reference = Runtime::new().unwrap();
+    let expected = source.replace("index: 0,", "index: 3,").replace("hit: false,", "hit: true,");
+    let reference = execute(&mut reference, 1, &expected, PreviewContext::default());
+    assert!(clicked.scene == reference.frame.expect(&reference.diagnostics).scene,
+        "The combining e-accent must map to the UTF-8 cluster beginning at byte 3");
+    save_browser_case("documentation-text-hit-testing", source,
+        &[(PreviewContext::default(), first), (input, clicked)]);
+}
+
+#[test]
+#[ignore = "requires setup.py and full vendored Miri"]
+fn every_documentation_starter_executes_and_dispatches_its_interactions() {
+    let sources = [
+        ("actions", include_str!("fixtures/documentation/actions.rs")),
+        ("animation", include_str!("fixtures/documentation/animation.rs")),
+        ("async-task", include_str!("fixtures/documentation/async-task.rs")),
+        ("counter", include_str!("fixtures/documentation/counter.rs")),
+        ("custom-element", include_str!("fixtures/documentation/custom-element.rs")),
+        ("drawing", include_str!("fixtures/documentation/drawing.rs")),
+        ("first-window", include_str!("fixtures/documentation/first-window.rs")),
+        ("layout", include_str!("fixtures/documentation/layout.rs")),
+        ("lists", include_str!("fixtures/documentation/lists.rs")),
+        ("subscriptions", include_str!("fixtures/documentation/subscriptions.rs")),
+        ("text", include_str!("fixtures/documentation/text.rs")),
+        ("text-hit-testing", include_str!("fixtures/documentation/text-hit-testing.rs")),
+    ];
+    let mut failures = Vec::new();
+    for (name, source) in sources {
+        let mut runtime = Runtime::new().unwrap();
+        let initial = execute(&mut runtime, 1, source, PreviewContext::default());
+        let Some(initial) = initial.frame else {
+            failures.push(format!("{name}: {}", initial.diagnostics));
+            continue;
+        };
+        let mut cases = vec![(PreviewContext::default(), initial.clone())];
+        let mut input = PreviewContext::default();
+        if name == "actions" {
+            input.events.push(PlatformInput::KeyDown(gpui::KeyDownEvent {
+                keystroke: gpui::Keystroke::parse("space").unwrap(),
+                is_held: false, prefer_character_input: false,
+            }).into());
+        } else if matches!(name, "counter" | "subscriptions" | "async-task" | "animation") {
+            let scene = initial.scene.to_scene().unwrap();
+            let button = scene.quads.iter().find(|quad| quad.background == gpui::rgb(0x155b50).into())
+                .unwrap_or_else(|| panic!("{name} has its real GPUI action button"));
+            let center = button.bounds.center();
+            input = click();
+            for event in &mut input.events {
+                match event {
+                    gpui_ce_codepen::guest::InputMessage::Event(PlatformInput::MouseDown(event)) =>
+                        event.position = point(px(center.x.0), px(center.y.0)),
+                    gpui_ce_codepen::guest::InputMessage::Event(PlatformInput::MouseUp(event)) =>
+                        event.position = point(px(center.x.0), px(center.y.0)),
+                    _ => {}
+                }
+            }
+        } else if name == "text-hit-testing" {
+            input = click();
+            for event in &mut input.events {
+                match event {
+                    gpui_ce_codepen::guest::InputMessage::Event(PlatformInput::MouseDown(event)) =>
+                        event.position = point(px(240.), px(155.)),
+                    gpui_ce_codepen::guest::InputMessage::Event(PlatformInput::MouseUp(event)) =>
+                        event.position = point(px(240.), px(155.)),
+                    _ => {}
+                }
+            }
+        }
+        let interacted = execute(&mut runtime, 2, source, input.clone());
+        let Some(interacted) = interacted.frame else {
+            failures.push(format!("{name} interaction: {}", interacted.diagnostics));
+            continue;
+        };
+        if matches!(name, "counter" | "subscriptions" | "actions" | "async-task") {
+            assert_ne!(interacted.scene, initial.scene, "{name} must execute its actual callback");
+        }
+        cases.push((input, interacted.clone()));
+        if matches!(name, "async-task" | "animation") {
+            let elapsed = PreviewContext { elapsed_ms: if name == "async-task" { 2000 } else { 350 }, ..Default::default() };
+            let advanced = execute(&mut runtime, 3, source, elapsed.clone());
+            let advanced = advanced.frame.expect(&advanced.diagnostics);
+            assert_ne!(advanced.scene, interacted.scene, "{name} must execute its pending timer/frame");
+            cases.push((elapsed, advanced));
+        }
+        save_browser_case(&format!("documentation-{name}"), source, &cases);
+        println!("PASS full native Miri canonical starter: {name}");
+    }
+    assert!(failures.is_empty(), "{}", failures.join("\n\n"));
+}
+
+#[test]
+#[ignore = "requires setup.py and full vendored Miri"]
+fn formatted_text_edit_preserves_live_entity() {
+    let source = include_str!("fixtures/documentation_counter.rs");
+    let mut runtime = Runtime::new().unwrap();
+    let initial = execute(&mut runtime, 1, source, PreviewContext::default());
+    let initial = initial.frame.expect(&initial.diagnostics);
+    let scene = initial.scene.to_scene().unwrap();
+    let button = scene.quads.iter().find(|quad| quad.background == gpui::rgb(0x155b50).into()).unwrap();
+    let center = button.bounds.center();
+    let mut input = click();
+    for event in &mut input.events {
+        match event {
+            gpui_ce_codepen::guest::InputMessage::Event(PlatformInput::MouseDown(event)) =>
+                event.position = point(px(center.x.0), px(center.y.0)),
+            gpui_ce_codepen::guest::InputMessage::Event(PlatformInput::MouseUp(event)) =>
+                event.position = point(px(center.x.0), px(center.y.0)),
+            _ => {}
+        }
+    }
+    assert!(execute(&mut runtime, 2, source, input.clone()).frame.is_some());
+    let edited = source.replace("Count: {}", "Total: {}");
+    let patched = execute(&mut runtime, 3, &edited, PreviewContext::default());
+    let patched = patched.frame.expect(&patched.diagnostics);
+    let mut reference_runtime = Runtime::new().unwrap();
+    let reference = execute(&mut reference_runtime, 1,
+        &edited.replace("Counter { count: 0 }", "Counter { count: 1 }"), PreviewContext::default());
+    let reference = reference.frame.expect(&reference.diagnostics);
+    assert_eq!(patched.scene, reference.scene,
+        "Editing format! text must update its promoted constants while preserving the live counter");
+}
+
+#[test]
+#[ignore = "requires setup.py and full vendored Miri"]
 fn superseded_frame_keeps_its_click_and_entity_state() {
     let directory = tempfile::tempdir().unwrap();
     let marker = directory.path().join("rendering");
@@ -451,6 +687,8 @@ fn real_gpui_render_entities_events_edits_and_all_lessons() {
             reply.diagnostics
         );
         println!("{}: {} ms", lesson.title, reply.elapsed_ms);
+        save_browser_case(&format!("guide-{}", index + 1), lesson.source,
+            &[(PreviewContext::default(), reply.frame.unwrap())]);
     }
     let broken = execute(
         &mut runtime,

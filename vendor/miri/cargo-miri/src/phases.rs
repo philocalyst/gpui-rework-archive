@@ -609,6 +609,8 @@ pub fn phase_runner(mut binary_args: impl Iterator<Item = String>, phase: Runner
     // then also needs to be dropped.
     // We also need to remove `--force-warn=unused_crate_dependencies` as cargo is not there to
     // process the output.
+    let metadata_only = env::var_os("GPUI_CODEPEN_METADATA_ONLY").as_deref()
+        == Some(std::ffi::OsStr::new("1"));
     for arg in info.args {
         if let Some(suffix) = arg.strip_prefix("--error-format") {
             assert!(suffix.starts_with('='));
@@ -618,6 +620,11 @@ pub fn phase_runner(mut binary_args: impl Iterator<Item = String>, phase: Runner
             // Drop this argument.
         } else if arg == "--force-warn=unused_crate_dependencies" {
             // Drop this argument.
+        } else if metadata_only && arg.starts_with("--emit=") {
+            // The resident Codepen VM and its incremental compiler must have
+            // the same output-type contract. MIRIFLAGS supplies metadata only;
+            // repeated --emit options would otherwise merge Cargo's link and
+            // dep-info requests into that contract.
         } else {
             cmd.arg(arg);
         }
