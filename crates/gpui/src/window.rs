@@ -2258,24 +2258,55 @@ pub struct DispatchEventResult {
     pub default_prevented: bool,
 }
 
-/// Rectangular region that clips window content, with optional fades at each edge.
+/// A rectangular clip with optional opacity ramps inside its edges.
 ///
-/// Content outside `bounds` is omitted. Fades are evaluated in window space against these
-/// axis-aligned bounds and do not follow transforms. Complex masks are not supported.
+/// Use [`Window::with_content_mask`] to apply it while prepainting hitboxes
+/// or painting content. Constructing a mask alone changes neither. Bounds
+/// use logical, window-local [`Pixels`] in those callbacks; recorded scene
+/// masks use [`ScaledPixels`]. They stay axis-aligned and do not follow a
+/// path or sprite transform. Use a surrounding div's overflow style for
+/// ordinary clipping in an element tree.
+///
+/// A positive fade distance makes an edge transparent, then increases its
+/// opacity linearly toward the interior. For example, a twelve-pixel right
+/// fade is half opaque six pixels from the right edge. When fades overlap,
+/// their opacity factors multiply. Zero disables that edge's ramp. Supply
+/// finite, nonnegative distances; the fields do not validate them.
+///
+/// # Drawing and input
+///
+/// The rectangle clips both drawing and hit testing, when applied in their
+/// respective phases. Fades affect drawing only: [`Hitbox::contains`] still
+/// accepts points in the faded part of the rectangle. Path painting currently
+/// uses the rectangle but ignores the fades; see [`Window::paint_path`].
+///
+/// `Default` has empty bounds, so it hides content rather than disabling
+/// clipping. Pass `None` to `with_content_mask` to keep the enclosing mask,
+/// or use [`Window::content_mask`] to inspect it. The
+/// [drawing chapter](crate::_documentation::drawing#keep-coordinates-and-clipping-explicit)
+/// shows where to establish a mask and how it relates to layout.
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[repr(C)]
 // docs:examples:begin
 #[doc = include_str!("docs/examples/gpui-ContentMask-596c376b.md")]
 // docs:examples:end
 pub struct ContentMask<P: Clone + Debug + Default + PartialEq> {
-    /// Visible rectangle in the mask's coordinate unit.
+    /// Visible rectangle in the mask's coordinate unit, independent of drawing transforms.
     pub bounds: Bounds<P>,
-    /// Fade distance at each edge. A zero distance leaves that edge fully opaque.
+    /// Distance over which opacity rises from zero at an edge to one inside it.
+    ///
+    /// Zero disables that edge's fade. Distances use the same unit as
+    /// [`bounds`](Self::bounds) and are stored without validation. Other
+    /// overlapping fades can still reduce opacity at that position.
     pub fade_out: Edges<P>,
 }
 
 impl ContentMask<Pixels> {
-    /// Converts pixel units to scaled pixels by `factor`.
+    /// Multiplies bounds and fade distances by `factor` to produce a scene-space mask.
+    ///
+    /// Window painting applies the display scale when recording. Pass a
+    /// logical-pixel mask to [`Window::with_content_mask`]; use this conversion
+    /// when constructing scene records directly.
     pub fn scale(&self, factor: f32) -> ContentMask<ScaledPixels> {
         ContentMask {
             bounds: self.bounds.scale(factor),
@@ -2283,10 +2314,34 @@ impl ContentMask<Pixels> {
         }
     }
 
-    /// Returns the intersection of two masks, combining edge fades at the resulting edges.
+    /// Intersects the rectangles and selects a fade for each resulting edge.
     ///
-    /// For each edge, the mask that actually clips at that edge contributes its
-    /// fade; when both masks clip at the same coordinate, the stronger fade wins.
+    /// The nearer clipping edge supplies its fade. If both edges coincide,
+    /// the larger distance wins. This does not multiply two complete masks:
+    /// a fade at an edge removed by the intersection is discarded. The masks
+    /// must use the same coordinate space, and their inputs remain unchanged.
+    ///
+    /// Here a shared left edge retains the outer fade. Moving the inner box
+    /// past that edge gives the intersection its own unfaded left edge:
+    ///
+    /// ```
+    /// use gpui::{Bounds, ContentMask, Edges, point, px, size};
+    ///
+    /// let outer = ContentMask {
+    ///     bounds: Bounds::new(point(px(0.), px(0.)), size(px(100.), px(20.))),
+    ///     fade_out: Edges { left: px(20.), ..Default::default() },
+    /// };
+    /// let mut inner = ContentMask {
+    ///     bounds: Bounds::new(point(px(0.), px(0.)), size(px(40.), px(20.))),
+    ///     fade_out: Default::default(),
+    /// };
+    /// assert_eq!(outer.intersect(&inner).fade_out.left, px(20.));
+    ///
+    /// inner.bounds.origin.x = px(30.);
+    /// let clipped = outer.intersect(&inner);
+    /// assert_eq!(clipped.bounds, inner.bounds);
+    /// assert_eq!(clipped.fade_out.left, px(0.));
+    /// ```
     pub fn intersect(&self, other: &Self) -> Self {
         fn edge_fade(
             a: Pixels,
@@ -2341,7 +2396,11 @@ impl ContentMask<Pixels> {
 }
 
 impl ContentMask<ScaledPixels> {
-    /// Intersects two masks in device coordinates with the normal edge fade rules.
+    /// Intersects two scene-space masks without changing their coordinate scale.
+    ///
+    /// Uses the same edge-selection rules as the
+    /// [logical-pixel method](ContentMask::<Pixels>::intersect): the nearer
+    /// edge supplies its fade, or the larger distance wins at coincident edges.
     pub fn intersect(&self, other: &Self) -> Self {
         let logical = |mask: &Self| ContentMask {
             bounds: mask.bounds.map(|v| Pixels(v.0)),
@@ -5476,6 +5535,11 @@ impl Window {
     /// locally authored geometry by the element's resolved origin before
     /// building it. The [drawing chapter](crate::_documentation::drawing#prepare-a-path-once-when-its-geometry-is-stable)
     /// connects that placement with prepaint, clipping, and reuse.
+    ///
+    /// > [!NOTE]
+    /// > The renderer clips paths to the content mask's rectangle but currently
+    /// > ignores its edge fades. Per-vertex masks do not provide independent
+    /// > clipping: the path's mask controls the whole triangle list.
     pub fn paint_path(&mut self, mut path: Path<Pixels>, color: impl Into<Background>) {
         self.invalidator.debug_assert_paint();
 

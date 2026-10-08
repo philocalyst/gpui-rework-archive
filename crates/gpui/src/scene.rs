@@ -1475,8 +1475,10 @@ impl From<PaintSurface> for Primitive {
 
 /// Renderer-local identifier assigned to a path when it is inserted into a scene.
 ///
-/// The numeric value is an index into that scene's path list, not a stable
-/// identity across frames or scenes.
+/// Recording assigns the current path count before appending the path.
+/// [`Scene::finish`] can then reorder that list: do not use the ID to index
+/// [`Scene::paths`] after sorting. It is not a stable identity across frames
+/// or scenes, or an element ID for retaining application state.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct PathId(
     /// Renderer-local identifier for a path.
@@ -1498,8 +1500,9 @@ pub struct PathId(
 /// for choosing where to prepare and retain geometry.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Path<P: Clone + Debug + Default + PartialEq> {
-    /// Index assigned when the path is inserted into a scene.
-    /// Window painting replaces a previously stored ID.
+    /// Identifier assigned from the path count when recording into a scene.
+    /// Window painting replaces a previously stored ID. See [`PathId`] for
+    /// why this is not an array index after the scene is finished.
     pub id: PathId,
     /// Draw-order key used when paths are sorted.
     pub order: DrawOrder,
@@ -1706,17 +1709,31 @@ impl From<Path<ScaledPixels>> for Primitive {
 /// `xy_position` and the mask use the path's coordinate type. `st_position` is
 /// shader input: it carries fill or quadratic-curve coordinates and is not a
 /// second position in pixels.
+///
+/// Construct ordinary contours with [`crate::PathBuilder`], or use
+/// [`Path::push_triangle`] for prepared triangles. The shared renderer takes
+/// paint and clipping from the containing [`Path`]; changing a vertex's mask
+/// does not clip that vertex independently.
 pub struct PathVertex<P: Clone + Debug + Default + PartialEq> {
     /// Position in the path coordinate space.
     pub xy_position: Point<P>,
-    /// Shader-specific path coordinate.
+    /// Fill or quadratic-curve input, interpolated across the triangle.
+    ///
+    /// This is dimensionless and remains unchanged under display scaling.
+    /// See [`Path::push_triangle`] for a fully filled triangle.
     pub st_position: Point<f32>,
-    /// Clip mask carried with this vertex.
+    /// Mask stored with this vertex and scaled by [`Self::scale`].
+    ///
+    /// The shared renderer uses [`Path::content_mask`] for clipping instead.
     pub content_mask: ContentMask<P>,
 }
 
 impl PathVertex<Pixels> {
     /// Converts this vertex from logical pixels to scene-space pixels.
+    ///
+    /// Multiplies its position, mask bounds, and fade distances by `factor`;
+    /// curve coordinates remain dimensionless. [`Window::paint_path`](crate::Window::paint_path)
+    /// already scales every vertex, so do not pre-scale ordinary window drawing.
     pub fn scale(&self, factor: f32) -> PathVertex<ScaledPixels> {
         PathVertex {
             xy_position: self.xy_position.scale(factor),

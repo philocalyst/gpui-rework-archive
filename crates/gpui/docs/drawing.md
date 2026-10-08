@@ -74,7 +74,18 @@ that was laid out or recorded.
 
 [`ContentMask`](crate::ContentMask) can also fade its edges. Its bounds and fade
 distances use the window's coordinate system; they do not follow an arbitrary
-drawing transform.
+drawing transform. A positive distance makes the edge transparent and ramps
+opacity up toward the interior; zero disables that fade. Hit testing still
+uses the rectangle, including its faded area. Apply the same mask during
+prepaint when the input region must share the paint clip. See the
+[clipped-control test](https://gpui-ce.github.io/book/testing.html#check-clipping-and-input-together)
+for both phases and a check outside the visible region.
+
+> [!NOTE]
+> Path painting currently honors the clip rectangle but ignores its edge
+> fades. A mask is not a general alpha texture or a rounded clipping shape.
+> Its default bounds are empty; use `None` in `with_content_mask` to retain
+> the enclosing clip rather than supplying a default mask.
 
 ## Prepare a path once when its geometry is stable
 
@@ -158,6 +169,13 @@ again when the window records the scene.
 > be empty. Invalid patterns return an error from `build`; handle it before
 > painting. Supply finite geometry and valid tessellation options as well:
 > a fallible tessellator is not a general sanitizer for arbitrary input.
+
+A build can also fail when its intermediate tessellation exceeds 65,536
+vertices, the limit of its 16-bit indices. For a detailed plot, reduce the
+geometry or increase the curve approximation tolerance in `FillOptions` or
+`StrokeOptions`. Shapes that can be painted independently can use separate
+paths. Leave `StrokeOptions::variable_line_width` as `None`: GPUI's builder
+commands do not supply the custom vertex attributes that option requires.
 
 Keep a finished path when its geometry can be reused. Its positions are baked
 into the vertices: changing the data, size, stroke style, or window-local origin

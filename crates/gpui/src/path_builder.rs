@@ -154,6 +154,9 @@ impl PathBuilder {
     /// This applies to every contour, including those already added. It
     /// replaces the entire style: a new [`StrokeOptions`] value supplies its
     /// own line width rather than preserving a preceding `stroke(width)`.
+    /// Leave [`StrokeOptions::variable_line_width`] as `None`: these drawing
+    /// commands do not supply the vertex attributes that option requires.
+    ///
     /// Here two nested contours run in the same direction. The nonzero rule
     /// fills the center; the default even-odd rule would leave a hole:
     ///
@@ -470,9 +473,20 @@ impl PathBuilder {
     /// # Errors
     ///
     /// Returns an error when lyon cannot tessellate the path or a stroke's
-    /// dash pattern is invalid. Builder commands are not a general validator
-    /// for arbitrary floating-point geometry; supply finite coordinates and
-    /// sensible tessellation options.
+    /// dash pattern is invalid. The intermediate buffers use 16-bit indices,
+    /// limiting one build to 65,536 tessellator vertices. Complex geometry can
+    /// exceed that limit even with valid coordinates. Simplify the geometry,
+    /// increase the curve approximation tolerance in [`FillOptions`] or
+    /// [`StrokeOptions`], or build independently painted shapes separately.
+    ///
+    /// Supply finite coordinates and valid tessellation options. The builder
+    /// does not validate arbitrary floating-point geometry or turn every
+    /// invalid option into a returned error.
+    ///
+    /// # Panics
+    ///
+    /// Debug builds panic if a stroke enables [`StrokeOptions::variable_line_width`].
+    /// The path has no vertex attributes to supply those widths; leave it as `None`.
     #[inline]
     pub fn build(self) -> Result<Path<Pixels>, Error> {
         let path = if let Some(transform) = self.transform {

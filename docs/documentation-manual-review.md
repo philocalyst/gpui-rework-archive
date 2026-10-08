@@ -1927,3 +1927,66 @@ CodePen library tests then pass. Logs are
 `target/documentation-proof/incoming-bounded-input-export-provenance.json`.
 This imports no batching delay or interpreter/SDK experiment and makes no
 claim that Miri frame throughput has improved.
+
+## Mask geometry, fades, and path metadata (2026-10-08)
+
+Revision `d5678186e7` passed the complete strict API, browser-program, Zola,
+mdBook, and link-audit build in `target/documentation-final-context-site.log`.
+Its generated guide copy is committed, its metadata reports no local changes,
+and the browser client matches both the reviewed source and target bundle.
+The primary editor read the rendered PathBuilder introduction, style field,
+and every inherent method; Path's introduction, fields, and inherent methods;
+PathStyle and its variants; and Window::paint_path. The PathBuilder-to-chapter
+and book-to-arc links were followed and their actual destinations checked.
+The new path sections were read in rustdoc, mdBook, and Zola. The revised
+rounding section was read in context: its table and container both measure
+350 CSS pixels at a 390-pixel viewport, with no document overflow. Percentage
+and DefiniteLength's revised introductions were checked too.
+
+The rebuilt browser editor retained a counter at one across a change from
+adding one to adding five; the next click produced six. Tab and Enter then
+produced eleven and showed the focus ring. A syntax error retained that scene
+and displayed the compiler diagnostic. Replacing an in-flight valid edit
+with a newer increment of seven recovered and produced eighteen from eleven.
+Restore returned the exact canonical source, verified through Copy Rust;
+Reset state returned the counter to zero. Auto-run remained enabled. These
+are browser observations, separate from the scheduling test's mocked deadline
+proof. Interaction still took roughly one second; throughput remains open.
+
+The primary editor then reread ContentMask's complete implementation and
+regression, Window's mask scopes and hitbox insertion, Hitbox::contains,
+the shared fade calculation, path upload records and shaders, and the Metal,
+WGPU, and DirectX path-upload paths. The short ContentMask introduction hid
+several material contracts: Default is an empty clip, fades extend inward,
+overlapping edge factors multiply, intersection selects the nearer edge's
+fade rather than multiplying two complete masks, and hit testing ignores
+fades. Its type, fields, scale, and both intersection methods now explain
+these rules. An asserting example checks retained and removed edge fades.
+
+The source trace also established that path rendering currently applies the
+clip rectangle but ignores edge fades and per-vertex masks. A browser-only
+Rust probe painted matching quad and path rectangles under one bottom fade:
+the quad faded and the path stayed solid. Its source and screenshot are in
+`target/documentation-proof/d5678186e7-mask-path-probe.rs` and
+`target/documentation-proof/d5678186e7-mask-path-limitation.png`. The exact
+canonical drawing source was restored afterward and returned to Live.
+ContentMask, Window::paint_path, PathVertex, and the canonical drawing chapter
+now state the limitation. This pass documents the renderer's behavior; it
+does not implement path fading.
+
+PathId's earlier claim that it indexes the scene's path list was corrected:
+insertion assigns a count, but Scene::finish can sort the list afterward.
+Path::id now points to that distinction. PathVertex explains dimensionless
+curve coordinates and the containing path's control over paint and clipping.
+The pinned lyon buffer builder and stroke entry paths were checked as well.
+PathBuilder now states its 65,536 intermediate-vertex limit and explains ways
+to reduce tessellation work. Its style and build contracts also explain why
+variable_line_width must remain None: these commands supply no custom vertex
+attributes, and lyon asserts that requirement in debug builds.
+All 247 core doctests pass, with one ignored, in
+`target/documentation-masks-doctests.log`. Strict default-feature core and
+companion rustdoc passes in `target/documentation-masks-default-api.log`.
+The next complete artifact build and rendered review remain pending for
+these mask changes. Prose was edited by hand, with no subagents. Jiff's
+complete crate-level cookbook was also read; this does not claim that every
+Jiff example or every GPUI public surface has received the final review.
