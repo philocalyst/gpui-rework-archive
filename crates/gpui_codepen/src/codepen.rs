@@ -481,7 +481,8 @@ impl Codepen {
                 let mut request = this
                     .session
                     .request(this.source.clone(), Backend::Miri, event);
-                request.input.events.extend(this.events.drain(..));
+                let queued = this.events.len().min(128 - request.input.events.len());
+                request.input.events.extend(this.events.drain(..queued));
                 request.input.elapsed_ms =
                     this.last_request.elapsed().as_millis().min(60_000) as u64;
                 this.last_request = web_time::Instant::now();
@@ -904,6 +905,64 @@ async fn browser_evaluate(request: Request) -> Reply {
 #[cfg(all(test, not(target_family = "wasm")))]
 mod tests {
     use super::*;
+    fn input_test_app() -> (gpui::HeadlessAppContext, gpui::WindowHandle<Codepen>, std::sync::Arc<Mailbox>) {
+        let text = gpui_codepen_guest::rpc::TextService::portable_factory()().unwrap();
+        let mut app = gpui::HeadlessAppContext::new(text);
+        app.set_automatic_drawing(false);
+        app.set_randomize_task_order(false);
+        let mailbox = std::sync::Arc::new(Mailbox::default());
+        let incoming = mailbox.clone();
+        let handle = app.open_window(gpui::size(px(400.), px(300.)), |_, cx| {
+            cx.new(|cx| {
+                let mut pen = Codepen::new("original", cx);
+                pen.worker.close();
+                pen.worker = Worker {
+                    mailbox: incoming,
+                    latest: Default::default(),
+                    thread: Default::default(),
+                };
+                pen.viewport_ready = true;
+                pen.displayed_source = Some(pen.source.clone());
+                pen
+            })
+        }).unwrap();
+        (app, handle, mailbox)
+    }
+
+    #[test]
+    fn full_pointer_queue_leaves_the_extra_event_for_the_next_request() {
+        let (mut app, handle, mailbox) = input_test_app();
+        app.update_window(handle.into(), |root, window, cx| {
+            let root = root.downcast::<Codepen>().unwrap();
+            let input = root.read(cx).preview.read(cx).on_input.clone();
+            input(gpui::PlatformInput::MouseMove(Default::default()).into(), window, cx);
+            // More platform events can arrive before the spawned request task
+            // runs. The captured first event is outside the bounded queue.
+            for _ in 0..128 {
+                input(gpui::PlatformInput::MouseDown(Default::default()).into(), window, cx);
+            }
+        }).unwrap();
+        app.run_until_parked();
+        let (request, reply) = mailbox.state.lock().unwrap().pending.take().unwrap();
+        assert_eq!(request.input.events.len(), 128);
+        request.input.validate().unwrap();
+        app.update_window(handle.into(), |root, _, cx| {
+            assert_eq!(root.downcast::<Codepen>().unwrap().read(cx).events.len(), 1);
+        }).unwrap();
+        reply.send(Reply {
+            generation: request.generation,
+            frame: None,
+            diagnostics: String::new(),
+            failure: None,
+            elapsed_ms: 0,
+        }).unwrap();
+        app.run_until_parked();
+        let (next, _reply) = mailbox.state.lock().unwrap().pending.take().unwrap();
+        assert_eq!(next.input.events.len(), 1);
+        assert!(matches!(next.input.events[0], gpui_codepen_guest::InputMessage::Event(gpui::PlatformInput::MouseDown(_))));
+        drop(app);
+    }
+
     #[test]
     fn worker_panic_releases_active_and_queued_replies() {
         let worker = Worker {
