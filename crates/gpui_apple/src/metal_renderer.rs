@@ -24,11 +24,6 @@ use gpui_render::{
 use image::RgbaImage;
 use objc2::runtime::AnyObject;
 
-use core_foundation::base::TCFType;
-use core_video::{
-    metal_texture::CVMetalTextureGetTexture, metal_texture_cache::CVMetalTextureCache,
-    pixel_buffer::kCVPixelFormatType_420YpCbCr8BiPlanarFullRange,
-};
 use foreign_types::{ForeignType, ForeignTypeRef};
 use metal::{
     CAMetalLayer, CommandQueue, MTLGPUFamily, MTLPixelFormat, MTLResourceOptions, MTLScissorRect,
@@ -262,7 +257,7 @@ pub struct MetalRenderer {
     #[allow(clippy::arc_with_non_send_sync)]
     instance_buffer_pool: Arc<Mutex<InstanceBufferPool>>,
     sprite_atlas: Arc<MetalAtlas>,
-    core_video_texture_cache: core_video::metal_texture_cache::CVMetalTextureCache,
+    core_video_texture_cache: CFRetained<CVMetalTextureCache>,
     path_intermediate_texture: Option<metal::Texture>,
     path_intermediate_msaa_texture: Option<metal::Texture>,
     // Offscreen scene target (the scene is rendered here, then blitted to the drawable, so blur
@@ -500,8 +495,25 @@ impl MetalRenderer {
         let command_queue = device.new_command_queue();
         let supports_shared_storage = cfg!(target_os = "ios") || is_apple_gpu;
         let sprite_atlas = Arc::new(MetalAtlas::new(device.clone(), supports_shared_storage));
-        let core_video_texture_cache =
-            CVMetalTextureCache::new(None, device.clone(), None).unwrap();
+        // metal and objc2-metal expose the same Objective-C device; the borrowed
+        // protocol object remains valid while `device` owns it.
+        let core_video_texture_cache = unsafe {
+            let mut cache = ptr::null_mut();
+            let status = CVMetalTextureCache::create(
+                None,
+                None,
+                &*device
+                    .as_ptr()
+                    .cast::<objc2::runtime::ProtocolObject<dyn objc2_metal::MTLDevice>>(),
+                None,
+                ptr::NonNull::from(&mut cache),
+            );
+            assert_eq!(
+                status, kCVReturnSuccess,
+                "failed to create CoreVideo Metal texture cache"
+            );
+            CFRetained::from_raw(ptr::NonNull::new(cache).expect("CoreVideo returned a null cache"))
+        };
 
         Self {
             device,
@@ -1926,7 +1938,9 @@ impl MetalRenderer {
                     image_buffer.get_height_of_plane(1),
                     1,
                 )
-                .unwrap();
+            };
+            let y_texture = plane_texture(0, objc2_metal::MTLPixelFormat::R8Unorm);
+            let cb_cr_texture = plane_texture(1, objc2_metal::MTLPixelFormat::RG8Unorm);
 
             let surface_uniforms = SurfaceUniforms {
                 bounds: surface.bounds.into(),

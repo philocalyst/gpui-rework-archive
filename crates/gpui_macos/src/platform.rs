@@ -22,6 +22,10 @@ use gpui::{
     PlatformWindow, Result, SystemMenuType, Task, ThermalState, WindowAppearance, WindowKind,
     WindowParams, popup::PopupNotSupportedError,
 };
+use gpui_apple::{
+    keychain,
+    thermal::{self, ThermalObserver},
+};
 use gpui_util::{ResultExt, new_std_command};
 use itertools::Itertools;
 use objc2::rc::{Allocated, Retained};
@@ -200,7 +204,7 @@ pub(crate) struct MacPlatformState {
     find_pasteboard: Pasteboard,
     reopen: Option<Box<dyn FnMut()>>,
     on_keyboard_layout_change: Option<Box<dyn FnMut()>>,
-    on_thermal_state_change: Option<Box<dyn FnMut()>>,
+    thermal_observer: Option<ThermalObserver>,
     on_displays_changed: Option<Box<dyn FnMut()>>,
     on_system_sleep: Option<Box<dyn FnMut()>>,
     on_system_wake: Option<Box<dyn FnMut()>>,
@@ -271,7 +275,7 @@ impl MacPlatform {
             dock_menu: None,
             app_delegate: None,
             on_keyboard_layout_change: None,
-            on_thermal_state_change: None,
+            thermal_observer: None,
             on_displays_changed: None,
             on_system_sleep: None,
             on_system_wake: None,
@@ -1079,7 +1083,8 @@ impl Platform for MacPlatform {
     }
 
     fn on_thermal_state_change(&self, callback: Box<dyn FnMut()>) {
-        self.0.lock().on_thermal_state_change = Some(callback);
+        let observer = ThermalObserver::new(&self.foreground_executor(), callback);
+        self.0.lock().thermal_observer = Some(observer);
     }
 
     fn on_system_sleep(&self, callback: Box<dyn FnMut()>) {
@@ -1237,105 +1242,20 @@ impl Platform for MacPlatform {
         let url = url.to_string();
         let username = username.to_string();
         let password = password.to_vec();
-        self.background_executor().spawn(async move {
-            unsafe {
-                use security::*;
-
-                let url = CFString::from(url.as_str());
-                let username = CFString::from(username.as_str());
-                let password = CFData::from_buffer(&password);
-
-                // First, check if there are already credentials for the given server. If so, then
-                // update the username and password.
-                let mut verb = "updating";
-                let mut query_attrs = CFMutableDictionary::with_capacity(2);
-                query_attrs.set(kSecClass as *const _, kSecClassInternetPassword as *const _);
-                query_attrs.set(kSecAttrServer as *const _, url.as_CFTypeRef());
-
-                let mut attrs = CFMutableDictionary::with_capacity(4);
-                attrs.set(kSecClass as *const _, kSecClassInternetPassword as *const _);
-                attrs.set(kSecAttrServer as *const _, url.as_CFTypeRef());
-                attrs.set(kSecAttrAccount as *const _, username.as_CFTypeRef());
-                attrs.set(kSecValueData as *const _, password.as_CFTypeRef());
-
-                let mut status = SecItemUpdate(
-                    query_attrs.as_concrete_TypeRef(),
-                    attrs.as_concrete_TypeRef(),
-                );
-
-                // If there were no existing credentials for the given server, then create them.
-                if status == errSecItemNotFound {
-                    verb = "creating";
-                    status = SecItemAdd(attrs.as_concrete_TypeRef(), ptr::null_mut());
-                }
-                anyhow::ensure!(status == errSecSuccess, "{verb} password failed: {status}");
-            }
-            Ok(())
-        })
+        self.background_executor()
+            .spawn(async move { Ok(keychain::write_credentials(&url, &username, &password)?) })
     }
 
     fn read_credentials(&self, url: &str) -> Task<Result<Option<(String, Vec<u8>)>>> {
         let url = url.to_string();
-        self.background_executor().spawn(async move {
-            let url = CFString::from(url.as_str());
-            let cf_true = CFBoolean::true_value().as_CFTypeRef();
-
-            unsafe {
-                use security::*;
-
-                // Find any credentials for the given server URL.
-                let mut attrs = CFMutableDictionary::with_capacity(5);
-                attrs.set(kSecClass as *const _, kSecClassInternetPassword as *const _);
-                attrs.set(kSecAttrServer as *const _, url.as_CFTypeRef());
-                attrs.set(kSecReturnAttributes as *const _, cf_true);
-                attrs.set(kSecReturnData as *const _, cf_true);
-
-                let mut result = CFTypeRef::from(ptr::null());
-                let status = SecItemCopyMatching(attrs.as_concrete_TypeRef(), &mut result);
-                match status {
-                    security::errSecSuccess => {}
-                    security::errSecItemNotFound | security::errSecUserCanceled => return Ok(None),
-                    _ => anyhow::bail!("reading password failed: {status}"),
-                }
-
-                let result = CFType::wrap_under_create_rule(result)
-                    .downcast::<CFDictionary>()
-                    .context("keychain item was not a dictionary")?;
-                let username = result
-                    .find(kSecAttrAccount as *const _)
-                    .context("account was missing from keychain item")?;
-                let username = CFType::wrap_under_get_rule(*username)
-                    .downcast::<CFString>()
-                    .context("account was not a string")?;
-                let password = result
-                    .find(kSecValueData as *const _)
-                    .context("password was missing from keychain item")?;
-                let password = CFType::wrap_under_get_rule(*password)
-                    .downcast::<CFData>()
-                    .context("password was not a string")?;
-
-                Ok(Some((username.to_string(), password.bytes().to_vec())))
-            }
-        })
+        self.background_executor()
+            .spawn(async move { Ok(keychain::read_credentials(&url)?) })
     }
 
     fn delete_credentials(&self, url: &str) -> Task<Result<()>> {
         let url = url.to_string();
-
-        self.background_executor().spawn(async move {
-            unsafe {
-                use security::*;
-
-                let url = CFString::from(url.as_str());
-                let mut query_attrs = CFMutableDictionary::with_capacity(2);
-                query_attrs.set(kSecClass as *const _, kSecClassInternetPassword as *const _);
-                query_attrs.set(kSecAttrServer as *const _, url.as_CFTypeRef());
-
-                let status = SecItemDelete(query_attrs.as_concrete_TypeRef());
-                anyhow::ensure!(status == errSecSuccess, "delete password failed: {status}");
-            }
-            Ok(())
-        })
+        self.background_executor()
+            .spawn(async move { Ok(keychain::delete_credentials(&url)?) })
     }
 
     fn supports_haptic_feedback(&self) -> bool {
@@ -1640,29 +1560,4 @@ unsafe extern "C" {
     pub(super) static kTISPropertyInputSourceIsASCIICapable: CFStringRef;
     pub(super) static kTISPropertyInputSourceType: CFStringRef;
     pub(super) static kTISTypeKeyboardInputMode: CFStringRef;
-}
-
-mod security {
-    #![allow(non_upper_case_globals)]
-    use super::*;
-
-    #[link(name = "Security", kind = "framework")]
-    unsafe extern "C" {
-        pub static kSecClass: CFStringRef;
-        pub static kSecClassInternetPassword: CFStringRef;
-        pub static kSecAttrServer: CFStringRef;
-        pub static kSecAttrAccount: CFStringRef;
-        pub static kSecValueData: CFStringRef;
-        pub static kSecReturnAttributes: CFStringRef;
-        pub static kSecReturnData: CFStringRef;
-
-        pub fn SecItemAdd(attributes: CFDictionaryRef, result: *mut CFTypeRef) -> OSStatus;
-        pub fn SecItemUpdate(query: CFDictionaryRef, attributes: CFDictionaryRef) -> OSStatus;
-        pub fn SecItemDelete(query: CFDictionaryRef) -> OSStatus;
-        pub fn SecItemCopyMatching(query: CFDictionaryRef, result: *mut CFTypeRef) -> OSStatus;
-    }
-
-    pub const errSecSuccess: OSStatus = 0;
-    pub const errSecUserCanceled: OSStatus = -128;
-    pub const errSecItemNotFound: OSStatus = -25300;
 }

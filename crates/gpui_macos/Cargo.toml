@@ -61,13 +61,13 @@ objc2.workspace = true
 objc2-app-kit.workspace = true
 objc2-core-graphics = { workspace = true, optional = true }
 objc2-core-media = { workspace = true, optional = true }
+objc2-core-video = { workspace = true, features = ["CVHostTime"] }
 objc2-foundation.workspace = true
 objc2-core-media.workspace = true
 objc2-screen-capture-kit.workspace = true
 objc2-user-notifications.workspace = true
 palette.workspace = true
 parking_lot.workspace = true
-pathfinder_geometry = { workspace = true, optional = true }
 raw-window-handle.workspace = true
 scheduler.workspace = true
 semver.workspace = true

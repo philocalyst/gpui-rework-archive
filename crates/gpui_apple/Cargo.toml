@@ -29,12 +29,16 @@ anyhow.workspace = true
 block.workspace = true
 collections.workspace = true
 core-foundation.workspace = true
+core-foundation-sys.workspace = true
 core-graphics.workspace = true
-core-video = { workspace = true, features = ["metal"] }
+core-text = { workspace = true, optional = true }
 derive_more.workspace = true
 dispatch2.workspace = true
 etagere.workspace = true
 foreign-types.workspace = true
+futures.workspace = true
+# WARNING: If you change this, you must also publish a new version of zed-font-kit to crates.io
+font-kit = { workspace = true, optional = true, features = ["source"] }
 gpui_util.workspace = true
 image.workspace = true
 libc.workspace = true
@@ -43,8 +47,10 @@ mach2.workspace = true
 metal.workspace = true
 objc2.workspace = true
 objc2-quartz-core.workspace = true
+objc2-security.workspace = true
 parking_lot.workspace = true
 smallvec.workspace = true
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dev-dependencies]
 gpui = { workspace = true, features = ["test-support"] }
+objc2-core-video = { workspace = true, features = ["CVBase"] }

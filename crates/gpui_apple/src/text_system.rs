@@ -29,13 +29,13 @@ impl MacTextSystem {
     }
 }
 
-impl Default for MacTextSystem {
+impl Default for AppleTextSystem {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl PlatformTextSystem for MacTextSystem {
+impl PlatformTextSystem for AppleTextSystem {
     fn add_fonts(&self, fonts: Vec<Cow<'static, [u8]>>) -> Result<()> {
         self.parley.add_fonts(fonts)
     }
