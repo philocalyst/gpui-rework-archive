@@ -117,7 +117,7 @@ Bounds are logical [`Pixels`](crate::Pixels); GPUI accounts for the window scale
 
 ### Add custom drawing with `canvas`
 
-Use [`canvas`](crate::canvas) when layout can be described by style and only the prepaint/paint callbacks are custom. Prepaint runs after layout and can return frame-local data, such as a hitbox. Paint receives that value and records drawing commands. Both closures are consumed once for that element value, so construct a new canvas when the view renders again. The [drawing walkthrough](https://gpui-ce.github.io/examples/drawing/#paint) shows custom quads and masks; the [custom-element walkthrough](https://gpui-ce.github.io/examples/custom-element/) shows when to implement all three `Element` phases.
+Use [`canvas`](crate::canvas) when layout can be described by style and only the prepaint/paint callbacks are custom. Prepaint runs after layout and can return frame-local data, such as a hitbox. Paint receives that value and records drawing commands. Both closures are consumed once for that element value, so construct a new canvas when the view renders again. The [drawing walkthrough](https://gpui-ce.github.io/examples/drawing/#bounds) shows custom quads and masks; the [custom-element walkthrough](https://gpui-ce.github.io/examples/custom-element/) shows when to implement all three `Element` phases.
 
 Implement [`Element`](crate::Element) directly when custom measurement or
 layout, accessibility hooks, or child preparation is part of the behavior:

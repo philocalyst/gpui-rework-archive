@@ -820,7 +820,7 @@ and tab-order rules behind these assertions.
 
 A pointer test can pass while the accessibility node has the wrong name or
 advertises no action. Force tree construction, inspect the node the app
-reported, and activate that node through the native accessibility path:
+reported, and activate that node through GPUI's accessibility action routing:
 
 ```rust
 use gpui::{AccessibleAction, AppContext, Context, Render, Role, TestApp, Text, Window,

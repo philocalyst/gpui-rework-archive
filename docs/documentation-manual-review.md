@@ -2313,3 +2313,15 @@ result belongs in `target/documentation-accessibility-testing-repaired-doctests.
 The example checks the accessible name, advertised action, application state,
 and stable node identity after drawing. Native screen-reader behavior remains
 a separate manual check.
+
+The repaired testing-chapter run passes all 22 examples (19 merged and three
+separate) in `target/documentation-accessibility-testing-repaired-doctests.log`.
+The primary editor reread the complete anchored, container-query, and deferred
+modules, including their tests, alongside the complete drawing, layout, and
+rendering chapters. The rendered AnyElement, container-query, and Deferred
+reference pages were read as well. That contextual check found one remaining
+drawing link whose valid anchor led to the introductory code rather than the
+painting code; it now leads to `#bounds`. The accessibility fixture's opening
+also names GPUI action routing rather than implying that a simulated test
+exercises the native adapter. These two prose corrections change no executable
+example or runtime code.
