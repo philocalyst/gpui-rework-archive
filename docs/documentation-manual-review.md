@@ -2353,3 +2353,43 @@ The primary editor also read Jiff 0.2.38's timestamp source sequentially
 through line 1825, including constructor limits, signed component normalization,
 conversion examples, checked and saturating arithmetic, and span differences.
 The later duration methods and remaining timestamp examples are still unread.
+
+## Hit-test routes and inset scroll requests (2026-10-09)
+
+The clean `1ba966e5c2` artifact passed the combined API, Zola, mdBook, and
+relative-link audit. Its served metadata, Miri manifest, runtime script, and
+compressed interpreter matched the files on disk. In the browser, the asset
+listing copied exactly without its hidden doctest return line; the event test
+copied exactly with its real Rust attributes and syntax highlighting. The
+local cargo-doc link reached the new accessible-activation section in mdBook.
+The browser-only editor reloaded the canonical counter at zero. Its initial
+load reported 24,861 ms; runtime responsiveness remains an open issue.
+Evidence is under `target/documentation-proof/1ba966e5c2-*`.
+
+The primary editor checked the complete hit-test construction and lookup
+implementation, pointer capture and release, region registration, mouse-event
+dispatch, draw-time cache refresh, and the existing inline-region/occlusion
+regression. The public `mouse_hit_test` contract incorrectly attributed its
+cache solely to mouse events. It now explains the refresh between prepaint
+and paint, including changes under a stationary pointer. Hitbox docs distinguish
+geometry from ordinary hover eligibility and wheel eligibility, frame records
+from returned copies, and metadata presence from a successful hit. The input
+chapter connects those choices. A new testing fixture checks all three
+blocking policies and redraw-time refresh. The first testing-chapter run
+passed 23 examples (20 merged and three separate) in
+`target/documentation-hit-routes-doctests.log`.
+
+The complete uniform-list module, including tests, was reread with the lists
+chapter. Its inset scroll docs had said that Bottom ignores the offset; the
+offset also affects the non-strict visibility decision. The corrected methods,
+pending-request fields, and canonical chapter distinguish that decision from
+alignment. The painted-row fixture now checks a visible row above the inset,
+a reveal that leaves a row in place, and strict alignment to the inset.
+The expanded fixture is being executed in
+`target/documentation-hit-routes-and-insets-doctests.log`; a fresh combined
+artifact and rendered review remain pending for these changes.
+
+Jiff 0.2.38's timestamp source was read sequentially through line 2510,
+covering the remaining duration difference examples, rounding configuration,
+periodic timestamps, parsing and formatting, and the start of arithmetic
+trait implementations. The remainder of that file is still unread.

@@ -75,6 +75,45 @@ must keep its active state on an owner and renew capture during prepaint.
 GPUI releases it after a received mouse-up. See
 [`Window::capture_pointer`](crate::Window::capture_pointer).
 
+### Choose the right hit query
+
+A point can lie inside a shape without that shape being eligible for input.
+For example, a popup can cover a chart while letting the chart's scroll pane
+continue to receive wheel events. Choose the query for the decision at hand:
+
+| Decision | Query | What it accounts for |
+| --- | --- | --- |
+| Does this point lie in the prepared region? | [`Hitbox::contains`](crate::Hitbox::contains) | Bounds or inline fragments, intersected with the captured rectangular clip |
+| Should this ordinary pointer listener act? | [`Hitbox::is_hovered`](crate::Hitbox::is_hovered) | The hover route, [keyboard hover suppression](crate::Window::last_input_was_keyboard), and pointer capture |
+| Should this wheel listener act? | [`Hitbox::should_handle_scroll`](crate::Hitbox::should_handle_scroll) | The scroll route; capture and keyboard modality do not affect it |
+| Which regions qualify geometrically? | [`HitTest::iter_hovered`](crate::HitTest::iter_hovered) and [`iter_scrollable`](crate::HitTest::iter_scrollable) | Front-to-back ordering and each region's blocking behavior |
+
+The routes include their blocking region. With
+[`BlockMouseExceptScroll`](crate::HitboxBehavior::BlockMouseExceptScroll),
+that region ends the hover route while the scroll route continues behind it.
+With `BlockMouse`, both routes end there. `Normal` leaves both open. More than
+one region can qualify; these queries do not choose one recipient or stop
+propagation. A raw listener must still check the event type, dispatch phase,
+and appropriate hit query before acting.
+
+[`Window::mouse_hit_test`](crate::Window::mouse_hit_test) supplies the test at
+the stored pointer position. GPUI updates it after prepaint and before paint,
+then again before pointer listeners run. A redraw can change eligibility
+under a stationary pointer. During prepaint, do not use that cached result
+to decide whether a newly inserted hitbox is hovered; it still describes the
+preceding test. The [overlay test](https://gpui-ce.github.io/book/testing.html#check-hover-and-scroll-through-an-overlay)
+checks the two routes, then changes the blocking policy without moving the
+pointer.
+
+Hit-test metadata has a different purpose. [`HitTest::entry`](crate::HitTest::entry)
+includes records that miss the point or are hidden behind a blocker. Tags
+identify those records for application code; finding a tag does not establish
+a hit. Assign tags through [`Window::insert_hitbox_mut`](crate::Window::insert_hitbox_mut)
+before cloning the record. Changing the copy returned by `insert_hitbox`
+does not change the frame's input region.
+
+### Recognize a touch gesture
+
 Raw touch updates are keyed by [`TouchId`](crate::TouchId) from `Started` through `Ended` or
 `Cancelled`; cancellation drops provisional state without completing a tap. The portable
 recognizer keeps a new contact pending while it can still become a tap or long press. With the

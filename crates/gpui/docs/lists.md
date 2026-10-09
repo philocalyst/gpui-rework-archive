@@ -119,6 +119,30 @@ its alignment. Use the strict variant to align an already visible item too.
 visible item in place and otherwise moves only far enough to reveal it.
 All strategies clamp at the collection's ends.
 
+### Reserve space above a scroll target
+
+[`scroll_to_item_with_offset`](crate::UniformListScrollHandle::scroll_to_item_with_offset)
+takes an inset measured in row heights. For 20-pixel rows in a 120-pixel
+viewport, an offset of two reserves 40 pixels above the target. The request
+first asks whether the whole row is visible **below that inset**. If so,
+it leaves the row in place, whatever alignment was requested.
+
+Otherwise, `Top` places the row below the inset, `Center` centers it in the
+remaining height, and `Bottom` places its bottom at the viewport's bottom.
+The inset affects the decision to move even with `Bottom`: a row at the
+very top is onscreen but outside the usable region. A 20-pixel row there
+would move down to y=100 in this viewport. Strict `Top` would put it at y=40.
+The [painted-row test](https://gpui-ce.github.io/book/testing.html#check-the-row-after-a-scroll-request)
+checks those positions and a non-strict request that leaves the row alone.
+
+Use [`scroll_to_item_strict_with_offset`](crate::UniformListScrollHandle::scroll_to_item_strict_with_offset)
+when an already visible row should adopt the requested alignment. `Nearest`
+still only reveals a row, including with the strict variant. The inset
+changes the scroll calculation; draw any header separately and give it its
+own input region when it should block the rows underneath.
+
+### Keep one handle per viewport
+
 Handle clones share one pending item request; a later request replaces an
 earlier unconsumed one. Reuse a handle for one list, and use separate handles
 for independent lists. For an unflipped list, the underlying pixel offset is

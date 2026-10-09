@@ -1157,6 +1157,85 @@ input records without depending on a GPU's rasterization. See
 [coordinate spaces](https://gpui-ce.github.io/book/layout.html#keep-geometry-in-one-coordinate-space)
 for the corresponding layout and offset rules.
 
+### Check hover and scroll through an overlay
+
+A blocking overlay need not block wheel input. This fixture records a back
+region, then a front region with the same bounds. Registration order puts the
+second region in front; tags identify the records in each hit-test route.
+With `BlockMouseExceptScroll`, only the front region qualifies for hover,
+while both qualify for scrolling:
+
+```rust
+use gpui::{Context, HitboxBehavior, HitboxId, HitTest, IntoElement, Render,
+           Window, canvas, fill, prelude::*, rgb};
+
+struct Regions { behavior: HitboxBehavior }
+
+impl Render for Regions {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        let behavior = self.behavior;
+        canvas(
+            move |bounds, window, _| {
+                window.insert_hitbox_mut(bounds, HitboxBehavior::Normal)
+                    .tags.push("back".into());
+                window.insert_hitbox_mut(bounds, behavior)
+                    .tags.push("front".into());
+            },
+            |bounds, _, window, _| window.paint_quad(fill(bounds, rgb(0x155b50))),
+        ).size_full()
+    }
+}
+
+fn names<'a>(test: &'a HitTest, route: impl Iterator<Item = &'a HitboxId>) -> Vec<&'a str> {
+    route.map(|id| test.entry(id).unwrap().tags()[0].as_ref()).collect()
+}
+
+let mut app = gpui::TestApp::new();
+let mut window = app.open_window(|_, _| Regions {
+    behavior: HitboxBehavior::BlockMouseExceptScroll,
+});
+window.simulate_mouse_move(gpui::point(gpui::px(20.), gpui::px(20.)));
+window.update(|_, window, _| {
+    let test = window.mouse_hit_test();
+    assert_eq!(names(test, test.iter_hovered()), ["front"]);
+    assert_eq!(names(test, test.iter_scrollable()), ["front", "back"]);
+});
+
+// Change the policy and redraw without moving the pointer.
+window.update(|view, _, cx| {
+    view.behavior = HitboxBehavior::Normal;
+    cx.notify();
+});
+window.update(|_, window, _| {
+    let test = window.mouse_hit_test();
+    assert_eq!(names(test, test.iter_hovered()), ["front", "back"]);
+    assert_eq!(names(test, test.iter_scrollable()), ["front", "back"]);
+});
+
+window.update(|view, _, cx| {
+    view.behavior = HitboxBehavior::BlockMouse;
+    cx.notify();
+});
+window.update(|_, window, _| {
+    let test = window.mouse_hit_test();
+    assert_eq!(names(test, test.iter_hovered()), ["front"]);
+    assert_eq!(names(test, test.iter_scrollable()), ["front"]);
+});
+```
+
+The first assertions distinguish wheel eligibility from hover eligibility.
+The later assertions check that drawing refreshes the hit test under a
+stationary pointer. The front region remains on both routes even when it
+blocks everything behind it.
+
+This tests geometry and blocking policy. It installs no input listeners and
+does not establish that scrolling actually changes a viewport. For that,
+deliver a wheel event to a scrollable element and assert the resulting rows
+or position. [`Hitbox::is_hovered`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Hitbox.html#method.is_hovered) also applies
+keyboard modality and pointer capture, which these geometric routes omit.
+The [input chapter](https://gpui-ce.github.io/book/input.html#choose-the-right-hit-query)
+explains which query belongs in a custom listener.
+
 ### Check that a shared model invalidates a cached view
 
 A cache test first draws the view, draws again to check reuse, then changes an
@@ -1236,6 +1315,7 @@ A queued scroll is not yet a visible row. For a uniform list, draw after the
 request and assert the target's painted position. This example gives row
 5,000 a distinct fill, scrolls it to the top, and resizes the same window.
 The second assertion catches a lost handle or element identity during resize.
+It then checks reveal and alignment requests with a two-row inset.
 
 ```rust
 use gpui::{Context, IntoElement, Render, ScrollStrategy, TestApp,
@@ -1285,6 +1365,39 @@ for viewport in [size(px(300.), px(200.)), size(px(150.), px(120.))] {
             size(viewport.width, px(20.)).scale(window.scale_factor()));
     });
 }
+
+let assert_top = |window: &mut gpui::TestAppWindow<Rows>, expected: gpui::Pixels| {
+    window.update(|_, window, _| {
+        let row = window.painted_quads().into_iter()
+            .find(|quad| quad.background == rgb(0x155b50).into())
+            .expect("the target row must remain painted");
+        assert_eq!(row.bounds.top(), expected.scale(window.scale_factor()));
+    })
+};
+
+// The row is onscreen at y=0, but above the two-row (40 px) inset.
+window.update(|view, _, cx| {
+    view.scroll.scroll_to_item_with_offset(5_000, ScrollStrategy::Bottom, 2);
+    cx.notify();
+});
+window.draw();
+assert_top(&mut window, px(100.));
+
+// At y=100, the whole row is visible below the inset. A reveal leaves it there.
+window.update(|view, _, cx| {
+    view.scroll.scroll_to_item_with_offset(5_000, ScrollStrategy::Top, 2);
+    cx.notify();
+});
+window.draw();
+assert_top(&mut window, px(100.));
+
+// Strict alignment moves that same visible row to the inset.
+window.update(|view, _, cx| {
+    view.scroll.scroll_to_item_strict_with_offset(5_000, ScrollStrategy::Top, 2);
+    cx.notify();
+});
+window.draw();
+assert_top(&mut window, px(40.));
 ```
 
 This checks layout and recorded drawing, not wheel-event routing. To cover the

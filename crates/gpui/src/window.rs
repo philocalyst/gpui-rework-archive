@@ -861,12 +861,25 @@ pub(crate) struct CursorStyleRequest {
     pub(crate) style: CursorStyle,
 }
 
-/// Input eligibility and hitbox metadata at one logical window-coordinate point.
+/// Geometric hover and scroll routes through a frame's hitboxes.
 ///
-/// The hover and scroll routes visit frontmost records first and include the
-/// record that blocks regions behind it. An overlay can block hover while
-/// allowing scroll through; see [`HitboxBehavior::BlockMouseExceptScroll`].
-/// [`entry`](Self::entry) also exposes metadata for regions outside these routes.
+/// Obtain the test for the window's stored pointer position with
+/// [`Window::mouse_hit_test`]. Each route visits hit regions from front to
+/// back and includes the region that blocks those behind it. Several
+/// overlapping regions can qualify; a route is not a single event target.
+///
+/// An overlay with [`HitboxBehavior::BlockMouseExceptScroll`] ends the hover
+/// route but lets the scroll route continue to a container underneath.
+/// Neither route applies keyboard modality or pointer capture. Use
+/// [`Hitbox::is_hovered`] when those interaction policies should apply too.
+/// The [input chapter](crate::_documentation::input#choose-the-right-hit-query)
+/// compares these queries, and the
+/// [overlapping-regions test](https://gpui-ce.github.io/book/testing.html#check-hover-and-scroll-through-an-overlay)
+/// exercises both routes across redraws.
+///
+/// [`entry`](Self::entry) provides metadata for every recorded hitbox,
+/// including occluded regions and regions outside the tested point. Finding
+/// an entry therefore does not establish that the point hit it.
 #[derive(Default, Eq, PartialEq)]
 pub struct HitTest {
     // HitboxIds which were included in the test's click path (the last of which will be the box that caused occlusion)
@@ -946,8 +959,11 @@ impl HitTest {
     }
 }
 
-/// An entry in a [`HitTest`] which represents a [`Hitbox`]. Contains some metadata about the
-/// hitbox in the frame the HitTest was evaluated on.
+/// A hitbox's registration depth and tags in the tested frame.
+///
+/// Returned by [`HitTest::entry`], including for boxes absent from both input
+/// routes. Depth describes ordering among all recorded hitboxes, rather than
+/// the nesting depth of an element or its position in a particular route.
 #[derive(Debug, PartialEq, Eq)]
 pub struct HitTestEntry {
     /// The depth of the hitbox in the ordered list from the Frame.
@@ -957,14 +973,19 @@ pub struct HitTestEntry {
 }
 
 impl HitTestEntry {
-    /// Returns the depth of the [`Hitbox`] in the frame.
-    /// A smaller value (closer to 0) represents closer to the viewer.
-    /// A larger value represents a hitbox farther from the viewer.
+    /// Returns this hitbox's index in the frame's front-to-back ordering.
+    ///
+    /// Zero is the last registered, frontmost hitbox. Boxes that miss the
+    /// tested point still occupy indices, so an input route can skip depths.
     pub fn depth(&self) -> usize {
         self.depth
     }
 
-    /// Returns any tags assigned to the [`Hitbox`] in the frame.
+    /// Returns the tags captured from this hitbox when the test was built.
+    ///
+    /// Assign tags to the frame record returned by [`Window::insert_hitbox_mut`].
+    /// They are application metadata; GPUI does not interpret them as input
+    /// filters or accessibility properties.
     pub fn tags(&self) -> &Vec<SharedString> {
         &self.tags
     }
@@ -993,10 +1014,11 @@ pub struct HitboxId(u64);
 
 #[cfg(feature = "headless")]
 impl HitboxId {
-    /// A placeholder HitboxId exclusively for integration testing API's that
-    /// need a hitbox but where the value of the hitbox does not matter. The
-    /// alternative is to make the Hitbox optional but that complicates the
-    /// implementation.
+    /// Returns a dummy identity for a test that never queries the hitbox.
+    ///
+    /// This registers no region and is not guaranteed to differ from a live
+    /// hitbox ID. Use [`Window::insert_hitbox`] when the test needs hit testing
+    /// or pointer capture.
     pub const fn placeholder() -> Self {
         Self(0)
     }
@@ -1038,10 +1060,13 @@ impl HitboxId {
         window.mouse_hit_test().iter_hovered().contains(&self)
     }
 
-    /// Checks if the hitbox with this ID contains the mouse and should handle scroll events.
-    /// Typically this should only be used when handling `ScrollWheelEvent`, and otherwise
-    /// `is_hovered` should be used. See the documentation of `Hitbox::is_hovered` for details about
-    /// this distinction.
+    /// Returns whether this ID occurs on the window's geometric scroll route.
+    ///
+    /// Use this for [`crate::ScrollWheelEvent`] listeners. Clipping and
+    /// [`HitboxBehavior::BlockMouse`] can exclude a region;
+    /// [`HitboxBehavior::BlockMouseExceptScroll`] leaves regions behind it
+    /// eligible. Keyboard modality and pointer capture do not change this
+    /// query. See [`HitTest::iter_scrollable`].
     pub fn should_handle_scroll(self, window: &Window) -> bool {
         window.mouse_hit_test().iter_scrollable().contains(&self)
     }
@@ -1060,18 +1085,19 @@ impl HitboxId {
 /// Create one with [`Window::insert_hitbox`].
 #[derive(Clone, Debug, Deref)]
 pub struct Hitbox {
-    /// A unique identifier for the hitbox.
+    /// This window's identity for the recorded hitbox.
     pub id: HitboxId,
     /// Input bounds in logical, window-local pixels, before clipping.
     #[deref]
     pub bounds: Bounds<Pixels>,
     /// The logical, window-local clip captured when the hitbox was inserted.
     pub content_mask: ContentMask<Pixels>,
-    /// Flags that specify hitbox behavior.
+    /// Whether this region blocks pointer or scroll eligibility behind it.
     pub behavior: HitboxBehavior,
     /// Disjoint regions of an inline element. `bounds` is their union.
     pub fragments: Option<Arc<[Bounds<Pixels>]>>,
-    /// Additional user-provided tags to extend behavior of the hitbox.
+    /// Application metadata copied into [`HitTestEntry::tags`].
+    /// GPUI does not use these tags to filter events.
     pub tags: Vec<SharedString>,
 }
 
@@ -1108,12 +1134,12 @@ impl Hitbox {
         self.id.is_hovered(window)
     }
 
-    /// Checks if the hitbox contains the mouse and should handle scroll events. Typically this
-    /// should only be used when handling `ScrollWheelEvent`, and otherwise `is_hovered` should be
-    /// used. See the documentation of `Hitbox::is_hovered` for details about this distinction.
+    /// Returns whether this region is eligible for scroll-wheel handling.
     ///
-    /// This can return `false` even when the hitbox contains the mouse, if a hitbox in front of
-    /// this sets `HitboxBehavior::BlockMouse` (`InteractiveElement::occlude`).
+    /// Delegates to [`HitboxId::should_handle_scroll`]. An overlay can block
+    /// hover while allowing this query to remain true. Use
+    /// [`Self::is_hovered`] for ordinary pointer handling; neither query
+    /// dispatches or consumes an event.
     pub fn should_handle_scroll(&self, window: &Window) -> bool {
         self.id.should_handle_scroll(window)
     }
@@ -1125,6 +1151,9 @@ impl Hitbox {
 /// [`Window::on_mouse_event`] listeners still receive events unless propagation
 /// stops; they must check their hitbox. Pointer capture can override ordinary
 /// hover eligibility for its captured hitbox.
+/// Blocking follows registered input geometry, independently of paint: an
+/// invisible region can block, and an opaque painted rectangle without a
+/// hitbox cannot. See the [input chapter](crate::_documentation::input#choose-the-right-hit-query).
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
 pub enum HitboxBehavior {
     /// Leaves regions behind it eligible for pointer and scroll input.
@@ -1148,7 +1177,10 @@ pub enum HitboxBehavior {
 }
 
 impl HitboxBehavior {
-    /// Returns true if this behavior should prevent hit-tests from marking hitboxes behind it as hovered (aka this is the last element that can be hovered).
+    /// Returns whether this behavior ends the geometric hover route.
+    ///
+    /// Both blocking variants return `true`. The blocking hitbox itself
+    /// remains on the route; only regions behind it are excluded.
     pub fn blocks_mouse(&self) -> bool {
         matches!(self, Self::BlockMouse | Self::BlockMouseExceptScroll)
     }
@@ -3651,16 +3683,25 @@ impl Window {
     /// A reused cached hitbox retains its existing ID. A received mouse-up
     /// releases capture after listeners run; use [`Self::release_pointer`] when
     /// cancelling the gesture or removing its owner earlier.
+    /// Refresh the window if the changed capture should update hover styling;
+    /// this setter does not request a redraw.
     pub fn capture_pointer(&mut self, hitbox_id: HitboxId) {
         self.captured_hitbox = Some(hitbox_id);
     }
 
-    /// Releases any active pointer capture.
+    /// Clears the stored pointer capture, restoring ordinary hover checks.
+    ///
+    /// This does not redraw the window or cancel the owner's drag state.
+    /// Clear that state and notify its view when cancelling a custom gesture.
+    /// A received mouse-up also clears capture, after its listeners run.
     pub fn release_pointer(&mut self) {
         self.captured_hitbox = None;
     }
 
-    /// Returns the hitbox that has captured the pointer, if any.
+    /// Returns the stored pointer-capture ID, if one has been set.
+    ///
+    /// This does not check whether that ID still belongs to a rendered region.
+    /// See [`Self::capture_pointer`] for renewing capture after a redraw.
     pub fn captured_hitbox(&self) -> Option<HitboxId> {
         self.captured_hitbox
     }
@@ -6419,22 +6460,45 @@ impl Window {
             .map(|layout_engine| layout_engine.vertical_align(layout_id))
     }
 
-    /// Add a logical window-local hit region to this frame and return its identity.
+    /// Records an input region during prepaint and returns a copy of it.
     ///
-    /// The current content mask is captured with the hitbox. Use the returned [`Hitbox`] during
-    /// paint or event handling to query hover and occlusion. Hitboxes are frame-local and must be
-    /// inserted during prepaint.
+    /// Supply window-local logical bounds, as received by a [`canvas`](crate::canvas)
+    /// callback. This captures the current content mask and inline fragments;
+    /// it does not add the element offset to `bounds`. Later registrations
+    /// are tested in front of earlier ones. `behavior` determines whether a
+    /// hit also excludes regions behind it.
     ///
-    /// This method should only be called as part of the prepaint phase of element drawing.
+    /// Pass the returned [`Hitbox`] into paint to filter
+    /// [`Self::on_mouse_event`] or choose a hover appearance. Registration
+    /// alone paints nothing and installs no event listener, focus target, or
+    /// accessibility node. See the
+    /// [clipped-control test](https://gpui-ce.github.io/book/testing.html#check-clipping-and-input-together)
+    /// for the complete prepaint-to-listener handoff.
+    ///
+    /// The return value is a copy: changing its fields does not change this
+    /// frame's input region. Use [`Self::insert_hitbox_mut`] to configure the
+    /// recorded region before copying it. Its ID belongs to this window's
+    /// frame records; rebuilding the region allocates a new one.
+    ///
+    /// # Panics
+    ///
+    /// Debug builds panic when called outside prepaint.
     pub fn insert_hitbox(&mut self, bounds: Bounds<Pixels>, behavior: HitboxBehavior) -> Hitbox {
         self.insert_hitbox_mut(bounds, behavior).clone()
     }
 
-    /// Add a logical window-local hit region and return a mutable reference to its frame record.
+    /// Records an input region during prepaint and returns its frame record.
     ///
-    /// The current content mask is captured with the hitbox. Use the returned [`Hitbox`] during
-    /// paint or event handling to query hover and occlusion. The reference is valid while building
-    /// this frame's prepaint records; call only during prepaint.
+    /// Coordinates, clipping, and ordering follow [`Self::insert_hitbox`].
+    /// Use this form to set tags or change the recorded geometry, then clone
+    /// the configured [`Hitbox`] to carry it into paint. A reference to the
+    /// record borrows the window, so it cannot survive another window call.
+    /// The [overlay test](https://gpui-ce.github.io/book/testing.html#check-hover-and-scroll-through-an-overlay)
+    /// tags two regions and inspects their distinct hover and scroll routes.
+    ///
+    /// # Panics
+    ///
+    /// Debug builds panic when called outside prepaint.
     pub fn insert_hitbox_mut(
         &mut self,
         bounds: Bounds<Pixels>,
@@ -7189,7 +7253,18 @@ impl Window {
         });
     }
 
-    /// Returns the hit-test that was most recently cached from a mouse event on the rendered frame.
+    /// Returns the cached geometric hit test at [`Self::mouse_position`].
+    ///
+    /// During drawing, GPUI rebuilds it after prepaint and before paint,
+    /// using the new frame's hitboxes. Pointer dispatch rebuilds it from the
+    /// rendered frame before calling listeners. Moving a region and drawing
+    /// again can therefore change the routes without moving the pointer.
+    /// During prepaint, this still describes the preceding test.
+    ///
+    /// This is not a fresh query to the platform, and it does not apply
+    /// keyboard modality or pointer capture. Use [`Hitbox::is_hovered`] or
+    /// [`Hitbox::should_handle_scroll`] to filter an ordinary pointer or wheel
+    /// listener. See [`HitTest`] for route order and metadata.
     pub fn mouse_hit_test(&self) -> &HitTest {
         &self.mouse_hit_test
     }

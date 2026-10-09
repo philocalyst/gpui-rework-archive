@@ -137,9 +137,14 @@ pub struct DeferredScrollToItem {
     pub item_index: usize,
     /// The scroll strategy to use
     pub strategy: ScrollStrategy,
-    /// Inset from the top edge in item heights, used by `Top` and `Center`.
+    /// Inset from the viewport's top edge, measured in item heights.
+    ///
+    /// This narrows the region used to decide whether the item is visible.
+    /// `Top` and `Center` also use it for alignment; `Bottom` aligns with the
+    /// bottom edge. See [`UniformListScrollHandle::scroll_to_item_with_offset`].
     pub offset: usize,
-    /// Align even if the item is already visible. `Nearest` still leaves visible items in place.
+    /// Align even if the item is already visible below the inset.
+    /// `Nearest` still leaves an item in that usable region in place.
     pub scroll_strict: bool,
 }
 
@@ -209,15 +214,21 @@ impl UniformListScrollHandle {
         });
     }
 
-    /// Scroll the list to the given item index with an offset in number of items.
+    /// Queues a reveal request with an inset above the target, in row heights.
     ///
-    /// This uses non-strict scrolling: if the item is already visible within the offset region,
-    /// no scrolling occurs.
+    /// An item wholly within the viewport below the inset stays in place,
+    /// regardless of `strategy`. Otherwise `Top` aligns its top below the
+    /// inset, `Center` centers it in the remaining height, and `Bottom` aligns
+    /// its bottom with the viewport's bottom edge. `Nearest` chooses `Top`
+    /// for an item above the inset and `Bottom` for one below the viewport.
     ///
-    /// `offset` reserves space above the target, measured in item heights.
-    /// `Top` aligns below that inset; `Center` centers in the remaining viewport.
-    /// `Bottom` ignores the offset. `Nearest` uses the inset when deciding whether
-    /// the target is above the visible region.
+    /// The inset affects the visibility check for **every** strategy. For
+    /// example, `Bottom` can move an item that is onscreen but above the
+    /// inset, even though its resulting alignment uses no bottom inset.
+    /// Use [`Self::scroll_to_item_strict_with_offset`] to align a visible
+    /// item too. Schedule a redraw to consume either request. The
+    /// [painted-row test](https://gpui-ce.github.io/book/testing.html#check-the-row-after-a-scroll-request)
+    /// checks both decisions using actual row bounds.
     pub fn scroll_to_item_with_offset(&self, ix: usize, strategy: ScrollStrategy, offset: usize) {
         self.0.borrow_mut().deferred_scroll_to_item = Some(DeferredScrollToItem {
             item_index: ix,
@@ -227,14 +238,13 @@ impl UniformListScrollHandle {
         });
     }
 
-    /// Scroll the list so that the given item index is at the exact scroll strategy position with an offset.
+    /// Queues an alignment request with an inset above the target, in row heights.
     ///
-    /// `Top`, `Center`, and `Bottom` align even an already visible item;
-    /// `Nearest` moves only an item outside the usable region.
-    ///
-    /// `offset` reserves space above the target, measured in item heights.
-    /// `Top` aligns below that inset; `Center` centers in the remaining viewport.
-    /// `Bottom` ignores the offset. `Nearest` still leaves a visible item in place.
+    /// `Top`, `Center`, and `Bottom` align an already visible item too.
+    /// Their alignment rules match [`Self::scroll_to_item_with_offset`].
+    /// `Nearest` remains a reveal operation: an item wholly visible below
+    /// the inset stays in place, including with this strict variant.
+    /// The next prepaint consumes the request; schedule a redraw separately.
     pub fn scroll_to_item_strict_with_offset(
         &self,
         ix: usize,
