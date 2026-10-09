@@ -1213,7 +1213,7 @@ impl DirectXRenderer {
 
             let uniforms = SurfaceUniforms {
                 bounds: surface.bounds.into(),
-                content_mask: surface.content_mask.bounds.into(),
+                content_mask: surface.content_mask.into(),
                 color_format: SurfaceColorFormat::Rgba,
                 opacity: opacities.get(index).copied().unwrap_or(1.0),
                 padding0: 0,
@@ -2898,6 +2898,7 @@ mod tests {
     fn full_mask() -> ContentMask<ScaledPixels> {
         ContentMask {
             bounds: scaled(0.0, 0.0, 200.0, 100.0),
+            ..Default::default()
         }
     }
 

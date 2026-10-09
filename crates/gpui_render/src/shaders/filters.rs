@@ -7,7 +7,7 @@ pub mod surface {
     #[derive(Clone, Copy, Wgsl)]
     pub struct SurfaceUniforms {
         pub bounds: Bounds,
-        pub content_mask: Bounds,
+        pub content_mask: ContentMask,
         pub color_format: SurfaceColorFormat,
         pub opacity: f32,
         pub padding0: u32,
@@ -59,7 +59,7 @@ pub mod surface {
             texture_position: vertex.unit_position,
             clip_distances: clip_distances(
                 vertex.viewport_position,
-                get!(SURFACE_LOCALS).content_mask,
+                get!(SURFACE_LOCALS).content_mask.bounds,
             ),
         }
     }
@@ -70,7 +70,9 @@ pub mod surface {
             return transparent();
         }
         if get!(SURFACE_LOCALS).color_format == SurfaceColorFormat::Yuv {
-            return sample_yuv_surface(input.texture_position) * get!(SURFACE_LOCALS).opacity;
+            return sample_yuv_surface(input.texture_position)
+                * get!(SURFACE_LOCALS).opacity
+                * content_mask_alpha(input.position.xy(), get!(SURFACE_LOCALS).content_mask);
         }
         texture_sample_level(
             SURFACE_TEXTURE,
@@ -78,6 +80,7 @@ pub mod surface {
             input.texture_position,
             0.0,
         ) * get!(SURFACE_LOCALS).opacity
+            * content_mask_alpha(input.position.xy(), get!(SURFACE_LOCALS).content_mask)
     }
 }
 

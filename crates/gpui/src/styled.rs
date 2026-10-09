@@ -1,8 +1,8 @@
 use crate::{
     self as gpui, AbsoluteLength, AlignContent, AlignItems, AlignSelf, BorderStyle, CursorStyle,
-    DefiniteLength, Display, Fill, Filter, FlexDirection, FlexWrap, Font, FontFeatures, FontStyle,
-    FontWeight, GridPlacement, GridTemplate, GridTemplateMinSize, JustifyContent, Length, Pixels,
-    SharedString, StrikethroughStyle, StyleRefinement, TextAlign, TextOverflow,
+    DefiniteLength, Display, Edges, Fill, Filter, FlexDirection, FlexWrap, Font, FontFeatures,
+    FontStyle, FontWeight, GridPlacement, GridTemplate, GridTemplateMinSize, JustifyContent,
+    Length, Pixels, SharedString, StrikethroughStyle, StyleRefinement, TextAlign, TextOverflow,
     TextStyleRefinement, TextTransform, UnderlineStyle, WhiteSpace, px, relative, rems,
 };
 pub use gpui_macros::{
@@ -115,6 +115,36 @@ pub trait Styled: Sized {
     /// `Overflow::Scroll`.
     fn scrollbar_width(mut self, width: impl Into<AbsoluteLength>) -> Self {
         self.style().scrollbar_width = Some(width.into());
+        self
+    }
+
+    /// Sets per-edge fade distances for content clipped by overflow.
+    fn overflow_fade(mut self, fade: impl Into<Edges<AbsoluteLength>>) -> Self {
+        let fade = fade.into();
+        self.style().overflow_fade.top = Some(fade.top);
+        self.style().overflow_fade.right = Some(fade.right);
+        self.style().overflow_fade.bottom = Some(fade.bottom);
+        self.style().overflow_fade.left = Some(fade.left);
+        self
+    }
+
+    /// Sets equal fade distances on the left and right overflow edges.
+    fn overflow_fade_x(mut self, fade: impl Into<AbsoluteLength>) -> Self {
+        let fade = fade.into();
+        self.style().overflow_fade.top = Some(px(0.).into());
+        self.style().overflow_fade.right = Some(fade);
+        self.style().overflow_fade.bottom = Some(px(0.).into());
+        self.style().overflow_fade.left = Some(fade);
+        self
+    }
+
+    /// Sets equal fade distances on the top and bottom overflow edges.
+    fn overflow_fade_y(mut self, fade: impl Into<AbsoluteLength>) -> Self {
+        let fade = fade.into();
+        self.style().overflow_fade.top = Some(fade);
+        self.style().overflow_fade.right = Some(px(0.).into());
+        self.style().overflow_fade.bottom = Some(fade);
+        self.style().overflow_fade.left = Some(px(0.).into());
         self
     }
 

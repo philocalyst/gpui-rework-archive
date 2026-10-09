@@ -1836,7 +1836,7 @@ impl MetalRenderer {
 
             let surface_uniforms = SurfaceUniforms {
                 bounds: surface.bounds.into(),
-                content_mask: surface.content_mask.bounds.into(),
+                content_mask: surface.content_mask.into(),
                 color_format: SurfaceColorFormat::Yuv,
                 opacity: opacities.get(index).copied().unwrap_or(1.0),
                 padding0: 0,
@@ -2405,6 +2405,7 @@ mod tests {
             bounds: underline_frame,
             content_mask: ContentMask {
                 bounds: underline_frame,
+                ..Default::default()
             },
             background: solid_background(hsla(0.0, 0.0, 0.1, 1.0)),
             ..Default::default()
@@ -2415,6 +2416,7 @@ mod tests {
             bounds: underline_bounds,
             content_mask: ContentMask {
                 bounds: underline_bounds,
+                ..Default::default()
             },
             color: hsla(0.6, 0.8, 0.6, 0.65).into(),
             thickness: ScaledPixels(1.0),
@@ -2443,6 +2445,7 @@ mod tests {
             bounds: underline_bounds,
             content_mask: ContentMask {
                 bounds: underline_bounds,
+                ..Default::default()
             },
             color: hsla(0.1, 0.9, 0.55, 1.0).into(),
             thickness: ScaledPixels(1.0),
@@ -2741,6 +2744,7 @@ mod tests {
             bounds: sprite_bounds,
             content_mask: ContentMask {
                 bounds: sprite_bounds,
+                ..Default::default()
             },
             corner_radii: Corners::all(ScaledPixels(1.0)),
             tile,
@@ -2825,6 +2829,7 @@ mod tests {
                     height: px(8.0),
                 },
             },
+            ..Default::default()
         };
         path.color = solid_background(hsla(0.45, 0.9, 0.45, 1.0));
         let mut path_scene = Scene::default();

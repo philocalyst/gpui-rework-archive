@@ -138,6 +138,13 @@ mod source {
         pub size: Vec2f,
     }
 
+    #[repr(C)]
+    #[derive(Clone, Copy, Wgsl)]
+    pub struct ContentMask {
+        pub bounds: Bounds,
+        pub fade_out: Edges,
+    }
+
     impl Bounds {
         pub fn position(bounds: Bounds, unit_position: Vec2f) -> Vec2f {
             bounds.origin + unit_position * bounds.size
@@ -176,6 +183,25 @@ mod source {
         pub right: f32,
         pub bottom: f32,
         pub left: f32,
+    }
+
+    pub fn content_mask_alpha(position: Vec2f, content_mask: ContentMask) -> f32 {
+        let bounds = content_mask.bounds;
+        let fade = content_mask.fade_out;
+        let mut alpha = 1.0;
+        if fade.left > 0.0 {
+            alpha *= saturate((position.x - bounds.origin.x) / fade.left);
+        }
+        if fade.right > 0.0 {
+            alpha *= saturate((bounds.origin.x + bounds.size.x - position.x) / fade.right);
+        }
+        if fade.top > 0.0 {
+            alpha *= saturate((position.y - bounds.origin.y) / fade.top);
+        }
+        if fade.bottom > 0.0 {
+            alpha *= saturate((bounds.origin.y + bounds.size.y - position.y) / fade.bottom);
+        }
+        alpha
     }
 
     impl Edges {

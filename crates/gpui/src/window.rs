@@ -2023,12 +2023,15 @@ pub struct DispatchEventResult {
 
 /// Indicates which region of the window is visible. Content falling outside of this mask will not be
 /// rendered. Currently, only rectangular content masks are supported, but we give the mask its own type
-/// to leave room to support more complex shapes in the future.
+/// to leave room to support more complex shapes in the future. Edge fades are evaluated in
+/// window space against these axis-aligned bounds and are not transform-aware.
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
 #[repr(C)]
 pub struct ContentMask<P: Clone + Debug + Default + PartialEq> {
     /// The bounds
     pub bounds: Bounds<P>,
+    /// Edge fade distances. A zero distance leaves that edge fully opaque.
+    pub fade_out: Edges<P>,
 }
 
 impl ContentMask<Pixels> {
@@ -2036,13 +2039,69 @@ impl ContentMask<Pixels> {
     pub fn scale(&self, factor: f32) -> ContentMask<ScaledPixels> {
         ContentMask {
             bounds: self.bounds.scale(factor),
+            fade_out: self.fade_out.scale(factor),
         }
     }
 
     /// Intersect the content mask with the given content mask.
     pub fn intersect(&self, other: &Self) -> Self {
         let bounds = self.bounds.intersect(&other.bounds);
-        ContentMask { bounds }
+        let fade_out = Edges {
+            top: if self.bounds.top() > other.bounds.top() {
+                self.fade_out.top
+            } else if other.bounds.top() > self.bounds.top() {
+                other.fade_out.top
+            } else {
+                self.fade_out.top.max(other.fade_out.top)
+            },
+            right: if self.bounds.right() < other.bounds.right() {
+                self.fade_out.right
+            } else if other.bounds.right() < self.bounds.right() {
+                other.fade_out.right
+            } else {
+                self.fade_out.right.max(other.fade_out.right)
+            },
+            bottom: if self.bounds.bottom() < other.bounds.bottom() {
+                self.fade_out.bottom
+            } else if other.bounds.bottom() < self.bounds.bottom() {
+                other.fade_out.bottom
+            } else {
+                self.fade_out.bottom.max(other.fade_out.bottom)
+            },
+            left: if self.bounds.left() > other.bounds.left() {
+                self.fade_out.left
+            } else if other.bounds.left() > self.bounds.left() {
+                other.fade_out.left
+            } else {
+                self.fade_out.left.max(other.fade_out.left)
+            },
+        };
+        ContentMask { bounds, fade_out }
+    }
+}
+
+#[cfg(test)]
+mod content_mask_tests {
+    use super::*;
+
+    fn mask(left: f32, width: f32, fade_left: f32) -> ContentMask<Pixels> {
+        ContentMask {
+            bounds: Bounds::new(point(px(left), px(0.)), size(px(width), px(10.))),
+            fade_out: Edges {
+                left: px(fade_left),
+                ..Default::default()
+            },
+        }
+    }
+
+    #[test]
+    fn intersect_keeps_only_the_fade_at_the_visible_edge() {
+        let outer = mask(0., 100., 20.);
+        let inner = mask(30., 40., 0.);
+        assert_eq!(outer.intersect(&inner).fade_out.left, px(0.));
+
+        let child = mask(0., 40., 0.);
+        assert_eq!(outer.intersect(&child).fade_out.left, px(20.));
     }
 }
 
@@ -2874,6 +2933,7 @@ impl Window {
     fn snapped_content_mask(&self) -> ContentMask<ScaledPixels> {
         ContentMask {
             bounds: self.cover_bounds(self.content_mask().bounds),
+            fade_out: self.content_mask().fade_out.scale(self.scale_factor()),
         }
     }
 
@@ -3891,6 +3951,7 @@ impl Window {
                     origin: Point::default(),
                     size: self.viewport_size,
                 },
+                ..Default::default()
             })
     }
 
@@ -4521,6 +4582,7 @@ impl Window {
                 self.next_frame.scene.insert_primitive(Quad {
                     content_mask: ContentMask {
                         bounds: content_mask_bounds,
+                        ..Default::default()
                     },
                     ..quad
                 });
