@@ -16,6 +16,7 @@ class Document(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.links = []
         self.ids = []
+        self.id_set = set()
         self.tags = {}
         self.redirect = None
         self.errors = []
@@ -25,6 +26,7 @@ class Document(HTMLParser):
         self.tags[tag] = self.tags.get(tag, 0) + 1
         if attrs.get('id'):
             self.ids.append(attrs['id'])
+            self.id_set.add(attrs['id'])
         for attr in ('href', 'src'):
             if attrs.get(attr):
                 self.links.append(attrs[attr])
@@ -43,10 +45,18 @@ def audit(public: Path, rustdoc: Path | None = None, base_url='https://gpui-ce.g
     base = urlparse(base_url)
     prefix = base.path.rstrip('/')
     cache = {}
+    resolved_paths = {}
     errors = []
 
+    def resolved(path):
+        # The built artifact is immutable during the audit. Most relative API
+        # targets recur on hundreds of pages, so resolve their paths once.
+        if path not in resolved_paths:
+            resolved_paths[path] = path.resolve()
+        return resolved_paths[path]
+
     def document(path):
-        path = path.resolve()
+        path = resolved(path)
         if path not in cache:
             doc = Document()
             doc.feed(path.read_text(encoding='utf-8'))
@@ -63,7 +73,7 @@ def audit(public: Path, rustdoc: Path | None = None, base_url='https://gpui-ce.g
         if url.netloc and url.netloc != base.netloc:
             if url.hostname == 'docs.rs' and url.path.startswith('/gpui-ce/') and rustdoc:
                 segments = url.path.strip('/').split('/')
-                target = (rustdoc / '/'.join(segments[2:])).resolve()
+                target = resolved(rustdoc / '/'.join(segments[2:]))
                 if target.is_dir() or url.path.endswith('/'):
                     target /= 'index.html'
                 return target, url.fragment
@@ -79,7 +89,7 @@ def audit(public: Path, rustdoc: Path | None = None, base_url='https://gpui-ce.g
             target = path.parent / route
         else:
             target = path
-        target = target.resolve()
+        target = resolved(target)
         if not target.is_relative_to(public):
             errors.append(f'{path}: link escapes artifact: {href}')
             return None, None
@@ -110,7 +120,7 @@ def audit(public: Path, rustdoc: Path | None = None, base_url='https://gpui-ce.g
             # Preview fragments select a program rather than an HTML anchor.
             if target in {public / 'preview/index.html', public / 'workbench/index.html'}:
                 return
-            ids = document(target).ids
+            ids = document(target).id_set
             # Rustdoc's source viewer selects a line range in JavaScript. HTML
             # supplies one ID per line rather than an ID for the entire range.
             line_range = re.fullmatch(r'(\d+)-(\d+)', fragment)
@@ -134,7 +144,7 @@ def audit(public: Path, rustdoc: Path | None = None, base_url='https://gpui-ce.g
                 errors.append(f'{path}: expected one main')
             if doc.tags.get('h1') != 1:
                 errors.append(f'{path}: expected one h1')
-        for href in doc.links:
+        for href in dict.fromkeys(doc.links):
             check_link(path, href)
 
     # Check local rustdoc links too: rustdoc resolves an item's path without
@@ -143,7 +153,7 @@ def audit(public: Path, rustdoc: Path | None = None, base_url='https://gpui-ce.g
     # literal Rust URIs when the dependency has no documentation URL.
     for package in ('gpui', 'gpui_ce_elements'):
         for path in (public / 'api' / package).rglob('*.html'):
-            for href in document(path).links:
+            for href in dict.fromkeys(document(path).links):
                 url = urlparse(href)
                 if url.scheme and url.scheme not in {'http', 'https', 'mailto', 'tel', 'data', 'javascript'}:
                     errors.append(f'{path}: unresolved Rust documentation link {href}')

@@ -46,7 +46,9 @@ def main() -> int:
     parser.add_argument("--with-api", action="store_true", help="include and link to rustdoc built from this checkout")
     parser.add_argument("--base-url", help="URL where the artifact will be served; supports a path prefix")
     parser.add_argument("--output-dir", type=Path, help="write the processed artifact to this directory")
-    parser.add_argument("--text-only", action="store_true", help="omit browser programs for a prose-only review")
+    browser = parser.add_mutually_exclusive_group()
+    browser.add_argument("--text-only", action="store_true", help="omit browser program builds for a prose-only review")
+    browser.add_argument("--reuse-browser-programs", action="store_true", help="reuse already-built browser programs for documentation-only changes; still check their published artifacts")
     args = parser.parse_args()
     public = (args.output_dir or PUBLIC).resolve()
     config = tomllib.loads((SITE / "zola.toml").read_text())
@@ -59,7 +61,7 @@ def main() -> int:
         parser.error("mdBook 0.5.4 is required; install it or set MDBOOK to its executable")
     run(sys.executable, str(ROOT / "scripts/docs/generate.py"), "--check")
     run(sys.executable, str(ROOT / "scripts/docs/sync_links.py"), "--check")
-    if not args.text_only:
+    if not args.text_only and not args.reuse_browser_programs:
         run(sys.executable, str(SITE / "scripts/build_editor.py"))
         run(sys.executable, str(SITE / "scripts/build_preview.py"))
     # The book resolves links against this checkout even when the published

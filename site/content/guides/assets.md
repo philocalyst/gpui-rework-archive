@@ -29,7 +29,6 @@ assets.insert("icons/check.svg", Cow::Borrowed(icon.as_slice()))?;
 
 assert_eq!(assets.load("icons/check.svg").as_deref(), Some(icon.as_slice()));
 assert!(assets.load("./icons/check.svg").is_none());
-# Ok::<(), gpui::DuplicateAssetPath>(())
 ```
 
 Pass the registry to [`Application::with_assets`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Application.html#method.with_assets)

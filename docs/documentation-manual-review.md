@@ -2325,3 +2325,31 @@ painting code; it now leads to `#bounds`. The accessibility fixture's opening
 also names GPUI action routing rather than implying that a simulated test
 exercises the native adapter. These two prose corrections change no executable
 example or runtime code.
+
+The combined artifact at `0e16654eac` passed strict rustdoc, mdBook, and the
+expanded relative-link audit. Its source digest and clean revision were checked
+before promotion, and its build metadata, Miri manifest, runtime JavaScript,
+and compressed interpreter matched their served HTTP bytes. The primary editor
+read the updated HTTP module, trait, response fields, four Element accessibility
+hooks, and TestAppWindow::update in the separate local cargo-doc instance.
+The published canvas backlink reached the corrected painting step; all three
+drawing steps, the complete rendered asset guide, and the new accessibility
+fixture in mdBook were read. Generated local cargo-doc links were adapted to
+the local site too, so they can be tested before publication.
+
+That browser read exposed rustdoc's hidden `# Ok(...)` lines in Zola's visible
+code. The canonical-guide adapter now removes hidden harness lines only for
+Zola, preserves real Rust attributes and shell comments, and normalizes Rust
+fence flags for highlighting. mdBook retains its native hidden-line handling.
+The site builder now permits explicitly reusing previously built browser
+programs during prose-only work, with the complete artifact audit still enabled.
+The audit caches repeated immutable paths and uses sets for anchor lookup;
+its scope and failure rules are unchanged. All 34 documentation-tool tests pass
+in `target/documentation-zola-code-framework-tests.log`, including hidden
+harness, real attribute, shell-comment, and implicit-Rust cases. A fresh
+combined artifact remains to be checked after these publication changes.
+
+The primary editor also read Jiff 0.2.38's timestamp source sequentially
+through line 1825, including constructor limits, signed component normalization,
+conversion examples, checked and saturating arithmetic, and span differences.
+The later duration methods and remaining timestamp examples are still unread.

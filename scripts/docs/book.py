@@ -142,21 +142,34 @@ class ApiLinks:
         raise ValueError(f"unresolved API link: {raw}; build cargo doc with test-support first")
 
 
-def render_markdown(text: str, links: ApiLinks, site_base: str) -> str:
-    # Adapt links only; prose and code remain the canonical source's words.
+def render_markdown(text: str, links: ApiLinks, site_base: str, *, zola: bool = False) -> str:
+    # Preserve canonical prose. mdBook understands rustdoc's hidden code lines;
+    # Zola needs the visible listing without the doctest harness or fence flags.
     # Fenced examples can contain Rust syntax resembling Markdown links.
     fenced = False
     delimiter = ""
+    rust = False
     rendered = []
     for line in text.splitlines(keepends=True):
         fence = re.match(r"\s*(`{3,}|~{3,})", line)
         if fence:
             if not fenced:
                 fenced, delimiter = True, fence[1][0]
+                language = line[fence.end():].strip()
+                rust = not language or language.split(",", 1)[0] == "rust"
+                if zola and rust:
+                    line = line[:fence.end()] + "rust\n"
             elif fence[1][0] == delimiter:
                 fenced = False
             rendered.append(line)
             continue
+        if fenced and zola and rust:
+            stripped = line.lstrip()
+            if stripped.rstrip() == "#" or stripped.startswith("# "):
+                continue
+            if stripped.startswith("##"):
+                indentation = line[:len(line) - len(stripped)]
+                line = indentation + stripped[1:]
         if not fenced:
             line = re.sub(r"\[([^\]\n]+)\]\((crate::[^)]+)\)",
                           lambda m: f"[{m[1]}]({links.resolve(m[2])})", line)
@@ -202,7 +215,7 @@ def main() -> int:
             frontmatter, _old = destination.read_text().split("\n+++\n", 1)
             source = canonical_source(name)
             _heading, body = source.split("\n", 1)
-            mirrored = render_markdown(body.lstrip(), links, config["base_url"])
+            mirrored = render_markdown(body.lstrip(), links, config["base_url"], zola=True)
             output = frontmatter + "\n+++\n\n<!-- Mirrored from crates/gpui/docs/" + name + ".md; edit that source. -->\n\n" + mirrored
             if destination.read_text() != output:
                 destination.write_text(output)

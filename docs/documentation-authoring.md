@@ -124,8 +124,13 @@ python3 site/scripts/build.py --with-api
 ```
 
 Regenerate the bundle when a component's Rust source changes. The site build
-rejects a starter that differs from the source it publishes. Use `--text-only`
-for an API, book, and prose review without the browser programs.
+rejects a starter that differs from the source it publishes. After a complete
+browser build, use `--with-api --reuse-browser-programs` to rebuild prose and
+rustdoc with the existing browser artifacts. The final audit still checks the
+programs, runtime files, and canonical starter sources. Use this option only
+when the changes affect documentation: it does not rebuild changes to Rust
+behavior, the editor, or the browser host. `--text-only` skips browser builds
+and validation for a prose review.
 
 Run `python3 site/scripts/dev.py` to serve the combined artifact at
 `http://127.0.0.1:1111` and rebuild after changes to API docs, walkthroughs,
@@ -137,3 +142,6 @@ development; it does not establish browser-only editing.
 Use `rust,test_harness` for a fenced example containing `#[gpui::test]` so
 rustdoc executes the generated test. A plain Rust fence around a test
 declaration can compile without running its assertions.
+Rustdoc's hidden `# ` lines remain in the canonical source and mdBook input.
+The Zola mirror removes those harness lines and normalizes Rust fence flags
+before highlighting. Visible Rust attributes and shell comments are preserved.

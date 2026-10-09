@@ -101,7 +101,7 @@ current state. This document publishes two saves in one update. The event
 stream must preserve both revisions in order, although reading the document
 after the update sees only revision two:
 
-```rust,test_harness
+```rust
 use futures::{FutureExt as _, StreamExt as _};
 use gpui::{AppContext as _, EventEmitter, TestAppContext};
 
@@ -142,7 +142,7 @@ Install an observation before the operation that should wake it. Waiting only
 after the operation can miss the signal. [`gpui::observe`](https://docs.rs/gpui-ce/0.2.2/gpui/test/fn.observe.html)
 returns a stream that owns its subscription:
 
-```rust,test_harness
+```rust
 use futures::StreamExt as _;
 use gpui::{AppContext as _, TestAppContext};
 
@@ -990,7 +990,7 @@ exercise candidate-window placement and the operating system's IME callbacks.
 chooses another runnable ordering. `#[gpui::test]` can run the same body with
 several scheduler seeds:
 
-```rust,test_harness
+```rust
 use gpui::{AppContext as _, TestAppContext};
 
 #[gpui::test(iterations = 32)]

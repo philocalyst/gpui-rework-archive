@@ -30,6 +30,20 @@ class BookTests(unittest.TestCase):
         rendered = render_markdown(source, self.links, "https://example.test/docs")
         self.assertEqual(rendered, source.replace("crate::Entity", self.links.resolve("Entity")))
 
+    def test_zola_shows_rust_listing_without_hidden_doctest_harness(self):
+        source = ("# Keep this heading\n\n```rust,test_harness\n"
+                  "# use gpui::Entity;\n#\n  # hidden();\n"
+                  "#[test]\nfn example() {}\n##[escaped]\n"
+                  "# Ok::<(), anyhow::Error>(())\n```\n")
+        self.assertEqual(render_markdown(source, self.links, "https://example.test", zola=True),
+                         "# Keep this heading\n\n```rust\n#[test]\nfn example() {}\n#[escaped]\n```\n")
+        self.assertEqual(render_markdown(source, self.links, "https://example.test"), source)
+
+    def test_zola_preserves_non_rust_hashes_and_handles_implicit_rust(self):
+        source = "```sh\n# Shell comment\n```\n\n```\n# hidden();\nvisible();\n```\n"
+        self.assertEqual(render_markdown(source, self.links, "https://example.test", zola=True),
+                         "```sh\n# Shell comment\n```\n\n```rust\nvisible();\n```\n")
+
     def test_mirror_reads_the_current_canonical_source(self):
         chapter = {"Chapter": {"content": "{{#gpui ownership}}\n", "sub_items": []}}
         class IdentityLinks:

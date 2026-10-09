@@ -186,7 +186,6 @@ outline.curve_to(point(px(0.), px(0.)), point(px(24.), px(32.)));
 outline.close();
 let path = outline.build()?;
 assert!(!path.vertices.is_empty());
-# Ok::<(), anyhow::Error>(())
 ```
 
 Pass a finished path and its paint to [`Window::paint_path`](https://docs.rs/gpui-ce/0.2.2/gpui/struct.Window.html#method.paint_path).
