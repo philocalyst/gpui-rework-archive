@@ -53,6 +53,7 @@ use std::{
 pub struct AnyView {
     entity: AnyEntity,
     render: fn(&AnyView, &mut Window, &mut App) -> AnyElement,
+    view_type_name: &'static str,
 }
 
 impl<V: Render> From<Entity<V>> for AnyView {
@@ -60,6 +61,7 @@ impl<V: Render> From<Entity<V>> for AnyView {
         AnyView {
             entity: value.into_any(),
             render: any_view::render::<V>,
+            view_type_name: type_name::<V>(),
         }
     }
 }
@@ -74,7 +76,7 @@ impl AnyView {
     /// definite size from `style`, because the contents aren't rendered to measure them. See
     /// [`Entity::cached`].
     pub fn cached(self, style: StyleRefinement) -> ViewElement<AnyView> {
-        ViewElement::new(self).cached(style)
+        self.into_element().cached(style)
     }
 
     /// Returns a weak handle to this view. The weak handle doesn't keep the view alive.
@@ -85,6 +87,7 @@ impl AnyView {
         AnyWeakView {
             entity: self.entity.downgrade(),
             render: self.render,
+            view_type_name: self.view_type_name,
         }
     }
 
@@ -97,6 +100,7 @@ impl AnyView {
             Err(entity) => Err(Self {
                 entity,
                 render: self.render,
+                view_type_name: self.view_type_name,
             }),
         }
     }
@@ -137,7 +141,7 @@ impl<V: 'static + Render> IntoElement for Entity<V> {
     type Element = ViewElement<Entity<V>>;
 
     fn into_element(self) -> Self::Element {
-        ViewElement::new(self)
+        ViewElement::with_type_name(self, type_name::<V>())
     }
 
     #[inline(never)]
@@ -150,7 +154,8 @@ impl IntoElement for AnyView {
     type Element = ViewElement<AnyView>;
 
     fn into_element(self) -> Self::Element {
-        ViewElement::new(self)
+        let view_type_name = self.view_type_name;
+        ViewElement::with_type_name(self, view_type_name)
     }
 }
 
@@ -161,6 +166,7 @@ impl IntoElement for AnyView {
 pub struct AnyWeakView {
     entity: AnyWeakEntity,
     render: fn(&AnyView, &mut Window, &mut App) -> AnyElement,
+    view_type_name: &'static str,
 }
 
 impl AnyWeakView {
@@ -170,6 +176,7 @@ impl AnyWeakView {
         Some(AnyView {
             entity,
             render: self.render,
+            view_type_name: self.view_type_name,
         })
     }
 }
@@ -179,6 +186,7 @@ impl<V: 'static + Render> From<WeakEntity<V>> for AnyWeakView {
         AnyWeakView {
             entity: view.into(),
             render: any_view::render::<V>,
+            view_type_name: type_name::<V>(),
         }
     }
 }
@@ -338,7 +346,7 @@ impl<T: Render> Entity<T> {
     /// [the frame](crate::_documentation::concepts::the_frame) for when frames are redrawn.
     #[track_caller]
     pub fn cached(self, style: StyleRefinement) -> ViewElement<Entity<T>> {
-        ViewElement::new(self).cached(style)
+        ViewElement::with_type_name(self, type_name::<T>()).cached(style)
     }
 }
 
@@ -352,6 +360,8 @@ pub struct ViewElement<V: View> {
     view: Option<V>,
     entity_id: Option<EntityId>,
     cached_style: Option<StyleRefinement>,
+    #[cfg(feature = "profiler")]
+    view_type_name: &'static str,
     #[cfg(debug_assertions)]
     source: &'static core::panic::Location<'static>,
 }
@@ -360,10 +370,20 @@ impl<V: View> ViewElement<V> {
     /// Wraps `view` as an element. The element takes the view's entity id, if it has one.
     #[track_caller]
     pub fn new(view: V) -> Self {
+        Self::with_type_name(view, type_name::<V>())
+    }
+
+    /// Wraps a view whose draw time profiling attributes to `view_type_name`,
+    /// such as an entity's type rather than [`Entity`]'s.
+    #[track_caller]
+    #[cfg_attr(not(feature = "profiler"), expect(unused_variables))]
+    pub(crate) fn with_type_name(view: V, view_type_name: &'static str) -> Self {
         let entity_id = view.entity_id();
         ViewElement {
             entity_id,
             cached_style: None,
+            #[cfg(feature = "profiler")]
+            view_type_name,
             view: Some(view),
             #[cfg(debug_assertions)]
             source: core::panic::Location::caller(),
@@ -644,6 +664,8 @@ impl<V: View> Element for ViewElement<V> {
     ) {
         if let Some(entity_id) = self.entity_id {
             // Stateful path.
+            #[cfg(feature = "profiler")]
+            let start = window.window_profiler.begin_view();
             paint_view(
                 entity_id,
                 self.cached_style.is_some(),
@@ -651,6 +673,12 @@ impl<V: View> Element for ViewElement<V> {
                 element,
                 window,
                 cx,
+            );
+            #[cfg(feature = "profiler")]
+            window.window_profiler.end_view(
+                start,
+                self.view_type_name,
+                crate::profiler::ViewPhase::Paint,
             );
         } else {
             // Stateless path: just paint the element.
