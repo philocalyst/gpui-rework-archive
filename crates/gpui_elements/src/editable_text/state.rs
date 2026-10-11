@@ -7,7 +7,8 @@ use crate::editable_text::{
 };
 use gpui::{
     App, Bounds, ClipboardItem, Context, ElementId, Entity, EntityInputHandler, EventEmitter,
-    FocusHandle, Focusable, NavigationDirection, Pixels, Point, UTF16Selection, Window, point,
+    FocusHandle, Focusable, NavigationDirection, Pixels, Point, Subscription, UTF16Selection,
+    Window, point,
 };
 use std::{borrow::Cow, ops::Range};
 
@@ -58,6 +59,14 @@ impl CaretSelection {
     }
 }
 
+#[derive(Clone)]
+struct MarkedTextSnapshot {
+    original_range: Range<usize>,
+    original_text: String,
+    selection: CaretSelection,
+    history: Option<EditableTextHistory>,
+}
+
 /// Internal state for EditableText elements.
 pub struct EditableTextState {
     /// The storage medium backing this element-state. Hypothetically supports both
@@ -77,6 +86,7 @@ pub struct EditableTextState {
 
     /// The utf-8 character range of `storage` which is being composed by IME
     marked_range: Option<Range<usize>>,
+    marked_text_snapshot: Option<MarkedTextSnapshot>,
 
     /// True while the user is in the act of highlighting a section of the text (e.g. during mouse pressed & dragging).
     is_selecting: bool,
@@ -84,8 +94,12 @@ pub struct EditableTextState {
     last_click_position: Option<Point<Pixels>>,
     /// The number of times the user has clicked `last_click_position`. Used to determine which click behavior to trigger, depending on single, double, or triple clicks.
     click_count: usize,
+    pending_caret_position: Option<Point<Pixels>>,
 
     focus_handle: FocusHandle,
+    pub(super) focus_out_subscription: Option<Subscription>,
+    suppress_next_blur: bool,
+    pub(super) tab_behavior: super::TabBehavior,
     history: Option<EditableTextHistory>,
 
     pub(super) layout_data: EditableTextLayoutResult,
@@ -98,6 +112,18 @@ impl EventEmitter<CaretNotify> for EditableTextState {}
 /// This is not suitable for input sanitation (which should occur before the mutation).
 pub struct TextChanged;
 impl EventEmitter<TextChanged> for EditableTextState {}
+
+/// A semantic editing event, separate from the per-mutation [`TextChanged`] event.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum EditableTextEvent {
+    /// The user submitted the current single-line value with Enter.
+    Submit(String),
+    /// The user canceled editing with Escape.
+    Cancel(String),
+    /// The field lost focus.
+    Blur(String),
+}
+impl EventEmitter<EditableTextEvent> for EditableTextState {}
 
 impl Focusable for EditableTextState {
     fn focus_handle(&self, _: &App) -> FocusHandle {
@@ -166,12 +192,17 @@ impl EditableTextState {
 
             selected_range: 0.into(),
             marked_range: None,
+            marked_text_snapshot: None,
 
             is_selecting: false,
             last_click_position: None,
             click_count: 0,
+            pending_caret_position: None,
 
             focus_handle: cx.focus_handle(),
+            focus_out_subscription: None,
+            suppress_next_blur: false,
+            tab_behavior: super::TabBehavior::default(),
             // TODO: what is the best way to give users access to configure this via element
             history: Some(EditableTextHistory::default()),
 
@@ -190,10 +221,39 @@ impl EditableTextState {
 
     /// Replaces the contents of the stored text with the provided string slice.
     pub fn emplace(&mut self, content: &str, cx: &mut Context<Self>) {
+        self.marked_text_snapshot = None;
+        self.marked_range = None;
         let len = self.storage.content_utf8().len();
         self.replace_text(0..len, content);
         self.emit_text_changed(cx);
         cx.notify();
+    }
+
+    /// Queues a caret placement at a point in window coordinates.
+    ///
+    /// The point is resolved against the editable element's next laid out frame, so callers can
+    /// request placement before the element has rendered or while its layout is changing.
+    pub fn place_caret_at_window_position(
+        &mut self,
+        position: Point<Pixels>,
+        cx: &mut Context<Self>,
+    ) {
+        self.pending_caret_position = Some(position);
+        cx.notify();
+    }
+
+    pub(super) fn take_pending_caret_position(&mut self) -> Option<Point<Pixels>> {
+        self.pending_caret_position.take()
+    }
+
+    pub(super) fn place_caret_at_pixel_point(
+        &mut self,
+        position: Point<Pixels>,
+        line_height: Pixels,
+        cx: &mut Context<Self>,
+    ) {
+        let caret_position = self.index_for_pixel_point(position, line_height);
+        self.move_to(caret_position, cx);
     }
 
     /// Returns the utf-8 character range that is currently selected within the current state of the text.
@@ -222,20 +282,12 @@ impl EditableTextState {
 }
 
 impl EditableTextState {
-    /// Validates/sanitizes incoming text according to the rules of the field.
+    /// Sanitizes incoming text according to the field's current single-line/multiline mode.
     fn validate_incoming_text<'text>(
         &self,
         _range: &Range<usize>,
         text_to_insert: &'text str,
     ) -> Cow<'text, str> {
-        // TODO: Apply text sanitization, ideally using externally-sourced implementations.
-        // example optional/opt-in sanitations include:
-        // - single-line fields should prune /n & /r
-        // - maximum utf8 length
-        // - numbers only
-        // should also consider validation support, for features such as:
-        // - total syntax evaluation (e.g. passwords)
-        // - conforms to regex or math (e.g. ssn, phone number, email, etc)
         let mut text_to_insert = Cow::Borrowed(text_to_insert);
 
         if !self.layout_data.supports_multiline {
@@ -253,8 +305,30 @@ impl EditableTextState {
         }
         */
 
-        // for now, this function is no-op
         text_to_insert
+    }
+
+    fn sanitize_utf16_offset(text: &str, offset: usize) -> usize {
+        let mut source_offset = 0;
+        let mut sanitized_offset = 0;
+        for character in text.chars() {
+            let width = character.len_utf16();
+            if source_offset + width > offset {
+                break;
+            }
+            source_offset += width;
+            if character != '\n' && character != '\r' {
+                sanitized_offset += width;
+            }
+        }
+        sanitized_offset
+    }
+
+    fn sanitize_utf16_selection(text: &str, range: &Option<Range<usize>>) -> Option<Range<usize>> {
+        range.as_ref().map(|range| {
+            Self::sanitize_utf16_offset(text, range.start)
+                ..Self::sanitize_utf16_offset(text, range.end)
+        })
     }
 
     /// Internal method to record historical changes and perform text replacement in storage.
@@ -265,10 +339,31 @@ impl EditableTextState {
         self.storage.replace_range(range, text_to_insert);
         self.selected_range = end_pos.into();
         self.marked_range = None;
+        self.marked_text_snapshot = None;
     }
 
     fn emit_text_changed(&self, cx: &mut Context<Self>) {
         cx.emit(TextChanged);
+    }
+
+    pub(super) fn emit_blur(&mut self, cx: &mut Context<Self>) {
+        if self.suppress_next_blur {
+            self.suppress_next_blur = false;
+            return;
+        }
+        cx.emit(EditableTextEvent::Blur(self.as_str().to_owned()));
+    }
+
+    fn record_marked_text_commit(&mut self, snapshot: MarkedTextSnapshot, text: &str) {
+        self.history = snapshot.history;
+        if let Some(history) = &mut self.history {
+            history.record(
+                snapshot.original_range,
+                &snapshot.original_text,
+                text.len(),
+                snapshot.selection.into(),
+            );
+        }
     }
 }
 
@@ -611,6 +706,9 @@ impl EditableTextState {
     }
 
     fn apply_from_history(&mut self, src: HistoryKind, dst: HistoryKind, cx: &mut Context<Self>) {
+        if !self.layout_data.accepts_input {
+            return;
+        }
         let Some(history) = &mut self.history else {
             return;
         };
@@ -716,6 +814,12 @@ impl EntityInputHandler for EditableTextState {
     }
 
     fn unmark_text(&mut self, _window: &mut Window, _cx: &mut Context<Self>) {
+        if let (Some(snapshot), Some(marked_range)) =
+            (self.marked_text_snapshot.take(), self.marked_range.take())
+        {
+            let committed_text = self.storage.content_utf8()[marked_range].to_owned();
+            self.record_marked_text_commit(snapshot, &committed_text);
+        }
         self.marked_range = None;
     }
 
@@ -726,9 +830,20 @@ impl EntityInputHandler for EditableTextState {
         _window: &mut Window,
         cx: &mut Context<Self>,
     ) {
+        if !self.layout_data.accepts_input {
+            return;
+        }
         let range_utf8 = self.ime_resolve_range(range_utf16);
         let text_to_insert = self.validate_incoming_text(&range_utf8, text_to_insert);
-        self.replace_text(range_utf8, text_to_insert.as_ref());
+        if let Some(snapshot) = self.marked_text_snapshot.take() {
+            self.record_marked_text_commit(snapshot, text_to_insert.as_ref());
+            self.storage
+                .replace_range(range_utf8.clone(), text_to_insert.as_ref());
+            self.selected_range = (range_utf8.start + text_to_insert.len()).into();
+            self.marked_range = None;
+        } else {
+            self.replace_text(range_utf8, text_to_insert.as_ref());
+        }
         cx.emit(CaretNotify::PauseBlinking);
         self.emit_text_changed(cx);
         cx.notify();
@@ -742,10 +857,34 @@ impl EntityInputHandler for EditableTextState {
         _window: &mut Window,
         cx: &mut Context<Self>,
     ) {
+        if !self.layout_data.accepts_input {
+            return;
+        }
         let range = self.ime_resolve_range(range_utf16);
+        let snapshot = self
+            .marked_text_snapshot
+            .take()
+            .unwrap_or_else(|| MarkedTextSnapshot {
+                original_range: range.clone(),
+                original_text: self.storage.content_utf8()[range.clone()].to_owned(),
+                selection: self.selected_range,
+                history: self.history.clone(),
+            });
+        let new_selected_range_utf16 = if self.layout_data.supports_multiline {
+            new_selected_range_utf16
+        } else {
+            Self::sanitize_utf16_selection(text_to_insert, &new_selected_range_utf16)
+        };
         let text_to_insert = self.validate_incoming_text(&range, text_to_insert);
-        self.replace_text(range.clone(), text_to_insert.as_ref());
+        self.storage
+            .replace_range(range.clone(), text_to_insert.as_ref());
+        self.selected_range = (range.start + text_to_insert.len()).into();
         self.ime_mark_text_in_range(&range, text_to_insert.len());
+        if text_to_insert.is_empty() {
+            self.record_marked_text_commit(snapshot, text_to_insert.as_ref());
+        } else {
+            self.marked_text_snapshot = Some(snapshot);
+        }
         self.ime_mark_selected_range(&range, &new_selected_range_utf16, text_to_insert.len());
         self.emit_text_changed(cx);
         cx.notify();
@@ -825,6 +964,21 @@ impl EntityInputHandler for EditableTextState {
 use super::{actions::*, history::HistoryKind};
 impl<'app> EditableTextActionHandler<Context<'app, Self>> for EditableTextState {
     fn escape(&mut self, _: &Escape, window: &mut Window, cx: &mut Context<'app, Self>) {
+        if let Some(marked_range) = self.marked_range.take() {
+            if let Some(snapshot) = self.marked_text_snapshot.take() {
+                let current_range = snapshot.original_range.start
+                    ..(snapshot.original_range.start + marked_range.len()).min(self.as_str().len());
+                self.storage
+                    .replace_range(current_range, &snapshot.original_text);
+                self.selected_range = snapshot.selection;
+                self.history = snapshot.history;
+                self.emit_text_changed(cx);
+            }
+            cx.notify();
+            return;
+        }
+        self.suppress_next_blur = true;
+        cx.emit(EditableTextEvent::Cancel(self.as_str().to_owned()));
         self.selected_range = 0.into();
         cx.notify();
 
@@ -832,10 +986,16 @@ impl<'app> EditableTextActionHandler<Context<'app, Self>> for EditableTextState 
     }
 
     fn insert_enter(&mut self, _: &Enter, window: &mut Window, cx: &mut Context<'app, Self>) {
-        if !self.layout_data.supports_multiline {
+        if !self.layout_data.accepts_input {
             return;
         }
-        if !self.layout_data.accepts_input {
+        // While marked text exists the platform is still composing an IME candidate. Let
+        // that composition consume Enter instead of submitting a partial candidate.
+        if self.marked_range.is_some() {
+            return;
+        }
+        if !self.layout_data.supports_multiline {
+            cx.emit(EditableTextEvent::Submit(self.as_str().to_owned()));
             return;
         }
         self.replace_text_in_range(None, "\n", window, cx);
@@ -845,7 +1005,17 @@ impl<'app> EditableTextActionHandler<Context<'app, Self>> for EditableTextState 
         if !self.layout_data.accepts_input {
             return;
         }
+        if self.tab_behavior == super::TabBehavior::Focus {
+            window.focus_next(cx);
+            return;
+        }
         self.replace_text_in_range(None, "\t", window, cx);
+    }
+
+    fn previous_tab(&mut self, _: &TabPrevious, window: &mut Window, cx: &mut Context<'app, Self>) {
+        if self.layout_data.accepts_input && self.tab_behavior == super::TabBehavior::Focus {
+            window.focus_prev(cx);
+        }
     }
 
     fn delete_left(&mut self, _: &DeleteLeft, _: &mut Window, cx: &mut Context<'app, Self>) {
@@ -1150,6 +1320,7 @@ impl<'app> EditableTextActionHandler<Context<'app, Self>> for EditableTextState 
 #[cfg(test)]
 mod tests {
     use std::time::Duration;
+    use std::{cell::RefCell, rc::Rc};
 
     use super::*;
     use crate::editable_text::StringStorage;
@@ -1198,6 +1369,173 @@ mod tests {
             .history()
             .map(|history| history.has_next(kind))
             .unwrap_or_default()
+    }
+
+    #[gpui::test]
+    fn single_line_enter_emits_submit_without_mutating_text(cx: &mut TestAppContext) {
+        let view = create_test_input(cx, "task title", 10);
+        let events = Rc::new(RefCell::new(Vec::new()));
+        view.update(cx, |view, window, cx| {
+            let events_for_listener = events.clone();
+            cx.subscribe(&view.input, move |_, _, event: &EditableTextEvent, _| {
+                events_for_listener.borrow_mut().push(event.clone());
+            })
+            .detach();
+            view.input.update(cx, |input, cx| {
+                input.layout_data.supports_multiline = false;
+                input.insert_enter(&Enter, window, cx);
+            });
+        })
+        .unwrap();
+
+        assert_eq!(
+            events.borrow().as_slice(),
+            &[EditableTextEvent::Submit("task title".into())]
+        );
+    }
+
+    #[gpui::test]
+    fn enter_during_ime_composition_does_not_submit(cx: &mut TestAppContext) {
+        let view = create_test_input(cx, "候補", 2);
+        let events = Rc::new(RefCell::new(Vec::new()));
+        view.update(cx, |view, window, cx| {
+            let events_for_listener = events.clone();
+            cx.subscribe(&view.input, move |_, _, event: &EditableTextEvent, _| {
+                events_for_listener.borrow_mut().push(event.clone());
+            })
+            .detach();
+            view.input.update(cx, |input, cx| {
+                input.layout_data.supports_multiline = false;
+                input.marked_range = Some(0.."候補".len());
+                input.insert_enter(&Enter, window, cx);
+                assert_eq!(input.marked_range, Some(0.."候補".len()));
+            });
+        })
+        .unwrap();
+
+        assert!(events.borrow().is_empty());
+    }
+
+    #[gpui::test]
+    fn escape_cancels_without_emitting_a_following_blur(cx: &mut TestAppContext) {
+        let view = create_test_input(cx, "draft", 5);
+        let events = Rc::new(RefCell::new(Vec::new()));
+        view.update(cx, |view, window, cx| {
+            let events_for_listener = events.clone();
+            cx.subscribe(&view.input, move |_, _, event: &EditableTextEvent, _| {
+                events_for_listener.borrow_mut().push(event.clone());
+            })
+            .detach();
+            view.input.update(cx, |input, cx| {
+                input.escape(&Escape, window, cx);
+                input.emit_blur(cx);
+            });
+        })
+        .unwrap();
+
+        assert_eq!(
+            events.borrow().as_slice(),
+            &[EditableTextEvent::Cancel("draft".into())]
+        );
+    }
+
+    #[gpui::test]
+    fn disabled_input_rejects_ime_replacements(cx: &mut TestAppContext) {
+        let view = create_test_input(cx, "locked", 6);
+        view.update(cx, |view, window, cx| {
+            view.input.update(cx, |input, cx| {
+                input.layout_data.accepts_input = false;
+                input.replace_text_in_range(Some(0..6), "changed", window, cx);
+                input.replace_and_mark_text_in_range(Some(0..6), "changed", None, window, cx);
+                assert_eq!(input.as_str(), "locked");
+            });
+        })
+        .unwrap();
+    }
+
+    #[gpui::test]
+    fn disabled_input_rejects_history_mutations(cx: &mut TestAppContext) {
+        let view = create_test_input(cx, "before", 6);
+        view.update(cx, |view, window, cx| {
+            view.input.update(cx, |input, cx| {
+                input.replace_text_in_range(None, " after", window, cx);
+                input.undo(&Undo, window, cx);
+                assert_eq!(input.as_str(), "before");
+                input.layout_data.accepts_input = false;
+                input.redo(&Redo, window, cx);
+                assert_eq!(input.as_str(), "before");
+            });
+        })
+        .unwrap();
+    }
+
+    #[gpui::test]
+    fn single_line_ime_sanitization_adjusts_utf16_selection(cx: &mut TestAppContext) {
+        let view = create_test_input(cx, "", 0);
+        view.update(cx, |view, window, cx| {
+            view.input.update(cx, |input, cx| {
+                input.layout_data.supports_multiline = false;
+                input.replace_and_mark_text_in_range(None, "a\nb", Some(2..3), window, cx);
+                assert_eq!(input.as_str(), "ab");
+                assert_eq!(input.marked_range, Some(0..2));
+                assert_eq!(input.selected_range, (1, 2).into());
+            });
+        })
+        .unwrap();
+    }
+
+    #[gpui::test]
+    fn escape_restores_selection_replaced_by_ime_candidate(cx: &mut TestAppContext) {
+        let original = "before 🐈 after";
+        let cat_start = original.find('🐈').unwrap();
+        let cat_range = cat_start..cat_start + '🐈'.len_utf8();
+        let view = create_test_input(cx, original, cat_range.clone());
+        view.update(cx, |view, window, cx| {
+            view.input.update(cx, |input, cx| {
+                let range_utf16 = input.storage.utf_range_8to16(&cat_range);
+                input.replace_and_mark_text_in_range(
+                    Some(range_utf16),
+                    "候補",
+                    Some(2..2),
+                    window,
+                    cx,
+                );
+                assert_eq!(input.as_str(), "before 候補 after");
+
+                input.escape(&Escape, window, cx);
+                assert_eq!(input.as_str(), original);
+                assert_eq!(input.selected_range, cat_range.into());
+                assert_eq!(input.marked_range, None);
+                assert!(!is_history_kind_available(input, HistoryKind::Undo));
+            });
+        })
+        .unwrap();
+    }
+
+    #[gpui::test]
+    fn confirming_ime_candidate_is_one_undoable_edit(cx: &mut TestAppContext) {
+        let original = "before 🐈 after";
+        let cat_start = original.find('🐈').unwrap();
+        let cat_range = cat_start..cat_start + '🐈'.len_utf8();
+        let view = create_test_input(cx, original, cat_range.clone());
+        view.update(cx, |view, window, cx| {
+            view.input.update(cx, |input, cx| {
+                let range_utf16 = input.storage.utf_range_8to16(&cat_range);
+                input.replace_and_mark_text_in_range(
+                    Some(range_utf16),
+                    "候補",
+                    Some(2..2),
+                    window,
+                    cx,
+                );
+                input.unmark_text(window, cx);
+                assert!(is_history_kind_available(input, HistoryKind::Undo));
+
+                input.undo(&Undo, window, cx);
+                assert_eq!(input.as_str(), original);
+            });
+        })
+        .unwrap();
     }
 
     // ============================================================
@@ -1671,6 +2009,21 @@ mod tests {
                 EditableTextActionHandler::paste(input, &Paste, window, cx);
                 assert_eq!(input.as_str(), "hello there world");
                 assert_eq!(input.selected_range, 11.into());
+            });
+        })
+        .unwrap();
+    }
+
+    #[gpui::test]
+    fn single_line_paste_removes_line_breaks(cx: &mut TestAppContext) {
+        let view = create_test_input(cx, "ab", 1);
+        cx.write_to_clipboard(ClipboardItem::new_string("x\ny\rz".to_string()));
+        view.update(cx, |view, window, cx| {
+            view.input.update(cx, |input, cx| {
+                input.layout_data.supports_multiline = false;
+                EditableTextActionHandler::paste(input, &Paste, window, cx);
+                assert_eq!(input.as_str(), "axyzb");
+                assert_eq!(input.selected_range, 4.into());
             });
         })
         .unwrap();

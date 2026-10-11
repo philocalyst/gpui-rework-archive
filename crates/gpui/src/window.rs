@@ -13,7 +13,7 @@ use crate::{
     GlobalElementId, GlyphId, GpuSpecs, InputHandler, IsZero, KeyBinding, KeyContext, KeyDownEvent,
     KeyEvent, Keystroke, KeystrokeEvent, LayoutId, Lerp, LineLayoutIndex, Modifiers,
     ModifiersChangedEvent, MonochromeSprite, Motion, MouseButton, MouseEvent, MouseMoveEvent,
-    MouseUpEvent, Path, Pixels, PlatformAtlas, PlatformDisplay, PlatformInput,
+    MouseUpEvent, PaintSnapshot, Path, Pixels, PlatformAtlas, PlatformDisplay, PlatformInput,
     PlatformInputHandler, PlatformWindow, Point, PolychromeSprite, Priority, PromptButton,
     PromptLevel, Quad, Render, RenderGlyphParams, RenderImage, RenderImageParams, RenderSvgParams,
     Replay, ResizeEdge, SMOOTH_SVG_SCALE_FACTOR, SUBPIXEL_VARIANTS_X, SUBPIXEL_VARIANTS_Y,
@@ -1221,6 +1221,7 @@ pub struct Window {
     is_resizable: bool,
     is_minimizable: bool,
     sprite_atlas: Arc<dyn PlatformAtlas>,
+    atlas_generation: u64,
     text_system: Arc<WindowTextSystem>,
     text_rendering_mode: Rc<Cell<TextRenderingMode>>,
     rem_size: Pixels,
@@ -1442,6 +1443,59 @@ fn default_bounds(display_id: Option<DisplayId>, cx: &mut App) -> WindowBounds {
 }
 
 impl Window {
+    /// Paints a child and captures its scene operations as a bounded paint-only snapshot.
+    /// Returns `None` when the operation cap is exceeded or unsupported primitives are present.
+    pub fn capture_paint_snapshot<R>(
+        &mut self,
+        bounds: Bounds<Pixels>,
+        paint: impl FnOnce(&mut Self) -> R,
+    ) -> (R, Option<PaintSnapshot>) {
+        self.invalidator.debug_assert_paint();
+        let start = self.next_frame.scene.len();
+        let result = paint(self);
+        let end = self.next_frame.scene.len();
+        let mut snapshot = self
+            .next_frame
+            .scene
+            .paint_snapshot(start..end, bounds.scale(self.scale_factor()));
+        if let Some(snapshot) = &mut snapshot {
+            snapshot.set_capture_scale_factor(self.scale_factor());
+            snapshot.set_capture_resources(self.handle.window_id().as_u64(), self.atlas_generation);
+        }
+        (result, snapshot)
+    }
+
+    /// Replays a paint-only snapshot at a logical origin, clipped to the current viewport.
+    /// Returns `false` when the window, atlas generation, or scale differs from capture; callers
+    /// should discard cached copies and wait for a fresh capture in that case.
+    pub fn replay_paint_snapshot(
+        &mut self,
+        snapshot: &PaintSnapshot,
+        origin: Point<Pixels>,
+        opacity: f32,
+    ) -> bool {
+        self.invalidator.debug_assert_paint();
+        let factor = self.scale_factor();
+        if !snapshot.is_compatible_with_scale_factor(factor)
+            || !snapshot
+                .is_compatible_with_window(self.handle.window_id().as_u64(), self.atlas_generation)
+        {
+            return false;
+        }
+        let original = snapshot.origin();
+        let delta = Point {
+            x: ScaledPixels(origin.x.0 * factor - original.x.0),
+            y: ScaledPixels(origin.y.0 * factor - original.y.0),
+        };
+        self.next_frame.scene.replay_snapshot(
+            snapshot,
+            delta,
+            self.content_mask().scale(factor),
+            opacity * self.element_opacity,
+        );
+        true
+    }
+
     pub(crate) fn new(
         handle: AnyWindowHandle,
         options: WindowOptions,
@@ -1776,6 +1830,7 @@ impl Window {
                                 if force_render {
                                     // Bypass cached view reuse so we don't replay stale
                                     // atlas tile references after a GPU device recovery.
+                                    window.invalidate_paint_snapshot_atlas();
                                     window.refresh();
                                 }
                                 let arena_clear_needed = window.draw(cx);
@@ -1976,6 +2031,7 @@ impl Window {
             is_resizable,
             is_minimizable,
             sprite_atlas,
+            atlas_generation: 0,
             text_system,
             text_rendering_mode: cx.text_rendering_mode.clone(),
             rem_size: px(16.),
@@ -5113,7 +5169,15 @@ impl Window {
             self.sprite_atlas.remove(&params.clone().into());
         }
 
+        // Snapshots retain tile IDs without atlas leases. Conservatively invalidate all of this
+        // window's snapshots after explicit atlas removal so none can replay a stale tile.
+        self.invalidate_paint_snapshot_atlas();
+
         Ok(())
+    }
+
+    fn invalidate_paint_snapshot_atlas(&mut self) {
+        self.atlas_generation = self.atlas_generation.wrapping_add(1);
     }
 
     /// Returns whether every frame of an image is present in the sprite atlas.

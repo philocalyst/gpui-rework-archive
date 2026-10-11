@@ -1,10 +1,7 @@
 use gpui::{
     App, Bounds, Context, Window, WindowBounds, WindowOptions, div, prelude::*, px, rgb, size,
 };
-use gpui_ce_elements::editable_text::{
-    actions::{DEFAULT_INPUT_CONTEXT, default_bindings},
-    text_area, text_input,
-};
+use gpui_ce_elements::editable_text::{text_area, text_input};
 
 struct Example;
 impl Render for Example {
@@ -50,7 +47,7 @@ impl Render for Example {
 
 fn main() {
     gpui_platform::application().run(|cx: &mut App| {
-        cx.bind_keys(default_bindings().as_keybindings(Some(DEFAULT_INPUT_CONTEXT)));
+        gpui_ce_elements::init(cx);
 
         let bounds = Bounds::centered(None, size(px(500.), px(500.0)), cx);
         cx.open_window(

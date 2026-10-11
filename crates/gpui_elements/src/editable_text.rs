@@ -69,10 +69,8 @@
 //! # }
 //! ```
 //!
-//! The user-inputted text can be accessed via event callbacks on the element.
-//! There is no callback representing the concept of "user is done editing". Its recommended that
-//! users write a [debounce](https://developer.mozilla.org/en-US/docs/Glossary/Debounce)
-//! or some way to detect "focus lost" to signify the user leaving the field.
+//! `TextChanged` reports each edit. `EditableTextEvent` reports submit, cancel, and focus loss,
+//! which lets callers distinguish ongoing edits from completed editing sessions.
 //! ```
 //! # use gpui::{prelude::*, App, Entity, Window, AppContext, ElementId};
 //! # fn test(window: &mut Window, cx: &mut App) -> gpui_ce_elements::editable_text::EditableTextElement {
@@ -153,12 +151,10 @@
 //! Full-text examples can be found in the [examples folder](https://github.com/gpui-ce/gpui-ce/tree/main/crates/gpui_elements/examples)
 //!
 //! ### Backlog of not-yet implemented features:
-//! - detecting focus being lost on an EditableText field
-//! - text sanitation & validation (see no-op implementation of [`EditableTextState::validate_incoming_text`])
+//! - configurable validation and text sanitation hooks
 //! - nav & select via PageUp/PageDown
-//! - screen reader support via a11y
 //! - masking text (e.g. for passwords)
-//! - disabling `insert_tab` if favor of tab being used to change focus between elements (i.e. escaping the field)
+//! - screen reader support via a11y
 //!
 
 pub mod actions;
@@ -173,3 +169,13 @@ pub use caret::*;
 pub use element::*;
 pub use state::*;
 pub use storage::*;
+
+/// Controls whether Tab inserts a tab character or moves focus to the next field.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum TabBehavior {
+    /// Preserve the editable text default: insert a tab character.
+    #[default]
+    Insert,
+    /// Move focus through the window's tab stops. Shift+Tab moves to the previous stop.
+    Focus,
+}

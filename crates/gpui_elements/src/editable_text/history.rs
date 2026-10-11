@@ -10,6 +10,7 @@ pub const MAX_HISTORY_LEN: usize = 1000;
 pub const DEFAULT_GROUP_INTERVAL: Duration = Duration::from_millis(300);
 
 // TODO: Should history get attached directly to storage? currently its per text field and operate both on storage and selection
+#[derive(Clone)]
 pub struct EditableTextHistory {
     /// The maximum duration between changes to `content` that can be grouped together as a single entry in the history log.
     grouping_interval: Duration,

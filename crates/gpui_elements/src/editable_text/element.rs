@@ -1,5 +1,5 @@
 use crate::editable_text::{
-    BLINK_INTERVAL_500MS, Caret, EditableTextState,
+    BLINK_INTERVAL_500MS, Caret, EditableTextState, TabBehavior,
     actions::{DEFAULT_INPUT_CONTEXT, EditableTextActionElement, EditableTextActionHandler},
     layout::{EditableTextLayoutResult, EditableTextLayoutState, TextLineSegment},
 };
@@ -31,6 +31,7 @@ pub fn editable_text(id: impl Into<ElementId>) -> EditableTextElement {
         caret_blink_interval: None,
         caret_width: px(2.),
         caret_height: relative(1.).into(),
+        tab_behavior: TabBehavior::default(),
     };
     this.interactivity.element_id = Some(id.into());
 
@@ -68,6 +69,7 @@ pub struct EditableTextElement {
     caret_blink_interval: Option<Duration>,
     caret_width: Pixels,
     caret_height: DefiniteLength,
+    tab_behavior: TabBehavior,
 }
 
 /// EditableText styling that goes beyond what Style/StyleRefinement supports
@@ -112,8 +114,7 @@ impl EditableTextElement {
     /// Configures whether the field supports multiple lines of text.
     /// Disabling this prevents actions like `enter` and navigating up and down.
     ///
-    /// It doesnt not automatically sanitize inputs from containing newlines (e.g. on paste).
-    /// This is a limitation of the current state of implementation and requires further iteration.
+    /// Incoming newlines are removed from single-line fields, including pasted and IME text.
     pub fn multiline(mut self, enabled: bool) -> Self {
         self.supports_multiline = enabled;
         self
@@ -128,6 +129,13 @@ impl EditableTextElement {
     /// Configures whether the element can accept input (effectively means "is the element currently enabled").
     pub fn accepts_input(mut self, enabled: bool) -> Self {
         self.accepts_input = enabled;
+        self
+    }
+
+    /// Configures whether Tab inserts `\t` or moves focus through the window's tab stops.
+    /// The default remains inserting a tab character for compatibility.
+    pub fn tab_behavior(mut self, behavior: TabBehavior) -> Self {
+        self.tab_behavior = behavior;
         self
     }
 
@@ -188,6 +196,104 @@ impl EditableTextElement {
     pub fn marked_color(mut self, color: Hsla) -> Self {
         self.colors.ime_underline = color;
         self
+    }
+}
+
+#[cfg(test)]
+mod mouse_hit_test_tests {
+    use super::*;
+    use crate::editable_text::StringStorage;
+    use gpui::{Context, Modifiers, Render, TestAppContext, Window, point, prelude::*};
+
+    struct InputView {
+        state: Entity<EditableTextState>,
+    }
+
+    impl Render for InputView {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            text_input("mouse-hit-test")
+                .state(self.state.downgrade())
+                .w(px(300.))
+                .h(px(48.))
+                .p(px(12.))
+        }
+    }
+
+    fn input_view<'a>(
+        cx: &'a mut TestAppContext,
+        text: &str,
+    ) -> (Entity<InputView>, &'a mut gpui::VisualTestContext) {
+        cx.update(crate::init);
+        let text = text.to_owned();
+        let (view, cx) = cx.add_window_view(move |_, cx| InputView {
+            state: cx.new(|cx| EditableTextState::new(StringStorage::from(text), cx)),
+        });
+        cx.update(|window, _| window.activate());
+        cx.run_until_parked();
+        (view, cx)
+    }
+
+    #[gpui::test]
+    fn clicking_text_midpoint_places_caret_at_midpoint_despite_padding(cx: &mut TestAppContext) {
+        let text = "clicking the middle should place the caret here";
+        let (view, cx) = input_view(cx, text);
+        cx.simulate_click(point(px(160.), px(24.)), Modifiers::none());
+
+        let caret = cx.update(|_, app| view.read(app).state.read(app).caret_pos());
+        assert!(
+            caret > 8 && caret < text.len() - 8,
+            "caret was at byte {caret}"
+        );
+    }
+
+    #[gpui::test]
+    fn queued_window_point_places_caret_after_the_field_is_first_laid_out(cx: &mut TestAppContext) {
+        cx.update(crate::init);
+        let text = "the first click position survives entering edit mode";
+        let text_for_view = text.to_owned();
+        let (view, cx) = cx.add_window_view(move |_, cx| {
+            let state = cx.new(|cx| {
+                let mut state = EditableTextState::new(StringStorage::from(text_for_view), cx);
+                state.place_caret_at_window_position(point(px(160.), px(24.)), cx);
+                state
+            });
+            InputView { state }
+        });
+        cx.update(|window, _| window.activate());
+        cx.run_until_parked();
+
+        let caret = cx.update(|_, app| view.read(app).state.read(app).caret_pos());
+        assert!(
+            caret > 8 && caret < text.len() - 8,
+            "queued click placed caret at byte {caret}"
+        );
+    }
+
+    #[gpui::test]
+    fn mouse_selection_uses_utf8_boundaries_and_supports_shift_click_and_drag(
+        cx: &mut TestAppContext,
+    ) {
+        let text = "a🙂bcdefghijklmnopqrstuvwxyz";
+        let (view, cx) = input_view(cx, text);
+
+        let anchor = point(px(36.), px(24.));
+        cx.simulate_click(anchor, Modifiers::none());
+        let anchor_caret = cx.update(|_, app| view.read(app).state.read(app).caret_pos());
+        assert!(text.is_char_boundary(anchor_caret));
+
+        cx.simulate_click(point(px(125.), px(24.)), Modifiers::shift());
+        let shifted_caret = cx.update(|_, app| view.read(app).state.read(app).caret_pos());
+        assert!(shifted_caret > anchor_caret);
+        assert!(text.is_char_boundary(shifted_caret));
+
+        cx.simulate_mouse_down(anchor, gpui::MouseButton::Left, Modifiers::none());
+        let target = point(px(180.), px(24.));
+        cx.simulate_mouse_move(target, Some(gpui::MouseButton::Left), Modifiers::none());
+        cx.simulate_mouse_move(target, Some(gpui::MouseButton::Left), Modifiers::none());
+        cx.simulate_mouse_up(target, gpui::MouseButton::Left, Modifiers::none());
+        let dragged_caret = cx.update(|_, app| view.read(app).state.read(app).caret_pos());
+        assert!(dragged_caret > anchor_caret);
+        assert!(text.is_char_boundary(dragged_caret));
     }
 }
 
@@ -271,6 +377,18 @@ impl Element for EditableTextElement {
         cx: &mut App,
     ) -> (gpui::LayoutId, Self::RequestLayoutState) {
         let entity = self.find_or_create_state(window, cx);
+        entity.update(cx, |state, _| state.tab_behavior = self.tab_behavior);
+        let focus_out_subscription = entity.read(cx).focus_out_subscription.is_none();
+        if focus_out_subscription {
+            let focus_handle = entity.read(cx).focus_handle(cx);
+            let weak_state = entity.downgrade();
+            let subscription = window.on_focus_out(&focus_handle, cx, move |_, _, cx| {
+                let _ = weak_state.update(cx, |state, cx| state.emit_blur(cx));
+            });
+            entity.update(cx, |state, _| {
+                state.focus_out_subscription = Some(subscription)
+            });
+        }
         let caret = self.find_or_create_caret(&entity, window, cx);
 
         if let Some(duration) = self.caret_blink_interval.take()
@@ -396,6 +514,21 @@ impl Element for EditableTextElement {
             },
         );
 
+        // A caller can request caret placement before the field exists in the tree (for example,
+        // when a tree row enters rename mode on the same click). Resolve it only after the new
+        // text layout, inner bounds, and scroll offset are available.
+        let pending_caret_position = request_layout
+            .state
+            .update(cx, |state, _| state.take_pending_caret_position());
+        if let Some(window_position) = pending_caret_position {
+            let text_position =
+                window_position - (prepaint.inner_bounds.origin + prepaint.scroll_offset);
+            let line_height = window.line_height();
+            request_layout.state.update(cx, |state, cx| {
+                state.place_caret_at_pixel_point(text_position, line_height, cx);
+            });
+        }
+
         let state = request_layout.state.read(cx);
         let elements = PrepaintElements::build_elements(
             state,
@@ -507,7 +640,9 @@ impl EditableTextElement {
         cx: &mut App,
     ) {
         let inner_bounds = prepaint.interactivity.inner_bounds;
-        let to_local_position = -(bounds.origin + prepaint.interactivity.scroll_offset);
+        // Text layout and painting are relative to the padded inner bounds. Convert mouse
+        // positions into that same coordinate space before applying the scroll offset.
+        let to_local_position = -(inner_bounds.origin + prepaint.interactivity.scroll_offset);
 
         let ime_handler = ElementInputHandler::new(inner_bounds, entity.clone());
         window.handle_input(&prepaint.focus_handle, ime_handler, cx);

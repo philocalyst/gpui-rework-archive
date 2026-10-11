@@ -17,6 +17,7 @@ gpui.workspace = true
 unicode-segmentation.workspace = true
 palette.workspace = true
 smallvec.workspace = true
+web-time.workspace = true
 
 [dev-dependencies]
 gpui = { path = "../gpui", package = "gpui-ce", features = ["test-support"] }
@@ -25,3 +26,7 @@ gpui_platform = { workspace = true, features = ["font-kit", "wayland", "x11"] }
 [[example]]
 name = "editable_text"
 path = "examples/editable_text.rs"
+
+[[example]]
+name = "tree_list"
+path = "examples/tree_list.rs"

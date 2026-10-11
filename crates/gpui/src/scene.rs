@@ -14,6 +14,7 @@ use std::{
     iter::Peekable,
     ops::{Add, Range, Sub},
     slice,
+    sync::Arc,
 };
 
 mod plan;
@@ -81,6 +82,114 @@ pub struct Scene {
 
 #[expect(missing_docs)]
 impl Scene {
+    /// Copies a bounded paint range if it contains only replayable standard primitives.
+    pub fn paint_snapshot(
+        &self,
+        range: Range<usize>,
+        bounds: Bounds<ScaledPixels>,
+    ) -> Option<PaintSnapshot> {
+        let operations = self.paint_operations.get(range)?;
+        if operations.len() > 4096
+            || estimated_operations_bytes(operations) > 4 * 1024 * 1024
+            || operations.iter().any(|op| {
+                matches!(
+                    op,
+                    PaintOperation::Primitive(
+                        Primitive::Surface(_) | Primitive::Shader(_) | Primitive::BackdropFilter(_)
+                    ) | PaintOperation::Surface { .. }
+                )
+            })
+        {
+            return None;
+        }
+        let (mut layers, mut filters) = (0usize, 0usize);
+        for operation in operations {
+            match operation {
+                PaintOperation::StartLayer(_) => layers += 1,
+                PaintOperation::EndLayer => {
+                    if layers == 0 {
+                        return None;
+                    }
+                    layers -= 1;
+                }
+                PaintOperation::Primitive(Primitive::FilterBoundary(boundary)) => {
+                    if boundary.is_start {
+                        filters += 1;
+                    } else {
+                        if filters == 0 {
+                            return None;
+                        }
+                        filters -= 1;
+                    }
+                }
+                _ => {}
+            }
+        }
+        if layers != 0 || filters != 0 {
+            return None;
+        }
+        Some(PaintSnapshot {
+            operations: Arc::from(operations.to_vec()),
+            bounds,
+            scale_factor: None,
+            owner_window_id: None,
+            atlas_generation: None,
+        })
+    }
+
+    /// Replays captured primitives translated and clipped to the caller's current viewport.
+    pub fn replay_snapshot(
+        &mut self,
+        snapshot: &PaintSnapshot,
+        delta: Point<ScaledPixels>,
+        clip: ContentMask<ScaledPixels>,
+        opacity: f32,
+    ) {
+        let opacity = opacity.clamp(0.0, 1.0);
+        if opacity < 1.0 {
+            let bounds = translate_bounds(snapshot.bounds, delta).intersect(&clip.bounds);
+            let make_boundary = |is_start| FilterBoundary {
+                order: 0,
+                bounds,
+                content_mask: clip,
+                corner_radii: Corners::default(),
+                corner_smoothing: 0.0,
+                filters: SmallVec::new(),
+                opacity,
+                is_start,
+            };
+            self.insert_primitive(Primitive::FilterBoundary(make_boundary(true)));
+            self.replay_snapshot_operations(snapshot, delta, clip);
+            self.insert_primitive(Primitive::FilterBoundary(make_boundary(false)));
+        } else {
+            self.replay_snapshot_operations(snapshot, delta, clip);
+        }
+    }
+
+    fn replay_snapshot_operations(
+        &mut self,
+        snapshot: &PaintSnapshot,
+        delta: Point<ScaledPixels>,
+        clip: ContentMask<ScaledPixels>,
+    ) {
+        for operation in snapshot.operations.iter() {
+            match operation {
+                PaintOperation::Primitive(primitive) => {
+                    let mut primitive = primitive.clone();
+                    translate_primitive(&mut primitive, delta, clip);
+                    self.insert_primitive(primitive);
+                }
+                PaintOperation::StartLayer(bounds) => {
+                    self.push_layer(translate_bounds(*bounds, delta).intersect(&clip.bounds))
+                }
+                PaintOperation::EndLayer => self.pop_layer(),
+                PaintOperation::Surface { .. } => {
+                    unreachable!("surfaces are rejected during capture")
+                }
+            }
+        }
+    }
+
     pub fn clear(&mut self) {
         self.paint_operations.clear();
         self.primitive_bounds.clear();
@@ -402,11 +511,114 @@ pub(crate) enum PrimitiveKind {
     FilterBoundaryEnd,
 }
 
+#[derive(Clone)]
 pub(crate) enum PaintOperation {
     Primitive(Primitive),
     Surface { surface: PaintSurface, opacity: f32 },
     StartLayer(Bounds<ScaledPixels>),
     EndLayer,
+}
+
+/// An owned, paint-only copy of a bounded scene range. It carries no dispatch or accessibility data.
+/// Window-captured snapshots are tied to their originating window and atlas generation; replay
+/// them only in that window and discard them after an atlas invalidation. Snapshots created
+/// directly through [`Scene::paint_snapshot`] have no window or scale stamp and can only be
+/// replayed through [`Scene::replay_snapshot`], not [`crate::Window::replay_paint_snapshot`].
+#[derive(Clone)]
+pub struct PaintSnapshot {
+    operations: Arc<[PaintOperation]>,
+    bounds: Bounds<ScaledPixels>,
+    scale_factor: Option<f32>,
+    owner_window_id: Option<u64>,
+    atlas_generation: Option<u64>,
+}
+
+impl PaintSnapshot {
+    /// Number of captured scene operations.
+    pub fn operation_count(&self) -> usize {
+        self.operations.len()
+    }
+    /// Original logical-space origin, in device-scaled pixels.
+    pub fn origin(&self) -> Point<ScaledPixels> {
+        self.bounds.origin
+    }
+    /// Bounds used when this snapshot was captured, in device-scaled pixels.
+    pub fn bounds(&self) -> Bounds<ScaledPixels> {
+        self.bounds
+    }
+    /// Scale factor of the window that captured this snapshot, when captured through a Window.
+    pub fn capture_scale_factor(&self) -> Option<f32> {
+        self.scale_factor
+    }
+    /// Conservative size estimate including operation storage and owned primitive buffers.
+    pub fn estimated_byte_size(&self) -> usize {
+        estimated_operations_bytes(&self.operations)
+    }
+
+    pub(crate) fn set_capture_scale_factor(&mut self, scale_factor: f32) {
+        self.scale_factor = Some(scale_factor);
+    }
+
+    pub(crate) fn set_capture_resources(&mut self, owner_window_id: u64, atlas_generation: u64) {
+        self.owner_window_id = Some(owner_window_id);
+        self.atlas_generation = Some(atlas_generation);
+    }
+
+    pub(crate) fn is_compatible_with_scale_factor(&self, scale_factor: f32) -> bool {
+        self.scale_factor
+            .map_or(false, |captured| captured == scale_factor)
+    }
+
+    pub(crate) fn is_compatible_with_window(
+        &self,
+        owner_window_id: u64,
+        atlas_generation: u64,
+    ) -> bool {
+        self.owner_window_id
+            .map_or(false, |owner| owner == owner_window_id)
+            && self
+                .atlas_generation
+                .map_or(false, |generation| generation == atlas_generation)
+    }
+}
+
+fn estimated_operation_bytes(operation: &PaintOperation) -> usize {
+    let mut bytes = std::mem::size_of::<PaintOperation>();
+    match operation {
+        PaintOperation::Primitive(Primitive::Path(path)) => {
+            bytes = bytes.saturating_add(
+                path.vertices
+                    .len()
+                    .saturating_mul(std::mem::size_of::<PathVertex<ScaledPixels>>()),
+            );
+        }
+        PaintOperation::Primitive(Primitive::FilterBoundary(boundary)) => {
+            bytes = bytes.saturating_add(
+                boundary
+                    .filters
+                    .len()
+                    .saturating_mul(std::mem::size_of::<ScaledFilter>()),
+            );
+        }
+        PaintOperation::Primitive(Primitive::BackdropFilter(filter)) => {
+            bytes = bytes.saturating_add(
+                filter
+                    .filters
+                    .len()
+                    .saturating_mul(std::mem::size_of::<ScaledFilter>()),
+            );
+        }
+        _ => {}
+    }
+    bytes
+}
+
+fn estimated_operations_bytes(operations: &[PaintOperation]) -> usize {
+    operations.iter().fold(
+        std::mem::size_of::<Arc<[PaintOperation]>>()
+            .saturating_add(2 * std::mem::size_of::<usize>()),
+        |total, operation| total.saturating_add(estimated_operation_bytes(operation)),
+    )
 }
 
 #[derive(Clone)]
@@ -423,6 +635,77 @@ pub enum Primitive {
     Surface(PaintSurface),
     BackdropFilter(BackdropFilter),
     FilterBoundary(FilterBoundary),
+}
+
+fn translate_bounds(
+    bounds: Bounds<ScaledPixels>,
+    delta: Point<ScaledPixels>,
+) -> Bounds<ScaledPixels> {
+    Bounds {
+        origin: Point {
+            x: ScaledPixels(bounds.origin.x.0 + delta.x.0),
+            y: ScaledPixels(bounds.origin.y.0 + delta.y.0),
+        },
+        size: bounds.size,
+    }
+}
+
+fn translate_mask(
+    mask: &mut ContentMask<ScaledPixels>,
+    delta: Point<ScaledPixels>,
+    clip: ContentMask<ScaledPixels>,
+) {
+    mask.bounds = translate_bounds(mask.bounds, delta).intersect(&clip.bounds);
+}
+
+fn translate_primitive(
+    primitive: &mut Primitive,
+    delta: Point<ScaledPixels>,
+    clip: ContentMask<ScaledPixels>,
+) {
+    match primitive {
+        Primitive::Shadow(p) => {
+            p.bounds = translate_bounds(p.bounds, delta);
+            p.element_bounds = translate_bounds(p.element_bounds, delta);
+            translate_mask(&mut p.content_mask, delta, clip);
+        }
+        Primitive::Quad(p) => {
+            p.bounds = translate_bounds(p.bounds, delta);
+            translate_mask(&mut p.content_mask, delta, clip);
+        }
+        Primitive::Path(p) => {
+            p.bounds = translate_bounds(p.bounds, delta);
+            translate_mask(&mut p.content_mask, delta, clip);
+            for v in &mut p.vertices {
+                v.xy_position.x.0 += delta.x.0;
+                v.xy_position.y.0 += delta.y.0;
+                translate_mask(&mut v.content_mask, delta, clip);
+            }
+        }
+        Primitive::Underline(p) => {
+            p.bounds = translate_bounds(p.bounds, delta);
+            translate_mask(&mut p.content_mask, delta, clip);
+        }
+        Primitive::MonochromeSprite(p) => {
+            p.bounds = translate_bounds(p.bounds, delta);
+            translate_mask(&mut p.content_mask, delta, clip);
+        }
+        Primitive::SubpixelSprite(p) => {
+            p.bounds = translate_bounds(p.bounds, delta);
+            translate_mask(&mut p.content_mask, delta, clip);
+        }
+        Primitive::PolychromeSprite(p) => {
+            p.bounds = translate_bounds(p.bounds, delta);
+            translate_mask(&mut p.content_mask, delta, clip);
+        }
+        Primitive::FilterBoundary(p) => {
+            p.bounds = translate_bounds(p.bounds, delta);
+            translate_mask(&mut p.content_mask, delta, clip);
+        }
+        Primitive::Surface(_) | Primitive::Shader(_) | Primitive::BackdropFilter(_) => {
+            unreachable!("unsupported primitive escaped snapshot validation")
+        }
+    }
 }
 
 #[expect(missing_docs)]
@@ -1384,6 +1667,97 @@ mod tests {
                 height: sp(100.0),
             },
         }
+    }
+
+    #[test]
+    fn paint_snapshot_translates_quads_and_intersects_the_new_clip() {
+        let mut source = Scene::default();
+        let bounds = full_bounds();
+        let mut quad = Quad::default();
+        quad.bounds = bounds;
+        quad.content_mask = ContentMask { bounds };
+        source.insert_primitive(quad);
+        let snapshot = source.paint_snapshot(0..source.len(), bounds).unwrap();
+        let clip = ContentMask {
+            bounds: Bounds {
+                origin: Point {
+                    x: sp(20.0),
+                    y: sp(0.0),
+                },
+                size: Size {
+                    width: sp(30.0),
+                    height: sp(100.0),
+                },
+            },
+        };
+        let mut replay = Scene::default();
+        replay.replay_snapshot(
+            &snapshot,
+            Point {
+                x: sp(10.0),
+                y: sp(5.0),
+            },
+            clip,
+            1.0,
+        );
+        assert_eq!(replay.quads.len(), 1);
+        assert_eq!(
+            replay.quads[0].bounds.origin,
+            Point {
+                x: sp(10.0),
+                y: sp(5.0)
+            }
+        );
+        assert_eq!(
+            replay.quads[0].content_mask.bounds,
+            Bounds {
+                origin: Point {
+                    x: sp(20.0),
+                    y: sp(5.0)
+                },
+                size: Size {
+                    width: sp(30.0),
+                    height: sp(95.0)
+                },
+            }
+        );
+    }
+
+    #[test]
+    fn paint_snapshot_rejects_surfaces() {
+        let mut source = Scene::default();
+        let bounds = full_bounds();
+        let surface = PaintSurface {
+            order: 0,
+            bounds,
+            content_mask: ContentMask { bounds },
+            source: SurfaceSource::Unsupported(Size::default()),
+        };
+        source.insert_primitive(surface);
+        assert!(source.paint_snapshot(0..source.len(), bounds).is_none());
+    }
+
+    #[test]
+    fn paint_snapshot_rejects_unbalanced_layer_ranges() {
+        let mut source = Scene::default();
+        let bounds = full_bounds();
+        source.push_layer(bounds);
+        assert!(source.paint_snapshot(0..source.len(), bounds).is_none());
+    }
+
+    #[test]
+    fn paint_snapshot_resource_stamp_rejects_other_window_and_stale_atlas() {
+        let scene = Scene::default();
+        let mut snapshot = scene.paint_snapshot(0..0, full_bounds()).unwrap();
+        assert!(!snapshot.is_compatible_with_scale_factor(2.0));
+        assert!(!snapshot.is_compatible_with_window(17, 4));
+        snapshot.set_capture_scale_factor(2.0);
+        snapshot.set_capture_resources(17, 4);
+        assert!(snapshot.is_compatible_with_scale_factor(2.0));
+        assert!(!snapshot.is_compatible_with_scale_factor(1.0));
+        assert!(snapshot.is_compatible_with_window(17, 4));
+        assert!(!snapshot.is_compatible_with_window(18, 4));
+        assert!(!snapshot.is_compatible_with_window(17, 5));
     }
 
     fn mask() -> ContentMask<ScaledPixels> {

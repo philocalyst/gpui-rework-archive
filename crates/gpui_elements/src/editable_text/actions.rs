@@ -14,6 +14,8 @@ gpui::actions!(
         Enter,
         /// Insert a tab character at the cursor position.
         Tab,
+        /// Move focus to the previous tab stop when Tab traversal is enabled.
+        TabPrevious,
         /// Delete the character before the cursor.
         DeleteLeft,
         /// Delete the character after the cursor.
@@ -126,6 +128,7 @@ pub fn default_bindings() -> gpui::ActionBindingCollection {
         .with::<DeleteLeft>("backspace")
         .with::<DeleteRight>("delete")
         .with::<Tab>("tab")
+        .with::<TabPrevious>("shift-tab")
         .with::<Enter>("enter")
         .with::<NavLeft>("left")
         .with::<NavRight>("right")
@@ -195,6 +198,8 @@ pub trait EditableTextActionHandler<Context>: Sized {
     fn insert_enter(&mut self, _: &Enter, _w: &mut Window, _cx: &mut Context) {}
     /// Insert a tab character at the cursor position.
     fn insert_tab(&mut self, _: &Tab, _w: &mut Window, _cx: &mut Context) {}
+    /// Move focus to the previous focusable element.
+    fn previous_tab(&mut self, _: &TabPrevious, _w: &mut Window, _cx: &mut Context) {}
 
     /// Delete the character before the cursor.
     fn delete_left(&mut self, _: &DeleteLeft, _w: &mut Window, _cx: &mut Context) {}
@@ -321,6 +326,7 @@ pub(super) trait EditableTextActionElement<State> {
         register_action!(self, escape);
         register_action!(self, insert_enter);
         register_action!(self, insert_tab);
+        register_action!(self, previous_tab);
         register_action!(self, delete_left);
         register_action!(self, delete_right);
         register_action!(self, delete_word_left);
