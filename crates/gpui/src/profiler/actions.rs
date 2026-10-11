@@ -83,8 +83,11 @@ impl ActionStatistics {
 
     #[cfg(feature = "profiler")]
     pub fn save_action_timing(&mut self) {
-        let now = Instant::now();
+        self.save_action_timing_at(Instant::now());
+    }
 
+    #[cfg(feature = "profiler")]
+    fn save_action_timing_at(&mut self, now: Instant) {
         let Some((action, started)) = self.running.take() else {
             // Actions are ran only on the foreground executor and therefore
             // sequentially _except_ in tests where they can run concurrently.
@@ -110,7 +113,7 @@ impl ActionStatistics {
                 && let Some(to_replace) = self
                     .longest_runtimes
                     .iter_mut()
-                    .min_by_key(|action| runtime >= action.runtime())
+                    .min_by_key(|action| action.runtime())
             {
                 *to_replace = timing;
             } else {
@@ -119,12 +122,16 @@ impl ActionStatistics {
                     .expect("just checked it is not full");
             };
 
-            self.runtime_to_beat = self
-                .longest_runtimes
-                .iter()
-                .map(|action| action.runtime())
-                .min()
-                .expect("never empty");
+            // Until the list is full, any action above the floor is worth keeping.
+            self.runtime_to_beat = if self.longest_runtimes.is_full() {
+                self.longest_runtimes
+                    .iter()
+                    .map(|action| action.runtime())
+                    .min()
+                    .expect("never empty")
+            } else {
+                Duration::from_micros(100)
+            };
         }
     }
     #[cfg(not(feature = "profiler"))]
@@ -210,4 +217,30 @@ pub fn take_action_stats() -> ActionStatistics {
 #[cfg(not(feature = "profiler"))]
 pub fn take_action_stats() -> ActionStatistics {
     ActionStatistics::default()
+}
+
+#[cfg(all(test, feature = "profiler"))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn retains_the_five_longest_actions_regardless_of_arrival_order() {
+        let start = Instant::now();
+        let mut stats = ActionStatistics::new();
+        for microseconds in [500, 100, 400, 200, 300, 50, 350, 150, 600] {
+            stats.update_running_action("test", start);
+            stats.save_action_timing_at(start + Duration::from_micros(microseconds));
+        }
+
+        let mut retained = stats
+            .longest_runtimes(false)
+            .map(|action| action.duration())
+            .collect::<Vec<_>>();
+        retained.sort();
+        assert_eq!(
+            retained,
+            [300, 350, 400, 500, 600].map(Duration::from_micros)
+        );
+        assert_eq!(stats.runtime_to_beat, Duration::from_micros(300));
+    }
 }
