@@ -523,6 +523,9 @@ impl<'a> Scope<'a> {
 #[cfg(not(target_family = "wasm"))]
 impl Drop for Scope<'_> {
     fn drop(&mut self) {
+        // Futures that were never submitted hold clones of `tx`, which would keep the
+        // channel open forever when the scope is dropped while unwinding.
+        self.futures.clear();
         self.tx.take().unwrap();
 
         // Wait until the channel is closed, which means that all of the spawned
@@ -557,6 +560,34 @@ mod test {
 
         let app = App::new_app(platform, AssetRegistry::default().into(), http_client);
         (dispatcher, background_executor, app)
+    }
+
+    #[test]
+    #[cfg(not(target_family = "wasm"))]
+    fn scoped_registration_panic_does_not_block_on_unstarted_futures() {
+        use std::sync::mpsc;
+
+        // A broken cleanup path blocks forever in `Scope::drop`, so run it on a
+        // separate thread and fail with a timeout instead of hanging the test.
+        let (completed_tx, completed_rx) = mpsc::channel();
+        let worker = std::thread::spawn(move || {
+            let dispatcher = Arc::new(TestDispatcher::new(0));
+            let executor = BackgroundExecutor::new(dispatcher);
+            let unwound = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                futures::executor::block_on(executor.scoped(|scope| {
+                    scope.spawn(async { unreachable!("an unsubmitted future must not run") });
+                    panic!("registration failed");
+                }));
+            }));
+            completed_tx.send(unwound.is_err()).unwrap();
+        });
+
+        assert_eq!(
+            completed_rx.recv_timeout(Duration::from_secs(5)),
+            Ok(true),
+            "the scope must unwind after dropping its unstarted futures"
+        );
+        worker.join().unwrap();
     }
 
     #[test]
