@@ -163,7 +163,7 @@ impl ApplicationHandle {
     /// double borrow.
     pub fn update<R>(&self, f: impl FnOnce(&mut App) -> R) -> R {
         let cx = &mut *self.app.borrow_mut();
-        f(cx)
+        cx.update(f)
     }
 
     /// An [`AsyncApp`] for use across await points. It holds the app weakly; keeping the
@@ -603,7 +603,7 @@ impl SystemWindowTabController {
                 tabs.push(tab);
             }
         } else {
-            let new_group_id = controller.tab_groups.len();
+            let new_group_id = controller.tab_groups.keys().max().map_or(0, |id| id + 1);
             controller.tab_groups.insert(new_group_id, tabs);
         }
     }
@@ -3160,7 +3160,7 @@ impl AnyDrag {
 
     /// Returns true if the type of the internal value matches the provided type.
     pub fn is_type<T: 'static>(&self) -> bool {
-        self.value.type_id() == TypeId::of::<T>()
+        self.value.as_ref().type_id() == TypeId::of::<T>()
     }
 }
 
@@ -3288,6 +3288,66 @@ mod test {
         cx.to_async().refresh();
 
         assert_eq!(render_count.get(), render_count_before_refresh + 1);
+    }
+
+    #[test]
+    fn embedded_update_flushes_effects() {
+        let cx = TestAppContext::single();
+        let handle = super::ApplicationHandle {
+            app: cx.app.clone(),
+        };
+        let completed = Rc::new(Cell::new(false));
+
+        handle.update(|cx| {
+            cx.defer({
+                let completed = completed.clone();
+                move |_| completed.set(true)
+            });
+        });
+
+        assert!(completed.get());
+    }
+
+    #[gpui::test]
+    fn adding_a_tab_group_after_removal_preserves_other_groups(cx: &mut TestAppContext) {
+        use super::{SystemWindowTab, SystemWindowTabController};
+
+        let windows: Vec<_> = (0..4).map(|_| cx.add_window(|_, _| Empty)).collect();
+        cx.update(|cx| {
+            for (ix, window) in windows.iter().take(3).enumerate() {
+                SystemWindowTabController::add_tab(
+                    cx,
+                    window.window_id(),
+                    vec![SystemWindowTab::new(
+                        format!("Window {ix}").into(),
+                        (*window).into(),
+                    )],
+                );
+            }
+            SystemWindowTabController::remove_tab(cx, windows[0].window_id());
+            SystemWindowTabController::add_tab(
+                cx,
+                windows[3].window_id(),
+                vec![SystemWindowTab::new("New window".into(), windows[3].into())],
+            );
+
+            let controller = cx.global::<SystemWindowTabController>();
+            assert_eq!(controller.tab_groups.len(), 3);
+            for window in &windows[1..] {
+                assert_eq!(controller.tabs(window.window_id()).unwrap().len(), 1);
+            }
+        });
+    }
+
+    #[gpui::test]
+    fn drag_type_matches_the_payload(cx: &mut TestAppContext) {
+        cx.update(|cx| {
+            let view = cx.new(|_| Empty);
+            let drag = super::AnyDrag::new(String::from("row"), view);
+            assert!(drag.is_type::<String>());
+            assert!(!drag.is_type::<usize>());
+            assert!(!drag.is_type::<std::sync::Arc<dyn std::any::Any>>());
+        });
     }
 
     #[test]
