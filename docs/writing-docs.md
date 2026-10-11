@@ -67,8 +67,8 @@ Small items deserve small docs. A field like `Point::x` needs one line. Spend
 words on the items readers struggle with: contexts, entities, elements,
 focus, actions, layout and painting.
 
-Link every GPUI item the first time it's mentioned: [`Entity`],
-[`Context::notify`], [`Window::focus`]. Rustdoc fails the build on broken links.
+Link every GPUI item the first time it's mentioned, as in ``[`Entity`]`` or
+``[`Context::notify`]``. Rustdoc fails the build on broken links.
 
 ## Examples
 
@@ -76,7 +76,7 @@ An example is a promise that the code works, so make it run:
 
 - Prefer examples that run and assert. `assert_eq!` shows the reader what to
   expect and proves it to CI.
-- Use [`TestApp`] to run app, entity and window code headlessly. Hide the
+- Use `TestApp` to run app, entity and window code headlessly. Hide the
   harness with `#` so the reader sees normal application code:
 
   ````rust
@@ -103,8 +103,9 @@ An example is a promise that the code works, so make it run:
   assert on the results of `notify` and `emit` in a *later* `update`.
 - Mark examples that declare actions (`actions!`, `#[derive(Action)]`) as
   ```` ```standalone_crate ````. Doctests share one binary and actions register
-  by name, so two examples declaring `editor::Save` would make every other
-  example panic. `tests/doc_examples.rs` enforces this.
+  by name, so two examples declaring `editor::Save` would make every example
+  that creates an app panic with "Action with name `editor::Save` already
+  registered".
 
 ## Links in long-form pages
 
@@ -126,16 +127,22 @@ Use headings as signposts, keep paragraphs short and put a runnable example
 near the top of every page. Callouts use plain blockquotes beginning with
 **Note:**, **Tip:** or **Warning:**.
 
-## Live examples
+## Example programs
 
-Examples under `crates/gpui/examples` run natively and, unless marked
-native-only, in the browser. Embed one in any page with:
+An example is one file in `crates/gpui/examples` with a `fn main` that only
+creates the application and a `pub fn run(cx: &mut App)` that does everything
+else. Cargo builds it, `site/player` runs it in the browser and renders it in
+its tests, and `_documentation.rs` gives it a page with its full source. To
+add one, write the file and add a line to both lists.
+
+To show a live example in another page, write:
 
 ```html
 <div class="gpui-example" data-example="counter">
-  <a href="https://gpui-ce.github.io/examples/#counter">Run the counter example in your browser</a>
+
+Run it with `cargo run --example counter`.
+
 </div>
 ```
 
-On the project site this becomes the running example. Elsewhere, such as on
-docs.rs, the link remains.
+On the GPUI site the example replaces the text. On docs.rs the text remains.

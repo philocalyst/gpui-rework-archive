@@ -1,7 +1,7 @@
 <img src="assets/readme/banner.png" alt="GPUI Community Edition banner" width="100%">
 
 <p align="center">
-  <a href="https://gpui-ce.github.io">Website</a> ​ · ​ <a href="crates/gpui/examples/learn">Examples</a> ​ · ​ <a href="https://discord.gg/ENGHGjrYEn">Discord</a>
+  <a href="https://gpui-ce.github.io">Website</a> ​ · ​ <a href="https://docs.rs/gpui-ce">Docs</a> ​ · ​ <a href="crates/gpui/examples">Examples</a> ​ · ​ <a href="https://discord.gg/ENGHGjrYEn">Discord</a>
 </p>
 
 # GPUI - Community Edition
@@ -31,7 +31,7 @@ It's mostly API compatible with upstream, but that is changing!
       .child("Hello, GPUI")
   ```
 
-  [Layout example](crates/gpui/examples/learn/layout.rs) ​ · ​ [Styling example](crates/gpui/examples/learn/styling.rs)
+  [Layout example](crates/gpui/examples/layout.rs) ​ · ​ [Styling example](crates/gpui/examples/styling.rs)
 
 - State and events
 
@@ -47,7 +47,7 @@ It's mostly API compatible with upstream, but that is changing!
       }))
   ```
 
-  [Interaction example](crates/gpui/examples/learn/interactive_elements.rs)
+  [Interaction example](crates/gpui/examples/interaction.rs)
 
 - Actions and keybinds
 
@@ -77,7 +77,7 @@ It's mostly API compatible with upstream, but that is changing!
       .child(format!("Count: {}", self.count))
   ```
 
-  [Keybind example](crates/gpui/examples/learn/actions_and_keybinds.rs)
+  [Keybind example](crates/gpui/examples/keyboard.rs)
 
 - Virtualized lists
 
@@ -96,7 +96,7 @@ It's mostly API compatible with upstream, but that is changing!
   .h(px(300.0))
   ```
 
-  [List example](crates/gpui/examples/learn/uniform_list.rs)
+  [List example](crates/gpui/examples/list.rs)
 
 - Custom drawing
 
@@ -112,7 +112,21 @@ It's mostly API compatible with upstream, but that is changing!
   .size(px(80.0))
   ```
 
-  [Drawing example](crates/gpui/examples/learn/custom_drawing.rs)
+  [Drawing example](crates/gpui/examples/canvas.rs)
+
+## Learn
+
+The documentation lives with the API reference, so it's versioned with the code
+and every example in it is tested:
+
+- [Tutorial](https://docs.rs/gpui-ce/latest/gpui/_documentation/tutorial/index.html): build a todo app, one idea at a time.
+- [Guides](https://docs.rs/gpui-ce/latest/gpui/_documentation/guides/index.html): get a specific job done.
+- [Concepts](https://docs.rs/gpui-ce/latest/gpui/_documentation/concepts/index.html): how GPUI works and why.
+- [Examples](crates/gpui/examples): complete programs. Run one with `cargo run --example counter`, or see them live on [the website](https://gpui-ce.github.io).
+
+To read the documentation for this checkout, run `just docs` and open
+`target/doc/gpui/index.html`. [`docs/writing-docs.md`](docs/writing-docs.md)
+explains how to contribute to it.
 
 ## Setup
 View the [setup guide](SETUP.md) for installation instructions.
