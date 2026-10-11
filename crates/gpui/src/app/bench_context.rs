@@ -526,7 +526,7 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
              ThreadedDispatcher; construct one with gpui::bench_platform"
         );
         let foreground_executor = platform.foreground_executor();
-        let asset_source = Arc::new(());
+        let asset_source = Arc::new(crate::AssetRegistry::default());
         // Benchmark setup must not make accidental network requests. The
         // production `BlockedHttpClient` reports them without enabling a
         // configurable test double through `test-support`.
