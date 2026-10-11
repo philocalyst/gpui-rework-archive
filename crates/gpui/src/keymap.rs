@@ -119,7 +119,13 @@ impl Keymap {
                     }
 
                     if is_no_action(&*disabled_binding.action) {
-                        if disabled_binding_matches_context(disabled_binding, binding) {
+                        // Like `bindings_for_input`, a null only hides bindings from
+                        // equal or weaker sources (a larger meta is weaker).
+                        let source = binding.meta.map_or(0, |meta| meta.0);
+                        let removal_source = disabled_binding.meta.map_or(0, |meta| meta.0);
+                        if source >= removal_source
+                            && disabled_binding_matches_context(disabled_binding, binding)
+                        {
                             return None;
                         }
                     } else if is_unbind(&*disabled_binding.action)
@@ -640,6 +646,41 @@ mod tests {
         ]);
         let (result, _) = keymap.bindings_for_input(&ctrl_x(), &editor_context());
         assert!(result.is_empty());
+    }
+
+    #[test]
+    fn test_bindings_for_action_disable_weaker_sources_only() {
+        // A base keymap null (meta 2) listed after the binding hides only
+        // bindings from equal or weaker sources, matching `bindings_for_input`.
+        for (source, expected) in [
+            (None, 1),
+            (Some(KeyBindingMetaIndex(0)), 1),
+            (Some(KeyBindingMetaIndex(1)), 1),
+            (Some(KeyBindingMetaIndex(2)), 0),
+            (Some(KeyBindingMetaIndex(3)), 0),
+        ] {
+            let mut binding = KeyBinding::new("ctrl-x", ActionAlpha {}, Some("editor"));
+            if let Some(source) = source {
+                binding.set_meta(source);
+            }
+            let mut keymap = Keymap::default();
+            keymap.add_bindings([
+                binding,
+                KeyBinding::new("ctrl-x", NoAction {}, Some("editor"))
+                    .with_meta(KeyBindingMetaIndex(2)),
+            ]);
+
+            let (candidates, _) = keymap.bindings_for_input(
+                &[Keystroke::parse("ctrl-x").unwrap()],
+                &[KeyContext::parse("editor").unwrap()],
+            );
+            assert_eq!(candidates.len(), expected, "{source:?}");
+            assert_eq!(
+                keymap.bindings_for_action(&ActionAlpha {}).count(),
+                expected,
+                "{source:?}"
+            );
+        }
     }
 
     #[test]
