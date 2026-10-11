@@ -154,39 +154,57 @@ fn calculate_seeds(
         .map(|seed| seed.parse().expect("invalid SEED variable as integer"))
         .ok();
 
-    let empty_range = || 0..0;
-
-    let iter = {
-        let env_range = if let Some(env_num) = env_num {
-            env_num..env_num + 1
-        } else {
-            empty_range()
-        };
-
-        // if `iterations` is 1 and !(`explicit_seeds` is non-empty || `SEED` is set), then add     the run `0`
-        // if `iterations` is 1 and  (`explicit_seeds` is non-empty || `SEED` is set), then discard the run `0`
-        // if `iterations` isn't 1 and `SEED` is set, do `SEED..SEED+iterations`
-        // otherwise, do `0..iterations`
-        let iterations_range = match (iterations, env_num) {
-            (1, None) if explicit_seeds.is_empty() => 0..1,
-            (1, None) | (1, Some(_)) => empty_range(),
-            (iterations, Some(env)) => env..env + iterations,
-            (iterations, None) => 0..iterations,
-        };
-
-        // if `SEED` is set, ignore `explicit_seeds`
-        let explicit_seeds = if env_num.is_some() {
-            &[]
-        } else {
-            explicit_seeds
-        };
-
-        env_range
-            .chain(iterations_range)
-            .chain(explicit_seeds.iter().copied())
-    };
+    let iter = seed_sequence(iterations, explicit_seeds, env_num);
     let is_multiple_runs = iter.clone().nth(1).is_some();
     (iter, is_multiple_runs)
+}
+
+fn seed_sequence(
+    iterations: u64,
+    explicit_seeds: &[u64],
+    env_num: Option<u64>,
+) -> impl Iterator<Item = u64> + Clone + '_ {
+    // if `iterations` is 1 and `explicit_seeds` is non-empty, discard the run `0`
+    // if `SEED` is set, do `SEED..SEED+iterations` and ignore `explicit_seeds`
+    // otherwise, do `0..iterations` followed by `explicit_seeds`
+    let range = match (iterations, env_num) {
+        (1, None) if !explicit_seeds.is_empty() => 0..0,
+        (iterations, Some(env)) => env..env + iterations,
+        (iterations, None) => 0..iterations,
+    };
+    let explicit_seeds = if env_num.is_some() {
+        &[]
+    } else {
+        explicit_seeds
+    };
+    range.chain(explicit_seeds.iter().copied())
+}
+
+#[cfg(test)]
+mod seed_tests {
+    use super::seed_sequence;
+
+    #[test]
+    fn environment_seed_starts_one_sequence_without_duplicate_first_run() {
+        assert_eq!(
+            seed_sequence(3, &[80], Some(17)).collect::<Vec<_>>(),
+            [17, 18, 19]
+        );
+        assert_eq!(seed_sequence(1, &[80], Some(17)).collect::<Vec<_>>(), [17]);
+    }
+
+    #[test]
+    fn explicit_seeds_replace_default_run_or_extend_iteration_range() {
+        assert_eq!(seed_sequence(1, &[], None).collect::<Vec<_>>(), [0]);
+        assert_eq!(
+            seed_sequence(1, &[17, 80], None).collect::<Vec<_>>(),
+            [17, 80]
+        );
+        assert_eq!(
+            seed_sequence(3, &[80], None).collect::<Vec<_>>(),
+            [0, 1, 2, 80]
+        );
+    }
 }
 
 /// A test struct for converting an observation callback into a stream.
