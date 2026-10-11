@@ -142,7 +142,7 @@ impl Scene {
     ) {
         self.is_finished = false;
         let clipped_bounds = primitive
-            .bounds()
+            .paint_bounds()
             .intersect(&primitive.content_mask().bounds);
 
         // Content-filter boundaries must always be inserted as matched pairs — dropping one
@@ -418,6 +418,20 @@ pub enum Primitive {
 
 #[expect(missing_docs)]
 impl Primitive {
+    /// The screen-space bounds of the primitive, which for transformed sprites differ from
+    /// their stored bounds.
+    fn paint_bounds(&self) -> Bounds<ScaledPixels> {
+        match self {
+            Primitive::MonochromeSprite(sprite) => {
+                transformed_bounds(sprite.bounds, sprite.transformation)
+            }
+            Primitive::SubpixelSprite(sprite) => {
+                transformed_bounds(sprite.bounds, sprite.transformation)
+            }
+            _ => *self.bounds(),
+        }
+    }
+
     pub fn bounds(&self) -> &Bounds<ScaledPixels> {
         match self {
             Primitive::Shadow(shadow) => &shadow.bounds,
@@ -447,6 +461,34 @@ impl Primitive {
             Primitive::FilterBoundary(boundary) => &boundary.content_mask,
         }
     }
+}
+
+fn transformed_bounds(
+    bounds: Bounds<ScaledPixels>,
+    transformation: TransformationMatrix,
+) -> Bounds<ScaledPixels> {
+    if transformation == TransformationMatrix::unit() {
+        return bounds;
+    }
+
+    let corners = [
+        bounds.origin,
+        bounds.top_right(),
+        bounds.bottom_left(),
+        bounds.bottom_right(),
+    ]
+    .map(|corner| {
+        transformation
+            .apply(corner.map(|value| Pixels(value.0)))
+            .map(|value| ScaledPixels(value.0))
+    });
+    let top_left = corners
+        .iter()
+        .fold(corners[0], |min, corner| min.min(corner));
+    let bottom_right = corners
+        .iter()
+        .fold(corners[0], |max, corner| max.max(corner));
+    Bounds::from_corners(top_left, bottom_right)
 }
 
 #[cfg_attr(
@@ -1378,6 +1420,102 @@ mod tests {
                 bounds: Bounds::<DevicePixels>::default(),
             },
         }
+    }
+
+    fn monochrome_sprite(
+        content_mask: ContentMask<ScaledPixels>,
+        transformation: TransformationMatrix,
+    ) -> MonochromeSprite {
+        MonochromeSprite {
+            order: 0,
+            padding: 0,
+            // Three wide and two tall, before the transformation.
+            bounds: Bounds {
+                origin: Point {
+                    x: sp(0.0),
+                    y: sp(0.0),
+                },
+                size: Size {
+                    width: sp(3.0),
+                    height: sp(2.0),
+                },
+            },
+            content_mask,
+            color: Default::default(),
+            tile: AtlasTile {
+                texture_id: AtlasTextureId {
+                    index: 0,
+                    kind: AtlasTextureKind::Monochrome,
+                },
+                tile_id: TileId(0),
+                padding: 0,
+                bounds: Bounds::<DevicePixels>::default(),
+            },
+            transformation,
+        }
+    }
+
+    /// Rotates a quarter turn, so the sprite covers x in 3..5 and y in 1..4.
+    fn rotated_sprite_transform() -> TransformationMatrix {
+        TransformationMatrix {
+            rotation_scale: [[0.0, -1.0], [1.0, 0.0]],
+            translation: [5.0, 1.0],
+        }
+    }
+
+    fn mask_at(x: f32, y: f32, width: f32, height: f32) -> ContentMask<ScaledPixels> {
+        ContentMask {
+            bounds: Bounds {
+                origin: Point { x: sp(x), y: sp(y) },
+                size: Size {
+                    width: sp(width),
+                    height: sp(height),
+                },
+            },
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn transformed_sprite_is_clipped_by_its_transformed_bounds() {
+        // The mask only overlaps the rotated sprite.
+        let mut scene = Scene::default();
+        scene.insert_primitive(monochrome_sprite(
+            mask_at(3.0, 1.0, 1.0, 3.0),
+            rotated_sprite_transform(),
+        ));
+        assert_eq!(scene.monochrome_sprites.len(), 1);
+
+        // The mask only overlaps the sprite before it is rotated.
+        let mut scene = Scene::default();
+        scene.insert_primitive(monochrome_sprite(
+            mask_at(0.0, 0.0, 1.0, 1.0),
+            rotated_sprite_transform(),
+        ));
+        assert!(scene.monochrome_sprites.is_empty());
+    }
+
+    #[test]
+    fn transformed_sprite_overlap_preserves_order_against_quads() {
+        let mut scene = Scene::default();
+        let mut background = quad();
+        background.bounds = Bounds {
+            origin: Point {
+                x: sp(3.5),
+                y: sp(1.5),
+            },
+            size: Size {
+                width: sp(1.0),
+                height: sp(1.0),
+            },
+        };
+        scene.insert_primitive(background);
+        scene.insert_primitive(monochrome_sprite(mask(), rotated_sprite_transform()));
+
+        assert!(
+            scene.monochrome_sprites[0].order > scene.quads[0].order,
+            "the later transformed sprite must sort above the overlapping quad"
+        );
     }
 
     fn batches(scene: &mut Scene) -> Vec<PrimitiveBatch> {
