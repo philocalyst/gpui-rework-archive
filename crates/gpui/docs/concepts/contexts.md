@@ -131,10 +131,8 @@ Two details in this example come from the async setting:
 to reach the window after it awaits. Window operations through it return
 errors once the window has closed.
 
-GPUI stops polling foreground tasks once the application is gone, so an
-`AsyncApp` you hold inside a task can assume the app is alive. If you store an
-`AsyncApp` somewhere else and use it after the application has quit, it
-panics.
+An `AsyncApp` refers to the application weakly, like a [`WeakEntity`] does to
+an entity. Using it after the application itself has been dropped panics.
 
 ## Writing code for any context
 

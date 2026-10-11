@@ -91,5 +91,122 @@ pages! {
     comparison => "comparison.md",
     platforms => "platforms.md",
     upstream => "upstream.md",
-    examples => "examples.md",
+}
+
+/// Each example's page is its summary and its complete source. On the GPUI
+/// site, `live` examples also run in the page.
+macro_rules! example {
+    ($name:ident, $summary:literal, live) => {
+        #[doc = concat!(
+            $summary, "\n\n",
+            "<div class=\"gpui-example\" data-example=\"", stringify!($name), "\">\n\n",
+            "Run it with `cargo run --example ", stringify!($name), "`.\n\n</div>\n\n",
+            "```rust\n", include_str!(concat!("../examples/", stringify!($name), ".rs")), "```\n",
+        )]
+        pub mod $name {}
+    };
+    ($name:ident, $summary:literal, native) => {
+        #[doc = concat!(
+            $summary, "\n\n",
+            "Run it with `cargo run --example ", stringify!($name), "`. ",
+            "It uses desktop platform services, so it doesn't run in a browser.\n\n",
+            "```rust\n", include_str!(concat!("../examples/", stringify!($name), ".rs")), "```\n",
+        )]
+        pub mod $name {}
+    };
+}
+
+// The examples are compiled as cargo examples, so their pages aren't doctests.
+#[doc = include_str!("../docs/examples.md")]
+#[cfg(not(doctest))]
+pub mod examples {
+    example!(
+        hello_world,
+        "The smallest GPUI program: a window with a styled greeting.",
+        live
+    );
+    example!(
+        counter,
+        "A button that counts its clicks: state, an event handler and `notify`.",
+        live
+    );
+    example!(
+        layout,
+        "An application shell built with flexbox and grid.",
+        live
+    );
+    example!(
+        styling,
+        "Backgrounds, borders, corners, shadows, opacity and blur.",
+        live
+    );
+    example!(
+        text,
+        "Type sizes, weights, decoration, wrapping, truncation and styled runs.",
+        live
+    );
+    example!(
+        images,
+        "Raster and vector images, and how they fit their boxes.",
+        live
+    );
+    example!(
+        interaction,
+        "Hover, press, clicks, cursors, tooltips, and drag and drop.",
+        live
+    );
+    example!(
+        keyboard,
+        "Actions, key bindings, key contexts and moving focus.",
+        live
+    );
+    example!(text_input, "Single- and multi-line editable text.", live);
+    example!(
+        list,
+        "A virtualized list of ten thousand rows with keyboard selection.",
+        live
+    );
+    example!(
+        events,
+        "Entities that observe each other and communicate with events.",
+        live
+    );
+    example!(tasks, "A stopwatch and a cancellable background job.", live);
+    example!(
+        animation,
+        "Animations, easing, springs and style transitions.",
+        live
+    );
+    example!(
+        canvas,
+        "A chart drawn with `canvas` and `PathBuilder`.",
+        live
+    );
+    example!(
+        custom_element,
+        "A slider written as a custom `Element`.",
+        live
+    );
+    example!(todos, "The finished app from the tutorial.", live);
+    example!(
+        windows,
+        "Opening, placing and closing several windows.",
+        native
+    );
+    example!(notifications, "Sending system notifications.", native);
+    example!(
+        keyring,
+        "Storing credentials in the platform keychain.",
+        native
+    );
+    example!(
+        haptics,
+        "Haptic feedback on trackpads that support it.",
+        native
+    );
+    example!(
+        layer_shell,
+        "Wayland layer-shell surfaces, such as panels and overlays.",
+        native
+    );
 }

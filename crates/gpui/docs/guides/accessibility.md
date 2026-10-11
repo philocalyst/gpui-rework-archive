@@ -1,315 +1,373 @@
-# Accessibility in GPUI
+# Make your app accessible
 
-"Accessibility" refers to the ability of your application to be used by all
-users, regardless of disability status. There are many aspects, all important, including:
-- Ensuring sufficient text contrast.
-- Providing a mechanism to disable animations.
-- Providing a mechanism to increase text sizes.
-- etc.
+GPUI reports your UI to screen readers and other assistive technology through
+[AccessKit]. You make an element visible to assistive technology by giving it an
+[`id`][`InteractiveElement::id`] and a [`role`][`StatefulInteractiveElement::role`],
+then describing its label and state. This guide covers that programmatic side,
+plus the checks you still do by hand: contrast, motion and focus.
 
-This guide is focused on **programmatic accessibility**. This allows
-assistive technology, such as screen readers or Braille displays, to inspect
-and interact with your app. Docs for contributors working on accessibility
-support can be found in the `a11y` module's doc comment.
+## Give each control a role and a label
 
-GPUI integrates with [AccessKit] to provide programmatic accessibility
-features (referred to as simply "accessibility" for the rest of this guide).
+An element becomes a node in the accessibility tree only when it has both an
+id and a role. Without a role, GPUI doesn't report the element at all. Without
+an id, GPUI can't keep the node stable from one frame to the next.
 
-A minimal example can be found in the `examples/a11y` directory.
-
-## Background
-
-Accessibility support is based on two key capabilities:
-- Exposing information about the current UI state to assistive technology.
-- Responding to actions requested by assistive technology.
-
-For example, a screen reader might want to announce to the user that a new
-button has appeared. The user may then want to use a voice control program
-to press that button.
-
-### IDs in GPUI - [`ElementId`] and [`GlobalElementId`]
-
-In GPUI, each [`Element`] can have an [`id`][Element::id]:
-```rust
-# use gpui::*;
-let div_with_id = div().id("my-id").child(text!("hello"));
-
-// IDs are optional
-let div_without_id = div().child(text!("hello"));
-```
-
-[`Element`]s with IDs are also assigned a [`GlobalElementId`]. This global
-ID is formed by composing all the non-`None` IDs of its ancestors. For
-example:
-```rust
-# use gpui::*;
-let inner = div().id("inner-id");
-let middle = div().child(inner);  // no ID
-let outer = div().id("outer-id").child(middle);
-```
-In this example, `inner`s global ID is (roughly speaking) `["outer-id",
-"inner-id"]`.
-
-Since `middle` doesn't have an ID itself, it has no global ID.
-
-[`GlobalElementId`]s should be unique per-frame. Duplicate global IDs in the
-same frame will likely cause bugs.
-
-### IDs and accessibility
-
-When GPUI renders a frame, it walks your UI tree, and finds nodes with
-global IDs, and informs assistive technology about this node.
-
-In order for nodes to be reported, they must also have a non-`None`
-[`role`][Element::a11y_role]. This is used to inform assistive technology
-what *sort* of node it is (button, label, table, etc.). You can use
-[`div().id(...).role()`][StatefulInteractiveElement::role] to set the role.
-
-Nodes with the same global ID *across frames* are considered to be "the
-same" node. For example:
-```rust
-# use gpui::*;
-// The UI in frame 1
-let frame_1 = div()
-    .id("parent")
-    .role(Role::Button)
-    .child(
-      div()
-        .id("id-1")
-        .role(Role::Label)
-        .child(text!("hello"))
-    );
-
-// The UI on the next frame
-let frame_2 = div()
-    .id("parent")
-    .role(Role::Button)
-    .child(
-      div()
-        .id("id-2")  // <- different ID
-        .role(Role::Label)
-        .child(text!("hello"))
-    );
-```
-Logically, the UI has not changed. But the screen reader has no way of
-knowing that both child [`div`]s are "the same". So assistive technology
-will interpret this as one node being removed, and another node being added.
-This can be very disorienting for users, since announcements typically only
-happen when something has *meaningfully* changed.
-
-In other words, by controlling the ID of an element, you can control whether
-a change to a UI element is considered meaningful. You can also control
-whether elements are reported to assistive technology *at all* by setting
-the [`role`][Element::a11y_role], since nodes with no role are not reported.
-
-#### IDs and text
-
-Special care must be taken when dealing with text.
-
-GPUI provides the [`text!`] macro, which wraps strings in the [`Text`] type,
-but automatically derives an ID. Usually, this is what you want. However,
-the way it generates its ID is subtle and perhaps surprising.
-
-The ID of an invocation of the [`text!`] macro is derived from the
-**location in the source code of that invocation**. For example:
+Set the label with [`aria_label`][StatefulInteractiveElement::aria_label]. The
+label names the element, so make it what a user would read on the control.
 
 ```rust
-# use gpui::*;
-let a = text!("a");
-let b = text!("b");
+use gpui::{AnyWindowHandle, Context, Role, TestApp, Window, accesskit, div, prelude::*};
 
-// Different source locations, different IDs
-assert_ne!(a.id(), b.id());
+struct SaveButton {
+    saves: usize,
+}
 
-// However:
+impl Render for SaveButton {
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        div()
+            .id("save")
+            .role(Role::Button)
+            .aria_label("Save")
+            .on_click(cx.listener(|this, _event, _window, cx| {
+                this.saves += 1;
+                cx.notify();
+            }))
+            .child(format!("Saved {} times", self.saves))
+    }
+}
 
-fn make_text(s: &str) -> Text { text!(s) }
+let mut app = TestApp::new();
+let mut window = app.open_window(|_, _| SaveButton { saves: 0 });
 
-let a = make_text("a");
-let b = make_text("b");
+// The tree is built only while assistive technology is connected, or when
+// it is forced. Forcing it lets a test read the tree.
+window.update(|_, window, _| window.set_a11y_forced(true));
+window.draw();
 
-// Both `a` and `b` are produced by the same `text!` invocation, so the IDs
-// are the same
-assert_eq!(a.id(), b.id());
-```
-This can produce surprising behaviour. For example, this footgun:
-```rust
-# use gpui::*;
-let todos = vec!["eat lunch", "drink water", "go to gym"];
-let todo_divs = todos.into_iter().map(|todo| {
-    text!(todo)
+let (button, role) = window.update(|_, window, _| {
+    let tree = window.a11y_tree().expect("the tree is built while forced");
+    let (id, node) = tree
+        .nodes
+        .iter()
+        .find(|(_, node)| node.label() == Some("Save"))
+        .expect("the save button is in the tree");
+    (*id, node.role())
 });
+assert_eq!(role, Role::Button);
 
-div()
-    .id("todo-list")
-    .role(Role::Document)
-    .children(todo_divs);  // ERROR: multiple nodes with the same global ID
+// Let an assistive technology click the button. This runs the same handler
+// as a mouse click. The handler updates the view, so go through the window
+// handle, which doesn't hold the view while the closure runs.
+let handle: AnyWindowHandle = window.handle().into();
+app.update(|cx| {
+    handle.update(cx, |_, window, cx| {
+        window.perform_a11y_action(button, accesskit::Action::Click, None, cx)
+    })
+})
+.unwrap();
+window.read(|button, _| assert_eq!(button.saves, 1));
 ```
 
-Here, when we map the iterator, since we have only written [`text!`] once,
-there is only one ID. And since they have the same ancestors and the same
-ID, they will have the same global ID. In release builds, this will mean
-some nodes get silently dropped!
+Notice what the example relies on:
 
-To fix this, you can set an ID:
-```rust
-# use gpui::*;
-let todos = vec!["eat lunch", "drink water", "go to gym"];
-let todo_divs = todos.into_iter().enumerate().map(|(index, todo)| {
-    text!(todo).with_id(index)  // OR `text(id = index, todo)`
-});
+- The button has an id, so its node keeps the same identity across frames.
+- The label is set on the element itself. The text child doesn't need a role
+  to supply the name.
+- [`on_click`][StatefulInteractiveElement::on_click] also registers an
+  accessibility `Click` action, so the button responds to assistive technology
+  without any extra code.
 
-div()
-    .id("todo-list")
-    .role(Role::Document)
-    .children(todo_divs);
-```
-Another possible solution is to wrap the [`text!`] in another node that
-*does* have a unique global ID. For example:
+### Stable ids and text
+
+A node's identity comes from its global element id, which combines the ids of
+all its ancestors (see [`GlobalElementId`]). If an id changes between frames,
+the assistive technology sees one node removed and another added. Users hear
+that as a change even when nothing on screen changed.
+
+[`text!`] derives its id from its source location. That is right for fixed
+labels, but a `text!` call inside a closure that you map over a list gives every
+item the same id. Set an id, or wrap the text in a div that has one:
+
 ```rust
-# use gpui::*;
+use gpui::{Role, div, prelude::*, text};
+
 let todos = vec!["eat lunch", "drink water", "go to gym"];
-let todo_divs = todos.into_iter().enumerate().map(|(index, todo)| {
+let items = todos.into_iter().enumerate().map(|(index, todo)| {
     div().id(index).child(text!(todo))
 });
 
-div()
-    .id("todo-list")
-    .role(Role::Document)
-    .children(todo_divs);
+let list = div().id("todo-list").role(Role::List).children(items);
 ```
-Since the AccessKit [`NodeId`][accesskit::NodeId] is derived from the global
-ID, and the global ID takes into account the IDs of all ancestors, this
-works too.
 
-Occasionally, you will need to create a [`Text`] element with *no* ID. You
-can achieve this with [`Text::new_inaccessible`]. If you are creating a
-custom UI component (e.g. a button), you may want this so that you can set a
-label property on a parent [`div`] without duplicating the text in the
-accessibility tree.
+[`Text::new_inaccessible`] creates text with no id. Use it when a parent
+already provides the label and you don't want the text announced twice.
 
-## Hiding content from assistive technology
+## Describe state
 
-[`aria_hidden()`][StatefulInteractiveElement::aria_hidden] hides an
-element and all of its descendants from assistive technology. It does not
-change rendering or input:
+Report state with the `aria_*` methods. Each one maps to a property on the
+AccessKit node, and you set it whenever the state changes:
+
+| Method | Use it for |
+| --- | --- |
+| [`aria_toggled`][StatefulInteractiveElement::aria_toggled] | Checkboxes and toggle buttons, with [`Toggled`] |
+| [`aria_selected`][StatefulInteractiveElement::aria_selected] | Selected rows, tabs and options |
+| [`aria_expanded`][StatefulInteractiveElement::aria_expanded] | Disclosure widgets, menus and accordions |
+| [`aria_disabled`][StatefulInteractiveElement::aria_disabled] | Controls that can't take input |
+| [`aria_value`][StatefulInteractiveElement::aria_value] | The string value of a text field or label |
+| [`aria_numeric_value`][StatefulInteractiveElement::aria_numeric_value] | Sliders, progress bars and spin buttons |
+
+Numeric values also take [`aria_min_numeric_value`][StatefulInteractiveElement::aria_min_numeric_value],
+[`aria_max_numeric_value`][StatefulInteractiveElement::aria_max_numeric_value]
+and [`aria_numeric_value_step`][StatefulInteractiveElement::aria_numeric_value_step].
+
 ```rust
-# use gpui::*;
-let decorative_content = div()
-    .id("decorative-content")
-    .aria_hidden()
-    .child(text!("Decorative text"));
+use gpui::{Role, Toggled, div, prelude::*};
+
+fn bold_toggle(bold: bool) -> impl IntoElement {
+    div()
+        .id("bold")
+        .role(Role::CheckBox)
+        .aria_label("Bold")
+        .aria_toggled(Toggled::from(bold))
+        .child("B")
+}
+
+fn volume_slider(volume: f64) -> impl IntoElement {
+    div()
+        .id("volume")
+        .role(Role::Slider)
+        .aria_label("Volume")
+        .aria_numeric_value(volume)
+        .aria_min_numeric_value(0.0)
+        .aria_max_numeric_value(100.0)
+        .aria_numeric_value_step(1.0)
+}
 ```
 
-GPUI requires an [`ElementId`] so it can create a stable AccessKit node for
-the hidden subtree. The element does not need an accessible role. Omitting
-`aria_hidden()` on a descendant cannot override a hidden ancestor.
+[`aria_description`][StatefulInteractiveElement::aria_description] adds
+supporting text that is announced after the name, role and value. Use it for a
+hint, not for the name. [`aria_placeholder`][StatefulInteractiveElement::aria_placeholder]
+gives the hint a text input shows while it is empty.
 
-Do not hide elements that can receive keyboard focus or contain focusable
-descendants. Hidden elements keep their focus and input handlers.
+Other properties cover structure: [`aria_level`][StatefulInteractiveElement::aria_level]
+for headings, [`aria_position_in_set`][StatefulInteractiveElement::aria_position_in_set]
+and [`aria_size_of_set`][StatefulInteractiveElement::aria_size_of_set] for items in
+a list, the `aria_row_*` and `aria_column_*` methods for grids, and
+[`aria_orientation`][StatefulInteractiveElement::aria_orientation]. Use
+[`aria_modal`][StatefulInteractiveElement::aria_modal] on a dialog that blocks the
+rest of the window.
 
-### Handling actions
+## Announce changes with live regions
 
-Assistive technology can dispatch actions to the UI. While many users of
-assistive technology use traditional input devices (e.g. a keyboard), some
-use more specialized systems. For example, users with limited mobility may
-use voice control to interact with your app.
+When text changes and the user should hear it without moving focus, make the
+element a live region. Give it a stable id and set
+[`aria_live`][StatefulInteractiveElement::aria_live]:
 
-When a user dispatches an action, it is dispatched *to a specific node*. It
-is your responsibility to tell the UI elements how they should respond when
-a request comes in.
+```rust
+use gpui::{Role, accesskit, div, prelude::*};
 
-Note, these actions are **totally unrelated** to GPUI's [`Action`] trait.
-AccessKit exposes [`accesskit::Action`]. In GPUI, this is re-exported as
-[`AccessibleAction`].
-
-To respond to an accessible action, use
-[`div().on_a11y_action()`][InteractiveElement::on_a11y_action]:
-```rust,ignore
-div()
-    .id("my-slider")
-    .role(Role::Slider)
-    .on_a11y_action(AccessibleAction::Increment, |_extra, _window, _cx| {
-        position += 1;
-        cx.notify();
-    })
-    .child(my_cool_slider());
+fn status(message: &str) -> impl IntoElement {
+    div()
+        .id("status")
+        .role(Role::Status)
+        .aria_live(accesskit::Live::Polite)
+        .child(message.to_string())
+}
 ```
 
-Note that some common actions are automatically registered. For example,
-[`.on_click()`][StatefulInteractiveElement::on_click] adds an
-[`AccessibleAction::Click`] handler that calls the click handler.
+`accesskit::Live::Polite` waits for the user to pause. `Assertive` interrupts,
+and `Off` silences the region. Use `Assertive` only for errors the user must
+hear now. [`aria_live_atomic`][StatefulInteractiveElement::aria_live_atomic]
+makes the assistive technology read the whole region instead of only the part
+that changed.
 
-## Synthetic children
+Keep the id the same from frame to frame. A new id makes a new node, and
+assistive technology may not announce its contents as a change.
 
-Sometimes, a custom [`Element`] may want to appear as if it is really made
-of multiple nodes. For example, a totally hypothetical custom text editor
-element may want to have [`Role::TextInput`], while presenting children
-consisting of [`Role::TextRun`]s.
+## Respond to actions from assistive technology
 
-This is possible using [`Element::a11y_synthetic_children`]. For example:
-```rust,ignore
-# use gpui::*;
-impl Element for MyCustomTextField {
+Assistive technology sends [`accesskit::Action`]s to a node: `Click`, `Focus`,
+`Increment`, `Decrement` and others. In GPUI, these are the same types as
+[`AccessibleAction`]. They are unrelated to GPUI's [`Action`] trait, which
+handles key bindings and menus.
 
-    // ...
-    
-    fn a11y_role(&self) -> Option<Role> {
-        Some(Role::TextInput)
-    }
-    
-    fn a11y_synthetic_children(
-        &mut self,
-        _prepaint: &mut Self::PrepaintState,
-        builder: &mut A11ySubtreeBuilder,
-    ) {
-        // Create the synthetic child node
-        let mut run = accesskit::Node::new(Role::TextRun);
-        run.set_value(self.text.clone());
-        run.set_character_lengths(
-            self.text.chars().map(|c| c.len_utf8() as u8).collect::<Vec<_>>(),
-        );
+Clicks and focus are handled for you. For any other action, register a handler
+with [`on_a11y_action`][StatefulInteractiveElement::on_a11y_action]. It runs
+with the optional [`accesskit::ActionData`] and mutable access to the window
+and app:
 
-        // Insert it as a child of `MyCustomTextField`
-        let run_id = builder.synthetic_node_id(0);
-        builder.push_child(run_id, run);
+```rust
+use gpui::{Context, Role, Window, accesskit, div, prelude::*};
 
-        // You can also mutate the parent (i.e. the `MyCustomTextField`)
-        let caret = accesskit::TextPosition {
-            node: run_id,
-            character_index: self.cursor,
-        };
-        builder.parent_node().set_text_selection(accesskit::TextSelection {
-            anchor: caret,
-            focus: caret,
-        });
+struct Slider {
+    value: i32,
+}
+
+impl Render for Slider {
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let up = cx.entity();
+        let down = up.clone();
+        div()
+            .id("slider")
+            .role(Role::Slider)
+            .aria_label("Level")
+            .aria_numeric_value(self.value as f64)
+            .on_a11y_action(accesskit::Action::Increment, move |_data, _window, cx| {
+                up.update(cx, |slider, cx| {
+                    slider.value += 1;
+                    cx.notify();
+                });
+            })
+            .on_a11y_action(accesskit::Action::Decrement, move |_data, _window, cx| {
+                down.update(cx, |slider, cx| {
+                    slider.value -= 1;
+                    cx.notify();
+                });
+            })
     }
 }
 ```
 
-Notably, synthetic children are added *after* an element is
-[prepainted][Element::prepaint], so prepaint state can be used (for example,
-to determine what is visible on screen).
+Two details matter here:
 
-## Further reading
+- GPUI attaches the listener while it paints, and only when assistive
+  technology is active. Your handler doesn't run until the next frame has been
+  painted with it.
+- The handler updates the entity and calls [`Context::notify`], as any other
+  event handler does. The new value reaches the tree on the next frame.
 
-Designing high-quality accessible interfaces can be challenging, in the same
-way that designing high-quality traditional interfaces can be. The
-following pages have useful information:
+Only add the actions your control supports. The node advertises each action
+you register, so an action you don't handle would appear to work.
 
-- [AccessKit]: The cross-platform accessibility toolkit GPUI uses
-  internally.
-- [MDN WAI-ARIA basics][mdn-aria]: Introduction to roles, properties, and
-  states.
-- [ARIA Authoring Practices Guide][apg]: W3C patterns for accessible
-  widgets.
+## Expose elements that GPUI doesn't draw as nodes
 
-Note that, while GPUI mimics web APIs, it doesn't necessarily behave
-*exactly* as a web browser would with the same attributes.
+Some custom elements draw several things that users interact with, such as the
+lines of a text editor. Give them child nodes with
+[`StatefulInteractiveElement::a11y_synthetic_children`], which runs after the
+element is prepainted. That means the closure can use what is on screen, such as
+the visible lines. The element needs an id, and either a role or `aria_hidden`.
+
+```rust
+use gpui::{Role, accesskit, div, prelude::*};
+
+fn text_field(text: &'static str) -> impl IntoElement {
+    div()
+        .id("text-field")
+        .role(Role::TextInput)
+        .a11y_synthetic_children(move |builder| {
+            let run_id = builder.synthetic_node_id(0);
+            let mut run = accesskit::Node::new(Role::TextRun);
+            run.set_value(text);
+            builder.push_child(run_id, run);
+        })
+}
+```
+
+For a custom [`Element`], implement [`Element::a11y_synthetic_children`] instead,
+and set the parent's properties through
+[`A11ySubtreeBuilder::parent_node`].
+
+## Hide decoration
+
+[`aria_hidden`][StatefulInteractiveElement::aria_hidden] removes an element and
+everything under it from the accessibility tree. It doesn't change how the
+element is drawn or whether it receives input:
+
+```rust
+use gpui::{div, prelude::*, text};
+
+let divider = div()
+    .id("divider")
+    .aria_hidden()
+    .child(text!("---"));
+```
+
+Don't hide anything a user can focus or interact with. A hidden element keeps
+its focus and input handlers, but assistive technology doesn't report it, so
+the user can land on a control they can't hear.
+
+## Test the tree
+
+The tree is built only when assistive technology is connected. To inspect it in
+a test, use [`Window::set_a11y_forced`] on a [`TestApp`] window, as shown at the
+top of this page, or on a real application with
+[`Application::with_accessibility_forced`]:
+
+```rust,no_run
+fn main() {
+    gpui_platform::application()
+        .with_accessibility_forced()
+        .run(|_cx| {
+            // Open windows here. Call `Window::debug_a11y_tree_json` to dump
+            // the tree while the app runs.
+        });
+}
+```
+
+[`Window::debug_a11y_tree_json`] returns the last frame's tree as a string, or
+`None` if no tree was built. It is useful when a control doesn't show up where you
+expected. [`Window::a11y_tree`]
+gives you the tree itself, for assertions.
+
+Use [`Application::new_inaccessible`] to turn accessibility off entirely, for
+example in a headless benchmark.
+
+## Motion, contrast and focus
+
+Accessibility also depends on things that don't go through the tree.
+
+**Reduced motion.** GPUI doesn't read the operating system's reduced-motion
+setting for you. Read it in your platform code and pass it to
+[`App::set_reduce_motion`]. Animations then render in a static state, and
+[`App::reduce_motion`] tells your own animations to do the same. The
+[animation example](crate::_documentation::examples::animation) shows how an
+animation checks it.
+
+```rust
+use gpui::App;
+
+fn apply_motion_preference(cx: &mut App, prefers_reduced_motion: bool) {
+    cx.set_reduce_motion(prefers_reduced_motion);
+}
+```
+
+**Contrast.** GPUI has no contrast checker. Choose text and background colors
+that meet the contrast ratio your product requires, and check them with a tool
+or a color picker. Check disabled and placeholder text too.
+
+**Focus.** Focus should always be visible. Give a focusable element a clear
+style for when it has focus, with [`InteractiveElement::focus_visible`]. The
+element must be focusable, which means it tracks a [`FocusHandle`]:
+
+```rust
+use gpui::{FocusHandle, div, prelude::*, rgb};
+
+fn text_button(focus_handle: &FocusHandle) -> impl IntoElement {
+    div()
+        .id("ok")
+        .track_focus(focus_handle)
+        .focus_visible(|style| style.border_color(rgb(0x3b82f6)))
+        .child("OK")
+}
+```
+
+Keyboard support comes first. Make every control reachable and operable from
+the keyboard, in a sensible order. See the [focus guide](crate::_documentation::guides::focus)
+and the [keyboard guide](crate::_documentation::guides::keyboard).
+
+## See also
+
+- [AccessKit] documents the platform model behind the tree.
+- The [MDN WAI-ARIA basics][mdn-aria] and the [ARIA Authoring Practices
+  Guide][apg] describe the roles, states and widget patterns this page uses.
+  GPUI follows their names, but it doesn't always behave like a browser with
+  the same attributes.
+- The [focus guide](crate::_documentation::guides::focus) and
+  [keyboard guide](crate::_documentation::guides::keyboard) cover the keyboard
+  path that assistive technology also relies on.
+- The [testing guide](crate::_documentation::guides::testing) shows how to run
+  views headlessly.
 
 [AccessKit]: https://accesskit.dev/
 [mdn-aria]: https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/WAI-ARIA_basics
 [apg]: https://www.w3.org/WAI/ARIA/apg/
-
-#[cfg(doc)]
-use crate::*; // so I don't have to qualify every type :)
