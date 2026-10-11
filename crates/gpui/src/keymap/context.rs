@@ -78,6 +78,11 @@ impl KeyContext {
             .chars()
             .take_while(|c| is_identifier_char(*c))
             .collect::<String>();
+        // Without this, an unexpected character makes no progress and recurses forever.
+        anyhow::ensure!(
+            !key.is_empty(),
+            "expected a context identifier at {source:?}"
+        );
         source = skip_whitespace(&source[key.len()..]);
         if let Some(suffix) = source.strip_prefix('=') {
             source = skip_whitespace(suffix);
@@ -548,6 +553,20 @@ mod tests {
             expected
         );
         assert_eq!(KeyContext::parse(" baz foo = bar").unwrap(), expected);
+    }
+
+    #[test]
+    fn test_parse_malformed_context() {
+        for source in [
+            ".",
+            "Editor && enabled",
+            "=insert",
+            "mode==insert",
+            "mode=\"insert\"",
+        ] {
+            assert!(KeyContext::parse(source).is_err(), "accepted {source:?}");
+        }
+        assert!(KeyContext::parse(" \n ").unwrap().is_empty());
     }
 
     #[test]
