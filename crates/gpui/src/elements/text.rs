@@ -809,7 +809,12 @@ impl TextLayout {
     ) -> Option<Pixels> {
         match white_space {
             WhiteSpace::Nowrap => None,
-            WhiteSpace::Normal => Self::evaluate_alignment_width(known_dimensions, available_space),
+            WhiteSpace::Normal => known_dimensions.width.or(match available_space.width {
+                crate::AvailableSpace::Definite(width) => Some(width),
+                // Wrap at every opportunity, so the min-content width is the longest unbreakable run.
+                crate::AvailableSpace::MinContent => Some(Pixels::ZERO),
+                crate::AvailableSpace::MaxContent => None,
+            }),
         }
     }
 
@@ -1998,6 +2003,59 @@ mod tests {
 
     const CONTAINER_COLOR: Hsla = hsla(0.72, 0.45, 0.32, 1.0);
     const TEXT_BACKGROUND_COLOR: Hsla = hsla(0.37, 0.65, 0.42, 1.0);
+
+    #[test]
+    fn wrap_width_of_a_min_content_probe_breaks_at_every_opportunity() {
+        let space = |width| Size {
+            width,
+            height: AvailableSpace::MaxContent,
+        };
+        let unknown = Size::default();
+        let wrap_width = |white_space, known: Size<Option<Pixels>>, space| {
+            TextLayout::evaluate_wrap_width(&white_space, known, space)
+        };
+
+        assert_eq!(
+            wrap_width(
+                WhiteSpace::Normal,
+                unknown,
+                space(AvailableSpace::MinContent)
+            ),
+            Some(Pixels::ZERO)
+        );
+        assert_eq!(
+            wrap_width(
+                WhiteSpace::Normal,
+                unknown,
+                space(AvailableSpace::MaxContent)
+            ),
+            None
+        );
+        assert_eq!(
+            wrap_width(
+                WhiteSpace::Normal,
+                unknown,
+                space(AvailableSpace::Definite(px(80.)))
+            ),
+            Some(px(80.))
+        );
+        let known = Size {
+            width: Some(px(50.)),
+            height: None,
+        };
+        assert_eq!(
+            wrap_width(WhiteSpace::Normal, known, space(AvailableSpace::MinContent)),
+            Some(px(50.))
+        );
+        assert_eq!(
+            wrap_width(
+                WhiteSpace::Nowrap,
+                unknown,
+                space(AvailableSpace::MinContent)
+            ),
+            None
+        );
+    }
 
     #[gpui::test]
     fn text_measurement_replaces_state_when_wrap_width_changes(cx: &mut TestAppContext) {
