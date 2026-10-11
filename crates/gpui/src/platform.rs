@@ -2194,6 +2194,13 @@ impl PlatformInputHandler {
         selection: &UTF16Selection,
         mut bounds_for_range: impl FnMut(Range<usize>) -> Option<Bounds<Pixels>>,
     ) -> Option<Bounds<Pixels>> {
+        // The active end of the selection, which is `start` when it is reversed.
+        let caret = if selection.reversed {
+            selection.range.start
+        } else {
+            selection.range.end
+        };
+
         if let Some(marked_range) = marked_range {
             // Default to the start of the marked (composing) range.
             let mut line_start = marked_range.start;
@@ -2201,7 +2208,6 @@ impl PlatformInputHandler {
             // Walk backward from the caret looking for a line break. A change in
             // the Y coordinate means we crossed into the previous visual line, so
             // the line start is one position after the break point.
-            let caret = selection.range.end;
             if let Some(caret_bounds) = bounds_for_range(caret..caret) {
                 for i in (marked_range.start..caret).rev() {
                     if let Some(b) = bounds_for_range(i..i) {
@@ -2215,12 +2221,7 @@ impl PlatformInputHandler {
             bounds_for_range(line_start..line_start)
         } else {
             // No active composition — use the selection endpoint.
-            let offset = if selection.reversed {
-                selection.range.start
-            } else {
-                selection.range.end
-            };
-            bounds_for_range(offset..offset)
+            bounds_for_range(caret..caret)
         }
     }
 
@@ -3820,6 +3821,65 @@ impl From<String> for ClipboardString {
             text: value,
             metadata: None,
         }
+    }
+}
+
+#[cfg(test)]
+mod ime_candidate_bounds_tests {
+    use super::*;
+    use crate::size;
+
+    // Offsets 0..3 sit on the first visual line and the rest wrap onto the second.
+    fn bounds_at(offset: usize) -> Bounds<Pixels> {
+        let line = if offset < 3 { 0. } else { 20. };
+        Bounds::new(point(px(offset as f32), px(line)), size(px(1.), px(20.)))
+    }
+
+    fn candidate_bounds(
+        marked_range: Option<Range<usize>>,
+        selection: UTF16Selection,
+    ) -> Option<Bounds<Pixels>> {
+        PlatformInputHandler::compute_ime_candidate_bounds(marked_range, &selection, |range| {
+            Some(bounds_at(range.start))
+        })
+    }
+
+    #[test]
+    fn composition_follows_the_active_end_of_a_reversed_selection() {
+        // The caret is at offset 2 on the first line, so the candidate window
+        // stays at the start of the composition instead of the wrapped line.
+        let bounds = candidate_bounds(
+            Some(0..8),
+            UTF16Selection {
+                range: 2..7,
+                reversed: true,
+            },
+        );
+        assert_eq!(bounds, Some(bounds_at(0)));
+    }
+
+    #[test]
+    fn composition_uses_the_start_of_the_caret_line() {
+        let bounds = candidate_bounds(
+            Some(0..8),
+            UTF16Selection {
+                range: 2..7,
+                reversed: false,
+            },
+        );
+        assert_eq!(bounds, Some(bounds_at(3)));
+    }
+
+    #[test]
+    fn without_composition_uses_the_active_end() {
+        let bounds = candidate_bounds(
+            None,
+            UTF16Selection {
+                range: 2..7,
+                reversed: true,
+            },
+        );
+        assert_eq!(bounds, Some(bounds_at(2)));
     }
 }
 
