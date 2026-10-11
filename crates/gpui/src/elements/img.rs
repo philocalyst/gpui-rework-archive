@@ -249,6 +249,41 @@ impl DerefMut for Stateful<Img> {
     }
 }
 
+/// Frames shorter than this are treated as this long, so zero-delay frames can't stall playback.
+const MIN_FRAME_DELAY: Duration = Duration::from_millis(1);
+
+/// Steps an animation forward by `elapsed`, returning the new frame index and the time already
+/// spent in that frame. Advances through as many frames as `elapsed` covers, not just one.
+fn advance_animation(
+    mut frame_index: usize,
+    elapsed: Duration,
+    frame_count: usize,
+    frame_delay: impl Fn(usize) -> Duration,
+) -> (usize, Duration) {
+    if frame_count == 0 {
+        return (0, elapsed);
+    }
+
+    let delay = |index| frame_delay(index).max(MIN_FRAME_DELAY);
+    frame_index %= frame_count;
+
+    // Whole cycles end on the same frame, so skip them rather than stepping through each.
+    let cycle_nanos = (0..frame_count)
+        .map(|index| delay(index).as_nanos())
+        .sum::<u128>();
+    let remainder_nanos = elapsed.as_nanos() % cycle_nanos;
+    let mut remaining = Duration::new(
+        (remainder_nanos / 1_000_000_000) as u64,
+        (remainder_nanos % 1_000_000_000) as u32,
+    );
+
+    while remaining >= delay(frame_index) {
+        remaining -= delay(frame_index);
+        frame_index = (frame_index + 1) % frame_count;
+    }
+    (frame_index, remaining)
+}
+
 /// The image state between frames
 struct ImgState {
     frame_index: usize,
@@ -320,18 +355,17 @@ impl Element for Img {
                                 state.frame_index = state.frame_index.min(max_frame_index);
                                 if frame_count > 1 && !cx.reduce_motion() {
                                     if window.is_window_active() {
-                                        let current_time = Instant::now();
+                                        let current_time = cx.background_executor().now();
                                         if let Some(last_frame_time) = state.last_frame_time {
                                             let elapsed = current_time - last_frame_time;
-                                            let frame_duration =
-                                                Duration::from(data.delay(state.frame_index));
-
-                                            if elapsed >= frame_duration {
-                                                state.frame_index =
-                                                    (state.frame_index + 1) % frame_count;
-                                                state.last_frame_time =
-                                                    Some(current_time - (elapsed - frame_duration));
-                                            }
+                                            let (frame_index, remainder) = advance_animation(
+                                                state.frame_index,
+                                                elapsed,
+                                                frame_count,
+                                                |index| Duration::from(data.delay(index)),
+                                            );
+                                            state.frame_index = frame_index;
+                                            state.last_frame_time = Some(current_time - remainder);
                                         } else {
                                             state.last_frame_time = Some(current_time);
                                         }
@@ -400,7 +434,8 @@ impl Element for Img {
                         None => {
                             if let Some(state) = &mut state {
                                 if let Some((started_loading, _)) = state.started_loading {
-                                    if started_loading.elapsed() > LOADING_DELAY
+                                    if cx.background_executor().now() - started_loading
+                                        > LOADING_DELAY
                                         && let Some(loading) = self.style.loading.as_ref()
                                     {
                                         let mut element = loading();
@@ -416,7 +451,8 @@ impl Element for Img {
                                         })
                                         .ok();
                                     });
-                                    state.started_loading = Some((Instant::now(), task));
+                                    state.started_loading =
+                                        Some((cx.background_executor().now(), task));
                                 }
                             }
                         }
@@ -800,8 +836,10 @@ impl From<image::ImageError> for ImageCacheError {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{ParentElement as _, TestAppContext, canvas, div, point, px, size};
-    use image::{Frame, ImageBuffer, Rgba};
+    use crate::{
+        Context, ParentElement as _, Render, TestAppContext, Window, canvas, div, point, px, size,
+    };
+    use image::{Delay, Frame, ImageBuffer, Rgba};
 
     const TEST_IMG_ID: &str = "test-img";
 
@@ -815,6 +853,99 @@ mod tests {
     fn test_image_with_size(width: u32, height: u32) -> Arc<RenderImage> {
         let frame = Frame::new(ImageBuffer::from_pixel(width, height, Rgba([0, 0, 0, 0])));
         Arc::new(RenderImage::new(SmallVec::from_elem(frame, 1)))
+    }
+
+    /// An animation whose frames are 1, 2 and 3 pixels wide, lasting 100, 200 and 300 ms.
+    fn animated_image() -> Arc<RenderImage> {
+        let frames = [(1, 100), (2, 200), (3, 300)].map(|(width, delay_ms)| {
+            Frame::from_parts(
+                ImageBuffer::from_pixel(width, 1, Rgba([255, 0, 0, 255])),
+                0,
+                0,
+                Delay::from_numer_denom_ms(delay_ms, 1),
+            )
+        });
+        Arc::new(RenderImage::new(SmallVec::from_iter(frames)))
+    }
+
+    struct AnimatedImageView(Arc<RenderImage>);
+
+    impl Render for AnimatedImageView {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            img(ImageSource::Render(self.0.clone()))
+                .id(TEST_IMG_ID)
+                .size_full()
+        }
+    }
+
+    #[test]
+    fn advance_animation_steps_through_every_covered_frame() {
+        let delays = [100, 200, 300].map(Duration::from_millis);
+        let advance = |frame, elapsed_ms| {
+            advance_animation(frame, Duration::from_millis(elapsed_ms), 3, |ix| delays[ix])
+        };
+
+        assert_eq!(advance(0, 0), (0, Duration::ZERO));
+        assert_eq!(advance(0, 99), (0, Duration::from_millis(99)));
+        assert_eq!(advance(0, 340), (2, Duration::from_millis(40)));
+        assert_eq!(advance(2, 375), (0, Duration::from_millis(75)));
+        // A full cycle plus 150 ms: back to the first frame, 50 ms into the second.
+        assert_eq!(advance(0, 750), (1, Duration::from_millis(50)));
+    }
+
+    #[test]
+    fn advance_animation_skips_whole_cycles_and_bounds_zero_delay_frames() {
+        let delays = [
+            Duration::ZERO,
+            Duration::from_millis(2),
+            Duration::from_millis(3),
+        ];
+        // Zero delays count as 1 ms, so a cycle lasts 6 ms.
+        let elapsed = Duration::from_millis(4);
+        let expected = advance_animation(1, elapsed, 3, |ix| delays[ix]);
+        assert_eq!(
+            advance_animation(1, elapsed + Duration::from_millis(6) * 500_000, 3, |ix| {
+                delays[ix]
+            }),
+            expected
+        );
+        assert_eq!(
+            advance_animation(0, Duration::from_millis(1), 2, |_| Duration::ZERO),
+            (1, Duration::ZERO)
+        );
+    }
+
+    #[gpui::test]
+    fn animated_image_follows_the_executor_clock(cx: &mut TestAppContext) {
+        let (_, window) = cx.add_window_view(|_, _| AnimatedImageView(animated_image()));
+        window.update(|window, _| window.activate());
+        let clock = window.cx.background_executor.clone();
+        let frame_width_after = |window: &mut crate::VisualTestContext, elapsed_ms: u64| {
+            clock.advance_clock(Duration::from_millis(elapsed_ms));
+            window.update(|window, cx| {
+                window.simulate_next_frame(cx);
+                window.draw(cx).clear(cx);
+                window
+                    .rendered_frame
+                    .scene
+                    .polychrome_sprites
+                    .last()
+                    .expect("animated image should paint a sprite")
+                    .tile
+                    .bounds
+                    .size
+                    .width
+                    .0
+            })
+        };
+
+        for (elapsed_ms, expected_width) in [(0, 1), (99, 1), (1, 2), (1_100, 1), (99, 1), (1, 2)] {
+            assert_eq!(
+                frame_width_after(window, elapsed_ms),
+                expected_width,
+                "after {elapsed_ms} ms"
+            );
+        }
     }
 
     /// Overwrites the cached `frame_index` of the sibling `img` during paint.
