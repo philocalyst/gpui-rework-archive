@@ -4,13 +4,14 @@ use std::{
     time::{Duration, Instant},
 };
 
-/// Maximum number of history entries to keep.
+/// The most entries an undo stack keeps. The oldest entry is dropped when a new one would exceed it.
 pub const MAX_HISTORY_LEN: usize = 1000;
 
-/// Default interval for grouping consecutive edits into a single undo entry.
+/// The default time window in which consecutive edits are grouped into one undo entry.
 pub const DEFAULT_GROUP_INTERVAL: Duration = Duration::from_millis(300);
 
 // TODO: Should history get attached directly to storage? currently its per text field and operate both on storage and selection
+/// The undo and redo stacks of one editable text field.
 pub struct EditableTextHistory {
     /// The maximum duration between changes to `content` that can be grouped together as a single entry in the history log.
     grouping_interval: Duration,
@@ -29,8 +30,9 @@ impl Default for EditableTextHistory {
     }
 }
 
-/// A patch-based history entry for memory-efficient undo/redo operations.
-/// Instead of storing the full content, we store only the change needed to reverse the edit.
+/// One recorded edit, stored as a patch rather than a copy of the content.
+///
+/// The entry holds only the text that the edit replaced, so it can reverse the edit.
 #[derive(Clone, Debug)]
 pub struct HistoryEntry {
     /// The byte range that was modified (after the edit, for undo; before the edit, for redo).
@@ -45,17 +47,27 @@ pub struct HistoryEntry {
     pub timestamp: Instant,
 }
 
+/// Selects the undo stack or the redo stack.
 #[derive(Clone, Debug)]
 pub enum HistoryKind {
+    /// The stack of edits that can be undone.
     Undo,
+    /// The stack of edits that were undone and can be redone.
     Redo,
 }
 
 impl EditableTextHistory {
+    /// Sets how long after an edit's first change later edits still join it.
     pub fn set_grouping_interval(&mut self, interval: Duration) {
         self.grouping_interval = interval;
     }
 
+    /// Records an edit so that it can be undone.
+    ///
+    /// The edit replaced `old_text` at `range` with `new_text_len` bytes. A
+    /// contiguous edit that arrives within the grouping interval of the last
+    /// entry extends that entry. Otherwise the edit starts a new entry. A new
+    /// entry clears the redo stack.
     pub fn record(
         &mut self,
         range: Range<usize>,
@@ -112,14 +124,17 @@ impl EditableTextHistory {
         }
     }
 
+    /// Returns `true` if the given stack has at least one entry.
     pub fn has_next(&self, kind: HistoryKind) -> bool {
         !self.stack(kind).is_empty()
     }
 
+    /// Pushes `entry` onto the given stack.
     pub fn push(&mut self, kind: HistoryKind, entry: HistoryEntry) {
         self.stack_mut(kind).push(entry);
     }
 
+    /// Removes and returns the newest entry of the given stack, or `None` if it is empty.
     pub fn take(&mut self, kind: HistoryKind) -> Option<HistoryEntry> {
         self.stack_mut(kind).pop()
     }
@@ -140,12 +155,21 @@ impl HistoryEntry {
         true
     }
 
+    /// Returns the range that this entry covers in the current content.
+    ///
+    /// The end is clamped to `max_len`, so the range stays valid if the content
+    /// has shrunk since the edit.
     pub fn char_range(&self, max_len: usize) -> Range<usize> {
         let undo_start = self.range.start;
         let undo_end = (self.range.start + self.new_text_len).min(max_len);
         undo_start..undo_end
     }
 
+    /// Returns the entry that reverses this one, which is how an undone edit
+    /// goes onto the redo stack.
+    ///
+    /// `prev_text_at_range` is the text that currently occupies the entry's
+    /// range, and it becomes the inverted entry's `old_text`.
     pub fn as_inverted(self, prev_text_at_range: String) -> Self {
         HistoryEntry {
             range: self.range.start..self.range.start + self.old_text.len(),

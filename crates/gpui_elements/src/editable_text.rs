@@ -6,10 +6,13 @@
 //! - navigating via keyboard & mouse (by character, word, line, and document)
 //! - highlight selection via keyboard & mouse (holding shift, double/triple click mouse, mouse drag)
 //! - typing using an InputMethodEditor (IME) for writing Chinese, Japanese, and Korean utf-16
-//! - inserting newlines (`\n`) and tabs (`\t`)
+//! - inserting newlines (`\n`) and tabs (`\t`) in multi-line fields
 //! - cut/copy/paste
 //! - caret / text cursor that can blink
 //! - simple undo/redo within a single field
+//! - a single-line mode, where Enter and Tab are passed to the surrounding view, so a form can
+//!   submit or move focus; see [`text_input`]
+//! - exposing its text and selection to accessibility APIs while an assistive technology is active
 //!
 //! For all input actions, see documentation in the [`actions`] module.
 //!
@@ -70,7 +73,7 @@
 //! ```
 //!
 //! The user-inputted text can be accessed via event callbacks on the element.
-//! There is no callback representing the concept of "user is done editing". Its recommended that
+//! There is no callback representing the concept of "user is done editing". It's recommended that
 //! users write a [debounce](https://developer.mozilla.org/en-US/docs/Glossary/Debounce)
 //! or some way to detect "focus lost" to signify the user leaving the field.
 //! ```
@@ -95,7 +98,7 @@
 //! # }
 //! ```
 //!
-//! You can configure the default value of the editable text by using [`use_keyed_init`]:
+//! You can configure the default value of the editable text by using [`EditableTextState::use_keyed_init`]:
 //! ```
 //! # use gpui::{prelude::*, App, Entity, Window, AppContext, ElementId};
 //! # use gpui_ce_elements::editable_text::{text_input, EditableTextState, StringStorage};
@@ -153,12 +156,14 @@
 //! Full-text examples can be found in the [examples folder](https://github.com/gpui-ce/gpui-ce/tree/main/crates/gpui_elements/examples)
 //!
 //! ### Backlog of not-yet implemented features:
-//! - detecting focus being lost on an EditableText field
-//! - text sanitation & validation (see no-op implementation of [`EditableTextState::validate_incoming_text`])
+//! - a public callback for when a field loses focus (the state clears its selection on blur, but
+//!   emits no event)
+//! - text sanitation & validation beyond removing line breaks from single-line fields. The
+//!   private `validate_incoming_text` method of `EditableTextState` is where this would go.
 //! - nav & select via PageUp/PageDown
-//! - screen reader support via a11y
+//! - fuller screen reader support, beyond the text and selection exposed while an assistive
+//!   technology is active
 //! - masking text (e.g. for passwords)
-//! - disabling `insert_tab` if favor of tab being used to change focus between elements (i.e. escaping the field)
 //!
 
 pub mod actions;

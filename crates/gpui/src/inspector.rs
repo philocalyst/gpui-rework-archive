@@ -1,10 +1,21 @@
-/// A unique identifier for an element that can be inspected.
+//! The element inspector: picks an element in a window and shows its details.
+//!
+//! The inspector exists only in builds with the `inspector` feature or with
+//! `debug_assertions` (debug builds). In other builds, [`InspectorElementId`] has
+//! no fields, the other inspector types are absent, and
+//! [`Window::is_inspector_picking`] returns `false`.
+
+/// Identifies one element so the inspector can select and describe it.
+///
+/// The `path` and `instance_id` fields exist only in builds with the `inspector`
+/// feature or with `debug_assertions`. Elsewhere the type has no fields, and every
+/// two IDs compare equal.
 #[derive(Debug, Eq, PartialEq, Hash, Clone)]
 pub struct InspectorElementId {
-    /// Stable part of the ID.
+    /// The element's stable path. Shared by reference counting, so cloning is cheap.
     #[cfg(any(feature = "inspector", debug_assertions))]
     pub path: std::rc::Rc<InspectorElementPath>,
-    /// Disambiguates elements that have the same path.
+    /// Tells apart elements that share a `path`, such as two rows built at the same call site.
     #[cfg(any(feature = "inspector", debug_assertions))]
     pub instance_id: usize,
 }
@@ -25,13 +36,17 @@ mod conditional {
     use collections::{FxHashMap, TypeIdHashMap};
     use std::any::{Any, TypeId};
 
-    /// `GlobalElementId` qualified by source location of element construction.
+    /// A [`GlobalElementId`](crate::GlobalElementId) plus the source location where the element was built.
+    ///
+    /// Two elements built at different call sites get different paths even when they
+    /// have the same ID, so the inspector can tell them apart.
     #[derive(Debug, Eq, PartialEq, Hash)]
     pub struct InspectorElementPath {
-        /// The path to the nearest ancestor element that has an `ElementId`.
+        /// The global ID of this element: the chain of `ElementId`s from the root down to it,
+        /// including the element itself when it has an `ElementId`.
         #[cfg(any(feature = "inspector", debug_assertions))]
         pub global_id: crate::GlobalElementId,
-        /// Source location where this element was constructed.
+        /// Where the element was constructed in source code.
         #[cfg(any(feature = "inspector", debug_assertions))]
         pub source_location: &'static std::panic::Location<'static>,
     }
@@ -51,12 +66,19 @@ mod conditional {
         }
     }
 
-    /// Function set on `App` to render the inspector UI.
+    /// The function that draws the inspector panel. Install it with
+    /// [`App::set_inspector_renderer`].
+    ///
+    /// The renderer receives the [`Inspector`] and the window and context it is drawn in,
+    /// and returns the panel's element. GPUI calls it on each draw of the inspector view.
     pub type InspectorRenderer =
         Box<dyn Fn(&mut Inspector, &mut Window, &mut Context<Inspector>) -> AnyElement>;
 
-    /// Manages inspector state - which element is currently selected and whether the inspector is
-    /// in picking mode.
+    /// Tracks the element that is selected or hovered in the inspector, and whether the
+    /// inspector is in picking mode.
+    ///
+    /// Each window owns one while its inspector is open. Use [`Window::toggle_inspector`]
+    /// to open and close it. Use [`Inspector::is_picking`] to check the mode.
     pub struct Inspector {
         active_element: Option<InspectedElement>,
         pub(crate) pick_depth: Option<f32>,
@@ -111,7 +133,8 @@ mod conditional {
             changed
         }
 
-        /// ID of the currently hovered or selected element.
+        /// Returns the ID of the element that is hovered while picking, or the element
+        /// that was selected, or `None` if no element is active.
         pub fn active_element_id(&self) -> Option<&InspectorElementId> {
             self.active_element.as_ref().map(|e| &e.id)
         }
@@ -142,17 +165,22 @@ mod conditional {
             result
         }
 
-        /// Starts element picking mode, allowing the user to select elements by clicking.
+        /// Enters picking mode. While picking, moving the pointer over an element makes it
+        /// the active element, and a click selects it and leaves picking mode.
         pub fn start_picking(&mut self) {
             self.pick_depth = Some(0.0);
         }
 
-        /// Returns whether the inspector is currently in picking mode.
+        /// Returns `true` while the inspector is in picking mode.
         pub fn is_picking(&self) -> bool {
             self.pick_depth.is_some()
         }
 
-        /// Renders elements for all registered inspector states of the active inspector element.
+        /// Returns one element for each state type that the active element has and that
+        /// has a renderer registered with [`App::register_inspector_element`]. Returns an
+        /// empty list when no element is active.
+        ///
+        /// Call this from your inspector renderer to show per-element details.
         pub fn render_inspector_states(
             &mut self,
             window: &mut Window,
@@ -207,6 +235,7 @@ mod conditional {
     }
 
     impl InspectorElementRegistry {
+        /// Stores the renderer for state type `T`, replacing any earlier one.
         pub fn register<T: 'static, R: IntoElement>(
             &mut self,
             f: impl 'static + Fn(InspectorElementId, &T, &mut Window, &mut App) -> R,
@@ -222,27 +251,38 @@ mod conditional {
     }
 }
 
-/// Provides definitions used by `#[derive_inspector_reflection]`.
+/// Runtime descriptions of trait methods, generated by `#[derive_inspector_reflection]`.
+///
+/// Available only with the `inspector` feature or in debug builds.
 #[cfg(any(feature = "inspector", debug_assertions))]
 pub mod inspector_reflection {
     use std::any::Any;
 
-    /// Reification of a function that has the signature `fn some_fn(T) -> T`. Provides the name,
-    /// documentation, and ability to invoke the function.
+    /// A method with the signature `fn some_fn(T) -> T`, described at runtime.
+    ///
+    /// Gives you the method's name and doc comment, and a way to call it. The
+    /// `derive_inspector_reflection` attribute on a trait generates one for each method
+    /// of the form `fn method(self) -> Self`, so tools can list and call those methods by
+    /// name.
     #[derive(Clone, Copy)]
     pub struct FunctionReflection<T> {
-        /// The name of the function
+        /// The method's name.
         pub name: &'static str,
-        /// The method
+        /// Calls the method. Takes and returns a boxed `T`.
         pub function: fn(Box<dyn Any>) -> Box<dyn Any>,
-        /// Documentation for the function
+        /// The method's doc comment, if it has one.
         pub documentation: Option<&'static str>,
-        /// `PhantomData` for the type of the argument and result
+        /// Ties the reflection to `T`. Not used at runtime.
         pub _type: std::marker::PhantomData<T>,
     }
 
     impl<T: 'static> FunctionReflection<T> {
-        /// Invoke this method on a value and return the result.
+        /// Calls the method on `value` and returns its result.
+        ///
+        /// # Panics
+        ///
+        /// Panics if the method returns a value that isn't a `T`. Generated reflections
+        /// always return `T`, so this indicates a bug in the generated code.
         pub fn invoke(&self, value: T) -> T {
             let boxed = Box::new(value) as Box<dyn Any>;
             let result = (self.function)(boxed);

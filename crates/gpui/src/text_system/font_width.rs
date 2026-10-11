@@ -7,10 +7,24 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-/// Font width as a percentage, with 100 representing normal width.
+/// The width of a font face, as a percentage of its normal width.
 ///
-/// Selects static width variants or a variable font's `wdth` axis. Requests outside
-/// a variable font's axis range are clamped to that range by the text backend.
+/// `100.0` is [`FontWidth::NORMAL`]. Smaller values select condensed faces, and
+/// larger values select expanded faces. Use the named constants for the standard
+/// steps, or any value in between. For a variable font, the value sets the
+/// `wdth` axis, and values outside that axis are clamped to its range by the
+/// text backend.
+///
+/// # Examples
+///
+/// ```
+/// # use gpui::{Font, FontWidth, font};
+/// let narrow = Font {
+///     width: FontWidth::CONDENSED,
+///     ..font("Noto Sans")
+/// };
+/// assert_eq!(narrow.width, FontWidth(75.0));
+/// ```
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Serialize, Deserialize, Add, Sub, FromStr)]
 #[serde(transparent)]
 pub struct FontWidth(pub f32);

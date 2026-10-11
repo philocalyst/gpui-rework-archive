@@ -3,7 +3,40 @@ use crate::{
     IntoElement, LayoutId, Pixels, Window,
 };
 
-/// Builds a `Deferred` element, which delays the layout and paint of its child.
+/// Creates a [`Deferred`] element that draws `child` after the rest of the tree.
+///
+/// Use it for content that must appear on top of its surroundings, such as a popover, a menu or a
+/// drag preview. The child takes part in layout where it is, so its size and position follow the
+/// normal rules. Its prepaint and paint are postponed until the rest of the tree has been drawn.
+/// The priority defaults to `0`. See [`Deferred::priority`].
+///
+/// # Example
+///
+/// ```
+/// use gpui::{
+///     Context, IntoElement, Render, TestApp, Window, anchored, deferred, div, point, prelude::*,
+///     px,
+/// };
+///
+/// struct Overlay;
+///
+/// impl Render for Overlay {
+///     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+///         div().size_full().child(
+///             deferred(
+///                 anchored()
+///                     .position(point(px(10.), px(10.)))
+///                     .child(div().w(px(40.)).h(px(40.))),
+///             )
+///             .priority(1),
+///         )
+///     }
+/// }
+///
+/// let mut app = TestApp::new();
+/// let mut window = app.open_window(|_window, _cx| Overlay);
+/// window.draw();
+/// ```
 pub fn deferred(child: impl IntoElement) -> Deferred {
     Deferred {
         child: Some(child.into_any_element()),
@@ -12,12 +45,15 @@ pub fn deferred(child: impl IntoElement) -> Deferred {
     }
 }
 
-/// An element which delays the painting of its child until after all of
-/// its ancestors, while keeping its layout as part of the current element tree.
+/// An element that draws its child after the rest of the tree, in priority order.
 ///
-/// Per [`Window::prepaint_deferred_draws`], deferred elements causing additional deferred elements
-/// should be constrained to limited circumstances and will stop processing after some depth
-/// (otherwise the renderer would be subject to an infinite loop when processing deferred draws).
+/// The child is laid out in place, so it is part of the element tree. Its prepaint and paint run
+/// later, in a separate pass. Each deferred child is drawn after the elements around it, and
+/// deferred children are drawn in ascending priority, so a higher priority draws on top. Create
+/// one with [`deferred`].
+///
+/// A deferred child may create more deferred children. GPUI processes these in rounds, and the
+/// frame panics if they nest more than ten rounds deep. Keep such nesting shallow.
 pub struct Deferred {
     child: Option<AnyElement>,
     priority: DeferredPriority,
@@ -84,36 +120,40 @@ impl IntoElement for Deferred {
 }
 
 impl Deferred {
-    /// Sets a priority for the element. A higher priority conceptually means painting the element
-    /// on top of deferred draws with a lower priority (i.e. closer to the viewer).
+    /// Sets the draw priority. Deferred elements draw in ascending priority, so a higher value
+    /// draws on top of the ones below it. Accepts a number, or a [`DeferredPriority`].
     pub fn priority(mut self, priority: impl Into<DeferredPriority>) -> Self {
         self.priority = priority.into();
         self
     }
 
-    /// Configures the priority of the deferred element to be 1 greater than the previous
-    /// deferred element (when this element is caused by another deferred element, even if indirectly).
-    /// Defaults to 1 when this is a deferred element caused by non-deferred elements.
+    /// Sets the priority to one more than the enclosing deferred element's, or to 1 when no deferred
+    /// element encloses this one.
+    ///
+    /// A deferred element is enclosing when it is being prepainted and creates this one, directly or
+    /// through other elements. Use it for nested popups, so that each level draws above the last.
     pub fn priority_auto(mut self) -> Self {
         self.priority = DeferredPriority::Auto;
         self
     }
 
-    /// When a content mask is provided, the deferred element will be clipped to that region during
-    /// both prepaint and paint.
+    /// Clips the deferred element to `mask` while it is painted.
+    ///
+    /// Without a mask, no extra clipping is applied.
     pub fn content_mask(mut self, mask: ContentMask<Pixels>) -> Self {
         self.content_mask = Some(mask);
         self
     }
 }
 
-/// Describes how the priority for a [`Deferred`] element is calculated.
+/// How the draw priority of a [`Deferred`] element is chosen.
+///
+/// A number converts into `Value`, so `.priority(2)` works.
 pub enum DeferredPriority {
-    /// The priority is calculated based on whether the deferred element is a by-product of another deferred element.
-    /// If this is the first deferred element in a rendering stack, priority is 1.
-    /// Otherwise the priority is the previous priority + 1 (so this element renders in front of the previous in the stack).
+    /// One more than the priority of the deferred element that created this one, or 1 when no
+    /// deferred element did. Use it for nested popups.
     Auto,
-    /// Takes an explicit priority value for the deferred element.
+    /// An explicit priority. Higher values draw on top.
     Value(usize),
 }
 impl From<usize> for DeferredPriority {

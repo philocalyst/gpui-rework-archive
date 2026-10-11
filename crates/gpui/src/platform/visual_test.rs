@@ -1,4 +1,4 @@
-//! Visual test platform that combines real rendering (macOs-only for now) with controllable TestDispatcher.
+//! Visual test platform that combines real rendering (macOS-only for now) with controllable TestDispatcher.
 //!
 //! This platform is used for visual tests that need:
 //! - Real rendering (e.g. Metal/compositor) for accurate screenshots
@@ -22,12 +22,19 @@ use std::{
     sync::Arc,
 };
 
-/// A platform that combines real Mac rendering with controllable TestDispatcher.
+/// A macOS platform that renders for real, but schedules tasks with a [`TestDispatcher`].
 ///
-/// This allows visual tests to:
-/// - Render real UI via Metal for accurate screenshots
-/// - Control task scheduling deterministically via TestDispatcher
-/// - Advance simulated time for testing time-based behaviors (tooltips, animations, etc.)
+/// Open windows, text and rendering come from the wrapped platform, so screenshots match the
+/// app. Tasks run deterministically on the [`TestDispatcher`]. Use [`Self::dispatcher`] to
+/// advance the virtual clock, which drives time-based behavior such as tooltips and animations.
+///
+/// Some platform services are stubbed, so they behave the same on every run:
+/// - The clipboard is kept in memory, and nothing reaches the system clipboard.
+/// - [`Platform::run`] panics. Use the test harness instead of starting an event loop.
+/// - File dialogs resolve immediately with no selection.
+/// - Menus are not stored, and quit, restart and activation do nothing.
+///
+/// This type exists only on macOS, in test builds and with the `test-support` feature.
 pub struct VisualTestPlatform {
     dispatcher: TestDispatcher,
     background_executor: BackgroundExecutor,
@@ -38,9 +45,10 @@ pub struct VisualTestPlatform {
 }
 
 impl VisualTestPlatform {
-    /// Creates a new VisualTestPlatform with the given random seed.
+    /// Creates a visual test platform that renders through `platform`.
     ///
-    /// The seed is used for deterministic random number generation in the TestDispatcher.
+    /// `seed` seeds the [`TestDispatcher`]'s random number generator. The same seed gives the
+    /// same task order on every run.
     pub fn new(platform: Rc<dyn Platform>, seed: u64) -> Self {
         let dispatcher = TestDispatcher::new(seed);
         let arc_dispatcher = Arc::new(dispatcher.clone());
@@ -58,7 +66,10 @@ impl VisualTestPlatform {
         }
     }
 
-    /// Returns a reference to the TestDispatcher for controlling task scheduling and time.
+    /// Returns the [`TestDispatcher`] that runs this platform's tasks.
+    ///
+    /// Call its `advance_clock` or `run_until_parked` methods to move time forward and run
+    /// the work that is waiting.
     pub fn dispatcher(&self) -> &TestDispatcher {
         &self.dispatcher
     }

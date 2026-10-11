@@ -1,3 +1,6 @@
+//! Builds the `scheduler` crate's executors on the platform's [`PlatformDispatcher`].
+//! Crate-internal; the executors are used through GPUI's public executor types.
+
 use crate::{PlatformDispatcher, RunnableMeta};
 use async_task::Runnable;
 use chrono::{DateTime, Utc};
@@ -33,6 +36,7 @@ pub struct PlatformScheduler {
 }
 
 impl PlatformScheduler {
+    /// Creates a scheduler that dispatches work through `dispatcher`.
     pub fn new(dispatcher: Arc<dyn PlatformDispatcher>) -> Self {
         Self {
             dispatcher: dispatcher.clone(),
@@ -43,6 +47,7 @@ impl PlatformScheduler {
         }
     }
 
+    /// Returns a new foreground executor whose tasks run on the platform's main thread.
     pub fn foreground_executor(self: &Arc<Self>) -> LocalExecutor {
         let session_id = self.next_session_id();
         let scheduler = Arc::downgrade(self);

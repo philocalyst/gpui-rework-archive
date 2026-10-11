@@ -7,9 +7,23 @@ use std::{
     time::Duration,
 };
 
-/// A helper trait for building complex objects with imperative conditionals in a fluent style.
+/// Adds methods that change a value in the middle of a builder chain, so conditional
+/// steps read in order.
+///
+/// Implemented for every [`IntoElement`](crate::IntoElement) type and for the window
+/// option types. It's in [`gpui::prelude`](crate::prelude).
+///
+/// # Examples
+///
+/// ```
+/// use gpui::{div, prelude::*};
+///
+/// let selected = true;
+/// let row = div().when(selected, |row| row.flex());
+/// ```
 pub trait FluentBuilder {
-    /// Imperatively modify self with the given closure.
+    /// Passes `self` to `f`, and returns the result. Use it to continue a chain with a
+    /// closure.
     fn map<U>(self, f: impl FnOnce(Self) -> U) -> U
     where
         Self: Sized,
@@ -17,7 +31,8 @@ pub trait FluentBuilder {
         f(self)
     }
 
-    /// Conditionally modify self with the given closure.
+    /// Calls `then` with `self` if `condition` is true. Otherwise returns `self`
+    /// unchanged.
     fn when(self, condition: bool, then: impl FnOnce(Self) -> Self) -> Self
     where
         Self: Sized,
@@ -25,7 +40,8 @@ pub trait FluentBuilder {
         self.map(|this| if condition { then(this) } else { this })
     }
 
-    /// Conditionally modify self with the given closure.
+    /// Calls `then` with `self` if `condition` is true, and `else_fn` with `self`
+    /// otherwise.
     fn when_else(
         self,
         condition: bool,
@@ -38,7 +54,8 @@ pub trait FluentBuilder {
         self.map(|this| if condition { then(this) } else { else_fn(this) })
     }
 
-    /// Conditionally unwrap and modify self with the given closure, if the given option is Some.
+    /// Calls `then` with `self` and the value inside `option` if the option is `Some`.
+    /// Returns `self` unchanged for `None`.
     fn when_some<T>(self, option: Option<T>, then: impl FnOnce(Self, T) -> Self) -> Self
     where
         Self: Sized,
@@ -51,7 +68,8 @@ pub trait FluentBuilder {
             }
         })
     }
-    /// Conditionally unwrap and modify self with the given closure, if the given option is None.
+    /// Calls `then` with `self` if `option` is `None`. The option is taken by reference,
+    /// so you can still use it afterward.
     fn when_none<T>(self, option: &Option<T>, then: impl FnOnce(Self) -> Self) -> Self
     where
         Self: Sized,
@@ -60,10 +78,26 @@ pub trait FluentBuilder {
     }
 }
 
-/// Extensions for Future types that provide additional combinators and utilities.
+/// Adds combinators to every future.
 pub trait FutureExt {
-    /// Requires a Future to complete before the specified duration has elapsed.
-    /// Similar to tokio::timeout.
+    /// Limits how long the future may take.
+    ///
+    /// The result is `Err(`[`Timeout`]`)` if `timeout` passes before the future completes.
+    /// The timer comes from `executor`, so in tests it follows the simulated clock.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::time::Duration;
+    /// use gpui::{FutureExt, TestApp};
+    ///
+    /// let app = TestApp::new();
+    /// let slow = app.background_executor().timer(Duration::from_secs(60));
+    /// let result = app
+    ///     .foreground_executor()
+    ///     .block_test(slow.with_timeout(Duration::from_secs(1), app.background_executor()));
+    /// assert!(result.is_err());
+    /// ```
     fn with_timeout(self, timeout: Duration, executor: &BackgroundExecutor) -> WithTimeout<Self>
     where
         Self: Sized;
@@ -81,6 +115,8 @@ impl<T: Future> FutureExt for T {
     }
 }
 
+/// The future returned by [`FutureExt::with_timeout`]. It resolves to the wrapped
+/// future's output, or to [`Timeout`] if the timer fires first.
 #[pin_project::pin_project]
 pub struct WithTimeout<T> {
     #[pin]
@@ -91,7 +127,8 @@ pub struct WithTimeout<T> {
 
 #[derive(Debug, thiserror::Error)]
 #[error("Timed out before future resolved")]
-/// Error returned by with_timeout when the timeout duration elapsed before the future resolved
+/// The error returned when a future given to [`FutureExt::with_timeout`] doesn't
+/// finish in time.
 pub struct Timeout;
 
 impl<T: Future> Future for WithTimeout<T> {

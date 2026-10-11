@@ -28,25 +28,51 @@ use thiserror::Error;
 
 use super::{Stateful, StatefulInteractiveElement};
 
-/// The delay before showing the loading state.
+/// How long an image may take to load before the [`StyledImage::with_loading`] placeholder appears.
+///
+/// An image that finishes within this delay never shows the placeholder, so fast loads don't flash.
 pub const LOADING_DELAY: Duration = Duration::from_millis(200);
 
-/// A type alias to the resource loader that the `img()` element uses.
+/// The asset loader that [`img`] uses for [`ImageSource::Resource`] sources: URLs, file paths and
+/// [`crate::AssetRegistry`] entries.
 ///
-/// Note: that this is only for Resources, like URLs or file paths.
-/// Custom loaders, or external images will not use this asset loader
+/// The other [`ImageSource`] variants don't use it. Use `App::remove_asset::<ImgResourceLoader>`
+/// with a [`Resource`] to evict one entry.
 pub type ImgResourceLoader = AssetLogger<ImageAssetLoader>;
 
-/// A source of image content.
+/// Where an [`img`] element gets its pixels.
+///
+/// You rarely build this yourself. Each argument to [`img`] converts into one variant: a string,
+/// a [`PathBuf`](std::path::PathBuf) or a [`SharedUri`] becomes [`ImageSource::Resource`], an
+/// `Arc<Image>` becomes [`ImageSource::Image`], and an `Arc<RenderImage>` becomes
+/// [`ImageSource::Render`].
+///
+/// # How a string is read
+///
+/// A `&str`, `String` or `SharedString` is a URL if the `url` crate parses it, and an asset path
+/// otherwise. Any scheme counts, so `"https://example.com/a.png"` is a URL, and so are
+/// `"c:/logo.png"` (a Windows drive path) and `"data:..."`. URLs go to the app's HTTP client, which
+/// normally rejects schemes it doesn't handle. `"images/logo.png"` has no scheme, so it is looked
+/// up in the [`crate::AssetRegistry`].
+///
+/// To skip that check, convert a [`PathBuf`](std::path::PathBuf) or a [`SharedUri`] instead. A
+/// `PathBuf` always reads the file system, and a `SharedUri` always fetches.
 #[derive(Clone)]
 pub enum ImageSource {
-    /// The image content will be loaded from some resource location
+    /// Load the image from a [`Resource`]: a URL, a file path or a name in the [`crate::AssetRegistry`].
+    ///
+    /// The bytes load in the background and are cached by source.
     Resource(Resource),
-    /// Cached image data
+    /// Pixels that are already decoded. Nothing is loaded, and the frames are drawn as they are.
     Render(Arc<RenderImage>),
-    /// Cached image data
+    /// Encoded bytes in an [`Image`], such as a PNG or an SVG. The image is decoded in the
+    /// background and cached under the [`Image`]'s ID, which is a hash of its bytes.
     Image(Arc<Image>),
-    /// A custom loading function to use
+    /// A function that the element calls on every layout and paint to get the image.
+    ///
+    /// Return `None` while the image is not ready, `Some(Ok(..))` with the image, or
+    /// `Some(Err(..))` to show the fallback. gpui doesn't cache the result, so the function must be
+    /// fast or cache its own result.
     Custom(Arc<dyn Fn(&mut Window, &mut App) -> Option<Result<Arc<RenderImage>, ImageCacheError>>>),
 }
 
@@ -125,7 +151,9 @@ where
     }
 }
 
-/// The style of an image element.
+/// The settings that the [`StyledImage`] methods set on an image element.
+///
+/// Reach it through [`StyledImage::image_style`]. You don't create one directly.
 pub struct ImageStyle {
     grayscale: bool,
     object_fit: ObjectFit,
@@ -144,32 +172,77 @@ impl Default for ImageStyle {
     }
 }
 
-/// Style an image element.
+/// Styling methods for image elements, implemented by [`Img`] and `Stateful<Img>`.
+///
+/// Each method returns `self`, so calls chain after [`img`].
 pub trait StyledImage: Sized {
-    /// Get a mutable [ImageStyle] from the element.
+    /// Returns the [`ImageStyle`] that the methods on this trait write to.
     fn image_style(&mut self) -> &mut ImageStyle;
 
-    /// Set the image to be displayed in grayscale.
+    /// Draws the image in grayscale when `grayscale` is `true`. The default is `false`.
     fn grayscale(mut self, grayscale: bool) -> Self {
         self.image_style().grayscale = grayscale;
         self
     }
 
-    /// Set the object fit for the image.
+    /// Sets how the image fills its box. The default is [`ObjectFit::Contain`].
+    ///
+    /// The fit matters only when the box's aspect ratio differs from the image's, so set both a
+    /// width and a height. With no size set, the box is the image's natural size, and every fit
+    /// looks the same.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use gpui::*;
+    /// let avatar = img("images/avatar.png")
+    ///     .size(px(48.))
+    ///     .rounded_full()
+    ///     .object_fit(ObjectFit::Cover);
+    /// ```
     fn object_fit(mut self, object_fit: ObjectFit) -> Self {
         self.image_style().object_fit = object_fit;
         self
     }
 
-    /// Set a fallback function that will be invoked to render an error view should
-    /// the image fail to load.
+    /// Sets the closure that builds the element to show when the image fails to load.
+    ///
+    /// Failures include a missing asset, a non-success HTTP status, bytes that don't decode, and a
+    /// URL that the HTTP client can't fetch. The closure runs again on each layout where the
+    /// fallback is shown, so keep it cheap.
     fn with_fallback(mut self, fallback: impl Fn() -> AnyElement + 'static) -> Self {
         self.image_style().fallback = Some(Box::new(fallback));
         self
     }
 
-    /// Set a fallback function that will be invoked to render a view while the image
-    /// is still being loaded.
+    /// Sets the closure that builds a placeholder to show while the image loads.
+    ///
+    /// The placeholder appears only if loading takes longer than [`LOADING_DELAY`], so a quick load
+    /// never shows it. The placeholder and the fallback are children of the image element, so the
+    /// element's own size and style still apply.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use gpui::*;
+    /// let photo = img("https://example.com/photo.jpg")
+    ///     .size(px(240.))
+    ///     .with_loading(|| {
+    ///         div()
+    ///             .size(px(240.))
+    ///             .bg(rgb(0xe5e7eb))
+    ///             .into_any_element()
+    ///     })
+    ///     .with_fallback(|| {
+    ///         div()
+    ///             .size(px(240.))
+    ///             .flex()
+    ///             .items_center()
+    ///             .justify_center()
+    ///             .child("Image unavailable")
+    ///             .into_any_element()
+    ///     });
+    /// ```
     fn with_loading(mut self, loading: impl Fn() -> AnyElement + 'static) -> Self {
         self.image_style().loading = Some(Box::new(loading));
         self
@@ -188,7 +261,10 @@ impl StyledImage for Stateful<Img> {
     }
 }
 
-/// An image element.
+/// An image element, made by [`img`].
+///
+/// It is a styled, interactive element. Style it with [`Styled`] and [`StyledImage`], and attach
+/// event handlers with [`InteractiveElement`].
 pub struct Img {
     interactivity: Interactivity,
     source: ImageSource,
@@ -196,7 +272,29 @@ pub struct Img {
     image_cache: Option<AnyImageCache>,
 }
 
-/// Create a new image element.
+/// Creates an image element that draws `source`.
+///
+/// Building the element does no work. The image starts loading the first time the element is laid
+/// out, on a background thread. Until it loads, the element has no size unless you set one, and it
+/// draws nothing unless you set a [`StyledImage::with_loading`] placeholder. Once the image loads,
+/// the element takes the image's natural size. If you set only a width or only a height, the other
+/// dimension follows the aspect ratio.
+///
+/// `source` is anything that converts into an [`ImageSource`]. That type explains how a string is
+/// read.
+///
+/// Loaded images are cached, so a second `img` with the same source reuses the decoded image. See
+/// the [images guide](crate::_documentation::guides::images_and_assets) for the cache rules, and
+/// [`crate::image_cache`] to scope them to a group of images.
+///
+/// # Examples
+///
+/// ```
+/// # use gpui::*;
+/// let remote = img("https://example.com/avatar.png");
+/// let bundled = img("images/logo.png");
+/// let local = img(std::path::PathBuf::from("assets/banner.jpg"));
+/// ```
 #[track_caller]
 pub fn img(source: impl Into<ImageSource>) -> Img {
     Img {
@@ -208,7 +306,18 @@ pub fn img(source: impl Into<ImageSource>) -> Img {
 }
 
 impl Img {
-    /// A list of all format extensions currently supported by this img element
+    /// Returns the file extensions that `img` can decode, in lowercase and without the dot.
+    ///
+    /// The list is the extensions of `image::ImageFormat` plus `svg`. gpui decides whether a file
+    /// loads by reading its bytes, not its extension, so the list is a guide.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use gpui::*;
+    /// assert!(Img::extensions().contains(&"png"));
+    /// assert!(Img::extensions().contains(&"svg"));
+    /// ```
     pub fn extensions() -> &'static [&'static str] {
         // This is the list in [image::ImageFormat::from_extension] + `svg`
         &[
@@ -217,15 +326,11 @@ impl Img {
         ]
     }
 
-    /// Sets the image cache for the current node.
+    /// Uses `image_cache` for this image, instead of the cache from an ancestor.
     ///
-    /// If the `image_cache` is not explicitly provided, the function will determine the image cache by:
-    ///
-    /// 1. Checking if any ancestor node of the current node contains an `ImageCacheElement`, If such a node exists, the image cache specified by that ancestor will be used.
-    /// 2. If no ancestor node contains an `ImageCacheElement`, the global image cache will be used as a fallback.
-    ///
-    /// This mechanism provides a flexible way to manage image caching, allowing precise control when needed,
-    /// while ensuring a default behavior when no cache is explicitly specified.
+    /// Without this call, the image uses the cache of the nearest ancestor [`crate::image_cache`] element,
+    /// or the app-wide asset cache if there is none. Only [`ImageSource::Resource`] sources go
+    /// through an image cache. The other variants ignore it.
     #[inline]
     pub fn image_cache<I: ImageCache>(self, image_cache: &Entity<I>) -> Self {
         Self {
@@ -256,7 +361,10 @@ struct ImgState {
     started_loading: Option<(Instant, Task<()>)>,
 }
 
-/// The image layout state between frames
+/// The per-frame state that an [`Img`] passes from layout to paint.
+///
+/// It holds the frame of an animated image to draw, and the placeholder or fallback element when
+/// one is showing.
 pub struct ImgLayoutState {
     frame_index: usize,
     replacement: Option<AnyElement>,
@@ -574,7 +682,10 @@ impl ImageSource {
         }
     }
 
-    /// Remove this image source from the asset system
+    /// Evicts this source from the app's asset cache, so the next `img` that uses it loads it again.
+    ///
+    /// Only [`ImageSource::Resource`] and [`ImageSource::Image`] are in that cache, so the other
+    /// variants do nothing. Images held by an [`crate::image_cache`] element are not affected.
     pub fn remove_asset(&self, cx: &mut App) {
         match self {
             ImageSource::Resource(resource) => {
@@ -585,8 +696,10 @@ impl ImageSource {
         }
     }
 
-    /// Check whether this image source is present in the asset system (loading
-    /// or loaded), without fetching it.
+    /// Returns `true` if this source is loading or loaded in the app's asset cache. Starts no load.
+    ///
+    /// Available with the `test-support` feature. Use it in tests to check that an image was
+    /// requested or evicted.
     #[cfg(any(test, feature = "test-support"))]
     pub fn is_asset_cached(&self, cx: &App) -> bool {
         match self {
@@ -613,7 +726,13 @@ impl Asset for ImageDecoder {
     }
 }
 
-/// An image loader for the GPUI asset system
+/// Loads and decodes a [`Resource`] into a [`RenderImage`]. [`img`] uses it, through
+/// [`ImgResourceLoader`], for URLs, file paths and registry entries.
+///
+/// The bytes come from the source. URLs go through the HTTP client and must return a success
+/// status. Paths are read from disk. Registry names are read from the [`crate::AssetRegistry`]. The format
+/// is then guessed from the bytes. Anything the `image` crate recognizes is decoded, and every
+/// frame that decodes is kept for GIF and animated WebP. Anything else is parsed as SVG.
 #[derive(Clone)]
 pub enum ImageAssetLoader {}
 
@@ -743,32 +862,36 @@ impl Asset for ImageAssetLoader {
     }
 }
 
-/// An error that can occur when interacting with the image cache.
+/// Why an image failed to load or decode.
+///
+/// [`StyledImage::with_fallback`] is shown when you get one of these. The cache keeps the error
+/// with the image, so every element that shows the image sees the same error.
 #[derive(Debug, Error, Clone)]
 pub enum ImageCacheError {
-    /// Some other kind of error occurred
+    /// A general failure, such as a failed HTTP request, or a GIF or WebP whose frames all failed
+    /// to decode.
     #[error("error: {0}")]
     Other(#[from] Arc<anyhow::Error>),
-    /// An error that occurred while reading the image from disk.
+    /// A file could not be read, such as a [`Resource::Path`] that doesn't exist.
     #[error("IO error: {0}")]
     Io(Arc<std::io::Error>),
-    /// An error that occurred while processing an image.
+    /// The HTTP response had a status other than success.
     #[error("unexpected http status for {uri}: {status}, body: {body}")]
     BadStatus {
-        /// The URI of the image.
+        /// The URI that was requested.
         uri: SharedUri,
         /// The HTTP status code.
         status: http::StatusCode,
-        /// The HTTP response body.
+        /// The first line of the response body.
         body: String,
     },
-    /// An error that occurred while processing an asset.
+    /// A name was not found in the [`crate::AssetRegistry`].
     #[error("asset error: {0}")]
     Asset(SharedString),
-    /// An error that occurred while processing an image.
+    /// The `image` crate could not decode the bytes.
     #[error("image error: {0}")]
     Image(Arc<ImageError>),
-    /// An error that occurred while processing an SVG.
+    /// The SVG could not be parsed or rendered.
     #[error("svg error: {0}")]
     Usvg(Arc<usvg::Error>),
 }

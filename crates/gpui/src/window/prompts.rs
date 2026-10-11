@@ -10,17 +10,27 @@ use crate::{
 
 use super::Window;
 
-/// The event emitted when a prompt's option is selected.
-/// The usize is the index of the selected option, from the actions
-/// passed to the prompt.
+/// The event a prompt emits when the user chooses one of its buttons.
+///
+/// The value is the index of the chosen button, counted from the first button passed to
+/// [`Window::prompt`](crate::Window::prompt).
 pub struct PromptResponse(pub usize);
 
-/// A prompt that can be rendered in the window.
+/// A view that can be shown as a prompt in a window.
+///
+/// A prompt is a view that emits a [`PromptResponse`] and can take focus. Every view that
+/// meets those bounds is a `Prompt`, so you don't implement this trait yourself. Pass the view
+/// to [`PromptHandle::with_view`] from a prompt builder.
 pub trait Prompt: EventEmitter<PromptResponse> + Focusable {}
 
 impl<V: EventEmitter<PromptResponse> + Focusable> Prompt for V {}
 
-/// A handle to a prompt that can be used to interact with it.
+/// A handle that a prompt builder uses to show a prompt and report the user's answer.
+///
+/// GPUI creates a `PromptHandle` for each prompt that it draws in the window, and passes it to
+/// the builder set with [`App::set_prompt_builder`]. The builder calls
+/// [`PromptHandle::with_view`] with the view it renders, and returns the result. The answer
+/// goes to the receiver that `Window::prompt` returned.
 pub struct PromptHandle {
     sender: oneshot::Sender<usize>,
 }
@@ -30,7 +40,12 @@ impl PromptHandle {
         Self { sender }
     }
 
-    /// Construct a new prompt handle from a view of the appropriate types
+    /// Shows `view` as the prompt, and returns the handle the window renders.
+    ///
+    /// The window focuses `view`. When `view` emits a [`PromptResponse`], its index is sent to
+    /// the prompt's receiver, the window drops the prompt, and focus returns to the element that
+    /// had it before. The handle is consumed, so a prompt can be answered once. Later responses
+    /// from `view` are ignored.
     pub fn with_view<V: Prompt + Render>(
         self,
         view: Entity<V>,
@@ -63,13 +78,41 @@ impl PromptHandle {
     }
 }
 
-/// A prompt handle capable of being rendered in a window.
+/// A prompt that a window can render, as returned by a prompt builder.
+///
+/// Get one from [`PromptHandle::with_view`]. The builder set with [`App::set_prompt_builder`]
+/// returns it, and the window keeps it until the user answers.
 pub struct RenderablePromptHandle {
     pub(crate) view: Box<dyn PromptViewHandle>,
 }
 
-/// Use this function in conjunction with [App::set_prompt_builder] to force
-/// GPUI to always use the fallback prompt renderer.
+/// Shows a prompt drawn inside the window, rather than a platform dialog.
+///
+/// Pass it to [`App::set_prompt_builder`] to draw every prompt in the window on every
+/// platform. [`Window::prompt`](crate::Window::prompt) also uses it when the platform has
+/// no native dialog, which is the case on the web. The prompt shows the message, the optional
+/// detail, and one button per answer. Its [`PromptLevel`](crate::PromptLevel) isn't shown.
+///
+/// Use [`App::reset_prompt_builder`] to go back to the platform's dialogs.
+///
+/// # Examples
+///
+/// ```
+/// # use gpui::{Context, PromptLevel, Render, TestApp, Window, div, fallback_prompt_renderer, prelude::*};
+/// # struct Root;
+/// # impl Render for Root {
+/// #     fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement { div() }
+/// # }
+/// # let mut app = TestApp::new();
+/// app.update(|cx| cx.set_prompt_builder(fallback_prompt_renderer));
+/// let mut window = app.open_window(|_, _| Root);
+///
+/// // The prompt is drawn in the window, so no platform dialog opens.
+/// window.update(|_, window, cx| {
+///     window.prompt(PromptLevel::Info, "Saved", None, &["OK"], cx);
+/// });
+/// assert!(window.update(|_, window, _| window.has_active_prompt()));
+/// ```
 pub fn fallback_prompt_renderer(
     level: PromptLevel,
     message: &str,
@@ -90,7 +133,10 @@ pub fn fallback_prompt_renderer(
     handle.with_view(renderer, window, cx)
 }
 
-/// The default GPUI fallback for rendering prompts, when the platform doesn't support it.
+/// The view that [`fallback_prompt_renderer`] shows inside the window.
+///
+/// You don't create this type yourself. Clicking a button emits a [`PromptResponse`] with that
+/// button's index, and the window then closes the prompt.
 pub struct FallbackPromptRenderer {
     _level: PromptLevel,
     message: String,

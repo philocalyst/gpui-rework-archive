@@ -1,5 +1,6 @@
-//! CPU layout metadata consumed by the shader compiler. Keep this beside the scene types
-//! so private fields are checked too, without exposing them to renderer implementations.
+//! CPU layout metadata that the shader tests in `gpui_render` check against the generated
+//! shaders. Keep this beside the scene types so private fields are checked too, without exposing
+//! them to renderer implementations.
 
 use super::*;
 use crate::{AtlasTextureId, DevicePixels, LinearColorStop, Size};

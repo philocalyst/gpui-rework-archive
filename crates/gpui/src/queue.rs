@@ -1,3 +1,10 @@
+//! A queue with three priority levels. Its sender can be shared by reference across
+//! threads, and cloning a receiver adds another consumer.
+//!
+//! When more than one level has items, each pop picks a level at random, in
+//! proportion to its [`Priority::weight`]: high 60, medium 30 and low 10. Within a
+//! level, items come out first in, first out. The queue is unbounded.
+
 use std::{
     collections::VecDeque,
     fmt,
@@ -132,6 +139,10 @@ impl<T> PriorityQueueState<T> {
     }
 }
 
+/// The sending half of a queue made by [`PriorityQueueReceiver::new`].
+///
+/// This type isn't `Clone`. Once the sender is dropped, a receiver finishes after it
+/// drains the queue.
 #[doc(hidden)]
 pub struct PriorityQueueSender<T> {
     state: Arc<PriorityQueueState<T>>,
@@ -142,11 +153,23 @@ impl<T> PriorityQueueSender<T> {
         Self { state }
     }
 
+    /// Adds `item` at the back of the given priority's queue and wakes a waiting receiver.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`SendError`] with the item if every receiver has been dropped.
+    /// Panics if `priority` is [`Priority::RealtimeAudio`], which never goes through this queue.
     pub fn send(&self, priority: Priority, item: T) -> Result<(), SendError<T>> {
         self.state.send(priority, item)?;
         Ok(())
     }
 
+    /// Like [`Self::send`], but spins until the queue's lock is free instead of blocking
+    /// the thread on it.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`SendError`] with the item if every receiver has been dropped.
     pub fn spin_send(&self, priority: Priority, item: T) -> Result<(), SendError<T>> {
         self.state.spin_send(priority, item)?;
         Ok(())
@@ -161,6 +184,10 @@ impl<T> Drop for PriorityQueueSender<T> {
     }
 }
 
+/// The receiving half of a priority queue. Pops items in weighted random order across
+/// the three priority levels.
+///
+/// Cloning a receiver adds another consumer to the same queue.
 #[doc(hidden)]
 pub struct PriorityQueueReceiver<T> {
     state: Arc<PriorityQueueState<T>>,
@@ -181,6 +208,7 @@ impl<T> Clone for PriorityQueueReceiver<T> {
     }
 }
 
+/// Returned by a send when no receiver is left. Holds the item that wasn't sent.
 #[doc(hidden)]
 pub struct SendError<T>(pub T);
 
@@ -190,12 +218,27 @@ impl<T: fmt::Debug> fmt::Debug for SendError<T> {
     }
 }
 
+/// Returned by a receive when the queue is empty and its sender has been dropped.
 #[derive(Debug)]
 #[doc(hidden)]
 pub struct RecvError;
 
 #[allow(dead_code)]
 impl<T> PriorityQueueReceiver<T> {
+    /// Creates an empty queue and returns its sender and receiver.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use gpui::{Priority, queue::PriorityQueueReceiver};
+    /// let (sender, mut receiver) = PriorityQueueReceiver::new();
+    /// sender.send(Priority::High, 1).unwrap();
+    /// assert_eq!(receiver.pop().unwrap(), 1);
+    ///
+    /// // Once the sender is dropped and the queue is empty, `pop` fails.
+    /// drop(sender);
+    /// assert!(receiver.pop().is_err());
+    /// ```
     pub fn new() -> (PriorityQueueSender<T>, Self) {
         let state = PriorityQueueState {
             queues: parking_lot::Mutex::new(PriorityQueues {
@@ -220,31 +263,34 @@ impl<T> PriorityQueueReceiver<T> {
         (sender, receiver)
     }
 
-    /// Returns whether the queue currently contains no elements.
+    /// Returns `true` if no items are queued at any priority.
     pub fn is_empty(&self) -> bool {
         self.state.queues.lock().is_empty()
     }
 
-    /// Returns the number of queued elements across all priorities.
+    /// Returns the number of queued items across all priorities.
     pub(crate) fn len(&self) -> usize {
         let queues = self.state.queues.lock();
         queues.high_priority.len() + queues.medium_priority.len() + queues.low_priority.len()
     }
 
-    /// Tries to pop one element from the priority queue without blocking.
+    /// Pops one item without blocking. Returns `Ok(None)` if the queue is empty.
     ///
-    /// This will early return if there are no elements in the queue.
-    ///
-    /// This method is best suited if you only intend to pop one element, for better performance
-    /// on large queues see [`Self::try_iter`]
+    /// Use this to take a single item. To drain many items, use [`Self::try_iter`].
     ///
     /// # Errors
     ///
-    /// If the sender was dropped
+    /// Returns [`RecvError`] when the queue is empty and its sender has been dropped.
     pub fn try_pop(&mut self) -> Result<Option<T>, RecvError> {
         self.pop_inner(false)
     }
 
+    /// Like [`Self::try_pop`], but spins until the queue's lock is free instead of
+    /// blocking the thread on it.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`RecvError`] when the queue is empty and its sender has been dropped.
     pub fn spin_try_pop(&mut self) -> Result<Option<T>, RecvError> {
         use Priority as P;
 
@@ -283,20 +329,21 @@ impl<T> PriorityQueueReceiver<T> {
         Ok(None)
     }
 
-    /// Pops an element from the priority queue blocking if necessary.
+    /// Pops one item, blocking the current thread until one is available.
     ///
-    /// This method is best suited if you only intend to pop one element, for better performance
-    /// on large queues see [`Self::iter``]
+    /// Use this to take a single item. To drain many items, use [`Self::iter`].
     ///
     /// # Errors
     ///
-    /// If the sender was dropped
+    /// Returns [`RecvError`] when the queue is empty and its sender has been dropped.
     pub fn pop(&mut self) -> Result<T, RecvError> {
         self.pop_inner(true).map(|e| e.unwrap())
     }
 
-    /// Returns an iterator over the elements of the queue
-    /// this iterator will end when all elements have been consumed and will not wait for new ones.
+    /// Returns an iterator that yields the queued items and ends when the queue is empty.
+    ///
+    /// The iterator never blocks. Its last item is `Err(RecvError)` if the sender has
+    /// been dropped, and `None` otherwise.
     pub fn try_iter(self) -> TryIter<T> {
         TryIter {
             receiver: self,
@@ -304,8 +351,11 @@ impl<T> PriorityQueueReceiver<T> {
         }
     }
 
-    /// Returns an iterator over the elements of the queue
-    /// this iterator will wait for new elements if the queue is empty.
+    /// Returns an iterator that yields items as they arrive, in the same weighted order as
+    /// [`Self::pop`].
+    ///
+    /// The iterator blocks while the queue is empty and ends once the sender has been
+    /// dropped and the queue is drained.
     pub fn iter(self) -> Iter<T> {
         Iter(self)
     }
@@ -365,6 +415,7 @@ impl<T> Drop for PriorityQueueReceiver<T> {
     }
 }
 
+/// The blocking iterator returned by [`PriorityQueueReceiver::iter`].
 #[doc(hidden)]
 pub struct Iter<T>(PriorityQueueReceiver<T>);
 impl<T> Iterator for Iter<T> {
@@ -376,6 +427,7 @@ impl<T> Iterator for Iter<T> {
 }
 impl<T> FusedIterator for Iter<T> {}
 
+/// The non-blocking iterator returned by [`PriorityQueueReceiver::try_iter`].
 #[doc(hidden)]
 pub struct TryIter<T> {
     receiver: PriorityQueueReceiver<T>,

@@ -229,7 +229,25 @@ impl RingStyle {
     }
 }
 
-/// The CSS styling that can be applied to an element via the `Styled` trait
+/// The resolved styling of an element, which GPUI uses to lay out and paint it.
+///
+/// You rarely build a `Style` yourself. The methods of [`Styled`] write into a
+/// [`StyleRefinement`], and GPUI applies that refinement over `Style::default()` when it
+/// draws the element. A default `Style` uses [`Display::Block`] and is visible.
+///
+/// # Examples
+///
+/// ```
+/// use gpui::{Display, Refineable, Style, StyleRefinement};
+///
+/// let mut style = Style::default();
+/// assert_eq!(style.display, Display::Block);
+///
+/// let mut refinement = StyleRefinement::default();
+/// refinement.display = Some(Display::Flex);
+/// style.refine(&refinement);
+/// assert_eq!(style.display, Display::Flex);
+/// ```
 #[derive(Clone, Refineable, Debug)]
 #[refineable(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Style {
@@ -256,7 +274,7 @@ pub struct Style {
     /// Edge fade distances for overflow masking.
     #[refineable]
     pub overflow_fade: Edges<AbsoluteLength>,
-    /// How much space (in points) should be reserved for the scrollbars of `Overflow::Scroll` and `Overflow::Auto` nodes.
+    /// How much space (in logical pixels or rems) should be reserved for the scrollbars of `Overflow::Scroll` nodes.
     pub scrollbar_width: AbsoluteLength,
     /// Whether both x and y axis should be scrollable at the same time.
     pub allow_concurrent_scroll: bool,
@@ -515,9 +533,9 @@ pub struct BoxShadow {
 }
 
 impl BoxShadow {
-    /// Creates a new [`BoxShadow`] with the given offset and color, matching the order
-    /// of the CSS `box-shadow` property. Use the builder methods to set blur radius,
-    /// spread radius, and inset.
+    /// Creates a new [`BoxShadow`] with the given offset and color. The blur and spread
+    /// radii are 0 and the shadow is outset. Use the builder methods to change them, or to
+    /// make the shadow inset.
     pub fn new(offset_x: Pixels, offset_y: Pixels, color: impl Into<Background>) -> Self {
         Self {
             color: color.into(),
@@ -582,9 +600,8 @@ impl Filter {
 /// renderers consume. Produced by [`Filter::scale`]; pixel magnitudes are in [`ScaledPixels`].
 ///
 /// This is intentionally a separate enum from [`Filter`] (rather than reusing it) so the scene
-/// stays in device space like every other primitive, and so the renderers `match` on it
-/// exhaustively — adding a filter variant breaks each backend's match, forcing a deliberate
-/// implement-or-decline decision per backend instead of silently rendering nothing.
+/// stays in device space like every other primitive. Matches on it are exhaustive, so adding
+/// a filter variant makes each one fail to compile until it is handled.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ScaledFilter {
     /// A gaussian blur with the given radius, in scaled (device) pixels.
@@ -639,7 +656,7 @@ pub enum TextAlign {
 
 /// Case mapping applied at layout time while keeping **UTF-8 byte lengths** unchanged.
 ///
-/// [`TextTransform::Uppercase`] and [`TextTransform::Lowercase`] use Unicode full case folding via
+/// [`TextTransform::Uppercase`] and [`TextTransform::Lowercase`] use Unicode case mapping via
 /// [`char::to_uppercase`] / [`char::to_lowercase`]. If mapping a code point would change its UTF-8
 /// length, or would replace one scalar value with more than one character, the **original**
 /// character is kept. That keeps indices into the underlying buffer aligned with hit-testing and
@@ -664,7 +681,30 @@ pub enum TextTransform {
     Capitalize,
 }
 
-/// The properties that can be used to style text in GPUI
+/// The text properties of an element: font, size, color and spacing.
+///
+/// Text properties inherit into child elements, so a value set on a container applies to
+/// its text unless a child sets its own. Set them with the methods of [`Styled`], such as
+/// [`Styled::text_color`] and [`Styled::text_size`], or refine a `TextStyle` directly.
+///
+/// The default text style uses black text, the `.SystemUIFont` family, a font size of
+/// `1rem` (16px at the default rem size), and a line height of the golden ratio times the
+/// font size.
+///
+/// # Examples
+///
+/// ```
+/// use gpui::{AbsoluteLength, Refineable, TextStyle, TextStyleRefinement, hsla, rems};
+///
+/// let mut style = TextStyle::default();
+/// assert_eq!(style.font_size, AbsoluteLength::from(rems(1.)));
+///
+/// let mut refinement = TextStyleRefinement::default();
+/// refinement.color = Some(hsla(0., 1., 0.5, 1.));
+/// refinement.font_size = Some(AbsoluteLength::from(rems(1.5)));
+/// style.refine(&refinement);
+/// assert_eq!(style.color, hsla(0., 1., 0.5, 1.));
+/// ```
 #[derive(Refineable, Clone, Debug, PartialEq)]
 #[refineable(Debug, PartialEq, Serialize, Deserialize)]
 pub struct TextStyle {
@@ -855,7 +895,7 @@ pub struct HighlightStyle {
     /// The underline style of the text
     pub underline: Option<UnderlineStyle>,
 
-    /// The underline style of the text
+    /// The strikethrough style of the text
     pub strikethrough: Option<StrikethroughStyle>,
 
     /// Similar to the CSS `opacity` property, this will cause the text to be less vibrant.
@@ -875,7 +915,7 @@ impl Style {
         }
     }
 
-    /// Returns true if the style is visible and the background is opaque.
+    /// Returns true if the style has a background that is not fully transparent. Visibility is not checked.
     pub fn has_opaque_background(&self) -> bool {
         self.background
             .as_ref()
@@ -1582,7 +1622,7 @@ pub enum FlexDirection {
 ///   - `Overflow::Scroll` nodes have space in the layout reserved for a scrollbar (width controlled by the `scrollbar_width` property)
 ///
 /// In Taffy, we only implement the layout related secondary effects as we are not concerned with drawing/painting. The amount of space reserved for
-/// a scrollbar is controlled by the `scrollbar_width` property. If this is `0` then `Scroll` behaves identically to `Hidden`.
+/// a scrollbar is controlled by the `scrollbar_width` property. If this is `0`, `Scroll` reserves no space, so its layout matches `Hidden`.
 ///
 /// <https://developer.mozilla.org/en-US/docs/Web/CSS/overflow>
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Default, Serialize, Deserialize, JsonSchema)]

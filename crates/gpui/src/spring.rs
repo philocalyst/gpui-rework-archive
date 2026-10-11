@@ -5,27 +5,50 @@ use crate::{Hsla, Motion, Pixels, Rems, Rgba, SpringDescription};
 const CRITICAL_DAMPING_TOLERANCE: f32 = 1e-4;
 pub(crate) const DEFAULT_SPRING_EPSILON: f32 = 0.001;
 
-/// The physical parameters of a damped harmonic oscillator.
+/// The physical parameters of a damped spring, which move a value toward a target.
 ///
-/// `stiffness` and `mass` must be finite and positive. `damping` must be finite
-/// and non-negative.
+/// A spring is a mass on a spring with damping. Stiffness pulls the value toward its target,
+/// damping slows it, and mass resists both. Use the same parameters for every frame of one
+/// animation. `stiffness` and `mass` must be finite and positive. `damping` must be finite and
+/// non-negative. The constructor doesn't check these, so invalid values give NaN or meaningless
+/// motion.
+///
+/// Create one with [`spring`]. Pass it to [`SpringAnimation::new`] to animate an element, or
+/// step it yourself with [`SpringConfig::step`].
+///
+/// # Examples
+///
+/// ```
+/// use gpui::spring;
+///
+/// let config = spring(100., 10., 1.);
+/// let (natural_frequency, damping_ratio) = config.canonical();
+/// assert_eq!(natural_frequency, 10.0);
+/// assert_eq!(damping_ratio, 0.5);
+/// ```
+///
+/// See the [animation guide](crate::_documentation::guides::animation#use-springs-for-interactive-values) for the bigger
+/// picture.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct SpringConfig {
-    /// The spring stiffness, conventionally written as $k$.
+    /// The spring constant, written $k$. A larger value pulls the spring toward its target faster.
     pub stiffness: f32,
-    /// The viscous damping coefficient, conventionally written as $c$.
+    /// The viscous damping coefficient, written $c$. Zero leaves the spring oscillating forever.
     pub damping: f32,
-    /// The moving mass, conventionally written as $m$.
+    /// The moving mass, written $m$. A larger mass responds more slowly.
     pub mass: f32,
 }
 
-/// Creates a spring configuration from its physical parameters.
+/// Creates a [`SpringConfig`] from stiffness, damping and mass.
+///
+/// This is the same as [`SpringConfig::new`]. Use the short name where the spring reads well
+/// next to its animation.
 pub const fn spring(stiffness: f32, damping: f32, mass: f32) -> SpringConfig {
     SpringConfig::new(stiffness, damping, mass)
 }
 
 impl SpringConfig {
-    /// Creates a spring from its physical parameters.
+    /// Creates a spring from its stiffness, damping and mass. See [`spring`].
     pub const fn new(stiffness: f32, damping: f32, mass: f32) -> Self {
         Self {
             stiffness,
@@ -34,17 +57,36 @@ impl SpringConfig {
         }
     }
 
-    /// Returns the natural angular frequency and damping ratio $(\omega_0, \zeta)$.
+    /// Returns the natural angular frequency $\omega_0$ and the damping ratio $\zeta$.
+    ///
+    /// A damping ratio below one underdamps the spring, so it overshoots its target. Exactly one
+    /// is critically damped, the fastest approach without overshoot. Above one it is overdamped
+    /// and approaches slowly.
     pub fn canonical(&self) -> (f32, f32) {
         let natural_frequency = (self.stiffness / self.mass).sqrt();
         let damping_ratio = self.damping / (2.0 * (self.stiffness * self.mass).sqrt());
         (natural_frequency, damping_ratio)
     }
 
-    /// Advances a spring toward a target that remains fixed for `delta_time`.
+    /// Advances the spring by `delta_time` seconds toward a fixed `target`.
     ///
-    /// This analytic step is independent of frame rate and preserves velocity,
-    /// allowing an interrupted spring to be retargeted without restarting it.
+    /// The step is exact for a target that doesn't change during `delta_time`. Two half-steps
+    /// therefore give the same result as one full step, so the motion doesn't depend on the frame
+    /// rate. The velocity carries over, so you can retarget an interrupted spring without restarting
+    /// it.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use gpui::{SpringState, spring};
+    ///
+    /// let config = spring(320., 24., 1.);
+    /// let start = SpringState::default();
+    /// let one_step = config.step(start, 1.0, 1.0 / 60.0);
+    /// let two_steps = config.step(config.step(start, 1.0, 1.0 / 120.0), 1.0, 1.0 / 120.0);
+    /// assert!((one_step.position - two_steps.position).abs() < 1e-3);
+    /// assert!(one_step.position > 0.0 && one_step.position < 1.0);
+    /// ```
     pub fn step(&self, state: SpringState, target: f32, delta_time: f32) -> SpringState {
         let propagator = self.propagator(delta_time);
         let displacement = state.position - target;
@@ -55,10 +97,24 @@ impl SpringConfig {
         }
     }
 
-    /// Advances a spring toward a target moving at a constant velocity.
+    /// Advances the spring by `delta_time` seconds toward a target that moves at `target_velocity`.
     ///
-    /// A first-order hold avoids the frame-rate-dependent lag introduced by
-    /// treating a dragged target as stationary between frames.
+    /// Use this for a target that moves steadily, such as a dragged pointer. The spring tracks the
+    /// moving target with a constant lag, instead of the frame-rate-dependent lag you get when
+    /// [`step`](Self::step) treats a moving target as fixed between frames.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use gpui::{SpringState, spring};
+    ///
+    /// // A natural frequency of 10 and a damping ratio of 0.8.
+    /// let config = spring(100., 16., 1.);
+    /// let state = SpringState { position: -0.48, velocity: 3.0 };
+    /// let next = config.step_ramp(state, 0.0, 3.0, 0.25);
+    /// assert!((next.position - 0.27).abs() < 1e-4);
+    /// assert!((next.velocity - 3.0).abs() < 1e-4);
+    /// ```
     pub fn step_ramp(
         &self,
         state: SpringState,
@@ -84,11 +140,21 @@ impl SpringConfig {
         }
     }
 
-    /// Returns the exact state-transition matrix for a constant target.
+    /// Returns the exact state-transition matrix for a fixed target over `delta_time` seconds.
     ///
-    /// Materializing this matrix is useful when many springs share the same
-    /// configuration and frame delta. A matrix must not be reused when the
-    /// frame delta changes.
+    /// The matrix maps the displacement from the target and the velocity to their values after
+    /// `delta_time`, which is what [`step`](Self::step) does. Build it once when many springs share
+    /// this config and frame delta. Rebuild it when the delta changes.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use gpui::spring;
+    ///
+    /// // With no time elapsed, nothing changes.
+    /// let matrix = spring(100., 10., 1.).propagator(0.0);
+    /// assert_eq!(matrix, [[1.0, 0.0], [0.0, 1.0]]);
+    /// ```
     pub fn propagator(&self, delta_time: f32) -> [[f32; 2]; 2] {
         let (natural_frequency, damping_ratio) = self.canonical();
 
@@ -144,10 +210,23 @@ impl SpringConfig {
         }
     }
 
-    /// Tests both displacement and velocity against a positional tolerance.
+    /// Returns whether the spring is within `epsilon` of `target`, in position and velocity.
     ///
-    /// Velocity is compared with `epsilon * natural_frequency`, giving it the
-    /// corresponding animated-units-per-second scale.
+    /// The position must be within `epsilon` of `target`. The velocity must be at most
+    /// `epsilon * natural_frequency`, which puts it on the same scale as position. A negative or
+    /// non-finite `epsilon` never settles.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use gpui::{SpringState, spring};
+    ///
+    /// let config = spring(100., 10., 1.);
+    /// let moving = SpringState { position: 1.0, velocity: 1.0 };
+    /// let nearly_still = SpringState { position: 1.005, velocity: 0.05 };
+    /// assert!(!config.is_settled(moving, 1.0, 0.01));
+    /// assert!(config.is_settled(nearly_still, 1.0, 0.01));
+    /// ```
     pub fn is_settled(&self, state: SpringState, target: f32, epsilon: f32) -> bool {
         let (natural_frequency, _) = self.canonical();
         epsilon.is_finite()
@@ -156,10 +235,30 @@ impl SpringConfig {
             && state.velocity.abs() <= epsilon * natural_frequency
     }
 
-    /// Returns a conservative time after which the spring remains settled.
+    /// Returns a time after which the spring stays settled, measured from `state` in seconds.
     ///
-    /// An undamped spring has no finite settling time and returns
-    /// [`Duration::MAX`].
+    /// The result is conservative. Stepping the spring to this time, or any later time, leaves it
+    /// settled by [`is_settled`](Self::is_settled) with the same `target` and `epsilon`. An
+    /// undamped spring that isn't already at rest never settles, so this returns
+    /// [`Duration::MAX`]. So does a non-positive or non-finite `epsilon`, unless the spring is
+    /// already at rest.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::time::Duration;
+    ///
+    /// use gpui::{SpringState, spring};
+    ///
+    /// let config = spring(100., 10., 1.);
+    /// let start = SpringState::default();
+    /// let time = config.settle_time(start, 1.0, 0.001);
+    /// assert!(time > Duration::ZERO && time < Duration::MAX);
+    /// let later = config.step(start, 1.0, time.as_secs_f32() + 0.1);
+    /// assert!(config.is_settled(later, 1.0, 0.001));
+    ///
+    /// assert_eq!(spring(100., 0., 1.).settle_time(start, 1.0, 0.001), Duration::MAX);
+    /// ```
     pub fn settle_time(&self, state: SpringState, target: f32, epsilon: f32) -> Duration {
         let displacement = state.position - target;
         if displacement == 0.0 && state.velocity == 0.0 {
@@ -252,28 +351,42 @@ impl SpringConfig {
     }
 }
 
-/// The instantaneous position and velocity of a spring.
+/// The position and velocity of a spring at one moment.
+///
+/// Pass the state from one step to the next with [`SpringConfig::step`]. The default is at rest
+/// at zero.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct SpringState {
-    /// The current value in the animated unit.
+    /// The current value, in the units of the animated value.
     pub position: f32,
-    /// The current value's change per second.
+    /// The change in position, per second.
     pub velocity: f32,
 }
 
-/// A value that can be targeted by a one-dimensional spring.
+/// A value that a one-dimensional spring can target.
 ///
-/// Implementations may project the spring coordinate into a richer output,
-/// allowing a discrete state or a path through a multidimensional value to be
-/// driven by one spring.
+/// The spring works in one coordinate, a single `f32`. A target implements this trait to say
+/// which coordinate it is, and how to turn a coordinate back into its output. The output is what
+/// the animator receives. [`f32`], [`Pixels`](crate::Pixels), [`Rems`](crate::Rems) and
+/// [`AnimationPhase`] are the built-in targets, and a [`bool`] targets `0.0` or `1.0`.
+///
+/// # Examples
+///
+/// ```
+/// use gpui::{SpringTarget, px};
+///
+/// assert_eq!(px(12.).target(), 12.0);
+/// assert_eq!(px(12.).resolve(14.0), px(14.));
+/// assert_eq!(true.target(), 1.0);
+/// ```
 pub trait SpringTarget: 'static {
-    /// The value supplied to the spring animator.
+    /// The value that the spring animator receives.
     type Output;
 
-    /// Returns the target in the spring's coordinate space.
+    /// Returns this target as a coordinate for the spring.
     fn target(&self) -> f32;
 
-    /// Projects a spring coordinate into the animated output.
+    /// Converts a spring coordinate into the output the animator receives.
     fn resolve(&self, value: f32) -> Self::Output;
 }
 
@@ -325,34 +438,57 @@ impl SpringTarget for bool {
     }
 }
 
-/// A potentially overshooting coordinate within an animation.
+/// A coordinate within an animation that can go past zero and one.
 ///
-/// Phases are not restricted to 0..1. Multi-stage animations can assign each
-/// stage its own coordinate and interpolate over ranges such as 1..=2.
+/// Phases aren't limited to `0.0..=1.0`. A multi-stage animation can give each stage its own
+/// range, such as `1.0..=2.0`, and interpolate values across that range. A [`bool`] target
+/// animates an `AnimationPhase` that settles at `0.0` or `1.0`.
+///
+/// # Examples
+///
+/// ```
+/// use gpui::AnimationPhase;
+///
+/// let phase = AnimationPhase(1.5);
+/// assert_eq!(phase.interpolate(10.0, 20.0), 25.0);
+/// assert_eq!(phase.interpolate_clamped(10.0, 20.0), 20.0);
+/// assert_eq!(phase.interpolate_between(1.0..=2.0, 10.0, 20.0), 15.0);
+/// assert_eq!(phase.interpolate_between_clamped(2.0..=3.0, 10.0, 20.0), 10.0);
+/// ```
 #[derive(Clone, Copy, Debug, Default, PartialEq, PartialOrd)]
 pub struct AnimationPhase(
-    /// The unbounded phase coordinate.
+    /// The phase coordinate, which is not bounded.
     pub f32,
 );
 
 impl AnimationPhase {
-    /// Restricts this phase to the bounds of a range.
+    /// Limits this phase to `range`.
+    ///
+    /// The bounds may be given in either order.
     pub fn clamp(self, range: RangeInclusive<f32>) -> Self {
         let (first, second) = range.into_inner();
         Self(self.0.clamp(first.min(second), first.max(second)))
     }
 
-    /// Interpolates between values using 0 and 1 as their phase coordinates.
+    /// Interpolates from `from` at phase `0.0` to `to` at phase `1.0`.
+    ///
+    /// Phases outside `0.0..=1.0` extrapolate past the endpoints. Use
+    /// [`interpolate_clamped`](Self::interpolate_clamped) to hold the endpoints instead.
     pub fn interpolate<T: Interpolate>(self, from: T, to: T) -> T {
         T::interpolate(from, to, self.0)
     }
 
-    /// Interpolates between values without extrapolating beyond 0 and 1.
+    /// Interpolates from `from` to `to` like [`interpolate`](Self::interpolate), holding the ends.
+    ///
+    /// A phase below `0.0` gives `from`, and a phase above `1.0` gives `to`.
     pub fn interpolate_clamped<T: Interpolate>(self, from: T, to: T) -> T {
         T::interpolate(from, to, self.0.clamp(0.0, 1.0))
     }
 
-    /// Interpolates between values assigned to arbitrary phase coordinates.
+    /// Interpolates across `range`, where its start maps to `from` and its end maps to `to`.
+    ///
+    /// Phases outside the range extrapolate. If the range is empty (`start == end`), the result
+    /// is `from` below `start` and `to` at or above it.
     pub fn interpolate_between<T: Interpolate>(
         self,
         range: RangeInclusive<f32>,
@@ -368,7 +504,11 @@ impl AnimationPhase {
         T::interpolate(from, to, phase)
     }
 
-    /// Interpolates over arbitrary phase coordinates without extrapolating.
+    /// Interpolates across `range` like [`interpolate_between`](Self::interpolate_between), holding
+    /// the ends.
+    ///
+    /// Phases outside the range give `from` or `to`. An empty range behaves as it does in
+    /// [`interpolate_between`](Self::interpolate_between).
     pub fn interpolate_between_clamped<T: Interpolate>(
         self,
         range: RangeInclusive<f32>,
@@ -409,9 +549,24 @@ impl SpringTarget for AnimationPhase {
     }
 }
 
-/// A value that supports linear interpolation and extrapolation.
+/// A value that [`AnimationPhase`] can interpolate.
+///
+/// Implemented for [`f32`], [`Pixels`](crate::Pixels), [`Rems`](crate::Rems), [`Rgba`](crate::Rgba)
+/// and [`Hsla`](crate::Hsla). Colors interpolate each channel. [`Hsla`](crate::Hsla) takes the
+/// shorter path around the hue wheel.
+///
+/// # Examples
+///
+/// ```
+/// use gpui::{Interpolate, Pixels, px};
+///
+/// assert_eq!(f32::interpolate(10.0, 20.0, 0.25), 12.5);
+/// assert_eq!(Pixels::interpolate(px(0.), px(8.), 0.5), px(4.));
+/// ```
 pub trait Interpolate: Sized {
-    /// Resolves the value at `phase`, where 0 is `from` and 1 is `to`.
+    /// Returns the value at `phase`, where `0.0` is `from` and `1.0` is `to`.
+    ///
+    /// Phases outside `0.0..=1.0` extrapolate.
     fn interpolate(from: Self, to: Self, phase: f32) -> Self;
 }
 
@@ -459,23 +614,67 @@ impl Interpolate for Hsla {
     }
 }
 
-/// Controls how a spring advances and resolves its presentation value.
+/// How a spring advances, and where it rests, when its animation changes state.
+///
+/// Set it with [`SpringAnimation::playback`]. The default is [`SpringPlayback::Running`].
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum SpringPlayback {
-    /// Advances toward the latest target, preserving velocity across retargets.
+    /// The spring advances toward the latest target and keeps its velocity across retargets.
     #[default]
     Running,
-    /// Holds the current position and velocity until playback resumes.
+    /// The spring holds its position and velocity. It resumes from them when playback runs again.
     Paused,
-    /// Holds the current position and discards velocity.
+    /// The spring holds its position and sets its velocity to zero.
     Stopped,
-    /// Snaps to the latest target and discards velocity.
+    /// The spring jumps to the latest target and sets its velocity to zero.
     Completed,
-    /// Returns to the initial value and discards velocity.
+    /// The spring returns to its initial value and sets its velocity to zero.
     Cancelled,
 }
 
-/// A stateful spring animation targeting a value or projected path.
+/// A spring animation for an element: a [`SpringConfig`], a target and a starting value.
+///
+/// Build one with [`SpringAnimation::new`] and [`SpringAnimation::to`], then pass it to
+/// [`AnimationExt::with_spring`](crate::AnimationExt::with_spring). The element keeps the spring's
+/// position and velocity across frames, so a retargeted spring bends toward the new target
+/// instead of jumping. Under [`App::reduce_motion`](crate::App::reduce_motion), the spring jumps
+/// straight to its target.
+///
+/// # Examples
+///
+/// ```
+/// use std::{cell::Cell, rc::Rc};
+///
+/// use gpui::{
+///     AnimationExt, Context, IntoElement, Render, SpringAnimation, TestApp, Window, div,
+///     prelude::*, spring,
+/// };
+///
+/// struct Knob {
+///     last: Rc<Cell<f32>>,
+/// }
+///
+/// impl Render for Knob {
+///     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+///         let last = self.last.clone();
+///         div().child("knob").with_spring(
+///             "knob",
+///             SpringAnimation::new(spring(320., 24., 1.)).to(1.0_f32),
+///             move |el, position| {
+///                 last.set(position);
+///                 el.opacity(position)
+///             },
+///         )
+///     }
+/// }
+///
+/// let last = Rc::new(Cell::new(0.0));
+/// let mut app = TestApp::new();
+/// app.update(|cx| cx.set_reduce_motion(true));
+/// let mut window = app.open_window(|_, _| Knob { last: last.clone() });
+/// window.draw();
+/// assert_eq!(last.get(), 1.0);
+/// ```
 #[derive(Clone, Debug)]
 pub struct SpringAnimation<T = ()> {
     pub(crate) motion: Motion<SpringDescription>,
@@ -485,7 +684,9 @@ pub struct SpringAnimation<T = ()> {
 }
 
 impl SpringAnimation<()> {
-    /// Creates a spring animation builder.
+    /// Creates a spring animation with `config`, which has no target yet.
+    ///
+    /// Call [`to`](Self::to) to set the target before passing the animation to an element.
     pub fn new(config: SpringConfig) -> Self {
         Self {
             motion: Motion::spring(config),
@@ -495,7 +696,11 @@ impl SpringAnimation<()> {
         }
     }
 
-    /// Sets the value or path targeted by this spring.
+    /// Sets the target of this spring.
+    ///
+    /// An `f32` targets a number, a [`Pixels`](crate::Pixels) or [`Rems`](crate::Rems) targets a
+    /// length, a `bool` targets `0.0` or `1.0`, and an [`AnimationPhase`] targets a phase.
+    /// The animator receives the target's [`SpringTarget::Output`].
     pub fn to<T: SpringTarget>(self, target: T) -> SpringAnimation<T> {
         let SpringAnimation {
             motion,
@@ -513,13 +718,18 @@ impl SpringAnimation<()> {
 }
 
 impl<T> SpringAnimation<T> {
-    /// Sets the settling tolerance in the target's scalar coordinate space.
+    /// Sets how close the spring must be to its target before it counts as settled.
+    ///
+    /// The tolerance is in the target's scalar coordinate. For a [`Pixels`](crate::Pixels) target,
+    /// it is in pixels. See [`Motion::with_epsilon`](crate::Motion::with_epsilon).
     pub fn with_epsilon(mut self, epsilon: f32) -> Self {
         self.motion = self.motion.with_epsilon(epsilon);
         self
     }
 
-    /// Sets how the spring advances or resolves its current value.
+    /// Sets how the spring advances, and where it rests, when its animation changes state.
+    ///
+    /// See [`SpringPlayback`].
     pub fn playback(mut self, playback: SpringPlayback) -> Self {
         self.playback = playback;
         self
@@ -527,18 +737,37 @@ impl<T> SpringAnimation<T> {
 }
 
 impl<T: SpringTarget> SpringAnimation<T> {
-    /// Sets the coordinate used when this element has no prior spring state.
+    /// Sets the value a newly mounted spring starts from.
+    ///
+    /// Without this, a new spring starts at its target and doesn't animate on mount. The value is
+    /// converted with [`SpringTarget::target`], so it must be the same kind of value as the target.
     pub fn from(mut self, initial: T) -> Self {
         self.initial = Some(initial.target());
         self
     }
 }
 
-/// Adapts a spring starting at zero with no velocity to GPUI's duration-based easing API.
+/// Returns the time a spring takes to settle from rest, and an easing that samples it over that time.
 ///
-/// The returned easing can overshoot the normalized 0..1 output range. Retargeting
-/// this duration-based form restarts the spring; use [`SpringConfig::step`] when
-/// preserving velocity matters.
+/// The spring starts at rest at zero and moves to `1.0`. The easing maps progress `0.0..=1.0`
+/// across the settling time, so it fits APIs that take a duration and an easing, such as
+/// [`Animation::with_easing`](crate::Animation::with_easing). The easing can overshoot `1.0`.
+/// Retargeting a duration-based animation restarts it. Use [`SpringConfig::step`] when keeping
+/// velocity matters.
+///
+/// # Examples
+///
+/// ```
+/// use std::time::Duration;
+///
+/// use gpui::{sampled_easing, spring};
+///
+/// let (duration, ease) = sampled_easing(spring(100., 6., 1.), 0.001);
+/// assert!(duration > Duration::ZERO);
+/// assert_eq!(ease(0.0), 0.0);
+/// assert_eq!(ease(1.0), 1.0);
+/// assert!((1..100).any(|step| ease(step as f32 / 100.0) > 1.0));
+/// ```
 pub fn sampled_easing(config: SpringConfig, epsilon: f32) -> (Duration, impl Fn(f32) -> f32) {
     let initial_state = SpringState {
         position: 0.0,

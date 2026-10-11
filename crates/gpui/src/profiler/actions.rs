@@ -1,3 +1,8 @@
+//! Timing for action handlers: the slowest handlers seen, and the one running now.
+//!
+//! Timing is recorded only with the `profiler` feature. Without it, the statistics stay
+//! empty.
+
 use std::time::Duration;
 
 use itertools::Itertools;
@@ -6,6 +11,10 @@ use scheduler::Instant;
 #[cfg(feature = "profiler")]
 use crate::action::Action;
 
+/// The five slowest action handlers seen so far, and the handler that is running now.
+///
+/// Read them with [`take_action_stats`]. Only handlers that run for at least 100
+/// microseconds are considered for the list, so most calls take the fast path.
 #[doc(hidden)]
 #[derive(Clone)]
 pub struct ActionStatistics {
@@ -64,23 +73,30 @@ impl ActionStatistics {
         }
     }
 
+    /// Returns the statistics gathered so far and resets this one. The running action stays
+    /// tracked, so it is still reported by the next snapshot.
     pub fn take(&mut self) -> Self {
         let taken = std::mem::take(self);
         self.running = taken.running;
         taken
     }
 
+    /// Returns `true` if no handler has been recorded as one of the longest.
     pub fn is_empty(&self) -> bool {
         self.longest_runtimes.is_empty()
     }
 
+    /// Records that `action` started at `started`, so a long-running handler can be reported
+    /// before it finishes.
     #[cfg(feature = "profiler")]
     pub fn update_running_action(&mut self, action: &'static str, started: Instant) {
         self.running = Some((action, started));
     }
+    /// Does nothing, because the `profiler` feature is off.
     #[cfg(not(feature = "profiler"))]
     pub fn update_running_action(&mut self, _action: &'static str, _started: Instant) {}
 
+    /// Ends the running action and keeps its timing if it is among the longest.
     #[cfg(feature = "profiler")]
     pub fn save_action_timing(&mut self) {
         let now = Instant::now();
@@ -127,9 +143,13 @@ impl ActionStatistics {
                 .expect("never empty");
         }
     }
+    /// Does nothing, because the `profiler` feature is off.
     #[cfg(not(feature = "profiler"))]
     pub fn save_action_timing(&mut self) {}
 
+    /// Returns the recorded handlers, and the running one if `include_running` is `true`.
+    ///
+    /// The running handler's `end` is the time of this call.
     pub fn longest_runtimes(&self, include_running: bool) -> impl Iterator<Item = ActionTiming> {
         self.longest_runtimes.iter().copied().chain(
             self.running
@@ -144,12 +164,17 @@ impl ActionStatistics {
     }
 }
 
+/// The timing of one action handler.
+///
+/// UNSTABLE: only for use in the profiler and zed-reliability.
 #[doc(hidden)]
-/// UNSTABLE only for use in the profiler and zed-reliability
 #[derive(Copy, Clone)]
 pub struct ActionTiming {
+    /// The action's name, or `"un-named"` if it has none.
     pub name: &'static str,
+    /// When the handler started.
     pub start: Instant,
+    /// When the handler finished, or the time of the snapshot for a running handler.
     pub end: Instant,
 }
 
@@ -163,12 +188,14 @@ impl core::fmt::Debug for ActionTiming {
 }
 
 impl ActionTiming {
+    /// Returns how long the handler ran, from `start` to `end`. Returns zero if `end` is before `start`.
     pub fn duration(&self) -> Duration {
         self.end.saturating_duration_since(self.start)
     }
 }
 
 impl ActionTiming {
+    /// Returns how long the handler ran, computed with `end - start`. Prefer [`Self::duration`].
     #[doc(hidden)]
     pub fn runtime(&self) -> Duration {
         self.end - self.start
@@ -181,6 +208,7 @@ impl ActionTiming {
 static ACTION_STATISTICS: spin::Mutex<ActionStatistics> =
     const { spin::Mutex::new(ActionStatistics::new()) };
 
+/// Records the start of the action `action` on the foreground thread, and returns its name.
 #[doc(hidden)]
 #[cfg(feature = "profiler")]
 pub(crate) fn update_running_action(
@@ -194,18 +222,23 @@ pub(crate) fn update_running_action(
     action
 }
 
+/// Ends the running action and records its timing.
 #[doc(hidden)]
 #[cfg(feature = "profiler")]
 pub(crate) fn save_action_timing() {
     ACTION_STATISTICS.lock().save_action_timing();
 }
 
+/// Returns the action statistics gathered since the previous call, and resets them.
+///
+/// Available with the `profiler` feature. Without it, this returns empty statistics.
 #[doc(hidden)]
 #[cfg(feature = "profiler")]
 pub fn take_action_stats() -> ActionStatistics {
     ACTION_STATISTICS.lock().take()
 }
 
+/// Returns empty action statistics, because the `profiler` feature is off.
 #[doc(hidden)]
 #[cfg(not(feature = "profiler"))]
 pub fn take_action_stats() -> ActionStatistics {
