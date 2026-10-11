@@ -420,7 +420,8 @@ impl Element for UniformList {
                     }) = shared_scroll_to_item
                     {
                         if y_flipped {
-                            item_index = self.item_count.saturating_sub(item_index + 1);
+                            item_index =
+                                self.item_count.saturating_sub(item_index.saturating_add(1));
                         }
                         let list_height = padded_bounds.size.height;
                         let mut updated_scroll_offset = shared_scroll_offset.borrow_mut();
@@ -724,6 +725,38 @@ impl InteractiveElement for UniformList {
 #[cfg(test)]
 mod test {
     use crate::TestAppContext;
+
+    #[gpui::test]
+    fn scroll_to_bottom_in_flipped_list_does_not_overflow(cx: &mut TestAppContext) {
+        use crate::{
+            AppContext as _, Context, IntoElement, Render, Styled, UniformListScrollHandle, Window,
+            div, px, size, uniform_list,
+        };
+
+        struct FlippedRows(UniformListScrollHandle);
+        impl Render for FlippedRows {
+            fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+                uniform_list("rows", 47, |range, _, _| {
+                    range.map(|_| div().h(px(20.))).collect()
+                })
+                .track_scroll(&self.0)
+                .y_flipped(true)
+                .size_full()
+            }
+        }
+
+        let handle = UniformListScrollHandle::new();
+        let window = cx.open_window(size(px(200.), px(200.)), |_, _| FlippedRows(handle.clone()));
+        let mut draw = || {
+            cx.update_window(window.into(), |_, window, cx| window.draw(cx).clear(cx))
+                .unwrap();
+        };
+        draw();
+        handle.scroll_to_bottom();
+        draw();
+        assert_eq!(handle.0.borrow().base_handle.offset().y, px(0.));
+        assert!(handle.0.borrow().deferred_scroll_to_item.is_none());
+    }
 
     #[gpui::test]
     fn test_scroll_strategy_nearest(cx: &mut TestAppContext) {
