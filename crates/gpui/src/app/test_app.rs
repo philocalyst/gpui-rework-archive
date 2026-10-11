@@ -472,13 +472,17 @@ impl<V: 'static + Render> TestAppWindow<V> {
     /// Simulate resizing the window.
     pub fn simulate_resize(&mut self, size: Size<Pixels>) {
         let window_id = self.handle.window_id();
-        let mut app = self.app.borrow_mut();
-        if let Some(Some(window)) = app.windows.get_mut(window_id) {
-            if let Some(test_window) = window.platform_window.as_test() {
-                test_window.simulate_resize(size);
+        // The window's resize callback updates the app, so it can't run while the app is borrowed.
+        let test_window = {
+            let mut app = self.app.borrow_mut();
+            match app.windows.get_mut(window_id) {
+                Some(Some(window)) => window.platform_window.as_test().cloned(),
+                _ => None,
             }
+        };
+        if let Some(mut test_window) = test_window {
+            test_window.simulate_resize(size);
         }
-        drop(app);
         self.background_executor.run_until_parked();
     }
 
@@ -507,7 +511,7 @@ impl<V> Clone for TestAppWindow<V> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{FocusHandle, Focusable, div, prelude::*};
+    use crate::{FocusHandle, Focusable, div, prelude::*, px, size};
 
     struct Counter {
         count: usize,
@@ -556,6 +560,18 @@ mod tests {
 
         drop(window);
         app.update(|cx| cx.shutdown());
+    }
+
+    #[test]
+    fn test_resize_updates_gpui_viewport() {
+        let mut app = TestApp::new();
+        let mut window = app.open_window(Counter::new);
+
+        window.simulate_resize(size(px(321.), px(123.)));
+
+        window.update(|_, window, _| {
+            assert_eq!(window.viewport_size(), size(px(321.), px(123.)));
+        });
     }
 
     #[test]
