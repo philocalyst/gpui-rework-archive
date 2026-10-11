@@ -3293,9 +3293,7 @@ mod test {
     #[test]
     fn embedded_update_flushes_effects() {
         let cx = TestAppContext::single();
-        let handle = super::ApplicationHandle {
-            app: cx.app.clone(),
-        };
+        let handle = super::ApplicationHandle { app: cx.app };
         let completed = Rc::new(Cell::new(false));
 
         handle.update(|cx| {
