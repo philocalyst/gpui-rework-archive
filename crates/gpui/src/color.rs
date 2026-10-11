@@ -165,7 +165,7 @@ pub fn rgba_schemar(_generator: &mut schemars::SchemaGenerator) -> schemars::Sch
 
 /// Wrapper methods to make alpha operations more convenient
 pub trait ColorExt {
-    /// Performs a SrcAlpha x (1 - SrcAlpha) blend
+    /// Composites `other` over this color (Porter-Duff source-over).
     fn blend(&self, other: &Self) -> Self
     where
         Self: Sized;
@@ -208,10 +208,8 @@ pub trait ColorExt {
 }
 impl ColorExt for Rgba {
     fn blend(&self, other: &Self) -> Self {
-        use palette::blend::{BlendWith, Equations, Parameter};
-        let blend_mode =
-            Equations::from_parameters(Parameter::OneMinusSourceAlpha, Parameter::SourceAlpha);
-        self.blend_with(*other, blend_mode)
+        use palette::blend::Compose;
+        other.over(*self)
     }
 
     fn fade_out(&mut self, factor: f32) {
@@ -536,6 +534,47 @@ impl<T: IntoColor<Hsla>> From<T> for Background {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn color_blend_composites_the_overlay_over_the_base() {
+        let assert_close = |actual: Rgba, expected: Rgba| {
+            for (actual, expected) in [
+                (actual.red, expected.red),
+                (actual.green, expected.green),
+                (actual.blue, expected.blue),
+                (actual.alpha, expected.alpha),
+            ] {
+                assert!(
+                    (actual - expected).abs() < 1e-6,
+                    "{actual:?} != {expected:?}"
+                );
+            }
+        };
+
+        let base = Rgba::new(1.0, 0.0, 0.0, 1.0);
+        assert_close(base.blend(&Rgba::new(0.0, 0.0, 1.0, 0.0)), base);
+        assert_close(
+            base.blend(&Rgba::new(0.0, 0.0, 1.0, 1.0)),
+            Rgba::new(0.0, 0.0, 1.0, 1.0),
+        );
+        assert_close(
+            base.blend(&Rgba::new(0.0, 0.0, 1.0, 0.25)),
+            Rgba::new(0.75, 0.0, 0.25, 1.0),
+        );
+    }
+
+    #[test]
+    fn highlight_keeps_the_base_color_under_a_transparent_overlay() {
+        let base = crate::TextStyle {
+            color: red(),
+            ..Default::default()
+        };
+        let transparent_blue = Hsla::new_const(RgbHue::new(240.), 1., 0.5, 0.);
+        let highlighted = base
+            .clone()
+            .highlight(crate::HighlightStyle::color(transparent_blue));
+        assert_eq!(highlighted.color, base.color);
+    }
 
     #[test]
     fn test_background_solid() {
