@@ -1,7 +1,7 @@
 use crate::editable_text::{
     BLINK_INTERVAL_500MS, Caret, EditableTextState,
     actions::{DEFAULT_INPUT_CONTEXT, EditableTextActionElement, EditableTextActionHandler},
-    layout::{EditableTextLayoutResult, EditableTextLayoutState},
+    layout::{EditableTextLayoutKey, EditableTextLayoutResult, EditableTextLayoutState},
 };
 use gpui::{
     A11ySubtreeBuilder, App, Bounds, CaretPosition, CursorStyle, DefiniteLength, DispatchPhase,
@@ -9,8 +9,8 @@ use gpui::{
     HitboxBehavior, Hsla, InteractiveElement, Interactivity, IntoElement, LayoutId, MouseButton,
     MouseDownEvent, MouseMoveEvent, MouseUpEvent, PaintQuad, ParagraphDirection, Pixels, Point,
     ShapedText, SharedString, Size, StatefulInteractiveElement, Style, StyleRefinement, Styled,
-    TextAlign, TextLayout, TextLayoutOptions, UnicodeBidi, WeakEntity, Window, accesskit, fill,
-    point, px, relative, size,
+    TextAlign, TextLayout, TextLayoutOptions, TextStyle, UnicodeBidi, WeakEntity, Window,
+    accesskit, fill, point, px, relative, size,
 };
 use palette::IntoColor;
 use smallvec::SmallVec;
@@ -223,6 +223,7 @@ impl EditableTextActionElement<EditableTextState> for EditableTextElement {
 struct PrelayoutState {
     state: Entity<EditableTextState>,
     prev_layout_state: EditableTextLayoutState,
+    prev_layout_key: Option<EditableTextLayoutKey>,
     storage_version: u16,
     show_placeholder: bool,
     text: Option<SharedString>,
@@ -350,6 +351,7 @@ impl Element for EditableTextElement {
             let prelayout = PrelayoutState {
                 state: entity.clone(),
                 prev_layout_state: state.layout_data.state,
+                prev_layout_key: state.layout_data.layout_key.clone(),
                 show_placeholder,
                 storage_version: state.version(),
                 text,
@@ -679,6 +681,17 @@ impl PrelayoutState {
         };
 
         let text = self.text.unwrap_or_default();
+        let layout_key = EditableTextLayoutKey {
+            text_style: TextStyle {
+                color,
+                ..text_style.clone()
+            },
+            source: text.clone(),
+            font_size,
+            line_height,
+            supports_multiline: self.supports_multiline,
+            accepts_input: self.accepts_input,
+        };
 
         window.request_measured_layout(
             Default::default(),
@@ -724,6 +737,7 @@ impl PrelayoutState {
                     && truncation.width.is_none()
                     && self.storage_version == self.prev_layout_state.last_seen_storage_version
                     && self.prev_layout_state.options == options
+                    && self.prev_layout_key.as_ref() == Some(&layout_key)
                 {
                     return size;
                 }
@@ -778,6 +792,7 @@ impl PrelayoutState {
                     line_height,
                     document_offset,
                     next_scroll_offset: initial_scroll,
+                    layout_key: Some(layout_key.clone()),
                 };
 
                 // Update the state for use in prepaint, paint, and action handlers.
