@@ -1,8 +1,6 @@
 use gpui::CaretSelection;
-use std::{
-    ops::Range,
-    time::{Duration, Instant},
-};
+use std::{ops::Range, time::Duration};
+use web_time::Instant;
 
 /// Maximum number of history entries to keep.
 pub const MAX_HISTORY_LEN: usize = 1000;
@@ -65,6 +63,9 @@ impl EditableTextHistory {
     ) {
         let now = Instant::now();
 
+        // Any new edit invalidates the redo stack, including one that joins an earlier group.
+        self.redo_stack.clear();
+
         // Check if we should group with the last entry
         if let Some(last) = self.undo_stack.last_mut()
             && now.duration_since(last.timestamp) < self.grouping_interval
@@ -72,7 +73,7 @@ impl EditableTextHistory {
             // The change was triggered within group interval timing.
             // Try to extend the existing patch (which is a mutation).
             // If extending successeds, then we can early-out. Otherwise the mutation is non-contiguous.
-            if last.extend(&range, new_text_len) {
+            if last.extend(&range, old_text, new_text_len) {
                 return;
             }
         }
@@ -92,9 +93,6 @@ impl EditableTextHistory {
                 timestamp: now,
             },
         );
-
-        // New edit invalidates redo stack
-        self.redo_stack.clear();
     }
 
     fn stack(&self, kind: HistoryKind) -> &Vec<HistoryEntry> {
@@ -126,7 +124,7 @@ impl EditableTextHistory {
 }
 
 impl HistoryEntry {
-    fn extend(&mut self, range: &Range<usize>, new_text_len: usize) -> bool {
+    fn extend(&mut self, range: &Range<usize>, old_text: &str, new_text_len: usize) -> bool {
         // NOTE: Could be more robust. Currently only supports human-written extensions from start towards end.
 
         // ranges must be contiguous in order to integrate/extend
@@ -136,6 +134,7 @@ impl HistoryEntry {
 
         self.range.end = range.start + new_text_len;
         self.new_text_len += new_text_len;
+        self.old_text.push_str(old_text);
 
         true
     }
