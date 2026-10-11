@@ -2341,8 +2341,12 @@ pub enum WindowAppearance {
     VibrantDark,
 }
 
-/// The appearance of the background of the window itself, when there is
-/// no content or the content is transparent.
+/// The appearance of the background of the window itself, when there is no content or the
+/// content is transparent.
+///
+/// The variants available depend on the target platform. In particular, Mica backdrops are only
+/// available on Windows.
+#[cfg(target_os = "windows")]
 #[derive(Copy, Clone, Debug, Default, PartialEq)]
 pub enum WindowBackgroundAppearance {
     /// Opaque.
@@ -2364,6 +2368,39 @@ pub enum WindowBackgroundAppearance {
     MicaBackdrop,
     /// The Mica Alt backdrop material, supported on Windows 11.
     MicaAltBackdrop,
+}
+
+/// The appearance of the background of the window itself, when there is no content or the
+/// content is transparent.
+#[cfg(any(target_os = "macos", target_os = "linux", target_os = "freebsd"))]
+#[derive(Copy, Clone, Debug, Default, PartialEq)]
+pub enum WindowBackgroundAppearance {
+    /// Opaque.
+    ///
+    /// This lets the window manager know that content behind this window does not need to be
+    /// drawn.
+    ///
+    /// Actual color depends on the system and themes should define a fully opaque background
+    /// color instead.
+    #[default]
+    Opaque,
+    /// Plain alpha transparency.
+    Transparent,
+    /// Transparency, but the contents behind the window are blurred.
+    ///
+    /// Not always supported.
+    Blurred,
+}
+
+/// The appearance of the background of a web window.
+///
+/// Web windows always have an opaque background at the platform level.
+#[cfg(target_family = "wasm")]
+#[derive(Copy, Clone, Debug, Default, PartialEq)]
+pub enum WindowBackgroundAppearance {
+    /// Opaque.
+    #[default]
+    Opaque,
 }
 
 /// The text rendering mode to use for drawing glyphs.
