@@ -165,6 +165,7 @@ pub mod actions;
 mod caret;
 mod element;
 mod history;
+pub use history::*;
 mod layout;
 mod state;
 mod storage;
