@@ -1492,7 +1492,7 @@ pub trait InteractiveElement: Sized {
 pub trait StatefulInteractiveElement: InteractiveElement {
     /// Set the accessible role for this element.
     ///
-    /// See the [accessibility guide](crate::_accessibility) for an overview.
+    /// See the [accessibility guide](crate::_documentation::guides::accessibility) for an overview.
     fn role(mut self, role: accesskit::Role) -> Self {
         debug_assert!(
             role != accesskit::Role::GenericContainer,
@@ -1724,7 +1724,7 @@ pub trait StatefulInteractiveElement: InteractiveElement {
     /// Register a handler for an accessibility action on this element.
     /// The handler is called when a screen reader requests the given action.
     ///
-    /// See the [accessibility guide](crate::_accessibility) for an overview.
+    /// See the [accessibility guide](crate::_documentation::guides::accessibility) for an overview.
     fn on_a11y_action(
         mut self,
         action: accesskit::Action,

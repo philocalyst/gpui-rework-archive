@@ -1,6 +1,6 @@
 //! Accessibility support, provided by [AccessKit][accesskit].
 //!
-//! There are user-facing guide-level docs [here](crate::_accessibility).
+//! There are user-facing guide-level docs [here](crate::_documentation::guides::accessibility).
 //!
 //! ## Architecture
 //!

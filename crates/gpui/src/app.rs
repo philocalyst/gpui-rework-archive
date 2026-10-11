@@ -192,7 +192,7 @@ impl Application {
     /// [`div().role()`][crate::StatefulInteractiveElement::role]) silently
     /// no-op.
     ///
-    /// See the [accessibility guide](crate::_accessibility) for an overview of
+    /// See the [accessibility guide](crate::_documentation::guides::accessibility) for an overview of
     /// the features this disables.
     pub fn new_inaccessible(platform: Rc<dyn Platform>) -> Self {
         let this = Self::with_platform(platform);

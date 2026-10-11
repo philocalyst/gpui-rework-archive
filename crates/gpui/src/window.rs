@@ -7155,7 +7155,7 @@ impl Window {
     /// activated, a redraw is forced, so gated work is recomputed before the
     /// next tree update is sent to the platform.
     ///
-    /// See the [accessibility guide](crate::_accessibility) for an overview.
+    /// See the [accessibility guide](crate::_documentation::guides::accessibility) for an overview.
     pub fn is_a11y_active(&self) -> bool {
         self.a11y.is_active()
     }
@@ -7198,7 +7198,7 @@ impl Window {
     /// The listener will be called when a screen reader requests the given
     /// action on the node identified by `node_id`.
     ///
-    /// See the [accessibility guide](crate::_accessibility) for an overview.
+    /// See the [accessibility guide](crate::_documentation::guides::accessibility) for an overview.
     pub fn on_a11y_action(
         &mut self,
         node_id: accesskit::NodeId,

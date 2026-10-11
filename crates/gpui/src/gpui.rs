@@ -1,4 +1,4 @@
-#![doc = include_str!("../README.md")]
+#![doc = include_str!("../docs/crate.md")]
 #![warn(missing_docs)]
 #![allow(clippy::type_complexity)] // Not useful, GPUI makes heavy use of callbacks
 #![allow(clippy::collapsible_else_if)] // False positives in platform specific code
@@ -70,10 +70,7 @@ mod window;
 #[cfg(any(test, feature = "test-support"))]
 pub use proptest;
 
-#[cfg(doc)]
-pub mod _accessibility;
-#[cfg(doc)]
-pub mod _ownership_and_data_flow;
+pub mod _documentation;
 
 /// Do not touch, here be dragons for use by gpui_macros and such.
 #[doc(hidden)]

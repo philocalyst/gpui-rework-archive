@@ -109,7 +109,7 @@ pub trait Element: 'static + IntoElement {
     ///
     /// Note: inclusion in accessibility tree requires non-`None` [`id`][Element::id].
     ///
-    /// See the [accessibility guide](crate::_accessibility) for an overview.
+    /// See the [accessibility guide](crate::_documentation::guides::accessibility) for an overview.
     fn a11y_role(&self) -> Option<accesskit::Role> {
         None
     }
@@ -127,7 +127,7 @@ pub trait Element: 'static + IntoElement {
     /// GPUI calls this only when [`Element::a11y_role`] returns `Some` or
     /// [`Element::is_a11y_hidden`] returns `true`.
     ///
-    /// See the [accessibility guide](crate::_accessibility) for an overview.
+    /// See the [accessibility guide](crate::_documentation::guides::accessibility) for an overview.
     fn write_a11y_info(&self, _node: &mut accesskit::Node) {}
 
     /// Add synthetic child nodes to an [`Element`]. The element must have an
@@ -139,7 +139,7 @@ pub trait Element: 'static + IntoElement {
     /// correspond to any GPUI element. For example, a custom text field element
     /// may want to inject synthetic child nodes for the text content.
     ///
-    /// See [Synthetic children](crate::_accessibility#synthetic-children) in
+    /// See [Synthetic children](crate::_documentation::guides::accessibility#synthetic-children) in
     /// the accessibility guide for more detail.
     fn a11y_synthetic_children(
         &mut self,

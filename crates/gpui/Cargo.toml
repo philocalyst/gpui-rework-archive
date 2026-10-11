@@ -46,7 +46,7 @@ hot-patching = ["dep:dioxus-devtools", "dep:subsecond"]
 [lib]
 name = "gpui"
 path = "src/gpui.rs"
-doctest = false
+doctest = true
 
 [dependencies]
 accesskit.workspace = true
@@ -151,6 +151,9 @@ windows-061 = { workspace = true, features = ["Win32_Graphics_Direct3D11"] }
 
 
 [dev-dependencies]
+# Examples in the documentation use `TestApp`, so GPUI's own tests always
+# build with `test-support`.
+gpui = { path = ".", package = "gpui-ce", features = ["test-support"] }
 accesskit_consumer.workspace = true
 backtrace.workspace = true
 smol.workspace = true
@@ -185,7 +188,7 @@ ignored = [
   "objc2-metal",
   "tracing",
 ]
-ignored-paths = ["src/_ownership_and_data_flow.rs"]
+
 
 # ============================================================================
 # Learn Examples - Educational examples for learning GPUI

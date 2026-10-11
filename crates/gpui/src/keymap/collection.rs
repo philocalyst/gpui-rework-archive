@@ -4,7 +4,7 @@ use std::{any::TypeId, collections::HashMap};
 /// A generic collection of `Action` -> keystrokes which can be bound under a shared key-context.
 /// Use `as_keybindings` to create an iterator of `KeyBinding` to provide to `App::bind_keys`.
 ///
-/// ```rust
+/// ```rust,standalone_crate
 /// # use gpui::{ActionBindingCollection, Action};
 /// gpui::actions!([MyAction]);
 /// # #[gpui::test]

@@ -12,7 +12,7 @@ use std::{
 ///
 /// For example:
 ///
-/// ```
+/// ```standalone_crate
 /// use gpui::actions;
 /// actions!(editor, [MoveUp, MoveDown, MoveLeft, MoveRight, Newline]);
 /// ```
@@ -45,7 +45,7 @@ macro_rules! actions {
 /// To declare a list of simple actions, you can use the actions! macro, which defines a simple unit
 /// struct action for each listed action name in the given namespace.
 ///
-/// ```
+/// ```standalone_crate
 /// use gpui::actions;
 /// actions!(editor, [MoveUp, MoveDown, MoveLeft, MoveRight, Newline]);
 /// ```
@@ -56,7 +56,7 @@ macro_rules! actions {
 ///
 /// More complex data types can also be actions, by using the derive macro for `Action`:
 ///
-/// ```
+/// ```standalone_crate
 /// use gpui::Action;
 /// #[derive(Clone, PartialEq, serde::Deserialize, schemars::JsonSchema, Action)]
 /// #[action(namespace = editor)]
@@ -95,7 +95,7 @@ macro_rules! actions {
 /// `#[register_action]` macro, which only generates the code needed to register your action before
 /// `main`.
 ///
-/// ```
+/// ```standalone_crate
 /// use gpui::{SharedString, register_action};
 /// #[derive(Clone, PartialEq, Eq, serde::Deserialize, schemars::JsonSchema)]
 /// pub struct Paste {
