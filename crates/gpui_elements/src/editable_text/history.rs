@@ -156,3 +156,56 @@ impl HistoryEntry {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn record_edit(
+        history: &mut EditableTextHistory,
+        range: Range<usize>,
+        old_text: &str,
+        new_len: usize,
+    ) {
+        history.record(range, old_text, new_len, 0.into());
+    }
+
+    #[test]
+    fn adjacent_replacements_preserve_all_replaced_text() {
+        let mut history = EditableTextHistory::default();
+        // "ab" becomes "xy" through two replacements that the grouping interval merges.
+        record_edit(&mut history, 0..1, "a", 1);
+        record_edit(&mut history, 1..2, "b", 1);
+
+        let entry = history.take(HistoryKind::Undo).unwrap();
+        assert!(history.take(HistoryKind::Undo).is_none());
+        assert_eq!(entry.old_text, "ab");
+        assert_eq!(entry.char_range(usize::MAX), 0..2);
+    }
+
+    #[test]
+    fn consecutive_forward_deletions_preserve_all_removed_text() {
+        let mut history = EditableTextHistory::default();
+        // Deleting "a" and then "b" forward from the same offset.
+        record_edit(&mut history, 0..1, "a", 0);
+        record_edit(&mut history, 0..1, "b", 0);
+
+        let entry = history.take(HistoryKind::Undo).unwrap();
+        assert!(history.take(HistoryKind::Undo).is_none());
+        assert_eq!(entry.old_text, "ab");
+    }
+
+    #[test]
+    fn an_edit_that_joins_an_earlier_group_also_invalidates_redo() {
+        let mut history = EditableTextHistory::default();
+        record_edit(&mut history, 0..1, "a", 1);
+        record_edit(&mut history, 5..6, "f", 1);
+        let undone = history.take(HistoryKind::Undo).unwrap();
+        history.push(HistoryKind::Redo, undone);
+        assert!(history.has_next(HistoryKind::Redo));
+
+        // Contiguous with the first entry, so it joins that group instead of pushing a new one.
+        record_edit(&mut history, 1..2, "b", 1);
+        assert!(!history.has_next(HistoryKind::Redo));
+    }
+}
