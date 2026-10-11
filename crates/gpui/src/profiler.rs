@@ -482,16 +482,17 @@ impl TaskStatistics {
             let to_replace = self
                 .longest_poll_times
                 .iter()
-                .position_min_by_key(|task| task.since_spawn())
+                .position_min_by_key(|task| task.poll_duration())
                 .expect("guarded by the comparison with nth_longest_yield_time");
             self.longest_poll_times[to_replace] = task;
 
             self.poll_time_to_beat = self
                 .longest_poll_times
                 .iter()
-                .map(|task| task.since_spawn())
+                .map(|task| task.poll_duration())
                 .min()
-                .expect("never empty");
+                .expect("never empty")
+                .max(Duration::from_micros(100));
         }
     }
 
@@ -512,7 +513,8 @@ impl TaskStatistics {
                 .iter()
                 .map(|task| task.since_spawn())
                 .min()
-                .expect("never empty");
+                .expect("never empty")
+                .max(Duration::from_micros(100));
         }
     }
 }
@@ -1248,6 +1250,52 @@ impl FrameTimingCollector {
 mod tests {
     use super::*;
     use std::sync::{Mutex, MutexGuard};
+
+    #[test]
+    fn long_poll_sample_is_ranked_by_poll_time_not_wait_time() {
+        let spawned = Instant::now();
+        let mut stats = TaskStatistics::default();
+        for microseconds in [500, 100, 400, 200, 300, 50, 350, 150, 600] {
+            // Every task waited 10 seconds to start, which must not affect its ranking.
+            let start = spawned + Duration::from_secs(10);
+            stats.add_yield_timing(TaskTiming {
+                location: std::panic::Location::caller(),
+                spawned: SpawnTime(spawned),
+                start,
+                end: YieldTime(start + Duration::from_micros(microseconds)),
+            });
+        }
+
+        let mut retained = stats.longest_poll_times.map(|task| task.poll_duration());
+        retained.sort();
+        assert_eq!(
+            retained,
+            [300, 350, 400, 500, 600].map(Duration::from_micros)
+        );
+        assert_eq!(stats.poll_time_to_beat, Duration::from_micros(300));
+    }
+
+    #[test]
+    fn short_polls_do_not_fill_unused_long_poll_slots() {
+        let spawned = Instant::now();
+        let mut stats = TaskStatistics::default();
+        for microseconds in [200, 50, 100, 20] {
+            stats.add_yield_timing(TaskTiming {
+                location: std::panic::Location::caller(),
+                spawned: SpawnTime(spawned),
+                start: spawned,
+                end: YieldTime(spawned + Duration::from_micros(microseconds)),
+            });
+        }
+
+        assert_eq!(stats.poll_time_to_beat, Duration::from_micros(100));
+        let retained = stats
+            .longest_poll_times
+            .iter()
+            .filter(|task| !task.poll_duration().is_zero())
+            .count();
+        assert_eq!(retained, 2, "only the 200 and 100 microsecond polls count");
+    }
 
     #[test]
     fn records_draw_events_only_while_tracing() {
