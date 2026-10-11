@@ -278,6 +278,13 @@ impl PathBuilder {
         options: &StrokeOptions,
     ) -> Result<Path<Pixels>, Error> {
         let path = if let Some(dash_array) = dash_array {
+            anyhow::ensure!(
+                !dash_array.is_empty()
+                    && dash_array
+                        .iter()
+                        .all(|length| length.0.is_finite() && length.0 > 0.),
+                "dash lengths must be finite, positive, and non-empty"
+            );
             let measurements = lyon::algorithms::measure::PathMeasurements::from_path(path, 0.01);
             let mut sampler = measurements
                 .create_sampler(path, lyon::algorithms::measure::SampleType::Normalized);
@@ -290,6 +297,11 @@ impl PathBuilder {
             while pos < total_length {
                 let dash_length = dash_array[dash_index % dash_array_len].0;
                 let next_pos = (pos + dash_length).min(total_length);
+                // A dash too short to move `pos` in floating point would loop forever.
+                anyhow::ensure!(
+                    next_pos > pos,
+                    "dash length is too small to advance along the path"
+                );
                 if dash_index % 2 == 0 {
                     let start = pos / total_length;
                     let end = next_pos / total_length;
@@ -343,5 +355,40 @@ impl PathBuilder {
         }
 
         path
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn dashed_line(dash_array: &[Pixels]) -> Result<Path<Pixels>, Error> {
+        let mut builder = PathBuilder::stroke(px(1.)).dash_array(dash_array);
+        builder.move_to(point(px(0.), px(0.)));
+        builder.line_to(point(px(10.), px(0.)));
+        builder.build()
+    }
+
+    #[test]
+    fn invalid_dash_arrays_return_errors() {
+        for dash_array in [
+            vec![],
+            vec![px(0.)],
+            vec![px(-1.)],
+            vec![px(f32::NAN)],
+            vec![px(f32::INFINITY)],
+        ] {
+            assert!(dashed_line(&dash_array).is_err(), "accepted {dash_array:?}");
+        }
+    }
+
+    #[test]
+    fn dash_lengths_must_advance_in_floating_point() {
+        assert!(dashed_line(&[px(1.), px(f32::MIN_POSITIVE)]).is_err());
+    }
+
+    #[test]
+    fn valid_dash_array_builds() {
+        assert!(dashed_line(&[px(2.), px(1.)]).is_ok());
     }
 }
