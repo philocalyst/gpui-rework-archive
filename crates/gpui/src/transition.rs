@@ -267,6 +267,40 @@ mod tests {
         Transition::new(state, motion)
     }
 
+    #[gpui::test]
+    fn unkeyed_transitions_have_distinct_state_that_persists(cx: &mut TestAppContext) {
+        struct Hooks {
+            seen: Rc<RefCell<Vec<[EntityId; 2]>>>,
+        }
+
+        impl Render for Hooks {
+            fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+                let first = window.use_transition(cx, Duration::from_secs(1), |_, _| 2.0_f32);
+                let second = window.use_transition(cx, Duration::from_secs(1), |_, _| 7.0_f32);
+                assert_eq!(*first.read_goal(cx), 2.0);
+                assert_eq!(*second.read_goal(cx), 7.0);
+                self.seen
+                    .borrow_mut()
+                    .push([first.entity_id(), second.entity_id()]);
+                crate::Empty
+            }
+        }
+
+        let seen = Rc::new(RefCell::new(Vec::new()));
+        let window = cx.open_window(size(px(100.), px(100.)), {
+            let seen = seen.clone();
+            move |_, _| Hooks { seen }
+        });
+        cx.run_until_parked();
+        window.update(cx, |_, _, cx| cx.notify()).unwrap();
+        cx.run_until_parked();
+
+        let seen = seen.borrow();
+        assert!(seen.len() >= 2);
+        assert_ne!(seen[0][0], seen[0][1]);
+        assert!(seen.iter().all(|ids| *ids == seen[0]));
+    }
+
     struct TransitionTestView {
         transition: Transition<f32>,
         rendered_values: Rc<RefCell<Vec<f32>>>,
