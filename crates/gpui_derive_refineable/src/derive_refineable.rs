@@ -255,20 +255,13 @@ pub fn derive_refineable(input: TokenStream) -> TokenStream {
 
     let refinement_is_empty_conditions: Vec<TokenStream2> = fields
         .iter()
-        .enumerate()
-        .map(|(i, field)| {
+        .map(|field| {
             let name = &field.ident;
 
-            let condition = if is_refineable_field(field) {
+            if is_refineable_field(field) {
                 quote! { self.#name.is_empty() }
             } else {
                 quote! { self.#name.is_none() }
-            };
-
-            if i < fields.len() - 1 {
-                quote! { #condition && }
-            } else {
-                condition
             }
         })
         .collect();
@@ -460,7 +453,7 @@ pub fn derive_refineable(input: TokenStream) -> TokenStream {
             #where_clause
         {
             fn is_empty(&self) -> bool {
-                #( #refinement_is_empty_conditions )*
+                true #( && #refinement_is_empty_conditions )*
             }
         }
 
