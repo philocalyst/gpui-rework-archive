@@ -1135,7 +1135,8 @@ impl PlatformTextLayout for ParleyLayout {
 
         let cursor = self.cursor(caret);
         let geometry = cursor.geometry(&self.layout, 0.0);
-        let line_index = self.line_index_at_block(geometry.y0 as f32);
+        // The cursor's top edge can sit on the previous line's block range, so use its midpoint.
+        let line_index = self.line_index_at_block(((geometry.y0 + geometry.y1) * 0.5) as f32);
 
         Some(Bounds::from_corners(
             point(px(geometry.x0 as f32), line_height * line_index),
@@ -1303,7 +1304,8 @@ impl PlatformTextLayout for ParleyLayout {
                 };
 
                 let geometry = cursor.geometry(&self.layout, 0.0);
-                let line_index = self.line_index_at_block(geometry.y0 as f32);
+                let line_index =
+                    self.line_index_at_block(((geometry.y0 + geometry.y1) * 0.5) as f32);
                 let target_ix = line_index
                     .checked_add_signed(delta)
                     .filter(|&target_ix| self.layout.get(target_ix).is_some());
@@ -2164,8 +2166,9 @@ impl ParleyTextSystem {
                     glyphs,
                     x_range: start..start + px(glyph_run.advance()),
                     style: PaintStyle::from(&source_runs[source_run]),
-                    underline_offset: Some(px(run_metrics.underline_offset)),
-                    strikethrough_offset: Some(px(run_metrics.strikethrough_offset)),
+                    // Parley's offsets are y-up; painting adds them to the baseline in y-down.
+                    underline_offset: Some(px(-run_metrics.underline_offset)),
+                    strikethrough_offset: Some(px(-run_metrics.strikethrough_offset)),
                 });
             }
 
@@ -2622,6 +2625,69 @@ mod tests {
                 .caret_bounds(CaretPosition::attached_to_next_cluster(0), px(24.0))
                 .unwrap();
             assert!(caret.origin.x > px(100.0), "text={text:?}, caret={caret:?}");
+        }
+    }
+
+    #[test]
+    fn wrapped_document_end_caret_stays_on_the_final_visual_line() {
+        let system = test_system();
+        let text = "Cafe\u{301} — Straße — click a wrapped line to inspect its UTF-8 byte index.";
+        let line_height = px(28.);
+
+        for family in [IBM_PLEX.family, SOURCE_SERIF.family] {
+            for width in [px(120.), px(240.), px(280.)] {
+                let layout = layout_wrapped(
+                    &system,
+                    text,
+                    px(18.),
+                    &[text_run(text, family)],
+                    width,
+                    None,
+                );
+                let native = &layout.platform_layout;
+                let last_line = native.line_count() - 1;
+                assert!(last_line > 0, "{family}, {width:?}: text did not wrap");
+
+                let end = native
+                    .caret_bounds(
+                        CaretPosition::attached_to_next_cluster(text.len()),
+                        line_height,
+                    )
+                    .unwrap();
+                assert_eq!(end.origin.y, line_height * last_line, "{family}, {width:?}");
+
+                // Down and up must visit every row in turn.
+                let mut caret = CaretPosition::attached_to_next_cluster(0);
+                let mut navigation_x = None;
+                for expected_line in 1..=last_line {
+                    let moved = native.caret_movement(
+                        caret,
+                        Direction::Down.with_boundary(Boundary::VisualLine),
+                        navigation_x,
+                    );
+                    caret = moved.result;
+                    navigation_x = moved.vertical_navigation_x;
+                    assert_eq!(
+                        native.caret_bounds(caret, line_height).unwrap().origin.y,
+                        line_height * expected_line,
+                        "down: {family}, {width:?}"
+                    );
+                }
+                for expected_line in (0..last_line).rev() {
+                    let moved = native.caret_movement(
+                        caret,
+                        Direction::Up.with_boundary(Boundary::VisualLine),
+                        navigation_x,
+                    );
+                    caret = moved.result;
+                    navigation_x = moved.vertical_navigation_x;
+                    assert_eq!(
+                        native.caret_bounds(caret, line_height).unwrap().origin.y,
+                        line_height * expected_line,
+                        "up: {family}, {width:?}"
+                    );
+                }
+            }
         }
     }
 
@@ -3892,6 +3958,35 @@ mod tests {
                 );
                 previous_end = first_line_end;
             }
+        }
+    }
+
+    #[test]
+    fn text_decorations_use_downward_window_coordinates() {
+        let system = test_system();
+        let text = "Underline and strike";
+        let run = TextRun {
+            underline: Some(UnderlineStyle {
+                thickness: px(1.),
+                ..Default::default()
+            }),
+            strikethrough: Some(StrikethroughStyle {
+                thickness: px(1.),
+                ..Default::default()
+            }),
+            ..text_run(text, IBM_PLEX.family)
+        };
+        let layout = layout_line(&system, text, px(24.), &[run]);
+        assert!(!layout.paint_fragments.is_empty());
+        for fragment in &layout.paint_fragments {
+            assert!(
+                fragment.underline_offset.unwrap() > Pixels::ZERO,
+                "underline must sit below the baseline"
+            );
+            assert!(
+                fragment.strikethrough_offset.unwrap() < Pixels::ZERO,
+                "strikethrough must sit above the baseline"
+            );
         }
     }
 
