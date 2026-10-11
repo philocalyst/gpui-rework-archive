@@ -482,6 +482,20 @@ impl<V: 'static + Render> TestAppWindow<V> {
         self.background_executor.run_until_parked();
     }
 
+    /// Makes this the active window, as if the user had clicked it, then runs pending tasks.
+    ///
+    /// Windows that [`TestApp`] opens start inactive. Focus listeners such as
+    /// [`Context::on_focus`] only run in the active window, so activate it before testing them.
+    pub fn activate(&mut self) {
+        let window_id = self.handle.window_id();
+        let test_window = match self.app.borrow_mut().windows.get_mut(window_id) {
+            Some(Some(window)) => window.platform_window.as_test().cloned(),
+            _ => None,
+        };
+        self.platform.set_active_window(test_window);
+        self.background_executor.run_until_parked();
+    }
+
     /// Force a redraw of the window.
     pub fn draw(&mut self) {
         let mut app = self.app.borrow_mut();

@@ -1550,14 +1550,19 @@ impl Element for List {
 
         let hitbox = window.insert_hitbox(bounds, HitboxBehavior::Normal);
 
-        // If the width of the list has changed, invalidate all cached item heights
+        // If the width of the list has changed, invalidate all cached item heights. A measured
+        // height depends on the old width, but a hint given up front, such as the one from
+        // `with_uniform_item_height`, doesn't, so unmeasured rows keep theirs.
         if state
             .last_layout_bounds
             .is_none_or(|last_bounds| last_bounds.size.width != bounds.size.width)
         {
             let new_items = SumTree::from_iter(
                 state.items.iter().map(|item| ListItem::Unmeasured {
-                    size_hint: None,
+                    size_hint: match item {
+                        ListItem::Unmeasured { size_hint, .. } => *size_hint,
+                        ListItem::Measured { .. } => None,
+                    },
                     focus_handle: item.focus_handle(),
                 }),
                 (),
@@ -1852,6 +1857,34 @@ mod test {
         // Scroll position should stay at the top of the list
         assert_eq!(state.logical_scroll_top().item_ix, 0);
         assert_eq!(state.logical_scroll_top().offset_in_item, px(0.));
+    }
+
+    #[gpui::test]
+    fn test_uniform_item_height_survives_the_first_layout(cx: &mut TestAppContext) {
+        let cx = cx.add_empty_window();
+
+        let state = ListState::new(10, crate::ListAlignment::Top, px(0.))
+            .with_uniform_item_height(px(50.));
+
+        struct TestView(ListState);
+        impl Render for TestView {
+            fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+                list(self.0.clone(), |_, _, _| div().h(px(50.)).w_full().into_any())
+                    .w_full()
+                    .h_full()
+            }
+        }
+
+        // Only the rows that fit in 200px are measured. The rest keep their hint.
+        cx.draw(point(px(0.), px(0.)), size(px(100.), px(200.)), |_, cx| {
+            cx.new(|_| TestView(state.clone())).into_any_element()
+        });
+        assert_eq!(state.max_offset_for_scrollbar().y, px(300.));
+
+        // Revealing the last row scrolls it to the bottom edge, 300px down.
+        state.scroll_to_reveal_item(9);
+        let top = state.logical_scroll_top();
+        assert_eq!(px(50. * top.item_ix as f32) + top.offset_in_item, px(300.));
     }
 
     #[gpui::test]
