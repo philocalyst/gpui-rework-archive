@@ -10,7 +10,6 @@ use std::{
 use crate::{
     PathStyle,
     abs_path::{AbsPath, AbsPathBuf},
-    is_absolute,
 };
 
 /// A file system path that is guaranteed to be relative and normalized.
