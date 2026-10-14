@@ -153,6 +153,11 @@ pub fn web_init() {
 ///
 /// Panics on Windows if the platform can't be initialized.
 pub fn current_platform(headless: bool) -> Rc<dyn Platform> {
+    #[cfg(target_os = "ios")]
+    {
+        gpui_ios::current_platform(headless)
+    }
+
     #[cfg(target_os = "macos")]
     {
         Rc::new(gpui_macos::MacPlatform::new(headless))

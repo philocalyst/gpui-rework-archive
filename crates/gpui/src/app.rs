@@ -430,6 +430,7 @@ impl Application {
 }
 
 type Handler = Box<dyn FnMut(&mut App) -> bool + 'static>;
+type AppLifecycleHandler = Box<dyn FnMut(AppLifecyclePhase, &mut App) -> bool + 'static>;
 type DisplayHandler = Box<dyn FnMut(DisplayEvent, &mut App) -> bool + 'static>;
 
 /// The properties of a display that GPUI reports changes to.
@@ -944,6 +945,8 @@ pub struct App {
     displays: HashMap<DisplayId, DisplayState>,
     pub(crate) system_sleep_observers: SubscriberSet<(), Handler>,
     pub(crate) system_wake_observers: SubscriberSet<(), Handler>,
+    app_lifecycle_observers: SubscriberSet<(), AppLifecycleHandler>,
+    memory_warning_observers: SubscriberSet<(), Handler>,
     pub(crate) release_listeners: SubscriberSet<EntityId, ReleaseListener>,
     pub(crate) global_observers: SubscriberSet<TypeId, Handler>,
     pub(crate) quit_observers: SubscriberSet<(), QuitHandler>,
@@ -1089,6 +1092,8 @@ impl App {
                 displays: read_displays(platform.as_ref()),
                 system_sleep_observers: SubscriberSet::new(),
                 system_wake_observers: SubscriberSet::new(),
+                app_lifecycle_observers: SubscriberSet::new(),
+                memory_warning_observers: SubscriberSet::new(),
                 global_observers: SubscriberSet::new(),
                 quit_observers: SubscriberSet::new(),
                 restart_observers: SubscriberSet::new(),
@@ -1180,6 +1185,32 @@ impl App {
                     cx.system_wake_observers
                         .clone()
                         .retain(&(), move |callback| (callback)(cx));
+                }
+            }
+        }));
+
+        platform.on_app_lifecycle(Box::new({
+            let app = Rc::downgrade(&app);
+            move |phase| {
+                if let Some(app) = app.upgrade() {
+                    app.borrow_mut().update(|cx| {
+                        cx.app_lifecycle_observers
+                            .clone()
+                            .retain(&(), |callback| callback(phase, cx));
+                    });
+                }
+            }
+        }));
+
+        platform.on_memory_warning(Box::new({
+            let app = Rc::downgrade(&app);
+            move || {
+                if let Some(app) = app.upgrade() {
+                    app.borrow_mut().update(|cx| {
+                        cx.memory_warning_observers
+                            .clone()
+                            .retain(&(), |callback| callback(cx));
+                    });
                 }
             }
         }));
