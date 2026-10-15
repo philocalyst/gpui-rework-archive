@@ -141,7 +141,7 @@ so the image is loaded once and shared:
 # use std::path::PathBuf;
 fn paint_thumbnail(path: PathBuf, bounds: Bounds<Pixels>, window: &mut Window, cx: &mut App) {
     if let Some(Ok(image)) = window.use_asset::<ImgResourceLoader>(&Resource::from(path), cx) {
-        let _ = window.paint_image(bounds, bounds, Corners::all(px(6.)), image, 0, false);
+        let _ = window.paint_image(bounds, bounds, Corners::all(px(6.)), 0.0, image, 0, false);
     }
 }
 ```
