@@ -120,7 +120,7 @@ let shadow = BoxShadow {
     spread_radius: px(0.),
     inset: false,
 };
-window.paint_drop_shadows(bounds, Corners::all(px(8.)), &[shadow]);
+window.paint_drop_shadows(bounds, Corners::all(px(8.)), 0.0, &[shadow]);
 window.paint_quad(fill(bounds, rgb(0xffffff)).corner_radii(px(8.)));
 # }
 ```
