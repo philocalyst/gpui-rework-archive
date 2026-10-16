@@ -3586,6 +3586,9 @@ pub struct WindowOptions {
     /// The name of the native tab group. Windows with the same identifier open as tabs of one window.
     /// macOS only.
     pub tabbing_identifier: Option<String>,
+
+    /// Whether to render the window using the Display P3 color space on macOS.
+    pub use_display_p3: bool,
 }
 
 impl FluentBuilder for WindowOptions {}
@@ -3666,6 +3669,9 @@ pub struct WindowParams {
     /// The name of the native tab group. macOS only.
     #[cfg(target_os = "macos")]
     pub tabbing_identifier: Option<String>,
+
+    #[cfg(target_os = "macos")]
+    pub use_display_p3: bool,
 }
 
 /// The state a window opens in, with the bounds it uses for that state.
@@ -3738,6 +3744,7 @@ impl Default for WindowOptions {
             window_min_size: None,
             window_decorations: None,
             tabbing_identifier: None,
+            use_display_p3: false,
         }
     }
 }
