@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """sync_upstream.py — bring upstream Zed GPUI changes into the standalone gpui-ce fork.
 
-Strategy: a vendor-branch 3-way (subtree-style) merge that preserves upstream history.
-A local branch (vendor/zed-gpui) holds a *filtered replay* of upstream's actual
-gpui-touching commits — each preserving its author/date/message (plus a `zed-upstream:`
-trailer) but carrying only the tracked crates/gpui* trees. Merging its tip replays exactly
-the upstream delta since the last sync (already-cherry-picked changes no-op) while every
-upstream commit stays in the merge's second-parent history. A conflicted merge is committed
-as TWO commits for reviewability: the raw merge with conflict markers committed in, then
-claude's resolution as a separate, auditable diff. Build fixes land in a third commit.
+Strategy: a vendor-branch 3-way (subtree-style) merge over a filtered replay. A local
+branch (vendor/zed-gpui) holds new one-parent commits for upstream commits that touch the
+tracked GPUI trees. Each replay commit preserves source author/date/message and adds a
+`zed-upstream:` trailer, but the original upstream ancestry and merge topology are not
+preserved. Merge commits are linearized when their filtered trees change. The sync merge
+records the vendor tip as its second parent. A conflicted merge is committed as TWO commits
+for reviewability: the raw merge with conflict markers, then an agent's resolution as a
+separate, auditable diff. Build fixes land in a third commit.
 
-Local-only: this never pushes, and never lets claude push.
+Local-only: this never pushes. Agent work is validated by the orchestrator before staging or committing.
 
 Usage:
   sync_upstream.py bootstrap [BASELINE_SHA]   # one-time setup (see README)
@@ -19,8 +19,9 @@ Usage:
 
 Options (sync):
   --ref REF        upstream ref to sync to (default: main / SYNC_ZED_REF)
-  --model NAME     claude model (default: opus / SYNC_MODEL)
-  --retries N      max claude passes per phase (default: 3 / SYNC_RETRIES)
+  --agent MODE     external (default), codex, or claude
+  --model NAME     optional agent model (SYNC_MODEL)
+  --retries N      max agent passes per phase (default: 3 / SYNC_RETRIES)
   --no-bump        don't bump pinned zed git-dep revs (no-op since PR #91 removed them)
   --dry-run        show what would be synced, then stop
 """
@@ -35,6 +36,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -141,12 +143,21 @@ class Runtime:
 
 RT = Runtime(
     zed_ref=_env("SYNC_ZED_REF", "main"),
-    model=_env("SYNC_MODEL", "opus"),
+    model=_env("SYNC_MODEL", ""),
     retries=int(_env("SYNC_RETRIES", "3")),
     bump_zed_deps=_env("SYNC_BUMP_ZED_DEPS", "1") == "1",
     dry_run=False,
 )
 
+
+from agent_session import AgentSession, SessionError, codex_exec_argv, codex_exec_env
+AGENT_BACKEND: str = _env("SYNC_AGENT", "external")
+CODEX_BIN: str = _env("SYNC_CODEX_BIN", "codex")
+CODEX_TIMEOUT: int = int(_env("SYNC_CODEX_TIMEOUT", str(CLAUDE_TIMEOUT)))
+ACTIVE_SYNC_CONTEXT: dict[str, object] = {}
+PAUSE_EXIT: int = 75
+class AgentPause(Exception):
+    pass
 
 # output
 _COLOR: bool = sys.stdout.isatty()
@@ -292,12 +303,12 @@ def replay_commit(tree: str, parent: str, original: str) -> str:
 def build_vendor_history(parent: str, frm: str, to: str) -> str:
     """Replay upstream gpui-touching commits frm..to as a filtered chain onto <parent>.
 
-    Merge commits and commits with no net change inside the tracked crates are dropped.
+    Merge commits are replayed linearly when their filtered tree changes the vendor tip.
     Echoes the new tip sha.
     """
     prev = parent
     replayed = 0
-    listing = gout("rev-list", "--reverse", "--topo-order", "--no-merges",
+    listing = gout("rev-list", "--reverse", "--topo-order",
                    f"{frm}..{to}", "--", *tracked_pathspec())
     for commit in listing.split():
         tree = filtered_tree(commit)
@@ -307,6 +318,15 @@ def build_vendor_history(parent: str, frm: str, to: str) -> str:
             continue  # no net change inside the tracked crates
         prev = replay_commit(tree, prev, commit)
         replayed += 1
+    expected_tree = filtered_tree(to)
+    if expected_tree is None:
+        die(f"no tracked crates found at target {to[:12]}")
+    actual_tree = gout("rev-parse", f"{prev}^{{tree}}")
+    if actual_tree != expected_tree:
+        die(
+            "filtered vendor replay is incomplete: "
+            f"tip tree {actual_tree} does not match target tree {expected_tree}"
+        )
     log(f"replayed {replayed} upstream gpui commit(s) into vendor history")
     return prev
 
@@ -375,23 +395,76 @@ def render_prompt(kind: str, files: list[str], issue: str = "",
     return f"{head}\n\nCommand: `{cmd_used}`\nRecent output (tail):\n{block}\n\n{body}"
 
 
-def run_claude(prompt: str) -> None:
-    """Invoke claude -p. Never fatal: max-turns/timeout exit non-zero AFTER useful work, so
-    the surrounding loop re-checks real progress and retries up to RT.retries."""
-    cmd = [
-        CLAUDE_BIN, "-p", prompt,
-        "--model", RT.model,
-        "--permission-mode", "acceptEdits",
-        "--allowedTools", CLAUDE_ALLOWED_TOOLS,
-    ]
+def run_agent_prompt(prompt: str, phase: str, attempt: int = 0) -> None:
+    context = dict(ACTIVE_SYNC_CONTEXT)
+    context.update({
+        "attempt": attempt,
+        "vendor_ref": f"refs/heads/{VENDOR_BRANCH}",
+        "zed_ref": RT.zed_ref,
+        "bump_zed_deps": RT.bump_zed_deps,
+        "retries": RT.retries,
+    })
+    sid = uuid.uuid4().hex
+    try:
+        session = AgentSession.create(REPO_ROOT, session_id=sid, phase=phase, prompt=prompt,
+                                      backend=AGENT_BACKEND, model=RT.model, context=context)
+        if phase == "verify":
+            session.capture("gate.log", RT.build_log.encode())
+    except SessionError as exc:
+        die(f"could not create agent checkpoint: {exc}")
+    if AGENT_BACKEND == "external":
+        log(f"external agent required; session {sid} is ready")
+        print(f"Prompt: {session.directory / session.checkpoint['prompt_file']}")
+        print(f"Resume after edits: sync_upstream.py resume {sid}")
+        raise AgentPause()
+    if AGENT_BACKEND == "codex":
+        argv = codex_exec_argv(
+            CODEX_BIN, session.directory / "response.md", RT.model or None
+        )
+        try:
+            result = subprocess.run(argv, cwd=REPO_ROOT, input=prompt, text=True,
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                    timeout=CODEX_TIMEOUT or None, env=codex_exec_env())
+        except FileNotFoundError:
+            die(f"Codex CLI not found: {CODEX_BIN}; choose --agent external")
+        except subprocess.TimeoutExpired:
+            session.capture("codex-events.jsonl", b"timeout\n")
+            session.complete("timed-out")
+            warn("Codex timed out; re-checking worktree")
+            return
+        session.capture("codex-events.jsonl", (result.stdout or "").encode())
+        session.capture("codex-stderr.log", (result.stderr or "").encode())
+        response_path = session.directory / "response.md"
+        if response_path.exists():
+            session.capture("codex-response.md", response_path.read_bytes())
+        allowed = set(cast(list[str], context.get("conflict_paths", []))) if phase == "resolve" else None
+        try:
+            changed = session.validate_resume(allowed_paths=allowed)
+        except SessionError as exc:
+            die(str(exc))
+        if phase == "verify":
+            _allowed_verify_paths(changed)
+        session.capture("after.diff", git("diff", "--binary", "HEAD").stdout.encode())
+        session.complete(f"exit-{result.returncode}; changed={len(changed)}")
+        if result.returncode:
+            warn(f"Codex exited {result.returncode}; re-checking worktree")
+        return
+    if AGENT_BACKEND != "claude":
+        die(f"unknown agent backend: {AGENT_BACKEND}")
+    cmd = [CLAUDE_BIN, "-p", prompt]
+    if RT.model:
+        cmd += ["--model", RT.model]
+    cmd += ["--permission-mode", "acceptEdits", "--allowedTools", CLAUDE_ALLOWED_TOOLS]
     if CLAUDE_MAX_TURNS > 0:
         cmd += ["--max-turns", str(CLAUDE_MAX_TURNS)]
     try:
         result = subprocess.run(cmd, cwd=REPO_ROOT, timeout=CLAUDE_TIMEOUT or None)
-        if result.returncode != 0:
-            warn(f"claude exited non-zero ({result.returncode}; likely --max-turns) — re-checking progress, may retry")
+        if result.returncode:
+            warn(f"Claude exited {result.returncode}; re-checking worktree")
+    except FileNotFoundError:
+        die(f"Claude CLI not found: {CLAUDE_BIN}; choose --agent external or codex")
     except subprocess.TimeoutExpired:
-        warn(f"claude hit the {CLAUDE_TIMEOUT}s timeout — re-checking progress, may retry")
+        warn("Claude timed out; re-checking worktree")
 
 
 # conflict detection / resolution
@@ -459,17 +532,18 @@ def resolve_conflicts_loop(branch: str, moves: dict[str, str] | None = None) -> 
             die(f"conflict resolution failed; branch '{branch}' left for manual finishing")
         files = conflicted_files()
         before = len(files)
-        log(f"claude conflict-resolution pass {attempt}/{RT.retries} ({before} file(s) remaining)")
+        log(f"{AGENT_BACKEND} conflict-resolution pass {attempt}/{RT.retries} ({before} file(s) remaining)")
         for path in files:
             print(f"    {_D}conflict:{_Z} {path}")
-        run_claude(render_prompt("resolve", files, moves=moves))
+        ACTIVE_SYNC_CONTEXT["conflict_paths"] = files
+        run_agent_prompt(render_prompt("resolve", files, moves=moves), "resolve", attempt)
         # Stage only tracked updates (resolves the conflicted files). NOT `-A`: conflict
-        # resolution edits existing files, so any new untracked file is claude's scratch
+        # resolution edits existing files, so any new untracked file is agent scratch
         # (e.g. saved base/upstream copies for diffing) and must not be swept into the commit.
         run_git("add", "-u")
         after = len(conflicted_files())
         if after > 0 and after >= before:
-            warn(f"no progress this pass ({before} → {after} files) — claude may be stuck")
+            warn(f"no progress this pass ({before} → {after} files) — the agent may be stuck")
 
 
 # dependency bump (legacy no-op: PR #91 removed all zed git deps, so there is currently
@@ -526,13 +600,13 @@ def _test_issue() -> str:
     return "test failures" if rc != 0 else ""
 
 
-def verify_fix_loop() -> bool:
+def verify_fix_loop(initial_attempt: int = 0) -> bool:
     """Loop the build (compile errors + warnings) and test gates, fixing failures with claude.
 
     The build gate runs first; only once it's clean do we run tests. Any failing gate's
     output is handed to claude, bounded by RT.retries total fix passes.
     """
-    attempt = 0
+    attempt = initial_attempt
     while True:
         issue = _build_issue()
         if not issue and RUN_TESTS:
@@ -544,8 +618,9 @@ def verify_fix_loop() -> bool:
         if attempt > RT.retries:
             warn(f"{issue} remain after {RT.retries} fix attempt(s); leaving branch for manual finishing")
             return False
-        log(f"claude fix pass {attempt}/{RT.retries} ({issue})")
-        run_claude(render_prompt("verify", [], issue))
+        log(f"{AGENT_BACKEND} fix pass {attempt}/{RT.retries} ({issue})")
+        ACTIVE_SYNC_CONTEXT["verify_issue"] = issue
+        run_agent_prompt(render_prompt("verify", [], issue), "verify", attempt)
 
 
 # state
@@ -689,8 +764,8 @@ def cmd_sync(ref: str | None) -> None:
     ok(f"working on branch '{branch}'")
 
     upstream_note = (
-        "The individual upstream commits are preserved in this merge's second-parent\n"
-        "history (filtered to the tracked crates)."
+        "The vendor parent is a filtered replay: source SHAs are recorded in\n"
+        "zed-upstream trailers, while original upstream ancestry/topology is not preserved."
     )
     merge_clean_msg = (
         f"merge: sync zed gpui {last[:12]}..{target[:12]}\n\n"
@@ -708,12 +783,16 @@ def cmd_sync(ref: str | None) -> None:
     resolution_msg = (
         f"resolve conflicts from zed gpui sync {last[:12]}..{target[:12]}\n\n"
         "Resolution of the conflict markers left by the preceding merge commit, performed\n"
-        "by claude -p. Review THIS diff in isolation to audit the resolution — it shows\n"
+        "by configured agent. Review THIS diff in isolation to audit the resolution — it shows\n"
         "exactly which side/lines were chosen, distinct from what git auto-merged."
     )
 
     log("merging upstream delta…")
     # 3-way merge but DON'T auto-commit, so we can split raw conflicts from the resolution.
+    ACTIVE_SYNC_CONTEXT.update({
+        "branch": branch, "last": last, "target": target, "vendor_tip": vnew,
+        "resolution_message": resolution_msg,
+    })
     merged = git("merge", "--no-ff", "--no-commit", vnew, check=False, capture=False)
     if merged.returncode == 0:
         run_git("commit", "--no-edit", "-m", merge_clean_msg)
@@ -721,38 +800,128 @@ def cmd_sync(ref: str | None) -> None:
     else:
         if not gok("rev-parse", "-q", "--verify", "MERGE_HEAD"):
             die("git merge failed without conflicts to resolve; aborting")
-        # Settle deterministic add/delete conflicts (kept out of the LLM step).
+        # Settle deterministic add/delete conflicts (kept out of the agent step).
         auto_resolve_add_delete(moves)
-        nconf = len(conflicted_files())
+        raw_conflicts = conflicted_files()
+        marker_paths = set(_marker_files())
+        binary_or_markerless = [path for path in raw_conflicts
+                                if path not in marker_paths and path in _unmerged()]
+        if binary_or_markerless:
+            die("merge has binary/markerless conflicts that need manual resolution before "
+                "the raw merge can be committed: " + ", ".join(binary_or_markerless))
+        nconf = len(raw_conflicts)
         # Commit 1: the RAW merge — auto-merges applied, conflict markers committed in.
         run_git("add", "-A")
         run_git("commit", "--no-edit", "-m", merge_raw_msg)
         ok(f"committed raw merge with conflict markers ({nconf} file(s) to resolve)")
         if nconf > 0:
             # Commit 2: claude's resolution of the markers — reviewable as an isolated diff.
-            warn("resolving conflict markers with claude…")
+            warn("resolving conflict markers with the configured agent…")
             resolve_conflicts_loop(branch, moves)
             run_git("commit", "-m", resolution_msg)
             ok("committed conflict resolution (separate, reviewable commit)")
         else:
             ok("no content conflicts (only add/delete, settled in the merge commit)")
 
+    complete_sync(branch, last, target, vnew)
+
+
+def complete_sync(branch: str, last: str, target: str, vendor_tip: str,
+                  initial_attempt: int = 0) -> None:
     if RT.bump_zed_deps:
         bump_zed_deps(target)
-
-    verify_ok = verify_fix_loop()
-
-    if gout("status", "--porcelain"):
-        run_git("add", "-A")
-        run_git("commit", "-m",
-                "chore(sync): post-merge fixes (zed deps bump + build/test/warning fixes)",
-                check=False)
-        ok("committed post-merge fixes")
-
-    write_state(target, vnew)
+    verify_ok = verify_fix_loop() if initial_attempt == 0 else verify_fix_loop(initial_attempt)
+    if not verify_ok:
+        warn("verification failed; committed sync state remains unchanged")
+        summary(branch, last, target, False)
+        die("verification failed; fix the branch and rerun the verification gate")
+    entries = gout("status", "--porcelain")
+    if entries:
+        untracked = [line[3:] for line in entries.splitlines() if line.startswith("?? ")]
+        if untracked and AGENT_BACKEND == "external":
+            die("untracked agent files require manual review: " + ", ".join(untracked))
+        run_git("add", "-u")
+        if gout("diff", "--cached", "--name-only"):
+            run_git("commit", "-m", "chore(sync): post-merge fixes (build/test/warning fixes)")
+            ok("committed post-merge fixes")
+    write_state(target, vendor_tip)
     run_git("add", str(STATE_FILE))
     run_git("commit", "-m", f"chore(sync): advance sync state to {target[:12]}")
-    summary(branch, last, target, verify_ok)
+    summary(branch, last, target, True)
+
+
+def _allowed_verify_paths(paths: list[str]) -> None:
+    files = {"Cargo.toml", "Cargo.lock", "Justfile", "justfile", ".cargo/config.toml"}
+    unexpected = [p for p in paths if p not in files and not p.startswith("crates/")]
+    if unexpected:
+        die("resume rejected: edits outside sync scope: " + ", ".join(unexpected))
+
+
+def cmd_resume(session_id: str, response_file: str | None = None) -> None:
+    try:
+        session = AgentSession.load(REPO_ROOT, session_id)
+    except SessionError as exc:
+        die(str(exc))
+    data = session.checkpoint
+    if not response_file:
+        die("resume requires --response-file so the external agent result is auditable")
+    try:
+        session.capture("external-response.md", Path(response_file).read_bytes())
+    except OSError as exc:
+        die(f"cannot read external response file: {exc}")
+    if data.get("backend") != "external":
+        die("resume accepts external-agent sessions only")
+    context = cast(dict[str, object], data.get("context", {}))
+    phase = cast(str, data.get("phase", ""))
+    RT.zed_ref = cast(str, context.get("zed_ref", RT.zed_ref))
+    RT.bump_zed_deps = bool(context.get("bump_zed_deps", RT.bump_zed_deps))
+    RT.retries = int(context.get("retries", RT.retries))
+    try:
+        allowed = set(cast(list[str], context.get("conflict_paths", []))) if phase == "resolve" else None
+        paths = session.validate_resume(allowed_paths=allowed)
+    except SessionError as exc:
+        die(str(exc))
+    session.capture("returned.diff", git("diff", "--binary", "HEAD").stdout.encode())
+    if phase == "resolve":
+        if has_unresolved():
+            die("resume rejected: conflict markers or unmerged entries remain")
+        if paths:
+            run_git("add", "--", *paths)
+        if _unmerged():
+            die("resume rejected: unmerged entries remain")
+        run_git("commit", "-m", cast(str, context["resolution_message"]))
+        session.complete("resolved")
+        ACTIVE_SYNC_CONTEXT.update(context)
+        complete_sync(cast(str, context["branch"]), cast(str, context["last"]),
+                      cast(str, context["target"]), cast(str, context["vendor_tip"]))
+        return
+    if phase == "verify":
+        _allowed_verify_paths(paths)
+        session.complete("fix-returned; gates-rechecking")
+        ACTIVE_SYNC_CONTEXT.update(context)
+        complete_sync(cast(str, context["branch"]), cast(str, context["last"]),
+                      cast(str, context["target"]), cast(str, context["vendor_tip"]),
+                      int(data.get("attempt", 0)))
+        return
+    die(f"unsupported session phase: {phase}")
+
+
+def cmd_agent_status(session_id: str | None = None) -> None:
+    text = git("rev-parse", "--git-path", "sync-upstream-sessions").stdout.strip()
+    base = Path(text)
+    if not base.is_absolute():
+        base = REPO_ROOT / base
+    paths = [base / session_id / "session.json"] if session_id else sorted(base.glob("*/session.json"))
+    if not paths:
+        print("no external-agent sessions")
+        return
+    for path in paths:
+        try:
+            data = json.loads(path.read_text())
+            print(f"{data.get('session_id')} {data.get('phase')} {data.get('outcome', 'pending')}")
+            print(f"  prompt: {path.parent / data.get('prompt_file', '')}")
+        except (OSError, json.JSONDecodeError):
+            warn(f"invalid session checkpoint: {path}")
 
 
 def cmd_status() -> None:
@@ -795,12 +964,16 @@ def main() -> int:
         description="Sync upstream Zed GPUI changes into gpui-ce (local-only, never pushes).",
     )
     _ = parser.add_argument("command", nargs="?", default="sync",
-                            choices=["sync", "bootstrap", "status"])
+                            choices=["sync", "bootstrap", "status", "resume", "agent-status"])
     _ = parser.add_argument("arg", nargs="?", default=None,
                             help="bootstrap: baseline sha; sync: upstream ref")
     _ = parser.add_argument("--ref", default=None, help="upstream ref to sync to")
-    _ = parser.add_argument("--model", default=None, help="claude model")
-    _ = parser.add_argument("--retries", type=int, default=None, help="max claude passes per phase")
+    _ = parser.add_argument("--model", default=None, help="agent model")
+    _ = parser.add_argument("--agent", choices=["external", "codex", "claude"], default=None,
+                            help="agent backend (default: external)")
+    _ = parser.add_argument("--response-file", default=None,
+                            help="raw external-agent response required by resume")
+    _ = parser.add_argument("--retries", type=int, default=None, help="max agent passes per phase")
     _ = parser.add_argument("--no-bump", action="store_true", help="don't bump pinned zed git-dep revs (no-op since PR #91 removed them)")
     _ = parser.add_argument("--dry-run", action="store_true", help="show what would be synced, then stop")
     ns = parser.parse_args()
@@ -810,7 +983,11 @@ def main() -> int:
     model = cast("str | None", ns.model)
     retries = cast("int | None", ns.retries)
     ref = cast("str | None", ns.ref)
-
+    agent = cast("str | None", ns.agent)
+    response_file = cast("str | None", ns.response_file)
+    global AGENT_BACKEND
+    if agent is not None:
+        AGENT_BACKEND = agent
     if model is not None:
         RT.model = model
     if retries is not None:
@@ -824,8 +1001,16 @@ def main() -> int:
             cmd_bootstrap(positional)
         elif command == "status":
             cmd_status()
+        elif command == "resume":
+            if not positional:
+                die("resume requires a session id")
+            cmd_resume(positional, response_file)
+        elif command == "agent-status":
+            cmd_agent_status(positional)
         else:
             cmd_sync(ref or positional)
+    except AgentPause:
+        return PAUSE_EXIT
     except SyncError as exc:
         print(f"{_R}✗ {exc}{_Z}", file=sys.stderr)
         return 1

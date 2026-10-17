@@ -1,14 +1,15 @@
 # Upstream sync
 
 Automated, local-only tooling to pull GPUI changes from the upstream Zed monorepo
-(`zed-industries/zed`) into this standalone fork. Conflicts and resulting build
-breakage are resolved with `claude -p`. **Nothing is ever pushed.**
+(`zed-industries/zed`) into this standalone fork. Agent work can use this ChatGPT session,
+Codex CLI, or the legacy Claude CLI. The orchestrator validates every response before it
+stages or commits changes. **Nothing is ever pushed.**
 
 ## TL;DR
 
 ```sh
 just sync-upstream-bootstrap   # ONE TIME — records the baseline to sync from
-just sync-upstream             # pull upstream changes onto a fresh sync/ branch
+just sync-upstream             # prints an external-agent session ID and prompt by default
 just sync-upstream-status      # how far behind upstream are we?
 ```
 
@@ -23,31 +24,31 @@ fork keeps the same crates at the **same relative paths**, so upstream changes a
 identical paths here. The script uses a **vendor-branch 3-way merge** (a generalized
 `git subtree` merge):
 
-1. A local branch `vendor/zed-gpui` holds a *filtered replay* of upstream's actual
-   gpui-touching commits — each keeps its original author/date/message (plus a
-   `zed-upstream: <sha>` trailer) but carries only the tracked `crates/gpui*` trees,
-   built via a throwaway git index (no working-tree churn). Non-gpui and merge commits
-   are dropped.
-2. Each sync extends that chain with the new commits and `git merge`s its tip. Git's
-   merge base is the previous tip, so the merge replays exactly the upstream delta since
-   the last sync — anything this fork already cherry-picked upstream produces **no
-   conflict** — and every upstream commit is preserved in the merge's **second-parent
-   history** (so `git log` shows both histories; `git log --first-parent` shows just the
-   -ce line).
+1. A local branch `vendor/zed-gpui` holds a *filtered replay* of upstream commits whose
+   filtered GPUI tree changes. Each replay commit is newly created with the source
+   author/date/message plus a `zed-upstream: <sha>` trailer and contains only tracked
+   `crates/gpui*` paths, built through a throwaway git index (no working-tree churn).
+   Merge commits are linearized when their filtered trees change. The original upstream
+   ancestry and merge topology are not preserved.
+2. Each sync extends that filtered replay and merges its tip. Git's merge base is the
+   previous vendor tip, so the merge applies the upstream GPUI delta since the last sync;
+   already-cherry-picked changes can merge without conflict. The sync commit's second
+   parent is the vendor tip. Its ancestry is the filtered replay, not original upstream
+   history; `zed-upstream` trailers provide the source commit mapping.
 3. The merge is committed as **two commits** for reviewability:
    - **Commit 1 — raw merge:** git's auto-merges applied, conflict markers committed in
      as-is (deterministic add/delete conflicts settled by policy: gpui-ce's deletions
      kept). This captures exactly what git could *not* resolve.
-   - **Commit 2 — resolution:** `claude -p` (`resolve-conflicts.prompt.md`, looped up to
-     `--retries`) edits out the markers. Because it's a separate commit, its diff shows
-     *exactly* what was chosen — auditable in isolation, distinct from git's auto-merge.
+   - **Commit 2 — resolution:** the selected agent (`resolve-conflicts.prompt.md`, looped
+     up to `--retries`) edits out the markers. Because it's separate, its diff shows what
+     was chosen, distinct from git's auto-merge.
    (A conflict-free sync is just one clean merge commit.)
 4. The **verify-fix loop** runs: the build gate (`just check`,
    which also treats compile **warnings** as fixable so the branch stays CI-clean), then
    the test gate (`just test`). (There are no `zed-industries/zed` git deps left to bump — PR #91
    vendored everything in-tree, so the old dep-bump step is now a no-op.) Any failure — compile
    errors, warnings, or test failures —
-   is handed to `claude -p` (`fix-build.prompt.md`), looped up to `--retries` times, and
+   is handed to the selected agent (`fix-build.prompt.md`), looped up to `--retries` times, and
    committed as a **third** commit. Disable tests with `SYNC_RUN_TESTS=0`, or warning
    enforcement with `SYNC_FAIL_ON_WARNINGS=0`.
 
@@ -116,9 +117,10 @@ recorded baseline advances automatically, so bootstrap is not needed again.
 
 | File | Purpose |
 |------|---------|
-| `sync_upstream.py` | orchestrator (git plumbing + `claude -p` loops); stdlib-only, fully typed |
-| `resolve-conflicts.prompt.md` | rules for the conflict-resolution `claude -p` pass |
-| `fix-build.prompt.md` | rules for the build-fix `claude -p` pass |
+| `sync_upstream.py` | orchestrator (git plumbing + agent loops); stdlib-only, fully typed |
+| `agent_session.py` | pinned, resumable external-agent sessions and audit artifacts |
+| `resolve-conflicts.prompt.md` | rules for the conflict-resolution agent pass |
+| `fix-build.prompt.md` | rules for the build-fix agent pass |
 | `state.json` | committed: last synced upstream sha + vendor tip |
 
 ## Config / env overrides
@@ -126,8 +128,8 @@ recorded baseline advances automatically, so bootstrap is not needed again.
 Every default near the top of `sync_upstream.py` is overridable via a `SYNC_*` env var:
 
 ```sh
-SYNC_MODEL=sonnet just sync-upstream          # cheaper model
-SYNC_RETRIES=5    just sync-upstream           # more claude passes
+SYNC_AGENT=codex SYNC_MODEL=MODEL just sync-upstream  # optional Codex CLI backend
+SYNC_RETRIES=5    just sync-upstream                  # more agent passes
 SYNC_VERIFY_CMD="just ci-test" just sync-upstream
 just sync-upstream --ref some-tag --no-bump --dry-run
 ```
@@ -136,11 +138,18 @@ just sync-upstream --ref some-tag --no-bump --dry-run
 
 - The compile gate is host-only (`just check` / `cargo check --workspace`). macOS- and
   Windows-specific changes can't be fully verified on a Linux host — verify those on the
-  platform or in CI. The build-fix prompt asks claude to flag such changes.
-- Requires Python 3 (stdlib only — no pip installs), the `claude` CLI on `PATH`, and a
-  working `just` + Rust toolchain. The `just` recipes shell out to `sync_upstream.py`.
+  platform or in CI. The build-fix prompt asks the agent to flag such changes.
+- Requires Python 3 (stdlib only — no pip installs), `just`, and the Rust toolchain. The
+  default `external` agent mode pauses with a durable prompt and session ID; continue it
+  with `sync_upstream.py resume SESSION --response-file PATH`. The response is retained
+  in the audit record. Optional `codex` mode requires `codex` on `PATH`; legacy
+  `claude` mode requires `claude` on `PATH`.
 - If conflict resolution exhausts its retries, the branch is left mid-merge for you to
-  finish. If the build can't be fixed in time, the merge is committed and the branch is
-  left with the remaining errors plus a clear report.
-- `--allowedTools` is passed as a single space-separated string; if your `claude` CLI
-  version expects a different format, adjust `SYNC_CLAUDE_ALLOWED_TOOLS`.
+  finish. If verification fails, sync state is not advanced and the command exits nonzero; the branch
+  remains available for review and another verification attempt.
+- Codex runs with `codex exec --json --sandbox workspace-write` and captures its final
+  message to an audit file. The runner removes common API/GitHub/SSH credential variables
+  and disables Git credential helpers for that subprocess.
+- External-agent resume requires `--response-file`; the script pins the branch, HEAD,
+  merge state, upstream/vendor targets, prompt digest, and allowed path set before and
+  after the response. It stages only explicitly validated files.
