@@ -280,6 +280,7 @@ impl InteractivityPrepaint {
 
 struct AccessibilityPrepaint {
     text_run: accesskit::Node,
+    value: String,
     anchor: usize,
     focus: usize,
 }
@@ -315,6 +316,12 @@ impl Element for EditableTextElement {
     }
 
     fn write_a11y_info(&self, node: &mut accesskit::Node) {
+        // Keep the editable-text element's own placeholder as the default, while allowing an
+        // explicit aria-placeholder from Interactivity to override it.
+        if let Some(placeholder) = &self.placeholder {
+            node.set_placeholder(placeholder.to_string());
+        }
+        self.interactivity.write_a11y_info(node);
         if !self.accepts_input {
             node.set_read_only();
         }
@@ -331,6 +338,9 @@ impl Element for EditableTextElement {
             .expect("accessibility data was prepared while building the tree");
         let text_run_id = builder.synthetic_node_id("text");
         builder.push_child(text_run_id, accessibility.text_run);
+        // Android and other platform adapters read editable content from the TextInput node's
+        // value. Keep the TextRun child as well for character-level selection/accessibility.
+        builder.parent_node().set_value(accessibility.value);
         builder
             .parent_node()
             .set_text_selection(accesskit::TextSelection {
@@ -496,12 +506,14 @@ impl Element for EditableTextElement {
         let accessibility = window.is_a11y_active().then(|| {
             let metrics = state.accessibility_text_metrics();
             let (anchor, focus) = metrics.character_indices_for_selection(state.caret_selection());
+            let value = state.as_str().to_owned();
             let mut text_run = accesskit::Node::new(accesskit::Role::TextRun);
-            text_run.set_value(state.as_str());
+            text_run.set_value(value.clone());
             text_run.set_character_lengths(metrics.character_lengths.clone());
 
             AccessibilityPrepaint {
                 text_run,
+                value,
                 anchor,
                 focus,
             }
@@ -963,6 +975,84 @@ mod tests {
     const CARET_COLOR: Hsla = hsla(0.95, 0.8, 0.6, 1.0);
     const TEXT_COLOR: Hsla = hsla(0.0, 0.0, 0.1, 1.0);
     const MARKED_COLOR: Hsla = hsla(0.55, 0.8, 0.6, 1.0);
+
+    struct AccessibleInputView {
+        input: Entity<EditableTextState>,
+    }
+
+    impl Render for AccessibleInputView {
+        fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+            text_input("a11y-editor")
+                .state(self.input.downgrade())
+                .aria_label("Editor")
+                .placeholder("Type here")
+        }
+    }
+
+    #[test]
+    fn editable_text_a11y_node_exposes_live_value_and_selection() {
+        let value = "A\u{732B}\u{1F600}";
+        let mut cx = HeadlessAppContext::new(Arc::new(TestTextSystem));
+        let window = cx
+            .open_window(size(px(320.0), px(120.0)), |_window, cx| {
+                let input = cx.new(|cx| {
+                    let mut state = EditableTextState::new(StringStorage::from(value), cx);
+                    state.select_to(value.len(), cx);
+                    state
+                });
+                cx.new(|_| AccessibleInputView { input })
+            })
+            .unwrap();
+        let any_window = window.into();
+        let update = cx
+            .update_window(any_window, |_, window, cx| {
+                window.set_a11y_forced(true);
+                window.draw(cx).clear(cx);
+                window.a11y_tree().unwrap().clone()
+            })
+            .unwrap();
+
+        let (_, input_node) = update
+            .nodes
+            .iter()
+            .find(|(_, node)| node.role() == accesskit::Role::TextInput)
+            .expect("editable text input should be present in the a11y tree");
+        assert_eq!(input_node.label(), Some("Editor"));
+        assert_eq!(input_node.value(), Some(value));
+        assert_eq!(input_node.placeholder(), Some("Type here"));
+        assert!(!input_node.is_read_only());
+
+        let selection = input_node
+            .text_selection()
+            .expect("text selection is exposed");
+        let (text_run_id, text_run) = update
+            .nodes
+            .iter()
+            .find(|(id, node)| {
+                *id == selection.focus.node && node.role() == accesskit::Role::TextRun
+            })
+            .expect("selection points into the text run");
+        assert_eq!(text_run.value(), Some(value));
+        assert_eq!(selection.focus.node, *text_run_id);
+        assert_eq!(selection.focus.character_index, value.chars().count());
+    }
+
+    #[test]
+    fn editable_text_forwards_a11y_label_and_placeholder() {
+        let element = text_input("editor")
+            .aria_label("Editor")
+            .placeholder("Type here")
+            .accepts_input(false);
+        let role = element.a11y_role();
+        let mut node = accesskit::Node::new(role.expect("editable text has an input role"));
+
+        element.write_a11y_info(&mut node);
+
+        assert_eq!(role, Some(accesskit::Role::TextInput));
+        assert_eq!(node.label(), Some("Editor"));
+        assert_eq!(node.placeholder(), Some("Type here"));
+        assert!(node.is_read_only());
+    }
 
     struct BidiInputView {
         input: Entity<EditableTextState>,

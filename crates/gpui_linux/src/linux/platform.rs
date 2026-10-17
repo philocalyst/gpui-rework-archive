@@ -486,11 +486,11 @@ impl LinuxPlatform {
             DisplayConnection::Headless(_) => {}
             #[cfg(feature = "wayland")]
             DisplayConnection::Wayland(connection) => {
-                Platform::set_gpu_requirements(connection, Box::new(requirements));
+                connection.set_gpu_requirements(Box::new(requirements));
             }
             #[cfg(feature = "x11")]
             DisplayConnection::X11(connection) => {
-                Platform::set_gpu_requirements(connection, Box::new(requirements));
+                connection.set_gpu_requirements(Box::new(requirements));
             }
         }
     }
@@ -812,8 +812,7 @@ impl Platform for LinuxPlatform {
     }
 
     fn set_keyring_label(&self, label: SharedString) {
-        self.inner
-            .with_common(|common| common.keyring_label = label);
+        self.with_common(|common| common.keyring_label = label);
     }
 
     fn open_url(&self, url: &str) {
@@ -1091,9 +1090,7 @@ impl Platform for LinuxPlatform {
         let url = url.to_string();
         let username = username.to_string();
         let password = password.to_vec();
-        let label = self
-            .inner
-            .with_common(|common| common.keyring_label.clone());
+        let label = self.with_common(|common| common.keyring_label.clone());
         self.background_executor().spawn(async move {
             let keyring = oo7::Keyring::new().await?;
             keyring.unlock().await?;
@@ -1111,9 +1108,7 @@ impl Platform for LinuxPlatform {
 
     fn read_credentials(&self, url: &str) -> Task<Result<Option<(String, Vec<u8>)>>> {
         let url = url.to_string();
-        let label = self
-            .inner
-            .with_common(|common| common.keyring_label.clone());
+        let label = self.with_common(|common| common.keyring_label.clone());
         self.background_executor().spawn(async move {
             let keyring = oo7::Keyring::new().await?;
             keyring.unlock().await?;
@@ -1142,9 +1137,7 @@ impl Platform for LinuxPlatform {
 
     fn delete_credentials(&self, url: &str) -> Task<Result<()>> {
         let url = url.to_string();
-        let label = self
-            .inner
-            .with_common(|common| common.keyring_label.clone());
+        let label = self.with_common(|common| common.keyring_label.clone());
         self.background_executor().spawn(async move {
             let keyring = oo7::Keyring::new().await?;
             keyring.unlock().await?;

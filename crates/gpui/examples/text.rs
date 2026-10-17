@@ -7,27 +7,98 @@
 //!
 //! Run it with `cargo run --example text`.
 
-use std::ops::Range;
+use std::{iter, ops::Range};
 
 use gpui::{
-    App, Bounds, Context, Div, FontStyle, FontWeight, HighlightStyle, QuitMode, StrikethroughStyle,
-    StyledText, TextTransform, UnderlineStyle, Window, WindowBounds, WindowOptions, colors::Colors,
-    div, prelude::*, px, relative, rgb, rgb_to_hsla, size,
+    AbsoluteLength, App, Bounds, Context, DefiniteLength, Div, FontStyle, FontWeight,
+    HighlightStyle, QuitMode, Rgba, SharedString, StrikethroughStyle, StyledText, TextStyle,
+    TextTransform, UnderlineStyle, Window, WindowBounds, WindowOptions, colors::Colors, div,
+    prelude::*, px, relative, rgb, rgb_to_hsla, size,
 };
 
 const ACCENT: u32 = 0x2563eb;
 
-struct Typography;
+#[derive(Clone, Debug, PartialEq)]
+struct SpecimenTheme {
+    bg: Rgba,
+    fg: Rgba,
+}
 
-impl Render for Typography {
-    fn render(&mut self, window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+impl SpecimenTheme {
+    fn for_appearance(window: &Window) -> Self {
         let colors = Colors::for_appearance(window);
+        Self {
+            bg: colors.container,
+            fg: colors.text,
+        }
+    }
+
+    fn invert(self) -> Self {
+        Self {
+            bg: self.fg,
+            fg: self.bg,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, IntoElement)]
+struct Specimen {
+    id: usize,
+    scale: f32,
+    text_style: Option<TextStyle>,
+    string: SharedString,
+    invert: bool,
+}
+
+impl Specimen {
+    fn new(id: usize) -> Self {
+        Self {
+            id,
+            scale: 1.0,
+            text_style: None,
+            string: "The quick brown fox jumps over the lazy dog".into(),
+            invert: false,
+        }
+    }
+
+    fn invert(mut self) -> Self {
+        self.invert = !self.invert;
+        self
+    }
+
+    fn scale(mut self, scale: f32) -> Self {
+        self.scale = scale;
+        self
+    }
+}
+
+impl RenderOnce for Specimen {
+    fn render(self, window: &mut Window, _cx: &mut App) -> impl IntoElement {
+        let rem_size = window.rem_size();
+        let style = self.text_style.unwrap_or_else(|| window.text_style());
+        let font_size: f32 = style.font_size.to_pixels(rem_size).into();
+        let line_height = match style.line_height {
+            DefiniteLength::Absolute(AbsoluteLength::Pixels(value)) => {
+                let pixels: f32 = value.into();
+                pixels / font_size
+            }
+            DefiniteLength::Absolute(AbsoluteLength::Rems(value)) => {
+                let pixels: f32 = value.to_pixels(rem_size).into();
+                pixels / font_size
+            }
+            DefiniteLength::Relative(value) => value.as_f32(),
+        };
+
+        let mut theme = SpecimenTheme::for_appearance(window);
+        if self.invert {
+            theme = theme.invert();
+        }
 
         div()
-            .id(self.id)
+            .id(format!("specimen-{}", self.id))
             .bg(theme.bg)
             .text_color(theme.fg)
-            .text_size(px(font_size * scale))
+            .text_size(px(font_size * self.scale))
             .line_height(relative(line_height))
             .p(px(10.0))
             .child(self.string)
@@ -57,8 +128,8 @@ impl CharacterGrid {
 }
 
 impl RenderOnce for CharacterGrid {
-    fn render(self, _window: &mut Window, _cx: &mut App) -> impl IntoElement {
-        let mut theme = SpecimenTheme::default();
+    fn render(self, window: &mut Window, _cx: &mut App) -> impl IntoElement {
+        let mut theme = SpecimenTheme::for_appearance(window);
 
         if self.invert {
             theme = theme.invert();
@@ -108,12 +179,12 @@ impl RenderOnce for CharacterGrid {
     }
 }
 
-struct TextExample {
+struct Typography {
     next_id: usize,
     font_family: SharedString,
 }
 
-impl TextExample {
+impl Typography {
     fn next_id(&mut self) -> usize {
         self.next_id += 1;
         self.next_id
@@ -145,14 +216,24 @@ const FONT_FAMILIES: [&str; 5] = [
     "Courier New",
 ];
 
-impl Render for TextExample {
-    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let tcx = cx.text_context();
-        let colors = cx.default_colors().clone();
-
-        let font_size = tcx.font_size;
-        let line_height = tcx.line_height;
-        let type_scale = tcx.type_scale;
+impl Render for Typography {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let colors = Colors::for_appearance(window);
+        let text_style = window.text_style();
+        let rem_size = window.rem_size();
+        let font_size: f32 = text_style.font_size.to_pixels(rem_size).into();
+        let line_height = match text_style.line_height {
+            DefiniteLength::Absolute(AbsoluteLength::Pixels(value)) => {
+                let pixels: f32 = value.into();
+                pixels / font_size
+            }
+            DefiniteLength::Absolute(AbsoluteLength::Rems(value)) => {
+                let pixels: f32 = value.to_pixels(rem_size).into();
+                pixels / font_size
+            }
+            DefiniteLength::Relative(value) => value.as_f32(),
+        };
+        let type_scale = 1.33;
 
         let step_down_2 = 1.0 / (type_scale * type_scale);
         let step_down_1 = 1.0 / type_scale;
@@ -165,11 +246,29 @@ impl Render for TextExample {
         let step_up_6 = step_up_5 * type_scale;
 
         div()
+            .id("page")
             .font_family(self.font_family.clone())
             .size_full()
             .overflow_y_scroll()
             .bg(colors.background)
             .text_color(colors.text)
+            .child(
+                div()
+                    .bg(colors.container)
+                    .border_b_1()
+                    .border_color(colors.border)
+                    .p_3()
+                    .flex()
+                    .child(Self::button(&self.font_family, cx, |this, cx| {
+                        let new_family = FONT_FAMILIES
+                            .iter()
+                            .position(|family| *family == this.font_family.as_str())
+                            .map(|index| FONT_FAMILIES[(index + 1) % FONT_FAMILIES.len()])
+                            .unwrap_or(FONT_FAMILIES[0]);
+                        this.font_family = SharedString::new(new_family);
+                        cx.notify();
+                    })),
+            )
             .child(
                 div().flex().justify_center().p_4().child(
                     div()
@@ -488,7 +587,12 @@ pub fn run(cx: &mut App) {
     let bounds = Bounds::centered(None, size(px(720.), px(860.)), cx);
     cx.open_window(
         WindowOptions::default().window_bounds(WindowBounds::Windowed(bounds)),
-        |_window, cx| cx.new(|_cx| Typography),
+        |_window, cx| {
+            cx.new(|_cx| Typography {
+                next_id: 0,
+                font_family: ".ZedMono".into(),
+            })
+        },
     )
     .unwrap();
     cx.activate(true);

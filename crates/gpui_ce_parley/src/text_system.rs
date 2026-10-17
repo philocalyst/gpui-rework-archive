@@ -2069,12 +2069,18 @@ impl ParleyTextSystem {
             let mut text_top = -text_metrics.ascent - leading;
             let mut text_bottom = text_metrics.descent + leading;
 
+            let mut ownership_run_index = None;
+            let mut consumed_glyphs = 0usize;
+            let mut run_glyph_source_ranges = Vec::new();
             for item in line.items() {
                 let PositionedLayoutItem::GlyphRun(glyph_run) = item else {
                     let PositionedLayoutItem::InlineBox(inline_box) = item else {
                         unreachable!();
                     };
 
+                    ownership_run_index = None;
+                    consumed_glyphs = 0;
+                    run_glyph_source_ranges.clear();
                     positioned_inline_boxes.push(PositionedInlineBox {
                         id: inline_box.id,
                         line_index: line_index,
@@ -2088,6 +2094,22 @@ impl ParleyTextSystem {
                 };
 
                 let run = glyph_run.run();
+                if ownership_run_index != Some(run.index()) {
+                    ownership_run_index = Some(run.index());
+                    consumed_glyphs = 0;
+                    let line_text_range = line.text_range();
+                    run_glyph_source_ranges = run
+                        .visual_clusters()
+                        .filter(|cluster| {
+                            let range = cluster.text_range();
+                            range.start < line_text_range.end && line_text_range.start < range.end
+                        })
+                        .flat_map(|cluster| {
+                            let source = prepared.map.source_range(cluster.text_range());
+                            std::iter::repeat(source).take(cluster.glyphs().count())
+                        })
+                        .collect();
+                }
                 let normalized_coords = run
                     .normalized_coords()
                     .iter()
@@ -2136,14 +2158,24 @@ impl ParleyTextSystem {
                     continue;
                 }
 
+                let positioned_glyphs = glyph_run.positioned_glyphs().collect::<Vec<_>>();
+                let glyph_count = glyph_run.glyphs().count();
+                let ownership_end = consumed_glyphs + glyph_count;
+                anyhow::ensure!(
+                    ownership_end <= run_glyph_source_ranges.len(),
+                    "Parley glyph ownership stream is shorter than its positioned glyph runs"
+                );
+                let glyph_source_ranges =
+                    run_glyph_source_ranges[consumed_glyphs..ownership_end].to_vec();
+                consumed_glyphs = ownership_end;
                 let glyphs = {
                     let font_instances = self.font_instances.read();
                     let color_glyphs = font_instances
                         .get(font_id)
                         .context("canonical font missing after interning")?
                         .color_glyphs()?;
-                    glyph_run
-                        .positioned_glyphs()
+                    positioned_glyphs
+                        .into_iter()
                         .map(|glyph| {
                             let id = GlyphId(glyph.id);
                             ShapedGlyph {
@@ -2154,16 +2186,19 @@ impl ParleyTextSystem {
                                     .any(|kind| self.color_glyph_formats.contains(&kind)),
                             }
                         })
-                        .collect()
+                        .collect::<Vec<_>>()
                 };
 
                 let start = px(glyph_run.offset()) - line_x;
                 let source_run = prepared.run_sources[glyph_run.style().brush.source_run];
+                let source_range = prepared.map.source_range(run.text_range());
                 paint_fragments.push(PaintFragment {
                     source_run,
+                    source_range,
                     font_id,
                     font_size: px(run.font_size()),
-                    glyphs,
+                    glyphs: glyphs.into(),
+                    glyph_source_ranges: Some(glyph_source_ranges.into()),
                     x_range: start..start + px(glyph_run.advance()),
                     style: PaintStyle::from(&source_runs[source_run]),
                     // Parley's offsets are y-up; painting adds them to the baseline in y-down.
@@ -2822,6 +2857,20 @@ mod tests {
                 .platform_layout
                 .normalized_caret(CaretPosition::attached_to_next_cluster(idx));
             assert!(caret.index <= text.len());
+        }
+
+        for fragment in &layout.layout.paint_fragments {
+            let ranges = fragment
+                .glyph_source_ranges
+                .as_ref()
+                .expect("Parley must retain exact source ownership for every glyph");
+            assert_eq!(ranges.len(), fragment.glyphs.len());
+            for range in ranges.iter() {
+                assert!(
+                    text.get(range.clone()).is_some(),
+                    "scoped bidi glyph range {range:?} must be a UTF-8 source range"
+                );
+            }
         }
 
         let selection = layout
@@ -4232,7 +4281,7 @@ mod tests {
             .add_fonts(vec![Cow::Borrowed(IBM_PLEX.data)])
             .unwrap();
         let text_system = Arc::new(TextSystem::new(backend.clone()));
-        let window_text_system = WindowTextSystem::new(text_system);
+        let window_text_system = WindowTextSystem::new(text_system.clone());
         let text = "registered later";
         let run = text_run(text, SOURCE_SERIF.family);
         let before = window_text_system
@@ -4240,7 +4289,7 @@ mod tests {
             .unwrap();
         let fallback_id = before.paint_fragments[0].font_id;
 
-        backend
+        text_system
             .add_fonts(vec![
                 Cow::Borrowed(SOURCE_SERIF.data),
                 Cow::Borrowed(NOTO_SANS.data),
@@ -4253,7 +4302,7 @@ mod tests {
         let source_serif_regular = backend.font_id(&font("Source Serif 4")).unwrap();
         assert_eq!(after.paint_fragments[0].font_id, source_serif_regular);
 
-        backend
+        text_system
             .add_fonts(vec![Cow::Borrowed(IBM_PLEX_SEMIBOLD.data)])
             .unwrap();
         let regular = backend.font_id(&font(IBM_PLEX.family)).unwrap();
@@ -5085,5 +5134,71 @@ mod tests {
             let auto_cached_item = bounds(&mut cx, any_window, "auto-cached-item");
             assert!(auto_cached_item.right() < auto_cached_row.center().x);
         }
+    }
+    #[test]
+    fn glyph_source_ranges_follow_parley_clusters_for_combining_emoji_and_bidi() {
+        let system = test_system();
+        let text = "a\u{301} fi \u{0633}\u{0644}\u{0627}\u{0645} \u{1f469}\u{200d}\u{1f469}\u{200d}\u{1f467}\u{200d}\u{1f466} \u{05d0}\u{05d1}";
+        let line = layout_line(&system, text, px(18.), &[text_run(text, IBM_PLEX.family)]);
+        let arabic_start = text.find("\u{0633}\u{0644}\u{0627}\u{0645}").unwrap();
+        let arabic = arabic_start..arabic_start + "\u{0633}\u{0644}\u{0627}\u{0645}".len();
+        let emoji_start = text.find(char::from_u32(0x1f469).unwrap()).unwrap();
+        let emoji_end =
+            emoji_start + "\u{1f469}\u{200d}\u{1f469}\u{200d}\u{1f467}\u{200d}\u{1f466}".len();
+        let combining = 0.."a\u{301}".len();
+        let emoji = emoji_start..emoji_end;
+        let mut saw_combining = false;
+        let mut saw_emoji = false;
+        let mut saw_arabic = false;
+        let mut glyph_count = 0;
+
+        for fragment in &line.paint_fragments {
+            assert!(
+                text.get(fragment.source_range.clone()).is_some(),
+                "fragment source {:?} must be a UTF-8 range",
+                fragment.source_range
+            );
+            let ranges = fragment
+                .glyph_source_ranges
+                .as_ref()
+                .expect("Parley exposes source ranges per glyph");
+            assert_eq!(ranges.len(), fragment.glyphs.len());
+            glyph_count += ranges.len();
+
+            for range in ranges.iter() {
+                assert!(
+                    text.get(range.clone()).is_some(),
+                    "range {range:?} must be a UTF-8 source range"
+                );
+                assert!(
+                    fragment.source_range.start <= range.start
+                        && range.end <= fragment.source_range.end,
+                    "glyph source {range:?} must belong to fragment {:?}",
+                    fragment.source_range
+                );
+                saw_combining |= range.start < combining.end && combining.start < range.end;
+                saw_arabic |= range.start < arabic.end && arabic.start < range.end;
+                saw_emoji |= range.start < emoji.end && emoji.start < range.end;
+            }
+        }
+
+        assert!(
+            glyph_count > 0,
+            "the shaped line must publish glyph ownership"
+        );
+        assert!(
+            saw_combining,
+            "the combining sequence must retain the source span Parley assigns to its glyphs"
+        );
+        assert!(saw_arabic, "Arabic shaping must retain source ranges");
+        assert!(
+            saw_emoji,
+            "the emoji sequence must retain the source span Parley assigns to its glyphs"
+        );
+
+        // These are exact backend shaping-cluster spans, not a partition of
+        // source Unicode graphemes. Combining marks and default-ignorable
+        // controls can have no independent glyph, so assert valid, fragment-
+        // local ownership above instead of inventing byte coverage.
     }
 }

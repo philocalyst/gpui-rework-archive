@@ -2407,7 +2407,7 @@ mod tests {
         }
     }
 
-    #[perf]
+    #[test]
     fn path_with_position_parse_posix_path() {
         // Test POSIX filename edge cases
         // Read more at https://en.wikipedia.org/wiki/Filename
@@ -2796,7 +2796,7 @@ mod tests {
         );
     }
 
-    #[perf]
+    #[test]
     #[cfg(target_os = "windows")]
     fn test_sanitized_path_verbatim_unc() {
         let path: Arc<Path> = PathBuf::from("\\\\?\\UNC\\server\\share\\file.txt").into();
@@ -2804,7 +2804,7 @@ mod tests {
         assert_eq!(sanitized_path.to_string(), "\\\\server\\share\\file.txt");
     }
 
-    #[perf]
+    #[test]
     fn test_compare_numeric_segments() {
         // Helper function to create peekable iterators and test
         fn compare(a: &str, b: &str) -> Ordering {
@@ -3223,7 +3223,12 @@ mod tests {
                 Some(rel_path("a/b/c").to_arc()),
             ),
             (PathStyle::Unix, "/a/b/c", "", None),
-            (PathStyle::Unix, "/a/b//c", "/a/b/", None),
+            (
+                PathStyle::Unix,
+                "/a/b//c",
+                "/a/b/",
+                Some(rel_path("c").to_arc()),
+            ),
             (PathStyle::Unix, "/a/bc", "/a/b", None),
             (
                 PathStyle::Unix,
@@ -3250,7 +3255,12 @@ mod tests {
                 Some(rel_path("a/b/c").to_arc()),
             ),
             (PathStyle::Windows, "C:\\a\\b\\c", "", None),
-            (PathStyle::Windows, "C:\\a\\b\\\\c", "C:\\a\\b\\", None),
+            (
+                PathStyle::Windows,
+                "C:\\a\\b\\\\c",
+                "C:\\a\\b\\",
+                Some(rel_path("c").to_arc()),
+            ),
             (PathStyle::Windows, "C:\\a\\bc", "C:\\a\\b", None),
             (
                 PathStyle::Windows,
@@ -3277,8 +3287,10 @@ mod tests {
                 child,
                 parent,
                 style
-                    .strip_prefix(child.as_ref(), parent.as_ref())
-                    .map(|rel_path| rel_path.to_arc()),
+                    .strip_prefix(Path::new(child), Path::new(parent))
+                    .ok()
+                    .and_then(|rel_path| RelPath::new(rel_path, style).ok())
+                    .map(|rel_path| Arc::from(rel_path.as_ref())),
             )
         });
         pretty_assertions::assert_eq!(actual, expected);

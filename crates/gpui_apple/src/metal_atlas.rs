@@ -45,18 +45,18 @@ struct MetalAtlasState {
 impl PlatformAtlas for MetalAtlas {
     fn get_or_insert_with<'a>(
         &self,
-        key: &AtlasKey,
+        key: AtlasKey,
         build: &mut dyn FnMut() -> Result<Option<(Size<DevicePixels>, Cow<'a, [u8]>)>>,
     ) -> Result<Option<AtlasTile>> {
         let mut lock = self.0.lock();
-        if let Some(tile) = lock.tiles_by_key.get(key) {
+        if let Some(tile) = lock.tiles_by_key.get(&key) {
             return Ok(Some(*tile));
         }
 
         let Some((size, bytes)) = build()? else {
             return Ok(None);
         };
-        let tile = lock.insert_tile(key.clone(), size, &bytes)?;
+        let tile = lock.insert_tile(key, size, &bytes)?;
 
         Ok(Some(tile))
     }

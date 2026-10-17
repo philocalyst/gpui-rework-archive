@@ -472,6 +472,7 @@ mod tests {
                     power_preference: wgpu::PowerPreference::LowPower,
                     compatible_surface: None,
                     force_fallback_adapter: false,
+                    apply_limit_buckets: false,
                 })
                 .await
                 .map_err(|error| anyhow::anyhow!("failed to request adapter: {error}"))?;
@@ -485,6 +486,7 @@ mod tests {
                     memory_hints: wgpu::MemoryHints::MemoryUsage,
                     trace: wgpu::Trace::Off,
                     experimental_features: wgpu::ExperimentalFeatures::disabled(),
+                    default_queue: wgpu::QueueDescriptor::default(),
                 })
                 .await
                 .map_err(|error| anyhow::anyhow!("failed to request device: {error}"))?;
@@ -576,7 +578,7 @@ mod tests {
         };
         let insert = |key: &AtlasKey| {
             atlas
-                .get_or_insert_with(key, &mut || {
+                .get_or_insert_with(key.clone(), &mut || {
                     Ok(Some((size, Cow::Owned(vec![0, 0, 0, 255]))))
                 })
                 .expect("allocation should succeed")

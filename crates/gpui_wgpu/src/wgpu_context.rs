@@ -190,8 +190,7 @@ pub struct WgpuContext {
     dual_source_blending: bool,
     color_texture_format: wgpu::TextureFormat,
     renderer_tier: RendererTier,
-    device_lost: Arc<AtomicBool>,
-    uncaptured_error: Arc<Mutex<Option<String>>>,
+    errors: Arc<DeviceErrorState>,
 }
 
 /// The resource transport selected for a device.
@@ -478,7 +477,7 @@ impl WgpuContext {
             texture_format,
             self.adapter.get_info(),
             self.backend,
-            Arc::clone(&self.device_lost),
+            Arc::clone(&self.errors.lost),
         )
     }
 
@@ -496,6 +495,7 @@ impl WgpuContext {
                     power_preference: wgpu::PowerPreference::LowPower,
                     compatible_surface: None,
                     force_fallback_adapter: false,
+                    apply_limit_buckets: false,
                 }))
                 .map_err(|error| {
                     anyhow::anyhow!("failed to request headless GPU adapter: {error}")
@@ -582,6 +582,7 @@ impl WgpuContext {
                 power_preference: wgpu::PowerPreference::HighPerformance,
                 compatible_surface: Some(&surface),
                 force_fallback_adapter: false,
+                apply_limit_buckets: false,
             })
             .await
             .map_err(|error| {
@@ -607,7 +608,7 @@ impl WgpuContext {
         adapter: wgpu::Adapter,
         device: CreatedDevice,
     ) -> anyhow::Result<Self> {
-        let (device_lost, uncaptured_error) = install_device_callbacks(&device.device);
+        let errors = DeviceErrorState::install(&device.device);
         let info = adapter.get_info();
         log::info!("Selected GPU adapter: {:?} ({:?})", info.name, info.backend);
         #[cfg(target_family = "wasm")]
@@ -630,8 +631,7 @@ impl WgpuContext {
             dual_source_blending: device.dual_source_blending,
             color_texture_format: device.color_texture_format,
             renderer_tier: device.renderer_tier,
-            device_lost,
-            uncaptured_error,
+            errors,
         })
     }
 
@@ -683,6 +683,7 @@ impl WgpuContext {
                 memory_hints: wgpu::MemoryHints::MemoryUsage,
                 trace: wgpu::Trace::Off,
                 experimental_features: wgpu::ExperimentalFeatures::disabled(),
+                default_queue: wgpu::QueueDescriptor::default(),
             })
             .await
             .map_err(|e| anyhow::anyhow!("Failed to create wgpu device: {e}"))?;
@@ -877,6 +878,7 @@ impl WgpuContext {
         let test_config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: caps.formats[0],
+            color_space: wgpu::SurfaceColorSpace::Auto,
             width: 64,
             height: 64,
             present_mode: wgpu::PresentMode::Fifo,
@@ -956,16 +958,83 @@ impl WgpuContext {
     /// Returns true if the GPU device was lost (driver crash, suspend/resume).
     /// When this returns true, the context should be recreated.
     pub fn device_lost(&self) -> bool {
-        self.device_lost.load(Ordering::Relaxed)
+        self.errors.device_lost()
     }
 
     /// Returns a clone of the device_lost flag for sharing with renderers.
     pub(crate) fn device_lost_flag(&self) -> Arc<AtomicBool> {
-        Arc::clone(&self.device_lost)
+        Arc::clone(&self.errors.lost)
     }
 
-    pub(crate) fn uncaptured_error_slot(&self) -> Arc<Mutex<Option<String>>> {
-        Arc::clone(&self.uncaptured_error)
+    /// Returns the device-wide error state, shared by all renderers using this device.
+    pub fn errors(&self) -> &Arc<DeviceErrorState> {
+        &self.errors
+    }
+}
+
+/// Errors reported by wgpu's device-wide callbacks.
+///
+/// A device has exactly one lost callback and one uncaptured-error callback, so this
+/// state is installed once per device and shared by every renderer using it.
+#[derive(Default)]
+pub struct DeviceErrorState {
+    lost: Arc<AtomicBool>,
+    last_error: Mutex<DeviceErrorData>,
+}
+
+#[derive(Default)]
+struct DeviceErrorData {
+    generation: u64,
+    latest: Option<String>,
+}
+
+impl DeviceErrorState {
+    fn install(device: &wgpu::Device) -> Arc<Self> {
+        let errors = Arc::new(Self::default());
+        device.set_device_lost_callback({
+            let errors = Arc::clone(&errors);
+            move |reason, message| {
+                log::error!("wgpu device lost: reason={reason:?}, message={message}");
+                if reason != wgpu::DeviceLostReason::Destroyed {
+                    errors.lost.store(true, Ordering::Relaxed);
+                }
+            }
+        });
+        device.on_uncaptured_error(Arc::new({
+            let errors = Arc::clone(&errors);
+            move |error| errors.record(error.to_string())
+        }));
+        errors
+    }
+
+    /// Returns true if the GPU device was lost (e.g., due to driver crash, suspend/resume).
+    pub fn device_lost(&self) -> bool {
+        self.lost.load(Ordering::Relaxed)
+    }
+
+    fn record(&self, error: String) {
+        let mut state = self.last_error.lock().unwrap();
+        state.generation = state.generation.wrapping_add(1);
+        state.latest = Some(error);
+    }
+
+    /// Returns the latest error once per observer, without consuming shared state.
+    /// Start each observer at zero, including after switching devices, so errors
+    /// raised during construction are observed. Multiple errors between observations
+    /// coalesce to the latest error; this is not an error queue.
+    pub fn observe_error(&self, generation: &mut u64) -> Option<String> {
+        let state = self.last_error.lock().unwrap();
+        if *generation == state.generation {
+            return None;
+        }
+        *generation = state.generation;
+        state.latest.clone()
+    }
+
+    /// The generation an observer should start from to see only errors raised after
+    /// this call, for a renderer joining a device other renderers already used.
+    pub fn current_generation(&self) -> u64 {
+        self.last_error.lock().unwrap().generation
     }
 }
 
@@ -980,31 +1049,6 @@ fn renderer_tier(adapter: &wgpu::Adapter) -> RendererTier {
     } else {
         RendererTier::WebGl2
     }
-}
-
-fn install_device_callbacks(
-    device: &wgpu::Device,
-) -> (Arc<AtomicBool>, Arc<Mutex<Option<String>>>) {
-    let device_lost = Arc::new(AtomicBool::new(false));
-    device.set_device_lost_callback({
-        let device_lost = Arc::clone(&device_lost);
-        move |reason, message| {
-            log::error!("wgpu device lost: reason={reason:?}, message={message}");
-            if reason != wgpu::DeviceLostReason::Destroyed {
-                device_lost.store(true, Ordering::Relaxed);
-            }
-        }
-    });
-    let uncaptured_error = Arc::new(Mutex::new(None));
-    device.on_uncaptured_error(Arc::new({
-        let uncaptured_error = Arc::clone(&uncaptured_error);
-        move |error| {
-            let message = error.to_string();
-            log::error!("uncaptured wgpu error: {message}");
-            *uncaptured_error.lock().unwrap() = Some(message);
-        }
-    }));
-    (device_lost, uncaptured_error)
 }
 
 #[cfg(not(target_family = "wasm"))]
@@ -1027,6 +1071,90 @@ fn parse_pci_id(id: &str) -> anyhow::Result<u32> {
 #[cfg(all(test, not(target_family = "wasm")))]
 mod tests {
     use super::{NativeBackend, SoftwareAdapterPolicy, parse_pci_id};
+
+    #[test]
+    fn device_errors_are_observed_independently_and_coalesce_to_latest() {
+        let errors = super::DeviceErrorState::default();
+        let mut first_generation = 0;
+        let mut second_generation = 0;
+
+        errors.record("first".to_owned());
+        assert_eq!(
+            errors.observe_error(&mut first_generation).as_deref(),
+            Some("first")
+        );
+        assert_eq!(
+            errors.observe_error(&mut second_generation).as_deref(),
+            Some("first")
+        );
+        assert_eq!(errors.observe_error(&mut first_generation), None);
+        assert_eq!(errors.observe_error(&mut second_generation), None);
+
+        errors.record("intermediate".to_owned());
+        errors.record("latest".to_owned());
+        assert_eq!(errors.current_generation(), 3);
+        assert_eq!(
+            errors.observe_error(&mut first_generation).as_deref(),
+            Some("latest")
+        );
+        assert_eq!(
+            errors.observe_error(&mut second_generation).as_deref(),
+            Some("latest")
+        );
+        assert_eq!(first_generation, 3);
+        assert_eq!(second_generation, 3);
+    }
+
+    #[test]
+    fn a_new_observer_can_join_after_existing_errors() {
+        let errors = super::DeviceErrorState::default();
+        errors.record("construction".to_owned());
+
+        let mut catch_up = 0;
+        assert_eq!(
+            errors.observe_error(&mut catch_up).as_deref(),
+            Some("construction")
+        );
+
+        let mut after_join = errors.current_generation();
+        assert_eq!(errors.observe_error(&mut after_join), None);
+        errors.record("after join".to_owned());
+        assert_eq!(
+            errors.observe_error(&mut after_join).as_deref(),
+            Some("after join")
+        );
+    }
+
+    #[test]
+    fn replacement_device_uses_a_fresh_error_generation() {
+        let old_device = super::DeviceErrorState::default();
+        let mut renderer_generation = 0;
+        old_device.record("old device error".to_owned());
+        assert_eq!(
+            old_device
+                .observe_error(&mut renderer_generation)
+                .as_deref(),
+            Some("old device error")
+        );
+        assert_eq!(renderer_generation, 1);
+
+        let recovered_device = super::DeviceErrorState::default();
+        let mut stale_generation = renderer_generation;
+        let mut recovered_renderer_generation = 0;
+        recovered_device.record("recovery construction error".to_owned());
+        assert_eq!(
+            recovered_device.observe_error(&mut stale_generation),
+            None,
+            "reusing the old generation would miss the first error on the replacement device"
+        );
+        assert_eq!(
+            recovered_device
+                .observe_error(&mut recovered_renderer_generation)
+                .as_deref(),
+            Some("recovery construction error")
+        );
+        assert_eq!(recovered_renderer_generation, 1);
+    }
 
     #[test]
     fn native_backend_fallbacks_are_individually_initialized() {

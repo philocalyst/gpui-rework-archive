@@ -76,13 +76,18 @@ fn renderer_backends_share_rust_authored_shaders() {
     let macos_root = root.join("crates/gpui_macos/src");
     assert!(
         !macos_root.join("metal_renderer.rs").exists(),
-        "the extracted Apple renderer must not retain a macOS compatibility module"
+        "the macOS crate must not duplicate the shared Apple renderer implementation"
     );
     let macos_lib = fs::read_to_string(macos_root.join("gpui_macos.rs"))
         .expect("failed to read the macOS crate root");
+    let compatibility_module = macos_lib
+        .split("pub mod metal_renderer {")
+        .nth(1)
+        .and_then(|body| body.split('}').next())
+        .expect("the macOS crate must preserve its public renderer compatibility module");
     assert!(
-        !macos_lib.contains("pub mod metal_renderer"),
-        "the macOS crate must not re-export the extracted renderer"
+        compatibility_module.contains("pub use gpui_apple::metal_renderer::"),
+        "the macOS compatibility module must re-export the canonical shared Apple renderer"
     );
 
     let mut platform_shader_sources = Vec::new();

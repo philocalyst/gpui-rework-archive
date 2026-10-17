@@ -1,5 +1,4 @@
 use anyhow::{Result, ensure};
-use futures::AsyncReadExt;
 use gpui::{
     App, Bounds, Context, Render, Subscription, Task, Window, WindowBounds, WindowOptions, div,
     prelude::*, px, rgb, size,
@@ -39,8 +38,6 @@ impl DynamicFonts {
     }
 
     fn load_font(&mut self, cx: &mut Context<Self>) {
-        // Many missing graphemes can request the same font, including after a failed
-        // download. Keep the task so this demo makes only one attempt per page load.
         if self.download.is_some() {
             return;
         }
@@ -49,16 +46,14 @@ impl DynamicFonts {
         let http_client = cx.http_client();
         self.download = Some(cx.spawn(async move |view, cx| {
             let result: Result<Vec<u8>> = async {
-                let mut response = http_client.get(FONT_URL, Default::default(), true).await?;
+                let response = http_client.get(FONT_URL, true).await?;
                 ensure!(
-                    response.status().is_success(),
+                    response.status.is_success(),
                     "Font request failed: HTTP {}",
-                    response.status()
+                    response.status
                 );
-                let mut bytes = Vec::new();
-                response.body_mut().read_to_end(&mut bytes).await?;
-                ensure!(!bytes.is_empty(), "Font response was empty");
-                Ok(bytes)
+                ensure!(!response.body.is_empty(), "Font response was empty");
+                Ok(response.body)
             }
             .await;
             view.update(cx, |view, cx| {
@@ -122,9 +117,9 @@ fn main() {
                 window_bounds: Some(WindowBounds::Windowed(bounds)),
                 ..Default::default()
             },
-            |_, cx| cx.new(DynamicFonts::new),
+            |_window, cx| cx.new(|cx| DynamicFonts::new(cx)),
         )
-        .log_err();
+        .expect("failed to open dynamic-font window");
         cx.activate(true);
     });
 }

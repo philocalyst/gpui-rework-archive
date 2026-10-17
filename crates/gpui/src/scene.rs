@@ -567,6 +567,10 @@ impl Primitive {
             Primitive::SubpixelSprite(sprite) => {
                 transformed_bounds(sprite.bounds, sprite.transformation)
             }
+            Primitive::Underline(underline) => underline
+                .bounds
+                .intersect(&underline.clip_bounds)
+                .intersect(&underline.content_mask.bounds),
             _ => *self.bounds(),
         }
     }
@@ -1038,9 +1042,14 @@ pub struct Underline {
     pub order: DrawOrder,
     /// Padding for the GPU struct layout. [`crate::Window`] always sets it to `0`.
     pub padding: u32,
-    /// The line's rectangle, in scaled pixels.
+    /// The line's full rectangle, in scaled pixels. This remains the phase origin for wavy lines.
     pub bounds: Bounds<ScaledPixels>,
-    /// The region that clips this line.
+    /// The hard clip rectangle, independent of the content mask's fade ramp.
+    ///
+    /// This can be narrowed to split a line around exclusions without changing its geometry or
+    /// moving the origin of a wavy underline.
+    pub clip_bounds: Bounds<ScaledPixels>,
+    /// The region that clips this line and supplies its edge fade.
     pub content_mask: ContentMask<ScaledPixels>,
     /// The color of the line.
     pub color: SceneHsla,
@@ -1670,6 +1679,64 @@ mod tests {
             content_mask: mask(),
             ..Default::default()
         }
+    }
+
+    #[test]
+    fn underline_paint_bounds_intersect_geometry_clip_and_content_mask() {
+        let underline = Underline {
+            order: 0,
+            padding: 0,
+            bounds: Bounds {
+                origin: Point {
+                    x: sp(10.0),
+                    y: sp(10.0),
+                },
+                size: Size {
+                    width: sp(45.0),
+                    height: sp(25.0),
+                },
+            },
+            clip_bounds: Bounds {
+                origin: Point {
+                    x: sp(30.0),
+                    y: sp(15.0),
+                },
+                size: Size {
+                    width: sp(60.0),
+                    height: sp(25.0),
+                },
+            },
+            content_mask: ContentMask {
+                bounds: Bounds {
+                    origin: Point {
+                        x: sp(25.0),
+                        y: sp(20.0),
+                    },
+                    size: Size {
+                        width: sp(45.0),
+                        height: sp(10.0),
+                    },
+                },
+                ..Default::default()
+            },
+            color: Default::default(),
+            thickness: sp(1.0),
+            wavy: ShaderBool::Disabled,
+        };
+
+        assert_eq!(
+            Primitive::Underline(underline).paint_bounds(),
+            Bounds {
+                origin: Point {
+                    x: sp(30.0),
+                    y: sp(20.0)
+                },
+                size: Size {
+                    width: sp(25.0),
+                    height: sp(10.0)
+                },
+            }
+        );
     }
 
     fn shadow() -> Shadow {

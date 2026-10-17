@@ -45,13 +45,12 @@ use crate::util::FluentBuilder;
 use crate::{
     Action, AnyWindowHandle, App, AsyncWindowContext, BackgroundExecutor, Bounds,
     DEFAULT_WINDOW_SIZE, DevicePixels, DispatchEventResult, Edges, ExternalDragPayload, Font,
-    FontId, FontMetrics, FontRun, ForegroundExecutor, GlyphAtlasEntry, GlyphId, GpuSpecs, Hsla,
-    ImageSource, InlineLayout, InlineLayoutRequest, Keymap, LineLayout, MissingGlyphSink, Pixels,
+    FontId, FontMetrics, ForegroundExecutor, GlyphAtlasEntry, GlyphId, GpuSpecs, ImageSource,
+    InlineLayout, InlineLayoutRequest, Keymap, LineLayout, MissingGlyphSink, Pixels,
     PlatformGestures, PlatformInput, Point, PreparedRasterStyle, Priority, RasterStyleRequest,
     RasterizedGlyph, RasterizedGlyphFormat, RenderGlyphParams, RenderImage, RenderImageParams,
-    RenderSvgParams, Scene, ShapedGlyph, ShapedRun, SharedString, Size, SvgRenderer,
-    SystemWindowTab, Task, TextLayoutRequest, ValidatedRasterizedGlyph, Window, WindowControlArea,
-    hash, point, px, size,
+    RenderSvgParams, Scene, SharedString, Size, SvgRenderer, SystemWindowTab, Task,
+    TextLayoutRequest, ValidatedRasterizedGlyph, Window, WindowControlArea, hash, point, px,
 };
 #[cfg(any(target_os = "linux", target_os = "freebsd"))]
 use anyhow::bail;
@@ -416,11 +415,13 @@ pub trait Platform: 'static {
     /// running briefly. The web backend only logs a warning, because a page can't quit
     /// itself.
     fn quit(&self);
-    /// Switches a capable platform between headless and windowed modes. See
-    /// [`App::request_windowing`].
-    /// Sets the windowing mode the platform starts in. Called before `run`. See
-    /// [`Application::with_windowing`].
+    /// Sets the windowing mode the platform starts in. Called before run. See
+    /// Application::with_windowing.
     fn set_initial_windowing(&self, _request: WindowingRequest) {}
+    /// Requests a switch between headless and windowed modes while the application is running.
+    ///
+    /// The returned task resolves when the platform has applied the change. Platforms that do
+    /// not support switching return an error from the default implementation.
     fn request_windowing(&self, _request: WindowingRequest) -> Task<anyhow::Result<()>> {
         Task::ready(Err(anyhow::anyhow!(
             "this platform cannot switch between headless and windowed modes"
@@ -632,6 +633,11 @@ pub trait Platform: 'static {
     fn thermal_state(&self) -> ThermalState;
     /// Registers the callback run when [`Platform::thermal_state`] changes. Read the new state from the platform inside the callback.
     fn on_thermal_state_change(&self, callback: Box<dyn FnMut()>);
+    /// Requests that the operating system keep the device awake while the returned guard lives.
+    ///
+    /// The reason explains the activity to the platform and may be shown in system UI. Dropping
+    /// the ActivityGuard releases the request. The task resolves with the guard or an error if
+    /// the platform cannot create the activity request.
     fn prevent_idle_sleep(&self, reason: &str) -> Task<Result<ActivityGuard>>;
 
     /// Sets the application's identifier and user-visible name.
@@ -1636,9 +1642,16 @@ pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
     /// Sets the identifier that groups windows into one native tab group. macOS only.
     fn set_tabbing_identifier(&self, _identifier: Option<String>) {}
 
+    /// Captures opaque, platform-specific state for restoring this native window later.
+    ///
+    /// Returns None when the backend has no restorable state. The bytes are only meaningful to
+    /// the backend that produced them; the default implementation returns None.
     fn native_window_state(&self) -> Option<Vec<u8>> {
         None
     }
+    /// Restores state previously returned by PlatformWindow::native_window_state.
+    ///
+    /// The default implementation does nothing on platforms without native state restoration.
     fn restore_native_window_state(&self, _state: &[u8]) {}
 
     /// Returns the window's Win32 `HWND`. Windows only.
@@ -2426,9 +2439,13 @@ mod tests {
             let paint_fragments = (!glyphs.is_empty())
                 .then(|| PaintFragment {
                     source_run: 0,
+                    source_range: 0..shaping_runs
+                        .first()
+                        .map_or(text.len(), |run| run.len.min(text.len())),
                     font_id: FontId(0),
                     font_size,
                     glyphs: glyphs.into(),
+                    glyph_source_ranges: None,
                     x_range: Pixels::ZERO..advance,
                     style: shaping_runs
                         .first()
@@ -2755,7 +2772,13 @@ impl<Backend: AtlasBackend> AtlasState<Backend> {
 /// tiles without uploading any pixels, so glyph, SVG, and image painting can
 /// run to completion in tests and headless platforms.
 #[derive(Default)]
-pub struct HeadlessAtlas(parking_lot::Mutex<AtlasState<HeadlessAtlasBackend>>);
+pub struct HeadlessAtlas(parking_lot::Mutex<HeadlessAtlasState>);
+
+#[derive(Default)]
+struct HeadlessAtlasState {
+    atlas: AtlasState<HeadlessAtlasBackend>,
+    glyph_cache: GlyphAtlasCache,
+}
 
 #[doc(hidden)]
 #[derive(Default)]
@@ -2797,16 +2820,39 @@ impl PlatformAtlas for HeadlessAtlas {
         key: AtlasKey,
         build: &mut dyn FnMut() -> Result<Option<(Size<DevicePixels>, Cow<'a, [u8]>)>>,
     ) -> Result<Option<AtlasTile>> {
-        self.0.lock().get_or_insert_with(key, build)
+        self.0.lock().atlas.get_or_insert_with(key, build)
+    }
+
+    fn get_or_insert_glyph_with(
+        &self,
+        params: &RenderGlyphParams,
+        build: &mut dyn FnMut() -> Result<ValidatedRasterizedGlyph>,
+    ) -> Result<GlyphAtlasEntry> {
+        let mut state = self.0.lock();
+        if let Some(entry) = state.glyph_cache.get(params) {
+            return Ok(entry);
+        }
+
+        let glyph = build()?;
+        let tile = if glyph.size == Size::default() {
+            None
+        } else {
+            let key = AtlasKey::from((params.clone(), glyph.format));
+            let mut pixels = || Ok(Some((glyph.size, Cow::Borrowed(glyph.pixels.as_slice()))));
+            state.atlas.get_or_insert_with(key, &mut pixels)?
+        };
+        Ok(state.glyph_cache.insert(params, &glyph, tile))
     }
 
     fn remove(&self, key: &AtlasKey) {
-        self.0.lock().remove(key);
+        let mut state = self.0.lock();
+        state.glyph_cache.remove(key);
+        state.atlas.remove(key);
     }
 
     #[cfg(any(test, feature = "test-support", feature = "bench-support"))]
     fn contains(&self, key: &AtlasKey) -> bool {
-        self.0.lock().contains(key)
+        self.0.lock().atlas.contains(key)
     }
 }
 
@@ -3068,6 +3114,11 @@ impl PlatformInputHandler {
             .flatten()
     }
 
+    /// Returns selection rectangles for a range of UTF-16 code units in document order.
+    ///
+    /// The platform uses these logical-pixel bounds to position selection UI. A backend may
+    /// return an empty vector when selection geometry is unavailable; IME candidate placement
+    /// can still use bounds_for_range. If the window has closed, this also returns an empty vector.
     pub fn selection_bounds_for_range(&mut self, range_utf16: Range<usize>) -> Vec<Bounds<Pixels>> {
         self.cx
             .update(|window, cx| {

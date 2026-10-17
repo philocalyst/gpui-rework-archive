@@ -1,594 +1,423 @@
-use crate::canvas_fallback::classify_canvas_fallback;
-use gpui::{FontId, FontRun, LineLayout, Pixels, Point, ShapedGlyph, ShapedRun};
-use smallvec::SmallVec;
+use crate::canvas_fallback::{CanvasFontFallback, classify_canvas_fallback};
+use gpui::FontId;
 use std::ops::Range;
 use unicode_segmentation::UnicodeSegmentation;
 
-#[derive(Debug, PartialEq)]
+/// One glyph's exact source ownership as emitted by a modern platform text layout.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub(crate) struct GlyphRecord {
+    pub(crate) source: Range<usize>,
+    pub(crate) font_id: FontId,
+    pub(crate) source_run: usize,
+    pub(crate) line_index: usize,
+    pub(crate) missing: bool,
+    pub(crate) native_color: bool,
+    /// Paint-fragment provenance for aggregate shaping-cluster ownership.
+    pub(crate) fragment_index: usize,
+    pub(crate) fragment_source: Range<usize>,
+}
+
+/// A complete grapheme whose glyphs can be replaced with one independent Canvas draw.
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct Candidate {
     pub(crate) source: Range<usize>,
     pub(crate) font_id: FontId,
-    pub(crate) is_emoji: bool,
+    pub(crate) source_run: usize,
+    pub(crate) line_index: usize,
     pub(crate) color: bool,
-    pub(crate) glyphs: Option<GlyphSpan>,
+    /// Indices into the input stream, kept in visual order.
+    pub(crate) glyph_records: Vec<usize>,
 }
 
-#[derive(Debug, PartialEq)]
-pub(crate) struct GlyphSpan {
-    pub(crate) range: Range<usize>,
-    pub(crate) position: Point<Pixels>,
-    pub(crate) end_x: Pixels,
-    pub(crate) contiguous: bool,
-    pub(crate) missing: bool,
-    pub(crate) native_color: bool,
-}
-
+/// Groups only complete graphemes with exact, single-font and single-line glyph ownership.
 pub(crate) fn collect_candidates(
     text: &str,
-    font_runs: &[FontRun],
-    layout: &LineLayout,
+    glyphs: &[GlyphRecord],
+    policy: CanvasFontFallback,
 ) -> Vec<Candidate> {
-    let mut font_runs = font_runs.iter().peekable();
-    let mut font_run = font_runs.next();
-    let mut run_end = font_run.map_or(0, |run| run.len);
     let mut candidates = Vec::new();
     for (start, grapheme) in text.grapheme_indices(true) {
-        while start >= run_end {
-            font_run = font_runs.next();
-            let Some(run) = font_run else { break };
-            run_end += run.len;
-        }
-        let Some(run) = font_run else { break };
-        // Paint-only run boundaries must not split a fallback grapheme.
-        while let Some(next_run) = font_runs.next_if(|next| next.font_id == run.font_id) {
-            run_end += next_run.len;
-        }
-        let end = start + grapheme.len();
-        if end > run_end {
-            continue;
-        }
         let Some(fallback) = classify_canvas_fallback(grapheme) else {
             continue;
         };
-        candidates.push(Candidate {
-            source: start..end,
-            font_id: run.font_id,
-            is_emoji: fallback.is_emoji,
-            color: fallback.emoji_presentation,
-            glyphs: None,
-        });
-    }
-    if candidates.is_empty() {
-        return candidates;
-    }
+        if !policy.allows(fallback.is_emoji) {
+            continue;
+        }
 
-    let mut glyphs = layout
-        .runs
-        .iter()
-        .flat_map(|run| run.glyphs.iter())
-        .enumerate()
-        .peekable();
-    while let Some((index, glyph)) = glyphs.next() {
-        let candidate_index =
-            candidates.partition_point(|candidate| candidate.source.end <= glyph.index);
-        let Some(candidate) = candidates
-            .get_mut(candidate_index)
-            .filter(|candidate| candidate.source.contains(&glyph.index))
-        else {
+        let source = start..start + grapheme.len();
+        let overlapping_fragments = glyphs
+            .iter()
+            .filter(|glyph| {
+                glyph.fragment_source.start < source.end && source.start < glyph.fragment_source.end
+            })
+            .map(|glyph| glyph.fragment_index)
+            .collect::<std::collections::HashSet<_>>();
+        if overlapping_fragments.len() != 1 {
+            continue;
+        }
+        let fragment_index = *overlapping_fragments.iter().next().unwrap();
+        let fragment_records = glyphs
+            .iter()
+            .enumerate()
+            .filter(|(_, glyph)| glyph.fragment_index == fragment_index)
+            .collect::<Vec<_>>();
+        if fragment_records
+            .iter()
+            .any(|(_, glyph)| glyph.source.is_empty())
+        {
+            continue;
+        }
+        let indices = fragment_records
+            .iter()
+            .filter_map(|(index, glyph)| {
+                let overlaps = glyph.source.start < source.end && source.start < glyph.source.end;
+                if overlaps && (glyph.source.start < source.start || glyph.source.end > source.end)
+                {
+                    return Some(usize::MAX);
+                }
+                overlaps.then_some(*index)
+            })
+            .collect::<Vec<_>>();
+        if indices.contains(&usize::MAX) {
+            continue;
+        }
+        let indices = indices;
+        let Some(&first_index) = indices.first() else {
             continue;
         };
-        let span = candidate.glyphs.get_or_insert_with(|| GlyphSpan {
-            range: index..index,
-            position: glyph.position,
-            end_x: glyph.position.x,
-            contiguous: true,
-            missing: false,
-            native_color: true,
+        let first = &glyphs[first_index];
+        if indices.iter().any(|index| {
+            let glyph = &glyphs[*index];
+            glyph.font_id != first.font_id
+                || glyph.source_run != first.source_run
+                || glyph.line_index != first.line_index
+        }) {
+            continue;
+        }
+
+        // Parley can map a shaping cluster to its leading scalar. Accept that only when
+        // the fragment itself owns exactly this grapheme and all its glyphs are contained.
+        // Otherwise require exact byte coverage except for FE0E/FE0F selector bytes.
+        let aggregate_ownership = fragment_records.len() == indices.len()
+            && fragment_records.iter().all(|(_, glyph)| {
+                glyph.fragment_source == source
+                    && !glyph.source.is_empty()
+                    && glyph.source.start >= source.start
+                    && glyph.source.end <= source.end
+            });
+        if !aggregate_ownership {
+            let mut covered = vec![false; grapheme.len()];
+            for index in &indices {
+                let range = &glyphs[*index].source;
+                for byte in range.start - source.start..range.end - source.start {
+                    covered[byte] = true;
+                }
+            }
+            let mut byte = 0;
+            let mut valid = true;
+            for ch in grapheme.chars() {
+                let char_end = byte + ch.len_utf8();
+                if covered[byte..char_end].iter().any(|covered| !covered)
+                    && !matches!(ch, '\u{fe0e}' | '\u{fe0f}')
+                {
+                    valid = false;
+                    break;
+                }
+                byte = char_end;
+            }
+            if !valid {
+                continue;
+            }
+        }
+        let missing = indices.iter().any(|index| glyphs[*index].missing);
+        let wrong_presentation = if fallback.emoji_presentation {
+            indices.iter().any(|index| !glyphs[*index].native_color)
+        } else {
+            indices.iter().any(|index| glyphs[*index].native_color)
+        };
+        if !(missing || wrong_presentation) {
+            continue;
+        }
+        candidates.push(Candidate {
+            source,
+            font_id: first.font_id,
+            source_run: first.source_run,
+            line_index: first.line_index,
+            color: fallback.emoji_presentation,
+            glyph_records: indices,
         });
-        span.contiguous &= span.range.end == index;
-        span.range.end = index + 1;
-        span.end_x = glyphs
-            .peek()
-            .map_or(layout.width, |(_, next)| next.position.x);
-        span.missing |= glyph.id.0 == 0;
-        span.native_color &= glyph.is_emoji;
     }
+
     candidates
 }
 
-pub(crate) struct Replacement {
-    pub(crate) glyph_range: Range<usize>,
-    pub(crate) font_id: FontId,
-    pub(crate) glyph: ShapedGlyph,
-    pub(crate) width_delta: Pixels,
+/// Decide whether a relaid-out glyph is safely hidden under a full-grapheme Canvas overlay.
+pub(crate) fn replacement_glyph_is_suppressed(
+    range: &Range<usize>,
+    replacements: &[Range<usize>],
+) -> Result<bool, ()> {
+    if range.start > range.end {
+        return Err(());
+    }
+    for replacement in replacements {
+        if range.is_empty() {
+            if replacement.start <= range.start && range.start <= replacement.end {
+                return Err(());
+            }
+        } else if range.start < replacement.end && replacement.start < range.end {
+            if range.start >= replacement.start && range.end <= replacement.end {
+                return Ok(true);
+            }
+            return Err(());
+        }
+    }
+    Ok(false)
 }
 
-struct Segment {
-    font_id: FontId,
-    length: usize,
-}
-
-/// Ranges refer to the original flattened glyph stream and must be sorted,
-/// non-overlapping, nonempty, and in bounds.
-pub(crate) fn apply_replacements(layout: &mut LineLayout, replacements: Vec<Replacement>) {
-    if replacements.is_empty() {
-        return;
-    }
-
-    let mut replacements = replacements.into_iter().peekable();
-    let mut original_index = 0;
-    let mut consumed_end = 0;
-    let mut shift = Pixels::ZERO;
-    let mut segments_by_run: SmallVec<[SmallVec<[Segment; 4]>; 4]> = SmallVec::new();
-    let mut spare_buffers: SmallVec<[Vec<ShapedGlyph>; 4]> = SmallVec::new();
-    let mut final_run_count = 0;
-
-    layout.runs.retain_mut(|run| {
-        let mut segments: SmallVec<[Segment; 4]> = SmallVec::new();
-        run.glyphs.retain_mut(|glyph| {
-            let index = original_index;
-            original_index += 1;
-            if index < consumed_end {
-                return false;
-            }
-
-            let font_id = if let Some(replacement) =
-                replacements.next_if(|replacement| replacement.glyph_range.start == index)
-            {
-                consumed_end = replacement.glyph_range.end;
-                *glyph = replacement.glyph;
-                glyph.position.x += shift;
-                shift += replacement.width_delta;
-                replacement.font_id
-            } else {
-                glyph.position.x += shift;
-                run.font_id
-            };
-
-            if let Some(segment) = segments.last_mut().filter(|last| last.font_id == font_id) {
-                segment.length += 1;
-            } else {
-                segments.push(Segment { font_id, length: 1 });
-            }
-            true
-        });
-
-        if segments.is_empty() {
-            spare_buffers.push(std::mem::take(&mut run.glyphs));
-            false
-        } else {
-            final_run_count += segments.len();
-            segments_by_run.push(segments);
-            true
-        }
-    });
-    layout.width += shift;
-
-    let source_run_count = layout.runs.len();
-    layout.runs.resize_with(final_run_count, || ShapedRun {
-        font_id: FontId(0),
-        glyphs: Vec::new(),
-    });
-
-    // Every destination is at or after its source. Expanding from the right
-    // therefore cannot overwrite an original run that still needs processing.
-    let mut destination_end = final_run_count;
-    for (source_index, segments) in (0..source_run_count).zip(segments_by_run).rev() {
-        let destination_start = destination_end - segments.len();
-        let mut glyph_end = layout.runs[source_index].glyphs.len();
-        for (segment_index, segment) in segments.into_iter().enumerate().rev() {
-            let destination_index = destination_start + segment_index;
-            if segment_index == 0 {
-                layout.runs[source_index].font_id = segment.font_id;
-                layout.runs.swap(source_index, destination_index);
-            } else {
-                let glyph_start = glyph_end - segment.length;
-                let mut glyphs = spare_buffers.pop().unwrap_or_default();
-                glyphs.extend(
-                    layout.runs[source_index]
-                        .glyphs
-                        .drain(glyph_start..glyph_end),
-                );
-                layout.runs[destination_index] = ShapedRun {
-                    font_id: segment.font_id,
-                    glyphs,
-                };
-                glyph_end = glyph_start;
-            }
-        }
-        destination_end = destination_start;
-    }
+/// Return complete Unicode grapheme ranges touched by exact shaping-cluster ranges.
+pub(crate) fn graphemes_intersecting_ranges(
+    text: &str,
+    ranges: &[Range<usize>],
+) -> Vec<Range<usize>> {
+    text.grapheme_indices(true)
+        .filter_map(|(start, grapheme)| {
+            let end = start + grapheme.len();
+            ranges
+                .iter()
+                .any(|range| range.start < end && start < range.end)
+                .then_some(start..end)
+        })
+        .collect()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use anyhow::{Context as _, Result};
-    use gpui::{GlyphId, point, px};
 
-    fn source_glyph(index: usize, x: f32, id: u32, color: bool) -> ShapedGlyph {
-        ShapedGlyph {
-            id: GlyphId(id),
-            position: point(px(x), px(2.0)),
-            index,
-            is_emoji: color,
+    fn glyph(
+        source: Range<usize>,
+        font_id: usize,
+        source_run: usize,
+        line_index: usize,
+        missing: bool,
+        native_color: bool,
+    ) -> GlyphRecord {
+        GlyphRecord {
+            source: source.clone(),
+            font_id: FontId(font_id),
+            source_run,
+            line_index,
+            missing,
+            native_color,
+            fragment_index: 0,
+            fragment_source: source.clone(),
         }
     }
 
+    fn in_fragment(mut glyph: GlyphRecord, index: usize, source: Range<usize>) -> GlyphRecord {
+        glyph.fragment_index = index;
+        glyph.fragment_source = source;
+        glyph
+    }
+
     #[test]
-    fn candidates_capture_bounds_without_a_flattened_vector() -> Result<()> {
-        let text = "中a文 ";
-        let mut layout = layout(&[2, 0, 2]);
-        layout.width = px(50.0);
-        layout.runs[0].glyphs = vec![
-            source_glyph(0, 0.0, 0, false),
-            source_glyph(3, 10.0, 1, false),
+    fn groups_full_extended_graphemes_and_preserves_exact_byte_ownership() {
+        let text = "a👩‍💻中";
+        let start = 1;
+        let emoji_end = start + "👩‍💻".len();
+        let glyphs = [
+            glyph(start..emoji_end, 3, 0, 0, true, false),
+            glyph(start..emoji_end, 3, 0, 0, true, false),
+            glyph(emoji_end..text.len(), 3, 0, 0, true, false),
         ];
-        layout.runs[2].glyphs = vec![
-            source_glyph(4, 25.0, 0, false),
-            source_glyph(7, 40.0, 3, false),
-        ];
-        let candidates = collect_candidates(
-            text,
-            &[FontRun {
-                len: text.len(),
-                font_id: FontId(7),
-            }],
-            &layout,
-        );
+        let candidates = collect_candidates(text, &glyphs, CanvasFontFallback::EmojiAndCjk);
         assert_eq!(candidates.len(), 2);
-        let first = candidates.first().context("missing first candidate")?;
-        assert_eq!(first.source, 0..3);
-        assert_eq!(first.font_id, FontId(7));
-        assert_eq!(
-            first.glyphs,
-            Some(GlyphSpan {
-                range: 0..1,
-                position: point(px(0.0), px(2.0)),
-                end_x: px(10.0),
-                contiguous: true,
-                missing: true,
-                native_color: false,
-            })
-        );
-        let last = candidates.last().context("missing last candidate")?;
-        assert_eq!(last.source, 4..7);
-        let span = last.glyphs.as_ref().context("missing glyph span")?;
-        assert_eq!(span.range, 2..3);
-        assert_eq!(span.position.x, px(25.0));
-        assert_eq!(span.end_x, px(40.0));
-        Ok(())
-    }
-
-    #[test]
-    fn candidates_keep_graphemes_across_same_font_boundaries() -> Result<()> {
-        let text = "か\u{3099}";
-        let mut layout = layout(&[1, 1]);
-        layout.runs[0].glyphs = vec![source_glyph(0, 0.0, 0, false)];
-        layout.runs[1].glyphs = vec![source_glyph(3, 10.0, 0, false)];
-        let mut font_runs = [
-            FontRun {
-                len: 3,
-                font_id: FontId(7),
-            },
-            FontRun {
-                len: 3,
-                font_id: FontId(7),
-            },
-        ];
-        let candidates = collect_candidates(text, &font_runs, &layout);
-        assert_eq!(candidates.len(), 1);
-        let span = candidates
-            .first()
-            .and_then(|candidate| candidate.glyphs.as_ref())
-            .context("missing glyph span")?;
-        assert_eq!(span.range, 0..2);
-        assert_eq!(span.position.x, px(0.0));
-        assert_eq!(span.end_x, layout.width);
-        assert!(span.contiguous);
-
-        font_runs[1].font_id = FontId(8);
-        assert!(collect_candidates(text, &font_runs, &layout).is_empty());
-        Ok(())
-    }
-
-    #[test]
-    fn candidates_handle_nonmonotonic_and_disjoint_source_indices() -> Result<()> {
-        let mut layout = layout(&[3]);
-        layout.width = px(50.0);
-        layout.runs[0].glyphs = vec![
-            source_glyph(3, 0.0, 0, false),
-            source_glyph(0, 20.0, 0, false),
-            source_glyph(3, 30.0, 0, false),
-        ];
-        let candidates = collect_candidates(
-            "中文",
-            &[FontRun {
-                len: 6,
-                font_id: FontId(7),
-            }],
-            &layout,
-        );
-        let first = candidates
-            .first()
-            .and_then(|candidate| candidate.glyphs.as_ref())
-            .context("missing first span")?;
-        assert_eq!(first.range, 1..2);
-        assert_eq!(first.position.x, px(20.0));
-        assert_eq!(first.end_x, px(30.0));
-        assert!(first.contiguous);
-        let last = candidates
-            .last()
-            .and_then(|candidate| candidate.glyphs.as_ref())
-            .context("missing last span")?;
-        assert_eq!(last.range, 0..3);
-        assert_eq!(last.position.x, px(0.0));
-        assert_eq!(last.end_x, layout.width);
-        assert!(!last.contiguous);
-        Ok(())
-    }
-
-    #[test]
-    fn candidates_preserve_native_coverage_and_color() -> Result<()> {
-        let mut layout = layout(&[1]);
-        let font_runs = [FontRun {
-            len: "😀".len(),
-            font_id: FontId(7),
-        }];
-        for (id, color) in [(0, false), (1, false), (0, true), (1, true)] {
-            layout.runs[0].glyphs = vec![source_glyph(0, 0.0, id, color)];
-            let candidates = collect_candidates("😀", &font_runs, &layout);
-            let candidate = candidates.first().context("missing candidate")?;
-            assert!(candidate.color);
-            let span = candidate.glyphs.as_ref().context("missing span")?;
-            assert_eq!(span.missing, id == 0);
-            assert_eq!(span.native_color, color);
-        }
-        layout.runs[0].glyphs.clear();
-        let candidates = collect_candidates("😀", &font_runs, &layout);
+        assert_eq!(candidates[0].source, start..emoji_end);
+        assert_eq!(candidates[0].glyph_records, vec![0, 1]);
+        assert_eq!(candidates[1].source, emoji_end..text.len());
+        assert_eq!(candidates[1].glyph_records, vec![2]);
         assert!(
             candidates
-                .first()
-                .context("missing candidate")?
-                .glyphs
-                .is_none()
+                .windows(2)
+                .all(|pair| pair[0].source.end <= pair[1].source.start)
         );
-        Ok(())
-    }
-
-    fn glyph(index: usize) -> ShapedGlyph {
-        ShapedGlyph {
-            id: GlyphId(index as u32),
-            position: point(px(index as f32 * 10.0), px(2.0)),
-            index: index * 2,
-            is_emoji: false,
-        }
-    }
-
-    fn layout(run_lengths: &[usize]) -> LineLayout {
-        let mut index = 0;
-        let runs = run_lengths
-            .iter()
-            .enumerate()
-            .map(|(font, length)| {
-                let glyphs = (index..index + length).map(glyph).collect();
-                index += length;
-                ShapedRun {
-                    font_id: FontId(font),
-                    glyphs,
-                }
-            })
-            .collect();
-        LineLayout {
-            runs,
-            width: px(index as f32 * 10.0),
-            font_size: px(14.0),
-            ascent: px(11.0),
-            descent: px(3.0),
-            len: index * 2,
-        }
-    }
-
-    fn replacement(range: Range<usize>, font_id: usize, delta: f32) -> Replacement {
-        let mut glyph = glyph(range.start);
-        glyph.id = GlyphId(999);
-        glyph.position.x += px(1.0);
-        glyph.position.y = px(7.0);
-        glyph.is_emoji = true;
-        Replacement {
-            glyph_range: range,
-            font_id: FontId(font_id),
-            glyph,
-            width_delta: px(delta),
-        }
-    }
-
-    fn reference(layout: &mut LineLayout, replacements: Vec<Replacement>) {
-        let original = std::mem::take(&mut layout.runs);
-        let mut replacements = replacements.into_iter().peekable();
-        let mut shift = Pixels::ZERO;
-        let mut consumed_end = 0;
-        for (index, (font_id, mut glyph)) in original
-            .into_iter()
-            .flat_map(|run| {
-                run.glyphs
-                    .into_iter()
-                    .map(move |glyph| (run.font_id, glyph))
-            })
-            .enumerate()
-        {
-            if index < consumed_end {
-                continue;
-            }
-            let font_id = if replacements
-                .peek()
-                .is_some_and(|replacement| replacement.glyph_range.start == index)
-            {
-                let replacement = replacements.next().expect("peeked replacement");
-                glyph = replacement.glyph;
-                glyph.position.x += shift;
-                shift += replacement.width_delta;
-                consumed_end = replacement.glyph_range.end;
-                replacement.font_id
-            } else {
-                glyph.position.x += shift;
-                font_id
-            };
-            if let Some(run) = layout.runs.last_mut().filter(|run| run.font_id == font_id) {
-                run.glyphs.push(glyph);
-            } else {
-                layout.runs.push(ShapedRun {
-                    font_id,
-                    glyphs: vec![glyph],
-                });
-            }
-        }
-        layout.width += shift;
-    }
-
-    fn assert_equal(actual: &LineLayout, expected: &LineLayout) {
-        let flatten = |layout: &LineLayout| {
-            layout
-                .runs
-                .iter()
-                .flat_map(|run| {
-                    run.glyphs.iter().map(move |glyph| {
-                        (
-                            run.font_id,
-                            glyph.id,
-                            glyph.position,
-                            glyph.index,
-                            glyph.is_emoji,
-                        )
-                    })
-                })
-                .collect::<Vec<_>>()
-        };
-        assert_eq!(flatten(actual), flatten(expected));
-        assert_eq!(actual.width, expected.width);
-        assert_eq!(actual.font_size, expected.font_size);
-        assert_eq!(actual.ascent, expected.ascent);
-        assert_eq!(actual.descent, expected.descent);
-        assert_eq!(actual.len, expected.len);
     }
 
     #[test]
-    fn no_replacements_preserves_even_empty_runs() {
-        let mut actual = layout(&[0, 3, 0]);
-        let pointer = actual.runs.as_ptr();
-        let glyph_pointer = actual.runs[1].glyphs.as_ptr();
-        apply_replacements(&mut actual, vec![]);
-        assert_eq!(actual.runs.len(), 3);
-        assert_eq!(actual.runs.as_ptr(), pointer);
-        assert_eq!(actual.runs[1].glyphs.as_ptr(), glyph_pointer);
-        assert_equal(&actual, &layout(&[0, 3, 0]));
-        apply_replacements(&mut layout(&[]), vec![]);
-        apply_replacements(&mut layout(&[0, 0]), vec![]);
+    fn keeps_visual_bidi_record_order_without_reversing_source_ranges() {
+        let text = "😀中";
+        let glyphs = [
+            glyph(4..7, 7, 0, 0, true, false),
+            glyph(0..4, 7, 0, 0, true, false),
+        ];
+        let candidates = collect_candidates(text, &glyphs, CanvasFontFallback::EmojiAndCjk);
+        assert_eq!(candidates.len(), 2);
+        assert_eq!(candidates[0].source, 0..4);
+        assert_eq!(candidates[0].glyph_records, vec![1]);
+        assert_eq!(candidates[1].source, 4..7);
+        assert_eq!(candidates[1].glyph_records, vec![0]);
     }
 
     #[test]
-    fn whole_run_reuses_both_allocations() {
-        let mut actual = layout(&[8]);
-        actual.runs.reserve(4);
-        actual.runs[0].glyphs.reserve(10);
-        let runs = (actual.runs.as_ptr(), actual.runs.capacity());
-        let glyphs = (
-            actual.runs[0].glyphs.as_ptr(),
-            actual.runs[0].glyphs.capacity(),
-        );
-        apply_replacements(&mut actual, vec![replacement(0..8, 9, -20.0)]);
-        assert_eq!((actual.runs.as_ptr(), actual.runs.capacity()), runs);
-        assert_eq!(
-            (
-                actual.runs[0].glyphs.as_ptr(),
-                actual.runs[0].glyphs.capacity()
-            ),
-            glyphs
-        );
-        assert_eq!(actual.runs[0].font_id, FontId(9));
-        assert_eq!(actual.runs[0].glyphs.len(), 1);
+    fn replaces_missing_or_wrong_color_presentation_only() {
+        let text = "❤️😀";
+        let first_end = "❤️".len();
+        let glyphs = [
+            glyph(0..first_end, 1, 0, 0, false, false),
+            glyph(first_end..text.len(), 1, 0, 0, false, true),
+        ];
+        let candidates = collect_candidates(text, &glyphs, CanvasFontFallback::Emoji);
+        assert_eq!(candidates.len(), 1);
+        assert_eq!(candidates[0].source, 0..first_end);
+        assert!(candidates[0].color);
     }
 
     #[test]
-    fn splits_reuse_outer_prefix_unaffected_and_emptied_buffers() {
-        let mut actual = layout(&[4, 4, 3]);
-        actual.runs.reserve(8);
-        let outer = (actual.runs.as_ptr(), actual.runs.capacity());
-        let prefix = actual.runs[0].glyphs.as_ptr();
-        let emptied = (
-            actual.runs[1].glyphs.as_ptr(),
-            actual.runs[1].glyphs.capacity(),
-        );
-        let unaffected = actual.runs[2].glyphs.as_ptr();
-        apply_replacements(&mut actual, vec![replacement(2..8, 9, -3.0)]);
-        assert_eq!((actual.runs.as_ptr(), actual.runs.capacity()), outer);
-        assert_eq!(actual.runs[0].glyphs.as_ptr(), prefix);
-        assert_eq!(
-            (
-                actual.runs[1].glyphs.as_ptr(),
-                actual.runs[1].glyphs.capacity()
-            ),
-            emptied
-        );
-        assert_eq!(actual.runs[2].glyphs.as_ptr(), unaffected);
-        let mut expected = layout(&[4, 4, 3]);
-        reference(&mut expected, vec![replacement(2..8, 9, -3.0)]);
-        assert_equal(&actual, &expected);
-    }
-
-    #[test]
-    fn multiple_splits_and_shifts() {
-        let mut actual = layout(&[7, 2, 3]);
-        actual.runs.reserve(12);
-        let outer = actual.runs.as_ptr();
-        let mut expected = layout(&[7, 2, 3]);
-        let replacements = || {
+    fn rejects_cross_font_cross_run_and_cross_line_clusters() {
+        let text = "👩‍💻";
+        let end = text.len();
+        for glyphs in [
             vec![
-                replacement(1..2, 9, 3.0),
-                replacement(3..5, 8, -7.0),
-                replacement(6..10, 9, 2.0),
-            ]
-        };
-        apply_replacements(&mut actual, replacements());
-        reference(&mut expected, replacements());
-        assert_equal(&actual, &expected);
-        assert_eq!(actual.runs.as_ptr(), outer);
+                glyph(0..end, 1, 0, 0, true, false),
+                glyph(0..end, 2, 0, 0, true, false),
+            ],
+            vec![
+                glyph(0..end, 1, 0, 0, true, false),
+                glyph(0..end, 1, 1, 0, true, false),
+            ],
+            vec![
+                glyph(0..end, 1, 0, 0, true, false),
+                glyph(0..end, 1, 0, 1, true, false),
+            ],
+        ] {
+            assert!(collect_candidates(text, &glyphs, CanvasFontFallback::Emoji).is_empty());
+        }
     }
 
     #[test]
-    fn exhaustive_small_streams_match_reference() {
-        // Base-four choices at each original glyph: keep, start a native-font
-        // replacement, start a fallback replacement, or extend the previous one.
-        for first in 0..=4 {
-            for second in 0..=4 - first {
-                let lengths = [first, 0, second, 4 - first - second];
-                for choices in 0usize..4usize.pow(4) {
-                    let replacements = || {
-                        let mut replacements: Vec<Replacement> = Vec::new();
-                        for index in 0..4 {
-                            match (choices >> (2 * index)) & 3 {
-                                0 => {}
-                                1 => replacements.push(replacement(index..index + 1, 0, 2.0)),
-                                2 => replacements.push(replacement(index..index + 1, 9, -3.0)),
-                                _ => {
-                                    if let Some(previous) = replacements
-                                        .last_mut()
-                                        .filter(|previous| previous.glyph_range.end == index)
-                                    {
-                                        previous.glyph_range.end += 1;
-                                    }
-                                }
-                            }
-                        }
-                        replacements
-                    };
-                    let mut actual = layout(&lengths);
-                    let mut expected = layout(&lengths);
-                    apply_replacements(&mut actual, replacements());
-                    reference(&mut expected, replacements());
-                    assert_equal(&actual, &expected);
-                }
-            }
-        }
+    fn missing_cluster_ranges_report_their_complete_unicode_graphemes() {
+        let text = "A👨‍👩‍👧‍👦か\u{3099}Z";
+        let family_start = text.find("👨").unwrap();
+        let family_end = family_start + "👨‍👩‍👧‍👦".len();
+        let kana_start = text.find("か").unwrap();
+        let z_start = text.find("Z").unwrap();
+        assert_eq!(
+            graphemes_intersecting_ranges(
+                text,
+                &[
+                    family_start..family_start + "👨".len(),
+                    kana_start..kana_start + "か".len()
+                ],
+            ),
+            vec![family_start..family_end, kana_start..z_start],
+        );
+    }
+
+    #[test]
+    fn rejects_partial_glyph_ownership_and_disabled_candidates() {
+        let text = "\u{1f468}\u{200d}\u{1f469}\u{200d}\u{1f467}\u{200d}\u{1f466}";
+        let glyphs = [glyph(0..4, 1, 0, 0, true, false)];
+        assert!(collect_candidates(text, &glyphs, CanvasFontFallback::Emoji).is_empty());
+        let emoji = "😀";
+        let glyphs = [glyph(0..emoji.len(), 1, 0, 0, true, false)];
+        assert!(collect_candidates(emoji, &glyphs, CanvasFontFallback::Disabled).is_empty());
+    }
+
+    #[test]
+    fn accepts_full_fragment_ownership_for_family_emoji_without_fabricating_glyph_ranges() {
+        let text = "\u{1f468}\u{200d}\u{1f469}\u{200d}\u{1f467}\u{200d}\u{1f466}";
+        let end = text.len();
+        let glyphs = (0..7)
+            .map(|_| in_fragment(glyph(0.."\u{1f468}".len(), 4, 0, 0, true, false), 0, 0..end))
+            .collect::<Vec<_>>();
+        let candidates = collect_candidates(text, &glyphs, CanvasFontFallback::Emoji);
+        assert_eq!(candidates.len(), 1);
+        assert_eq!(candidates[0].source, 0..end);
+        assert_eq!(candidates[0].glyph_records, (0..7).collect::<Vec<_>>());
+        assert!(
+            glyphs
+                .iter()
+                .all(|glyph| glyph.source == (0.."\u{1f468}".len()))
+        );
+    }
+
+    #[test]
+    fn rejects_competing_fragment_and_unproven_family_gap() {
+        let text = "\u{1f468}\u{200d}\u{1f469}\u{200d}\u{1f467}\u{200d}\u{1f466}";
+        let end = text.len();
+        let glyphs = [
+            in_fragment(glyph(0..4, 4, 0, 0, true, false), 0, 0..end),
+            in_fragment(glyph(8..12, 4, 0, 0, true, false), 1, 0..end),
+        ];
+        assert!(collect_candidates(text, &glyphs, CanvasFontFallback::Emoji).is_empty());
+        let partial = [glyph(0..4, 4, 0, 0, true, false)];
+        assert!(collect_candidates(text, &partial, CanvasFontFallback::Emoji).is_empty());
+    }
+
+    #[test]
+    fn permits_only_selector_gaps_and_preserves_text_vs_emoji_presentation() {
+        let spider = "\u{1f578}";
+        let text = format!("{spider}\u{fe0f}{spider}\u{fe0e}");
+        let second_start = (spider.to_owned() + "\u{fe0f}").len();
+        let full_source = 0..text.len();
+        let glyphs = [
+            in_fragment(
+                glyph(0..spider.len(), 9, 0, 0, false, false),
+                0,
+                full_source.clone(),
+            ),
+            in_fragment(
+                glyph(
+                    second_start..second_start + spider.len(),
+                    9,
+                    0,
+                    0,
+                    false,
+                    true,
+                ),
+                0,
+                full_source,
+            ),
+        ];
+        let candidates = collect_candidates(&text, &glyphs, CanvasFontFallback::Emoji);
+        assert_eq!(candidates.len(), 2);
+        assert_eq!(candidates[0].source, 0..second_start);
+        assert!(candidates[0].color);
+        assert_eq!(candidates[1].source, second_start..text.len());
+        assert!(!candidates[1].color);
+        let arbitrary_gap = [glyph(0..spider.len(), 9, 0, 0, true, false)];
+        assert!(
+            collect_candidates(
+                &(spider.to_owned() + "\u{200d}"),
+                &arbitrary_gap,
+                CanvasFontFallback::Emoji
+            )
+            .is_empty()
+        );
+    }
+
+    #[test]
+    fn changed_relayout_ranges_are_hidden_only_when_contained() {
+        let replacements = [4..15, 20..24];
+        assert_eq!(
+            replacement_glyph_is_suppressed(&(8..12), &replacements),
+            Ok(true)
+        );
+        assert_eq!(
+            replacement_glyph_is_suppressed(&(4..15), &replacements),
+            Ok(true)
+        );
+        assert_eq!(
+            replacement_glyph_is_suppressed(&(15..20), &replacements),
+            Ok(false)
+        );
+        assert_eq!(
+            replacement_glyph_is_suppressed(&(12..21), &replacements),
+            Err(())
+        );
+        assert_eq!(
+            replacement_glyph_is_suppressed(&(9..9), &replacements),
+            Err(())
+        );
     }
 }

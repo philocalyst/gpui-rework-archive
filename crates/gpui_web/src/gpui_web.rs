@@ -7,6 +7,8 @@ pub mod canvas_fallback;
 
 pub use canvas_fallback::CanvasFontFallback;
 
+#[cfg(any(target_family = "wasm", test))]
+mod canvas_layout;
 #[cfg(target_family = "wasm")]
 mod canvas_text;
 #[cfg(target_family = "wasm")]
@@ -42,7 +44,9 @@ pub use dispatcher::WebDispatcher;
 pub use display::WebDisplay;
 #[cfg(target_family = "wasm")]
 pub use gpui_wgpu::WebBackendPreference;
+#[cfg(target_family = "wasm")]
 pub use http_client::FetchHttpClient;
+#[cfg(target_family = "wasm")]
 pub use keyboard::WebKeyboardLayout;
 #[cfg(target_family = "wasm")]
 pub use logging::init_logging;

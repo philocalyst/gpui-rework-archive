@@ -3,9 +3,6 @@ use crate::{
     AtlasKey, AtlasTextureKind, PlatformAtlas, TestAtlas, TestTextSystem, hsla, point, size,
 };
 
-#[cfg(test)]
-use std::{sync::atomic::AtomicUsize, sync::atomic::Ordering};
-
 use crate::{
     Bounds, DevicePixels, Pixels, PlatformTextSystem, Point, ResolvedDirection, Result,
     SharedString, Size, StrikethroughStyle, TextAlign, TextRenderingMode, UnderlineStyle,
@@ -15,18 +12,18 @@ use anyhow::{Context as _, anyhow};
 use collections::{FxHashMap, FxHashSet};
 use core::fmt;
 use derive_more::{Add, Deref, FromStr, Sub};
+use itertools::Itertools;
 use palette::Hsla;
-use parking_lot::{RwLock, RwLockUpgradableReadGuard};
+use parking_lot::{Mutex, RwLock, RwLockUpgradableReadGuard};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 use std::{
     borrow::Cow,
-    cmp,
     collections::VecDeque,
     fmt::{Debug, Display, Formatter},
     hash::{Hash, Hasher},
-    ops::{Deref, DerefMut, Range},
+    ops::Range,
     sync::{
         Arc,
         atomic::{AtomicUsize, Ordering},
@@ -38,12 +35,14 @@ mod font_features;
 mod font_width;
 mod line;
 mod line_layout;
+mod line_wrapper;
 
 pub use font_fallbacks::*;
 pub use font_features::*;
 pub use font_width::*;
 pub use line::*;
 pub use line_layout::*;
+pub use line_wrapper::{Boundary, IndentAdjustment, LineFragment, LineWrapper};
 
 /// UTF-8 text range containment checks.
 pub trait TextRangeExt {
@@ -263,10 +262,6 @@ pub struct TextSystem {
     platform_text_system: Arc<dyn PlatformTextSystem>,
     font_ids_by_font: RwLock<FxHashMap<Font, Result<FontId>>>,
     font_metrics: RwLock<FxHashMap<FontId, FontMetrics>>,
-    raster_bounds: RwLock<FxHashMap<RenderGlyphParams, Bounds<DevicePixels>>>,
-    wrapper_pool: Mutex<FxHashMap<FontIdWithSize, Vec<LineWrapper>>>,
-    font_runs_pool: Mutex<Vec<Vec<FontRun>>>,
-    fallback_font_stack: SmallVec<[Font; 2]>,
     font_generation: Arc<AtomicUsize>,
     missing_glyph_reporter: Arc<MissingGlyphReporter>,
     missing_glyph_receiver: Mutex<Option<MissingGlyphReceiver>>,
@@ -284,21 +279,6 @@ impl TextSystem {
             platform_text_system,
             font_metrics: RwLock::default(),
             font_ids_by_font: RwLock::default(),
-            wrapper_pool: Mutex::default(),
-            font_runs_pool: Mutex::default(),
-            fallback_font_stack: smallvec![
-                // TODO: Remove this when Linux have implemented setting fallbacks.
-                font(".ZedMono"),
-                font(".ZedSans"),
-                font("Helvetica"),
-                font("Segoe UI"),     // Windows
-                font("Ubuntu"),       // Gnome (Ubuntu)
-                font("Adwaita Sans"), // Gnome 47
-                font("Cantarell"),    // Gnome
-                font("Noto Sans"),    // KDE
-                font("DejaVu Sans"),
-                font("Arial"), // macOS, Windows
-            ],
             font_generation: Arc::default(),
             missing_glyph_reporter: Arc::new(MissingGlyphReporter {
                 generation: missing_glyph_generation.clone(),
@@ -774,6 +754,16 @@ impl WindowTextSystem {
     /// layouts.
     pub fn layout_inline(&self, request: InlineLayoutRequest<'_>) -> Arc<InlineLayout> {
         self.line_layout_cache.layout_inline(request)
+    }
+
+    /// Creates a reusable line wrapper with backend-measured cluster widths.
+    pub fn line_wrapper(&self, font: Font, font_size: Pixels) -> LineWrapper {
+        LineWrapper::new(
+            self.text_system.platform_text_system.clone(),
+            font,
+            font_size,
+            self.text_system.font_generation.clone(),
+        )
     }
 
     /// Lays out one line of text and returns the backend's [`LineLayout`].

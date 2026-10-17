@@ -8,13 +8,13 @@
 //! - Touch-based input instead of mouse
 //! - System keyboard handling differs significantly
 
-use super::{CallbackSlot, application::IosApplicationState};
+use super::{application::IosApplicationState, CallbackSlot};
 use super::{IosDisplay, IosWindow};
 use anyhow::anyhow;
 use block2::RcBlock;
 use futures::{
-    StreamExt,
     channel::{mpsc, oneshot},
+    StreamExt,
 };
 use gpui::{
     Action, AnyWindowHandle, AppLifecyclePhase, BackgroundExecutor, ClipboardItem, CursorStyle,
@@ -23,10 +23,11 @@ use gpui::{
     PlatformWindow, Result, Task, ThermalState, WindowAppearance, WindowParams,
 };
 use gpui_apple::{
-    AppleDispatcher, keychain,
+    keychain,
     thermal::{self, ThermalObserver},
+    AppleDispatcher,
 };
-use objc2::{MainThreadMarker, MainThreadOnly, rc::Retained, runtime::ProtocolObject};
+use objc2::{rc::Retained, runtime::ProtocolObject, MainThreadMarker, MainThreadOnly};
 use objc2_foundation::{
     NSBundle, NSDictionary, NSNotification, NSNotificationCenter, NSObjectProtocol, NSString, NSURL,
 };
@@ -239,9 +240,7 @@ impl Platform for IosPlatform {
     }
 
     fn active_window(&self) -> Option<AnyWindowHandle> {
-        // iOS typically has one active window
-        // This would need to track the current key window
-        None
+        self.0.application.active_window()
     }
 
     fn open_window(
