@@ -1,8 +1,11 @@
 import importlib.util
+import os
 import subprocess
 import sys
 import tempfile
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 from pathlib import Path
 
 MODULE = Path(__file__).with_name("agent_session.py")
@@ -174,6 +177,96 @@ class AgentSessionTests(unittest.TestCase):
         finally:
             sync.REPO_ROOT = previous_root
             sync.gout = previous_gout
+
+    def test_external_resume_restores_pinned_gates_over_fresh_environment(self) -> None:
+        root = self.repo()
+        old_globals = (
+            sync.REPO_ROOT, sync.AGENT_BACKEND, sync.VERIFY_CMD, sync.TEST_CMD,
+            sync.RUN_TESTS, sync.FAIL_ON_WARNINGS, sync.ACTIVE_SYNC_CONTEXT,
+        )
+        old_uuid4 = sync.uuid.uuid4
+        sync.REPO_ROOT = root
+        sync.AGENT_BACKEND = "external"
+        sync.VERIFY_CMD = "just custom-check --strict"
+        sync.TEST_CMD = "just custom-tests --focused"
+        sync.RUN_TESTS = True
+        sync.FAIL_ON_WARNINGS = False
+        sync.ACTIVE_SYNC_CONTEXT = {
+            "branch": "sync/fixture",
+            "last": git(root, "rev-parse", "HEAD"),
+            "target": git(root, "rev-parse", "HEAD"),
+            "vendor_tip": git(root, "rev-parse", "refs/heads/vendor/zed-gpui"),
+            "resolution_message": "fixture resolution",
+        }
+        sync.uuid.uuid4 = lambda: SimpleNamespace(hex="pinned-gates")
+        try:
+            with self.assertRaises(sync.AgentPause):
+                sync.run_agent_prompt("fix the verification failure", "verify", 2)
+        finally:
+            sync.uuid.uuid4 = old_uuid4
+            (
+                sync.REPO_ROOT, sync.AGENT_BACKEND, sync.VERIFY_CMD, sync.TEST_CMD,
+                sync.RUN_TESTS, sync.FAIL_ON_WARNINGS, sync.ACTIVE_SYNC_CONTEXT,
+            ) = old_globals
+
+        saved = agent.AgentSession.load(root, "pinned-gates")
+        context = saved.checkpoint["context"]
+        self.assertEqual(context["verify_cmd"], "just custom-check --strict")
+        self.assertEqual(context["test_cmd"], "just custom-tests --focused")
+        self.assertTrue(context["run_tests"])
+        self.assertFalse(context["fail_on_warnings"])
+
+        env = {
+            "SYNC_VERIFY_CMD": "just wrong-check",
+            "SYNC_TEST_CMD": "just wrong-tests",
+            "SYNC_RUN_TESTS": "0",
+            "SYNC_FAIL_ON_WARNINGS": "1",
+        }
+        with patch.dict(os.environ, env):
+            os.environ.pop("SYNC_FAIL_ON_WARNINGS", None)
+            fresh_spec = importlib.util.spec_from_file_location(
+                "sync_upstream_resume_fixture", SYNC_SCRIPT
+            )
+            assert fresh_spec and fresh_spec.loader
+            fresh = importlib.util.module_from_spec(fresh_spec)
+            sys.modules[fresh_spec.name] = fresh
+            fresh_spec.loader.exec_module(fresh)
+        fresh.REPO_ROOT = root
+        observed: dict[str, object] = {}
+        def capture_gates(*_args: object, **_kwargs: object) -> None:
+            observed.update({
+                "verify_cmd": fresh.VERIFY_CMD,
+                "test_cmd": fresh.TEST_CMD,
+                "run_tests": fresh.RUN_TESTS,
+                "fail_on_warnings": fresh.FAIL_ON_WARNINGS,
+            })
+        fresh.complete_sync = capture_gates
+        response = saved.directory / "external-response.md"
+        response.write_text("completed changes")
+        fresh.cmd_resume("pinned-gates", str(response))
+        self.assertEqual(observed, {
+            "verify_cmd": "just custom-check --strict",
+            "test_cmd": "just custom-tests --focused",
+            "run_tests": True,
+            "fail_on_warnings": False,
+        })
+
+    def test_resume_rejects_legacy_checkpoint_without_pinned_gates(self) -> None:
+        root = self.repo()
+        session = agent.AgentSession.create(
+            root, session_id="legacy-gates", phase="verify", prompt="fix build",
+            backend="external", model="chatgpt",
+            context={"vendor_ref": "refs/heads/vendor/zed-gpui"},
+        )
+        response = session.directory / "legacy-response.md"
+        response.write_text("response")
+        old_root = sync.REPO_ROOT
+        sync.REPO_ROOT = root
+        try:
+            with self.assertRaisesRegex(sync.SyncError, "predates pinned verification settings"):
+                sync.cmd_resume(session.session_id, str(response))
+        finally:
+            sync.REPO_ROOT = old_root
 
     def test_codex_command_uses_supported_sandbox_and_stdin_prompt(self) -> None:
         output = Path("/tmp/last-message.md")

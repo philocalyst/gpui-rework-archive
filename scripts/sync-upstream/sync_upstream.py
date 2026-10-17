@@ -436,6 +436,10 @@ def run_agent_prompt(prompt: str, phase: str, attempt: int = 0) -> None:
         "zed_ref": RT.zed_ref,
         "bump_zed_deps": RT.bump_zed_deps,
         "retries": RT.retries,
+        "verify_cmd": VERIFY_CMD,
+        "test_cmd": TEST_CMD,
+        "run_tests": RUN_TESTS,
+        "fail_on_warnings": FAIL_ON_WARNINGS,
     })
     sid = uuid.uuid4().hex
     try:
@@ -891,6 +895,7 @@ def _allowed_verify_paths(paths: list[str]) -> None:
 
 
 def cmd_resume(session_id: str, response_file: str | None = None) -> None:
+    global VERIFY_CMD, TEST_CMD, RUN_TESTS, FAIL_ON_WARNINGS
     try:
         session = AgentSession.load(REPO_ROOT, session_id)
     except SessionError as exc:
@@ -906,6 +911,21 @@ def cmd_resume(session_id: str, response_file: str | None = None) -> None:
         die("resume accepts external-agent sessions only")
     context = cast(dict[str, object], data.get("context", {}))
     phase = cast(str, data.get("phase", ""))
+    gate_keys = ("verify_cmd", "test_cmd", "run_tests", "fail_on_warnings")
+    missing_gates = [key for key in gate_keys if key not in context]
+    if missing_gates:
+        die(
+            "resume rejected: this session predates pinned verification settings; "
+            "restart the sync instead of silently using current defaults"
+        )
+    if not isinstance(context["verify_cmd"], str) or not isinstance(context["test_cmd"], str):
+        die("resume rejected: invalid pinned verification command settings")
+    if not isinstance(context["run_tests"], bool) or not isinstance(context["fail_on_warnings"], bool):
+        die("resume rejected: invalid pinned verification policy settings")
+    VERIFY_CMD = cast(str, context["verify_cmd"])
+    TEST_CMD = cast(str, context["test_cmd"])
+    RUN_TESTS = cast(bool, context["run_tests"])
+    FAIL_ON_WARNINGS = cast(bool, context["fail_on_warnings"])
     RT.zed_ref = cast(str, context.get("zed_ref", RT.zed_ref))
     RT.bump_zed_deps = bool(context.get("bump_zed_deps", RT.bump_zed_deps))
     RT.retries = int(context.get("retries", RT.retries))
