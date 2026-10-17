@@ -994,10 +994,25 @@ pub enum ResizeEdge {
     TopLeft,
 }
 
+impl From<ResizeEdge> for CursorStyle {
+    fn from(edge: ResizeEdge) -> Self {
+        match edge {
+            ResizeEdge::Top => Self::ResizeUp,
+            ResizeEdge::Right => Self::ResizeRight,
+            ResizeEdge::Bottom => Self::ResizeDown,
+            ResizeEdge::Left => Self::ResizeLeft,
+            ResizeEdge::TopLeft => Self::ResizeUpLeft,
+            ResizeEdge::TopRight => Self::ResizeUpRight,
+            ResizeEdge::BottomLeft => Self::ResizeDownLeft,
+            ResizeEdge::BottomRight => Self::ResizeDownRight,
+        }
+    }
+}
+
 /// Whether a window draws its own titlebar and borders, or the window server does.
 ///
-/// Set this with [`WindowOptions::window_decorations`]. Linux's Wayland and X11
-/// backends honor it. The other backends ignore it.
+/// Set this with WindowOptions::window_decorations. Linux Wayland and X11 backends honor it;
+/// other backends ignore it. This type describes the appearance of a window.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Default)]
 pub enum WindowDecorations {
     /// The window server draws the titlebar and borders.
@@ -4391,12 +4406,24 @@ pub enum CursorStyle {
     /// corresponds to the CSS cursor value `ns-resize`
     ResizeUpDown,
 
+    /// A cursor for the upper-left resize edge (`nw-resize`).
+    ResizeUpLeft,
+
+    /// A cursor for the upper-right resize edge (`ne-resize`).
+    ResizeUpRight,
+
+    /// A cursor for the lower-left resize edge (`sw-resize`).
+    ResizeDownLeft,
+
+    /// A cursor for the lower-right resize edge (`se-resize`).
+    ResizeDownRight,
+
     /// A resize cursor directing up-left and down-right
-    /// corresponds to the CSS cursor value `nesw-resize`
+    /// corresponds to the CSS cursor value `nwse-resize`
     ResizeUpLeftDownRight,
 
     /// A resize cursor directing up-right and down-left
-    /// corresponds to the CSS cursor value `nwse-resize`
+    /// corresponds to the CSS cursor value `nesw-resize`
     ResizeUpRightDownLeft,
 
     /// A cursor indicating that the item/column can be resized horizontally.

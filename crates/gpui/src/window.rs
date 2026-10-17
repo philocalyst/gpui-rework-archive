@@ -1,13 +1,13 @@
 use crate::{
     Action, AnyDrag, AnyElement, AnyImageCache, AnyTooltip, AnyView, App, AppContext, Arena, Asset,
     AsyncWindowContext, AtlasTile, AvailableSpace, BackdropFilter, Background, BorderStyle, Bounds,
-    BoxShadow, Capslock, ColorExt, Context, Corners, CursorHideMode, CursorStyle, Decorations,
-    DevicePixels, DispatchActionListener, DispatchNodeId, DispatchTree, DisplayId, Edges, Effect,
-    Entity, EntityId, EventEmitter, FileDropEvent, Filter, FilterBoundary, FontId, Global,
-    GlobalElementId, GlyphId, GlyphRenderMode, GpuSpecs, InputHandler, InputPreference,
-    IntoElement, IsZero, KeyBinding, KeyContext, KeyDownEvent, KeyEvent, Keystroke, KeystrokeEvent,
-    LayoutId, Lerp, LineLayoutIndex, Modifiers, ModifiersChangedEvent, MonochromeSprite, Motion,
-    MouseButton, MouseEvent, MouseMoveEvent, MouseUpEvent, Path, Pixels, PlatformAtlas,
+    BoxShadow, Capslock, Context, Corners, CursorHideMode, CursorStyle, Decorations, DevicePixels,
+    DispatchActionListener, DispatchNodeId, DispatchTree, DisplayId, Edges, Effect, Entity,
+    EntityId, EventEmitter, FileDropEvent, Filter, FilterBoundary, FontId, Global, GlobalElementId,
+    GlyphId, GlyphRenderMode, GpuSpecs, InputHandler, InputPreference, IntoElement, IsZero,
+    KeyBinding, KeyContext, KeyDownEvent, KeyEvent, Keystroke, KeystrokeEvent, LayoutId, Lerp,
+    LineLayoutIndex, Modifiers, ModifiersChangedEvent, MonochromeSprite, Motion, MouseButton,
+    MouseEvent, MouseMoveEvent, MouseUpEvent, PaintSurface, Path, Pixels, PlatformAtlas,
     PlatformDisplay, PlatformInput, PlatformInputHandler, PlatformWindow, Point, PolychromeSprite,
     Priority, PromptButton, PromptLevel, Quad, RasterizedGlyphFormat, Render, RenderGlyphParams,
     RenderImage, RenderImageParams, RenderSvgParams, Replay, ResizeEdge, ResolvedDirection,
@@ -35,7 +35,6 @@ use derive_more::{Deref, DerefMut};
 use futures::channel::oneshot;
 use gpui_util::post_inc;
 use gpui_util::{ResultExt, measure};
-use itertools::FoldWhile::{Continue, Done};
 use itertools::Itertools;
 use palette::Hsla;
 use parking_lot::{RwLock, RwLockUpgradableReadGuard};
@@ -866,10 +865,42 @@ type FrameCallback = Box<dyn FnOnce(&mut Window, &mut App)>;
 pub(crate) type AnyMouseListener =
     Box<dyn FnMut(&dyn Any, DispatchPhase, &mut Window, &mut App) + 'static>;
 
+#[derive(Clone, Copy)]
+pub(crate) struct PointerChange {
+    pub(crate) position: Option<Point<Pixels>>,
+    pub(crate) cause: PointerChangeCause,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) enum PointerChangeCause {
+    Input,
+    Layout,
+}
+
+type PointerObserver = Rc<dyn Fn(PointerChange, &mut Window, &mut App)>;
+
 #[derive(Clone)]
-pub(crate) struct CursorStyleRequest {
-    pub(crate) hitbox_id: Option<HitboxId>,
-    pub(crate) style: CursorStyle,
+enum CursorStyleRequest {
+    Window(CursorStyleSource),
+    Hitbox {
+        id: HitboxId,
+        style: CursorStyleSource,
+    },
+}
+
+#[derive(Clone)]
+enum CursorStyleSource {
+    Fixed(CursorStyle),
+    Position(Rc<dyn Fn(Point<Pixels>) -> Option<CursorStyle>>),
+}
+
+impl CursorStyleSource {
+    fn resolve(&self, position: Point<Pixels>) -> Option<CursorStyle> {
+        match self {
+            Self::Fixed(style) => Some(*style),
+            Self::Position(resolve) => resolve(position),
+        }
+    }
 }
 
 /// The hitboxes under the mouse, from front to back, as of the last frame.
@@ -1277,6 +1308,7 @@ pub(crate) struct Frame {
     pub(crate) element_states: FxHashMap<(GlobalElementId, TypeId), ElementStateBox>,
     accessed_element_states: Vec<(GlobalElementId, TypeId)>,
     pub(crate) mouse_listeners: Vec<Option<AnyMouseListener>>,
+    pointer_observers: Rc<Vec<PointerObserver>>,
     pub(crate) dispatch_tree: DispatchTree,
     pub(crate) scene: Scene,
     pub(crate) hitboxes: Vec<Hitbox>,
@@ -1284,7 +1316,7 @@ pub(crate) struct Frame {
     pub(crate) deferred_draws: Vec<DeferredDraw>,
     pub(crate) input_handlers: Vec<Option<PlatformInputHandler>>,
     pub(crate) tooltip_requests: Vec<Option<TooltipRequest>>,
-    pub(crate) cursor_styles: Vec<CursorStyleRequest>,
+    cursor_styles: Vec<CursorStyleRequest>,
     #[cfg(any(test, feature = "test-support"))]
     pub(crate) debug_bounds: FxHashMap<String, Bounds<Pixels>>,
     #[cfg(any(test, feature = "test-support"))]
@@ -1312,6 +1344,7 @@ pub(crate) struct PaintIndex {
     #[cfg(any(test, feature = "test-support"))]
     debug_bounds_index: usize,
     mouse_listeners_index: usize,
+    pointer_observers_index: usize,
     input_handlers_index: usize,
     cursor_styles_index: usize,
     accessed_element_states_index: usize,
@@ -1333,6 +1366,7 @@ impl Frame {
             element_states: FxHashMap::default(),
             accessed_element_states: Vec::new(),
             mouse_listeners: Vec::new(),
+            pointer_observers: Rc::default(),
             dispatch_tree,
             scene: Scene::default(),
             hitboxes: Vec::new(),
@@ -1360,6 +1394,7 @@ impl Frame {
         self.element_states.clear();
         self.accessed_element_states.clear();
         self.mouse_listeners.clear();
+        Rc::make_mut(&mut self.pointer_observers).clear();
         self.dispatch_tree.clear();
         self.scene.clear();
         self.input_handlers.clear();
@@ -1385,18 +1420,30 @@ impl Frame {
     }
 
     pub(crate) fn cursor_style(&self, window: &Window) -> Option<CursorStyle> {
+        // Resolve window-wide requests first, regardless of paint order.
         self.cursor_styles
             .iter()
             .rev()
-            .fold_while(None, |style, request| match request.hitbox_id {
-                None => Done(Some(request.style)),
-                Some(hitbox_id) => Continue(style.or_else(|| {
-                    hitbox_id
-                        .is_hovered_ignoring_last_input(window)
-                        .then_some(request.style)
-                })),
+            .find_map(|request| match request {
+                CursorStyleRequest::Window(style) => style.resolve(window.mouse_position()),
+                CursorStyleRequest::Hitbox { .. } => None,
             })
-            .into_inner()
+            .or_else(|| {
+                if !window.pointer_inside_window {
+                    return None;
+                }
+                self.cursor_styles
+                    .iter()
+                    .rev()
+                    .find_map(|request| match request {
+                        CursorStyleRequest::Hitbox { id, style }
+                            if id.is_hovered_ignoring_last_input(window) =>
+                        {
+                            style.resolve(window.mouse_position())
+                        }
+                        _ => None,
+                    })
+            })
     }
 
     pub(crate) fn hit_test(&self, position: Point<Pixels>) -> HitTest {
@@ -1515,7 +1562,6 @@ pub struct Window {
     /// Bounds of the parent `Div` currently prepainting this element as one of its children.
     /// Inset transitions use these bounds to resolve `auto` from the child's rendered position.
     style_transition_containing_bounds: Option<Bounds<Pixels>>,
-    pub(crate) element_opacity: f32,
     pub(crate) content_mask_stack: Vec<ContentMask<Pixels>>,
     pub(crate) requested_autoscroll: Option<Bounds<Pixels>>,
     /// The [`TextInputConfiguration`] most recently forwarded to the platform
@@ -1536,6 +1582,7 @@ pub struct Window {
     focus_lost_path: SmallVec<[FocusId; 8]>,
     default_prevented: bool,
     mouse_position: Point<Pixels>,
+    pointer_inside_window: bool,
     mouse_hit_test: HitTest,
     modifiers: Modifiers,
     capslock: Capslock,
@@ -2361,6 +2408,7 @@ impl Window {
                 handle
                     .update(&mut cx, |_, window, _| {
                         window.hovered.set(active);
+                        window.pointer_inside_window = active;
                         window.refresh();
                     })
                     .log_err();
@@ -2477,7 +2525,6 @@ impl Window {
             element_offset_stack: Vec::new(),
             style_transition_containing_bounds: None,
             content_mask_stack: Vec::new(),
-            element_opacity: 1.0,
             requested_autoscroll: None,
             last_text_input_configuration: None,
             focused_text_input: None,
@@ -2493,6 +2540,7 @@ impl Window {
             focus_lost_path: SmallVec::new(),
             default_prevented: true,
             mouse_position,
+            pointer_inside_window: true,
             mouse_hit_test: HitTest::default(),
             modifiers,
             capslock,
@@ -3963,11 +4011,7 @@ impl Window {
             bounds: self.underline_bounds(origin, width, style),
             clip_bounds: content_mask.bounds,
             content_mask,
-            color: style
-                .color
-                .unwrap_or_default()
-                .opacity(self.element_opacity())
-                .into(),
+            color: style.color.unwrap_or_default().into(),
             thickness: self.snap_stroke(style.thickness),
             wavy: style.wavy.into(),
         }
@@ -4261,6 +4305,7 @@ impl Window {
         self.reset_cursor_style(cx);
         self.refreshing = false;
         self.invalidator.set_phase(DrawPhase::None);
+        self.notify_pointer_observers(PointerChangeCause::Layout, cx);
         // Focus listeners may move focus (e.g. a dock forwarding focus to its active
         // panel). `Window::focus` suppresses `refresh` while a draw is in progress, so
         // schedule another frame here to render the new focus state and dispatch the
@@ -4777,6 +4822,7 @@ impl Window {
             #[cfg(any(test, feature = "test-support"))]
             debug_bounds_index: self.next_frame.debug_bounds_records.len(),
             mouse_listeners_index: self.next_frame.mouse_listeners.len(),
+            pointer_observers_index: self.next_frame.pointer_observers.len(),
             input_handlers_index: self.next_frame.input_handlers.len(),
             cursor_styles_index: self.next_frame.cursor_styles.len(),
             accessed_element_states_index: self.next_frame.accessed_element_states.len(),
@@ -4794,6 +4840,12 @@ impl Window {
             self.next_frame
                 .record_debug_bounds(selector.clone(), *bounds);
         }
+        Rc::make_mut(&mut self.next_frame.pointer_observers).extend(
+            self.rendered_frame.pointer_observers
+                [range.start.pointer_observers_index..range.end.pointer_observers_index]
+                .iter()
+                .cloned(),
+        );
         self.next_frame.cursor_styles.extend(
             self.rendered_frame.cursor_styles
                 [range.start.cursor_styles_index..range.end.cursor_styles_index]
@@ -4858,10 +4910,28 @@ impl Window {
     /// to set the cursor for the whole window.
     pub fn set_cursor_style(&mut self, style: CursorStyle, hitbox: &Hitbox) {
         self.invalidator.debug_assert_paint();
-        self.next_frame.cursor_styles.push(CursorStyleRequest {
-            hitbox_id: Some(hitbox.id),
-            style,
-        });
+        self.next_frame
+            .cursor_styles
+            .push(CursorStyleRequest::Hitbox {
+                id: hitbox.id,
+                style: CursorStyleSource::Fixed(style),
+            });
+    }
+
+    /// Resolves this hitbox's cursor from window coordinates on pointer input.
+    /// Return `None` to use the next cursor request. Cached paints retain the resolver.
+    pub fn set_cursor_style_with(
+        &mut self,
+        hitbox: &Hitbox,
+        resolve: impl Fn(Point<Pixels>) -> Option<CursorStyle> + 'static,
+    ) {
+        self.invalidator.debug_assert_paint();
+        self.next_frame
+            .cursor_styles
+            .push(CursorStyleRequest::Hitbox {
+                id: hitbox.id,
+                style: CursorStyleSource::Position(Rc::new(resolve)),
+            });
     }
 
     /// Sets the cursor for the whole window, overriding any cursor set with [`Window::set_cursor_style`].
@@ -4869,10 +4939,23 @@ impl Window {
     /// Call it during paint.
     pub fn set_window_cursor_style(&mut self, style: CursorStyle) {
         self.invalidator.debug_assert_paint();
-        self.next_frame.cursor_styles.push(CursorStyleRequest {
-            hitbox_id: None,
-            style,
-        })
+        self.next_frame
+            .cursor_styles
+            .push(CursorStyleRequest::Window(CursorStyleSource::Fixed(style)));
+    }
+
+    /// Resolves a window-wide cursor from pointer position.
+    /// Return `None` to defer to hitbox cursor requests.
+    pub fn set_window_cursor_style_with(
+        &mut self,
+        resolve: impl Fn(Point<Pixels>) -> Option<CursorStyle> + 'static,
+    ) {
+        self.invalidator.debug_assert_paint();
+        self.next_frame
+            .cursor_styles
+            .push(CursorStyleRequest::Window(CursorStyleSource::Position(
+                Rc::new(resolve),
+            )));
     }
 
     /// Shows `tooltip` for the upcoming frame and returns its [`TooltipId`].
@@ -4967,18 +5050,47 @@ impl Window {
     pub(crate) fn with_element_opacity<R>(
         &mut self,
         opacity: Option<f32>,
-        f: impl FnOnce(&mut Self) -> R,
+        paint: impl FnOnce(&mut Self) -> R,
     ) -> R {
-        self.invalidator.debug_assert_paint_or_prepaint();
+        self.invalidator.debug_assert_paint();
+        let opacity = opacity.unwrap_or(1.0).clamp(0.0, 1.0);
 
-        let Some(opacity) = opacity else {
-            return f(self);
+        if opacity == 1.0 {
+            return paint(self);
+        }
+
+        // The existing targets cover the viewport, preserving shadows and visible overflow.
+        // Child paint operations already carry their clipping and edge fades.
+        let bounds = self.cover_bounds(Bounds::new(Point::default(), self.viewport_size()));
+        let boundary = FilterBoundary {
+            order: 0,
+            bounds,
+            content_mask: ContentMask {
+                bounds,
+                fade_out: Edges::default(),
+            },
+            corner_radii: Corners::default(),
+            corner_smoothing: 0.0,
+            filters: SmallVec::new(),
+            opacity,
+            is_start: true,
         };
 
-        let previous_opacity = self.element_opacity;
-        self.element_opacity = previous_opacity * opacity;
-        let result = f(self);
-        self.element_opacity = previous_opacity;
+        self.with_filter_boundary(boundary, paint)
+    }
+
+    fn with_filter_boundary<R>(
+        &mut self,
+        boundary: FilterBoundary,
+        paint: impl FnOnce(&mut Self) -> R,
+    ) -> R {
+        self.next_frame.scene.insert_primitive(boundary.clone());
+        let result = paint(self);
+        self.next_frame.scene.insert_primitive(FilterBoundary {
+            is_start: false,
+            ..boundary
+        });
+
         result
     }
 
@@ -5060,17 +5172,9 @@ impl Window {
             .unwrap_or_default()
     }
 
-    /// Obtain the current element opacity. This method should only be called during the
-    /// prepaint phase of element drawing.
-    #[inline]
-    pub(crate) fn element_opacity(&self) -> f32 {
-        self.invalidator.debug_assert_paint_or_prepaint();
-        self.element_opacity
-    }
-
     /// Returns the content mask in effect, which is the window's bounds unless a parent has clipped it.
     ///
-    /// Call it during prepaint or paint. See [`Window::with_content_mask`].
+    /// Call it during prepaint or paint. See Window::with_content_mask.
     pub fn content_mask(&self) -> ContentMask<Pixels> {
         self.invalidator.debug_assert_paint_or_prepaint();
         self.content_mask_stack
@@ -5409,7 +5513,9 @@ impl Window {
         result
     }
 
-    /// Paints the outer shadows in `shadows` behind an element of `bounds` and `corner_radii`.
+    /// Paint the drop shadows into the scene at the current z-index. Inset shadows are
+    /// skipped; paint those after the element background. Corner smoothing ranges from
+    /// circular corners at 0.0 to maximum smoothing at 1.0.
     ///
     /// Paint these before the element's background, so the shadow sits under it. Inset shadows
     /// are skipped; paint those with [`Window::paint_inset_shadows`] after the background.
@@ -5418,15 +5524,13 @@ impl Window {
         &mut self,
         bounds: Bounds<Pixels>,
         corner_radii: Corners<Pixels>,
+        corner_smoothing: f32,
         shadows: &[BoxShadow],
     ) {
-        self.paint_drop_shadows_with_corner_smoothing(bounds, corner_radii, 0.0, shadows);
+        self.paint_shadows(bounds, corner_radii, corner_smoothing, shadows, false);
     }
 
-    /// Paints outer shadows whose corners are smoothed by `corner_smoothing`.
-    ///
-    /// The smoothing value gives squircle-style corners, from `0.0` for circular arcs. Inset
-    /// shadows in `shadows` are ignored. Call it during paint.
+    /// Paints outer shadows with the requested corner smoothing.
     pub fn paint_drop_shadows_with_corner_smoothing(
         &mut self,
         bounds: Bounds<Pixels>,
@@ -5434,51 +5538,23 @@ impl Window {
         corner_smoothing: f32,
         shadows: &[BoxShadow],
     ) {
-        self.invalidator.debug_assert_paint();
-
-        let scale_factor = self.scale_factor();
-        let content_mask = self.snapped_content_mask();
-        let opacity = self.element_opacity();
-        let element_bounds = self.cover_bounds(bounds);
-        let element_corner_radii = corner_radii.scale(scale_factor);
-        let corner_smoothing = corner_smoothing.clamp(0.0, 1.0);
-        for shadow in shadows {
-            if shadow.inset {
-                continue;
-            }
-            let shadow_bounds = (bounds + shadow.offset).dilate(shadow.spread_radius);
-            self.next_frame.scene.insert_primitive(Shadow {
-                order: 0,
-                blur_radius: shadow.blur_radius.scale(scale_factor),
-                bounds: self.cover_bounds(shadow_bounds),
-                content_mask,
-                corner_radii: corner_radii.scale(scale_factor),
-                color: shadow.color.opacity(opacity),
-                element_bounds,
-                element_corner_radii,
-                inset: false.into(),
-                corner_smoothing,
-            });
-        }
+        self.paint_drop_shadows(bounds, corner_radii, corner_smoothing, shadows);
     }
 
-    /// Paints the inset shadows in `shadows` inside an element of `bounds` and `corner_radii`.
-    ///
-    /// Paint these after the element's background, so the shadow sits on top of the fill. Outer
-    /// shadows are skipped; paint those with [`Window::paint_drop_shadows`] before the background.
-    /// Call it during paint.
+    /// Paint inset shadows at the current z-index after the element background. Drop shadows
+    /// are skipped; paint those before the background. Corner smoothing ranges from circular
+    /// corners at 0.0 to maximum smoothing at 1.0.
     pub fn paint_inset_shadows(
         &mut self,
         bounds: Bounds<Pixels>,
         corner_radii: Corners<Pixels>,
+        corner_smoothing: f32,
         shadows: &[BoxShadow],
     ) {
-        self.paint_inset_shadows_with_corner_smoothing(bounds, corner_radii, 0.0, shadows);
+        self.paint_shadows(bounds, corner_radii, corner_smoothing, shadows, true);
     }
 
-    /// Paints inset shadows whose corners are smoothed by `corner_smoothing`.
-    ///
-    /// Outer shadows in `shadows` are ignored. Call it during paint, after the background.
+    /// Paints inset shadows with the requested corner smoothing.
     pub fn paint_inset_shadows_with_corner_smoothing(
         &mut self,
         bounds: Bounds<Pixels>,
@@ -5486,38 +5562,51 @@ impl Window {
         corner_smoothing: f32,
         shadows: &[BoxShadow],
     ) {
+        self.paint_inset_shadows(bounds, corner_radii, corner_smoothing, shadows);
+    }
+
+    fn paint_shadows(
+        &mut self,
+        bounds: Bounds<Pixels>,
+        corner_radii: Corners<Pixels>,
+        corner_smoothing: f32,
+        shadows: &[BoxShadow],
+        inset: bool,
+    ) {
         self.invalidator.debug_assert_paint();
 
         let scale_factor = self.scale_factor();
         let content_mask = self.snapped_content_mask();
-        let opacity = self.element_opacity();
         let element_bounds = self.cover_bounds(bounds);
         let element_corner_radii = corner_radii.scale(scale_factor);
         let corner_smoothing = corner_smoothing.clamp(0.0, 1.0);
-        for shadow in shadows {
-            if !shadow.inset {
-                continue;
-            }
-            let hole = (bounds + shadow.offset).dilate(-shadow.spread_radius);
-            // Clamp at zero so a large spread can't produce negative radii, which would
-            // break the SDF in the shader.
-            let zero = Pixels::ZERO;
-            let hole_corner_radii = Corners {
-                top_left: (corner_radii.top_left - shadow.spread_radius).max(zero),
-                top_right: (corner_radii.top_right - shadow.spread_radius).max(zero),
-                bottom_right: (corner_radii.bottom_right - shadow.spread_radius).max(zero),
-                bottom_left: (corner_radii.bottom_left - shadow.spread_radius).max(zero),
+
+        for shadow in shadows.iter().filter(|shadow| shadow.inset == inset) {
+            let spread = if inset {
+                -shadow.spread_radius
+            } else {
+                shadow.spread_radius
             };
+
+            let shadow_bounds = (bounds + shadow.offset).dilate(spread);
+
+            let shadow_radii = if inset {
+                // Large inset spreads must not produce negative radii in the shader.
+                corner_radii.map(|radius| (*radius - shadow.spread_radius).max(Pixels::ZERO))
+            } else {
+                corner_radii
+            };
+
             self.next_frame.scene.insert_primitive(Shadow {
                 order: 0,
                 blur_radius: shadow.blur_radius.scale(scale_factor),
-                bounds: self.cover_bounds(hole),
+                bounds: self.cover_bounds(shadow_bounds),
                 content_mask,
-                corner_radii: hole_corner_radii.scale(scale_factor),
-                color: shadow.color.opacity(opacity),
+                corner_radii: shadow_radii.scale(scale_factor),
+                color: shadow.color,
                 element_bounds,
                 element_corner_radii,
-                inset: true.into(),
+                inset: inset.into(),
                 corner_smoothing,
             });
         }
@@ -5528,21 +5617,12 @@ impl Window {
     /// into the rounded rectangle described by `bounds` and `corner_radii` — the CSS
     /// `backdrop-filter` effect (frosted glass). Typically the element then paints a translucent
     /// background quad on top so its color tints the blurred backdrop.
+    /// `corner_smoothing` ranges from circular corners at `0.0` to maximum smoothing at `1.0`.
     ///
     /// Does nothing when `filters` produce no visible blur.
     ///
     /// This method should only be called as part of the paint phase of element drawing.
     pub fn paint_backdrop_filter(
-        &mut self,
-        bounds: Bounds<Pixels>,
-        corner_radii: Corners<Pixels>,
-        filters: &[Filter],
-    ) {
-        self.paint_backdrop_filter_with_corner_smoothing(bounds, corner_radii, 0.0, filters);
-    }
-
-    /// Paints a backdrop filter like [`Window::paint_backdrop_filter`], with corners smoothed by `corner_smoothing`.
-    pub fn paint_backdrop_filter_with_corner_smoothing(
         &mut self,
         bounds: Bounds<Pixels>,
         corner_radii: Corners<Pixels>,
@@ -5568,33 +5648,32 @@ impl Window {
             corner_radii: corner_radii.scale(scale_factor),
             corner_smoothing: corner_smoothing.clamp(0.0, 1.0),
             filters,
-            opacity: self.element_opacity(),
+            opacity: 1.0,
         });
+    }
+
+    /// Paints a backdrop filter with the requested corner smoothing.
+    pub fn paint_backdrop_filter_with_corner_smoothing(
+        &mut self,
+        bounds: Bounds<Pixels>,
+        corner_radii: Corners<Pixels>,
+        corner_smoothing: f32,
+        filters: &[Filter],
+    ) {
+        self.paint_backdrop_filter(bounds, corner_radii, corner_smoothing, filters);
     }
 
     /// Isolate the painting performed by `f` into a content-filter group: the renderer renders
     /// everything `f` paints into an offscreen target, blurs it as a single layer, and
     /// composites the result back into the rounded rectangle described by `bounds` and
     /// `corner_radii` — the CSS `filter` effect (e.g. blurring an element and its children).
+    /// `corner_smoothing` ranges from circular corners at `0.0` to maximum smoothing at `1.0`.
     ///
     /// When `filters` produce no visible blur this simply runs `f` with no offscreen
     /// indirection.
     ///
     /// This method should only be called as part of the paint phase of element drawing.
     pub fn with_filter_layer<R>(
-        &mut self,
-        bounds: Bounds<Pixels>,
-        corner_radii: Corners<Pixels>,
-        filters: &[Filter],
-        f: impl FnOnce(&mut Self) -> R,
-    ) -> R {
-        self.with_filter_layer_with_corner_smoothing(bounds, corner_radii, 0.0, filters, f)
-    }
-
-    /// Runs `f` in a content-filter group like [`Window::with_filter_layer`], with corners smoothed by `corner_smoothing`.
-    ///
-    /// Call it during paint.
-    pub fn with_filter_layer_with_corner_smoothing<R>(
         &mut self,
         bounds: Bounds<Pixels>,
         corner_radii: Corners<Pixels>,
@@ -5614,13 +5693,6 @@ impl Window {
             return f(self);
         }
 
-        // Snapshot the (scaled) group parameters once so the start and end markers agree.
-        //
-        // `opacity` is 1.0 — NOT `element_opacity()`. The group's children/bg/border are painted
-        // through the normal paint methods while `element_opacity` is still in effect, so they
-        // already carry the element's opacity (consistent with gpui's per-primitive opacity for
-        // non-filtered elements). Re-applying it at composite time would double it (e.g.
-        // `.blur(r).opacity(0.5)` would render at 0.25 instead of 0.5).
         let boundary = FilterBoundary {
             order: 0,
             bounds: self.snap_bounds(bounds),
@@ -5632,14 +5704,19 @@ impl Window {
             is_start: true,
         };
 
-        self.next_frame.scene.insert_primitive(boundary.clone());
-        let result = f(self);
-        self.next_frame.scene.insert_primitive(FilterBoundary {
-            is_start: false,
-            ..boundary
-        });
+        self.with_filter_boundary(boundary, f)
+    }
 
-        result
+    /// Runs a content-filter group with the requested corner smoothing.
+    pub fn with_filter_layer_with_corner_smoothing<R>(
+        &mut self,
+        bounds: Bounds<Pixels>,
+        corner_radii: Corners<Pixels>,
+        corner_smoothing: f32,
+        filters: &[Filter],
+        f: impl FnOnce(&mut Self) -> R,
+    ) -> R {
+        self.with_filter_layer(bounds, corner_radii, corner_smoothing, filters, f)
     }
 
     fn largest_border_interior(quad: &Quad) -> Bounds<ScaledPixels> {
@@ -5684,7 +5761,8 @@ impl Window {
 
     /// Paint one or more quads into the scene for the next frame at the current stacking context.
     /// Quads are colored rectangular regions with an optional background, border, and corner radius.
-    /// see [`fill`], [`outline`], and [`quad`] to construct this type.
+    /// Use [`PaintQuad::new`] and its builder methods to construct the quad.
+    /// `quad.corner_smoothing` ranges from circular corners at `0.0` to maximum smoothing at `1.0`.
     ///
     /// This method should only be called as part of the paint phase of element drawing.
     ///
@@ -5692,29 +5770,32 @@ impl Window {
     /// where the circular arcs meet. This will not display well when combined with dashed borders.
     /// Use `Corners::clamp_radii_for_quad_size` if the radii should fit within the bounds.
     pub fn paint_quad(&mut self, quad: PaintQuad) {
-        self.paint_quad_with_corner_smoothing(quad, 0.0);
+        let corner_smoothing = quad.corner_smoothing;
+        self.paint_quad_with_corner_smoothing(quad, corner_smoothing);
     }
 
-    /// Paints `quad` with the given corner smoothing, from `0.0` for circular corners to `1.0`
-    /// for fully smooth corners.
+    /// Paints quad with corner smoothing from 0.0 for circular corners to 1.0 for fully smooth corners.
     pub fn paint_quad_with_corner_smoothing(&mut self, quad: PaintQuad, corner_smoothing: f32) {
         self.invalidator.debug_assert_paint();
+        let quad = PaintQuad {
+            corner_smoothing: corner_smoothing.clamp(0.0, 1.0),
+            ..quad
+        };
 
-        let opacity = self.element_opacity();
         let snapped_bounds = self.snap_bounds(quad.bounds);
         let snapped_border_widths = self.snap_border_widths(quad.border_widths);
         let quad = Quad {
             order: 0,
             bounds: snapped_bounds,
             content_mask: self.snapped_content_mask(),
-            background: quad.background.opacity(opacity),
-            border_color: quad.border_color.opacity(opacity),
+            background: quad.background,
+            border_color: quad.border_color,
             corner_radii: quad.corner_radii.scale(self.scale_factor()),
             border_widths: snapped_border_widths,
             border_style: quad.border_style,
             border_dashed_length: quad.border_dashed_length,
             border_dashed_gap: quad.border_dashed_gap,
-            corner_smoothing: corner_smoothing.clamp(0.0, 1.0),
+            corner_smoothing: quad.corner_smoothing.clamp(0.0, 1.0),
             padding: 0,
         };
 
@@ -5772,17 +5853,16 @@ impl Window {
 
     /// Paints `path` filled with `color`, at the current z-index.
     ///
-    /// The path's coordinates are in logical pixels within the window, and the content mask and
-    /// element opacity apply to it. Call it during paint.
+    /// The path's coordinates are in logical pixels within the window. The content mask clips it,
+    /// and opacity scopes composite it with their group. Call it during paint.
     pub fn paint_path(&mut self, mut path: Path<Pixels>, color: impl Into<Background>) {
         self.invalidator.debug_assert_paint();
 
         let scale_factor = self.scale_factor();
         let content_mask = self.content_mask();
-        let opacity = self.element_opacity();
         path.content_mask = content_mask;
         let color: Background = color.into();
-        path.color = color.opacity(opacity);
+        path.color = color;
         self.next_frame
             .scene
             .insert_primitive(path.scale(scale_factor));
@@ -5811,7 +5891,6 @@ impl Window {
             origin: origin.map(|c| ScaledPixels(round_to_device_pixel(c.0, scale_factor))),
             size: size(self.snap_stroke(width), height),
         };
-        let element_opacity = self.element_opacity();
         let content_mask = self.snapped_content_mask();
 
         self.next_frame.scene.insert_primitive(Underline {
@@ -5820,11 +5899,7 @@ impl Window {
             bounds,
             clip_bounds: content_mask.bounds,
             content_mask,
-            color: style
-                .color
-                .unwrap_or_default()
-                .opacity(element_opacity)
-                .into(),
+            color: style.color.unwrap_or_default().into(),
             thickness,
             wavy: style.wavy.into(),
         });
@@ -5832,8 +5907,8 @@ impl Window {
 
     /// Paints a strikethrough line of `width` starting at `origin`, using `style`.
     ///
-    /// The line is drawn at the current z-index, and the content mask and element opacity apply
-    /// to it. Call it during paint.
+    /// The line is drawn at the current z-index and clipped by the content mask. Opacity scopes
+    /// composite it with their group. Call it during paint.
     pub fn paint_strikethrough(
         &mut self,
         origin: Point<Pixels>,
@@ -5848,7 +5923,6 @@ impl Window {
             origin: origin.map(|c| ScaledPixels(round_to_device_pixel(c.0, scale_factor))),
             size: size(self.snap_stroke(width), self.snap_stroke(height)),
         };
-        let opacity = self.element_opacity();
         let content_mask = self.snapped_content_mask();
 
         self.next_frame.scene.insert_primitive(Underline {
@@ -5858,7 +5932,7 @@ impl Window {
             clip_bounds: content_mask.bounds,
             content_mask,
             thickness: self.snap_stroke(style.thickness),
-            color: style.color.unwrap_or_default().opacity(opacity).into(),
+            color: style.color.unwrap_or_default().into(),
             wavy: false.into(),
         });
     }
@@ -5881,7 +5955,6 @@ impl Window {
     ) -> Result<()> {
         self.invalidator.debug_assert_paint();
 
-        let element_opacity = self.element_opacity();
         let scale_factor = self.scale_factor();
         let glyph_origin = origin.scale(scale_factor);
 
@@ -5903,7 +5976,7 @@ impl Window {
             raster_style,
         };
 
-        self.paint_glyph_from_atlas(integer_origin, params, color, element_opacity)
+        self.paint_glyph_from_atlas(integer_origin, params, color)
     }
 
     fn paint_glyph_from_atlas(
@@ -5911,7 +5984,6 @@ impl Window {
         integer_origin: Point<ScaledPixels>,
         params: RenderGlyphParams,
         mask_color: Hsla,
-        opacity: f32,
     ) -> Result<()> {
         let text_system = self.text_system().clone();
         let entry = self
@@ -5935,7 +6007,7 @@ impl Window {
                     padding: 0,
                     bounds,
                     content_mask,
-                    color: mask_color.opacity(opacity).into(),
+                    color: mask_color.into(),
                     tile,
                     transformation: TransformationMatrix::unit(),
                 });
@@ -5946,7 +6018,7 @@ impl Window {
                     padding: 0,
                     bounds,
                     content_mask,
-                    color: mask_color.opacity(opacity).into(),
+                    color: mask_color.into(),
                     tile,
                     transformation: TransformationMatrix::unit(),
                 });
@@ -5960,7 +6032,7 @@ impl Window {
                     corner_radii: Default::default(),
                     content_mask,
                     tile,
-                    opacity,
+                    opacity: 1.0,
                 });
             }
         }
@@ -5968,6 +6040,10 @@ impl Window {
     }
 
     fn should_use_subpixel_rendering(&self, font_id: FontId, font_size: Pixels) -> bool {
+        if self.next_frame.scene.is_in_filter_group() {
+            return false;
+        }
+
         if self
             .platform_window
             .background_appearance()
@@ -6037,7 +6113,7 @@ impl Window {
             raster_style,
         };
 
-        self.paint_glyph_from_atlas(integer_origin, params, color, self.element_opacity())
+        self.paint_glyph_from_atlas(integer_origin, params, color)
     }
 
     /// Paints a monochrome SVG into `bounds`, tinted with `color`.
@@ -6057,7 +6133,6 @@ impl Window {
     ) -> Result<()> {
         self.invalidator.debug_assert_paint();
 
-        let element_opacity = self.element_opacity();
         let bounds = self.snap_bounds(bounds);
 
         let params = RenderSvgParams {
@@ -6100,7 +6175,7 @@ impl Window {
             padding: 0,
             bounds: final_bounds,
             content_mask,
-            color: color.opacity(element_opacity).into(),
+            color: color.into(),
             tile,
             transformation,
         });
@@ -6110,32 +6185,12 @@ impl Window {
 
     /// Paints `data` into `bounds`, scaled to fit `image_bounds`.
     ///
-    /// The visible region is `bounds.intersect(&image_bounds)`, and `corner_radii` round the
-    /// corners of `bounds`. `frame_index` selects a frame of an animated image, and `grayscale`
-    /// paints the image in grayscale. Returns an error if the image can't be uploaded to the
-    /// renderer. Call it during paint.
+    /// Paints data into bounds, scaled to fit image_bounds.
+    ///
+    /// The visible region is bounds intersected with image_bounds. frame_index selects an animated
+    /// image frame; grayscale controls grayscale rendering. corner_smoothing ranges from circular
+    /// corners at 0.0 to maximum smoothing at 1.0. Returns an error if upload fails.
     pub fn paint_image(
-        &mut self,
-        bounds: Bounds<Pixels>,
-        image_bounds: Bounds<Pixels>,
-        corner_radii: Corners<Pixels>,
-        data: Arc<RenderImage>,
-        frame_index: usize,
-        grayscale: bool,
-    ) -> Result<()> {
-        self.paint_image_with_corner_smoothing(
-            bounds,
-            image_bounds,
-            corner_radii,
-            0.0,
-            data,
-            frame_index,
-            grayscale,
-        )
-    }
-
-    /// Paints an image like [`Window::paint_image`], with corners smoothed by `corner_smoothing`.
-    pub fn paint_image_with_corner_smoothing(
         &mut self,
         bounds: Bounds<Pixels>,
         image_bounds: Bounds<Pixels>,
@@ -6219,7 +6274,6 @@ impl Window {
         let corner_radii = corner_radii
             .clamp_radii_for_quad_size(visible_bounds.size)
             .scale(self.scale_factor());
-        let opacity = self.element_opacity();
 
         self.next_frame.scene.insert_primitive(PolychromeSprite {
             order: 0,
@@ -6229,9 +6283,31 @@ impl Window {
             content_mask,
             corner_radii,
             tile: sub_tile,
-            opacity,
+            opacity: 1.0,
         });
         Ok(())
+    }
+
+    /// Paints an image with the requested corner smoothing.
+    pub fn paint_image_with_corner_smoothing(
+        &mut self,
+        bounds: Bounds<Pixels>,
+        image_bounds: Bounds<Pixels>,
+        corner_radii: Corners<Pixels>,
+        corner_smoothing: f32,
+        data: Arc<RenderImage>,
+        frame_index: usize,
+        grayscale: bool,
+    ) -> Result<()> {
+        self.paint_image(
+            bounds,
+            image_bounds,
+            corner_radii,
+            corner_smoothing,
+            data,
+            frame_index,
+            grayscale,
+        )
     }
 
     /// Paints a platform surface, such as a video frame, into `bounds`.
@@ -6242,8 +6318,6 @@ impl Window {
         bounds: Bounds<Pixels>,
         source: impl Into<crate::SurfaceSource>,
     ) {
-        use crate::PaintSurface;
-
         self.invalidator.debug_assert_paint();
 
         let bounds = self.snap_bounds(bounds);
@@ -6254,17 +6328,14 @@ impl Window {
             crate::SurfaceSource::Surface(image_buffer) => Some(image_buffer.clone()),
             _ => None,
         };
-        self.next_frame.scene.insert_surface(
-            PaintSurface {
-                order: 0,
-                bounds,
-                content_mask,
-                source,
-                #[cfg(any(target_os = "macos", target_os = "ios"))]
-                image_buffer,
-            },
-            self.element_opacity(),
-        );
+        self.next_frame.scene.insert_primitive(PaintSurface {
+            order: 0,
+            bounds,
+            content_mask,
+            source,
+            #[cfg(any(target_os = "macos", target_os = "ios"))]
+            image_buffer,
+        });
     }
 
     /// Removes every frame of `data` from the renderer's texture atlas, freeing its GPU memory.
@@ -6854,7 +6925,33 @@ impl Window {
         )));
     }
 
-    /// Registers a listener for key events of type `Event` on the current element, for the frame being painted.
+    /// Registers a listener for key events of type Event on the current element for this paint.
+    // Observe completed hit tests independently of event propagation.
+    pub(crate) fn on_pointer_change(
+        &mut self,
+        observer: impl Fn(PointerChange, &mut Window, &mut App) + 'static,
+    ) {
+        self.invalidator.debug_assert_paint();
+        Rc::make_mut(&mut self.next_frame.pointer_observers).push(Rc::new(observer));
+    }
+
+    fn notify_pointer_observers(&mut self, cause: PointerChangeCause, cx: &mut App) {
+        let change = PointerChange {
+            position: self.pointer_inside_window.then_some(self.mouse_position),
+            cause,
+        };
+        let observers = self.rendered_frame.pointer_observers.clone();
+        let propagate_event = cx.propagate_event;
+        let default_prevented = self.default_prevented;
+        for observer in observers.iter() {
+            observer(change, self, cx);
+            cx.propagate_event = propagate_event;
+            self.default_prevented = default_prevented;
+        }
+    }
+
+    /// Register a key event listener on this node for the next frame. The type is inferred
+    /// from the listener's first parameter. The listener is cleared when the next frame is rendered.
     ///
     /// `Event` is chosen by the type of the listener's first parameter, such as `KeyDownEvent`.
     /// Listeners are cleared when the next frame is painted, so register them on every paint.
@@ -7359,11 +7456,21 @@ impl Window {
     }
 
     fn dispatch_mouse_event(&mut self, event: &dyn Any, cx: &mut App) {
+        if event.is::<crate::MouseExitEvent>() {
+            self.pointer_inside_window = false;
+        } else if event.is::<MouseMoveEvent>()
+            || event.is::<crate::MouseDownEvent>()
+            || event.is::<MouseUpEvent>()
+        {
+            self.pointer_inside_window =
+                Bounds::new(Point::default(), self.viewport_size).contains(&self.mouse_position);
+        }
         let hit_test = self.rendered_frame.hit_test(self.mouse_position());
         if hit_test != self.mouse_hit_test {
             self.mouse_hit_test = hit_test;
-            self.reset_cursor_style(cx);
         }
+        // Resolve on every pointer event, including movement within one hitbox.
+        self.reset_cursor_style(cx);
 
         #[cfg(any(feature = "inspector", debug_assertions))]
         if self.is_inspector_picking(cx) {
@@ -7413,6 +7520,12 @@ impl Window {
         // Auto-release pointer capture on mouse up
         if event.is::<MouseUpEvent>() && self.captured_hitbox.is_some() {
             self.captured_hitbox = None;
+        }
+        if event.is::<MouseMoveEvent>()
+            || event.is::<crate::MouseExitEvent>()
+            || event.is::<MouseUpEvent>()
+        {
+            self.notify_pointer_observers(PointerChangeCause::Input, cx);
         }
     }
 
@@ -8807,7 +8920,7 @@ impl Window {
                     .iter()
                     .find(|hitbox| hitbox.id == hitbox_id)
             {
-                self.paint_quad(crate::fill(hitbox.bounds, crate::rgba(0x61afef4d)));
+                self.paint_quad(PaintQuad::new(hitbox.bounds).background(crate::rgba(0x61afef4d)));
             }
         }
     }
@@ -9418,24 +9531,31 @@ impl From<[u8; 20]> for ElementId {
     }
 }
 
-/// A rectangle with a background and optional border, ready for [`Window::paint_quad`].
+/// A rectangle with an optional background and border, ready for Window::paint_quad.
 ///
-/// Build one with [`fill`], [`outline`] or [`quad`], then adjust it with the builder methods.
-/// Its fields are in logical pixels, and its colors are multiplied by the element's opacity
-/// when painted.
-#[derive(Clone)]
+/// Build one with fill, outline or quad, then adjust it with builder methods. Its fields are in
+/// logical pixels. Colors retain their own alpha; element opacity scopes composite the group once.
+#[derive(Clone, derive_setters::Setters)]
+#[setters(into, generate = false)]
 pub struct PaintQuad {
     /// The bounds of the quad within the window.
     pub bounds: Bounds<Pixels>,
     /// The radii of the quad's corners.
+    #[setters(generate)]
     pub corner_radii: Corners<Pixels>,
+    /// Corner smoothing, from circular corners at `0.0` to maximum smoothing at `1.0`.
+    pub corner_smoothing: f32,
     /// The background color of the quad.
+    #[setters(generate)]
     pub background: Background,
     /// The widths of the quad's borders.
+    #[setters(generate)]
     pub border_widths: Edges<Pixels>,
     /// The background painted into the quad's borders.
+    #[setters(generate)]
     pub border_color: Background,
     /// The style of the quad's borders.
+    #[setters(generate)]
     pub border_style: BorderStyle,
     /// The length of each border dash, as a multiple of the border width.
     pub border_dashed_length: f32,
@@ -9444,34 +9564,25 @@ pub struct PaintQuad {
 }
 
 impl PaintQuad {
-    /// Returns this quad with the given corner radii.
-    pub fn corner_radii(self, corner_radii: impl Into<Corners<Pixels>>) -> Self {
-        PaintQuad {
-            corner_radii: corner_radii.into(),
-            ..self
+    /// Creates a transparent quad with no border or rounded corners.
+    pub fn new(bounds: impl Into<Bounds<Pixels>>) -> Self {
+        Self {
+            bounds: bounds.into(),
+            corner_radii: (0.).into(),
+            corner_smoothing: 0.0,
+            background: transparent_black().into(),
+            border_widths: (0.).into(),
+            border_color: transparent_black().into(),
+            border_style: BorderStyle::default(),
+            border_dashed_length: crate::scene::DEFAULT_BORDER_DASHED_LENGTH,
+            border_dashed_gap: crate::scene::DEFAULT_BORDER_DASHED_GAP,
         }
     }
 
-    /// Returns this quad with the given border widths. Each edge has its own width.
-    pub fn border_widths(self, border_widths: impl Into<Edges<Pixels>>) -> Self {
+    /// Sets corner smoothing, clamped to 0.0 through 1.0.
+    pub fn corner_smoothing(self, amount: f32) -> Self {
         PaintQuad {
-            border_widths: border_widths.into(),
-            ..self
-        }
-    }
-
-    /// Returns this quad with its borders painted in `border_color`.
-    pub fn border_color(self, border_color: impl Into<Background>) -> Self {
-        PaintQuad {
-            border_color: border_color.into(),
-            ..self
-        }
-    }
-
-    /// Returns this quad with the given background.
-    pub fn background(self, background: impl Into<Background>) -> Self {
-        PaintQuad {
-            background: background.into(),
+            corner_smoothing: amount.clamp(0.0, 1.0),
             ..self
         }
     }
@@ -9497,11 +9608,11 @@ impl PaintQuad {
     }
 }
 
-/// Returns a quad with every property set: bounds, corner radii, background, border and border style.
+/// Returns a quad with bounds, radii, background, border widths, border color and border style.
 ///
-/// Use [`fill`] or [`outline`] when you need only one of these. Corner radii larger than the bounds
-/// produce sharp corners where the arcs meet, and dashed borders don't look right with them.
-/// `Corners::clamp_radii_for_quad_size` keeps the radii within the bounds.
+/// Use fill or outline when you need only some properties. Radii larger than bounds produce sharp
+/// corners where the arcs meet; clamp radii when that is not wanted.
+#[deprecated(note = "replaced with builder syntax for PaintQuad")]
 pub fn quad(
     bounds: Bounds<Pixels>,
     corner_radii: impl Into<Corners<Pixels>>,
@@ -9510,66 +9621,31 @@ pub fn quad(
     border_color: impl Into<Background>,
     border_style: BorderStyle,
 ) -> PaintQuad {
-    PaintQuad {
-        bounds,
-        corner_radii: corner_radii.into(),
-        background: background.into(),
-        border_widths: border_widths.into(),
-        border_color: border_color.into(),
-        border_style,
-        border_dashed_length: crate::scene::DEFAULT_BORDER_DASHED_LENGTH,
-        border_dashed_gap: crate::scene::DEFAULT_BORDER_DASHED_GAP,
-    }
+    PaintQuad::new(bounds)
+        .corner_radii(corner_radii)
+        .background(background)
+        .border_widths(border_widths)
+        .border_color(border_color)
+        .border_style(border_style)
 }
 
-/// Returns a quad with no border and no corner radius, filled with `background`.
-///
-/// # Examples
-///
-/// ```
-/// # use gpui::{Bounds, fill, point, px, rgb, size};
-/// let bounds = Bounds::new(point(px(0.), px(0.)), size(px(40.), px(20.)));
-/// let quad = fill(bounds, rgb(0xf5f5f4));
-/// assert_eq!(quad.border_widths.top, px(0.));
-/// ```
+/// Returns a filled quad with no border and no corner radius.
+#[deprecated(note = "replaced with builder syntax for PaintQuad")]
 pub fn fill(bounds: impl Into<Bounds<Pixels>>, background: impl Into<Background>) -> PaintQuad {
-    PaintQuad {
-        bounds: bounds.into(),
-        corner_radii: (0.).into(),
-        background: background.into(),
-        border_widths: (0.).into(),
-        border_color: transparent_black().into(),
-        border_style: BorderStyle::default(),
-        border_dashed_length: crate::scene::DEFAULT_BORDER_DASHED_LENGTH,
-        border_dashed_gap: crate::scene::DEFAULT_BORDER_DASHED_GAP,
-    }
+    PaintQuad::new(bounds).background(background)
 }
 
-/// Returns a transparent quad with a 1px border of `border_color` and the given `border_style`.
-///
-/// # Examples
-///
-/// ```
-/// # use gpui::{BorderStyle, Bounds, outline, point, px, rgb, size};
-/// let bounds = Bounds::new(point(px(0.), px(0.)), size(px(40.), px(20.)));
-/// let quad = outline(bounds, rgb(0x2563eb), BorderStyle::Solid);
-/// assert_eq!(quad.border_widths.top, px(1.));
-/// ```
+/// Returns a transparent quad with a 1px border and the given border style.
+#[deprecated(note = "replaced with builder syntax for PaintQuad")]
 pub fn outline(
     bounds: impl Into<Bounds<Pixels>>,
     border_color: impl Into<Background>,
     border_style: BorderStyle,
 ) -> PaintQuad {
-    PaintQuad {
-        bounds: bounds.into(),
-        corner_radii: (0.).into(),
-        background: transparent_black().into(),
-        border_widths: (1.).into(),
-        border_color: border_color.into(),
-        border_style,
-        border_dashed_length: crate::scene::DEFAULT_BORDER_DASHED_LENGTH,
-        border_dashed_gap: crate::scene::DEFAULT_BORDER_DASHED_GAP,
-    }
+    PaintQuad::new(bounds)
+        .border_widths(1f32)
+        .border_color(border_color)
+        .border_style(border_style)
 }
 
 #[inline(never)]
@@ -9586,13 +9662,17 @@ fn with_element_arena_erased(callback: &mut dyn FnMut(&mut Arena)) -> Result<(),
 }
 
 #[cfg(test)]
+mod pointer_tests;
+
+#[cfg(test)]
 mod tests {
     use super::*;
+    use crate::util::FluentBuilder;
     use crate::{
-        AnyWindowHandle, Bounds, ContentMask, Context, DispatchPhase, DragMoveEvent, Empty,
-        ExternalDragPayload, ExternalPaths, FileDragPaths, FileDropEvent, FocusHandle, Font,
+        AnyWindowHandle, Bounds, ColorExt, ContentMask, Context, DispatchPhase, DragMoveEvent,
+        Empty, ExternalDragPayload, ExternalPaths, FileDragPaths, FileDropEvent, FocusHandle, Font,
         FontMetrics, ImageSource, InlineLayout, InlineLayoutRequest, InputEvent,
-        InteractiveElement as _, IntoElement, KeyDownEvent, Keystroke, LineLayout, LongPressEvent,
+        InteractiveElement, IntoElement, KeyDownEvent, Keystroke, LineLayout, LongPressEvent,
         MouseButton, MouseDownEvent, MouseMoveEvent, ParentElement, Pixels, PlatformInput,
         PlatformTextSystem, Point, PreparedRasterStyle, RasterColorEffect, RasterStyleRequest,
         RasterizedGlyph, Render, RequestFrameOptions, ScaledPixels, ShaderBool,
@@ -9861,17 +9941,17 @@ mod tests {
         test_window.draw();
 
         test_window.update(|_, window, _| {
-            assert_eq!(window.rendered_primitive_counts(), (0, 1, 1, 4));
+            assert_eq!(window.rendered_primitive_counts(), (0, 2, 0, 4));
             let scene = &window.rendered_frame.scene;
-            let expected_color = hsla(0.6, 0.7, 0.4, 0.8).opacity(0.5).into();
+            let expected_color = hsla(0.6, 0.7, 0.4, 0.8).into();
 
             assert_eq!(scene.monochrome_sprites[0].color, expected_color);
-            assert_eq!(scene.subpixel_sprites[0].color, expected_color);
+            assert_eq!(scene.monochrome_sprites[1].color, expected_color);
             assert!(
                 scene
                     .polychrome_sprites
                     .iter()
-                    .all(|sprite| sprite.opacity == 0.5)
+                    .all(|sprite| sprite.opacity == 1.0)
             );
             assert_eq!(
                 scene.monochrome_sprites[0].bounds.origin,
@@ -9882,7 +9962,7 @@ mod tests {
                 crate::AtlasTextureKind::Monochrome
             );
             assert_eq!(
-                scene.subpixel_sprites[0].tile.texture_id.kind,
+                scene.monochrome_sprites[1].tile.texture_id.kind,
                 crate::AtlasTextureKind::Subpixel
             );
             assert_eq!(
@@ -10550,7 +10630,7 @@ mod tests {
             .unwrap();
 
         assert_eq!(shadows.len(), 3);
-        let gradient = shadow_gradient().opacity(0.5);
+        let gradient = shadow_gradient();
         let drop_gradient = shadows
             .iter()
             .find(|shadow| shadow.inset == ShaderBool::Disabled && shadow.color == gradient)
@@ -10566,8 +10646,8 @@ mod tests {
 
         assert_eq!(
             solid.color.as_solid(),
-            Some(hsla(0.3, 0.7, 0.4, 0.2)),
-            "element opacity should apply to solid shadow paint"
+            Some(hsla(0.3, 0.7, 0.4, 0.4)),
+            "shadow alpha stays intrinsic until the group composite"
         );
         assert_eq!(drop_gradient.element_bounds, inset_gradient.element_bounds);
         assert!(drop_gradient.bounds.size.width > drop_gradient.element_bounds.size.width);
@@ -10610,6 +10690,7 @@ mod tests {
                     scene
                         .filter_boundaries
                         .iter()
+                        .filter(|boundary| !boundary.filters.is_empty())
                         .map(|boundary| boundary.corner_smoothing),
                 );
                 assert_smoothing(
@@ -11869,7 +11950,6 @@ mod tests {
         test_underline_paint_at_scales(cx, |window| {
             let scale = window.scale_factor();
             let original_mask = window.content_mask();
-            let original_opacity = window.element_opacity();
             let mask = ContentMask {
                 bounds: Bounds::from_corners(point(px(4.), px(10.)), point(px(16.), px(12.))),
                 fade_out: Edges {
@@ -11886,21 +11966,20 @@ mod tests {
             };
             let origin = point(px(-1.25), px(9.25));
             let width = px(24.);
+            window.next_frame.scene.clear();
             window.with_content_mask(Some(mask), |window| {
                 window.with_element_opacity(Some(0.5), |window| {
                     window.with_element_opacity(Some(0.5), |window| {
-                        let original = paint_test_underlines(window, |window| {
-                            window.paint_underline(origin, width, &style);
-                        })[0];
-                        assert_eq!(original.color, hsla(0.25, 0.5, 0.75, 0.125).into());
-                        let underlines = paint_test_underlines(window, |window| {
-                            window.paint_underline_with_exclusions(
-                                origin,
-                                width,
-                                &style,
-                                &[ScaledPixels(6. * scale)..ScaledPixels(8. * scale)],
-                            );
-                        });
+                        window.paint_underline(origin, width, &style);
+                        let original = window.next_frame.scene.underlines[0].clone();
+                        assert_eq!(original.color, hsla(0.25, 0.5, 0.75, 0.5).into());
+                        window.paint_underline_with_exclusions(
+                            origin,
+                            width,
+                            &style,
+                            &[ScaledPixels(6. * scale)..ScaledPixels(8. * scale)],
+                        );
+                        let underlines = &window.next_frame.scene.underlines[1..];
                         assert_eq!(underlines.len(), 2);
                         let original_bounds = original.content_mask.bounds;
                         let expected_mask = original.content_mask;
@@ -11936,8 +12015,16 @@ mod tests {
                     });
                 });
             });
+            let boundaries = &window.next_frame.scene.filter_boundaries;
+            assert_eq!(boundaries.len(), 4);
+            assert_eq!(
+                boundaries
+                    .iter()
+                    .map(|b| (b.is_start, b.opacity))
+                    .collect::<Vec<_>>(),
+                vec![(true, 0.5), (true, 0.5), (false, 0.5), (false, 0.5)],
+            );
             assert_eq!(window.content_mask(), original_mask);
-            assert_eq!(window.element_opacity(), original_opacity);
         });
     }
 
@@ -12110,6 +12197,125 @@ mod tests {
                 );
             })
             .unwrap();
+    }
+
+    struct CachedOpacityChild {
+        renders: Rc<Cell<usize>>,
+        paints: Rc<Cell<usize>>,
+    }
+
+    impl Render for CachedOpacityChild {
+        fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+            self.renders.set(self.renders.get() + 1);
+            let paints = self.paints.clone();
+
+            div().size(px(20.0)).bg(crate::red()).child(
+                canvas(
+                    |_, _, _| (),
+                    move |bounds, _, window, _| {
+                        paints.set(paints.get() + 1);
+                        window.paint_quad(PaintQuad::new(bounds).background(crate::blue()));
+                    },
+                )
+                .size_full()
+                .opacity(0.5),
+            )
+        }
+    }
+
+    struct CachedOpacityParent {
+        opacity: Option<f32>,
+        child: Entity<CachedOpacityChild>,
+        cached: bool,
+    }
+
+    impl Render for CachedOpacityParent {
+        fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+            let mut child_style = div().size(px(20.0));
+            let child = if self.cached {
+                self.child
+                    .clone()
+                    .cached(child_style.style().clone())
+                    .into_any_element()
+            } else {
+                self.child.clone().into_any_element()
+            };
+
+            div()
+                .size(px(40.0))
+                .when_some(self.opacity, |parent, opacity| parent.opacity(opacity))
+                .child(child)
+        }
+    }
+
+    #[test]
+    fn parent_opacity_changes_replay_cached_canvas_groups() {
+        let renders = Rc::new(Cell::new(0));
+        let paints = Rc::new(Cell::new(0));
+        let mut app = TestApp::new();
+        let mut test_window = app.open_window(|_, cx| CachedOpacityParent {
+            opacity: None,
+            cached: true,
+            child: cx.new(|_| CachedOpacityChild {
+                renders: renders.clone(),
+                paints: paints.clone(),
+            }),
+        });
+        test_window.draw();
+        let initial_renders = renders.get();
+        let initial_paints = paints.get();
+        assert!(initial_renders > 0);
+        assert!(initial_paints > 0);
+
+        let scene_snapshot = |scene: &Scene| {
+            (
+                scene.render_commands().to_vec(),
+                scene
+                    .quads
+                    .iter()
+                    .map(|quad| (quad.order, quad.bounds, quad.content_mask, quad.background))
+                    .collect::<Vec<_>>(),
+                scene
+                    .filter_boundaries
+                    .iter()
+                    .map(|boundary| {
+                        (
+                            boundary.bounds,
+                            boundary.content_mask,
+                            boundary.opacity,
+                            boundary.is_start,
+                        )
+                    })
+                    .collect::<Vec<_>>(),
+            )
+        };
+
+        for opacity in [Some(0.5), Some(0.25), Some(1.0), Some(0.0), None] {
+            let mut fresh_app = TestApp::new();
+            let mut fresh_window = fresh_app.open_window(|_, cx| CachedOpacityParent {
+                opacity,
+                cached: false,
+                child: cx.new(|_| CachedOpacityChild {
+                    renders: Rc::new(Cell::new(0)),
+                    paints: Rc::new(Cell::new(0)),
+                }),
+            });
+            fresh_window.draw();
+            let fresh_scene =
+                fresh_window.update(|_, window, _| scene_snapshot(&window.rendered_frame.scene));
+
+            test_window.update(|view, _, cx| {
+                view.opacity = opacity;
+                cx.notify();
+            });
+            test_window.draw();
+            test_window.update(|_, window, _| {
+                let scene = &window.rendered_frame.scene;
+                assert_eq!(scene_snapshot(scene), fresh_scene, "opacity {opacity:?}");
+            });
+            assert_eq!(renders.get(), initial_renders);
+            assert_eq!(paints.get(), initial_paints);
+        }
     }
 }
 

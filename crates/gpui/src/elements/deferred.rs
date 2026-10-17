@@ -53,10 +53,18 @@ pub fn deferred(child: impl IntoElement) -> Deferred {
 /// one with [`deferred`].
 ///
 /// A deferred child may create more deferred children. GPUI processes these in rounds, and the
-/// frame panics if they nest more than ten rounds deep. Keep such nesting shallow.
+/// frame stops processing after a bounded nesting depth to avoid an infinite deferred-draw loop.
+#[derive(derive_setters::Setters)]
+#[setters(generate = false)]
 pub struct Deferred {
     child: Option<AnyElement>,
+    /// Sets a priority for the element. A higher priority means painting the element
+    /// on top of deferred draws with a lower priority, closer to the viewer.
+    #[setters(generate, into)]
     priority: DeferredPriority,
+    /// When a content mask is provided, the deferred element will be clipped to that region during
+    /// both prepaint and paint.
+    #[setters(generate, strip_option)]
     content_mask: Option<ContentMask<Pixels>>,
 }
 
@@ -120,29 +128,11 @@ impl IntoElement for Deferred {
 }
 
 impl Deferred {
-    /// Sets the draw priority. Deferred elements draw in ascending priority, so a higher value
-    /// draws on top of the ones below it. Accepts a number, or a [`DeferredPriority`].
-    pub fn priority(mut self, priority: impl Into<DeferredPriority>) -> Self {
-        self.priority = priority.into();
-        self
-    }
-
     /// Sets the priority to one more than the enclosing deferred element's, or to 1 when no deferred
-    /// element encloses this one.
-    ///
-    /// A deferred element is enclosing when it is being prepainted and creates this one, directly or
-    /// through other elements. Use it for nested popups, so that each level draws above the last.
+    /// element encloses this one. This also applies when the nested deferred element is created
+    /// indirectly through other elements.
     pub fn priority_auto(mut self) -> Self {
         self.priority = DeferredPriority::Auto;
-        self
-    }
-
-    /// Clips the deferred element to `mask` while it is prepainted and painted, so the clipped
-    /// area also doesn't receive mouse input.
-    ///
-    /// Without a mask, no extra clipping is applied.
-    pub fn content_mask(mut self, mask: ContentMask<Pixels>) -> Self {
-        self.content_mask = Some(mask);
         self
     }
 }

@@ -19,9 +19,14 @@ geometry from one phase to the other:
 let meter = canvas(
     |bounds, _window, _cx| bounds.size.width * 0.6,
     |bounds, filled_width, window, _cx| {
-        window.paint_quad(outline(bounds, rgb(0x9ca3af), BorderStyle::Solid));
+        window.paint_quad(
+            PaintQuad::new(bounds)
+                .border_widths(px(1.))
+                .border_color(rgb(0x9ca3af))
+                .border_style(BorderStyle::Solid),
+        );
         let filled = Bounds::new(bounds.origin, size(filled_width, bounds.size.height));
-        window.paint_quad(fill(filled, rgb(0x2563eb)));
+        window.paint_quad(PaintQuad::new(filled).background(rgb(0x2563eb)));
     },
 )
 .w_full()
@@ -40,21 +45,18 @@ data it needs on the view and move a copy into the closures.
 
 ## Paint rectangles with `paint_quad`
 
-[`Window::paint_quad`] draws a [`PaintQuad`], and three functions build one:
+[`Window::paint_quad`] draws a [`PaintQuad`]. Build one with [`PaintQuad::new`] and
+chain builder methods for its background, corner radii, and border. The older
+[`fill`], [`outline`], and [`quad`] helper functions are deprecated; use the
+PaintQuad builder for new code.
 
-- [`fill`] paints a background with no border.
-- [`outline`] paints a 1px border with no background.
-- [`quad`] takes every part: corner radii, background, border widths, border
-  color and [`BorderStyle`].
-
-A quad's corners can be rounded and its border dashed. Use builder methods
-on [`PaintQuad`] to adjust a quad from [`fill`] or [`outline`]:
+A quad's corners can be rounded and its border dashed:
 
 ```rust
 # use gpui::*;
 # let bounds = Bounds::new(point(px(0.), px(0.)), size(px(120.), px(48.)));
 # fn paint(bounds: Bounds<Pixels>, window: &mut Window) {
-let card = fill(bounds, rgb(0xf9fafb))
+let card = PaintQuad::new(bounds).background(rgb(0xf9fafb))
     .corner_radii(px(8.))
     .border_widths(px(1.))
     .border_color(rgb(0xd1d5db));
@@ -120,8 +122,8 @@ let shadow = BoxShadow {
     spread_radius: px(0.),
     inset: false,
 };
-window.paint_drop_shadows(bounds, Corners::all(px(8.)), &[shadow]);
-window.paint_quad(fill(bounds, rgb(0xffffff)).corner_radii(px(8.)));
+window.paint_drop_shadows(bounds, Corners::all(px(8.)), 0.0, &[shadow]);
+window.paint_quad(PaintQuad::new(bounds).background(rgb(0xffffff)).corner_radii(px(8.)));
 # }
 ```
 
@@ -131,8 +133,10 @@ shape covers the shadow where they overlap.
 ## Draw images and text
 
 [`Window::paint_image`] draws a decoded [`RenderImage`] into `image_bounds`. Only
-the part inside `bounds` is visible, and `corner_radii` applies to `bounds`. It
-returns a `Result`, and it takes the frame index for animated images. Get the image with
+the part inside `bounds` is visible. `corner_radii` applies to `bounds`, and
+`corner_smoothing` ranges from circular corners at `0.0` to maximum smoothing at
+`1.0`. The method returns a `Result` and takes a frame index for animated images.
+Get the image with
 [`Window::use_asset`] and [`ImgResourceLoader`], the same loader [`img`] uses,
 so the image is loaded once and shared:
 
@@ -141,7 +145,7 @@ so the image is loaded once and shared:
 # use std::path::PathBuf;
 fn paint_thumbnail(path: PathBuf, bounds: Bounds<Pixels>, window: &mut Window, cx: &mut App) {
     if let Some(Ok(image)) = window.use_asset::<ImgResourceLoader>(&Resource::from(path), cx) {
-        let _ = window.paint_image(bounds, bounds, Corners::all(px(6.)), image, 0, false);
+        let _ = window.paint_image(bounds, bounds, Corners::all(px(6.)), 0.0, image, 0, false);
     }
 }
 ```
@@ -181,7 +185,7 @@ let inner = Bounds::new(
 );
 
 window.with_content_mask(Some(ContentMask { bounds: inner, ..Default::default() }), |window| {
-    window.paint_quad(fill(bounds, rgb(0xef4444)));
+    window.paint_quad(PaintQuad::new(bounds).background(rgb(0xef4444)));
 });
 # }
 ```

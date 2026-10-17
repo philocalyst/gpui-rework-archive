@@ -53,6 +53,7 @@ pub mod queue;
 /// A seeded, mutable element tree for benchmarks and tests of GPUI rendering.
 #[cfg(any(test, feature = "bench-support"))]
 pub mod randomized_element_tree;
+mod resize;
 mod scene;
 #[cfg(any(test, feature = "test-support", feature = "bench-support"))]
 mod seeds;
@@ -121,6 +122,7 @@ pub use gpui_macros::{
     AppContext, InteractiveElement, IntoElement, ParentElement, Render, StatefulInteractiveElement,
     Styled, VisualContext, bench, property_test, register_action, test,
 };
+pub use resize::*;
 pub use spring::*;
 
 /// Defines a Criterion benchmark group for benchmarks annotated with [`gpui::bench`].
@@ -234,7 +236,7 @@ pub use taffy::{AvailableSpace, LayoutId};
 pub use test::*;
 pub use text_system::*;
 pub use transition::*;
-pub use util::{FutureExt, Timeout};
+pub use util::{FutureExt, TextRangeExt, Timeout};
 pub use view::*;
 pub use window::*;
 

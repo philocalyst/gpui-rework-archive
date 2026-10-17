@@ -14,6 +14,8 @@ update that state through a context; `notify` requests the next redraw. For API
 and feature differences from Zed's GPUI, see the
 [upstream guide](crates/gpui/docs/upstream.md).
 
+Release notes and deprecation status are listed in the [changelog](CHANGELOG.md).
+
 ## Overview
 
 - Layout and styling
@@ -120,7 +122,7 @@ and feature differences from Zed's GPUI, see the
   canvas(
       |_bounds, _window, _cx| {},
       |bounds, _state, window, _cx| {
-          window.paint_quad(fill(bounds, rgb(0x5078f0)));
+          window.paint_quad(PaintQuad::new(bounds).background(rgb(0x5078f0)));
       },
   )
   .size(px(80.0))

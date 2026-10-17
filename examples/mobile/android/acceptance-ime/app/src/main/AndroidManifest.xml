@@ -1,0 +1,32 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:label="GPUI Acceptance IME" android:allowBackup="false">
+        <service
+            android:name=".AcceptanceImeService"
+            android:label="GPUI Acceptance IME"
+            android:permission="android.permission.BIND_INPUT_METHOD"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.view.InputMethod" />
+            </intent-filter>
+            <meta-data android:name="android.view.im" android:resource="@xml/method" />
+        </service>
+        <service
+            android:name=".AcceptanceAccessibilityService"
+            android:label="GPUI acceptance accessibility helper"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service" />
+        </service>
+        <receiver
+            android:name=".ImeCommandReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="dev.gpui.acceptanceime.COMMAND" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

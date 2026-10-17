@@ -1213,7 +1213,7 @@ pub trait Styled: Sized {
         self
     }
 
-    /// Sets the opacity of this element and its children.
+    /// Sets the opacity of this element and its children, composited together as one group.
     ///
     /// `0.0` is fully transparent and `1.0` is fully opaque.
     fn opacity(mut self, opacity: f32) -> Self {

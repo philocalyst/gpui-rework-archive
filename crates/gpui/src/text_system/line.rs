@@ -1,9 +1,11 @@
 use crate::{
-    App, Bounds, InlineLayout, LineLayout, PaintFragment, Pixels, Point, Result, ShapedTextLayout,
-    SharedString, TextAlign, TextSystem, UnderlineStyle, VisualLine, Window, fill, point, size,
+    App, Bounds, InlineLayout, LineLayout, PaintFragment, PaintQuad, Pixels, Point, Result,
+    ShapedTextLayout, SharedString, TextAlign, TextSystem, UnderlineStyle, VisualLine, Window,
+    point, size,
 };
 use derive_more::{Deref, DerefMut};
 use std::{
+    iter::Peekable,
     ops::Range,
     sync::{
         Arc,
@@ -56,7 +58,7 @@ impl ShapedLine {
         self.layout.len
     }
 
-    /// Returns a forward-only cursor over Unicode grapheme boundaries that align with backend shaping clusters.
+    /// Returns a forward-only cursor over Unicode grapheme boundaries aligned with backend shaping clusters.
     pub fn cursor(&self) -> ShapedLineCursor<'_> {
         assert_eq!(
             self.len(),
@@ -84,12 +86,12 @@ impl ShapedLine {
             "split is not a UTF-8 boundary"
         );
         assert!(
-            self.is_cluster_boundary(i),
-            "split falls inside a shaped cluster"
-        );
-        assert!(
             self.is_grapheme_boundary(i),
             "split falls inside a Unicode grapheme"
+        );
+        assert!(
+            self.is_cluster_boundary(i),
+            "split falls inside a shaped cluster"
         );
         (self.slice(0..i), self.slice(i..self.len()))
     }
@@ -102,13 +104,6 @@ impl ShapedLine {
                 .normalized_caret(crate::CaretPosition::attached_to_next_cluster(i))
                 .index
                 == i
-    }
-    fn is_grapheme_boundary(&self, i: usize) -> bool {
-        i == self.len()
-            || self
-                .text
-                .grapheme_indices(true)
-                .any(|(start, _)| start == i)
     }
     fn slice(&self, source: Range<usize>) -> ShapedLine {
         let h = self.layout.ascent + self.layout.descent;
@@ -347,7 +342,7 @@ pub struct ShapedLineCursor<'a> {
     line: &'a ShapedLine,
     byte_index: usize,
     x_offset: Pixels,
-    grapheme_starts: std::iter::Peekable<GraphemeIndices<'a>>,
+    grapheme_starts: Peekable<GraphemeIndices<'a>>,
 }
 impl ShapedLineCursor<'_> {
     fn is_grapheme_boundary(&mut self, i: usize) -> bool {
@@ -1393,13 +1388,13 @@ fn paint_fragment_decorations_at(
             );
         }
     } else if let Some(color) = fragment.style.background_color {
-        window.paint_quad(fill(
-            Bounds::new(
+        window.paint_quad(
+            PaintQuad::new(Bounds::new(
                 point(range.start, line_origin.y),
                 size(range.end - range.start, line_height),
-            ),
-            color,
-        ));
+            ))
+            .background(color),
+        );
     }
 }
 

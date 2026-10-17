@@ -2,8 +2,7 @@ use super::{AtlasTextureId, BatchIterator, FilterBoundary, Scene};
 use smallvec::SmallVec;
 use std::ops::Range;
 
-/// The maximum nesting depth for content-filter groups that receive their own offscreen target.
-/// Deeper groups are drawn inline into the current target.
+/// Inline capacity of renderer isolation stacks. Deeper groups allocate additional targets.
 pub const MAX_FILTER_GROUP_DEPTH: usize = 2;
 
 /// The index of an offscreen target in the renderer's content-filter target pool.
@@ -20,7 +19,7 @@ impl FilterTargetIndex {
 /// Where the contents of a filter group are rendered.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum FilterRenderTarget {
-    /// Render directly into the current target, such as once isolation targets are exhausted.
+    /// Render an unmatched group directly into the current target.
     Inline,
     /// Render into a dedicated offscreen target and composite it into the parent.
     Isolated(FilterTargetIndex),
@@ -47,14 +46,16 @@ pub struct ScenePlanRequirements {
     pub surface_count: usize,
     /// The number of [`crate::BackdropFilter`]s to draw.
     pub backdrop_filter_count: usize,
-    /// The number of content-filter groups that draw into an isolated target.
+    /// The number of filter or grouped-opacity groups that draw into an isolated target.
     pub isolated_filter_count: usize,
     /// The number of isolated targets needed at the deepest level of nesting.
     pub isolated_target_count: usize,
     /// Whether any path is rasterized into an offscreen target.
     pub uses_path_target: bool,
-    /// Whether a backdrop filter or an isolated content-filter group needs an offscreen target.
+    /// Whether a backdrop filter or an isolated filter or opacity group needs an offscreen target.
     pub uses_offscreen_target: bool,
+    /// Whether a foreground or backdrop filter needs a temporary blur target.
+    pub uses_blur_target: bool,
 }
 
 /// A compiled scene command stream, built by [`Scene::finish`] and shared by every renderer.
@@ -96,9 +97,7 @@ impl ScenePlan {
                 PrimitiveBatch::FilterBoundary(boundary_index) => {
                     let boundary = &scene.filter_boundaries[boundary_index];
                     if boundary.is_start {
-                        let target = if matched_starts[boundary_index]
-                            && isolated_depth < MAX_FILTER_GROUP_DEPTH
-                        {
+                        let target = if matched_starts[boundary_index] {
                             FilterRenderTarget::Isolated(FilterTargetIndex(isolated_depth))
                         } else {
                             FilterRenderTarget::Inline
@@ -106,6 +105,7 @@ impl ScenePlan {
                         if target.is_isolated() {
                             isolated_depth += 1;
                             requirements.uses_offscreen_target = true;
+                            requirements.uses_blur_target |= boundary.max_blur_radius() > 0.0;
                             requirements.isolated_target_count =
                                 requirements.isolated_target_count.max(isolated_depth);
                         }
@@ -134,6 +134,12 @@ impl ScenePlan {
                     }
                 }
                 batch => {
+                    if let PrimitiveBatch::BackdropFilters(range) = &batch {
+                        requirements.uses_blur_target |= scene.backdrop_filters[range.clone()]
+                            .iter()
+                            .any(|filter| filter.max_blur_radius() > 0.0);
+                    }
+
                     requirements.include_batch(&batch);
                     commands.push(RenderCommand::Batch(batch));
                 }
@@ -292,7 +298,7 @@ pub enum PrimitiveBatch {
     Surfaces(Range<usize>),
     /// Backdrop filters, as indices into [`Scene::backdrop_filters`].
     BackdropFilters(Range<usize>),
-    /// A content-filter boundary, as an index into [`Scene::filter_boundaries`].
+    /// A filter or grouped-opacity boundary, as an index into [`Scene::filter_boundaries`].
     FilterBoundary(usize),
 }
 
@@ -301,14 +307,14 @@ pub enum PrimitiveBatch {
 pub enum RenderCommand {
     /// A normal primitive batch.
     Batch(PrimitiveBatch),
-    /// Begin rendering a content-filter group.
+    /// Begin rendering a filter or grouped-opacity group.
     BeginFilter {
         /// Index of the opening boundary in [`Scene::filter_boundaries`].
         boundary_index: usize,
         /// Whether this group renders inline or into an isolated target.
         target: FilterRenderTarget,
     },
-    /// Finish and composite a content-filter group.
+    /// Finish and composite a filter or grouped-opacity group.
     EndFilter {
         /// Index of the matched opening boundary in [`Scene::filter_boundaries`].
         boundary_index: usize,

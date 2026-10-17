@@ -24,11 +24,11 @@ use gpui::{
 };
 use gpui_apple::metal_renderer::MetalRenderer;
 use objc2::rc::Retained;
-use objc2::runtime::AnyClass;
+use objc2::runtime::{AnyClass, AnyObject};
 use objc2::{ClassType, DefinedClass, MainThreadMarker, MainThreadOnly, define_class, msg_send};
 use objc2_core_foundation::{CGPoint, CGRect, CGSize};
 use objc2_foundation::{
-    NSNotification, NSNotificationCenter, NSNumber, NSObjectProtocol, NSSet, NSValue,
+    NSNotification, NSNotificationCenter, NSNumber, NSObjectProtocol, NSSet, NSString, NSValue,
 };
 use objc2_quartz_core::CAMetalLayer;
 use objc2_ui_kit::{
@@ -52,6 +52,9 @@ use std::{
 };
 
 const KEYBOARD_DISMISS_DISTANCE: Pixels = px(24.);
+#[cfg(debug_assertions)]
+const TEST_ACCESSIBILITY_CONTAINER_QUERY_ARGUMENT: &str =
+    "--gpui-test-accessibility-container-query";
 
 struct IosA11yActivationHandler(Box<dyn Fn() -> Option<gpui::accesskit::TreeUpdate> + Send>);
 
@@ -444,8 +447,8 @@ impl IosWindowState {
             let notification_center = NSNotificationCenter::defaultCenter();
 
             let window = Rc::downgrade(self);
-            let frame_change_block =
-                block2::RcBlock::new(move |notification: NonNull<NSNotification>| {
+            let frame_change_block = block2::RcBlock::new(
+                move |notification: NonNull<NSNotification>| {
                     let notification = notification.as_ref();
                     let Some(user_info) = notification.userInfo() else {
                         return;
@@ -457,24 +460,40 @@ impl IosWindowState {
                     let Some(frame_value) = frame_value.downcast_ref::<NSValue>() else {
                         return;
                     };
-                    let frame = frame_value.CGRectValue();
+                    let raw_frame = frame_value.CGRectValue();
                     if let Some(window) = window.upgrade() {
                         let screen_space = window.window.screen().coordinateSpace();
-                        let frame = window
+                        let converted_frame = window
                             .window
-                            .convertRect_fromCoordinateSpace(frame, &screen_space);
+                            .convertRect_fromCoordinateSpace(raw_frame, &screen_space);
+                        let bounds = window.view.bounds();
+                        let inset = keyboard_bottom_inset(bounds, converted_frame);
+                        test_log_ime(&format!(
+                            "[GPUI-IME-TEST] will-change raw_frame={raw_frame:?} converted_frame={converted_frame:?} view_bounds={bounds:?} inset={inset}"
+                        ));
                         let (duration, curve) = keyboard_animation_info(notification);
-                        window.animate_keyboard_height(
-                            keyboard_bottom_inset(window.view.bounds(), frame),
-                            duration,
-                            curve,
-                        );
+                        window.animate_keyboard_height(inset, duration, curve);
                     }
-                });
+                },
+            );
 
             let window = Rc::downgrade(self);
             let hide_block = block2::RcBlock::new(move |notification: NonNull<NSNotification>| {
                 if let Some(window) = window.upgrade() {
+                    let frame = notification
+                        .as_ref()
+                        .userInfo()
+                        .and_then(|user_info| user_info.objectForKey(UIKeyboardFrameEndUserInfoKey))
+                        .and_then(|value| {
+                            value
+                                .downcast_ref::<NSValue>()
+                                .map(|value| value.CGRectValue())
+                        });
+                    test_log_ime(&format!(
+                        "[GPUI-IME-TEST] will-hide raw_frame={frame:?} view_bounds={:?} first_responder={}",
+                        window.view.bounds(),
+                        window.text_input_view.isFirstResponder()
+                    ));
                     let (duration, curve) = keyboard_animation_info(notification.as_ref());
                     window.animate_keyboard_height(0., duration, curve);
                 }
@@ -1011,6 +1030,19 @@ impl PlatformWindow for IosWindow {
             )
         };
         self.a11y_adapter.borrow_mut().replace(adapter);
+
+        // UI automation cannot enable VoiceOver without changing a global
+        // simulator setting. When explicitly requested by the native iOS
+        // acceptance test, ask UIKit for this real root view's container after
+        // installing AccessKit's subclass. That invokes the adapter's actual
+        // accessibilityElements override and requests GPUI's initial tree.
+        // Ordinary app launches retain AccessKit's assistive-client gating.
+        #[cfg(debug_assertions)]
+        if std::env::args_os().any(|argument| {
+            argument == std::ffi::OsStr::new(TEST_ACCESSIBILITY_CONTAINER_QUERY_ARGUMENT)
+        }) {
+            let _: *mut AnyObject = unsafe { msg_send![&*self.view, accessibilityElements] };
+        }
     }
 
     fn a11y_tree_update(&self, tree_update: gpui::accesskit::TreeUpdate) {
@@ -1058,6 +1090,27 @@ fn interpolate_keyboard_inset(from: f32, to: f32, progress: f32, curve: i64) -> 
         _ => progress * progress * (3.0 - 2.0 * progress),
     };
     from + (to - from) * eased
+}
+
+#[link(name = "Foundation", kind = "framework")]
+unsafe extern "C" {
+    fn NSLog(format: *mut AnyObject, ...);
+}
+
+pub(super) fn test_log_ime(message: &str) {
+    if !cfg!(debug_assertions)
+        || !std::env::args().any(|argument| argument == "--gpui-test-log-ime")
+    {
+        return;
+    }
+    let format = NSString::from_str("%@");
+    let message = NSString::from_str(message);
+    unsafe {
+        NSLog(
+            Retained::as_ptr(&format).cast_mut().cast::<AnyObject>(),
+            Retained::as_ptr(&message).cast_mut().cast::<AnyObject>(),
+        );
+    }
 }
 
 fn keyboard_bottom_inset(bounds: CGRect, keyboard: CGRect) -> f32 {

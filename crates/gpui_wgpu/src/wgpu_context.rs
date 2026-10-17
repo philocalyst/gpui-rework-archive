@@ -19,7 +19,7 @@ pub const DISABLE_DIRECT_COMPOSITION_ENV: &str = "GPUI_DISABLE_DIRECT_COMPOSITIO
 /// creates and retains EGL state even when a Vulkan adapter is eventually selected.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 #[cfg(not(target_family = "wasm"))]
-pub(crate) enum NativeBackend {
+pub enum NativeBackend {
     #[cfg(target_vendor = "apple")]
     Metal,
     #[cfg(target_os = "windows")]
@@ -43,11 +43,11 @@ pub(crate) struct NativeInstance {
 #[cfg(not(target_family = "wasm"))]
 impl NativeBackend {
     #[cfg(target_vendor = "apple")]
-    const PREFERENCE: &'static [Self] = &[Self::Metal];
+    pub(crate) const PREFERENCE: &'static [Self] = &[Self::Metal];
     #[cfg(target_os = "windows")]
-    const PREFERENCE: &'static [Self] = &[Self::Dx12, Self::Vulkan, Self::Gl];
+    pub(crate) const PREFERENCE: &'static [Self] = &[Self::Dx12, Self::Vulkan, Self::Gl];
     #[cfg(not(any(target_vendor = "apple", target_os = "windows")))]
-    const PREFERENCE: &'static [Self] = &[Self::Vulkan, Self::Gl];
+    pub(crate) const PREFERENCE: &'static [Self] = &[Self::Vulkan, Self::Gl];
 
     pub(crate) fn instance(
         self,
@@ -85,10 +85,21 @@ impl NativeBackend {
 
     pub(crate) fn try_in_preference_order<T>(
         operation: &'static str,
+        attempt: impl FnMut(Self) -> anyhow::Result<T>,
+    ) -> anyhow::Result<T> {
+        Self::try_in_order(operation, Self::PREFERENCE, attempt)
+    }
+
+    pub(crate) fn try_in_order<T>(
+        operation: &'static str,
+        backends: &[Self],
         mut attempt: impl FnMut(Self) -> anyhow::Result<T>,
     ) -> anyhow::Result<T> {
+        if backends.is_empty() {
+            anyhow::bail!("no native GPU backends supplied for {operation}");
+        }
         let mut failures = SmallVec::<[NativeBackendFailure; 3]>::new();
-        for &backend in Self::PREFERENCE {
+        for &backend in backends {
             match attempt(backend) {
                 Ok(value) => return Ok(value),
                 Err(source) => failures.push(NativeBackendFailure { backend, source }),

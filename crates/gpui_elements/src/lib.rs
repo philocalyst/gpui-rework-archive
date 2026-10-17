@@ -4,3 +4,4 @@
 //! multi-line text inputs.
 
 pub mod editable_text;
+pub mod switch;
