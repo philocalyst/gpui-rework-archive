@@ -8,8 +8,8 @@
 //! Run it with `cargo run --example canvas`.
 
 use gpui::{
-    App, Bounds, Context, PathBuilder, Pixels, Point, QuitMode, Window, WindowBounds,
-    WindowOptions, canvas, colors::Colors, div, fill, point, prelude::*, px, rgb, rgba, size,
+    App, Bounds, Context, PaintQuad, PathBuilder, Pixels, Point, QuitMode, Window, WindowBounds,
+    WindowOptions, canvas, colors::Colors, div, point, prelude::*, px, rgb, rgba, size,
 };
 
 const SERIES: [(&str, &[f32]); 2] = [
@@ -96,10 +96,13 @@ fn paint_chart(bounds: Bounds<Pixels>, values: &[f32], colors: &Colors, window: 
 
     for i in 0..=4 {
         let y = plot.origin.y + plot.size.height * (i as f32 / 4.);
-        window.paint_quad(fill(
-            Bounds::new(point(plot.origin.x, y), size(plot.size.width, px(1.))),
-            colors.separator,
-        ));
+        window.paint_quad(
+            PaintQuad::new(Bounds::new(
+                point(plot.origin.x, y),
+                size(plot.size.width, px(1.)),
+            ))
+            .background(colors.separator),
+        );
     }
 
     let max = values.iter().copied().fold(0., f32::max) * 1.1;
@@ -141,13 +144,11 @@ fn paint_chart(bounds: Bounds<Pixels>, values: &[f32], colors: &Colors, window: 
     let radius = px(4.);
     for p in &points {
         window.paint_quad(
-            fill(
-                Bounds::centered_at(*p, size(radius * 2., radius * 2.)),
-                accent,
-            )
-            .corner_radii(radius)
-            .border_widths(px(2.))
-            .border_color(colors.background),
+            PaintQuad::new(Bounds::centered_at(*p, size(radius * 2., radius * 2.)))
+                .background(accent)
+                .corner_radii(radius)
+                .border_widths(px(2.))
+                .border_color(colors.background),
         );
     }
 }

@@ -1,3 +1,4 @@
+use super::inline::{InlineTextMetrics, InlineVisualLine};
 use crate::{
     Bounds, FontId, GlyphId, InlineBidiScope, InlineBoxRequest, InlineLayoutRequest,
     InlineTextStyle, Pixels, PlatformTextSystem, Point, SharedString, Size, StrikethroughStyle,
@@ -44,29 +45,8 @@ pub struct LineLayout {
     pub platform_layout: Arc<dyn PlatformTextLayout>,
 }
 
-/// Font metrics that set the vertical extent of an inline line.
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
-pub struct InlineTextMetrics {
-    /// The distance from the baseline up to the top of the tallest glyphs.
-    pub ascent: Pixels,
-    /// The distance from the baseline down to the bottom of the lowest glyphs.
-    pub descent: Pixels,
-    /// The height of a lowercase `x` in the container's font.
-    pub x_height: Pixels,
-}
-
-/// One row of an inline layout, positioned relative to the layout's origin.
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
-pub struct InlineVisualLine {
-    /// The top-left corner of the row, relative to the inline layout.
-    pub origin: Point<Pixels>,
-    /// The size of the row, including the room that atomic boxes need.
-    pub size: Size<Pixels>,
-    /// The baseline of the row, measured down from `origin.y`.
-    pub baseline: Pixels,
-}
-
 /// An atomic box from an inline layout, with the position the layout gave it.
+/// The position assigned to an element embedded in text.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct PositionedInlineBox {
     /// The identifier from the matching [`InlineBoxRequest::id`].
@@ -461,7 +441,19 @@ pub struct PaintStyle {
     pub strikethrough: Option<StrikethroughStyle>,
 }
 
+impl From<&TextRun> for PaintStyle {
+    fn from(run: &TextRun) -> Self {
+        Self {
+            color: run.color,
+            background_color: run.background_color,
+            underline: run.underline,
+            strikethrough: run.strikethrough,
+        }
+    }
+}
+
 /// A run of glyphs that share one font and one style, positioned on a visual line.
+/// A positioned, style-specific glyph run painted on one visual line.
 #[derive(Clone, Debug, PartialEq)]
 pub struct PaintFragment {
     /// Index of the input text run that supplies paint properties.

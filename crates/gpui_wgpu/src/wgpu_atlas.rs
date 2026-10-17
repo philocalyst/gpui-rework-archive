@@ -578,7 +578,7 @@ mod tests {
         };
         let insert = |key: &AtlasKey| {
             atlas
-                .get_or_insert_with(key, &mut || {
+                .get_or_insert_with(key.clone(), &mut || {
                     Ok(Some((size, Cow::Owned(vec![0, 0, 0, 255]))))
                 })
                 .expect("allocation should succeed")

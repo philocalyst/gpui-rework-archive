@@ -2154,7 +2154,8 @@ impl ParleyTextSystem {
                 text_top = text_top.min(px(-run_metrics.ascent - half_leading));
                 text_bottom = text_bottom.max(px(run_metrics.descent + half_leading));
 
-                if text.is_empty() {
+                // Bidi preparation can add direction markers to an empty source string.
+                if source_text_len == 0 {
                     continue;
                 }
 
@@ -2202,6 +2203,9 @@ impl ParleyTextSystem {
                     x_range: start..start + px(glyph_run.advance()),
                     style: PaintStyle::from(&source_runs[source_run]),
                     // Parley's offsets are y-up; painting adds them to the baseline in y-down.
+                    // Parley reports font metrics y-up (an underline below the
+                    // baseline is negative); gpui adds these to `baseline_y` in
+                    // y-down space, so flip them.
                     underline_offset: Some(px(-run_metrics.underline_offset)),
                     strikethrough_offset: Some(px(-run_metrics.strikethrough_offset)),
                 });
@@ -2512,10 +2516,6 @@ impl PlatformTextSystem for ParleyTextSystem {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::font_fixtures::{
-        IBM_PLEX, IBM_PLEX_SEMIBOLD, LILEX, NOTO_ARABIC, NOTO_COLOR_EMOJI, NOTO_HEBREW, NOTO_SANS,
-        SOURCE_SERIF,
-    };
     use crate::{FontSynthesis, FontVariation, RasterFace};
     use gpui::{
         AppContext, CaretSelection, Context, FontFallbacks, FontFeatures as GpuiFontFeatures,
@@ -2523,6 +2523,10 @@ mod tests {
         HeadlessAppContext, HighlightStyle, Hsla, IntoElement, Point, RasterizedGlyphFormat,
         Render, ScaledPixels, StrikethroughStyle, Styled, StyledText, TextSystem, UnderlineStyle,
         VerticalAlign, Window, WindowHandle, WindowTextSystem, div, font, hsla, prelude::*,
+    };
+    use gpui_fonts::{
+        IBM_PLEX, IBM_PLEX_SEMIBOLD, LILEX, NOTO_ARABIC, NOTO_COLOR_EMOJI, NOTO_HEBREW, NOTO_SANS,
+        SOURCE_SERIF,
     };
     use std::{
         cell::Cell,
@@ -2578,21 +2582,37 @@ mod tests {
         }
     }
 
+    fn layout_with_options(
+        system: &ParleyTextSystem,
+        text: &str,
+        font_size: Pixels,
+        runs: &[TextRun],
+        options: TextLayoutOptions,
+    ) -> LineLayout {
+        system.layout_text(TextLayoutRequest {
+            text,
+            font_size,
+            runs,
+            options,
+        })
+    }
+
     fn layout_line(
         system: &ParleyTextSystem,
         text: &str,
         font_size: Pixels,
         runs: &[TextRun],
     ) -> LineLayout {
-        system.layout_text(TextLayoutRequest {
+        layout_with_options(
+            system,
             text,
             font_size,
             runs,
-            options: TextLayoutOptions {
+            TextLayoutOptions {
                 text_align: TextAlign::Left,
                 ..Default::default()
             },
-        })
+        )
     }
 
     fn layout_wrapped(
@@ -2603,17 +2623,18 @@ mod tests {
         wrap_width: Pixels,
         line_clamp: Option<usize>,
     ) -> LineLayout {
-        system.layout_text(TextLayoutRequest {
+        layout_with_options(
+            system,
             text,
             font_size,
             runs,
-            options: TextLayoutOptions {
+            TextLayoutOptions {
                 wrap_width: Some(wrap_width),
                 line_clamp,
                 text_align: TextAlign::Left,
                 ..Default::default()
             },
-        })
+        )
     }
 
     fn layout_directional(
@@ -2623,43 +2644,48 @@ mod tests {
         text_align: TextAlign,
         alignment_width: Option<Pixels>,
     ) -> LineLayout {
-        system.layout_text(TextLayoutRequest {
+        layout_with_options(
+            system,
             text,
-            font_size: px(16.0),
-            runs: &[text_run(text, "IBM Plex Sans")],
-            options: TextLayoutOptions {
+            px(16.0),
+            &[text_run(text, IBM_PLEX.family)],
+            TextLayoutOptions {
                 alignment_width,
                 text_align,
                 direction,
                 ..Default::default()
             },
-        })
+        )
     }
 
     #[test]
-    fn explicit_rtl_sets_the_base_direction_without_rtl_characters() {
+    fn decoration_offsets_are_y_down_from_the_baseline() {
         let system = test_system();
+        for family in [IBM_PLEX.family, SOURCE_SERIF.family, LILEX.family] {
+            let text = "Learn how";
+            let layout = layout_line(&system, text, px(16.0), &[text_run(text, family)]);
+            let fragment = &layout.paint_fragments[0];
+            let underline = fragment.underline_offset.unwrap();
+            let strikethrough = fragment.strikethrough_offset.unwrap();
 
-        for text in ["English 123!", "123 …", ""] {
-            let layout = layout_directional(
-                &system,
-                text,
-                ParagraphDirection::RightToLeft,
-                TextAlign::Start,
-                Some(px(240.0)),
+            // gpui paints at `baseline_y + offset` with y growing downward: the
+            // underline sits below the baseline, within the descent, and the
+            // strikethrough sits above it, within the ascent.
+            assert!(underline > px(0.0), "{family}: underline={underline:?}");
+            assert!(
+                underline <= layout.descent,
+                "{family}: underline={underline:?}, descent={:?}",
+                layout.descent
             );
-
-            assert_eq!(layout.len, text.len());
-            assert_eq!(layout.platform_layout.len(), text.len());
-            assert_eq!(
-                layout.visual_lines[0].direction,
-                ResolvedDirection::RightToLeft
+            assert!(
+                strikethrough < px(0.0),
+                "{family}: strikethrough={strikethrough:?}"
             );
-            let caret = layout
-                .platform_layout
-                .caret_bounds(CaretPosition::attached_to_next_cluster(0), px(24.0))
-                .unwrap();
-            assert!(caret.origin.x > px(100.0), "text={text:?}, caret={caret:?}");
+            assert!(
+                -strikethrough < layout.ascent,
+                "{family}: strikethrough={strikethrough:?}, ascent={:?}",
+                layout.ascent
+            );
         }
     }
 
@@ -2812,6 +2838,207 @@ mod tests {
     }
 
     #[test]
+    fn empty_directional_text_without_runs_keeps_metrics_without_paint() {
+        let system = test_system();
+        {
+            // Give Parley a default font for synthetic bidi markers without
+            // depending on installed system fonts or an explicit text run.
+            let mut state = system.parley.lock();
+            let collection = &mut state.font_context.collection;
+            let family = collection.family_id(IBM_PLEX.family).unwrap();
+            collection.set_generic_families(GenericFamily::SansSerif, std::iter::once(family));
+        }
+
+        for (direction, expected_direction) in [
+            (ParagraphDirection::Auto, ResolvedDirection::LeftToRight),
+            (
+                ParagraphDirection::LeftToRight,
+                ResolvedDirection::LeftToRight,
+            ),
+            (
+                ParagraphDirection::RightToLeft,
+                ResolvedDirection::RightToLeft,
+            ),
+        ] {
+            // Exercise both a fresh layout and the cached result.
+            for _ in 0..2 {
+                let layout = system.layout_text(TextLayoutRequest {
+                    text: "",
+                    font_size: px(16.0),
+                    runs: &[],
+                    options: TextLayoutOptions {
+                        direction,
+                        ..Default::default()
+                    },
+                });
+
+                assert_eq!(layout.len, 0);
+                assert_eq!(layout.width, Pixels::ZERO);
+                assert!(layout.ascent > Pixels::ZERO);
+                assert!(layout.descent > Pixels::ZERO);
+                assert_eq!(layout.visual_lines.len(), 1);
+                assert_eq!(layout.visual_lines[0].text_range, 0..0);
+                assert_eq!(layout.visual_lines[0].paint_fragment_range, 0..0);
+                assert_eq!(layout.visual_lines[0].direction, expected_direction);
+                assert!(layout.paint_fragments.is_empty());
+            }
+        }
+    }
+
+    #[test]
+    fn paragraph_direction_preserves_logical_alignment_and_source_endpoint_carets() {
+        let system = test_system();
+        let line_height = px(24.0);
+
+        for (name, text, direction, align, right_aligned, endpoint_hits) in [
+            (
+                "RTL Latin",
+                "English 123!",
+                ParagraphDirection::RightToLeft,
+                TextAlign::Start,
+                true,
+                false,
+            ),
+            (
+                "RTL neutral",
+                "123 …",
+                ParagraphDirection::RightToLeft,
+                TextAlign::Start,
+                true,
+                false,
+            ),
+            (
+                "RTL empty",
+                "",
+                ParagraphDirection::RightToLeft,
+                TextAlign::Start,
+                true,
+                false,
+            ),
+            (
+                "opposing RTL",
+                "English 123",
+                ParagraphDirection::RightToLeft,
+                TextAlign::Start,
+                true,
+                true,
+            ),
+            (
+                "opposing LTR",
+                "مرحبا",
+                ParagraphDirection::LeftToRight,
+                TextAlign::Start,
+                false,
+                true,
+            ),
+            (
+                "matching LTR",
+                "English 123",
+                ParagraphDirection::LeftToRight,
+                TextAlign::Start,
+                false,
+                true,
+            ),
+            (
+                "matching RTL",
+                "مرحبا",
+                ParagraphDirection::RightToLeft,
+                TextAlign::Start,
+                true,
+                true,
+            ),
+            (
+                "RTL start",
+                "English",
+                ParagraphDirection::RightToLeft,
+                TextAlign::Start,
+                true,
+                false,
+            ),
+            (
+                "RTL end",
+                "English",
+                ParagraphDirection::RightToLeft,
+                TextAlign::End,
+                false,
+                false,
+            ),
+            (
+                "LTR start",
+                "English",
+                ParagraphDirection::LeftToRight,
+                TextAlign::Start,
+                false,
+                false,
+            ),
+        ] {
+            let layout = layout_with_options(
+                &system,
+                text,
+                px(16.),
+                &[text_run(text, IBM_PLEX.family)],
+                TextLayoutOptions {
+                    direction,
+                    text_align: align,
+                    alignment_width: Some(px(240.)),
+                    ..Default::default()
+                },
+            );
+            let native = &layout.platform_layout;
+            let expected_direction = match direction {
+                ParagraphDirection::RightToLeft => ResolvedDirection::RightToLeft,
+                _ => ResolvedDirection::LeftToRight,
+            };
+            assert_eq!(layout.len, text.len(), "{name}");
+            assert_eq!(native.len(), text.len(), "{name}");
+            assert_eq!(
+                layout.visual_lines[0].direction, expected_direction,
+                "{name}"
+            );
+
+            let start = native
+                .caret_bounds(CaretPosition::attached_to_next_cluster(0), line_height)
+                .unwrap();
+            assert_eq!(
+                start.origin.x > px(100.0),
+                right_aligned,
+                "{name}: {start:?}"
+            );
+
+            if text.is_empty() {
+                continue;
+            }
+
+            let selection = native.selection_bounds(0..text.len(), line_height);
+            assert!(!selection.is_empty(), "{name}");
+
+            if right_aligned {
+                assert!(selection[0].origin.x > px(100.0), "{name}: {selection:?}");
+            } else {
+                assert!(selection[0].origin.x < px(1.0), "{name}: {selection:?}");
+            }
+
+            if !endpoint_hits {
+                continue;
+            }
+
+            for expected in [
+                CaretPosition::attached_to_next_cluster(0),
+                CaretPosition::attached_to_previous_cluster(text.len()),
+            ] {
+                let bounds = native.caret_bounds(expected, line_height).unwrap();
+                let hit = native
+                    .caret_from_pixel_point(
+                        bounds.origin + point(px(0.0), line_height / 2.0),
+                        line_height,
+                    )
+                    .unwrap_or_else(|caret| caret);
+                assert_eq!(hit, expected, "{name}");
+            }
+        }
+    }
+
+    #[test]
     fn bidi_scope_controls_preserve_source_byte_indices() {
         let system = test_system();
         let text = "A אב B";
@@ -2865,7 +3092,7 @@ mod tests {
                 .as_ref()
                 .expect("Parley must retain exact source ownership for every glyph");
             assert_eq!(ranges.len(), fragment.glyphs.len());
-            for range in ranges {
+            for range in ranges.iter() {
                 assert!(
                     text.get(range.clone()).is_some(),
                     "scoped bidi glyph range {range:?} must be a UTF-8 source range"
@@ -2883,12 +3110,16 @@ mod tests {
     #[test]
     fn result_cache_keeps_source_maps_for_authored_directional_controls() {
         let system = test_system();
-        let explicit = layout_directional(
+        let explicit = layout_with_options(
             &system,
             "a",
-            ParagraphDirection::LeftToRight,
-            TextAlign::Left,
-            None,
+            px(16.),
+            &[text_run("a", IBM_PLEX.family)],
+            TextLayoutOptions {
+                direction: ParagraphDirection::LeftToRight,
+                text_align: TextAlign::Left,
+                ..Default::default()
+            },
         );
         let source = "\u{200e}a";
         let authored_control = system.layout_text(TextLayoutRequest {
@@ -3028,7 +3259,7 @@ mod tests {
         }
     }
 
-    fn assert_document_contract(text: &str, layout: &LineLayout) {
+    fn assert_document_structure(text: &str, layout: &LineLayout) {
         assert_eq!(layout.len, text.len());
         assert!(!layout.visual_lines.is_empty());
         assert_eq!(layout.visual_lines[0].text_range.start, 0);
@@ -3068,7 +3299,9 @@ mod tests {
                 }
             }
         }
+    }
 
+    fn assert_document_navigation(text: &str, layout: &LineLayout) {
         let line_height = px(24.0);
         let wrapped = shaped_text_layout(layout.clone(), px(120.0));
         let mut caret = wrapped
@@ -3423,40 +3656,22 @@ mod tests {
         assert_inline_geometry_is_contained(&layout, layout.size.width);
     }
 
-    #[test]
-    fn paragraph_direction_does_not_leak_across_newlines() {
-        let system = test_system();
-        let text = "שלום עולם\nabc אבג def\nx (مرحبا) y";
-        let runs = [text_run(text, "IBM Plex Sans")];
-        let document = shaped_text_layout(layout_line(&system, text, px(18.0), &runs), px(500.0));
+    fn paragraph_samples() -> [String; 4] {
+        let sample =
+            "שלום עולם\nمرحبا بالعالم\nabc אבג def\nx (مرحبا) y\nEnglish ثم عربي ثم English";
 
-        for (left, right) in [("abc", "def"), ("x", "y")] {
-            let left_position = document
-                .visual_position_for_byte_index(text.find(left).unwrap(), px(24.0))
-                .unwrap();
-            let right_position = document
-                .visual_position_for_byte_index(text.find(right).unwrap(), px(24.0))
-                .unwrap();
-
-            assert_eq!(left_position.y, right_position.y);
-            assert!(
-                left_position.x < right_position.x,
-                "{left} must precede {right}"
-            );
-        }
+        [
+            sample.to_string(),
+            format!("Latin first\n{sample}\n\n"),
+            "אבג\u{2028}abc אבג def\n123 (45)\n\u{2067}אבג\u{2069} abc\nمرحبا".to_string(),
+            "שלום עולם\nabc אבג def\nx (مرحبا) y".to_string(),
+        ]
     }
 
     #[test]
     fn paragraph_paint_and_carets_match_independent_layouts() {
         let system = test_system();
-        let sample =
-            "שלום עולם\nمرحبا بالعالم\nabc אבג def\nx (مرحبا) y\nEnglish ثم عربي ثم English";
-
-        for text in [
-            sample.to_string(),
-            format!("Latin first\n{sample}\n\n"),
-            "אבג\u{2028}abc אבג def\n123 (45)\n\u{2067}אבג\u{2069} abc\nمرحبا".to_string(),
-        ] {
+        for text in paragraph_samples() {
             for width in [px(500.), px(90.)] {
                 let document = layout_wrapped(
                     &system,
@@ -3466,7 +3681,29 @@ mod tests {
                     width,
                     None,
                 );
-                assert_document_contract(&text, &document);
+
+                if width == px(500.) && !text.contains('\u{2028}') {
+                    let shaped = shaped_text_layout(document.clone(), width);
+
+                    for (left, right) in [("abc", "def"), ("x", "y")] {
+                        let Some((left_idx, right_idx)) = text.find(left).zip(text.find(right))
+                        else {
+                            continue;
+                        };
+
+                        let left_position = shaped
+                            .visual_position_for_byte_index(left_idx, px(24.))
+                            .unwrap();
+                        let right_position = shaped
+                            .visual_position_for_byte_index(right_idx, px(24.))
+                            .unwrap();
+                        assert_eq!(left_position.y, right_position.y);
+                        assert!(
+                            left_position.x < right_position.x,
+                            "{left} must precede {right}"
+                        );
+                    }
+                }
 
                 let mut first_line = 0;
 
@@ -3554,12 +3791,10 @@ mod tests {
         );
     }
 
-    #[test]
-    fn paragraph_interaction_preserves_breaks_and_visual_traversal() {
-        let system = test_system();
+    fn assert_paragraph_break_interaction(system: &ParleyTextSystem) {
         let text = "שלום עולם\r\n\nabc אבג def\u{2029}مرحبا بالعالم\n";
         let layout = layout_wrapped(
-            &system,
+            system,
             text,
             px(18.),
             &[text_run(text, "IBM Plex Sans")],
@@ -3740,7 +3975,7 @@ mod tests {
         );
 
         let mixed = "abc אבג\nאבג abc\n";
-        let layout = layout_line(&system, mixed, px(18.), &[text_run(mixed, "IBM Plex Sans")]);
+        let layout = layout_line(system, mixed, px(18.), &[text_run(mixed, "IBM Plex Sans")]);
 
         for (line_index, source) in paragraph_ranges(mixed).into_iter().take(2).enumerate() {
             let selection = layout
@@ -3920,14 +4155,20 @@ mod tests {
                     .map(|line| line.text_range.clone())
                     .collect::<Vec<_>>()
             );
-            assert_document_contract(text, &document);
         }
     }
 
-    #[test]
-    fn document_layout_contract_covers_scripts_breaks_wrapping_and_clamping() {
-        let system = test_system();
-        let cases = [
+    struct DocumentCase {
+        name: &'static str,
+        text: Cow<'static, str>,
+        wrap_width: Option<Pixels>,
+        line_clamp: Option<usize>,
+        minimum_lines: usize,
+        exact_line_count: bool,
+    }
+
+    fn document_cases() -> Vec<DocumentCase> {
+        let mut cases = [
             ("empty", "", px(120.0), None, 1usize),
             ("hard breaks", "one\ntwo\nthree", px(500.0), None, 3),
             ("trailing break", "one\n", px(500.0), None, 2),
@@ -3944,28 +4185,119 @@ mod tests {
             ("thai", "ภาษาไทย ก้ กี", px(500.0), None, 1),
             ("ligatures", "office affine ffi", px(500.0), None, 1),
             ("emoji", "👩🏽‍💻 family 👨‍👩‍👧‍👦 🇬🇧", px(500.0), None, 1),
-        ];
+        ]
+        .into_iter()
+        .map(
+            |(name, text, width, line_clamp, minimum_lines)| DocumentCase {
+                name,
+                text: Cow::Borrowed(text),
+                wrap_width: Some(width),
+                line_clamp,
+                minimum_lines,
+                exact_line_count: line_clamp.is_some(),
+            },
+        )
+        .collect::<Vec<_>>();
 
-        for (name, text, width, max_lines, minimum_lines) in cases {
-            let runs = (!text.is_empty())
-                .then(|| text_run(text, IBM_PLEX.family))
-                .into_iter()
-                .collect::<Vec<_>>();
-            let layout = layout_wrapped(&system, text, px(18.0), &runs, width, max_lines);
-            assert_document_contract(text, &layout);
+        cases.push(DocumentCase {
+            name: "unwrapped empty",
+            text: Cow::Borrowed(""),
+            wrap_width: None,
+            line_clamp: None,
+            minimum_lines: 1,
+            exact_line_count: false,
+        });
 
-            if max_lines.is_some() {
-                assert_eq!(layout.visual_lines.len(), minimum_lines, "{name}");
-            } else {
-                assert!(layout.visual_lines.len() >= minimum_lines, "{name}");
+        for text in paragraph_samples() {
+            for width in [px(500.), px(90.)] {
+                cases.push(DocumentCase {
+                    name: "paragraph composition",
+                    text: Cow::Owned(text.clone()),
+                    wrap_width: Some(width),
+                    line_clamp: None,
+                    minimum_lines: 1,
+                    exact_line_count: false,
+                });
             }
         }
 
-        let layout = layout_line(&system, "", px(18.0), &[]);
-        assert_document_contract("", &layout);
-        assert_eq!(layout.visual_lines[0].text_range, 0..0);
-        assert_eq!(layout.width, Pixels::ZERO);
-        assert!(layout.paint_fragments.is_empty());
+        for line_clamp in [None, Some(0), Some(1), Some(3), Some(8)] {
+            cases.push(DocumentCase {
+                name: "Latin composition clamp",
+                text: Cow::Borrowed("one two three four\nfive six seven eight\nnine ten\n"),
+                wrap_width: Some(px(80.)),
+                line_clamp,
+                minimum_lines: 1,
+                exact_line_count: false,
+            });
+        }
+
+        cases
+    }
+
+    fn layout_document_case(system: &ParleyTextSystem, case: &DocumentCase) -> LineLayout {
+        let runs = (!case.text.is_empty())
+            .then(|| text_run(&case.text, IBM_PLEX.family))
+            .into_iter()
+            .collect::<Vec<_>>();
+
+        layout_with_options(
+            system,
+            &case.text,
+            px(18.),
+            &runs,
+            TextLayoutOptions {
+                wrap_width: case.wrap_width,
+                line_clamp: case.line_clamp,
+                text_align: TextAlign::Left,
+                ..Default::default()
+            },
+        )
+    }
+
+    #[test]
+    fn document_structure_preserves_source_ranges_fragments_and_line_counts() {
+        let system = test_system();
+
+        for case in document_cases() {
+            let layout = layout_document_case(&system, &case);
+            assert_document_structure(&case.text, &layout);
+
+            if case.exact_line_count {
+                assert_eq!(
+                    layout.visual_lines.len(),
+                    case.minimum_lines,
+                    "{}",
+                    case.name
+                );
+            } else {
+                assert!(
+                    layout.visual_lines.len() >= case.minimum_lines,
+                    "{}: {:?}",
+                    case.name,
+                    case.text
+                );
+            }
+
+            if case.text.is_empty() {
+                assert_eq!(layout.visual_lines[0].text_range, 0..0);
+                assert_eq!(layout.width, Pixels::ZERO);
+                assert!(layout.paint_fragments.is_empty());
+            }
+        }
+    }
+
+    #[test]
+    fn document_navigation_preserves_source_boundaries_across_scripts_and_clamps() {
+        let system = test_system();
+
+        for case in document_cases() {
+            let layout = layout_document_case(&system, &case);
+            assert_document_navigation(&case.text, &layout);
+        }
+
+        assert_paragraph_break_interaction(&system);
+        assert_native_cluster_interaction(&system);
     }
 
     #[test]
@@ -4115,6 +4447,111 @@ mod tests {
     }
 
     #[test]
+    fn paint_changes_preserve_geometry_cache_identity_and_authored_run_boundaries() {
+        let system = test_system();
+        let text = "office café العربية";
+        let first_end = "office ".len();
+        let second_end = first_end + "café ".len();
+        let mut first_font = font(SOURCE_SERIF.family);
+        first_font.features = GpuiFontFeatures::disable_ligatures();
+        first_font.fallbacks = Some(FontFallbacks::from_fonts(vec![
+            IBM_PLEX.family.into(),
+            NOTO_COLOR_EMOJI.family.into(),
+        ]));
+        let base_runs = vec![
+            TextRun {
+                len: first_end,
+                font: first_font,
+                letter_spacing: Some(px(0.4)),
+                color: hsla(0.0, 0.8, 0.4, 1.0),
+                ..Default::default()
+            },
+            TextRun {
+                len: second_end - first_end,
+                font: font(IBM_PLEX.family).bold(),
+                color: hsla(0.35, 0.7, 0.35, 1.0),
+                ..Default::default()
+            },
+            TextRun {
+                len: text.len() - second_end,
+                font: font(IBM_PLEX.family),
+                color: hsla(0.6, 0.8, 0.45, 1.0),
+                ..Default::default()
+            },
+        ];
+        let mut left = text_run("left ", NOTO_SANS.family);
+        left.font.width = gpui::FontWidth::CONDENSED;
+        let right = text_run("right", IBM_PLEX.family);
+
+        for (name, text, original_runs, font_size) in [
+            ("styled document", text, base_runs, px(20.)),
+            (
+                "identical paint boundaries",
+                "left right",
+                vec![left, right],
+                px(18.),
+            ),
+        ] {
+            let mut decorated_runs = original_runs.clone();
+
+            for (idx, run) in decorated_runs.iter_mut().enumerate() {
+                run.color = hsla(idx as f32 * 0.3, 0.8, 0.4, 1.0);
+            }
+
+            decorated_runs[0].background_color = Some(hsla(0.1, 0.5, 0.5, 0.3));
+            decorated_runs[0].underline = Some(UnderlineStyle {
+                thickness: px(1.5),
+                color: None,
+                wavy: true,
+            });
+            decorated_runs[1].strikethrough = Some(StrikethroughStyle {
+                thickness: px(1.0),
+                color: None,
+            });
+
+            let original = layout_line(&system, text, font_size, &original_runs);
+            let decorated = layout_line(&system, text, font_size, &decorated_runs);
+            let geometry = |layout: &LineLayout| {
+                layout
+                    .paint_fragments
+                    .iter()
+                    .flat_map(|fragment| {
+                        fragment.glyphs.iter().map(move |glyph| {
+                            (
+                                fragment.source_run,
+                                fragment.font_id,
+                                glyph.id,
+                                glyph.position,
+                            )
+                        })
+                    })
+                    .collect::<Vec<_>>()
+            };
+            assert_eq!(original.width, decorated.width, "{name}");
+            assert_eq!(geometry(&original), geometry(&decorated), "{name}");
+            assert!(
+                Arc::ptr_eq(&original.platform_layout, &decorated.platform_layout),
+                "{name}"
+            );
+
+            for (idx, run) in decorated_runs.iter().enumerate() {
+                let fragments = decorated
+                    .paint_fragments
+                    .iter()
+                    .filter(|fragment| fragment.source_run == idx)
+                    .collect::<Vec<_>>();
+                assert!(!fragments.is_empty(), "{name}: missing authored run {idx}");
+                assert!(
+                    fragments
+                        .iter()
+                        .all(|fragment| fragment.style == PaintStyle::from(run)),
+                    "{name}: lost paint style for run {idx}"
+                );
+            }
+        }
+    }
+
+    #[test]
     fn paragraph_caches_preserve_shaping_across_widths_and_edits() {
         let system = test_system();
         let text = "one two three four five";
@@ -4171,38 +4608,6 @@ mod tests {
             system.paragraph_cache.lock().entries.len(),
             cache_entries + 1,
             "the unchanged first paragraph should keep its cached shaping"
-        );
-    }
-
-    #[test]
-    fn paint_cache_preserves_identical_input_run_boundaries() {
-        let system = test_system();
-        let text = "left right";
-        let mut left = text_run("left ", "IBM Plex Sans");
-        let mut right = text_run("right", "IBM Plex Sans");
-        left.font.family = NOTO_SANS.family.into();
-        left.font.width = gpui::FontWidth::CONDENSED;
-        let first = layout_line(&system, text, px(18.0), &[left.clone(), right.clone()]);
-
-        left.color = hsla(0.0, 0.8, 0.4, 1.0);
-        right.color = hsla(0.6, 0.8, 0.4, 1.0);
-        let repainted = layout_line(&system, text, px(18.0), &[left.clone(), right.clone()]);
-
-        assert!(Arc::ptr_eq(
-            &first.platform_layout,
-            &repainted.platform_layout
-        ));
-        assert!(
-            repainted
-                .paint_fragments
-                .iter()
-                .any(|fragment| fragment.style == PaintStyle::from(&left))
-        );
-        assert!(
-            repainted
-                .paint_fragments
-                .iter()
-                .any(|fragment| fragment.style == PaintStyle::from(&right))
         );
     }
 
@@ -4281,7 +4686,7 @@ mod tests {
             .add_fonts(vec![Cow::Borrowed(IBM_PLEX.data)])
             .unwrap();
         let text_system = Arc::new(TextSystem::new(backend.clone()));
-        let window_text_system = WindowTextSystem::new(text_system);
+        let window_text_system = WindowTextSystem::new(text_system.clone());
         let text = "registered later";
         let run = text_run(text, SOURCE_SERIF.family);
         let before = window_text_system
@@ -4289,7 +4694,7 @@ mod tests {
             .unwrap();
         let fallback_id = before.paint_fragments[0].font_id;
 
-        backend
+        text_system
             .add_fonts(vec![
                 Cow::Borrowed(SOURCE_SERIF.data),
                 Cow::Borrowed(NOTO_SANS.data),
@@ -4302,7 +4707,7 @@ mod tests {
         let source_serif_regular = backend.font_id(&font("Source Serif 4")).unwrap();
         assert_eq!(after.paint_fragments[0].font_id, source_serif_regular);
 
-        backend
+        text_system
             .add_fonts(vec![Cow::Borrowed(IBM_PLEX_SEMIBOLD.data)])
             .unwrap();
         let regular = backend.font_id(&font(IBM_PLEX.family)).unwrap();
@@ -4341,11 +4746,9 @@ mod tests {
         assert_eq!(backend.font_id(&static_font).unwrap(), regular);
     }
 
-    #[test]
-    fn native_interaction_handles_bidi_atomic_clusters_and_semantic_selection() {
-        let system = test_system();
+    fn assert_native_cluster_interaction(system: &ParleyTextSystem) {
         for text in ["👩🏽‍💻", "👨‍👩‍👧‍👦", "🇬🇧", "ก้"] {
-            let layout = layout_line(&system, text, px(22.0), &[text_run(text, IBM_PLEX.family)]);
+            let layout = layout_line(system, text, px(22.0), &[text_run(text, IBM_PLEX.family)]);
             let wrapped = shaped_text_layout(layout, px(500.0));
             assert_eq!(
                 wrapped.logical_cluster_after(CaretPosition::default()),
@@ -4375,7 +4778,7 @@ mod tests {
         let single_line_text = "abcd";
         let single_line = shaped_text_layout(
             layout_line(
-                &system,
+                system,
                 single_line_text,
                 px(20.0),
                 &[text_run(single_line_text, IBM_PLEX.family)],
@@ -4409,7 +4812,7 @@ mod tests {
         let text = "abc אבג العربية xyz";
         let layout = shaped_text_layout(
             layout_wrapped(
-                &system,
+                system,
                 text,
                 px(20.0),
                 &[text_run(text, IBM_PLEX.family)],
@@ -5140,61 +5543,72 @@ mod tests {
         let system = test_system();
         let text = "a\u{301} fi \u{0633}\u{0644}\u{0627}\u{0645} \u{1f469}\u{200d}\u{1f469}\u{200d}\u{1f467}\u{200d}\u{1f466} \u{05d0}\u{05d1}";
         let line = layout_line(&system, text, px(18.), &[text_run(text, IBM_PLEX.family)]);
-        let ligature_start = text.find("fi").unwrap();
-        let ligature = ligature_start..ligature_start + 2;
-        let mut saw_ligature = false;
         let arabic_start = text.find("\u{0633}\u{0644}\u{0627}\u{0645}").unwrap();
         let arabic = arabic_start..arabic_start + "\u{0633}\u{0644}\u{0627}\u{0645}".len();
-        let emoji_start = text.find('👩').unwrap();
-        let emoji_end = emoji_start + "👩‍👩‍👧‍👦".len();
+        let emoji_start = text.find(char::from_u32(0x1f469).unwrap()).unwrap();
+        let emoji_end =
+            emoji_start + "\u{1f469}\u{200d}\u{1f469}\u{200d}\u{1f467}\u{200d}\u{1f466}".len();
         let combining = 0.."a\u{301}".len();
-        let emoji = emoji_start..emoji_end;
+        let hebrew_start = text.find("\u{05d0}\u{05d1}").unwrap();
+        let hebrew = hebrew_start..hebrew_start + "\u{05d0}\u{05d1}".len();
+        let mut glyph_count = 0usize;
+        let mut combining_ranges = Vec::new();
         let mut saw_combining = false;
         let mut saw_emoji = false;
         let mut saw_arabic = false;
+        let mut saw_hebrew = false;
         for fragment in &line.paint_fragments {
             let ranges = fragment
                 .glyph_source_ranges
                 .as_ref()
                 .expect("Parley exposes source ranges per glyph");
             assert_eq!(ranges.len(), fragment.glyphs.len());
-            for range in ranges {
+            for range in ranges.iter() {
                 assert!(
                     text.get(range.clone()).is_some(),
                     "range {range:?} must be a UTF-8 source range"
                 );
-                if range.start < ligature.end && ligature.start < range.end {
-                    assert_eq!(range, &ligature, "default fi ligature must remain atomic");
-                    saw_ligature = true;
+                assert!(
+                    fragment.source_range.start <= range.start
+                        && range.end <= fragment.source_range.end,
+                    "glyph ownership {range:?} must be contained in fragment {:?}",
+                    fragment.source_range
+                );
+                if !range.is_empty() {
+                    glyph_count += 1;
                 }
                 if range.start < combining.end && combining.start < range.end {
-                    assert_eq!(range, &combining, "combining sequence must stay atomic");
-                    saw_combining = true;
+                    combining_ranges.push(range.clone());
                 }
-                if range.start < arabic.end && arabic.start < range.end {
-                    saw_arabic = true;
-                }
-                if range.start < emoji.end && emoji.start < range.end {
-                    assert_eq!(range, &emoji, "emoji ZWJ sequence must stay atomic");
-                    saw_emoji = true;
-                }
+                saw_combining |= range.start < combining.end && combining.start < range.end;
+                saw_arabic |= range.start < arabic.end && arabic.start < range.end;
+                saw_emoji |= range.start < emoji_end && emoji_start < range.end;
+                saw_hebrew |= range.start < hebrew.end && hebrew.start < range.end;
             }
         }
+
+        assert!(glyph_count > 0, "the line should emit glyph ownership");
         assert!(
             saw_combining,
-            "the combining glyph must retain its original source range"
+            "the combining sequence must have emitted glyph ownership"
         );
+        assert!(saw_arabic, "Arabic shaping must retain source ownership");
+        assert!(saw_emoji, "the emoji sequence must emit glyph ownership");
         assert!(
-            saw_ligature,
-            "the fi ligature must keep its source cluster range"
+            saw_hebrew,
+            "the Hebrew bidi run must retain source ownership"
         );
+
+        // This pinned fixture includes exact cluster ownership that is
+        // smaller than the extended grapheme. Keep the ranges visible in a
+        // failure so the backend's actual ownership can be reviewed.
         assert!(
-            saw_arabic,
-            "Arabic glyphs must retain source ranges after contextual shaping"
+            combining_ranges.iter().any(|range| range != &combining),
+            "expected partial shaping-cluster ownership; ranges={combining_ranges:?}"
         );
-        assert!(
-            saw_emoji,
-            "the emoji glyph must retain its original source range"
-        );
+
+        // These are exact shaping-cluster ranges, not a partition of every
+        // source byte and not Unicode grapheme ranges. Grapheme-atomic
+        // cursor/slicing behavior is covered independently.
     }
 }

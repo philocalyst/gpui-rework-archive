@@ -10,7 +10,7 @@ use gpui::{
     MouseDownEvent, MouseMoveEvent, MouseUpEvent, PaintQuad, ParagraphDirection, Pixels, Point,
     ShapedText, SharedString, Size, StatefulInteractiveElement, Style, StyleRefinement, Styled,
     TextAlign, TextLayout, TextLayoutOptions, TextStyle, UnicodeBidi, WeakEntity, Window,
-    accesskit, fill, point, px, relative, size,
+    accesskit, point, px, relative, size,
 };
 use palette::IntoColor;
 use smallvec::SmallVec;
@@ -39,6 +39,28 @@ pub fn editable_text(id: impl Into<ElementId>) -> EditableTextElement {
 
     this = this.key_context(DEFAULT_INPUT_CONTEXT);
     this.register_actions();
+
+    // AccessKit uses Unicode-scalar offsets for the synthetic text run, while
+    // the editor stores UTF-8 byte offsets. Keep the mapping in state.
+    let state_entity = this.state_entity.clone();
+    this = this.on_a11y_action(
+        accesskit::Action::SetTextSelection,
+        move |data, _window, cx| {
+            let Some(accesskit::ActionData::SetTextSelection(selection)) = data else {
+                return;
+            };
+            let Some(entity) = state_entity.borrow().upgrade() else {
+                return;
+            };
+            entity.update(cx, |state, cx| {
+                state.set_accessibility_selection(
+                    selection.anchor.character_index,
+                    selection.focus.character_index,
+                    cx,
+                );
+            });
+        },
+    );
 
     this
 }
@@ -71,18 +93,39 @@ pub fn text_area(id: impl Into<ElementId>) -> EditableTextElement {
 /// [`EditableTextState`], which the element finds through its id, or which you
 /// attach with [`EditableTextElement::state`]. See the
 /// [module documentation](crate::editable_text) for examples.
+#[derive(derive_setters::Setters)]
+#[setters(generate = false)]
 pub struct EditableTextElement {
     interactivity: Interactivity,
     // Populated on first render with an entity stored/attached to the view.
     // This reference is shared with the action handlers, which are processed between renders
     // and therefore cannot otherwise access state attached to the view.
     state_entity: Rc<RefCell<WeakEntity<EditableTextState>>>,
+    /// Configures whether the field supports multiple lines of text.
+    /// Disabling this prevents actions like `enter` and navigating up and down.
+    ///
+    /// Inputs containing newlines, such as pasted text, are not automatically sanitized.
+    /// This is a limitation of the current state of implementation and requires further iteration.
+    #[setters(generate, rename = "multiline")]
     supports_multiline: bool,
+    /// Assigns the text that should be displayed when storage of the element is empty.
+    #[setters(generate, strip_option, into)]
     placeholder: Option<SharedString>,
+    /// Configures whether the element is enabled and can accept input.
+    #[setters(generate)]
     accepts_input: bool,
     colors: EditableTextColors,
+    /// Sets the blinking interval of the caret.
+    #[setters(generate, strip_option)]
     caret_blink_interval: Option<Duration>,
+    /// Sets the width of the caret / text-cursor.
+    #[setters(generate, rename = "caret_w", into)]
     caret_width: Pixels,
+    /// Sets the height of the caret / text-cursor.
+    ///
+    /// Relative lengths are resolved against the current line height. The default is
+    /// `relative(1.)`, which makes the caret as tall as the line.
+    #[setters(generate, rename = "caret_h", into)]
     caret_height: DefiniteLength,
 }
 
@@ -127,42 +170,7 @@ impl EditableTextElement {
         self
     }
 
-    /// Sets whether the field holds several lines of text.
-    ///
-    /// With `false`, Enter and Tab propagate to the surrounding view, and Up and
-    /// Down move to the start and end of the text. Newlines in inserted text,
-    /// including pasted text, are removed.
-    pub fn multiline(mut self, enabled: bool) -> Self {
-        self.supports_multiline = enabled;
-        self
-    }
-
-    /// Sets the text shown while the field is empty.
-    pub fn placeholder(mut self, text: impl Into<SharedString>) -> Self {
-        self.placeholder = Some(text.into());
-        self
-    }
-
-    /// Sets whether the field accepts edits.
-    ///
-    /// When `false`, typing, paste, cut and delete do nothing, and multi-line fields
-    /// also ignore Enter and Tab. The field can still be focused, so the user can
-    /// select and copy the text.
-    pub fn accepts_input(mut self, enabled: bool) -> Self {
-        self.accepts_input = enabled;
-        self
-    }
-
-    /// Sets the time between caret blinks, and applies it to the field's caret.
-    ///
-    /// A zero duration turns blinking off. The interval is applied on each frame
-    /// that the element lays out, so it takes effect without any extra setup.
-    pub fn caret_blink_interval(mut self, duration: Duration) -> Self {
-        self.caret_blink_interval = Some(duration);
-        self
-    }
-
-    /// Sets the caret blink interval to 500 milliseconds.
+    /// Sets the blinking interval to 500 milliseconds.
     pub fn caret_blink_interval_500ms(self) -> Self {
         self.caret_blink_interval(BLINK_INTERVAL_500MS)
     }
@@ -172,21 +180,6 @@ impl EditableTextElement {
     /// Cannot be refined via [`StyleRefinement`](gpui::StyleRefinement) due to limitations in the fields of [`Style`](gpui::Style).
     pub fn placeholder_color(mut self, color: impl IntoColor<Hsla>) -> Self {
         self.colors.placeholder = color.into_color();
-        self
-    }
-
-    /// Sets the width of the caret. The default is 2 pixels.
-    pub fn caret_w(mut self, width: impl Into<Pixels>) -> Self {
-        self.caret_width = width.into();
-        self
-    }
-
-    /// Sets the height of the caret.
-    ///
-    /// Relative lengths are resolved against the current line height. The default is
-    /// `relative(1.)`, which makes the caret as tall as the line.
-    pub fn caret_h(mut self, height: impl Into<DefiniteLength>) -> Self {
-        self.caret_height = height.into();
         self
     }
 
@@ -893,13 +886,11 @@ impl PrepaintElements {
                 .selection_bounds(start..end, line_height)
                 .into_iter()
                 .map(move |bounds| {
-                    fill(
-                        Bounds::from_corners(
-                            document_origin + bounds.origin + point(Pixels::ZERO, offset_y),
-                            document_origin + bounds.bottom_right(),
-                        ),
-                        color,
-                    )
+                    PaintQuad::new(Bounds::from_corners(
+                        document_origin + bounds.origin + point(Pixels::ZERO, offset_y),
+                        document_origin + bounds.bottom_right(),
+                    ))
+                    .background(color)
                 })
         };
 
@@ -924,13 +915,13 @@ impl PrepaintElements {
                     .unwrap_or_default();
             let caret_height = caret_height.to_pixels(line_height.into(), window.rem_size());
             let vertical_offset = (line_height - caret_height) / 2.;
-            elements.caret = Some(fill(
-                Bounds::new(
+            elements.caret = Some(
+                PaintQuad::new(Bounds::new(
                     caret_point + point(Pixels::ZERO, vertical_offset),
                     size(caret_width, caret_height),
-                ),
-                colors.caret,
-            ));
+                ))
+                .background(colors.caret),
+            );
         }
 
         elements
@@ -978,6 +969,7 @@ mod tests {
 
     struct AccessibleInputView {
         input: Entity<EditableTextState>,
+        accepts_input: bool,
     }
 
     impl Render for AccessibleInputView {
@@ -986,6 +978,7 @@ mod tests {
                 .state(self.input.downgrade())
                 .aria_label("Editor")
                 .placeholder("Type here")
+                .when(!self.accepts_input, |input| input.accepts_input(false))
         }
     }
 
@@ -1000,7 +993,10 @@ mod tests {
                     state.select_to(value.len(), cx);
                     state
                 });
-                cx.new(|_| AccessibleInputView { input })
+                cx.new(|_| AccessibleInputView {
+                    input,
+                    accepts_input: true,
+                })
             })
             .unwrap();
         let any_window = window.into();
@@ -1035,6 +1031,100 @@ mod tests {
         assert_eq!(text_run.value(), Some(value));
         assert_eq!(selection.focus.node, *text_run_id);
         assert_eq!(selection.focus.character_index, value.chars().count());
+    }
+
+    #[test]
+    fn editable_text_a11y_selection_action_updates_read_only_editor_in_scalar_units() {
+        let value = "A\u{732B}\u{1F600}B";
+        let mut cx = HeadlessAppContext::new(Arc::new(TestTextSystem));
+        let input_slot = Rc::new(RefCell::new(None));
+        let input_capture = input_slot.clone();
+        let window = cx
+            .open_window(size(px(320.0), px(120.0)), move |_window, cx| {
+                let input = cx.new(|cx| {
+                    let mut state = EditableTextState::new(StringStorage::from(value), cx);
+                    state.select_to(value.len(), cx);
+                    state
+                });
+                *input_capture.borrow_mut() = Some(input.clone());
+                cx.new(|_| AccessibleInputView {
+                    input,
+                    accepts_input: false,
+                })
+            })
+            .unwrap();
+        let any_window = window.into();
+        let tree = cx
+            .update_window(any_window, |_, window, cx| {
+                window.set_a11y_forced(true);
+                window.draw(cx).clear(cx);
+                window.a11y_tree().unwrap().clone()
+            })
+            .unwrap();
+        let (input_id, input_node) = tree
+            .nodes
+            .iter()
+            .find(|(_, node)| node.role() == accesskit::Role::TextInput)
+            .map(|(id, node)| (*id, node))
+            .expect("read-only editor remains in the a11y tree");
+        assert!(input_node.is_read_only());
+        assert_eq!(input_node.value(), Some(value));
+        let initial_selection = input_node
+            .text_selection()
+            .expect("editable text exposes a selection");
+        let text_run_id = initial_selection.focus.node;
+        assert!(
+            tree.nodes
+                .iter()
+                .find(|(id, node)| *id == text_run_id && node.role() == accesskit::Role::TextRun)
+                .is_some()
+        );
+
+        // AccessKit character_index counts Unicode scalars. In this string,
+        // scalar index 3 maps past the supplementary-plane character at byte 8.
+        let requested = accesskit::TextSelection {
+            anchor: accesskit::TextPosition {
+                node: text_run_id,
+                character_index: 3,
+            },
+            focus: accesskit::TextPosition {
+                node: text_run_id,
+                character_index: 1,
+            },
+        };
+        let updated_tree = cx
+            .update_window(any_window, |_, window, cx| {
+                window.perform_a11y_action(
+                    input_id,
+                    accesskit::Action::SetTextSelection,
+                    Some(accesskit::ActionData::SetTextSelection(requested)),
+                    cx,
+                );
+                window.draw(cx).clear(cx);
+                window.a11y_tree().unwrap().clone()
+            })
+            .unwrap();
+
+        let input = input_slot.borrow().as_ref().unwrap().clone();
+        cx.update(|cx| {
+            let state = input.read(cx);
+            let selection = state.caret_selection();
+            assert_eq!(selection.anchor.index, 8);
+            assert_eq!(selection.caret.index, 1);
+            assert_eq!(state.selected_byte_range(), 1..8);
+            assert_eq!(state.as_str(), value);
+        });
+        let node = updated_tree
+            .nodes
+            .iter()
+            .find(|(id, _)| *id == input_id)
+            .map(|(_, node)| node)
+            .unwrap();
+        assert!(node.is_read_only());
+        assert_eq!(node.value(), Some(value));
+        let selection = node.text_selection().unwrap();
+        assert_eq!(selection.anchor.character_index, 3);
+        assert_eq!(selection.focus.character_index, 1);
     }
 
     #[test]
@@ -1137,15 +1227,9 @@ mod tests {
                 .with_fallback_families(["IBM Plex Sans", "Noto Sans Hebrew", "Noto Sans Arabic"]);
             system
                 .add_fonts(vec![
-                    Cow::Borrowed(include_bytes!(
-                        "../../../../assets/fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf"
-                    )),
-                    Cow::Borrowed(include_bytes!(
-                        "../../../../assets/fonts/noto-sans-hebrew/NotoSansHebrew-Regular.ttf"
-                    )),
-                    Cow::Borrowed(include_bytes!(
-                        "../../../../assets/fonts/noto-sans-arabic/NotoSansArabic-Regular.ttf"
-                    )),
+                    Cow::Borrowed(*gpui_fonts::IBM_PLEX),
+                    Cow::Borrowed(*gpui_fonts::NOTO_HEBREW),
+                    Cow::Borrowed(*gpui_fonts::NOTO_ARABIC),
                 ])
                 .unwrap();
 

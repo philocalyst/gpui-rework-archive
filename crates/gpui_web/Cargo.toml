@@ -21,6 +21,7 @@ unicode-segmentation.workspace = true
 smallvec.workspace = true
 [target.'cfg(target_family = "wasm")'.dependencies]
 gpui.workspace = true
+gpui_parley.workspace = true
 scheduler.workspace = true
 gpui_wgpu.workspace = true
 parking_lot = { workspace = true, features = ["nightly"] }

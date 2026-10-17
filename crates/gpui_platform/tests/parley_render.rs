@@ -10,11 +10,7 @@ use gpui::{
 };
 use std::borrow::Cow;
 
-#[allow(dead_code)]
-#[path = "../../gpui_ce_parley/src/font_fixtures.rs"]
-mod font_fixtures;
-
-use font_fixtures::{IBM_PLEX, NOTO_ARABIC, NOTO_COLOR_EMOJI, NOTO_HEBREW, SOURCE_SERIF};
+use gpui_fonts::{IBM_PLEX, NOTO_ARABIC, NOTO_COLOR_EMOJI, NOTO_HEBREW, SOURCE_SERIF};
 
 const BIDI_SAMPLE: &str =
     "שלום עולם\nمرحبا بالعالم\nabc אבג def\nx (مرحبا) y\nEnglish ثم عربي ثم English";
@@ -134,10 +130,9 @@ fn main() {
             let text_system = platform.text_system();
 
             HeadlessAppContext::with_platform(text_system, std::sync::Arc::new(()), || {
-                Some(Box::new(
-                    gpui_wgpu::WgpuHeadlessRenderer::new()
-                        .expect("failed to initialize the headless WGPU renderer"),
-                ) as Box<dyn gpui::PlatformHeadlessRenderer>)
+                gpui_wgpu::WgpuHeadlessRenderer::new().map(|renderer| {
+                    Some(Box::new(renderer) as Box<dyn gpui::PlatformHeadlessRenderer>)
+                })
             })
         };
 

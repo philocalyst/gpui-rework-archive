@@ -37,15 +37,20 @@ harness = false
 required-features = ["bench-support"]
 [dependencies]
 anyhow.workspace = true
-gpui.workspace = true
+gpui = { workspace = true, default-features = false }
+
 [dev-dependencies]
 bench_metrics.workspace = true
 criterion.workspace = true
+gpui_fonts = { path = "../gpui_ce_fonts", version = "0.2.2", package = "gpui-ce-fonts" }
+
 [target.'cfg(target_os = "macos")'.dependencies]
 gpui_apple.workspace = true
 gpui_macos.workspace = true
 [target.'cfg(target_os = "ios")'.dependencies]
 gpui_ios.workspace = true
+[target.'cfg(target_os = "android")'.dependencies]
+gpui_mobile.workspace = true
 [target.'cfg(any(target_os = "linux", target_os = "freebsd", target_os = "windows"))'.dev-dependencies]
 gpui = { workspace = true, features = ["test-support"] }
 gpui_wgpu = { workspace = true, features = ["test-support"] }

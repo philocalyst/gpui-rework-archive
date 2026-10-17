@@ -17,12 +17,26 @@ pub struct AnchoredState {
 ///
 /// Create one with [`anchored`]. Its children keep their own layout, and the anchored element
 /// moves the group so that it sits at the anchor position. It suits popovers, menus and tooltips.
+#[derive(derive_setters::Setters)]
+#[setters(generate = false)]
 pub struct Anchored {
     children: SmallVec<[AnyElement; 2]>,
+    /// Sets which corner of the anchored element should be anchored to the current position.
+    #[setters(generate)]
     anchor: Anchor,
     fit_mode: AnchoredFitMode,
+    /// Sets the position in window coordinates.
+    /// Otherwise, the location where the anchored element is rendered is used.
+    #[setters(generate, rename = "position", strip_option)]
     anchor_position: Option<Point<Pixels>>,
+    /// Sets the position mode for this anchored element. Local will have this
+    /// interpret its [`Anchored::position`] as relative to the parent element.
+    /// While Window will have it interpret the position as relative to the window.
+    #[setters(generate)]
     position_mode: AnchoredPositionMode,
+    /// Offset the final position by this amount.
+    /// Useful when you want to anchor to an element but offset from it, such as in PopoverMenu.
+    #[setters(generate, strip_option)]
     offset: Option<Point<Pixels>>,
 }
 
@@ -95,39 +109,6 @@ pub fn anchored() -> Anchored {
 }
 
 impl Anchored {
-    /// Sets which corner of the element sits at the anchor position. The default is the top left.
-    pub fn anchor(mut self, anchor: Anchor) -> Self {
-        self.anchor = anchor;
-        self
-    }
-
-    /// Sets the anchor position. Its meaning depends on [`Anchored::position_mode`]: window
-    /// coordinates by default, or an offset from the parent's origin for [`AnchoredPositionMode::Local`].
-    ///
-    /// Without this, the anchor is the element's own position.
-    pub fn position(mut self, anchor: Point<Pixels>) -> Self {
-        self.anchor_position = Some(anchor);
-        self
-    }
-
-    /// Moves the placed element by `offset`, after the anchor position is applied.
-    ///
-    /// Use it to sit beside an anchor rather than on it, such as a popover that's offset from the
-    /// button that opens it.
-    pub fn offset(mut self, offset: Point<Pixels>) -> Self {
-        self.offset = Some(offset);
-        self
-    }
-
-    /// Sets how [`Anchored::position`] is interpreted. The default is [`AnchoredPositionMode::Window`].
-    ///
-    /// [`AnchoredPositionMode::Window`] treats the position as window coordinates.
-    /// [`AnchoredPositionMode::Local`] treats it as relative to the element's parent.
-    pub fn position_mode(mut self, mode: AnchoredPositionMode) -> Self {
-        self.position_mode = mode;
-        self
-    }
-
     /// Snaps the element to the window's edge when it would overflow, rather than switching
     /// corners.
     pub fn snap_to_window(mut self) -> Self {

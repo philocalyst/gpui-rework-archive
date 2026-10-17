@@ -1,0 +1,80 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+		A10000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = { LastUpgradeCheck = 1600; TargetAttributes = { A10000000000000000000010 = { CreatedOnToolsVersion = 16.0; }; A10000000000000000000011 = { CreatedOnToolsVersion = 16.0; }; }; };
+			buildConfigurationList = A10000000000000000000020;
+			compatibilityVersion = "Xcode 14.0";
+			mainGroup = A10000000000000000000002;
+			productRefGroup = A10000000000000000000003;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (A10000000000000000000010, A10000000000000000000011);
+		};
+		A10000000000000000000002 /* Main group */ = { isa = PBXGroup; children = (A10000000000000000000004, A1000000000000000000000B, A10000000000000000000003); sourceTree = "<group>"; };
+		A10000000000000000000003 /* Products */ = { isa = PBXGroup; children = (A10000000000000000000005, A10000000000000000000006); name = Products; sourceTree = "<group>"; };
+		A10000000000000000000004 /* Tests */ = { isa = PBXGroup; children = (A10000000000000000000007); path = GPUIAcceptanceUITests; sourceTree = "<group>"; };
+		A1000000000000000000000B /* App bootstrap */ = { isa = PBXGroup; children = (A10000000000000000000012); path = GPUIAcceptanceApp; sourceTree = "<group>"; };
+		A10000000000000000000005 /* GPUIAcceptanceApp.app */ = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GPUIAcceptanceApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000000000000000000006 /* GPUIAcceptanceUITests.xctest */ = { isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GPUIAcceptanceUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000000000000000000007 /* GPUIAcceptanceUITests.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUIAcceptanceUITests.swift; sourceTree = "<group>"; };
+		A10000000000000000000008 /* test source */ = { isa = PBXBuildFile; fileRef = A10000000000000000000007; };
+		A10000000000000000000012 /* PlaceholderApp.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceholderApp.swift; sourceTree = "<group>"; };
+		A10000000000000000000009 /* app target dependency proxy */ = { isa = PBXContainerItemProxy; containerPortal = A10000000000000000000001; proxyType = 1; remoteGlobalIDString = A10000000000000000000010; remoteInfo = GPUIAcceptanceApp; };
+		A1000000000000000000000A /* app target dependency */ = { isa = PBXTargetDependency; target = A10000000000000000000010; targetProxy = A10000000000000000000009; };
+		A10000000000000000000010 /* GPUIAcceptanceApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A10000000000000000000021;
+			buildPhases = (A10000000000000000000030, A10000000000000000000031, A10000000000000000000032, A10000000000000000000033);
+			buildRules = ();
+			dependencies = ();
+			name = GPUIAcceptanceApp;
+			productName = GPUIAcceptanceApp;
+			productReference = A10000000000000000000005;
+			productType = "com.apple.product-type.application";
+		};
+		A10000000000000000000011 /* GPUIAcceptanceUITests */ = {
+			isa = PBXNativeTarget;
+				buildConfigurationList = A10000000000000000000022;
+				buildPhases = (A10000000000000000000034, A10000000000000000000035, A10000000000000000000036);
+				buildRules = ();
+				dependencies = (A1000000000000000000000A);
+				name = GPUIAcceptanceUITests;
+				productName = GPUIAcceptanceUITests;
+				productReference = A10000000000000000000006;
+				productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		A10000000000000000000030 /* App sources */ = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		A10000000000000000000031 /* App frameworks */ = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		A10000000000000000000032 /* App resources */ = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		A10000000000000000000033 /* Build Rust acceptance app */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = ();
+			inputPaths = ();
+			name = "Build Rust acceptance app";
+			outputPaths = ("$(TARGET_BUILD_DIR)/$(FULL_PRODUCT_NAME)/gpui-ce-mobile-example-ios", "$(TARGET_BUILD_DIR)/$(FULL_PRODUCT_NAME)/Info.plist");
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "set -euo pipefail\nmobile_root=\"${MOBILE_REPO_ROOT:-${PROJECT_DIR}/../../../../../}\"\nexport IOS_PACKAGE_DIR=\"${DERIVED_FILE_DIR}/rust-ios-package\"\n\"${mobile_root}/examples/mobile/ios/build-rust.sh\" \"${CONFIGURATION}\" iphonesimulator\nprofile=debug\nif [[ \"${CONFIGURATION}\" == Release ]]; then profile=release; fi\nrust_app=\"${IOS_PACKAGE_DIR}/aarch64-apple-ios-sim/${profile}/GpuiMobile.app\"\nproduct=\"${TARGET_BUILD_DIR}/${FULL_PRODUCT_NAME}\"\nrm -rf \"${product}\"\nmkdir -p \"$(dirname \"${product}\")\"\ncp -R \"${rust_app}\" \"${product}\"\ntest -x \"${product}/gpui-ce-mobile-example-ios\"\ntest -f \"${product}/Info.plist\"\n";
+		};
+		A10000000000000000000034 /* UI test sources */ = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000008); runOnlyForDeploymentPostprocessing = 0; };
+		A10000000000000000000035 /* UI test frameworks */ = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		A10000000000000000000036 /* UI test resources */ = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		A10000000000000000000020 = { isa = XCConfigurationList; buildConfigurations = (A10000000000000000000040, A10000000000000000000041); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		A10000000000000000000021 = { isa = XCConfigurationList; buildConfigurations = (A10000000000000000000042, A10000000000000000000043); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		A10000000000000000000022 = { isa = XCConfigurationList; buildConfigurations = (A10000000000000000000044, A10000000000000000000045); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		A10000000000000000000040 /* Project Debug */ = { isa = XCBuildConfiguration; buildSettings = { IPHONEOS_DEPLOYMENT_TARGET = 15.0; SDKROOT = iphonesimulator; SWIFT_VERSION = 5.0; }; name = Debug; };
+		A10000000000000000000041 /* Project Release */ = { isa = XCBuildConfiguration; buildSettings = { IPHONEOS_DEPLOYMENT_TARGET = 15.0; SDKROOT = iphonesimulator; SWIFT_VERSION = 5.0; }; name = Release; };
+		A10000000000000000000042 /* App Debug */ = { isa = XCBuildConfiguration; buildSettings = { CODE_SIGNING_ALLOWED = NO; CODE_SIGNING_REQUIRED = NO; EXECUTABLE_NAME = "gpui-ce-mobile-example-ios"; GENERATE_INFOPLIST_FILE = NO; IPHONEOS_DEPLOYMENT_TARGET = 15.0; PRODUCT_BUNDLE_IDENTIFIER = "dev.gpui.mobile.acceptance"; PRODUCT_NAME = GPUIAcceptanceApp; SDKROOT = iphonesimulator; SKIP_INSTALL = NO; SUPPORTED_PLATFORMS = iphonesimulator; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Debug; };
+		A10000000000000000000043 /* App Release */ = { isa = XCBuildConfiguration; buildSettings = { CODE_SIGNING_ALLOWED = NO; CODE_SIGNING_REQUIRED = NO; EXECUTABLE_NAME = "gpui-ce-mobile-example-ios"; GENERATE_INFOPLIST_FILE = NO; IPHONEOS_DEPLOYMENT_TARGET = 15.0; PRODUCT_BUNDLE_IDENTIFIER = "dev.gpui.mobile.acceptance"; PRODUCT_NAME = GPUIAcceptanceApp; SDKROOT = iphonesimulator; SKIP_INSTALL = NO; SUPPORTED_PLATFORMS = iphonesimulator; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Release; };
+		A10000000000000000000044 /* UI Tests Debug */ = { isa = XCBuildConfiguration; buildSettings = { CODE_SIGN_IDENTITY = "-"; CODE_SIGN_STYLE = Manual; DEVELOPMENT_TEAM = ""; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 15.0; PRODUCT_BUNDLE_IDENTIFIER = "dev.gpui.mobile.acceptance.uitests"; PRODUCT_NAME = GPUIAcceptanceUITests; SDKROOT = iphonesimulator; SKIP_INSTALL = YES; SWIFT_VERSION = 5.0; SUPPORTED_PLATFORMS = iphonesimulator; TARGETED_DEVICE_FAMILY = "1,2"; TEST_TARGET_NAME = GPUIAcceptanceApp; }; name = Debug; };
+		A10000000000000000000045 /* UI Tests Release */ = { isa = XCBuildConfiguration; buildSettings = { CODE_SIGN_IDENTITY = "-"; CODE_SIGN_STYLE = Manual; DEVELOPMENT_TEAM = ""; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 15.0; PRODUCT_BUNDLE_IDENTIFIER = "dev.gpui.mobile.acceptance.uitests"; PRODUCT_NAME = GPUIAcceptanceUITests; SDKROOT = iphonesimulator; SKIP_INSTALL = YES; SWIFT_VERSION = 5.0; SUPPORTED_PLATFORMS = iphonesimulator; TARGETED_DEVICE_FAMILY = "1,2"; TEST_TARGET_NAME = GPUIAcceptanceApp; }; name = Release; };
+	};
+	rootObject = A10000000000000000000001;
+}

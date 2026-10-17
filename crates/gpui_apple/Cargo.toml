@@ -38,7 +38,6 @@ core-foundation.workspace = true
 core-foundation-sys.workspace = true
 core-graphics.workspace = true
 core-text.workspace = true
-core-video.workspace = true
 derive_more.workspace = true
 dispatch2.workspace = true
 etagere.workspace = true

@@ -11,23 +11,24 @@
 
 use super::events::*;
 use super::text_input::TextInputView;
-use super::{platform::IosPlatformState, CallbackSlot, IosDisplay};
+use super::{CallbackSlot, IosDisplay, platform::IosPlatformState};
 use accesskit_ios::SubclassingAdapter;
+use gpui::accesskit::{ActionHandler, ActivationHandler, DeactivationHandler};
 use gpui::{
-    px, size, A11yCallbacks, AnyWindowHandle, Bounds, Capslock, DevicePixels, DispatchEventResult,
-    DisplayId, Edges, GpuSpecs, Modifiers, Pixels, PlatformAtlas, PlatformDisplay, PlatformInput,
+    A11yCallbacks, AnyWindowHandle, Bounds, Capslock, DevicePixels, DispatchEventResult, DisplayId,
+    Edges, GpuSpecs, Modifiers, Pixels, PlatformAtlas, PlatformDisplay, PlatformInput,
     PlatformInputHandler, PlatformWindow, Point, PromptButton, PromptLevel, RequestFrameOptions,
     Scene, Size, TextInputConfiguration, TextInputStateChange, TouchEvent, TouchId, TouchPhase,
     WindowAppearance, WindowBackgroundAppearance, WindowBounds, WindowControlArea, WindowInsets,
-    WindowParams, WindowVisibility,
+    WindowParams, WindowVisibility, px, size,
 };
-use gpui_apple::metal_renderer::{Context as MetalContext, MetalRenderer};
+use gpui_apple::metal_renderer::MetalRenderer;
 use objc2::rc::Retained;
-use objc2::runtime::AnyClass;
-use objc2::{define_class, msg_send, ClassType, DefinedClass, MainThreadMarker, MainThreadOnly};
+use objc2::runtime::{AnyClass, AnyObject};
+use objc2::{ClassType, DefinedClass, MainThreadMarker, MainThreadOnly, define_class, msg_send};
 use objc2_core_foundation::{CGPoint, CGRect, CGSize};
 use objc2_foundation::{
-    NSNotification, NSNotificationCenter, NSNumber, NSObjectProtocol, NSSet, NSValue,
+    NSNotification, NSNotificationCenter, NSNumber, NSObjectProtocol, NSSet, NSString, NSValue,
 };
 use objc2_quartz_core::CAMetalLayer;
 use objc2_ui_kit::{
@@ -36,8 +37,8 @@ use objc2_ui_kit::{
     UIKeyboardWillChangeFrameNotification, UIKeyboardWillHideNotification, UIStatusBarStyle,
 };
 use objc2_ui_kit::{
-    UIEvent, UIScreen, UITouch, UITraitCollection, UITraitEnvironment, UIUserInterfaceStyle,
-    UIView, UIViewAutoresizing, UIViewController, UIWindow, UIWindowScene,
+    UICoordinateSpace, UIEvent, UIScreen, UITouch, UITraitCollection, UITraitEnvironment,
+    UIUserInterfaceStyle, UIView, UIViewAutoresizing, UIViewController, UIWindow, UIWindowScene,
 };
 use parking_lot::Mutex;
 use raw_window_handle::{HasDisplayHandle, HasWindowHandle, UiKitDisplayHandle, UiKitWindowHandle};
@@ -51,6 +52,33 @@ use std::{
 };
 
 const KEYBOARD_DISMISS_DISTANCE: Pixels = px(24.);
+#[cfg(debug_assertions)]
+const TEST_ACCESSIBILITY_CONTAINER_QUERY_ARGUMENT: &str =
+    "--gpui-test-accessibility-container-query";
+
+struct IosA11yActivationHandler(Box<dyn Fn() -> Option<gpui::accesskit::TreeUpdate> + Send>);
+
+impl ActivationHandler for IosA11yActivationHandler {
+    fn request_initial_tree(&mut self) -> Option<gpui::accesskit::TreeUpdate> {
+        (self.0)()
+    }
+}
+
+struct IosA11yActionHandler(Box<dyn Fn(gpui::accesskit::ActionRequest) + Send>);
+
+impl ActionHandler for IosA11yActionHandler {
+    fn do_action(&mut self, request: gpui::accesskit::ActionRequest) {
+        (self.0)(request)
+    }
+}
+
+struct IosA11yDeactivationHandler(Box<dyn Fn() + Send>);
+
+impl DeactivationHandler for IosA11yDeactivationHandler {
+    fn deactivate_accessibility(&mut self) {
+        (self.0)()
+    }
+}
 
 #[derive(Clone, Copy)]
 struct KeyboardDismissTouch {
@@ -336,13 +364,11 @@ impl IosWindow {
 
         let pixel_w = (screen_bounds_cg.size.width * scale) as i32;
         let pixel_h = (screen_bounds_cg.size.height * scale) as i32;
-        let mut renderer = MetalRenderer::from_layer(
-            MetalContext::default(),
-            layer
-                .downcast_ref::<CAMetalLayer>()
-                .ok_or_else(|| anyhow::anyhow!("UIKit view must have a CAMetalLayer"))?,
-            false,
-        );
+        let renderer_layer = layer
+            .downcast::<CAMetalLayer>()
+            .map_err(|_| anyhow::anyhow!("UIKit view must have a CAMetalLayer"))?;
+        let mut renderer =
+            MetalRenderer::new_for_layer(renderer_layer, Arc::new(Mutex::default()), false);
         renderer.update_drawable_size(size(DevicePixels(pixel_w), DevicePixels(pixel_h)));
 
         let state = IosWindowState {
@@ -421,8 +447,8 @@ impl IosWindowState {
             let notification_center = NSNotificationCenter::defaultCenter();
 
             let window = Rc::downgrade(self);
-            let frame_change_block =
-                block2::RcBlock::new(move |notification: NonNull<NSNotification>| {
+            let frame_change_block = block2::RcBlock::new(
+                move |notification: NonNull<NSNotification>| {
                     let notification = notification.as_ref();
                     let Some(user_info) = notification.userInfo() else {
                         return;
@@ -434,24 +460,40 @@ impl IosWindowState {
                     let Some(frame_value) = frame_value.downcast_ref::<NSValue>() else {
                         return;
                     };
-                    let frame = frame_value.CGRectValue();
+                    let raw_frame = frame_value.CGRectValue();
                     if let Some(window) = window.upgrade() {
                         let screen_space = window.window.screen().coordinateSpace();
-                        let frame = window
+                        let converted_frame = window
                             .window
-                            .convertRect_fromCoordinateSpace(frame, &screen_space);
+                            .convertRect_fromCoordinateSpace(raw_frame, &screen_space);
+                        let bounds = window.view.bounds();
+                        let inset = keyboard_bottom_inset(bounds, converted_frame);
+                        test_log_ime(&format!(
+                            "[GPUI-IME-TEST] will-change raw_frame={raw_frame:?} converted_frame={converted_frame:?} view_bounds={bounds:?} inset={inset}"
+                        ));
                         let (duration, curve) = keyboard_animation_info(notification);
-                        window.animate_keyboard_height(
-                            keyboard_bottom_inset(window.view.bounds(), frame),
-                            duration,
-                            curve,
-                        );
+                        window.animate_keyboard_height(inset, duration, curve);
                     }
-                });
+                },
+            );
 
             let window = Rc::downgrade(self);
             let hide_block = block2::RcBlock::new(move |notification: NonNull<NSNotification>| {
                 if let Some(window) = window.upgrade() {
+                    let frame = notification
+                        .as_ref()
+                        .userInfo()
+                        .and_then(|user_info| user_info.objectForKey(UIKeyboardFrameEndUserInfoKey))
+                        .and_then(|value| {
+                            value
+                                .downcast_ref::<NSValue>()
+                                .map(|value| value.CGRectValue())
+                        });
+                    test_log_ime(&format!(
+                        "[GPUI-IME-TEST] will-hide raw_frame={frame:?} view_bounds={:?} first_responder={}",
+                        window.view.bounds(),
+                        window.text_input_view.isFirstResponder()
+                    ));
                     let (duration, curve) = keyboard_animation_info(notification.as_ref());
                     window.animate_keyboard_height(0., duration, curve);
                 }
@@ -840,8 +882,9 @@ impl PlatformWindow for IosWindow {
         None
     }
 
-    fn activate(&self) {
+    fn activate(&self, _token: Option<&str>) -> bool {
         self.window.makeKeyAndVisible();
+        true
     }
 
     fn is_active(&self) -> bool {
@@ -978,13 +1021,28 @@ impl PlatformWindow for IosWindow {
     fn a11y_init(&self, callbacks: A11yCallbacks) {
         let adapter = unsafe {
             SubclassingAdapter::for_window(
-                self.window.as_ptr().cast::<c_void>(),
-                callbacks.activation,
-                callbacks.action,
-                callbacks.deactivation,
+                Retained::<UIWindow>::as_ptr(&self.window)
+                    .cast_mut()
+                    .cast::<c_void>(),
+                IosA11yActivationHandler(callbacks.activation),
+                IosA11yActionHandler(callbacks.action),
+                IosA11yDeactivationHandler(callbacks.deactivation),
             )
         };
         self.a11y_adapter.borrow_mut().replace(adapter);
+
+        // UI automation cannot enable VoiceOver without changing a global
+        // simulator setting. When explicitly requested by the native iOS
+        // acceptance test, ask UIKit for this real root view's container after
+        // installing AccessKit's subclass. That invokes the adapter's actual
+        // accessibilityElements override and requests GPUI's initial tree.
+        // Ordinary app launches retain AccessKit's assistive-client gating.
+        #[cfg(debug_assertions)]
+        if std::env::args_os().any(|argument| {
+            argument == std::ffi::OsStr::new(TEST_ACCESSIBILITY_CONTAINER_QUERY_ARGUMENT)
+        }) {
+            let _: *mut AnyObject = unsafe { msg_send![&*self.view, accessibilityElements] };
+        }
     }
 
     fn a11y_tree_update(&self, tree_update: gpui::accesskit::TreeUpdate) {
@@ -1003,17 +1061,22 @@ fn keyboard_animation_info(notification: &NSNotification) -> (Duration, i64) {
     let Some(user_info) = notification.userInfo() else {
         return (Duration::ZERO, 0);
     };
-    let duration = user_info
-        .objectForKey(UIKeyboardAnimationDurationUserInfoKey)
-        .and_then(|value| value.downcast_ref::<NSNumber>())
-        .map(|number| number.doubleValue())
+    let duration = unsafe { user_info.objectForKey(UIKeyboardAnimationDurationUserInfoKey) }
+        .and_then(|value| {
+            value
+                .downcast_ref::<NSNumber>()
+                .map(|number| number.doubleValue())
+        })
         .filter(|seconds| seconds.is_finite() && *seconds > 0.0)
         .map(|seconds| Duration::from_secs_f64(seconds.min(10.0)))
         .unwrap_or(Duration::ZERO);
-    let curve = user_info
-        .objectForKey(UIKeyboardAnimationCurveUserInfoKey)
-        .and_then(|value| value.downcast_ref::<NSNumber>())
-        .map(|number| number.integerValue())
+    let curve = unsafe { user_info.objectForKey(UIKeyboardAnimationCurveUserInfoKey) }
+        .and_then(|value| {
+            value
+                .downcast_ref::<NSNumber>()
+                .map(|number| number.integerValue())
+        })
+        .and_then(|curve| i64::try_from(curve).ok())
         .unwrap_or(0);
     (duration, curve)
 }
@@ -1027,6 +1090,27 @@ fn interpolate_keyboard_inset(from: f32, to: f32, progress: f32, curve: i64) -> 
         _ => progress * progress * (3.0 - 2.0 * progress),
     };
     from + (to - from) * eased
+}
+
+#[link(name = "Foundation", kind = "framework")]
+unsafe extern "C" {
+    fn NSLog(format: *mut AnyObject, ...);
+}
+
+pub(super) fn test_log_ime(message: &str) {
+    if !cfg!(debug_assertions)
+        || !std::env::args().any(|argument| argument == "--gpui-test-log-ime")
+    {
+        return;
+    }
+    let format = NSString::from_str("%@");
+    let message = NSString::from_str(message);
+    unsafe {
+        NSLog(
+            Retained::as_ptr(&format).cast_mut().cast::<AnyObject>(),
+            Retained::as_ptr(&message).cast_mut().cast::<AnyObject>(),
+        );
+    }
 }
 
 fn keyboard_bottom_inset(bounds: CGRect, keyboard: CGRect) -> f32 {
@@ -1087,7 +1171,7 @@ fn update_visibility(
 #[cfg(test)]
 mod tests {
     use super::{
-        interpolate_keyboard_inset, keyboard_bottom_inset, update_visibility, CallbackSlot,
+        CallbackSlot, interpolate_keyboard_inset, keyboard_bottom_inset, update_visibility,
     };
     use gpui::WindowVisibility;
     use objc2_core_foundation::{CGPoint, CGRect, CGSize};
@@ -1144,9 +1228,10 @@ mod tests {
         assert_eq!(
             slot.with(|value| {
                 *value += 1;
-                assert!(slot
-                    .with(|_| panic!("reentered the same handler"))
-                    .is_none());
+                assert!(
+                    slot.with(|_| panic!("reentered the same handler"))
+                        .is_none()
+                );
                 *value
             }),
             Some(2)
@@ -1170,9 +1255,10 @@ mod tests {
         let slot = CallbackSlot::default();
         slot.set(1);
         slot.with(|_| assert!(slot.take().is_none()));
-        assert!(slot
-            .with(|_| panic!("restored a withdrawn handler"))
-            .is_none());
+        assert!(
+            slot.with(|_| panic!("restored a withdrawn handler"))
+                .is_none()
+        );
     }
 
     #[test]

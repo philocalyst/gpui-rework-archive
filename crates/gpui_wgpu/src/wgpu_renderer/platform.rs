@@ -32,6 +32,32 @@ impl WgpuRenderer {
     where
         W: HasWindowHandle + HasDisplayHandle + std::fmt::Debug + Send + Sync + Clone + 'static,
     {
+        Self::new_with_backend_order(
+            gpu_context,
+            window,
+            config,
+            compositor_gpu,
+            extra_requirements,
+            NativeBackend::PREFERENCE,
+        )
+    }
+
+    /// Creates a native renderer while trying one backend at a time in the given order.
+    /// Each attempt includes context/device creation and GPUI pipeline initialization, so a
+    /// pipeline validation error on one API can fall back to the next API before the shared
+    /// context is published. Later windows reuse that established shared context.
+    #[cfg(not(target_family = "wasm"))]
+    pub fn new_with_backend_order<W>(
+        gpu_context: GpuContext,
+        window: &W,
+        config: WgpuSurfaceConfig,
+        compositor_gpu: Option<CompositorGpuHint>,
+        extra_requirements: Option<WgpuDeviceRequirements>,
+        backend_order: &[NativeBackend],
+    ) -> anyhow::Result<Self>
+    where
+        W: HasWindowHandle + HasDisplayHandle + std::fmt::Debug + Send + Sync + Clone + 'static,
+    {
         let window_handle = window
             .window_handle()
             .map_err(|error| anyhow::anyhow!("failed to get window handle: {error}"))?;
@@ -42,6 +68,7 @@ impl WgpuRenderer {
             config,
             compositor_gpu,
             extra_requirements,
+            backend_order,
         )
     }
 
@@ -61,6 +88,7 @@ impl WgpuRenderer {
             config,
             None,
             extra_requirements,
+            NativeBackend::PREFERENCE,
         )
     }
 
@@ -72,35 +100,53 @@ impl WgpuRenderer {
         config: WgpuSurfaceConfig,
         compositor_gpu: Option<CompositorGpuHint>,
         extra_requirements: Option<WgpuDeviceRequirements>,
+        backend_order: &[NativeBackend],
     ) -> anyhow::Result<Self> {
         let mut context_slot = gpu_context.borrow_mut();
-        let (context, surface) = match context_slot.as_mut() {
-            Some(context) => {
-                let surface = create_surface(&context.instance, surface_target)?;
-                context.check_compatible_with_surface(&surface)?;
-                (context, surface)
-            }
-            None => {
-                let (context, surface) = initialize_context_and_surface(
-                    display,
-                    surface_target,
+        if let Some(context) = context_slot.as_ref() {
+            let surface = create_surface(&context.instance, surface_target)?;
+            context.check_compatible_with_surface(&surface)?;
+            return new_internal_with_validation_scope(
+                Some(Rc::clone(&gpu_context)),
+                context,
+                Some(surface),
+                config,
+                compositor_gpu,
+                extra_requirements,
+            );
+        }
+
+        let (context, renderer) = NativeBackend::try_in_order(
+            "a GPU context and renderer for the window",
+            backend_order,
+            |backend| {
+                let instance = backend.instance(display());
+                let surface = create_surface(&instance.raw, surface_target)?;
+                let context = WgpuContext::new_with_adapter_policy(
+                    instance,
+                    &surface,
                     compositor_gpu,
                     SoftwareAdapterPolicy::Allow,
                     extra_requirements.as_ref(),
                 )?;
-                (context_slot.insert(context), surface)
-            }
-        };
-        let atlas = Arc::new(WgpuAtlas::from_context(context));
-        Self::new_internal(
-            Some(Rc::clone(&gpu_context)),
-            context,
-            Some(surface),
-            config,
-            compositor_gpu,
-            extra_requirements,
-            atlas,
-        )
+                let attempt_config = WgpuSurfaceConfig {
+                    size: config.size,
+                    transparent: config.transparent,
+                    preferred_present_mode: config.preferred_present_mode,
+                };
+                let renderer = new_internal_with_validation_scope(
+                    Some(Rc::clone(&gpu_context)),
+                    &context,
+                    Some(surface),
+                    attempt_config,
+                    compositor_gpu,
+                    extra_requirements.clone(),
+                )?;
+                Ok((context, renderer))
+            },
+        )?;
+        *context_slot = Some(context);
+        Ok(renderer)
     }
 
     #[cfg(target_family = "wasm")]
@@ -402,6 +448,36 @@ impl NativeSurfaceTarget {
 type DisplayHandleSource<'a> = &'a dyn Fn() -> Option<Box<dyn wgpu::wgt::WgpuHasDisplayHandle>>;
 
 #[cfg(not(target_family = "wasm"))]
+fn new_internal_with_validation_scope(
+    gpu_context: Option<GpuContext>,
+    context: &WgpuContext,
+    surface: Option<wgpu::Surface<'static>>,
+    config: WgpuSurfaceConfig,
+    compositor_gpu: Option<CompositorGpuHint>,
+    extra_requirements: Option<WgpuDeviceRequirements>,
+) -> anyhow::Result<WgpuRenderer> {
+    let validation_scope = context.device.push_error_scope(wgpu::ErrorFilter::Validation);
+    let atlas = Arc::new(WgpuAtlas::from_context(context));
+    let renderer = WgpuRenderer::new_internal(
+        gpu_context,
+        context,
+        surface,
+        config,
+        compositor_gpu,
+        extra_requirements,
+        atlas,
+    );
+    let validation_error = gpui::block_on(validation_scope.pop());
+    if let Some(error) = validation_error {
+        anyhow::bail!("renderer pipeline initialization failed validation: {error}");
+    }
+    if context.device_lost() {
+        anyhow::bail!("GPU device was lost during renderer initialization");
+    }
+    renderer
+}
+
+#[cfg(not(target_family = "wasm"))]
 fn initialize_context_and_surface(
     display: DisplayHandleSource<'_>,
     surface_target: NativeSurfaceTarget,
@@ -489,7 +565,10 @@ mod tests {
         let mut scene = Scene::default();
         scene.insert_primitive(Quad {
             bounds,
-            content_mask: gpui::ContentMask { bounds },
+            content_mask: gpui::ContentMask {
+                bounds,
+                ..Default::default()
+            },
             background: gpui::solid_background(gpui::red()),
             ..Default::default()
         });

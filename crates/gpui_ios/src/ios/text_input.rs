@@ -158,7 +158,8 @@ define_class!(
         #[unsafe(method(reconcileTextInput))]
         fn reconcile_text_input(&self) {
             self.ivars().update_pending.set(false);
-            let eligible = self.ivars().keyboard_desired.get()
+            let desired = self.ivars().keyboard_desired.get();
+            let eligible = desired
                 && self.with_handler(|handler| {
                     if !handler.query_accepts_focused_text_input() { return false; }
                     let Some(document) = document_range(handler) else { return false; };
@@ -166,13 +167,20 @@ define_class!(
                         .is_some_and(|selection| contains_range(&document, &selection.range))
                 }).unwrap_or(false);
             self.ivars().keyboard_eligible.set(eligible);
-            if self.canBecomeFirstResponder() {
-                if !self.isFirstResponder() { self.becomeFirstResponder(); }
-            } else if self.isFirstResponder() {
+            let first_before = self.isFirstResponder();
+            let can_become = self.canBecomeFirstResponder();
+            let mut become_result = None;
+            if can_become {
+                if !first_before { become_result = Some(self.becomeFirstResponder()); }
+            } else if first_before {
                 let previous = self.ivars().reconciling_responder.replace(true);
                 self.resignFirstResponder();
                 self.ivars().reconciling_responder.set(previous);
             }
+            super::window::test_log_ime(&format!(
+                "[GPUI-IME-TEST] reconcile desired={desired} eligible={eligible} can_become={can_become} first_before={first_before} first_after={} become_result={become_result:?}",
+                self.isFirstResponder(),
+            ));
             if self.ivars().configuration_changed.replace(false) && self.isFirstResponder() {
                 self.reloadInputViews();
             }

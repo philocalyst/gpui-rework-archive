@@ -4158,10 +4158,13 @@ impl<G: Global> DerefMut for GlobalLease<G> {
     }
 }
 
-/// The state of a drag in progress, started by dragging an element in a window.
+/// Contains the state of a drag in progress, started by dragging an element in a window or
+/// by dragging into the app from the underlying platform.
 ///
 /// Set with [`App::start_drag`]. Read it with [`App::active_drag`]. It is cleared by
 /// [`App::stop_drag`] when the drop happens.
+#[derive(derive_setters::Setters)]
+#[setters(generate = false)]
 pub struct AnyDrag {
     /// The view that draws the dragged item under the cursor.
     pub view: AnyView,
@@ -4170,9 +4173,11 @@ pub struct AnyDrag {
     pub value: Arc<dyn Any>,
 
     /// The offset from the cursor to the drag view, so the view stays under the same point it was grabbed.
+    #[setters(generate, rename = "offset")]
     pub cursor_offset: Point<Pixels>,
 
     /// The cursor shown during the drag, or `None` for the default.
+    #[setters(generate)]
     pub cursor_style: Option<CursorStyle>,
 
     /// Resolves the payload to offer the platform if the drag leaves the window.
@@ -4192,19 +4197,10 @@ impl AnyDrag {
         }
     }
 
-    /// Sets [`AnyDrag::cursor_offset`].
-    pub fn offset(mut self, offset: Point<Pixels>) -> Self {
-        self.cursor_offset = offset;
-        self
-    }
+    /// Assigns a constructor of an external payload to be called when the drag moves outside
+    /// of the application window. The closure builds the payload only if the drag leaves the
+    /// window.
 
-    /// Sets [`AnyDrag::cursor_style`].
-    pub fn cursor_style(mut self, style: Option<CursorStyle>) -> Self {
-        self.cursor_style = style;
-        self
-    }
-
-    /// Sets [`AnyDrag::external_payload_source`]: the closure builds the payload if the drag leaves the window.
     pub fn external_payload(
         mut self,
         predicate: impl FnOnce(&mut Window, &mut App) -> Option<ExternalDragPayload> + 'static,

@@ -3223,7 +3223,12 @@ mod tests {
                 Some(rel_path("a/b/c").to_arc()),
             ),
             (PathStyle::Unix, "/a/b/c", "", None),
-            (PathStyle::Unix, "/a/b//c", "/a/b/", None),
+            (
+                PathStyle::Unix,
+                "/a/b//c",
+                "/a/b/",
+                Some(rel_path("c").to_arc()),
+            ),
             (PathStyle::Unix, "/a/bc", "/a/b", None),
             (
                 PathStyle::Unix,
@@ -3250,7 +3255,12 @@ mod tests {
                 Some(rel_path("a/b/c").to_arc()),
             ),
             (PathStyle::Windows, "C:\\a\\b\\c", "", None),
-            (PathStyle::Windows, "C:\\a\\b\\\\c", "C:\\a\\b\\", None),
+            (
+                PathStyle::Windows,
+                "C:\\a\\b\\\\c",
+                "C:\\a\\b\\",
+                Some(rel_path("c").to_arc()),
+            ),
             (PathStyle::Windows, "C:\\a\\bc", "C:\\a\\b", None),
             (
                 PathStyle::Windows,
@@ -3277,7 +3287,7 @@ mod tests {
                 child,
                 parent,
                 style
-                    .strip_prefix(child.as_ref(), parent.as_ref())
+                    .strip_prefix(Path::new(child), Path::new(parent))
                     .ok()
                     .and_then(|rel_path| RelPath::new(rel_path, style).ok())
                     .map(|rel_path| Arc::from(rel_path.as_ref())),

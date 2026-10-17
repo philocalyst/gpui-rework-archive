@@ -1,23 +1,29 @@
 use crate::canvas_fallback::{CanvasFontFallback, classify_canvas_fallback};
+use crate::canvas_layout::{CanvasOverlay, CanvasPlatformTextLayout};
 use crate::canvas_text::{self, CanvasTextMetrics};
 use crate::glyph_cache::{CanvasGlyph, GlyphCache};
-use crate::run_replacements::{Replacement, apply_replacements, collect_candidates};
 use anyhow::{Context as _, Result, ensure};
 use gpui::{
-    Bounds, DevicePixels, Font, FontId, FontMetrics, FontRun, FontStyle, GlyphId, Hsla, LineLayout,
-    MissingGlyphSink, Pixels, PlatformTextSystem, RenderGlyphParams, SUBPIXEL_VARIANTS_X,
-    SUBPIXEL_VARIANTS_Y, ShapedGlyph, Size, TextRenderingMode, point, px, size,
+    Bounds, CaretAffinity, CaretPosition, FallbackFontClass, Font, FontId, FontMetrics, FontStyle,
+    GlyphId, GlyphRenderMode, InlineBoxRequest, InlineLayout, InlineLayoutRequest,
+    InlineTextMetrics, InlineTextStyle, LineLayout, MissingGlyph, MissingGlyphSink, PaintFragment,
+    Pixels, PlatformTextSystem, PreparedRasterStyle, RasterStyleRequest, RasterizedGlyph,
+    RasterizedGlyphFormat, RenderGlyphParams, SUBPIXEL_VARIANTS_X, SUBPIXEL_VARIANTS_Y,
+    ShapedGlyph, Size, TextLayoutRequest, TextRenderingMode, VerticalAlign, point, px, size,
 };
-use gpui_wgpu::CosmicTextSystem;
+use gpui_parley::{ParleyTextSystem, SystemFonts};
 use parking_lot::RwLock;
-use std::{borrow::Cow, collections::HashMap, sync::Arc};
+use std::{
+    borrow::Cow,
+    collections::{HashMap, HashSet},
+    ops::Range,
+    sync::Arc,
+};
 
-// Cosmic's font IDs index its loaded-font vector. Keep browser IDs in a disjoint namespace.
-const CANVAS_FONT_BIT: usize = 1 << (usize::BITS - 1);
 const MAX_MEASUREMENTS: usize = 4096;
 
 pub(crate) struct WebTextSystem {
-    native: CosmicTextSystem,
+    native: ParleyTextSystem,
     state: RwLock<State>,
     canvas_font_fallback: CanvasFontFallback,
 }
@@ -26,10 +32,26 @@ pub(crate) struct WebTextSystem {
 struct State {
     missing_glyph_sink: Option<Arc<dyn MissingGlyphSink>>,
     descriptors: HashMap<FontId, Font>,
-    canvas_fonts: Vec<Arc<CanvasFont>>,
+    native_font_ids: HashMap<FontId, FontId>,
+    font_handles: HashMap<FontId, FontHandle>,
+    next_font_id: usize,
     canvas_font_ids: HashMap<FontId, FontId>,
     glyphs: GlyphCache,
     measurements: HashMap<(FontId, GlyphId, Pixels), CanvasTextMetrics>,
+}
+
+#[derive(Clone)]
+struct FallbackCandidate {
+    source: Range<usize>,
+    font_id: FontId,
+    font_size: Pixels,
+    color: bool,
+    template: PaintFragment,
+}
+
+enum FontHandle {
+    Native(FontId),
+    Canvas(Arc<CanvasFont>),
 }
 
 struct CanvasFont {
@@ -39,6 +61,25 @@ struct CanvasFont {
 }
 
 impl State {
+    fn allocate_font_handle(&mut self, handle: FontHandle) -> Result<FontId> {
+        let font_id = FontId(self.next_font_id);
+        self.next_font_id = self
+            .next_font_id
+            .checked_add(1)
+            .context("Web font handle space exhausted")?;
+        self.font_handles.insert(font_id, handle);
+        Ok(font_id)
+    }
+
+    fn public_native_font_id(&mut self, native_id: FontId) -> Result<FontId> {
+        if let Some(font_id) = self.native_font_ids.get(&native_id) {
+            return Ok(*font_id);
+        }
+        let font_id = self.allocate_font_handle(FontHandle::Native(native_id))?;
+        self.native_font_ids.insert(native_id, font_id);
+        Ok(font_id)
+    }
+
     fn cached_fallback(
         &self,
         native_id: FontId,
@@ -59,39 +100,68 @@ impl WebTextSystem {
         canvas_font_fallback: CanvasFontFallback,
     ) -> Self {
         Self {
-            native: CosmicTextSystem::new_without_system_fonts(system_font_fallback),
+            native: ParleyTextSystem::new_with_system_font(SystemFonts::Skip, system_font_fallback),
             state: RwLock::new(State::default()),
             canvas_font_fallback,
         }
     }
 
     fn canvas_font(&self, font_id: FontId) -> Option<Arc<CanvasFont>> {
-        if font_id.0 & CANVAS_FONT_BIT == 0 {
-            return None;
+        match self.state.read().font_handles.get(&font_id) {
+            Some(FontHandle::Canvas(font)) => Some(font.clone()),
+            _ => None,
         }
-        self.state
-            .read()
-            .canvas_fonts
-            .get(font_id.0 & !CANVAS_FONT_BIT)
-            .cloned()
     }
 
     fn native_font_id(&self, font_id: FontId) -> FontId {
-        self.canvas_font(font_id)
-            .map_or(font_id, |font| font.native_id)
+        match self.state.read().font_handles.get(&font_id) {
+            Some(FontHandle::Native(native_id)) => *native_id,
+            Some(FontHandle::Canvas(font)) => font.native_id,
+            None => panic!("unknown Web font handle {font_id:?}"),
+        }
     }
 
-    fn canvas_font_id(&self, native_id: FontId) -> Result<FontId> {
-        let descriptor = {
+    fn public_font_id(&self, native_id: FontId) -> FontId {
+        let mut state = self.state.write();
+        if let Some(font_id) = state.native_font_ids.get(&native_id) {
+            return *font_id;
+        }
+        state
+            .public_native_font_id(native_id)
+            .expect("Web font handle space exhausted")
+    }
+
+    fn expose_native_layout(&self, layout: &mut LineLayout) {
+        for fragment in &mut layout.paint_fragments {
+            fragment.font_id = self.public_font_id(fragment.font_id);
+        }
+    }
+
+    fn expose_inline_layout(&self, layout: &mut InlineLayout) {
+        let mut shaped_layout = (*layout.layout).clone();
+        self.expose_native_layout(&mut shaped_layout);
+        layout.layout = Arc::new(shaped_layout);
+    }
+
+    fn canvas_font_id(&self, source_font_id: FontId) -> Result<FontId> {
+        let (native_id, descriptor) = {
             let state = self.state.read();
-            if let Some(font_id) = state.canvas_font_ids.get(&native_id) {
+            if let Some(font_id) = state.canvas_font_ids.get(&source_font_id) {
                 return Ok(*font_id);
             }
-            state
+            let native_id = match state.font_handles.get(&source_font_id) {
+                Some(FontHandle::Native(native_id)) => *native_id,
+                Some(FontHandle::Canvas(_)) => {
+                    anyhow::bail!("Canvas fallback source font is already a Canvas font")
+                }
+                None => anyhow::bail!("unknown source font handle for Canvas fallback"),
+            };
+            let descriptor = state
                 .descriptors
-                .get(&native_id)
+                .get(&source_font_id)
                 .cloned()
-                .context("missing source font descriptor for Canvas fallback")?
+                .context("missing source font descriptor for Canvas fallback")?;
+            (native_id, descriptor)
         };
         let monospace = match (
             self.native.glyph_for_char(native_id, 'i'),
@@ -104,20 +174,16 @@ impl WebTextSystem {
             _ => false,
         };
         let mut state = self.state.write();
-        if let Some(font_id) = state.canvas_font_ids.get(&native_id) {
+        if let Some(font_id) = state.canvas_font_ids.get(&source_font_id) {
             return Ok(*font_id);
         }
-        ensure!(
-            state.canvas_fonts.len() < CANVAS_FONT_BIT,
-            "Canvas font ID space exhausted"
-        );
-        let font_id = FontId(CANVAS_FONT_BIT | state.canvas_fonts.len());
-        state.canvas_fonts.push(Arc::new(CanvasFont {
+        let font = Arc::new(CanvasFont {
             native_id,
             descriptor,
             monospace,
-        }));
-        state.canvas_font_ids.insert(native_id, font_id);
+        });
+        let font_id = state.allocate_font_handle(FontHandle::Canvas(font))?;
+        state.canvas_font_ids.insert(source_font_id, font_id);
         Ok(font_id)
     }
 
@@ -165,6 +231,71 @@ impl WebTextSystem {
         Ok(metrics)
     }
 
+    fn report_missing(&self, text: &str, layout: &LineLayout) {
+        let Some(sink) = self.state.read().missing_glyph_sink.clone() else {
+            return;
+        };
+        let mut missing_ranges = Vec::new();
+        let mut missing_font_by_range = HashMap::new();
+        for fragment in &layout.paint_fragments {
+            let Some(ranges) = &fragment.glyph_source_ranges else {
+                continue;
+            };
+            if self.canvas_font(fragment.font_id).is_some() {
+                continue;
+            }
+            for (glyph, range) in fragment.glyphs.iter().zip(ranges.iter()) {
+                if glyph.id.0 == 0 && text.get(range.clone()).is_some() {
+                    missing_ranges.push(range.clone());
+                    missing_font_by_range
+                        .entry(range.clone())
+                        .or_insert(fragment.font_id);
+                }
+            }
+        }
+        let grapheme_ranges =
+            crate::run_replacements::graphemes_intersecting_ranges(text, &missing_ranges);
+        let mut missing = Vec::new();
+        for range in grapheme_ranges {
+            let Some(grapheme) = text.get(range.clone()) else {
+                continue;
+            };
+            let Some(font_id) = missing_ranges
+                .iter()
+                .find(|missing| missing.start < range.end && range.start < missing.end)
+                .and_then(|missing| missing_font_by_range.get(missing))
+                .copied()
+            else {
+                continue;
+            };
+            let native_font_id = self.native_font_id(font_id);
+            let font_class = match (
+                self.native
+                    .glyph_for_char(native_font_id, char::from_u32(105).unwrap()),
+                self.native
+                    .glyph_for_char(native_font_id, char::from_u32(109).unwrap()),
+            ) {
+                (Some(narrow), Some(wide))
+                    if self
+                        .native
+                        .advance(native_font_id, narrow)
+                        .is_ok_and(|narrow| {
+                            self.native
+                                .advance(native_font_id, wide)
+                                .is_ok_and(|wide| narrow.width == wide.width)
+                        }) =>
+                {
+                    FallbackFontClass::Monospace
+                }
+                _ => FallbackFontClass::Proportional,
+            };
+            missing.push(MissingGlyph::new(grapheme.into(), font_class));
+        }
+        if !missing.is_empty() {
+            sink.report(missing);
+        }
+    }
+
     fn fallback_glyph(
         &self,
         native_id: FontId,
@@ -184,69 +315,13 @@ impl WebTextSystem {
         let metrics = self.measure(font_id, glyph_id, font_size)?;
         Ok((font_id, glyph_id, metrics))
     }
-
-    fn apply_fallback(&self, text: &str, font_runs: &[FontRun], layout: &mut LineLayout) {
-        if self.canvas_font_fallback == CanvasFontFallback::Disabled
-            || text.is_ascii()
-            || !f32::from(layout.font_size).is_finite()
-            || layout.font_size <= px(0.)
-        {
-            return;
-        }
-        let mut replacements = Vec::new();
-        for candidate in collect_candidates(text, font_runs, layout) {
-            if !self.canvas_font_fallback.allows(candidate.is_emoji) {
-                continue;
-            }
-            let Some(glyphs) = candidate.glyphs else {
-                continue;
-            };
-            if !glyphs.contiguous || !(glyphs.missing || (candidate.color && !glyphs.native_color))
-            {
-                continue;
-            }
-            let old_width = glyphs.end_x - glyphs.position.x;
-            if old_width < px(0.) {
-                continue;
-            }
-            let replacement = (|| -> Result<Replacement> {
-                let text = text
-                    .get(candidate.source.clone())
-                    .context("invalid Canvas fallback source range")?;
-                let (font_id, glyph_id, metrics) = self.fallback_glyph(
-                    candidate.font_id,
-                    text,
-                    candidate.color,
-                    layout.font_size,
-                )?;
-                Ok(Replacement {
-                    glyph_range: glyphs.range,
-                    font_id,
-                    glyph: ShapedGlyph {
-                        id: glyph_id,
-                        position: glyphs.position,
-                        index: candidate.source.start,
-                        is_emoji: candidate.color,
-                    },
-                    width_delta: px(metrics.advance) - old_width,
-                })
-            })();
-            match replacement {
-                Ok(replacement) => replacements.push(replacement),
-                Err(error) => log::warn!("Canvas font fallback failed: {error:#}"),
-            }
-        }
-        if replacements.is_empty() {
-            return;
-        }
-        replacements.sort_unstable_by_key(|replacement| replacement.glyph_range.start);
-        // Keep the primary font's baseline and line spacing stable. Browser ink
-        // extents affect raster bounds, not the surrounding editor's line metrics.
-        apply_replacements(layout, replacements);
-    }
 }
 
 impl PlatformTextSystem for WebTextSystem {
+    fn font_generation(&self) -> u64 {
+        self.native.font_generation()
+    }
+
     fn set_missing_glyph_sink(&self, sink: Option<Arc<dyn MissingGlyphSink>>) {
         // Cosmic must not report missing glyphs before Canvas has a chance to replace them.
         self.state.write().missing_glyph_sink = sink;
@@ -263,32 +338,23 @@ impl PlatformTextSystem for WebTextSystem {
     }
 
     fn font_id(&self, font: &Font) -> Result<FontId> {
-        let font_id = self.native.font_id(font)?;
-        ensure!(
-            font_id.0 & CANVAS_FONT_BIT == 0,
-            "native font ID space exhausted"
-        );
-        let mut descriptor = font.clone();
-        (descriptor.weight, descriptor.style) = self.native.font_weight_and_style(font_id)?;
-        self.state
-            .write()
+        let native_id = self.native.font_id(font)?;
+        let mut state = self.state.write();
+        let font_id = state
+            .public_native_font_id(native_id)
+            .context("allocating Web font handle")?;
+        state
             .descriptors
             .entry(font_id)
-            .or_insert(descriptor);
+            .or_insert_with(|| font.clone());
         Ok(font_id)
     }
 
     fn prewarm_fonts(&self, font_ids: &[FontId]) {
-        if font_ids
-            .iter()
-            .all(|font_id| font_id.0 & CANVAS_FONT_BIT == 0)
-        {
-            return self.native.prewarm_fonts(font_ids);
-        }
-        let native_ids: Vec<_> = font_ids
+        let native_ids = font_ids
             .iter()
             .map(|font_id| self.native_font_id(*font_id))
-            .collect();
+            .collect::<Vec<_>>();
         self.native.prewarm_fonts(&native_ids);
     }
 
@@ -298,7 +364,9 @@ impl PlatformTextSystem for WebTextSystem {
 
     fn typographic_bounds(&self, font_id: FontId, glyph_id: GlyphId) -> Result<Bounds<f32>> {
         let Some(font) = self.canvas_font(font_id) else {
-            return self.native.typographic_bounds(font_id, glyph_id);
+            return self
+                .native
+                .typographic_bounds(self.native_font_id(font_id), glyph_id);
         };
         let font_size = px(self.native.font_metrics(font.native_id).units_per_em as f32);
         let metrics = self.measure(font_id, glyph_id, font_size)?;
@@ -313,7 +381,7 @@ impl PlatformTextSystem for WebTextSystem {
 
     fn advance(&self, font_id: FontId, glyph_id: GlyphId) -> Result<Size<f32>> {
         let Some(font) = self.canvas_font(font_id) else {
-            return self.native.advance(font_id, glyph_id);
+            return self.native.advance(self.native_font_id(font_id), glyph_id);
         };
         let font_size = px(self.native.font_metrics(font.native_id).units_per_em as f32);
         Ok(size(
@@ -324,7 +392,9 @@ impl PlatformTextSystem for WebTextSystem {
 
     fn glyph_for_char(&self, font_id: FontId, character: char) -> Option<GlyphId> {
         if self.canvas_font(font_id).is_none() {
-            return self.native.glyph_for_char(font_id, character);
+            return self
+                .native
+                .glyph_for_char(self.native_font_id(font_id), character);
         }
         let mut buffer = [0; 4];
         let text = character.encode_utf8(&mut buffer);
@@ -339,9 +409,11 @@ impl PlatformTextSystem for WebTextSystem {
         }
     }
 
-    fn glyph_raster_bounds(&self, params: &RenderGlyphParams) -> Result<Bounds<DevicePixels>> {
+    fn rasterize_glyph(&self, params: &RenderGlyphParams) -> Result<RasterizedGlyph> {
         if self.canvas_font(params.font_id).is_none() {
-            return self.native.glyph_raster_bounds(params);
+            let mut native_params = params.clone();
+            native_params.font_id = self.native_font_id(params.font_id);
+            return self.native.rasterize_glyph(&native_params);
         }
         let metrics = self.measure(
             params.font_id,
@@ -349,7 +421,9 @@ impl PlatformTextSystem for WebTextSystem {
             params.font_size * params.scale_factor,
         )?;
         if metrics.right <= metrics.left || metrics.ascent + metrics.descent <= 0. {
-            return Ok(Bounds::default());
+            return Ok(RasterizedGlyph::empty(
+                params.raster_style.mode.rasterized_format(),
+            ));
         }
         let (offset_x, offset_y) = subpixel_offset(params);
         let left = (f64::from(metrics.left) + f64::from(offset_x)).floor() - 1.;
@@ -368,65 +442,436 @@ impl PlatformTextSystem for WebTextSystem {
         let height = (bottom as i32)
             .checked_sub(top as i32)
             .context("Canvas text height overflow")?;
-        Ok(Bounds {
+        let bounds = Bounds {
             origin: point((left as i32).into(), (top as i32).into()),
             size: size(width.into(), height.into()),
-        })
-    }
-
-    fn rasterize_glyph(
-        &self,
-        params: &RenderGlyphParams,
-        bounds: Bounds<DevicePixels>,
-    ) -> Result<(Size<DevicePixels>, Vec<u8>)> {
-        let Some(font) = self.canvas_font(params.font_id) else {
-            return self.native.rasterize_glyph(params, bounds);
         };
+        let font = self
+            .canvas_font(params.font_id)
+            .context("invalid Canvas font ID")?;
         let glyph = self.canvas_glyph(params.font_id, params.glyph_id)?;
         let css_font = font.css_font(params.font_size * params.scale_factor, glyph.color)?;
-        let mut pixels = canvas_text::rasterize(
+        let pixels = canvas_text::rasterize(
             &glyph.text,
             &css_font,
             bounds,
             subpixel_offset(params),
             glyph.color,
         )?;
-        if params.subpixel_rendering && !glyph.color {
-            pixels = pixels.into_iter().flat_map(|alpha| [alpha; 4]).collect();
-        }
-        Ok((bounds.size, pixels))
+        let (format, pixels) = if glyph.color {
+            (RasterizedGlyphFormat::BgraColor, pixels)
+        } else if params.raster_style.mode == GlyphRenderMode::Subpixel {
+            (
+                RasterizedGlyphFormat::BgraSubpixelMask,
+                pixels.into_iter().flat_map(|alpha| [alpha; 4]).collect(),
+            )
+        } else {
+            (RasterizedGlyphFormat::AlphaMask, pixels)
+        };
+        Ok(RasterizedGlyph {
+            bounds,
+            size: bounds.size,
+            format,
+            pixels,
+        })
     }
 
-    fn layout_line(&self, text: &str, font_size: Pixels, runs: &[FontRun]) -> LineLayout {
-        let native_runs: Cow<'_, [FontRun]> =
-            if runs.iter().any(|run| run.font_id.0 & CANVAS_FONT_BIT != 0) {
-                Cow::Owned(
-                    runs.iter()
-                        .map(|run| FontRun {
-                            len: run.len,
-                            font_id: self.native_font_id(run.font_id),
-                        })
-                        .collect(),
-                )
-            } else {
-                Cow::Borrowed(runs)
-            };
-        let mut layout = self.native.layout_line(text, font_size, &native_runs);
-        self.apply_fallback(text, &native_runs, &mut layout);
-        let sink = self.state.read().missing_glyph_sink.clone();
-        if let Some(sink) = sink {
-            let missing_indices = layout
-                .runs
-                .iter()
-                .filter(|run| run.font_id.0 & CANVAS_FONT_BIT == 0)
-                .flat_map(|run| &run.glyphs)
-                .filter(|glyph| glyph.id.0 == 0)
-                .map(|glyph| glyph.index);
-            sink.report(
-                self.native
-                    .missing_glyphs(text, &native_runs, missing_indices),
-            );
+    fn prepare_raster_style(&self, request: RasterStyleRequest) -> PreparedRasterStyle {
+        if self.canvas_font(request.font_id).is_none() {
+            let mut native_request = request;
+            native_request.font_id = self.native_font_id(native_request.font_id);
+            return self.native.prepare_raster_style(native_request);
         }
+        let mode = if self
+            .canvas_glyph(request.font_id, request.glyph_id)
+            .is_ok_and(|glyph| glyph.color)
+        {
+            GlyphRenderMode::Color
+        } else {
+            GlyphRenderMode::Grayscale
+        };
+        PreparedRasterStyle::independent(mode)
+    }
+
+    fn layout_text(&self, request: TextLayoutRequest<'_>) -> LineLayout {
+        for run in request.runs {
+            let _ = self.font_id(&run.font);
+        }
+        let mut measured = self.native.layout_text(request);
+        if self.canvas_font_fallback == CanvasFontFallback::Disabled
+            || measured.ascent + measured.descent <= px(0.)
+        {
+            self.expose_native_layout(&mut measured);
+            return measured;
+        }
+        let text_metrics = InlineTextMetrics {
+            ascent: measured.ascent,
+            descent: measured.descent,
+            x_height: measured.ascent / 2.,
+        };
+        self.layout_inline(InlineLayoutRequest {
+            text: request.text,
+            runs: request.runs,
+            text_styles: &[],
+            boxes: &[],
+            font_size: request.font_size,
+            line_height: measured.ascent + measured.descent,
+            text_metrics,
+            options: request.options,
+            bidi_scopes: &[],
+        })
+        .layout
+        .as_ref()
+        .clone()
+    }
+
+    fn layout_inline(&self, request: InlineLayoutRequest<'_>) -> InlineLayout {
+        for run in request.runs {
+            let _ = self.font_id(&run.font);
+        }
+        let mut initial = self.native.layout_inline(request);
+        if self.canvas_font_fallback == CanvasFontFallback::Disabled {
+            self.expose_inline_layout(&mut initial);
+            return initial;
+        }
+
+        let mut glyph_records = Vec::new();
+        let mut glyph_locations = Vec::new();
+        let mut run_starts = Vec::with_capacity(request.runs.len());
+        let mut run_start = 0usize;
+        for run in request.runs {
+            run_starts.push(run_start);
+            run_start += run.len;
+        }
+        for (fragment_index, fragment) in initial.layout.paint_fragments.iter().enumerate() {
+            let Some(source_ranges) = &fragment.glyph_source_ranges else {
+                // Without exact byte ownership, replacing any grapheme could erase neighboring
+                // shaping clusters or corrupt source mapping.
+                self.expose_inline_layout(&mut initial);
+                self.report_missing(request.text, &initial.layout);
+                return initial;
+            };
+            let Some(line_index) = initial
+                .layout
+                .visual_lines
+                .iter()
+                .position(|line| line.paint_fragment_range.contains(&fragment_index))
+            else {
+                continue;
+            };
+            for (glyph_index, (glyph, source)) in
+                fragment.glyphs.iter().zip(source_ranges.iter()).enumerate()
+            {
+                glyph_records.push(crate::run_replacements::GlyphRecord {
+                    source: source.clone(),
+                    font_id: fragment.font_id,
+                    source_run: fragment.source_run,
+                    line_index,
+                    missing: glyph.id.0 == 0,
+                    native_color: glyph.is_emoji,
+                    fragment_index,
+                    fragment_source: fragment.source_range.clone(),
+                });
+                glyph_locations.push((fragment_index, glyph_index));
+            }
+        }
+        let candidates = crate::run_replacements::collect_candidates(
+            request.text,
+            &glyph_records,
+            self.canvas_font_fallback,
+        )
+        .into_iter()
+        .filter_map(|candidate| {
+            let (fragment_index, _) = *candidate
+                .glyph_records
+                .first()
+                .and_then(|index| glyph_locations.get(*index))?;
+            let template = initial.layout.paint_fragments.get(fragment_index)?;
+            if candidate.glyph_records.iter().any(|index| {
+                glyph_locations
+                    .get(*index)
+                    .and_then(|(fragment_index, _)| {
+                        initial.layout.paint_fragments.get(*fragment_index)
+                    })
+                    .is_none_or(|fragment| fragment.font_size != template.font_size)
+            }) {
+                return None;
+            }
+            let source_run = candidate.source_run;
+            let run_start = *run_starts.get(source_run)?;
+            let run = request.runs.get(source_run)?;
+            if candidate.source.start < run_start || candidate.source.end > run_start + run.len {
+                return None;
+            }
+            if request.text_styles.iter().any(|style| {
+                style.range.start < candidate.source.end
+                    && candidate.source.start < style.range.end
+                    && !(style.range.start <= candidate.source.start
+                        && candidate.source.end <= style.range.end)
+            }) {
+                return None;
+            }
+            let font_id = self.font_id(&run.font).ok()?;
+            Some(FallbackCandidate {
+                source: candidate.source,
+                font_id,
+                font_size: template.font_size,
+                color: candidate.color,
+                template: template.clone(),
+            })
+        })
+        .collect::<Vec<_>>();
+
+        if candidates.is_empty() {
+            self.expose_inline_layout(&mut initial);
+            self.report_missing(request.text, &initial.layout);
+            return initial;
+        }
+
+        let mut boxes = request.boxes.to_vec();
+        let mut injections = Vec::new();
+        let mut next_id = u64::MAX;
+        for candidate in &candidates {
+            while boxes.iter().any(|inline_box| inline_box.id == next_id) {
+                next_id = next_id.saturating_sub(1);
+            }
+            let Some(text) = request.text.get(candidate.source.clone()) else {
+                continue;
+            };
+            let Ok((font_id, glyph_id, metrics)) = self.fallback_glyph(
+                candidate.font_id,
+                text,
+                candidate.color,
+                candidate.font_size,
+            ) else {
+                continue;
+            };
+            let height = metrics.ascent + metrics.descent;
+            if !metrics.advance.is_finite() || !height.is_finite() || height <= 0. {
+                continue;
+            }
+            boxes.push(InlineBoxRequest {
+                id: next_id,
+                index: candidate.source.start,
+                size: size(px(metrics.advance), px(height)),
+                vertical_align: VerticalAlign::Baseline,
+            });
+            injections.push((candidate.clone(), next_id, font_id, glyph_id, metrics));
+            next_id = next_id.saturating_sub(1);
+        }
+        // Parley partitions inline requests by index. Stable sorting keeps caller boxes in
+        // their original order at ties and places each Canvas replacement at its source index.
+        boxes.sort_by_key(|inline_box| inline_box.index);
+        if injections.is_empty() {
+            self.expose_inline_layout(&mut initial);
+            self.report_missing(request.text, &initial.layout);
+            return initial;
+        }
+
+        // Only hide native glyphs for candidates whose Canvas glyph and measured advance are ready.
+        let successful = injections
+            .iter()
+            .map(|(candidate, ..)| candidate)
+            .collect::<Vec<_>>();
+        let mut text_styles = Vec::new();
+        for style in request.text_styles {
+            let mut cursor = style.range.start;
+            for candidate in successful.iter().filter(|candidate| {
+                style.range.start <= candidate.source.start
+                    && candidate.source.end <= style.range.end
+            }) {
+                if cursor < candidate.source.start {
+                    text_styles.push(InlineTextStyle {
+                        range: cursor..candidate.source.start,
+                        ..style.clone()
+                    });
+                }
+                text_styles.push(InlineTextStyle {
+                    range: candidate.source.clone(),
+                    font_size: px(0.),
+                    line_height: style.line_height,
+                });
+                cursor = candidate.source.end;
+            }
+            if cursor < style.range.end {
+                text_styles.push(InlineTextStyle {
+                    range: cursor..style.range.end,
+                    ..style.clone()
+                });
+            }
+        }
+        for candidate in successful.iter().filter(|candidate| {
+            !request.text_styles.iter().any(|style| {
+                style.range.start <= candidate.source.start
+                    && candidate.source.end <= style.range.end
+            })
+        }) {
+            text_styles.push(InlineTextStyle {
+                range: candidate.source.clone(),
+                font_size: px(0.),
+                line_height: request.line_height,
+            });
+        }
+        text_styles.sort_by_key(|style| (style.range.end, style.range.start));
+
+        let mut layout = self.native.layout_inline(InlineLayoutRequest {
+            boxes: &boxes,
+            text_styles: &text_styles,
+            ..request
+        });
+        // Parley must retain every request ID in the layout. If it does not, discard this
+        // speculative pass rather than suppressing source glyphs without replacement geometry.
+        if injections
+            .iter()
+            .any(|(_, id, ..)| !layout.boxes.iter().any(|inline_box| inline_box.id == *id))
+        {
+            self.expose_inline_layout(&mut initial);
+            self.report_missing(request.text, &initial.layout);
+            return initial;
+        }
+        let replacement_ranges = injections
+            .iter()
+            .map(|(candidate, ..)| candidate.source.clone())
+            .collect::<Vec<_>>();
+        // The placeholder pass may reshape clusters. Validate every new mapping before
+        // suppressing native paint: contained remappings are safe, while crossings,
+        // malformed UTF-8 ranges, or missing provenance discard the speculative layout.
+        for fragment in &layout.layout.paint_fragments {
+            let Some(source_ranges) = &fragment.glyph_source_ranges else {
+                self.expose_inline_layout(&mut initial);
+                self.report_missing(request.text, &initial.layout);
+                return initial;
+            };
+            if source_ranges.len() != fragment.glyphs.len()
+                || source_ranges
+                    .iter()
+                    .any(|range| request.text.get(range.clone()).is_none())
+                || source_ranges.iter().any(|range| {
+                    crate::run_replacements::replacement_glyph_is_suppressed(
+                        range,
+                        &replacement_ranges,
+                    )
+                    .is_err()
+                })
+            {
+                self.expose_inline_layout(&mut initial);
+                self.report_missing(request.text, &initial.layout);
+                return initial;
+            }
+        }
+        let mut line_fragments = vec![Vec::new(); layout.layout.visual_lines.len()];
+        for (line_index, line) in layout.layout.visual_lines.iter().enumerate() {
+            for fragment in &layout.layout.paint_fragments[line.paint_fragment_range.clone()] {
+                let mut fragment = fragment.clone();
+                fragment.font_id = self.public_font_id(fragment.font_id);
+                if let Some(source_ranges) = &fragment.glyph_source_ranges {
+                    let keep = fragment
+                        .glyphs
+                        .iter()
+                        .zip(source_ranges.iter())
+                        .enumerate()
+                        .filter_map(|(index, (glyph, range))| {
+                            let suppress =
+                                crate::run_replacements::replacement_glyph_is_suppressed(
+                                    range,
+                                    &replacement_ranges,
+                                )
+                                .expect("replacement glyph mappings were validated above");
+                            (!suppress).then_some((glyph.clone(), range.clone(), index))
+                        })
+                        .collect::<Vec<_>>();
+                    fragment.glyphs = keep
+                        .iter()
+                        .map(|(glyph, _, _)| glyph.clone())
+                        .collect::<Vec<_>>()
+                        .into();
+                    fragment.glyph_source_ranges = Some(
+                        keep.iter()
+                            .map(|(_, range, _)| range.clone())
+                            .collect::<Vec<_>>()
+                            .into(),
+                    );
+                }
+                if !fragment.glyphs.is_empty() {
+                    line_fragments[line_index].push(fragment);
+                }
+            }
+        }
+        let positioned_boxes = layout.boxes.clone();
+        let mut overlays = Vec::new();
+        for (candidate, id, font_id, glyph_id, metrics) in &injections {
+            let Some(inline_box) = positioned_boxes
+                .iter()
+                .find(|inline_box| inline_box.id == *id)
+            else {
+                continue;
+            };
+            let line = layout.lines[inline_box.line_index];
+            let line_local_x = inline_box.bounds.origin.x - line.origin.x;
+            let line_local_y = inline_box.bounds.origin.y - line.origin.y;
+            let glyph = ShapedGlyph {
+                id: *glyph_id,
+                position: point(
+                    line_local_x - px(metrics.left),
+                    line_local_y + px(metrics.ascent) - line.baseline,
+                ),
+                is_emoji: candidate.color,
+            };
+            let mut fragment = candidate.template.clone();
+            fragment.source_range = candidate.source.clone();
+            fragment.font_id = *font_id;
+            fragment.font_size = candidate.font_size;
+            fragment.glyphs = vec![glyph].into();
+            fragment.glyph_source_ranges = Some(vec![candidate.source.clone()].into());
+            fragment.x_range = line_local_x..line_local_x + px(metrics.advance);
+            line_fragments[inline_box.line_index].push(fragment);
+
+            let start = initial.layout.platform_layout.caret_bounds(
+                CaretPosition {
+                    index: candidate.source.start,
+                    affinity: CaretAffinity::Downstream,
+                },
+                request.line_height,
+            );
+            let end = initial.layout.platform_layout.caret_bounds(
+                CaretPosition {
+                    index: candidate.source.end,
+                    affinity: CaretAffinity::Upstream,
+                },
+                request.line_height,
+            );
+            let rtl =
+                matches!((start, end), (Some(start), Some(end)) if start.origin.x > end.origin.x);
+            overlays.push(CanvasOverlay {
+                source: candidate.source.clone(),
+                bounds: inline_box.bounds,
+                line_index: inline_box.line_index,
+                rtl,
+            });
+        }
+
+        let private_ids = injections
+            .iter()
+            .map(|(_, id, ..)| *id)
+            .collect::<HashSet<_>>();
+        layout
+            .boxes
+            .retain(|inline_box| !private_ids.contains(&inline_box.id));
+        let mut shaped_layout = (*layout.layout).clone();
+        shaped_layout.paint_fragments.clear();
+        for (line_index, fragments) in line_fragments.iter_mut().enumerate() {
+            fragments.sort_by_key(|fragment| fragment.x_range.start);
+            let start = shaped_layout.paint_fragments.len();
+            shaped_layout.paint_fragments.append(fragments);
+            shaped_layout.visual_lines[line_index].paint_fragment_range =
+                start..shaped_layout.paint_fragments.len();
+        }
+        shaped_layout.platform_layout = Arc::new(CanvasPlatformTextLayout::new(
+            shaped_layout.platform_layout.clone(),
+            overlays,
+        ));
+        layout.layout = Arc::new(shaped_layout);
+        self.report_missing(request.text, &layout.layout);
         layout
     }
 
@@ -434,12 +879,9 @@ impl PlatformTextSystem for WebTextSystem {
         if self.canvas_font(font_id).is_some() {
             TextRenderingMode::Grayscale
         } else {
-            self.native.recommended_rendering_mode(font_id, font_size)
+            self.native
+                .recommended_rendering_mode(self.native_font_id(font_id), font_size)
         }
-    }
-
-    fn glyph_dilation_for_color(&self, color: Hsla) -> u8 {
-        self.native.glyph_dilation_for_color(color)
     }
 }
 
@@ -506,4 +948,34 @@ fn subpixel_offset(params: &RenderGlyphParams) -> (f32, f32) {
         f32::from(params.subpixel_variant.x) / SUBPIXEL_VARIANTS_X as f32,
         f32::from(params.subpixel_variant.y) / SUBPIXEL_VARIANTS_Y as f32,
     )
+}
+
+#[cfg(test)]
+mod font_handle_tests {
+    use super::*;
+
+    #[test]
+    fn opaque_font_handles_round_trip_high_bit_native_ids() {
+        let native_id = FontId(1usize << (usize::BITS - 1));
+        let mut state = State::default();
+
+        let public_id = state.public_native_font_id(native_id).unwrap();
+        assert_eq!(state.public_native_font_id(native_id).unwrap(), public_id);
+        assert_eq!(state.native_font_ids.get(&native_id), Some(&public_id));
+        assert!(
+            matches!(state.font_handles.get(&public_id), Some(FontHandle::Native(id)) if *id == native_id)
+        );
+
+        let canvas_id = state
+            .allocate_font_handle(FontHandle::Canvas(Arc::new(CanvasFont {
+                native_id,
+                descriptor: Font::default(),
+                monospace: false,
+            })))
+            .unwrap();
+        assert_ne!(canvas_id, public_id);
+        assert!(
+            matches!(state.font_handles.get(&canvas_id), Some(FontHandle::Canvas(font)) if font.native_id == native_id)
+        );
+    }
 }

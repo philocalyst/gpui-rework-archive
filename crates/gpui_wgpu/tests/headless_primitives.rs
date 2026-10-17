@@ -430,12 +430,13 @@ fn smoothed_primitives_share_one_contour() {
     });
 
     let filter_bounds = bounds(190.0, 92.0, 70.0, 52.0);
-    scene.insert_primitive(Quad {
+    let backdrop = Quad {
         bounds: filter_bounds,
         content_mask,
         background: checkerboard(white, 2.0),
         ..Default::default()
-    });
+    };
+    scene.insert_primitive(backdrop);
     scene.insert_primitive(BackdropFilter {
         order: 0,
         bounds: filter_bounds,
@@ -451,12 +452,7 @@ fn smoothed_primitives_share_one_contour() {
         .render_scene_to_image(&scene, target)
         .expect("render must succeed");
     let mut unfiltered_scene = Scene::default();
-    unfiltered_scene.insert_primitive(Quad {
-        bounds: filter_bounds,
-        content_mask,
-        background: checkerboard(white, 2.0),
-        ..Default::default()
-    });
+    unfiltered_scene.insert_primitive(backdrop);
     unfiltered_scene.finish();
     let unfiltered = renderer
         .render_scene_to_image(&unfiltered_scene, target)
@@ -466,22 +462,31 @@ fn smoothed_primitives_share_one_contour() {
     let is_black = |x, y| pixel(x, y)[0..3].iter().all(|channel| *channel <= 12);
     let is_white = |x, y| pixel(x, y)[0..3].iter().all(|channel| *channel >= 235);
 
-    assert!(is_black(10, 10), "smoothed fill must exclude its corner");
-    assert!(
-        pixel(35, 10)[1] > 180,
-        "fill shoulder must reach the top edge"
-    );
-    assert!(pixel(35, 35)[1] > 180, "fill center");
+    for (name, left, center, channel, minimum) in
+        [("fill", 10, 35, 1, 180), ("image", 204, 229, 0, 220)]
+    {
+        assert!(
+            is_black(left, 10),
+            "smoothed {name} must exclude its corner"
+        );
+        assert!(
+            pixel(center, 10)[channel] > minimum,
+            "{name} shoulder must reach the top edge",
+        );
+        assert!(pixel(center, 35)[channel] > minimum, "{name} center");
+    }
 
-    assert!(is_white(96, 10), "thin top border");
-    assert!(
-        is_black(96, 14),
-        "top border must not grow to the right width"
-    );
-    assert!(is_white(120, 35), "right border");
-    assert!(is_black(115, 35), "right border interior boundary");
-    assert!(is_white(96, 56), "thick bottom border");
-    assert!(is_black(96, 50), "bottom border interior boundary");
+    for (side, outer, inner) in [
+        ("top", (96, 10), (96, 14)),
+        ("right", (120, 35), (115, 35)),
+        ("bottom", (96, 56), (96, 50)),
+    ] {
+        assert!(is_white(outer.0, outer.1), "{side} border");
+        assert!(
+            is_black(inner.0, inner.1),
+            "{side} border interior boundary"
+        );
+    }
 
     let dashed_pixels = (8..62)
         .flat_map(|y| (132..194).map(move |x| (x, y)))
@@ -492,13 +497,6 @@ fn smoothed_primitives_share_one_contour() {
         "dashed contour coverage: {dashed_pixels}"
     );
     assert!(is_black(163, 35), "dashed border interior");
-
-    assert!(is_black(204, 10), "smoothed image must exclude its corner");
-    assert!(
-        pixel(229, 10)[0] > 220,
-        "image shoulder must reach the top edge"
-    );
-    assert!(pixel(229, 35)[0] > 220, "image center");
 
     assert!(
         pixel(73, 132)[2] > 35,
@@ -608,7 +606,7 @@ fn split_wavy_underline_preserves_fade_ramp_and_phase() {
         bounds: geometry,
         clip_bounds: geometry,
         content_mask: mask,
-        color: gpui::rgb_to_hsla(gpui::white()).into(),
+        color: gpui::white().into(),
         thickness: ScaledPixels(3.0),
         wavy: ShaderBool::Enabled,
     });
@@ -633,7 +631,7 @@ fn split_wavy_underline_preserves_fade_ramp_and_phase() {
             bounds: geometry,
             clip_bounds,
             content_mask: mask,
-            color: gpui::rgb_to_hsla(gpui::white()).into(),
+            color: gpui::white().into(),
             thickness: ScaledPixels(3.0),
             wavy: ShaderBool::Enabled,
         });
@@ -681,7 +679,7 @@ fn underline_hard_clip_intersects_zero_fade_content_mask() {
         // intersects both rectangles even though this mask has no fade ramps.
         clip_bounds: bounds(0.0, 0.0, 310.0, 100.0),
         content_mask: mask,
-        color: gpui::rgb_to_hsla(gpui::white()).into(),
+        color: gpui::white().into(),
         thickness: ScaledPixels(4.0),
         wavy: ShaderBool::Disabled,
     });

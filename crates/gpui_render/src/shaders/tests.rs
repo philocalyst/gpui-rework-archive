@@ -118,6 +118,58 @@ fn scene_instance_storage_sizes_are_bounded() {
     }
 }
 
+fn assert_underline_field_types(module: &naga::Module, members: &[naga::StructMember]) {
+    let expected = [
+        ("order", "u32", std::mem::offset_of!(gpui::Underline, order)),
+        ("padding", "u32", std::mem::offset_of!(gpui::Underline, padding)),
+        ("bounds", "Bounds", std::mem::offset_of!(gpui::Underline, bounds)),
+        (
+            "clip_bounds",
+            "Bounds",
+            std::mem::offset_of!(gpui::Underline, clip_bounds),
+        ),
+        (
+            "content_mask",
+            "ContentMask",
+            std::mem::offset_of!(gpui::Underline, content_mask),
+        ),
+        ("color", "Hsla", std::mem::offset_of!(gpui::Underline, color)),
+        (
+            "thickness",
+            "f32",
+            std::mem::offset_of!(gpui::Underline, thickness),
+        ),
+        ("wavy", "u32", std::mem::offset_of!(gpui::Underline, wavy)),
+    ];
+    assert_eq!(members.len(), expected.len(), "Underline field count");
+    for (member, (expected_name, expected_type, expected_offset)) in
+        members.iter().zip(expected)
+    {
+        assert_eq!(member.name.as_deref(), Some(expected_name), "Underline field name");
+        assert_eq!(member.offset as usize, expected_offset, "Underline.{expected_name} offset");
+        let ty = &module.types[member.ty];
+        let matches_expected = match expected_type {
+            "u32" => matches!(
+                &ty.inner,
+                naga::TypeInner::Scalar(scalar)
+                    if scalar.kind == naga::ScalarKind::Uint && scalar.width == 4
+            ),
+            "f32" => matches!(
+                &ty.inner,
+                naga::TypeInner::Scalar(scalar)
+                    if scalar.kind == naga::ScalarKind::Float && scalar.width == 4
+            ),
+            struct_name => ty.name.as_deref() == Some(struct_name),
+        };
+        assert!(
+            matches_expected,
+            "Underline.{} must have shader type {expected_type}, got {:?}",
+            member.name.as_deref().unwrap_or("<unnamed>"),
+            ty.inner
+        );
+    }
+}
+
 #[test]
 fn shader_buffer_layouts_match_host_layouts() {
     let modules = [
@@ -128,13 +180,12 @@ fn shader_buffer_layouts_match_host_layouts() {
 
     for layouts in [gpui::SCENE_BUFFER_LAYOUTS, interface::RENDER_BUFFER_LAYOUTS] {
         for layout in layouts {
-            let ty = modules
+            let (module, ty) = modules
                 .iter()
                 .find_map(|module| {
-                    module
-                        .types
-                        .iter()
-                        .find_map(|(_, ty)| (ty.name.as_deref() == Some(layout.name)).then_some(ty))
+                    module.types.iter().find_map(|(_, ty)| {
+                        (ty.name.as_deref() == Some(layout.name)).then_some((module, ty))
+                    })
                 })
                 .unwrap_or_else(|| panic!("missing shader ABI type {}", layout.name));
             let naga::TypeInner::Struct { members, span } = &ty.inner else {
@@ -152,6 +203,10 @@ fn shader_buffer_layouts_match_host_layouts() {
                 "shader ABI fields: {}",
                 layout.name
             );
+            if layout.name == "Underline" {
+                assert_underline_field_types(module, members);
+            }
+
             for (member, (name, offset)) in members.iter().zip(layout.fields) {
                 assert_eq!(
                     member.name.as_deref(),

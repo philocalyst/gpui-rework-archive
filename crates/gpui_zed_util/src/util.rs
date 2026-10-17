@@ -840,7 +840,7 @@ macro_rules! __fs_embed {
 
             fn compressed(
                 _file_path: &str,
-            ) -> ::core::option::Option<$crate::__rust_embed::EmbeddedCompressedFile> {
+            ) -> ::core::option::Option<$crate::__rust_embed::utils::EmbeddedCompressedFile> {
                 // This branch reads live files from disk and therefore has no
                 // compile-time compressed payload to return. Release and
                 // debug-embed builds use the derive implementation instead.
