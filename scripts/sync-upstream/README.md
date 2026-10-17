@@ -13,9 +13,11 @@ just sync-upstream             # prints an external-agent session ID and prompt 
 just sync-upstream-status      # how far behind upstream are we?
 ```
 
-`just sync-upstream` leaves a `sync/zed-<date>-<sha>` branch with the upstream delta
-merged, conflicts resolved, and the workspace compiling (or a clear report of what's
-left). Review it, then fast-forward `main` onto it or open a PR — by hand.
+`just sync-upstream` starts a `sync/zed-<date>-<sha>` branch. In default external mode,
+it pauses at each required conflict-resolution or build-fix checkpoint with a session ID
+and prompt; resume with `sync_upstream.py resume SESSION --response-file PATH`. The run is
+complete only after resolution and verification finish successfully. Then review the branch
+and fast-forward `main` or open a PR by hand.
 
 ## How it works
 
@@ -54,8 +56,9 @@ identical paths here. The script uses a **vendor-branch 3-way merge** (a general
 
 ### Tracked crates (fork dir ← upstream dir; dirs, not package names)
 
-Synced 1:1 (same dir): `gpui`, `gpui_linux`, `gpui_macos`, `gpui_macros`, `gpui_platform`,
-`gpui_shared_string`, `gpui_tokio`, `gpui_web`, `gpui_wgpu`, `gpui_windows`.
+Synced 1:1 (same dir): `gpui`, `gpui_apple`, `gpui_ios`, `gpui_linux`, `gpui_macos`,
+`gpui_macros`, `gpui_platform`, `gpui_shared_string`, `gpui_tokio`, `gpui_web`,
+`gpui_wgpu`, `gpui_windows`.
 
 Synced with **path remapping** — vendored + renamed by the fork (PR #91 removed the git sources):
 `gpui_collections`←`collections`, `gpui_sum_tree`←`sum_tree`, `gpui_refineable`←`refineable`,

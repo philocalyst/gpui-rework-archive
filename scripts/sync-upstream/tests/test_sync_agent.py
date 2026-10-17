@@ -108,6 +108,41 @@ class AgentSessionTests(unittest.TestCase):
         with self.assertRaisesRegex(agent.SessionError, "prompt digest mismatch"):
             session.validate_resume()
 
+    def test_upstream_gpui_inventory_requires_explicit_tracking_or_exclusion(self) -> None:
+        temp = tempfile.TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        root = Path(temp.name)
+        git(root, "init", "-q", "-b", "main")
+        git(root, "config", "user.name", "Test")
+        git(root, "config", "user.email", "test@example.invalid")
+        for crate in ("gpui", "gpui_apple", "gpui_ios"):
+            crate_dir = root / "crates" / crate
+            crate_dir.mkdir(parents=True)
+            (crate_dir / "Cargo.toml").write_text("[package]\n")
+        git(root, "add", "crates")
+        git(root, "commit", "-qm", "tracked GPUI inventory")
+        target = git(root, "rev-parse", "HEAD")
+
+        previous_root = sync.REPO_ROOT
+        sync.REPO_ROOT = root
+        try:
+            self.assertEqual(
+                sync.TRACKED_CRATES["gpui_apple"], "gpui_apple"
+            )
+            self.assertEqual(
+                sync.TRACKED_CRATES["gpui_ios"], "gpui_ios"
+            )
+            sync.validate_upstream_crate_inventory(target)
+            unknown = root / "crates" / "gpui_new_platform"
+            unknown.mkdir()
+            (unknown / "Cargo.toml").write_text("[package]\n")
+            git(root, "add", "crates/gpui_new_platform")
+            git(root, "commit", "-qm", "new unmapped GPUI crate")
+            with self.assertRaisesRegex(sync.SyncError, "unmapped GPUI crate"):
+                sync.validate_upstream_crate_inventory(git(root, "rev-parse", "HEAD"))
+        finally:
+            sync.REPO_ROOT = previous_root
+
     def test_vendor_history_fails_closed_when_listing_omits_tree_change(self) -> None:
         temp = tempfile.TemporaryDirectory()
         self.addCleanup(temp.cleanup)

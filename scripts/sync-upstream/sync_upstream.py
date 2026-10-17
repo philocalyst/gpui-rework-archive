@@ -85,6 +85,8 @@ TRACKED_CRATES: dict[str, str] = {
     "gpui_web": "gpui_web",
     "gpui_wgpu": "gpui_wgpu",
     "gpui_windows": "gpui_windows",
+    "gpui_apple": "gpui_apple",
+    "gpui_ios": "gpui_ios",
     # vendored + renamed from upstream (fork dir -> upstream path)
     "gpui_collections": "collections",
     "gpui_sum_tree": "sum_tree",
@@ -99,6 +101,10 @@ TRACKED_CRATES: dict[str, str] = {
     # merge (see MOVE detection below) instead of leaving a stale duplicate in gpui_zed_util.
     "gpui_path": "path",
 }
+
+# Deliberate exclusions must name a reason. The preflight rejects every upstream root-level
+# gpui* crate that is neither mapped above nor explicitly listed here.
+INTENTIONALLY_UNTRACKED_UPSTREAM_GPUI_CRATES: dict[str, str] = {}
 
 VENDOR_BRANCH: str = _env("SYNC_VENDOR_BRANCH", "vendor/zed-gpui")
 
@@ -275,8 +281,34 @@ def filtered_tree(sha: str) -> str | None:
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+def validate_upstream_crate_inventory(sha: str) -> None:
+    """Fail if a GPUI crate at the selected upstream commit would be silently omitted."""
+    entries = gout("ls-tree", "-d", "--name-only", f"{sha}:crates").splitlines()
+    present = {entry for entry in entries if entry.startswith("gpui")}
+    tracked = {
+        upstream_path.split("/", 1)[0]
+        for upstream_path in TRACKED_CRATES.values()
+        if upstream_path.startswith("gpui")
+    }
+    unreasoned_exclusions = {
+        crate for crate, reason in INTENTIONALLY_UNTRACKED_UPSTREAM_GPUI_CRATES.items()
+        if not reason.strip()
+    }
+    if unreasoned_exclusions:
+        die("untracked-crate exclusion is missing a reason: "
+            + ", ".join(sorted(unreasoned_exclusions)))
+    unknown = present - tracked - set(INTENTIONALLY_UNTRACKED_UPSTREAM_GPUI_CRATES)
+    if unknown:
+        die(
+            f"upstream {sha[:12]} contains unmapped GPUI crate(s): "
+            + ", ".join(sorted(unknown))
+            + "; update TRACKED_CRATES or document an intentional exclusion"
+        )
+
+
 def build_vendor_snapshot(sha: str, parent: str | None = None) -> str:
     """Bootstrap baseline: a single filtered snapshot commit. Echoes the commit sha."""
+    validate_upstream_crate_inventory(sha)
     tree = filtered_tree(sha)
     if tree is None:
         die(f"no tracked crates found at {sha[:12]}")
@@ -306,6 +338,7 @@ def build_vendor_history(parent: str, frm: str, to: str) -> str:
     Merge commits are replayed linearly when their filtered tree changes the vendor tip.
     Echoes the new tip sha.
     """
+    validate_upstream_crate_inventory(to)
     prev = parent
     replayed = 0
     listing = gout("rev-list", "--reverse", "--topo-order",
