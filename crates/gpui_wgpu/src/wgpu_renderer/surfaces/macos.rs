@@ -338,6 +338,7 @@ mod tests {
                     bounds: bounds(4.0),
                 },
                 source,
+                image_buffer: None,
             });
         }
         scene.finish();

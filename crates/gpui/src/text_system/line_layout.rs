@@ -466,12 +466,21 @@ pub struct PaintStyle {
 pub struct PaintFragment {
     /// Index of the input text run that supplies paint properties.
     pub source_run: usize,
+    /// Original UTF-8 byte range represented by this visual fragment.
+    pub source_range: Range<usize>,
     /// Canonical font used by the glyphs.
     pub font_id: FontId,
     /// Resolved size of this shaped run.
     pub font_size: Pixels,
     /// Positioned glyphs local to the visual line.
     pub glyphs: Arc<[ShapedGlyph]>,
+    /// Original UTF-8 source range for each glyph, in the same visual order as `glyphs`.
+    ///
+    /// Parley supplies one range per glyph, with all glyphs in a shaping cluster sharing its
+    /// range. This keeps ligatures, combining sequences, and emoji sequences indivisible when
+    /// a shaped line is sliced. Backends without native cluster mapping leave this as `None`.
+    #[doc(hidden)]
+    pub glyph_source_ranges: Option<Arc<[Range<usize>]>>,
     /// Horizontal bounds of this fragment.
     pub x_range: Range<Pixels>,
     /// Paint properties shared by every glyph in the fragment.
@@ -1144,12 +1153,6 @@ impl LineLayoutCache {
             shaped_texts_index: frame.shaped_texts.used.len(),
             inline_layouts_index: frame.inline_layouts.used.len(),
         }
-    }
-
-    /// Invalidates every cached layout after backend shaping state changes.
-    pub fn clear(&self) {
-        *self.previous_frame.lock() = FrameCache::default();
-        *self.current_frame.write() = FrameCache::default();
     }
 
     pub fn reuse_layouts(&self, range: Range<LineLayoutIndex>) {

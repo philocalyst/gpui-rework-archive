@@ -21,7 +21,7 @@ globset = "0.4"
 itertools.workspace = true
 rand = { workspace = true, optional = true }
 regex = { workspace = true, features = ["unicode-bool", "unicode-gencat"] }
-rust-embed = { version = "8.11", features = ["include-exclude"] }
+rust-embed = { version = "8.11", features = ["include-exclude", "compression"] }
 schemars = { workspace = true, features = ["derive"] }
 serde.workspace = true
 serde_json.workspace = true

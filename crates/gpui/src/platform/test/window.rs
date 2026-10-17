@@ -15,6 +15,7 @@ use parking_lot::Mutex;
 use raw_window_handle::{HasDisplayHandle, HasWindowHandle};
 use std::{
     cell::Cell,
+    collections::HashMap,
     path::PathBuf,
     rc::{Rc, Weak},
     sync::{self, Arc},
@@ -695,6 +696,7 @@ impl TestAtlasState {
 
 impl TestAtlas {
     /// Creates an empty atlas.
+    #[cfg(test)]
     pub fn new() -> Self {
         TestAtlas(Mutex::new(TestAtlasState {
             next_id: 0,
@@ -714,13 +716,13 @@ impl TestAtlas {
 impl PlatformAtlas for TestAtlas {
     fn get_or_insert_with<'a>(
         &self,
-        key: &crate::AtlasKey,
+        key: crate::AtlasKey,
         build: &mut dyn FnMut() -> anyhow::Result<
             Option<(Size<crate::DevicePixels>, std::borrow::Cow<'a, [u8]>)>,
         >,
     ) -> anyhow::Result<Option<crate::AtlasTile>> {
         let mut state = self.0.lock();
-        if let Some(&tile) = state.tiles.get(key) {
+        if let Some(&tile) = state.tiles.get(&key) {
             return Ok(Some(tile));
         }
         drop(state);
@@ -731,7 +733,7 @@ impl PlatformAtlas for TestAtlas {
 
         let mut state = self.0.lock();
 
-        Ok(Some(state.insert_tile(key.clone(), size)))
+        Ok(Some(state.insert_tile(key, size)))
     }
 
     fn get_or_insert_glyph_with(

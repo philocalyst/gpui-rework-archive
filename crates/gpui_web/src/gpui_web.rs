@@ -42,7 +42,9 @@ pub use dispatcher::WebDispatcher;
 pub use display::WebDisplay;
 #[cfg(target_family = "wasm")]
 pub use gpui_wgpu::WebBackendPreference;
+#[cfg(target_family = "wasm")]
 pub use http_client::FetchHttpClient;
+#[cfg(target_family = "wasm")]
 pub use keyboard::WebKeyboardLayout;
 #[cfg(target_family = "wasm")]
 pub use logging::init_logging;

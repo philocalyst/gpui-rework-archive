@@ -2069,12 +2069,18 @@ impl ParleyTextSystem {
             let mut text_top = -text_metrics.ascent - leading;
             let mut text_bottom = text_metrics.descent + leading;
 
+            let mut ownership_run_index = None;
+            let mut consumed_glyphs = 0usize;
+            let mut run_glyph_source_ranges = Vec::new();
             for item in line.items() {
                 let PositionedLayoutItem::GlyphRun(glyph_run) = item else {
                     let PositionedLayoutItem::InlineBox(inline_box) = item else {
                         unreachable!();
                     };
 
+                    ownership_run_index = None;
+                    consumed_glyphs = 0;
+                    run_glyph_source_ranges.clear();
                     positioned_inline_boxes.push(PositionedInlineBox {
                         id: inline_box.id,
                         line_index: line_index,
@@ -2088,6 +2094,22 @@ impl ParleyTextSystem {
                 };
 
                 let run = glyph_run.run();
+                if ownership_run_index != Some(run.index()) {
+                    ownership_run_index = Some(run.index());
+                    consumed_glyphs = 0;
+                    let line_text_range = line.text_range();
+                    run_glyph_source_ranges = run
+                        .visual_clusters()
+                        .filter(|cluster| {
+                            let range = cluster.text_range();
+                            range.start < line_text_range.end && line_text_range.start < range.end
+                        })
+                        .flat_map(|cluster| {
+                            let source = prepared.map.source_range(cluster.text_range());
+                            std::iter::repeat(source).take(cluster.glyphs().count())
+                        })
+                        .collect();
+                }
                 let normalized_coords = run
                     .normalized_coords()
                     .iter()
@@ -2136,14 +2158,24 @@ impl ParleyTextSystem {
                     continue;
                 }
 
+                let positioned_glyphs = glyph_run.positioned_glyphs().collect::<Vec<_>>();
+                let glyph_count = glyph_run.glyphs().count();
+                let ownership_end = consumed_glyphs + glyph_count;
+                anyhow::ensure!(
+                    ownership_end <= run_glyph_source_ranges.len(),
+                    "Parley glyph ownership stream is shorter than its positioned glyph runs"
+                );
+                let glyph_source_ranges =
+                    run_glyph_source_ranges[consumed_glyphs..ownership_end].to_vec();
+                consumed_glyphs = ownership_end;
                 let glyphs = {
                     let font_instances = self.font_instances.read();
                     let color_glyphs = font_instances
                         .get(font_id)
                         .context("canonical font missing after interning")?
                         .color_glyphs()?;
-                    glyph_run
-                        .positioned_glyphs()
+                    positioned_glyphs
+                        .into_iter()
                         .map(|glyph| {
                             let id = GlyphId(glyph.id);
                             ShapedGlyph {
@@ -2154,16 +2186,19 @@ impl ParleyTextSystem {
                                     .any(|kind| self.color_glyph_formats.contains(&kind)),
                             }
                         })
-                        .collect()
+                        .collect::<Vec<_>>()
                 };
 
                 let start = px(glyph_run.offset()) - line_x;
                 let source_run = prepared.run_sources[glyph_run.style().brush.source_run];
+                let source_range = prepared.map.source_range(run.text_range());
                 paint_fragments.push(PaintFragment {
                     source_run,
+                    source_range,
                     font_id,
                     font_size: px(run.font_size()),
-                    glyphs,
+                    glyphs: glyphs.into(),
+                    glyph_source_ranges: Some(glyph_source_ranges.into()),
                     x_range: start..start + px(glyph_run.advance()),
                     style: PaintStyle::from(&source_runs[source_run]),
                     // Parley's offsets are y-up; painting adds them to the baseline in y-down.
@@ -2822,6 +2857,20 @@ mod tests {
                 .platform_layout
                 .normalized_caret(CaretPosition::attached_to_next_cluster(idx));
             assert!(caret.index <= text.len());
+        }
+
+        for fragment in &layout.layout.paint_fragments {
+            let ranges = fragment
+                .glyph_source_ranges
+                .as_ref()
+                .expect("Parley must retain exact source ownership for every glyph");
+            assert_eq!(ranges.len(), fragment.glyphs.len());
+            for range in ranges {
+                assert!(
+                    text.get(range.clone()).is_some(),
+                    "scoped bidi glyph range {range:?} must be a UTF-8 source range"
+                );
+            }
         }
 
         let selection = layout
@@ -5085,5 +5134,67 @@ mod tests {
             let auto_cached_item = bounds(&mut cx, any_window, "auto-cached-item");
             assert!(auto_cached_item.right() < auto_cached_row.center().x);
         }
+    }
+    #[test]
+    fn glyph_source_ranges_follow_parley_clusters_for_combining_emoji_and_bidi() {
+        let system = test_system();
+        let text = "a\u{301} fi \u{0633}\u{0644}\u{0627}\u{0645} \u{1f469}\u{200d}\u{1f469}\u{200d}\u{1f467}\u{200d}\u{1f466} \u{05d0}\u{05d1}";
+        let line = layout_line(&system, text, px(18.), &[text_run(text, IBM_PLEX.family)]);
+        let ligature_start = text.find("fi").unwrap();
+        let ligature = ligature_start..ligature_start + 2;
+        let mut saw_ligature = false;
+        let arabic_start = text.find("\u{0633}\u{0644}\u{0627}\u{0645}").unwrap();
+        let arabic = arabic_start..arabic_start + "\u{0633}\u{0644}\u{0627}\u{0645}".len();
+        let emoji_start = text.find('👩').unwrap();
+        let emoji_end = emoji_start + "👩‍👩‍👧‍👦".len();
+        let combining = 0.."a\u{301}".len();
+        let emoji = emoji_start..emoji_end;
+        let mut saw_combining = false;
+        let mut saw_emoji = false;
+        let mut saw_arabic = false;
+        for fragment in &line.paint_fragments {
+            let ranges = fragment
+                .glyph_source_ranges
+                .as_ref()
+                .expect("Parley exposes source ranges per glyph");
+            assert_eq!(ranges.len(), fragment.glyphs.len());
+            for range in ranges {
+                assert!(
+                    text.get(range.clone()).is_some(),
+                    "range {range:?} must be a UTF-8 source range"
+                );
+                if range.start < ligature.end && ligature.start < range.end {
+                    assert_eq!(range, &ligature, "default fi ligature must remain atomic");
+                    saw_ligature = true;
+                }
+                if range.start < combining.end && combining.start < range.end {
+                    assert_eq!(range, &combining, "combining sequence must stay atomic");
+                    saw_combining = true;
+                }
+                if range.start < arabic.end && arabic.start < range.end {
+                    saw_arabic = true;
+                }
+                if range.start < emoji.end && emoji.start < range.end {
+                    assert_eq!(range, &emoji, "emoji ZWJ sequence must stay atomic");
+                    saw_emoji = true;
+                }
+            }
+        }
+        assert!(
+            saw_combining,
+            "the combining glyph must retain its original source range"
+        );
+        assert!(
+            saw_ligature,
+            "the fi ligature must keep its source cluster range"
+        );
+        assert!(
+            saw_arabic,
+            "Arabic glyphs must retain source ranges after contextual shaping"
+        );
+        assert!(
+            saw_emoji,
+            "the emoji glyph must retain its original source range"
+        );
     }
 }

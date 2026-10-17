@@ -693,10 +693,12 @@ impl WaylandWindowState {
                 .set_min_size(f32::from(size.width) as i32, f32::from(size.height) as i32);
         }
 
-        let max_texture_size = self.renderer.max_texture_size() as i32;
-        xdg_state
-            .toplevel
-            .set_max_size(max_texture_size, max_texture_size);
+        if let Some(renderer) = self.renderer.as_ref() {
+            let max_texture_size = renderer.max_texture_size() as i32;
+            xdg_state
+                .toplevel
+                .set_max_size(max_texture_size, max_texture_size);
+        }
 
         if let Some(parent) = self.parent.as_ref() {
             let parent_toplevel = parent.toplevel();
@@ -2418,17 +2420,19 @@ impl PlatformWindow for WaylandWindow {
     }
 
     fn gpu_specs(&self) -> Option<GpuSpecs> {
-        self.borrow().renderer.as_ref()?.gpu_specs()
+        Some(self.borrow().renderer.as_ref()?.gpu_specs())
     }
 
     fn gpu_context(&self) -> Option<Box<dyn std::any::Any>> {
-        let (device, queue) = self.borrow().renderer.gpu_context();
+        let state = self.borrow();
+        let (device, queue) = state.renderer.as_ref()?.gpu_context();
         Some(Box::new((device, queue)))
     }
 
     fn gpu_context_info(&self) -> Option<Box<dyn std::any::Any>> {
         self.borrow()
             .renderer
+            .as_ref()?
             .gpu_context_info()
             .map(|context| Box::new(context) as Box<dyn std::any::Any>)
     }
@@ -2436,7 +2440,10 @@ impl PlatformWindow for WaylandWindow {
     fn gpu_device_lost(&self) -> Option<bool> {
         // Only loads an atomic flag — safe even mid-recovery, when
         // `gpu_context` would panic on the torn-down resources.
-        Some(self.borrow().renderer.device_lost())
+        self.borrow()
+            .renderer
+            .as_ref()
+            .map(WgpuRenderer::device_lost)
     }
 
     fn play_system_bell(&self) {

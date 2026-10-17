@@ -2407,7 +2407,7 @@ mod tests {
         }
     }
 
-    #[perf]
+    #[test]
     fn path_with_position_parse_posix_path() {
         // Test POSIX filename edge cases
         // Read more at https://en.wikipedia.org/wiki/Filename
@@ -2796,7 +2796,7 @@ mod tests {
         );
     }
 
-    #[perf]
+    #[test]
     #[cfg(target_os = "windows")]
     fn test_sanitized_path_verbatim_unc() {
         let path: Arc<Path> = PathBuf::from("\\\\?\\UNC\\server\\share\\file.txt").into();
@@ -2804,7 +2804,7 @@ mod tests {
         assert_eq!(sanitized_path.to_string(), "\\\\server\\share\\file.txt");
     }
 
-    #[perf]
+    #[test]
     fn test_compare_numeric_segments() {
         // Helper function to create peekable iterators and test
         fn compare(a: &str, b: &str) -> Ordering {
@@ -3278,7 +3278,9 @@ mod tests {
                 parent,
                 style
                     .strip_prefix(child.as_ref(), parent.as_ref())
-                    .map(|rel_path| rel_path.to_arc()),
+                    .ok()
+                    .and_then(|rel_path| RelPath::new(rel_path, style).ok())
+                    .map(|rel_path| Arc::from(rel_path.as_ref())),
             )
         });
         pretty_assertions::assert_eq!(actual, expected);

@@ -1532,7 +1532,13 @@ impl PlatformWindow for X11Window {
         let Some(client) = self.0.state.borrow().client.get_client() else {
             return;
         };
-        let executor = client.0.borrow().common.background_executor.clone();
+        let executor = client
+            .0
+            .borrow()
+            .common
+            .borrow()
+            .background_executor
+            .clone();
         crate::linux::character_palette::show_character_palette(executor, None);
     }
 
@@ -2029,11 +2035,12 @@ impl PlatformWindow for X11Window {
     }
 
     fn gpu_specs(&self) -> Option<GpuSpecs> {
-        self.0.state.borrow().renderer.as_ref()?.gpu_specs()
+        Some(self.0.state.borrow().renderer.as_ref()?.gpu_specs())
     }
 
     fn gpu_context(&self) -> Option<Box<dyn std::any::Any>> {
-        let (device, queue) = self.0.state.borrow().renderer.gpu_context();
+        let state = self.0.state.borrow();
+        let (device, queue) = state.renderer.as_ref()?.gpu_context();
         Some(Box::new((device, queue)))
     }
 
@@ -2042,6 +2049,7 @@ impl PlatformWindow for X11Window {
             .state
             .borrow()
             .renderer
+            .as_ref()?
             .gpu_context_info()
             .map(|context| Box::new(context) as Box<dyn std::any::Any>)
     }
@@ -2049,7 +2057,12 @@ impl PlatformWindow for X11Window {
     fn gpu_device_lost(&self) -> Option<bool> {
         // Only loads an atomic flag — safe even mid-recovery, when
         // `gpu_context` would panic on the torn-down resources.
-        Some(self.0.state.borrow().renderer.device_lost())
+        self.0
+            .state
+            .borrow()
+            .renderer
+            .as_ref()
+            .map(WgpuRenderer::device_lost)
     }
 
     fn play_system_bell(&self) {

@@ -127,8 +127,7 @@ mod renderer {
         base::{CGFloat, kCGImageAlphaPremultipliedLast},
         color_space::CGColorSpace,
         context::{CGContext, CGLineJoin, CGTextDrawingMode},
-        display::CGPoint,
-        geometry::CGAffineTransform,
+        geometry::{CGAffineTransform, CGPoint},
     };
     use core_text::{
         font,

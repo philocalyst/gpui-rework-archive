@@ -16,9 +16,11 @@ doctest = false
 
 [features]
 default = []
+# Kept for feature compatibility; gpui_render now supplies the native shader artifacts.
 runtime_shaders = []
 bench-support = ["gpui/bench-support"]
 test-support = ["gpui/test-support"]
+# Retained for compatibility; the Parley text system is built on Apple targets.
 font-kit = []
 
 [dependencies]
@@ -51,7 +53,6 @@ mach2.workspace = true
 metal.workspace = true
 objc2.workspace = true
 objc2-core-foundation = { workspace = true, features = ["std", "CFData", "CFDictionary", "CFString", "CFNumber", "CFBase"] }
-objc2-core-text.workspace = true
 objc2-core-video = { workspace = true, features = ["CVPixelBuffer", "CVMetalTexture", "CVMetalTextureCache", "CVReturn", "objc2", "objc2-metal"] }
 objc2-metal = { version = "0.3", default-features = false, features = ["MTLDevice", "MTLPixelFormat", "MTLTexture"] }
 objc2-foundation = { workspace = true, features = ["NSThread", "NSNotification", "NSOperation", "NSProcessInfo", "block2"] }
@@ -63,9 +64,6 @@ smallvec.workspace = true
 skrifa.workspace = true
 thiserror.workspace = true
 font-kit = { version = "0.14.1-zed", package = "zed-font-kit", features = ["source"] }
-
-[target.'cfg(any(target_os = "macos", target_os = "ios"))'.build-dependencies]
-cbindgen.workspace = true
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dev-dependencies]
 gpui = { workspace = true, features = ["test-support"] }

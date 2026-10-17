@@ -732,7 +732,7 @@ impl WaylandClientStatePtr {
             token.commit();
         } else {
             crate::linux::character_palette::show_character_palette(
-                state.common.background_executor.clone(),
+                state.common.borrow().background_executor.clone(),
                 None,
             );
         }
@@ -1297,7 +1297,7 @@ impl WaylandConnection {
         None
     }
 
-    fn set_gpu_requirements(&self, requirements: Box<dyn std::any::Any>) {
+    pub(crate) fn set_gpu_requirements(&self, requirements: Box<dyn std::any::Any>) {
         if let Ok(reqs) = requirements.downcast::<gpui_wgpu::WgpuDeviceRequirements>() {
             self.0.borrow_mut().gpu_requirements = Some(*reqs);
         } else {

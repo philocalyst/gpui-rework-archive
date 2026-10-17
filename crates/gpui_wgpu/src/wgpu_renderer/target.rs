@@ -33,7 +33,7 @@ impl RenderTarget {
                     capabilities
                         .formats
                         .iter()
-                        .find(|format| !format.is_srgb())
+                        .find(|format| !format.has_srgb_suffix())
                         .copied()
                 })
                 .or_else(|| capabilities.formats.first().copied())
@@ -76,6 +76,7 @@ impl RenderTarget {
             config: wgpu::SurfaceConfiguration {
                 usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
                 format,
+                color_space: wgpu::SurfaceColorSpace::Auto,
                 width,
                 height,
                 present_mode,

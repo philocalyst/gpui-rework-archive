@@ -1,6 +1,6 @@
 use crate::{
     AnyElement, AppContext as _, Context, ElementId, Entity, Hsla, InteractiveElement, IntoElement,
-    ParentElement, Render, StatefulInteractiveElement, Styled, Window, div, px,
+    ParentElement, Render, StatefulInteractiveElement, Styled, Window, div, hsla, px,
     util::FluentBuilder,
 };
 use collections::{HashMap, HashSet};
@@ -1399,12 +1399,12 @@ fn normalized_density(density: f64) -> f64 {
 }
 
 fn random_color(rng: &mut StdRng) -> Hsla {
-    Hsla {
-        h: rng.random_range(0.0..1.0),
-        s: rng.random_range(0.25..0.9),
-        l: rng.random_range(0.18..0.82),
-        a: 1.0,
-    }
+    hsla(
+        rng.random_range(0.0..1.0),
+        rng.random_range(0.25..0.9),
+        rng.random_range(0.18..0.82),
+        1.0,
+    )
 }
 
 fn random_opacity(rng: &mut StdRng) -> f32 {
@@ -1463,7 +1463,7 @@ mod tests {
         bounds: Bounds<ScaledPixels>,
         content_mask: ContentMask<ScaledPixels>,
         background: Background,
-        border_color: Hsla,
+        border_color: Background,
         corner_radii: Corners<ScaledPixels>,
         border_widths: Edges<ScaledPixels>,
     }

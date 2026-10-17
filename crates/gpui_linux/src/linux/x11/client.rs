@@ -520,6 +520,7 @@ impl X11Connection {
                 pinch_scale: 1.0,
                 gpu_context: Rc::new(RefCell::new(None)),
                 compositor_gpu,
+                gpu_requirements: None,
                 scale_factor,
 
                 xkb_context,
@@ -1669,7 +1670,7 @@ impl X11Client {
         .map(|display| Rc::new(display) as Rc<dyn PlatformDisplay>)
     }
 
-    fn set_gpu_requirements(&self, requirements: Box<dyn std::any::Any>) {
+    pub(crate) fn set_gpu_requirements(&self, requirements: Box<dyn std::any::Any>) {
         if let Ok(reqs) = requirements.downcast::<gpui_wgpu::WgpuDeviceRequirements>() {
             self.0.borrow_mut().gpu_requirements = Some(*reqs);
         } else {

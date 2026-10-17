@@ -124,7 +124,16 @@ impl PreparedTargets {
 }
 
 fn begin_frame(renderer: &mut WgpuRenderer) -> bool {
-    let Some(error) = renderer.faults.pending_error.lock().unwrap().take() else {
+    // The generation belongs to this renderer, so polling cannot consume an error
+    // notification from another renderer sharing the same device.
+    let surface_error = renderer.faults.pending_error.lock().unwrap().take();
+    let error = surface_error.or_else(|| {
+        renderer
+            .faults
+            .device_errors
+            .observe_error(&mut renderer.faults.observed_error_generation)
+    });
+    let Some(error) = error else {
         renderer.faults.consecutive_failed_frames = 0;
         renderer.atlas.before_frame();
         return true;

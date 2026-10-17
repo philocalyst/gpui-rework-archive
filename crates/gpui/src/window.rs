@@ -21,9 +21,7 @@ use crate::{
     WindowTextSystem, WindowVisibility,
     gestures::{GestureTuning, RecognizedTouchGesture, TouchGestureRecognizer},
     interactive::TouchEvent,
-    point,
-    prelude::*,
-    px, rems, size, transparent_black,
+    point, px, rems, size, transparent_black,
     util::{
         atomic_incr_if_not_zero, ceil_to_device_pixel, floor_to_device_pixel,
         round_half_toward_zero, round_half_toward_zero_f64, round_stroke_to_device_pixel,
@@ -39,10 +37,6 @@ use gpui_util::post_inc;
 use gpui_util::{ResultExt, measure};
 use itertools::FoldWhile::{Continue, Done};
 use itertools::Itertools;
-#[cfg(any(target_os = "macos", target_os = "ios"))]
-use objc2_core_foundation::CFRetained;
-#[cfg(any(target_os = "macos", target_os = "ios"))]
-use objc2_core_video::CVPixelBuffer;
 use palette::Hsla;
 use parking_lot::{RwLock, RwLockUpgradableReadGuard};
 use raw_window_handle::{HandleError, HasDisplayHandle, HasWindowHandle};
@@ -1128,11 +1122,7 @@ impl Hitbox {
     /// modality or mouse position.
     pub fn is_hovered_at(&self, position: Point<Pixels>, window: &Window) -> bool {
         let hit_test = window.rendered_frame.hit_test(position);
-        hit_test
-            .ids
-            .iter()
-            .take(hit_test.hover_hitbox_count)
-            .any(|id| self.id == *id)
+        hit_test.iter_hovered().any(|id| self.id == *id)
     }
 
     /// Checks if the hitbox contains the mouse and should handle scroll events. Typically this
@@ -3946,14 +3936,11 @@ impl Window {
         exclusions.sort_unstable_by_key(|span| span.start);
 
         let mut paint_span = |start, end| {
+            let clip_bounds =
+                Bounds::from_corners(point(start, bounds.top()), point(end, bounds.bottom()));
             self.next_frame.scene.insert_primitive(Underline {
-                content_mask: ContentMask {
-                    bounds: Bounds::from_corners(
-                        point(start, bounds.top()),
-                        point(end, bounds.bottom()),
-                    ),
-                },
-                ..underline
+                clip_bounds,
+                ..underline.clone()
             });
         };
         let mut start = bounds.left();
@@ -3969,15 +3956,18 @@ impl Window {
     }
 
     fn underline(&self, origin: Point<Pixels>, width: Pixels, style: &UnderlineStyle) -> Underline {
+        let content_mask = self.snapped_content_mask();
         Underline {
             order: 0,
-            pad: 0,
+            padding: 0,
             bounds: self.underline_bounds(origin, width, style),
-            content_mask: self.snapped_content_mask(),
+            clip_bounds: content_mask.bounds,
+            content_mask,
             color: style
                 .color
                 .unwrap_or_default()
-                .opacity(self.element_opacity()),
+                .opacity(self.element_opacity())
+                .into(),
             thickness: self.snap_stroke(style.thickness),
             wavy: style.wavy.into(),
         }
@@ -5822,12 +5812,14 @@ impl Window {
             size: size(self.snap_stroke(width), height),
         };
         let element_opacity = self.element_opacity();
+        let content_mask = self.snapped_content_mask();
 
         self.next_frame.scene.insert_primitive(Underline {
             order: 0,
             padding: 0,
             bounds,
-            content_mask: self.snapped_content_mask(),
+            clip_bounds: content_mask.bounds,
+            content_mask,
             color: style
                 .color
                 .unwrap_or_default()
@@ -5857,12 +5849,14 @@ impl Window {
             size: size(self.snap_stroke(width), self.snap_stroke(height)),
         };
         let opacity = self.element_opacity();
+        let content_mask = self.snapped_content_mask();
 
         self.next_frame.scene.insert_primitive(Underline {
             order: 0,
             padding: 0,
             bounds,
-            content_mask: self.snapped_content_mask(),
+            clip_bounds: content_mask.bounds,
+            content_mask,
             thickness: self.snap_stroke(style.thickness),
             color: style.color.unwrap_or_default().opacity(opacity).into(),
             wavy: false.into(),
@@ -6248,7 +6242,7 @@ impl Window {
         bounds: Bounds<Pixels>,
         source: impl Into<crate::SurfaceSource>,
     ) {
-        use crate::{PaintSurface, SurfaceSource};
+        use crate::PaintSurface;
 
         self.invalidator.debug_assert_paint();
 
@@ -6257,7 +6251,7 @@ impl Window {
         let source = source.into();
         #[cfg(any(target_os = "macos", target_os = "ios"))]
         let image_buffer = match &source {
-            SurfaceSource::Surface(image_buffer) => Some(image_buffer.clone()),
+            crate::SurfaceSource::Surface(image_buffer) => Some(image_buffer.clone()),
             _ => None,
         };
         self.next_frame.scene.insert_surface(
@@ -7779,9 +7773,7 @@ impl Window {
     /// Returns pending input that can still complete a multi-stroke key binding. Input left over
     /// from a previous focus can never complete one.
     pub fn pending_input(&self) -> Option<PendingInputStatus<'_>> {
-        self.pending_input
-            .as_ref()
-            .filter(|pending_input| pending_input.focus == self.focus)
+        self.active_pending_input()
             .map(|pending_input| PendingInputStatus {
                 keystrokes: pending_input.keystrokes.as_slice(),
                 timeout: pending_input
@@ -9597,17 +9589,17 @@ fn with_element_arena_erased(callback: &mut dyn FnMut(&mut Arena)) -> Result<(),
 mod tests {
     use super::*;
     use crate::{
-        AnyWindowHandle, AppContext as _, Bounds, ContentMask, Context, DispatchPhase,
-        DragMoveEvent, Empty, ExternalDragPayload, ExternalPaths, FileDragPaths, FileDropEvent,
-        FocusHandle, Font, FontMetrics, ImageSource, InlineLayout, InlineLayoutRequest, InputEvent,
-        InputEvent as _, InteractiveElement, InteractiveElement as _, IntoElement, KeyDownEvent,
-        Keystroke, LineLayout, LongPressEvent, MouseButton, MouseDownEvent, MouseMoveEvent,
-        ParentElement, Pixels, PlatformInput, PlatformTextSystem, Point, PreparedRasterStyle,
-        RasterColorEffect, RasterStyleRequest, RasterizedGlyph, Render, RequestFrameOptions,
-        ScaledPixels, ShaderBool, StatefulInteractiveElement, StatefulInteractiveElement as _,
-        Styled, TestApp, TestAppContext, TestTextSystem, TextLayoutRequest, TouchDragEvent,
-        TouchEvent, TouchId, TouchPhase, Underline, UnderlineStyle, Window, WindowAppearance,
-        WindowOptions, canvas, div, hsla, img, linear_color_stop, linear_gradient, point, px, size,
+        AnyWindowHandle, Bounds, ContentMask, Context, DispatchPhase, DragMoveEvent, Empty,
+        ExternalDragPayload, ExternalPaths, FileDragPaths, FileDropEvent, FocusHandle, Font,
+        FontMetrics, ImageSource, InlineLayout, InlineLayoutRequest, InputEvent,
+        InteractiveElement, InteractiveElement as _, IntoElement, KeyDownEvent, Keystroke,
+        LineLayout, LongPressEvent, MouseButton, MouseDownEvent, MouseMoveEvent, ParentElement,
+        Pixels, PlatformInput, PlatformTextSystem, Point, PreparedRasterStyle, RasterColorEffect,
+        RasterStyleRequest, RasterizedGlyph, Render, RequestFrameOptions, ScaledPixels, ShaderBool,
+        StatefulInteractiveElement, Styled, TestApp, TestAppContext, TestTextSystem,
+        TextLayoutRequest, TouchDragEvent, TouchEvent, TouchId, TouchPhase, Underline,
+        UnderlineStyle, Window, WindowAppearance, WindowOptions, canvas, div, hsla, img,
+        linear_color_stop, linear_gradient, point, px, size,
     };
     use image::{Frame as ImageFrame, ImageBuffer, Rgba};
     use proptest::prelude::*;
@@ -11740,7 +11732,7 @@ mod tests {
                                 assert_eq!(underline.bounds, bounds);
                                 assert_eq!(underline.thickness, stroke(thickness));
                                 assert_eq!(underline.wavy, wavy.into());
-                                assert_eq!(underline.color, hsla(0.25, 0.5, 0.75, 0.5));
+                                assert_eq!(underline.color, hsla(0.25, 0.5, 0.75, 0.5).into());
                             }
 
                             let underlines = paint_test_underlines(window, |window| {
@@ -11750,6 +11742,7 @@ mod tests {
                             for (actual, original) in underlines.iter().zip(&original) {
                                 assert_same_underline_geometry(actual, original);
                                 assert_eq!(actual.content_mask, original.content_mask);
+                                assert_eq!(actual.clip_bounds, original.clip_bounds);
                             }
 
                             let left = bounds.left().0 as i32;
@@ -11785,8 +11778,31 @@ mod tests {
                                 })
                                 .collect::<Vec<_>>();
                             assert_eq!(underline_device_columns(underlines), expected);
+                            let mut expected_clip_spans: Vec<(ScaledPixels, ScaledPixels)> =
+                                Vec::new();
+                            for column in &expected {
+                                let start = ScaledPixels(*column as f32);
+                                let end = ScaledPixels((*column + 1) as f32);
+                                if let Some((_, previous_end)) = expected_clip_spans.last_mut() {
+                                    if *previous_end == start {
+                                        *previous_end = end;
+                                        continue;
+                                    }
+                                }
+                                expected_clip_spans.push((start, end));
+                            }
+                            let actual_clip_spans = underlines
+                                .iter()
+                                .map(|underline| {
+                                    (underline.clip_bounds.left(), underline.clip_bounds.right())
+                                })
+                                .collect::<Vec<_>>();
+                            assert_eq!(actual_clip_spans, expected_clip_spans);
                             for underline in underlines {
                                 assert_same_underline_geometry(underline, &original[0]);
+                                assert_eq!(underline.content_mask, original[0].content_mask);
+                                assert_eq!(underline.clip_bounds.top(), bounds.top());
+                                assert_eq!(underline.clip_bounds.bottom(), bounds.bottom());
                             }
                         }
                     }
@@ -11827,6 +11843,12 @@ mod tests {
             });
             assert_eq!(underlines.len(), 1);
             assert_same_underline_geometry(&underlines[0], &original);
+            assert_eq!(underlines[0].content_mask, original.content_mask);
+            assert_eq!(underlines[0].clip_bounds.left(), point_bounds.right());
+            assert_eq!(
+                underlines[0].clip_bounds.right(),
+                original.clip_bounds.right()
+            );
             assert_eq!(
                 underline_device_columns(underlines),
                 (28..48).collect::<Vec<_>>()
@@ -11842,6 +11864,12 @@ mod tests {
             let original_opacity = window.element_opacity();
             let mask = ContentMask {
                 bounds: Bounds::from_corners(point(px(4.), px(10.)), point(px(16.), px(12.))),
+                fade_out: Edges {
+                    left: px(4.),
+                    top: px(0.5),
+                    right: px(2.),
+                    bottom: px(0.25),
+                },
             };
             let style = UnderlineStyle {
                 thickness: px(2.),
@@ -11856,7 +11884,7 @@ mod tests {
                         let original = paint_test_underlines(window, |window| {
                             window.paint_underline(origin, width, &style);
                         })[0];
-                        assert_eq!(original.color, hsla(0.25, 0.5, 0.75, 0.125));
+                        assert_eq!(original.color, hsla(0.25, 0.5, 0.75, 0.125).into());
                         let underlines = paint_test_underlines(window, |window| {
                             window.paint_underline_with_exclusions(
                                 origin,
@@ -11866,23 +11894,36 @@ mod tests {
                             );
                         });
                         assert_eq!(underlines.len(), 2);
-                        let expected = [(4. * scale, 6. * scale), (8. * scale, 16. * scale)].map(
+                        let original_bounds = original.content_mask.bounds;
+                        let expected_mask = original.content_mask;
+                        let visible_bounds = original.bounds.intersect(&original_bounds);
+                        let expected_clip_spans = [(4. * scale, 6. * scale), (8. * scale, 16. * scale)].map(
                             |(left, right)| {
                                 Bounds::from_corners(
-                                    point(ScaledPixels(left), ScaledPixels((10. * scale).floor())),
-                                    point(ScaledPixels(right), ScaledPixels((12. * scale).ceil())),
+                                    point(ScaledPixels(left), visible_bounds.top()),
+                                    point(ScaledPixels(right), visible_bounds.bottom()),
                                 )
                             },
                         );
+                        assert!(expected_mask.fade_out.left > ScaledPixels(0.));
+                        assert!(expected_mask.fade_out.right > ScaledPixels(0.));
+                        assert!(expected_mask.fade_out.top > ScaledPixels(0.));
+                        assert!(expected_mask.fade_out.bottom > ScaledPixels(0.));
+                        let left_fade_end = expected_mask.bounds.left() + expected_mask.fade_out.left;
+                        assert!(expected_clip_spans[0].right() > expected_mask.bounds.left());
+                        assert!(expected_clip_spans[0].right() < left_fade_end);
                         assert_eq!(
-                            underlines
-                                .iter()
-                                .map(|underline| underline.content_mask.bounds)
-                                .collect::<Vec<_>>(),
-                            expected
+                            underlines.iter().map(|underline| underline.clip_bounds).collect::<Vec<_>>(),
+                            expected_clip_spans
+                        );
+                        assert_eq!(
+                            underlines.iter().map(|underline| underline.content_mask).collect::<Vec<_>>(),
+                            vec![expected_mask; 2],
+                            "a clip boundary inside the 4px left fade must retain the original fade ramp"
                         );
                         for underline in underlines {
                             assert_same_underline_geometry(underline, &original);
+                            assert_eq!(underline.bounds, original.bounds);
                         }
                     });
                 });
@@ -11990,6 +12031,7 @@ mod tests {
                             point(px(-1000.), px(-1000.)),
                             point(px(1000.), px(1000.)),
                         ),
+                        ..Default::default()
                     });
                     paint(window);
                     window.content_mask_stack.pop();
@@ -12022,14 +12064,17 @@ mod tests {
         assert_eq!(actual.thickness, expected.thickness);
         assert_eq!(actual.wavy, expected.wavy);
         assert_eq!(actual.color, expected.color);
-        assert_eq!(actual.pad, expected.pad);
+        assert_eq!(actual.padding, expected.padding);
     }
 
     fn underline_device_columns(underlines: &[Underline]) -> Vec<i32> {
         underlines
             .iter()
             .flat_map(|underline| {
-                let bounds = underline.bounds.intersect(&underline.content_mask.bounds);
+                let bounds = underline
+                    .bounds
+                    .intersect(&underline.content_mask.bounds)
+                    .intersect(&underline.clip_bounds);
                 bounds.left().0 as i32..bounds.right().0 as i32
             })
             .collect()
@@ -12064,7 +12109,8 @@ mod tests {
 mod inspector_tests {
     use super::*;
     use crate::{
-        DivInspectorState, InspectorElementId, MouseDownEvent, StyleRefinement, TestAppContext, div,
+        DivInspectorState, InspectorElementId, InteractiveElement as _, MouseDownEvent,
+        ParentElement as _, StyleRefinement, Styled as _, TestAppContext, div,
     };
 
     #[gpui::test]

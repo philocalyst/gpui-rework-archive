@@ -1,6 +1,7 @@
 use crate::metal_atlas::MetalAtlas;
 use anyhow::Result;
 use block::ConcreteBlock;
+use core_foundation::base::TCFType;
 use core_graphics::geometry::CGSize;
 use gpui::{
     AtlasTextureId, Bounds, Corners, DevicePixels, FilterRenderTarget, MAX_FILTER_GROUP_DEPTH,
@@ -22,7 +23,6 @@ use gpui_render::{
 #[cfg(any(test, feature = "bench-support", feature = "test-support"))]
 use image::RgbaImage;
 
-use core_foundation::base::TCFType;
 use core_video::{
     metal_texture::CVMetalTextureGetTexture, metal_texture_cache::CVMetalTextureCache,
     pixel_buffer::kCVPixelFormatType_420YpCbCr8BiPlanarFullRange,
@@ -31,6 +31,11 @@ use foreign_types::{ForeignType, ForeignTypeRef};
 use metal::{
     CAMetalLayer, CommandQueue, MTLGPUFamily, MTLPixelFormat, MTLResourceOptions, MTLScissorRect,
     NSRange, NSUInteger, RenderPassColorAttachmentDescriptorRef, SamplerDescriptor,
+};
+use objc2_core_foundation::{CFGetTypeID, CFRetained};
+use objc2_core_video::{
+    CVPixelBufferGetHeightOfPlane, CVPixelBufferGetPixelFormatType, CVPixelBufferGetTypeID,
+    CVPixelBufferGetWidthOfPlane,
 };
 use objc2_quartz_core::{CAAutoresizingMask, CAMetalLayer as Objc2CAMetalLayer};
 use parking_lot::Mutex;
@@ -1808,7 +1813,13 @@ impl MetalRenderer {
 
         for (index, surface) in surfaces.iter().enumerate() {
             let image_buffer = match &surface.source {
-                SurfaceSource::Surface(image_buffer) => image_buffer,
+                SurfaceSource::Surface(_) => {
+                    let Some(image_buffer) = surface.image_buffer.as_ref() else {
+                        log::error!("Metal cannot draw a surface without a native image buffer");
+                        continue;
+                    };
+                    image_buffer
+                }
                 SurfaceSource::Unsupported(size) => {
                     log::error!("Metal cannot draw unsupported surface source with size {size:?}");
                     continue;
@@ -1822,30 +1833,37 @@ impl MetalRenderer {
                 }
             };
 
-            assert_eq!(
-                image_buffer.get_pixel_format(),
-                kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
-            );
+            if CFGetTypeID(Some(&**image_buffer)) != CVPixelBufferGetTypeID() {
+                log::error!("Metal requires a CVPixelBuffer-backed surface");
+                continue;
+            }
+            if CVPixelBufferGetPixelFormatType(&**image_buffer)
+                != kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
+            {
+                log::error!("Metal requires a full-range bi-planar 4:2:0 pixel buffer");
+                continue;
+            }
 
+            let image_ref = CFRetained::as_ptr(image_buffer).as_ptr().cast();
             let y_texture = self
                 .core_video_texture_cache
                 .create_texture_from_image(
-                    image_buffer.as_concrete_TypeRef(),
+                    image_ref,
                     None,
                     MTLPixelFormat::R8Unorm,
-                    image_buffer.get_width_of_plane(0),
-                    image_buffer.get_height_of_plane(0),
+                    CVPixelBufferGetWidthOfPlane(&**image_buffer, 0),
+                    CVPixelBufferGetHeightOfPlane(&**image_buffer, 0),
                     0,
                 )
                 .unwrap();
             let cb_cr_texture = self
                 .core_video_texture_cache
                 .create_texture_from_image(
-                    image_buffer.as_concrete_TypeRef(),
+                    image_ref,
                     None,
                     MTLPixelFormat::RG8Unorm,
-                    image_buffer.get_width_of_plane(1),
-                    image_buffer.get_height_of_plane(1),
+                    CVPixelBufferGetWidthOfPlane(&**image_buffer, 1),
+                    CVPixelBufferGetHeightOfPlane(&**image_buffer, 1),
                     1,
                 )
                 .unwrap();
@@ -2439,6 +2457,7 @@ mod tests {
             order: 0,
             padding: 0,
             bounds: underline_bounds,
+            clip_bounds: underline_bounds,
             content_mask: ContentMask {
                 bounds: underline_bounds,
                 ..Default::default()
@@ -2468,6 +2487,7 @@ mod tests {
             order: 0,
             padding: 0,
             bounds: underline_bounds,
+            clip_bounds: underline_bounds,
             content_mask: ContentMask {
                 bounds: underline_bounds,
                 ..Default::default()
