@@ -6,7 +6,8 @@ monorepo (`zed-industries/zed`). Two groups:
 **Same relative path** (upstream dir == fork dir; dirs, not package names — packages are
 `gpui-ce` / `gpui_ce_*`): `crates/gpui`, `crates/gpui_linux`,
 `crates/gpui_macos`, `crates/gpui_macros`, `crates/gpui_platform`, `crates/gpui_shared_string`,
-`crates/gpui_tokio`, `crates/gpui_web`, `crates/gpui_wgpu`, `crates/gpui_windows`.
+`crates/gpui_tokio`, `crates/gpui_web`, `crates/gpui_wgpu`, `crates/gpui_windows`,
+`crates/gpui_apple`, `crates/gpui_ios`.
 
 **Vendored + renamed** (upstream dir → fork dir; dirs, not package names), formerly pulled as
 `zed-industries/zed` git deps but now vendored in-tree by the fork:
@@ -57,6 +58,13 @@ edits land as a **separate, reviewable resolution commit** diffed against that r
    - **Stripped zed-internal crates:** the fork replaces zed-only infra with std/community crates —
      e.g. `ztracing`→`tracing`, and `zlog`/`zlog::init_test()` test-logger blocks are removed. Keep
      these substitutions; don't reintroduce `ztracing`/`zlog`.
+   - **Apple and iOS platform crates:** `gpui_apple` is expanded shared Apple platform support,
+     while `gpui_ios` is the canonical iOS platform crate. Keep them as distinct identity-mapped
+     crates and preserve upstream's Apple/iOS target-specific dependencies and feature edges.
+     Preserve gpui-ce packaging (`gpui_ce_apple` / `gpui_ce_ios` package aliases and upstream
+     `[lib]` names), root workspace membership/dependency aliases, and existing fork adaptations.
+     Do not fold iOS into `gpui_apple`, omit either crate because the current host is not Apple, or
+     remove platform dependencies merely because they are target-specific.
 
 5. **`Cargo.toml` (per-crate and root):**
    - KEEP gpui-ce packaging (names, `publish`, `edition`, workspace metadata) and the fork's dep
@@ -71,6 +79,13 @@ edits land as a **separate, reviewable resolution commit** diffed against that r
    If an upstream change references a crate or module that doesn't exist in gpui-ce (e.g.
    `http_client`, `reqwest_client`, `util_macros`), drop that reference rather than reintroducing the
    removed code.
+   Do not infer a crate's licensing status from its Cargo manifest field alone, and do not
+   require license reclassification solely because that field changed. Inspect the actual license
+   text, source notices, and relevant history; preserve existing Apache-compatible notice/license
+   evidence unless verified source evidence requires a different treatment. If a crate has a dangling
+   license reference, verify the intended canonical Apache license text first, then restore the
+   intact text byte-for-byte. When a crate-level path collides with an existing root license file,
+   preserve the existing root file exactly; do not overwrite it based on an unverified copy.
 
 7. **Add/delete conflicts are handled for you** — the script settles `modify/delete` cases
    (files gpui-ce deleted that upstream changed are kept deleted) before calling you, so you

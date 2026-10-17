@@ -268,6 +268,20 @@ class AgentSessionTests(unittest.TestCase):
         finally:
             sync.REPO_ROOT = old_root
 
+    def test_conflict_prompt_tracks_platform_inventory_and_license_evidence(self) -> None:
+        prompt = (SYNC_SCRIPT.parent / "resolve-conflicts.prompt.md").read_text()
+        identity_inventory = prompt.split("**Same relative path**", 1)[1].split(
+            "**Vendored + renamed**", 1
+        )[0]
+        for fork_path, upstream_path in sync.TRACKED_CRATES.items():
+            if fork_path == upstream_path:
+                self.assertIn(f"crates/{upstream_path}", identity_inventory)
+        self.assertIn("canonical iOS platform crate", prompt)
+        self.assertIn("Do not infer a crate's licensing status from its Cargo manifest field alone", prompt)
+        self.assertIn("preserve existing Apache-compatible notice/license", prompt)
+        self.assertIn("restore the", prompt)
+        self.assertIn("intact text byte-for-byte", prompt)
+
     def test_codex_command_uses_supported_sandbox_and_stdin_prompt(self) -> None:
         output = Path("/tmp/last-message.md")
         argv = agent.codex_exec_argv("codex", output)
