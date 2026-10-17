@@ -22,12 +22,6 @@ use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 use std::{
     borrow::Cow,
-<<<<<<< HEAD
-    fmt::{Debug, Display, Formatter},
-    hash::{Hash, Hasher},
-    ops::Range,
-    sync::Arc,
-=======
     cmp,
     collections::VecDeque,
     fmt::{Debug, Display, Formatter},
@@ -37,7 +31,6 @@ use std::{
         Arc,
         atomic::{AtomicUsize, Ordering},
     },
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 };
 
 mod font_fallbacks;
@@ -83,14 +76,13 @@ pub const SUBPIXEL_VARIANTS_X: u8 = 4;
 /// Glyphs are not offset vertically, so there is one variant along the Y axis.
 pub const SUBPIXEL_VARIANTS_Y: u8 = 1;
 
-<<<<<<< HEAD
 /// The platform-independent font database and metrics cache, shared by all windows.
 ///
 /// Get it from [`App::text_system`](crate::App::text_system) and use it to register fonts with
 /// [`TextSystem::add_fonts`], to measure glyphs and to resolve [`Font`]s to
 /// [`FontId`]s. To shape text for painting, use the [`WindowTextSystem`] of the
 /// window, which also caches the layouts.
-=======
+
 // Leave enough room below the underline for its stroke while keeping it below the baseline.
 const UNDERLINE_DESCENT_OFFSET_FACTOR: f32 = 0.618;
 
@@ -267,13 +259,10 @@ impl Drop for MissingGlyphReceiver {
 }
 
 /// The GPUI text rendering sub system.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 pub struct TextSystem {
     platform_text_system: Arc<dyn PlatformTextSystem>,
     font_ids_by_font: RwLock<FxHashMap<Font, Result<FontId>>>,
     font_metrics: RwLock<FxHashMap<FontId, FontMetrics>>,
-<<<<<<< HEAD
-=======
     raster_bounds: RwLock<FxHashMap<RenderGlyphParams, Bounds<DevicePixels>>>,
     wrapper_pool: Mutex<FxHashMap<FontIdWithSize, Vec<LineWrapper>>>,
     font_runs_pool: Mutex<Vec<Vec<FontRun>>>,
@@ -281,7 +270,6 @@ pub struct TextSystem {
     font_generation: Arc<AtomicUsize>,
     missing_glyph_reporter: Arc<MissingGlyphReporter>,
     missing_glyph_receiver: Mutex<Option<MissingGlyphReceiver>>,
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 }
 
 impl TextSystem {
@@ -296,61 +284,6 @@ impl TextSystem {
             platform_text_system,
             font_metrics: RwLock::default(),
             font_ids_by_font: RwLock::default(),
-<<<<<<< HEAD
-        }
-    }
-
-    /// Returns the font family names that this text system can resolve.
-    ///
-    /// Use these names as [`Font::family`] values. On the web, the list contains
-    /// only the families registered with [`TextSystem::add_fonts`] and the
-    /// `.SystemUIFont` alias, because the web has no system fonts.
-    pub fn all_font_names(&self) -> Vec<String> {
-        self.platform_text_system.all_font_names()
-    }
-
-    /// Registers font files so that [`Font`]s can resolve to them.
-    ///
-    /// Each entry is the bytes of one font file, such as a `.ttf` or `.otf`.
-    /// Use `Cow::Borrowed` for bytes compiled into the binary with
-    /// `include_bytes!`, and `Cow::Owned` for bytes loaded at runtime. The
-    /// family names come from each font's name table, so pass those names to
-    /// [`font`] or set [`Font::family`] to use them.
-    ///
-    /// The web starts with an empty font database, so add the fonts your
-    /// application uses before you open a window.
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if an entry contains no font face that the platform
-    /// supports. The parley backend, used on macOS, Windows, Linux, and the web, checks
-    /// every entry before it registers any, so a failed call leaves the set of
-    /// fonts unchanged.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use gpui::TestApp;
-    /// # use std::borrow::Cow;
-    /// # let mut app = TestApp::new();
-    /// let bytes = include_bytes!(concat!(
-    ///     env!("CARGO_MANIFEST_DIR"),
-    ///     "/../../assets/fonts/lilex/Lilex-Regular.ttf"
-    /// ));
-    /// app.text_system()
-    ///     .add_fonts(vec![Cow::Borrowed(bytes.as_slice())])
-    ///     .expect("Lilex is a valid font");
-    /// ```
-    ///
-    /// See [text](crate::_documentation::guides::text) for how fonts are chosen.
-    pub fn add_fonts(&self, fonts: Vec<Cow<'static, [u8]>>) -> Result<()> {
-        // Serialize registration with cache misses so an in-flight lookup cannot
-        // repopulate a stale miss after the newly registered fonts become available.
-        let mut font_ids = self.font_ids_by_font.write();
-        let result = self.platform_text_system.add_fonts(fonts);
-        font_ids.clear();
-        result
-=======
             wrapper_pool: Mutex::default(),
             font_runs_pool: Mutex::default(),
             fallback_font_stack: smallvec![
@@ -394,8 +327,11 @@ impl TextSystem {
     /// Cached font resolution and line layouts are invalidated after installation.
     /// Layouts already in progress may complete against the previous font set.
     pub fn add_fonts(&self, fonts: Vec<Cow<'static, [u8]>>) -> Result<()> {
+        // Serialize registration with cache misses so an in-flight lookup cannot
+        // repopulate a stale miss after the newly registered fonts become available.
+        let mut font_ids = self.font_ids_by_font.write();
         self.platform_text_system.add_fonts(fonts)?;
-        self.font_ids_by_font.write().clear();
+        font_ids.clear();
         self.missing_glyph_reporter.reset();
         self.font_generation.fetch_add(1, Ordering::Release);
         Ok(())
@@ -424,7 +360,6 @@ impl TextSystem {
     #[cfg(test)]
     pub(crate) fn report_missing_glyphs_in_test(&self, missing_glyphs: Vec<MissingGlyph>) {
         self.missing_glyph_reporter.report(missing_glyphs);
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 
     /// Resolves a font family and style to a cached [`FontId`].

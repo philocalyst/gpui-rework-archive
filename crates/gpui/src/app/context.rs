@@ -470,7 +470,6 @@ impl<'a, T: 'static> Context<'a, T> {
 
     /// Wraps `f` in an event handler that receives this entity mutably.
     ///
-<<<<<<< HEAD
     /// Element event handlers receive the event, a [`Window`] and an [`App`], but not your entity.
     /// `listener` returns a handler that calls `f` with the entity, the event, the window and a context
     /// for the entity. Pass the result to an element's handler method, such as `on_click`.
@@ -510,12 +509,10 @@ impl<'a, T: 'static> Context<'a, T> {
     /// ```
     ///
     /// See [ownership and data flow](crate::_documentation::concepts::ownership).
-=======
     /// Many GPUI callbacks take the form of `Fn(&E, &mut Window, &mut App)`,
     /// but it's often useful to be able to access view state in these
     /// callbacks. This method provides a convenient way to do so.
     #[inline(always)]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn listener<E: ?Sized>(
         &self,
         listener: impl Fn(&mut T, &E, &mut Window, &mut Context<T>) + 'static,
@@ -736,12 +733,6 @@ impl<'a, T: 'static> Context<'a, T> {
         subscription
     }
 
-<<<<<<< HEAD
-    /// Calls `callback` when the system appearance changes between light and dark.
-    ///
-    /// Keep the returned [`Subscription`] alive for as long as you want the callback to run. The callback
-    /// stops once this entity is released.
-=======
     /// Registers a callback to be invoked when the window's visibility changes
     /// (see [`WindowVisibility`]).
     pub fn observe_window_visibility(
@@ -762,7 +753,10 @@ impl<'a, T: 'static> Context<'a, T> {
     }
 
     /// Registers a callback to be invoked when the window appearance changes.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Calls `callback` when the system appearance changes between light and dark.
+    ///
+    /// Keep the returned [`Subscription`] alive for as long as you want the callback to run. The callback
+    /// stops once this entity is released.
     pub fn observe_window_appearance(
         &self,
         window: &mut Window,
@@ -780,12 +774,6 @@ impl<'a, T: 'static> Context<'a, T> {
         subscription
     }
 
-<<<<<<< HEAD
-    /// Calls `callback` when the window's titlebar button layout changes.
-    ///
-    /// Keep the returned [`Subscription`] alive for as long as you want the callback to run. The callback
-    /// stops once this entity is released.
-=======
     /// Registers a callback invoked when the window moves to another display
     /// or its display's refresh interval changes. See
     /// [`Window::observe_window_display`].
@@ -807,7 +795,10 @@ impl<'a, T: 'static> Context<'a, T> {
     }
 
     /// Registers a callback to be invoked when the window button layout changes.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Calls `callback` when the window's titlebar button layout changes.
+    ///
+    /// Keep the returned [`Subscription`] alive for as long as you want the callback to run. The callback
+    /// stops once this entity is released.
     pub fn observe_button_layout_changed(
         &self,
         window: &mut Window,
@@ -825,16 +816,13 @@ impl<'a, T: 'static> Context<'a, T> {
         subscription
     }
 
-<<<<<<< HEAD
     /// Calls `f` for each key-down keystroke in any window that reaches the end of dispatch, or that a
     /// key binding handles.
     ///
     /// The keystroke's `action` is set when a key binding handled it. The callback doesn't run when a
     /// focused element's listener stops propagation. Keep the returned [`Subscription`] alive for as long
     /// as you want the callback to run.
-=======
     /// Registers a callback for [`App::observe_keystrokes`] that updates this entity.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn observe_keystrokes(
         &mut self,
         mut f: impl FnMut(&mut T, &KeystrokeEvent, &mut Window, &mut Context<T>) + 'static,

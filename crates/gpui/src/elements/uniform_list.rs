@@ -594,23 +594,13 @@ impl Element for UniformList {
                         (self.render_items)(visible_range.clone(), window, cx)
                     };
 
-<<<<<<< HEAD
                     window.with_content_mask(
                         Some(style.scroll_mask(bounds, window.rem_size())),
                         |window| {
                             for (mut item, ix) in items.into_iter().zip(visible_range.clone()) {
+                                let item_top = item_height_f64 * ix as f64 - scroll_top;
                                 let item_origin = padded_bounds.origin
-                                    + scroll_offset
-                                    + point(Pixels::ZERO, item_height * ix);
-=======
-                    let content_mask = ContentMask { bounds };
-                    window.with_content_mask(Some(content_mask), |window| {
-                        for (mut item, ix) in items.into_iter().zip(visible_range.clone()) {
-                            let item_top = item_height_f64 * ix as f64 - scroll_top;
-                            let item_origin = padded_bounds.origin
-                                + point(scroll_offset.x, Pixels::from(item_top));
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
-
+                                    + point(scroll_offset.x, Pixels::from(item_top));
                                 let available_width = if can_scroll_horizontally {
                                     padded_bounds.size.width + scroll_offset.x.abs()
                                 } else {

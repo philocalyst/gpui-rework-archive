@@ -9,17 +9,17 @@ use windows::Win32::Graphics::{
 };
 
 use gpui::{
-<<<<<<< HEAD
-    AtlasKey, AtlasTextureId, AtlasTextureKind, AtlasTextureList, AtlasTile, Bounds, DevicePixels,
-    GlyphAtlasCache, GlyphAtlasEntry, PlatformAtlas, Point, RenderGlyphParams, Size,
-    ValidatedRasterizedGlyph,
-=======
     AtlasBackend, AtlasKey, AtlasState, AtlasTextureId, AtlasTextureKind, AtlasTextureList,
-    AtlasTile, Bounds, DevicePixels, PlatformAtlas, Point, Size,
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    AtlasTile, Bounds, DevicePixels, GlyphAtlasCache, GlyphAtlasEntry, PlatformAtlas, Point,
+    RenderGlyphParams, Size, ValidatedRasterizedGlyph,
 };
 
-pub(crate) struct DirectXAtlas(Mutex<AtlasState<DirectXAtlasTextures>>);
+pub(crate) struct DirectXAtlas(Mutex<DirectXAtlasState>);
+
+struct DirectXAtlasState {
+    atlas: AtlasState<DirectXAtlasTextures>,
+    glyph_cache: GlyphAtlasCache,
+}
 
 struct DirectXAtlasTextures {
     device: ID3D11Device,
@@ -27,11 +27,6 @@ struct DirectXAtlasTextures {
     monochrome_textures: AtlasTextureList<DirectXAtlasTexture>,
     polychrome_textures: AtlasTextureList<DirectXAtlasTexture>,
     subpixel_textures: AtlasTextureList<DirectXAtlasTexture>,
-<<<<<<< HEAD
-    tiles_by_key: FxHashMap<AtlasKey, AtlasTile>,
-    glyph_cache: GlyphAtlasCache,
-=======
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 }
 
 struct DirectXAtlasTexture {
@@ -45,19 +40,16 @@ struct DirectXAtlasTexture {
 
 impl DirectXAtlas {
     pub(crate) fn new(device: &ID3D11Device, device_context: &ID3D11DeviceContext) -> Self {
-        DirectXAtlas(Mutex::new(AtlasState::new(DirectXAtlasTextures {
-            device: device.clone(),
-            device_context: device_context.clone(),
-            monochrome_textures: Default::default(),
-            polychrome_textures: Default::default(),
-            subpixel_textures: Default::default(),
-<<<<<<< HEAD
-            tiles_by_key: Default::default(),
-            glyph_cache: Default::default(),
+        DirectXAtlas(Mutex::new(DirectXAtlasState {
+            atlas: AtlasState::new(DirectXAtlasTextures {
+                device: device.clone(),
+                device_context: device_context.clone(),
+                monochrome_textures: Default::default(),
+                polychrome_textures: Default::default(),
+                subpixel_textures: Default::default(),
+            }),
+            glyph_cache: GlyphAtlasCache::default(),
         }))
-=======
-        })))
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 
     /// Returns the view backing `id`, or `None` once every tile in it has been
@@ -69,7 +61,7 @@ impl DirectXAtlas {
         id: AtlasTextureId,
     ) -> Option<[Option<ID3D11ShaderResourceView>; 1]> {
         let lock = self.0.lock();
-        let texture = lock.backend.texture(id)?;
+        let texture = lock.atlas.backend.texture(id)?;
         Some(texture.view.clone())
     }
 
@@ -79,23 +71,14 @@ impl DirectXAtlas {
         device_context: &ID3D11DeviceContext,
     ) {
         let mut lock = self.0.lock();
-<<<<<<< HEAD
-        lock.device = device.clone();
-        lock.device_context = device_context.clone();
-        lock.monochrome_textures = AtlasTextureList::default();
-        lock.polychrome_textures = AtlasTextureList::default();
-        lock.subpixel_textures = AtlasTextureList::default();
-        lock.tiles_by_key.clear();
         lock.glyph_cache.clear();
-=======
-        lock.clear(|textures| {
+        lock.atlas.clear(|textures| {
             textures.device = device.clone();
             textures.device_context = device_context.clone();
             textures.monochrome_textures = AtlasTextureList::default();
             textures.polychrome_textures = AtlasTextureList::default();
             textures.subpixel_textures = AtlasTextureList::default();
         });
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 }
 
@@ -107,21 +90,16 @@ impl PlatformAtlas for DirectXAtlas {
             Option<(Size<DevicePixels>, std::borrow::Cow<'a, [u8]>)>,
         >,
     ) -> anyhow::Result<Option<AtlasTile>> {
-<<<<<<< HEAD
-        let mut lock = self.0.lock();
-        if let Some(tile) = lock.tiles_by_key.get(key) {
-            return Ok(Some(*tile));
-        }
-
-        let Some((size, bytes)) = build()? else {
-            return Ok(None);
+        let mut state = self.0.lock();
+        let texture_kind = key.texture_kind();
+        let mut validated_build = || {
+            let Some((size, bytes)) = build()? else {
+                return Ok(None);
+            };
+            texture_kind.validate_upload(size, &bytes)?;
+            Ok(Some((size, bytes)))
         };
-        // Validate before allocation: a rejected bitmap must never leave a cached,
-        // uninitialized tile that every later glyph/SVG lookup treats as successful.
-        key.texture_kind().validate_upload(size, &bytes)?;
-        let tile = lock.insert_tile(key.clone(), size, &bytes)?;
-
-        Ok(Some(tile))
+        state.atlas.get_or_insert_with(key, &mut validated_build)
     }
 
     fn get_or_insert_glyph_with(
@@ -129,8 +107,10 @@ impl PlatformAtlas for DirectXAtlas {
         params: &RenderGlyphParams,
         build: &mut dyn FnMut() -> anyhow::Result<ValidatedRasterizedGlyph>,
     ) -> anyhow::Result<GlyphAtlasEntry> {
-        let mut lock = self.0.lock();
-        if let Some(entry) = lock.glyph_cache.get(params) {
+        use std::borrow::Cow;
+
+        let mut state = self.0.lock();
+        if let Some(entry) = state.glyph_cache.get(params) {
             return Ok(entry);
         }
 
@@ -139,26 +119,19 @@ impl PlatformAtlas for DirectXAtlas {
             None
         } else {
             let key = AtlasKey::from((params.clone(), glyph.format));
-            Some(lock.insert_tile(key, glyph.size, &glyph.pixels)?)
+            let mut pixels = || Ok(Some((glyph.size, Cow::Borrowed(glyph.pixels.as_slice()))));
+            state.atlas.get_or_insert_with(key, &mut pixels)?
         };
-        Ok(lock.glyph_cache.insert(params, &glyph, tile))
-=======
-        self.0.lock().get_or_insert_with(key, build)
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+        Ok(state.glyph_cache.insert(params, &glyph, tile))
     }
 
     fn remove(&self, key: &AtlasKey) {
-        self.0.lock().remove(key);
+        let mut state = self.0.lock();
+        state.glyph_cache.remove(key);
+        state.atlas.remove(key);
     }
 }
 
-<<<<<<< HEAD
-        lock.glyph_cache.remove(key);
-
-        let Some(tile) = lock.tiles_by_key.remove(key) else {
-            return;
-        };
-=======
 impl AtlasBackend for DirectXAtlasTextures {
     fn insert(
         &mut self,
@@ -177,7 +150,6 @@ impl AtlasBackend for DirectXAtlasTextures {
     }
 
     fn remove(&mut self, tile: AtlasTile) {
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         let id = tile.texture_id;
 
         let textures = match id.kind {
@@ -202,31 +174,7 @@ impl AtlasBackend for DirectXAtlasTextures {
     }
 }
 
-<<<<<<< HEAD
-impl DirectXAtlasState {
-    fn insert_tile(
-        &mut self,
-        key: AtlasKey,
-        size: Size<DevicePixels>,
-        bytes: &[u8],
-    ) -> anyhow::Result<AtlasTile> {
-        anyhow::ensure!(
-            size.width.0 <= 16384 && size.height.0 <= 16384,
-            "atlas tile {size:?} exceeds the Direct3D 11 texture limit"
-        );
-        let tile = self
-            .allocate(size, key.texture_kind())
-            .ok_or_else(|| anyhow::anyhow!("failed to allocate"))?;
-        self.texture(tile.texture_id)
-            .upload(&self.device_context, tile.bounds, bytes);
-        self.tiles_by_key.insert(key, tile);
-
-        Ok(tile)
-    }
-
-=======
 impl DirectXAtlasTextures {
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     fn allocate(
         &mut self,
         size: Size<DevicePixels>,
@@ -268,12 +216,26 @@ impl DirectXAtlasTextures {
             height: DevicePixels(16384),
         };
         let size = min_size.min(&MAX_ATLAS_SIZE).max(&DEFAULT_ATLAS_SIZE);
-        let (pixel_format, bytes_per_pixel) = match kind {
-            AtlasTextureKind::Monochrome => (DXGI_FORMAT_R8_UNORM, 1),
-            AtlasTextureKind::Polychrome | AtlasTextureKind::Subpixel => {
-                (DXGI_FORMAT_B8G8R8A8_UNORM, 4)
+        let pixel_format;
+        let bind_flag;
+        let bytes_per_pixel;
+        match kind {
+            AtlasTextureKind::Monochrome => {
+                pixel_format = DXGI_FORMAT_R8_UNORM;
+                bind_flag = D3D11_BIND_SHADER_RESOURCE;
+                bytes_per_pixel = 1;
             }
-        };
+            AtlasTextureKind::Polychrome => {
+                pixel_format = DXGI_FORMAT_B8G8R8A8_UNORM;
+                bind_flag = D3D11_BIND_SHADER_RESOURCE;
+                bytes_per_pixel = 4;
+            }
+            AtlasTextureKind::Subpixel => {
+                pixel_format = DXGI_FORMAT_R8G8B8A8_UNORM;
+                bind_flag = D3D11_BIND_SHADER_RESOURCE;
+                bytes_per_pixel = 4;
+            }
+        }
         let texture_desc = D3D11_TEXTURE2D_DESC {
             Width: size.width.0 as u32,
             Height: size.height.0 as u32,
@@ -285,7 +247,7 @@ impl DirectXAtlasTextures {
                 Quality: 0,
             },
             Usage: D3D11_USAGE_DEFAULT,
-            BindFlags: D3D11_BIND_SHADER_RESOURCE.0 as u32,
+            BindFlags: bind_flag.0 as u32,
             CPUAccessFlags: 0,
             MiscFlags: 0,
         };
@@ -364,8 +326,24 @@ impl DirectXAtlasTexture {
         bounds: Bounds<DevicePixels>,
         bytes: &[u8],
     ) {
-        // The insertion boundary validates the exact byte count before allocating this tile.
-        debug_assert!(self.id.kind.validate_upload(bounds.size, bytes).is_ok());
+        // `UpdateSubresource` reads `row_pitch * height` bytes from `bytes` based on the
+        // `D3D11_BOX` below. If the caller hands us a slice shorter than that, the driver would
+        // over-read past the end of the source buffer (potentially by multiple megabytes), so bail
+        // out instead. This is a first-insert path rather than a per-frame one, so the check is
+        // effectively free.
+        let row_bytes = bounds.size.width.to_bytes(self.bytes_per_pixel as u8) as usize;
+        let expected = row_bytes * bounds.size.height.0.max(0) as usize;
+        if bytes.len() < expected {
+            log::error!(
+                "DirectXAtlasTexture::upload: source slice is {} bytes but the {}x{} region \
+                 requires {} bytes; skipping upload to avoid a driver over-read",
+                bytes.len(),
+                bounds.size.width.0,
+                bounds.size.height.0,
+                expected,
+            );
+            return;
+        }
         unsafe {
             device_context.UpdateSubresource(
                 &self.texture,

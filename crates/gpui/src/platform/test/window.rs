@@ -1,19 +1,12 @@
 use crate::{
-<<<<<<< HEAD
     AnyWindowHandle, AtlasKey, AtlasTextureId, AtlasTile, Bounds, DevicePixels,
-    DispatchEventResult, GlyphAtlasCache, GlyphAtlasEntry, GpuSpecs, Pixels, PlatformAtlas,
-    PlatformDisplay, PlatformHeadlessRenderer, PlatformInput, PlatformInputHandler, PlatformWindow,
-    Point, PromptButton, RenderGlyphParams, RequestFrameOptions, Scene, Size, TestPlatform,
-    TextInputConfiguration, TextInputStateChange, TileId, ValidatedRasterizedGlyph,
-    WindowAppearance, WindowBackgroundAppearance, WindowBounds, WindowControlArea, WindowParams,
-=======
-    AnyWindowHandle, Bounds, DevicePixels, DispatchEventResult, DisplayId, GpuSpecs, HeadlessAtlas,
+    DispatchEventResult, DisplayId, GlyphAtlasCache, GlyphAtlasEntry, GpuSpecs, HeadlessAtlas,
     Pixels, PlatformAtlas, PlatformDisplay, PlatformHeadlessRenderer, PlatformInput,
-    PlatformInputHandler, PlatformWindow, Point, PromptButton, RequestFrameOptions, Scene, Size,
-    TestDisplay, TestPlatform, TextInputConfiguration, TextInputStateChange, WindowAppearance,
+    PlatformInputHandler, PlatformWindow, Point, PromptButton, RenderGlyphParams,
+    RequestFrameOptions, Scene, Size, TestDisplay, TestPlatform, TextInputConfiguration,
+    TextInputStateChange, TileId, ValidatedRasterizedGlyph, WindowAppearance,
     WindowBackgroundAppearance, WindowBounds, WindowControlArea, WindowInsets, WindowParams,
     WindowVisibility,
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 };
 use gpui_util::ResultExt as _;
 #[cfg(any(test, feature = "test-support"))]
@@ -183,14 +176,11 @@ impl TestWindow {
         self.0.lock().frame_scheduled
     }
 
-<<<<<<< HEAD
     /// Returns whether the window is visible. It starts visible when it was opened with `show` set.
     pub fn is_visible(&self) -> bool {
         self.0.lock().visible
     }
 
-    /// Returns every [`TextInputConfiguration`] sent to this window, oldest first.
-=======
     pub fn simulate_visibility_change(&self, visibility: WindowVisibility) {
         let callback = {
             let mut state = self.0.lock();
@@ -249,7 +239,6 @@ impl TestWindow {
     }
 
     /// Every [`TextInputConfiguration`] forwarded to this window, in order.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn text_input_configurations(&self) -> Vec<TextInputConfiguration> {
         self.0.lock().text_input_configurations.clone()
     }
@@ -669,7 +658,6 @@ impl PlatformWindow for TestWindow {
         None
     }
 }
-<<<<<<< HEAD
 
 pub(crate) struct TestAtlasState {
     next_id: u32,
@@ -786,5 +774,3 @@ impl PlatformAtlas for TestAtlas {
         }
     }
 }
-=======
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f

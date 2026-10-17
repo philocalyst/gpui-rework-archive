@@ -125,10 +125,9 @@ pub use spring::*;
 
 /// Defines a Criterion benchmark group for benchmarks annotated with [`gpui::bench`].
 ///
-<<<<<<< HEAD
 /// It takes the same arguments as `criterion::criterion_group!`, so GPUI benchmark
 /// files keep the shape of ordinary Criterion benchmarks.
-=======
+
 /// This mirrors `criterion::criterion_group!`, but the group measures with the
 /// `gpui::BenchMeasurement` configured by `BENCH_MEASUREMENT` (see
 /// `BenchMeasurement::from_env`). By default Criterion analyzes wall time
@@ -141,7 +140,6 @@ pub use spring::*;
 /// measurement is replaced. To measure with something else, call
 /// `criterion::criterion_group!` directly with
 /// `config = criterion::Criterion::default().with_measurement(gpui::BenchMeasurement::new(...))`.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 ///
 /// [`gpui::bench`]: crate::bench
 #[macro_export]
@@ -162,9 +160,6 @@ macro_rules! bench_group {
     };
 }
 
-<<<<<<< HEAD
-/// Defines the entry point for the benchmark groups, like `criterion::criterion_main!`.
-=======
 /// Defines the entry point for GPUI Criterion benchmark groups.
 ///
 /// This mirrors `criterion::criterion_main!` so GPUI benchmark files can keep the
@@ -180,7 +175,6 @@ macro_rules! bench_group {
 ///
 /// `allocator = none;` installs no global allocator, leaving Rust's default and
 /// dropping the allocation metrics from reports.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 #[macro_export]
 macro_rules! bench_main {
     (allocator = none; $($groups:tt)*) => {

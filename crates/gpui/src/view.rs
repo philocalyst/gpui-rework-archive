@@ -1,15 +1,8 @@
 use crate::{
-<<<<<<< HEAD
-    AnyElement, AnyEntity, AnyWeakEntity, App, Bounds, ContentMask, Context, Element, ElementId,
-    Entity, EntityId, GlobalElementId, InspectorElementId, IntoElement, LayoutId, PaintIndex,
-    Pixels, PrepaintStateIndex, Render, RenderOnce, ResolvedDirection, Style, StyleRefinement,
-    TextStyle, UnicodeBidi, WeakEntity,
-=======
     AnyElement, AnyEntity, AnyWeakEntity, App, AvailableSpace, Bounds, ContentMask, Context,
     Element, ElementId, Entity, EntityId, GlobalElementId, InspectorElementId, IntoElement,
-    LayoutId, PaintIndex, Pixels, PrepaintStateIndex, Render, RenderOnce, Size, Style,
-    StyleRefinement, TextStyle, WeakEntity,
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    LayoutId, PaintIndex, Pixels, PrepaintStateIndex, Render, RenderOnce, ResolvedDirection, Size,
+    Style, StyleRefinement, TextStyle, UnicodeBidi, WeakEntity,
 };
 use crate::{Empty, Window};
 use anyhow::Result;
@@ -504,7 +497,6 @@ impl<V: View> Element for ViewElement<V> {
         window: &mut Window,
         cx: &mut App,
     ) -> (LayoutId, Self::RequestLayoutState) {
-<<<<<<< HEAD
         let entity_id = self.entity_id;
         let request_layout = |window: &mut Window| {
             let caching_disabled = window.is_inspector_picking(cx);
@@ -573,32 +565,6 @@ impl<V: View> Element for ViewElement<V> {
                 ElementId::Name(std::any::type_name::<V>().into()),
                 request_layout,
             )
-=======
-        if let Some(entity_id) = self.entity_id {
-            // Stateful path: create a reactive boundary.
-            #[cfg(feature = "profiler")]
-            let start = window.window_profiler.begin_view();
-            let view = &mut self.view;
-            let layout = request_layout_view(
-                entity_id,
-                self.cached_style.as_ref(),
-                window,
-                cx,
-                &mut |window, cx| render_view(view.take().unwrap(), window, cx),
-            );
-            #[cfg(feature = "profiler")]
-            window.window_profiler.end_view(
-                start,
-                self.view_type_name,
-                crate::profiler::ViewPhase::RequestLayout,
-            );
-            layout
-        } else {
-            // Stateless path: isolate subtree via type name (no entity identity).
-            request_layout_component(type_name::<V>(), window, cx, &mut |window, cx| {
-                render_view(self.view.take().unwrap(), window, cx)
-            })
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         }
     }
 
@@ -613,7 +579,6 @@ impl<V: View> Element for ViewElement<V> {
     ) -> Option<AnyElement> {
         if let Some(entity_id) = self.entity_id {
             // Stateful path.
-<<<<<<< HEAD
             window.set_view_id(entity_id);
             window.with_rendered_view(entity_id, |window| {
                 if request_layout.detached_layout_id.is_none()
@@ -710,29 +675,6 @@ impl<V: View> Element for ViewElement<V> {
                 },
             );
             Some(request_layout.element.take().unwrap())
-=======
-            #[cfg(feature = "profiler")]
-            let start = window.window_profiler.begin_view();
-            let prepainted = prepaint_view(
-                entity_id,
-                global_id,
-                bounds,
-                element,
-                window,
-                cx,
-                &mut |window, cx| render_view(self.view.take().unwrap(), window, cx),
-            );
-            #[cfg(feature = "profiler")]
-            window.window_profiler.end_view(
-                start,
-                self.view_type_name,
-                crate::profiler::ViewPhase::Prepaint,
-            );
-            prepainted
-        } else {
-            // Stateless path: just prepaint the element.
-            prepaint_component(type_name::<V>(), element, window, cx)
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         }
     }
 

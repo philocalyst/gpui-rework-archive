@@ -24,9 +24,6 @@ impl Render for Typography {
         let colors = Colors::for_appearance(window);
 
         div()
-<<<<<<< HEAD
-            .id("page")
-=======
             .id(self.id)
             .bg(theme.bg)
             .text_color(theme.fg)
@@ -169,7 +166,6 @@ impl Render for TextExample {
 
         div()
             .font_family(self.font_family.clone())
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
             .size_full()
             .overflow_y_scroll()
             .bg(colors.background)
@@ -192,8 +188,6 @@ impl Render for TextExample {
                         .child(section("Monospace", monospace(&colors))),
                 ),
             )
-<<<<<<< HEAD
-=======
             .child(
                 div()
                     .id("text-example")
@@ -240,7 +234,6 @@ impl Render for TextExample {
                     ),
             )
             .child(div().w(px(240.)).h_full().bg(colors.container))
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 }
 

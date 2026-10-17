@@ -205,22 +205,18 @@ impl A11y {
     /// See the docs for [`Self::active_flag`] and [`Self::active_this_frame`]
     /// for more commentary.
     pub(crate) fn sync_active_flag(&mut self) {
-<<<<<<< HEAD
         self.active_this_frame =
-            !self.force_disabled && (self.forced || self.active_flag.load(Ordering::SeqCst));
+            self.is_enabled() && (self.forced || self.active_flag.load(Ordering::SeqCst));
     }
 
     /// Build the tree every frame regardless of whether assistive technology
     /// is connected. Takes effect on the next frame.
     pub(crate) fn set_forced(&mut self, forced: bool) {
         self.forced = forced;
-=======
-        self.active_this_frame = self.is_enabled() && self.active_flag.load(Ordering::SeqCst);
     }
 
     pub(crate) fn is_enabled(&self) -> bool {
         !self.force_disabled
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 
     pub(crate) fn is_active(&self) -> bool {
@@ -707,7 +703,6 @@ mod tests {
     }
 
     #[test]
-<<<<<<< HEAD
     fn forced_builds_the_tree_without_an_assistive_client() {
         // No assistive technology has activated the platform adapter.
         let mut a11y = A11y::new(Arc::new(AtomicBool::new(false)), false, true, None);
@@ -724,18 +719,24 @@ mod tests {
         let mut a11y = A11y::new(Arc::new(AtomicBool::new(true)), true, true, None);
         a11y.sync_active_flag();
         assert!(!a11y.is_active());
-=======
+    }
+
+    #[test]
     fn accessibility_enabled_is_independent_of_activation() {
         for force_disabled in [false, true] {
             for active in [false, true] {
-                let mut a11y = A11y::new(Arc::new(AtomicBool::new(active)), force_disabled, None);
+                let mut a11y = A11y::new(
+                    Arc::new(AtomicBool::new(active)),
+                    force_disabled,
+                    false,
+                    None,
+                );
                 a11y.sync_active_flag();
 
                 assert_eq!(a11y.is_enabled(), !force_disabled);
                 assert_eq!(a11y.is_active(), !force_disabled && active);
             }
         }
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 
     #[test]

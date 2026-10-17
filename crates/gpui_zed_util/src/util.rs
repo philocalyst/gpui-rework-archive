@@ -45,12 +45,7 @@ pub use path::PathExt;
 pub use path::normalize_path;
 pub use path::rel_path;
 
-<<<<<<< HEAD
 pub use take_until::*;
-=======
-#[cfg(any(test, feature = "test-support"))]
-pub use util_macros::{line_endings, path, uri};
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
 #[cfg(not(target_family = "wasm"))]
 pub use self::shell::{

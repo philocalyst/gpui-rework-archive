@@ -17,10 +17,9 @@ use refineable::Refineable;
 /// `custom-gpu` feature, pass a GPU texture.
 #[derive(Clone)]
 pub enum SurfaceSource {
-<<<<<<< HEAD
     /// A macOS image buffer from CoreVideo.
-    #[cfg(target_os = "macos")]
-    Surface(CVPixelBuffer),
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
+    Surface(CFRetained<CVPixelBuffer>),
     /// A GPU texture, with its size in device pixels.
     #[cfg(any(
         target_os = "linux",
@@ -51,7 +50,7 @@ pub enum SurfaceSource {
 impl std::fmt::Debug for SurfaceSource {
     fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match *self {
-            #[cfg(target_os = "macos")]
+            #[cfg(any(target_os = "macos", target_os = "ios"))]
             SurfaceSource::Surface(ref buf) => _f.debug_tuple("Surface").field(buf).finish(),
             #[cfg(any(
                 target_os = "linux",
@@ -73,10 +72,11 @@ impl std::fmt::Debug for SurfaceSource {
 impl SurfaceSource {
     fn size(&self) -> Size<DevicePixels> {
         match self {
-            #[cfg(target_os = "macos")]
-            SurfaceSource::Surface(buffer) => {
-                crate::size(buffer.get_width().into(), buffer.get_height().into())
-            }
+            #[cfg(any(target_os = "macos", target_os = "ios"))]
+            SurfaceSource::Surface(buffer) => crate::size(
+                CVPixelBufferGetWidth(buffer).into(),
+                CVPixelBufferGetHeight(buffer).into(),
+            ),
             #[cfg(any(
                 target_os = "linux",
                 target_os = "freebsd",
@@ -89,11 +89,6 @@ impl SurfaceSource {
             SurfaceSource::Unsupported(size) => *size,
         }
     }
-=======
-    /// A CoreVideo image buffer
-    #[cfg(any(target_os = "macos", target_os = "ios"))]
-    Surface(CFRetained<CVPixelBuffer>),
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 }
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]
@@ -127,16 +122,12 @@ pub struct Surface {
     style: StyleRefinement,
 }
 
-<<<<<<< HEAD
 /// Creates a [`Surface`] that shows `source`.
 ///
 /// The frame is scaled with [`ObjectFit::Contain`] unless you change it with [`Surface::object_fit`].
 /// Size the element with [`Styled`] methods, such as `.size_full()`, because the frame doesn't
 /// give it a size.
-=======
-/// Create a new surface element.
-#[cfg(any(target_os = "macos", target_os = "ios"))]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+
 pub fn surface(source: impl Into<SurfaceSource>) -> Surface {
     Surface {
         source: source.into(),
@@ -193,7 +184,10 @@ impl Element for Surface {
         &mut self,
         _global_id: Option<&GlobalElementId>,
         _inspector_id: Option<&InspectorElementId>,
-<<<<<<< HEAD
+        #[cfg_attr(
+            not(any(target_os = "macos", target_os = "ios")),
+            allow(unused_variables)
+        )]
         _bounds: Bounds<Pixels>,
         _: &mut Self::RequestLayoutState,
         _: &mut Self::PrepaintState,
@@ -207,36 +201,6 @@ impl Element for Surface {
         _window.with_element_opacity(style.opacity, |window| {
             window.paint_surface(new_bounds, self.source.clone());
         });
-=======
-        #[cfg_attr(
-            not(any(target_os = "macos", target_os = "ios")),
-            allow(unused_variables)
-        )]
-        bounds: Bounds<Pixels>,
-        _: &mut Self::RequestLayoutState,
-        _: &mut Self::PrepaintState,
-        #[cfg_attr(
-            not(any(target_os = "macos", target_os = "ios")),
-            allow(unused_variables)
-        )]
-        window: &mut Window,
-        _: &mut App,
-    ) {
-        match &self.source {
-            #[cfg(any(target_os = "macos", target_os = "ios"))]
-            SurfaceSource::Surface(surface) => {
-                let size = crate::size(
-                    CVPixelBufferGetWidth(surface).into(),
-                    CVPixelBufferGetHeight(surface).into(),
-                );
-                let new_bounds = self.object_fit.get_bounds(bounds, size);
-                // TODO: Add support for corner_radii
-                window.paint_surface(new_bounds, surface.clone());
-            }
-            #[allow(unreachable_patterns)]
-            _ => {}
-        }
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 }
 

@@ -43,22 +43,13 @@ pub(crate) enum PowerState {
 /// and total duration. Available with the `profiler` feature.
 pub const TASK_POLL_FLOOR: Duration = Duration::from_micros(100);
 
-<<<<<<< HEAD
-/// How long a dirty frame can hold up foreground-idle boundaries without being presented.
-///
-/// A window that never presents, such as a hidden or occluded window that gets no frame
-/// callbacks, would otherwise block idle boundaries forever. After this deadline the frame
-/// no longer blocks them. The open interval still seals only at a presentation or idle
-/// boundary, so a hang and the frame it starved stay in one interval. Available with the
-/// `profiler` feature.
-=======
 /// A dirty frame that has not been presented by this deadline stops blocking
 /// foreground-idle boundaries, so a window that never presents (hidden or
 /// occluded windows receive no frame callbacks) cannot suppress boundaries
 /// indefinitely. Expiry only unblocks: the open interval still seals at a
 /// presentation, completed frame skip, or idle boundary, keeping a starving
-/// hang and the callback it starved in one interval.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+/// hang and the callback it starved in one interval. Available with the
+/// `profiler` feature.
 pub const FRAME_DEADLINE: Duration = Duration::from_secs(1);
 
 /// Growth in [`system_suspended_time`] below this is attributed to reading
@@ -158,11 +149,6 @@ pub struct InputTiming {
     pub caused_invalidation: bool,
 }
 
-<<<<<<< HEAD
-/// The exact count and total duration of task polls below [`TASK_POLL_FLOOR`].
-///
-/// Available with the `profiler` feature.
-=======
 /// A frame callback entering the foreground, without implying foreground work.
 #[derive(Debug, Copy, Clone)]
 pub struct PlatformSignal {
@@ -198,8 +184,9 @@ pub struct FrameSkipped {
     pub reason: FrameSkipReason,
 }
 
-/// Exact count and total duration of task polls below [`TASK_POLL_FLOOR`].
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+/// The exact count and total duration of task polls below [`TASK_POLL_FLOOR`].
+///
+/// Available with the `profiler` feature.
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
 pub struct PollSummary {
     /// Number of polls below the floor.

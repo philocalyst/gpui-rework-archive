@@ -16,24 +16,23 @@ doctest = false
 [features]
 default = ["gpui/default"]
 bench-support = ["gpui/bench-support", "gpui_apple/bench-support"]
-<<<<<<< HEAD
 test-support = [
   "gpui/test-support",
   "gpui_apple/test-support",
   "gpui_wgpu?/test-support",
 ]
-font-kit = []
-screen-capture = ["gpui/screen-capture", "dep:core-video"]
+runtime_shaders = ["gpui_apple/runtime_shaders"]
+font-kit = ["gpui_apple/font-kit"]
+screen-capture = [
+  "gpui/screen-capture",
+  "dep:objc2-core-graphics",
+  "dep:objc2-core-media",
+  "dep:objc2-screen-capture-kit",
+]
 # Draw windows with the WGPU renderer instead of Metal, so applications can
 # share its device and composite their own WGPU textures (with gpui's
 # `custom-gpu` feature).
 wgpu = ["dep:gpui_wgpu"]
-=======
-test-support = ["gpui/test-support", "gpui_apple/test-support"]
-runtime_shaders = ["gpui_apple/runtime_shaders"]
-font-kit = ["gpui_apple/font-kit"]
-screen-capture = ["gpui/screen-capture", "dep:objc2-core-graphics", "dep:objc2-core-media", "dep:objc2-screen-capture-kit"]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
 [dependencies]
 gpui.workspace = true
@@ -43,21 +42,17 @@ accesskit.workspace = true
 accesskit_macos.workspace = true
 anyhow.workspace = true
 block2.workspace = true
+cocoa.workspace = true
 collections.workspace = true
 core-foundation.workspace = true
 core-foundation-sys.workspace = true
 core-graphics.workspace = true
-<<<<<<< HEAD
 core-text.workspace = true
 core-video = { workspace = true, optional = true }
 ctor.workspace = true
-dispatch2 = "0.3.1"
+dispatch2 = { workspace = true, features = ["block2", "objc2"] }
 etagere.workspace = true
 font-kit = { version = "0.14.1-zed", package = "zed-font-kit" }
-=======
-ctor.workspace = true
-dispatch2 = { workspace = true, features = ["block2", "objc2"] }
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 foreign-types.workspace = true
 futures.workspace = true
 gpui_apple.workspace = true
@@ -67,25 +62,16 @@ gpui_wgpu = { workspace = true, optional = true }
 image.workspace = true
 itertools.workspace = true
 log.workspace = true
-<<<<<<< HEAD
 mach2.workspace = true
-media.workspace = true
 metal.workspace = true
-=======
 objc.workspace = true
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 objc2.workspace = true
 objc2-app-kit.workspace = true
 objc2-core-graphics = { workspace = true, optional = true }
 objc2-core-media = { workspace = true, optional = true }
 objc2-core-video = { workspace = true, features = ["CVHostTime"] }
 objc2-foundation.workspace = true
-<<<<<<< HEAD
-objc2-core-media.workspace = true
-objc2-screen-capture-kit.workspace = true
-=======
 objc2-screen-capture-kit = { workspace = true, optional = true }
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 objc2-user-notifications.workspace = true
 palette.workspace = true
 parking_lot.workspace = true

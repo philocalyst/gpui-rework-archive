@@ -2,14 +2,10 @@ use crate::{Bounds, DisplayId, Pixels, PlatformDisplay, Point, px};
 use anyhow::{Ok, Result};
 use std::time::Duration;
 
-<<<<<<< HEAD
 /// A fake display that the test platform reports as its only screen.
 ///
 /// It is 1920 by 1080 logical pixels, with its origin at `(0, 0)`. Each one gets a new UUID.
-#[derive(Debug)]
-=======
 #[derive(Debug, Clone)]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 pub(crate) struct TestDisplay {
     id: DisplayId,
     uuid: uuid::Uuid,

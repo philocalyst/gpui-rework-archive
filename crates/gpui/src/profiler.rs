@@ -1464,9 +1464,6 @@ impl WindowProfiler {
         journal::end_foreground_turn();
     }
 
-<<<<<<< HEAD
-    /// Records the start of a window draw. Pair it with [`Self::end_draw`].
-=======
     /// Records when the frame signal for the frame the next draw will produce
     /// fired. Coalesced signals report the first.
     pub fn record_frame_signal(&mut self, signal_at: Option<Instant>) {
@@ -1480,7 +1477,6 @@ impl WindowProfiler {
     }
 
     /// Records the beginning of a window draw.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn begin_draw(&mut self) {
         journal::begin_foreground_turn();
         let started_at = Instant::now();
@@ -1489,12 +1485,6 @@ impl WindowProfiler {
             .push(WindowActivity::Draw { started_at });
     }
 
-<<<<<<< HEAD
-    /// Records the end of the draw that [`Self::begin_draw`] started, and returns how long it took.
-    ///
-    /// `dirty_at` is when the frame was first invalidated, and `invalidations` is how many
-    /// invalidations this frame covers. Returns [`Duration::ZERO`] if no draw was begun.
-=======
     /// Records the phases of the window draw in progress.
     pub fn record_draw_phases(&mut self, phases: DrawPhases) {
         self.draw_phases = phases;
@@ -1528,8 +1518,10 @@ impl WindowProfiler {
         }
     }
 
-    /// Records the end of a window draw and returns the draw duration.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Records the end of the draw that [`Self::begin_draw`] started, and returns how long it took.
+    ///
+    /// `dirty_at` is when the frame was first invalidated, and `invalidations` is how many
+    /// invalidations this frame covers. Returns [`Duration::ZERO`] if no draw was begun.
     pub fn end_draw(&mut self, dirty_at: Option<Instant>, invalidations: u64) -> Duration {
         let Some(WindowActivity::Draw {
             started_at: draw_start,
@@ -1565,14 +1557,12 @@ impl WindowProfiler {
     /// Records that the window's latest frame was presented between `present_start`
     /// and `present_end`.
     ///
-<<<<<<< HEAD
     /// `window_active` says whether the window is active, and `next_frame_scheduled`
     /// says whether another frame is already requested. Together they decide whether
     /// the gap until the next newly drawn frame counts as an animation interval.
-=======
+
     /// `next_frame_scheduled` marks the animation state for the interval
     /// ending at the next newly drawn frame's presentation.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn record_present(
         &mut self,
         present_start: Instant,
@@ -1808,7 +1798,6 @@ mod tests {
     use std::sync::{Mutex, MutexGuard};
 
     #[test]
-<<<<<<< HEAD
     fn long_poll_sample_is_ranked_by_poll_time_not_wait_time() {
         let spawned = Instant::now();
         let mut stats = TaskStatistics::default();
@@ -1852,7 +1841,9 @@ mod tests {
             .filter(|task| !task.poll_duration().is_zero())
             .count();
         assert_eq!(retained, 2, "only the 200 and 100 microsecond polls count");
-=======
+    }
+
+    #[test]
     fn interruptions_drop_latency_samples_but_hiding_keeps_draw_work() {
         for sleep in [false, true] {
             let (_journal, _guard) = journal::install_test_foreground_journal(64, 4);
@@ -2075,7 +2066,6 @@ mod tests {
             delta.draw_duration.len() + delta.work.len() + delta.input_work.len(),
             0
         );
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 
     #[test]

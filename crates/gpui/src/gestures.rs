@@ -1,6 +1,5 @@
 //! Touch gesture recognition.
 //!
-<<<<<<< HEAD
 //! GPUI recognizes gestures from raw [`TouchEvent`](crate::TouchEvent)s in one
 //! portable recognizer in gpui core. Recognized gestures are reported through
 //! the existing mouse and scroll events, so code written against `on_click` and
@@ -14,13 +13,6 @@
 //!   becomes a [`TouchDragEvent`].
 //!
 //! Pinch recognition from touch is not implemented yet.
-=======
-//! GPUI recognizes gestures from raw [`TouchEvent`](crate::TouchEvent)s using
-//! a portable recognizer. Taps synthesize mouse presses and releases so
-//! existing click listeners and text selection work on mobile. Pans produce
-//! [`ScrollWheelEvent`](crate::ScrollWheelEvent)s, including post-release
-//! momentum. Long presses and touch drags can be claimed by element listeners.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
 use std::collections::VecDeque;
 use std::mem;
@@ -414,11 +406,7 @@ mod friction_spline {
 /// recognized by the portable recognizer.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct GestureKinds {
-<<<<<<< HEAD
     /// A tap, including multi-taps. GPUI reports taps as mouse clicks.
-=======
-    /// Tap (and multi-tap), synthesized as mouse presses by the portable recognizer.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub tap: bool,
     /// A long press, reported as a [`LongPressEvent`].
     pub long_press: bool,

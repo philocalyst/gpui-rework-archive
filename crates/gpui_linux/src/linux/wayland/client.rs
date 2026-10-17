@@ -88,12 +88,8 @@ use xkbcommon::xkb::ffi::XKB_KEYMAP_FORMAT_TEXT_V1;
 use xkbcommon::xkb::{self, KEYMAP_COMPILE_NO_FLAGS, Keycode};
 
 use super::{
-<<<<<<< HEAD
-    display::WaylandDisplay,
-    scroll::KineticScrollController,
-=======
     display::{WaylandDisplay, refresh_interval_from_millihertz},
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    scroll::KineticScrollController,
     window::{ImeInput, WaylandWindowStatePtr},
 };
 
@@ -1301,14 +1297,14 @@ impl WaylandConnection {
         None
     }
 
-<<<<<<< HEAD
     fn set_gpu_requirements(&self, requirements: Box<dyn std::any::Any>) {
         if let Ok(reqs) = requirements.downcast::<gpui_wgpu::WgpuDeviceRequirements>() {
             self.0.borrow_mut().gpu_requirements = Some(*reqs);
         } else {
             log::warn!("set_gpu_requirements: unexpected type, expected WgpuDeviceRequirements");
         }
-=======
+    }
+
     #[cfg(feature = "screen-capture")]
     pub(crate) fn is_screen_capture_supported(&self) -> bool {
         true
@@ -1319,18 +1315,11 @@ impl WaylandConnection {
         &self,
     ) -> futures::channel::oneshot::Receiver<anyhow::Result<Vec<Rc<dyn gpui::ScreenCaptureSource>>>>
     {
-        // TODO: Get screen capture working on wayland. Be sure to try window resizing as that may
-        // be tricky.
-        //
-        // start_scap_default_target_source()
         let (sources_tx, sources_rx) = futures::channel::oneshot::channel();
-        sources_tx
-            .send(Err(anyhow::anyhow!(
-                "Wayland screen capture not yet implemented."
-            )))
-            .ok();
+        let _ = sources_tx.send(Err(anyhow::anyhow!(
+            "Wayland screen capture not yet implemented."
+        )));
         sources_rx
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 
     pub(crate) fn open_window(
@@ -1751,18 +1740,13 @@ impl Dispatch<WlCallback, ObjectId> for WaylandClientStatePtr {
         };
         drop(state);
 
-<<<<<<< HEAD
-        if let wl_callback::Event::Done { .. } = event {
-            window.frame_callback_fired();
-            if let Some((window, input)) = kinetic_input {
-                window.handle_input(input);
-            }
-=======
         if let wl_callback::Event::Done { callback_data } = event {
             window.frame_callback_fired(PlatformFrameSignal::capture(|| {
                 frame_callback_signal_at(callback_data)
             }));
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+            if let Some((window, input)) = kinetic_input {
+                window.handle_input(input);
+            }
         }
     }
 }

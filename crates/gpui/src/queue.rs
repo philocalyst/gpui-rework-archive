@@ -87,19 +87,6 @@ impl<T> PriorityQueueState<T> {
         };
     }
 
-<<<<<<< HEAD
-    fn recv<'a>(&'a self) -> Result<parking_lot::MutexGuard<'a, PriorityQueues<T>>, RecvError> {
-        let mut queues = self.queues.lock();
-
-        // Re-check on every wakeup: the last sender dropping is the only thing that ends the wait.
-        while queues.is_empty() {
-            let sender_count = self.sender_count.load(std::sync::atomic::Ordering::Relaxed);
-            if sender_count == 0 {
-                return Err(crate::queue::RecvError);
-            }
-
-            self.condvar.wait(&mut queues);
-=======
     fn recv<'a>(&'a self) -> Result<MutexGuard<'a, PriorityQueues<T>>, RecvError> {
         let mut queues = self.queues.lock().unwrap_or_else(PoisonError::into_inner);
 
@@ -113,7 +100,6 @@ impl<T> PriorityQueueState<T> {
                 .condvar
                 .wait(queues)
                 .unwrap_or_else(PoisonError::into_inner);
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         }
 
         Ok(queues)
@@ -195,33 +181,20 @@ impl<T> PriorityQueueSender<T> {
 
 impl<T> Drop for PriorityQueueSender<T> {
     fn drop(&mut self) {
-<<<<<<< HEAD
-        // Hold the lock so a receiver can't check the count and then miss this wakeup.
-        let _queues = self.state.queues.lock();
-        if self
-            .state
-            .sender_count
-            .fetch_sub(1, std::sync::atomic::Ordering::AcqRel)
-            == 1
-        {
-=======
         let previous = self
             .state
             .sender_count
             .fetch_sub(1, std::sync::atomic::Ordering::AcqRel);
         if previous == 1 {
-            // A receiver checks the sender count and starts waiting under the queue lock,
-            // atomically. Acquiring that lock once, even with nothing to do under it,
-            // means any receiver that saw a live sender is already waiting, so the
-            // notification below reaches it; without this, a receiver between its check
-            // and its wait would miss the wake-up and block forever.
+            // Pair the last-sender transition with the receiver's check-and-wait lock.
+            // A receiver that saw a live sender is either waiting or must release this
+            // lock before it can wait, so the notification cannot be lost.
             drop(
                 self.state
                     .queues
                     .lock()
                     .unwrap_or_else(PoisonError::into_inner),
             );
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
             self.state.condvar.notify_all();
         }
     }
@@ -507,7 +480,6 @@ mod tests {
     use super::*;
 
     #[test]
-<<<<<<< HEAD
     fn dropping_the_last_sender_wakes_a_waiting_receiver() {
         let (sender, mut receiver) = PriorityQueueReceiver::<usize>::new();
         let (finished, result) = std::sync::mpsc::channel();
@@ -515,7 +487,6 @@ mod tests {
             finished.send(receiver.pop().is_err()).ok();
         });
 
-        // Give the receiver time to block on the empty queue.
         std::thread::sleep(std::time::Duration::from_millis(100));
         drop(sender);
         assert_eq!(
@@ -533,7 +504,9 @@ mod tests {
         assert!(items.next().is_none());
         sender.send(Priority::High, 2).unwrap();
         assert!(items.next().is_none());
-=======
+    }
+
+    #[test]
     fn blocked_receivers_end_when_the_sender_drops() {
         let (sender, receiver) = PriorityQueueReceiver::<u32>::new();
         let (done_sender, done_receiver) = std::sync::mpsc::channel();
@@ -569,7 +542,6 @@ mod tests {
         for worker in workers {
             worker.join().expect("worker should exit cleanly");
         }
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 
     #[test]

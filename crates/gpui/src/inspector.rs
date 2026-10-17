@@ -241,12 +241,8 @@ mod conditional {
     }
 
     impl InspectorElementRegistry {
-<<<<<<< HEAD
         /// Stores the renderer for state type `T`, replacing any earlier one.
-        pub fn register<T: 'static, R: IntoElement>(
-=======
         pub fn register<T: 'static, R: IntoElement, F>(
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
             &mut self,
             factory: impl 'static + Fn(&mut Window, &mut App) -> F,
         ) where

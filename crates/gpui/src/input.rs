@@ -12,7 +12,6 @@ use std::ops::Range;
 /// `text`. An offset inside a character returns the offset of that character's
 /// end.
 ///
-<<<<<<< HEAD
 /// # Examples
 ///
 /// ```
@@ -189,7 +188,6 @@ pub fn utf16_to_utf8_offset(text: &str, utf16_offset: usize) -> usize {
 /// window.simulate_input("Ada");
 /// assert_eq!(window.read(|field, _| field.text.clone()), "Ada");
 /// ```
-=======
 /// Dismissing the software keyboard can leave the component focused. Call
 /// [`Window::request_virtual_keyboard`] from an editing gesture, such as tapping
 /// the field, to reopen it; repainting alone should not undo a dismissal.
@@ -204,7 +202,6 @@ pub fn utf16_to_utf8_offset(text: &str, utf16_offset: usize) -> usize {
 /// selection rectangles; it should return line/run fragments in one batch.
 ///
 /// See [`InputHandler`] for details on how to implement each method.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 pub trait EntityInputHandler: 'static + Sized {
     /// Returns the text in a UTF-16 range, for the platform to read back.
     ///
@@ -304,12 +301,10 @@ pub trait EntityInputHandler: 'static + Sized {
         cx: &mut Context<Self>,
     ) -> Option<Bounds<Pixels>>;
 
-<<<<<<< HEAD
     /// Returns the UTF-16 index of the character at `point`, which the platform uses
     /// to map a screen position to text.
     ///
     /// `point` is in window coordinates, in logical pixels.
-=======
     /// See [`InputHandler::selection_bounds_for_range`] for details.
     fn selection_bounds_for_range(
         &mut self,
@@ -322,7 +317,6 @@ pub trait EntityInputHandler: 'static + Sized {
     }
 
     /// See [`InputHandler::character_index_for_point`] for details
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     fn character_index_for_point(
         &mut self,
         point: crate::Point<Pixels>,

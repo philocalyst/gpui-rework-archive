@@ -6,22 +6,12 @@ license = "Apache-2.0"
 publish = true
 description = "Utility structs and functions used by gpui-ce (vendored from Zed's gpui_util)."
 repository = "https://github.com/gpui-ce/gpui-ce"
-
 [lib]
 name = "gpui_util"
 path = "src/lib.rs"
-
-[lib]
 doctest = false
-
 [dependencies]
-<<<<<<< HEAD
-log = { version = "0.4.16", features = ["kv_unstable_serde", "serde"] }
-anyhow = "1.0.86"
-=======
-log = { workspace = true, features = ["serde"] }
+log.workspace = true
 anyhow.workspace = true
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
-
 [target.'cfg(target_os = "windows")'.dependencies]
 which = "6.0.0"

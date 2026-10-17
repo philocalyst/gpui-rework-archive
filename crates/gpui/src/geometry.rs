@@ -2343,7 +2343,6 @@ impl Anchor {
         }
     }
 
-<<<<<<< HEAD
     /// Returns `true` for the midpoint of an edge, and `false` for a corner.
     ///
     /// # Examples
@@ -2353,9 +2352,6 @@ impl Anchor {
     /// assert!(Anchor::LeftCenter.is_center());
     /// assert!(!Anchor::BottomRight.is_center());
     /// ```
-=======
-    /// Returns whether the anchor is center-positioned.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     #[inline]
     pub fn is_center(&self) -> bool {
         matches!(

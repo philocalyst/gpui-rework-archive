@@ -469,13 +469,9 @@ impl WebWindowInner {
                     let force_render = this.state.borrow_mut().renderer.needs_redraw();
                     callback(RequestFrameOptions {
                         require_presentation: false,
-<<<<<<< HEAD
                         force_render,
-=======
-                        force_render: false,
                         signal_at: None,
                         signal_source: FrameRequestSource::NativeCallback,
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
                     })
                 },
             );

@@ -86,12 +86,6 @@ pub fn headless() -> gpui::Application {
     gpui::Application::with_platform(current_platform(true))
 }
 
-<<<<<<< HEAD
-/// The rendering backend that the web platform uses.
-///
-/// `Auto` (the default) prefers browser WebGPU and falls back to WebGL2. `WebGpu`
-/// and `WebGl` force one backend. Pass it to `application_with_web_backend`.
-=======
 /// Returns a Linux app that may switch among `allowed_modes`.
 ///
 /// It starts windowed in the process's own environment, or headless if that names no allowed
@@ -102,7 +96,10 @@ pub fn linux(allowed_modes: gpui::WindowingModes) -> gpui::Application {
     gpui::Application::with_platform(gpui_linux::linux_platform(allowed_modes))
 }
 
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+/// The rendering backend that the web platform uses.
+///
+/// `Auto` (the default) prefers browser WebGPU and falls back to WebGL2. `WebGpu`
+/// and `WebGl` force one backend. Pass it to `application_with_web_backend`.
 #[cfg(target_family = "wasm")]
 pub use gpui_web::WebBackendPreference;
 
@@ -196,13 +193,6 @@ pub fn current_platform(headless: bool) -> Rc<dyn Platform> {
     }
 }
 
-<<<<<<< HEAD
-/// Returns a [`gpui::PlatformHeadlessRenderer`] for drawing without a window.
-///
-/// Returns `None` on platforms that have no headless renderer. It is available
-/// only with the `bench-support` or `test-support` feature. On macOS it returns a
-/// Metal renderer.
-=======
 /// Returns the current platform's text system for benchmark contexts, built once per
 /// thread and shared by every context on it.
 ///
@@ -219,23 +209,20 @@ pub fn bench_text_system() -> std::sync::Arc<dyn gpui::PlatformTextSystem> {
     TEXT_SYSTEM.with(|text_system| text_system.clone())
 }
 
-/// Returns a new [`HeadlessRenderer`] for the current platform, if available.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+/// Returns a [`gpui::PlatformHeadlessRenderer`] for drawing without a window.
+///
+/// Returns `None` on platforms that have no headless renderer. It is available
+/// only with the `bench-support` or `test-support` feature. On macOS it returns a
+/// Metal renderer.
 #[cfg(any(feature = "bench-support", feature = "test-support"))]
 pub fn current_headless_renderer() -> anyhow::Result<Option<Box<dyn gpui::PlatformHeadlessRenderer>>>
 {
     #[cfg(target_os = "macos")]
     {
-<<<<<<< HEAD
-        Some(
+        Ok(Some(
             Box::new(gpui_apple::metal_renderer::MetalHeadlessRenderer::new())
                 as Box<dyn gpui::PlatformHeadlessRenderer>,
-        )
-=======
-        Ok(Some(Box::new(
-            gpui_macos::metal_renderer::MetalHeadlessRenderer::new(),
-        )))
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+        ))
     }
 
     #[cfg(target_os = "linux")]

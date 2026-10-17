@@ -34,27 +34,16 @@ use crate::{
 use std::{cell::Cell, rc::Weak};
 
 use crate::{
-<<<<<<< HEAD
     Action, AnyDrag, AnyElement, AnyTooltip, AnyView, App, AppContext, Bounds, ClickEvent,
     CursorStyle, DispatchPhase, Display, Element, ElementId, Entity, EntityId, ExternalDragPayload,
-    FocusHandle, Global, GlobalElementId, Hitbox, HitboxBehavior, HitboxId, InspectorElementId,
-    IntoElement, IsZero, KeyContext, KeyDownEvent, KeyUpEvent, KeyboardButton, KeyboardClickEvent,
-    LayoutId, ModifiersChangedEvent, MouseButton, MouseClickEvent, MouseDownEvent, MouseExitEvent,
+    ExternalDragPayloadSource, FileDropEvent, FocusHandle, Global, GlobalElementId, Hitbox,
+    HitboxBehavior, HitboxId, InspectorElementId, IntoElement, IsZero, KeyContext, KeyDownEvent,
+    KeyUpEvent, KeyboardButton, KeyboardClickEvent, LayoutId, LongPressEvent,
+    ModifiersChangedEvent, MouseButton, MouseClickEvent, MouseDownEvent, MouseExitEvent,
     MouseMoveEvent, MousePressureEvent, MouseUpEvent, OngoingScroll, Overflow, ParentElement,
     PinchEvent, Pixels, Point, Render, ScrollWheelEvent, SharedString, Size, Style,
     StyleRefinement, StyleTransitionContext, StyleTransitionState, StyleTransitions, Styled, Task,
-    TooltipId, Visibility, Window, WindowControlArea, point, px, size,
-=======
-    Action, AnyDrag, AnyElement, AnyTooltip, AnyView, App, Bounds, ClickEvent, DispatchPhase,
-    Display, Element, ElementId, Entity, EntityId, ExternalDragPayload, ExternalDragPayloadSource,
-    FileDropEvent, FocusHandle, Global, GlobalElementId, Hitbox, HitboxBehavior, HitboxId,
-    InspectorElementId, IntoElement, IsZero, KeyContext, KeyDownEvent, KeyUpEvent, KeyboardButton,
-    KeyboardClickEvent, LayoutId, LongPressEvent, ModifiersChangedEvent, MouseButton,
-    MouseClickEvent, MouseDownEvent, MouseExitEvent, MouseMoveEvent, MousePressureEvent,
-    MouseUpEvent, OngoingScroll, Overflow, ParentElement, PinchEvent, Pixels, Point, Render,
-    ScrollWheelEvent, SharedString, Size, Style, StyleRefinement, Styled, Task, TooltipId,
-    TouchPhase, Visibility, Window, WindowControlArea, point, px, size,
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    TooltipId, TouchPhase, Visibility, Window, WindowControlArea, point, px, size,
 };
 use collections::HashMap;
 use gpui_util::ResultExt;
@@ -399,9 +388,6 @@ impl Interactivity {
             }));
     }
 
-<<<<<<< HEAD
-    /// Runs `listener` for pointer moves during a drag of type `T`, in the capture phase.
-=======
     /// Bind the given callback to [`FileDropEvent::Exited`] when a platform file drag
     /// leaves this element's window while the element is hovered.
     ///
@@ -423,13 +409,6 @@ impl Interactivity {
                 }
             }));
     }
-
-    /// Bind the given callback to the mouse drag event of the given type. Note that this
-    /// will be called for all move events, inside or outside of this element, as long as the
-    /// drag was started with this element under the mouse. Useful for implementing draggable
-    /// UIs that don't conform to a drag and drop style interaction, like resizing.
-    /// The imperative API equivalent to [`InteractiveElement::on_drag_move`].
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     ///
     /// The listener runs for every move while a drag of type `T` is active, including moves outside this element.
     /// This is the imperative equivalent of [`InteractiveElement::on_drag_move`].
@@ -720,30 +699,20 @@ impl Interactivity {
 
     /// Sets a style function that applies while a dragged value is over this element.
     ///
-<<<<<<< HEAD
-    /// The style applies only if this element has a drop listener for the dragged type. Use
-    /// [`DropListener::on_drag_over`] when the style depends on the dragged type. This is the imperative equivalent of
-    /// [`InteractiveElement::on_drag_over_any`].
-    pub fn on_drag_over_any(
-        &mut self,
-        predicate: impl Fn(StyleRefinement, &dyn Any, &mut Window, &mut App) -> StyleRefinement
-        + 'static,
-    ) {
-        self.drag_over_style = Some(Box::new(move |value, window, app| {
-            predicate(StyleRefinement::default(), value, window, app)
-        }));
-    }
-
-    /// Runs `listener` when this element is clicked, or when it is activated from the keyboard.
+    /// Bind the given callback to [`FileDropEvent::Exited`] when a platform file drag
+    /// leaves this element's window while the element is hovered.
     ///
-    /// A mouse click fires when the left button is pressed and released over the element without the pointer
-    /// moving far enough to start a drag. A keyboard click fires when Enter or Space is pressed and released while
-    /// the element is focused and no other key is pressed in between. The listener receives a [`ClickEvent`].
-    /// This is the imperative equivalent of [`StatefulInteractiveElement::on_click`]. It requires an element id.
-=======
+    /// This is a window-local exit event, not notification that the platform drag session ended.
+    /// The fluent API equivalent to [`Interactivity::on_file_drop_exit`].
+    ///
     /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
-    #[inline(always)]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    fn on_file_drop_exit(
+        mut self,
+        listener: impl Fn(&FileDropEvent, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.interactivity().on_file_drop_exit(listener);
+        self
+    }
     pub fn on_click(&mut self, listener: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static)
     where
         Self: Sized,
@@ -848,18 +817,28 @@ impl Interactivity {
         });
     }
 
-<<<<<<< HEAD
-    /// Runs `listener` with `true` when the pointer enters this element and with `false` when it leaves.
-=======
-    /// Bind the given callback on the hover start and end events of this element. Note that the boolean
-    /// passed to the callback is true when the hover starts and false when it ends.
-    /// Transitions caused by layout changes under a stationary mouse also invoke the callback.
+    /// The style applies only if this element has a drop listener for the dragged type. Use
+    /// [`DropListener::on_drag_over`] when the style depends on the dragged type. This is the imperative equivalent of
+    /// [`InteractiveElement::on_drag_over_any`].
+    pub fn on_drag_over_any(
+        &mut self,
+        predicate: impl Fn(StyleRefinement, &dyn Any, &mut Window, &mut App) -> StyleRefinement
+        + 'static,
+    ) {
+        self.drag_over_style = Some(Box::new(move |value, window, app| {
+            predicate(StyleRefinement::default(), value, window, app)
+        }));
+    }
+
+    /// Runs `listener` when this element is clicked, or when it is activated from the keyboard.
     ///
-    /// By default, keyboard input suppresses hover until the next mouse move, mouse down, or touch. Set
-    /// [`HoverListenerMode::InputModalityIndependent`] with [`Self::hover_listener_mode`] to
-    /// continue hit-testing hover after keyboard input.
-    /// The imperative API equivalent to [`StatefulInteractiveElement::on_hover`].
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// A mouse click fires when the left button is pressed and released over the element without the pointer
+    /// moving far enough to start a drag. A keyboard click fires when Enter or Space is pressed and released while
+    /// the element is focused and no other key is pressed in between. The listener receives a [`ClickEvent`].
+    /// This is the imperative equivalent of [`StatefulInteractiveElement::on_click`]. It requires an element id.
+
+    /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
+    #[inline(always)]
     ///
     /// Transitions caused by layout changes under a stationary pointer also run the listener. The listener does not
     /// run while a drag is in progress. This is the imperative equivalent of [`StatefulInteractiveElement::on_hover`].
@@ -870,30 +849,16 @@ impl Interactivity {
         self.hover_listeners.push(Rc::new(listener));
     }
 
-<<<<<<< HEAD
-    /// Sets a function that builds a tooltip view shown while the pointer rests over this element.
+    /// Bind the given callback on the hover start and end events of this element. Note that the boolean
+    /// passed to the callback is true when the hover starts and false when it ends.
+    /// Transitions caused by layout changes under a stationary mouse also invoke the callback.
     ///
-    /// The tooltip is hidden as soon as the pointer leaves the element, so the user cannot move onto it. Use
-    /// [`Interactivity::hoverable_tooltip`] for a tooltip that stays open. This is the imperative equivalent of
-    /// [`StatefulInteractiveElement::tooltip`].
-    ///
-    /// # Panics
-    ///
-    /// Panics in debug builds if a tooltip is already set on this element.
-=======
-    /// Sets how [`Self::on_hover`] responds to key presses while the mouse is stationary.
-    /// This affects only the hover listener, not hover styles or tooltips. The imperative API
-    /// equivalent to [`StatefulInteractiveElement::hover_listener_mode`].
-    pub fn hover_listener_mode(&mut self, mode: HoverListenerMode)
-    where
-        Self: Sized,
-    {
-        self.hover_listener_mode = mode;
-    }
+    /// By default, keyboard input suppresses hover until the next mouse move, mouse down, or touch. Set
+    /// [`HoverListenerMode::InputModalityIndependent`] with [`Self::hover_listener_mode`] to
+    /// continue hit-testing hover after keyboard input.
+    /// The imperative API equivalent to [`StatefulInteractiveElement::on_hover`].
+    /// Runs `listener` with `true` when the pointer enters this element and with `false` when it leaves.
 
-    /// Constructs a tooltip when the element is hovered or long-pressed.
-    /// The imperative API equivalent to [`StatefulInteractiveElement::tooltip`].
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn tooltip(&mut self, build_tooltip: impl Fn(&mut Window, &mut App) -> AnyView + 'static)
     where
         Self: Sized,
@@ -908,20 +873,25 @@ impl Interactivity {
         });
     }
 
-<<<<<<< HEAD
-    /// Sets a function that builds a tooltip view that stays open while the pointer is over it.
+    /// Sets how [`Self::on_hover`] responds to key presses while the mouse is stationary.
+    /// This affects only the hover listener, not hover styles or tooltips. The imperative API
+    /// equivalent to [`StatefulInteractiveElement::hover_listener_mode`].
+    pub fn hover_listener_mode(&mut self, mode: HoverListenerMode)
+    where
+        Self: Sized,
+    {
+        self.hover_listener_mode = mode;
+    }
+    /// Sets a function that builds a tooltip view shown while the pointer rests over this element.
     ///
-    /// This is the same as [`Interactivity::tooltip`], except the pointer can move into the tooltip without closing it.
-    /// This is the imperative equivalent of [`StatefulInteractiveElement::hoverable_tooltip`].
+    /// The tooltip is hidden as soon as the pointer leaves the element, so the user cannot move onto it. Use
+    /// [`Interactivity::hoverable_tooltip`] for a tooltip that stays open. This is the imperative equivalent of
+    /// [`StatefulInteractiveElement::tooltip`].
     ///
     /// # Panics
     ///
     /// Panics in debug builds if a tooltip is already set on this element.
-=======
-    /// Constructs a tooltip when the element is hovered or long-pressed.
-    /// The tooltip itself is also hoverable and won't disappear when the user moves the mouse into
-    /// the tooltip. The imperative API equivalent to [`StatefulInteractiveElement::hoverable_tooltip`].
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+
     pub fn hoverable_tooltip(
         &mut self,
         build_tooltip: impl Fn(&mut Window, &mut App) -> AnyView + 'static,
@@ -938,17 +908,18 @@ impl Interactivity {
         });
     }
 
-<<<<<<< HEAD
-    /// Sets how long the pointer must rest over this element before its tooltip appears.
+    /// Sets a function that builds a tooltip view that stays open while the pointer is over it.
     ///
-    /// The default is 500 milliseconds. This is the imperative equivalent of
-    /// [`StatefulInteractiveElement::tooltip_show_delay`].
-=======
-    /// Sets the delay before this element's tooltip is shown on hover.
+    /// This is the same as [`Interactivity::tooltip`], except the pointer can move into the tooltip without closing it.
+    /// This is the imperative equivalent of [`StatefulInteractiveElement::hoverable_tooltip`].
     ///
-    /// Touch long presses show the tooltip immediately once the gesture is recognized.
-    /// The imperative API equivalent to [`StatefulInteractiveElement::tooltip_show_delay`].
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// # Panics
+    ///
+    /// Panics in debug builds if a tooltip is already set on this element.
+
+    /// Constructs a tooltip when the element is hovered or long-pressed.
+    /// The tooltip itself is also hoverable and won't disappear when the user moves the mouse into
+    /// the tooltip. The imperative API equivalent to [`StatefulInteractiveElement::hoverable_tooltip`].
     pub fn tooltip_show_delay(&mut self, delay: Duration) {
         self.tooltip_show_delay = Some(delay);
     }
@@ -1185,14 +1156,15 @@ pub trait InteractiveElement: Sized {
 
     /// Runs `listener` when `button` is pressed over this element, during the bubble phase.
     ///
-<<<<<<< HEAD
-    /// The listener runs only if the pointer is over the element's hitbox. It receives the [`MouseDownEvent`], the window
-    /// and the app. The fluent equivalent of [`Interactivity::on_mouse_down`]. Use
-    /// [`Context::listener`](crate::Context::listener) to call into a view.
-=======
-    /// See [`Context::listener`](crate::Context::listener) to get access to the view state from this callback.
-    #[inline(always)]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Sets how long the pointer must rest over this element before its tooltip appears.
+    ///
+    /// The default is 500 milliseconds. This is the imperative equivalent of
+    /// [`StatefulInteractiveElement::tooltip_show_delay`].
+
+    /// Sets the delay before this element's tooltip is shown on hover.
+    ///
+    /// Touch long presses show the tooltip immediately once the gesture is recognized.
+    /// The imperative API equivalent to [`StatefulInteractiveElement::tooltip_show_delay`].
     fn on_mouse_down(
         mut self,
         button: MouseButton,
@@ -1202,14 +1174,17 @@ pub trait InteractiveElement: Sized {
         self
     }
 
-<<<<<<< HEAD
-    #[cfg(any(test, feature = "test-support"))]
-    /// Sets a name for this element that tests can use to find its bounds.
-    ///
-    /// Pass the name to [`VisualTestContext::debug_bounds`](crate::VisualTestContext::debug_bounds) to get the bounds of
-    /// the element in a test. This method is available only with the `test-support` feature or in tests; in other
-    /// builds it is a no-op.
-=======
+    /// The listener runs only if the pointer is over the element's hitbox. It receives the [`MouseDownEvent`], the window
+    /// and the app. The fluent equivalent of [`Interactivity::on_mouse_down`]. Use
+    /// [`Context::listener`](crate::Context::listener) to call into a view.
+
+    /// See [`Context::listener`](crate::Context::listener) to get access to the view state from this callback.
+    #[inline(always)]
+    fn debug_selector(mut self, f: impl FnOnce() -> String) -> Self {
+        self.interactivity().debug_selector = Some(f());
+        self
+    }
+
     /// Set a key that can be used to look up this element's bounds
     /// in the [`crate::VisualTestContext::debug_bounds`] map.
     ///
@@ -1217,24 +1192,6 @@ pub trait InteractiveElement: Sized {
     /// feature. Elsewhere this is a no-op, so `test-support` can stay enabled
     /// in release builds without the per-frame cost.
     #[cfg(any(test, all(debug_assertions, feature = "test-support")))]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
-    fn debug_selector(mut self, f: impl FnOnce() -> String) -> Self {
-        self.interactivity().debug_selector = Some(f());
-        self
-    }
-
-<<<<<<< HEAD
-    #[cfg(not(any(test, feature = "test-support")))]
-    /// Does nothing in this build. The debug selector is available only in tests and with `test-support`.
-=======
-    /// Set a key that can be used to look up this element's bounds
-    /// in the [`crate::VisualTestContext::debug_bounds`] map.
-    ///
-    /// Selectors are only recorded in debug builds with the `test-support`
-    /// feature. Elsewhere this is a no-op, so `test-support` can stay enabled
-    /// in release builds without the per-frame cost.
-    #[cfg(not(any(test, all(debug_assertions, feature = "test-support"))))]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     #[inline]
     fn debug_selector(self, _: impl FnOnce() -> String) -> Self {
         self
@@ -1392,30 +1349,13 @@ pub trait InteractiveElement: Sized {
         self
     }
 
-<<<<<<< HEAD
-    /// Runs `listener` for pointer moves during any drag of type `T`, wherever the drag started.
-=======
-    /// Bind the given callback to [`FileDropEvent::Exited`] when a platform file drag
-    /// leaves this element's window while the element is hovered.
+    /// Set a key that can be used to look up this element's bounds
+    /// in the [`crate::VisualTestContext::debug_bounds`] map.
     ///
-    /// This is a window-local exit event, not notification that the platform drag session ended.
-    /// The fluent API equivalent to [`Interactivity::on_file_drop_exit`].
-    ///
-    /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
-    fn on_file_drop_exit(
-        mut self,
-        listener: impl Fn(&FileDropEvent, &mut Window, &mut App) + 'static,
-    ) -> Self {
-        self.interactivity().on_file_drop_exit(listener);
-        self
-    }
-
-    /// Bind the given callback to the mouse drag event of the given type. Note that this
-    /// will be called for all move events, inside or outside of this element, as long as the
-    /// drag was started with this element under the mouse. Useful for implementing draggable
-    /// UIs that don't conform to a drag and drop style interaction, like resizing.
-    /// The fluent API equivalent to [`Interactivity::on_drag_move`].
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Selectors are only recorded in debug builds with the `test-support`
+    /// feature. Elsewhere this is a no-op, so `test-support` can stay enabled
+    /// in release builds without the per-frame cost.
+    #[cfg(not(any(test, all(debug_assertions, feature = "test-support"))))]
     ///
     /// The listener runs for every move while the drag is active, even outside this element. This is the right
     /// hook for drags that don't drop anywhere, such as resizing a splitter. The fluent equivalent of
@@ -1569,12 +1509,10 @@ pub trait InteractiveElement: Sized {
 
     /// Runs `listener` when the set of pressed modifier keys changes.
     ///
-<<<<<<< HEAD
     /// The fluent equivalent of [`Interactivity::on_modifiers_changed`].
-=======
+
     /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
     #[inline(always)]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     fn on_modifiers_changed(
         mut self,
         listener: impl Fn(&ModifiersChangedEvent, &mut Window, &mut App) + 'static,
@@ -1988,7 +1926,6 @@ pub trait StatefulInteractiveElement: InteractiveElement {
 
     /// Marks this element, typically a dialog, as modal.
     ///
-<<<<<<< HEAD
     /// While it is open, assistive technology treats the rest of the window as inert. It maps to AccessKit's `Modal` flag.
     fn aria_modal(mut self, modal: bool) -> Self {
         self.interactivity().aria.modal = Some(modal);
@@ -2016,10 +1953,9 @@ pub trait StatefulInteractiveElement: InteractiveElement {
     /// The listener receives the action data the client sent, if any, along with the window and the app. Use it to let a
     /// screen reader press a button or change a value. See the [accessibility guide](crate::_documentation::guides::accessibility)
     /// for an overview.
-=======
+
     /// See the [accessibility guide](crate::_accessibility) for an overview.
     #[inline(always)]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     fn on_a11y_action(
         mut self,
         action: accesskit::Action,
@@ -2134,7 +2070,6 @@ pub trait StatefulInteractiveElement: InteractiveElement {
 
     /// Runs `listener` when this element is clicked, or activated from the keyboard.
     ///
-<<<<<<< HEAD
     /// A mouse click fires when the left button is pressed and released over the element, with no drag in between. A
     /// keyboard click fires when Enter or Space is pressed and released while the element is focused, with no other key
     /// pressed in between. The listener receives a [`ClickEvent`] that says which kind of click it was.
@@ -2154,10 +2089,9 @@ pub trait StatefulInteractiveElement: InteractiveElement {
     ///         }
     ///     });
     /// ```
-=======
+
     /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
     #[inline(always)]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     fn on_click(mut self, listener: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static) -> Self
     where
         Self: Sized,
@@ -2261,9 +2195,6 @@ pub trait StatefulInteractiveElement: InteractiveElement {
         self
     }
 
-<<<<<<< HEAD
-    /// Runs `listener` with `true` when the pointer enters this element and `false` when it leaves.
-=======
     /// Bind the given callback on the hover start and end events of this element. Note that the boolean
     /// passed to the callback is true when the hover starts and false when it ends.
     /// Transitions caused by layout changes under a stationary mouse also invoke the callback.
@@ -2272,7 +2203,8 @@ pub trait StatefulInteractiveElement: InteractiveElement {
     /// [`HoverListenerMode::InputModalityIndependent`] with [`Self::hover_listener_mode`] to
     /// continue hit-testing hover after keyboard input.
     /// The fluent API equivalent to [`Interactivity::on_hover`].
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Runs `listener` with `true` when the pointer enters this element and `false` when it leaves.
+
     ///
     /// The listener does not run while a drag is in progress. Transitions caused by layout changes under a stationary
     /// pointer also run it.
@@ -2284,7 +2216,16 @@ pub trait StatefulInteractiveElement: InteractiveElement {
         self
     }
 
-<<<<<<< HEAD
+    /// Sets how [`Self::on_hover`] responds to key presses while the mouse is stationary.
+    /// This affects only the hover listener, not hover styles or tooltips. The fluent API
+    /// equivalent to [`Interactivity::hover_listener_mode`].
+    fn hover_listener_mode(mut self, mode: HoverListenerMode) -> Self
+    where
+        Self: Sized,
+    {
+        self.interactivity().hover_listener_mode(mode);
+        self
+    }
     /// Shows a tooltip built by `build_tooltip` while the pointer rests over this element.
     ///
     /// The tooltip appears after the show delay, which is 500 milliseconds by default. It hides when the pointer leaves
@@ -2310,21 +2251,7 @@ pub trait StatefulInteractiveElement: InteractiveElement {
     ///         .tooltip(|_window, cx| cx.new(|_| Hint).into())
     /// }
     /// ```
-=======
-    /// Sets how [`Self::on_hover`] responds to key presses while the mouse is stationary.
-    /// This affects only the hover listener, not hover styles or tooltips. The fluent API
-    /// equivalent to [`Interactivity::hover_listener_mode`].
-    fn hover_listener_mode(mut self, mode: HoverListenerMode) -> Self
-    where
-        Self: Sized,
-    {
-        self.interactivity().hover_listener_mode(mode);
-        self
-    }
 
-    /// Constructs a tooltip when the element is hovered or long-pressed.
-    /// The fluent API equivalent to [`Interactivity::tooltip`].
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     fn tooltip(mut self, build_tooltip: impl Fn(&mut Window, &mut App) -> AnyView + 'static) -> Self
     where
         Self: Sized,
@@ -2333,17 +2260,15 @@ pub trait StatefulInteractiveElement: InteractiveElement {
         self
     }
 
-<<<<<<< HEAD
     /// Shows a tooltip built by `build_tooltip` while the pointer rests over this element, and keeps it open while the
     /// pointer is over the tooltip.
     ///
     /// This is the same as [`tooltip`](Self::tooltip) except that the user can move into the tooltip, for example to
     /// select text or press a button in it.
-=======
+
     /// Constructs a tooltip when the element is hovered or long-pressed.
     /// The tooltip itself is also hoverable and won't disappear when the user moves the mouse into
     /// the tooltip. The fluent API equivalent to [`Interactivity::hoverable_tooltip`].
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     fn hoverable_tooltip(
         mut self,
         build_tooltip: impl Fn(&mut Window, &mut App) -> AnyView + 'static,
@@ -2355,16 +2280,14 @@ pub trait StatefulInteractiveElement: InteractiveElement {
         self
     }
 
-<<<<<<< HEAD
     /// Sets how long the pointer must rest over this element before its tooltip appears.
     ///
     /// The default is 500 milliseconds.
-=======
+
     /// Sets the delay before this element's tooltip is shown on hover.
     ///
     /// Touch long presses show the tooltip immediately once the gesture is recognized.
     /// The fluent API equivalent to [`Interactivity::tooltip_show_delay`].
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     fn tooltip_show_delay(mut self, delay: Duration) -> Self
     where
         Self: Sized,
@@ -2422,7 +2345,6 @@ pub(crate) type PinchListener =
 pub(crate) type ClickListener = Rc<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>;
 pub(crate) type HoverListener = Rc<dyn Fn(&bool, &mut Window, &mut App) + 'static>;
 
-<<<<<<< HEAD
 pub(crate) type DragListener =
     Box<dyn Fn(Point<Pixels>, Option<CursorStyle>, &mut Window, &mut App) -> AnyDrag + 'static>;
 
@@ -2551,7 +2473,8 @@ impl<T: Sized + 'static> DropListener<T> {
             on_drop,
         }
     }
-=======
+}
+
 /// Controls how [`StatefulInteractiveElement::on_hover`] responds to key presses while the mouse
 /// is stationary.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -2573,13 +2496,6 @@ impl HoverListenerMode {
             Self::InputModalityIndependent => hitbox.id.is_hovered_ignoring_last_input(window),
         }
     }
-}
-
-pub(crate) struct DragListener {
-    value: Arc<dyn Any>,
-    render: Box<dyn Fn(&dyn Any, Point<Pixels>, &mut Window, &mut App) -> AnyView + 'static>,
-    external_payload: Option<ExternalDragPayloadResolver>,
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 }
 
 type CanDropPredicate = Box<dyn Fn(&dyn Any, &Hitbox, &mut Window, &mut App) -> bool + 'static>;
@@ -3160,12 +3076,9 @@ pub struct Interactivity {
     pub(crate) click_listeners: Vec<ClickListener>,
     pub(crate) aux_click_listeners: Vec<ClickListener>,
     pub(crate) drag_listener: Option<DragListener>,
-<<<<<<< HEAD
     pub(crate) hover_listeners: Vec<HoverListener>,
-=======
-    pub(crate) hover_listener: Option<Box<dyn Fn(&bool, &mut Window, &mut App)>>,
+
     pub(crate) hover_listener_mode: HoverListenerMode,
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub(crate) tooltip_builder: Option<TooltipBuilder>,
     pub(crate) tooltip_show_delay: Option<Duration>,
     pub(crate) window_control: Option<WindowControlArea>,
@@ -4756,11 +4669,9 @@ pub struct InteractiveElementState {
     pub(crate) scroll_offset: Option<Rc<RefCell<Point<Pixels>>>>,
     ongoing_scroll: Option<Rc<RefCell<OngoingScroll>>>,
     pub(crate) active_tooltip: Option<Rc<RefCell<Option<ActiveTooltip>>>>,
-<<<<<<< HEAD
     pub(crate) style_transitions: Option<Box<StyleTransitionState>>,
-=======
+
     long_press_tooltip_active: Option<Rc<Cell<bool>>>,
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 }
 
 /// Whether an element, or a group that contains it, is pressed by the mouse.
@@ -5615,7 +5526,11 @@ impl ScrollHandle {
 #[cfg(test)]
 mod tests {
     use super::*;
-<<<<<<< HEAD
+    use crate::{
+        AnyWindowHandle, AppContext as _, Context, GestureTuning, InputEvent, Keystroke,
+        MouseMoveEvent, TestAppContext, TouchEvent, TouchId, canvas, util::FluentBuilder as _,
+    };
+    use std::{cell::Cell, rc::Weak};
 
     #[gpui::test]
     fn tracked_scroll_reports_children_to_prepaint_listener(cx: &mut TestAppContext) {
@@ -5838,13 +5753,6 @@ mod tests {
             }
         }
     }
-=======
-    use crate::{
-        AnyWindowHandle, AppContext as _, Context, GestureTuning, InputEvent, Keystroke,
-        MouseMoveEvent, TestAppContext, TouchEvent, TouchId, canvas, util::FluentBuilder as _,
-    };
-    use std::{cell::Cell, rc::Weak};
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
     struct GroupHoverTestView {
         render_count: Rc<Cell<usize>>,

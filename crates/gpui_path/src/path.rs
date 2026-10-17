@@ -505,76 +505,6 @@ mod tests {
     }
 
     #[test]
-<<<<<<< HEAD
-    fn test_strip_prefix() {
-        let expected = [
-            (
-                PathStyle::Unix,
-                "/a/b/c",
-                "/a/b",
-                Some(rel_path("c").to_arc()),
-            ),
-            (
-                PathStyle::Unix,
-                "/a/b/c",
-                "/a/b/",
-                Some(rel_path("c").to_arc()),
-            ),
-            (
-                PathStyle::Unix,
-                "/a/b/c",
-                "/",
-                Some(rel_path("a/b/c").to_arc()),
-            ),
-            (PathStyle::Unix, "/a/b/c", "", None),
-            (PathStyle::Unix, "/a/b//c", "/a/b/", None),
-            (PathStyle::Unix, "/a/bc", "/a/b", None),
-            (
-                PathStyle::Unix,
-                "/a/b/c",
-                "/a/b/c",
-                Some(rel_path("").to_arc()),
-            ),
-            (
-                PathStyle::Windows,
-                "C:\\a\\b\\c",
-                "C:\\a\\b",
-                Some(rel_path("c").to_arc()),
-            ),
-            (
-                PathStyle::Windows,
-                "C:\\a\\b\\c",
-                "C:\\a\\b\\",
-                Some(rel_path("c").to_arc()),
-            ),
-            (
-                PathStyle::Windows,
-                "C:\\a\\b\\c",
-                "C:\\",
-                Some(rel_path("a/b/c").to_arc()),
-            ),
-            (PathStyle::Windows, "C:\\a\\b\\c", "", None),
-            (PathStyle::Windows, "C:\\a\\b\\\\c", "C:\\a\\b\\", None),
-            (PathStyle::Windows, "C:\\a\\bc", "C:\\a\\b", None),
-            (
-                PathStyle::Windows,
-                "C:\\a\\b/c",
-                "C:\\a\\b",
-                Some(rel_path("c").to_arc()),
-            ),
-            (
-                PathStyle::Windows,
-                "C:\\a\\b/c",
-                "C:\\a\\b\\",
-                Some(rel_path("c").to_arc()),
-            ),
-            (
-                PathStyle::Windows,
-                "C:\\a\\b/c",
-                "C:\\a\\b/",
-                Some(rel_path("c").to_arc()),
-            ),
-=======
     fn test_unix_path_style_starts_with_and_strip_prefix() {
         let unix_paths_and_prefixes = [
             ("", "", true, Some("")),
@@ -605,7 +535,6 @@ mod tests {
             ("/foo/bar/baz", "", true, Some("/foo/bar/baz")),
             ("/foo/bar//baz", "/foo/bar/", true, Some("baz")),
             ("/foo/barbaz", "/foo/bar", false, None),
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         ];
 
         for (path, prefix, expected_starts_with, expected_stripped) in unix_paths_and_prefixes {
@@ -628,17 +557,6 @@ mod tests {
     fn test_windows_path_style_starts_with_and_strip_prefix() {
         let windows_paths_and_prefixes = [
             (
-<<<<<<< HEAD
-                style,
-                child,
-                parent,
-                style
-                    .strip_prefix(child.as_ref(), parent.as_ref())
-                    .map(|rel_path| rel_path.to_arc()),
-            )
-        });
-        pretty_assertions::assert_eq!(actual, expected);
-=======
                 r"C:\src\rust\cargo-test\test\Cargo.toml",
                 r"c:\src\rust\cargo-test\test",
                 true,
@@ -709,7 +627,6 @@ mod tests {
                 "{path:?}.strip_prefix({prefix:?})"
             );
         }
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 
     #[test]

@@ -809,14 +809,11 @@ impl AnyWeakEntity {
     ///
     /// # Debugging Leaks
     ///
-<<<<<<< HEAD
     /// If this method panics because of a leaked handle, set the `LEAK_BACKTRACE` environment variable to
     /// see where the handle was created:
-=======
     /// With leak detection enabled (build with `GPUI_LEAK_DETECTION=1`), a failure
     /// lists each leaked handle. Also set the `LEAK_BACKTRACE` environment variable
     /// to see where they were allocated:
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     ///
     /// ```bash
     /// GPUI_LEAK_DETECTION=1 LEAK_BACKTRACE=1 cargo test my_test
@@ -825,15 +822,14 @@ impl AnyWeakEntity {
     /// # Panics
     ///
     /// - Panics if any strong handles to the entity are still alive.
-<<<<<<< HEAD
     /// - Panics if the entity was dropped in the current update. Its resources are kept until that update
     ///   finishes.
-    #[cfg(any(test, feature = "leak-detection"))]
-=======
-    /// - Panics if the entity was recently dropped but cleanup hasn't completed yet
-    ///   (resources are retained until the end of the effect cycle).
-    #[cfg(any(test, feature = "test-support", gpui_leak_detection))]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    #[cfg(any(
+        test,
+        feature = "test-support",
+        feature = "leak-detection",
+        gpui_leak_detection
+    ))]
     pub fn assert_released(&self) {
         #[cfg(any(test, gpui_leak_detection))]
         self.entity_ref_counts
@@ -969,7 +965,6 @@ impl<T: 'static> WeakEntity<T> {
         })
     }
 
-<<<<<<< HEAD
     /// Changes the entity if it still exists. Returns an error if it has been released.
     ///
     /// This is [`Entity::update`] for a handle that may be stale. Use it in callbacks and tasks, where the
@@ -1003,12 +998,10 @@ impl<T: 'static> WeakEntity<T> {
     /// assert!(weak.update(cx, |counter, _cx| counter.count += 1).is_err());
     /// # });
     /// ```
-=======
     /// Updates the entity referenced by this handle with the given function if
     /// the referenced entity still exists. Returns an error if the entity has
     /// been released.
     #[inline(always)]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn update<C, R>(
         &self,
         cx: &mut C,
@@ -1021,17 +1014,14 @@ impl<T: 'static> WeakEntity<T> {
         Ok(cx.update_entity(&entity, update))
     }
 
-<<<<<<< HEAD
     /// Like [`WeakEntity::update`], but also passes the [`Window`] that the entity is shown in.
     ///
     /// Returns an error if the entity has been released, or if it isn't shown in a window that is
     /// currently available.
-=======
     /// Updates the entity referenced by this handle with the given function if
     /// the referenced entity still exists, within a visual context that has a window.
     /// Returns an error if the entity has been released.
     #[inline(always)]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn update_in<C, R>(
         &self,
         cx: &mut C,
@@ -1047,16 +1037,13 @@ impl<T: 'static> WeakEntity<T> {
         .context("entity has no current window")
     }
 
-<<<<<<< HEAD
     /// Calls `read` with the entity if it still exists. Returns an error if it has been released.
     ///
     /// Use this when you only need to read the value. It works with any [`AppContext`].
-=======
     /// Reads the entity referenced by this handle with the given function if
     /// the referenced entity still exists. Returns an error if the entity has
     /// been released.
     #[inline(always)]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn read_with<C, R>(&self, cx: &C, read: impl FnOnce(&T, &App) -> R) -> Result<R>
     where
         C: AppContext,
@@ -1179,17 +1166,15 @@ pub(crate) struct LeakDetector {
 
 /// A snapshot of the entities that had alive handles at one point in time.
 ///
-<<<<<<< HEAD
 /// Take one with [`App::leak_detector_snapshot`], and pass it to [`App::assert_no_new_leaks`]. The
 /// check ignores entities that were already alive when the snapshot was taken.
-#[cfg(any(test, feature = "leak-detection"))]
-=======
-/// Created by [`LeakDetector::snapshot`]. Can later be passed to
-/// [`LeakDetector::assert_no_new_leaks`] to verify that no new entity
-/// handles remain between the snapshot and the current state.
-#[cfg(any(test, feature = "test-support", gpui_leak_detection))]
+#[cfg(any(
+    test,
+    feature = "test-support",
+    feature = "leak-detection",
+    gpui_leak_detection
+))]
 #[derive(Default)]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 pub struct LeakDetectorSnapshot {
     #[cfg(any(test, gpui_leak_detection))]
     entity_ids: collections::HashSet<EntityId>,

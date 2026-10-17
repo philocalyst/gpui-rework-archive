@@ -519,15 +519,6 @@ pub trait ParentElement {
     }
 }
 
-<<<<<<< HEAD
-/// Identifies one element across frames: the path of [`ElementId`]s from the window's root to it.
-///
-/// GPUI passes this to the phase methods of an element that has an [`Element::id`]. Pass it to
-/// [`Window::with_element_state`] to read and write state that belongs to the element. Two
-/// elements share a `GlobalElementId` only when their id paths are equal.
-#[derive(Deref, DerefMut, Clone, Default, Debug, Eq, PartialEq, Hash)]
-pub struct GlobalElementId(pub(crate) Arc<[ElementId]>);
-=======
 /// A globally unique identifier for an element, used to track state across frames.
 ///
 /// The hash of the id path is computed once, when the id is built. Every
@@ -601,8 +592,6 @@ impl std::hash::Hash for GlobalElementId {
         state.write_u64(self.hash);
     }
 }
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
-
 impl Display for GlobalElementId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for (i, element_id) in self.ids.iter().enumerate() {

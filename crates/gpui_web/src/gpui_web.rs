@@ -42,13 +42,7 @@ pub use dispatcher::WebDispatcher;
 pub use display::WebDisplay;
 #[cfg(target_family = "wasm")]
 pub use gpui_wgpu::WebBackendPreference;
-<<<<<<< HEAD
 pub use http_client::FetchHttpClient;
-=======
-#[cfg(target_family = "wasm")]
-pub use http_client::{FetchCredentials, FetchHttpClient};
-#[cfg(target_family = "wasm")]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 pub use keyboard::WebKeyboardLayout;
 #[cfg(target_family = "wasm")]
 pub use logging::init_logging;

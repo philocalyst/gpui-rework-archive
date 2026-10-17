@@ -17,11 +17,10 @@ doctest = false
 default = ["wayland", "x11"]
 test-support = ["gpui/test-support"]
 wayland = [
-<<<<<<< HEAD
+  "dep:accesskit_unix",
   "bitflags",
   "gpui_wgpu",
   "ashpd/wayland",
-
   "calloop-wayland-source",
   "memfd",
   "wayland-backend",
@@ -34,11 +33,12 @@ wayland = [
   "xkbcommon/wayland",
   "open",
   "gpui/wayland",
+  "uuid/v5",
 ]
 x11 = [
+  "dep:accesskit_unix",
   "gpui_wgpu",
   "ashpd",
-
   "as-raw-xcb-connection",
   "x11rb",
   "xkbcommon/x11",
@@ -46,43 +46,9 @@ x11 = [
   "x11-clipboard",
   "filedescriptor",
   "open",
-=======
-    "dep:accesskit_unix",
-    "gpui_wgpu",
-    "ashpd/wayland",
-
-    "calloop-wayland-source",
-    "wayland-backend",
-    "wayland-client",
-    "wayland-cursor",
-    "wayland-protocols",
-    "wayland-protocols-plasma",
-    "wayland-protocols-wlr",
-    "filedescriptor",
-    "xkbcommon/wayland",
-    "open",
-    "gpui/wayland",
-    "uuid/v5",
+  "scap?/x11",
 ]
-x11 = [
-    "dep:accesskit_unix",
-    "gpui_wgpu",
-    "ashpd",
-
-    "as-raw-xcb-connection",
-    "x11rb",
-    "xkbcommon/x11",
-    "xim",
-    "filedescriptor",
-    "open",
-    "scap?/x11",
-]
-screen-capture = [
-    "gpui/screen-capture",
-    "scap",
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
-]
-
+screen-capture = ["gpui/screen-capture", "scap"]
 
 [target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies]
 accesskit.workspace = true
@@ -107,15 +73,9 @@ url.workspace = true
 uuid.workspace = true
 
 # Always used
-<<<<<<< HEAD
-oo7 = { version = "0.6", default-features = false, features = [
+oo7 = { workspace = true, features = [
   "async-std",
   "native_crypto",
-=======
-oo7 = { workspace = true, features = [
-    "async-std",
-    "native_crypto",
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 ] }
 calloop = "0.14.3"
 notify-rust.workspace = true
@@ -167,18 +127,10 @@ xim = { version = "0.4.0-zed", package = "zed-xim", features = [
   "x11rb-xcb",
   "x11rb-client",
 ], optional = true }
-<<<<<<< HEAD
 x11-clipboard = { version = "0.9.3", optional = true }
-=======
-# WARNING: If you change this, you must also publish a new version of zed-xim to crates.io
-xim = { git = "https://github.com/zed-industries/xim-rs.git", rev = "16f35a2c881b815a2b6cdfd6687988e84f8447d8", features = [
-    "x11rb-xcb",
-    "x11rb-client",
-], package = "zed-xim", version = "0.4.0-zed", optional = true }
 
 [target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dev-dependencies]
 gpui = { workspace = true, features = ["test-support"] }
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
 [package.metadata.cargo-shear]
 ignored = ["scap"]

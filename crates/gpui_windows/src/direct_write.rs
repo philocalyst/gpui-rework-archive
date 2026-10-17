@@ -66,21 +66,8 @@ struct NativeFace {
     face: IDWriteFontFace3,
 }
 
-<<<<<<< HEAD
 struct NativeSource {
     file: IDWriteFontFile,
-=======
-struct DirectWriteState {
-    /// Used to rasterize color glyphs. `None` while the platform is headless: shaping and
-    /// layout don't need a GPU, and nothing is drawn.
-    gpu_state: Option<GPUState>,
-    system_font_collection: IDWriteFontCollection1,
-    custom_font_collection: IDWriteFontCollection1,
-    fonts: Vec<FontInfo>,
-    font_to_font_id: HashMap<Font, FontId>,
-    font_info_cache: HashMap<usize, FontId>,
-    layout_line_scratch: Vec<u16>,
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 }
 
 #[windows_core::implement()]
@@ -89,31 +76,13 @@ struct FontDataOwner {
 }
 
 impl DirectWriteTextSystem {
-<<<<<<< HEAD
-    pub(crate) fn new(directx_devices: &DirectXDevices) -> Result<Self> {
-        Self::new_inner(Some(directx_devices))
+    pub(crate) fn new(directx_devices: Option<&DirectXDevices>) -> Result<Self> {
+        Self::new_inner(directx_devices)
     }
 
     pub(crate) fn new_headless() -> Result<Self> {
         Self::new_inner(None)
     }
-=======
-    /// Creates the text system, able to rasterize color glyphs once it has `directx_devices`.
-    pub(crate) fn new(directx_devices: Option<&DirectXDevices>) -> Result<Self> {
-        let factory: IDWriteFactory5 = unsafe { DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED)? };
-        // The `IDWriteInMemoryFontFileLoader` here is supported starting from
-        // Windows 10 Creators Update, which consequently requires the entire
-        // `DirectWriteTextSystem` to run on `win10 1703`+.
-        let in_memory_loader = unsafe { factory.CreateInMemoryFontFileLoader()? };
-        unsafe { factory.RegisterFontFileLoader(&in_memory_loader)? };
-        let builder = unsafe { factory.CreateFontSetBuilder()? };
-        let mut locale = [0u16; LOCALE_NAME_MAX_LENGTH as usize];
-        unsafe { GetUserDefaultLocaleName(&mut locale) };
-        let locale = HSTRING::from_wide(&locale);
-        let text_renderer = TextRendererWrapper::new(locale.clone());
-
-        let gpu_state = directx_devices.map(GPUState::new).transpose()?;
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
     fn new_inner(directx_devices: Option<&DirectXDevices>) -> Result<Self> {
         let renderer = Arc::new(RwLock::new(DirectWriteGlyphRenderer::new(directx_devices)?));
@@ -127,16 +96,15 @@ impl DirectWriteTextSystem {
         Ok(Self { parley, renderer })
     }
 
-    /// Uses `directx_devices` to rasterize color glyphs, replacing any previous devices, for
-    /// example after the device was lost.
     pub(crate) fn handle_gpu_lost(&self, directx_devices: &DirectXDevices) -> Result<()> {
         self.renderer.write().handle_gpu_lost(directx_devices)
     }
 
-    /// Releases the GPU state, when the platform switches to headless mode.
-    pub(crate) fn release_gpu(&self) {
-        self.state.write().gpu_state = None;
-    }
+    /// Releases GPU state when the platform returns to a headless windowing mode.
+    ///
+    /// This backend rasterizes glyphs into owned CPU bitmaps, so it has no GPU
+    /// resources to release.
+    pub(crate) fn release_gpu(&self) {}
 }
 
 impl PlatformTextSystem for DirectWriteTextSystem {
@@ -408,7 +376,6 @@ impl DirectWriteGlyphRenderer {
     fn rasterize_glyph(
         &self,
         params: &RenderGlyphParams,
-<<<<<<< HEAD
         glyph_analysis: &IDWriteGlyphRunAnalysis,
         texture_type: DWRITE_TEXTURE_TYPE,
         native_bounds: RECT,
@@ -425,32 +392,6 @@ impl DirectWriteGlyphRenderer {
                     (native_bounds.bottom - native_bounds.top).into(),
                 ),
             }
-=======
-        glyph_bounds: Bounds<DevicePixels>,
-    ) -> Result<Vec<u8>> {
-        // INVARIANT: the code below drives the *shared* D3D11 immediate context
-        // (`Map`/`Unmap`/`Draw`/`CopyResource`), which `DirectXRenderer` and `DirectXAtlas` also
-        // touch. An immediate `ID3D11DeviceContext` is not thread-safe, so this must only run on
-        // the main UI thread (which it always is; text rasterization never leaves that thread).
-        let gpu_state = self
-            .gpu_state
-            .as_ref()
-            .context("rasterizing color glyphs needs a GPU, which headless mode has none of")?;
-        let bitmap_size = glyph_bounds.size;
-        let subpixel_shift = params
-            .subpixel_variant
-            .map(|v| v as f32 / SUBPIXEL_VARIANTS_X as f32);
-        let baseline_origin_x = subpixel_shift.x / params.scale_factor;
-        let baseline_origin_y = subpixel_shift.y / params.scale_factor;
-
-        let transform = DWRITE_MATRIX {
-            m11: params.scale_factor,
-            m12: 0.0,
-            m21: 0.0,
-            m22: params.scale_factor,
-            dx: 0.0,
-            dy: 0.0,
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         };
 
         if params.raster_style.mode == GlyphRenderMode::Color {
@@ -677,51 +618,7 @@ impl DirectWriteGlyphRenderer {
                         &layer.glyphRun,
                         &brush,
                         DWRITE_MEASURING_MODE_NATURAL,
-<<<<<<< HEAD
                     );
-=======
-                        DWRITE_GRID_FIT_MODE_DEFAULT,
-                        DWRITE_TEXT_ANTIALIAS_MODE_GRAYSCALE,
-                        baseline_origin_x,
-                        baseline_origin_y,
-                    )
-                }?;
-
-                let color_bounds =
-                    unsafe { color_analysis.GetAlphaTextureBounds(DWRITE_TEXTURE_ALIASED_1x1) }?;
-
-                let color_size = size(
-                    color_bounds.right - color_bounds.left,
-                    color_bounds.bottom - color_bounds.top,
-                );
-                if color_size.width > 0 && color_size.height > 0 {
-                    alpha_data.clear();
-                    alpha_data.resize((color_size.width * color_size.height) as usize, 0);
-                    unsafe {
-                        color_analysis.CreateAlphaTexture(
-                            DWRITE_TEXTURE_ALIASED_1x1,
-                            &color_bounds,
-                            &mut alpha_data,
-                        )
-                    }?;
-
-                    let run_color = {
-                        let run_color = color_run.Base.runColor;
-                        Rgba {
-                            r: run_color.r,
-                            g: run_color.g,
-                            b: run_color.b,
-                            a: run_color.a,
-                        }
-                    };
-                    let bounds = bounds(point(color_bounds.left, color_bounds.top), color_size);
-                    glyph_layers.push(GlyphLayerTexture::new(
-                        gpu_state,
-                        run_color,
-                        bounds,
-                        &alpha_data,
-                    )?);
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
                 }
             }
 
@@ -739,7 +636,6 @@ impl DirectWriteGlyphRenderer {
             return Ok(RasterizedGlyph::empty(format));
         }
 
-<<<<<<< HEAD
         let bitmap_size = size(width.into(), height.into());
         let rasterized = RasterizedGlyph {
             bounds: Bounds {
@@ -749,107 +645,15 @@ impl DirectWriteGlyphRenderer {
             size: bitmap_size,
             format,
             pixels,
-=======
-        let render_target_texture = {
-            let mut texture = None;
-            let desc = D3D11_TEXTURE2D_DESC {
-                Width: bitmap_size.width.0 as u32,
-                Height: bitmap_size.height.0 as u32,
-                MipLevels: 1,
-                ArraySize: 1,
-                Format: DXGI_FORMAT_B8G8R8A8_UNORM,
-                SampleDesc: DXGI_SAMPLE_DESC {
-                    Count: 1,
-                    Quality: 0,
-                },
-                Usage: D3D11_USAGE_DEFAULT,
-                BindFlags: D3D11_BIND_RENDER_TARGET.0 as u32,
-                CPUAccessFlags: 0,
-                MiscFlags: 0,
-            };
-            unsafe {
-                gpu_state
-                    .device
-                    .CreateTexture2D(&desc, None, Some(&mut texture))
-            }?;
-            texture.unwrap()
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         };
         rasterized.validate()?;
 
         Ok(rasterized)
     }
 
-<<<<<<< HEAD
     fn handle_gpu_lost(&mut self, _directx_devices: &DirectXDevices) -> Result<()> {
         // Color targets are software bitmaps owned by each raster call.
         Ok(())
-=======
-    fn get_typographic_bounds(&self, font_id: FontId, glyph_id: GlyphId) -> Result<Bounds<f32>> {
-        unsafe {
-            let font = &self.fonts[font_id.0].font_face;
-            let glyph_indices = [glyph_id.0 as u16];
-            let mut metrics = [DWRITE_GLYPH_METRICS::default()];
-            font.GetDesignGlyphMetrics(glyph_indices.as_ptr(), 1, metrics.as_mut_ptr(), false)?;
-
-            let metrics = &metrics[0];
-            let advance_width = metrics.advanceWidth as i32;
-            let advance_height = metrics.advanceHeight as i32;
-            let left_side_bearing = metrics.leftSideBearing;
-            let right_side_bearing = metrics.rightSideBearing;
-            let top_side_bearing = metrics.topSideBearing;
-            let bottom_side_bearing = metrics.bottomSideBearing;
-            let vertical_origin_y = metrics.verticalOriginY;
-
-            let y_offset = vertical_origin_y + bottom_side_bearing - advance_height;
-            let width = advance_width - (left_side_bearing + right_side_bearing);
-            let height = advance_height - (top_side_bearing + bottom_side_bearing);
-
-            Ok(Bounds {
-                origin: Point {
-                    x: left_side_bearing as f32,
-                    y: y_offset as f32,
-                },
-                size: Size {
-                    width: width as f32,
-                    height: height as f32,
-                },
-            })
-        }
-    }
-
-    fn get_advance(&self, font_id: FontId, glyph_id: GlyphId) -> Result<Size<f32>> {
-        unsafe {
-            let font = &self.fonts[font_id.0].font_face;
-            let glyph_indices = [glyph_id.0 as u16];
-            let mut metrics = [DWRITE_GLYPH_METRICS::default()];
-            font.GetDesignGlyphMetrics(glyph_indices.as_ptr(), 1, metrics.as_mut_ptr(), false)?;
-
-            let metrics = &metrics[0];
-
-            Ok(Size {
-                width: metrics.advanceWidth as f32,
-                height: 0.0,
-            })
-        }
-    }
-
-    fn all_font_names(&self, components: &DirectWriteComponents) -> Vec<String> {
-        let mut result =
-            get_font_names_from_collection(&self.system_font_collection, &components.locale);
-        result.extend(get_font_names_from_collection(
-            &self.custom_font_collection,
-            &components.locale,
-        ));
-        result
-    }
-
-    fn handle_gpu_lost(&mut self, directx_devices: &DirectXDevices) -> Result<()> {
-        try_to_recover_from_device_lost(|| {
-            GPUState::new(directx_devices).context("Recreating GPU state for DirectWrite")
-        })
-        .map(|gpu_state| self.gpu_state = Some(gpu_state))
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 }
 
@@ -964,253 +768,7 @@ impl NativeFace {
             }?;
             let variable_face = unsafe { reference.CreateFontFace() }?;
 
-<<<<<<< HEAD
             variable_face.cast()?
-=======
-    fn DrawUnderline(
-        &self,
-        _clientdrawingcontext: *const ::core::ffi::c_void,
-        _baselineoriginx: f32,
-        _baselineoriginy: f32,
-        _underline: *const DWRITE_UNDERLINE,
-        _clientdrawingeffect: windows::core::Ref<windows::core::IUnknown>,
-    ) -> windows::core::Result<()> {
-        Err(windows::core::Error::new(
-            E_NOTIMPL,
-            "DrawUnderline unimplemented",
-        ))
-    }
-
-    fn DrawStrikethrough(
-        &self,
-        _clientdrawingcontext: *const ::core::ffi::c_void,
-        _baselineoriginx: f32,
-        _baselineoriginy: f32,
-        _strikethrough: *const DWRITE_STRIKETHROUGH,
-        _clientdrawingeffect: windows::core::Ref<windows::core::IUnknown>,
-    ) -> windows::core::Result<()> {
-        Err(windows::core::Error::new(
-            E_NOTIMPL,
-            "DrawStrikethrough unimplemented",
-        ))
-    }
-
-    fn DrawInlineObject(
-        &self,
-        _clientdrawingcontext: *const ::core::ffi::c_void,
-        _originx: f32,
-        _originy: f32,
-        _inlineobject: windows::core::Ref<IDWriteInlineObject>,
-        _issideways: BOOL,
-        _isrighttoleft: BOOL,
-        _clientdrawingeffect: windows::core::Ref<windows::core::IUnknown>,
-    ) -> windows::core::Result<()> {
-        Err(windows::core::Error::new(
-            E_NOTIMPL,
-            "DrawInlineObject unimplemented",
-        ))
-    }
-}
-
-/// Interprets an optional DirectWrite array pointer as a slice, treating a
-/// null pointer with a zero length as an empty slice. A null pointer with a
-/// nonzero length fails with `null_error_message`.
-///
-/// # Safety
-///
-/// When `ptr` is non-null, the caller must guarantee that it points to a valid
-/// array of at least `len` elements that outlives the returned slice.
-unsafe fn slice_from_nullable<'a, T>(
-    ptr: *const T,
-    len: usize,
-    null_error_message: &str,
-) -> windows::core::Result<&'a [T]> {
-    if ptr.is_null() {
-        if len != 0 {
-            return Err(Error::new(E_INVALIDARG, null_error_message));
-        }
-        Ok(&[])
-    } else {
-        Ok(unsafe { std::slice::from_raw_parts(ptr, len) })
-    }
-}
-
-struct StringIndexConverter<'a> {
-    text: &'a str,
-    utf8_ix: usize,
-    utf16_ix: usize,
-}
-
-impl<'a> StringIndexConverter<'a> {
-    fn new(text: &'a str) -> Self {
-        Self {
-            text,
-            utf8_ix: 0,
-            utf16_ix: 0,
-        }
-    }
-
-    #[allow(dead_code)]
-    fn advance_to_utf8_ix(&mut self, utf8_target: usize) {
-        for (ix, c) in self.text[self.utf8_ix..].char_indices() {
-            if self.utf8_ix + ix >= utf8_target {
-                self.utf8_ix += ix;
-                return;
-            }
-            self.utf16_ix += c.len_utf16();
-        }
-        self.utf8_ix = self.text.len();
-    }
-
-    fn advance_to_utf16_ix(&mut self, utf16_target: usize) {
-        for (ix, c) in self.text[self.utf8_ix..].char_indices() {
-            if self.utf16_ix >= utf16_target {
-                self.utf8_ix += ix;
-                return;
-            }
-            self.utf16_ix += c.len_utf16();
-        }
-        self.utf8_ix = self.text.len();
-    }
-}
-
-fn font_style_to_dwrite(style: FontStyle) -> DWRITE_FONT_STYLE {
-    match style {
-        FontStyle::Normal => DWRITE_FONT_STYLE_NORMAL,
-        FontStyle::Italic => DWRITE_FONT_STYLE_ITALIC,
-        FontStyle::Oblique => DWRITE_FONT_STYLE_OBLIQUE,
-    }
-}
-
-fn font_style_from_dwrite(value: DWRITE_FONT_STYLE) -> FontStyle {
-    match value.0 {
-        0 => FontStyle::Normal,
-        1 => FontStyle::Italic,
-        2 => FontStyle::Oblique,
-        _ => unreachable!(),
-    }
-}
-
-fn font_weight_to_dwrite(weight: FontWeight) -> DWRITE_FONT_WEIGHT {
-    DWRITE_FONT_WEIGHT(weight.0 as i32)
-}
-
-fn font_weight_from_dwrite(value: DWRITE_FONT_WEIGHT) -> FontWeight {
-    FontWeight(value.0 as f32)
-}
-
-fn get_font_names_from_collection(
-    collection: &IDWriteFontCollection1,
-    locale: &HSTRING,
-) -> Vec<String> {
-    unsafe {
-        let mut result = Vec::new();
-        let family_count = collection.GetFontFamilyCount();
-        for index in 0..family_count {
-            let Some(font_family) = collection.GetFontFamily(index).log_err() else {
-                continue;
-            };
-            let Some(localized_family_name) = font_family.GetFamilyNames().log_err() else {
-                continue;
-            };
-            let Some(family_name) = get_name(localized_family_name, locale).log_err() else {
-                continue;
-            };
-            result.push(family_name);
-        }
-
-        result
-    }
-}
-
-fn font_face_to_font(font_face: &IDWriteFontFace3, locale: &HSTRING) -> Option<Font> {
-    let localized_family_name = unsafe { font_face.GetFamilyNames().log_err() }?;
-    let family_name = get_name(localized_family_name, locale).log_err()?;
-    let weight = unsafe { font_face.GetWeight() };
-    let style = unsafe { font_face.GetStyle() };
-    Some(Font {
-        family: family_name.into(),
-        features: FontFeatures::default(),
-        weight: font_weight_from_dwrite(weight),
-        style: font_style_from_dwrite(style),
-        fallbacks: None,
-    })
-}
-
-// https://learn.microsoft.com/en-us/windows/win32/api/dwrite/ne-dwrite-dwrite_font_feature_tag
-fn apply_font_features(
-    direct_write_features: &IDWriteTypography,
-    features: &FontFeatures,
-) -> Result<()> {
-    let tag_values = features.tag_value_list();
-
-    // All of these features are enabled by default by DirectWrite.
-    // If you want to (and can) peek into the source of DirectWrite
-    let mut feature_liga = make_direct_write_feature("liga", 1);
-    let mut feature_clig = make_direct_write_feature("clig", 1);
-    let mut feature_calt = make_direct_write_feature("calt", 1);
-
-    for (tag, value) in tag_values {
-        if tag.as_str() == "liga" && *value == 0 {
-            feature_liga.parameter = 0;
-            continue;
-        }
-        if tag.as_str() == "clig" && *value == 0 {
-            feature_clig.parameter = 0;
-            continue;
-        }
-        if tag.as_str() == "calt" && *value == 0 {
-            feature_calt.parameter = 0;
-            continue;
-        }
-
-        unsafe {
-            direct_write_features.AddFontFeature(make_direct_write_feature(tag, *value))?;
-        }
-    }
-    unsafe {
-        direct_write_features.AddFontFeature(feature_liga)?;
-        direct_write_features.AddFontFeature(feature_clig)?;
-        direct_write_features.AddFontFeature(feature_calt)?;
-    }
-
-    Ok(())
-}
-
-#[inline]
-const fn make_direct_write_feature(feature_name: &str, parameter: u32) -> DWRITE_FONT_FEATURE {
-    let tag = make_direct_write_tag(feature_name);
-    DWRITE_FONT_FEATURE {
-        nameTag: tag,
-        parameter,
-    }
-}
-
-#[inline]
-const fn make_open_type_tag(tag_name: &str) -> u32 {
-    let bytes = tag_name.as_bytes();
-    debug_assert!(bytes.len() == 4);
-    u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]])
-}
-
-#[inline]
-const fn make_direct_write_tag(tag_name: &str) -> DWRITE_FONT_FEATURE_TAG {
-    DWRITE_FONT_FEATURE_TAG(make_open_type_tag(tag_name))
-}
-
-#[inline]
-fn get_name(string: IDWriteLocalizedStrings, locale: &HSTRING) -> Result<String> {
-    let mut locale_name_index = 0u32;
-    let mut exists = BOOL(0);
-    unsafe { string.FindLocaleName(locale, &mut locale_name_index, &mut exists as _)? };
-    if !exists.as_bool() {
-        unsafe {
-            string.FindLocaleName(
-                DEFAULT_LOCALE_NAME,
-                &mut locale_name_index as _,
-                &mut exists as _,
-            )?
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         };
 
         Ok(Self { face: native_face })
@@ -1431,7 +989,6 @@ mod tests {
             .glyph_for_char(regular_id, 'A')
             .context("IBM Plex Sans has no A glyph")?;
 
-<<<<<<< HEAD
         for scale_factor in [1.0, 1.5, 2.0] {
             let grayscale = rasterize(
                 &system,
@@ -1443,12 +1000,6 @@ mod tests {
             )?;
             assert_eq!(grayscale.format, RasterizedGlyphFormat::AlphaMask);
             grayscale.validate()?;
-=======
-    #[test]
-    fn color_emoji_rasterization_is_stable_across_batches() -> Result<()> {
-        let devices = DirectXDevices::new()?;
-        let text_system = DirectWriteTextSystem::new(Some(&devices))?;
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
             for subpixel_x in 0..SUBPIXEL_VARIANTS_X {
                 for subpixel_y in 0..SUBPIXEL_VARIANTS_Y {
@@ -1586,7 +1137,7 @@ mod tests {
     #[test]
     fn native_color_survives_device_recovery() -> Result<()> {
         let devices = DirectXDevices::new()?;
-        let system = DirectWriteTextSystem::new(&devices)?;
+        let system = DirectWriteTextSystem::new(Some(&devices))?;
         let font_id = system.font_id(&font("Segoe UI Emoji"))?;
         let glyph_id = system
             .glyph_for_char(font_id, '😀')

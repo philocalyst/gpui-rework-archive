@@ -13,12 +13,8 @@ use mach2::{
 };
 
 use async_task::Runnable;
-<<<<<<< HEAD:crates/gpui_macos/src/dispatcher.rs
-use objc2_foundation::NSThread;
-=======
 use objc2::{rc::Retained, runtime::ProtocolObject};
 use objc2_foundation::{NSActivityOptions, NSObjectProtocol, NSProcessInfo, NSString, NSThread};
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f:crates/gpui_apple/src/dispatcher.rs
 use std::{ffi::c_void, ptr::NonNull, time::Duration};
 
 pub struct AppleDispatcher;

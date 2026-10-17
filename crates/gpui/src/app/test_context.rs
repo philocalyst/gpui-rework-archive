@@ -1,23 +1,13 @@
 use crate::{
-<<<<<<< HEAD
     Action, AnyView, AnyWindowHandle, App, AppCell, AppContext, AssetRegistry, AsyncApp,
     AvailableSpace, BackgroundExecutor, BorrowAppContext, Bounds, Capslock, ClipboardItem,
-    DrawPhase, Drawable, Element, Empty, EntityId, EventEmitter, ForegroundExecutor, Global,
-    InputEvent, Keystroke, Modifiers, ModifiersChangedEvent, MouseButton, MouseDownEvent,
-    MouseMoveEvent, MouseUpEvent, Pixels, Platform, Point, Render, Result, SharedString, Size,
-    SystemNotification, SystemNotificationResponse, Task, TestDispatcher, TestPlatform,
-    TestScreenCaptureSource, TestWindow, TextSystem, VisualContext, Window, WindowBounds,
-    WindowHandle, WindowOptions, app::GpuiMode, window::ElementArenaScope,
-=======
-    Action, AnyView, AnyWindowHandle, App, AppCell, AppContext, AsyncApp, AvailableSpace,
-    BackgroundExecutor, BorrowAppContext, Bounds, Capslock, ClipboardItem, DisplayId, DrawPhase,
-    Drawable, Element, Empty, EntityId, EventEmitter, ForegroundExecutor, Global, InputEvent,
-    Keystroke, Modifiers, ModifiersChangedEvent, MouseButton, MouseDownEvent, MouseMoveEvent,
-    MouseUpEvent, Pixels, Platform, PlatformTextSystem, Point, Render, Result, SharedString, Size,
-    SystemNotification, SystemNotificationResponse, Task, TestDispatcher, TestPlatform,
-    TestScreenCaptureSource, TestWindow, TextSystem, VisualContext, Window, WindowBounds,
-    WindowHandle, WindowOptions, WindowVisibility, app::GpuiMode, window::ElementArenaScope,
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    DisplayId, DrawPhase, Drawable, Element, Empty, EntityId, EventEmitter, ForegroundExecutor,
+    Global, InputEvent, Keystroke, Modifiers, ModifiersChangedEvent, MouseButton, MouseDownEvent,
+    MouseMoveEvent, MouseUpEvent, Pixels, Platform, PlatformTextSystem, Point, Render, Result,
+    SharedString, Size, SystemNotification, SystemNotificationResponse, Task, TestDispatcher,
+    TestPlatform, TestScreenCaptureSource, TestWindow, TextSystem, VisualContext, Window,
+    WindowBounds, WindowHandle, WindowOptions, WindowVisibility, app::GpuiMode,
+    window::ElementArenaScope,
 };
 use anyhow::{anyhow, bail};
 use futures::{Stream, StreamExt, channel::oneshot};
@@ -180,9 +170,6 @@ impl TestAppContext {
         let background_executor = BackgroundExecutor::new(arc_dispatcher.clone());
         let foreground_executor = ForegroundExecutor::new(arc_dispatcher);
         let platform = TestPlatform::new(background_executor.clone(), foreground_executor.clone());
-<<<<<<< HEAD
-        let http_client = crate::http_client::FakeHttpClient::with_404_response();
-=======
         Self::build_with_platform(
             dispatcher,
             fn_name,
@@ -222,9 +209,7 @@ impl TestAppContext {
         foreground_executor: ForegroundExecutor,
         platform: Rc<TestPlatform>,
     ) -> Self {
-        let asset_source = Arc::new(());
-        let http_client = http_client::FakeHttpClient::with_404_response();
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+        let http_client = crate::http_client::FakeHttpClient::with_404_response();
         let text_system = Arc::new(TextSystem::new(platform.text_system()));
 
         let app = App::new_app(
@@ -246,16 +231,13 @@ impl TestAppContext {
         }
     }
 
-<<<<<<< HEAD
-    /// Turns off drawing for this app for the rest of the test.
-=======
     /// Disables accessibility for subsequently created test windows.
     pub fn disable_accessibility(&mut self) {
         self.update(|cx| cx.accessibility_force_disabled = true);
     }
 
     /// Skip all drawing operations for the duration of this test.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Turns off drawing for this app for the rest of the test.
     pub fn skip_drawing(&mut self) {
         self.app.borrow_mut().mode = GpuiMode::Test { skip_drawing: true };
     }
@@ -278,11 +260,6 @@ impl TestAppContext {
         self.test_platform.did_prompt_for_new_path()
     }
 
-<<<<<<< HEAD
-    /// Creates another app that shares this context's scheduler, so tasks from both apps interleave deterministically.
-    ///
-    /// The new app has its own state, windows and globals.
-=======
     /// Returns the number of active idle sleep prevention tokens.
     pub fn active_idle_sleep_preventions(&self) -> usize {
         self.test_platform.active_idle_sleep_preventions()
@@ -299,7 +276,9 @@ impl TestAppContext {
     }
 
     /// returns a new `TestAppContext` re-using the same executors to interleave tasks.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Creates another app that shares this context's scheduler, so tasks from both apps interleave deterministically.
+    ///
+    /// The new app has its own state, windows and globals.
     pub fn new_app(&self) -> TestAppContext {
         Self::build(self.dispatcher.clone(), self.fn_name)
     }
@@ -585,12 +564,6 @@ impl TestAppContext {
         self.test_window(window_handle).simulate_resize(size);
     }
 
-<<<<<<< HEAD
-    /// Returns a receiver that gets the path and arguments of the next restart request.
-    ///
-    /// The app doesn't restart in a test. Calling this again replaces the previous
-    /// sender, so the previous receiver is cancelled.
-=======
     /// Simulates a change in whether the platform is presenting the window.
     pub fn simulate_window_visibility_change(
         &self,
@@ -652,7 +625,10 @@ impl TestAppContext {
     }
 
     /// Returns true if there's an alert dialog open.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Returns a receiver that gets the path and arguments of the next restart request.
+    ///
+    /// The app doesn't restart in a test. Calling this again replaces the previous
+    /// sender, so the previous receiver is cancelled.
     pub fn expect_restart(&self) -> oneshot::Receiver<(Option<PathBuf>, Vec<std::ffi::OsString>)> {
         let (tx, rx) = futures::channel::oneshot::channel();
         self.test_platform.expect_restart.borrow_mut().replace(tx);
@@ -1199,12 +1175,6 @@ impl VisualTestContext {
         self.simulate_window_resize(self.window, size)
     }
 
-<<<<<<< HEAD
-    /// Returns the bounds of the element with `debug_selector(selector)` in the last painted frame, or `None`.
-    ///
-    /// Draw the view first, so that the frame contains the element. Use this to click
-    /// an element without guessing its position.
-=======
     /// Simulates a change in whether the platform is presenting this window.
     pub fn simulate_visibility_change(&self, visibility: WindowVisibility) {
         self.simulate_window_visibility_change(self.window, visibility);
@@ -1219,7 +1189,10 @@ impl VisualTestContext {
     ///
     /// Returns `None` in builds without `debug_assertions`, which don't record
     /// selectors; see [`crate::InteractiveElement::debug_selector`].
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Returns the bounds of the element with `debug_selector(selector)` in the last painted frame, or `None`.
+    ///
+    /// Draw the view first, so that the frame contains the element. Use this to click
+    /// an element without guessing its position.
     pub fn debug_bounds(&mut self, selector: &'static str) -> Option<Bounds<Pixels>> {
         self.update(|window, _| window.rendered_frame.debug_bounds.get(selector).copied())
     }

@@ -363,17 +363,11 @@ impl Keymap {
         }
     }
 
-<<<<<<< HEAD
     /// Returns the bindings that `input` could still complete with more keystrokes, highest
     /// precedence first, for the given `context_stack`.
     ///
     /// Use it to list the shortcuts available after a prefix, such as after `ctrl-k`. Bindings
     /// that match `input` exactly, and `NoAction` and `Unbind` entries, are not included.
-=======
-    /// Find the bindings that can follow the current input sequence, in precedence order. Only
-    /// includes bindings that dispatch would run for their full keystrokes, so bindings disabled
-    /// with `null` or `Unbind` are left out.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn possible_next_bindings_for_input(
         &self,
         input: &[Keystroke],

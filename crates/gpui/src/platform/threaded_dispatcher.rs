@@ -363,9 +363,6 @@ impl ThreadedDispatcher {
         ran_any
     }
 
-<<<<<<< HEAD
-    /// Cancels every armed timer, and returns how many were canceled.
-=======
     #[cfg(any(test, feature = "bench-support"))]
     pub(crate) fn run_until_with_frames<R>(
         &self,
@@ -401,7 +398,7 @@ impl ThreadedDispatcher {
 
     /// Cancels all pending timers so timers armed by one workload can't fire
     /// during a later workload sharing this process-lifetime dispatcher.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Cancels every armed timer, and returns how many were canceled.
     ///
     /// Use it between workloads that share one dispatcher, so a timer from the earlier workload
     /// can't fire during the later one. Dropping a timer drops its completion sender, which wakes

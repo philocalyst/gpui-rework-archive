@@ -11,34 +11,19 @@ workspace = true
 
 [lib]
 path = "src/gpui_wgpu.rs"
-doctest = false
 
 [features]
 default = []
-<<<<<<< HEAD
 test-support = ["gpui/test-support", "dep:image"]
 custom-gpu = ["gpui/custom-gpu"]
 wgpu-surfaces = ["gpui/wgpu-surfaces"]
-=======
-bench-support = ["gpui/bench-support", "dep:image"]
-font-kit = ["dep:font-kit"]
-test-support = ["gpui/test-support", "dep:image"]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
 [dependencies]
 gpui = { path = "../gpui", version = "0.2.2", package = "gpui-ce", default-features = false }
 gpui_render.workspace = true
 anyhow.workspace = true
-<<<<<<< HEAD
-=======
-bytemuck.workspace = true
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 collections.workspace = true
 etagere.workspace = true
-<<<<<<< HEAD
-=======
-itertools.workspace = true
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 image = { workspace = true, optional = true }
 log.workspace = true
 parking_lot.workspace = true
@@ -46,7 +31,6 @@ profiling.workspace = true
 raw-window-handle.workspace = true
 smallvec.workspace = true
 gpui_util.workspace = true
-<<<<<<< HEAD
 wgpu.workspace = true
 wgsl-rs.workspace = true
 
@@ -75,21 +59,6 @@ windows-061 = { workspace = true, features = [
 ] }
 
 [target.'cfg(target_family = "wasm")'.dependencies]
-=======
-
-# Optional: only needed on platforms with multiple font sources (e.g. Linux)
-# WARNING: If you change this, you must also publish a new version of zed-font-kit to crates.io
-font-kit = { workspace = true, optional = true }
-
-[target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies]
-wgpu = { workspace = true, features = ["std", "metal", "gles", "vulkan", "wgsl", "webgpu"] }
-
-[target.'cfg(not(any(target_os = "linux", target_os = "freebsd")))'.dependencies]
-wgpu = { workspace = true, default-features = true }
-
-[target.'cfg(target_family = "wasm")'.dependencies]
-web-sys = { workspace = true, features = ["HtmlCanvasElement"] }
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 wgpu = { workspace = true, features = ["webgl"] }
 wasm-bindgen.workspace = true
 wasm-bindgen-futures.workspace = true
@@ -99,16 +68,9 @@ js-sys.workspace = true
 [dev-dependencies]
 bytemuck = { version = "1", features = ["derive"] }
 criterion.workspace = true
-<<<<<<< HEAD
 env_logger.workspace = true
 gpui_platform = { workspace = true, features = ["wayland", "x11"] }
 naga = { version = "29.0.4", features = ["wgsl-in"] }
-=======
-gpui = { workspace = true, features = ["bench-support"] }
-image.workspace = true
-# Validate shaders with the same Naga revision that wgpu uses at runtime.
-naga = { git = "https://github.com/gfx-rs/wgpu", rev = "3b3506ea31154edc04de64debda0e780cba2639c", features = ["wgsl-in"] }
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
 [target.'cfg(target_os = "linux")'.dev-dependencies]
 wayland-backend = { version = "0.3.15", features = [

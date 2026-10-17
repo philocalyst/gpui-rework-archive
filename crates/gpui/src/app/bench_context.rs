@@ -257,15 +257,8 @@ impl BenchReport {
         })
     }
 
-<<<<<<< HEAD
-    /// Prints the report to stderr, with the name of the benchmark it belongs to.
-    ///
-    /// This prints nothing when no frames or foreground work were recorded.
-    pub fn print(&self, benchmark_name: Option<&'static str>) {
-=======
     /// Prints this report to stderr.
     pub fn print(&self, benchmark_name: &str) {
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         let frame_snapshot = self.frame_snapshot.borrow();
         if frame_snapshot.is_empty() && self.metrics.is_empty() {
             return;
@@ -620,17 +613,14 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
         read(&app)
     }
 
-<<<<<<< HEAD
     /// Runs queued foreground tasks on this thread, and waits for background work in flight to finish.
     ///
     /// Timers that aren't due yet are not waited for. See [`ThreadedDispatcher::run_until_idle`].
-=======
     /// Runs queued foreground tasks on this thread and waits for in flight
     /// background work to finish. Timers that aren't due yet are not waited
     /// for (see [`ThreadedDispatcher::run_until_idle`]). Scheduled frames are
     /// delivered after each task poll and when there are no ready tasks, but
     /// animations alone do not keep this method running.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn run_until_idle(&self) {
         let dispatcher = self
             .background_executor
@@ -673,14 +663,11 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
 
     /// Runs main-thread tasks until `ready` returns `Some`, and returns that value.
     ///
-<<<<<<< HEAD
     /// Unlike [`BenchAppContext::run_until_idle`], this stops as soon as `ready` is
     /// satisfied, leaving other queued work pending.
-=======
     /// While incomplete, scheduled frames run after each task poll and while
     /// waiting for work. Readiness is checked before frame delivery, so completion
     /// does not wait for a final presentation; renderer sessions do that explicitly.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn run_until<R>(&self, ready: impl FnMut() -> Option<R>) -> R {
         self.background_executor
             .dispatcher()
@@ -697,14 +684,11 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
 
     /// Measures `benchmark` with Criterion's iteration loop.
     ///
-<<<<<<< HEAD
     /// `benchmark` runs once per Criterion iteration and receives this context, so it
     /// can update GPUI state. Window draws it triggers are recorded in the report.
-=======
     /// The closure is invoked once per Criterion iteration with this
     /// benchmark app context so it can update GPUI state. Each iteration then
     /// delivers the scheduled frame batch, without draining foreground tasks.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     ///
     /// # Panics
     ///
@@ -830,21 +814,6 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
         self.replace_bencher(bencher);
     }
 
-<<<<<<< HEAD
-    /// Measures how long one update of `view` takes to produce a presented frame.
-    ///
-    /// Each iteration runs `update` on `view` inside the window that holds it. Flushing
-    /// the update's effects draws the window, and the frame is then presented, which
-    /// includes submitting it to the GPU when a renderer is configured. The entity must
-    /// be in the window's render tree, such as the root view or one of its children.
-    ///
-    /// Frame events come from the GPUI frame profiler
-    /// ([`crate::profiler::record_frame_event`]), which is enabled for the duration of the measurement.
-    ///
-    /// # Panics
-    ///
-    /// Panics if `view` has no current window, or if a measurement is already running.
-=======
     /// Measures unpaced update and rendering work for an entity in its current window.
     ///
     /// Each iteration runs `update` against the entity in its current window. In
@@ -861,7 +830,6 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
     /// Frame events are collected through the GPUI frame profiler
     /// ([`crate::profiler::record_frame_event`]), which is enabled for the
     /// duration of the measurement.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn bench_renderer<V>(
         &mut self,
         view: Entity<V>,
@@ -902,15 +870,6 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
         self.replace_bencher(bencher);
     }
 
-<<<<<<< HEAD
-    /// Opens a window with an empty root view, runs queued work, and returns a [`BenchWindowContext`] for it.
-    ///
-    /// The window is sized to the test display, like [`TestAppContext::add_window`](crate::TestAppContext::add_window).
-    ///
-    /// # Panics
-    ///
-    /// Panics if the window can't be opened.
-=======
     /// Measures finite rendering sessions with fresh, untimed setup for each iteration.
     ///
     /// `setup` returns session state, its window, and a shared stop flag.
@@ -1079,7 +1038,6 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
     ///
     /// Activation is settled before returning so renderer measurements exercise
     /// foreground animation rather than the inactive-window frame throttle.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn add_empty_window(&mut self) -> BenchWindowContext<'a, 'measurement> {
         let bounds = {
             let app = self.app.borrow();

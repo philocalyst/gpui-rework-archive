@@ -1,19 +1,9 @@
-<<<<<<< HEAD
-#![cfg(target_os = "macos")]
-//! Shared Apple platform support for GPUI.
-//!
-//! This crate contains the Metal renderer and GPU resource management shared
-//! by GPUI's Apple platform backends.
-
-mod metal_atlas;
-pub mod metal_renderer;
-=======
 #![cfg(any(target_os = "macos", target_os = "ios"))]
 //! Shared Apple rendering, task dispatch, and system services for GPUI.
 //!
-//! This crate renders GPUI scenes directly with Metal on Apple platforms. It
-//! owns GPU resources, text rendering, Keychain access, and thermal notifications
-//! while leaving application lifecycle, windowing, and input to each platform backend.
+//! This crate renders GPUI scenes directly with Metal on Apple platforms and
+//! provides shared dispatch, text, Keychain, and thermal support. Windowing and
+//! input remain owned by the platform-specific crates.
 
 mod dispatcher;
 pub mod keychain;
@@ -23,10 +13,11 @@ pub mod thermal;
 
 #[cfg(feature = "font-kit")]
 mod open_type;
-#[cfg(feature = "font-kit")]
 mod text_system;
 
 pub use dispatcher::{AppleActivity, AppleDispatcher};
-#[cfg(feature = "font-kit")]
+#[cfg(target_os = "ios")]
 pub use text_system::AppleTextSystem;
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+pub use text_system::MacTextSystem;
+#[cfg(target_os = "macos")]
+pub use text_system::MacTextSystem as AppleTextSystem;

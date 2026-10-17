@@ -773,7 +773,6 @@ impl<V: 'static + Render> TestAppWindow<V> {
         self.background_executor.run_until_parked();
     }
 
-<<<<<<< HEAD
     /// Makes this the active window, as if the user had clicked it, then runs pending tasks.
     ///
     /// Windows that [`TestApp`] opens start inactive. Focus listeners such as
@@ -788,12 +787,6 @@ impl<V: 'static + Render> TestAppWindow<V> {
         self.background_executor.run_until_parked();
     }
 
-    /// Paints the window now, so that later input and hit tests use the current layout.
-    ///
-    /// Call this after building the view and after anything changes its layout, before
-    /// simulating a click at a position. It doesn't run pending tasks. See the example
-    /// on [`TestApp`].
-=======
     /// Simulate the window moving to a display with a different scale factor.
     pub fn simulate_scale_factor_change(&mut self, scale_factor: f32) {
         let window_id = self.handle.window_id();
@@ -812,8 +805,12 @@ impl<V: 'static + Render> TestAppWindow<V> {
         self.background_executor.run_until_parked();
     }
 
+    /// Paints the window now, so that later input and hit tests use the current layout.
+    ///
+    /// Call this after building the view and after anything changes its layout, before
+    /// simulating a click at a position. It doesn't run pending tasks. See the example
+    /// on [`TestApp`].
     /// Force a redraw of the window.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn draw(&mut self) {
         let mut app = self.app.borrow_mut();
         let any_handle: AnyWindowHandle = self.handle.into();
@@ -890,7 +887,6 @@ mod tests {
     }
 
     #[test]
-<<<<<<< HEAD
     fn test_resize_updates_gpui_viewport() {
         let mut app = TestApp::new();
         let mut window = app.open_window(Counter::new);
@@ -900,7 +896,9 @@ mod tests {
         window.update(|_, window, _| {
             assert_eq!(window.viewport_size(), size(px(321.), px(123.)));
         });
-=======
+    }
+
+    #[test]
     fn test_simulate_scale_factor_change() {
         let mut app = TestApp::new();
         let mut window = app.open_window(|_, _| crate::EmptyView);
@@ -918,7 +916,6 @@ mod tests {
 
         drop(window);
         app.update(|cx| cx.shutdown());
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 
     #[test]

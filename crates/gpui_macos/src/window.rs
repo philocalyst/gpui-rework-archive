@@ -6,25 +6,6 @@ use crate::{
 #[cfg(any(test, feature = "test-support"))]
 use anyhow::Result;
 use block2::RcBlock;
-<<<<<<< HEAD
-=======
-use cocoa::{
-    appkit::{
-        NSApplication, NSBackingStoreBuffered, NSColor, NSEvent, NSEventModifierFlags, NSEventType,
-        NSFilenamesPboardType, NSPasteboard, NSRequestUserAttentionType, NSScreen, NSView,
-        NSViewHeightSizable, NSViewWidthSizable, NSVisualEffectBlendingMode,
-        NSVisualEffectMaterial, NSVisualEffectState, NSVisualEffectView, NSWindow,
-        NSWindowCollectionBehavior, NSWindowOcclusionState, NSWindowOrderingMode,
-        NSWindowStyleMask, NSWindowTitleVisibility,
-    },
-    base::{id, nil},
-    foundation::{
-        NSArray, NSAutoreleasePool, NSData, NSDictionary, NSFastEnumeration, NSInteger, NSNotFound,
-        NSOperatingSystemVersion, NSPoint, NSProcessInfo, NSRect, NSSize, NSString, NSUInteger,
-        NSUserDefaults,
-    },
-};
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 use dispatch2::DispatchQueue;
 use gpui::{
     AnyWindowHandle, BackgroundExecutor, Bounds, Capslock, CursorStyle, ExternalDragPayload,
@@ -47,37 +28,32 @@ use foreign_types::ForeignTypeRef;
 use futures::channel::oneshot;
 use gpui_util::ResultExt;
 use objc2::{
+    AnyThread, MainThreadMarker, class, msg_send,
+    rc::Retained,
+    runtime::{
+        AnyClass, AnyObject as Objc2Object, AnyProtocol, Bool, ClassBuilder, ProtocolObject, Sel,
+    },
+    sel,
+};
+use objc2::{
     MainThreadMarker, class, msg_send,
     rc::Retained,
     runtime::{AnyClass, AnyObject as Objc2Object, AnyProtocol, Bool, ClassBuilder, Sel},
     sel,
 };
-<<<<<<< HEAD
 use objc2_app_kit::{
     NSAlert, NSAlertStyle, NSBackingStoreType, NSBeep, NSButton as Objc2NSButton,
-    NSEventModifierFlags, NSEventType, NSRequestUserAttentionType, NSScreen, NSView as Objc2NSView,
-    NSViewLayerContentsRedrawPolicy, NSVisualEffectMaterial, NSVisualEffectState,
-    NSWindow as Objc2NSWindow, NSWindowButton as Objc2NSWindowButton, NSWindowCollectionBehavior,
-    NSWindowOcclusionState, NSWindowOrderingMode, NSWindowStyleMask, NSWindowTitleVisibility,
+    NSDraggingImageComponent, NSDraggingImageComponentIconKey, NSDraggingItem,
+    NSEventModifierFlags, NSEventType, NSPasteboardWriting, NSRequestUserAttentionType, NSScreen,
+    NSTrackingArea, NSTrackingAreaOptions, NSView as Objc2NSView, NSViewLayerContentsRedrawPolicy,
+    NSVisualEffectMaterial, NSVisualEffectState, NSWindow as Objc2NSWindow,
+    NSWindowButton as Objc2NSWindowButton, NSWindowCollectionBehavior, NSWindowOcclusionState,
+    NSWindowOrderingMode, NSWindowStyleMask, NSWindowTitleVisibility, NSWorkspace,
 };
 use objc2_foundation::{
-    NSInteger, NSNotFound, NSOperatingSystemVersion, NSPoint as Objc2NSPoint, NSRange,
-    NSRangePointer, NSRect as Objc2NSRect, NSSize, NSString, NSUInteger,
+    NSInteger, NSNotFound, NSObject, NSOperatingSystemVersion, NSPoint as Objc2NSPoint, NSRange,
+    NSRangePointer, NSRect as Objc2NSRect, NSSize, NSString, NSUInteger, NSURL,
 };
-=======
-use objc2::{
-    AnyThread, MainThreadMarker,
-    rc::Retained,
-    runtime::{AnyObject as Objc2Object, ProtocolObject},
-};
-use objc2_app_kit::{
-    NSAlert, NSAlertStyle, NSBeep, NSButton as Objc2NSButton, NSDraggingImageComponent,
-    NSDraggingImageComponentIconKey, NSDraggingItem, NSPasteboardWriting, NSTrackingArea,
-    NSTrackingAreaOptions, NSView as Objc2NSView, NSWindow as Objc2NSWindow,
-    NSWindowButton as Objc2NSWindowButton, NSWorkspace,
-};
-use objc2_foundation::{NSPoint as Objc2NSPoint, NSRect as Objc2NSRect, NSURL};
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 use parking_lot::Mutex;
 use raw_window_handle as rwh;
 use smallvec::SmallVec;
@@ -99,7 +75,6 @@ use std::{
 
 const WINDOW_STATE_IVAR: &str = "windowState";
 
-<<<<<<< HEAD
 unsafe fn set_window_state_ivar(object: ObjcId, state: *mut c_void) {
     let object = unsafe { &mut *object };
     let name = CString::new(WINDOW_STATE_IVAR).unwrap();
@@ -113,7 +88,11 @@ unsafe fn window_state_ivar(object: &Objc2Object) -> &objc2::runtime::Ivar {
 }
 
 type ObjcId = *mut Objc2Object;
+type Object = Objc2Object;
+type id = ObjcId;
 const NIL: ObjcId = ptr::null_mut();
+#[allow(non_upper_case_globals)]
+const nil: ObjcId = NIL;
 
 fn ns_string(value: &str) -> Retained<NSString> {
     NSString::from_str(value)
@@ -321,16 +300,9 @@ static mut WINDOW_CLASS: *const AnyClass = ptr::null();
 static mut PANEL_CLASS: *const AnyClass = ptr::null();
 static mut VIEW_CLASS: *const AnyClass = ptr::null();
 static mut BLURRED_VIEW_CLASS: *const AnyClass = ptr::null();
-=======
+static mut WINDOW_STATE_ARCHIVER_DELEGATE_CLASS: *const AnyClass = ptr::null();
+static mut WINDOW_STATE_UNARCHIVER_CLASS: *const AnyClass = ptr::null();
 static RESTORES_WORKSPACE_AT_LAUNCH_DEFAULT: Once = Once::new();
-
-static mut WINDOW_CLASS: *const Class = ptr::null();
-static mut PANEL_CLASS: *const Class = ptr::null();
-static mut VIEW_CLASS: *const Class = ptr::null();
-static mut BLURRED_VIEW_CLASS: *const Class = ptr::null();
-static mut WINDOW_STATE_ARCHIVER_DELEGATE_CLASS: *const Class = ptr::null();
-static mut WINDOW_STATE_UNARCHIVER_CLASS: *const Class = ptr::null();
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
 #[allow(non_upper_case_globals)]
 const VIEW_WIDTH_SIZABLE: NSUInteger = 1 << 1;
@@ -362,15 +334,6 @@ pub enum UserTabbingPreference {
     InFullScreen,
 }
 
-<<<<<<< HEAD
-#[link(name = "AppKit", kind = "framework")]
-unsafe extern "C" {
-    // AppKit constant naming the icon component of an NSDraggingImageComponent.
-    #[allow(non_upper_case_globals)]
-    static NSDraggingImageComponentIconKey: ObjcId;
-}
-=======
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 #[ctor(unsafe)]
 unsafe fn build_classes() {
     unsafe {
@@ -563,24 +526,33 @@ unsafe fn build_classes() {
             decl.register() as *const AnyClass
         };
         WINDOW_STATE_ARCHIVER_DELEGATE_CLASS = {
-            let mut decl =
-                ClassDecl::new("GPUIWindowStateArchiverDelegate", class!(NSObject)).unwrap();
+            let mut decl = ClassBuilder::new(
+                CString::new("GPUIWindowStateArchiverDelegate")
+                    .unwrap()
+                    .as_c_str(),
+                class!(NSObject),
+            )
+            .unwrap();
             decl.add_method(
                 sel!(archiver:willEncodeObject:),
                 window_state_archiver_will_encode_object
                     as extern "C" fn(&Object, Sel, id, id) -> id,
             );
-            decl.register()
+            decl.register() as *const AnyClass
         };
         WINDOW_STATE_UNARCHIVER_CLASS = {
-            let mut decl =
-                ClassDecl::new("GPUIWindowStateKeyedUnarchiver", class!(NSKeyedUnarchiver))
-                    .unwrap();
+            let mut decl = ClassBuilder::new(
+                CString::new("GPUIWindowStateKeyedUnarchiver")
+                    .unwrap()
+                    .as_c_str(),
+                class!(NSKeyedUnarchiver),
+            )
+            .unwrap();
             decl.add_method(
                 sel!(_windowRestorationOptions),
                 window_state_unarchiver_restoration_options as extern "C" fn(&Object, Sel) -> id,
             );
-            decl.register()
+            decl.register() as *const AnyClass
         };
     }
 }
@@ -601,9 +573,9 @@ extern "C" fn window_state_archiver_will_encode_object(
         if object.is_null() {
             return object;
         }
-        let is_view: BOOL = msg_send![object, isKindOfClass: class!(NSView)];
-        let is_window: BOOL = msg_send![object, isKindOfClass: class!(NSWindow)];
-        if is_view == YES || is_window == YES {
+        let is_view: Bool = msg_send![object, isKindOfClass: class!(NSView)];
+        let is_window: Bool = msg_send![object, isKindOfClass: class!(NSWindow)];
+        if bool::from(is_view) || bool::from(is_window) {
             nil
         } else {
             object
@@ -622,7 +594,7 @@ extern "C" fn window_state_unarchiver_restoration_options(_this: &Object, _sel: 
     // SAFETY: we look the class up by name and only send it `alloc`/`init`/`autorelease`, all of
     // which have the standard `-> id` signature. Returning `nil` when the class is absent is valid.
     unsafe {
-        match Class::get("NSWindowRestorationOptions") {
+        match AnyClass::get("NSWindowRestorationOptions") {
             Some(class) => {
                 let options: id = msg_send![class, alloc];
                 let options: id = msg_send![options, init];
@@ -1381,19 +1353,8 @@ impl MacWindow {
                 cursor_style: CursorStyle::Arrow,
                 cursor_visible,
                 frame_source: None,
-<<<<<<< HEAD
                 renderer,
                 force_render_pending: false,
-=======
-                renderer: renderer::new_renderer(
-                    renderer_context,
-                    native_window as *mut _,
-                    native_view as *mut _,
-                    bounds.size.map(|pixels| pixels.as_f32()),
-                    false,
-                    use_display_p3,
-                ),
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
                 request_frame_callback: None,
                 event_callback: None,
                 activate_callback: None,
@@ -1491,16 +1452,13 @@ impl MacWindow {
                     if kind == WindowKind::Floating {
                         // Let the window float keep above normal windows.
                         native_window.setLevel_(NSFloatingWindowLevel);
-                        native_window.setAcceptsMouseMovedEvents_(YES);
+                        native_window.setAcceptsMouseMovedEvents_(Bool::new(true));
                     } else {
                         native_window.setLevel_(NSNormalWindowLevel);
-                        native_window.setAcceptsMouseMovedEvents_(NO);
+                        native_window.setAcceptsMouseMovedEvents_(Bool::new(false));
                         add_mouse_tracking_area(tracking_view);
                     }
-<<<<<<< HEAD
                     native_window.setAcceptsMouseMovedEvents_(Bool::new(true));
-=======
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
                     if let Some(tabbing_identifier) = tabbing_identifier {
                         let tabbing_id = ns_string(tabbing_identifier.as_str());
@@ -1512,23 +1470,7 @@ impl MacWindow {
                 // `AnchoredPopup` is rejected in `MacPlatform::open_window`, grouped here only
                 // for exhaustiveness.
                 WindowKind::PopUp | WindowKind::AnchoredPopup(_) => {
-<<<<<<< HEAD
-                    // Use a tracking area to allow receiving MouseMoved events even when
-                    // the window or application aren't active, which is often the case
-                    // e.g. for notification windows.
-                    let tracking_area: ObjcId = msg_send![class!(NSTrackingArea), alloc];
-                    let _: () = msg_send![
-                        tracking_area,
-                        initWithRect: Objc2NSRect::new(Objc2NSPoint::new(0., 0.), NSSize::new(0., 0.)),
-                        options: NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved | NSTrackingActiveAlways | NSTrackingInVisibleRect,
-                        owner: native_view,
-                        userInfo: NIL
-                    ];
-                    let _: () =
-                        msg_send![native_view, addTrackingArea: tracking_area.autorelease()];
-=======
                     add_mouse_tracking_area(tracking_view);
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
                     native_window.setLevel_(NSPopUpWindowLevel);
                     let _: () = msg_send![
@@ -1828,7 +1770,7 @@ impl PlatformWindow for MacWindow {
         // released, so no pointer into Objective-C memory escapes this block.
         unsafe {
             let archiver: id = msg_send![class!(NSKeyedArchiver), alloc];
-            let archiver: id = msg_send![archiver, initRequiringSecureCoding: YES];
+            let archiver: id = msg_send![archiver, initRequiringSecureCoding: Bool::new(true)];
             if archiver.is_null() {
                 log::warn!("failed to create an archiver for the native window state");
                 return None;
@@ -1891,7 +1833,8 @@ impl PlatformWindow for MacWindow {
                 RESTORES_WORKSPACE_AT_LAUNCH_DEFAULT.call_once(|| {
                     let defaults: id = NSUserDefaults::standardUserDefaults();
                     let key = ns_string("NSWindowRestoresWorkspaceAtLaunch");
-                    let yes_value: id = msg_send![class!(NSNumber), numberWithBool: YES];
+                    let yes_value: id =
+                        msg_send![class!(NSNumber), numberWithBool: Bool::new(true)];
                     let dict: id = msg_send![
                         class!(NSDictionary),
                         dictionaryWithObject: yes_value
@@ -2095,15 +2038,8 @@ impl PlatformWindow for MacWindow {
         executor
             .spawn(async move {
                 if !closed.load(Ordering::Acquire) {
-<<<<<<< HEAD
                     unsafe {
                         let _: () = msg_send![window, makeKeyAndOrderFront: NIL];
-=======
-                    let window = unsafe { &*window.cast::<Objc2NSWindow>() };
-                    if !window.isVisible() {
-                        let view = unsafe { &*view.cast::<Objc2NSView>() };
-                        view.setNeedsDisplay(true);
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
                     }
                     window.makeKeyAndOrderFront(None);
                 }
@@ -2546,19 +2482,15 @@ impl PlatformWindow for MacWindow {
                             }
                             "Fill" => {
                                 if is_resizable {
-<<<<<<< HEAD
-                                    window.zoom_(NIL);
-=======
                                     // Unlike `zoom:`, AppKit's private Fill action honors the system's
                                     // "Tiled windows have margins" setting.
-                                    let responds_to_zoom_fill: BOOL =
+                                    let can_fill: Bool =
                                         msg_send![window, respondsToSelector: sel!(_zoomFill:)];
-                                    if responds_to_zoom_fill == YES {
-                                        let _: () = msg_send![window, _zoomFill: nil];
+                                    if can_fill == Bool::new(true) {
+                                        let _: () = msg_send![window, _zoomFill: NIL];
                                     } else {
-                                        window.zoom_(nil);
+                                        window.zoom_(NIL);
                                     }
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
                                 }
                             }
                             _ => {
@@ -2616,11 +2548,7 @@ impl PlatformWindow for MacWindow {
 
         // SAFETY: This method runs on the AppKit/foreground path during drag initiation. The
         // native view/window are retained by MacWindowState, copied out under a short lock above,
-<<<<<<< HEAD
-        // and Objective-C results that may be NIL are checked before use.
-=======
         // and all pointers passed to Objective-C remain valid for their respective calls.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         unsafe {
             let event: ObjcId = Retained::as_ptr(&last_left_mouse_down_event)
                 .cast_mut()
@@ -2628,15 +2556,9 @@ impl PlatformWindow for MacWindow {
             let dragging_items: ObjcId = msg_send![class!(NSMutableArray), array];
             // AppKit keeps this frame's distance from the event's location as the drag image's
             // offset from the cursor, so it has to stay anchored on `event`.
-<<<<<<< HEAD
             let location: Objc2NSPoint = msg_send![event, locationInWindow];
             let frame = Objc2NSRect::new(
                 Objc2NSPoint::new(location.x - 16., location.y - 16.),
-=======
-            let location: cocoa::foundation::NSPoint = msg_send![event, locationInWindow];
-            let frame = NSRect::new(
-                NSPoint::new(location.x - 16., location.y - 16.),
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
                 NSSize::new(32., 32.),
             );
 
@@ -2647,26 +2569,6 @@ impl PlatformWindow for MacWindow {
                     continue;
                 };
 
-<<<<<<< HEAD
-                let url: ObjcId = msg_send![
-                    class!(NSURL),
-                    fileURLWithFileSystemRepresentation: path_bytes.as_ptr(),
-                    isDirectory: Bool::new(*is_directory),
-                    relativeToURL: NIL
-                ];
-
-                if url.is_null() {
-                    log::warn!("start_external_drag skipped path with NIL NSURL");
-                    continue;
-                }
-
-                let item: ObjcId = msg_send![class!(NSDraggingItem), alloc];
-                let item: ObjcId = msg_send![item, initWithPasteboardWriter: url];
-                if item.is_null() {
-                    log::warn!("start_external_drag declined: NSDraggingItem allocation failed");
-                    continue;
-                }
-=======
                 let path_bytes = NonNull::new_unchecked(path_bytes.as_ptr().cast_mut());
                 let url = NSURL::fileURLWithFileSystemRepresentation_isDirectory_relativeToURL(
                     path_bytes,
@@ -2679,7 +2581,6 @@ impl PlatformWindow for MacWindow {
                     NSDraggingItem::alloc(),
                     pasteboard_writer,
                 );
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
                 // Resolve drag images lazily via `imageComponentsProvider` (Apple's
                 // recommendation for large item counts), and by file *type* rather than
@@ -2695,28 +2596,6 @@ impl PlatformWindow for MacWindow {
                         .map(|extension| extension.to_string())
                         .unwrap_or_else(|| "public.data".to_string())
                 };
-<<<<<<< HEAD
-                let provider = RcBlock::new(move || -> ObjcId {
-                    let component: ObjcId = msg_send![
-                        class!(NSDraggingImageComponent),
-                        draggingImageComponentWithKey: NSDraggingImageComponentIconKey
-                    ];
-                    let workspace: ObjcId = msg_send![class!(NSWorkspace), sharedWorkspace];
-                    let file_type = ns_string(&file_type);
-                    let icon: ObjcId = msg_send![workspace, iconForFileType: &*file_type];
-                    let _: () = msg_send![component, setContents: icon];
-                    // Component frames are relative to the item's dragging frame.
-                    let _: () = msg_send![
-                        component,
-                        setFrame: Objc2NSRect::new(Objc2NSPoint::new(0., 0.), NSSize::new(32., 32.))
-                    ];
-                    msg_send![class!(NSArray), arrayWithObject: component]
-                });
-                let _: () = msg_send![item, setDraggingFrame: frame];
-                let _: () = msg_send![item, setImageComponentsProvider: &*provider];
-                let _: () = msg_send![dragging_items, addObject: item];
-                let _: () = msg_send![item, release];
-=======
                 let provider = RcBlock::new(move || {
                     let component = NSDraggingImageComponent::draggingImageComponentWithKey(
                         NSDraggingImageComponentIconKey,
@@ -2735,7 +2614,6 @@ impl PlatformWindow for MacWindow {
                 item.setDraggingFrame(frame);
                 item.setImageComponentsProvider(Some(&provider));
                 let _: () = msg_send![dragging_items, addObject: Retained::as_ptr(&item)];
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
             }
 
             let count: NSUInteger = msg_send![dragging_items, count];
@@ -2937,19 +2815,11 @@ unsafe extern "C" fn dealloc_view(this: &Objc2Object, _: Sel) {
     }
 }
 
-<<<<<<< HEAD
-unsafe extern "C" fn reset_cursor_rects(this: &Objc2Object, _: Sel) {
-=======
 fn add_mouse_tracking_area(native_view: &Objc2NSView) {
     let options = NSTrackingAreaOptions::MouseEnteredAndExited
         | NSTrackingAreaOptions::MouseMoved
-        // Track even when another application is active so visible
-        // windows can respond to hover without being focused.
         | NSTrackingAreaOptions::ActiveAlways
         | NSTrackingAreaOptions::InVisibleRect;
-
-    // SAFETY: NSView provides the tracking-event callbacks, and the owner is
-    // the same view that retains the tracking area. No user info is supplied.
     let tracking_area = unsafe {
         NSTrackingArea::initWithRect_options_owner_userInfo(
             NSTrackingArea::alloc(),
@@ -2962,8 +2832,7 @@ fn add_mouse_tracking_area(native_view: &Objc2NSView) {
     native_view.addTrackingArea(&tracking_area);
 }
 
-extern "C" fn reset_cursor_rects(this: &Object, _: Sel) {
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+unsafe extern "C" fn reset_cursor_rects(this: &Objc2Object, _: Sel) {
     // SAFETY: AppKit invokes cursor-rect updates on the main thread for GPUIView instances,
     // whose WINDOW_STATE_IVAR is initialized when the view is created. The cursor registered
     // below is a valid NSCursor.
@@ -3397,15 +3266,12 @@ unsafe extern "C" fn handle_view_event(this: &Objc2Object, _: Sel, native_event:
     }
 }
 
-<<<<<<< HEAD
-unsafe extern "C" fn window_did_change_occlusion_state(this: &Objc2Object, _: Sel, _: ObjcId) {
-=======
 fn visibility(state: &MacWindowState) -> WindowVisibility {
     let is_visible = unsafe {
         state
             .native_window
             .occlusionState()
-            .contains(NSWindowOcclusionState::NSWindowOcclusionStateVisible)
+            .contains(NSWindowOcclusionState::Visible)
     };
     if is_visible {
         WindowVisibility::Visible
@@ -3421,11 +3287,6 @@ fn report_visibility(window_state: &Arc<Mutex<MacWindowState>>) {
     }
     let executor = state.foreground_executor.clone();
     drop(state);
-
-    // AppKit can notify while GPUI is updating a window. Deliver observers
-    // after that update completes, as activation notifications do. The state
-    // is read at delivery rather than captured here so a burst of
-    // notifications collapses to the final value.
     executor
         .spawn({
             let window_state = window_state.clone();
@@ -3446,8 +3307,7 @@ fn report_visibility(window_state: &Arc<Mutex<MacWindowState>>) {
         .detach();
 }
 
-extern "C" fn window_did_change_occlusion_state(this: &Object, _: Sel, _: id) {
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+unsafe extern "C" fn window_did_change_occlusion_state(this: &Objc2Object, _: Sel, _: ObjcId) {
     let window_state = unsafe { get_window_state(this) };
     let mut lock = window_state.lock();
     unsafe {
@@ -3543,21 +3403,17 @@ pub(crate) fn is_macos_version_at_least(version: NSOperatingSystemVersion) -> bo
     }
 }
 
-<<<<<<< HEAD
-unsafe extern "C" fn window_did_move(this: &Objc2Object, _: Sel, _: ObjcId) {
-=======
-fn ns_error_description(error: id) -> String {
+fn ns_error_description(error: ObjcId) -> String {
     if error.is_null() {
         return "unknown error".to_owned();
     }
     unsafe {
-        let description: id = msg_send![error, localizedDescription];
-        description.to_str().to_owned()
+        let description: ObjcId = msg_send![error, localizedDescription];
+        objc_string(description)
     }
 }
 
-extern "C" fn window_did_move(this: &Object, _: Sel, _: id) {
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+unsafe extern "C" fn window_did_move(this: &Objc2Object, _: Sel, _: ObjcId) {
     let window_state = unsafe { get_window_state(this) };
     let mut lock = window_state.as_ref().lock();
     if let Some(mut callback) = lock.moved_callback.take() {
@@ -3620,12 +3476,8 @@ fn report_display_change(window_state: &Arc<Mutex<MacWindowState>>) {
         .detach();
 }
 
-<<<<<<< HEAD
 unsafe extern "C" fn window_did_change_key_status(this: &Objc2Object, selector: Sel, _: ObjcId) {
-=======
-extern "C" fn window_did_change_key_status(this: &Object, selector: Sel, _: id) {
     let signal_at = PlatformFrameSignal::capture(scheduler::Instant::now);
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     let window_state = unsafe { get_window_state(this) };
     let lock = window_state.lock();
     let is_active = unsafe { lock.native_window.isKeyWindow() == Bool::new(true) };
@@ -3678,17 +3530,11 @@ extern "C" fn window_did_change_key_status(this: &Object, selector: Sel, _: id) 
             if let Some(mut callback) = lock.request_frame_callback.take() {
                 lock.renderer.set_presents_with_transaction(true);
                 lock.stop_display_link();
-                let request = lock.next_frame_request();
+                let mut request = lock.next_frame_request();
+                request.signal_at = signal_at;
+                request.signal_source = FrameRequestSource::NativeCallback;
                 drop(lock);
-<<<<<<< HEAD
                 callback(request);
-=======
-                callback(RequestFrameOptions {
-                    signal_at,
-                    signal_source: FrameRequestSource::NativeCallback,
-                    ..Default::default()
-                });
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
                 let mut lock = window_state.lock();
                 lock.request_frame_callback = Some(callback);
@@ -3804,28 +3650,18 @@ unsafe extern "C" fn set_frame_size(this: &Objc2Object, _: Sel, size: NSSize) {
     };
 }
 
-<<<<<<< HEAD
 unsafe extern "C" fn display_layer(this: &Objc2Object, _: Sel, _: ObjcId) {
-=======
-extern "C" fn display_layer(this: &Object, _: Sel, _: id) {
     let signal_at = PlatformFrameSignal::capture(scheduler::Instant::now);
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     let window_state = unsafe { get_window_state(this) };
     let mut lock = window_state.lock();
     if let Some(mut callback) = lock.request_frame_callback.take() {
         lock.renderer.set_presents_with_transaction(true);
         lock.stop_display_link();
-        let request = lock.next_frame_request();
+        let mut request = lock.next_frame_request();
+        request.signal_at = signal_at;
+        request.signal_source = FrameRequestSource::NativeCallback;
         drop(lock);
-<<<<<<< HEAD
         callback(request);
-=======
-        callback(RequestFrameOptions {
-            signal_at,
-            signal_source: FrameRequestSource::NativeCallback,
-            ..Default::default()
-        });
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
         let mut lock = window_state.lock();
         lock.request_frame_callback = Some(callback);
@@ -3840,31 +3676,22 @@ extern "C" fn step(view: *mut c_void) {
         let window_state = get_window_state(&*view);
         let mut lock = window_state.lock();
 
-<<<<<<< HEAD
         if let Some(mut callback) = lock.request_frame_callback.take() {
-            let request = lock.next_frame_request();
+            let (signal_at, signal_source) = lock
+                .frame_source
+                .as_ref()
+                .and_then(WindowFrameSource::take_signal)
+                .map_or(
+                    (None, FrameRequestSource::NativeCallback),
+                    |(at, source)| (Some(at), source),
+                );
+            let mut request = lock.next_frame_request();
+            request.signal_at = signal_at;
+            request.signal_source = signal_source;
             drop(lock);
             callback(request);
             window_state.lock().request_frame_callback = Some(callback);
         }
-=======
-    if let Some(mut callback) = lock.request_frame_callback.take() {
-        let (signal_at, signal_source) = lock
-            .frame_source
-            .as_ref()
-            .and_then(WindowFrameSource::take_signal)
-            .map_or(
-                (None, FrameRequestSource::NativeCallback),
-                |(at, source)| (Some(at), source),
-            );
-        drop(lock);
-        callback(RequestFrameOptions {
-            signal_at,
-            signal_source,
-            ..Default::default()
-        });
-        window_state.lock().request_frame_callback = Some(callback);
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 }
 
@@ -4347,12 +4174,6 @@ unsafe extern "C" fn blurred_view_init_with_frame(
 ) -> ObjcId {
     unsafe {
         let view = msg_send![super(this, class!(NSVisualEffectView)), initWithFrame: frame];
-<<<<<<< HEAD
-        // Use a colorless semantic material. The default value `AppearanceBased`, though not
-        // manually set, is deprecated.
-        let _: () = msg_send![view, setMaterial: NSVisualEffectMaterial::Selection];
-        let _: () = msg_send![view, setState: NSVisualEffectState::Active];
-=======
         // A window-background material, whose tint and extra saturation
         // `blurred_view_update_layer` strips, leaving only the blur. `Selection`, used before,
         // has no `CABackdropLayer` on macOS 27, so nothing behind the window was blurred. (Setting
@@ -4361,7 +4182,6 @@ unsafe extern "C" fn blurred_view_init_with_frame(
         // The default, but blurring what's behind the window is this view's whole purpose.
         NSVisualEffectView::setBlendingMode_(view, NSVisualEffectBlendingMode::BehindWindow);
         NSVisualEffectView::setState_(view, NSVisualEffectState::Active);
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         view
     }
 }

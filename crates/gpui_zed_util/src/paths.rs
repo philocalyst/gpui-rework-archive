@@ -2340,8 +2340,6 @@ mod tests {
     }
 
     #[test]
-<<<<<<< HEAD
-=======
     fn path_with_position_preserves_paths_without_positions() {
         for input in [
             "",
@@ -2410,7 +2408,6 @@ mod tests {
     }
 
     #[perf]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     fn path_with_position_parse_posix_path() {
         // Test POSIX filename edge cases
         // Read more at https://en.wikipedia.org/wiki/Filename
@@ -2799,9 +2796,6 @@ mod tests {
         );
     }
 
-<<<<<<< HEAD
-    #[test]
-=======
     #[perf]
     #[cfg(target_os = "windows")]
     fn test_sanitized_path_verbatim_unc() {
@@ -2811,7 +2805,6 @@ mod tests {
     }
 
     #[perf]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     fn test_compare_numeric_segments() {
         // Helper function to create peekable iterators and test
         fn compare(a: &str, b: &str) -> Ordering {

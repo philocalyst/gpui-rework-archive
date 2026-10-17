@@ -723,28 +723,22 @@ impl WebWindowInner {
             let is_held = event.repeat();
             let key_char = compute_key_char(&event, &key, &modifiers);
 
-<<<<<<< HEAD
-            // The first IME keydown can precede compositionstart, when both
-            // composing flags are still false. Leave it to the browser without
-            // dispatching editor actions or cancelling its default behavior.
+            // Leave an initial IME keydown to the browser even if compositionstart
+            // has not arrived yet. The software keyboard must also edit the mirror
+            // itself so iOS keeps its autocorrect context and delivers the related
+            // beforeinput/input events.
             if is_ime_keydown(
                 this.is_composing.get(),
                 event.is_composing(),
                 event.key_code(),
-            ) {
-=======
-            // The software keyboard must edit the mirror itself: cancelling
-            // keydown prevents iOS from updating its autocorrect context and
-            // from delivering the corresponding beforeinput/input events.
-            if this.touch_input
+            ) || (this.touch_input
                 && this.ime_mirror.virtual_keyboard_enabled()
                 && this.state.borrow().input_handler.is_some()
                 && !modifiers.platform
                 && !modifiers.control
                 && !modifiers.alt
-                && (key_char.is_some() || matches!(key.as_str(), "backspace" | "delete" | "enter"))
+                && (key_char.is_some() || matches!(key.as_str(), "backspace" | "delete" | "enter")))
             {
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
                 return;
             }
 

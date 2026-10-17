@@ -11,11 +11,6 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::Arc;
 
-<<<<<<< HEAD
-/// Where an image or other asset is loaded from: a URL, a file path, or a name in the registry.
-///
-/// Equal resources share one cache entry.
-=======
 pub(crate) struct CachedLoad<T> {
     state: Rc<RefCell<CachedLoadState<T>>>,
     // Keep the owner outside the state so publishing a result cannot cancel its own task.
@@ -71,8 +66,9 @@ impl<T: Clone + Send + 'static> CachedLoad<T> {
     }
 }
 
-/// An enum representing
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+/// Where an image or other asset is loaded from: a URL, a file path, or a name in the registry.
+///
+/// Equal resources share one cache entry.
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Resource {
     /// A URL, fetched with the app's HTTP client.

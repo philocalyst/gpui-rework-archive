@@ -1,16 +1,9 @@
 use crate::{
-<<<<<<< HEAD
-    MacDispatcher, MacDisplay, MacKeyboardLayout, MacKeyboardMapper, MacWindow,
-    events::key_to_native, haptic_feedback::MacHaptics, pasteboard::Pasteboard, renderer,
-=======
-    AppleActivity, AppleDispatcher, BoolExt, MacDisplay, MacKeyboardLayout, MacKeyboardMapper,
-    MacWindow, events::key_to_native, ns_string, pasteboard::Pasteboard, renderer,
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
-    set_active_window_cursor_style,
+    MacDisplay, MacKeyboardLayout, MacKeyboardMapper, MacWindow, events::key_to_native,
+    haptic_feedback::MacHaptics, pasteboard::Pasteboard, renderer, set_active_window_cursor_style,
 };
 use anyhow::{Context as _, anyhow};
 use block2::RcBlock;
-<<<<<<< HEAD
 use core_foundation::{
     base::{CFType, CFTypeRef, OSStatus, TCFType},
     boolean::CFBoolean,
@@ -22,32 +15,6 @@ use core_foundation::{
 use dispatch2::DispatchQueue;
 use futures::channel::oneshot;
 use gpui::{
-    Action, AnyWindowHandle, BackgroundExecutor, ClipboardItem, CursorStyle, ForegroundExecutor,
-    KeyContext, Keymap, MacActivationPolicy, Menu, MenuItem, OsMenu, OwnedMenu, PathPromptOptions,
-    Platform, PlatformDisplay, PlatformKeyboardLayout, PlatformKeyboardMapper, PlatformTextSystem,
-    PlatformWindow, Result, SystemMenuType, Task, ThermalState, WindowAppearance, WindowKind,
-    WindowParams, popup::PopupNotSupportedError,
-=======
-use cocoa::{
-    appkit::{
-        NSAppearanceNameVibrantDark, NSAppearanceNameVibrantLight, NSApplication,
-        NSApplicationActivationPolicy,
-        NSApplicationActivationPolicy::{
-            NSApplicationActivationPolicyAccessory, NSApplicationActivationPolicyRegular,
-        },
-        NSControl as _, NSEventModifierFlags, NSMenu, NSMenuItem, NSVisualEffectState,
-        NSVisualEffectView, NSWindow,
-    },
-    base::{BOOL, NO, YES, id, nil, selector},
-    foundation::{
-        NSArray, NSAutoreleasePool, NSBundle, NSInteger, NSProcessInfo, NSString, NSUInteger, NSURL,
-    },
-};
-use core_foundation::{base::CFRelease, runloop::CFRunLoopRun, string::CFStringRef};
-use ctor::ctor;
-use dispatch2::DispatchQueue;
-use futures::channel::oneshot;
-use gpui::{
     Action, ActivationPolicy, ActivityGuard, AnyWindowHandle, BackgroundExecutor, ClipboardItem,
     CursorStyle, ForegroundExecutor, GraphicalEnvironment, KeyContext, Keymap, Menu, MenuItem,
     OsMenu, OwnedMenu, PathPromptOptions, Platform, PlatformDisplay, PlatformKeyboardLayout,
@@ -56,9 +23,8 @@ use gpui::{
     popup::PopupNotSupportedError,
 };
 use gpui_apple::{
-    keychain,
+    AppleActivity, AppleDispatcher, keychain,
     thermal::{self, ThermalObserver},
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 };
 use gpui_util::{ResultExt, new_std_command};
 use itertools::Itertools;
@@ -66,26 +32,22 @@ use objc2::rc::{Allocated, Retained};
 use objc2::runtime::{AnyObject, ProtocolObject};
 use objc2::{ClassType, DefinedClass, MainThreadMarker, MainThreadOnly, define_class, msg_send};
 use objc2_app_kit::{
-    NSAppearance, NSApplication, NSApplicationActivationPolicy, NSApplicationDelegate,
-    NSControlStateValueOn, NSCursor, NSDocumentController, NSEventModifierFlags, NSMenu,
-    NSMenuDelegate, NSMenuItem, NSModalResponseOK, NSOpenPanel, NSResponder, NSSavePanel,
-    NSScroller, NSWorkspace,
+    NSAppearance, NSApplication, NSApplicationActivationPolicy,
+    NSApplicationActivationPolicy::{
+        NSApplicationActivationPolicyAccessory, NSApplicationActivationPolicyRegular,
+    },
+    NSApplicationDelegate, NSControlStateValueOn, NSCursor, NSDocumentController,
+    NSEventModifierFlags, NSMenu, NSMenuDelegate, NSMenuItem, NSModalResponse, NSModalResponseOK,
+    NSOpenPanel, NSResponder, NSSavePanel, NSScroller, NSWorkspace, NSWorkspaceDidWakeNotification,
+    NSWorkspaceWillSleepNotification,
 };
 #[cfg(feature = "screen-capture")]
 use objc2_foundation::NSOperatingSystemVersion;
 use objc2_foundation::{
-    NSArray, NSAutoreleasePool, NSBundle, NSInteger, NSNotification, NSNotificationCenter,
-    NSNumber, NSObjectProtocol, NSProcessInfo, NSString, NSUInteger, NSURL, NSUserDefaults,
+    NSActivityOptions, NSArray, NSAutoreleasePool, NSBundle, NSInteger, NSNotification,
+    NSNotificationCenter, NSNumber, NSObjectProtocol, NSProcessInfo, NSString, NSUInteger, NSURL,
+    NSUserDefaults,
 };
-<<<<<<< HEAD
-=======
-use objc2::{MainThreadMarker, runtime::AnyObject};
-use objc2_app_kit::{
-    NSModalResponse, NSModalResponseOK, NSOpenPanel, NSSavePanel, NSWorkspace,
-    NSWorkspaceDidWakeNotification, NSWorkspaceWillSleepNotification,
-};
-use objc2_foundation::NSActivityOptions;
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 use parking_lot::Mutex;
 use ptr::null_mut;
 use semver::Version;
@@ -131,7 +93,6 @@ define_class!(
     unsafe impl NSObjectProtocol for GPUIApplication {}
 );
 
-<<<<<<< HEAD
 define_class!(
     // SAFETY: NSResponder has no subclassing requirements, and this class
     // does not implement Drop.
@@ -140,17 +101,6 @@ define_class!(
     #[name = "GPUIApplicationDelegate"]
     #[ivars = PlatformIvars]
     struct GPUIApplicationDelegate;
-=======
-            decl.add_method(
-                sel!(onScreenParametersChange:),
-                on_screen_parameters_change as extern "C" fn(&mut Object, Sel, id),
-            );
-
-            decl.add_method(
-                sel!(onSystemSleep:),
-                on_system_sleep as extern "C" fn(&mut Object, Sel, id),
-            );
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
     impl GPUIApplicationDelegate {
         #[unsafe(method_id(init))]
@@ -223,9 +173,13 @@ define_class!(
         fn keyboard_layout_change(&self, _: &NSNotification) {
             on_keyboard_layout_change(self);
         }
-        #[unsafe(method(onThermalStateChange:))]
-        fn thermal_state_change(&self, _: &NSNotification) {
-            on_thermal_state_change(self);
+        #[unsafe(method(onScreenParametersChange:))]
+        fn screen_parameters_change(&self, _: &NSNotification) {
+            on_screen_parameters_change(self);
+        }
+        #[unsafe(method(onSystemSleep:))]
+        fn system_sleep(&self, _: &NSNotification) {
+            on_system_sleep(self);
         }
         #[unsafe(method(onSystemWake:))]
         fn system_wake(&self, _: &NSNotification) {
@@ -254,12 +208,8 @@ pub(crate) struct MacPlatformState {
     text_system: Arc<dyn PlatformTextSystem>,
     renderer_context: renderer::Context,
     headless: bool,
-<<<<<<< HEAD
-    activation_policy: Option<MacActivationPolicy>,
-=======
     activation_policy: ActivationPolicy,
     application_created: bool,
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     general_pasteboard: Pasteboard,
     find_pasteboard: Pasteboard,
     reopen: Option<Box<dyn FnMut()>>,
@@ -308,12 +258,7 @@ impl MacPlatform {
         let marker = MainThreadMarker::new().expect("Mac platform not created on main thread");
         let dispatcher = Arc::new(AppleDispatcher::new());
 
-<<<<<<< HEAD
         let text_system = Arc::new(crate::MacTextSystem::new());
-=======
-        #[cfg(feature = "font-kit")]
-        let text_system = Arc::new(gpui_apple::AppleTextSystem::new());
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
         let keyboard_layout = MacKeyboardLayout::new();
         let keyboard_mapper = Rc::new(MacKeyboardMapper::new(keyboard_layout.id()));
@@ -326,7 +271,6 @@ impl MacPlatform {
             background_executor: BackgroundExecutor::new(dispatcher.clone()),
             foreground_executor: ForegroundExecutor::new(dispatcher),
             renderer_context: renderer::Context::default(),
-            activation_policy: None,
             general_pasteboard: Pasteboard::general(),
             find_pasteboard: Pasteboard::find(),
             reopen: None,
@@ -581,24 +525,20 @@ impl MacPlatform {
         )
     }
 
-    // Before the app finishes launching there is no delegate yet;
-    // `did_finish_launching` registers the observers then.
+    // The typed delegate is retained for the duration of the application run.
     fn ensure_system_power_observers(&self) {
-        if self.0.lock().system_power_observers_registered {
+        let (registered, delegate) = {
+            let state = self.0.lock();
+            (
+                state.system_power_observers_registered,
+                state.app_delegate.clone(),
+            )
+        };
+        if registered {
             return;
         }
-
-        // The shared application must be created through `APP_CLASS`, or `run`
-        // finds a plain `NSApplication` without the `platform` ivar; only the
-        // delegate lookup goes through the typed binding.
-        // SAFETY: APP_CLASS is registered during startup and `sharedApplication`
-        // returns a live NSApplication instance.
-        let delegate = unsafe {
-            let app: id = msg_send![APP_CLASS, sharedApplication];
-            (*(app as *const objc2_app_kit::NSApplication)).delegate()
-        };
         if let Some(delegate) = delegate {
-            register_system_power_observers(delegate.as_ref());
+            register_system_power_observers(as_any_object(delegate.as_ref()));
             self.0.lock().system_power_observers_registered = true;
         }
     }
@@ -617,10 +557,6 @@ impl Platform for MacPlatform {
         self.0.lock().text_system.clone()
     }
 
-    fn set_mac_activation_policy(&self, policy: MacActivationPolicy) {
-        self.0.lock().activation_policy = Some(policy);
-    }
-
     fn run(&self, on_finish_launching: Box<dyn FnOnce()>) {
         let mut state = self.0.lock();
         if state.headless {
@@ -633,29 +569,20 @@ impl Platform for MacPlatform {
         }
 
         unsafe {
-<<<<<<< HEAD
             let app: Retained<GPUIApplication> =
                 msg_send![GPUIApplication::class(), sharedApplication];
             let app_delegate = GPUIApplicationDelegate::new();
-            let app_delegate_protocol = ProtocolObject::from_ref(&*app_delegate);
-            app.as_super().setDelegate(Some(&app_delegate_protocol));
-=======
-            let app: id = msg_send![APP_CLASS, sharedApplication];
-            // An accessory app must not register in the Dock during launch, so its
-            // policy has to precede the run loop. `Regular` is applied in
-            // `did_finish_launching` instead: setting it this early leaves the menu
-            // bar of an unbundled app launched from a terminal unclickable.
             let policy = {
                 let mut state = self.0.lock();
                 state.application_created = true;
                 state.activation_policy
             };
             if policy == ActivationPolicy::Accessory {
-                app.setActivationPolicy_(native_activation_policy(policy));
+                app.as_super()
+                    .setActivationPolicy(native_activation_policy(policy));
             }
-            let app_delegate: id = msg_send![APP_DELEGATE_CLASS, new];
-            app.setDelegate_(app_delegate);
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+            let app_delegate_protocol = ProtocolObject::from_ref(&*app_delegate);
+            app.as_super().setDelegate(Some(&app_delegate_protocol));
 
             let self_ptr = self as *const Self as *mut c_void;
             app.ivars().platform.set(self_ptr);
@@ -755,8 +682,10 @@ impl Platform for MacPlatform {
         drop(state);
         if should_apply {
             unsafe {
-                let app: id = msg_send![APP_CLASS, sharedApplication];
-                app.setActivationPolicy_(native_activation_policy(policy));
+                let app: Retained<GPUIApplication> =
+                    msg_send![GPUIApplication::class(), sharedApplication];
+                app.as_super()
+                    .setActivationPolicy(native_activation_policy(policy));
             }
         }
     }
@@ -939,7 +868,6 @@ impl Platform for MacPlatform {
             )));
         }
 
-<<<<<<< HEAD
         let bundle_id = NSBundle::mainBundle().bundleIdentifier();
         let Some(bundle_id) = bundle_id else {
             return Task::ready(Err(anyhow!("Can only register URL scheme in bundled apps")));
@@ -974,42 +902,6 @@ impl Platform for MacPlatform {
                 Some(&block),
             );
         }
-=======
-        let Some(bundle_id) = NSBundle::mainBundle().bundleIdentifier() else {
-            return Task::ready(Err(anyhow!("Can only register URL scheme in bundled apps")));
-        };
-
-        let workspace = NSWorkspace::sharedWorkspace();
-        let Some(app) = workspace.URLForApplicationWithBundleIdentifier(&bundle_id) else {
-            return Task::ready(Err(anyhow!(
-                "Cannot register URL scheme until app is installed"
-            )));
-        };
-
-        let scheme = NSString::from_str(scheme);
-
-        let done_tx = Cell::new(Some(done_tx));
-        let handler = RcBlock::new(move |error: *mut NSError| {
-            let result = if let Some(error) = unsafe { error.as_ref() } {
-                Err(anyhow!(
-                    "Failed to register: {}",
-                    error.localizedDescription()
-                ))
-            } else {
-                Ok(())
-            };
-
-            if let Some(done_tx) = done_tx.take() {
-                _ = done_tx.send(result);
-            }
-        });
-
-        workspace.setDefaultApplicationAtURL_toOpenURLsWithScheme_completionHandler(
-            &app,
-            &scheme,
-            Some(&handler),
-        );
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
         self.background_executor().spawn(async { done_rx.await? })
     }
@@ -1028,41 +920,6 @@ impl Platform for MacPlatform {
         let (done_tx, done_rx) = oneshot::channel();
         self.foreground_executor()
             .spawn(async move {
-<<<<<<< HEAD
-                {
-                    let panel = NSOpenPanel::openPanel(MainThreadMarker::new().unwrap());
-                    panel.setCanChooseDirectories(options.directories);
-                    panel.setCanChooseFiles(options.files);
-                    panel.setAllowsMultipleSelection(options.multiple);
-
-                    panel.setCanCreateDirectories(true);
-                    panel.setResolvesAliases(false);
-                    let panel_for_callback = panel.clone();
-                    let done_tx = Cell::new(Some(done_tx));
-                    let block = RcBlock::new(move |response: objc2_app_kit::NSModalResponse| {
-                        let result = if response == NSModalResponseOK {
-                            let mut result = Vec::new();
-                            let urls = panel_for_callback.URLs();
-                            for i in 0..urls.count() {
-                                let url = urls.objectAtIndex(i as NSUInteger);
-                                if url.isFileURL()
-                                    && let Ok(path) = ns_url_to_path(&url)
-                                {
-                                    result.push(path)
-                                }
-                            }
-                            Some(result)
-                        } else {
-                            None
-                        };
-
-                        if let Some(done_tx) = done_tx.take() {
-                            let _ = done_tx.send(Ok(result));
-                        }
-                    });
-                    if let Some(prompt) = options.prompt {
-                        panel.setPrompt(Some(&ns_string(&prompt)));
-=======
                 let panel = NSOpenPanel::openPanel(marker);
                 panel.setCanChooseDirectories(options.directories);
                 panel.setCanChooseFiles(options.files);
@@ -1088,16 +945,11 @@ impl Platform for MacPlatform {
                                 .collect::<Vec<_>>()
                         });
                         _ = done_tx.send(Ok(result));
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
                     }
                 });
 
-<<<<<<< HEAD
-                    panel.beginWithCompletionHandler(&block);
-=======
                 if let Some(prompt) = options.prompt {
                     panel.setPrompt(Some(&NSString::from_str(prompt.as_str())));
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
                 }
 
                 panel.beginWithCompletionHandler(&handler);
@@ -1119,30 +971,6 @@ impl Platform for MacPlatform {
         let marker = self.1;
         self.foreground_executor()
             .spawn(async move {
-<<<<<<< HEAD
-                {
-                    let panel = NSSavePanel::savePanel(MainThreadMarker::new().unwrap());
-                    let path = ns_string(directory.to_string_lossy().as_ref());
-                    let url = NSURL::fileURLWithPath_isDirectory(&path, true);
-                    panel.setDirectoryURL(Some(&url));
-                    let panel_for_callback = panel.clone();
-
-                    if let Some(suggested_name) = suggested_name {
-                        let name_string = ns_string(&suggested_name);
-                        panel.setNameFieldStringValue(&name_string);
-                    }
-
-                    let done_tx = Cell::new(Some(done_tx));
-                    let block = RcBlock::new(move |response: objc2_app_kit::NSModalResponse| {
-                        let mut result = None;
-                        if response == NSModalResponseOK {
-                            if let Some(url) = panel_for_callback.URL()
-                                && url.isFileURL()
-                            {
-                                result = ns_url_to_path(&url).ok().map(|mut result| {
-                                    let Some(filename) = result.file_name() else {
-                                        return result;
-=======
                 let panel = NSSavePanel::savePanel(marker);
                 panel.setDirectoryURL(url.as_deref());
 
@@ -1166,7 +994,6 @@ impl Platform for MacPlatform {
                                 .map(|mut path| {
                                     let Some(filename) = path.file_name() else {
                                         return path;
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
                                     };
                                     let chunks = filename
                                         .as_bytes()
@@ -1187,14 +1014,6 @@ impl Platform for MacPlatform {
                                         path.set_extension("");
                                     }
 
-<<<<<<< HEAD
-                        if let Some(done_tx) = done_tx.take() {
-                            let _ = done_tx.send(Ok(result));
-                        }
-                    });
-                    panel.beginWithCompletionHandler(&block);
-                }
-=======
                                     path
                                 })
                         } else {
@@ -1206,7 +1025,6 @@ impl Platform for MacPlatform {
                 });
 
                 panel.beginWithCompletionHandler(&handler);
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
             })
             .detach();
 
@@ -1286,30 +1104,6 @@ impl Platform for MacPlatform {
     }
 
     fn on_system_wake(&self, callback: Box<dyn FnMut()>) {
-<<<<<<< HEAD
-        let mut state = self.0.lock();
-        state.on_system_wake = Some(callback);
-        if state.system_wake_observer_registered {
-            return;
-        }
-        drop(state);
-
-        let delegate = self.0.lock().app_delegate.clone();
-        if let Some(delegate) = delegate {
-            register_system_wake_observer(&delegate);
-            self.0.lock().system_wake_observer_registered = true;
-        }
-    }
-
-    fn thermal_state(&self) -> ThermalState {
-        match NSProcessInfo::processInfo().thermalState().0 {
-            0 => ThermalState::Nominal,
-            1 => ThermalState::Fair,
-            2 => ThermalState::Serious,
-            3 => ThermalState::Critical,
-            _ => ThermalState::Nominal,
-        }
-=======
         self.0.lock().on_system_wake = Some(callback);
         self.ensure_system_power_observers();
     }
@@ -1323,7 +1117,6 @@ impl Platform for MacPlatform {
             reason,
             NSActivityOptions::UserInitiated,
         )))
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 
     fn show_system_notification(&self, notification: gpui::SystemNotification) {
@@ -1484,127 +1277,58 @@ fn get_mac_platform(object: &GPUIApplicationDelegate) -> &MacPlatform {
 }
 
 fn will_finish_launching(this: &GPUIApplicationDelegate) {
-    {
-        let user_defaults = NSUserDefaults::standardUserDefaults();
-
-        // The autofill heuristic controller causes slowdown and high CPU usage.
-        // We don't know exactly why. This disables the full heuristic controller.
-        //
-        // Adapted from: https://github.com/ghostty-org/ghostty/pull/8625
-        let name = ns_string("NSAutoFillHeuristicControllerEnabled");
-        let existing_value = user_defaults.objectForKey(&name);
-        if existing_value.is_none() {
-            let false_value = NSNumber::numberWithBool(false);
-            unsafe { user_defaults.setObject_forKey(Some(&false_value), &name) };
-        }
-
-<<<<<<< HEAD
-        let platform = get_mac_platform(this);
-        let state = platform.0.lock();
-        if let Some(policy) = state.activation_policy {
-            let app: Retained<GPUIApplication> =
-                unsafe { msg_send![GPUIApplication::class(), sharedApplication] };
-            let ns_policy = match policy {
-                MacActivationPolicy::Regular => NSApplicationActivationPolicy::Regular,
-                MacActivationPolicy::Accessory => NSApplicationActivationPolicy::Accessory,
-                MacActivationPolicy::Prohibited => NSApplicationActivationPolicy::Prohibited,
-            };
-            app.as_super().setActivationPolicy(ns_policy);
-=======
-extern "C" fn did_finish_launching(this: &mut Object, _: Sel, _: id) {
-    unsafe {
-        let app: id = msg_send![APP_CLASS, sharedApplication];
-        let policy = get_mac_platform(this).0.lock().activation_policy;
-        app.setActivationPolicy_(native_activation_policy(policy));
-
-        let notification_center: *mut Object =
-            msg_send![class!(NSNotificationCenter), defaultCenter];
-        let name = ns_string("NSTextInputContextKeyboardSelectionDidChangeNotification");
-        let _: () = msg_send![notification_center, addObserver: this as id
-            selector: sel!(onKeyboardLayoutChange:)
-            name: name
-            object: nil
-        ];
-
-        // Posted when a display is connected, disconnected, rearranged, or
-        // changes mode, which includes its refresh rate.
-        let _: () = msg_send![notification_center, addObserver: this as id
-            selector: sel!(onScreenParametersChange:)
-            name: ns_string("NSApplicationDidChangeScreenParametersNotification")
-            object: nil
-        ];
-
-        // SAFETY: `this` is a live Objective-C object; only the pointer's type changes.
-        let observer = &*(this as *mut Object as *const AnyObject);
-        let platform = get_mac_platform(this);
-        let callback = {
-            let mut state = platform.0.lock();
-            if (state.on_system_sleep.is_some() || state.on_system_wake.is_some())
-                && !state.system_power_observers_registered
-            {
-                register_system_power_observers(observer);
-                state.system_power_observers_registered = true;
-            }
-            state.finish_launching.take()
-        };
-        if let Some(callback) = callback {
-            callback();
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
-        }
+    let user_defaults = NSUserDefaults::standardUserDefaults();
+    // Disable a costly autofill heuristic controller, matching upstream behavior.
+    let name = ns_string("NSAutoFillHeuristicControllerEnabled");
+    if user_defaults.objectForKey(&name).is_none() {
+        let false_value = NSNumber::numberWithBool(false);
+        unsafe { user_defaults.setObject_forKey(Some(&false_value), &name) };
     }
+    let _ = this;
 }
 
-<<<<<<< HEAD
 fn did_finish_launching(this: &GPUIApplicationDelegate) {
     let platform = get_mac_platform(this);
-    let state = platform.0.lock();
-    if state.activation_policy.is_none() {
-        let app: Retained<GPUIApplication> =
-            unsafe { msg_send![GPUIApplication::class(), sharedApplication] };
-        app.as_super()
-            .setActivationPolicy(NSApplicationActivationPolicy::Regular);
-    }
-    drop(state);
+    let policy = platform.0.lock().activation_policy;
+    let app: Retained<GPUIApplication> =
+        unsafe { msg_send![GPUIApplication::class(), sharedApplication] };
+    app.as_super()
+        .setActivationPolicy(native_activation_policy(policy));
 
-    let notification_center = NSNotificationCenter::defaultCenter();
-    let name = ns_string("NSTextInputContextKeyboardSelectionDidChangeNotification");
+    let center = NSNotificationCenter::defaultCenter();
+    let keyboard_name = ns_string("NSTextInputContextKeyboardSelectionDidChangeNotification");
+    let display_name = ns_string("NSApplicationDidChangeScreenParametersNotification");
     unsafe {
-        notification_center.addObserver_selector_name_object(
+        center.addObserver_selector_name_object(
             as_any_object(this),
             objc2::sel!(onKeyboardLayoutChange:),
-            Some(&name),
+            Some(&keyboard_name),
+            None,
+        );
+        center.addObserver_selector_name_object(
+            as_any_object(this),
+            objc2::sel!(onScreenParametersChange:),
+            Some(&display_name),
             None,
         );
     }
 
-    let thermal_name = ns_string("NSProcessInfoThermalStateDidChangeNotification");
-    let process_info = NSProcessInfo::processInfo();
-    unsafe {
-        notification_center.addObserver_selector_name_object(
-            as_any_object(this),
-            objc2::sel!(onThermalStateChange:),
-            Some(&thermal_name),
-            Some(&process_info),
-        );
-    }
-    let platform = get_mac_platform(this);
-    let callback = {
-        let mut state = platform.0.lock();
-        if state.on_system_wake.is_some() && !state.system_wake_observer_registered {
-            register_system_wake_observer(this);
-            state.system_wake_observer_registered = true;
-        }
-        state.finish_launching.take()
+    let should_register_power = {
+        let state = platform.0.lock();
+        (state.on_system_sleep.is_some() || state.on_system_wake.is_some())
+            && !state.system_power_observers_registered
     };
-    if let Some(callback) = callback {
+    if should_register_power {
+        register_system_power_observers(as_any_object(this));
+        platform.0.lock().system_power_observers_registered = true;
+    }
+    if let Some(callback) = platform.0.lock().finish_launching.take() {
         callback();
-=======
-/// `observer` must be the app delegate, whose class declares `onSystemSleep:`
-/// and `onSystemWake:` (see `build_classes`).
+    }
+}
+
 fn register_system_power_observers(observer: &AnyObject) {
     let center = NSWorkspace::sharedWorkspace().notificationCenter();
-    // SAFETY: both selectors are declared on the delegate class with the
-    // notification-handler signature these observers are invoked with.
     unsafe {
         center.addObserver_selector_name_object(
             observer,
@@ -1618,26 +1342,11 @@ fn register_system_power_observers(observer: &AnyObject) {
             Some(NSWorkspaceDidWakeNotification),
             None,
         );
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 }
 
 fn as_any_object<T>(object: &T) -> &AnyObject {
     unsafe { &*(object as *const T as *const AnyObject) }
-}
-
-fn register_system_wake_observer(observer: &GPUIApplicationDelegate) {
-    let workspace = NSWorkspace::sharedWorkspace();
-    let workspace_center = workspace.notificationCenter();
-    let wake_name = ns_string("NSWorkspaceDidWakeNotification");
-    unsafe {
-        workspace_center.addObserver_selector_name_object(
-            as_any_object(observer),
-            objc2::sel!(onSystemWake:),
-            Some(&wake_name),
-            None,
-        );
-    }
 }
 
 fn should_handle_reopen(this: &GPUIApplicationDelegate, has_open_windows: bool) -> bool {
@@ -1679,20 +1388,12 @@ fn on_keyboard_layout_change(this: &GPUIApplicationDelegate) {
     }
 }
 
-<<<<<<< HEAD
-fn on_thermal_state_change(this: &GPUIApplicationDelegate) {
-=======
-extern "C" fn on_screen_parameters_change(this: &mut Object, _: Sel, _: id) {
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
-    // Defer to the next run loop iteration to avoid re-entrant borrows of the App RefCell,
-    // as NSNotificationCenter delivers this notification synchronously and it may fire while
-    // the App is already borrowed (same pattern as quit() above).
+fn on_screen_parameters_change(this: &GPUIApplicationDelegate) {
     let platform = get_mac_platform(this);
     let platform_ptr = platform as *const MacPlatform as *mut c_void;
     unsafe {
         DispatchQueue::main().exec_async_f(platform_ptr, on_screen_parameters_change);
     }
-
     extern "C" fn on_screen_parameters_change(context: *mut c_void) {
         let platform = unsafe { &*(context as *const MacPlatform) };
         let callback = platform.0.lock().on_displays_changed.take();
@@ -1707,23 +1408,13 @@ extern "C" fn on_screen_parameters_change(this: &mut Object, _: Sel, _: id) {
     }
 }
 
-<<<<<<< HEAD
-fn on_system_wake(this: &GPUIApplicationDelegate) {
-=======
-// Deferred to the main queue like the wake and thermal notifications. The
-// machine keeps running the main run loop for well over a frame after the
-// observers return, so the block runs before it suspends.
-extern "C" fn on_system_sleep(this: &mut Object, _: Sel, _: id) {
-    // SAFETY: this is the registered app delegate carrying MAC_PLATFORM_IVAR.
-    let platform = unsafe { get_mac_platform(this) };
+fn on_system_sleep(this: &GPUIApplicationDelegate) {
+    let platform = get_mac_platform(this);
     let platform_ptr = platform as *const MacPlatform as *mut c_void;
-    // SAFETY: platform lives for the process lifetime while callbacks are registered.
     unsafe {
         DispatchQueue::main().exec_async_f(platform_ptr, on_system_sleep);
     }
-
     extern "C" fn on_system_sleep(context: *mut c_void) {
-        // SAFETY: context is the MacPlatform pointer queued above.
         let platform = unsafe { &*(context as *const MacPlatform) };
         let mut lock = platform.0.lock();
         if let Some(mut callback) = lock.on_system_sleep.take() {
@@ -1734,18 +1425,13 @@ extern "C" fn on_system_sleep(this: &mut Object, _: Sel, _: id) {
     }
 }
 
-extern "C" fn on_system_wake(this: &mut Object, _: Sel, _: id) {
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
-    // SAFETY: this is the registered app delegate carrying MAC_PLATFORM_IVAR.
+fn on_system_wake(this: &GPUIApplicationDelegate) {
     let platform = get_mac_platform(this);
     let platform_ptr = platform as *const MacPlatform as *mut c_void;
-    // SAFETY: platform lives for the process lifetime while callbacks are registered.
     unsafe {
         DispatchQueue::main().exec_async_f(platform_ptr, on_system_wake);
     }
-
     extern "C" fn on_system_wake(context: *mut c_void) {
-        // SAFETY: context is the MacPlatform pointer queued above.
         let platform = unsafe { &*(context as *const MacPlatform) };
         let mut lock = platform.0.lock();
         if let Some(mut callback) = lock.on_system_wake.take() {

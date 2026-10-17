@@ -42,8 +42,6 @@ use std::{
     time::Duration,
 };
 
-<<<<<<< HEAD
-=======
 use anyhow::{Context as _, Result, anyhow};
 use derive_more::{Deref, DerefMut};
 use futures::{Future, FutureExt, channel::oneshot, future::LocalBoxFuture};
@@ -92,7 +90,6 @@ use crate::{
     hash, init_app_menus,
 };
 
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 mod async_context;
 #[cfg(feature = "bench-support")]
 mod bench_context;
@@ -350,7 +347,6 @@ impl Application {
         self
     }
 
-<<<<<<< HEAD
     /// Sets the activation policy for the application (macOS only).
     ///
     /// This determines how the application appears in the system:
@@ -375,7 +371,6 @@ impl Application {
     /// and the app keeps running in the page.
     ///
     /// See the [`Application`] example for a complete `main`.
-=======
     /// Sets the windowing mode the app starts in. See [`App::request_windowing`].
     ///
     /// Defaults to windowed. On Linux, the default environment is the process's own, and the app
@@ -392,7 +387,6 @@ impl Application {
     ///
     /// On WebAssembly, this returns immediately and retains the app for the lifetime
     /// of the Wasm instance. Use [`Self::run_embedded`] to control its lifetime explicitly.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn run<F>(self, on_finish_launching: F)
     where
         F: 'static + FnOnce(&mut App),
@@ -415,12 +409,9 @@ impl Application {
             on_finish_launching(cx);
         }));
 
-<<<<<<< HEAD
         // Native platform run loops block until shutdown, keeping `self` alive for the
         // application's lifetime. The web platform schedules startup and returns
         // immediately, so retain the application until the browser tears down the page.
-=======
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         #[cfg(target_family = "wasm")]
         std::mem::forget(self);
     }
@@ -570,7 +561,6 @@ type WindowClosedHandler = Box<dyn FnMut(&mut App, WindowId)>;
 type ReleaseListener = Box<dyn FnOnce(&mut dyn Any, &mut App) + 'static>;
 type NewEntityListener = Box<dyn FnMut(AnyEntity, &mut Option<&mut Window>, &mut App) + 'static>;
 
-<<<<<<< HEAD
 /// Controls whether the app quits on its own when its last window closes.
 ///
 /// The check runs each time a window closes. With [`QuitMode::LastWindowClosed`], the
@@ -583,7 +573,6 @@ type NewEntityListener = Box<dyn FnMut(AnyEntity, &mut Option<&mut Window>, &mut
 /// # use gpui::QuitMode;
 /// assert_eq!(QuitMode::default(), QuitMode::Default);
 /// ```
-=======
 struct MissingGlyphCallbackEntry {
     registration: Rc<()>,
     callback: Option<MissingGlyphCallback>,
@@ -642,7 +631,6 @@ impl MissingGlyphCallbackSlot {
 }
 
 /// Defines when the application should automatically quit.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum QuitMode {
     /// Behaves like [`QuitMode::LastWindowClosed`] on Linux and Windows, and like
@@ -1142,13 +1130,10 @@ pub struct App {
     /// Whether the app was created by [`Application::new_inaccessible`]. No
     /// accesskit APIs will be called when this flag is set.
     pub(crate) accessibility_force_disabled: bool,
-<<<<<<< HEAD
     /// Whether windows build their accessibility tree every frame without an
     /// assistive-technology client. See [`Application::with_accessibility_forced`].
     pub(crate) accessibility_forced: bool,
     flushing_effects: bool,
-=======
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pending_updates: usize,
     quit_mode: QuitMode,
     quitting: bool,
@@ -1199,13 +1184,8 @@ impl App {
                 foreground_executor,
                 #[cfg(feature = "profiler")]
                 foreground_journal,
-<<<<<<< HEAD
-                svg_renderer: SvgRenderer::new(asset_registry.clone()),
-=======
-                #[cfg(all(feature = "profiler", not(target_family = "wasm")))]
                 hang_monitor: None,
-                svg_renderer: SvgRenderer::new(asset_source.clone()),
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+                svg_renderer: SvgRenderer::new(asset_registry.clone()),
                 loading_assets: Default::default(),
                 asset_registry,
                 http_client,
@@ -1416,9 +1396,6 @@ impl App {
         self.entities.assert_no_new_leaks(snapshot)
     }
 
-<<<<<<< HEAD
-    /// Runs the quit handlers, closes every window and flushes pending effects.
-=======
     /// Without leak detection compiled in, this records nothing.
     #[cfg(all(feature = "test-support", not(any(test, gpui_leak_detection))))]
     pub fn leak_detector_snapshot(&self) -> LeakDetectorSnapshot {
@@ -1431,7 +1408,7 @@ impl App {
     pub fn assert_no_new_leaks(&self, _snapshot: &LeakDetectorSnapshot) {}
 
     /// Quit the application gracefully.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Runs the quit handlers, closes every window and flushes pending effects.
     ///
     /// The platform calls this when the app quits. Handlers registered with
     /// [`Context::on_app_quit`] run first. Native apps wait up to [`SHUTDOWN_TIMEOUT`]
@@ -1530,11 +1507,6 @@ impl App {
         self.platform.quit();
     }
 
-<<<<<<< HEAD
-    /// Returns the policy that decides when GPUI hides the cursor while typing.
-    ///
-    /// Defaults to [`CursorHideMode::OnTypingAndAction`].
-=======
     /// Switches the platform between headless and windowed modes.
     ///
     /// On Linux, headless means no display server: windows opened afterwards lay out and handle
@@ -1572,7 +1544,9 @@ impl App {
 
     /// Returns the current policy for hiding the cursor in response to
     /// keyboard input.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Returns the policy that decides when GPUI hides the cursor while typing.
+    ///
+    /// Defaults to [`CursorHideMode::OnTypingAndAction`].
     pub fn cursor_hide_mode(&self) -> CursorHideMode {
         self.cursor_hide_mode
     }
@@ -2015,18 +1989,15 @@ impl App {
         self.platform.thermal_state()
     }
 
-<<<<<<< HEAD
-    /// Calls `callback` when the system's thermal state changes.
-    ///
-    /// The subscription stays active while you hold it.
-=======
     /// Prevents idle sleep while the returned guard is held.
     pub fn prevent_idle_sleep(&self, reason: &str) -> Task<Result<ActivityGuard>> {
         self.platform.prevent_idle_sleep(reason)
     }
 
     /// Invokes a handler when the thermal state changes
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Calls `callback` when the system's thermal state changes.
+    ///
+    /// The subscription stays active while you hold it.
     pub fn on_thermal_state_change<F>(&self, mut callback: F) -> Subscription
     where
         F: 'static + FnMut(&mut App),
@@ -2042,12 +2013,6 @@ impl App {
         subscription
     }
 
-<<<<<<< HEAD
-    /// Calls `callback` when the system wakes from sleep.
-    ///
-    /// Use it to reconnect to network services or refresh data that went stale
-    /// while the machine slept. The subscription stays active while you hold it.
-=======
     /// Invokes a handler when the system is about to sleep.
     ///
     /// The platform gives the process only a short time before suspending, so
@@ -2119,7 +2084,10 @@ impl App {
     }
 
     /// Invokes a handler when the system wakes from sleep.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Calls `callback` when the system wakes from sleep.
+    ///
+    /// Use it to reconnect to network services or refresh data that went stale
+    /// while the machine slept. The subscription stays active while you hold it.
     pub fn on_system_wake<F>(&self, mut callback: F) -> Subscription
     where
         F: 'static + FnMut(&mut App),
@@ -2135,11 +2103,6 @@ impl App {
         subscription
     }
 
-<<<<<<< HEAD
-    /// Returns whether the windows use the light or dark appearance.
-    ///
-    /// This is the system setting unless [`App::set_window_appearance`] overrides it.
-=======
     /// Observes mobile application lifecycle changes. Desktop platforms do not
     /// emit these events. On iOS these currently describe the single connected
     /// scene, not individual windows.
@@ -2177,7 +2140,9 @@ impl App {
     }
 
     /// Returns the appearance of the application's windows.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Returns whether the windows use the light or dark appearance.
+    ///
+    /// This is the system setting unless [`App::set_window_appearance`] overrides it.
     pub fn window_appearance(&self) -> WindowAppearance {
         self.platform.window_appearance()
     }
@@ -2488,9 +2453,6 @@ impl App {
         self.quit_mode = mode;
     }
 
-<<<<<<< HEAD
-    /// Returns the SVG renderer that draws the app's SVG assets.
-=======
     /// Sets whether the application participates in the system's foreground UI.
     ///
     /// Only has an effect on macOS, where [`Self::request_windowing`] normally sets it. Use this
@@ -2504,7 +2466,7 @@ impl App {
     }
 
     /// Returns the SVG renderer used by the application.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Returns the SVG renderer that draws the app's SVG assets.
     pub fn svg_renderer(&self) -> SvgRenderer {
         self.svg_renderer.clone()
     }
@@ -2722,21 +2684,18 @@ impl App {
         });
     }
 
-<<<<<<< HEAD
     /// Runs `f` with the window that most recently drew the entity `entity_id`.
     ///
     /// If the entity has not been drawn yet, the window it was created in is used. The
     /// callback receives the [`Window`] and the [`App`]. Returns `None` if the entity has
     /// no current window, if that window has closed, or if the window is already being
     /// updated higher up the call stack.
-=======
     /// Run `f` against the entity's *current* window — the most recently
     /// rendered window that referenced the entity, or its creation window if
     /// it has yet to be rendered. Returns `None` if the entity has no
     /// current window, or if that window has been closed, or if it is
     /// already on the update stack.
     #[inline(always)]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn with_window<R>(
         &mut self,
         entity_id: EntityId,
@@ -2790,14 +2749,6 @@ impl App {
         &self.background_executor
     }
 
-<<<<<<< HEAD
-    /// Returns the [`ForegroundExecutor`], which runs futures on the main thread.
-    ///
-    /// # Panics
-    ///
-    /// Panics if called after the quit handlers have started running (from
-    /// [`App::on_app_quit`]).
-=======
     /// Whether this app runs on the deterministic test scheduler. See
     /// [`BackgroundExecutor::is_test`].
     pub fn is_test(&self) -> bool {
@@ -2805,7 +2756,12 @@ impl App {
     }
 
     /// Obtains a reference to the executor, which can be used to spawn futures.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Returns the [`ForegroundExecutor`], which runs futures on the main thread.
+    ///
+    /// # Panics
+    ///
+    /// Panics if called after the quit handlers have started running (from
+    /// [`App::on_app_quit`]).
     pub fn foreground_executor(&self) -> &ForegroundExecutor {
         if self.quitting {
             panic!("Can't spawn on main thread after on_app_quit")
@@ -2820,39 +2776,6 @@ impl App {
         self.foreground_journal.clone()
     }
 
-<<<<<<< HEAD
-    /// Runs an async block on the main thread, with an [`AsyncApp`] for access to app state.
-    ///
-    /// The closure receives `&mut AsyncApp`. Use it to update entities and windows after
-    /// an `await`. The future doesn't need to be `Send`, because it stays on the main
-    /// thread. Dropping the returned [`Task`] cancels it, so store it or call
-    /// [`Task::detach`] to let it run to completion in the background.
-    ///
-    /// Use [`App::background_executor`] for CPU-heavy or blocking work, and send the
-    /// result back to the main thread with a `spawn` task.
-    ///
-    /// # Panics
-    ///
-    /// In debug builds this panics if called after the quit handlers have started
-    /// running. Release builds log a debug message and continue.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use gpui::{AppContext, TestApp};
-    /// # use std::{cell::Cell, rc::Rc};
-    /// # let mut app = TestApp::new();
-    /// let ran = Rc::new(Cell::new(false));
-    /// app.update(|cx| {
-    ///     let ran = ran.clone();
-    ///     cx.spawn(async move |_cx| ran.set(true)).detach();
-    /// });
-    /// app.read(|_| assert!(ran.get()));
-    /// ```
-    ///
-    /// See [async work](crate::_documentation::guides::async_work) for the executors and
-    /// how to share state across tasks.
-=======
     /// Starts detecting foreground hangs on a dedicated thread.
     ///
     /// Nothing is spawned unless the app calls this. The thread polls a
@@ -2894,7 +2817,37 @@ impl App {
 
     /// Spawns the future returned by the given function on the main thread. The closure will be invoked
     /// with [AsyncApp], which allows the application state to be accessed across await points.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Runs an async block on the main thread, with an [`AsyncApp`] for access to app state.
+    ///
+    /// The closure receives `&mut AsyncApp`. Use it to update entities and windows after
+    /// an `await`. The future doesn't need to be `Send`, because it stays on the main
+    /// thread. Dropping the returned [`Task`] cancels it, so store it or call
+    /// [`Task::detach`] to let it run to completion in the background.
+    ///
+    /// Use [`App::background_executor`] for CPU-heavy or blocking work, and send the
+    /// result back to the main thread with a `spawn` task.
+    ///
+    /// # Panics
+    ///
+    /// In debug builds this panics if called after the quit handlers have started
+    /// running. Release builds log a debug message and continue.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use gpui::{AppContext, TestApp};
+    /// # use std::{cell::Cell, rc::Rc};
+    /// # let mut app = TestApp::new();
+    /// let ran = Rc::new(Cell::new(false));
+    /// app.update(|cx| {
+    ///     let ran = ran.clone();
+    ///     cx.spawn(async move |_cx| ran.set(true)).detach();
+    /// });
+    /// app.read(|_| assert!(ran.get()));
+    /// ```
+    ///
+    /// See [async work](crate::_documentation::guides::async_work) for the executors and
+    /// how to share state across tasks.
     #[track_caller]
     #[inline(always)]
     pub fn spawn<AsyncFn, R>(&self, f: AsyncFn) -> Task<R>
@@ -2958,9 +2911,6 @@ impl App {
         &self.text_system
     }
 
-<<<<<<< HEAD
-    /// Returns whether a global of type `G` has been set.
-=======
     /// Invokes a callback with grapheme clusters that exhausted font fallback.
     ///
     /// Registering a callback replaces the previous callback and enables missing-glyph
@@ -2998,7 +2948,7 @@ impl App {
     }
 
     /// Check whether a global of the given type has been assigned.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Returns whether a global of type `G` has been set.
     pub fn has_global<G: Global>(&self) -> bool {
         self.globals_by_type.contains_key(&TypeId::of::<G>())
     }
@@ -3241,18 +3191,15 @@ impl App {
         })
     }
 
-<<<<<<< HEAD
     /// Calls `f` for every key-down that reaches any window of the app.
     ///
     /// The callback runs after action and event handling has finished, so it sees the
     /// keystrokes that were not handled earlier. Use [`App::intercept_keystrokes`] to
     /// see keystrokes before they are dispatched. Keep the returned [`Subscription`] alive.
-=======
     /// Register a callback to be invoked after a keystroke is resolved in any window,
     /// including the action that handled it, if any. Keystrokes consumed by an
     /// interceptor or raw keyboard event handler are not observed.
     /// Standalone modifiers are observed on release.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn observe_keystrokes(
         &mut self,
         mut f: impl FnMut(&KeystrokeEvent, &mut Window, &mut App) + 'static,
@@ -3827,15 +3774,6 @@ impl App {
         self.loading_assets.contains_key(&asset_id)
     }
 
-<<<<<<< HEAD
-    /// Starts loading the asset `A` for `source` in the background, or returns the load already in progress.
-    ///
-    /// The result is a shared task that resolves to the asset output, and a flag that is
-    /// `true` only for the call that started the load. Concurrent calls for the same
-    /// `source` share one [`Asset::load`] and its cached result. Use
-    /// [`App::remove_asset`] to load it again.
-    pub fn fetch_asset<A: Asset>(&mut self, source: &A::Source) -> (Shared<Task<A::Output>>, bool) {
-=======
     /// Starts loading an uncached asset and returns its result once available.
     ///
     /// Pending loads and completed results are cached until [`Self::remove_asset`].
@@ -3845,7 +3783,6 @@ impl App {
     }
 
     pub(crate) fn asset_entry<A: Asset>(&mut self, source: &A::Source) -> &CachedLoad<A::Output> {
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         let asset_id = (TypeId::of::<A>(), hash(source));
         if !self.loading_assets.contains_key(&asset_id) {
             let future = A::load(source.clone(), self);
@@ -4354,11 +4291,6 @@ pub struct AnyTooltip {
     pub check_visible_and_update: Rc<dyn Fn(Bounds<Pixels>, &mut Window, &mut App) -> bool>,
 }
 
-<<<<<<< HEAD
-/// A keystroke that reached the app, with the action it resolved to, if any.
-///
-/// Passed to the callbacks from [`App::observe_keystrokes`] and [`App::intercept_keystrokes`].
-=======
 /// Whether a keystroke should prefer character input or key bindings.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum InputPreference {
@@ -4369,16 +4301,14 @@ pub enum InputPreference {
 }
 
 /// A keystroke event, and potentially the associated action
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+/// A keystroke that reached the app, with the action it resolved to, if any.
+///
+/// Passed to the callbacks from [`App::observe_keystrokes`] and [`App::intercept_keystrokes`].
 #[derive(Debug)]
 pub struct KeystrokeEvent {
     /// The keystroke that was pressed.
     pub keystroke: Keystroke,
 
-<<<<<<< HEAD
-    /// The action the keystroke resolved to, or `None` if no binding matched. Always
-    /// `None` in an `intercept_keystrokes` callback.
-=======
     /// Whether this keystroke should prefer character input or key bindings.
     /// This is [`InputPreference::CharacterInput`] when the platform prefers text for the key
     /// (e.g. AltGr on Windows) and the focused input accepts text. Interceptors still receive
@@ -4389,7 +4319,8 @@ pub struct KeystrokeEvent {
     pub input_preference: InputPreference,
 
     /// The action that was resolved for the keystroke, if any
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// The action the keystroke resolved to, or `None` if no binding matched. Always
+    /// `None` in an `intercept_keystrokes` callback.
     pub action: Option<Box<dyn Action>>,
 
     /// The key contexts that were active for the keystroke, from the outermost to the focused element.

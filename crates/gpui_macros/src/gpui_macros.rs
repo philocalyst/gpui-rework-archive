@@ -333,7 +333,6 @@ pub fn test(args: TokenStream, function: TokenStream) -> TokenStream {
 /// Criterion. Benchmarks with an `inputs` argument take the input as their
 /// first parameter, before the context: `fn bench(input: T, cx: &mut BenchAppContext)`.
 ///
-<<<<<<< HEAD
 /// The macro generates a function that takes `&mut criterion::Criterion`, so
 /// register it with `criterion_group!` and `criterion_main!` in the benchmark
 /// target. Each benchmark prints a GPUI report when it finishes.
@@ -356,7 +355,7 @@ pub fn test(args: TokenStream, function: TokenStream) -> TokenStream {
 /// The benchmark crate needs `criterion` and `gpui_platform` as dev-dependencies,
 /// because the generated code calls both. Enable the `bench-support` feature on
 /// `gpui`, which provides `BenchAppContext`.
-=======
+
 /// A benchmark that takes a `StdRng` parameter (by value, in any position) is run
 /// once per seed, with the RNG seeded from it. Seeds are chosen exactly as for
 /// `#[gpui::test]`: `seed = N`, `seeds(...)`, and `iterations = N` take the same
@@ -378,7 +377,6 @@ pub fn test(args: TokenStream, function: TokenStream) -> TokenStream {
 /// The benchmark crate must add `criterion` and `gpui_platform` (with its
 /// `test-support` feature) to its dev-dependencies and enable gpui's `bench`
 /// feature, since the generated code references all three.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 #[proc_macro_attribute]
 pub fn bench(args: TokenStream, function: TokenStream) -> TokenStream {
     bench::bench(args, function)

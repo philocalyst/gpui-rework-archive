@@ -157,7 +157,6 @@ pub fn run_test(
     }
 }
 
-<<<<<<< HEAD
 fn calculate_seeds(
     iterations: u64,
     explicit_seeds: &[u64],
@@ -227,9 +226,6 @@ mod seed_tests {
 /// A stream of unit values from an entity observation, created by [`observe`].
 ///
 /// Dropping the stream stops the observation.
-=======
-/// A test struct for converting an observation callback into a stream.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 pub struct Observation<T> {
     rx: Pin<Box<async_channel::Receiver<T>>>,
     _subscription: Subscription,

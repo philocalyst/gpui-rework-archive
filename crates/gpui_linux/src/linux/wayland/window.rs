@@ -1232,15 +1232,10 @@ impl WaylandWindowStatePtr {
             let initial_configure = self.frame_loop.get() == FrameLoop::Unconfigured;
             let visible = state.visible;
             drop(state);
-<<<<<<< HEAD
             if !visible {
                 return;
             } else if initial_configure {
-                self.frame();
-=======
-            if initial_configure {
                 self.frame(None, FrameRequestSource::NativeCallback);
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
             } else {
                 self.request_redraw();
             }
@@ -2216,17 +2211,13 @@ impl PlatformWindow for WaylandWindow {
             return;
         };
 
-<<<<<<< HEAD
         if !state.visible {
             state.redraw_requested = true;
             self.0.frame_loop.set(FrameLoop::Unconfigured);
             return;
         }
 
-        if state.renderer.device_lost() {
-=======
         if renderer.device_lost() {
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
             let raw_window = RawWindow {
                 window: state.surface.id().as_ptr().cast::<std::ffi::c_void>(),
                 display: state

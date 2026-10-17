@@ -1,52 +1,35 @@
 use crate::{
     Action, AnyDrag, AnyElement, AnyImageCache, AnyTooltip, AnyView, App, AppContext, Arena, Asset,
-<<<<<<< HEAD
     AsyncWindowContext, AtlasTile, AvailableSpace, BackdropFilter, Background, BorderStyle, Bounds,
     BoxShadow, Capslock, ColorExt, Context, Corners, CursorHideMode, CursorStyle, Decorations,
     DevicePixels, DispatchActionListener, DispatchNodeId, DispatchTree, DisplayId, Edges, Effect,
     Entity, EntityId, EventEmitter, FileDropEvent, Filter, FilterBoundary, FontId, Global,
-    GlobalElementId, GlyphId, GlyphRenderMode, GpuSpecs, InputHandler, IntoElement, IsZero,
-    KeyBinding, KeyContext, KeyDownEvent, KeyEvent, Keystroke, KeystrokeEvent, LayoutId, Lerp,
-    LineLayoutIndex, Modifiers, ModifiersChangedEvent, MonochromeSprite, Motion, MouseButton,
-    MouseEvent, MouseMoveEvent, MouseUpEvent, Path, Pixels, PlatformAtlas, PlatformDisplay,
-    PlatformInput, PlatformInputHandler, PlatformWindow, Point, PolychromeSprite, Priority,
-    PromptButton, PromptLevel, Quad, RasterizedGlyphFormat, Render, RenderGlyphParams, RenderImage,
-    RenderImageParams, RenderSvgParams, Replay, ResizeEdge, ResolvedDirection,
+    GlobalElementId, GlyphId, GlyphRenderMode, GpuSpecs, InputHandler, InputPreference,
+    IntoElement, IsZero, KeyBinding, KeyContext, KeyDownEvent, KeyEvent, Keystroke, KeystrokeEvent,
+    LayoutId, Lerp, LineLayoutIndex, Modifiers, ModifiersChangedEvent, MonochromeSprite, Motion,
+    MouseButton, MouseEvent, MouseMoveEvent, MouseUpEvent, Path, Pixels, PlatformAtlas,
+    PlatformDisplay, PlatformInput, PlatformInputHandler, PlatformWindow, Point, PolychromeSprite,
+    Priority, PromptButton, PromptLevel, Quad, RasterizedGlyphFormat, Render, RenderGlyphParams,
+    RenderImage, RenderImageParams, RenderSvgParams, Replay, ResizeEdge, ResolvedDirection,
     SMOOTH_SVG_SCALE_FACTOR, SUBPIXEL_VARIANTS_X, SUBPIXEL_VARIANTS_Y, ScaledFilter, ScaledPixels,
     Scene, Shadow, SharedString, Size, StrikethroughStyle, Style, SubpixelSprite, SubscriberSet,
     Subscription, SystemWindowTab, SystemWindowTabController, TabStopMap, TaffyLayoutEngine, Task,
     TextInputConfiguration, TextInputStateChange, TextRenderingMode, TextStyle,
     TextStyleRefinement, ThermalState, TransformationMatrix, Transition, TransitionState,
     Underline, UnderlineStyle, UnicodeBidi, WindowAppearance, WindowBackgroundAppearance,
-    WindowBounds, WindowControls, WindowDecorations, WindowOptions, WindowParams, WindowTextSystem,
+    WindowBounds, WindowControls, WindowDecorations, WindowInsets, WindowOptions, WindowParams,
+    WindowTextSystem, WindowVisibility,
     gestures::{GestureTuning, RecognizedTouchGesture, TouchGestureRecognizer},
     interactive::TouchEvent,
-    point, px, rems, size, transparent_black,
+    point,
+    prelude::*,
+    px, rems, size, transparent_black,
     util::{
         atomic_incr_if_not_zero, ceil_to_device_pixel, floor_to_device_pixel,
         round_half_toward_zero, round_half_toward_zero_f64, round_stroke_to_device_pixel,
         round_to_device_pixel,
     },
     white,
-=======
-    AsyncWindowContext, AtlasTile, AvailableSpace, Background, BorderStyle, Bounds, BoxShadow,
-    Capslock, Context, Corners, CursorHideMode, CursorStyle, Decorations, DevicePixels,
-    DispatchActionListener, DispatchNodeId, DispatchTree, DisplayId, Edges, Effect, Entity,
-    EntityId, EventEmitter, FileDropEvent, FontId, Global, GlobalElementId, GlyphId, GpuSpecs,
-    Hsla, InputHandler, InputPreference, IsZero, KeyBinding, KeyContext, KeyDownEvent, KeyEvent,
-    Keystroke, KeystrokeEvent, LayoutId, LineLayoutIndex, Modifiers, ModifiersChangedEvent,
-    MonochromeSprite, MouseButton, MouseEvent, MouseMoveEvent, MouseUpEvent, Path, Pixels,
-    PlatformAtlas, PlatformDisplay, PlatformInput, PlatformInputHandler, PlatformWindow, Point,
-    PolychromeSprite, Priority, PromptButton, PromptLevel, Quad, Render, RenderGlyphParams,
-    RenderImage, RenderImageParams, RenderSvgParams, Replay, ResizeEdge, SMOOTH_SVG_SCALE_FACTOR,
-    SUBPIXEL_VARIANTS_X, SUBPIXEL_VARIANTS_Y, ScaledPixels, Scene, Shadow, SharedString, Size,
-    StrikethroughStyle, Style, SubpixelSprite, SubscriberSet, Subscription, SystemWindowTab,
-    SystemWindowTabController, TabStopMap, TaffyLayoutEngine, Task, TextInputConfiguration,
-    TextInputStateChange, TextRenderingMode, TextStyle, TextStyleRefinement, ThermalState,
-    TransformationMatrix, Underline, UnderlineStyle, WindowAppearance, WindowBackgroundAppearance,
-    WindowBounds, WindowControls, WindowDecorations, WindowInsets, WindowOptions, WindowParams,
-    WindowTextSystem, WindowVisibility, point, prelude::*, px, rems, size, transparent_black,
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 };
 use anyhow::{Context as _, Result, anyhow};
 use collections::{FxHashMap, FxHashSet};
@@ -56,16 +39,12 @@ use gpui_util::post_inc;
 use gpui_util::{ResultExt, measure};
 use itertools::FoldWhile::{Continue, Done};
 use itertools::Itertools;
-<<<<<<< HEAD
-use palette::Hsla;
-use parking_lot::RwLock;
-=======
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 use objc2_core_foundation::CFRetained;
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 use objc2_core_video::CVPixelBuffer;
+use palette::Hsla;
 use parking_lot::{RwLock, RwLockUpgradableReadGuard};
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 use raw_window_handle::{HandleError, HasDisplayHandle, HasWindowHandle};
 use refineable::Refineable;
 use scheduler::Instant;
@@ -1145,9 +1124,6 @@ impl Hitbox {
         self.id.is_hovered(window)
     }
 
-<<<<<<< HEAD
-    /// Returns whether the mouse is over this hitbox and this hitbox should handle scroll events.
-=======
     /// Checks whether this hitbox would be hovered at `position`, regardless of the current input
     /// modality or mouse position.
     pub fn is_hovered_at(&self, position: Point<Pixels>, window: &Window) -> bool {
@@ -1162,7 +1138,7 @@ impl Hitbox {
     /// Checks if the hitbox contains the mouse and should handle scroll events. Typically this
     /// should only be used when handling `ScrollWheelEvent`, and otherwise `is_hovered` should be
     /// used. See the documentation of `Hitbox::is_hovered` for details about this distinction.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Returns whether the mouse is over this hitbox and this hitbox should handle scroll events.
     ///
     /// Use it in `ScrollWheelEvent` handlers. It returns `false` only when a
     /// [`HitboxBehavior::BlockMouse`] hitbox is in front of this one, so overlays
@@ -1910,12 +1886,9 @@ impl Window {
             icon,
             #[cfg_attr(not(target_os = "macos"), allow(unused_variables))]
             tabbing_identifier,
-<<<<<<< HEAD
-            ..
-=======
             #[cfg_attr(not(target_os = "macos"), allow(unused_variables))]
             use_display_p3,
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+            ..
         } = options;
 
         let initial_window_title = titlebar
@@ -2726,14 +2699,6 @@ impl Window {
         }
     }
 
-<<<<<<< HEAD
-    /// Calls `callback` when the system switches between light and dark appearance.
-    ///
-    /// The callback runs during the next update after the change, not inside the
-    /// platform callback. Keep the returned [`Subscription`] alive for as long as
-    /// you want to be notified; dropping it unsubscribes. See [`Window::appearance`]
-    /// to read the current value.
-=======
     pub(crate) fn refresh_visibility(&mut self, cx: &mut App) {
         let visibility = self.platform_window.visibility();
         if self.visibility != visibility {
@@ -2782,7 +2747,12 @@ impl Window {
     }
 
     /// Registers a callback to be invoked when the window appearance changes.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Calls `callback` when the system switches between light and dark appearance.
+    ///
+    /// The callback runs during the next update after the change, not inside the
+    /// platform callback. Keep the returned [`Subscription`] alive for as long as
+    /// you want to be notified; dropping it unsubscribes. See [`Window::appearance`]
+    /// to read the current value.
     pub fn observe_window_appearance(
         &self,
         mut callback: impl FnMut(&mut Window, &mut App) + 'static,
@@ -3114,13 +3084,6 @@ impl Window {
         self.platform_window.inner_window_bounds()
     }
 
-<<<<<<< HEAD
-    /// Dispatches `action` to the focused element, after the current update finishes.
-    ///
-    /// The action runs through the focus path, like an action from a keybinding. If
-    /// nothing has focus, it is dispatched from the root of the window's last
-    /// rendered frame.
-=======
     /// Encode the window's native restorable state into an opaque blob.
     /// Returns `None` on platforms without native state restoration or if encoding fails.
     pub fn native_window_state(&self) -> Option<Vec<u8>> {
@@ -3134,7 +3097,11 @@ impl Window {
     }
 
     /// Dispatch the given action on the currently focused element.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Dispatches `action` to the focused element, after the current update finishes.
+    ///
+    /// The action runs through the focus path, like an action from a keybinding. If
+    /// nothing has focus, it is dispatched from the root of the window's last
+    /// rendered frame.
     pub fn dispatch_action(&mut self, action: Box<dyn Action>, cx: &mut App) {
         let focus_id = self.focused(cx).map(|handle| handle.id);
 
@@ -3440,12 +3407,6 @@ impl Window {
             .retain(&(), |callback| callback(self, cx));
     }
 
-<<<<<<< HEAD
-    /// Returns the window's bounds in global screen coordinates, in logical pixels.
-    ///
-    /// The window can span several displays, so the origin is in the same global space
-    /// as the displays. Use [`Window::viewport_size`] for the size of the content area.
-=======
     fn display_changed(handle: AnyWindowHandle, cx: &mut App) {
         let moved_to = handle
             .update(cx, |_, window, _| {
@@ -3506,17 +3467,14 @@ impl Window {
     }
 
     /// Returns the bounds of the current window in the global coordinate space, which could span across multiple displays.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Returns the window's bounds in global screen coordinates, in logical pixels.
+    ///
+    /// The window can span several displays, so the origin is in the same global space
+    /// as the displays. Use [`Window::viewport_size`] for the size of the content area.
     pub fn bounds(&self) -> Bounds<Pixels> {
         self.platform_window.bounds()
     }
 
-<<<<<<< HEAD
-    /// Rasterizes the last rendered frame and returns its pixels as an RGBA image.
-    ///
-    /// The frame isn't shown on screen, and the window doesn't need to be visible.
-    /// Use it for visual tests. Returns an error if the platform can't render to an image.
-=======
     /// Returns the regions of this window obscured by system UI and the keyboard.
     pub fn insets(&self) -> WindowInsets {
         self.platform_window.insets()
@@ -3525,7 +3483,10 @@ impl Window {
     /// Renders the current frame's scene to a texture and returns the pixel data as an RGBA image.
     /// This does not present the frame to screen - useful for visual testing where we want
     /// to capture what would be rendered without displaying it or requiring the window to be visible.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Rasterizes the last rendered frame and returns its pixels as an RGBA image.
+    ///
+    /// The frame isn't shown on screen, and the window doesn't need to be visible.
+    /// Use it for visual tests. Returns an error if the platform can't render to an image.
     #[cfg(any(test, feature = "test-support"))]
     pub fn render_to_image(&self) -> anyhow::Result<image::RgbaImage> {
         self.platform_window
@@ -3576,9 +3537,6 @@ impl Window {
         self.rendered_frame.scene.quads.clone()
     }
 
-<<<<<<< HEAD
-    /// Resizes the window's content area to `size`, in logical pixels.
-=======
     /// Returns the underlines in the most recently rendered frame's scene.
     #[cfg(any(test, feature = "test-support"))]
     pub fn painted_underlines(&self) -> Vec<Underline> {
@@ -3586,7 +3544,7 @@ impl Window {
     }
 
     /// Set the content size of the window.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Resizes the window's content area to `size`, in logical pixels.
     pub fn resize(&mut self, size: Size<Pixels>) {
         self.platform_window.resize(size);
     }
@@ -3632,11 +3590,6 @@ impl Window {
         self.viewport_size
     }
 
-<<<<<<< HEAD
-    /// Returns whether the operating system considers this window active.
-    ///
-    /// Key input goes to the focused element only while the window is active.
-=======
     /// Returns the platform's visible viewport in window-local logical pixels.
     ///
     /// Unlike `viewport_size`, this can shrink or move when the keyboard opens.
@@ -3678,7 +3631,9 @@ impl Window {
     }
 
     /// Returns whether this window is focused by the operating system (receiving key events).
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+    /// Returns whether the operating system considers this window active.
+    ///
+    /// Key input goes to the focused element only while the window is active.
     pub fn is_window_active(&self) -> bool {
         self.active.get()
     }
@@ -5228,7 +5183,6 @@ impl Window {
         )
     }
 
-<<<<<<< HEAD
     /// Passes the state stored for `global_id` to `f`, and stores the state `f` returns.
     ///
     /// `f` receives `None` the first time, or after the element wasn't rendered in the previous frame.
@@ -5240,13 +5194,6 @@ impl Window {
     /// Panics if the state stored for `global_id` has a different type than `S`. A nested call for
     /// the same id and type doesn't see the state that `f` is updating. Use
     /// [`Window::use_keyed_state`] for ordinary state that needs no type juggling.
-=======
-    /// Updates or initializes state for an element with the given id that lives across multiple
-    /// frames. If an element with this ID existed in the rendered frame, its state will be passed
-    /// to the given closure. The state returned by the closure will be stored so it can be referenced
-    /// when drawing the next frame. This method should only be called as part of element drawing.
-    #[inline(always)]
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn with_element_state<S, R>(
         &mut self,
         global_id: &GlobalElementId,
@@ -5862,7 +5809,6 @@ impl Window {
         style: &UnderlineStyle,
     ) {
         self.invalidator.debug_assert_paint();
-<<<<<<< HEAD
 
         let scale_factor = self.scale_factor();
         let thickness = self.snap_stroke(style.thickness);
@@ -5890,10 +5836,6 @@ impl Window {
             thickness,
             wavy: style.wavy.into(),
         });
-=======
-        let underline = self.underline(origin, width, style);
-        self.next_frame.scene.insert_primitive(underline);
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 
     /// Paints a strikethrough line of `width` starting at `origin`, using `style`.
@@ -5967,25 +5909,8 @@ impl Window {
             raster_style,
         };
 
-<<<<<<< HEAD
         self.paint_glyph_from_atlas(integer_origin, params, color, element_opacity)
     }
-=======
-        let raster_bounds = self.text_system().raster_bounds(&params)?;
-        if !raster_bounds.is_zero() {
-            let tile = self
-                .sprite_atlas
-                .get_or_insert_with(params.clone().into(), &mut || {
-                    let (size, bytes) = self.text_system().rasterize_glyph(&params)?;
-                    Ok(Some((size, Cow::Owned(bytes))))
-                })?
-                .expect("Callback above only errors or returns Some");
-            let bounds = Bounds {
-                origin: integer_origin + raster_bounds.origin.map(Into::into),
-                size: tile.bounds.size.map(Into::into),
-            };
-            let content_mask = self.snapped_content_mask();
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
     fn paint_glyph_from_atlas(
         &mut self,
@@ -6118,39 +6043,7 @@ impl Window {
             raster_style,
         };
 
-<<<<<<< HEAD
         self.paint_glyph_from_atlas(integer_origin, params, color, self.element_opacity())
-=======
-        let raster_bounds = self.text_system().raster_bounds(&params)?;
-        if !raster_bounds.is_zero() {
-            let tile = self
-                .sprite_atlas
-                .get_or_insert_with(params.clone().into(), &mut || {
-                    let (size, bytes) = self.text_system().rasterize_glyph(&params)?;
-                    Ok(Some((size, Cow::Owned(bytes))))
-                })?
-                .expect("Callback above only errors or returns Some");
-
-            let bounds = Bounds {
-                origin: integer_origin + raster_bounds.origin.map(Into::into),
-                size: tile.bounds.size.map(Into::into),
-            };
-            let content_mask = self.snapped_content_mask();
-            let opacity = self.element_opacity();
-
-            self.next_frame.scene.insert_primitive(PolychromeSprite {
-                order: 0,
-                pad: 0,
-                grayscale: false.into(),
-                bounds,
-                corner_radii: Default::default(),
-                content_mask,
-                tile,
-                opacity,
-            });
-        }
-        Ok(())
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 
     /// Paints a monochrome SVG into `bounds`, tinted with `color`.
@@ -6349,33 +6242,32 @@ impl Window {
 
     /// Paints a platform surface, such as a video frame, into `bounds`.
     ///
-<<<<<<< HEAD
     /// `source` identifies the surface. The content mask applies. Call it during paint.
     pub fn paint_surface(
         &mut self,
         bounds: Bounds<Pixels>,
         source: impl Into<crate::SurfaceSource>,
-=======
-    /// This method should only be called as part of the paint phase of element drawing.
-    #[cfg(any(target_os = "macos", target_os = "ios"))]
-    pub fn paint_surface(
-        &mut self,
-        bounds: Bounds<Pixels>,
-        image_buffer: CFRetained<CVPixelBuffer>,
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     ) {
-        use crate::PaintSurface;
+        use crate::{PaintSurface, SurfaceSource};
 
         self.invalidator.debug_assert_paint();
 
         let bounds = self.snap_bounds(bounds);
         let content_mask = self.snapped_content_mask();
+        let source = source.into();
+        #[cfg(any(target_os = "macos", target_os = "ios"))]
+        let image_buffer = match &source {
+            SurfaceSource::Surface(image_buffer) => Some(image_buffer.clone()),
+            _ => None,
+        };
         self.next_frame.scene.insert_surface(
             PaintSurface {
                 order: 0,
                 bounds,
                 content_mask,
-                source: source.into(),
+                source,
+                #[cfg(any(target_os = "macos", target_os = "ios"))]
+                image_buffer,
             },
             self.element_opacity(),
         );
@@ -7853,7 +7745,6 @@ impl Window {
         }
     }
 
-<<<<<<< HEAD
     /// Pending input that can still complete a binding. Input left over from a previous focus can
     /// never complete one.
     fn active_pending_input(&self) -> Option<&PendingInput> {
@@ -7866,9 +7757,6 @@ impl Window {
     ///
     /// After the first keystroke of such a binding, GPUI waits for the next one. Use this to show
     /// that a sequence is pending.
-=======
-    /// Determine whether a potential multi-stroke key binding is in progress on this window.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn has_pending_keystrokes(&self) -> bool {
         self.pending_input().is_some()
     }
@@ -7884,12 +7772,10 @@ impl Window {
         }
     }
 
-<<<<<<< HEAD
     /// Returns the keystrokes typed so far that could still complete a multi-keystroke binding.
     ///
     /// Returns `None` when no binding is pending. The list is cleared when the sequence completes,
     /// times out, or focus changes.
-=======
     /// Returns pending input that can still complete a multi-stroke key binding. Input left over
     /// from a previous focus can never complete one.
     pub fn pending_input(&self) -> Option<PendingInputStatus<'_>> {
@@ -7982,7 +7868,6 @@ impl Window {
     }
 
     /// Returns the currently pending input keystrokes that might result in a multi-stroke key binding.
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn pending_input_keystrokes(&self) -> Option<&[Keystroke]> {
         self.pending_input()
             .map(|pending_input| pending_input.keystrokes())
@@ -9712,24 +9597,17 @@ fn with_element_arena_erased(callback: &mut dyn FnMut(&mut Arena)) -> Result<(),
 mod tests {
     use super::*;
     use crate::{
-<<<<<<< HEAD
-        DragMoveEvent, Empty, ExternalDragPayload, ExternalPaths, FileDragPaths, FocusHandle, Font,
-        FontMetrics, ImageSource, InlineLayout, InlineLayoutRequest, InputEvent,
-        InteractiveElement, LineLayout, LongPressEvent, MouseDownEvent, ParentElement,
-        PlatformTextSystem, PreparedRasterStyle, RasterColorEffect, RasterStyleRequest,
-        RasterizedGlyph, RequestFrameOptions, ShaderBool, StatefulInteractiveElement, Styled,
-        TestApp, TestAppContext, TestTextSystem, TextLayoutRequest, TouchDragEvent, TouchId,
-        TouchPhase, canvas, div, hsla, img, linear_color_stop, linear_gradient,
-=======
         AnyWindowHandle, AppContext as _, Bounds, ContentMask, Context, DispatchPhase,
         DragMoveEvent, Empty, ExternalDragPayload, ExternalPaths, FileDragPaths, FileDropEvent,
-        FocusHandle, InputEvent as _, InteractiveElement as _, IntoElement, KeyDownEvent,
-        Keystroke, LongPressEvent, MouseButton, MouseDownEvent, MouseMoveEvent, ParentElement,
-        Pixels, PlatformInput, Point, Render, RequestFrameOptions, ScaledPixels,
-        StatefulInteractiveElement as _, Styled, TestAppContext, TouchDragEvent, TouchEvent,
-        TouchId, TouchPhase, Underline, UnderlineStyle, Window, WindowAppearance, WindowOptions,
-        canvas, div, hsla, point, px, size,
->>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
+        FocusHandle, Font, FontMetrics, ImageSource, InlineLayout, InlineLayoutRequest, InputEvent,
+        InputEvent as _, InteractiveElement, InteractiveElement as _, IntoElement, KeyDownEvent,
+        Keystroke, LineLayout, LongPressEvent, MouseButton, MouseDownEvent, MouseMoveEvent,
+        ParentElement, Pixels, PlatformInput, PlatformTextSystem, Point, PreparedRasterStyle,
+        RasterColorEffect, RasterStyleRequest, RasterizedGlyph, Render, RequestFrameOptions,
+        ScaledPixels, ShaderBool, StatefulInteractiveElement, StatefulInteractiveElement as _,
+        Styled, TestApp, TestAppContext, TestTextSystem, TextLayoutRequest, TouchDragEvent,
+        TouchEvent, TouchId, TouchPhase, Underline, UnderlineStyle, Window, WindowAppearance,
+        WindowOptions, canvas, div, hsla, img, linear_color_stop, linear_gradient, point, px, size,
     };
     use image::{Frame as ImageFrame, ImageBuffer, Rgba};
     use proptest::prelude::*;
@@ -10484,7 +10362,20 @@ mod tests {
 
     #[gpui::test]
     fn test_fully_visible_bounds_preserve_layout_viewport(cx: &mut TestAppContext) {
-        let window = cx.add_window(|_, _| EmptyView);
+        struct InsetsProbe(std::rc::Rc<std::cell::Cell<usize>>);
+
+        impl Render for InsetsProbe {
+            fn render(&mut self, window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+                self.0.set(self.0.get() + 1);
+                div().child(format!("{:?}", window.insets().ime.bottom))
+            }
+        }
+
+        let renders = std::rc::Rc::new(std::cell::Cell::new(0));
+        let window = cx.add_window({
+            let renders = renders.clone();
+            move |_, _| InsetsProbe(renders)
+        });
         let mut platform_window = cx.test_window(window.into());
         platform_window.simulate_resize(size(px(400.), px(800.)));
         window
@@ -10519,8 +10410,11 @@ mod tests {
                 ..Default::default()
             },
         };
+        let renders_before_insets = renders.get();
         platform_window.simulate_insets_change(insets.clone());
         assert!(platform_window.frame_wake_count() > wakes);
+        platform_window.simulate_frame_request(RequestFrameOptions::default());
+        assert!(renders.get() > renders_before_insets);
         window
             .update(cx, |_, window, cx| {
                 let focus = cx.focus_handle();
