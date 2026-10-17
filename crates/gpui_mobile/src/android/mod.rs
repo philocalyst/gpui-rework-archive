@@ -53,6 +53,7 @@ pub use gpui::{Bounds, DevicePixels, Pixels, Point, Size, point, size};
 mod accessibility;
 mod accesskit_adapter;
 mod accesskit_classes;
+mod callbacks;
 pub mod dispatcher;
 pub mod display;
 mod document_picker;

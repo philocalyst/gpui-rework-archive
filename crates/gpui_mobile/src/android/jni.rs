@@ -1105,7 +1105,7 @@ pub fn run_event_loop(app: &AndroidApp) {
                 if platform.primary_window().is_some() {
                     if let Some(finish_cb) = platform.take_finish_launching_callback() {
                         log::info!("invoking finish_launching callback (iter={})", iteration);
-                        finish_cb();
+                        finish_cb.call_once();
                     }
 
                     if let Some(init_cb) = platform.take_on_init_window_callback() {
@@ -1151,6 +1151,9 @@ pub fn run_event_loop(app: &AndroidApp) {
         }
     }
 
+    if let Some(platform) = PLATFORM.get() {
+        platform.shutdown_callback_registry_on_owner();
+    }
     log::info!("run_event_loop: exiting main loop");
 }
 

@@ -4201,6 +4201,7 @@ impl Interactivity {
                 for (listener, state) in self.hover_region_listeners.iter().zip(states) {
                     let observe = listener.bind(state);
                     let region_hitbox = hitbox.clone();
+                    let hover_listener_mode = self.hover_listener_mode;
                     let pending_mouse_down = element_state
                         .pending_mouse_down
                         .get_or_insert_with(Default::default)
@@ -4214,7 +4215,9 @@ impl Interactivity {
                             || !layout_changed && pending_mouse_down.borrow().is_some()
                         {
                             None
-                        } else if change.position.is_some() && !region_hitbox.is_hovered(window) {
+                        } else if change.position.is_some()
+                            && !hover_listener_mode.is_hovered(&region_hitbox, window)
+                        {
                             None
                         } else {
                             change.position
@@ -4246,21 +4249,6 @@ impl Interactivity {
                     }
                 };
                 let hover_listener_mode = self.hover_listener_mode;
-
-                // The hit test above belongs to the previously rendered frame. Re-evaluate
-                // after layout installs this frame's hit test so stationary pointers update
-                // hover when an element moves under them.
-                let layout_update_hover = update_hover.clone();
-                let layout_hitbox = hitbox.clone();
-                let layout_has_mouse_down = has_mouse_down.clone();
-                window.on_pointer_change(move |change, window, cx| {
-                    if change.cause == PointerChangeCause::Layout {
-                        let is_hovered = layout_has_mouse_down.borrow().is_none()
-                            && !cx.has_active_drag()
-                            && hover_listener_mode.is_hovered(&layout_hitbox, window);
-                        layout_update_hover(is_hovered, window, cx);
-                    }
-                });
 
                 window.on_mouse_event({
                     let update_hover = update_hover.clone();
