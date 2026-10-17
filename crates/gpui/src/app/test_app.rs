@@ -773,6 +773,7 @@ impl<V: 'static + Render> TestAppWindow<V> {
         self.background_executor.run_until_parked();
     }
 
+<<<<<<< HEAD
     /// Makes this the active window, as if the user had clicked it, then runs pending tasks.
     ///
     /// Windows that [`TestApp`] opens start inactive. Focus listeners such as
@@ -792,6 +793,27 @@ impl<V: 'static + Render> TestAppWindow<V> {
     /// Call this after building the view and after anything changes its layout, before
     /// simulating a click at a position. It doesn't run pending tasks. See the example
     /// on [`TestApp`].
+=======
+    /// Simulate the window moving to a display with a different scale factor.
+    pub fn simulate_scale_factor_change(&mut self, scale_factor: f32) {
+        let window_id = self.handle.window_id();
+        let test_window = {
+            let mut app = self.app.borrow_mut();
+            app.windows
+                .get_mut(window_id)
+                .and_then(|window| window.as_mut())
+                .and_then(|window| window.platform_window.as_test())
+                .cloned()
+        };
+        // The resize callback needs to borrow the app again synchronously.
+        if let Some(mut test_window) = test_window {
+            test_window.simulate_scale_factor_change(scale_factor);
+        }
+        self.background_executor.run_until_parked();
+    }
+
+    /// Force a redraw of the window.
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn draw(&mut self) {
         let mut app = self.app.borrow_mut();
         let any_handle: AnyWindowHandle = self.handle.into();
@@ -868,6 +890,7 @@ mod tests {
     }
 
     #[test]
+<<<<<<< HEAD
     fn test_resize_updates_gpui_viewport() {
         let mut app = TestApp::new();
         let mut window = app.open_window(Counter::new);
@@ -877,6 +900,25 @@ mod tests {
         window.update(|_, window, _| {
             assert_eq!(window.viewport_size(), size(px(321.), px(123.)));
         });
+=======
+    fn test_simulate_scale_factor_change() {
+        let mut app = TestApp::new();
+        let mut window = app.open_window(|_, _| crate::EmptyView);
+        let viewport_size = window.update(|_, window, _| {
+            assert_eq!(window.scale_factor(), 2.0);
+            window.viewport_size()
+        });
+
+        window.simulate_scale_factor_change(1.0);
+
+        window.update(|_, window, _| {
+            assert_eq!(window.scale_factor(), 1.0);
+            assert_eq!(window.viewport_size(), viewport_size);
+        });
+
+        drop(window);
+        app.update(|cx| cx.shutdown());
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 
     #[test]

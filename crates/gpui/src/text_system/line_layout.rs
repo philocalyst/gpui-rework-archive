@@ -13,7 +13,11 @@ use std::{
     ops::Range,
     sync::{
         Arc,
+<<<<<<< HEAD
         atomic::{AtomicU64, Ordering},
+=======
+        atomic::{AtomicUsize, Ordering},
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     },
 };
 
@@ -958,9 +962,18 @@ impl ShapedTextLayout {
             result: if extend {
                 selection.with_caret(caret)
             } else {
+<<<<<<< HEAD
                 caret.into()
             },
             vertical_navigation_x,
+=======
+                // The shaper can place a trailing zero-width wrap boundary glyph slightly past
+                // the line's width, so the row can extend past where `index_for_x` has glyphs.
+                self.unwrapped_layout
+                    .index_for_x(position_in_unwrapped_line.x)
+                    .ok_or(wrapped_line_end_index)
+            }
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         }
     }
 
@@ -1009,7 +1022,14 @@ pub(crate) struct LineLayoutCache {
     previous_frame: Mutex<FrameCache>,
     current_frame: RwLock<FrameCache>,
     platform_text_system: Arc<dyn PlatformTextSystem>,
+<<<<<<< HEAD
     font_generation: AtomicU64,
+=======
+    /// Advances when [`TextSystem::add_fonts`] successfully changes the font database.
+    font_generation: Arc<AtomicUsize>,
+    /// Records the generation represented by both frame caches.
+    cached_font_generation: AtomicUsize,
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 }
 
 #[derive(Default)]
@@ -1113,25 +1133,41 @@ fn repaint_shaped_text_layout(
 
 #[derive(Clone, Default)]
 pub(crate) struct LineLayoutIndex {
+    font_generation: usize,
     lines_index: usize,
     shaped_texts_index: usize,
     inline_layouts_index: usize,
 }
 
 impl LineLayoutCache {
+<<<<<<< HEAD
     pub fn new(platform_text_system: Arc<dyn PlatformTextSystem>) -> Self {
         let font_generation = platform_text_system.font_generation();
+=======
+    pub fn new(
+        platform_text_system: Arc<dyn PlatformTextSystem>,
+        font_generation: Arc<AtomicUsize>,
+    ) -> Self {
+        let cached_font_generation = font_generation.load(Ordering::Acquire);
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         Self {
             previous_frame: Mutex::default(),
             current_frame: RwLock::default(),
             platform_text_system,
+<<<<<<< HEAD
             font_generation: AtomicU64::new(font_generation),
+=======
+            font_generation,
+            cached_font_generation: AtomicUsize::new(cached_font_generation),
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         }
     }
 
     pub fn layout_index(&self) -> LineLayoutIndex {
+        let font_generation = self.clear_if_font_generation_changed();
         let frame = self.current_frame.read();
         LineLayoutIndex {
+<<<<<<< HEAD
             lines_index: frame.lines.used.len(),
             shaped_texts_index: frame.shaped_texts.used.len(),
             inline_layouts_index: frame.inline_layouts.used.len(),
@@ -1149,12 +1185,25 @@ impl LineLayoutCache {
         if self.font_generation.load(Ordering::Acquire) != generation {
             self.clear();
             self.font_generation.store(generation, Ordering::Release);
+=======
+            font_generation,
+            lines_index: frame.used_lines.len(),
+            wrapped_lines_index: frame.used_wrapped_lines.len(),
+            lines_by_hash_index: frame.used_lines_by_hash.len(),
+            wrapped_lines_by_hash_index: frame.used_wrapped_lines_by_hash.len(),
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         }
     }
 
     pub fn reuse_layouts(&self, range: Range<LineLayoutIndex>) {
-        let mut previous_frame = &mut *self.previous_frame.lock();
+        let font_generation = self.clear_if_font_generation_changed();
+        if range.start.font_generation != font_generation
+            || range.end.font_generation != font_generation
+        {
+            return;
+        }
         let mut current_frame = &mut *self.current_frame.write();
+        let mut previous_frame = &mut *self.previous_frame.lock();
 
         current_frame.lines.reuse(
             &mut previous_frame.lines,
@@ -1171,6 +1220,10 @@ impl LineLayoutCache {
     }
 
     pub fn truncate_layouts(&self, index: LineLayoutIndex) {
+        let font_generation = self.clear_if_font_generation_changed();
+        if index.font_generation != font_generation {
+            return;
+        }
         let mut current_frame = &mut *self.current_frame.write();
         current_frame.lines.used.truncate(index.lines_index);
         current_frame
@@ -1184,8 +1237,9 @@ impl LineLayoutCache {
     }
 
     pub fn finish_frame(&self) {
-        let mut prev_frame = self.previous_frame.lock();
+        let _font_generation = self.clear_if_font_generation_changed();
         let mut curr_frame = self.current_frame.write();
+        let mut prev_frame = self.previous_frame.lock();
         std::mem::swap(&mut *prev_frame, &mut *curr_frame);
         curr_frame.lines.clear();
         curr_frame.shaped_texts.clear();
@@ -1203,9 +1257,13 @@ impl LineLayoutCache {
         Text: AsRef<str>,
         SharedString: From<Text>,
     {
+<<<<<<< HEAD
         self.sync_font_generation();
         let wrap_width = options.wrap_width;
         let shaping_runs = runs.iter().map(ShapingRun::from).collect::<SmallVec<_>>();
+=======
+        let _font_generation = self.clear_if_font_generation_changed();
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         let key = &CacheKeyRef {
             text: text.as_ref(),
             font_size,
@@ -1266,8 +1324,12 @@ impl LineLayoutCache {
         Text: AsRef<str>,
         SharedString: From<Text>,
     {
+<<<<<<< HEAD
         self.sync_font_generation();
         let shaping_runs = runs.iter().map(ShapingRun::from).collect::<SmallVec<_>>();
+=======
+        let _font_generation = self.clear_if_font_generation_changed();
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         let key = &CacheKeyRef {
             text: text.as_ref(),
             font_size,
@@ -1304,9 +1366,97 @@ impl LineLayoutCache {
         }
     }
 
+<<<<<<< HEAD
     pub fn layout_inline(&self, request: InlineLayoutRequest<'_>) -> Arc<InlineLayout> {
         self.sync_font_generation();
         let key = &request as &dyn AsInlineCacheKeyRef;
+=======
+    /// Try to retrieve a previously-shaped line layout using a caller-provided content hash.
+    ///
+    /// This is a *non-allocating* cache probe: it does not materialize any text. If the layout
+    /// is not already cached in either the current frame or previous frame, returns `None`.
+    ///
+    /// Contract (caller enforced):
+    /// - Same `text_hash` implies identical text content (collision risk accepted by caller).
+    /// - `text_len` should be the UTF-8 byte length of the text (helps reduce accidental collisions).
+    pub fn try_layout_line_by_hash(
+        &self,
+        text_hash: u64,
+        text_len: usize,
+        font_size: Pixels,
+        runs: &[FontRun],
+        force_width: Option<Pixels>,
+    ) -> Option<Arc<LineLayout>> {
+        let _font_generation = self.clear_if_font_generation_changed();
+        let key_ref = HashedCacheKeyRef {
+            text_hash,
+            text_len,
+            font_size,
+            runs,
+            wrap_width: None,
+            force_width,
+        };
+
+        let current_frame = self.current_frame.read();
+        if let Some((_, layout)) = current_frame.lines_by_hash.iter().find(|(key, _)| {
+            HashedCacheKeyRef {
+                text_hash: key.text_hash,
+                text_len: key.text_len,
+                font_size: key.font_size,
+                runs: key.runs.as_slice(),
+                wrap_width: key.wrap_width,
+                force_width: key.force_width,
+            } == key_ref
+        }) {
+            return Some(layout.clone());
+        }
+
+        let previous_frame = self.previous_frame.lock();
+        if let Some((_, layout)) = previous_frame.lines_by_hash.iter().find(|(key, _)| {
+            HashedCacheKeyRef {
+                text_hash: key.text_hash,
+                text_len: key.text_len,
+                font_size: key.font_size,
+                runs: key.runs.as_slice(),
+                wrap_width: key.wrap_width,
+                force_width: key.force_width,
+            } == key_ref
+        }) {
+            return Some(layout.clone());
+        }
+
+        None
+    }
+
+    /// Layout a line of text using a caller-provided content hash as the cache key.
+    ///
+    /// This enables cache hits without materializing a contiguous `SharedString` for `text`.
+    /// If the cache misses, `materialize_text` is invoked to produce the `SharedString` for shaping.
+    ///
+    /// Contract (caller enforced):
+    /// - Same `text_hash` implies identical text content (collision risk accepted by caller).
+    /// - `text_len` should be the UTF-8 byte length of the text (helps reduce accidental collisions).
+    pub fn layout_line_by_hash(
+        &self,
+        text_hash: u64,
+        text_len: usize,
+        font_size: Pixels,
+        runs: &[FontRun],
+        force_width: Option<Pixels>,
+        materialize_text: impl FnOnce() -> SharedString,
+    ) -> Arc<LineLayout> {
+        let _font_generation = self.clear_if_font_generation_changed();
+        let key_ref = HashedCacheKeyRef {
+            text_hash,
+            text_len,
+            font_size,
+            runs,
+            wrap_width: None,
+            force_width,
+        };
+
+        // Fast path: already cached (no allocation).
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         let current_frame = self.current_frame.upgradable_read();
 
         if let Some(layout) = current_frame.inline_layouts.get(key) {
@@ -1330,6 +1480,24 @@ impl LineLayoutCache {
         current_frame.inline_layouts.insert(key, layout.clone());
 
         layout
+    }
+
+    fn clear_if_font_generation_changed(&self) -> usize {
+        let font_generation = self.font_generation.load(Ordering::Acquire);
+        if self.cached_font_generation.load(Ordering::Acquire) == font_generation {
+            return font_generation;
+        }
+
+        let mut current_frame = self.current_frame.write();
+        if self.cached_font_generation.load(Ordering::Acquire) == font_generation {
+            return font_generation;
+        }
+
+        *current_frame = FrameCache::default();
+        *self.previous_frame.lock() = FrameCache::default();
+        self.cached_font_generation
+            .store(font_generation, Ordering::Release);
+        font_generation
     }
 }
 

@@ -1,5 +1,5 @@
 use dispatch2::{DispatchQueue, DispatchQueueGlobalPriority, DispatchTime, GlobalQueueIdentifier};
-use gpui::{PlatformDispatcher, Priority, RunnableMeta, RunnableVariant};
+use gpui::{ActivityGuard, PlatformDispatcher, Priority, RunnableMeta, RunnableVariant};
 use gpui_util::ResultExt;
 use mach2::{
     kern_return::KERN_SUCCESS,
@@ -13,18 +13,23 @@ use mach2::{
 };
 
 use async_task::Runnable;
+<<<<<<< HEAD:crates/gpui_macos/src/dispatcher.rs
 use objc2_foundation::NSThread;
+=======
+use objc2::{rc::Retained, runtime::ProtocolObject};
+use objc2_foundation::{NSActivityOptions, NSObjectProtocol, NSProcessInfo, NSString, NSThread};
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f:crates/gpui_apple/src/dispatcher.rs
 use std::{ffi::c_void, ptr::NonNull, time::Duration};
 
-pub(crate) struct MacDispatcher;
+pub struct AppleDispatcher;
 
-impl MacDispatcher {
+impl AppleDispatcher {
     pub fn new() -> Self {
         Self
     }
 }
 
-impl PlatformDispatcher for MacDispatcher {
+impl PlatformDispatcher for AppleDispatcher {
     fn is_main_thread(&self) -> bool {
         NSThread::isMainThread_class()
     }
@@ -70,6 +75,36 @@ impl PlatformDispatcher for MacDispatcher {
             set_audio_thread_priority().log_err();
             f();
         });
+    }
+
+    fn prevent_app_nap(&self, reason: &str) -> ActivityGuard {
+        AppleActivity::begin(
+            reason,
+            NSActivityOptions::UserInitiatedAllowingIdleSystemSleep,
+        )
+    }
+}
+
+pub struct AppleActivity {
+    activity: Retained<ProtocolObject<dyn NSObjectProtocol>>,
+}
+
+// The activity token returned by NSProcessInfo is thread-safe
+unsafe impl Send for AppleActivity {}
+
+impl AppleActivity {
+    pub fn begin(reason: &str, options: NSActivityOptions) -> ActivityGuard {
+        let activity = Self {
+            activity: NSProcessInfo::processInfo()
+                .beginActivityWithOptions_reason(options, &NSString::from_str(reason)),
+        };
+        ActivityGuard::new(move || drop(activity))
+    }
+}
+
+impl Drop for AppleActivity {
+    fn drop(&mut self) {
+        unsafe { NSProcessInfo::processInfo().endActivity(&self.activity) };
     }
 }
 

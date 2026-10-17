@@ -24,7 +24,152 @@ impl Render for Typography {
         let colors = Colors::for_appearance(window);
 
         div()
+<<<<<<< HEAD
             .id("page")
+=======
+            .id(self.id)
+            .bg(theme.bg)
+            .text_color(theme.fg)
+            .text_size(px(font_size * scale))
+            .line_height(relative(line_height))
+            .p(px(10.0))
+            .child(self.string)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, IntoElement)]
+struct CharacterGrid {
+    scale: f32,
+    invert: bool,
+    text_style: Option<TextStyle>,
+}
+
+impl CharacterGrid {
+    pub fn new() -> Self {
+        Self {
+            scale: 1.0,
+            invert: false,
+            text_style: None,
+        }
+    }
+
+    pub fn scale(mut self, scale: f32) -> Self {
+        self.scale = scale;
+        self
+    }
+}
+
+impl RenderOnce for CharacterGrid {
+    fn render(self, _window: &mut Window, _cx: &mut App) -> impl IntoElement {
+        let mut theme = SpecimenTheme::default();
+
+        if self.invert {
+            theme = theme.invert();
+        }
+
+        let characters = vec![
+            "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A", "B", "C", "D", "E", "F", "G",
+            "H", "I", "J", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y",
+            "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "p", "q",
+            "r", "s", "t", "u", "v", "w", "x", "y", "z", "ẞ", "ſ", "ß", "ð", "Þ", "þ", "α", "β",
+            "Γ", "γ", "Δ", "δ", "η", "θ", "ι", "κ", "Λ", "λ", "μ", "ν", "ξ", "π", "τ", "υ", "φ",
+            "χ", "ψ", "∂", "а", "в", "Ж", "ж", "З", "з", "К", "к", "л", "м", "Н", "н", "Р", "р",
+            "У", "у", "ф", "ч", "ь", "ы", "Э", "э", "Я", "я", "ij", "öẋ", ".,", "⣝⣑", "~", "*",
+            "_", "^", "`", "'", "(", "{", "«", "#", "&", "@", "$", "¢", "%", "|", "?", "¶", "µ",
+            "❮", "<=", "!=", "==", "--", "++", "=>", "->", "🏀", "🎊", "😍", "❤️", "👍", "👎",
+        ];
+
+        let columns = 20;
+        let rows = characters.len().div_ceil(columns);
+
+        let grid_rows = (0..rows).map(|row_idx| {
+            let start_idx = row_idx * columns;
+            let end_idx = (start_idx + columns).min(characters.len());
+
+            div()
+                .w_full()
+                .flex()
+                .flex_row()
+                .children((start_idx..end_idx).map(|i| {
+                    div()
+                        .text_center()
+                        .size(px(62.))
+                        .bg(theme.bg)
+                        .text_color(theme.fg)
+                        .text_size(px(24.0))
+                        .line_height(relative(1.0))
+                        .child(characters[i])
+                }))
+                .when(end_idx - start_idx < columns, |d| {
+                    d.children(
+                        iter::repeat_with(|| div().flex_1()).take(columns - (end_idx - start_idx)),
+                    )
+                })
+        });
+
+        div().p_4().gap_2().flex().flex_col().children(grid_rows)
+    }
+}
+
+struct TextExample {
+    next_id: usize,
+    font_family: SharedString,
+}
+
+impl TextExample {
+    fn next_id(&mut self) -> usize {
+        self.next_id += 1;
+        self.next_id
+    }
+
+    fn button(
+        text: &str,
+        cx: &mut Context<Self>,
+        on_click: impl Fn(&mut Self, &mut Context<Self>) + 'static,
+    ) -> impl IntoElement {
+        div()
+            .id(text.to_string())
+            .flex_none()
+            .child(text.to_string())
+            .bg(gpui::black())
+            .text_color(gpui::white())
+            .active(|this| this.opacity(0.8))
+            .px_3()
+            .py_1()
+            .on_click(cx.listener(move |this, _, _, cx| on_click(this, cx)))
+    }
+}
+
+const FONT_FAMILIES: [&str; 5] = [
+    ".ZedMono",
+    ".SystemUIFont",
+    "Menlo",
+    "Monaco",
+    "Courier New",
+];
+
+impl Render for TextExample {
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let tcx = cx.text_context();
+        let colors = cx.default_colors().clone();
+
+        let font_size = tcx.font_size;
+        let line_height = tcx.line_height;
+        let type_scale = tcx.type_scale;
+
+        let step_down_2 = 1.0 / (type_scale * type_scale);
+        let step_down_1 = 1.0 / type_scale;
+        let base = 1.0;
+        let step_up_1 = base * type_scale;
+        let step_up_2 = step_up_1 * type_scale;
+        let step_up_3 = step_up_2 * type_scale;
+        let step_up_4 = step_up_3 * type_scale;
+        let step_up_5 = step_up_4 * type_scale;
+        let step_up_6 = step_up_5 * type_scale;
+
+        div()
+            .font_family(self.font_family.clone())
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
             .size_full()
             .overflow_y_scroll()
             .bg(colors.background)
@@ -47,6 +192,55 @@ impl Render for Typography {
                         .child(section("Monospace", monospace(&colors))),
                 ),
             )
+<<<<<<< HEAD
+=======
+            .child(
+                div()
+                    .id("text-example")
+                    .overflow_y_scroll()
+                    .overflow_x_hidden()
+                    .bg(rgb(0xffffff))
+                    .size_full()
+                    .child(
+                        div()
+                            .flex()
+                            .flex_col()
+                            .p_3()
+                            .text_size(px(font_size))
+                            .line_height(relative(line_height))
+                            .children([
+                                div().child("CJK: 中文「日本語」한글"),
+                                div().child(
+                                    "Kana: が / か\u{3099}; Hangul: 각 / \u{1100}\u{1161}\u{11a8}",
+                                ),
+                                div().child("Emoji: 😀 ❤️ ❤\u{fe0e} 👍🏽 🇯🇵 1\u{fe0f}\u{20e3} 👩‍💻 👨‍👩‍👧‍👦"),
+                            ]),
+                    )
+                    .child(div().child(CharacterGrid::new().scale(base)))
+                    .child(
+                        div()
+                            .child(Specimen::new(self.next_id()).scale(step_down_2))
+                            .child(Specimen::new(self.next_id()).scale(step_down_2).invert())
+                            .child(Specimen::new(self.next_id()).scale(step_down_1))
+                            .child(Specimen::new(self.next_id()).scale(step_down_1).invert())
+                            .child(Specimen::new(self.next_id()).scale(base))
+                            .child(Specimen::new(self.next_id()).scale(base).invert())
+                            .child(Specimen::new(self.next_id()).scale(step_up_1))
+                            .child(Specimen::new(self.next_id()).scale(step_up_1).invert())
+                            .child(Specimen::new(self.next_id()).scale(step_up_2))
+                            .child(Specimen::new(self.next_id()).scale(step_up_2).invert())
+                            .child(Specimen::new(self.next_id()).scale(step_up_3))
+                            .child(Specimen::new(self.next_id()).scale(step_up_3).invert())
+                            .child(Specimen::new(self.next_id()).scale(step_up_4))
+                            .child(Specimen::new(self.next_id()).scale(step_up_4).invert())
+                            .child(Specimen::new(self.next_id()).scale(step_up_5))
+                            .child(Specimen::new(self.next_id()).scale(step_up_5).invert())
+                            .child(Specimen::new(self.next_id()).scale(step_up_6))
+                            .child(Specimen::new(self.next_id()).scale(step_up_6).invert()),
+                    ),
+            )
+            .child(div().w(px(240.)).h_full().bg(colors.container))
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 }
 

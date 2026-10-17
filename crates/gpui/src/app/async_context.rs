@@ -92,6 +92,7 @@ impl AppContext for AsyncApp {
         app.insert_entity(reservation, build_entity)
     }
 
+    #[inline(always)]
     fn update_entity<T: 'static, R>(
         &mut self,
         handle: &Entity<T>,
@@ -109,6 +110,7 @@ impl AppContext for AsyncApp {
         panic!("Cannot as_mut with an async context. Try calling update() first")
     }
 
+    #[inline(always)]
     fn read_entity<T, R>(&self, handle: &Entity<T>, callback: impl FnOnce(&T, &App) -> R) -> R
     where
         T: 'static,
@@ -118,6 +120,7 @@ impl AppContext for AsyncApp {
         lock.read_entity(handle, callback)
     }
 
+<<<<<<< HEAD
     fn notify(&mut self, entity_id: EntityId) {
         let app = self.app();
         let mut lock = app.borrow_mut();
@@ -134,6 +137,9 @@ impl AppContext for AsyncApp {
         lock.emit(entity, event)
     }
 
+=======
+    #[inline(always)]
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     fn update_window<T, F>(&mut self, window: AnyWindowHandle, f: F) -> Result<T>
     where
         F: FnOnce(AnyView, &mut Window, &mut App) -> T,
@@ -146,6 +152,7 @@ impl AppContext for AsyncApp {
         lock.update_window(window, f)
     }
 
+    #[inline(always)]
     fn with_window<R>(
         &mut self,
         entity_id: EntityId,
@@ -230,11 +237,22 @@ impl AsyncApp {
         &self.background_executor
     }
 
+<<<<<<< HEAD
     /// Returns the [`ForegroundExecutor`], for running futures on the main thread.
+=======
+    /// Whether this app runs on the deterministic test scheduler. See
+    /// [`BackgroundExecutor::is_test`].
+    pub fn is_test(&self) -> bool {
+        self.background_executor.is_test()
+    }
+
+    /// Get an executor which can be used to spawn futures in the foreground.
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn foreground_executor(&self) -> &ForegroundExecutor {
         &self.foreground_executor
     }
 
+<<<<<<< HEAD
     /// Runs `f` with the app and returns its result.
     ///
     /// Effects queued by `f`, such as notifications, are flushed before this returns.
@@ -243,6 +261,10 @@ impl AsyncApp {
     ///
     /// Panics if the app has been released, or if it is already borrowed, such as when
     /// called from inside another update.
+=======
+    /// Invoke the given function in the context of the app, then flush any effects produced during its invocation.
+    #[inline(always)]
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn update<R>(&self, f: impl FnOnce(&mut App) -> R) -> R {
         let app = self.app();
         let mut lock = app.borrow_mut();
@@ -299,6 +321,7 @@ impl AsyncApp {
     /// `f` receives an `&mut AsyncApp`. Dropping the returned [`Task`] cancels the
     /// future, so store it, await it or call [`Task::detach`].
     #[track_caller]
+    #[inline(always)]
     pub fn spawn<AsyncFn, R>(&self, f: AsyncFn) -> Task<R>
     where
         AsyncFn: AsyncFnOnce(&mut AsyncApp) -> R + 'static,
@@ -318,11 +341,16 @@ impl AsyncApp {
 
     /// Calls `read` with the global of type `G` and the app, and returns its result.
     ///
+<<<<<<< HEAD
     /// Use [`AsyncApp::try_read_global`] if the global may not be set.
     ///
     /// # Panics
     ///
     /// Panics if no global of type `G` has been set, or if the app has been released.
+=======
+    /// Panics if no global state of the specified type has been assigned.
+    #[inline(always)]
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn read_global<G: Global, R>(&self, read: impl FnOnce(&G, &App) -> R) -> R {
         let app = self.app();
         let app = app.borrow_mut();
@@ -463,6 +491,7 @@ impl AsyncWindowContext {
         self.window
     }
 
+<<<<<<< HEAD
     /// Runs `update` with the window and the app, and returns its result.
     ///
     /// Effects queued by `update` are flushed before this returns.
@@ -471,16 +500,25 @@ impl AsyncWindowContext {
     ///
     /// Returns an error if the window has closed, or if the app is quitting or already
     /// borrowed.
+=======
+    /// A convenience method for [`App::update_window`].
+    #[inline(always)]
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn update<R>(&mut self, update: impl FnOnce(&mut Window, &mut App) -> R) -> Result<R> {
         self.app
             .update_window(self.window, |_, window, cx| update(window, cx))
     }
 
+<<<<<<< HEAD
     /// Like [`AsyncWindowContext::update`], but also passes the window's root view.
     ///
     /// # Errors
     ///
     /// Returns an error under the same conditions as [`AsyncWindowContext::update`].
+=======
+    /// A convenience method for [`App::update_window`].
+    #[inline(always)]
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn update_root<R>(
         &mut self,
         update: impl FnOnce(AnyView, &mut Window, &mut App) -> R,
@@ -547,6 +585,7 @@ impl AsyncWindowContext {
     /// Dropping the returned [`Task`] cancels the future. Store it, await it or call
     /// [`Task::detach`].
     #[track_caller]
+    #[inline(always)]
     pub fn spawn<AsyncFn, R>(&self, f: AsyncFn) -> Task<R>
     where
         AsyncFn: AsyncFnOnce(&mut AsyncWindowContext) -> R + 'static,
@@ -626,6 +665,7 @@ impl AppContext for AsyncWindowContext {
         }
     }
 
+    #[inline(always)]
     fn update_entity<T: 'static, R>(
         &mut self,
         handle: &Entity<T>,
@@ -641,6 +681,7 @@ impl AppContext for AsyncWindowContext {
         panic!("Cannot use as_mut() from an async context, call `update`")
     }
 
+    #[inline(always)]
     fn read_entity<T, R>(&self, handle: &Entity<T>, read: impl FnOnce(&T, &App) -> R) -> R
     where
         T: 'static,
@@ -648,6 +689,7 @@ impl AppContext for AsyncWindowContext {
         self.app.read_entity(handle, read)
     }
 
+<<<<<<< HEAD
     fn notify(&mut self, entity_id: EntityId) {
         self.app.notify(entity_id);
     }
@@ -660,6 +702,9 @@ impl AppContext for AsyncWindowContext {
         self.app.emit(entity, event)
     }
 
+=======
+    #[inline(always)]
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     fn update_window<T, F>(&mut self, window: AnyWindowHandle, update: F) -> Result<T>
     where
         F: FnOnce(AnyView, &mut Window, &mut App) -> T,
@@ -667,6 +712,7 @@ impl AppContext for AsyncWindowContext {
         self.app.update_window(window, update)
     }
 
+    #[inline(always)]
     fn with_window<R>(
         &mut self,
         entity_id: EntityId,

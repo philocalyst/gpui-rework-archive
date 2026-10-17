@@ -16,6 +16,12 @@ multithreaded = ["dep:wasm_thread", "scheduler/wasm-threads"]
 
 [lib]
 path = "src/gpui_web.rs"
+doctest = false
+
+[dependencies]
+unicode-properties = "=0.1.3"
+unicode-script.workspace = true
+unicode-segmentation.workspace = true
 
 [target.'cfg(target_family = "wasm")'.dependencies]
 gpui.workspace = true
@@ -25,6 +31,7 @@ parking_lot = { workspace = true, features = ["nightly"] }
 gpui_wgpu.workspace = true
 http.workspace = true
 anyhow.workspace = true
+async-channel.workspace = true
 futures.workspace = true
 log.workspace = true
 uuid.workspace = true
@@ -34,6 +41,7 @@ web-time.workspace = true
 console_error_panic_hook.workspace = true
 js-sys.workspace = true
 raw-window-handle.workspace = true
+<<<<<<< HEAD
 # The crates.io release contains the current wasm-bindgen-compatible worker
 # bootstrap, so consumers do not need a Git dependency.
 wasm_thread = { version = "0.3.3", features = ["es_modules"], optional = true }
@@ -86,7 +94,69 @@ web-sys = { version = "0.3", features = [
   "Response",
   "WheelEvent",
   "Window",
+=======
+smallvec.workspace = true
+wasm_thread = { workspace = true, optional = true }
+web-sys = { workspace = true, features = [
+    "console",
+    "Blob",
+    "Clipboard",
+    "ClipboardEvent",
+    "ClipboardItem",
+    "CompositionEvent",
+    "CssStyleDeclaration",
+    "DataTransfer",
+    "DataTransferItem",
+    "DataTransferItemList",
+    "Document",
+    "DomRect",
+    "DragEvent",
+    "Element",
+    "EventTarget",
+    "File",
+    "FocusOptions",
+    "HtmlCanvasElement",
+    "HtmlElement",
+    "HtmlTextAreaElement",
+    "IdleDeadline",
+    "IdleRequestOptions",
+    "ImageData",
+    "InputEvent",
+    "KeyboardEvent",
+    "Location",
+    "MediaQueryList",
+    "MouseEvent",
+    "Navigator",
+    "OffscreenCanvas",
+    "OffscreenCanvasRenderingContext2d",
+    "PointerEvent",
+    "ReadableStream",
+    "ReadableStreamDefaultReader",
+    "ReadableStreamReadResult",
+    "ResizeObserver",
+    "ResizeObserverBoxOptions",
+    "ResizeObserverEntry",
+    "ResizeObserverSize",
+    "ResizeObserverOptions",
+    "Screen",
+    "Storage",
+    "TextMetrics",
+    "VisualViewport",
+    "Headers",
+    "Request",
+    "RequestCredentials",
+    "RequestInit",
+    "RequestRedirect",
+    "Response",
+    "WheelEvent",
+    "Window",
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 ] }
+
+[dev-dependencies]
+anyhow.workspace = true
+gpui.workspace = true
+smallvec.workspace = true
 
 [package.metadata.cargo-shear]
 ignored = ["scheduler"]

@@ -12,6 +12,7 @@ path = "src/sum_tree.rs"
 doctest = false
 
 [dependencies]
+<<<<<<< HEAD
 heapless = "0.9.2"
 rayon = "1.11.0"
 log = "0.4.29"
@@ -21,6 +22,20 @@ proptest = { version = "1.0", features = ["attr-macro"], optional = true }
 [dev-dependencies]
 rand = "0.9"
 proptest = { version = "1.0", features = ["attr-macro"] }
+=======
+heapless.workspace = true
+rayon.workspace = true
+ztracing.workspace = true
+tracing.workspace = true
+proptest = { workspace = true, optional = true }
+
+[dev-dependencies]
+log.workspace = true
+ctor.workspace = true
+rand.workspace = true
+proptest.workspace = true
+zlog.workspace = true
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
 [features]
 test-support = ["proptest"]

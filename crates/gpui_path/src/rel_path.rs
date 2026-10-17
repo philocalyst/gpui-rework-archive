@@ -10,7 +10,6 @@ use std::{
 use crate::{
     PathStyle,
     abs_path::{AbsPath, AbsPathBuf},
-    is_absolute,
 };
 
 /// A file system path that is guaranteed to be relative and normalized.
@@ -73,7 +72,11 @@ impl RelPath {
             path = prefix;
         }
 
+<<<<<<< HEAD
         if is_absolute(path, path_style) {
+=======
+        if path_style.has_root(Path::new(&path)) {
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
             return Err(anyhow!("absolute path not allowed: {path:?}"));
         }
 

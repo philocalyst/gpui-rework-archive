@@ -27,7 +27,7 @@ wasm-threads = ["dep:wasm_thread", "flume/spin"]
 [dependencies]
 async-task.workspace = true
 backtrace.workspace = true
-chrono.workspace = true
+chrono = { workspace = true, features = ["now", "wasmbind"] }
 flume.workspace = true
 futures.workspace = true
 parking_lot.workspace = true
@@ -35,8 +35,12 @@ rand.workspace = true
 web-time.workspace = true
 
 [target.'cfg(target_family = "wasm")'.dependencies]
+<<<<<<< HEAD
 # Forked because upstream is unmaintained and its worker bootstrap still calls
 # the wasm-bindgen init function with the positional arguments deprecated in 0.2.93.
 wasm_thread = { git = "https://github.com/zed-industries/wasm_thread", rev = "0cf96c7708dfb97ccf3da50347e25edcf75d6937", version = "0.3", features = [
   "es_modules",
 ], optional = true }
+=======
+wasm_thread = { workspace = true, optional = true }
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f

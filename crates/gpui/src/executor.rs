@@ -1,4 +1,4 @@
-use crate::{App, PlatformDispatcher, PlatformScheduler};
+use crate::{ActivityGuard, App, PlatformDispatcher, PlatformScheduler};
 #[cfg(not(target_family = "wasm"))]
 use futures::channel::mpsc;
 use futures::prelude::*;
@@ -117,6 +117,7 @@ impl BackgroundExecutor {
         self.inner.clone()
     }
 
+<<<<<<< HEAD
     /// Runs the future that `f` returns on a thread of its own, and returns a task for
     /// its result.
     ///
@@ -132,6 +133,13 @@ impl BackgroundExecutor {
         Fut::Output: Send + Sync + 'static,
     {
         self.inner.spawn_dedicated(f)
+=======
+    /// Prevents App Nap-style throttling while the returned guard is held.
+    ///
+    /// This does not prevent the system from entering idle sleep.
+    pub fn prevent_app_nap(&self, reason: &str) -> ActivityGuard {
+        self.dispatcher.prevent_app_nap(reason)
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 
     /// Schedules `future` on this executor and returns a task for its result.
@@ -406,8 +414,20 @@ impl BackgroundExecutor {
         self.dispatcher.is_main_thread()
     }
 
+<<<<<<< HEAD
     /// Returns the platform dispatcher this executor sends work through. GPUI uses this
     /// internally.
+=======
+    /// Whether this executor runs on the deterministic test scheduler.
+    ///
+    /// Available in every build. Use it, rather than `cfg(feature =
+    /// "test-support")`, for behavior that must differ under tests, so that
+    /// compiling `test-support` into an application doesn't change it.
+    pub fn is_test(&self) -> bool {
+        self.inner.is_test()
+    }
+
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     #[doc(hidden)]
     pub fn dispatcher(&self) -> &Arc<dyn PlatformDispatcher> {
         &self.dispatcher

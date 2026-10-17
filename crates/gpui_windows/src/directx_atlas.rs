@@ -1,4 +1,3 @@
-use collections::FxHashMap;
 use etagere::BucketedAtlasAllocator;
 use parking_lot::Mutex;
 use windows::Win32::Graphics::{
@@ -10,21 +9,29 @@ use windows::Win32::Graphics::{
 };
 
 use gpui::{
+<<<<<<< HEAD
     AtlasKey, AtlasTextureId, AtlasTextureKind, AtlasTextureList, AtlasTile, Bounds, DevicePixels,
     GlyphAtlasCache, GlyphAtlasEntry, PlatformAtlas, Point, RenderGlyphParams, Size,
     ValidatedRasterizedGlyph,
+=======
+    AtlasBackend, AtlasKey, AtlasState, AtlasTextureId, AtlasTextureKind, AtlasTextureList,
+    AtlasTile, Bounds, DevicePixels, PlatformAtlas, Point, Size,
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 };
 
-pub(crate) struct DirectXAtlas(Mutex<DirectXAtlasState>);
+pub(crate) struct DirectXAtlas(Mutex<AtlasState<DirectXAtlasTextures>>);
 
-struct DirectXAtlasState {
+struct DirectXAtlasTextures {
     device: ID3D11Device,
     device_context: ID3D11DeviceContext,
     monochrome_textures: AtlasTextureList<DirectXAtlasTexture>,
     polychrome_textures: AtlasTextureList<DirectXAtlasTexture>,
     subpixel_textures: AtlasTextureList<DirectXAtlasTexture>,
+<<<<<<< HEAD
     tiles_by_key: FxHashMap<AtlasKey, AtlasTile>,
     glyph_cache: GlyphAtlasCache,
+=======
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 }
 
 struct DirectXAtlasTexture {
@@ -38,24 +45,32 @@ struct DirectXAtlasTexture {
 
 impl DirectXAtlas {
     pub(crate) fn new(device: &ID3D11Device, device_context: &ID3D11DeviceContext) -> Self {
-        DirectXAtlas(Mutex::new(DirectXAtlasState {
+        DirectXAtlas(Mutex::new(AtlasState::new(DirectXAtlasTextures {
             device: device.clone(),
             device_context: device_context.clone(),
             monochrome_textures: Default::default(),
             polychrome_textures: Default::default(),
             subpixel_textures: Default::default(),
+<<<<<<< HEAD
             tiles_by_key: Default::default(),
             glyph_cache: Default::default(),
         }))
+=======
+        })))
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 
+    /// Returns the view backing `id`, or `None` once every tile in it has been
+    /// removed. A scene can still reference such a texture when a cached view
+    /// replays a paint from before the image was dropped, so callers must skip
+    /// those sprites rather than assume the texture exists.
     pub(crate) fn get_texture_view(
         &self,
         id: AtlasTextureId,
-    ) -> [Option<ID3D11ShaderResourceView>; 1] {
+    ) -> Option<[Option<ID3D11ShaderResourceView>; 1]> {
         let lock = self.0.lock();
-        let tex = lock.texture(id);
-        tex.view.clone()
+        let texture = lock.backend.texture(id)?;
+        Some(texture.view.clone())
     }
 
     pub(crate) fn handle_device_lost(
@@ -64,6 +79,7 @@ impl DirectXAtlas {
         device_context: &ID3D11DeviceContext,
     ) {
         let mut lock = self.0.lock();
+<<<<<<< HEAD
         lock.device = device.clone();
         lock.device_context = device_context.clone();
         lock.monochrome_textures = AtlasTextureList::default();
@@ -71,17 +87,27 @@ impl DirectXAtlas {
         lock.subpixel_textures = AtlasTextureList::default();
         lock.tiles_by_key.clear();
         lock.glyph_cache.clear();
+=======
+        lock.clear(|textures| {
+            textures.device = device.clone();
+            textures.device_context = device_context.clone();
+            textures.monochrome_textures = AtlasTextureList::default();
+            textures.polychrome_textures = AtlasTextureList::default();
+            textures.subpixel_textures = AtlasTextureList::default();
+        });
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 }
 
 impl PlatformAtlas for DirectXAtlas {
     fn get_or_insert_with<'a>(
         &self,
-        key: &AtlasKey,
+        key: AtlasKey,
         build: &mut dyn FnMut() -> anyhow::Result<
             Option<(Size<DevicePixels>, std::borrow::Cow<'a, [u8]>)>,
         >,
     ) -> anyhow::Result<Option<AtlasTile>> {
+<<<<<<< HEAD
         let mut lock = self.0.lock();
         if let Some(tile) = lock.tiles_by_key.get(key) {
             return Ok(Some(*tile));
@@ -116,22 +142,48 @@ impl PlatformAtlas for DirectXAtlas {
             Some(lock.insert_tile(key, glyph.size, &glyph.pixels)?)
         };
         Ok(lock.glyph_cache.insert(params, &glyph, tile))
+=======
+        self.0.lock().get_or_insert_with(key, build)
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 
     fn remove(&self, key: &AtlasKey) {
-        let mut lock = self.0.lock();
+        self.0.lock().remove(key);
+    }
+}
 
+<<<<<<< HEAD
         lock.glyph_cache.remove(key);
 
         let Some(tile) = lock.tiles_by_key.remove(key) else {
             return;
         };
+=======
+impl AtlasBackend for DirectXAtlasTextures {
+    fn insert(
+        &mut self,
+        kind: AtlasTextureKind,
+        size: Size<DevicePixels>,
+        bytes: &[u8],
+    ) -> anyhow::Result<AtlasTile> {
+        let tile = self
+            .allocate(size, kind)
+            .ok_or_else(|| anyhow::anyhow!("failed to allocate"))?;
+        let texture = self
+            .texture(tile.texture_id)
+            .ok_or_else(|| anyhow::anyhow!("allocated tile refers to a missing texture"))?;
+        texture.upload(&self.device_context, tile.bounds, bytes);
+        Ok(tile)
+    }
+
+    fn remove(&mut self, tile: AtlasTile) {
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         let id = tile.texture_id;
 
         let textures = match id.kind {
-            AtlasTextureKind::Monochrome => &mut lock.monochrome_textures,
-            AtlasTextureKind::Polychrome => &mut lock.polychrome_textures,
-            AtlasTextureKind::Subpixel => &mut lock.subpixel_textures,
+            AtlasTextureKind::Monochrome => &mut self.monochrome_textures,
+            AtlasTextureKind::Polychrome => &mut self.polychrome_textures,
+            AtlasTextureKind::Subpixel => &mut self.subpixel_textures,
         };
 
         let Some(texture_slot) = textures.textures.get_mut(id.index as usize) else {
@@ -150,6 +202,7 @@ impl PlatformAtlas for DirectXAtlas {
     }
 }
 
+<<<<<<< HEAD
 impl DirectXAtlasState {
     fn insert_tile(
         &mut self,
@@ -171,6 +224,9 @@ impl DirectXAtlasState {
         Ok(tile)
     }
 
+=======
+impl DirectXAtlasTextures {
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     fn allocate(
         &mut self,
         size: Size<DevicePixels>,
@@ -276,18 +332,13 @@ impl DirectXAtlasState {
         }
     }
 
-    fn texture(&self, id: AtlasTextureId) -> &DirectXAtlasTexture {
-        match id.kind {
-            AtlasTextureKind::Monochrome => &self.monochrome_textures[id.index as usize]
-                .as_ref()
-                .unwrap(),
-            AtlasTextureKind::Polychrome => &self.polychrome_textures[id.index as usize]
-                .as_ref()
-                .unwrap(),
-            AtlasTextureKind::Subpixel => {
-                &self.subpixel_textures[id.index as usize].as_ref().unwrap()
-            }
-        }
+    fn texture(&self, id: AtlasTextureId) -> Option<&DirectXAtlasTexture> {
+        let textures = match id.kind {
+            AtlasTextureKind::Monochrome => &self.monochrome_textures,
+            AtlasTextureKind::Polychrome => &self.polychrome_textures,
+            AtlasTextureKind::Subpixel => &self.subpixel_textures,
+        };
+        textures.textures.get(id.index as usize)?.as_ref()
     }
 }
 
@@ -394,7 +445,7 @@ mod tests {
         })
     }
 
-    fn insert_tile(atlas: &DirectXAtlas, key: &AtlasKey, size: Size<DevicePixels>) -> AtlasTile {
+    fn insert_tile(atlas: &DirectXAtlas, key: AtlasKey, size: Size<DevicePixels>) -> AtlasTile {
         atlas
             .get_or_insert_with(key, &mut || {
                 let byte_count = (size.width.0 as usize) * (size.height.0 as usize) * 4;
@@ -423,13 +474,13 @@ mod tests {
         let big_key_a = make_image_key(2);
         let big_key_b = make_image_key(3);
 
-        let keeper_tile = insert_tile(&atlas, &keeper_key, small);
-        let tile_a = insert_tile(&atlas, &big_key_a, big);
+        let keeper_tile = insert_tile(&atlas, keeper_key, small);
+        let tile_a = insert_tile(&atlas, big_key_a.clone(), big);
         assert_eq!(keeper_tile.texture_id, tile_a.texture_id);
 
         atlas.remove(&big_key_a);
 
-        let tile_b = insert_tile(&atlas, &big_key_b, big);
+        let tile_b = insert_tile(&atlas, big_key_b, big);
         assert_eq!(tile_b.texture_id, keeper_tile.texture_id);
     }
 }

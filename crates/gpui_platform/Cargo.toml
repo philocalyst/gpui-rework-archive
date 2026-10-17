@@ -11,8 +11,10 @@ workspace = true
 
 [lib]
 path = "src/gpui_platform.rs"
+doctest = false
 
 [features]
+<<<<<<< HEAD
 default = []
 bench-support = [
   "gpui/bench-support",
@@ -34,16 +36,50 @@ screen-capture = [
 # macOS windows draw with the WGPU renderer instead of Metal. Custom GPU
 # controls also need gpui_wgpu's `custom-gpu` feature to share its device.
 macos-wgpu = ["gpui_macos/wgpu"]
+=======
+default = ["multithreaded"]
+# Threads in the browser: needs a nightly toolchain and a cross-origin-isolated
+# page. Off, gpui_web builds on stable.
+multithreaded = ["gpui_web/multithreaded"]
+bench-support = ["gpui/bench-support", "gpui_macos/bench-support", "gpui_wgpu/bench-support"]
+font-kit = ["gpui_macos/font-kit"]
+inspector = ["gpui/inspector"]
+test-support = ["gpui/test-support", "gpui_macos/test-support", "gpui_windows/test-support", "gpui_wgpu/test-support"]
+screen-capture = ["gpui/screen-capture", "gpui_macos/screen-capture", "gpui_windows/screen-capture", "gpui_linux/screen-capture"]
+runtime_shaders = ["gpui_macos/runtime_shaders", "gpui_ios/runtime_shaders"]
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 wayland = ["gpui_linux/wayland"]
 x11 = ["gpui_linux/x11"]
 
+[[bench]]
+name = "focus_cleanup"
+path = "../gpui/benches/focus_cleanup.rs"
+harness = false
+required-features = ["bench-support"]
+
+[[bench]]
+name = "inspector_render"
+harness = false
+required-features = ["bench-support"]
+
+[[bench]]
+name = "randomized_element_tree"
+harness = false
+required-features = ["bench-support"]
+
 [dependencies]
+anyhow.workspace = true
 gpui.workspace = true
+
+[dev-dependencies]
+bench_metrics.workspace = true
+criterion.workspace = true
 
 [target.'cfg(target_os = "macos")'.dependencies]
 gpui_apple.workspace = true
 gpui_macos.workspace = true
 
+<<<<<<< HEAD
 [target.'cfg(target_os = "macos")'.dev-dependencies]
 gpui = { workspace = true, features = ["test-support"] }
 gpui_apple = { workspace = true, features = ["test-support"] }
@@ -52,6 +88,10 @@ gpui_macos = { workspace = true, features = ["test-support"] }
 [target.'cfg(any(target_os = "linux", target_os = "freebsd", target_os = "windows"))'.dev-dependencies]
 gpui = { workspace = true, features = ["test-support"] }
 gpui_wgpu = { workspace = true, features = ["test-support"] }
+=======
+[target.'cfg(target_os = "ios")'.dependencies]
+gpui_ios.workspace = true
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
 [target.'cfg(target_os = "windows")'.dependencies]
 gpui_windows.workspace = true
@@ -59,6 +99,9 @@ gpui = { workspace = true, features = ["windows-manifest"] }
 
 [target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies]
 gpui_linux.workspace = true
+
+[target.'cfg(target_os = "linux")'.dependencies]
+gpui_wgpu = { workspace = true, optional = true }
 
 [target.'cfg(target_family = "wasm")'.dependencies]
 gpui_web = { path = "../gpui_web", version = "0.1.0", package = "gpui_ce_web", default-features = false }

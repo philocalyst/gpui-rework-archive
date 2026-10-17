@@ -198,16 +198,21 @@ impl SvgRenderer {
         }
     }
 
+<<<<<<< HEAD
     /// Parses SVG bytes into a [`ParsedSvg`], which can then be rasterized at any size.
     ///
     /// # Errors
     ///
     /// Returns a `usvg::Error` if `bytes` is not a valid SVG document.
     #[tracing::instrument(skip_all)]
+=======
+    /// Parses SVG data into a [`ParsedSvg`] that can be rasterized at any scale.
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn parse_svg(&self, bytes: &[u8]) -> Result<ParsedSvg, usvg::Error> {
         usvg::Tree::from_data(bytes, &self.usvg_options).map(ParsedSvg)
     }
 
+<<<<<<< HEAD
     /// Rasterizes a parsed SVG at `size` into a [`RenderImage`].
     ///
     /// A scale-factor size is drawn at [`SMOOTH_SVG_SCALE_FACTOR`] times the requested size, and the
@@ -219,6 +224,9 @@ impl SvgRenderer {
     ///
     /// Returns a `usvg::Error` if the rasterized size is zero, such as for a zero requested size.
     #[tracing::instrument(skip_all)]
+=======
+    /// Rasterizes a previously parsed SVG into an image buffer.
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     pub fn render_parsed(
         &self,
         svg: &ParsedSvg,

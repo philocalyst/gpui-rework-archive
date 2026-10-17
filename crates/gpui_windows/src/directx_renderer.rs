@@ -790,6 +790,12 @@ impl DirectXRenderer {
         scene: &Scene,
         background_appearance: WindowBackgroundAppearance,
     ) -> Result<image::RgbaImage> {
+<<<<<<< HEAD
+=======
+        // A pending device-lost recovery (`skip_draws`) leaves the atlas holding
+        // tile references from the previous device; drawing before the forced
+        // re-render rebuilds them panics in `DirectXAtlasTextures::texture`.
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         anyhow::ensure!(
             !self.skip_draws,
             "render_to_image unavailable while recovering from a lost device"
@@ -1135,11 +1141,31 @@ impl DirectXRenderer {
         texture_id: AtlasTextureId,
         instances: InstanceRange,
     ) -> Result<()> {
+<<<<<<< HEAD
         let texture_view = self.atlas.get_texture_view(texture_id);
         self.pipelines.mono_sprites.draw_instances(
             &self.frame_bindings()?,
             Some(&texture_view),
             instances,
+=======
+        if len == 0 {
+            return Ok(());
+        }
+        let devices = self.devices.as_ref().context("devices missing")?;
+        let Some(texture_view) = self.atlas.get_texture_view(texture_id) else {
+            return Ok(());
+        };
+        self.pipelines.mono_sprites.draw_range_with_texture(
+            &devices.device_context,
+            &texture_view,
+            self.globals
+                .batch_params_buffer
+                .as_ref()
+                .context("batch params buffer missing")?,
+            slice::from_ref(&self.globals.sampler),
+            start as u32,
+            len as u32,
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         )
     }
 
@@ -1148,11 +1174,31 @@ impl DirectXRenderer {
         texture_id: AtlasTextureId,
         instances: InstanceRange,
     ) -> Result<()> {
+<<<<<<< HEAD
         let texture_view = self.atlas.get_texture_view(texture_id);
         self.pipelines.subpixel_sprites.draw_instances(
             &self.frame_bindings()?,
             Some(&texture_view),
             instances,
+=======
+        if len == 0 {
+            return Ok(());
+        }
+        let devices = self.devices.as_ref().context("devices missing")?;
+        let Some(texture_view) = self.atlas.get_texture_view(texture_id) else {
+            return Ok(());
+        };
+        self.pipelines.subpixel_sprites.draw_range_with_texture(
+            &devices.device_context,
+            &texture_view,
+            self.globals
+                .batch_params_buffer
+                .as_ref()
+                .context("batch params buffer missing")?,
+            slice::from_ref(&self.globals.sampler),
+            start as u32,
+            len as u32,
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         )
     }
 
@@ -1162,12 +1208,32 @@ impl DirectXRenderer {
         instances: InstanceRange,
         smoothed: bool,
     ) -> Result<()> {
+<<<<<<< HEAD
         let texture_view = self.atlas.get_texture_view(texture_id);
         self.pipelines.poly_sprites.draw_instances_variant(
             &self.frame_bindings()?,
             Some(&texture_view),
             instances,
             smoothed,
+=======
+        if len == 0 {
+            return Ok(());
+        }
+        let devices = self.devices.as_ref().context("devices missing")?;
+        let Some(texture_view) = self.atlas.get_texture_view(texture_id) else {
+            return Ok(());
+        };
+        self.pipelines.poly_sprites.draw_range_with_texture(
+            &devices.device_context,
+            &texture_view,
+            self.globals
+                .batch_params_buffer
+                .as_ref()
+                .context("batch params buffer missing")?,
+            slice::from_ref(&self.globals.sampler),
+            start as u32,
+            len as u32,
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         )
     }
 
@@ -2300,7 +2366,7 @@ fn create_blend_state(device: &ID3D11Device) -> Result<ID3D11BlendState> {
     desc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
     desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
     desc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-    desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+    desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
     desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL.0 as u8;
     unsafe {
         let mut state = None;
@@ -2361,7 +2427,7 @@ fn create_blend_state_for_path_sprite(device: &ID3D11Device) -> Result<ID3D11Ble
     desc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
     desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
     desc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-    desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+    desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
     desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL.0 as u8;
     unsafe {
         let mut state = None;

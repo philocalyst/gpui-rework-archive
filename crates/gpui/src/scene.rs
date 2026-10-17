@@ -1421,8 +1421,13 @@ pub struct PaintSurface {
     pub bounds: Bounds<ScaledPixels>,
     /// The region that clips this surface.
     pub content_mask: ContentMask<ScaledPixels>,
+<<<<<<< HEAD
     /// Where the pixels come from.
     pub source: crate::SurfaceSource,
+=======
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
+    pub image_buffer: objc2_core_foundation::CFRetained<objc2_core_video::CVPixelBuffer>,
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 }
 
 impl From<PaintSurface> for Primitive {

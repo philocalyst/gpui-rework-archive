@@ -17,9 +17,17 @@ name = "gpui_macros"
 path = "src/gpui_macros.rs"
 proc-macro = true
 doctest = true
+test = false
 
 [dependencies]
 heck.workspace = true
 proc-macro2.workspace = true
 quote.workspace = true
+<<<<<<< HEAD
 syn.workspace = true
+=======
+syn = { workspace = true, default-features = true, features = ["full", "extra-traits", "visit-mut"] }
+
+[dev-dependencies]
+gpui = { workspace = true, features = ["inspector"] }
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f

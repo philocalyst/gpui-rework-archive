@@ -9,7 +9,7 @@ use std::{
     collections::VecDeque,
     fmt,
     iter::FusedIterator,
-    sync::{Arc, atomic::AtomicUsize},
+    sync::{Arc, Condvar, Mutex, MutexGuard, PoisonError, TryLockError, atomic::AtomicUsize},
 };
 
 use rand::{Rng, SeedableRng, rngs::SmallRng};
@@ -31,8 +31,10 @@ impl<T> PriorityQueues<T> {
 }
 
 struct PriorityQueueState<T> {
-    queues: parking_lot::Mutex<PriorityQueues<T>>,
-    condvar: parking_lot::Condvar,
+    // std's Wasm atomic backend unlocks and notifies without acquiring another
+    // lock. parking_lot can park during those operations, even after try_lock.
+    queues: Mutex<PriorityQueues<T>>,
+    condvar: Condvar,
     receiver_count: AtomicUsize,
     sender_count: AtomicUsize,
 }
@@ -47,7 +49,7 @@ impl<T> PriorityQueueState<T> {
             return Err(SendError(item));
         }
 
-        let mut queues = self.queues.lock();
+        let mut queues = self.queues.lock().unwrap_or_else(PoisonError::into_inner);
         Self::push(&mut queues, priority, item);
         self.condvar.notify_one();
         Ok(())
@@ -63,10 +65,11 @@ impl<T> PriorityQueueState<T> {
         }
 
         let mut queues = loop {
-            if let Some(guard) = self.queues.try_lock() {
-                break guard;
+            match self.queues.try_lock() {
+                Ok(guard) => break guard,
+                Err(TryLockError::Poisoned(error)) => break error.into_inner(),
+                Err(TryLockError::WouldBlock) => std::hint::spin_loop(),
             }
-            std::hint::spin_loop();
         };
         Self::push(&mut queues, priority, item);
         self.condvar.notify_one();
@@ -84,6 +87,7 @@ impl<T> PriorityQueueState<T> {
         };
     }
 
+<<<<<<< HEAD
     fn recv<'a>(&'a self) -> Result<parking_lot::MutexGuard<'a, PriorityQueues<T>>, RecvError> {
         let mut queues = self.queues.lock();
 
@@ -95,15 +99,28 @@ impl<T> PriorityQueueState<T> {
             }
 
             self.condvar.wait(&mut queues);
+=======
+    fn recv<'a>(&'a self) -> Result<MutexGuard<'a, PriorityQueues<T>>, RecvError> {
+        let mut queues = self.queues.lock().unwrap_or_else(PoisonError::into_inner);
+
+        // Re-checked after every wake: dropping the last sender wakes waiting receivers
+        // so they can end instead of blocking forever on a queue nothing can fill.
+        while queues.is_empty() {
+            if self.sender_count.load(std::sync::atomic::Ordering::Acquire) == 0 {
+                return Err(crate::queue::RecvError);
+            }
+            queues = self
+                .condvar
+                .wait(queues)
+                .unwrap_or_else(PoisonError::into_inner);
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         }
 
         Ok(queues)
     }
 
-    fn try_recv<'a>(
-        &'a self,
-    ) -> Result<Option<parking_lot::MutexGuard<'a, PriorityQueues<T>>>, RecvError> {
-        let mut queues = self.queues.lock();
+    fn try_recv<'a>(&'a self) -> Result<Option<MutexGuard<'a, PriorityQueues<T>>>, RecvError> {
+        let queues = self.queues.lock().unwrap_or_else(PoisonError::into_inner);
 
         let sender_count = self.sender_count.load(std::sync::atomic::Ordering::Relaxed);
         if queues.is_empty() && sender_count == 0 {
@@ -117,14 +134,13 @@ impl<T> PriorityQueueState<T> {
         }
     }
 
-    fn spin_try_recv<'a>(
-        &'a self,
-    ) -> Result<Option<parking_lot::MutexGuard<'a, PriorityQueues<T>>>, RecvError> {
+    fn spin_try_recv<'a>(&'a self) -> Result<Option<MutexGuard<'a, PriorityQueues<T>>>, RecvError> {
         let queues = loop {
-            if let Some(guard) = self.queues.try_lock() {
-                break guard;
+            match self.queues.try_lock() {
+                Ok(guard) => break guard,
+                Err(TryLockError::Poisoned(error)) => break error.into_inner(),
+                Err(TryLockError::WouldBlock) => std::hint::spin_loop(),
             }
-            std::hint::spin_loop();
         };
 
         let sender_count = self.sender_count.load(std::sync::atomic::Ordering::Relaxed);
@@ -179,6 +195,7 @@ impl<T> PriorityQueueSender<T> {
 
 impl<T> Drop for PriorityQueueSender<T> {
     fn drop(&mut self) {
+<<<<<<< HEAD
         // Hold the lock so a receiver can't check the count and then miss this wakeup.
         let _queues = self.state.queues.lock();
         if self
@@ -187,6 +204,24 @@ impl<T> Drop for PriorityQueueSender<T> {
             .fetch_sub(1, std::sync::atomic::Ordering::AcqRel)
             == 1
         {
+=======
+        let previous = self
+            .state
+            .sender_count
+            .fetch_sub(1, std::sync::atomic::Ordering::AcqRel);
+        if previous == 1 {
+            // A receiver checks the sender count and starts waiting under the queue lock,
+            // atomically. Acquiring that lock once, even with nothing to do under it,
+            // means any receiver that saw a live sender is already waiting, so the
+            // notification below reaches it; without this, a receiver between its check
+            // and its wait would miss the wake-up and block forever.
+            drop(
+                self.state
+                    .queues
+                    .lock()
+                    .unwrap_or_else(PoisonError::into_inner),
+            );
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
             self.state.condvar.notify_all();
         }
     }
@@ -249,12 +284,12 @@ impl<T> PriorityQueueReceiver<T> {
     /// ```
     pub fn new() -> (PriorityQueueSender<T>, Self) {
         let state = PriorityQueueState {
-            queues: parking_lot::Mutex::new(PriorityQueues {
+            queues: Mutex::new(PriorityQueues {
                 high_priority: VecDeque::new(),
                 medium_priority: VecDeque::new(),
                 low_priority: VecDeque::new(),
             }),
-            condvar: parking_lot::Condvar::new(),
+            condvar: Condvar::new(),
             receiver_count: AtomicUsize::new(1),
             sender_count: AtomicUsize::new(1),
         };
@@ -273,12 +308,20 @@ impl<T> PriorityQueueReceiver<T> {
 
     /// Returns `true` if no items are queued at any priority.
     pub fn is_empty(&self) -> bool {
-        self.state.queues.lock().is_empty()
+        self.state
+            .queues
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .is_empty()
     }
 
     /// Returns the number of queued items across all priorities.
     pub(crate) fn len(&self) -> usize {
-        let queues = self.state.queues.lock();
+        let queues = self
+            .state
+            .queues
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner);
         queues.high_priority.len() + queues.medium_priority.len() + queues.low_priority.len()
     }
 
@@ -464,6 +507,7 @@ mod tests {
     use super::*;
 
     #[test]
+<<<<<<< HEAD
     fn dropping_the_last_sender_wakes_a_waiting_receiver() {
         let (sender, mut receiver) = PriorityQueueReceiver::<usize>::new();
         let (finished, result) = std::sync::mpsc::channel();
@@ -489,6 +533,43 @@ mod tests {
         assert!(items.next().is_none());
         sender.send(Priority::High, 2).unwrap();
         assert!(items.next().is_none());
+=======
+    fn blocked_receivers_end_when_the_sender_drops() {
+        let (sender, receiver) = PriorityQueueReceiver::<u32>::new();
+        let (done_sender, done_receiver) = std::sync::mpsc::channel();
+        let workers = (0..2)
+            .map(|_| {
+                let receiver = receiver.clone();
+                let done_sender = done_sender.clone();
+                std::thread::spawn(move || {
+                    let received: Vec<u32> = receiver.iter().collect();
+                    done_sender.send(received).ok();
+                })
+            })
+            .collect::<Vec<_>>();
+        drop(receiver);
+
+        sender.send(Priority::Medium, 7).unwrap();
+        std::thread::sleep(std::time::Duration::from_millis(50));
+        assert!(
+            done_receiver.try_recv().is_err(),
+            "receivers keep waiting while the sender is alive"
+        );
+
+        drop(sender);
+        let mut received = Vec::new();
+        for _ in 0..2 {
+            received.extend(
+                done_receiver
+                    .recv_timeout(std::time::Duration::from_secs(5))
+                    .expect("a waiting receiver should end once the sender is dropped"),
+            );
+        }
+        assert_eq!(received, [7]);
+        for worker in workers {
+            worker.join().expect("worker should exit cleanly");
+        }
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 
     #[test]

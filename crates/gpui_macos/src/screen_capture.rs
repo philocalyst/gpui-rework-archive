@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 use crate::display::screen_id;
 use anyhow::{Result, anyhow};
 use block2::RcBlock;
@@ -8,11 +9,17 @@ use core_graphics::display::{
     CGDisplayModeGetPixelWidth, CGDisplayModeRelease,
 };
 use core_video::pixel_buffer::kCVPixelFormatType_420YpCbCr8BiPlanarFullRange;
+=======
+use anyhow::{Result, anyhow};
+use block2::RcBlock;
+use collections::HashMap;
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 use futures::channel::oneshot;
 use gpui::{
     DevicePixels, ForegroundExecutor, ScreenCaptureFrame, ScreenCaptureSource, ScreenCaptureStream,
     SharedString, SourceMetadata, size,
 };
+<<<<<<< HEAD
 use media::core_media::{CMSampleBuffer, CMSampleBufferRef};
 use objc2::rc::Retained;
 use objc2::runtime::ProtocolObject;
@@ -24,6 +31,21 @@ use objc2_screen_capture_kit::{
     SCContentFilter, SCDisplay, SCShareableContent, SCStream, SCStreamConfiguration,
     SCStreamDelegate, SCStreamOutput, SCStreamOutputType, SCWindow,
 };
+=======
+use objc2::{
+    AnyThread, DefinedClass, MainThreadMarker, define_class, msg_send,
+    rc::Retained,
+    runtime::{NSObject, ProtocolObject},
+};
+use objc2_app_kit::NSScreen;
+use objc2_core_graphics::{CGDirectDisplayID, CGDisplayCopyDisplayMode, CGDisplayMode};
+use objc2_core_media::CMSampleBuffer;
+use objc2_foundation::{NSArray, NSError, NSNumber, NSObjectProtocol, NSString};
+use objc2_screen_capture_kit::{
+    SCContentFilter, SCDisplay, SCShareableContent, SCStream, SCStreamConfiguration,
+    SCStreamOutput, SCStreamOutputType, SCWindow,
+};
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 use std::{cell::RefCell, rc::Rc};
 
 #[derive(Clone)]
@@ -38,6 +60,7 @@ pub struct MacScreenCaptureStream {
     meta: SourceMetadata,
 }
 
+<<<<<<< HEAD
 const SCREEN_CAPTURE_QUEUE_DEPTH: isize = 3;
 
 impl ScreenCaptureSource for MacScreenCaptureSource {
@@ -54,18 +77,33 @@ impl ScreenCaptureSource for MacScreenCaptureSource {
             CGDisplayModeRelease(display_mode_ref);
             size(DevicePixels(width as i32), DevicePixels(height as i32))
         };
+=======
+impl MacScreenCaptureSource {
+    fn metadata(&self) -> SourceMetadata {
+        let display_id = unsafe { self.sc_display.displayID() };
+        let display_mode = CGDisplayCopyDisplayMode(display_id);
+        let width = CGDisplayMode::pixel_width(display_mode.as_deref());
+        let height = CGDisplayMode::pixel_height(display_mode.as_deref());
+        let size = size(DevicePixels(width as i32), DevicePixels(height as i32));
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         let (label, is_main) = self
             .meta
             .clone()
             .map(|meta| (meta.label, meta.is_main))
             .unzip();
 
-        Ok(SourceMetadata {
+        SourceMetadata {
             id: display_id as u64,
             label,
             is_main,
             resolution: size,
-        })
+        }
+    }
+}
+
+impl ScreenCaptureSource for MacScreenCaptureSource {
+    fn metadata(&self) -> Result<SourceMetadata> {
+        Ok(self.metadata())
     }
 
     fn stream(
@@ -73,6 +111,7 @@ impl ScreenCaptureSource for MacScreenCaptureSource {
         _foreground_executor: &ForegroundExecutor,
         frame_callback: Box<dyn Fn(ScreenCaptureFrame) + Send>,
     ) -> oneshot::Receiver<Result<Box<dyn ScreenCaptureStream>>> {
+<<<<<<< HEAD
         let (tx, rx) = oneshot::channel();
         let meta = match self.metadata() {
             Ok(meta) => meta,
@@ -81,6 +120,10 @@ impl ScreenCaptureSource for MacScreenCaptureSource {
                 return rx;
             }
         };
+=======
+        let (sender, receiver) = oneshot::channel();
+        let metadata = self.metadata();
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
 
         unsafe {
             let excluded_windows = NSArray::<SCWindow>::new();
@@ -88,6 +131,7 @@ impl ScreenCaptureSource for MacScreenCaptureSource {
                 SCContentFilter::alloc(),
                 &self.sc_display,
                 &excluded_windows,
+<<<<<<< HEAD
             );
             let configuration = SCStreamConfiguration::new();
             configuration.setScalesToFit(true);
@@ -103,8 +147,16 @@ impl ScreenCaptureSource for MacScreenCaptureSource {
                 &filter,
                 &configuration,
                 Some(ProtocolObject::from_ref(&*delegate)),
+=======
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
             );
+            let configuration = SCStreamConfiguration::new();
+            configuration.setScalesToFit(true);
+            configuration.setPixelFormat(0x42475241);
+            configuration.setWidth(metadata.resolution.width.0 as usize);
+            configuration.setHeight(metadata.resolution.height.0 as usize);
 
+<<<<<<< HEAD
             if let Err(error) = stream.addStreamOutput_type_sampleHandlerQueue_error(
                 ProtocolObject::from_ref(&*output),
                 SCStreamOutputType::Screen,
@@ -124,10 +176,43 @@ impl ScreenCaptureSource for MacScreenCaptureSource {
                 let result = if let Some(error) = error.as_ref() {
                     Err(anyhow!(
                         "failed to start screen capture stream {}",
+=======
+            let stream = SCStream::initWithFilter_configuration_delegate(
+                SCStream::alloc(),
+                &filter,
+                &configuration,
+                None,
+            );
+            let output = StreamOutput::new(frame_callback);
+            let output_protocol = ProtocolObject::from_ref(&*output);
+
+            if let Err(error) = stream.addStreamOutput_type_sampleHandlerQueue_error(
+                output_protocol,
+                SCStreamOutputType::Screen,
+                None,
+            ) {
+                _ = sender.send(Err(anyhow!(
+                    "failed to add stream output: {}",
+                    error.localizedDescription()
+                )));
+
+                return receiver;
+            }
+
+            let state = Rc::new(RefCell::new(Some((sender, stream.clone(), output))));
+            let handler = RcBlock::new(move |error: *mut NSError| {
+                let Some((sender, stream, output)) = state.borrow_mut().take() else {
+                    return;
+                };
+                let result = if let Some(error) = error.as_ref() {
+                    Err(anyhow!(
+                        "failed to start screen capture stream: {}",
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
                         error.localizedDescription()
                     ))
                 } else {
                     Ok(Box::new(MacScreenCaptureStream {
+<<<<<<< HEAD
                         meta: meta.clone(),
                         sc_stream: stream_for_completion.clone(),
                         sc_stream_output: output_for_completion.clone(),
@@ -140,6 +225,20 @@ impl ScreenCaptureSource for MacScreenCaptureSource {
             stream.startCaptureWithCompletionHandler(Some(&completion));
         }
         rx
+=======
+                        meta: metadata.clone(),
+                        sc_stream: stream,
+                        sc_stream_output: output,
+                    }) as Box<dyn ScreenCaptureStream>)
+                };
+
+                _ = sender.send(result);
+            });
+            stream.startCaptureWithCompletionHandler(Some(&handler));
+        }
+
+        receiver
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     }
 }
 
@@ -152,26 +251,47 @@ impl ScreenCaptureStream for MacScreenCaptureStream {
 impl Drop for MacScreenCaptureStream {
     fn drop(&mut self) {
         unsafe {
+<<<<<<< HEAD
             if let Err(error) = self.sc_stream.removeStreamOutput_type_error(
                 ProtocolObject::from_ref(&*self.sc_stream_output),
                 SCStreamOutputType::Screen,
             ) {
                 log::error!(
                     "failed to remove screen stream output {}",
+=======
+            let output = ProtocolObject::from_ref(&*self.sc_stream_output);
+            if let Err(error) = self
+                .sc_stream
+                .removeStreamOutput_type_error(output, SCStreamOutputType::Screen)
+            {
+                log::error!(
+                    "failed to remove screen capture stream output: {}",
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
                     error.localizedDescription()
                 );
             }
 
+<<<<<<< HEAD
             let completion = RcBlock::new(move |error: *mut NSError| {
                 if let Some(error) = error.as_ref() {
                     log::error!(
                         "failed to stop screen capture stream {}",
+=======
+            let handler = RcBlock::new(move |error: *mut NSError| {
+                if let Some(error) = error.as_ref() {
+                    log::error!(
+                        "failed to stop screen capture stream: {}",
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
                         error.localizedDescription()
                     );
                 }
             });
             self.sc_stream
+<<<<<<< HEAD
                 .stopCaptureWithCompletionHandler(Some(&completion));
+=======
+                .stopCaptureWithCompletionHandler(Some(&handler));
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         }
     }
 }
@@ -183,6 +303,7 @@ struct ScreenMeta {
     is_main: bool,
 }
 
+<<<<<<< HEAD
 fn screen_id_to_human_label() -> HashMap<CGDirectDisplayID, ScreenMeta> {
     let Some(mtm) = MainThreadMarker::new() else {
         return HashMap::default();
@@ -201,19 +322,54 @@ fn screen_id_to_human_label() -> HashMap<CGDirectDisplayID, ScreenMeta> {
             screen_id,
             ScreenMeta {
                 label: name.to_string().into(),
+=======
+fn screen_id_to_human_label(marker: MainThreadMarker) -> HashMap<CGDirectDisplayID, ScreenMeta> {
+    let screens = NSScreen::screens(marker);
+    let mut map = HashMap::default();
+
+    let screen_number_key = NSString::from_str("NSScreenNumber");
+
+    for (i, screen) in screens.iter().enumerate() {
+        let description = screen.deviceDescription();
+        let Some(obj) = description.objectForKey(&screen_number_key) else {
+            continue;
+        };
+        let Some(screen_id) = obj.downcast_ref::<NSNumber>() else {
+            continue;
+        };
+        let name = screen.localizedName().to_string();
+
+        map.insert(
+            screen_id.as_u32(),
+            ScreenMeta {
+                label: name.into(),
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
                 is_main: i == 0,
             },
         );
     }
+
     map
 }
 
+<<<<<<< HEAD
 pub(crate) fn get_sources() -> oneshot::Receiver<Result<Vec<Rc<dyn ScreenCaptureSource>>>> {
     let (tx, rx) = oneshot::channel();
     let tx = Rc::new(RefCell::new(Some(tx)));
     let screen_id_to_label = screen_id_to_human_label();
     let block = RcBlock::new(
         move |shareable_content: *mut SCShareableContent, error: *mut NSError| {
+=======
+pub(crate) fn get_sources(
+    marker: MainThreadMarker,
+) -> oneshot::Receiver<Result<Vec<Rc<dyn ScreenCaptureSource>>>> {
+    let (tx, rx) = oneshot::channel();
+    let tx = Rc::new(RefCell::new(Some(tx)));
+    let screen_id_to_label = screen_id_to_human_label(marker);
+
+    let handler = RcBlock::new(
+        move |content: *mut SCShareableContent, error: *mut NSError| {
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
             let Some(tx) = tx.borrow_mut().take() else {
                 return;
             };
@@ -223,6 +379,7 @@ pub(crate) fn get_sources() -> oneshot::Receiver<Result<Vec<Rc<dyn ScreenCapture
                     "Screen share failed: {}",
                     error.localizedDescription()
                 ))
+<<<<<<< HEAD
             } else if let Some(shareable_content) = unsafe { shareable_content.as_ref() } {
                 let displays = unsafe { shareable_content.displays() };
                 let mut result = Vec::new();
@@ -250,10 +407,43 @@ pub(crate) fn get_sources() -> oneshot::Receiver<Result<Vec<Rc<dyn ScreenCapture
             &block,
         );
     }
+=======
+            } else if let Some(content) = unsafe { content.as_ref() } {
+                // SAFETY: Marked unsafe conservatively by objc2
+                let result = unsafe { content.displays() }
+                    .into_iter()
+                    .map(|display| {
+                        // SAFETY: Marked unsafe conservatively by objc2
+                        let id = unsafe { display.displayID() };
+                        let metadata = screen_id_to_label.get(&id).cloned();
+                        let source = MacScreenCaptureSource {
+                            sc_display: display,
+                            meta: metadata,
+                        };
+                        Rc::new(source) as Rc<dyn ScreenCaptureSource>
+                    })
+                    .collect::<Vec<_>>();
+
+                Ok(result)
+            } else {
+                // The two pointers are mutually exclusive, this should never happen
+                Err(anyhow!("Screen share failed"))
+            };
+
+            _ = tx.send(result);
+        },
+    );
+
+    unsafe {
+        SCShareableContent::getShareableContentExcludingDesktopWindows_onScreenWindowsOnly_completionHandler(true, true, &handler);
+    }
+
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     rx
 }
 
 struct StreamOutputIvars {
+<<<<<<< HEAD
     callback: Box<dyn Fn(ScreenCaptureFrame) + Send>,
 }
 
@@ -278,10 +468,20 @@ impl StreamDelegate {
 define_class!(
     #[unsafe(super(NSObject))]
     #[name = "GPUIStreamOutput"]
+=======
+    frame_callback: Box<dyn Fn(ScreenCaptureFrame) + Send>,
+}
+
+define_class!(
+    // SAFETY: `NSObject` has no subclassing requirements, and `StreamOutput` does not
+    // implement `Drop`; `define_class!` manages destruction of its ivars.
+    #[unsafe(super(NSObject))]
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
     #[ivars = StreamOutputIvars]
     struct StreamOutput;
 
     unsafe impl NSObjectProtocol for StreamOutput {}
+<<<<<<< HEAD
     unsafe impl SCStreamOutput for StreamOutput {
         // The Rust name mirrors the generated protocol requirement exactly.
         #[allow(non_snake_case)]
@@ -290,12 +490,22 @@ define_class!(
             &self,
             _stream: &SCStream,
             sample_buffer: &ObjcCMSampleBuffer,
+=======
+
+    unsafe impl SCStreamOutput for StreamOutput {
+        #[unsafe(method(stream:didOutputSampleBuffer:ofType:))]
+        fn stream_did_output_sample_buffer_of_type(
+            &self,
+            _stream: &SCStream,
+            sample_buffer: &CMSampleBuffer,
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
             buffer_type: SCStreamOutputType,
         ) {
             if buffer_type != SCStreamOutputType::Screen {
                 return;
             }
 
+<<<<<<< HEAD
             // ScreenCaptureKit's CMSampleBuffer and gpui-media's CoreMedia
             // wrapper are both the same opaque CoreMedia reference. Keep the
             // conversion at this boundary while using the generated typed
@@ -305,14 +515,25 @@ define_class!(
             if let Some(buffer) = sample_buffer.image_buffer() {
                 (self.ivars().callback)(ScreenCaptureFrame(buffer));
             }
+=======
+            let Some(image_buffer) = (unsafe { sample_buffer.image_buffer() }) else {
+                return;
+            };
+            (self.ivars().frame_callback)(ScreenCaptureFrame(image_buffer));
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         }
     }
 );
 
 impl StreamOutput {
+<<<<<<< HEAD
     fn new(callback: Box<dyn Fn(ScreenCaptureFrame) + Send>) -> Retained<Self> {
         let this = Self::alloc().set_ivars(StreamOutputIvars { callback });
         // SAFETY: NSObject's `init` is its designated initializer.
+=======
+    fn new(frame_callback: Box<dyn Fn(ScreenCaptureFrame) + Send>) -> Retained<Self> {
+        let this = Self::alloc().set_ivars(StreamOutputIvars { frame_callback });
+>>>>>>> 23cb1f7c5c21ea7f7e30eb9b07590058e9835b6f
         unsafe { msg_send![super(this), init] }
     }
 }
