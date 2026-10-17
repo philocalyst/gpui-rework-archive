@@ -1774,6 +1774,9 @@ impl Element for List {
         window: &mut Window,
         cx: &mut App,
     ) -> (crate::LayoutId, Self::RequestLayoutState) {
+        // ListState is mutated through cloned handles and cannot notify this owning view.
+        // Keep retained owners fresh so remeasure and follow-tail changes take effect.
+        window.mark_cached_views_frame_bound();
         let layout_id = match self.sizing_behavior {
             ListSizingBehavior::Infer => {
                 let style = self.base_style();

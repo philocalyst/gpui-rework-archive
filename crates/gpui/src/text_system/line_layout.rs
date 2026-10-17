@@ -1114,12 +1114,75 @@ fn repaint_shaped_text_layout(
     })
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub(crate) struct LineLayoutIndex {
     font_generation: usize,
     lines_index: usize,
     shaped_texts_index: usize,
     inline_layouts_index: usize,
+}
+
+impl LineLayoutIndex {
+    pub(crate) fn rebase_from(
+        &mut self,
+        source_start: &Self,
+        source_end: &Self,
+        destination: &Self,
+    ) {
+        // Cache indices are only comparable within the same font generation.
+        // Leave stale indices untouched; reuse_layouts rejects their generation.
+        if self.font_generation != source_start.font_generation
+            || source_start.font_generation != source_end.font_generation
+            || destination.font_generation != source_start.font_generation
+        {
+            return;
+        }
+
+        rebase_index(
+            &mut self.lines_index,
+            source_start.lines_index,
+            source_end.lines_index,
+            destination.lines_index,
+        );
+        rebase_index(
+            &mut self.shaped_texts_index,
+            source_start.shaped_texts_index,
+            source_end.shaped_texts_index,
+            destination.shaped_texts_index,
+        );
+        rebase_index(
+            &mut self.inline_layouts_index,
+            source_start.inline_layouts_index,
+            source_end.inline_layouts_index,
+            destination.inline_layouts_index,
+        );
+    }
+}
+
+fn rebase_index(
+    index: &mut usize,
+    source_start: usize,
+    source_end: usize,
+    destination_start: usize,
+) {
+    if (source_start..=source_end).contains(index) {
+        *index = destination_start + (*index - source_start);
+    }
+}
+
+fn has_reusable_layouts(range: Range<usize>, previous_len: usize, lane: &str) -> bool {
+    // Empty ranges own no cache entries, so their absolute index does not need
+    // to fit in the previous frame's list.
+    if range.start == range.end {
+        return false;
+    }
+    assert!(
+        range.start < range.end && range.end <= previous_len,
+        "invalid retained {lane} range: {:?}..{:?} of {previous_len} entries",
+        range.start,
+        range.end,
+    );
+    true
 }
 
 impl LineLayoutCache {
@@ -1158,18 +1221,32 @@ impl LineLayoutCache {
         let mut current_frame = &mut *self.current_frame.write();
         let mut previous_frame = &mut *self.previous_frame.lock();
 
-        current_frame.lines.reuse(
-            &mut previous_frame.lines,
-            range.start.lines_index..range.end.lines_index,
-        );
-        current_frame.shaped_texts.reuse(
-            &mut previous_frame.shaped_texts,
-            range.start.shaped_texts_index..range.end.shaped_texts_index,
-        );
-        current_frame.inline_layouts.reuse(
-            &mut previous_frame.inline_layouts,
-            range.start.inline_layouts_index..range.end.inline_layouts_index,
-        );
+        let line_range = range.start.lines_index..range.end.lines_index;
+        if has_reusable_layouts(line_range.clone(), previous_frame.lines.used.len(), "line") {
+            current_frame
+                .lines
+                .reuse(&mut previous_frame.lines, line_range);
+        }
+        let shaped_range = range.start.shaped_texts_index..range.end.shaped_texts_index;
+        if has_reusable_layouts(
+            shaped_range.clone(),
+            previous_frame.shaped_texts.used.len(),
+            "shaped-text",
+        ) {
+            current_frame
+                .shaped_texts
+                .reuse(&mut previous_frame.shaped_texts, shaped_range);
+        }
+        let inline_range = range.start.inline_layouts_index..range.end.inline_layouts_index;
+        if has_reusable_layouts(
+            inline_range.clone(),
+            previous_frame.inline_layouts.used.len(),
+            "inline-layout",
+        ) {
+            current_frame
+                .inline_layouts
+                .reuse(&mut previous_frame.inline_layouts, inline_range);
+        }
     }
 
     pub fn truncate_layouts(&self, index: LineLayoutIndex) {
@@ -1511,6 +1588,100 @@ impl AsCacheKeyRef for CacheKeyRef<'_> {
 mod tests {
     use super::*;
     use crate::{point, px, size};
+
+    #[test]
+    fn line_layout_index_rebases_each_lane_within_same_font_generation() {
+        let start = LineLayoutIndex {
+            font_generation: 7,
+            lines_index: 4,
+            shaped_texts_index: 8,
+            inline_layouts_index: 2,
+        };
+        let end = LineLayoutIndex {
+            font_generation: 7,
+            lines_index: 9,
+            shaped_texts_index: 15,
+            inline_layouts_index: 6,
+        };
+        let destination = LineLayoutIndex {
+            font_generation: 7,
+            lines_index: 1,
+            shaped_texts_index: 3,
+            inline_layouts_index: 10,
+        };
+        let mut index = LineLayoutIndex {
+            font_generation: 7,
+            lines_index: 7,
+            shaped_texts_index: 12,
+            inline_layouts_index: 4,
+        };
+
+        index.rebase_from(&start, &end, &destination);
+
+        assert_eq!(
+            index,
+            LineLayoutIndex {
+                font_generation: 7,
+                lines_index: 4,
+                shaped_texts_index: 7,
+                inline_layouts_index: 12,
+            }
+        );
+    }
+
+    #[test]
+    fn line_layout_index_does_not_rebase_across_font_generation_changes() {
+        let start = LineLayoutIndex {
+            font_generation: 7,
+            lines_index: 4,
+            shaped_texts_index: 8,
+            inline_layouts_index: 2,
+        };
+        let end = LineLayoutIndex {
+            font_generation: 7,
+            lines_index: 9,
+            shaped_texts_index: 15,
+            inline_layouts_index: 6,
+        };
+        let destination = LineLayoutIndex {
+            font_generation: 8,
+            lines_index: 1,
+            shaped_texts_index: 3,
+            inline_layouts_index: 10,
+        };
+        let mut stale = LineLayoutIndex {
+            font_generation: 7,
+            lines_index: 7,
+            shaped_texts_index: 12,
+            inline_layouts_index: 4,
+        };
+
+        stale.rebase_from(&start, &end, &destination);
+
+        assert_eq!(stale.lines_index, 7);
+        assert_eq!(stale.shaped_texts_index, 12);
+        assert_eq!(stale.inline_layouts_index, 4);
+        assert_eq!(stale.font_generation, 7);
+    }
+
+    #[test]
+    fn empty_retained_ranges_are_safe_for_every_cache_lane() {
+        assert!(!has_reusable_layouts(50..50, 0, "line"));
+        assert!(!has_reusable_layouts(80..80, 1, "shaped-text"));
+        assert!(!has_reusable_layouts(120..120, 2, "inline-layout"));
+    }
+
+    #[test]
+    fn nonempty_retained_ranges_validate_the_previous_frame_bounds() {
+        let panic = std::panic::catch_unwind(|| has_reusable_layouts(1..2, 1, "shaped-text"))
+            .expect_err("out-of-bounds retained range must panic");
+        let message = panic
+            .downcast_ref::<String>()
+            .map(String::as_str)
+            .or_else(|| panic.downcast_ref::<&str>().copied())
+            .unwrap_or_default();
+        assert!(message.contains("shaped-text"), "{message}");
+    }
 
     #[test]
     fn caret_selection_endpoint_ordering_uses_byte_indices() {

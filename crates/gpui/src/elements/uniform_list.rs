@@ -380,6 +380,10 @@ impl Element for UniformList {
         window: &mut Window,
         cx: &mut App,
     ) -> (LayoutId, Self::RequestLayoutState) {
+        // A tracked handle can receive scroll requests without notifying the owning view.
+        if self.scroll_handle.is_some() {
+            window.mark_cached_views_frame_bound();
+        }
         let max_items = self.item_count;
         let item_size = self.measure_item(None, window, cx);
         let layout_id = self.interactivity.request_layout(

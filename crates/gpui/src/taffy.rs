@@ -1,7 +1,7 @@
 use crate::{
     AbsoluteLength, App, Bounds, DefiniteLength, Display, Edges, GridTemplate, InlineContent,
     LayoutDirection, Length, Pixels, Point, Position, ResolvedDirection, SharedString, Size, Style,
-    UnicodeBidi, VerticalAlign, Window, size,
+    UnicodeBidi, VerticalAlign, Window, WindowTextSystem, size,
     util::{
         ceil_to_device_pixel, round_half_toward_zero, round_stroke_to_device_pixel,
         round_to_device_pixel,
@@ -22,13 +22,20 @@ type StackSafe<T> = stacksafe::StackSafe<T>;
 #[cfg(not(feature = "stacker"))]
 type StackSafe<T> = T;
 
-type MeasureFn =
+type FrameBoundMeasureFn =
     dyn FnMut(Size<Option<Pixels>>, Size<AvailableSpace>, &mut Window, &mut App) -> Size<Pixels>;
-type NodeMeasureFn = StackSafe<Box<MeasureFn>>;
+type RetainedMeasureFn =
+    dyn FnMut(Size<Option<Pixels>>, Size<AvailableSpace>, &WindowTextSystem) -> Size<Pixels>;
 
-struct NodeContext {
-    measure: NodeMeasureFn,
-    unicode_bidi: UnicodeBidi,
+enum NodeContext {
+    FrameBound {
+        measure: StackSafe<Box<FrameBoundMeasureFn>>,
+        unicode_bidi: UnicodeBidi,
+    },
+    Retained {
+        measure: StackSafe<Box<RetainedMeasureFn>>,
+        unicode_bidi: UnicodeBidi,
+    },
 }
 
 #[derive(Clone)]
@@ -69,12 +76,17 @@ pub struct TaffyLayoutEngine {
     /// Unrounded absolute border-box top-left per-node coordinate in device pixels.
     absolute_outer_origins: FxHashMap<LayoutId, Point<f32>>,
     computed_available_spaces: FxHashMap<LayoutId, Size<AvailableSpace>>,
+    computed_layouts: FxHashSet<LayoutId>,
     vertical_alignments: FxHashMap<LayoutId, VerticalAlign>,
     pub(crate) inline_content: FxHashMap<LayoutId, Arc<InlineContent>>,
     pub(crate) inline_fragments: FxHashMap<LayoutId, Arc<[Bounds<Pixels>]>>,
     display_and_position: FxHashMap<LayoutId, (Display, Position)>,
     directions: FxHashMap<LayoutId, DirectionMetadata>,
     layout_bounds_scratch_space: Vec<LayoutId>,
+    live_layout_nodes: Vec<LayoutId>,
+    frame_layout_nodes: Vec<LayoutId>,
+    frame_layout_node_set: FxHashSet<LayoutId>,
+    frame_bound_measured_nodes: FxHashSet<LayoutId>,
 }
 
 const EXPECT_MESSAGE: &str = "we should avoid taffy layout errors by construction if possible";
@@ -89,28 +101,95 @@ impl TaffyLayoutEngine {
             absolute_layout_bounds: FxHashMap::default(),
             absolute_outer_origins: FxHashMap::default(),
             computed_available_spaces: FxHashMap::default(),
+            computed_layouts: FxHashSet::default(),
             vertical_alignments: FxHashMap::default(),
             inline_content: FxHashMap::default(),
             inline_fragments: FxHashMap::default(),
             display_and_position: FxHashMap::default(),
             directions: FxHashMap::default(),
             layout_bounds_scratch_space: Vec::new(),
+            live_layout_nodes: Vec::new(),
+            frame_layout_nodes: Vec::new(),
+            frame_layout_node_set: FxHashSet::default(),
+            frame_bound_measured_nodes: FxHashSet::default(),
         }
     }
 
-    /// Removes every node and cached result, so the engine can start a new frame.
+    /// Removes nodes from the previous frame that were not claimed by retained subtrees.
     ///
-    /// Any [`LayoutId`] from before the call is invalid afterwards.
-    pub fn clear(&mut self) {
-        self.taffy.clear();
+    /// Retained nodes keep their Taffy layout cache; unclaimed nodes and frame-bound measurement
+    /// closures are released before the next frame starts.
+    pub fn finish_frame(&mut self) {
+        for node in self.live_layout_nodes.drain(..) {
+            if !self.frame_layout_node_set.contains(&node) {
+                self.taffy
+                    .set_node_context(node.0, None)
+                    .expect(EXPECT_MESSAGE);
+                self.taffy.remove(node.0).expect(EXPECT_MESSAGE);
+                self.vertical_alignments.remove(&node);
+                self.display_and_position.remove(&node);
+                self.inline_content.remove(&node);
+                self.inline_fragments.remove(&node);
+                self.directions.remove(&node);
+                self.computed_available_spaces.remove(&node);
+                self.frame_bound_measured_nodes.remove(&node);
+            }
+        }
+        self.release_frame_bound_measured_contexts();
+        std::mem::swap(&mut self.live_layout_nodes, &mut self.frame_layout_nodes);
+        self.frame_layout_nodes.clear();
+        self.frame_layout_node_set.clear();
+        #[cfg(test)]
+        debug_assert_eq!(
+            self.taffy.total_node_count(),
+            self.live_layout_nodes.len(),
+            "Taffy tree nodes must match the layout engine's retained live-node inventory after pruning",
+        );
         self.absolute_layout_bounds.clear();
         self.absolute_outer_origins.clear();
-        self.computed_available_spaces.clear();
-        self.vertical_alignments.clear();
-        self.inline_content.clear();
-        self.inline_fragments.clear();
-        self.display_and_position.clear();
-        self.directions.clear();
+        self.computed_layouts.clear();
+    }
+
+    pub(crate) fn release_frame_bound_measured_contexts(&mut self) {
+        for node in self.frame_bound_measured_nodes.drain() {
+            self.taffy
+                .set_node_context(node.0, None)
+                .expect(EXPECT_MESSAGE);
+        }
+    }
+
+    #[cfg(test)]
+    pub(crate) fn live_layout_node_count(&self) -> usize {
+        self.live_layout_nodes.len()
+    }
+
+    #[cfg(test)]
+    pub(crate) fn live_measured_node_count(&self) -> usize {
+        self.live_layout_nodes
+            .iter()
+            .filter(|node| self.taffy.get_node_context(node.0).is_some())
+            .count()
+    }
+
+    pub fn retain_subtree(&mut self, root: LayoutId) {
+        self.layout_bounds_scratch_space.clear();
+        self.layout_bounds_scratch_space.push(root);
+        while let Some(node) = self.layout_bounds_scratch_space.pop() {
+            if !self.frame_layout_node_set.insert(node) {
+                continue;
+            }
+            self.frame_layout_nodes.push(node);
+            self.layout_bounds_scratch_space.extend(
+                (0..self.taffy.child_count(node.0))
+                    .map(|index| LayoutId::from(self.taffy.get_child_id(node.0, index))),
+            );
+        }
+    }
+
+    fn claim_node(&mut self, node: LayoutId) {
+        if self.frame_layout_node_set.insert(node) {
+            self.frame_layout_nodes.push(node);
+        }
     }
 
     /// Adds a node styled by `style`, with `children` as its child nodes, and returns its id.
@@ -132,6 +211,19 @@ impl TaffyLayoutEngine {
                 .expect(EXPECT_MESSAGE)
                 .into()
         } else {
+            // TaffyTree::new_with_children only assigns each child's parent pointer. Unlike
+            // set_children, it does not unlink that child from its previous parent's child list.
+            // A cached subtree may supply a child still attached to the previous frame's parent.
+            // Detach it first so pruning that old parent cannot clear the new parent link or
+            // leave a dangling child key that later panics during removal.
+            for child in children {
+                if let Some(previous_parent) = self.taffy.parent(child.0) {
+                    self.taffy
+                        .remove_child(previous_parent, child.0)
+                        .expect(EXPECT_MESSAGE);
+                }
+            }
+
             self.taffy
                 // This is safe because LayoutId is repr(transparent) to taffy::tree::NodeId.
                 .new_with_children(taffy_style, LayoutId::to_taffy_slice(children))
@@ -139,6 +231,7 @@ impl TaffyLayoutEngine {
                 .into()
         };
 
+        self.claim_node(node_id);
         self.record_style(node_id, &style);
 
         node_id
@@ -163,24 +256,65 @@ impl TaffyLayoutEngine {
         ) -> Size<Pixels>
         + 'static,
     ) -> LayoutId {
-        let taffy_style = style.to_taffy(rem_size, scale_factor);
-        let measure = Box::new(measure) as Box<MeasureFn>;
+        let unicode_bidi = style.effective_unicode_bidi();
+        let measure = Box::new(measure) as Box<FrameBoundMeasureFn>;
         #[cfg(feature = "stacker")]
         let measure = StackSafe::new(measure);
+        let node_id = self.request_measured_layout_with_context(
+            style,
+            rem_size,
+            scale_factor,
+            NodeContext::FrameBound {
+                measure,
+                unicode_bidi,
+            },
+        );
+        self.frame_bound_measured_nodes.insert(node_id);
+        node_id
+    }
 
+    pub fn request_retained_measured_layout(
+        &mut self,
+        style: Style,
+        rem_size: Pixels,
+        scale_factor: f32,
+        measure: impl FnMut(
+            Size<Option<Pixels>>,
+            Size<AvailableSpace>,
+            &WindowTextSystem,
+        ) -> Size<Pixels>
+        + 'static,
+    ) -> LayoutId {
+        let unicode_bidi = style.effective_unicode_bidi();
+        let measure = Box::new(measure) as Box<RetainedMeasureFn>;
+        #[cfg(feature = "stacker")]
+        let measure = StackSafe::new(measure);
+        self.request_measured_layout_with_context(
+            style,
+            rem_size,
+            scale_factor,
+            NodeContext::Retained {
+                measure,
+                unicode_bidi,
+            },
+        )
+    }
+
+    fn request_measured_layout_with_context(
+        &mut self,
+        style: Style,
+        rem_size: Pixels,
+        scale_factor: f32,
+        context: NodeContext,
+    ) -> LayoutId {
+        let taffy_style = style.to_taffy(rem_size, scale_factor);
         let node_id = self
             .taffy
-            .new_leaf_with_context(
-                taffy_style,
-                NodeContext {
-                    measure,
-                    unicode_bidi: style.effective_unicode_bidi(),
-                },
-            )
+            .new_leaf_with_context(taffy_style, context)
             .expect(EXPECT_MESSAGE)
             .into();
+        self.claim_node(node_id);
         self.record_style(node_id, &style);
-
         node_id
     }
 
@@ -467,6 +601,10 @@ impl TaffyLayoutEngine {
         // }
         //
 
+        if !self.computed_layouts.insert(id) {
+            self.clear_cached_bounds(id);
+        }
+
         let changed_ids = self.resolve_directions(id, inherited_direction);
 
         for changed_id in changed_ids {
@@ -490,6 +628,32 @@ impl TaffyLayoutEngine {
         }
 
         self.compute_resolved_layout(id, available_space, window, cx);
+    }
+
+    /// Computes a detached root at an assigned size, then restores its natural root style.
+    pub fn compute_layout_at_size(
+        &mut self,
+        id: LayoutId,
+        available_space: Size<AvailableSpace>,
+        size: Size<Pixels>,
+        inherited_direction: ResolvedDirection,
+        window: &mut Window,
+        cx: &mut App,
+    ) {
+        let scale_factor = window.scale_factor();
+        let natural_style = self.taffy.style(id.0).expect(EXPECT_MESSAGE).clone();
+        let mut assigned_style = natural_style.clone();
+        assigned_style.size.width =
+            taffy::style::Dimension::length(round_to_device_pixel(size.width.0, scale_factor));
+        assigned_style.size.height =
+            taffy::style::Dimension::length(round_to_device_pixel(size.height.0, scale_factor));
+        self.taffy
+            .set_style(id.0, assigned_style)
+            .expect(EXPECT_MESSAGE);
+        self.compute_layout(id, available_space, inherited_direction, window, cx);
+        self.taffy
+            .set_style(id.0, natural_style)
+            .expect(EXPECT_MESSAGE);
     }
 
     fn clear_cached_bounds(&mut self, id: LayoutId) {
@@ -564,10 +728,19 @@ impl TaffyLayoutEngine {
                         std::mem::replace(&mut window.measurement_direction, resolved_direction);
                     let previous_unicode_bidi = std::mem::replace(
                         &mut window.measurement_unicode_bidi,
-                        node_context.unicode_bidi,
+                        match node_context {
+                            NodeContext::FrameBound { unicode_bidi, .. }
+                            | NodeContext::Retained { unicode_bidi, .. } => *unicode_bidi,
+                        },
                     );
-                    let measured_size: Size<Pixels> =
-                        (node_context.measure)(known_dimensions, available_space, window, cx);
+                    let measured_size: Size<Pixels> = match node_context {
+                        NodeContext::FrameBound { measure, .. } => {
+                            measure(known_dimensions, available_space, window, cx)
+                        }
+                        NodeContext::Retained { measure, .. } => {
+                            measure(known_dimensions, available_space, window.text_system())
+                        }
+                    };
                     window.measurement_direction = previous_direction;
                     window.measurement_unicode_bidi = previous_unicode_bidi;
 
@@ -1192,6 +1365,68 @@ mod tests {
             direction,
             ..Default::default()
         }
+    }
+
+    #[test]
+    fn retained_layout_subtrees_keep_stable_nodes_and_prune_unclaimed_nodes() {
+        let mut engine = TaffyLayoutEngine::new();
+        let child = engine.request_layout(Style::default(), px(16.), 1.0, &[]);
+        let root = engine.request_layout(Style::default(), px(16.), 1.0, &[child]);
+        engine.finish_frame();
+        assert_eq!(engine.live_layout_node_count(), 2);
+
+        engine.retain_subtree(root);
+        engine.finish_frame();
+        assert_eq!(engine.live_layout_node_count(), 2);
+
+        let replacement = engine.request_layout(Style::default(), px(16.), 1.0, &[]);
+        engine.finish_frame();
+        assert_eq!(engine.live_layout_node_count(), 1);
+        assert!(engine.taffy.style(replacement.into()).is_ok());
+    }
+
+    #[test]
+    fn retained_child_can_be_reparented_before_the_old_parent_is_pruned() {
+        let mut engine = TaffyLayoutEngine::new();
+        let child = engine.request_layout(Style::default(), px(16.), 1.0, &[]);
+        let old_parent = engine.request_layout(Style::default(), px(16.), 1.0, &[child]);
+        engine.finish_frame();
+
+        // The child belongs to a cached subtree but its old parent is not retained.
+        engine.retain_subtree(child);
+        let new_parent = engine.request_layout(Style::default(), px(16.), 1.0, &[child]);
+        engine.finish_frame();
+
+        assert_eq!(engine.live_layout_node_count(), 2);
+        assert!(!engine.live_layout_nodes.contains(&old_parent));
+        assert_eq!(engine.taffy.parent(child.0), Some(new_parent.0));
+        assert_eq!(engine.taffy.child_count(new_parent.0), 1);
+
+        // Pruning the reparented subtree removes each node once and leaves no stale child link.
+        engine.finish_frame();
+        assert_eq!(engine.live_layout_node_count(), 0);
+    }
+
+    #[test]
+    fn frame_bound_measured_closures_are_released_after_the_frame() {
+        let mut engine = TaffyLayoutEngine::new();
+        let measured =
+            engine.request_measured_layout(Style::default(), px(16.), 1.0, |_, _, _, _| {
+                crate::size(px(1.), px(1.))
+            });
+        assert!(engine.taffy.get_node_context(measured.into()).is_some());
+        engine.finish_frame();
+        assert!(engine.taffy.get_node_context(measured.into()).is_none());
+
+        let retained =
+            engine.request_retained_measured_layout(Style::default(), px(16.), 1.0, |_, _, _| {
+                crate::size(px(2.), px(2.))
+            });
+        engine.finish_frame();
+        assert!(engine.taffy.get_node_context(retained.into()).is_some());
+        engine.retain_subtree(retained);
+        engine.finish_frame();
+        assert!(engine.taffy.get_node_context(retained.into()).is_some());
     }
 
     #[test]

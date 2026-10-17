@@ -107,6 +107,78 @@ pub(crate) const ROOT_NODE_ID: NodeId = NodeId(0);
 pub(crate) type A11yActionListener =
     Box<dyn FnMut(Option<&accesskit::ActionData>, &mut Window, &mut App) + 'static>;
 
+/// Position in the current accessibility parent used to identify the direct
+/// children added by one retained view.
+#[derive(Clone, Copy, Default)]
+pub(crate) struct A11ySubtreeStart {
+    parent: Option<NodeId>,
+    child_count: usize,
+}
+
+/// One cached view's membership in the previous canonical tree.
+///
+/// Membership is discovered iteratively from the direct roots, then `nodes()`
+/// yields those nodes in the canonical TreeUpdate order.
+struct CachedA11ySubtree<'a> {
+    tree: &'a TreeUpdate,
+    node_indices_by_id: &'a FxHashMap<NodeId, usize>,
+    canonical_indices: Vec<usize>,
+}
+
+impl<'a> CachedA11ySubtree<'a> {
+    fn new(
+        tree: &'a TreeUpdate,
+        node_indices: &'a FxHashMap<NodeId, usize>,
+        roots: &[NodeId],
+    ) -> Self {
+        let mut seen = FxHashSet::default();
+        let mut canonical_indices = Vec::new();
+        let mut pending: Vec<_> = roots.iter().rev().copied().collect();
+        while let Some(id) = pending.pop() {
+            let index = node_indices.get(&id).copied().unwrap_or_else(|| {
+                panic!("cached a11y root {id:?} is absent from the previous tree")
+            });
+            if !seen.insert(index) {
+                continue;
+            }
+            canonical_indices.push(index);
+            pending.extend(tree.nodes[index].1.children().iter().rev().copied());
+        }
+        canonical_indices.sort_unstable();
+        canonical_indices.dedup();
+        Self {
+            tree,
+            node_indices_by_id: node_indices,
+            canonical_indices,
+        }
+    }
+
+    fn contains(&self, id: NodeId) -> bool {
+        self.node_indices_by_id
+            .get(&id)
+            .is_some_and(|index| self.canonical_indices.binary_search(index).is_ok())
+    }
+
+    fn nodes(&self) -> impl Iterator<Item = (NodeId, &accesskit::Node)> + '_ {
+        self.canonical_indices
+            .iter()
+            .map(|index| &self.tree.nodes[*index])
+            .map(|(id, node)| (*id, node))
+    }
+}
+
+/// Prepaint and paint metadata retained for one complete accessibility frame.
+#[derive(Default)]
+struct A11yFrameMetadata {
+    focus: Option<NodeId>,
+    active_descendant: Option<NodeId>,
+    focus_ids: FxHashMap<NodeId, FocusId>,
+    node_bounds: FxHashMap<NodeId, Bounds<Pixels>>,
+    action_listeners: FxHashMap<NodeId, Vec<(Action, A11yActionListener)>>,
+    #[cfg(debug_assertions)]
+    node_info: FxHashMap<NodeId, debug::NodeDebugInfo>,
+}
+
 /// Per-window accessibility state.
 ///
 /// Manages the AccessKit tree that is built each frame and the mappings
@@ -142,6 +214,8 @@ pub(crate) struct A11y {
     pub(crate) focus_ids: FxHashMap<NodeId, FocusId>,
     pub(crate) node_bounds: FxHashMap<NodeId, Bounds<Pixels>>,
     pub(crate) action_listeners: FxHashMap<NodeId, Vec<(Action, A11yActionListener)>>,
+    previous_node_indices: FxHashMap<NodeId, usize>,
+    previous: A11yFrameMetadata,
     /// The window's title, used to label the root node so assistive
     /// technology can tell windows apart.
     window_title: Option<SharedString>,
@@ -172,6 +246,8 @@ impl A11y {
             focus_ids: FxHashMap::default(),
             node_bounds: FxHashMap::default(),
             action_listeners: FxHashMap::default(),
+            previous_node_indices: FxHashMap::default(),
+            previous: A11yFrameMetadata::default(),
             window_title,
             last_focus_without_node: None,
             debug: debug::A11yDebug::default(),
@@ -221,6 +297,133 @@ impl A11y {
 
     pub(crate) fn is_active(&self) -> bool {
         self.active_this_frame
+    }
+
+    /// Mark the current accessibility parent's child count before rendering a
+    /// view. The marker stays empty while accessibility is inactive.
+    pub(crate) fn cache_subtree_start(&self) -> A11ySubtreeStart {
+        let Some(parent) = self.nodes.current_node_id() else {
+            return A11ySubtreeStart::default();
+        };
+        let child_count = self
+            .nodes
+            .current_node()
+            .map_or(0, |node| node.children().len());
+        A11ySubtreeStart {
+            parent: Some(parent),
+            child_count,
+        }
+    }
+
+    /// Return the direct accessibility roots added since `start` was captured.
+    /// These IDs are the only per-view accessibility data stored with a render
+    /// cache; node payloads and metadata remain canonical in `A11y`.
+    pub(crate) fn cache_subtree_roots(&self, start: A11ySubtreeStart) -> Vec<NodeId> {
+        let Some(parent) = start.parent else {
+            return Vec::new();
+        };
+        let current_parent = self.nodes.current_node_id();
+        assert_eq!(
+            current_parent,
+            Some(parent),
+            "a11y subtree capture must unwind to the parent where it began"
+        );
+        let children = self
+            .nodes
+            .current_node()
+            .map_or(&[][..], |node| node.children());
+        assert!(
+            start.child_count <= children.len(),
+            "a11y parent lost children while capturing a retained subtree"
+        );
+        children[start.child_count..].to_vec()
+    }
+
+    /// Rebuild cached nodes under the current accessibility parent and restore
+    /// all prepaint metadata associated with those nodes.
+    pub(crate) fn reuse_prepaint(&mut self, roots: &[NodeId]) {
+        if roots.is_empty() {
+            return;
+        }
+        let Some(tree) = self.debug.last_tree_update() else {
+            panic!("cached a11y subtree has no previous canonical tree");
+        };
+        let subtree = CachedA11ySubtree::new(tree, &self.previous_node_indices, roots);
+        let focus = self.previous.focus.filter(|id| subtree.contains(*id));
+        let active_descendant = self
+            .previous
+            .active_descendant
+            .filter(|id| subtree.contains(*id));
+
+        self.nodes.attach_cached_roots(roots);
+        for (id, node) in subtree.nodes() {
+            assert!(
+                self.nodes.seen_ids.insert(id),
+                "cached a11y subtree contains duplicate node {id:?}"
+            );
+            self.nodes.all_nodes.push((id, node.clone()));
+
+            if let Some(focus_id) = self.previous.focus_ids.get(&id) {
+                self.focus_ids.insert(id, *focus_id);
+            }
+            if let Some(bounds) = self.previous.node_bounds.get(&id) {
+                self.node_bounds.insert(id, *bounds);
+            }
+            #[cfg(debug_assertions)]
+            if let Some(info) = self.previous.node_info.get(&id) {
+                self.nodes.record_node_info(id, info.clone());
+            }
+        }
+
+        if let Some(focus) = focus {
+            match self.nodes.focus {
+                None => self.set_focus(focus),
+                Some(current_focus) if current_focus == focus => {}
+                Some(current_focus) => debug_assert_eq!(
+                    current_focus, focus,
+                    "cached accessibility focus is stale; focus-dependent views must be invalidated"
+                ),
+            }
+        }
+        if let Some(active_descendant) = active_descendant {
+            if self.nodes.focus == self.previous.focus {
+                match self.nodes.active_descendant {
+                    None => self.nodes.active_descendant = Some(active_descendant),
+                    Some(current) if current == active_descendant => {}
+                    Some(current) => debug_assert_eq!(
+                        current, active_descendant,
+                        "cached accessibility active descendant is stale"
+                    ),
+                }
+            } else {
+                debug_assert_eq!(
+                    self.nodes.focus, self.previous.focus,
+                    "cached active descendant requires its previous focused ancestor"
+                );
+            }
+        }
+    }
+
+    /// Restore action callbacks for cached nodes during paint. Listeners are
+    /// moved out of the previous map so unmounted or newly rebuilt nodes can be
+    /// discarded at the end of this frame.
+    pub(crate) fn reuse_paint(&mut self, roots: &[NodeId]) {
+        if roots.is_empty() {
+            return;
+        }
+        let Some(tree) = self.debug.last_tree_update() else {
+            panic!("cached a11y actions have no previous canonical tree");
+        };
+        let subtree = CachedA11ySubtree::new(tree, &self.previous_node_indices, roots);
+        for (id, _) in subtree.nodes() {
+            if let Some(listeners) = self.previous.action_listeners.remove(&id) {
+                let replaced = self.action_listeners.insert(id, listeners);
+                debug_assert!(
+                    replaced.is_none(),
+                    "cached a11y action listeners replaced newly painted listeners for {id:?}"
+                );
+            }
+        }
     }
 
     pub(crate) fn set_focusable(&mut self, node_id: NodeId, focus_id: FocusId) {
@@ -275,9 +478,22 @@ impl A11y {
 
     /// Clear per-frame state and push the root node to start a new frame.
     pub(crate) fn begin_frame(&mut self) {
+        std::mem::swap(&mut self.focus_ids, &mut self.previous.focus_ids);
         self.focus_ids.clear();
+        std::mem::swap(&mut self.node_bounds, &mut self.previous.node_bounds);
         self.node_bounds.clear();
+        std::mem::swap(
+            &mut self.action_listeners,
+            &mut self.previous.action_listeners,
+        );
         self.action_listeners.clear();
+        self.previous.focus = self.nodes.focus;
+        self.previous.active_descendant = self.nodes.active_descendant;
+        #[cfg(debug_assertions)]
+        {
+            std::mem::swap(&mut self.nodes.node_info, &mut self.previous.node_info);
+            self.nodes.node_info.clear();
+        }
         self.nodes.begin_frame(self.window_title.as_ref());
     }
 
@@ -294,6 +510,13 @@ impl A11y {
         );
         #[cfg(debug_assertions)]
         self.debug.capture_node_info(&self.nodes.node_info);
+        self.previous_node_indices.clear();
+        for (index, (id, _)) in update.nodes.iter().enumerate() {
+            self.previous_node_indices.insert(*id, index);
+        }
+        // Replayed subtrees have leased listeners out of this map. Anything
+        // left belongs to nodes that disappeared or were rebuilt this frame.
+        self.previous.action_listeners.clear();
         update
     }
 
@@ -504,6 +727,23 @@ impl A11yNodeBuilder {
         self.nodes_stack.last_mut()
     }
 
+    fn attach_cached_roots(&mut self, roots: &[NodeId]) {
+        let Some(parent) = self.nodes_stack.last_mut() else {
+            panic!("cached a11y roots require a current parent node");
+        };
+        for root in roots {
+            parent.push_child(*root);
+        }
+    }
+
+    fn current_node(&self) -> Option<&accesskit::Node> {
+        self.nodes_stack.last()
+    }
+
+    fn current_node_id(&self) -> Option<NodeId> {
+        self.ids_stack.last().copied()
+    }
+
     /// Pop the current node off the stack and finalize it into the all_nodes
     /// list.
     pub(crate) fn pop(&mut self) {
@@ -683,8 +923,9 @@ mod tests {
     // in gpui's own `test` attribute macro and shadow the standard one.
     use super::{A11y, A11yNodeBuilder, ROOT_NODE_ID};
     use crate::FocusId;
-    use accesskit::{NodeId, Role};
+    use accesskit::{Action, NodeId, Role};
     use std::sync::{Arc, atomic::AtomicBool};
+    use std::{cell::Cell, rc::Rc};
 
     fn test_node() -> accesskit::Node {
         accesskit::Node::new(Role::GenericContainer)
@@ -700,6 +941,65 @@ mod tests {
         let mut a11y = A11y::new(Arc::new(AtomicBool::new(true)), false, false, None);
         a11y.begin_frame();
         a11y
+    }
+
+    #[test]
+    fn retained_accessibility_subtree_replays_nodes_focus_and_action_listeners() {
+        let mut a11y = new_a11y();
+        let marker = a11y.cache_subtree_start();
+        let container = NodeId(10);
+        let child = NodeId(11);
+        let mut node = accesskit::Node::new(Role::GenericContainer);
+        node.set_label("cached container");
+        assert!(a11y.nodes.push(container, node));
+        a11y.set_focusable(container, FocusId::default());
+        a11y.set_focus(container);
+        let mut child_node = accesskit::Node::new(Role::Button);
+        child_node.set_label("cached child");
+        assert!(a11y.nodes.push_leaf(child, child_node));
+        a11y.nodes.pop();
+        let calls = Rc::new(Cell::new(0));
+        let calls_for_listener = calls.clone();
+        a11y.action_listeners.insert(
+            child,
+            vec![(
+                Action::Click,
+                Box::new(move |_, _, _| calls_for_listener.set(calls_for_listener.get() + 1)),
+            )],
+        );
+        let roots = a11y.cache_subtree_roots(marker);
+        assert_eq!(roots, [container]);
+        let first = a11y.end_frame(Default::default());
+
+        a11y.begin_frame();
+        let marker = a11y.cache_subtree_start();
+        a11y.reuse_prepaint(&roots);
+        assert_eq!(a11y.cache_subtree_roots(marker), roots);
+        assert_eq!(a11y.nodes.focus, Some(container));
+        assert_eq!(a11y.focus_ids.get(&container), Some(&FocusId::default()));
+        a11y.reuse_paint(&roots);
+        assert!(!a11y.previous.action_listeners.contains_key(&child));
+        assert!(a11y.action_listeners.contains_key(&child));
+        assert_eq!(calls.get(), 0);
+
+        let second = a11y.end_frame(Default::default());
+        assert_eq!(first.focus, second.focus);
+        assert_eq!(first.nodes, second.nodes);
+    }
+
+    #[test]
+    fn retained_accessibility_markers_capture_only_direct_roots() {
+        let mut a11y = new_a11y();
+        let outer = a11y.cache_subtree_start();
+        assert!(a11y.nodes.push(NodeId(1), test_node()));
+        let nested = a11y.cache_subtree_start();
+        assert!(a11y.nodes.push(NodeId(2), test_node()));
+        assert!(a11y.nodes.push_leaf(NodeId(3), test_node()));
+        a11y.nodes.pop();
+        assert_eq!(a11y.cache_subtree_roots(nested), [NodeId(2)]);
+        a11y.nodes.pop();
+        assert!(a11y.nodes.push_leaf(NodeId(4), test_node()));
+        assert_eq!(a11y.cache_subtree_roots(outer), [NodeId(1), NodeId(4)]);
     }
 
     #[test]

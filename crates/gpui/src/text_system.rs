@@ -3,9 +3,6 @@ use crate::{
     AtlasKey, AtlasTextureKind, PlatformAtlas, TestAtlas, TestTextSystem, hsla, point, size,
 };
 
-#[cfg(test)]
-use std::{sync::atomic::AtomicUsize, sync::atomic::Ordering};
-
 use crate::{
     Bounds, DevicePixels, Pixels, PlatformTextSystem, Point, ResolvedDirection, Result,
     SharedString, Size, StrikethroughStyle, TextAlign, TextRenderingMode, UnderlineStyle,

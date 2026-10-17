@@ -15,7 +15,7 @@ use gpui_render::shaders::interface as shader_interface;
 
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 mod buffers;
 mod drawing;
@@ -45,6 +45,8 @@ pub type GpuContext = Rc<RefCell<Option<WgpuContext>>>;
 struct GpuFaultState {
     device_errors: Arc<DeviceErrorState>,
     observed_error_generation: u64,
+    // Surface acquisition errors are local to this renderer, unlike device-wide errors.
+    pending_error: Arc<Mutex<Option<String>>>,
     consecutive_failed_frames: u32,
     device_lost: Arc<std::sync::atomic::AtomicBool>,
     #[cfg(not(target_family = "wasm"))]
@@ -129,6 +131,7 @@ impl WgpuRenderer {
             faults: GpuFaultState {
                 device_errors: Arc::clone(context.errors()),
                 observed_error_generation: 0,
+                pending_error: Arc::new(Mutex::new(None)),
                 consecutive_failed_frames: 0,
                 device_lost: context.device_lost_flag(),
                 #[cfg(not(target_family = "wasm"))]

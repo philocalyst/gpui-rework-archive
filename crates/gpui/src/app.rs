@@ -87,6 +87,12 @@ pub struct AppCell {
     app: RefCell<App>,
 }
 
+#[derive(Default)]
+struct GlobalDependencyState {
+    revision: u64,
+    windows: FxHashMap<WindowId, WindowInvalidator>,
+}
+
 impl AppCell {
     #[doc(hidden)]
     #[track_caller]
@@ -1057,6 +1063,9 @@ pub struct App {
     // below is plain data, the drop order is insignificant here
     pub(crate) pending_notifications: FxHashSet<EntityId>,
     pub(crate) pending_global_notifications: TypeIdHashSet,
+    accessed_global_revisions: RefCell<FxHashMap<TypeId, u64>>,
+    global_dependencies: FxHashMap<TypeId, GlobalDependencyState>,
+    tracked_globals: FxHashMap<WindowId, FxHashSet<TypeId>>,
     pub(crate) restart_path: Option<PathBuf>,
     pub(crate) restart_arguments: Vec<OsString>,
     pub(crate) layout_id_buffer: Vec<LayoutId>, // We recycle this memory across layout requests.
@@ -1157,6 +1166,9 @@ impl App {
                 pending_effects: VecDeque::new(),
                 pending_notifications: FxHashSet::default(),
                 pending_global_notifications: Default::default(),
+                accessed_global_revisions: RefCell::new(FxHashMap::default()),
+                global_dependencies: FxHashMap::default(),
+                tracked_globals: FxHashMap::default(),
                 observers: SubscriberSet::new(),
                 tracked_entities: FxHashMap::default(),
                 window_invalidators_by_entity: FxHashMap::default(),
@@ -1612,20 +1624,85 @@ impl App {
         })
     }
 
-    pub(crate) fn detect_accessed_entities<R>(
+    pub(crate) fn detect_accessed_dependencies<R>(
         &mut self,
         callback: impl FnOnce(&mut App) -> R,
-    ) -> (R, FxHashSet<EntityId>) {
-        let accessed_entities_start = self.entities.accessed_entities.get_mut().clone();
+    ) -> (R, ViewDependencies) {
+        let mut previous_entities = mem::take(self.entities.accessed_entities.get_mut());
+        let mut previous_globals = mem::take(self.accessed_global_revisions.get_mut());
         let result = callback(self);
-        let entities_accessed_in_callback = self
-            .entities
-            .accessed_entities
-            .get_mut()
-            .difference(&accessed_entities_start)
-            .copied()
-            .collect::<FxHashSet<EntityId>>();
-        (result, entities_accessed_in_callback)
+        let entities = mem::take(self.entities.accessed_entities.get_mut());
+        let globals = mem::take(self.accessed_global_revisions.get_mut());
+        previous_entities.extend(entities.iter().copied());
+        for (global_type, revision) in &globals {
+            previous_globals.entry(*global_type).or_insert(*revision);
+        }
+        *self.entities.accessed_entities.get_mut() = previous_entities;
+        *self.accessed_global_revisions.get_mut() = previous_globals;
+        (result, ViewDependencies { entities, globals })
+    }
+
+    pub(crate) fn extend_accessed_dependencies(&mut self, dependencies: &ViewDependencies) {
+        self.entities.extend_accessed(&dependencies.entities);
+        for (global_type, revision) in &dependencies.globals {
+            self.accessed_global_revisions
+                .get_mut()
+                .entry(*global_type)
+                .or_insert(*revision);
+        }
+    }
+
+    pub(crate) fn clear_accessed_global_revisions(&mut self) {
+        self.accessed_global_revisions.get_mut().clear();
+    }
+
+    pub(crate) fn take_accessed_global_revisions(&mut self) -> FxHashMap<TypeId, u64> {
+        mem::take(self.accessed_global_revisions.get_mut())
+    }
+
+    pub(crate) fn restore_accessed_global_revisions(&mut self, revisions: FxHashMap<TypeId, u64>) {
+        *self.accessed_global_revisions.get_mut() = revisions;
+    }
+
+    pub(crate) fn global_revision(&self, global_type: TypeId) -> u64 {
+        self.global_dependencies
+            .get(&global_type)
+            .map(|deps| deps.revision)
+            .unwrap_or_default()
+    }
+
+    pub(crate) fn record_global_dependencies(
+        &mut self,
+        window_handle: AnyWindowHandle,
+        invalidator: WindowInvalidator,
+        globals: &FxHashMap<TypeId, u64>,
+    ) {
+        if globals
+            .iter()
+            .any(|(kind, revision)| self.global_revision(*kind) != *revision)
+        {
+            invalidator.set_dirty(true);
+        }
+        let mut tracked = mem::take(self.tracked_globals.entry(window_handle.id).or_default());
+        for kind in tracked.iter().filter(|kind| !globals.contains_key(kind)) {
+            let remove_entry = self.global_dependencies.get_mut(kind).is_some_and(|deps| {
+                deps.windows.remove(&window_handle.id);
+                deps.windows.is_empty() && deps.revision == 0
+            });
+            if remove_entry {
+                self.global_dependencies.remove(kind);
+            }
+        }
+        for kind in globals.keys().filter(|kind| !tracked.contains(kind)) {
+            self.global_dependencies
+                .entry(*kind)
+                .or_default()
+                .windows
+                .insert(window_handle.id, invalidator.clone());
+        }
+        tracked.clear();
+        tracked.extend(globals.keys().copied());
+        *self.tracked_globals.entry(window_handle.id).or_default() = tracked;
     }
 
     pub(crate) fn record_entities_accessed(
@@ -2900,10 +2977,36 @@ impl App {
         })
     }
 
+    fn note_global_read(&self, global_type: TypeId) {
+        let revision = self.global_revision(global_type);
+        self.accessed_global_revisions
+            .borrow_mut()
+            .entry(global_type)
+            .or_insert(revision);
+    }
+
+    fn advance_global_revision(&mut self, global_type: TypeId) {
+        let dependencies = self.global_dependencies.entry(global_type).or_default();
+        dependencies.revision = dependencies
+            .revision
+            .checked_add(1)
+            .expect("global dependency revision exhausted");
+        for invalidator in dependencies.windows.values() {
+            invalidator.set_dirty(true);
+        }
+    }
+
+    fn note_global_write(&mut self, global_type: TypeId) {
+        self.advance_global_revision(global_type);
+        self.push_effect(Effect::NotifyGlobalObservers { global_type });
+    }
+
     /// Check whether a global of the given type has been assigned.
     /// Returns whether a global of type `G` has been set.
     pub fn has_global<G: Global>(&self) -> bool {
-        self.globals_by_type.contains_key(&TypeId::of::<G>())
+        let global_type = TypeId::of::<G>();
+        self.note_global_read(global_type);
+        self.globals_by_type.contains_key(&global_type)
     }
 
     /// Returns the global of type `G`.
@@ -2914,6 +3017,7 @@ impl App {
     /// global may be missing.
     #[track_caller]
     pub fn global<G: Global>(&self) -> &G {
+        self.note_global_read(TypeId::of::<G>());
         self.globals_by_type
             .get(&TypeId::of::<G>())
             .map(|any_state| any_state.downcast_ref::<G>().unwrap())
@@ -2922,6 +3026,7 @@ impl App {
 
     /// Returns the global of type `G`, or `None` if it has not been set.
     pub fn try_global<G: Global>(&self) -> Option<&G> {
+        self.note_global_read(TypeId::of::<G>());
         self.globals_by_type
             .get(&TypeId::of::<G>())
             .map(|any_state| any_state.downcast_ref::<G>().unwrap())
@@ -2940,7 +3045,8 @@ impl App {
     #[track_caller]
     pub fn global_mut<G: Global>(&mut self) -> &mut G {
         let global_type = TypeId::of::<G>();
-        self.push_effect(Effect::NotifyGlobalObservers { global_type });
+        self.note_global_read(global_type);
+        self.note_global_write(global_type);
         self.globals_by_type
             .get_mut(&global_type)
             .and_then(|any_state| any_state.downcast_mut::<G>())
@@ -2952,7 +3058,8 @@ impl App {
     /// Like [`App::global_mut`], this notifies global observers.
     pub fn default_global<G: Global + Default>(&mut self) -> &mut G {
         let global_type = TypeId::of::<G>();
-        self.push_effect(Effect::NotifyGlobalObservers { global_type });
+        self.note_global_read(global_type);
+        self.note_global_write(global_type);
         self.globals_by_type
             .entry(global_type)
             .or_insert_with(|| Box::<G>::default())
@@ -2979,14 +3086,17 @@ impl App {
     /// ```
     pub fn set_global<G: Global>(&mut self, global: G) {
         let global_type = TypeId::of::<G>();
-        self.push_effect(Effect::NotifyGlobalObservers { global_type });
+        self.note_global_write(global_type);
         self.globals_by_type.insert(global_type, Box::new(global));
     }
 
     /// Clear all stored globals. Does not notify global observers.
     #[cfg(any(test, feature = "test-support"))]
     pub fn clear_globals(&mut self) {
-        self.globals_by_type.drain();
+        let globals = mem::take(&mut self.globals_by_type);
+        for global_type in globals.keys().copied() {
+            self.advance_global_revision(global_type);
+        }
     }
 
     /// Removes the global of type `G` and returns it.
@@ -2998,7 +3108,8 @@ impl App {
     /// Panics if no global of type `G` has been set.
     pub fn remove_global<G: Global>(&mut self) -> G {
         let global_type = TypeId::of::<G>();
-        self.push_effect(Effect::NotifyGlobalObservers { global_type });
+        self.note_global_read(global_type);
+        self.note_global_write(global_type);
         *self
             .globals_by_type
             .remove(&global_type)
@@ -3050,6 +3161,7 @@ impl App {
     /// Move the global of the given type to the stack.
     #[track_caller]
     pub(crate) fn lease_global<G: Global>(&mut self) -> GlobalLease<G> {
+        self.advance_global_revision(TypeId::of::<G>());
         GlobalLease::new(
             self.globals_by_type
                 .remove(&TypeId::of::<G>())
@@ -3062,7 +3174,7 @@ impl App {
     pub(crate) fn end_global_lease<G: Global>(&mut self, lease: GlobalLease<G>) {
         let global_type = TypeId::of::<G>();
 
-        self.push_effect(Effect::NotifyGlobalObservers { global_type });
+        self.note_global_write(global_type);
         self.globals_by_type.insert(global_type, lease.global);
     }
 
@@ -3845,6 +3957,21 @@ impl App {
                         }
                     }
 
+                    if let Some(tracked) = cx.tracked_globals.remove(&window_id) {
+                        for global_type in tracked {
+                            let remove_entry = cx
+                                .global_dependencies
+                                .get_mut(&global_type)
+                                .is_some_and(|deps| {
+                                    deps.windows.remove(&window_id);
+                                    deps.windows.is_empty() && deps.revision == 0
+                                });
+                            if remove_entry {
+                                cx.global_dependencies.remove(&global_type);
+                            }
+                        }
+                    }
+
                     cx.window_closed_observers.clone().retain(&(), |callback| {
                         callback(cx, window_id);
                         true
@@ -4335,6 +4462,7 @@ impl<'a, T> Drop for GpuiBorrow<'a, T> {
 #[cfg(test)]
 mod test {
     use std::{
+        any::TypeId,
         cell::{Cell, RefCell},
         ffi::OsString,
         path::PathBuf,
@@ -4345,9 +4473,105 @@ mod test {
     use std::os::unix::ffi::OsStringExt;
 
     use crate::{
-        AppContext, Context, Empty, FallbackFontClass, IntoElement, MissingGlyph, Render,
-        TestAppContext, Window,
+        AnyWindowHandle, AppContext, Context, Empty, FallbackFontClass, Global, IntoElement,
+        MissingGlyph, Render, TestAppContext, Window,
     };
+
+    struct DependencyGlobal;
+    impl Global for DependencyGlobal {}
+
+    #[gpui::test]
+    fn nested_dependency_scopes_capture_and_restore_reads(cx: &mut TestAppContext) {
+        let preexisting = cx.new(|_| ());
+        let nested = cx.new(|_| ());
+        cx.update(|app| {
+            app.set_global(DependencyGlobal);
+            let global_type = TypeId::of::<DependencyGlobal>();
+            let captured_revision = app.global_revision(global_type);
+            app.entities.read(&preexisting);
+            let ((), outer) = app.detect_accessed_dependencies(|app| {
+                let _ = app.global::<DependencyGlobal>();
+                app.entities.read(&nested);
+                let ((), inner) = app.detect_accessed_dependencies(|app| {
+                    let _ = app.global::<DependencyGlobal>();
+                    app.entities.read(&nested);
+                });
+                assert!(inner.entities.contains(&nested.entity_id()));
+                assert_eq!(inner.globals.get(&global_type), Some(&captured_revision));
+            });
+
+            assert!(!outer.entities.contains(&preexisting.entity_id()));
+            assert!(outer.entities.contains(&nested.entity_id()));
+            assert_eq!(outer.globals.get(&global_type), Some(&captured_revision));
+            assert!(
+                app.entities
+                    .accessed_entities
+                    .borrow()
+                    .contains(&preexisting.entity_id())
+            );
+            assert!(
+                app.entities
+                    .accessed_entities
+                    .borrow()
+                    .contains(&nested.entity_id())
+            );
+            assert_eq!(
+                app.accessed_global_revisions.borrow().get(&global_type),
+                Some(&captured_revision)
+            );
+
+            app.entities.clear_accessed();
+            app.clear_accessed_global_revisions();
+            app.extend_accessed_dependencies(&outer);
+            assert!(
+                app.entities
+                    .accessed_entities
+                    .borrow()
+                    .contains(&nested.entity_id())
+            );
+            assert_eq!(
+                app.accessed_global_revisions.borrow().get(&global_type),
+                Some(&captured_revision)
+            );
+        });
+    }
+
+    #[gpui::test]
+    fn closing_window_releases_tracked_global_dependencies(cx: &mut TestAppContext) {
+        let window: AnyWindowHandle = cx.add_window(|_, _| Empty).into();
+        cx.update(|app| {
+            app.set_global(DependencyGlobal);
+            let global_type = TypeId::of::<DependencyGlobal>();
+            let revision = app.global_revision(global_type);
+            app.update_window(window, |_, window_state, app| {
+                let mut globals = collections::FxHashMap::default();
+                globals.insert(global_type, revision);
+                app.record_global_dependencies(window, window_state.invalidator.clone(), &globals);
+                window_state.remove_window();
+            })
+            .unwrap();
+
+            assert!(!app.tracked_globals.contains_key(&window.id));
+            assert!(
+                app.global_dependencies
+                    .get(&global_type)
+                    .is_none_or(|dependencies| !dependencies.windows.contains_key(&window.id))
+            );
+        });
+    }
+
+    #[gpui::test]
+    fn clearing_globals_advances_the_retained_revision(cx: &mut TestAppContext) {
+        cx.update(|app| {
+            app.set_global(DependencyGlobal);
+            let global_type = TypeId::of::<DependencyGlobal>();
+            let before_clear = app.global_revision(global_type);
+            let _ = app.global::<DependencyGlobal>();
+            app.clear_globals();
+            assert!(app.global_revision(global_type) > before_clear);
+            assert!(app.try_global::<DependencyGlobal>().is_none());
+        });
+    }
 
     struct RenderCounter(Rc<Cell<usize>>);
 

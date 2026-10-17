@@ -97,24 +97,23 @@ State that must outlive a frame lives in one of three places:
 [Elements](crate::_documentation::concepts::elements) explains element ids and
 element state in more detail.
 
-## Rendering less
+## Reusing unchanged view work
 
-By default, a dirty window renders its whole tree, starting from the root view.
-That works well when rendering builds small values, as layout and paint are
-designed for repeated passes. When a view is expensive to render and rarely changes,
-embed it with [`Entity::cached`]. GPUI then reuses that view's elements, layout
-and painted primitives from the previous frame until the view itself is notified.
-Reading another entity while producing the cached subtree does not by itself
-invalidate this cache; observe that entity and notify the cached view when its
-value changes. Changes to the cached view's bounds, content mask, text style,
-text direction or Unicode bidirectional text mode also rebuild the subtree.
+Entity-backed views can retain their subtree naturally when used as elements.
+GPUI tracks entity and global reads made by the view and its nested work, so a
+notified dependency invalidates the cached owners that read it. Deferred
+prepaint and paint reads are included. A retained view still rebuilds when its
+layout environment changes or its measurement depends on data valid only for
+that frame. Hand-written `ViewElement::new` remains fresh because a parent may
+supply new properties without notifying the wrapped entity.
 
-Virtualized lists reduce the number of rows built for a frame. [`uniform_list`]
-and [`list`] normally render the viewport and any overdraw, with exceptions for
-measurement and retained focus. A large item count can still cost memory and
-indexing work, and measuring variable-height rows adds work as they enter the
-viewport. The [list guide](crate::_documentation::guides::lists_and_scrolling)
-explains these costs and the trade-off of measuring all rows in advance.
+Use [`Entity::cached`] or [`AnyView::cached`] when the parent should provide a
+fixed root style. An ordinary entity child remains naturally sized. See
+[retained view rendering](crate::_documentation::concepts::retained_rendering)
+for the invalidation rules and the distinction between natural, fixed-style,
+and fresh views. [`uniform_list`] and [`list`] reduce the rows built for a
+frame by virtualizing offscreen content; see the
+[list guide](crate::_documentation::guides::lists_and_scrolling).
 
 ## Asking for the next frame
 

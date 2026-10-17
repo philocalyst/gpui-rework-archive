@@ -350,18 +350,23 @@ impl InlineParagraphCollector<'_> {
         let measured_document = document.clone();
         let measurement_cache = measurement.clone();
         let unicode_bidi = self.unicode_bidi;
+        let direction = self.window.resolved_direction();
+        let rem_size = self.window.rem_size();
+        let scale_factor = self.window.scale_factor();
 
-        let layout_id = self.window.request_measured_layout(
+        let layout_id = self.window.request_retained_measured_layout(
             Style {
                 display: Display::Block,
                 ..Style::default()
             },
-            move |known_dimensions, available_space, window, _cx| {
+            rem_size,
+            scale_factor,
+            move |known_dimensions, available_space, text_system| {
                 let (options, truncation) = TextLayout::layout_options(
                     &text_style,
                     known_dimensions,
                     available_space,
-                    window.resolved_direction(),
+                    direction,
                     unicode_bidi,
                 );
 
@@ -388,7 +393,7 @@ impl InlineParagraphCollector<'_> {
                     bidi_scopes: &bidi_scopes,
                 };
                 let (document, layout) =
-                    measured_document.layout(request, &truncation, window.text_system());
+                    measured_document.layout(request, &truncation, text_system);
 
                 let size = layout.size;
                 measurement_cache

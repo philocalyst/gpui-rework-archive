@@ -871,7 +871,7 @@ mod tests {
         let focus_handle = cx.update(|_, cx| view.read(cx).focus_handle.clone());
         cx.update(|window, cx| {
             window.focus(&focus_handle, cx);
-            window.activate_window();
+            window.activate();
         });
 
         (cx, action_count, secondary_action_count)
@@ -939,7 +939,7 @@ mod tests {
         let (test, cx) = cx.add_window_view(|_, cx| PendingTextInputTestView::new(cx));
         test.update_in(cx, |test, window, cx| {
             window.focus(&test.focus_handle, cx);
-            window.activate_window();
+            window.activate();
             cx.bind_keys([KeyBinding::new("ctrl-alt-a", TestAction, Some("Terminal"))]);
         });
         (test, cx)
@@ -1535,7 +1535,7 @@ mod tests {
         cx.update(|window, cx| {
             let focus_handle = view.read(cx).focus_handle.clone();
             window.focus(&focus_handle, cx);
-            window.activate_window();
+            window.activate();
         });
         let (observed_keystrokes, _observer) = capture_observed_keystrokes(cx);
 
@@ -1779,7 +1779,7 @@ mod tests {
         let (test, cx) = cx.add_window_view(|_, cx| PendingTextInputTestView::new(cx));
         test.update_in(cx, |test, window, cx| {
             window.focus(&test.focus_handle, cx);
-            window.activate_window();
+            window.activate();
         });
         let _subscription = cx.update(|_, cx| {
             cx.intercept_keystrokes(|event, _, cx| {
@@ -2178,7 +2178,7 @@ mod tests {
         let focus_handle = test.update(cx, |test, _| test.focus_handle.clone());
         cx.update(|window, cx| {
             window.focus(&focus_handle, cx);
-            window.activate_window();
+            window.activate();
         });
 
         assert_eq!(query_prefers_ime_for_printable_keys(cx), Some(true));

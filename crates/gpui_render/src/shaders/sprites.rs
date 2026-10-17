@@ -15,8 +15,11 @@ pub mod underline {
         pub wavy: ShaderBool,
     }
 
-    fn underline_clip_bounds(underline: Underline) -> Bounds {
-        let origin = max(underline.clip_bounds.origin, underline.content_mask.bounds.origin);
+    pub fn underline_clip_bounds(underline: Underline) -> Bounds {
+        let origin = max(
+            underline.clip_bounds.origin,
+            underline.content_mask.bounds.origin,
+        );
         let clip_end = underline.clip_bounds.origin + underline.clip_bounds.size;
         let mask_end = underline.content_mask.bounds.origin + underline.content_mask.bounds.size;
         let end = min(clip_end, mask_end);
@@ -69,7 +72,10 @@ pub mod underline {
             position: vertex.clip_position,
             color: hsla_to_rgba(underline.color),
             underline_id: instance_id,
-            clip_distances: clip_distances(vertex.viewport_position, underline_clip_bounds(underline)),
+            clip_distances: clip_distances(
+                vertex.viewport_position,
+                underline_clip_bounds(underline),
+            ),
         }
     }
 

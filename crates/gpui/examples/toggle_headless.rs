@@ -112,7 +112,7 @@ fn open_window(todos: &Entity<Todos>, cx: &mut App) -> anyhow::Result<()> {
     })?;
     // On macOS, making the window key does not activate the app over the terminal.
     cx.activate(true);
-    handle.update(cx, |_, window, _| window.activate_window())?;
+    handle.update(cx, |_, window, _| window.activate())?;
     todos.update(cx, |todos, _| todos.window = Some(handle.into()));
     Ok(())
 }
