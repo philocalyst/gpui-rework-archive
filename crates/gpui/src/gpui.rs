@@ -54,7 +54,13 @@ pub mod queue;
 #[cfg(any(test, feature = "bench-support"))]
 pub mod randomized_element_tree;
 mod resize;
+#[cfg(test)]
+mod retained_tests;
+#[cfg(test)]
+mod retention_workload;
 mod scene;
+#[cfg(test)]
+mod scene_workload;
 #[cfg(any(test, feature = "test-support", feature = "bench-support"))]
 mod seeds;
 mod shared_uri;

@@ -98,11 +98,11 @@ impl Element for Deferred {
         _bounds: Bounds<Pixels>,
         _request_layout: &mut Self::RequestLayoutState,
         window: &mut Window,
-        cx: &mut App,
+        _cx: &mut App,
     ) {
         let child = self.child.take().unwrap();
         let element_offset = window.element_offset();
-        let priority = self.priority.evaluate(cx);
+        let priority = self.priority.evaluate(window);
         window.defer_draw(child, element_offset, priority, self.content_mask);
     }
 
@@ -153,35 +153,16 @@ impl From<usize> for DeferredPriority {
     }
 }
 impl DeferredPriority {
-    /// Calculates the new priority based on the current value in the [`DeferredPriorityStackCache`].
+    /// Calculates the new priority based on the current deferred nesting depth.
     /// Should only be called during prepaint of a [`Deferred`] element.
-    fn evaluate(&self, cx: &App) -> usize {
+    fn evaluate(&self, window: &Window) -> usize {
         match self {
             DeferredPriority::Value(value) => *value,
-            DeferredPriority::Auto => match DeferredPriorityStackCache::current_depth(cx) {
+            DeferredPriority::Auto => match window.deferred_priority() {
                 None => 1, // NOTE: functionality change. If using auto, we start at a priority of 1 instead of 0.
                 Some(prev_deferred_priority) => prev_deferred_priority.saturating_add(1),
             },
         }
-    }
-}
-
-/// Internal global to track the depth of deferred renders during prepaint.
-#[derive(Default)]
-pub(crate) struct DeferredPriorityStackCache(Vec<usize>);
-impl crate::Global for DeferredPriorityStackCache {}
-impl DeferredPriorityStackCache {
-    pub(crate) fn push(priority: usize, cx: &mut App) {
-        cx.default_global::<Self>().0.push(priority);
-    }
-
-    pub(crate) fn pop(cx: &mut App) {
-        cx.default_global::<Self>().0.pop();
-    }
-
-    fn current_depth(cx: &App) -> Option<usize> {
-        let cache = cx.try_global::<Self>()?;
-        cache.0.last().copied()
     }
 }
 

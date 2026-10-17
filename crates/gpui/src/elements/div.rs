@@ -33,7 +33,7 @@ use crate::{HighlightStyle, StyledText, hsla};
 use crate::{
     Action, AnyDrag, AnyElement, AnyTooltip, AnyView, App, AppContext, Bounds, ClickEvent,
     CursorStyle, DispatchPhase, Display, Element, ElementId, Entity, EntityId, ExternalDragPayload,
-    FileDropEvent, FocusHandle, Global, GlobalElementId, Hitbox, HitboxBehavior, HitboxId,
+    FileDropEvent, FocusHandle, GlobalElementId, Hitbox, HitboxBehavior, HitboxId,
     InspectorElementId, IntoElement, IsZero, KeyContext, KeyDownEvent, KeyUpEvent, KeyboardButton,
     KeyboardClickEvent, LayoutId, LongPressEvent, ModifiersChangedEvent, MouseButton,
     MouseClickEvent, MouseDownEvent, MouseExitEvent, MouseMoveEvent, MousePressureEvent,
@@ -42,7 +42,6 @@ use crate::{
     StyleTransitionContext, StyleTransitionState, StyleTransitions, Styled, Task, TooltipId,
     TouchPhase, Visibility, Window, WindowControlArea, point, px, size,
 };
-use collections::HashMap;
 use gpui_util::ResultExt;
 use itertools::Either;
 use refineable::Refineable;
@@ -2980,47 +2979,55 @@ impl Element for Div {
                     }
                 }
 
-                window.with_image_cache(image_cache, |window| {
-                    window.with_style_transition_containing_bounds(bounds, |window| {
-                        let has_standalone_inline = request_layout.standalone_inline().is_some();
-                        let inline_order = if has_standalone_inline {
-                            self.prepaint_order_fn
-                                .as_ref()
-                                .map(|order_fn| order_fn(window, cx))
-                        } else {
-                            None
-                        };
-
-                        window.with_element_offset(scroll_offset, |window| {
-                            if let Some(inline) = request_layout.standalone_inline_mut() {
-                                inline.record_paragraph_origins(window);
-                                prepaint_children(
-                                    &mut self.children,
-                                    inline_order.as_deref(),
-                                    window,
-                                    cx,
-                                );
-                            } else {
-                                let order = self
-                                    .prepaint_order_fn
+                window.with_element_opacity(style.opacity, |window| {
+                    window.with_image_cache(image_cache, |window| {
+                        window.with_style_transition_containing_bounds(bounds, |window| {
+                            let has_standalone_inline =
+                                request_layout.standalone_inline().is_some();
+                            let inline_order = if has_standalone_inline {
+                                self.prepaint_order_fn
                                     .as_ref()
-                                    .map(|order_fn| order_fn(window, cx));
-                                prepaint_children(&mut self.children, order.as_deref(), window, cx);
+                                    .map(|order_fn| order_fn(window, cx))
+                            } else {
+                                None
+                            };
+
+                            window.with_element_offset(scroll_offset, |window| {
+                                if let Some(inline) = request_layout.standalone_inline_mut() {
+                                    inline.record_paragraph_origins(window);
+                                    prepaint_children(
+                                        &mut self.children,
+                                        inline_order.as_deref(),
+                                        window,
+                                        cx,
+                                    );
+                                } else {
+                                    let order = self
+                                        .prepaint_order_fn
+                                        .as_ref()
+                                        .map(|order_fn| order_fn(window, cx));
+                                    prepaint_children(
+                                        &mut self.children,
+                                        order.as_deref(),
+                                        window,
+                                        cx,
+                                    );
+                                }
+                            });
+
+                            if has_prepaint_listener && has_standalone_inline {
+                                children_bounds.extend(
+                                    request_layout
+                                        .child_layout_ids
+                                        .iter()
+                                        .map(|layout_id| window.layout_bounds(*layout_id)),
+                                );
+                            }
+
+                            if let Some(listener) = self.prepaint_listener.as_ref() {
+                                listener(children_bounds, window, cx);
                             }
                         });
-
-                        if has_prepaint_listener && has_standalone_inline {
-                            children_bounds.extend(
-                                request_layout
-                                    .child_layout_ids
-                                    .iter()
-                                    .map(|layout_id| window.layout_bounds(*layout_id)),
-                            );
-                        }
-
-                        if let Some(listener) = self.prepaint_listener.as_ref() {
-                            listener(children_bounds, window, cx);
-                        }
                     });
                 });
 
@@ -3240,6 +3247,10 @@ impl Interactivity {
         cx: &mut App,
         f: impl FnOnce(Style, &mut Window, &mut App) -> LayoutId,
     ) -> LayoutId {
+        // Tracked scroll handles are mutable outside the entity and do not notify it themselves.
+        if self.tracked_scroll_handle.is_some() {
+            window.mark_cached_views_frame_bound();
+        }
         #[cfg(any(feature = "inspector", debug_assertions))]
         window.with_inspector_state(
             _inspector_id,
@@ -3586,12 +3597,10 @@ impl Interactivity {
 
                 #[cfg(any(feature = "test-support", test))]
                 if let Some(debug_selector) = &self.debug_selector {
-                    window
-                        .next_frame
-                        .record_debug_bounds(debug_selector.clone(), bounds);
+                    window.record_debug_bounds(debug_selector.clone(), bounds);
                 }
 
-                self.paint_hover_group_handler(window, cx);
+                self.paint_hover_group_handler(window);
 
                 if style.visibility == Visibility::Hidden {
                     return ((), element_state);
@@ -3628,7 +3637,7 @@ impl Interactivity {
                         }
 
                         if let Some(group) = self.group.clone() {
-                            GroupHitboxes::push(group, hitbox.id, cx);
+                            window.push_group_hitbox(group, hitbox.id);
                         }
 
                         if let Some(area) = self.window_control {
@@ -3659,7 +3668,7 @@ impl Interactivity {
                         window.insert_inspector_hitbox(_hitbox.id, _inspector_id, cx);
 
                         if let Some(group) = self.group.as_ref() {
-                            GroupHitboxes::pop(group, cx);
+                            window.pop_group_hitbox(group);
                         }
                     }
                 };
@@ -3927,7 +3936,7 @@ impl Interactivity {
         }
 
         if let Some(group_hover) = self.group_hover_style.as_ref() {
-            if let Some(group_hitbox_id) = GroupHitboxes::get(&group_hover.group, cx) {
+            if let Some(group_hitbox_id) = window.group_hitbox(&group_hover.group) {
                 let hover_state = element_state
                     .as_ref()
                     .and_then(|element| element.hover_state.as_ref())
@@ -4340,7 +4349,7 @@ impl Interactivity {
                 let active_group_hitbox = self
                     .group_active_style
                     .as_ref()
-                    .and_then(|group_active| GroupHitboxes::get(&group_active.group, cx));
+                    .and_then(|group_active| window.group_hitbox(&group_active.group));
                 let hitbox = hitbox.clone();
                 window.on_mouse_event(move |_: &MouseDownEvent, phase, window, _cx| {
                     if phase == DispatchPhase::Bubble && !window.default_prevented() {
@@ -4392,11 +4401,11 @@ impl Interactivity {
         }
     }
 
-    fn paint_hover_group_handler(&self, window: &mut Window, cx: &mut App) {
+    fn paint_hover_group_handler(&self, window: &mut Window) {
         let group_hitbox = self
             .group_hover_style
             .as_ref()
-            .and_then(|group_hover| GroupHitboxes::get(&group_hover.group, cx));
+            .and_then(|group_hover| window.group_hitbox(&group_hover.group));
 
         if let Some(group_hitbox) = group_hitbox {
             let was_hovered = group_hitbox.is_hovered(window);
@@ -4535,7 +4544,7 @@ impl Interactivity {
         if !cx.has_active_drag() {
             if let Some(group_hover) = self.group_hover_style.as_ref() {
                 let is_group_hovered =
-                    if let Some(group_hitbox_id) = GroupHitboxes::get(&group_hover.group, cx) {
+                    if let Some(group_hitbox_id) = window.group_hitbox(&group_hover.group) {
                         !window.last_input_was_touch() && group_hitbox_id.is_hovered(window)
                     } else if let Some(element_state) = element_state.as_ref() {
                         element_state
@@ -4597,8 +4606,7 @@ impl Interactivity {
 
                 if let Some((_, drop_listener)) = relevant_drop_listener {
                     for (state_type, group_drag_style) in &self.group_drag_over_styles {
-                        if let Some(group_hitbox_id) =
-                            GroupHitboxes::get(&group_drag_style.group, cx)
+                        if let Some(group_hitbox_id) = window.group_hitbox(&group_drag_style.group)
                             && *state_type == drag.value.as_ref().type_id()
                             && group_hitbox_id.is_hovered(window)
                         {
@@ -4651,6 +4659,8 @@ impl Interactivity {
                     cx.background_executor().now(),
                     cx.reduce_motion(),
                 ) {
+                    // A retained view must re-evaluate an active transition on each frame.
+                    window.mark_cached_views_frame_bound();
                     window.request_animation_frame();
                 }
             } else {
@@ -5208,34 +5218,6 @@ fn handle_tooltip_check_visible_and_update(
     }
 
     active_tooltip.borrow().is_some()
-}
-
-/// Temporary cache of hitbox groups, written and read from during paint recursion.
-#[derive(Default)]
-pub(crate) struct GroupHitboxes(HashMap<SharedString, SmallVec<[HitboxId; 1]>>);
-
-impl Global for GroupHitboxes {}
-
-impl GroupHitboxes {
-    pub fn get(name: &SharedString, cx: &mut App) -> Option<HitboxId> {
-        cx.default_global::<Self>()
-            .0
-            .get(name)
-            .and_then(|bounds_stack| bounds_stack.last())
-            .cloned()
-    }
-
-    pub fn push(name: SharedString, hitbox_id: HitboxId, cx: &mut App) {
-        cx.default_global::<Self>()
-            .0
-            .entry(name)
-            .or_default()
-            .push(hitbox_id);
-    }
-
-    pub fn pop(name: &SharedString, cx: &mut App) {
-        cx.default_global::<Self>().0.get_mut(name).unwrap().pop();
-    }
 }
 
 /// An element with an [`ElementId`], which lets it keep state between frames.

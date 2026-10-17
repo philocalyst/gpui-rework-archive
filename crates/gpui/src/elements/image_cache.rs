@@ -1,7 +1,8 @@
 use crate::{
     AnyElement, AnyEntity, App, AppContext, Asset, AssetLogger, Bounds, Element, ElementId, Entity,
-    GlobalElementId, ImageAssetLoader, ImageCacheError, InspectorElementId, IntoElement, LayoutId,
-    ParentElement, Pixels, RenderImage, Resource, Style, StyleRefinement, Styled, Window, hash,
+    EntityId, GlobalElementId, ImageAssetLoader, ImageCacheError, InspectorElementId, IntoElement,
+    LayoutId, ParentElement, Pixels, RenderImage, Resource, Style, StyleRefinement, Styled, Window,
+    hash,
 };
 
 use crate::asset_cache::CachedLoad;
@@ -59,6 +60,10 @@ impl<I: ImageCache> From<Entity<I>> for AnyImageCache {
 }
 
 impl AnyImageCache {
+    pub(crate) fn entity_id(&self) -> EntityId {
+        self.image_cache.entity_id()
+    }
+
     /// Asks the cache for `resource`. Returns `None` while the image loads, and the result once it is
     /// ready. See [`ImageCache::load`].
     pub fn load(

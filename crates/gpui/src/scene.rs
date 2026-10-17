@@ -111,13 +111,34 @@ pub struct Scene {
     surface_opacities: Vec<f32>,
     /// [`crate::BackdropFilter`] primitives.
     pub backdrop_filters: Vec<BackdropFilter>,
-    /// Start and end markers of filter or grouped-opacity isolation. Matched pairs isolate the group; unmatched markers render inline.
+    /// Start and end markers of filter or grouped-opacity groups. They always come in matched pairs.
     pub filter_boundaries: Vec<FilterBoundary>,
+    sort_keys: Vec<SceneSortKey>,
+    sort_old_to_new: Vec<usize>,
+    sort_scratch: Vec<usize>,
+    permutations: ScenePermutations,
     render_plan: ScenePlan,
     is_finished: bool,
 }
 
 impl Scene {
+    fn prepare_recording(&mut self) {
+        if !self.is_finished {
+            return;
+        }
+
+        if !self.permutations.is_identity() {
+            for operation in &mut self.paint_operations {
+                self.permutations.remap(operation, &self.sort_old_to_new);
+            }
+        }
+        self.permutations = ScenePermutations::default();
+        self.sort_old_to_new.clear();
+        self.sort_scratch.clear();
+        self.sort_keys.clear();
+        self.is_finished = false;
+    }
+
     /// Removes every primitive and resets the scene so that it can be painted again.
     ///
     /// The vectors keep their capacity, so a scene that is cleared and refilled each frame
@@ -138,6 +159,10 @@ impl Scene {
         self.surface_opacities.clear();
         self.backdrop_filters.clear();
         self.filter_boundaries.clear();
+        self.sort_keys.clear();
+        self.sort_old_to_new.clear();
+        self.sort_scratch.clear();
+        self.permutations = ScenePermutations::default();
         self.render_plan.clear();
         self.is_finished = false;
     }
@@ -153,7 +178,7 @@ impl Scene {
     ///
     /// [`crate::Window::paint_layer`] calls this for you.
     pub fn push_layer(&mut self, bounds: Bounds<ScaledPixels>) {
-        self.is_finished = false;
+        self.prepare_recording();
         let order = self.primitive_bounds.insert(bounds);
         self.layer_stack.push(Some(order));
         self.paint_operations
@@ -163,7 +188,7 @@ impl Scene {
     /// Ends the layer started by the most recent [`Scene::push_layer`]. The scene does not check
     /// that the calls are balanced, so callers must keep the nesting correct.
     pub fn pop_layer(&mut self) {
-        self.is_finished = false;
+        self.prepare_recording();
         self.layer_stack.pop();
         self.paint_operations.push(PaintOperation::EndLayer);
     }
@@ -173,7 +198,7 @@ impl Scene {
     /// Use this to put overlays, such as tooltips and drag images, above the rest of the scene. The
     /// renderer draws primitives in ascending draw order.
     pub fn raise_order_floor(&mut self) {
-        self.is_finished = false;
+        self.prepare_recording();
         let floor = self.primitive_bounds.max_order() + 1;
         self.primitive_bounds.set_order_floor(floor);
     }
@@ -206,11 +231,11 @@ impl Scene {
     /// assert!(scene.quads.is_empty());
     /// ```
     pub fn insert_primitive(&mut self, primitive: impl Into<Primitive>) {
-        let mut primitive = primitive.into();
-        self.is_finished = false;
+        self.insert_primitive_recorded(primitive.into());
+    }
 
-        // Cached glyph batches may have been recorded outside isolation. The monochrome
-        // pipeline also accepts RGB atlas masks and provides a scalar-alpha fallback.
+    fn insert_primitive_recorded(&mut self, mut primitive: Primitive) {
+        self.prepare_recording();
         if self.is_in_filter_group()
             && let Primitive::SubpixelSprite(sprite) = primitive
         {
@@ -224,14 +249,20 @@ impl Scene {
                 transformation: sprite.transformation,
             });
         }
-
         let clipped_bounds = primitive
             .paint_bounds()
             .intersect(&primitive.content_mask().bounds);
 
-        // Isolation boundaries stay paired even when their clipped region is empty.
-        // Each marker sorts above prior content, and its order floor keeps following
-        // content inside the intended group or after its closing marker.
+        // Content-filter boundaries must always be inserted as matched pairs — dropping one
+        // (e.g. for an empty clipped region) would orphan its partner and corrupt the renderer's
+        // target stack. Each marker takes an order strictly above ALL prior content, so the start
+        // sorts after everything painted before it and the element's own children (which overlap
+        // the marker bounds) sort strictly above the start. This keeps a marker's order range from
+        // colliding with unrelated non-overlapping content that reuses low orderings (e.g. a
+        // background grid), which would otherwise sweep that content into the group. Content
+        // painted *after* the group is held above it by raising the order floor when the end
+        // marker is inserted (see below) — otherwise a later non-overlapping sibling could reuse a
+        // low order that lands inside the start..end range and be swept into the group.
         let is_filter_boundary = matches!(primitive, Primitive::FilterBoundary(_));
 
         if clipped_bounds.is_empty() && !is_filter_boundary {
@@ -252,109 +283,225 @@ impl Scene {
                 .flatten()
                 .unwrap_or_else(|| self.primitive_bounds.insert(clipped_bounds))
         };
-        match &mut primitive {
-            Primitive::Shadow(shadow) => {
+        let paint_operation = match primitive {
+            Primitive::Shadow(mut shadow) => {
                 shadow.order = order;
-                self.shadows.push(*shadow);
+                let index = self.shadows.len();
+                self.shadows.push(shadow);
+                PaintOperation::Shadow(index)
             }
-            Primitive::Quad(quad) => {
+            Primitive::Quad(mut quad) => {
                 quad.order = order;
-                self.quads.push(*quad);
+                let index = self.quads.len();
+                self.quads.push(quad);
+                PaintOperation::Quad(index)
             }
-            Primitive::Path(path) => {
+            Primitive::Path(mut path) => {
                 path.order = order;
                 path.id = PathId(self.paths.len());
-                self.paths.push(path.clone());
+                let index = self.paths.len();
+                self.paths.push(path);
+                PaintOperation::Path(index)
             }
-            Primitive::Underline(underline) => {
+            Primitive::Underline(mut underline) => {
                 underline.order = order;
-                self.underlines.push(*underline);
+                let index = self.underlines.len();
+                self.underlines.push(underline);
+                PaintOperation::Underline(index)
             }
-            Primitive::MonochromeSprite(sprite) => {
+            Primitive::MonochromeSprite(mut sprite) => {
                 sprite.order = order;
-                self.monochrome_sprites.push(*sprite);
+                let index = self.monochrome_sprites.len();
+                self.monochrome_sprites.push(sprite);
+                PaintOperation::MonochromeSprite(index)
             }
-            Primitive::SubpixelSprite(sprite) => {
+            Primitive::SubpixelSprite(mut sprite) => {
                 sprite.order = order;
-                self.subpixel_sprites.push(*sprite);
+                let index = self.subpixel_sprites.len();
+                self.subpixel_sprites.push(sprite);
+                PaintOperation::SubpixelSprite(index)
             }
-            Primitive::PolychromeSprite(sprite) => {
+            Primitive::PolychromeSprite(mut sprite) => {
                 sprite.order = order;
-                self.polychrome_sprites.push(*sprite);
+                let index = self.polychrome_sprites.len();
+                self.polychrome_sprites.push(sprite);
+                PaintOperation::PolychromeSprite(index)
             }
-            Primitive::Surface(surface) => {
+            Primitive::Surface(mut surface) => {
                 surface.order = order;
-                self.surfaces.push(surface.clone());
+                let index = self.surfaces.len();
+                self.surfaces.push(surface);
                 self.surface_opacities.push(1.0);
+                PaintOperation::Surface(index)
             }
-            Primitive::BackdropFilter(filter) => {
+            Primitive::BackdropFilter(mut filter) => {
                 filter.order = order;
-                self.backdrop_filters.push(filter.clone());
+                let index = self.backdrop_filters.len();
+                self.backdrop_filters.push(filter);
+                PaintOperation::BackdropFilter(index)
             }
-            Primitive::FilterBoundary(boundary) => {
+            Primitive::FilterBoundary(mut boundary) => {
                 boundary.order = order;
-                // Every boundary breaks active layer batching and starts a new order segment.
                 self.layer_stack.fill(None);
                 self.primitive_bounds.set_order_floor(order + 1);
-
                 if boundary.is_start {
                     self.filter_depth += 1;
                 } else {
                     self.filter_depth = self.filter_depth.saturating_sub(1);
                 }
-
-                self.filter_boundaries.push(boundary.clone());
+                let index = self.filter_boundaries.len();
+                self.filter_boundaries.push(boundary);
+                PaintOperation::FilterBoundary(index)
             }
-        }
-
-        self.paint_operations
-            .push(PaintOperation::Primitive(primitive));
+        };
+        self.paint_operations.push(paint_operation);
     }
 
-    /// Inserts the paint operations in `range` from `prev_scene` into this scene, as if they had been
-    /// painted again.
+    /// Replays operations from `range` in `prev_scene` into this scene.
     ///
-    /// Use this to reuse the output of an earlier frame for a view that hasn't changed. Draw orders
-    /// are assigned again in this scene.
-    ///
-    /// # Panics
-    ///
-    /// Panics if `range` extends past the end of `prev_scene`'s paint operations.
+    /// The range indexes the source scene paint-operation stream and must be within its current
+    /// length. Replayed primitives are inserted through this scene normal clipping and draw-order
+    /// logic, so the destination scene can combine them with newly painted content. If the source
+    /// scene has been finished, its lane-sort mappings are applied before reading each primitive.
     pub fn replay(&mut self, range: Range<usize>, prev_scene: &Scene) {
         for operation in &prev_scene.paint_operations[range] {
+            let mut operation = *operation;
+            prev_scene
+                .permutations
+                .remap(&mut operation, &prev_scene.sort_old_to_new);
             match operation {
-                PaintOperation::Primitive(primitive) => self.insert_primitive(primitive.clone()),
-                PaintOperation::StartLayer(bounds) => self.push_layer(*bounds),
+                PaintOperation::StartLayer(bounds) => self.push_layer(bounds),
                 PaintOperation::EndLayer => self.pop_layer(),
+                PaintOperation::Shadow(index) => {
+                    self.insert_primitive(Primitive::Shadow(prev_scene.shadows[index]))
+                }
+                PaintOperation::Quad(index) => {
+                    self.insert_primitive(Primitive::Quad(prev_scene.quads[index]))
+                }
+                PaintOperation::Path(index) => {
+                    self.insert_primitive(Primitive::Path(prev_scene.paths[index].clone()))
+                }
+                PaintOperation::Underline(index) => {
+                    self.insert_primitive(Primitive::Underline(prev_scene.underlines[index]))
+                }
+                PaintOperation::MonochromeSprite(index) => self.insert_primitive(
+                    Primitive::MonochromeSprite(prev_scene.monochrome_sprites[index]),
+                ),
+                PaintOperation::SubpixelSprite(index) => self.insert_primitive(
+                    Primitive::SubpixelSprite(prev_scene.subpixel_sprites[index]),
+                ),
+                PaintOperation::PolychromeSprite(index) => self.insert_primitive(
+                    Primitive::PolychromeSprite(prev_scene.polychrome_sprites[index]),
+                ),
+                PaintOperation::Surface(index) => {
+                    self.insert_primitive(Primitive::Surface(prev_scene.surfaces[index].clone()))
+                }
+                PaintOperation::BackdropFilter(index) => self.insert_primitive(
+                    Primitive::BackdropFilter(prev_scene.backdrop_filters[index].clone()),
+                ),
+                PaintOperation::FilterBoundary(index) => self.insert_primitive(
+                    Primitive::FilterBoundary(prev_scene.filter_boundaries[index].clone()),
+                ),
             }
         }
     }
 
-    /// Sorts the primitives by draw order and compiles the renderer's plan.
+    /// Sorts primitive lanes by draw order and compiles renderer commands for this scene.
     ///
-    /// Call this after painting and before rendering. Adding a primitive after `finish` marks the
-    /// scene unfinished again; call `finish` again before reading [`Scene::batches`] or
-    /// [`Scene::render_commands`].
+    /// Call this after recording operations and before reading [`Self::batches`] or
+    /// [`Self::render_commands`]. Calling it again after further insertions updates the compiled
+    /// plan while preserving the operation indices used by replay.
     pub fn finish(&mut self) {
-        self.shadows.sort_by_key(|shadow| shadow.order);
-        self.quads.sort_by_key(|quad| quad.order);
-        self.paths.sort_by_key(|path| path.order);
-        self.underlines.sort_by_key(|underline| underline.order);
-        self.monochrome_sprites
-            .sort_by_key(|sprite| (sprite.order, sprite.tile.tile_id));
-        self.subpixel_sprites
-            .sort_by_key(|sprite| (sprite.order, sprite.tile.tile_id));
-        self.polychrome_sprites
-            .sort_by_key(|sprite| (sprite.order, sprite.tile.tile_id));
-        self.surfaces.sort_by_key(|surface| surface.order);
+        let was_finished = self.is_finished;
         self.surface_opacities.resize(self.surfaces.len(), 1.0);
-        self.backdrop_filters.sort_by_key(|filter| filter.order);
+        self.surface_opacities.truncate(self.surfaces.len());
+
+        let mut permutations = ScenePermutations::default();
+        macro_rules! sort_and_apply_lane {
+            ($kind:ident, $lane:ident, $key:expr, $parallel:expr) => {{
+                sort_scene_items(
+                    &self.$lane,
+                    &mut self.sort_keys,
+                    &mut self.sort_old_to_new,
+                    $key,
+                    &mut permutations[SceneLane::$kind],
+                );
+                apply_scene_sort(
+                    &mut self.$lane,
+                    &self.sort_old_to_new,
+                    &mut self.sort_scratch,
+                    permutations[SceneLane::$kind].sort.clone(),
+                    $key,
+                    $parallel,
+                );
+            }};
+        }
+        sort_and_apply_lane!(Shadows, shadows, |shadow| (shadow.order, 0), |_| {});
+        sort_and_apply_lane!(Quads, quads, |quad| (quad.order, 0), |_| {});
+        sort_and_apply_lane!(Paths, paths, |path| (path.order, 0), |_| {});
+        sort_and_apply_lane!(
+            Underlines,
+            underlines,
+            |underline| (underline.order, 0),
+            |_| {}
+        );
+        sort_and_apply_lane!(
+            MonochromeSprites,
+            monochrome_sprites,
+            |sprite| { (sprite.order, sprite.tile.tile_id.0) },
+            |_| {}
+        );
+        sort_and_apply_lane!(
+            SubpixelSprites,
+            subpixel_sprites,
+            |sprite| { (sprite.order, sprite.tile.tile_id.0) },
+            |_| {}
+        );
+        sort_and_apply_lane!(
+            PolychromeSprites,
+            polychrome_sprites,
+            |sprite| { (sprite.order, sprite.tile.tile_id.0) },
+            |_| {}
+        );
+        sort_and_apply_lane!(Surfaces, surfaces, |surface| (surface.order, 0), |edit| {
+            match edit {
+                LaneEdit::Swap(from, to) => self.surface_opacities.swap(from, to),
+                LaneEdit::Reverse(range) => self.surface_opacities[range].reverse(),
+            }
+        });
+        sort_and_apply_lane!(
+            BackdropFilters,
+            backdrop_filters,
+            |filter| (filter.order, 0),
+            |_| {}
+        );
         // Markers normally get distinct, monotonically-increasing orders (children overlap
         // their group bounds and so sort strictly between the start and end). The `!is_start`
         // tiebreak only matters for a degenerate empty group whose start and end tie: it keeps
         // the start (false = 0) ahead of the end (true = 1) so the pair stays well-formed.
-        self.filter_boundaries
-            .sort_by_key(|boundary| (boundary.order, !boundary.is_start));
+        sort_and_apply_lane!(
+            FilterBoundaries,
+            filter_boundaries,
+            |boundary| { (boundary.order, (!boundary.is_start) as u32) },
+            |_| {}
+        );
+        self.sort_keys.clear();
+        self.sort_scratch.clear();
+        if was_finished {
+            if !permutations.is_identity() {
+                let composed = compose_scene_permutations(
+                    &self.permutations,
+                    &permutations,
+                    &self.sort_old_to_new,
+                    &mut self.sort_scratch,
+                );
+                std::mem::swap(&mut self.sort_old_to_new, &mut self.sort_scratch);
+                self.sort_scratch.clear();
+                self.permutations = composed;
+            }
+        } else {
+            self.permutations = permutations;
+        }
         let commands = std::mem::take(&mut self.render_plan.commands);
         self.render_plan = ScenePlan::build(self, commands);
         self.is_finished = true;
@@ -438,14 +585,15 @@ impl Scene {
         &self.render_plan
     }
 
-    /// Returns the intrinsic opacity of each surface in [`Self::surfaces`].
+    /// Returns the intrinsic opacity of each surface in the same order.
+    ///
     /// Surfaces are fully opaque here; group opacity is applied when compositing.
     pub fn surface_opacities(&self) -> &[f32] {
         &self.surface_opacities
     }
 
-    /// Returns `true` if rendering this scene needs an offscreen target for backdrop filters,
-    /// isolated content-filter groups, or grouped opacity.
+    /// Returns `true` if rendering this scene needs an offscreen target. That is the case when it has
+    /// backdrop filters, or filter or grouped-opacity groups that draw into an isolated target.
     ///
     /// # Panics
     ///
@@ -493,7 +641,7 @@ impl From<palette::Hsla> for SceneHsla {
     allow(dead_code)
 )]
 pub(crate) enum PrimitiveKind {
-    // Lowest discriminant: at an equal order, a filter-group start is emitted before
+    // Lowest discriminant: at an equal order, a filter or grouped-opacity group-start is emitted before
     // the group's own content so the renderer redirects rendering before any child draws.
     FilterBoundaryStart,
     Shadow,
@@ -511,10 +659,372 @@ pub(crate) enum PrimitiveKind {
     FilterBoundaryEnd,
 }
 
+#[derive(Clone, Copy)]
 pub(crate) enum PaintOperation {
-    Primitive(Primitive),
+    Shadow(usize),
+    Quad(usize),
+    Path(usize),
+    Underline(usize),
+    MonochromeSprite(usize),
+    SubpixelSprite(usize),
+    PolychromeSprite(usize),
+    Surface(usize),
+    BackdropFilter(usize),
+    FilterBoundary(usize),
     StartLayer(Bounds<ScaledPixels>),
     EndLayer,
+}
+
+#[derive(Clone, Copy)]
+#[repr(usize)]
+enum SceneLane {
+    Shadows,
+    Quads,
+    Paths,
+    Underlines,
+    MonochromeSprites,
+    SubpixelSprites,
+    PolychromeSprites,
+    Surfaces,
+    BackdropFilters,
+    FilterBoundaries,
+}
+
+const SCENE_LANE_COUNT: usize = SceneLane::FilterBoundaries as usize + 1;
+
+#[derive(Clone)]
+struct ScenePermutations {
+    lanes: [LaneMapping; SCENE_LANE_COUNT],
+}
+
+impl Default for ScenePermutations {
+    fn default() -> Self {
+        Self {
+            lanes: std::array::from_fn(|_| LaneMapping::default()),
+        }
+    }
+}
+
+impl std::ops::Index<SceneLane> for ScenePermutations {
+    type Output = LaneMapping;
+
+    fn index(&self, lane: SceneLane) -> &Self::Output {
+        &self.lanes[lane as usize]
+    }
+}
+
+impl std::ops::IndexMut<SceneLane> for ScenePermutations {
+    fn index_mut(&mut self, lane: SceneLane) -> &mut Self::Output {
+        &mut self.lanes[lane as usize]
+    }
+}
+
+#[derive(Clone, Default)]
+struct LaneMapping {
+    source_len: usize,
+    sort: LaneSort,
+}
+
+#[derive(Clone, Default)]
+enum LaneSort {
+    #[default]
+    Identity,
+    Swap(usize),
+    Reverse(usize),
+    ReverseRuns(Range<usize>),
+    Indexed(Range<usize>),
+}
+
+enum LanePattern {
+    Identity,
+    Swap(usize),
+    Reverse,
+    ReverseRuns,
+    Indexed,
+}
+
+#[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
+struct SceneSortKey(DrawOrder, u32, usize);
+
+impl ScenePermutations {
+    fn is_identity(&self) -> bool {
+        self.lanes
+            .iter()
+            .all(|mapping| matches!(&mapping.sort, LaneSort::Identity))
+    }
+
+    fn remap(&self, operation: &mut PaintOperation, old_to_new: &[usize]) {
+        let (lane, index) = match operation {
+            PaintOperation::Shadow(index) => (SceneLane::Shadows, index),
+            PaintOperation::Quad(index) => (SceneLane::Quads, index),
+            PaintOperation::Path(index) => (SceneLane::Paths, index),
+            PaintOperation::Underline(index) => (SceneLane::Underlines, index),
+            PaintOperation::MonochromeSprite(index) => (SceneLane::MonochromeSprites, index),
+            PaintOperation::SubpixelSprite(index) => (SceneLane::SubpixelSprites, index),
+            PaintOperation::PolychromeSprite(index) => (SceneLane::PolychromeSprites, index),
+            PaintOperation::Surface(index) => (SceneLane::Surfaces, index),
+            PaintOperation::BackdropFilter(index) => (SceneLane::BackdropFilters, index),
+            PaintOperation::FilterBoundary(index) => (SceneLane::FilterBoundaries, index),
+            PaintOperation::StartLayer(_) | PaintOperation::EndLayer => return,
+        };
+        remap_index(index, &self[lane].sort, old_to_new);
+    }
+}
+
+fn compose_scene_permutations(
+    previous: &ScenePermutations,
+    current: &ScenePermutations,
+    source: &[usize],
+    output: &mut Vec<usize>,
+) -> ScenePermutations {
+    ScenePermutations {
+        lanes: std::array::from_fn(|index| {
+            compose_lane(
+                &previous.lanes[index],
+                &current.lanes[index],
+                source,
+                output,
+            )
+        }),
+    }
+}
+
+fn compose_lane(
+    previous: &LaneMapping,
+    current: &LaneMapping,
+    source: &[usize],
+    output: &mut Vec<usize>,
+) -> LaneMapping {
+    let source_len = previous.source_len;
+    let sort = match (&previous.sort, &current.sort) {
+        (LaneSort::Identity, sort) => copy_lane_sort(sort, source_len, source, output),
+        (sort, LaneSort::Identity) => copy_lane_sort(sort, source_len, source, output),
+        (LaneSort::Swap(old), LaneSort::Swap(new)) if old == new => LaneSort::Identity,
+        (LaneSort::Reverse(old), LaneSort::Reverse(new)) if old == new => LaneSort::Identity,
+        _ => {
+            let start = output.len();
+            for old_index in 0..source_len {
+                let current_index = map_index(old_index, &previous.sort, source);
+                output.push(map_index(current_index, &current.sort, source));
+            }
+            if output[start..]
+                .iter()
+                .enumerate()
+                .all(|(index, &mapped)| index == mapped)
+            {
+                output.truncate(start);
+                LaneSort::Identity
+            } else {
+                LaneSort::Indexed(start..output.len())
+            }
+        }
+    };
+    LaneMapping { source_len, sort }
+}
+
+fn copy_lane_sort(
+    sort: &LaneSort,
+    source_len: usize,
+    source: &[usize],
+    output: &mut Vec<usize>,
+) -> LaneSort {
+    match sort {
+        LaneSort::Identity => LaneSort::Identity,
+        LaneSort::Swap(position) => LaneSort::Swap(*position),
+        LaneSort::Reverse(len) => LaneSort::Reverse(*len),
+        LaneSort::ReverseRuns(range) | LaneSort::Indexed(range) => {
+            copy_lane_map(range, source_len, source, output)
+        }
+    }
+}
+
+fn copy_lane_map(
+    range: &Range<usize>,
+    source_len: usize,
+    source: &[usize],
+    output: &mut Vec<usize>,
+) -> LaneSort {
+    let start = output.len();
+    let mapping = &source[range.start..range.start + source_len];
+    if mapping
+        .iter()
+        .enumerate()
+        .all(|(index, &mapped)| index == mapped)
+    {
+        return LaneSort::Identity;
+    }
+    output.extend_from_slice(mapping);
+    LaneSort::Indexed(start..output.len())
+}
+
+#[inline]
+fn remap_index(index: &mut usize, sort: &LaneSort, old_to_new: &[usize]) {
+    *index = map_index(*index, sort, old_to_new);
+}
+
+#[inline]
+fn map_index(index: usize, sort: &LaneSort, old_to_new: &[usize]) -> usize {
+    match sort {
+        LaneSort::Identity => {}
+        LaneSort::Swap(position) => {
+            return match index {
+                index if index == *position => index + 1,
+                index if index == *position + 1 => index - 1,
+                index => index,
+            };
+        }
+        LaneSort::Reverse(len) => return len - 1 - index,
+        LaneSort::ReverseRuns(range) | LaneSort::Indexed(range) => {
+            return old_to_new[range.start + index];
+        }
+    }
+    index
+}
+
+/// Selects a cheap lane operation for monotone keys; equal runs never take simple reverse.
+/// Remaining keys use old indices as a final key, preserving stable-sort tie behavior.
+fn sort_scene_items<T>(
+    items: &[T],
+    sort_keys: &mut Vec<SceneSortKey>,
+    old_to_new: &mut Vec<usize>,
+    key: impl Fn(&T) -> (DrawOrder, u32),
+    mapping: &mut LaneMapping,
+) {
+    mapping.source_len = items.len();
+    let sort = &mut mapping.sort;
+    match classify_scene_lane(items, &key) {
+        LanePattern::Identity => *sort = LaneSort::Identity,
+        LanePattern::Swap(position) => *sort = LaneSort::Swap(position),
+        LanePattern::Reverse => *sort = LaneSort::Reverse(items.len()),
+        LanePattern::ReverseRuns => {
+            let start = old_to_new.len();
+            old_to_new.resize(start + items.len(), 0);
+            let mut run_start = 0;
+            let mut run_key = key(&items[0]);
+            for end in 1..=items.len() {
+                let next_key = items.get(end).map(&key);
+                if next_key != Some(run_key) {
+                    let new_start = items.len() - end;
+                    for old_index in run_start..end {
+                        old_to_new[start + old_index] = new_start + old_index - run_start;
+                    }
+                    run_start = end;
+                    if let Some(next_key) = next_key {
+                        run_key = next_key;
+                    }
+                }
+            }
+            *sort = LaneSort::ReverseRuns(start..old_to_new.len());
+        }
+        LanePattern::Indexed => {
+            let start = old_to_new.len();
+            sort_keys.clear();
+            sort_keys.extend(items.iter().enumerate().map(|(index, item)| {
+                let (order, tie_break) = key(item);
+                SceneSortKey(order, tie_break, index)
+            }));
+            sort_keys.sort_unstable();
+            old_to_new.resize(start + items.len(), 0);
+            for (new_index, &SceneSortKey(_, _, old_index)) in sort_keys.iter().enumerate() {
+                old_to_new[start + old_index] = new_index;
+            }
+            *sort = LaneSort::Indexed(start..old_to_new.len());
+        }
+    }
+}
+
+fn classify_scene_lane<T>(items: &[T], key: &impl Fn(&T) -> (DrawOrder, u32)) -> LanePattern {
+    let mut inversions = items
+        .windows(2)
+        .enumerate()
+        .filter(|(_, pair)| key(&pair[0]) > key(&pair[1]));
+    let Some((position, _)) = inversions.next() else {
+        return LanePattern::Identity;
+    };
+    if inversions.next().is_none() {
+        let lower = key(&items[position + 1]);
+        let upper = key(&items[position]);
+        // With one inversion, its adjacent keys bound the already ordered prefix and suffix.
+        let prefix_is_ordered = position == 0 || key(&items[position - 1]) <= lower;
+        let suffix_is_ordered = position + 2 == items.len() || upper <= key(&items[position + 2]);
+        if prefix_is_ordered && suffix_is_ordered {
+            return LanePattern::Swap(position);
+        }
+    }
+
+    match items
+        .windows(2)
+        .try_fold(true, |strictly_decreasing, pair| {
+            let previous = key(&pair[0]);
+            let current = key(&pair[1]);
+            if previous < current {
+                None
+            } else {
+                Some(strictly_decreasing && previous > current)
+            }
+        }) {
+        Some(true) => LanePattern::Reverse,
+        Some(false) => LanePattern::ReverseRuns,
+        None => LanePattern::Indexed,
+    }
+}
+
+enum LaneEdit {
+    Swap(usize, usize),
+    Reverse(Range<usize>),
+}
+
+/// Applies a permutation in place and mirrors each edit to its parallel lane.
+fn apply_scene_sort<T>(
+    items: &mut [T],
+    old_to_new: &[usize],
+    scratch: &mut Vec<usize>,
+    sort: LaneSort,
+    key: impl Fn(&T) -> (DrawOrder, u32),
+    mut apply_parallel: impl FnMut(LaneEdit),
+) {
+    match sort {
+        LaneSort::Identity => {}
+        LaneSort::Swap(position) => {
+            items.swap(position, position + 1);
+            apply_parallel(LaneEdit::Swap(position, position + 1));
+        }
+        LaneSort::Reverse(len) => {
+            items[..len].reverse();
+            apply_parallel(LaneEdit::Reverse(0..len));
+        }
+        LaneSort::ReverseRuns(range) => {
+            let len = items.len();
+            items.reverse();
+            apply_parallel(LaneEdit::Reverse(0..len));
+            let mut start = 0;
+            while start < len {
+                let run_key = key(&items[start]);
+                let mut end = start + 1;
+                while end < len && key(&items[end]) == run_key {
+                    end += 1;
+                }
+                let run = start..end;
+                items[run.clone()].reverse();
+                apply_parallel(LaneEdit::Reverse(run));
+                start = end;
+            }
+            debug_assert_eq!(range.len(), len);
+        }
+        LaneSort::Indexed(range) => {
+            scratch.clear();
+            scratch.extend_from_slice(&old_to_new[range]);
+            let old_to_new = scratch.as_mut_slice();
+            for index in 0..items.len() {
+                while old_to_new[index] != index {
+                    let destination = old_to_new[index];
+                    items.swap(index, destination);
+                    apply_parallel(LaneEdit::Swap(index, destination));
+                    old_to_new.swap(index, destination);
+                }
+            }
+        }
+    }
 }
 
 /// Any primitive that [`Scene::insert_primitive`] accepts.
@@ -1127,15 +1637,14 @@ impl From<BackdropFilter> for Primitive {
     }
 }
 
-/// The start or end marker of a content-filter or opacity isolation group.
+/// The start or end marker of a filter or grouped-opacity isolation group.
 ///
-/// Primitives between a matched pair are drawn into an offscreen target, filtered as one layer,
-/// and composited back into `bounds`. The group opacity is applied once to the completed result.
-/// An empty filter chain represents opacity-only isolation. Unmatched markers render inline;
-/// nesting depth is not limited by [`MAX_FILTER_GROUP_DEPTH`](crate::MAX_FILTER_GROUP_DEPTH), which
-/// is an inline storage capacity.
-///
-/// Produced by [`crate::Window::with_filter_layer`] or the element-opacity scope.
+/// The primitives between a matched pair are drawn into an offscreen target, filtered as one layer,
+/// and composited back into bounds. Group opacity is applied once to the completed result.
+/// An empty filter chain is opacity-only isolation; nesting may allocate pooled targets beyond the
+/// inline target-stack capacity.
+/// Produced by [`crate::Window::with_filter_layer`], which inserts a start marker, paints its contents, and
+/// inserts the end marker, or by the element-opacity scope.
 #[derive(Debug, Clone)]
 pub struct FilterBoundary {
     /// The draw order. [`Scene::insert_primitive`] assigns it.
@@ -1149,7 +1658,7 @@ pub struct FilterBoundary {
     /// How smooth the corners are, from `0.0` for circular arcs to `1.0`.
     pub corner_smoothing: f32,
     /// The filter chain applied to the isolated group, in scene (device-pixel) space. Identity
-    /// filters are dropped at paint time. An empty chain represents an opacity-only group.
+    /// Identity filters are dropped at paint time; an empty chain represents an opacity-only group.
     /// Inline capacity 4 (same struct size as 1 here — see [`BackdropFilter::filters`]).
     pub filters: SmallVec<[ScaledFilter; 4]>,
     /// Opacity applied once when compositing the completed group into its parent.
@@ -1633,18 +2142,23 @@ mod tests {
     use super::*;
     use crate::{AtlasTextureKind, DevicePixels, Point, ShaderBool, Size, SurfaceSource, TileId};
 
-    fn scaled(value: f32) -> ScaledPixels {
+    fn sp(value: f32) -> ScaledPixels {
         ScaledPixels(value)
     }
 
-    // Keep the helper name used by the synced underline exclusion fixtures.
-    fn sp(value: f32) -> ScaledPixels {
-        scaled(value)
-    }
-
-    /// Default primitives overlap so their draw orders follow insertion order.
+    /// All test primitives cover the same region so the bounds tree assigns strictly
+    /// increasing orders in insertion order — making the expected batch order deterministic.
     fn full_bounds() -> Bounds<ScaledPixels> {
-        Bounds::new(Point::default(), Size::new(scaled(100.0), scaled(100.0)))
+        Bounds {
+            origin: Point {
+                x: sp(0.0),
+                y: sp(0.0),
+            },
+            size: Size {
+                width: sp(100.0),
+                height: sp(100.0),
+            },
+        }
     }
 
     fn mask() -> ContentMask<ScaledPixels> {
@@ -1723,7 +2237,7 @@ mod tests {
     fn shadow() -> Shadow {
         Shadow {
             order: 0,
-            blur_radius: scaled(0.0),
+            blur_radius: sp(0.0),
             bounds: full_bounds(),
             corner_radii: Corners::default(),
             content_mask: mask(),
@@ -1732,6 +2246,26 @@ mod tests {
             element_corner_radii: Corners::default(),
             inset: ShaderBool::Disabled,
             corner_smoothing: 0.0,
+        }
+    }
+
+    fn subpixel_sprite() -> SubpixelSprite {
+        SubpixelSprite {
+            order: 0,
+            padding: 0,
+            bounds: full_bounds(),
+            content_mask: mask(),
+            color: Default::default(),
+            tile: AtlasTile {
+                texture_id: AtlasTextureId {
+                    index: 0,
+                    kind: AtlasTextureKind::Subpixel,
+                },
+                tile_id: TileId(0),
+                padding: 0,
+                bounds: Bounds::<DevicePixels>::default(),
+            },
+            transformation: TransformationMatrix::unit(),
         }
     }
 
@@ -1919,8 +2453,16 @@ mod tests {
     /// A 100x100 quad whose bounds don't overlap `full_bounds()` (used to exercise the
     /// order-reuse path: non-overlapping content reuses low draw-orders).
     fn detached_quad() -> Quad {
-        let bounds = Bounds::new(point(scaled(200.0), scaled(200.0)), full_bounds().size);
-
+        let bounds = Bounds {
+            origin: Point {
+                x: sp(200.0),
+                y: sp(200.0),
+            },
+            size: Size {
+                width: sp(100.0),
+                height: sp(100.0),
+            },
+        };
         Quad {
             bounds,
             content_mask: ContentMask {
@@ -1938,7 +2480,7 @@ mod tests {
             content_mask: mask(),
             corner_radii: Corners::default(),
             corner_smoothing: 0.0,
-            filters: smallvec::smallvec![ScaledFilter::Blur(scaled(8.0))],
+            filters: smallvec::smallvec![ScaledFilter::Blur(sp(8.0))],
             opacity: 1.0,
             is_start,
         }
@@ -1949,7 +2491,7 @@ mod tests {
             bounds: full_bounds(),
             content_mask: mask(),
             corner_radii: Corners::default(),
-            filters: smallvec::smallvec![ScaledFilter::Blur(scaled(20.0))],
+            filters: smallvec::smallvec![ScaledFilter::Blur(sp(20.0))],
             opacity: 1.0,
             ..Default::default()
         }
@@ -1966,96 +2508,544 @@ mod tests {
         }
     }
 
-    #[test]
-    fn backdrop_filter_sorts_before_a_later_overlapping_quad() {
-        let mut scene = Scene::default();
-        scene.insert_primitive(quad());
-        scene.insert_primitive(backdrop());
-        scene.insert_primitive(quad());
+    fn tagged_surface(tag: i32) -> PaintSurface {
+        PaintSurface {
+            source: SurfaceSource::Unsupported(Size {
+                width: DevicePixels(tag),
+                height: DevicePixels(1),
+            }),
+            ..surface()
+        }
+    }
 
+    fn path_with_triangles(triangle_count: usize) -> Path<ScaledPixels> {
+        let mut path = Path::new(point(crate::px(10.0), crate::px(10.0)));
+        let triangle = (
+            point(crate::px(10.0), crate::px(10.0)),
+            point(crate::px(20.0), crate::px(10.0)),
+            point(crate::px(10.0), crate::px(20.0)),
+        );
+        let st = (point(0.0, 0.0), point(1.0, 0.0), point(0.0, 1.0));
+        for _ in 0..triangle_count {
+            path.push_triangle(triangle, st);
+        }
+        let mut path = path.scale(1.0);
+        path.bounds = full_bounds();
+        path.content_mask = mask();
+        path
+    }
+
+    fn batch_kinds(scene: &mut Scene) -> Vec<&'static str> {
+        scene.finish();
+        scene
+            .batches()
+            .map(|batch| match batch {
+                PrimitiveBatch::Quads { .. } => "quad",
+                PrimitiveBatch::BackdropFilters(_) => "backdrop",
+                PrimitiveBatch::FilterBoundary(ix) => {
+                    if scene.filter_boundaries[ix].is_start {
+                        "start"
+                    } else {
+                        "end"
+                    }
+                }
+                _ => "other",
+            })
+            .collect()
+    }
+
+    #[test]
+    fn content_filter_group_brackets_its_children() {
+        let mut scene = Scene::default();
+        // Background painted before the filtered element.
+        scene.insert_primitive(quad());
+        // A content-filtered element: start marker, its child, end marker.
+        scene.insert_primitive(boundary(true));
+        scene.insert_primitive(quad());
+        scene.insert_primitive(boundary(false));
+
+        // The start must precede the group's child and the end must follow it, so the
+        // renderer can redirect rendering for exactly the group's span.
+        assert_eq!(
+            batch_kinds(&mut scene),
+            vec!["quad", "start", "quad", "end"]
+        );
+    }
+
+    #[test]
+    fn replay_inside_opacity_group_converts_cached_subpixel_glyphs_to_monochrome() {
+        let mut previous = Scene::default();
+        previous.insert_primitive(subpixel_sprite());
+        previous.finish();
+
+        let mut replayed = Scene::default();
+        let mut start = boundary(true);
+        start.opacity = 0.5;
+        replayed.insert_primitive(start);
+        replayed.replay(0..previous.paint_operations.len(), &previous);
+        let mut end = boundary(false);
+        end.opacity = 0.5;
+        replayed.insert_primitive(end);
+        replayed.finish();
+
+        assert!(replayed.subpixel_sprites.is_empty());
+        assert_eq!(replayed.monochrome_sprites.len(), 1);
         assert!(matches!(
-            batches(&mut scene).as_slice(),
+            replayed.render_commands(),
             [
-                PrimitiveBatch::Quads { .. },
-                PrimitiveBatch::BackdropFilters(_),
-                PrimitiveBatch::Quads { .. }
+                RenderCommand::BeginFilter { .. },
+                RenderCommand::Batch(PrimitiveBatch::MonochromeSprites { .. }),
+                RenderCommand::EndFilter { .. }
             ]
         ));
     }
 
     #[test]
-    fn isolation_commands_preserve_order_pairing_and_replay() {
-        for active_layer in [false, true] {
-            let mut scene = Scene::default();
-
-            if active_layer {
-                scene.push_layer(full_bounds());
-            }
-
+    fn replay_matches_forced_fresh_scene_across_group_layers_surfaces_and_order_barriers() {
+        fn paint(scene: &mut Scene) {
             scene.insert_primitive(quad());
-            scene.insert_primitive(boundary(true));
-            scene.insert_primitive(detached_quad());
-            scene.insert_primitive(boundary(true));
+            scene.push_layer(full_bounds());
             scene.insert_primitive(quad());
-            scene.insert_primitive(boundary(true));
-            scene.insert_primitive(surface());
-            scene.insert_primitive(boundary(false));
-            scene.insert_primitive(boundary(false));
+            scene.pop_layer();
+            let mut outer = boundary(true);
+            outer.opacity = 0.35;
+            scene.insert_primitive(outer);
+            let mut inner = boundary(true);
+            inner.filters.clear();
+            inner.opacity = 0.6;
+            scene.insert_primitive(inner);
+            scene.insert_primitive(Primitive::Surface(tagged_surface(44)));
+            scene.insert_primitive(backdrop());
+            scene.insert_primitive(quad());
+            let mut inner_end = boundary(false);
+            inner_end.opacity = 0.6;
+            scene.insert_primitive(inner_end);
+            scene.insert_primitive(quad());
+            let mut outer_end = boundary(false);
+            outer_end.opacity = 0.35;
+            scene.insert_primitive(outer_end);
+            scene.raise_order_floor();
             scene.insert_primitive(detached_quad());
-            scene.insert_primitive(boundary(false));
-            scene.insert_primitive(detached_quad());
+        }
 
-            if active_layer {
-                scene.pop_layer();
-            }
+        let mut previous = Scene::default();
+        paint(&mut previous);
+        previous.finish();
+        for (quad, order) in previous.quads.iter_mut().zip([3, 1, 2, 4]) {
+            quad.order = order;
+        }
+        for (surface, order) in previous.surfaces.iter_mut().zip([2]) {
+            surface.order = order;
+        }
+        previous.finish();
 
-            scene.finish();
-            assert_eq!(scene.render_plan().requirements().isolated_target_count, 3);
+        let mut replayed = Scene::default();
+        replayed.replay(0..previous.paint_operations.len(), &previous);
+        replayed.finish();
+        let mut forced_fresh = Scene::default();
+        paint(&mut forced_fresh);
+        forced_fresh.finish();
 
-            let commands: Vec<_> = scene
+        assert_eq!(replayed.render_commands(), forced_fresh.render_commands());
+        assert_eq!(
+            replayed.surface_opacities(),
+            forced_fresh.surface_opacities()
+        );
+        let boundaries = |scene: &Scene| {
+            scene
+                .filter_boundaries
+                .iter()
+                .map(|b| (b.is_start, b.opacity, b.filters.len()))
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(boundaries(&replayed), boundaries(&forced_fresh));
+        let tags = |scene: &Scene| {
+            scene
+                .surfaces
+                .iter()
+                .map(|surface| match &surface.source {
+                    SurfaceSource::Unsupported(size) => size.width.0,
+                    _ => unreachable!(),
+                })
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(tags(&replayed), [44]);
+        assert_eq!(tags(&forced_fresh), [44]);
+        let close_order = replayed.filter_boundaries.last().unwrap().order;
+        assert!(replayed.quads.last().unwrap().order > close_order);
+        assert!(replayed.requires_offscreen_rendering());
+        assert!(forced_fresh.requires_offscreen_rendering());
+    }
+
+    #[test]
+    fn replay_resolves_typed_indices_after_every_primitive_lane_is_sorted() {
+        let mut scene = Scene::default();
+        for smoothing in [0.1, 0.2, 0.3] {
+            let mut quad = quad();
+            quad.corner_smoothing = smoothing;
+            scene.insert_primitive(quad);
+        }
+        scene.insert_primitive(path_with_triangles(1));
+        scene.insert_primitive(path_with_triangles(2));
+        for tile_id in [8, 2, 5] {
+            let mut sprite = polychrome_sprite(0);
+            sprite.tile.tile_id = TileId(tile_id);
+            sprite.opacity = tile_id as f32 / 10.0;
+            scene.insert_primitive(sprite);
+        }
+        for (tag, _opacity) in [(10, 0.1), (20, 0.2), (30, 0.3)] {
+            let surface = tagged_surface(tag);
+            scene.insert_primitive(Primitive::Surface(surface));
+        }
+        for opacity in [0.1, 0.2] {
+            let mut filter = backdrop();
+            filter.opacity = opacity;
+            scene.insert_primitive(filter);
+        }
+
+        // Force non-identity permutations, including stable ties and sprite tile-id sorting.
+        for (quad, order) in scene.quads.iter_mut().zip([2, 1, 2]) {
+            quad.order = order;
+        }
+        for (path, order) in scene.paths.iter_mut().zip([2, 1]) {
+            path.order = order;
+        }
+        for sprite in &mut scene.polychrome_sprites {
+            sprite.order = 7;
+        }
+        for (surface, order) in scene.surfaces.iter_mut().zip([3, 1, 2]) {
+            surface.order = order;
+        }
+        for (filter, order) in scene.backdrop_filters.iter_mut().zip([2, 1]) {
+            filter.order = order;
+        }
+        scene.finish();
+
+        assert_eq!(
+            scene
+                .quads
+                .iter()
+                .map(|quad| quad.corner_smoothing)
+                .collect::<Vec<_>>(),
+            [0.2, 0.1, 0.3]
+        );
+        assert_eq!(
+            scene
+                .paths
+                .iter()
+                .map(|path| (path.id, path.vertices.len()))
+                .collect::<Vec<_>>(),
+            [(PathId(1), 6), (PathId(0), 3)]
+        );
+        assert_eq!(
+            scene
+                .polychrome_sprites
+                .iter()
+                .map(|sprite| (sprite.tile.tile_id, sprite.opacity))
+                .collect::<Vec<_>>(),
+            [(TileId(2), 0.2), (TileId(5), 0.5), (TileId(8), 0.8)]
+        );
+        assert_eq!(scene.surface_opacities(), &[1.0, 1.0, 1.0]);
+        assert_eq!(
+            scene
+                .surfaces
+                .iter()
+                .map(|surface| match &surface.source {
+                    SurfaceSource::Unsupported(size) => size.width.0,
+                    _ => unreachable!(),
+                })
+                .collect::<Vec<_>>(),
+            [20, 30, 10]
+        );
+        assert_eq!(
+            scene
+                .backdrop_filters
+                .iter()
+                .map(|filter| filter.opacity)
+                .collect::<Vec<_>>(),
+            [0.2, 0.1]
+        );
+
+        let mut replay = Scene::default();
+        replay.replay(0..scene.paint_operations.len(), &scene);
+        replay.finish();
+        assert_eq!(
+            replay
+                .quads
+                .iter()
+                .map(|quad| quad.corner_smoothing)
+                .collect::<Vec<_>>(),
+            [0.1, 0.2, 0.3]
+        );
+        assert_eq!(
+            replay
+                .paths
+                .iter()
+                .map(|path| (path.id, path.vertices.len()))
+                .collect::<Vec<_>>(),
+            [(PathId(0), 3), (PathId(1), 6)]
+        );
+        assert_eq!(
+            replay
+                .polychrome_sprites
+                .iter()
+                .map(|sprite| (sprite.tile.tile_id, sprite.opacity))
+                .collect::<Vec<_>>(),
+            [(TileId(8), 0.8), (TileId(2), 0.2), (TileId(5), 0.5)]
+        );
+        assert_eq!(replay.surface_opacities(), &[1.0, 1.0, 1.0]);
+        assert_eq!(
+            replay
+                .surfaces
+                .iter()
+                .map(|surface| match &surface.source {
+                    SurfaceSource::Unsupported(size) => size.width.0,
+                    _ => unreachable!(),
+                })
+                .collect::<Vec<_>>(),
+            [10, 20, 30]
+        );
+        assert_eq!(
+            replay
+                .backdrop_filters
+                .iter()
+                .map(|filter| filter.opacity)
+                .collect::<Vec<_>>(),
+            [0.1, 0.2]
+        );
+    }
+
+    #[test]
+    fn replay_keeps_filter_pairs_attached_after_boundary_sorting() {
+        let mut scene = Scene::default();
+        for opacity in [0.25, 0.75] {
+            let mut start = boundary(true);
+            start.opacity = opacity;
+            scene.insert_primitive(start);
+            scene.insert_primitive(quad());
+            let mut end = boundary(false);
+            end.opacity = opacity;
+            scene.insert_primitive(end);
+        }
+        scene.filter_boundaries[0].order = 2;
+        scene.filter_boundaries[1].order = 2;
+        scene.filter_boundaries[2].order = 1;
+        scene.filter_boundaries[3].order = 1;
+        scene.finish();
+
+        assert_eq!(
+            scene
+                .filter_boundaries
+                .iter()
+                .map(|boundary| boundary.opacity)
+                .collect::<Vec<_>>(),
+            [0.75, 0.75, 0.25, 0.25]
+        );
+
+        let mut replay = Scene::default();
+        replay.replay(0..scene.paint_operations.len(), &scene);
+        replay.finish();
+        assert_eq!(
+            replay
+                .filter_boundaries
+                .iter()
+                .map(|boundary| boundary.opacity)
+                .collect::<Vec<_>>(),
+            [0.25, 0.25, 0.75, 0.75]
+        );
+        assert_eq!(
+            replay
                 .render_commands()
                 .iter()
-                .map(|command| match command {
-                    RenderCommand::BeginFilter {
-                        boundary_index,
-                        target: FilterRenderTarget::Isolated(target),
-                    } => ("start", Some((*boundary_index, target.as_usize()))),
-                    RenderCommand::EndFilter {
-                        boundary_index,
-                        target: FilterRenderTarget::Isolated(target),
-                        ..
-                    } => ("end", Some((*boundary_index, target.as_usize()))),
-                    RenderCommand::Batch(PrimitiveBatch::Quads { .. }) => ("quad", None),
-                    RenderCommand::Batch(PrimitiveBatch::Surfaces(_)) => ("surface", None),
-                    other => panic!("unexpected command: {other:?}"),
+                .filter_map(|command| match command {
+                    RenderCommand::BeginFilter { boundary_index, .. } =>
+                        Some(replay.filter_boundaries[*boundary_index].opacity,),
+                    _ => None,
                 })
-                .collect();
-            assert_eq!(
-                commands,
-                [
-                    ("quad", None),
-                    ("start", Some((0, 0))),
-                    ("quad", None),
-                    ("start", Some((1, 1))),
-                    ("quad", None),
-                    ("start", Some((2, 2))),
-                    ("surface", None),
-                    ("end", Some((2, 2))),
-                    ("end", Some((1, 1))),
-                    ("quad", None),
-                    ("end", Some((0, 0))),
-                    ("quad", None),
-                ]
-            );
+                .collect::<Vec<_>>(),
+            [0.25, 0.75]
+        );
+    }
 
-            let mut replay = Scene::default();
-            replay.replay(0..scene.len(), &scene);
-            replay.finish();
-            assert_eq!(replay.render_commands(), scene.render_commands());
-            assert_eq!(replay.surface_opacities(), &[1.0]);
-            assert!(replay.layer_stack.is_empty());
-            assert!(!replay.is_in_filter_group());
+    #[test]
+    fn finished_scenes_can_be_extended_then_replayed_repeatedly() {
+        let mut previous = Scene::default();
+        for smoothing in [0.1, 0.2] {
+            let mut quad = quad();
+            quad.corner_smoothing = smoothing;
+            previous.insert_primitive(quad);
         }
+        previous.finish();
+
+        let mut appended = Scene::default();
+        appended.replay(0..previous.len(), &previous);
+        appended.finish();
+        let mut quad = quad();
+        quad.corner_smoothing = 0.3;
+        appended.insert_primitive(quad);
+        appended.finish();
+
+        let mut replay = Scene::default();
+        replay.replay(0..appended.len(), &appended);
+        replay.replay(0..appended.len(), &appended);
+        replay.finish();
+        assert_eq!(
+            replay
+                .quads
+                .iter()
+                .map(|quad| quad.corner_smoothing)
+                .collect::<Vec<_>>(),
+            [0.1, 0.2, 0.3, 0.1, 0.2, 0.3]
+        );
+    }
+
+    // Note: this validates only the *scene ordering* of nested filter boundaries (start/child/
+    // end interleaving), not that a renderer actually isolates both levels — that depends on the
+    // backend's group-texture pool (see MAX_FILTER_DEPTH) and is exercised by the `blur` example.
+    // Note: this validates only the *scene ordering* of nested filter boundaries (start/child/
+    // end interleaving), not that a renderer actually isolates both levels — that depends on the
+    // backend's group-texture pool (see MAX_FILTER_DEPTH) and is exercised by the `blur` example.
+    #[test]
+    fn nested_content_filters_emit_well_nested_ordering() {
+        let mut scene = Scene::default();
+        scene.insert_primitive(boundary(true)); // outer start
+        scene.insert_primitive(quad()); // outer child
+        scene.insert_primitive(boundary(true)); // inner start
+        scene.insert_primitive(quad()); // inner child
+        scene.insert_primitive(boundary(false)); // inner end
+        scene.insert_primitive(boundary(false)); // outer end
+
+        assert_eq!(
+            batch_kinds(&mut scene),
+            vec!["start", "quad", "start", "quad", "end", "end"]
+        );
+    }
+
+    #[test]
+    fn content_after_a_filter_group_sorts_above_it() {
+        let mut scene = Scene::default();
+        // A content-filtered element: start marker, its child, end marker.
+        scene.insert_primitive(boundary(true));
+        scene.insert_primitive(quad());
+        scene.insert_primitive(boundary(false));
+        // A sibling painted after the group that does NOT overlap it. Without the close-time
+        // order-floor it would reuse the lowest order, tie with the start marker, and be swept
+        // into the group (start, quad, quad, end); it must instead sort after the end marker.
+        scene.insert_primitive(detached_quad());
+
+        assert_eq!(
+            batch_kinds(&mut scene),
+            vec!["start", "quad", "end", "quad"]
+        );
+    }
+
+    #[test]
+    fn backdrop_filter_sorts_before_a_later_overlapping_quad() {
+        let mut scene = Scene::default();
+        // Content behind the frosted panel.
+        scene.insert_primitive(quad());
+        // The panel: its backdrop snapshot, then its (translucent) background quad on top.
+        scene.insert_primitive(backdrop());
+        scene.insert_primitive(quad());
+
+        assert_eq!(batch_kinds(&mut scene), vec!["quad", "backdrop", "quad"]);
+    }
+
+    #[test]
+    fn render_commands_allocate_targets_for_nested_filter_groups() {
+        let mut scene = Scene::default();
+        // Three nested groups receive distinct pooled targets. The inline storage depth
+        // is only a stack optimization; it is not a limit on target allocation.
+        scene.insert_primitive(boundary(true));
+        scene.insert_primitive(quad());
+        scene.insert_primitive(boundary(true));
+        scene.insert_primitive(quad());
+        scene.insert_primitive(boundary(true));
+        scene.insert_primitive(quad());
+        scene.insert_primitive(boundary(false));
+        scene.insert_primitive(boundary(false));
+        scene.insert_primitive(boundary(false));
+        scene.finish();
+
+        let commands: Vec<_> = scene
+            .render_commands()
+            .iter()
+            .map(|command| match command {
+                RenderCommand::Batch(PrimitiveBatch::Quads { .. }) => "quad".to_string(),
+                RenderCommand::BeginFilter {
+                    boundary_index,
+                    target,
+                } => {
+                    let boundary = &scene.filter_boundaries[*boundary_index];
+                    assert!(boundary.is_start);
+                    format!("begin:{target:?}")
+                }
+                // An end command must carry its matched *start* boundary. This lets a
+                // renderer use the opening group's bounds, filters, and opacity while
+                // composing it, rather than trusting an independently-sorted end marker.
+                RenderCommand::EndFilter {
+                    boundary_index,
+                    target,
+                    ..
+                } => {
+                    let boundary = &scene.filter_boundaries[*boundary_index];
+                    assert!(boundary.is_start);
+                    format!("end:{target:?}")
+                }
+                RenderCommand::Batch(other) => panic!("unexpected batch: {other:?}"),
+            })
+            .collect();
+
+        assert_eq!(
+            commands,
+            vec![
+                "begin:Isolated(FilterTargetIndex(0))",
+                "quad",
+                "begin:Isolated(FilterTargetIndex(1))",
+                "quad",
+                "begin:Isolated(FilterTargetIndex(2))",
+                "quad",
+                "end:Isolated(FilterTargetIndex(2))",
+                "end:Isolated(FilterTargetIndex(1))",
+                "end:Isolated(FilterTargetIndex(0))",
+            ]
+        );
+    }
+
+    #[test]
+    fn render_commands_keep_later_content_outside_a_completed_filter() {
+        let mut scene = Scene::default();
+        scene.insert_primitive(boundary(true));
+        scene.insert_primitive(quad());
+        scene.insert_primitive(boundary(false));
+        // This non-overlapping sibling would reuse a low order without the close-time
+        // order floor. The command stream is the renderer contract: it must come after
+        // the group has been composited, not be painted into its offscreen target.
+        scene.insert_primitive(detached_quad());
+        scene.finish();
+
+        let commands: Vec<_> = scene
+            .render_commands()
+            .iter()
+            .map(|command| match command {
+                RenderCommand::BeginFilter { target, .. } => {
+                    format!("begin:{target:?}")
+                }
+                RenderCommand::EndFilter { target, .. } => format!("end:{target:?}"),
+                RenderCommand::Batch(PrimitiveBatch::Quads { .. }) => "quad".to_string(),
+                RenderCommand::Batch(other) => panic!("unexpected batch: {other:?}"),
+            })
+            .collect();
+
+        assert_eq!(
+            commands,
+            vec![
+                "begin:Isolated(FilterTargetIndex(0))",
+                "quad",
+                "end:Isolated(FilterTargetIndex(0))",
+                "quad"
+            ]
+        );
     }
 
     #[test]
@@ -2128,6 +3118,22 @@ mod tests {
     }
 
     #[test]
+    fn plan_requirements_are_collected_with_filter_pairing() {
+        let mut scene = Scene::default();
+        scene.insert_primitive(backdrop());
+        scene.insert_primitive(boundary(true));
+        scene.insert_primitive(quad());
+        scene.insert_primitive(boundary(false));
+        scene.finish();
+
+        let requirements = scene.render_plan().requirements();
+        assert_eq!(requirements.backdrop_filter_count, 1);
+        assert_eq!(requirements.isolated_filter_count, 1);
+        assert_eq!(requirements.isolated_target_count, 1);
+        assert_eq!(requirements.instance_batch_count, 1);
+        assert!(requirements.uses_offscreen_target);
+    }
+    #[test]
     fn filter_requirements_distinguish_opacity_from_blur() {
         for (name, group, content_blur, backdrop_blur) in [
             ("ordinary quad", false, false, false),
@@ -2138,31 +3144,24 @@ mod tests {
         ] {
             let mut scene = Scene::default();
             let mut start = boundary(true);
-
             if !content_blur {
                 start.filters.clear();
                 start.opacity = 0.5;
             }
-
             if group {
                 scene.insert_primitive(start.clone());
             }
-
             if backdrop_blur {
                 scene.insert_primitive(backdrop());
             }
-
             scene.insert_primitive(quad());
-
             if group {
                 scene.insert_primitive(FilterBoundary {
                     is_start: false,
                     ..start
                 });
             }
-
             scene.finish();
-
             let requirements = scene.render_plan().requirements();
             assert_eq!(
                 (

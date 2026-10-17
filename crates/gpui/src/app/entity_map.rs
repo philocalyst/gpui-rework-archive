@@ -1,6 +1,6 @@
 use crate::{App, AppContext, GpuiBorrow, VisualContext, Window, seal::Sealed};
 use anyhow::{Context as _, Result};
-use collections::FxHashSet;
+use collections::{FxHashMap, FxHashSet};
 use derive_more::{Deref, DerefMut};
 use parking_lot::{RwLock, RwLockUpgradableReadGuard};
 use slotmap::{KeyData, SecondaryMap, SlotMap};
@@ -30,6 +30,21 @@ slotmap::new_key_type! {
     /// Two entities never share an id, even after one has been released and its slot is reused. Get the
     /// id of a handle with [`Entity::entity_id`] or [`AnyEntity::entity_id`].
     pub struct EntityId;
+}
+
+#[derive(Clone, Default)]
+pub(crate) struct ViewDependencies {
+    pub(crate) entities: FxHashSet<EntityId>,
+    pub(crate) globals: FxHashMap<TypeId, u64>,
+}
+
+impl ViewDependencies {
+    pub(crate) fn extend(&mut self, other: &Self) {
+        self.entities.extend(other.entities.iter().copied());
+        for (global_type, revision) in &other.globals {
+            self.globals.entry(*global_type).or_insert(*revision);
+        }
+    }
 }
 
 impl From<u64> for EntityId {
