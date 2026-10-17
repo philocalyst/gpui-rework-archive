@@ -13,7 +13,10 @@ monorepo (`zed-industries/zed`). Two groups:
 `zed-industries/zed` git deps but now vendored in-tree by the fork:
 `collections`→`gpui_collections`, `sum_tree`→`gpui_sum_tree`, `refineable`→`gpui_refineable`,
 `refineable/derive_refineable`→`gpui_derive_refineable`, `scheduler`→`gpui_scheduler`,
-`media`→`gpui_media`, `util`→`gpui_zed_util`, `gpui_util`→`gpui_ce_util`, `path`→`gpui_path`.
+`media`→`gpui_media`, `util`→`gpui_zed_util`, `gpui_util`→`gpui_ce_util`, `path`→`gpui_path`,
+`bench_metrics`→`gpui_bench_metrics`. `bench_metrics` is a standalone Apache-2.0 crate used by
+upstream benchmark support; preserve its verified Apache license text and notices, set the fork
+package alias to `gpui_ce_bench_metrics`, and keep `[lib] name = "bench_metrics"`.
 (Packaging is orthogonal: every fork package is `gpui_ce_*` — main crate `gpui-ce` with a hyphen —
 with `[lib] name` preserving the upstream crate name so `use` sites are unchanged.) The sync remaps upstream's
 content into these fork dirs, so a conflict here is upstream's version of the crate vs. the fork's

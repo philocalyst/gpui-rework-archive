@@ -61,10 +61,14 @@ Synced 1:1 (same dir): `gpui`, `gpui_apple`, `gpui_ios`, `gpui_linux`, `gpui_mac
 `gpui_wgpu`, `gpui_windows`.
 
 Synced with **path remapping** — vendored + renamed by the fork (PR #91 removed the git sources):
-`gpui_collections`←`collections`, `gpui_sum_tree`←`sum_tree`, `gpui_refineable`←`refineable`,
+`gpui_bench_metrics`←`bench_metrics`, `gpui_collections`←`collections`,
+`gpui_sum_tree`←`sum_tree`, `gpui_refineable`←`refineable`,
 `gpui_derive_refineable`←`refineable/derive_refineable`, `gpui_scheduler`←`scheduler`,
 `gpui_media`←`media`, `gpui_zed_util`←`util`, `gpui_ce_util`←`gpui_util`, `gpui_path`←`path`.
-Packaging is orthogonal to directories: every fork package is `gpui_ce_*` (main crate `gpui-ce`
+The small standalone Apache-2.0 `bench_metrics` crate is included because upstream `bench-support`
+and platform benchmark targets depend on it. It maps to `gpui_bench_metrics` while retaining the
+upstream library name `bench_metrics`. Packaging is orthogonal to directories: every fork package is
+`gpui_ce_*` (main crate `gpui-ce`
 with a hyphen), each with `[lib] name` preserving the upstream crate name and a
 `[workspace.dependencies]` alias mapping the upstream name back (e.g.
 `collections = { package = "gpui_ce_collections" }`, `gpui = { package = "gpui-ce" }`).

@@ -146,6 +146,34 @@ class AgentSessionTests(unittest.TestCase):
         finally:
             sync.REPO_ROOT = previous_root
 
+    def test_filtered_tree_remaps_standalone_bench_metrics_crate(self) -> None:
+        temp = tempfile.TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        root = Path(temp.name)
+        git(root, "init", "-q", "-b", "main")
+        git(root, "config", "user.name", "Test")
+        git(root, "config", "user.email", "test@example.invalid")
+        for crate in ("gpui", "bench_metrics"):
+            crate_dir = root / "crates" / crate
+            crate_dir.mkdir(parents=True)
+            (crate_dir / "Cargo.toml").write_text(f'[package]\nname = "{crate}"\n')
+        git(root, "add", "crates")
+        git(root, "commit", "-qm", "upstream benchmark support inventory")
+        target = git(root, "rev-parse", "HEAD")
+
+        previous_root = sync.REPO_ROOT
+        sync.REPO_ROOT = root
+        try:
+            self.assertIn("crates/bench_metrics", sync.tracked_pathspec())
+            self.assertEqual(sync.TRACKED_CRATES["gpui_bench_metrics"], "bench_metrics")
+            tree = sync.filtered_tree(target)
+            self.assertIsNotNone(tree)
+            paths = git(root, "ls-tree", "-r", "--name-only", tree)
+            self.assertIn("crates/gpui_bench_metrics/Cargo.toml", paths.splitlines())
+            self.assertNotIn("crates/bench_metrics/Cargo.toml", paths.splitlines())
+        finally:
+            sync.REPO_ROOT = previous_root
+
     def test_vendor_history_fails_closed_when_listing_omits_tree_change(self) -> None:
         temp = tempfile.TemporaryDirectory()
         self.addCleanup(temp.cleanup)
@@ -277,6 +305,14 @@ class AgentSessionTests(unittest.TestCase):
             if fork_path == upstream_path:
                 self.assertIn(f"crates/{upstream_path}", identity_inventory)
         self.assertIn("canonical iOS platform crate", prompt)
+        build_prompt = (SYNC_SCRIPT.parent / "fix-build.prompt.md").read_text()
+        self.assertIn("gpui_bench_metrics", build_prompt)
+        self.assertIn("preserve its Apache license text and notices", build_prompt)
+        self.assertIn("bench_metrics", prompt)
+        self.assertIn("gpui_bench_metrics", prompt)
+        readme = (SYNC_SCRIPT.parent / "README.md").read_text()
+        self.assertIn("bench_metrics", readme)
+        self.assertIn("gpui_bench_metrics", readme)
         self.assertIn("Do not infer a crate's licensing status from its Cargo manifest field alone", prompt)
         self.assertIn("preserve existing Apache-compatible notice/license", prompt)
         self.assertIn("restore the", prompt)

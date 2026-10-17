@@ -88,6 +88,7 @@ TRACKED_CRATES: dict[str, str] = {
     "gpui_apple": "gpui_apple",
     "gpui_ios": "gpui_ios",
     # vendored + renamed from upstream (fork dir -> upstream path)
+    "gpui_bench_metrics": "bench_metrics",
     "gpui_collections": "collections",
     "gpui_sum_tree": "sum_tree",
     "gpui_refineable": "refineable",
