@@ -59,6 +59,10 @@ pub fn test_missing_glyph_notifications() -> Result<(), JsValue> {
             .any(|glyph| glyph.is_emoji)
     );
     let missing = reports.0.lock().expect("report lock").clone();
+    let missing_graphemes = missing.iter().map(|report| report.grapheme()).collect::<Vec<_>>();
+    web_sys::console::log_1(&JsValue::from_str(&format!(
+        "actual missing graphemes before assertion: {missing_graphemes:?}"
+    )));
     assert_eq!(
         missing
             .iter()
