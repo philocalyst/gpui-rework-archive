@@ -1,11 +1,14 @@
 use crate::{
     App, Bounds, InlineLayout, LineLayout, PaintFragment, Pixels, Point, Result, ShapedTextLayout,
-    SharedString, TextAlign, TextSystem, VisualLine, Window, fill, point, size,
+    SharedString, TextAlign, TextSystem, UnderlineStyle, VisualLine, Window, fill, point, size,
 };
 use derive_more::{Deref, DerefMut};
-use std::sync::{
-    Arc,
-    atomic::{AtomicUsize, Ordering},
+use std::{
+    ops::Range,
+    sync::{
+        Arc,
+        atomic::{AtomicUsize, Ordering},
+    },
 };
 
 static GLYPH_PAINT_ERRORS: AtomicUsize = AtomicUsize::new(0);
@@ -83,6 +86,38 @@ impl ShapedLine {
         window: &mut Window,
         cx: &mut App,
     ) -> Result<()> {
+        self.paint_with_underline_handler(
+            origin,
+            line_height,
+            align,
+            align_width,
+            window,
+            cx,
+            |_, origin, width, style, window| window.paint_underline(origin, width, style),
+        )
+    }
+
+    /// Paints the line and calls the handler for every visual underline fragment.
+    ///
+    /// The callback receives the original UTF-8 byte range, visual position and width of the
+    /// underline, its resolved style, and the window. The byte range stays in logical source
+    /// order even when bidirectional layout paints fragments in visual order.
+    pub fn paint_with_underline_handler(
+        &self,
+        origin: Point<Pixels>,
+        line_height: Pixels,
+        align: TextAlign,
+        align_width: Option<Pixels>,
+        window: &mut Window,
+        cx: &mut App,
+        mut paint_underline: impl FnMut(
+            Range<usize>,
+            Point<Pixels>,
+            Pixels,
+            &UnderlineStyle,
+            &mut Window,
+        ),
+    ) -> Result<()> {
         paint_visual_text(
             origin,
             &self.layout,
@@ -93,6 +128,7 @@ impl ShapedLine {
             TextPaintPass::Foreground,
             window,
             cx,
+            &mut paint_underline,
         )
     }
 
@@ -119,6 +155,7 @@ impl ShapedLine {
             TextPaintPass::Background,
             window,
             cx,
+            &mut paint_underline_default,
         )
     }
 }
@@ -204,6 +241,7 @@ impl ShapedText {
             TextPaintPass::Foreground,
             window,
             cx,
+            &mut paint_underline_default,
         )
     }
 
@@ -233,6 +271,7 @@ impl ShapedText {
             TextPaintPass::Background,
             window,
             cx,
+            &mut paint_underline_default,
         )
     }
 }
@@ -300,6 +339,7 @@ fn paint_inline_layout(
                 pass,
                 &text_system,
                 window,
+                &mut paint_underline_default,
             );
         }
 
@@ -337,6 +377,13 @@ fn paint_visual_line(
     pass: TextPaintPass,
     text_system: &TextSystem,
     window: &mut Window,
+    paint_underline: &mut dyn FnMut(
+        Range<usize>,
+        Point<Pixels>,
+        Pixels,
+        &UnderlineStyle,
+        &mut Window,
+    ),
 ) {
     let context = FragmentPaintContext {
         line_origin,
@@ -347,7 +394,7 @@ fn paint_visual_line(
         text_system,
     };
     for fragment in &layout.paint_fragments[visual_line.paint_fragment_range.clone()] {
-        paint_text_fragment(fragment, &context, window);
+        paint_text_fragment(fragment, &context, window, paint_underline);
     }
 }
 
@@ -355,6 +402,13 @@ fn paint_text_fragment(
     fragment: &PaintFragment,
     context: &FragmentPaintContext<'_>,
     window: &mut Window,
+    paint_underline: &mut dyn FnMut(
+        Range<usize>,
+        Point<Pixels>,
+        Pixels,
+        &UnderlineStyle,
+        &mut Window,
+    ),
 ) {
     paint_fragment_decorations_at(
         fragment,
@@ -364,6 +418,7 @@ fn paint_text_fragment(
         context.layout,
         window,
         context.pass == TextPaintPass::Foreground,
+        paint_underline,
     );
     if context.pass == TextPaintPass::Background {
         return;
@@ -420,6 +475,16 @@ fn paint_text_fragment(
     }
 }
 
+fn paint_underline_default(
+    _source_range: Range<usize>,
+    origin: Point<Pixels>,
+    width: Pixels,
+    style: &UnderlineStyle,
+    window: &mut Window,
+) {
+    window.paint_underline(origin, width, style);
+}
+
 fn paint_visual_text(
     origin: Point<Pixels>,
     layout: &LineLayout,
@@ -461,6 +526,7 @@ fn paint_visual_text(
                 pass,
                 &text_system,
                 window,
+                paint_underline,
             );
         }
 
@@ -513,18 +579,27 @@ fn paint_fragment_decorations_at(
     layout: &LineLayout,
     window: &mut Window,
     foreground: bool,
+    paint_underline: &mut dyn FnMut(
+        Range<usize>,
+        Point<Pixels>,
+        Pixels,
+        &UnderlineStyle,
+        &mut Window,
+    ),
 ) {
     let range = line_origin.x + fragment.x_range.start..line_origin.x + fragment.x_range.end;
     if foreground {
         if let Some(mut underline) = fragment.style.underline {
             underline.color = Some(underline.color.unwrap_or(fragment.style.color));
-            window.paint_underline(
+            paint_underline(
+                fragment.source_range.clone(),
                 point(
                     range.start,
                     baseline_y + fragment.underline_offset.unwrap_or(layout.descent * 0.618),
                 ),
                 range.end - range.start,
                 &underline,
+                window,
             );
         }
         if let Some(mut strike) = fragment.style.strikethrough {

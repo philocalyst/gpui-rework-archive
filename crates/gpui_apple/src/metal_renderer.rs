@@ -1808,7 +1808,13 @@ impl MetalRenderer {
 
         for (index, surface) in surfaces.iter().enumerate() {
             let image_buffer = match &surface.source {
-                SurfaceSource::Surface(image_buffer) => image_buffer,
+                SurfaceSource::Surface(_) => {
+                    let Some(image_buffer) = surface.image_buffer.as_ref() else {
+                        log::error!("Metal cannot draw a surface without a native image buffer");
+                        continue;
+                    };
+                    image_buffer
+                }
                 SurfaceSource::Unsupported(size) => {
                     log::error!("Metal cannot draw unsupported surface source with size {size:?}");
                     continue;
@@ -2439,6 +2445,7 @@ mod tests {
             order: 0,
             padding: 0,
             bounds: underline_bounds,
+            clip_bounds: underline_bounds,
             content_mask: ContentMask {
                 bounds: underline_bounds,
                 ..Default::default()
@@ -2468,6 +2475,7 @@ mod tests {
             order: 0,
             padding: 0,
             bounds: underline_bounds,
+            clip_bounds: underline_bounds,
             content_mask: ContentMask {
                 bounds: underline_bounds,
                 ..Default::default()

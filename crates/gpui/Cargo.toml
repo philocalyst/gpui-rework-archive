@@ -44,7 +44,7 @@ inspector = ["gpui_macros/inspector"]
 # Tracks every entity handle so tests can assert nothing leaked. Also enabled
 # by setting `GPUI_LEAK_DETECTION` when building; see `build.rs`.
 leak-detection = []
-font-kit = []
+font-kit = ["dep:font-kit"]
 wayland = []
 x11 = []
 screen-capture = ["dep:windows-capture"]
@@ -132,6 +132,7 @@ taffy = { workspace = true, features = [
     "content_size",
 ] }
 thiserror.workspace = true
+tracing.workspace = true
 gpui_util.workspace = true
 unicode-segmentation.workspace = true
 unicode-bidi.workspace = true

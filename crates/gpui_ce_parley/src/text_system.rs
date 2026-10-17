@@ -2159,8 +2159,10 @@ impl ParleyTextSystem {
 
                 let start = px(glyph_run.offset()) - line_x;
                 let source_run = prepared.run_sources[glyph_run.style().brush.source_run];
+                let source_range = prepared.map.source_range(run.text_range());
                 paint_fragments.push(PaintFragment {
                     source_run,
+                    source_range,
                     font_id,
                     font_size: px(run.font_size()),
                     glyphs,

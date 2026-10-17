@@ -466,6 +466,8 @@ pub struct PaintStyle {
 pub struct PaintFragment {
     /// Index of the input text run that supplies paint properties.
     pub source_run: usize,
+    /// Original UTF-8 byte range represented by this visual fragment.
+    pub source_range: Range<usize>,
     /// Canonical font used by the glyphs.
     pub font_id: FontId,
     /// Resolved size of this shaped run.
@@ -1144,12 +1146,6 @@ impl LineLayoutCache {
             shaped_texts_index: frame.shaped_texts.used.len(),
             inline_layouts_index: frame.inline_layouts.used.len(),
         }
-    }
-
-    /// Invalidates every cached layout after backend shaping state changes.
-    pub fn clear(&self) {
-        *self.previous_frame.lock() = FrameCache::default();
-        *self.current_frame.write() = FrameCache::default();
     }
 
     pub fn reuse_layouts(&self, range: Range<LineLayoutIndex>) {

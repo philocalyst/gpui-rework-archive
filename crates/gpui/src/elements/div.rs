@@ -36,14 +36,14 @@ use std::{cell::Cell, rc::Weak};
 use crate::{
     Action, AnyDrag, AnyElement, AnyTooltip, AnyView, App, AppContext, Bounds, ClickEvent,
     CursorStyle, DispatchPhase, Display, Element, ElementId, Entity, EntityId, ExternalDragPayload,
-    ExternalDragPayloadSource, FileDropEvent, FocusHandle, Global, GlobalElementId, Hitbox,
-    HitboxBehavior, HitboxId, InspectorElementId, IntoElement, IsZero, KeyContext, KeyDownEvent,
-    KeyUpEvent, KeyboardButton, KeyboardClickEvent, LayoutId, LongPressEvent,
-    ModifiersChangedEvent, MouseButton, MouseClickEvent, MouseDownEvent, MouseExitEvent,
-    MouseMoveEvent, MousePressureEvent, MouseUpEvent, OngoingScroll, Overflow, ParentElement,
-    PinchEvent, Pixels, Point, Render, ScrollWheelEvent, SharedString, Size, Style,
-    StyleRefinement, StyleTransitionContext, StyleTransitionState, StyleTransitions, Styled, Task,
-    TooltipId, TouchPhase, Visibility, Window, WindowControlArea, point, px, size,
+    FileDropEvent, FocusHandle, Global, GlobalElementId, Hitbox, HitboxBehavior, HitboxId,
+    InspectorElementId, IntoElement, IsZero, KeyContext, KeyDownEvent, KeyUpEvent, KeyboardButton,
+    KeyboardClickEvent, LayoutId, LongPressEvent, ModifiersChangedEvent, MouseButton,
+    MouseClickEvent, MouseDownEvent, MouseExitEvent, MouseMoveEvent, MousePressureEvent,
+    MouseUpEvent, OngoingScroll, Overflow, ParentElement, PinchEvent, Pixels, Point, Render,
+    ScrollWheelEvent, SharedString, Size, Style, StyleRefinement, StyleTransitionContext,
+    StyleTransitionState, StyleTransitions, Styled, Task, TooltipId, TouchPhase, Visibility,
+    Window, WindowControlArea, point, px, size,
 };
 use collections::HashMap;
 use gpui_util::ResultExt;
@@ -697,22 +697,10 @@ impl Interactivity {
         }));
     }
 
-    /// Sets a style function that applies while a dragged value is over this element.
+    /// Runs the listener when this element is clicked.
     ///
-    /// Bind the given callback to [`FileDropEvent::Exited`] when a platform file drag
-    /// leaves this element's window while the element is hovered.
-    ///
-    /// This is a window-local exit event, not notification that the platform drag session ended.
-    /// The fluent API equivalent to [`Interactivity::on_file_drop_exit`].
-    ///
-    /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
-    fn on_file_drop_exit(
-        mut self,
-        listener: impl Fn(&FileDropEvent, &mut Window, &mut App) + 'static,
-    ) -> Self {
-        self.interactivity().on_file_drop_exit(listener);
-        self
-    }
+    /// This imperative form is useful when configuring an element in place. For fluent
+    /// composition, use InteractiveElement::on_click.
     pub fn on_click(&mut self, listener: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static)
     where
         Self: Sized,
@@ -1000,6 +988,21 @@ pub trait InteractiveElement: Sized {
     /// Every other method on this trait is implemented by calling this one, so implement it by returning a field.
     fn interactivity(&mut self) -> &mut Interactivity;
 
+    /// Bind the given callback to [`FileDropEvent::Exited`] when a platform file drag
+    /// leaves this element's window while the element is hovered.
+    ///
+    /// This is a window-local exit event, not notification that the platform drag session ended.
+    /// The fluent API equivalent to [`Interactivity::on_file_drop_exit`].
+    ///
+    /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
+    fn on_file_drop_exit(
+        mut self,
+        listener: impl Fn(&FileDropEvent, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.interactivity().on_file_drop_exit(listener);
+        self
+    }
+
     /// Animates changes to this element's style properties over time.
     ///
     /// `build` receives a [`StyleTransitions`] and returns it with the properties to animate and their timing. When a
@@ -1179,6 +1182,7 @@ pub trait InteractiveElement: Sized {
     /// [`Context::listener`](crate::Context::listener) to call into a view.
 
     /// See [`Context::listener`](crate::Context::listener) to get access to the view state from this callback.
+    #[cfg(any(test, all(debug_assertions, feature = "test-support")))]
     #[inline(always)]
     fn debug_selector(mut self, f: impl FnOnce() -> String) -> Self {
         self.interactivity().debug_selector = Some(f());
@@ -1191,7 +1195,7 @@ pub trait InteractiveElement: Sized {
     /// Selectors are only recorded in debug builds with the `test-support`
     /// feature. Elsewhere this is a no-op, so `test-support` can stay enabled
     /// in release builds without the per-frame cost.
-    #[cfg(any(test, all(debug_assertions, feature = "test-support")))]
+    #[cfg(not(any(test, all(debug_assertions, feature = "test-support"))))]
     #[inline]
     fn debug_selector(self, _: impl FnOnce() -> String) -> Self {
         self
@@ -4548,7 +4552,12 @@ impl Interactivity {
         style
     }
 
-    pub(crate) fn write_a11y_info(&self, node: &mut accesskit::Node) {
+    /// Writes this element's configured accessibility metadata and actions to an AccessKit node.
+    ///
+    /// Custom interactive elements that compose an Interactivity value should call this from
+    /// their Element::write_a11y_info implementation so fluent accessibility properties are
+    /// preserved on the custom element's own node.
+    pub fn write_a11y_info(&self, node: &mut accesskit::Node) {
         if let Some(id) = &self.aria.author_id {
             node.set_author_id(id.to_string());
         }

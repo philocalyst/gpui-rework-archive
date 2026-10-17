@@ -15,6 +15,7 @@ path = "src/gpui_wgpu.rs"
 [features]
 default = []
 test-support = ["gpui/test-support", "dep:image"]
+bench-support = ["gpui/bench-support", "dep:image"]
 custom-gpu = ["gpui/custom-gpu"]
 wgpu-surfaces = ["gpui/wgpu-surfaces"]
 
@@ -70,7 +71,7 @@ bytemuck = { version = "1", features = ["derive"] }
 criterion.workspace = true
 env_logger.workspace = true
 gpui_platform = { workspace = true, features = ["wayland", "x11"] }
-naga = { version = "29.0.4", features = ["wgsl-in"] }
+naga = { git = "https://github.com/gfx-rs/wgpu", rev = "3b3506ea31154edc04de64debda0e780cba2639c", features = ["wgsl-in"] }
 
 [target.'cfg(target_os = "linux")'.dev-dependencies]
 wayland-backend = { version = "0.3.15", features = [

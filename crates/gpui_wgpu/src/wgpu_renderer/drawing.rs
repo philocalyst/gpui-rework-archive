@@ -66,7 +66,12 @@ impl WgpuRenderer {
         instances: &mut InstanceUpload,
         pass: &mut wgpu::RenderPass<'_>,
     ) -> frame::DrawResult {
-        let texture = self.atlas.get_texture_info(texture_id);
+        if sprites.is_empty() {
+            return Ok(());
+        }
+        let Some(texture) = self.atlas.get_texture_info(texture_id) else {
+            return Ok(());
+        };
         self.draw_instances_with_texture(
             sprites,
             texture_id,
@@ -84,7 +89,12 @@ impl WgpuRenderer {
         instances: &mut InstanceUpload,
         pass: &mut wgpu::RenderPass<'_>,
     ) -> frame::DrawResult {
-        let texture = self.atlas.get_texture_info(texture_id);
+        if sprites.is_empty() {
+            return Ok(());
+        }
+        let Some(texture) = self.atlas.get_texture_info(texture_id) else {
+            return Ok(());
+        };
         let resources = self.resources();
         let pipeline = resources
             .pipelines
@@ -102,7 +112,12 @@ impl WgpuRenderer {
         instances: &mut InstanceUpload,
         pass: &mut wgpu::RenderPass<'_>,
     ) -> frame::DrawResult {
-        let texture = self.atlas.get_texture_info(texture_id);
+        if sprites.is_empty() {
+            return Ok(());
+        }
+        let Some(texture) = self.atlas.get_texture_info(texture_id) else {
+            return Ok(());
+        };
         let pipelines = &self.resources().pipelines;
         let pipeline = if smoothed {
             &pipelines.smoothed_polychrome_sprites

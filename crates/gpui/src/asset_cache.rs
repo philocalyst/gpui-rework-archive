@@ -1,4 +1,4 @@
-use crate::{App, EntityId, SharedString, SharedUri, Task};
+use crate::{App, AppContext, EntityId, SharedString, SharedUri, Task};
 use collections::FxHashSet;
 use futures::{Future, TryFutureExt};
 

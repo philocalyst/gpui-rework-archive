@@ -1,15 +1,16 @@
 use crate::{
-    Action, ActionBuildError, ActionRegistry, Any, AnyView, AnyWindowHandle, AppContext, Arena,
-    ArenaBox, Asset, AssetRegistry, BackgroundExecutor, Bounds, ClipboardItem, ClipboardReadError,
-    CursorStyle, DispatchPhase, DisplayId, EventEmitter, ExternalDragPayload, FocusHandle,
+    Action, ActionBuildError, ActionRegistry, ActivationPolicy, ActivityGuard, Any, AnyView,
+    AnyWindowHandle, AppContext, AppLifecyclePhase, Arena, ArenaBox, Asset, AssetRegistry,
+    BackgroundExecutor, Bounds, ClipboardItem, ClipboardReadError, CursorStyle, DispatchPhase,
+    DisplayChanges, DisplayEvent, DisplayId, EventEmitter, ExternalDragPayload, FocusHandle,
     FocusMap, ForegroundExecutor, Global, HapticFeedbackStyle, KeyBinding, KeyContext, Keymap,
-    Keystroke, LayoutId, Menu, MenuItem, OwnedMenu, PathPromptOptions, Pixels, Platform,
-    PlatformDisplay, PlatformKeyboardLayout, PlatformKeyboardMapper, Point, Priority,
+    Keystroke, LayoutId, Menu, MenuItem, MissingGlyph, OwnedMenu, PathPromptOptions, Pixels,
+    Platform, PlatformDisplay, PlatformKeyboardLayout, PlatformKeyboardMapper, Point, Priority,
     PromptBuilder, PromptButton, PromptHandle, PromptLevel, Render, RenderImage,
     RenderablePromptHandle, Reservation, ScreenCaptureSource, SharedString, SubscriberSet,
     Subscription, SvgRenderer, SystemNotification, SystemNotificationResponse, Task,
     TextRenderingMode, TextSystem, ThermalState, Window, WindowAppearance, WindowButtonLayout,
-    WindowHandle, WindowId, WindowInvalidator,
+    WindowHandle, WindowId, WindowInvalidator, WindowingRequest,
     colors::{Colors, GlobalColors},
     hash,
     http_client::{HttpClient, NullHttpClient},
@@ -18,11 +19,7 @@ use crate::{
 use anyhow::{Context as _, Result, anyhow};
 use collections::{FxHashMap, FxHashSet, HashMap, TypeIdHashMap, TypeIdHashSet, VecDeque};
 use derive_more::{Deref, DerefMut};
-use futures::{
-    Future, FutureExt,
-    channel::oneshot,
-    future::{LocalBoxFuture, Shared},
-};
+use futures::{Future, FutureExt, channel::oneshot, future::LocalBoxFuture};
 use gpui_util::{ResultExt, debug_panic};
 use itertools::Itertools;
 use parking_lot::RwLock;
@@ -42,52 +39,16 @@ use std::{
     time::Duration,
 };
 
-use anyhow::{Context as _, Result, anyhow};
-use derive_more::{Deref, DerefMut};
-use futures::{Future, FutureExt, channel::oneshot, future::LocalBoxFuture};
-use itertools::Itertools;
-use parking_lot::RwLock;
-use slotmap::SlotMap;
-
+#[cfg(any(feature = "inspector", debug_assertions))]
+use crate::InspectorElementRegistry;
+#[cfg(target_os = "macos")]
+use crate::MacActivationPolicy;
+use crate::asset_cache::CachedLoad;
 pub use async_context::*;
 #[cfg(feature = "bench-support")]
 pub use bench_context::{
     BenchAppContext, BenchMeasurement, BenchReport, BenchWindowContext, CountingAllocator,
     MetricReport, bench_platform,
-};
-use collections::{FxHashMap, FxHashSet, HashMap, TypeIdHashMap, TypeIdHashSet, VecDeque};
-pub use context::*;
-pub use entity_map::*;
-use gpui_util::{ResultExt, debug_panic};
-#[cfg(any(test, feature = "test-support"))]
-pub use headless_app_context::*;
-use http_client::{HttpClient, Url};
-use smallvec::SmallVec;
-#[cfg(any(test, feature = "test-support"))]
-pub use test_app::*;
-#[cfg(any(test, feature = "test-support"))]
-pub use test_context::*;
-#[cfg(all(target_os = "macos", any(test, feature = "test-support")))]
-pub use visual_test_context::*;
-
-#[cfg(any(feature = "inspector", debug_assertions))]
-use crate::InspectorElementRegistry;
-use crate::asset_cache::CachedLoad;
-use crate::{
-    Action, ActionBuildError, ActionRegistry, ActivationPolicy, ActivityGuard, Any, AnyView,
-    AnyWindowHandle, AppContext, AppLifecyclePhase, Arena, ArenaBox, Asset, AssetSource,
-    BackgroundExecutor, Bounds, ClipboardItem, ClipboardReadError, CursorStyle, DispatchPhase,
-    DisplayChanges, DisplayEvent, DisplayId, EventEmitter, ExternalDragPayload, FocusHandle,
-    FocusMap, ForegroundExecutor, Global, KeyBinding, KeyContext, Keymap, Keystroke, LayoutId,
-    Menu, MenuItem, MissingGlyph, OwnedMenu, PathPromptOptions, Pixels, Platform, PlatformDisplay,
-    PlatformKeyboardLayout, PlatformKeyboardMapper, Point, Priority, PromptBuilder, PromptButton,
-    PromptHandle, PromptLevel, Render, RenderImage, RenderablePromptHandle, Reservation,
-    ScreenCaptureSource, SharedString, SubscriberSet, Subscription, SvgRenderer,
-    SystemNotification, SystemNotificationResponse, Task, TextRenderingMode, TextSystem,
-    ThermalState, Window, WindowAppearance, WindowButtonLayout, WindowHandle, WindowId,
-    WindowInvalidator, WindowingRequest,
-    colors::{Colors, GlobalColors},
-    hash, init_app_menus,
 };
 
 mod async_context;
@@ -104,9 +65,6 @@ mod test_context;
 #[cfg(all(target_os = "macos", any(test, feature = "test-support")))]
 mod visual_test_context;
 
-pub use async_context::*;
-#[cfg(feature = "bench-support")]
-pub use bench_context::{BenchAppContext, BenchReport, BenchWindowContext, bench_platform};
 pub use context::*;
 pub use entity_map::*;
 #[cfg(any(test, feature = "test-support"))]
@@ -117,11 +75,6 @@ pub use test_app::*;
 pub use test_context::*;
 #[cfg(all(target_os = "macos", any(test, feature = "test-support")))]
 pub use visual_test_context::*;
-
-#[cfg(any(feature = "inspector", debug_assertions))]
-use crate::InspectorElementRegistry;
-#[cfg(target_os = "macos")]
-use crate::MacActivationPolicy;
 
 /// The duration for which native applications wait for futures returned from
 /// [Context::on_app_quit] before fully quitting.
@@ -1133,7 +1086,6 @@ pub struct App {
     /// Whether windows build their accessibility tree every frame without an
     /// assistive-technology client. See [`Application::with_accessibility_forced`].
     pub(crate) accessibility_forced: bool,
-    flushing_effects: bool,
     pending_updates: usize,
     quit_mode: QuitMode,
     quitting: bool,
@@ -1184,6 +1136,7 @@ impl App {
                 foreground_executor,
                 #[cfg(feature = "profiler")]
                 foreground_journal,
+                #[cfg(all(feature = "profiler", not(target_family = "wasm")))]
                 hang_monitor: None,
                 svg_renderer: SvgRenderer::new(asset_registry.clone()),
                 loading_assets: Default::default(),
@@ -4495,6 +4448,28 @@ mod test {
         });
 
         assert!(completed.get());
+    }
+
+    #[gpui::test]
+    fn nested_update_defers_new_effects_until_current_effect_returns(cx: &mut TestAppContext) {
+        let order = Rc::new(RefCell::new(Vec::new()));
+        cx.update({
+            let order = order.clone();
+            move |cx| {
+                cx.defer(move |cx| {
+                    order.borrow_mut().push("outer-start");
+                    cx.update({
+                        let order = order.clone();
+                        |cx| {
+                            cx.defer(move |_| order.borrow_mut().push("nested"));
+                        }
+                    });
+                    order.borrow_mut().push("outer-end");
+                });
+            }
+        });
+
+        assert_eq!(*order.borrow(), ["outer-start", "outer-end", "nested"]);
     }
 
     #[gpui::test]

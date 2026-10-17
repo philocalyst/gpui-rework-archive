@@ -1,11 +1,10 @@
-use super::{CallbackSlot, platform::IosPlatformState, window::IosWindowState};
-use gpui::{AppLifecyclePhase, WindowVisibility};
+use super::{platform::IosPlatformState, window::IosWindowState, CallbackSlot};
+use gpui::{AnyWindowHandle, AppLifecyclePhase, WindowVisibility};
 use objc2::{
-    ClassType, DefinedClass, MainThreadMarker, MainThreadOnly, Message, define_class, extern_class,
-    extern_methods, msg_send,
+    define_class, extern_class, extern_methods, msg_send,
     rc::{Allocated, Retained},
     runtime::AnyObject,
-    sel,
+    sel, ClassType, DefinedClass, MainThreadMarker, MainThreadOnly, Message,
 };
 use objc2_foundation::{
     NSDictionary, NSObject, NSObjectProtocol, NSRunLoop, NSRunLoopCommonModes, NSSet, NSString,
@@ -116,6 +115,16 @@ impl IosApplicationState {
                 }
             }
         }
+    }
+
+    pub(super) fn active_window(&self) -> Option<AnyWindowHandle> {
+        let mut active_window = None;
+        self.with_windows(|window| {
+            if active_window.is_none() && window.is_active() {
+                active_window = Some(window.handle());
+            }
+        });
+        active_window
     }
 
     fn finish_launching(&self) {

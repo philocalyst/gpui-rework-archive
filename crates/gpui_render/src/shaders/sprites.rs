@@ -8,11 +8,24 @@ pub mod underline {
         pub order: u32,
         pub padding: u32,
         pub bounds: Bounds,
+        pub clip_bounds: Bounds,
         pub content_mask: ContentMask,
         pub color: Hsla,
         pub thickness: f32,
         pub wavy: ShaderBool,
     }
+
+    fn underline_clip_bounds(underline: Underline) -> Bounds {
+        let origin = max(underline.clip_bounds.origin, underline.content_mask.bounds.origin);
+        let clip_end = underline.clip_bounds.origin + underline.clip_bounds.size;
+        let mask_end = underline.content_mask.bounds.origin + underline.content_mask.bounds.size;
+        let end = min(clip_end, mask_end);
+        Bounds {
+            origin,
+            size: max(end - origin, vec2f(0.0, 0.0)),
+        }
+    }
+
     storage!(group(1), binding(0), UNDERLINES: RuntimeArray<Underline>);
 
     pub fn wavy_underline_coverage(underline: Underline, position: Vec2f) -> f32 {
@@ -56,7 +69,7 @@ pub mod underline {
             position: vertex.clip_position,
             color: hsla_to_rgba(underline.color),
             underline_id: instance_id,
-            clip_distances: clip_distances(vertex.viewport_position, underline.content_mask.bounds),
+            clip_distances: clip_distances(vertex.viewport_position, underline_clip_bounds(underline)),
         }
     }
 

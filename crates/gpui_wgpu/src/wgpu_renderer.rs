@@ -1,4 +1,7 @@
-use crate::{CompositorGpuHint, WgpuAtlas, WgpuContext, WgpuContextHandle, WgpuDeviceRequirements};
+use crate::{
+    CompositorGpuHint, DeviceErrorState, WgpuAtlas, WgpuContext, WgpuContextHandle,
+    WgpuDeviceRequirements,
+};
 use gpui::{DevicePixels, GpuSpecs, Scene, Size};
 
 #[cfg(test)]
@@ -12,7 +15,7 @@ use gpui_render::shaders::interface as shader_interface;
 
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 mod buffers;
 mod drawing;
@@ -40,7 +43,8 @@ use target::RenderTarget;
 pub type GpuContext = Rc<RefCell<Option<WgpuContext>>>;
 
 struct GpuFaultState {
-    pending_error: Arc<Mutex<Option<String>>>,
+    device_errors: Arc<DeviceErrorState>,
+    observed_error_generation: u64,
     consecutive_failed_frames: u32,
     device_lost: Arc<std::sync::atomic::AtomicBool>,
     #[cfg(not(target_family = "wasm"))]
@@ -107,10 +111,7 @@ impl WgpuRenderer {
             &rendering_params,
             dual_source_blending,
         )?;
-        let ResourceMetadata {
-            globals,
-            last_error,
-        } = metadata;
+        let ResourceMetadata { globals } = metadata;
 
         Ok(Self {
             context: gpu_context,
@@ -126,7 +127,8 @@ impl WgpuRenderer {
             adapter_info,
             uploaded_globals: None,
             faults: GpuFaultState {
-                pending_error: last_error,
+                device_errors: Arc::clone(context.errors()),
+                observed_error_generation: 0,
                 consecutive_failed_frames: 0,
                 device_lost: context.device_lost_flag(),
                 #[cfg(not(target_family = "wasm"))]
@@ -474,6 +476,7 @@ mod tests {
             order: 0,
             padding: 0,
             bounds,
+            clip_bounds: bounds,
             content_mask: gpui::ContentMask {
                 bounds,
                 ..Default::default()
@@ -847,6 +850,7 @@ mod tests {
                 order: index * 2 + 1,
                 padding: 0,
                 bounds,
+                clip_bounds: bounds,
                 content_mask: gpui::ContentMask {
                     bounds,
                     ..Default::default()
