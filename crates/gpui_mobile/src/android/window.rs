@@ -2021,8 +2021,8 @@ mod tests {
     fn headless_window_logical_size() {
         let w = AndroidWindow::headless(1080, 1920, 3.0);
         let ls = w.logical_size();
-        assert!((ls.width.0 - 360.0).abs() < f32::EPSILON);
-        assert!((ls.height.0 - 640.0).abs() < f32::EPSILON);
+        assert!((ls.width.as_f32() - 360.0).abs() < f32::EPSILON);
+        assert!((ls.height.as_f32() - 640.0).abs() < f32::EPSILON);
     }
 
     #[test]

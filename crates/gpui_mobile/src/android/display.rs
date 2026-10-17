@@ -337,8 +337,8 @@ mod tests {
         let d = AndroidDisplay::headless(1440, 2960);
         // Headless always has scale_factor = 1.0, so logical == physical.
         let logical = d.logical_size();
-        assert!((logical.width.0 - 1440.0).abs() < f32::EPSILON);
-        assert!((logical.height.0 - 2960.0).abs() < f32::EPSILON);
+        assert!((logical.width.as_f32() - 1440.0).abs() < f32::EPSILON);
+        assert!((logical.height.as_f32() - 2960.0).abs() < f32::EPSILON);
     }
 
     #[test]
