@@ -782,13 +782,20 @@ def runtime_failure_lines(logs: str) -> list[str]:
     failures = re.findall(
         r"(?im)^.*(?:FATAL EXCEPTION|Fatal signal|ANR in |UnsatisfiedLinkError).*$", logs
     )
-    # Android Emulator may emit this known Widevine startup warning even when
-    # GPUI is healthy. Keep every other dynamic-loader failure fatal.
+    # Android images can emit these two scoped platform-package startup
+    # warnings independently of the app: Widevine's optional crypto module and
+    # PrebuiltBugle's bundled curve25519 lookup. Keep every other loader error
+    # fatal, including failures from GPUI/native app libraries.
     for line in logs.splitlines():
         lowered = line.lower()
-        if "dlopen failed" in lowered and not (
-            "wvcdm" in lowered and "liboemcrypto.so" in lowered
-        ):
+        known_platform_warning = (
+            ("wvcdm" in lowered and "liboemcrypto.so" in lowered)
+            or (
+                "libcurve25519.so" in lowered
+                and "caller=/product/priv-app/prebuiltbugle/prebuiltbugle.apk" in lowered
+            )
+        )
+        if "dlopen failed" in lowered and not known_platform_warning:
             failures.append(line)
     return failures
 
