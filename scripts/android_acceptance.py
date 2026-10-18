@@ -357,6 +357,16 @@ def run_font_scale_recreation(
         root = wait_label(serial, artifact, root_label, "font-scale-recreated", timeout=20)
         if root_label not in exact_labels(root):
             raise RuntimeError("recreated app root did not become accessible")
+        # Capture once more after the replacement is resumed and rendered. Native
+        # teardown/finish callbacks may be logged after the first recreation event.
+        logs = adb(serial, "logcat", "-d", "-b", "all", timeout=45)
+        events = activity_recreation_events(logs, package, activity, pid_before)
+        validate_activity_recreation_events(logs, events)
+        if app_pid(serial, package) != pid_before:
+            raise RuntimeError("font-scale recreation changed process after the replacement rendered")
+        (artifact / "font-scale-after-logcat.txt").write_text(logs)
+        (artifact / "font-scale-after-events.json").write_text(
+            json.dumps(events, indent=2) + "\n")
         (artifact / "font-scale-after-activities.txt").write_text(
             adb(serial, "shell", "dumpsys", "activity", "activities"))
         (artifact / "font-scale-after-pid.txt").write_text(str(pid_after) + "\n")
