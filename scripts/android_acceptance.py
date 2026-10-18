@@ -881,6 +881,38 @@ def runtime_failure_lines(logs: str) -> list[str]:
     return failures
 
 
+def clear_logcat(serial: str, artifact: Path) -> None:
+    # Clear every readable buffer used by the later adb logcat -d -b all scan.
+    # API 26's logd rejects all as a clear selector even though it accepts
+    # each constituent buffer, so retain an explicit, fail-closed shell fallback.
+    attempts: list[str] = []
+    routes = (
+        ("host-default", ("logcat", "-c")),
+        ("host-all-buffers", ("logcat", "-b", "all", "-c")),
+        ("device-shell-all-readable-buffers",
+         ("shell", "logcat", "-b", "main,system,radio,events,crash,kernel", "-c")),
+    )
+    receipt = artifact / "logcat-clear-attempts.txt"
+    for label, command in routes:
+        argv = [ADB, "-s", serial, *command]
+        attempts.append(f"[{label}] argv={argv!r} status=started\n")
+        receipt.write_text("".join(attempts))
+        try:
+            output = adb(serial, *command, timeout=20)
+        except RuntimeError as error:
+            attempts[-1] = f"[{label}] argv={argv!r} exit=failed\n{error}\n"
+            receipt.write_text("".join(attempts))
+            continue
+        except Exception as error:
+            attempts[-1] = f"[{label}] argv={argv!r} exception={type(error).__name__}: {error}\n"
+            receipt.write_text("".join(attempts))
+            raise
+        attempts[-1] = f"[{label}] argv={argv!r} exit=0\n{output}\n"
+        receipt.write_text("".join(attempts))
+        return
+    raise RuntimeError("all logcat clear transports failed; see logcat-clear-attempts.txt")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("apk", type=Path)
@@ -919,17 +951,7 @@ def main() -> int:
         raise RuntimeError(f"emulator API {api} is below declared min API {args.min_api}")
     print(f"Emulator: abi={device_abi} api={api}")
 
-    try:
-        adb(args.serial, "logcat", "-c")
-    except RuntimeError as error:
-        # Some API 26 emulator/logd combinations reject clearing the implicit
-        # main buffer while accepting the explicit all-buffer operation.
-        if "failed to clear the 'main' log" not in str(error):
-            raise
-        (args.artifacts / "logcat-clear-fallback.txt").write_text(
-            f"default clear failed; retrying explicit all-buffer clear\n{error}\n"
-        )
-        adb(args.serial, "logcat", "-b", "all", "-c")
+    clear_logcat(args.serial, args.artifacts)
     run(ADB, "-s", args.serial, "install", "-r", str(args.apk.resolve()), timeout=180)
     run(ADB, "-s", args.serial, "install", "-r", str(args.ime_apk.resolve()), timeout=120)
     component = f"{args.package}/{args.activity}"
