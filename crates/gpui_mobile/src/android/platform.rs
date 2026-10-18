@@ -32,7 +32,7 @@
 //! compiles in isolation.  Replace the stub section with `use gpui::*` when
 //! building inside the full workspace.
 
-use anyhow::Result;
+use anyhow::{Context as _, Result};
 use futures::channel::oneshot;
 use gpui::{
     Action, ActivityGuard, AnyWindowHandle, BackgroundExecutor, ClipboardItem, CursorStyle,
@@ -141,7 +141,7 @@ struct AndroidPlatformState {
 
     // ── rendering ─────────────────────────────────────────────────────────────
     /// Shared wgpu device + queue.  `None` until the first window is opened.
-    gpu_context: GpuContext,
+    gpu_context: Option<GpuContext>,
 
     // ── windows / displays ────────────────────────────────────────────────────
     windows: WindowList,
@@ -506,7 +506,7 @@ impl AndroidPlatform {
             native_session,
             state: Mutex::new(AndroidPlatformState {
                 dispatcher,
-                gpu_context: Rc::new(RefCell::new(None)),
+                gpu_context: Some(Rc::new(RefCell::new(None))),
                 windows: WindowList::default(),
                 pending_window: None,
                 displays,
@@ -530,6 +530,44 @@ impl AndroidPlatform {
     }
 
     // ── executor access ───────────────────────────────────────────────────────
+
+    fn replace_callback<T, F>(&self, value: T, slot: F) -> bool
+    where
+        F: for<'a> FnOnce(&'a mut AndroidPlatformState) -> &'a mut Option<T>,
+    {
+        let (old, rejected) = {
+            let mut state = self.state.lock();
+            if self
+                .native_session
+                .as_ref()
+                .is_some_and(|session| !session.is_active())
+            {
+                (None, Some(value))
+            } else {
+                (slot(&mut state).replace(value), None)
+            }
+        };
+        drop(old);
+        let accepted = rejected.is_none();
+        drop(rejected);
+        accepted
+    }
+
+    fn take_callback<T, F>(&self, slot: F) -> Option<T>
+    where
+        F: for<'a> FnOnce(&'a mut AndroidPlatformState) -> &'a mut Option<T>,
+    {
+        let mut state = self.state.lock();
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            None
+        } else {
+            slot(&mut state).take()
+        }
+    }
 
     /// Returns the background-task executor (Rust thread-pool).
     pub fn background_executor(&self) -> Arc<AndroidDispatcher> {
@@ -563,12 +601,9 @@ impl AndroidPlatform {
     where
         F: FnOnce(Arc<AndroidWindow>) + Send + 'static,
     {
-        let old = self
-            .state
-            .lock()
-            .on_init_window_callback
-            .replace(Box::new(callback));
-        drop(old);
+        self.replace_callback(Box::new(callback), |state| {
+            &mut state.on_init_window_callback
+        });
     }
 
     /// Take the `on_init_window` callback (if any).
@@ -577,7 +612,7 @@ impl AndroidPlatform {
     pub fn take_on_init_window_callback(
         &self,
     ) -> Option<Box<dyn FnOnce(Arc<AndroidWindow>) + Send>> {
-        self.state.lock().on_init_window_callback.take()
+        self.take_callback(|state| &mut state.on_init_window_callback)
     }
 
     /// Store the finish-launching callback and drive the event loop.
@@ -592,17 +627,11 @@ impl AndroidPlatform {
     /// `AndroidWindow` exists).  At that point `cx.open_window(...)` will
     /// find the existing primary window.
     pub fn run(&self, on_finish_launching: Box<dyn FnOnce() + 'static>) {
-        {
-            let old = {
-                let mut state = self.state.lock();
-                let dispatcher = Arc::clone(&state.dispatcher);
-                state.finish_launching.replace(Registration::new(
-                    Some(dispatcher),
-                    Callback::Close(Some(on_finish_launching)),
-                ))
-            };
-            drop(old);
-        }
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        self.replace_callback(
+            Registration::new(Some(dispatcher), Callback::Close(Some(on_finish_launching))),
+            |state| &mut state.finish_launching,
+        );
         log::info!("AndroidPlatform::run — callback stored, entering event loop");
 
         // Drive the event loop.  This blocks until quit() is called or
@@ -615,7 +644,7 @@ impl AndroidPlatform {
             // entry point (`super::host`), whose render thread owns the loop and keeps
             // the app alive through `Application::run_embedded`. Invoke the callback
             // immediately and return.
-            let cb = self.state.lock().finish_launching.take();
+            let cb = self.take_callback(|state| &mut state.finish_launching);
             if let Some(cb) = cb {
                 cb.call_once();
             }
@@ -629,7 +658,7 @@ impl AndroidPlatform {
     /// Called by `run_event_loop` when the native window is ready so that
     /// the GPUI `Application` context can open its first window.
     pub(super) fn take_finish_launching_callback(&self) -> Option<Registration> {
-        self.state.lock().finish_launching.take()
+        self.take_callback(|state| &mut state.finish_launching)
     }
 
     /// Request a graceful quit.
@@ -637,6 +666,13 @@ impl AndroidPlatform {
     /// Sets the `should_quit` flag; the main loop will exit on the next tick.
     /// Invokes the registered quit callback before returning.
     pub fn quit(&self) {
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return;
+        }
         log::info!("AndroidPlatform::quit");
         // GPUI may defer shutdown while its App is borrowed. Take the callback
         // out of the mutex so it can call back into the platform safely.
@@ -657,18 +693,39 @@ impl AndroidPlatform {
 
     /// Called by the app delegate when the app moves to the foreground.
     pub fn did_become_active(&self) {
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return;
+        }
         log::debug!("AndroidPlatform::did_become_active");
         self.state.lock().is_active = true;
     }
 
     /// Called by the app delegate when the app moves to the background.
     pub fn did_enter_background(&self) {
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return;
+        }
         log::debug!("AndroidPlatform::did_enter_background");
         self.state.lock().is_active = false;
     }
 
     /// Deliver URLs from an implicit or explicit intent.
     pub fn deliver_open_urls(&self, urls: Vec<String>) {
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return;
+        }
         log::debug!("AndroidPlatform: delivering {} URL(s)", urls.len());
         let cb = { self.state.lock().open_urls_callback.clone() };
         if let Some(cb) = cb {
@@ -678,6 +735,13 @@ impl AndroidPlatform {
 
     /// Notify the platform that the keyboard layout has changed.
     pub fn notify_keyboard_layout_change(&self) {
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return;
+        }
         let cb = { self.state.lock().keyboard_layout_callback.clone() };
         if let Some(cb) = cb {
             cb.dispatch(CallbackEvent::KeyboardLayout);
@@ -686,6 +750,13 @@ impl AndroidPlatform {
 
     /// Deliver a "reopen" event (app tapped in recents while already running).
     pub fn deliver_reopen(&self) {
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return;
+        }
         let cb = { self.state.lock().reopen_callback.clone() };
         if let Some(cb) = cb {
             cb.dispatch(CallbackEvent::Reopen);
@@ -703,9 +774,14 @@ impl AndroidPlatform {
     ) -> Result<Arc<AndroidWindow>> {
         let window = {
             let mut state = self.state.lock();
-            let window = AndroidWindow::new(
+            let window = AndroidWindow::new_for_session(
                 native_window,
-                Rc::clone(&state.gpu_context),
+                Rc::clone(
+                    state
+                        .gpu_context
+                        .as_ref()
+                        .context("NativeActivity GPU context has been retired")?,
+                ),
                 scale_factor,
                 transparent,
                 Some(Arc::clone(&state.dispatcher)),
@@ -764,32 +840,148 @@ impl AndroidPlatform {
     ///
     /// Cleared by that call. See [`AndroidPlatformState::pending_window`].
     pub fn set_pending_window(&self, window: Arc<AndroidWindow>) {
-        self.state.lock().pending_window = Some(window);
+        if let Some(session) = self.native_session.as_ref() {
+            assert!(
+                session.is_owner_thread(),
+                "NativeActivity pending windows are set on their owner thread"
+            );
+        }
+        let (old, rejected) = {
+            let mut state = self.state.lock();
+            let same_runtime = match (self.native_session.as_ref(), window.native_session.as_ref())
+            {
+                (Some(session), Some(owner)) => session.is_active() && Arc::ptr_eq(owner, session),
+                (None, None) => true,
+                _ => false,
+            };
+            let valid = same_runtime && !window.retired.load(std::sync::atomic::Ordering::Acquire);
+            if valid {
+                (state.pending_window.replace(window), None)
+            } else {
+                (None, Some(window))
+            }
+        };
+        // A window may release thread-affine resources in Drop; never drop it
+        // while the platform state mutex is held.
+        drop(old);
+        drop(rejected);
     }
 
     /// Take the window named by [`Self::set_pending_window`], if any.
     pub fn take_pending_window(&self) -> Option<Arc<AndroidWindow>> {
-        self.state.lock().pending_window.take()
+        self.take_callback(|state| &mut state.pending_window)
     }
 
     /// Remove and return the window identified by `id`.
     pub fn close_window(&self, id: u64) -> Option<Arc<AndroidWindow>> {
-        let window = self.state.lock().windows.remove(id)?;
-        window.clear_callbacks_on_owner();
+        let (window, pending) = {
+            let mut state = self.state.lock();
+            let window = state.windows.remove(id).or_else(|| {
+                state
+                    .pending_window
+                    .as_ref()
+                    .filter(|pending| pending.id() == id)
+                    .cloned()
+            })?;
+            assert!(
+                state.dispatcher.is_main_thread(),
+                "Android windows are closed on their owner thread"
+            );
+            // Serialize terminal retirement with set_pending_window.
+            window.mark_retired_on_owner();
+            let pending = state
+                .pending_window
+                .as_ref()
+                .is_some_and(|pending| Arc::ptr_eq(pending, &window))
+                .then(|| state.pending_window.take())
+                .flatten();
+            (window, pending)
+        };
+        drop(pending);
+        window.retire_native_resources_on_owner();
+        if let Some(session) = window.native_session.as_ref() {
+            session.unregister_window(&window);
+        }
         Some(window)
     }
 
-    pub(super) fn shutdown_callback_registry_on_owner(&self) {
+    /// Retire native-session callback producers on the owner thread, after
+    /// `Application::run` has dropped its windows and App callbacks.
+    pub(super) fn retire_native_session_on_owner(&self) {
         let dispatcher = Arc::clone(&self.state.lock().dispatcher);
         assert!(
             dispatcher.is_main_thread(),
-            "callback registry shutdown must run on owner thread"
+            "native-session retirement must run on owner thread"
         );
-        // Detach the ALooper callback first while still on its owner thread.
-        // Then destroy all !Send GPUI callbacks on that same thread. Escaped
-        // AndroidWindow Arcs can retain the now-shutdown dispatcher safely.
-        dispatcher.shutdown();
+
+        // Close local-task admission first. Callback removal below may wake
+        // these tasks, which are then canceled by draining their typed queue
+        // entries on this owner thread.
+        let scopes = dispatcher.begin_local_task_retirements();
+        let mut windows = {
+            let state = self.state.lock();
+            state.windows.iter().cloned().collect::<Vec<_>>()
+        };
+        if let Some(window) = self.state.lock().pending_window.as_ref() {
+            windows.push(Arc::clone(window));
+        }
+        if let Some(session) = self.native_session.as_ref() {
+            windows.extend(session.take_windows_for_retirement());
+        }
+        let mut seen = std::collections::HashSet::new();
+        windows.retain(|window| seen.insert(Arc::as_ptr(window) as usize));
+
+        for window in &windows {
+            window.mark_retired_on_owner();
+            window.close_accessibility();
+            window.clear_callbacks_on_owner();
+        }
+        super::accessibility::reset_native_session();
         super::callbacks::clear_current_thread();
+
+        // Empty PlatformState before releasing the dispatcher. Taking these
+        // fields makes a late public platform/window Arc inert; all NDK and Rc
+        // resources are dropped below on the Android owner thread.
+        let (windows_owned, pending, displays, gpu_context, registrations, init_callback) = {
+            let mut state = self.state.lock();
+            state.is_active = false;
+            let windows_owned = std::mem::take(&mut state.windows);
+            let pending = state.pending_window.take();
+            let displays = std::mem::take(&mut state.displays);
+            let gpu_context = state.gpu_context.take();
+            let registrations = (
+                state.displays_changed_callback.take(),
+                state.finish_launching.take(),
+                state.quit_callback.take(),
+                state.reopen_callback.take(),
+                state.open_urls_callback.take(),
+                state.keyboard_layout_callback.take(),
+            );
+            let init_callback = state.on_init_window_callback.take();
+            (
+                windows_owned,
+                pending,
+                displays,
+                gpu_context,
+                registrations,
+                init_callback,
+            )
+        };
+        drop(registrations);
+        drop(init_callback);
+
+        // Callback and task cancellation can enqueue further local wakeups.
+        // Drain until every registered scope is empty and atomically sealed.
+        dispatcher.finish_local_task_retirements(&scopes);
+
+        for window in &windows {
+            window.retire_native_resources_on_owner();
+        }
+        drop(windows_owned);
+        drop(pending);
+        drop(displays);
+        drop(gpu_context);
+        dispatcher.shutdown();
     }
 
     /// Returns the primary (first) window, if any.
@@ -804,7 +996,12 @@ impl AndroidPlatform {
 
     /// Get a clone of the shared GPU context handle.
     pub fn gpu_context(&self) -> GpuContext {
-        Rc::clone(&self.state.lock().gpu_context)
+        self.state
+            .lock()
+            .gpu_context
+            .as_ref()
+            .expect("Android platform GPU context has been retired")
+            .clone()
     }
 
     // ── display management ────────────────────────────────────────────────────
@@ -1105,8 +1302,7 @@ impl AndroidPlatform {
                 true
             })),
         );
-        let old = self.state.lock().quit_callback.replace(registration);
-        drop(old);
+        self.replace_callback(registration, |state| &mut state.quit_callback);
     }
 
     /// Register a callback invoked when the app is re-opened.
@@ -1116,8 +1312,7 @@ impl AndroidPlatform {
     {
         let dispatcher = Arc::clone(&self.state.lock().dispatcher);
         let registration = Registration::new(Some(dispatcher), Callback::Reopen(Box::new(cb)));
-        let old = self.state.lock().reopen_callback.replace(registration);
-        drop(old);
+        self.replace_callback(registration, |state| &mut state.reopen_callback);
     }
 
     /// Register a callback invoked when the OS delivers URLs to open.
@@ -1127,8 +1322,7 @@ impl AndroidPlatform {
     {
         let dispatcher = Arc::clone(&self.state.lock().dispatcher);
         let registration = Registration::new(Some(dispatcher), Callback::OpenUrls(Box::new(cb)));
-        let old = self.state.lock().open_urls_callback.replace(registration);
-        drop(old);
+        self.replace_callback(registration, |state| &mut state.open_urls_callback);
     }
 
     /// Register a callback invoked when the keyboard layout changes.
@@ -1139,12 +1333,7 @@ impl AndroidPlatform {
         let dispatcher = Arc::clone(&self.state.lock().dispatcher);
         let registration =
             Registration::new(Some(dispatcher), Callback::KeyboardLayout(Box::new(cb)));
-        let old = self
-            .state
-            .lock()
-            .keyboard_layout_callback
-            .replace(registration);
-        drop(old);
+        self.replace_callback(registration, |state| &mut state.keyboard_layout_callback);
     }
 
     // ── dispatcher tick ───────────────────────────────────────────────────────
@@ -1274,12 +1463,7 @@ impl Platform for AndroidPlatform {
     fn on_displays_changed(&self, callback: Box<dyn FnMut()>) {
         let dispatcher = Arc::clone(&self.state.lock().dispatcher);
         let registration = Registration::new(Some(dispatcher), Callback::DisplaysChanged(callback));
-        let old = self
-            .state
-            .lock()
-            .displays_changed_callback
-            .replace(registration);
-        drop(old);
+        self.replace_callback(registration, |state| &mut state.displays_changed_callback);
     }
 
     fn active_window(&self) -> Option<AnyWindowHandle> {
@@ -1341,8 +1525,7 @@ impl Platform for AndroidPlatform {
     fn on_open_urls(&self, callback: Box<dyn FnMut(Vec<String>)>) {
         let dispatcher = Arc::clone(&self.state.lock().dispatcher);
         let registration = Registration::new(Some(dispatcher), Callback::OpenUrls(callback));
-        let old = self.state.lock().open_urls_callback.replace(registration);
-        drop(old);
+        self.replace_callback(registration, |state| &mut state.open_urls_callback);
     }
 
     fn register_url_scheme(&self, _url: &str) -> Task<Result<()>> {
@@ -1383,8 +1566,7 @@ impl Platform for AndroidPlatform {
     fn on_quit(&self, callback: Box<dyn FnMut() -> bool>) {
         let dispatcher = Arc::clone(&self.state.lock().dispatcher);
         let registration = Registration::new(Some(dispatcher), Callback::Quit(callback));
-        let old = self.state.lock().quit_callback.replace(registration);
-        drop(old);
+        self.replace_callback(registration, |state| &mut state.quit_callback);
     }
 
     fn on_system_sleep(&self, _callback: Box<dyn FnMut()>) {
@@ -1413,8 +1595,7 @@ impl Platform for AndroidPlatform {
     fn on_reopen(&self, callback: Box<dyn FnMut()>) {
         let dispatcher = Arc::clone(&self.state.lock().dispatcher);
         let registration = Registration::new(Some(dispatcher), Callback::Reopen(callback));
-        let old = self.state.lock().reopen_callback.replace(registration);
-        drop(old);
+        self.replace_callback(registration, |state| &mut state.reopen_callback);
     }
 
     fn set_menus(&self, _menus: Vec<Menu>, _keymap: &Keymap) {
@@ -1442,6 +1623,13 @@ impl Platform for AndroidPlatform {
     }
 
     fn on_thermal_state_change(&self, callback: Box<dyn FnMut()>) {
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return;
+        }
         // Subscribe to Android thermal callbacks via PowerManager.
         //
         // On Android 29+ (Q), PowerManager provides `addThermalStatusListener`
@@ -1520,12 +1708,7 @@ impl Platform for AndroidPlatform {
     fn on_keyboard_layout_change(&self, callback: Box<dyn FnMut()>) {
         let dispatcher = Arc::clone(&self.state.lock().dispatcher);
         let registration = Registration::new(Some(dispatcher), Callback::KeyboardLayout(callback));
-        let old = self
-            .state
-            .lock()
-            .keyboard_layout_callback
-            .replace(registration);
-        drop(old);
+        self.replace_callback(registration, |state| &mut state.keyboard_layout_callback);
     }
 }
 
@@ -1773,6 +1956,35 @@ mod tests {
     }
 
     // ── lifecycle ─────────────────────────────────────────────────────────────
+
+    #[test]
+    fn close_window_retires_handle_and_clears_pending_window() {
+        let p = headless();
+        let window = AndroidWindow::headless(120, 240, 2.0);
+        let retained = Arc::clone(&window);
+        p.state.lock().windows.push(Arc::clone(&window));
+        p.set_pending_window(Arc::clone(&window));
+
+        assert!(p.close_window(window.id()).is_some());
+        assert!(retained.retired.load(std::sync::atomic::Ordering::Acquire));
+        assert!(p.take_pending_window().is_none());
+
+        // A retained host handle cannot be made pending again after logical close.
+        p.set_pending_window(retained);
+        assert!(p.take_pending_window().is_none());
+    }
+
+    #[test]
+    fn close_window_can_retire_a_pending_window_before_open() {
+        let p = headless();
+        let window = AndroidWindow::headless(80, 160, 2.0);
+        let retained = Arc::clone(&window);
+        p.set_pending_window(window);
+
+        assert!(p.close_window(retained.id()).is_some());
+        assert!(retained.retired.load(std::sync::atomic::Ordering::Acquire));
+        assert!(p.take_pending_window().is_none());
+    }
 
     #[test]
     fn run_invokes_finish_launching_callback() {

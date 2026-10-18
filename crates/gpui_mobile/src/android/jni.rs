@@ -121,7 +121,9 @@ fn publish_physical_insets(session: &NativeSession, next: PhysicalWindowInsets) 
         changed
     };
     if changed {
-        session.app.create_waker().wake();
+        if let Some(app) = session.app() {
+            app.create_waker().wake();
+        }
     }
 }
 
@@ -233,7 +235,8 @@ pub(crate) fn activity_for_session<'local>(
     if !is_current_native_session(session) {
         return Err("Activity session has ended or been replaced".into());
     }
-    let activity = session.app.activity_as_ptr();
+    let app = session.app().ok_or("Activity session has ended")?;
+    let activity = app.activity_as_ptr();
     if activity.is_null() {
         return Err("Activity is no longer available".into());
     }
@@ -336,15 +339,103 @@ pub(crate) fn find_app_class_for_runtime<'local>(
 static NATIVE_SESSION: Mutex<Option<Arc<NativeSession>>> = Mutex::new(None);
 static NEXT_NATIVE_SESSION: AtomicU64 = AtomicU64::new(1);
 
+#[derive(Default)]
+struct NativeWindowRegistry {
+    windows: Mutex<Vec<Arc<super::window::AndroidWindow>>>,
+}
+impl NativeWindowRegistry {
+    fn register(&self, window: &Arc<super::window::AndroidWindow>) {
+        let mut windows = self.windows.lock().expect("poisoned");
+        if !windows
+            .iter()
+            .any(|registered| Arc::ptr_eq(registered, window))
+        {
+            windows.push(Arc::clone(window));
+        }
+    }
+
+    fn unregister(&self, window: &Arc<super::window::AndroidWindow>) {
+        let removed = {
+            let mut windows = self.windows.lock().expect("poisoned");
+            windows
+                .iter()
+                .position(|registered| Arc::ptr_eq(registered, window))
+                .map(|index| windows.remove(index))
+        };
+        drop(removed);
+    }
+
+    fn take(&self) -> Vec<Arc<super::window::AndroidWindow>> {
+        std::mem::take(&mut *self.windows.lock().expect("poisoned"))
+    }
+}
+
 pub(crate) struct NativeSession {
     pub(crate) generation: u64,
-    pub(crate) app: AndroidApp,
+    app: Mutex<Option<AndroidApp>>,
     active: AtomicBool,
     presented: AtomicBool,
+    owner_thread: std::thread::ThreadId,
+    windows: NativeWindowRegistry,
 }
 impl NativeSession {
     pub(crate) fn is_active(&self) -> bool {
         self.active.load(Ordering::Acquire)
+    }
+
+    /// Clone the Activity handle while it is active. The clone keeps the
+    /// android-activity global reference alive for the full native/JNI operation.
+    pub(crate) fn app(&self) -> Option<AndroidApp> {
+        if !self.is_active() {
+            return None;
+        }
+        let app = self.app.lock().expect("poisoned");
+        if self.is_active() {
+            app.as_ref().cloned()
+        } else {
+            None
+        }
+    }
+
+    /// Release the owner-held Activity reference after session resources retire.
+    fn take_app_on_owner(&self) -> Option<AndroidApp> {
+        assert!(
+            self.is_owner_thread(),
+            "Activity handle must retire on owner"
+        );
+        self.app.lock().expect("poisoned").take()
+    }
+
+    pub(crate) fn is_owner_thread(&self) -> bool {
+        std::thread::current().id() == self.owner_thread
+    }
+
+    pub(crate) fn register_window(&self, window: &Arc<super::window::AndroidWindow>) {
+        assert!(
+            self.is_owner_thread(),
+            "NativeActivity windows must be created on their owner"
+        );
+        assert!(
+            self.is_active(),
+            "cannot register a window to a retired NativeActivity"
+        );
+        self.windows.register(window);
+    }
+
+    pub(crate) fn unregister_window(&self, window: &Arc<super::window::AndroidWindow>) {
+        assert!(
+            self.is_owner_thread(),
+            "NativeActivity windows must be retired on their owner"
+        );
+        self.windows.unregister(window);
+    }
+
+    pub(crate) fn take_windows_for_retirement(&self) -> Vec<Arc<super::window::AndroidWindow>> {
+        assert!(
+            self.is_owner_thread(),
+            "NativeActivity windows must be retired on their owner"
+        );
+        self.windows.take()
     }
 }
 #[must_use = "keep the session guard alive for the duration of the NativeActivity run"]
@@ -380,9 +471,22 @@ impl Drop for NativeSessionGuard {
             }
             self.session.active.store(false, Ordering::Release);
         }
-        // Adapter teardown can call JNI; never hold the runtime-slot lock.
-        super::accessibility::reset_native_session();
-        let (retired_session, retired_platform) = {
+        // Retire window-owned event producers before sealing the dispatcher.
+        // Dropping A11y senders wakes GPUI LocalExecutor tasks; those wakeups
+        // must be queued and drained on this owner thread, not rejected inline
+        // while event_listener holds its notification lock.
+        if let Some(platform) = self.platform.as_ref() {
+            platform.retire_native_session_on_owner();
+        } else {
+            let windows = self.session.take_windows_for_retirement();
+            for window in &windows {
+                window.retire_native_resources_on_owner();
+            }
+            super::accessibility::reset_native_session();
+            super::callbacks::clear_current_thread();
+            drop(windows);
+        }
+        let (retired_session, retired_platform, retired_app) = {
             let mut session_slot = NATIVE_SESSION.lock().expect("poisoned");
             if !session_slot
                 .as_ref()
@@ -391,6 +495,7 @@ impl Drop for NativeSessionGuard {
                 return;
             }
             reset_native_session_state();
+            let retired_app = self.session.take_app_on_owner();
             let retired_platform = {
                 let mut platform_slot = PLATFORM.lock().expect("poisoned");
                 if platform_slot.as_ref().is_some_and(|current| {
@@ -403,10 +508,11 @@ impl Drop for NativeSessionGuard {
                     None
                 }
             };
-            (session_slot.take(), retired_platform)
+            (session_slot.take(), retired_platform, retired_app)
         };
         drop(retired_platform);
         drop(retired_session);
+        drop(retired_app);
     }
 }
 
@@ -636,10 +742,10 @@ fn host_assets_in_frame(
 /// Run `f` with the app's `AssetManager`: from `android-activity`, or from the
 /// Activity passed to [`set_host_activity`] on the host-driven path.
 pub(crate) fn with_asset_manager<T>(f: impl FnOnce(&ndk::asset::AssetManager) -> T) -> Option<T> {
-    if let Some(app) = android_app() {
-        return Some(f(&app.asset_manager()));
+    match native_session() {
+        Some(session) => session.app().map(|app| f(&app.asset_manager())),
+        None => HOST_ASSETS.get().map(|assets| f(&assets.native)),
     }
-    HOST_ASSETS.get().map(|assets| f(&assets.native))
 }
 
 /// Resolve assets for the owning runtime. A missing NativeActivity handle means
@@ -650,7 +756,8 @@ pub(crate) fn with_asset_manager_for_runtime<T>(
 ) -> Option<T> {
     match session {
         Some(session) if is_current_native_session(session) => {
-            Some(f(&session.app.asset_manager()))
+            let app = session.app()?;
+            Some(f(&app.asset_manager()))
         }
         Some(_) => None,
         None if native_session().is_none() => HOST_ASSETS.get().map(|assets| f(&assets.native)),
@@ -664,9 +771,13 @@ pub(crate) fn with_asset_manager_for_runtime<T>(
 /// Used by platform integrations for JNI calls. The VM is process-lived even when
 /// the Activity-scoped runtime is replaced.
 pub fn java_vm() -> *mut c_void {
-    native_session()
-        .map(|session| session.app.vm_as_ptr())
-        .unwrap_or_else(|| HOST_VM.load(std::sync::atomic::Ordering::SeqCst))
+    match native_session() {
+        Some(session) => session
+            .app()
+            .map(|app| app.vm_as_ptr())
+            .unwrap_or(std::ptr::null_mut()),
+        None => HOST_VM.load(std::sync::atomic::Ordering::SeqCst),
+    }
 }
 
 /// Return the raw Activity jobject only for legacy host-driven integrations.
@@ -688,7 +799,7 @@ pub fn activity_as_ptr() -> *mut c_void {
 
 /// Returns a clone of the active NativeActivity's `AndroidApp`, if initialized.
 pub fn android_app() -> Option<AndroidApp> {
-    native_session().map(|session| session.app.clone())
+    native_session().and_then(|session| session.app())
 }
 
 /// Install the platform built by the host-driven path (`super::host`).
@@ -801,8 +912,10 @@ pub(crate) fn query_night_mode_for_runtime(session: Option<&NativeSession>) -> b
         if !is_current_native_session(session) {
             return false;
         }
-        let config =
-            ndk::configuration::Configuration::from_asset_manager(&session.app.asset_manager());
+        let Some(app) = session.app() else {
+            return false;
+        };
+        let config = ndk::configuration::Configuration::from_asset_manager(&app.asset_manager());
         config.ui_mode_night() == ndk::configuration::UiModeNight::Yes
     } else {
         match host_ui_mode() {
@@ -1079,9 +1192,11 @@ fn process_input_events(app: &AndroidApp, session: &NativeSession) {
 /// that platform requests quit or its Activity is destroyed. The AndroidApp must
 /// belong to the currently-active session; stale entry points return immediately.
 pub fn run_event_loop(app: &AndroidApp) {
-    let Some(session) =
-        native_session().filter(|session| session.app.activity_as_ptr() == app.activity_as_ptr())
-    else {
+    let Some(session) = native_session().filter(|session| {
+        session
+            .app()
+            .is_some_and(|active| active.activity_as_ptr() == app.activity_as_ptr())
+    }) else {
         log::warn!("run_event_loop: AndroidApp does not own the active Activity session");
         return;
     };
@@ -1093,7 +1208,10 @@ pub(crate) fn run_event_loop_for_session(session: &Arc<NativeSession>) {
         log::warn!("run_event_loop: refusing a stale Activity session");
         return;
     }
-    let app = &session.app;
+    let Some(app) = session.app() else {
+        log::warn!("run_event_loop: Activity handle is unavailable");
+        return;
+    };
     log::info!("run_event_loop: entering main loop");
 
     // Track whether the on_init_window callback has already been invoked.
@@ -1155,7 +1273,7 @@ pub(crate) fn run_event_loop_for_session(session: &Arc<NativeSession>) {
         );
         app.poll_events(Some(timeout), |event| match event {
             PollEvent::Main(main_event) => {
-                handle_main_event(app, session, main_event);
+                handle_main_event(&app, session, main_event);
             }
             PollEvent::Wake => {}
             PollEvent::Timeout => {}
@@ -1173,7 +1291,7 @@ pub(crate) fn run_event_loop_for_session(session: &Arc<NativeSession>) {
         let drain_events = |app: &AndroidApp| {
             app.poll_events(Some(Duration::ZERO), |event| {
                 if let PollEvent::Main(main_event) = event {
-                    handle_main_event(app, session, main_event);
+                    handle_main_event(&app, session, main_event);
                 }
             });
         };
@@ -1189,7 +1307,7 @@ pub(crate) fn run_event_loop_for_session(session: &Arc<NativeSession>) {
                 }
             }
             // Drain immediately — Java thread may be blocked on InitWindow condvar.
-            drain_events(app);
+            drain_events(&app);
         }
 
         // 2. InitWindow — replace surface on existing renderer, or create new
@@ -1253,7 +1371,7 @@ pub(crate) fn run_event_loop_for_session(session: &Arc<NativeSession>) {
                 }
             }
             // Drain — Java thread may have queued ConfigChanged/WindowResized.
-            drain_events(app);
+            drain_events(&app);
         }
 
         // 3. WindowResized
@@ -1349,7 +1467,7 @@ pub(crate) fn run_event_loop_for_session(session: &Arc<NativeSession>) {
         }
 
         // Process input events.
-        process_input_events(app, session);
+        process_input_events(&app, session);
 
         // Deferred initialisation callbacks (runs once).
         if !INIT_WINDOW_DONE.load(Ordering::Relaxed) {
@@ -1396,16 +1514,16 @@ pub(crate) fn run_event_loop_for_session(session: &Arc<NativeSession>) {
                     // Drain lifecycle events that arrived during rendering
                     // (e.g. rotation triggers TerminateWindow while we were
                     // in get_current_texture / present).
-                    drain_events(app);
-                    process_input_events(app, session);
+                    drain_events(&app);
+                    process_input_events(&app, session);
                 }
             }
         }
     }
 
-    if let Some(platform) = platform_for_session(session) {
-        platform.shutdown_callback_registry_on_owner();
-    }
+    // Do not shut down the dispatcher here. Application::run still owns GPUI
+    // windows and their callbacks until it returns. NativeSessionGuard retires
+    // those producers and drains their owner-thread wakeups after that drop.
     log::info!("run_event_loop: exiting main loop");
 }
 
@@ -1577,7 +1695,9 @@ pub fn poll_events(timeout_ms: i32) -> bool {
         Some(session) if session.is_active() => session,
         _ => return false,
     };
-    let app = &session.app;
+    let Some(app) = session.app() else {
+        return false;
+    };
 
     let timeout = if timeout_ms < 0 {
         None
@@ -1587,13 +1707,13 @@ pub fn poll_events(timeout_ms: i32) -> bool {
 
     app.poll_events(timeout, |event| match event {
         PollEvent::Main(main_event) => {
-            handle_main_event(app, &session, main_event);
+            handle_main_event(&app, &session, main_event);
         }
         PollEvent::Wake => {}
         _ => {}
     });
 
-    process_input_events(app, &session);
+    process_input_events(&app, &session);
 
     // Drive the GPUI rendering pipeline (same as run_event_loop).
     if let Some(platform) = platform_for_session(&session) {
@@ -1653,9 +1773,11 @@ pub fn install_panic_hook() {
 pub fn init_platform(app: &AndroidApp) -> Result<NativeSessionGuard, String> {
     let session = Arc::new(NativeSession {
         generation: NEXT_NATIVE_SESSION.fetch_add(1, Ordering::Relaxed),
-        app: app.clone(),
+        app: Mutex::new(Some(app.clone())),
         active: AtomicBool::new(true),
         presented: AtomicBool::new(false),
+        owner_thread: std::thread::current().id(),
+        windows: NativeWindowRegistry::default(),
     });
     {
         let mut session_slot = NATIVE_SESSION.lock().expect("poisoned");
@@ -2009,7 +2131,9 @@ pub(crate) fn hide_keyboard_for_runtime(native_session: Option<&NativeSession>) 
     });
     if let Some(session) = native_session {
         if session.is_active() {
-            session.app.hide_soft_input(false);
+            if let Some(app) = session.app() {
+                app.hide_soft_input(false);
+            }
         }
     } else if let Some(app) = android_app() {
         app.hide_soft_input(false);
@@ -2322,6 +2446,30 @@ pub unsafe extern "C" fn Java_dev_gpui_mobile_GpuiMediaSession_nativeMediaSeek(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn native_window_registry_pins_last_external_arc_until_owner_drain() {
+        let registry = NativeWindowRegistry::default();
+        let window = super::super::window::AndroidWindow::headless(8, 6, 1.0);
+        let weak = Arc::downgrade(&window);
+        registry.register(&window);
+
+        std::thread::spawn(move || drop(window))
+            .join()
+            .expect("external handle drop should not panic");
+        assert!(
+            weak.upgrade().is_some(),
+            "the owner registry must keep a live native handle pinned"
+        );
+
+        let owner_windows = registry.take();
+        assert_eq!(owner_windows.len(), 1);
+        drop(owner_windows);
+        assert!(
+            weak.upgrade().is_none(),
+            "the owner drain should release the final handle"
+        );
+    }
 
     #[test]
     fn poll_events_returns_false_when_no_platform() {

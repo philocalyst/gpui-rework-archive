@@ -356,7 +356,8 @@ fn with_activity<T>(
             if !session.is_active() {
                 return Err("Activity session has ended".into());
             }
-            let activity = session.app.activity_as_ptr();
+            let app = session.app().ok_or("Activity session has ended")?;
+            let activity = app.activity_as_ptr();
             if activity.is_null() {
                 return Err("Activity is no longer available".into());
             }

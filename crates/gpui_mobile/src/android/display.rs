@@ -278,6 +278,7 @@ impl fmt::Display for AndroidDisplay {
 ///
 /// On a typical Android device there is a single display.  Foldables and
 /// devices with external display support may expose two.
+#[derive(Default)]
 pub struct DisplayList {
     displays: Vec<AndroidDisplay>,
 }

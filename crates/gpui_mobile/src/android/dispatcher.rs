@@ -25,7 +25,7 @@
 #![allow(unsafe_code)]
 
 use std::{
-    collections::VecDeque,
+    collections::{HashMap, HashSet, VecDeque},
     os::unix::io::RawFd,
     sync::{
         Arc,
@@ -34,7 +34,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use gpui::{PlatformDispatcher, Priority, RunnableVariant};
+use gpui::{LocalTaskScope, PlatformDispatcher, Priority, RunnableVariant};
 use ndk::looper::ForeignLooper;
 use parking_lot::Mutex;
 
@@ -73,9 +73,30 @@ struct libc_looper_opaque {
 
 type BoxedTask = Box<dyn FnOnce() + Send + 'static>;
 
+/// Tasks accepted by the owner-thread queue. Local runnables remain typed so
+/// retirement can drop their futures on the owner instead of invoking Runnable::run
+/// after the executor has begun closing.
+enum MainTask {
+    Generic(BoxedTask),
+    Local {
+        scope: Arc<LocalTaskScope>,
+        runnable: RunnableVariant,
+    },
+}
+
+fn scope_key(scope: &Arc<LocalTaskScope>) -> usize {
+    Arc::as_ptr(scope) as usize
+}
+
 /// Shared state between the dispatcher and the looper callback.
 struct MainQueue {
-    tasks: VecDeque<BoxedTask>,
+    tasks: VecDeque<MainTask>,
+    /// All platform-local task scopes created by this dispatcher.
+    local_scopes: HashMap<usize, Arc<LocalTaskScope>>,
+    /// Scopes whose queued runnables must be canceled, not polled.
+    retiring_scopes: HashSet<usize>,
+    /// Scopes whose queues and task registrations have been sealed.
+    sealed_scopes: HashSet<usize>,
     /// Write end of the wake pipe.
     write_fd: RawFd,
 }
@@ -84,7 +105,7 @@ struct MainQueue {
 
 /// A minimal fixed-size thread-pool for background tasks.
 struct ThreadPool {
-    sender: std::sync::mpsc::Sender<BoxedTask>,
+    sender: Mutex<Option<std::sync::mpsc::Sender<BoxedTask>>>,
 }
 
 impl ThreadPool {
@@ -111,12 +132,31 @@ impl ThreadPool {
                 .expect("failed to spawn background thread");
         }
 
-        ThreadPool { sender }
+        ThreadPool {
+            sender: Mutex::new(Some(sender)),
+        }
     }
 
     fn dispatch(&self, task: BoxedTask) {
-        // If the pool is shutting down the send will fail silently.
-        let _ = self.sender.send(task);
+        // Linearize enqueue against shutdown while keeping rejected task drops
+        // outside the sender lock.
+        let mut task = Some(task);
+        let result = {
+            let sender = self.sender.lock();
+            sender
+                .as_ref()
+                .map(|sender| sender.send(task.take().expect("task available")))
+        };
+        match result {
+            Some(Ok(())) => {}
+            Some(Err(error)) => drop(error.0),
+            None => drop(task),
+        }
+    }
+
+    fn shutdown(&self) {
+        let sender = self.sender.lock().take();
+        drop(sender);
     }
 }
 
@@ -181,6 +221,9 @@ impl AndroidDispatcher {
 
         let main_queue = Arc::new(Mutex::new(MainQueue {
             tasks: VecDeque::new(),
+            local_scopes: HashMap::new(),
+            retiring_scopes: HashSet::new(),
+            sealed_scopes: HashSet::new(),
             write_fd,
         }));
 
@@ -220,6 +263,9 @@ impl AndroidDispatcher {
 
         let main_queue = Arc::new(Mutex::new(MainQueue {
             tasks: VecDeque::new(),
+            local_scopes: HashMap::new(),
+            retiring_scopes: HashSet::new(),
+            sealed_scopes: HashSet::new(),
             write_fd,
         }));
 
@@ -265,7 +311,7 @@ impl AndroidDispatcher {
             drop(task);
             return;
         }
-        q.tasks.push_back(task);
+        q.tasks.push_back(MainTask::Generic(task));
         wake_pipe(q.write_fd);
     }
 
@@ -290,6 +336,10 @@ impl AndroidDispatcher {
         }
         let due = Instant::now() + delay;
         let mut delayed = self.delayed.lock();
+        if self.shutdown.load(Ordering::Acquire) {
+            drop(delayed);
+            return;
+        }
         delayed.push(DelayedTask {
             due,
             task: Box::new(f),
@@ -342,10 +392,10 @@ impl AndroidDispatcher {
         loop {
             let task = {
                 let mut q = self.main_queue.lock();
-                q.tasks.pop_front()
+                pop_main_task(&mut q)
             };
             match task {
-                Some(f) => f(),
+                Some((task, cancel_local)) => run_main_task(task, cancel_local),
                 None => break,
             }
         }
@@ -357,19 +407,98 @@ impl AndroidDispatcher {
             self.is_main_thread(),
             "AndroidDispatcher must be shut down on its owner thread"
         );
-        let mut pending = {
-            let mut queue = self.main_queue.lock();
-            // Serialize the shutdown fence with dispatch_on_main_thread's
-            // queue-lock recheck: nothing can enqueue behind this drain.
-            self.shutdown.store(true, Ordering::SeqCst);
-            std::mem::take(&mut queue.tasks)
-        };
-        // Execute accepted tasks on their owner before callbacks are cleared.
-        // Tasks posted by these tasks are rejected by the shutdown fence.
-        while let Some(task) = pending.pop_front() {
-            task();
+        // Drain to quiescence while still accepting owner-thread wakeups. In
+        // particular, dropping GPUI callback senders can notify EventListeners;
+        // their LocalRunnables must be run/dropped on this owner after notify
+        // releases its internal lock. Seal atomically only after the queue is
+        // empty. Native-session retirement removes library-owned producers
+        // before reaching this point.
+        loop {
+            let pending = {
+                let mut queue = self.main_queue.lock();
+                if queue.tasks.is_empty() {
+                    for (key, scope) in &queue.local_scopes {
+                        assert!(
+                            queue.retiring_scopes.contains(key)
+                                && queue.sealed_scopes.contains(key)
+                                && scope.is_retiring()
+                                && scope.live_task_count() == 0,
+                            "AndroidDispatcher shutdown before local task scope retirement"
+                        );
+                    }
+                    self.shutdown.store(true, Ordering::SeqCst);
+                    break;
+                }
+                std::mem::take(&mut queue.tasks)
+            };
+            for task in pending {
+                let cancel_local = match &task {
+                    MainTask::Local { scope, .. } => {
+                        let queue = self.main_queue.lock();
+                        queue.retiring_scopes.contains(&scope_key(scope)) || scope.is_retiring()
+                    }
+                    MainTask::Generic(_) => false,
+                };
+                run_main_task(task, cancel_local);
+            }
         }
         self.unregister_from_looper();
+        let delayed = std::mem::take(&mut *self.delayed.lock());
+        drop(delayed);
+        self.pool.shutdown();
+    }
+
+    /// Begin cancellation for every local executor owned by this dispatcher.
+    /// Must run on the owner thread before callback producers are detached.
+    pub(crate) fn begin_local_task_retirements(&self) -> Vec<Arc<LocalTaskScope>> {
+        assert!(
+            self.is_main_thread(),
+            "local task retirement is owner-thread-only"
+        );
+        let scopes = {
+            let queue = self.main_queue.lock();
+            queue.local_scopes.values().cloned().collect::<Vec<_>>()
+        };
+        for scope in &scopes {
+            <Self as PlatformDispatcher>::begin_local_task_retirement(self, scope);
+            // The dispatcher phase is set first under its queue lock; this
+            // wake is deliberately outside that lock.
+            scope.begin_retirement();
+        }
+        scopes
+    }
+
+    /// Drain callbacks/cancellations until each local executor has no live
+    /// task headers and can atomically seal admission.
+    pub(crate) fn finish_local_task_retirements(&self, scopes: &[Arc<LocalTaskScope>]) {
+        assert!(
+            self.is_main_thread(),
+            "local task retirement is owner-thread-only"
+        );
+        loop {
+            self.flush_main_thread_tasks();
+            if scopes.iter().all(|scope| {
+                <Self as PlatformDispatcher>::finish_local_task_retirement(self, scope)
+            }) {
+                return;
+            }
+            std::thread::yield_now();
+        }
+    }
+
+    fn enqueue_local_task(&self, scope: Arc<LocalTaskScope>, runnable: RunnableVariant) {
+        let mut queue = self.main_queue.lock();
+        assert!(
+            !self.shutdown.load(Ordering::Acquire),
+            "local runnable scheduled after Android dispatcher retirement"
+        );
+        let key = scope_key(&scope);
+        assert!(
+            queue.local_scopes.contains_key(&key),
+            "unknown Android local task scope"
+        );
+        queue.tasks.push_back(MainTask::Local { scope, runnable });
+        wake_pipe(queue.write_fd);
     }
 
     // ── private helpers ───────────────────────────────────────────────────────
@@ -479,6 +608,25 @@ impl Drop for AndroidDispatcher {
     }
 }
 
+fn pop_main_task(queue: &mut MainQueue) -> Option<(MainTask, bool)> {
+    let task = queue.tasks.pop_front()?;
+    let cancel_local = match &task {
+        MainTask::Generic(_) => false,
+        MainTask::Local { scope, .. } => {
+            queue.retiring_scopes.contains(&scope_key(scope)) || scope.is_retiring()
+        }
+    };
+    Some((task, cancel_local))
+}
+
+fn run_main_task(task: MainTask, cancel_local: bool) {
+    match task {
+        MainTask::Generic(task) => task(),
+        MainTask::Local { runnable, .. } if cancel_local => drop(runnable),
+        MainTask::Local { runnable, .. } => runnable.run(),
+    }
+}
+
 // ── ALooper callback ──────────────────────────────────────────────────────────
 
 /// Called by `ALooper` on the main thread when the wake pipe becomes readable.
@@ -501,10 +649,10 @@ unsafe extern "C" fn looper_callback(fd: RawFd, _events: i32, data: *mut std::ff
     loop {
         let task = {
             let mut q = queue_arc.lock();
-            q.tasks.pop_front()
+            pop_main_task(&mut q)
         };
         match task {
-            Some(f) => f(),
+            Some((task, cancel_local)) => run_main_task(task, cancel_local),
             None => break,
         }
     }
@@ -594,6 +742,9 @@ impl PlatformDispatcher for AndroidDispatcher {
     }
 
     fn dispatch(&self, runnable: RunnableVariant, _priority: Priority) {
+        if self.shutdown.load(Ordering::Acquire) {
+            return;
+        }
         // All non-realtime background tasks go to the thread-pool.
         // Priority-based scheduling is not yet implemented; all tasks are
         // treated equally by the pool.
@@ -603,14 +754,105 @@ impl PlatformDispatcher for AndroidDispatcher {
     }
 
     fn dispatch_on_main_thread(&self, runnable: RunnableVariant, _priority: Priority) {
-        if self.shutdown.load(Ordering::Relaxed) {
+        let mut q = self.main_queue.lock();
+        // Pair this check with shutdown empty-queue seal under the same lock.
+        // Late posts after retirement are rejected; native-session teardown
+        // first drains library-owned local producers on this owner thread.
+        if self.shutdown.load(Ordering::Acquire) {
+            drop(q);
             return;
         }
-        let mut q = self.main_queue.lock();
-        q.tasks.push_back(Box::new(move || {
+        q.tasks.push_back(MainTask::Generic(Box::new(move || {
             runnable.run();
-        }));
+        })));
         wake_pipe(q.write_fd);
+    }
+
+    fn create_local_task_scope(&self) -> Option<Arc<LocalTaskScope>> {
+        let scope = Arc::new(LocalTaskScope::new());
+        let key = scope_key(&scope);
+        let mut queue = self.main_queue.lock();
+        assert!(
+            !self.shutdown.load(Ordering::Acquire),
+            "cannot create a local task scope after dispatcher shutdown"
+        );
+        queue.local_scopes.insert(key, Arc::clone(&scope));
+        Some(scope)
+    }
+
+    fn dispatch_local_task(&self, scope: Arc<LocalTaskScope>, runnable: RunnableVariant) {
+        self.enqueue_local_task(scope, runnable);
+    }
+
+    fn dispatch_local_task_when_idle(
+        &self,
+        scope: Arc<LocalTaskScope>,
+        runnable: RunnableVariant,
+        _timeout: Option<Duration>,
+    ) {
+        // Android's current idle hook is the normal owner queue at low
+        // priority; retain that behavior while preserving the typed scope tag.
+        self.enqueue_local_task(scope, runnable);
+    }
+
+    fn dispatch_local_task_cancellation(
+        &self,
+        scope: Arc<LocalTaskScope>,
+        runnable: RunnableVariant,
+    ) {
+        self.enqueue_local_task(scope, runnable);
+    }
+
+    fn begin_local_task_retirement(&self, scope: &Arc<LocalTaskScope>) {
+        assert!(
+            self.is_main_thread(),
+            "local task retirement is owner-thread-only"
+        );
+        let key = scope_key(scope);
+        let mut queue = self.main_queue.lock();
+        assert!(
+            queue.local_scopes.contains_key(&key),
+            "unknown Android local task scope"
+        );
+        queue.retiring_scopes.insert(key);
+        // ForegroundTaskRetirement calls scope.begin_retirement after this
+        // hook returns, so waking tasks never occurs while the queue is locked.
+    }
+
+    fn drain_local_task_retirements(&self, _scope: &Arc<LocalTaskScope>) {
+        assert!(
+            self.is_main_thread(),
+            "local task retirement is owner-thread-only"
+        );
+        loop {
+            let task = {
+                let mut queue = self.main_queue.lock();
+                pop_main_task(&mut queue)
+            };
+            let Some((task, cancel_local)) = task else {
+                break;
+            };
+            run_main_task(task, cancel_local);
+        }
+    }
+
+    fn finish_local_task_retirement(&self, scope: &Arc<LocalTaskScope>) -> bool {
+        assert!(
+            self.is_main_thread(),
+            "local task retirement is owner-thread-only"
+        );
+        let key = scope_key(scope);
+        let mut queue = self.main_queue.lock();
+        if !queue.retiring_scopes.contains(&key)
+            || queue.tasks.iter().any(|task| {
+                matches!(task, MainTask::Local { scope: queued, .. } if scope_key(queued) == key)
+            })
+            || !scope.seal_if_quiescent()
+        {
+            return false;
+        }
+        queue.sealed_scopes.insert(key);
+        true
     }
 
     fn dispatch_after(&self, duration: Duration, runnable: RunnableVariant) {
@@ -619,6 +861,10 @@ impl PlatformDispatcher for AndroidDispatcher {
         }
         let due = Instant::now() + duration;
         let mut delayed = self.delayed.lock();
+        if self.shutdown.load(Ordering::Acquire) {
+            drop(delayed);
+            return;
+        }
         delayed.push(DelayedTask {
             due,
             task: Box::new(move || {
@@ -678,13 +924,16 @@ mod tests {
 
         let main_queue = Arc::new(Mutex::new(MainQueue {
             tasks: VecDeque::new(),
+            local_scopes: HashMap::new(),
+            retiring_scopes: HashSet::new(),
+            sealed_scopes: HashSet::new(),
             write_fd,
         }));
 
         let dispatcher = AndroidDispatcher {
             main_queue,
             read_fd,
-            looper: Mutex::new(None),
+            looper: None,
             pool: ThreadPool::new(1),
             delayed: Mutex::new(Vec::new()),
             shutdown: AtomicBool::new(false),
@@ -708,12 +957,64 @@ mod tests {
     }
 
     #[test]
+    fn retirement_cancels_accepted_local_runnables_on_the_owner() {
+        struct DropThread {
+            observed: Arc<Mutex<Option<std::thread::ThreadId>>>,
+        }
+        impl Drop for DropThread {
+            fn drop(&mut self) {
+                *self.observed.lock() = Some(std::thread::current().id());
+            }
+        }
+
+        let dispatcher = AndroidDispatcher::new_headless();
+        let foreground = gpui::ForegroundExecutor::new(dispatcher.clone());
+        let owner = std::thread::current().id();
+        let dropped_on = Arc::new(Mutex::new(None));
+        let probe = DropThread {
+            observed: Arc::clone(&dropped_on),
+        };
+        let polls = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let polls_future = Arc::clone(&polls);
+
+        // This runnable is accepted before the retirement cut, but is still
+        // queued. Retirement must turn it into owner-thread cancellation
+        // instead of polling the user future.
+        let _task = foreground.spawn(async move {
+            let _drop_thread = probe;
+            polls_future.fetch_add(1, Ordering::SeqCst);
+            std::future::pending::<()>().await;
+        });
+
+        let scopes = dispatcher.begin_local_task_retirements();
+        dispatcher.finish_local_task_retirements(&scopes);
+
+        assert_eq!(polls.load(Ordering::SeqCst), 0);
+        assert_eq!(*dropped_on.lock(), Some(owner));
+        assert!(scopes.iter().all(|scope| scope.live_task_count() == 0));
+        dispatcher.shutdown();
+    }
+
+    #[test]
     fn shutdown_drains_accepted_tasks_and_rejects_late_tasks() {
         let dispatcher = AndroidDispatcher::new_headless();
         let observed = Arc::new(Mutex::new(Vec::new()));
+        let owner = std::thread::current().id();
+        let dropped_on = Arc::new(Mutex::new(None));
+        struct DropProbe(Arc<Mutex<Option<std::thread::ThreadId>>>);
+        impl Drop for DropProbe {
+            fn drop(&mut self) {
+                *self.0.lock() = Some(std::thread::current().id());
+            }
+        }
+        let probe = DropProbe(Arc::clone(&dropped_on));
         let from_task = Arc::clone(&observed);
         dispatcher.dispatch_on_main_thread(move || from_task.lock().push(1));
+        dispatcher.dispatch_after(Duration::from_secs(600), move || drop(probe));
         dispatcher.shutdown();
+        assert!(dispatcher.pool.sender.lock().is_none());
+        assert!(dispatcher.delayed.lock().is_empty());
+        assert_eq!(*dropped_on.lock(), Some(owner));
         assert_eq!(*observed.lock(), vec![1]);
         let from_late_task = Arc::clone(&observed);
         dispatcher.dispatch_on_main_thread(move || from_late_task.lock().push(2));

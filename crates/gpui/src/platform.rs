@@ -64,7 +64,7 @@ use image::codecs::gif::GifDecoder;
 use image::{AnimationDecoder as _, DynamicImage, Frame};
 use raw_window_handle::{HasDisplayHandle, HasWindowHandle};
 use scheduler::Instant;
-pub use scheduler::RunnableMeta;
+pub use scheduler::{LocalTaskScope, RunnableMeta};
 use schemars::JsonSchema;
 use seahash::SeaHasher;
 use serde::{Deserialize, Serialize};
@@ -1874,6 +1874,55 @@ pub trait PlatformDispatcher: Send + Sync {
     ) {
         let _ = timeout;
         self.dispatch_on_main_thread(runnable, Priority::Low);
+    }
+
+    /// Creates an owner-thread local-task scope for platforms that retire event loops.
+    #[doc(hidden)]
+    fn create_local_task_scope(&self) -> Option<Arc<LocalTaskScope>> {
+        None
+    }
+
+    /// Dispatches a scoped runnable through the normal owner-thread queue.
+    #[doc(hidden)]
+    fn dispatch_local_task(&self, _scope: Arc<LocalTaskScope>, runnable: RunnableVariant) {
+        self.dispatch_on_main_thread(runnable, Priority::default());
+    }
+
+    /// Dispatches a scoped runnable through the owner's idle queue.
+    #[doc(hidden)]
+    fn dispatch_local_task_when_idle(
+        &self,
+        _scope: Arc<LocalTaskScope>,
+        runnable: RunnableVariant,
+        timeout: Option<Duration>,
+    ) {
+        self.dispatch_on_main_thread_when_idle(runnable, timeout);
+    }
+
+    /// Enqueues a scoped runnable for owner-thread destruction without polling.
+    #[doc(hidden)]
+    fn dispatch_local_task_cancellation(
+        &self,
+        _scope: Arc<LocalTaskScope>,
+        runnable: RunnableVariant,
+    ) {
+        self.dispatch_on_main_thread(runnable, Priority::High);
+    }
+
+    /// Begins retiring a scope after switching its queue to cancellation mode.
+    #[doc(hidden)]
+    fn begin_local_task_retirement(&self, scope: &Arc<LocalTaskScope>) {
+        scope.begin_retirement();
+    }
+
+    /// Drops one batch of queued cancellation runnables on the owner thread.
+    #[doc(hidden)]
+    fn drain_local_task_retirements(&self, _scope: &Arc<LocalTaskScope>) {}
+
+    /// Finishes retirement only after all scoped queues and tasks are empty.
+    #[doc(hidden)]
+    fn finish_local_task_retirement(&self, scope: &Arc<LocalTaskScope>) -> bool {
+        scope.seal_if_quiescent()
     }
 
     fn idle_time_remaining(&self) -> Option<Duration> {
