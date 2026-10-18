@@ -536,8 +536,9 @@ impl AndroidWindow {
         // and creating/configuring the replacement first can fail with
         // EGL_BAD_ALLOC while the old EGL surface still owns that queue.
         let incoming_addr = native_window.ptr().as_ptr() as usize;
+        let previous_window_addr = state.surface_window_addr;
         if let Some(renderer) = state.renderer.as_mut() {
-            let same_window = state.surface_window_addr == incoming_addr;
+            let same_window = previous_window_addr == incoming_addr;
             log::info!(
                 "AndroidWindow::init_window — {} native window, rebuilding surface {}×{}",
                 if same_window { "same" } else { "new" },
