@@ -381,9 +381,22 @@ def display_size(serial: str) -> tuple[int, int]:
 def display_rotation(serial: str) -> int:
     output = adb(serial, "shell", "dumpsys", "window", "displays")
     match = re.search(r"mDisplayRotation=ROTATION_(0|90|180|270)", output)
-    if not match:
-        raise RuntimeError(f"could not read current display rotation from window manager: {output[:1000]}")
-    return int(match.group(1))
+    if match:
+        return int(match.group(1))
+    # API 26 omits mDisplayRotation from dumpsys window displays; Android 10
+    # may instead expose mCurrentRotation.
+    legacy_window_match = re.search(r"mCurrentRotation=ROTATION_(0|90|180|270)", output)
+    if legacy_window_match:
+        return int(legacy_window_match.group(1))
+    # API 26 exposes the same quarter-turn index through InputManager.
+    legacy = adb(serial, "shell", "dumpsys", "input")
+    legacy_match = re.search(r"^\s*SurfaceOrientation:\s*([0-3])\s*$", legacy, re.MULTILINE)
+    if legacy_match:
+        return int(legacy_match.group(1)) * 90
+    raise RuntimeError(
+        "could not read current display rotation from window or input manager: "
+        f"{output[:1000]}\n{legacy[:1000]}"
+    )
 
 
 def wait_rotation(serial: str, expected: int, timeout: float = 10) -> None:

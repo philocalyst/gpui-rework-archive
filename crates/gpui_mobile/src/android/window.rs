@@ -332,17 +332,11 @@ struct WindowState {
     /// Whether the window background should be transparent.
     transparent: bool,
 
-    /// Address of the `ANativeWindow` the renderer's wgpu surface was created from.
+    /// Address of the last `ANativeWindow` used to build the renderer surface.
     ///
-    /// Vulkan permits one surface per native window, and `replace_surface` builds the
-    /// new surface *before* dropping the old one. The framework sometimes hands a
-    /// recreated `SurfaceView` back the very same `ANativeWindow`, and building a second
-    /// surface for it aborts inside wgpu-hal with `ERROR_NATIVE_WINDOW_IN_USE_KHR`.
-    /// Comparing against this address lets `init_window` release the old surface before
-    /// creating the new one. The field is never cleared in `term_window` —
-    /// `unconfigure_surface` keeps the wgpu surface (and therefore the native window)
-    /// alive, so a matching address always means the *same live* object rather than a
-    /// recycled allocation.
+    /// Kept across `term_window` for diagnostics only. The old surface and native
+    /// window are released there; pointer equality after a later init is not treated
+    /// as proof that Android returned the same live window object.
     surface_window_addr: usize,
 
     // ── callbacks ─────────────────────────────────────────────────────────
@@ -536,71 +530,35 @@ impl AndroidWindow {
         let mut state = self.state.lock();
         let transparent = state.transparent;
 
-        // If a renderer already exists (kept alive across term_window), just
-        // replace its surface.  This preserves the atlas and all cached
-        // AtlasTextureIds so GPUI's scene cache remains valid.
+        // A renderer can survive `term_window` so its GPU context remains
+        // available. Rebuild its surface only after dropping the previous one:
+        // EGL/Android may reuse a BufferQueue for a new ANativeWindow pointer,
+        // and creating/configuring the replacement first can fail with
+        // EGL_BAD_ALLOC while the old EGL surface still owns that queue.
         let incoming_addr = native_window.ptr().as_ptr() as usize;
-        if state.renderer.is_some() && state.surface_window_addr == incoming_addr {
-            // Same live `ANativeWindow` as the surface we already hold. Two things
-            // rule out the paths used elsewhere in this function:
-            //
-            // - `replace_surface` creates the new surface *before* dropping the old
-            //   one, and Vulkan refuses a second surface on a window that is still
-            //   connected (`ERROR_NATIVE_WINDOW_IN_USE_KHR`, an `expect` inside
-            //   wgpu-hal that cannot be caught).
-            // - `update_drawable_size` alone is not enough: `term_window` left the
-            //   surface unconfigured, and nothing but a surface rebuild re-arms it,
-            //   so `draw` would keep bailing out and the window would stay black.
-            //
-            // `destroy` releases the old surface first; `recover` then rebuilds the
-            // renderer on the same window while keeping the atlas `Arc` that GPUI
-            // holds (its tiles are cleared and re-rasterised on the next paint, which
-            // `force_render_once` below guarantees).
+        if let Some(renderer) = state.renderer.as_mut() {
+            let same_window = state.surface_window_addr == incoming_addr;
             log::info!(
-                "AndroidWindow::init_window — same native window, rebuilding surface {}×{}",
+                "AndroidWindow::init_window — {} native window, rebuilding surface {}×{}",
+                if same_window { "same" } else { "new" },
                 width,
                 height
             );
             let raw = Self::raw_window(&native_window);
-            let renderer = state.renderer.as_mut().unwrap();
+            // Dropping renderer resources drops the old wgpu Surface and its EGL
+            // swapchain before `recover` creates the new platform surface. The
+            // renderer keeps its context and Atlas Arc; recovery clears stale atlas
+            // tiles so the forced full frame below rerasterizes them.
+            renderer.unconfigure_surface();
             renderer.destroy();
             renderer
                 .recover(&raw)
-                .context("failed to rebuild the wgpu surface on the same native window")?;
+                .context("failed to rebuild the wgpu surface after Android window init")?;
             renderer.update_drawable_size(gpui::size(
                 gpui::DevicePixels(width),
                 gpui::DevicePixels(height),
             ));
-        } else if state.renderer.is_some() {
-            let raw = Self::raw_window(&native_window);
-            let config = WgpuSurfaceConfig {
-                size: gpui::size(gpui::DevicePixels(width), gpui::DevicePixels(height)),
-                transparent,
-                // `None` keeps the mode negotiated when the renderer was created.
-                // `replace_surface` applies a preferred mode without checking the
-                // surface caps (unlike `WgpuRenderer::new`), and GL only offers
-                // `Fifo`: asking for `Mailbox` here leaves the surface unconfigured
-                // and the next frame panics in `get_current_texture_view`.
-                preferred_present_mode: None,
-            };
-            let instance = state
-                .gpu_context
-                .borrow()
-                .as_ref()
-                .ok_or_else(|| anyhow::anyhow!("gpu_context missing during surface replacement"))?
-                .instance
-                .clone();
-            state
-                .renderer
-                .as_mut()
-                .unwrap()
-                .replace_surface(&raw, config, &instance)?;
             state.surface_window_addr = incoming_addr;
-            log::info!(
-                "AndroidWindow::init_window — replaced surface {}×{}",
-                width,
-                height
-            );
         } else {
             // First init or after a full destroy — create a fresh renderer.
             let ctx = if state.gpu_context.borrow().is_some() {
@@ -671,15 +629,18 @@ impl AndroidWindow {
     pub fn term_window(&self) {
         let mut state = self.state.lock();
 
-        // Unconfigure the surface so the renderer stops trying to present,
-        // but keep the renderer alive so the atlas (with all cached
-        // texture IDs) survives across the background/foreground cycle.
-        if let Some(ref mut renderer) = state.renderer {
+        // Drop the wgpu surface before releasing its raw Android window handle.
+        // The renderer wrapper, GPU context, and atlas Arc remain available for
+        // recovery when the next native window is initialized.
+        if let Some(renderer) = state.renderer.as_mut() {
             renderer.unconfigure_surface();
-            log::info!("AndroidWindow::term_window — surface unconfigured (renderer kept alive)");
+            renderer.destroy();
+            log::info!(
+                "AndroidWindow::term_window — surface resources dropped (renderer context retained)"
+            );
         }
 
-        // Release our reference on the native window.
+        // The surface no longer refers to this handle, so it is now safe to release.
         state.native_window = None;
 
         state.is_active = false;
