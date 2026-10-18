@@ -1,4 +1,5 @@
 import sys
+import tempfile
 import unittest
 from unittest.mock import patch
 from pathlib import Path
@@ -61,6 +62,64 @@ class RuntimeFailureClassificationTests(unittest.TestCase):
     def test_anr_remains_fatal(self):
         line = "10-18 10:20:42.719 5295 5383 E ActivityManager: ANR in dev.gpui.mobile.example"
         self.assertEqual(android_acceptance.runtime_failure_lines(line), [line])
+
+
+class KeyboardInsetConvergenceTests(unittest.TestCase):
+    def run_hidden_inset_check(self, labels, *, geometry=None, advance=0.25):
+        now = [0.0]
+        label_values = iter(labels)
+
+        def fake_adb(_serial, *args, **_kwargs):
+            if args == ("shell", "getprop", "ro.build.version.sdk"):
+                return "29"
+            if args == ("shell", "dumpsys", "input_method"):
+                return "mInputShown=false mIsInputViewShown=true"
+            if args == ("shell", "dumpsys", "window", "displays"):
+                return ""
+            if args == ("shell", "dumpsys", "window", "windows"):
+                return ""
+            if args == ("shell", "wm", "density"):
+                return "Physical density: 420"
+            raise AssertionError(f"unexpected adb command: {args!r}")
+
+        def fake_dump(_serial, _artifact, _name):
+            try:
+                label = next(label_values)
+            except StopIteration:
+                label = labels[-1]
+            return f'<hierarchy><node content-desc="{label}" /></hierarchy>'
+
+        def fake_sleep(_duration):
+            now[0] += advance
+
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(android_acceptance, "adb", side_effect=fake_adb), \
+                 patch.object(android_acceptance, "dump_ui", side_effect=fake_dump), \
+                 patch.object(android_acceptance.time, "monotonic", side_effect=lambda: now[0]), \
+                 patch.object(android_acceptance.time, "sleep", side_effect=fake_sleep):
+                if geometry is None:
+                    return android_acceptance.check_keyboard_inset(
+                        "serial", Path(directory), "hidden", False)
+                with patch.object(android_acceptance, "parse_ime_geometry", return_value=geometry):
+                    return android_acceptance.check_keyboard_inset(
+                        "serial", Path(directory), "hidden", False)
+
+    def test_hidden_inset_stale_value_waits_for_geometry_convergence(self):
+        self.assertEqual(
+            self.run_hidden_inset_check(["Keyboard inset: 72 px", "Keyboard inset: 0 px"]),
+            0,
+        )
+
+    def test_persistent_hidden_inset_mismatch_fails_at_original_deadline(self):
+        with self.assertRaisesRegex(RuntimeError, "last inset mismatch=Keyboard inset: 72 px"):
+            self.run_hidden_inset_check(["Keyboard inset: 72 px"], advance=20.0)
+
+    def test_hidden_state_rejects_remaining_visible_ime_geometry(self):
+        with self.assertRaisesRegex(RuntimeError, "geometry_visible=True"):
+            self.run_hidden_inset_check(
+                ["Keyboard inset: 0 px"], geometry=[(225, "visible InputMethod surface")],
+                advance=20.0,
+            )
 
 
 class FontScaleRecreationTests(unittest.TestCase):

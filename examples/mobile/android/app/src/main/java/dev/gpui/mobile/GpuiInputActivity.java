@@ -138,10 +138,18 @@ public class GpuiInputActivity extends NativeActivity {
         return obscuredBottom > safeBottom + 1 ? obscuredBottom : 0;
     }
 
+    private boolean legacyImeWasVisible;
+
     private void publishLegacyInsets() {
         if (Build.VERSION.SDK_INT >= 30) return;
+        int imeBottom = legacyImeBottom();
+        boolean imeVisible = imeBottom > 0;
+        boolean imeHiddenWhileFocused = legacyImeWasVisible && !imeVisible
+                && keyboardSessionActive && input != null && input.hasFocus() && hasWindowFocus();
+        legacyImeWasVisible = imeVisible;
+        if (imeHiddenWhileFocused) input.keyboardHiddenByBack();
         nativeInsets(lastSafeInsets[0], lastSafeInsets[1], lastSafeInsets[2], lastSafeInsets[3],
-                0, 0, legacyImeBottom(), 0);
+                0, 0, imeBottom, 0);
     }
 
     @Override protected void onStart() {
@@ -166,6 +174,7 @@ public class GpuiInputActivity extends NativeActivity {
     }
 
     @Override protected void onStop() {
+        if (Build.VERSION.SDK_INT < 30) legacyImeWasVisible = false;
         nativeInsets(lastSafeInsets[0], lastSafeInsets[1], lastSafeInsets[2],
                 lastSafeInsets[3], 0, 0, 0, 0);
         super.onStop();
@@ -509,7 +518,10 @@ public class GpuiInputActivity extends NativeActivity {
             }
         }
 
-        private void keyboardHiddenByBack() { sendIme(5, "", 0, 0); }
+        private void keyboardHiddenByBack() {
+            keyboardSessionActive = false;
+            sendIme(5, "", 0, 0);
+        }
 
         @Override public boolean onKeyPreIme(int code, KeyEvent event) {
             if (code == KeyEvent.KEYCODE_BACK) {

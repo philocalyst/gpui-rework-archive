@@ -200,6 +200,8 @@ def check_keyboard_inset(serial: str, artifact: Path, name: str, visible: bool) 
     last_ime = ""
     last_window = ""
     last_legacy = ""
+    last_mismatch = ""
+    last_visibility_geometry = ""
     while time.monotonic() < deadline:
         xml = dump_ui(serial, artifact, f"{name}-keyboard-inset")
         labels = exact_labels(xml)
@@ -218,6 +220,10 @@ def check_keyboard_inset(serial: str, artifact: Path, name: str, visible: bool) 
                 "no visible IME geometry (legacy window parser or modern InsetsSource absent)"
             )
             geometry_visible = bool(geometries)
+            last_visibility_geometry = (
+                f"input_method_shown={shown}, geometry_visible={geometry_visible}, "
+                f"expected_visible={visible}"
+            )
             if shown == visible and geometry_visible == visible:
                 if visible:
                     physical_bottom = geometries[-1][0]
@@ -230,10 +236,14 @@ def check_keyboard_inset(serial: str, artifact: Path, name: str, visible: bool) 
                 density = int(density_match.group(1)) / 160.0
                 expected = int(physical_bottom / density + 0.5)
                 if abs(logical - expected) > 1:
-                    raise RuntimeError(
-                        f"{name}: {label} disagrees with Android IME geometry: "
-                        f"physical_occlusion={physical_bottom}px density={density:g} expected≈{expected}px; {last_geometry}"
+                    last_mismatch = (
+                        f"{label} disagrees with Android IME geometry: "
+                        f"physical_occlusion={physical_bottom}px density={density:g} "
+                        f"expected logical inset={expected}px; {last_geometry}"
                     )
+                    time.sleep(min(0.25, max(0.0, deadline - time.monotonic())))
+                    continue
+                last_mismatch = ""
                 (artifact / f"{name}-keyboard-inset.txt").write_text(
                     f"api={api}\naccessibility probe: {label}\n"
                     f"expected logical inset from Android IME geometry: {expected} px\n"
@@ -248,7 +258,8 @@ def check_keyboard_inset(serial: str, artifact: Path, name: str, visible: bool) 
     last_shown_state = input_method_is_shown(last_ime)
     raise RuntimeError(
         f"{name}: keyboard inset did not reach visible={visible}; last probe={last_label!r}; "
-        f"last input_method shown={last_shown_state}; geometry={last_geometry}"
+        f"last input_method shown={last_shown_state}; geometry={last_geometry}; "
+        f"visibility/geometry={last_visibility_geometry}; last inset mismatch={last_mismatch or 'none'}"
     )
 
 
