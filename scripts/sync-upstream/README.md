@@ -146,6 +146,10 @@ SYNC_VERIFY_CMD="just ci-test" just sync-upstream
 just sync-upstream --ref some-tag --no-bump --dry-run
 ```
 
+### Resuming a paused external session
+
+When the script pauses for an external agent, the session checkpoint records the effective values of `SYNC_VERIFY_CMD`, `SYNC_TEST_CMD`, `SYNC_RUN_TESTS`, and `SYNC_FAIL_ON_WARNINGS` as `verify_cmd`, `test_cmd`, `run_tests`, and `fail_on_warnings`. Resume restores those pinned settings before continuing, so a different or unset environment in the later shell does not silently change the gates for that sync. Checkpoints created before these settings were recorded are rejected; restart the sync instead of resuming with current defaults.
+
 ## Caveats
 
 - The compile gate is host-only (`just check` / `cargo check --workspace`). macOS- and
