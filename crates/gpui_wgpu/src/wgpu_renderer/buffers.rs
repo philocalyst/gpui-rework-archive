@@ -187,32 +187,42 @@ impl InstanceUpload {
         }
     }
 
-    pub(super) fn finish(&mut self, encoder: &mut wgpu::CommandEncoder) {
-        // Dropping the mapped views schedules queue writes before the next submission.
+    /// Finalizes frame-local uploads and returns the data-texture copy command buffer, if any.
+    ///
+    /// The copy is submitted before the draw command buffer. WebGL2 reads instance payloads
+    /// from the texture in the vertex stage, so recording its upload after render passes would
+    /// make the first draw observe the previous frame's texture contents.
+    pub(super) fn finish(&mut self, device: &wgpu::Device) -> Option<wgpu::CommandBuffer> {
+        // Dropping mapped views schedules queue writes before the next submission.
         self.staging.take();
         self.range_upload.take();
-        if let Some(copy) = &self.texture_copy {
-            let used_texels = self.cursor.div_ceil(TEXEL_BYTES);
-            if used_texels > 0 {
-                let height = used_texels.div_ceil(u64::from(DATA_TEXTURE_WIDTH));
-                encoder.copy_buffer_to_texture(
-                    wgpu::TexelCopyBufferInfo {
-                        buffer: &copy.staging,
-                        layout: wgpu::TexelCopyBufferLayout {
-                            offset: 0,
-                            bytes_per_row: Some(DATA_TEXTURE_WIDTH * TEXEL_BYTES as u32),
-                            rows_per_image: Some(height as u32),
-                        },
-                    },
-                    copy.texture.as_image_copy(),
-                    wgpu::Extent3d {
-                        width: DATA_TEXTURE_WIDTH,
-                        height: height as u32,
-                        depth_or_array_layers: 1,
-                    },
-                );
-            }
+        let copy = self.texture_copy.as_ref()?;
+        let used_texels = self.cursor.div_ceil(TEXEL_BYTES);
+        if used_texels == 0 {
+            return None;
         }
+
+        let height = used_texels.div_ceil(u64::from(DATA_TEXTURE_WIDTH));
+        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("gpui_instance_texture_upload"),
+        });
+        encoder.copy_buffer_to_texture(
+            wgpu::TexelCopyBufferInfo {
+                buffer: &copy.staging,
+                layout: wgpu::TexelCopyBufferLayout {
+                    offset: 0,
+                    bytes_per_row: Some(DATA_TEXTURE_WIDTH * TEXEL_BYTES as u32),
+                    rows_per_image: Some(height as u32),
+                },
+            },
+            copy.texture.as_image_copy(),
+            wgpu::Extent3d {
+                width: DATA_TEXTURE_WIDTH,
+                height: height as u32,
+                depth_or_array_layers: 1,
+            },
+        );
+        Some(encoder.finish())
     }
 }
 

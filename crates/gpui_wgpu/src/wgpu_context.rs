@@ -497,7 +497,39 @@ impl WgpuContext {
     pub fn new_headless(
         extra_requirements: Option<&WgpuDeviceRequirements>,
     ) -> anyhow::Result<Self> {
-        NativeBackend::try_in_preference_order("a headless GPU context", |backend| {
+        Self::new_headless_with_backends(
+            "a headless GPU context",
+            NativeBackend::PREFERENCE,
+            extra_requirements,
+            None,
+        )
+    }
+
+    #[cfg(all(
+        test,
+        feature = "test-support",
+        not(target_family = "wasm"),
+        not(target_vendor = "apple")
+    ))]
+    pub(crate) fn new_headless_gl_for_test(
+        renderer_tier_override: Option<RendererTier>,
+    ) -> anyhow::Result<Self> {
+        Self::new_headless_with_backends(
+            "a forced-GL headless renderer regression test",
+            &[NativeBackend::Gl],
+            None,
+            renderer_tier_override,
+        )
+    }
+
+    #[cfg(not(target_family = "wasm"))]
+    fn new_headless_with_backends(
+        operation: &'static str,
+        backends: &[NativeBackend],
+        extra_requirements: Option<&WgpuDeviceRequirements>,
+        renderer_tier_override: Option<RendererTier>,
+    ) -> anyhow::Result<Self> {
+        NativeBackend::try_in_order(operation, backends, |backend| {
             let instance = backend.instance(None);
             let adapter =
                 gpui::block_on(instance.raw.request_adapter(&wgpu::RequestAdapterOptions {
@@ -511,7 +543,11 @@ impl WgpuContext {
                 .map_err(|error| {
                     anyhow::anyhow!("failed to request headless GPU adapter: {error}")
                 })?;
-            let device = gpui::block_on(Self::create_device(&adapter, extra_requirements))?;
+            let device = gpui::block_on(Self::create_device(
+                &adapter,
+                extra_requirements,
+                renderer_tier_override,
+            ))?;
             Self::from_created_device(instance.raw, adapter, device)
         })
     }
@@ -601,7 +637,7 @@ impl WgpuContext {
                     "Failed to request a {preference:?} adapter compatible with the canvas: {error}"
                 )
             })?;
-        let device = Self::create_device(&adapter, None).await?;
+        let device = Self::create_device(&adapter, None, None).await?;
         let context = Self::from_created_device(instance, adapter, device)?;
         log::info!(
             "Browser graphics initialized: requested={preference:?}, selected={backend:?}, \
@@ -649,8 +685,9 @@ impl WgpuContext {
     async fn create_device(
         adapter: &wgpu::Adapter,
         extra_requirements: Option<&WgpuDeviceRequirements>,
+        renderer_tier_override: Option<RendererTier>,
     ) -> anyhow::Result<CreatedDevice> {
-        let renderer_tier = renderer_tier(adapter);
+        let renderer_tier = renderer_tier_override.unwrap_or_else(|| renderer_tier(adapter));
         // Our LCD shader uses storage buffers even when the adapter exposes dual-source
         // blending. Downlevel devices must use grayscale and the data-texture dialect.
         let dual_source_blending = renderer_tier == RendererTier::Modern
@@ -881,7 +918,7 @@ impl WgpuContext {
             anyhow::bail!("no compatible alpha modes");
         }
 
-        let device = Self::create_device(adapter, extra_requirements).await?;
+        let device = Self::create_device(adapter, extra_requirements, None).await?;
         let error_scope = device
             .device
             .push_error_scope(wgpu::ErrorFilter::Validation);
