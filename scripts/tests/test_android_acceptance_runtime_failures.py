@@ -1,5 +1,6 @@
 import sys
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -185,6 +186,142 @@ class FontScaleRecreationTests(unittest.TestCase):
                 clock=lambda: 0.0,
                 sleep=lambda _: None,
             )
+
+
+    def test_api29_am_callbacks_are_correlated_by_component_pid_and_order(self):
+        log = """10-18 16:58:27.247 1966 1988 I am_relaunch_resume_activity: [0,218790825,9,dev.gpui.mobile.example/dev.gpui.mobile.GpuiInputActivity]
+10-18 16:58:27.309 6768 6768 I am_on_destroy_called: [0,dev.gpui.mobile.GpuiInputActivity,performDestroy]
+10-18 16:58:27.356 6768 6768 I am_on_create_called: [0,dev.gpui.mobile.GpuiInputActivity,performCreate]"""
+        events = android_acceptance.activity_recreation_events(
+            log, "dev.gpui.mobile.example", "dev.gpui.mobile.GpuiInputActivity", 6768, api=29)
+        android_acceptance.validate_activity_recreation_events(log, events, api=29)
+        self.assertEqual(len(events["relaunch"]), 1)
+        wrong_component = log.replace("GpuiInputActivity]", "GpuiInputActivitySuffix]")
+        wrong_events = android_acceptance.activity_recreation_events(
+            wrong_component, "dev.gpui.mobile.example", "dev.gpui.mobile.GpuiInputActivity", 6768, api=29)
+        with self.assertRaisesRegex(RuntimeError, "same Activity/PID"):
+            android_acceptance.validate_activity_recreation_events(wrong_component, wrong_events, api=29)
+
+    def test_api29_rejects_wrong_process_and_missing_relaunch(self):
+        log = """10-18 16:58:27.247 1966 1988 I am_relaunch_resume_activity: [0,218790825,9,dev.gpui.mobile.example/dev.gpui.mobile.GpuiInputActivity]
+10-18 16:58:27.309 9999 9999 I am_on_destroy_called: [0,dev.gpui.mobile.GpuiInputActivity,performDestroy]
+10-18 16:58:27.356 9999 9999 I am_on_create_called: [0,dev.gpui.mobile.GpuiInputActivity,performCreate]"""
+        events = android_acceptance.activity_recreation_events(
+            log, "dev.gpui.mobile.example", "dev.gpui.mobile.GpuiInputActivity", 6768, api=29)
+        with self.assertRaisesRegex(RuntimeError, "same Activity/PID"):
+            android_acceptance.validate_activity_recreation_events(log, events, api=29)
+        no_relaunch = "\\n".join(log.splitlines()[1:])
+        events = android_acceptance.activity_recreation_events(
+            no_relaunch, "dev.gpui.mobile.example", "dev.gpui.mobile.GpuiInputActivity", 9999, api=29)
+        with self.assertRaisesRegex(RuntimeError, "same Activity/PID"):
+            android_acceptance.validate_activity_recreation_events(no_relaunch, events, api=29)
+
+    def test_api26_requires_native_generation_relaunch_and_resume_sequence(self):
+        log = """10-18 16:56:19.742 1701 1716 I am_relaunch_resume_activity: [0,137211794,9,dev.gpui.mobile.example/dev.gpui.mobile.GpuiInputActivity]
+10-18 16:56:19.806 5131 5150 I gpui-android: gpui_mobile::android::jni: MainEvent::Destroy
+10-18 16:56:19.807 5131 5150 I gpui-android: gpui_mobile::android::jni: run_event_loop: exiting main loop
+10-18 16:56:19.830 5131 5131 I android-activity: Creating: Activity = 0x21d2, saved state size = 0
+10-18 16:56:19.833 5131 5253 I gpui-android: gpui_mobile::android::jni: init_platform: started Activity session generation=2
+10-18 16:56:19.980 5131 5253 I gpui-android: gpui_mobile::android::jni: MainEvent::Start
+10-18 16:56:19.981 5131 5253 I gpui-android: gpui_mobile::android::jni: deferred: Resume (iter=2)"""
+        events = android_acceptance.activity_recreation_events(
+            log, "dev.gpui.mobile.example", "dev.gpui.mobile.GpuiInputActivity", 5131, api=26)
+        android_acceptance.validate_activity_recreation_events(
+            log, events, api=26, baseline_generation=1)
+        self.assertEqual(len(events["relaunch"]), 1)
+
+    def test_api26_rejects_missing_correlation_and_wrong_generation(self):
+        log = """10-18 16:56:19.742 1701 1716 I am_relaunch_resume_activity: [0,137211794,9,dev.gpui.mobile.example/dev.gpui.mobile.GpuiInputActivity]
+10-18 16:56:19.806 5131 5150 I gpui-android: gpui_mobile::android::jni: MainEvent::Destroy
+10-18 16:56:19.807 5131 5150 I gpui-android: gpui_mobile::android::jni: run_event_loop: exiting main loop
+10-18 16:56:19.830 5131 5131 I android-activity: Creating: Activity = 0x21d2, saved state size = 0
+10-18 16:56:19.833 5131 5253 I gpui-android: gpui_mobile::android::jni: init_platform: started Activity session generation=2
+10-18 16:56:19.980 5131 5253 I gpui-android: gpui_mobile::android::jni: MainEvent::Start
+10-18 16:56:19.981 5131 5253 I gpui-android: gpui_mobile::android::jni: deferred: Resume (iter=2)"""
+        events = android_acceptance.activity_recreation_events(
+            log, "dev.gpui.mobile.example", "dev.gpui.mobile.GpuiInputActivity", 5131, api=26)
+        with self.assertRaisesRegex(RuntimeError, "does not expose an ActivityRecord token"):
+            android_acceptance.validate_activity_recreation_events(
+                log, events, api=26, baseline_generation=0)
+        wrong_process = "\\n".join(
+            line.replace("5131", "9999") if "5131" in line else line
+            for line in log.splitlines()
+        )
+        events = android_acceptance.activity_recreation_events(
+            wrong_process, "dev.gpui.mobile.example", "dev.gpui.mobile.GpuiInputActivity", 5131, api=26)
+        with self.assertRaisesRegex(RuntimeError, "does not expose an ActivityRecord token"):
+            android_acceptance.validate_activity_recreation_events(
+                wrong_process, events, api=26, baseline_generation=1)
+        no_relaunch = "\\n".join(line for line in log.splitlines() if "am_relaunch_resume_activity" not in line)
+        events = android_acceptance.activity_recreation_events(
+            no_relaunch, "dev.gpui.mobile.example", "dev.gpui.mobile.GpuiInputActivity", 5131, api=26)
+        with self.assertRaisesRegex(RuntimeError, "does not expose an ActivityRecord token"):
+            android_acceptance.validate_activity_recreation_events(
+                no_relaunch, events, api=26, baseline_generation=1)
+
+    def test_modern_ime_visibility_reads_geometry_then_input_method(self):
+        calls = []
+        _, ime, geometry = android_acceptance.modern_ime_visibility_sample(
+            lambda: calls.append("window") or
+                "InsetsSource id=0x2 type=ime frame=[0,1200][1080,1920] visible=true",
+            lambda: calls.append("input_method") or "mInputShown=true",
+        )
+        self.assertEqual(calls, ["window", "input_method"])
+        self.assertTrue(geometry)
+        self.assertTrue(android_acceptance.input_method_is_shown(ime))
+
+    def test_modern_ime_visibility_skips_slow_input_dump_until_geometry_exists(self):
+        calls = []
+        _, ime, geometry = android_acceptance.modern_ime_visibility_sample(
+            lambda: calls.append("window") or
+                "InsetsSource id=0x2 type=ime frame=[0,1920][1080,1920] visible=false",
+            lambda: calls.append("input_method") or "mInputShown=true",
+        )
+        self.assertEqual(calls, ["window"])
+        self.assertEqual(ime, "")
+        self.assertEqual(geometry, [])
+
+    def test_modern_ime_visibility_still_requires_true_input_method_state(self):
+        calls = []
+        _, ime, geometry = android_acceptance.modern_ime_visibility_sample(
+            lambda: calls.append("window") or
+                "InsetsSource id=0x2 type=ime frame=[0,1200][1080,1920] visible=true",
+            lambda: calls.append("input_method") or "mInputShown=false",
+        )
+        self.assertEqual(calls, ["window", "input_method"])
+        self.assertTrue(geometry)
+        self.assertFalse(android_acceptance.input_method_is_shown(ime))
+        self.assertFalse(android_acceptance.ime_visibility_matches(True, ime, geometry))
+
+
+    def test_api36_visible_poll_respects_one_deadline_without_ime_dump_until_geometry(self):
+        now = [0.0]
+        calls = []
+        timeouts = []
+
+        def fake_adb(serial, *args, timeout=30, **kwargs):
+            calls.append(args)
+            timeouts.append(timeout)
+            if args == ("shell", "getprop", "ro.build.version.sdk"):
+                return "36"
+            if args == ("shell", "dumpsys", "window", "displays"):
+                return "InsetsSource id=0x2 type=ime frame=[0,1920][1080,1920] visible=false"
+            if args == ("shell", "dumpsys", "input_method"):
+                self.fail("slow input_method dump must not run without visible geometry")
+            self.fail(f"unexpected adb command: {args}")
+
+        def fake_sleep(duration):
+            now[0] += duration
+
+        with patch.object(android_acceptance, "adb", side_effect=fake_adb), \
+             patch.object(android_acceptance.time, "monotonic", side_effect=lambda: now[0]), \
+             patch.object(android_acceptance.time, "sleep", side_effect=fake_sleep):
+            with self.assertRaisesRegex(RuntimeError, "did not become visible within 0.3s"):
+                android_acceptance.check_ime_shown("emulator-test", timeout=0.3)
+        self.assertNotIn(("shell", "dumpsys", "input_method"), calls)
+        self.assertTrue(timeouts)
+        self.assertTrue(all(0 < timeout <= 0.3 for timeout in timeouts))
+        self.assertLessEqual(now[0], 0.3)
 
 
 if __name__ == "__main__":

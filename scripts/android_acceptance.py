@@ -260,81 +260,171 @@ def app_pid(serial: str, package: str, timeout: float = 30) -> int:
     return values[0]
 
 
-def activity_recreation_events(logs: str, package: str, activity: str, pid: int) -> dict[str, list[str]]:
-    """Select durable Activity lifecycle events for one process and component."""
-    events: dict[str, list[str]] = {"relaunch": [], "destroy": [], "create": []}
+def _line_pid(line: str) -> int | None:
+    match = re.match(r"^\S+\s+\S+\s+(\d+)\s+\d+\s+[A-Z]\s+", line)
+    return int(match.group(1)) if match else None
+
+
+def _legacy_relaunch_matches_component(line: str, component: str) -> bool:
+    match = re.search(r"\bam_relaunch_resume_activity:\s*\[([^]]+)\]", line)
+    if not match:
+        return False
+    fields = match.group(1).split(",")
+    return len(fields) >= 4 and fields[3] == component
+
+
+def activity_recreation_events(logs: str, package: str, activity: str, pid: int, api: int = 30) -> dict[str, list[str]]:
+    """Collect lifecycle evidence using the captured schema for each Android API."""
+    events = {key: [] for key in (
+        "relaunch", "destroy", "create", "native_destroy", "event_loop_exit",
+        "native_create", "generation", "start", "resume",
+    )}
     component = f"{package}/{activity}"
     for line in logs.splitlines():
-        if "wm_relaunch_resume_activity:" in line and component in line:
-            events["relaunch"].append(line)
-            continue
-        match = re.search(r"\bwm_on_(destroy|create)_called:\s*\[([^,]+),([^,]+),", line)
-        if not match or match.group(3) != activity:
-            continue
-        pid_match = re.match(r"^\S+\s+\S+\s+(\d+)\s+\d+\s+[A-Z]\s+", line)
-        if not pid_match or int(pid_match.group(1)) != pid:
-            continue
-        events[match.group(1)].append(line)
+        if api >= 30:
+            if "wm_relaunch_resume_activity:" in line and component in line:
+                events["relaunch"].append(line)
+                continue
+            match = re.search(r"\bwm_on_(destroy|create)_called:\s*\[([^,]+),([^,]+),", line)
+            if match and match.group(3) == activity and _line_pid(line) == pid:
+                events[match.group(1)].append(line)
+        elif api == 29:
+            if _legacy_relaunch_matches_component(line, component):
+                events["relaunch"].append(line)
+                continue
+            match = re.search(r"\bam_on_(destroy|create)_called:\s*\[([^,]+),([^,]+),", line)
+            if match and match.group(3) == activity and _line_pid(line) == pid:
+                events[match.group(1)].append(line)
+        else:
+            if _legacy_relaunch_matches_component(line, component):
+                events["relaunch"].append(line)
+            if _line_pid(line) != pid:
+                continue
+            if "MainEvent::Destroy" in line:
+                events["native_destroy"].append(line)
+            if "run_event_loop: exiting main loop" in line:
+                events["event_loop_exit"].append(line)
+            if "android-activity: Creating: Activity =" in line:
+                events["native_create"].append(line)
+            if "init_platform: started Activity session generation=" in line:
+                events["generation"].append(line)
+            if "MainEvent::Start" in line:
+                events["start"].append(line)
+            if "deferred: Resume" in line:
+                events["resume"].append(line)
     return events
 
 
+def _line_ordered_after(logs: str, earlier: str, later: str) -> bool:
+    first = logs.rfind(earlier)
+    second = logs.find(later, first + len(earlier)) if first >= 0 else -1
+    return first >= 0 and second > first
+
+
 def activity_create_follows_destroy(logs: str, events: dict[str, list[str]]) -> bool:
-    """Return whether this log slice contains a create after the latest destroy."""
     if not events["destroy"]:
         return False
-    destroy_line = events["destroy"][-1]
-    destroy_position = logs.rfind(destroy_line)
-    return destroy_position >= 0 and any(
-        logs.find(line) > destroy_position for line in events["create"]
+    destroy_position = logs.rfind(events["destroy"][-1])
+    return destroy_position >= 0 and any(logs.find(line) > destroy_position for line in events["create"])
+
+
+def api26_native_recreation_follows_destroy(
+    logs: str, events: dict[str, list[str]], baseline_generation: int | None
+) -> bool:
+    if baseline_generation is None or not events["relaunch"]:
+        return False
+    required = ("native_destroy", "event_loop_exit", "native_create", "generation", "start", "resume")
+    if any(not events[key] for key in required):
+        return False
+    relaunch, destroy = events["relaunch"][-1], events["native_destroy"][-1]
+    exiting = next((line for line in events["event_loop_exit"] if _line_ordered_after(logs, destroy, line)), "")
+    creating = next((line for line in events["native_create"] if exiting and _line_ordered_after(logs, exiting, line)), "")
+    generation = next((line for line in events["generation"] if creating and _line_ordered_after(logs, creating, line)), "")
+    start = next((line for line in events["start"] if generation and _line_ordered_after(logs, generation, line)), "")
+    resume = next((line for line in events["resume"] if start and _line_ordered_after(logs, start, line)), "")
+    parsed_generation = re.search(r"session generation=(\d+)", generation)
+    return bool(
+        _line_ordered_after(logs, relaunch, destroy)
+        and exiting and creating and generation and start and resume and parsed_generation
+        and int(parsed_generation.group(1)) == baseline_generation + 1
     )
 
 
-def validate_activity_recreation_events(logs: str, events: dict[str, list[str]]) -> None:
+def validate_activity_recreation_events(
+    logs: str, events: dict[str, list[str]], api: int = 30,
+    baseline_generation: int | None = None,
+) -> None:
+    if api == 26:
+        if not api26_native_recreation_follows_destroy(logs, events, baseline_generation):
+            raise RuntimeError(
+                "API26 recreation lacks correlated same-PID native Destroy/exit/Create, "
+                "generation increment, Start, and Resume after matching relaunch; "
+                "native Creating does not expose an ActivityRecord token"
+            )
+        return
     if not (events["relaunch"] and events["destroy"] and events["create"]):
-        raise RuntimeError(
-            "font-scale change did not produce durable wm_relaunch_resume_activity, "
-            "wm_on_destroy_called, and wm_on_create_called events for the same Activity/PID")
-    destroy_line = events["destroy"][-1]
-    create_after_destroy = [line for line in events["create"]
-                            if logs.find(line) > logs.rfind(destroy_line)]
-    if not create_after_destroy:
+        names = ("am_relaunch_resume_activity/am_on_destroy_called/am_on_create_called"
+                 if api == 29 else
+                 "wm_relaunch_resume_activity/wm_on_destroy_called/wm_on_create_called")
+        raise RuntimeError(f"font-scale change did not produce durable {names} events for the same Activity/PID")
+    destroy = events["destroy"][-1]
+    creates = [line for line in events["create"] if logs.find(line) > logs.rfind(destroy)]
+    if not creates:
         raise RuntimeError("Activity create event did not follow its destroy event")
-    token = re.search(r"wm_on_destroy_called:\s*\[([^,]+),", destroy_line)
-    create_token = re.search(r"wm_on_create_called:\s*\[([^,]+),", create_after_destroy[-1])
+    if api == 29:
+        if not (_line_ordered_after(logs, events["relaunch"][-1], destroy)
+                and _line_ordered_after(logs, destroy, creates[-1])):
+            raise RuntimeError("API29 Activity callbacks are not ordered after the matching component relaunch")
+        return
+    token = re.search(r"wm_on_destroy_called:\s*\[([^,]+),", destroy)
+    create_token = re.search(r"wm_on_create_called:\s*\[([^,]+),", creates[-1])
     if not token or not create_token or token.group(1) != create_token.group(1):
         raise RuntimeError("Activity lifecycle events refer to different or missing ActivityRecord tokens")
-    relaunch_tokens = []
-    for line in events["relaunch"]:
-        match = re.search(r"wm_relaunch_resume_activity:\s*\[[^,]+,([^,]+),", line)
-        if match:
-            relaunch_tokens.append(match.group(1))
+    relaunch_tokens = [
+        match.group(1)
+        for line in events["relaunch"]
+        if (match := re.search(r"wm_relaunch_resume_activity:\s*\[[^,]+,([^,]+),", line))
+    ]
     if token.group(1) not in relaunch_tokens:
         raise RuntimeError("wm_relaunch and Activity lifecycle events refer to different ActivityRecord tokens")
 
 
+def _latest_api26_generation(logs: str, pid: int) -> int | None:
+    values = [
+        int(match.group(1))
+        for line in logs.splitlines() if _line_pid(line) == pid
+        if (match := re.search(r"init_platform: started Activity session generation=(\d+)", line))
+    ]
+    return values[-1] if values else None
+
+
+def _activity_recreation_complete(logs: str, events: dict[str, list[str]], api: int, baseline: int | None) -> bool:
+    if api == 26:
+        return api26_native_recreation_follows_destroy(logs, events, baseline)
+    if not (events["relaunch"] and events["destroy"]):
+        return False
+    if api >= 30:
+        return activity_create_follows_destroy(logs, events)
+    return bool(events["create"] and _line_ordered_after(logs, events["destroy"][-1], events["create"][-1]))
+
+
 def wait_for_activity_recreation_events(
-    read_logs,
-    package: str,
-    activity: str,
-    pid: int,
-    read_pid,
-    *,
-    timeout_seconds: float = 20.0,
-    poll_interval_seconds: float = 0.15,
-    clock=time.monotonic,
-    sleep=time.sleep,
+    read_logs, package: str, activity: str, pid: int, read_pid, *,
+    api: int = 30, baseline_generation: int | None = None,
+    timeout_seconds: float = 20.0, poll_interval_seconds: float = 0.15,
+    clock=time.monotonic, sleep=time.sleep,
 ) -> tuple[str, dict[str, list[str]]]:
-    """Poll until a same-token create follows destroy, or fail at the deadline."""
+    """Poll for correlated lifecycle evidence, failing closed at the deadline."""
     deadline = clock() + timeout_seconds
     logs = ""
-    events: dict[str, list[str]] = {"relaunch": [], "destroy": [], "create": []}
+    events = activity_recreation_events("", package, activity, pid, api)
 
     def timed_out() -> RuntimeError:
         return RuntimeError(
             "timed out waiting for ordered Activity recreation events "
-            f"(relaunch={len(events['relaunch'])}, destroy={len(events['destroy'])}, "
-            f"create={len(events['create'])}, create_after_destroy="
-            f"{activity_create_follows_destroy(logs, events)})"
+            f"(api={api}, relaunch={len(events['relaunch'])}, destroy={len(events['destroy'])}, "
+            f"create={len(events['create'])}, native_generation="
+            f"{events['generation'][-1] if events['generation'] else 'none'})"
         )
 
     while True:
@@ -342,16 +432,15 @@ def wait_for_activity_recreation_events(
         if remaining <= 0:
             raise timed_out()
         logs = read_logs(remaining)
-        events = activity_recreation_events(logs, package, activity, pid)
-        if events["relaunch"] and events["destroy"] and activity_create_follows_destroy(logs, events):
-            validate_activity_recreation_events(logs, events)
+        events = activity_recreation_events(logs, package, activity, pid, api)
+        if _activity_recreation_complete(logs, events, api, baseline_generation):
+            validate_activity_recreation_events(logs, events, api, baseline_generation)
             return logs, events
         remaining = deadline - clock()
         if remaining <= 0:
             raise timed_out()
-        current_pid = read_pid(remaining)
-        if current_pid != pid:
-            raise RuntimeError(f"font-scale recreation restarted process: pid {pid} -> {current_pid}")
+        if read_pid(remaining) != pid:
+            raise RuntimeError(f"font-scale recreation restarted process: pid {pid}")
         sleep(min(poll_interval_seconds, deadline - clock()))
 
 def distinct_font_scale(current: str) -> str:
@@ -371,11 +460,18 @@ def run_font_scale_recreation(
     original = adb(serial, *key).strip()
     replacement = distinct_font_scale(original)
     pid_before = app_pid(serial, package)
+    api = int(adb(serial, "shell", "getprop", "ro.build.version.sdk").strip())
     before_events = adb(serial, "logcat", "-d", "-b", "all", timeout=45)
+    baseline_generation = _latest_api26_generation(before_events, pid_before) if api == 26 else None
     before_activities = adb(serial, "shell", "dumpsys", "activity", "activities")
     (artifact / "font-scale-before.txt").write_text(original + "\n")
     (artifact / "font-scale-before-pid.txt").write_text(str(pid_before) + "\n")
     (artifact / "font-scale-before-logcat.txt").write_text(before_events)
+    (artifact / "font-scale-lifecycle-contract.txt").write_text(
+        f"api={api}\napp_pid={pid_before}\n"
+        f"correlation={'same-PID native session sequence; framework token unavailable' if api == 26 else 'same-PID component lifecycle' if api == 29 else 'same-token framework ActivityRecord'}\n"
+        f"baseline_native_generation={baseline_generation if baseline_generation is not None else 'n/a'}\n"
+    )
     (artifact / "font-scale-before-activities.txt").write_text(before_activities)
     capture_screen(serial, artifact, "font-scale-before")
     changed = False
@@ -396,6 +492,8 @@ def run_font_scale_recreation(
             activity,
             pid_before,
             lambda remaining: app_pid(serial, package, timeout=remaining),
+            api=api,
+            baseline_generation=baseline_generation,
             timeout_seconds=20.0,
             poll_interval_seconds=0.15,
         )
@@ -409,8 +507,8 @@ def run_font_scale_recreation(
         # Capture once more after the replacement is resumed and rendered. Native
         # teardown/finish callbacks may be logged after the first recreation event.
         logs = adb(serial, "logcat", "-d", "-b", "all", timeout=45)
-        events = activity_recreation_events(logs, package, activity, pid_before)
-        validate_activity_recreation_events(logs, events)
+        events = activity_recreation_events(logs, package, activity, pid_before, api)
+        validate_activity_recreation_events(logs, events, api, baseline_generation)
         if app_pid(serial, package) != pid_before:
             raise RuntimeError("font-scale recreation changed process after the replacement rendered")
         (artifact / "font-scale-after-logcat.txt").write_text(logs)
@@ -669,6 +767,21 @@ def wait_resumed_activity(serial: str, package: str, expected: bool, timeout: fl
     raise RuntimeError(f"package {package!r} did not become {state}; last activity: {last}")
 
 
+
+def ime_visibility_matches(visible: bool, input_method_dump: str, geometry: list[tuple[int, str]]) -> bool:
+    """Require requested InputMethodManager state and matching visible geometry."""
+    return input_method_is_shown(input_method_dump) == visible and bool(geometry) == visible
+
+
+def modern_ime_visibility_sample(read_window, read_input_method):
+    """Read visible geometry first; query slow IMMS state only when geometry exists."""
+    window = read_window()
+    geometry = parse_ime_geometry(30, window)
+    if not geometry:
+        return window, "", geometry
+    return window, read_input_method(), geometry
+
+
 def check_ime_shown(
     serial: str, artifact: Path | None = None, timeout: float = 6
 ) -> None:
@@ -694,19 +807,26 @@ def check_ime_shown(
 
     while time.monotonic() < deadline:
         try:
-            last_ime = bounded_adb("shell", "dumpsys", "input_method")
-            shown = input_method_is_shown(last_ime)
-
-            last_window = bounded_adb("shell", "dumpsys", "window", "displays")
-            legacy_windows = bounded_adb("shell", "dumpsys", "window", "windows") if api < 30 else ""
-            visible_frames = parse_ime_geometry(api, last_window, legacy_windows)
+            if api >= 30:
+                last_window, last_ime, visible_frames = modern_ime_visibility_sample(
+                    lambda: bounded_adb("shell", "dumpsys", "window", "displays"),
+                    lambda: bounded_adb("shell", "dumpsys", "input_method"),
+                )
+                shown = input_method_is_shown(last_ime) if last_ime else False
+                legacy_windows = ""
+            else:
+                last_ime = bounded_adb("shell", "dumpsys", "input_method")
+                shown = input_method_is_shown(last_ime)
+                last_window = bounded_adb("shell", "dumpsys", "window", "displays")
+                legacy_windows = bounded_adb("shell", "dumpsys", "window", "windows")
+                visible_frames = parse_ime_geometry(api, last_window, legacy_windows)
             last_geometry = (
                 "; ".join(detail for _height, detail in visible_frames)
                 if visible_frames
                 else ("API30+ has no parsed visible nonempty InsetsSource type=ime frame"
                       if api >= 30 else "API<30 has no shown InputMethod surface with positive occlusion")
             )
-            if shown and visible_frames:
+            if ime_visibility_matches(True, last_ime, visible_frames):
                 if artifact is not None:
                     (artifact / "ime-visible-startup.txt").write_text(
                         f"elapsed_seconds={time.monotonic() - started:.3f}\n"
