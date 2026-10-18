@@ -2943,10 +2943,6 @@ impl Element for Div {
             (child_max - child_min).into()
         };
 
-        if let Some(scroll_handle) = self.interactivity.tracked_scroll_handle.as_ref() {
-            scroll_handle.scroll_to_active_item();
-        }
-
         self.interactivity.prepaint(
             global_id,
             inspector_id,
@@ -3507,7 +3503,13 @@ impl Interactivity {
                 .map(|handle| handle.0.borrow_mut());
             if let Some(mut scroll_handle_state) = tracked_scroll_handle.as_deref_mut() {
                 scroll_handle_state.overflow = style.overflow;
+                scroll_handle_state.bounds = bounds;
                 scroll_to_bottom = mem::take(&mut scroll_handle_state.scroll_to_bottom);
+                ScrollHandle::scroll_to_active_item_in_state(
+                    scroll_handle_state,
+                    bounds,
+                    style.overflow,
+                );
             }
 
             let rem_size = window.rem_size();
@@ -5514,9 +5516,19 @@ impl ScrollHandle {
     /// Scrolls the minimal amount to either ensure that the child is
     /// fully visible or the top element of the view depends on the
     /// scroll strategy
+    #[cfg(test)]
     fn scroll_to_active_item(&self) {
         let mut state = self.0.borrow_mut();
+        let viewport_bounds = state.bounds;
+        let overflow = state.overflow;
+        Self::scroll_to_active_item_in_state(&mut state, viewport_bounds, overflow);
+    }
 
+    fn scroll_to_active_item_in_state(
+        state: &mut ScrollHandleState,
+        viewport_bounds: Bounds<Pixels>,
+        overflow: Point<Overflow>,
+    ) {
         let Some(active_item) = state.active_item else {
             return;
         };
@@ -5527,32 +5539,32 @@ impl ScrollHandle {
 
                 match active_item.strategy {
                     ScrollStrategy::FirstVisible => {
-                        if state.overflow.y == Overflow::Scroll {
+                        if overflow.y == Overflow::Scroll {
                             let child_height = bounds.size.height;
-                            let viewport_height = state.bounds.size.height;
+                            let viewport_height = viewport_bounds.size.height;
                             if child_height > viewport_height {
-                                scroll_offset.y = state.bounds.top() - bounds.top();
-                            } else if bounds.top() + scroll_offset.y < state.bounds.top() {
-                                scroll_offset.y = state.bounds.top() - bounds.top();
-                            } else if bounds.bottom() + scroll_offset.y > state.bounds.bottom() {
-                                scroll_offset.y = state.bounds.bottom() - bounds.bottom();
+                                scroll_offset.y = viewport_bounds.top() - bounds.top();
+                            } else if bounds.top() + scroll_offset.y < viewport_bounds.top() {
+                                scroll_offset.y = viewport_bounds.top() - bounds.top();
+                            } else if bounds.bottom() + scroll_offset.y > viewport_bounds.bottom() {
+                                scroll_offset.y = viewport_bounds.bottom() - bounds.bottom();
                             }
                         }
                     }
                     ScrollStrategy::Top => {
-                        scroll_offset.y = state.bounds.top() - bounds.top();
+                        scroll_offset.y = viewport_bounds.top() - bounds.top();
                     }
                 }
 
-                if state.overflow.x == Overflow::Scroll {
+                if overflow.x == Overflow::Scroll {
                     let child_width = bounds.size.width;
-                    let viewport_width = state.bounds.size.width;
+                    let viewport_width = viewport_bounds.size.width;
                     if child_width > viewport_width {
-                        scroll_offset.x = state.bounds.left() - bounds.left();
-                    } else if bounds.left() + scroll_offset.x < state.bounds.left() {
-                        scroll_offset.x = state.bounds.left() - bounds.left();
-                    } else if bounds.right() + scroll_offset.x > state.bounds.right() {
-                        scroll_offset.x = state.bounds.right() - bounds.right();
+                        scroll_offset.x = viewport_bounds.left() - bounds.left();
+                    } else if bounds.left() + scroll_offset.x < viewport_bounds.left() {
+                        scroll_offset.x = viewport_bounds.left() - bounds.left();
+                    } else if bounds.right() + scroll_offset.x > viewport_bounds.right() {
+                        scroll_offset.x = viewport_bounds.right() - bounds.right();
                     }
                 }
                 None
@@ -5666,6 +5678,61 @@ mod tests {
         assert_eq!(bounds[1].top(), bounds[0].bottom());
         assert_eq!(scroll_handle.bounds_for_item(0), Some(bounds[0]));
         assert_eq!(scroll_handle.bounds_for_item(1), Some(bounds[1]));
+    }
+
+    #[gpui::test]
+    fn tracked_scroll_item_uses_current_viewport_when_it_shrinks(cx: &mut TestAppContext) {
+        struct ResizableScrollView {
+            height: Pixels,
+            handle: ScrollHandle,
+        }
+
+        impl Render for ResizableScrollView {
+            fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+                div()
+                    .id("resizable-scroll")
+                    .w(px(100.))
+                    .h(self.height)
+                    .flex()
+                    .flex_col()
+                    .overflow_y_scroll()
+                    .track_scroll(&self.handle)
+                    .children((0..4).map(|_| div().h(px(30.)).flex_shrink_0()))
+            }
+        }
+
+        let handle = ScrollHandle::new();
+        let window = cx.open_window(size(px(100.), px(100.)), |_, _| ResizableScrollView {
+            height: px(100.),
+            handle: handle.clone(),
+        });
+        cx.update_window(window.into(), |_, window, cx| window.draw(cx).clear(cx))
+            .unwrap();
+
+        let old_viewport = handle.bounds();
+        let target = handle.bounds_for_item(2).unwrap();
+        assert_eq!(old_viewport.size.height, px(100.));
+        assert!(target.top() >= old_viewport.top());
+        assert!(target.bottom() <= old_viewport.bottom());
+
+        window
+            .update(cx, |view, window, _cx| {
+                view.height = px(40.);
+                window.refresh();
+            })
+            .unwrap();
+        // This child was visible in the previous 100px viewport, but must
+        // move for the new 40px viewport in the frame that lays out the resize.
+        handle.scroll_to_item(2);
+        cx.update_window(window.into(), |_, window, cx| window.draw(cx).clear(cx))
+            .unwrap();
+
+        let viewport = handle.bounds();
+        let target = handle.bounds_for_item(2).unwrap();
+        let offset = handle.offset();
+        assert_eq!(viewport.size.height, px(40.));
+        assert!(target.top() + offset.y >= viewport.top());
+        assert!(target.bottom() + offset.y <= viewport.bottom());
     }
 
     #[gpui::test]
