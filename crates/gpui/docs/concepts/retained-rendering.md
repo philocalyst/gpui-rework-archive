@@ -219,6 +219,34 @@ cargo test -p gpui-ce --no-default-features --lib retained_
 ```
 
 A paired baseline/candidate workload is required before making performance
-claims. The correctness workload and a clean-frame render counter alone do not
-establish end-to-end frame-time improvements. See the [performance
-guide](crate::_documentation::guides::performance) for profiling guidance.
+claims. A source-level architecture comparison can describe retained-view
+ownership and invalidation tradeoffs, but it does not establish whole-framework
+simplicity or runtime speed. The correctness workload and a clean-frame render
+counter alone do not establish end-to-end frame-time improvements. See the
+[performance guide](crate::_documentation::guides::performance) for profiling
+guidance.
+
+## Paired measurements and scope
+
+An exploratory CPU/headless comparison against pinned gpui-fast
+`37f3959732d13404989e58e89c4e37ec9489e3f5` has valid per-profile results for
+three workloads. CE is the baseline and Fast the candidate; ratios above 1 mean
+CE took longer. The per-profile geometric-mean CE/Fast wall-time p50 ratios
+were 1.139544 for owned image-cache work, 1.824318 for dependency fanout, and
+6.051998 for the supplemental test-mode viewport. Each profile used 10 paired
+runs, 50 measured samples and 10 warmups per scenario, with CPU affinity 2.
+These values are exploratory at this sample count and are separate per-profile
+summaries, not a combined aggregate. The source and workloads cover CPU-side
+update/layout and quad-scene work with empty text rasterizers; they do not
+measure text-sprite rendering throughput.
+
+The full nine-scenario primary aggregate is unavailable. The coalesced viewport
+profile is excluded because Fast failed geometry at sample 25 / reorder. Tall
+is excluded because the engines had semantic scene mismatches in three
+scenarios. No glyph-rendering performance result is available. The per-profile
+data and methodology, including all scenarios, p99 results, intervals, and raw
+receipt links, are in
+`final-sync/benchmarks/retained-core/evidence/retained-analysis-valid-profiles-20261018/valid-profiles-02-04.md`
+and the adjacent JSON companion. These results show CE slower on the three valid
+profiles; they do not support a claim that the retained core is faster overall or simpler as
+a whole framework.

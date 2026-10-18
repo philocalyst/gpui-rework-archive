@@ -165,9 +165,13 @@ verification are preserved under
 `evidence/android-final-9043c8f/`; the exact emulator configurations and
 runner invocations are recorded there. API 26 and 29 install commands reported success but no pulled APK hashes were saved; API 34 and 36 pulled app, test, and helper APK hashes match the recorded artifacts. The first API 34 stale-signer attempt is excluded; the passing run followed uninstall and reinstall.
 
-The final device attempt to execute the native test ELF exited 127 because
-the pushed executable was not found, so no native assertion pass is claimed.
-The earlier 134/134 native test result is historical and separate.
+The native Android test ELF was executed on the API 34 x86_64 emulator and
+reported 134 passed, 0 failed, 0 ignored, and 0 filtered tests. Its SHA-256 is
+`a6fa155e539b0b00551bf4a7f45b721c478655427cd6f9ffe4dccd5dd386349e`; the
+host copy and device pulls before and after execution matched. This reused a
+prebuilt Android ELF from the a7 product checkpoint; it did not freshly compile
+native tests from the evaluated source. The earlier API 26 wrapper failure is
+preserved as historical evidence and is not the result of this run.
 
 The runner regression suite passed 28/28. Runner source SHA-256:
 `c9a4e1e8d55cb778899d4a7183ba689b3b4cac45091749465fb6fae0a81f584e`; test
