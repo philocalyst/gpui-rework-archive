@@ -483,6 +483,7 @@ impl Element for EditableTextElement {
                     // this is converted into positive for usage with bounds
                     state.layout_data.scroll_bounds =
                         Bounds::new(-scroll_offset, inner_bounds.size);
+                    state.layout_data.text_origin = inner_bounds.origin;
                 });
                 let document_offset = request_layout.state.read(cx).layout_data.document_offset;
                 InteractivityPrepaint {
@@ -814,6 +815,7 @@ impl PrelayoutState {
                     accepts_input: self.accepts_input,
                     // updated during prepaint
                     scroll_bounds: Bounds::default(),
+                    text_origin: Point::default(),
                     state: EditableTextLayoutState {
                         size: Some(size),
                         last_seen_storage_version: self.storage_version,
@@ -1382,6 +1384,16 @@ mod tests {
             self.point_for_caret(CaretPosition::attached_to_next_cluster(idx))
         }
 
+        fn platform_index_at(&mut self, point: Point<Pixels>) -> Option<usize> {
+            self.cx
+                .update_window(self.window.into(), |_view, window, cx| {
+                    self.input.update(cx, |state, cx| {
+                        state.character_index_for_point(point, window, cx)
+                    })
+                })
+                .unwrap()
+        }
+
         fn update_input(
             &mut self,
             update: impl FnOnce(&mut EditableTextState, &mut Context<EditableTextState>),
@@ -1847,6 +1859,29 @@ mod tests {
         );
         assert_eq!(document_offset, Point::default());
         assert_eq!(scroll.x, Pixels::ZERO);
+    }
+
+    #[test]
+    fn platform_input_points_are_translated_into_padded_scrolled_text_coordinates() {
+        let text = "aébcdefghijklmnopqrstuvwxyz";
+        let mut fixture = BidiInputFixture::new(text, 18.0, 140.0, false, 1.0);
+        let caret_byte = "aébcdefghijk".len();
+        let expected_utf16 = text[..caret_byte].encode_utf16().count();
+
+        let position = fixture.point(caret_byte);
+        assert_eq!(
+            fixture.platform_index_at(position),
+            Some(expected_utf16),
+            "window-coordinate point should map through the padded text origin"
+        );
+
+        fixture.scroll(point(px(20.0), px(0.0)));
+        let position = fixture.point(caret_byte);
+        assert_eq!(
+            fixture.platform_index_at(position),
+            Some(expected_utf16),
+            "window-coordinate point should also account for horizontal scrolling"
+        );
     }
 
     #[test]

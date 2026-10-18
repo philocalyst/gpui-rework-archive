@@ -1167,8 +1167,8 @@ impl EntityInputHandler for EditableTextState {
         window: &mut Window,
         _cx: &mut Context<Self>,
     ) -> Option<usize> {
-        let point =
-            point + self.layout_data.scroll_bounds.origin - self.layout_data.document_offset;
+        let point = point - self.layout_data.text_origin + self.layout_data.scroll_bounds.origin
+            - self.layout_data.document_offset;
         let index = self.index_for_pixel_point(point, window.line_height());
         Some(self.storage.utf_offset_8to16(index))
     }

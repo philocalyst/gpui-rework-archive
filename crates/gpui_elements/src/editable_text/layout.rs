@@ -34,6 +34,8 @@ pub(super) struct EditableTextLayoutResult {
     pub accepts_input: bool,
     /// The last seen scroll position and size of the element
     pub scroll_bounds: Bounds<Pixels>,
+    /// Window-coordinate origin of the text area used by platform input point queries.
+    pub text_origin: Point<Pixels>,
     pub state: EditableTextLayoutState,
     /// The document layout produced by the painter's `prepaint`.
     /// Cached so IME `bounds_for_range` / `character_index_for_point` can evaluate without re-shaping.
