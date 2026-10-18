@@ -21,6 +21,8 @@ mod events;
 mod glyph_cache;
 #[cfg(target_family = "wasm")]
 mod http_client;
+#[cfg(any(target_family = "wasm", test))]
+mod ime_diff;
 #[cfg(target_family = "wasm")]
 mod ime_mirror;
 #[cfg(target_family = "wasm")]

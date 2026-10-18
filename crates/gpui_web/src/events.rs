@@ -843,7 +843,7 @@ impl WebWindowInner {
 
             // Composition text is delivered through the composition events;
             // the mirror is reconciled once on compositionend.
-            if this.is_composing.get() || event.is_composing() {
+            if !should_import_ime_input(this.is_composing.get(), event.is_composing()) {
                 return;
             }
 
@@ -852,9 +852,6 @@ impl WebWindowInner {
             if new_value == old_value {
                 return;
             }
-
-            let old_units: Vec<u16> = old_value.encode_utf16().collect();
-            let new_units: Vec<u16> = new_value.encode_utf16().collect();
 
             // A prefix/suffix diff is ambiguous when the inserted text
             // shares characters with what follows it (inserting "pactor "
@@ -868,33 +865,14 @@ impl WebWindowInner {
                 .ime_mirror
                 .selection_start()
                 .map(|caret| caret as usize);
-            let anchored_suffix_length = post_edit_caret
-                .map(|caret| new_units.len().saturating_sub(caret))
-                .filter(|&suffix_length| {
-                    suffix_length <= old_units.len()
-                        && old_units[old_units.len() - suffix_length..]
-                            == new_units[new_units.len() - suffix_length..]
-                });
-            let suffix_length = anchored_suffix_length.unwrap_or_else(|| {
-                old_units
-                    .iter()
-                    .rev()
-                    .zip(new_units.iter().rev())
-                    .take_while(|(old_unit, new_unit)| old_unit == new_unit)
-                    .count()
-            });
-            let prefix_length = old_units
-                .iter()
-                .zip(&new_units)
-                .take_while(|(old_unit, new_unit)| old_unit == new_unit)
-                .count()
-                .min(old_units.len() - suffix_length)
-                .min(new_units.len() - suffix_length);
-
-            let inserted_text = String::from_utf16_lossy(
-                &new_units[prefix_length..new_units.len() - suffix_length],
-            );
-            let replaced_old_end = old_units.len() - suffix_length;
+            let Some(diff) =
+                crate::ime_diff::diff_ime_text(&old_value, &new_value, post_edit_caret)
+            else {
+                return;
+            };
+            let prefix_length = diff.prefix_length;
+            let replaced_old_end = diff.replaced_old_end;
+            let inserted_text = diff.replacement;
 
             // The edit's shape relative to the element's pre-edit selection.
             // The element is private to the IME and these syncs, so the
@@ -1433,6 +1411,11 @@ fn mouse_position_in_element(event: &web_sys::MouseEvent) -> Point<Pixels> {
     point(px(event.offset_x() as f32), px(event.offset_y() as f32))
 }
 
+/// Whether the ordinary input event should be imported instead of waiting for compositionend.
+fn should_import_ime_input(is_composing: bool, event_is_composing: bool) -> bool {
+    !is_composing && !event_is_composing
+}
+
 /// Legacy DOM keyCode reported for keydown events processed by an IME.
 /// 229 == Windows `VK_PROCESSKEY` (0xE5).
 /// https://www.w3.org/TR/uievents/#determine-keydown-keyup-keyCode
@@ -1448,6 +1431,14 @@ fn is_ime_keydown(is_composing: bool, event_is_composing: bool, key_code: u32) -
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn composing_input_remains_owned_by_composition_events() {
+        assert!(!should_import_ime_input(true, false));
+        assert!(!should_import_ime_input(false, true));
+        assert!(!should_import_ime_input(true, true));
+        assert!(should_import_ime_input(false, false));
+    }
 
     #[test]
     fn ime_keydowns_include_composition_boundaries() {

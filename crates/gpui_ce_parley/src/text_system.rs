@@ -131,6 +131,7 @@ struct ParagraphResultCacheKey {
     inline_text_metrics: Option<InlineTextMetrics>,
     text_align: TextAlign,
     alignment_width: Option<Pixels>,
+    collect_synthetic_root_provenance: bool,
 }
 
 type ParagraphResultCache = BoundedCache<ParagraphResultCacheKey, ParleyLayoutResult, 512>;
@@ -417,6 +418,7 @@ struct PreparedBidiText {
     text_styles: Vec<InlineTextStyle>,
     inline_boxes: Vec<InlineBoxRequest>,
     map: SourceMap,
+    root_marker_backend_range: Option<Range<usize>>,
 }
 
 #[derive(Clone)]
@@ -498,12 +500,15 @@ fn prepare_bidi_text(
         backend_to_source.extend(std::iter::repeat_n(source_idx, character.len_utf8()));
     };
 
+    let mut root_marker_backend_range = None;
     if let Some(root_direction) = root_direction {
+        let marker_start = prepared.len();
         let marker = match root_direction {
             ResolvedDirection::LeftToRight => '\u{200e}',
             ResolvedDirection::RightToLeft => '\u{200f}',
         };
         append_synthetic(marker, 0, &mut prepared, &mut backend_to_source);
+        root_marker_backend_range = Some(marker_start..prepared.len());
     }
 
     for (source_idx, character) in text
@@ -584,6 +589,7 @@ fn prepare_bidi_text(
         text_styles,
         inline_boxes,
         map,
+        root_marker_backend_range,
     }
 }
 
@@ -664,6 +670,7 @@ type RasterStyleCache = BoundedCache<RasterStyleCacheKey, PreparedRasterStyle, 2
 struct ParleyLayoutParams<'a> {
     text: TextLayoutRequest<'a>,
     inline: Option<ParleyInlineLayoutParams<'a>>,
+    collect_synthetic_root_provenance: bool,
 }
 
 struct ParleyInlineLayoutParams<'a> {
@@ -680,6 +687,7 @@ struct ParleyLayoutResult {
     inline_lines: Vec<InlineVisualLine>,
     inline_boxes: Vec<PositionedInlineBox>,
     size: Size<Pixels>,
+    synthetic_root_glyphs: Vec<(usize, usize)>,
 }
 
 fn inline_alignment_offset(
@@ -1465,6 +1473,47 @@ impl ParleyTextSystem {
         self
     }
 
+    #[doc(hidden)]
+    pub fn layout_inline_with_synthetic_root_provenance(
+        &self,
+        request: InlineLayoutRequest<'_>,
+    ) -> (InlineLayout, Vec<(usize, usize)>) {
+        let result = self
+            .parley_layout(ParleyLayoutParams {
+                text: TextLayoutRequest {
+                    text: request.text,
+                    font_size: request.font_size,
+                    runs: request.runs,
+                    options: request.options,
+                },
+                inline: Some(ParleyInlineLayoutParams {
+                    boxes: request.boxes,
+                    text_styles: request.text_styles,
+                    line_height: request.line_height,
+                    text_metrics: request.text_metrics,
+                    bidi_scopes: request.bidi_scopes,
+                }),
+                collect_synthetic_root_provenance: true,
+            })
+            .expect("Parley failed to lay out a validated GPUI inline document");
+        let alignment_offset = inline_alignment_offset(
+            request.options.text_align,
+            result.layout.visual_lines[0].direction,
+            &result.inline_lines,
+        );
+        let provenance = result.synthetic_root_glyphs;
+        (
+            InlineLayout {
+                layout: std::sync::Arc::new(result.layout),
+                alignment_offset,
+                lines: result.inline_lines,
+                boxes: result.inline_boxes,
+                size: result.size,
+            },
+            provenance,
+        )
+    }
+
     fn font_families<'a>(
         &'a self,
         descriptor: &'a Font,
@@ -1534,6 +1583,7 @@ impl ParleyTextSystem {
         let mut paragraphs = Vec::new();
         let mut visual_lines = Vec::new();
         let mut paint_fragments = Vec::new();
+        let mut synthetic_root_glyphs = Vec::new();
         let mut inline_lines = Vec::new();
         let mut positioned_inline_boxes = Vec::new();
 
@@ -1621,6 +1671,7 @@ impl ParleyTextSystem {
                 })
                 .collect::<Vec<_>>();
             let mut result = self.parley_paragraph_layout(ParleyLayoutParams {
+                collect_synthetic_root_provenance: params.collect_synthetic_root_provenance,
                 text: TextLayoutRequest {
                     text: &text[source.content.clone()],
                     runs: &paragraph_runs,
@@ -1650,6 +1701,9 @@ impl ParleyTextSystem {
 
             let first_line = visual_lines.len();
             let first_fragment = paint_fragments.len();
+            synthetic_root_glyphs.extend(result.synthetic_root_glyphs.iter().map(
+                |(fragment_index, glyph_index)| (first_fragment + *fragment_index, *glyph_index),
+            ));
             let block_offset = document_size.height;
 
             for line in &mut result.layout.visual_lines {
@@ -1718,6 +1772,7 @@ impl ParleyTextSystem {
             inline_lines,
             inline_boxes: positioned_inline_boxes,
             size: document_size,
+            synthetic_root_glyphs,
         })
     }
 
@@ -1725,6 +1780,7 @@ impl ParleyTextSystem {
         &self,
         params: ParleyLayoutParams<'_>,
     ) -> Result<ParleyLayoutResult> {
+        let collect_synthetic_root_provenance = params.collect_synthetic_root_provenance;
         let request = params.text;
         let (inline_boxes, text_styles, line_height, inline_text_metrics, bidi_scopes) =
             match params.inline.as_ref() {
@@ -1795,6 +1851,7 @@ impl ParleyTextSystem {
             inline_text_metrics,
             text_align,
             alignment_width,
+            collect_synthetic_root_provenance: params.collect_synthetic_root_provenance,
         };
 
         if let Some(mut result) = self.paragraph_result_cache.lock().get(&result_cache_key) {
@@ -2039,6 +2096,7 @@ impl ParleyTextSystem {
         };
         let mut visual_lines = Vec::new();
         let mut paint_fragments = Vec::new();
+        let mut synthetic_root_glyphs = Vec::new();
 
         let mut positioned_inline_boxes = Vec::new();
         let mut inline_lines = Vec::new();
@@ -2072,6 +2130,7 @@ impl ParleyTextSystem {
             let mut ownership_run_index = None;
             let mut consumed_glyphs = 0usize;
             let mut run_glyph_source_ranges = Vec::new();
+            let mut run_glyph_is_synthetic_root = Vec::new();
             for item in line.items() {
                 let PositionedLayoutItem::GlyphRun(glyph_run) = item else {
                     let PositionedLayoutItem::InlineBox(inline_box) = item else {
@@ -2081,6 +2140,7 @@ impl ParleyTextSystem {
                     ownership_run_index = None;
                     consumed_glyphs = 0;
                     run_glyph_source_ranges.clear();
+                    run_glyph_is_synthetic_root.clear();
                     positioned_inline_boxes.push(PositionedInlineBox {
                         id: inline_box.id,
                         line_index: line_index,
@@ -2109,6 +2169,21 @@ impl ParleyTextSystem {
                             std::iter::repeat(source).take(cluster.glyphs().count())
                         })
                         .collect();
+                    if collect_synthetic_root_provenance {
+                        run_glyph_is_synthetic_root = run
+                            .visual_clusters()
+                            .filter(|cluster| {
+                                let range = cluster.text_range();
+                                range.start < line_text_range.end
+                                    && line_text_range.start < range.end
+                            })
+                            .flat_map(|cluster| {
+                                let is_root = Some(cluster.text_range())
+                                    == prepared.root_marker_backend_range;
+                                std::iter::repeat(is_root).take(cluster.glyphs().count())
+                            })
+                            .collect();
+                    }
                 }
                 let normalized_coords = run
                     .normalized_coords()
@@ -2168,6 +2243,15 @@ impl ParleyTextSystem {
                 );
                 let glyph_source_ranges =
                     run_glyph_source_ranges[consumed_glyphs..ownership_end].to_vec();
+                let glyph_is_synthetic_root = if collect_synthetic_root_provenance {
+                    anyhow::ensure!(
+                        ownership_end <= run_glyph_is_synthetic_root.len(),
+                        "Parley synthetic glyph provenance stream is shorter than its positioned glyph runs"
+                    );
+                    run_glyph_is_synthetic_root[consumed_glyphs..ownership_end].to_vec()
+                } else {
+                    Vec::new()
+                };
                 consumed_glyphs = ownership_end;
                 let glyphs = {
                     let font_instances = self.font_instances.read();
@@ -2193,6 +2277,16 @@ impl ParleyTextSystem {
                 let start = px(glyph_run.offset()) - line_x;
                 let source_run = prepared.run_sources[glyph_run.style().brush.source_run];
                 let source_range = prepared.map.source_range(run.text_range());
+                let fragment_index = paint_fragments.len();
+                if collect_synthetic_root_provenance {
+                    synthetic_root_glyphs.extend(
+                        glyph_is_synthetic_root.iter().enumerate().filter_map(
+                            |(glyph_index, is_root)| {
+                                is_root.then_some((fragment_index, glyph_index))
+                            },
+                        ),
+                    );
+                }
                 paint_fragments.push(PaintFragment {
                     source_run,
                     source_range,
@@ -2286,6 +2380,7 @@ impl ParleyTextSystem {
             inline_lines,
             inline_boxes: positioned_inline_boxes,
             size,
+            synthetic_root_glyphs,
         };
         self.paragraph_result_cache
             .lock()
@@ -2472,6 +2567,7 @@ impl PlatformTextSystem for ParleyTextSystem {
     fn layout_text(&self, request: TextLayoutRequest<'_>) -> LineLayout {
         self.parley_layout(ParleyLayoutParams {
             text: request,
+            collect_synthetic_root_provenance: false,
             inline: None,
         })
         .expect("Parley failed to lay out a validated GPUI document")
@@ -2487,6 +2583,7 @@ impl PlatformTextSystem for ParleyTextSystem {
                     runs: request.runs,
                     options: request.options,
                 },
+                collect_synthetic_root_provenance: false,
                 inline: Some(ParleyInlineLayoutParams {
                     boxes: request.boxes,
                     text_styles: request.text_styles,
@@ -4138,6 +4235,7 @@ mod tests {
                             ..TextLayoutOptions::default()
                         },
                     },
+                    collect_synthetic_root_provenance: false,
                     inline: None,
                 })
                 .unwrap();
@@ -5538,6 +5636,259 @@ mod tests {
             assert!(auto_cached_item.right() < auto_cached_row.center().x);
         }
     }
+    #[test]
+    fn synthetic_root_provenance_rebases_across_paragraphs() {
+        let system = test_system();
+        let text = "😀\n🕸";
+        let runs = [text_run(text, IBM_PLEX.family)];
+        let (layout, provenance) =
+            system.layout_inline_with_synthetic_root_provenance(InlineLayoutRequest {
+                text,
+                font_size: px(16.0),
+                runs: &runs,
+                boxes: &[],
+                text_styles: &[],
+                line_height: px(20.0),
+                text_metrics: InlineTextMetrics::default(),
+                options: TextLayoutOptions {
+                    direction: ParagraphDirection::LeftToRight,
+                    text_align: TextAlign::Left,
+                    ..Default::default()
+                },
+                bidi_scopes: &[],
+            });
+        assert_eq!(provenance.len(), 2);
+        let mut tagged_lines = Vec::new();
+        for (fragment_index, glyph_index) in provenance {
+            let fragment = &layout.layout.paint_fragments[fragment_index];
+            assert!(fragment.glyph_source_ranges.as_ref().unwrap()[glyph_index].is_empty());
+            let line_index = layout
+                .layout
+                .visual_lines
+                .iter()
+                .position(|line| line.paint_fragment_range.contains(&fragment_index))
+                .expect("tagged fragment belongs to a composed line");
+            tagged_lines.push(line_index);
+        }
+        tagged_lines.sort_unstable();
+        tagged_lines.dedup();
+        assert_eq!(tagged_lines.len(), 2);
+    }
+
+    #[test]
+    fn synthetic_root_direction_markers_have_no_source_ink_or_shaped_advance() {
+        fn total_width(layout: &LineLayout) -> f32 {
+            layout
+                .paint_fragments
+                .iter()
+                .map(|fragment| f32::from(fragment.x_range.end - fragment.x_range.start))
+                .sum()
+        }
+
+        fn sorted_visual_positions(layout: &LineLayout) -> Vec<(u32, u32, u32)> {
+            let mut positions = layout
+                .paint_fragments
+                .iter()
+                .flat_map(|fragment| {
+                    fragment
+                        .glyphs
+                        .iter()
+                        .zip(fragment.glyph_source_ranges.as_ref().unwrap().iter())
+                        .filter(|(_, range)| !range.is_empty())
+                        .map(|(glyph, _)| {
+                            (
+                                glyph.id.0,
+                                f32::from(glyph.position.x).to_bits(),
+                                f32::from(glyph.position.y).to_bits(),
+                            )
+                        })
+                })
+                .collect::<Vec<_>>();
+            positions.sort_unstable();
+            positions
+        }
+
+        let system = test_system();
+
+        for text in ["\u{1f600}\u{1f600}\u{1f600}", "\u{1f578}\u{1f578}\u{1f578}"] {
+            let plain_runs = [text_run(text, IBM_PLEX.family)];
+            let automatic_plain = system.layout_text(TextLayoutRequest {
+                text,
+                font_size: px(16.0),
+                runs: &plain_runs,
+                options: TextLayoutOptions {
+                    text_align: TextAlign::Left,
+                    ..Default::default()
+                },
+            });
+
+            for direction in [
+                ParagraphDirection::LeftToRight,
+                ParagraphDirection::RightToLeft,
+            ] {
+                let explicit = layout_directional(&system, text, direction, TextAlign::Left, None);
+                let explicit_runs = [text_run(text, IBM_PLEX.family)];
+                let (provenance_layout, synthetic_glyphs) = system
+                    .layout_inline_with_synthetic_root_provenance(InlineLayoutRequest {
+                        text,
+                        font_size: px(16.0),
+                        runs: &explicit_runs,
+                        boxes: &[],
+                        text_styles: &[],
+                        line_height: px(20.0),
+                        text_metrics: InlineTextMetrics::default(),
+                        options: TextLayoutOptions {
+                            direction,
+                            text_align: TextAlign::Left,
+                            ..Default::default()
+                        },
+                        bidi_scopes: &[],
+                    });
+                assert_eq!(synthetic_glyphs.len(), 1);
+                let (marker_fragment, marker_glyph) = synthetic_glyphs[0];
+                let provenance_marker = &provenance_layout.layout.paint_fragments[marker_fragment];
+                let provenance_source = provenance_marker.glyph_source_ranges.as_ref().unwrap();
+                assert!(
+                    provenance_source[marker_glyph].is_empty(),
+                    "only Parley's internally tagged root marker has empty source ownership"
+                );
+                let explicit_marker = explicit
+                    .paint_fragments
+                    .iter()
+                    .find_map(|fragment| {
+                        fragment
+                            .glyph_source_ranges
+                            .as_ref()
+                            .and_then(|ranges| ranges.iter().position(Range::is_empty))
+                            .map(|index| {
+                                (
+                                    fragment.font_id,
+                                    fragment.glyphs[index].id,
+                                    fragment.glyphs[index].position,
+                                )
+                            })
+                    })
+                    .expect("ordinary layout contains the root marker");
+                assert_eq!(
+                    (
+                        provenance_marker.font_id,
+                        provenance_marker.glyphs[marker_glyph].id,
+                        provenance_marker.glyphs[marker_glyph].position,
+                    ),
+                    explicit_marker,
+                    "the sparse tag resolves to the same marker in the ordinary layout"
+                );
+                let rtl = direction == ParagraphDirection::RightToLeft;
+                let authored_text = if rtl {
+                    format!("\u{200f}{text}")
+                } else {
+                    text.to_owned()
+                };
+                let authored_runs = [text_run(&authored_text, IBM_PLEX.family)];
+                let direction_matched = system.layout_text(TextLayoutRequest {
+                    text: &authored_text,
+                    font_size: px(16.0),
+                    runs: &authored_runs,
+                    options: TextLayoutOptions {
+                        text_align: TextAlign::Left,
+                        ..Default::default()
+                    },
+                });
+                let source_prefix = if rtl { "\u{200f}".len() } else { 0 };
+
+                let mut empty_markers = Vec::new();
+                let mut explicit_source_glyphs = Vec::new();
+                let mut matched_source_glyphs = Vec::new();
+                let mut authored_markers = Vec::new();
+
+                for fragment in &explicit.paint_fragments {
+                    let ranges = fragment
+                        .glyph_source_ranges
+                        .as_ref()
+                        .expect("Parley exposes source ranges per glyph");
+                    assert_eq!(ranges.len(), fragment.glyphs.len());
+                    for (range, glyph) in ranges.iter().zip(fragment.glyphs.iter()) {
+                        if range.is_empty() {
+                            empty_markers.push((fragment.font_id, glyph.id, glyph.position));
+                        } else {
+                            explicit_source_glyphs.push((range.clone(), glyph.id, glyph.position));
+                        }
+                    }
+                }
+
+                for fragment in &direction_matched.paint_fragments {
+                    let ranges = fragment
+                        .glyph_source_ranges
+                        .as_ref()
+                        .expect("Parley exposes source ranges per glyph");
+                    assert_eq!(ranges.len(), fragment.glyphs.len());
+                    for (range, glyph) in ranges.iter().zip(fragment.glyphs.iter()) {
+                        if rtl && range.start == 0 && range.end == source_prefix {
+                            authored_markers.push((fragment.font_id, glyph.id, glyph.position));
+                        } else {
+                            assert!(range.start >= source_prefix);
+                            matched_source_glyphs.push((
+                                range.start - source_prefix..range.end - source_prefix,
+                                glyph.id,
+                                glyph.position,
+                            ));
+                        }
+                    }
+                }
+
+                assert_eq!(
+                    empty_markers.len(),
+                    1,
+                    "one injected root marker is mapped to an empty source range"
+                );
+                assert_eq!(explicit_source_glyphs, matched_source_glyphs);
+                assert_eq!(total_width(&explicit), total_width(&direction_matched));
+                if rtl {
+                    assert_eq!(
+                        authored_markers.len(),
+                        1,
+                        "authored RLM maps to its UTF-8 bytes"
+                    );
+                    assert_eq!(
+                        (empty_markers[0].1, empty_markers[0].2),
+                        (authored_markers[0].1, authored_markers[0].2)
+                    );
+                }
+
+                let (font_id, marker_id, _) = empty_markers[0];
+                let marker_ink = system
+                    .typographic_bounds(font_id, marker_id)
+                    .expect("the injected bidi marker has font metrics");
+                assert_eq!(marker_ink.size.width, 0.0);
+                assert_eq!(marker_ink.size.height, 0.0);
+                let marker_raster = system
+                    .rasterize_glyph(&RenderGlyphParams {
+                        font_id,
+                        glyph_id: marker_id,
+                        font_size: px(16.0),
+                        subpixel_variant: Default::default(),
+                        scale_factor: 1.0,
+                        raster_style: PreparedRasterStyle::independent(GlyphRenderMode::Grayscale),
+                    })
+                    .expect("the injected bidi marker can be rasterized");
+                assert!(marker_raster.pixels.is_empty());
+                assert_eq!(marker_raster.size.width.0, 0);
+                assert_eq!(marker_raster.size.height.0, 0);
+
+                assert_eq!(
+                    total_width(&explicit),
+                    total_width(&automatic_plain),
+                    "the injected root marker adds no shaped advance"
+                );
+                assert_eq!(
+                    sorted_visual_positions(&explicit),
+                    sorted_visual_positions(&automatic_plain),
+                    "the injected root marker leaves glyph positions unchanged"
+                );
+            }
+        }
+    }
+
     #[test]
     fn glyph_source_ranges_follow_parley_clusters_for_combining_emoji_and_bidi() {
         let system = test_system();

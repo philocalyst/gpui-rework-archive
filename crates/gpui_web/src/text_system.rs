@@ -529,11 +529,30 @@ impl PlatformTextSystem for WebTextSystem {
         for run in request.runs {
             let _ = self.font_id(&run.font);
         }
-        let mut initial = self.native.layout_inline(request);
         if self.canvas_font_fallback == CanvasFontFallback::Disabled {
+            let mut initial = self.native.layout_inline(request);
             self.expose_inline_layout(&mut initial);
             return initial;
         }
+        let (mut initial, initial_provenance) = self
+            .native
+            .layout_inline_with_synthetic_root_provenance(request);
+        let initial_synthetic_root = initial_provenance
+            .into_iter()
+            .filter(|(fragment_index, glyph_index)| {
+                initial
+                    .layout
+                    .paint_fragments
+                    .get(*fragment_index)
+                    .and_then(|fragment| {
+                        fragment
+                            .glyph_source_ranges
+                            .as_ref()
+                            .and_then(|ranges| ranges.get(*glyph_index))
+                    })
+                    .is_some_and(Range::is_empty)
+            })
+            .collect::<HashSet<_>>();
 
         let mut glyph_records = Vec::new();
         let mut glyph_locations = Vec::new();
@@ -571,6 +590,8 @@ impl PlatformTextSystem for WebTextSystem {
                     native_color: glyph.is_emoji,
                     fragment_index,
                     fragment_source: fragment.source_range.clone(),
+                    synthetic_root_control: initial_synthetic_root
+                        .contains(&(fragment_index, glyph_index)),
                 });
                 glyph_locations.push((fragment_index, glyph_index));
             }
@@ -714,11 +735,15 @@ impl PlatformTextSystem for WebTextSystem {
         }
         text_styles.sort_by_key(|style| (style.range.end, style.range.start));
 
-        let mut layout = self.native.layout_inline(InlineLayoutRequest {
-            boxes: &boxes,
-            text_styles: &text_styles,
-            ..request
-        });
+        let (mut layout, speculative_provenance) = self
+            .native
+            .layout_inline_with_synthetic_root_provenance(InlineLayoutRequest {
+                boxes: &boxes,
+                text_styles: &text_styles,
+                ..request
+            });
+        let speculative_synthetic_root = speculative_provenance.into_iter().collect::<HashSet<_>>();
+
         // Parley must retain every request ID in the layout. If it does not, discard this
         // speculative pass rather than suppressing source glyphs without replacement geometry.
         if injections
@@ -736,7 +761,27 @@ impl PlatformTextSystem for WebTextSystem {
         // The placeholder pass may reshape clusters. Validate every new mapping before
         // suppressing native paint: contained remappings are safe, while crossings,
         // malformed UTF-8 ranges, or missing provenance discard the speculative layout.
-        for fragment in &layout.layout.paint_fragments {
+        if speculative_synthetic_root
+            .iter()
+            .any(|(fragment_index, glyph_index)| {
+                layout
+                    .layout
+                    .paint_fragments
+                    .get(*fragment_index)
+                    .and_then(|fragment| {
+                        fragment
+                            .glyph_source_ranges
+                            .as_ref()
+                            .and_then(|ranges| ranges.get(*glyph_index))
+                    })
+                    .is_none_or(|range| !range.is_empty())
+            })
+        {
+            self.expose_inline_layout(&mut initial);
+            self.report_missing(request.text, &initial.layout);
+            return initial;
+        }
+        for (fragment_index, fragment) in layout.layout.paint_fragments.iter().enumerate() {
             let Some(source_ranges) = &fragment.glyph_source_ranges else {
                 self.expose_inline_layout(&mut initial);
                 self.report_missing(request.text, &initial.layout);
@@ -745,14 +790,19 @@ impl PlatformTextSystem for WebTextSystem {
             if source_ranges.len() != fragment.glyphs.len()
                 || source_ranges
                     .iter()
-                    .any(|range| request.text.get(range.clone()).is_none())
-                || source_ranges.iter().any(|range| {
-                    crate::run_replacements::replacement_glyph_is_suppressed(
-                        range,
-                        &replacement_ranges,
-                    )
-                    .is_err()
-                })
+                    .enumerate()
+                    .any(|(glyph_index, range)| {
+                        request.text.get(range.clone()).is_none()
+                            || (range.is_empty()
+                                && !speculative_synthetic_root
+                                    .contains(&(fragment_index, glyph_index)))
+                            || (!range.is_empty()
+                                && crate::run_replacements::replacement_glyph_is_suppressed(
+                                    range,
+                                    &replacement_ranges,
+                                )
+                                .is_err())
+                    })
             {
                 self.expose_inline_layout(&mut initial);
                 self.report_missing(request.text, &initial.layout);
@@ -761,7 +811,12 @@ impl PlatformTextSystem for WebTextSystem {
         }
         let mut line_fragments = vec![Vec::new(); layout.layout.visual_lines.len()];
         for (line_index, line) in layout.layout.visual_lines.iter().enumerate() {
-            for fragment in &layout.layout.paint_fragments[line.paint_fragment_range.clone()] {
+            for (fragment_offset, fragment) in layout.layout.paint_fragments
+                [line.paint_fragment_range.clone()]
+            .iter()
+            .enumerate()
+            {
+                let fragment_index = line.paint_fragment_range.start + fragment_offset;
                 let mut fragment = fragment.clone();
                 fragment.font_id = self.public_font_id(fragment.font_id);
                 if let Some(source_ranges) = &fragment.glyph_source_ranges {
@@ -772,11 +827,15 @@ impl PlatformTextSystem for WebTextSystem {
                         .enumerate()
                         .filter_map(|(index, (glyph, range))| {
                             let suppress =
-                                crate::run_replacements::replacement_glyph_is_suppressed(
-                                    range,
-                                    &replacement_ranges,
-                                )
-                                .expect("replacement glyph mappings were validated above");
+                                if speculative_synthetic_root.contains(&(fragment_index, index)) {
+                                    false
+                                } else {
+                                    crate::run_replacements::replacement_glyph_is_suppressed(
+                                        range,
+                                        &replacement_ranges,
+                                    )
+                                    .expect("replacement glyph mappings were validated above")
+                                };
                             (!suppress).then_some((glyph.clone(), range.clone(), index))
                         })
                         .collect::<Vec<_>>();

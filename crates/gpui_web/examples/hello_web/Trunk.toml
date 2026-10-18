@@ -1,5 +1,5 @@
 [build]
-locked = false
+locked = true
 no_sri = true
 
 [serve]
