@@ -383,6 +383,14 @@ impl NativeSession {
         self.active.load(Ordering::Acquire)
     }
 
+    pub(crate) fn retire_on_owner(&self) {
+        assert!(
+            self.is_owner_thread(),
+            "native-session retirement is owner-thread-only"
+        );
+        self.active.store(false, Ordering::Release);
+    }
+
     /// Clone the Activity handle while it is active. The clone keeps the
     /// android-activity global reference alive for the full native/JNI operation.
     pub(crate) fn app(&self) -> Option<AndroidApp> {

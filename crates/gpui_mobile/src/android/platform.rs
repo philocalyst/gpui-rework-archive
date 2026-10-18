@@ -638,6 +638,10 @@ impl AndroidPlatform {
         // be invoked from inside the event loop when the window is ready.
         if let Some(session) = &self.native_session {
             super::jni::run_event_loop_for_session(session);
+            // Retire GPUI callbacks and scoped foreground tasks before
+            // Application::run returns and releases its AppCell. The session
+            // guard repeats this cleanup as an idempotent safety net.
+            self.retire_native_session_on_owner();
         } else {
             // No `AndroidApp` to drive: either headless / test mode, or the host-driven
             // entry point (`super::host`), whose render thread owns the loop and keeps
@@ -904,9 +908,14 @@ impl AndroidPlatform {
         Some(window)
     }
 
-    /// Retire native-session callback producers on the owner thread, after
-    /// `Application::run` has dropped its windows and App callbacks.
+    /// Retire native-session callback producers on the owner thread while the
+    /// GPUI AppCell is still alive. The run loop calls this before returning;
+    /// the native-session guard calls it again after `Application::run` as a
+    /// fallback, so all operations here must tolerate already-retired state.
     pub(super) fn retire_native_session_on_owner(&self) {
+        if let Some(session) = self.native_session.as_ref() {
+            session.retire_on_owner();
+        }
         let dispatcher = Arc::clone(&self.state.lock().dispatcher);
         assert!(
             dispatcher.is_main_thread(),
@@ -1983,6 +1992,25 @@ mod tests {
         assert!(p.close_window(retained.id()).is_some());
         assert!(retained.is_retired());
         assert!(p.take_pending_window().is_none());
+    }
+
+    #[test]
+    fn native_retirement_is_idempotent_and_closes_callbacks_once() {
+        let p = headless();
+        let window = AndroidWindow::headless(100, 200, 1.0);
+        let close_count = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let close_count_for_callback = Arc::clone(&close_count);
+        window.on_close(move || {
+            close_count_for_callback.fetch_add(1, Ordering::SeqCst);
+        });
+        p.state.lock().windows.push(Arc::clone(&window));
+
+        p.retire_native_session_on_owner();
+        p.retire_native_session_on_owner();
+
+        assert!(window.is_retired());
+        assert_eq!(close_count.load(Ordering::SeqCst), 1);
+        assert_eq!(p.window_count(), 0);
     }
 
     #[test]
