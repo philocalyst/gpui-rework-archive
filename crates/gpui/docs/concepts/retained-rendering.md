@@ -85,10 +85,109 @@ use an internal retainable measurement path when its callback owns stable inputs
 and only reads the window text system. This does not make arbitrary application
 measurement callbacks retainable.
 
-Retained layout nodes are claimed in the next Taffy frame and stale subtrees are
-pruned at frame end. Replayed output only comes from a completed painted range;
-partial layout or paint work is rebuilt. Each mount occurrence has its own
-retained state, even when the same entity appears more than once in a window.
+`Display::default()` is `Flex`, while `Style::default()` and a default `Div` use `Block`.
+The paragraph behavior below describes adjacent inline content in Block flow;
+an explicit Flex display uses the flex layout path.
+
+### Block paragraph and inline-span reuse
+
+A `Div` with `Block` display collects adjacent inline text into a paragraph
+document: text, runs, style ranges, inline spans, and any atomic inline boxes.
+The paragraph memo is an internal optimization for repeated plain-text paragraphs.
+It does not reuse a prior frame's callback or document as current-frame state. The
+Taffy paragraph node keeps a fresh measurement callback bound to the current
+document and an optional memo of the previous shaping inputs and layout.
+
+The memo key snapshots the paragraph's text style, resolved LTR direction,
+normal Unicode bidi mode, font size and metrics, line height, rem size, scale,
+font generation, and each span's text/box ranges and direction metadata. It also
+checks the paragraph text, runs, and style ranges. Reuse is limited to paragraphs
+without inline boxes whose paragraph and spans remain static LTR with normal bidi.
+Encountering Auto, RTL, or non-normal bidi conservatively disables inline-text
+reuse for the rest of that Window, including descendants requested later during
+prepaint. A previous measurement with a truncation width or inline boxes is not
+adopted from the paragraph memo. A same-options wrapped layout without truncation
+can be reused; if current constraints change the layout options, truncation
+width, or bidi scopes, or the font generation changes, the callback measures
+again.
+
+On a matching paragraph-node claim, GPUI checks the live Taffy node, style,
+direction metadata, leaf shape, and frame-bound status before consulting the
+memo. The memo then verifies the current shaping inputs and prior measurement,
+and adopts the prior `Arc<InlineLayout>` only when the prior result was not
+truncated or boxed. It binds that immutable layout to the current document and
+measurement cache. The current callback still checks layout options, bidi scopes,
+truncation width, and font generation; if those differ, it shapes the current
+document normally. Borrow conflicts and stale or pruned node identities fall
+back to a fresh node and layout.
+
+Inline text spans have a separate retained-node role. Their current content,
+style, direction metadata, and leaf status must match before a node ID is reused;
+GPUI replaces its callback, marks the detached span node dirty, and clears
+computed geometry so custom elements that query a span receive current
+measurement. Thus paragraph shaping may be reused while span geometry and
+callbacks remain current.
+
+### Logical layout claims
+
+A retained view records Taffy layout-node IDs in request order in a
+`LayoutClaimLog`. On a later render, the view requests layout again and GPUI
+attempts to claim the corresponding old nodes in that same order. Each claim
+checks the old node's liveness, Taffy style, physical children, layout-direction
+metadata, logical-child metadata, and whether measurement is frame-bound.
+Inline spans can be logical claims without being physical paragraph-flow
+children. Paragraph claims add the text-memo checks described above.
+
+A scope counts as fully replayed only if it consumes its complete previous log
+without becoming non-replayable. A mismatch stops reuse for the remainder of
+that scope and lets the new requests create fresh nodes; the updated claim log
+then describes the current request sequence. Unclaimed Taffy nodes are pruned at
+frame end. This log preserves identity and catches shape changes; it does not
+make layout replay constant-time.
+
+### Using the parent-computed layout
+
+When a retained view rebuilds its element but its complete layout-claim log
+replays, GPUI may use the matching root node's layout already computed by the
+current parent layout pass. The eligibility checks also require the same cached
+root ID, unchanged layout environment, no frame-bound measurement, and valid
+cached dependencies. The previous frame's root-bounds-size equality is not
+required: the parent has computed the root for the current frame's constraints.
+The element still prepaints freshly. Reuse of painted output separately requires
+the exact output key, including bounds, to match; on any failed eligibility
+check, GPUI takes the fresh layout path.
+
+Stale Taffy subtrees are pruned at frame end. When the set of unique node IDs
+claimed for the frame equals Taffy's live node count, the count check proves
+there are no unclaimed nodes and skips the retained-node pruning scan. If counts
+differ, GPUI scans retained parents and detaches stale direct children in one
+batch per parent. It then scans the tracked live-node inventory for stale roots,
+removes each stale parent before its descendants, and clears their node metadata.
+It also releases frame-bound measurement closures.
+The equality fast path skips only pruning's scan; frame finalization, dependency
+checks, layout claims, and output replay remain separate work.
+
+The retained Scene path accumulates adjacent replay ranges as one pending range.
+At frame finish, a nonempty range covering the complete previous Scene can be
+transferred only when the destination is pristine and the source Scene is
+finished. Those eligibility checks read range/Scene state, and the transfer
+swaps Scene ownership rather than copying paint operations. Otherwise GPUI
+flushes the pending range through ordinary Scene replay and finishes the
+destination Scene. This makes a qualifying whole-Scene handoff constant-time;
+it does not make a frame constant-time. Partial Scene replay and all layout,
+state, dependency, and preparation work still scale with their inputs.
+
+The BoundsTree uses height-aware insertion to keep its spatial tree balanced;
+its structural tests bound height logarithmically for increasing leaf counts.
+Balancing limits traversal depth, but an intersection query can still visit many
+branches and has an `O(N)` worst case when bounds overlap broadly. Replayed output
+still comes only from completed painted ranges; partial layout or paint work is
+rebuilt. Each mount occurrence has its own retained state, even when the same
+entity appears more than once in a window.
+
+Paragraph reuse skips some shaping, not paragraph collection: when an owner
+rebuilds, GPUI still collects text, runs, spans, and styles and compares the memo
+inputs. That work grows with paragraph length and span/style count.
 
 ## Work grows with tracked inputs and retained output
 

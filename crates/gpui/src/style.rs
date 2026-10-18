@@ -1499,7 +1499,10 @@ pub type JustifyContent = AlignContent;
 
 /// Selects the layout algorithm used for this element's children.
 ///
-/// Defaults to flex layout. Block containers arrange text and inline children in paragraphs.
+/// `Display::default()` is [`Display::Flex`]. `Style::default()` uses
+/// [`Display::Block`]; block containers collect direct text and inline children
+/// into paragraphs. Choose flex layout explicitly when children should
+/// participate as flex items.
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Default, Serialize, Deserialize, JsonSchema)]
 // Inline participation is handled by GPUI before independent box layout in Taffy.
 pub enum Display {
