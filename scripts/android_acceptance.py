@@ -863,10 +863,10 @@ def runtime_failure_lines(logs: str) -> list[str]:
     failures = re.findall(
         r"(?im)^.*(?:FATAL EXCEPTION|Fatal signal|ANR in |UnsatisfiedLinkError).*$", logs
     )
-    # Android images can emit these two scoped platform-package startup
-    # warnings independently of the app: Widevine's optional crypto module and
-    # PrebuiltBugle's bundled curve25519 lookup. Keep every other loader error
-    # fatal, including failures from GPUI/native app libraries.
+    # Android images can emit scoped optional-library warnings independently
+    # of the app: Widevine crypto, PrebuiltBugle curve25519, and this exact
+    # DEBUG-level Velvet lookup observed on API 36. Keep every other loader
+    # error fatal, including failures from GPUI/native app libraries.
     for line in logs.splitlines():
         lowered = line.lower()
         known_platform_warning = (
@@ -874,6 +874,11 @@ def runtime_failure_lines(logs: str) -> list[str]:
             or (
                 "libcurve25519.so" in lowered
                 and "caller=/product/priv-app/prebuiltbugle/prebuiltbugle.apk" in lowered
+            )
+            or (
+                re.search(r"\bD nativeloader:", line) is not None
+                and "(caller=/product/priv-app/velvet/velvet.apk!classes3.dex):" in lowered
+                and 'dlopen failed: library "libgeller_jni_lib_split.so" not found' in lowered
             )
         )
         if "dlopen failed" in lowered and not known_platform_warning:
