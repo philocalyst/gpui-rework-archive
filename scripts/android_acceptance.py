@@ -452,6 +452,50 @@ def distinct_font_scale(current: str) -> str:
     return "1.10" if abs(value - 1.10) > 0.001 else "1.15"
 
 
+def effective_font_scale(activity_dump: str) -> str:
+    """Read the framework's effective fontScale from Activity configuration."""
+    values = re.findall(r"CurrentConfiguration=\{([0-9]+(?:\.[0-9]+)?)\b", activity_dump)
+    if not values:
+        raise RuntimeError("Activity dump did not expose CurrentConfiguration fontScale")
+    if len(set(values)) != 1:
+        raise RuntimeError(f"Activity dump has inconsistent effective font scales: {values!r}")
+    return values[0]
+
+
+def stored_font_scale(settings_dump: str) -> str | None:
+    """Return the explicit system setting entry, distinguishing absence from OS default."""
+    values = [line.partition("=")[2] for line in settings_dump.splitlines()
+              if line.startswith("font_scale=")]
+    if len(values) > 1:
+        raise RuntimeError(f"settings list contains duplicate font_scale entries: {values!r}")
+    return values[0] if values else None
+
+
+def font_scale_restore_matches(
+    original: str,
+    restored: str,
+    original_effective: str,
+    restored_effective: str,
+    original_entry: str | None,
+    restored_entry: str | None,
+) -> bool:
+    """Require exact restoration, allowing only Android's absent-key 1.0 normalization."""
+    if original == "null":
+        return (
+            original_entry is None
+            and restored_entry is None
+            and restored in {"null", "1.0"}
+            and original_effective == "1.0"
+            and restored_effective == "1.0"
+        )
+    return (
+        restored == original
+        and original_entry == original
+        and restored_entry == original
+        and restored_effective == original_effective
+    )
+
+
 def run_font_scale_recreation(
     serial: str, artifact: Path, package: str, activity: str, root_label: str
 ) -> str:
@@ -464,7 +508,15 @@ def run_font_scale_recreation(
     before_events = adb(serial, "logcat", "-d", "-b", "all", timeout=45)
     baseline_generation = _latest_api26_generation(before_events, pid_before) if api == 26 else None
     before_activities = adb(serial, "shell", "dumpsys", "activity", "activities")
+    original_effective = effective_font_scale(before_activities)
+    original_entry = stored_font_scale(adb(serial, "shell", "settings", "list", "system"))
+    if original == "null" and original_entry is not None:
+        raise RuntimeError(
+            f"font_scale read as absent but settings list contains {original_entry!r}")
     (artifact / "font-scale-before.txt").write_text(original + "\n")
+    (artifact / "font-scale-before-effective.txt").write_text(original_effective + "\n")
+    (artifact / "font-scale-before-stored-entry.txt").write_text(
+        (original_entry if original_entry is not None else "<absent>") + "\n")
     (artifact / "font-scale-before-pid.txt").write_text(str(pid_before) + "\n")
     (artifact / "font-scale-before-logcat.txt").write_text(before_events)
     (artifact / "font-scale-lifecycle-contract.txt").write_text(
@@ -560,14 +612,35 @@ def run_font_scale_recreation(
                     adb(serial, "shell", "settings", "put", "system", "font_scale", original, timeout=8)
                     restore_command = f"adb -s {serial} shell settings put system font_scale {original}"
                 restored = adb(serial, *key).strip()
-                (artifact / "font-scale-restore.txt").write_text(
-                    f"original={original}\nrestored={restored}\ncommand={restore_command}\n")
-                if restored != original:
-                    raise RuntimeError(
-                        f"font_scale restore mismatch: expected {original!r}, got {restored!r}")
-                # Wait for the app to settle after returning to the user's exact setting.
+                restored_entry = stored_font_scale(adb(serial, "shell", "settings", "list", "system"))
+                # Persist the raw restore result and command before any further probe can fail.
+                restore_record = (
+                    f"original_raw={original}\n"
+                    f"restored_raw={restored}\n"
+                    f"original_stored_entry={original_entry if original_entry is not None else '<absent>'}\n"
+                    f"restored_stored_entry={restored_entry if restored_entry is not None else '<absent>'}\n"
+                    f"command={restore_command}\n")
+                (artifact / "font-scale-restore.txt").write_text(restore_record)
+                # Wait for the app to settle after returning to the user's exact setting,
+                # then verify the effective framework configuration as well as raw storage.
                 restored_root = wait_label(
                     serial, artifact, root_label, "font-scale-restored", timeout=20)
+                restored_activities = adb(serial, "shell", "dumpsys", "activity", "activities")
+                restored_effective = effective_font_scale(restored_activities)
+                (artifact / "font-scale-restore-activities.txt").write_text(restored_activities)
+                (artifact / "font-scale-restore.txt").write_text(
+                    restore_record
+                    + f"original_effective={original_effective}\n"
+                    + f"restored_effective={restored_effective}\n")
+                if not font_scale_restore_matches(
+                    original, restored, original_effective, restored_effective,
+                    original_entry, restored_entry
+                ):
+                    raise RuntimeError(
+                        "font_scale restoration mismatch: "
+                        f"raw {original!r}->{restored!r}, "
+                        f"effective {original_effective!r}->{restored_effective!r}, "
+                        f"stored {original_entry!r}->{restored_entry!r}")
                 capture_screen(serial, artifact, "font-scale-restored")
             except Exception as restore_error:
                 (artifact / "font-scale-restore-error.txt").write_text(

@@ -64,6 +64,36 @@ class RuntimeFailureClassificationTests(unittest.TestCase):
 
 
 class FontScaleRecreationTests(unittest.TestCase):
+    def test_missing_font_scale_restoration_accepts_only_absent_effective_default(self):
+        self.assertTrue(android_acceptance.font_scale_restore_matches(
+            "null", "1.0", "1.0", "1.0", None, None))
+        self.assertTrue(android_acceptance.font_scale_restore_matches(
+            "null", "null", "1.0", "1.0", None, None))
+        self.assertFalse(android_acceptance.font_scale_restore_matches(
+            "null", "1.0", "1.0", "1.1", None, None))
+        self.assertFalse(android_acceptance.font_scale_restore_matches(
+            "null", "1.0", "1.0", "1.0", None, "1.0"))
+
+    def test_explicit_font_scale_must_restore_raw_entry_and_effective_value(self):
+        self.assertTrue(android_acceptance.font_scale_restore_matches(
+            "1.15", "1.15", "1.15", "1.15", "1.15", "1.15"))
+        self.assertFalse(android_acceptance.font_scale_restore_matches(
+            "1.15", "1.0", "1.15", "1.0", "1.15", "1.0"))
+        self.assertFalse(android_acceptance.font_scale_restore_matches(
+            "1.15", "1.15", "1.15", "1.10", "1.15", "1.15"))
+
+    def test_effective_font_scale_requires_one_consistent_activity_configuration(self):
+        dump = """ActivityRecord:
+  CurrentConfiguration={1.0 310mcc260mnc [en_US] ldltr}
+  mLastReportedConfiguration:
+  CurrentConfiguration={1.0 310mcc260mnc [en_US] ldltr}"""
+        self.assertEqual(android_acceptance.effective_font_scale(dump), "1.0")
+        with self.assertRaisesRegex(RuntimeError, "inconsistent effective font scales"):
+            android_acceptance.effective_font_scale(
+                "CurrentConfiguration={1.0 a}\nCurrentConfiguration={1.1 b}")
+        with self.assertRaisesRegex(RuntimeError, "did not expose"):
+            android_acceptance.effective_font_scale("no configuration")
+
     def test_font_scale_uses_a_distinct_value_and_handles_missing_setting(self):
         self.assertEqual(android_acceptance.distinct_font_scale("null"), "1.10")
         self.assertEqual(android_acceptance.distinct_font_scale("1.0"), "1.10")
