@@ -25,11 +25,15 @@ owners that scheduled that work. A global read is tied to that global type's
 revision. When a tracked entity is notified or a tracked global revision
 changes, the affected cached view rebuilds on the next frame.
 
-A retained layout also depends on its window environment: viewport and scale,
-`rem` and text style, opacity, content mask, image-cache identity, pointer and
-focus state, accessibility state, input modality, text direction, and Unicode
-bidirectional mode. Changes to the view's bounds or inherited paint environment
-can require fresh prepaint and paint output even when its layout can be reused.
+A retained layout cache includes viewport and scale, `rem` and text style,
+content mask, image-cache identity, focus, window activity, accessibility
+activity, keyboard/touch input modality, modifiers, text direction and Unicode
+bidirectional mode. Mouse position is not an unconditional cache key: GPUI
+records a mouse-position dependency only when code in that retained subtree
+reads it, then invalidates that subtree when the recorded position changes.
+Inherited paint values such as group opacity can change how retained output is
+composited without forcing its layout subtree to be rebuilt. Other bounds or
+paint-environment changes can still require fresh prepaint or paint output.
 
 `Window::refresh` forces a fresh render of the window. It is useful when a value
 outside GPUI's tracked entity and global state changes what the view displays.

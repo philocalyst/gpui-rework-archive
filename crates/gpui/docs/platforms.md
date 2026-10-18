@@ -79,6 +79,39 @@ be denied or a system service absent. Depending on the API, an unsupported call
 returns an error, returns `None`, or does nothing. The [platform services guide](crate::_documentation::guides::platform_services)
 shows how to handle those outcomes and retain asynchronous operations.
 
+## iOS and Android
+
+GPUI uses separate mobile backends. The target-aware `gpui_ce_platform`
+package selects the backend for an iOS or Android build; application views
+still use the same GPUI `App`, `Window` and element APIs.
+
+| Target | Platform crate | Native integration |
+| --- | --- | --- |
+| iOS | `gpui_ce_ios` (imported as `gpui_ios`) | UIKit windows, lifecycle, touch and text input; `gpui_ce_apple` (`gpui_apple`) supplies shared Apple Metal and CoreText support. |
+| Android | `gpui_ce_mobile` (imported as `gpui_mobile`) | Android window, renderer, touch, lifecycle, accessibility and `InputConnection` integration. |
+
+The checked-in mobile example shares its Rust view code between targets. The
+Android APK uses a `NativeActivity` host. The Android backend also exposes a
+host-driven Activity path for applications that own a Java Activity; follow
+that path's surface and lifecycle callback order instead of mixing the two
+entry points. The iOS backend currently supports one connected `UIWindowScene`;
+it does not provide multiple simultaneous scenes.
+
+Both targets deliver text composition through their native text-input protocol.
+Android's `InputConnection` proxy publishes immutable snapshots to the IME and
+queues edits for the GPUI thread; it does not synchronously query GPUI while an
+IME holds framework locks. UIKit reports text ranges in UTF-16 units, which the
+iOS adapter translates at the native boundary. `Window::insets()` keeps safe
+area and keyboard (`ime`) insets separate; `WindowInsets::effective()` returns
+the larger edge value for layout padding. System services and device behavior
+still depend on the OS version, permissions, and the host application.
+
+For SDK prerequisites, build/package commands, and the mobile acceptance
+scripts, see [Build for iOS and Android](crate::_documentation::guides::mobile).
+A successful cross-target Cargo build does not establish that a device has a
+working GPU driver, that the keyboard can compose text, or that app lifecycle
+callbacks match a particular host.
+
 ## Browser builds
 
 The browser backend draws into one canvas filling the page. It uses wgpu with

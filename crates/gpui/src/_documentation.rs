@@ -61,6 +61,7 @@ pub mod guides {
         images_and_assets => "guides/images-and-assets.md",
         windows => "guides/windows.md",
         platform_services => "guides/platform-services.md",
+        mobile => "guides/mobile.md",
         accessibility => "guides/accessibility.md",
         testing => "guides/testing.md",
         performance => "guides/performance.md",
