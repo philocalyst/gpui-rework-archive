@@ -480,9 +480,9 @@ def font_scale_restore_matches(
     restored_entry: str | None,
 ) -> bool:
     """Require exact restoration, allowing only Android's absent-key 1.0 normalization."""
-    if original == "null":
+    if original_entry is None:
         return (
-            original_entry is None
+            original in {"null", "1.0"}
             and restored_entry is None
             and restored in {"null", "1.0"}
             and original_effective == "1.0"
@@ -510,9 +510,15 @@ def run_font_scale_recreation(
     before_activities = adb(serial, "shell", "dumpsys", "activity", "activities")
     original_effective = effective_font_scale(before_activities)
     original_entry = stored_font_scale(adb(serial, "shell", "settings", "list", "system"))
-    if original == "null" and original_entry is not None:
+    if original_entry is None and original not in {"null", "1.0"}:
         raise RuntimeError(
-            f"font_scale read as absent but settings list contains {original_entry!r}")
+            f"font_scale entry is absent but settings get returned unexpected {original!r}")
+    if original_entry is not None and original != original_entry:
+        raise RuntimeError(
+            f"font_scale raw value {original!r} differs from stored entry {original_entry!r}")
+    if original_entry is None and original_effective != "1.0":
+        raise RuntimeError(
+            f"font_scale entry is absent but effective configuration is {original_effective!r}")
     (artifact / "font-scale-before.txt").write_text(original + "\n")
     (artifact / "font-scale-before-effective.txt").write_text(original_effective + "\n")
     (artifact / "font-scale-before-stored-entry.txt").write_text(
@@ -605,12 +611,12 @@ def run_font_scale_recreation(
     finally:
         if changed:
             try:
-                if original == "null":
+                if original_entry is None:
                     adb(serial, "shell", "settings", "delete", "system", "font_scale", timeout=8)
                     restore_command = f"adb -s {serial} shell settings delete system font_scale"
                 else:
-                    adb(serial, "shell", "settings", "put", "system", "font_scale", original, timeout=8)
-                    restore_command = f"adb -s {serial} shell settings put system font_scale {original}"
+                    adb(serial, "shell", "settings", "put", "system", "font_scale", original_entry, timeout=8)
+                    restore_command = f"adb -s {serial} shell settings put system font_scale {original_entry}"
                 restored = adb(serial, *key).strip()
                 restored_entry = stored_font_scale(adb(serial, "shell", "settings", "list", "system"))
                 # Persist the raw restore result and command before any further probe can fail.
