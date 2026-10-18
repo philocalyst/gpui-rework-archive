@@ -656,6 +656,7 @@ impl EditableTextElement {
 
                 cx.stop_propagation();
                 window.focus(&focus_handle, cx);
+                window.request_virtual_keyboard();
 
                 let text_position = event.position - document_origin;
                 state.update(cx, |state, cx| {
@@ -954,8 +955,9 @@ mod tests {
     use gpui::{
         AppContext as _, CaretPosition, CaretSelection, Context, EntityInputHandler,
         HeadlessAppContext, KeyDownEvent, KeyUpEvent, Keystroke, LayoutDirection, Modifiers,
-        ModifiersChangedEvent, NavigationDirection, PlatformInput, PlatformTextSystem, Render,
-        ScaledPixels, TestTextSystem, WindowHandle, div, hsla, prelude::*, rgba,
+        ModifiersChangedEvent, MouseButton, NavigationDirection, PlatformInput, PlatformTextSystem,
+        Render, ScaledPixels, TestAppContext, TestTextSystem, WindowHandle, div, hsla, prelude::*,
+        rgba,
     };
     use gpui_parley::{ParleyTextSystem, SystemFonts};
     use std::{borrow::Cow, collections::HashSet, sync::Arc};
@@ -975,11 +977,80 @@ mod tests {
     impl Render for AccessibleInputView {
         fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
             text_input("a11y-editor")
+                .debug_selector(|| "a11y-editor".to_string())
                 .state(self.input.downgrade())
                 .aria_label("Editor")
                 .placeholder("Type here")
                 .when(!self.accepts_input, |input| input.accepts_input(false))
         }
+    }
+
+    #[gpui::test]
+    fn clicking_an_already_focused_editor_requests_the_virtual_keyboard_again(
+        cx: &mut TestAppContext,
+    ) {
+        let (view, window) = cx.add_window_view(|_, cx| {
+            let input = cx.new(|cx| EditableTextState::new(StringStorage::from("value"), cx));
+            AccessibleInputView {
+                input,
+                accepts_input: true,
+            }
+        });
+        let bounds = window
+            .debug_bounds("a11y-editor")
+            .expect("the editor has debug bounds after the first frame");
+        let position = point(
+            bounds.origin.x + bounds.size.width / 2.,
+            bounds.origin.y + bounds.size.height / 2.,
+        );
+
+        window.simulate_click(position, Modifiers::none());
+        let initial_requests = window.virtual_keyboard_requests();
+        assert!(
+            initial_requests > 0,
+            "the initial editor click requests the keyboard"
+        );
+        assert!(
+            window.update(|window, app| {
+                view.read(app).input.focus_handle(app).is_focused(window)
+            })
+        );
+
+        window.update(|window, _| window.dismiss_virtual_keyboard());
+        assert_eq!(window.virtual_keyboard_requests(), initial_requests);
+        assert!(
+            window.update(|window, app| {
+                view.read(app).input.focus_handle(app).is_focused(window)
+            })
+        );
+
+        window.simulate_click(position, Modifiers::none());
+        assert_eq!(
+            window.virtual_keyboard_requests(),
+            initial_requests + 1,
+            "a same-editor user click must request the keyboard after dismissal"
+        );
+    }
+
+    #[gpui::test]
+    fn clicking_a_read_only_editor_does_not_request_the_virtual_keyboard(cx: &mut TestAppContext) {
+        let (_, window) = cx.add_window_view(|_, cx| {
+            let input = cx.new(|cx| EditableTextState::new(StringStorage::from("value"), cx));
+            AccessibleInputView {
+                input,
+                accepts_input: false,
+            }
+        });
+        let bounds = window
+            .debug_bounds("a11y-editor")
+            .expect("the editor has debug bounds after the first frame");
+        let position = point(
+            bounds.origin.x + bounds.size.width / 2.,
+            bounds.origin.y + bounds.size.height / 2.,
+        );
+
+        window.simulate_click(position, Modifiers::none());
+        assert_eq!(window.virtual_keyboard_requests(), 0);
     }
 
     #[test]

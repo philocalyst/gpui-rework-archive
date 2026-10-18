@@ -1031,6 +1031,11 @@ pub struct VisualTestContext {
 }
 
 impl VisualTestContext {
+    /// Returns the number of virtual keyboard show requests sent to this test window.
+    pub fn virtual_keyboard_requests(&self) -> usize {
+        self.cx.test_window(self.window).virtual_keyboard_requests()
+    }
+
     /// Runs `f` with the window and the app. This doesn't run pending tasks.
     pub fn update<R>(&mut self, f: impl FnOnce(&mut Window, &mut App) -> R) -> R {
         self.cx
