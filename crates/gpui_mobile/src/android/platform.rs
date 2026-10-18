@@ -219,6 +219,7 @@ unsafe impl Send for AndroidPlatformState {}
 /// expectation that the platform is single-threaded at the Rc level.
 pub struct AndroidPlatform {
     state: Mutex<AndroidPlatformState>,
+    pub(crate) native_session: Option<Arc<super::jni::NativeSession>>,
     /// Set to `true` when `quit()` is called; the main loop checks this.
     should_quit: AtomicBool,
     /// The system night mode, as last applied to every window. What
@@ -325,6 +326,14 @@ impl AndroidPlatform {
     /// Panics if called from a thread that is not the Android main thread
     /// (i.e. `ALooper_forThread()` returns null) — unless `headless` is `true`.
     pub fn new(headless: bool) -> Self {
+        Self::new_scoped(headless, None)
+    }
+
+    pub(crate) fn new_for_session(headless: bool, session: Arc<super::jni::NativeSession>) -> Self {
+        Self::new_scoped(headless, Some(session))
+    }
+
+    fn new_scoped(headless: bool, native_session: Option<Arc<super::jni::NativeSession>>) -> Self {
         crate::android::init_logger();
 
         // Build a dispatcher appropriate for the current context.
@@ -442,9 +451,10 @@ impl AndroidPlatform {
                 // `set_host_activity` either provides the AssetManager first or
                 // finds the text system pending afterwards.
                 let mut pending = EMOJI_FONT_PENDING.lock().expect("poisoned");
-                if let Some(result) = crate::android::jni::with_asset_manager(|assets| {
-                    load_asset_bytes(assets, BUNDLED_EMOJI_FONT)
-                }) {
+                if let Some(result) = crate::android::jni::with_asset_manager_for_runtime(
+                    native_session.as_deref(),
+                    |assets| load_asset_bytes(assets, BUNDLED_EMOJI_FONT),
+                ) {
                     match result {
                         Ok(bytes) => {
                             log::info!(
@@ -493,6 +503,7 @@ impl AndroidPlatform {
         log::info!("AndroidPlatform::new — headless={headless}");
 
         Self {
+            native_session,
             state: Mutex::new(AndroidPlatformState {
                 dispatcher,
                 gpu_context: Rc::new(RefCell::new(None)),
@@ -597,8 +608,8 @@ impl AndroidPlatform {
         // Drive the event loop.  This blocks until quit() is called or
         // the activity is destroyed.  The finish_launching callback will
         // be invoked from inside the event loop when the window is ready.
-        if let Some(app) = super::jni::android_app() {
-            super::jni::run_event_loop(&app);
+        if let Some(session) = &self.native_session {
+            super::jni::run_event_loop_for_session(session);
         } else {
             // No `AndroidApp` to drive: either headless / test mode, or the host-driven
             // entry point (`super::host`), whose render thread owns the loop and keeps
@@ -698,6 +709,7 @@ impl AndroidPlatform {
                 scale_factor,
                 transparent,
                 Some(Arc::clone(&state.dispatcher)),
+                self.native_session.clone(),
             )?;
             state.windows.push(Arc::clone(&window));
             window
@@ -725,7 +737,16 @@ impl AndroidPlatform {
 
     /// Read the system night mode and apply it to every window.
     pub fn refresh_appearance(&self) {
-        self.set_appearance(super::jni::query_appearance());
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return;
+        }
+        self.set_appearance(super::jni::query_appearance_for_runtime(
+            self.native_session.as_deref(),
+        ));
     }
 
     /// Apply `appearance` to every window, and answer it from
@@ -906,11 +927,18 @@ impl AndroidPlatform {
     ///
     /// Returns `None` if the JNI environment is unavailable or the call fails.
     fn query_keyboard_layout_id_via_jni(&self) -> Option<String> {
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return None;
+        }
         use crate::android::jni::{self as jni_helpers, get_string};
         use jni::objects::JValue;
 
         jni_helpers::with_env(|env| {
-            let activity = jni_helpers::activity(env)?;
+            let activity = jni_helpers::activity_for_runtime(env, self.native_session.as_deref())?;
 
             // activity.getSystemService("input_method")
             let service_name = env.new_string("input_method").map_err(|e| e.to_string())?;
@@ -998,11 +1026,18 @@ impl AndroidPlatform {
     /// Returns -1 on failure (JNI unavailable, API < 29, etc.).
     #[allow(dead_code)]
     fn query_thermal_status_via_jni(&self) -> i32 {
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return -1;
+        }
         use crate::android::jni as jni_helpers;
         use jni::objects::JValue;
 
         jni_helpers::with_env(|env| {
-            let activity = jni_helpers::activity(env)?;
+            let activity = jni_helpers::activity_for_runtime(env, self.native_session.as_deref())?;
 
             // activity.getSystemService("power")
             let service_name = env.new_string("power").map_err(|e| e.to_string())?;
@@ -1318,7 +1353,7 @@ impl Platform for AndroidPlatform {
         &self,
         options: PathPromptOptions,
     ) -> oneshot::Receiver<Result<Option<Vec<PathBuf>>>> {
-        super::document_picker::prompt(options)
+        super::document_picker::prompt(options, self.native_session.clone())
     }
 
     fn prompt_for_new_path(

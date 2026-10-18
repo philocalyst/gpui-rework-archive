@@ -1,6 +1,6 @@
 //! Android Storage Access Framework bridge returning readable local files.
 
-use super::jni::{self as jni_helpers, JniExt};
+use super::jni::{self as jni_helpers, JniExt, NativeSession};
 use anyhow::{Result, anyhow};
 use futures::channel::oneshot;
 use gpui::PathPromptOptions;
@@ -9,6 +9,7 @@ use std::path::PathBuf;
 
 pub(super) fn prompt(
     options: PathPromptOptions,
+    session: Option<std::sync::Arc<NativeSession>>,
 ) -> oneshot::Receiver<Result<Option<Vec<PathBuf>>>> {
     let (sender, receiver) = oneshot::channel();
     // Waiting for an Activity result on GPUI's native event thread deadlocks
@@ -19,17 +20,27 @@ pub(super) fn prompt(
                 "Android file prompts support files only; directory URIs are not filesystem paths"
             ))
         } else {
-            pick_files(options.multiple).map_err(|error| anyhow!(error))
+            pick_files(options.multiple, session.as_deref()).map_err(|error| anyhow!(error))
         };
         let _ = sender.send(result);
     });
     receiver
 }
 
-fn pick_files(multiple: bool) -> std::result::Result<Option<Vec<PathBuf>>, String> {
+fn pick_files(
+    multiple: bool,
+    session: Option<&NativeSession>,
+) -> std::result::Result<Option<Vec<PathBuf>>, String> {
     jni_helpers::with_env(|env| {
-        let activity = jni_helpers::activity(env)?;
-        let class = jni_helpers::find_app_class(env, "dev.gpui.mobile.GpuiPathPicker")?;
+        let activity = match session {
+            Some(session) => jni_helpers::activity_for_session(env, session)?,
+            None => jni_helpers::activity_for_runtime(env, None)?,
+        };
+        let class = jni_helpers::find_app_class_for_runtime(
+            env,
+            "dev.gpui.mobile.GpuiPathPicker",
+            session,
+        )?;
         let result = env
             .call_static_method(
                 &class,

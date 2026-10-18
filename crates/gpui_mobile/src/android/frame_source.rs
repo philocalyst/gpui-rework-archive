@@ -42,7 +42,7 @@ use std::{
     cell::RefCell,
     ptr,
     sync::{
-        OnceLock,
+        Mutex, OnceLock,
         atomic::{AtomicBool, AtomicPtr, Ordering},
         mpsc,
     },
@@ -50,6 +50,7 @@ use std::{
 };
 
 use crate::frame_pacer::FramePacer;
+use ndk::looper::ForeignLooper;
 
 /// Longest the loop blocks with nothing due; a missed wakeup costs at most
 /// this much latency instead of a frozen app.
@@ -67,7 +68,7 @@ thread_local! {
 }
 
 /// The loop thread's `ALooper`, for [`wake`] from other threads.
-static MAIN_LOOPER: AtomicPtr<ndk_sys::ALooper> = AtomicPtr::new(ptr::null_mut());
+static MAIN_LOOPER: Mutex<Option<ForeignLooper>> = Mutex::new(None);
 
 /// The vsync thread's `ALooper`; null while it has no choreographer.
 static VSYNC_LOOPER: AtomicPtr<ndk_sys::ALooper> = AtomicPtr::new(ptr::null_mut());
@@ -86,13 +87,35 @@ static FRAME_DUE: AtomicBool = AtomicBool::new(false);
 /// into [`schedule_frame`] on its next iteration.
 static OFF_THREAD_DEMAND: AtomicBool = AtomicBool::new(false);
 
+/// Clear state owned by a NativeActivity event-loop entry before its Activity
+/// session is replaced. The vsync worker is process-lived; its pending demand
+/// and the loop-thread pacer are entry-scoped.
+pub(crate) fn reset_native_session() {
+    let old_looper = {
+        let mut main_looper = MAIN_LOOPER
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        main_looper.take()
+    };
+    drop(old_looper);
+    POST_REQUESTED.store(false, Ordering::Release);
+    FRAME_DUE.store(false, Ordering::Release);
+    OFF_THREAD_DEMAND.store(false, Ordering::Release);
+    PACER.with(|slot| *slot.borrow_mut() = None);
+}
+
 /// Installs the pacer on the calling thread, which must own an `ALooper`
 /// (`android-activity`'s native thread, or the host render thread after
 /// `ALooper_prepare`). Idempotent; spawns the vsync thread on first use.
 pub(crate) fn install() {
-    // SAFETY: plain query of the calling thread's looper.
-    let looper = unsafe { ndk_sys::ALooper_forThread() };
-    MAIN_LOOPER.store(looper, Ordering::Release);
+    let looper = ForeignLooper::for_thread();
+    let old_looper = {
+        let mut main_looper = MAIN_LOOPER
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        std::mem::replace(&mut *main_looper, looper)
+    };
+    drop(old_looper);
 
     let has_choreographer = *VSYNC_THREAD.get_or_init(spawn_vsync_thread);
     PACER.with(|slot| {
@@ -103,7 +126,7 @@ pub(crate) fn install() {
             FramePacer::with_vsync(
                 Box::new(|| {
                     POST_REQUESTED.store(true, Ordering::Release);
-                    wake_looper(&VSYNC_LOOPER);
+                    wake_vsync_looper();
                 }),
                 REFRESH_INTERVAL,
             )
@@ -174,14 +197,29 @@ unsafe extern "C" fn on_vsync(
     _data: *mut std::ffi::c_void,
 ) {
     FRAME_DUE.store(true, Ordering::Release);
-    wake_looper(&MAIN_LOOPER);
+    wake_main_looper();
 }
 
-fn wake_looper(looper: &AtomicPtr<ndk_sys::ALooper>) {
-    let looper = looper.load(Ordering::Acquire);
+fn wake_vsync_looper() {
+    // The process-lived vsync worker owns this looper for its entire lifetime.
+    let looper = VSYNC_LOOPER.load(Ordering::Acquire);
     if !looper.is_null() {
-        // SAFETY: `ALooper_wake` is documented as safe to call from any thread.
+        // SAFETY: ALooper_wake is safe from any thread; this looper is retained
+        // by the process-lived worker and is never reset by native-session teardown.
         unsafe { ndk_sys::ALooper_wake(looper) };
+    }
+}
+
+fn wake_main_looper() {
+    // Clone the acquired reference while synchronized, then call the NDK after
+    // unlocking. A concurrent reset may release the slot but not this clone.
+    let looper = MAIN_LOOPER
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner())
+        .as_ref()
+        .cloned();
+    if let Some(looper) = looper {
+        looper.wake();
     }
 }
 
@@ -250,5 +288,5 @@ pub(crate) fn poll_timeout(next_delayed_task: Option<Instant>, can_draw: bool) -
 /// the looper's file descriptors (`TEXT_INPUT_DIRTY`, [`schedule_frame`]
 /// from another thread). A no-op before [`install`].
 pub(crate) fn wake() {
-    wake_looper(&MAIN_LOOPER);
+    wake_main_looper();
 }

@@ -8,8 +8,8 @@
 //!
 //! ```text
 //! android-activity loads the .so and calls android_main(app: AndroidApp)
-//!   └── We store the AndroidApp globally
-//!       └── Call the user-supplied gpui_android_main(app)
+//!   └── init_platform(app) installs an Activity-scoped session and returns a guard
+//!       └── The caller holds the guard while GPUI runs; dropping it retires that session
 //! ```
 //!
 //! ## Threading model
@@ -46,9 +46,11 @@
 
 use std::{
     ffi::c_void,
+    marker::PhantomData,
+    rc::Rc,
     sync::{
         Arc, OnceLock,
-        atomic::{AtomicBool, Ordering},
+        atomic::{AtomicBool, AtomicU64, Ordering},
     },
     time::Duration,
 };
@@ -61,9 +63,9 @@ static INIT_WINDOW_DONE: AtomicBool = AtomicBool::new(false);
 
 /// Whether the GPUI native library has completed initialization.
 ///
-/// Set to `true` after the first frame is rendered. This can be queried
-/// via JNI by a custom Activity to dismiss the splash screen, although
-/// with NativeActivity the system splash handles this automatically.
+/// Set after the first native window is ready and its init callbacks run.
+/// This does not prove a frame has been presented; the recreation test uses
+/// the separate generation-scoped present signal below.
 pub static NATIVE_INITIALIZED: AtomicBool = AtomicBool::new(false);
 
 /// Deferred lifecycle flags.
@@ -97,29 +99,33 @@ struct PhysicalWindowInsets {
 
 static PHYSICAL_WINDOW_INSETS: OnceLock<Mutex<PhysicalWindowInsets>> = OnceLock::new();
 
-fn publish_physical_insets(next: PhysicalWindowInsets) {
+fn publish_physical_insets(session: &NativeSession, next: PhysicalWindowInsets) {
     let changed = {
+        let current_session = NATIVE_SESSION.lock().expect("poisoned");
+        let Some(current) = current_session.as_ref() else {
+            return;
+        };
+        if !std::ptr::eq(Arc::as_ptr(current), session) || !session.is_active() {
+            return;
+        }
         let mut current = PHYSICAL_WINDOW_INSETS
             .get_or_init(|| Mutex::new(PhysicalWindowInsets::default()))
             .lock()
-            .unwrap();
-        if *current == next {
-            false
-        } else {
-            *current = next;
-            true
+            .expect("poisoned");
+        let changed = *current != next;
+        *current = next;
+        NATIVE_INSETS_RECEIVED.store(true, Ordering::Release);
+        if changed {
+            WINDOW_INSETS_PENDING.store(true, Ordering::Release);
         }
+        changed
     };
-    NATIVE_INSETS_RECEIVED.store(true, Ordering::Release);
     if changed {
-        WINDOW_INSETS_PENDING.store(true, Ordering::Release);
-        if let Some(app) = ANDROID_APP.get() {
-            app.create_waker().wake();
-        }
+        session.app.create_waker().wake();
     }
 }
 
-fn clear_ime_insets() {
+fn clear_ime_insets(session: &NativeSession) {
     if !NATIVE_INSETS_RECEIVED.load(Ordering::Acquire) {
         return;
     }
@@ -128,10 +134,13 @@ fn clear_ime_insets() {
         .lock()
         .unwrap();
     if current.ime != [0; 4] {
-        publish_physical_insets(PhysicalWindowInsets {
-            ime: [0; 4],
-            ..current
-        });
+        publish_physical_insets(
+            session,
+            PhysicalWindowInsets {
+                ime: [0; 4],
+                ..current
+            },
+        );
     }
 }
 
@@ -185,17 +194,52 @@ pub fn obtain_env<T>(f: impl FnOnce(&mut jni::Env) -> Result<T, String>) -> Resu
 
 /// Get the Activity as a [`JObject`].
 ///
-/// `activity_as_ptr()` returns a JNI global reference from `android-activity`
-/// that is valid for the lifetime of the app. We wrap it in a `JObject`.
+/// In NativeActivity mode this promotes the current session-owned global reference
+/// to a local reference while the session handle remains alive. Host mode uses the
+/// host-owned global reference. Prefer this scoped accessor to raw jobject APIs.
 ///
-/// Requires `&Env` because jni 0.22's `JObject::from_raw` binds the
-/// local-reference-frame lifetime.
-pub fn activity<'local>(env: &jni::Env<'local>) -> Result<JObject<'local>, String> {
-    let ptr = activity_as_ptr();
-    if ptr.is_null() {
-        return Err("Activity not available".into());
+/// Requires `&mut Env` because promoting the owner-held Activity global to a
+/// local reference allocates a JNI reference in the current local frame.
+pub fn activity<'local>(env: &mut jni::Env<'local>) -> Result<JObject<'local>, String> {
+    if let Some(session) = native_session() {
+        return activity_for_session(env, &session);
     }
-    Ok(unsafe { JObject::from_raw(env, ptr as jni::sys::jobject) })
+    host_activity(env)
+}
+/// Resolve an Activity for an operation owned by a specific runtime. `None` means
+/// host-driven mode only and fails closed while a NativeActivity session is active.
+pub(crate) fn activity_for_runtime<'local>(
+    env: &mut jni::Env<'local>,
+    session: Option<&NativeSession>,
+) -> Result<JObject<'local>, String> {
+    match session {
+        Some(session) => activity_for_session(env, session),
+        None if native_session().is_none() => host_activity(env),
+        None => Err("an Activity session is required while NativeActivity owns the runtime".into()),
+    }
+}
+
+fn host_activity<'local>(env: &mut jni::Env<'local>) -> Result<JObject<'local>, String> {
+    let slot = HOST_ACTIVITY.lock().expect("poisoned");
+    let activity = slot.current.as_ref().ok_or("Activity not available")?;
+    env.new_local_ref(activity)
+        .map_err(|error| error.to_string())
+}
+
+pub(crate) fn activity_for_session<'local>(
+    env: &mut jni::Env<'local>,
+    session: &NativeSession,
+) -> Result<JObject<'local>, String> {
+    if !is_current_native_session(session) {
+        return Err("Activity session has ended or been replaced".into());
+    }
+    let activity = session.app.activity_as_ptr();
+    if activity.is_null() {
+        return Err("Activity is no longer available".into());
+    }
+    let global = unsafe { JObject::from_raw(env, activity as _) };
+    env.new_local_ref(&global)
+        .map_err(|error| error.to_string())
 }
 
 /// Convert a Java String (`JObject` wrapping a `java.lang.String`) to a Rust `String`.
@@ -231,7 +275,18 @@ pub fn find_app_class<'local>(
     env: &mut jni::Env<'local>,
     class_name: &str,
 ) -> Result<jni::objects::JClass<'local>, String> {
-    let act = activity(env)?;
+    let session = native_session();
+    find_app_class_for_runtime(env, class_name, session.as_deref())
+}
+
+/// Load a class from the classloader belonging to the operation's runtime.
+/// `None` selects host mode only and fails closed during a NativeActivity session.
+pub(crate) fn find_app_class_for_runtime<'local>(
+    env: &mut jni::Env<'local>,
+    class_name: &str,
+    session: Option<&NativeSession>,
+) -> Result<jni::objects::JClass<'local>, String> {
+    let act = activity_for_runtime(env, session)?;
 
     // activity.getClassLoader() — call on the Context instance directly.
     // Do NOT use activity.getClass().getClassLoader(): NativeActivity is a
@@ -276,15 +331,114 @@ pub fn find_app_class<'local>(
 
 // ── global state ─────────────────────────────────────────────────────────────
 
-/// The `AndroidApp` handle from `android-activity`.
-///
-/// Set once in `android_main`; read-only thereafter.
-static ANDROID_APP: OnceLock<AndroidApp> = OnceLock::new();
+/// The currently active, Activity-scoped `AndroidApp` runtime. Replaced only
+/// after the previous NativeActivity entry has retired its session guard.
+static NATIVE_SESSION: Mutex<Option<Arc<NativeSession>>> = Mutex::new(None);
+static NEXT_NATIVE_SESSION: AtomicU64 = AtomicU64::new(1);
 
-/// Process-global `AndroidPlatform` instance.
-///
-/// Initialised once during `android_main`; read-only thereafter.
-static PLATFORM: OnceLock<Arc<AndroidPlatform>> = OnceLock::new();
+pub(crate) struct NativeSession {
+    pub(crate) generation: u64,
+    pub(crate) app: AndroidApp,
+    active: AtomicBool,
+    presented: AtomicBool,
+}
+impl NativeSession {
+    pub(crate) fn is_active(&self) -> bool {
+        self.active.load(Ordering::Acquire)
+    }
+}
+#[must_use = "keep the session guard alive for the duration of the NativeActivity run"]
+pub struct NativeSessionGuard {
+    session: Arc<NativeSession>,
+    platform: Option<Arc<AndroidPlatform>>,
+    // PACER is thread-local and teardown must run on the NativeActivity owner thread.
+    _owner_thread: PhantomData<Rc<()>>,
+}
+impl NativeSessionGuard {
+    /// The platform owned by this Activity session, for custom application setup.
+    ///
+    /// The returned `Arc` is session-bound; operations on it stop affecting the
+    /// runtime after this guard is dropped. Keep this guard on its creating thread.
+    pub fn platform(&self) -> Option<Arc<AndroidPlatform>> {
+        self.platform.as_ref().cloned()
+    }
+
+    fn publish_platform(&mut self, platform: Arc<AndroidPlatform>) {
+        *PLATFORM.lock().expect("poisoned") = Some(Arc::clone(&platform));
+        self.platform = Some(platform);
+    }
+}
+impl Drop for NativeSessionGuard {
+    fn drop(&mut self) {
+        {
+            let session_slot = NATIVE_SESSION.lock().expect("poisoned");
+            if !session_slot
+                .as_ref()
+                .is_some_and(|current| Arc::ptr_eq(current, &self.session))
+            {
+                return;
+            }
+            self.session.active.store(false, Ordering::Release);
+        }
+        // Adapter teardown can call JNI; never hold the runtime-slot lock.
+        super::accessibility::reset_native_session();
+        let (retired_session, retired_platform) = {
+            let mut session_slot = NATIVE_SESSION.lock().expect("poisoned");
+            if !session_slot
+                .as_ref()
+                .is_some_and(|current| Arc::ptr_eq(current, &self.session))
+            {
+                return;
+            }
+            reset_native_session_state();
+            let retired_platform = {
+                let mut platform_slot = PLATFORM.lock().expect("poisoned");
+                if platform_slot.as_ref().is_some_and(|current| {
+                    self.platform
+                        .as_ref()
+                        .is_some_and(|owned| Arc::ptr_eq(current, owned))
+                }) {
+                    platform_slot.take()
+                } else {
+                    None
+                }
+            };
+            (session_slot.take(), retired_platform)
+        };
+        drop(retired_platform);
+        drop(retired_session);
+    }
+}
+
+fn reset_native_session_state() {
+    INIT_WINDOW_DONE.store(false, Ordering::Release);
+    NATIVE_INITIALIZED.store(false, Ordering::Release);
+    PAUSE_PENDING.store(false, Ordering::Release);
+    RESUME_PENDING.store(false, Ordering::Release);
+    TERM_WINDOW_PENDING.store(false, Ordering::Release);
+    INIT_WINDOW_PENDING.store(false, Ordering::Release);
+    WINDOW_RESIZED_PENDING.store(false, Ordering::Release);
+    CONFIG_CHANGED_PENDING.store(false, Ordering::Release);
+    WINDOW_INSETS_PENDING.store(false, Ordering::Release);
+    NATIVE_INSETS_RECEIVED.store(false, Ordering::Release);
+    *PHYSICAL_WINDOW_INSETS
+        .get_or_init(|| Mutex::new(PhysicalWindowInsets::default()))
+        .lock()
+        .expect("poisoned") = PhysicalWindowInsets::default();
+    *LAST_CHROME_STYLE.lock().expect("poisoned") = None;
+    *SHOWN_KEYBOARD.lock().expect("poisoned") = None;
+    *DISMISSED_KEYBOARD.lock().expect("poisoned") = None;
+    crate::TEXT_INPUT_DIRTY.store(false, Ordering::Release);
+    super::text_input::new_session();
+    super::frame_source::reset_native_session();
+}
+pub(crate) fn native_session() -> Option<Arc<NativeSession>> {
+    NATIVE_SESSION.lock().expect("poisoned").as_ref().cloned()
+}
+
+/// The active Android platform, if the host or NativeActivity entry has installed one.
+/// The owning NativeActivity session clears its platform when its guard is dropped.
+static PLATFORM: Mutex<Option<Arc<AndroidPlatform>>> = Mutex::new(None);
 
 /// Get the unicode character produced by an Android key event via JNI.
 ///
@@ -353,11 +507,12 @@ struct HostActivity {
 ///
 /// Call from a JNI entry point in `Activity.onCreate`, every time — a recreated
 /// Activity is a new object. This module takes its own global reference and records
-/// the JVM, so `java_vm()` / `activity_as_ptr()` and everything built on them (IME,
-/// safe areas, file pickers, `rustls-platform-verifier`) work exactly as on the
-/// `android-activity` path. A no-op when `android-activity` owns the process.
-/// Call it before `host::start`: the platform reads bundled assets (the emoji font)
-/// when it starts. If `start` came first, the emoji font is loaded here instead.
+/// the JVM. Runtime-bound host operations use this Activity only when no
+/// NativeActivity session is active; an Android `android-activity` session makes
+/// registration a no-op. Call it before `host::start`: the platform reads bundled
+/// assets (the emoji font) when it starts. If `start` came first, the emoji font is
+/// loaded here instead. Raw pointers remain available only through the deprecated,
+/// host-only [`activity_as_ptr`].
 pub fn set_host_activity(env: &mut jni::Env<'_>, activity: &JObject<'_>) -> Result<(), String> {
     let result = register_host_activity(env, activity);
     // The caller may make more JNI calls before returning to Java, which a pending
@@ -369,7 +524,7 @@ pub fn set_host_activity(env: &mut jni::Env<'_>, activity: &JObject<'_>) -> Resu
 }
 
 fn register_host_activity(env: &mut jni::Env<'_>, activity: &JObject<'_>) -> Result<(), String> {
-    if ANDROID_APP.get().is_some() {
+    if native_session().is_some() {
         return Ok(());
     }
     let global = env.new_global_ref(activity).e()?;
@@ -394,10 +549,15 @@ fn register_host_activity(env: &mut jni::Env<'_>, activity: &JObject<'_>) -> Res
             .e()?;
         let _ = HOST_CONTEXT.set(context);
     }
-    let mut slot = HOST_ACTIVITY.lock().expect("poisoned");
-    slot.previous = slot.current.take();
-    slot.current = Some(global);
-    drop(slot);
+    {
+        let native_slot = NATIVE_SESSION.lock().expect("poisoned");
+        if native_slot.is_some() {
+            return Ok(());
+        }
+        let mut slot = HOST_ACTIVITY.lock().expect("poisoned");
+        slot.previous = slot.current.take();
+        slot.current = Some(global);
+    }
     if HOST_ASSETS.get().is_none() {
         match host_assets(env, activity) {
             Ok(assets) => {
@@ -482,61 +642,126 @@ pub(crate) fn with_asset_manager<T>(f: impl FnOnce(&ndk::asset::AssetManager) ->
     HOST_ASSETS.get().map(|assets| f(&assets.native))
 }
 
+/// Resolve assets for the owning runtime. A missing NativeActivity handle means
+/// host mode, and never falls through to a newer NativeActivity's assets.
+pub(crate) fn with_asset_manager_for_runtime<T>(
+    session: Option<&NativeSession>,
+    f: impl FnOnce(&ndk::asset::AssetManager) -> T,
+) -> Option<T> {
+    match session {
+        Some(session) if is_current_native_session(session) => {
+            Some(f(&session.app.asset_manager()))
+        }
+        Some(_) => None,
+        None if native_session().is_none() => HOST_ASSETS.get().map(|assets| f(&assets.native)),
+        None => None,
+    }
+}
+
 /// Public accessor for the JavaVM pointer.
 ///
 /// Uses `AndroidApp::vm_as_ptr()` from the stored `AndroidApp`.
-/// Used by `platform.rs` for JNI calls.
+/// Used by platform integrations for JNI calls. The VM is process-lived even when
+/// the Activity-scoped runtime is replaced.
 pub fn java_vm() -> *mut c_void {
-    ANDROID_APP
-        .get()
-        .map(|app| app.vm_as_ptr())
+    native_session()
+        .map(|session| session.app.vm_as_ptr())
         .unwrap_or_else(|| HOST_VM.load(std::sync::atomic::Ordering::SeqCst))
 }
 
-/// Public accessor for the current Activity's JNI object reference.
+/// Return the raw Activity jobject only for legacy host-driven integrations.
 ///
-/// Uses `AndroidApp::activity_as_ptr()` from the stored `AndroidApp`.
-/// Used by `platform.rs` and `window.rs` for JNI calls that require the
-/// activity's jobject.
-///
-/// NOTE: This returns a jobject (JNI global ref), NOT an `ANativeActivity *`.
-/// Code that previously used `(*activity).clazz` should use this directly
-/// as the activity jobject.
+/// NativeActivity sessions are intentionally not exposed as a raw pointer: callers
+/// must use [`activity`] inside a JNI environment so the session and local reference
+/// lifetimes are explicit. The returned host pointer is valid only while the host
+/// retains its Activity registration.
+#[deprecated(note = "use activity(env); raw Activity pointers are host-only")]
 pub fn activity_as_ptr() -> *mut c_void {
-    ANDROID_APP
-        .get()
-        .map(|app| app.activity_as_ptr())
-        .unwrap_or_else(|| {
-            HOST_ACTIVITY
-                .lock()
-                .expect("poisoned")
-                .current
-                .as_ref()
-                .map(|activity| activity.as_raw() as *mut c_void)
-                .unwrap_or(std::ptr::null_mut())
-        })
+    HOST_ACTIVITY
+        .lock()
+        .expect("poisoned")
+        .current
+        .as_ref()
+        .map(|activity| activity.as_raw() as *mut c_void)
+        .unwrap_or(std::ptr::null_mut())
 }
 
-/// Returns a clone of the stored `AndroidApp`, if initialised.
+/// Returns a clone of the active NativeActivity's `AndroidApp`, if initialized.
 pub fn android_app() -> Option<AndroidApp> {
-    ANDROID_APP.get().cloned()
+    native_session().map(|session| session.app.clone())
 }
 
 /// Install the platform built by the host-driven path (`super::host`).
 ///
-/// The `android-activity` path calls `init_platform` instead; both end up in the same
-/// slot so every accessor in this module keeps working regardless of entry point.
+/// The `android-activity` path calls `init_platform` instead. The two entry paths
+/// are mutually exclusive while active.
 pub(crate) fn set_host_platform(platform: Arc<AndroidPlatform>) {
-    if PLATFORM.set(platform).is_err() {
-        log::warn!("set_host_platform: PLATFORM already set — both entry points in one process?");
+    let session_slot = NATIVE_SESSION.lock().expect("poisoned");
+    if session_slot.is_some() {
+        log::error!("set_host_platform rejected while NativeActivity owns the runtime");
+        return;
+    }
+    let mut platform_slot = PLATFORM.lock().expect("poisoned");
+    if platform_slot.is_some() {
+        log::warn!("set_host_platform: PLATFORM already set — duplicate host start?");
+    } else {
+        *platform_slot = Some(platform);
     }
 }
 
-/// Returns a reference to the global `AndroidPlatform`, if initialised.
-///
-/// Returns `None` before `android_main` has set it up.
-pub fn platform() -> Option<&'static Arc<AndroidPlatform>> {
-    PLATFORM.get()
+/// Returns a cloned handle to the active `AndroidPlatform`, if initialized.
+/// Prefer [`NativeSessionGuard::platform`] when custom code owns a NativeActivity entry.
+pub fn platform() -> Option<Arc<AndroidPlatform>> {
+    PLATFORM.lock().expect("poisoned").as_ref().cloned()
+}
+
+fn is_current_native_session(session: &NativeSession) -> bool {
+    let slot = NATIVE_SESSION.lock().expect("poisoned");
+    slot.as_ref()
+        .is_some_and(|current| std::ptr::eq(Arc::as_ptr(current), session) && session.is_active())
+}
+
+/// Run a short mutation of process-global native-session state only while the
+/// requested Activity still owns the session slot. The closure must not call
+/// JNI, invoke callbacks, or acquire platform/window locks.
+pub(crate) fn with_current_runtime_state<T>(
+    session: Option<&NativeSession>,
+    update: impl FnOnce() -> T,
+) -> Option<T> {
+    let slot = NATIVE_SESSION.lock().expect("poisoned");
+    match (session, slot.as_ref()) {
+        (Some(session), Some(current))
+            if std::ptr::eq(Arc::as_ptr(current), session) && session.is_active() =>
+        {
+            Some(update())
+        }
+        (None, None) => Some(update()),
+        _ => None,
+    }
+}
+
+/// Serialize an IME event's token check and queue insertion against runtime
+/// replacement. The caller must keep this closure limited to input queue state.
+pub(crate) fn with_runtime_slot<T>(update: impl FnOnce() -> T) -> T {
+    let _slot = NATIVE_SESSION.lock().expect("poisoned");
+    update()
+}
+
+pub(crate) fn platform_for_session(session: &NativeSession) -> Option<Arc<AndroidPlatform>> {
+    if !is_current_native_session(session) {
+        return None;
+    }
+    PLATFORM
+        .lock()
+        .expect("poisoned")
+        .as_ref()
+        .filter(|platform| {
+            platform
+                .native_session
+                .as_ref()
+                .is_some_and(|owner| std::ptr::eq(Arc::as_ptr(owner), session))
+        })
+        .cloned()
 }
 
 /// Returns a [`SharedPlatform`] wrapping the global `Arc<AndroidPlatform>`.
@@ -550,9 +775,7 @@ pub fn platform() -> Option<&'static Arc<AndroidPlatform>> {
 ///
 /// Returns `None` before `init_platform` has been called.
 pub fn shared_platform() -> Option<SharedPlatform> {
-    PLATFORM
-        .get()
-        .map(|arc| SharedPlatform::new(Arc::clone(arc)))
+    platform().map(SharedPlatform::new)
 }
 
 // ── input event types ─────────────────────────────────────────────────────────
@@ -569,13 +792,19 @@ const AMOTION_EVENT_ACTION_CANCEL: u32 = 3;
 ///
 /// Returns `true` if the system is in dark mode.
 pub fn query_night_mode_via_jni() -> bool {
-    let is_dark = if let Some(app) = android_app() {
-        // Build an ndk::configuration::Configuration from the app's asset manager.
-        let config = ndk::configuration::Configuration::from_asset_manager(&app.asset_manager());
+    let session = native_session();
+    query_night_mode_for_runtime(session.as_deref())
+}
+
+pub(crate) fn query_night_mode_for_runtime(session: Option<&NativeSession>) -> bool {
+    let is_dark = if let Some(session) = session {
+        if !is_current_native_session(session) {
+            return false;
+        }
+        let config =
+            ndk::configuration::Configuration::from_asset_manager(&session.app.asset_manager());
         config.ui_mode_night() == ndk::configuration::UiModeNight::Yes
     } else {
-        // No AndroidApp on the host-driven path: query the application context,
-        // independent of the last Activity registered or its local night mode.
         match host_ui_mode() {
             Ok(ui_mode) => is_night(ui_mode),
             Err(err) => {
@@ -584,7 +813,6 @@ pub fn query_night_mode_via_jni() -> bool {
             }
         }
     };
-
     log::debug!("query_night_mode: is_dark={}", is_dark);
     is_dark
 }
@@ -634,7 +862,14 @@ fn host_ui_mode() -> Result<i32, String> {
 
 /// The system night mode as a window appearance.
 pub(crate) fn query_appearance() -> crate::android::window::WindowAppearance {
-    appearance(query_night_mode_via_jni())
+    let session = native_session();
+    query_appearance_for_runtime(session.as_deref())
+}
+
+pub(crate) fn query_appearance_for_runtime(
+    session: Option<&NativeSession>,
+) -> crate::android::window::WindowAppearance {
+    appearance(query_night_mode_for_runtime(session))
 }
 
 /// The appearance a `Configuration.uiMode` asks for.
@@ -653,8 +888,8 @@ fn appearance(is_dark: bool) -> crate::android::window::WindowAppearance {
 // ── input event processing ────────────────────────────────────────────────────
 
 /// Process input events from the `AndroidApp` and dispatch them to the window.
-fn process_input_events(app: &AndroidApp) {
-    let platform = match PLATFORM.get() {
+fn process_input_events(app: &AndroidApp, session: &NativeSession) {
+    let platform = match platform_for_session(session) {
         Some(p) => p,
         None => {
             log::trace!("process_input_events: no platform yet");
@@ -840,9 +1075,25 @@ fn process_input_events(app: &AndroidApp) {
 /// The event loop that processes `android-activity` events and drives the
 /// platform.
 ///
-/// Called from `android_main` after the platform is initialised.
-/// Runs until the platform requests quit or the activity is destroyed.
+/// Called after [`init_platform`] has installed the matching session. Runs until
+/// that platform requests quit or its Activity is destroyed. The AndroidApp must
+/// belong to the currently-active session; stale entry points return immediately.
 pub fn run_event_loop(app: &AndroidApp) {
+    let Some(session) =
+        native_session().filter(|session| session.app.activity_as_ptr() == app.activity_as_ptr())
+    else {
+        log::warn!("run_event_loop: AndroidApp does not own the active Activity session");
+        return;
+    };
+    run_event_loop_for_session(&session);
+}
+
+pub(crate) fn run_event_loop_for_session(session: &Arc<NativeSession>) {
+    if !is_current_native_session(session) {
+        log::warn!("run_event_loop: refusing a stale Activity session");
+        return;
+    }
+    let app = &session.app;
     log::info!("run_event_loop: entering main loop");
 
     // Track whether the on_init_window callback has already been invoked.
@@ -863,6 +1114,10 @@ pub fn run_event_loop(app: &AndroidApp) {
     let mut app_is_active = false;
 
     loop {
+        if !is_current_native_session(session) {
+            log::info!("run_event_loop: Activity session ended");
+            break;
+        }
         iteration += 1;
 
         // Log a heartbeat every 5 seconds so we can tell if the loop is alive.
@@ -878,7 +1133,7 @@ pub fn run_event_loop(app: &AndroidApp) {
         }
 
         // Check if quit was requested.
-        if let Some(platform) = PLATFORM.get() {
+        if let Some(platform) = platform_for_session(session) {
             if platform.should_quit() {
                 log::info!("run_event_loop: platform requested quit");
                 dispose_all_platform_views();
@@ -895,14 +1150,12 @@ pub fn run_event_loop(app: &AndroidApp) {
         // the delayed dispatcher tasks `platform.tick()` has to release and
         // the clock fallback without a choreographer.
         let timeout = super::frame_source::poll_timeout(
-            PLATFORM
-                .get()
-                .and_then(|platform| platform.next_delayed_due()),
+            platform_for_session(session).and_then(|platform| platform.next_delayed_due()),
             INIT_WINDOW_DONE.load(Ordering::Relaxed) && app_is_active,
         );
         app.poll_events(Some(timeout), |event| match event {
             PollEvent::Main(main_event) => {
-                handle_main_event(app, main_event);
+                handle_main_event(app, session, main_event);
             }
             PollEvent::Wake => {}
             PollEvent::Timeout => {}
@@ -920,7 +1173,7 @@ pub fn run_event_loop(app: &AndroidApp) {
         let drain_events = |app: &AndroidApp| {
             app.poll_events(Some(Duration::ZERO), |event| {
                 if let PollEvent::Main(main_event) = event {
-                    handle_main_event(app, main_event);
+                    handle_main_event(app, session, main_event);
                 }
             });
         };
@@ -930,7 +1183,7 @@ pub fn run_event_loop(app: &AndroidApp) {
             log::info!("deferred: TerminateWindow (iter={})", iteration);
             INIT_WINDOW_DONE.store(false, Ordering::Relaxed);
             *LAST_CHROME_STYLE.lock().unwrap() = None;
-            if let Some(platform) = PLATFORM.get() {
+            if let Some(platform) = platform_for_session(session) {
                 if let Some(win) = platform.primary_window() {
                     win.term_window();
                 }
@@ -942,7 +1195,7 @@ pub fn run_event_loop(app: &AndroidApp) {
         // 2. InitWindow — replace surface on existing renderer, or create new
         if INIT_WINDOW_PENDING.swap(false, Ordering::Relaxed) {
             log::info!("deferred: InitWindow (iter={})", iteration);
-            if let Some(platform) = PLATFORM.get() {
+            if let Some(platform) = platform_for_session(session) {
                 if let Some(native_window) = app.native_window() {
                     let width = native_window.width();
                     let height = native_window.height();
@@ -1006,7 +1259,7 @@ pub fn run_event_loop(app: &AndroidApp) {
         // 3. WindowResized
         if WINDOW_RESIZED_PENDING.swap(false, Ordering::Relaxed) {
             log::debug!("deferred: WindowResized");
-            if let Some(platform) = PLATFORM.get() {
+            if let Some(platform) = platform_for_session(session) {
                 if let Some(win) = platform.primary_window() {
                     win.handle_resize();
                     if !NATIVE_INSETS_RECEIVED.load(Ordering::Acquire) {
@@ -1025,9 +1278,8 @@ pub fn run_event_loop(app: &AndroidApp) {
                 .get_or_init(|| Mutex::new(PhysicalWindowInsets::default()))
                 .lock()
                 .unwrap();
-            if let Some(window) = PLATFORM
-                .get()
-                .and_then(|platform| platform.primary_window())
+            if let Some(window) =
+                platform_for_session(session).and_then(|platform| platform.primary_window())
             {
                 let safe = super::window::SafeAreaInsets {
                     top: insets.safe[0] as f32,
@@ -1048,7 +1300,7 @@ pub fn run_event_loop(app: &AndroidApp) {
         // 4. ConfigChanged
         if CONFIG_CHANGED_PENDING.swap(false, Ordering::Relaxed) {
             log::debug!("deferred: ConfigChanged");
-            if let Some(platform) = PLATFORM.get() {
+            if let Some(platform) = platform_for_session(session) {
                 platform.notify_keyboard_layout_change();
                 platform.refresh_appearance();
             }
@@ -1057,7 +1309,7 @@ pub fn run_event_loop(app: &AndroidApp) {
         // 5. Pause / background
         if PAUSE_PENDING.swap(false, Ordering::Relaxed) {
             log::info!("deferred: Pause (iter={})", iteration);
-            if let Some(platform) = PLATFORM.get() {
+            if let Some(platform) = platform_for_session(session) {
                 platform.did_enter_background();
                 if let Some(win) = platform.primary_window() {
                     win.set_active(false);
@@ -1070,7 +1322,7 @@ pub fn run_event_loop(app: &AndroidApp) {
         // 6. Resume / foreground
         if RESUME_PENDING.swap(false, Ordering::Relaxed) {
             log::info!("deferred: Resume (iter={})", iteration);
-            if let Some(platform) = PLATFORM.get() {
+            if let Some(platform) = platform_for_session(session) {
                 platform.did_become_active();
                 if let Some(win) = platform.primary_window() {
                     win.set_active(true);
@@ -1081,7 +1333,7 @@ pub fn run_event_loop(app: &AndroidApp) {
         }
 
         // Track active/focused state.
-        if let Some(platform) = PLATFORM.get() {
+        if let Some(platform) = platform_for_session(session) {
             if let Some(win) = platform.primary_window() {
                 let is_active = win.is_active();
                 if is_active != app_is_active {
@@ -1097,11 +1349,11 @@ pub fn run_event_loop(app: &AndroidApp) {
         }
 
         // Process input events.
-        process_input_events(app);
+        process_input_events(app, session);
 
         // Deferred initialisation callbacks (runs once).
         if !INIT_WINDOW_DONE.load(Ordering::Relaxed) {
-            if let Some(platform) = PLATFORM.get() {
+            if let Some(platform) = platform_for_session(session) {
                 if platform.primary_window().is_some() {
                     if let Some(finish_cb) = platform.take_finish_launching_callback() {
                         log::info!("invoking finish_launching callback (iter={})", iteration);
@@ -1128,7 +1380,7 @@ pub fn run_event_loop(app: &AndroidApp) {
         }
 
         // ── Render ──
-        if let Some(platform) = PLATFORM.get() {
+        if let Some(platform) = platform_for_session(session) {
             if INIT_WINDOW_DONE.load(Ordering::Relaxed) && app_is_active {
                 platform.flush_main_thread_tasks();
                 // Software-keyboard text bypasses GPUI's invalidator; the
@@ -1145,13 +1397,13 @@ pub fn run_event_loop(app: &AndroidApp) {
                     // (e.g. rotation triggers TerminateWindow while we were
                     // in get_current_texture / present).
                     drain_events(app);
-                    process_input_events(app);
+                    process_input_events(app, session);
                 }
             }
         }
     }
 
-    if let Some(platform) = PLATFORM.get() {
+    if let Some(platform) = platform_for_session(session) {
         platform.shutdown_callback_registry_on_owner();
     }
     log::info!("run_event_loop: exiting main loop");
@@ -1206,93 +1458,99 @@ fn dispose_all_platform_views() {
 }
 
 /// Handle a single `MainEvent` from `android-activity`.
-fn handle_main_event(_app: &AndroidApp, event: MainEvent<'_>) {
-    match event {
+fn handle_main_event(_app: &AndroidApp, session: &NativeSession, event: MainEvent<'_>) {
+    #[derive(Clone, Copy)]
+    enum DeferredAction {
+        None,
+        ClearImeInsets,
+        Quit,
+    }
+
+    // Validate ownership while applying lifecycle flags. A one-time check
+    // followed by an unlocked global write can let a late old-Activity event
+    // mutate the newly-created Activity's flags.
+    let action = with_current_runtime_state(Some(session), || match event {
         MainEvent::InitWindow { .. } => {
             log::info!("MainEvent::InitWindow");
-            // Defer to after poll_events to avoid deadlock with state lock.
             INIT_WINDOW_PENDING.store(true, Ordering::Relaxed);
+            DeferredAction::None
         }
-
         MainEvent::TerminateWindow { .. } => {
             log::info!("MainEvent::TerminateWindow");
-            // Defer to after poll_events to avoid deadlock with state lock.
             TERM_WINDOW_PENDING.store(true, Ordering::Relaxed);
+            DeferredAction::None
         }
-
         MainEvent::WindowResized { .. } => {
             log::debug!("MainEvent::WindowResized");
-            // Defer to after poll_events to avoid deadlock with state lock.
             WINDOW_RESIZED_PENDING.store(true, Ordering::Relaxed);
+            DeferredAction::None
         }
-
-        MainEvent::GainedFocus => {
-            log::info!("MainEvent::GainedFocus");
+        MainEvent::GainedFocus | MainEvent::Resume { .. } => {
+            log::info!("MainEvent: gained focus/resumed");
             RESUME_PENDING.store(true, Ordering::Relaxed);
+            DeferredAction::None
         }
-
         MainEvent::LostFocus => {
             log::info!("MainEvent::LostFocus");
             PAUSE_PENDING.store(true, Ordering::Relaxed);
+            DeferredAction::None
         }
-
-        MainEvent::Resume { .. } => {
-            log::info!("MainEvent::Resume");
-            RESUME_PENDING.store(true, Ordering::Relaxed);
-        }
-
         MainEvent::Pause => {
             log::info!("MainEvent::Pause");
-            clear_ime_insets();
-            // set_active uses AtomicBool so it never blocks.
             PAUSE_PENDING.store(true, Ordering::Relaxed);
+            DeferredAction::ClearImeInsets
         }
-
         MainEvent::ConfigChanged { .. } => {
             log::debug!("MainEvent::ConfigChanged");
             CONFIG_CHANGED_PENDING.store(true, Ordering::Relaxed);
+            DeferredAction::None
         }
-
         MainEvent::Start => {
             log::info!("MainEvent::Start");
+            DeferredAction::None
         }
-
         MainEvent::Stop => {
             log::info!("MainEvent::Stop");
+            DeferredAction::None
         }
-
         MainEvent::SaveState { .. } => {
             log::info!("MainEvent::SaveState");
+            DeferredAction::None
         }
-
         MainEvent::LowMemory => {
             log::warn!("MainEvent::LowMemory — consider releasing cached resources");
+            DeferredAction::None
         }
-
         MainEvent::Destroy => {
             log::info!("MainEvent::Destroy");
-
-            if let Some(platform) = PLATFORM.get() {
-                platform.quit();
-            }
+            DeferredAction::Quit
         }
-
         MainEvent::InsetsChanged { .. } => {
             log::debug!("MainEvent::InsetsChanged");
             WINDOW_RESIZED_PENDING.store(true, Ordering::Relaxed);
             if NATIVE_INSETS_RECEIVED.load(Ordering::Acquire) {
                 WINDOW_INSETS_PENDING.store(true, Ordering::Release);
             }
+            DeferredAction::None
         }
-
         MainEvent::ContentRectChanged { .. } => {
             log::debug!("MainEvent::ContentRectChanged");
             WINDOW_RESIZED_PENDING.store(true, Ordering::Relaxed);
+            DeferredAction::None
         }
-
         _ => {
             log::trace!("MainEvent: other variant");
+            DeferredAction::None
         }
+    });
+    match action {
+        Some(DeferredAction::ClearImeInsets) => clear_ime_insets(session),
+        Some(DeferredAction::Quit) => {
+            if let Some(platform) = platform_for_session(session) {
+                platform.quit();
+            }
+        }
+        Some(DeferredAction::None) | None => {}
     }
 }
 
@@ -1308,17 +1566,18 @@ fn handle_main_event(_app: &AndroidApp, event: MainEvent<'_>) {
 ///
 /// Returns `true` if the application should exit.
 pub fn poll_events(timeout_ms: i32) -> bool {
-    if let Some(platform) = PLATFORM.get() {
+    if let Some(platform) = native_session().and_then(|session| platform_for_session(&session)) {
         if platform.should_quit() {
             return true;
         }
         platform.tick();
     }
 
-    let app = match ANDROID_APP.get() {
-        Some(app) => app,
-        None => return false,
+    let session = match native_session() {
+        Some(session) if session.is_active() => session,
+        _ => return false,
     };
+    let app = &session.app;
 
     let timeout = if timeout_ms < 0 {
         None
@@ -1328,16 +1587,16 @@ pub fn poll_events(timeout_ms: i32) -> bool {
 
     app.poll_events(timeout, |event| match event {
         PollEvent::Main(main_event) => {
-            handle_main_event(app, main_event);
+            handle_main_event(app, &session, main_event);
         }
         PollEvent::Wake => {}
         _ => {}
     });
 
-    process_input_events(app);
+    process_input_events(app, &session);
 
     // Drive the GPUI rendering pipeline (same as run_event_loop).
-    if let Some(platform) = PLATFORM.get() {
+    if let Some(platform) = platform_for_session(&session) {
         platform.flush_main_thread_tasks();
         if let Some(win) = platform.primary_window() {
             win.request_frame();
@@ -1377,25 +1636,52 @@ pub fn install_panic_hook() {
     }));
 }
 
-/// Store the `AndroidApp` globally and create the `AndroidPlatform`.
+/// Start a NativeActivity-backed platform session.
 ///
-/// Must be called exactly once from `android_main` before
-/// `run_event_loop`.  Returns a reference to the platform so the caller
-/// can register callbacks (e.g. `set_on_init_window`) before entering
-/// the event loop.
-pub fn init_platform(app: &AndroidApp) -> &'static Arc<AndroidPlatform> {
-    let _ = ANDROID_APP.set(app.clone());
-    log::info!("init_platform: stored AndroidApp");
-
-    let platform = Arc::new(AndroidPlatform::new(false));
+/// Keep the returned guard alive on the NativeActivity owner thread for the entire
+/// application run. The guard is deliberately `!Send`/`!Sync` because teardown
+/// resets owner-thread looper state. Dropping it retires only this Activity session,
+/// clears its callback state, and permits a later Activity instance in the same
+/// process to initialize. A second concurrent NativeActivity entry is rejected
+/// instead of waiting on the UI thread. Use [`run_native_activity`] for the standard
+/// entry path, or obtain this session's platform through [`NativeSessionGuard::platform`]:
+///
+/// ```ignore
+/// let _session = init_platform(&app)?;
+/// run_event_loop(&app);
+/// ```
+pub fn init_platform(app: &AndroidApp) -> Result<NativeSessionGuard, String> {
+    let session = Arc::new(NativeSession {
+        generation: NEXT_NATIVE_SESSION.fetch_add(1, Ordering::Relaxed),
+        app: app.clone(),
+        active: AtomicBool::new(true),
+        presented: AtomicBool::new(false),
+    });
+    {
+        let mut session_slot = NATIVE_SESSION.lock().expect("poisoned");
+        if session_slot.is_some() {
+            return Err("a NativeActivity runtime is still active".into());
+        }
+        let platform_slot = PLATFORM.lock().expect("poisoned");
+        if platform_slot.is_some() {
+            return Err("a host Android platform is already active".into());
+        }
+        reset_native_session_state();
+        *session_slot = Some(Arc::clone(&session));
+    }
+    log::info!(
+        "init_platform: started Activity session generation={}",
+        session.generation
+    );
+    let mut guard = NativeSessionGuard {
+        session: Arc::clone(&session),
+        platform: None,
+        _owner_thread: PhantomData,
+    };
+    let platform = Arc::new(AndroidPlatform::new_for_session(false, session));
     log::info!("init_platform: AndroidPlatform created");
-
-    PLATFORM
-        .set(Arc::clone(&platform))
-        .unwrap_or_else(|_| log::warn!("PLATFORM already set — duplicate init_platform?"));
-
-    // SAFETY: we just set it above.
-    PLATFORM.get().unwrap()
+    guard.publish_platform(platform);
+    Ok(guard)
 }
 
 // ── system chrome (status bar / navigation bar) ───────────────────────────────
@@ -1419,22 +1705,36 @@ static LAST_CHROME_STYLE: std::sync::Mutex<
 ///
 /// Must be called from the main (native) thread that has JNI access.
 pub fn set_system_chrome(style: &crate::SystemChromeStyle) {
+    let session = native_session();
+    set_system_chrome_for_runtime(session.as_deref(), style);
+}
+
+fn set_system_chrome_for_runtime(
+    session: Option<&NativeSession>,
+    style: &crate::SystemChromeStyle,
+) {
     let status_bar_color = style.status_bar_color;
     let navigation_bar_color = style.navigation_bar_color;
     let status_bar_style = style.status_bar_style;
 
-    // Skip the (expensive, potentially deadlocking) JNI calls when nothing changed.
-    {
+    // Serialize the cache update with session replacement. A stale frame may not
+    // suppress the new Activity's first application of the same style.
+    let changed = with_current_runtime_state(session, || {
         let key = (status_bar_color, navigation_bar_color, status_bar_style);
-        let mut last = LAST_CHROME_STYLE.lock().unwrap();
+        let mut last = LAST_CHROME_STYLE.lock().expect("poisoned");
         if *last == Some(key) {
-            return;
+            false
+        } else {
+            *last = Some(key);
+            true
         }
-        *last = Some(key);
+    });
+    if changed != Some(true) {
+        return;
     }
 
     let result = with_env(|env| {
-        let activity_obj = activity(env)?;
+        let activity_obj = activity_for_runtime(env, session)?;
 
         // 1. Get the Window: activity.getWindow()
         let window = env
@@ -1576,21 +1876,44 @@ static DISMISSED_KEYBOARD: std::sync::Mutex<Option<crate::KeyboardType>> =
 
 /// IME event 5: the system already hid the keyboard; remember it for a tap to undo.
 pub(crate) fn keyboard_hidden_by_user() {
-    let shown = SHOWN_KEYBOARD.lock().expect("poisoned").take();
-    if shown.is_some() {
-        *DISMISSED_KEYBOARD.lock().expect("poisoned") = shown;
-    }
+    keyboard_hidden_by_user_for_runtime(None);
+}
+
+pub(crate) fn keyboard_hidden_by_user_for_runtime(native_session: Option<&NativeSession>) {
+    let _ = with_current_runtime_state(native_session, || {
+        let shown = SHOWN_KEYBOARD.lock().expect("poisoned").take();
+        if shown.is_some() {
+            *DISMISSED_KEYBOARD.lock().expect("poisoned") = shown;
+        }
+    });
 }
 
 pub(crate) fn keyboard_dismissed() -> bool {
-    DISMISSED_KEYBOARD.lock().expect("poisoned").is_some()
+    let session = native_session();
+    keyboard_dismissed_for_runtime(session.as_deref()).unwrap_or(false)
+}
+
+pub(crate) fn keyboard_dismissed_for_runtime(
+    native_session: Option<&NativeSession>,
+) -> Option<bool> {
+    with_current_runtime_state(native_session, || {
+        DISMISSED_KEYBOARD.lock().expect("poisoned").is_some()
+    })
 }
 
 /// Show the keyboard [`keyboard_hidden_by_user`] took away again.
 pub(crate) fn reshow_dismissed_keyboard() {
-    let dismissed = DISMISSED_KEYBOARD.lock().expect("poisoned").take();
+    let session = native_session();
+    reshow_dismissed_keyboard_for_runtime(session.as_deref());
+}
+
+pub(crate) fn reshow_dismissed_keyboard_for_runtime(native_session: Option<&NativeSession>) {
+    let dismissed = with_current_runtime_state(native_session, || {
+        DISMISSED_KEYBOARD.lock().expect("poisoned").take()
+    })
+    .flatten();
     if let Some(keyboard_type) = dismissed {
-        show_keyboard_android(keyboard_type);
+        show_keyboard_for_runtime(native_session, keyboard_type);
     }
 }
 
@@ -1599,10 +1922,13 @@ pub(crate) fn reshow_dismissed_keyboard() {
 /// Called by [`super::host`] once a recreated Activity's surface is attached. A fresh
 /// IME session is started, which is what we want: the proxy is a new object.
 pub(crate) fn restore_keyboard() {
-    let keyboard_type = *SHOWN_KEYBOARD.lock().expect("poisoned");
+    // This is the host-driven Activity-recreation path. Do not let a delayed host
+    // callback redirect its keyboard request to a NativeActivity session.
+    let keyboard_type =
+        with_current_runtime_state(None, || *SHOWN_KEYBOARD.lock().expect("poisoned")).flatten();
     if let Some(keyboard_type) = keyboard_type {
         log::info!("restore_keyboard: re-showing {keyboard_type:?} on the new Activity");
-        show_keyboard_android(keyboard_type);
+        show_keyboard_for_runtime(None, keyboard_type);
     }
 }
 
@@ -1611,8 +1937,21 @@ pub(crate) fn restore_keyboard() {
 /// Unlike NativeActivity's key-event-only connection, its InputConnection
 /// supports composing text, commits and Unicode surrounding-text deletion.
 pub fn show_keyboard_android(keyboard_type: crate::KeyboardType) {
-    *SHOWN_KEYBOARD.lock().expect("poisoned") = Some(keyboard_type);
-    *DISMISSED_KEYBOARD.lock().expect("poisoned") = None;
+    let session = native_session();
+    show_keyboard_for_runtime(session.as_deref(), keyboard_type);
+}
+
+pub(crate) fn show_keyboard_for_runtime(
+    native_session: Option<&NativeSession>,
+    keyboard_type: crate::KeyboardType,
+) {
+    let Some(session) = with_current_runtime_state(native_session, || {
+        *SHOWN_KEYBOARD.lock().expect("poisoned") = Some(keyboard_type);
+        *DISMISSED_KEYBOARD.lock().expect("poisoned") = None;
+        super::text_input::new_session()
+    }) else {
+        return;
+    };
     let kind = match keyboard_type {
         crate::KeyboardType::Default => 0,
         crate::KeyboardType::EmailAddress => 1,
@@ -1621,9 +1960,8 @@ pub fn show_keyboard_android(keyboard_type: crate::KeyboardType) {
         crate::KeyboardType::URL => 4,
         crate::KeyboardType::Decimal => 5,
     };
-    let session = super::text_input::new_session();
     if let Err(error) = with_env(|env| {
-        let activity = activity(env)?;
+        let activity = activity_for_runtime(env, native_session)?;
         env.call_method(
             &activity,
             jni::jni_str!("gpuiShowKeyboard"),
@@ -1645,30 +1983,50 @@ pub fn show_keyboard_android(keyboard_type: crate::KeyboardType) {
 ///
 /// Invalidates queued IME callbacks and clears the native composition buffer.
 pub fn hide_keyboard_android() {
-    *SHOWN_KEYBOARD.lock().expect("poisoned") = None;
-    *DISMISSED_KEYBOARD.lock().expect("poisoned") = None;
-    let session = super::text_input::new_session();
+    let session = native_session();
+    hide_keyboard_for_runtime(session.as_deref());
+}
+
+pub(crate) fn hide_keyboard_for_runtime(native_session: Option<&NativeSession>) {
+    let Some(input_session) = with_current_runtime_state(native_session, || {
+        *SHOWN_KEYBOARD.lock().expect("poisoned") = None;
+        *DISMISSED_KEYBOARD.lock().expect("poisoned") = None;
+        super::text_input::new_session()
+    }) else {
+        return;
+    };
     let _ = with_env(|env| {
-        let activity = activity(env)?;
+        let activity = activity_for_runtime(env, native_session)?;
         let result = env.call_method(
             &activity,
             jni::jni_str!("gpuiHideKeyboard"),
             jni::jni_sig!("(J)V"),
-            &[JValue::Long(session as i64)],
+            &[JValue::Long(input_session as i64)],
         );
         env.exception_clear();
         result.map_err(|e| e.to_string())?;
         Ok(())
     });
-    if let Some(app) = android_app() {
+    if let Some(session) = native_session {
+        if session.is_active() {
+            session.app.hide_soft_input(false);
+        }
+    } else if let Some(app) = android_app() {
         app.hide_soft_input(false);
     }
 }
 
 pub(super) fn reset_keyboard_composition() {
-    let session = super::text_input::new_session();
+    let session = native_session();
+    reset_keyboard_composition_for_runtime(session.as_deref());
+}
+pub(super) fn reset_keyboard_composition_for_runtime(native_session: Option<&NativeSession>) {
+    let Some(session) = with_current_runtime_state(native_session, super::text_input::new_session)
+    else {
+        return;
+    };
     let _ = with_env(|env| {
-        let activity = activity(env)?;
+        let activity = activity_for_runtime(env, native_session)?;
         let result = env.call_method(
             &activity,
             jni::jni_str!("gpuiResetComposition"),
@@ -1694,8 +2052,33 @@ pub(super) fn sync_input_snapshot(
     marked_end: i32,
     generation: u64,
 ) {
+    let native_session = native_session();
+    sync_input_snapshot_for_runtime(
+        native_session.as_deref(),
+        session,
+        text,
+        selection_start,
+        selection_end,
+        marked_start,
+        marked_end,
+        generation,
+    );
+}
+pub(super) fn sync_input_snapshot_for_runtime(
+    native_session: Option<&NativeSession>,
+    session: u64,
+    text: &str,
+    selection_start: i32,
+    selection_end: i32,
+    marked_start: i32,
+    marked_end: i32,
+    generation: u64,
+) {
+    if native_session.is_some_and(|session| !session.is_active()) {
+        return;
+    }
     let _ = with_env(|env| {
-        let activity = activity(env)?;
+        let activity = activity_for_runtime(env, native_session)?;
         let text = env.new_string(text).e()?;
         env.call_method(
             &activity,
@@ -1720,9 +2103,41 @@ pub(super) fn sync_input_snapshot(
 /// Activity's UI-thread WindowInsets listener. The GPUI owner thread applies
 /// the latest snapshot after its looper wakes.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn Java_dev_gpui_mobile_GpuiInputActivity_nativeInsets(
+pub unsafe extern "C" fn Java_dev_gpui_mobile_GpuiInputActivity_nativeRuntimeGeneration(
     _env: *mut c_void,
     _class: *mut c_void,
+) -> i64 {
+    native_session().map_or(0, |session| session.generation as i64)
+}
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn Java_dev_gpui_mobile_GpuiInputActivity_nativeRuntimeInitialized(
+    _env: *mut c_void,
+    _class: *mut c_void,
+) -> u8 {
+    u8::from(
+        native_session().is_some_and(|session| session.is_active())
+            && NATIVE_INITIALIZED.load(Ordering::Acquire),
+    )
+}
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn Java_dev_gpui_mobile_GpuiInputActivity_nativePresentedFrameGeneration(
+    _env: *mut c_void,
+    _class: *mut c_void,
+) -> i64 {
+    native_session()
+        .filter(|session| session.is_active() && session.presented.load(Ordering::Acquire))
+        .map_or(0, |session| session.generation as i64)
+}
+pub(crate) fn note_presented_frame(session: &NativeSession) {
+    if session.is_active() {
+        session.presented.store(true, Ordering::Release);
+    }
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn Java_dev_gpui_mobile_GpuiInputActivity_nativeInsets(
+    _env: *mut c_void,
+    callback_activity: *mut c_void,
     safe_top: i32,
     safe_right: i32,
     safe_bottom: i32,
@@ -1732,20 +2147,37 @@ pub unsafe extern "C" fn Java_dev_gpui_mobile_GpuiInputActivity_nativeInsets(
     ime_bottom: i32,
     ime_left: i32,
 ) {
-    publish_physical_insets(PhysicalWindowInsets {
-        safe: [
-            safe_top.max(0),
-            safe_right.max(0),
-            safe_bottom.max(0),
-            safe_left.max(0),
-        ],
-        ime: [
-            ime_top.max(0),
-            ime_right.max(0),
-            ime_bottom.max(0),
-            ime_left.max(0),
-        ],
-    });
+    let Some(session) = native_session().filter(|session| session.is_active()) else {
+        return;
+    };
+    let current = with_env(|env| {
+        let callback = unsafe { JObject::from_raw(env, callback_activity as _) };
+        let current = activity_for_session(env, &session)?;
+        env.is_same_object(&callback, &current)
+            .map_err(|error| error.to_string())
+    })
+    .unwrap_or(false);
+    if !current {
+        log::debug!("Ignoring insets from an obsolete Activity instance");
+        return;
+    }
+    publish_physical_insets(
+        &session,
+        PhysicalWindowInsets {
+            safe: [
+                safe_top.max(0),
+                safe_right.max(0),
+                safe_bottom.max(0),
+                safe_left.max(0),
+            ],
+            ime: [
+                ime_top.max(0),
+                ime_right.max(0),
+                ime_bottom.max(0),
+                ime_left.max(0),
+            ],
+        },
+    );
 }
 
 /// Receive Java InputConnection updates without touching GPUI on the UI thread.
@@ -1782,7 +2214,8 @@ pub unsafe extern "C" fn Java_dev_gpui_mobile_GpuiInputActivity_nativeIme(
 // ── JNI export for GpuiActivity splash screen ────────────────────────────────
 
 /// Called from `GpuiActivity.nativeIsInitialized()` to check whether the
-/// native library has finished initializing (first frame rendered).
+/// native library has initialized. This does not prove a frame was presented;
+/// use the session-scoped presented-frame signal for that distinction.
 ///
 /// The AndroidX SplashScreen API calls this via `setKeepOnScreenCondition`
 /// to hold the splash visible until GPUI is ready.
@@ -1906,6 +2339,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(deprecated)]
     fn activity_as_ptr_returns_null_before_init() {
         let ptr = activity_as_ptr();
         assert!(ptr.is_null());
@@ -1932,7 +2366,13 @@ where
     F: FnOnce(&mut gpui::App) + 'static,
 {
     super::init_logger();
-    let _platform = init_platform(&app);
+    let _runtime = match init_platform(&app) {
+        Ok(runtime) => runtime,
+        Err(error) => {
+            log::error!("NativeActivity initialization rejected: {error}");
+            return;
+        }
+    };
     let platform = shared_platform().expect("Android platform initialization failed");
     gpui::Application::with_platform(platform.into_rc()).run(launch);
 }

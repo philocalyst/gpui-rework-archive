@@ -376,6 +376,9 @@ pub struct AndroidWindow {
     active: Arc<std::sync::atomic::AtomicBool>,
     active_transition: Mutex<()>,
     dispatcher: Option<Arc<super::dispatcher::AndroidDispatcher>>,
+    /// Activity runtime that created this surface, preventing an obsolete
+    /// window from satisfying the next Activity's first-frame probe.
+    native_session: Option<Arc<super::jni::NativeSession>>,
     /// Set when the window gets a *new* surface, cleared by the next frame.
     ///
     /// A replaced swapchain starts out empty, but GPUI only repaints what it
@@ -395,6 +398,25 @@ unsafe impl Send for AndroidWindow {}
 unsafe impl Sync for AndroidWindow {}
 
 impl AndroidWindow {
+    /// Raise frame demand only while this window's owner is still the active
+    /// runtime. Native windows can outlive an Activity teardown through queued
+    /// callbacks; those callbacks must not wake a replacement session.
+    fn schedule_owned_frame_for(owner: Option<&super::jni::NativeSession>) {
+        let _ = super::jni::with_current_runtime_state(owner, super::frame_source::schedule_frame);
+    }
+
+    fn schedule_owned_frame(&self) {
+        Self::schedule_owned_frame_for(self.native_session.as_deref());
+    }
+
+    /// Resume pacing under this window's owning runtime, or host runtime.
+    fn resume_owned_frame(&self) {
+        let _ = super::jni::with_current_runtime_state(
+            self.native_session.as_deref(),
+            super::frame_source::resume,
+        );
+    }
+
     // ── constructors ─────────────────────────────────────────────────────────
 
     /// Create an `AndroidWindow` from an `ndk::NativeWindow`.
@@ -416,6 +438,7 @@ impl AndroidWindow {
         scale_factor: f32,
         transparent: bool,
         dispatcher: Option<Arc<super::dispatcher::AndroidDispatcher>>,
+        native_session: Option<Arc<super::jni::NativeSession>>,
     ) -> Result<Arc<Self>> {
         request_high_frame_rate(&native_window);
 
@@ -471,6 +494,7 @@ impl AndroidWindow {
             active: Arc::new(std::sync::atomic::AtomicBool::new(true)),
             active_transition: Mutex::new(()),
             dispatcher,
+            native_session,
             force_render_once: Arc::new(std::sync::atomic::AtomicBool::new(true)),
             a11y: Default::default(),
             host: Default::default(),
@@ -511,6 +535,7 @@ impl AndroidWindow {
             active: Arc::new(std::sync::atomic::AtomicBool::new(false)),
             active_transition: Mutex::new(()),
             dispatcher: None,
+            native_session: None,
             force_render_once: Arc::new(std::sync::atomic::AtomicBool::new(true)),
             a11y: Default::default(),
             host: Default::default(),
@@ -594,7 +619,7 @@ impl AndroidWindow {
         drop(state);
         // That repaint is not something GPUI knows it wants: ask the loop for
         // the frame ourselves.
-        super::frame_source::resume();
+        self.resume_owned_frame();
 
         // A recreated Activity can hand back a surface of a *different* size (the
         // classic case being a rotation that recreates the Activity). `handle_resize`
@@ -720,6 +745,13 @@ impl AndroidWindow {
     /// - Intermittently during fast scrolling if the layout pass
     ///   hasn't produced new content yet.
     pub fn draw(&self, scene: &gpui::Scene) {
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return;
+        }
         // Skip only truly empty scenes. Text and images are emitted as sprite
         // primitives, not quads, so checking `scene.quads` alone can drop
         // valid text-only frames during scroll or cache refresh and produce
@@ -743,7 +775,11 @@ impl AndroidWindow {
             }
         };
 
-        renderer.draw(scene);
+        if renderer.draw(scene) {
+            if let Some(session) = &self.native_session {
+                super::jni::note_presented_frame(session);
+            }
+        }
 
         // Put the renderer back.
         let mut state = self.state.lock();
@@ -829,7 +865,7 @@ impl AndroidWindow {
             if let Some(handlers) = self.a11y.lock().expect("poisoned").clone() {
                 super::accessibility::init(&handlers);
             }
-            super::frame_source::resume();
+            self.resume_owned_frame();
         }
     }
 
@@ -1363,16 +1399,24 @@ impl PlatformWindow for AndroidPlatformWindow {
     fn text_input_state_changed(&self, change: gpui::TextInputStateChange) {
         match change {
             gpui::TextInputStateChange::FocusGained => {
-                super::jni::show_keyboard_android(crate::KeyboardType::Default);
+                super::jni::show_keyboard_for_runtime(
+                    self.window.native_session.as_deref(),
+                    crate::KeyboardType::Default,
+                );
             }
-            gpui::TextInputStateChange::FocusLost => super::jni::hide_keyboard_android(),
+            gpui::TextInputStateChange::FocusLost => {
+                super::jni::hide_keyboard_for_runtime(self.window.native_session.as_deref())
+            }
             _ => {}
         }
     }
 
     fn a11y_init(&self, callbacks: gpui::A11yCallbacks) {
-        let handlers =
-            super::accessibility::Handlers::new(callbacks, self.window.host.get().copied());
+        let handlers = super::accessibility::Handlers::new(
+            callbacks,
+            self.window.host.get().copied(),
+            self.window.native_session.clone(),
+        );
         *self.window.a11y.lock().expect("poisoned") = Some(handlers.clone());
         super::accessibility::init(&handlers);
     }
@@ -1481,8 +1525,19 @@ impl PlatformWindow for AndroidPlatformWindow {
         let input_handler = Rc::clone(&self.input_handler);
         let input_callback = Rc::clone(&self.ime_input_callback);
         let force_render_once = Arc::clone(&self.window.force_render_once);
+        let native_session = self.window.native_session.clone();
         self.window.on_request_frame(move |mut options| {
-            super::text_input::drain(&input_handler, &mut **input_callback.borrow_mut());
+            if native_session
+                .as_ref()
+                .is_some_and(|session| !session.is_active())
+            {
+                return;
+            }
+            super::text_input::drain(
+                &input_handler,
+                &mut **input_callback.borrow_mut(),
+                native_session.as_deref(),
+            );
             let text_dirty =
                 crate::TEXT_INPUT_DIRTY.swap(false, std::sync::atomic::Ordering::AcqRel);
             let surface_new = force_render_once.swap(false, std::sync::atomic::Ordering::AcqRel);
@@ -1493,18 +1548,32 @@ impl PlatformWindow for AndroidPlatformWindow {
 
     fn on_input(&self, callback: Box<dyn FnMut(gpui::PlatformInput) -> DispatchEventResult>) {
         let input_handler = Rc::clone(&self.input_handler);
+        let native_session = self.window.native_session.clone();
         let mut callback = callback;
         // Where the current single-finger touch started, to tell a tap from a drag.
         let mut tap_start: Option<(gpui::TouchId, gpui::Point<gpui::Pixels>)> = None;
         let callback: Box<dyn FnMut(gpui::PlatformInput) -> DispatchEventResult> =
             Box::new(move |event| {
+                if native_session
+                    .as_ref()
+                    .is_some_and(|session| !session.is_active())
+                {
+                    return DispatchEventResult::default();
+                }
                 if let gpui::PlatformInput::Touch(touch) = &event {
                     match touch.phase {
                         gpui::TouchPhase::Started => {
                             // Apply any last IME update to the old input before a tap can
                             // change focus. A new native session rejects late IME callbacks.
-                            super::text_input::drain(&input_handler, &mut callback);
-                            super::text_input::finish_composition(&input_handler);
+                            super::text_input::drain(
+                                &input_handler,
+                                &mut callback,
+                                native_session.as_deref(),
+                            );
+                            super::text_input::finish_composition(
+                                &input_handler,
+                                native_session.as_deref(),
+                            );
                             tap_start = Some((touch.id, touch.position));
                         }
                         gpui::TouchPhase::Moved => {
@@ -1521,10 +1590,22 @@ impl PlatformWindow for AndroidPlatformWindow {
                             // EditText. Checked before GPUI handles the tap, against the
                             // input that is focused now.
                             if tap_start.take().is_some_and(|(id, _)| id == touch.id)
-                                && super::jni::keyboard_dismissed()
+                                && native_session
+                                    .as_ref()
+                                    .is_none_or(|session| session.is_active())
+                                && super::jni::keyboard_dismissed_for_runtime(
+                                    native_session.as_deref(),
+                                ) == Some(true)
                                 && tap_hits_focused_input(&input_handler, touch.position)
                             {
-                                super::jni::reshow_dismissed_keyboard();
+                                if native_session
+                                    .as_ref()
+                                    .is_none_or(|session| session.is_active())
+                                {
+                                    super::jni::reshow_dismissed_keyboard_for_runtime(
+                                        native_session.as_deref(),
+                                    );
+                                }
                             }
                         }
                         gpui::TouchPhase::Cancelled => tap_start = None,
@@ -1671,13 +1752,22 @@ impl PlatformWindow for AndroidPlatformWindow {
     }
 
     fn frame_waker(&self) -> Option<Rc<dyn Fn()>> {
-        // GPUI calls this when a window turns dirty; the loop draws at the
-        // next vsync (see `frame_source`).
-        Some(Rc::new(super::frame_source::schedule_frame))
+        // GPUI may retain this callback beyond the platform window's lifetime.
+        // Keep only a weak session identity, not the renderer/native window.
+        // A callback from a retired native session is a no-op.
+        let owner = self.window.native_session.as_ref().map(Arc::downgrade);
+        Some(Rc::new(move || match owner.as_ref() {
+            Some(owner) => {
+                if let Some(owner) = owner.upgrade() {
+                    AndroidWindow::schedule_owned_frame_for(Some(&owner));
+                }
+            }
+            None => AndroidWindow::schedule_owned_frame_for(None),
+        }))
     }
 
     fn schedule_frame(&self) {
-        super::frame_source::schedule_frame();
+        self.window.schedule_owned_frame();
     }
 
     fn draw(&self, scene: &gpui::Scene) {
@@ -1718,8 +1808,19 @@ impl PlatformWindow for AndroidPlatformWindow {
         let y: f32 = bounds.origin.y.into();
         let h: f32 = bounds.size.height.into();
 
+        if self
+            .window
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return;
+        }
         let _ = jni_helpers::with_env(|env| {
-            let activity = jni_helpers::activity(env)?;
+            let activity = match &self.window.native_session {
+                Some(session) => jni_helpers::activity_for_session(env, session)?,
+                None => jni_helpers::activity_for_runtime(env, None)?,
+            };
 
             // 1. Get InputMethodManager
             let service_name = env.new_string("input_method").map_err(|e| e.to_string())?;

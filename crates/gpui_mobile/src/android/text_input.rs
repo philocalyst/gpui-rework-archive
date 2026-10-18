@@ -35,8 +35,14 @@ pub(super) fn new_session() -> u64 {
 }
 
 pub(super) fn enqueue(event: ImeEvent) {
-    if event.session == SESSION.load(Ordering::Acquire) {
+    let queued = super::jni::with_runtime_slot(|| {
+        if event.session != SESSION.load(Ordering::Acquire) {
+            return false;
+        }
         EVENTS.lock().push_back(event);
+        true
+    });
+    if queued {
         crate::mark_text_input_dirty();
     }
 }
@@ -44,13 +50,30 @@ pub(super) fn enqueue(event: ImeEvent) {
 pub(super) fn drain(
     slot: &Rc<RefCell<Option<PlatformInputHandler>>>,
     input: &mut dyn FnMut(PlatformInput) -> DispatchEventResult,
+    native_session: Option<&super::jni::NativeSession>,
 ) {
-    let events = std::mem::take(&mut *EVENTS.lock());
+    let Some(events) = super::jni::with_current_runtime_state(native_session, || {
+        std::mem::take(&mut *EVENTS.lock())
+    }) else {
+        return;
+    };
     for event in events {
-        if event.session != SESSION.load(Ordering::Acquire) {
+        let current = super::jni::with_current_runtime_state(native_session, || {
+            if event.session != SESSION.load(Ordering::Acquire) {
+                return false;
+            }
+            PROCESSED_GENERATION.fetch_max(event.generation, Ordering::AcqRel);
+            match event.kind {
+                0 => COMPOSING.store(true, Ordering::Release),
+                1 => COMPOSING.store(false, Ordering::Release),
+                _ => {}
+            }
+            true
+        })
+        .unwrap_or(false);
+        if !current {
             continue;
         }
-        PROCESSED_GENERATION.fetch_max(event.generation, Ordering::AcqRel);
         if event.kind == 6 {
             // InputConnection.setSelection reports UTF-16 offsets from the proxy to
             // the focused GPUI field; the proxy itself intentionally has no document.
@@ -68,12 +91,12 @@ pub(super) fn drain(
             // The user hid the keyboard (back) but the input keeps focus: unlike 4 this
             // is not an Escape, which would close whatever owns the field (a search
             // overlay, with its query). See `jni::keyboard_hidden_by_user`.
-            finish_composition(slot);
-            super::jni::keyboard_hidden_by_user();
+            finish_composition(slot, native_session);
+            super::jni::keyboard_hidden_by_user_for_runtime(native_session);
             continue;
         }
         if event.kind == 4 {
-            finish_composition(slot);
+            finish_composition(slot, native_session);
             input(PlatformInput::KeyDown(KeyDownEvent {
                 keystroke: Keystroke {
                     key: "escape".into(),
@@ -94,7 +117,6 @@ pub(super) fn drain(
         };
         match event.kind {
             0 => {
-                COMPOSING.store(true, Ordering::Release);
                 handler.replace_and_mark_text_in_range(
                     None,
                     &event.text,
@@ -102,7 +124,6 @@ pub(super) fn drain(
                 );
             }
             1 => {
-                COMPOSING.store(false, Ordering::Release);
                 handler.replace_text_in_range(None, &event.text);
                 handler.unmark_text();
             }
@@ -147,12 +168,16 @@ pub(super) fn drain(
             *current = Some(handler);
         }
     }
-    sync_snapshot(slot);
+    sync_snapshot(slot, native_session);
 }
 
-fn sync_snapshot(slot: &Rc<RefCell<Option<PlatformInputHandler>>>) {
+fn sync_snapshot(
+    slot: &Rc<RefCell<Option<PlatformInputHandler>>>,
+    native_session: Option<&super::jni::NativeSession>,
+) {
     let Some(mut handler) = slot.borrow_mut().take() else {
-        super::jni::sync_input_snapshot(
+        super::jni::sync_input_snapshot_for_runtime(
+            native_session,
             SESSION.load(Ordering::Acquire),
             "",
             0,
@@ -174,7 +199,8 @@ fn sync_snapshot(slot: &Rc<RefCell<Option<PlatformInputHandler>>>) {
     drop(current);
 
     let (Some(text), Some(selection)) = (text, selection) else {
-        super::jni::sync_input_snapshot(
+        super::jni::sync_input_snapshot_for_runtime(
+            native_session,
             SESSION.load(Ordering::Acquire),
             "",
             0,
@@ -193,7 +219,8 @@ fn sync_snapshot(slot: &Rc<RefCell<Option<PlatformInputHandler>>>) {
     let (marked_start, marked_end) = marked
         .map(|range| (range.start as i32, range.end as i32))
         .unwrap_or((-1, -1));
-    super::jni::sync_input_snapshot(
+    super::jni::sync_input_snapshot_for_runtime(
+        native_session,
         SESSION.load(Ordering::Acquire),
         &text,
         anchor as i32,
@@ -204,8 +231,15 @@ fn sync_snapshot(slot: &Rc<RefCell<Option<PlatformInputHandler>>>) {
     );
 }
 
-pub(super) fn finish_composition(slot: &Rc<RefCell<Option<PlatformInputHandler>>>) {
-    if !COMPOSING.swap(false, Ordering::AcqRel) {
+pub(super) fn finish_composition(
+    slot: &Rc<RefCell<Option<PlatformInputHandler>>>,
+    native_session: Option<&super::jni::NativeSession>,
+) {
+    let composing = super::jni::with_current_runtime_state(native_session, || {
+        COMPOSING.swap(false, Ordering::AcqRel)
+    })
+    .unwrap_or(false);
+    if !composing {
         return;
     }
     let handler = slot.borrow_mut().take();
@@ -216,7 +250,7 @@ pub(super) fn finish_composition(slot: &Rc<RefCell<Option<PlatformInputHandler>>
             *current = Some(handler);
         }
     }
-    super::jni::reset_keyboard_composition();
+    super::jni::reset_keyboard_composition_for_runtime(native_session);
 }
 
 /// Keep the original TextInput callback contract for clients without a platform

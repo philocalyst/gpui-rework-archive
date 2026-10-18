@@ -35,6 +35,7 @@ use std::{
 };
 
 use gpui::{PlatformDispatcher, Priority, RunnableVariant};
+use ndk::looper::ForeignLooper;
 use parking_lot::Mutex;
 
 // ── NDK / libc symbols we need ────────────────────────────────────────────────
@@ -47,8 +48,6 @@ const ALOOPER_POLL_CALLBACK: i32 = -2;
 const ALOOPER_EVENT_INPUT: i32 = 1;
 
 unsafe extern "C" {
-    /// Returns the looper associated with the calling thread, or null.
-    fn ALooper_forThread() -> *mut libc_looper_opaque;
     /// Adds a file-descriptor to the looper.
     fn ALooper_addFd(
         looper: *mut libc_looper_opaque,
@@ -62,8 +61,6 @@ unsafe extern "C" {
     ) -> i32;
     /// Removes a file-descriptor from the looper.
     fn ALooper_removeFd(looper: *mut libc_looper_opaque, fd: RawFd) -> i32;
-    /// Returns from a blocking poll on the looper; safe from any thread.
-    fn ALooper_wake(looper: *mut libc_looper_opaque);
 }
 
 // Opaque C type placeholder.
@@ -142,9 +139,9 @@ pub struct AndroidDispatcher {
     main_queue: Arc<Mutex<MainQueue>>,
     /// Read end of the wake pipe (owned here for clean shutdown).
     read_fd: RawFd,
-    /// Raw pointer to the main-thread `ALooper` (not `Send` — used only on the
-    /// main thread).
-    looper: *mut libc_looper_opaque,
+    /// Acquired reference to the main-thread looper. The dispatcher owns it
+    /// until drop; fd registration and removal remain owner-thread-only.
+    looper: Option<ForeignLooper>,
     /// Background thread-pool.
     pool: ThreadPool,
     /// Delayed background tasks sorted by due time.
@@ -160,33 +157,22 @@ pub struct AndroidDispatcher {
     owner_thread: std::thread::ThreadId,
 }
 
-// SAFETY: The `looper` pointer is only ever used on the main thread
-// (in `register_with_looper` and `unregister`), except for `ALooper_wake`,
-// which is documented as safe from any thread.  The rest of the fields are
-// `Send`-safe via `Mutex` / `Arc`.
-unsafe impl Send for AndroidDispatcher {}
-unsafe impl Sync for AndroidDispatcher {}
-
 impl AndroidDispatcher {
     /// Create a new dispatcher.
     ///
-    /// Must be called on the **main thread** so that `ALooper_forThread()`
-    /// returns a valid looper.
+    /// Must be called on a thread with a prepared Android looper.
     ///
     /// # Panics
     ///
     /// Panics if:
     /// * `pipe(2)` fails.
-    /// * `ALooper_forThread()` returns null (i.e. not called on main thread).
+    /// * the calling thread has no prepared Android looper.
     pub fn new() -> Arc<Self> {
         // Create wake pipe.
         let (read_fd, write_fd) = create_pipe().expect("failed to create wake pipe");
 
-        let looper = unsafe { ALooper_forThread() };
-        assert!(
-            !looper.is_null(),
-            "AndroidDispatcher::new() must be called on the Android main thread"
-        );
+        let looper = ForeignLooper::for_thread()
+            .expect("AndroidDispatcher::new() requires a prepared Android looper");
 
         let pool_threads = std::thread::available_parallelism()
             .map(|n| n.get())
@@ -201,7 +187,7 @@ impl AndroidDispatcher {
         let dispatcher = Arc::new(Self {
             main_queue: Arc::clone(&main_queue),
             read_fd,
-            looper,
+            looper: Some(looper),
             pool: ThreadPool::new(pool_threads),
             delayed: Mutex::new(Vec::new()),
             shutdown: AtomicBool::new(false),
@@ -240,7 +226,7 @@ impl AndroidDispatcher {
         Arc::new(Self {
             main_queue,
             read_fd,
-            looper: std::ptr::null_mut(), // no real looper in headless mode
+            looper: None, // no real looper in headless mode
             pool: ThreadPool::new(pool_threads),
             delayed: Mutex::new(Vec::new()),
             shutdown: AtomicBool::new(false),
@@ -261,7 +247,7 @@ impl AndroidDispatcher {
     /// Android looper callback. Headless dispatchers still have an owner
     /// thread and preserve inline owner-thread callback semantics.
     pub fn is_headless(&self) -> bool {
-        self.looper.is_null()
+        self.looper.is_none()
     }
 
     /// Enqueue a task to run on the **main** (foreground) thread.
@@ -324,10 +310,10 @@ impl AndroidDispatcher {
     /// `next_delayed_due()`; a delayed task posted from another thread would
     /// otherwise wait for an unrelated wakeup.
     fn wake_looper(&self) {
-        if !self.looper.is_null() {
-            // SAFETY: `ALooper_wake` is documented as safe from any thread,
-            // and the looper outlives the dispatcher's thread.
-            unsafe { ALooper_wake(self.looper) };
+        // The borrowed dispatcher keeps its owned looper reference alive
+        // for the duration of this nonblocking wake.
+        if let Some(looper) = self.looper.as_ref() {
+            looper.wake();
         }
     }
 
@@ -398,9 +384,13 @@ impl AndroidDispatcher {
         // `GLOBAL_DISPATCHER`).
         let data_ptr = Arc::into_raw(Arc::clone(&self.main_queue)) as *mut std::ffi::c_void;
 
+        let Some(looper) = self.looper.as_ref() else {
+            drop(unsafe { Arc::from_raw(data_ptr as *const Mutex<MainQueue>) });
+            return;
+        };
         let ret = unsafe {
             ALooper_addFd(
-                self.looper,
+                looper.ptr().as_ptr().cast(),
                 self.read_fd,
                 0, // ident — unused when callback is Some
                 ALOOPER_EVENT_INPUT,
@@ -428,14 +418,17 @@ impl AndroidDispatcher {
     /// Drop intentionally leaves the fd/queue alive rather than invalidating a
     /// callback still registered with ALooper.
     fn unregister_from_looper(&self) -> bool {
-        if self.looper.is_null() || !self.looper_registered.load(Ordering::Acquire) {
+        if self.looper.is_none() || !self.looper_registered.load(Ordering::Acquire) {
             return true;
         }
         if !self.is_main_thread() {
             log::error!("AndroidDispatcher reached its last Arc before owner-thread shutdown");
             return false;
         }
-        let result = unsafe { ALooper_removeFd(self.looper, self.read_fd) };
+        let Some(looper) = self.looper.as_ref() else {
+            return true;
+        };
+        let result = unsafe { ALooper_removeFd(looper.ptr().as_ptr().cast(), self.read_fd) };
         if result < 0 {
             log::error!(
                 "ALooper_removeFd failed with {}; keeping registration alive",
@@ -470,9 +463,12 @@ impl Drop for AndroidDispatcher {
     fn drop(&mut self) {
         self.shutdown.store(true, Ordering::SeqCst);
         if !self.unregister_from_looper() {
-            // The looper owns a raw Arc to MainQueue and still watches read_fd.
-            // Leave both pipe ends valid; leaking is safer than calling the
-            // owner-only ALooper API or closing an fd still registered there.
+            // ALooper still has the queue Arc and read fd registered. Preserve
+            // its native owner reference too; releasing it here could invalidate
+            // a registration that only the owner thread may remove.
+            if let Some(looper) = self.looper.take() {
+                std::mem::forget(looper);
+            }
             return;
         }
         // Close file descriptors after the looper callback is detached.
@@ -688,7 +684,7 @@ mod tests {
         let dispatcher = AndroidDispatcher {
             main_queue,
             read_fd,
-            looper: std::ptr::null_mut(),
+            looper: Mutex::new(None),
             pool: ThreadPool::new(1),
             delayed: Mutex::new(Vec::new()),
             shutdown: AtomicBool::new(false),
