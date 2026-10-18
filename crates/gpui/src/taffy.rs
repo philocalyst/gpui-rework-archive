@@ -126,11 +126,75 @@ impl TaffyLayoutEngine {
     /// Retained nodes keep their Taffy layout cache; unclaimed nodes and frame-bound measurement
     /// closures are released before the next frame starts.
     pub fn finish_frame(&mut self) {
-        for node in self.live_layout_nodes.drain(..) {
-            if !self.frame_layout_node_set.contains(&node) {
+        if self
+            .live_layout_nodes
+            .iter()
+            .any(|node| !self.frame_layout_node_set.contains(node))
+        {
+            // Detach stale direct children from retained parents in one operation. Taffy's remove
+            // searches the parent's child vector, so removing a wide sibling set one child at a time
+            // would repeatedly scan and shift that vector.
+            for &parent in &self.frame_layout_nodes {
+                let child_count = self.taffy.child_count(parent.0);
+                let has_unclaimed_child = (0..child_count).any(|index| {
+                    let child = LayoutId::from(self.taffy.get_child_id(parent.0, index));
+                    !self.frame_layout_node_set.contains(&child)
+                });
+                if !has_unclaimed_child {
+                    continue;
+                }
+
+                self.layout_bounds_scratch_space.clear();
+                for index in 0..child_count {
+                    let child = LayoutId::from(self.taffy.get_child_id(parent.0, index));
+                    if self.frame_layout_node_set.contains(&child) {
+                        self.layout_bounds_scratch_space.push(child);
+                    }
+                }
                 self.taffy
-                    .set_node_context(node.0, None)
+                    .set_children(
+                        parent.0,
+                        LayoutId::to_taffy_slice(&self.layout_bounds_scratch_space),
+                    )
                     .expect(EXPECT_MESSAGE);
+            }
+
+            // Start at doomed roots, then remove each before its descendants. Taffy::remove detaches
+            // a node's children, so descendants can be removed without rescanning sibling lists.
+            self.layout_bounds_scratch_space.clear();
+            for node in &self.live_layout_nodes {
+                if self.frame_layout_node_set.contains(node) {
+                    continue;
+                }
+                let parent_is_retained = self.taffy.parent(node.0).is_some_and(|parent| {
+                    self.frame_layout_node_set.contains(&LayoutId::from(parent))
+                });
+                if self.taffy.parent(node.0).is_none() || parent_is_retained {
+                    self.layout_bounds_scratch_space.push(*node);
+                }
+            }
+
+            while let Some(node) = self.layout_bounds_scratch_space.pop() {
+                if self.frame_layout_node_set.contains(&node) {
+                    continue;
+                }
+
+                // Save children before remove; removal detaches them from this parent.
+                let child_count = self.taffy.child_count(node.0);
+                for index in 0..child_count {
+                    let child = LayoutId::from(self.taffy.get_child_id(node.0, index));
+                    if !self.frame_layout_node_set.contains(&child) {
+                        self.layout_bounds_scratch_space.push(child);
+                    }
+                }
+
+                // Taffy::remove leaves context data in its side map, so remove it explicitly. Skip
+                // ordinary nodes because changing context also marks a node dirty.
+                if self.taffy.get_node_context(node.0).is_some() {
+                    self.taffy
+                        .set_node_context(node.0, None)
+                        .expect(EXPECT_MESSAGE);
+                }
                 self.taffy.remove(node.0).expect(EXPECT_MESSAGE);
                 self.vertical_alignments.remove(&node);
                 self.display_and_position.remove(&node);
@@ -141,6 +205,7 @@ impl TaffyLayoutEngine {
                 self.frame_bound_measured_nodes.remove(&node);
             }
         }
+        self.live_layout_nodes.clear();
         self.release_frame_bound_measured_contexts();
         std::mem::swap(&mut self.live_layout_nodes, &mut self.frame_layout_nodes);
         self.frame_layout_nodes.clear();
@@ -1368,6 +1433,7 @@ impl From<Size<Pixels>> for Size<AvailableSpace> {
 mod tests {
     use super::*;
     use crate::px;
+    use taffy::prelude::TaffyMaxContent;
 
     fn direction_style(direction: LayoutDirection) -> Style {
         Style {
@@ -1392,6 +1458,94 @@ mod tests {
         engine.finish_frame();
         assert_eq!(engine.live_layout_node_count(), 1);
         assert!(engine.taffy.style(replacement.into()).is_ok());
+    }
+
+    #[test]
+    fn pruning_a_wide_tree_drops_contexts_and_invalidates_all_old_handles() {
+        let mut engine = TaffyLayoutEngine::new();
+        let drops = Rc::new(Cell::new(0));
+        let mut children = Vec::new();
+        let mut measured = None;
+        for index in 0..256 {
+            let child = if index == 128 {
+                struct DropProbe(Rc<Cell<usize>>);
+                impl Drop for DropProbe {
+                    fn drop(&mut self) {
+                        self.0.set(self.0.get() + 1);
+                    }
+                }
+
+                let probe = DropProbe(drops.clone());
+                let measure = engine.request_retained_measured_layout(
+                    Style::default(),
+                    px(16.),
+                    1.0,
+                    move |_, _, _| {
+                        let _ = &probe;
+                        crate::size(px(1.), px(1.))
+                    },
+                );
+                measured = Some(measure);
+                measure
+            } else {
+                engine.request_layout(Style::default(), px(16.), 1.0, &[])
+            };
+            children.push(child);
+        }
+        let root = engine.request_layout(Style::default(), px(16.), 1.0, &children);
+        engine.finish_frame();
+        assert_eq!(engine.live_layout_node_count(), 257);
+        assert_eq!(drops.get(), 0);
+
+        // No nodes are claimed in the next frame. Reclamation must drop the retained callback
+        // and remove every old handle without leaving stale Taffy child references.
+        engine.finish_frame();
+        assert_eq!(engine.live_layout_node_count(), 0);
+        assert_eq!(engine.taffy.total_node_count(), 0);
+        assert_eq!(drops.get(), 1);
+        assert!(!engine.live_layout_nodes.contains(&root));
+        assert!(!engine.live_layout_nodes.contains(&measured.unwrap()));
+    }
+
+    #[test]
+    fn pruning_a_parent_detaches_a_retained_descendant() {
+        let mut engine = TaffyLayoutEngine::new();
+        let child = engine.request_layout(Style::default(), px(16.), 1.0, &[]);
+        let old_parent = engine.request_layout(Style::default(), px(16.), 1.0, &[child]);
+        engine.finish_frame();
+
+        engine.retain_subtree(child);
+        engine.finish_frame();
+
+        assert_eq!(engine.live_layout_node_count(), 1);
+        assert!(!engine.live_layout_nodes.contains(&old_parent));
+        assert!(engine.taffy.style(child.into()).is_ok());
+        assert_eq!(engine.taffy.parent(child.0), None);
+    }
+
+    #[test]
+    fn pruning_unclaimed_children_marks_a_retained_parent_dirty() {
+        let mut engine = TaffyLayoutEngine::new();
+        let child = engine.request_layout(Style::default(), px(16.), 1.0, &[]);
+        let parent = engine.request_layout(Style::default(), px(16.), 1.0, &[child]);
+        engine.finish_frame();
+
+        engine
+            .taffy
+            .compute_layout(parent.0, TaffySize::MAX_CONTENT)
+            .expect(EXPECT_MESSAGE);
+        assert!(!engine.taffy.dirty(parent.0).unwrap());
+
+        // Exercise a retained parent whose stale children were not claimed this frame.
+        engine.frame_layout_nodes.push(parent);
+        engine.frame_layout_node_set.insert(parent);
+        engine.finish_frame();
+
+        assert!(engine.taffy.style(parent.into()).is_ok());
+        assert_eq!(engine.taffy.child_count(parent.0), 0);
+        assert!(engine.taffy.dirty(parent.0).unwrap());
+        assert!(!engine.live_layout_nodes.contains(&child));
+        assert_eq!(engine.taffy.total_node_count(), 1);
     }
 
     #[test]
