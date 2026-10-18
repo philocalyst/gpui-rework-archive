@@ -13,6 +13,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 1
+        testInstrumentationRunner = "dev.gpui.mobile.test.PlatformViewProbeInstrumentation"
         versionName = "0.1.0"
         ndk { abiFilters += setOf("arm64-v8a", "x86_64") }
         manifestPlaceholders["nativeLibraryName"] = "gpui_ce_mobile_example"

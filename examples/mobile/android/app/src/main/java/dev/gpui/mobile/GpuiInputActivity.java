@@ -67,6 +67,7 @@ public class GpuiInputActivity extends NativeActivity {
             throw new IllegalStateException(error);
         }
         super.onCreate(state);
+        GpuiPlatformView.bindActivity(this);
         installWindowInsets();
         if (Build.VERSION.SDK_INT >= 33) Api33Back.register(this);
     }
@@ -126,6 +127,12 @@ public class GpuiInputActivity extends NativeActivity {
     @Override protected void onStart() {
         super.onStart();
         getWindow().getDecorView().requestApplyInsets();
+    }
+
+    @Override protected void onDestroy() {
+        // Release static overlay Views even when native initialization failed.
+        GpuiPlatformView.unbindActivity(this);
+        super.onDestroy();
     }
 
     @Override protected void onStop() {
