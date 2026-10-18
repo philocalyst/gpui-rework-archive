@@ -77,7 +77,8 @@ pub(crate) struct LayoutClaimOutcome {
 }
 
 struct LayoutClaimScope {
-    previous: Option<LayoutClaimLog>,
+    had_previous: bool,
+    previous_len: usize,
     cursor: usize,
     nodes: Vec<LayoutId>,
     replaying: bool,
@@ -289,31 +290,38 @@ impl TaffyLayoutEngine {
     }
 
     pub(crate) fn begin_layout_claim_scope(&mut self, previous: Option<LayoutClaimLog>) {
-        let replaying = previous.as_ref().is_some_and(|log| log.replayable);
+        let (nodes, previous_len, had_previous, replaying) = match previous {
+            Some(previous) => {
+                let replaying = previous.replayable;
+                let previous_len = previous.nodes.len();
+                (previous.nodes, previous_len, true, replaying)
+            }
+            None => (Vec::new(), 0, false, false),
+        };
         self.layout_claim_scopes.push(LayoutClaimScope {
-            previous,
+            had_previous,
+            previous_len,
             cursor: 0,
-            nodes: Vec::new(),
+            nodes,
             replaying,
             replayable: true,
         });
     }
 
     pub(crate) fn finish_layout_claim_scope(&mut self) -> LayoutClaimOutcome {
-        let scope = self
+        let mut scope = self
             .layout_claim_scopes
             .pop()
             .expect("layout claim scopes must be balanced");
-        let fully_replayed = scope.previous.as_ref().is_some_and(|previous| {
-            scope.replaying
-                && scope.replayable
-                && scope.cursor == previous.nodes.len()
-                && scope.nodes.len() == previous.nodes.len()
-        });
-        let invalidate_parent = !scope.replayable || (scope.previous.is_some() && !fully_replayed);
+        let fully_replayed = scope.had_previous
+            && scope.replaying
+            && scope.replayable
+            && scope.cursor == scope.previous_len;
+        let invalidate_parent = !scope.replayable || (scope.had_previous && !fully_replayed);
         if invalidate_parent {
             self.mark_layout_claim_scope_non_replayable();
         }
+        scope.nodes.truncate(scope.cursor);
         LayoutClaimOutcome {
             log: LayoutClaimLog {
                 nodes: scope.nodes,
@@ -346,11 +354,7 @@ impl TaffyLayoutEngine {
             return None;
         }
         let old = match self.layout_claim_scopes.last() {
-            Some(scope) if scope.replaying => scope
-                .previous
-                .as_ref()
-                .and_then(|previous| previous.nodes.get(scope.cursor))
-                .copied(),
+            Some(scope) if scope.replaying => scope.nodes.get(scope.cursor).copied(),
             _ => return None,
         };
         let Some(old) = old else {
@@ -361,9 +365,11 @@ impl TaffyLayoutEngine {
             .taffy
             .style(old.0)
             .is_ok_and(|old_style| old_style == taffy_style);
-        let children_match = self.taffy.children(old.0).is_ok_and(|old_children| {
-            old_children.as_slice() == LayoutId::to_taffy_slice(children)
-        });
+        let children_match = self.taffy.child_count(old.0) == children.len()
+            && children
+                .iter()
+                .enumerate()
+                .all(|(index, child)| self.taffy.get_child_id(old.0, index) == child.0);
         let metadata_matches = self.taffy.get_node_context(old.0).is_none()
             && !self.frame_bound_measured_nodes.contains(&old)
             && self
@@ -386,7 +392,6 @@ impl TaffyLayoutEngine {
         if style_matches && children_match && metadata_matches {
             let scope = self.layout_claim_scopes.last_mut().unwrap();
             scope.cursor += 1;
-            scope.nodes.push(old);
             self.claim_node(old);
             Some(old)
         } else {
@@ -403,7 +408,12 @@ impl TaffyLayoutEngine {
             scope.replayable = false;
             scope.replaying = false;
         }
-        scope.nodes.push(node);
+        if scope.cursor < scope.nodes.len() {
+            scope.nodes[scope.cursor] = node;
+        } else {
+            scope.nodes.push(node);
+        }
+        scope.cursor += 1;
     }
 
     /// Adds a node styled by `style`, with `children` as its child nodes, and returns its id.
@@ -1657,6 +1667,59 @@ mod tests {
         assert_ne!(changed_root, root);
         let changed = engine.finish_layout_claim_scope();
         assert!(!changed.fully_replayed);
+        engine.finish_frame();
+        assert_eq!(engine.taffy.total_node_count(), 2);
+    }
+
+    #[test]
+    fn exact_claim_replay_reuses_the_owned_log_allocation() {
+        let mut engine = TaffyLayoutEngine::new();
+        engine.begin_layout_claim_scope(None);
+        let first = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let second = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let initial = engine.finish_layout_claim_scope();
+        let initial_ptr = initial.log.nodes.as_ptr();
+        let initial_capacity = initial.log.nodes.capacity();
+        engine.finish_frame();
+
+        engine.begin_layout_claim_scope(Some(initial.log));
+        let replayed_first = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let replayed_second = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let replay = engine.finish_layout_claim_scope();
+        assert!(replay.fully_replayed);
+        assert_eq!(replayed_first, first);
+        assert_eq!(replayed_second, second);
+        assert_eq!(replay.log.nodes.as_ptr(), initial_ptr);
+        assert_eq!(replay.log.nodes.capacity(), initial_capacity);
+    }
+
+    #[test]
+    fn mismatch_overwrites_prefix_and_shrink_truncates_the_reused_log() {
+        let mut engine = TaffyLayoutEngine::new();
+        engine.begin_layout_claim_scope(None);
+        let first = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let second = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let _third = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let initial = engine.finish_layout_claim_scope();
+        let initial_ptr = initial.log.nodes.as_ptr();
+        engine.finish_frame();
+
+        engine.begin_layout_claim_scope(Some(initial.log));
+        let replayed_first = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let replacement = engine.request_layout(
+            static_direction_style(LayoutDirection::LeftToRight),
+            px(16.0),
+            1.0,
+            &[],
+        );
+        let shortened = engine.finish_layout_claim_scope();
+        assert!(!shortened.fully_replayed);
+        assert_eq!(replayed_first, first);
+        assert_eq!(shortened.log.nodes.as_ptr(), initial_ptr);
+        assert_eq!(shortened.log.nodes, vec![first, replacement]);
+        assert_ne!(replacement, second);
+        assert_eq!(shortened.log.nodes.len(), 2);
+        assert!(shortened.log.nodes.capacity() >= 3);
         engine.finish_frame();
         assert_eq!(engine.taffy.total_node_count(), 2);
     }
