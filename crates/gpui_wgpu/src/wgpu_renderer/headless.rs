@@ -86,6 +86,13 @@ impl WgpuRenderer {
         let width = target.size.width.0 as u32;
         let height = target.size.height.0 as u32;
         let bytes_per_row = width * 4;
+        let output_len = (bytes_per_row as usize)
+            .checked_mul(height as usize)
+            .ok_or_else(|| anyhow::anyhow!("offscreen image size overflowed host memory"))?;
+        let mut pixels = Vec::new();
+        pixels.try_reserve_exact(output_len).map_err(|error| {
+            anyhow::anyhow!("failed to allocate offscreen image pixels: {error}")
+        })?;
         let (sender, receiver) = std::sync::mpsc::sync_channel(1);
         target
             .readback
@@ -106,7 +113,6 @@ impl WgpuRenderer {
             .map_err(|error| anyhow::anyhow!("failed to map offscreen readback: {error}"))?;
 
         let mapped = target.readback.slice(..).get_mapped_range()?;
-        let mut pixels = Vec::with_capacity(bytes_per_row as usize * height as usize);
         for row in mapped.chunks_exact(target.padded_bytes_per_row as usize) {
             pixels.extend_from_slice(&row[..bytes_per_row as usize]);
         }
@@ -150,6 +156,16 @@ pub struct WgpuHeadlessRenderer {
 }
 
 impl WgpuHeadlessRenderer {
+    /// Returns the active adapter's maximum 2D texture dimension.
+    pub fn max_texture_size(&self) -> u32 {
+        self.renderer.max_texture_size()
+    }
+
+    /// Returns the largest buffer that the active device can allocate.
+    pub fn max_readback_buffer_size(&self) -> u64 {
+        self.renderer.resources().device.limits().max_buffer_size
+    }
+
     pub fn new() -> anyhow::Result<Self> {
         let context = WgpuContext::new_headless(None)?;
         let renderer = WgpuRenderer::new_headless(

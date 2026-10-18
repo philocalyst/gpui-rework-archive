@@ -3006,6 +3006,7 @@ dependencies = [
  "gpui-ce",
  "gpui_ce_parley",
  "gpui_ce_wgpu",
+ "image",
  "jni 0.22.4",
  "libc",
  "log",

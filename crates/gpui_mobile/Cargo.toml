@@ -15,7 +15,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 
 [features]
 default = []
-offscreen = ["gpui_wgpu/test-support"]
+offscreen = ["gpui_wgpu/test-support", "dep:image"]
 
 [dependencies]
 gpui.workspace = true
@@ -27,6 +27,7 @@ log.workspace = true
 parking_lot.workspace = true
 raw-window-handle.workspace = true
 smallvec.workspace = true
+image = { workspace = true, optional = true }
 
 [target.'cfg(target_os = "android")'.dependencies]
 jni = "0.22"

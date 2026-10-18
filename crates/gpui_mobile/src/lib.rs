@@ -5,6 +5,9 @@
 
 pub use gpui;
 
+#[cfg(all(feature = "offscreen", any(target_os = "android", test)))]
+pub mod offscreen;
+
 #[cfg(any(test, target_os = "android"))]
 pub(crate) mod owner_thread_registry;
 
