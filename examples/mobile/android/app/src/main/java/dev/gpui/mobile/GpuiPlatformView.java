@@ -44,6 +44,10 @@ public final class GpuiPlatformView {
     private static final Map<Long, Entry> ENTRIES = new HashMap<>();
     private static final Map<String, ViewFactory> FACTORIES = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<Long, CreateRequest> CREATES = new ConcurrentHashMap<>();
+    private static final int REQUEST_PENDING = 0;
+    private static final int REQUEST_CANCELLED = 1;
+    private static final int REQUEST_SUCCEEDED = 2;
+    private static final int REQUEST_FAILED = 3;
 
     private static volatile WeakReference<Activity> host = new WeakReference<>(null);
     private static final AtomicLong HOST_GENERATION = new AtomicLong();
@@ -51,6 +55,8 @@ public final class GpuiPlatformView {
     // so every Activity destruction path detaches it in unbindActivity().
     private static FrameLayout root;
     private static boolean paused;
+    // Main-thread only; reentrant lifecycle callbacks invalidate stale loops.
+    private static long lifecycleGeneration;
 
     private GpuiPlatformView() {}
 
@@ -160,25 +166,20 @@ public final class GpuiPlatformView {
 
         try {
             if (!request.done.await(CREATE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)) {
-                synchronized (request.gate) {
-                    if (request.completed) return request.succeeded;
-                    request.cancelled.set(true);
+                if (request.status.compareAndSet(REQUEST_PENDING, REQUEST_CANCELLED)) {
+                    CREATES.remove(viewId, request);
+                    Log.e(TAG, "createView timed out; request cancelled id=" + viewId);
                 }
-                CREATES.remove(viewId, request);
-                Log.e(TAG, "createView timed out; request cancelled id=" + viewId);
-                return false;
+                return request.status.get() == REQUEST_SUCCEEDED;
             }
         } catch (InterruptedException interrupted) {
-            synchronized (request.gate) {
-                if (request.completed) return request.succeeded;
-                request.cancelled.set(true);
-            }
-            CREATES.remove(viewId, request);
+            boolean cancelled = request.status.compareAndSet(REQUEST_PENDING, REQUEST_CANCELLED);
+            if (cancelled) CREATES.remove(viewId, request);
             Thread.currentThread().interrupt();
             Log.e(TAG, "createView interrupted; request cancelled id=" + viewId);
-            return false;
+            return request.status.get() == REQUEST_SUCCEEDED;
         }
-        return request.succeeded;
+        return request.status.get() == REQUEST_SUCCEEDED;
     }
 
     private static void createOnMain(
@@ -192,8 +193,9 @@ public final class GpuiPlatformView {
         View child = null;
         ViewFactory factory = null;
         FrameLayout container = null;
+        Entry createdEntry = null;
         try {
-            if (request.cancelled.get()) {
+            if (request.status.get() != REQUEST_PENDING) {
                 finishRequest(request, false);
                 return;
             }
@@ -228,30 +230,57 @@ public final class GpuiPlatformView {
                     ViewGroup.LayoutParams.MATCH_PARENT));
             applyBounds(activity, container, x, y, width, height);
 
-            // Lifecycle hooks can call application code and may block. Run them
-            // before taking request.gate so timeout/dispose can still cancel a
-            // creation while a custom view is being paused.
-            Entry entry = new Entry(container, child, factory);
-            if (paused) transitionLifecycle(entry, true);
+            // Lifecycle and View operations may synchronously call application
+            // code. None run while holding a cancellation or registry lock.
+            Entry entry = new Entry(request.id, container, child, factory);
+            createdEntry = entry;
+            if (!prepareDetachedEntry(entry, request, activity)) {
+                disposeEntry(entry);
+                finishRequest(request, false);
+                return;
+            }
 
-            synchronized (request.gate) {
-                // Recheck after factory and lifecycle work. A timeout, dispose,
-                // or Activity change must never attach late work.
-                if (request.cancelled.get() || !isCurrentHost(activity, request.generation)) {
-                    disposeDetached(factory, child);
-                    finishRequestLocked(request, false);
-                    return;
-                }
-                ensureRoot(activity).addView(container);
-                synchronized (STATE_LOCK) {
-                    ENTRIES.put(request.id, entry);
-                }
-                applyVisibility(entry);
-                request.succeeded = true;
-                request.completed = true;
+            FrameLayout parent = ensureRoot(activity);
+            if (!requestIsCurrent(request, activity)) {
+                disposeEntry(entry);
+                finishRequest(request, false);
+                return;
+            }
+            boolean duplicate;
+            synchronized (STATE_LOCK) {
+                duplicate = ENTRIES.containsKey(request.id);
+                // Install before addView: onAttachedToWindow can synchronously
+                // dispose this id and must find the pending entry.
+                if (!duplicate) ENTRIES.put(request.id, entry);
+            }
+            if (duplicate) {
+                finishRequest(request, false);
+                disposeEntry(entry);
+                return;
+            }
+            parent.addView(container);
+            if (!requestIsCurrent(request, activity) || entry(request.id) != entry) {
+                removeEntryIfSame(request.id, entry);
+                finishRequest(request, false);
+                return;
+            }
+
+            applyVisibility(entry);
+            if (!requestIsCurrent(request, activity) || entry(request.id) != entry) {
+                removeEntryIfSame(request.id, entry);
+                finishRequest(request, false);
+                return;
+            }
+            if (!request.status.compareAndSet(REQUEST_PENDING, REQUEST_SUCCEEDED)) {
+                removeEntryIfSame(request.id, entry);
+                return;
             }
         } catch (Throwable error) {
-            if (factory != null && child != null) disposeDetached(factory, child);
+            if (createdEntry != null) {
+                if (!removeEntryIfSame(request.id, createdEntry)) disposeEntry(createdEntry);
+            } else if (factory != null && child != null) {
+                disposeDetached(factory, child);
+            }
             Log.e(TAG, "failed to create platform view type='" + viewType + "'", error);
             finishRequest(request, false);
         } finally {
@@ -410,36 +439,18 @@ public final class GpuiPlatformView {
     /** JNI entry point: dispose one view and invalidate any queued creation. */
     public static void disposeView(long viewId) {
         CreateRequest request = CREATES.get(viewId);
-        if (request != null) {
-            synchronized (request.gate) {
-                request.cancelled.set(true);
-            }
-        }
+        if (request != null) request.status.compareAndSet(REQUEST_PENDING, REQUEST_CANCELLED);
         runOnMain(() -> removeEntry(viewId));
     }
 
     /** JNI lifecycle entry point. */
     public static void pauseAll() {
-        runOnMain(() -> {
-            if (paused) return;
-            paused = true;
-            for (Entry entry : snapshotEntries()) {
-                transitionLifecycle(entry, true);
-                applyVisibility(entry);
-            }
-        });
+        runOnMain(() -> transitionAll(true));
     }
 
     /** JNI lifecycle entry point. */
     public static void resumeAll() {
-        runOnMain(() -> {
-            if (!paused) return;
-            paused = false;
-            for (Entry entry : snapshotEntries()) {
-                transitionLifecycle(entry, false);
-                applyVisibility(entry);
-            }
-        });
+        runOnMain(() -> transitionAll(false));
     }
 
     /** JNI shutdown entry point; safe to call repeatedly. */
@@ -490,6 +501,7 @@ public final class GpuiPlatformView {
             ((ViewGroup) oldRoot.getParent()).removeView(oldRoot);
         }
         paused = false;
+        lifecycleGeneration++;
     }
 
     private static void removeEntry(long id) {
@@ -522,10 +534,44 @@ public final class GpuiPlatformView {
         }
     }
 
-    private static void transitionLifecycle(Entry entry, boolean shouldPause) {
-        if (entry.disposed.get() || entry.lifecyclePaused == shouldPause) return;
-        // Update first so reentrant lifecycle calls cannot invoke the same
-        // transition twice. Failures are isolated; the host state still moves.
+    private static void transitionAll(boolean shouldPause) {
+        if (paused == shouldPause) return;
+        paused = shouldPause;
+        long generation = ++lifecycleGeneration;
+        for (Entry entry : snapshotEntries()) {
+            if (generation != lifecycleGeneration) return;
+            transitionLifecycle(entry, shouldPause, generation);
+            if (generation != lifecycleGeneration) return;
+            if (entry(entry.id) == entry) applyVisibility(entry);
+            if (generation != lifecycleGeneration) return;
+        }
+    }
+
+    private static boolean prepareDetachedEntry(
+            Entry entry, CreateRequest request, Activity activity) {
+        // Visibility and lifecycle callbacks may reenter host lifecycle methods.
+        // Retry against the newest generation, but fail closed if a hostile
+        // callback keeps changing state instead of blocking the UI indefinitely.
+        for (int attempts = 0; attempts < 8; attempts++) {
+            if (!requestIsCurrent(request, activity)) return false;
+            if (entry.lifecyclePaused != paused) {
+                long generation = lifecycleGeneration;
+                transitionLifecycle(entry, paused, generation);
+                if (!requestIsCurrent(request, activity)) return false;
+                if (generation != lifecycleGeneration) continue;
+            }
+            long generation = lifecycleGeneration;
+            applyVisibility(entry);
+            if (!requestIsCurrent(request, activity)) return false;
+            if (generation == lifecycleGeneration && entry.lifecyclePaused == paused) return true;
+        }
+        Log.e(TAG, "platform view lifecycle kept changing during create id=" + request.id);
+        return false;
+    }
+
+    private static void transitionLifecycle(Entry entry, boolean shouldPause, long generation) {
+        if (generation != lifecycleGeneration || entry.disposed.get()
+                || entry.lifecyclePaused == shouldPause) return;
         entry.lifecyclePaused = shouldPause;
         try {
             if (shouldPause) entry.factory.onPause(entry.child);
@@ -533,6 +579,24 @@ public final class GpuiPlatformView {
         } catch (Throwable error) {
             Log.e(TAG, "custom platform view lifecycle callback failed", error);
         }
+    }
+
+    private static boolean requestIsCurrent(CreateRequest request, Activity activity) {
+        return request.status.get() == REQUEST_PENDING
+                && isCurrentHost(activity, request.generation);
+    }
+
+    private static boolean removeEntryIfSame(long id, Entry expected) {
+        if (expected == null) return false;
+        boolean removed = false;
+        synchronized (STATE_LOCK) {
+            if (ENTRIES.get(id) == expected) {
+                ENTRIES.remove(id);
+                removed = true;
+            }
+        }
+        if (removed) disposeEntry(expected);
+        return removed;
     }
 
     private static void applyVisibility(Entry entry) {
@@ -553,9 +617,7 @@ public final class GpuiPlatformView {
 
     private static void invalidateCreates() {
         for (CreateRequest request : CREATES.values()) {
-            synchronized (request.gate) {
-                request.cancelled.set(true);
-            }
+            request.status.compareAndSet(REQUEST_PENDING, REQUEST_CANCELLED);
         }
         CREATES.clear();
     }
@@ -566,16 +628,8 @@ public final class GpuiPlatformView {
     }
 
     private static void finishRequest(CreateRequest request, boolean success) {
-        synchronized (request.gate) {
-            finishRequestLocked(request, success);
-        }
-    }
-
-    private static void finishRequestLocked(CreateRequest request, boolean success) {
-        if (!request.completed) {
-            request.succeeded = success;
-            request.completed = true;
-        }
+        request.status.compareAndSet(REQUEST_PENDING,
+                success ? REQUEST_SUCCEEDED : REQUEST_FAILED);
         request.done.countDown();
         CREATES.remove(request.id, request);
     }
@@ -584,11 +638,9 @@ public final class GpuiPlatformView {
         final long id;
         final WeakReference<Activity> activity;
         final long generation;
-        final Object gate = new Object();
         final CountDownLatch done = new CountDownLatch(1);
-        final AtomicBoolean cancelled = new AtomicBoolean();
-        volatile boolean completed;
-        volatile boolean succeeded;
+        final java.util.concurrent.atomic.AtomicInteger status =
+                new java.util.concurrent.atomic.AtomicInteger(REQUEST_PENDING);
 
         CreateRequest(long id, Activity activity, long generation) {
             this.id = id;
@@ -598,6 +650,7 @@ public final class GpuiPlatformView {
     }
 
     private static final class Entry {
+        final long id;
         final FrameLayout container;
         final View child;
         final ViewFactory factory;
@@ -605,7 +658,8 @@ public final class GpuiPlatformView {
         volatile boolean requestedVisible = true;
         volatile boolean lifecyclePaused;
 
-        Entry(FrameLayout container, View child, ViewFactory factory) {
+        Entry(long id, FrameLayout container, View child, ViewFactory factory) {
+            this.id = id;
             this.container = container;
             this.child = child;
             this.factory = factory;

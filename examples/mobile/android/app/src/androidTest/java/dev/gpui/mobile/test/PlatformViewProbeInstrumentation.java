@@ -171,6 +171,61 @@ public final class PlatformViewProbeInstrumentation extends Instrumentation {
         GpuiPlatformView.setZIndex(id, 7);
         check(container.getZ() == 7f, "z index did not reach native container");
 
+        long selfDisposeId = id + 20;
+        GpuiPlatformView.registerViewFactory("probe_self_dispose", (host, creationParams) ->
+                new View(host) {
+                    @Override protected void onAttachedToWindow() {
+                        super.onAttachedToWindow();
+                        GpuiPlatformView.disposeView(selfDisposeId);
+                    }
+                });
+        check(!GpuiPlatformView.createView(activity, "probe_self_dispose", selfDisposeId,
+                        0f, 0f, 30f, 30f, ""),
+                "self-dispose from onAttachedToWindow must prevent create success");
+        check(GpuiPlatformView.getView(selfDisposeId) == null
+                        && GpuiPlatformView.getContainer(selfDisposeId) == null,
+                "self-disposed attached view remained registered");
+        GpuiPlatformView.unregisterViewFactory("probe_self_dispose");
+
+        AtomicInteger reentrantPauses = new AtomicInteger();
+        AtomicInteger reentrantResumes = new AtomicInteger();
+        AtomicBoolean reenterResume = new AtomicBoolean(true);
+        GpuiPlatformView.registerViewFactory("probe_reentrant_lifecycle", new GpuiPlatformView.ViewFactory() {
+            @Override public View create(Activity host, Map<String, String> creationParams) {
+                return new TextView(host);
+            }
+
+            @Override public void onPause(View view) {
+                reentrantPauses.incrementAndGet();
+                if (reenterResume.compareAndSet(true, false)) GpuiPlatformView.resumeAll();
+            }
+
+            @Override public void onResume(View view) {
+                reentrantResumes.incrementAndGet();
+            }
+        });
+        long reentrantOne = id + 21;
+        long reentrantTwo = id + 22;
+        check(GpuiPlatformView.createView(activity, "probe_reentrant_lifecycle", reentrantOne,
+                0f, 0f, 20f, 20f, ""), "first reentrant lifecycle view failed to create");
+        check(GpuiPlatformView.createView(activity, "probe_reentrant_lifecycle", reentrantTwo,
+                0f, 0f, 20f, 20f, ""), "second reentrant lifecycle view failed to create");
+        GpuiPlatformView.pauseAll();
+        check(reentrantPauses.get() == 1 && reentrantResumes.get() == 1,
+                "reentrant resume did not stop the stale pause transition loop");
+        check(GpuiPlatformView.getContainer(reentrantOne).getVisibility() == View.VISIBLE
+                        && GpuiPlatformView.getContainer(reentrantTwo).getVisibility() == View.VISIBLE,
+                "reentrant pause/resume left a view hidden");
+        GpuiPlatformView.pauseAll();
+        check(reentrantPauses.get() == 3,
+                "a later pause did not reconcile both views after the reentrant transition");
+        GpuiPlatformView.resumeAll();
+        check(reentrantResumes.get() == 3,
+                "a later resume did not reconcile both views after the reentrant transition");
+        GpuiPlatformView.disposeView(reentrantOne);
+        GpuiPlatformView.disposeView(reentrantTwo);
+        GpuiPlatformView.unregisterViewFactory("probe_reentrant_lifecycle");
+
         GpuiPlatformView.setBounds(id, 3f, 5f, 90f, 45f);
         bounds = (FrameLayout.LayoutParams) container.getLayoutParams();
         check(bounds.leftMargin == Math.round(3f * density) && bounds.topMargin == Math.round(5f * density),
