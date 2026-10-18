@@ -332,10 +332,113 @@ def wait_resumed_activity(serial: str, package: str, expected: bool, timeout: fl
     raise RuntimeError(f"package {package!r} did not become {state}; last activity: {last}")
 
 
-def check_ime_shown(serial: str) -> None:
-    ime = adb(serial, "shell", "dumpsys", "input_method")
-    if not re.search(r"(mInputShown|mIsInputViewShown)\s*=\s*true", ime, re.IGNORECASE):
-        raise RuntimeError("soft keyboard did not become visible for the editor")
+def check_ime_shown(
+    serial: str, artifact: Path | None = None, timeout: float = 6
+) -> None:
+    deadline = time.monotonic() + timeout
+    started = time.monotonic()
+    last_ime = ""
+    last_window = ""
+    last_geometry = "no visible IME frame"
+    last_error = ""
+    try:
+        api = int(adb(
+            serial, "shell", "getprop", "ro.build.version.sdk",
+            timeout=timeout,
+        ).strip())
+    except (ValueError, RuntimeError, subprocess.TimeoutExpired) as error:
+        raise RuntimeError(f"could not determine Android API for IME visibility check: {error}") from error
+
+    def bounded_adb(*args: str) -> str:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return ""
+        return adb(serial, *args, timeout=remaining)
+
+    while time.monotonic() < deadline:
+        try:
+            last_ime = bounded_adb("shell", "dumpsys", "input_method")
+            shown = bool(re.search(
+                r"(mInputShown|mIsInputViewShown)\s*=\s*true",
+                last_ime,
+                re.IGNORECASE,
+            ))
+
+            last_window = bounded_adb("shell", "dumpsys", "window", "displays")
+            visible_frames = []
+            if api >= 30:
+                sources = re.findall(
+                    r"InsetsSource id=\S+ type=ime frame=\[(-?\d+),(-?\d+)\]"
+                    r"\[(-?\d+),(-?\d+)\].*?visible=(true|false)",
+                    last_window,
+                )
+                for left, top, right, bottom, visible in sources:
+                    width = int(right) - int(left)
+                    height = int(bottom) - int(top)
+                    if visible == "true" and width > 0 and height > 0:
+                        visible_frames.append(
+                            f"InsetsSource frame=[{left},{top}][{right},{bottom}] "
+                            f"size={width}x{height}"
+                        )
+                last_geometry = (
+                    "; ".join(visible_frames)
+                    if visible_frames
+                    else "API30+ has no parsed visible nonempty InsetsSource type=ime frame"
+                )
+            else:
+                # Android 26-29 do not expose InsetsSource snapshots. Verify
+                # the actual WindowManager InputMethod surface instead.
+                legacy_windows = bounded_adb("shell", "dumpsys", "window", "windows")
+                blocks = re.split(r"(?m)^\s*Window #\d+ ", legacy_windows)[1:]
+                for block in blocks:
+                    header = block.splitlines()[0] if block.splitlines() else ""
+                    if "InputMethod" not in header:
+                        continue
+                    surface = re.search(
+                        r"Surface:\s*shown=(true|false).*?rect=\([-\d.]+,[-\d.]+\)"
+                        r"\s+([\d.]+)\s+x\s+([\d.]+)",
+                        block,
+                    )
+                    if surface and surface.group(1) == "true":
+                        width, height = float(surface.group(2)), float(surface.group(3))
+                        if width > 0 and height > 0:
+                            visible_frames.append(
+                                f"InputMethod Surface shown=true size={width:g}x{height:g}"
+                            )
+                last_geometry = (
+                    "; ".join(visible_frames)
+                    if visible_frames
+                    else "API<30 has no shown nonempty InputMethod Surface"
+                )
+            if shown and visible_frames:
+                if artifact is not None:
+                    (artifact / "ime-visible-startup.txt").write_text(
+                        f"elapsed_seconds={time.monotonic() - started:.3f}\n"
+                        f"api={api}\ninput_method_shown=true\n"
+                        f"visible_geometry={last_geometry}\n"
+                    )
+                return
+        except (RuntimeError, subprocess.TimeoutExpired) as error:
+            last_error = str(error)
+        time.sleep(min(0.15, max(0.0, deadline - time.monotonic())))
+
+    shown_state = re.search(
+        r"(mInputShown|mIsInputViewShown)\s*=\s*(true|false)",
+        last_ime,
+        re.IGNORECASE,
+    )
+    shown_text = shown_state.group(0) if shown_state else "input-method shown state unavailable"
+    message = (
+        f"soft keyboard did not become visible within {timeout:g}s for the editor: "
+        f"{shown_text}; {last_geometry}"
+    )
+    if last_error:
+        message += f"; last command error={last_error}"
+    message += (
+        f"; last IME state tail={last_ime[-1200:]!r}"
+        f"; last window state tail={last_window[-1200:]!r}"
+    )
+    raise RuntimeError(message)
 
 
 def wait_ime_hidden(serial: str, timeout: float = 6) -> str:
@@ -470,8 +573,7 @@ def run_ime_contract(serial: str, artifact: Path, editor_label: str,
         if editor_label not in exact_labels(xml):
             raise RuntimeError(f"editor label {editor_label!r} missing before IME tests")
         tap_label(serial, xml, editor_label)
-        time.sleep(0.5)
-        check_ime_shown(serial)
+        check_ime_shown(serial, artifact)
         check_keyboard_inset(serial, artifact, "ime-keyboard-visible", True)
         capture_screen(serial, artifact, "ime-keyboard-visible")
 
