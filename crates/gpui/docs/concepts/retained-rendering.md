@@ -90,6 +90,18 @@ pruned at frame end. Replayed output only comes from a completed painted range;
 partial layout or paint work is rebuilt. Each mount occurrence has its own
 retained state, even when the same entity appears more than once in a window.
 
+## Work grows with tracked inputs and retained output
+
+Retention avoids rerunning a clean view's `Render` implementation, but a hit
+still has validation and replay work. Validation visits the dependencies
+recorded for the retained subtree, including entity and global revision
+checks; replay walks the cached operation ranges needed to reproduce output.
+Both costs can grow with the number of tracked dependencies and retained
+operations. Invalidation, fresh layout, paint, or accessibility work adds its
+own cost. Retention is therefore not a universal constant-time guarantee; use
+the paired correctness and profiling guidance below for the workload you care
+about.
+
 ## Check correctness before measuring speed
 
 The retained regression suite compares natural retained output with

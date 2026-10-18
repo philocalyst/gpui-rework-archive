@@ -128,3 +128,73 @@ The `ime` edge represents the keyboard area. Use it when the UI needs to report 
 On Android, the host must forward surface creation/destruction, Activity resume/pause, touch, keys, and InputConnection events through one supported entry path. The host-driven API documents the ordering requirements in `gpui_mobile::android::host`. The `surface_destroyed` callback waits up to two seconds for the render thread to release the surface. If it times out, it logs an error and returns, so a stuck render thread is not guaranteed to have released the surface before the framework continues teardown. On iOS, UIKit owns the window and scene lifecycle; the backend converts UIKit touch, keyboard-frame, and text-input events into GPUI events and updates.
 
 See [Accept text input](crate::_documentation::guides::text_input), [Manage focus](crate::_documentation::guides::focus), [Make your app accessible](crate::_documentation::guides::accessibility), and [Platform capabilities](crate::_documentation::platforms) for application-level behavior. A package build or emulator test does not establish physical-device GPU support, VoiceOver spoken focus, or support for every host lifecycle.
+
+## Validated release configurations
+
+The current Android acceptance matrix is bound to the product app SHA-256
+`1ecf3f5915150372edf7e93d0745f1590216029dacf2ff4f4d38c066b17e2f25`, Android
+source checkpoint `11a71ada`, and runner SHA-256
+`286e1f01f436d030ceed89dc336897da4147e666a1b22524ac5608cba42f1a92`. The
+matching AndroidTest APK is `50e3f8ad6922ce2b4a4a5a476e2cc1d1df0999ffe2c3a6206c199e073b823854`;
+the test-only IME APK is
+`4cbb883f81995f3ddf62179a20dfed567851039fbfa8c9d23f9d1673c0874df7`. All three
+APKs have signer SHA-256
+`bedc415e4a37986a64f383fe69cf0a9216934142fba5d65ba792f0a8c3b9b85a`.
+
+| Emulator API | Strict acceptance | Native-view probe |
+| --- | --- | --- |
+| 26 | Pass | Pass |
+| 29 | Pass | Pass |
+| 34 | Pass | Pass |
+| 36 | Pass | Pass |
+
+The full run matrix and evidence paths are in
+`final-sync/evidence/android/refresh-resume-11a71ad/final-matrix-report.md`.
+API 36 passed with the resolved ANGLE/SwiftShader GLES mode launched as
+`-gpu swangle -feature -Vulkan -accel on`; the earlier API 36 Lavapipe lane
+failed its post-rotation keyboard-visibility assertion and is kept as a
+separate configuration result. API 26, 29, and 34 used the recorded emulator
+configurations in the same evidence directory. These are x86_64 emulator
+results, not physical-device GPU results.
+
+To run the acceptance flow against a built app and test-only IME on a connected
+emulator, use the repository runner from the checkout root:
+
+```sh
+python3 scripts/android_acceptance.py \
+  examples/mobile/android/app/build/outputs/apk/debug/app-debug.apk \
+  --ime-apk examples/mobile/android/acceptance-ime/app/build/outputs/apk/debug/app-debug.apk \
+  --serial emulator-5554 \
+  --artifacts target/android-acceptance
+```
+
+The test APK and helper IME are separate from the product APK. API 36 emulator
+renderer selection matters: preserve the resolved renderer from the evidence,
+not only the requested `-gpu` option.
+
+The iOS app-level acceptance suite passed 7/7 unflagged Release XCUITests on
+source checkpoint `ac997d31662b8aa370acb729e64192f422b7cf77` (tree
+`e1b6ef748b40c236a1cc3b728fb48e4024450647`). Its portable artifact archive SHA-256
+is `6409cf9d203a7c06e803af5781c648105ba79ae1acd33510d6ac42b97a84ac74`; the
+portable manifest SHA-256 is
+`123ca4c8fd12da798703f924f5273d2842d821881fbd185dc75049a2b6e69244`. The app
+was validated in the simulator. The arm64 device executable is unsigned and
+was compile/package checked only; there is no physical-device runtime result.
+The implementation requires iOS 15 or newer.
+
+The suite uses real UIKit keyboard input and text interaction: Pinyin candidate
+composition, emoji entry, word selection by double-tap and replacement using a
+native keyboard key, and caret hit testing with text padding, horizontal scroll,
+and UTF-16 offsets. It also checks keyboard insets in portrait/landscape,
+rotation, background/resume, and fresh relaunch. Run it on macOS with a booted
+simulator and Chinese (Simplified) Pinyin enabled:
+
+```sh
+IOS_SIMULATOR_UDID="SIMULATOR_UUID" \
+  ./examples/mobile/ios/run-app-acceptance.sh
+```
+
+These results describe the recorded simulator/emulator setups. They do not
+claim physical-device GPU support, VoiceOver spoken focus, multi-window iOS
+scene support, or universal IME behavior across untested keyboards and OS
+versions.

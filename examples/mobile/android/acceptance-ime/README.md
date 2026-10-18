@@ -24,3 +24,36 @@ scripts/android_acceptance.py \
 ```
 
 The runner defaults to package `dev.gpui.mobile.example`, component `dev.gpui.mobile.GpuiInputActivity`, and emulator `emulator-5554`. It restores the device's prior default IME, accessibility-service list, accessibility-enabled flag, and rotation settings when the test completes.
+
+## Recorded runtime matrix
+
+The latest strict acceptance matrix is recorded in
+`final-sync/evidence/android/refresh-resume-11a71ad/final-matrix-report.md`.
+It passed on API 26, 29, 34, and 36 x86_64 emulators, including the native-view
+instrumentation probe. Product app SHA-256:
+`1ecf3f5915150372edf7e93d0745f1590216029dacf2ff4f4d38c066b17e2f25`;
+AndroidTest APK:
+`50e3f8ad6922ce2b4a4a5a476e2cc1d1df0999ffe2c3a6206c199e073b823854`;
+acceptance IME APK:
+`4cbb883f81995f3ddf62179a20dfed567851039fbfa8c9d23f9d1673c0874df7`.
+The runner was `scripts/android_acceptance.py` SHA-256
+`286e1f01f436d030ceed89dc336897da4147e666a1b22524ac5608cba42f1a92`.
+The source checkpoint was `11a71ada`, including the Android surface lifecycle
+fix. API 36's successful configuration resolved to ANGLE/SwiftShader GLES with
+`-gpu swangle -feature -Vulkan -accel on`. Its failed Lavapipe run is retained
+as a separate configuration diagnostic; do not combine it with the passing
+swangle receipt.
+
+The runner command from the repository root is:
+
+```sh
+python3 scripts/android_acceptance.py \
+  path/to/gpui-ce-mobile-example.apk \
+  --ime-apk examples/mobile/android/acceptance-ime/app/build/outputs/apk/debug/app-debug.apk \
+  --serial emulator-5554 \
+  --artifacts target/android-acceptance
+```
+
+These are emulator results, not physical-device certification. A fresh run
+must retain the APK hashes, exact runner/source inputs, API level, resolved
+graphics backend, and per-stage output directory.
