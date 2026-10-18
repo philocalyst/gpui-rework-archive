@@ -51,6 +51,31 @@ The runner defaults to emulator-5554 and checks the emulator ABI and minimum API
 
 The Java InputConnection proxy keeps an immutable text/selection snapshot for synchronous IME queries. It queues edits for the GPUI owner thread rather than calling into GPUI while the IME holds framework locks. Native UTF-16 selection and composition ranges are converted at the text-input boundary. On API 30 and later the host receives typed keyboard insets; on API 26–29 it estimates the keyboard region from the visible display frame.
 
+### Embedding Android native views
+
+The Android bridge uses hybrid composition: native Android views are positioned in an overlay above the `NativeActivity` surface. They cannot be interleaved arbitrarily with GPUI GPU content. A platform view type must be registered on both sides with the same name. Register the Rust bridge factory during Android application initialization. This target-specific example is illustrative and is not compiled as a Linux GPUI doctest:
+
+```rust,ignore
+use gpui_mobile::{
+    android::platform_view::AndroidPlatformViewFactory,
+    platform_view::PlatformViewRegistry,
+};
+
+PlatformViewRegistry::global().register(
+    "web_view",
+    Box::new(AndroidPlatformViewFactory::new("web_view")),
+);
+```
+
+The Java bridge provides `container`, `webview`, and `web_view` factories. Other types, including video, camera, and map views, require an application-provided Android factory:
+
+```java
+GpuiPlatformView.registerViewFactory("video_player", (activity, params) ->
+    new MyVideoView(activity, params));
+```
+
+`GpuiPlatformView.ViewFactory.create` and its `dispose` callback run on Android's UI thread. Rust requests view creation synchronously with a bounded wait; factory work must stay short and must not wait on the GPUI thread. The sample `GpuiInputActivity` binds the Activity in `onCreate` and unbinds it in `onDestroy`; a custom host must follow the same bind/unbind lifecycle so static overlay views do not retain a destroyed Activity. Unknown or unregistered view types fail creation rather than producing placeholder video, camera, or map content.
+
 ## iOS prerequisites and build
 
 Build on macOS with Xcode and its command-line tools selected. The checked-in script uses Rust 1.95.0 by default and targets iOS 15 or newer. Install its Rust targets with:
