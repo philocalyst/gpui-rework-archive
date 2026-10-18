@@ -1356,6 +1356,7 @@ pub(crate) struct RetainedViewStats {
     pub(crate) live_layout_nodes: usize,
     pub(crate) measured_layouts: usize,
     pub(crate) retained_element_states: usize,
+    pub(crate) full_scene_transfers: usize,
 }
 
 #[derive(Clone, PartialEq)]
@@ -1376,6 +1377,11 @@ pub(crate) struct ViewEnvironment {
     pub(crate) modifiers: Modifiers,
 }
 
+struct PendingSceneReplay {
+    source_range: Range<usize>,
+    destination_start: usize,
+}
+
 pub(crate) struct Frame {
     accessed_state_generation: u64,
     pub(crate) focus: Option<FocusId>,
@@ -1386,6 +1392,7 @@ pub(crate) struct Frame {
     pointer_observers: Rc<Vec<PointerObserver>>,
     pub(crate) dispatch_tree: DispatchTree,
     pub(crate) scene: Scene,
+    pending_scene_replay: Option<PendingSceneReplay>,
     pub(crate) hitboxes: Vec<Hitbox>,
     pub(crate) window_control_hitboxes: Vec<(WindowControlArea, Hitbox)>,
     pub(crate) deferred_draws: Vec<DeferredDraw>,
@@ -1549,6 +1556,7 @@ impl Frame {
             pointer_observers: Rc::default(),
             dispatch_tree,
             scene: Scene::default(),
+            pending_scene_replay: None,
             hitboxes: Vec::new(),
             window_control_hitboxes: Vec::new(),
             deferred_draws: Vec::new(),
@@ -1577,6 +1585,7 @@ impl Frame {
         Rc::make_mut(&mut self.pointer_observers).clear();
         self.dispatch_tree.clear();
         self.scene.clear();
+        self.pending_scene_replay = None;
         self.input_handlers.clear();
         self.tooltip_requests.clear();
         self.cursor_styles.clear();
@@ -1636,7 +1645,7 @@ impl Frame {
             .unwrap_or_default()
     }
 
-    pub(crate) fn finish(&mut self, prev_frame: &mut Self) {
+    pub(crate) fn finish(&mut self, prev_frame: &mut Self) -> bool {
         for element_state_key in &self.accessed_element_states {
             if let Some((element_state_key, element_state)) =
                 prev_frame.element_states.remove_entry(element_state_key)
@@ -1645,7 +1654,48 @@ impl Frame {
             }
         }
 
-        self.scene.finish();
+        let can_transfer = self.pending_scene_replay.as_ref().is_some_and(|pending| {
+            pending.source_range.start == 0
+                && pending.source_range.end == prev_frame.scene.len()
+                && !pending.source_range.is_empty()
+                && self.scene.is_pristine()
+                && prev_frame.scene.can_transfer_full_scene()
+        });
+        if can_transfer {
+            true
+        } else {
+            self.flush_scene_replay(&prev_frame.scene);
+            self.scene.finish();
+            false
+        }
+    }
+
+    fn flush_scene_replay(&mut self, source_scene: &Scene) {
+        let Some(pending) = self.pending_scene_replay.as_ref() else {
+            return;
+        };
+        debug_assert_eq!(self.scene.len(), pending.destination_start);
+        let destination_start = self.scene.len();
+        let source_range = pending.source_range.clone();
+        self.scene.replay(source_range.clone(), source_scene);
+        debug_assert_eq!(
+            self.scene.len() - destination_start,
+            source_range.len(),
+            "a retained scene range must preserve its paint-operation count"
+        );
+        self.pending_scene_replay = None;
+    }
+
+    fn commit_scene_transfer(&mut self, previous: &mut Self) {
+        let pending = self
+            .pending_scene_replay
+            .as_ref()
+            .expect("a full scene transfer must have a pending range");
+        assert_eq!(pending.source_range, 0..previous.scene.len());
+        assert!(self.scene.is_pristine());
+        assert!(previous.scene.can_transfer_full_scene());
+        self.pending_scene_replay = None;
+        mem::swap(&mut self.scene, &mut previous.scene);
     }
 }
 
@@ -4172,7 +4222,7 @@ impl Window {
         self.invalidator.debug_assert_paint();
         let underline = self.underline(origin, width, style);
         if exclusions.is_empty() {
-            self.next_frame.scene.insert_primitive(underline);
+            self.scene_mut().insert_primitive(underline);
             return;
         }
 
@@ -4190,7 +4240,7 @@ impl Window {
             })
             .collect::<SmallVec<[_; 4]>>();
         if exclusions.is_empty() {
-            self.next_frame.scene.insert_primitive(underline);
+            self.scene_mut().insert_primitive(underline);
             return;
         }
         exclusions.sort_unstable_by_key(|span| span.start);
@@ -4198,7 +4248,7 @@ impl Window {
         let mut paint_span = |start, end| {
             let clip_bounds =
                 Bounds::from_corners(point(start, bounds.top()), point(end, bounds.bottom()));
-            self.next_frame.scene.insert_primitive(Underline {
+            self.scene_mut().insert_primitive(Underline {
                 clip_bounds,
                 ..underline.clone()
             });
@@ -4390,6 +4440,12 @@ impl Window {
     /// GPUI calls this for every frame that needs one, so most code doesn't call it directly.
     #[profiling::function]
     pub fn draw(&mut self, cx: &mut App) -> ArenaClearNeeded {
+        if self.next_frame.pending_scene_replay.is_some() {
+            // A previous draw unwound after queuing a replay. Discard its partial frame and
+            // rebuild from the still-committed rendered frame.
+            self.next_frame.clear();
+            self.refreshing = true;
+        }
         // Drain every draw in profiler builds so a previous frame's
         // first-invalidation timestamp can't be attributed to this one.
         #[cfg(feature = "profiler")]
@@ -4455,6 +4511,7 @@ impl Window {
             {
                 let viewport_size = self.viewport_size;
                 let scale_factor = self.scale_factor();
+                self.flush_pending_scene_replay();
                 self.debug_frame_overlay.paint(
                     &mut self.next_frame.scene,
                     viewport_size,
@@ -4496,7 +4553,7 @@ impl Window {
 
         self.layout_engine.as_mut().unwrap().finish_frame();
         self.text_system().finish_frame();
-        self.next_frame.finish(&mut self.rendered_frame);
+        let transfer_full_scene = self.next_frame.finish(&mut self.rendered_frame);
         self.flush_pending_view_dependencies();
         #[cfg(test)]
         {
@@ -4516,6 +4573,14 @@ impl Window {
         self.invalidator.set_phase(DrawPhase::Focus);
         let previous_focus_path = self.rendered_frame.focus_path();
         let previous_window_active = self.rendered_frame.window_active;
+        if transfer_full_scene {
+            #[cfg(test)]
+            {
+                self.retained_view_stats.full_scene_transfers += 1;
+            }
+            self.next_frame
+                .commit_scene_transfer(&mut self.rendered_frame);
+        }
         mem::swap(&mut self.rendered_frame, &mut self.next_frame);
         self.next_frame.clear();
         let current_focus_path = self.rendered_frame.focus_path();
@@ -4989,7 +5054,7 @@ impl Window {
         // Deferred draws are overlays (tooltips, popovers, drag images) and must sort above the
         // whole main scene. Raise the order floor so they do — this also keeps a deferred
         // backdrop's order from falling inside a content-filter order range left by the main scene.
-        self.next_frame.scene.raise_order_floor();
+        self.scene_mut().raise_order_floor();
 
         let traversal_order = self.deferred_draw_traversal_order();
         let mut deferred_draws = mem::take(&mut self.next_frame.deferred_draws);
@@ -5287,9 +5352,41 @@ impl Window {
         }
     }
 
+    fn flush_pending_scene_replay(&mut self) {
+        self.next_frame
+            .flush_scene_replay(&self.rendered_frame.scene);
+    }
+
+    fn scene_mut(&mut self) -> &mut Scene {
+        self.flush_pending_scene_replay();
+        &mut self.next_frame.scene
+    }
+
+    fn queue_scene_replay(&mut self, source_range: Range<usize>) {
+        if source_range.is_empty() {
+            return;
+        }
+        if let Some(pending) = &mut self.next_frame.pending_scene_replay {
+            if pending.source_range.end == source_range.start {
+                pending.source_range.end = source_range.end;
+                return;
+            }
+            self.flush_pending_scene_replay();
+        }
+        self.next_frame.pending_scene_replay = Some(PendingSceneReplay {
+            source_range,
+            destination_start: self.next_frame.scene.len(),
+        });
+    }
+
     pub(crate) fn paint_index(&self) -> PaintIndex {
         PaintIndex {
-            scene_index: self.next_frame.scene.len(),
+            scene_index: self.next_frame.scene.len()
+                + self
+                    .next_frame
+                    .pending_scene_replay
+                    .as_ref()
+                    .map_or(0, |pending| pending.source_range.len()),
             #[cfg(any(test, feature = "test-support"))]
             debug_bounds_index: self.next_frame.debug_bounds_records.len(),
             mouse_listeners_index: self.next_frame.mouse_listeners.len(),
@@ -5346,10 +5443,7 @@ impl Window {
 
         self.text_system
             .reuse_layouts(range.start.line_layout_index..range.end.line_layout_index);
-        self.next_frame.scene.replay(
-            range.start.scene_index..range.end.scene_index,
-            &self.rendered_frame.scene,
-        );
+        self.queue_scene_replay(range.start.scene_index..range.end.scene_index);
         self.rebase_replayed_view_states(
             range.start.accessed_element_states_index..range.end.accessed_element_states_index,
             |state| state.rebase_paint_range(&range, &destination),
@@ -5557,9 +5651,9 @@ impl Window {
         boundary: FilterBoundary,
         paint: impl FnOnce(&mut Self) -> R,
     ) -> R {
-        self.next_frame.scene.insert_primitive(boundary.clone());
+        self.scene_mut().insert_primitive(boundary.clone());
         let result = paint(self);
-        self.next_frame.scene.insert_primitive(FilterBoundary {
+        self.scene_mut().insert_primitive(FilterBoundary {
             is_start: false,
             ..boundary
         });
@@ -5993,15 +6087,14 @@ impl Window {
         let content_mask = self.content_mask();
         let clipped_bounds = bounds.intersect(&content_mask.bounds);
         if !clipped_bounds.is_empty() {
-            self.next_frame
-                .scene
-                .push_layer(self.cover_bounds(clipped_bounds));
+            let bounds = self.cover_bounds(clipped_bounds);
+            self.scene_mut().push_layer(bounds);
         }
 
         let result = f(self);
 
         if !clipped_bounds.is_empty() {
-            self.next_frame.scene.pop_layer();
+            self.scene_mut().pop_layer();
         }
 
         result
@@ -6091,7 +6184,7 @@ impl Window {
                 corner_radii
             };
 
-            self.next_frame.scene.insert_primitive(Shadow {
+            let shadow = Shadow {
                 order: 0,
                 blur_radius: shadow.blur_radius.scale(scale_factor),
                 bounds: self.cover_bounds(shadow_bounds),
@@ -6102,7 +6195,8 @@ impl Window {
                 element_corner_radii,
                 inset: inset.into(),
                 corner_smoothing,
-            });
+            };
+            self.scene_mut().insert_primitive(shadow);
         }
     }
 
@@ -6135,7 +6229,7 @@ impl Window {
             return;
         }
 
-        self.next_frame.scene.insert_primitive(BackdropFilter {
+        let backdrop_filter = BackdropFilter {
             order: 0,
             bounds: self.snap_bounds(bounds),
             content_mask: self.snapped_content_mask(),
@@ -6143,7 +6237,8 @@ impl Window {
             corner_smoothing: corner_smoothing.clamp(0.0, 1.0),
             filters,
             opacity: 1.0,
-        });
+        };
+        self.scene_mut().insert_primitive(backdrop_filter);
     }
 
     /// Paints a backdrop filter with the requested corner smoothing.
@@ -6294,7 +6389,7 @@ impl Window {
         };
 
         if !quad.background.is_transparent() {
-            self.next_frame.scene.insert_primitive(quad);
+            self.scene_mut().insert_primitive(quad);
             return;
         }
 
@@ -6304,7 +6399,7 @@ impl Window {
         let inner_bounds = Self::largest_border_interior(&quad);
 
         if inner_bounds.is_empty() {
-            self.next_frame.scene.insert_primitive(quad);
+            self.scene_mut().insert_primitive(quad);
             return;
         }
 
@@ -6334,7 +6429,7 @@ impl Window {
         for strip in strips {
             let content_mask_bounds = quad.content_mask.bounds.intersect(&strip);
             if !content_mask_bounds.is_empty() {
-                self.next_frame.scene.insert_primitive(Quad {
+                self.scene_mut().insert_primitive(Quad {
                     content_mask: ContentMask {
                         bounds: content_mask_bounds,
                         ..Default::default()
@@ -6357,9 +6452,7 @@ impl Window {
         path.content_mask = content_mask;
         let color: Background = color.into();
         path.color = color;
-        self.next_frame
-            .scene
-            .insert_primitive(path.scale(scale_factor));
+        self.scene_mut().insert_primitive(path.scale(scale_factor));
     }
 
     /// Paints an underline of `width` starting at `origin`, using `style`.
@@ -6387,7 +6480,7 @@ impl Window {
         };
         let content_mask = self.snapped_content_mask();
 
-        self.next_frame.scene.insert_primitive(Underline {
+        self.scene_mut().insert_primitive(Underline {
             order: 0,
             padding: 0,
             bounds,
@@ -6418,14 +6511,15 @@ impl Window {
             size: size(self.snap_stroke(width), self.snap_stroke(height)),
         };
         let content_mask = self.snapped_content_mask();
+        let thickness = self.snap_stroke(style.thickness);
 
-        self.next_frame.scene.insert_primitive(Underline {
+        self.scene_mut().insert_primitive(Underline {
             order: 0,
             padding: 0,
             bounds,
             clip_bounds: content_mask.bounds,
             content_mask,
-            thickness: self.snap_stroke(style.thickness),
+            thickness,
             color: style.color.unwrap_or_default().into(),
             wavy: false.into(),
         });
@@ -6496,7 +6590,7 @@ impl Window {
 
         match entry.format {
             RasterizedGlyphFormat::AlphaMask => {
-                self.next_frame.scene.insert_primitive(MonochromeSprite {
+                self.scene_mut().insert_primitive(MonochromeSprite {
                     order: 0,
                     padding: 0,
                     bounds,
@@ -6507,7 +6601,7 @@ impl Window {
                 });
             }
             RasterizedGlyphFormat::BgraSubpixelMask => {
-                self.next_frame.scene.insert_primitive(SubpixelSprite {
+                self.scene_mut().insert_primitive(SubpixelSprite {
                     order: 0,
                     padding: 0,
                     bounds,
@@ -6518,7 +6612,7 @@ impl Window {
                 });
             }
             RasterizedGlyphFormat::BgraColor => {
-                self.next_frame.scene.insert_primitive(PolychromeSprite {
+                self.scene_mut().insert_primitive(PolychromeSprite {
                     order: 0,
                     grayscale: false.into(),
                     corner_smoothing: 0.0,
@@ -6533,7 +6627,8 @@ impl Window {
         Ok(())
     }
 
-    fn should_use_subpixel_rendering(&self, font_id: FontId, font_size: Pixels) -> bool {
+    fn should_use_subpixel_rendering(&mut self, font_id: FontId, font_size: Pixels) -> bool {
+        self.flush_pending_scene_replay();
         if self.next_frame.scene.is_in_filter_group() {
             return false;
         }
@@ -6664,7 +6759,7 @@ impl Window {
             .map_origin(|value| ScaledPixels(round_half_toward_zero(value.0)))
             .map_size(|size| size.ceil());
 
-        self.next_frame.scene.insert_primitive(MonochromeSprite {
+        self.scene_mut().insert_primitive(MonochromeSprite {
             order: 0,
             padding: 0,
             bounds: final_bounds,
@@ -6769,7 +6864,7 @@ impl Window {
             .clamp_radii_for_quad_size(visible_bounds.size)
             .scale(self.scale_factor());
 
-        self.next_frame.scene.insert_primitive(PolychromeSprite {
+        self.scene_mut().insert_primitive(PolychromeSprite {
             order: 0,
             grayscale: grayscale.into(),
             corner_smoothing: corner_smoothing.clamp(0.0, 1.0),
@@ -6822,7 +6917,7 @@ impl Window {
             crate::SurfaceSource::Surface(image_buffer) => Some(image_buffer.clone()),
             _ => None,
         };
-        self.next_frame.scene.insert_primitive(PaintSurface {
+        self.scene_mut().insert_primitive(PaintSurface {
             order: 0,
             bounds,
             content_mask,
@@ -13085,6 +13180,284 @@ mod tests {
                 .when_some(self.opacity, |parent, opacity| parent.opacity(opacity))
                 .child(child)
         }
+    }
+
+    #[test]
+    fn retained_scene_replay_coalesces_ranges_and_flushes_before_queries_and_mutations() {
+        let mut app = TestApp::new();
+        let mut window = app.open_window(|_, _| Empty);
+        window.draw();
+        window.update(|_, window, _| {
+            let bounds = Bounds::new(
+                point(ScaledPixels(0.0), ScaledPixels(0.0)),
+                size(ScaledPixels(20.0), ScaledPixels(20.0)),
+            );
+            let quad = crate::Quad {
+                bounds,
+                content_mask: ContentMask {
+                    bounds,
+                    ..Default::default()
+                },
+                ..Default::default()
+            };
+            window.rendered_frame.scene.clear();
+            let mut first_overlap = quad.clone();
+            first_overlap.background = crate::red().into();
+            window.rendered_frame.scene.insert_primitive(first_overlap);
+
+            let mut second_overlap = quad.clone();
+            second_overlap.background = crate::blue().into();
+            window.rendered_frame.scene.insert_primitive(second_overlap);
+
+            let mut disjoint_and_clipped = quad.clone();
+            disjoint_and_clipped.bounds.origin.x = ScaledPixels(100.0);
+            disjoint_and_clipped.content_mask.bounds.origin.x = ScaledPixels(105.0);
+            disjoint_and_clipped.content_mask.bounds.size.width = ScaledPixels(10.0);
+            disjoint_and_clipped.background = crate::red().into();
+            window
+                .rendered_frame
+                .scene
+                .insert_primitive(disjoint_and_clipped);
+
+            // A fully clipped quad is omitted, so virtual operation indices still match the
+            // stored source operations one-for-one.
+            let mut fully_clipped = quad.clone();
+            fully_clipped.content_mask.bounds.origin.x = ScaledPixels(100.0);
+            window.rendered_frame.scene.insert_primitive(fully_clipped);
+            assert_eq!(window.rendered_frame.scene.len(), 3);
+            assert_eq!(window.rendered_frame.scene.quads.len(), 3);
+            window.rendered_frame.scene.finish();
+            assert_eq!(
+                window
+                    .rendered_frame
+                    .scene
+                    .quads
+                    .iter()
+                    .map(|quad| quad.order)
+                    .collect::<Vec<_>>(),
+                vec![1, 1, 2],
+                "the retained source should exercise lane index remapping"
+            );
+
+            let source_snapshot = |scene: &Scene| {
+                (
+                    scene.render_commands().to_vec(),
+                    scene
+                        .quads
+                        .iter()
+                        .map(|quad| (quad.order, quad.bounds, quad.content_mask, quad.background))
+                        .collect::<Vec<_>>(),
+                )
+            };
+
+            // Adjacent cached siblings stay virtual until a scene observer/mutator needs them.
+            window.next_frame.scene.clear();
+            window.queue_scene_replay(0..1);
+            window.queue_scene_replay(1..2);
+            window.queue_scene_replay(2..3);
+            assert_eq!(window.paint_index().scene_index, 3);
+            assert_eq!(window.next_frame.scene.len(), 0);
+            let expected = {
+                let mut scene = Scene::default();
+                scene.replay(0..3, &window.rendered_frame.scene);
+                scene.insert_primitive(quad.clone());
+                scene.finish();
+                source_snapshot(&scene)
+            };
+            window.scene_mut().insert_primitive(quad.clone());
+            assert_eq!(window.next_frame.scene.len(), 4);
+            assert!(window.next_frame.pending_scene_replay.is_none());
+            window.next_frame.scene.finish();
+            assert_eq!(source_snapshot(&window.next_frame.scene), expected);
+
+            // Gaps and overlaps flush before queuing the next range and match eager replay.
+            window.next_frame.scene.clear();
+            window.queue_scene_replay(0..1);
+            window.queue_scene_replay(2..3);
+            assert_eq!(window.next_frame.scene.len(), 1);
+            assert_eq!(window.paint_index().scene_index, 2);
+            window.flush_pending_scene_replay();
+            window.next_frame.scene.finish();
+            let mut expected = Scene::default();
+            expected.replay(0..1, &window.rendered_frame.scene);
+            expected.replay(2..3, &window.rendered_frame.scene);
+            expected.finish();
+            assert_eq!(
+                source_snapshot(&window.next_frame.scene),
+                source_snapshot(&expected)
+            );
+
+            window.next_frame.scene.clear();
+            window.queue_scene_replay(0..1);
+            window.queue_scene_replay(0..1);
+            assert_eq!(window.next_frame.scene.len(), 1);
+            assert_eq!(window.paint_index().scene_index, 2);
+            window.flush_pending_scene_replay();
+            window.next_frame.scene.finish();
+            let mut expected = Scene::default();
+            expected.replay(0..1, &window.rendered_frame.scene);
+            expected.replay(0..1, &window.rendered_frame.scene);
+            expected.finish();
+            assert_eq!(
+                source_snapshot(&window.next_frame.scene),
+                source_snapshot(&expected)
+            );
+
+            // A pending group range must flush before the paint-query reads filter state.
+            let filter_start = crate::FilterBoundary {
+                order: 0,
+                bounds,
+                content_mask: ContentMask {
+                    bounds,
+                    ..Default::default()
+                },
+                corner_radii: Default::default(),
+                corner_smoothing: 0.0,
+                filters: smallvec![],
+                opacity: 1.0,
+                is_start: true,
+            };
+            window.rendered_frame.scene.clear();
+            window.rendered_frame.scene.insert_primitive(filter_start);
+            window.rendered_frame.scene.finish();
+            window.next_frame.scene.clear();
+            window.queue_scene_replay(0..1);
+            assert!(!window.should_use_subpixel_rendering(crate::FontId(0), px(12.0)));
+            assert!(window.next_frame.pending_scene_replay.is_none());
+            assert_eq!(window.next_frame.scene.filter_boundaries.len(), 1);
+
+            // Deferred draws raise an ordering floor. The shared mutation path flushes first.
+            window.next_frame.scene.clear();
+            window.queue_scene_replay(0..1);
+            window.scene_mut().raise_order_floor();
+            assert!(window.next_frame.pending_scene_replay.is_none());
+            assert_eq!(window.next_frame.scene.len(), 1);
+        });
+    }
+
+    #[test]
+    fn abandoned_virtual_scene_replay_is_discarded_before_the_next_draw() {
+        let mut app = TestApp::new();
+        let mut window = app.open_window(|_, _| Empty);
+        window.draw();
+
+        window.update(|_, window, _| {
+            let bounds = Bounds::new(
+                point(ScaledPixels(0.0), ScaledPixels(0.0)),
+                size(ScaledPixels(20.0), ScaledPixels(20.0)),
+            );
+            let quad = crate::Quad {
+                bounds,
+                content_mask: ContentMask {
+                    bounds,
+                    ..Default::default()
+                },
+                ..Default::default()
+            };
+            window.rendered_frame.scene.clear();
+            window.rendered_frame.scene.insert_primitive(quad);
+            window.rendered_frame.scene.finish();
+            let previous_scene_len = window.rendered_frame.scene.len();
+            let previous_quad_count = window.rendered_frame.scene.quads.len();
+
+            let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                window.next_frame.scene.clear();
+                window.queue_scene_replay(0..previous_scene_len);
+                panic!("simulate an unwind after retained paint was queued");
+            }));
+            assert!(result.is_err());
+            assert_eq!(window.rendered_frame.scene.len(), previous_scene_len);
+            assert_eq!(window.rendered_frame.scene.quads.len(), previous_quad_count);
+            assert!(window.next_frame.pending_scene_replay.is_some());
+        });
+
+        window.draw();
+        let (scene_len, has_pending_replay, refreshing) = window.update(|_, window, _| {
+            (
+                window.rendered_frame.scene.len(),
+                window.next_frame.pending_scene_replay.is_some(),
+                window.refreshing,
+            )
+        });
+        assert_eq!(scene_len, 0);
+        assert!(!has_pending_replay);
+        assert!(!refreshing);
+    }
+
+    struct PlainCachedSceneChild {
+        paints: Rc<Cell<usize>>,
+    }
+
+    impl Render for PlainCachedSceneChild {
+        fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+            self.paints.set(self.paints.get() + 1);
+            div().size(px(20.0)).bg(crate::red())
+        }
+    }
+
+    struct PlainCachedSceneRoot {
+        children: [Entity<PlainCachedSceneChild>; 3],
+    }
+
+    impl Render for PlainCachedSceneRoot {
+        fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+            div()
+                .child(self.children[0].clone())
+                .child(self.children[1].clone())
+                .child(self.children[2].clone())
+        }
+    }
+
+    #[test]
+    fn full_retained_scene_replay_transfers_finished_scene() {
+        let paints = Rc::new(Cell::new(0));
+        let mut app = TestApp::new();
+        let mut window = app.open_window(|_, cx| PlainCachedSceneRoot {
+            children: std::array::from_fn(|_| {
+                cx.new(|_| PlainCachedSceneChild {
+                    paints: paints.clone(),
+                })
+            }),
+        });
+
+        let scene_snapshot = |scene: &Scene| {
+            (
+                scene.render_commands().to_vec(),
+                scene
+                    .quads
+                    .iter()
+                    .map(|quad| (quad.order, quad.bounds, quad.content_mask, quad.background))
+                    .collect::<Vec<_>>(),
+            )
+        };
+        window.draw();
+        let first = window.update(|_, window, _| {
+            assert!(!window.rendered_frame.scene.quads.is_empty());
+            scene_snapshot(&window.rendered_frame.scene)
+        });
+        let first_paints = paints.get();
+        assert!(first_paints > 0);
+
+        // Rebuild the parent while leaving its three child Entities clean. Their retained paint
+        // ranges are adjacent, so this exercises actual sibling coalescing in the driver.
+        window.update(|_, _, cx| cx.notify());
+        let (second, transfers, reused_views) = window.update(|_, window, _| {
+            (
+                scene_snapshot(&window.rendered_frame.scene),
+                window.retained_view_stats().full_scene_transfers,
+                window.retained_view_stats().reused_views,
+            )
+        });
+        assert_eq!(second, first);
+        assert_eq!(paints.get(), first_paints);
+        assert!(
+            reused_views >= 3,
+            "all three sibling views should be reused"
+        );
+        assert_eq!(
+            transfers, 1,
+            "the complete ordinary scene should use the transfer path"
+        );
     }
 
     #[test]

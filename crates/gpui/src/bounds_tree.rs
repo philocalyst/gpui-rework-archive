@@ -126,6 +126,18 @@ where
         self.order_floor = self.order_floor.max(floor);
     }
 
+    /// Returns whether this tree has no recorded bounds or ordering floor.
+    pub(crate) fn is_pristine(&self) -> bool {
+        self.nodes.is_empty()
+            && self.root.is_none()
+            && self.max_leaf.is_none()
+            && self.order_floor == 0
+    }
+
+    pub(crate) fn has_default_order_floor(&self) -> bool {
+        self.order_floor == 0
+    }
+
     /// The highest ordering assigned to any bounds so far (0 if empty).
     pub fn max_order(&self) -> u32 {
         self.max_leaf.map_or(0, |idx| self.nodes[idx].max_order)

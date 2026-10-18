@@ -167,6 +167,54 @@ impl Scene {
         self.is_finished = false;
     }
 
+    /// Returns whether this scene has never recorded content or raised its ordering floor.
+    pub(crate) fn is_pristine(&self) -> bool {
+        self.paint_operations.is_empty()
+            && self.primitive_bounds.is_pristine()
+            && self.layer_stack.is_empty()
+            && self.filter_depth == 0
+            && self.shadows.is_empty()
+            && self.quads.is_empty()
+            && self.paths.is_empty()
+            && self.underlines.is_empty()
+            && self.monochrome_sprites.is_empty()
+            && self.subpixel_sprites.is_empty()
+            && self.polychrome_sprites.is_empty()
+            && self.surfaces.is_empty()
+            && self.surface_opacities.is_empty()
+            && self.backdrop_filters.is_empty()
+            && self.filter_boundaries.is_empty()
+            && self.sort_keys.is_empty()
+            && self.sort_old_to_new.is_empty()
+            && self.sort_scratch.is_empty()
+            && self.permutations.is_identity()
+            && self.render_plan.commands.is_empty()
+            && !self.is_finished
+    }
+
+    /// Whether this finished scene can be transferred as a complete retained paint range.
+    pub(crate) fn can_transfer_full_scene(&self) -> bool {
+        self.is_finished
+            && self.primitive_bounds.has_default_order_floor()
+            && self.layer_stack.is_empty()
+            && self.filter_depth == 0
+            && self.surfaces.is_empty()
+            && self.backdrop_filters.is_empty()
+            && self.filter_boundaries.is_empty()
+            && self.paint_operations.iter().all(|operation| {
+                matches!(
+                    operation,
+                    PaintOperation::Shadow(_)
+                        | PaintOperation::Quad(_)
+                        | PaintOperation::Path(_)
+                        | PaintOperation::Underline(_)
+                        | PaintOperation::MonochromeSprite(_)
+                        | PaintOperation::SubpixelSprite(_)
+                        | PaintOperation::PolychromeSprite(_)
+                )
+            })
+    }
+
     /// Returns the number of paint operations in this scene, including layer boundaries.
     pub fn len(&self) -> usize {
         self.paint_operations.len()
@@ -2174,6 +2222,44 @@ mod tests {
             content_mask: mask(),
             ..Default::default()
         }
+    }
+
+    #[test]
+    fn full_scene_transfer_eligibility_rejects_nonordinary_state() {
+        let mut ordinary = Scene::default();
+        ordinary.insert_primitive(quad());
+        ordinary.finish();
+        assert!(ordinary.can_transfer_full_scene());
+
+        let mut layered = Scene::default();
+        layered.push_layer(full_bounds());
+        layered.insert_primitive(quad());
+        layered.pop_layer();
+        layered.finish();
+        assert!(!layered.can_transfer_full_scene());
+
+        let mut raised_floor = Scene::default();
+        raised_floor.raise_order_floor();
+        raised_floor.insert_primitive(quad());
+        raised_floor.finish();
+        assert!(!raised_floor.can_transfer_full_scene());
+
+        let mut filtered = Scene::default();
+        filtered.insert_primitive(boundary(true));
+        filtered.insert_primitive(quad());
+        filtered.insert_primitive(boundary(false));
+        filtered.finish();
+        assert!(!filtered.can_transfer_full_scene());
+
+        let mut with_backdrop = Scene::default();
+        with_backdrop.insert_primitive(backdrop());
+        with_backdrop.finish();
+        assert!(!with_backdrop.can_transfer_full_scene());
+
+        let mut with_surface = Scene::default();
+        with_surface.insert_primitive(surface());
+        with_surface.finish();
+        assert!(!with_surface.can_transfer_full_scene());
     }
 
     #[test]
