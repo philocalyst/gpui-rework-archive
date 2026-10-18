@@ -15,6 +15,7 @@ use crate::{
     size,
 };
 use std::{
+    cell::Cell,
     cell::RefCell,
     ops::Range,
     rc::Rc,
@@ -1037,7 +1038,7 @@ fn force_pointer_read_refresh_and_compare(
     cx: &mut TestAppContext,
 ) {
     let before = snapshot_window(window, cx);
-    cx.update_window(AnyWindowHandle::from(window.clone()), |_, window, cx| {
+    cx.update_window(AnyWindowHandle::from(window.clone()), |_, window, _cx| {
         window.refresh()
     })
     .unwrap();
@@ -1196,6 +1197,437 @@ fn retained_pointer_reads_are_pruned_when_child_is_unmounted(cx: &mut TestAppCon
         Some(&(PointerReadPhase::Paint, position))
     );
     force_pointer_read_refresh_and_compare(&window, cx);
+}
+
+struct RetainedKeyedStateLeaf {
+    render_count: Rc<Cell<usize>>,
+    state: Rc<RefCell<Option<crate::WeakEntity<usize>>>>,
+    observations: Rc<RefCell<Vec<(crate::EntityId, usize)>>>,
+    layout_markers: Rc<RefCell<Vec<usize>>>,
+}
+
+impl Render for RetainedKeyedStateLeaf {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        self.render_count.set(self.render_count.get() + 1);
+        let state = window.use_keyed_state("retained-counter", cx, |_, _| 0usize);
+        let value = *state.read(cx);
+        self.state.replace(Some(state.downgrade()));
+        self.observations
+            .borrow_mut()
+            .push((state.entity_id(), value));
+
+        div()
+            .size(px(90.))
+            .child(value.to_string())
+            .child(RetainedRequestLayoutState {
+                markers: self.layout_markers.clone(),
+            })
+    }
+}
+
+struct RetainedKeyedStateOuter {
+    child: Entity<RetainedKeyedStateLeaf>,
+    render_count: Rc<Cell<usize>>,
+}
+
+impl Render for RetainedKeyedStateOuter {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        self.render_count.set(self.render_count.get() + 1);
+        self.child
+            .clone()
+            .cached(StyleRefinement::default().size(px(90.)))
+    }
+}
+
+struct RetainedKeyedStateRoot {
+    outer: Entity<RetainedKeyedStateOuter>,
+    show_outer: bool,
+}
+
+impl Render for RetainedKeyedStateRoot {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        let mut root = div().size(px(100.));
+        if self.show_outer {
+            root = root.child(
+                self.outer
+                    .clone()
+                    .cached(StyleRefinement::default().size(px(100.))),
+            );
+        }
+        root
+    }
+}
+
+struct RetainedRequestLayoutState {
+    markers: Rc<RefCell<Vec<usize>>>,
+}
+
+impl IntoElement for RetainedRequestLayoutState {
+    type Element = Self;
+
+    fn into_element(self) -> Self::Element {
+        self
+    }
+}
+
+impl Element for RetainedRequestLayoutState {
+    type RequestLayoutState = ();
+    type PrepaintState = ();
+
+    fn id(&self) -> Option<ElementId> {
+        Some("retained-request-layout-state".into())
+    }
+
+    fn source_location(&self) -> Option<&'static std::panic::Location<'static>> {
+        None
+    }
+
+    fn request_layout(
+        &mut self,
+        id: Option<&GlobalElementId>,
+        _: Option<&crate::InspectorElementId>,
+        window: &mut Window,
+        cx: &mut App,
+    ) -> (LayoutId, Self::RequestLayoutState) {
+        static NEXT_MARKER: AtomicUsize = AtomicUsize::new(1);
+        let marker = window.with_element_state(id.unwrap(), |marker: Option<usize>, _| {
+            let marker = marker.unwrap_or_else(|| NEXT_MARKER.fetch_add(1, Ordering::Relaxed));
+            (marker, marker)
+        });
+        self.markers.borrow_mut().push(marker);
+        let mut style = Style::default();
+        style.size.width = px(4.).into();
+        style.size.height = px(4.).into();
+        (window.request_layout(style, [], cx), ())
+    }
+
+    fn prepaint(
+        &mut self,
+        _: Option<&GlobalElementId>,
+        _: Option<&crate::InspectorElementId>,
+        _: Bounds<Pixels>,
+        _: &mut Self::RequestLayoutState,
+        _: &mut Window,
+        _: &mut App,
+    ) -> Self::PrepaintState {
+    }
+
+    fn paint(
+        &mut self,
+        _: Option<&GlobalElementId>,
+        _: Option<&crate::InspectorElementId>,
+        _: Bounds<Pixels>,
+        _: &mut Self::RequestLayoutState,
+        _: &mut Self::PrepaintState,
+        _: &mut Window,
+        _: &mut App,
+    ) {
+    }
+}
+
+#[gpui::test]
+fn retained_request_layout_state_survives_cache_hits_and_nested_rebuilds(cx: &mut TestAppContext) {
+    let leaf_render_count = Rc::new(Cell::new(0));
+    let outer_render_count = Rc::new(Cell::new(0));
+    let state_slot = Rc::new(RefCell::new(None));
+    let observations = Rc::new(RefCell::new(Vec::new()));
+    let layout_markers = Rc::new(RefCell::new(Vec::new()));
+    let outer_slot = Rc::new(RefCell::new(None));
+
+    let window = cx.add_window({
+        let leaf_render_count = leaf_render_count.clone();
+        let outer_render_count = outer_render_count.clone();
+        let state = state_slot.clone();
+        let observations = observations.clone();
+        let layout_markers = layout_markers.clone();
+        let outer_slot = outer_slot.clone();
+        move |_, cx| {
+            let child = cx.new(|_| RetainedKeyedStateLeaf {
+                render_count: leaf_render_count,
+                state,
+                observations,
+                layout_markers,
+            });
+            let outer = cx.new(|_| RetainedKeyedStateOuter {
+                child,
+                render_count: outer_render_count,
+            });
+            outer_slot.replace(Some(outer.clone()));
+            RetainedKeyedStateRoot {
+                outer,
+                show_outer: true,
+            }
+        }
+    });
+    cx.run_until_parked();
+
+    assert_eq!(leaf_render_count.get(), 1);
+    let (state_id, initial_value) = observations.borrow()[0];
+    assert_eq!(initial_value, 0);
+    let initial_layout_marker = layout_markers.borrow()[0];
+
+    // A clean parent invalidation replays the outer cache without visiting either nested view.
+    for _ in 0..3 {
+        window.update(cx, |_, _, cx| cx.notify()).unwrap();
+        cx.run_until_parked();
+    }
+    assert_eq!(outer_render_count.get(), 1);
+    assert_eq!(leaf_render_count.get(), 1);
+
+    // Rebuild the outer view while the inner cached view remains reusable. Its request-layout
+    // access range must be rebased along with the inner ViewElementState.
+    let outer = outer_slot.borrow().as_ref().unwrap().clone();
+    cx.update(|app| outer.update(app, |_, cx| cx.notify()));
+    cx.run_until_parked();
+    assert_eq!(outer_render_count.get(), 2);
+    assert_eq!(leaf_render_count.get(), 1);
+
+    // Both Render-time use_keyed_state and custom request_layout state retain their identity.
+    let keyed_state = state_slot.borrow().as_ref().unwrap().clone();
+    cx.update(|app| {
+        keyed_state
+            .update(app, |value, cx| {
+                *value = 42;
+                cx.notify();
+            })
+            .unwrap()
+    });
+    cx.run_until_parked();
+    assert_eq!(leaf_render_count.get(), 2);
+    assert_eq!(observations.borrow().last(), Some(&(state_id, 42)));
+    assert_eq!(layout_markers.borrow().last(), Some(&initial_layout_marker));
+
+    // Once unmounted, the cached frame state is no longer accessed and the keyed entity releases.
+    drop(keyed_state);
+    window
+        .update(cx, |root, _, cx| {
+            root.show_outer = false;
+            cx.notify();
+        })
+        .unwrap();
+    cx.run_until_parked();
+    let weak_state = state_slot.borrow();
+    assert!(weak_state.as_ref().unwrap().upgrade().is_none());
+}
+
+struct ClippedRetainedStateRoot {
+    child: Entity<RetainedKeyedStateLeaf>,
+    child_mounted: bool,
+    reveal_child: bool,
+}
+
+impl Render for ClippedRetainedStateRoot {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        let child = div()
+            .mt(if self.reveal_child { px(0.) } else { px(140.) })
+            .debug_selector(|| "CLIPPED_RETAINED_CHILD".into())
+            .child(
+                self.child
+                    .clone()
+                    .cached(StyleRefinement::default().size(px(60.))),
+            );
+        let mut clip = div().size(px(100.)).overflow_hidden();
+        if self.child_mounted {
+            clip = clip.child(child);
+        }
+        clip
+    }
+}
+
+#[gpui::test]
+fn retained_fixed_child_state_survives_clipping_reveal_and_same_frame_layout(
+    cx: &mut TestAppContext,
+) {
+    let child_render_count = Rc::new(Cell::new(0));
+    let state_slot = Rc::new(RefCell::new(None));
+    let observations = Rc::new(RefCell::new(Vec::new()));
+    let layout_markers = Rc::new(RefCell::new(Vec::new()));
+    let window = cx.add_window({
+        let child_render_count = child_render_count.clone();
+        let state = state_slot.clone();
+        let observations = observations.clone();
+        let layout_markers = layout_markers.clone();
+        move |_, cx| ClippedRetainedStateRoot {
+            child: cx.new(|_| RetainedKeyedStateLeaf {
+                render_count: child_render_count,
+                state,
+                observations,
+                layout_markers,
+            }),
+            child_mounted: true,
+            reveal_child: false,
+        }
+    });
+    cx.run_until_parked();
+
+    assert_eq!(child_render_count.get(), 1);
+    let clipped = snapshot_window(&window, cx);
+    assert_eq!(
+        clipped.debug_bounds["CLIPPED_RETAINED_CHILD"].origin.y,
+        px(140.)
+    );
+    let (state_id, weak_state) = {
+        let state = state_slot.borrow();
+        let state = state.as_ref().expect("child captured keyed state");
+        (observations.borrow()[0].0, state.clone())
+    };
+    assert_eq!(observations.borrow()[0].1, 0);
+
+    // The fixed-style child is request-laid-out during the parent layout and again from its
+    // detached root during prepaint. Keep it mounted but fully outside the clip across several replays.
+    for _ in 0..3 {
+        window.update(cx, |_, _, cx| cx.notify()).unwrap();
+        cx.run_until_parked();
+    }
+    assert_eq!(child_render_count.get(), 1);
+    assert_eq!(weak_state.upgrade().unwrap().entity_id(), state_id);
+
+    // Updating the clipped keyed entity must preserve both its identity and value.
+    let keyed_state = weak_state.upgrade().unwrap();
+    cx.update(|app| {
+        keyed_state.update(app, |value, cx| {
+            *value = 42;
+            cx.notify();
+        })
+    });
+    drop(keyed_state);
+    cx.run_until_parked();
+    assert_eq!(observations.borrow().last(), Some(&(state_id, 42)));
+
+    window
+        .update(cx, |root, _, cx| {
+            root.reveal_child = true;
+            cx.notify();
+        })
+        .unwrap();
+    cx.run_until_parked();
+    assert_eq!(observations.borrow().last(), Some(&(state_id, 42)));
+    let revealed = snapshot_window(&window, cx);
+    assert_eq!(
+        revealed.debug_bounds["CLIPPED_RETAINED_CHILD"].origin.y,
+        px(0.),
+        "the cached child must become visible after the clip is revealed"
+    );
+
+    // Once unmounted, no retained access range should keep the keyed Entity alive.
+    window
+        .update(cx, |root, _, cx| {
+            root.child_mounted = false;
+            cx.notify();
+        })
+        .unwrap();
+    cx.run_until_parked();
+    assert!(weak_state.upgrade().is_none());
+}
+
+struct DuplicateMountKeyedState {
+    states: Rc<RefCell<Vec<(crate::EntityId, crate::WeakEntity<usize>)>>>,
+}
+
+impl Render for DuplicateMountKeyedState {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let state = window.use_keyed_state("duplicate-mount-counter", cx, |_, _| 0usize);
+        self.states
+            .borrow_mut()
+            .push((state.entity_id(), state.downgrade()));
+        div().size(px(60.)).child(state.read(cx).to_string())
+    }
+}
+
+struct DuplicateMountRoot {
+    child: Entity<DuplicateMountKeyedState>,
+    show_first: bool,
+}
+
+impl Render for DuplicateMountRoot {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        let mut first = div().id("first-mount");
+        if self.show_first {
+            first = first.child(
+                self.child
+                    .clone()
+                    .cached(StyleRefinement::default().size(px(60.))),
+            );
+        }
+        div().size(px(100.)).child(first).child(
+            div().id("second-mount").child(
+                self.child
+                    .clone()
+                    .cached(StyleRefinement::default().size(px(60.))),
+            ),
+        )
+    }
+}
+
+#[gpui::test]
+fn retained_duplicate_mount_state_is_scoped_and_released_independently(cx: &mut TestAppContext) {
+    let states = Rc::new(RefCell::new(Vec::new()));
+    let window = cx.add_window({
+        let states = states.clone();
+        move |_, cx| DuplicateMountRoot {
+            child: cx.new(|_| DuplicateMountKeyedState { states }),
+            show_first: true,
+        }
+    });
+    cx.run_until_parked();
+
+    let initial_states = states.borrow().clone();
+    assert_eq!(initial_states.len(), 2);
+    let (first_id, first_state) = &initial_states[0];
+    let (second_id, second_state) = &initial_states[1];
+    assert_ne!(first_id, second_id, "each mount must own its keyed state");
+
+    for _ in 0..3 {
+        window.update(cx, |_, _, cx| cx.notify()).unwrap();
+        cx.run_until_parked();
+    }
+    assert_eq!(states.borrow().len(), 2, "both clean mounts should replay");
+
+    window
+        .update(cx, |root, _, cx| {
+            root.show_first = false;
+            cx.notify();
+        })
+        .unwrap();
+    cx.run_until_parked();
+    assert!(
+        first_state.upgrade().is_none(),
+        "removed mount state must expire"
+    );
+    assert!(
+        second_state.upgrade().is_some(),
+        "remaining mount state must survive"
+    );
+
+    window
+        .update(cx, |root, _, cx| {
+            root.show_first = true;
+            cx.notify();
+        })
+        .unwrap();
+    cx.run_until_parked();
+    let states = states.borrow();
+    let mut distinct_ids = Vec::new();
+    for (id, _) in states.iter() {
+        if !distinct_ids.contains(id) {
+            distinct_ids.push(*id);
+        }
+    }
+    assert_eq!(
+        distinct_ids.len(),
+        3,
+        "two original mounts and one fresh remount must own distinct keyed state"
+    );
+    assert!(
+        states.iter().any(|(id, _)| id == second_id),
+        "the surviving mount must keep its original keyed state identity"
+    );
+    assert!(
+        distinct_ids
+            .iter()
+            .any(|id| id != first_id && id != second_id),
+        "remount must create fresh keyed state"
+    );
 }
 
 #[gpui::test]
@@ -2859,7 +3291,7 @@ fn notify_during_paint_schedules_followup_frame(cx: &mut TestAppContext) {
             rendered_values,
         }
     });
-    cx.open_window(size(px(120.), px(80.)), {
+    cx.open_window(size(px(120.), px(140.)), {
         let view = view.clone();
         move |_, _| NotifyDuringPaintRoot { view: view.clone() }
     });

@@ -459,6 +459,8 @@ struct LayoutCache {
     direction_contribution: Option<ResolvedDirection>,
     frame_bound: bool,
     mouse_position: Option<crate::Point<crate::Pixels>>,
+    request_layout_state_range: Range<usize>,
+    request_layout_state_generation: u64,
 }
 
 #[cfg(test)]
@@ -528,6 +530,22 @@ impl ViewElementState {
         if let Some(cache) = &mut self.cache {
             cache.layout.dependencies.extend(dependencies);
             cache.layout.frame_bound |= frame_bound;
+        }
+    }
+
+    pub(crate) fn request_layout_state_origin(&self) -> Option<(Range<usize>, u64, LayoutId)> {
+        let cache = self.cache.as_ref()?;
+        Some((
+            cache.layout.request_layout_state_range.clone(),
+            cache.layout.request_layout_state_generation,
+            cache.layout.root,
+        ))
+    }
+
+    pub(crate) fn set_request_layout_state_origin(&mut self, range: Range<usize>, generation: u64) {
+        if let Some(cache) = &mut self.cache {
+            cache.layout.request_layout_state_range = range;
+            cache.layout.request_layout_state_generation = generation;
         }
     }
 
@@ -612,6 +630,7 @@ fn cache_is_valid(cache: &ViewCache, entity_id: EntityId, window: &Window, cx: &
         && !window.cached_view_mouse_position_changed(cache.layout.mouse_position)
         && !window.dirty_views.contains(&entity_id)
         && !cache.layout.frame_bound
+        && window.access_state_generation_is_live(cache.layout.request_layout_state_generation)
         && cache
             .layout
             .dependencies
@@ -675,13 +694,32 @@ impl<V: View> Element for ViewElement<V> {
                     let environment = window.view_environment();
                     window.with_element_state::<ViewElementState, _>(&cache_id, |state, window| {
                         let mut state = state.unwrap_or_default();
-                        if let Some(cache) = state.cache.as_ref().filter(|cache| {
+                        let cache_is_reusable = state.cache.as_ref().is_some_and(|cache| {
                             cache_is_valid(cache, entity_id, window, cx)
                                 && cache.layout.environment == environment
                                 && cache.layout.fixed_style == fixed_style
-                        }) {
+                        });
+                        if cache_is_reusable {
+                            let cache = state.cache.as_ref().unwrap();
                             let root = cache.layout.root;
+                            let request_layout_state_generation =
+                                cache.layout.request_layout_state_generation;
+                            let request_layout_state_range =
+                                cache.layout.request_layout_state_range.clone();
                             window.retain_layout_subtree(root);
+                            let (request_layout_state_range, request_layout_state_generation) =
+                                if request_layout_state_generation
+                                    == window.rendered_access_state_generation()
+                                {
+                                    (
+                                        window.reuse_element_state_accesses(
+                                            request_layout_state_range,
+                                        ),
+                                        window.current_access_state_generation(),
+                                    )
+                                } else {
+                                    (request_layout_state_range, request_layout_state_generation)
+                                };
                             if fixed_style.is_some() {
                                 window.set_layout_auto_direction_hint(
                                     root,
@@ -692,36 +730,71 @@ impl<V: View> Element for ViewElement<V> {
                             if cache.layout.mouse_position.is_some() {
                                 window.retain_cached_view_mouse_position_dependency();
                             }
+                            state
+                                .cache
+                                .as_mut()
+                                .unwrap()
+                                .layout
+                                .request_layout_state_range = request_layout_state_range;
+                            state
+                                .cache
+                                .as_mut()
+                                .unwrap()
+                                .layout
+                                .request_layout_state_generation = request_layout_state_generation;
                             window.note_view_reused();
                             return ((root, None), state);
                         }
 
-                        let (root, request_element, dependencies, direction_contribution) =
-                            if let Some(style) = &fixed_style {
-                                let mut root_style = Style::default();
-                                root_style.refine(style.as_ref());
-                                let root = window.request_layout(root_style, None, cx);
-                                let ((element, direction_contribution), dependencies) = cx
-                                    .detect_accessed_dependencies(|cx| {
-                                        let mut element =
-                                            render_view(self.view.take().unwrap(), window, cx);
-                                        let child_layout = element.request_layout(window, cx);
-                                        let contribution =
-                                            window.layout_auto_direction_contribution(child_layout);
-                                        window.set_layout_auto_direction_hint(root, contribution);
-                                        (element, contribution)
-                                    });
-                                (root, Some(element), dependencies, direction_contribution)
-                            } else {
-                                let ((element, root_layout), dependencies) = cx
-                                    .detect_accessed_dependencies(|cx| {
-                                        let mut element =
-                                            render_view(self.view.take().unwrap(), window, cx);
-                                        let root_layout = element.request_layout(window, cx);
-                                        (element, root_layout)
-                                    });
-                                (root_layout, Some(element), dependencies, None)
-                            };
+                        let (
+                            root,
+                            request_element,
+                            dependencies,
+                            direction_contribution,
+                            request_layout_state_range,
+                        ) = if let Some(style) = &fixed_style {
+                            let mut root_style = Style::default();
+                            root_style.refine(style.as_ref());
+                            let root = window.request_layout(root_style, None, cx);
+                            let state_range_start = window.accessed_element_state_index();
+                            let ((element, direction_contribution), dependencies) = cx
+                                .detect_accessed_dependencies(|cx| {
+                                    let mut element =
+                                        render_view(self.view.take().unwrap(), window, cx);
+                                    let child_layout = element.request_layout(window, cx);
+                                    let contribution =
+                                        window.layout_auto_direction_contribution(child_layout);
+                                    window.set_layout_auto_direction_hint(root, contribution);
+                                    (element, contribution)
+                                });
+                            let request_layout_state_range =
+                                window.accessed_element_state_range(state_range_start);
+                            (
+                                root,
+                                Some(element),
+                                dependencies,
+                                direction_contribution,
+                                request_layout_state_range,
+                            )
+                        } else {
+                            let state_range_start = window.accessed_element_state_index();
+                            let ((element, root_layout), dependencies) = cx
+                                .detect_accessed_dependencies(|cx| {
+                                    let mut element =
+                                        render_view(self.view.take().unwrap(), window, cx);
+                                    let root_layout = element.request_layout(window, cx);
+                                    (element, root_layout)
+                                });
+                            let request_layout_state_range =
+                                window.accessed_element_state_range(state_range_start);
+                            (
+                                root_layout,
+                                Some(element),
+                                dependencies,
+                                None,
+                                request_layout_state_range,
+                            )
+                        };
 
                         state.cache = Some(ViewCache {
                             layout: LayoutCache {
@@ -732,6 +805,9 @@ impl<V: View> Element for ViewElement<V> {
                                 direction_contribution,
                                 frame_bound: false,
                                 mouse_position: None,
+                                request_layout_state_range,
+                                request_layout_state_generation: window
+                                    .current_access_state_generation(),
                             },
                             output: CachedOutput::NeedsPrepaint,
                         });

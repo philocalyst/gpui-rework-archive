@@ -170,6 +170,7 @@ use std::{
 /// });
 ///
 /// log.0.borrow_mut().clear();
+/// window.update(|_, window, _| window.refresh());
 /// window.draw();
 /// assert_eq!(*log.0.borrow(), ["request_layout", "prepaint", "paint"]);
 /// ```
@@ -380,6 +381,7 @@ impl<T: IntoElement> FluentBuilder for T {}
 /// });
 ///
 /// renders.set(0);
+/// window.update(|_, window, _| window.refresh());
 /// window.draw();
 /// assert_eq!(renders.get(), 1);
 /// ```
@@ -450,6 +452,7 @@ impl Render for Empty {
 /// });
 ///
 /// renders.set(0);
+/// window.update(|_, window, _| window.refresh());
 /// window.draw();
 /// assert_eq!(renders.get(), 1);
 /// ```

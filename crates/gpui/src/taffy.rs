@@ -64,12 +64,18 @@ struct DirectionMetadata {
     resolved: LayoutDirectionHandle,
 }
 
-/// Computes element layout with Taffy, a flexbox and grid engine, for one frame.
+/// Computes element layout with Taffy, a flexbox and grid engine.
 ///
-/// Window code creates one node per element with [`Self::request_layout`] or
-/// [`Self::request_measured_layout`], then calls [`Self::compute_layout`] on the root and
-/// [`Self::layout_bounds`] to read each node's position. The engine is cleared at the end of each
-/// frame, so a [`LayoutId`] is valid only in the frame that created it.
+/// Window code creates nodes with [`Self::request_layout`] or
+/// [`Self::request_measured_layout`], computes the root with [`Self::compute_layout`], and reads
+/// node positions with [`Self::layout_bounds`]. Nodes claimed by a retained subtree can remain in
+/// the tree across frames, preserving their layout cache and [`LayoutId`]. At
+/// [`Self::finish_frame`], nodes not claimed for the current frame are removed.
+///
+/// Measurement callbacks have separate lifetimes: [`Self::request_measured_layout`] callbacks
+/// receive mutable access to the Window and App and are released at the end of the frame.
+/// [`Self::request_retained_measured_layout`] callbacks receive a [`WindowTextSystem`] and can
+/// remain attached to a retained node.
 pub struct TaffyLayoutEngine {
     taffy: TaffyTree<NodeContext>,
     absolute_layout_bounds: FxHashMap<LayoutId, Bounds<Pixels>>,
@@ -894,11 +900,14 @@ impl TaffyLayoutEngine {
     }
 }
 
-/// An id for a node in the layout tree of the current frame.
+/// An id for a node in the Taffy layout tree.
 ///
-/// [`Window::request_layout`](crate::Window::request_layout) returns one for each element. Pass
-/// the ids of an element's children when you request its layout, and read a node's position
-/// with the window's layout bounds methods. An id is valid only in the frame that created it.
+/// [`Window::request_layout`](crate::Window::request_layout) returns ids while building an
+/// element tree. Pass an element's child ids when requesting its layout, and read node positions
+/// with the window's layout bounds methods. GPUI may preserve a node and its id across frames while
+/// the owning subtree is retained. Nodes not claimed in the current frame are removed when the
+/// frame finishes, so a [`LayoutId`] is valid only while GPUI retains its node; it is not a
+/// durable application identity.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 #[repr(transparent)]
 pub struct LayoutId(NodeId);

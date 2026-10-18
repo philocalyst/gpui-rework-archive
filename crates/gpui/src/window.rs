@@ -1377,6 +1377,7 @@ pub(crate) struct ViewEnvironment {
 }
 
 pub(crate) struct Frame {
+    accessed_state_generation: u64,
     pub(crate) focus: Option<FocusId>,
     pub(crate) window_active: bool,
     pub(crate) element_states: FxHashMap<(GlobalElementId, TypeId), ElementStateBox>,
@@ -1539,6 +1540,7 @@ impl Frame {
 
     pub(crate) fn new(dispatch_tree: DispatchTree) -> Self {
         Frame {
+            accessed_state_generation: 0,
             focus: None,
             window_active: false,
             element_states: FxHashMap::default(),
@@ -1742,6 +1744,8 @@ pub struct Window {
     frame_bound_layout_views: FxHashSet<GlobalElementId>,
     pending_deferred_dependencies: FxHashMap<GlobalElementId, crate::ViewDependencies>,
     replayed_view_state_ids: FxHashSet<GlobalElementId>,
+    replayed_access_state_exact: FxHashMap<(usize, usize), Range<usize>>,
+    replayed_access_state_queue: Vec<(Range<usize>, Range<usize>)>,
     group_hitboxes: FxHashMap<SharedString, Vec<HitboxId>>,
     deferred_priority_stack: Vec<usize>,
     pub(crate) element_offset_stack: Vec<Point<Pixels>>,
@@ -2716,6 +2720,8 @@ impl Window {
             frame_bound_layout_views: FxHashSet::default(),
             pending_deferred_dependencies: FxHashMap::default(),
             replayed_view_state_ids: FxHashSet::default(),
+            replayed_access_state_exact: FxHashMap::default(),
+            replayed_access_state_queue: Vec::new(),
             group_hitboxes: FxHashMap::default(),
             deferred_priority_stack: Vec::new(),
             element_offset_stack: Vec::new(),
@@ -4394,6 +4400,11 @@ impl Window {
         // Set up the per-App arena for element allocation during this draw.
         // This ensures that multiple test Apps have isolated arenas.
         let arena_scope = ElementArenaScope::enter(&cx.element_arena);
+        self.next_frame.accessed_state_generation = self
+            .rendered_frame
+            .accessed_state_generation
+            .checked_add(1)
+            .expect("frame access generation overflow");
 
         if self.platform_window.prepare_frame() {
             self.refresh();
@@ -5025,6 +5036,154 @@ impl Window {
         sorted_indices
     }
 
+    pub(crate) fn accessed_element_state_index(&self) -> usize {
+        self.next_frame.accessed_element_states.len()
+    }
+
+    pub(crate) fn accessed_element_state_range(&self, start: usize) -> Range<usize> {
+        start..self.next_frame.accessed_element_states.len()
+    }
+
+    pub(crate) fn current_access_state_generation(&self) -> u64 {
+        self.next_frame.accessed_state_generation
+    }
+    pub(crate) fn rendered_access_state_generation(&self) -> u64 {
+        self.rendered_frame.accessed_state_generation
+    }
+    pub(crate) fn access_state_generation_is_live(&self, generation: u64) -> bool {
+        generation == self.rendered_frame.accessed_state_generation
+            || generation == self.next_frame.accessed_state_generation
+    }
+    fn append_rendered_access_state_span(&mut self, source: Range<usize>) -> Range<usize> {
+        let destination_start = self.next_frame.accessed_element_states.len();
+        self.next_frame.accessed_element_states.extend(
+            self.rendered_frame.accessed_element_states[source]
+                .iter()
+                .map(|(id, ty)| (id.clone(), *ty)),
+        );
+        destination_start..self.next_frame.accessed_element_states.len()
+    }
+    fn mapped_access_state_span(
+        &self,
+        source: &Range<usize>,
+        active_source: &Range<usize>,
+        active_destination: &Range<usize>,
+    ) -> Option<Range<usize>> {
+        if active_source.start <= source.start && source.end <= active_source.end {
+            let start = active_destination.start + source.start - active_source.start;
+            return Some(start..start + (source.end - source.start));
+        }
+        self.replayed_access_state_exact
+            .get(&(source.start, source.end))
+            .cloned()
+    }
+
+    // Replay an exact access slice, recursively carrying nested views whose newest ranges came
+    // from another phase in this source frame. Each copied source span is mapped only once.
+    pub(crate) fn reuse_element_state_accesses(&mut self, source: Range<usize>) -> Range<usize> {
+        let source_generation = self.rendered_frame.accessed_state_generation;
+        let current_generation = self.next_frame.accessed_state_generation;
+        assert!(
+            source.start <= source.end
+                && source.end <= self.rendered_frame.accessed_element_states.len()
+        );
+        self.replayed_access_state_exact.clear();
+        self.replayed_access_state_queue.clear();
+        let destination = self.append_rendered_access_state_span(source.clone());
+        self.replayed_access_state_exact
+            .insert((source.start, source.end), destination.clone());
+        self.replayed_access_state_queue
+            .push((source, destination.clone()));
+        let mut replayed_view_state_ids = std::mem::take(&mut self.replayed_view_state_ids);
+        let mut queue_index = 0;
+        while queue_index < self.replayed_access_state_queue.len() {
+            let (active_source, active_destination) =
+                self.replayed_access_state_queue[queue_index].clone();
+            queue_index += 1;
+            replayed_view_state_ids.clear();
+            for (id, ty) in &self.rendered_frame.accessed_element_states[active_source.clone()] {
+                if *ty == TypeId::of::<crate::view::ViewElementState>() {
+                    replayed_view_state_ids.insert(id.clone());
+                }
+            }
+            for id in &replayed_view_state_ids {
+                let key = (id.clone(), TypeId::of::<crate::view::ViewElementState>());
+                let (origin, in_next_frame) = {
+                    let state_box = self
+                        .next_frame
+                        .element_states
+                        .get(&key)
+                        .map(|state| (state, true))
+                        .or_else(|| {
+                            self.rendered_frame
+                                .element_states
+                                .get(&key)
+                                .map(|state| (state, false))
+                        });
+                    let Some((state_box, in_next_frame)) = state_box else {
+                        continue;
+                    };
+                    let Some(Some(state)) = state_box
+                        .inner
+                        .downcast_ref::<Option<crate::view::ViewElementState>>()
+                    else {
+                        unreachable!("view state type id must match its stored value")
+                    };
+                    (state.request_layout_state_origin(), in_next_frame)
+                };
+                let Some((nested, generation, root)) = origin else {
+                    continue;
+                };
+                if generation == current_generation {
+                    continue;
+                }
+                assert_eq!(
+                    generation, source_generation,
+                    "retained view access replay found a request-layout range from an older frame"
+                );
+                assert!(
+                    nested.start <= nested.end
+                        && nested.end <= self.rendered_frame.accessed_element_states.len(),
+                    "retained view request-layout range is outside its source frame"
+                );
+                let mapped = if let Some(mapped) =
+                    self.mapped_access_state_span(&nested, &active_source, &active_destination)
+                {
+                    mapped
+                } else {
+                    let mapped = self.append_rendered_access_state_span(nested.clone());
+                    self.replayed_access_state_exact
+                        .insert((nested.start, nested.end), mapped.clone());
+                    self.replayed_access_state_queue
+                        .push((nested, mapped.clone()));
+                    mapped
+                };
+                let state_map = if in_next_frame {
+                    &mut self.next_frame.element_states
+                } else {
+                    &mut self.rendered_frame.element_states
+                };
+                if let Some(state) = state_map.get_mut(&key) {
+                    if let Some(Some(state)) = state
+                        .inner
+                        .downcast_mut::<Option<crate::view::ViewElementState>>()
+                    {
+                        state.set_request_layout_state_origin(mapped, current_generation);
+                    }
+                }
+                if let Some(engine) = self.layout_engine.as_mut() {
+                    engine.retain_subtree(root);
+                }
+            }
+        }
+        // Include all recursively copied phase spans in the owning request-layout range. The
+        // next clean replay can then copy the closure as one slice instead of rediscovering and
+        // appending the same disjoint descendants on every frame.
+        let closure = destination.start..self.next_frame.accessed_element_states.len();
+        self.replayed_view_state_ids = replayed_view_state_ids;
+        closure
+    }
+
     pub(crate) fn prepaint_index(&self) -> PrepaintStateIndex {
         PrepaintStateIndex {
             hitboxes_index: self.next_frame.hitboxes.len(),
@@ -5049,11 +5208,8 @@ impl Window {
                 .iter_mut()
                 .map(|request| request.take()),
         );
-        self.next_frame.accessed_element_states.extend(
-            self.rendered_frame.accessed_element_states[range.start.accessed_element_states_index
-                ..range.end.accessed_element_states_index]
-                .iter()
-                .map(|(id, type_id)| (id.clone(), *type_id)),
+        self.reuse_element_state_accesses(
+            range.start.accessed_element_states_index..range.end.accessed_element_states_index,
         );
         self.text_system
             .reuse_layouts(range.start.line_layout_index..range.end.line_layout_index);
@@ -5180,11 +5336,8 @@ impl Window {
                 .iter_mut()
                 .map(|listener| listener.take()),
         );
-        self.next_frame.accessed_element_states.extend(
-            self.rendered_frame.accessed_element_states[range.start.accessed_element_states_index
-                ..range.end.accessed_element_states_index]
-                .iter()
-                .map(|(id, type_id)| (id.clone(), *type_id)),
+        self.reuse_element_state_accesses(
+            range.start.accessed_element_states_index..range.end.accessed_element_states_index,
         );
         self.next_frame.tab_stops.replay(
             &self.rendered_frame.tab_stops.insertion_history
@@ -5537,27 +5690,46 @@ impl Window {
     /// # Examples
     ///
     /// ```
-    /// # use gpui::{Context, TestApp, Window, div, prelude::*};
+    /// # use gpui::{Context, Entity, TestApp, Window, div, prelude::*};
     /// # use std::{cell::RefCell, rc::Rc};
-    /// # struct Root { values: Rc<RefCell<Vec<usize>>> }
+    /// # struct Root {
+    /// #     values: Rc<RefCell<Vec<usize>>>,
+    /// #     counter: Rc<RefCell<Option<Entity<usize>>>>,
+    /// #     counter_ids: Rc<RefCell<Vec<gpui::EntityId>>>,
+    /// # }
     /// # impl Render for Root {
     /// #     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
     /// #         let count = window.use_keyed_state("count", cx, |_, _| 0_usize);
-    /// #         count.update(cx, |count, _| *count += 1);
+    /// #         *self.counter.borrow_mut() = Some(count.clone());
+    /// #         self.counter_ids.borrow_mut().push(count.entity_id());
     /// #         self.values.borrow_mut().push(*count.read(cx));
     /// #         div()
     /// #     }
     /// # }
     /// # let values = Rc::new(RefCell::new(Vec::new()));
+    /// # let counter_slot = Rc::new(RefCell::new(None));
+    /// # let counter_ids = Rc::new(RefCell::new(Vec::new()));
     /// # let mut app = TestApp::new();
-    /// # let mut window = app.open_window(|_, _| Root { values: values.clone() });
-    /// # window.update(|_, window, _| window.refresh());
+    /// # let mut window = app.open_window(|_, _| Root {
+    /// #     values: values.clone(),
+    /// #     counter: counter_slot.clone(),
+    /// #     counter_ids: counter_ids.clone(),
+    /// # });
     /// # window.draw();
-    /// # window.update(|_, window, _| window.refresh());
-    /// # window.draw();
-    /// let values = values.borrow();
-    /// assert!(values.len() >= 2);
-    /// assert!(values.iter().enumerate().all(|(index, value)| *value == index + 1));
+    /// assert_eq!(values.borrow().last(), Some(&0));
+    /// let counter = counter_slot.borrow().as_ref().unwrap().clone();
+    /// app.update(|cx| {
+    ///     counter.update(cx, |count, cx| {
+    ///         *count = 1;
+    ///         cx.notify();
+    ///     });
+    /// });
+    /// window.draw();
+    ///
+    /// assert_eq!(values.borrow().last(), Some(&1));
+    /// assert!(counter_ids.borrow().iter().all(|id| *id == counter.entity_id()));
+    /// # drop(counter);
+    /// # drop(counter_slot.borrow_mut().take());
     /// ```
     pub fn use_keyed_state<S: 'static>(
         &mut self,
