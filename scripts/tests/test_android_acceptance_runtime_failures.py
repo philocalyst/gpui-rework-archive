@@ -71,12 +71,18 @@ class FontScaleRecreationTests(unittest.TestCase):
             "null", "null", "1.0", "1.0", None, None))
         self.assertTrue(android_acceptance.font_scale_restore_matches(
             "1.0", "1.0", "1.0", "1.0", None, None))
+        self.assertTrue(android_acceptance.font_scale_restore_matches(
+            "null", "null", "1.0", "1.0", None, "1.0"))
+        self.assertTrue(android_acceptance.font_scale_restore_matches(
+            "1.0", "1.0", "1.0", "1.0", None, "1.0"))
         self.assertFalse(android_acceptance.font_scale_restore_matches(
             "null", "1.0", "1.0", "1.1", None, None))
         self.assertFalse(android_acceptance.font_scale_restore_matches(
-            "null", "1.0", "1.0", "1.0", None, "1.0"))
+            "null", "1.0", "1.0", "1.0", None, "2.0"))
         self.assertFalse(android_acceptance.font_scale_restore_matches(
             "1.0", "1.0", "1.1", "1.0", None, None))
+        self.assertFalse(android_acceptance.font_scale_restore_matches(
+            "null", "2.0", "1.0", "2.0", None, "2.0"))
 
     def test_explicit_font_scale_must_restore_raw_entry_and_effective_value(self):
         self.assertTrue(android_acceptance.font_scale_restore_matches(

@@ -483,7 +483,7 @@ def font_scale_restore_matches(
     if original_entry is None:
         return (
             original in {"null", "1.0"}
-            and restored_entry is None
+            and restored_entry in {None, "1.0"}
             and restored in {"null", "1.0"}
             and original_effective == "1.0"
             and restored_effective == "1.0"
