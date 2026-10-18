@@ -53,6 +53,7 @@ const CONTENT_VIEW_ID: i32 = 0x0102_0002;
 
 struct Bridge {
     callbacks: Handlers,
+    native_session: Option<Arc<super::jni::NativeSession>>,
     adapter: Option<Adapter>,
 }
 
@@ -72,11 +73,19 @@ impl Drop for Adapter {
 /// One window's GPUI callbacks, shared by every adapter its Activity gets, and the
 /// window's host on the host-driven path.
 #[derive(Clone)]
-pub(super) struct Handlers(Arc<Mutex<A11yCallbacks>>, Option<HostId>);
+pub(super) struct Handlers(
+    Arc<Mutex<A11yCallbacks>>,
+    Option<HostId>,
+    Option<Arc<super::jni::NativeSession>>,
+);
 
 impl Handlers {
-    pub(super) fn new(callbacks: A11yCallbacks, host: Option<HostId>) -> Self {
-        Self(Arc::new(Mutex::new(callbacks)), host)
+    pub(super) fn new(
+        callbacks: A11yCallbacks,
+        host: Option<HostId>,
+        native_session: Option<Arc<super::jni::NativeSession>>,
+    ) -> Self {
+        Self(Arc::new(Mutex::new(callbacks)), host, native_session)
     }
 
     fn deactivate(&self) {
@@ -99,7 +108,19 @@ impl ActionHandler for Handlers {
 /// Point the screen reader at this window, on the GPUI thread. Called from
 /// `PlatformWindow::a11y_init` and when the window becomes active again.
 pub(super) fn init(callbacks: &Handlers) {
+    if callbacks.1.is_none()
+        && !super::jni::with_current_runtime_state(callbacks.2.as_deref(), || ()).is_some()
+    {
+        return;
+    }
     let mut bridge = BRIDGE.lock().expect("poisoned");
+    // Recheck after taking BRIDGE: teardown may have reset it after the initial
+    // check but before this window acquired the bridge lock.
+    if callbacks.1.is_none()
+        && super::jni::with_current_runtime_state(callbacks.2.as_deref(), || ()).is_none()
+    {
+        return;
+    }
     if let Some(previous) = bridge.as_mut() {
         if Arc::ptr_eq(&previous.callbacks.0, &callbacks.0) {
             // An earlier attach may have failed (no JavaVM or Activity yet, a JNI
@@ -115,6 +136,7 @@ pub(super) fn init(callbacks: &Handlers) {
     bridge
         .insert(Bridge {
             callbacks: callbacks.clone(),
+            native_session: callbacks.2.clone(),
             adapter: None,
         })
         .attach();
@@ -160,15 +182,23 @@ pub(super) fn close(callbacks: &Handlers) {
     }
 }
 
+/// Drop the adapter attached to the Activity that ended its native session.
+pub(super) fn reset_native_session() {
+    let previous = BRIDGE.lock().expect("poisoned").take();
+    drop(previous);
+}
+
 impl Bridge {
     /// Whether the adapter is on the window's current Activity.
     fn is_current(&self) -> bool {
         let Some(adapter) = &self.adapter else {
             return false;
         };
-        with_activity(self.callbacks.1, |env, activity| {
-            Ok(Ok(env.is_same_object(&adapter.activity, activity)?))
-        })
+        with_activity(
+            self.callbacks.1,
+            self.native_session.as_deref(),
+            |env, activity| Ok(Ok(env.is_same_object(&adapter.activity, activity)?)),
+        )
         .unwrap_or(false)
     }
 
@@ -176,32 +206,36 @@ impl Bridge {
         // Dropping the old adapter removes its delegate from the old view.
         self.adapter = None;
         let callbacks = self.callbacks.clone();
-        match with_activity(self.callbacks.1, |env, activity| {
-            let view = host_view(env, activity)?;
-            if view.is_null() {
-                return Ok(Err("the Activity has no content view".into()));
-            }
-            let view = &view;
-            // `InjectingAdapter` panics on the UI thread, aborting the process, if the
-            // view has a delegate already: the host's, or an androidx layer's.
-            if let Some(class) = foreign_delegate(env, view)? {
-                return Ok(Err(format!(
-                    "the view already has an accessibility delegate ({class})"
-                )));
-            }
-            if MANAGER.get().is_none() {
-                let _ = MANAGER.set(accessibility_manager(env, view)?);
-            }
-            Ok(Ok(Adapter {
-                inner: ManuallyDrop::new(InjectingAdapter::new(
-                    env,
-                    view,
-                    callbacks.clone(),
-                    callbacks,
-                )),
-                activity: env.new_global_ref(activity)?,
-            }))
-        }) {
+        match with_activity(
+            self.callbacks.1,
+            self.native_session.as_deref(),
+            |env, activity| {
+                let view = host_view(env, activity)?;
+                if view.is_null() {
+                    return Ok(Err("the Activity has no content view".into()));
+                }
+                let view = &view;
+                // `InjectingAdapter` panics on the UI thread, aborting the process, if the
+                // view has a delegate already: the host's, or an androidx layer's.
+                if let Some(class) = foreign_delegate(env, view)? {
+                    return Ok(Err(format!(
+                        "the view already has an accessibility delegate ({class})"
+                    )));
+                }
+                if MANAGER.get().is_none() {
+                    let _ = MANAGER.set(accessibility_manager(env, view)?);
+                }
+                Ok(Ok(Adapter {
+                    inner: ManuallyDrop::new(InjectingAdapter::new(
+                        env,
+                        view,
+                        callbacks.clone(),
+                        callbacks,
+                    )),
+                    activity: env.new_global_ref(activity)?,
+                }))
+            },
+        ) {
             Ok(adapter) => self.adapter = Some(adapter),
             Err(err) => log::warn!("accessibility: cannot attach to the host view: {err}"),
         }
@@ -312,11 +346,23 @@ fn accessibility_manager(
 /// Run `f` with the window's own Activity, on this thread's (permanently attached) env.
 fn with_activity<T>(
     host: Option<HostId>,
+    native_session: Option<&super::jni::NativeSession>,
     f: impl FnOnce(&mut JNIEnv, &JObject) -> accesskit_android::jni::errors::Result<Result<T, String>>,
 ) -> Result<T, String> {
     match host {
         Some(host) => super::host::with_activity(host, |activity| with_raw_activity(activity, f)),
-        None => with_raw_activity(super::jni::activity_as_ptr(), f),
+        None => {
+            let session = native_session.ok_or("NativeActivity session is unavailable")?;
+            if !session.is_active() {
+                return Err("Activity session has ended".into());
+            }
+            let app = session.app().ok_or("Activity session has ended")?;
+            let activity = app.activity_as_ptr();
+            if activity.is_null() {
+                return Err("Activity is no longer available".into());
+            }
+            with_raw_activity(activity, f)
+        }
     }
 }
 

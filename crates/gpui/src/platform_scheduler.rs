@@ -50,12 +50,35 @@ impl PlatformScheduler {
     /// Returns a new foreground executor whose tasks run on the platform's main thread.
     pub fn foreground_executor(self: &Arc<Self>) -> LocalExecutor {
         let session_id = self.next_session_id();
-        let scheduler = Arc::downgrade(self);
-        LocalExecutor::new(session_id, self.clone(), move |runnable| {
-            if let Some(scheduler) = scheduler.upgrade() {
-                scheduler.schedule_local(session_id, runnable);
-            }
-        })
+        if let Some(scope) = self.dispatcher.create_local_task_scope() {
+            let dispatch_scope = scope.clone();
+            let dispatch_dispatcher = self.dispatcher.clone();
+            let cancellation_scope = scope.clone();
+            let cancellation_dispatcher = self.dispatcher.clone();
+            #[cfg(feature = "profiler")]
+            let foreground_runnables = self.foreground_runnables.clone();
+            LocalExecutor::new_with_scope(
+                session_id,
+                self.clone(),
+                scope,
+                move |runnable| {
+                    #[cfg(feature = "profiler")]
+                    foreground_runnables.queued();
+                    dispatch_dispatcher.dispatch_local_task(dispatch_scope.clone(), runnable);
+                },
+                move |runnable| {
+                    cancellation_dispatcher
+                        .dispatch_local_task_cancellation(cancellation_scope.clone(), runnable);
+                },
+            )
+        } else {
+            let scheduler = Arc::downgrade(self);
+            LocalExecutor::new(session_id, self.clone(), move |runnable| {
+                if let Some(scheduler) = scheduler.upgrade() {
+                    scheduler.schedule_local(session_id, runnable);
+                }
+            })
+        }
     }
 
     fn next_session_id(&self) -> SessionId {

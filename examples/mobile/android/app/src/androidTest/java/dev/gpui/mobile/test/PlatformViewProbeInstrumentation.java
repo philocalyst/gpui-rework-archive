@@ -176,6 +176,32 @@ public final class PlatformViewProbeInstrumentation extends Instrumentation {
                 result.putString("native_recreation", "new runtime initialized and presented after Activity.recreate");
             }
 
+            if (hooks != null) {
+                BackInputSnapshot beforeBack = readBackInputSnapshot(recreated);
+                result.putBoolean("pre_back_ime_visible", beforeBack.imeVisible);
+                result.putBoolean("pre_back_keyboard_session_active", beforeBack.keyboardSessionActive);
+                result.putBoolean("pre_back_input_proxy_focused", beforeBack.inputProxyFocused);
+
+                boolean hasEditingSession = beforeBack.imeVisible || beforeBack.keyboardSessionActive;
+                if (hasEditingSession) {
+                    check(beforeBack.inputProxyFocused,
+                            "editing/IME state exists but the input proxy is not focused; refusing ambiguous Back test");
+                    sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);
+                    BackInputSnapshot dismissed = awaitInputDismissed(recreated, 5_000);
+                    result.putBoolean("first_back_dismissed_ime", !dismissed.imeVisible);
+                    result.putBoolean("first_back_cleared_keyboard_session", !dismissed.keyboardSessionActive);
+                    result.putBoolean("post_dismiss_input_proxy_focused", dismissed.inputProxyFocused);
+                    check(!dismissed.imeVisible && !dismissed.keyboardSessionActive,
+                            "first Back did not dismiss the active editing session");
+                    check(!awaitFinishing(recreated, 100),
+                            "first Back finished the Activity while dismissing an active editing session");
+                } else {
+                    check(!beforeBack.inputProxyFocused,
+                            "input proxy is focused without an IME or keyboard session; refusing ambiguous Back test");
+                    result.putBoolean("pre_back_no_editor_state", true);
+                }
+            }
+
             sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);
             check(awaitFinishing(recreated, 5_000),
                     "normal Back did not finish the recreated NativeActivity");
@@ -193,6 +219,49 @@ public final class PlatformViewProbeInstrumentation extends Instrumentation {
             }
             waitForIdleSync();
         }
+    }
+
+    private static final class BackInputSnapshot {
+        final boolean imeVisible;
+        final boolean keyboardSessionActive;
+        final boolean inputProxyFocused;
+        BackInputSnapshot(boolean imeVisible, boolean keyboardSessionActive, boolean inputProxyFocused) {
+            this.imeVisible = imeVisible;
+            this.keyboardSessionActive = keyboardSessionActive;
+            this.inputProxyFocused = inputProxyFocused;
+        }
+    }
+
+    private BackInputSnapshot readBackInputSnapshot(GpuiInputActivity activity) throws Throwable {
+        AtomicReference<BackInputSnapshot> snapshot = new AtomicReference<>();
+        runOnUi(() -> {
+            java.lang.reflect.Method imeVisible = GpuiInputActivity.class.getDeclaredMethod("imeVisibleForTest");
+            java.lang.reflect.Method keyboardSession = GpuiInputActivity.class.getDeclaredMethod("keyboardSessionActiveForTest");
+            java.lang.reflect.Method proxyFocused = GpuiInputActivity.class.getDeclaredMethod("inputProxyFocusedForTest");
+            imeVisible.setAccessible(true);
+            keyboardSession.setAccessible(true);
+            proxyFocused.setAccessible(true);
+            check(imeVisible.getReturnType() == boolean.class
+                            && keyboardSession.getReturnType() == boolean.class
+                            && proxyFocused.getReturnType() == boolean.class,
+                    "Back input diagnostic hooks have unexpected return types");
+            snapshot.set(new BackInputSnapshot(
+                    ((Boolean) imeVisible.invoke(activity)).booleanValue(),
+                    ((Boolean) keyboardSession.invoke(activity)).booleanValue(),
+                    ((Boolean) proxyFocused.invoke(activity)).booleanValue()));
+        });
+        return snapshot.get();
+    }
+
+    private BackInputSnapshot awaitInputDismissed(GpuiInputActivity activity, long timeoutMs) throws Throwable {
+        long deadline = SystemClock.uptimeMillis() + timeoutMs;
+        BackInputSnapshot last;
+        do {
+            last = readBackInputSnapshot(activity);
+            if (!last.imeVisible && !last.keyboardSessionActive) return last;
+            Thread.sleep(50);
+        } while (SystemClock.uptimeMillis() < deadline);
+        return last;
     }
 
     private GpuiInputActivity launchNativeActivity() {

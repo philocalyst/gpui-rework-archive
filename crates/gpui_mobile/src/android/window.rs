@@ -304,7 +304,7 @@ struct WindowState {
 
     /// Shared GPU context (instance + adapter + device + queue).
     /// Created once and reused across window re-creations.
-    gpu_context: GpuContext,
+    gpu_context: Option<GpuContext>,
 
     /// The wgpu renderer from `gpui_wgpu`.  `None` while the surface is unavailable.
     renderer: Option<WgpuRenderer>,
@@ -375,7 +375,12 @@ pub struct AndroidWindow {
     /// (which may be held by a background render thread).
     active: Arc<std::sync::atomic::AtomicBool>,
     active_transition: Mutex<()>,
+    /// Permanently set after logical close; TERM_WINDOW alone is not terminal.
+    retired: std::sync::atomic::AtomicBool,
     dispatcher: Option<Arc<super::dispatcher::AndroidDispatcher>>,
+    /// Activity runtime that created this surface, preventing an obsolete
+    /// window from satisfying the next Activity's first-frame probe.
+    pub(crate) native_session: Option<Arc<super::jni::NativeSession>>,
     /// Set when the window gets a *new* surface, cleared by the next frame.
     ///
     /// A replaced swapchain starts out empty, but GPUI only repaints what it
@@ -395,6 +400,25 @@ unsafe impl Send for AndroidWindow {}
 unsafe impl Sync for AndroidWindow {}
 
 impl AndroidWindow {
+    /// Raise frame demand only while this window's owner is still the active
+    /// runtime. Native windows can outlive an Activity teardown through queued
+    /// callbacks; those callbacks must not wake a replacement session.
+    fn schedule_owned_frame_for(owner: Option<&super::jni::NativeSession>) {
+        let _ = super::jni::with_current_runtime_state(owner, super::frame_source::schedule_frame);
+    }
+
+    fn schedule_owned_frame(&self) {
+        Self::schedule_owned_frame_for(self.native_session.as_deref());
+    }
+
+    /// Resume pacing under this window's owning runtime, or host runtime.
+    fn resume_owned_frame(&self) {
+        let _ = super::jni::with_current_runtime_state(
+            self.native_session.as_deref(),
+            super::frame_source::resume,
+        );
+    }
+
     // ── constructors ─────────────────────────────────────────────────────────
 
     /// Create an `AndroidWindow` from an `ndk::NativeWindow`.
@@ -417,6 +441,49 @@ impl AndroidWindow {
         transparent: bool,
         dispatcher: Option<Arc<super::dispatcher::AndroidDispatcher>>,
     ) -> Result<Arc<Self>> {
+        let native_session = super::jni::native_session();
+        let dispatcher = if let Some(session) = native_session.as_ref() {
+            Self::validate_session_window(session, &native_window)?;
+            let platform = super::jni::platform_for_session(session)
+                .context("NativeActivity platform is no longer active")?;
+            let canonical = platform.foreground_executor();
+            if let Some(dispatcher) = dispatcher {
+                anyhow::ensure!(
+                    Arc::ptr_eq(&dispatcher, &canonical),
+                    "AndroidWindow dispatcher does not belong to the active NativeActivity session"
+                );
+                Some(dispatcher)
+            } else {
+                Some(canonical)
+            }
+        } else {
+            dispatcher
+        };
+        Self::new_for_session(
+            native_window,
+            gpu_context,
+            scale_factor,
+            transparent,
+            dispatcher,
+            native_session,
+        )
+    }
+
+    pub(crate) fn new_for_session(
+        native_window: NativeWindow,
+        gpu_context: GpuContext,
+        scale_factor: f32,
+        transparent: bool,
+        dispatcher: Option<Arc<super::dispatcher::AndroidDispatcher>>,
+        native_session: Option<Arc<super::jni::NativeSession>>,
+    ) -> Result<Arc<Self>> {
+        if let Some(session) = native_session.as_ref() {
+            Self::validate_session_window(session, &native_window)?;
+            anyhow::ensure!(
+                dispatcher.is_some(),
+                "NativeActivity window requires its session dispatcher"
+            );
+        }
         request_high_frame_rate(&native_window);
 
         let width = native_window.width();
@@ -443,7 +510,7 @@ impl AndroidWindow {
 
         let state = Arc::new(Mutex::new(WindowState {
             native_window: Some(native_window),
-            gpu_context,
+            gpu_context: Some(gpu_context),
             renderer: Some(renderer),
             width,
             height,
@@ -465,16 +532,85 @@ impl AndroidWindow {
             insets_callback: None,
         }));
 
-        Ok(Arc::new(Self {
+        let window = Arc::new(Self {
             state,
             id,
             active: Arc::new(std::sync::atomic::AtomicBool::new(true)),
             active_transition: Mutex::new(()),
+            retired: std::sync::atomic::AtomicBool::new(false),
             dispatcher,
+            native_session: native_session.clone(),
             force_render_once: Arc::new(std::sync::atomic::AtomicBool::new(true)),
             a11y: Default::default(),
             host: Default::default(),
-        }))
+        });
+        if let Some(session) = native_session {
+            session.register_window(&window);
+        }
+        Ok(window)
+    }
+
+    fn validate_session_window(
+        session: &super::jni::NativeSession,
+        native_window: &NativeWindow,
+    ) -> Result<()> {
+        anyhow::ensure!(
+            session.is_owner_thread(),
+            "NativeActivity window creation must run on its owner thread"
+        );
+        anyhow::ensure!(session.is_active(), "NativeActivity session has retired");
+        let app = session
+            .app()
+            .context("NativeActivity session has no active Activity handle")?;
+        let expected = app
+            .native_window()
+            .context("NativeActivity session has no active native window")?;
+        anyhow::ensure!(
+            expected.ptr() == native_window.ptr(),
+            "NativeWindow does not belong to the active NativeActivity session"
+        );
+        Ok(())
+    }
+
+    pub(crate) fn is_retired(&self) -> bool {
+        self.retired.load(std::sync::atomic::Ordering::Acquire)
+    }
+
+    pub(crate) fn mark_retired_on_owner(&self) {
+        if let Some(session) = self.native_session.as_ref() {
+            assert!(
+                session.is_owner_thread(),
+                "native window retirement must run on owner"
+            );
+        }
+        // Latch before callbacks: close handlers may re-enter or retain this Arc.
+        self.retired
+            .store(true, std::sync::atomic::Ordering::Release);
+    }
+
+    /// Make an escaped native-window handle inert while releasing thread-affine
+    /// GPU and NDK resources on the Activity owner thread.
+    pub(crate) fn retire_native_resources_on_owner(&self) {
+        self.mark_retired_on_owner();
+        self.close_accessibility();
+        self.clear_callbacks_on_owner();
+        self.active
+            .store(false, std::sync::atomic::Ordering::Release);
+        let (mut renderer, native_window, gpu_context) = {
+            let mut state = self.state.lock();
+            state.is_active = false;
+            state.surface_window_addr = 0;
+            let renderer = state.renderer.take();
+            let native_window = state.native_window.take();
+            let gpu_context = state.gpu_context.take();
+            (renderer, native_window, gpu_context)
+        };
+        if let Some(renderer) = renderer.as_mut() {
+            renderer.destroy();
+        }
+        drop(renderer);
+        drop(native_window);
+        drop(gpu_context);
     }
 
     /// Create a headless `AndroidWindow` for testing.
@@ -483,7 +619,7 @@ impl AndroidWindow {
     pub fn headless(width: i32, height: i32, scale_factor: f32) -> Arc<Self> {
         let state = Arc::new(Mutex::new(WindowState {
             native_window: None,
-            gpu_context: Rc::new(RefCell::new(None)),
+            gpu_context: None,
             renderer: None,
             width,
             height,
@@ -510,7 +646,9 @@ impl AndroidWindow {
             id: ((width as u64) << 32) | (height as u64),
             active: Arc::new(std::sync::atomic::AtomicBool::new(false)),
             active_transition: Mutex::new(()),
+            retired: std::sync::atomic::AtomicBool::new(false),
             dispatcher: None,
+            native_session: None,
             force_render_once: Arc::new(std::sync::atomic::AtomicBool::new(true)),
             a11y: Default::default(),
             host: Default::default(),
@@ -522,12 +660,23 @@ impl AndroidWindow {
     /// Called when `APP_CMD_INIT_WINDOW` fires and a new `NativeWindow` is
     /// available (e.g. after returning from the background).
     pub fn init_window(&self, native_window: NativeWindow, gpu_context: GpuContext) -> Result<()> {
+        anyhow::ensure!(
+            !self.retired.load(std::sync::atomic::Ordering::Acquire),
+            "AndroidWindow has been permanently retired"
+        );
+        if let Some(session) = self.native_session.as_ref() {
+            Self::validate_session_window(session, &native_window)?;
+        }
         request_high_frame_rate(&native_window);
 
         let width = native_window.width();
         let height = native_window.height();
 
         let mut state = self.state.lock();
+        anyhow::ensure!(
+            !self.retired.load(std::sync::atomic::Ordering::Acquire),
+            "AndroidWindow has been permanently retired"
+        );
         let transparent = state.transparent;
 
         // A renderer can survive `term_window` so its GPU context remains
@@ -562,11 +711,15 @@ impl AndroidWindow {
             state.surface_window_addr = incoming_addr;
         } else {
             // First init or after a full destroy — create a fresh renderer.
-            let ctx = if state.gpu_context.borrow().is_some() {
-                Rc::clone(&state.gpu_context)
+            let ctx = if state
+                .gpu_context
+                .as_ref()
+                .is_some_and(|context| context.borrow().is_some())
+            {
+                Rc::clone(state.gpu_context.as_ref().expect("checked above"))
             } else {
                 // Use the context from the platform; store it in our state too.
-                state.gpu_context = Rc::clone(&gpu_context);
+                state.gpu_context = Some(Rc::clone(&gpu_context));
                 gpu_context
             };
             let renderer = Self::create_renderer(&native_window, ctx, width, height, transparent)?;
@@ -594,7 +747,7 @@ impl AndroidWindow {
         drop(state);
         // That repaint is not something GPUI knows it wants: ask the loop for
         // the frame ourselves.
-        super::frame_source::resume();
+        self.resume_owned_frame();
 
         // A recreated Activity can hand back a surface of a *different* size (the
         // classic case being a rotation that recreates the Activity). `handle_resize`
@@ -720,6 +873,13 @@ impl AndroidWindow {
     /// - Intermittently during fast scrolling if the layout pass
     ///   hasn't produced new content yet.
     pub fn draw(&self, scene: &gpui::Scene) {
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return;
+        }
         // Skip only truly empty scenes. Text and images are emitted as sprite
         // primitives, not quads, so checking `scene.quads` alone can drop
         // valid text-only frames during scroll or cache refresh and produce
@@ -743,7 +903,11 @@ impl AndroidWindow {
             }
         };
 
-        renderer.draw(scene);
+        if renderer.draw(scene) {
+            if let Some(session) = &self.native_session {
+                super::jni::note_presented_frame(session);
+            }
+        }
 
         // Put the renderer back.
         let mut state = self.state.lock();
@@ -779,6 +943,13 @@ impl AndroidWindow {
         if let Some(cb) = cb {
             cb.dispatch(CallbackEvent::Key(event));
         }
+    }
+
+    /// Deliver Back on the owning event-loop thread and return whether GPUI
+    /// consumed it. Other Android key events keep using the queued public path.
+    pub(crate) fn handle_key_event_for_input(&self, event: AndroidKeyEvent) -> Option<bool> {
+        let cb = { self.state.lock().key_callback.clone() };
+        cb.and_then(|cb| cb.call_key(event))
     }
 
     pub fn set_appearance(&self, appearance: WindowAppearance) {
@@ -829,7 +1000,7 @@ impl AndroidWindow {
             if let Some(handlers) = self.a11y.lock().expect("poisoned").clone() {
                 super::accessibility::init(&handlers);
             }
-            super::frame_source::resume();
+            self.resume_owned_frame();
         }
     }
 
@@ -1011,6 +1182,29 @@ impl AndroidWindow {
 
     // ── callback registration ─────────────────────────────────────────────────
 
+    fn install_registration<F>(
+        &self,
+        registration: Registration,
+        serialize_transition: bool,
+        slot: F,
+    ) where
+        F: for<'a> FnOnce(&'a mut WindowState) -> &'a mut Option<Registration>,
+    {
+        let serial = serialize_transition.then(|| self.active_transition.lock());
+        let (old, rejected) = {
+            let mut state = self.state.lock();
+            if self.retired.load(std::sync::atomic::Ordering::Acquire) {
+                (None, Some(registration))
+            } else {
+                (slot(&mut state).replace(registration), None)
+            }
+        };
+        // Registration destructors can re-enter these setters.
+        drop(serial);
+        drop(old);
+        drop(rejected);
+    }
+
     /// Register a callback invoked once per VSync tick.
     pub(super) fn clear_callbacks_on_owner(&self) {
         let callbacks = {
@@ -1039,12 +1233,9 @@ impl AndroidWindow {
     {
         let registration =
             Registration::new(self.dispatcher.clone(), Callback::Frame(Box::new(cb)));
-        let old = self
-            .state
-            .lock()
-            .request_frame_callback
-            .replace(registration);
-        drop(old);
+        self.install_registration(registration, false, |state| {
+            &mut state.request_frame_callback
+        });
     }
     pub fn on_touch<F>(&self, cb: F)
     where
@@ -1052,16 +1243,24 @@ impl AndroidWindow {
     {
         let registration =
             Registration::new(self.dispatcher.clone(), Callback::Touch(Box::new(cb)));
-        let old = self.state.lock().touch_callback.replace(registration);
-        drop(old);
+        self.install_registration(registration, false, |state| &mut state.touch_callback);
     }
-    pub fn on_key_event<F>(&self, cb: F)
+    pub fn on_key_event<F>(&self, mut cb: F)
     where
         F: FnMut(AndroidKeyEvent) + 'static,
     {
+        self.on_key_event_with_result(move |event| {
+            cb(event);
+            true
+        });
+    }
+
+    pub(crate) fn on_key_event_with_result<F>(&self, cb: F)
+    where
+        F: FnMut(AndroidKeyEvent) -> bool + 'static,
+    {
         let registration = Registration::new(self.dispatcher.clone(), Callback::Key(Box::new(cb)));
-        let old = self.state.lock().key_callback.replace(registration);
-        drop(old);
+        self.install_registration(registration, false, |state| &mut state.key_callback);
     }
     pub fn on_resize<F>(&self, cb: F)
     where
@@ -1069,8 +1268,7 @@ impl AndroidWindow {
     {
         let registration =
             Registration::new(self.dispatcher.clone(), Callback::Resize(Box::new(cb)));
-        let old = self.state.lock().resize_callback.replace(registration);
-        drop(old);
+        self.install_registration(registration, false, |state| &mut state.resize_callback);
     }
     pub fn on_close<F>(&self, cb: F)
     where
@@ -1078,8 +1276,7 @@ impl AndroidWindow {
     {
         let registration =
             Registration::new(self.dispatcher.clone(), Callback::Close(Some(Box::new(cb))));
-        let old = self.state.lock().close_callback.replace(registration);
-        drop(old);
+        self.install_registration(registration, false, |state| &mut state.close_callback);
     }
     pub fn on_appearance_changed<F>(&self, cb: F)
     where
@@ -1087,8 +1284,7 @@ impl AndroidWindow {
     {
         let registration =
             Registration::new(self.dispatcher.clone(), Callback::Appearance(Box::new(cb)));
-        let old = self.state.lock().appearance_callback.replace(registration);
-        drop(old);
+        self.install_registration(registration, false, |state| &mut state.appearance_callback);
     }
     pub fn on_active_status_change<F>(&self, cb: F)
     where
@@ -1096,14 +1292,9 @@ impl AndroidWindow {
     {
         let registration =
             Registration::new(self.dispatcher.clone(), Callback::Active(Box::new(cb)));
-        let old = {
-            let _serial = self.active_transition.lock();
-            self.state
-                .lock()
-                .active_status_callback
-                .replace(registration)
-        };
-        drop(old);
+        self.install_registration(registration, true, |state| {
+            &mut state.active_status_callback
+        });
     }
     pub fn on_visibility_change<F>(&self, cb: F)
     where
@@ -1111,11 +1302,7 @@ impl AndroidWindow {
     {
         let registration =
             Registration::new(self.dispatcher.clone(), Callback::Visibility(Box::new(cb)));
-        let old = {
-            let _serial = self.active_transition.lock();
-            self.state.lock().visibility_callback.replace(registration)
-        };
-        drop(old);
+        self.install_registration(registration, true, |state| &mut state.visibility_callback);
     }
 
     /// Whether the GPU supports dual-source blending (subpixel text AA).
@@ -1315,10 +1502,10 @@ impl PlatformWindow for AndroidPlatformWindow {
     }
 
     fn on_insets_changed(&self, callback: Box<dyn FnMut(gpui::WindowInsets)>) {
-        self.window.state.lock().insets_callback = Some(Registration::new(
-            self.window.dispatcher.clone(),
-            Callback::Insets(callback),
-        ));
+        let registration =
+            Registration::new(self.window.dispatcher.clone(), Callback::Insets(callback));
+        self.window
+            .install_registration(registration, false, |state| &mut state.insets_callback);
     }
 
     fn resize(&mut self, _size: gpui::Size<gpui::Pixels>) {
@@ -1363,21 +1550,57 @@ impl PlatformWindow for AndroidPlatformWindow {
     fn text_input_state_changed(&self, change: gpui::TextInputStateChange) {
         match change {
             gpui::TextInputStateChange::FocusGained => {
-                super::jni::show_keyboard_android(crate::KeyboardType::Default);
+                super::jni::show_keyboard_for_runtime(
+                    self.window.native_session.as_deref(),
+                    crate::KeyboardType::Default,
+                );
             }
-            gpui::TextInputStateChange::FocusLost => super::jni::hide_keyboard_android(),
+            gpui::TextInputStateChange::FocusLost => {
+                super::jni::hide_keyboard_for_runtime(self.window.native_session.as_deref())
+            }
             _ => {}
         }
     }
 
     fn a11y_init(&self, callbacks: gpui::A11yCallbacks) {
-        let handlers =
-            super::accessibility::Handlers::new(callbacks, self.window.host.get().copied());
-        *self.window.a11y.lock().expect("poisoned") = Some(handlers.clone());
-        super::accessibility::init(&handlers);
+        if self
+            .window
+            .retired
+            .load(std::sync::atomic::Ordering::Acquire)
+        {
+            return;
+        }
+        let handlers = super::accessibility::Handlers::new(
+            callbacks,
+            self.window.host.get().copied(),
+            self.window.native_session.clone(),
+        );
+        let installed = {
+            let mut a11y = self.window.a11y.lock().expect("poisoned");
+            if self
+                .window
+                .retired
+                .load(std::sync::atomic::Ordering::Acquire)
+            {
+                false
+            } else {
+                *a11y = Some(handlers.clone());
+                true
+            }
+        };
+        if installed {
+            super::accessibility::init(&handlers);
+        }
     }
 
     fn a11y_tree_update(&self, tree_update: gpui::accesskit::TreeUpdate) {
+        if self
+            .window
+            .retired
+            .load(std::sync::atomic::Ordering::Acquire)
+        {
+            return;
+        }
         static DIAGNOSTIC_UPDATES: std::sync::OnceLock<std::sync::atomic::AtomicUsize> =
             std::sync::OnceLock::new();
         let diagnostic_index = DIAGNOSTIC_UPDATES
@@ -1481,8 +1704,19 @@ impl PlatformWindow for AndroidPlatformWindow {
         let input_handler = Rc::clone(&self.input_handler);
         let input_callback = Rc::clone(&self.ime_input_callback);
         let force_render_once = Arc::clone(&self.window.force_render_once);
+        let native_session = self.window.native_session.clone();
         self.window.on_request_frame(move |mut options| {
-            super::text_input::drain(&input_handler, &mut **input_callback.borrow_mut());
+            if native_session
+                .as_ref()
+                .is_some_and(|session| !session.is_active())
+            {
+                return;
+            }
+            super::text_input::drain(
+                &input_handler,
+                &mut **input_callback.borrow_mut(),
+                native_session.as_deref(),
+            );
             let text_dirty =
                 crate::TEXT_INPUT_DIRTY.swap(false, std::sync::atomic::Ordering::AcqRel);
             let surface_new = force_render_once.swap(false, std::sync::atomic::Ordering::AcqRel);
@@ -1493,18 +1727,32 @@ impl PlatformWindow for AndroidPlatformWindow {
 
     fn on_input(&self, callback: Box<dyn FnMut(gpui::PlatformInput) -> DispatchEventResult>) {
         let input_handler = Rc::clone(&self.input_handler);
+        let native_session = self.window.native_session.clone();
         let mut callback = callback;
         // Where the current single-finger touch started, to tell a tap from a drag.
         let mut tap_start: Option<(gpui::TouchId, gpui::Point<gpui::Pixels>)> = None;
         let callback: Box<dyn FnMut(gpui::PlatformInput) -> DispatchEventResult> =
             Box::new(move |event| {
+                if native_session
+                    .as_ref()
+                    .is_some_and(|session| !session.is_active())
+                {
+                    return DispatchEventResult::default();
+                }
                 if let gpui::PlatformInput::Touch(touch) = &event {
                     match touch.phase {
                         gpui::TouchPhase::Started => {
                             // Apply any last IME update to the old input before a tap can
                             // change focus. A new native session rejects late IME callbacks.
-                            super::text_input::drain(&input_handler, &mut callback);
-                            super::text_input::finish_composition(&input_handler);
+                            super::text_input::drain(
+                                &input_handler,
+                                &mut callback,
+                                native_session.as_deref(),
+                            );
+                            super::text_input::finish_composition(
+                                &input_handler,
+                                native_session.as_deref(),
+                            );
                             tap_start = Some((touch.id, touch.position));
                         }
                         gpui::TouchPhase::Moved => {
@@ -1521,10 +1769,22 @@ impl PlatformWindow for AndroidPlatformWindow {
                             // EditText. Checked before GPUI handles the tap, against the
                             // input that is focused now.
                             if tap_start.take().is_some_and(|(id, _)| id == touch.id)
-                                && super::jni::keyboard_dismissed()
+                                && native_session
+                                    .as_ref()
+                                    .is_none_or(|session| session.is_active())
+                                && super::jni::keyboard_dismissed_for_runtime(
+                                    native_session.as_deref(),
+                                ) == Some(true)
                                 && tap_hits_focused_input(&input_handler, touch.position)
                             {
-                                super::jni::reshow_dismissed_keyboard();
+                                if native_session
+                                    .as_ref()
+                                    .is_none_or(|session| session.is_active())
+                                {
+                                    super::jni::reshow_dismissed_keyboard_for_runtime(
+                                        native_session.as_deref(),
+                                    );
+                                }
                             }
                         }
                         gpui::TouchPhase::Cancelled => tap_start = None,
@@ -1592,7 +1852,7 @@ impl PlatformWindow for AndroidPlatformWindow {
         // ── Key events → PlatformInput ───────────────────────────────────
         {
             let cb = Rc::clone(&input_cb);
-            self.window.on_key_event(move |key_event| {
+            self.window.on_key_event_with_result(move |key_event| {
                 use crate::android::keyboard::{
                     AKEY_EVENT_ACTION_DOWN, AKEY_EVENT_ACTION_UP, android_key_to_keystroke,
                 };
@@ -1607,7 +1867,7 @@ impl PlatformWindow for AndroidPlatformWindow {
                     key_event.unicode_char,
                 ) {
                     Some(ks) => ks,
-                    None => return, // Modifier-only or unmapped key
+                    None => return false, // Modifier-only or unmapped key
                 };
 
                 let event = if key_event.action == AKEY_EVENT_ACTION_DOWN {
@@ -1619,11 +1879,19 @@ impl PlatformWindow for AndroidPlatformWindow {
                 } else if key_event.action == AKEY_EVENT_ACTION_UP {
                     gpui::PlatformInput::KeyUp(gpui::KeyUpEvent { keystroke })
                 } else {
-                    return; // ACTION_MULTIPLE or unknown
+                    return false; // ACTION_MULTIPLE or unknown
                 };
 
-                let mut guard = cb.borrow_mut();
-                let _ = guard(event);
+                let Ok(mut guard) = cb.try_borrow_mut() else {
+                    // Reentrant manual polling can arrive while GPUI is already
+                    // dispatching an input callback. Fail open to Android's
+                    // system Back handling instead of panicking on RefCell.
+                    return false;
+                };
+                let result = guard(event);
+                key_event.key_code != crate::android::keyboard::AKEYCODE_BACK
+                    || !result.propagate
+                    || result.default_prevented
             });
         }
     }
@@ -1671,13 +1939,22 @@ impl PlatformWindow for AndroidPlatformWindow {
     }
 
     fn frame_waker(&self) -> Option<Rc<dyn Fn()>> {
-        // GPUI calls this when a window turns dirty; the loop draws at the
-        // next vsync (see `frame_source`).
-        Some(Rc::new(super::frame_source::schedule_frame))
+        // GPUI may retain this callback beyond the platform window's lifetime.
+        // Keep only a weak session identity, not the renderer/native window.
+        // A callback from a retired native session is a no-op.
+        let owner = self.window.native_session.as_ref().map(Arc::downgrade);
+        Some(Rc::new(move || match owner.as_ref() {
+            Some(owner) => {
+                if let Some(owner) = owner.upgrade() {
+                    AndroidWindow::schedule_owned_frame_for(Some(&owner));
+                }
+            }
+            None => AndroidWindow::schedule_owned_frame_for(None),
+        }))
     }
 
     fn schedule_frame(&self) {
-        super::frame_source::schedule_frame();
+        self.window.schedule_owned_frame();
     }
 
     fn draw(&self, scene: &gpui::Scene) {
@@ -1718,8 +1995,19 @@ impl PlatformWindow for AndroidPlatformWindow {
         let y: f32 = bounds.origin.y.into();
         let h: f32 = bounds.size.height.into();
 
+        if self
+            .window
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return;
+        }
         let _ = jni_helpers::with_env(|env| {
-            let activity = jni_helpers::activity(env)?;
+            let activity = match &self.window.native_session {
+                Some(session) => jni_helpers::activity_for_session(env, session)?,
+                None => jni_helpers::activity_for_runtime(env, None)?,
+            };
 
             // 1. Get InputMethodManager
             let service_name = env.new_string("input_method").map_err(|e| e.to_string())?;
@@ -1970,6 +2258,35 @@ mod tests {
     use super::*;
 
     #[test]
+    fn logical_retirement_rejects_reentrant_and_late_callbacks() {
+        let window = AndroidWindow::headless(100, 200, 2.0);
+        let retained = window.clone();
+        window.on_close(move || {
+            retained.on_close(|| panic!("callback installed after retirement"));
+        });
+
+        window.retire_native_resources_on_owner();
+        assert!(window.retired.load(std::sync::atomic::Ordering::Acquire));
+
+        window.on_request_frame(|_| panic!("callback installed after retirement"));
+        window.on_touch(|_| panic!("callback installed after retirement"));
+        window.on_key_event(|_| panic!("callback installed after retirement"));
+        window.on_resize(|_, _| panic!("callback installed after retirement"));
+        window.on_close(|| panic!("callback installed after retirement"));
+        window.on_appearance_changed(|_| panic!("callback installed after retirement"));
+        window.on_active_status_change(|_| panic!("callback installed after retirement"));
+        window.on_visibility_change(|_| panic!("callback installed after retirement"));
+        window.clear_callbacks_on_owner();
+    }
+
+    #[test]
+    fn term_window_does_not_permanently_retire_logical_window() {
+        let window = AndroidWindow::headless(100, 200, 2.0);
+        window.term_window();
+        assert!(!window.retired.load(std::sync::atomic::Ordering::Acquire));
+    }
+
+    #[test]
     fn headless_window_geometry() {
         let w = AndroidWindow::headless(1080, 1920, 3.0);
         assert_eq!(w.physical_size().width, DevicePixels(1080));
@@ -2086,6 +2403,47 @@ mod tests {
         let events = received.lock();
         assert_eq!(events.len(), 1);
         assert_eq!(events[0].key_code, 29);
+    }
+
+    #[test]
+    fn legacy_key_callback_remains_consumed_and_can_close_during_sync_dispatch() {
+        let window = AndroidWindow::headless(1080, 1920, 2.0);
+        let closing_window = Arc::clone(&window);
+        window.on_key_event(move |_| closing_window.retire_native_resources_on_owner());
+
+        let event = AndroidKeyEvent {
+            key_code: 4,
+            action: 0,
+            meta_state: 0,
+            unicode_char: 0,
+        };
+        assert_eq!(window.handle_key_event_for_input(event.clone()), Some(true));
+        // Closing from the callback removes the stored registration. Once this
+        // synchronous dispatch releases its local registration clone, later
+        // dispatches must not find the callback in the owner-thread registry.
+        assert_eq!(window.handle_key_event_for_input(event), None);
+    }
+
+    #[test]
+    fn synchronous_key_callback_reports_consumption_without_queueing() {
+        let window = AndroidWindow::headless(1080, 1920, 2.0);
+        let seen = std::rc::Rc::new(std::cell::RefCell::new(Vec::new()));
+        let seen_by_callback = std::rc::Rc::clone(&seen);
+        window.on_key_event_with_result(move |event| {
+            seen_by_callback.borrow_mut().push(event.key_code);
+            false
+        });
+
+        assert_eq!(
+            window.handle_key_event_for_input(AndroidKeyEvent {
+                key_code: 4,
+                action: 0,
+                meta_state: 0,
+                unicode_char: 0,
+            }),
+            Some(false)
+        );
+        assert_eq!(*seen.borrow(), [4]);
     }
 
     #[test]

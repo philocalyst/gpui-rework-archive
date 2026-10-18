@@ -10,7 +10,8 @@ use std::{future::Future, marker::PhantomData, rc::Rc, sync::Arc, time::Duration
 use std::{mem, pin::Pin};
 
 pub use scheduler::{
-    DedicatedExecutor, FallibleTask, LocalExecutor as SchedulerLocalExecutor, Priority, Task,
+    DedicatedExecutor, FallibleTask, LocalExecutor as SchedulerLocalExecutor, LocalTaskScope,
+    Priority, Task,
 };
 
 /// Runs `Send` futures on GPUI's background executor.
@@ -41,6 +42,37 @@ pub struct ForegroundExecutor {
     #[cfg(feature = "profiler")]
     foreground_runnables: Option<crate::profiler::journal::ForegroundRunnableCounter>,
     not_send: PhantomData<Rc<()>>,
+}
+
+/// Owner-thread cancellation barrier for a platform-scoped foreground executor.
+#[doc(hidden)]
+#[derive(Clone)]
+pub struct ForegroundTaskRetirement {
+    dispatcher: Arc<dyn PlatformDispatcher>,
+    scope: Arc<LocalTaskScope>,
+    not_send: PhantomData<Rc<()>>,
+}
+
+impl ForegroundTaskRetirement {
+    /// Latches retirement and wakes every tracked local task.
+    pub fn begin(&self) {
+        // Let the platform route subsequent wakes to its owner-thread cancellation queue
+        // before waking tasks that may already have a runnable in flight.
+        self.dispatcher.begin_local_task_retirement(&self.scope);
+        self.scope.begin_retirement();
+    }
+
+    /// Drains one batch of accepted/cancellation runnables on the owner thread.
+    pub fn drain_once(&self) {
+        self.dispatcher.drain_local_task_retirements(&self.scope);
+    }
+
+    /// Finishes the scope once its queues and tracked futures are quiescent.
+    ///
+    /// Returns false while another owner-thread drain is required.
+    pub fn try_finish(&self) -> bool {
+        self.dispatcher.finish_local_task_retirement(&self.scope)
+    }
 }
 
 /// Extension methods for tasks that produce a [`Result`].
@@ -486,6 +518,17 @@ impl ForegroundExecutor {
         }
     }
 
+    /// Returns the platform retirement barrier when the dispatcher opted into
+    /// owner-thread task retirement.
+    #[doc(hidden)]
+    pub fn retirement_handle(&self) -> Option<ForegroundTaskRetirement> {
+        Some(ForegroundTaskRetirement {
+            dispatcher: self.dispatcher.clone(),
+            scope: self.inner.retirement_scope()?,
+            not_send: PhantomData,
+        })
+    }
+
     /// Runs `future` on the main thread, and returns a task for its result.
     ///
     /// The future needn't be `Send`, so it can hold entity handles and other state that
@@ -546,6 +589,7 @@ impl ForegroundExecutor {
         R: 'static,
     {
         let dispatcher = self.dispatcher.clone();
+        let retirement_scope = self.inner.retirement_scope();
         #[cfg(feature = "profiler")]
         let foreground_runnables = self.foreground_runnables.clone();
         self.inner
@@ -554,7 +598,11 @@ impl ForegroundExecutor {
                 if let Some(foreground_runnables) = &foreground_runnables {
                     foreground_runnables.queued();
                 }
-                dispatcher.dispatch_on_main_thread_when_idle(runnable, timeout);
+                if let Some(scope) = retirement_scope.clone() {
+                    dispatcher.dispatch_local_task_when_idle(scope, runnable, timeout);
+                } else {
+                    dispatcher.dispatch_on_main_thread_when_idle(runnable, timeout);
+                }
             })
     }
 

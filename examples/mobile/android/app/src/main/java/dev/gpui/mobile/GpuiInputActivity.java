@@ -9,13 +9,11 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.Selection;
 import android.text.TextWatcher;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.graphics.Color;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
@@ -25,12 +23,10 @@ import android.view.inputmethod.InputConnectionWrapper;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.SurroundingText;
 import android.widget.EditText;
-import android.widget.PopupWindow;
 
 /** NativeActivity with a UI-thread InputConnection for multistage IMEs. */
 public class GpuiInputActivity extends NativeActivity {
     private InputProxy input;
-    private LegacyImeObserver legacyImeObserver;
     private volatile InputSnapshot inputSnapshot = new InputSnapshot(0, "", 0, 0, -1, -1, 0);
 
     private static final class InputSnapshot {
@@ -71,7 +67,6 @@ public class GpuiInputActivity extends NativeActivity {
             throw new IllegalStateException(error);
         }
         super.onCreate(state);
-        GpuiPlatformView.bindActivity(this);
         installWindowInsets();
         if (Build.VERSION.SDK_INT >= 33) Api33Back.register(this);
     }
@@ -96,9 +91,6 @@ public class GpuiInputActivity extends NativeActivity {
             publishInsets(insets);
             return insets;
         });
-        if (Build.VERSION.SDK_INT < 30) {
-            legacyImeObserver = new LegacyImeObserver(this, decor);
-        }
         decor.requestApplyInsets();
     }
 
@@ -116,213 +108,48 @@ public class GpuiInputActivity extends NativeActivity {
         lastSafeInsets[1] = right;
         lastSafeInsets[2] = bottom;
         lastSafeInsets[3] = left;
-        if (legacyImeObserver != null) legacyImeObserver.sample();
 
-        // API 26-29 do not expose a typed IME inset. A separate, invisible
-        // resize-aware observer window samples the keyboard edge while this
-        // NativeActivity remains ADJUST_NOTHING and keeps its surface stable.
-        int imeBottom = legacyImeObserver == null ? 0 : legacyImeObserver.imeBottom();
+        View decor = getWindow().getDecorView();
+        View root = decor.getRootView();
+        Rect visible = new Rect();
+        decor.getWindowVisibleDisplayFrame(visible);
+        int[] rootLocation = new int[2];
+        root.getLocationOnScreen(rootLocation);
+        int rootBottom = rootLocation[1] + root.getHeight();
+        // Use the obscured bottom edge, not rootHeight-visible.height():
+        // that height difference also includes the status-bar top inset.
+        int obscuredBottom = Math.max(0, rootBottom - visible.bottom);
+        int imeBottom = Math.max(0, obscuredBottom - bottom);
         nativeInsets(top, right, bottom, left, 0, 0, imeBottom, 0);
-    }
-
-    @Override protected void onResume() {
-        super.onResume();
-        activityResumed = true;
-    }
-
-    @Override protected void onPause() {
-        activityResumed = false;
-        super.onPause();
     }
 
     @Override protected void onStart() {
         super.onStart();
-        if (legacyImeObserver != null) legacyImeObserver.start();
         getWindow().getDecorView().requestApplyInsets();
     }
 
-    @Override protected void onDestroy() {
-        if (legacyImeObserver != null) legacyImeObserver.stop();
-        // Release static overlay Views even when native initialization failed.
-        GpuiPlatformView.unbindActivity(this);
-        super.onDestroy();
+    @Override public void finish() {
+        // android-activity calls ANativeActivity_finish when android_main
+        // returns. During a configuration relaunch, that old native loop's
+        // finish request must not cancel the framework-created replacement.
+        boolean changingConfigurations = isChangingConfigurations();
+        boolean destroyed = isDestroyed();
+        boolean finishing = isFinishing();
+        android.util.Log.i("gpui-android", "finish requested: changingConfigurations="
+                + changingConfigurations + " destroyed=" + destroyed + " finishing=" + finishing);
+        if (changingConfigurations) {
+            android.util.Log.i("gpui-android", "Ignoring finish from configuration-changing instance");
+            return;
+        }
+        super.finish();
     }
 
     @Override protected void onStop() {
-        if (legacyImeObserver != null) legacyImeObserver.stop();
         nativeInsets(lastSafeInsets[0], lastSafeInsets[1], lastSafeInsets[2],
                 lastSafeInsets[3], 0, 0, 0, 0);
         super.onStop();
     }
 
-    /**
-     * API 26-29 have no public typed IME insets. This one-pixel, non-focusable
-     * PopupWindow opts into resize behavior so its own visible frame tracks the
-     * IME, without resizing the NativeActivity surface. The real input target
-     * remains the Activity's InputProxy.
-     */
-    private static final class LegacyImeObserver {
-        private final GpuiInputActivity activity;
-        private final View activityDecor;
-        private final View content;
-        private final PopupWindow popup;
-        private final Rect visibleFrame = new Rect();
-        private final int[] rootLocation = new int[2];
-        private final ViewTreeObserver.OnGlobalLayoutListener observerLayoutListener = this::sample;
-        private final ViewTreeObserver.OnGlobalLayoutListener activityLayoutListener = this::sample;
-        private final Runnable attachRunnable = this::attachIfDesired;
-        private boolean desiredStarted;
-        private boolean started;
-        private int imeBottom;
-        private int observedImeBottom;
-        private int hideConfirmationGeneration;
-        private boolean lastSampleValid;
-
-        LegacyImeObserver(GpuiInputActivity activity, View activityDecor) {
-            this.activity = activity;
-            this.activityDecor = activityDecor;
-            content = new View(activity);
-            content.setBackgroundColor(Color.TRANSPARENT);
-            content.setFocusable(false);
-            content.setFocusableInTouchMode(false);
-            content.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-            popup = new PopupWindow(content, 1, ViewGroup.LayoutParams.MATCH_PARENT, false);
-            popup.setFocusable(false);
-            popup.setTouchable(false);
-            popup.setOutsideTouchable(false);
-            popup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
-            popup.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-            popup.setElevation(0f);
-        }
-
-        int imeBottom() { return imeBottom; }
-
-        void start() {
-            desiredStarted = true;
-            attachIfDesired();
-        }
-
-        private void attachIfDesired() {
-            if (!desiredStarted || started || activity.isFinishing() || activity.isDestroyed()) return;
-            if (!activityDecor.isAttachedToWindow()) {
-                activityDecor.removeCallbacks(attachRunnable);
-                activityDecor.post(attachRunnable);
-                return;
-            }
-            try {
-                popup.showAtLocation(activityDecor, Gravity.TOP | Gravity.START, 0, 0);
-            } catch (android.view.WindowManager.BadTokenException error) {
-                android.util.Log.w("gpui-android", "Could not attach legacy IME observer", error);
-                return;
-            }
-            started = true;
-            content.getViewTreeObserver().addOnGlobalLayoutListener(observerLayoutListener);
-            activityDecor.getViewTreeObserver().addOnGlobalLayoutListener(activityLayoutListener);
-            sample();
-        }
-
-        void stop() {
-            desiredStarted = false;
-            hideConfirmationGeneration++;
-            lastSampleValid = false;
-            activityDecor.removeCallbacks(attachRunnable);
-            if (!started) {
-                observedImeBottom = 0;
-                publish(0);
-                return;
-            }
-            started = false;
-            removeLayoutListener(content, observerLayoutListener);
-            removeLayoutListener(activityDecor, activityLayoutListener);
-            if (popup.isShowing()) popup.dismiss();
-            observedImeBottom = 0;
-            publish(0);
-        }
-
-        private static void removeLayoutListener(View view,
-                ViewTreeObserver.OnGlobalLayoutListener listener) {
-            ViewTreeObserver observer = view.getViewTreeObserver();
-            if (observer.isAlive()) observer.removeOnGlobalLayoutListener(listener);
-        }
-
-        private void sample() {
-            if (!started || !popup.isShowing()) {
-                lastSampleValid = false;
-                return;
-            }
-            content.getWindowVisibleDisplayFrame(visibleFrame);
-            View root = activityDecor.getRootView();
-            root.getLocationOnScreen(rootLocation);
-            int rootBottom = rootLocation[1] + root.getHeight();
-            if (rootBottom <= 0 || visibleFrame.isEmpty()) {
-                lastSampleValid = false;
-                return;
-            }
-            lastSampleValid = true;
-
-            int coveredBottom = Math.max(0, rootBottom - visibleFrame.bottom);
-            int safeBottom = activity.lastSafeInsets[2];
-            // A hidden observer frame may end at the navigation bar. Filter
-            // that stable region, but report the complete screen-edge occlusion
-            // as soon as the visible edge passes it (matching Type.ime() on API 30+).
-            int nextImeBottom = coveredBottom > safeBottom ? coveredBottom : 0;
-            if (nextImeBottom != observedImeBottom) {
-                int previousObservedImeBottom = observedImeBottom;
-                observedImeBottom = nextImeBottom;
-                android.util.Log.d("gpui-android", "legacy IME frame rootBottom=" + rootBottom
-                        + " visibleBottom=" + visibleFrame.bottom + " safeBottom=" + safeBottom
-                        + " imeBottom=" + nextImeBottom);
-                if (nextImeBottom > 0) {
-                    // A new visible geometry invalidates any pending hidden confirmation.
-                    hideConfirmationGeneration++;
-                    publish(nextImeBottom);
-                } else if (previousObservedImeBottom > 0) {
-                    // Keep the published inset until a second valid hidden sample
-                    // confirms this is not a transient resize or rotation frame.
-                    confirmHiddenAfterLayout();
-                }
-            }
-        }
-
-        private void confirmHiddenAfterLayout() {
-            final int transition = ++hideConfirmationGeneration;
-            final long session = activity.keyboardSessionGeneration;
-            final int orientation = activity.getResources().getConfiguration().orientation;
-            final int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
-            content.postDelayed(() -> {
-                if (transition != hideConfirmationGeneration || !desiredStarted || !started
-                        || !popup.isShowing()) return;
-                // Re-read after transient frames settle. If rotation is still changing,
-                // wait for a stable sample rather than treating it as a user dismissal.
-                sample();
-                if (transition != hideConfirmationGeneration) return;
-                if (!lastSampleValid) {
-                    confirmHiddenAfterLayout();
-                    return;
-                }
-                if (orientation != activity.getResources().getConfiguration().orientation
-                        || rotation != activity.getWindowManager().getDefaultDisplay().getRotation()) {
-                    confirmHiddenAfterLayout();
-                    return;
-                }
-                if (observedImeBottom != 0) return;
-                if (activity.activityResumed && session == activity.keyboardSessionGeneration) {
-                    activity.reportLegacyImeDismissal(session);
-                }
-                publish(0);
-            }, 150);
-        }
-
-        private void publish(int nextImeBottom) {
-            imeBottom = nextImeBottom;
-            activity.nativeInsets(activity.lastSafeInsets[0], activity.lastSafeInsets[1],
-                    activity.lastSafeInsets[2], activity.lastSafeInsets[3],
-                    0, 0, imeBottom, 0);
-        }
-    }
-
-    private boolean activityResumed;
-    private long keyboardSessionGeneration;
     private boolean backStartedWithIme;
     // Android can hide the IME before dispatching Back to the Activity. Keep
     // one pending input-session dismissal so that Back cannot also finish the
@@ -334,11 +161,16 @@ public class GpuiInputActivity extends NativeActivity {
         ViewGroup decor = (ViewGroup) getWindow().getDecorView();
         Rect visible = new Rect();
         decor.getWindowVisibleDisplayFrame(visible);
-        return legacyImeObserver != null && legacyImeObserver.imeBottom() > 0;
+        int obscured = decor.getRootView().getHeight() - visible.height();
+        return obscured > (int) (160 * getResources().getDisplayMetrics().density);
     }
 
     private void handleSystemBack() {
         boolean imeWasVisible = backStartedWithIme || isImeVisible();
+        android.util.Log.i("gpui-android", "Java Back callback: imeVisible=" + imeWasVisible
+                + " keyboardSessionActive=" + keyboardSessionActive
+                + " proxyPresent=" + (input != null)
+                + " proxyFocused=" + (input != null && input.hasFocus()));
         boolean dismissInputSession = keyboardSessionActive;
         backStartedWithIme = false;
         if (input != null && input.hasFocus() && (imeWasVisible || dismissInputSession)) {
@@ -354,10 +186,13 @@ public class GpuiInputActivity extends NativeActivity {
     }
 
     @Override public void onBackPressed() {
-        // NativeActivity's legacy path can receive KEYCODE_BACK even when the
-        // platform dispatcher callback is bypassed by a device IME.
+        android.util.Log.i("gpui-android", "NativeActivity.onBackPressed");
         handleSystemBack();
     }
+
+    private boolean imeVisibleForTest() { return isImeVisible(); }
+    private boolean keyboardSessionActiveForTest() { return keyboardSessionActive; }
+    private boolean inputProxyFocusedForTest() { return input != null && input.hasFocus(); }
 
     // Keep API 33 types in a nested class so API 26-32 don't resolve them.
     private static final class Api33Back implements android.window.OnBackInvokedCallback {
@@ -367,7 +202,10 @@ public class GpuiInputActivity extends NativeActivity {
             activity.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
                     android.window.OnBackInvokedDispatcher.PRIORITY_OVERLAY, new Api33Back(activity));
         }
-        @Override public void onBackInvoked() { activity.handleSystemBack(); }
+        @Override public void onBackInvoked() {
+            android.util.Log.i("gpui-android", "OnBackInvokedCallback");
+            activity.handleSystemBack();
+        }
     }
 
     private static final class Api30Insets {
@@ -397,7 +235,7 @@ public class GpuiInputActivity extends NativeActivity {
             activity.lastSafeInsets[1] = safe.right;
             activity.lastSafeInsets[2] = safe.bottom;
             activity.lastSafeInsets[3] = safe.left;
-            nativeInsets(safe.top, safe.right, safe.bottom, safe.left,
+            activity.nativeInsets(safe.top, safe.right, safe.bottom, safe.left,
                     ime.top, ime.right, ime.bottom, ime.left);
         }
 
@@ -407,17 +245,8 @@ public class GpuiInputActivity extends NativeActivity {
         }
     }
 
-    private void reportLegacyImeDismissal(long sessionGeneration) {
-        if (sessionGeneration != keyboardSessionGeneration || !activityResumed
-                || !keyboardSessionActive || input == null || !input.hasFocus()) return;
-        keyboardSessionActive = false;
-        android.util.Log.i("gpui-android", "Observed external IME dismissal; retaining editor focus");
-        input.keyboardHiddenByBack();
-    }
-
     public void gpuiShowKeyboard(int keyboardType, long session) {
         runOnUiThread(() -> {
-            keyboardSessionGeneration++;
             keyboardSessionActive = true;
             if (input == null) {
                 input = new InputProxy();
@@ -445,7 +274,6 @@ public class GpuiInputActivity extends NativeActivity {
 
     public void gpuiHideKeyboard(long session) {
         runOnUiThread(() -> {
-            keyboardSessionGeneration++;
             keyboardSessionActive = false;
             if (input == null) return;
             input.reset(session, false);
@@ -664,14 +492,14 @@ public class GpuiInputActivity extends NativeActivity {
             }
         }
 
-        private void keyboardHiddenByBack() {
-            keyboardSessionActive = false;
-            keyboardSessionGeneration++;
-            sendIme(5, "", 0, 0);
-        }
+        private void keyboardHiddenByBack() { sendIme(5, "", 0, 0); }
 
         @Override public boolean onKeyPreIme(int code, KeyEvent event) {
             if (code == KeyEvent.KEYCODE_BACK) {
+                android.util.Log.i("gpui-android", "InputProxy.onKeyPreIme Back action="
+                        + event.getAction() + " imeVisible=" + isImeVisible()
+                        + " keyboardSessionActive=" + keyboardSessionActive
+                        + " proxyFocused=" + hasFocus());
                 if (event.getAction() == KeyEvent.ACTION_DOWN) backStartedWithIme = isImeVisible();
                 else if (event.getAction() == KeyEvent.ACTION_UP && (backStartedWithIme || isImeVisible())) {
                     keyboardHiddenByBack();
@@ -853,6 +681,14 @@ public class GpuiInputActivity extends NativeActivity {
     }
 
     private static native void nativeIme(long session, int kind, String text, int start, int end, long generation);
-    private static native void nativeInsets(int safeTop, int safeRight, int safeBottom, int safeLeft,
-                                            int imeTop, int imeRight, int imeBottom, int imeLeft);
+    private native void nativeInsets(int safeTop, int safeRight, int safeBottom, int safeLeft,
+                                     int imeTop, int imeRight, int imeBottom, int imeLeft);
+
+    private static native long nativeRuntimeGeneration();
+    private static native boolean nativeRuntimeInitialized();
+    private static native long nativePresentedFrameGeneration();
+
+    private static long runtimeGenerationForTest() { return nativeRuntimeGeneration(); }
+    private static boolean runtimeInitializedForTest() { return nativeRuntimeInitialized(); }
+    private static long presentedFrameGenerationForTest() { return nativePresentedFrameGeneration(); }
 }

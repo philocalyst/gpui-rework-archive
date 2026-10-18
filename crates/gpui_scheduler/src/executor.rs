@@ -2,13 +2,17 @@ use crate::{Instant, Priority, RunnableMeta, Scheduler, SessionId, Timer};
 use async_task::Runnable;
 use std::{
     any::Any,
+    collections::HashMap,
     future::Future,
     marker::PhantomData,
     mem::ManuallyDrop,
     panic::Location,
     pin::Pin,
     rc::Rc,
-    sync::Arc,
+    sync::{
+        Arc, Mutex, Weak,
+        atomic::{AtomicBool, Ordering},
+    },
     task::{Context, Poll, Waker},
     thread::{self, ThreadId},
     time::Duration,
@@ -27,21 +31,170 @@ pub type DedicatedFn = Box<
         + 'static,
 >;
 
-/// An executor for one session, for futures that are not `Send`.
+/// Tracks local tasks that a platform must cancel on their owning thread
+/// before retiring a thread-bound event loop.
+#[doc(hidden)]
+pub struct LocalTaskScope {
+    retiring: AtomicBool,
+    state: Mutex<LocalTaskState>,
+}
+
+struct LocalTaskState {
+    next_task_id: u64,
+    tasks: HashMap<u64, Option<Waker>>,
+    sealed: bool,
+}
+
+impl LocalTaskScope {
+    /// Creates an empty owner-thread task scope.
+    pub fn new() -> Self {
+        Self {
+            retiring: AtomicBool::new(false),
+            state: Mutex::new(LocalTaskState {
+                next_task_id: 0,
+                tasks: HashMap::new(),
+                sealed: false,
+            }),
+        }
+    }
+
+    /// Whether retirement has started.
+    pub fn is_retiring(&self) -> bool {
+        self.retiring.load(Ordering::Acquire)
+    }
+
+    /// Returns the number of local futures that have not yet been destroyed.
+    pub fn live_task_count(&self) -> usize {
+        self.state
+            .lock()
+            .expect("local task scope poisoned")
+            .tasks
+            .len()
+    }
+
+    /// Latches retirement and wakes registered tasks without holding the
+    /// registry lock. The platform must drop their runnables on the owner
+    /// thread before treating this scope as quiescent.
+    pub fn begin_retirement(&self) {
+        if self.retiring.swap(true, Ordering::AcqRel) {
+            return;
+        }
+        let wakers = {
+            let mut state = self.state.lock().expect("local task scope poisoned");
+            state
+                .tasks
+                .values_mut()
+                .filter_map(Option::take)
+                .collect::<Vec<_>>()
+        };
+        for waker in wakers {
+            waker.wake();
+        }
+    }
+
+    /// Seals task admission after retirement when every registered future is destroyed.
+    ///
+    /// A platform calls this only after its owner-thread queues are empty. The task registry
+    /// lock makes the empty check atomic with later spawn registration.
+    #[doc(hidden)]
+    pub fn seal_if_quiescent(&self) -> bool {
+        let mut state = self.state.lock().expect("local task scope poisoned");
+        if !self.is_retiring() || !state.tasks.is_empty() {
+            return false;
+        }
+        state.sealed = true;
+        true
+    }
+
+    fn register(&self) -> u64 {
+        let mut state = self.state.lock().expect("local task scope poisoned");
+        assert!(
+            !state.sealed,
+            "cannot spawn a local task after its owner scope has been sealed"
+        );
+        let id = state.next_task_id;
+        state.next_task_id = state
+            .next_task_id
+            .checked_add(1)
+            .expect("local task scope task ID overflow");
+        state.tasks.insert(id, None);
+        id
+    }
+
+    fn attach_waker(&self, id: u64, waker: Waker) {
+        let mut waker = Some(waker);
+        let replaced = {
+            let mut state = self.state.lock().expect("local task scope poisoned");
+            state
+                .tasks
+                .get_mut(&id)
+                .and_then(|entry| entry.replace(waker.take().unwrap()))
+        };
+        drop(replaced);
+        drop(waker);
+    }
+
+    fn unregister(&self, id: u64) {
+        let removed = self
+            .state
+            .lock()
+            .expect("local task scope poisoned")
+            .tasks
+            .remove(&id);
+        drop(removed);
+    }
+}
+
+impl Default for LocalTaskScope {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+struct LocalTaskRegistration {
+    scope: Weak<LocalTaskScope>,
+    id: u64,
+}
+
+impl Drop for LocalTaskRegistration {
+    fn drop(&mut self) {
+        if let Some(scope) = self.scope.upgrade() {
+            scope.unregister(self.id);
+        }
+    }
+}
+
+struct RegisteredLocalFuture<F> {
+    future: F,
+    // Rust drops fields in declaration order: the user future is destroyed
+    // before the registration is removed from its scope.
+    _registration: LocalTaskRegistration,
+}
+
+impl<F: Future> Future for RegisteredLocalFuture<F> {
+    type Output = F::Output;
+
+    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        // The future remains pinned in its original field.
+        unsafe { self.map_unchecked_mut(|this| &mut this.future) }.poll(cx)
+    }
+}
+
+/// An executor for one session, for futures that are not Send.
 ///
-/// Tasks spawned on a `LocalExecutor` run in order on whichever thread drains
-/// the dispatch destination it was built with. That is the main thread for the
-/// default session, or a dedicated thread for a session created with
-/// [`LocalExecutor::spawn_dedicated`]. Futures spawned here are polled and
-/// dropped on the thread that spawned them.
+/// Tasks spawned on a LocalExecutor run in order on whichever thread drains
+/// the dispatch destination it was built with. Futures are polled and dropped
+/// on the thread that spawned them.
 #[derive(Clone)]
 pub struct LocalExecutor {
     session_id: SessionId,
     scheduler: Arc<dyn Scheduler>,
-    // Spawned tasks' schedule callbacks each hold an `Arc` clone of this
+    // Spawned tasks' schedule callbacks each hold an Arc clone of this
     // closure, so the destination it captures stays alive as long as work
     // could still land on it.
     dispatch: Arc<dyn Fn(Runnable<RunnableMeta>) + Send + Sync>,
+    retirement: Option<Arc<LocalTaskScope>>,
+    dispatch_cancellation: Option<Arc<dyn Fn(Runnable<RunnableMeta>) + Send + Sync>>,
     not_send: PhantomData<Rc<()>>,
 }
 
@@ -62,8 +215,37 @@ impl LocalExecutor {
             session_id,
             scheduler,
             dispatch: Arc::new(dispatch),
+            retirement: None,
+            dispatch_cancellation: None,
             not_send: PhantomData,
         }
+    }
+
+    /// Creates a local executor whose tasks are tracked by a platform-owned
+    /// retirement scope. Cancellation dispatch must enqueue runnables for
+    /// owner-thread destruction and must not invoke user code inline.
+    #[doc(hidden)]
+    pub fn new_with_scope(
+        session_id: SessionId,
+        scheduler: Arc<dyn Scheduler>,
+        scope: Arc<LocalTaskScope>,
+        dispatch: impl Fn(Runnable<RunnableMeta>) + Send + Sync + 'static,
+        dispatch_cancellation: impl Fn(Runnable<RunnableMeta>) + Send + Sync + 'static,
+    ) -> Self {
+        Self {
+            session_id,
+            scheduler,
+            dispatch: Arc::new(dispatch),
+            retirement: Some(scope),
+            dispatch_cancellation: Some(Arc::new(dispatch_cancellation)),
+            not_send: PhantomData,
+        }
+    }
+
+    /// Returns this executor's platform retirement scope, if present.
+    #[doc(hidden)]
+    pub fn retirement_scope(&self) -> Option<Arc<LocalTaskScope>> {
+        self.retirement.clone()
     }
 
     /// Returns the session this executor runs tasks for.
@@ -93,18 +275,8 @@ impl LocalExecutor {
         F: Future + 'static,
         F::Output: 'static,
     {
-        let schedule = self.schedule();
-        let location = Location::caller();
-        let (runnable, task) = spawn_local_with_source_location(
-            future,
-            schedule,
-            RunnableMeta {
-                location,
-                spawned: crate::SpawnTime(Instant::now()),
-            },
-        );
-        runnable.schedule();
-        Task(TaskState::Spawned(task))
+        let dispatch = self.dispatch.clone();
+        self.spawn_with_dispatch(future, move |runnable| dispatch(runnable))
     }
 
     /// Like [`Self::spawn`], but sends the task's runnables to `dispatch`
@@ -123,16 +295,51 @@ impl LocalExecutor {
         F::Output: 'static,
     {
         let location = Location::caller();
-        let (runnable, task) = spawn_local_with_source_location(
-            future,
-            dispatch,
-            RunnableMeta {
-                location,
-                spawned: crate::SpawnTime(Instant::now()),
-            },
-        );
-        runnable.schedule();
-        Task(TaskState::Spawned(task))
+        let metadata = RunnableMeta {
+            location,
+            spawned: crate::SpawnTime(Instant::now()),
+        };
+        if let Some(scope) = self.retirement.clone() {
+            let id = scope.register();
+            let registration = LocalTaskRegistration {
+                scope: Arc::downgrade(&scope),
+                id,
+            };
+            let future = RegisteredLocalFuture {
+                future,
+                _registration: registration,
+            };
+            let cancellation = self
+                .dispatch_cancellation
+                .as_ref()
+                .expect("scoped executor must have a cancellation dispatcher")
+                .clone();
+            let normal_dispatch: Arc<dyn Fn(Runnable<RunnableMeta>) + Send + Sync> =
+                Arc::new(dispatch);
+            let scope_for_schedule = scope.clone();
+            let schedule: Arc<dyn Fn(Runnable<RunnableMeta>) + Send + Sync> =
+                Arc::new(move |runnable| {
+                    if scope_for_schedule.is_retiring() {
+                        cancellation(runnable);
+                    } else {
+                        normal_dispatch(runnable);
+                    }
+                });
+            let (runnable, task) = spawn_local_with_source_location(
+                future,
+                move |runnable| schedule(runnable),
+                metadata,
+            );
+            // Registration precedes initial scheduling. If retirement raced
+            // with construction, that initial schedule goes to owner cancellation.
+            scope.attach_waker(id, runnable.waker());
+            runnable.schedule();
+            Task(TaskState::Spawned(task))
+        } else {
+            let (runnable, task) = spawn_local_with_source_location(future, dispatch, metadata);
+            runnable.schedule();
+            Task(TaskState::Spawned(task))
+        }
     }
 
     /// Blocks the current thread until `future` completes, and returns its output.
@@ -229,11 +436,6 @@ impl LocalExecutor {
             .clone()
             .spawn_dedicated(box_dedicated(f))
             .downcast::<Fut::Output>()
-    }
-
-    fn schedule(&self) -> impl Fn(Runnable<RunnableMeta>) + Send + Sync + 'static {
-        let dispatch = self.dispatch.clone();
-        move |runnable| dispatch(runnable)
     }
 }
 
@@ -951,4 +1153,203 @@ where
     // the non-`Send` future is only polled and dropped on the thread that
     // spawned it.
     unsafe { builder.spawn_unchecked(future, schedule) }
+}
+
+#[cfg(test)]
+mod local_task_scope_tests {
+    use super::*;
+    use crate::TestScheduler;
+    use std::{
+        collections::VecDeque,
+        sync::{Arc, Mutex},
+        task::{Poll, Waker},
+        thread::ThreadId,
+    };
+
+    type Queue = Arc<Mutex<VecDeque<Runnable<RunnableMeta>>>>;
+
+    fn queue() -> Queue {
+        Arc::new(Mutex::new(VecDeque::new()))
+    }
+
+    fn pop(queue: &Queue) -> Runnable<RunnableMeta> {
+        queue.lock().unwrap().pop_front().expect("queued runnable")
+    }
+
+    fn executor(scope: Arc<LocalTaskScope>, normal: Queue, cancellation: Queue) -> LocalExecutor {
+        let scheduler: Arc<dyn Scheduler> =
+            Arc::new(TestScheduler::new(crate::TestSchedulerConfig::default()));
+        LocalExecutor::new_with_scope(
+            SessionId::new(0),
+            scheduler,
+            scope,
+            move |runnable| normal.lock().unwrap().push_back(runnable),
+            move |runnable| cancellation.lock().unwrap().push_back(runnable),
+        )
+    }
+
+    struct DropOnThread {
+        dropped_on: Arc<Mutex<Option<ThreadId>>>,
+    }
+
+    impl Drop for DropOnThread {
+        fn drop(&mut self) {
+            *self.dropped_on.lock().unwrap() = Some(std::thread::current().id());
+        }
+    }
+
+    #[test]
+    fn sealed_scope_late_waker_cannot_dispatch_or_drop_local_work_off_owner() {
+        let owner = std::thread::current().id();
+        let scope = Arc::new(LocalTaskScope::new());
+        let normal = queue();
+        let cancellation = queue();
+        let executor = executor(scope.clone(), normal.clone(), cancellation.clone());
+        let saved_waker = Arc::new(Mutex::new(None::<Waker>));
+        let dropped_on = Arc::new(Mutex::new(None));
+
+        let task = {
+            let saved_waker = saved_waker.clone();
+            let dropped_on = dropped_on.clone();
+            executor.spawn(async move {
+                let _probe = DropOnThread { dropped_on };
+                futures::future::poll_fn(move |cx| {
+                    *saved_waker.lock().unwrap() = Some(cx.waker().clone());
+                    Poll::<()>::Pending
+                })
+                .await;
+            })
+        };
+        task.detach();
+        pop(&normal).run();
+        assert_eq!(scope.live_task_count(), 1);
+
+        let late_waker = saved_waker.lock().unwrap().clone().unwrap();
+        scope.begin_retirement();
+        drop(pop(&cancellation));
+
+        assert_eq!(scope.live_task_count(), 0);
+        assert_eq!(*dropped_on.lock().unwrap(), Some(owner));
+        assert!(scope.seal_if_quiescent());
+        std::thread::spawn(move || late_waker.wake())
+            .join()
+            .expect("late wake thread");
+        assert!(cancellation.lock().unwrap().is_empty());
+    }
+
+    #[test]
+    fn completion_unregisters_task_and_spawn_after_retirement_is_canceled() {
+        let scope = Arc::new(LocalTaskScope::new());
+        let normal = queue();
+        let cancellation = queue();
+        let executor = executor(scope.clone(), normal.clone(), cancellation.clone());
+
+        executor.spawn(async { 42 }).detach();
+        pop(&normal).run();
+        assert_eq!(scope.live_task_count(), 0);
+
+        scope.begin_retirement();
+        executor.spawn(async { 7 }).detach();
+        assert!(normal.lock().unwrap().is_empty());
+        assert_eq!(scope.live_task_count(), 1);
+        drop(pop(&cancellation));
+        assert_eq!(scope.live_task_count(), 0);
+    }
+
+    #[test]
+    fn custom_idle_dispatch_is_bypassed_during_retirement() {
+        let scope = Arc::new(LocalTaskScope::new());
+        let normal = queue();
+        let cancellation = queue();
+        let executor = executor(scope.clone(), normal, cancellation.clone());
+        let idle = queue();
+        let idle_dispatches = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let pending_waker = Arc::new(Mutex::new(None::<Waker>));
+
+        let task = {
+            let idle_dispatches = idle_dispatches.clone();
+            let idle = idle.clone();
+            let pending_waker = pending_waker.clone();
+            executor.spawn_with_dispatch(
+                async move {
+                    futures::future::poll_fn(move |cx| {
+                        *pending_waker.lock().unwrap() = Some(cx.waker().clone());
+                        Poll::<()>::Pending
+                    })
+                    .await;
+                },
+                move |runnable| {
+                    idle_dispatches.fetch_add(1, Ordering::SeqCst);
+                    idle.lock().unwrap().push_back(runnable);
+                },
+            )
+        };
+        task.detach();
+        pop(&idle).run();
+        assert_eq!(idle_dispatches.load(Ordering::SeqCst), 1);
+
+        scope.begin_retirement();
+        drop(pop(&cancellation));
+        assert_eq!(idle_dispatches.load(Ordering::SeqCst), 1);
+        assert_eq!(scope.live_task_count(), 0);
+    }
+}
+
+#[cfg(test)]
+mod sealed_scope_tests {
+    use super::*;
+    use crate::TestScheduler;
+    use std::{
+        collections::VecDeque,
+        sync::{Arc, Mutex},
+        thread::ThreadId,
+    };
+
+    #[test]
+    fn sealed_scope_rejects_new_spawns_and_drops_input_on_owner() {
+        let owner = std::thread::current().id();
+        let scope = Arc::new(LocalTaskScope::new());
+        scope.begin_retirement();
+        assert!(scope.seal_if_quiescent());
+
+        let normal = Arc::new(Mutex::new(VecDeque::new()));
+        let cancellation = Arc::new(Mutex::new(VecDeque::new()));
+        let scheduler: Arc<dyn Scheduler> =
+            Arc::new(TestScheduler::new(crate::TestSchedulerConfig::default()));
+        let executor = LocalExecutor::new_with_scope(
+            SessionId::new(1),
+            scheduler,
+            scope,
+            {
+                let normal = normal.clone();
+                move |runnable| normal.lock().unwrap().push_back(runnable)
+            },
+            {
+                let cancellation = cancellation.clone();
+                move |runnable| cancellation.lock().unwrap().push_back(runnable)
+            },
+        );
+        let dropped_on = Arc::new(Mutex::new(None::<ThreadId>));
+        let probe = {
+            let dropped_on = dropped_on.clone();
+            struct Probe(Arc<Mutex<Option<ThreadId>>>);
+            impl Drop for Probe {
+                fn drop(&mut self) {
+                    *self.0.lock().unwrap() = Some(std::thread::current().id());
+                }
+            }
+            Probe(dropped_on)
+        };
+        let future = async move {
+            let _probe = probe;
+        };
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            executor.spawn(future).detach();
+        }));
+
+        assert!(result.is_err());
+        assert_eq!(*dropped_on.lock().unwrap(), Some(owner));
+        assert!(normal.lock().unwrap().is_empty());
+        assert!(cancellation.lock().unwrap().is_empty());
+    }
 }
