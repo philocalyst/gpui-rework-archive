@@ -123,8 +123,11 @@ public class GpuiInputActivity extends NativeActivity {
         Rect visible = new Rect();
         decor.getWindowVisibleDisplayFrame(visible);
         int[] rootLocation = new int[2];
+        int[] rootLocationInWindow = new int[2];
         root.getLocationOnScreen(rootLocation);
-        int rootBottom = rootLocation[1] + root.getHeight();
+        root.getLocationInWindow(rootLocationInWindow);
+        int windowOriginY = rootLocation[1] - rootLocationInWindow[1];
+        int rootBottom = windowOriginY + root.getHeight();
         // Compare against the stable navigation area, then report the full
         // occlusion so GPUI keeps the same screen-space inset as newer APIs.
         int obscuredBottom = Math.max(0, rootBottom - visible.bottom);
