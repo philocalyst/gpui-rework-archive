@@ -1,10 +1,10 @@
 use crate::{
-    ActiveTooltip, AnyView, App, AppContext, Bounds, DispatchPhase, Element, ElementId,
-    GlobalElementId, HighlightStyle, Hitbox, HitboxBehavior, InspectorElementId, IntoElement,
-    LayoutId, LineLayout, MouseDownEvent, MouseMoveEvent, MouseUpEvent, ParagraphDirection, Pixels,
-    Point, ShapedText, ShapedTextLayout, SharedString, Size, TextAlign, TextLayoutOptions,
-    TextOverflow, TextRangeExt, TextRun, TextStyle, TextTransform, TooltipId, UnicodeBidi,
-    WhiteSpace, Window, WindowTextSystem, px, register_tooltip_mouse_handlers,
+    ActiveTooltip, AnyView, App, AppContext, AvailableSpace, Bounds, DispatchPhase, Element,
+    ElementId, GlobalElementId, HighlightStyle, Hitbox, HitboxBehavior, InspectorElementId,
+    IntoElement, LayoutId, LineLayout, MouseDownEvent, MouseMoveEvent, MouseUpEvent,
+    ParagraphDirection, Pixels, Point, ShapedText, ShapedTextLayout, SharedString, Size, TextAlign,
+    TextLayoutOptions, TextOverflow, TextRangeExt, TextRun, TextStyle, TextTransform, TooltipId,
+    UnicodeBidi, WhiteSpace, Window, WindowTextSystem, px, register_tooltip_mouse_handlers,
     set_tooltip_on_window,
 };
 use anyhow::Context as _;
@@ -1076,80 +1076,102 @@ impl TextLayout {
 
         let rem_size = window.rem_size();
         let scale_factor = window.scale_factor();
-        let resolved_direction = window.resolved_direction();
         let unicode_bidi = window.resolved_unicode_bidi();
-        let layout_id =
-            window.request_retained_measured_layout(Default::default(), rem_size, scale_factor, {
-                let element_state = self.clone();
+        let measure = {
+            let element_state = self.clone();
+            move |known_dimensions: Size<Option<Pixels>>,
+                  available_space: Size<AvailableSpace>,
+                  resolved_direction: crate::ResolvedDirection,
+                  text_system: &WindowTextSystem| {
+                let (options, truncation) = Self::layout_options(
+                    &text_style,
+                    known_dimensions,
+                    available_space,
+                    resolved_direction,
+                    unicode_bidi,
+                );
+                let truncate_width = truncation.width;
 
-                move |known_dimensions, available_space, text_system| {
-                    let (options, truncation) = Self::layout_options(
-                        &text_style,
-                        known_dimensions,
-                        available_space,
-                        resolved_direction,
-                        unicode_bidi,
-                    );
-                    let truncate_width = truncation.width;
-
-                    // Only use cached layout if:
-                    // 1. truncate_width is None (if truncate_width is Some, we need to re-layout
-                    //    because the previous layout may have been computed without truncation)
-                    // 2. the cached layout was not truncated (a truncated layout answers an
-                    //    unconstrained probe with the truncated size, which poisons intrinsic
-                    //    sizing with whatever width some earlier measure pass happened to use)
-                    // 3. the complete layout options match.
-                    if let Some(text_layout) = element_state.0.layout.borrow().as_ref()
-                        && truncate_width.is_none()
-                        && text_layout.truncate_width.is_none()
-                        && text_layout.options == options
-                    {
-                        return text_layout.size;
-                    }
-
-                    let (text, runs) = Self::apply_truncation_with_text_system(
-                        text.clone(),
-                        &text_style,
-                        font_size,
-                        options.wrap_width,
-                        &truncation,
-                        &runs,
-                        options.direction,
-                        options.unicode_bidi,
-                        text_system,
-                    );
-                    let document = text_system
-                        .shape_text_with_options(text, font_size, &runs, options)
-                        .log_err();
-
-                    let size = document
-                        .as_ref()
-                        .map_or_else(Size::default, |document| document.size(line_height));
-
-                    let len = document
-                        .as_ref()
-                        .map(|document| document.len())
-                        .unwrap_or_default();
-
-                    element_state
-                        .0
-                        .layout
-                        .borrow_mut()
-                        .replace(TextLayoutInner {
-                            document,
-                            len,
-                            line_height,
-                            truncate_width,
-                            options,
-                            size,
-                            bounds: None,
-                        });
-
-                    size
+                // Only use cached layout if:
+                // 1. truncate_width is None (if truncate_width is Some, we need to re-layout
+                //    because the previous layout may have been computed without truncation)
+                // 2. the cached layout was not truncated (a truncated layout answers an
+                //    unconstrained probe with the truncated size, which poisons intrinsic
+                //    sizing with whatever width some earlier measure pass happened to use)
+                // 3. the complete layout options match.
+                if let Some(text_layout) = element_state.0.layout.borrow().as_ref()
+                    && truncate_width.is_none()
+                    && text_layout.truncate_width.is_none()
+                    && text_layout.options == options
+                {
+                    return text_layout.size;
                 }
-            });
 
-        window.publish_inline_content(layout_id, content);
+                let (text, runs) = Self::apply_truncation_with_text_system(
+                    text.clone(),
+                    &text_style,
+                    font_size,
+                    options.wrap_width,
+                    &truncation,
+                    &runs,
+                    options.direction,
+                    options.unicode_bidi,
+                    text_system,
+                );
+                let document = text_system
+                    .shape_text_with_options(text, font_size, &runs, options)
+                    .log_err();
+
+                let size = document
+                    .as_ref()
+                    .map_or_else(Size::default, |document| document.size(line_height));
+
+                let len = document
+                    .as_ref()
+                    .map(|document| document.len())
+                    .unwrap_or_default();
+
+                element_state
+                    .0
+                    .layout
+                    .borrow_mut()
+                    .replace(TextLayoutInner {
+                        document,
+                        len,
+                        line_height,
+                        truncate_width,
+                        options,
+                        size,
+                        bounds: None,
+                    });
+
+                size
+            }
+        };
+        let collecting_inline = window.collecting_inline;
+        let allow_inline_reuse = !window.inline_text_reuse_disabled;
+        let layout_id = if collecting_inline {
+            window.request_retained_inline_text_span_layout(
+                Default::default(),
+                rem_size,
+                scale_factor,
+                &content,
+                measure,
+            )
+        } else {
+            window.request_retained_measured_layout(
+                Default::default(),
+                rem_size,
+                scale_factor,
+                measure,
+            )
+        };
+
+        if collecting_inline && allow_inline_reuse {
+            window.publish_replayable_inline_text_content(layout_id, content);
+        } else {
+            window.publish_inline_content(layout_id, content);
+        }
         self.0.layout_id.set(Some(layout_id));
         layout_id
     }

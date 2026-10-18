@@ -4,17 +4,18 @@
 //! oracle is `Window::refresh`, which redraws the same logical state with retention disabled.
 
 use crate::{
-    AnyWindowHandle, App, AppContext as _, Bounds, Context, DevicePixels, Element, ElementId,
-    ElementInputHandler, Entity, EntityInputHandler, FilterRenderTarget, FocusHandle, Global,
-    GlobalElementId, ImageCache, ImageCacheError, InteractiveElement as _, IntoElement,
+    AnyElement, AnyWindowHandle, App, AppContext as _, Bounds, Context, DevicePixels, Element,
+    ElementId, ElementInputHandler, Entity, EntityInputHandler, FilterRenderTarget, FocusHandle,
+    Global, GlobalElementId, ImageCache, ImageCacheError, InteractiveElement as _, IntoElement,
     LayoutDirection, LayoutId, Modifiers, MouseButton, PaintQuad, ParentElement as _, Pixels,
-    Point, PrimitiveBatch, Render, RenderCommand, RenderImage, Resource,
+    PlatformTextSystem, Point, PrimitiveBatch, Render, RenderCommand, RenderImage, Resource,
     StatefulInteractiveElement as _, Style, StyleRefinement, Styled as _, SurfaceSource,
-    TestAppContext, TextInputAction, TextInputConfiguration, UTF16Selection, View, ViewElement,
-    VisualTestContext, Window, WindowHandle, canvas, deferred, div, img, point, px, rems, rgb,
-    size,
+    TestAppContext, TestTextSystem, TextInputAction, TextInputConfiguration, UTF16Selection, View,
+    ViewElement, VisualTestContext, Window, WindowHandle, canvas, deferred, div, img, point, px,
+    rems, rgb, size,
 };
 use std::{
+    borrow::Cow,
     cell::Cell,
     cell::RefCell,
     ops::Range,
@@ -2780,6 +2781,7 @@ impl Render for IntrinsicText {
                 .repeat(5 + self.generation % 2);
         div()
             .w_full()
+            .text_color(rgb(0x202020))
             .debug_selector(|| "INTRINSIC_TEXT".into())
             .child(div().w_full().child(text))
     }
@@ -2959,6 +2961,585 @@ fn exercise_intrinsic_replays(
     assert_eq!(*retained.text_renders.borrow(), text_before_update + 1);
     assert!(*retained.child_renders.borrow() <= child_before_update + 1);
     assert_intrinsic_matches_reference(retained, reference, cx)
+}
+
+fn ordered_glyph_bounds<V: Render>(
+    handle: &WindowHandle<V>,
+    cx: &mut TestAppContext,
+) -> Vec<[f32; 4]> {
+    handle
+        .update(cx, |_, window, _| {
+            let scene = &window.rendered_frame.scene;
+            let mut glyphs = scene
+                .monochrome_sprites
+                .iter()
+                .map(|sprite| {
+                    (
+                        sprite.order,
+                        [
+                            sprite.bounds.origin.x.0,
+                            sprite.bounds.origin.y.0,
+                            sprite.bounds.size.width.0,
+                            sprite.bounds.size.height.0,
+                        ],
+                    )
+                })
+                .chain(scene.subpixel_sprites.iter().map(|sprite| {
+                    (
+                        sprite.order,
+                        [
+                            sprite.bounds.origin.x.0,
+                            sprite.bounds.origin.y.0,
+                            sprite.bounds.size.width.0,
+                            sprite.bounds.size.height.0,
+                        ],
+                    )
+                }))
+                .collect::<Vec<_>>();
+            glyphs.sort_by_key(|(order, _)| *order);
+            glyphs.into_iter().map(|(_, bounds)| bounds).collect()
+        })
+        .unwrap()
+}
+
+struct VisibleGlyphTestTextSystem;
+
+impl PlatformTextSystem for VisibleGlyphTestTextSystem {
+    fn add_fonts(&self, fonts: Vec<Cow<'static, [u8]>>) -> anyhow::Result<()> {
+        PlatformTextSystem::add_fonts(&TestTextSystem, fonts)
+    }
+
+    fn all_font_names(&self) -> Vec<String> {
+        PlatformTextSystem::all_font_names(&TestTextSystem)
+    }
+
+    fn font_id(&self, descriptor: &crate::Font) -> anyhow::Result<crate::FontId> {
+        PlatformTextSystem::font_id(&TestTextSystem, descriptor)
+    }
+
+    fn font_metrics(&self, font_id: crate::FontId) -> crate::FontMetrics {
+        PlatformTextSystem::font_metrics(&TestTextSystem, font_id)
+    }
+
+    fn typographic_bounds(
+        &self,
+        font_id: crate::FontId,
+        glyph_id: crate::GlyphId,
+    ) -> anyhow::Result<Bounds<f32>> {
+        PlatformTextSystem::typographic_bounds(&TestTextSystem, font_id, glyph_id)
+    }
+
+    fn advance(
+        &self,
+        font_id: crate::FontId,
+        glyph_id: crate::GlyphId,
+    ) -> anyhow::Result<crate::Size<f32>> {
+        PlatformTextSystem::advance(&TestTextSystem, font_id, glyph_id)
+    }
+
+    fn glyph_for_char(&self, font_id: crate::FontId, character: char) -> Option<crate::GlyphId> {
+        PlatformTextSystem::glyph_for_char(&TestTextSystem, font_id, character)
+    }
+
+    fn rasterize_glyph(
+        &self,
+        _params: &crate::RenderGlyphParams,
+    ) -> anyhow::Result<crate::RasterizedGlyph> {
+        let size = crate::size(crate::DevicePixels(1), crate::DevicePixels(1));
+        Ok(crate::RasterizedGlyph {
+            bounds: Bounds {
+                origin: crate::point(crate::DevicePixels(0), crate::DevicePixels(0)),
+                size,
+            },
+            size,
+            format: crate::RasterizedGlyphFormat::AlphaMask,
+            pixels: vec![255],
+        })
+    }
+
+    fn layout_text(&self, request: crate::TextLayoutRequest<'_>) -> crate::LineLayout {
+        PlatformTextSystem::layout_text(&TestTextSystem, request)
+    }
+
+    fn layout_inline(&self, request: crate::InlineLayoutRequest<'_>) -> crate::InlineLayout {
+        PlatformTextSystem::layout_inline(&TestTextSystem, request)
+    }
+}
+
+struct LateAutoTextParent {
+    child: Option<AnyElement>,
+    auto: bool,
+}
+impl IntoElement for LateAutoTextParent {
+    type Element = Self;
+    fn into_element(self) -> Self::Element {
+        self
+    }
+}
+impl Element for LateAutoTextParent {
+    type RequestLayoutState = AnyElement;
+    type PrepaintState = ();
+    fn id(&self) -> Option<ElementId> {
+        None
+    }
+    fn source_location(&self) -> Option<&'static std::panic::Location<'static>> {
+        None
+    }
+    fn request_layout(
+        &mut self,
+        _: Option<&GlobalElementId>,
+        _: Option<&crate::InspectorElementId>,
+        window: &mut Window,
+        cx: &mut App,
+    ) -> (LayoutId, Self::RequestLayoutState) {
+        // Request the child before publishing this parent: custom Elements have this public order.
+        let mut child = self.child.take().expect("child is requested once");
+        let child_layout = child.request_layout(window, cx);
+        let mut style = Style::default();
+        style.size.width = px(220.).into();
+        style.direction = if self.auto {
+            LayoutDirection::Auto
+        } else {
+            LayoutDirection::Inherit
+        };
+        let layout_id = window.request_layout(style, [child_layout], cx);
+        if self.auto {
+            window.set_layout_direction_text(layout_id, "שלום");
+        }
+        (layout_id, child)
+    }
+    fn prepaint(
+        &mut self,
+        _: Option<&GlobalElementId>,
+        _: Option<&crate::InspectorElementId>,
+        _: Bounds<Pixels>,
+        child: &mut Self::RequestLayoutState,
+        window: &mut Window,
+        cx: &mut App,
+    ) -> Self::PrepaintState {
+        assert_eq!(
+            window.resolved_direction(),
+            if self.auto {
+                crate::ResolvedDirection::RightToLeft
+            } else {
+                crate::ResolvedDirection::LeftToRight
+            }
+        );
+        child.prepaint(window, cx);
+    }
+    fn paint(
+        &mut self,
+        _: Option<&GlobalElementId>,
+        _: Option<&crate::InspectorElementId>,
+        _: Bounds<Pixels>,
+        child: &mut Self::RequestLayoutState,
+        _: &mut Self::PrepaintState,
+        window: &mut Window,
+        cx: &mut App,
+    ) {
+        child.paint(window, cx);
+    }
+}
+struct LateAutoRoot {
+    auto: bool,
+}
+impl Render for LateAutoRoot {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        // This fresh subtree is requested before LateAutoTextParent creates the Auto node.
+        LateAutoTextParent {
+            child: Some(
+                div()
+                    .w(px(220.))
+                    .unicode_bidi(crate::UnicodeBidi::Normal)
+                    .child("אבג abc 123")
+                    .into_any_element(),
+            ),
+            auto: self.auto,
+        }
+    }
+}
+fn late_auto_fixture(cx: &mut TestAppContext) -> WindowHandle<LateAutoRoot> {
+    cx.open_window(size(px(260.), px(120.)), move |_, _| LateAutoRoot {
+        auto: false,
+    })
+}
+struct IndependentSpanMeasureProbe {
+    child: Option<AnyElement>,
+    width: Rc<Cell<Pixels>>,
+    measured: Rc<RefCell<Vec<crate::Size<Pixels>>>>,
+}
+impl IntoElement for IndependentSpanMeasureProbe {
+    type Element = Self;
+    fn into_element(self) -> Self::Element {
+        self
+    }
+}
+impl Element for IndependentSpanMeasureProbe {
+    type RequestLayoutState = (AnyElement, LayoutId);
+    type PrepaintState = ();
+    fn id(&self) -> Option<ElementId> {
+        None
+    }
+    fn source_location(&self) -> Option<&'static std::panic::Location<'static>> {
+        None
+    }
+    fn request_layout(
+        &mut self,
+        _: Option<&GlobalElementId>,
+        _: Option<&crate::InspectorElementId>,
+        window: &mut Window,
+        cx: &mut App,
+    ) -> (LayoutId, Self::RequestLayoutState) {
+        let mut child = self.child.take().expect("text child is requested once");
+        let child_id = child.request_layout(window, cx);
+        let mut style = Style::default();
+        style.size.width = px(180.).into();
+        let parent = window.request_layout(style, [child_id], cx);
+        (parent, (child, child_id))
+    }
+    fn prepaint(
+        &mut self,
+        _: Option<&GlobalElementId>,
+        _: Option<&crate::InspectorElementId>,
+        _: Bounds<Pixels>,
+        state: &mut Self::RequestLayoutState,
+        window: &mut Window,
+        cx: &mut App,
+    ) -> Self::PrepaintState {
+        window.compute_layout(
+            state.1,
+            size(
+                crate::AvailableSpace::Definite(self.width.get()),
+                crate::AvailableSpace::MaxContent,
+            ),
+            cx,
+        );
+        self.measured
+            .borrow_mut()
+            .push(window.layout_bounds(state.1).size);
+        state.0.prepaint(window, cx);
+    }
+    fn paint(
+        &mut self,
+        _: Option<&GlobalElementId>,
+        _: Option<&crate::InspectorElementId>,
+        _: Bounds<Pixels>,
+        state: &mut Self::RequestLayoutState,
+        _: &mut Self::PrepaintState,
+        window: &mut Window,
+        cx: &mut App,
+    ) {
+        state.0.paint(window, cx);
+    }
+}
+struct IndependentSpanChild {
+    measured: Rc<RefCell<Vec<crate::Size<Pixels>>>>,
+    width: Rc<Cell<Pixels>>,
+}
+impl Render for IndependentSpanChild {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        div().w(px(180.)).child(IndependentSpanMeasureProbe {
+            child: Some(
+                crate::Text::new_inaccessible(
+                    "A long text span that must wrap when the custom parent measures it narrowly."
+                        .into(),
+                )
+                .into_any_element(),
+            ),
+            width: self.width.clone(),
+            measured: self.measured.clone(),
+        })
+    }
+}
+struct IndependentSpanRoot {
+    child: Entity<IndependentSpanChild>,
+    leading_height: Pixels,
+}
+impl Render for IndependentSpanRoot {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        div()
+            .size_full()
+            .flex()
+            .flex_col()
+            .child(div().h(self.leading_height))
+            .child(
+                self.child
+                    .clone()
+                    .cached(StyleRefinement::default().size(px(180.))),
+            )
+    }
+}
+fn independent_span_fixture(
+    cx: &mut TestAppContext,
+) -> (
+    WindowHandle<IndependentSpanRoot>,
+    Rc<RefCell<Vec<crate::Size<Pixels>>>>,
+    Rc<Cell<Pixels>>,
+) {
+    let measured = Rc::new(RefCell::new(Vec::new()));
+    let width = Rc::new(Cell::new(px(34.)));
+    let child = cx.new({
+        let measured = measured.clone();
+        let width = width.clone();
+        move |_| IndependentSpanChild { measured, width }
+    });
+    let window = cx.open_window(size(px(240.), px(180.)), move |_, _| IndependentSpanRoot {
+        child,
+        leading_height: px(10.),
+    });
+    (window, measured, width)
+}
+#[gpui::test]
+fn retained_inline_span_can_be_measured_independently_after_replay(cx: &mut TestAppContext) {
+    let mut cx = TestAppContext::build_with_text_system(
+        cx.dispatcher.clone(),
+        Some("retained_inline_span_can_be_measured_independently_after_replay"),
+        Arc::new(VisibleGlyphTestTextSystem),
+    );
+    let (retained, retained_measurements, retained_width) = independent_span_fixture(&mut cx);
+    let (reference, reference_measurements, reference_width) = independent_span_fixture(&mut cx);
+    cx.run_until_parked();
+    let initial = snapshot_window(&retained, &mut cx);
+    assert!(
+        initial.primitive_counts.1 + initial.primitive_counts.2 + initial.primitive_counts.3 > 0
+    );
+    let initial_size = *retained_measurements
+        .borrow()
+        .last()
+        .expect("initial custom span measure");
+    assert!(
+        initial_size.height > px(12.),
+        "the custom constraint should wrap the text span"
+    );
+
+    retained_width.set(px(12.));
+    reference_width.set(px(12.));
+    for (window, force_refresh) in [(&retained, false), (&reference, true)] {
+        window
+            .update(&mut cx, |root, window, cx| {
+                root.leading_height += px(9.);
+                cx.notify();
+                if force_refresh {
+                    window.refresh();
+                }
+            })
+            .unwrap();
+    }
+    cx.run_until_parked();
+    let retained_frame = snapshot_window(&retained, &mut cx);
+    let reference_frame = snapshot_window(&reference, &mut cx);
+    assert_eq!(retained_frame, reference_frame);
+    assert!(
+        retained_frame.primitive_counts.1
+            + retained_frame.primitive_counts.2
+            + retained_frame.primitive_counts.3
+            > 0
+    );
+    assert_eq!(
+        retained_measurements.borrow().last(),
+        reference_measurements.borrow().last(),
+        "replayed span must use a fresh current measure callback under the custom constraint"
+    );
+    let retained_sizes = retained_measurements.borrow();
+    assert_ne!(
+        retained_sizes[retained_sizes.len() - 2].width,
+        retained_sizes.last().unwrap().width,
+        "the retained span must be recomputed under the changed custom width"
+    );
+    assert_eq!(retained_sizes.last().unwrap().width, retained_width.get());
+    assert!(
+        retained_sizes.last().unwrap().height > px(12.),
+        "the current custom width must still wrap the text"
+    );
+}
+
+#[gpui::test]
+fn retained_paragraph_handles_postorder_custom_auto_parent(cx: &mut TestAppContext) {
+    let mut cx = TestAppContext::build_with_text_system(
+        cx.dispatcher.clone(),
+        Some("retained_paragraph_handles_postorder_custom_auto_parent"),
+        Arc::new(VisibleGlyphTestTextSystem),
+    );
+    let retained = late_auto_fixture(&mut cx);
+    let reference = late_auto_fixture(&mut cx);
+    cx.run_until_parked();
+    retained
+        .update(&mut cx, |_, window, _| window.refresh())
+        .unwrap();
+    cx.run_until_parked();
+    let initial = snapshot_window(&retained, &mut cx);
+    let initial_glyphs = ordered_glyph_bounds(&retained, &mut cx);
+    assert!(
+        !initial_glyphs.is_empty(),
+        "initial text must paint glyph sprites"
+    );
+    let initial_stats = retained
+        .update(&mut cx, |_, window, _| {
+            window.inline_text_reuse_test_stats()
+        })
+        .unwrap();
+    assert!(
+        initial.primitive_counts.1 + initial.primitive_counts.2 + initial.primitive_counts.3 > 0
+    );
+
+    for (window, force_refresh) in [(&retained, false), (&reference, true)] {
+        window
+            .update(&mut cx, |root, window, cx| {
+                root.auto = true;
+                cx.notify();
+                if force_refresh {
+                    window.refresh();
+                }
+            })
+            .unwrap();
+    }
+    cx.run_until_parked();
+    let retained_auto = snapshot_window(&retained, &mut cx);
+    let retained_auto_glyphs = ordered_glyph_bounds(&retained, &mut cx);
+    let reference_auto_glyphs = ordered_glyph_bounds(&reference, &mut cx);
+    let reference_auto = snapshot_window(&reference, &mut cx);
+    assert_eq!(retained_auto, reference_auto);
+    assert_eq!(retained_auto_glyphs, reference_auto_glyphs);
+    assert_ne!(
+        retained_auto_glyphs, initial_glyphs,
+        "late Auto RTL must change ordered glyph positions, not just scene metadata"
+    );
+    let after_auto = retained
+        .update(&mut cx, |_, window, _| {
+            window.inline_text_reuse_test_stats()
+        })
+        .unwrap();
+    assert!(
+        after_auto.2 > initial_stats.2,
+        "the late Auto direction must reach the current text measurement callback"
+    );
+
+    for (window, force_refresh) in [(&retained, false), (&reference, true)] {
+        window
+            .update(&mut cx, |_, window, cx| {
+                cx.notify();
+                if force_refresh {
+                    window.refresh();
+                }
+            })
+            .unwrap();
+    }
+    cx.run_until_parked();
+    assert_eq!(
+        snapshot_window(&retained, &mut cx),
+        snapshot_window(&reference, &mut cx)
+    );
+}
+
+#[gpui::test]
+fn retained_plain_block_paragraph_reuses_layout_on_origin_only_miss(cx: &mut TestAppContext) {
+    let mut cx = TestAppContext::build_with_text_system(
+        cx.dispatcher.clone(),
+        Some("retained_plain_block_paragraph_reuses_layout_on_origin_only_miss"),
+        Arc::new(VisibleGlyphTestTextSystem),
+    );
+    let retained = intrinsic_fixture(&mut cx);
+    let reference = intrinsic_fixture(&mut cx);
+    cx.run_until_parked();
+
+    let initial = retained
+        .window
+        .update(&mut cx, |_, window, _| {
+            window.inline_text_reuse_test_stats()
+        })
+        .unwrap();
+    assert!(
+        initial.2 > 0,
+        "the plain Block paragraph must be measured initially"
+    );
+    assert_intrinsic_matches_reference(&retained, &reference, &mut cx);
+
+    // Exercise a clean cached frame before moving the paragraph. Detached logical text spans
+    // must remain alive even though they are not physical paragraph-flow children.
+    update_intrinsic_pair(&retained, &reference, &mut cx, |_| {});
+    let clean_frame = assert_intrinsic_matches_reference(&retained, &reference, &mut cx);
+    assert!(
+        clean_frame.primitive_counts.1
+            + clean_frame.primitive_counts.2
+            + clean_frame.primitive_counts.3
+            > 0,
+        "the Block paragraph should paint text glyphs on its clean cache hit"
+    );
+    let clean = retained
+        .window
+        .update(&mut cx, |_, window, _| {
+            window.inline_text_reuse_test_stats()
+        })
+        .unwrap();
+    assert_eq!(
+        clean.0, initial.0,
+        "a clean cached frame skips span requests"
+    );
+    assert_eq!(
+        clean.1, initial.1,
+        "a clean cached frame skips paragraph requests"
+    );
+    assert_eq!(clean.2, initial.2, "a clean paragraph hit must not reshape");
+
+    update_intrinsic_pair(&retained, &reference, &mut cx, |root| {
+        root.leading_height += px(7.);
+    });
+    let frame = assert_intrinsic_matches_reference(&retained, &reference, &mut cx);
+    let bounds = frame.debug_bounds["INTRINSIC_TEXT"];
+    assert!(bounds.size.width > px(0.) && bounds.size.height > px(0.));
+    assert!(
+        frame.primitive_counts.1 + frame.primitive_counts.2 + frame.primitive_counts.3 > 0,
+        "the moved Block paragraph should still paint text glyphs"
+    );
+
+    let after = retained
+        .window
+        .update(&mut cx, |_, window, _| {
+            window.inline_text_reuse_test_stats()
+        })
+        .unwrap();
+    assert!(
+        after.0 > clean.0,
+        "the retained inline text span should replay after movement"
+    );
+    assert!(
+        after.1 > clean.1,
+        "the paragraph memo should hit after movement"
+    );
+    assert_eq!(
+        after.2, clean.2,
+        "moving an unchanged paragraph should not reshape"
+    );
+}
+
+#[gpui::test]
+fn retained_plain_block_paragraph_rejects_changed_text_key(cx: &mut TestAppContext) {
+    let retained = intrinsic_fixture(cx);
+    let reference = intrinsic_fixture(cx);
+    cx.run_until_parked();
+    assert_intrinsic_matches_reference(&retained, &reference, cx);
+
+    let before = retained
+        .window
+        .update(cx, |_, window, _| window.inline_text_reuse_test_stats())
+        .unwrap();
+    update_intrinsic_text_pair(&retained, &reference, cx);
+    let frame = assert_intrinsic_matches_reference(&retained, &reference, cx);
+    assert!(frame.debug_bounds["INTRINSIC_TEXT"].size.height > px(0.));
+    assert!(frame.scene_operation_count > 0);
+
+    let after = retained
+        .window
+        .update(cx, |_, window, _| window.inline_text_reuse_test_stats())
+        .unwrap();
+    assert_eq!(
+        after.1, before.1,
+        "changing paragraph text must reject the old shaped-layout memo"
+    );
+    assert!(
+        after.2 > before.2,
+        "the changed paragraph must invoke its fresh measurement callback"
+    );
 }
 
 #[gpui::test]
@@ -3279,6 +3860,115 @@ fn origin_only_cached_view_replays_attached_layout_and_matches_forced_fresh_wind
         .unwrap();
     assert_eq!(next_stats.reused_views, 1);
     assert_eq!(snapshot_window(&retained, cx), fresh_snapshot);
+}
+
+struct DirectionParagraphPanel {
+    renders: Arc<AtomicUsize>,
+}
+
+impl Render for DirectionParagraphPanel {
+    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+        self.renders.fetch_add(1, Ordering::Relaxed);
+        div()
+            .id("direction-paragraph")
+            .debug_selector(|| "DIRECTION_PARAGRAPH".into())
+            .w(px(330.))
+            .child("שלום עולם. This paragraph stays unchanged while its parent changes direction.")
+    }
+}
+
+struct DirectionParagraphRoot {
+    auto: bool,
+    leading_height: Pixels,
+    panel: Entity<DirectionParagraphPanel>,
+    force_fresh_child: bool,
+}
+
+impl Render for DirectionParagraphRoot {
+    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+        let panel = if self.force_fresh_child {
+            ViewElement::new(self.panel.clone()).into_any_element()
+        } else {
+            self.panel.clone().into_any_element()
+        };
+        let mut root = div().size_full().flex().flex_col();
+        if self.auto {
+            root = root.direction(LayoutDirection::Auto);
+        }
+        root.child(div().w_full().h(self.leading_height).flex_shrink_0())
+            .child(panel)
+            .child(div().w_full().h(px(28.)).flex_shrink_0())
+    }
+}
+
+#[gpui::test]
+fn cached_child_paragraph_falls_back_when_parent_changes_to_auto_direction(
+    cx: &mut TestAppContext,
+) {
+    let retained_renders = Arc::new(AtomicUsize::new(0));
+    let retained_panel = cx.new({
+        let renders = retained_renders.clone();
+        move |_| DirectionParagraphPanel { renders }
+    });
+    let fresh_renders = Arc::new(AtomicUsize::new(0));
+    let fresh_panel = cx.new({
+        let renders = fresh_renders.clone();
+        move |_| DirectionParagraphPanel { renders }
+    });
+    let retained = cx.open_window(size(px(420.), px(180.)), {
+        let panel = retained_panel.clone();
+        move |_, _| DirectionParagraphRoot {
+            auto: false,
+            leading_height: px(4.),
+            panel: panel.clone(),
+            force_fresh_child: false,
+        }
+    });
+    let forced_fresh = cx.open_window(size(px(420.), px(180.)), {
+        let panel = fresh_panel.clone();
+        move |_, _| DirectionParagraphRoot {
+            auto: false,
+            leading_height: px(4.),
+            panel: panel.clone(),
+            force_fresh_child: true,
+        }
+    });
+    cx.run_until_parked();
+    assert_eq!(
+        snapshot_window(&retained, cx),
+        snapshot_window(&forced_fresh, cx)
+    );
+    assert_eq!(retained_renders.load(Ordering::Relaxed), 1);
+
+    // The retained child entity stays unchanged while its parent both moves it and introduces
+    // Auto direction. The forced-fresh window is an independent shaping/layout oracle.
+    retained
+        .update(cx, |root, _, cx| {
+            root.auto = true;
+            root.leading_height = px(36.);
+            cx.notify();
+        })
+        .unwrap();
+    forced_fresh
+        .update(cx, |root, window, cx| {
+            root.auto = true;
+            root.leading_height = px(36.);
+            cx.notify();
+            window.refresh();
+        })
+        .unwrap();
+    cx.run_until_parked();
+
+    let retained_frame = snapshot_window(&retained, cx);
+    let fresh_frame = snapshot_window(&forced_fresh, cx);
+    assert_eq!(retained_frame, fresh_frame);
+    assert!(
+        retained_frame.debug_bounds["DIRECTION_PARAGRAPH"]
+            .size
+            .width
+            > px(0.)
+    );
+    assert!(retained_frame.scene_operation_count > 0);
 }
 
 struct AutoDirectionPanel {

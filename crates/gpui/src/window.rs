@@ -1782,6 +1782,8 @@ pub struct Window {
     pub(crate) viewport_size: Size<Pixels>,
     layout_engine: Option<TaffyLayoutEngine>,
     pub(crate) collecting_inline: bool,
+    /// Permanently disables typed text reuse after this window encounters dynamic direction or bidi.
+    pub(crate) inline_text_reuse_disabled: bool,
     pub(crate) current_inline_fragments: Option<Arc<[Bounds<Pixels>]>>,
     pub(crate) root: Option<AnyView>,
     pub(crate) element_id_stack: ElementIdStack,
@@ -2758,6 +2760,7 @@ impl Window {
             viewport_size: content_size,
             layout_engine: Some(TaffyLayoutEngine::new()),
             collecting_inline: false,
+            inline_text_reuse_disabled: false,
             current_inline_fragments: None,
             root: None,
             element_id_stack: ElementIdStack::default(),
@@ -6978,19 +6981,57 @@ impl Window {
         children: impl IntoIterator<Item = LayoutId>,
         cx: &mut App,
     ) -> LayoutId {
+        self.request_layout_with_optional_logical_children(style, children, None, cx)
+    }
+
+    pub(crate) fn request_layout_with_logical_children(
+        &mut self,
+        style: Style,
+        children: impl IntoIterator<Item = LayoutId>,
+        logical_children: &[LayoutId],
+        cx: &mut App,
+    ) -> LayoutId {
+        self.request_layout_with_optional_logical_children(
+            style,
+            children,
+            Some(logical_children),
+            cx,
+        )
+    }
+
+    fn request_layout_with_optional_logical_children(
+        &mut self,
+        style: Style,
+        children: impl IntoIterator<Item = LayoutId>,
+        logical_children: Option<&[LayoutId]>,
+        cx: &mut App,
+    ) -> LayoutId {
         self.invalidator.debug_assert_prepaint();
 
         cx.layout_id_buffer.clear();
         cx.layout_id_buffer.extend(children);
         let rem_size = self.rem_size();
         let scale_factor = self.scale_factor();
+        // A custom Element may request text children before creating its direction node.
+        // Once an unsafe direction is observed, keep text-memo reuse disabled for this Window.
+        self.inline_text_reuse_disabled |= matches!(
+            style.direction,
+            crate::LayoutDirection::Auto | crate::LayoutDirection::RightToLeft
+        ) || style.effective_unicode_bidi()
+            != crate::UnicodeBidi::Normal
+            || self.resolved_direction() == crate::ResolvedDirection::RightToLeft;
 
-        self.layout_engine.as_mut().unwrap().request_layout(
-            style,
-            rem_size,
-            scale_factor,
-            &cx.layout_id_buffer,
-        )
+        let engine = self.layout_engine.as_mut().unwrap();
+        match logical_children {
+            Some(logical_children) => engine.request_layout_with_logical_children(
+                style,
+                rem_size,
+                scale_factor,
+                &cx.layout_id_buffer,
+                logical_children,
+            ),
+            None => engine.request_layout(style, rem_size, scale_factor, &cx.layout_id_buffer),
+        }
     }
 
     /// Adds a layout node whose size comes from `measure`, which runs during layout.
@@ -7125,6 +7166,24 @@ impl Window {
         }
         layout_engine.mark_layout_claim_scope_non_replayable();
 
+        layout_engine
+            .inline_content
+            .insert(node_id, Arc::new(content));
+        true
+    }
+
+    pub(crate) fn publish_replayable_inline_text_content(
+        &mut self,
+        node_id: LayoutId,
+        content: crate::InlineContent,
+    ) -> bool {
+        let Some(layout_engine) = self.layout_engine.as_mut() else {
+            return false;
+        };
+
+        if let crate::InlineContent::Text { text, .. } = &content {
+            layout_engine.set_replayable_inline_text_direction(node_id, text.clone());
+        }
         layout_engine
             .inline_content
             .insert(node_id, Arc::new(content));
@@ -7547,6 +7606,13 @@ impl Window {
         self.retained_view_stats
     }
 
+    #[cfg(test)]
+    pub(crate) fn inline_text_reuse_test_stats(&self) -> (usize, usize, usize) {
+        self.layout_engine
+            .as_ref()
+            .map_or((0, 0, 0), |engine| engine.inline_text_reuse_test_stats())
+    }
+
     pub(crate) fn note_view_rebuilt(&mut self) {
         #[cfg(test)]
         {
@@ -7717,6 +7783,7 @@ impl Window {
         measure: impl FnMut(
             Size<Option<Pixels>>,
             Size<AvailableSpace>,
+            crate::ResolvedDirection,
             &WindowTextSystem,
         ) -> Size<Pixels>
         + 'static,
@@ -7725,6 +7792,54 @@ impl Window {
             .as_mut()
             .unwrap()
             .request_retained_measured_layout(style, rem_size, scale_factor, measure)
+    }
+
+    pub(crate) fn request_retained_inline_text_span_layout(
+        &mut self,
+        style: Style,
+        rem_size: Pixels,
+        scale_factor: f32,
+        content: &crate::InlineContent,
+        measure: impl FnMut(
+            Size<Option<Pixels>>,
+            Size<AvailableSpace>,
+            crate::ResolvedDirection,
+            &WindowTextSystem,
+        ) -> Size<Pixels>
+        + 'static,
+    ) -> LayoutId {
+        let allow_reuse = !self.inline_text_reuse_disabled;
+        self.layout_engine
+            .as_mut()
+            .unwrap()
+            .request_retained_inline_text_span_layout(
+                style,
+                rem_size,
+                scale_factor,
+                content,
+                allow_reuse,
+                measure,
+            )
+    }
+
+    pub(crate) fn request_retained_inline_paragraph_layout(
+        &mut self,
+        style: Style,
+        rem_size: Pixels,
+        scale_factor: f32,
+        memo: Option<crate::InlineParagraphMemo>,
+        measure: impl FnMut(
+            Size<Option<Pixels>>,
+            Size<AvailableSpace>,
+            crate::ResolvedDirection,
+            &WindowTextSystem,
+        ) -> Size<Pixels>
+        + 'static,
+    ) -> LayoutId {
+        self.layout_engine
+            .as_mut()
+            .unwrap()
+            .request_retained_inline_paragraph_layout(style, rem_size, scale_factor, memo, measure)
     }
 
     #[inline]

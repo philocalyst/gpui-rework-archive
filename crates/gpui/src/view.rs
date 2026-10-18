@@ -897,11 +897,6 @@ impl<V: View> Element for ViewElement<V> {
                             cx.extend_accessed_dependencies(&cache.layout.dependencies);
                             (None, Some(output.paint), output.a11y_roots)
                         } else {
-                            let previous_size = match &cache.output {
-                                CachedOutput::Painted(output) => Some(output.key.bounds.size),
-                                CachedOutput::Prepared(output) => Some(output.key.bounds.size),
-                                CachedOutput::NeedsPrepaint => None,
-                            };
                             cache.output = CachedOutput::NeedsPrepaint;
                             let ( (fresh_element, claim_log), dependencies) =
                                 cx.detect_accessed_dependencies(|cx| {
@@ -918,7 +913,6 @@ impl<V: View> Element for ViewElement<V> {
                                         claim_log = outcome.log;
                                         let use_parent_layout = outcome.fully_replayed
                                             && layout_id == cache.layout.root
-                                            && previous_size == Some(bounds.size)
                                             && cache.layout.environment == environment
                                             && !cache.layout.frame_bound
                                             && cache_is_valid(cache, entity_id, window, cx);
