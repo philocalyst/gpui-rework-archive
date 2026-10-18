@@ -13391,7 +13391,10 @@ mod tests {
     impl Render for PlainCachedSceneChild {
         fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
             self.paints.set(self.paints.get() + 1);
-            div().size(px(20.0)).bg(crate::red())
+            div()
+                .size(px(20.0))
+                .bg(crate::red())
+                .child("retained text layer")
         }
     }
 
@@ -13430,25 +13433,49 @@ mod tests {
                     .collect::<Vec<_>>(),
             )
         };
+        let scene_storage = |scene: &Scene| {
+            (
+                scene.paint_operations.as_ptr() as usize,
+                scene.quads.as_ptr() as usize,
+                scene.render_commands().as_ptr() as usize,
+            )
+        };
         window.draw();
-        let first = window.update(|_, window, _| {
-            assert!(!window.rendered_frame.scene.quads.is_empty());
-            scene_snapshot(&window.rendered_frame.scene)
-        });
+        let (first, first_storage) =
+            window.update(|_, window, _| {
+                let scene = &window.rendered_frame.scene;
+                assert!(!scene.quads.is_empty());
+                assert!(scene.paint_operations.iter().any(|operation| matches!(
+                    operation,
+                    crate::scene::PaintOperation::StartLayer(_)
+                )));
+                assert!(
+                    scene.paint_operations.iter().any(|operation| matches!(
+                        operation,
+                        crate::scene::PaintOperation::EndLayer
+                    ))
+                );
+                (scene_snapshot(scene), scene_storage(scene))
+            });
         let first_paints = paints.get();
         assert!(first_paints > 0);
 
         // Rebuild the parent while leaving its three child Entities clean. Their retained paint
         // ranges are adjacent, so this exercises actual sibling coalescing in the driver.
         window.update(|_, _, cx| cx.notify());
-        let (second, transfers, reused_views) = window.update(|_, window, _| {
+        let (second, second_storage, transfers, reused_views) = window.update(|_, window, _| {
             (
                 scene_snapshot(&window.rendered_frame.scene),
+                scene_storage(&window.rendered_frame.scene),
                 window.retained_view_stats().full_scene_transfers,
                 window.retained_view_stats().reused_views,
             )
         });
         assert_eq!(second, first);
+        assert_eq!(
+            second_storage, first_storage,
+            "the finished Scene allocation should transfer intact"
+        );
         assert_eq!(paints.get(), first_paints);
         assert!(
             reused_views >= 3,
@@ -13456,7 +13483,7 @@ mod tests {
         );
         assert_eq!(
             transfers, 1,
-            "the complete ordinary scene should use the transfer path"
+            "the complete finished scene, including text layers, should transfer intact"
         );
     }
 

@@ -193,26 +193,13 @@ impl Scene {
     }
 
     /// Whether this finished scene can be transferred as a complete retained paint range.
+    ///
+    /// This is the source-side condition only. Frame also requires an exact nonempty full-range
+    /// replay into a pristine destination, then moves the immutable window-owned scene instead of
+    /// replaying its operations. The move preserves its lanes, order tree, permutations, render
+    /// plan, and resource handles as one coherent snapshot.
     pub(crate) fn can_transfer_full_scene(&self) -> bool {
         self.is_finished
-            && self.primitive_bounds.has_default_order_floor()
-            && self.layer_stack.is_empty()
-            && self.filter_depth == 0
-            && self.surfaces.is_empty()
-            && self.backdrop_filters.is_empty()
-            && self.filter_boundaries.is_empty()
-            && self.paint_operations.iter().all(|operation| {
-                matches!(
-                    operation,
-                    PaintOperation::Shadow(_)
-                        | PaintOperation::Quad(_)
-                        | PaintOperation::Path(_)
-                        | PaintOperation::Underline(_)
-                        | PaintOperation::MonochromeSprite(_)
-                        | PaintOperation::SubpixelSprite(_)
-                        | PaintOperation::PolychromeSprite(_)
-                )
-            })
     }
 
     /// Returns the number of paint operations in this scene, including layer boundaries.
@@ -2225,7 +2212,11 @@ mod tests {
     }
 
     #[test]
-    fn full_scene_transfer_eligibility_rejects_nonordinary_state() {
+    fn full_scene_transfer_eligibility_requires_a_finished_scene_only() {
+        let mut unfinished = Scene::default();
+        unfinished.insert_primitive(quad());
+        assert!(!unfinished.can_transfer_full_scene());
+
         let mut ordinary = Scene::default();
         ordinary.insert_primitive(quad());
         ordinary.finish();
@@ -2236,30 +2227,30 @@ mod tests {
         layered.insert_primitive(quad());
         layered.pop_layer();
         layered.finish();
-        assert!(!layered.can_transfer_full_scene());
+        assert!(layered.can_transfer_full_scene());
 
         let mut raised_floor = Scene::default();
         raised_floor.raise_order_floor();
         raised_floor.insert_primitive(quad());
         raised_floor.finish();
-        assert!(!raised_floor.can_transfer_full_scene());
+        assert!(raised_floor.can_transfer_full_scene());
 
         let mut filtered = Scene::default();
         filtered.insert_primitive(boundary(true));
         filtered.insert_primitive(quad());
         filtered.insert_primitive(boundary(false));
         filtered.finish();
-        assert!(!filtered.can_transfer_full_scene());
+        assert!(filtered.can_transfer_full_scene());
 
         let mut with_backdrop = Scene::default();
         with_backdrop.insert_primitive(backdrop());
         with_backdrop.finish();
-        assert!(!with_backdrop.can_transfer_full_scene());
+        assert!(with_backdrop.can_transfer_full_scene());
 
         let mut with_surface = Scene::default();
         with_surface.insert_primitive(surface());
         with_surface.finish();
-        assert!(!with_surface.can_transfer_full_scene());
+        assert!(with_surface.can_transfer_full_scene());
     }
 
     #[test]
