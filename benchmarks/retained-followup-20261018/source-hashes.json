@@ -1,0 +1,34 @@
+{
+  "ce_adapter.rs": {
+    "candidate_path": "/home/miles/reactivity-port/final-sync/benchmarks/retained-core/evidence/glyph-bounded-diagnostics-overlay-20261018/ce-adapter.rs.candidate",
+    "candidate_sha256": "6ed5ba3412433542a0a17fc19ead22c6bf84bf946a5cbcc24bc31aff81e7471d",
+    "patch_path": "/home/miles/reactivity-port/final-sync/benchmarks/retained-core/evidence/glyph-bounded-diagnostics-overlay-20261018/ce-adapter.rs.patch",
+    "patch_sha256": "9f16fc4326a31ec360faf2ba812aeaaf2e907ff83fdac5c8453240505c919b64",
+    "preimage_path": "/home/miles/reactivity-port/final-sync/benchmarks/retained-core/evidence/glyph-bounded-diagnostics-overlay-20261018/ce-adapter.rs.preimage",
+    "preimage_sha256": "9a148f113694129446490ba8b36311ccbe510aaf38e7b6f963a2a07aa4024483"
+  },
+  "ce_viewport_coalesced.rs": {
+    "candidate_path": "/home/miles/reactivity-port/final-sync/benchmarks/retained-core/evidence/glyph-bounded-diagnostics-overlay-20261018/ce-viewport_coalesced.rs.candidate",
+    "candidate_sha256": "2a3b01b6e814f267410da3fa76874406ab1d26edd2d88fd7051805b784942e7e",
+    "patch_path": "/home/miles/reactivity-port/final-sync/benchmarks/retained-core/evidence/glyph-bounded-diagnostics-overlay-20261018/ce-viewport_coalesced.rs.patch",
+    "patch_sha256": "1b408af6792a10895bcebfea815b017bf1f7214d315a40314d9be9e26408d019",
+    "preimage_path": "/home/miles/reactivity-port/final-sync/benchmarks/retained-core/evidence/glyph-bounded-diagnostics-overlay-20261018/ce-viewport_coalesced.rs.preimage",
+    "preimage_sha256": "1f4f0876119731e061e32b61fbfa92160a37379fcb32648a7741e7dad2ea2977"
+  },
+  "fast_adapter.rs": {
+    "candidate_path": "/home/miles/reactivity-port/final-sync/benchmarks/retained-core/evidence/glyph-bounded-diagnostics-overlay-20261018/fast-adapter.rs.candidate",
+    "candidate_sha256": "6ed5ba3412433542a0a17fc19ead22c6bf84bf946a5cbcc24bc31aff81e7471d",
+    "patch_path": "/home/miles/reactivity-port/final-sync/benchmarks/retained-core/evidence/glyph-bounded-diagnostics-overlay-20261018/fast-adapter.rs.patch",
+    "patch_sha256": "68bcf4a0bcffe3bb30d22f216baff5e4b1b01824683d99118acbfaa09576b71f",
+    "preimage_path": "/home/miles/reactivity-port/final-sync/benchmarks/retained-core/evidence/glyph-bounded-diagnostics-overlay-20261018/fast-adapter.rs.preimage",
+    "preimage_sha256": "9a148f113694129446490ba8b36311ccbe510aaf38e7b6f963a2a07aa4024483"
+  },
+  "fast_viewport_coalesced.rs": {
+    "candidate_path": "/home/miles/reactivity-port/final-sync/benchmarks/retained-core/evidence/glyph-bounded-diagnostics-overlay-20261018/fast-viewport_coalesced.rs.candidate",
+    "candidate_sha256": "2a3b01b6e814f267410da3fa76874406ab1d26edd2d88fd7051805b784942e7e",
+    "patch_path": "/home/miles/reactivity-port/final-sync/benchmarks/retained-core/evidence/glyph-bounded-diagnostics-overlay-20261018/fast-viewport_coalesced.rs.patch",
+    "patch_sha256": "dbac39ceefeb3fd83ef830ca7d8882ca9d0b10fb0478040c1b83d6f262515233",
+    "preimage_path": "/home/miles/reactivity-port/final-sync/benchmarks/retained-core/evidence/glyph-bounded-diagnostics-overlay-20261018/fast-viewport_coalesced.rs.preimage",
+    "preimage_sha256": "1f4f0876119731e061e32b61fbfa92160a37379fcb32648a7741e7dad2ea2977"
+  }
+}

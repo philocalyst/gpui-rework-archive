@@ -1,0 +1,50 @@
+--- a/fast/viewport_coalesced.rs
++++ b/fast/viewport_coalesced.rs
+@@ -413,7 +413,15 @@
+     };
+     benchmark_cx.app.borrow_mut().mode = crate::app::GpuiMode::Production;
+     let cx = &mut benchmark_cx;
+-    let window = cx.open_window(size(px(WINDOW_WIDTH), px(WINDOW_HEIGHT)), |_, cx| {
++    let window = cx.open_window(size(px(WINDOW_WIDTH), px(WINDOW_HEIGHT)), |window, cx| {
++        if glyph_mask {
++            window.set_scale_factor(1.0);
++            assert_eq!(
++                window.scale_factor().to_bits(),
++                1.0f32.to_bits(),
++                "glyph-only retained window scale must be exactly 1"
++            );
++        }
+         BenchRoot::with_panel_height(cx, VIEWPORT_PANEL_HEIGHT)
+     });
+     cx.run_until_parked();
+@@ -462,7 +470,15 @@
+     let mut oracle = Vec::new();
+ 
+     if !skip_oracle {
+-        let fresh = cx.open_window(size(px(WINDOW_WIDTH), px(WINDOW_HEIGHT)), |_, cx| {
++        let fresh = cx.open_window(size(px(WINDOW_WIDTH), px(WINDOW_HEIGHT)), |window, cx| {
++            if glyph_mask {
++                window.set_scale_factor(1.0);
++                assert_eq!(
++                    window.scale_factor().to_bits(),
++                    1.0f32.to_bits(),
++                    "glyph-only fresh window scale must be exactly 1"
++                );
++            }
+             BenchRoot::with_panel_height(cx, VIEWPORT_PANEL_HEIGHT)
+         });
+         cx.run_until_parked();
+@@ -696,6 +712,13 @@
+             } else {
+                 target
+             };
++            if !glyph_mask && sample == 25 {
++                let label = format!(
++                    "viewport|scenario={}|sample={sample}|target={target}|visible={visible}",
++                    scenario.name()
++                );
++                dump_semantic_geometry_components(&window, cx, &label);
++            }
+             assert_visible_panel(&window, cx, visible);
+             let rendered = rendered_panels(&window, cx).saturating_sub(before_renders);
+             assert!(rendered > 0, "sample did not render a panel");
