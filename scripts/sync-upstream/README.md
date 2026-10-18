@@ -1,23 +1,28 @@
 # Upstream sync
 
-Automated, local-only tooling to pull GPUI changes from the upstream Zed monorepo
-(`zed-industries/zed`) into this standalone fork. Agent work can use this ChatGPT session,
-Codex CLI, or the legacy Claude CLI. The orchestrator validates every response before it
-stages or commits changes. **Nothing is ever pushed.**
+Local orchestration to pull GPUI changes from the upstream Zed monorepo (`zed-industries/zed`)
+into this standalone fork. The default external-agent mode is a manual handoff: copy the saved
+prompt into a ChatGPT session or another agent with access to this sync worktree, let it edit the
+worktree, then save its final response to the requested response file. The script does not call
+ChatGPT or GitHub write APIs. It records the response for audit and validates repository state and
+changed-path scope before staging or committing; it does not apply or semantically validate the
+response text. The orchestrator itself has no push step. External tools run outside its enforcement
+boundary, so use read-only GitHub tools and permissions.
 
 ## TL;DR
 
 ```sh
-just sync-upstream-bootstrap   # ONE TIME — records the baseline to sync from
+just sync-upstream-bootstrap 876ec5a8a074  # EXAMPLE: replace with this fork's baseline SHA
 just sync-upstream             # prints an external-agent session ID and prompt by default
 just sync-upstream-status      # how far behind upstream are we?
 ```
 
 `just sync-upstream` starts a `sync/zed-<date>-<sha>` branch. In default external mode,
 it pauses at each required conflict-resolution or build-fix checkpoint with a session ID
-and prompt; resume with `sync_upstream.py resume SESSION --response-file PATH`. The run is
-complete only after resolution and verification finish successfully. Then review the branch
-and fast-forward `main` or open a PR by hand.
+and prompt. The printed resume command includes `--response-file`; save the agent's final text
+there. That file is kept for audit only; the edits must already be present in the sync worktree.
+The run is complete only after resolution and verification finish successfully. Then review the
+branch and fast-forward `main` or open a PR by hand.
 
 ## How it works
 
@@ -111,7 +116,7 @@ but PR #91 removed those git sources, so there is no longer a pinned rev to defa
 baseline explicitly**:
 
 ```sh
-just sync-upstream-bootstrap <upstream-sha>   # e.g. 876ec5a8a074 (the last rev pinned before #91)
+just sync-upstream-bootstrap 876ec5a8a074  # EXAMPLE: use the SHA matching your fork
 ```
 
 Bootstrap adds the `zed` remote, builds the baseline vendor snapshot (all tracked crates remapped to
@@ -147,16 +152,19 @@ just sync-upstream --ref some-tag --no-bump --dry-run
   Windows-specific changes can't be fully verified on a Linux host — verify those on the
   platform or in CI. The build-fix prompt asks the agent to flag such changes.
 - Requires Python 3 (stdlib only — no pip installs), `just`, and the Rust toolchain. The
-  default `external` agent mode pauses with a durable prompt and session ID; continue it
-  with `sync_upstream.py resume SESSION --response-file PATH`. The response is retained
-  in the audit record. Optional `codex` mode requires `codex` on `PATH`; legacy
-  `claude` mode requires `claude` on `PATH`.
+  default `external` mode pauses with a durable prompt and session ID for a manual handoff;
+  it does not invoke ChatGPT. Continue with the exact resume command it prints. The response file
+  is retained for audit and is not used to apply edits. Optional `codex` mode requires `codex` on
+  `PATH`; legacy `claude` mode requires `claude` on `PATH`.
 - If conflict resolution exhausts its retries, the branch is left mid-merge for you to
   finish. If verification fails, sync state is not advanced and the command exits nonzero; the branch
   remains available for review and another verification attempt.
-- Codex runs with `codex exec --json --sandbox workspace-write` and captures its final
-  message to an audit file. The runner removes common API/GitHub/SSH credential variables
-  and disables Git credential helpers for that subprocess.
-- External-agent resume requires `--response-file`; the script pins the branch, HEAD,
-  merge state, upstream/vendor targets, prompt digest, and allowed path set before and
-  after the response. It stages only explicitly validated files.
+- The built-in Codex runner uses `codex exec --json --sandbox workspace-write` and captures its
+  final message. It removes common API/GitHub/SSH credential variables and disables Git credential
+  helpers for that subprocess. The default Claude tool allowlist omits Git push, but its
+  `SYNC_CLAUDE_ALLOWED_TOOLS` override is caller-controlled. These restrictions do not govern a
+  manually operated external agent.
+- External-agent resume requires `--response-file`. The script pins branch, HEAD, merge state,
+  upstream/vendor targets, prompt digest, and allowed path set, and checks changed paths before
+  resuming. It stages validated worktree files; it does not inspect the response text for correctness.
+  The sync orchestrator itself never pushes, but cannot enforce what an external tool does.

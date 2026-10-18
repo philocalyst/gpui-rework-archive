@@ -10,7 +10,8 @@ records the vendor tip as its second parent. A conflicted merge is committed as 
 for reviewability: the raw merge with conflict markers, then an agent's resolution as a
 separate, auditable diff. Build fixes land in a third commit.
 
-Local-only: this never pushes. Agent work is validated by the orchestrator before staging or committing.
+Local-only: the orchestrator has no GitHub write or push step. External-agent permissions are
+not controlled here. Before staging or committing, it validates local changes and their scope.
 
 Usage:
   sync_upstream.py bootstrap [BASELINE_SHA]   # one-time setup (see README)
@@ -32,6 +33,7 @@ import argparse
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -116,8 +118,8 @@ CLAUDE_TIMEOUT: int = int(_env("SYNC_CLAUDE_TIMEOUT", "1800"))
 # Optional cap on claude's agentic turns per invocation (0 = no cap, the default).
 CLAUDE_MAX_TURNS: int = int(_env("SYNC_CLAUDE_MAX_TURNS", "0"))
 # Edits/writes are auto-accepted via --permission-mode acceptEdits; the rest are
-# read-only/build helpers. Git staging/commits are done here, never by claude; push is
-# never allowed.
+# read-only/build helpers. Git staging/commits are done here, never by claude. The default
+# allowlist omits push; custom SYNC_CLAUDE_ALLOWED_TOOLS changes that boundary.
 _DEFAULT_ALLOWED_TOOLS: str = (
     "Read Edit Write Grep Glob Bash(cargo check:*) Bash(cargo build:*) "
     "Bash(cargo metadata:*) Bash(git status:*) Bash(git diff:*) Bash(git log:*) "
@@ -452,8 +454,13 @@ def run_agent_prompt(prompt: str, phase: str, attempt: int = 0) -> None:
         die(f"could not create agent checkpoint: {exc}")
     if AGENT_BACKEND == "external":
         log(f"external agent required; session {sid} is ready")
+        response_path = session.directory / "agent-response.md"
         print(f"Prompt: {session.directory / session.checkpoint['prompt_file']}")
-        print(f"Resume after edits: sync_upstream.py resume {sid}")
+        print(
+            "Resume after edits: python3 "
+            f"{shlex.quote(str(SCRIPT_DIR / 'sync_upstream.py'))} resume {sid} "
+            f"--response-file {shlex.quote(str(response_path))}"
+        )
         raise AgentPause()
     if AGENT_BACKEND == "codex":
         argv = codex_exec_argv(
@@ -1008,7 +1015,7 @@ def summary(branch: str, last: str, target: str, verify_ok: bool) -> None:
     print(f"  verify ({gates}) : {'OK' if verify_ok else 'FAILED'}")
     print(f"\nReview : git log --oneline --stat main..{branch}")
     print(f"Merge  : git switch main && git merge --ff-only {branch}   (or open a PR)")
-    print(f"{_D}Nothing was pushed.{_Z}")
+    print(f"{_D}The sync orchestrator performed no push; external agent permissions are outside its control.{_Z}")
 
 
 # entrypoint

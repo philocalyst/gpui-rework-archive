@@ -1,9 +1,12 @@
 import importlib.util
+import io
+import shlex
 import os
 import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from types import SimpleNamespace
 from unittest.mock import patch
 from pathlib import Path
@@ -317,6 +320,64 @@ class AgentSessionTests(unittest.TestCase):
         self.assertIn("preserve existing Apache-compatible notice/license", prompt)
         self.assertIn("restore the", prompt)
         self.assertIn("intact text byte-for-byte", prompt)
+
+
+    def test_external_pause_prints_a_runnable_resume_command_with_response_file(self) -> None:
+        temporary = tempfile.TemporaryDirectory(prefix="sync fixture ")
+        self.addCleanup(temporary.cleanup)
+        root = Path(temporary.name)
+        git(root, "init", "-q")
+        git(root, "config", "user.name", "Test")
+        git(root, "config", "user.email", "test@example.invalid")
+        (root / "tracked.txt").write_text("base\n")
+        git(root, "add", "tracked.txt")
+        git(root, "commit", "-qm", "base")
+        git(root, "update-ref", "refs/heads/vendor/zed-gpui", "HEAD")
+
+        old_values = (
+            sync.REPO_ROOT,
+            sync.AGENT_BACKEND,
+            sync.ACTIVE_SYNC_CONTEXT,
+            sync.SCRIPT_DIR,
+            sync.uuid.uuid4,
+        )
+        fake_script_dir = Path("/workspace with spaces/scripts/sync-upstream")
+        sync.REPO_ROOT = root
+        sync.AGENT_BACKEND = "external"
+        sync.ACTIVE_SYNC_CONTEXT = {}
+        sync.SCRIPT_DIR = fake_script_dir
+        sync.uuid.uuid4 = lambda: SimpleNamespace(hex="resume-command-fixture")
+        output = io.StringIO()
+        try:
+            with redirect_stdout(output), self.assertRaises(sync.AgentPause):
+                sync.run_agent_prompt("resolve this prompt", "resolve")
+        finally:
+            (
+                sync.REPO_ROOT,
+                sync.AGENT_BACKEND,
+                sync.ACTIVE_SYNC_CONTEXT,
+                sync.SCRIPT_DIR,
+                sync.uuid.uuid4,
+            ) = old_values
+
+        session_dir = agent._git_path(root, "sync-upstream-sessions/resume-command-fixture")
+        resume_line = next(
+            line for line in output.getvalue().splitlines()
+            if line.startswith("Resume after edits: ")
+        )
+        argv = shlex.split(resume_line.removeprefix("Resume after edits: "))
+        self.assertEqual(
+            argv,
+            [
+                "python3",
+                str(fake_script_dir / "sync_upstream.py"),
+                "resume",
+                "resume-command-fixture",
+                "--response-file",
+                str(session_dir / "agent-response.md"),
+            ],
+        )
+        self.assertTrue((session_dir / "resolve.prompt.md").is_file())
 
     def test_codex_command_uses_supported_sandbox_and_stdin_prompt(self) -> None:
         output = Path("/tmp/last-message.md")
