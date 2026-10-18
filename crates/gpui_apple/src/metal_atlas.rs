@@ -338,7 +338,7 @@ mod tests {
 
     fn insert_tile(atlas: &MetalAtlas, key: &AtlasKey, size: Size<DevicePixels>) -> AtlasTile {
         atlas
-            .get_or_insert_with(key, &mut || {
+            .get_or_insert_with(key.clone(), &mut || {
                 let byte_count = (size.width.0 as usize) * (size.height.0 as usize) * 4;
                 Ok(Some((size, Cow::Owned(vec![0u8; byte_count]))))
             })
@@ -439,7 +439,7 @@ mod tests {
             },
         });
         let tile = atlas
-            .get_or_insert_with(&key, &mut || {
+            .get_or_insert_with(key.clone(), &mut || {
                 Ok(Some((
                     Size {
                         width: DevicePixels(8),

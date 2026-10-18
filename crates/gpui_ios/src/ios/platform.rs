@@ -8,13 +8,13 @@
 //! - Touch-based input instead of mouse
 //! - System keyboard handling differs significantly
 
-use super::{application::IosApplicationState, CallbackSlot};
+use super::{CallbackSlot, application::IosApplicationState};
 use super::{IosDisplay, IosWindow};
 use anyhow::anyhow;
 use block2::RcBlock;
 use futures::{
-    channel::{mpsc, oneshot},
     StreamExt,
+    channel::{mpsc, oneshot},
 };
 use gpui::{
     Action, AnyWindowHandle, AppLifecyclePhase, BackgroundExecutor, ClipboardItem, CursorStyle,
@@ -23,11 +23,10 @@ use gpui::{
     PlatformWindow, Result, Task, ThermalState, WindowAppearance, WindowParams,
 };
 use gpui_apple::{
-    keychain,
+    AppleDispatcher, keychain,
     thermal::{self, ThermalObserver},
-    AppleDispatcher,
 };
-use objc2::{rc::Retained, runtime::ProtocolObject, MainThreadMarker, MainThreadOnly};
+use objc2::{MainThreadMarker, MainThreadOnly, rc::Retained, runtime::ProtocolObject};
 use objc2_foundation::{
     NSBundle, NSDictionary, NSNotification, NSNotificationCenter, NSObjectProtocol, NSString, NSURL,
 };

@@ -92,7 +92,7 @@ palette = { version = "0.7.6", features = ["serializing"] }
 parking_lot = "0.12.1"
 phf = { version = "0.13.1", features = ["macros"] }
 postage = { version = "0.5", features = ["futures-traits"] }
-proptest = { git = "https://github.com/proptest-rs/proptest", rev = "3dca198a8fef1b32e3a66f1e1897c955b4dc5b5b", features = ["attr-macro"] }
+proptest = { version = "1.10", features = ["attr-macro"] }
 chrono = { version = "0.4", features = ["serde"] }
 profiling = "1"
 rand = "0.9.4"
@@ -184,7 +184,7 @@ ashpd = { version = "0.13", default-features = false, features = [
 libc = "0.2"
 smol = "2.0"
 util = { path = "crates/gpui_zed_util", version = "0.2.2", package = "gpui_ce_zed_util" }
-wgpu = { git = "https://github.com/gfx-rs/wgpu", rev = "3b3506ea31154edc04de64debda0e780cba2639c" }
+wgpu = "29.0.3"
 wgsl-rs = { git = "https://github.com/schell/wgsl-rs", rev = "b2de16a1b81e67d76bc265c296184f882864badb", default-features = false, features = [
   "validation",
 ] }
@@ -203,6 +203,9 @@ objc2-app-kit = { version = "0.3", default-features = false, features = [
   "NSGraphics",
   "NSHapticFeedback",
   "NSCursor",
+  "NSDragging",
+  "NSDraggingItem",
+  "NSImage",
   "NSPanel",
   "NSMenu",
   "NSMenuItem",
@@ -217,6 +220,7 @@ objc2-app-kit = { version = "0.3", default-features = false, features = [
   "NSRunningApplication",
   "NSScreen",
   "NSTextInputClient",
+  "NSTrackingArea",
   "NSView",
   "NSWindow",
   "block2",

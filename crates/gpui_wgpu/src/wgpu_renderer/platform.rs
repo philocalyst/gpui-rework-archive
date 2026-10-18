@@ -206,7 +206,7 @@ impl WgpuRenderer {
             .create_view(&wgpu::TextureViewDescriptor::default());
         let rendered = self.render_to_view(scene, &view);
         if rendered {
-            self.resources().queue.present(frame);
+            frame.present();
         } else {
             // Vulkan's native swapchain cannot release an acquired image just
             // by dropping it. Repeated failed frames would exhaust its images
@@ -456,7 +456,9 @@ fn new_internal_with_validation_scope(
     compositor_gpu: Option<CompositorGpuHint>,
     extra_requirements: Option<WgpuDeviceRequirements>,
 ) -> anyhow::Result<WgpuRenderer> {
-    let validation_scope = context.device.push_error_scope(wgpu::ErrorFilter::Validation);
+    let validation_scope = context
+        .device
+        .push_error_scope(wgpu::ErrorFilter::Validation);
     let atlas = Arc::new(WgpuAtlas::from_context(context));
     let renderer = WgpuRenderer::new_internal(
         gpu_context,

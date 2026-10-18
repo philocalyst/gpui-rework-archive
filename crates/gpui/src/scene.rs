@@ -1960,11 +1960,8 @@ pub struct PaintSurface {
     pub bounds: Bounds<ScaledPixels>,
     /// The region that clips this surface.
     pub content_mask: ContentMask<ScaledPixels>,
-    /// Where the pixels come from for the cross-platform packet renderer.
+    /// Where the pixels come from.
     pub source: crate::SurfaceSource,
-    /// Native Apple pixel buffer retained for the upstream platform surface seam.
-    #[cfg(any(target_os = "macos", target_os = "ios"))]
-    pub image_buffer: Option<objc2_core_foundation::CFRetained<objc2_core_video::CVPixelBuffer>>,
 }
 
 impl From<PaintSurface> for Primitive {
@@ -2580,8 +2577,6 @@ mod tests {
             bounds: full_bounds(),
             content_mask: mask(),
             source: SurfaceSource::Unsupported(Size::default()),
-            #[cfg(any(target_os = "macos", target_os = "ios"))]
-            image_buffer: None,
         }
     }
 

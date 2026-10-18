@@ -176,6 +176,8 @@ pub enum ActivationPolicy {
     Regular,
     /// Run without foreground application UI while retaining the ability to open windows.
     Accessory,
+    /// Run in the background without windows; the app cannot be activated.
+    Prohibited,
 }
 
 #[cfg(any(test, feature = "test-support", feature = "bench-support"))]
@@ -371,16 +373,8 @@ bitflags::bitflags! {
 }
 
 /// The activation policy for a macOS application.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub enum MacActivationPolicy {
-    /// The application is an ordinary app that appears in the Dock and may have a user interface.
-    #[default]
-    Regular,
-    /// The application doesn't appear in the Dock and doesn't have a menu bar, but it may be activated programmatically or by clicking on one of its windows.
-    Accessory,
-    /// The application doesn't appear in the Dock and may not create windows or be activated.
-    Prohibited,
-}
+#[deprecated(note = "renamed to `ActivationPolicy`")]
+pub type MacActivationPolicy = ActivationPolicy;
 
 /// The operating system or browser that GPUI runs on, as seen by the [`App`].
 ///
@@ -401,9 +395,6 @@ pub trait Platform: 'static {
     fn foreground_executor(&self) -> ForegroundExecutor;
     /// Returns the platform's text system, which shapes and rasterizes glyphs.
     fn text_system(&self) -> Arc<dyn PlatformTextSystem>;
-
-    /// Sets the macOS activation policy. Only `gpui_macos` overrides this; other platforms ignore the call.
-    fn set_mac_activation_policy(&self, _policy: MacActivationPolicy) {}
     /// Starts the event loop and calls `on_finish_launching` once the application is ready.
     ///
     /// This method blocks until the application exits. Create windows inside

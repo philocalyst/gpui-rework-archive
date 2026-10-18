@@ -4,14 +4,7 @@ use crate::{
 };
 use anyhow::{Context as _, anyhow};
 use block2::RcBlock;
-use core_foundation::{
-    base::{CFType, CFTypeRef, OSStatus, TCFType},
-    boolean::CFBoolean,
-    data::CFData,
-    dictionary::{CFDictionary, CFDictionaryRef, CFMutableDictionary},
-    runloop::CFRunLoopRun,
-    string::{CFString, CFStringRef},
-};
+use core_foundation::{runloop::CFRunLoopRun, string::CFStringRef};
 use dispatch2::DispatchQueue;
 use futures::channel::oneshot;
 use gpui::{
@@ -32,20 +25,17 @@ use objc2::rc::{Allocated, Retained};
 use objc2::runtime::{AnyObject, ProtocolObject};
 use objc2::{ClassType, DefinedClass, MainThreadMarker, MainThreadOnly, define_class, msg_send};
 use objc2_app_kit::{
-    NSAppearance, NSApplication, NSApplicationActivationPolicy,
-    NSApplicationActivationPolicy::{
-        NSApplicationActivationPolicyAccessory, NSApplicationActivationPolicyRegular,
-    },
-    NSApplicationDelegate, NSControlStateValueOn, NSCursor, NSDocumentController,
-    NSEventModifierFlags, NSMenu, NSMenuDelegate, NSMenuItem, NSModalResponse, NSModalResponseOK,
-    NSOpenPanel, NSResponder, NSSavePanel, NSScroller, NSWorkspace, NSWorkspaceDidWakeNotification,
+    NSAppearance, NSApplication, NSApplicationActivationPolicy, NSApplicationDelegate,
+    NSControlStateValueOn, NSCursor, NSDocumentController, NSEventModifierFlags, NSMenu,
+    NSMenuDelegate, NSMenuItem, NSModalResponse, NSModalResponseOK, NSOpenPanel, NSResponder,
+    NSSavePanel, NSScroller, NSWorkspace, NSWorkspaceDidWakeNotification,
     NSWorkspaceWillSleepNotification,
 };
 #[cfg(feature = "screen-capture")]
 use objc2_foundation::NSOperatingSystemVersion;
 use objc2_foundation::{
     NSActivityOptions, NSArray, NSAutoreleasePool, NSBundle, NSInteger, NSNotification,
-    NSNotificationCenter, NSNumber, NSObjectProtocol, NSProcessInfo, NSString, NSUInteger, NSURL,
+    NSNotificationCenter, NSNumber, NSObjectProtocol, NSProcessInfo, NSString, NSURL,
     NSUserDefaults,
 };
 use parking_lot::Mutex;
@@ -248,8 +238,9 @@ fn activation_policy_for(request: &WindowingRequest) -> ActivationPolicy {
 
 fn native_activation_policy(policy: ActivationPolicy) -> NSApplicationActivationPolicy {
     match policy {
-        ActivationPolicy::Regular => NSApplicationActivationPolicyRegular,
-        ActivationPolicy::Accessory => NSApplicationActivationPolicyAccessory,
+        ActivationPolicy::Regular => NSApplicationActivationPolicy::Regular,
+        ActivationPolicy::Accessory => NSApplicationActivationPolicy::Accessory,
+        ActivationPolicy::Prohibited => NSApplicationActivationPolicy::Prohibited,
     }
 }
 
@@ -538,7 +529,7 @@ impl MacPlatform {
             return;
         }
         if let Some(delegate) = delegate {
-            register_system_power_observers(as_any_object(delegate.as_ref()));
+            register_system_power_observers(as_any_object(&*delegate));
             self.0.lock().system_power_observers_registered = true;
         }
     }
@@ -577,7 +568,7 @@ impl Platform for MacPlatform {
                 state.application_created = true;
                 state.activation_policy
             };
-            if policy == ActivationPolicy::Accessory {
+            if policy != ActivationPolicy::Regular {
                 app.as_super()
                     .setActivationPolicy(native_activation_policy(policy));
             }
@@ -807,6 +798,7 @@ impl Platform for MacPlatform {
             renderer_context,
             options.bounds.size.map(|pixels| pixels.as_f32()),
             false,
+            options.use_display_p3,
         )?;
         Ok(Box::new(MacWindow::open(
             handle,
@@ -857,7 +849,7 @@ impl Platform for MacPlatform {
     }
 
     fn register_url_scheme(&self, scheme: &str) -> Task<anyhow::Result<()>> {
-        use objc2_foundation::{NSBundle, NSError, NSString};
+        use objc2_foundation::NSBundle;
 
         // API only available post Monterey
         // https://developer.apple.com/documentation/appkit/nsworkspace/3753004-setdefaultapplicationaturl

@@ -1,8 +1,10 @@
 use crate::metal_atlas::MetalAtlas;
 use anyhow::Result;
 use block::ConcreteBlock;
-use core_foundation::base::TCFType;
-use core_graphics::geometry::CGSize;
+use core_graphics::{
+    color_space::{CGColorSpace, kCGColorSpaceDisplayP3},
+    geometry::CGSize,
+};
 use gpui::{
     AtlasTextureId, Bounds, Corners, DevicePixels, FilterRenderTarget, MAX_FILTER_GROUP_DEPTH,
     MonochromeSprite, PaintSurface, Path, PolychromeSprite, PrimitiveBatch, Quad, RenderCommand,
@@ -145,13 +147,13 @@ fn bind_instance_bytes(
 
 /// Creates the CAMetalLayer that backs a window's view. The renderer drawing
 /// into it sets its device and pixel format.
-pub fn new_window_layer(transparent: bool) -> metal::MetalLayer {
+pub fn new_window_layer(transparent: bool, display_p3: bool) -> metal::MetalLayer {
     let layer = metal::MetalLayer::new();
-    configure_window_layer(&layer, transparent);
+    configure_window_layer(&layer, transparent, display_p3);
     layer
 }
 
-fn configure_window_layer(layer: &metal::MetalLayer, transparent: bool) {
+fn configure_window_layer(layer: &metal::MetalLayer, transparent: bool, display_p3: bool) {
     // Support direct-to-display rendering if the window is not transparent
     // https://developer.apple.com/documentation/metal/managing-your-game-window-for-metal-in-macos
     layer.set_opaque(!transparent);
@@ -164,6 +166,19 @@ fn configure_window_layer(layer: &metal::MetalLayer, transparent: bool) {
     layer_object.setAutoresizingMask(
         CAAutoresizingMask::LayerWidthSizable | CAAutoresizingMask::LayerHeightSizable,
     );
+    if display_p3 {
+        // SAFETY: `kCGColorSpaceDisplayP3` is a Core Graphics constant.
+        match CGColorSpace::create_with_name(unsafe { kCGColorSpaceDisplayP3 }) {
+            // SAFETY: the layer copies the color space, which stays alive for the call.
+            Some(color_space) => unsafe {
+                let _: () = objc2::msg_send![
+                    layer_object,
+                    setColorspace: color_space.as_ptr().cast::<std::ffi::c_void>()
+                ];
+            },
+            None => log::error!("unable to create the Display P3 color space"),
+        }
+    }
 }
 
 fn into_metal_layer(layer: objc2::rc::Retained<Objc2CAMetalLayer>) -> metal::MetalLayer {
@@ -175,8 +190,9 @@ pub fn new_renderer(
     context: self::Context,
     _bounds: gpui::Size<f32>,
     transparent: bool,
+    display_p3: bool,
 ) -> Result<Renderer> {
-    Ok(MetalRenderer::new(context, transparent))
+    Ok(MetalRenderer::new(context, transparent, display_p3))
 }
 
 pub struct InstanceBufferPool {
@@ -295,9 +311,13 @@ pub struct MetalRenderer {
 
 impl MetalRenderer {
     /// Creates a new MetalRenderer with a CAMetalLayer for window-based rendering.
-    pub fn new(instance_buffer_pool: Arc<Mutex<InstanceBufferPool>>, transparent: bool) -> Self {
+    pub fn new(
+        instance_buffer_pool: Arc<Mutex<InstanceBufferPool>>,
+        transparent: bool,
+        display_p3: bool,
+    ) -> Self {
         let device = Self::create_device();
-        let layer = new_window_layer(transparent);
+        let layer = new_window_layer(transparent, display_p3);
         Self::new_with_layer(device, layer, instance_buffer_pool, transparent)
     }
 
@@ -310,6 +330,7 @@ impl MetalRenderer {
     ) -> Self {
         let device = Self::create_device();
         let layer = into_metal_layer(layer);
+        configure_window_layer(&layer, transparent, false);
         Self::new_with_layer(device, layer, instance_buffer_pool, transparent)
     }
 
@@ -319,7 +340,6 @@ impl MetalRenderer {
         instance_buffer_pool: Arc<Mutex<InstanceBufferPool>>,
         transparent: bool,
     ) -> Self {
-        configure_window_layer(&layer, transparent);
         layer.set_device(&device);
         layer.set_pixel_format(MTLPixelFormat::BGRA8Unorm);
         layer.set_maximum_drawable_count(3);
@@ -1911,13 +1931,7 @@ impl MetalRenderer {
 
         for surface in surfaces {
             let image_buffer = match &surface.source {
-                SurfaceSource::Surface(_) => {
-                    let Some(image_buffer) = surface.image_buffer.as_ref() else {
-                        log::error!("Metal cannot draw a surface without a native image buffer");
-                        continue;
-                    };
-                    image_buffer
-                }
+                SurfaceSource::Surface(image_buffer) => image_buffer,
                 SurfaceSource::Unsupported(size) => {
                     log::error!("Metal cannot draw unsupported surface source with size {size:?}");
                     continue;
@@ -2371,7 +2385,7 @@ mod tests {
         });
         let tile = renderer
             .sprite_atlas()
-            .get_or_insert_with(&key, &mut || {
+            .get_or_insert_with(key.clone(), &mut || {
                 Ok(Some((tile_size, Cow::Owned(vec![64; 64]))))
             })
             .unwrap()
@@ -2939,7 +2953,7 @@ mod tests {
         });
         let tile = renderer
             .sprite_atlas()
-            .get_or_insert_with(&key, &mut || {
+            .get_or_insert_with(key.clone(), &mut || {
                 Ok(Some((
                     Size {
                         width: DevicePixels(2),

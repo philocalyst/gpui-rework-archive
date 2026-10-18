@@ -42,7 +42,6 @@ use std::{
 #[cfg(any(feature = "inspector", debug_assertions))]
 use crate::InspectorElementRegistry;
 #[cfg(target_os = "macos")]
-use crate::MacActivationPolicy;
 use crate::asset_cache::CachedLoad;
 pub use async_context::*;
 #[cfg(feature = "bench-support")]
@@ -317,8 +316,8 @@ impl Application {
     /// The method exists only on macOS, so cross-platform code calls it behind
     /// `#[cfg(target_os = "macos")]`.
     #[cfg(target_os = "macos")]
-    pub fn with_activation_policy(self, policy: MacActivationPolicy) -> Self {
-        self.0.borrow().platform.set_mac_activation_policy(policy);
+    pub fn with_activation_policy(self, policy: ActivationPolicy) -> Self {
+        self.0.borrow().platform.set_activation_policy(policy);
         self
     }
 

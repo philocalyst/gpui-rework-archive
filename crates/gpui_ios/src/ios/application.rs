@@ -1,10 +1,11 @@
-use super::{platform::IosPlatformState, window::IosWindowState, CallbackSlot};
+use super::{CallbackSlot, platform::IosPlatformState, window::IosWindowState};
 use gpui::{AnyWindowHandle, AppLifecyclePhase, WindowVisibility};
 use objc2::{
-    define_class, extern_class, extern_methods, msg_send,
+    ClassType, DefinedClass, MainThreadMarker, MainThreadOnly, Message, define_class, extern_class,
+    extern_methods, msg_send,
     rc::{Allocated, Retained},
     runtime::AnyObject,
-    sel, ClassType, DefinedClass, MainThreadMarker, MainThreadOnly, Message,
+    sel,
 };
 use objc2_foundation::{
     NSDictionary, NSObject, NSObjectProtocol, NSRunLoop, NSRunLoopCommonModes, NSSet, NSString,

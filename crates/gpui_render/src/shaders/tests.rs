@@ -121,8 +121,16 @@ fn scene_instance_storage_sizes_are_bounded() {
 fn assert_underline_field_types(module: &naga::Module, members: &[naga::StructMember]) {
     let expected = [
         ("order", "u32", std::mem::offset_of!(gpui::Underline, order)),
-        ("padding", "u32", std::mem::offset_of!(gpui::Underline, padding)),
-        ("bounds", "Bounds", std::mem::offset_of!(gpui::Underline, bounds)),
+        (
+            "padding",
+            "u32",
+            std::mem::offset_of!(gpui::Underline, padding),
+        ),
+        (
+            "bounds",
+            "Bounds",
+            std::mem::offset_of!(gpui::Underline, bounds),
+        ),
         (
             "clip_bounds",
             "Bounds",
@@ -133,7 +141,11 @@ fn assert_underline_field_types(module: &naga::Module, members: &[naga::StructMe
             "ContentMask",
             std::mem::offset_of!(gpui::Underline, content_mask),
         ),
-        ("color", "Hsla", std::mem::offset_of!(gpui::Underline, color)),
+        (
+            "color",
+            "Hsla",
+            std::mem::offset_of!(gpui::Underline, color),
+        ),
         (
             "thickness",
             "f32",
@@ -142,11 +154,16 @@ fn assert_underline_field_types(module: &naga::Module, members: &[naga::StructMe
         ("wavy", "u32", std::mem::offset_of!(gpui::Underline, wavy)),
     ];
     assert_eq!(members.len(), expected.len(), "Underline field count");
-    for (member, (expected_name, expected_type, expected_offset)) in
-        members.iter().zip(expected)
-    {
-        assert_eq!(member.name.as_deref(), Some(expected_name), "Underline field name");
-        assert_eq!(member.offset as usize, expected_offset, "Underline.{expected_name} offset");
+    for (member, (expected_name, expected_type, expected_offset)) in members.iter().zip(expected) {
+        assert_eq!(
+            member.name.as_deref(),
+            Some(expected_name),
+            "Underline field name"
+        );
+        assert_eq!(
+            member.offset as usize, expected_offset,
+            "Underline.{expected_name} offset"
+        );
         let ty = &module.types[member.ty];
         let matches_expected = match expected_type {
             "u32" => matches!(

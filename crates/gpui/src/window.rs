@@ -6915,19 +6915,11 @@ impl Window {
 
         let bounds = self.snap_bounds(bounds);
         let content_mask = self.snapped_content_mask();
-        let source = source.into();
-        #[cfg(any(target_os = "macos", target_os = "ios"))]
-        let image_buffer = match &source {
-            crate::SurfaceSource::Surface(image_buffer) => Some(image_buffer.clone()),
-            _ => None,
-        };
         self.scene_mut().insert_primitive(PaintSurface {
             order: 0,
             bounds,
             content_mask,
-            source,
-            #[cfg(any(target_os = "macos", target_os = "ios"))]
-            image_buffer,
+            source: source.into(),
         });
     }
 
