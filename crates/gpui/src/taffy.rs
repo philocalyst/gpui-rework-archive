@@ -93,6 +93,9 @@ pub struct TaffyLayoutEngine {
     frame_layout_nodes: Vec<LayoutId>,
     frame_layout_node_set: FxHashSet<LayoutId>,
     frame_bound_measured_nodes: FxHashSet<LayoutId>,
+    // Direction resolution can be skipped while the engine is provably LTR-only. This is
+    // monotone because a previously resolved RTL/Auto node can remain retained across frames.
+    direction_resolution_needed: bool,
 }
 
 const EXPECT_MESSAGE: &str = "we should avoid taffy layout errors by construction if possible";
@@ -118,6 +121,7 @@ impl TaffyLayoutEngine {
             frame_layout_nodes: Vec::new(),
             frame_layout_node_set: FxHashSet::default(),
             frame_bound_measured_nodes: FxHashSet::default(),
+            direction_resolution_needed: false,
         }
     }
 
@@ -390,6 +394,11 @@ impl TaffyLayoutEngine {
     }
 
     fn record_style(&mut self, node_id: LayoutId, style: &Style) {
+        self.direction_resolution_needed |= matches!(
+            style.direction,
+            LayoutDirection::RightToLeft | LayoutDirection::Auto
+        );
+
         if style.vertical_align != VerticalAlign::Baseline {
             self.vertical_alignments
                 .insert(node_id, style.vertical_align);
@@ -482,6 +491,13 @@ impl TaffyLayoutEngine {
         root_id: LayoutId,
         inherited: ResolvedDirection,
     ) -> Vec<LayoutId> {
+        if inherited == ResolvedDirection::RightToLeft {
+            self.direction_resolution_needed = true;
+        }
+        if !self.direction_resolution_needed {
+            return Vec::new();
+        }
+
         let mut visited = FxHashSet::default();
         let mut changed = Vec::new();
         self.resolve_direction_subtree(root_id, inherited, &mut visited, &mut changed);
@@ -1440,6 +1456,203 @@ mod tests {
             direction,
             ..Default::default()
         }
+    }
+
+    fn resolve_directions_without_guard(
+        engine: &mut TaffyLayoutEngine,
+        root_id: LayoutId,
+        inherited: ResolvedDirection,
+    ) -> Vec<LayoutId> {
+        let mut visited = FxHashSet::default();
+        let mut changed = Vec::new();
+        engine.resolve_direction_subtree(root_id, inherited, &mut visited, &mut changed);
+        changed
+    }
+
+    #[test]
+    fn ltr_only_direction_resolution_matches_the_full_walk() {
+        fn make_engine() -> (TaffyLayoutEngine, LayoutId, LayoutId, LayoutId) {
+            let mut engine = TaffyLayoutEngine::new();
+            let logical_child = engine.request_layout(
+                direction_style(LayoutDirection::Inherit),
+                px(16.0),
+                1.0,
+                &[],
+            );
+            engine.set_direction_text(logical_child, "مرحبا".into());
+            engine.set_auto_direction_hint(logical_child, Some(ResolvedDirection::RightToLeft));
+
+            let explicit_ltr_child = engine.request_layout(
+                direction_style(LayoutDirection::LeftToRight),
+                px(16.0),
+                1.0,
+                &[],
+            );
+            let root = engine.request_layout(
+                direction_style(LayoutDirection::Inherit),
+                px(16.0),
+                1.0,
+                &[],
+            );
+            // This edge is logical-only, as in inline paragraph layouts. Without Auto it cannot
+            // affect resolved direction, even when the child has directional text and a hint.
+            engine.set_logical_children(root, &[logical_child, explicit_ltr_child]);
+            (engine, root, logical_child, explicit_ltr_child)
+        }
+
+        let (mut guarded, guarded_root, guarded_child, guarded_ltr) = make_engine();
+        let (mut reference, reference_root, reference_child, reference_ltr) = make_engine();
+        assert!(!guarded.direction_resolution_needed);
+
+        let guarded_changed =
+            guarded.resolve_directions(guarded_root, ResolvedDirection::LeftToRight);
+        let reference_changed = resolve_directions_without_guard(
+            &mut reference,
+            reference_root,
+            ResolvedDirection::LeftToRight,
+        );
+        assert_eq!(guarded_changed, reference_changed);
+        assert_eq!(
+            guarded.direction_handle(guarded_root).get(),
+            reference.direction_handle(reference_root).get()
+        );
+        assert_eq!(
+            guarded.direction_handle(guarded_child).get(),
+            reference.direction_handle(reference_child).get()
+        );
+        assert_eq!(
+            guarded.direction_handle(guarded_ltr).get(),
+            reference.direction_handle(reference_ltr).get()
+        );
+        for (guarded_id, reference_id) in [
+            (guarded_root, reference_root),
+            (guarded_child, reference_child),
+            (guarded_ltr, reference_ltr),
+        ] {
+            assert_eq!(
+                guarded.taffy.style(guarded_id.into()).unwrap().direction,
+                reference
+                    .taffy
+                    .style(reference_id.into())
+                    .unwrap()
+                    .direction
+            );
+        }
+        assert_eq!(
+            guarded.direction_handle(guarded_root).get(),
+            ResolvedDirection::LeftToRight
+        );
+        assert_eq!(
+            guarded.direction_handle(guarded_child).get(),
+            ResolvedDirection::LeftToRight
+        );
+        assert_eq!(
+            guarded.direction_handle(guarded_ltr).get(),
+            ResolvedDirection::LeftToRight
+        );
+        assert!(!guarded.direction_resolution_needed);
+    }
+
+    #[test]
+    fn rtl_inheritance_latches_direction_resolution_across_roots_and_pruning() {
+        let mut engine = TaffyLayoutEngine::new();
+        let rtl_child = engine.request_layout(
+            direction_style(LayoutDirection::Inherit),
+            px(16.0),
+            1.0,
+            &[],
+        );
+        let rtl_root = engine.request_layout(
+            direction_style(LayoutDirection::Inherit),
+            px(16.0),
+            1.0,
+            &[rtl_child],
+        );
+        let changed = engine.resolve_directions(rtl_root, ResolvedDirection::RightToLeft);
+        assert!(engine.direction_resolution_needed);
+        assert_eq!(changed.len(), 2);
+        assert_eq!(
+            engine.direction_handle(rtl_child).get(),
+            ResolvedDirection::RightToLeft
+        );
+        assert_eq!(
+            engine.taffy.style(rtl_child.into()).unwrap().direction,
+            taffy::style::Direction::Rtl
+        );
+
+        // Keep the RTL child alive while replacing its old RTL parent with a fresh LTR root.
+        engine.retain_subtree(rtl_child);
+        let ltr_root = engine.request_layout(Style::default(), px(16.0), 1.0, &[rtl_child]);
+        let changed = engine.resolve_directions(ltr_root, ResolvedDirection::LeftToRight);
+        assert!(changed.contains(&rtl_child));
+        assert_eq!(
+            engine.direction_handle(rtl_child).get(),
+            ResolvedDirection::LeftToRight
+        );
+        assert_eq!(
+            engine.taffy.style(rtl_child.into()).unwrap().direction,
+            taffy::style::Direction::Ltr
+        );
+        assert!(engine.direction_resolution_needed);
+
+        engine.finish_frame();
+        engine.finish_frame();
+        assert!(engine.live_layout_nodes.is_empty());
+        assert!(
+            engine.direction_resolution_needed,
+            "the RTL guard remains latched after pruning"
+        );
+    }
+
+    #[test]
+    fn authored_rtl_latches_direction_resolution() {
+        let mut engine = TaffyLayoutEngine::new();
+        let root = engine.request_layout(
+            direction_style(LayoutDirection::RightToLeft),
+            px(16.0),
+            1.0,
+            &[],
+        );
+        assert!(engine.direction_resolution_needed);
+        let changed = engine.resolve_directions(root, ResolvedDirection::LeftToRight);
+        assert_eq!(changed, vec![root]);
+        assert_eq!(
+            engine.direction_handle(root).get(),
+            ResolvedDirection::RightToLeft
+        );
+        assert_eq!(
+            engine.taffy.style(root.into()).unwrap().direction,
+            taffy::style::Direction::Rtl
+        );
+    }
+
+    #[test]
+    fn authored_auto_rtl_latches_guard_across_pruning() {
+        let mut engine = TaffyLayoutEngine::new();
+        let text = engine.request_layout(
+            direction_style(LayoutDirection::Inherit),
+            px(16.0),
+            1.0,
+            &[],
+        );
+        engine.set_direction_text(text, "مرحبا".into());
+        let root = engine.request_layout(
+            direction_style(LayoutDirection::Auto),
+            px(16.0),
+            1.0,
+            &[text],
+        );
+        assert!(engine.direction_resolution_needed);
+        let _ = engine.resolve_directions(root, ResolvedDirection::LeftToRight);
+        assert_eq!(
+            engine.direction_handle(root).get(),
+            ResolvedDirection::RightToLeft
+        );
+
+        engine.finish_frame();
+        engine.finish_frame();
+        assert!(engine.live_layout_nodes.is_empty());
+        assert!(engine.direction_resolution_needed);
     }
 
     #[test]
