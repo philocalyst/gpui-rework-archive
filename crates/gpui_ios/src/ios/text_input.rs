@@ -186,7 +186,6 @@ define_class!(
                 false
             })
             .unwrap_or(false);
-
             if handled {
                 true
             } else if action == sel!(selectAll:)
@@ -435,7 +434,8 @@ define_class!(
         }
         #[unsafe(method(setSelectedTextRange:))]
         fn set_selected_text_range(&self, range: Option<&UITextRange>) {
-            if let Some(range) = range.and_then(|range| self.validated_range(range)) {
+            let range = range.and_then(|range| self.validated_range(range));
+            if let Some(range) = range {
                 self.edit(|handler| {
                     if allowed_range(handler, &range) { handler.set_selected_text_range(range); }
                 });
@@ -597,10 +597,12 @@ define_class!(
         #[unsafe(method_id(closestPositionToPoint:))]
         fn closest_position(&self, point: CGPoint) -> Option<Retained<UITextPosition>> {
             self.with_handler(|handler| {
-                let offset = handler.character_index_for_point(gpui::point(px(point.x as f32), px(point.y as f32)))?;
-                allowed_range(handler, &(offset..offset)).then_some(offset)
-            }).flatten()
-                .map(|offset| self.new_position(offset))
+                handler
+                    .character_index_for_point(gpui::point(px(point.x as f32), px(point.y as f32)))
+                    .filter(|offset| allowed_range(handler, &(*offset..*offset)))
+            })
+            .flatten()
+            .map(|offset| self.new_position(offset))
         }
         #[unsafe(method_id(closestPositionToPoint:withinRange:))]
         fn closest_position_within_range(&self, point: CGPoint, range: &UITextRange) -> Option<Retained<UITextPosition>> {

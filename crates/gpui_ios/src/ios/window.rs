@@ -186,23 +186,37 @@ define_class!(
             _interaction: &UITextInteraction,
             location: CGPoint,
         ) -> bool {
-            self.ivars()
+            let point = gpui::point(px(location.x as f32), px(location.y as f32));
+            let state = self.ivars().with_window(|window| {
+                window.with_input_handler(|handler| {
+                    (handler.query_accepts_focused_text_input(), handler.element_bounds())
+                })
+            }).flatten();
+            let (focused, bounds) = state.unwrap_or((false, None));
+            let inside = bounds.as_ref().is_some_and(|bounds| bounds.contains(&point));
+            let accepted = focused && inside;
+            accepted
+        }
+
+        #[unsafe(method(interactionWillBegin:))]
+        fn interaction_will_begin(&self, _interaction: &UITextInteraction) {
+            let should_show_keyboard = self
+                .ivars()
                 .with_window(|window| {
                     window
                         .with_input_handler(|handler| {
-                            if !handler.query_accepts_focused_text_input() {
-                                return false;
-                            }
-                            let Some(bounds) = handler.element_bounds() else {
-                                return false;
-                            };
-                            let location = point(px(location.x as f32), px(location.y as f32));
-                            bounds.contains(&location)
+                            handler.query_accepts_focused_text_input()
                         })
                         .unwrap_or(false)
                 })
-                .unwrap_or(false)
+                .unwrap_or(false);
+            if should_show_keyboard {
+                self.ivars()
+                    .with_window(IosWindowState::show_keyboard);
+            }
+
         }
+
     }
 
     impl MetalView {
@@ -393,7 +407,7 @@ impl IosWindow {
 
         let text_interaction =
             UITextInteraction::textInteractionForMode(UITextInteractionMode::Editable, main_thread);
-        unsafe { text_interaction.setTextInput(Some(text_input_view.as_ref())) };
+        unsafe { text_interaction.setTextInput(Some(text_input_view.as_super().as_super())) };
         text_interaction.setDelegate(Some(ProtocolObject::from_ref(&*view)));
         view.addInteraction(&ProtocolObject::from_ref(&*text_interaction));
 
