@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import base64
 import os
+import json
 from pathlib import Path
 import re
 import shutil
@@ -249,6 +250,175 @@ def check_keyboard_inset(serial: str, artifact: Path, name: str, visible: bool) 
         f"{name}: keyboard inset did not reach visible={visible}; last probe={last_label!r}; "
         f"last input_method shown={last_shown_state}; geometry={last_geometry}"
     )
+
+
+def app_pid(serial: str, package: str) -> int:
+    output = adb(serial, "shell", "pidof", package).strip()
+    values = [int(value) for value in output.split() if value.isdigit()]
+    if not values:
+        raise RuntimeError(f"process {package!r} is not running")
+    return values[0]
+
+
+def activity_recreation_events(logs: str, package: str, activity: str, pid: int) -> dict[str, list[str]]:
+    """Select durable Activity lifecycle events for one process and component."""
+    events: dict[str, list[str]] = {"relaunch": [], "destroy": [], "create": []}
+    component = f"{package}/{activity}"
+    for line in logs.splitlines():
+        if "wm_relaunch_resume_activity:" in line and component in line:
+            events["relaunch"].append(line)
+            continue
+        match = re.search(r"\bwm_on_(destroy|create)_called:\s*\[([^,]+),([^,]+),", line)
+        if not match or match.group(3) != activity:
+            continue
+        pid_match = re.match(r"^\S+\s+\S+\s+(\d+)\s+\d+\s+[A-Z]\s+", line)
+        if not pid_match or int(pid_match.group(1)) != pid:
+            continue
+        events[match.group(1)].append(line)
+    return events
+
+
+def validate_activity_recreation_events(logs: str, events: dict[str, list[str]]) -> None:
+    if not (events["relaunch"] and events["destroy"] and events["create"]):
+        raise RuntimeError(
+            "font-scale change did not produce durable wm_relaunch_resume_activity, "
+            "wm_on_destroy_called, and wm_on_create_called events for the same Activity/PID")
+    destroy_line = events["destroy"][-1]
+    create_after_destroy = [line for line in events["create"]
+                            if logs.find(line) > logs.find(destroy_line)]
+    if not create_after_destroy:
+        raise RuntimeError("Activity create event did not follow its destroy event")
+    token = re.search(r"wm_on_destroy_called:\s*\[([^,]+),", destroy_line)
+    create_token = re.search(r"wm_on_create_called:\s*\[([^,]+),", create_after_destroy[-1])
+    if not token or not create_token or token.group(1) != create_token.group(1):
+        raise RuntimeError("Activity lifecycle events refer to different or missing ActivityRecord tokens")
+    relaunch_tokens = []
+    for line in events["relaunch"]:
+        match = re.search(r"wm_relaunch_resume_activity:\s*\[[^,]+,([^,]+),", line)
+        if match:
+            relaunch_tokens.append(match.group(1))
+    if token.group(1) not in relaunch_tokens:
+        raise RuntimeError("wm_relaunch and Activity lifecycle events refer to different ActivityRecord tokens")
+
+
+def distinct_font_scale(current: str) -> str:
+    """Pick a non-default test value without losing the caller's exact original."""
+    try:
+        value = float(current) if current != "null" else 1.0
+    except ValueError as error:
+        raise RuntimeError(f"unrecognized system font_scale value {current!r}") from error
+    return "1.10" if abs(value - 1.10) > 0.001 else "1.15"
+
+
+def run_font_scale_recreation(
+    serial: str, artifact: Path, package: str, activity: str, root_label: str
+) -> str:
+    """Trigger and prove a real same-process Activity recreation, then restore settings."""
+    key = ("shell", "settings", "get", "system", "font_scale")
+    original = adb(serial, *key).strip()
+    replacement = distinct_font_scale(original)
+    pid_before = app_pid(serial, package)
+    before_events = adb(serial, "logcat", "-d", "-b", "all", timeout=45)
+    before_activities = adb(serial, "shell", "dumpsys", "activity", "activities")
+    (artifact / "font-scale-before.txt").write_text(original + "\n")
+    (artifact / "font-scale-before-pid.txt").write_text(str(pid_before) + "\n")
+    (artifact / "font-scale-before-logcat.txt").write_text(before_events)
+    (artifact / "font-scale-before-activities.txt").write_text(before_activities)
+    capture_screen(serial, artifact, "font-scale-before")
+    changed = False
+    failed = False
+    restored_root = ""
+    logs = ""
+    events: dict[str, list[str]] = {"relaunch": [], "destroy": [], "create": []}
+    try:
+        # The prior log is durable above; start this evidence slice at the trigger.
+        clear_logcat(serial, artifact)
+        changed = True
+        adb(serial, "shell", "settings", "put", "system", "font_scale", replacement, timeout=8)
+        (artifact / "font-scale-change-command.txt").write_text(
+            f"adb -s {serial} shell settings put system font_scale {replacement}\n")
+        deadline = time.monotonic() + 20.0
+        logs = ""
+        while time.monotonic() < deadline:
+            logs = adb(serial, "logcat", "-d", "-b", "all", timeout=5)
+            events = activity_recreation_events(logs, package, activity, pid_before)
+            if events["relaunch"] and events["destroy"] and events["create"]:
+                break
+            current_pid = app_pid(serial, package)
+            if current_pid != pid_before:
+                raise RuntimeError(
+                    f"font-scale recreation restarted process: pid {pid_before} -> {current_pid}")
+            time.sleep(0.15)
+        validate_activity_recreation_events(logs, events)
+        pid_after = app_pid(serial, package)
+        if pid_after != pid_before:
+            raise RuntimeError(f"Activity recreation changed process PID: {pid_before} -> {pid_after}")
+        resumed = wait_resumed_activity(serial, package, True, timeout=15)
+        root = wait_label(serial, artifact, root_label, "font-scale-recreated", timeout=20)
+        if root_label not in exact_labels(root):
+            raise RuntimeError("recreated app root did not become accessible")
+        (artifact / "font-scale-after-activities.txt").write_text(
+            adb(serial, "shell", "dumpsys", "activity", "activities"))
+        (artifact / "font-scale-after-pid.txt").write_text(str(pid_after) + "\n")
+        (artifact / "font-scale-after-resumed.txt").write_text(resumed + "\n")
+        capture_screen(serial, artifact, "font-scale-after")
+        print("Same-process system font-scale Activity recreation: PASS")
+    except Exception as error:
+        failed = True
+        if logs:
+            (artifact / "font-scale-after-logcat.txt").write_text(logs)
+            (artifact / "font-scale-after-events.json").write_text(
+                json.dumps(events, indent=2) + "\n")
+        (artifact / "font-scale-recreation-error.txt").write_text(
+            f"{type(error).__name__}: {error}\n")
+        capture_errors = []
+        for filename, capture in (
+            ("font-scale-failure-activities.txt",
+             lambda: adb(serial, "shell", "dumpsys", "activity", "activities", timeout=5)),
+            ("font-scale-failure-window.txt",
+             lambda: adb(serial, "shell", "dumpsys", "window", "displays", timeout=5)),
+            ("font-scale-failure-logcat.txt",
+             lambda: adb(serial, "logcat", "-d", "-b", "all", timeout=10)),
+            ("font-scale-failure-top-resumed.txt", lambda: top_resumed_activity(serial)),
+        ):
+            try:
+                (artifact / filename).write_text(capture())
+            except Exception as capture_error:
+                capture_errors.append(f"{filename}: {capture_error}")
+        try:
+            capture_screen(serial, artifact, "font-scale-failure")
+        except Exception as capture_error:
+            capture_errors.append(f"screenshot: {capture_error}")
+        if capture_errors:
+            (artifact / "font-scale-failure-capture-errors.txt").write_text(
+                "\n".join(capture_errors) + "\n")
+        raise
+    finally:
+        if changed:
+            try:
+                if original == "null":
+                    adb(serial, "shell", "settings", "delete", "system", "font_scale", timeout=8)
+                    restore_command = f"adb -s {serial} shell settings delete system font_scale"
+                else:
+                    adb(serial, "shell", "settings", "put", "system", "font_scale", original, timeout=8)
+                    restore_command = f"adb -s {serial} shell settings put system font_scale {original}"
+                restored = adb(serial, *key).strip()
+                (artifact / "font-scale-restore.txt").write_text(
+                    f"original={original}\nrestored={restored}\ncommand={restore_command}\n")
+                if restored != original:
+                    raise RuntimeError(
+                        f"font_scale restore mismatch: expected {original!r}, got {restored!r}")
+                # Wait for the app to settle after returning to the user's exact setting.
+                restored_root = wait_label(
+                    serial, artifact, root_label, "font-scale-restored", timeout=20)
+                capture_screen(serial, artifact, "font-scale-restored")
+            except Exception as restore_error:
+                (artifact / "font-scale-restore-error.txt").write_text(
+                    f"{type(restore_error).__name__}: {restore_error}\n")
+                if not failed:
+                    raise
+    return restored_root
+
 
 def capture_screen(serial: str, artifact: Path, name: str) -> None:
     result = subprocess.run([ADB, "-s", serial, "exec-out", "screencap", "-p"],
@@ -926,6 +1096,9 @@ def main() -> int:
     parser.add_argument("--abi", default="x86_64")
     parser.add_argument("--min-api", type=int, default=26)
     parser.add_argument("--root-label", default="GPUI mobile acceptance")
+    parser.add_argument(
+        "--font-scale-recreation", action="store_true",
+        help="trigger a real system font-scale configuration recreation, verify same-process lifecycle, then restore the exact setting")
     parser.add_argument("--counter-label", default="Increment")
     parser.add_argument("--counter-before", default="Count: 0")
     parser.add_argument("--counter-after", default="Count: 1")
@@ -965,6 +1138,9 @@ def main() -> int:
     check_keyboard_inset(args.serial, args.artifacts, "launch", False)
     capture_screen(args.serial, args.artifacts, "first-frame")
     print("NativeActivity launch and first accessible frame: PASS")
+    if args.font_scale_recreation:
+        root_xml = run_font_scale_recreation(
+            args.serial, args.artifacts, args.package, args.activity, args.root_label)
 
     labels = exact_labels(root_xml)
     if args.counter_before not in labels:

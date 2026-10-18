@@ -62,5 +62,49 @@ class RuntimeFailureClassificationTests(unittest.TestCase):
         self.assertEqual(android_acceptance.runtime_failure_lines(line), [line])
 
 
+class FontScaleRecreationTests(unittest.TestCase):
+    def test_font_scale_uses_a_distinct_value_and_handles_missing_setting(self):
+        self.assertEqual(android_acceptance.distinct_font_scale("null"), "1.10")
+        self.assertEqual(android_acceptance.distinct_font_scale("1.0"), "1.10")
+        self.assertEqual(android_acceptance.distinct_font_scale("1.10"), "1.15")
+        self.assertEqual(android_acceptance.distinct_font_scale("1.15"), "1.10")
+
+    def test_activity_recreation_requires_same_process_destroy_and_create(self):
+        log = """10-18 10:38:48.683  545  567 I wm_relaunch_resume_activity: [0,68170572,10,dev.gpui.mobile.example/dev.gpui.mobile.GpuiInputActivity,40000000]
+10-18 10:38:49.193 3230 3230 I wm_on_destroy_called: [68170572,dev.gpui.mobile.GpuiInputActivity,performDestroy,5]
+10-18 10:38:49.316 3230 3230 I wm_on_create_called: [68170572,dev.gpui.mobile.GpuiInputActivity,performCreate,68]
+10-18 10:38:49.500 9999 9999 I wm_on_create_called: [68170572,dev.gpui.mobile.GpuiInputActivity,performCreate,68]
+"""
+        events = android_acceptance.activity_recreation_events(
+            log, "dev.gpui.mobile.example", "dev.gpui.mobile.GpuiInputActivity", 3230)
+        self.assertEqual(len(events["relaunch"]), 1)
+        self.assertEqual(len(events["destroy"]), 1)
+        self.assertEqual(len(events["create"]), 1)
+        self.assertLess(log.index(events["destroy"][0]), log.index(events["create"][0]))
+        android_acceptance.validate_activity_recreation_events(log, events)
+
+    def test_activity_recreation_does_not_accept_destroy_without_recreated_activity(self):
+        log = """10-18 10:38:49.193 3230 3230 I wm_on_destroy_called: [68170572,dev.gpui.mobile.GpuiInputActivity,performDestroy,5]
+10-18 10:38:49.735 545 916 I wm_relaunch_resume_activity: [0,183945133,9,com.android.launcher/.Launcher,40000000]
+"""
+        events = android_acceptance.activity_recreation_events(
+            log, "dev.gpui.mobile.example", "dev.gpui.mobile.GpuiInputActivity", 3230)
+        self.assertEqual(events["relaunch"], [])
+        self.assertEqual(len(events["destroy"]), 1)
+        self.assertEqual(events["create"], [])
+        with self.assertRaisesRegex(RuntimeError, "did not produce durable"):
+            android_acceptance.validate_activity_recreation_events(log, events)
+
+    def test_activity_recreation_rejects_unrelated_record_token(self):
+        log = """10-18 10:38:48.683 545 567 I wm_relaunch_resume_activity: [0,68170572,10,dev.gpui.mobile.example/dev.gpui.mobile.GpuiInputActivity,40000000]
+10-18 10:38:49.193 3230 3230 I wm_on_destroy_called: [68170572,dev.gpui.mobile.GpuiInputActivity,performDestroy,5]
+10-18 10:38:49.316 3230 3230 I wm_on_create_called: [99999999,dev.gpui.mobile.GpuiInputActivity,performCreate,68]
+"""
+        events = android_acceptance.activity_recreation_events(
+            log, "dev.gpui.mobile.example", "dev.gpui.mobile.GpuiInputActivity", 3230)
+        with self.assertRaisesRegex(RuntimeError, "different or missing"):
+            android_acceptance.validate_activity_recreation_events(log, events)
+
+
 if __name__ == "__main__":
     unittest.main()
