@@ -32,7 +32,7 @@ cargo ndk -t arm64-v8a -t x86_64 -P 26 \
 )
 ```
 
-The APK is written to examples/mobile/android/app/build/outputs/apk/debug/app-debug.apk. The repository helper `examples/mobile/build.sh android` also packages this example in the configured Android build environment; its build step expects ANDROID_NDK_HOME and RUSTC.
+The APK is written to `examples/mobile/android/app/build/outputs/apk/debug/app-debug.apk`. On Linux, the repository packaging entrypoint is `examples/mobile/android/build.sh`; it builds and strips the native libraries, preserves unstripped libraries and debug symbols, and assembles the APK. It requires `ANDROID_NDK_HOME`, `RUSTC`, and the Android SDK environment described above. Set `GPUI_BUILD_RUNNER` only when the build must run through a configured external runner.
 
 To run the accessibility, touch, scroll, IME, rotation, background/resume, and relaunch acceptance flow on an x86_64 emulator, first build the test-only IME fixture:
 
@@ -47,9 +47,9 @@ python3 scripts/android_acceptance.py \
   --ime-apk examples/mobile/android/acceptance-ime/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-The runner defaults to emulator-5554 and checks the emulator ABI and minimum API. It temporarily changes the default IME, accessibility service, and rotation settings, then restores their previous values. Use a disposable emulator if you cannot allow those settings to be changed during the test.
+The runner defaults to emulator-5554 and checks the emulator ABI and minimum API. It temporarily changes the default IME, accessibility service, and rotation settings, then restores their previous values where the OS exposes them; an unset preference may be normalized to its default. Use a disposable emulator if you cannot allow those settings to be changed during the test.
 
-The Java InputConnection proxy keeps an immutable text/selection snapshot for synchronous IME queries. It queues edits for the GPUI owner thread rather than calling into GPUI while the IME holds framework locks. Native UTF-16 selection and composition ranges are converted at the text-input boundary. On API 30 and later the host receives typed keyboard insets; on API 26–29 it estimates the keyboard region from the visible display frame.
+The Java InputConnection proxy keeps an immutable text/selection snapshot for synchronous IME queries. It queues edits for the GPUI owner thread rather than calling into GPUI while the IME holds framework locks. Native UTF-16 selection and composition ranges are converted at the text-input boundary. On API 30 and later the host receives typed keyboard insets through the platform inset-animation path. On API 26–29 the host uses `SOFT_INPUT_ADJUST_PAN` and a legacy visible-display-frame observer. It measures the visible frame relative to the window’s screen origin so pan displacement is not counted as keyboard occlusion, publishes keyboard occlusion separately from stable safe-area insets, and clears stale geometry on an explicit hidden-IME notification.
 
 ### Embedding Android native views
 
@@ -74,7 +74,7 @@ GpuiPlatformView.registerViewFactory("video_player", (activity, params) ->
     new MyVideoView(activity, params));
 ```
 
-`GpuiPlatformView.ViewFactory.create` and its `dispose` callback run on Android's UI thread. Rust requests view creation synchronously with a bounded wait; factory work must stay short and must not wait on the GPUI thread. The sample `GpuiInputActivity` binds the Activity in `onCreate` and unbinds it in `onDestroy`; a custom host must follow the same bind/unbind lifecycle so static overlay views do not retain a destroyed Activity. Unknown or unregistered view types fail creation rather than producing placeholder video, camera, or map content.
+`GpuiPlatformView.ViewFactory.create` and its `dispose` callback run on Android's UI thread. Rust requests view creation synchronously with a bounded wait; factory work must stay short and must not wait on the GPUI thread. The sample `GpuiInputActivity` does not bind the optional platform-view bridge. A custom Activity host that uses this bridge must call `GpuiPlatformView.bindActivity(this)` on the UI thread after `super.onCreate(...)`, then call `GpuiPlatformView.unbindActivity(this)` on the UI thread before `super.onDestroy()`. Unbinding clears the overlay and invalidates pending creations so bridge-owned views do not retain a destroyed Activity. Unknown or unregistered view types fail creation rather than producing placeholder video, camera, or map content.
 
 ## iOS prerequisites and build
 
@@ -132,34 +132,49 @@ See [Accept text input](crate::_documentation::guides::text_input), [Manage focu
 
 ## Validated release configurations
 
-The current Android acceptance matrix is bound to the product app SHA-256
-`1ecf3f5915150372edf7e93d0745f1590216029dacf2ff4f4d38c066b17e2f25`, built
-from source checkpoint `11a71ada` plus the approved `window.rs` overlay
-(SHA-256 `52cadb2058ff787d3cd0e2c8645fe8f2471089c9f548a33853e29f90d2097886`).
-That exact source state is committed as `58748acf200778474ae334a670b43b592172de0b`;
-the runner SHA-256 is
-`286e1f01f436d030ceed89dc336897da4147e666a1b22524ac5608cba42f1a92`. The
-matching AndroidTest APK is `50e3f8ad6922ce2b4a4a5a476e2cc1d1df0999ffe2c3a6206c199e073b823854`;
-the test-only IME APK is
-`4cbb883f81995f3ddf62179a20dfed567851039fbfa8c9d23f9d1673c0874df7`. All three
-APKs have signer SHA-256
-`bedc415e4a37986a64f383fe69cf0a9216934142fba5d65ba792f0a8c3b9b85a`.
+### Android
 
-| Emulator API | Strict acceptance | Native-view probe |
+The current acceptance APK is bound to source checkpoint
+`9043c8f31d039dcfabf71456b45a18c30b398977` (tree
+`69b31c92dee9101e9d38608077150ecb172c2949`). Product APK SHA-256:
+`5e07577d3b25422a5b4fe0f6f4d5b6ce2475dbed0112c5cb80a95449a52dc961`.
+AndroidTest APK SHA-256:
+`55eba964d66d78195bbe8662e19e57393f9b5df29b15f4d9c28050a39745f75e`.
+The test-only IME APK SHA-256 is
+`0c00c866ccd4decc77da75a7d055beb156c2b06bf0a7bcbc1ac845746b56595b`.
+The Java host source SHA-256 is
+`4851a3e7dc3e50d0c624cffb9ef276cd65db46478047e887edddf534ec8dc07e`.
+All packaged native libraries match the previously validated a7 product
+libraries byte-for-byte; this APK did not rebuild Rust, WGSL, or Cargo inputs.
+The runner SHA-256 is
+`c9a4e1e8d55cb778899d4a7183ba689b3b4cac45091749465fb6fae0a81f584e`.
+
+| Emulator API | Strict acceptance | Native lifecycle instrumentation |
 | --- | --- | --- |
 | 26 | Pass | Pass |
 | 29 | Pass | Pass |
 | 34 | Pass | Pass |
 | 36 | Pass | Pass |
 
-The full run matrix and evidence paths are in
-`final-sync/evidence/android/refresh-resume-11a71ad/final-matrix-report.md`.
-API 36 passed with the resolved ANGLE/SwiftShader GLES mode launched as
-`-gpu swangle -feature -Vulkan -accel on`; the earlier API 36 Lavapipe lane
-failed its post-rotation keyboard-visibility assertion and is kept as a
-separate configuration result. API 26, 29, and 34 used the recorded emulator
-configurations in the same evidence directory. These are x86_64 emulator
-results, not physical-device GPU results.
+API 26, 29, and 34 strict runs passed on x86_64 emulators, including IME
+composition and UTF-16 editing, explicit hide and keyboard Back, rotation,
+background/resume, Activity font-scale recreation, touch/scroll, fresh launch,
+and crash/ANR scanning. API 36 also passed. These are emulator results,
+not physical-device Android validation. Per-API logs, APK hashes, and static
+verification are preserved under
+`evidence/android-final-9043c8f/`; the exact emulator configurations and
+runner invocations are recorded there. API 26 and 29 install commands reported success but no pulled APK hashes were saved; API 34 and 36 pulled app, test, and helper APK hashes match the recorded artifacts. The first API 34 stale-signer attempt is excluded; the passing run followed uninstall and reinstall.
+
+The final device attempt to execute the native test ELF exited 127 because
+the pushed executable was not found, so no native assertion pass is claimed.
+The earlier 134/134 native test result is historical and separate.
+
+The runner regression suite passed 28/28. Runner source SHA-256:
+`c9a4e1e8d55cb778899d4a7183ba689b3b4cac45091749465fb6fae0a81f584e`; test
+source SHA-256:
+`e98a0ab722ba67a0c6fcb0d8fac505e4586f1e584f8dae46b414455b8dfdad49`. Log:
+`evidence/android-final-6e6db89/font-scale-runner-tests-v7.log`, SHA-256
+`2c8f548e102b52f58d24f18c8a190514bb377fc9bf4dd2ee70c0f3aea5080548`.
 
 To run the acceptance flow against a built app and test-only IME on a connected
 emulator, use the repository runner from the checkout root:
@@ -172,19 +187,21 @@ python3 scripts/android_acceptance.py \
   --artifacts target/android-acceptance
 ```
 
-The test APK and helper IME are separate from the product APK. API 36 emulator
-renderer selection matters: preserve the resolved renderer from the evidence,
-not only the requested `-gpu` option.
+The test APK and helper IME are separate from the product APK. The runner
+temporarily changes the default IME, accessibility service, rotation, and
+font-scale settings, then restores their previous values where the OS exposes them; an unset preference may be normalized to its default. Use a disposable
+emulator if you cannot allow those settings to be changed during the test.
+
+### iOS
 
 The iOS app-level acceptance suite passed 7/7 unflagged Release XCUITests on
-source checkpoint `ac997d31662b8aa370acb729e64192f422b7cf77` (tree
-`e1b6ef748b40c236a1cc3b728fb48e4024450647`). Its portable artifact archive SHA-256
-is `6409cf9d203a7c06e803af5781c648105ba79ae1acd33510d6ac42b97a84ac74`; the
-portable manifest SHA-256 is
-`123ca4c8fd12da798703f924f5273d2842d821881fbd185dc75049a2b6e69244`. The app
-was validated in the simulator. The arm64 device executable is unsigned and
-was compile/package checked only; there is no physical-device runtime result.
-The implementation requires iOS 15 or newer.
+source checkpoint `a7e52d69e33f01ef5f1e7bfa37a950f5c774297f`. The unsigned
+arm64 device package build passed, but it was not installed or run on a physical
+device. The evidence mirror is
+`evidence/ios-validation/final-a7e52d69e33f01ef5f1e7bfa37a950f5c774297f/`,
+bundle SHA-256
+`581550e4fc44408bf92a2741cf5a83fb6649298b714cc2df90363500a52a5051`. The
+implementation requires iOS 15 or newer.
 
 The suite uses real UIKit keyboard input and text interaction: Pinyin candidate
 composition, emoji entry, word selection by double-tap and replacement using a

@@ -157,6 +157,12 @@ The element still prepaints freshly. Reuse of painted output separately requires
 the exact output key, including bounds, to match; on any failed eligibility
 check, GPUI takes the fresh layout path.
 
+When a rebuilt retained layout keeps its claimed root attached to a Taffy
+parent, GPUI compensates the prepaint origin from the absolute-zero origin and
+the sampled structural origin. This preserves the current frame bounds and
+scroll position without detaching the root; the existing eligibility guards
+remain in force.
+
 Stale Taffy subtrees are pruned at frame end. When the set of unique node IDs
 claimed for the frame equals Taffy's live node count, the count check proves
 there are no unclaimed nodes and skips the retained-node pruning scan. If counts
