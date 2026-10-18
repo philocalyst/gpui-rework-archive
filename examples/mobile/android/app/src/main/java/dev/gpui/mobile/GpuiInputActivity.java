@@ -75,7 +75,9 @@ public class GpuiInputActivity extends NativeActivity {
 
     private void installWindowInsets() {
         Window window = getWindow();
-        window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+        window.setSoftInputMode(Build.VERSION.SDK_INT >= 30
+                ? android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING
+                : android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         View decor = window.getDecorView();
         if (Build.VERSION.SDK_INT >= 30) {
             Api30Insets.configure(window);
@@ -91,6 +93,9 @@ public class GpuiInputActivity extends NativeActivity {
             publishInsets(insets);
             return insets;
         });
+        if (Build.VERSION.SDK_INT < 30) {
+            decor.getViewTreeObserver().addOnGlobalLayoutListener(this::publishLegacyInsets);
+        }
         decor.requestApplyInsets();
     }
 
@@ -102,13 +107,17 @@ public class GpuiInputActivity extends NativeActivity {
 
         int top = Math.max(0, insets.getSystemWindowInsetTop());
         int right = Math.max(0, insets.getSystemWindowInsetRight());
-        int bottom = Math.max(0, insets.getSystemWindowInsetBottom());
+        int bottom = Math.max(0, insets.getStableInsetBottom());
         int left = Math.max(0, insets.getSystemWindowInsetLeft());
         lastSafeInsets[0] = top;
         lastSafeInsets[1] = right;
         lastSafeInsets[2] = bottom;
         lastSafeInsets[3] = left;
 
+        publishLegacyInsets();
+    }
+
+    private int legacyImeBottom() {
         View decor = getWindow().getDecorView();
         View root = decor.getRootView();
         Rect visible = new Rect();
@@ -116,11 +125,23 @@ public class GpuiInputActivity extends NativeActivity {
         int[] rootLocation = new int[2];
         root.getLocationOnScreen(rootLocation);
         int rootBottom = rootLocation[1] + root.getHeight();
-        // Use the obscured bottom edge, not rootHeight-visible.height():
-        // that height difference also includes the status-bar top inset.
+        // Compare against the stable navigation area, then report the full
+        // occlusion so GPUI keeps the same screen-space inset as newer APIs.
         int obscuredBottom = Math.max(0, rootBottom - visible.bottom);
-        int imeBottom = Math.max(0, obscuredBottom - bottom);
-        nativeInsets(top, right, bottom, left, 0, 0, imeBottom, 0);
+        int safeBottom = lastSafeInsets[2];
+        android.view.WindowInsets rootInsets = decor.getRootWindowInsets();
+        if (rootInsets != null) {
+            safeBottom = rootInsets.getStableInsetBottom();
+        }
+        // A one-pixel tolerance absorbs integer rounding without excluding
+        // short keyboards on compact displays.
+        return obscuredBottom > safeBottom + 1 ? obscuredBottom : 0;
+    }
+
+    private void publishLegacyInsets() {
+        if (Build.VERSION.SDK_INT >= 30) return;
+        nativeInsets(lastSafeInsets[0], lastSafeInsets[1], lastSafeInsets[2], lastSafeInsets[3],
+                0, 0, legacyImeBottom(), 0);
     }
 
     @Override protected void onStart() {
@@ -158,11 +179,7 @@ public class GpuiInputActivity extends NativeActivity {
 
     private boolean isImeVisible() {
         if (Build.VERSION.SDK_INT >= 30) return Api30Insets.isVisible(this);
-        ViewGroup decor = (ViewGroup) getWindow().getDecorView();
-        Rect visible = new Rect();
-        decor.getWindowVisibleDisplayFrame(visible);
-        int obscured = decor.getRootView().getHeight() - visible.height();
-        return obscured > (int) (160 * getResources().getDisplayMetrics().density);
+        return legacyImeBottom() > 0;
     }
 
     private void handleSystemBack() {
