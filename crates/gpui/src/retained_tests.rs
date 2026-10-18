@@ -5,13 +5,14 @@
 
 use crate::{
     AnyWindowHandle, App, AppContext as _, Bounds, Context, DevicePixels, Element, ElementId,
-    ElementInputHandler, Entity, EntityInputHandler, FocusHandle, Global, GlobalElementId,
-    ImageCache, ImageCacheError, InteractiveElement as _, IntoElement, LayoutDirection, LayoutId,
-    Modifiers, MouseButton, ParentElement as _, Pixels, Render, RenderImage, Resource,
+    ElementInputHandler, Entity, EntityInputHandler, FilterRenderTarget, FocusHandle, Global,
+    GlobalElementId, ImageCache, ImageCacheError, InteractiveElement as _, IntoElement,
+    LayoutDirection, LayoutId, Modifiers, MouseButton, PaintQuad, ParentElement as _, Pixels,
+    Point, PrimitiveBatch, Render, RenderCommand, RenderImage, Resource,
     StatefulInteractiveElement as _, Style, StyleRefinement, Styled as _, SurfaceSource,
     TestAppContext, TextInputAction, TextInputConfiguration, UTF16Selection, View, ViewElement,
-    VisualTestContext, Window, WindowHandle, canvas, deferred, div, fill, img, point, px, rems,
-    rgb, size,
+    VisualTestContext, Window, WindowHandle, canvas, deferred, div, img, point, px, rems, rgb,
+    size,
 };
 use std::{
     cell::RefCell,
@@ -60,6 +61,7 @@ struct Model {
 struct OraclePanel {
     index: usize,
     generation: usize,
+    opacity: f32,
     render_model: Option<Entity<Model>>,
     paint_model: Option<Entity<Model>>,
     has_cached_image: bool,
@@ -107,7 +109,7 @@ impl Render for OraclePanel {
             .debug_selector(move || format!("PANEL-{index}"))
             .size_full()
             .track_focus(&self.focus_handle)
-            .opacity(0.94)
+            .opacity(self.opacity)
             .blur(px(0.6))
             .on_mouse_down(MouseButton::Left, {
                 let event_hits = event_hits.clone();
@@ -181,7 +183,7 @@ impl Render for OraclePanel {
                         } else {
                             rgb(0xc45a61)
                         };
-                        window.paint_quad(fill(bounds, color));
+                        window.paint_quad(PaintQuad::new(bounds).background(color));
                         window.handle_input(
                             &focus_handle,
                             ElementInputHandler::new(bounds, view),
@@ -416,6 +418,7 @@ fn oracle_harness(cx: &mut TestAppContext) -> OracleHarness {
                     cx.new(|cx| OraclePanel {
                         index,
                         generation: 0,
+                        opacity: 0.94,
                         render_model,
                         paint_model,
                         has_cached_image: index == 2,
@@ -468,6 +471,7 @@ struct FrameSnapshot {
     scene_dump: String,
     scene_lanes: Vec<(&'static str, Vec<String>)>,
     surface_opacities: Vec<f32>,
+    effective_surface_opacities: Vec<f32>,
     deferred_count: usize,
 }
 
@@ -485,6 +489,7 @@ impl PartialEq for FrameSnapshot {
             && self.scene_dump == other.scene_dump
             && self.scene_lanes == other.scene_lanes
             && self.surface_opacities == other.surface_opacities
+            && self.effective_surface_opacities == other.effective_surface_opacities
             && self.deferred_count == other.deferred_count
     }
 }
@@ -496,6 +501,45 @@ struct HitboxSnapshot {
     behavior: crate::HitboxBehavior,
     tags: Vec<String>,
     fragments: Option<Vec<Bounds<Pixels>>>,
+}
+
+fn effective_surface_opacities(scene: &crate::Scene) -> Vec<f32> {
+    let mut opacities = vec![1.0; scene.surfaces.len()];
+    let mut group_opacities = Vec::new();
+    let mut effective_opacity = 1.0;
+
+    for command in scene.render_commands() {
+        match command {
+            RenderCommand::BeginFilter {
+                boundary_index,
+                target: FilterRenderTarget::Isolated(_),
+            } => {
+                group_opacities.push(effective_opacity);
+                effective_opacity *= scene.filter_boundaries[*boundary_index].opacity;
+            }
+            RenderCommand::BeginFilter {
+                target: FilterRenderTarget::Inline,
+                ..
+            } => group_opacities.push(effective_opacity),
+            RenderCommand::EndFilter { .. } => {
+                effective_opacity = group_opacities
+                    .pop()
+                    .expect("render plan filters must be balanced");
+            }
+            RenderCommand::Batch(PrimitiveBatch::Surfaces(range)) => {
+                for opacity in &mut opacities[range.clone()] {
+                    *opacity = effective_opacity;
+                }
+            }
+            RenderCommand::Batch(_) => {}
+        }
+    }
+
+    assert!(
+        group_opacities.is_empty(),
+        "render plan filters must be balanced"
+    );
+    opacities
 }
 
 fn snapshot_window<V: Render>(
@@ -562,7 +606,7 @@ fn snapshot_window<V: Render>(
                     .iter()
                     .map(Option::is_some)
                     .collect(),
-                cursor_style_count: window.rendered_frame.cursor_styles.len(),
+                cursor_style_count: window.painted_cursor_style_count(),
                 // Scene primitives are plain deterministic values but intentionally do not all
                 // implement PartialEq. Debug snapshots include geometry, ordering, masks,
                 // filter boundaries, and surfaces for an exact same-process comparison.
@@ -592,6 +636,7 @@ fn snapshot_window<V: Render>(
                     ("filter_boundaries", scene.filter_boundaries.iter().map(|item| format!("{item:?}")).collect()),
                 ],
                 surface_opacities: scene.surface_opacities().to_vec(),
+                effective_surface_opacities: effective_surface_opacities(scene),
                 deferred_count: window.rendered_frame.deferred_draws.len(),
             }
         })
@@ -817,6 +862,342 @@ fn update_panel(
     cx.run_until_parked();
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum PointerReadPhase {
+    None,
+    Render,
+    Prepaint,
+    Paint,
+}
+
+struct PointerReadView {
+    phase: PointerReadPhase,
+    render_count: Arc<AtomicUsize>,
+    observations: Rc<RefCell<Vec<(PointerReadPhase, Point<Pixels>)>>>,
+}
+
+impl Render for PointerReadView {
+    fn render(&mut self, window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+        self.render_count.fetch_add(1, Ordering::Relaxed);
+
+        let render_position = if self.phase == PointerReadPhase::Render {
+            let position = window.mouse_position();
+            self.observations
+                .borrow_mut()
+                .push((PointerReadPhase::Render, position));
+            Some(position)
+        } else {
+            None
+        };
+        let phase = self.phase;
+        let prepaint_observations = self.observations.clone();
+        let paint_observations = self.observations.clone();
+        let pointer_canvas = canvas(
+            move |_, window, _| {
+                if phase == PointerReadPhase::Prepaint {
+                    let position = window.mouse_position();
+                    prepaint_observations
+                        .borrow_mut()
+                        .push((PointerReadPhase::Prepaint, position));
+                    Some(position)
+                } else {
+                    None
+                }
+            },
+            move |bounds, prepaint_position, window, _| {
+                let position = if phase == PointerReadPhase::Paint {
+                    let position = window.mouse_position();
+                    paint_observations
+                        .borrow_mut()
+                        .push((PointerReadPhase::Paint, position));
+                    Some(position)
+                } else {
+                    prepaint_position
+                };
+                if let Some(position) = position {
+                    let x = position.x.0 as u32;
+                    let y = position.y.0 as u32;
+                    window.paint_quad(
+                        PaintQuad::new(bounds)
+                            .background(rgb(((x & 0xff) << 16) | ((y & 0xff) << 8) | 0x20)),
+                    );
+                }
+            },
+        )
+        .w_full()
+        .h(px(12.));
+
+        let mut element = div().w_full().h(px(36.)).child(pointer_canvas);
+        if let Some(position) = render_position {
+            element = element.child(format!("render pointer {position:?}"));
+        }
+        element
+    }
+}
+
+struct PointerReadRoot {
+    children: Vec<Entity<PointerReadView>>,
+    mounted: bool,
+    reads_mouse_position: bool,
+    render_count: Arc<AtomicUsize>,
+    root_observations: Rc<RefCell<Vec<Point<Pixels>>>>,
+}
+
+impl Render for PointerReadRoot {
+    fn render(&mut self, window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+        self.render_count.fetch_add(1, Ordering::Relaxed);
+        let mut element = div().size_full().flex().flex_col();
+        if self.reads_mouse_position {
+            let position = window.mouse_position();
+            self.root_observations.borrow_mut().push(position);
+            element = element.child(format!("parent pointer {position:?}"));
+        }
+        if self.mounted {
+            element = element.children(self.children.iter().cloned());
+        }
+        element
+    }
+}
+
+struct PointerReadHarness {
+    window: WindowHandle<PointerReadRoot>,
+    child_render_counts: Vec<Arc<AtomicUsize>>,
+    child_observations: Vec<Rc<RefCell<Vec<(PointerReadPhase, Point<Pixels>)>>>>,
+    root_render_count: Arc<AtomicUsize>,
+    root_observations: Rc<RefCell<Vec<Point<Pixels>>>>,
+}
+
+fn pointer_read_harness(
+    cx: &mut TestAppContext,
+    phases: &[PointerReadPhase],
+    reads_mouse_position: bool,
+) -> PointerReadHarness {
+    let child_render_counts = phases
+        .iter()
+        .map(|_| Arc::new(AtomicUsize::new(0)))
+        .collect::<Vec<_>>();
+    let child_observations = phases
+        .iter()
+        .map(|_| Rc::new(RefCell::new(Vec::new())))
+        .collect::<Vec<_>>();
+    let children = phases
+        .iter()
+        .copied()
+        .zip(child_render_counts.iter().cloned())
+        .zip(child_observations.iter().cloned())
+        .map(|((phase, render_count), observations)| {
+            cx.new(|_| PointerReadView {
+                phase,
+                render_count,
+                observations,
+            })
+        })
+        .collect::<Vec<_>>();
+    let root_render_count = Arc::new(AtomicUsize::new(0));
+    let root_observations = Rc::new(RefCell::new(Vec::new()));
+    let window = cx.add_window({
+        let root_render_count = root_render_count.clone();
+        let root_observations = root_observations.clone();
+        move |_, _| PointerReadRoot {
+            children,
+            mounted: true,
+            reads_mouse_position,
+            render_count: root_render_count,
+            root_observations,
+        }
+    });
+    let any_window = AnyWindowHandle::from(window);
+    cx.update_window(any_window, |_, window, cx| window.draw(cx).clear(cx))
+        .unwrap();
+
+    PointerReadHarness {
+        window,
+        child_render_counts,
+        child_observations,
+        root_render_count,
+        root_observations,
+    }
+}
+
+fn simulate_pointer_move(
+    window: &WindowHandle<PointerReadRoot>,
+    cx: &mut TestAppContext,
+    position: Point<Pixels>,
+) {
+    cx.update_window(AnyWindowHandle::from(window.clone()), |_, window, cx| {
+        window.simulate_mouse_move(position, cx);
+        window.draw(cx).clear(cx);
+    })
+    .unwrap();
+    cx.run_until_parked();
+}
+
+fn force_pointer_read_refresh_and_compare(
+    window: &WindowHandle<PointerReadRoot>,
+    cx: &mut TestAppContext,
+) {
+    let before = snapshot_window(window, cx);
+    cx.update_window(AnyWindowHandle::from(window.clone()), |_, window, cx| {
+        window.refresh()
+    })
+    .unwrap();
+    cx.run_until_parked();
+    assert_eq!(before, snapshot_window(window, cx));
+}
+
+#[gpui::test]
+fn retained_views_track_direct_mouse_reads_in_render_prepaint_and_paint(cx: &mut TestAppContext) {
+    let harness = pointer_read_harness(
+        cx,
+        &[
+            PointerReadPhase::Render,
+            PointerReadPhase::Prepaint,
+            PointerReadPhase::Paint,
+        ],
+        false,
+    );
+    let window = harness.window;
+    reset_counts(&harness.child_render_counts);
+
+    let first_position = point(px(17.), px(29.));
+    simulate_pointer_move(&window, cx, first_position);
+    assert_eq!(counts(&harness.child_render_counts), vec![1, 1, 1]);
+    for (phase, observations) in [
+        PointerReadPhase::Render,
+        PointerReadPhase::Prepaint,
+        PointerReadPhase::Paint,
+    ]
+    .into_iter()
+    .zip(&harness.child_observations)
+    {
+        assert_eq!(observations.borrow().last(), Some(&(phase, first_position)));
+    }
+
+    for _ in 0..3 {
+        reset_counts(&harness.child_render_counts);
+        window.update(cx, |_, _, cx| cx.notify()).unwrap();
+        cx.run_until_parked();
+        assert_eq!(counts(&harness.child_render_counts), vec![0, 0, 0]);
+    }
+
+    reset_counts(&harness.child_render_counts);
+    let second_position = point(px(41.), px(53.));
+    simulate_pointer_move(&window, cx, second_position);
+    assert_eq!(
+        counts(&harness.child_render_counts),
+        vec![1, 1, 1],
+        "each direct pointer reader must rebuild after cache hits when the pointer moves"
+    );
+    for (phase, observations) in [
+        PointerReadPhase::Render,
+        PointerReadPhase::Prepaint,
+        PointerReadPhase::Paint,
+    ]
+    .into_iter()
+    .zip(&harness.child_observations)
+    {
+        assert_eq!(
+            observations.borrow().last(),
+            Some(&(phase, second_position))
+        );
+    }
+    force_pointer_read_refresh_and_compare(&window, cx);
+}
+
+#[gpui::test]
+fn retained_parent_pointer_read_survives_child_cache_hits(cx: &mut TestAppContext) {
+    let harness = pointer_read_harness(cx, &[PointerReadPhase::None], true);
+    let window = harness.window;
+
+    reset_counts(&[harness.root_render_count.clone()]);
+    reset_counts(&harness.child_render_counts);
+    window.update(cx, |_, _, cx| cx.notify()).unwrap();
+    cx.run_until_parked();
+    assert_eq!(counts(&[harness.root_render_count.clone()]), vec![1]);
+    assert_eq!(counts(&harness.child_render_counts), vec![0]);
+
+    reset_counts(&[harness.root_render_count.clone()]);
+    reset_counts(&harness.child_render_counts);
+    let position = point(px(67.), px(81.));
+    simulate_pointer_move(&window, cx, position);
+    assert_eq!(counts(&[harness.root_render_count.clone()]), vec![1]);
+    assert_eq!(counts(&harness.child_render_counts), vec![0]);
+    assert_eq!(harness.root_observations.borrow().last(), Some(&position));
+    force_pointer_read_refresh_and_compare(&window, cx);
+}
+
+#[gpui::test]
+fn retained_child_pointer_read_propagates_across_parent_rebuild(cx: &mut TestAppContext) {
+    let harness = pointer_read_harness(cx, &[PointerReadPhase::Render], false);
+    let window = harness.window;
+
+    reset_counts(&[harness.root_render_count.clone()]);
+    reset_counts(&harness.child_render_counts);
+    window.update(cx, |_, _, cx| cx.notify()).unwrap();
+    cx.run_until_parked();
+    assert_eq!(counts(&[harness.root_render_count.clone()]), vec![1]);
+    assert_eq!(
+        counts(&harness.child_render_counts),
+        vec![0],
+        "the child should reuse its cached direct pointer read during the parent rebuild"
+    );
+
+    reset_counts(&[harness.root_render_count.clone()]);
+    reset_counts(&harness.child_render_counts);
+    let position = point(px(73.), px(89.));
+    simulate_pointer_move(&window, cx, position);
+    assert_eq!(
+        counts(&[harness.root_render_count.clone()]),
+        vec![1],
+        "the child dependency should propagate to the parent that rebuilt around its cache hit"
+    );
+    assert_eq!(counts(&harness.child_render_counts), vec![1]);
+    assert_eq!(
+        harness.child_observations[0].borrow().last(),
+        Some(&(PointerReadPhase::Render, position))
+    );
+    force_pointer_read_refresh_and_compare(&window, cx);
+}
+
+#[gpui::test]
+fn retained_pointer_reads_are_pruned_when_child_is_unmounted(cx: &mut TestAppContext) {
+    let harness = pointer_read_harness(cx, &[PointerReadPhase::Paint], false);
+    let window = harness.window;
+
+    reset_counts(&harness.child_render_counts);
+    window
+        .update(cx, |root, _, cx| {
+            root.mounted = false;
+            cx.notify();
+        })
+        .unwrap();
+    cx.run_until_parked();
+    assert_eq!(counts(&harness.child_render_counts), vec![0]);
+
+    reset_counts(&harness.child_render_counts);
+    simulate_pointer_move(&window, cx, point(px(24.), px(35.)));
+    assert_eq!(counts(&harness.child_render_counts), vec![0]);
+
+    window
+        .update(cx, |root, _, cx| {
+            root.mounted = true;
+            cx.notify();
+        })
+        .unwrap();
+    cx.run_until_parked();
+    assert_eq!(counts(&harness.child_render_counts), vec![1]);
+    reset_counts(&harness.child_render_counts);
+
+    let position = point(px(48.), px(62.));
+    simulate_pointer_move(&window, cx, position);
+    assert_eq!(counts(&harness.child_render_counts), vec![1]);
+    assert_eq!(
+        harness.child_observations[0].borrow().last(),
+        Some(&(PointerReadPhase::Paint, position))
+    );
+    force_pointer_read_refresh_and_compare(&window, cx);
+}
+
 #[gpui::test]
 fn retained_views_match_forced_refresh_through_seeded_history(cx: &mut TestAppContext) {
     let harness = oracle_harness(cx);
@@ -929,8 +1310,8 @@ fn retained_views_match_forced_refresh_through_seeded_history(cx: &mut TestAppCo
     force_refresh_and_compare(&harness, cx);
     reset_counts(&harness.render_counts);
 
-    // Ancestor opacity is ambient paint context. Rebuilding only the root must still produce the
-    // same pixels/scene metadata as refreshing the complete window.
+    // Ancestor opacity is a paint-time group scope outside each retained child. Rebuilding only
+    // the root should reuse every child, while replayed grouping must match a forced fresh render.
     harness
         .window
         .update(cx, |root, _, cx| {
@@ -939,10 +1320,34 @@ fn retained_views_match_forced_refresh_through_seeded_history(cx: &mut TestAppCo
         })
         .unwrap();
     cx.run_until_parked();
-    // TestAppContext records scene operations and metadata but not backend pixels. Opacity
-    // changes inherited paint context, so every mounted panel must rebuild even when its own
-    // entity state remains clean.
-    assert_eq!(counts(&harness.render_counts), vec![2, 1, 1, 1]);
+    assert_eq!(
+        counts(&harness.render_counts),
+        vec![0, 0, 0, 0],
+        "changing only the ancestor opacity must replay all clean child views"
+    );
+    force_refresh_and_compare(&harness, cx);
+    reset_counts(&harness.render_counts);
+
+    // A child-owned opacity change invalidates that entity and rebuilds its group markers. Check
+    // the updated start marker, then compare the retained scene with an uncached fresh render.
+    update_panel(&harness, cx, 1, |panel, cx| {
+        panel.opacity = 0.42;
+        cx.notify();
+    });
+    assert_eq!(counts(&harness.render_counts), vec![0, 1, 0, 0]);
+    let updated_opacity_groups = harness
+        .window
+        .update(cx, |_, window, _| {
+            window
+                .rendered_frame
+                .scene
+                .filter_boundaries
+                .iter()
+                .filter(|boundary| boundary.is_start && (boundary.opacity - 0.42).abs() < 0.0001)
+                .count()
+        })
+        .unwrap();
+    assert_eq!(updated_opacity_groups, 1);
     force_refresh_and_compare(&harness, cx);
     reset_counts(&harness.render_counts);
 
@@ -1007,9 +1412,15 @@ fn retained_views_match_forced_refresh_through_seeded_history(cx: &mut TestAppCo
     );
     let surface_opacity = deferred_frame.surface_opacities.first().copied();
     assert_eq!(deferred_frame.surface_opacities.len(), 1);
+    assert_eq!(
+        surface_opacity,
+        Some(1.0),
+        "surface opacity is intrinsic and group alpha is applied at composite time"
+    );
+    let effective_surface_opacity = deferred_frame.effective_surface_opacities.first().copied();
     assert!(
-        (surface_opacity.unwrap() - (0.35 * 0.94 * 0.68)).abs() < 0.001,
-        "surface opacity lost an inherited context: bounds={:?}, opacity={surface_opacity:?}",
+        (effective_surface_opacity.unwrap() - (0.35 * 0.94 * 0.68)).abs() < 0.001,
+        "balanced grouped opacity was not applied to the surface at draw time: bounds={:?}, effective={effective_surface_opacity:?}",
         deferred_frame.debug_bounds.get("ORACLE_SURFACE"),
     );
     reset_counts(&harness.render_counts);
@@ -1305,7 +1716,7 @@ impl Element for DeferredLateRead {
         };
         self.last_signature
             .store((*prepaint << 8) | global_value, Ordering::Relaxed);
-        window.paint_quad(fill(bounds, color));
+        window.paint_quad(PaintQuad::new(bounds).background(color));
     }
 }
 
@@ -1790,7 +2201,7 @@ impl Element for PublicMeasureProbe {
         window: &mut Window,
         _cx: &mut App,
     ) {
-        window.paint_quad(fill(bounds, rgb(0x345c99)));
+        window.paint_quad(PaintQuad::new(bounds).background(rgb(0x345c99)));
     }
 }
 

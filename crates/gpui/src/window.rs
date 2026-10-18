@@ -1367,9 +1367,7 @@ pub(crate) struct ViewEnvironment {
     pub(crate) direction: ResolvedDirection,
     pub(crate) unicode_bidi: UnicodeBidi,
     pub(crate) content_mask: ContentMask<Pixels>,
-    pub(crate) opacity: f32,
     pub(crate) image_caches: Vec<EntityId>,
-    pub(crate) mouse_position: Point<Pixels>,
     pub(crate) focus: Option<FocusId>,
     pub(crate) window_active: bool,
     pub(crate) a11y_active: bool,
@@ -1739,6 +1737,7 @@ pub struct Window {
     pub(crate) measurement_unicode_bidi: UnicodeBidi,
     pub(crate) rendered_entity_stack: Vec<EntityId>,
     cached_view_stack: Vec<CachedViewScope>,
+    current_cached_view_mouse_positions: RefCell<FxHashMap<GlobalElementId, Point<Pixels>>>,
     view_mount_counts: FxHashMap<GlobalElementId, u32>,
     frame_bound_layout_views: FxHashSet<GlobalElementId>,
     pending_deferred_dependencies: FxHashMap<GlobalElementId, crate::ViewDependencies>,
@@ -2712,6 +2711,7 @@ impl Window {
             measurement_unicode_bidi: UnicodeBidi::Normal,
             rendered_entity_stack: Vec::new(),
             cached_view_stack: Vec::new(),
+            current_cached_view_mouse_positions: RefCell::new(FxHashMap::default()),
             view_mount_counts: FxHashMap::default(),
             frame_bound_layout_views: FxHashSet::default(),
             pending_deferred_dependencies: FxHashMap::default(),
@@ -3782,6 +3782,11 @@ impl Window {
         self.rendered_frame.scene.underlines.clone()
     }
 
+    #[cfg(test)]
+    pub(crate) fn painted_cursor_style_count(&self) -> usize {
+        self.rendered_frame.cursor_styles.len()
+    }
+
     /// Set the content size of the window.
     /// Resizes the window's content area to `size`, in logical pixels.
     pub fn resize(&mut self, size: Size<Pixels>) {
@@ -4304,6 +4309,12 @@ impl Window {
     ///
     /// The position is updated from the mouse events the window receives.
     pub fn mouse_position(&self) -> Point<Pixels> {
+        if !self.cached_view_stack.is_empty() {
+            let mut reads = self.current_cached_view_mouse_positions.borrow_mut();
+            for scope in &self.cached_view_stack {
+                reads.insert(scope.id.clone(), self.mouse_position);
+            }
+        }
         self.mouse_position
     }
 
@@ -4428,6 +4439,7 @@ impl Window {
         }
         if !cx.mode.skip_drawing() {
             self.draw_roots(cx);
+            self.finish_cached_view_mouse_position_reads();
             #[cfg(feature = "profiler")]
             {
                 let viewport_size = self.viewport_size;
@@ -7199,6 +7211,44 @@ impl Window {
         }
     }
 
+    pub(crate) fn cached_view_mouse_position_changed(
+        &self,
+        cached_position: Option<Point<Pixels>>,
+    ) -> bool {
+        cached_position.is_some_and(|cached_position| cached_position != self.mouse_position)
+    }
+
+    pub(crate) fn retain_cached_view_mouse_position_dependency(&mut self) {
+        if self.cached_view_stack.is_empty() {
+            return;
+        }
+        let position = self.mouse_position;
+        let mut current = self.current_cached_view_mouse_positions.borrow_mut();
+        for scope in &self.cached_view_stack {
+            current.insert(scope.id.clone(), position);
+        }
+    }
+
+    fn finish_cached_view_mouse_position_reads(&mut self) {
+        debug_assert!(self.cached_view_stack.is_empty());
+        let mut reads = self.current_cached_view_mouse_positions.borrow_mut();
+        for (id, position) in reads.drain() {
+            let key = (id, TypeId::of::<crate::view::ViewElementState>());
+            let Some(state) = self.next_frame.element_states.get_mut(&key) else {
+                continue;
+            };
+            let Some(state) = state
+                .inner
+                .downcast_mut::<Option<crate::view::ViewElementState>>()
+            else {
+                continue;
+            };
+            if let Some(state) = state.as_mut() {
+                state.set_mouse_position_dependency(position);
+            }
+        }
+    }
+
     pub(crate) fn view_environment(&self) -> ViewEnvironment {
         ViewEnvironment {
             viewport_size: self.viewport_size,
@@ -7208,13 +7258,11 @@ impl Window {
             direction: self.resolved_direction(),
             unicode_bidi: self.resolved_unicode_bidi(),
             content_mask: self.content_mask(),
-            opacity: self.element_opacity,
             image_caches: self
                 .image_cache_stack
                 .iter()
                 .map(AnyImageCache::entity_id)
                 .collect(),
-            mouse_position: self.mouse_position,
             focus: self.focus,
             window_active: self.active.get(),
             a11y_active: self.a11y.is_active(),

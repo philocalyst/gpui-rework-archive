@@ -1,8 +1,8 @@
 use crate::{
-    AnyElement, AnyEntity, AnyWeakEntity, App, Bounds, ContentMask, Context, Element, ElementId,
-    Entity, EntityId, GlobalElementId, InspectorElementId, IntoElement, LayoutId, PaintIndex,
-    Pixels, PrepaintStateIndex, Render, RenderOnce, ResolvedDirection, Style, StyleRefinement,
-    TextStyle, UnicodeBidi, ViewDependencies, WeakEntity,
+    AnyElement, AnyEntity, AnyWeakEntity, App, Bounds, Context, Element, ElementId, Entity,
+    EntityId, GlobalElementId, InspectorElementId, IntoElement, LayoutId, PaintIndex, Pixels,
+    PrepaintStateIndex, Render, RenderOnce, ResolvedDirection, Style, StyleRefinement,
+    ViewDependencies, WeakEntity,
 };
 use crate::{Empty, Window};
 use anyhow::Result;
@@ -434,6 +434,13 @@ impl<V: View> IntoElement for ViewElement<V> {
     }
 }
 
+/// The state a [`ViewElement`] carries from layout request through prepaint.
+///
+/// Kept as a public alias for compatibility; the retained view pipeline stores its prepared
+/// element directly in this optional slot without adding a wrapper allocation.
+#[doc(hidden)]
+pub type ViewElementRequestLayoutState = Option<AnyElement>;
+
 #[derive(Default)]
 pub(crate) struct ViewElementState {
     cache: Option<ViewCache>,
@@ -451,6 +458,7 @@ struct LayoutCache {
     dependencies: ViewDependencies,
     direction_contribution: Option<ResolvedDirection>,
     frame_bound: bool,
+    mouse_position: Option<crate::Point<crate::Pixels>>,
 }
 
 #[cfg(test)]
@@ -503,6 +511,12 @@ impl ViewElementState {
         };
         if let CachedOutput::Prepared(output) = &mut cache.output {
             output.a11y_roots.extend_from_slice(roots);
+        }
+    }
+
+    pub(crate) fn set_mouse_position_dependency(&mut self, position: crate::Point<crate::Pixels>) {
+        if let Some(cache) = &mut self.cache {
+            cache.layout.mouse_position = Some(position);
         }
     }
 
@@ -595,14 +609,14 @@ fn cache_is_valid(cache: &ViewCache, entity_id: EntityId, window: &Window, cx: &
     !window.refreshing
         && !window.is_inspector_picking(cx)
         && !window.inspector_is_open()
+        && !window.cached_view_mouse_position_changed(cache.layout.mouse_position)
         && !window.dirty_views.contains(&entity_id)
         && !cache.layout.frame_bound
-        && !cache
+        && cache
             .layout
             .dependencies
             .entities
-            .iter()
-            .any(|entity| window.dirty_views.contains(entity))
+            .is_disjoint(&window.dirty_views)
         && cache
             .layout
             .dependencies
@@ -612,7 +626,7 @@ fn cache_is_valid(cache: &ViewCache, entity_id: EntityId, window: &Window, cx: &
 }
 
 impl<V: View> Element for ViewElement<V> {
-    type RequestLayoutState = Option<AnyElement>;
+    type RequestLayoutState = ViewElementRequestLayoutState;
     type PrepaintState = Option<AnyElement>;
 
     fn id(&self) -> Option<ElementId> {
@@ -675,6 +689,9 @@ impl<V: View> Element for ViewElement<V> {
                                 );
                             }
                             cx.extend_accessed_dependencies(&cache.layout.dependencies);
+                            if cache.layout.mouse_position.is_some() {
+                                window.retain_cached_view_mouse_position_dependency();
+                            }
                             window.note_view_reused();
                             return ((root, None), state);
                         }
@@ -714,6 +731,7 @@ impl<V: View> Element for ViewElement<V> {
                                 dependencies,
                                 direction_contribution,
                                 frame_bound: false,
+                                mouse_position: None,
                             },
                             output: CachedOutput::NeedsPrepaint,
                         });
@@ -938,55 +956,4 @@ impl Render for EmptyView {
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
         Empty
     }
-}
-
-#[inline(never)]
-fn paint_view(
-    entity_id: EntityId,
-    cached: bool,
-    global_id: Option<&GlobalElementId>,
-    element: &mut Option<AnyElement>,
-    window: &mut Window,
-    cx: &mut App,
-) {
-    window.with_rendered_view(entity_id, |window| {
-        let caching_disabled = window.is_inspector_picking(cx);
-        if cached && !caching_disabled {
-            window.with_element_state::<ViewElementState, _>(
-                global_id.unwrap(),
-                |element_state, window| {
-                    let mut element_state = element_state.unwrap();
-
-                    let paint_start = window.paint_index();
-
-                    if let Some(element) = element {
-                        let refreshing = mem::replace(&mut window.refreshing, true);
-                        element.paint(window, cx);
-                        window.refreshing = refreshing;
-                    } else {
-                        window.reuse_paint(element_state.paint_range.clone());
-                    }
-
-                    let paint_end = window.paint_index();
-                    element_state.paint_range = paint_start..paint_end;
-
-                    ((), element_state)
-                },
-            )
-        } else {
-            element.as_mut().unwrap().paint(window, cx);
-        }
-    });
-}
-
-#[inline(never)]
-fn paint_component(
-    name: &'static str,
-    element: &mut Option<AnyElement>,
-    window: &mut Window,
-    cx: &mut App,
-) {
-    window.with_id(ElementId::Name(name.into()), |window| {
-        element.as_mut().unwrap().paint(window, cx);
-    });
 }

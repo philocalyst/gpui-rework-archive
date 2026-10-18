@@ -95,6 +95,17 @@ impl ShapedLine {
         );
         (self.slice(0..i), self.slice(i..self.len()))
     }
+    // Splitting is an occasional operation, so scan the source once here. The
+    // forward cursor uses its retained GraphemeIndices iterator to avoid rescanning.
+    fn is_grapheme_boundary(&self, i: usize) -> bool {
+        i == 0
+            || i == self.text.len()
+            || self
+                .text
+                .grapheme_indices(true)
+                .any(|(start, _)| start == i)
+    }
+
     fn is_cluster_boundary(&self, i: usize) -> bool {
         i == 0
             || i == self.len()
@@ -897,8 +908,8 @@ mod cursor_tests {
         );
     }
     #[test]
-    #[should_panic(expected = "shaped cluster")]
-    fn split_rejects_a_boundary_inside_combining_cluster() {
+    #[should_panic(expected = "Unicode grapheme")]
+    fn split_rejects_a_boundary_inside_combining_grapheme() {
         shaped().split_at(1);
     }
     #[test]

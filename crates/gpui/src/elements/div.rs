@@ -33,14 +33,14 @@ use crate::{HighlightStyle, StyledText, hsla};
 use crate::{
     Action, AnyDrag, AnyElement, AnyTooltip, AnyView, App, AppContext, Bounds, ClickEvent,
     CursorStyle, DispatchPhase, Display, Element, ElementId, Entity, EntityId, ExternalDragPayload,
-    FileDropEvent, FocusHandle, GlobalElementId, Hitbox, HitboxBehavior, HitboxId,
-    InspectorElementId, IntoElement, IsZero, KeyContext, KeyDownEvent, KeyUpEvent, KeyboardButton,
-    KeyboardClickEvent, LayoutId, LongPressEvent, ModifiersChangedEvent, MouseButton,
-    MouseClickEvent, MouseDownEvent, MouseExitEvent, MouseMoveEvent, MousePressureEvent,
-    MouseUpEvent, OngoingScroll, Overflow, ParentElement, PinchEvent, Pixels, Point,
-    PointerChangeCause, Render, ScrollWheelEvent, SharedString, Size, Style, StyleRefinement,
-    StyleTransitionContext, StyleTransitionState, StyleTransitions, Styled, Task, TooltipId,
-    TouchPhase, Visibility, Window, WindowControlArea, point, px, size,
+    FileDropEvent, FocusHandle, GlobalElementId, Hitbox, HitboxBehavior, InspectorElementId,
+    IntoElement, IsZero, KeyContext, KeyDownEvent, KeyUpEvent, KeyboardButton, KeyboardClickEvent,
+    LayoutId, LongPressEvent, ModifiersChangedEvent, MouseButton, MouseClickEvent, MouseDownEvent,
+    MouseExitEvent, MouseMoveEvent, MousePressureEvent, MouseUpEvent, OngoingScroll, Overflow,
+    ParentElement, PinchEvent, Pixels, Point, PointerChangeCause, Render, ScrollWheelEvent,
+    SharedString, Size, Style, StyleRefinement, StyleTransitionContext, StyleTransitionState,
+    StyleTransitions, Styled, Task, TooltipId, TouchPhase, Visibility, Window, WindowControlArea,
+    point, px, size,
 };
 use gpui_util::ResultExt;
 use itertools::Either;
@@ -2979,55 +2979,47 @@ impl Element for Div {
                     }
                 }
 
-                window.with_element_opacity(style.opacity, |window| {
-                    window.with_image_cache(image_cache, |window| {
-                        window.with_style_transition_containing_bounds(bounds, |window| {
-                            let has_standalone_inline =
-                                request_layout.standalone_inline().is_some();
-                            let inline_order = if has_standalone_inline {
-                                self.prepaint_order_fn
-                                    .as_ref()
-                                    .map(|order_fn| order_fn(window, cx))
-                            } else {
-                                None
-                            };
+                window.with_image_cache(image_cache, |window| {
+                    window.with_style_transition_containing_bounds(bounds, |window| {
+                        let has_standalone_inline = request_layout.standalone_inline().is_some();
+                        let inline_order = if has_standalone_inline {
+                            self.prepaint_order_fn
+                                .as_ref()
+                                .map(|order_fn| order_fn(window, cx))
+                        } else {
+                            None
+                        };
 
-                            window.with_element_offset(scroll_offset, |window| {
-                                if let Some(inline) = request_layout.standalone_inline_mut() {
-                                    inline.record_paragraph_origins(window);
-                                    prepaint_children(
-                                        &mut self.children,
-                                        inline_order.as_deref(),
-                                        window,
-                                        cx,
-                                    );
-                                } else {
-                                    let order = self
-                                        .prepaint_order_fn
-                                        .as_ref()
-                                        .map(|order_fn| order_fn(window, cx));
-                                    prepaint_children(
-                                        &mut self.children,
-                                        order.as_deref(),
-                                        window,
-                                        cx,
-                                    );
-                                }
-                            });
-
-                            if has_prepaint_listener && has_standalone_inline {
-                                children_bounds.extend(
-                                    request_layout
-                                        .child_layout_ids
-                                        .iter()
-                                        .map(|layout_id| window.layout_bounds(*layout_id)),
+                        window.with_element_offset(scroll_offset, |window| {
+                            if let Some(inline) = request_layout.standalone_inline_mut() {
+                                inline.record_paragraph_origins(window);
+                                prepaint_children(
+                                    &mut self.children,
+                                    inline_order.as_deref(),
+                                    window,
+                                    cx,
                                 );
-                            }
-
-                            if let Some(listener) = self.prepaint_listener.as_ref() {
-                                listener(children_bounds, window, cx);
+                            } else {
+                                let order = self
+                                    .prepaint_order_fn
+                                    .as_ref()
+                                    .map(|order_fn| order_fn(window, cx));
+                                prepaint_children(&mut self.children, order.as_deref(), window, cx);
                             }
                         });
+
+                        if has_prepaint_listener && has_standalone_inline {
+                            children_bounds.extend(
+                                request_layout
+                                    .child_layout_ids
+                                    .iter()
+                                    .map(|layout_id| window.layout_bounds(*layout_id)),
+                            );
+                        }
+
+                        if let Some(listener) = self.prepaint_listener.as_ref() {
+                            listener(children_bounds, window, cx);
+                        }
                     });
                 });
 

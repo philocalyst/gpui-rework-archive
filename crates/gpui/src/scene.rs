@@ -111,7 +111,7 @@ pub struct Scene {
     surface_opacities: Vec<f32>,
     /// [`crate::BackdropFilter`] primitives.
     pub backdrop_filters: Vec<BackdropFilter>,
-    /// Start and end markers of filter or grouped-opacity groups. They always come in matched pairs.
+    /// Start and end markers of filter or grouped-opacity isolation. Matched pairs isolate the group; unmatched markers render inline.
     pub filter_boundaries: Vec<FilterBoundary>,
     sort_keys: Vec<SceneSortKey>,
     sort_old_to_new: Vec<usize>,
