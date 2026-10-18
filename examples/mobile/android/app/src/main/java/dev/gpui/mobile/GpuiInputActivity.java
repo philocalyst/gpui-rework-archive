@@ -162,6 +162,10 @@ public class GpuiInputActivity extends NativeActivity {
 
     private void handleSystemBack() {
         boolean imeWasVisible = backStartedWithIme || isImeVisible();
+        android.util.Log.i("gpui-android", "Java Back callback: imeVisible=" + imeWasVisible
+                + " keyboardSessionActive=" + keyboardSessionActive
+                + " proxyPresent=" + (input != null)
+                + " proxyFocused=" + (input != null && input.hasFocus()));
         boolean dismissInputSession = keyboardSessionActive;
         backStartedWithIme = false;
         if (input != null && input.hasFocus() && (imeWasVisible || dismissInputSession)) {
@@ -177,10 +181,13 @@ public class GpuiInputActivity extends NativeActivity {
     }
 
     @Override public void onBackPressed() {
-        // NativeActivity's legacy path can receive KEYCODE_BACK even when the
-        // platform dispatcher callback is bypassed by a device IME.
+        android.util.Log.i("gpui-android", "NativeActivity.onBackPressed");
         handleSystemBack();
     }
+
+    private boolean imeVisibleForTest() { return isImeVisible(); }
+    private boolean keyboardSessionActiveForTest() { return keyboardSessionActive; }
+    private boolean inputProxyFocusedForTest() { return input != null && input.hasFocus(); }
 
     // Keep API 33 types in a nested class so API 26-32 don't resolve them.
     private static final class Api33Back implements android.window.OnBackInvokedCallback {
@@ -190,7 +197,10 @@ public class GpuiInputActivity extends NativeActivity {
             activity.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
                     android.window.OnBackInvokedDispatcher.PRIORITY_OVERLAY, new Api33Back(activity));
         }
-        @Override public void onBackInvoked() { activity.handleSystemBack(); }
+        @Override public void onBackInvoked() {
+            android.util.Log.i("gpui-android", "OnBackInvokedCallback");
+            activity.handleSystemBack();
+        }
     }
 
     private static final class Api30Insets {
@@ -481,6 +491,10 @@ public class GpuiInputActivity extends NativeActivity {
 
         @Override public boolean onKeyPreIme(int code, KeyEvent event) {
             if (code == KeyEvent.KEYCODE_BACK) {
+                android.util.Log.i("gpui-android", "InputProxy.onKeyPreIme Back action="
+                        + event.getAction() + " imeVisible=" + isImeVisible()
+                        + " keyboardSessionActive=" + keyboardSessionActive
+                        + " proxyFocused=" + hasFocus());
                 if (event.getAction() == KeyEvent.ACTION_DOWN) backStartedWithIme = isImeVisible();
                 else if (event.getAction() == KeyEvent.ACTION_UP && (backStartedWithIme || isImeVisible())) {
                     keyboardHiddenByBack();

@@ -945,6 +945,13 @@ impl AndroidWindow {
         }
     }
 
+    /// Deliver Back on the owning event-loop thread and return whether GPUI
+    /// consumed it. Other Android key events keep using the queued public path.
+    pub(crate) fn handle_key_event_for_input(&self, event: AndroidKeyEvent) -> Option<bool> {
+        let cb = { self.state.lock().key_callback.clone() };
+        cb.and_then(|cb| cb.call_key(event))
+    }
+
     pub fn set_appearance(&self, appearance: WindowAppearance) {
         let cb = {
             let mut st = self.state.lock();
@@ -1238,9 +1245,19 @@ impl AndroidWindow {
             Registration::new(self.dispatcher.clone(), Callback::Touch(Box::new(cb)));
         self.install_registration(registration, false, |state| &mut state.touch_callback);
     }
-    pub fn on_key_event<F>(&self, cb: F)
+    pub fn on_key_event<F>(&self, mut cb: F)
     where
         F: FnMut(AndroidKeyEvent) + 'static,
+    {
+        self.on_key_event_with_result(move |event| {
+            cb(event);
+            true
+        });
+    }
+
+    pub(crate) fn on_key_event_with_result<F>(&self, cb: F)
+    where
+        F: FnMut(AndroidKeyEvent) -> bool + 'static,
     {
         let registration = Registration::new(self.dispatcher.clone(), Callback::Key(Box::new(cb)));
         self.install_registration(registration, false, |state| &mut state.key_callback);
@@ -1835,7 +1852,7 @@ impl PlatformWindow for AndroidPlatformWindow {
         // ── Key events → PlatformInput ───────────────────────────────────
         {
             let cb = Rc::clone(&input_cb);
-            self.window.on_key_event(move |key_event| {
+            self.window.on_key_event_with_result(move |key_event| {
                 use crate::android::keyboard::{
                     AKEY_EVENT_ACTION_DOWN, AKEY_EVENT_ACTION_UP, android_key_to_keystroke,
                 };
@@ -1850,7 +1867,7 @@ impl PlatformWindow for AndroidPlatformWindow {
                     key_event.unicode_char,
                 ) {
                     Some(ks) => ks,
-                    None => return, // Modifier-only or unmapped key
+                    None => return false, // Modifier-only or unmapped key
                 };
 
                 let event = if key_event.action == AKEY_EVENT_ACTION_DOWN {
@@ -1862,11 +1879,19 @@ impl PlatformWindow for AndroidPlatformWindow {
                 } else if key_event.action == AKEY_EVENT_ACTION_UP {
                     gpui::PlatformInput::KeyUp(gpui::KeyUpEvent { keystroke })
                 } else {
-                    return; // ACTION_MULTIPLE or unknown
+                    return false; // ACTION_MULTIPLE or unknown
                 };
 
-                let mut guard = cb.borrow_mut();
-                let _ = guard(event);
+                let Ok(mut guard) = cb.try_borrow_mut() else {
+                    // Reentrant manual polling can arrive while GPUI is already
+                    // dispatching an input callback. Fail open to Android's
+                    // system Back handling instead of panicking on RefCell.
+                    return false;
+                };
+                let result = guard(event);
+                key_event.key_code != crate::android::keyboard::AKEYCODE_BACK
+                    || !result.propagate
+                    || result.default_prevented
             });
         }
     }
@@ -2378,6 +2403,47 @@ mod tests {
         let events = received.lock();
         assert_eq!(events.len(), 1);
         assert_eq!(events[0].key_code, 29);
+    }
+
+    #[test]
+    fn legacy_key_callback_remains_consumed_and_can_close_during_sync_dispatch() {
+        let window = AndroidWindow::headless(1080, 1920, 2.0);
+        let closing_window = Arc::clone(&window);
+        window.on_key_event(move |_| closing_window.retire_native_resources_on_owner());
+
+        let event = AndroidKeyEvent {
+            key_code: 4,
+            action: 0,
+            meta_state: 0,
+            unicode_char: 0,
+        };
+        assert_eq!(window.handle_key_event_for_input(event.clone()), Some(true));
+        // Closing from the callback removes the stored registration. Once this
+        // synchronous dispatch releases its local registration clone, later
+        // dispatches must not find the callback in the owner-thread registry.
+        assert_eq!(window.handle_key_event_for_input(event), None);
+    }
+
+    #[test]
+    fn synchronous_key_callback_reports_consumption_without_queueing() {
+        let window = AndroidWindow::headless(1080, 1920, 2.0);
+        let seen = std::rc::Rc::new(std::cell::RefCell::new(Vec::new()));
+        let seen_by_callback = std::rc::Rc::clone(&seen);
+        window.on_key_event_with_result(move |event| {
+            seen_by_callback.borrow_mut().push(event.key_code);
+            false
+        });
+
+        assert_eq!(
+            window.handle_key_event_for_input(AndroidKeyEvent {
+                key_code: 4,
+                action: 0,
+                meta_state: 0,
+                unicode_char: 0,
+            }),
+            Some(false)
+        );
+        assert_eq!(*seen.borrow(), [4]);
     }
 
     #[test]

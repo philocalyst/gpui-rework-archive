@@ -375,6 +375,7 @@ pub(crate) struct NativeSession {
     app: Mutex<Option<AndroidApp>>,
     active: AtomicBool,
     presented: AtomicBool,
+    back_down_consumed: AtomicBool,
     owner_thread: std::thread::ThreadId,
     windows: NativeWindowRegistry,
 }
@@ -1008,6 +1009,35 @@ fn appearance(is_dark: bool) -> crate::android::window::WindowAppearance {
 
 // ── input event processing ────────────────────────────────────────────────────
 
+/// Preserve a Back key sequence across input-queue polls when GPUI consumes its
+/// Down event. Some bindings consume Down but have no work on Up; allowing that
+/// Up through would accidentally trigger Android's default Back action.
+fn back_event_consumed(
+    action: i32,
+    repeat_count: i32,
+    gpui_consumed: bool,
+    down_consumed: &AtomicBool,
+) -> bool {
+    match action {
+        0 if repeat_count == 0 => {
+            // A fresh physical press replaces any stale latch left by a lost Up.
+            down_consumed.store(gpui_consumed, Ordering::Release);
+            gpui_consumed
+        }
+        0 => {
+            if gpui_consumed {
+                down_consumed.store(true, Ordering::Release);
+            }
+            down_consumed.load(Ordering::Acquire) || gpui_consumed
+        }
+        1 => down_consumed.swap(false, Ordering::AcqRel) || gpui_consumed,
+        _ => {
+            down_consumed.store(false, Ordering::Release);
+            gpui_consumed
+        }
+    }
+}
+
 /// Process input events from the `AndroidApp` and dispatch them to the window.
 fn process_input_events(app: &AndroidApp, session: &NativeSession) {
     let platform = match platform_for_session(session) {
@@ -1148,6 +1178,7 @@ fn process_input_events(app: &AndroidApp, session: &NativeSession) {
                             };
 
                             let key_code: u32 = key_event.key_code().into();
+                            let repeat_count = key_event.repeat_count();
                             let meta_state: u32 = key_event.meta_state().0;
 
                             let unicode_char = unicode_char_for_key_event(
@@ -1173,8 +1204,32 @@ fn process_input_events(app: &AndroidApp, session: &NativeSession) {
                                 unicode_char,
                             };
 
-                            win.handle_key_event(key_event);
-                            android_activity::InputStatus::Handled
+                            if key_code as i32 == crate::android::keyboard::AKEYCODE_BACK {
+                                let gpui_consumed = win
+                                    .handle_key_event_for_input(key_event)
+                                    .unwrap_or(false);
+                                let consumed = back_event_consumed(
+                                    action,
+                                    repeat_count,
+                                    gpui_consumed,
+                                    &session.back_down_consumed,
+                                );
+                                log::info!(
+                                    "Back input dispatched: action={} gpui_consumed={} sequence_consumed={} input_status={}",
+                                    action,
+                                    gpui_consumed,
+                                    consumed,
+                                    if consumed { "handled" } else { "unhandled" },
+                                );
+                                if consumed {
+                                    android_activity::InputStatus::Handled
+                                } else {
+                                    android_activity::InputStatus::Unhandled
+                                }
+                            } else {
+                                win.handle_key_event(key_event);
+                                android_activity::InputStatus::Handled
+                            }
                         }
                         _ => android_activity::InputStatus::Unhandled,
                     }
@@ -1529,9 +1584,8 @@ pub(crate) fn run_event_loop_for_session(session: &Arc<NativeSession>) {
         }
     }
 
-    // Do not shut down the dispatcher here. Application::run still owns GPUI
-    // windows and their callbacks until it returns. NativeSessionGuard retires
-    // those producers and drains their owner-thread wakeups after that drop.
+    // AndroidPlatform::run retires windows while App is alive; later guard
+    // cleanup is an idempotent fallback.
     log::info!("run_event_loop: exiting main loop");
 }
 
@@ -1618,11 +1672,13 @@ fn handle_main_event(_app: &AndroidApp, session: &NativeSession, event: MainEven
         }
         MainEvent::LostFocus => {
             log::info!("MainEvent::LostFocus");
+            session.back_down_consumed.store(false, Ordering::Release);
             PAUSE_PENDING.store(true, Ordering::Relaxed);
             DeferredAction::None
         }
         MainEvent::Pause => {
             log::info!("MainEvent::Pause");
+            session.back_down_consumed.store(false, Ordering::Release);
             PAUSE_PENDING.store(true, Ordering::Relaxed);
             DeferredAction::ClearImeInsets
         }
@@ -1784,6 +1840,7 @@ pub fn init_platform(app: &AndroidApp) -> Result<NativeSessionGuard, String> {
         app: Mutex::new(Some(app.clone())),
         active: AtomicBool::new(true),
         presented: AtomicBool::new(false),
+        back_down_consumed: AtomicBool::new(false),
         owner_thread: std::thread::current().id(),
         windows: NativeWindowRegistry::default(),
     });
@@ -2454,6 +2511,31 @@ pub unsafe extern "C" fn Java_dev_gpui_mobile_GpuiMediaSession_nativeMediaSeek(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn back_consumption_is_preserved_across_down_and_up() {
+        let down_consumed = AtomicBool::new(false);
+        // Model Down and Up being delivered by different input-queue polls.
+        assert!(back_event_consumed(0, 0, true, &down_consumed));
+        assert!(down_consumed.load(Ordering::Acquire));
+        // Down and Up may be delivered by different input-queue polls.
+        assert!(back_event_consumed(1, 0, false, &down_consumed));
+        assert!(!down_consumed.load(Ordering::Acquire));
+
+        assert!(!back_event_consumed(0, 0, false, &down_consumed));
+        assert!(!back_event_consumed(1, 0, false, &down_consumed));
+        assert!(back_event_consumed(1, 0, true, &down_consumed));
+
+        // A lost Up must not make a later independent press permanently handled.
+        assert!(back_event_consumed(0, 0, true, &down_consumed));
+        assert!(!back_event_consumed(0, 0, false, &down_consumed));
+        assert!(!down_consumed.load(Ordering::Acquire));
+
+        // Repeated Down events preserve the original press decision.
+        assert!(back_event_consumed(0, 0, true, &down_consumed));
+        assert!(back_event_consumed(0, 1, false, &down_consumed));
+        assert!(back_event_consumed(1, 0, false, &down_consumed));
+    }
 
     #[test]
     fn native_window_registry_pins_last_external_arc_until_owner_drain() {

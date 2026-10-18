@@ -36,7 +36,7 @@ thread_local! {
 pub(super) enum Callback {
     Frame(Box<dyn FnMut(RequestFrameOptions) + 'static>),
     Touch(Box<dyn FnMut(TouchPoint) + 'static>),
-    Key(Box<dyn FnMut(AndroidKeyEvent) + 'static>),
+    Key(Box<dyn FnMut(AndroidKeyEvent) -> bool + 'static>),
     Resize(Box<dyn FnMut(Size<DevicePixels>, f32) + 'static>),
     Close(Option<Box<dyn FnOnce() + 'static>>),
     Appearance(Box<dyn FnMut(WindowAppearance) + 'static>),
@@ -113,6 +113,37 @@ impl Registration {
         {
             drain_owner_events();
         }
+    }
+
+    /// Invoke a key callback synchronously on its owner thread and return its
+    /// handled result. Native Android uses this only for Back so it can let the
+    /// Activity fallback run when GPUI does not consume Escape.
+    pub(super) fn call_key(&self, event: AndroidKeyEvent) -> Option<bool> {
+        assert_eq!(
+            thread::current().id(),
+            self.0.owner,
+            "key callback called off owner thread"
+        );
+        if !self.0.active.load(Ordering::Acquire) {
+            return None;
+        }
+        let id = self.0.id;
+        let mut callback = CALLBACKS.with(|callbacks| callbacks.remove(id.0.get()))?;
+        let result = match &mut callback {
+            Callback::Key(callback) => Some(callback(event)),
+            _ => {
+                log::error!("Android callback kind mismatch for synchronous key event");
+                None
+            }
+        };
+        if self.0.active.load(Ordering::Acquire) {
+            CALLBACKS.with(|callbacks| {
+                let previous = callbacks.insert(id.0.get(), callback);
+                debug_assert!(previous.is_none());
+                drop(previous);
+            });
+        }
+        result
     }
 
     pub(super) fn dispatch_deferred(&self, event: Event) {
@@ -411,5 +442,29 @@ mod tests {
         assert_eq!(*count.borrow(), 1);
         drop(registration);
         dispatcher.shutdown();
+    }
+
+    #[test]
+    fn synchronous_key_callback_returns_consumption_on_owner() {
+        let observed = Rc::new(RefCell::new(Vec::new()));
+        let callback_observed = Rc::clone(&observed);
+        let registration = Registration::new(
+            None,
+            Callback::Key(Box::new(move |event| {
+                callback_observed.borrow_mut().push(event.key_code);
+                false
+            })),
+        );
+        assert_eq!(
+            registration.call_key(AndroidKeyEvent {
+                key_code: 4,
+                action: 0,
+                meta_state: 0,
+                unicode_char: 0,
+            }),
+            Some(false)
+        );
+        assert_eq!(*observed.borrow(), [4]);
+        drop(registration);
     }
 }
