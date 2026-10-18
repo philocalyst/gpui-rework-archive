@@ -1,3 +1,4 @@
+use crate::InlineParagraphMemo;
 use crate::{
     AbsoluteLength, App, Bounds, DefiniteLength, Display, Edges, GridTemplate, InlineContent,
     LayoutDirection, Length, Pixels, Point, Position, ResolvedDirection, SharedString, Size, Style,
@@ -24,8 +25,12 @@ type StackSafe<T> = T;
 
 type FrameBoundMeasureFn =
     dyn FnMut(Size<Option<Pixels>>, Size<AvailableSpace>, &mut Window, &mut App) -> Size<Pixels>;
-type RetainedMeasureFn =
-    dyn FnMut(Size<Option<Pixels>>, Size<AvailableSpace>, &WindowTextSystem) -> Size<Pixels>;
+type RetainedMeasureFn = dyn for<'a> FnMut(
+    Size<Option<Pixels>>,
+    Size<AvailableSpace>,
+    ResolvedDirection,
+    &'a WindowTextSystem,
+) -> Size<Pixels>;
 
 enum NodeContext {
     FrameBound {
@@ -35,6 +40,15 @@ enum NodeContext {
     Retained {
         measure: StackSafe<Box<RetainedMeasureFn>>,
         unicode_bidi: UnicodeBidi,
+    },
+    RetainedInlineTextSpan {
+        measure: StackSafe<Box<RetainedMeasureFn>>,
+        unicode_bidi: UnicodeBidi,
+    },
+    RetainedInlineParagraph {
+        measure: StackSafe<Box<RetainedMeasureFn>>,
+        unicode_bidi: UnicodeBidi,
+        memo: Option<Box<InlineParagraphMemo>>,
     },
 }
 
@@ -62,6 +76,27 @@ struct DirectionMetadata {
     auto_direction_hint: Option<ResolvedDirection>,
     logical_children: Option<Vec<LayoutId>>,
     resolved: LayoutDirectionHandle,
+}
+
+/// Request-order IDs owned by one retained ViewElement. Nested views keep separate logs.
+#[derive(Clone, Default)]
+pub(crate) struct LayoutClaimLog {
+    nodes: Vec<LayoutId>,
+    replayable: bool,
+}
+
+pub(crate) struct LayoutClaimOutcome {
+    pub(crate) log: LayoutClaimLog,
+    pub(crate) fully_replayed: bool,
+}
+
+struct LayoutClaimScope {
+    had_previous: bool,
+    previous_len: usize,
+    cursor: usize,
+    nodes: Vec<LayoutId>,
+    replaying: bool,
+    replayable: bool,
 }
 
 /// Computes element layout with Taffy, a flexbox and grid engine.
@@ -93,6 +128,16 @@ pub struct TaffyLayoutEngine {
     frame_layout_nodes: Vec<LayoutId>,
     frame_layout_node_set: FxHashSet<LayoutId>,
     frame_bound_measured_nodes: FxHashSet<LayoutId>,
+    layout_claim_scopes: Vec<LayoutClaimScope>,
+    #[cfg(test)]
+    inline_text_span_replay_hits: usize,
+    #[cfg(test)]
+    inline_paragraph_replay_hits: usize,
+    #[cfg(test)]
+    inline_paragraph_measure_calls: Rc<Cell<usize>>,
+    // Direction resolution can be skipped while the engine is provably LTR-only. This is
+    // monotone because a previously resolved RTL/Auto node can remain retained across frames.
+    direction_resolution_needed: bool,
 }
 
 const EXPECT_MESSAGE: &str = "we should avoid taffy layout errors by construction if possible";
@@ -118,6 +163,14 @@ impl TaffyLayoutEngine {
             frame_layout_nodes: Vec::new(),
             frame_layout_node_set: FxHashSet::default(),
             frame_bound_measured_nodes: FxHashSet::default(),
+            layout_claim_scopes: Vec::new(),
+            #[cfg(test)]
+            inline_text_span_replay_hits: 0,
+            #[cfg(test)]
+            inline_paragraph_replay_hits: 0,
+            #[cfg(test)]
+            inline_paragraph_measure_calls: Rc::new(Cell::new(0)),
+            direction_resolution_needed: false,
         }
     }
 
@@ -126,11 +179,10 @@ impl TaffyLayoutEngine {
     /// Retained nodes keep their Taffy layout cache; unclaimed nodes and frame-bound measurement
     /// closures are released before the next frame starts.
     pub fn finish_frame(&mut self) {
-        if self
-            .live_layout_nodes
-            .iter()
-            .any(|node| !self.frame_layout_node_set.contains(node))
-        {
+        // Every claim is a live Taffy node, and every node allocated this frame is claimed
+        // immediately. Unclaimed prior-frame nodes remain in the tree until this cleanup, so an
+        // equal count proves there is nothing to prune without scanning all retained nodes.
+        if self.frame_layout_node_set.len() != self.taffy.total_node_count() {
             // Detach stale direct children from retained parents in one operation. Taffy's remove
             // searches the parent's child vector, so removing a wide sibling set one child at a time
             // would repeatedly scan and shift that vector.
@@ -254,6 +306,14 @@ impl TaffyLayoutEngine {
                 (0..self.taffy.child_count(node.0))
                     .map(|index| LayoutId::from(self.taffy.get_child_id(node.0, index))),
             );
+            if let Some(logical_children) = self
+                .directions
+                .get(&node)
+                .and_then(|metadata| metadata.logical_children.as_ref())
+            {
+                self.layout_bounds_scratch_space
+                    .extend(logical_children.iter().copied());
+            }
         }
     }
 
@@ -261,6 +321,145 @@ impl TaffyLayoutEngine {
         if self.frame_layout_node_set.insert(node) {
             self.frame_layout_nodes.push(node);
         }
+    }
+
+    pub(crate) fn begin_layout_claim_scope(&mut self, previous: Option<LayoutClaimLog>) {
+        let (nodes, previous_len, had_previous, replaying) = match previous {
+            Some(previous) => {
+                let replaying = previous.replayable;
+                let previous_len = previous.nodes.len();
+                (previous.nodes, previous_len, true, replaying)
+            }
+            None => (Vec::new(), 0, false, false),
+        };
+        self.layout_claim_scopes.push(LayoutClaimScope {
+            had_previous,
+            previous_len,
+            cursor: 0,
+            nodes,
+            replaying,
+            replayable: true,
+        });
+    }
+
+    pub(crate) fn finish_layout_claim_scope(&mut self) -> LayoutClaimOutcome {
+        let mut scope = self
+            .layout_claim_scopes
+            .pop()
+            .expect("layout claim scopes must be balanced");
+        let fully_replayed = scope.had_previous
+            && scope.replaying
+            && scope.replayable
+            && scope.cursor == scope.previous_len;
+        let invalidate_parent = !scope.replayable || (scope.had_previous && !fully_replayed);
+        if invalidate_parent {
+            self.mark_layout_claim_scope_non_replayable();
+        }
+        scope.nodes.truncate(scope.cursor);
+        LayoutClaimOutcome {
+            log: LayoutClaimLog {
+                nodes: scope.nodes,
+                replayable: scope.replayable,
+            },
+            fully_replayed,
+        }
+    }
+
+    pub(crate) fn mark_layout_claim_scope_non_replayable(&mut self) {
+        if let Some(scope) = self.layout_claim_scopes.last_mut() {
+            scope.replayable = false;
+            scope.replaying = false;
+        }
+    }
+
+    fn static_layout_style(style: &Style) -> bool {
+        style.direction != LayoutDirection::Auto
+            && style.effective_unicode_bidi() == UnicodeBidi::Normal
+    }
+
+    fn try_replay_layout(
+        &mut self,
+        style: &Style,
+        taffy_style: &taffy::Style,
+        children: &[LayoutId],
+        logical_children: Option<&[LayoutId]>,
+    ) -> Option<LayoutId> {
+        if !Self::static_layout_style(style) {
+            self.mark_layout_claim_scope_non_replayable();
+            return None;
+        }
+        let old = match self.layout_claim_scopes.last() {
+            Some(scope) if scope.replaying => scope.nodes.get(scope.cursor).copied(),
+            _ => return None,
+        };
+        let Some(old) = old else {
+            self.layout_claim_scopes.last_mut().unwrap().replaying = false;
+            return None;
+        };
+        // A custom element can leave a detached allocation in the flat claim log. Pruning
+        // removes its direction metadata, which is our O(1) liveness sentinel; Taffy 0.13's
+        // style returns a Result but indexes its SlotMap and panics for a stale key.
+        if !self.directions.contains_key(&old) {
+            self.layout_claim_scopes.last_mut().unwrap().replaying = false;
+            return None;
+        }
+        let Ok(old_style) = self.taffy.style(old.0) else {
+            self.layout_claim_scopes.last_mut().unwrap().replaying = false;
+            return None;
+        };
+        if old_style != taffy_style {
+            self.layout_claim_scopes.last_mut().unwrap().replaying = false;
+            return None;
+        }
+        let children_match = self.taffy.child_count(old.0) == children.len()
+            && children
+                .iter()
+                .enumerate()
+                .all(|(index, child)| self.taffy.get_child_id(old.0, index) == child.0);
+        let metadata_matches = self.taffy.get_node_context(old.0).is_none()
+            && !self.frame_bound_measured_nodes.contains(&old)
+            && self
+                .vertical_alignments
+                .get(&old)
+                .copied()
+                .unwrap_or(VerticalAlign::Baseline)
+                == style.vertical_align
+            && self.display_and_position.get(&old).copied()
+                == Some((style.display, style.position))
+            && self.directions.get(&old).is_some_and(|metadata| {
+                metadata.authored == style.direction
+                    && metadata.unicode_bidi == style.effective_unicode_bidi()
+                    && metadata.source_direction.is_none()
+                    && metadata.auto_direction_hint.is_none()
+                    && metadata.logical_children.as_deref() == logical_children
+            })
+            && !self.inline_content.contains_key(&old)
+            && !self.inline_fragments.contains_key(&old);
+        if children_match && metadata_matches {
+            let scope = self.layout_claim_scopes.last_mut().unwrap();
+            scope.cursor += 1;
+            self.claim_node(old);
+            Some(old)
+        } else {
+            self.layout_claim_scopes.last_mut().unwrap().replaying = false;
+            None
+        }
+    }
+
+    fn record_layout_claim(&mut self, node: LayoutId, style: &Style) {
+        let Some(scope) = self.layout_claim_scopes.last_mut() else {
+            return;
+        };
+        if !Self::static_layout_style(style) {
+            scope.replayable = false;
+            scope.replaying = false;
+        }
+        if scope.cursor < scope.nodes.len() {
+            scope.nodes[scope.cursor] = node;
+        } else {
+            scope.nodes.push(node);
+        }
+        scope.cursor += 1;
     }
 
     /// Adds a node styled by `style`, with `children` as its child nodes, and returns its id.
@@ -274,7 +473,47 @@ impl TaffyLayoutEngine {
         scale_factor: f32,
         children: &[LayoutId],
     ) -> LayoutId {
+        self.request_layout_with_optional_logical_children(
+            style,
+            rem_size,
+            scale_factor,
+            children,
+            None,
+        )
+    }
+
+    pub(crate) fn request_layout_with_logical_children(
+        &mut self,
+        style: Style,
+        rem_size: Pixels,
+        scale_factor: f32,
+        children: &[LayoutId],
+        logical_children: &[LayoutId],
+    ) -> LayoutId {
+        self.request_layout_with_optional_logical_children(
+            style,
+            rem_size,
+            scale_factor,
+            children,
+            Some(logical_children),
+        )
+    }
+
+    fn request_layout_with_optional_logical_children(
+        &mut self,
+        style: Style,
+        rem_size: Pixels,
+        scale_factor: f32,
+        children: &[LayoutId],
+        logical_children: Option<&[LayoutId]>,
+    ) -> LayoutId {
+        let normalized_logical_children = logical_children.filter(|logical| *logical != children);
         let taffy_style = style.to_taffy(rem_size, scale_factor);
+        if let Some(node_id) =
+            self.try_replay_layout(&style, &taffy_style, children, normalized_logical_children)
+        {
+            return node_id;
+        }
 
         let node_id = if children.is_empty() {
             self.taffy
@@ -304,6 +543,12 @@ impl TaffyLayoutEngine {
 
         self.claim_node(node_id);
         self.record_style(node_id, &style);
+        if let Some(logical_children) = normalized_logical_children {
+            if let Some(metadata) = self.directions.get_mut(&node_id) {
+                metadata.logical_children = Some(logical_children.to_vec());
+            }
+        }
+        self.record_layout_claim(node_id, &style);
 
         node_id
     }
@@ -352,6 +597,7 @@ impl TaffyLayoutEngine {
         measure: impl FnMut(
             Size<Option<Pixels>>,
             Size<AvailableSpace>,
+            ResolvedDirection,
             &WindowTextSystem,
         ) -> Size<Pixels>
         + 'static,
@@ -371,6 +617,263 @@ impl TaffyLayoutEngine {
         )
     }
 
+    pub(crate) fn request_retained_inline_text_span_layout(
+        &mut self,
+        style: Style,
+        rem_size: Pixels,
+        scale_factor: f32,
+        content: &InlineContent,
+        allow_reuse: bool,
+        measure: impl FnMut(
+            Size<Option<Pixels>>,
+            Size<AvailableSpace>,
+            ResolvedDirection,
+            &WindowTextSystem,
+        ) -> Size<Pixels>
+        + 'static,
+    ) -> LayoutId {
+        let unicode_bidi = style.effective_unicode_bidi();
+        let measure = Box::new(measure) as Box<RetainedMeasureFn>;
+        #[cfg(feature = "stacker")]
+        let measure = StackSafe::new(measure);
+        let taffy_style = style.to_taffy(rem_size, scale_factor);
+        let eligible = allow_reuse
+            && style.direction == LayoutDirection::Inherit
+            && Self::static_layout_style(&style)
+            && unicode_bidi == UnicodeBidi::Normal;
+        if !eligible {
+            self.mark_layout_claim_scope_non_replayable();
+        }
+
+        let old = match self.layout_claim_scopes.last() {
+            Some(scope) if scope.replaying && eligible => scope.nodes.get(scope.cursor).copied(),
+            _ => None,
+        };
+        let old = old.and_then(|old| {
+            if !self.directions.contains_key(&old) {
+                self.layout_claim_scopes.last_mut().unwrap().replaying = false;
+                return None;
+            }
+            match self.taffy.style(old.0) {
+                Ok(old_style) => Some((old, old_style == &taffy_style)),
+                Err(_) => {
+                    self.layout_claim_scopes.last_mut().unwrap().replaying = false;
+                    None
+                }
+            }
+        });
+        if let Some((old, style_matches)) = old {
+            let metadata_matches = self.directions.get(&old).is_some_and(|metadata| {
+                metadata.authored == LayoutDirection::Inherit
+                    && metadata.unicode_bidi == UnicodeBidi::Normal
+                    && metadata.source_direction == Self::text_source_direction(content)
+                    && metadata.auto_direction_hint.is_none()
+                    && metadata.logical_children.is_none()
+            });
+            let content_matches = self
+                .inline_content
+                .get(&old)
+                .is_some_and(|old_content| Self::inline_text_content_matches(old_content, content));
+            let role_matches = matches!(
+                self.taffy.get_node_context(old.0),
+                Some(NodeContext::RetainedInlineTextSpan { .. })
+            );
+            let can_replay = style_matches
+                && content_matches
+                && metadata_matches
+                && role_matches
+                && self.taffy.child_count(old.0) == 0
+                && !self.frame_bound_measured_nodes.contains(&old);
+            if can_replay {
+                if let Some(node_context) = self.taffy.get_node_context_mut(old.0) {
+                    *node_context = NodeContext::RetainedInlineTextSpan {
+                        measure,
+                        unicode_bidi,
+                    };
+                    // Span nodes are detached from paragraph flow, but custom Elements may query
+                    // or attach them independently. Force the fresh callback to run in that case.
+                    self.taffy.mark_dirty(old.0).expect(EXPECT_MESSAGE);
+                    #[cfg(test)]
+                    {
+                        self.inline_text_span_replay_hits += 1;
+                    }
+                    self.computed_layouts.remove(&old);
+                    self.computed_available_spaces.remove(&old);
+                    self.inline_fragments.remove(&old);
+                    self.absolute_layout_bounds.remove(&old);
+                    self.absolute_outer_origins.remove(&old);
+                    self.claim_node(old);
+                    self.record_layout_claim(old, &style);
+                    return old;
+                }
+            }
+            if let Some(scope) = self.layout_claim_scopes.last_mut() {
+                scope.replaying = false;
+            }
+        }
+
+        let node_id = self
+            .taffy
+            .new_leaf_with_context(
+                taffy_style,
+                NodeContext::RetainedInlineTextSpan {
+                    measure,
+                    unicode_bidi,
+                },
+            )
+            .expect(EXPECT_MESSAGE)
+            .into();
+        self.claim_node(node_id);
+        self.record_style(node_id, &style);
+        self.record_layout_claim(node_id, &style);
+        node_id
+    }
+
+    pub(crate) fn request_retained_inline_paragraph_layout(
+        &mut self,
+        style: Style,
+        rem_size: Pixels,
+        scale_factor: f32,
+        memo: Option<InlineParagraphMemo>,
+        measure: impl FnMut(
+            Size<Option<Pixels>>,
+            Size<AvailableSpace>,
+            ResolvedDirection,
+            &WindowTextSystem,
+        ) -> Size<Pixels>
+        + 'static,
+    ) -> LayoutId {
+        let unicode_bidi = style.effective_unicode_bidi();
+        let measure = Box::new(measure) as Box<RetainedMeasureFn>;
+        #[cfg(feature = "stacker")]
+        let measure = StackSafe::new(measure);
+        let taffy_style = style.to_taffy(rem_size, scale_factor);
+        let eligible = memo.is_some()
+            && Self::static_layout_style(&style)
+            && unicode_bidi == UnicodeBidi::Normal;
+        if !eligible {
+            self.mark_layout_claim_scope_non_replayable();
+        }
+
+        let old = match self.layout_claim_scopes.last() {
+            Some(scope) if scope.replaying && eligible => scope.nodes.get(scope.cursor).copied(),
+            _ => None,
+        };
+        let old = old.and_then(|old| {
+            if !self.directions.contains_key(&old) {
+                self.layout_claim_scopes.last_mut().unwrap().replaying = false;
+                return None;
+            }
+            match self.taffy.style(old.0) {
+                Ok(old_style) => Some((old, old_style == &taffy_style)),
+                Err(_) => {
+                    self.layout_claim_scopes.last_mut().unwrap().replaying = false;
+                    None
+                }
+            }
+        });
+        if let Some((old, style_matches)) = old {
+            let metadata_matches = self.directions.get(&old).is_some_and(|metadata| {
+                metadata.authored == LayoutDirection::Inherit
+                    && metadata.unicode_bidi == UnicodeBidi::Normal
+                    && metadata.source_direction.is_none()
+                    && metadata.auto_direction_hint.is_none()
+                    && metadata.logical_children.is_none()
+            });
+            let can_replay = style_matches
+                && metadata_matches
+                && self.taffy.child_count(old.0) == 0
+                && !self.frame_bound_measured_nodes.contains(&old)
+                && !self.inline_content.contains_key(&old)
+                && !self.inline_fragments.contains_key(&old);
+            if can_replay {
+                let adopted = memo.as_ref().is_some_and(|memo| {
+                    self.taffy.get_node_context(old.0).is_some_and(|old_context| {
+                        matches!(old_context, NodeContext::RetainedInlineParagraph { memo: Some(old_memo), .. }
+                            if memo.adopt_from(old_memo))
+                    })
+                });
+                if adopted {
+                    if let Some(node_context) = self.taffy.get_node_context_mut(old.0) {
+                        *node_context = NodeContext::RetainedInlineParagraph {
+                            measure,
+                            unicode_bidi,
+                            memo: memo.map(Box::new),
+                        };
+                        #[cfg(test)]
+                        {
+                            self.inline_paragraph_replay_hits += 1;
+                        }
+                        self.claim_node(old);
+                        self.record_layout_claim(old, &style);
+                        return old;
+                    }
+                }
+            }
+            if let Some(scope) = self.layout_claim_scopes.last_mut() {
+                scope.replaying = false;
+            }
+        }
+
+        let node_id = self
+            .taffy
+            .new_leaf_with_context(
+                taffy_style,
+                NodeContext::RetainedInlineParagraph {
+                    measure,
+                    unicode_bidi,
+                    memo: memo.map(Box::new),
+                },
+            )
+            .expect(EXPECT_MESSAGE)
+            .into();
+        self.claim_node(node_id);
+        self.record_style(node_id, &style);
+        self.record_layout_claim(node_id, &style);
+        node_id
+    }
+
+    #[cfg(test)]
+    pub(crate) fn inline_text_reuse_test_stats(&self) -> (usize, usize, usize) {
+        (
+            self.inline_text_span_replay_hits,
+            self.inline_paragraph_replay_hits,
+            self.inline_paragraph_measure_calls.get(),
+        )
+    }
+
+    fn text_source_direction(content: &InlineContent) -> Option<ResolvedDirection> {
+        match content {
+            InlineContent::Text { text, .. } => ResolvedDirection::from_first_strong(text),
+            _ => None,
+        }
+    }
+
+    fn inline_text_content_matches(left: &InlineContent, right: &InlineContent) -> bool {
+        match (left, right) {
+            (
+                InlineContent::Text {
+                    text: left_text,
+                    runs: left_runs,
+                    font_size: left_font_size,
+                    line_height: left_line_height,
+                },
+                InlineContent::Text {
+                    text: right_text,
+                    runs: right_runs,
+                    font_size: right_font_size,
+                    line_height: right_line_height,
+                },
+            ) => {
+                left_text == right_text
+                    && left_runs == right_runs
+                    && left_font_size == right_font_size
+                    && left_line_height == right_line_height
+            }
+            _ => false,
+        }
+    }
+
     fn request_measured_layout_with_context(
         &mut self,
         style: Style,
@@ -386,10 +889,17 @@ impl TaffyLayoutEngine {
             .into();
         self.claim_node(node_id);
         self.record_style(node_id, &style);
+        self.mark_layout_claim_scope_non_replayable();
+        self.record_layout_claim(node_id, &style);
         node_id
     }
 
     fn record_style(&mut self, node_id: LayoutId, style: &Style) {
+        self.direction_resolution_needed |= matches!(
+            style.direction,
+            LayoutDirection::RightToLeft | LayoutDirection::Auto
+        );
+
         if style.vertical_align != VerticalAlign::Baseline {
             self.vertical_alignments
                 .insert(node_id, style.vertical_align);
@@ -411,16 +921,45 @@ impl TaffyLayoutEngine {
     }
 
     pub(crate) fn set_logical_children(&mut self, node_id: LayoutId, children: &[LayoutId]) {
-        let actual_children = self.taffy.children(node_id.into()).expect(EXPECT_MESSAGE);
-        let logical_children = (actual_children.as_slice() != LayoutId::to_taffy_slice(children))
-            .then(|| children.to_vec());
+        let actual_child_count = self.taffy.child_count(node_id.into());
+        let matches_physical = actual_child_count == children.len()
+            && children
+                .iter()
+                .enumerate()
+                .all(|(index, child)| self.taffy.get_child_id(node_id.into(), index) == child.0);
+        let logical_children = (!matches_physical).then_some(children);
+
+        let changed = self
+            .directions
+            .get(&node_id)
+            .is_some_and(|metadata| metadata.logical_children.as_deref() != logical_children);
+        if !changed {
+            return;
+        }
 
         if let Some(metadata) = self.directions.get_mut(&node_id) {
-            metadata.logical_children = logical_children;
+            metadata.logical_children = logical_children.map(<[LayoutId]>::to_vec);
         }
+        self.mark_layout_claim_scope_non_replayable();
     }
 
     pub(crate) fn set_direction_text(&mut self, node_id: LayoutId, text: SharedString) {
+        let has_source_direction = if let Some(metadata) = self.directions.get_mut(&node_id) {
+            metadata.source_direction = ResolvedDirection::from_first_strong(&text);
+            metadata.source_direction.is_some()
+        } else {
+            false
+        };
+        if has_source_direction {
+            self.mark_layout_claim_scope_non_replayable();
+        }
+    }
+
+    pub(crate) fn set_replayable_inline_text_direction(
+        &mut self,
+        node_id: LayoutId,
+        text: SharedString,
+    ) {
         if let Some(metadata) = self.directions.get_mut(&node_id) {
             metadata.source_direction = ResolvedDirection::from_first_strong(&text);
         }
@@ -433,6 +972,9 @@ impl TaffyLayoutEngine {
     ) {
         if let Some(metadata) = self.directions.get_mut(&node_id) {
             metadata.auto_direction_hint = direction;
+        }
+        if direction.is_some() {
+            self.mark_layout_claim_scope_non_replayable();
         }
     }
 
@@ -482,6 +1024,13 @@ impl TaffyLayoutEngine {
         root_id: LayoutId,
         inherited: ResolvedDirection,
     ) -> Vec<LayoutId> {
+        if inherited == ResolvedDirection::RightToLeft {
+            self.direction_resolution_needed = true;
+        }
+        if !self.direction_resolution_needed {
+            return Vec::new();
+        }
+
         let mut visited = FxHashSet::default();
         let mut changed = Vec::new();
         self.resolve_direction_subtree(root_id, inherited, &mut visited, &mut changed);
@@ -751,6 +1300,8 @@ impl TaffyLayoutEngine {
         cx: &mut App,
     ) {
         let scale_factor = window.scale_factor();
+        #[cfg(test)]
+        let inline_paragraph_measure_calls = self.inline_paragraph_measure_calls.clone();
 
         let transform = |v: AvailableSpace| match v {
             AvailableSpace::Definite(pixels) => {
@@ -801,15 +1352,34 @@ impl TaffyLayoutEngine {
                         &mut window.measurement_unicode_bidi,
                         match node_context {
                             NodeContext::FrameBound { unicode_bidi, .. }
-                            | NodeContext::Retained { unicode_bidi, .. } => *unicode_bidi,
+                            | NodeContext::Retained { unicode_bidi, .. }
+                            | NodeContext::RetainedInlineTextSpan { unicode_bidi, .. }
+                            | NodeContext::RetainedInlineParagraph { unicode_bidi, .. } => {
+                                *unicode_bidi
+                            }
                         },
                     );
                     let measured_size: Size<Pixels> = match node_context {
                         NodeContext::FrameBound { measure, .. } => {
                             measure(known_dimensions, available_space, window, cx)
                         }
-                        NodeContext::Retained { measure, .. } => {
-                            measure(known_dimensions, available_space, window.text_system())
+                        NodeContext::Retained { measure, .. }
+                        | NodeContext::RetainedInlineTextSpan { measure, .. } => measure(
+                            known_dimensions,
+                            available_space,
+                            resolved_direction,
+                            window.text_system(),
+                        ),
+                        NodeContext::RetainedInlineParagraph { measure, .. } => {
+                            #[cfg(test)]
+                            inline_paragraph_measure_calls
+                                .set(inline_paragraph_measure_calls.get() + 1);
+                            measure(
+                                known_dimensions,
+                                available_space,
+                                resolved_direction,
+                                window.text_system(),
+                            )
                         }
                     };
                     window.measurement_direction = previous_direction;
@@ -1435,11 +2005,529 @@ mod tests {
     use crate::px;
     use taffy::prelude::TaffyMaxContent;
 
+    #[test]
+    fn node_context_stays_compact_with_paragraph_memo() {
+        assert!(std::mem::size_of::<NodeContext>() <= 32);
+    }
+
     fn direction_style(direction: LayoutDirection) -> Style {
         Style {
             direction,
             ..Default::default()
         }
+    }
+
+    fn static_direction_style(direction: LayoutDirection) -> Style {
+        Style {
+            direction,
+            unicode_bidi: UnicodeBidi::Normal,
+            unicode_bidi_explicit: true,
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn exact_layout_claim_replay_reuses_ids_and_prunes_on_shape_change() {
+        let mut engine = TaffyLayoutEngine::new();
+        engine.begin_layout_claim_scope(None);
+        let child = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let root = engine.request_layout(Style::default(), px(16.0), 1.0, &[child]);
+        let initial = engine.finish_layout_claim_scope();
+        assert!(!initial.fully_replayed);
+        assert!(initial.log.replayable);
+        assert_eq!(engine.taffy.total_node_count(), 2);
+        engine.finish_frame();
+
+        engine.begin_layout_claim_scope(Some(initial.log));
+        let reused_child = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let reused_root = engine.request_layout(Style::default(), px(16.0), 1.0, &[reused_child]);
+        let replay = engine.finish_layout_claim_scope();
+        assert!(replay.fully_replayed);
+        assert_eq!(reused_child, child);
+        assert_eq!(reused_root, root);
+        assert_eq!(engine.taffy.total_node_count(), 2);
+        engine.finish_frame();
+
+        engine.begin_layout_claim_scope(Some(replay.log));
+        let changed_child = engine.request_layout(
+            static_direction_style(LayoutDirection::LeftToRight),
+            px(16.0),
+            1.0,
+            &[],
+        );
+        let changed_root = engine.request_layout(Style::default(), px(16.0), 1.0, &[changed_child]);
+        assert_ne!(changed_root, root);
+        let changed = engine.finish_layout_claim_scope();
+        assert!(!changed.fully_replayed);
+        engine.finish_frame();
+        assert_eq!(engine.taffy.total_node_count(), 2);
+    }
+
+    #[test]
+    fn pruned_inline_span_claim_falls_back_without_stale_taffy_access() {
+        let mut engine = TaffyLayoutEngine::new();
+        let content = InlineContent::Text {
+            text: "span".into(),
+            runs: Arc::<[crate::TextRun]>::from([]),
+            font_size: px(12.0),
+            line_height: px(14.0),
+        };
+
+        engine.begin_layout_claim_scope(None);
+        let old = engine.request_retained_inline_text_span_layout(
+            Style::default(),
+            px(16.0),
+            1.0,
+            &content,
+            true,
+            |_, _, _, _| size(px(24.0), px(14.0)),
+        );
+        engine.set_replayable_inline_text_direction(old, "span".into());
+        engine.inline_content.insert(
+            old,
+            Arc::new(InlineContent::Text {
+                text: "span".into(),
+                runs: Arc::<[crate::TextRun]>::from([]),
+                font_size: px(12.0),
+                line_height: px(14.0),
+            }),
+        );
+        let initial = engine.finish_layout_claim_scope();
+        assert!(initial.log.replayable);
+        engine.finish_frame();
+        assert!(engine.directions.contains_key(&old));
+
+        // Simulate an ordinary detached allocation that was in the previous flat claim log but
+        // was not retained by the view subtree. The next span request must treat its ID as stale.
+        engine.finish_frame();
+        assert!(!engine.directions.contains_key(&old));
+
+        engine.begin_layout_claim_scope(Some(initial.log));
+        let replacement = engine.request_retained_inline_text_span_layout(
+            Style::default(),
+            px(16.0),
+            1.0,
+            &content,
+            true,
+            |_, _, _, _| size(px(24.0), px(14.0)),
+        );
+        engine.set_replayable_inline_text_direction(replacement, "span".into());
+        engine.inline_content.insert(
+            replacement,
+            Arc::new(InlineContent::Text {
+                text: "span".into(),
+                runs: Arc::<[crate::TextRun]>::from([]),
+                font_size: px(12.0),
+                line_height: px(14.0),
+            }),
+        );
+        let fallback = engine.finish_layout_claim_scope();
+        assert!(!fallback.fully_replayed);
+        assert_ne!(replacement, old);
+        engine.finish_frame();
+        assert_eq!(engine.live_layout_node_count(), 1);
+    }
+
+    #[test]
+    fn exact_claim_replay_reuses_the_owned_log_allocation() {
+        let mut engine = TaffyLayoutEngine::new();
+        engine.begin_layout_claim_scope(None);
+        let first = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let second = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let initial = engine.finish_layout_claim_scope();
+        let initial_ptr = initial.log.nodes.as_ptr();
+        let initial_capacity = initial.log.nodes.capacity();
+        engine.finish_frame();
+
+        engine.begin_layout_claim_scope(Some(initial.log));
+        let replayed_first = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let replayed_second = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let replay = engine.finish_layout_claim_scope();
+        assert!(replay.fully_replayed);
+        assert_eq!(replayed_first, first);
+        assert_eq!(replayed_second, second);
+        assert_eq!(replay.log.nodes.as_ptr(), initial_ptr);
+        assert_eq!(replay.log.nodes.capacity(), initial_capacity);
+    }
+
+    #[test]
+    fn mismatch_overwrites_prefix_and_shrink_truncates_the_reused_log() {
+        let mut engine = TaffyLayoutEngine::new();
+        engine.begin_layout_claim_scope(None);
+        let first = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let second = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let _third = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let initial = engine.finish_layout_claim_scope();
+        let initial_ptr = initial.log.nodes.as_ptr();
+        engine.finish_frame();
+
+        engine.begin_layout_claim_scope(Some(initial.log));
+        let replayed_first = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let replacement = engine.request_layout(
+            static_direction_style(LayoutDirection::LeftToRight),
+            px(16.0),
+            1.0,
+            &[],
+        );
+        let shortened = engine.finish_layout_claim_scope();
+        assert!(!shortened.fully_replayed);
+        assert_eq!(replayed_first, first);
+        assert_eq!(shortened.log.nodes.as_ptr(), initial_ptr);
+        assert_eq!(shortened.log.nodes, vec![first, replacement]);
+        assert_ne!(replacement, second);
+        assert_eq!(shortened.log.nodes.len(), 2);
+        assert!(shortened.log.nodes.capacity() >= 3);
+        engine.finish_frame();
+        assert_eq!(engine.taffy.total_node_count(), 2);
+    }
+
+    #[test]
+    fn extra_request_after_claim_log_is_exhausted_is_a_fallback() {
+        let mut engine = TaffyLayoutEngine::new();
+        engine.begin_layout_claim_scope(None);
+        let old_root = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let initial = engine.finish_layout_claim_scope();
+        engine.finish_frame();
+
+        engine.begin_layout_claim_scope(Some(initial.log));
+        let retained_leaf = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let expanded_root =
+            engine.request_layout(Style::default(), px(16.0), 1.0, &[retained_leaf]);
+        let expanded = engine.finish_layout_claim_scope();
+        assert_eq!(retained_leaf, old_root);
+        assert!(!expanded.fully_replayed);
+        assert_eq!(expanded.log.nodes.len(), 2);
+        engine.finish_frame();
+        assert_eq!(engine.taffy.total_node_count(), 2);
+
+        engine.begin_layout_claim_scope(Some(expanded.log));
+        let replayed_leaf = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let replayed_root =
+            engine.request_layout(Style::default(), px(16.0), 1.0, &[replayed_leaf]);
+        let replay = engine.finish_layout_claim_scope();
+        assert!(replay.fully_replayed);
+        assert_eq!(replayed_leaf, retained_leaf);
+        assert_eq!(replayed_root, expanded_root);
+    }
+
+    #[test]
+    fn fallback_claims_old_nodes_for_one_frame_then_replays_replacement_log() {
+        let mut engine = TaffyLayoutEngine::new();
+        engine.begin_layout_claim_scope(None);
+        let old_child = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let old_root = engine.request_layout(Style::default(), px(16.0), 1.0, &[old_child]);
+        let initial = engine.finish_layout_claim_scope();
+        engine.finish_frame();
+        assert_eq!(engine.taffy.total_node_count(), 2);
+
+        // The view has already retained its prior subtree before fresh request descriptors
+        // reveal a shape mismatch. Those IDs must remain claimed through this frame.
+        engine.retain_subtree(old_root);
+        engine.begin_layout_claim_scope(Some(initial.log.clone()));
+        let new_child = engine.request_layout(
+            static_direction_style(LayoutDirection::LeftToRight),
+            px(16.0),
+            1.0,
+            &[],
+        );
+        let new_root = engine.request_layout(Style::default(), px(16.0), 1.0, &[new_child]);
+        let fallback = engine.finish_layout_claim_scope();
+        assert!(!fallback.fully_replayed);
+        assert_ne!(fallback.log.nodes, initial.log.nodes);
+        assert_eq!(engine.taffy.total_node_count(), 4);
+        engine.finish_frame();
+        assert_eq!(engine.taffy.total_node_count(), 4);
+
+        // The frame-bound fallback forces a fresh request next frame. Its replacement log
+        // now exactly replays, and the unclaimed old subtree is pruned at frame end.
+        engine.retain_subtree(new_root);
+        engine.begin_layout_claim_scope(Some(fallback.log));
+        let replayed_child = engine.request_layout(
+            static_direction_style(LayoutDirection::LeftToRight),
+            px(16.0),
+            1.0,
+            &[],
+        );
+        let replayed_root =
+            engine.request_layout(Style::default(), px(16.0), 1.0, &[replayed_child]);
+        let replay = engine.finish_layout_claim_scope();
+        assert!(replay.fully_replayed);
+        assert_eq!(replayed_child, new_child);
+        assert_eq!(replayed_root, new_root);
+        engine.finish_frame();
+        assert_eq!(engine.taffy.total_node_count(), 2);
+    }
+
+    #[test]
+    fn non_replayable_nested_scope_disables_parent_replay() {
+        let mut engine = TaffyLayoutEngine::new();
+        engine.begin_layout_claim_scope(None);
+        engine.begin_layout_claim_scope(None);
+        engine.request_retained_measured_layout(Style::default(), px(16.0), 1.0, |_, _, _, _| {
+            size(px(12.0), px(8.0))
+        });
+        let nested = engine.finish_layout_claim_scope();
+        assert!(!nested.log.replayable);
+
+        let parent = engine.request_layout(Style::default(), px(16.0), 1.0, &nested.log.nodes);
+        let outer = engine.finish_layout_claim_scope();
+        assert!(!outer.log.replayable);
+        assert_eq!(engine.taffy.child_count(parent.0), 1);
+    }
+
+    #[test]
+    fn changed_nested_child_disables_parent_replay_and_prunes_old_tree() {
+        let mut engine = TaffyLayoutEngine::new();
+        engine.begin_layout_claim_scope(None);
+        engine.begin_layout_claim_scope(None);
+        let old_child = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let nested_initial = engine.finish_layout_claim_scope();
+        let old_parent = engine.request_layout(Style::default(), px(16.0), 1.0, &[old_child]);
+        let parent_initial = engine.finish_layout_claim_scope();
+        assert!(parent_initial.log.replayable);
+        engine.finish_frame();
+        assert_eq!(engine.taffy.total_node_count(), 2);
+
+        engine.begin_layout_claim_scope(Some(parent_initial.log));
+        engine.begin_layout_claim_scope(Some(nested_initial.log));
+        let new_child = engine.request_layout(
+            static_direction_style(LayoutDirection::LeftToRight),
+            px(16.0),
+            1.0,
+            &[],
+        );
+        let nested_changed = engine.finish_layout_claim_scope();
+        assert!(nested_changed.log.replayable);
+        assert!(!nested_changed.fully_replayed);
+        let new_parent = engine.request_layout(Style::default(), px(16.0), 1.0, &[new_child]);
+        let parent_changed = engine.finish_layout_claim_scope();
+        assert!(!parent_changed.fully_replayed);
+        assert_ne!(new_parent, old_parent);
+        engine.finish_frame();
+        assert_eq!(engine.taffy.total_node_count(), 2);
+    }
+
+    #[test]
+    fn measured_layout_claims_never_replay_opaque_closures() {
+        let mut engine = TaffyLayoutEngine::new();
+        engine.begin_layout_claim_scope(None);
+        let first = engine.request_retained_measured_layout(
+            Style::default(),
+            px(16.0),
+            1.0,
+            |_, _, _, _| size(px(12.0), px(8.0)),
+        );
+        let initial = engine.finish_layout_claim_scope();
+        assert!(!initial.log.replayable);
+        engine.finish_frame();
+
+        engine.begin_layout_claim_scope(Some(initial.log));
+        let second = engine.request_retained_measured_layout(
+            Style::default(),
+            px(16.0),
+            1.0,
+            |_, _, _, _| size(px(12.0), px(8.0)),
+        );
+        let replay = engine.finish_layout_claim_scope();
+        assert!(!replay.fully_replayed);
+        assert_ne!(first, second);
+    }
+
+    fn resolve_directions_without_guard(
+        engine: &mut TaffyLayoutEngine,
+        root_id: LayoutId,
+        inherited: ResolvedDirection,
+    ) -> Vec<LayoutId> {
+        let mut visited = FxHashSet::default();
+        let mut changed = Vec::new();
+        engine.resolve_direction_subtree(root_id, inherited, &mut visited, &mut changed);
+        changed
+    }
+
+    #[test]
+    fn ltr_only_direction_resolution_matches_the_full_walk() {
+        fn make_engine() -> (TaffyLayoutEngine, LayoutId, LayoutId, LayoutId) {
+            let mut engine = TaffyLayoutEngine::new();
+            let logical_child = engine.request_layout(
+                direction_style(LayoutDirection::Inherit),
+                px(16.0),
+                1.0,
+                &[],
+            );
+            engine.set_direction_text(logical_child, "مرحبا".into());
+            engine.set_auto_direction_hint(logical_child, Some(ResolvedDirection::RightToLeft));
+
+            let explicit_ltr_child = engine.request_layout(
+                direction_style(LayoutDirection::LeftToRight),
+                px(16.0),
+                1.0,
+                &[],
+            );
+            let root = engine.request_layout(
+                direction_style(LayoutDirection::Inherit),
+                px(16.0),
+                1.0,
+                &[],
+            );
+            // This edge is logical-only, as in inline paragraph layouts. Without Auto it cannot
+            // affect resolved direction, even when the child has directional text and a hint.
+            engine.set_logical_children(root, &[logical_child, explicit_ltr_child]);
+            (engine, root, logical_child, explicit_ltr_child)
+        }
+
+        let (mut guarded, guarded_root, guarded_child, guarded_ltr) = make_engine();
+        let (mut reference, reference_root, reference_child, reference_ltr) = make_engine();
+        assert!(!guarded.direction_resolution_needed);
+
+        let guarded_changed =
+            guarded.resolve_directions(guarded_root, ResolvedDirection::LeftToRight);
+        let reference_changed = resolve_directions_without_guard(
+            &mut reference,
+            reference_root,
+            ResolvedDirection::LeftToRight,
+        );
+        assert_eq!(guarded_changed, reference_changed);
+        assert_eq!(
+            guarded.direction_handle(guarded_root).get(),
+            reference.direction_handle(reference_root).get()
+        );
+        assert_eq!(
+            guarded.direction_handle(guarded_child).get(),
+            reference.direction_handle(reference_child).get()
+        );
+        assert_eq!(
+            guarded.direction_handle(guarded_ltr).get(),
+            reference.direction_handle(reference_ltr).get()
+        );
+        for (guarded_id, reference_id) in [
+            (guarded_root, reference_root),
+            (guarded_child, reference_child),
+            (guarded_ltr, reference_ltr),
+        ] {
+            assert_eq!(
+                guarded.taffy.style(guarded_id.into()).unwrap().direction,
+                reference
+                    .taffy
+                    .style(reference_id.into())
+                    .unwrap()
+                    .direction
+            );
+        }
+        assert_eq!(
+            guarded.direction_handle(guarded_root).get(),
+            ResolvedDirection::LeftToRight
+        );
+        assert_eq!(
+            guarded.direction_handle(guarded_child).get(),
+            ResolvedDirection::LeftToRight
+        );
+        assert_eq!(
+            guarded.direction_handle(guarded_ltr).get(),
+            ResolvedDirection::LeftToRight
+        );
+        assert!(!guarded.direction_resolution_needed);
+    }
+
+    #[test]
+    fn rtl_inheritance_latches_direction_resolution_across_roots_and_pruning() {
+        let mut engine = TaffyLayoutEngine::new();
+        let rtl_child = engine.request_layout(
+            direction_style(LayoutDirection::Inherit),
+            px(16.0),
+            1.0,
+            &[],
+        );
+        let rtl_root = engine.request_layout(
+            direction_style(LayoutDirection::Inherit),
+            px(16.0),
+            1.0,
+            &[rtl_child],
+        );
+        let changed = engine.resolve_directions(rtl_root, ResolvedDirection::RightToLeft);
+        assert!(engine.direction_resolution_needed);
+        assert_eq!(changed.len(), 2);
+        assert_eq!(
+            engine.direction_handle(rtl_child).get(),
+            ResolvedDirection::RightToLeft
+        );
+        assert_eq!(
+            engine.taffy.style(rtl_child.into()).unwrap().direction,
+            taffy::style::Direction::Rtl
+        );
+
+        // Keep the RTL child alive while replacing its old RTL parent with a fresh LTR root.
+        engine.retain_subtree(rtl_child);
+        let ltr_root = engine.request_layout(Style::default(), px(16.0), 1.0, &[rtl_child]);
+        let changed = engine.resolve_directions(ltr_root, ResolvedDirection::LeftToRight);
+        assert!(changed.contains(&rtl_child));
+        assert_eq!(
+            engine.direction_handle(rtl_child).get(),
+            ResolvedDirection::LeftToRight
+        );
+        assert_eq!(
+            engine.taffy.style(rtl_child.into()).unwrap().direction,
+            taffy::style::Direction::Ltr
+        );
+        assert!(engine.direction_resolution_needed);
+
+        engine.finish_frame();
+        engine.finish_frame();
+        assert!(engine.live_layout_nodes.is_empty());
+        assert!(
+            engine.direction_resolution_needed,
+            "the RTL guard remains latched after pruning"
+        );
+    }
+
+    #[test]
+    fn authored_rtl_latches_direction_resolution() {
+        let mut engine = TaffyLayoutEngine::new();
+        let root = engine.request_layout(
+            direction_style(LayoutDirection::RightToLeft),
+            px(16.0),
+            1.0,
+            &[],
+        );
+        assert!(engine.direction_resolution_needed);
+        let changed = engine.resolve_directions(root, ResolvedDirection::LeftToRight);
+        assert_eq!(changed, vec![root]);
+        assert_eq!(
+            engine.direction_handle(root).get(),
+            ResolvedDirection::RightToLeft
+        );
+        assert_eq!(
+            engine.taffy.style(root.into()).unwrap().direction,
+            taffy::style::Direction::Rtl
+        );
+    }
+
+    #[test]
+    fn authored_auto_rtl_latches_guard_across_pruning() {
+        let mut engine = TaffyLayoutEngine::new();
+        let text = engine.request_layout(
+            direction_style(LayoutDirection::Inherit),
+            px(16.0),
+            1.0,
+            &[],
+        );
+        engine.set_direction_text(text, "مرحبا".into());
+        let root = engine.request_layout(
+            direction_style(LayoutDirection::Auto),
+            px(16.0),
+            1.0,
+            &[text],
+        );
+        assert!(engine.direction_resolution_needed);
+        let _ = engine.resolve_directions(root, ResolvedDirection::LeftToRight);
+        assert_eq!(
+            engine.direction_handle(root).get(),
+            ResolvedDirection::RightToLeft
+        );
+
+        engine.finish_frame();
+        engine.finish_frame();
+        assert!(engine.live_layout_nodes.is_empty());
+        assert!(engine.direction_resolution_needed);
     }
 
     #[test]
@@ -1480,7 +2568,7 @@ mod tests {
                     Style::default(),
                     px(16.),
                     1.0,
-                    move |_, _, _| {
+                    move |_, _, _, _| {
                         let _ = &probe;
                         crate::size(px(1.), px(1.))
                     },
@@ -1549,6 +2637,39 @@ mod tests {
     }
 
     #[test]
+    fn pruning_detects_an_omitted_child_when_a_new_child_replaces_it() {
+        let mut engine = TaffyLayoutEngine::new();
+        let old_child = engine.request_layout(Style::default(), px(16.), 1.0, &[]);
+        let parent = engine.request_layout(Style::default(), px(16.), 1.0, &[old_child]);
+        engine.finish_frame();
+        assert_eq!(engine.taffy.total_node_count(), 2);
+
+        // Keep the parent and replace its old child with a newly allocated child. The claimed
+        // set stays the same size as the old live-node list, but the unclaimed old child remains
+        // allocated until finish_frame and must still be pruned.
+        engine.frame_layout_nodes.push(parent);
+        engine.frame_layout_node_set.insert(parent);
+        let replacement = engine.request_layout(Style::default(), px(16.), 1.0, &[]);
+        engine
+            .taffy
+            .set_children(parent.0, &[replacement.0])
+            .expect(EXPECT_MESSAGE);
+        assert_eq!(
+            engine.frame_layout_node_set.len(),
+            engine.live_layout_nodes.len()
+        );
+        assert_eq!(engine.taffy.total_node_count(), 3);
+
+        engine.finish_frame();
+
+        assert!(!engine.live_layout_nodes.contains(&old_child));
+        assert_eq!(engine.taffy.child_count(parent.0), 1);
+        assert_eq!(engine.taffy.get_child_id(parent.0, 0), replacement.0);
+        assert_eq!(engine.taffy.total_node_count(), 2);
+        assert_eq!(engine.live_layout_node_count(), 2);
+    }
+
+    #[test]
     fn retained_child_can_be_reparented_before_the_old_parent_is_pruned() {
         let mut engine = TaffyLayoutEngine::new();
         let child = engine.request_layout(Style::default(), px(16.), 1.0, &[]);
@@ -1581,10 +2702,12 @@ mod tests {
         engine.finish_frame();
         assert!(engine.taffy.get_node_context(measured.into()).is_none());
 
-        let retained =
-            engine.request_retained_measured_layout(Style::default(), px(16.), 1.0, |_, _, _| {
-                crate::size(px(2.), px(2.))
-            });
+        let retained = engine.request_retained_measured_layout(
+            Style::default(),
+            px(16.),
+            1.0,
+            |_, _, _, _| crate::size(px(2.), px(2.)),
+        );
         engine.finish_frame();
         assert!(engine.taffy.get_node_context(retained.into()).is_some());
         engine.retain_subtree(retained);

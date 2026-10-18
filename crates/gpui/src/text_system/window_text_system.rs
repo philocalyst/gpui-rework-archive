@@ -36,6 +36,12 @@ impl WindowTextSystem {
         )
     }
 
+    pub(crate) fn font_generation(&self) -> usize {
+        self.text_system
+            .font_generation
+            .load(std::sync::atomic::Ordering::Acquire)
+    }
+
     pub(crate) fn layout_index(&self) -> LineLayoutIndex {
         self.line_layout_cache.layout_index()
     }

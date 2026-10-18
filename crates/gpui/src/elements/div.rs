@@ -61,8 +61,8 @@ use std::{
 use super::ImageCacheProvider;
 
 mod inline;
-pub(crate) use inline::InlineContent;
 use inline::InlineDivFrameState;
+pub(crate) use inline::{InlineContent, InlineParagraphMemo};
 #[cfg(feature = "stacker")]
 type StackSafe<T> = stacksafe::StackSafe<T>;
 #[cfg(not(feature = "stacker"))]
@@ -2820,6 +2820,15 @@ impl Element for Div {
                 |style, window, cx| {
                     window.with_text_style(style.text_style().cloned(), |window| {
                         let display = style.display;
+                        // Once an unsafe direction enters a Window, later cached descendants may
+                        // request layout during prepaint after this parent has returned. Keep the
+                        // conservative text-reuse guard for the Window lifetime.
+                        window.inline_text_reuse_disabled |= matches!(
+                            style.direction,
+                            crate::LayoutDirection::Auto | crate::LayoutDirection::RightToLeft
+                        ) || style.effective_unicode_bidi()
+                            != crate::UnicodeBidi::Normal
+                            || window.resolved_direction() == crate::ResolvedDirection::RightToLeft;
                         let collected_by_ancestor =
                             window.collecting_inline && display == Display::Inline;
                         let previous_collecting_inline = std::mem::replace(
@@ -2846,7 +2855,12 @@ impl Element for Div {
                             inline = Some(state);
                             node_id
                         } else if collected_by_ancestor {
-                            window.request_layout(style, std::iter::empty(), cx)
+                            window.request_layout_with_logical_children(
+                                style,
+                                std::iter::empty(),
+                                &child_layout_ids,
+                                cx,
+                            )
                         } else {
                             window.request_layout(style, child_layout_ids.iter().copied(), cx)
                         };
