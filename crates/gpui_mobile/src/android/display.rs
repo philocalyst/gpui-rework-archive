@@ -38,9 +38,14 @@ const DENSITY_DEFAULT: i32 = 160;
 /// `NativeWindow` is internally reference-counted (`ANativeWindow_acquire` /
 /// `ANativeWindow_release`), so cloning and dropping are handled automatically.
 #[derive(Clone)]
+enum DisplayBacking {
+    Window(NativeWindow),
+    Headless(Size<DevicePixels>),
+}
+
+#[derive(Clone)]
 pub struct AndroidDisplay {
-    /// The underlying native window, or `None` for headless displays.
-    window: Option<NativeWindow>,
+    backing: DisplayBacking,
 
     /// Display density expressed as a scale factor relative to 160 dpi
     /// (the Android "baseline" density).
@@ -76,7 +81,7 @@ impl AndroidDisplay {
         let id = window.ptr().as_ptr() as u64;
 
         Self {
-            window: Some(window.clone()),
+            backing: DisplayBacking::Window(window.clone()),
             scale_factor,
             id,
         }
@@ -95,7 +100,10 @@ impl AndroidDisplay {
     /// No native window is held.
     pub fn headless(width: i32, height: i32) -> Self {
         Self {
-            window: None,
+            backing: DisplayBacking::Headless(Size {
+                width: DevicePixels(width),
+                height: DevicePixels(height),
+            }),
             scale_factor: 1.0,
             id: ((width as u64) << 32) | (height as u64),
         }
@@ -105,17 +113,17 @@ impl AndroidDisplay {
 
     /// Physical width of the display in device pixels.
     pub fn physical_width(&self) -> DevicePixels {
-        match &self.window {
-            Some(nw) => DevicePixels(nw.width()),
-            None => DevicePixels(0),
+        match &self.backing {
+            DisplayBacking::Window(window) => DevicePixels(window.width()),
+            DisplayBacking::Headless(size) => size.width,
         }
     }
 
     /// Physical height of the display in device pixels.
     pub fn physical_height(&self) -> DevicePixels {
-        match &self.window {
-            Some(nw) => DevicePixels(nw.height()),
-            None => DevicePixels(0),
+        match &self.backing {
+            DisplayBacking::Window(window) => DevicePixels(window.height()),
+            DisplayBacking::Headless(size) => size.height,
         }
     }
 
@@ -196,7 +204,7 @@ impl AndroidDisplay {
 
     /// Returns `true` if this display is backed by a real `ANativeWindow`.
     pub fn is_real(&self) -> bool {
-        self.window.is_some()
+        matches!(&self.backing, DisplayBacking::Window(_))
     }
 
     // ── raw handle ────────────────────────────────────────────────────────────
@@ -205,7 +213,10 @@ impl AndroidDisplay {
     ///
     /// Returns `None` for headless displays.
     pub fn native_window(&self) -> Option<&NativeWindow> {
-        self.window.as_ref()
+        match &self.backing {
+            DisplayBacking::Window(window) => Some(window),
+            DisplayBacking::Headless(_) => None,
+        }
     }
 }
 
