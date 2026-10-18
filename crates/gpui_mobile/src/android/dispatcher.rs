@@ -29,7 +29,7 @@ use std::{
     os::unix::io::RawFd,
     sync::{
         Arc,
-        atomic::{AtomicBool, Ordering},
+        atomic::{AtomicBool, AtomicPtr, Ordering},
     },
     time::{Duration, Instant},
 };
@@ -151,6 +151,13 @@ pub struct AndroidDispatcher {
     delayed: Mutex<Vec<DelayedTask>>,
     /// Set to `true` once `shutdown()` is called.
     shutdown: AtomicBool,
+    /// Tracks whether the owner looper currently holds the main-queue callback.
+    /// `ALooper_removeFd` is owner-thread-only, so a late Arc drop must observe
+    /// that explicit owner shutdown already unregistered it.
+    looper_registered: AtomicBool,
+    /// Raw Arc passed to ALooper_addFd; reclaimed after successful removal.
+    looper_data: AtomicPtr<std::ffi::c_void>,
+    owner_thread: std::thread::ThreadId,
 }
 
 // SAFETY: The `looper` pointer is only ever used on the main thread
@@ -198,6 +205,9 @@ impl AndroidDispatcher {
             pool: ThreadPool::new(pool_threads),
             delayed: Mutex::new(Vec::new()),
             shutdown: AtomicBool::new(false),
+            looper_registered: AtomicBool::new(false),
+            looper_data: AtomicPtr::new(std::ptr::null_mut()),
+            owner_thread: std::thread::current().id(),
         });
 
         // Register the read end of the pipe with the looper so we get a
@@ -234,6 +244,9 @@ impl AndroidDispatcher {
             pool: ThreadPool::new(pool_threads),
             delayed: Mutex::new(Vec::new()),
             shutdown: AtomicBool::new(false),
+            looper_registered: AtomicBool::new(false),
+            looper_data: AtomicPtr::new(std::ptr::null_mut()),
+            owner_thread: std::thread::current().id(),
         })
     }
 
@@ -241,11 +254,14 @@ impl AndroidDispatcher {
 
     /// Returns `true` if the calling thread is the main/UI thread.
     pub fn is_main_thread(&self) -> bool {
-        // On Android the main thread is the one that owns the looper we
-        // registered with.  `ALooper_forThread()` returns the *same* pointer
-        // if we're on that thread, or a *different* (or null) pointer otherwise.
-        let current = unsafe { ALooper_forThread() };
-        !current.is_null() && current == self.looper
+        std::thread::current().id() == self.owner_thread
+    }
+
+    /// Whether foreground work must be drained explicitly instead of by an
+    /// Android looper callback. Headless dispatchers still have an owner
+    /// thread and preserve inline owner-thread callback semantics.
+    pub fn is_headless(&self) -> bool {
+        self.looper.is_null()
     }
 
     /// Enqueue a task to run on the **main** (foreground) thread.
@@ -256,8 +272,14 @@ impl AndroidDispatcher {
         if self.shutdown.load(Ordering::Relaxed) {
             return;
         }
+        let task: BoxedTask = Box::new(f);
         let mut q = self.main_queue.lock();
-        q.tasks.push_back(Box::new(f));
+        if self.shutdown.load(Ordering::Acquire) {
+            drop(q);
+            drop(task);
+            return;
+        }
+        q.tasks.push_back(task);
         wake_pipe(q.write_fd);
     }
 
@@ -345,7 +367,22 @@ impl AndroidDispatcher {
 
     /// Stop accepting new tasks and signal the thread-pool to wind down.
     pub fn shutdown(&self) {
-        self.shutdown.store(true, Ordering::SeqCst);
+        assert!(
+            self.is_main_thread(),
+            "AndroidDispatcher must be shut down on its owner thread"
+        );
+        let mut pending = {
+            let mut queue = self.main_queue.lock();
+            // Serialize the shutdown fence with dispatch_on_main_thread's
+            // queue-lock recheck: nothing can enqueue behind this drain.
+            self.shutdown.store(true, Ordering::SeqCst);
+            std::mem::take(&mut queue.tasks)
+        };
+        // Execute accepted tasks on their owner before callbacks are cleared.
+        // Tasks posted by these tasks are rejected by the shutdown fence.
+        while let Some(task) = pending.pop_front() {
+            task();
+        }
         self.unregister_from_looper();
     }
 
@@ -372,7 +409,13 @@ impl AndroidDispatcher {
             )
         };
 
-        if ret != 1 {
+        if ret == 1 {
+            self.looper_data.store(data_ptr, Ordering::Release);
+            self.looper_registered.store(true, Ordering::Release);
+        } else {
+            // ALooper did not take ownership of the raw Arc passed as callback
+            // data, so reclaim it here instead of leaking the queue.
+            drop(unsafe { Arc::from_raw(data_ptr as *const Mutex<MainQueue>) });
             log::warn!(
                 "ALooper_addFd returned {} (expected 1); foreground dispatch may not work",
                 ret
@@ -380,10 +423,37 @@ impl AndroidDispatcher {
         }
     }
 
-    fn unregister_from_looper(&self) {
-        unsafe {
-            ALooper_removeFd(self.looper, self.read_fd);
+    /// Unregister only on the looper owner. Returns false when a late worker
+    /// drop cannot safely perform the owner-only NDK operation; in that case
+    /// Drop intentionally leaves the fd/queue alive rather than invalidating a
+    /// callback still registered with ALooper.
+    fn unregister_from_looper(&self) -> bool {
+        if self.looper.is_null() || !self.looper_registered.load(Ordering::Acquire) {
+            return true;
         }
+        if !self.is_main_thread() {
+            log::error!("AndroidDispatcher reached its last Arc before owner-thread shutdown");
+            return false;
+        }
+        let result = unsafe { ALooper_removeFd(self.looper, self.read_fd) };
+        if result < 0 {
+            log::error!(
+                "ALooper_removeFd failed with {}; keeping registration alive",
+                result
+            );
+            return false;
+        }
+        self.looper_registered.store(false, Ordering::Release);
+        let data = self
+            .looper_data
+            .swap(std::ptr::null_mut(), Ordering::AcqRel);
+        if !data.is_null() {
+            // ALooper confirms this callback is no longer registered (result
+            // 1 removed it; 0 means it had already been removed). Reclaim the
+            // strong count transferred by Arc::into_raw in register_with_looper.
+            drop(unsafe { Arc::from_raw(data as *const Mutex<MainQueue>) });
+        }
+        true
     }
 }
 
@@ -399,8 +469,13 @@ impl Default for AndroidDispatcher {
 impl Drop for AndroidDispatcher {
     fn drop(&mut self) {
         self.shutdown.store(true, Ordering::SeqCst);
-        self.unregister_from_looper();
-        // Close file descriptors.
+        if !self.unregister_from_looper() {
+            // The looper owns a raw Arc to MainQueue and still watches read_fd.
+            // Leave both pipe ends valid; leaking is safer than calling the
+            // owner-only ALooper API or closing an fd still registered there.
+            return;
+        }
+        // Close file descriptors after the looper callback is detached.
         unsafe {
             libc_close(self.read_fd);
             libc_close(self.main_queue.lock().write_fd);
@@ -617,6 +692,9 @@ mod tests {
             pool: ThreadPool::new(1),
             delayed: Mutex::new(Vec::new()),
             shutdown: AtomicBool::new(false),
+            looper_registered: AtomicBool::new(false),
+            looper_data: AtomicPtr::new(std::ptr::null_mut()),
+            owner_thread: std::thread::current().id(),
         };
 
         let ran = Arc::new(AtomicBool::new(false));
@@ -629,13 +707,22 @@ mod tests {
         dispatcher.tick();
         assert!(!ran.load(Ordering::Relaxed), "task should not run yet");
 
-        // Cleanup — prevent Drop from calling ALooper_removeFd with a null pointer.
-        dispatcher.shutdown.store(true, Ordering::SeqCst);
-        std::mem::forget(dispatcher); // skip Drop (null looper)
-        unsafe {
-            libc_close(read_fd);
-            libc_close(write_fd);
-        }
+        // Headless shutdown and Drop are null-looper-safe and close the pipes.
+        dispatcher.shutdown();
+    }
+
+    #[test]
+    fn shutdown_drains_accepted_tasks_and_rejects_late_tasks() {
+        let dispatcher = AndroidDispatcher::new_headless();
+        let observed = Arc::new(Mutex::new(Vec::new()));
+        let from_task = Arc::clone(&observed);
+        dispatcher.dispatch_on_main_thread(move || from_task.lock().push(1));
+        dispatcher.shutdown();
+        assert_eq!(*observed.lock(), vec![1]);
+        let from_late_task = Arc::clone(&observed);
+        dispatcher.dispatch_on_main_thread(move || from_late_task.lock().push(2));
+        dispatcher.flush_main_thread_tasks();
+        assert_eq!(*observed.lock(), vec![1]);
     }
 
     /// Verify pipe creation succeeds.

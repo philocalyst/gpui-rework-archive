@@ -53,6 +53,7 @@ use std::ptr::NonNull;
 use std::rc::Rc;
 use std::sync::{Arc, OnceLock};
 
+use super::callbacks::{Callback, Event as CallbackEvent, Registration};
 use super::{AndroidKeyEvent, Bounds, DevicePixels, Pixels, Point, Size, TouchPoint, host};
 
 /// A touch that ends within this distance of where it started is a tap, not a drag.
@@ -242,35 +243,6 @@ fn request_high_frame_rate(window: &NativeWindow) {
 
 // ── callback type aliases ─────────────────────────────────────────────────────
 
-/// Called once per VSync tick to produce the next `Scene`.
-pub type RequestFrameCallback = Box<dyn FnMut() + Send + 'static>;
-
-/// Called when a touch event arrives.
-pub type TouchCallback = Box<dyn FnMut(TouchPoint) + Send + 'static>;
-
-/// Called when the window's active status changes (foreground/background).
-pub type ActiveStatusCallback = Box<dyn FnMut(bool) + Send + 'static>;
-
-/// Called when the window becomes visible or hidden.
-pub type VisibilityCallback = Box<dyn FnMut(bool) + Send + 'static>;
-
-/// Called when a key event arrives.
-pub type KeyCallback = Box<dyn FnMut(AndroidKeyEvent) + Send + 'static>;
-
-/// Called when the window is resized.
-pub type ResizeCallback = Box<dyn FnMut(Size<DevicePixels>, f32) + Send + 'static>;
-
-/// Called when the window is destroyed (surface lost).
-pub type CloseCallback = Box<dyn FnOnce() + Send + 'static>;
-
-/// Called when the window appearance (light/dark) changes.
-pub type AppearanceCallback = Box<dyn FnMut(WindowAppearance) + Send + 'static>;
-
-/// Called when system bars, cutouts, or the keyboard change window insets.
-pub type InsetsCallback = Box<dyn FnMut(gpui::WindowInsets) + Send + 'static>;
-
-// ── appearance ────────────────────────────────────────────────────────────────
-
 /// Light / dark / high-contrast appearance of the window.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Default)]
 pub enum WindowAppearance {
@@ -374,15 +346,15 @@ struct WindowState {
     surface_window_addr: usize,
 
     // ── callbacks ─────────────────────────────────────────────────────────
-    request_frame_callback: Option<RequestFrameCallback>,
-    touch_callback: Option<TouchCallback>,
-    key_callback: Option<KeyCallback>,
-    resize_callback: Option<ResizeCallback>,
-    close_callback: Option<CloseCallback>,
-    appearance_callback: Option<AppearanceCallback>,
-    active_status_callback: Option<ActiveStatusCallback>,
-    visibility_callback: Option<VisibilityCallback>,
-    insets_callback: Option<InsetsCallback>,
+    request_frame_callback: Option<Registration>,
+    touch_callback: Option<Registration>,
+    key_callback: Option<Registration>,
+    resize_callback: Option<Registration>,
+    close_callback: Option<Registration>,
+    appearance_callback: Option<Registration>,
+    active_status_callback: Option<Registration>,
+    visibility_callback: Option<Registration>,
+    insets_callback: Option<Registration>,
 }
 
 // SAFETY: `WindowState` is only ever accessed while holding the
@@ -408,6 +380,8 @@ pub struct AndroidWindow {
     /// lifecycle handlers can set it without acquiring the state lock
     /// (which may be held by a background render thread).
     active: Arc<std::sync::atomic::AtomicBool>,
+    active_transition: Mutex<()>,
+    dispatcher: Option<Arc<super::dispatcher::AndroidDispatcher>>,
     /// Set when the window gets a *new* surface, cleared by the next frame.
     ///
     /// A replaced swapchain starts out empty, but GPUI only repaints what it
@@ -447,6 +421,7 @@ impl AndroidWindow {
         gpu_context: GpuContext,
         scale_factor: f32,
         transparent: bool,
+        dispatcher: Option<Arc<super::dispatcher::AndroidDispatcher>>,
     ) -> Result<Arc<Self>> {
         request_high_frame_rate(&native_window);
 
@@ -500,6 +475,8 @@ impl AndroidWindow {
             state,
             id,
             active: Arc::new(std::sync::atomic::AtomicBool::new(true)),
+            active_transition: Mutex::new(()),
+            dispatcher,
             force_render_once: Arc::new(std::sync::atomic::AtomicBool::new(true)),
             a11y: Default::default(),
             host: Default::default(),
@@ -538,6 +515,8 @@ impl AndroidWindow {
             state,
             id: ((width as u64) << 32) | (height as u64),
             active: Arc::new(std::sync::atomic::AtomicBool::new(false)),
+            active_transition: Mutex::new(()),
+            dispatcher: None,
             force_render_once: Arc::new(std::sync::atomic::AtomicBool::new(true)),
             a11y: Default::default(),
             host: Default::default(),
@@ -674,33 +653,21 @@ impl AndroidWindow {
     /// window, whether or not they differ from what GPUI last saw.
     fn notify_resize(&self) {
         let (width, height, scale) = {
-            let state = self.state.lock();
-            (state.width, state.height, state.scale_factor)
+            let st = self.state.lock();
+            (st.width, st.height, st.scale_factor)
         };
-        let cb = {
-            let mut state = self.state.lock();
-            state.resize_callback.take()
-        };
-        if let Some(mut cb) = cb {
-            cb(
+        let cb = { self.state.lock().resize_callback.clone() };
+        if let Some(cb) = cb {
+            cb.dispatch(CallbackEvent::Resize(
                 Size {
                     width: DevicePixels(width),
                     height: DevicePixels(height),
                 },
                 scale,
-            );
-            let mut state = self.state.lock();
-            if state.resize_callback.is_none() {
-                state.resize_callback = Some(cb);
-            }
+            ));
         }
     }
 
-    /// Called when `APP_CMD_TERM_WINDOW` fires and the surface is about to be
-    /// destroyed.
-    ///
-    /// Drops the renderer (and therefore the wgpu surface) but keeps the window
-    /// struct alive so callbacks are preserved.
     pub fn term_window(&self) {
         let mut state = self.state.lock();
 
@@ -729,75 +696,36 @@ impl AndroidWindow {
 
     /// Called when `APP_CMD_WINDOW_RESIZED` fires.
     pub fn handle_resize(&self) {
-        let (new_w, new_h, scale) = {
-            let mut state = self.state.lock();
-
-            let nw = match state.native_window.as_ref() {
-                Some(nw) => nw,
-                None => return,
+        let (w, h, scale) = {
+            let mut st = self.state.lock();
+            let Some(nw) = st.native_window.as_ref() else {
+                return;
             };
-
-            let new_w = nw.width();
-            let new_h = nw.height();
-
-            if new_w == state.width && new_h == state.height {
-                log::debug!("handle_resize: no change ({}×{})", new_w, new_h);
+            let (w, h) = (nw.width(), nw.height());
+            if w == st.width && h == st.height {
                 return;
             }
-
-            log::info!(
-                "AndroidWindow resize: {}×{} → {}×{}",
-                state.width,
-                state.height,
-                new_w,
-                new_h
-            );
-
-            state.width = new_w;
-            state.height = new_h;
-            let scale = state.scale_factor;
-
-            // update_drawable_size calls device.poll(Wait) which can take
-            // time — take the renderer out to avoid holding the state lock.
-            if let Some(mut renderer) = state.renderer.take() {
-                renderer.update_drawable_size(gpui::size(
-                    gpui::DevicePixels(new_w),
-                    gpui::DevicePixels(new_h),
-                ));
-                state.renderer = Some(renderer);
+            st.width = w;
+            st.height = h;
+            let scale = st.scale_factor;
+            if let Some(mut r) = st.renderer.take() {
+                r.update_drawable_size(gpui::size(gpui::DevicePixels(w), gpui::DevicePixels(h)));
+                st.renderer = Some(r);
             }
-
-            (new_w, new_h, scale)
-        }; // state lock dropped
-
-        // Fire the resize callback outside the lock — GPUI's callback may
-        // call bounds() / scale_factor() which need the state lock.
-        let cb = {
-            let mut state = self.state.lock();
-            state.resize_callback.take()
+            (w, h, scale)
         };
-        if let Some(mut cb) = cb {
-            cb(
+        let cb = { self.state.lock().resize_callback.clone() };
+        if let Some(cb) = cb {
+            cb.dispatch(CallbackEvent::Resize(
                 Size {
-                    width: DevicePixels(new_w),
-                    height: DevicePixels(new_h),
+                    width: DevicePixels(w),
+                    height: DevicePixels(h),
                 },
                 scale,
-            );
-            // Put callback back.
-            let mut state = self.state.lock();
-            if state.resize_callback.is_none() {
-                state.resize_callback = Some(cb);
-            }
+            ));
         }
     }
 
-    // ── drawing ───────────────────────────────────────────────────────────────
-
-    /// Returns `true` when the scene contains no renderable primitives.
-    ///
-    /// Checks every primitive bucket instead of just `quads`, because text
-    /// and images are emitted as sprite primitives.
     fn scene_is_empty(scene: &gpui::Scene) -> bool {
         scene.shadows.is_empty()
             && scene.quads.is_empty()
@@ -871,110 +799,40 @@ impl AndroidWindow {
     /// `AndroidWindow::draw`, which needs to acquire the same `state` lock
     /// to access the renderer.
     pub fn request_frame(&self) {
-        // Take the callback out of the lock so it can be invoked without
-        // holding it.  This lets `draw()` (called from inside the callback)
-        // acquire the lock for the renderer.
-        let cb = {
-            let mut state = self.state.lock();
-            state.request_frame_callback.take()
-        };
-
-        if let Some(mut cb) = cb {
-            cb();
-
-            // Put the callback back so it fires again next frame.
-            let mut state = self.state.lock();
-            // Only put it back if nothing else registered a new callback
-            // while we were running (unlikely but defensive).
-            if state.request_frame_callback.is_none() {
-                state.request_frame_callback = Some(cb);
-            }
+        let cb = { self.state.lock().request_frame_callback.clone() };
+        if let Some(cb) = cb {
+            cb.dispatch(CallbackEvent::Frame(RequestFrameOptions::default()));
         }
     }
 
-    // ── input event delivery ──────────────────────────────────────────────────
-
-    /// Deliver a touch point to the registered touch callback.
-    ///
-    /// The callback is taken out of the lock before invocation (same pattern
-    /// as `request_frame`) to avoid potential deadlocks if the callback
-    /// re-enters any window method that needs the lock.
     pub fn handle_touch(&self, point: TouchPoint) {
-        let cb = {
-            let mut state = self.state.lock();
-            state.touch_callback.take()
-        };
-        if let Some(mut cb) = cb {
-            let scale = self.scale_factor();
-            log::debug!(
-                "handle_touch: id={} action={} phys=({:.0},{:.0}) logical=({:.0},{:.0}) scale={:.1}",
-                point.id,
-                point.action,
-                point.x,
-                point.y,
-                point.x / scale,
-                point.y / scale,
-                scale,
-            );
-            cb(point);
-            let mut state = self.state.lock();
-            if state.touch_callback.is_none() {
-                state.touch_callback = Some(cb);
-            }
-        } else {
-            log::warn!(
-                "handle_touch: NO touch_callback registered — touch dropped (id={} action={})",
-                point.id,
-                point.action,
-            );
+        let cb = { self.state.lock().touch_callback.clone() };
+        if let Some(cb) = cb {
+            cb.dispatch(CallbackEvent::Touch(point));
         }
     }
 
-    /// Deliver a key event to the registered key callback.
     pub fn handle_key_event(&self, event: AndroidKeyEvent) {
-        let cb = {
-            let mut state = self.state.lock();
-            state.key_callback.take()
-        };
-        if let Some(mut cb) = cb {
-            cb(event);
-            let mut state = self.state.lock();
-            if state.key_callback.is_none() {
-                state.key_callback = Some(cb);
-            }
+        let cb = { self.state.lock().key_callback.clone() };
+        if let Some(cb) = cb {
+            cb.dispatch(CallbackEvent::Key(event));
         }
     }
 
-    // ── appearance ────────────────────────────────────────────────────────────
-
-    /// Update the window's appearance (e.g. after a dark-mode change).
     pub fn set_appearance(&self, appearance: WindowAppearance) {
-        let changed = {
-            let mut state = self.state.lock();
-            if state.appearance == appearance {
+        let cb = {
+            let mut st = self.state.lock();
+            if st.appearance == appearance {
                 return;
             }
-            state.appearance = appearance;
-            true
+            st.appearance = appearance;
+            st.appearance_callback.clone()
         };
-        if changed {
-            // Fire callback outside the lock — it may call back into
-            // GPUI which needs state access.
-            let cb = {
-                let mut state = self.state.lock();
-                state.appearance_callback.take()
-            };
-            if let Some(mut cb) = cb {
-                cb(appearance);
-                let mut state = self.state.lock();
-                if state.appearance_callback.is_none() {
-                    state.appearance_callback = Some(cb);
-                }
-            }
+        if let Some(cb) = cb {
+            cb.dispatch(CallbackEvent::Appearance(appearance));
         }
     }
 
-    /// Returns the current appearance.
     pub fn appearance(&self) -> WindowAppearance {
         self.state.lock().appearance
     }
@@ -983,59 +841,36 @@ impl AndroidWindow {
     ///
     /// Called by `on_window_focus_changed` in `jni.rs`.
     pub fn set_active(&self, active: bool) {
-        use std::sync::atomic::Ordering;
-        let prev = self.active.swap(active, Ordering::Relaxed);
+        let serial = self.active_transition.lock();
+        let prev = self
+            .active
+            .swap(active, std::sync::atomic::Ordering::AcqRel);
+        let (active_callback, visibility_callback) = {
+            let mut state = self.state.lock();
+            state.is_active = active;
+            (
+                state.active_status_callback.clone(),
+                state.visibility_callback.clone(),
+            )
+        };
         if prev != active {
-            log::info!(
-                "AndroidWindow::set_active({}) — changed from {}",
-                active,
-                prev
-            );
-            // Take the callback out of the state so we can invoke it WITHOUT
-            // holding the window state lock.  The callback wraps a GPUI
-            // closure that acquires its own Mutex (and may call back into
-            // GPUI), so calling it under the state lock deadlocks.
-            let mut taken_cb: Option<Box<dyn FnMut(bool) + Send>> = None;
-            let mut visibility_cb: Option<Box<dyn FnMut(bool) + Send>> = None;
-            if let Some(mut state) = self.state.try_lock() {
-                state.is_active = active;
-                taken_cb = state.active_status_callback.take();
-                visibility_cb = state.visibility_callback.take();
-            } else {
-                log::info!(
-                    "AndroidWindow::set_active({}) — lock busy, skipping",
-                    active
-                );
+            if let Some(callback) = active_callback {
+                callback.dispatch_deferred(CallbackEvent::Active(active));
             }
-            // Fire callback outside the lock.
-            if let Some(mut cb) = taken_cb {
-                cb(active);
-                // Put it back so future calls still fire.
-                if let Some(mut state) = self.state.try_lock() {
-                    state.active_status_callback = Some(cb);
-                }
+            if let Some(callback) = visibility_callback {
+                callback.dispatch_deferred(CallbackEvent::Visibility(active));
             }
-            if let Some(mut cb) = visibility_cb {
-                cb(active);
-                if let Some(mut state) = self.state.try_lock() {
-                    state.visibility_callback = Some(cb);
-                }
-            }
-            log::info!("AndroidWindow::set_active({}) — done", active);
         }
+        drop(serial);
+        super::callbacks::drain_owner_events();
         if active {
-            // Also when already active: the surface arriving is a later, safer point to
-            // attach, and a recreated Activity has new views.
             if let Some(handlers) = self.a11y.lock().expect("poisoned").clone() {
                 super::accessibility::init(&handlers);
             }
-            // A vsync callback posted before the app left the foreground may
-            // never fire; post afresh so demand raised meanwhile is served.
             super::frame_source::resume();
         }
     }
 
-    /// Name the host this window belongs to; see [`super::host::set_activity`].
     pub(super) fn set_host(&self, host: super::host::HostId) {
         let _ = self.host.set(host);
     }
@@ -1146,18 +981,10 @@ impl AndroidWindow {
             return;
         }
 
-        let mut callback = {
-            let mut state = self.state.lock();
-            state.insets_callback.take()
-        };
-        if let Some(ref mut callback) = callback {
-            callback(self.window_insets());
-        }
-        if let Some(callback) = callback {
-            let mut state = self.state.lock();
-            if state.insets_callback.is_none() {
-                state.insets_callback = Some(callback);
-            }
+        let insets = self.window_insets();
+        let cb = { self.state.lock().insets_callback.clone() };
+        if let Some(cb) = cb {
+            cb.dispatch(CallbackEvent::Insets(insets));
         }
     }
 
@@ -1223,69 +1050,111 @@ impl AndroidWindow {
     // ── callback registration ─────────────────────────────────────────────────
 
     /// Register a callback invoked once per VSync tick.
+    pub(super) fn clear_callbacks_on_owner(&self) {
+        let callbacks = {
+            let mut state = self.state.lock();
+            (
+                state.request_frame_callback.take(),
+                state.touch_callback.take(),
+                state.key_callback.take(),
+                state.resize_callback.take(),
+                state.close_callback.take(),
+                state.appearance_callback.take(),
+                state.active_status_callback.take(),
+                state.visibility_callback.take(),
+                state.insets_callback.take(),
+            )
+        };
+        if let Some(close) = callbacks.4.as_ref() {
+            close.call_once();
+        }
+        drop(callbacks);
+    }
+
     pub fn on_request_frame<F>(&self, cb: F)
     where
-        F: FnMut() + Send + 'static,
+        F: FnMut(RequestFrameOptions) + 'static,
     {
-        self.state.lock().request_frame_callback = Some(Box::new(cb));
+        let registration =
+            Registration::new(self.dispatcher.clone(), Callback::Frame(Box::new(cb)));
+        let old = self
+            .state
+            .lock()
+            .request_frame_callback
+            .replace(registration);
+        drop(old);
     }
-
-    /// Register a callback invoked for each touch point.
     pub fn on_touch<F>(&self, cb: F)
     where
-        F: FnMut(TouchPoint) + Send + 'static,
+        F: FnMut(TouchPoint) + 'static,
     {
-        self.state.lock().touch_callback = Some(Box::new(cb));
+        let registration =
+            Registration::new(self.dispatcher.clone(), Callback::Touch(Box::new(cb)));
+        let old = self.state.lock().touch_callback.replace(registration);
+        drop(old);
     }
-
-    /// Register a callback invoked for each key event.
     pub fn on_key_event<F>(&self, cb: F)
     where
-        F: FnMut(AndroidKeyEvent) + Send + 'static,
+        F: FnMut(AndroidKeyEvent) + 'static,
     {
-        self.state.lock().key_callback = Some(Box::new(cb));
+        let registration = Registration::new(self.dispatcher.clone(), Callback::Key(Box::new(cb)));
+        let old = self.state.lock().key_callback.replace(registration);
+        drop(old);
     }
-
-    /// Register a callback invoked when the window is resized.
     pub fn on_resize<F>(&self, cb: F)
     where
-        F: FnMut(Size<DevicePixels>, f32) + Send + 'static,
+        F: FnMut(Size<DevicePixels>, f32) + 'static,
     {
-        self.state.lock().resize_callback = Some(Box::new(cb));
+        let registration =
+            Registration::new(self.dispatcher.clone(), Callback::Resize(Box::new(cb)));
+        let old = self.state.lock().resize_callback.replace(registration);
+        drop(old);
     }
-
-    /// Register a callback invoked once when the window surface is lost.
     pub fn on_close<F>(&self, cb: F)
     where
-        F: FnOnce() + Send + 'static,
+        F: FnOnce() + 'static,
     {
-        self.state.lock().close_callback = Some(Box::new(cb));
+        let registration =
+            Registration::new(self.dispatcher.clone(), Callback::Close(Some(Box::new(cb))));
+        let old = self.state.lock().close_callback.replace(registration);
+        drop(old);
     }
-
-    /// Register a callback invoked when the appearance (light/dark) changes.
     pub fn on_appearance_changed<F>(&self, cb: F)
     where
-        F: FnMut(WindowAppearance) + Send + 'static,
+        F: FnMut(WindowAppearance) + 'static,
     {
-        self.state.lock().appearance_callback = Some(Box::new(cb));
+        let registration =
+            Registration::new(self.dispatcher.clone(), Callback::Appearance(Box::new(cb)));
+        let old = self.state.lock().appearance_callback.replace(registration);
+        drop(old);
     }
-
-    /// Register a callback invoked when the window's active status changes.
     pub fn on_active_status_change<F>(&self, cb: F)
     where
-        F: FnMut(bool) + Send + 'static,
+        F: FnMut(bool) + 'static,
     {
-        self.state.lock().active_status_callback = Some(Box::new(cb));
+        let registration =
+            Registration::new(self.dispatcher.clone(), Callback::Active(Box::new(cb)));
+        let old = {
+            let _serial = self.active_transition.lock();
+            self.state
+                .lock()
+                .active_status_callback
+                .replace(registration)
+        };
+        drop(old);
     }
-
     pub fn on_visibility_change<F>(&self, cb: F)
     where
-        F: FnMut(bool) + Send + 'static,
+        F: FnMut(bool) + 'static,
     {
-        self.state.lock().visibility_callback = Some(Box::new(cb));
+        let registration =
+            Registration::new(self.dispatcher.clone(), Callback::Visibility(Box::new(cb)));
+        let old = {
+            let _serial = self.active_transition.lock();
+            self.state.lock().visibility_callback.replace(registration)
+        };
+        drop(old);
     }
-
-    // ── GPU introspection ─────────────────────────────────────────────────────
 
     /// Whether the GPU supports dual-source blending (subpixel text AA).
     pub fn supports_subpixel_aa(&self) -> bool {
@@ -1402,8 +1271,7 @@ pub struct AndroidPlatformWindow {
     window: Arc<AndroidWindow>,
     display: Option<Rc<dyn PlatformDisplay>>,
     input_handler: Rc<RefCell<Option<PlatformInputHandler>>>,
-    ime_input_callback:
-        Arc<Mutex<Box<dyn FnMut(gpui::PlatformInput) -> DispatchEventResult + Send>>>,
+    ime_input_callback: Rc<RefCell<Box<dyn FnMut(gpui::PlatformInput) -> DispatchEventResult>>>,
     title: String,
 }
 
@@ -1414,7 +1282,7 @@ impl AndroidPlatformWindow {
             window,
             display,
             input_handler: Rc::new(RefCell::new(None)),
-            ime_input_callback: Arc::new(Mutex::new(Box::new(|_| DispatchEventResult::default()))),
+            ime_input_callback: Rc::new(RefCell::new(Box::new(|_| DispatchEventResult::default()))),
             title: String::new(),
         }
     }
@@ -1485,9 +1353,10 @@ impl PlatformWindow for AndroidPlatformWindow {
     }
 
     fn on_insets_changed(&self, callback: Box<dyn FnMut(gpui::WindowInsets)>) {
-        let callback: Box<dyn FnMut(gpui::WindowInsets) + Send> =
-            unsafe { std::mem::transmute(callback) };
-        self.window.state.lock().insets_callback = Some(callback);
+        self.window.state.lock().insets_callback = Some(Registration::new(
+            self.window.dispatcher.clone(),
+            Callback::Insets(callback),
+        ));
     }
 
     fn resize(&mut self, _size: gpui::Size<gpui::Pixels>) {
@@ -1631,20 +1500,13 @@ impl PlatformWindow for AndroidPlatformWindow {
     }
 
     fn on_visibility_change(&self, mut callback: Box<dyn FnMut(WindowVisibility)>) {
-        let callback: Box<dyn FnMut(bool)> = Box::new(move |visible| {
+        self.window.on_visibility_change(move |visible| {
             callback(if visible {
                 WindowVisibility::Visible
             } else {
                 WindowVisibility::Hidden
-            });
+            })
         });
-        // Android active/lifecycle notifications are created, invoked, and
-        // dropped on the NativeActivity event thread. The platform trait does
-        // not express that thread affinity, while AndroidWindow stores callbacks
-        // behind its synchronized state; erase the non-Send marker only after
-        // coercion to the trait object.
-        let callback: Box<dyn FnMut(bool) + Send> = unsafe { std::mem::transmute(callback) };
-        self.window.on_visibility_change(callback);
     }
 
     fn on_display_changed(&self, _callback: Box<dyn FnMut()>) {
@@ -1653,37 +1515,17 @@ impl PlatformWindow for AndroidPlatformWindow {
         // carry the geometry changes this backend can observe.
     }
 
-    fn on_request_frame(&self, callback: Box<dyn FnMut(RequestFrameOptions)>) {
+    fn on_request_frame(&self, mut callback: Box<dyn FnMut(RequestFrameOptions)>) {
         let input_handler = Rc::clone(&self.input_handler);
-        let input_callback = Arc::clone(&self.ime_input_callback);
-        let mut callback = callback;
-        let callback: Box<dyn FnMut(RequestFrameOptions)> = Box::new(move |options| {
-            super::text_input::drain(&input_handler, &mut **input_callback.lock());
-            callback(options);
-        });
-        // PlatformWindow gives us Box<dyn FnMut(...)> (not Send).
-        // AndroidWindow::on_request_frame requires Send.  On Android the
-        // request-frame callback is always invoked on the main thread, so
-        // this transmute is safe in practice.
-        let send_callback: Box<dyn FnMut(RequestFrameOptions) + Send> =
-            unsafe { std::mem::transmute(callback) };
-        let send_callback = Mutex::new(send_callback);
-
+        let input_callback = Rc::clone(&self.ime_input_callback);
         let force_render_once = Arc::clone(&self.window.force_render_once);
-        self.window.on_request_frame(move || {
-            // Check if text input arrived since last frame — if so, force a
-            // render so drain_pending_text() runs and the UI updates.
+        self.window.on_request_frame(move |mut options| {
+            super::text_input::drain(&input_handler, &mut **input_callback.borrow_mut());
             let text_dirty =
                 crate::TEXT_INPUT_DIRTY.swap(false, std::sync::atomic::Ordering::AcqRel);
-            // A freshly attached surface has an empty swapchain; repaint in full.
             let surface_new = force_render_once.swap(false, std::sync::atomic::Ordering::AcqRel);
-
-            let mut cb = send_callback.lock();
-            cb(RequestFrameOptions {
-                require_presentation: false,
-                force_render: text_dirty || surface_new,
-                ..Default::default()
-            });
+            options.force_render |= text_dirty || surface_new;
+            callback(options);
         });
     }
 
@@ -1728,22 +1570,14 @@ impl PlatformWindow for AndroidPlatformWindow {
                 }
                 callback(event)
             });
-        // Bridge AndroidWindow touch/key callbacks → gpui::PlatformInput.
-        //
-        // PlatformWindow gives us Box<dyn FnMut(...)> (not Send).
-        // AndroidWindow callbacks require Send.  On Android the input
-        // callbacks are always invoked on the main thread, so this
-        // transmute is safe in practice.
-        let send_callback: Box<dyn FnMut(gpui::PlatformInput) -> DispatchEventResult + Send> =
-            unsafe { std::mem::transmute(callback) };
-        *self.ime_input_callback.lock() = send_callback;
-        let input_cb = Arc::clone(&self.ime_input_callback);
+        *self.ime_input_callback.borrow_mut() = callback;
+        let input_cb = Rc::clone(&self.ime_input_callback);
 
         // Preserve raw contacts so GPUI can arbitrate long presses, claimed
         // control drags and ordinary pans, including hover suppression and inertia.
         // `FlingGuard` keeps a contact that stops a fling from inheriting its axis.
         {
-            let cb = Arc::clone(&input_cb);
+            let cb = Rc::clone(&input_cb);
             let window = Arc::downgrade(&self.window);
             let mut next_id = 0u64;
             let mut next_touch_id = move || {
@@ -1783,7 +1617,7 @@ impl PlatformWindow for AndroidPlatformWindow {
                     predicted_position: None,
                     force: None,
                 };
-                let mut cb = cb.lock();
+                let mut cb = cb.borrow_mut();
                 fling_guard.relay(event, &mut next_touch_id, |event| {
                     cb(gpui::PlatformInput::Touch(event));
                 });
@@ -1795,7 +1629,7 @@ impl PlatformWindow for AndroidPlatformWindow {
 
         // ── Key events → PlatformInput ───────────────────────────────────
         {
-            let cb = Arc::clone(&input_cb);
+            let cb = Rc::clone(&input_cb);
             self.window.on_key_event(move |key_event| {
                 use crate::android::keyboard::{
                     AKEY_EVENT_ACTION_DOWN, AKEY_EVENT_ACTION_UP, android_key_to_keystroke,
@@ -1826,23 +1660,15 @@ impl PlatformWindow for AndroidPlatformWindow {
                     return; // ACTION_MULTIPLE or unknown
                 };
 
-                let mut guard = cb.lock();
+                let mut guard = cb.borrow_mut();
                 let _ = guard(event);
             });
         }
     }
 
-    fn on_active_status_change(&self, callback: Box<dyn FnMut(bool)>) {
-        // Wire the callback to AndroidWindow's active status change.
-        // PlatformWindow gives us Box<dyn FnMut(bool)> (not Send).
-        // AndroidWindow::on_active_status_change requires Send.
-        // On Android, this callback is always invoked on the main thread.
-        let send_callback: Box<dyn FnMut(bool) + Send> = unsafe { std::mem::transmute(callback) };
-        let send_callback = Mutex::new(send_callback);
-        self.window.on_active_status_change(move |active| {
-            let mut cb = send_callback.lock();
-            cb(active);
-        });
+    fn on_active_status_change(&self, mut callback: Box<dyn FnMut(bool)>) {
+        self.window
+            .on_active_status_change(move |active| callback(active));
     }
 
     fn on_hover_status_change(&self, callback: Box<dyn FnMut(bool)>) {
@@ -1850,22 +1676,15 @@ impl PlatformWindow for AndroidPlatformWindow {
         // No hover concept on touch devices
     }
 
-    fn on_resize(&self, callback: Box<dyn FnMut(gpui::Size<gpui::Pixels>, f32)>) {
-        // PlatformWindow::on_resize gives us Box<dyn FnMut(...)> (not Send).
-        // AndroidWindow::on_resize requires Send.  On Android the resize
-        // callback is always invoked on the main thread, so this is safe.
-        let send_callback: Box<dyn FnMut(gpui::Size<gpui::Pixels>, f32) + Send> =
-            unsafe { std::mem::transmute(callback) };
-        let send_callback = Arc::new(Mutex::new(send_callback));
+    fn on_resize(&self, mut callback: Box<dyn FnMut(gpui::Size<gpui::Pixels>, f32)>) {
         self.window.on_resize(move |device_size, scale| {
-            let mut cb = send_callback.lock();
-            cb(
+            callback(
                 gpui::size(
                     gpui::px(device_size.width.0 as f32 / scale),
                     gpui::px(device_size.height.0 as f32 / scale),
                 ),
                 scale,
-            );
+            )
         });
     }
 
@@ -1882,26 +1701,11 @@ impl PlatformWindow for AndroidPlatformWindow {
     }
 
     fn on_close(&self, callback: Box<dyn FnOnce()>) {
-        // PlatformWindow gives us Box<dyn FnOnce()> (not Send).
-        // AndroidWindow::on_close requires Send.  On Android, the close
-        // callback is always invoked on the main thread, so this transmute
-        // is safe in practice.
-        let send_callback: Box<dyn FnOnce() + Send + 'static> =
-            unsafe { std::mem::transmute::<Box<dyn FnOnce()>, Box<dyn FnOnce() + Send>>(callback) };
-        self.window.on_close(send_callback);
+        self.window.on_close(callback);
     }
 
-    fn on_appearance_changed(&self, callback: Box<dyn FnMut()>) {
-        // Wire to system dark mode changes via Configuration.
-        // PlatformWindow gives us Box<dyn FnMut()> (not Send).
-        // AndroidWindow::on_appearance_changed requires Send.
-        // On Android, this callback is always invoked on the main thread.
-        let send_callback: Box<dyn FnMut() + Send> = unsafe { std::mem::transmute(callback) };
-        let send_callback = Mutex::new(send_callback);
-        self.window.on_appearance_changed(move |_appearance| {
-            let mut cb = send_callback.lock();
-            cb();
-        });
+    fn on_appearance_changed(&self, mut callback: Box<dyn FnMut()>) {
+        self.window.on_appearance_changed(move |_| callback());
     }
 
     fn frame_waker(&self) -> Option<Rc<dyn Fn()>> {
@@ -2217,8 +2021,8 @@ mod tests {
     fn headless_window_logical_size() {
         let w = AndroidWindow::headless(1080, 1920, 3.0);
         let ls = w.logical_size();
-        assert!((ls.width.0 - 360.0).abs() < f32::EPSILON);
-        assert!((ls.height.0 - 640.0).abs() < f32::EPSILON);
+        assert!((ls.width.as_f32() - 360.0).abs() < f32::EPSILON);
+        assert!((ls.height.as_f32() - 640.0).abs() < f32::EPSILON);
     }
 
     #[test]
@@ -2328,7 +2132,7 @@ mod tests {
         let count = std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0));
         let c2 = count.clone();
 
-        w.on_request_frame(move || {
+        w.on_request_frame(move |_| {
             c2.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         });
 

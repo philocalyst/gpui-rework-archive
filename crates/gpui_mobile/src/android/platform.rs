@@ -56,6 +56,7 @@ use std::{
 
 use super::{
     AndroidBackend,
+    callbacks::{Callback, Event as CallbackEvent, Registration},
     dispatcher::AndroidDispatcher,
     display::{AndroidDisplay, DisplayList},
     window::{AndroidWindow, WindowList},
@@ -155,7 +156,7 @@ struct AndroidPlatformState {
     pending_window: Option<Arc<AndroidWindow>>,
     displays: DisplayList,
     /// Notifies GPUI when native display geometry is refreshed.
-    displays_changed_callback: Option<Box<dyn FnMut() + Send>>,
+    displays_changed_callback: Option<Registration>,
 
     // ── text ──────────────────────────────────────────────────────────────────
     text_system: Arc<ParleyTextSystem>,
@@ -166,20 +167,20 @@ struct AndroidPlatformState {
 
     // ── lifecycle callbacks ───────────────────────────────────────────────────
     /// The `on_finish_launching` closure passed to `run()`.
-    finish_launching: Option<Box<dyn FnOnce() + Send>>,
+    finish_launching: Option<Registration>,
 
     /// Called when the app is about to quit.
-    quit_callback: Option<Box<dyn FnMut() -> bool + Send>>,
+    quit_callback: Option<Registration>,
 
     /// Called when the app is re-opened (e.g. tapped in the recents screen
     /// while already running).
-    reopen_callback: Option<Box<dyn FnMut() + Send>>,
+    reopen_callback: Option<Registration>,
 
     /// Called when the OS delivers a list of URLs to open.
-    open_urls_callback: Option<Box<dyn FnMut(Vec<String>) + Send>>,
+    open_urls_callback: Option<Registration>,
 
     /// Called when the keyboard layout changes.
-    keyboard_layout_callback: Option<Box<dyn FnMut() + Send>>,
+    keyboard_layout_callback: Option<Registration>,
 
     /// Called once when `MainEvent::InitWindow` has successfully created the
     /// native window.  This is where the user should set up their GPUI views.
@@ -551,7 +552,12 @@ impl AndroidPlatform {
     where
         F: FnOnce(Arc<AndroidWindow>) + Send + 'static,
     {
-        self.state.lock().on_init_window_callback = Some(Box::new(callback));
+        let old = self
+            .state
+            .lock()
+            .on_init_window_callback
+            .replace(Box::new(callback));
+        drop(old);
     }
 
     /// Take the `on_init_window` callback (if any).
@@ -574,10 +580,17 @@ impl AndroidPlatform {
     /// after `MainEvent::InitWindow` has been processed and an
     /// `AndroidWindow` exists).  At that point `cx.open_window(...)` will
     /// find the existing primary window.
-    pub fn run(&self, on_finish_launching: Box<dyn FnOnce() + Send + 'static>) {
+    pub fn run(&self, on_finish_launching: Box<dyn FnOnce() + 'static>) {
         {
-            let mut state = self.state.lock();
-            state.finish_launching = Some(on_finish_launching);
+            let old = {
+                let mut state = self.state.lock();
+                let dispatcher = Arc::clone(&state.dispatcher);
+                state.finish_launching.replace(Registration::new(
+                    Some(dispatcher),
+                    Callback::Close(Some(on_finish_launching)),
+                ))
+            };
+            drop(old);
         }
         log::info!("AndroidPlatform::run — callback stored, entering event loop");
 
@@ -593,7 +606,7 @@ impl AndroidPlatform {
             // immediately and return.
             let cb = self.state.lock().finish_launching.take();
             if let Some(cb) = cb {
-                cb();
+                cb.call_once();
             }
         }
 
@@ -604,7 +617,7 @@ impl AndroidPlatform {
     ///
     /// Called by `run_event_loop` when the native window is ready so that
     /// the GPUI `Application` context can open its first window.
-    pub fn take_finish_launching_callback(&self) -> Option<Box<dyn FnOnce() + Send>> {
+    pub(super) fn take_finish_launching_callback(&self) -> Option<Registration> {
         self.state.lock().finish_launching.take()
     }
 
@@ -616,11 +629,11 @@ impl AndroidPlatform {
         log::info!("AndroidPlatform::quit");
         // GPUI may defer shutdown while its App is borrowed. Take the callback
         // out of the mutex so it can call back into the platform safely.
-        let mut callback = self.state.lock().quit_callback.take();
-        let can_quit = callback.as_mut().map_or(true, |callback| callback());
-        if let Some(callback) = callback {
-            self.state.lock().quit_callback.get_or_insert(callback);
-        }
+        let callback = self.state.lock().quit_callback.clone();
+        let can_quit = callback
+            .as_ref()
+            .and_then(Registration::call_quit)
+            .unwrap_or(true);
         if can_quit {
             self.should_quit.store(true, Ordering::SeqCst);
         }
@@ -646,22 +659,25 @@ impl AndroidPlatform {
     /// Deliver URLs from an implicit or explicit intent.
     pub fn deliver_open_urls(&self, urls: Vec<String>) {
         log::debug!("AndroidPlatform: delivering {} URL(s)", urls.len());
-        if let Some(cb) = self.state.lock().open_urls_callback.as_mut() {
-            cb(urls);
+        let cb = { self.state.lock().open_urls_callback.clone() };
+        if let Some(cb) = cb {
+            cb.dispatch(CallbackEvent::OpenUrls(urls));
         }
     }
 
     /// Notify the platform that the keyboard layout has changed.
     pub fn notify_keyboard_layout_change(&self) {
-        if let Some(cb) = self.state.lock().keyboard_layout_callback.as_mut() {
-            cb();
+        let cb = { self.state.lock().keyboard_layout_callback.clone() };
+        if let Some(cb) = cb {
+            cb.dispatch(CallbackEvent::KeyboardLayout);
         }
     }
 
     /// Deliver a "reopen" event (app tapped in recents while already running).
     pub fn deliver_reopen(&self) {
-        if let Some(cb) = self.state.lock().reopen_callback.as_mut() {
-            cb();
+        let cb = { self.state.lock().reopen_callback.clone() };
+        if let Some(cb) = cb {
+            cb.dispatch(CallbackEvent::Reopen);
         }
     }
 
@@ -681,6 +697,7 @@ impl AndroidPlatform {
                 Rc::clone(&state.gpu_context),
                 scale_factor,
                 transparent,
+                Some(Arc::clone(&state.dispatcher)),
             )?;
             state.windows.push(Arc::clone(&window));
             window
@@ -736,7 +753,22 @@ impl AndroidPlatform {
 
     /// Remove and return the window identified by `id`.
     pub fn close_window(&self, id: u64) -> Option<Arc<AndroidWindow>> {
-        self.state.lock().windows.remove(id)
+        let window = self.state.lock().windows.remove(id)?;
+        window.clear_callbacks_on_owner();
+        Some(window)
+    }
+
+    pub(super) fn shutdown_callback_registry_on_owner(&self) {
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        assert!(
+            dispatcher.is_main_thread(),
+            "callback registry shutdown must run on owner thread"
+        );
+        // Detach the ALooper callback first while still on its owner thread.
+        // Then destroy all !Send GPUI callbacks on that same thread. Escaped
+        // AndroidWindow Arcs can retain the now-shutdown dispatcher safely.
+        dispatcher.shutdown();
+        super::callbacks::clear_current_thread();
     }
 
     /// Returns the primary (first) window, if any.
@@ -775,16 +807,10 @@ impl AndroidPlatform {
         asset_manager: &ndk::asset::AssetManager,
     ) {
         let display = AndroidDisplay::from_activity(native_window, asset_manager);
-        let callback = {
-            let mut state = self.state.lock();
-            state.displays = DisplayList::single(display);
-            state.displays_changed_callback.take()
-        };
-        if let Some(mut callback) = callback {
-            // GPUI's callback may query the platform, so it must run outside the
-            // state mutex. Restore it afterward for future surface/display changes.
-            callback();
-            self.state.lock().displays_changed_callback = Some(callback);
+        self.state.lock().displays = DisplayList::single(display);
+        let callback = { self.state.lock().displays_changed_callback.clone() };
+        if let Some(callback) = callback {
+            callback.dispatch(CallbackEvent::DisplaysChanged);
         }
     }
 
@@ -950,22 +976,11 @@ impl AndroidPlatform {
     /// loop tick rather than setting up a full JNI callback bridge.  The
     /// callback is stored and invoked when the thermal state changes.
     fn register_thermal_listener(&self, callback: Box<dyn FnMut()>) {
-        // Store the callback — it will be invoked from `check_thermal_state`
-        // which is called periodically from the tick/poll loop.
-        //
-        // The actual thermal state query happens in `query_thermal_status_via_jni`.
-        // We store the callback and the last-known state; on each tick we
-        // re-query and fire the callback if the state changed.
-        //
-        // Note: A fully async approach would use `PowerManager.addThermalStatusListener`
-        // with a JNI callback proxy.  The polling approach is simpler and avoids
-        // the complexity of bridging Java→Rust callbacks.
-        let send_callback: Box<dyn FnMut() + Send> =
-            unsafe { std::mem::transmute::<Box<dyn FnMut()>, Box<dyn FnMut() + Send>>(callback) };
-        // For now we store it but the periodic check is not yet wired into
-        // the main tick.  The infrastructure is in place for future wiring.
-        let _ = send_callback;
-        log::debug!("register_thermal_listener: callback stored (polling not yet wired into tick)");
+        // Android API 29 exposes thermal status queries, but this backend has no
+        // registered listener or polling loop yet. Drop the callback on the
+        // platform owner thread rather than retaining a listener that never fires.
+        drop(callback);
+        log::debug!("thermal-state callbacks are unavailable on this Android backend");
     }
 
     /// Query the current thermal status via JNI.
@@ -1047,10 +1062,16 @@ impl AndroidPlatform {
     where
         F: FnMut() + Send + 'static,
     {
-        self.state.lock().quit_callback = Some(Box::new(move || {
-            cb();
-            true
-        }));
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        let registration = Registration::new(
+            Some(dispatcher),
+            Callback::Quit(Box::new(move || {
+                cb();
+                true
+            })),
+        );
+        let old = self.state.lock().quit_callback.replace(registration);
+        drop(old);
     }
 
     /// Register a callback invoked when the app is re-opened.
@@ -1058,7 +1079,10 @@ impl AndroidPlatform {
     where
         F: FnMut() + Send + 'static,
     {
-        self.state.lock().reopen_callback = Some(Box::new(cb));
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        let registration = Registration::new(Some(dispatcher), Callback::Reopen(Box::new(cb)));
+        let old = self.state.lock().reopen_callback.replace(registration);
+        drop(old);
     }
 
     /// Register a callback invoked when the OS delivers URLs to open.
@@ -1066,7 +1090,10 @@ impl AndroidPlatform {
     where
         F: FnMut(Vec<String>) + Send + 'static,
     {
-        self.state.lock().open_urls_callback = Some(Box::new(cb));
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        let registration = Registration::new(Some(dispatcher), Callback::OpenUrls(Box::new(cb)));
+        let old = self.state.lock().open_urls_callback.replace(registration);
+        drop(old);
     }
 
     /// Register a callback invoked when the keyboard layout changes.
@@ -1074,7 +1101,15 @@ impl AndroidPlatform {
     where
         F: FnMut() + Send + 'static,
     {
-        self.state.lock().keyboard_layout_callback = Some(Box::new(cb));
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        let registration =
+            Registration::new(Some(dispatcher), Callback::KeyboardLayout(Box::new(cb)));
+        let old = self
+            .state
+            .lock()
+            .keyboard_layout_callback
+            .replace(registration);
+        drop(old);
     }
 
     // ── dispatcher tick ───────────────────────────────────────────────────────
@@ -1154,12 +1189,9 @@ impl Platform for AndroidPlatform {
     }
 
     fn run(&self, on_finish_launching: Box<dyn 'static + FnOnce()>) {
-        // The trait gives us `Box<dyn FnOnce()>` (not Send).  On Android
-        // Platform::run is always called on the main native thread, so this
-        // transmute is safe in practice.
-        let send_callback: Box<dyn FnOnce() + Send> =
-            unsafe { std::mem::transmute(on_finish_launching) };
-        self.run(send_callback);
+        // The callback remains in the owner-thread callback registry for its
+        // full lifetime; no Send marker is fabricated for this GPUI closure.
+        AndroidPlatform::run(self, on_finish_launching);
     }
 
     fn quit(&self) {
@@ -1205,10 +1237,14 @@ impl Platform for AndroidPlatform {
     }
 
     fn on_displays_changed(&self, callback: Box<dyn FnMut()>) {
-        // The native surface/configuration lifecycle is delivered on Android's
-        // main thread. GPUI's callback is non-Send but is only invoked there.
-        let callback: Box<dyn FnMut() + Send> = unsafe { std::mem::transmute(callback) };
-        self.state.lock().displays_changed_callback = Some(callback);
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        let registration = Registration::new(Some(dispatcher), Callback::DisplaysChanged(callback));
+        let old = self
+            .state
+            .lock()
+            .displays_changed_callback
+            .replace(registration);
+        drop(old);
     }
 
     fn active_window(&self) -> Option<AnyWindowHandle> {
@@ -1268,12 +1304,10 @@ impl Platform for AndroidPlatform {
     }
 
     fn on_open_urls(&self, callback: Box<dyn FnMut(Vec<String>)>) {
-        self.state.lock().open_urls_callback = Some(unsafe {
-            // SAFETY: on Android we are single-threaded on the main thread.
-            std::mem::transmute::<Box<dyn FnMut(Vec<String>)>, Box<dyn FnMut(Vec<String>) + Send>>(
-                callback,
-            )
-        });
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        let registration = Registration::new(Some(dispatcher), Callback::OpenUrls(callback));
+        let old = self.state.lock().open_urls_callback.replace(registration);
+        drop(old);
     }
 
     fn register_url_scheme(&self, _url: &str) -> Task<Result<()>> {
@@ -1312,11 +1346,10 @@ impl Platform for AndroidPlatform {
     }
 
     fn on_quit(&self, callback: Box<dyn FnMut() -> bool>) {
-        self.state.lock().quit_callback = Some(unsafe {
-            std::mem::transmute::<Box<dyn FnMut() -> bool>, Box<dyn FnMut() -> bool + Send>>(
-                callback,
-            )
-        });
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        let registration = Registration::new(Some(dispatcher), Callback::Quit(callback));
+        let old = self.state.lock().quit_callback.replace(registration);
+        drop(old);
     }
 
     fn on_system_sleep(&self, _callback: Box<dyn FnMut()>) {
@@ -1343,9 +1376,10 @@ impl Platform for AndroidPlatform {
     }
 
     fn on_reopen(&self, callback: Box<dyn FnMut()>) {
-        self.state.lock().reopen_callback = Some(unsafe {
-            std::mem::transmute::<Box<dyn FnMut()>, Box<dyn FnMut() + Send>>(callback)
-        });
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        let registration = Registration::new(Some(dispatcher), Callback::Reopen(callback));
+        let old = self.state.lock().reopen_callback.replace(registration);
+        drop(old);
     }
 
     fn set_menus(&self, _menus: Vec<Menu>, _keymap: &Keymap) {
@@ -1449,9 +1483,14 @@ impl Platform for AndroidPlatform {
     }
 
     fn on_keyboard_layout_change(&self, callback: Box<dyn FnMut()>) {
-        self.state.lock().keyboard_layout_callback = Some(unsafe {
-            std::mem::transmute::<Box<dyn FnMut()>, Box<dyn FnMut() + Send>>(callback)
-        });
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        let registration = Registration::new(Some(dispatcher), Callback::KeyboardLayout(callback));
+        let old = self
+            .state
+            .lock()
+            .keyboard_layout_callback
+            .replace(registration);
+        drop(old);
     }
 }
 

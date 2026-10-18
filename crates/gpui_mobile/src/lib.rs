@@ -6,6 +6,9 @@
 pub use gpui;
 
 #[cfg(any(test, target_os = "android"))]
+pub(crate) mod owner_thread_registry;
+
+#[cfg(any(test, target_os = "android"))]
 mod fling_guard;
 #[cfg(any(test, target_os = "android"))]
 mod frame_pacer;
