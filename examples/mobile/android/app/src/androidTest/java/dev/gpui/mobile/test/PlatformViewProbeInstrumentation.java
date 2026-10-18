@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /** No-dependency instrumentation probe for the debug-only Android platform-view bridge. */
@@ -118,6 +119,27 @@ public final class PlatformViewProbeInstrumentation extends Instrumentation {
         check(container.getVisibility() == View.GONE,
                 "create queued while paused must start GONE");
 
+        AtomicInteger pauseCalls = new AtomicInteger();
+        AtomicInteger resumeCalls = new AtomicInteger();
+        long lifecycleId = id + 10;
+        GpuiPlatformView.registerViewFactory("probe_lifecycle", new GpuiPlatformView.ViewFactory() {
+            @Override public View create(Activity host, Map<String, String> creationParams) {
+                return new TextView(host);
+            }
+
+            @Override public void onPause(View view) {
+                pauseCalls.incrementAndGet();
+            }
+
+            @Override public void onResume(View view) {
+                resumeCalls.incrementAndGet();
+            }
+        });
+        check(GpuiPlatformView.createView(activity, "probe_lifecycle", lifecycleId,
+                0f, 0f, 24f, 20f, ""), "lifecycle factory create failed while paused");
+        check(pauseCalls.get() == 1 && resumeCalls.get() == 0,
+                "view created in paused state did not receive exactly one pause callback");
+
         float density = activity.getResources().getDisplayMetrics().density;
         FrameLayout.LayoutParams bounds = (FrameLayout.LayoutParams) container.getLayoutParams();
         check(bounds.leftMargin == Math.round(13.25f * density), "x bounds not converted to device pixels");
@@ -127,6 +149,18 @@ public final class PlatformViewProbeInstrumentation extends Instrumentation {
 
         GpuiPlatformView.resumeAll();
         check(container.getVisibility() == View.VISIBLE, "resume did not restore requested visibility");
+        check(resumeCalls.get() == 1 && pauseCalls.get() == 1,
+                "resume transition was not delivered exactly once");
+        GpuiPlatformView.resumeAll();
+        check(resumeCalls.get() == 1, "duplicate resume delivered a duplicate callback");
+        GpuiPlatformView.pauseAll();
+        check(pauseCalls.get() == 2, "pause transition was not delivered exactly once");
+        GpuiPlatformView.pauseAll();
+        check(pauseCalls.get() == 2, "duplicate pause delivered a duplicate callback");
+        GpuiPlatformView.resumeAll();
+        check(resumeCalls.get() == 2, "second resume transition was not delivered");
+        GpuiPlatformView.disposeView(lifecycleId);
+        GpuiPlatformView.unregisterViewFactory("probe_lifecycle");
         GpuiPlatformView.setVisible(id, false);
         check(container.getVisibility() == View.GONE, "setVisible(false) failed");
         GpuiPlatformView.pauseAll();

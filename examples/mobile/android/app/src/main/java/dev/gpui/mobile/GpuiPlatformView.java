@@ -60,6 +60,17 @@ public final class GpuiPlatformView {
         View create(Activity activity, Map<String, String> creationParams) throws Exception;
 
         /** Release any resources owned by a custom view. Called on the UI thread. */
+        /** Pause view-owned work when the host Activity pauses. Called on the UI thread. */
+        default void onPause(View view) throws Exception {
+            if (view instanceof WebView) ((WebView) view).onPause();
+        }
+
+        /** Resume view-owned work when the host Activity resumes. Called on the UI thread. */
+        default void onResume(View view) throws Exception {
+            if (view instanceof WebView) ((WebView) view).onResume();
+        }
+
+        /** Release any resources owned by a custom view. Called on the UI thread. */
         default void dispose(View view) {
             if (view instanceof WebView) {
                 WebView web = (WebView) view;
@@ -217,20 +228,24 @@ public final class GpuiPlatformView {
                     ViewGroup.LayoutParams.MATCH_PARENT));
             applyBounds(activity, container, x, y, width, height);
 
+            // Lifecycle hooks can call application code and may block. Run them
+            // before taking request.gate so timeout/dispose can still cancel a
+            // creation while a custom view is being paused.
+            Entry entry = new Entry(container, child, factory);
+            if (paused) transitionLifecycle(entry, true);
+
             synchronized (request.gate) {
-                // Recheck after potentially slow factory work. A timeout,
-                // dispose, or Activity change must never attach late work.
+                // Recheck after factory and lifecycle work. A timeout, dispose,
+                // or Activity change must never attach late work.
                 if (request.cancelled.get() || !isCurrentHost(activity, request.generation)) {
                     disposeDetached(factory, child);
                     finishRequestLocked(request, false);
                     return;
                 }
                 ensureRoot(activity).addView(container);
-                Entry entry = new Entry(container, child, factory);
                 synchronized (STATE_LOCK) {
                     ENTRIES.put(request.id, entry);
                 }
-                // A create queued behind pauseAll must inherit the paused state.
                 applyVisibility(entry);
                 request.succeeded = true;
                 request.completed = true;
@@ -406,16 +421,24 @@ public final class GpuiPlatformView {
     /** JNI lifecycle entry point. */
     public static void pauseAll() {
         runOnMain(() -> {
+            if (paused) return;
             paused = true;
-            for (Entry entry : snapshotEntries()) applyVisibility(entry);
+            for (Entry entry : snapshotEntries()) {
+                transitionLifecycle(entry, true);
+                applyVisibility(entry);
+            }
         });
     }
 
     /** JNI lifecycle entry point. */
     public static void resumeAll() {
         runOnMain(() -> {
+            if (!paused) return;
             paused = false;
-            for (Entry entry : snapshotEntries()) applyVisibility(entry);
+            for (Entry entry : snapshotEntries()) {
+                transitionLifecycle(entry, false);
+                applyVisibility(entry);
+            }
         });
     }
 
@@ -499,6 +522,19 @@ public final class GpuiPlatformView {
         }
     }
 
+    private static void transitionLifecycle(Entry entry, boolean shouldPause) {
+        if (entry.disposed.get() || entry.lifecyclePaused == shouldPause) return;
+        // Update first so reentrant lifecycle calls cannot invoke the same
+        // transition twice. Failures are isolated; the host state still moves.
+        entry.lifecyclePaused = shouldPause;
+        try {
+            if (shouldPause) entry.factory.onPause(entry.child);
+            else entry.factory.onResume(entry.child);
+        } catch (Throwable error) {
+            Log.e(TAG, "custom platform view lifecycle callback failed", error);
+        }
+    }
+
     private static void applyVisibility(Entry entry) {
         entry.container.setVisibility(entry.requestedVisible && !paused ? View.VISIBLE : View.GONE);
     }
@@ -567,6 +603,7 @@ public final class GpuiPlatformView {
         final ViewFactory factory;
         final AtomicBoolean disposed = new AtomicBoolean();
         volatile boolean requestedVisible = true;
+        volatile boolean lifecyclePaused;
 
         Entry(FrameLayout container, View child, ViewFactory factory) {
             this.container = container;
