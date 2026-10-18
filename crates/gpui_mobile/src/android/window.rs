@@ -572,6 +572,10 @@ impl AndroidWindow {
         Ok(())
     }
 
+    pub(crate) fn is_retired(&self) -> bool {
+        self.retired.load(std::sync::atomic::Ordering::Acquire)
+    }
+
     pub(crate) fn mark_retired_on_owner(&self) {
         if let Some(session) = self.native_session.as_ref() {
             assert!(

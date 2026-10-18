@@ -623,7 +623,9 @@ fn run_main_task(task: MainTask, cancel_local: bool) {
     match task {
         MainTask::Generic(task) => task(),
         MainTask::Local { runnable, .. } if cancel_local => drop(runnable),
-        MainTask::Local { runnable, .. } => runnable.run(),
+        MainTask::Local { runnable, .. } => {
+            runnable.run();
+        }
     }
 }
 

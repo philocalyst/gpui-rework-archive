@@ -601,9 +601,8 @@ impl AndroidPlatform {
     where
         F: FnOnce(Arc<AndroidWindow>) + Send + 'static,
     {
-        self.replace_callback(Box::new(callback), |state| {
-            &mut state.on_init_window_callback
-        });
+        let callback: Box<dyn FnOnce(Arc<AndroidWindow>) + Send> = Box::new(callback);
+        self.replace_callback(callback, |state| &mut state.on_init_window_callback);
     }
 
     /// Take the `on_init_window` callback (if any).
@@ -854,7 +853,7 @@ impl AndroidPlatform {
                 (None, None) => true,
                 _ => false,
             };
-            let valid = same_runtime && !window.retired.load(std::sync::atomic::Ordering::Acquire);
+            let valid = same_runtime && !window.is_retired();
             if valid {
                 (state.pending_window.replace(window), None)
             } else {
@@ -1966,7 +1965,7 @@ mod tests {
         p.set_pending_window(Arc::clone(&window));
 
         assert!(p.close_window(window.id()).is_some());
-        assert!(retained.retired.load(std::sync::atomic::Ordering::Acquire));
+        assert!(retained.is_retired());
         assert!(p.take_pending_window().is_none());
 
         // A retained host handle cannot be made pending again after logical close.
@@ -1982,7 +1981,7 @@ mod tests {
         p.set_pending_window(window);
 
         assert!(p.close_window(retained.id()).is_some());
-        assert!(retained.retired.load(std::sync::atomic::Ordering::Acquire));
+        assert!(retained.is_retired());
         assert!(p.take_pending_window().is_none());
     }
 
