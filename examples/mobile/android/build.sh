@@ -59,7 +59,7 @@ for abi in arm64-v8a x86_64; do
         "$llvm_objcopy" --add-gnu-debuglink="$unstripped_dir/$abi/$library.debug" "$source"
     done
 done
-if ! "$llvm_readelf" --dyn-syms "$script_dir/app/src/main/jniLibs/arm64-v8a/libgpui_ce_mobile_example.so" | grep -q ANativeActivity_onCreate; then
+if ! "$llvm_readelf" --dyn-syms "$script_dir/app/src/main/jniLibs/arm64-v8a/libgpui_ce_mobile_example.so" | grep ANativeActivity_onCreate > /dev/null; then
     echo "stripped NativeActivity library lost ANativeActivity_onCreate" >&2
     exit 1
 fi
