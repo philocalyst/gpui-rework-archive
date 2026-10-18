@@ -64,6 +64,26 @@ struct DirectionMetadata {
     resolved: LayoutDirectionHandle,
 }
 
+/// Request-order IDs owned by one retained ViewElement. Nested views keep separate logs.
+#[derive(Clone, Default)]
+pub(crate) struct LayoutClaimLog {
+    nodes: Vec<LayoutId>,
+    replayable: bool,
+}
+
+pub(crate) struct LayoutClaimOutcome {
+    pub(crate) log: LayoutClaimLog,
+    pub(crate) fully_replayed: bool,
+}
+
+struct LayoutClaimScope {
+    previous: Option<LayoutClaimLog>,
+    cursor: usize,
+    nodes: Vec<LayoutId>,
+    replaying: bool,
+    replayable: bool,
+}
+
 /// Computes element layout with Taffy, a flexbox and grid engine.
 ///
 /// Window code creates nodes with [`Self::request_layout`] or
@@ -93,6 +113,7 @@ pub struct TaffyLayoutEngine {
     frame_layout_nodes: Vec<LayoutId>,
     frame_layout_node_set: FxHashSet<LayoutId>,
     frame_bound_measured_nodes: FxHashSet<LayoutId>,
+    layout_claim_scopes: Vec<LayoutClaimScope>,
     // Direction resolution can be skipped while the engine is provably LTR-only. This is
     // monotone because a previously resolved RTL/Auto node can remain retained across frames.
     direction_resolution_needed: bool,
@@ -121,6 +142,7 @@ impl TaffyLayoutEngine {
             frame_layout_nodes: Vec::new(),
             frame_layout_node_set: FxHashSet::default(),
             frame_bound_measured_nodes: FxHashSet::default(),
+            layout_claim_scopes: Vec::new(),
             direction_resolution_needed: false,
         }
     }
@@ -266,6 +288,124 @@ impl TaffyLayoutEngine {
         }
     }
 
+    pub(crate) fn begin_layout_claim_scope(&mut self, previous: Option<LayoutClaimLog>) {
+        let replaying = previous.as_ref().is_some_and(|log| log.replayable);
+        self.layout_claim_scopes.push(LayoutClaimScope {
+            previous,
+            cursor: 0,
+            nodes: Vec::new(),
+            replaying,
+            replayable: true,
+        });
+    }
+
+    pub(crate) fn finish_layout_claim_scope(&mut self) -> LayoutClaimOutcome {
+        let scope = self
+            .layout_claim_scopes
+            .pop()
+            .expect("layout claim scopes must be balanced");
+        let fully_replayed = scope.previous.as_ref().is_some_and(|previous| {
+            scope.replaying
+                && scope.replayable
+                && scope.cursor == previous.nodes.len()
+                && scope.nodes.len() == previous.nodes.len()
+        });
+        let invalidate_parent = !scope.replayable || (scope.previous.is_some() && !fully_replayed);
+        if invalidate_parent {
+            self.mark_layout_claim_scope_non_replayable();
+        }
+        LayoutClaimOutcome {
+            log: LayoutClaimLog {
+                nodes: scope.nodes,
+                replayable: scope.replayable,
+            },
+            fully_replayed,
+        }
+    }
+
+    pub(crate) fn mark_layout_claim_scope_non_replayable(&mut self) {
+        if let Some(scope) = self.layout_claim_scopes.last_mut() {
+            scope.replayable = false;
+            scope.replaying = false;
+        }
+    }
+
+    fn static_layout_style(style: &Style) -> bool {
+        style.direction != LayoutDirection::Auto
+            && style.effective_unicode_bidi() == UnicodeBidi::Normal
+    }
+
+    fn try_replay_layout(
+        &mut self,
+        style: &Style,
+        taffy_style: &taffy::Style,
+        children: &[LayoutId],
+    ) -> Option<LayoutId> {
+        if !Self::static_layout_style(style) {
+            self.mark_layout_claim_scope_non_replayable();
+            return None;
+        }
+        let old = match self.layout_claim_scopes.last() {
+            Some(scope) if scope.replaying => scope
+                .previous
+                .as_ref()
+                .and_then(|previous| previous.nodes.get(scope.cursor))
+                .copied(),
+            _ => return None,
+        };
+        let Some(old) = old else {
+            self.layout_claim_scopes.last_mut().unwrap().replaying = false;
+            return None;
+        };
+        let style_matches = self
+            .taffy
+            .style(old.0)
+            .is_ok_and(|old_style| old_style == taffy_style);
+        let children_match = self.taffy.children(old.0).is_ok_and(|old_children| {
+            old_children.as_slice() == LayoutId::to_taffy_slice(children)
+        });
+        let metadata_matches = self.taffy.get_node_context(old.0).is_none()
+            && !self.frame_bound_measured_nodes.contains(&old)
+            && self
+                .vertical_alignments
+                .get(&old)
+                .copied()
+                .unwrap_or(VerticalAlign::Baseline)
+                == style.vertical_align
+            && self.display_and_position.get(&old).copied()
+                == Some((style.display, style.position))
+            && self.directions.get(&old).is_some_and(|metadata| {
+                metadata.authored == style.direction
+                    && metadata.unicode_bidi == style.effective_unicode_bidi()
+                    && metadata.source_direction.is_none()
+                    && metadata.auto_direction_hint.is_none()
+                    && metadata.logical_children.is_none()
+            })
+            && !self.inline_content.contains_key(&old)
+            && !self.inline_fragments.contains_key(&old);
+        if style_matches && children_match && metadata_matches {
+            let scope = self.layout_claim_scopes.last_mut().unwrap();
+            scope.cursor += 1;
+            scope.nodes.push(old);
+            self.claim_node(old);
+            Some(old)
+        } else {
+            self.layout_claim_scopes.last_mut().unwrap().replaying = false;
+            None
+        }
+    }
+
+    fn record_layout_claim(&mut self, node: LayoutId, style: &Style) {
+        let Some(scope) = self.layout_claim_scopes.last_mut() else {
+            return;
+        };
+        if !Self::static_layout_style(style) {
+            scope.replayable = false;
+            scope.replaying = false;
+        }
+        scope.nodes.push(node);
+    }
+
     /// Adds a node styled by `style`, with `children` as its child nodes, and returns its id.
     ///
     /// `rem_size` and `scale_factor` resolve the style's lengths. Lengths in `rem` use
@@ -278,6 +418,9 @@ impl TaffyLayoutEngine {
         children: &[LayoutId],
     ) -> LayoutId {
         let taffy_style = style.to_taffy(rem_size, scale_factor);
+        if let Some(node_id) = self.try_replay_layout(&style, &taffy_style, children) {
+            return node_id;
+        }
 
         let node_id = if children.is_empty() {
             self.taffy
@@ -307,6 +450,7 @@ impl TaffyLayoutEngine {
 
         self.claim_node(node_id);
         self.record_style(node_id, &style);
+        self.record_layout_claim(node_id, &style);
 
         node_id
     }
@@ -389,6 +533,8 @@ impl TaffyLayoutEngine {
             .into();
         self.claim_node(node_id);
         self.record_style(node_id, &style);
+        self.mark_layout_claim_scope_non_replayable();
+        self.record_layout_claim(node_id, &style);
         node_id
     }
 
@@ -424,13 +570,22 @@ impl TaffyLayoutEngine {
             .then(|| children.to_vec());
 
         if let Some(metadata) = self.directions.get_mut(&node_id) {
-            metadata.logical_children = logical_children;
+            metadata.logical_children = logical_children.clone();
+        }
+        if logical_children.is_some() {
+            self.mark_layout_claim_scope_non_replayable();
         }
     }
 
     pub(crate) fn set_direction_text(&mut self, node_id: LayoutId, text: SharedString) {
-        if let Some(metadata) = self.directions.get_mut(&node_id) {
+        let has_source_direction = if let Some(metadata) = self.directions.get_mut(&node_id) {
             metadata.source_direction = ResolvedDirection::from_first_strong(&text);
+            metadata.source_direction.is_some()
+        } else {
+            false
+        };
+        if has_source_direction {
+            self.mark_layout_claim_scope_non_replayable();
         }
     }
 
@@ -441,6 +596,9 @@ impl TaffyLayoutEngine {
     ) {
         if let Some(metadata) = self.directions.get_mut(&node_id) {
             metadata.auto_direction_hint = direction;
+        }
+        if direction.is_some() {
+            self.mark_layout_claim_scope_non_replayable();
         }
     }
 
@@ -1457,6 +1615,200 @@ mod tests {
         }
     }
 
+    fn static_direction_style(direction: LayoutDirection) -> Style {
+        Style {
+            direction,
+            unicode_bidi: UnicodeBidi::Normal,
+            unicode_bidi_explicit: true,
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn exact_layout_claim_replay_reuses_ids_and_prunes_on_shape_change() {
+        let mut engine = TaffyLayoutEngine::new();
+        engine.begin_layout_claim_scope(None);
+        let child = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let root = engine.request_layout(Style::default(), px(16.0), 1.0, &[child]);
+        let initial = engine.finish_layout_claim_scope();
+        assert!(!initial.fully_replayed);
+        assert!(initial.log.replayable);
+        assert_eq!(engine.taffy.total_node_count(), 2);
+        engine.finish_frame();
+
+        engine.begin_layout_claim_scope(Some(initial.log));
+        let reused_child = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let reused_root = engine.request_layout(Style::default(), px(16.0), 1.0, &[reused_child]);
+        let replay = engine.finish_layout_claim_scope();
+        assert!(replay.fully_replayed);
+        assert_eq!(reused_child, child);
+        assert_eq!(reused_root, root);
+        assert_eq!(engine.taffy.total_node_count(), 2);
+        engine.finish_frame();
+
+        engine.begin_layout_claim_scope(Some(replay.log));
+        let changed_child = engine.request_layout(
+            static_direction_style(LayoutDirection::LeftToRight),
+            px(16.0),
+            1.0,
+            &[],
+        );
+        let changed_root = engine.request_layout(Style::default(), px(16.0), 1.0, &[changed_child]);
+        assert_ne!(changed_root, root);
+        let changed = engine.finish_layout_claim_scope();
+        assert!(!changed.fully_replayed);
+        engine.finish_frame();
+        assert_eq!(engine.taffy.total_node_count(), 2);
+    }
+
+    #[test]
+    fn extra_request_after_claim_log_is_exhausted_is_a_fallback() {
+        let mut engine = TaffyLayoutEngine::new();
+        engine.begin_layout_claim_scope(None);
+        let old_root = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let initial = engine.finish_layout_claim_scope();
+        engine.finish_frame();
+
+        engine.begin_layout_claim_scope(Some(initial.log));
+        let retained_leaf = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let expanded_root =
+            engine.request_layout(Style::default(), px(16.0), 1.0, &[retained_leaf]);
+        let expanded = engine.finish_layout_claim_scope();
+        assert_eq!(retained_leaf, old_root);
+        assert!(!expanded.fully_replayed);
+        assert_eq!(expanded.log.nodes.len(), 2);
+        engine.finish_frame();
+        assert_eq!(engine.taffy.total_node_count(), 2);
+
+        engine.begin_layout_claim_scope(Some(expanded.log));
+        let replayed_leaf = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let replayed_root =
+            engine.request_layout(Style::default(), px(16.0), 1.0, &[replayed_leaf]);
+        let replay = engine.finish_layout_claim_scope();
+        assert!(replay.fully_replayed);
+        assert_eq!(replayed_leaf, retained_leaf);
+        assert_eq!(replayed_root, expanded_root);
+    }
+
+    #[test]
+    fn fallback_claims_old_nodes_for_one_frame_then_replays_replacement_log() {
+        let mut engine = TaffyLayoutEngine::new();
+        engine.begin_layout_claim_scope(None);
+        let old_child = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let old_root = engine.request_layout(Style::default(), px(16.0), 1.0, &[old_child]);
+        let initial = engine.finish_layout_claim_scope();
+        engine.finish_frame();
+        assert_eq!(engine.taffy.total_node_count(), 2);
+
+        // The view has already retained its prior subtree before fresh request descriptors
+        // reveal a shape mismatch. Those IDs must remain claimed through this frame.
+        engine.retain_subtree(old_root);
+        engine.begin_layout_claim_scope(Some(initial.log.clone()));
+        let new_child = engine.request_layout(
+            static_direction_style(LayoutDirection::LeftToRight),
+            px(16.0),
+            1.0,
+            &[],
+        );
+        let new_root = engine.request_layout(Style::default(), px(16.0), 1.0, &[new_child]);
+        let fallback = engine.finish_layout_claim_scope();
+        assert!(!fallback.fully_replayed);
+        assert_ne!(fallback.log.nodes, initial.log.nodes);
+        assert_eq!(engine.taffy.total_node_count(), 4);
+        engine.finish_frame();
+        assert_eq!(engine.taffy.total_node_count(), 4);
+
+        // The frame-bound fallback forces a fresh request next frame. Its replacement log
+        // now exactly replays, and the unclaimed old subtree is pruned at frame end.
+        engine.retain_subtree(new_root);
+        engine.begin_layout_claim_scope(Some(fallback.log));
+        let replayed_child = engine.request_layout(
+            static_direction_style(LayoutDirection::LeftToRight),
+            px(16.0),
+            1.0,
+            &[],
+        );
+        let replayed_root =
+            engine.request_layout(Style::default(), px(16.0), 1.0, &[replayed_child]);
+        let replay = engine.finish_layout_claim_scope();
+        assert!(replay.fully_replayed);
+        assert_eq!(replayed_child, new_child);
+        assert_eq!(replayed_root, new_root);
+        engine.finish_frame();
+        assert_eq!(engine.taffy.total_node_count(), 2);
+    }
+
+    #[test]
+    fn non_replayable_nested_scope_disables_parent_replay() {
+        let mut engine = TaffyLayoutEngine::new();
+        engine.begin_layout_claim_scope(None);
+        engine.begin_layout_claim_scope(None);
+        engine.request_retained_measured_layout(Style::default(), px(16.0), 1.0, |_, _, _| {
+            size(px(12.0), px(8.0))
+        });
+        let nested = engine.finish_layout_claim_scope();
+        assert!(!nested.log.replayable);
+
+        let parent = engine.request_layout(Style::default(), px(16.0), 1.0, &nested.log.nodes);
+        let outer = engine.finish_layout_claim_scope();
+        assert!(!outer.log.replayable);
+        assert_eq!(engine.taffy.child_count(parent.0), 1);
+    }
+
+    #[test]
+    fn changed_nested_child_disables_parent_replay_and_prunes_old_tree() {
+        let mut engine = TaffyLayoutEngine::new();
+        engine.begin_layout_claim_scope(None);
+        engine.begin_layout_claim_scope(None);
+        let old_child = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
+        let nested_initial = engine.finish_layout_claim_scope();
+        let old_parent = engine.request_layout(Style::default(), px(16.0), 1.0, &[old_child]);
+        let parent_initial = engine.finish_layout_claim_scope();
+        assert!(parent_initial.log.replayable);
+        engine.finish_frame();
+        assert_eq!(engine.taffy.total_node_count(), 2);
+
+        engine.begin_layout_claim_scope(Some(parent_initial.log));
+        engine.begin_layout_claim_scope(Some(nested_initial.log));
+        let new_child = engine.request_layout(
+            static_direction_style(LayoutDirection::LeftToRight),
+            px(16.0),
+            1.0,
+            &[],
+        );
+        let nested_changed = engine.finish_layout_claim_scope();
+        assert!(nested_changed.log.replayable);
+        assert!(!nested_changed.fully_replayed);
+        let new_parent = engine.request_layout(Style::default(), px(16.0), 1.0, &[new_child]);
+        let parent_changed = engine.finish_layout_claim_scope();
+        assert!(!parent_changed.fully_replayed);
+        assert_ne!(new_parent, old_parent);
+        engine.finish_frame();
+        assert_eq!(engine.taffy.total_node_count(), 2);
+    }
+
+    #[test]
+    fn measured_layout_claims_never_replay_opaque_closures() {
+        let mut engine = TaffyLayoutEngine::new();
+        engine.begin_layout_claim_scope(None);
+        let first =
+            engine.request_retained_measured_layout(Style::default(), px(16.0), 1.0, |_, _, _| {
+                size(px(12.0), px(8.0))
+            });
+        let initial = engine.finish_layout_claim_scope();
+        assert!(!initial.log.replayable);
+        engine.finish_frame();
+
+        engine.begin_layout_claim_scope(Some(initial.log));
+        let second =
+            engine.request_retained_measured_layout(Style::default(), px(16.0), 1.0, |_, _, _| {
+                size(px(12.0), px(8.0))
+            });
+        let replay = engine.finish_layout_claim_scope();
+        assert!(!replay.fully_replayed);
+        assert_ne!(first, second);
+    }
+
     fn resolve_directions_without_guard(
         engine: &mut TaffyLayoutEngine,
         root_id: LayoutId,
@@ -1778,7 +2130,10 @@ mod tests {
             .taffy
             .set_children(parent.0, &[replacement.0])
             .expect(EXPECT_MESSAGE);
-        assert_eq!(engine.frame_layout_node_set.len(), engine.live_layout_nodes.len());
+        assert_eq!(
+            engine.frame_layout_node_set.len(),
+            engine.live_layout_nodes.len()
+        );
         assert_eq!(engine.taffy.total_node_count(), 3);
 
         engine.finish_frame();

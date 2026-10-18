@@ -453,6 +453,7 @@ struct ViewCache {
 
 struct LayoutCache {
     root: LayoutId,
+    claim_log: crate::taffy::LayoutClaimLog,
     environment: crate::window::ViewEnvironment,
     fixed_style: Option<Arc<StyleRefinement>>,
     dependencies: ViewDependencies,
@@ -747,58 +748,65 @@ impl<V: View> Element for ViewElement<V> {
                         }
 
                         let (
-                            root,
-                            request_element,
-                            dependencies,
-                            direction_contribution,
-                            request_layout_state_range,
-                        ) = if let Some(style) = &fixed_style {
-                            let mut root_style = Style::default();
-                            root_style.refine(style.as_ref());
-                            let root = window.request_layout(root_style, None, cx);
-                            let state_range_start = window.accessed_element_state_index();
-                            let ((element, direction_contribution), dependencies) = cx
-                                .detect_accessed_dependencies(|cx| {
-                                    let mut element =
-                                        render_view(self.view.take().unwrap(), window, cx);
-                                    let child_layout = element.request_layout(window, cx);
-                                    let contribution =
-                                        window.layout_auto_direction_contribution(child_layout);
-                                    window.set_layout_auto_direction_hint(root, contribution);
-                                    (element, contribution)
-                                });
-                            let request_layout_state_range =
-                                window.accessed_element_state_range(state_range_start);
                             (
                                 root,
-                                Some(element),
+                                request_element,
                                 dependencies,
                                 direction_contribution,
                                 request_layout_state_range,
-                            )
-                        } else {
-                            let state_range_start = window.accessed_element_state_index();
-                            let ((element, root_layout), dependencies) = cx
-                                .detect_accessed_dependencies(|cx| {
-                                    let mut element =
-                                        render_view(self.view.take().unwrap(), window, cx);
-                                    let root_layout = element.request_layout(window, cx);
-                                    (element, root_layout)
-                                });
-                            let request_layout_state_range =
-                                window.accessed_element_state_range(state_range_start);
-                            (
-                                root_layout,
-                                Some(element),
-                                dependencies,
-                                None,
-                                request_layout_state_range,
-                            )
-                        };
+                            ),
+                            claim_outcome,
+                        ) = window.with_layout_claim_scope(None, |window| {
+                            let result = if let Some(style) = &fixed_style {
+                                let mut root_style = Style::default();
+                                root_style.refine(style.as_ref());
+                                let root = window.request_layout(root_style, None, cx);
+                                let state_range_start = window.accessed_element_state_index();
+                                let ((element, direction_contribution), dependencies) = cx
+                                    .detect_accessed_dependencies(|cx| {
+                                        let mut element =
+                                            render_view(self.view.take().unwrap(), window, cx);
+                                        let child_layout = element.request_layout(window, cx);
+                                        let contribution =
+                                            window.layout_auto_direction_contribution(child_layout);
+                                        window.set_layout_auto_direction_hint(root, contribution);
+                                        (element, contribution)
+                                    });
+                                let request_layout_state_range =
+                                    window.accessed_element_state_range(state_range_start);
+                                (
+                                    root,
+                                    Some(element),
+                                    dependencies,
+                                    direction_contribution,
+                                    request_layout_state_range,
+                                )
+                            } else {
+                                let state_range_start = window.accessed_element_state_index();
+                                let ((element, root_layout), dependencies) = cx
+                                    .detect_accessed_dependencies(|cx| {
+                                        let mut element =
+                                            render_view(self.view.take().unwrap(), window, cx);
+                                        let root_layout = element.request_layout(window, cx);
+                                        (element, root_layout)
+                                    });
+                                let request_layout_state_range =
+                                    window.accessed_element_state_range(state_range_start);
+                                (
+                                    root_layout,
+                                    Some(element),
+                                    dependencies,
+                                    None,
+                                    request_layout_state_range,
+                                )
+                            };
+                            result
+                        });
 
                         state.cache = Some(ViewCache {
                             layout: LayoutCache {
                                 root,
+                                claim_log: claim_outcome.log,
                                 environment,
                                 fixed_style,
                                 dependencies,
@@ -889,29 +897,63 @@ impl<V: View> Element for ViewElement<V> {
                             cx.extend_accessed_dependencies(&cache.layout.dependencies);
                             (None, Some(output.paint), output.a11y_roots)
                         } else {
+                            let previous_size = match &cache.output {
+                                CachedOutput::Painted(output) => Some(output.key.bounds.size),
+                                CachedOutput::Prepared(output) => Some(output.key.bounds.size),
+                                CachedOutput::NeedsPrepaint => None,
+                            };
                             cache.output = CachedOutput::NeedsPrepaint;
-                            let (fresh_element, dependencies) = cx.detect_accessed_dependencies(|cx| {
-                                let mut fresh_element = fresh_element.take().unwrap_or_else(|| {
-                                    render_view(self.view.take().unwrap(), window, cx)
-                                });
-                                if request_reused || fixed_style.is_some() {
+                            let ( (fresh_element, claim_log), dependencies) =
+                                cx.detect_accessed_dependencies(|cx| {
+                                    let mut fresh_element = fresh_element.take().unwrap_or_else(|| {
+                                        render_view(self.view.take().unwrap(), window, cx)
+                                    });
+                                    let mut claim_log =
+                                        std::mem::take(&mut cache.layout.claim_log);
                                     if request_reused && fixed_style.is_none() {
-                                        // A detached intrinsic layout can reparent retained child nodes.
-                                        // Rebuild this owner chain next frame to reconnect it safely.
-                                        window.mark_cached_views_frame_bound();
+                                        let (layout_id, outcome) = window.with_layout_claim_scope(
+                                            Some(std::mem::take(&mut claim_log)),
+                                            |window| fresh_element.request_layout(window, cx),
+                                        );
+                                        claim_log = outcome.log;
+                                        let use_parent_layout = outcome.fully_replayed
+                                            && layout_id == cache.layout.root
+                                            && previous_size == Some(bounds.size)
+                                            && cache.layout.environment == environment
+                                            && !cache.layout.frame_bound
+                                            && cache_is_valid(cache, entity_id, window, cx);
+                                        if use_parent_layout {
+                                            // The retained parent already computed this exact tree this
+                                            // frame. Rebuild element state, then use those attached IDs.
+                                            #[cfg(test)]
+                                            window.note_layout_claim_replay();
+                                            fresh_element.prepaint(window, cx);
+                                        } else {
+                                            // A detached intrinsic layout can reparent retained child nodes.
+                                            // Rebuild this owner chain next frame to reconnect it safely.
+                                            window.mark_cached_views_frame_bound();
+                                            fresh_element.layout_as_root_at_size(
+                                                bounds.size.into(),
+                                                bounds.size,
+                                                window,
+                                                cx,
+                                            );
+                                            fresh_element.prepaint_at(bounds.origin, window, cx);
+                                        }
+                                    } else if request_reused || fixed_style.is_some() {
+                                        fresh_element.layout_as_root_at_size(
+                                            bounds.size.into(),
+                                            bounds.size,
+                                            window,
+                                            cx,
+                                        );
+                                        fresh_element.prepaint_at(bounds.origin, window, cx);
+                                    } else {
+                                        fresh_element.prepaint(window, cx);
                                     }
-                                    fresh_element.layout_as_root_at_size(
-                                        bounds.size.into(),
-                                        bounds.size,
-                                        window,
-                                        cx,
-                                    );
-                                    fresh_element.prepaint_at(bounds.origin, window, cx);
-                                } else {
-                                    fresh_element.prepaint(window, cx);
-                                }
-                                fresh_element
-                            });
+                                    (fresh_element, claim_log)
+                                });
+                            cache.layout.claim_log = claim_log;
                             cache.layout.dependencies.extend(&dependencies);
                             cx.extend_accessed_dependencies(&cache.layout.dependencies);
                             let roots = window.a11y.cache_subtree_roots(a11y_start);

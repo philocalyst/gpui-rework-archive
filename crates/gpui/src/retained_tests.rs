@@ -3141,6 +3141,146 @@ fn manual_identity_view_renders_when_parent_supplied_props_change(cx: &mut TestA
     assert_eq!(retained, snapshot_window(&window, cx));
 }
 
+struct LayoutClaimPanel {
+    renders: Arc<AtomicUsize>,
+}
+
+impl Render for LayoutClaimPanel {
+    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+        self.renders.fetch_add(1, Ordering::Relaxed);
+        div()
+            .id("layout-claim-panel")
+            .debug_selector(|| "LAYOUT_CLAIM_PANEL".into())
+            .w_full()
+            .h(px(72.))
+            .flex_shrink_0()
+            .bg(rgb(0x426b95))
+            .child(
+                div()
+                    .id("layout-claim-block")
+                    .debug_selector(|| "LAYOUT_CLAIM_BLOCK".into())
+                    .w(px(22.))
+                    .h(px(18.))
+                    .bg(rgb(0xefb448)),
+            )
+    }
+}
+
+struct LayoutClaimRoot {
+    top_gap: Pixels,
+    panel: Entity<LayoutClaimPanel>,
+    force_fresh_child: bool,
+}
+
+impl Render for LayoutClaimRoot {
+    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+        let panel = if self.force_fresh_child {
+            ViewElement::new(self.panel.clone()).into_any_element()
+        } else {
+            self.panel.clone().into_any_element()
+        };
+        div()
+            .size_full()
+            .flex()
+            .flex_col()
+            .child(div().w_full().h(self.top_gap).flex_shrink_0())
+            .child(panel)
+            .child(div().w_full().h(px(220.)).flex_shrink_0())
+    }
+}
+
+#[gpui::test]
+fn origin_only_cached_view_replays_attached_layout_and_matches_forced_fresh_window(
+    cx: &mut TestAppContext,
+) {
+    let renders = Arc::new(AtomicUsize::new(0));
+    let panel = cx.new({
+        let renders = renders.clone();
+        move |_| LayoutClaimPanel {
+            renders: renders.clone(),
+        }
+    });
+    let retained = cx.open_window(size(px(180.), px(140.)), {
+        let panel = panel.clone();
+        move |_, _| LayoutClaimRoot {
+            top_gap: px(0.),
+            panel: panel.clone(),
+            force_fresh_child: false,
+        }
+    });
+    let forced_fresh = cx.open_window(size(px(180.), px(140.)), {
+        let panel = panel.clone();
+        move |_, _| LayoutClaimRoot {
+            top_gap: px(0.),
+            panel: panel.clone(),
+            force_fresh_child: true,
+        }
+    });
+    cx.run_until_parked();
+    let initial_snapshot = snapshot_window(&retained, cx);
+    let initial_panel_size = initial_snapshot.debug_bounds["LAYOUT_CLAIM_PANEL"].size;
+    assert_eq!(initial_panel_size, size(px(180.), px(72.)));
+    let initial_stats = retained
+        .update(cx, |_, window, _| window.retained_view_stats())
+        .unwrap();
+    assert!(initial_stats.live_layout_nodes > 0);
+
+    // Moving only a sibling changes this view's origin while preserving its size and layout
+    // environment. The reference window refreshes from scratch for the same new state.
+    retained
+        .update(cx, |root, _, cx| {
+            root.top_gap = px(24.);
+            cx.notify();
+        })
+        .unwrap();
+    forced_fresh
+        .update(cx, |root, window, cx| {
+            root.top_gap = px(24.);
+            cx.notify();
+            window.refresh();
+        })
+        .unwrap();
+    cx.run_until_parked();
+
+    let retained_snapshot = snapshot_window(&retained, cx);
+    let fresh_snapshot = snapshot_window(&forced_fresh, cx);
+    assert_eq!(retained_snapshot, fresh_snapshot);
+    assert_eq!(
+        retained_snapshot.debug_bounds["LAYOUT_CLAIM_PANEL"]
+            .origin
+            .y,
+        px(24.),
+        "the origin-only change must reach fresh prepaint"
+    );
+    assert_eq!(
+        retained_snapshot.debug_bounds["LAYOUT_CLAIM_PANEL"].size, initial_panel_size,
+        "the origin-only change must preserve the retained view's measured size"
+    );
+    let stats = retained
+        .update(cx, |_, window, _| window.retained_view_stats())
+        .unwrap();
+    assert_eq!(
+        stats.layout_claim_replays, 1,
+        "the unchanged child request tree must take the attached-layout replay branch"
+    );
+    assert_eq!(
+        stats.live_layout_nodes, initial_stats.live_layout_nodes,
+        "origin-only replay must not allocate replacement Taffy nodes"
+    );
+
+    // The successful replay must not mark the view frame-bound. A normal parent notification
+    // can therefore reuse its retained output on the next frame without rerendering the panel.
+    let renders_after_move = renders.load(Ordering::Relaxed);
+    retained.update(cx, |_, _, cx| cx.notify()).unwrap();
+    cx.run_until_parked();
+    assert_eq!(renders.load(Ordering::Relaxed), renders_after_move);
+    let next_stats = retained
+        .update(cx, |_, window, _| window.retained_view_stats())
+        .unwrap();
+    assert_eq!(next_stats.reused_views, 1);
+    assert_eq!(snapshot_window(&retained, cx), fresh_snapshot);
+}
+
 struct AutoDirectionPanel {
     text: String,
     renders: Arc<AtomicUsize>,

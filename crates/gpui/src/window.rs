@@ -1357,6 +1357,7 @@ pub(crate) struct RetainedViewStats {
     pub(crate) measured_layouts: usize,
     pub(crate) retained_element_states: usize,
     pub(crate) full_scene_transfers: usize,
+    pub(crate) layout_claim_replays: usize,
 }
 
 #[derive(Clone, PartialEq)]
@@ -7122,6 +7123,7 @@ impl Window {
         if let crate::InlineContent::Text { text, .. } = &content {
             layout_engine.set_direction_text(node_id, text.clone());
         }
+        layout_engine.mark_layout_claim_scope_non_replayable();
 
         layout_engine
             .inline_content
@@ -7253,6 +7255,7 @@ impl Window {
             return false;
         };
 
+        engine.mark_layout_claim_scope_non_replayable();
         engine.place_inline(node_id, bounds, scale);
 
         if let Some(mut fragments) = fragments {
@@ -7558,6 +7561,11 @@ impl Window {
         }
     }
 
+    #[cfg(test)]
+    pub(crate) fn note_layout_claim_replay(&mut self) {
+        self.retained_view_stats.layout_claim_replays += 1;
+    }
+
     pub(crate) fn mark_cached_views_frame_bound(&mut self) {
         self.frame_bound_layout_views
             .extend(self.cached_view_stack.iter().map(|scope| scope.id.clone()));
@@ -7636,6 +7644,27 @@ impl Window {
     pub(crate) fn retain_layout_subtree(&mut self, root: LayoutId) {
         if let Some(layout_engine) = self.layout_engine.as_mut() {
             layout_engine.retain_subtree(root);
+        }
+    }
+
+    pub(crate) fn with_layout_claim_scope<R>(
+        &mut self,
+        previous: Option<crate::taffy::LayoutClaimLog>,
+        f: impl FnOnce(&mut Window) -> R,
+    ) -> (R, crate::taffy::LayoutClaimOutcome) {
+        self.layout_engine
+            .as_mut()
+            .expect("layout engine exists during element layout")
+            .begin_layout_claim_scope(previous);
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(self)));
+        let outcome = self
+            .layout_engine
+            .as_mut()
+            .expect("layout engine exists during element layout")
+            .finish_layout_claim_scope();
+        match result {
+            Ok(value) => (value, outcome),
+            Err(payload) => std::panic::resume_unwind(payload),
         }
     }
 
