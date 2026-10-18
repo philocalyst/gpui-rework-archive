@@ -230,6 +230,20 @@ pub enum WebBackendPreference {
 }
 
 #[cfg(target_family = "wasm")]
+fn web_backend_options(preference: WebBackendPreference) -> wgpu::BackendOptions {
+    let mut options = wgpu::BackendOptions::default();
+    if preference != WebBackendPreference::WebGpu {
+        // Browser WebGL cannot block in clientWaitSync with a timeout. wgpu's surface
+        // teardown/reconfigure waits for submitted work, so use its documented browser
+        // workaround whenever GL is an available backend. Completion callbacks and device
+        // maintenance may report work complete before it has physically finished; native GL
+        // and Browser WebGPU keep defaults.
+        options.gl.fence_behavior = wgpu::GlFenceBehavior::AutoFinish;
+    }
+    options
+}
+
+#[cfg(target_family = "wasm")]
 pub struct PreparedWebGraphics {
     pub context: WgpuContext,
     pub surface: wgpu::Surface<'static>,
@@ -609,7 +623,7 @@ impl WgpuContext {
         let descriptor = wgpu::InstanceDescriptor {
             backends,
             flags: wgpu::InstanceFlags::default(),
-            backend_options: wgpu::BackendOptions::default(),
+            backend_options: web_backend_options(preference),
             memory_budget_thresholds: wgpu::MemoryBudgetThresholds::default(),
             display: Some(Box::new(WebDisplaySource)),
         };
@@ -1087,14 +1101,21 @@ impl DeviceErrorState {
 }
 
 fn renderer_tier(adapter: &wgpu::Adapter) -> RendererTier {
-    let limits = adapter.limits();
-    let flags = adapter.get_downlevel_capabilities().flags;
-    if limits.max_storage_buffers_per_shader_stage > 0
-        && flags.contains(wgpu::DownlevelFlags::VERTEX_STORAGE)
-        && flags.contains(wgpu::DownlevelFlags::FRAGMENT_STORAGE)
-    {
+    renderer_tier_for(
+        &adapter.limits(),
+        adapter.get_downlevel_capabilities().flags,
+    )
+}
+
+fn renderer_tier_for(limits: &wgpu::Limits, flags: wgpu::DownlevelFlags) -> RendererTier {
+    let modern_storage_flags = wgpu::DownlevelFlags::VERTEX_STORAGE
+        | wgpu::DownlevelFlags::FRAGMENT_STORAGE
+        | wgpu::DownlevelFlags::BUFFER_BINDINGS_NOT_16_BYTE_ALIGNED;
+    if limits.max_storage_buffers_per_shader_stage > 0 && flags.contains(modern_storage_flags) {
         RendererTier::Modern
     } else {
+        // The generated storage-buffer ABI includes 248-byte Quad records. Devices that
+        // require 16-byte-multiple binding sizes must use the packed data-texture transport.
         RendererTier::WebGl2
     }
 }
@@ -1118,7 +1139,9 @@ fn parse_pci_id(id: &str) -> anyhow::Result<u32> {
 
 #[cfg(all(test, not(target_family = "wasm")))]
 mod tests {
-    use super::{NativeBackend, SoftwareAdapterPolicy, parse_pci_id};
+    use super::{
+        NativeBackend, RendererTier, SoftwareAdapterPolicy, parse_pci_id, renderer_tier_for,
+    };
 
     #[test]
     fn device_errors_are_observed_independently_and_coalesce_to_latest() {
@@ -1205,6 +1228,27 @@ mod tests {
     }
 
     #[test]
+    fn storage_tier_requires_unaligned_binding_size_support() {
+        let mut limits = wgpu::Limits::default();
+        limits.max_storage_buffers_per_shader_stage = 1;
+        let storage_flags =
+            wgpu::DownlevelFlags::VERTEX_STORAGE | wgpu::DownlevelFlags::FRAGMENT_STORAGE;
+
+        assert_eq!(
+            renderer_tier_for(&limits, storage_flags),
+            RendererTier::WebGl2,
+            "storage support alone cannot bind the 248-byte Quad record on a 16-byte-aligned device"
+        );
+        assert_eq!(
+            renderer_tier_for(
+                &limits,
+                storage_flags | wgpu::DownlevelFlags::BUFFER_BINDINGS_NOT_16_BYTE_ALIGNED,
+            ),
+            RendererTier::Modern,
+        );
+    }
+
+    #[test]
     fn native_backend_fallbacks_are_individually_initialized() {
         let backends = NativeBackend::PREFERENCE;
         assert!(!backends.is_empty());
@@ -1275,6 +1319,29 @@ mod tests {
         assert_eq!(
             parse_pci_id(&format!("{:#x}", 0x1234)).unwrap(),
             parse_pci_id(&format!("{:#X}", 0x1234)).unwrap(),
+        );
+    }
+}
+
+#[cfg(all(test, target_family = "wasm"))]
+mod web_backend_options_tests {
+    use super::{WebBackendPreference, web_backend_options};
+
+    #[test]
+    fn browser_gl_uses_nonblocking_fence_workaround_but_webgpu_does_not() {
+        for preference in [WebBackendPreference::Auto, WebBackendPreference::WebGl] {
+            assert!(
+                web_backend_options(preference)
+                    .gl
+                    .fence_behavior
+                    .is_auto_finish()
+            );
+        }
+        assert!(
+            !web_backend_options(WebBackendPreference::WebGpu)
+                .gl
+                .fence_behavior
+                .is_auto_finish()
         );
     }
 }
