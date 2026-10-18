@@ -130,11 +130,10 @@ impl TaffyLayoutEngine {
     /// Retained nodes keep their Taffy layout cache; unclaimed nodes and frame-bound measurement
     /// closures are released before the next frame starts.
     pub fn finish_frame(&mut self) {
-        if self
-            .live_layout_nodes
-            .iter()
-            .any(|node| !self.frame_layout_node_set.contains(node))
-        {
+        // Every claim is a live Taffy node, and every node allocated this frame is claimed
+        // immediately. Unclaimed prior-frame nodes remain in the tree until this cleanup, so an
+        // equal count proves there is nothing to prune without scanning all retained nodes.
+        if self.frame_layout_node_set.len() != self.taffy.total_node_count() {
             // Detach stale direct children from retained parents in one operation. Taffy's remove
             // searches the parent's child vector, so removing a wide sibling set one child at a time
             // would repeatedly scan and shift that vector.
@@ -1759,6 +1758,36 @@ mod tests {
         assert!(engine.taffy.dirty(parent.0).unwrap());
         assert!(!engine.live_layout_nodes.contains(&child));
         assert_eq!(engine.taffy.total_node_count(), 1);
+    }
+
+    #[test]
+    fn pruning_detects_an_omitted_child_when_a_new_child_replaces_it() {
+        let mut engine = TaffyLayoutEngine::new();
+        let old_child = engine.request_layout(Style::default(), px(16.), 1.0, &[]);
+        let parent = engine.request_layout(Style::default(), px(16.), 1.0, &[old_child]);
+        engine.finish_frame();
+        assert_eq!(engine.taffy.total_node_count(), 2);
+
+        // Keep the parent and replace its old child with a newly allocated child. The claimed
+        // set stays the same size as the old live-node list, but the unclaimed old child remains
+        // allocated until finish_frame and must still be pruned.
+        engine.frame_layout_nodes.push(parent);
+        engine.frame_layout_node_set.insert(parent);
+        let replacement = engine.request_layout(Style::default(), px(16.), 1.0, &[]);
+        engine
+            .taffy
+            .set_children(parent.0, &[replacement.0])
+            .expect(EXPECT_MESSAGE);
+        assert_eq!(engine.frame_layout_node_set.len(), engine.live_layout_nodes.len());
+        assert_eq!(engine.taffy.total_node_count(), 3);
+
+        engine.finish_frame();
+
+        assert!(!engine.live_layout_nodes.contains(&old_child));
+        assert_eq!(engine.taffy.child_count(parent.0), 1);
+        assert_eq!(engine.taffy.get_child_id(parent.0, 0), replacement.0);
+        assert_eq!(engine.taffy.total_node_count(), 2);
+        assert_eq!(engine.live_layout_node_count(), 2);
     }
 
     #[test]
