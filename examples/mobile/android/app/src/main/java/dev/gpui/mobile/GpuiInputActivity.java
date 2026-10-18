@@ -9,11 +9,13 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.Selection;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.graphics.Color;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
@@ -23,10 +25,12 @@ import android.view.inputmethod.InputConnectionWrapper;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.SurroundingText;
 import android.widget.EditText;
+import android.widget.PopupWindow;
 
 /** NativeActivity with a UI-thread InputConnection for multistage IMEs. */
 public class GpuiInputActivity extends NativeActivity {
     private InputProxy input;
+    private LegacyImeObserver legacyImeObserver;
     private volatile InputSnapshot inputSnapshot = new InputSnapshot(0, "", 0, 0, -1, -1, 0);
 
     private static final class InputSnapshot {
@@ -92,6 +96,9 @@ public class GpuiInputActivity extends NativeActivity {
             publishInsets(insets);
             return insets;
         });
+        if (Build.VERSION.SDK_INT < 30) {
+            legacyImeObserver = new LegacyImeObserver(this, decor);
+        }
         decor.requestApplyInsets();
     }
 
@@ -109,36 +116,146 @@ public class GpuiInputActivity extends NativeActivity {
         lastSafeInsets[1] = right;
         lastSafeInsets[2] = bottom;
         lastSafeInsets[3] = left;
+        if (legacyImeObserver != null) legacyImeObserver.sample();
 
-        View decor = getWindow().getDecorView();
-        View root = decor.getRootView();
-        Rect visible = new Rect();
-        decor.getWindowVisibleDisplayFrame(visible);
-        int[] rootLocation = new int[2];
-        root.getLocationOnScreen(rootLocation);
-        int rootBottom = rootLocation[1] + root.getHeight();
-        // Use the obscured bottom edge, not rootHeight-visible.height():
-        // that height difference also includes the status-bar top inset.
-        int obscuredBottom = Math.max(0, rootBottom - visible.bottom);
-        int imeBottom = Math.max(0, obscuredBottom - bottom);
+        // API 26-29 do not expose a typed IME inset. A separate, invisible
+        // resize-aware observer window samples the keyboard edge while this
+        // NativeActivity remains ADJUST_NOTHING and keeps its surface stable.
+        int imeBottom = legacyImeObserver == null ? 0 : legacyImeObserver.imeBottom();
         nativeInsets(top, right, bottom, left, 0, 0, imeBottom, 0);
     }
 
     @Override protected void onStart() {
         super.onStart();
+        if (legacyImeObserver != null) legacyImeObserver.start();
         getWindow().getDecorView().requestApplyInsets();
     }
 
     @Override protected void onDestroy() {
+        if (legacyImeObserver != null) legacyImeObserver.stop();
         // Release static overlay Views even when native initialization failed.
         GpuiPlatformView.unbindActivity(this);
         super.onDestroy();
     }
 
     @Override protected void onStop() {
+        if (legacyImeObserver != null) legacyImeObserver.stop();
         nativeInsets(lastSafeInsets[0], lastSafeInsets[1], lastSafeInsets[2],
                 lastSafeInsets[3], 0, 0, 0, 0);
         super.onStop();
+    }
+
+    /**
+     * API 26-29 have no public typed IME insets. This one-pixel, non-focusable
+     * PopupWindow opts into resize behavior so its own visible frame tracks the
+     * IME, without resizing the NativeActivity surface. The real input target
+     * remains the Activity's InputProxy.
+     */
+    private static final class LegacyImeObserver {
+        private final GpuiInputActivity activity;
+        private final View activityDecor;
+        private final View content;
+        private final PopupWindow popup;
+        private final Rect visibleFrame = new Rect();
+        private final int[] rootLocation = new int[2];
+        private final ViewTreeObserver.OnGlobalLayoutListener observerLayoutListener = this::sample;
+        private final ViewTreeObserver.OnGlobalLayoutListener activityLayoutListener = this::sample;
+        private final Runnable attachRunnable = this::attachIfDesired;
+        private boolean desiredStarted;
+        private boolean started;
+        private int imeBottom;
+
+        LegacyImeObserver(GpuiInputActivity activity, View activityDecor) {
+            this.activity = activity;
+            this.activityDecor = activityDecor;
+            content = new View(activity);
+            content.setBackgroundColor(Color.TRANSPARENT);
+            content.setFocusable(false);
+            content.setFocusableInTouchMode(false);
+            content.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+            popup = new PopupWindow(content, 1, ViewGroup.LayoutParams.MATCH_PARENT, false);
+            popup.setFocusable(false);
+            popup.setTouchable(false);
+            popup.setOutsideTouchable(false);
+            popup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
+            popup.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+            popup.setElevation(0f);
+        }
+
+        int imeBottom() { return imeBottom; }
+
+        void start() {
+            desiredStarted = true;
+            attachIfDesired();
+        }
+
+        private void attachIfDesired() {
+            if (!desiredStarted || started || activity.isFinishing() || activity.isDestroyed()) return;
+            if (!activityDecor.isAttachedToWindow()) {
+                activityDecor.removeCallbacks(attachRunnable);
+                activityDecor.post(attachRunnable);
+                return;
+            }
+            try {
+                popup.showAtLocation(activityDecor, Gravity.TOP | Gravity.START, 0, 0);
+            } catch (android.view.WindowManager.BadTokenException error) {
+                android.util.Log.w("gpui-android", "Could not attach legacy IME observer", error);
+                return;
+            }
+            started = true;
+            content.getViewTreeObserver().addOnGlobalLayoutListener(observerLayoutListener);
+            activityDecor.getViewTreeObserver().addOnGlobalLayoutListener(activityLayoutListener);
+            sample();
+        }
+
+        void stop() {
+            desiredStarted = false;
+            activityDecor.removeCallbacks(attachRunnable);
+            if (!started) {
+                publish(0);
+                return;
+            }
+            started = false;
+            removeLayoutListener(content, observerLayoutListener);
+            removeLayoutListener(activityDecor, activityLayoutListener);
+            if (popup.isShowing()) popup.dismiss();
+            publish(0);
+        }
+
+        private static void removeLayoutListener(View view,
+                ViewTreeObserver.OnGlobalLayoutListener listener) {
+            ViewTreeObserver observer = view.getViewTreeObserver();
+            if (observer.isAlive()) observer.removeOnGlobalLayoutListener(listener);
+        }
+
+        private void sample() {
+            if (!started || !popup.isShowing()) return;
+            content.getWindowVisibleDisplayFrame(visibleFrame);
+            View root = activityDecor.getRootView();
+            root.getLocationOnScreen(rootLocation);
+            int rootBottom = rootLocation[1] + root.getHeight();
+            if (rootBottom <= 0 || visibleFrame.isEmpty()) return;
+
+            int coveredBottom = Math.max(0, rootBottom - visibleFrame.bottom);
+            int safeBottom = activity.lastSafeInsets[2];
+            // A hidden observer frame may end at the navigation bar. Filter
+            // that stable region, but report the complete screen-edge occlusion
+            // as soon as the visible edge passes it (matching Type.ime() on API 30+).
+            int nextImeBottom = coveredBottom > safeBottom ? coveredBottom : 0;
+            if (nextImeBottom != imeBottom) {
+                android.util.Log.d("gpui-android", "legacy IME frame rootBottom=" + rootBottom
+                        + " visibleBottom=" + visibleFrame.bottom + " safeBottom=" + safeBottom
+                        + " imeBottom=" + nextImeBottom);
+                publish(nextImeBottom);
+            }
+        }
+
+        private void publish(int nextImeBottom) {
+            imeBottom = nextImeBottom;
+            activity.nativeInsets(activity.lastSafeInsets[0], activity.lastSafeInsets[1],
+                    activity.lastSafeInsets[2], activity.lastSafeInsets[3],
+                    0, 0, imeBottom, 0);
+        }
     }
 
     private boolean backStartedWithIme;
@@ -152,8 +269,7 @@ public class GpuiInputActivity extends NativeActivity {
         ViewGroup decor = (ViewGroup) getWindow().getDecorView();
         Rect visible = new Rect();
         decor.getWindowVisibleDisplayFrame(visible);
-        int obscured = decor.getRootView().getHeight() - visible.height();
-        return obscured > (int) (160 * getResources().getDisplayMetrics().density);
+        return legacyImeObserver != null && legacyImeObserver.imeBottom() > 0;
     }
 
     private void handleSystemBack() {

@@ -25,6 +25,12 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class PlatformViewProbeInstrumentation extends Instrumentation {
     private static final String TAG = "GpuiPlatformViewProbe";
 
+    @Override public void onCreate(Bundle arguments) {
+        super.onCreate(arguments);
+        // Custom Instrumentation classes must explicitly start their runner thread.
+        start();
+    }
+
     @Override public void onStart() {
         super.onStart();
         Bundle result = new Bundle();
