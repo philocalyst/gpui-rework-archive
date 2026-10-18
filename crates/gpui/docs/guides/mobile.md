@@ -105,6 +105,7 @@ The simulator bundle is ad-hoc signed and needs no developer account. The device
 Run the app-level XCUITest against a booted iPhone simulator:
 
 ```sh
+IOS_ACCEPTANCE_CONFIGURATION=Release \
 IOS_SIMULATOR_UDID="SIMULATOR_UUID" \
   ./examples/mobile/ios/run-app-acceptance.sh
 ```
@@ -132,8 +133,11 @@ See [Accept text input](crate::_documentation::guides::text_input), [Manage focu
 ## Validated release configurations
 
 The current Android acceptance matrix is bound to the product app SHA-256
-`1ecf3f5915150372edf7e93d0745f1590216029dacf2ff4f4d38c066b17e2f25`, Android
-source checkpoint `11a71ada`, and runner SHA-256
+`1ecf3f5915150372edf7e93d0745f1590216029dacf2ff4f4d38c066b17e2f25`, built
+from source checkpoint `11a71ada` plus the approved `window.rs` overlay
+(SHA-256 `52cadb2058ff787d3cd0e2c8645fe8f2471089c9f548a33853e29f90d2097886`).
+That exact source state is committed as `58748acf200778474ae334a670b43b592172de0b`;
+the runner SHA-256 is
 `286e1f01f436d030ceed89dc336897da4147e666a1b22524ac5608cba42f1a92`. The
 matching AndroidTest APK is `50e3f8ad6922ce2b4a4a5a476e2cc1d1df0999ffe2c3a6206c199e073b823854`;
 the test-only IME APK is
@@ -186,10 +190,13 @@ The suite uses real UIKit keyboard input and text interaction: Pinyin candidate
 composition, emoji entry, word selection by double-tap and replacement using a
 native keyboard key, and caret hit testing with text padding, horizontal scroll,
 and UTF-16 offsets. It also checks keyboard insets in portrait/landscape,
-rotation, background/resume, and fresh relaunch. Run it on macOS with a booted
-simulator and Chinese (Simplified) Pinyin enabled:
+rotation, background/resume, and fresh relaunch. The runner defaults to the
+tested Release configuration; set
+`IOS_ACCEPTANCE_CONFIGURATION` to select another Xcode configuration. Run it on
+macOS with a booted simulator and Chinese (Simplified) Pinyin enabled:
 
 ```sh
+IOS_ACCEPTANCE_CONFIGURATION=Release \
 IOS_SIMULATOR_UDID="SIMULATOR_UUID" \
   ./examples/mobile/ios/run-app-acceptance.sh
 ```

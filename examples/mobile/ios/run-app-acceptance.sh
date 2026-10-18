@@ -8,6 +8,7 @@ if [[ -z "$simulator_udid" ]]; then
   exit 2
 fi
 
+configuration="${IOS_ACCEPTANCE_CONFIGURATION:-Release}"
 artifact_root="${IOS_ACCEPTANCE_ARTIFACTS:-$repository_root/target/ios-app-acceptance}"
 if [[ "$artifact_root" != /* ]]; then
   echo "IOS_ACCEPTANCE_ARTIFACTS must be an absolute path." >&2
@@ -27,7 +28,7 @@ if [[ ! -d "$project" ]]; then
   exit 2
 fi
 
-printf 'Running the Rust GPUI acceptance app on simulator %s.\n' "$simulator_udid"
+printf 'Running the Rust GPUI acceptance app on simulator %s (%s).\n' "$simulator_udid" "$configuration"
 printf 'Enable Chinese (Simplified) Pinyin in Simulator Settings for the IME composition test.\n'
 printf 'Artifacts: %s\n' "$run_directory"
 
@@ -35,6 +36,7 @@ set +e
 MOBILE_REPO_ROOT="$repository_root" xcodebuild test \
   -project "$project" \
   -scheme GPUIAcceptance \
+  -configuration "$configuration" \
   -destination "platform=iOS Simulator,id=$simulator_udid" \
   -derivedDataPath "$run_directory/DerivedData" \
   -resultBundlePath "$result_bundle" \

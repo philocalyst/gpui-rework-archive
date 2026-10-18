@@ -38,8 +38,12 @@ acceptance IME APK:
 `4cbb883f81995f3ddf62179a20dfed567851039fbfa8c9d23f9d1673c0874df7`.
 The runner was `scripts/android_acceptance.py` SHA-256
 `286e1f01f436d030ceed89dc336897da4147e666a1b22524ac5608cba42f1a92`.
-The source checkpoint was `11a71ada`, including the Android surface lifecycle
-fix. API 36's successful configuration resolved to ANGLE/SwiftShader GLES with
+The app was built from source checkpoint `11a71ada` plus the approved Android
+`window.rs` overlay (SHA-256
+`52cadb2058ff787d3cd0e2c8645fe8f2471089c9f548a33853e29f90d2097886`); that
+exact source state is committed as
+`58748acf200778474ae334a670b43b592172de0b`. API 36's successful configuration
+resolved to ANGLE/SwiftShader GLES with
 `-gpu swangle -feature -Vulkan -accel on`. Its failed Lavapipe run is retained
 as a separate configuration diagnostic; do not combine it with the passing
 swangle receipt.

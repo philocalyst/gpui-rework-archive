@@ -53,11 +53,15 @@ unsigned and was compile/package checked, not run on a physical device.
 The suite covers real Pinyin composition/candidate selection, native emoji
 input, UIKit double-tap word selection and keyboard replacement, caret hit
 testing with padding and horizontal scrolling, UTF-16 selection, rotation,
-keyboard inset geometry, background/resume, and process relaunch. Run it with a
-booted iPhone simulator and Chinese (Simplified) Pinyin enabled:
+keyboard inset geometry, background/resume, and process relaunch. The runner
+defaults to the tested Release configuration; set
+`IOS_ACCEPTANCE_CONFIGURATION` to choose another Xcode configuration. Run it
+with a booted iPhone simulator and Chinese (Simplified) Pinyin enabled:
 
 ```sh
-IOS_SIMULATOR_UDID="SIMULATOR_UUID" ./examples/mobile/ios/run-app-acceptance.sh
+IOS_ACCEPTANCE_CONFIGURATION=Release \
+IOS_SIMULATOR_UDID="SIMULATOR_UUID" \
+  ./examples/mobile/ios/run-app-acceptance.sh
 ```
 
 The backend targets iOS 15 or newer. No physical-device runtime, VoiceOver
