@@ -1,0 +1,13 @@
+--- a/ce/adapter.rs
++++ b/ce/adapter.rs
+@@ -746,6 +746,10 @@
+                     sample
+                 );
+             }
++            if sample == 0 {
++                let label = format!("tall|scenario={}|sample={sample}", scenario.name());
++                dump_semantic_geometry_components(&window, cx, &label);
++            }
+             println!(
+                 "{}",
+                 Sample {
