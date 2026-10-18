@@ -4,7 +4,7 @@ use gpui::{
     TextInputStateChange, px,
 };
 use objc2::rc::{Retained, Weak};
-use objc2::runtime::{AnyObject, ProtocolObject};
+use objc2::runtime::{AnyObject, ProtocolObject, Sel};
 use objc2::{DefinedClass, MainThreadMarker, MainThreadOnly, Message, define_class, msg_send, sel};
 use objc2_core_foundation::{CGPoint, CGRect, CGSize};
 use objc2_foundation::{
@@ -153,6 +153,148 @@ define_class!(
                 self.ivars().keyboard_eligible.set(false);
             }
             resigned
+        }
+
+        #[unsafe(method(canPerformAction:withSender:))]
+        unsafe fn can_perform_action(&self, action: Sel, sender: Option<&AnyObject>) -> bool {
+            let handled = self.with_handler(|handler| {
+                if !handler.query_accepts_focused_text_input() {
+                    return false;
+                }
+                if action == sel!(selectAll:) {
+                    let Some(range) = editable_text_range(handler) else {
+                        return false;
+                    };
+                    return !range.is_empty()
+                        && handler
+                            .selected_text_range(false)
+                            .is_none_or(|selection| selection.range != range);
+                }
+                if action == sel!(copy:) || action == sel!(cut:) {
+                    return selected_text(handler).is_some();
+                }
+                if action == sel!(paste:) {
+                    let has_text = unsafe { UIPasteboard::generalPasteboard().hasStrings() };
+                    return has_text
+                        && handler.selected_text_range(false).is_some_and(|selection| {
+                            allowed_range(handler, &selection.range)
+                                && handler
+                                    .marked_text_range()
+                                    .is_none_or(|range| allowed_range(handler, &range))
+                        });
+                }
+                false
+            })
+            .unwrap_or(false);
+
+            if handled {
+                true
+            } else if action == sel!(selectAll:)
+                || action == sel!(copy:)
+                || action == sel!(cut:)
+                || action == sel!(paste:)
+            {
+                false
+            } else {
+                unsafe { msg_send![super(self), canPerformAction: action withSender: sender] }
+            }
+        }
+
+        #[unsafe(method(selectAll:))]
+        fn select_all(&self, _sender: Option<&AnyObject>) {
+            let mut changed = false;
+            self.edit(|handler| {
+                let Some(range) = editable_text_range(handler) else {
+                    return;
+                };
+                if handler
+                    .selected_text_range(false)
+                    .is_none_or(|selection| selection.range != range)
+                {
+                    handler.set_selected_text_range(range);
+                    changed = true;
+                }
+            });
+            if changed {
+                self.notify_edit_menu_change(false);
+            }
+        }
+
+        #[unsafe(method(copy:))]
+        fn copy(&self, _sender: Option<&AnyObject>) {
+            let text = self
+                .with_handler(|handler| {
+                    handler
+                        .query_accepts_focused_text_input()
+                        .then(|| selected_text(handler))
+                        .flatten()
+                })
+                .flatten();
+            if let Some((_, text)) = text {
+                unsafe {
+                    UIPasteboard::generalPasteboard()
+                        .setString(Some(&NSString::from_str(&text)));
+                }
+            }
+        }
+
+        #[unsafe(method(cut:))]
+        fn cut(&self, _sender: Option<&AnyObject>) {
+            let mut changed = false;
+            self.edit(|handler| {
+                let Some((range, text)) = selected_text(handler) else {
+                    return;
+                };
+                unsafe {
+                    UIPasteboard::generalPasteboard()
+                        .setString(Some(&NSString::from_str(&text)));
+                }
+                handler.replace_text_in_range(Some(range), "");
+                changed = true;
+            });
+            if changed {
+                self.notify_edit_menu_change(true);
+            }
+        }
+
+        #[unsafe(method(paste:))]
+        fn paste(&self, _sender: Option<&AnyObject>) {
+            let eligible = self
+                .with_handler(|handler| {
+                    handler.query_accepts_focused_text_input()
+                        && handler.selected_text_range(false).is_some_and(|selection| {
+                            allowed_range(handler, &selection.range)
+                                && handler
+                                    .marked_text_range()
+                                    .is_none_or(|range| allowed_range(handler, &range))
+                        })
+                })
+                .unwrap_or(false);
+            if !eligible {
+                return;
+            }
+            let Some(text) = (unsafe { UIPasteboard::generalPasteboard().string() }) else {
+                return;
+            };
+            let text = text.to_string();
+            let mut changed = false;
+            self.edit(|handler| {
+                let Some(selection) = handler.selected_text_range(false) else {
+                    return;
+                };
+                if !allowed_range(handler, &selection.range)
+                    || handler
+                        .marked_text_range()
+                        .is_some_and(|range| !allowed_range(handler, &range))
+                {
+                    return;
+                }
+                handler.replace_text_in_range(None, &text);
+                changed = true;
+            });
+            if changed {
+                self.notify_edit_menu_change(true);
+            }
         }
 
         #[unsafe(method(reconcileTextInput))]
@@ -562,6 +704,14 @@ impl TextInputView {
         self.with_handler(document_range).flatten()
     }
 
+    fn notify_edit_menu_change(&self, content_changed: bool) {
+        self.ivars().selection_changed.set(true);
+        if content_changed {
+            self.ivars().content_changed.set(true);
+        }
+        self.refresh_keyboard();
+    }
+
     fn bounds(&self, range: Range<usize>) -> Option<CGRect> {
         self.with_handler(|handler| {
             if !allowed_range(handler, &range) {
@@ -681,6 +831,26 @@ fn document_range(handler: &mut PlatformInputHandler) -> Option<Range<usize>> {
 
 fn allowed_range(handler: &mut PlatformInputHandler, range: &Range<usize>) -> bool {
     document_range(handler).is_some_and(|editable| contains_range(&editable, range))
+}
+
+fn editable_text_range(handler: &mut PlatformInputHandler) -> Option<Range<usize>> {
+    handler
+        .text_input_editable_range()
+        .or_else(|| handler.text_length_utf16().map(|length| 0..length))
+        .filter(|range| range.start <= range.end)
+}
+
+fn selected_text(handler: &mut PlatformInputHandler) -> Option<(Range<usize>, String)> {
+    let range = handler.selected_text_range(false)?.range;
+    if range.is_empty() || !allowed_range(handler, &range) {
+        return None;
+    }
+    let mut adjusted = None;
+    let text = handler.text_for_range(range.clone(), &mut adjusted)?;
+    if adjusted.is_some_and(|adjusted| adjusted != range) {
+        return None;
+    }
+    Some((range, text))
 }
 
 fn read_text(

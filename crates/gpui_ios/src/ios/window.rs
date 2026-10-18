@@ -24,7 +24,7 @@ use gpui::{
 };
 use gpui_apple::metal_renderer::MetalRenderer;
 use objc2::rc::Retained;
-use objc2::runtime::{AnyClass, AnyObject};
+use objc2::runtime::{AnyClass, AnyObject, ProtocolObject};
 use objc2::{ClassType, DefinedClass, MainThreadMarker, MainThreadOnly, define_class, msg_send};
 use objc2_core_foundation::{CGPoint, CGRect, CGSize};
 use objc2_foundation::{
@@ -35,6 +35,7 @@ use objc2_ui_kit::{
     NSValueUIGeometryExtensions, UIKeyboardAnimationCurveUserInfoKey,
     UIKeyboardAnimationDurationUserInfoKey, UIKeyboardFrameEndUserInfoKey,
     UIKeyboardWillChangeFrameNotification, UIKeyboardWillHideNotification, UIStatusBarStyle,
+    UITextInteraction, UITextInteractionDelegate, UITextInteractionMode,
 };
 use objc2_ui_kit::{
     UICoordinateSpace, UIEvent, UIScreen, UITouch, UITraitCollection, UITraitEnvironment,
@@ -178,6 +179,32 @@ define_class!(
 
     unsafe impl NSObjectProtocol for MetalView {}
 
+    unsafe impl UITextInteractionDelegate for MetalView {
+        #[unsafe(method(interactionShouldBegin:atPoint:))]
+        fn interaction_should_begin_at_point(
+            &self,
+            _interaction: &UITextInteraction,
+            location: CGPoint,
+        ) -> bool {
+            self.ivars()
+                .with_window(|window| {
+                    window
+                        .with_input_handler(|handler| {
+                            if !handler.query_accepts_focused_text_input() {
+                                return false;
+                            }
+                            let Some(bounds) = handler.element_bounds() else {
+                                return false;
+                            };
+                            let location = point(px(location.x as f32), px(location.y as f32));
+                            bounds.contains(&location)
+                        })
+                        .unwrap_or(false)
+                })
+                .unwrap_or(false)
+        }
+    }
+
     impl MetalView {
         #[unsafe(method(layerClass))]
         fn layer_class() -> &'static AnyClass {
@@ -262,6 +289,8 @@ pub(crate) struct IosWindowState {
     view: Retained<MetalView>,
     /// The hidden text input view for keyboard input
     text_input_view: Retained<TextInputView>,
+    /// UIKit selection gestures attached to the visible Metal view and backed by the text proxy.
+    text_interaction: Retained<UITextInteraction>,
     /// Current bounds in pixels
     bounds: Cell<Bounds<Pixels>>,
     /// Scale factor
@@ -362,6 +391,12 @@ impl IosWindow {
         text_input_view.setUserInteractionEnabled(true);
         view.addSubview(&text_input_view);
 
+        let text_interaction =
+            UITextInteraction::textInteractionForMode(UITextInteractionMode::Editable, main_thread);
+        unsafe { text_interaction.setTextInput(Some(text_input_view.as_ref())) };
+        text_interaction.setDelegate(Some(ProtocolObject::from_ref(&*view)));
+        view.addInteraction(&ProtocolObject::from_ref(&*text_interaction));
+
         let pixel_w = (screen_bounds_cg.size.width * scale) as i32;
         let pixel_h = (screen_bounds_cg.size.height * scale) as i32;
         let renderer_layer = layer
@@ -381,6 +416,7 @@ impl IosWindow {
             view_controller,
             view,
             text_input_view,
+            text_interaction,
             bounds: Cell::new(screen_bounds),
             scale_factor: Cell::new(scale_factor),
             input_handler: CallbackSlot::default(),
@@ -779,6 +815,10 @@ impl Drop for IosWindow {
 
         *self.view_controller.ivars().0.borrow_mut() = Weak::new();
         *self.view.ivars().0.borrow_mut() = Weak::new();
+        self.view
+            .removeInteraction(&ProtocolObject::from_ref(&*self.text_interaction));
+        self.text_interaction.setDelegate(None);
+        unsafe { self.text_interaction.setTextInput(None) };
         self.text_input_view.set_window(Weak::new());
         self.text_input_view.removeFromSuperview();
     }
