@@ -25,7 +25,40 @@
 //! ## Usage
 //!
 //! ```rust,no_run
-//! use gpui_mobile::platform_view::{PlatformViewRegistry, PlatformViewParams};
+//! use std::sync::atomic::{AtomicBool, Ordering};
+//! use gpui_mobile::platform_view::{
+//!     PlatformView, PlatformViewBounds, PlatformViewFactory, PlatformViewId,
+//!     PlatformViewParams, PlatformViewRegistry,
+//! };
+//!
+//! // This self-contained stub compiles the example; a native backend should forward these methods to its platform view.
+//! struct VideoView {
+//!     id: PlatformViewId,
+//!     disposed: AtomicBool,
+//! }
+//!
+//! impl PlatformView for VideoView {
+//!     fn id(&self) -> PlatformViewId { self.id }
+//!     fn view_type(&self) -> &str { "video_player" }
+//!     fn set_bounds(&self, _bounds: PlatformViewBounds) {}
+//!     fn set_visible(&self, _visible: bool) {}
+//!     fn set_z_index(&self, _z_index: i32) {}
+//!     fn dispose(&self) { self.disposed.store(true, Ordering::Release); }
+//!     fn is_disposed(&self) -> bool { self.disposed.load(Ordering::Acquire) }
+//! }
+//!
+//! struct MyVideoFactory;
+//!
+//! impl PlatformViewFactory for MyVideoFactory {
+//!     fn create(&self, _params: &PlatformViewParams) -> Result<Box<dyn PlatformView>, String> {
+//!         Ok(Box::new(VideoView {
+//!             id: PlatformViewId::next(),
+//!             disposed: AtomicBool::new(false),
+//!         }))
+//!     }
+//!
+//!     fn view_type(&self) -> &str { "video_player" }
+//! }
 //!
 //! // Register a factory (typically in package init)
 //! PlatformViewRegistry::global().register("video_player", Box::new(MyVideoFactory));
@@ -34,6 +67,7 @@
 //! let handle = PlatformViewRegistry::global()
 //!     .create_view("video_player", PlatformViewParams::default())
 //!     .unwrap();
+//! assert_eq!(handle.view_type(), "video_player");
 //! ```
 
 use std::collections::HashMap;

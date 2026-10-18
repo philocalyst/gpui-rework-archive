@@ -676,6 +676,21 @@ def run_ime_contract(serial: str, artifact: Path, editor_label: str,
         adb(serial, "shell", "ime", "disable", ime_component, check=False)
 
 
+def runtime_failure_lines(logs: str) -> list[str]:
+    failures = re.findall(
+        r"(?im)^.*(?:FATAL EXCEPTION|Fatal signal|ANR in |UnsatisfiedLinkError).*$", logs
+    )
+    # Android Emulator may emit this known Widevine startup warning even when
+    # GPUI is healthy. Keep every other dynamic-loader failure fatal.
+    for line in logs.splitlines():
+        lowered = line.lower()
+        if "dlopen failed" in lowered and not (
+            "wvcdm" in lowered and "liboemcrypto.so" in lowered
+        ):
+            failures.append(line)
+    return failures
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("apk", type=Path)
@@ -714,7 +729,17 @@ def main() -> int:
         raise RuntimeError(f"emulator API {api} is below declared min API {args.min_api}")
     print(f"Emulator: abi={device_abi} api={api}")
 
-    adb(args.serial, "logcat", "-c")
+    try:
+        adb(args.serial, "logcat", "-c")
+    except RuntimeError as error:
+        # Some API 26 emulator/logd combinations reject clearing the implicit
+        # main buffer while accepting the explicit all-buffer operation.
+        if "failed to clear the 'main' log" not in str(error):
+            raise
+        (args.artifacts / "logcat-clear-fallback.txt").write_text(
+            f"default clear failed; retrying explicit all-buffer clear\n{error}\n"
+        )
+        adb(args.serial, "logcat", "-b", "all", "-c")
     run(ADB, "-s", args.serial, "install", "-r", str(args.apk.resolve()), timeout=180)
     run(ADB, "-s", args.serial, "install", "-r", str(args.ime_apk.resolve()), timeout=120)
     component = f"{args.package}/{args.activity}"
@@ -826,7 +851,7 @@ def main() -> int:
 
     logs = adb(args.serial, "logcat", "-d")
     (args.artifacts / "logcat.txt").write_text(logs)
-    fatal = re.findall(r"(?im)^.*(?:FATAL EXCEPTION|Fatal signal|ANR in |UnsatisfiedLinkError|dlopen failed).*$", logs)
+    fatal = runtime_failure_lines(logs)
     if fatal:
         raise RuntimeError("crash/ANR/native loader failure found:\n" + "\n".join(fatal[-20:]))
     print(f"Crash/ANR/native loader scan: PASS; artifacts: {args.artifacts.resolve()}")
