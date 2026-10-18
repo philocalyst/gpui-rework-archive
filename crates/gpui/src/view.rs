@@ -1,7 +1,7 @@
 use crate::{
     AnyElement, AnyEntity, AnyWeakEntity, App, Bounds, Context, Element, ElementId, Entity,
     EntityId, GlobalElementId, InspectorElementId, IntoElement, LayoutId, PaintIndex, Pixels,
-    PrepaintStateIndex, Render, RenderOnce, ResolvedDirection, Style, StyleRefinement,
+    Point, PrepaintStateIndex, Render, RenderOnce, ResolvedDirection, Style, StyleRefinement,
     ViewDependencies, WeakEntity,
 };
 use crate::{Empty, Window};
@@ -926,22 +926,38 @@ impl<V: View> Element for ViewElement<V> {
                                             // A detached intrinsic layout can reparent retained child nodes.
                                             // Rebuild this owner chain next frame to reconnect it safely.
                                             window.mark_cached_views_frame_bound();
-                                            fresh_element.layout_as_root_at_size(
+                                            let (layout_id, _) = fresh_element.layout_as_root_at_size(
                                                 bounds.size.into(),
                                                 bounds.size,
                                                 window,
                                                 cx,
                                             );
-                                            fresh_element.prepaint_at(bounds.origin, window, cx);
+                                            let structural_origin = window.with_absolute_element_offset(
+                                                Point::default(),
+                                                |window| window.layout_bounds(layout_id).origin,
+                                            );
+                                            fresh_element.prepaint_at(
+                                                bounds.origin - structural_origin,
+                                                window,
+                                                cx,
+                                            );
                                         }
                                     } else if request_reused || fixed_style.is_some() {
-                                        fresh_element.layout_as_root_at_size(
+                                        let (layout_id, _) = fresh_element.layout_as_root_at_size(
                                             bounds.size.into(),
                                             bounds.size,
                                             window,
                                             cx,
                                         );
-                                        fresh_element.prepaint_at(bounds.origin, window, cx);
+                                        let structural_origin = window.with_absolute_element_offset(
+                                            Point::default(),
+                                            |window| window.layout_bounds(layout_id).origin,
+                                        );
+                                        fresh_element.prepaint_at(
+                                            bounds.origin - structural_origin,
+                                            window,
+                                            cx,
+                                        );
                                     } else {
                                         fresh_element.prepaint(window, cx);
                                     }
