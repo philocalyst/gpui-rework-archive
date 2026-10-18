@@ -116,10 +116,89 @@ def capture_failure_state(serial: str, artifact: Path, name: str, error: object)
         (artifact / f"{prefix}-capture-errors.txt").write_text("\n".join(errors) + "\n")
 
 
+def input_method_is_shown(dump: str) -> bool:
+    """Use InputMethodManager's shown request as the authoritative state.
+
+    API 26 may leave mIsInputViewShown=true after the actual window surface
+    has been hidden; mInputShown=false is the state used by requestHideSelf.
+    Keep the view flag only as a compatibility fallback when mInputShown is
+    absent from a platform dump.
+    """
+    shown = re.search(r"\bmInputShown\s*=\s*(true|false)", dump, re.IGNORECASE)
+    if shown:
+        return shown.group(1).lower() == "true"
+    view = re.search(r"\bmIsInputViewShown\s*=\s*(true|false)", dump, re.IGNORECASE)
+    return bool(view and view.group(1).lower() == "true")
+
+
+def parse_ime_geometry(api: int, display_dump: str, legacy_window_dump: str = "") -> list[tuple[int, str]]:
+    """Return visible IME occlusion heights in physical pixels and their evidence.
+
+    API 30+ uses only WindowInsets' published IME source frames. API 26-29
+    have no InsetsSource dump, so use the shown InputMethod window frame and
+    its visible/content inset, which marks the keyboard's top edge within the
+    IME window (LatinIME can own a full-screen window with a large top inset).
+    """
+    geometries: list[tuple[int, str]] = []
+    if api >= 30:
+        sources = re.findall(
+            r"InsetsSource id=\S+ type=ime frame=\[(-?\d+),(-?\d+)\]"
+            r"\[(-?\d+),(-?\d+)\].*?visible=(true|false)",
+            display_dump,
+        )
+        for left, top, right, bottom, visible in sources:
+            width = int(right) - int(left)
+            height = int(bottom) - int(top)
+            if visible == "true" and width > 0 and height > 0:
+                geometries.append((height, f"InsetsSource frame=[{left},{top}][{right},{bottom}] size={width}x{height}"))
+        return geometries
+
+    blocks = re.split(r"(?m)^\s*Window #\d+ ", legacy_window_dump)[1:]
+    for block in blocks:
+        header = block.splitlines()[0] if block.splitlines() else ""
+        if "InputMethod" not in header:
+            continue
+        surface = re.search(
+            r"Surface:\s*shown=(true|false).*?rect=\([-\d.]+,[-\d.]+\)"
+            r"\s+([\d.]+)\s+x\s+([\d.]+)",
+            block,
+        )
+        frame = re.search(r"mFrame=\[(-?\d+),(-?\d+)\]\[(-?\d+),(-?\d+)\]", block)
+        visible_insets = re.search(
+            r"mGivenVisibleInsets=\[(-?\d+),(-?\d+)\]\[(-?\d+),(-?\d+)\]", block
+        )
+        content_insets = re.search(
+            r"mGivenContentInsets=\[(-?\d+),(-?\d+)\]\[(-?\d+),(-?\d+)\]", block
+        )
+        if not surface or surface.group(1) != "true" or not frame:
+            continue
+        surface_width, surface_height = float(surface.group(2)), float(surface.group(3))
+        frame_top, frame_bottom = int(frame.group(2)), int(frame.group(4))
+        frame_height = frame_bottom - frame_top
+        # InputMethod visible insets describe the area before keyboard pixels;
+        # content insets are a compatibility fallback when visible is absent.
+        top_inset = int(visible_insets.group(2)) if visible_insets else 0
+        if top_inset <= 0 and content_insets:
+            top_inset = int(content_insets.group(2))
+        occlusion = min(frame_height, int(surface_height + 0.5)) - min(frame_height, max(0, top_inset))
+        if surface_width > 0 and frame_height > 0 and occlusion > 0:
+            geometries.append((occlusion,
+                f"InputMethod Surface shown=true size={surface_width:g}x{surface_height:g} "
+                f"frame=[{frame.group(1)},{frame_top}][{frame.group(3)},{frame_bottom}] "
+                f"visible_inset_top={int(visible_insets.group(2)) if visible_insets else 'missing'} "
+                f"content_inset_top={int(content_insets.group(2)) if content_insets else 'missing'} "
+                f"occlusion={occlusion}px"))
+    return geometries
+
+
 def check_keyboard_inset(serial: str, artifact: Path, name: str, visible: bool) -> int:
+    api = int(adb(serial, "shell", "getprop", "ro.build.version.sdk").strip())
     deadline = time.monotonic() + 18
     last_label = ""
+    last_geometry = "no visible IME frame"
+    last_ime = ""
     last_window = ""
+    last_legacy = ""
     while time.monotonic() < deadline:
         xml = dump_ui(serial, artifact, f"{name}-keyboard-inset")
         labels = exact_labels(xml)
@@ -128,16 +207,19 @@ def check_keyboard_inset(serial: str, artifact: Path, name: str, visible: bool) 
         if match:
             logical = int(match.group(1))
             last_label = label
+            last_ime = adb(serial, "shell", "dumpsys", "input_method")
+            shown = input_method_is_shown(last_ime)
             last_window = adb(serial, "shell", "dumpsys", "window", "displays")
-            sources = re.findall(
-                r"InsetsSource id=\S+ type=ime frame=\[(-?\d+),(-?\d+)\]\[(-?\d+),(-?\d+)\].*?visible=(true|false)",
-                last_window,
+            if api < 30:
+                last_legacy = adb(serial, "shell", "dumpsys", "window", "windows")
+            geometries = parse_ime_geometry(api, last_window, last_legacy)
+            last_geometry = "; ".join(detail for _height, detail in geometries) or (
+                "no visible IME geometry (legacy window parser or modern InsetsSource absent)"
             )
-            visible_sources = [source for source in sources if source[4] == "true"]
-            if bool(visible_sources) == visible:
+            geometry_visible = bool(geometries)
+            if shown == visible and geometry_visible == visible:
                 if visible:
-                    _left, top, _right, bottom, _shown = visible_sources[-1]
-                    physical_bottom = int(bottom) - int(top)
+                    physical_bottom = geometries[-1][0]
                 else:
                     physical_bottom = 0
                 density_output = adb(serial, "shell", "wm", "density")
@@ -148,21 +230,24 @@ def check_keyboard_inset(serial: str, artifact: Path, name: str, visible: bool) 
                 expected = int(physical_bottom / density + 0.5)
                 if abs(logical - expected) > 1:
                     raise RuntimeError(
-                        f"{name}: {label} disagrees with Android IME frame: "
-                        f"frame={physical_bottom}px density={density:g} expected≈{expected}px"
+                        f"{name}: {label} disagrees with Android IME geometry: "
+                        f"physical_occlusion={physical_bottom}px density={density:g} expected≈{expected}px; {last_geometry}"
                     )
                 (artifact / f"{name}-keyboard-inset.txt").write_text(
-                    f"accessibility probe: {label}\n"
-                    f"expected logical inset from Android IME frame: {expected} px\n"
-                    f"physical IME frame height: {physical_bottom} px\n"
+                    f"api={api}\naccessibility probe: {label}\n"
+                    f"expected logical inset from Android IME geometry: {expected} px\n"
+                    f"physical IME occlusion: {physical_bottom} px\n"
                     f"display density scale: {density:g}\n"
-                    f"keyboard visible expected: {visible}\n"
-                    f"window dumpsys:\n{last_window}"
+                    f"input_method_shown={shown}\nkeyboard visible expected: {visible}\n"
+                    f"geometry: {last_geometry}\nwindow displays:\n{last_window}\n"
+                    f"legacy window dump:\n{last_legacy}"
                 )
                 return logical
         time.sleep(0.25)
+    last_shown_state = input_method_is_shown(last_ime)
     raise RuntimeError(
-        f"{name}: keyboard inset did not reach visible={visible}; last probe={last_label!r}"
+        f"{name}: keyboard inset did not reach visible={visible}; last probe={last_label!r}; "
+        f"last input_method shown={last_shown_state}; geometry={last_geometry}"
     )
 
 def capture_screen(serial: str, artifact: Path, name: str) -> None:
@@ -314,10 +399,20 @@ def wait_rotation(serial: str, expected: int, timeout: float = 10) -> None:
 
 def top_resumed_activity(serial: str) -> str:
     output = adb(serial, "shell", "dumpsys", "activity", "activities")
-    match = re.search(r"^\s*topResumedActivity=.*$", output, re.MULTILINE)
-    if not match:
-        raise RuntimeError("ActivityTaskManager did not report a top resumed activity")
-    return match.group(0).strip()
+    # Android 10+ reports topResumedActivity; older ActivityManager dumps use
+    # mResumedActivity or ResumedActivity. Keep the record so callers still
+    # assert the expected package instead of treating an absent modern field
+    # as a backgrounded app.
+    patterns = (
+        r"^\s*topResumedActivity=.*$",
+        r"^\s*mResumedActivity:\s*ActivityRecord.*$",
+        r"^\s*ResumedActivity:\s*ActivityRecord.*$",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, output, re.MULTILINE)
+        if match:
+            return match.group(0).strip()
+    raise RuntimeError("ActivityTaskManager did not report a resumed activity")
 
 
 def wait_resumed_activity(serial: str, package: str, expected: bool, timeout: float = 20) -> str:
@@ -358,58 +453,17 @@ def check_ime_shown(
     while time.monotonic() < deadline:
         try:
             last_ime = bounded_adb("shell", "dumpsys", "input_method")
-            shown = bool(re.search(
-                r"(mInputShown|mIsInputViewShown)\s*=\s*true",
-                last_ime,
-                re.IGNORECASE,
-            ))
+            shown = input_method_is_shown(last_ime)
 
             last_window = bounded_adb("shell", "dumpsys", "window", "displays")
-            visible_frames = []
-            if api >= 30:
-                sources = re.findall(
-                    r"InsetsSource id=\S+ type=ime frame=\[(-?\d+),(-?\d+)\]"
-                    r"\[(-?\d+),(-?\d+)\].*?visible=(true|false)",
-                    last_window,
-                )
-                for left, top, right, bottom, visible in sources:
-                    width = int(right) - int(left)
-                    height = int(bottom) - int(top)
-                    if visible == "true" and width > 0 and height > 0:
-                        visible_frames.append(
-                            f"InsetsSource frame=[{left},{top}][{right},{bottom}] "
-                            f"size={width}x{height}"
-                        )
-                last_geometry = (
-                    "; ".join(visible_frames)
-                    if visible_frames
-                    else "API30+ has no parsed visible nonempty InsetsSource type=ime frame"
-                )
-            else:
-                # Android 26-29 do not expose InsetsSource snapshots. Verify
-                # the actual WindowManager InputMethod surface instead.
-                legacy_windows = bounded_adb("shell", "dumpsys", "window", "windows")
-                blocks = re.split(r"(?m)^\s*Window #\d+ ", legacy_windows)[1:]
-                for block in blocks:
-                    header = block.splitlines()[0] if block.splitlines() else ""
-                    if "InputMethod" not in header:
-                        continue
-                    surface = re.search(
-                        r"Surface:\s*shown=(true|false).*?rect=\([-\d.]+,[-\d.]+\)"
-                        r"\s+([\d.]+)\s+x\s+([\d.]+)",
-                        block,
-                    )
-                    if surface and surface.group(1) == "true":
-                        width, height = float(surface.group(2)), float(surface.group(3))
-                        if width > 0 and height > 0:
-                            visible_frames.append(
-                                f"InputMethod Surface shown=true size={width:g}x{height:g}"
-                            )
-                last_geometry = (
-                    "; ".join(visible_frames)
-                    if visible_frames
-                    else "API<30 has no shown nonempty InputMethod Surface"
-                )
+            legacy_windows = bounded_adb("shell", "dumpsys", "window", "windows") if api < 30 else ""
+            visible_frames = parse_ime_geometry(api, last_window, legacy_windows)
+            last_geometry = (
+                "; ".join(detail for _height, detail in visible_frames)
+                if visible_frames
+                else ("API30+ has no parsed visible nonempty InsetsSource type=ime frame"
+                      if api >= 30 else "API<30 has no shown InputMethod surface with positive occlusion")
+            )
             if shown and visible_frames:
                 if artifact is not None:
                     (artifact / "ime-visible-startup.txt").write_text(
@@ -472,7 +526,7 @@ def send_ime(serial: str, operation: str, *, text: str = "", first: int = 0, sec
         command.extend(("--esn", "text"))
     command.extend(("--ei", "first", str(first), "--ei", "second", str(second),
                     "--el", "command_id", command_id))
-    adb(serial, *command)
+    adb(serial, *command, timeout=8)
     expected = f"command-id={command_id} operation={operation} result=ok"
     deadline = time.monotonic() + 6
     while time.monotonic() < deadline:
@@ -557,7 +611,8 @@ def wait_input_snapshot(serial: str, artifact: Path,
 
 
 def run_ime_contract(serial: str, artifact: Path, editor_label: str,
-                     ime_package: str, ime_component: str, app_package: str) -> None:
+                     ime_package: str, ime_component: str, app_package: str,
+                     api: int) -> None:
     old_ime = adb(serial, "shell", "settings", "get", "secure", "default_input_method").strip()
     old_show_ime = adb(serial, "shell", "settings", "get", "secure", "show_ime_with_hard_keyboard").strip()
     setting_record = artifact / "show-ime-with-hard-keyboard.txt"
@@ -600,10 +655,13 @@ def run_ime_contract(serial: str, artifact: Path, editor_label: str,
                 "before": before, "after": after, "selected": selected,
                 "text": text, "selection_start": selection_start,
                 "selection_end": selection_end,
-                "surrounding_text": text,
-                "surrounding_selection_start": selection_start,
-                "surrounding_selection_end": selection_end,
-                "surrounding_offset": 0,
+                # InputConnection.getSurroundingText was added in API 31.
+                # Older platforms must report its unavailable sentinel while
+                # still satisfying the before/after/selected/extracted checks.
+                "surrounding_text": text if api >= 31 else None,
+                "surrounding_selection_start": selection_start if api >= 31 else -1,
+                "surrounding_selection_end": selection_end if api >= 31 else -1,
+                "surrounding_offset": 0 if api >= 31 else -1,
             }
 
         end_snapshot = snapshot(original, original, "", "", 7, 7)
@@ -737,7 +795,17 @@ def run_ime_contract(serial: str, artifact: Path, editor_label: str,
         (artifact / "ime-request-hide.txt").write_text(
             f"requestHideSelf(0) hid keyboard: yes\n"
             f"foreground activity: {hidden_activity}\n{hidden_ime}")
-        send_ime(serial, "show")
+        if api == 26:
+            # Android 8 can block the helper receiver while requestShowSelf
+            # waits for the hidden InputMethodService window. Re-focus the real
+            # editor instead, then require actual IME geometry and inset below.
+            editor_xml = dump_ui(serial, artifact, "ime-resume-editor-tap")
+            tap_label(serial, editor_xml, editor_label)
+            (artifact / "ime-resume-method.txt").write_text(
+                "API 26 re-show requested by tapping the real editor;\n"
+                "visible frame and app inset are asserted before Back.\n")
+        else:
+            send_ime(serial, "show")
         time.sleep(0.5)
         check_ime_shown(serial)
         check_keyboard_inset(serial, artifact, "ime-visible-back-shown", True)
@@ -890,7 +958,7 @@ def main() -> int:
         time.sleep(0.3)
 
     run_ime_contract(args.serial, args.artifacts, args.editor_label,
-                     args.ime_package, args.ime_component, args.package)
+                     args.ime_package, args.ime_component, args.package, api)
     lifecycle_xml = wait_label(args.serial, args.artifacts, args.root_label, "lifecycle-before-rotation")
     if "A😀かZ" not in exact_labels(lifecycle_xml):
         raise RuntimeError("final editor value was not retained before rotation")
