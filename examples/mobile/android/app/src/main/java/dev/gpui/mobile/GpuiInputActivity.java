@@ -129,11 +129,16 @@ public class GpuiInputActivity extends NativeActivity {
     }
 
     @Override public void finish() {
-        // android-activity calls ANativeActivity_finish when the old native
-        // loop returns during configuration relaunch. Do not finish its
-        // replacement Activity after this instance has been destroyed.
-        if (isChangingConfigurations() && isDestroyed()) {
-            android.util.Log.i("gpui-android", "Ignoring finish from destroyed configuration instance");
+        // android-activity calls ANativeActivity_finish when android_main
+        // returns. During a configuration relaunch, that old native loop's
+        // finish request must not cancel the framework-created replacement.
+        boolean changingConfigurations = isChangingConfigurations();
+        boolean destroyed = isDestroyed();
+        boolean finishing = isFinishing();
+        android.util.Log.i("gpui-android", "finish requested: changingConfigurations="
+                + changingConfigurations + " destroyed=" + destroyed + " finishing=" + finishing);
+        if (changingConfigurations) {
+            android.util.Log.i("gpui-android", "Ignoring finish from configuration-changing instance");
             return;
         }
         super.finish();
