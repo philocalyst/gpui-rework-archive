@@ -21,7 +21,7 @@ import zipfile
 import xml.etree.ElementTree as ET
 
 
-def run(*args: str, check: bool = True, timeout: int = 30) -> str:
+def run(*args: str, check: bool = True, timeout: float = 30) -> str:
     result = subprocess.run(args, text=True, stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT, timeout=timeout)
     if check and result.returncode:
@@ -29,7 +29,7 @@ def run(*args: str, check: bool = True, timeout: int = 30) -> str:
     return result.stdout
 
 
-def adb(serial: str, *args: str, check: bool = True, timeout: int = 30) -> str:
+def adb(serial: str, *args: str, check: bool = True, timeout: float = 30) -> str:
     return run(ADB, "-s", serial, *args, check=check, timeout=timeout)
 
 
@@ -252,8 +252,8 @@ def check_keyboard_inset(serial: str, artifact: Path, name: str, visible: bool) 
     )
 
 
-def app_pid(serial: str, package: str) -> int:
-    output = adb(serial, "shell", "pidof", package).strip()
+def app_pid(serial: str, package: str, timeout: float = 30) -> int:
+    output = adb(serial, "shell", "pidof", package, timeout=timeout).strip()
     values = [int(value) for value in output.split() if value.isdigit()]
     if not values:
         raise RuntimeError(f"process {package!r} is not running")
@@ -278,6 +278,17 @@ def activity_recreation_events(logs: str, package: str, activity: str, pid: int)
     return events
 
 
+def activity_create_follows_destroy(logs: str, events: dict[str, list[str]]) -> bool:
+    """Return whether this log slice contains a create after the latest destroy."""
+    if not events["destroy"]:
+        return False
+    destroy_line = events["destroy"][-1]
+    destroy_position = logs.rfind(destroy_line)
+    return destroy_position >= 0 and any(
+        logs.find(line) > destroy_position for line in events["create"]
+    )
+
+
 def validate_activity_recreation_events(logs: str, events: dict[str, list[str]]) -> None:
     if not (events["relaunch"] and events["destroy"] and events["create"]):
         raise RuntimeError(
@@ -285,7 +296,7 @@ def validate_activity_recreation_events(logs: str, events: dict[str, list[str]])
             "wm_on_destroy_called, and wm_on_create_called events for the same Activity/PID")
     destroy_line = events["destroy"][-1]
     create_after_destroy = [line for line in events["create"]
-                            if logs.find(line) > logs.find(destroy_line)]
+                            if logs.find(line) > logs.rfind(destroy_line)]
     if not create_after_destroy:
         raise RuntimeError("Activity create event did not follow its destroy event")
     token = re.search(r"wm_on_destroy_called:\s*\[([^,]+),", destroy_line)
@@ -300,6 +311,48 @@ def validate_activity_recreation_events(logs: str, events: dict[str, list[str]])
     if token.group(1) not in relaunch_tokens:
         raise RuntimeError("wm_relaunch and Activity lifecycle events refer to different ActivityRecord tokens")
 
+
+def wait_for_activity_recreation_events(
+    read_logs,
+    package: str,
+    activity: str,
+    pid: int,
+    read_pid,
+    *,
+    timeout_seconds: float = 20.0,
+    poll_interval_seconds: float = 0.15,
+    clock=time.monotonic,
+    sleep=time.sleep,
+) -> tuple[str, dict[str, list[str]]]:
+    """Poll until a same-token create follows destroy, or fail at the deadline."""
+    deadline = clock() + timeout_seconds
+    logs = ""
+    events: dict[str, list[str]] = {"relaunch": [], "destroy": [], "create": []}
+
+    def timed_out() -> RuntimeError:
+        return RuntimeError(
+            "timed out waiting for ordered Activity recreation events "
+            f"(relaunch={len(events['relaunch'])}, destroy={len(events['destroy'])}, "
+            f"create={len(events['create'])}, create_after_destroy="
+            f"{activity_create_follows_destroy(logs, events)})"
+        )
+
+    while True:
+        remaining = deadline - clock()
+        if remaining <= 0:
+            raise timed_out()
+        logs = read_logs(remaining)
+        events = activity_recreation_events(logs, package, activity, pid)
+        if events["relaunch"] and events["destroy"] and activity_create_follows_destroy(logs, events):
+            validate_activity_recreation_events(logs, events)
+            return logs, events
+        remaining = deadline - clock()
+        if remaining <= 0:
+            raise timed_out()
+        current_pid = read_pid(remaining)
+        if current_pid != pid:
+            raise RuntimeError(f"font-scale recreation restarted process: pid {pid} -> {current_pid}")
+        sleep(min(poll_interval_seconds, deadline - clock()))
 
 def distinct_font_scale(current: str) -> str:
     """Pick a non-default test value without losing the caller's exact original."""
@@ -337,19 +390,15 @@ def run_font_scale_recreation(
         adb(serial, "shell", "settings", "put", "system", "font_scale", replacement, timeout=8)
         (artifact / "font-scale-change-command.txt").write_text(
             f"adb -s {serial} shell settings put system font_scale {replacement}\n")
-        deadline = time.monotonic() + 20.0
-        logs = ""
-        while time.monotonic() < deadline:
-            logs = adb(serial, "logcat", "-d", "-b", "all", timeout=5)
-            events = activity_recreation_events(logs, package, activity, pid_before)
-            if events["relaunch"] and events["destroy"] and events["create"]:
-                break
-            current_pid = app_pid(serial, package)
-            if current_pid != pid_before:
-                raise RuntimeError(
-                    f"font-scale recreation restarted process: pid {pid_before} -> {current_pid}")
-            time.sleep(0.15)
-        validate_activity_recreation_events(logs, events)
+        logs, events = wait_for_activity_recreation_events(
+            lambda remaining: adb(serial, "logcat", "-d", "-b", "all", timeout=remaining),
+            package,
+            activity,
+            pid_before,
+            lambda remaining: app_pid(serial, package, timeout=remaining),
+            timeout_seconds=20.0,
+            poll_interval_seconds=0.15,
+        )
         pid_after = app_pid(serial, package)
         if pid_after != pid_before:
             raise RuntimeError(f"Activity recreation changed process PID: {pid_before} -> {pid_after}")

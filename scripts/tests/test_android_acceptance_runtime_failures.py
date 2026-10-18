@@ -106,5 +106,86 @@ class FontScaleRecreationTests(unittest.TestCase):
             android_acceptance.validate_activity_recreation_events(log, events)
 
 
+    def test_font_scale_poll_waits_for_ordered_replacement_after_stale_create(self):
+        old_create = (
+            "10-18 10:39:11.710 3230 3230 I wm_on_create_called: "
+            "[68170572,dev.gpui.mobile.GpuiInputActivity,performCreate,93]"
+        )
+        relaunch = (
+            "10-18 10:39:22.881 545 567 I wm_relaunch_resume_activity: "
+            "[0,68170572,45,dev.gpui.mobile.example/dev.gpui.mobile.GpuiInputActivity,40000000]"
+        )
+        destroy = (
+            "10-18 10:39:23.809 3230 3230 I wm_on_destroy_called: "
+            "[68170572,dev.gpui.mobile.GpuiInputActivity,performDestroy,112]"
+        )
+        new_create = (
+            "10-18 10:39:23.871 3230 3230 I wm_on_create_called: "
+            "[68170572,dev.gpui.mobile.GpuiInputActivity,performCreate,29]"
+        )
+        snapshots = [
+            "\n".join((old_create, relaunch, destroy)),
+            "\n".join((old_create, relaunch, destroy, new_create)),
+        ]
+        snapshots_last = snapshots[-1]
+        now = [0.0]
+
+        def read_logs(_timeout):
+            return snapshots.pop(0) if snapshots else snapshots_last
+
+        def sleep(duration):
+            now[0] += duration
+
+        logs, events = android_acceptance.wait_for_activity_recreation_events(
+            read_logs,
+            "dev.gpui.mobile.example",
+            "dev.gpui.mobile.GpuiInputActivity",
+            3230,
+            lambda _timeout: 3230,
+            timeout_seconds=1.0,
+            poll_interval_seconds=0.15,
+            clock=lambda: now[0],
+            sleep=sleep,
+        )
+        self.assertIn(new_create, logs)
+        android_acceptance.validate_activity_recreation_events(logs, events)
+
+    def test_font_scale_poll_times_out_when_only_pre_destroy_create_is_present(self):
+        log = """10-18 10:39:11.710 3230 3230 I wm_on_create_called: [68170572,dev.gpui.mobile.GpuiInputActivity,performCreate,93]
+10-18 10:39:22.881 545 567 I wm_relaunch_resume_activity: [0,68170572,45,dev.gpui.mobile.example/dev.gpui.mobile.GpuiInputActivity,40000000]
+10-18 10:39:23.809 3230 3230 I wm_on_destroy_called: [68170572,dev.gpui.mobile.GpuiInputActivity,performDestroy,112]"""
+        now = [0.0]
+
+        with self.assertRaisesRegex(RuntimeError, "timed out waiting for ordered Activity recreation"):
+            android_acceptance.wait_for_activity_recreation_events(
+                lambda _timeout: log,
+                "dev.gpui.mobile.example",
+                "dev.gpui.mobile.GpuiInputActivity",
+                3230,
+                lambda _timeout: 3230,
+                timeout_seconds=0.3,
+                poll_interval_seconds=0.15,
+                clock=lambda: now[0],
+                sleep=lambda duration: now.__setitem__(0, now[0] + duration),
+            )
+
+    def test_font_scale_poll_rejects_wrong_activity_record_token_after_destroy(self):
+        log = """10-18 10:39:22.881 545 567 I wm_relaunch_resume_activity: [0,68170572,45,dev.gpui.mobile.example/dev.gpui.mobile.GpuiInputActivity,40000000]
+10-18 10:39:23.809 3230 3230 I wm_on_destroy_called: [68170572,dev.gpui.mobile.GpuiInputActivity,performDestroy,112]
+10-18 10:39:23.871 3230 3230 I wm_on_create_called: [99999999,dev.gpui.mobile.GpuiInputActivity,performCreate,29]"""
+        with self.assertRaisesRegex(RuntimeError, "different or missing ActivityRecord tokens"):
+            android_acceptance.wait_for_activity_recreation_events(
+                lambda _timeout: log,
+                "dev.gpui.mobile.example",
+                "dev.gpui.mobile.GpuiInputActivity",
+                3230,
+                lambda _timeout: 3230,
+                timeout_seconds=1.0,
+                poll_interval_seconds=0.15,
+                clock=lambda: 0.0,
+                sleep=lambda _: None,
+            )
+
+
 if __name__ == "__main__":
     unittest.main()
