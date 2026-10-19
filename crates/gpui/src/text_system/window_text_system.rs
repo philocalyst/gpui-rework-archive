@@ -34,6 +34,11 @@ impl WindowTextSystem {
         }
     }
 
+    /// Changes whenever fonts are added, which can change the layout of any text.
+    pub(crate) fn font_generation(&self) -> u64 {
+        self.text_system.platform_text_system.font_generation()
+    }
+
     pub(crate) fn layout_index(&self) -> LineLayoutIndex {
         self.line_layout_cache.layout_index()
     }

@@ -92,6 +92,7 @@ pub const SCENE_BUFFER_LAYOUTS: &[SceneBufferLayout] = &[
         order,
         padding,
         bounds,
+        clip_bounds,
         content_mask,
         color,
         thickness,

@@ -2,6 +2,7 @@ use crate::elements::div::ScrollHandle;
 use crate::elements::text::{
     TruncationCandidate, text_layout_fits, truncate_with_measured_candidates,
 };
+use crate::taffy::MeasureKey;
 use crate::{
     App, AvailableSpace, Bounds, Display, InlineBidiScope, InlineBoxRequest, InlineLayout,
     InlineLayoutRequest, InlineTextMetrics, InlineTextStyle, LayoutId, Pixels, Point, Position,
@@ -54,6 +55,65 @@ struct InlineDocument {
     boxes: Vec<InlineBoxRequest>,
     box_layout_ids: Vec<LayoutId>,
     spans: Vec<InlineSpan>,
+}
+
+/// Documents are equal when they would lay out the same. Span directions resolve later, from
+/// nodes compared by the layout engine.
+impl PartialEq for InlineDocument {
+    fn eq(&self, other: &Self) -> bool {
+        self.text == other.text
+            && self.runs == other.runs
+            && self.text_styles == other.text_styles
+            && self.boxes == other.boxes
+            && self.spans.len() == other.spans.len()
+            && self.spans.iter().zip(&other.spans).all(|(span, other)| {
+                span.text_range == other.text_range
+                    && span.box_range == other.box_range
+                    && span.unicode_bidi == other.unicode_bidi
+            })
+    }
+}
+
+/// What a paragraph's size depends on, besides the space it gets, and the paragraph's
+/// measurement.
+struct ParagraphKey {
+    document: Rc<InlineDocument>,
+    text_style: TextStyle,
+    unicode_bidi: UnicodeBidi,
+    rem_size: Pixels,
+    scale_factor: f32,
+    font_generation: u64,
+    measurement: Rc<RefCell<Option<InlineParagraphMeasurement>>>,
+}
+
+impl MeasureKey for ParagraphKey {
+    fn same(&self, previous: &dyn MeasureKey) -> bool {
+        previous
+            .as_any()
+            .downcast_ref::<Self>()
+            .is_some_and(|previous| {
+                self.document == previous.document
+                    && self.text_style == previous.text_style
+                    && self.unicode_bidi == previous.unicode_bidi
+                    && self.rem_size == previous.rem_size
+                    && self.scale_factor == previous.scale_factor
+                    && self.font_generation == previous.font_generation
+            })
+    }
+
+    fn inherit(&self, previous: &dyn MeasureKey) -> bool {
+        let Some(previous) = previous.as_any().downcast_ref::<Self>() else {
+            return false;
+        };
+        let measurement = previous.measurement.borrow().clone();
+        let measured = measurement.is_some();
+        *self.measurement.borrow_mut() = measurement;
+        measured
+    }
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 impl InlineDocument {
@@ -168,6 +228,7 @@ impl InlineDocument {
     }
 }
 
+#[derive(Clone)]
 struct InlineParagraphMeasurement {
     truncate_width: Option<Pixels>,
     options: crate::TextLayoutOptions,
@@ -347,16 +408,31 @@ impl InlineParagraphCollector<'_> {
             x_height: self.window.text_system().x_height(font_id, font_size),
         };
 
+        // A paragraph keeps its layout only while its spans keep theirs, since their directions
+        // resolve later.
+        let key = document
+            .spans
+            .iter()
+            .all(|span| self.window.layout_inherited(span.layout_id))
+            .then(|| ParagraphKey {
+                document: document.clone(),
+                text_style: text_style.clone(),
+                unicode_bidi: self.unicode_bidi,
+                rem_size: self.window.rem_size(),
+                scale_factor: self.window.scale_factor(),
+                font_generation: self.window.text_system().font_generation(),
+                measurement: measurement.clone(),
+            });
         let measured_document = document.clone();
         let measurement_cache = measurement.clone();
         let unicode_bidi = self.unicode_bidi;
 
-        let layout_id = self.window.request_measured_layout(
-            Style {
-                display: Display::Block,
-                ..Style::default()
-            },
-            move |known_dimensions, available_space, window, _cx| {
+        let style = Style {
+            display: Display::Block,
+            ..Style::default()
+        };
+        let measure =
+            move |known_dimensions, available_space, window: &mut Window, _cx: &mut App| {
                 let (options, truncation) = TextLayout::layout_options(
                     &text_style,
                     known_dimensions,
@@ -402,8 +478,13 @@ impl InlineParagraphCollector<'_> {
                     });
 
                 size
-            },
-        );
+            };
+        let layout_id = match key {
+            Some(key) => self
+                .window
+                .request_keyed_measured_layout(style, key, measure),
+            None => self.window.request_measured_layout(style, measure),
+        };
 
         self.frame_state.flow_child_layout_ids.push(layout_id);
         self.frame_state.paragraphs.push(InlineParagraph {

@@ -252,6 +252,11 @@ impl Scene {
                 .flatten()
                 .unwrap_or_else(|| self.primitive_bounds.insert(clipped_bounds))
         };
+        self.push_ordered(primitive, order);
+    }
+
+    /// Stores `primitive` at `order`, updating the filter-group bookkeeping a marker carries.
+    fn push_ordered(&mut self, mut primitive: Primitive, order: u32) {
         match &mut primitive {
             Primitive::Shadow(shadow) => {
                 shadow.order = order;
@@ -321,12 +326,81 @@ impl Scene {
     ///
     /// Panics if `range` extends past the end of `prev_scene`'s paint operations.
     pub fn replay(&mut self, range: Range<usize>, prev_scene: &Scene) {
-        for operation in &prev_scene.paint_operations[range] {
-            match operation {
-                PaintOperation::Primitive(primitive) => self.insert_primitive(primitive.clone()),
-                PaintOperation::StartLayer(bounds) => self.push_layer(*bounds),
-                PaintOperation::EndLayer => self.pop_layer(),
+        self.replay_with(range, prev_scene, &mut None);
+    }
+
+    /// [`Scene::replay`], with the range's summary kept in `summary` for the next replay.
+    pub(crate) fn replay_with(
+        &mut self,
+        range: Range<usize>,
+        prev_scene: &Scene,
+        summary: &mut Option<ReplaySummary>,
+    ) {
+        let operations = &prev_scene.paint_operations[range];
+        if self.layer_stack.iter().any(Option::is_some) {
+            // Primitives in an open layer take its order, which a shift can't express.
+            for operation in operations {
+                match operation {
+                    PaintOperation::Primitive(primitive) => {
+                        self.insert_primitive(primitive.clone())
+                    }
+                    PaintOperation::StartLayer(bounds) => self.push_layer(*bounds),
+                    PaintOperation::EndLayer => self.pop_layer(),
+                }
             }
+            return;
+        }
+
+        // The range keeps the relative orders it was painted with, shifted as one block so it
+        // draws above whatever it overlaps here, and stands in the bounds tree as one leaf.
+        let Some(first_order) = operations.iter().find_map(|operation| match operation {
+            PaintOperation::Primitive(primitive) => Some(primitive.order()),
+            _ => None,
+        }) else {
+            self.paint_operations.extend(operations.iter().cloned());
+            return;
+        };
+        let ReplaySummary {
+            union,
+            span,
+            first_offset,
+            has_boundaries,
+        } = *summary.get_or_insert_with(|| ReplaySummary::new(operations));
+        let orders = first_order - first_offset..first_order - first_offset + span;
+        self.is_finished = false;
+        let below = if has_boundaries {
+            // Isolation markers must sort above everything painted so far.
+            self.primitive_bounds.max_order()
+        } else {
+            self.primitive_bounds.max_intersecting(&union)
+        };
+        let first = (below + 1).max(self.primitive_bounds.order_floor());
+        let shift = |order: u32| order - orders.start + first;
+        self.primitive_bounds
+            .insert_with_order(union, shift(orders.end));
+
+        self.paint_operations.reserve(operations.len());
+        for operation in operations {
+            let PaintOperation::Primitive(primitive) = operation else {
+                self.paint_operations.push(operation.clone());
+                continue;
+            };
+            let mut primitive = primitive.clone();
+            if self.is_in_filter_group()
+                && let Primitive::SubpixelSprite(sprite) = primitive
+            {
+                primitive = Primitive::MonochromeSprite(MonochromeSprite {
+                    order: sprite.order,
+                    padding: sprite.padding,
+                    bounds: sprite.bounds,
+                    content_mask: sprite.content_mask,
+                    color: sprite.color,
+                    tile: sprite.tile,
+                    transformation: sprite.transformation,
+                });
+            }
+            let order = shift(primitive.order());
+            self.push_ordered(primitive, order);
         }
     }
 
@@ -512,6 +586,53 @@ pub(crate) enum PrimitiveKind {
     FilterBoundaryEnd,
 }
 
+/// What [`Scene::replay`] needs to know about a range of paint operations. It doesn't change
+/// when the range is shifted as one block, so a view keeps it from one replay to the next.
+#[derive(Clone, Copy, Debug)]
+pub(crate) struct ReplaySummary {
+    union: Bounds<ScaledPixels>,
+    /// The highest draw order in the range minus the lowest.
+    span: u32,
+    /// The first primitive's draw order minus the lowest.
+    first_offset: u32,
+    has_boundaries: bool,
+}
+
+impl ReplaySummary {
+    /// Summarizes `operations`, which must contain a primitive.
+    fn new(operations: &[PaintOperation]) -> Self {
+        let mut union: Option<Bounds<ScaledPixels>> = None;
+        let (mut min_order, mut max_order) = (u32::MAX, 0);
+        let mut first = None;
+        let mut has_boundaries = false;
+        for operation in operations {
+            let PaintOperation::Primitive(primitive) = operation else {
+                continue;
+            };
+            let mut bounds = primitive
+                .paint_bounds()
+                .intersect(&primitive.content_mask().bounds);
+            if let Primitive::FilterBoundary(_) = primitive {
+                has_boundaries = true;
+                if bounds.is_empty() {
+                    bounds = *primitive.bounds();
+                }
+            }
+            union = Some(union.map_or(bounds, |union| union.union(&bounds)));
+            first.get_or_insert(primitive.order());
+            min_order = min_order.min(primitive.order());
+            max_order = max_order.max(primitive.order());
+        }
+        Self {
+            union: union.expect("a replayed range with a primitive"),
+            span: max_order - min_order,
+            first_offset: first.unwrap_or_default() - min_order,
+            has_boundaries,
+        }
+    }
+}
+
+#[derive(Clone)]
 pub(crate) enum PaintOperation {
     Primitive(Primitive),
     StartLayer(Bounds<ScaledPixels>),
@@ -571,6 +692,22 @@ impl Primitive {
             Primitive::Surface(surface) => &surface.bounds,
             Primitive::BackdropFilter(filter) => &filter.bounds,
             Primitive::FilterBoundary(boundary) => &boundary.bounds,
+        }
+    }
+
+    /// The draw order the scene assigned when the primitive was inserted.
+    fn order(&self) -> DrawOrder {
+        match self {
+            Primitive::Shadow(shadow) => shadow.order,
+            Primitive::Quad(quad) => quad.order,
+            Primitive::Path(path) => path.order,
+            Primitive::Underline(underline) => underline.order,
+            Primitive::MonochromeSprite(sprite) => sprite.order,
+            Primitive::SubpixelSprite(sprite) => sprite.order,
+            Primitive::PolychromeSprite(sprite) => sprite.order,
+            Primitive::Surface(surface) => surface.order,
+            Primitive::BackdropFilter(filter) => filter.order,
+            Primitive::FilterBoundary(boundary) => boundary.order,
         }
     }
 
@@ -1025,9 +1162,12 @@ pub struct Underline {
     pub order: DrawOrder,
     /// Padding for the GPU struct layout. [`crate::Window`] always sets it to `0`.
     pub padding: u32,
-    /// The line's rectangle, in scaled pixels.
+    /// The line's full rectangle, in scaled pixels. This remains the phase origin for wavy lines.
     pub bounds: Bounds<ScaledPixels>,
-    /// The region that clips this line.
+    /// The rectangle the line is clipped to, within `content_mask.bounds`. Narrowing it splits a
+    /// line around exclusions without moving a wavy line's phase or the content mask's fade.
+    pub clip_bounds: Bounds<ScaledPixels>,
+    /// The region that clips this line and supplies its edge fade.
     pub content_mask: ContentMask<ScaledPixels>,
     /// The color of the line.
     pub color: SceneHsla,

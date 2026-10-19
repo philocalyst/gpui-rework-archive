@@ -1049,7 +1049,11 @@ where
     }
 
     fn reuse(&mut self, previous: &mut Self, range: Range<usize>) {
-        for key in &previous.used[range] {
+        // A font change clears the previous frame, so a range recorded before it may be stale.
+        let Some(keys) = previous.used.get(range) else {
+            return;
+        };
+        for key in keys {
             if let Some(layout) = previous.entries.remove(key) {
                 self.entries.insert(key.clone(), layout);
             }
@@ -1103,10 +1107,31 @@ fn repaint_shaped_text_layout(
 
 #[derive(Clone, Default)]
 pub(crate) struct LineLayoutIndex {
-    font_generation: usize,
     lines_index: usize,
     shaped_texts_index: usize,
     inline_layouts_index: usize,
+}
+
+impl LineLayoutIndex {
+    /// Moves an index taken inside a range that started at `from` to the same place in a copy of
+    /// that range starting at `to`. These indices only decide which layouts stay cached, so an
+    /// index outside the range saturates instead of failing.
+    pub(crate) fn rebased(&self, from: &Self, to: &Self) -> Self {
+        let shift = |index: usize, from: usize, to: usize| index.saturating_sub(from) + to;
+        Self {
+            lines_index: shift(self.lines_index, from.lines_index, to.lines_index),
+            shaped_texts_index: shift(
+                self.shaped_texts_index,
+                from.shaped_texts_index,
+                to.shaped_texts_index,
+            ),
+            inline_layouts_index: shift(
+                self.inline_layouts_index,
+                from.inline_layouts_index,
+                to.inline_layouts_index,
+            ),
+        }
+    }
 }
 
 impl LineLayoutCache {
@@ -1121,7 +1146,6 @@ impl LineLayoutCache {
     }
 
     pub fn layout_index(&self) -> LineLayoutIndex {
-        let font_generation = self.clear_if_font_generation_changed();
         let frame = self.current_frame.read();
         LineLayoutIndex {
             lines_index: frame.lines.used.len(),
@@ -1145,14 +1169,8 @@ impl LineLayoutCache {
     }
 
     pub fn reuse_layouts(&self, range: Range<LineLayoutIndex>) {
-        let font_generation = self.clear_if_font_generation_changed();
-        if range.start.font_generation != font_generation
-            || range.end.font_generation != font_generation
-        {
-            return;
-        }
-        let mut current_frame = &mut *self.current_frame.write();
         let mut previous_frame = &mut *self.previous_frame.lock();
+        let mut current_frame = &mut *self.current_frame.write();
 
         current_frame.lines.reuse(
             &mut previous_frame.lines,
@@ -1169,10 +1187,6 @@ impl LineLayoutCache {
     }
 
     pub fn truncate_layouts(&self, index: LineLayoutIndex) {
-        let font_generation = self.clear_if_font_generation_changed();
-        if index.font_generation != font_generation {
-            return;
-        }
         let mut current_frame = &mut *self.current_frame.write();
         current_frame.lines.used.truncate(index.lines_index);
         current_frame
@@ -1186,9 +1200,8 @@ impl LineLayoutCache {
     }
 
     pub fn finish_frame(&self) {
-        let _font_generation = self.clear_if_font_generation_changed();
-        let mut curr_frame = self.current_frame.write();
         let mut prev_frame = self.previous_frame.lock();
+        let mut curr_frame = self.current_frame.write();
         std::mem::swap(&mut *prev_frame, &mut *curr_frame);
         curr_frame.lines.clear();
         curr_frame.shaped_texts.clear();
@@ -1333,24 +1346,6 @@ impl LineLayoutCache {
         current_frame.inline_layouts.insert(key, layout.clone());
 
         layout
-    }
-
-    fn clear_if_font_generation_changed(&self) -> usize {
-        let font_generation = self.font_generation.load(Ordering::Acquire);
-        if self.cached_font_generation.load(Ordering::Acquire) == font_generation {
-            return font_generation;
-        }
-
-        let mut current_frame = self.current_frame.write();
-        if self.cached_font_generation.load(Ordering::Acquire) == font_generation {
-            return font_generation;
-        }
-
-        *current_frame = FrameCache::default();
-        *self.previous_frame.lock() = FrameCache::default();
-        self.cached_font_generation
-            .store(font_generation, Ordering::Release);
-        font_generation
     }
 }
 

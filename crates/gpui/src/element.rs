@@ -170,6 +170,8 @@ use std::{
 /// });
 ///
 /// log.0.borrow_mut().clear();
+/// // Notify the view so the next draw renders it again instead of reusing its output.
+/// window.update(|_, _, cx| cx.notify());
 /// window.draw();
 /// assert_eq!(*log.0.borrow(), ["request_layout", "prepaint", "paint"]);
 /// ```
@@ -348,7 +350,8 @@ impl<T: IntoElement> FluentBuilder for T {}
 /// GPUI calls `render` each time it draws the window and reaches this view. The view keeps its
 /// state in `self`, not in the elements it returns. Those elements are consumed by the frame and
 /// dropped, and the next call builds new ones. So `render` should only read state and build
-/// elements from it. [`Entity::cached`](crate::Entity::cached) skips the call while the view is unchanged.
+/// elements from it. GPUI skips the call while nothing the view read has changed; see
+/// [retained view rendering](crate::_documentation::concepts::retained_rendering).
 ///
 /// # Example
 ///
@@ -380,6 +383,8 @@ impl<T: IntoElement> FluentBuilder for T {}
 /// });
 ///
 /// renders.set(0);
+/// // Notify the view so the next draw renders it again instead of reusing its output.
+/// window.update(|_, _, cx| cx.notify());
 /// window.draw();
 /// assert_eq!(renders.get(), 1);
 /// ```
@@ -450,6 +455,8 @@ impl Render for Empty {
 /// });
 ///
 /// renders.set(0);
+/// // Notify the view so the next draw renders it again instead of reusing its output.
+/// window.update(|_, _, cx| cx.notify());
 /// window.draw();
 /// assert_eq!(renders.get(), 1);
 /// ```
@@ -519,14 +526,79 @@ pub trait ParentElement {
     }
 }
 
-/// Identifies one element across frames: the path of [`ElementId`]s from the window's root to it.
+/// A globally unique identifier for an element, used to track state across frames.
 ///
-/// GPUI passes this to the phase methods of an element that has an [`Element::id`]. Pass it to
-/// [`Window::with_element_state`] to read and write state that belongs to the element. Two
-/// elements share a `GlobalElementId` only when their id paths are equal.
-#[derive(Deref, DerefMut, Clone, Default, Debug, Eq, PartialEq, Hash)]
-pub struct GlobalElementId(pub(crate) Arc<[ElementId]>);
+/// The hash of the id path is computed once, when the id is built. Every
+/// element with an id is looked up in the element-state maps of two frames
+/// and recorded as accessed on every frame it is drawn, and each of those
+/// hashes the whole path — every ancestor's id, string names byte by byte —
+/// so on a deep tree the hashing alone was a visible share of a frame.
+#[derive(Clone, Debug)]
+pub struct GlobalElementId {
+    ids: Arc<[ElementId]>,
+    hash: u64,
+}
 
+/// The hash of an empty id path; every path hash is folded from it with
+/// [`extend_path_hash`], one id at a time, so the window can keep the hash
+/// of each prefix of its id stack and never re-hash a path.
+pub(crate) const EMPTY_PATH_HASH: u64 = 0;
+
+/// The hash of the path `prefix` + `id`, given the hash of `prefix`.
+pub(crate) fn extend_path_hash(prefix: u64, id: &ElementId) -> u64 {
+    use std::hash::{Hash, Hasher};
+    let mut hasher = collections::FxHasher::with_seed(prefix as usize);
+    id.hash(&mut hasher);
+    hasher.finish()
+}
+
+impl GlobalElementId {
+    pub(crate) fn new(ids: &[ElementId]) -> Self {
+        let hash = ids.iter().fold(EMPTY_PATH_HASH, extend_path_hash);
+        Self::with_hash(ids, hash)
+    }
+
+    /// `ids` with its hash already known, as the window's id stack keeps it.
+    pub(crate) fn with_hash(ids: &[ElementId], hash: u64) -> Self {
+        debug_assert_eq!(hash, ids.iter().fold(EMPTY_PATH_HASH, extend_path_hash));
+        Self {
+            ids: Arc::from(ids),
+            hash,
+        }
+    }
+
+    pub(crate) fn accesskit_node_id(&self) -> accesskit::NodeId {
+        accesskit::NodeId(self.hash)
+    }
+}
+
+impl Default for GlobalElementId {
+    fn default() -> Self {
+        Self::new(&[])
+    }
+}
+
+impl std::ops::Deref for GlobalElementId {
+    type Target = [ElementId];
+
+    fn deref(&self) -> &Self::Target {
+        &self.ids
+    }
+}
+
+impl PartialEq for GlobalElementId {
+    fn eq(&self, other: &Self) -> bool {
+        self.hash == other.hash && (Arc::ptr_eq(&self.ids, &other.ids) || self.ids == other.ids)
+    }
+}
+
+impl Eq for GlobalElementId {}
+
+impl std::hash::Hash for GlobalElementId {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        state.write_u64(self.hash);
+    }
+}
 impl Display for GlobalElementId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for (i, element_id) in self.ids.iter().enumerate() {

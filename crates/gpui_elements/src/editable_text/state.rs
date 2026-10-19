@@ -261,6 +261,27 @@ impl EditableTextState {
     pub(super) fn accessibility_text_metrics(&self) -> &AccessibilityTextMetrics {
         &self.accessibility_text_metrics
     }
+
+    /// Applies AccessKit Unicode-scalar selection offsets to the UTF-8 editor.
+    pub(super) fn set_accessibility_selection(
+        &mut self,
+        anchor_scalar: usize,
+        focus_scalar: usize,
+        cx: &mut Context<Self>,
+    ) {
+        let offsets = &self.accessibility_text_metrics.byte_offsets;
+        let last = offsets.len().saturating_sub(1);
+        let anchor = offsets[anchor_scalar.min(last)];
+        let focus = offsets[focus_scalar.min(last)];
+        self.set_selection(CaretSelection {
+            anchor: CaretPosition::attached_to_next_cluster(anchor),
+            caret: CaretPosition::attached_to_next_cluster(focus),
+        });
+        self.scroll_to_caret();
+        cx.emit(CaretNotify::PauseBlinking);
+        self.emit_text_changed(cx);
+        cx.notify();
+    }
 }
 
 pub(super) struct AccessibilityTextMetrics {
@@ -1001,6 +1022,14 @@ impl EditableTextState {
 
 // IME handler
 impl EntityInputHandler for EditableTextState {
+    fn text_length_utf16(
+        &mut self,
+        _window: &mut Window,
+        _cx: &mut Context<Self>,
+    ) -> Option<usize> {
+        Some(self.storage.len_utf16())
+    }
+
     fn text_for_range(
         &mut self,
         range_utf16: Range<usize>,
@@ -1026,8 +1055,27 @@ impl EntityInputHandler for EditableTextState {
         Some(UTF16Selection {
             range: self.storage.utf_range_8to16(&selection_range),
             reversed: self.selection_movement.result.endpoint_ordering()
-                == std::cmp::Ordering::Greater,
+                == std::cmp::Ordering::Less,
         })
+    }
+
+    fn set_selected_text_range(
+        &mut self,
+        range_utf16: Range<usize>,
+        _window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        let range_utf8 = self.storage.utf_range_16to8(&range_utf16);
+        // Platform ranges are directed anchor..head ranges. Preserve their
+        // endpoint order when mapping them to the editor's anchor and caret.
+        self.set_selection(CaretSelection {
+            anchor: CaretPosition::attached_to_next_cluster(range_utf8.start),
+            caret: CaretPosition::attached_to_next_cluster(range_utf8.end),
+        });
+        self.scroll_to_caret();
+        cx.emit(CaretNotify::PauseBlinking);
+        self.emit_text_changed(cx);
+        cx.notify();
     }
 
     fn marked_text_range(
@@ -1119,8 +1167,8 @@ impl EntityInputHandler for EditableTextState {
         window: &mut Window,
         _cx: &mut Context<Self>,
     ) -> Option<usize> {
-        let point =
-            point + self.layout_data.scroll_bounds.origin - self.layout_data.document_offset;
+        let point = point - self.layout_data.text_origin + self.layout_data.scroll_bounds.origin
+            - self.layout_data.document_offset;
         let index = self.index_for_pixel_point(point, window.line_height());
         Some(self.storage.utf_offset_8to16(index))
     }
@@ -1523,6 +1571,22 @@ mod tests {
             metrics.character_indices_for_selection(CaretSelection::from(5)),
             (2, 2)
         );
+    }
+
+    #[gpui::test]
+    fn text_length_utf16_reports_empty_ascii_cjk_and_supplementary_text(cx: &mut TestAppContext) {
+        for (text, expected) in [
+            ("", 0),
+            ("abc", 3),
+            ("\u{6f22}\u{5b57}", 2),
+            ("\u{1f642}", 2),
+            ("e\u{301}", 2),
+        ] {
+            let view = create_test_input(cx, text, 0);
+            update_movement_input(view, cx, |input, window, cx| {
+                assert_eq!(input.text_length_utf16(window, cx), Some(expected));
+            });
+        }
     }
 
     #[gpui::test]
@@ -2927,6 +2991,31 @@ mod tests {
             assert_eq!(
                 input.selected_text_range(false, window, cx).unwrap().range,
                 3..3
+            );
+
+            // Platform selections use UTF-16 offsets. Preserve anchor/head
+            // direction across non-ASCII and supplementary-plane characters.
+            input.set_selected_text_range(1..3, window, cx);
+            let forward = input.selected_text_range(false, window, cx).unwrap();
+            assert_eq!(forward.range, 1..3);
+            assert!(!forward.reversed);
+            assert_eq!(input.caret_selection().anchor.index, 1);
+            assert_eq!(input.caret_selection().caret.index, 7);
+
+            // A backward platform selection runs from its anchor down to its caret.
+            input.set_selected_text_range(std::ops::Range { start: 3, end: 1 }, window, cx);
+            let reverse = input.selected_text_range(false, window, cx).unwrap();
+            assert_eq!(reverse.range, 1..3);
+            assert!(reverse.reversed);
+            assert_eq!(input.caret_selection().anchor.index, 7);
+            assert_eq!(input.caret_selection().caret.index, 1);
+
+            input.set_selected_text_range(1..3, window, cx);
+            input.replace_text_in_range(None, "", window, cx);
+            assert_eq!(input.as_str(), "AB");
+            assert_eq!(
+                input.selected_text_range(false, window, cx).unwrap().range,
+                1..1
             );
         });
     }

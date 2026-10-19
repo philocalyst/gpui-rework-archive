@@ -2293,9 +2293,13 @@ fn face_families<'a>(
 
 impl PlatformTextSystem for ParleyTextSystem {
     fn add_fonts(&self, fonts: Vec<Cow<'static, [u8]>>) -> Result<()> {
+        // Borrowed data, such as an embedded or memory-mapped font, is used in place.
         let blobs = fonts
             .into_iter()
-            .map(|bytes| fontique::Blob::from(bytes.into_owned()))
+            .map(|bytes| match bytes {
+                Cow::Borrowed(bytes) => fontique::Blob::new(std::sync::Arc::new(bytes)),
+                Cow::Owned(bytes) => fontique::Blob::from(bytes),
+            })
             .collect::<Vec<_>>();
 
         {

@@ -40,6 +40,28 @@ pub fn editable_text(id: impl Into<ElementId>) -> EditableTextElement {
     this = this.key_context(DEFAULT_INPUT_CONTEXT);
     this.register_actions();
 
+    // AccessKit uses Unicode-scalar offsets for the synthetic text run, while
+    // the editor stores UTF-8 byte offsets. Keep the mapping in state.
+    let state_entity = this.state_entity.clone();
+    this = this.on_a11y_action(
+        accesskit::Action::SetTextSelection,
+        move |data, _window, cx| {
+            let Some(accesskit::ActionData::SetTextSelection(selection)) = data else {
+                return;
+            };
+            let Some(entity) = state_entity.borrow().upgrade() else {
+                return;
+            };
+            entity.update(cx, |state, cx| {
+                state.set_accessibility_selection(
+                    selection.anchor.character_index,
+                    selection.focus.character_index,
+                    cx,
+                );
+            });
+        },
+    );
+
     this
 }
 
@@ -258,6 +280,7 @@ impl InteractivityPrepaint {
 
 struct AccessibilityPrepaint {
     text_run: accesskit::Node,
+    value: String,
     anchor: usize,
     focus: usize,
 }
@@ -293,6 +316,12 @@ impl Element for EditableTextElement {
     }
 
     fn write_a11y_info(&self, node: &mut accesskit::Node) {
+        // Keep the editable-text element's own placeholder as the default, while allowing an
+        // explicit aria-placeholder from Interactivity to override it.
+        if let Some(placeholder) = &self.placeholder {
+            node.set_placeholder(placeholder.to_string());
+        }
+        self.interactivity.write_a11y_info(node);
         if !self.accepts_input {
             node.set_read_only();
         }
@@ -309,6 +338,9 @@ impl Element for EditableTextElement {
             .expect("accessibility data was prepared while building the tree");
         let text_run_id = builder.synthetic_node_id("text");
         builder.push_child(text_run_id, accessibility.text_run);
+        // Android and other platform adapters read editable content from the TextInput node's
+        // value. Keep the TextRun child as well for character-level selection/accessibility.
+        builder.parent_node().set_value(accessibility.value);
         builder
             .parent_node()
             .set_text_selection(accesskit::TextSelection {
@@ -458,6 +490,7 @@ impl Element for EditableTextElement {
                     // this is converted into positive for usage with bounds
                     state.layout_data.scroll_bounds =
                         Bounds::new(-scroll_offset, inner_bounds.size);
+                    state.layout_data.text_origin = inner_bounds.origin;
                 });
                 let document_offset = request_layout.state.read(cx).layout_data.document_offset;
                 InteractivityPrepaint {
@@ -474,12 +507,14 @@ impl Element for EditableTextElement {
         let accessibility = window.is_a11y_active().then(|| {
             let metrics = state.accessibility_text_metrics();
             let (anchor, focus) = metrics.character_indices_for_selection(state.caret_selection());
+            let value = state.as_str().to_owned();
             let mut text_run = accesskit::Node::new(accesskit::Role::TextRun);
-            text_run.set_value(state.as_str());
+            text_run.set_value(value.clone());
             text_run.set_character_lengths(metrics.character_lengths.clone());
 
             AccessibilityPrepaint {
                 text_run,
+                value,
                 anchor,
                 focus,
             }
@@ -629,6 +664,7 @@ impl EditableTextElement {
 
                 cx.stop_propagation();
                 window.focus(&focus_handle, cx);
+                window.request_virtual_keyboard();
 
                 let text_position = event.position - document_origin;
                 state.update(cx, |state, cx| {
@@ -786,6 +822,7 @@ impl PrelayoutState {
                     accepts_input: self.accepts_input,
                     // updated during prepaint
                     scroll_bounds: Bounds::default(),
+                    text_origin: Point::default(),
                     state: EditableTextLayoutState {
                         size: Some(size),
                         last_seen_storage_version: self.storage_version,
@@ -927,8 +964,9 @@ mod tests {
     use gpui::{
         AppContext as _, CaretPosition, CaretSelection, Context, EntityInputHandler,
         HeadlessAppContext, KeyDownEvent, KeyUpEvent, Keystroke, LayoutDirection, Modifiers,
-        ModifiersChangedEvent, NavigationDirection, PlatformInput, PlatformTextSystem, Render,
-        ScaledPixels, TestTextSystem, WindowHandle, div, hsla, prelude::*, rgba,
+        ModifiersChangedEvent, MouseButton, NavigationDirection, PlatformInput, PlatformTextSystem,
+        Render, ScaledPixels, TestAppContext, TestTextSystem, WindowHandle, div, hsla, prelude::*,
+        rgba,
     };
     use gpui_parley::{ParleyTextSystem, SystemFonts};
     use std::{borrow::Cow, collections::HashSet, sync::Arc};
@@ -939,6 +977,252 @@ mod tests {
     const CARET_COLOR: Hsla = hsla(0.95, 0.8, 0.6, 1.0);
     const TEXT_COLOR: Hsla = hsla(0.0, 0.0, 0.1, 1.0);
     const MARKED_COLOR: Hsla = hsla(0.55, 0.8, 0.6, 1.0);
+
+    struct AccessibleInputView {
+        input: Entity<EditableTextState>,
+        accepts_input: bool,
+    }
+
+    impl Render for AccessibleInputView {
+        fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+            text_input("a11y-editor")
+                .debug_selector(|| "a11y-editor".to_string())
+                .state(self.input.downgrade())
+                .aria_label("Editor")
+                .placeholder("Type here")
+                .when(!self.accepts_input, |input| input.accepts_input(false))
+        }
+    }
+
+    #[gpui::test]
+    fn clicking_an_already_focused_editor_requests_the_virtual_keyboard_again(
+        cx: &mut TestAppContext,
+    ) {
+        let (view, window) = cx.add_window_view(|_, cx| {
+            let input = cx.new(|cx| EditableTextState::new(StringStorage::from("value"), cx));
+            AccessibleInputView {
+                input,
+                accepts_input: true,
+            }
+        });
+        let bounds = window
+            .debug_bounds("a11y-editor")
+            .expect("the editor has debug bounds after the first frame");
+        let position = point(
+            bounds.origin.x + bounds.size.width / 2.,
+            bounds.origin.y + bounds.size.height / 2.,
+        );
+
+        window.simulate_click(position, Modifiers::none());
+        let initial_requests = window.virtual_keyboard_requests();
+        assert!(
+            initial_requests > 0,
+            "the initial editor click requests the keyboard"
+        );
+        assert!(
+            window.update(|window, app| {
+                view.read(app).input.focus_handle(app).is_focused(window)
+            })
+        );
+
+        window.update(|window, _| window.dismiss_virtual_keyboard());
+        assert_eq!(window.virtual_keyboard_requests(), initial_requests);
+        assert!(
+            window.update(|window, app| {
+                view.read(app).input.focus_handle(app).is_focused(window)
+            })
+        );
+
+        window.simulate_click(position, Modifiers::none());
+        assert_eq!(
+            window.virtual_keyboard_requests(),
+            initial_requests + 1,
+            "a same-editor user click must request the keyboard after dismissal"
+        );
+    }
+
+    #[gpui::test]
+    fn clicking_a_read_only_editor_does_not_request_the_virtual_keyboard(cx: &mut TestAppContext) {
+        let (_, window) = cx.add_window_view(|_, cx| {
+            let input = cx.new(|cx| EditableTextState::new(StringStorage::from("value"), cx));
+            AccessibleInputView {
+                input,
+                accepts_input: false,
+            }
+        });
+        let bounds = window
+            .debug_bounds("a11y-editor")
+            .expect("the editor has debug bounds after the first frame");
+        let position = point(
+            bounds.origin.x + bounds.size.width / 2.,
+            bounds.origin.y + bounds.size.height / 2.,
+        );
+
+        window.simulate_click(position, Modifiers::none());
+        assert_eq!(window.virtual_keyboard_requests(), 0);
+    }
+
+    #[test]
+    fn editable_text_a11y_node_exposes_live_value_and_selection() {
+        let value = "A\u{732B}\u{1F600}";
+        let mut cx = HeadlessAppContext::new(Arc::new(TestTextSystem));
+        let window = cx
+            .open_window(size(px(320.0), px(120.0)), |_window, cx| {
+                let input = cx.new(|cx| {
+                    let mut state = EditableTextState::new(StringStorage::from(value), cx);
+                    state.select_to(value.len(), cx);
+                    state
+                });
+                cx.new(|_| AccessibleInputView {
+                    input,
+                    accepts_input: true,
+                })
+            })
+            .unwrap();
+        let any_window = window.into();
+        let update = cx
+            .update_window(any_window, |_, window, cx| {
+                window.set_a11y_forced(true);
+                window.draw(cx).clear(cx);
+                window.a11y_tree().unwrap().clone()
+            })
+            .unwrap();
+
+        let (_, input_node) = update
+            .nodes
+            .iter()
+            .find(|(_, node)| node.role() == accesskit::Role::TextInput)
+            .expect("editable text input should be present in the a11y tree");
+        assert_eq!(input_node.label(), Some("Editor"));
+        assert_eq!(input_node.value(), Some(value));
+        assert_eq!(input_node.placeholder(), Some("Type here"));
+        assert!(!input_node.is_read_only());
+
+        let selection = input_node
+            .text_selection()
+            .expect("text selection is exposed");
+        let (text_run_id, text_run) = update
+            .nodes
+            .iter()
+            .find(|(id, node)| {
+                *id == selection.focus.node && node.role() == accesskit::Role::TextRun
+            })
+            .expect("selection points into the text run");
+        assert_eq!(text_run.value(), Some(value));
+        assert_eq!(selection.focus.node, *text_run_id);
+        assert_eq!(selection.focus.character_index, value.chars().count());
+    }
+
+    #[test]
+    fn editable_text_a11y_selection_action_updates_read_only_editor_in_scalar_units() {
+        let value = "A\u{732B}\u{1F600}B";
+        let mut cx = HeadlessAppContext::new(Arc::new(TestTextSystem));
+        let input_slot = Rc::new(RefCell::new(None));
+        let input_capture = input_slot.clone();
+        let window = cx
+            .open_window(size(px(320.0), px(120.0)), move |_window, cx| {
+                let input = cx.new(|cx| {
+                    let mut state = EditableTextState::new(StringStorage::from(value), cx);
+                    state.select_to(value.len(), cx);
+                    state
+                });
+                *input_capture.borrow_mut() = Some(input.clone());
+                cx.new(|_| AccessibleInputView {
+                    input,
+                    accepts_input: false,
+                })
+            })
+            .unwrap();
+        let any_window = window.into();
+        let tree = cx
+            .update_window(any_window, |_, window, cx| {
+                window.set_a11y_forced(true);
+                window.draw(cx).clear(cx);
+                window.a11y_tree().unwrap().clone()
+            })
+            .unwrap();
+        let (input_id, input_node) = tree
+            .nodes
+            .iter()
+            .find(|(_, node)| node.role() == accesskit::Role::TextInput)
+            .map(|(id, node)| (*id, node))
+            .expect("read-only editor remains in the a11y tree");
+        assert!(input_node.is_read_only());
+        assert_eq!(input_node.value(), Some(value));
+        let initial_selection = input_node
+            .text_selection()
+            .expect("editable text exposes a selection");
+        let text_run_id = initial_selection.focus.node;
+        assert!(
+            tree.nodes
+                .iter()
+                .find(|(id, node)| *id == text_run_id && node.role() == accesskit::Role::TextRun)
+                .is_some()
+        );
+
+        // AccessKit character_index counts Unicode scalars. In this string,
+        // scalar index 3 maps past the supplementary-plane character at byte 8.
+        let requested = accesskit::TextSelection {
+            anchor: accesskit::TextPosition {
+                node: text_run_id,
+                character_index: 3,
+            },
+            focus: accesskit::TextPosition {
+                node: text_run_id,
+                character_index: 1,
+            },
+        };
+        let updated_tree = cx
+            .update_window(any_window, |_, window, cx| {
+                window.perform_a11y_action(
+                    input_id,
+                    accesskit::Action::SetTextSelection,
+                    Some(accesskit::ActionData::SetTextSelection(requested)),
+                    cx,
+                );
+                window.draw(cx).clear(cx);
+                window.a11y_tree().unwrap().clone()
+            })
+            .unwrap();
+
+        let input = input_slot.borrow().as_ref().unwrap().clone();
+        cx.update(|cx| {
+            let state = input.read(cx);
+            let selection = state.caret_selection();
+            assert_eq!(selection.anchor.index, 8);
+            assert_eq!(selection.caret.index, 1);
+            assert_eq!(state.selected_byte_range(), 1..8);
+            assert_eq!(state.as_str(), value);
+        });
+        let node = updated_tree
+            .nodes
+            .iter()
+            .find(|(id, _)| *id == input_id)
+            .map(|(_, node)| node)
+            .unwrap();
+        assert!(node.is_read_only());
+        assert_eq!(node.value(), Some(value));
+        let selection = node.text_selection().unwrap();
+        assert_eq!(selection.anchor.character_index, 3);
+        assert_eq!(selection.focus.character_index, 1);
+    }
+
+    #[test]
+    fn editable_text_forwards_a11y_label_and_placeholder() {
+        let element = text_input("editor")
+            .aria_label("Editor")
+            .placeholder("Type here")
+            .accepts_input(false);
+        let role = element.a11y_role();
+        let mut node = accesskit::Node::new(role.expect("editable text has an input role"));
+
+        element.write_a11y_info(&mut node);
+
+        assert_eq!(role, Some(accesskit::Role::TextInput));
+        assert_eq!(node.label(), Some("Editor"));
+        assert_eq!(node.placeholder(), Some("Type here"));
+        assert!(node.is_read_only());
+    }
 
     struct BidiInputView {
         input: Entity<EditableTextState>,
@@ -1105,6 +1389,16 @@ mod tests {
 
         fn point(&mut self, idx: usize) -> Point<Pixels> {
             self.point_for_caret(CaretPosition::attached_to_next_cluster(idx))
+        }
+
+        fn platform_index_at(&mut self, point: Point<Pixels>) -> Option<usize> {
+            self.cx
+                .update_window(self.window.into(), |_view, window, cx| {
+                    self.input.update(cx, |state, cx| {
+                        state.character_index_for_point(point, window, cx)
+                    })
+                })
+                .unwrap()
         }
 
         fn update_input(
@@ -1572,6 +1866,29 @@ mod tests {
         );
         assert_eq!(document_offset, Point::default());
         assert_eq!(scroll.x, Pixels::ZERO);
+    }
+
+    #[test]
+    fn platform_input_points_are_translated_into_padded_scrolled_text_coordinates() {
+        let text = "aébcdefghijklmnopqrstuvwxyz";
+        let mut fixture = BidiInputFixture::new(text, 18.0, 140.0, false, 1.0);
+        let caret_byte = "aébcdefghijk".len();
+        let expected_utf16 = text[..caret_byte].encode_utf16().count();
+
+        let position = fixture.point(caret_byte);
+        assert_eq!(
+            fixture.platform_index_at(position),
+            Some(expected_utf16),
+            "window-coordinate point should map through the padded text origin"
+        );
+
+        fixture.scroll(point(px(20.0), px(0.0)));
+        let position = fixture.point(caret_byte);
+        assert_eq!(
+            fixture.platform_index_at(position),
+            Some(expected_utf16),
+            "window-coordinate point should also account for horizontal scrolling"
+        );
     }
 
     #[test]
