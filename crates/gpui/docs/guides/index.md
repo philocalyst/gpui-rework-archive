@@ -7,6 +7,7 @@ when the implementation model matters.
 **Getting set up**
 
 * [Start a project](guides::start_a_project)
+* [Build for iOS and Android](guides::mobile)
 * [Run on the web](guides::web)
 * [Reload code while the app runs](guides::hot_reload)
 

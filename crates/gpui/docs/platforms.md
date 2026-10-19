@@ -79,6 +79,26 @@ be denied or a system service absent. Depending on the API, an unsupported call
 returns an error, returns `None`, or does nothing. The [platform services guide](crate::_documentation::guides::platform_services)
 shows how to handle those outcomes and retain asynchronous operations.
 
+## iOS and Android
+
+The mobile backends run the same views as the desktop ones:
+
+| Target | Platform crate | Windowing | GPU | Glyph rasterization |
+| --- | --- | --- | --- | --- |
+| iOS | `gpui_ios` | UIKit | Metal | Core Text |
+| Android | `gpui_mobile` | `NativeActivity` | wgpu over Vulkan, or OpenGL ES | Swash |
+
+Both deliver touch input, compose text through the system keyboard and expose an
+AccessKit accessibility tree. [`Window::insets`] reports the safe area and the
+keyboard separately, so a view can pad for either. iOS supports one connected
+`UIWindowScene` at a time. On Android, GPUI falls back to OpenGL ES when Vulkan
+can't build its pipelines.
+
+Android 13 and newer ship an emoji font with COLRv1 color glyphs, which GPUI
+can't rasterize. Bundle an emoji font with bitmap glyphs, as the example app
+does. [Build for iOS and Android](crate::_documentation::guides::mobile) covers
+the toolchains, the example app and the entry points.
+
 ## Browser builds
 
 The browser backend draws into one canvas filling the page. It uses wgpu with

@@ -31,11 +31,11 @@ impl Counter {
 ```
 
 Notify the entity that owns the changed state. Notifying a view that happens to
-render the model does not invalidate the model or notify its observers. The same
-rule matters for an [`Entity::cached`] subtree: reading another entity does not
-register a cache dependency, so observe that model and notify the cached view.
-[The frame](crate::_documentation::concepts::the_frame#rendering-less) explains
-that distinction and the other cache invalidation conditions.
+render the model does not invalidate the model or notify its observers. Views
+that read the model render again when the model notifies; a view that reads
+nothing that changed keeps the output it drew before.
+[Retained view rendering](crate::_documentation::concepts::retained_rendering)
+lists what a view depends on.
 
 ## "cannot update … while it is already being updated"
 

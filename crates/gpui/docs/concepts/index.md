@@ -15,7 +15,9 @@ explains the `cx` passed to a handler and how that access changes across an
 A later draw turns the current counter value into elements. [Elements, components
 and views](crate::_documentation::concepts::elements) distinguishes those values
 from the state they retain. [The frame](crate::_documentation::concepts::the_frame)
-follows the result through layout, hit testing and paint. [Layout and style](crate::_documentation::concepts::layout_and_style)
+follows the result through layout, hit testing and paint, and [retained view
+rendering](crate::_documentation::concepts::retained_rendering) explains which of
+that work a view that didn't change skips. [Layout and style](crate::_documentation::concepts::layout_and_style)
 then supplies the rules for each box's size and position, including units,
 constraints, flexbox, grid and overflow.
 

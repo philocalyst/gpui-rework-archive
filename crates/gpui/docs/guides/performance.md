@@ -64,75 +64,34 @@ histograms, for logging or benchmarks. It has the time from the first change to
 the frame being presented, the time spent in `draw`, and the interval between
 frames while the window is animating.
 
-## Cache a view that doesn't change
+## Reuse a view that didn't change
 
-When a view's output depends only on its own state, you can keep its rendered
-subtree between frames. [`Entity::cached`] does this. It takes the style that
-lays the view out:
+A view keeps what it drew between frames. When a later frame draws the window,
+GPUI skips the `render` call of every view where nothing it read has changed,
+and reuses that view's layout and painted output. Passing an [`Entity`] or
+[`AnyView`] as a child is enough; you don't opt in.
 
-```rust
-use gpui::{Context, Entity, Render, StyleRefinement, Window, div, prelude::*, px};
+GPUI records the entities and globals a view reads while it renders, prepaints
+and paints, including reads made by the views nested in it. A view renders again
+on the next frame when one of these happens:
 
-struct Sidebar {
-    items: Vec<&'static str>,
-}
+- Its own entity, or an entity it read, is notified with [`Context::notify`].
+- A global it read is updated.
+- It's drawn with a different size, position, content mask or text direction,
+  or its inherited text style, rem size or scale factor changes.
+- The window is refreshed with [`Window::refresh`].
 
-impl Render for Sidebar {
-    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
-        div().size_full().children(self.items.iter().map(|item| div().child(*item)))
-    }
-}
-
-struct Root {
-    sidebar: Entity<Sidebar>,
-}
-
-impl Render for Root {
-    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
-        div()
-            .size(px(800.))
-            .child(
-                self.sidebar
-                    .clone()
-                    .cached(StyleRefinement::default().size_full()),
-            )
-    }
-}
-```
-
-A cached view is rendered again when one of these happens:
-
-- Its entity is notified with [`Context::notify`]. Calling `cx.notify()` in the
-  view itself is the usual case.
-- Its bounds, its content mask, its text style, its text direction or its Unicode
-  bidirectional text mode change.
-- The window is refreshed with [`Window::refresh`], which ignores the cache.
-
-Three things follow:
-
-- Caching needs a definite size. GPUI lays the cached view out from the style you
-  pass and doesn't measure its contents. Use a size such as `size_full()`, or a
-  fixed width and height, on the cached view.
-- The cache doesn't observe arbitrary dependencies. A parent that passes new
-  values through a field on the view, or an entity the cached view reads, doesn't
-  refresh a cached child by itself. Put the data in the child's own entity, or
-  observe the dependency and notify the cached entity when it changes.
-- Caching is off while the inspector is choosing an element, so the picked
-  element stays live.
-
-The test below shows why a dependency needs an observer. The dependency is read
-while `Sidebar` renders, but changing it without notification leaves the cached
-subtree untouched. The retained [`Subscription`] turns a later notification into
-`Sidebar`'s own [`Context::notify`], which refreshes the cache.
+The test below reads a dependency while `Sidebar` renders. Changing the
+dependency without notifying it leaves the sidebar's output as it was; notifying
+it renders the sidebar again, with no observer in between.
 
 ```rust
 use std::{cell::Cell, rc::Rc};
 
-use gpui::{Context, Entity, Render, StyleRefinement, Subscription, TestApp, Window, div, prelude::*, px};
+use gpui::{Context, Entity, Render, TestApp, Window, div, prelude::*, px};
 
 struct Sidebar {
     dependency: Entity<usize>,
-    dependency_subscription: Subscription,
     renders: Rc<Cell<usize>>,
 }
 
@@ -140,7 +99,7 @@ impl Render for Sidebar {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let value = *self.dependency.read(cx);
         self.renders.set(self.renders.get() + 1);
-        div().size_full().child(value.to_string())
+        div().child(value.to_string())
     }
 }
 
@@ -150,11 +109,7 @@ struct Root {
 
 impl Render for Root {
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
-        div().size(px(800.)).child(
-            self.sidebar
-                .clone()
-                .cached(StyleRefinement::default().size_full()),
-        )
+        div().size(px(800.)).child(self.sidebar.clone())
     }
 }
 
@@ -162,41 +117,42 @@ let renders = Rc::new(Cell::new(0));
 let mut app = TestApp::new();
 let dependency = app.update(|cx| cx.new(|_| 0_usize));
 let mut window = app.open_window({
-    let dependency_for_sidebar = dependency.clone();
+    let dependency = dependency.clone();
     let renders = renders.clone();
-    move |_, cx| {
-        let sidebar = cx.new(|cx| {
-            let dependency_subscription =
-                cx.observe(&dependency_for_sidebar, |_, _, cx| cx.notify());
-            Sidebar {
-                dependency: dependency_for_sidebar,
-                dependency_subscription,
-                renders,
-            }
-        });
-        Root { sidebar }
+    move |_, cx| Root {
+        sidebar: cx.new(|_| Sidebar { dependency, renders }),
     }
 });
 window.draw();
 let after_first_frame = renders.get();
 
 window.draw();
-assert_eq!(renders.get(), after_first_frame, "an unchanged cache is reused");
+assert_eq!(renders.get(), after_first_frame, "an unchanged view is reused");
+
+window.update(|_, window, _| window.refresh());
+window.draw();
+assert_eq!(renders.get(), after_first_frame + 1, "a refresh renders every view");
 
 app.update(|cx| dependency.update(cx, |value, _| *value = 1));
 window.draw();
-assert_eq!(renders.get(), after_first_frame, "mutation without notification leaves the cache intact");
+assert_eq!(renders.get(), after_first_frame + 1, "a change without notify isn't seen");
 
 app.update(|cx| dependency.update(cx, |value, cx| {
     *value = 2;
     cx.notify();
 }));
 window.draw();
-assert_eq!(renders.get(), after_first_frame + 1, "the observer notifies the cached view");
+assert_eq!(renders.get(), after_first_frame + 2, "notifying a dependency renders its readers");
 ```
 
-Cache a view when it is expensive and rarely changes, such as a sidebar, document preview
-or chart. A view that you notify every frame gains nothing from caching.
+State that GPUI doesn't track, such as a value behind an `Rc<RefCell<_>>` or an
+atomic, isn't seen by a view that already drew. Notify the view's entity after
+changing it.
+
+A view that is notified every frame gains nothing from being kept, and keeping
+it still costs a check of each recorded dependency. [Retained view
+rendering](crate::_documentation::concepts::retained_rendering) explains what is
+kept, and when to give a view a fixed size with [`Entity::cached`].
 
 ## Render only the rows on screen
 

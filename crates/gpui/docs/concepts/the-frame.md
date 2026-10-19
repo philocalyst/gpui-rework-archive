@@ -99,15 +99,12 @@ element state in more detail.
 
 ## Rendering less
 
-By default, a dirty window renders its whole tree, starting from the root view.
-That works well when rendering builds small values, as layout and paint are
-designed for repeated passes. When a view is expensive to render and rarely changes,
-embed it with [`Entity::cached`]. GPUI then reuses that view's elements, layout
-and painted primitives from the previous frame until the view itself is notified.
-Reading another entity while producing the cached subtree does not by itself
-invalidate this cache; observe that entity and notify the cached view when its
-value changes. Changes to the cached view's bounds, content mask, text style,
-text direction or Unicode bidirectional text mode also rebuild the subtree.
+A dirty window doesn't render its whole tree. Each view keeps what it drew, and
+GPUI renders again only the views where something they read has changed, or
+that are drawn at a new size or position. Reading an entity while rendering is
+enough to depend on it: notifying that entity renders the view again.
+[Retained view rendering](crate::_documentation::concepts::retained_rendering)
+lists what a view depends on and what reusing its output costs.
 
 Virtualized lists reduce the number of rows built for a frame. [`uniform_list`]
 and [`list`] normally render the viewport and any overdraw, with exceptions for
@@ -138,5 +135,5 @@ as the system appearance.
   [`Context::spawn`] instead; see [executors](crate::_documentation::concepts::executors).
 * Give every interactive element a stable `id`.
 * Call `notify` after changing state that a view or observer needs to see.
-* Reach for [`Entity::cached`] and virtualized lists when profiling shows
-  rendering is expensive, not before.
+* Reach for virtualized lists when profiling shows rendering is expensive, not
+  before.

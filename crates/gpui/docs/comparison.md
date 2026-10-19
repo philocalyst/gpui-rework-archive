@@ -22,9 +22,8 @@ Here you go! No talk of performance (check your use-case, and you can likely inf
 GPUI rebuilds its element tree during rendering, then uses separate layout,
 painting, and dispatch paths for focus, keys, and actions. Persistent state
 lives in entities. After a mutation, [`Context::notify`](crate::Context::notify)
-invalidates ordinary views that read the entity; a cached subtree needs its own
-entity notified, as [the frame model](crate::_documentation::concepts::the_frame#rendering-less)
-explains. The separation gives focus, keymaps, custom layout, and virtualized
+renders again the views that read the entity, as [the frame
+model](crate::_documentation::concepts::the_frame#rendering-less) explains. The separation gives focus, keymaps, custom layout, and virtualized
 large views distinct places in the system. egui keeps drawing code beside its
 button response, a compact arrangement for a tool or debug panel.
 

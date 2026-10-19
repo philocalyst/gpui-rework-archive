@@ -279,14 +279,10 @@ impl Render for Workspace {
 }
 ```
 
-When `Sidebar` notifies, its window is redrawn. By default a redraw renders
-the window's whole tree again, starting from the root view, because building
-elements is cheap. A view that is expensive to render can opt out: embed it
-with [`Entity::cached`](crate::Entity::cached) and GPUI reuses its previous
-output until the view is notified, or its bounds, content mask, text style, text direction or
-Unicode bidirectional text mode changes. If the cached view reads another entity, observe that
-entity and notify the cached view when its value changes. [The frame](crate::_documentation::concepts::the_frame)
-explains the rendering side of this in detail.
+When `Sidebar` notifies, its window is redrawn. The redraw renders `Sidebar`
+again, along with any view that read it, and reuses the output of the views
+whose inputs didn't change. [Retained view rendering](crate::_documentation::concepts::retained_rendering)
+explains which views render again.
 
 ## Globals
 

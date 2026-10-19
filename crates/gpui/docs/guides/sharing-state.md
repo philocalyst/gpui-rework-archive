@@ -99,10 +99,9 @@ on the entity; mutation alone does neither. Notifications coalesce within an
 update, so even several `notify` calls produce one observer callback. Delivery
 waits until the model's mutable borrow is released and the update has finished.
 
-Caching needs an explicit connection. A view rendered through [`Entity::cached`]
-is not invalidated merely because it reads another entity. Notify the cached
-view's own entity when the output must change. An observer still receives the
-model's notifications independently of that rendering cache.
+A view that reads the model during rendering depends on it: notifying the model
+renders that view again on the next frame, without an observer. An observer is
+for work beyond rendering, such as updating other state when the model changes.
 
 ## Send typed events with `emit` and `subscribe`
 
