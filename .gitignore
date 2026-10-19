@@ -50,11 +50,3 @@ xcuserdata/
 .build
 
 /build
-
-# Local mobile build toolchains and caches
-/.android/
-/.gradle-android/
-
-# Authored iOS acceptance project used by examples/mobile/ios/run-app-acceptance.sh
-!examples/mobile/ios/AcceptanceTests/GPUIAcceptanceUITests.xcodeproj/
-!examples/mobile/ios/AcceptanceTests/GPUIAcceptanceUITests.xcodeproj/**

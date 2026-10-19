@@ -14,8 +14,6 @@ update that state through a context; `notify` requests the next redraw. For API
 and feature differences from Zed's GPUI, see the
 [upstream guide](crates/gpui/docs/upstream.md).
 
-Release notes and deprecation status are listed in the [changelog](CHANGELOG.md).
-
 ## Overview
 
 - Layout and styling
