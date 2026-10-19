@@ -45,10 +45,10 @@ data it needs on the view and move a copy into the closures.
 
 ## Paint rectangles with `paint_quad`
 
-[`Window::paint_quad`] draws a [`PaintQuad`]. Build one with [`PaintQuad::new`] and
-chain builder methods for its background, corner radii, and border. The older
-[`fill`], [`outline`], and [`quad`] helper functions are deprecated; use the
-PaintQuad builder for new code.
+[`Window::paint_quad`] draws a [`PaintQuad`]. Start one with [`PaintQuad::new`]
+and set its background, corner radii and border with builder methods. The
+[`fill`], [`outline`] and [`quad`] functions that built quads before are
+deprecated.
 
 A quad's corners can be rounded and its border dashed:
 
@@ -56,7 +56,8 @@ A quad's corners can be rounded and its border dashed:
 # use gpui::*;
 # let bounds = Bounds::new(point(px(0.), px(0.)), size(px(120.), px(48.)));
 # fn paint(bounds: Bounds<Pixels>, window: &mut Window) {
-let card = PaintQuad::new(bounds).background(rgb(0xf9fafb))
+let card = PaintQuad::new(bounds)
+    .background(rgb(0xf9fafb))
     .corner_radii(px(8.))
     .border_widths(px(1.))
     .border_color(rgb(0xd1d5db));
@@ -133,10 +134,8 @@ shape covers the shadow where they overlap.
 ## Draw images and text
 
 [`Window::paint_image`] draws a decoded [`RenderImage`] into `image_bounds`. Only
-the part inside `bounds` is visible. `corner_radii` applies to `bounds`, and
-`corner_smoothing` ranges from circular corners at `0.0` to maximum smoothing at
-`1.0`. The method returns a `Result` and takes a frame index for animated images.
-Get the image with
+the part inside `bounds` is visible, and `corner_radii` applies to `bounds`. It
+returns a `Result`, and it takes the frame index for animated images. Get the image with
 [`Window::use_asset`] and [`ImgResourceLoader`], the same loader [`img`] uses,
 so the image is loaded once and shared:
 

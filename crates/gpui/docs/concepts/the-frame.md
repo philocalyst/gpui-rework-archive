@@ -97,23 +97,21 @@ State that must outlive a frame lives in one of three places:
 [Elements](crate::_documentation::concepts::elements) explains element ids and
 element state in more detail.
 
-## Reusing unchanged view work
+## Rendering less
 
-Entity-backed views can retain their subtree naturally when used as elements.
-GPUI tracks entity and global reads made by the view and its nested work, so a
-notified dependency invalidates the cached owners that read it. Deferred
-prepaint and paint reads are included. A retained view still rebuilds when its
-layout environment changes or its measurement depends on data valid only for
-that frame. Hand-written `ViewElement::new` remains fresh because a parent may
-supply new properties without notifying the wrapped entity.
+A dirty window doesn't render its whole tree. Each view keeps what it drew, and
+GPUI renders again only the views where something they read has changed, or
+that are drawn at a new size or position. Reading an entity while rendering is
+enough to depend on it: notifying that entity renders the view again.
+[Retained view rendering](crate::_documentation::concepts::retained_rendering)
+lists what a view depends on and what reusing its output costs.
 
-Use [`Entity::cached`] or [`AnyView::cached`] when the parent should provide a
-fixed root style. An ordinary entity child remains naturally sized. See
-[retained view rendering](crate::_documentation::concepts::retained_rendering)
-for the invalidation rules and the distinction between natural, fixed-style,
-and fresh views. [`uniform_list`] and [`list`] reduce the rows built for a
-frame by virtualizing offscreen content; see the
-[list guide](crate::_documentation::guides::lists_and_scrolling).
+Virtualized lists reduce the number of rows built for a frame. [`uniform_list`]
+and [`list`] normally render the viewport and any overdraw, with exceptions for
+measurement and retained focus. A large item count can still cost memory and
+indexing work, and measuring variable-height rows adds work as they enter the
+viewport. The [list guide](crate::_documentation::guides::lists_and_scrolling)
+explains these costs and the trade-off of measuring all rows in advance.
 
 ## Asking for the next frame
 
@@ -137,5 +135,5 @@ as the system appearance.
   [`Context::spawn`] instead; see [executors](crate::_documentation::concepts::executors).
 * Give every interactive element a stable `id`.
 * Call `notify` after changing state that a view or observer needs to see.
-* Reach for [`Entity::cached`] and virtualized lists when profiling shows
-  rendering is expensive, not before.
+* Reach for virtualized lists when profiling shows rendering is expensive, not
+  before.

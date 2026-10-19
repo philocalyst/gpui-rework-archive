@@ -80,7 +80,6 @@ pub mod concepts {
         contexts => "concepts/contexts.md",
         the_frame => "concepts/the-frame.md",
         retained_rendering => "concepts/retained-rendering.md",
-        scene_performance => "scene-performance.md",
         elements => "concepts/elements.md",
         layout_and_style => "concepts/layout-and-style.md",
         input_dispatch => "concepts/input-dispatch.md",

@@ -41,12 +41,11 @@ position and animation progress, for example—when they have stable ids.
 Recreating an element then does not reset its interaction state. [Elements](crate::_documentation::concepts::elements)
 explains identity and the layout, prepaint and paint phases.
 
-Rebuilding a complex view still costs CPU time. [`Entity::cached`] reuses a
-view's rendered content until that entity is notified, the window is refreshed,
-or its bounds or text environment changes. If the view reads another entity,
-observe that entity and notify the cached view when its contents must change.
-[Performance](crate::_documentation::guides::performance) covers when caching
-and list virtualization help.
+Rebuilding a complex view still costs CPU time, so GPUI keeps each view's
+output and renders it again only when an entity or global it read is notified,
+the window is refreshed, or its bounds or text environment change.
+[Performance](crate::_documentation::guides::performance) covers when keeping
+views and list virtualization help.
 
 ## App-owned state
 

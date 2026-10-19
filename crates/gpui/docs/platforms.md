@@ -81,36 +81,23 @@ shows how to handle those outcomes and retain asynchronous operations.
 
 ## iOS and Android
 
-GPUI uses separate mobile backends. The target-aware `gpui_ce_platform`
-package selects the backend for an iOS or Android build; application views
-still use the same GPUI `App`, `Window` and element APIs.
+The mobile backends run the same views as the desktop ones:
 
-| Target | Platform crate | Native integration |
-| --- | --- | --- |
-| iOS | `gpui_ce_ios` (imported as `gpui_ios`) | UIKit windows, lifecycle, touch and text input; `gpui_ce_apple` (`gpui_apple`) supplies shared Apple Metal and CoreText support. |
-| Android | `gpui_ce_mobile` (imported as `gpui_mobile`) | Android window, renderer, touch, lifecycle, accessibility and `InputConnection` integration. |
+| Target | Platform crate | Windowing | GPU | Glyph rasterization |
+| --- | --- | --- | --- | --- |
+| iOS | `gpui_ios` | UIKit | Metal | Core Text |
+| Android | `gpui_mobile` | `NativeActivity` | wgpu over Vulkan, or OpenGL ES | Swash |
 
-The checked-in mobile example shares its Rust view code between targets. The
-Android APK uses a `NativeActivity` host. The Android backend also exposes a
-host-driven Activity path for applications that own a Java Activity; follow
-that path's surface and lifecycle callback order instead of mixing the two
-entry points. The iOS backend currently supports one connected `UIWindowScene`;
-it does not provide multiple simultaneous scenes.
+Both deliver touch input, compose text through the system keyboard and expose an
+AccessKit accessibility tree. [`Window::insets`] reports the safe area and the
+keyboard separately, so a view can pad for either. iOS supports one connected
+`UIWindowScene` at a time. On Android, GPUI falls back to OpenGL ES when Vulkan
+can't build its pipelines.
 
-Both targets deliver text composition through their native text-input protocol.
-Android's `InputConnection` proxy publishes immutable snapshots to the IME and
-queues edits for the GPUI thread; it does not synchronously query GPUI while an
-IME holds framework locks. UIKit reports text ranges in UTF-16 units, which the
-iOS adapter translates at the native boundary. `Window::insets()` keeps safe
-area and keyboard (`ime`) insets separate; `WindowInsets::effective()` returns
-the larger edge value for layout padding. System services and device behavior
-still depend on the OS version, permissions, and the host application.
-
-For SDK prerequisites, build/package commands, and the mobile acceptance
-scripts, see [Build for iOS and Android](crate::_documentation::guides::mobile).
-A successful cross-target Cargo build does not establish that a device has a
-working GPU driver, that the keyboard can compose text, or that app lifecycle
-callbacks match a particular host.
+Android 13 and newer ship an emoji font with COLRv1 color glyphs, which GPUI
+can't rasterize. Bundle an emoji font with bitmap glyphs, as the example app
+does. [Build for iOS and Android](crate::_documentation::guides::mobile) covers
+the toolchains, the example app and the entry points.
 
 ## Browser builds
 
