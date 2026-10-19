@@ -67,7 +67,7 @@ impl IosPlatform {
     pub fn new() -> Self {
         let dispatcher = Arc::new(AppleDispatcher::new());
 
-        let text_system: Arc<dyn PlatformTextSystem> = Arc::new(gpui_apple::AppleTextSystem::new());
+        let text_system: Arc<dyn PlatformTextSystem> = Arc::new(gpui_apple::MacTextSystem::new());
 
         let state = Rc::new(IosPlatformState {
             application: IosApplicationState::default(),

@@ -18,19 +18,13 @@ name = "text"
 path = "../../../gpui/examples/text.rs"
 [[bin]]
 name = "input"
-path = "input.rs"
-[[bin]]
-name = "font_fallback_test"
-path = "font_fallback_test.rs"
+path = "../../../gpui/examples/text_input.rs"
 [[bin]]
 name = "http_client_test"
 path = "http_client_test.rs"
 [[bin]]
 name = "queue_test"
 path = "queue_test.rs"
-[[bin]]
-name = "dynamic_fonts"
-path = "dynamic_fonts.rs"
 [dependencies]
 anyhow = "1"
 futures = "0.3"

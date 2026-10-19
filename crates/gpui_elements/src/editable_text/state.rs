@@ -2635,52 +2635,6 @@ mod tests {
     }
 
     #[gpui::test]
-
-    fn test_undo_restores_content(cx: &mut TestAppContext) {
-        let view = create_test_input(cx, "hello", 5);
-        update_movement_input(view, cx, |input, window, cx| {
-            without_history_grouping(input);
-
-            // Make an edit
-            input.replace_text_in_range(None, " world", window, cx);
-            assert_eq!(input.as_str(), "hello world");
-
-            // Undo should restore original content
-            input.undo(&Undo, window, cx);
-            assert_eq!(input.as_str(), "hello");
-        });
-    }
-
-    #[gpui::test]
-    fn test_redo_restores_undone_content(cx: &mut TestAppContext) {
-        let view = create_test_input(cx, "A😀B", 6);
-        update_movement_input(view, cx, |input, window, cx| {
-            without_history_grouping(input);
-
-            input.replace_text_in_range(None, "日本", window, cx);
-            assert_eq!(input.as_str(), "A😀B日本");
-            assert_eq!(
-                input.accessibility_text_metrics().character_lengths,
-                [1, 4, 1, 3, 3]
-            );
-
-            input.undo(&Undo, window, cx);
-            assert_eq!(input.as_str(), "A😀B");
-            assert_eq!(
-                input.accessibility_text_metrics().byte_offsets,
-                [0, 1, 5, 6]
-            );
-
-            input.redo(&Redo, window, cx);
-            assert_eq!(input.as_str(), "A😀B日本");
-            assert_eq!(
-                input.accessibility_text_metrics().byte_offsets,
-                [0, 1, 5, 6, 9, 12]
-            );
-        });
-    }
-
-    #[gpui::test]
     fn redo_restores_the_selection_from_before_undo(cx: &mut TestAppContext) {
         let view = create_test_input(cx, "hello", 5);
         update_movement_input(view, cx, |input, window, cx| {

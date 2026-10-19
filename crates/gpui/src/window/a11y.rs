@@ -107,78 +107,6 @@ pub(crate) const ROOT_NODE_ID: NodeId = NodeId(0);
 pub(crate) type A11yActionListener =
     Box<dyn FnMut(Option<&accesskit::ActionData>, &mut Window, &mut App) + 'static>;
 
-/// Position in the current accessibility parent used to identify the direct
-/// children added by one retained view.
-#[derive(Clone, Copy, Default)]
-pub(crate) struct A11ySubtreeStart {
-    parent: Option<NodeId>,
-    child_count: usize,
-}
-
-/// One cached view's membership in the previous canonical tree.
-///
-/// Membership is discovered iteratively from the direct roots, then `nodes()`
-/// yields those nodes in the canonical TreeUpdate order.
-struct CachedA11ySubtree<'a> {
-    tree: &'a TreeUpdate,
-    node_indices_by_id: &'a FxHashMap<NodeId, usize>,
-    canonical_indices: Vec<usize>,
-}
-
-impl<'a> CachedA11ySubtree<'a> {
-    fn new(
-        tree: &'a TreeUpdate,
-        node_indices: &'a FxHashMap<NodeId, usize>,
-        roots: &[NodeId],
-    ) -> Self {
-        let mut seen = FxHashSet::default();
-        let mut canonical_indices = Vec::new();
-        let mut pending: Vec<_> = roots.iter().rev().copied().collect();
-        while let Some(id) = pending.pop() {
-            let index = node_indices.get(&id).copied().unwrap_or_else(|| {
-                panic!("cached a11y root {id:?} is absent from the previous tree")
-            });
-            if !seen.insert(index) {
-                continue;
-            }
-            canonical_indices.push(index);
-            pending.extend(tree.nodes[index].1.children().iter().rev().copied());
-        }
-        canonical_indices.sort_unstable();
-        canonical_indices.dedup();
-        Self {
-            tree,
-            node_indices_by_id: node_indices,
-            canonical_indices,
-        }
-    }
-
-    fn contains(&self, id: NodeId) -> bool {
-        self.node_indices_by_id
-            .get(&id)
-            .is_some_and(|index| self.canonical_indices.binary_search(index).is_ok())
-    }
-
-    fn nodes(&self) -> impl Iterator<Item = (NodeId, &accesskit::Node)> + '_ {
-        self.canonical_indices
-            .iter()
-            .map(|index| &self.tree.nodes[*index])
-            .map(|(id, node)| (*id, node))
-    }
-}
-
-/// Prepaint and paint metadata retained for one complete accessibility frame.
-#[derive(Default)]
-struct A11yFrameMetadata {
-    focus: Option<NodeId>,
-    active_descendant: Option<NodeId>,
-    focus_ids: FxHashMap<NodeId, FocusId>,
-    node_bounds: FxHashMap<NodeId, Bounds<Pixels>>,
-    action_listeners: FxHashMap<NodeId, Vec<(Action, A11yActionListener)>>,
-    #[cfg(debug_assertions)]
-    node_info: FxHashMap<NodeId, debug::NodeDebugInfo>,
-}
-
 /// Per-window accessibility state.
 ///
 /// Manages the AccessKit tree that is built each frame and the mappings
@@ -214,8 +142,8 @@ pub(crate) struct A11y {
     pub(crate) focus_ids: FxHashMap<NodeId, FocusId>,
     pub(crate) node_bounds: FxHashMap<NodeId, Bounds<Pixels>>,
     pub(crate) action_listeners: FxHashMap<NodeId, Vec<(Action, A11yActionListener)>>,
-    previous_node_indices: FxHashMap<NodeId, usize>,
-    previous: A11yFrameMetadata,
+    /// Last frame's action listeners, which reused views carry into this frame.
+    previous_action_listeners: FxHashMap<NodeId, Vec<(Action, A11yActionListener)>>,
     /// The window's title, used to label the root node so assistive
     /// technology can tell windows apart.
     window_title: Option<SharedString>,
@@ -246,8 +174,7 @@ impl A11y {
             focus_ids: FxHashMap::default(),
             node_bounds: FxHashMap::default(),
             action_listeners: FxHashMap::default(),
-            previous_node_indices: FxHashMap::default(),
-            previous: A11yFrameMetadata::default(),
+            previous_action_listeners: FxHashMap::default(),
             window_title,
             last_focus_without_node: None,
             debug: debug::A11yDebug::default(),
@@ -282,7 +209,7 @@ impl A11y {
     /// for more commentary.
     pub(crate) fn sync_active_flag(&mut self) {
         self.active_this_frame =
-            self.is_enabled() && (self.forced || self.active_flag.load(Ordering::SeqCst));
+            !self.force_disabled && (self.forced || self.active_flag.load(Ordering::SeqCst));
     }
 
     /// Build the tree every frame regardless of whether assistive technology
@@ -297,133 +224,6 @@ impl A11y {
 
     pub(crate) fn is_active(&self) -> bool {
         self.active_this_frame
-    }
-
-    /// Mark the current accessibility parent's child count before rendering a
-    /// view. The marker stays empty while accessibility is inactive.
-    pub(crate) fn cache_subtree_start(&self) -> A11ySubtreeStart {
-        let Some(parent) = self.nodes.current_node_id() else {
-            return A11ySubtreeStart::default();
-        };
-        let child_count = self
-            .nodes
-            .current_node()
-            .map_or(0, |node| node.children().len());
-        A11ySubtreeStart {
-            parent: Some(parent),
-            child_count,
-        }
-    }
-
-    /// Return the direct accessibility roots added since `start` was captured.
-    /// These IDs are the only per-view accessibility data stored with a render
-    /// cache; node payloads and metadata remain canonical in `A11y`.
-    pub(crate) fn cache_subtree_roots(&self, start: A11ySubtreeStart) -> Vec<NodeId> {
-        let Some(parent) = start.parent else {
-            return Vec::new();
-        };
-        let current_parent = self.nodes.current_node_id();
-        assert_eq!(
-            current_parent,
-            Some(parent),
-            "a11y subtree capture must unwind to the parent where it began"
-        );
-        let children = self
-            .nodes
-            .current_node()
-            .map_or(&[][..], |node| node.children());
-        assert!(
-            start.child_count <= children.len(),
-            "a11y parent lost children while capturing a retained subtree"
-        );
-        children[start.child_count..].to_vec()
-    }
-
-    /// Rebuild cached nodes under the current accessibility parent and restore
-    /// all prepaint metadata associated with those nodes.
-    pub(crate) fn reuse_prepaint(&mut self, roots: &[NodeId]) {
-        if roots.is_empty() {
-            return;
-        }
-        let Some(tree) = self.debug.last_tree_update() else {
-            panic!("cached a11y subtree has no previous canonical tree");
-        };
-        let subtree = CachedA11ySubtree::new(tree, &self.previous_node_indices, roots);
-        let focus = self.previous.focus.filter(|id| subtree.contains(*id));
-        let active_descendant = self
-            .previous
-            .active_descendant
-            .filter(|id| subtree.contains(*id));
-
-        self.nodes.attach_cached_roots(roots);
-        for (id, node) in subtree.nodes() {
-            assert!(
-                self.nodes.seen_ids.insert(id),
-                "cached a11y subtree contains duplicate node {id:?}"
-            );
-            self.nodes.all_nodes.push((id, node.clone()));
-
-            if let Some(focus_id) = self.previous.focus_ids.get(&id) {
-                self.focus_ids.insert(id, *focus_id);
-            }
-            if let Some(bounds) = self.previous.node_bounds.get(&id) {
-                self.node_bounds.insert(id, *bounds);
-            }
-            #[cfg(debug_assertions)]
-            if let Some(info) = self.previous.node_info.get(&id) {
-                self.nodes.record_node_info(id, info.clone());
-            }
-        }
-
-        if let Some(focus) = focus {
-            match self.nodes.focus {
-                None => self.set_focus(focus),
-                Some(current_focus) if current_focus == focus => {}
-                Some(current_focus) => debug_assert_eq!(
-                    current_focus, focus,
-                    "cached accessibility focus is stale; focus-dependent views must be invalidated"
-                ),
-            }
-        }
-        if let Some(active_descendant) = active_descendant {
-            if self.nodes.focus == self.previous.focus {
-                match self.nodes.active_descendant {
-                    None => self.nodes.active_descendant = Some(active_descendant),
-                    Some(current) if current == active_descendant => {}
-                    Some(current) => debug_assert_eq!(
-                        current, active_descendant,
-                        "cached accessibility active descendant is stale"
-                    ),
-                }
-            } else {
-                debug_assert_eq!(
-                    self.nodes.focus, self.previous.focus,
-                    "cached active descendant requires its previous focused ancestor"
-                );
-            }
-        }
-    }
-
-    /// Restore action callbacks for cached nodes during paint. Listeners are
-    /// moved out of the previous map so unmounted or newly rebuilt nodes can be
-    /// discarded at the end of this frame.
-    pub(crate) fn reuse_paint(&mut self, roots: &[NodeId]) {
-        if roots.is_empty() {
-            return;
-        }
-        let Some(tree) = self.debug.last_tree_update() else {
-            panic!("cached a11y actions have no previous canonical tree");
-        };
-        let subtree = CachedA11ySubtree::new(tree, &self.previous_node_indices, roots);
-        for (id, _) in subtree.nodes() {
-            if let Some(listeners) = self.previous.action_listeners.remove(&id) {
-                let replaced = self.action_listeners.insert(id, listeners);
-                debug_assert!(
-                    replaced.is_none(),
-                    "cached a11y action listeners replaced newly painted listeners for {id:?}"
-                );
-            }
-        }
     }
 
     pub(crate) fn set_focusable(&mut self, node_id: NodeId, focus_id: FocusId) {
@@ -478,23 +278,85 @@ impl A11y {
 
     /// Clear per-frame state and push the root node to start a new frame.
     pub(crate) fn begin_frame(&mut self) {
-        std::mem::swap(&mut self.focus_ids, &mut self.previous.focus_ids);
         self.focus_ids.clear();
-        std::mem::swap(&mut self.node_bounds, &mut self.previous.node_bounds);
         self.node_bounds.clear();
-        std::mem::swap(
-            &mut self.action_listeners,
-            &mut self.previous.action_listeners,
-        );
-        self.action_listeners.clear();
-        self.previous.focus = self.nodes.focus;
-        self.previous.active_descendant = self.nodes.active_descendant;
-        #[cfg(debug_assertions)]
-        {
-            std::mem::swap(&mut self.nodes.node_info, &mut self.previous.node_info);
-            self.nodes.node_info.clear();
-        }
+        self.previous_action_listeners = std::mem::take(&mut self.action_listeners);
         self.nodes.begin_frame(self.window_title.as_ref());
+    }
+
+    /// Marks where a view starts adding nodes, for [`Self::record`].
+    pub(crate) fn mark(&self) -> A11yMark {
+        A11yMark {
+            nodes: self.nodes.all_nodes.len(),
+            children: self.nodes.nodes_stack.last().map_or(0, |node| node.children().len()),
+            focus: self.nodes.focus,
+            active_descendant: self.nodes.active_descendant,
+        }
+    }
+
+    /// Copies what was added to the tree since `mark`, so a reused view can [replay](Self::replay)
+    /// it without running its prepaint again.
+    pub(crate) fn record(&self, mark: A11yMark) -> A11yRecording {
+        let nodes = self.nodes.all_nodes[mark.nodes..].to_vec();
+        let children = self
+            .nodes
+            .nodes_stack
+            .last()
+            .map_or(&[][..], |node| &node.children()[mark.children..])
+            .to_vec();
+        fn lookup<T: Copy>(
+            nodes: &[(NodeId, accesskit::Node)],
+            map: &FxHashMap<NodeId, T>,
+        ) -> Vec<(NodeId, T)> {
+            nodes
+                .iter()
+                .filter_map(|(id, _)| Some((*id, *map.get(id)?)))
+                .collect()
+        }
+        A11yRecording {
+            bounds: lookup(&nodes, &self.node_bounds),
+            focusable: lookup(&nodes, &self.focus_ids),
+            focus: self.nodes.focus.filter(|_| mark.focus.is_none()),
+            active_descendant: self
+                .nodes
+                .active_descendant
+                .filter(|_| mark.active_descendant.is_none()),
+            #[cfg(debug_assertions)]
+            info: nodes
+                .iter()
+                .filter_map(|(id, _)| Some((*id, self.nodes.node_info.get(id)?.clone())))
+                .collect(),
+            nodes,
+            children,
+        }
+    }
+
+    /// Adds a recorded view's nodes back under the open node, with their bounds, focus and action
+    /// listeners.
+    pub(crate) fn replay(&mut self, recording: &A11yRecording) {
+        for (id, node) in &recording.nodes {
+            if self.nodes.can_push(*id) {
+                self.nodes.all_nodes.push((*id, node.clone()));
+            }
+            if let Some(listeners) = self.previous_action_listeners.remove(id) {
+                self.action_listeners.insert(*id, listeners);
+            }
+        }
+        if let Some(parent) = self.nodes.nodes_stack.last_mut() {
+            for id in &recording.children {
+                parent.push_child(*id);
+            }
+        }
+        self.node_bounds.extend(recording.bounds.iter().copied());
+        self.focus_ids.extend(recording.focusable.iter().copied());
+        if let Some(id) = recording.focus {
+            self.nodes.set_focus(id);
+        }
+        if let Some(id) = recording.active_descendant {
+            self.nodes.set_active_descendant(id);
+        }
+        #[cfg(debug_assertions)]
+        self.nodes.node_info.extend(recording.info.iter().cloned());
     }
 
     /// Finalize the tree and produce a [`TreeUpdate`] for the platform adapter.
@@ -510,13 +372,6 @@ impl A11y {
         );
         #[cfg(debug_assertions)]
         self.debug.capture_node_info(&self.nodes.node_info);
-        self.previous_node_indices.clear();
-        for (index, (id, _)) in update.nodes.iter().enumerate() {
-            self.previous_node_indices.insert(*id, index);
-        }
-        // Replayed subtrees have leased listeners out of this map. Anything
-        // left belongs to nodes that disappeared or were rebuilt this frame.
-        self.previous.action_listeners.clear();
         update
     }
 
@@ -635,6 +490,27 @@ impl<'a> A11ySubtreeBuilder<'a> {
     }
 }
 
+/// Where the tree stood when a view started drawing. See [`A11y::mark`].
+pub(crate) struct A11yMark {
+    nodes: usize,
+    children: usize,
+    focus: Option<NodeId>,
+    active_descendant: Option<NodeId>,
+}
+
+/// The nodes one view added to the tree in a frame. See [`A11y::record`].
+pub(crate) struct A11yRecording {
+    nodes: Vec<(NodeId, accesskit::Node)>,
+    /// The nodes added directly under the node that was open when the view drew.
+    children: Vec<NodeId>,
+    bounds: Vec<(NodeId, Bounds<Pixels>)>,
+    focusable: Vec<(NodeId, FocusId)>,
+    focus: Option<NodeId>,
+    active_descendant: Option<NodeId>,
+    #[cfg(debug_assertions)]
+    info: Vec<(NodeId, debug::NodeDebugInfo)>,
+}
+
 pub(crate) struct A11yNodeBuilder {
     ids_stack: SmallVec<[NodeId; 16]>,
     nodes_stack: SmallVec<[accesskit::Node; 16]>,
@@ -725,23 +601,6 @@ impl A11yNodeBuilder {
 
     pub(crate) fn current_node_mut(&mut self) -> Option<&mut accesskit::Node> {
         self.nodes_stack.last_mut()
-    }
-
-    fn attach_cached_roots(&mut self, roots: &[NodeId]) {
-        let Some(parent) = self.nodes_stack.last_mut() else {
-            panic!("cached a11y roots require a current parent node");
-        };
-        for root in roots {
-            parent.push_child(*root);
-        }
-    }
-
-    fn current_node(&self) -> Option<&accesskit::Node> {
-        self.nodes_stack.last()
-    }
-
-    fn current_node_id(&self) -> Option<NodeId> {
-        self.ids_stack.last().copied()
     }
 
     /// Pop the current node off the stack and finalize it into the all_nodes
@@ -923,9 +782,8 @@ mod tests {
     // in gpui's own `test` attribute macro and shadow the standard one.
     use super::{A11y, A11yNodeBuilder, ROOT_NODE_ID};
     use crate::FocusId;
-    use accesskit::{Action, NodeId, Role};
+    use accesskit::{NodeId, Role, TreeUpdate};
     use std::sync::{Arc, atomic::AtomicBool};
-    use std::{cell::Cell, rc::Rc};
 
     fn test_node() -> accesskit::Node {
         accesskit::Node::new(Role::GenericContainer)
@@ -941,65 +799,6 @@ mod tests {
         let mut a11y = A11y::new(Arc::new(AtomicBool::new(true)), false, false, None);
         a11y.begin_frame();
         a11y
-    }
-
-    #[test]
-    fn retained_accessibility_subtree_replays_nodes_focus_and_action_listeners() {
-        let mut a11y = new_a11y();
-        let marker = a11y.cache_subtree_start();
-        let container = NodeId(10);
-        let child = NodeId(11);
-        let mut node = accesskit::Node::new(Role::GenericContainer);
-        node.set_label("cached container");
-        assert!(a11y.nodes.push(container, node));
-        a11y.set_focusable(container, FocusId::default());
-        a11y.set_focus(container);
-        let mut child_node = accesskit::Node::new(Role::Button);
-        child_node.set_label("cached child");
-        assert!(a11y.nodes.push_leaf(child, child_node));
-        a11y.nodes.pop();
-        let calls = Rc::new(Cell::new(0));
-        let calls_for_listener = calls.clone();
-        a11y.action_listeners.insert(
-            child,
-            vec![(
-                Action::Click,
-                Box::new(move |_, _, _| calls_for_listener.set(calls_for_listener.get() + 1)),
-            )],
-        );
-        let roots = a11y.cache_subtree_roots(marker);
-        assert_eq!(roots, [container]);
-        let first = a11y.end_frame(Default::default());
-
-        a11y.begin_frame();
-        let marker = a11y.cache_subtree_start();
-        a11y.reuse_prepaint(&roots);
-        assert_eq!(a11y.cache_subtree_roots(marker), roots);
-        assert_eq!(a11y.nodes.focus, Some(container));
-        assert_eq!(a11y.focus_ids.get(&container), Some(&FocusId::default()));
-        a11y.reuse_paint(&roots);
-        assert!(!a11y.previous.action_listeners.contains_key(&child));
-        assert!(a11y.action_listeners.contains_key(&child));
-        assert_eq!(calls.get(), 0);
-
-        let second = a11y.end_frame(Default::default());
-        assert_eq!(first.focus, second.focus);
-        assert_eq!(first.nodes, second.nodes);
-    }
-
-    #[test]
-    fn retained_accessibility_markers_capture_only_direct_roots() {
-        let mut a11y = new_a11y();
-        let outer = a11y.cache_subtree_start();
-        assert!(a11y.nodes.push(NodeId(1), test_node()));
-        let nested = a11y.cache_subtree_start();
-        assert!(a11y.nodes.push(NodeId(2), test_node()));
-        assert!(a11y.nodes.push_leaf(NodeId(3), test_node()));
-        a11y.nodes.pop();
-        assert_eq!(a11y.cache_subtree_roots(nested), [NodeId(2)]);
-        a11y.nodes.pop();
-        assert!(a11y.nodes.push_leaf(NodeId(4), test_node()));
-        assert_eq!(a11y.cache_subtree_roots(outer), [NodeId(1), NodeId(4)]);
     }
 
     #[test]
@@ -1269,5 +1068,114 @@ mod tests {
 
         let update = a11y.end_frame(Default::default());
         assert_eq!(update.focus, a);
+    }
+
+    #[gpui::test]
+    fn reused_views_keep_their_nodes_focus_and_listeners(cx: &mut crate::TestAppContext) {
+        use crate::{
+            AnyWindowHandle, AppContext, Context, Entity, FocusHandle, InteractiveElement, IntoElement,
+            ParentElement, Render, StatefulInteractiveElement, Styled, Window, div, px,
+        };
+        use std::{cell::Cell, rc::Rc};
+
+        struct Button {
+            label: &'static str,
+            focus: FocusHandle,
+            renders: Rc<Cell<usize>>,
+            presses: Rc<Cell<usize>>,
+        }
+
+        impl Render for Button {
+            fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+                self.renders.set(self.renders.get() + 1);
+                let presses = self.presses.clone();
+                div()
+                    .id("button")
+                    .role(Role::Button)
+                    .aria_label(self.label)
+                    .track_focus(&self.focus)
+                    .size(px(10.))
+                    .on_a11y_action(accesskit::Action::Click, move |_, _, _| {
+                        presses.set(presses.get() + 1)
+                    })
+            }
+        }
+
+        struct Host(Entity<Button>, Entity<Button>);
+
+        impl Render for Host {
+            fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+                div()
+                    .id("host")
+                    .role(Role::Group)
+                    .child(self.0.clone())
+                    .child(self.1.clone())
+            }
+        }
+
+        let renders = Rc::new(Cell::new(0));
+        let presses = Rc::new(Cell::new(0));
+        let button = |label, cx: &mut crate::TestAppContext| {
+            let (renders, presses) = (renders.clone(), presses.clone());
+            cx.new(|cx| Button {
+                label,
+                focus: cx.focus_handle(),
+                renders,
+                presses,
+            })
+        };
+        let (first, second) = (button("first", cx), button("second", cx));
+        let window = cx.add_window({
+            let (first, second) = (first.clone(), second.clone());
+            move |_, _| Host(first, second)
+        });
+        let window = AnyWindowHandle::from(window);
+        let draw = |cx: &mut crate::TestAppContext| {
+            cx.update_window(window, |_, window, cx| {
+                window.draw(cx).clear(cx);
+                window.a11y_tree().unwrap().clone()
+            })
+            .unwrap()
+        };
+        let find = |tree: &TreeUpdate, label: &str| {
+            tree.nodes
+                .iter()
+                .find(|(_, node)| node.label() == Some(label))
+                .map(|(id, _)| *id)
+                .unwrap()
+        };
+
+        cx.update_window(window, |_, window, cx| {
+            window.set_a11y_forced(true);
+            let focus = second.read(cx).focus.clone();
+            focus.focus(window, cx);
+        })
+        .unwrap();
+        let before = draw(cx);
+        let second_id = find(&before, "second");
+        assert_eq!(before.focus, second_id);
+
+        let renders_before = renders.get();
+        first.update(cx, |button, cx| {
+            button.label = "changed";
+            cx.notify();
+        });
+        let after = draw(cx);
+        assert_eq!(renders.get(), renders_before + 1, "only the changed view renders");
+
+        let mut expected = before.clone();
+        let first_id = find(&before, "first");
+        for (id, node) in &mut expected.nodes {
+            if *id == first_id {
+                node.set_label("changed");
+            }
+        }
+        assert_eq!(after, expected, "the reused view's nodes and focus are unchanged");
+
+        cx.update_window(window, |_, window, cx| {
+            window.perform_a11y_action(second_id, accesskit::Action::Click, None, cx)
+        })
+        .unwrap();
+        assert_eq!(presses.get(), 1, "the reused view's action listener survives");
     }
 }

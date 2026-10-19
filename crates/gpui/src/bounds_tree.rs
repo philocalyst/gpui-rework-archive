@@ -48,8 +48,6 @@ where
     bounds: Bounds<U>,
     /// Maximum ordering value in this subtree.
     max_order: u32,
-    /// Height from this node to a leaf (leaves have height zero).
-    height: u32,
     /// Node-specific data.
     kind: NodeKind,
 }
@@ -126,14 +124,6 @@ where
         self.order_floor = self.order_floor.max(floor);
     }
 
-    /// Returns whether this tree has no recorded bounds or ordering floor.
-    pub(crate) fn is_pristine(&self) -> bool {
-        self.nodes.is_empty()
-            && self.root.is_none()
-            && self.max_leaf.is_none()
-            && self.order_floor == 0
-    }
-
     /// The highest ordering assigned to any bounds so far (0 if empty).
     pub fn max_order(&self) -> u32 {
         self.max_leaf.map_or(0, |idx| self.nodes[idx].max_order)
@@ -149,6 +139,24 @@ where
         let new_leaf_idx = self.insert_leaf(new_bounds, ordering);
         self.max_leaf = Some(new_leaf_idx);
         ordering
+    }
+
+    /// The order floor set by [`Self::set_order_floor`].
+    pub(crate) fn order_floor(&self) -> u32 {
+        self.order_floor
+    }
+
+    /// Returns the highest ordering among bounds that intersect `query`, or 0.
+    pub(crate) fn max_intersecting(&mut self, query: &Bounds<U>) -> u32 {
+        self.find_max_ordering(query)
+    }
+
+    /// Inserts bounds that already have an ordering, such as a replayed group of primitives.
+    pub(crate) fn insert_with_order(&mut self, new_bounds: Bounds<U>, ordering: u32) {
+        let new_leaf_idx = self.insert_leaf(new_bounds, ordering);
+        if self.max_order() < ordering || self.max_leaf.is_none() {
+            self.max_leaf = Some(new_leaf_idx);
+        }
     }
 
     /// Inserts bounds into the tree and returns its assigned ordering.
@@ -237,7 +245,6 @@ where
         self.nodes.push(Node {
             bounds: bounds.clone(),
             max_order: order,
-            height: 0,
             kind: NodeKind::Leaf { order },
         });
 
@@ -266,7 +273,6 @@ where
             self.nodes.push(Node {
                 bounds: root_bounds.union(&bounds),
                 max_order: cmp::max(root_order, order),
-                height: 1,
                 kind: NodeKind::Internal { children },
             });
             self.root = Some(new_root_idx);
@@ -285,20 +291,16 @@ where
 
             self.insert_path.push(current_idx);
 
-            // Keep sibling subtree heights balanced first. Among equally short children,
-            // preserve the spatial half-perimeter heuristic.
+            // Find the best child to descend into
             let mut best_child_idx = children.as_slice()[0];
             let mut best_child_pos = 0;
-            let mut best_height = self.nodes[best_child_idx].height;
             let mut best_cost = bounds
                 .union(&self.nodes[best_child_idx].bounds)
                 .half_perimeter();
 
             for (pos, &child_idx) in children.as_slice().iter().enumerate().skip(1) {
-                let child_height = self.nodes[child_idx].height;
                 let cost = bounds.union(&self.nodes[child_idx].bounds).half_perimeter();
-                if child_height < best_height || (child_height == best_height && cost < best_cost) {
-                    best_height = child_height;
+                if cost < best_cost {
                     best_cost = cost;
                     best_child_idx = child_idx;
                     best_child_pos = pos;
@@ -344,7 +346,6 @@ where
                     self.nodes.push(Node {
                         bounds: sibling_bounds.union(&bounds),
                         max_order: new_internal_max,
-                        height: 1,
                         kind: NodeKind::Internal {
                             children: new_children,
                         },
@@ -374,20 +375,7 @@ where
         // Propagate bounds and max_order updates up the tree
         let mut updated_child_idx = None;
         for &node_idx in self.insert_path.iter().rev() {
-            let height = match &self.nodes[node_idx].kind {
-                NodeKind::Leaf { .. } => 0,
-                NodeKind::Internal { children } => {
-                    children
-                        .as_slice()
-                        .iter()
-                        .map(|&child_idx| self.nodes[child_idx].height)
-                        .max()
-                        .unwrap_or(0)
-                        + 1
-                }
-            };
             let node = &mut self.nodes[node_idx];
-            node.height = height;
             node.bounds = node.bounds.union(&bounds);
 
             if node.max_order < order {
@@ -435,173 +423,6 @@ mod tests {
     use super::*;
     use crate::{Bounds, Point, Size};
     use rand::{Rng, SeedableRng};
-
-    fn bounds(x: f32, y: f32, width: f32, height: f32) -> Bounds<f32> {
-        Bounds {
-            origin: Point { x, y },
-            size: Size { width, height },
-        }
-    }
-
-    fn check_subtree(tree: &BoundsTree<f32>, index: usize) -> (usize, Bounds<f32>, u32) {
-        let node = &tree.nodes[index];
-        match &node.kind {
-            NodeKind::Leaf { order } => {
-                assert_eq!(node.height, 0, "leaf height at node {index}");
-                assert_eq!(node.max_order, *order, "leaf max order at node {index}");
-                (1, node.bounds.clone(), *order)
-            }
-            NodeKind::Internal { children } => {
-                assert!(
-                    (2..=MAX_CHILDREN).contains(&children.len()),
-                    "internal child count at node {index}"
-                );
-                let mut leaf_count = 0;
-                let mut expected_bounds: Option<Bounds<f32>> = None;
-                let mut expected_max = 0;
-                let mut child_min_height = u32::MAX;
-                let mut child_max_height = 0u32;
-                let mut last_child_max = 0;
-                for &child in children.as_slice() {
-                    let (child_leaves, child_bounds, child_max) = check_subtree(tree, child);
-                    leaf_count += child_leaves;
-                    expected_bounds = Some(match expected_bounds {
-                        Some(bounds) => bounds.union(&child_bounds),
-                        None => child_bounds,
-                    });
-                    expected_max = expected_max.max(child_max);
-                    child_min_height = child_min_height.min(tree.nodes[child].height);
-                    child_max_height = child_max_height.max(tree.nodes[child].height);
-                    last_child_max = child_max;
-                }
-                assert!(
-                    child_max_height - child_min_height <= 1,
-                    "unbalanced children at node {index}: min={child_min_height}, max={child_max_height}"
-                );
-                assert_eq!(node.height, child_max_height + 1, "height at node {index}");
-                assert_eq!(node.max_order, expected_max, "max order at node {index}");
-                assert_eq!(
-                    last_child_max, expected_max,
-                    "max-order child must be last at node {index}"
-                );
-                assert_eq!(
-                    node.bounds,
-                    expected_bounds.unwrap(),
-                    "bounds at node {index}"
-                );
-                (leaf_count, node.bounds.clone(), expected_max)
-            }
-        }
-    }
-
-    fn verify_structure_and_queries(tree: &mut BoundsTree<f32>, inserted: &[(Bounds<f32>, u32)]) {
-        let Some(root) = tree.root else {
-            assert!(inserted.is_empty());
-            return;
-        };
-        let (leaf_count, _, max_order) = check_subtree(tree, root);
-        assert_eq!(leaf_count, inserted.len());
-        assert_eq!(tree.max_order(), max_order);
-        let ceil_log2 = usize::BITS as usize - (leaf_count + 1).leading_zeros() as usize;
-        let height = usize::try_from(tree.nodes[root].height).expect("tree height fits usize");
-        assert!(
-            height <= 2 * ceil_log2,
-            "tree height {} exceeds conservative logarithmic bound for {leaf_count} leaves",
-            height
-        );
-
-        for (index, (query, _)) in inserted.iter().enumerate().step_by(7) {
-            let expected = inserted
-                .iter()
-                .filter_map(|(bounds, order)| bounds.intersects(query).then_some(*order))
-                .max()
-                .unwrap_or(0);
-            assert_eq!(
-                tree.find_max_ordering(query),
-                expected,
-                "query at insertion {index}"
-            );
-        }
-    }
-
-    fn exercise_sequence(sequence: Vec<(Bounds<f32>, bool, u32)>) {
-        let mut tree = BoundsTree::default();
-        let mut reference: Vec<(Bounds<f32>, u32)> = Vec::new();
-        let mut floor = 0;
-        for (index, (rect, insert_above_all, requested_floor)) in sequence.into_iter().enumerate() {
-            floor = floor.max(requested_floor);
-            tree.set_order_floor(floor);
-            let expected = if insert_above_all {
-                reference.iter().map(|(_, order)| *order).max().unwrap_or(0) + 1
-            } else {
-                reference
-                    .iter()
-                    .filter_map(|(old, order)| old.intersects(&rect).then_some(*order))
-                    .max()
-                    .unwrap_or(0)
-                    .saturating_add(1)
-                    .max(floor)
-            };
-            let actual = if insert_above_all {
-                tree.insert_above_all(rect.clone())
-            } else {
-                tree.insert(rect.clone())
-            };
-            assert_eq!(actual, expected, "insert {index}");
-            reference.push((rect, actual));
-        }
-        verify_structure_and_queries(&mut tree, &reference);
-    }
-
-    #[test]
-    fn height_first_insertion_stays_balanced_for_adversarial_shapes() {
-        const N: usize = 768;
-
-        let monotonic_tall = (0..N)
-            .map(|i| (bounds(0.0, i as f32 * 12.0, 8.0, 8.0), false, 0))
-            .collect();
-        exercise_sequence(monotonic_tall);
-
-        let alternating_clusters = (0..N)
-            .map(|i| {
-                let x = if i % 2 == 0 { -10_000.0 } else { 10_000.0 };
-                (
-                    bounds(x + (i % 13) as f32 * 3.0, (i / 13) as f32 * 11.0, 4.0, 4.0),
-                    false,
-                    0,
-                )
-            })
-            .collect();
-        exercise_sequence(alternating_clusters);
-
-        let overlap_heavy = (0..N)
-            .map(|i| {
-                let x = (i % 37) as f32 * 1.7;
-                let y = ((i * 19) % 41) as f32 * 1.3;
-                (bounds(x, y, 90.0, 90.0), false, 0)
-            })
-            .collect();
-        exercise_sequence(overlap_heavy);
-
-        let mixed_floor_and_global_order = (0..N)
-            .map(|i| {
-                let rect = bounds(
-                    ((i * 17) % 43) as f32 * 9.0,
-                    ((i * 29) % 47) as f32 * 7.0,
-                    18.0 + (i % 5) as f32,
-                    12.0 + (i % 3) as f32,
-                );
-                let above_all = i % 23 == 0;
-                let floor = if i % 71 == 0 {
-                    (i / 71 + 1) as u32 * 3
-                } else {
-                    0
-                };
-                (rect, above_all, floor)
-            })
-            .collect();
-        exercise_sequence(mixed_floor_and_global_order);
-    }
 
     #[test]
     fn test_insert() {

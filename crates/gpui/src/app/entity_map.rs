@@ -1,12 +1,12 @@
 use crate::{App, AppContext, GpuiBorrow, VisualContext, Window, seal::Sealed};
 use anyhow::{Context as _, Result};
-use collections::{FxHashMap, FxHashSet};
+use collections::FxHashSet;
 use derive_more::{Deref, DerefMut};
 use parking_lot::{RwLock, RwLockUpgradableReadGuard};
 use slotmap::{KeyData, SecondaryMap, SlotMap};
 use std::{
     any::{Any, TypeId, type_name},
-    cell::RefCell,
+    cell::{Cell, RefCell},
     cmp::Ordering,
     fmt::{self, Display},
     hash::{Hash, Hasher},
@@ -30,21 +30,6 @@ slotmap::new_key_type! {
     /// Two entities never share an id, even after one has been released and its slot is reused. Get the
     /// id of a handle with [`Entity::entity_id`] or [`AnyEntity::entity_id`].
     pub struct EntityId;
-}
-
-#[derive(Clone, Default)]
-pub(crate) struct ViewDependencies {
-    pub(crate) entities: FxHashSet<EntityId>,
-    pub(crate) globals: FxHashMap<TypeId, u64>,
-}
-
-impl ViewDependencies {
-    pub(crate) fn extend(&mut self, other: &Self) {
-        self.entities.extend(other.entities.iter().copied());
-        for (global_type, revision) in &other.globals {
-            self.globals.entry(*global_type).or_insert(*revision);
-        }
-    }
 }
 
 impl From<u64> for EntityId {
@@ -79,6 +64,9 @@ impl Display for EntityId {
 pub(crate) struct EntityMap {
     entities: SecondaryMap<EntityId, Box<dyn Any>>,
     pub accessed_entities: RefCell<FxHashSet<EntityId>>,
+    /// While a dependency recording is open, every entity read, in order and with repeats.
+    pub(crate) access_log: RefCell<Vec<EntityId>>,
+    pub(crate) recordings: Cell<usize>,
     ref_counts: Arc<RwLock<EntityRefCounts>>,
 }
 
@@ -99,6 +87,8 @@ impl EntityMap {
         Self {
             entities: SecondaryMap::new(),
             accessed_entities: RefCell::new(FxHashSet::default()),
+            access_log: RefCell::default(),
+            recordings: Cell::new(0),
             ref_counts: Arc::new(RwLock::new(EntityRefCounts {
                 counts: SlotMap::with_key(),
                 dropped_entity_ids: Vec::new(),
@@ -148,8 +138,7 @@ impl EntityMap {
     where
         T: 'static,
     {
-        let mut accessed_entities = self.accessed_entities.get_mut();
-        accessed_entities.insert(slot.entity_id);
+        self.note_access(slot.entity_id);
 
         let handle = slot.0;
         self.entities.insert(handle.entity_id, Box::new(entity));
@@ -200,12 +189,6 @@ impl EntityMap {
         );
     }
 
-    pub fn extend_accessed(&mut self, entities: &FxHashSet<EntityId>) {
-        self.accessed_entities
-            .get_mut()
-            .extend(entities.iter().copied());
-    }
-
     pub fn clear_accessed(&mut self) {
         self.accessed_entities.get_mut().clear();
     }
@@ -233,14 +216,20 @@ impl EntityMap {
 
     #[inline(never)]
     fn read_inner(&self, entity_id: EntityId) -> Option<&dyn Any> {
-        let mut accessed_entities = self.accessed_entities.borrow_mut();
-        accessed_entities.insert(entity_id);
+        self.note_access(entity_id);
         self.entities.get(entity_id).map(Box::as_ref)
+    }
+
+    pub(crate) fn note_access(&self, entity_id: EntityId) {
+        self.accessed_entities.borrow_mut().insert(entity_id);
+        if self.recordings.get() > 0 {
+            self.access_log.borrow_mut().push(entity_id);
+        }
     }
 
     #[inline(never)]
     fn lease_inner(&mut self, entity_id: EntityId) -> Option<Box<dyn Any>> {
-        self.accessed_entities.get_mut().insert(entity_id);
+        self.note_access(entity_id);
         self.entities.remove(entity_id)
     }
 

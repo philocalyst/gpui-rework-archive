@@ -1,8 +1,8 @@
-use super::inline::{InlineTextMetrics, InlineVisualLine};
 use crate::{
     Bounds, FontId, GlyphId, InlineBidiScope, InlineBoxRequest, InlineLayoutRequest,
-    InlineTextStyle, Pixels, PlatformTextSystem, Point, SharedString, Size, StrikethroughStyle,
-    TextLayoutOptions, TextLayoutRequest, TextRun, UnderlineStyle, VerticalAlign,
+    InlineTextMetrics, InlineTextStyle, InlineVisualLine, Pixels, PlatformTextSystem, Point,
+    SharedString, Size, StrikethroughStyle, TextLayoutOptions, TextLayoutRequest, TextRun,
+    UnderlineStyle, VerticalAlign,
 };
 use collections::FxHashMap;
 use palette::Hsla;
@@ -14,7 +14,7 @@ use std::{
     ops::Range,
     sync::{
         Arc,
-        atomic::{AtomicUsize, Ordering},
+        atomic::{AtomicU64, Ordering},
     },
 };
 
@@ -46,7 +46,6 @@ pub struct LineLayout {
 }
 
 /// An atomic box from an inline layout, with the position the layout gave it.
-/// The position assigned to an element embedded in text.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct PositionedInlineBox {
     /// The identifier from the matching [`InlineBoxRequest::id`].
@@ -453,27 +452,16 @@ impl From<&TextRun> for PaintStyle {
 }
 
 /// A run of glyphs that share one font and one style, positioned on a visual line.
-/// A positioned, style-specific glyph run painted on one visual line.
 #[derive(Clone, Debug, PartialEq)]
 pub struct PaintFragment {
     /// Index of the input text run that supplies paint properties.
     pub source_run: usize,
-    /// Original UTF-8 byte range represented by this visual fragment.
-    pub source_range: Range<usize>,
     /// Canonical font used by the glyphs.
     pub font_id: FontId,
     /// Resolved size of this shaped run.
     pub font_size: Pixels,
     /// Positioned glyphs local to the visual line.
     pub glyphs: Arc<[ShapedGlyph]>,
-    /// Exact UTF-8 source range owned by each glyph's backend shaping cluster.
-    ///
-    /// Parley supplies one range per glyph, with glyphs in a shaping cluster sharing the
-    /// cluster range. These are not Unicode grapheme ranges: a grapheme may span several
-    /// clusters, or a cluster may span several graphemes. Slicing requires both grapheme
-    /// boundaries and complete cluster coverage. Backends without native mapping use None.
-    #[doc(hidden)]
-    pub glyph_source_ranges: Option<Arc<[Range<usize>]>>,
     /// Horizontal bounds of this fragment.
     pub x_range: Range<Pixels>,
     /// Paint properties shared by every glyph in the fragment.
@@ -1011,8 +999,7 @@ pub(crate) struct LineLayoutCache {
     previous_frame: Mutex<FrameCache>,
     current_frame: RwLock<FrameCache>,
     platform_text_system: Arc<dyn PlatformTextSystem>,
-    font_generation: Arc<AtomicUsize>,
-    cached_font_generation: AtomicUsize,
+    font_generation: AtomicU64,
 }
 
 #[derive(Default)]
@@ -1062,7 +1049,11 @@ where
     }
 
     fn reuse(&mut self, previous: &mut Self, range: Range<usize>) {
-        for key in &previous.used[range] {
+        // A font change clears the previous frame, so a range recorded before it may be stale.
+        let Some(keys) = previous.used.get(range) else {
+            return;
+        };
+        for key in keys {
             if let Some(layout) = previous.entries.remove(key) {
                 self.entries.insert(key.clone(), layout);
             }
@@ -1114,146 +1105,88 @@ fn repaint_shaped_text_layout(
     })
 }
 
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Default)]
 pub(crate) struct LineLayoutIndex {
-    font_generation: usize,
     lines_index: usize,
     shaped_texts_index: usize,
     inline_layouts_index: usize,
 }
 
 impl LineLayoutIndex {
-    pub(crate) fn rebase_from(
-        &mut self,
-        source_start: &Self,
-        source_end: &Self,
-        destination: &Self,
-    ) {
-        // Cache indices are only comparable within the same font generation.
-        // Leave stale indices untouched; reuse_layouts rejects their generation.
-        if self.font_generation != source_start.font_generation
-            || source_start.font_generation != source_end.font_generation
-            || destination.font_generation != source_start.font_generation
-        {
-            return;
+    /// Moves an index taken inside a range that started at `from` to the same place in a copy of
+    /// that range starting at `to`. These indices only decide which layouts stay cached, so an
+    /// index outside the range saturates instead of failing.
+    pub(crate) fn rebased(&self, from: &Self, to: &Self) -> Self {
+        let shift = |index: usize, from: usize, to: usize| index.saturating_sub(from) + to;
+        Self {
+            lines_index: shift(self.lines_index, from.lines_index, to.lines_index),
+            shaped_texts_index: shift(
+                self.shaped_texts_index,
+                from.shaped_texts_index,
+                to.shaped_texts_index,
+            ),
+            inline_layouts_index: shift(
+                self.inline_layouts_index,
+                from.inline_layouts_index,
+                to.inline_layouts_index,
+            ),
         }
-
-        rebase_index(
-            &mut self.lines_index,
-            source_start.lines_index,
-            source_end.lines_index,
-            destination.lines_index,
-        );
-        rebase_index(
-            &mut self.shaped_texts_index,
-            source_start.shaped_texts_index,
-            source_end.shaped_texts_index,
-            destination.shaped_texts_index,
-        );
-        rebase_index(
-            &mut self.inline_layouts_index,
-            source_start.inline_layouts_index,
-            source_end.inline_layouts_index,
-            destination.inline_layouts_index,
-        );
     }
-}
-
-fn rebase_index(
-    index: &mut usize,
-    source_start: usize,
-    source_end: usize,
-    destination_start: usize,
-) {
-    if (source_start..=source_end).contains(index) {
-        *index = destination_start + (*index - source_start);
-    }
-}
-
-fn has_reusable_layouts(range: Range<usize>, previous_len: usize, lane: &str) -> bool {
-    // Empty ranges own no cache entries, so their absolute index does not need
-    // to fit in the previous frame's list.
-    if range.start == range.end {
-        return false;
-    }
-    assert!(
-        range.start < range.end && range.end <= previous_len,
-        "invalid retained {lane} range: {:?}..{:?} of {previous_len} entries",
-        range.start,
-        range.end,
-    );
-    true
 }
 
 impl LineLayoutCache {
-    pub fn new(
-        platform_text_system: Arc<dyn PlatformTextSystem>,
-        font_generation: Arc<AtomicUsize>,
-    ) -> Self {
-        let cached_font_generation = font_generation.load(Ordering::Acquire);
+    pub fn new(platform_text_system: Arc<dyn PlatformTextSystem>) -> Self {
+        let font_generation = platform_text_system.font_generation();
         Self {
             previous_frame: Mutex::default(),
             current_frame: RwLock::default(),
             platform_text_system,
-            font_generation,
-            cached_font_generation: AtomicUsize::new(cached_font_generation),
+            font_generation: AtomicU64::new(font_generation),
         }
     }
 
     pub fn layout_index(&self) -> LineLayoutIndex {
-        let font_generation = self.clear_if_font_generation_changed();
         let frame = self.current_frame.read();
         LineLayoutIndex {
-            font_generation,
             lines_index: frame.lines.used.len(),
             shaped_texts_index: frame.shaped_texts.used.len(),
             inline_layouts_index: frame.inline_layouts.used.len(),
         }
     }
 
-    pub fn reuse_layouts(&self, range: Range<LineLayoutIndex>) {
-        let font_generation = self.clear_if_font_generation_changed();
-        if range.start.font_generation != font_generation
-            || range.end.font_generation != font_generation
-        {
-            return;
-        }
-        let mut current_frame = &mut *self.current_frame.write();
-        let mut previous_frame = &mut *self.previous_frame.lock();
+    /// Invalidates every cached layout after backend shaping state changes.
+    pub fn clear(&self) {
+        *self.previous_frame.lock() = FrameCache::default();
+        *self.current_frame.write() = FrameCache::default();
+    }
 
-        let line_range = range.start.lines_index..range.end.lines_index;
-        if has_reusable_layouts(line_range.clone(), previous_frame.lines.used.len(), "line") {
-            current_frame
-                .lines
-                .reuse(&mut previous_frame.lines, line_range);
-        }
-        let shaped_range = range.start.shaped_texts_index..range.end.shaped_texts_index;
-        if has_reusable_layouts(
-            shaped_range.clone(),
-            previous_frame.shaped_texts.used.len(),
-            "shaped-text",
-        ) {
-            current_frame
-                .shaped_texts
-                .reuse(&mut previous_frame.shaped_texts, shaped_range);
-        }
-        let inline_range = range.start.inline_layouts_index..range.end.inline_layouts_index;
-        if has_reusable_layouts(
-            inline_range.clone(),
-            previous_frame.inline_layouts.used.len(),
-            "inline-layout",
-        ) {
-            current_frame
-                .inline_layouts
-                .reuse(&mut previous_frame.inline_layouts, inline_range);
+    fn sync_font_generation(&self) {
+        let generation = self.platform_text_system.font_generation();
+        if self.font_generation.load(Ordering::Acquire) != generation {
+            self.clear();
+            self.font_generation.store(generation, Ordering::Release);
         }
     }
 
+    pub fn reuse_layouts(&self, range: Range<LineLayoutIndex>) {
+        let mut previous_frame = &mut *self.previous_frame.lock();
+        let mut current_frame = &mut *self.current_frame.write();
+
+        current_frame.lines.reuse(
+            &mut previous_frame.lines,
+            range.start.lines_index..range.end.lines_index,
+        );
+        current_frame.shaped_texts.reuse(
+            &mut previous_frame.shaped_texts,
+            range.start.shaped_texts_index..range.end.shaped_texts_index,
+        );
+        current_frame.inline_layouts.reuse(
+            &mut previous_frame.inline_layouts,
+            range.start.inline_layouts_index..range.end.inline_layouts_index,
+        );
+    }
+
     pub fn truncate_layouts(&self, index: LineLayoutIndex) {
-        let font_generation = self.clear_if_font_generation_changed();
-        if index.font_generation != font_generation {
-            return;
-        }
         let mut current_frame = &mut *self.current_frame.write();
         current_frame.lines.used.truncate(index.lines_index);
         current_frame
@@ -1267,9 +1200,8 @@ impl LineLayoutCache {
     }
 
     pub fn finish_frame(&self) {
-        let _font_generation = self.clear_if_font_generation_changed();
-        let mut curr_frame = self.current_frame.write();
         let mut prev_frame = self.previous_frame.lock();
+        let mut curr_frame = self.current_frame.write();
         std::mem::swap(&mut *prev_frame, &mut *curr_frame);
         curr_frame.lines.clear();
         curr_frame.shaped_texts.clear();
@@ -1287,7 +1219,7 @@ impl LineLayoutCache {
         Text: AsRef<str>,
         SharedString: From<Text>,
     {
-        let _font_generation = self.clear_if_font_generation_changed();
+        self.sync_font_generation();
         let wrap_width = options.wrap_width;
         let shaping_runs = runs.iter().map(ShapingRun::from).collect::<SmallVec<_>>();
         let key = &CacheKeyRef {
@@ -1350,7 +1282,7 @@ impl LineLayoutCache {
         Text: AsRef<str>,
         SharedString: From<Text>,
     {
-        let _font_generation = self.clear_if_font_generation_changed();
+        self.sync_font_generation();
         let shaping_runs = runs.iter().map(ShapingRun::from).collect::<SmallVec<_>>();
         let key = &CacheKeyRef {
             text: text.as_ref(),
@@ -1389,7 +1321,7 @@ impl LineLayoutCache {
     }
 
     pub fn layout_inline(&self, request: InlineLayoutRequest<'_>) -> Arc<InlineLayout> {
-        let _font_generation = self.clear_if_font_generation_changed();
+        self.sync_font_generation();
         let key = &request as &dyn AsInlineCacheKeyRef;
         let current_frame = self.current_frame.upgradable_read();
 
@@ -1414,24 +1346,6 @@ impl LineLayoutCache {
         current_frame.inline_layouts.insert(key, layout.clone());
 
         layout
-    }
-
-    fn clear_if_font_generation_changed(&self) -> usize {
-        let font_generation = self.font_generation.load(Ordering::Acquire);
-        if self.cached_font_generation.load(Ordering::Acquire) == font_generation {
-            return font_generation;
-        }
-
-        let mut current_frame = self.current_frame.write();
-        if self.cached_font_generation.load(Ordering::Acquire) == font_generation {
-            return font_generation;
-        }
-
-        *current_frame = FrameCache::default();
-        *self.previous_frame.lock() = FrameCache::default();
-        self.cached_font_generation
-            .store(font_generation, Ordering::Release);
-        font_generation
     }
 }
 
@@ -1588,100 +1502,6 @@ impl AsCacheKeyRef for CacheKeyRef<'_> {
 mod tests {
     use super::*;
     use crate::{point, px, size};
-
-    #[test]
-    fn line_layout_index_rebases_each_lane_within_same_font_generation() {
-        let start = LineLayoutIndex {
-            font_generation: 7,
-            lines_index: 4,
-            shaped_texts_index: 8,
-            inline_layouts_index: 2,
-        };
-        let end = LineLayoutIndex {
-            font_generation: 7,
-            lines_index: 9,
-            shaped_texts_index: 15,
-            inline_layouts_index: 6,
-        };
-        let destination = LineLayoutIndex {
-            font_generation: 7,
-            lines_index: 1,
-            shaped_texts_index: 3,
-            inline_layouts_index: 10,
-        };
-        let mut index = LineLayoutIndex {
-            font_generation: 7,
-            lines_index: 7,
-            shaped_texts_index: 12,
-            inline_layouts_index: 4,
-        };
-
-        index.rebase_from(&start, &end, &destination);
-
-        assert_eq!(
-            index,
-            LineLayoutIndex {
-                font_generation: 7,
-                lines_index: 4,
-                shaped_texts_index: 7,
-                inline_layouts_index: 12,
-            }
-        );
-    }
-
-    #[test]
-    fn line_layout_index_does_not_rebase_across_font_generation_changes() {
-        let start = LineLayoutIndex {
-            font_generation: 7,
-            lines_index: 4,
-            shaped_texts_index: 8,
-            inline_layouts_index: 2,
-        };
-        let end = LineLayoutIndex {
-            font_generation: 7,
-            lines_index: 9,
-            shaped_texts_index: 15,
-            inline_layouts_index: 6,
-        };
-        let destination = LineLayoutIndex {
-            font_generation: 8,
-            lines_index: 1,
-            shaped_texts_index: 3,
-            inline_layouts_index: 10,
-        };
-        let mut stale = LineLayoutIndex {
-            font_generation: 7,
-            lines_index: 7,
-            shaped_texts_index: 12,
-            inline_layouts_index: 4,
-        };
-
-        stale.rebase_from(&start, &end, &destination);
-
-        assert_eq!(stale.lines_index, 7);
-        assert_eq!(stale.shaped_texts_index, 12);
-        assert_eq!(stale.inline_layouts_index, 4);
-        assert_eq!(stale.font_generation, 7);
-    }
-
-    #[test]
-    fn empty_retained_ranges_are_safe_for_every_cache_lane() {
-        assert!(!has_reusable_layouts(50..50, 0, "line"));
-        assert!(!has_reusable_layouts(80..80, 1, "shaped-text"));
-        assert!(!has_reusable_layouts(120..120, 2, "inline-layout"));
-    }
-
-    #[test]
-    fn nonempty_retained_ranges_validate_the_previous_frame_bounds() {
-        let panic = std::panic::catch_unwind(|| has_reusable_layouts(1..2, 1, "shaped-text"))
-            .expect_err("out-of-bounds retained range must panic");
-        let message = panic
-            .downcast_ref::<String>()
-            .map(String::as_str)
-            .or_else(|| panic.downcast_ref::<&str>().copied())
-            .unwrap_or_default();
-        assert!(message.contains("shaped-text"), "{message}");
-    }
 
     #[test]
     fn caret_selection_endpoint_ordering_uses_byte_indices() {

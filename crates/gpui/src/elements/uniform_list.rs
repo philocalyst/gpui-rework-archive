@@ -193,6 +193,12 @@ pub struct ItemSize {
 }
 
 impl UniformListScrollHandle {
+    fn revised(&self) -> std::cell::RefMut<'_, UniformListScrollState> {
+        let state = self.0.borrow_mut();
+        state.base_handle.revision().bump();
+        state
+    }
+
     /// Creates a handle that isn't attached to a list yet.
     ///
     /// Pass it to [`UniformList::track_scroll`] when you build the list.
@@ -245,7 +251,7 @@ impl UniformListScrollHandle {
     /// window.read(|rows, _| assert_eq!(rows.scroll.0.borrow().base_handle.offset().y, px(-96.)));
     /// ```
     pub fn scroll_to_item(&self, ix: usize, strategy: ScrollStrategy) {
-        self.0.borrow_mut().deferred_scroll_to_item = Some(DeferredScrollToItem {
+        self.revised().deferred_scroll_to_item = Some(DeferredScrollToItem {
             item_index: ix,
             strategy,
             offset: 0,
@@ -260,7 +266,7 @@ impl UniformListScrollHandle {
     /// when a row must land at a fixed position, such as the top after a keyboard jump. The scroll
     /// takes effect on the next prepaint; see [`Self::scroll_to_item`] for an example.
     pub fn scroll_to_item_strict(&self, ix: usize, strategy: ScrollStrategy) {
-        self.0.borrow_mut().deferred_scroll_to_item = Some(DeferredScrollToItem {
+        self.revised().deferred_scroll_to_item = Some(DeferredScrollToItem {
             item_index: ix,
             strategy,
             offset: 0,
@@ -279,7 +285,7 @@ impl UniformListScrollHandle {
     ///
     /// This is non-strict, so a row that is visible below the cleared rows doesn't move the list.
     pub fn scroll_to_item_with_offset(&self, ix: usize, strategy: ScrollStrategy, offset: usize) {
-        self.0.borrow_mut().deferred_scroll_to_item = Some(DeferredScrollToItem {
+        self.revised().deferred_scroll_to_item = Some(DeferredScrollToItem {
             item_index: ix,
             strategy,
             offset,
@@ -296,7 +302,7 @@ impl UniformListScrollHandle {
         strategy: ScrollStrategy,
         offset: usize,
     ) {
-        self.0.borrow_mut().deferred_scroll_to_item = Some(DeferredScrollToItem {
+        self.revised().deferred_scroll_to_item = Some(DeferredScrollToItem {
             item_index: ix,
             strategy,
             offset,
@@ -380,10 +386,6 @@ impl Element for UniformList {
         window: &mut Window,
         cx: &mut App,
     ) -> (LayoutId, Self::RequestLayoutState) {
-        // A tracked handle can receive scroll requests without notifying the owning view.
-        if self.scroll_handle.is_some() {
-            window.mark_cached_views_frame_bound();
-        }
         let max_items = self.item_count;
         let item_size = self.measure_item(None, window, cx);
         let layout_id = self.interactivity.request_layout(
