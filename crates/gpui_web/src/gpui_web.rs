@@ -3,26 +3,14 @@
 //! force either backend with `WebBackendPreference`. Opening a second top-level window, or
 //! reopening one after it closes, returns `WebWindowError`.
 
-pub mod canvas_fallback;
-
-pub use canvas_fallback::CanvasFontFallback;
-
-#[cfg(any(target_family = "wasm", test))]
-mod canvas_layout;
-#[cfg(target_family = "wasm")]
-mod canvas_text;
 #[cfg(target_family = "wasm")]
 mod dispatcher;
 #[cfg(target_family = "wasm")]
 mod display;
 #[cfg(target_family = "wasm")]
 mod events;
-#[cfg(any(target_family = "wasm", test))]
-mod glyph_cache;
 #[cfg(target_family = "wasm")]
 mod http_client;
-#[cfg(any(target_family = "wasm", test))]
-mod ime_diff;
 #[cfg(target_family = "wasm")]
 mod ime_mirror;
 #[cfg(target_family = "wasm")]
@@ -31,10 +19,6 @@ mod keyboard;
 mod logging;
 #[cfg(target_family = "wasm")]
 mod platform;
-#[cfg(any(target_family = "wasm", test))]
-mod run_replacements;
-#[cfg(target_family = "wasm")]
-mod text_system;
 #[cfg(target_family = "wasm")]
 mod viewport;
 #[cfg(target_family = "wasm")]

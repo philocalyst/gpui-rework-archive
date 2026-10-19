@@ -46,7 +46,7 @@ use crate::{
     Action, AnyWindowHandle, App, AsyncWindowContext, BackgroundExecutor, Bounds,
     DEFAULT_WINDOW_SIZE, DevicePixels, DispatchEventResult, Edges, ExternalDragPayload, Font,
     FontId, FontMetrics, ForegroundExecutor, GlyphAtlasEntry, GlyphId, GpuSpecs, ImageSource,
-    InlineLayout, InlineLayoutRequest, Keymap, LineLayout, MissingGlyphSink, Pixels,
+    InlineLayout, InlineLayoutRequest, Keymap, LineLayout, Pixels,
     PlatformGestures, PlatformInput, Point, PreparedRasterStyle, Priority, RasterStyleRequest,
     RasterizedGlyph, RasterizedGlyphFormat, RenderGlyphParams, RenderImage, RenderImageParams,
     RenderSvgParams, Scene, SharedString, Size, SvgRenderer, SystemWindowTab, Task,
@@ -798,9 +798,6 @@ pub trait PlatformDisplay: Debug {
     /// [`Window::refresh_interval`](crate::Window::refresh_interval).
     fn refresh_interval(&self) -> Option<Duration>;
 
-    /// Get the visible bounds for this display, excluding taskbar/dock areas.
-    /// This is the usable area where windows can be placed without being obscured.
-    /// Defaults to the full display bounds if not overridden.
     /// Returns the usable bounds, excluding the menu bar, Dock and taskbar.
     ///
     /// Defaults to [`PlatformDisplay::bounds`] when a backend doesn't override it.
@@ -1957,9 +1954,6 @@ pub trait PlatformTextSystem: Send + Sync {
     ///
     /// Returns an error if any of the bytes can't be parsed as a font.
     fn add_fonts(&self, fonts: Vec<Cow<'static, [u8]>>) -> Result<()>;
-    /// Installs a nonblocking sink for unresolved grapheme clusters.
-    fn set_missing_glyph_sink(&self, _sink: Option<Arc<dyn MissingGlyphSink>>) {}
-    /// Get all available font names.
     /// Returns the names of every font family available to layout.
     fn all_font_names(&self) -> Vec<String>;
     /// Returns a number that changes whenever the font collection changes, so caches can detect stale entries.
@@ -2494,13 +2488,9 @@ mod tests {
             let paint_fragments = (!glyphs.is_empty())
                 .then(|| PaintFragment {
                     source_run: 0,
-                    source_range: 0..shaping_runs
-                        .first()
-                        .map_or(text.len(), |run| run.len.min(text.len())),
                     font_id: FontId(0),
                     font_size,
                     glyphs: glyphs.into(),
-                    glyph_source_ranges: None,
                     x_range: Pixels::ZERO..advance,
                     style: shaping_runs
                         .first()

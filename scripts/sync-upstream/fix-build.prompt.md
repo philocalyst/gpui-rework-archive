@@ -14,8 +14,7 @@ or a test failure (see the output above). Fix it so the gate passes.
    **vendored in-tree** as dirs `crates/gpui_collections`, `crates/gpui_zed_util`,
    `crates/gpui_ce_util`, `crates/gpui_sum_tree`, `crates/gpui_refineable`,
    `crates/gpui_derive_refineable`, `crates/gpui_scheduler`, `crates/gpui_media`,
-   `crates/gpui_path`, and `crates/gpui_bench_metrics` (package `gpui_ce_bench_metrics`,
-   `[lib] name = "bench_metrics"`) (packages `gpui_ce_*`, `[lib] name` = upstream name so `use` sites are
+   `crates/gpui_path` (packages `gpui_ce_*`, `[lib] name` = upstream name so `use` sites are
    unchanged) and are **synced by this same tool** — so if gpui needs a new API from one of them,
    it should already be present from the merge. Prefer using that API; only hand-add to a vendored
    crate if the merge genuinely didn't bring it (and say so in your summary).
@@ -58,16 +57,12 @@ or a test failure (see the output above). Fix it so the gate passes.
    (`gpui-ce` for the main crate; see `crates/gpui_path` / `crates/gpui_zed_util` for the current
    template, keeping `[lib] name` as the upstream crate name so `use` sites are unchanged), match
    the siblings' `version`/`edition`/`publish`/`description`/`repository`, convert workspace/git deps to gpui-ce's
-   sourcing convention (rule 6), and add the crate to root workspace membership. Inspect license
-   texts, source notices, and relevant history; do not infer licensing from Cargo metadata alone or
-   reclassify a crate solely because its manifest field changed. Preserve verified compatible license
-   evidence and flag genuinely incompatible source for human review.
-   For bench_metrics specifically, the source and Apache-2.0 license have been verified; map it to
-   crates/gpui_bench_metrics, use package gpui_ce_bench_metrics with [lib] name = bench_metrics,
-   and preserve its Apache license text and notices.
-   For `bench_metrics` specifically, the source and Apache-2.0 license have been verified; map it
-   to `crates/gpui_bench_metrics`, use package `gpui_ce_bench_metrics` with `[lib] name = "bench_metrics"`,
-   and preserve its Apache license text/notices.
+   sourcing convention (rule 6), add the crate to the root `Cargo.toml` members, and **set
+   `license = "Apache-2.0"`** — gpui-ce is Apache-only, and an upstream manifest may declare another
+   license (or contradict its own bundled license file). Also copy a sibling's `LICENSE-APACHE` file
+   into the new crate dir; upstream ships that as a symlink to a root file gpui-ce doesn't have, so
+   the link would dangle. Call out in your summary anything whose license looks non-Apache, and do
+   NOT silently vendor code that genuinely is — flag it for a human instead.
 
 When finished, briefly summarize the fixes and anything a human should double-check (especially
 changes to macOS/Windows-only code that this host can't fully compile, and any tests you judged to

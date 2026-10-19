@@ -68,6 +68,17 @@ pub fn utf16_to_utf8_offset(text: &str, utf16_offset: usize) -> usize {
 /// the same meaning as the matching method on [`InputHandler`], which documents
 /// the platform side.
 ///
+/// On touch platforms, dismissing the software keyboard can leave the view focused. Call
+/// [`Window::request_virtual_keyboard`] from an editing gesture, such as a tap on the field,
+/// to show it again. After edits or selection changes that your app makes itself, call
+/// [`Window::notify_text_input_changed`] or [`Window::notify_text_selection_changed`] so the
+/// platform's text services stay in sync. UIKit also needs
+/// [`text_length_utf16`](Self::text_length_utf16), or a bounded
+/// [`text_input_editable_range`](Self::text_input_editable_range), and
+/// [`set_selected_text_range`](Self::set_selected_text_range). For native selection
+/// rectangles, implement [`selection_bounds_for_range`](Self::selection_bounds_for_range),
+/// which returns all of a range's line fragments at once.
+///
 /// The text guide has a complete editable field: [text input](crate::_documentation::guides::text_input).
 ///
 /// # Examples
@@ -188,20 +199,6 @@ pub fn utf16_to_utf8_offset(text: &str, utf16_offset: usize) -> usize {
 /// window.simulate_input("Ada");
 /// assert_eq!(window.read(|field, _| field.text.clone()), "Ada");
 /// ```
-/// Dismissing the software keyboard can leave the component focused. Call
-/// [`Window::request_virtual_keyboard`] from an editing gesture, such as tapping
-/// the field, to reopen it; repainting alone should not undo a dismissal.
-///
-/// After application-driven edits or selection changes, also call
-/// [`Window::notify_text_input_changed`] or [`Window::notify_text_selection_changed`]
-/// so native text services can invalidate their state.
-///
-/// UIKit text input also needs `text_length_utf16` (or a bounded
-/// `text_input_editable_range`) and native selection updates through
-/// `set_selected_text_range`. Supply `selection_bounds_for_range` for native
-/// selection rectangles; it should return line/run fragments in one batch.
-///
-/// See [`InputHandler`] for details on how to implement each method.
 pub trait EntityInputHandler: 'static + Sized {
     /// Returns the text in a UTF-16 range, for the platform to read back.
     ///

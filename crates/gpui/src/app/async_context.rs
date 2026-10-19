@@ -240,7 +240,6 @@ impl AsyncApp {
         self.background_executor.is_test()
     }
 
-    /// Get an executor which can be used to spawn futures in the foreground.
     /// Returns the [`ForegroundExecutor`], for running futures on the main thread.
     pub fn foreground_executor(&self) -> &ForegroundExecutor {
         &self.foreground_executor
@@ -254,7 +253,6 @@ impl AsyncApp {
     ///
     /// Panics if the app has been released, or if it is already borrowed, such as when
     /// called from inside another update.
-    /// Invoke the given function in the context of the app, then flush any effects produced during its invocation.
     #[inline(always)]
     pub fn update<R>(&self, f: impl FnOnce(&mut App) -> R) -> R {
         let app = self.app();
@@ -337,7 +335,6 @@ impl AsyncApp {
     /// # Panics
     ///
     /// Panics if no global of type `G` has been set, or if the app has been released.
-    /// Panics if no global state of the specified type has been assigned.
     #[inline(always)]
     pub fn read_global<G: Global, R>(&self, read: impl FnOnce(&G, &App) -> R) -> R {
         let app = self.app();
@@ -487,7 +484,6 @@ impl AsyncWindowContext {
     ///
     /// Returns an error if the window has closed, or if the app is quitting or already
     /// borrowed.
-    /// A convenience method for [`App::update_window`].
     #[inline(always)]
     pub fn update<R>(&mut self, update: impl FnOnce(&mut Window, &mut App) -> R) -> Result<R> {
         self.app
@@ -499,7 +495,6 @@ impl AsyncWindowContext {
     /// # Errors
     ///
     /// Returns an error under the same conditions as [`AsyncWindowContext::update`].
-    /// A convenience method for [`App::update_window`].
     #[inline(always)]
     pub fn update_root<R>(
         &mut self,

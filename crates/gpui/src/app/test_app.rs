@@ -810,7 +810,6 @@ impl<V: 'static + Render> TestAppWindow<V> {
     /// Call this after building the view and after anything changes its layout, before
     /// simulating a click at a position. It doesn't run pending tasks. See the example
     /// on [`TestApp`].
-    /// Force a redraw of the window.
     pub fn draw(&mut self) {
         let mut app = self.app.borrow_mut();
         let any_handle: AnyWindowHandle = self.handle.into();

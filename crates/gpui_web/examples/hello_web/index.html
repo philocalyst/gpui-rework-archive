@@ -12,8 +12,6 @@
         <link data-trunk rel="rust" data-type="worker" data-bin="text" data-bindgen-target="web" data-wasm-opt="0" />
         <link data-trunk rel="rust" data-type="worker" data-bin="input" data-bindgen-target="web" data-wasm-opt="0" />
         <script data-trunk type="module" src="gallery.js"></script>
-        <link data-trunk rel="rust" data-type="worker" data-bin="dynamic_fonts" data-bindgen-target="web" data-wasm-opt="0" />
-        <link data-trunk rel="rust" data-type="worker" data-bin="font_fallback_test" data-bindgen-target="web" data-wasm-opt="0" />
         <link data-trunk rel="rust" data-type="worker" data-bin="queue_test" data-bindgen-target="web" data-wasm-opt="0" />
         <link data-trunk rel="rust" data-type="worker" data-bin="http_client_test" data-bindgen-target="web" data-wasm-opt="0" />
         <style>
@@ -100,8 +98,7 @@
             <ul>
                 <li><a href="/hello-world" data-module="hello_world"><strong>Hello world</strong><span>Basic GPUI layout and styling.</span></a></li>
                 <li><a href="/text" data-module="text"><strong>Styled text</strong><span>Typography, font sizes, and line heights.</span></a></li>
-                <li><a href="/input" data-module="input"><strong>Text input</strong><span>Editing and Canvas glyph fallback.</span></a></li>
-                <li><a href="/dynamic-fonts" data-module="dynamic_fonts"><strong>Dynamic fonts</strong><span>Download a font when missing glyphs are reported.</span></a></li>
+                <li><a href="/input" data-module="input"><strong>Text input</strong><span>Typing, cursor movement, and selections.</span></a></li>
                 <li><a href="/prime-sieve" data-module="hello_web"><strong>Prime sieve</strong><span>Background tasks and progress updates.</span></a></li>
             </ul>
         </main>

@@ -616,11 +616,8 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
     /// Runs queued foreground tasks on this thread, and waits for background work in flight to finish.
     ///
     /// Timers that aren't due yet are not waited for. See [`ThreadedDispatcher::run_until_idle`].
-    /// Runs queued foreground tasks on this thread and waits for in flight
-    /// background work to finish. Timers that aren't due yet are not waited
-    /// for (see [`ThreadedDispatcher::run_until_idle`]). Scheduled frames are
-    /// delivered after each task poll and when there are no ready tasks, but
-    /// animations alone do not keep this method running.
+    /// Scheduled frames are delivered after each task poll and whenever no task is ready,
+    /// but animations alone don't keep this running.
     pub fn run_until_idle(&self) {
         let dispatcher = self
             .background_executor
@@ -664,10 +661,9 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
     /// Runs main-thread tasks until `ready` returns `Some`, and returns that value.
     ///
     /// Unlike [`BenchAppContext::run_until_idle`], this stops as soon as `ready` is
-    /// satisfied, leaving other queued work pending.
-    /// While incomplete, scheduled frames run after each task poll and while
-    /// waiting for work. Readiness is checked before frame delivery, so completion
-    /// does not wait for a final presentation; renderer sessions do that explicitly.
+    /// satisfied, leaving other queued work pending. Until then, scheduled frames run
+    /// after each task poll and while waiting for work. `ready` is checked before frames
+    /// are delivered, so this doesn't wait for a final presentation.
     pub fn run_until<R>(&self, ready: impl FnMut() -> Option<R>) -> R {
         self.background_executor
             .dispatcher()
@@ -685,10 +681,9 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
     /// Measures `benchmark` with Criterion's iteration loop.
     ///
     /// `benchmark` runs once per Criterion iteration and receives this context, so it
-    /// can update GPUI state. Window draws it triggers are recorded in the report.
-    /// The closure is invoked once per Criterion iteration with this
-    /// benchmark app context so it can update GPUI state. Each iteration then
-    /// delivers the scheduled frame batch, without draining foreground tasks.
+    /// can update GPUI state. After each iteration the scheduled frames are delivered,
+    /// without running other foreground tasks, and the window draws are recorded in the
+    /// report.
     ///
     /// # Panics
     ///

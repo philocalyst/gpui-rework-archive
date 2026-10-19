@@ -14,8 +14,4 @@ pub mod thermal;
 mod text_system;
 
 pub use dispatcher::{AppleActivity, AppleDispatcher};
-#[cfg(target_os = "ios")]
-pub use text_system::AppleTextSystem;
 pub use text_system::MacTextSystem;
-#[cfg(target_os = "macos")]
-pub use text_system::MacTextSystem as AppleTextSystem;

@@ -509,9 +509,6 @@ impl<'a, T: 'static> Context<'a, T> {
     /// ```
     ///
     /// See [ownership and data flow](crate::_documentation::concepts::ownership).
-    /// Many GPUI callbacks take the form of `Fn(&E, &mut Window, &mut App)`,
-    /// but it's often useful to be able to access view state in these
-    /// callbacks. This method provides a convenient way to do so.
     #[inline(always)]
     pub fn listener<E: ?Sized>(
         &self,
@@ -752,7 +749,6 @@ impl<'a, T: 'static> Context<'a, T> {
         subscription
     }
 
-    /// Registers a callback to be invoked when the window appearance changes.
     /// Calls `callback` when the system appearance changes between light and dark.
     ///
     /// Keep the returned [`Subscription`] alive for as long as you want the callback to run. The callback
@@ -794,7 +790,6 @@ impl<'a, T: 'static> Context<'a, T> {
         subscription
     }
 
-    /// Registers a callback to be invoked when the window button layout changes.
     /// Calls `callback` when the window's titlebar button layout changes.
     ///
     /// Keep the returned [`Subscription`] alive for as long as you want the callback to run. The callback
@@ -816,13 +811,10 @@ impl<'a, T: 'static> Context<'a, T> {
         subscription
     }
 
-    /// Calls `f` for each key-down keystroke in any window that reaches the end of dispatch, or that a
-    /// key binding handles.
+    /// Calls `f` with this entity for each keystroke that [`App::observe_keystrokes`] observes.
     ///
-    /// The keystroke's `action` is set when a key binding handled it. The callback doesn't run when a
-    /// focused element's listener stops propagation. Keep the returned [`Subscription`] alive for as long
-    /// as you want the callback to run.
-    /// Registers a callback for [`App::observe_keystrokes`] that updates this entity.
+    /// The keystroke's `action` is set when a key binding handled it. Keep the returned
+    /// [`Subscription`] alive for as long as you want the callback to run.
     pub fn observe_keystrokes(
         &mut self,
         mut f: impl FnMut(&mut T, &KeystrokeEvent, &mut Window, &mut Context<T>) + 'static,
