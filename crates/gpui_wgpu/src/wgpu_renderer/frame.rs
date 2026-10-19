@@ -140,7 +140,7 @@ impl PreparedTargets {
 fn begin_frame(renderer: &mut WgpuRenderer) -> bool {
     // The generation belongs to this renderer, so polling cannot consume an error
     // notification from another renderer sharing the same device.
-    let surface_error = renderer.faults.pending_error.lock().unwrap().take();
+    let surface_error = renderer.faults.pending_error.take();
     let error = surface_error.or_else(|| {
         renderer
             .faults
@@ -269,7 +269,7 @@ impl FrameRequirements {
         let mut instance_batches = 0_u64;
         let mut reserve = |element_size: usize, count: usize| {
             if count > 0 {
-                let stride = element_size as u64;
+                let stride = transport.element_stride(element_size as u64);
                 storage_bytes = storage_bytes.next_multiple_of(transport.batch_alignment(stride));
                 storage_bytes = storage_bytes.saturating_add(stride.saturating_mul(count as u64));
                 instance_batches += 1;

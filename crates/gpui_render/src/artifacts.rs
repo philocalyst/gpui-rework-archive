@@ -159,45 +159,58 @@ mod tests {
             .unwrap_or_else(|| panic!("generated {name} function must exist"))
     }
 
+    /// The generated expression for word `word` of a downlevel element.
+    fn word(word: usize) -> String {
+        format!("t{}.{}", word / 4, ["x", "y", "z", "w"][word % 4])
+    }
+
     #[test]
     fn downlevel_background_array_uses_host_element_stride() {
-        let decoder = generated_function(BASE_DOWNLEVEL_WGSL, "dl_load_Background_impl");
-        let element_stride = std::mem::size_of::<gpui::LinearColorStop>() / 4;
-        let second_element_offset = 7 + element_stride;
+        let decoder = generated_function(BASE_DOWNLEVEL_WGSL, "dl_load_Quad_impl");
+        let mut backgrounds = [
+            std::mem::offset_of!(gpui::Quad, background) / 4,
+            std::mem::offset_of!(gpui::Quad, border_color) / 4,
+        ];
+        backgrounds.sort();
+        let stop_stride = std::mem::size_of::<gpui::LinearColorStop>() / 4;
+        let stops = decoder
+            .split("LinearColorStop(")
+            .skip(1)
+            .collect::<Vec<_>>();
 
-        assert!(
-            decoder.contains("base + 7u"),
-            "Background decoder must load its first color stop at word 7"
+        assert_eq!(
+            stops.len(),
+            4,
+            "Quad decoder must decode two stops per background"
         );
-        assert!(
-            decoder.contains(&format!("base + {second_element_offset}u")),
-            "Background decoder must use the host LinearColorStop stride"
-        );
-        assert!(
-            !decoder.contains("base + 17u)), dl_scene_word"),
-            "Background decoder must not read padding as the second color stop"
-        );
+        for (index, stop) in stops.into_iter().enumerate() {
+            let first = word(backgrounds[index / 2] + 7 + index % 2 * stop_stride);
+            assert!(
+                stop.starts_with(&format!("Hsla(bitcast<f32>({first})")),
+                "color stop {index} must start at its host offset, word {first}"
+            );
+        }
     }
 
     #[test]
     fn downlevel_quad_decoder_uses_host_dash_offsets_and_stride() {
         let decoder = generated_function(BASE_DOWNLEVEL_WGSL, "dl_load_Quad_impl");
         let loader = generated_function(BASE_DOWNLEVEL_WGSL, "dl_load_QUADS");
-        let dash_length_word = std::mem::offset_of!(gpui::Quad, border_dashed_length) / 4;
-        let dash_gap_word = std::mem::offset_of!(gpui::Quad, border_dashed_gap) / 4;
-        let stride_words = std::mem::size_of::<gpui::Quad>() / 4;
+        let dash_length = word(std::mem::offset_of!(gpui::Quad, border_dashed_length) / 4);
+        let dash_gap = word(std::mem::offset_of!(gpui::Quad, border_dashed_gap) / 4);
+        let stride_texels = std::mem::size_of::<gpui::Quad>().div_ceil(16);
 
         assert!(
-            decoder.contains(&format!("base, {dash_length_word}u")),
+            decoder.contains(&format!("bitcast<f32>({dash_length})")),
             "Quad decoder must load border_dashed_length from its host offset"
         );
         assert!(
-            decoder.contains(&format!("base, {dash_gap_word}u")),
+            decoder.contains(&format!("bitcast<f32>({dash_gap})")),
             "Quad decoder must load border_dashed_gap from its host offset"
         );
         assert!(
-            loader.contains(&format!("i * {stride_words}u")),
-            "Quad decoder must advance by the host Quad stride"
+            loader.contains(&format!("i * {stride_texels}u")),
+            "Quad decoder must advance by the host Quad stride, in texels"
         );
     }
 }

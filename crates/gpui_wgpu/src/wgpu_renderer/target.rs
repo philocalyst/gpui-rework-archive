@@ -20,27 +20,6 @@ impl RenderTarget {
         surface: Option<&wgpu::Surface<'_>>,
         requested: WgpuSurfaceConfig,
     ) -> anyhow::Result<Self> {
-        Self::new_with_headless_format(adapter, device, surface, requested, None)
-    }
-
-    pub(super) fn new_with_headless_format(
-        adapter: &wgpu::Adapter,
-        device: &wgpu::Device,
-        surface: Option<&wgpu::Surface<'_>>,
-        requested: WgpuSurfaceConfig,
-        headless_format: Option<wgpu::TextureFormat>,
-    ) -> anyhow::Result<Self> {
-        if surface.is_none() {
-            if let Some(format) = headless_format {
-                let required =
-                    wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC;
-                let allowed = adapter.get_texture_format_features(format).allowed_usages;
-                anyhow::ensure!(
-                    allowed.contains(required),
-                    "headless test target format {format:?} does not support {required:?}; allowed usages are {allowed:?}"
-                );
-            }
-        }
         let (format, transparent_alpha_mode, opaque_alpha_mode, present_mode) =
             if let Some(surface) = surface {
                 let capabilities = surface.get_capabilities(adapter);
@@ -80,7 +59,7 @@ impl RenderTarget {
             } else {
                 // Native desktop swapchains are BGRA; matching that keeps snapshots comparable.
                 (
-                    headless_format.unwrap_or(wgpu::TextureFormat::Bgra8Unorm),
+                    wgpu::TextureFormat::Bgra8Unorm,
                     wgpu::CompositeAlphaMode::PreMultiplied,
                     wgpu::CompositeAlphaMode::Opaque,
                     wgpu::PresentMode::Fifo,

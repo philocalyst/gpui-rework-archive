@@ -192,6 +192,7 @@ struct SelectedAdapter {
     device: CreatedDevice,
 }
 
+#[derive(Clone)]
 pub struct WgpuContext {
     pub instance: wgpu::Instance,
     pub adapter: wgpu::Adapter,
@@ -507,43 +508,35 @@ impl WgpuContext {
     }
 
     /// Creates a native device without a presentation surface.
+    ///
+    /// Creating a device takes tens of milliseconds, and tests and benchmarks create a headless
+    /// renderer for every window they open, so a device without extra requirements is shared by
+    /// the whole process until it is lost. The cache is a static that is never dropped, because
+    /// wgpu's queue reads its own thread-locals on drop, which panics during thread teardown.
     #[cfg(not(target_family = "wasm"))]
     pub fn new_headless(
         extra_requirements: Option<&WgpuDeviceRequirements>,
     ) -> anyhow::Result<Self> {
-        Self::new_headless_with_backends(
-            "a headless GPU context",
-            NativeBackend::PREFERENCE,
-            extra_requirements,
-            None,
-        )
-    }
-
-    #[cfg(all(
-        test,
-        feature = "test-support",
-        not(target_family = "wasm"),
-        not(target_vendor = "apple")
-    ))]
-    pub(crate) fn new_headless_gl_for_test(
-        renderer_tier_override: Option<RendererTier>,
-    ) -> anyhow::Result<Self> {
-        Self::new_headless_with_backends(
-            "a forced-GL headless renderer regression test",
-            &[NativeBackend::Gl],
-            None,
-            renderer_tier_override,
-        )
+        static SHARED: Mutex<Option<WgpuContext>> = Mutex::new(None);
+        if extra_requirements.is_some() {
+            return Self::create_headless(extra_requirements);
+        }
+        let mut shared = SHARED.lock().unwrap();
+        if let Some(context) = shared.as_ref()
+            && !context.device_lost()
+        {
+            return Ok(context.clone());
+        }
+        let context = Self::create_headless(None)?;
+        *shared = Some(context.clone());
+        Ok(context)
     }
 
     #[cfg(not(target_family = "wasm"))]
-    fn new_headless_with_backends(
-        operation: &'static str,
-        backends: &[NativeBackend],
+    fn create_headless(
         extra_requirements: Option<&WgpuDeviceRequirements>,
-        renderer_tier_override: Option<RendererTier>,
     ) -> anyhow::Result<Self> {
-        NativeBackend::try_in_order(operation, backends, |backend| {
+        NativeBackend::try_in_preference_order("a headless GPU context", |backend| {
             let instance = backend.instance(None);
             let adapter =
                 gpui::block_on(instance.raw.request_adapter(&wgpu::RequestAdapterOptions {
@@ -556,11 +549,7 @@ impl WgpuContext {
                 .map_err(|error| {
                     anyhow::anyhow!("failed to request headless GPU adapter: {error}")
                 })?;
-            let device = gpui::block_on(Self::create_device(
-                &adapter,
-                extra_requirements,
-                renderer_tier_override,
-            ))?;
+            let device = gpui::block_on(Self::create_device(&adapter, extra_requirements))?;
             Self::from_created_device(instance.raw, adapter, device)
         })
     }
@@ -649,7 +638,7 @@ impl WgpuContext {
                     "Failed to request a {preference:?} adapter compatible with the canvas: {error}"
                 )
             })?;
-        let device = Self::create_device(&adapter, None, None).await?;
+        let device = Self::create_device(&adapter, None).await?;
         let context = Self::from_created_device(instance, adapter, device)?;
         log::info!(
             "Browser graphics initialized: requested={preference:?}, selected={backend:?}, \
@@ -697,9 +686,8 @@ impl WgpuContext {
     async fn create_device(
         adapter: &wgpu::Adapter,
         extra_requirements: Option<&WgpuDeviceRequirements>,
-        renderer_tier_override: Option<RendererTier>,
     ) -> anyhow::Result<CreatedDevice> {
-        let renderer_tier = renderer_tier_override.unwrap_or_else(|| renderer_tier(adapter));
+        let renderer_tier = renderer_tier(adapter);
         // Our LCD shader uses storage buffers even when the adapter exposes dual-source
         // blending. Downlevel devices must use grayscale and the data-texture dialect.
         let dual_source_blending = renderer_tier == RendererTier::Modern
@@ -929,7 +917,7 @@ impl WgpuContext {
             anyhow::bail!("no compatible alpha modes");
         }
 
-        let device = Self::create_device(adapter, extra_requirements, None).await?;
+        let device = Self::create_device(adapter, extra_requirements).await?;
         let error_scope = device
             .device
             .push_error_scope(wgpu::ErrorFilter::Validation);
@@ -1022,6 +1010,16 @@ impl WgpuContext {
     /// Returns a clone of the device_lost flag for sharing with renderers.
     pub(crate) fn device_lost_flag(&self) -> Arc<AtomicBool> {
         Arc::clone(&self.errors.lost)
+    }
+
+    /// This device with the WebGL2 instance transport, to test it on any adapter.
+    #[cfg(all(test, feature = "test-support"))]
+    pub(crate) fn with_webgl2_transport(&self) -> Self {
+        Self {
+            renderer_tier: RendererTier::WebGl2,
+            dual_source_blending: false,
+            ..self.clone()
+        }
     }
 
     /// Returns the device-wide error state, shared by all renderers using this device.

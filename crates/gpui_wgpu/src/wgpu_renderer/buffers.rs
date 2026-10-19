@@ -34,6 +34,15 @@ impl InstanceTransport {
         }
     }
 
+    /// Bytes from one element to the next. Downlevel elements start on a texel, so the
+    /// shaders fetch each texel once and select its components statically.
+    pub(super) fn element_stride(self, element_size: u64) -> u64 {
+        match self {
+            Self::StorageBuffer => element_size,
+            Self::DataTexture => element_size.next_multiple_of(TEXEL_BYTES),
+        }
+    }
+
     /// Byte alignment between batches; the downlevel base must land on a texel.
     pub(super) fn batch_alignment(self, element_stride: u64) -> u64 {
         match self {
@@ -95,17 +104,26 @@ impl InstanceUpload {
         if values.is_empty() {
             return Some(self.empty_batch());
         }
-        let stride = std::mem::size_of::<T>() as u64;
-        let data = shader_interface::slice_as_bytes(values);
+        let element_size = std::mem::size_of::<T>();
+        let stride = self.transport.element_stride(element_size as u64);
         let count = u32::try_from(values.len()).ok()?;
-        let (offset, range_offset) = self.allocate_batch(data.len() as u64, stride, count)?;
+        let size = stride.checked_mul(count as u64)?;
+        let (offset, range_offset) = self.allocate_batch(size, stride, count)?;
         let staging = self
             .staging
             .as_mut()
             .expect("non-empty frame uploads have mapped staging memory");
-        staging
-            .slice(offset as usize..(offset + data.len() as u64) as usize)
-            .copy_from_slice(data);
+        let mut destination = staging.slice(offset as usize..(offset + size) as usize);
+        if stride == element_size as u64 {
+            destination.copy_from_slice(shader_interface::slice_as_bytes(values));
+        } else {
+            for (index, value) in values.iter().enumerate() {
+                let start = index * stride as usize;
+                destination
+                    .slice(start..start + element_size)
+                    .copy_from_slice(shader_interface::bytes_of(value));
+            }
+        }
         Some(self.batch(offset, stride, count, range_offset))
     }
 
@@ -118,7 +136,8 @@ impl InstanceUpload {
             return Some(self.empty_batch());
         }
         let count = u32::try_from(count).ok()?;
-        let stride = std::mem::size_of::<T>() as u64;
+        let element_size = std::mem::size_of::<T>();
+        let stride = self.transport.element_stride(element_size as u64);
         let size = stride.checked_mul(count as u64)?;
         let (offset, range_offset) = self.allocate_batch(size, stride, count)?;
         let staging = self.staging.as_mut()?;
@@ -126,9 +145,9 @@ impl InstanceUpload {
         let mut values = values.into_iter();
         for index in 0..count {
             let value = values.next()?;
-            let index = index as u64;
+            let start = (index as u64 * stride) as usize;
             destination
-                .slice((index * stride) as usize..((index + 1) * stride) as usize)
+                .slice(start..start + element_size)
                 .copy_from_slice(shader_interface::bytes_of(&value));
         }
         if values.next().is_some() {

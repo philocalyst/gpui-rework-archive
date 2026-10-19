@@ -361,11 +361,8 @@ fn emit_downlevel_runtime(name: &str, base_source: &str, arrays: &[StorageArray]
     .unwrap();
     writeln!(
         runtime,
-        "fn dl_scene_word(t: texture_2d<u32>, base: u32, w: u32) -> u32 {{
-    let linear = base + w;
-    let texel = textureLoad(t, vec2<u32>(linear / 4u % DATA_TEXTURE_WIDTH, linear / 4u / DATA_TEXTURE_WIDTH), 0);
-    var components = array(texel.x, texel.y, texel.z, texel.w);
-    return components[linear % 4u];
+        "fn dl_texel(t: texture_2d<u32>, index: u32) -> vec4<u32> {{
+    return textureLoad(t, vec2<u32>(index % DATA_TEXTURE_WIDTH, index / DATA_TEXTURE_WIDTH), 0);
 }}"
     )
     .unwrap();
@@ -381,12 +378,14 @@ fn emit_downlevel_runtime(name: &str, base_source: &str, arrays: &[StorageArray]
     let mut emitted: BTreeSet<String> = BTreeSet::new();
     for array in arrays {
         let handle = find_type(&module, &array.element_type, name);
-        emit_type_decoder(&module, &layouter, handle, &mut runtime, &mut emitted);
-        let words = words_per_element(&layouter, handle);
+        if emitted.insert(array.element_type.clone()) {
+            emit_element_decoder(&module, &layouter, handle, &mut runtime);
+        }
+        let texels = texels_per_element(&layouter, handle);
         writeln!(
             runtime,
             "fn dl_load_{array_name}(i: u32) -> {type_name} {{
-    return dl_load_{type_name}_impl({array_name}_DATA, DATA_RANGE.base_texel * 4u + i * {words}u);
+    return dl_load_{type_name}_impl({array_name}_DATA, DATA_RANGE.base_texel + i * {texels}u);
 }}",
             array_name = array.name,
             type_name = array.element_type,
@@ -405,65 +404,46 @@ fn find_type(module: &naga::Module, name: &str, context: &str) -> naga::Handle<n
         .unwrap_or_else(|| panic!("type {name} not found in {context}"))
 }
 
-fn words_per_element(layouter: &naga::proc::Layouter, handle: naga::Handle<naga::Type>) -> u32 {
-    layouter[handle].to_stride().div_ceil(4)
+fn texels_per_element(layouter: &naga::proc::Layouter, handle: naga::Handle<naga::Type>) -> u32 {
+    layouter[handle].to_stride().div_ceil(16)
 }
 
-fn emit_type_decoder(
+/// Emits `dl_load_{name}_impl`, which fetches each texel of an element once and builds the
+/// value from their components. Elements start on a texel, so every component is chosen
+/// statically; WebGL compilers optimize dynamic vector indexing badly.
+fn emit_element_decoder(
     module: &naga::Module,
     layouter: &naga::proc::Layouter,
     handle: naga::Handle<naga::Type>,
     out: &mut String,
-    emitted: &mut BTreeSet<String>,
 ) {
     let name = module.types[handle]
         .name
-        .clone()
+        .as_deref()
         .unwrap_or_else(|| panic!("anonymous types are not supported by the downlevel transport"));
-    if !emitted.insert(name.clone()) {
-        return;
-    }
-    // Ensure nested named types are emitted before their users.
-    let ty = &module.types[handle];
-    let mut members = Vec::new();
-    if let naga::TypeInner::Struct { members: list, .. } = &ty.inner {
-        for member in list {
-            let member_layout = layouter[member.ty];
-            // Use Naga's validated member offset rather than reconstructing it
-            // from sizes. In particular, array members have a size that covers
-            // all elements while their stride is the distance between elements;
-            // rebuilding offsets here is easy to get wrong as layouts evolve.
-            let offset = member.offset;
-            assert_eq!(offset % 4, 0, "struct member is not word aligned");
-            if let naga::TypeInner::Struct { .. } = &module.types[member.ty].inner {
-                emit_type_decoder(module, layouter, member.ty, out, emitted);
-            }
-            members.push((member.ty, offset / 4));
-            assert!(
-                offset
-                    .checked_add(member_layout.size)
-                    .is_some_and(|end| end <= layouter[handle].size),
-                "struct member exceeds the layout of {}",
-                name
-            );
-        }
-    } else {
-        panic!("expected struct type {name}");
-    }
-
-    let arguments = members
-        .iter()
-        .map(|(member_ty, word)| decode_expr(module, layouter, *member_ty, *word, out, emitted))
-        .collect::<Vec<_>>()
-        .join(", ");
+    let fetches = (0..texels_per_element(layouter, handle))
+        .map(|texel| format!("    let t{texel} = dl_texel(t, base + {texel}u);\n"))
+        .collect::<String>();
+    let value = decode_expr(module, layouter, handle, 0);
     write!(
         out,
         "fn dl_load_{name}_impl(t: texture_2d<u32>, base: u32) -> {name} {{
-    return {name}({arguments});
+{fetches}    return {value};
 }}
 "
     )
     .unwrap();
+}
+
+/// The expression for the 32-bit word at `word` of the element being decoded.
+fn word_expr(word: u32, kind: naga::ScalarKind) -> String {
+    let component = format!("t{}.{}", word / 4, ["x", "y", "z", "w"][word as usize % 4]);
+    match kind {
+        naga::ScalarKind::Uint => component,
+        naga::ScalarKind::Float => format!("bitcast<f32>({component})"),
+        naga::ScalarKind::Sint => format!("bitcast<i32>({component})"),
+        other => panic!("unsupported scalar {other:?}"),
+    }
 }
 
 fn decode_expr(
@@ -471,22 +451,10 @@ fn decode_expr(
     layouter: &naga::proc::Layouter,
     handle: naga::Handle<naga::Type>,
     word: u32,
-    out: &mut String,
-    emitted: &mut BTreeSet<String>,
 ) -> String {
+    let join = |exprs: Vec<String>| exprs.join(", ");
     match &module.types[handle].inner {
-        naga::TypeInner::Scalar(naga::Scalar {
-            kind: naga::ScalarKind::Uint,
-            ..
-        }) => format!("dl_scene_word(t, base, {word}u)"),
-        naga::TypeInner::Scalar(naga::Scalar {
-            kind: naga::ScalarKind::Float,
-            ..
-        }) => format!("bitcast<f32>(dl_scene_word(t, base, {word}u))"),
-        naga::TypeInner::Scalar(naga::Scalar {
-            kind: naga::ScalarKind::Sint,
-            ..
-        }) => format!("bitcast<i32>(dl_scene_word(t, base, {word}u))"),
+        naga::TypeInner::Scalar(scalar) => word_expr(word, scalar.kind),
         naga::TypeInner::Vector { size, scalar } => {
             let kind = match scalar.kind {
                 naga::ScalarKind::Uint => "u32",
@@ -494,44 +462,19 @@ fn decode_expr(
                 naga::ScalarKind::Sint => "i32",
                 other => panic!("unsupported vector scalar {other:?}"),
             };
-            let cast = |w: u32| match scalar.kind {
-                naga::ScalarKind::Uint => format!("dl_scene_word(t, base, {w}u)"),
-                naga::ScalarKind::Float => {
-                    format!("bitcast<f32>(dl_scene_word(t, base, {w}u))")
-                }
-                naga::ScalarKind::Sint => {
-                    format!("bitcast<i32>(dl_scene_word(t, base, {w}u))")
-                }
-                other => panic!("unsupported scalar {other:?}"),
-            };
-            let size_word = u32::from(*size);
-            let components = (0..size_word)
-                .map(|index| cast(word + index))
-                .collect::<Vec<_>>()
-                .join(", ");
-            format!("vec{size_word}<{kind}>({components})")
+            let size = u32::from(*size);
+            let components = (0..size).map(|index| word_expr(word + index, scalar.kind));
+            format!("vec{size}<{kind}>({})", join(components.collect()))
         }
         naga::TypeInner::Matrix { columns, rows, .. } => {
             assert_eq!(scalar_kind(module, handle), naga::ScalarKind::Float);
-            let rows_word = u32::from(*rows);
-            let columns_word = u32::from(*columns);
-            let column_exprs = (0..columns_word)
-                .map(|column| {
-                    let base = word + column * rows_word;
-                    let components = (0..rows_word)
-                        .map(|component| {
-                            format!(
-                                "bitcast<f32>(dl_scene_word(t, base, {}u))",
-                                base + component
-                            )
-                        })
-                        .collect::<Vec<_>>()
-                        .join(", ");
-                    format!("vec{rows_word}<f32>({components})")
-                })
-                .collect::<Vec<_>>()
-                .join(", ");
-            format!("mat{columns_word}x{rows_word}<f32>({column_exprs})")
+            let (columns, rows) = (u32::from(*columns), u32::from(*rows));
+            let column_exprs = (0..columns).map(|column| {
+                let components = (0..rows)
+                    .map(|row| word_expr(word + column * rows + row, naga::ScalarKind::Float));
+                format!("vec{rows}<f32>({})", join(components.collect()))
+            });
+            format!("mat{columns}x{rows}<f32>({})", join(column_exprs.collect()))
         }
         naga::TypeInner::Array { base, size, stride } => {
             // `Layouter::to_stride` on an array handle is the stride of the
@@ -539,29 +482,31 @@ fn decode_expr(
             // to alignment. The element stride lives on TypeInner::Array and
             // must be used for indexing individual elements.
             assert_eq!(*stride % 4, 0, "array element stride is not word aligned");
-            let element_stride = *stride / 4;
             let naga::ArraySize::Constant(length) = size else {
                 panic!("runtime-sized arrays are not supported inside downlevel elements");
             };
-            let element_exprs = (0..length.get())
-                .map(|index| {
-                    decode_expr(
-                        module,
-                        layouter,
-                        *base,
-                        word + index * element_stride,
-                        out,
-                        emitted,
-                    )
-                })
-                .collect::<Vec<_>>()
-                .join(", ");
-            format!("array({element_exprs})")
+            let elements = (0..length.get())
+                .map(|index| decode_expr(module, layouter, *base, word + index * *stride / 4));
+            format!("array({})", join(elements.collect()))
         }
-        naga::TypeInner::Struct { .. } => {
-            emit_type_decoder(module, layouter, handle, out, emitted);
-            let name = module.types[handle].name.clone().expect("named struct");
-            format!("dl_load_{name}_impl(t, base + {word}u)")
+        naga::TypeInner::Struct { members, .. } => {
+            let name = module.types[handle].name.as_deref().expect("named struct");
+            let fields = members.iter().map(|member| {
+                // Use Naga's validated member offset rather than reconstructing it
+                // from sizes. In particular, array members have a size that covers
+                // all elements while their stride is the distance between elements;
+                // rebuilding offsets here is easy to get wrong as layouts evolve.
+                assert_eq!(member.offset % 4, 0, "struct member is not word aligned");
+                assert!(
+                    member
+                        .offset
+                        .checked_add(layouter[member.ty].size)
+                        .is_some_and(|end| end <= layouter[handle].size),
+                    "struct member exceeds the layout of {name}"
+                );
+                decode_expr(module, layouter, member.ty, word + member.offset / 4)
+            });
+            format!("{name}({})", join(fields.collect()))
         }
         other => panic!("unsupported downlevel type {other:?}"),
     }

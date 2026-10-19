@@ -196,8 +196,7 @@ impl WgpuRenderer {
             wgpu::CurrentSurfaceTexture::Validation => {
                 self.target.request_redraw();
                 // This error belongs to this surface, not every renderer sharing the device.
-                *self.faults.pending_error.lock().unwrap() =
-                    Some("surface texture validation error".to_string());
+                self.faults.pending_error = Some("surface texture validation error".to_string());
                 return false;
             }
         };

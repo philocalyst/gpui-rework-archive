@@ -24,7 +24,7 @@ use smallvec::{SmallVec, smallvec};
 
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 mod buffers;
 mod drawing;
@@ -55,7 +55,7 @@ struct GpuFaultState {
     device_errors: Arc<DeviceErrorState>,
     observed_error_generation: u64,
     // Surface acquisition errors are local to this renderer, unlike device-wide errors.
-    pending_error: Arc<Mutex<Option<String>>>,
+    pending_error: Option<String>,
     consecutive_failed_frames: u32,
     device_lost: Arc<std::sync::atomic::AtomicBool>,
     #[cfg(not(target_family = "wasm"))]
@@ -97,35 +97,6 @@ impl WgpuRenderer {
             .expect("GPU resources not available")
     }
 
-    #[cfg(all(
-        test,
-        feature = "test-support",
-        not(target_family = "wasm"),
-        not(target_vendor = "apple")
-    ))]
-    fn new_headless_with_format_for_test(
-        context: &WgpuContext,
-        size: Size<DevicePixels>,
-        format: wgpu::TextureFormat,
-    ) -> anyhow::Result<Self> {
-        let mut renderer = Self::new_internal_with_headless_format(
-            None,
-            context,
-            None,
-            WgpuSurfaceConfig {
-                size,
-                transparent: false,
-                preferred_present_mode: None,
-            },
-            None,
-            None,
-            Arc::new(WgpuAtlas::from_context(context)),
-            Some(format),
-        )?;
-        renderer.target.clear_color = wgpu::Color::BLACK;
-        Ok(renderer)
-    }
-
     fn new_internal(
         gpu_context: Option<GpuContext>,
         context: &WgpuContext,
@@ -135,38 +106,11 @@ impl WgpuRenderer {
         extra_requirements: Option<WgpuDeviceRequirements>,
         atlas: Arc<WgpuAtlas>,
     ) -> anyhow::Result<Self> {
-        Self::new_internal_with_headless_format(
-            gpu_context,
-            context,
-            surface,
-            config,
-            compositor_gpu,
-            extra_requirements,
-            atlas,
-            None,
-        )
-    }
-
-    fn new_internal_with_headless_format(
-        gpu_context: Option<GpuContext>,
-        context: &WgpuContext,
-        surface: Option<wgpu::Surface<'static>>,
-        config: WgpuSurfaceConfig,
-        compositor_gpu: Option<CompositorGpuHint>,
-        extra_requirements: Option<WgpuDeviceRequirements>,
-        atlas: Arc<WgpuAtlas>,
-        headless_format: Option<wgpu::TextureFormat>,
-    ) -> anyhow::Result<Self> {
-        let target = match headless_format {
-            Some(format) => RenderTarget::new_with_headless_format(
-                &context.adapter,
-                &context.device,
-                surface.as_ref(),
-                config,
-                Some(format),
-            )?,
-            None => RenderTarget::new(&context.adapter, &context.device, surface.as_ref(), config)?,
-        };
+        // The device may be shared with other renderers. Observe only errors raised from here
+        // on, including any while this renderer builds its pipelines.
+        let observed_error_generation = context.errors().current_generation();
+        let target =
+            RenderTarget::new(&context.adapter, &context.device, surface.as_ref(), config)?;
         if let Some(surface) = surface.as_ref() {
             surface.configure(&context.device, target.configuration());
         }
@@ -198,8 +142,8 @@ impl WgpuRenderer {
             uploaded_globals: None,
             faults: GpuFaultState {
                 device_errors: Arc::clone(context.errors()),
-                observed_error_generation: 0,
-                pending_error: Arc::new(Mutex::new(None)),
+                observed_error_generation,
+                pending_error: None,
                 consecutive_failed_frames: 0,
                 device_lost: context.device_lost_flag(),
                 #[cfg(not(target_family = "wasm"))]
@@ -416,129 +360,6 @@ mod tests {
         (4..16).any(|y| (left..right).any(|x| first.get_pixel(x, y) != second.get_pixel(x, y)))
     }
 
-    /// Run explicitly with `cargo test -p gpui_ce_wgpu --features test-support native_gl_headless_quad_readback -- --ignored --nocapture`.
-    /// The ignored status is intentional: this test requires a real native GL/EGL adapter.
-    #[cfg(all(
-        feature = "test-support",
-        not(target_family = "wasm"),
-        not(target_vendor = "apple")
-    ))]
-    #[test]
-    #[ignore = "requires a native GL/EGL adapter; run explicitly to validate GLES/WebGL2 pixels"]
-    fn native_gl_headless_quad_readback() -> anyhow::Result<()> {
-        fn scene(color: u32) -> Scene {
-            let target = test_bounds(0.0, 0.0, 8.0, 8.0);
-            let quad = test_bounds(2.0, 2.0, 4.0, 4.0);
-            let mut scene = Scene::default();
-            scene.insert_primitive(test_quad(
-                quad,
-                target,
-                gpui::rgb_to_hsla(gpui::rgba(color)),
-            ));
-            scene.finish();
-            scene
-        }
-
-        fn assert_pixel(
-            image: &image::RgbaImage,
-            x: u32,
-            y: u32,
-            expected: [u8; 4],
-            format: wgpu::TextureFormat,
-            tier: RendererTier,
-            frame: &str,
-        ) {
-            let actual = image.get_pixel(x, y).0;
-            for (channel, (actual, expected)) in actual.iter().zip(expected).enumerate() {
-                assert!(
-                    actual.abs_diff(expected) <= 2,
-                    "forced GL tier {tier:?}, target {format:?}, {frame} pixel ({x},{y}): channel {channel} got {actual}, expected {expected}; full pixel {actual:?}",
-                );
-            }
-        }
-
-        fn check_pixels(context: &WgpuContext, format: wgpu::TextureFormat) -> anyhow::Result<()> {
-            let size = gpui::size(DevicePixels(8), DevicePixels(8));
-            let mut renderer =
-                WgpuRenderer::new_headless_with_format_for_test(context, size, format)?;
-            let first = renderer.render_to_image(&scene(0x1db153ff))?;
-            assert_pixel(
-                &first,
-                4,
-                4,
-                [29, 177, 83, 255],
-                format,
-                context.renderer_tier(),
-                "first-frame A",
-            );
-            assert_pixel(
-                &first,
-                0,
-                0,
-                [0, 0, 0, 255],
-                format,
-                context.renderer_tier(),
-                "first-frame outside",
-            );
-
-            let second = renderer.render_to_image(&scene(0xd32b71ff))?;
-            assert_pixel(
-                &second,
-                4,
-                4,
-                [211, 43, 113, 255],
-                format,
-                context.renderer_tier(),
-                "changed-frame B",
-            );
-            assert_pixel(
-                &second,
-                0,
-                0,
-                [0, 0, 0, 255],
-                format,
-                context.renderer_tier(),
-                "changed-frame outside",
-            );
-            Ok(())
-        }
-
-        let context = WgpuContext::new_headless_gl_for_test(None)?;
-        assert_eq!(context.backend(), WgpuBackend::Native(wgpu::Backend::Gl));
-        eprintln!(
-            "forced GL adapter {:?}, tier {:?}, atlas format {:?}",
-            context.adapter.get_info(),
-            context.renderer_tier(),
-            context.color_texture_format(),
-        );
-        for format in [
-            wgpu::TextureFormat::Rgba8Unorm,
-            wgpu::TextureFormat::Bgra8Unorm,
-        ] {
-            check_pixels(&context, format)?;
-        }
-
-        if context.renderer_tier() == RendererTier::Modern {
-            let webgl2_context = WgpuContext::new_headless_gl_for_test(Some(RendererTier::WebGl2))?;
-            assert_eq!(
-                webgl2_context.backend(),
-                WgpuBackend::Native(wgpu::Backend::Gl)
-            );
-            assert_eq!(webgl2_context.renderer_tier(), RendererTier::WebGl2);
-            eprintln!(
-                "forced GL adapter {:?}, explicitly exercising WebGl2 transport",
-                webgl2_context.adapter.get_info()
-            );
-            for format in [
-                wgpu::TextureFormat::Rgba8Unorm,
-                wgpu::TextureFormat::Bgra8Unorm,
-            ] {
-                check_pixels(&webgl2_context, format)?;
-            }
-        }
-        Ok(())
-    }
-
     #[test]
     fn rust_storage_types_match_shader_strides() {
         fn module_layout(source: &wgsl_rs::Source) -> (naga::Module, naga::proc::Layouter) {
@@ -664,6 +485,81 @@ mod tests {
             [128, 0, 0, 255],
             "must match the retired Metal renderer's mixed primitive baseline"
         );
+        Ok(())
+    }
+
+    /// The WebGL2 transport decodes instances from a data texture with generated decoders.
+    /// Drawing one scene through it and through storage buffers, on one adapter, checks them.
+    #[cfg(all(feature = "test-support", not(target_family = "wasm")))]
+    #[test]
+    fn webgl2_transport_matches_storage_buffers() -> anyhow::Result<()> {
+        let context = WgpuContext::new_headless(None)?;
+        let size = gpui::size(DevicePixels(48), DevicePixels(24));
+        let content_mask = gpui::ContentMask {
+            bounds: test_bounds(0.0, 0.0, 48.0, 24.0),
+            ..Default::default()
+        };
+        let backgrounds = [
+            gpui::checkerboard(gpui::hsla(0.6, 0.7, 0.5, 1.0), 2.0),
+            gpui::linear_gradient(
+                90.0,
+                gpui::linear_color_stop(gpui::hsla(0.8, 0.9, 0.4, 1.0), 0.0),
+                gpui::linear_color_stop(gpui::hsla(0.1, 0.8, 0.6, 1.0), 1.0),
+            ),
+        ];
+        let mut scene = Scene::default();
+        for (index, background) in backgrounds.into_iter().enumerate() {
+            let bounds = test_bounds(4.0 + index as f32 * 22.0, 4.0, 18.0, 14.0);
+            scene.insert_primitive(gpui::Shadow {
+                order: 0,
+                blur_radius: ScaledPixels(2.0),
+                bounds,
+                content_mask,
+                color: gpui::hsla(0.0, 0.0, 0.0, 0.5).into(),
+                element_bounds: bounds,
+                corner_radii: gpui::Corners::all(ScaledPixels(4.0)),
+                element_corner_radii: gpui::Corners::all(ScaledPixels(4.0)),
+                inset: false.into(),
+                corner_smoothing: 0.0,
+            });
+            scene.insert_primitive(Quad {
+                bounds,
+                content_mask,
+                background,
+                border_style: gpui::BorderStyle::Dashed,
+                border_color: gpui::hsla(0.6, 0.9, 0.7, 1.0).into(),
+                border_widths: gpui::Edges::all(ScaledPixels(2.0)),
+                corner_radii: gpui::Corners::all(ScaledPixels(4.0)),
+                ..Default::default()
+            });
+        }
+        let underline = test_bounds(4.0, 19.0, 40.0, 4.0);
+        scene.insert_primitive(Underline {
+            order: 0,
+            padding: 0,
+            bounds: underline,
+            clip_bounds: underline,
+            content_mask,
+            color: gpui::hsla(0.0, 1.0, 0.5, 1.0).into(),
+            thickness: ScaledPixels(1.0),
+            wavy: true.into(),
+        });
+        scene.finish();
+
+        let storage = WgpuRenderer::new_headless(&context, size)?.render_to_image(&scene)?;
+        let webgl2 = WgpuRenderer::new_headless(&context.with_webgl2_transport(), size)?
+            .render_to_image(&scene)?;
+        assert!(storage.pixels().any(|pixel| pixel.0 != [0, 0, 0, 255]));
+        for (x, y, pixel) in webgl2.enumerate_pixels() {
+            let expected = storage.get_pixel(x, y).0;
+            assert!(
+                pixel.0.iter().zip(expected).all(|(drawn, expected)| {
+                    drawn.abs_diff(expected) <= MAX_CROSS_BACKEND_CHANNEL_DELTA
+                }),
+                "pixel ({x}, {y}): the WebGL2 transport drew {:?}, storage buffers drew {expected:?}",
+                pixel.0
+            );
+        }
         Ok(())
     }
 

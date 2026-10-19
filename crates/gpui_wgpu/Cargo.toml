@@ -42,7 +42,7 @@ pollster.workspace = true
 metal.workspace = true
 objc2.workspace = true
 objc2-core-foundation.workspace = true
-objc2-core-video = { workspace = true, features = ["CVPixelBuffer", "CVPixelBufferIOSurface", "CVMetalTexture", "CVMetalTextureCache", "CVReturn", "objc2-io-surface", "objc2-metal"] }
+objc2-core-video = { workspace = true, features = ["objc2", "CVPixelBuffer", "CVPixelBufferIOSurface", "CVMetalTexture", "CVMetalTextureCache", "CVReturn", "objc2-io-surface", "objc2-metal"] }
 objc2-io-surface = { version = "0.3", default-features = false, features = ["std", "objc2-core-foundation", "IOSurfaceRef"] }
 objc2-metal = "0.3"
 

@@ -112,7 +112,7 @@ impl WgpuRenderer {
             .map_err(|error| anyhow::anyhow!("offscreen readback callback dropped: {error}"))?
             .map_err(|error| anyhow::anyhow!("failed to map offscreen readback: {error}"))?;
 
-        let mapped = target.readback.slice(..).get_mapped_range()?;
+        let mapped = target.readback.slice(..).get_mapped_range();
         for row in mapped.chunks_exact(target.padded_bytes_per_row as usize) {
             pixels.extend_from_slice(&row[..bytes_per_row as usize]);
         }
@@ -159,11 +159,6 @@ impl WgpuHeadlessRenderer {
     /// Returns the active adapter's maximum 2D texture dimension.
     pub fn max_texture_size(&self) -> u32 {
         self.renderer.max_texture_size()
-    }
-
-    /// Returns the largest buffer that the active device can allocate.
-    pub fn max_readback_buffer_size(&self) -> u64 {
-        self.renderer.resources().device.limits().max_buffer_size
     }
 
     pub fn new() -> anyhow::Result<Self> {

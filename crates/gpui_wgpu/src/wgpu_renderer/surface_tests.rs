@@ -133,10 +133,10 @@ fn failed_frames_release_surface_images() {
         // Exercise the existing failure path in begin_frame, after draw has
         // acquired an image. Do not mock acquisition or call recovery ourselves.
         renderer.faults.consecutive_failed_frames = 5;
-        *renderer.faults.pending_error.lock().unwrap() = Some("injected frame error".into());
+        renderer.faults.pending_error = Some("injected frame error".into());
         assert!(!renderer.draw(&scene), "injected frame {attempt} must fail");
         assert!(
-            renderer.faults.pending_error.lock().unwrap().is_none(),
+            renderer.faults.pending_error.is_none(),
             "frame {attempt} never reached rendering: surface images were exhausted"
         );
         events.roundtrip(&mut state).unwrap();
