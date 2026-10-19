@@ -1450,9 +1450,16 @@ impl MacWindow {
                     } else {
                         native_window.setLevel_(NSNormalWindowLevel);
                         native_window.setAcceptsMouseMovedEvents_(Bool::new(false));
-                        add_mouse_tracking_area(tracking_view);
+                        add_mouse_tracking_area(
+                            tracking_view,
+                            NSTrackingAreaOptions::MouseEnteredAndExited
+                                | NSTrackingAreaOptions::MouseMoved
+                                // Track while this application is active, even if another
+                                // window in the application has focus.
+                                | NSTrackingAreaOptions::ActiveInActiveApp
+                                | NSTrackingAreaOptions::InVisibleRect,
+                        );
                     }
-                    native_window.setAcceptsMouseMovedEvents_(Bool::new(true));
 
                     if let Some(tabbing_identifier) = tabbing_identifier {
                         let tabbing_id = ns_string(tabbing_identifier.as_str());
@@ -1464,7 +1471,15 @@ impl MacWindow {
                 // `AnchoredPopup` is rejected in `MacPlatform::open_window`, grouped here only
                 // for exhaustiveness.
                 WindowKind::PopUp | WindowKind::AnchoredPopup(_) => {
-                    add_mouse_tracking_area(tracking_view);
+                    add_mouse_tracking_area(
+                        tracking_view,
+                        NSTrackingAreaOptions::MouseEnteredAndExited
+                            | NSTrackingAreaOptions::MouseMoved
+                            // Track even when another application is active, e.g. so
+                            // notification windows can respond to hover.
+                            | NSTrackingAreaOptions::ActiveAlways
+                            | NSTrackingAreaOptions::InVisibleRect,
+                    );
 
                     native_window.setLevel_(NSPopUpWindowLevel);
                     let _: () = msg_send![
@@ -2784,11 +2799,9 @@ unsafe extern "C" fn dealloc_view(this: &Objc2Object, _: Sel) {
     }
 }
 
-fn add_mouse_tracking_area(native_view: &Objc2NSView) {
-    let options = NSTrackingAreaOptions::MouseEnteredAndExited
-        | NSTrackingAreaOptions::MouseMoved
-        | NSTrackingAreaOptions::ActiveAlways
-        | NSTrackingAreaOptions::InVisibleRect;
+fn add_mouse_tracking_area(native_view: &Objc2NSView, options: NSTrackingAreaOptions) {
+    // SAFETY: NSView provides the tracking-event callbacks, and the owner is
+    // the same view that retains the tracking area. No user info is supplied.
     let tracking_area = unsafe {
         NSTrackingArea::initWithRect_options_owner_userInfo(
             NSTrackingArea::alloc(),

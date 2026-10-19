@@ -214,17 +214,6 @@ pub use style::*;
 pub use style_transitions::*;
 pub use styled::*;
 pub use subscription::*;
-/// Subsecond entry points for hot-patching callbacks outside GPUI's render boundaries.
-#[cfg(all(
-    feature = "hot-reload",
-    any(
-        target_os = "macos",
-        target_os = "linux",
-        target_os = "windows",
-        target_os = "ios"
-    )
-))]
-pub use subsecond;
 pub use svg_renderer::*;
 pub(crate) use tab_stop::*;
 use taffy::TaffyLayoutEngine;

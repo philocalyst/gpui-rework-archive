@@ -564,22 +564,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "async-tungstenite"
-version = "0.33.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3b465d66478a9bb84abed46695c44a58e34f3e8d0abfb2e958218d420969049"
-dependencies = [
- "atomic-waker",
- "futures-core",
- "futures-io",
- "futures-task",
- "futures-util",
- "log",
- "pin-project-lite",
- "tungstenite",
-]
-
-[[package]]
 name = "async_zip"
 version = "0.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2710,23 +2694,17 @@ dependencies = [
  "anyhow",
  "async-channel",
  "async-task",
- "async-tungstenite",
  "backtrace",
  "bitflags 2.13.1",
  "chrono",
- "core-text",
- "core-video",
  "criterion",
  "ctor",
  "derive_more",
  "derive_setters",
- "dioxus-cli-config",
  "dioxus-devtools",
- "dioxus-devtools-types",
  "embed-resource",
  "env_logger",
  "etagere",
- "foreign-types",
  "futures",
  "futures-concurrency",
  "getrandom 0.3.4",
@@ -2798,8 +2776,6 @@ dependencies = [
  "windows 0.61.3",
  "windows 0.62.2",
  "windows-capture",
- "zed-font-kit",
- "zed-scap",
 ]
 
 [[package]]
@@ -2837,7 +2813,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-task",
- "block",
  "block2 0.6.2",
  "core-foundation 0.10.0",
  "core-foundation-sys",
@@ -3002,7 +2977,6 @@ dependencies = [
  "core-foundation-sys",
  "core-graphics 0.24.0",
  "core-text",
- "core-video",
  "ctor",
  "dispatch2",
  "etagere",
@@ -3019,7 +2993,6 @@ dependencies = [
  "image",
  "itertools 0.14.0",
  "log",
- "mach2",
  "metal",
  "objc",
  "objc2 0.6.4",
